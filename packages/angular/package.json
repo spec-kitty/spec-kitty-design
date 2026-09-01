@@ -1,6 +1,7 @@
 {
   "name": "@spec-kitty/angular",
   "version": "1.0.0",
+  "license": "MIT",
   "peerDependencies": {
     "@angular/core": ">=21.0.0 <22.0.0",
     "@spec-kitty/tokens": "^1.0.0",

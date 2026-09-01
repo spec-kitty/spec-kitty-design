@@ -2,9 +2,21 @@
   "name": "@spec-kitty/html-js",
   "version": "1.0.0",
   "description": "Spec Kitty HTML primitives and JavaScript utilities",
-  "main": "src/index.ts",
-  "exports": { ".": "./src/index.ts" },
-  "files": ["dist/", "README.md"],
+  "license": "MIT",
+  "main": "./dist/src/index.js",
+  "types": "./dist/src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "default": "./dist/src/index.js"
+    },
+    "./button/*": "./dist/button/*",
+    "./stub/*": "./dist/stub/*"
+  },
+  "files": [
+    "dist/",
+    "README.md"
+  ],
   "peerDependencies": {
     "@spec-kitty/tokens": "^1.0.0"
   }

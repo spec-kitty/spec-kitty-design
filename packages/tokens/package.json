@@ -1,9 +1,19 @@
 {
   "name": "@spec-kitty/tokens",
   "version": "1.0.0",
-  "description": "Spec Kitty design tokens — CSS custom properties (--sk-* namespace)",
+  "description": "Spec Kitty design tokens \u2014 CSS custom properties (--sk-* namespace)",
   "main": "dist/tokens.css",
-  "exports": { ".": "./dist/tokens.css", "./catalogue": "./dist/token-catalogue.json" },
-  "files": ["dist/tokens.css", "dist/token-catalogue.json", "README.md", "fonts/**", "assets/**"],
-  "peerDependencies": {}
+  "exports": {
+    ".": "./dist/tokens.css",
+    "./catalogue": "./dist/token-catalogue.json"
+  },
+  "files": [
+    "dist/tokens.css",
+    "dist/token-catalogue.json",
+    "README.md",
+    "fonts/**",
+    "assets/**"
+  ],
+  "peerDependencies": {},
+  "license": "MIT"
 }

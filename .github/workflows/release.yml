@@ -29,6 +29,9 @@ jobs:
       - name: Build all packages
         run: npx nx run-many --target=build --projects=tokens,angular,html-js
 
+      - name: Copy behavior helper beside compiled output (html-js nav-pill drawer)
+        run: cp packages/html-js/src/nav-pill/sk-nav-pill.js packages/html-js/dist/src/nav-pill/sk-nav-pill.js
+
       - name: "[ENFORCED] Dist contents audit — no secrets/sourcemaps (ADR-005)"
         run: |
           for pkg in tokens angular html-js; do
@@ -50,7 +53,7 @@ jobs:
 
       - name: Publish @spec-kitty/angular (FR-044)
         run: npm publish --provenance --access public
-        working-directory: packages/angular
+        working-directory: packages/angular/dist
 
       - name: Publish @spec-kitty/html-js (FR-044)
         run: npm publish --provenance --access public
