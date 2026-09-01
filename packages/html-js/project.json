@@ -11,22 +11,26 @@
         "tsConfig": "packages/html-js/tsconfig.lib.json",
         "assets": [
           {
-            "input": "packages/html-js/src/stub",
+            "input": "packages/html-js/src",
             "glob": "**/*.{html,css}",
-            "output": "stub"
-          },
-          {
-            "input": "packages/html-js/src/button",
-            "glob": "**/*.{html,css}",
-            "output": "button"
+            "output": "./"
           }
         ]
       }
     },
     "lint": {
       "executor": "@nx/eslint:lint",
-      "options": { "lintFilePatterns": ["packages/html-js/**/*.ts", "packages/html-js/**/*.html"] }
+      "options": {
+        "lintFilePatterns": [
+          "packages/html-js/**/*.ts",
+          "packages/html-js/**/*.html"
+        ]
+      }
     }
   },
-  "tags": ["scope:html-js", "type:publishable", "framework:vanilla"]
+  "tags": [
+    "scope:html-js",
+    "type:publishable",
+    "framework:vanilla"
+  ]
 }
