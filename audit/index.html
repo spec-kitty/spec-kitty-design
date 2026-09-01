@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Spec Kitty design — render audit</title>
+<link rel="stylesheet" href="/packages/tokens/dist/tokens.css">
+<link rel="stylesheet" href="/packages/html-js/dist/blog-card/sk-blog-card.css">
+<link rel="stylesheet" href="/packages/html-js/dist/button/sk-button.css">
+<link rel="stylesheet" href="/packages/html-js/dist/card/sk-card.css">
+<link rel="stylesheet" href="/packages/html-js/dist/check-bullet/sk-check-bullet.css">
+<link rel="stylesheet" href="/packages/html-js/dist/feature-card/sk-feature-card.css">
+<link rel="stylesheet" href="/packages/html-js/dist/form-field/sk-form-field.css">
+<link rel="stylesheet" href="/packages/html-js/dist/grid/sk-grid.css">
+<link rel="stylesheet" href="/packages/html-js/dist/nav-pill/sk-nav-pill-drawer.css">
+<link rel="stylesheet" href="/packages/html-js/dist/nav-pill/sk-nav-pill.css">
+<link rel="stylesheet" href="/packages/html-js/dist/pill-tag/sk-pill-tag.css">
+<link rel="stylesheet" href="/packages/html-js/dist/ribbon-card/sk-ribbon-card.css">
+<link rel="stylesheet" href="/packages/html-js/dist/section-banner/sk-section-banner.css">
+<link rel="stylesheet" href="/packages/html-js/dist/site-footer/sk-site-footer.css">
+<link rel="stylesheet" href="/packages/html-js/dist/stub/sk-stub.css">
+<style>
+  body { font-family: var(--sk-font-sans, system-ui); margin: 2rem; background: var(--sk-surface-page, #fff); color: var(--sk-fg-default, #eee); }
+  .case { margin: 0 0 1.5rem; padding: 1rem; border: 1px dashed #555; border-radius: 8px; min-height: 40px; }
+  .case-label { font: 600 11px/1.4 ui-monospace, monospace; letter-spacing: .08em; text-transform: uppercase; color: #888; margin-bottom: .5rem; }
+  h2 { border-bottom: 1px solid #333; padding-bottom: .3rem; margin-top: 2.5rem; }
+</style>
+</head>
+<body>
+<h1>Spec Kitty design — render audit (41 components)</h1>
+<div id="root"></div>
+<script type="module">
+  import * as blog from '/packages/html-js/dist/src/blog-card/index.js';
+  import * as button from '/packages/html-js/dist/src/button/index.js';
+  import * as card from '/packages/html-js/dist/src/card/index.js';
+  import * as check from '/packages/html-js/dist/src/check-bullet/index.js';
+  import * as feature from '/packages/html-js/dist/src/feature-card/index.js';
+  import * as form from '/packages/html-js/dist/src/form-field/index.js';
+  import * as grid from '/packages/html-js/dist/src/grid/index.js';
+  import * as nav from '/packages/html-js/dist/src/nav-pill/index.js';
+  import * as pill from '/packages/html-js/dist/src/pill-tag/index.js';
+  import * as ribbon from '/packages/html-js/dist/src/ribbon-card/index.js';
+  import * as banner from '/packages/html-js/dist/src/section-banner/index.js';
+  import * as site from '/packages/html-js/dist/src/site-footer/index.js';
+  import * as stub from '/packages/html-js/dist/src/stub/index.js';
+
+  const mods = [blog, button, card, check, feature, form, grid, nav, pill, ribbon, banner, site, stub];
+  const results = {};
+
+  for (const mod of mods) {
+    for (const name of Object.keys(mod)) {
+      if (!name.toLowerCase().startsWith('sk')) continue;
+      // find (or create) the section for this component
+      let sec = document.getElementById('case-' + name);
+      if (!sec) {
+        sec = document.createElement('section');
+        sec.className = 'case';
+        sec.id = 'case-' + name;
+        sec.innerHTML = '<div class="case-label">' + name + '</div><div class="mount"></div>';
+        document.getElementById('root').appendChild(sec);
+      }
+      try {
+        const html = mod[name];
+        if (typeof html !== 'string') { results[name] = 'NOT-A-STRING'; continue; }
+        sec.querySelector('.mount').innerHTML = html;
+        results[name] = sec.querySelector('.mount *') ? 'rendered' : 'EMPTY';
+      } catch (e) { results[name] = 'ERROR: ' + e.message; }
+    }
+  }
+  window.__RESULTS__ = results;
+  window.__DONE__ = true;
+</script>
+</body></html>
