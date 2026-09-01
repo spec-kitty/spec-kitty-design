@@ -60,7 +60,7 @@ jobs:
         working-directory: packages/html-js
 
       - name: Create GitHub Release with SBOM
-        uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda  # softprops/action-gh-release v3.0.0
+        uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228  # softprops/action-gh-release v3.0.2
         with:
           files: spec-kitty-design-sbom.cdx.json
           generate_release_notes: true
