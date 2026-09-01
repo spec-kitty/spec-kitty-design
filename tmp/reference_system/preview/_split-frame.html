@@ -33,8 +33,8 @@
   var params = new URLSearchParams(location.search);
   var src = params.get('src');
   if (!src) { document.body.innerHTML = '<p style="color:#fff;padding:24px;font-family:monospace">Missing ?src=...</p>'; return; }
-  // Strip any leading slashes / parent traversal — only allow same-folder filenames
-  src = src.replace(/^[\/\\.]+/, '');
+  // Strict allowlist: only same-folder HTML filenames (a-z, 0-9, -, _, .)
+  if (!/^[a-z0-9_.-]+\.html$/i.test(src)) { document.body.innerHTML = '<p style="color:#fff;padding:24px;font-family:monospace">Invalid src</p>'; return; }
   document.getElementById('d').src = src + '?theme=dark';
   document.getElementById('l').src = src + '?theme=light';
 })();

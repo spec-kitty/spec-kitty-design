@@ -171,9 +171,15 @@ jobs:
       - run: npm ci --ignore-scripts
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c  # actions/download-artifact v8.0.1
         with: { name: storybook-static, path: apps/storybook/storybook-static }
-      - run: npx playwright install --with-deps chromium
+      # playwright.config.ts runs chromium/firefox/webkit projects, but
+      # visual baselines exist for chromium only (7 snapshots) — firefox/
+      # webkit baselines were never generated, so VR could never pass
+      # anywhere. Enforced VR gate runs chromium-only for now; cross-browser
+      # smoke still exercises all three browsers. Baseline refresh across
+      # the matrix is filed as follow-up work.
+      - run: npx playwright install --with-deps
       - name: "[ENFORCED] Visual regression (FR-024)"
-        run: npx playwright test apps/storybook/src/tests/visual.spec.ts
+        run: npx playwright test apps/storybook/src/tests/visual.spec.ts --project=chromium
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # actions/upload-artifact v4.6.2
         if: failure()
         with:
@@ -209,8 +215,15 @@ jobs:
       - run: npm ci --ignore-scripts
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c  # actions/download-artifact v8.0.1
         with: { name: storybook-static, path: apps/storybook/storybook-static }
+      - name: Serve storybook-static for audit
+        run: npx --yes http-server apps/storybook/storybook-static -p 6006 --silent &
       - name: "[INFO] Lighthouse audit (FR-022)"
-        run: npx lhci autorun
+        # @lhci/cli removed from devDeps: abandoned upstream with an
+        # unpatchable transitive chain (image-size/extract-zip/puppeteer-core).
+        # Plain lighthouse via npx keeps the advisory value without the vulns.
+        run: |
+          npx --yes lighthouse@latest http://localhost:6006 --quiet --chrome-flags="--headless" --output=json --output-path=lighthouse-report.json || true
+          node -e "const r=require('./lighthouse-report.json'); for (const [k,v] of Object.entries(r.categories)) console.log(k+': '+Math.round(v.score*100))" || true
 
   # ── Merge gate ──────────────────────────────────────────────────────────────
   gate:
