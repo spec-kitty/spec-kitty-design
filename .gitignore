@@ -7,6 +7,11 @@ packages/*/dist/
 !packages/tokens/dist/
 packages/tokens/dist/*
 !packages/tokens/dist/token-catalogue.json
+# publishability (2026-09-01 pre-publish audit, planning session): npm pack respects
+# .gitignore for re-inclusion, so CI-built dist trees for the other two publishable
+# packages need explicit exceptions or `npm publish` ships config files with no code.
+!packages/angular/dist/
+!packages/html-js/dist/
 .nx/cache
 .nx/workspace-data
 

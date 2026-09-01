@@ -50,7 +50,7 @@ jobs:
 
       - name: Publish @spec-kitty/angular (FR-044)
         run: npm publish --provenance --access public
-        working-directory: packages/angular
+        working-directory: packages/angular/dist
 
       - name: Publish @spec-kitty/html-js (FR-044)
         run: npm publish --provenance --access public
