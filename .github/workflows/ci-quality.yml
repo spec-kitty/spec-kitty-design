@@ -221,6 +221,12 @@ jobs:
       - run: npx playwright install --with-deps
       - name: "[ENFORCED] Cross-browser smoke (FR-023)"
         run: npx playwright test apps/storybook/src/tests/smoke.spec.ts
+      # sk-nav-pill.js is the only executable code in @spec-kitty/styles and had no
+      # test until M2 (#68). It runs here rather than in visual-regression because
+      # it asserts behaviour, not pixels, and because it drives the assembled demo
+      # page — the real no-build consumer path from the ADR-12 audit.
+      - name: "[ENFORCED] Styles runtime behaviour — nav-pill drawer"
+        run: npx playwright test apps/storybook/src/tests/nav-pill-behaviour.spec.ts
 
   # ── Lighthouse (advisory) ──────────────────────────────────────────────────
   lighthouse:
