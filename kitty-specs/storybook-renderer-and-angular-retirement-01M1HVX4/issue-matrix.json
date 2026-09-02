@@ -61,7 +61,7 @@
       "wp": "WP02"
     },
     "#93": {
-      "evidence_ref": "LightMode renders dark; scoped OUT by operator decision DM-01M1HXC6WQC90NK940WN2BXR9K.",
+      "evidence_ref": "Follow-up: #93 stays open. LightMode renders dark (:root[data-theme=light] cannot match a wrapper div); scoped OUT of this mission by operator decision DM-01M1HXC6WQC90NK940WN2BXR9K, so ADR-13 confirmation #3 is not claimed here.",
       "fr": null,
       "nfr": null,
       "repo": null,
