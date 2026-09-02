@@ -18,11 +18,11 @@ history:
 - timestamp: '2026-09-02T20:20:00Z'
   agent: system
   action: Prompt generated via spec-kitty tasks
-authoritative_surface: src/tests/visual.spec.ts-snapshots/
+authoritative_surface: apps/storybook/src/tests/
 create_intent: []
 execution_mode: code_change
 owned_files:
-- src/tests/visual.spec.ts-snapshots/**
+- apps/storybook/src/tests/**
 tags: []
 tracker_refs: []
 ---
@@ -43,7 +43,11 @@ Implements IC-04.
 
 ## The `LightMode` constraint (C-004)
 
-**Do not re-shoot a `LightMode` baseline while #93 is open.**
+**Scope note, verified in this checkout: there is no `LightMode` baseline.** The 7 files are `sk-feature-card-{angular,html}-default`, `sk-ribbon-card-angular-default`, `sk-ribbon-card-{angular,html}-with-ribbon`, and `sk-stub-{angular,html}-default`. The 4 to retire are the `-angular-` ones; the 3 survivors are `sk-feature-card-html-default`, `sk-ribbon-card-html-with-ribbon`, `sk-stub-html-default`.
+
+So C-004 does **not** bite on the baseline set. It bites on the mission's **exit criterion** — #69 requires "`LightMode` variants intact", and that is what must not be certified while #93 is open. If a `LightMode` baseline is ever added, the rule below applies to it.
+
+**Do not re-shoot a `LightMode` baseline while #93 is open, and do not certify "LightMode intact" on the strength of a green visual suite that contains no LightMode baseline at all.**
 
 ADR-13's confirmation #3 requires `LightMode` variants to "render correctly with `data-theme="light"` reaching the component". #93 reports that every `LightMode` story renders **dark**, because the selector is `:root[data-theme="light"]` and `:root` only matches `<html>`, while the stories set the attribute on a wrapping `<div>`. ADR-13's own spike saw a `color-contrast` violation on `LightMode` and called it pre-existing.
 

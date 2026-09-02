@@ -20,11 +20,13 @@ history:
 - timestamp: '2026-09-02T20:20:00Z'
   agent: system
   action: Prompt generated via spec-kitty tasks
-authoritative_surface: src/
+authoritative_surface: apps/storybook/.storybook/
 create_intent: []
 execution_mode: code_change
 owned_files:
-- src/**
+- apps/storybook/.storybook/**
+- package.json
+- package-lock.json
 tags: []
 tracker_refs: []
 ---

@@ -8,19 +8,66 @@
     {
       "lane_id": "lane-a",
       "wp_ids": [
-        "WP01",
-        "WP02",
-        "WP03",
-        "WP04"
+        "WP01"
       ],
       "write_scope": [
-        "src/**",
-        "src/lib/**/**",
-        "src/tests/visual.spec.ts-snapshots/**"
+        "apps/storybook/.storybook/**",
+        "package-lock.json",
+        "package.json"
+      ],
+      "predicted_surfaces": [
+        "artifact-rendering"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    },
+    {
+      "lane_id": "lane-b",
+      "wp_ids": [
+        "WP02"
+      ],
+      "write_scope": [
+        "packages/styles/src/**/*.stories.ts"
       ],
       "predicted_surfaces": [
         "api",
         "app-shell",
+        "artifact-rendering"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    },
+    {
+      "lane_id": "lane-c",
+      "wp_ids": [
+        "WP03"
+      ],
+      "write_scope": [
+        ".github/workflows/pr-preview.yml",
+        ".github/workflows/release.yml",
+        ".github/workflows/storybook-deploy.yml",
+        "angular.json",
+        "commitlint.config.cjs",
+        "nx.json",
+        "packages/angular/**"
+      ],
+      "predicted_surfaces": [
+        "api",
+        "artifact-rendering",
+        "legacy-cleanup"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    },
+    {
+      "lane_id": "lane-d",
+      "wp_ids": [
+        "WP04"
+      ],
+      "write_scope": [
+        "apps/storybook/src/tests/**"
+      ],
+      "predicted_surfaces": [
         "artifact-rendering",
         "legacy-cleanup"
       ],
@@ -28,35 +75,8 @@
       "parallel_group": 0
     }
   ],
-  "computed_at": "2026-09-02T20:20:34.587726+00:00",
+  "computed_at": "2026-09-02T20:21:27.268972+00:00",
   "computed_from": "dependency_graph+ownership",
   "planning_artifact_wps": [],
-  "planning_commit_sha": "f36ba9f793215ea729e6ab58d5421e23c428bd22",
-  "collapse_report": {
-    "events": [
-      {
-        "wp_a": "WP01",
-        "wp_b": "WP02",
-        "rule": "write_scope_overlap",
-        "evidence": "overlapping globs: 'src/**' vs 'src/**'"
-      },
-      {
-        "wp_a": "WP01",
-        "wp_b": "WP03",
-        "rule": "write_scope_overlap",
-        "evidence": "overlapping globs: 'src/**' vs 'src/lib/**/**'"
-      },
-      {
-        "wp_a": "WP01",
-        "wp_b": "WP04",
-        "rule": "write_scope_overlap",
-        "evidence": "overlapping globs: 'src/**' vs 'src/tests/visual.spec.ts-snapshots/**'"
-      }
-    ],
-    "total_merges": 3,
-    "independent_wps_collapsed": 3,
-    "by_rule": {
-      "write_scope_overlap": 3
-    }
-  }
+  "planning_commit_sha": "f24e108060153ad708b58e2ff51d6f95ce2cb4fe"
 }

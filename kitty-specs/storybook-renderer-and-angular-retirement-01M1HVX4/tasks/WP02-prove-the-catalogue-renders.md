@@ -20,11 +20,11 @@ history:
 - timestamp: '2026-09-02T20:20:00Z'
   agent: system
   action: Prompt generated via spec-kitty tasks
-authoritative_surface: src/
+authoritative_surface: packages/styles/src/
 create_intent: []
 execution_mode: code_change
 owned_files:
-- src/**
+- packages/styles/src/**/*.stories.ts
 tags: []
 tracker_refs: []
 ---

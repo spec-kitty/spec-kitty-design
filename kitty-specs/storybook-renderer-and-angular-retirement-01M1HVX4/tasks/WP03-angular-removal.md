@@ -23,11 +23,17 @@ history:
 - timestamp: '2026-09-02T20:20:00Z'
   agent: system
   action: Prompt generated via spec-kitty tasks
-authoritative_surface: src/lib/**/
+authoritative_surface: packages/angular/
 create_intent: []
 execution_mode: code_change
 owned_files:
-- src/lib/**/**
+- packages/angular/**
+- angular.json
+- commitlint.config.cjs
+- .github/workflows/release.yml
+- .github/workflows/storybook-deploy.yml
+- .github/workflows/pr-preview.yml
+- nx.json
 tags: []
 tracker_refs: []
 ---
