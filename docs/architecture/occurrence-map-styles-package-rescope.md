@@ -14,16 +14,22 @@ table below is the line metric, consistently.
 | Class | Files | Matching lines | Action |
 |---|---:|---:|---|
 | Frozen historical record | 93 | 600 | untouched |
-| Live references | 27 | 154 | **151 rewritten, 3 held** (see the commitlint note) |
-| Package source headers | 29 | 29 | untouched — moved verbatim |
+| Live references | 27 | 154 | **rewritten** |
+| Package source headers | 29 | 29 | **rewritten** — see below |
 | Decision records | 8 | 22 | untouched |
-| Demo display copy | 1 | 8 | 7 rewritten, 1 untouched |
+| Demo display copy | 1 | 8 | **rewritten** |
 | Diagram sources and renders | 6 | 6 | deferred to #83 |
-| Programme document | 1 | 6 | 6 occurrences untouched |
-| Commitlint scope enum | 1 | 3 | untouched |
-| Angular CSS comments | 3 | 3 | untouched |
+| Programme document | 1 | 6 | 5 untouched, 1 corrected |
+| Commitlint scope enum | 1 | 3 | **scope dropped**; 3 explanatory comment lines remain |
+| Angular CSS comments | 3 | 3 | **rewritten** |
 
 Files sum to 169, lines to 831.
+
+**The header, Angular-comment and commitlint rows were deferrals in this
+document's first two drafts. The operator directed that the findings be fixed
+rather than deferred, so they were** — see *Findings fixed rather than deferred*
+below. What remains untouched is the frozen record, the ADRs, and the diagrams
+that belong to #83.
 
 ## Rewritten — live references
 
@@ -108,45 +114,6 @@ states what was decided on a date. ADR-8 in particular *argues from* the name
 `tokens ← html-js` graph; #83 explicitly out-of-scopes ADR text, so that is tracked
 on **#88**, not #83.
 
-**Package source headers** — 29 files under `packages/styles/src/` open with an
-attribution comment naming `@spec-kitty/html-js`: 11 `.css`, 16 `.html`, plus
-`form-field/index.ts` and `nav-pill/sk-nav-pill.js`.
-
-The governing rule is that **this mission renames references to the component
-source, and does not edit the component source itself.** That is what #68 means by
-putting *"any CSS or markup change"* and *"the `index.ts` string exports — they
-move, they do not change"* out of scope, and it covers all 29 including the `.js`,
-which no narrower wording reaches. It is also the rule that correctly *permits*
-rewriting `apps/demo/*.html` and `audit/index.html`, which are references, not
-source.
-
-Worth recording against **#88**: **28 of the 29 reach the published tarball.** The
-27 `.css`/`.html` are copied verbatim by `project.json`'s `**/*.{html,css}` asset
-glob, and `sk-nav-pill.js` is copied by hand in `release.yml`. So a consumer opening
-`@spec-kitty/styles/dist/button/sk-button.css` reads a comment naming a package that
-does not exist — a published-artifact inconsistency, not merely an internal one.
-
-**Angular CSS comments** — `packages/angular/src/lib/button/sk-button-*.component.css`
-carry present-tense provenance claims naming `@spec-kitty/html-js`. Out of scope
-(Angular), and #69 deletes the package outright. **#88**.
-
-**Commitlint scope enum** — `commitlint.config.cjs` carries its own rule:
-*"`angular` and `html-js` stay until their packages are actually gone."* That
-condition has now fired, but the file is not in this mission's in-scope list.
-Tracked on **#88** — note #69's body commits only to retiring the `angular` scope,
-so `html-js` needs an explicit owner rather than an assumption.
-
-Three live doc lines are held back with it, and they are **stale, not accurate**:
-
-- `CLAUDE.md:38` and `llms-full.txt:604` mirror the enum and list only the original
-  ten scopes. The enum has carried `styles`, `elements` and `react` since O2, so
-  both were already incomplete at the base commit — O2's unfinished business.
-- `CLAUDE.md:107` is a different thing: not a list, but a worked example
-  (*"sticking a tokens change in an `html-js`-scoped commit…"*). It names a scope by
-  the name of a package **this merge deletes**, so unlike the other two it is
-  degraded by this mission rather than merely inherited. It is the one of the three
-  with a real claim to have belonged in this diff.
-
 **Diagram sources and renders** (`docs/architecture/assets/**`) — ADR-12 assigns
 these files to the diagram-correction mission, which must add the `styles` and
 `elements` layers anyway. That mission is **#83** (#67 was closed COMPLETED on
@@ -177,6 +144,87 @@ Actions workflows on `main`.
 titled *"Bug fixes — Angular buttons + html-js CSS imports"*. Prose about a past work
 package, not a path reference. The other 7 occurrences in that file are live paths
 and were rewritten.
+
+## Findings fixed rather than deferred
+
+The adversarial gate ran twice and produced no code defect after pass 1. The
+operator directed that its findings be fixed rather than filed. What changed:
+
+**Names.** All 29 source headers and the 3 Angular button-CSS comments now say
+`@spec-kitty/styles`. This mattered more than an internal tidy: **28 of the 29 reach
+the published tarball** — the 27 `.css`/`.html` via `project.json`'s
+`**/*.{html,css}` asset glob and `sk-nav-pill.js` via `release.yml`'s hand-written
+`cp` — so a consumer opening `@spec-kitty/styles/dist/button/sk-button.css` was
+reading a comment naming a package that does not exist. The edit is 32 files, 32
+lines, and every changed line is a comment. `packages/styles/README.md` also pointed
+installers at `src/`, which the `files` allowlist excludes from the tarball; it now
+points at `dist/`.
+
+**The commitlint enum.** `html-js` is dropped, per the file's own standing rule that
+the scope stays only *"until their packages are actually gone"*. `CLAUDE.md` and
+`llms-full.txt` mirrored that enum and had been wrong since O2 — listing ten scopes
+against an enum of thirteen — so both are corrected, and `CLAUDE.md`'s worked example
+now names a package that exists.
+
+**A dead boundary rule.** `eslint.config.mjs` constrained `sourceTag: 'scope:docs'`,
+which no project carries; the rule matched nothing while `apps/storybook`, the one
+project that depends on all three packages, was governed by no constraint at all.
+Retargeted to `scope:storybook`. Lint passes.
+
+**A `.gitignore` exception resting on a false premise.** The un-ignore entries for
+`packages/{angular,styles}/dist/` were justified by *"npm pack respects .gitignore for
+re-inclusion"*. Tested both packages both ways: the tarballs are identical — `styles`
+is governed by its `files` allowlist and `angular` publishes from inside `dist/`,
+where root ignore rules do not reach. The exceptions bought nothing and un-ignored
+the build trees, which is how a stray `git add -A` in this very mission nearly
+committed compiled output. Removed, with the test recorded in the file.
+
+**A lockfile pin that had drifted.** The root mirror said `^1.59.1` for
+`@playwright/test` against the manifest's exact `1.62.1`. `docs-diagrams.yml` now pins
+the diagram-rendering browser off that exact version, so the drift was load-bearing
+for diagram reproducibility.
+
+**Two gates that could not fail.**
+
+- `quality:htmlhint` ended in `|| true`. The 9 errors it was masking are Angular
+  *template fragments*, where `attr-lowercase` (`*ngIf`) and `input-requires-label`
+  are category errors — that is what the `|| true` was really for. The glob is now
+  narrowed off `packages/angular` and widened onto `apps/demo/**` and `audit/*.html`,
+  and the `|| true` is gone. 20 files, clean.
+- The demo deploy assembly ran only on push to `main`, and its only check grepped for
+  a residual `../../packages` prefix — it proved the `sed` fired, never that the
+  rewritten targets existed. It is now `scripts/assemble-demo-dist.sh`, which derives
+  the component set from the pages themselves rather than a hardcoded seven-name
+  allowlist (removing the drift class entirely) and asserts every reference resolves.
+  `ci-quality.yml` runs it on every PR. Both failure modes were tested: a page
+  referencing a component that does not exist, and a rename the `sed` missed.
+
+**The runtime code had no test.** `sk-nav-pill.js` is the only executable code in
+this package and nothing exercised it, so a broken import would have gone green
+everywhere. `apps/storybook/src/tests/nav-pill-behaviour.spec.ts` drives it through
+the assembled demo page and asserts both the toggle behaviour and the absence of
+module/asset failures; verified by breaking the specifier and watching it fail.
+
+### A finding this work turned up, which is not fixed here
+
+Chasing that last item surfaced something larger. **The HTML Storybook stories do not
+render at all.** Storybook is configured with `@storybook/angular` as its only
+framework, and the HTML stories — whose `render` returns a raw string — never leave
+the `sb-preparing-story` state. Reproduced directly: `primitives-skstub-angular--default`
+and `components-skfeaturecard-angular--default` render; `primitives-skstub-html--default`
+and `components-skfeaturecard-html--default` are blank after a 25-second wait.
+
+The consequence is that **3 of the 7 visual baselines — the HTML ones, and the only
+ones that touch this package — are screenshots of a loading spinner.** They pass
+unchanged no matter what happens to `packages/styles`. `visual.spec.ts` takes those
+three after only `waitForLoadState('domcontentloaded')`, with no selector wait, which
+is why nobody noticed.
+
+That is why this mission's exit criterion needed the correction recorded in
+`elements-first-programme.md`: the baselines were never the behaviour-neutrality
+proof they were taken for. It is **not** fixed here — ADR-13 and M3 (#69) move
+Storybook to the web-components renderer, which is the fix — but the baselines should
+not be trusted as component coverage until then. Filed on #88.
 
 ## Behaviour-neutrality evidence
 
