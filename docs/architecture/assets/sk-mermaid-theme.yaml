@@ -10,7 +10,7 @@
 
 theme: base
 themeVariables:
-  fontFamily: "ui-sans-serif, system-ui, sans-serif"
+  fontFamily: "SK Diagram"   # embedded by render-diagrams.js; host fonts are never consulted
   fontSize: "14px"
   primaryColor: "#161619"          # Node fill (sk-surface-page equivalent)
   primaryTextColor: "#e8e8eb"      # Node text (sk-on-page equivalent)
