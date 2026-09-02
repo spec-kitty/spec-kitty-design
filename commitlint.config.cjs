@@ -24,6 +24,12 @@ module.exports = {
     'scope-enum': [2, 'always', [
       'tokens', 'angular', 'html-js', 'storybook',
       'doctrine', 'ci', 'docs', 'release', 'deps', 'security',
+      // Elements-first programme (ADR-8). `styles` is html-js re-scoped, `elements`
+      // is the custom-element base layer, `react` is its generated wrapper. Added
+      // ahead of the packages themselves because a scope-enum miss blocks the first
+      // commit of the mission that creates each one. `angular` and `html-js` stay
+      // until their packages are actually gone.
+      'styles', 'elements', 'react',
     ]],
     'subject-case': [2, 'never', ['upper-case', 'pascal-case', 'start-case']],
   },
