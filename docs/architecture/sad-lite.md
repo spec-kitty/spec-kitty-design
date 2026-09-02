@@ -57,7 +57,7 @@ This document describes the architecture of the Spec Kitty Design System — a m
 |---|---|---|
 | `@spec-kitty/tokens` | Single source of truth for all `--sk-*` visual values; zero-build-step distribution | All other packages; any HTML/CSS surface |
 | `@spec-kitty/angular` | Angular LTS components consuming token values by reference; includes Storybook stories | Angular applications (SK dashboard, custom) |
-| `@spec-kitty/html-js` | Framework-agnostic HTML primitives and ES module utilities; vanilla markup only | Static HTML surfaces, Jekyll/Hugo themes, non-Angular JS projects |
+| `@spec-kitty/styles` | Framework-agnostic HTML primitives and ES module utilities; vanilla markup only | Static HTML surfaces, Jekyll/Hugo themes, non-Angular JS projects |
 | Storybook | Living documentation; visual regression CI surface; multi-framework renderer; deployed to GitHub Pages | Contributors, component consumers, CI |
 | `doctrine/` | Brand voice + visual identity governance for AI agents; org-layer doctrine bundle; SKILL.md | AI agents working on any Priivacy-ai project |
 | CI pipeline | Quality enforcement: CVE scan, linting, a11y, visual regression, cross-browser, Lighthouse, SBOM | Every PR and release |
@@ -65,7 +65,7 @@ This document describes the architecture of the Spec Kitty Design System — a m
 ### Dependency rules
 
 1. `@spec-kitty/tokens` has **no** dependencies on other packages in this repo.
-2. `@spec-kitty/angular` and `@spec-kitty/html-js` depend on `@spec-kitty/tokens` as a peer dependency only — they do **not** bundle token values.
+2. `@spec-kitty/angular` and `@spec-kitty/styles` depend on `@spec-kitty/tokens` as a peer dependency only — they do **not** bundle token values.
 3. No framework package depends on another framework package.
 4. `doctrine/` is an independent directory with no npm dependency on any package.
 5. Storybook is a development tool; it is **not** a dependency of any published package.
@@ -101,7 +101,7 @@ This document describes the architecture of the Spec Kitty Design System — a m
 
 **Sub-contexts:**
 - **Angular Components** (`@spec-kitty/angular`) — targets Angular LTS; inherits Angular's 6-month LTS lifecycle
-- **HTML/JS Primitives** (`@spec-kitty/html-js`) — framework-agnostic; no build step required for consumers
+- **HTML/JS Primitives** (`@spec-kitty/styles`) — framework-agnostic; no build step required for consumers
 
 **Inbound:** Token authority context (token values); Storybook stories (documentation obligation)
 **Outbound:** Published npm packages per framework target

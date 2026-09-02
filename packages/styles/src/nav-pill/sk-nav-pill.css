@@ -1,0 +1,87 @@
+/* @spec-kitty/styles — sk-nav-pill styles — tokens only, no hardcoded values */
+
+.sk-nav-pill {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sk-space-2);
+  padding: var(--sk-space-2);
+  background: var(--sk-surface-card);
+  border: var(--sk-border-width-1) solid var(--sk-border-default);
+  border-radius: var(--sk-radius-pill);
+  width: fit-content;
+}
+
+.sk-nav-pill__items {
+  display: flex;
+  align-items: center;
+  gap: var(--sk-space-1);
+}
+
+.sk-nav-pill__item {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--sk-space-2) var(--sk-space-3);
+  border-radius: var(--sk-radius-pill);
+  font-family: var(--sk-font-sans);
+  font-size: var(--sk-text-sm);
+  font-weight: var(--sk-weight-normal);
+  color: var(--sk-fg-muted);
+  text-decoration: none;
+  transition:
+    color var(--sk-motion-duration-fast) var(--sk-motion-ease-out),
+    background-color var(--sk-motion-duration-fast) var(--sk-motion-ease-out),
+    box-shadow var(--sk-motion-duration-base) var(--sk-motion-ease-out);
+}
+
+.sk-nav-pill__item:hover {
+  color: var(--sk-fg-default);
+  background: var(--sk-bg-pill);
+}
+
+.sk-nav-pill__item--active {
+  color: var(--sk-fg-default);
+  background: var(--sk-bg-pill);
+  border: var(--sk-border-width-1) solid var(--sk-border-strong);
+  font-weight: var(--sk-weight-semibold);
+}
+
+.sk-nav-pill__item--active:hover {
+  background: var(--sk-bg-pill);
+}
+
+.sk-nav-pill__item:focus-visible {
+  outline: var(--sk-border-width-2) solid var(--sk-border-focus);
+  outline-offset: 2px;
+}
+
+.sk-nav-pill__cta {
+  padding-left: var(--sk-space-2);
+}
+
+.sk-nav-pill__cta-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--sk-space-2) var(--sk-space-4);
+  background: var(--sk-color-accent);
+  color: var(--sk-fg-on-primary);
+  border: none;
+  border-radius: var(--sk-radius-pill);
+  font-family: var(--sk-font-sans);
+  font-size: var(--sk-text-sm);
+  font-weight: var(--sk-weight-semibold);
+  cursor: pointer;
+  transition:
+    background-color var(--sk-motion-duration-fast) var(--sk-motion-ease-out),
+    box-shadow var(--sk-motion-duration-base) var(--sk-motion-ease-out);
+}
+
+.sk-nav-pill__cta-btn:hover {
+  box-shadow: var(--sk-shadow-glow-primary);
+}
+
+.sk-nav-pill__cta-btn:focus-visible {
+  outline: var(--sk-border-width-2) solid var(--sk-border-focus);
+  outline-offset: 2px;
+}

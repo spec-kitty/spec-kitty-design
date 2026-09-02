@@ -1,0 +1,91 @@
+/* @spec-kitty/styles — sk-site-footer */
+/* All values use --sk-* tokens only */
+
+.sk-site-footer {
+  padding: var(--sk-space-11) 0 var(--sk-space-8);
+  border-top: 1px solid var(--sk-border-default);
+}
+
+.sk-site-footer__grid {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1fr;
+  gap: var(--sk-space-10);
+}
+
+@media (max-width: 640px) {
+  .sk-site-footer__grid { grid-template-columns: 1fr; gap: var(--sk-space-8); }
+}
+
+.sk-site-footer__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--sk-space-3);
+  margin-bottom: var(--sk-space-4);
+}
+
+.sk-site-footer__wordmark {
+  font-family: var(--sk-font-display);
+  font-weight: var(--sk-weight-extrabold);
+  font-size: var(--sk-text-base);
+  color: var(--sk-fg-default);
+  letter-spacing: -0.01em;
+}
+
+.sk-site-footer__tagline {
+  font-size: var(--sk-text-sm);
+  color: var(--sk-fg-muted);
+  line-height: 1.55;
+  max-width: 360px;
+  margin: 0;
+}
+
+.sk-site-footer__heading {
+  font-family: var(--sk-font-mono);
+  font-size: var(--sk-text-xs);
+  font-weight: var(--sk-weight-bold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--sk-fg-muted);
+  margin-bottom: var(--sk-space-5);
+}
+
+.sk-site-footer__links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sk-space-3);
+}
+
+.sk-footer-link {
+  color: var(--sk-fg-muted);
+  font-size: var(--sk-text-sm);
+  font-weight: var(--sk-weight-medium);
+  text-decoration: none;
+  text-decoration-line: underline;
+  text-decoration-color: transparent;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 4px;
+  transition:
+    color var(--sk-motion-duration-fast) var(--sk-motion-ease-out),
+    text-decoration-color var(--sk-motion-duration-fast) var(--sk-motion-ease-out);
+}
+
+.sk-footer-link:hover {
+  color: var(--sk-fg-default);
+  text-decoration-color: var(--sk-color-yellow);
+}
+
+.sk-site-footer__divider {
+  height: 1px;
+  background: var(--sk-border-default);
+  border: 0;
+  margin: var(--sk-space-7) 0;
+}
+
+.sk-site-footer__legal {
+  font-size: var(--sk-text-xs);
+  color: var(--sk-fg-muted);
+  margin: 0;
+}

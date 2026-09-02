@@ -43,12 +43,17 @@ jobs:
               - 'packages/tokens/**'
             components:
               - 'packages/angular/**'
-              - 'packages/html-js/**'
+              - 'packages/styles/**'
               - 'apps/storybook/**'
+              # The demo pages are part of this surface: storybook-build is what
+              # runs assemble-demo-dist.sh, so a PR editing a demo asset path
+              # must not skip it.
+              - 'apps/demo/**'
               # The gates' own runners live here. Without this,
               # run-axe-storybook.js could be edited without the a11y gate
               # running — which is exactly how four defects reached the train
-              # unnoticed, and why this gate had never run green (#90).
+              # unnoticed, and why that gate had never run green (#90). It also
+              # covers assemble-demo-dist.sh, which storybook-build runs.
               - 'scripts/**'
             docs:
               - 'docs/**'
@@ -148,6 +153,16 @@ jobs:
       - run: npm ci --ignore-scripts
       - name: "[ENFORCED] Storybook build (NFR-003 < 3 min)"
         run: npx nx run storybook:storybook:build
+      # Runs before the upload so the artifact the downstream jobs consume matches
+      # what the deploy actually publishes — the demo pages included. That is what
+      # lets nav-pill-behaviour.spec.ts drive the package's runtime JS through the
+      # real consumer path. It also runs the same script the deploy runs, so the sed
+      # rewrite, the asset mirroring and the reference-resolution check are exercised
+      # on every PR instead of only on push to main.
+      - name: "[ENFORCED] Demo surface assembles and every asset reference resolves"
+        run: |
+          npx nx run-many --target=build --projects=tokens
+          bash scripts/assemble-demo-dist.sh apps/storybook/storybook-static
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # actions/upload-artifact v4.6.2
         with:
           name: storybook-static
@@ -211,6 +226,12 @@ jobs:
       - run: npx playwright install --with-deps
       - name: "[ENFORCED] Cross-browser smoke (FR-023)"
         run: npx playwright test apps/storybook/src/tests/smoke.spec.ts
+      # sk-nav-pill.js is the only executable code in @spec-kitty/styles and had no
+      # test until M2 (#68). It runs here rather than in visual-regression because
+      # it asserts behaviour, not pixels, and because it drives the assembled demo
+      # page — the real no-build consumer path from the ADR-12 audit.
+      - name: "[ENFORCED] Styles runtime behaviour — nav-pill drawer"
+        run: npx playwright test apps/storybook/src/tests/nav-pill-behaviour.spec.ts
 
   # ── Lighthouse (advisory) ──────────────────────────────────────────────────
   lighthouse:
@@ -238,7 +259,7 @@ jobs:
   # ── Merge gate ──────────────────────────────────────────────────────────────
   gate:
     runs-on: ubuntu-latest
-    needs: [security, workflow-pin-check, lint-code, a11y, visual-regression, playwright]
+    needs: [security, workflow-pin-check, lint-code, storybook-build, a11y, visual-regression, playwright]
     if: always()
     steps:
       - name: "[ENFORCED] All hard gates must pass (FR-026)"
@@ -246,20 +267,29 @@ jobs:
           echo "security: ${{ needs.security.result }}"
           echo "workflow-pin-check: ${{ needs.workflow-pin-check.result }}"
           echo "lint-code: ${{ needs.lint-code.result }}"
+          echo "storybook-build: ${{ needs.storybook-build.result }}"
           echo "a11y: ${{ needs.a11y.result }}"
           echo "visual-regression: ${{ needs.visual-regression.result }}"
           echo "playwright: ${{ needs.playwright.result }}"
           # a11y / visual-regression / playwright are skipped when storybook-build is skipped (no component changes)
+          # storybook-build carries [ENFORCED] steps of its own (the Storybook
+          # build and the demo-surface assembly check). Until it was added to
+          # needs, a failure there skipped a11y / visual-regression / playwright,
+          # and 'skipped' is accepted below - so those enforced steps could not
+          # block a merge. It is legitimately skipped when no component changed.
+          sb_ok="${{ needs.storybook-build.result }}"
           a11y_ok="${{ needs.a11y.result }}"
           vr_ok="${{ needs.visual-regression.result }}"
           pw_ok="${{ needs.playwright.result }}"
           # Treat 'skipped' as acceptable (no components changed, gates not applicable)
+          if [ "$sb_ok"   != "success" ] && [ "$sb_ok"   != "skipped" ]; then sb_ok="fail"; fi
           if [ "$a11y_ok" != "success" ] && [ "$a11y_ok" != "skipped" ]; then a11y_ok="fail"; fi
           if [ "$vr_ok"   != "success" ] && [ "$vr_ok"   != "skipped" ]; then vr_ok="fail"; fi
           if [ "$pw_ok"   != "success" ] && [ "$pw_ok"   != "skipped" ]; then pw_ok="fail"; fi
           if [ "${{ needs.security.result }}"          != "success" ] || \
              [ "${{ needs.workflow-pin-check.result }}" != "success" ] || \
              [ "${{ needs.lint-code.result }}"          != "success" ] || \
+             [ "$sb_ok"   = "fail" ] || \
              [ "$a11y_ok" = "fail" ] || \
              [ "$vr_ok"   = "fail" ] || \
              [ "$pw_ok"   = "fail" ]; then

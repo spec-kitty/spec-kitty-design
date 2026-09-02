@@ -27,14 +27,14 @@ jobs:
         run: bash scripts/npm-audit-gate.sh
 
       - name: Build all packages
-        run: npx nx run-many --target=build --projects=tokens,angular,html-js
+        run: npx nx run-many --target=build --projects=tokens,angular,styles
 
-      - name: Copy behavior helper beside compiled output (html-js nav-pill drawer)
-        run: cp packages/html-js/src/nav-pill/sk-nav-pill.js packages/html-js/dist/src/nav-pill/sk-nav-pill.js
+      - name: Copy behavior helper beside compiled output (styles nav-pill drawer)
+        run: cp packages/styles/src/nav-pill/sk-nav-pill.js packages/styles/dist/src/nav-pill/sk-nav-pill.js
 
       - name: "[ENFORCED] Dist contents audit — no secrets/sourcemaps (ADR-005)"
         run: |
-          for pkg in tokens angular html-js; do
+          for pkg in tokens angular styles; do
             echo "=== packages/$pkg ==="
             cd packages/$pkg && npm pack --dry-run 2>&1 | grep "npm notice" | grep -v "==="
             cd ../..
@@ -55,9 +55,9 @@ jobs:
         run: npm publish --provenance --access public
         working-directory: packages/angular/dist
 
-      - name: Publish @spec-kitty/html-js (FR-044)
+      - name: Publish @spec-kitty/styles (FR-044)
         run: npm publish --provenance --access public
-        working-directory: packages/html-js
+        working-directory: packages/styles
 
       - name: Create GitHub Release with SBOM
         uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda  # softprops/action-gh-release v3.0.0

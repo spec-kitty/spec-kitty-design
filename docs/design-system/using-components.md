@@ -1,12 +1,12 @@
 # Using components
 
-The Spec Kitty component libraries ship in two flavours: `@spec-kitty/angular` for Angular applications and `@spec-kitty/html-js` for framework-agnostic HTML projects. Both require `@spec-kitty/tokens`.
+The Spec Kitty component libraries ship in two flavours: `@spec-kitty/angular` for Angular applications and `@spec-kitty/styles` for framework-agnostic HTML projects. Both require `@spec-kitty/tokens`.
 
 ## Installation
 
 ```bash
 npm install @spec-kitty/angular @spec-kitty/tokens    # Angular
-npm install @spec-kitty/html-js @spec-kitty/tokens    # plain HTML/JS
+npm install @spec-kitty/styles @spec-kitty/tokens    # plain HTML/JS
 ```
 
 > Note: these packages must be published to npm before the import paths below work in consumer projects. Until then, install from the local repository using `npm link` or a path dependency.

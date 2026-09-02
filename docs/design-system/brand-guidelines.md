@@ -133,6 +133,6 @@ The Spec Kitty mascot is a bespectacled cat rendered in a watercolour illustrati
 - Slide decks and presentations
 - Social media and promotional assets
 
-The mascot must never be embedded in software packages (`@spec-kitty/tokens`, `@spec-kitty/angular`, `@spec-kitty/html-js`) or shipped as a dependency of consumer projects. It is a brand illustration asset, not a UI component.
+The mascot must never be embedded in software packages (`@spec-kitty/tokens`, `@spec-kitty/angular`, `@spec-kitty/styles`) or shipped as a dependency of consumer projects. It is a brand illustration asset, not a UI component.
 
 The canonical master illustration is a 1024x1024 PNG. Do not scale it below 64px or use it as a favicon without the approved favicon crop.

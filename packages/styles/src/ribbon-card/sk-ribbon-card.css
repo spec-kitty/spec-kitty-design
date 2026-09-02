@@ -1,0 +1,112 @@
+/* @spec-kitty/styles — sk-ribbon-card shared styles */
+/* All values use --sk-* tokens only — no hardcoded values */
+/* Deviation note: the ribbon top/right offset uses small fixed px values
+   (top:0, right:24px) for precise corner anchoring — accepted layout constant
+   not representable as a spacing token. */
+
+.sk-ribbon-card {
+  position: relative;
+  padding: var(--sk-space-6);
+  background: var(--sk-surface-card);
+  border: 1px solid var(--sk-border-default);
+  border-radius: var(--sk-radius-md);
+  overflow: visible;
+}
+
+/* The ribbon tab drops from the top edge of the card */
+.sk-ribbon-card__ribbon {
+  transform: rotate(45deg);
+  transform-origin: center;
+  position: absolute;
+  top: 0;
+  right: var(--sk-space-6);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sk-space-1);
+  font-family: var(--sk-font-mono);
+  font-size: var(--sk-text-xs);
+  font-weight: var(--sk-weight-bold);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: var(--sk-space-1) var(--sk-space-3);
+  border-radius: 0 0 var(--sk-radius-sm) var(--sk-radius-sm);
+}
+
+.sk-ribbon-card__ribbon svg {
+  width: 12px;
+  height: 12px;
+  stroke-width: 2.4;
+}
+
+/* Ribbon colour variants */
+/* Deviation: text colours for ribbon variants use dark warm-toned values
+   that match the reference design; these are fixed ink colours on coloured
+   backgrounds and are accepted design constants (not representable as
+   semantic fg tokens). */
+.sk-ribbon-card__ribbon--yellow {
+  background: var(--sk-color-yellow);
+  color: var(--sk-fg-on-primary);
+}
+
+.sk-ribbon-card__ribbon--green {
+  background: var(--sk-color-green);
+  color: var(--sk-fg-on-primary);
+}
+
+.sk-ribbon-card__ribbon--purple {
+  background: var(--sk-color-purple);
+  color: var(--sk-fg-on-primary);
+}
+
+.sk-ribbon-card__ribbon--blue {
+  background: var(--sk-color-blue);
+  color: var(--sk-fg-on-primary);
+}
+
+.sk-ribbon-card__ribbon--red {
+  background: var(--sk-color-red);
+  color: var(--sk-fg-on-primary);
+}
+
+/* Colorized-border variants — accent the card edge with a brand colour
+   instead of the default neutral hairline border. Per WP01 / issue #10.
+   Pairs with a matching ribbon variant for a coherent accent treatment. */
+.sk-ribbon-card--border-yellow {
+  border-color: var(--sk-color-yellow);
+}
+
+.sk-ribbon-card--border-green {
+  border-color: var(--sk-color-green);
+}
+
+.sk-ribbon-card--border-purple {
+  border-color: var(--sk-color-purple);
+}
+
+.sk-ribbon-card--border-blue {
+  border-color: var(--sk-color-blue);
+}
+
+.sk-ribbon-card--border-red {
+  border-color: var(--sk-color-red);
+}
+
+/* Card content — top margin creates space for the ribbon tab */
+.sk-ribbon-card__content {
+  margin-top: var(--sk-space-5);
+}
+
+.sk-ribbon-card__content h3,
+.sk-ribbon-card__content h4 {
+  margin: 0 0 var(--sk-space-2);
+  font-family: var(--sk-font-sans);
+  font-weight: var(--sk-weight-bold);
+  color: var(--sk-fg-default);
+}
+
+.sk-ribbon-card__content p {
+  margin: 0;
+  font-size: var(--sk-text-sm);
+  line-height: 1.55;
+  color: var(--sk-fg-muted);
+}

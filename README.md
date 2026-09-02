@@ -10,7 +10,7 @@ A token-first, framework-progressive design system for the [Spec Kitty](https://
 
 Spec Kitty Design provides:
 - **Design tokens** (`@spec-kitty/tokens`) - CSS custom properties for colour, typography, spacing, motion, and radius. The single authoritative source for all visual values across the ecosystem.
-- **HTML/JS components** (`@spec-kitty/html-js`) - framework-agnostic CSS and lightweight JS for core UI patterns (navigation, cards, tags, forms, banners, footer).
+- **HTML/JS components** (`@spec-kitty/styles`) - framework-agnostic CSS and lightweight JS for core UI patterns (navigation, cards, tags, forms, banners, footer).
 - **Angular components** (`@spec-kitty/angular`) - Angular component wrappers for the same patterns.
 - **Brand assets** - fonts (Falling Sky, Swansea), logo, and visual identity artefacts.
 
@@ -41,7 +41,7 @@ Then use `--sk-*` CSS custom properties anywhere in your styles:
 
 ```html
 <!-- After loading tokens.css, add the component stylesheet: -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@spec-kitty/html-js/dist/nav-pill/sk-nav-pill.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@spec-kitty/styles/dist/nav-pill/sk-nav-pill.css">
 
 <nav class="sk-nav-pill" aria-label="Primary navigation">
   <div class="sk-nav-pill__items">
@@ -98,7 +98,7 @@ npx nx run-many --target=build --all
 ```
 packages/
   tokens/       - CSS custom properties + brand fonts
-  html-js/      - Framework-agnostic CSS + JS components
+  styles/       - Framework-agnostic CSS + JS components
   angular/      - Angular component wrappers
 apps/
   storybook/    - Storybook application

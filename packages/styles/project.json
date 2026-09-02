@@ -1,0 +1,36 @@
+{
+  "name": "styles",
+  "projectType": "library",
+  "sourceRoot": "packages/styles/src",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "options": {
+        "outputPath": "packages/styles/dist",
+        "main": "packages/styles/src/index.ts",
+        "tsConfig": "packages/styles/tsconfig.lib.json",
+        "assets": [
+          {
+            "input": "packages/styles/src",
+            "glob": "**/*.{html,css}",
+            "output": "./"
+          }
+        ]
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "options": {
+        "lintFilePatterns": [
+          "packages/styles/**/*.ts",
+          "packages/styles/**/*.html"
+        ]
+      }
+    }
+  },
+  "tags": [
+    "scope:styles",
+    "type:publishable",
+    "framework:vanilla"
+  ]
+}

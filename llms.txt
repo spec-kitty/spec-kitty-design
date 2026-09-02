@@ -16,7 +16,7 @@
 ## Packages
 
 - [@spec-kitty/tokens README](https://github.com/stijn-dejongh/spec-kitty-design/blob/main/packages/tokens/README.md): Token categories, semantic pairing rules, light mode, linting.
-- [@spec-kitty/html-js README](https://github.com/stijn-dejongh/spec-kitty-design/blob/main/packages/html-js/README.md): Framework-agnostic CSS + minimal JS modules.
+- [@spec-kitty/styles README](https://github.com/stijn-dejongh/spec-kitty-design/blob/main/packages/styles/README.md): Framework-agnostic CSS + minimal JS modules.
 - [@spec-kitty/angular README](https://github.com/stijn-dejongh/spec-kitty-design/blob/main/packages/angular/README.md): Angular component wrappers, peer deps Angular >=19.
 
 ## Architecture & doctrine

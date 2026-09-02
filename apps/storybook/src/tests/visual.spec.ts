@@ -7,7 +7,7 @@ test.setTimeout(60000);
 // sk-stub-html-default, sk-feature-card-html-default and
 // sk-ribbon-card-html-with-ribbon are byte-identical to each other — one md5,
 // 4257 bytes, a uniform #0D0E11 frame. Three different components cannot produce
-// one identical image: the html-js stories do not mount under @storybook/angular,
+// one identical image: the styles-package stories do not mount under @storybook/angular,
 // so all three are pictures of an empty canvas. They pass unchanged whatever
 // happens to those components.
 //

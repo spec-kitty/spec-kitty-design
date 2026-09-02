@@ -101,7 +101,7 @@ Remaining, all short: enable 2FA on the org; issue a granular publish token scop
 | **O4** | Tokens webfont: remove the Google Fonts `@import` at `tokens.css:138` | open — see below |
 | **O5** | Charter amendment lifting the unit-test prohibition | open — wording drafted, needs the CLI |
 | **O6** | Glossary seed: `element`, `styles layer`, `wrapper`, `manifest`, `conformance matrix` | open |
-| **O7** | SP-7 follow-up: pin the diagram rendering environment | open — see ADR-12 |
+| **O7** | SP-7 follow-up: pin the diagram rendering environment | **done** — `13459c8` pins Playwright's Chromium and re-renders all 8 SVGs |
 | **O8** | SaaS: three components referenced by six files that no longer exist (`TeamspacePulseInMotion`, `ProjectPostureRail`, `TeamspacePulse`) | open — separate repo, unrelated to this programme |
 
 **O4's fork, decided:** drop `--sk-font-mono` to the system monospace stack and delete the `@import`. JetBrains Mono is not vendored — `packages/tokens/fonts/` ships Falling Sky and Swansea only — so removing the import is not a one-line delete. Self-hosting it (woff2 + `@font-face` + OFL attribution) is the alternative and remains available as a follow-up if the brand requires that exact face. The immediate win is that a token file stops making a runtime third-party network request, which kitty-desktop already had to patch out.
@@ -134,7 +134,9 @@ ADRs 8, 9, 10, 11, 12 and 13 are written and committed on the train. What remain
 
 **Explicitly out of scope:** any Lit or element code; any CSS or markup change; the `index.ts` string exports (they move, they do not change); Angular; deleting anything.
 
-**Mandatory artefact:** an occurrence classification separating live references (rewrite) from historical record (`kitty-specs/**`, `docs/architecture/validation/**`, `docs/learnings/**`, `audit/**` — untouched).
+**Operator amendment, 2026-09-02 — three of those clauses were lifted.** After the adversarial gate on #85, the operator directed that its findings be *fixed* rather than deferred. That authorised, and M2 shipped: line-1 attribution comments in 29 `.css`/`.html`/`.ts`/`.js` files under `packages/styles/src` and 3 under `packages/angular` (comment lines only — no rule, selector or element changed, and the `index.ts` string exports are untouched); and deletions of two `.gitignore` entries, the `html-js` commitlint scope, and `quality:htmlhint`'s `|| true`. The same directive also produced the three largest non-rename additions, which #68's in-scope list likewise does not cover and which are named here for the same reason: **`scripts/assemble-demo-dist.sh`** (the demo-surface assembly extracted out of `storybook-deploy.yml` so it runs per PR), **`apps/storybook/src/tests/nav-pill-behaviour.spec.ts`** (the first test of `sk-nav-pill.js`, the moved package's only executable code), and the **`ci-quality.yml` rewiring** that binds `storybook-build` into the merge gate. (The HTMLHint narrowing off Angular templates is in `package.json`'s `quality:htmlhint`, not the workflow.) Recorded here because this line is the contract, and an override left only in a mission's own prose is not a contract amendment.
+
+**Mandatory artefact:** an occurrence classification separating live references (rewrite) from historical record (`kitty-specs/**`, `docs/architecture/validation/**`, `docs/learnings/**` — untouched). Delivered as [`occurrence-map-styles-package-rescope.md`](occurrence-map-styles-package-rescope.md). Note `audit/**` was listed here as record and is not: `audit/run.js` is a live Playwright harness and `audit/index.html` carried 27 live package paths, so M2 rewrote them.
 
 **Depends on:** O2 ✅. **Reads:** ADR-8.
 
@@ -142,13 +144,17 @@ ADRs 8, 9, 10, 11, 12 and 13 are written and committed on the train. What remain
 
 **Exit:** `npm run quality:all` green; Storybook builds; **the 7 visual baselines pass unchanged** — that is the behaviour-neutrality proof and the reason nothing else may be in the diff; demo pages resolve from disk and after the deploy rewrite; no live `packages/html-js` reference remains.
 
+**On what proves behaviour-neutrality** (corrected in M2 after the adversarial gate): the baselines were overstated here as *"the behaviour-neutrality proof"*, and they are weaker than "necessary but not sufficient" — **3 of the 7 target `packages/styles` and none of those three renders anything.** Storybook is configured with `@storybook/angular` as its only framework; it wraps each story in a host element named after the story id, and for the HTML stories — whose `render` returns a raw string — that host mounts **empty**. All three snapshots are therefore one byte-identical 1280×720 frame (4257 bytes, md5 `f642335856be…`, uniform `#0D0E11` since #91 re-baselined them). The axe gate could not see this either, for a different reason — it loaded over `file://` and rendered nothing at all; #91 fixed that and now skips these 74 stories explicitly rather than passing them. They pass unchanged whatever happens to the package. The other 4 are Angular stories, unaffected by this rename. Nothing covers the package's only runtime code, `sk-nav-pill.js`, until M2 added `nav-pill-behaviour.spec.ts`. See **#88**; **M3 (#69)** is the fix, because the web-components renderer mounts those stories natively.
+
+The binding evidence for M2 is instead: the moved source tree is byte-identical apart from line-1 comments, and every rewritten path resolves in all three modes — `file://`, the post-`sed` deploy dist, and `audit/index.html` resolved against a real build (path resolution; the harness itself was not executed end to end).
+
 ---
 
 ### M3 · `storybook-renderer-and-angular-retirement` — **ready after M2**
 
 **Intent:** move Storybook to the web-components renderer and delete Angular from the repository.
 
-**In scope:** swap `main.ts` to `@storybook/web-components-vite`; replace the hand-written `webpackFinal` CSS rule with Vite's native handling; delete the 10 Angular story files, `packages/angular`, `angular.json`, `ng-package.json` and the 16 Angular/`zone.js`/`ng-packagr`/`@nx/angular`/`@storybook/angular` devDependencies; update the three workflows hardcoding `projects=tokens,angular,html-js`; retire the `angular` commitlint scope; re-establish the baseline set.
+**In scope:** swap `main.ts` to `@storybook/web-components-vite`; replace the hand-written `webpackFinal` CSS rule with Vite's native handling; delete the 10 Angular story files, `packages/angular`, `angular.json`, `ng-package.json` and the 16 Angular/`zone.js`/`ng-packagr`/`@nx/angular`/`@storybook/angular` devDependencies; update the three workflows hardcoding `projects=tokens,angular,styles` (M2 renamed the third; M3 drops the second); retire the `angular` commitlint scope (M2 already dropped `html-js`); re-establish the baseline set.
 
 **Out of scope:** the generated Angular wrapper (deferred to M15); any element code; new component coverage.
 
@@ -156,7 +162,7 @@ ADRs 8, 9, 10, 11, 12 and 13 are written and committed on the train. What remain
 
 **Proven ahead of time (ADR-13):** the 13 html-js story files need **no changes** — `renderToCanvas` handles a raw HTML string natively, verified by building the real card story under the new renderer and rendering all six of its exports.
 
-**Carries one mandatory repair:** the axe runner must serve the built Storybook over **HTTP**. A Vite build emits module scripts, which are CORS-blocked over `file://`; run against the spike build, all six stories failed to render. Without this the migration silently converts the a11y gate into a no-op.
+**The mandatory repair is discharged:** #91 (`ce30b3e`) already makes the axe runner serve over HTTP, for the same CORS reason this brief anticipated — a Vite build emits module scripts and `file://` blocks them. **What M3 must not forget:** `scripts/run-axe-storybook.js` hard-fails with *"No stories left to assess"* the moment `packages/angular` is deleted, unless `UNRENDERABLE_IMPORT_PATTERN` is deleted with it. That guard is deliberate — it stops the gate certifying absence over an empty set — so removing the pattern is part of this mission, not an accident to discover in CI.
 
 **Exit:** no `packages/angular`; Storybook builds inside NFR-003's three minutes; every remaining story renders, proven by the repaired axe gate over HTTP; `LightMode` variants intact; 4 Angular-keyed baselines retired and the remaining 3 re-shot and reviewed.
 

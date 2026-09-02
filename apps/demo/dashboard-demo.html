@@ -11,7 +11,7 @@
 
   Path assumptions (relative to this file at apps/demo/):
     - Tokens CSS:      ../../packages/tokens/dist/tokens.css
-    - Component CSS:   ../../packages/html-js/src/<component>/sk-<component>.css
+    - Component CSS:   ../../packages/styles/src/<component>/sk-<component>.css
 
   Reference: /home/stijnd/Documents/code/forks/spec-kitty/src/specify_cli/dashboard/templates/index.html
 -->
@@ -27,11 +27,11 @@
   <link rel="stylesheet" href="../../packages/tokens/dist/tokens.css" />
 
   <!-- Component CSS -->
-  <link rel="stylesheet" href="../../packages/html-js/src/pill-tag/sk-pill-tag.css" />
-  <link rel="stylesheet" href="../../packages/html-js/src/button/sk-button.css" />
-  <link rel="stylesheet" href="../../packages/html-js/src/nav-pill/sk-nav-pill.css" />
-  <link rel="stylesheet" href="../../packages/html-js/src/nav-pill/sk-nav-pill-drawer.css" />
-  <link rel="stylesheet" href="../../packages/html-js/src/section-banner/sk-section-banner.css" />
+  <link rel="stylesheet" href="../../packages/styles/src/pill-tag/sk-pill-tag.css" />
+  <link rel="stylesheet" href="../../packages/styles/src/button/sk-button.css" />
+  <link rel="stylesheet" href="../../packages/styles/src/nav-pill/sk-nav-pill.css" />
+  <link rel="stylesheet" href="../../packages/styles/src/nav-pill/sk-nav-pill-drawer.css" />
+  <link rel="stylesheet" href="../../packages/styles/src/section-banner/sk-section-banner.css" />
 
   <style>
     /* -----------------------------------------------------------------------
@@ -494,7 +494,7 @@
 
   })();</script>
   <script type="module">
-    import { skToggleDrawer } from '../../packages/html-js/src/nav-pill/sk-nav-pill.js';
+    import { skToggleDrawer } from '../../packages/styles/src/nav-pill/sk-nav-pill.js';
     window.skToggleDrawer = skToggleDrawer;
   </script>
   <style>
@@ -700,7 +700,7 @@
 
       <div class="dash-card dash-card--review">
         <span class="dash-card__id">WP01</span>
-        <span class="dash-card__title">Bug fixes — Angular buttons + html-js CSS imports</span>
+        <span class="dash-card__title">Bug fixes — Angular buttons + styles CSS imports</span>
         <div class="dash-card__subtask-bar">
           <div class="dash-card__subtask-fill" style="width: 100%"></div>
         </div>

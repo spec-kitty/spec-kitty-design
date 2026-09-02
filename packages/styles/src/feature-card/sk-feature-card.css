@@ -1,0 +1,77 @@
+/* @spec-kitty/styles — sk-feature-card shared styles */
+/* All values use --sk-* tokens only — no hardcoded values */
+/* Deviation note: rgba() tint values for icon-chip backgrounds use
+   hardcoded rgb channels (per spec C-103 accepted deviation for tint
+   calculations where CSS relative colour syntax is not yet universally
+   supported). Opacity value (0.10–0.15) is the only non-token value. */
+
+.sk-feature-card {
+  padding: var(--sk-space-6);
+  background: var(--sk-surface-card);
+  border: 1px solid var(--sk-border-default);
+  border-radius: var(--sk-radius-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sk-space-4);
+}
+
+.sk-feature-card__icon-chip {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--sk-radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* Tint colours: rgba channels derived from the token values.
+   Yellow chip now uses --sk-color-yellow-alpha-15 token (WP03, mission-review DRIFT-2 remediation).
+   Green and purple have no alpha tokens yet — accepted deviation per mission-review-01KQPDB5J5EK82K39TF1MPQA7H.
+   Token reference: --sk-color-yellow=#F5C518, --sk-color-green=#8FCB8F,
+   --sk-color-purple=#B8A9E0 */
+.sk-feature-card__icon-chip--yellow {
+  background: var(--sk-color-yellow-alpha-15);
+  color: var(--sk-color-yellow);
+}
+
+.sk-feature-card__icon-chip--green {
+  background: rgba(143, 203, 143, 0.12);
+  color: var(--sk-color-green);
+}
+
+.sk-feature-card__icon-chip--purple {
+  background: rgba(184, 169, 224, 0.15);
+  color: var(--sk-color-purple);
+}
+
+/* Colorized-border variants — accent the card edge with a brand colour
+   instead of the default neutral hairline border. Per WP01 / issue #10.
+   These modifiers compose with the existing icon-chip variants and do
+   NOT touch the rgba() tint rules above (out-of-scope debt). */
+.sk-feature-card--border-yellow {
+  border-color: var(--sk-color-yellow);
+}
+
+.sk-feature-card--border-green {
+  border-color: var(--sk-color-green);
+}
+
+.sk-feature-card--border-purple {
+  border-color: var(--sk-color-purple);
+}
+
+.sk-feature-card__title {
+  font-family: var(--sk-font-sans);
+  font-size: var(--sk-text-lg);
+  font-weight: var(--sk-weight-bold);
+  color: var(--sk-fg-default);
+  margin: 0;
+}
+
+.sk-feature-card__body {
+  font-size: var(--sk-text-sm);
+  color: var(--sk-fg-muted);
+  margin: 0;
+  line-height: 1.55;
+}

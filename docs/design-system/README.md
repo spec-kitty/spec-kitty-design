@@ -9,7 +9,7 @@ for teams building Spec Kitty-branded interfaces.
 |---|---|---|
 | `@spec-kitty/tokens` | CSS custom properties, brand fonts, brand assets | `npm install @spec-kitty/tokens` |
 | `@spec-kitty/angular` | Angular component library | `npm install @spec-kitty/angular @spec-kitty/tokens` |
-| `@spec-kitty/html-js` | Framework-agnostic HTML primitives | `npm install @spec-kitty/html-js @spec-kitty/tokens` |
+| `@spec-kitty/styles` | Framework-agnostic HTML primitives | `npm install @spec-kitty/styles @spec-kitty/tokens` |
 
 ## Guides
 

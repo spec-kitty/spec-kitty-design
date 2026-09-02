@@ -9,7 +9,7 @@
 
   Path assumptions (relative to this file at apps/demo/):
     - Tokens CSS:  ../../packages/tokens/dist/tokens.css
-    - Component CSS: ../../packages/html-js/src/<component>/sk-<component>.css
+    - Component CSS: ../../packages/styles/src/<component>/sk-<component>.css
 
   Note: @font-face declarations in tokens.css use relative paths to ./fonts/
   (relative to tokens.css itself). Fonts load correctly when served over HTTP.
@@ -28,12 +28,12 @@
   <link rel="stylesheet" href="../../packages/tokens/dist/tokens.css" />
 
   <!-- Component CSS files — loaded explicitly since this is plain HTML -->
-  <link rel="stylesheet" href="../../packages/html-js/src/button/sk-button.css" />
-  <link rel="stylesheet" href="../../packages/html-js/src/nav-pill/sk-nav-pill.css" />
-  <link rel="stylesheet" href="../../packages/html-js/src/card/sk-card.css" />
-  <link rel="stylesheet" href="../../packages/html-js/src/pill-tag/sk-pill-tag.css" />
-  <link rel="stylesheet" href="../../packages/html-js/src/section-banner/sk-section-banner.css" />
-  <link rel="stylesheet" href="../../packages/html-js/src/feature-card/sk-feature-card.css" />
+  <link rel="stylesheet" href="../../packages/styles/src/button/sk-button.css" />
+  <link rel="stylesheet" href="../../packages/styles/src/nav-pill/sk-nav-pill.css" />
+  <link rel="stylesheet" href="../../packages/styles/src/card/sk-card.css" />
+  <link rel="stylesheet" href="../../packages/styles/src/pill-tag/sk-pill-tag.css" />
+  <link rel="stylesheet" href="../../packages/styles/src/section-banner/sk-section-banner.css" />
+  <link rel="stylesheet" href="../../packages/styles/src/feature-card/sk-feature-card.css" />
 
   <style>
     /* Page-level layout — token values only */
@@ -403,7 +403,7 @@
   </section>
 
   <!-- ── Footer — sk-site-footer component ───────────────────────────────── -->
-  <link rel="stylesheet" href="../../packages/html-js/src/site-footer/sk-site-footer.css" />
+  <link rel="stylesheet" href="../../packages/styles/src/site-footer/sk-site-footer.css" />
   <div class="demo-container">
     <footer class="sk-site-footer">
       <div class="sk-site-footer__grid">

@@ -1,0 +1,90 @@
+/* @spec-kitty/styles — sk-nav-pill-drawer: hamburger trigger + collapsible drawer */
+/* Import this file IN ADDITION TO sk-nav-pill.css for responsive/collapsible nav behaviour. */
+/* Requires: sk-nav-pill.css (base pill layout must be loaded first) */
+/* JS dependency: skToggleDrawer() from sk-nav-pill.js must be wired to the hamburger button */
+
+/* ── Collapsed / hamburger button (mobile) ─────────────────────────────── */
+
+.sk-nav-pill__hamburger {
+  display: none; /* hidden on desktop; shown via media query */
+  width: 44px;
+  height: 44px;
+  border-radius: var(--sk-radius-pill);
+  background: var(--sk-surface-input);
+  color: var(--sk-fg-muted);
+  border: none;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition:
+    color var(--sk-motion-duration-fast) var(--sk-motion-ease-out),
+    background-color var(--sk-motion-duration-fast) var(--sk-motion-ease-out),
+    box-shadow var(--sk-motion-duration-base) var(--sk-motion-ease-out),
+    transform var(--sk-motion-duration-base) var(--sk-motion-ease-out);
+}
+
+.sk-nav-pill__hamburger svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Hover accent variants — matching reference is-hover-* classes */
+.sk-nav-pill__hamburger:hover {
+  color: var(--sk-color-yellow);
+  background: var(--sk-color-yellow-alpha-15);
+  box-shadow:
+    0 0 0 var(--sk-border-width-1) var(--sk-color-yellow-alpha-35),
+    0 6px 22px -4px var(--sk-color-yellow-alpha-60);
+  transform: translateY(-1px);
+}
+
+/* Drawer: full-width nav shown when hamburger is active */
+.sk-nav-pill__drawer {
+  display: none;
+  flex-direction: column;
+  gap: var(--sk-space-1);
+  padding: var(--sk-space-3);
+  background: var(--sk-surface-card);
+  border: var(--sk-border-width-1) solid var(--sk-border-default);
+  border-radius: var(--sk-radius-md);
+  margin-top: var(--sk-space-2);
+  /* Collapse animation */
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transition:
+    max-height var(--sk-motion-duration-base) var(--sk-motion-ease-out),
+    opacity var(--sk-motion-duration-fast) var(--sk-motion-ease-out),
+    padding var(--sk-motion-duration-fast) var(--sk-motion-ease-out);
+}
+
+.sk-nav-pill__drawer.is-open {
+  display: flex;
+  max-height: 400px;
+  opacity: 1;
+  padding: var(--sk-space-3);
+}
+
+/* Animated open state */
+.sk-nav-pill--has-drawer .sk-nav-pill__hamburger[aria-expanded="true"] {
+  color: var(--sk-fg-default);
+  background: var(--sk-surface-card);
+  box-shadow: 0 0 0 var(--sk-border-width-1) var(--sk-border-default);
+}
+
+.sk-nav-pill__drawer .sk-nav-pill__item {
+  width: 100%;
+  border-radius: var(--sk-radius-sm);
+  padding: var(--sk-space-3) var(--sk-space-4);
+}
+
+/* Responsive: hide desktop items, show hamburger below 720px */
+@media (max-width: 720px) {
+  .sk-nav-pill--responsive .sk-nav-pill__items {
+    display: none;
+  }
+  .sk-nav-pill--responsive .sk-nav-pill__hamburger {
+    display: inline-flex;
+  }
+}
