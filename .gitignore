@@ -11,7 +11,7 @@ packages/tokens/dist/*
 # .gitignore for re-inclusion, so CI-built dist trees for the other two publishable
 # packages need explicit exceptions or `npm publish` ships config files with no code.
 !packages/angular/dist/
-!packages/html-js/dist/
+!packages/styles/dist/
 .nx/cache
 .nx/workspace-data
 

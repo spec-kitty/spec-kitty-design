@@ -1,17 +1,17 @@
 {
-  "name": "html-js",
+  "name": "styles",
   "projectType": "library",
-  "sourceRoot": "packages/html-js/src",
+  "sourceRoot": "packages/styles/src",
   "targets": {
     "build": {
       "executor": "@nx/js:tsc",
       "options": {
-        "outputPath": "packages/html-js/dist",
-        "main": "packages/html-js/src/index.ts",
-        "tsConfig": "packages/html-js/tsconfig.lib.json",
+        "outputPath": "packages/styles/dist",
+        "main": "packages/styles/src/index.ts",
+        "tsConfig": "packages/styles/tsconfig.lib.json",
         "assets": [
           {
-            "input": "packages/html-js/src",
+            "input": "packages/styles/src",
             "glob": "**/*.{html,css}",
             "output": "./"
           }
@@ -22,14 +22,14 @@
       "executor": "@nx/eslint:lint",
       "options": {
         "lintFilePatterns": [
-          "packages/html-js/**/*.ts",
-          "packages/html-js/**/*.html"
+          "packages/styles/**/*.ts",
+          "packages/styles/**/*.html"
         ]
       }
     }
   },
   "tags": [
-    "scope:html-js",
+    "scope:styles",
     "type:publishable",
     "framework:vanilla"
   ]

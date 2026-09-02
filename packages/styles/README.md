@@ -1,4 +1,4 @@
-# @spec-kitty/html-js
+# @spec-kitty/styles
 
 Framework-agnostic HTML primitives and ES utilities for the Spec Kitty design system.
 No Angular, no React, no Vue required.
@@ -7,19 +7,19 @@ No Angular, no React, no Vue required.
 
 **npm**:
 ```bash
-npm install @spec-kitty/html-js @spec-kitty/tokens
+npm install @spec-kitty/styles @spec-kitty/tokens
 ```
 
 **CDN (zero build step)**:
 ```html
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@spec-kitty/tokens/dist/tokens.css">
-<script type="module" src="https://cdn.jsdelivr.net/npm/@spec-kitty/html-js/dist/src/index.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/@spec-kitty/styles/dist/src/index.js"></script>
 ```
 
 ## Usage
 
 ```typescript
-import { SkStubHTML } from '@spec-kitty/html-js';
+import { SkStubHTML } from '@spec-kitty/styles';
 
 document.querySelector('#app').innerHTML = SkStubHTML;
 ```
@@ -33,7 +33,7 @@ Or with CSS loaded separately:
   </head>
   <body id="app"></body>
   <script type="module">
-    import { SkStubHTML } from '@spec-kitty/html-js';
+    import { SkStubHTML } from '@spec-kitty/styles';
     document.getElementById('app').innerHTML = SkStubHTML;
   </script>
 </html>
@@ -48,9 +48,9 @@ desktop pill, or load **both** stylesheets for the responsive/drawer pattern.
 ### Required CSS imports
 
 ```html
-<link rel="stylesheet" href="node_modules/@spec-kitty/html-js/src/nav-pill/sk-nav-pill.css">
+<link rel="stylesheet" href="node_modules/@spec-kitty/styles/src/nav-pill/sk-nav-pill.css">
 <!-- For the drawer / hamburger pattern, ALSO load: -->
-<link rel="stylesheet" href="node_modules/@spec-kitty/html-js/src/nav-pill/sk-nav-pill-drawer.css">
+<link rel="stylesheet" href="node_modules/@spec-kitty/styles/src/nav-pill/sk-nav-pill-drawer.css">
 ```
 
 ### Drawer ID contract
@@ -80,7 +80,7 @@ pipelines and module-friendly environments.
 </button>
 
 <script type="module">
-  import { skToggleDrawer } from '@spec-kitty/html-js';
+  import { skToggleDrawer } from '@spec-kitty/styles';
   document.getElementById('hamburger')
     .addEventListener('click', (e) => skToggleDrawer(e.currentTarget));
 </script>
@@ -102,7 +102,7 @@ For static-HTML environments where wiring `addEventListener` is awkward
 </button>
 
 <script type="module">
-  import { skToggleDrawer } from '@spec-kitty/html-js';
+  import { skToggleDrawer } from '@spec-kitty/styles';
   window.skToggleDrawer = skToggleDrawer;
 </script>
 ```
