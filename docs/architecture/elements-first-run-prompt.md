@@ -86,7 +86,7 @@ Comment on the issue at each point-cut with a one-line status. That is what make
 
 1. Stop work on that thread.
 2. Comment on the issue with the fork, the options, and what you would recommend and why.
-3. If the rest of the mission can proceed without it, proceed and note what you deferred. If it cannot, go to step 7 and release the claim.
+3. If the rest of the mission can proceed without it, proceed and note what you deferred. If it cannot, go to step 8 and release the claim.
 
 Discovering a decision is a legitimate outcome. Deciding one silently is not — it produces exactly the drift this programme exists to remove.
 
@@ -99,7 +99,7 @@ gh pr create --repo spec-kitty/spec-kitty-design \
   --body "Refs #<N> · part of #66 ..."
 ```
 
-**Use `Refs #<N>`, not `Closes`.** A PR merging into the train does not auto-close anything — GitHub only honours closing keywords on merges into the default branch. The issue is closed by hand in step 7.
+**Use `Refs #<N>`, not `Closes`.** A PR merging into the train does not auto-close anything — GitHub only honours closing keywords on merges into the default branch. The issue is closed by hand in step 8.
 
 CI Quality runs on train PRs; the workflow's branch filters were extended to `train/**` for exactly this. A PR that touches a new package directory must also extend `ci-quality.yml`'s `components` path filter, or its component gates silently skip.
 
@@ -148,7 +148,25 @@ EOF
 - **A lens that concedes nothing is noise.** Four confident verdicts on a docs-only PR means the squad told you nothing.
 - **Halt on flat or rising severity across passes, not on new findings appearing.** Falling severity is convergence. Two passes maximum; if severity has not fallen by pass 2, stop and escalate to the operator rather than running a third.
 
-## 7. Close out — always release the claim
+## 7. Merge — mission branch into the train, and only that
+
+**Operator standing order, 2026-09-02.** The loop **may** merge a mission branch into `train/elements-first`. The loop **never** merges the train into `main` — that is an operator act and is not delegated.
+
+Both conditions must hold, and neither substitutes for the other:
+
+1. **CI is green** on the PR head.
+2. **The adversarial gate's evidence is posted** on the PR and its SHA matches the head.
+
+```sh
+gh pr checks <PR> --repo spec-kitty/spec-kitty-design          # 1 — green?
+gh pr view <PR> --repo spec-kitty/spec-kitty-design --json headRefOid --jq .headRefOid
+# 2 — does the gate comment name that same SHA?
+gh pr merge <PR> --repo spec-kitty/spec-kitty-design --squash --delete-branch
+```
+
+If either condition fails, do not merge. If CI went green *before* a later push, it is stale in the same way the gate is: both are pinned to a SHA, and both re-run.
+
+## 8. Close out — always release the claim
 
 **On success**, after the PR merges into the train:
 
@@ -173,7 +191,7 @@ gh issue edit <N> --repo spec-kitty/spec-kitty-design --remove-assignee @me
 
 **Never leave an issue assigned to a finished or abandoned iteration.** A stale assignee is indistinguishable from work in progress, and the loop will skip it forever.
 
-## 8. Loop
+## 9. Loop
 
 Return to step 1. Stop when nothing is both unassigned and unblocked, and report the state of the epic.
 
@@ -181,7 +199,7 @@ Return to step 1. Stop when nothing is both unassigned and unblocked, and report
 
 ## What this loop must never do
 
-- **Push to `main`, or open a PR against `main`.** The train lands once, by a human.
+- **Push to `main`, open a PR against `main`, or merge the train into `main`.** The train lands once, by the operator. Merging mission branches into the train is permitted, under step 7's two conditions.
 - **Merge its own PR** without the full adversarial gate having run against the head SHA and its evidence posted on the PR.
 - **Write an ADR** outside #67.
 - **Hand-edit `kitty-specs/`, the charter, or the glossary.** Those go through the CLI.

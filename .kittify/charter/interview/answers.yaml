@@ -22,8 +22,12 @@ answers:
     CSS custom properties (--sk-* namespace) are the single authoritative
     token distribution format consumed across all framework targets.
     Secondary: docsite theme integration (static site generator TBD).
-    No unit-test framework — quality signal is visual conformance and
-    accessibility audit, not line coverage.
+    Component behaviour is verified with Vitest in browser mode on the
+    Playwright provider, with a Node project in the same configuration for
+    build tooling; Playwright remains the cross-browser, visual-regression and
+    accessibility layer. There is no line-coverage threshold — the quality bar
+    is a required-behaviours list, visual conformance and accessibility
+    conformance.
 
   testing_requirements: >
     Every component requires a Storybook story covering at minimum: default
@@ -33,14 +37,32 @@ answers:
     marked done. Visual diff against the Claude Design reference screenshots
     (tmp/) is required for new and modified components. Cross-browser smoke
     tests (Chrome, Firefox, Safari latest) are required before a release tag.
-    No minimum line-coverage threshold — visual and accessibility conformance
-    is the primary quality bar.
+    A component that owns behaviour is additionally verified against the
+    required-behaviours list in ADR-11: form association (a native form submit
+    produces the expected FormData; setValidity blocks submission and reaches
+    the accessibility tree; reset restores; a disabled control is excluded),
+    the event contract (fires once, documented detail shape, composed and
+    bubbles as documented, preventDefault honoured where cancelable), property
+    assignment before element upgrade, slot assignment and fallback content,
+    focus and keyboard behaviour including state attributes, the presence and
+    targetability of every declared ::part(), style adoption without injecting
+    a style element, and the duplicate-registration guard. Build tooling is
+    verified for generation determinism. Tests asserting only that a component
+    renders, and snapshots of shadow-DOM markup, do not satisfy this
+    requirement — the visual-regression baselines own appearance. There is no
+    minimum line-coverage threshold.
 
   quality_gates: >
     A component is done when: (1) Storybook story renders without console
-    errors; (2) axe-core reports zero WCAG 2.1 AA violations; (3) visual
-    review against the reference screenshots is approved; (4) the component
-    documents its token dependencies (which --sk-* variables it uses).
+    errors; (2) axe-core reports zero WCAG 2.1 AA violations, where a story
+    that fails to load is a failure and not a pass; (3) visual review against
+    the reference screenshots is approved; (4) the component documents its
+    token dependencies (which --sk-* variables it uses); and (5) every
+    applicable item on the ADR-11 required-behaviours list has a test that has
+    been demonstrated to fail before it passes. An adversarial review squad
+    closes every pull request, with its evidence posted on that pull request
+    before merge, plus the earlier point-cuts its mission's tier declares
+    (see review_policy).
     CSS/SCSS output must use only --sk-* tokens — no hardcoded color, spacing,
     or type values outside the token file. Conventional commits enforced via
     commitlint. One maintainer approval required for PRs touching component
@@ -53,7 +75,24 @@ answers:
     must pass in CI before merge. One human approval required for any change
     to the --sk-* token namespace (colors_and_type.scss or equivalent).
     Exception: documentation-only changes (stories, README, SKILL.md) can
-    self-merge when CI is green.
+    self-merge when CI is green. Adversarial squad cadence is a standing
+    order. Every pull request receives the full adversarial gate before merge,
+    and the gate's evidence is posted as a comment on that pull request —
+    naming the commit SHA reviewed, each lens by profile id with its verdict,
+    findings as severity/file/line/recommendation, the disposition of each
+    finding, and the severity trend against the previous pass. A pull request
+    is not merged until CI is green, that evidence is present, and its SHA
+    matches the head. Earlier point-cuts are tiered by mission risk and
+    recorded in docs/architecture/elements-first-programme.md:
+    mechanism-setting missions get the squad post-spec, post-plan and
+    post-tasks; high-blast-radius missions post-tasks; routine missions rely on
+    the merge gate alone. The squad is report-only at the earlier point-cuts:
+    findings are triaged and folded before the next phase starts. Agents may
+    merge mission branches into the elements-first integration branch under
+    those conditions; merging that integration branch into main is an operator
+    act and is never delegated. Delegated seats run on the smaller model; the
+    larger model is reserved for squad lenses and synthesis, arbiter
+    escalation, and plan-phase architecture on risky missions.
 
   performance_targets: >
     Base CSS token file (colors_and_type.css) must remain under 20 KB
