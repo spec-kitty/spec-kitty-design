@@ -7,6 +7,17 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) conve
 
 ## [Unreleased]
 
+### Changed
+
+- `sk-check-bullet` (Angular) now carries `role="listitem"` on its host element and
+  renders a `<div>` internally rather than an `<li>`. Angular renders a component's
+  template inside its host, so the old bare `<li>` had the host as its parent
+  rather than the consumer's `<ul>` — axe reported both `listitem` and `list`
+  violations. **Consumers must wrap it in a `<ul>` or another `role="list"`
+  ancestor**; a bare bullet is now correctly reported as `aria-required-parent`.
+  The `html-js` check-bullet is unaffected — it emits a real `<li>` with no host
+  element to interpose.
+
 ### Added
 
 - Initial token layer (`@spec-kitty/tokens`) with 93 design tokens across 13 categories

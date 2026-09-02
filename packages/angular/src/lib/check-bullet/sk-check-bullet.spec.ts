@@ -19,6 +19,14 @@ describe('SkCheckBulletComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  it('should expose the list-item role on its host', () => {
+    // Angular renders the template inside the host, so the host — not the inner
+    // element — is what the consumer's <ul> sees. Without this role the <li> that
+    // used to be in the template had the host as its parent and axe reported both
+    // `listitem` and `list`. See #92.
+    expect((fixture.nativeElement as HTMLElement).getAttribute('role')).toBe('listitem');
+  });
+
   it('should render the provided text', () => {
     component.text = 'Feature description here';
     fixture.detectChanges();

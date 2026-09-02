@@ -2,6 +2,26 @@ import { test, expect } from '@playwright/test';
 
 test.setTimeout(60000);
 
+// Three of the seven baselines below assert nothing.
+//
+// sk-stub-html-default, sk-feature-card-html-default and
+// sk-ribbon-card-html-with-ribbon are byte-identical to each other — one md5,
+// 4257 bytes, a uniform #0D0E11 frame. Three different components cannot produce
+// one identical image: the html-js stories do not mount under @storybook/angular,
+// so all three are pictures of an empty canvas. They pass unchanged whatever
+// happens to those components.
+//
+// This is the same certifying-absence failure the axe gate had (#90), in the gate
+// next to it — and run-axe-storybook.js excludes these exact stories as
+// unassessable while this file still commits their blankness as the expectation.
+// Recorded rather than skipped so the inconsistency is visible: M3 (#69) moves
+// Storybook to the web-components renderer, at which point these three start
+// rendering and must be re-baselined against real output. Tracked as #88.
+//
+// Note also that only the four Angular cases below wait on a selector; the three
+// HTML ones take their screenshot after domcontentloaded alone, which is why a
+// blank frame was never noticed.
+
 test('SK-stub Angular default — visual baseline', async ({ page }) => {
   // Navigate directly to the story iframe for stable visual snapshots
   await page.goto('/iframe.html?id=primitives-skstub-angular--default&viewMode=story');
