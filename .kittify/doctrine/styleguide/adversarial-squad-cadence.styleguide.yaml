@@ -108,33 +108,12 @@ patterns:
       # Output: research.md or plan.md amendment; tasks step proceeds
 
 anti_patterns:
-  - name: Merging on a partial squad
-    description: >
-      Taking the merge decision while a dispatched lens has not reported. The lens that has
-      not answered is the one most likely to be holding the finding that matters — in this
-      programme a PR was merged on three of four lenses and the fourth then found two further
-      gate holes. Wait for every lens.
-    bad_example: |
-      # Bad: three lenses are back and look clean, so merge
-      if all(v == "LAND" for v in reported_verdicts):
-          merge_pr()   # one lens still outstanding
-    good_example: |
-      # Good: the gate is over the dispatched set, not the returned set
-      if dispatched == reported and all(v == "LAND" for v in reported.values()):
-          merge_pr()
-  - name: Stale-SHA evidence
-    description: >
-      Carrying a squad verdict forward across a push. The verdict certifies a tree that is no
-      longer the tree being merged, which is a certification of absence rather than of review.
-    bad_example: |
-      # Bad: squad ran, then findings were folded in, then merge on the old verdict
-      verdict = run_squad()      # against abc1234
-      push_fixes()               # tip is now def5678
-      merge_pr(evidence=verdict) # certifies a tree nobody reviewed
-    good_example: |
-      # Good: evidence names the tip it was taken against
-      verdict = run_squad(sha=head_sha())
-      assert verdict.sha == head_sha(), "re-run the affected lenses"
+  # The two gate anti-patterns (Merging on a partial squad, Stale-SHA evidence) are
+  # deliberately NOT restated here. They live in the project procedure override, and
+  # this styleguide's own "Playbook restatement" anti-pattern below forbids copying the
+  # procedure's anti-pattern list into another artifact. The gate mechanics are carried
+  # by principles 2 and 3 above. Restating anti_patterns at all is forced only by the
+  # shallow merge, which is how the packaged "Gate-hardwiring" entry gets removed.
   - name: Playbook restatement
     description: >
       Copying the squad playbook (profile selection order, point-cut definitions,

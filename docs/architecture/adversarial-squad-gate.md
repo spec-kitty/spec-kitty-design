@@ -56,7 +56,7 @@ Two consequences worth knowing before editing these files:
 | --- | --- | --- |
 | `DIRECTIVE_046` | `directive/046-readable-consistent-prs.directive.yaml` | **Yes — load-bearing** |
 | `adversarial-squad-deployment` | `procedure/adversarial-squad-deployment.procedure.yaml` | Yes, via explicit `--include` and reference-following |
-| `adversarial-squad-cadence` | `styleguide/adversarial-squad-cadence.styleguide.yaml` | **No** — see below |
+| `adversarial-squad-cadence` | `styleguide/adversarial-squad-cadence.styleguide.yaml` | Not in action contexts; reachable via explicit `--include`; present in the generated bundle — see below |
 
 ## What was verified, and what was not
 
@@ -81,11 +81,14 @@ Binding was therefore established empirically:
   observation, not four. The action-scoped `directives` list requires
   `--mission-type`; there `DIRECTIVE_046` is present for **`implement` and `review`**,
   and absent for `specify` and `plan`.
-- **Only the `intent` field travels.** The action context exposes `id`, `source`,
-  `summary`, `title` — and `summary` is `intent` verbatim. The `procedures`,
-  `integrity_rules` and `validation_criteria` arrays do **not** reach a lens. That is
-  why the two gate mechanics above are stated inside `intent` and not only in the
-  structured fields where they belong.
+- **Only the `intent` field travels.** Two arrays carry directives, with different
+  shapes: `all_directives` entries expose `id`, `source`, `summary`, `title`; the
+  action-scoped `directives` entries expose those plus `delivery` and `references`.
+  In both, `summary` is `intent` verbatim, and in neither do `procedures`,
+  `integrity_rules` or `validation_criteria` appear. That is why the two gate
+  mechanics above are stated inside `intent` and not only in the structured fields
+  where they belong. `references` travels on the action-scoped entry but resolves
+  from the built-in DRG — see the next point.
 - **The procedure override binds and closes the reference chain.** `DIRECTIVE_046`
   lists `adversarial-squad-deployment` in its `references`, so an agent following that
   chain previously landed on packaged text calling the gate a named anti-pattern.
@@ -102,24 +105,46 @@ Binding was therefore established empirically:
   changes, and check: `grep -c "not a mandated gate" .kittify/charter/charter.yaml`
   must be 0. (`charter.md` is hand-curated and is not rewritten by that command —
   verified unchanged.)
-- **The styleguide override does not reach action contexts.** It resolves correctly at
-  the repository layer (provenance `project`, 7 fields replaced, 5 inherited), but
-  `resolver.py` hardcodes `styleguides=[]` on the action path, including under
-  `--include-all`. It is kept because deleting it would leave project `DIRECTIVE_046`
-  saying "merge GATE" beside a packaged styleguide still saying "No enforcement of
-  squad participation is permitted" — a worse contradiction than the cost of the file.
-  It is not what carries the rule to agents.
+- **The styleguide override does not reach action contexts — but not for the reason
+  first recorded here.** It resolves correctly at the repository layer (provenance
+  `project`, **8 fields replaced, 4 inherited**). An earlier version of this document
+  claimed `resolver.py` hardcodes `styleguides=[]` on the action path. That is false
+  and was caught by the gate: the review action context returns four styleguides
+  (`given-when-then-authoring`, `test-desiderata-and-boundaries`, `testing-principles`,
+  `tiered-standards`). The `styleguides=[]` line sits in the charter-selection path
+  that runs when `--mission-type` is omitted.
+
+  The real reason is the reference edge. `adversarial-squad-cadence` is absent because
+  the action bundle resolves references transitively over the **DRG graph**, and this
+  project ships no DRG fragment (`charter status` → `Synthesized DRG: BUILT_IN_ONLY`).
+  So the `styleguide: adversarial-squad-cadence` entry the override *adds* to
+  `DIRECTIVE_046.references` is inert. The open remedy is to ship a project DRG
+  fragment, not to treat the surface as unreachable.
+
+  It is reachable by explicit `spec-kitty charter context --include
+  styleguide:adversarial-squad-cadence`, and its gate wording is present in the
+  generated bundle. It is kept because deleting it would leave project
+  `DIRECTIVE_046` saying "merge GATE" beside a packaged styleguide still saying "No
+  enforcement of squad participation is permitted" — a worse contradiction than the
+  cost of the file. It is not what carries the rule to agents.
 
 ## Running `charter synthesize` is safe for the overrides
 
 Tested in a throwaway copy: `spec-kitty charter synthesize` **does not prune or
 rewrite** the three override YAMLs (md5 unchanged for all three), even though
 `synthesis-manifest.yaml` records `artifacts: []` / `built_in_only: true` and does not
-know about them. `charter status` reports the delta honestly as
-`Artifacts: 0 (live doctrine files: 3)`.
+know about them.
 
-It **does** rewrite `.kittify/doctrine/PROVENANCE.md` from its template — observed
-58 lines → 17 — which is why this document exists outside that tree.
+`charter status` reports `Artifacts: 0 (live doctrine files: 2)` — **2, not 3, with
+three overrides on disk.** `_status_collectors.py` globs only `directive/`, `tactic/`
+and `styleguide/`, so the procedure override is invisible to that counter. An operator
+sanity-checking the override set with `charter status` will undercount by one; worth
+filing upstream.
+
+It **does** rewrite `.kittify/doctrine/PROVENANCE.md` from its template — 27 lines → 17
+as measured at this tip (58 → 17 was measured pre-fold, when that file was longer) —
+which is why this document exists outside that tree, and why the pointer that matters
+is the one in `docs/architecture/README.md`, not the one inside `PROVENANCE.md`.
 
 ## Known unreachable surface
 

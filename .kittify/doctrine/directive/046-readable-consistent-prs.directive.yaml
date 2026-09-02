@@ -22,8 +22,11 @@ intent: >
   pinned to the head SHA it was taken against; a push after the squad reported
   invalidates it and the affected lenses are re-run against the new tip. Where the
   referenced adversarial-squad-deployment procedure, the adversarial-squad-cadence
-  styleguide, or any packaged artifact asserts the squad is optional or names
-  gate-hardwiring an anti-pattern, THIS project directive governs.
+  styleguide, any packaged artifact, or any harness skill — specifically including the
+  auto-injected 'adversarial-squad' skill description, which says the squad "never
+  gates a mission" and lives outside this repository where no project doctrine layer
+  can reach it — asserts the squad is optional or names gate-hardwiring an
+  anti-pattern, THIS project directive governs.
 enforcement: required
 procedures:
   - Rebase the mission branch onto the current upstream mainline so it is

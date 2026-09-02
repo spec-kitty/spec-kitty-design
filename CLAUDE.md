@@ -18,7 +18,7 @@ Storybook publishes everything to [`https://stijn-dejongh.github.io/spec-kitty-d
 | `packages/angular/src/lib/<component>/` | `*.component.ts/html/css`, `*.component.spec.ts`, `*.stories.ts`. |
 | `apps/storybook/` | Storybook 10.x config; auto-emits `index.json` at build. |
 | `apps/demo/{blog-demo,dashboard-demo,index}.html` | Composed example pages served at the deploy root. |
-| `docs/architecture/` | ADRs (`decisions/`), `sad-lite.md`, `system-context-canvas.md`, `quality-attribute-assessment.md`, `risk-register.md`, `research/`, `validation/`. |
+| `docs/architecture/` | ADRs (`decisions/`), `sad-lite.md`, `system-context-canvas.md`, `quality-attribute-assessment.md`, `risk-register.md`, `adversarial-squad-gate.md`, `research/`, `validation/`. |
 | `docs/contributing/` | `adding-a-component.md`, `adding-a-token.md`, `running-quality-checks.md`. |
 | `docs/design-system/` | `using-tokens.md`, `using-components.md`, `brand-guidelines.md`, `changelog.md`. |
 | `docs/learnings/` | Post-mission retrospectives. |

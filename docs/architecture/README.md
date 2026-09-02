@@ -10,6 +10,7 @@ This directory contains the architectural record for the Spec Kitty Design Syste
 | [system-context-canvas.md](system-context-canvas.md) | Organisational context, stakeholders, external forces, constraints |
 | [quality-attribute-assessment.md](quality-attribute-assessment.md) | AMMERSE impact analysis of the core architectural choices |
 | [risk-register.md](risk-register.md) | Full risk inventory with mitigations and owners |
+| [adversarial-squad-gate.md](adversarial-squad-gate.md) | Why the adversarial squad is a merge gate here, how the `.kittify/doctrine/` overrides bind, and what was verified |
 
 ## Decisions (ADRs)
 

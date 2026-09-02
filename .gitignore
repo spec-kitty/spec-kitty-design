@@ -50,6 +50,7 @@ npm-debug.log*
 .kittify/charter/metadata.yaml
 .kittify/charter/references.yaml
 .kittify/dossiers/
+.kittify/encoding-provenance/
 .kittify/events/
 .kittify/merge-state.json
 .kittify/missions/__pycache__/
