@@ -59,7 +59,14 @@
   --sk-fg-default:          #FFFFFF;   /* headlines — maps to --sk-fg-0 */
   --sk-fg-body:             #D6D6DA;   /* body text — maps to --sk-fg-1 */
   --sk-fg-muted:            #A9A9B0;   /* secondary body, muted copy — maps to --sk-fg-2 */
-  --sk-fg-subtle:           #6E6E78;   /* tertiary / labels — maps to --sk-fg-3 */
+  --sk-fg-subtle:           #81818B;
+
+  /* Default page foreground. Without this, any element that does not set its own
+     `color` inherits the UA default (black) and renders black-on-dark: measured at
+     1.2:1 on --sk-surface-card. It is present in every card story, but axe can only
+     REPORT it where an ancestor sets an explicit background it can resolve, which is
+     why only the LightMode variants were flagged. #101. */
+  color: var(--sk-fg-body);   /* tertiary / labels — maps to --sk-fg-3; #6E6E78 failed WCAG AA (3.45:1 on --sk-surface-card, 3.83:1 on --sk-surface-page), see #101 */
   --sk-fg-placeholder:      #4A4A52;   /* placeholder text — maps to --sk-fg-4 */
   --sk-fg-on-primary:       #1A1408;   /* dark ink on yellow buttons */
   --sk-fg-on-card:          #D6D6DA;   /* text on card surface */

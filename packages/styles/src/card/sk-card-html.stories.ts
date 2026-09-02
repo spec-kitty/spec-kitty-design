@@ -1,3 +1,4 @@
+import '../pill-tag/sk-pill-tag.css';
 import './sk-card.css';
 import type { Meta, StoryObj } from '@storybook/web-components';
 
