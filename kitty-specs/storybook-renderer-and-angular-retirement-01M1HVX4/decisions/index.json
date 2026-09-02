@@ -143,6 +143,30 @@
       "status": "resolved",
       "step_id": "lightmode-exit-criterion",
       "summary_json": null
+    },
+    {
+      "created_at": "2026-09-02T21:22:16.751390Z",
+      "decision_id": "01M1J00KHF3Z957ATR1QSZ744N",
+      "final_answer": "Narrow NFR-003 to renderer-driven rewrites; permit unrelated story edits",
+      "input_key": "story-file-edits",
+      "mission_id": "01M1HVX4NCTMNE2VSE2MXH6Z0A",
+      "mission_slug": "storybook-renderer-and-angular-retirement-01M1HVX4",
+      "opened_by": "operator",
+      "options": [
+        "Narrow NFR-003 to renderer-driven rewrites; permit unrelated story edits",
+        "Keep NFR-003 as an absolute bar on story edits",
+        "Drop NFR-003 entirely"
+      ],
+      "origin_flow": "plan",
+      "other_answer": false,
+      "question": "NFR-003 forbids content edits to story files, which blocks fixing the missing sk-stub.css import. Operator reports a redesign is coming that will edit story files anyway. Should NFR-003 be lifted, narrowed, or kept?",
+      "rationale": "Operator, 2026-09-02: a big redesign is coming and will edit story files regardless, so an absolute bar is not worth defending. NFR-003's evidentiary purpose is preserved by narrowing rather than dropping it: ADR-13's load-bearing claim is that no story needed rewriting TO RENDER under the web-components renderer, and that claim is still measured. Unrelated fixes (a missing CSS import, the type-import source) no longer breach it.",
+      "resolved_at": "2026-09-02T21:22:30.601093Z",
+      "resolved_by": "operator",
+      "slot_key": null,
+      "status": "resolved",
+      "step_id": "story-file-edits",
+      "summary_json": null
     }
   ],
   "mission_id": "01M1HVX4NCTMNE2VSE2MXH6Z0A",

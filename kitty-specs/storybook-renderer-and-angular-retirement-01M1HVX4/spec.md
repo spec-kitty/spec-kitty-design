@@ -129,7 +129,7 @@ remaining baseline has a live story and was re-shot under Vite.
 |----|-------|-------------|----------|----------|--------|
 | NFR-001 | Storybook build time | The full catalogue builds under `@storybook/web-components-vite` in under 3 minutes (NFR-003 of the programme). | Performance | High | Open |
 | NFR-002 | Rendering proven, not asserted | Every remaining story is proven to render by the accessibility gate served over HTTP, which fails when a component host mounts no content. | Reliability | High | Open |
-| NFR-003 | Zero story rewrites | The 13 `packages/styles` story files reach a rendering state with no content edits; only the type-import source (FR-008) may change. | Maintainability | High | Open |
+| NFR-003 | Zero *renderer-driven* story rewrites | **Narrowed by operator decision 2026-09-02 (`DM-01M1J00KHF3Z957ATR1QSZ744N`): story files MAY be edited; a redesign is coming that will edit them anyway.** What must remain true is the claim this requirement exists to evidence: no story file needed a change **in order to render** under the web-components renderer. Renderer-unrelated edits — the type-import source (FR-008), the missing `sk-stub.css` import — do not breach it and must be listed in the PR with a one-line reason each, so the ADR-13 claim stays auditable. | Maintainability | High | Open |
 | NFR-004 | No dependency residue | Zero matches for `@angular/`, `@angular-devkit/`, `zone.js`, `ng-packagr`, `@nx/angular`, `@storybook/angular` in `package.json`, the lockfile and the workflows. | Maintainability | High | Open |
 
 ### Constraints
@@ -162,7 +162,10 @@ remaining baseline has a live story and was re-shot under Vite.
 - **SC-002**: The accessibility gate, served over HTTP, visits every story in the
   catalogue index and reports zero unmounted component hosts.
 - **SC-003**: Zero of the 13 `packages/styles` story files required a content
-  rewrite to render.
+  rewrite **in order to render**. Story edits made for unrelated reasons are
+  permitted (operator decision, see NFR-003) and are enumerated in the PR with a
+  reason each; a reader must be able to check that none of them was needed to
+  make a story mount.
 - **SC-004**: Zero matches for `@angular/`, `@angular-devkit/`, `zone.js`, `ng-packagr`, `@nx/angular`
   and `@storybook/angular` across `package.json`, the lockfile and the three
   workflows; `packages/angular` and `angular.json` no longer exist.
