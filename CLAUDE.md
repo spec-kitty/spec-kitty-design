@@ -4,7 +4,7 @@ Read this first. It is the canonical entry point for any LLM coding agent (Claud
 
 ## 1. What this repo is
 
-A Nx monorepo for a token-driven web design system. Three published packages: `@spec-kitty/tokens` (CSS custom properties as the single source of truth for every design value), `@spec-kitty/html-js` (framework-free web components — a `sk-<name>.css` file plus an optional minimal JS module per component), and `@spec-kitty/angular` (thin Angular wrappers around the html-js building blocks). Tokens flow one direction: `tokens → html-js → angular`. The token layer never depends on anything; consumer packages never bypass it.
+A Nx monorepo for a token-driven web design system. Three published packages: `@spec-kitty/tokens` (CSS custom properties as the single source of truth for every design value), `@spec-kitty/styles` (framework-free web components — a `sk-<name>.css` file plus an optional minimal JS module per component), and `@spec-kitty/angular` (thin Angular wrappers around the styles building blocks). Tokens flow one direction: `tokens → styles → angular`. The token layer never depends on anything; consumer packages never bypass it.
 
 Storybook publishes everything to [`https://stijn-dejongh.github.io/spec-kitty-design/`](https://stijn-dejongh.github.io/spec-kitty-design/). Two static demo pages — `blog-demo.html` and `dashboard-demo.html` — live at the deploy root and showcase realistic compositions of the components against the live token CSS.
 
@@ -14,7 +14,7 @@ Storybook publishes everything to [`https://stijn-dejongh.github.io/spec-kitty-d
 |------|-----------------|
 | `packages/tokens/src/tokens.css` | Every design token. Touch this when adding/changing design values. |
 | `packages/tokens/dist/token-catalogue.json` | Generated catalogue consumed by stylelint. Regenerate after token changes. |
-| `packages/html-js/src/<component>/` | `sk-<name>.css` (styles), `sk-<name>.js` (optional ES module), `sk-<name>.stories.ts` (Storybook), `index.ts` (re-export). |
+| `packages/styles/src/<component>/` | `sk-<name>.css` (styles), `sk-<name>.js` (optional ES module), `sk-<name>.stories.ts` (Storybook), `index.ts` (re-export). |
 | `packages/angular/src/lib/<component>/` | `*.component.ts/html/css`, `*.component.spec.ts`, `*.stories.ts`. |
 | `apps/storybook/` | Storybook 10.x config; auto-emits `index.json` at build. |
 | `apps/demo/{blog-demo,dashboard-demo,index}.html` | Composed example pages served at the deploy root. |
@@ -32,7 +32,7 @@ Storybook publishes everything to [`https://stijn-dejongh.github.io/spec-kitty-d
 ## 3. Hard rules (non-negotiable)
 
 1. **Tokens first.** Every CSS value (colour, spacing, font-size, radius, shadow, motion, z-index) must reference a `var(--sk-*)` token defined in `packages/tokens/src/tokens.css`. No raw `rgba()`, `#hex`, or `Npx` literals in component CSS. Stylelint enforces via `stylelint-declaration-strict-value` against the generated catalogue.
-2. **Token-only dependency boundary.** `packages/html-js` and `packages/angular` may import only from `packages/tokens`. ESLint `@nx/enforce-module-boundaries` enforces.
+2. **Token-only dependency boundary.** `packages/styles` and `packages/angular` may import only from `packages/tokens`. ESLint `@nx/enforce-module-boundaries` enforces.
 3. **Semantic pairing.** Surface and foreground tokens come in pairs (e.g. `--sk-surface-page` ↔ `--sk-on-page`). Don't mix across pairs.
 4. **BEM naming.** `sk-block__element--modifier`. Block prefix is always `sk-`.
 5. **Conventional commits** with scopes: `tokens`, `angular`, `html-js`, `storybook`, `doctrine`, `ci`, `docs`, `release`, `deps`, `security`. Subject lowercase. `commitlint` runs on PRs.
@@ -49,7 +49,7 @@ Storybook publishes everything to [`https://stijn-dejongh.github.io/spec-kitty-d
 | Stylelint only | `npm run quality:stylelint` |
 | Build tokens + catalogue | `npx nx run tokens:build && npx nx run tokens:catalogue` |
 | Regenerate token catalogue only | `npx nx run tokens:catalogue` (or `npm run tokens:catalogue`) |
-| Build html-js | `npx nx run html-js:build` |
+| Build styles | `npx nx run styles:build` |
 | Build Angular | `npx nx run angular:build` |
 | Build Storybook | `npx nx run storybook:storybook:build` |
 | Run Storybook locally | `npx nx run storybook:storybook` |
@@ -62,18 +62,18 @@ Storybook publishes everything to [`https://stijn-dejongh.github.io/spec-kitty-d
 ## 5. Adding a new component (decision tree)
 
 - **Need a new design value?** Add it to `packages/tokens/src/tokens.css`, then run `npx nx run tokens:catalogue`. If introducing a new token category (e.g. a new prefix), also update [`./docs/contributing/adding-a-token.md`](./docs/contributing/adding-a-token.md).
-- **Framework-free component?** Create `packages/html-js/src/<name>/`. Files: `sk-<name>.css`, optional `sk-<name>.js` ES module, `sk-<name>.stories.ts`, `index.ts` re-export. If the component has structural HTML, also include `sk-<name>.html` for reference and a `sk-<name>.d.ts` for the JS module.
-- **Angular wrapper?** Create `packages/angular/src/lib/<name>/`. Files: `*.component.{ts,html,css,spec.ts}`, `*.stories.ts`. Wrap an existing html-js component when possible — keep CSS centralised in the html-js package and reference it via the component's `styleUrls`.
+- **Framework-free component?** Create `packages/styles/src/<name>/`. Files: `sk-<name>.css`, optional `sk-<name>.js` ES module, `sk-<name>.stories.ts`, `index.ts` re-export. If the component has structural HTML, also include `sk-<name>.html` for reference and a `sk-<name>.d.ts` for the JS module.
+- **Angular wrapper?** Create `packages/angular/src/lib/<name>/`. Files: `*.component.{ts,html,css,spec.ts}`, `*.stories.ts`. Wrap an existing styles component when possible — keep CSS centralised in the styles package and reference it via the component's `styleUrls`.
 - **Full recipe:** [`./docs/contributing/adding-a-component.md`](./docs/contributing/adding-a-component.md).
 
-Existing components (use as patterns): `button`, `card`, `check-bullet`, `feature-card`, `form-field`, `nav-pill`, `pill-tag`, `ribbon-card`, `section-banner`, `site-footer` (html-js only), `stub`.
+Existing components (use as patterns): `button`, `card`, `check-bullet`, `feature-card`, `form-field`, `nav-pill`, `pill-tag`, `ribbon-card`, `section-banner`, `site-footer` (styles only), `stub`.
 
 ## 6. Storybook conventions
 
 - **Title taxonomy** — pick the closest existing root: `Components/`, `Form/`, `Navigation/`, `Primitives/`, `Tags/`, `Tokens/`. Don't invent new top-level groups without a reason.
 - **Required exports per story file:** `Default`, plus variants for state/size/etc., plus `LightMode`. The `LightMode` story is enforced by review, not lint — don't skip it.
 - **Docs strings:** `parameters.docs.description.story` is encouraged for non-obvious behaviour.
-- **JS-dependent components:** when a component depends on a JS module function (e.g. drawer toggling), attach it via a story decorator. Reference pattern: `packages/html-js/src/nav-pill/sk-nav-pill.stories.ts` (`CollapsedHamburger`).
+- **JS-dependent components:** when a component depends on a JS module function (e.g. drawer toggling), attach it via a story decorator. Reference pattern: `packages/styles/src/nav-pill/sk-nav-pill.stories.ts` (`CollapsedHamburger`).
 - **Backgrounds:** the `sk-light` and default backgrounds are configured in the Storybook preview; use `parameters.backgrounds.default: 'sk-light'` for the LightMode variant.
 
 ## 7. Spec Kitty governance

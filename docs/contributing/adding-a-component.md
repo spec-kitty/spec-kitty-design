@@ -1,7 +1,7 @@
 # Adding a component
 
 Components live in two packages: `packages/angular/` (Angular LTS) and
-`packages/html-js/` (framework-agnostic HTML). Most components should exist
+`packages/styles/` (framework-agnostic HTML). Most components should exist
 in both — start with the HTML primitive, then add the Angular wrapper.
 
 ## Steps
@@ -18,12 +18,12 @@ npx nx g @nx/angular:component <name> \
 
 ### 2. Write the HTML primitive
 
-Create `packages/html-js/src/<name>/index.ts` and `<name>.css`.
+Create `packages/styles/src/<name>/index.ts` and `<name>.css`.
 
 ### 3. Add Storybook stories
 
 - Angular story: `packages/angular/src/lib/<name>/<name>.stories.ts`
-- HTML story: `packages/html-js/src/<name>/<name>.html.stories.ts`
+- HTML story: `packages/styles/src/<name>/<name>.html.stories.ts`
 
 Required story exports: `Default`, `Mobile`, `Desktop`.
 For interactive components, add `Hover`, `Focus`, `Disabled`.
@@ -45,7 +45,7 @@ export { MyComponent } from './lib/<name>/<name>.component';
 ### 6. Run checks
 
 ```bash
-npx nx run-many --target=build --projects=tokens,angular,html-js
+npx nx run-many --target=build --projects=tokens,angular,styles
 npx nx run storybook:storybook:build
 node scripts/run-axe-storybook.js
 ```

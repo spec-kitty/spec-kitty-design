@@ -49,7 +49,7 @@ const meta: Meta = {
 
 ## Stub reference
 
-The stub component (`packages/angular/src/lib/stub/`, `packages/html-js/src/stub/`)
+The stub component (`packages/angular/src/lib/stub/`, `packages/styles/src/stub/`)
 is the minimal valid example. Follow its structure for new components.
 
 ## CI gates a new component must pass

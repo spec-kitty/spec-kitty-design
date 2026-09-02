@@ -13,7 +13,7 @@ source of truth; this file mirrors what is in the repo at the time of writing.
 `spec-kitty-design` is a token-driven, framework-progressive web design system
 for the Spec Kitty / Priivacy-ai ecosystem. A single CSS-custom-property token
 file (`@spec-kitty/tokens`) is the authoritative source for every visual value;
-two component packages (`@spec-kitty/html-js` for framework-free CSS+HTML and
+two component packages (`@spec-kitty/styles` for framework-free CSS+HTML and
 `@spec-kitty/angular` for Angular wrappers) consume those tokens by reference,
 never by duplication. The system is published interactively as a Storybook
 catalogue and as two static demo pages (`blog-demo.html`, `dashboard-demo.html`),
@@ -25,7 +25,7 @@ all deployed together to GitHub Pages.
 spec-kitty-design/
   packages/
     tokens/         # @spec-kitty/tokens — CSS custom properties + Falling Sky / Swansea / JetBrains Mono
-    html-js/        # @spec-kitty/html-js — framework-free CSS + lightweight JS components
+    styles/        # @spec-kitty/styles — framework-free CSS + lightweight JS components
     angular/        # @spec-kitty/angular — Angular standalone component wrappers
   apps/
     storybook/      # Storybook 10.x catalogue (Angular + HTML renderers)
@@ -81,7 +81,7 @@ repos.
 `docs/architecture/decisions/2026-05-01-2-monorepo-package-topology.md`.
 **Decision:** independently publishable packages in a single Nx monorepo, with
 a strictly one-directional dependency graph: `@spec-kitty/tokens ←
-@spec-kitty/angular`, `@spec-kitty/tokens ← @spec-kitty/html-js`. No
+@spec-kitty/angular`, `@spec-kitty/tokens ← @spec-kitty/styles`. No
 framework package may depend on another framework package. **Why:** an
 Angular consumer should not pay for HTML/JS bytes and vice-versa; an Angular
 LTS major bump should not force a version bump on `@spec-kitty/tokens`; new
@@ -476,75 +476,75 @@ are standalone (no NgModule).
 - Variants: `Default`, `OnLightBackground`, `Mobile`, `Desktop`, `Hover`
 - Notes: WP04 proof-of-concept primitive that confirmed Storybook 10.x multi-framework rendering and viewport addons.
 
-### html-js package — `packages/html-js/src/`
+### styles package — `packages/styles/src/`
 
-#### sk-button (html-js)
-- Path: `packages/html-js/src/button/sk-button.css` + `sk-button-primary.html` + `sk-button-secondary.html` + `sk-button-html.stories.ts`
+#### sk-button (styles)
+- Path: `packages/styles/src/button/sk-button.css` + `sk-button-primary.html` + `sk-button-secondary.html` + `sk-button-html.stories.ts`
 - Story title: `Components/Button (HTML)`
 - Variants: `Default` (Primary), `Secondary`, `Ghost`, `Small`, `Disabled`, `AllVariants`, `LightMode`
 - Notes: BEM classes `sk-button`, `sk-button--primary`, `sk-button--secondary`, `sk-button--ghost`, `sk-button--small`. Single CSS file covers all variants.
 
-#### sk-card (html-js)
-- Path: `packages/html-js/src/card/sk-card.css` + `sk-card.html` + `sk-card-html.stories.ts`
+#### sk-card (styles)
+- Path: `packages/styles/src/card/sk-card.css` + `sk-card.html` + `sk-card-html.stories.ts`
 - Story title: `Components/Card`
 - Variants: `Default`, `Blue`, `Purple`, `Inset`, `BlogCardExample`, `LightMode`
 - Notes: surface-tinted card; `BlogCardExample` is the composition used on `blog-demo.html`.
 
-#### sk-check-bullet (html-js)
-- Path: `packages/html-js/src/check-bullet/sk-check-bullet.css` + `sk-check-bullet.html` + `sk-check-bullet-html.stories.ts`
+#### sk-check-bullet (styles)
+- Path: `packages/styles/src/check-bullet/sk-check-bullet.css` + `sk-check-bullet.html` + `sk-check-bullet-html.stories.ts`
 - Story title: `Primitives/SkCheckBullet (HTML)`
 - Variants: `Default`, `ListOfThree`, `LightMode`
 - Notes: identical visual to Angular variant; pure CSS (no JS).
 
-#### sk-feature-card (html-js)
-- Path: `packages/html-js/src/feature-card/sk-feature-card.css` + `sk-feature-card.html` + `sk-feature-card-html.stories.ts`
+#### sk-feature-card (styles)
+- Path: `packages/styles/src/feature-card/sk-feature-card.css` + `sk-feature-card.html` + `sk-feature-card-html.stories.ts`
 - Story title: `Components/SkFeatureCard (HTML)`
 - Variants: `Default`, `GreenIcon`, `PurpleIcon`, `LightMode`, `Grid`
 - Notes: `Grid` shows three feature cards in a responsive 3-up grid; exports `SkFeatureCardYellowHTML`, `SkFeatureCardGreenHTML`, `SkFeatureCardPurpleHTML`.
 
-#### sk-form-field (html-js)
-- Path: `packages/html-js/src/form-field/sk-form-field.css` + `sk-form-field.html` + per-state HTML files + `sk-form-field-html.stories.ts`
+#### sk-form-field (styles)
+- Path: `packages/styles/src/form-field/sk-form-field.css` + `sk-form-field.html` + per-state HTML files + `sk-form-field-html.stories.ts`
 - Story title: `Form/FormField (HTML)`
 - Variants: `FormInputDefault`, `FormInputFocus`, `FormInputError`, `FormInputDisabled`, `FormInputFilled`, `FormTextareaDefault`, `FormTextareaError`, `LightMode`
 - Notes: state markup is split into separate `.html` snippets (e.g. `sk-form-input-error.html`) consumed by stories.
 
-#### sk-nav-pill (html-js)
-- Path: `packages/html-js/src/nav-pill/sk-nav-pill.css` + `sk-nav-pill-drawer.css` + `sk-nav-pill.html` + `sk-nav-pill.js` + `sk-nav-pill.d.ts` + `sk-nav-pill.stories.ts`
+#### sk-nav-pill (styles)
+- Path: `packages/styles/src/nav-pill/sk-nav-pill.css` + `sk-nav-pill-drawer.css` + `sk-nav-pill.html` + `sk-nav-pill.js` + `sk-nav-pill.d.ts` + `sk-nav-pill.stories.ts`
 - Story title: `Navigation/SkNavPill (HTML)`
 - Variants: `Default`, `ActiveItem`, `Mobile`, `CollapsedHamburger`, `LightMode`
-- Notes: only html-js component with companion JS. The JS handles the
+- Notes: only styles component with companion JS. The JS handles the
   collapsed-hamburger drawer toggle on narrow viewports; ARIA roles applied via
   template. Two CSS files: rail layout and the mobile drawer.
 
-#### sk-pill-tag (html-js)
-- Path: `packages/html-js/src/pill-tag/sk-pill-tag.css` + `sk-pill-tag.html` + `sk-pill-tag.stories.ts`
+#### sk-pill-tag (styles)
+- Path: `packages/styles/src/pill-tag/sk-pill-tag.css` + `sk-pill-tag.html` + `sk-pill-tag.stories.ts`
 - Story title: `Tags/SkPillTag (HTML)`
 - Variants: `Default`, `Green`, `Purple`, `Breaking`, `Yellow`, `AllVariants`, `EyebrowPill`, `LightMode`
 - Notes: exports both `SkPillTagHTML` and `SkEyebrowPillHTML`; same `PillTagVariant` type as Angular.
 
-#### sk-ribbon-card (html-js)
-- Path: `packages/html-js/src/ribbon-card/sk-ribbon-card.css` + `sk-ribbon-card.html` + `sk-ribbon-card-plain.html` + `sk-ribbon-card-html.stories.ts`
+#### sk-ribbon-card (styles)
+- Path: `packages/styles/src/ribbon-card/sk-ribbon-card.css` + `sk-ribbon-card.html` + `sk-ribbon-card-plain.html` + `sk-ribbon-card-html.stories.ts`
 - Story title: `Components/SkRibbonCard (HTML)`
 - Variants: `Default`, `WithRibbon`, `RibbonYellow`, `RibbonGreen`, `RibbonPurple`, `LightMode`
-- Notes: html-js variant adds `RibbonYellow` (Angular omits this colourway).
+- Notes: styles variant adds `RibbonYellow` (Angular omits this colourway).
 
-#### sk-section-banner (html-js)
-- Path: `packages/html-js/src/section-banner/sk-section-banner.css` + `sk-section-banner.html` + `sk-section-banner-html.stories.ts`
+#### sk-section-banner (styles)
+- Path: `packages/styles/src/section-banner/sk-section-banner.css` + `sk-section-banner.html` + `sk-section-banner-html.stories.ts`
 - Story title: `Primitives/SkSectionBanner (HTML)`
 - Variants: `Neutral`, `Purple`, `Green`, `LightMode`
 - Notes: exports `SkSectionBannerNeutralHTML`, `SkSectionBannerPurpleHTML`, `SkSectionBannerGreenHTML`.
 
-#### sk-site-footer (html-js, no Angular twin)
-- Path: `packages/html-js/src/site-footer/sk-site-footer.css` + `sk-site-footer.stories.ts`
+#### sk-site-footer (styles, no Angular twin)
+- Path: `packages/styles/src/site-footer/sk-site-footer.css` + `sk-site-footer.stories.ts`
 - Story title: `Components/SiteFooter`
 - Variants: `Default`, `LightMode`
-- Notes: marketing footer with brand mark, link columns, legal line. html-js only — no Angular wrapper exists.
+- Notes: marketing footer with brand mark, link columns, legal line. styles only — no Angular wrapper exists.
 
-#### sk-stub (html-js)
-- Path: `packages/html-js/src/stub/sk-stub.css` + `sk-stub.html` + `sk-stub-html.stories.ts`
+#### sk-stub (styles)
+- Path: `packages/styles/src/stub/sk-stub.css` + `sk-stub.html` + `sk-stub-html.stories.ts`
 - Story title: `Primitives/SkStub (HTML)`
 - Variants: `Default`, `Mobile`, `Desktop`
-- Notes: html-js side of the WP04 proof-of-concept primitive.
+- Notes: styles side of the WP04 proof-of-concept primitive.
 
 ### Tokens stories
 
@@ -594,8 +594,8 @@ Actions `uses:` directives pinned to immutable commit SHAs).
   no-hardcoded-values rule (it defines them).
 - **ESLint** (`eslint.config.mjs`) — Nx flat-base plus
   `@nx/enforce-module-boundaries` with the ADR-002 dependency direction baked
-  in: `scope:angular` and `scope:html-js` may only depend on `scope:tokens`;
-  `scope:docs` may depend on tokens / angular / html-js; publishable packages
+  in: `scope:angular` and `scope:styles` may only depend on `scope:tokens`;
+  `scope:docs` may depend on tokens / angular / styles; publishable packages
   cannot depend on internal-tagged libs. `eslint-plugin-security` warns on
   object-injection / non-literal-fs and errors on unsafe-regex.
 - **HTMLHint** (`.htmlhintrc`) — covers structural HTML quality on
@@ -702,20 +702,20 @@ npm install @spec-kitty/tokens
 @import '@spec-kitty/tokens/dist/tokens.css';
 ```
 
-### html-js component (CDN-friendly)
+### styles component (CDN-friendly)
 
 ```html
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@spec-kitty/tokens/dist/tokens.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@spec-kitty/html-js/src/button/sk-button-primary.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@spec-kitty/styles/src/button/sk-button-primary.css">
 <button class="sk-button sk-button--primary">Click me</button>
 ```
 
 For components that ship companion JS (currently `sk-nav-pill`):
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@spec-kitty/html-js/src/nav-pill/sk-nav-pill.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@spec-kitty/html-js/src/nav-pill/sk-nav-pill-drawer.css">
-<script type="module" src="https://cdn.jsdelivr.net/npm/@spec-kitty/html-js/src/nav-pill/sk-nav-pill.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@spec-kitty/styles/src/nav-pill/sk-nav-pill.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@spec-kitty/styles/src/nav-pill/sk-nav-pill-drawer.css">
+<script type="module" src="https://cdn.jsdelivr.net/npm/@spec-kitty/styles/src/nav-pill/sk-nav-pill.js"></script>
 ```
 
 ### Angular
@@ -750,23 +750,23 @@ piece to the system without violating any gate.
 
 1. **Choose a package.**
    - New design value (colour, spacing step, radius, shadow, motion curve) — `@spec-kitty/tokens`.
-   - New framework-free component — `@spec-kitty/html-js`.
+   - New framework-free component — `@spec-kitty/styles`.
    - New Angular wrapper of an existing primitive — `@spec-kitty/angular`.
-   - New pattern that needs to land in both renderers — implement in `html-js` first, then Angular wrapper that mirrors the markup.
+   - New pattern that needs to land in both renderers — implement in `styles` first, then Angular wrapper that mirrors the markup.
 
 2. **Create files** under the package:
    - `packages/<pkg>/src/<component>/<sk-name>.css` — styles.
-   - `packages/<pkg>/src/<component>/<sk-name>.html` — markup (html-js) or `<sk-name>.component.html` (Angular).
+   - `packages/<pkg>/src/<component>/<sk-name>.html` — markup (styles) or `<sk-name>.component.html` (Angular).
    - `packages/<pkg>/src/<component>/<sk-name>.stories.ts` — Storybook entry.
    - Angular only: `<sk-name>.component.ts` (or `<sk-name>.ts`) plus `<sk-name>.spec.ts` for unit tests.
-   - Update the package's `src/index.ts` to export the new symbol (Angular: the component class; html-js: an HTML string constant).
+   - Update the package's `src/index.ts` to export the new symbol (Angular: the component class; styles: an HTML string constant).
 
 3. **CSS rules.**
    - Use only `var(--sk-*)` references. No raw `#hex`, `rgb()`, `rem`, `px` literals on the property families enforced by Stylelint (`color`, `background`, `background-color`, `font-family`, `padding`, `margin`, `border-radius`). Allowed literal values: `transparent`, `inherit`, `initial`, `unset`, `none`, `currentColor`, `0`.
    - Add new token values to `packages/tokens/src/tokens.css` first, then run `npx nx run tokens:catalogue` so the catalogue and Stylelint allowlist update before the consuming component CSS is committed.
 
 4. **Story file.**
-   - `title:` must match the existing taxonomy: `Components/<Name>`, `Form/<Name>`, `Navigation/<Name>`, `Primitives/<Name>`, `Tags/<Name>`, or `Tokens/<Name>`. Mirror Angular and html-js entries with `(Angular)` / `(HTML)` suffixes per ADR-006 fallback.
+   - `title:` must match the existing taxonomy: `Components/<Name>`, `Form/<Name>`, `Navigation/<Name>`, `Primitives/<Name>`, `Tags/<Name>`, or `Tokens/<Name>`. Mirror Angular and styles entries with `(Angular)` / `(HTML)` suffixes per ADR-006 fallback.
    - Required exports: `Default` plus a `LightMode` variant. The `LightMode` story wraps the rendered output in `<div data-theme="light" style="background: var(--sk-surface-page); padding: var(--sk-space-7);">…</div>` and sets `parameters.backgrounds.default: 'sk-light'`.
    - Cover meaningful states: error, disabled, hover, focus, mobile viewport — each as a separate named export.
 
@@ -785,7 +785,7 @@ piece to the system without violating any gate.
    commitlint allowlist:
 
    ```
-   feat(html-js): add sk-modal primitive
+   feat(styles): add sk-modal primitive
    feat(angular): add SkModalComponent wrapper
    feat(tokens): add --sk-shadow-overlay token
    docs(docs): document sk-modal usage in storybook getting-started
@@ -820,4 +820,4 @@ Flat link list of every URL referenced above, for skim use.
 - Storybook 8.x→10.x framework docs (ADR-6 reference) — <https://storybook.js.org/docs/configure/integration/frameworks>
 - jsDelivr CDN base for the `@spec-kitty` scope — <https://cdn.jsdelivr.net/npm/@spec-kitty/>
 - Tokens CSS via CDN — <https://cdn.jsdelivr.net/npm/@spec-kitty/tokens/dist/tokens.css>
-- html-js button CSS via CDN — <https://cdn.jsdelivr.net/npm/@spec-kitty/html-js/src/button/sk-button-primary.css>
+- styles button CSS via CDN — <https://cdn.jsdelivr.net/npm/@spec-kitty/styles/src/button/sk-button-primary.css>

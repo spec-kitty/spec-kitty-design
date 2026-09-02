@@ -67,7 +67,7 @@
 **In scope:**
 - CSS custom property token package (`@spec-kitty/tokens`)
 - Angular component library (`@spec-kitty/angular`)
-- Plain HTML/JS primitive package (`@spec-kitty/html-js`)
+- Plain HTML/JS primitive package (`@spec-kitty/styles`)
 - Storybook (documentation + CI visual regression)
 - Brand voice and visual identity doctrine bundle
 - CI quality pipeline (lint, a11y, visual regression, cross-browser, Lighthouse, security)

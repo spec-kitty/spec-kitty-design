@@ -24,7 +24,7 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) conve
 - Brand fonts bundled: Falling Sky family (30 files), Swansea family
 - Brand assets: logo, favicon
 - Angular component library (`@spec-kitty/angular`) with 8 component categories
-- HTML/JS primitives (`@spec-kitty/html-js`) with 8 component categories
+- HTML/JS primitives (`@spec-kitty/styles`) with 8 component categories
 - Storybook catalog with design token documentation pages (Colours, Typography, Spacing, Brand)
 - User guide documentation (`docs/design-system/`)
 
