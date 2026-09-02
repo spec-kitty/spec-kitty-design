@@ -49,7 +49,7 @@ as it is, not as those documents describe it.
 - **`DIRECTIVE_046` (project override)** — the adversarial squad is a merge GATE here. Every dispatched lens must report before the merge decision, and evidence names the head SHA. Satisfied by the tier-B point-cuts below plus the non-negotiable pre-merge gate.
 - **Squad tier B** (from #69): post-tasks and pre-merge only. No post-spec squad — the run prompt says "not more, not fewer".
 - **ADR-13 governs the renderer choice** (C-001). This mission implements it and does not re-open it.
-- **Open conflict, escalated not decided**: ADR-13 confirmation #3 ("LightMode variants still render correctly") contradicts open defect #93 (every `LightMode` story renders dark; `:root[data-theme="light"]` cannot match a `<div>`). Raised on #69 with a recommendation to scope `LightMode` out of this mission's exit criteria. Tracked as C-004; proceeding on that basis unless the operator directs otherwise.
+- **Conflict RESOLVED by the operator (2026-09-02)**: ADR-13 confirmation #3 ("LightMode variants still render correctly") contradicts open defect #93 (every `LightMode` story renders dark; `:root[data-theme="light"]` cannot match the wrapper `<div>` the stories use). Escalated on #69; the operator chose **scope `LightMode` out of this mission's exit criteria — #93 owns the fix**. Recorded as C-004 (Resolved) and in the decision ledger as `DM-01M1HXC6WQC90NK940WN2BXR9K`. Consequence for this mission: it must **not** claim "LightMode intact" at merge, and ADR-13's confirmation #3 cannot be ticked until #93 lands. ADR-13 should be amended by whoever fixes #93, not by this mission.
 
 ## Project Structure
 
