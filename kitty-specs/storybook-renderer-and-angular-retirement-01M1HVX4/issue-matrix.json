@@ -37,7 +37,7 @@
       "wp": null
     },
     "#91": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "Axe HTTP repair landed in ce30b3e before this mission; verified still holding against a Vite build (74 stories, 0 render failures).",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -45,8 +45,8 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "verdict": "verified-already-fixed",
+      "wp": "WP02"
     },
     "#93": {
       "evidence_ref": "<link or commit>",
