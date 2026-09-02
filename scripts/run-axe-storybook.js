@@ -243,9 +243,21 @@ async function checkStory(page, storyId) {
     // so a story that left the preview wedged reported every LATER story as
     // "did not render" — form-forminput-angular--form-input-focus renders in
     // 68ms on its own and was being blamed on a timeout. See #90.
-    const page = await context.newPage();
+    // One retry on a render failure. With a fresh page per story the failures are
+    // no longer systematic, but a small varying set (3 of 57, different each run)
+    // still misses the render window under load. A retry distinguishes a slow
+    // first paint from a story that genuinely cannot mount, without widening the
+    // timeout for all 57.
+    let page = await context.newPage();
     try {
-      const violations = await checkStory(page, storyId);
+      let violations;
+      try {
+        violations = await checkStory(page, storyId);
+      } catch (first) {
+        await page.close();
+        page = await context.newPage();
+        violations = await checkStory(page, storyId);
+      }
       if (violations.length > 0) {
         totalViolations += violations.length;
         failingStories.push({ storyId, violations });

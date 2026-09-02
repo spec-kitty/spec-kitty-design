@@ -1,0 +1,20 @@
+<!--
+  The preview canvas has no background of its own, so every dark-theme story was
+  being composited on the browser default (white). preview.ts declares a
+  `backgrounds` parameter with an `sk-dark` default, but @storybook/addon-backgrounds
+  is not installed (main.ts loads only addon-docs and addon-a11y), so that parameter
+  is inert.
+
+  The consequence was not cosmetic: the axe gate measured dark-theme foreground
+  colours against #ffffff and reported 9 colour-contrast violations that cannot
+  occur in any real consumer. See #90.
+
+  --sk-surface-page is the canonical page surface token: dark at :root, light under
+  [data-theme="light"]. The light-mode stories wrap themselves in their own
+  data-theme="light" container, so they are unaffected by this.
+-->
+<style>
+  body {
+    background: var(--sk-surface-page);
+  }
+</style>
