@@ -21,15 +21,14 @@ jobs:
           node-version: "22"
           cache: npm
       - run: npm ci --ignore-scripts
-      # O7: the rendering browser is pinned, not apt-provided. mermaid renders
-      # text metrics differently between Chromium builds, so an unpinned
-      # browser made this check non-reproducible — it reported drift on 8 of 8
-      # committed SVGs with no .mmd modified. Playwright's Chromium is pinned
-      # by the exact @playwright/test version in package.json, so this runner
-      # and every contributor resolve the identical build.
+      # The rendering browser is pinned via Playwright's exactly-pinned Chromium
+      # rather than apt's. Necessary but not sufficient: the theme's font stack
+      # resolves per host, so this runner and a contributor machine still render
+      # different geometry. See the artifact step below.
       - name: Install pinned Chromium (Playwright)
         run: npx playwright install --with-deps chromium
       - name: "[ENFORCED] Render diagrams — drift check (FR-014, FR-015)"
+        id: drift
         run: node scripts/render-diagrams.js --check
 
       # The theme's fontFamily is "ui-sans-serif, system-ui, sans-serif" — a stack
@@ -38,12 +37,17 @@ jobs:
       # and this runner. No contributor can reproduce these bytes locally. On
       # failure, publish what the runner rendered so the fix is a download rather
       # than a guessing game.
+      # Conditioned on the drift step specifically, not on job failure: if npm ci
+      # or the browser install fails, the working tree still holds the COMMITTED
+      # bytes, and publishing those as "runner-rendered" would hand a contributor
+      # a no-op commit and a still-red gate.
       - name: Publish runner-rendered SVGs (drift only)
-        if: failure()
+        if: failure() && steps.drift.conclusion == 'failure'
         run: node scripts/render-diagrams.js
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # actions/upload-artifact v4.6.2
-        if: failure()
+        if: failure() && steps.drift.conclusion == 'failure'
         with:
           name: runner-rendered-svgs
           path: docs/architecture/assets/*.svg
-          retention-days: 7
+          if-no-files-found: error
+          retention-days: 30

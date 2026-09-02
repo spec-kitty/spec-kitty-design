@@ -53,9 +53,15 @@ Mermaid CLI (`mmdc`) must be on `PATH` or installed under
 install (`npm install -g @mermaid-js/mermaid-cli`) works.
 
 `puppeteer-config.json` in this directory configures the headless browser
-`mmdc` uses; it currently points at `/usr/bin/chromium`, which is the path
-provided in CI. Local contributors with a different chromium location can
-temporarily edit the path or rely on the puppeteer-bundled Chrome.
+`mmdc` uses. `render-diagrams.js` resolves Playwright's exactly-pinned Chromium
+by default and honours `PUPPETEER_EXECUTABLE_PATH` as an override, so the
+`/usr/bin/chromium` value in that file is a last-resort fallback.
+
+> **A local render will not reproduce the committed bytes.** The brand theme's
+> `fontFamily` is `ui-sans-serif, system-ui, sans-serif` — a stack that resolves
+> to whatever fonts the host has. Mermaid measures text with the browser's fonts,
+> so every diagram's geometry differs per machine, and pinning the browser cannot
+> change that. The committed SVGs are the ones CI produces.
 
 ## Verifying before pushing
 
@@ -70,8 +76,12 @@ bezier-control-point reordering does not flap the gate, but any meaningful
 change to a diagram does). Exits non-zero with a per-file diff summary on
 the first mismatch.
 
-This is the same command CI runs (forward-reference: WP06 owns
-`.github/workflows/docs-diagrams.yml`).
+This is the same command CI runs (`.github/workflows/docs-diagrams.yml`), but
+**it will report drift locally even when your diagrams are correct**, for the
+font reason above. When the gate fails in CI, download the `runner-rendered-svgs`
+artifact from that failed run and commit those bytes — do not commit a local
+render. Use the local run to confirm your `.mmd` edits parse and to eyeball the
+output, not to produce committed SVGs.
 
 ## Failure modes the gate catches
 
