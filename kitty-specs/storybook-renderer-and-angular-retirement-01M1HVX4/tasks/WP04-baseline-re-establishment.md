@@ -37,9 +37,20 @@ Implements IC-04.
 
 ## Subtasks
 
-- **T011** — Remove the 4 Angular-keyed baselines (FR-009).
-- **T012** — Re-shoot the remaining 3 under the new builder. For each, state whether it changed and, if so, why. An unexplained diff is a finding, not a new baseline.
-- **T013** — Apply C-004 to any `LightMode`-keyed baseline: see below.
+- **T011** — Remove the 4 Angular-keyed baseline PNGs **and the four test bodies that assert them** — `visual.spec.ts:25-33, 40-45, 52-62`, which navigate to `…-angular--…` story ids. Deleting only the PNGs leaves four tests that hang on a 20s `waitForSelector` and fail (FR-009).
+- **T011b** — **Add `waitForSelector` to the three HTML tests** (`visual.spec.ts:35-38, 47-50, 64-67`) before re-shooting. They currently screenshot after `waitForLoadState('domcontentloaded')` alone — the file says at `:21-23` that this is exactly why the blank frames went unnoticed. Re-shooting without this races the Vite mount and can re-commit a blank PNG that then passes forever.
+- **T012** — Re-shoot the remaining 3 under the new builder, with `CI=1` or a freshly-killed port 6006 (`playwright.config.ts:16` sets `reuseExistingServer: !CI` against a hardcoded port, so a local re-shoot can silently screenshot a *stale* `storybook-static`).
+
+  **The diff logic here is inverted from the usual case and the earlier draft had it backwards.** All three surviving baselines are the *same blank frame*:
+
+  ```
+  f642335856be21c8fb251d2dce35c383  4257  sk-feature-card-html-default-chromium-linux.png
+  f642335856be21c8fb251d2dce35c383  4257  sk-ribbon-card-html-with-ribbon-chromium-linux.png
+  f642335856be21c8fb251d2dce35c383  4257  sk-stub-html-default-chromium-linux.png
+  ```
+
+  Three different components, one identical image — because the gate skipped these stories and the tests never waited for a mount (`visual.spec.ts:5-23`, tracked as **#88**). So a **no-diff is the failure signal**; these must change from blank to real content. Explain any baseline that does *not* change.
+- **T013** — *(deleted — it instructed applying a rule to an empty set; no `LightMode` baseline exists. C-004's disposition is stated at mission level in `plan.md`'s Charter Check and must be repeated in the PR.)*
 
 ## The `LightMode` constraint (C-004)
 
@@ -57,5 +68,7 @@ Re-shooting would freeze that defect into the reference set — the opposite of 
 
 - [ ] No baseline exists without a live story (FR-009).
 - [ ] Every retained baseline was re-shot under the new builder, not carried across — say so per baseline.
+- [ ] The three new PNGs have **three distinct md5s**, none equal to `f642335856be21c8fb251d2dce35c383`. A repeat of that hash means a blank frame was re-committed.
+- [ ] The four Angular test bodies and the Angular smoke test are gone; the Playwright suite passes.
 - [ ] Every diff is explained; none silently accepted.
 - [ ] `LightMode` handled per C-004, with the disposition stated explicitly in the PR rather than implied by a green suite.
