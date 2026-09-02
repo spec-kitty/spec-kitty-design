@@ -1,0 +1,17 @@
+{
+  "last_saas_confirmed_hash": null,
+  "pending_local_commits": [
+    {
+      "type": "LocalCommit",
+      "git_hash": "ecf9881653182e7a6911a8a1a3dfcd61229c0cfa",
+      "mission_id": "storybook-renderer-and-angular-retirement-01M1HVX4",
+      "build_id": "85202551-6e2c-4fe5-b9ad-15f2f3721846",
+      "project_uuid": "c5970476-a956-4ffe-aa95-38643e6e81fb",
+      "changed_files": [
+        "kitty-specs/storybook-renderer-and-angular-retirement-01M1HVX4/status.events.jsonl",
+        "kitty-specs/storybook-renderer-and-angular-retirement-01M1HVX4/status.json"
+      ],
+      "committed_at": "2026-09-02T20:38:21.558593+00:00"
+    }
+  ]
+}
