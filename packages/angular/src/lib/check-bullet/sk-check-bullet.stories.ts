@@ -16,7 +16,20 @@ const meta: Meta<SkCheckBulletComponent> = {
 export default meta;
 type Story = StoryObj<SkCheckBulletComponent>;
 
+// The host carries role="listitem" (see sk-check-bullet.ts), so it needs a list
+// parent to be valid — axe's aria-required-parent is right to insist. Rendering a
+// bare bullet showed the component outside the context it requires; the <ul> is
+// how a consumer is meant to use it, and matches ListOfThree below.
 export const Default: Story = {
+  render: (args) => ({
+    props: args,
+    template: `
+      <ul style="list-style:none;padding:0;margin:0">
+        <sk-check-bullet [text]="text"></sk-check-bullet>
+      </ul>
+    `,
+    moduleMetadata: { imports: [SkCheckBulletComponent] },
+  }),
   args: {
     text: 'Feature description here',
   },

@@ -1,3 +1,9 @@
+/* The host is the list item (see sk-check-bullet.ts). It must be a block so it
+   behaves as a flex child of the consumer's <ul>, as the <li> it replaced did. */
+:host {
+  display: block;
+}
+
 .sk-check-bullet {
   display: flex;
   align-items: flex-start;
