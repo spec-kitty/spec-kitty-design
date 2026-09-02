@@ -1,5 +1,5 @@
 import '../../../packages/tokens/src/tokens.css';
-import type { Preview } from '@storybook/angular';
+import type { Preview } from '@storybook/web-components';
 
 const preview: Preview = {
   parameters: {

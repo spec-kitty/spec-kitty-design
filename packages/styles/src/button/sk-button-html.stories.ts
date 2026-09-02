@@ -1,5 +1,5 @@
 import './sk-button.css';
-import type { Meta, StoryObj } from '@storybook/html';
+import type { Meta, StoryObj } from '@storybook/web-components';
 import { SkButtonPrimaryHTML, SkButtonSecondaryHTML } from './index';
 
 const meta: Meta = {

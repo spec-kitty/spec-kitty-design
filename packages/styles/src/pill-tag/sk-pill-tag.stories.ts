@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/html';
+import type { Meta, StoryObj } from '@storybook/web-components';
 import { SkTagHTML, SkEyebrowPillHTML, type PillTagVariant } from './index';
 import './sk-pill-tag.css';
 

@@ -14,9 +14,8 @@ export default [
       // Enforce package boundaries per project tags
       '@nx/enforce-module-boundaries': ['error', {
         depConstraints: [
-          { sourceTag: 'scope:angular',    onlyDependOnLibsWithTags: ['scope:tokens'] },
           { sourceTag: 'scope:styles',     onlyDependOnLibsWithTags: ['scope:tokens'] },
-          { sourceTag: 'scope:storybook',  onlyDependOnLibsWithTags: ['scope:tokens', 'scope:angular', 'scope:styles'] },
+          { sourceTag: 'scope:storybook',  onlyDependOnLibsWithTags: ['scope:tokens', 'scope:styles'] },
           { sourceTag: 'type:publishable', notDependOnLibsWithTags: ['type:internal'] },
         ],
       }],

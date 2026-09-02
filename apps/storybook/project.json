@@ -6,20 +6,29 @@
     "storybook": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "node_modules/.bin/ng run storybook:storybook",
+        "command": "storybook dev --config-dir apps/storybook/.storybook --port 6006",
         "forwardAllArgs": false
       },
-      "dependsOn": ["^build"]
+      "dependsOn": [
+        "^build"
+      ]
     },
     "storybook:build": {
       "executor": "nx:run-commands",
-      "outputs": ["{workspaceRoot}/apps/storybook/storybook-static"],
+      "outputs": [
+        "{workspaceRoot}/apps/storybook/storybook-static"
+      ],
       "options": {
-        "command": "node_modules/.bin/ng run storybook:build-storybook",
+        "command": "storybook build --config-dir apps/storybook/.storybook --output-dir apps/storybook/storybook-static",
         "forwardAllArgs": false
       },
-      "dependsOn": ["^build"]
+      "dependsOn": [
+        "^build"
+      ]
     }
   },
-  "tags": ["scope:storybook", "type:app"]
+  "tags": [
+    "scope:storybook",
+    "type:app"
+  ]
 }

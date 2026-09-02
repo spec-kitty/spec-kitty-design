@@ -254,7 +254,7 @@ amendment.
 | `--sk-fg-default` | `#FFFFFF` | headlines (= `--sk-fg-0`) |
 | `--sk-fg-body` | `#D6D6DA` | body text (= `--sk-fg-1`) |
 | `--sk-fg-muted` | `#A9A9B0` | secondary body (= `--sk-fg-2`) |
-| `--sk-fg-subtle` | `#6E6E78` | tertiary / labels (= `--sk-fg-3`) |
+| `--sk-fg-subtle` | `#81818B` | tertiary / labels (= `--sk-fg-3`) |
 | `--sk-fg-placeholder` | `#4A4A52` | placeholder text (= `--sk-fg-4`) |
 | `--sk-fg-on-primary` | `#1A1408` | dark ink on yellow buttons |
 | `--sk-fg-on-card` | `#D6D6DA` | text on card surface |

@@ -14,18 +14,22 @@
       "dependsOn": [
         "^build"
       ],
-      "cache": true
+      "cache": true,
+      "inputs": [
+        "{projectRoot}/**/*",
+        "{workspaceRoot}/packages/*/src/**/*",
+        "{workspaceRoot}/packages/*/assets/**/*",
+        "{workspaceRoot}/package.json",
+        "{workspaceRoot}/package-lock.json",
+        "{workspaceRoot}/tsconfig.base.json",
+        "{workspaceRoot}/packages/*/package.json"
+      ]
     },
     "test": {
       "cache": true
     }
   },
   "defaultProject": "storybook",
-  "generators": {
-    "@nx/angular:component": {
-      "style": "css"
-    }
-  },
   "defaultBase": "main",
   "analytics": false
 }

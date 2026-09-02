@@ -1,5 +1,5 @@
 import './sk-section-banner.css';
-import type { Meta, StoryObj } from '@storybook/html';
+import type { Meta, StoryObj } from '@storybook/web-components';
 import {
   SkSectionBannerNeutralHTML,
   SkSectionBannerPurpleHTML,

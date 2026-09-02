@@ -1,5 +1,5 @@
 import './sk-form-field.css';
-import type { Meta, StoryObj } from '@storybook/html';
+import type { Meta, StoryObj } from '@storybook/web-components';
 import {
   SkFormInputDefaultHTML,
   SkFormInputFocusHTML,

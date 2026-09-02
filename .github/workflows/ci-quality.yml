@@ -42,7 +42,7 @@ jobs:
             tokens:
               - 'packages/tokens/**'
             components:
-              - 'packages/angular/**'
+              - 'tsconfig.base.json'
               - 'packages/styles/**'
               - 'apps/storybook/**'
               # The demo pages are part of this surface: storybook-build is what

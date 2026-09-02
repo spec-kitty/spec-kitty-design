@@ -59,7 +59,10 @@
   --sk-fg-default:          #FFFFFF;   /* headlines — maps to --sk-fg-0 */
   --sk-fg-body:             #D6D6DA;   /* body text — maps to --sk-fg-1 */
   --sk-fg-muted:            #A9A9B0;   /* secondary body, muted copy — maps to --sk-fg-2 */
-  --sk-fg-subtle:           #6E6E78;   /* tertiary / labels — maps to --sk-fg-3 */
+  /* tertiary / labels — maps to --sk-fg-3. Was #6E6E78, which failed WCAG AA on
+     BOTH surfaces: 3.45:1 on --sk-surface-card and 3.83:1 on --sk-surface-page.
+     #81818B is the minimum same-hue lightening that clears 4.5:1 (4.51 / 5.01). #101 */
+  --sk-fg-subtle:           #81818B;
   --sk-fg-placeholder:      #4A4A52;   /* placeholder text — maps to --sk-fg-4 */
   --sk-fg-on-primary:       #1A1408;   /* dark ink on yellow buttons */
   --sk-fg-on-card:          #D6D6DA;   /* text on card surface */
@@ -196,7 +199,11 @@
   --sk-fg-default:          #1A1A14;   /* near-black ink for headlines */
   --sk-fg-body:             #2A2A22;   /* body */
   --sk-fg-muted:            #5C5C52;   /* secondary body */
-  --sk-fg-subtle:           #8A8A7E;   /* tertiary / labels */
+  /* tertiary / labels. FAILS WCAG AA on the light surfaces it is used against:
+     3.49:1 on #FFFFFF (card) and 3.20:1 on #F8F5EC (page) — the same defect as the
+     dark value this PR raised, and worse. NOT fixed here: #93 makes LightMode
+     unrenderable, so a change could not be verified. Stays with #101. */
+  --sk-fg-subtle:           #8A8A7E;
   --sk-fg-placeholder:      #B8B8AC;   /* placeholder */
 
   --sk-border-default:      #EAE4D2;   /* hairline default */

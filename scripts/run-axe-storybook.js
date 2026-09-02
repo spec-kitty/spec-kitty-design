@@ -23,22 +23,47 @@ const path = require('path');
 const STORYBOOK_DIR = path.resolve('apps/storybook/storybook-static');
 const AXE_TAGS = ['wcag2a', 'wcag2aa'];
 
-// Stories that cannot render at all in the current Storybook, and why.
+
+// The media half of "this element rendered its own content", single-sourced.
 //
-// Storybook is configured with @storybook/angular as its only framework
-// (apps/storybook/.storybook/main.ts). The `-html--` stories' `render` returns a
-// raw HTML string, which that renderer cannot mount: it creates the story's host
-// element and leaves it empty. There is nothing for axe to assess, and asserting
-// on them would fail this gate permanently for a reason no accessibility fix can
-// address.
+// Only the SELECTOR is hoisted, and it travels to the browser as DATA. Both the
+// render wait and the render assertion run in separate browser contexts, so the
+// predicate itself has to be written out on each side -- but the list that
+// actually drifts lives in one place.
 //
-// They are skipped and COUNTED, never silently dropped. ADR-13 / M3 (#69) moves
-// Storybook to the web-components renderer, which mounts these natively; delete
-// this skip in that mission and the 74 stories rejoin the gate. Tracked as #88.
-// Matched against the story's importPath from index.json, not its id: the id is a
-// slug of the story title and several html-js stories ("Components/Card") carry no
-// marker at all, so an id pattern silently under-matched by 20 stories.
-const UNRENDERABLE_IMPORT_PATTERN = /\/packages\/(html-js|styles)\//;
+// Do not "fix" the remaining two-line duplication by shipping the predicate as a
+// source string and eval()-ing it in both contexts: that was tried and it made
+// waitForFunction throw, which the existing .catch() swallowed, silently turning
+// the wait into a no-op and reproducing the "3 of 57, different each run" flake
+// this pairing exists to prevent. Measured: stable 0/0 render failures before,
+// 0 then 4 after, different stories each run.
+//
+// Content means TEXT or MEDIA -- never "a descendant that also carries an sk-*
+// class", which is the hole that let a host plus one empty BEM element pass.
+// Each arm must be evidence that something WAS RENDERED, not merely that a tag
+// exists. The first version of this list was too loose and made the gate WEAKER
+// than the predicate it replaced, measured by the pre-merge squad over a 24-mutant
+// build: it caught 8 of 24 blank stories where a text-only rule caught 24 of 24.
+// Three shapes regressed to passing -- <img alt="">, an empty [aria-label]
+// descendant, and a host whose only child is an empty <svg>.
+//
+//   img[alt]:not([alt=""])  an image with no alt text is not evidence of content
+//                           (and would fail axe on its own merits)
+//   svg > *                 a non-EMPTY svg; a bare <svg></svg> renders nothing
+//   bare [aria-label] / [role="img"] are NOT here: an attribute on an empty
+//                           element is a promise of content, not content
+//   picture/video/canvas    likewise qualified. Bare tags were left in the first
+//                           tightening and a pre-merge lens proved the gap: a story
+//                           rendering <div class="sk-card"><picture></picture></div>
+//                           passed green, and an empty <picture> paints nothing.
+//
+// This keeps the legitimate icon-only case green
+// (<button class="sk-btn" aria-label="Close"><svg><path/></svg></button>) while
+// closing all three regressions, and produces output identical to the looser list
+// on all 74 real stories.
+const CONTENT_MEDIA_SELECTOR =
+  'img[alt]:not([alt=""]), svg > *, input, select, textarea, ' +
+  'picture:has(img), video[src], video:has(source), canvas[width]:not([width="0"])';
 
 // ── Static server ─────────────────────────────────────────────────────────────
 //
@@ -137,7 +162,7 @@ let BASE_URL = null;
  * ADR-8 makes these real custom elements.
  */
 async function assertStoryRendered(page, selectors) {
-  const verdict = await page.evaluate((rootSelectors) => {
+  const verdict = await page.evaluate(([rootSelectors, mediaSelector]) => {
     const root = rootSelectors.map((s) => document.querySelector(s)).find(Boolean);
     if (!root) {
       return { ok: false, reason: `no render root (looked for ${rootSelectors.join(', ')})` };
@@ -164,17 +189,25 @@ async function assertStoryRendered(page, selectors) {
     // component renders nothing: a story whose whole output is an empty <ul>
     // passed this gate green.
     //
-    // Every component in this design system emits an sk-* class, so requiring one
-    // (or any text) is evidence the story's own content mounted, not just its
-    // wrappers. Survives #69: the web-components renderer emits the same classes.
+    // Evidence that the story's own content mounted, not just its wrappers.
+    // Content means TEXT or MEDIA -- never "a descendant that also carries an sk-*
+    // class". The earlier version accepted any sk-*-classed descendant, which let a
+    // host plus one empty BEM element (<div class="sk-stub"><span
+    // class="sk-stub__label"></span></div>) pass: the label satisfies the descendant
+    // test, and BEM ELEMENT classes are exempt from the per-host emptiness check
+    // below because they fail BLOCK_CLASS. The pre-merge squad demonstrated it by
+    // emptying 8 form-field stories plus stub -- 12 blank stories, all 12 green.
+    // That is verbatim the failure the comment above claims to have closed, so the
+    // descendant arm is gone rather than patched.
+    // Mirrors the wait predicate below; the selector is shared via
+    // CONTENT_MEDIA_SELECTOR so the list cannot drift between them.
     const hasOwnContent = (el) =>
-      el.querySelector('[class^="sk-"], [class*=" sk-"]') !== null ||
-      el.textContent.trim().length > 0;
+      el.textContent.trim().length > 0 || el.querySelector(mediaSelector) !== null;
 
     if (!hasOwnContent(root)) {
       return {
         ok: false,
-        reason: 'story wrappers mounted but the component did not — no sk-* element and no text',
+        reason: 'story wrappers mounted but the component did not — no text and no media element',
       };
     }
 
@@ -183,10 +216,51 @@ async function assertStoryRendered(page, selectors) {
     // sk-form-input's template left all 8 form stories green, because the parent
     // sk-form-field still emitted its class. That is the same certifying-absence
     // failure this gate exists to close, one nesting level down.
-    const empty = Array.from(root.querySelectorAll('*'))
-      .filter((el) => /^sk-/i.test(el.tagName))
+    //
+    // TWO host shapes, because the repo has two. The tagName filter below was
+    // written when every component was an Angular element (<sk-card>). #69 deletes
+    // those: the packages/styles stories emit PLAIN HTML carrying sk-* CLASSES and
+    // no sk-* tagName at all, so on its own this filter would match zero elements
+    // after the migration and silently degrade the gate back to the existential
+    // root check above — the exact failure the block comment rejects. The class
+    // arm keeps it discriminating. Found by the post-tasks squad on #69.
+    // Compared against tagName.toUpperCase(): SVG-namespaced elements report a
+    // LOWERCASE tagName, so bare 'SVG'/'USE'/'PATH' entries never matched. That is not
+    // cosmetic — <svg class="sk-icon-sun"> carries a BLOCK class and would have been
+    // selected as a host with no text, failing the gate as "rendered nothing". Live in
+    // apps/demo today, one story away from being live here. Found by the pre-merge squad.
+    const VOID_OR_LEAF = new Set([
+      'IMG', 'INPUT', 'BR', 'HR', 'TEXTAREA', 'SELECT', 'SVG', 'USE', 'PATH',
+    ]);
+    // A BEM block (`sk-card`), not an element (`sk-card__title`) or modifier
+    // (`sk-card--blue`): blocks are the component hosts, and a block that rendered
+    // nothing is the defect. Elements and modifiers are parts of an already-checked
+    // block, so requiring content of each would fail on legitimately empty slots.
+    const BLOCK_CLASS = /^sk-[a-z0-9]+(?:-[a-z0-9]+)*$/;
+    const hostsByTag = Array.from(root.querySelectorAll('*')).filter((el) =>
+      /^sk-/i.test(el.tagName)
+    );
+    const hostsByClass = Array.from(root.querySelectorAll('[class]')).filter(
+      (el) =>
+        !VOID_OR_LEAF.has(el.tagName.toUpperCase()) &&
+        Array.from(el.classList).some((c) => BLOCK_CLASS.test(c))
+    );
+    const hosts = [...new Set([...hostsByTag, ...hostsByClass])];
+    if (hosts.length === 0) {
+      return {
+        ok: false,
+        reason:
+          'no component host found — no sk-* element and no sk-* block class; ' +
+          'the story mounted wrappers only',
+      };
+    }
+    const empty = hosts
       .filter((el) => !hasOwnContent(el))
-      .map((el) => el.tagName.toLowerCase());
+      .map((el) =>
+        /^sk-/i.test(el.tagName)
+          ? el.tagName.toLowerCase()
+          : `${el.tagName.toLowerCase()}.${Array.from(el.classList).find((c) => BLOCK_CLASS.test(c))}`
+      );
     if (empty.length > 0) {
       return {
         ok: false,
@@ -194,7 +268,7 @@ async function assertStoryRendered(page, selectors) {
       };
     }
     return { ok: true };
-  }, selectors);
+  }, [selectors, CONTENT_MEDIA_SELECTOR]);
 
   if (!verdict.ok) {
     throw new Error(verdict.reason);
@@ -221,21 +295,27 @@ async function checkStory(page, storyId) {
     // timeout we fall through: assertStoryRendered reports the precise reason.
     await page
       .waitForFunction(
-        (rootSelectors) => {
+        ([rootSelectors, mediaSelector]) => {
           const root = rootSelectors.map((s) => document.querySelector(s)).find(Boolean);
-          // Must match assertStoryRendered exactly. It used to wait on
-          // childElementCount > 0 — which is the *unmounted* state, since the
-          // story host is always present once the preview boots — so it resolved
-          // immediately, the timeout was never spent, and the assertion then ran
-          // against a DOM nobody had waited for. That was the "3 of 57, different
-          // each run" flake, and no retry can fix a wait that does not wait.
+          // Must match assertStoryRendered's hasOwnContent EXACTLY -- text or a
+          // media element, never "a descendant that also carries an sk-* class".
+          // It used to wait on childElementCount > 0 — which is the *unmounted*
+          // state, since the story host is always present once the preview boots —
+          // so it resolved immediately, the timeout was never spent, and the
+          // assertion then ran against a DOM nobody had waited for. That was the
+          // "3 of 57, different each run" flake, and no retry can fix a wait that
+          // does not wait. #69 broke this pairing once already by hardening the
+          // assertion and leaving the wait behind, which made the wait STRICTLY
+          // WEAKER than the assert: a story that paints its wrapper before filling
+          // its text would satisfy the wait and then fail the assert. Caught by the
+          // pre-merge squad. If you change one, change both.
           return (
             !!root &&
-            (root.querySelector('[class^="sk-"], [class*=" sk-"]') !== null ||
-              root.textContent.trim().length > 0)
+            (root.textContent.trim().length > 0 ||
+              root.querySelector(mediaSelector) !== null)
           );
         },
-        RENDER_ROOT_SELECTORS,
+        [RENDER_ROOT_SELECTORS, CONTENT_MEDIA_SELECTOR],
         { timeout: RENDER_TIMEOUT_MS }
       )
       .catch(() => {});
@@ -269,43 +349,25 @@ async function checkStory(page, storyId) {
 
   const storyIds = loadStoryManifest();
 
-  // Fallback: if manifest not found, test the known stub stories directly
-  const idsToTest = storyIds ?? [
-    { id: 'primitives-skstub-angular--default', importPath: '' },
-    { id: 'primitives-skstub-html--default', importPath: '' },
-  ];
-
-  const skipped = idsToTest.filter((e) => UNRENDERABLE_IMPORT_PATTERN.test(e.importPath));
-  const testable = idsToTest.filter((e) => !UNRENDERABLE_IMPORT_PATTERN.test(e.importPath));
-
-  // Certifying absence over an empty set is the failure this whole file exists to
-  // prevent, and it is reachable: #69 deletes packages/angular, after which every
-  // remaining story matches the skip pattern above. The comment there asks whoever
-  // does that to delete the skip; this makes forgetting it loud instead of green.
-  if (testable.length === 0) {
-    console.error('❌ No stories left to assess — every story was skipped.');
-    console.error('   If packages/angular was just removed, delete UNRENDERABLE_IMPORT_PATTERN (#69).');
-    server.close();
-    process.exit(1);
-  }
-
-  if (!storyIds) {
-    console.error('❌ Story manifest not found — refusing to report on a guessed story list.');
+  if (!storyIds || storyIds.length === 0) {
+    console.error('❌ No stories to assess — refusing to report green over an empty set.');
+    console.error('   Either the manifest is missing/malformed, or it parsed to zero stories.');
     console.error('   index.json/stories.json is missing or malformed; rebuild Storybook.');
-    console.error('   Passing over two hardcoded stubs is the certifying-absence failure');
-    console.error('   this gate exists to prevent (#90).');
+    console.error('   Guessing a story list is the certifying-absence failure this gate');
+    console.error('   exists to prevent (#90).');
     server.close();
     process.exit(1);
-  } else {
-    console.log(`Testing ${testable.length} stories for WCAG 2.1 AA compliance (serving ${BASE_URL})...`);
-    if (skipped.length > 0) {
-      console.log(
-        `⏭  Skipping ${skipped.length} story/stories that cannot mount under the ` +
-          'Angular renderer (see #88; M3/#69 makes them renderable):'
-      );
-      for (const e of skipped) console.log(`     ${e.id}`);
-    }
   }
+
+  // #69 deleted UNRENDERABLE_IMPORT_PATTERN, so there is no filtered subset: every
+  // story in the manifest is assessed. The evidence of coverage is the per-story
+  // result lines below, NOT this count -- a single number compared against itself
+  // would prove nothing. If a skip mechanism is ever reintroduced, it must be
+  // reported here explicitly and this comment deleted.
+  const testable = storyIds;
+  console.log(
+    `Testing ${testable.length} stories for WCAG 2.1 AA compliance (serving ${BASE_URL})...`
+  );
 
   // The server is in-process on purpose. This script calls process.exit(), which
   // does not reap spawned children, so an http-server child would be orphaned on

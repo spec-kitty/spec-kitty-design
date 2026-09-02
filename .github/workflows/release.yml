@@ -27,14 +27,14 @@ jobs:
         run: bash scripts/npm-audit-gate.sh
 
       - name: Build all packages
-        run: npx nx run-many --target=build --projects=tokens,angular,styles
+        run: npx nx run-many --target=build --projects=tokens,styles
 
       - name: Copy behavior helper beside compiled output (styles nav-pill drawer)
         run: cp packages/styles/src/nav-pill/sk-nav-pill.js packages/styles/dist/src/nav-pill/sk-nav-pill.js
 
       - name: "[ENFORCED] Dist contents audit — no secrets/sourcemaps (ADR-005)"
         run: |
-          for pkg in tokens angular styles; do
+          for pkg in tokens styles; do
             echo "=== packages/$pkg ==="
             cd packages/$pkg && npm pack --dry-run 2>&1 | grep "npm notice" | grep -v "==="
             cd ../..
@@ -50,10 +50,6 @@ jobs:
       - name: Publish @spec-kitty/tokens (FR-044)
         run: npm publish --provenance --access public
         working-directory: packages/tokens
-
-      - name: Publish @spec-kitty/angular (FR-044)
-        run: npm publish --provenance --access public
-        working-directory: packages/angular/dist
 
       - name: Publish @spec-kitty/styles (FR-044)
         run: npm publish --provenance --access public
