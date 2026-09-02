@@ -217,7 +217,20 @@ function renderOne(mmdcPath, compiledPath, outPath) {
     '-q', // quieter mermaid output
   ];
   if (fs.existsSync(PUPPETEER_CONFIG)) {
-    args.unshift('-p', PUPPETEER_CONFIG);
+    // puppeteer-config.json pins executablePath to /usr/bin/chromium, which is
+    // where CI's `apt-get install chromium-browser` puts it. That absolute path
+    // does not exist on every contributor machine, and mermaid-cli's config file
+    // takes precedence over PUPPETEER_EXECUTABLE_PATH — so without this override
+    // the drift check is unrunnable locally and only ever exercised in CI.
+    const override = process.env.PUPPETEER_EXECUTABLE_PATH;
+    if (override) {
+      const base = JSON.parse(fs.readFileSync(PUPPETEER_CONFIG, 'utf8'));
+      const merged = path.join(os.tmpdir(), `sk-puppeteer-${process.pid}.json`);
+      fs.writeFileSync(merged, JSON.stringify({ ...base, executablePath: override }));
+      args.unshift('-p', merged);
+    } else {
+      args.unshift('-p', PUPPETEER_CONFIG);
+    }
   }
   const result = spawnSync(mmdcPath, args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
   if (result.status !== 0) {
