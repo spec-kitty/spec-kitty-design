@@ -9,7 +9,7 @@ on:
       # Publishable packages that feed the Storybook catalog
       - "packages/tokens/**"
       - "packages/angular/**"
-      - "packages/html-js/**"
+      - "packages/styles/**"
       # Static demo pages
       - "apps/demo/**"
       # Workflow file itself
@@ -35,7 +35,7 @@ jobs:
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e  # actions/setup-node v6.4.0
         with: { node-version: '22', cache: 'npm' }
       - run: npm ci --ignore-scripts
-      - run: npx nx run-many --target=build --projects=tokens,angular,html-js
+      - run: npx nx run-many --target=build --projects=tokens,angular,styles
       - run: npx nx run storybook:storybook:build
 
       - name: Copy demo pages into Storybook dist
@@ -54,11 +54,11 @@ jobs:
           # to apps/demo/). Path mappings:
           #   ../../packages/tokens/dist/tokens.css      -> ./tokens.css
           #   ../../packages/tokens/assets/<file>        -> ./assets/<file>
-          #   ../../packages/html-js/src/<comp>/<file>   -> ./<comp>/<file>
+          #   ../../packages/styles/src/<comp>/<file>   -> ./<comp>/<file>
           sed -i \
             -e 's|\.\./\.\./packages/tokens/dist/tokens\.css|./tokens.css|g' \
             -e 's|\.\./\.\./packages/tokens/assets/|./assets/|g' \
-            -e 's|\.\./\.\./packages/html-js/src/|./|g' \
+            -e 's|\.\./\.\./packages/styles/src/|./|g' \
             "$DIST/blog-demo.html" \
             "$DIST/dashboard-demo.html"
 
@@ -92,9 +92,9 @@ jobs:
           # Storybook root using the same per-component subdirectory layout
           # the demo pages reference after the sed rewrite.
           for comp in button nav-pill pill-tag section-banner site-footer card feature-card; do
-            if [ -d "packages/html-js/src/$comp" ]; then
+            if [ -d "packages/styles/src/$comp" ]; then
               mkdir -p "$DIST/$comp"
-              find "packages/html-js/src/$comp" -maxdepth 1 -type f \
+              find "packages/styles/src/$comp" -maxdepth 1 -type f \
                 \( -name '*.css' -o -name '*.js' \) \
                 -exec cp {} "$DIST/$comp/" \;
             fi
