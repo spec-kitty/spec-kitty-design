@@ -4,20 +4,20 @@
 <meta charset="utf-8">
 <title>Spec Kitty design — render audit</title>
 <link rel="stylesheet" href="/packages/tokens/dist/tokens.css">
-<link rel="stylesheet" href="/packages/html-js/dist/blog-card/sk-blog-card.css">
-<link rel="stylesheet" href="/packages/html-js/dist/button/sk-button.css">
-<link rel="stylesheet" href="/packages/html-js/dist/card/sk-card.css">
-<link rel="stylesheet" href="/packages/html-js/dist/check-bullet/sk-check-bullet.css">
-<link rel="stylesheet" href="/packages/html-js/dist/feature-card/sk-feature-card.css">
-<link rel="stylesheet" href="/packages/html-js/dist/form-field/sk-form-field.css">
-<link rel="stylesheet" href="/packages/html-js/dist/grid/sk-grid.css">
-<link rel="stylesheet" href="/packages/html-js/dist/nav-pill/sk-nav-pill-drawer.css">
-<link rel="stylesheet" href="/packages/html-js/dist/nav-pill/sk-nav-pill.css">
-<link rel="stylesheet" href="/packages/html-js/dist/pill-tag/sk-pill-tag.css">
-<link rel="stylesheet" href="/packages/html-js/dist/ribbon-card/sk-ribbon-card.css">
-<link rel="stylesheet" href="/packages/html-js/dist/section-banner/sk-section-banner.css">
-<link rel="stylesheet" href="/packages/html-js/dist/site-footer/sk-site-footer.css">
-<link rel="stylesheet" href="/packages/html-js/dist/stub/sk-stub.css">
+<link rel="stylesheet" href="/packages/styles/dist/blog-card/sk-blog-card.css">
+<link rel="stylesheet" href="/packages/styles/dist/button/sk-button.css">
+<link rel="stylesheet" href="/packages/styles/dist/card/sk-card.css">
+<link rel="stylesheet" href="/packages/styles/dist/check-bullet/sk-check-bullet.css">
+<link rel="stylesheet" href="/packages/styles/dist/feature-card/sk-feature-card.css">
+<link rel="stylesheet" href="/packages/styles/dist/form-field/sk-form-field.css">
+<link rel="stylesheet" href="/packages/styles/dist/grid/sk-grid.css">
+<link rel="stylesheet" href="/packages/styles/dist/nav-pill/sk-nav-pill-drawer.css">
+<link rel="stylesheet" href="/packages/styles/dist/nav-pill/sk-nav-pill.css">
+<link rel="stylesheet" href="/packages/styles/dist/pill-tag/sk-pill-tag.css">
+<link rel="stylesheet" href="/packages/styles/dist/ribbon-card/sk-ribbon-card.css">
+<link rel="stylesheet" href="/packages/styles/dist/section-banner/sk-section-banner.css">
+<link rel="stylesheet" href="/packages/styles/dist/site-footer/sk-site-footer.css">
+<link rel="stylesheet" href="/packages/styles/dist/stub/sk-stub.css">
 <style>
   body { font-family: var(--sk-font-sans, system-ui); margin: 2rem; background: var(--sk-surface-page, #fff); color: var(--sk-fg-default, #eee); }
   .case { margin: 0 0 1.5rem; padding: 1rem; border: 1px dashed #555; border-radius: 8px; min-height: 40px; }
@@ -29,19 +29,19 @@
 <h1>Spec Kitty design — render audit (41 components)</h1>
 <div id="root"></div>
 <script type="module">
-  import * as blog from '/packages/html-js/dist/src/blog-card/index.js';
-  import * as button from '/packages/html-js/dist/src/button/index.js';
-  import * as card from '/packages/html-js/dist/src/card/index.js';
-  import * as check from '/packages/html-js/dist/src/check-bullet/index.js';
-  import * as feature from '/packages/html-js/dist/src/feature-card/index.js';
-  import * as form from '/packages/html-js/dist/src/form-field/index.js';
-  import * as grid from '/packages/html-js/dist/src/grid/index.js';
-  import * as nav from '/packages/html-js/dist/src/nav-pill/index.js';
-  import * as pill from '/packages/html-js/dist/src/pill-tag/index.js';
-  import * as ribbon from '/packages/html-js/dist/src/ribbon-card/index.js';
-  import * as banner from '/packages/html-js/dist/src/section-banner/index.js';
-  import * as site from '/packages/html-js/dist/src/site-footer/index.js';
-  import * as stub from '/packages/html-js/dist/src/stub/index.js';
+  import * as blog from '/packages/styles/dist/src/blog-card/index.js';
+  import * as button from '/packages/styles/dist/src/button/index.js';
+  import * as card from '/packages/styles/dist/src/card/index.js';
+  import * as check from '/packages/styles/dist/src/check-bullet/index.js';
+  import * as feature from '/packages/styles/dist/src/feature-card/index.js';
+  import * as form from '/packages/styles/dist/src/form-field/index.js';
+  import * as grid from '/packages/styles/dist/src/grid/index.js';
+  import * as nav from '/packages/styles/dist/src/nav-pill/index.js';
+  import * as pill from '/packages/styles/dist/src/pill-tag/index.js';
+  import * as ribbon from '/packages/styles/dist/src/ribbon-card/index.js';
+  import * as banner from '/packages/styles/dist/src/section-banner/index.js';
+  import * as site from '/packages/styles/dist/src/site-footer/index.js';
+  import * as stub from '/packages/styles/dist/src/stub/index.js';
 
   const mods = [blog, button, card, check, feature, form, grid, nav, pill, ribbon, banner, site, stub];
   const results = {};

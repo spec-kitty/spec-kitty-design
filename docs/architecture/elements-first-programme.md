@@ -134,7 +134,7 @@ ADRs 8, 9, 10, 11, 12 and 13 are written and committed on the train. What remain
 
 **Explicitly out of scope:** any Lit or element code; any CSS or markup change; the `index.ts` string exports (they move, they do not change); Angular; deleting anything.
 
-**Mandatory artefact:** an occurrence classification separating live references (rewrite) from historical record (`kitty-specs/**`, `docs/architecture/validation/**`, `docs/learnings/**`, `audit/**` — untouched).
+**Mandatory artefact:** an occurrence classification separating live references (rewrite) from historical record (`kitty-specs/**`, `docs/architecture/validation/**`, `docs/learnings/**` — untouched). Delivered as [`occurrence-map-styles-package-rescope.md`](occurrence-map-styles-package-rescope.md). Note `audit/**` was listed here as record and is not: `audit/run.js` is a live Playwright harness and `audit/index.html` carried 27 live package paths, so M2 rewrote them.
 
 **Depends on:** O2 ✅. **Reads:** ADR-8.
 
