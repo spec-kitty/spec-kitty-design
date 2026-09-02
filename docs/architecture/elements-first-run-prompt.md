@@ -59,15 +59,26 @@ EOF
 )"
 ```
 
-## 3. Set up
+## 3. Set up — in a primary checkout, never a git worktree
+
+**This matters more than it looks.** The `spec-kitty` CLI resolves the project root via the git **primary checkout**, not the working directory. Run from inside a `git worktree`, its commands read and *write* into whichever checkout owns the repository — not the one you are standing in.
+
+Observed twice while preparing this programme: `spec-kitty charter generate`, run from a worktree, wrote a 137 KB `charter.yaml` and modified `.kittify/config.yaml` in a *different* checkout, staging the new file; and `spec-kitty charter lint`, which only reads, still dropped a `.kittify/lint-report.json` there. In this ecosystem that other checkout is the one every SaaS mission's `design:guardrails` resolves through, so the blast radius is another repo's CI.
+
+So: **clone, do not add a worktree.**
 
 ```sh
-git fetch origin
-git checkout train/elements-first && git pull --ff-only
+git clone --branch train/elements-first \
+  https://github.com/spec-kitty/spec-kitty-design.git <workdir>
+cd <workdir>
+[ -d .git ] || { echo "worktree, not a primary checkout — stop"; exit 1; }
+npm ci --ignore-scripts
 git checkout -b mission/<slug>
 ```
 
-Never branch from `main`, and never PR into `main` — the train lands on `main` once, at the end, as a single rebase-merge.
+If you are resuming in an existing clone: `git checkout train/elements-first && git pull --ff-only` first, then branch.
+
+Never branch from `main`, and never PR into `main` — the train lands on `main` once, at the end, by the operator.
 
 ## 4. Drive
 
