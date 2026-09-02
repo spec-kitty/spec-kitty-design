@@ -24,6 +24,25 @@ const STORYBOOK_DIR = path.resolve('apps/storybook/storybook-static');
 const AXE_TAGS = ['wcag2a', 'wcag2aa'];
 
 
+// The media half of "this element rendered its own content", single-sourced.
+//
+// Only the SELECTOR is hoisted, and it travels to the browser as DATA. Both the
+// render wait and the render assertion run in separate browser contexts, so the
+// predicate itself has to be written out on each side -- but the list that
+// actually drifts lives in one place.
+//
+// Do not "fix" the remaining two-line duplication by shipping the predicate as a
+// source string and eval()-ing it in both contexts: that was tried and it made
+// waitForFunction throw, which the existing .catch() swallowed, silently turning
+// the wait into a no-op and reproducing the "3 of 57, different each run" flake
+// this pairing exists to prevent. Measured: stable 0/0 render failures before,
+// 0 then 4 after, different stories each run.
+//
+// Content means TEXT or MEDIA -- never "a descendant that also carries an sk-*
+// class", which is the hole that let a host plus one empty BEM element pass.
+const CONTENT_MEDIA_SELECTOR =
+  'img, svg, input, select, textarea, canvas, video, picture, [role="img"], [aria-label]';
+
 // ── Static server ─────────────────────────────────────────────────────────────
 //
 // The gate used to load stories as `file://…/iframe.html`. Storybook 10 bootstraps
@@ -121,7 +140,7 @@ let BASE_URL = null;
  * ADR-8 makes these real custom elements.
  */
 async function assertStoryRendered(page, selectors) {
-  const verdict = await page.evaluate((rootSelectors) => {
+  const verdict = await page.evaluate(([rootSelectors, mediaSelector]) => {
     const root = rootSelectors.map((s) => document.querySelector(s)).find(Boolean);
     if (!root) {
       return { ok: false, reason: `no render root (looked for ${rootSelectors.join(', ')})` };
@@ -158,11 +177,10 @@ async function assertStoryRendered(page, selectors) {
     // emptying 8 form-field stories plus stub -- 12 blank stories, all 12 green.
     // That is verbatim the failure the comment above claims to have closed, so the
     // descendant arm is gone rather than patched.
+    // Mirrors the wait predicate below; the selector is shared via
+    // CONTENT_MEDIA_SELECTOR so the list cannot drift between them.
     const hasOwnContent = (el) =>
-      el.textContent.trim().length > 0 ||
-      el.querySelector(
-        'img, svg, input, select, textarea, canvas, video, picture, [role="img"], [aria-label]'
-      ) !== null;
+      el.textContent.trim().length > 0 || el.querySelector(mediaSelector) !== null;
 
     if (!hasOwnContent(root)) {
       return {
@@ -228,7 +246,7 @@ async function assertStoryRendered(page, selectors) {
       };
     }
     return { ok: true };
-  }, selectors);
+  }, [selectors, CONTENT_MEDIA_SELECTOR]);
 
   if (!verdict.ok) {
     throw new Error(verdict.reason);
@@ -255,7 +273,7 @@ async function checkStory(page, storyId) {
     // timeout we fall through: assertStoryRendered reports the precise reason.
     await page
       .waitForFunction(
-        (rootSelectors) => {
+        ([rootSelectors, mediaSelector]) => {
           const root = rootSelectors.map((s) => document.querySelector(s)).find(Boolean);
           // Must match assertStoryRendered's hasOwnContent EXACTLY -- text or a
           // media element, never "a descendant that also carries an sk-* class".
@@ -272,12 +290,10 @@ async function checkStory(page, storyId) {
           return (
             !!root &&
             (root.textContent.trim().length > 0 ||
-              root.querySelector(
-                'img, svg, input, select, textarea, canvas, video, picture, [role="img"], [aria-label]'
-              ) !== null)
+              root.querySelector(mediaSelector) !== null)
           );
         },
-        RENDER_ROOT_SELECTORS,
+        [RENDER_ROOT_SELECTORS, CONTENT_MEDIA_SELECTOR],
         { timeout: RENDER_TIMEOUT_MS }
       )
       .catch(() => {});
@@ -311,8 +327,9 @@ async function checkStory(page, storyId) {
 
   const storyIds = loadStoryManifest();
 
-  if (!storyIds) {
-    console.error('❌ Story manifest not found — refusing to report on a guessed story list.');
+  if (!storyIds || storyIds.length === 0) {
+    console.error('❌ No stories to assess — refusing to report green over an empty set.');
+    console.error('   Either the manifest is missing/malformed, or it parsed to zero stories.');
     console.error('   index.json/stories.json is missing or malformed; rebuild Storybook.');
     console.error('   Guessing a story list is the certifying-absence failure this gate');
     console.error('   exists to prevent (#90).');
