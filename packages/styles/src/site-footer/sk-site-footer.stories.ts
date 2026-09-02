@@ -1,5 +1,5 @@
 import './sk-site-footer.css';
-import type { Meta, StoryObj } from '@storybook/html';
+import type { Meta, StoryObj } from '@storybook/web-components';
 import { SkSiteFooterHTML } from './index';
 
 const meta: Meta = {

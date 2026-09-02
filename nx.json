@@ -14,7 +14,14 @@
       "dependsOn": [
         "^build"
       ],
-      "cache": true
+      "cache": true,
+      "inputs": [
+        "{projectRoot}/**/*",
+        "{workspaceRoot}/packages/*/src/**/*",
+        "{workspaceRoot}/packages/*/assets/**/*",
+        "{workspaceRoot}/package.json",
+        "{workspaceRoot}/package-lock.json"
+      ]
     },
     "test": {
       "cache": true

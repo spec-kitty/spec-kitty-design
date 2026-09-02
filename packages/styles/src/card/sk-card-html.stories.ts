@@ -1,5 +1,5 @@
 import './sk-card.css';
-import type { Meta, StoryObj } from '@storybook/html';
+import type { Meta, StoryObj } from '@storybook/web-components';
 
 const meta: Meta = {
   title: 'Components/Card',

@@ -1,4 +1,5 @@
-import type { Meta, StoryObj } from '@storybook/html';
+import type { Meta, StoryObj } from '@storybook/web-components';
+import './sk-stub.css';
 import { SkStubHTML } from './index';
 
 const meta: Meta = {

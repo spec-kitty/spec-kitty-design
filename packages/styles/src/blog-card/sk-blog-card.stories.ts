@@ -1,6 +1,6 @@
 import '../card/sk-card.css';
 import './sk-blog-card.css';
-import type { Meta, StoryObj } from '@storybook/html';
+import type { Meta, StoryObj } from '@storybook/web-components';
 import {
   SkBlogCardDefaultHTML,
   SkBlogCardLongTitleHTML,

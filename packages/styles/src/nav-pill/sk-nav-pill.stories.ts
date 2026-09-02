@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/html';
+import type { Meta, StoryObj } from '@storybook/web-components';
 import './sk-nav-pill.css';
 import './sk-nav-pill-drawer.css';
 import { skToggleDrawer } from './index';
