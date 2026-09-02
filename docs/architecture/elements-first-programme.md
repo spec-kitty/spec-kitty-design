@@ -266,15 +266,19 @@ Nine remaining components, three per mission. **layout:** grid, section-banner, 
 
 ---
 
-### M14 · `elements-first-release` — after M11–13, **hard prerequisite N1**
+### M14 · `elements-first-release` — after M11–13
 
 **In scope:** `release.yml` rebuilt for the new graph; provenance; SBOM; the integrity hash for the browser bundle; the single-version policy note; CHANGELOG; the semver ruling — nothing was ever installed, so 1.0.0 is still free.
 
-**Exit:** `npm view @spec-kitty/elements` returns a version; a `file://` page loads the published classic-script bundle with no network; a CDN load with an integrity hash works.
+**This mission prepares the release; it does not perform it.** `release.yml` fires on `push: tags: ['v*.*.*']`, not on a merge. Tagging from the integration branch would publish 1.0.0 out of a state that has not been reviewed as a whole, so the tag is pushed **after the train lands on `main`, by the operator** — the same authority as the merge itself.
+
+**Consequence, stated plainly: no mission in this programme needs npm write access.** N1's remaining steps (2FA, publish token, `NPM_TOKEN`, dry run) gate the operator's release, not any mission's work. N1 is therefore not a hard prerequisite for this mission — only for the tag that follows it.
+
+**Exit:** `npm publish --dry-run` passes for every package in the new graph, proving the rebuilt pipeline end to end; a `file://` page loads the **locally built** classic-script bundle with no network; the integrity hash is generated and recorded; and the release runbook states the post-merge sequence — land the train, tag, workflow publishes.
 
 ---
 
-### M15 · `fourth-target-cost-measurement` — after M9 + M14
+### M15 · `fourth-target-cost-measurement` — after M9 (M14 not required: measure against a local build)
 
 ADR-8 confirmation criterion **#4**. Pick the target in advance (Vue or Solid), timebox to one day, measure and record — including the honest outcome "no package needed". Fold the deferred Angular generator in here if and only if a consumer has appeared.
 
