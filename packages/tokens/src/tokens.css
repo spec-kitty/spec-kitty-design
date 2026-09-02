@@ -59,17 +59,21 @@
   --sk-fg-default:          #FFFFFF;   /* headlines — maps to --sk-fg-0 */
   --sk-fg-body:             #D6D6DA;   /* body text — maps to --sk-fg-1 */
   --sk-fg-muted:            #A9A9B0;   /* secondary body, muted copy — maps to --sk-fg-2 */
+  /* tertiary / labels — maps to --sk-fg-3. Was #6E6E78, which failed WCAG AA on
+     BOTH surfaces: 3.45:1 on --sk-surface-card and 3.83:1 on --sk-surface-page.
+     #81818B is the minimum same-hue lightening that clears 4.5:1 (4.51 / 5.01). #101 */
   --sk-fg-subtle:           #81818B;
-
-  /* Default page foreground. Without this, any element that does not set its own
-     `color` inherits the UA default (black) and renders black-on-dark: measured at
-     1.2:1 on --sk-surface-card. It is present in every card story, but axe can only
-     REPORT it where an ancestor sets an explicit background it can resolve, which is
-     why only the LightMode variants were flagged. #101. */
-  color: var(--sk-fg-body);   /* tertiary / labels — maps to --sk-fg-3; #6E6E78 failed WCAG AA (3.45:1 on --sk-surface-card, 3.83:1 on --sk-surface-page), see #101 */
   --sk-fg-placeholder:      #4A4A52;   /* placeholder text — maps to --sk-fg-4 */
   --sk-fg-on-primary:       #1A1408;   /* dark ink on yellow buttons */
   --sk-fg-on-card:          #D6D6DA;   /* text on card surface */
+
+  /* Default page foreground — a real property, not a token. Without it, any element
+     that sets no `color` of its own inherits the UA default (black) and renders
+     black-on-dark: measured at 1.2:1 on --sk-surface-card. Present in EVERY card
+     story, but axe can only report it where an ancestor sets a background it can
+     resolve, which is why only the LightMode variants were ever flagged. Resolves
+     per-theme, since the light block redefines --sk-fg-body. #101 */
+  color: var(--sk-fg-body);
 
   /* ── Borders ─────────────────────── */
   --sk-border-default:      #2B313B;   /* hairline default — slightly cool */
