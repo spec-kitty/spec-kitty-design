@@ -91,9 +91,15 @@ The rule is **narrowed, not repealed**: no framework package may depend on *anot
 
 #### Neutral
 
-* Storybook renders one implementation instead of two, which simplifies rather than complicates the ADR-6 arrangement.
 * `@spec-kitty/html-js` is re-scoped and renamed rather than deleted; its CSS becomes the shared source for both consumption paths.
-* The rename is a cross-repository change: `docs/design-qa/design-authority.json` in the SaaS repo lists `packages/html-js/src/index.ts` in `required_files` and enforces it on every SaaS PR, so a paired PR is required.
+* The rename is a cross-repository change: `docs/design-qa/design-authority.json` in the SaaS repo lists `packages/html-js/src/index.ts` in `required_files`, and `scripts/design/resolve-design-repo.mjs` hard-fails when that path disappears. It is *not* a release blocker — that repo has no GitHub Actions workflows on `main`, so the guardrail is a `make` target and a PR-template checkbox, not an enforced gate. A paired PR is correctness hygiene, not a synchronised release.
+
+#### Corrected after review (2026-09-02)
+
+Two claims in this ADR's first draft were wrong and are recorded here rather than silently edited, because both changed the mission sequencing downstream:
+
+* **Storybook is not simplified by retiring `packages/angular`.** The first draft claimed Storybook "renders one implementation instead of two, which simplifies rather than complicates the ADR-6 arrangement". In fact `apps/storybook/.storybook/main.ts:15` configures a single framework — `@storybook/angular` — and the whole Storybook is an Angular CLI application in `angular.json`, built through `@storybook/angular:build-storybook` with a hand-written webpack CSS rule scoped to `packages/html-js` and `packages/tokens`. Retiring the Angular *package* does not retire Angular; choosing the elements-era builder is a prerequisite spike with its own blast radius (`angular.json`, `zone.js`, 15 story files, and 4 of the 7 visual-regression baselines, which are keyed to Angular story ids). ADR-13 owns that decision.
+* **The SaaS guardrail is not CI-enforced.** See the corrected bullet above.
 
 ### Confirmation
 
