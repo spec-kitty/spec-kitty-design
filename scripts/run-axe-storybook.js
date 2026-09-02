@@ -16,11 +16,66 @@
 
 const { chromium } = require('playwright');
 const { injectAxe, getViolations } = require('axe-playwright');
-const { existsSync, readFileSync } = require('fs');
+const { existsSync, readFileSync, createReadStream, statSync } = require('fs');
+const http = require('http');
 const path = require('path');
 
 const STORYBOOK_DIR = path.resolve('apps/storybook/storybook-static');
 const AXE_TAGS = ['wcag2a', 'wcag2aa'];
+
+// Stories that cannot render at all in the current Storybook, and why.
+//
+// Storybook is configured with @storybook/angular as its only framework
+// (apps/storybook/.storybook/main.ts). The `-html--` stories' `render` returns a
+// raw HTML string, which that renderer cannot mount: it creates the story's host
+// element and leaves it empty. There is nothing for axe to assess, and asserting
+// on them would fail this gate permanently for a reason no accessibility fix can
+// address.
+//
+// They are skipped and COUNTED, never silently dropped. ADR-13 / M3 (#69) moves
+// Storybook to the web-components renderer, which mounts these natively; delete
+// this skip in that mission and the 54 stories rejoin the gate. Tracked as #88.
+// Matched against the story's importPath from index.json, not its id: the id is a
+// slug of the story title and several html-js stories ("Components/Card") carry no
+// marker at all, so an id pattern silently under-matched by 20 stories.
+const UNRENDERABLE_IMPORT_PATTERN = /\/packages\/(html-js|styles)\//;
+
+// ── Static server ─────────────────────────────────────────────────────────────
+//
+// The gate used to load stories as `file://…/iframe.html`. Storybook 10 bootstraps
+// its whole preview from an inline `<script type="module">import './sb-preview/
+// runtime.js'`, and Chromium blocks module imports from a file:// opaque origin,
+// so NOTHING rendered and the gate failed every story with the unhelpful
+// "render root is empty". See #90. Serving over HTTP is the fix; port 0 takes an
+// ephemeral port so parallel jobs cannot collide.
+
+const MIME = {
+  '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8',
+  '.mjs': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8',
+  '.json': 'application/json; charset=utf-8', '.svg': 'image/svg+xml',
+  '.png': 'image/png', '.jpg': 'image/jpeg', '.webp': 'image/webp',
+  '.woff': 'font/woff', '.woff2': 'font/woff2', '.otf': 'font/otf', '.ttf': 'font/ttf',
+  '.map': 'application/json; charset=utf-8',
+};
+
+function startStaticServer(root) {
+  const server = http.createServer((req, res) => {
+    const urlPath = decodeURIComponent((req.url || '/').split('?')[0]);
+    const resolved = path.join(root, path.normalize(urlPath).replace(/^(\.\.[/\\])+/, ''));
+    if (!resolved.startsWith(root)) { res.writeHead(403).end(); return; }
+    let target = resolved;
+    try {
+      if (statSync(target).isDirectory()) target = path.join(target, 'index.html');
+    } catch { res.writeHead(404).end(); return; }
+    if (!existsSync(target)) { res.writeHead(404).end(); return; }
+    res.writeHead(200, { 'Content-Type': MIME[path.extname(target)] || 'application/octet-stream' });
+    createReadStream(target).pipe(res);
+  });
+  return new Promise((resolve, reject) => {
+    server.on('error', reject);
+    server.listen(0, '127.0.0.1', () => resolve({ server, port: server.address().port }));
+  });
+}
 
 // ── Load story manifest ───────────────────────────────────────────────────────
 
@@ -35,8 +90,8 @@ function loadStoryManifest() {
       const entries = data.entries || data; // stories.json has flat map
       return Object.values(entries)
         .filter(e => e.type === 'story' || !e.type) // older format has no type field
-        .map(e => e.id)
-        .filter(Boolean);
+        .filter(e => e.id)
+        .map(e => ({ id: e.id, importPath: e.importPath || '' }));
     }
   }
   return null;
@@ -47,6 +102,7 @@ function loadStoryManifest() {
 // Storybook 7+ renders into #storybook-root; older builds used #root.
 const RENDER_ROOT_SELECTORS = ['#storybook-root', '#root'];
 const RENDER_TIMEOUT_MS = 8000;
+let BASE_URL = null;
 
 /**
  * Assert the story actually rendered something.
@@ -72,16 +128,19 @@ async function assertStoryRendered(page, selectors) {
     if (root.childElementCount === 0 && root.textContent.trim() === '') {
       return { ok: false, reason: 'render root is empty' };
     }
-    const undefinedTags = [
-      ...new Set(
-        Array.from(root.querySelectorAll('*'))
-          .map((el) => el.tagName.toLowerCase())
-          .filter((tag) => tag.includes('-'))
-          .filter((tag) => !window.customElements.get(tag))
-      ),
-    ];
-    if (undefinedTags.length > 0) {
-      return { ok: false, reason: `custom element(s) never upgraded: ${undefinedTags.join(', ')}` };
+    // The story's own host element always exists once the preview boots, so
+    // "root has a child" is not evidence the story rendered — an unmounted story
+    // has exactly that and nothing else. Requiring a descendant OF the host is
+    // what separates the two: measured over HTTP, rendered stories carry 3-4
+    // descendants, an unmounted one carries exactly 1 (the host).
+    //
+    // This replaces a check that flagged any hyphenated tag not registered with
+    // customElements. Angular component selectors — sk-button-primary,
+    // sk-form-field — are hyphenated by convention and are never registered, so
+    // that check failed every Angular story by construction, on a page that had
+    // rendered correctly. See #90.
+    if (root.querySelectorAll('*').length <= 1) {
+      return { ok: false, reason: 'story host is present but empty — nothing mounted inside it' };
     }
     return { ok: true };
   }, selectors);
@@ -92,7 +151,7 @@ async function assertStoryRendered(page, selectors) {
 }
 
 async function checkStory(page, storyId) {
-  const url = `file://${STORYBOOK_DIR}/iframe.html?id=${storyId}&viewMode=story`;
+  const url = `${BASE_URL}/iframe.html?id=${storyId}&viewMode=story`;
 
   const scriptErrors = [];
   const onPageError = (err) => scriptErrors.push(err.message);
@@ -144,30 +203,47 @@ async function checkStory(page, storyId) {
     process.exit(2);
   }
 
+  const { server, port } = await startStaticServer(STORYBOOK_DIR);
+  BASE_URL = `http://127.0.0.1:${port}`;
+
   const storyIds = loadStoryManifest();
 
   // Fallback: if manifest not found, test the known stub stories directly
   const idsToTest = storyIds ?? [
-    'primitives-skstub-angular--default',
-    'primitives-skstub-html--default',
+    { id: 'primitives-skstub-angular--default', importPath: '' },
+    { id: 'primitives-skstub-html--default', importPath: '' },
   ];
+
+  const skipped = idsToTest.filter((e) => UNRENDERABLE_IMPORT_PATTERN.test(e.importPath));
+  const testable = idsToTest.filter((e) => !UNRENDERABLE_IMPORT_PATTERN.test(e.importPath));
 
   if (!storyIds) {
     console.warn('⚠  Story manifest not found — testing known stub stories only.');
     console.warn('   Rebuild Storybook to enable full story iteration.');
   } else {
-    console.log(`Testing ${idsToTest.length} stories for WCAG 2.1 AA compliance...`);
+    console.log(`Testing ${testable.length} stories for WCAG 2.1 AA compliance (serving ${BASE_URL})...`);
+    if (skipped.length > 0) {
+      console.log(
+        `⏭  Skipping ${skipped.length} story/stories that cannot mount under the ` +
+          'Angular renderer (see #88; M3/#69 makes them renderable):'
+      );
+      for (const e of skipped) console.log(`     ${e.id}`);
+    }
   }
 
   const browser = await chromium.launch();
   const context = await browser.newContext();
-  const page = await context.newPage();
 
   let totalViolations = 0;
   const failingStories = [];
   const loadFailures = [];
 
-  for (const storyId of idsToTest) {
+  for (const { id: storyId } of testable) {
+    // A fresh page per story. The runner used to share one page across all 131,
+    // so a story that left the preview wedged reported every LATER story as
+    // "did not render" — form-forminput-angular--form-input-focus renders in
+    // 68ms on its own and was being blamed on a timeout. See #90.
+    const page = await context.newPage();
     try {
       const violations = await checkStory(page, storyId);
       if (violations.length > 0) {
@@ -183,13 +259,16 @@ async function checkStory(page, storyId) {
       // as skippable is what let this gate pass on an empty page.
       loadFailures.push({ storyId, reason: err.message });
       console.error(`❌ ${storyId}: did not render (${err.message})`);
+    } finally {
+      await page.close();
     }
   }
 
   await browser.close();
+  server.close();
 
   if (loadFailures.length > 0) {
-    console.error(`\n❌ ${loadFailures.length} of ${idsToTest.length} story/stories did not render:`);
+    console.error(`\n❌ ${loadFailures.length} of ${testable.length} story/stories did not render:`);
     loadFailures.forEach(({ storyId, reason }) => console.error(`   ${storyId} — ${reason}`));
     console.error('   A story that does not render cannot be assessed for accessibility.');
   }
@@ -202,5 +281,5 @@ async function checkStory(page, storyId) {
     process.exit(1);
   }
 
-  console.log(`\n✅ Zero WCAG 2.1 AA violations across all ${idsToTest.length} rendered story/stories.`);
+  console.log(`\n✅ Zero WCAG 2.1 AA violations across all ${testable.length} rendered story/stories.`);
 })();
