@@ -28,6 +28,10 @@
 <style>
   body {
     background: var(--sk-surface-page, #0D0E11);
-    color: var(--sk-fg-default, #E8E8EB);
+    /* Deliberately no `color`. Nothing this design system ships gives a consumer
+       a body foreground rule — tokens.css declares variables only — so a component
+       that does not set its own colour really does inherit UA black. Setting it
+       here would hide that from the gate: measured, an inheriting component goes
+       from a 1.08:1 violation to clean purely because of the preview. */
   }
 </style>

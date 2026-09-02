@@ -167,13 +167,30 @@ async function assertStoryRendered(page, selectors) {
     // Every component in this design system emits an sk-* class, so requiring one
     // (or any text) is evidence the story's own content mounted, not just its
     // wrappers. Survives #69: the web-components renderer emits the same classes.
-    const rendered =
-      root.querySelector('[class^="sk-"], [class*=" sk-"]') !== null ||
-      root.textContent.trim().length > 0;
-    if (!rendered) {
+    const hasOwnContent = (el) =>
+      el.querySelector('[class^="sk-"], [class*=" sk-"]') !== null ||
+      el.textContent.trim().length > 0;
+
+    if (!hasOwnContent(root)) {
       return {
         ok: false,
         reason: 'story wrappers mounted but the component did not — no sk-* element and no text',
+      };
+    }
+
+    // Per component host, not just per root. An existential check over the whole
+    // render root passes as long as ANY component rendered: emptying
+    // sk-form-input's template left all 8 form stories green, because the parent
+    // sk-form-field still emitted its class. That is the same certifying-absence
+    // failure this gate exists to close, one nesting level down.
+    const empty = Array.from(root.querySelectorAll('*'))
+      .filter((el) => /^sk-/i.test(el.tagName))
+      .filter((el) => !hasOwnContent(el))
+      .map((el) => el.tagName.toLowerCase());
+    if (empty.length > 0) {
+      return {
+        ok: false,
+        reason: `component host(s) rendered nothing: ${[...new Set(empty)].join(', ')}`,
       };
     }
     return { ok: true };
