@@ -22,13 +22,13 @@ module.exports = {
   ignores: SPEC_KITTY_AUTO_COMMIT_PATTERNS,
   rules: {
     'scope-enum': [2, 'always', [
-      'tokens', 'angular', 'storybook',
+      'tokens', 'storybook',
       'doctrine', 'ci', 'docs', 'release', 'deps', 'security',
       // Elements-first programme (ADR-8). `styles` is html-js re-scoped, `elements`
       // is the custom-element base layer, `react` is its generated wrapper. Added
       // ahead of the packages themselves because a scope-enum miss blocks the first
       // commit of the mission that creates each one. `html-js` was dropped in M2
-      // when packages/html-js became packages/styles; `angular` stays until #69
+      // when packages/html-js became packages/styles; `angular` was retired by #69
       // retires that package.
       'styles', 'elements', 'react',
     ]],

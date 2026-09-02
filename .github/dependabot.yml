@@ -7,8 +7,6 @@ updates:
       day: monday
       time: "06:00"
     groups:
-      angular:
-        patterns: ["@angular/*", "@nx/angular*", "zone.js"]
       storybook:
         patterns: ["@storybook/*", "storybook"]
       playwright:
