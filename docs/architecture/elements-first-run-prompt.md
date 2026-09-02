@@ -204,7 +204,50 @@ gh issue edit <N> --repo spec-kitty/spec-kitty-design --remove-assignee @me
 
 ## 9. Loop
 
-Return to step 1. Stop when nothing is both unassigned and unblocked, and report the state of the epic.
+Return to step 1.
+
+---
+
+## Running more than one loop at a time
+
+The claim protocol already makes concurrent loops *safe*. These four rules make them *useful*.
+
+### 1. Cap it at two
+
+The dependency graph permits at most two independent missions for most of the programme — `#69 ∥ #70`, then `#73 ∥ #74` — and three only at the batches, conditionally. A third loop spends its time losing claim races and reporting "nothing unblocked". Two is the number.
+
+### 2. Every loop gets its own clone
+
+Two loops sharing a checkout will fight over `HEAD` and `node_modules`, and the `spec-kitty` CLI's primary-checkout resolution turns that into cross-contamination. Path per iteration, never reused while another loop is live:
+
+```sh
+git clone --branch train/elements-first \
+  https://github.com/spec-kitty/spec-kitty-design.git ~/work/ef-$(date +%s)-$$
+```
+
+### 3. Select with jitter, not always-lowest
+
+Step 1's "lowest-numbered eligible" rule makes two loops collide on the same issue every single time — one always wins, the other always retries. With more than one loop running, pick **at random from the eligible set** instead, and sleep 2–5 seconds before claiming. The claim check still resolves any genuine race; jitter just stops you paying for one on every iteration.
+
+### 4. A rebase invalidates the gate
+
+This is the rule that actually bites. Both the CI verdict and the adversarial-gate evidence are **pinned to a SHA**. If your PR needs a rebase because the other loop merged into the train first, the rebase produces a new head — and both the green check and the gate evidence now refer to a commit that is no longer the head.
+
+```sh
+git fetch origin && git rebase origin/train/elements-first
+git push --force-with-lease
+# the PR head changed → CI re-runs, and the gate MUST re-run
+```
+
+**Re-run the gate and post fresh evidence.** Do not merge on evidence whose SHA is not the head, and do not hand-wave it as "the rebase was trivial" — that is precisely the reasoning the SHA pin exists to refuse. If two loops are merging often enough that this hurts, the answer is fewer loops, not looser evidence.
+
+### Which pairs are actually safe
+
+- **`#69 ∥ #70`** — disjoint. #69 owns `release.yml`, `storybook-deploy.yml` and `pr-preview.yml`; #70 owns `ci-quality.yml`. Verified non-overlapping.
+- **`#73 ∥ #74`** — disjoint component directories. Both may extend the conformance matrix #71 established; if both do, the second to merge rebases and re-runs the gate per rule 4.
+- **`#77 ∥ #78 ∥ #79`** — only if ADR-11 rules that generated wrapper output and the manifest are **CI-generated rather than committed**. If they are committed, all three collide on the same generated files and must serialise. **Check that ruling before launching them in parallel.**
+
+Everything else in the graph is a chain. Do not invent parallelism the dependency lines do not permit — they encode real coupling, not caution. Stop when nothing is both unassigned and unblocked, and report the state of the epic.
 
 ---
 
