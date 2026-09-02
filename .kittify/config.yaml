@@ -16,3 +16,9 @@ project:
   slug: spec-kitty-design
   node_id: 26ae9a8b6053
   build_id: 85202551-6e2c-4fe5-b9ad-15f2f3721846
+mission_type_activations:
+- software-dev
+- documentation
+- research
+- plan
+charter: .kittify/charter/charter.yaml
