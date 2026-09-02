@@ -8,6 +8,13 @@
 ---
 
 ![Package Dependency Graph](../assets/package-dependency-graph.svg)
+
+> **Amended by ADR-8 (2026-09-02).** The graph above shows the amended topology —
+> `tokens → styles → elements`, with framework wrappers generated from the manifest.
+> The Decision Outcome below records the original 2026-05-01 decision; ADR-8 narrows
+> its "no framework package may depend on another framework package" rule rather than
+> repealing it, on the grounds that `@spec-kitty/elements` is a platform layer, not a
+> framework target.
 > Source: [`../assets/package-dependency-graph.mmd`](../assets/package-dependency-graph.mmd)
 
 ## Context and Problem Statement

@@ -16,8 +16,12 @@
 //   kitty-specs/<mission>/contracts/brand-theme-source.md
 //   kitty-specs/<mission>/contracts/diagram-pipeline-ci-gate.md
 //
-// Local-CI parity (FR-016): no environment variables or CI-only flags affect
-// the rendered output; the same command runs locally and in CI.
+// Local-CI parity (FR-016): the same command runs locally and in CI, and no
+// environment variable or CI-only flag changes the render path. The OUTPUT,
+// however, is not currently machine-independent — the theme's system-ui font
+// stack resolves per host, so committed bytes match CI and not a contributor's
+// local render. FR-016 is therefore only partially met; see the deviation
+// recorded against it and the durable-fix issue.
 
 'use strict';
 
@@ -222,12 +226,12 @@ function renderOne(mmdcPath, compiledPath, outPath) {
     // does not exist on every contributor machine, and mermaid-cli's config file
     // takes precedence over PUPPETEER_EXECUTABLE_PATH — so without this override
     // the drift check is unrunnable locally and only ever exercised in CI.
-    // O7: pin the rendering browser. mermaid renders text metrics differently
-    // between Chromium builds, so an unpinned browser makes the drift check
-    // non-reproducible — it reported drift on 8 of 8 committed SVGs with no
-    // .mmd modified. Playwright's Chromium is pinned by the exact
-    // @playwright/test version in package.json, so CI and every contributor
-    // resolve the identical build. An explicit env override still wins.
+    // Pin the rendering browser via Playwright's exactly-pinned Chromium.
+    // NOTE: this is necessary but NOT sufficient for reproducibility. The theme's
+    // fontFamily is "ui-sans-serif, system-ui, sans-serif", which resolves to the
+    // host's fonts, so text metrics — and therefore every diagram's geometry —
+    // still differ between a contributor machine and CI. A durable fix needs a
+    // pinned font or a containerised render. An explicit env override still wins.
     let override = process.env.PUPPETEER_EXECUTABLE_PATH;
     if (!override) {
       try {
@@ -363,7 +367,12 @@ function main() {
           console.error(`  - ${d.file}: ${d.reason}`);
         }
         console.error('');
-        console.error('Remediation: run `node scripts/render-diagrams.js` locally and commit the regenerated SVGs.');
+        console.error(
+          "Remediation: a local render will NOT match this check. The theme fontFamily is\n" +
+          "  \"ui-sans-serif, system-ui, sans-serif\", which resolves to whatever fonts the\n" +
+          "  host has, so geometry differs per machine. Download the \"runner-rendered-svgs\"\n" +
+          "  artifact from the failed docs-diagrams run and commit those bytes instead.",
+        );
         exitCode = 1;
       } else {
         console.log(`OK: ${sources.length} diagram(s) match committed SVGs.`);

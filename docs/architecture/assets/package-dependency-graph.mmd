@@ -11,43 +11,59 @@ flowchart LR
         catalogue["token-catalogue.json\nenumerated schema"]
     end
 
-    subgraph FrameworkPkgs["Framework Packages"]
-        angular["@spec-kitty/angular  v1.x\n(peer: @spec-kitty/tokens)"]
-        html_js["@spec-kitty/html-js  v1.x\n(peer: @spec-kitty/tokens)"]
+    subgraph BasePkgs["Base Layers"]
+        styles["@spec-kitty/styles\n(peer: @spec-kitty/tokens)\nplanned — ADR-8"]
+        elements["@spec-kitty/elements\n(Lit custom elements)\nplanned — ADR-8"]
     end
 
-    subgraph Future["Future Framework Targets\n(additive  —  no existing pkg changes)"]
-        vue["@spec-kitty/vue"]
-        svelte["@spec-kitty/svelte"]
+    subgraph WrapperPkgs["Generated Wrappers  ·  on demand"]
+        react["@spec-kitty/react\nplanned — ADR-8"]
+        angular_wrap["@spec-kitty/angular\nplanned — only if a consumer appears"]
+    end
+
+    subgraph Native["Native custom-element support\n(no wrapper package needed)"]
+        vue["Vue"]
+        svelte["Svelte"]
+        solid["Solid"]
+        vanilla["vanilla / Django / SSG"]
     end
 
     subgraph Consumers["Consuming Projects"]
         dashboard["spec-kitty\ndashboard"]
         docsite["Future Docsite\nJekyll / Hugo"]
-        custom["Custom Angular App"]
+        desktop["kitty-desktop\nTauri + Svelte"]
         static["Static HTML Page"]
+        saas_react["Team Kitty SaaS design surface\nReact 19.2 + Storybook"]
     end
 
     ref -->|"reconcile  FR-034"| css
     live -->|"reconcile  FR-034"| css
-    css --> angular
-    css --> html_js
-    css -.->|"future"| vue
-    css -.->|"future"| svelte
+    css --> styles
+    styles -->|"same .css, adopted"| elements
+    elements -->|"manifest"| react
+    react -.->|"planned — the one identified wrapper consumer"| saas_react
+    elements -->|"manifest"| angular_wrap
+    elements -->|"consumed directly  (elements + manifest)"| vue
+    elements -->|"consumed directly"| svelte
+    elements -->|"consumed directly"| solid
+    elements -->|"consumed directly"| vanilla
 
-    angular -->|"npm install"| dashboard
-    angular -->|"npm install"| custom
-    html_js -->|"npm install or CDN"| docsite
+    elements -.->|"classic script, no build step  (planned — #650)"| dashboard
+    css -.->|"vendored tokens.css mirror @ cdde80a"| desktop
+    elements -.->|"npm install  (planned)"| desktop
+    styles -->|"CSS + static HTML"| docsite
     css -->|"CDN link  zero build-step"| static
 
     classDef source fill:#1C1C20,stroke:#B8A9E0,color:#B8A9E0,stroke-width:1.5px
     classDef token fill:#1a1a08,stroke:#F5C518,color:#F5C518,stroke-width:2px
-    classDef framework fill:#14202E,stroke:#A9C7E8,color:#A9C7E8,stroke-width:1.5px
-    classDef future_cls fill:#161619,stroke:#26262C,color:#545458,stroke-width:1px,stroke-dasharray: 4 4
+    classDef base fill:#14202E,stroke:#A9C7E8,color:#A9C7E8,stroke-width:1.5px
+    classDef native fill:#161619,stroke:#8FCB8F,color:#8FCB8F,stroke-width:1.5px
+    classDef ondemand fill:#161619,stroke:#26262C,color:#545458,stroke-width:1px,stroke-dasharray: 4 4
     classDef consumer fill:#161619,stroke:#8FCB8F,color:#8FCB8F,stroke-width:1.5px
 
     class ref,live source
     class css,catalogue token
-    class angular,html_js framework
-    class vue,svelte future_cls
-    class dashboard,docsite,custom,static consumer
+    class styles,elements base
+    class react,angular_wrap ondemand
+    class vue,svelte,solid,vanilla native
+    class dashboard,docsite,desktop,static,saas_react consumer
