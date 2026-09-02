@@ -23,22 +23,6 @@ const path = require('path');
 const STORYBOOK_DIR = path.resolve('apps/storybook/storybook-static');
 const AXE_TAGS = ['wcag2a', 'wcag2aa'];
 
-// Stories that cannot render at all in the current Storybook, and why.
-//
-// Storybook is configured with @storybook/angular as its only framework
-// (apps/storybook/.storybook/main.ts). The `-html--` stories' `render` returns a
-// raw HTML string, which that renderer cannot mount: it creates the story's host
-// element and leaves it empty. There is nothing for axe to assess, and asserting
-// on them would fail this gate permanently for a reason no accessibility fix can
-// address.
-//
-// They are skipped and COUNTED, never silently dropped. ADR-13 / M3 (#69) moves
-// Storybook to the web-components renderer, which mounts these natively; delete
-// this skip in that mission and the 74 stories rejoin the gate. Tracked as #88.
-// Matched against the story's importPath from index.json, not its id: the id is a
-// slug of the story title and several html-js stories ("Components/Card") carry no
-// marker at all, so an id pattern silently under-matched by 20 stories.
-const UNRENDERABLE_IMPORT_PATTERN = /\/packages\/(html-js|styles)\//;
 
 // ── Static server ─────────────────────────────────────────────────────────────
 //
@@ -183,10 +167,47 @@ async function assertStoryRendered(page, selectors) {
     // sk-form-input's template left all 8 form stories green, because the parent
     // sk-form-field still emitted its class. That is the same certifying-absence
     // failure this gate exists to close, one nesting level down.
-    const empty = Array.from(root.querySelectorAll('*'))
-      .filter((el) => /^sk-/i.test(el.tagName))
+    //
+    // TWO host shapes, because the repo has two. The tagName filter below was
+    // written when every component was an Angular element (<sk-card>). #69 deletes
+    // those: the packages/styles stories emit PLAIN HTML carrying sk-* CLASSES and
+    // no sk-* tagName at all, so on its own this filter would match zero elements
+    // after the migration and silently degrade the gate back to the existential
+    // root check above — the exact failure the block comment rejects. The class
+    // arm keeps it discriminating. Found by the post-tasks squad on #69.
+    const VOID_OR_LEAF = new Set([
+      'IMG', 'INPUT', 'BR', 'HR', 'AREA', 'EMBED', 'SOURCE', 'TRACK', 'WBR', 'COL',
+      'SVG', 'USE', 'PATH', 'TEXTAREA', 'SELECT', 'IFRAME', 'CANVAS', 'VIDEO', 'AUDIO',
+    ]);
+    // A BEM block (`sk-card`), not an element (`sk-card__title`) or modifier
+    // (`sk-card--blue`): blocks are the component hosts, and a block that rendered
+    // nothing is the defect. Elements and modifiers are parts of an already-checked
+    // block, so requiring content of each would fail on legitimately empty slots.
+    const BLOCK_CLASS = /^sk-[a-z0-9]+(?:-[a-z0-9]+)*$/;
+    const hostsByTag = Array.from(root.querySelectorAll('*')).filter((el) =>
+      /^sk-/i.test(el.tagName)
+    );
+    const hostsByClass = Array.from(root.querySelectorAll('[class]')).filter(
+      (el) =>
+        !VOID_OR_LEAF.has(el.tagName) &&
+        Array.from(el.classList).some((c) => BLOCK_CLASS.test(c))
+    );
+    const hosts = [...new Set([...hostsByTag, ...hostsByClass])];
+    if (hosts.length === 0) {
+      return {
+        ok: false,
+        reason:
+          'no component host found — no sk-* element and no sk-* block class; ' +
+          'the story mounted wrappers only',
+      };
+    }
+    const empty = hosts
       .filter((el) => !hasOwnContent(el))
-      .map((el) => el.tagName.toLowerCase());
+      .map((el) =>
+        /^sk-/i.test(el.tagName)
+          ? el.tagName.toLowerCase()
+          : `${el.tagName.toLowerCase()}.${Array.from(el.classList).find((c) => BLOCK_CLASS.test(c))}`
+      );
     if (empty.length > 0) {
       return {
         ok: false,
@@ -275,19 +296,11 @@ async function checkStory(page, storyId) {
     { id: 'primitives-skstub-html--default', importPath: '' },
   ];
 
-  const skipped = idsToTest.filter((e) => UNRENDERABLE_IMPORT_PATTERN.test(e.importPath));
-  const testable = idsToTest.filter((e) => !UNRENDERABLE_IMPORT_PATTERN.test(e.importPath));
-
-  // Certifying absence over an empty set is the failure this whole file exists to
-  // prevent, and it is reachable: #69 deletes packages/angular, after which every
-  // remaining story matches the skip pattern above. The comment there asks whoever
-  // does that to delete the skip; this makes forgetting it loud instead of green.
-  if (testable.length === 0) {
-    console.error('❌ No stories left to assess — every story was skipped.');
-    console.error('   If packages/angular was just removed, delete UNRENDERABLE_IMPORT_PATTERN (#69).');
-    server.close();
-    process.exit(1);
-  }
+  // #69 deleted UNRENDERABLE_IMPORT_PATTERN: the web-components renderer mounts
+  // the string-returning packages/styles stories natively, so all of them are
+  // assessed. Every story in the manifest is now testable; there is no skip list,
+  // and therefore no way for this gate to quietly review a subset.
+  const testable = idsToTest;
 
   if (!storyIds) {
     console.error('❌ Story manifest not found — refusing to report on a guessed story list.');
@@ -297,13 +310,14 @@ async function checkStory(page, storyId) {
     server.close();
     process.exit(1);
   } else {
-    console.log(`Testing ${testable.length} stories for WCAG 2.1 AA compliance (serving ${BASE_URL})...`);
-    if (skipped.length > 0) {
-      console.log(
-        `⏭  Skipping ${skipped.length} story/stories that cannot mount under the ` +
-          'Angular renderer (see #88; M3/#69 makes them renderable):'
-      );
-      for (const e of skipped) console.log(`     ${e.id}`);
+    console.log(
+      `Testing ${testable.length} of ${idsToTest.length} stories for WCAG 2.1 AA ` +
+        `compliance (serving ${BASE_URL})...`
+    );
+    if (testable.length !== idsToTest.length) {
+      console.error('❌ Refusing to run: the assessed set is smaller than the manifest.');
+      server.close();
+      process.exit(1);
     }
   }
 
