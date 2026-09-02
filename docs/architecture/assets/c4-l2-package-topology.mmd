@@ -5,12 +5,13 @@ flowchart TB
 
         subgraph Published["Published Packages  ·  @spec-kitty scope"]
             tokens["@spec-kitty/tokens\n─────────────────\n--sk-* CSS custom properties\nZero build-step · CDN + npm\n< 20 KB uncompressed"]
-            angular["@spec-kitty/angular\n─────────────────\nAngular LTS components\nTokens by reference\nStorybook stories\n< 150 KB / chunk"]
-            html_js["@spec-kitty/html-js\n─────────────────\nFramework-agnostic primitives\nVanilla HTML + ES modules\nNo build step for consumers\nStorybook stories"]
+            styles["@spec-kitty/styles\n─────────────────\nOne sk-<name>.css per component\nStatic HTML for SSR consumers\nNo build step for consumers"]
+            elements["@spec-kitty/elements\n─────────────────\nLit custom elements\nAdopts the same .css files\nESM + self-contained classic script\nEmits custom-elements.json"]
+            wrappers["@spec-kitty/react · /angular\n─────────────────\nGenerated from the manifest\nNo markup · no CSS · no behaviour\nPublished only when a consumer exists"]
         end
 
         subgraph Internal["Internal  ·  not published"]
-            storybook["Storybook\n─────────────────\nMulti-framework renderer\nAngular + plain HTML tabs\nVisual regression baseline\nGitHub Pages on main merge"]
+            storybook["Storybook\n─────────────────\nWeb-components renderer on Vite\nOne story per component\nVisual regression baseline\nGitHub Pages on main merge"]
             doctrine["doctrine/\n─────────────────\nSK-D01  SK-D02  directives\nsk-brand-voice styleguide\nsk-visual-identity styleguide\ngraph.yaml  org-layer stub\nSKILL.md  enhanced"]
         end
 
@@ -20,10 +21,12 @@ flowchart TB
 
     end
 
-    tokens -->|"peer dep"| angular
-    tokens -->|"peer dep"| html_js
-    angular -->|"stories"| storybook
-    html_js -->|"stories"| storybook
+    tokens -->|"peer dep"| styles
+    styles -->|"same .css, adopted"| elements
+    elements -->|"custom-elements.json"| wrappers
+    tokens -->|"peer dep"| elements
+    elements -->|"stories"| storybook
+    styles -->|"static HTML + CSS"| storybook
     storybook -->|"baseline snapshots"| ci
     doctrine -->|"governance context"| storybook
 
@@ -31,6 +34,6 @@ flowchart TB
     classDef internal fill:#14202E,stroke:#A9C7E8,color:#A9C7E8,stroke-width:1.5px
     classDef tooling fill:#1C1C20,stroke:#B8A9E0,color:#B8A9E0,stroke-width:1.5px
 
-    class tokens,angular,html_js pub
+    class tokens,styles,elements,wrappers pub
     class storybook,doctrine internal
     class ci tooling

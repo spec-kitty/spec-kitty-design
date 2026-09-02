@@ -11,33 +11,43 @@ flowchart LR
         catalogue["token-catalogue.json\nenumerated schema"]
     end
 
-    subgraph FrameworkPkgs["Framework Packages"]
-        angular["@spec-kitty/angular  v1.x\n(peer: @spec-kitty/tokens)"]
-        html_js["@spec-kitty/html-js  v1.x\n(peer: @spec-kitty/tokens)"]
+    subgraph BasePkgs["Base Layers"]
+        styles["@spec-kitty/styles\n(peer: @spec-kitty/tokens)"]
+        elements["@spec-kitty/elements\n(Lit custom elements)"]
     end
 
-    subgraph Future["Future Framework Targets\n(additive  —  no existing pkg changes)"]
-        vue["@spec-kitty/vue"]
-        svelte["@spec-kitty/svelte"]
+    subgraph WrapperPkgs["Generated Wrappers  ·  on demand"]
+        react["@spec-kitty/react"]
+        ngwrap["@spec-kitty/angular"]
+    end
+
+    subgraph Native["Native custom-element support\n(no wrapper package needed)"]
+        vue["Vue"]
+        svelte["Svelte"]
+        vanilla["vanilla / Django / SSG"]
     end
 
     subgraph Consumers["Consuming Projects"]
         dashboard["spec-kitty\ndashboard"]
         docsite["Future Docsite\nJekyll / Hugo"]
-        custom["Custom Angular App"]
+        desktop["kitty-desktop\nTauri + Svelte"]
         static["Static HTML Page"]
     end
 
     ref -->|"reconcile  FR-034"| css
     live -->|"reconcile  FR-034"| css
-    css --> angular
-    css --> html_js
-    css -.->|"future"| vue
-    css -.->|"future"| svelte
+    css --> styles
+    styles -->|"same .css, adopted"| elements
+    css --> elements
+    elements -->|"manifest"| react
+    elements -->|"manifest"| ngwrap
+    elements -.->|"consumed directly"| vue
+    elements -.->|"consumed directly"| svelte
+    elements -.->|"consumed directly"| vanilla
 
-    angular -->|"npm install"| dashboard
-    angular -->|"npm install"| custom
-    html_js -->|"npm install or CDN"| docsite
+    elements -->|"classic script  no build step"| dashboard
+    elements -->|"npm install"| desktop
+    styles -->|"CSS + static HTML"| docsite
     css -->|"CDN link  zero build-step"| static
 
     classDef source fill:#1C1C20,stroke:#B8A9E0,color:#B8A9E0,stroke-width:1.5px
@@ -48,6 +58,7 @@ flowchart LR
 
     class ref,live source
     class css,catalogue token
-    class angular,html_js framework
-    class vue,svelte future_cls
-    class dashboard,docsite,custom,static consumer
+    class styles,elements framework
+    class react,ngwrap framework
+    class vue,svelte,vanilla future_cls
+    class dashboard,docsite,desktop,static consumer
