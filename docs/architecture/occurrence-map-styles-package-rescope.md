@@ -146,10 +146,19 @@ because that repo has no Actions workflows on `main`.
 behaviour-neutrality proof"*. They are not, and this is the sharpest thing the
 mission found.
 
-**Storybook's HTML stories never render.** `@storybook/angular` is the only
-configured framework and cannot mount the raw HTML string those stories return, so
-they sit in `sb-preparing-story` indefinitely. Reproduced with a 25-second wait:
-the two Angular stories render, the two HTML ones do not.
+**Storybook's HTML stories mount nothing.** `@storybook/angular` is the only
+configured framework. It wraps every story in a host element named after the story
+id — and for the HTML stories, whose `render` returns a raw string, that host is
+created **empty**:
+
+```
+primitives-skstub-html--default   -> <primitives-skstub-html--default ng-version="21.2.22"></...>   0 children, 0 text
+form-forminput-angular--form-input-error -> <form-forminput-angular--form-input-error ...><sk-form-field ...>  real markup
+```
+
+An earlier draft of this document said they "sit in `sb-preparing-story`
+indefinitely". That mechanism was wrong; the host mounts, the component never
+does. The consequence is the same and is what matters.
 
 The proof is in the committed baselines themselves. The three HTML snapshots —
 `sk-stub-html-default`, `sk-feature-card-html-default`,
@@ -162,6 +171,11 @@ So those three pass unchanged whatever happens to this package — which is why 
 passed a mission that moved every file in it. `visual.spec.ts` takes them after
 only `waitForLoadState('domcontentloaded')`, with no selector wait, unlike the
 Angular cases which wait on a real class and would have failed loudly.
+
+**The axe gate is blind to it too.** `scripts/run-axe-storybook.js` treats a story
+as rendered when the root has `childElementCount > 0 || textContent`. The empty host
+element *is* a child, so every HTML story passes that check while displaying
+nothing — the WCAG scan has been running against empty wrappers.
 
 Not fixed here: ADR-13 and M3 (#69) move Storybook to the web-components renderer,
 which is the fix. Tracked on **#88**. Until then the visual baselines are not

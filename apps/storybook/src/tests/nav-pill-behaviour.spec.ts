@@ -11,10 +11,10 @@ import { test, expect } from '@playwright/test';
  * working while every gate stayed green.
  *
  * It exercises the deployed artifact rather than a Storybook story, deliberately.
- * Storybook is configured with `@storybook/angular` as its only framework, so the
- * HTML stories never leave the "preparing story" state and render nothing — the
- * three HTML visual baselines are byte-identical blank frames as a result (#88,
- * ADR-13, M3). The demo page is real HTML loading a real ES module, which is how
+ * Storybook is configured with `@storybook/angular` as its only framework, which
+ * mounts each story into a host element named after the story id; for the HTML
+ * stories that host is created empty, so nothing renders and the three HTML visual
+ * baselines are byte-identical blank frames (#88, ADR-13, M3). The demo page is real HTML loading a real ES module, which is how
  * every no-build consumer in the ADR-12 audit actually uses this package.
  */
 
