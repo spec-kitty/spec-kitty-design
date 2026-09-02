@@ -36,6 +36,18 @@
       "verdict": "deferred-with-followup",
       "wp": null
     },
+    "#85": {
+      "evidence_ref": "The packages/html-js -> packages/styles rename landed in 9255b2a before this mission; verified in-checkout and the stale paths in the issue body and ADR-13 corrected in plan.md.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "verified-already-fixed",
+      "wp": "WP03"
+    },
     "#91": {
       "evidence_ref": "Axe HTTP repair landed in ce30b3e before this mission; verified still holding against a Vite build (74 stories, 0 render failures).",
       "fr": null,
