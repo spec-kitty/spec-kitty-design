@@ -6,9 +6,16 @@ scope: operations
 # PROJECT OVERRIDE of the packaged adversarial-squad-cadence styleguide.
 # The packaged artifact makes the squad "strong guidance, not a gate" and forbids
 # enforcement. In the elements-first programme the operator has ruled the squad IS
-# a gate ("it's not guidance it's a gate"), so this layer replaces the principles,
-# anti_patterns and quality_test fields. Fields not restated here (patterns,
-# references) are inherited from the packaged artifact by field-level merge.
+# a gate, so this layer replaces the principles, patterns, anti_patterns and
+# quality_test fields. Fields not restated here (references, applies_to_languages,
+# structural_lint_config, tooling) are inherited from the packaged artifact by
+# field-level merge.
+#
+# patterns is restated rather than inherited because the packaged entries carry
+# "squad is advisory only" and "runs advisory — findings inform the tasks step, not
+# block it". Inheriting them left the merged artifact contradicting its own first
+# principle. The restatement keeps both planning point-cuts advisory (they still are)
+# and adds the pre-merge gate point-cut.
 
 principles:
   - >
@@ -46,6 +53,59 @@ principles:
     lives in adversarial-squad-deployment.procedure. Do not restate the playbook here;
     reference it. Where that procedure asserts the squad is optional, this project override
     and the project DIRECTIVE_046 override govern instead.
+  - >
+    The gate applies at the PRE-MERGE point-cut. The planning point-cuts (post-spec,
+    post-plan, post-tasks, mission sizing) remain advisory as in the packaged doctrine:
+    findings inform the next step, they do not block it. The patterns below describe those
+    advisory point-cuts and are deliberately unchanged in that respect.
+  - >
+    This styleguide folds experiment #2094 (multi-squad pre-flight cadence; closed on land
+    with a tracker comment referencing mission doctrine-catfooding-2196).
+
+patterns:
+  - name: Pre-merge gate squad
+    description: >
+      Before merging any pull request, dispatch a bounded squad over the aggregate diff.
+      This point-cut is a GATE: every dispatched lens must report before the merge decision,
+      and the recorded verdict names the head SHA it was taken against. Fold the confirmed
+      findings, then re-run the same lenses against the folded tip (two passes per
+      point-cut). Escalate to the operator only on a named blocker or a finding that
+      contradicts a governing document.
+    good_example: |
+      # Trigger: PR open, head SHA known
+      # Profiles: architect-alphonso (structure), reviewer-renata (overclaim/accuracy),
+      #           debugger-debbie (live evidence), randy-reducer (duplication/split-brain)
+      # Gate: dispatched == reported, and every verdict names the current head SHA
+      verdicts = dispatch_squad(sha=head_sha())
+      assert set(verdicts) == set(dispatched), "a lens has not reported — HOLD"
+      assert all(v.sha == head_sha() for v in verdicts.values()), "stale evidence — re-run"
+      # merge only after both assertions hold
+  - name: Post-tasks anti-laziness squad
+    description: >
+      After /spec-kitty.tasks and before claiming the first WP, dispatch a bounded squad to
+      audit the work-package decomposition for fakeable DoDs, undersized scope, and missing
+      coverage. Record convergent findings in the tasks document or as a pre-implementation
+      note. This is the highest-value planning point-cut: finding decomposition gaps before
+      implementation avoids costly mid-WP scope expansions. Advisory — it informs the next
+      step rather than blocking it.
+    good_example: |
+      # Trigger: tasks finalized, first WP not yet claimed
+      # Profiles: architect-alphonso (structure), debugger-debbie (live-evidence coverage),
+      #           paula-patterns (decomposition realism), randy-reducer (duplication/overlap)
+      # Sharp question: "Are the DoDs fakeable? Is any WP materially undersized?"
+      # Output: convergent findings recorded in tasks.md amendment section;
+      #         mission proceeds — this planning point-cut is advisory
+  - name: Post-plan brownfield squad
+    description: >
+      After /spec-kitty.plan, dispatch a focused squad to surface foldable issues,
+      split-brain surface risks, and deprecation debt the plan may have missed. Advisory —
+      findings inform the tasks step rather than blocking it.
+    good_example: |
+      # Trigger: plan.md complete, /spec-kitty.tasks not yet run
+      # Profiles: researcher-ryan (prior-art and related issues),
+      #           architect-alphonso (split-brain risk)
+      # Sharp question: "What has this plan missed that /spec-kitty.tasks should address?"
+      # Output: research.md or plan.md amendment; tasks step proceeds
 
 anti_patterns:
   - name: Merging on a partial squad

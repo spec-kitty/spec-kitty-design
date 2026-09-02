@@ -37,6 +37,7 @@ directives:
 catalog:
   mission: software-dev
   template_set: software-dev-default
+  languages:
   references:
   - id: USER:PROJECT_PROFILE
     kind: user_profile
@@ -269,7 +270,7 @@ catalog:
   - id: DIRECTIVE:DIRECTIVE_046
     kind: directive
     title: Readable and Consistent Pull Requests
-    summary: "Every mission branch and pull request an agent prepares must be readable, consistent, and independently reviewed before it is handed to the operator. Concretely, three properties are required and must not be traded away for speed: (1) LINEAR history — the branch is rebased onto the current upstream base and carries a small set of logically-sliced commits, never a tangle of merge and status commits (rebase over merge); (2) CONSISTENT and COMPLETE scope — the branch finishes the work it set out to do and does not defer genuinely small remaining items to a follow-up, deferring only work that is genuinely high-effort or mission-sized; (3) INDEPENDENTLY REVIEWED — the aggregate diff has had an independent review before, or in parallel to, opening the draft PR, with real findings folded in while the PR is still a draft. The adversarial review squad (adversarial-squad-deployment) is the RECOMMENDED review mechanism — not a mandated gate; it stays optional per its own doctrine.\n"
+    summary: "Every mission branch and pull request an agent prepares must be readable, consistent, and independently reviewed before it is handed to the operator. Concretely, three properties are required and must not be traded away for speed: (1) LINEAR history — the branch is rebased onto the current upstream base and carries a small set of logically-sliced commits, never a tangle of merge and status commits (rebase over merge); (2) CONSISTENT and COMPLETE scope — the branch finishes the work it set out to do and does not defer genuinely small remaining items to a follow-up, deferring only work that is genuinely high-effort or mission-sized; (3) INDEPENDENTLY REVIEWED — the aggregate diff has had an independent review before, or in parallel to, opening the draft PR, with real findings folded in while the PR is still a draft. In THIS project the adversarial review squad (adversarial-squad-deployment) is the REQUIRED review mechanism and is a merge GATE, not optional enrichment. Two mechanics are part of that gate and are stated here because this field is the one an agent's action context actually carries. FIRST, every dispatched lens must report before the merge decision is taken — merging on a subset is prohibited, and a lens that cannot be dispatched is a HOLD to resolve, not a lens to drop. SECOND, squad evidence is pinned to the head SHA it was taken against; a push after the squad reported invalidates it and the affected lenses are re-run against the new tip. Where the referenced adversarial-squad-deployment procedure, the adversarial-squad-cadence styleguide, or any packaged artifact asserts the squad is optional or names gate-hardwiring an anti-pattern, THIS project directive governs.\n"
     source_path: ''
     local_path: _LIBRARY/directive-directive-046.md
   - id: DIRECTIVE:DIRECTIVE_047
@@ -1073,7 +1074,7 @@ catalog:
   - id: STYLEGUIDE:adversarial-squad-cadence
     kind: styleguide
     title: Adversarial Squad Cadence
-    summary: "Run a bounded multi-profile adversarial squad at each planning point-cut as strong guidance, not a gate. A mission is not blocked for skipping the squad.\n"
+    summary: "Run a bounded multi-profile adversarial squad at every pull request as a GATE. A PR is not merged until the squad has reported. This project deliberately overrides the packaged optional invariant; the override is scoped to this repository and does not change the packaged artifact.\n"
     source_path: ''
     local_path: _LIBRARY/styleguide-adversarial-squad-cadence.md
   - id: STYLEGUIDE:aggregate-design-rules
@@ -1301,7 +1302,7 @@ catalog:
   - id: PROCEDURE:adversarial-squad-deployment
     kind: procedure
     title: Adversarial Squad Deployment
-    summary: "Deploy a small, bounded set of profile-loaded subagents in parallel at high-leverage review point-cuts so independent doctrine lenses converge on findings no single reviewer would catch. Turns review from one perspective into a cheap adversarial panel that resists laziness, accidental-pass, and single-lens blind spots. Optional and charter- or memory-activated — it enriches the flow, it does not gate it.\n"
+    summary: "Deploy a small, bounded set of profile-loaded subagents in parallel at high-leverage review point-cuts so independent doctrine lenses converge on findings no single reviewer would catch. Turns review from one perspective into a cheap adversarial panel that resists laziness, accidental-pass, and single-lens blind spots. PROJECT OVERRIDE: in this repository the squad is a merge GATE, not optional enrichment. It is required at every pull request, every dispatched lens must report before the merge decision is taken, and its evidence is pinned to the head SHA it was taken against.\n"
     source_path: ''
     local_path: _LIBRARY/procedure-adversarial-squad-deployment.md
   - id: PROCEDURE:bdd-scenario-lifecycle
@@ -1600,7 +1601,7 @@ catalog:
     local_path: _LIBRARY/template-set-software-dev-default.md
 overrides: {}
 metadata:
-  generated_at: '2026-09-02T19:06:19Z'
+  generated_at: '2026-09-02T19:46:30Z'
   bundle_schema_version: 2
 mission_type_activations:
 - software-dev

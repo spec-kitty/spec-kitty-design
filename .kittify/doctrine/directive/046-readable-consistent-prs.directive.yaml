@@ -14,17 +14,17 @@ intent: >
   has had an independent review before, or in parallel to, opening the draft PR,
   with real findings folded in while the PR is still a draft. In THIS project the
   adversarial review squad (adversarial-squad-deployment) is the REQUIRED review
-  mechanism and is a merge GATE, not optional enrichment: see the project
-  adversarial-squad-cadence styleguide, which overrides the packaged optional
-  invariant for this repository.
+  mechanism and is a merge GATE, not optional enrichment. Two mechanics are part of
+  that gate and are stated here because this field is the one an agent's action
+  context actually carries. FIRST, every dispatched lens must report before the merge
+  decision is taken — merging on a subset is prohibited, and a lens that cannot be
+  dispatched is a HOLD to resolve, not a lens to drop. SECOND, squad evidence is
+  pinned to the head SHA it was taken against; a push after the squad reported
+  invalidates it and the affected lenses are re-run against the new tip. Where the
+  referenced adversarial-squad-deployment procedure, the adversarial-squad-cadence
+  styleguide, or any packaged artifact asserts the squad is optional or names
+  gate-hardwiring an anti-pattern, THIS project directive governs.
 enforcement: required
-scope: >
-  Applies to every agent-prepared mission branch and pull request in the SDD flow,
-  from the point the mission's work packages are approved through to hand-off. It
-  governs how the branch history is shaped, how completely the scope is finished,
-  and what review has run before the PR is presented. It does not change the
-  operator-merges rule (DIRECTIVE_045) — it constrains what the agent hands the
-  operator.
 procedures:
   - Rebase the mission branch onto the current upstream mainline so it is
     ahead-only, and compact it into a small set of readable, logically-sliced
