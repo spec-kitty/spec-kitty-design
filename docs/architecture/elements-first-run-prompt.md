@@ -157,7 +157,8 @@ EOF
 - **Every finding needs `file:line`.** An ungrounded finding is not evidence.
 - **Every finding needs a disposition** — folded here, or deferred with an issue number. "Noted" is not a disposition.
 - **A lens that concedes nothing is noise.** Four confident verdicts on a docs-only PR means the squad told you nothing.
-- **Halt on flat or rising severity across passes, not on new findings appearing.** Falling severity is convergence. Two passes maximum; if severity has not fallen by pass 2, stop and escalate to the operator rather than running a third.
+- **Two passes maximum, and no severity arithmetic.** A pass is done when every finding it raised is folded or filed. If pass 2 raises new in-scope findings, fold them and merge — do not run a third, and do not escalate because a count failed to fall. Escalate only when a lens names a specific blocker you cannot resolve, or when a governing document contradicts another.
+- **Re-read a second-pass review against the current head before acting on it.** A reviewer pinned to an older SHA will report findings you have already fixed; that is the SHA pin working, not the reviewer being wrong.
 
 ## 7. Merge — mission branch into the train, and only that
 

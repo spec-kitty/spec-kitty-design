@@ -45,7 +45,7 @@ The gate is not run until its evidence is on the PR. The comment must carry, at 
 - **Each lens by profile id**, with its verdict and the initialization it applied.
 - **Findings as `[SEVERITY] file:line — issue — recommendation`.** Ungrounded findings do not count as evidence.
 - **Disposition per finding**: folded into this PR, or deferred with an issue link. "Noted" is not a disposition.
-- **Pass number and the severity trend** against the previous pass, since the halt rule turns on trend rather than on new findings appearing.
+- **Pass number**, and for a second pass, which of the previous pass's findings are now fixed, still open, or superseded — named individually, not counted.
 - **Where each lens concedes it does not apply.** A lens that concedes nothing is noise, and a squad that produces four confident verdicts on a docs-only PR has told you nothing.
 
 **Cost:** the gate is per PR, not per mission. A mission that opens three PRs pays three gates — which is deliberate: it prices incoherent PRs. Uniform pre-merge raises the programme from roughly 93 delegate runs to roughly 112, about 20%, for the point-cut where a finding is cheapest to act on and most expensive to miss.
@@ -64,7 +64,9 @@ Tier A earns squads at the earlier point-cuts too because each one sets somethin
 
 **Dispatch rule:** each delegate's prompt begins with the profile load — `spec-kitty agent profile show <id>` and `spec-kitty charter context --action <action> --json` — then states which initialization, boundaries, directives and tactics it applied. Loading the profile is the point; naming a persona is not. Delegates stay read-only unless the task is an isolated implementation in its own worktree. Output is `[SEVERITY] file:line — issue — recommendation`, ending in a verdict, grounded in cited evidence, with honest concession of where the lens does not apply.
 
-**Halting:** stop on flat or rising severity across passes, not on the appearance of new findings; falling severity is convergence, not failure. Two passes maximum per point-cut.
+**Halting: two passes per point-cut, and that is the whole rule.** A pass ends when every finding it raised is either folded or filed. If a second pass raises new in-scope findings, fold those too and merge — do not run a third, and do not stop and escalate merely because the count did not fall.
+
+*A severity-trend halt was tried and removed. It misfired twice: severity counts are not comparable across passes when the head moves between them, so a reviewer pinned to a stale SHA reports findings already fixed; and findings raised at a different layer — a CI response, say — inflate the count while the original findings are genuinely converging. Counting also treats "created by the fix" and "pre-existing, newly noticed" as the same thing. Escalate on a specific blocker a lens names, not on arithmetic.*
 
 ## Boundary rules that apply to every mission
 
@@ -108,7 +110,7 @@ Remaining, all short: enable 2FA on the org; issue a granular publish token scop
 
 **O5 also activates the squad**, in the same run, by amending two answers in `.kittify/charter/interview/answers.yaml`. Note the mechanism: `selected_tactics` stays empty — the squad binds through review-policy prose, which is what agents read. Drafted text:
 
-> **`review_policy`** — append: *"Adversarial squad cadence is a standing order. Every pull request receives the full adversarial gate before merge, and the gate's evidence is posted as a comment on that pull request — naming the commit SHA reviewed, each lens by profile id with its verdict, findings as severity/file/line/recommendation, the disposition of each finding, and the severity trend against the previous pass. A pull request is not merged until that evidence is present and its SHA matches the head. Earlier point-cuts are tiered by mission risk and recorded in `docs/architecture/elements-first-programme.md`: mechanism-setting missions get the squad post-spec, post-plan and post-tasks; high-blast-radius missions post-tasks; routine missions rely on the merge gate alone. The squad is report-only at the earlier point-cuts: findings are triaged and folded before the next phase starts. Delegated seats run on the smaller model; the larger model is reserved for squad lenses and synthesis, arbiter escalation, and plan-phase architecture on risky missions."*
+> **`review_policy`** — append: *"Adversarial squad cadence is a standing order. Every pull request receives the full adversarial gate before merge, and the gate's evidence is posted as a comment on that pull request — naming the commit SHA reviewed, each lens by profile id with its verdict, findings as severity/file/line/recommendation, and the disposition of each finding. A pull request is not merged until that evidence is present and its SHA matches the head. Earlier point-cuts are tiered by mission risk and recorded in `docs/architecture/elements-first-programme.md`: mechanism-setting missions get the squad post-spec, post-plan and post-tasks; high-blast-radius missions post-tasks; routine missions rely on the merge gate alone. The squad is report-only at the earlier point-cuts: findings are triaged and folded before the next phase starts. Delegated seats run on the smaller model; the larger model is reserved for squad lenses and synthesis, arbiter escalation, and plan-phase architecture on risky missions."*
 >
 > **`quality_gates`** — append: *"An adversarial review squad closes every pull request, with its evidence posted on that pull request before merge, plus the earlier point-cuts its mission's tier declares (see review_policy)."*
 
