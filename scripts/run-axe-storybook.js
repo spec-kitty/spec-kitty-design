@@ -156,8 +156,24 @@ async function assertStoryRendered(page, selectors) {
     // sk-form-field — are hyphenated by convention and are never registered, so
     // that check failed every Angular story by construction, on a page that had
     // rendered correctly. See #90.
-    if (root.querySelectorAll('*').length <= 1) {
-      return { ok: false, reason: 'story host is present but empty — nothing mounted inside it' };
+    // Counting descendants is not enough. It was calibrated on the unmounted
+    // html-js shape (exactly one descendant: the story host) — and those stories
+    // are excluded by UNRENDERABLE_IMPORT_PATTERN, so the count discriminated
+    // nothing about the population actually assessed. An Angular story nests the
+    // story host AND the component host, so it clears 2 descendants even when the
+    // component renders nothing: a story whose whole output is an empty <ul>
+    // passed this gate green.
+    //
+    // Every component in this design system emits an sk-* class, so requiring one
+    // (or any text) is evidence the story's own content mounted, not just its
+    // wrappers. Survives #69: the web-components renderer emits the same classes.
+    const rendered =
+      root.querySelector('[class*="sk-"]') !== null || root.textContent.trim().length > 0;
+    if (!rendered) {
+      return {
+        ok: false,
+        reason: 'story wrappers mounted but the component did not — no sk-* element and no text',
+      };
     }
     return { ok: true };
   }, selectors);
@@ -195,7 +211,10 @@ async function checkStory(page, storyId) {
           // immediately, the timeout was never spent, and the assertion then ran
           // against a DOM nobody had waited for. That was the "3 of 57, different
           // each run" flake, and no retry can fix a wait that does not wait.
-          return !!root && root.querySelectorAll('*').length > 1;
+          return (
+            !!root &&
+            (root.querySelector('[class*="sk-"]') !== null || root.textContent.trim().length > 0)
+          );
         },
         RENDER_ROOT_SELECTORS,
         { timeout: RENDER_TIMEOUT_MS }
