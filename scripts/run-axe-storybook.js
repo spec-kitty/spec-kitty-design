@@ -52,13 +52,18 @@ const AXE_TAGS = ['wcag2a', 'wcag2aa'];
 //   svg > *                 a non-EMPTY svg; a bare <svg></svg> renders nothing
 //   bare [aria-label] / [role="img"] are NOT here: an attribute on an empty
 //                           element is a promise of content, not content
+//   picture/video/canvas    likewise qualified. Bare tags were left in the first
+//                           tightening and a pre-merge lens proved the gap: a story
+//                           rendering <div class="sk-card"><picture></picture></div>
+//                           passed green, and an empty <picture> paints nothing.
 //
 // This keeps the legitimate icon-only case green
 // (<button class="sk-btn" aria-label="Close"><svg><path/></svg></button>) while
 // closing all three regressions, and produces output identical to the looser list
 // on all 74 real stories.
 const CONTENT_MEDIA_SELECTOR =
-  'img[alt]:not([alt=""]), svg > *, input, select, textarea, canvas, video, picture';
+  'img[alt]:not([alt=""]), svg > *, input, select, textarea, ' +
+  'picture:has(img), video[src], video:has(source), canvas[width]:not([width="0"])';
 
 // ── Static server ─────────────────────────────────────────────────────────────
 //
