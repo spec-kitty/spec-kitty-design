@@ -3,15 +3,15 @@
 flowchart TB
     subgraph Monorepo["spec-kitty-design  ·  monorepo  (nx / turborepo)"]
 
-        subgraph Published["Published Packages  ·  @spec-kitty scope"]
+        subgraph Published["Publishable Packages  ·  @spec-kitty scope not yet owned (ADR-12)"]
             tokens["@spec-kitty/tokens\n─────────────────\n--sk-* CSS custom properties\nZero build-step · CDN + npm\n< 20 KB uncompressed"]
-            styles["@spec-kitty/styles\n─────────────────\nOne sk-<name>.css per component\nStatic HTML for SSR consumers\nNo build step for consumers"]
-            elements["@spec-kitty/elements\n─────────────────\nLit custom elements\nAdopts the same .css files\nESM + self-contained classic script\nEmits custom-elements.json"]
-            wrappers["@spec-kitty/react · /angular\n─────────────────\nGenerated from the manifest\nNo markup · no CSS · no behaviour\nPublished only when a consumer exists"]
+            styles["@spec-kitty/styles  ·  planned (ADR-8)\n─────────────────\nOne sk-<name>.css per component\nStatic HTML for SSR consumers\nNo build step for consumers"]
+            elements["@spec-kitty/elements  ·  planned (ADR-8)\n─────────────────\nLit custom elements\nAdopts the same .css files\nESM + self-contained classic script\nEmits custom-elements.json"]
+            wrappers["@spec-kitty/react · /angular  ·  on demand\n─────────────────\nGenerated from the manifest\nNo markup · no CSS · no behaviour\nPublished only when a consumer exists"]
         end
 
         subgraph Internal["Internal  ·  not published"]
-            storybook["Storybook\n─────────────────\nWeb-components renderer on Vite\nOne story per component\nVisual regression baseline\nGitHub Pages on main merge"]
+            storybook["Storybook\n─────────────────\nAngular renderer on webpack (today)\n→ web-components on Vite\n   (ADR-13 — proposed)\nVisual regression baseline\nGitHub Pages on main merge"]
             doctrine["doctrine/\n─────────────────\nSK-D01  SK-D02  directives\nsk-brand-voice styleguide\nsk-visual-identity styleguide\ngraph.yaml  org-layer stub\nSKILL.md  enhanced"]
         end
 
@@ -24,7 +24,6 @@ flowchart TB
     tokens -->|"peer dep"| styles
     styles -->|"same .css, adopted"| elements
     elements -->|"custom-elements.json"| wrappers
-    tokens -->|"peer dep"| elements
     elements -->|"stories"| storybook
     styles -->|"static HTML + CSS"| storybook
     storybook -->|"baseline snapshots"| ci

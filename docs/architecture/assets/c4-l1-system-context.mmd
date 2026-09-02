@@ -29,7 +29,7 @@ flowchart TB
 
     nobuild_dev -->|"script tag: @spec-kitty/elements browser bundle"| npm
     app_dev -->|"npm install @spec-kitty/elements (+ wrapper if one exists)"| npm
-    html_dev -->|"CDN link or @spec-kitty/tokens"| npm
+    html_dev -->|"CDN link · @spec-kitty/tokens + /styles"| npm
     agent -->|"reads SKILL.md + doctrine/"| ds
 
     ds -->|"publishes packages"| npm

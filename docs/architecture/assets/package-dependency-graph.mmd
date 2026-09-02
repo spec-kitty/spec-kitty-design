@@ -12,18 +12,19 @@ flowchart LR
     end
 
     subgraph BasePkgs["Base Layers"]
-        styles["@spec-kitty/styles\n(peer: @spec-kitty/tokens)"]
-        elements["@spec-kitty/elements\n(Lit custom elements)"]
+        styles["@spec-kitty/styles\n(peer: @spec-kitty/tokens)\nplanned — ADR-8"]
+        elements["@spec-kitty/elements\n(Lit custom elements)\nplanned — ADR-8"]
     end
 
     subgraph WrapperPkgs["Generated Wrappers  ·  on demand"]
-        react["@spec-kitty/react"]
-        ngwrap["@spec-kitty/angular"]
+        react["@spec-kitty/react\nplanned — ADR-8"]
+        angular_wrap["@spec-kitty/angular\nplanned — only if a consumer appears"]
     end
 
     subgraph Native["Native custom-element support\n(no wrapper package needed)"]
         vue["Vue"]
         svelte["Svelte"]
+        solid["Solid"]
         vanilla["vanilla / Django / SSG"]
     end
 
@@ -38,27 +39,29 @@ flowchart LR
     live -->|"reconcile  FR-034"| css
     css --> styles
     styles -->|"same .css, adopted"| elements
-    css --> elements
     elements -->|"manifest"| react
-    elements -->|"manifest"| ngwrap
-    elements -.->|"consumed directly"| vue
-    elements -.->|"consumed directly"| svelte
-    elements -.->|"consumed directly"| vanilla
+    elements -->|"manifest"| angular_wrap
+    elements -->|"consumed directly  (elements + manifest)"| vue
+    elements -->|"consumed directly"| svelte
+    elements -->|"consumed directly"| solid
+    elements -->|"consumed directly"| vanilla
 
-    elements -->|"classic script  no build step"| dashboard
-    elements -->|"npm install"| desktop
+    elements -.->|"classic script, no build step  (planned — #650)"| dashboard
+    css -.->|"vendored tokens.css mirror @ cdde80a"| desktop
+    elements -.->|"npm install  (planned)"| desktop
     styles -->|"CSS + static HTML"| docsite
     css -->|"CDN link  zero build-step"| static
 
     classDef source fill:#1C1C20,stroke:#B8A9E0,color:#B8A9E0,stroke-width:1.5px
     classDef token fill:#1a1a08,stroke:#F5C518,color:#F5C518,stroke-width:2px
     classDef framework fill:#14202E,stroke:#A9C7E8,color:#A9C7E8,stroke-width:1.5px
-    classDef future_cls fill:#161619,stroke:#26262C,color:#545458,stroke-width:1px,stroke-dasharray: 4 4
+    classDef native fill:#161619,stroke:#8FCB8F,color:#8FCB8F,stroke-width:1.5px
+    classDef ondemand fill:#161619,stroke:#26262C,color:#545458,stroke-width:1px,stroke-dasharray: 4 4
     classDef consumer fill:#161619,stroke:#8FCB8F,color:#8FCB8F,stroke-width:1.5px
 
     class ref,live source
     class css,catalogue token
     class styles,elements framework
-    class react,ngwrap framework
-    class vue,svelte,vanilla future_cls
+    class react,angular_wrap ondemand
+    class vue,svelte,solid,vanilla native
     class dashboard,docsite,desktop,static consumer
