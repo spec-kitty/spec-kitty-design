@@ -44,17 +44,81 @@ function loadStoryManifest() {
 
 // ── Run axe on a single story ─────────────────────────────────────────────────
 
+// Storybook 7+ renders into #storybook-root; older builds used #root.
+const RENDER_ROOT_SELECTORS = ['#storybook-root', '#root'];
+
+/**
+ * Assert the story actually rendered something.
+ *
+ * axe reports zero violations for a blank page, so without this check a story
+ * that fails to load is indistinguishable from a story that is clean — the
+ * gate certifies absence. Three failure shapes are caught:
+ *
+ *   1. no render root at all (the iframe never booted);
+ *   2. a render root with no element and no text (the framework booted but
+ *      rendered nothing);
+ *   3. a custom element present in the DOM whose tag was never defined in the
+ *      registry — the elements-era shape. An unupgraded custom element is an
+ *      inert unknown tag: it has no shadow root, no content, and no semantics,
+ *      and axe is perfectly happy with it.
+ */
+async function assertStoryRendered(page, selectors) {
+  const verdict = await page.evaluate((rootSelectors) => {
+    const root = rootSelectors.map((s) => document.querySelector(s)).find(Boolean);
+    if (!root) {
+      return { ok: false, reason: `no render root (looked for ${rootSelectors.join(', ')})` };
+    }
+    if (root.childElementCount === 0 && root.textContent.trim() === '') {
+      return { ok: false, reason: 'render root is empty' };
+    }
+    const undefinedTags = [
+      ...new Set(
+        Array.from(root.querySelectorAll('*'))
+          .map((el) => el.tagName.toLowerCase())
+          .filter((tag) => tag.includes('-'))
+          .filter((tag) => !window.customElements.get(tag))
+      ),
+    ];
+    if (undefinedTags.length > 0) {
+      return { ok: false, reason: `custom element(s) never upgraded: ${undefinedTags.join(', ')}` };
+    }
+    return { ok: true };
+  }, selectors);
+
+  if (!verdict.ok) {
+    throw new Error(verdict.reason);
+  }
+}
+
 async function checkStory(page, storyId) {
   const url = `file://${STORYBOOK_DIR}/iframe.html?id=${storyId}&viewMode=story`;
-  await page.goto(url, { waitUntil: 'domcontentloaded' });
 
-  // Wait briefly for Angular/HTML framework to bootstrap
-  await page.waitForTimeout(500);
+  const scriptErrors = [];
+  const onPageError = (err) => scriptErrors.push(err.message);
+  page.on('pageerror', onPageError);
 
-  await injectAxe(page);
-  return getViolations(page, 'body', {
-    runOnly: { type: 'tag', values: AXE_TAGS },
-  });
+  try {
+    const response = await page.goto(url, { waitUntil: 'domcontentloaded' });
+    if (response && !response.ok() && response.status() !== 0) {
+      throw new Error(`iframe.html returned HTTP ${response.status()}`);
+    }
+
+    // Wait briefly for the story framework to bootstrap.
+    await page.waitForTimeout(500);
+
+    if (scriptErrors.length > 0) {
+      throw new Error(`script error: ${scriptErrors[0]}`);
+    }
+
+    await assertStoryRendered(page, RENDER_ROOT_SELECTORS);
+
+    await injectAxe(page);
+    return getViolations(page, 'body', {
+      runOnly: { type: 'tag', values: AXE_TAGS },
+    });
+  } finally {
+    page.off('pageerror', onPageError);
+  }
 }
 
 // ── Main ──────────────────────────────────────────────────────────────────────
@@ -87,6 +151,7 @@ async function checkStory(page, storyId) {
 
   let totalViolations = 0;
   const failingStories = [];
+  const loadFailures = [];
 
   for (const storyId of idsToTest) {
     try {
@@ -100,16 +165,28 @@ async function checkStory(page, storyId) {
         console.log(`✅ ${storyId}`);
       }
     } catch (err) {
-      console.warn(`⚠  ${storyId}: could not load (${err.message})`);
+      // A story that does not render is a failure, not a warning. Treating it
+      // as skippable is what let this gate pass on an empty page.
+      loadFailures.push({ storyId, reason: err.message });
+      console.error(`❌ ${storyId}: did not render (${err.message})`);
     }
   }
 
   await browser.close();
 
+  if (loadFailures.length > 0) {
+    console.error(`\n❌ ${loadFailures.length} of ${idsToTest.length} story/stories did not render:`);
+    loadFailures.forEach(({ storyId, reason }) => console.error(`   ${storyId} — ${reason}`));
+    console.error('   A story that does not render cannot be assessed for accessibility.');
+  }
+
   if (totalViolations > 0) {
     console.error(`\n❌ ${totalViolations} WCAG 2.1 AA violation(s) across ${failingStories.length} story/stories.`);
+  }
+
+  if (loadFailures.length > 0 || totalViolations > 0) {
     process.exit(1);
   }
 
-  console.log(`\n✅ Zero WCAG 2.1 AA violations across all ${idsToTest.length} story/stories.`);
+  console.log(`\n✅ Zero WCAG 2.1 AA violations across all ${idsToTest.length} rendered story/stories.`);
 })();
