@@ -20,7 +20,9 @@
         "{workspaceRoot}/packages/*/src/**/*",
         "{workspaceRoot}/packages/*/assets/**/*",
         "{workspaceRoot}/package.json",
-        "{workspaceRoot}/package-lock.json"
+        "{workspaceRoot}/package-lock.json",
+        "{workspaceRoot}/tsconfig.base.json",
+        "{workspaceRoot}/packages/*/package.json"
       ]
     },
     "test": {
@@ -28,11 +30,6 @@
     }
   },
   "defaultProject": "storybook",
-  "generators": {
-    "@nx/angular:component": {
-      "style": "css"
-    }
-  },
   "defaultBase": "main",
   "analytics": false
 }

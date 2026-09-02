@@ -11,6 +11,11 @@ const SPEC_KITTY_AUTO_COMMIT_PATTERNS = [
   (msg) => /^feat\(kitty\/mission-/.test(msg),
   // chore(spec): apply post-analysis remediations ... (Spec Kitty spec edits)
   (msg) => /^chore\(spec\):/.test(msg),
+  // chore(spec-kitty): status transition WPnn — emitted by `spec-kitty agent tasks
+  // move-task`. The slug-suffixed pattern above does not match it: current CLI
+  // versions use a bare `spec-kitty` scope with no mission ULID. Caught by the
+  // pre-merge squad on #69, where 12 such CLI-authored commits failed scope-enum.
+  (msg) => /^chore\(spec-kitty\):/.test(msg),
   // Bootstrap commits emitted by older Spec Kitty CLI versions (no conv-commit format)
   (msg) => /^(Add|Map|Update) (tasks|plan|meta|charter|requirements?) /i.test(msg),
   // spec: Initial mission spec (Spec Kitty creation step)
@@ -28,8 +33,7 @@ module.exports = {
       // is the custom-element base layer, `react` is its generated wrapper. Added
       // ahead of the packages themselves because a scope-enum miss blocks the first
       // commit of the mission that creates each one. `html-js` was dropped in M2
-      // when packages/html-js became packages/styles; `angular` was retired by #69
-      // retires that package.
+      // when packages/html-js became packages/styles; `angular` was retired by #69.
       'styles', 'elements', 'react',
     ]],
     'subject-case': [2, 'never', ['upper-case', 'pascal-case', 'start-case']],

@@ -2,62 +2,55 @@ import { test, expect } from '@playwright/test';
 
 test.setTimeout(60000);
 
-// #69 re-baselined all three of these.
+// #69 re-baselined all three of these, and fixed two mechanisms that made the old
+// baselines meaningless.
 //
-// Before this mission sk-stub-html-default, sk-feature-card-html-default and
-// sk-ribbon-card-html-with-ribbon were byte-identical to each other — one md5
-// (f642335856be21c8fb251d2dce35c383), 4257 bytes, a uniform #0D0E11 frame. Three
-// different components cannot produce one identical image: the styles-package
-// stories did not mount under @storybook/angular, so all three were pictures of
-// an empty canvas and passed unchanged whatever happened to those components.
-// That was the same certifying-absence failure the axe gate had (#90), in the
-// gate next to it. Tracked as #88.
+// WHY THEY WERE BLANK. Under @storybook/angular the packages/styles stories never
+// mounted, so all three baselines were the same empty #0D0E11 frame (one md5,
+// f642335856be21c8fb251d2dce35c383). Tracked as #88. That is the primary cause.
 //
-// Two things fixed it, and both must stay: the web-components renderer mounts
-// these stories, and each test now waits on its component's selector. They
-// previously screenshotted after domcontentloaded alone, which is why the blank
-// frames were never noticed. Do not replace a waitForSelector with a bare
-// waitForLoadState here.
+// WHY RE-SHOOTING ALONE WOULD NOT HAVE FIXED IT. These tests screenshotted the whole
+// PAGE. .sk-stub renders ~311x37px in a 1280x720 viewport — about 1.25% of the pixels
+// — against maxDiffPixelRatio: 0.02, so for that component a blank render and a full
+// render compared EQUAL and --update-snapshots refused to rewrite the file while
+// reporting "3 passed". (Only the stub was under the threshold; feature-card at ~14%
+// and ribbon-card at ~8% were not. The blindness explains the stub; non-mounting
+// explains all three.) Screenshots are now clipped to the component, so the ratio is
+// meaningful: hiding .sk-stub__label yields 0.88 instead of 0.006.
+//
+// THE TRADE. Clipping surrenders layout/position regressions — a component shifted
+// 400px still passes, where a full-page shot caught it. Page background and overlay
+// collisions are still caught (rounded corners leak surrounding pixels into the crop).
+// This is a deliberate trade: a blank render certifies silently, a layout shift is
+// visible to anyone opening the catalogue. Filed as #103.
+//
+// BASELINES ARE CI-AUTHORITATIVE. These PNGs were shot on the ubuntu-latest runner,
+// not locally: font rasterization differs and clipping makes the component's box size
+// part of the assertion, so a locally-shot baseline fails CI on dimensions alone
+// (312x38 local vs 336x34 CI for the stub). Refresh them from the
+// visual-regression-diffs artifact of a CI run, never with a local --update-snapshots.
+//
+// Two things must not be undone: the web-components renderer mounts these stories, and
+// each test waits on its component's selector. Do not replace a waitForSelector with a
+// bare waitForLoadState, and do not un-clip the screenshots.
 
 test('SK-stub HTML default — visual baseline', async ({ page }) => {
-  // HTML story renders via the @storybook/html framework in the Storybook iframe
   await page.goto('/iframe.html?id=primitives-skstub-html--default&viewMode=story');
-  // #69: wait on the component, not just domcontentloaded. These three tests
-  // screenshotted after domcontentloaded alone, which is why three DIFFERENT
-  // components all produced the same blank frame and nobody noticed (#88).
   const target = page.locator('.sk-stub').first();
   await target.waitFor({ state: 'visible', timeout: 20000 });
-  // Screenshot the COMPONENT, not the page. A full-page shot made the gate
-  // blind: .sk-stub is 277x19px, ~0.6% of a 1280x720 viewport, so a blank
-  // render differed from a full render by less than maxDiffPixelRatio and
-  // Playwright called them equal. That is how three identical blank baselines
-  // survived (#88). Clipping to the component makes the ratio meaningful.
   await expect(target).toHaveScreenshot('sk-stub-html-default.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
 });
 
 test('SK-feature-card HTML default — visual baseline', async ({ page }) => {
   await page.goto('/iframe.html?id=components-skfeaturecard-html--default&viewMode=story');
-  // #69: wait on the component, not just domcontentloaded (see #88).
   const target = page.locator('.sk-feature-card').first();
   await target.waitFor({ state: 'visible', timeout: 20000 });
-  // Screenshot the COMPONENT, not the page. A full-page shot made the gate
-  // blind: .sk-stub is 277x19px, ~0.6% of a 1280x720 viewport, so a blank
-  // render differed from a full render by less than maxDiffPixelRatio and
-  // Playwright called them equal. That is how three identical blank baselines
-  // survived (#88). Clipping to the component makes the ratio meaningful.
   await expect(target).toHaveScreenshot('sk-feature-card-html-default.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
 });
 
-
 test('SK-ribbon-card HTML with ribbon — visual baseline', async ({ page }) => {
   await page.goto('/iframe.html?id=components-skribboncard-html--with-ribbon&viewMode=story');
-  // #69: wait on the component, not just domcontentloaded (see #88).
   const target = page.locator('.sk-ribbon-card').first();
   await target.waitFor({ state: 'visible', timeout: 20000 });
-  // Screenshot the COMPONENT, not the page. A full-page shot made the gate
-  // blind: .sk-stub is 277x19px, ~0.6% of a 1280x720 viewport, so a blank
-  // render differed from a full render by less than maxDiffPixelRatio and
-  // Playwright called them equal. That is how three identical blank baselines
-  // survived (#88). Clipping to the component makes the ratio meaningful.
   await expect(target).toHaveScreenshot('sk-ribbon-card-html-with-ribbon.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
 });
