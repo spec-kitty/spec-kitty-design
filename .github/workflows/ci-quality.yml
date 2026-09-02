@@ -52,9 +52,8 @@ jobs:
               # The gates' own runners live here. Without this,
               # run-axe-storybook.js could be edited without the a11y gate
               # running — which is exactly how four defects reached the train
-              # unnoticed, and why that gate had never run green (#90). This
-              # supersedes the narrower scripts/assemble-demo-dist.sh entry this
-              # branch had added.
+              # unnoticed, and why that gate had never run green (#90). It also
+              # covers assemble-demo-dist.sh, which storybook-build runs.
               - 'scripts/**'
             docs:
               - 'docs/**'

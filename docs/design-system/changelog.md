@@ -15,7 +15,7 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) conve
   rather than the consumer's `<ul>` — axe reported both `listitem` and `list`
   violations. **Consumers must wrap it in a `<ul>` or another `role="list"`
   ancestor**; a bare bullet is now correctly reported as `aria-required-parent`.
-  The `html-js` check-bullet is unaffected — it emits a real `<li>` with no host
+  The `styles` check-bullet is unaffected — it emits a real `<li>` with no host
   element to interpose.
 
 ### Added

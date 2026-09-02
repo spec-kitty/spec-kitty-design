@@ -29,6 +29,16 @@ occurrence count is **884**. Every count below is the line metric, consistently.
 
 Files sum to 169, lines to 831.
 
+**The baseline is a point in time, and two references appeared after it.** #91
+merged into the train while this mission was open and introduced `html-js`
+mentions of its own — in `docs/design-system/changelog.md` and
+`apps/storybook/src/tests/visual.spec.ts`. Both are swept here even though they
+are outside the 169-file count above, because #68's exit criterion is about the
+tree at merge, not about a snapshot. The remaining mentions in
+`scripts/run-axe-storybook.js` are deliberately left alone: that is #91's file,
+its `(html-js|styles)` pattern is what kept these 74 stories excluded across the
+rename, and #69 deletes the constant outright.
+
 ## Rewritten
 
 The directory move itself: `git mv packages/html-js packages/styles`, **65 renames,
@@ -151,7 +161,12 @@ because that repo has no Actions workflows on `main`.
 - `npm run quality:all` exits 0. Reported because #68 names it, but it constrains
   little here: `quality:stylelint` covers CSS content that did not change, and the
   htmlhint globs did not cover `apps/demo` or `audit` until this mission widened
-  them.
+  them. The same edit **narrowed** them off `packages/angular`, and that is
+  deliberate: htmlhint cannot parse Angular structural directives, so those 15
+  templates produce 9 unfixable errors (`attr-lowercase` on `*ngIf`, `#ctaButton`).
+  Re-adding the glob would make an enforced gate permanently red for a reason no
+  fix addresses — which is what the `|| true` this mission removed was really
+  masking.
 - **CI is the authority for the baselines and the gates**; the PR's checks are the
   live surface, and a SHA-pinned transcript in a committed document goes stale on
   the next push, so none is kept here.
@@ -176,8 +191,11 @@ That is what the visual baselines capture.
 
 The proof is in the committed baselines themselves. The three HTML snapshots —
 `sk-stub-html-default`, `sk-feature-card-html-default`,
-`sk-ribbon-card-html-with-ribbon` — are **byte-identical**: 4254 bytes,
-md5 `fb104b5fd49f…`, a blank 1280×720 frame. Three different components cannot
+`sk-ribbon-card-html-with-ribbon` — are **byte-identical**: 4257 bytes,
+md5 `f642335856be…`, a uniform `#0D0E11` 1280×720 frame. (They were 4254 bytes of
+uniform white until #91 re-baselined them against the corrected canvas; the
+identity, which is the load-bearing part, survived the change.) Three different
+components cannot
 produce one identical image. They are the only baselines that touch
 `@spec-kitty/styles`; the other four are Angular stories.
 
@@ -186,14 +204,17 @@ passed a mission that moved every file in it. `visual.spec.ts` takes them after
 only `waitForLoadState('domcontentloaded')`, with no selector wait, unlike the
 Angular cases which wait on a real class and would have failed loudly.
 
-**The axe gate cannot see this, because the axe gate is itself broken.** An earlier
-draft of this document said the empty host satisfies
-`scripts/run-axe-storybook.js`'s `childElementCount > 0` check, so HTML stories
-"pass while displaying nothing". That is true only over HTTP. The gate loads over
-`file://` (`run-axe-storybook.js:95`), where Chromium blocks Storybook 10's
-`<script type="module">` preview bootstrap as a cross-origin request, so **no** story
-renders and the gate fails all 131 — Angular included. Filed separately; it is not
-this mission's to fix and not this mission's doing.
+**The axe gate could not see this, because the axe gate was itself broken — that is
+now fixed on the train.** Two earlier drafts of this paragraph were wrong in turn:
+first that the gate is "blind" because an empty host satisfies its
+`childElementCount > 0` check, then that it fails all 131 because it loads over
+`file://`. The second was true at the time. **#91 has since landed** (`ce30b3e`):
+the runner serves over HTTP, asserts per component host, and skips these 74
+unmountable stories explicitly — listed by id on every run rather than silently
+passed. So the gate now assesses 57 stories and reports zero violations, and the
+blindness described here is closed. What remains open is #88: these stories still
+do not mount, so they are excluded rather than assessed, until M3 (#69) moves
+Storybook to the web-components renderer.
 
 Not fixed here: ADR-13 and M3 (#69) move Storybook to the web-components renderer,
 which is the fix. Tracked on **#88**. Until then the visual baselines are not
