@@ -22,9 +22,9 @@ const config: StorybookConfig = {
   ],
   webpackFinal: async (webpackConfig: Configuration) => {
     const rules = webpackConfig.module?.rules ?? [];
-    const htmlJsPath = path.resolve(__dirname, '../../../packages/html-js');
+    const stylesPath = path.resolve(__dirname, '../../../packages/styles');
     const tokensPath = path.resolve(__dirname, '../../../packages/tokens');
-    // Allow direct CSS imports (ES module style) from html-js stories and tokens preview.
+    // Allow direct CSS imports (ES module style) from styles stories and tokens preview.
     // Angular component CSS files (packages/angular) go through the Angular pipeline — do NOT include them here.
     rules.push({
       test: /\.css$/,
@@ -32,7 +32,7 @@ const config: StorybookConfig = {
         'style-loader',
         { loader: 'css-loader', options: { sourceMap: false, url: false, import: false } },
       ],
-      include: [htmlJsPath, tokensPath],
+      include: [stylesPath, tokensPath],
     });
     if (webpackConfig.module) {
       webpackConfig.module.rules = rules;
