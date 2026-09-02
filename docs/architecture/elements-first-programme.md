@@ -28,14 +28,29 @@ The squad is **report-only** and never gates a mission — findings are triaged 
 
 **Blanket cadence does not port to a sixteen-mission programme.** Every point-cut of every mission is 60 deployments; at 3–4 lenses each that is roughly 200 delegate runs, and a single research-grade delegate pass in this programme measured 199k tokens. The cadence below is tiered by what a mission sets in motion rather than by ceremony, and costs about 29 deployments.
 
-| Tier | Missions | Point-cuts | Lenses |
-|---|---|---|---|
-| **A — mechanism-setting** | M4, M5, M8 | post-spec, post-plan, post-tasks, pre-merge | 4 |
-| **B — high blast radius** | M2, M3, M9, M14 | post-tasks, pre-merge | 3 |
-| **C — routine** | M6, M7, M10, M11–13, M15, M16 | pre-merge only | 3 |
-| **Programme** | the `train/elements-first` → `main` PR | pre-merge over the aggregate diff | 4 |
+**Pre-merge is not tiered.** Every PR into the train gets the **full gate — all four lenses — and its evidence posted as a PR comment before the merge.** Operator standing order, 2026-09-02. The tiering below governs only the *earlier* point-cuts, where the return on a squad varies by what the mission sets in motion.
 
-Tier A earns the full cadence because each one sets something every later mission inherits: M4 the element mechanism, M5 the verification standard, M8 the accessibility ruling whose failure mode is the charter's second-highest recorded risk. Tier C gets pre-merge only because the ADRs already pin those missions' decisions and the conformance matrix checks mechanically what a squad would re-read.
+| Tier | Missions | Earlier point-cuts | Pre-merge (every PR) |
+|---|---|---|---|
+| **A — mechanism-setting** | M4, M5, M8 | post-spec, post-plan, post-tasks · 4 lenses | **full · 4 lenses · evidence posted** |
+| **B — high blast radius** | M2, M3, M9, M14 | post-tasks · 3 lenses | **full · 4 lenses · evidence posted** |
+| **C — routine** | M6, M7, M10, M11–13, M15, M16 | none | **full · 4 lenses · evidence posted** |
+| **Programme** | the `train/elements-first` → `main` PR | — | **full · 4 lenses · evidence posted** |
+
+### The evidence comment
+
+The gate is not run until its evidence is on the PR. The comment must carry, at minimum:
+
+- **The commit SHA reviewed.** Without it the evidence silently decouples from the diff the moment anyone pushes again — the same failure the `[ci] green @<sha>` convention exists to prevent. A gate whose SHA is not the PR head is stale and must be re-run.
+- **Each lens by profile id**, with its verdict and the initialization it applied.
+- **Findings as `[SEVERITY] file:line — issue — recommendation`.** Ungrounded findings do not count as evidence.
+- **Disposition per finding**: folded into this PR, or deferred with an issue link. "Noted" is not a disposition.
+- **Pass number and the severity trend** against the previous pass, since the halt rule turns on trend rather than on new findings appearing.
+- **Where each lens concedes it does not apply.** A lens that concedes nothing is noise, and a squad that produces four confident verdicts on a docs-only PR has told you nothing.
+
+**Cost:** the gate is per PR, not per mission. A mission that opens three PRs pays three gates — which is deliberate: it prices incoherent PRs. Uniform pre-merge raises the programme from roughly 93 delegate runs to roughly 112, about 20%, for the point-cut where a finding is cheapest to act on and most expensive to miss.
+
+Tier A earns squads at the earlier point-cuts too because each one sets something every later mission inherits: M4 the element mechanism, M5 the verification standard, M8 the accessibility ruling whose failure mode is the charter's second-highest recorded risk. Tier C skips the earlier point-cuts because the ADRs already pin those missions' decisions and the conformance matrix checks mechanically what a squad would re-read — but it still faces the full gate at the merge.
 
 **Lens selection**, from the roster — complementary, not redundant:
 
@@ -91,9 +106,9 @@ Tier A earns the full cadence because each one sets something every later missio
 
 **O5 also activates the squad**, in the same run, by amending two answers in `.kittify/charter/interview/answers.yaml`. Note the mechanism: `selected_tactics` stays empty — the squad binds through review-policy prose, which is what agents read. Drafted text:
 
-> **`review_policy`** — append: *"Adversarial squad cadence is a standing order, tiered by mission risk and recorded in `docs/architecture/elements-first-programme.md`. Mechanism-setting missions get the squad at every SDD point-cut — post-spec, post-plan, post-tasks and pre-merge; high-blast-radius missions at post-tasks and pre-merge; routine missions pre-merge only; and the integration branch gets a squad over the aggregate diff before it lands on main. The squad is report-only and never gates a mission: findings are triaged and folded before the next phase starts. Delegated seats run on the smaller model; the larger model is reserved for squad lenses and synthesis, arbiter escalation, and plan-phase architecture on risky missions."*
+> **`review_policy`** — append: *"Adversarial squad cadence is a standing order. Every pull request receives the full adversarial gate before merge, and the gate's evidence is posted as a comment on that pull request — naming the commit SHA reviewed, each lens by profile id with its verdict, findings as severity/file/line/recommendation, the disposition of each finding, and the severity trend against the previous pass. A pull request is not merged until that evidence is present and its SHA matches the head. Earlier point-cuts are tiered by mission risk and recorded in `docs/architecture/elements-first-programme.md`: mechanism-setting missions get the squad post-spec, post-plan and post-tasks; high-blast-radius missions post-tasks; routine missions rely on the merge gate alone. The squad is report-only at the earlier point-cuts: findings are triaged and folded before the next phase starts. Delegated seats run on the smaller model; the larger model is reserved for squad lenses and synthesis, arbiter escalation, and plan-phase architecture on risky missions."*
 >
-> **`quality_gates`** — append: *"An adversarial review squad closes the point-cuts its mission's tier declares (see review_policy)."*
+> **`quality_gates`** — append: *"An adversarial review squad closes every pull request, with its evidence posted on that pull request before merge, plus the earlier point-cuts its mission's tier declares (see review_policy)."*
 
 ---
 
