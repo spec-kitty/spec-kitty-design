@@ -16,6 +16,35 @@ Every mission below has an intent, a scope boundary in both directions, dependen
 4. PR into `train/elements-first`. CI Quality runs on the train — the workflow's branch filters were extended for exactly this.
 5. Charter gates still apply per component: a Storybook story including a `LightMode` variant, axe-core zero violations, visual diff against the reference set, token-only CSS.
 
+## Adversarial squad cadence
+
+The squad is **report-only** and never gates a mission — findings are triaged and folded before the next phase starts. It is activated the way kitty-desktop activates it: as a standing order in the charter's review policy prose, not through `selected_tactics`, which stays empty.
+
+**Blanket cadence does not port to a sixteen-mission programme.** Every point-cut of every mission is 60 deployments; at 3–4 lenses each that is roughly 200 delegate runs, and a single research-grade delegate pass in this programme measured 199k tokens. The cadence below is tiered by what a mission sets in motion rather than by ceremony, and costs about 29 deployments.
+
+| Tier | Missions | Point-cuts | Lenses |
+|---|---|---|---|
+| **A — mechanism-setting** | M4, M5, M8 | post-spec, post-plan, post-tasks, pre-merge | 4 |
+| **B — high blast radius** | M2, M3, M9, M14 | post-tasks, pre-merge | 3 |
+| **C — routine** | M6, M7, M10, M11–13, M15, M16 | pre-merge only | 3 |
+| **Programme** | the `train/elements-first` → `main` PR | pre-merge over the aggregate diff | 4 |
+
+Tier A earns the full cadence because each one sets something every later mission inherits: M4 the element mechanism, M5 the verification standard, M8 the accessibility ruling whose failure mode is the charter's second-highest recorded risk. Tier C gets pre-merge only because the ADRs already pin those missions' decisions and the conformance matrix checks mechanically what a squad would re-read.
+
+**Lens selection**, from the roster — complementary, not redundant:
+
+* `architect-alphonso` — the layering *is* the thesis; every tier.
+* `reviewer-renata` — contract-versus-implementation and fakeable assertions. Non-negotiable on this programme: two gates in this repo were already certifying absence, and a third — the diagram drift check — is not reproducible.
+* `debugger-debbie` — "would this actually catch the regression?" Tier A and the programme merge.
+* `randy-reducer` — duplication and dead code, which is literally what this programme exists to remove. Read critically; it carries a known duct-tape bias.
+* `doctrine-daphne` — charter and SK-D01 integrity, on M1-adjacent and charter-touching work.
+
+**Model routing** (adopted from kitty-desktop's standing order #7): Sonnet for every delegated seat; Opus only for squad lenses and synthesis, arbiter escalation, and plan-phase architecture on risky missions. When in doubt, route down.
+
+**Dispatch rule:** each delegate's prompt begins with the profile load — `spec-kitty agent profile show <id>` and `spec-kitty charter context --action <action> --json` — then states which initialization, boundaries, directives and tactics it applied. Loading the profile is the point; naming a persona is not. Delegates stay read-only unless the task is an isolated implementation in its own worktree. Output is `[SEVERITY] file:line — issue — recommendation`, ending in a verdict, grounded in cited evidence, with honest concession of where the lens does not apply.
+
+**Halting:** stop on flat or rising severity across passes, not on the appearance of new findings; falling severity is convergence, not failure. Two passes maximum per point-cut.
+
 ## Boundary rules that apply to every mission
 
 1. **A mission may create, rename or delete a package only if its slug says so.** M2 renames, M3 deletes `angular`, M4 creates `elements`. No other mission touches a `package.json` `name` field.
@@ -53,6 +82,12 @@ Every mission below has an intent, a scope boundary in both directions, dependen
 **O4's fork, decided:** drop `--sk-font-mono` to the system monospace stack and delete the `@import`. JetBrains Mono is not vendored — `packages/tokens/fonts/` ships Falling Sky and Swansea only — so removing the import is not a one-line delete. Self-hosting it (woff2 + `@font-face` + OFL attribution) is the alternative and remains available as a follow-up if the brand requires that exact face. The immediate win is that a token file stops making a runtime third-party network request, which kitty-desktop already had to patch out.
 
 **O5's drafted wording** replaces the final sentence of `languages_frameworks`, the closing sentence of `testing_requirements`, and extends the numbered list in `quality_gates` — including making a story that fails to load a *failure* rather than a pass. Run `spec-kitty charter interview → generate → sync`.
+
+**O5 also activates the squad**, in the same run, by amending two answers in `.kittify/charter/interview/answers.yaml`. Note the mechanism: `selected_tactics` stays empty — the squad binds through review-policy prose, which is what agents read. Drafted text:
+
+> **`review_policy`** — append: *"Adversarial squad cadence is a standing order, tiered by mission risk and recorded in `docs/architecture/elements-first-programme.md`. Mechanism-setting missions get the squad at every SDD point-cut — post-spec, post-plan, post-tasks and pre-merge; high-blast-radius missions at post-tasks and pre-merge; routine missions pre-merge only; and the integration branch gets a squad over the aggregate diff before it lands on main. The squad is report-only and never gates a mission: findings are triaged and folded before the next phase starts. Delegated seats run on the smaller model; the larger model is reserved for squad lenses and synthesis, arbiter escalation, and plan-phase architecture on risky missions."*
+>
+> **`quality_gates`** — append: *"An adversarial review squad closes the point-cuts its mission's tier declares (see review_policy)."*
 
 ---
 
