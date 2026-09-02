@@ -22,7 +22,7 @@ occurrence count is **884**. Every count below is the line metric, consistently.
 | Package source headers | 29 | 29 | rewritten |
 | Decision records | 8 | 22 | untouched |
 | Demo display copy | 1 | 8 | rewritten |
-| Diagram sources and renders | 6 | 6 | deferred to #83 |
+| Diagram sources and renders | 6 | 6 | 4 corrected by #84; 2 remain |
 | Programme document | 1 | 6 | 5 untouched, 1 corrected |
 | Commitlint scope enum | 1 | 3 | scope dropped; 3 comment lines remain |
 | Angular CSS comments | 3 | 3 | rewritten |
@@ -99,11 +99,23 @@ explains what is being re-scoped. ADR-2 still lacks an "Amended by ADR-8"
 back-pointer while drawing the old graph; #83 out-of-scopes ADR text, so that is
 tracked on **#88**.
 
-**Diagram sources and renders** (`docs/architecture/assets/**`) — ADR-12 assigns
-these to the diagram mission, which must add the `styles` and `elements` layers
-anyway. That is **#83** (#67 was closed COMPLETED on 2026-09-02 and superseded).
-Consequence: `sad-lite.md` §3 now has an updated inline mermaid block above an
-embedded SVG that still renders the old name, until #83 re-renders it.
+**Diagram sources and renders** (`docs/architecture/assets/**`) — ADR-12 assigned
+these to the diagram mission (**#83**, after #67 was closed COMPLETED and
+superseded). **#84 landed on the train while this PR was open and corrected three
+of them** — `c4-l1-system-context`, `c4-l2-package-topology` and
+`package-dependency-graph` — so this branch was rebased onto that work rather than
+duplicating it.
+
+**One is left, and it belongs to nobody yet:** `bounded-context-map.mmd` still
+draws `@spec-kitty/html-js`, with its rendered `.svg` to match. ADR-12's list of
+required corrections never named it, so it fell outside #83's scope rather than
+being missed by it. It needs an owner — it is the last diagram in the repository
+asserting a package that no longer exists.
+
+The inline mermaid duplicate that used to sit in `sad-lite.md` §3 is gone: #84
+deleted it in favour of the corrected SVG embed, and this branch took that
+deletion during the rebase. The adjacency problem an earlier draft of this
+document recorded there no longer exists.
 
 **Commitlint comment lines** — the enum entry was dropped, but three comment lines
 in `commitlint.config.cjs` still say `html-js` while explaining that history. They
