@@ -22,7 +22,7 @@ const SPEC_KITTY_AUTO_COMMIT_PATTERNS = [
   // not end-of-string: commitlint passes ignores the FULL message, body included.
   (msg) => /^chore\(spec-kitty\): status transition WP\d+\s*(\n|$)/.test(msg),
   (msg) => /^chore: Record review-cycle-\d+ \([a-z-]+\) for WP\d+ on \S+\s*(\n|$)/.test(msg),
-  (msg) => /^chore: update issue-matrix\b/.test(msg),
+  (msg) => /^chore: update issue-matrix for \S+\s*(\n|$)/.test(msg),
   // Bootstrap commits emitted by older Spec Kitty CLI versions (no conv-commit format)
   (msg) => /^(Add|Map|Update) (tasks|plan|meta|charter|requirements?) /i.test(msg),
   // spec: Initial mission spec (Spec Kitty creation step)

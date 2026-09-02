@@ -11,8 +11,8 @@
       "evidence": "main.ts binds @storybook/web-components-vite; all 5 surviving @storybook/* + storybook resolve to 10.6.0; no @storybook/angular import under .storybook/. Commit 1af6936.",
       "pass_fail": "pass",
       "verified_by": "four-lens pre-merge gate + CI run 33688342088",
-      "verified_at": "2026-09-02T22:15:20.356851+00:00",
-      "notes": "Verified at 805de32. Mission not merged: blocked on #101 (8 pre-existing --sk-fg-subtle contrast violations), an operator design decision outside this mission's scope."
+      "verified_at": "2026-09-02T23:15:42.162796+00:00",
+      "notes": "Verified at d51d02d. #101's dark-theme half was fixed inside this PR (--sk-fg-subtle raised, missing pill-tag import, .sk-card given a colour); the a11y gate is green with zero violations across all 74 stories. The light-theme --sk-fg-subtle still fails AA and stays with #101, unverifiable while #93 keeps LightMode unrenderable."
     },
     {
       "criterion_id": "FR-002",
@@ -21,8 +21,8 @@
       "evidence": "webpackFinal and its webpack type import deleted. Proven mechanically on components-card--default over HTTP: --sk-surface-page = '#0D0E11' (non-empty) and .sk-card computed border-radius = '16px' (not 0px), background rgb(24,26,31). Eyeball verification explicitly not relied on.",
       "pass_fail": "pass",
       "verified_by": "four-lens pre-merge gate + CI run 33688342088",
-      "verified_at": "2026-09-02T22:15:20.356851+00:00",
-      "notes": "Verified at 805de32. Mission not merged: blocked on #101 (8 pre-existing --sk-fg-subtle contrast violations), an operator design decision outside this mission's scope."
+      "verified_at": "2026-09-02T23:15:42.162796+00:00",
+      "notes": "Verified at d51d02d. #101's dark-theme half was fixed inside this PR (--sk-fg-subtle raised, missing pill-tag import, .sk-card given a colour); the a11y gate is green with zero violations across all 74 stories. The light-theme --sk-fg-subtle still fails AA and stays with #101, unverifiable while #93 keeps LightMode unrenderable."
     },
     {
       "criterion_id": "FR-003",
@@ -31,8 +31,8 @@
       "evidence": "packages/angular/ and angular.json do not exist; `npx nx graph` exits 0. Commit 95cb220.",
       "pass_fail": "pass",
       "verified_by": "four-lens pre-merge gate + CI run 33688342088",
-      "verified_at": "2026-09-02T22:15:20.356851+00:00",
-      "notes": "Verified at 805de32. Mission not merged: blocked on #101 (8 pre-existing --sk-fg-subtle contrast violations), an operator design decision outside this mission's scope."
+      "verified_at": "2026-09-02T23:15:42.162796+00:00",
+      "notes": "Verified at d51d02d. #101's dark-theme half was fixed inside this PR (--sk-fg-subtle raised, missing pill-tag import, .sk-card given a colour); the a11y gate is green with zero violations across all 74 stories. The light-theme --sk-fg-subtle still fails AA and stays with #101, unverifiable while #93 keeps LightMode unrenderable."
     },
     {
       "criterion_id": "FR-004",
@@ -41,8 +41,8 @@
       "evidence": "Built index.json contains 74 stories and 0 with an importPath under packages/angular (was 131 = 74 styles + 57 angular).",
       "pass_fail": "pass",
       "verified_by": "four-lens pre-merge gate + CI run 33688342088",
-      "verified_at": "2026-09-02T22:15:20.356851+00:00",
-      "notes": "Verified at 805de32. Mission not merged: blocked on #101 (8 pre-existing --sk-fg-subtle contrast violations), an operator design decision outside this mission's scope."
+      "verified_at": "2026-09-02T23:15:42.162796+00:00",
+      "notes": "Verified at d51d02d. #101's dark-theme half was fixed inside this PR (--sk-fg-subtle raised, missing pill-tag import, .sk-card given a colour); the a11y gate is green with zero violations across all 74 stories. The light-theme --sk-fg-subtle still fails AA and stays with #101, unverifiable while #93 keeps LightMode unrenderable."
     },
     {
       "criterion_id": "FR-005",
@@ -51,8 +51,8 @@
       "evidence": "0 matches for @angular/, @angular-devkit/, zone.js, ng-packagr, @nx/angular, @storybook/angular, @storybook/html in package.json AND package-lock.json. Note: the pre-merge squad caught that the lockfile had regained an orphaned `packages/angular` workspace node marked extraneous:true after the restore-and-prune; it was removed explicitly and `npm ci --dry-run` re-verified (exit 0, 1582 packages, 1579 integrity hashes, 301 platform entries). 495 lockfile entries removed vs base, not 448.",
       "pass_fail": "pass",
       "verified_by": "four-lens pre-merge gate + CI run 33688342088",
-      "verified_at": "2026-09-02T22:15:20.356851+00:00",
-      "notes": "Verified at 805de32. Mission not merged: blocked on #101 (8 pre-existing --sk-fg-subtle contrast violations), an operator design decision outside this mission's scope."
+      "verified_at": "2026-09-02T23:15:42.162796+00:00",
+      "notes": "Verified at d51d02d. #101's dark-theme half was fixed inside this PR (--sk-fg-subtle raised, missing pill-tag import, .sk-card given a colour); the a11y gate is green with zero violations across all 74 stories. The light-theme --sk-fg-subtle still fails AA and stays with #101, unverifiable while #93 keeps LightMode unrenderable."
     },
     {
       "criterion_id": "FR-006",
@@ -61,8 +61,8 @@
       "evidence": "angular removed from all --projects= lists, release.yml's `for pkg in` loop AND its Publish @spec-kitty/angular step, storybook-deploy.yml's path trigger, and ci-quality.yml's components filter. All 5 workflows parse as valid YAML.",
       "pass_fail": "pass",
       "verified_by": "four-lens pre-merge gate + CI run 33688342088",
-      "verified_at": "2026-09-02T22:15:20.356851+00:00",
-      "notes": "Verified at 805de32. Mission not merged: blocked on #101 (8 pre-existing --sk-fg-subtle contrast violations), an operator design decision outside this mission's scope."
+      "verified_at": "2026-09-02T23:15:42.162796+00:00",
+      "notes": "Verified at d51d02d. #101's dark-theme half was fixed inside this PR (--sk-fg-subtle raised, missing pill-tag import, .sk-card given a colour); the a11y gate is green with zero violations across all 74 stories. The light-theme --sk-fg-subtle still fails AA and stays with #101, unverifiable while #93 keeps LightMode unrenderable."
     },
     {
       "criterion_id": "FR-007",
@@ -71,8 +71,8 @@
       "evidence": "`angular` removed from commitlint.config.cjs scope-enum; a test(angular): commit is rejected. CI lint-code passes on 805de32.",
       "pass_fail": "pass",
       "verified_by": "four-lens pre-merge gate + CI run 33688342088",
-      "verified_at": "2026-09-02T22:15:20.356851+00:00",
-      "notes": "Verified at 805de32. Mission not merged: blocked on #101 (8 pre-existing --sk-fg-subtle contrast violations), an operator design decision outside this mission's scope."
+      "verified_at": "2026-09-02T23:15:42.162796+00:00",
+      "notes": "Verified at d51d02d. #101's dark-theme half was fixed inside this PR (--sk-fg-subtle raised, missing pill-tag import, .sk-card given a colour); the a11y gate is green with zero violations across all 74 stories. The light-theme --sk-fg-subtle still fails AA and stays with #101, unverifiable while #93 keeps LightMode unrenderable."
     },
     {
       "criterion_id": "FR-008",
@@ -81,8 +81,8 @@
       "evidence": "All 13 packages/styles story files import Meta/StoryObj from @storybook/web-components; 0 @storybook/html references remain. @storybook/web-components declared as a direct devDependency rather than relied on via hoisting.",
       "pass_fail": "pass",
       "verified_by": "four-lens pre-merge gate + CI run 33688342088",
-      "verified_at": "2026-09-02T22:15:20.356851+00:00",
-      "notes": "Verified at 805de32. Mission not merged: blocked on #101 (8 pre-existing --sk-fg-subtle contrast violations), an operator design decision outside this mission's scope."
+      "verified_at": "2026-09-02T23:15:42.162796+00:00",
+      "notes": "Verified at d51d02d. #101's dark-theme half was fixed inside this PR (--sk-fg-subtle raised, missing pill-tag import, .sk-card given a colour); the a11y gate is green with zero violations across all 74 stories. The light-theme --sk-fg-subtle still fails AA and stays with #101, unverifiable while #93 keeps LightMode unrenderable."
     },
     {
       "criterion_id": "FR-009",
@@ -91,8 +91,8 @@
       "evidence": "4 Angular baselines and their 4 test bodies removed; 3 survivors re-shot. The 3 new PNGs have distinct md5s, none equal to the blank-frame hash f642335856be21c8fb251d2dce35c383. Baselines are CI-authoritative (adopted from run 33685531813); CI visual-regression passes on 805de32.",
       "pass_fail": "pass",
       "verified_by": "four-lens pre-merge gate + CI run 33688342088",
-      "verified_at": "2026-09-02T22:15:20.356851+00:00",
-      "notes": "Verified at 805de32. Mission not merged: blocked on #101 (8 pre-existing --sk-fg-subtle contrast violations), an operator design decision outside this mission's scope."
+      "verified_at": "2026-09-02T23:15:42.162796+00:00",
+      "notes": "Verified at d51d02d. #101's dark-theme half was fixed inside this PR (--sk-fg-subtle raised, missing pill-tag import, .sk-card given a colour); the a11y gate is green with zero violations across all 74 stories. The light-theme --sk-fg-subtle still fails AA and stays with #101, unverifiable while #93 keeps LightMode unrenderable."
     }
   ],
   "negative_invariants": []

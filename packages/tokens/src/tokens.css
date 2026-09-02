@@ -67,14 +67,6 @@
   --sk-fg-on-primary:       #1A1408;   /* dark ink on yellow buttons */
   --sk-fg-on-card:          #D6D6DA;   /* text on card surface */
 
-  /* Default page foreground — a real property, not a token. Without it, any element
-     that sets no `color` of its own inherits the UA default (black) and renders
-     black-on-dark: measured at 1.2:1 on --sk-surface-card. Present in EVERY card
-     story, but axe can only report it where an ancestor sets a background it can
-     resolve, which is why only the LightMode variants were ever flagged. Resolves
-     per-theme, since the light block redefines --sk-fg-body. #101 */
-  color: var(--sk-fg-body);
-
   /* ── Borders ─────────────────────── */
   --sk-border-default:      #2B313B;   /* hairline default — slightly cool */
   --sk-border-strong:       #353C48;   /* card border */
@@ -207,7 +199,11 @@
   --sk-fg-default:          #1A1A14;   /* near-black ink for headlines */
   --sk-fg-body:             #2A2A22;   /* body */
   --sk-fg-muted:            #5C5C52;   /* secondary body */
-  --sk-fg-subtle:           #8A8A7E;   /* tertiary / labels */
+  /* tertiary / labels. FAILS WCAG AA on the light surfaces it is used against:
+     3.49:1 on #FFFFFF (card) and 3.20:1 on #F8F5EC (page) — the same defect as the
+     dark value this PR raised, and worse. NOT fixed here: #93 makes LightMode
+     unrenderable, so a change could not be verified. Stays with #101. */
+  --sk-fg-subtle:           #8A8A7E;
   --sk-fg-placeholder:      #B8B8AC;   /* placeholder */
 
   --sk-border-default:      #EAE4D2;   /* hairline default */
