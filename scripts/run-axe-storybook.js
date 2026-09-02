@@ -46,6 +46,7 @@ function loadStoryManifest() {
 
 // Storybook 7+ renders into #storybook-root; older builds used #root.
 const RENDER_ROOT_SELECTORS = ['#storybook-root', '#root'];
+const RENDER_TIMEOUT_MS = 8000;
 
 /**
  * Assert the story actually rendered something.
@@ -103,8 +104,21 @@ async function checkStory(page, storyId) {
       throw new Error(`iframe.html returned HTTP ${response.status()}`);
     }
 
-    // Wait briefly for the story framework to bootstrap.
-    await page.waitForTimeout(500);
+    // Wait for the story to actually render rather than guessing at a fixed
+    // delay. A cold preview bundle takes longer than any constant short enough
+    // to be worth using across a whole catalogue — measured at over 500ms for
+    // the first story of a run, and well under it for every story after. On
+    // timeout we fall through: assertStoryRendered reports the precise reason.
+    await page
+      .waitForFunction(
+        (rootSelectors) => {
+          const root = rootSelectors.map((s) => document.querySelector(s)).find(Boolean);
+          return !!root && (root.childElementCount > 0 || root.textContent.trim().length > 0);
+        },
+        RENDER_ROOT_SELECTORS,
+        { timeout: RENDER_TIMEOUT_MS }
+      )
+      .catch(() => {});
 
     if (scriptErrors.length > 0) {
       throw new Error(`script error: ${scriptErrors[0]}`);
