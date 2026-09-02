@@ -21,7 +21,13 @@ jobs:
           node-version: "22"
           cache: npm
       - run: npm ci --ignore-scripts
-      - name: Install Chromium (required by puppeteer-config.json)
-        run: sudo apt-get install -y chromium-browser
+      # O7: the rendering browser is pinned, not apt-provided. mermaid renders
+      # text metrics differently between Chromium builds, so an unpinned
+      # browser made this check non-reproducible — it reported drift on 8 of 8
+      # committed SVGs with no .mmd modified. Playwright's Chromium is pinned
+      # by the exact @playwright/test version in package.json, so this runner
+      # and every contributor resolve the identical build.
+      - name: Install pinned Chromium (Playwright)
+        run: npx playwright install --with-deps chromium
       - name: "[ENFORCED] Render diagrams — drift check (FR-014, FR-015)"
         run: node scripts/render-diagrams.js --check

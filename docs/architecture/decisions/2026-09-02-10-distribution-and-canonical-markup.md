@@ -1,8 +1,8 @@
 # ADR 10 (2026-09-02): Distribution, Build Artifacts, and Canonical Markup
 
 **Date:** 2026-09-02
-**Status:** Proposed
-**Deciders:** MOES-Media (operator session, 2026-09-02); the canonical-markup ruling is recommended here and ratified at review
+**Status:** Accepted (ratified by the operator, 2026-09-02)
+**Deciders:** MOES-Media (operator session, 2026-09-02); the canonical-markup ruling in §3 was ratified by the operator on 2026-09-02
 **Technical Story:** ADR-8 constraints 1 and 2; SP-3, run before this record was written
 
 ---
@@ -50,7 +50,7 @@ The classic-script format is not a preference. `file://` plus `type="module"` is
 
 ### 3. Canonical markup: the element's template is the sole authored source
 
-**Recommended ruling.** The static `.html` that `@spec-kitty/styles` ships becomes **build output generated from the element**, marked as generated and never hand-edited.
+**Ratified 2026-09-02.** The static `.html` that `@spec-kitty/styles` ships becomes **build output generated from the element**, marked as generated and never hand-edited.
 
 This satisfies criterion 3 honestly — authored markup exists exactly once — while keeping the real HTML that the server-rendered consumers need. The alternatives were considered and are worse: declaring the `.html` canonical means hand-syncing it against the element forever, which is the drift this programme exists to end; and dropping static markup entirely strands the docsite, the marketing pages, the slidedecks and the Django UI, who are the majority of named consumers.
 

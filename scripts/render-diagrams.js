@@ -222,7 +222,22 @@ function renderOne(mmdcPath, compiledPath, outPath) {
     // does not exist on every contributor machine, and mermaid-cli's config file
     // takes precedence over PUPPETEER_EXECUTABLE_PATH — so without this override
     // the drift check is unrunnable locally and only ever exercised in CI.
-    const override = process.env.PUPPETEER_EXECUTABLE_PATH;
+    // O7: pin the rendering browser. mermaid renders text metrics differently
+    // between Chromium builds, so an unpinned browser makes the drift check
+    // non-reproducible — it reported drift on 8 of 8 committed SVGs with no
+    // .mmd modified. Playwright's Chromium is pinned by the exact
+    // @playwright/test version in package.json, so CI and every contributor
+    // resolve the identical build. An explicit env override still wins.
+    let override = process.env.PUPPETEER_EXECUTABLE_PATH;
+    if (!override) {
+      try {
+        const pw = require('playwright');
+        const p = pw.chromium.executablePath();
+        if (p && fs.existsSync(p)) override = p;
+      } catch {
+        // playwright not installed — fall back to the pinned config path
+      }
+    }
     if (override) {
       const base = JSON.parse(fs.readFileSync(PUPPETEER_CONFIG, 'utf8'));
       const merged = path.join(os.tmpdir(), `sk-puppeteer-${process.pid}.json`);

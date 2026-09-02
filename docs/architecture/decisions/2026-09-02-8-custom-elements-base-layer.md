@@ -1,7 +1,7 @@
 # ADR 8 (2026-09-02): Custom Elements as the Shared Component Base Layer
 
 **Date:** 2026-09-02
-**Status:** Proposed
+**Status:** Accepted (ratified by the operator, 2026-09-02)
 **Deciders:** MOES-Media (operator session, 2026-09-02)
 **Technical Story:** Multi-framework consumption of the design system; amends ADR-2 (monorepo package topology); closes the schema gap raised in `research/001-design-system-architectural-evaluation.md` §3.1 / line 163
 
