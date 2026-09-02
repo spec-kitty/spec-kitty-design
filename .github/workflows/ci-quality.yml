@@ -60,6 +60,13 @@ jobs:
               # the gate definitions themselves ran no storybook gate at all
               # (#94).
               - '.github/workflows/ci-quality.yml'
+              # ...and the config those gates run on. scripts/** covered the
+              # runners and ci-quality.yml the wiring; these drive the jobs
+              # themselves, and an edit to any of them was invisible (#94).
+              - 'playwright.config.ts'
+              - 'nx.json'
+              - 'package.json'
+              - 'package-lock.json'
             docs:
               - 'docs/**'
               - '*.md'
@@ -269,10 +276,10 @@ jobs:
     steps:
       - name: "[ENFORCED] All hard gates must pass (FR-026)"
         run: |
+          echo "changes: ${{ needs.changes.result }} (tokens=${{ needs.changes.outputs.tokens }} components=${{ needs.changes.outputs.components }})"
           echo "security: ${{ needs.security.result }}"
           echo "workflow-pin-check: ${{ needs.workflow-pin-check.result }}"
           echo "lint-code: ${{ needs.lint-code.result }}"
-          echo "changes: ${{ needs.changes.result }}"
           echo "storybook-build: ${{ needs.storybook-build.result }}"
           echo "a11y: ${{ needs.a11y.result }}"
           echo "visual-regression: ${{ needs.visual-regression.result }}"
@@ -299,6 +306,23 @@ jobs:
           if [ "$a11y_ok" != "success" ] && [ "$a11y_ok" != "skipped" ]; then a11y_ok="fail"; fi
           if [ "$vr_ok"   != "success" ] && [ "$vr_ok"   != "skipped" ]; then vr_ok="fail"; fi
           if [ "$pw_ok"   != "success" ] && [ "$pw_ok"   != "skipped" ]; then pw_ok="fail"; fi
+
+          # 'skipped' is only acceptable for the REASON it exists: nothing
+          # relevant changed. Accepting it unconditionally was the same
+          # green-by-skip defect one level down - a PR editing this file could
+          # set `if: false` on a11y, get 'skipped', and pass. The filter outputs
+          # make the tolerance conditional on data rather than asserted in a
+          # comment, and they are reachable here only because `changes` is now
+          # in `needs` (#94).
+          relevant="${{ needs.changes.outputs.tokens }}${{ needs.changes.outputs.components }}"
+          case "$relevant" in
+            *true*)
+              if [ "$sb_ok"   = "skipped" ]; then sb_ok="fail";   echo "storybook-build skipped despite relevant changes"; fi
+              if [ "$a11y_ok" = "skipped" ]; then a11y_ok="fail"; echo "a11y skipped despite relevant changes"; fi
+              if [ "$vr_ok"   = "skipped" ]; then vr_ok="fail";   echo "visual-regression skipped despite relevant changes"; fi
+              if [ "$pw_ok"   = "skipped" ]; then pw_ok="fail";   echo "playwright skipped despite relevant changes"; fi
+              ;;
+          esac
           if [ "${{ needs.changes.result }}"           != "success" ] || \
              [ "${{ needs.security.result }}"          != "success" ] || \
              [ "${{ needs.workflow-pin-check.result }}" != "success" ] || \
