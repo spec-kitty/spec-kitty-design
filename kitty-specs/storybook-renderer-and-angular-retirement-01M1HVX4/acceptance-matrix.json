@@ -6,7 +6,7 @@
   "criteria": [
     {
       "criterion_id": "FR-001",
-      "description": "`apps/storybook/.storybook/main.ts` binds `@storybook/web-components-vite` at the resolved Storybook version (10.5.10, not the ^10.3.6 range); no `@storybook/angular` import remains under `.storybook/`.",
+      "description": "`apps/storybook/.storybook/main.ts` binds `@storybook/web-components-vite` at the resolved Storybook version (the resolved lockfile version, currently 10.6.0 \u2014 not the declared range); no `@storybook/angular` import remains under `.storybook/`.",
       "proof_type": "automated_test",
       "evidence": "main.ts binds @storybook/web-components-vite; all 5 surviving @storybook/* + storybook resolve to 10.6.0; no @storybook/angular import under .storybook/. Commit 1af6936.",
       "pass_fail": "pass",
@@ -48,7 +48,7 @@
       "criterion_id": "FR-005",
       "description": "Zero matches for `@angular/`, `@angular-devkit/`, `zone.js`, `ng-packagr`, `@nx/angular`, `@storybook/angular`, `@storybook/html` in `package.json` and `package-lock.json`. Note the plain `@angular/` token does NOT match `@angular-devkit/*`; both must be checked.",
       "proof_type": "automated_test",
-      "evidence": "0 matches for @angular/, @angular-devkit/, zone.js, ng-packagr, @nx/angular, @storybook/angular, @storybook/html in package.json and package-lock.json. Includes the 3 @angular-devkit/* the issue's enumeration omitted. Lockfile re-pruned in 805de32 preserving 1579 integrity hashes; npm ci --dry-run exit 0.",
+      "evidence": "0 matches for @angular/, @angular-devkit/, zone.js, ng-packagr, @nx/angular, @storybook/angular, @storybook/html in package.json AND package-lock.json. Note: the pre-merge squad caught that the lockfile had regained an orphaned `packages/angular` workspace node marked extraneous:true after the restore-and-prune; it was removed explicitly and `npm ci --dry-run` re-verified (exit 0, 1582 packages, 1579 integrity hashes, 301 platform entries). 495 lockfile entries removed vs base, not 448.",
       "pass_fail": "pass",
       "verified_by": "four-lens pre-merge gate + CI run 33688342088",
       "verified_at": "2026-09-02T22:15:20.356851+00:00",

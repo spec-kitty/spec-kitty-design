@@ -257,16 +257,24 @@ async function checkStory(page, storyId) {
       .waitForFunction(
         (rootSelectors) => {
           const root = rootSelectors.map((s) => document.querySelector(s)).find(Boolean);
-          // Must match assertStoryRendered exactly. It used to wait on
-          // childElementCount > 0 — which is the *unmounted* state, since the
-          // story host is always present once the preview boots — so it resolved
-          // immediately, the timeout was never spent, and the assertion then ran
-          // against a DOM nobody had waited for. That was the "3 of 57, different
-          // each run" flake, and no retry can fix a wait that does not wait.
+          // Must match assertStoryRendered's hasOwnContent EXACTLY -- text or a
+          // media element, never "a descendant that also carries an sk-* class".
+          // It used to wait on childElementCount > 0 — which is the *unmounted*
+          // state, since the story host is always present once the preview boots —
+          // so it resolved immediately, the timeout was never spent, and the
+          // assertion then ran against a DOM nobody had waited for. That was the
+          // "3 of 57, different each run" flake, and no retry can fix a wait that
+          // does not wait. #69 broke this pairing once already by hardening the
+          // assertion and leaving the wait behind, which made the wait STRICTLY
+          // WEAKER than the assert: a story that paints its wrapper before filling
+          // its text would satisfy the wait and then fail the assert. Caught by the
+          // pre-merge squad. If you change one, change both.
           return (
             !!root &&
-            (root.querySelector('[class^="sk-"], [class*=" sk-"]') !== null ||
-              root.textContent.trim().length > 0)
+            (root.textContent.trim().length > 0 ||
+              root.querySelector(
+                'img, svg, input, select, textarea, canvas, video, picture, [role="img"], [aria-label]'
+              ) !== null)
           );
         },
         RENDER_ROOT_SELECTORS,
