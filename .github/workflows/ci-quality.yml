@@ -55,6 +55,11 @@ jobs:
               # unnoticed, and why that gate had never run green (#90). It also
               # covers assemble-demo-dist.sh, which storybook-build runs.
               - 'scripts/**'
+              # And this file, which wires those gates together. Adding
+              # scripts/** without it left the sibling hole open: a PR editing
+              # the gate definitions themselves ran no storybook gate at all
+              # (#94).
+              - '.github/workflows/ci-quality.yml'
             docs:
               - 'docs/**'
               - '*.md'
@@ -259,7 +264,7 @@ jobs:
   # ── Merge gate ──────────────────────────────────────────────────────────────
   gate:
     runs-on: ubuntu-latest
-    needs: [security, workflow-pin-check, lint-code, storybook-build, a11y, visual-regression, playwright]
+    needs: [changes, security, workflow-pin-check, lint-code, storybook-build, a11y, visual-regression, playwright]
     if: always()
     steps:
       - name: "[ENFORCED] All hard gates must pass (FR-026)"
@@ -267,6 +272,7 @@ jobs:
           echo "security: ${{ needs.security.result }}"
           echo "workflow-pin-check: ${{ needs.workflow-pin-check.result }}"
           echo "lint-code: ${{ needs.lint-code.result }}"
+          echo "changes: ${{ needs.changes.result }}"
           echo "storybook-build: ${{ needs.storybook-build.result }}"
           echo "a11y: ${{ needs.a11y.result }}"
           echo "visual-regression: ${{ needs.visual-regression.result }}"
@@ -277,6 +283,13 @@ jobs:
           # needs, a failure there skipped a11y / visual-regression / playwright,
           # and 'skipped' is accepted below - so those enforced steps could not
           # block a merge. It is legitimately skipped when no component changed.
+          #
+          # `changes` is tested STRICTLY (never 'skipped') because every other
+          # gate hangs off its outputs. If it fails, storybook-build skips for
+          # unmet needs, the three downstream jobs skip on their result guards,
+          # and all four are then accepted below - the same green-by-skip shape,
+          # one level up. It runs unconditionally, so 'skipped' is never
+          # legitimate for it (#94).
           sb_ok="${{ needs.storybook-build.result }}"
           a11y_ok="${{ needs.a11y.result }}"
           vr_ok="${{ needs.visual-regression.result }}"
@@ -286,7 +299,8 @@ jobs:
           if [ "$a11y_ok" != "success" ] && [ "$a11y_ok" != "skipped" ]; then a11y_ok="fail"; fi
           if [ "$vr_ok"   != "success" ] && [ "$vr_ok"   != "skipped" ]; then vr_ok="fail"; fi
           if [ "$pw_ok"   != "success" ] && [ "$pw_ok"   != "skipped" ]; then pw_ok="fail"; fi
-          if [ "${{ needs.security.result }}"          != "success" ] || \
+          if [ "${{ needs.changes.result }}"           != "success" ] || \
+             [ "${{ needs.security.result }}"          != "success" ] || \
              [ "${{ needs.workflow-pin-check.result }}" != "success" ] || \
              [ "${{ needs.lint-code.result }}"          != "success" ] || \
              [ "$sb_ok"   = "fail" ] || \
