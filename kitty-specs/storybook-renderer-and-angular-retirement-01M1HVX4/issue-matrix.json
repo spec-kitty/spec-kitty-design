@@ -49,7 +49,7 @@
       "wp": "WP02"
     },
     "#93": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "LightMode renders dark; scoped OUT by operator decision DM-01M1HXC6WQC90NK940WN2BXR9K.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -57,8 +57,8 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "verdict": "deferred-with-followup",
+      "wp": "WP04"
     }
   },
   "schema_version": 1
