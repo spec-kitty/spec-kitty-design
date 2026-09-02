@@ -39,6 +39,12 @@ tree at merge, not about a snapshot. The remaining mentions in
 its `(html-js|styles)` pattern is what kept these 74 stories excluded across the
 rename, and #69 deletes the constant outright.
 
+**That coupling is the single cross-PR fact a reviewer of this rename most needs.**
+#91 wrote the pattern with both names on purpose, so that renaming the directory
+would not silently un-skip 74 unmountable stories and turn the a11y gate red. It
+held: the run at this head still reports 74 skipped. M3 (#69) deletes the pattern,
+and `run-axe-storybook.js` hard-fails if that is forgotten.
+
 ## Rewritten
 
 The directory move itself: `git mv packages/html-js packages/styles`, **65 renames,
@@ -113,10 +119,11 @@ when this mission classified it; **#84 has since added one**, and corrected
 
 **Diagram sources and renders** (`docs/architecture/assets/**`) — ADR-12 assigned
 these to the diagram mission (**#83**, after #67 was closed COMPLETED and
-superseded). **#84 landed on the train while this PR was open and corrected three
-of them** — `c4-l1-system-context`, `c4-l2-package-topology` and
-`package-dependency-graph` — so this branch was rebased onto that work rather than
-duplicating it.
+superseded). **#84 landed on the train while this PR was open** and corrected the three
+diagrams ADR-12 named. Two of them carried this string — `c4-l2-package-topology`
+and `package-dependency-graph`, four of the six files in this class;
+`c4-l1-system-context` had none. This branch was rebased onto that work rather
+than duplicating it.
 
 **One is left, and it is owned by #87:** `bounded-context-map.mmd` still draws
 `@spec-kitty/html-js`, with its rendered `.svg` to match. ADR-12's list of required
