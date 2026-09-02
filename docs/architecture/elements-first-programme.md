@@ -10,11 +10,17 @@ Every mission below has an intent, a scope boundary in both directions, dependen
 
 ## How to run one
 
-1. Cut `mission/<slug>` from `train/elements-first`.
-2. `spec-kitty specify` → `plan` → `tasks`, seeded from this brief. Do not hand-edit `kitty-specs/` artefacts (CLAUDE.md §7).
-3. Implement. Conventional commits, scopes from `commitlint.config.cjs` (`styles`, `elements` and `react` were added ahead of the packages; `angular` and `html-js` stay until those packages are gone).
-4. PR into `train/elements-first`. CI Quality runs on the train — the workflow's branch filters were extended for exactly this.
-5. Charter gates still apply per component: a Storybook story including a `LightMode` variant, axe-core zero violations, visual diff against the reference set, token-only CSS.
+The full loop procedure — selection, claiming, driving, and releasing the claim — is in
+[`elements-first-run-prompt.md`](./elements-first-run-prompt.md). In short:
+
+1. Take the lowest-numbered unassigned issue in epic #66 whose dependencies are closed.
+2. **Claim it before any other action** — assign yourself, verify you are the sole assignee, comment on the issue. Claiming is the concurrency guard, not bookkeeping.
+3. Cut `mission/<slug>` from `train/elements-first`.
+4. `spec-kitty specify` → `plan` → `tasks`, seeded from the issue body. Never hand-edit `kitty-specs/` (CLAUDE.md §7).
+5. PR into the train with `Refs #N` — a merge into the train closes nothing automatically.
+6. On success, comment the evidence and close. On blocked, comment why and **remove the assignee** so the issue does not look claimed forever.
+
+Charter gates still apply per component: a Storybook story including a `LightMode` variant, axe-core zero violations, visual diff against the reference set, token-only CSS.
 
 ## Adversarial squad cadence
 
