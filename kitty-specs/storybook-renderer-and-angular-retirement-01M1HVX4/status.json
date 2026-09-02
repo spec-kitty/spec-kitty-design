@@ -97,7 +97,8 @@
       "model": "__resolved_model_absent__",
       "notes": [
         "Subtasks complete and CI-verified on 805de32 (build pass, visual-regression pass, playwright pass, lint-code pass, axe 74 stories/0 render failures). Forced because mark-status requires a legacy tasks.md that the flat tasks/WP*.md layout does not create, so there is no non-force path to record subtask completion. Filed upstream.",
-        "Four-lens pre-merge gate pass 1 on fd1bf6c: all four HOLD, 3 blockers folded in 805de32. Pass 2 dispatched."
+        "Four-lens pre-merge gate pass 1 on fd1bf6c: all four HOLD, 3 blockers folded in 805de32. Pass 2 dispatched.",
+        "Four-lens pre-merge gate: pass 1 all HOLD, 3 blockers folded in 805de32, CI verified (build/visual-regression/playwright/lint-code pass; axe 74 stories, 0 render failures). Only #101 outstanding — an operator design decision, not a WP defect."
       ],
       "provider": "__resolved_provider_absent__",
       "review_result": {
