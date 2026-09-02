@@ -1,7 +1,7 @@
 {
   "rows": {
     "#66": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "Parent epic; this mission is one of its missions. Verdict enum has no parent/context value.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -9,7 +9,7 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
+      "verdict": "in-mission",
       "wp": null
     },
     "#69": {
