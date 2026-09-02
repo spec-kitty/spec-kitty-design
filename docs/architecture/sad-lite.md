@@ -30,47 +30,6 @@ This document describes the architecture of the Spec Kitty Design System — a m
 ![C4 Level 1 — System Context](assets/c4-l1-system-context.svg)
 > Source: [`assets/c4-l1-system-context.mmd`](assets/c4-l1-system-context.mmd)
 
-```mermaid
-flowchart TB
-    subgraph Consumers["Consumers"]
-        angular_dev["Angular Developer\n(SK dashboard, custom apps)"]
-        html_dev["Static/HTML Developer\n(Jekyll/Hugo docsite, blog)"]
-        agent["AI Coding Agent\n(Claude Code, Cursor, Codex, ...)"]
-    end
-
-    subgraph DesignSystem["spec-kitty-design (this repo)"]
-        ds["Design System\n(tokens, components, Storybook,\ndoctrine bundle, SKILL.md)"]
-    end
-
-    subgraph Registries["External Registries"]
-        npm["npm Registry\n(@spec-kitty scope)"]
-        pages["GitHub Pages\n(Storybook public URL)"]
-    end
-
-    subgraph Upstream["Upstream References"]
-        mk["spec-kitty.ai\nMarketing Site\n(canonical --sk-* values)"]
-        ref["Claude Design Reference\n(tmp/ — gitignored)"]
-    end
-
-    subgraph Downstream["Consuming Repositories"]
-        sk_repo["spec-kitty\n(dashboard #650)"]
-        docsite["Future Docsite\n(Jekyll/Hugo #648)"]
-    end
-
-    angular_dev -->|"npm install\n@spec-kitty/angular"| npm
-    html_dev -->|"CDN link or\nnpm install @spec-kitty/tokens"| npm
-    agent -->|"reads SKILL.md\nand doctrine/"| ds
-
-    ds -->|"publishes packages"| npm
-    ds -->|"deploys on merge to main"| pages
-
-    mk -->|"token value reconciliation\n(FR-034, ADR-003)"| ds
-    ref -->|"visual baseline"| ds
-
-    sk_repo -->|"imports\n@spec-kitty/tokens\n@spec-kitty/angular"| npm
-    docsite -->|"imports\n@spec-kitty/tokens"| npm
-```
-
 ### Actor and system roles
 
 | Entity | Role |
@@ -91,35 +50,6 @@ flowchart TB
 
 ![C4 Level 2 — Package Topology](assets/c4-l2-package-topology.svg)
 > Source: [`assets/c4-l2-package-topology.mmd`](assets/c4-l2-package-topology.mmd)
-
-```mermaid
-flowchart TB
-    subgraph Monorepo["spec-kitty-design monorepo (nx/turborepo)"]
-
-        subgraph Published["Published Packages (@spec-kitty scope)"]
-            tokens["@spec-kitty/tokens\n────────────────\n• --sk-* CSS custom properties\n• Zero build-step consumption\n• CDN + npm distribution\n• < 20 KB uncompressed"]
-            angular["@spec-kitty/angular\n────────────────\n• Angular LTS component library\n• Imports tokens by reference\n• Storybook stories included\n• < 150 KB compressed/chunk"]
-            html_js["@spec-kitty/html-js\n────────────────\n• Framework-agnostic primitives\n• Vanilla HTML + ES modules\n• No build step for consumers\n• Storybook stories included"]
-        end
-
-        subgraph Internal["Internal Packages (not published)"]
-            storybook["Storybook\n────────────────\n• Multi-framework renderer\n• Angular + plain HTML tabs\n• Visual regression baseline\n• Deployed to GitHub Pages"]
-            doctrine["doctrine/\n────────────────\n• SK-D01, SK-D02 directives\n• sk-brand-voice styleguide\n• sk-visual-identity styleguide\n• graph.yaml (org-layer stub)\n• SKILL.md (enhanced)"]
-        end
-
-        subgraph Tooling["CI / Quality Tooling (not published)"]
-            ci["CI Pipeline\n────────────────\n• npm audit (hard gate)\n• ESLint + Stylelint + HTMLHint\n• axe-core WCAG 2.1 AA\n• Playwright cross-browser\n• Visual regression\n• Lighthouse\n• Dependabot\n• CycloneDX SBOM"]
-        end
-
-    end
-
-    tokens -->|"peer dep"| angular
-    tokens -->|"peer dep"| html_js
-    angular -->|"stories"| storybook
-    html_js -->|"stories"| storybook
-    storybook -->|"baseline"| ci
-    doctrine -->|"governance context\nfor agents"| storybook
-```
 
 ### Package responsibilities
 

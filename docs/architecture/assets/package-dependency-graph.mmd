@@ -33,6 +33,7 @@ flowchart LR
         docsite["Future Docsite\nJekyll / Hugo"]
         desktop["kitty-desktop\nTauri + Svelte"]
         static["Static HTML Page"]
+        saas_react["Team Kitty SaaS design surface\nReact 19.2 + Storybook"]
     end
 
     ref -->|"reconcile  FR-034"| css
@@ -40,6 +41,7 @@ flowchart LR
     css --> styles
     styles -->|"same .css, adopted"| elements
     elements -->|"manifest"| react
+    react -.->|"planned — the one identified wrapper consumer"| saas_react
     elements -->|"manifest"| angular_wrap
     elements -->|"consumed directly  (elements + manifest)"| vue
     elements -->|"consumed directly"| svelte
@@ -54,14 +56,14 @@ flowchart LR
 
     classDef source fill:#1C1C20,stroke:#B8A9E0,color:#B8A9E0,stroke-width:1.5px
     classDef token fill:#1a1a08,stroke:#F5C518,color:#F5C518,stroke-width:2px
-    classDef framework fill:#14202E,stroke:#A9C7E8,color:#A9C7E8,stroke-width:1.5px
+    classDef base fill:#14202E,stroke:#A9C7E8,color:#A9C7E8,stroke-width:1.5px
     classDef native fill:#161619,stroke:#8FCB8F,color:#8FCB8F,stroke-width:1.5px
     classDef ondemand fill:#161619,stroke:#26262C,color:#545458,stroke-width:1px,stroke-dasharray: 4 4
     classDef consumer fill:#161619,stroke:#8FCB8F,color:#8FCB8F,stroke-width:1.5px
 
     class ref,live source
     class css,catalogue token
-    class styles,elements framework
+    class styles,elements base
     class react,angular_wrap ondemand
     class vue,svelte,solid,vanilla native
-    class dashboard,docsite,desktop,static consumer
+    class dashboard,docsite,desktop,static,saas_react consumer
