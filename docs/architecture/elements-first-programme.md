@@ -73,7 +73,7 @@ Tier A earns squads at the earlier point-cuts too because each one sets somethin
 3. **Pipeline files have one owner per wave**: M2 owns the deploy and release path rewrites, M5 owns `ci-quality.yml` gate additions, M14 owns `release.yml`'s publish graph.
 4. **ADRs are written only in M1.** A later mission that discovers a decision files an issue and stops; it does not append.
 5. **`kitty-specs/**`, `docs/architecture/validation/**` and `docs/learnings/**` are frozen historical record**, including during the rename.
-6. **Charter and glossary changes go through the CLI**, never by hand, and never inside a mission's work-package diff.
+6. **Know which governance file is hand-edited and which is generated.** `kitty-specs/**` artefacts are never hand-edited — they desync runtime state (CLAUDE.md §7). `.kittify/charter/charter.md` is the opposite: it is a curated document and the *only* place this project's policy prose lives. `spec-kitty charter generate` does not write it — verified, including with `--force` — and `charter.yaml` is the doctrine catalogue (`governance`, `directives`, `catalog`), carrying no project policy at all. So charter policy changes are hand edits to `charter.md`, mirrored into `interview/answers.yaml` as the capture of record, and never made inside a mission's work-package diff.
 
 ---
 

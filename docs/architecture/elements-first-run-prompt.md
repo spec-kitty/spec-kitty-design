@@ -202,6 +202,6 @@ Return to step 1. Stop when nothing is both unassigned and unblocked, and report
 - **Push to `main`, open a PR against `main`, or merge the train into `main`.** The train lands once, by the operator. Merging mission branches into the train is permitted, under step 7's two conditions.
 - **Merge its own PR** without the full adversarial gate having run against the head SHA and its evidence posted on the PR.
 - **Write an ADR** outside #67.
-- **Hand-edit `kitty-specs/`, the charter, or the glossary.** Those go through the CLI.
+- **Hand-edit `kitty-specs/`.** Those artefacts desync runtime state (CLAUDE.md §7). The charter is different: `charter.md` is curated by hand and is the only home of project policy — but changing it is never part of a mission's diff.
 - **Touch `kitty-specs/**`, `docs/architecture/validation/**` or `docs/learnings/**`** — frozen historical record, including during the rename in #68.
 - **Start a mission whose dependencies are still open**, however tempting the parallelism looks. The dependency lines encode real coupling: #70 before #71 because a gate cannot precede the thing it gates; #76 before the batches because nine components authored from the old recipe rebuild the duplication.
