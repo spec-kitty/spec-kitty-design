@@ -1,7 +1,7 @@
 {
-  "event_count": 18,
-  "last_event_id": "01M1J2WD0T3AHNG9PKX0E5JDBF",
-  "materialized_at": "2026-09-02T22:12:24.730671+00:00",
+  "event_count": 19,
+  "last_event_id": "01M1J2WE00ZC822AWCGDMKPKAX",
+  "materialized_at": "2026-09-02T22:12:25.728739+00:00",
   "mission_number": "",
   "mission_slug": "storybook-renderer-and-angular-retirement-01M1HVX4",
   "mission_type": "software-dev",
@@ -11,9 +11,9 @@
     "canceled": 0,
     "claimed": 0,
     "done": 0,
-    "for_review": 2,
+    "for_review": 1,
     "in_progress": 0,
-    "in_review": 2,
+    "in_review": 3,
     "planned": 0
   },
   "work_packages": {
@@ -43,7 +43,8 @@
       "last_transition_at": "2026-09-02T22:12:24.730671+00:00",
       "model": "__resolved_model_absent__",
       "notes": [
-        "Subtasks complete and CI-verified on 805de32 (build pass, visual-regression pass, playwright pass, lint-code pass, axe 74 stories/0 render failures). Forced because mark-status requires a legacy tasks.md that the flat tasks/WP*.md layout does not create, so there is no non-force path to record subtask completion. Filed upstream."
+        "Subtasks complete and CI-verified on 805de32 (build pass, visual-regression pass, playwright pass, lint-code pass, axe 74 stories/0 render failures). Forced because mark-status requires a legacy tasks.md that the flat tasks/WP*.md layout does not create, so there is no non-force path to record subtask completion. Filed upstream.",
+        "Four-lens pre-merge gate pass 1 on fd1bf6c: all four HOLD, 3 blockers folded in 805de32. Pass 2 dispatched."
       ],
       "provider": "__resolved_provider_absent__",
       "role": "reviewer"
@@ -53,15 +54,15 @@
       "agent_profile": "__resolved_profile_absent__",
       "agent_profile_version": "__resolved_profile_version_absent__",
       "force_count": 1,
-      "lane": "for_review",
-      "last_event_id": "01M1J2W276X63SVQB7SMP7X2WN",
-      "last_transition_at": "2026-09-02T22:12:13.670653+00:00",
+      "lane": "in_review",
+      "last_event_id": "01M1J2WE00ZC822AWCGDMKPKAX",
+      "last_transition_at": "2026-09-02T22:12:25.728739+00:00",
       "model": "__resolved_model_absent__",
       "notes": [
         "Subtasks complete and CI-verified on 805de32 (build pass, visual-regression pass, playwright pass, lint-code pass, axe 74 stories/0 render failures). Forced because mark-status requires a legacy tasks.md that the flat tasks/WP*.md layout does not create, so there is no non-force path to record subtask completion. Filed upstream."
       ],
       "provider": "__resolved_provider_absent__",
-      "role": "implementer"
+      "role": "reviewer"
     },
     "WP04": {
       "actor": "user",
