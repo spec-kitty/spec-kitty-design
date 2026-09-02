@@ -1,10 +1,15 @@
 name: CI Quality
 
 on:
+  # `train/**` is the elements-first integration line (ADR-8). Mission branches
+  # PR into the train, and the train lands on main once. Without the train in
+  # these filters those PRs would run no quality gate at all — the checks are
+  # branch-filtered, not universal, so a long-lived integration branch has to
+  # be named explicitly or it merges unchecked.
   pull_request:
-    branches: [main]
+    branches: [main, 'train/**']
   push:
-    branches: [main]
+    branches: [main, 'train/**']
   schedule:
     # FR-041: nightly CVE audit on main branch
     # Offset from top of hour to avoid busy scheduling window (matches SK pattern)
