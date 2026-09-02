@@ -21,7 +21,7 @@ occurrence count is **884**. Every count below is the line metric, consistently.
 | Live references | 27 | 154 | rewritten |
 | Package source headers | 29 | 29 | rewritten |
 | Decision records | 8 | 22 | untouched |
-| Demo display copy | 1 | 8 | rewritten |
+| Demo display copy | 1 | 8 | rewritten — 7 live paths + 1 prose line |
 | Diagram sources and renders | 6 | 6 | 4 corrected by #84; 2 remain |
 | Programme document | 1 | 6 | 5 untouched, 1 corrected |
 | Commitlint scope enum | 1 | 3 | scope dropped; 3 comment lines remain |
@@ -32,8 +32,10 @@ Files sum to 169, lines to 831.
 ## Rewritten
 
 The directory move itself: `git mv packages/html-js packages/styles`, **65 renames,
-62 at 100% similarity**. The three carrying content are `README.md`, `package.json`
-and `project.json` — the files whose job is to name the package. Nothing under
+33 of them at 100% similarity**. The move alone was 62-at-100%; rewriting the 29
+stale `@spec-kitty/html-js` headers under the operator's fix-the-findings directive
+moved those files into the content-carrying column, alongside `README.md`,
+`package.json` and `project.json` — the three whose job is to name the package. Nothing under
 `src/` changed except line-1 attribution comments:
 `git rev-parse <head>:packages/styles/src` matched
 `git rev-parse 13459c8:packages/html-js/src` exactly until those headers were
@@ -93,11 +95,11 @@ breakage nor the repair.
 did under the name the package had at the time. Rewriting would falsify the record,
 and `kitty-specs/**` desyncs runtime state when hand-edited (CLAUDE.md §7).
 
-**Decision records** (`docs/architecture/decisions/**`, `research/**`) — an ADR
+**Decision records** (`docs/architecture/decisions/**`, `docs/architecture/research/**`) — an ADR
 states what was decided on a date, and ADR-8 argues *from* the old name when it
-explains what is being re-scoped. ADR-2 still lacks an "Amended by ADR-8"
-back-pointer while drawing the old graph; #83 out-of-scopes ADR text, so that is
-tracked on **#88**.
+explains what is being re-scoped. ADR-2 lacked an "Amended by ADR-8" back-pointer
+when this mission classified it; **#84 has since added one**, and corrected
+`package-dependency-graph` with it, so that deferral is discharged.
 
 **Diagram sources and renders** (`docs/architecture/assets/**`) — ADR-12 assigned
 these to the diagram mission (**#83**, after #67 was closed COMPLETED and
@@ -106,11 +108,13 @@ of them** — `c4-l1-system-context`, `c4-l2-package-topology` and
 `package-dependency-graph` — so this branch was rebased onto that work rather than
 duplicating it.
 
-**One is left, and it belongs to nobody yet:** `bounded-context-map.mmd` still
-draws `@spec-kitty/html-js`, with its rendered `.svg` to match. ADR-12's list of
-required corrections never named it, so it fell outside #83's scope rather than
-being missed by it. It needs an owner — it is the last diagram in the repository
-asserting a package that no longer exists.
+**One is left, and it is owned by #87:** `bounded-context-map.mmd` still draws
+`@spec-kitty/html-js`, with its rendered `.svg` to match. ADR-12's list of required
+corrections never named it, so it fell outside that mission's scope rather than
+being missed by it — **#87** was filed from #84's own gate and names this file line
+by line. It is the last diagram in the repository asserting a package that no
+longer exists, and it is rendered into `sad-lite.md` §4, so that document still
+shows the old name in one embedded diagram.
 
 The inline mermaid duplicate that used to sit in `sad-lite.md` §3 is gone: #84
 deleted it in favour of the corrected SVG embed, and this branch took that
@@ -168,9 +172,7 @@ primitives-skstub-html--default   -> <primitives-skstub-html--default ng-version
 form-forminput-angular--form-input-error -> <form-forminput-angular--form-input-error ...><sk-form-field ...>  real markup
 ```
 
-An earlier draft of this document said they "sit in `sb-preparing-story`
-indefinitely". That mechanism was wrong; the host mounts, the component never
-does. The consequence is the same and is what matters.
+That is what the visual baselines capture.
 
 The proof is in the committed baselines themselves. The three HTML snapshots —
 `sk-stub-html-default`, `sk-feature-card-html-default`,
@@ -184,10 +186,14 @@ passed a mission that moved every file in it. `visual.spec.ts` takes them after
 only `waitForLoadState('domcontentloaded')`, with no selector wait, unlike the
 Angular cases which wait on a real class and would have failed loudly.
 
-**The axe gate is blind to it too.** `scripts/run-axe-storybook.js` treats a story
-as rendered when the root has `childElementCount > 0 || textContent`. The empty host
-element *is* a child, so every HTML story passes that check while displaying
-nothing — the WCAG scan has been running against empty wrappers.
+**The axe gate cannot see this, because the axe gate is itself broken.** An earlier
+draft of this document said the empty host satisfies
+`scripts/run-axe-storybook.js`'s `childElementCount > 0` check, so HTML stories
+"pass while displaying nothing". That is true only over HTTP. The gate loads over
+`file://` (`run-axe-storybook.js:95`), where Chromium blocks Storybook 10's
+`<script type="module">` preview bootstrap as a cross-origin request, so **no** story
+renders and the gate fails all 131 — Angular included. Filed separately; it is not
+this mission's to fix and not this mission's doing.
 
 Not fixed here: ADR-13 and M3 (#69) move Storybook to the web-components renderer,
 which is the fix. Tracked on **#88**. Until then the visual baselines are not
