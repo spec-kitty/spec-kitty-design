@@ -1,0 +1,4 @@
+{"event": "started", "invocation_id": "01M1HR77XR3ZJXGAKS91RJH97F", "profile_id": "doctrine-daphne", "action": "classify", "request_text": "Generate charter.yaml so mission types activate, verifying charter.md is unchanged", "actor": "claude", "mode_of_work": "task_execution", "governance_context_hash": "8fb3e7484804aba3", "governance_context_available": true, "started_at": "2026-09-02T19:06:07.149856+00:00", "model_id": "claude-haiku-4-5"}
+{"event": "completed", "invocation_id": "01M1HR77XR3ZJXGAKS91RJH97F", "completed_at": "2026-09-02T19:07:16.512316+00:00", "outcome": "done", "closed_by": "agent"}
+{"event": "artifact_link", "invocation_id": "01M1HR77XR3ZJXGAKS91RJH97F", "at": "2026-09-02T19:07:16.512549+00:00", "kind": "artifact", "ref": ".kittify/charter/charter.yaml"}
+{"event": "commit_link", "invocation_id": "01M1HR77XR3ZJXGAKS91RJH97F", "at": "2026-09-02T19:07:16.512623+00:00", "sha": "9599cd6"}
