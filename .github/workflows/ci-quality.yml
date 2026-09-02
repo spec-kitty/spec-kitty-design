@@ -45,6 +45,11 @@ jobs:
               - 'packages/angular/**'
               - 'packages/html-js/**'
               - 'apps/storybook/**'
+              # The gates' own runners live here. Without this,
+              # run-axe-storybook.js could be edited without the a11y gate
+              # running — which is exactly how four defects reached the train
+              # unnoticed, and why this gate had never run green (#90).
+              - 'scripts/**'
             docs:
               - 'docs/**'
               - '*.md'

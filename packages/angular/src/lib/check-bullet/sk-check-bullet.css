@@ -1,5 +1,7 @@
-/* The host is the list item (see sk-check-bullet.ts). It must be a block so it
-   behaves as a flex child of the consumer's <ul>, as the <li> it replaced did. */
+/* The host is the list item (see sk-check-bullet.ts). An unknown element defaults
+   to display:inline; in a flex <ul> that is blockified anyway, so this rule earns
+   its place in the NON-flex case — a plain block <ul>, as the Default story uses —
+   where an inline host would shrink-wrap its contents. */
 :host {
   display: block;
 }
@@ -8,7 +10,6 @@
   display: flex;
   align-items: flex-start;
   gap: var(--sk-space-3);
-  list-style: none;
   color: var(--sk-fg-default);
   font-family: var(--sk-font-sans);
   font-size: var(--sk-text-base);

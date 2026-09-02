@@ -34,7 +34,7 @@ const AXE_TAGS = ['wcag2a', 'wcag2aa'];
 //
 // They are skipped and COUNTED, never silently dropped. ADR-13 / M3 (#69) moves
 // Storybook to the web-components renderer, which mounts these natively; delete
-// this skip in that mission and the 54 stories rejoin the gate. Tracked as #88.
+// this skip in that mission and the 74 stories rejoin the gate. Tracked as #88.
 // Matched against the story's importPath from index.json, not its id: the id is a
 // slug of the story title and several html-js stories ("Components/Card") carry no
 // marker at all, so an id pattern silently under-matched by 20 stories.
@@ -60,7 +60,13 @@ const MIME = {
 
 function startStaticServer(root) {
   const server = http.createServer((req, res) => {
-    const urlPath = decodeURIComponent((req.url || '/').split('?')[0]);
+    let urlPath;
+    try {
+      urlPath = decodeURIComponent((req.url || '/').split('?')[0]);
+    } catch {
+      res.writeHead(400).end();
+      return;
+    }
     const resolved = path.join(root, path.normalize(urlPath).replace(/^(\.\.[/\\])+/, ''));
     if (!resolved.startsWith(root)) { res.writeHead(403).end(); return; }
     let target = resolved;
@@ -72,8 +78,12 @@ function startStaticServer(root) {
     createReadStream(target).pipe(res);
   });
   return new Promise((resolve, reject) => {
-    server.on('error', reject);
-    server.listen(0, '127.0.0.1', () => resolve({ server, port: server.address().port }));
+    const onError = (e) => { server.off('error', onError); reject(e); };
+    server.on('error', onError);
+    server.listen(0, '127.0.0.1', () => {
+      server.off('error', onError);
+      resolve({ server, port: server.address().port });
+    });
   });
 }
 
@@ -114,10 +124,17 @@ let BASE_URL = null;
  *   1. no render root at all (the iframe never booted);
  *   2. a render root with no element and no text (the framework booted but
  *      rendered nothing);
- *   3. a custom element present in the DOM whose tag was never defined in the
- *      registry — the elements-era shape. An unupgraded custom element is an
- *      inert unknown tag: it has no shadow root, no content, and no semantics,
- *      and axe is perfectly happy with it.
+ *   3. a render root containing only the story's host element and nothing inside
+ *      it — the framework booted and mounted the host, but the story itself
+ *      never rendered into it.
+ *
+ * A previous version also flagged any hyphenated tag not registered with
+ * customElements, as an "un-upgraded custom element" detector. That failed every
+ * Angular story by construction — sk-button-primary and friends are Angular
+ * component selectors, hyphenated by convention and never registered — and it is
+ * removed rather than narrowed (#90). It will be worth reinstating, scoped to
+ * genuinely unregistered elements with no children and no shadow root, when
+ * ADR-8 makes these real custom elements.
  */
 async function assertStoryRendered(page, selectors) {
   const verdict = await page.evaluate((rootSelectors) => {
@@ -172,7 +189,13 @@ async function checkStory(page, storyId) {
       .waitForFunction(
         (rootSelectors) => {
           const root = rootSelectors.map((s) => document.querySelector(s)).find(Boolean);
-          return !!root && (root.childElementCount > 0 || root.textContent.trim().length > 0);
+          // Must match assertStoryRendered exactly. It used to wait on
+          // childElementCount > 0 — which is the *unmounted* state, since the
+          // story host is always present once the preview boots — so it resolved
+          // immediately, the timeout was never spent, and the assertion then ran
+          // against a DOM nobody had waited for. That was the "3 of 57, different
+          // each run" flake, and no retry can fix a wait that does not wait.
+          return !!root && root.querySelectorAll('*').length > 1;
         },
         RENDER_ROOT_SELECTORS,
         { timeout: RENDER_TIMEOUT_MS }
@@ -217,6 +240,17 @@ async function checkStory(page, storyId) {
   const skipped = idsToTest.filter((e) => UNRENDERABLE_IMPORT_PATTERN.test(e.importPath));
   const testable = idsToTest.filter((e) => !UNRENDERABLE_IMPORT_PATTERN.test(e.importPath));
 
+  // Certifying absence over an empty set is the failure this whole file exists to
+  // prevent, and it is reachable: #69 deletes packages/angular, after which every
+  // remaining story matches the skip pattern above. The comment there asks whoever
+  // does that to delete the skip; this makes forgetting it loud instead of green.
+  if (testable.length === 0) {
+    console.error('❌ No stories left to assess — every story was skipped.');
+    console.error('   If packages/angular was just removed, delete UNRENDERABLE_IMPORT_PATTERN (#69).');
+    server.close();
+    process.exit(1);
+  }
+
   if (!storyIds) {
     console.warn('⚠  Story manifest not found — testing known stub stories only.');
     console.warn('   Rebuild Storybook to enable full story iteration.');
@@ -231,6 +265,11 @@ async function checkStory(page, storyId) {
     }
   }
 
+  // The server is in-process on purpose. This script calls process.exit(), which
+  // does not reap spawned children, so an http-server child would be orphaned on
+  // exactly the failing runs this gate exists to produce; and listen(0) gives a
+  // collision-free port, where the repo's other two static servers both hardcode
+  // 6006 and would fight a local run.
   const browser = await chromium.launch();
   const context = await browser.newContext();
 
@@ -243,21 +282,9 @@ async function checkStory(page, storyId) {
     // so a story that left the preview wedged reported every LATER story as
     // "did not render" — form-forminput-angular--form-input-focus renders in
     // 68ms on its own and was being blamed on a timeout. See #90.
-    // One retry on a render failure. With a fresh page per story the failures are
-    // no longer systematic, but a small varying set (3 of 57, different each run)
-    // still misses the render window under load. A retry distinguishes a slow
-    // first paint from a story that genuinely cannot mount, without widening the
-    // timeout for all 57.
-    let page = await context.newPage();
+    const page = await context.newPage();
     try {
-      let violations;
-      try {
-        violations = await checkStory(page, storyId);
-      } catch (first) {
-        await page.close();
-        page = await context.newPage();
-        violations = await checkStory(page, storyId);
-      }
+      const violations = await checkStory(page, storyId);
       if (violations.length > 0) {
         totalViolations += violations.length;
         failingStories.push({ storyId, violations });
@@ -277,6 +304,7 @@ async function checkStory(page, storyId) {
   }
 
   await browser.close();
+  server.closeAllConnections?.();
   server.close();
 
   if (loadFailures.length > 0) {

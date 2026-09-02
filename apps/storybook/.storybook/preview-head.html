@@ -1,20 +1,28 @@
 <!--
-  The preview canvas has no background of its own, so every dark-theme story was
-  being composited on the browser default (white). preview.ts declares a
-  `backgrounds` parameter with an `sk-dark` default, but @storybook/addon-backgrounds
-  is not installed (main.ts loads only addon-docs and addon-a11y), so that parameter
-  is inert.
+  The preview canvas had no background of its own, so every dark-theme story was
+  composited on the browser default (white). preview.ts used to declare a
+  `backgrounds` parameter defaulting to sk-dark; it never did anything.
+
+  The reason is an API shape, not a missing addon: backgrounds ships in Storybook
+  core (storybook@10 exports ./backgrounds, and withBackgroundAndGrid lives in the
+  core preview runtime), but the decorator reads `parameters.backgrounds.options`
+  as a record plus a selection from `globals.backgrounds.value`. The config was the
+  Storybook 8 shape — `default` plus a `values` array — so `options` fell back to
+  the built-in defaults, `globals.backgrounds` was undefined, and no background was
+  ever applied. Installing an addon would have changed nothing.
 
   The consequence was not cosmetic: the axe gate measured dark-theme foreground
   colours against #ffffff and reported 9 colour-contrast violations that cannot
   occur in any real consumer. See #90.
 
-  --sk-surface-page is the canonical page surface token: dark at :root, light under
-  [data-theme="light"]. The light-mode stories wrap themselves in their own
-  data-theme="light" container, so they are unaffected by this.
+  Driving it from the token here rather than from parameters is deliberate — it is
+  one source of truth. --sk-surface-page is the canonical page surface: dark at
+  :root, light under [data-theme="light"]. The light-mode stories wrap themselves
+  in their own data-theme="light" container, so they are unaffected.
 -->
 <style>
   body {
-    background: var(--sk-surface-page);
+    background: var(--sk-surface-page, #0D0E11);
+    color: var(--sk-fg-default, #E8E8EB);
   }
 </style>
