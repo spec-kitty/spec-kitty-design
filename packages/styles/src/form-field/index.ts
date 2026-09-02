@@ -1,4 +1,4 @@
-/* @spec-kitty/html-js — form-field HTML string exports */
+/* @spec-kitty/styles — form-field HTML string exports */
 
 export const SkFormFieldHTML = `<div class="sk-form-field">
   <label class="sk-form-field__label" for="field-id">Label</label>

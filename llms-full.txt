@@ -601,8 +601,9 @@ Actions `uses:` directives pinned to immutable commit SHAs).
 - **HTMLHint** (`.htmlhintrc`) — covers structural HTML quality on
   `packages/**/*.html` and `apps/storybook/src/**/*.html`.
 - **commitlint** — extends `@commitlint/config-conventional`; the `scope-enum`
-  rule restricts scopes to: `tokens`, `angular`, `html-js`, `storybook`,
-  `doctrine`, `ci`, `docs`, `release`, `deps`, `security`. Subject case must
+  rule restricts scopes to: `tokens`, `angular`, `styles`, `storybook`,
+  `doctrine`, `ci`, `docs`, `release`, `deps`, `security`, plus `elements` and
+  `react` reserved for packages not yet created (ADR-8). Subject case must
   not be upper / pascal / start case.
 
 ### CI workflow — `.github/workflows/ci-quality.yml`

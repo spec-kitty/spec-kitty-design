@@ -1,4 +1,4 @@
-/* @spec-kitty/html-js — sk-feature-card shared styles */
+/* @spec-kitty/styles — sk-feature-card shared styles */
 /* All values use --sk-* tokens only — no hardcoded values */
 /* Deviation note: rgba() tint values for icon-chip backgrounds use
    hardcoded rgb channels (per spec C-103 accepted deviation for tint

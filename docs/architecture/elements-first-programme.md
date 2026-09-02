@@ -101,7 +101,7 @@ Remaining, all short: enable 2FA on the org; issue a granular publish token scop
 | **O4** | Tokens webfont: remove the Google Fonts `@import` at `tokens.css:138` | open — see below |
 | **O5** | Charter amendment lifting the unit-test prohibition | open — wording drafted, needs the CLI |
 | **O6** | Glossary seed: `element`, `styles layer`, `wrapper`, `manifest`, `conformance matrix` | open |
-| **O7** | SP-7 follow-up: pin the diagram rendering environment | open — see ADR-12 |
+| **O7** | SP-7 follow-up: pin the diagram rendering environment | **done** — `13459c8` pins Playwright's Chromium and re-renders all 8 SVGs |
 | **O8** | SaaS: three components referenced by six files that no longer exist (`TeamspacePulseInMotion`, `ProjectPostureRail`, `TeamspacePulse`) | open — separate repo, unrelated to this programme |
 
 **O4's fork, decided:** drop `--sk-font-mono` to the system monospace stack and delete the `@import`. JetBrains Mono is not vendored — `packages/tokens/fonts/` ships Falling Sky and Swansea only — so removing the import is not a one-line delete. Self-hosting it (woff2 + `@font-face` + OFL attribution) is the alternative and remains available as a follow-up if the brand requires that exact face. The immediate win is that a token file stops making a runtime third-party network request, which kitty-desktop already had to patch out.
@@ -140,7 +140,9 @@ ADRs 8, 9, 10, 11, 12 and 13 are written and committed on the train. What remain
 
 **WP shape:** classification map · move + package/nx/eslint metadata · pipelines · demo pages both modes · doc surfaces.
 
-**Exit:** `npm run quality:all` green; Storybook builds; **the 7 visual baselines pass unchanged** — that is the behaviour-neutrality proof and the reason nothing else may be in the diff; demo pages resolve from disk and after the deploy rewrite; no live `packages/html-js` reference remains.
+**Exit:** `npm run quality:all` green; Storybook builds; **the 7 visual baselines pass unchanged**; demo pages resolve from disk and after the deploy rewrite; no live `packages/html-js` reference remains.
+
+**On what proves behaviour-neutrality** (corrected in M2 after the adversarial gate): the baselines are necessary but not sufficient, and were overstated here as *"the behaviour-neutrality proof"*. Only 3 of the 7 render `packages/styles`; the other 4 are Angular stories. None exercises the package's only runtime behaviour, `sk-nav-pill.js`. The binding evidence is that the moved tree is byte-identical (`git rev-parse` on the two `src` trees returns one hash) plus resolution of every rewritten path in all three modes — `file://`, the post-`sed` deploy dist, and the `audit/` harness against a real build.
 
 ---
 
@@ -148,7 +150,7 @@ ADRs 8, 9, 10, 11, 12 and 13 are written and committed on the train. What remain
 
 **Intent:** move Storybook to the web-components renderer and delete Angular from the repository.
 
-**In scope:** swap `main.ts` to `@storybook/web-components-vite`; replace the hand-written `webpackFinal` CSS rule with Vite's native handling; delete the 10 Angular story files, `packages/angular`, `angular.json`, `ng-package.json` and the 16 Angular/`zone.js`/`ng-packagr`/`@nx/angular`/`@storybook/angular` devDependencies; update the three workflows hardcoding `projects=tokens,angular,html-js`; retire the `angular` commitlint scope; re-establish the baseline set.
+**In scope:** swap `main.ts` to `@storybook/web-components-vite`; replace the hand-written `webpackFinal` CSS rule with Vite's native handling; delete the 10 Angular story files, `packages/angular`, `angular.json`, `ng-package.json` and the 16 Angular/`zone.js`/`ng-packagr`/`@nx/angular`/`@storybook/angular` devDependencies; update the three workflows hardcoding `projects=tokens,angular,styles` (M2 renamed the third; M3 drops the second); retire the `angular` commitlint scope (M2 already dropped `html-js`); re-establish the baseline set.
 
 **Out of scope:** the generated Angular wrapper (deferred to M15); any element code; new component coverage.
 

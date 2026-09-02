@@ -1,4 +1,4 @@
-/* @spec-kitty/html-js — sk-nav-pill-drawer: hamburger trigger + collapsible drawer */
+/* @spec-kitty/styles — sk-nav-pill-drawer: hamburger trigger + collapsible drawer */
 /* Import this file IN ADDITION TO sk-nav-pill.css for responsive/collapsible nav behaviour. */
 /* Requires: sk-nav-pill.css (base pill layout must be loaded first) */
 /* JS dependency: skToggleDrawer() from sk-nav-pill.js must be wired to the hamburger button */

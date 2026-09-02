@@ -9,7 +9,7 @@
   "scripts": {
     "quality:lint": "nx run-many --target=lint --all",
     "quality:stylelint": "stylelint --allow-empty-input 'packages/**/*.css' 'packages/**/*.scss'",
-    "quality:htmlhint": "htmlhint 'packages/**/*.html' 'apps/storybook/src/**/*.html' || true",
+    "quality:htmlhint": "htmlhint 'packages/styles/**/*.html' 'packages/tokens/**/*.html' 'apps/storybook/src/**/*.html' 'apps/demo/**/*.html' 'audit/*.html'",
     "quality:commitlint": "commitlint --from=HEAD~1",
     "quality:all": "npm run quality:lint && npm run quality:stylelint && npm run quality:htmlhint",
     "tokens:catalogue": "node scripts/generate-token-catalogue.js",

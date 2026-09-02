@@ -7,11 +7,15 @@ packages/*/dist/
 !packages/tokens/dist/
 packages/tokens/dist/*
 !packages/tokens/dist/token-catalogue.json
-# publishability (2026-09-01 pre-publish audit, planning session): npm pack respects
-# .gitignore for re-inclusion, so CI-built dist trees for the other two publishable
-# packages need explicit exceptions or `npm publish` ships config files with no code.
-!packages/angular/dist/
-!packages/styles/dist/
+# The 2026-09-01 pre-publish audit added `!packages/angular/dist/` and
+# `!packages/styles/dist/` here, believing npm pack would otherwise ship config
+# files with no code. Tested in M2 and that is not so: both packages pack
+# byte-identically with and without the exceptions. `@spec-kitty/styles` is
+# governed by its package.json `files` allowlist (87 dist entries either way) and
+# `@spec-kitty/angular` publishes from `packages/angular/dist`, where the root
+# ignore rules do not reach (5 entries either way). The exceptions bought nothing
+# and un-ignored the build trees, so a stray `git add -A` after a local build
+# committed compiled output. Removed.
 .nx/cache
 .nx/workspace-data
 

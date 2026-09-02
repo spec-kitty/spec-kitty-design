@@ -48,9 +48,9 @@ desktop pill, or load **both** stylesheets for the responsive/drawer pattern.
 ### Required CSS imports
 
 ```html
-<link rel="stylesheet" href="node_modules/@spec-kitty/styles/src/nav-pill/sk-nav-pill.css">
+<link rel="stylesheet" href="node_modules/@spec-kitty/styles/dist/nav-pill/sk-nav-pill.css">
 <!-- For the drawer / hamburger pattern, ALSO load: -->
-<link rel="stylesheet" href="node_modules/@spec-kitty/styles/src/nav-pill/sk-nav-pill-drawer.css">
+<link rel="stylesheet" href="node_modules/@spec-kitty/styles/dist/nav-pill/sk-nav-pill-drawer.css">
 ```
 
 ### Drawer ID contract

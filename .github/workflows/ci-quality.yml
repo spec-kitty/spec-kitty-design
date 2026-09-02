@@ -148,6 +148,16 @@ jobs:
       - run: npm ci --ignore-scripts
       - name: "[ENFORCED] Storybook build (NFR-003 < 3 min)"
         run: npx nx run storybook:storybook:build
+      # Runs before the upload so the artifact the downstream jobs consume matches
+      # what the deploy actually publishes — the demo pages included. That is what
+      # lets nav-pill-behaviour.spec.ts drive the package's runtime JS through the
+      # real consumer path. It also runs the same script the deploy runs, so the sed
+      # rewrite, the asset mirroring and the reference-resolution check are exercised
+      # on every PR instead of only on push to main.
+      - name: "[ENFORCED] Demo surface assembles and every asset reference resolves"
+        run: |
+          npx nx run-many --target=build --projects=tokens,styles
+          bash scripts/assemble-demo-dist.sh apps/storybook/storybook-static
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # actions/upload-artifact v4.6.2
         with:
           name: storybook-static

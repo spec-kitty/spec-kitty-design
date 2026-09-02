@@ -1,4 +1,4 @@
-/* @spec-kitty/html-js — sk-ribbon-card shared styles */
+/* @spec-kitty/styles — sk-ribbon-card shared styles */
 /* All values use --sk-* tokens only — no hardcoded values */
 /* Deviation note: the ribbon top/right offset uses small fixed px values
    (top:0, right:24px) for precise corner anchoring — accepted layout constant

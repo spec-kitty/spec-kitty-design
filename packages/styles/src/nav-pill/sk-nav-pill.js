@@ -1,4 +1,4 @@
-/* @spec-kitty/html-js — sk-nav-pill toggle behaviour */
+/* @spec-kitty/styles — sk-nav-pill toggle behaviour */
 
 /**
  * Toggle the nav drawer open/closed and synchronize the hamburger button's
