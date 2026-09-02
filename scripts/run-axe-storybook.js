@@ -40,8 +40,25 @@ const AXE_TAGS = ['wcag2a', 'wcag2aa'];
 //
 // Content means TEXT or MEDIA -- never "a descendant that also carries an sk-*
 // class", which is the hole that let a host plus one empty BEM element pass.
+// Each arm must be evidence that something WAS RENDERED, not merely that a tag
+// exists. The first version of this list was too loose and made the gate WEAKER
+// than the predicate it replaced, measured by the pre-merge squad over a 24-mutant
+// build: it caught 8 of 24 blank stories where a text-only rule caught 24 of 24.
+// Three shapes regressed to passing -- <img alt="">, an empty [aria-label]
+// descendant, and a host whose only child is an empty <svg>.
+//
+//   img[alt]:not([alt=""])  an image with no alt text is not evidence of content
+//                           (and would fail axe on its own merits)
+//   svg > *                 a non-EMPTY svg; a bare <svg></svg> renders nothing
+//   bare [aria-label] / [role="img"] are NOT here: an attribute on an empty
+//                           element is a promise of content, not content
+//
+// This keeps the legitimate icon-only case green
+// (<button class="sk-btn" aria-label="Close"><svg><path/></svg></button>) while
+// closing all three regressions, and produces output identical to the looser list
+// on all 74 real stories.
 const CONTENT_MEDIA_SELECTOR =
-  'img, svg, input, select, textarea, canvas, video, picture, [role="img"], [aria-label]';
+  'img[alt]:not([alt=""]), svg > *, input, select, textarea, canvas, video, picture';
 
 // ── Static server ─────────────────────────────────────────────────────────────
 //
