@@ -79,7 +79,9 @@ Tier A earns squads at the earlier point-cuts too because each one sets somethin
 
 ## Operator items — not engineering, no repo work
 
-**N1 · Own the `@spec-kitty` npm scope.** Blocks M14 and nothing else; start it immediately because lead time is unbounded. Steps: decide which GitHub organisation owns the scope (`spec-kitty` and `Priivacy-ai` are split across every repo in this ecosystem — this is the actual open question); create the npm org; enable 2FA; issue a granular publish token; add it as `NPM_TOKEN` in repository secrets; prove with `npm publish --dry-run`. ADR-2 recorded this as a pre-flight and it was never done — tag `v1.0.0` failed on it.
+**N1 · Own the `@spec-kitty` npm scope.** Blocks M14 and nothing else. **The npm organisation was created on 2026-09-02** — the part with unbounded lead time is done, and the org-ownership question that ADR-2 flagged as a pre-flight is settled.
+
+Remaining, all short: enable 2FA on the org; issue a granular publish token scoped to `@spec-kitty/*`; add it as `NPM_TOKEN` in this repository's secrets; prove the path end to end with `npm publish --dry-run`. That last step matters — tag `v1.0.0`'s release run failed with `404 PUT .../@spec-kitty%2ftokens`, and a dry run is what converts "the org exists" into "the workflow can actually publish". Until it passes, treat M14 as blocked rather than ready.
 
 **N2 · Storybook Pages hosting identity.** The published URL is `stijn-dejongh.github.io/spec-kitty-design` while the repository is `spec-kitty/spec-kitty-design`. Ownership question, not code.
 
