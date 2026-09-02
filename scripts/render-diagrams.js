@@ -45,12 +45,6 @@ const REPO_ROOT = path.resolve(__dirname, '..');
 const ASSETS_DIR = path.join(REPO_ROOT, 'docs', 'architecture', 'assets');
 const THEME_FILE = path.join(ASSETS_DIR, 'sk-mermaid-theme.yaml');
 const PUPPETEER_CONFIG = path.join(ASSETS_DIR, 'puppeteer-config.json');
-// The brand's regular-weight face, vendored in this repo. Embedded into the render
-// as a data: URI so the diagrams do not depend on any font installed on the host —
-// the previous "ui-sans-serif, system-ui, sans-serif" stack resolved differently on
-// every machine, which is what made this gate irreproducible.
-const DIAGRAM_FONT = path.join(REPO_ROOT, 'packages', 'tokens', 'fonts', 'FallingSky-JKwK.otf');
-const DIAGRAM_FONT_FAMILY = 'SK Diagram';
 const PLACEHOLDER = '%%THEME%%';
 // A bare inline init block is the failure pattern we reject in source files.
 const INLINE_INIT_RE = /%%\{\s*init\s*:/;
@@ -165,21 +159,6 @@ function compileSource(srcPath, initDirective, tmpDir) {
   return compiledPath;
 }
 
-function writeFontCss(tmpDir) {
-  if (!fs.existsSync(DIAGRAM_FONT)) {
-    fail(`diagram font not found: ${path.relative(REPO_ROOT, DIAGRAM_FONT)}`);
-  }
-  const b64 = fs.readFileSync(DIAGRAM_FONT).toString('base64');
-  const cssPath = path.join(tmpDir, 'diagram-font.css');
-  fs.writeFileSync(
-    cssPath,
-    `@font-face{font-family:'${DIAGRAM_FONT_FAMILY}';font-style:normal;font-weight:400;` +
-      `src:url(data:font/otf;base64,${b64}) format('opentype');}\n` +
-      `svg, svg * { font-family: '${DIAGRAM_FONT_FAMILY}', sans-serif !important; }\n`,
-  );
-  return cssPath;
-}
-
 function findMmdc() {
   // Resolve `mmdc` either via local node_modules/.bin (preferred — pinned dep
   // in WP06) or via PATH (developer installed it globally). We do not auto-
@@ -235,15 +214,12 @@ function normalizeSvg(buf) {
   return Buffer.from(text, 'utf8');
 }
 
-function renderOne(mmdcPath, compiledPath, outPath, fontCssPath) {
+function renderOne(mmdcPath, compiledPath, outPath) {
   const args = [
     '-i', compiledPath,
     '-o', outPath,
     '-q', // quieter mermaid output
   ];
-  if (fontCssPath) {
-    args.unshift('-C', fontCssPath);
-  }
   if (fs.existsSync(PUPPETEER_CONFIG)) {
     // puppeteer-config.json pins executablePath to /usr/bin/chromium, which is
     // where CI's `apt-get install chromium-browser` puts it. That absolute path
@@ -319,7 +295,6 @@ function main() {
   // Always work inside an isolated temp dir so source-file render and
   // check-mode render share one code path.
   const tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'sk-render-diagrams-'));
-  const fontCssPath = writeFontCss(tmpRoot);
   const compiledDir = path.join(tmpRoot, 'compiled');
   const renderedDir = path.join(tmpRoot, 'rendered');
   ensureDir(compiledDir);
@@ -335,7 +310,7 @@ function main() {
       const renderedSvg = path.join(renderedDir, `${base}.svg`);
       const committedSvg = path.join(ASSETS_DIR, `${base}.svg`);
 
-      renderOne(mmdcPath, compiledPath, renderedSvg, fontCssPath);
+      renderOne(mmdcPath, compiledPath, renderedSvg);
       const renderedRaw = fs.readFileSync(renderedSvg);
 
       if (checkMode) {
