@@ -31,3 +31,19 @@ jobs:
         run: npx playwright install --with-deps chromium
       - name: "[ENFORCED] Render diagrams — drift check (FR-014, FR-015)"
         run: node scripts/render-diagrams.js --check
+
+      # The theme's fontFamily is "ui-sans-serif, system-ui, sans-serif" — a stack
+      # that resolves to whatever the host has, so mermaid's text metrics, and
+      # therefore every diagram's geometry, differ between a contributor machine
+      # and this runner. No contributor can reproduce these bytes locally. On
+      # failure, publish what the runner rendered so the fix is a download rather
+      # than a guessing game.
+      - name: Publish runner-rendered SVGs (drift only)
+        if: failure()
+        run: node scripts/render-diagrams.js
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # actions/upload-artifact v4.6.2
+        if: failure()
+        with:
+          name: runner-rendered-svgs
+          path: docs/architecture/assets/*.svg
+          retention-days: 7
