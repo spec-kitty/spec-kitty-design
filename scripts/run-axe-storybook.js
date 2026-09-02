@@ -168,7 +168,8 @@ async function assertStoryRendered(page, selectors) {
     // (or any text) is evidence the story's own content mounted, not just its
     // wrappers. Survives #69: the web-components renderer emits the same classes.
     const rendered =
-      root.querySelector('[class*="sk-"]') !== null || root.textContent.trim().length > 0;
+      root.querySelector('[class^="sk-"], [class*=" sk-"]') !== null ||
+      root.textContent.trim().length > 0;
     if (!rendered) {
       return {
         ok: false,
@@ -213,7 +214,8 @@ async function checkStory(page, storyId) {
           // each run" flake, and no retry can fix a wait that does not wait.
           return (
             !!root &&
-            (root.querySelector('[class*="sk-"]') !== null || root.textContent.trim().length > 0)
+            (root.querySelector('[class^="sk-"], [class*=" sk-"]') !== null ||
+              root.textContent.trim().length > 0)
           );
         },
         RENDER_ROOT_SELECTORS,
@@ -271,8 +273,12 @@ async function checkStory(page, storyId) {
   }
 
   if (!storyIds) {
-    console.warn('⚠  Story manifest not found — testing known stub stories only.');
-    console.warn('   Rebuild Storybook to enable full story iteration.');
+    console.error('❌ Story manifest not found — refusing to report on a guessed story list.');
+    console.error('   index.json/stories.json is missing or malformed; rebuild Storybook.');
+    console.error('   Passing over two hardcoded stubs is the certifying-absence failure');
+    console.error('   this gate exists to prevent (#90).');
+    server.close();
+    process.exit(1);
   } else {
     console.log(`Testing ${testable.length} stories for WCAG 2.1 AA compliance (serving ${BASE_URL})...`);
     if (skipped.length > 0) {

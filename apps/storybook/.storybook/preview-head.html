@@ -16,9 +16,14 @@
   occur in any real consumer. See #90.
 
   Driving it from the token here rather than from parameters is deliberate — it is
-  one source of truth. --sk-surface-page is the canonical page surface: dark at
-  :root, light under [data-theme="light"]. The light-mode stories wrap themselves
-  in their own data-theme="light" container, so they are unaffected.
+  one source of truth. --sk-surface-page is the canonical page surface.
+
+  A note on the light theme, because an earlier version of this comment got it
+  wrong: tokens.css anchors the light override on `:root[data-theme="light"],
+  .sk-light`. :root matches only <html>, and no element in the repo carries
+  class="sk-light" — so the <div data-theme="light"> wrappers the LightMode
+  stories use match neither selector and inherit the dark tokens. Those stories
+  render dark. That is not caused by this file and is not fixed here; see #93.
 -->
 <style>
   body {
