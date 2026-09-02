@@ -1,0 +1,97 @@
+schema_version: "1.0"
+id: adversarial-squad-cadence
+title: Adversarial Squad Cadence
+scope: operations
+
+# PROJECT OVERRIDE of the packaged adversarial-squad-cadence styleguide.
+# The packaged artifact makes the squad "strong guidance, not a gate" and forbids
+# enforcement. In the elements-first programme the operator has ruled the squad IS
+# a gate ("it's not guidance it's a gate"), so this layer replaces the principles,
+# anti_patterns and quality_test fields. Fields not restated here (patterns,
+# references) are inherited from the packaged artifact by field-level merge.
+
+principles:
+  - >
+    Run a bounded multi-profile adversarial squad at every pull request as a GATE.
+    A PR is not merged until the squad has reported. This project deliberately
+    overrides the packaged optional invariant; the override is scoped to this
+    repository and does not change the packaged artifact.
+  - >
+    Every dispatched lens must report before the merge decision is taken. A partial
+    squad is not a squad: merging on three of four lenses, or on a subset chosen after
+    the fact, does not satisfy the gate. If a lens cannot be dispatched, that is a HOLD
+    to be resolved, not a lens to be dropped.
+  - >
+    Squad evidence is pinned to the head SHA it was taken against. A push after the
+    squad reported invalidates that evidence; the affected lenses are re-run against
+    the new tip. A verdict that does not name a SHA, or names one that is no longer
+    the tip, does not satisfy the gate.
+  - >
+    Two passes per point-cut. Fold the confirmed findings from pass one, then re-run
+    the same lenses against the folded tip. Escalate to the operator only on a named
+    blocker or a finding that contradicts a governing document; a second pass that
+    lands no new confirmed findings closes the point-cut.
+  - >
+    Canonical trigger points for the squad cadence: post-spec (scope and prior-art check),
+    post-plan (brownfield foldable-issue and split-brain check), post-tasks (anti-laziness
+    and decomposition realism check), at mission sizing (effort and risk calibration), and
+    — added by this override — at every PR before merge.
+  - >
+    A squad bounded to 3-5 distinct profile perspectives is typical. More delegates is not
+    better — distinct lenses are. A 20-30 minute bounded squad is preferable to an unbounded
+    sprawl.
+  - >
+    This styleguide governs the cadence — the when and why of running a squad. The squad
+    playbook (profile selection, point-cut definitions, model-discipline rules, anti-patterns)
+    lives in adversarial-squad-deployment.procedure. Do not restate the playbook here;
+    reference it. Where that procedure asserts the squad is optional, this project override
+    and the project DIRECTIVE_046 override govern instead.
+
+anti_patterns:
+  - name: Merging on a partial squad
+    description: >
+      Taking the merge decision while a dispatched lens has not reported. The lens that has
+      not answered is the one most likely to be holding the finding that matters — in this
+      programme a PR was merged on three of four lenses and the fourth then found two further
+      gate holes. Wait for every lens.
+    bad_example: |
+      # Bad: three lenses are back and look clean, so merge
+      if all(v == "LAND" for v in reported_verdicts):
+          merge_pr()   # one lens still outstanding
+    good_example: |
+      # Good: the gate is over the dispatched set, not the returned set
+      if dispatched == reported and all(v == "LAND" for v in reported.values()):
+          merge_pr()
+  - name: Stale-SHA evidence
+    description: >
+      Carrying a squad verdict forward across a push. The verdict certifies a tree that is no
+      longer the tree being merged, which is a certification of absence rather than of review.
+    bad_example: |
+      # Bad: squad ran, then findings were folded in, then merge on the old verdict
+      verdict = run_squad()      # against abc1234
+      push_fixes()               # tip is now def5678
+      merge_pr(evidence=verdict) # certifies a tree nobody reviewed
+    good_example: |
+      # Good: evidence names the tip it was taken against
+      verdict = run_squad(sha=head_sha())
+      assert verdict.sha == head_sha(), "re-run the affected lenses"
+  - name: Playbook restatement
+    description: >
+      Copying the squad playbook (profile selection order, point-cut definitions,
+      anti-pattern list, model-discipline rules) from adversarial-squad-deployment.procedure
+      into this or any other artifact creates a split-brain authority.
+      Reference the procedure; do not restate it.
+    bad_example: |
+      # Bad: restating procedure steps inside cadence guidance
+      # "1. Select 3-4 profiles by lens. 2. Dispatch in parallel.
+      #  3. Require structured output. 4. Synthesize..."
+    good_example: |
+      # Good: cadence guidance references the procedure for execution details
+      # "For the squad execution playbook (profile selection, dispatch discipline,
+      #  synthesis, anti-patterns), see adversarial-squad-deployment.procedure."
+
+quality_test: >
+  Can a practitioner read this styleguide and immediately know (a) at which workflow
+  point-cuts a squad must run, (b) that in this project the squad is a merge gate and that
+  every dispatched lens must report against the current head SHA before merging, and
+  (c) where to find the execution playbook — without this styleguide restating the playbook?
