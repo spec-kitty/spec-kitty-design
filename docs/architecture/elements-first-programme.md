@@ -134,6 +134,8 @@ ADRs 8, 9, 10, 11, 12 and 13 are written and committed on the train. What remain
 
 **Explicitly out of scope:** any Lit or element code; any CSS or markup change; the `index.ts` string exports (they move, they do not change); Angular; deleting anything.
 
+**Operator amendment, 2026-09-02 — three of those clauses were lifted.** After the adversarial gate on #85, the operator directed that its findings be *fixed* rather than deferred. That authorised, and M2 shipped: line-1 attribution comments in 29 `.css`/`.html`/`.ts`/`.js` files under `packages/styles/src` and 3 under `packages/angular` (comment lines only — no rule, selector or element changed, and the `index.ts` string exports are untouched); and deletions of two `.gitignore` entries, the `html-js` commitlint scope, and `quality:htmlhint`'s `|| true`. Recorded here because this line is the contract, and an override left only in a mission's own prose is not a contract amendment.
+
 **Mandatory artefact:** an occurrence classification separating live references (rewrite) from historical record (`kitty-specs/**`, `docs/architecture/validation/**`, `docs/learnings/**` — untouched). Delivered as [`occurrence-map-styles-package-rescope.md`](occurrence-map-styles-package-rescope.md). Note `audit/**` was listed here as record and is not: `audit/run.js` is a live Playwright harness and `audit/index.html` carried 27 live package paths, so M2 rewrote them.
 
 **Depends on:** O2 ✅. **Reads:** ADR-8.
@@ -142,7 +144,9 @@ ADRs 8, 9, 10, 11, 12 and 13 are written and committed on the train. What remain
 
 **Exit:** `npm run quality:all` green; Storybook builds; **the 7 visual baselines pass unchanged**; demo pages resolve from disk and after the deploy rewrite; no live `packages/html-js` reference remains.
 
-**On what proves behaviour-neutrality** (corrected in M2 after the adversarial gate): the baselines are necessary but not sufficient, and were overstated here as *"the behaviour-neutrality proof"*. Only 3 of the 7 render `packages/styles`; the other 4 are Angular stories. None exercises the package's only runtime behaviour, `sk-nav-pill.js`. The binding evidence is that the moved tree is byte-identical (`git rev-parse` on the two `src` trees returns one hash) plus resolution of every rewritten path in all three modes — `file://`, the post-`sed` deploy dist, and the `audit/` harness against a real build.
+**On what proves behaviour-neutrality** (corrected in M2 after the adversarial gate): the baselines were overstated here as *"the behaviour-neutrality proof"*, and they are weaker than "necessary but not sufficient" — **3 of the 7 target `packages/styles` and none of those three renders anything.** Storybook is configured with `@storybook/angular` as its only framework and cannot mount the raw HTML string those stories return, so all three snapshots are one byte-identical blank 1280×720 frame (4254 bytes, md5 `fb104b5f…`). They pass unchanged whatever happens to the package. The other 4 are Angular stories, unaffected by this rename. Nothing covers the package's only runtime code, `sk-nav-pill.js`, until M2 added `nav-pill-behaviour.spec.ts`. See **#88**; **M3 (#69)** is the fix, because the web-components renderer mounts those stories natively.
+
+The binding evidence for M2 is instead: the moved source tree is byte-identical apart from line-1 comments, and every rewritten path resolves in all three modes — `file://`, the post-`sed` deploy dist, and `audit/index.html` resolved against a real build (path resolution; the harness itself was not executed end to end).
 
 ---
 

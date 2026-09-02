@@ -599,7 +599,10 @@ Actions `uses:` directives pinned to immutable commit SHAs).
   cannot depend on internal-tagged libs. `eslint-plugin-security` warns on
   object-injection / non-literal-fs and errors on unsafe-regex.
 - **HTMLHint** (`.htmlhintrc`) — covers structural HTML quality on
-  `packages/**/*.html` and `apps/storybook/src/**/*.html`.
+  `packages/styles/src/**/*.html`, `apps/demo/**/*.html` and `audit/*.html`.
+  Enforcing: the command carries no `|| true`. `packages/angular` is deliberately
+  excluded — Angular templates are fragments, so `attr-lowercase` (`*ngIf`) and
+  `input-requires-label` are category errors there; #69 retires that package.
 - **commitlint** — extends `@commitlint/config-conventional`; the `scope-enum`
   rule restricts scopes to: `tokens`, `angular`, `styles`, `storybook`,
   `doctrine`, `ci`, `docs`, `release`, `deps`, `security`, plus `elements` and
@@ -629,12 +632,12 @@ changes  ──┬──> security ──┐
 - `security` — `npm ci --ignore-scripts`, then `bash scripts/npm-audit-gate.sh` and lockfile drift check (FR-041, FR-042).
 - `workflow-pin-check` — verifies every `uses:` is pinned to a SHA (FR-043).
 - `lint-code` — Nx-affected ESLint, Stylelint, HTMLHint; commitlint on PRs (FR-017 / FR-018 / FR-019 / FR-020). Failures captured to `lint-reports` artifact and surfaced as a PR comment by the `lint-feedback` job for same-repo PRs.
-- `storybook-build` — gated on `tokens` or `components` path changes; uploads `storybook-static` artifact for downstream jobs.
+- `storybook-build` — gated on `tokens` or `components` path changes (`components` includes `apps/demo/**` and `scripts/assemble-demo-dist.sh`); builds Storybook, uploads the `storybook-static` artifact for downstream jobs, and runs `scripts/assemble-demo-dist.sh`, which assembles the demo surface and fails if any asset reference does not resolve.
 - `a11y` — runs `@axe-core` against the built Storybook for WCAG 2.1 AA (FR-021) using `scripts/run-axe-storybook.js`.
 - `visual-regression` — Playwright runs `apps/storybook/src/tests/visual.spec.ts` (FR-024); diff artifacts uploaded on failure.
-- `playwright` — cross-browser smoke `apps/storybook/src/tests/smoke.spec.ts` (FR-023).
+- `playwright` — cross-browser smoke `apps/storybook/src/tests/smoke.spec.ts` (FR-023), plus `apps/storybook/src/tests/nav-pill-behaviour.spec.ts`, which drives `skToggleDrawer` — the only executable code in `@spec-kitty/styles` — through the assembled demo page.
 - `lighthouse` — advisory only (`continue-on-error: true`), runs `lhci autorun` per `lighthouserc.cjs` (FR-022).
-- `gate` — final job that aggregates required results; treats `skipped` (no component changes) as acceptable for a11y / visual / smoke but fails if any of security / workflow-pin / lint / a11y / visual / smoke explicitly failed.
+- `gate` — final job that aggregates required results; treats `skipped` (no component changes) as acceptable for storybook-build / a11y / visual / smoke but fails if any of security / workflow-pin / lint / storybook-build / a11y / visual / smoke explicitly failed. `storybook-build` is a dependency because it carries `[ENFORCED]` steps of its own; without it a failure there merely skipped the three downstream jobs, and skipped counts as acceptable.
 
 Other workflows:
 

@@ -12,8 +12,9 @@ on:
       - "packages/styles/**"
       # Static demo pages
       - "apps/demo/**"
-      # Workflow file itself
+      # Workflow file itself, and the script holding its assembly logic
       - ".github/workflows/storybook-deploy.yml"
+      - "scripts/assemble-demo-dist.sh"
 
 permissions:
   contents: read

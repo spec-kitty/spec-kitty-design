@@ -37,7 +37,7 @@ Storybook publishes everything to [`https://stijn-dejongh.github.io/spec-kitty-d
 4. **BEM naming.** `sk-block__element--modifier`. Block prefix is always `sk-`.
 5. **Conventional commits** with scopes: `tokens`, `angular`, `styles`, `storybook`, `doctrine`, `ci`, `docs`, `release`, `deps`, `security`, plus `elements` and `react` reserved for packages not yet created (ADR-8). Subject lowercase. `commitlint` runs on PRs.
 6. **Every story has a `LightMode` variant.** Wraps output in `<div data-theme="light" style="background: var(--sk-surface-page); padding: var(--sk-space-6); display: inline-block;">` and sets `parameters.backgrounds.default: 'sk-light'`.
-7. **Don't break the demo pages.** `apps/demo/*.html` link component CSS via relative paths (`../../packages/...`) for local file:// dev; `storybook-deploy.yml` rewrites those paths via `sed` before publishing. Verify both paths still resolve when adding a new component.
+7. **Don't break the demo pages.** `apps/demo/*.html` link component CSS via relative paths (`../../packages/...`) for local file:// dev; `scripts/assemble-demo-dist.sh` rewrites those paths via `sed` before publishing (called by `storybook-deploy.yml`, and by `ci-quality.yml` so it is checked per PR). Verify both paths still resolve when adding a new component.
 
 ## 4. Common commands
 
@@ -103,6 +103,6 @@ This repo uses Spec Kitty for structured spec-driven development.
 - **Cross-package import** — `@nx/enforce-module-boundaries` will fail with a clear error pointing to the rule. Re-route through `@spec-kitty/tokens` or compose at the consumer level.
 - **Hardcoded colour / spacing in CSS** — stylelint fails with `Expected ... to be a token`. Add to `tokens.css` first, regenerate catalogue, then reference via `var(--sk-*)`.
 - **Stale token catalogue** — symptoms are stylelint failures on tokens you just added. Run `npx nx run tokens:catalogue`.
-- **Demo page path drift** — when adding a new component, check both (a) the local-dev relative path inside `apps/demo/<file>.html` resolves from disk, and (b) the deploy workflow's `sed` rewrite step in `.github/workflows/storybook-deploy.yml` covers the new path mapping.
+- **Demo page path drift** — when adding a new component, check both (a) the local-dev relative path inside `apps/demo/<file>.html` resolves from disk, and (b) `scripts/assemble-demo-dist.sh`'s `sed` rewrite covers the new path mapping — it derives the copied component set from the demo pages, so a new component needs no allowlist edit.
 - **Conventional-commit scope mismatch** — sticking a tokens change in a `styles`-scoped commit will pass commitlint but confuses release tooling. Match the scope to the package you actually changed.
 - **Manual `kitty-specs/` edits** — break runtime state. Always go through skills / CLI.
