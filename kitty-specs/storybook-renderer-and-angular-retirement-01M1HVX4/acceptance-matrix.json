@@ -6,93 +6,93 @@
   "criteria": [
     {
       "criterion_id": "FR-001",
-      "description": "Verify FR-001 is satisfied",
+      "description": "`apps/storybook/.storybook/main.ts` binds `@storybook/web-components-vite` at the resolved Storybook version (10.5.10, not the ^10.3.6 range); no `@storybook/angular` import remains under `.storybook/`.",
       "proof_type": "automated_test",
       "evidence": null,
       "pass_fail": "pending",
       "verified_by": null,
       "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "notes": "Authored post-tasks; replaces the generated stub. Evidence recorded in the PR."
     },
     {
       "criterion_id": "FR-002",
-      "description": "Verify FR-002 is satisfied",
-      "proof_type": "automated_test",
+      "description": "The `webpackFinal` hook and its `webpack` type import are gone, and CSS is proven to reach stories mechanically: `--sk-surface-page` resolves non-empty AND a component rule applies (e.g. `sk-card` computed `border-radius` != 0px). Eyeball verification does not satisfy this.",
+      "proof_type": "manual_review",
       "evidence": null,
       "pass_fail": "pending",
       "verified_by": null,
       "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "notes": "Authored post-tasks; replaces the generated stub. Evidence recorded in the PR."
     },
     {
       "criterion_id": "FR-003",
-      "description": "Verify FR-003 is satisfied",
+      "description": "`packages/angular/` and `angular.json` do not exist; `npx nx graph` resolves.",
       "proof_type": "automated_test",
       "evidence": null,
       "pass_fail": "pending",
       "verified_by": null,
       "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "notes": "Authored post-tasks; replaces the generated stub. Evidence recorded in the PR."
     },
     {
       "criterion_id": "FR-004",
-      "description": "Verify FR-004 is satisfied",
+      "description": "The 10 Angular story files are gone; the catalogue index contains no `*-angular--*` story id.",
       "proof_type": "automated_test",
       "evidence": null,
       "pass_fail": "pending",
       "verified_by": null,
       "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "notes": "Authored post-tasks; replaces the generated stub. Evidence recorded in the PR."
     },
     {
       "criterion_id": "FR-005",
-      "description": "Verify FR-005 is satisfied",
+      "description": "Zero matches for `@angular/`, `@angular-devkit/`, `zone.js`, `ng-packagr`, `@nx/angular`, `@storybook/angular`, `@storybook/html` in `package.json` and `package-lock.json`. Note the plain `@angular/` token does NOT match `@angular-devkit/*`; both must be checked.",
       "proof_type": "automated_test",
       "evidence": null,
       "pass_fail": "pending",
       "verified_by": null,
       "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "notes": "Authored post-tasks; replaces the generated stub. Evidence recorded in the PR."
     },
     {
       "criterion_id": "FR-006",
-      "description": "Verify FR-006 is satisfied",
+      "description": "No workflow names the `angular` project or filters on `packages/angular/**`: the three `--projects=` lists, `release.yml`'s `for pkg in` loop and its `Publish @spec-kitty/angular` step, `storybook-deploy.yml`'s path trigger, and `ci-quality.yml`'s components filter.",
       "proof_type": "automated_test",
       "evidence": null,
       "pass_fail": "pending",
       "verified_by": null,
       "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "notes": "Authored post-tasks; replaces the generated stub. Evidence recorded in the PR."
     },
     {
       "criterion_id": "FR-007",
-      "description": "Verify FR-007 is satisfied",
+      "description": "`angular` is absent from `commitlint.config.cjs` scope-enum; a commit using it is rejected.",
       "proof_type": "automated_test",
       "evidence": null,
       "pass_fail": "pending",
       "verified_by": null,
       "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "notes": "Authored post-tasks; replaces the generated stub. Evidence recorded in the PR."
     },
     {
       "criterion_id": "FR-008",
-      "description": "Verify FR-008 is satisfied",
+      "description": "The 13 `packages/styles` story files import `Meta`/`StoryObj` from `@storybook/web-components`, which is a declared direct devDependency (not hoisted). Verified by an explicitly named command, since this repo has no `typecheck` script.",
       "proof_type": "automated_test",
       "evidence": null,
       "pass_fail": "pending",
       "verified_by": null,
       "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "notes": "Authored post-tasks; replaces the generated stub. Evidence recorded in the PR."
     },
     {
       "criterion_id": "FR-009",
-      "description": "Verify FR-009 is satisfied",
+      "description": "The 4 Angular baselines AND their 4 test bodies are removed; the 3 survivors are re-shot with a `waitForSelector` and have three DISTINCT md5s, none equal to the blank-frame hash f642335856be21c8fb251d2dce35c383.",
       "proof_type": "automated_test",
       "evidence": null,
       "pass_fail": "pending",
       "verified_by": null,
       "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "notes": "Authored post-tasks; replaces the generated stub. Evidence recorded in the PR."
     }
   ],
   "negative_invariants": []

@@ -32,7 +32,7 @@ a build that renders nothing fails rather than passes silently.
 2. **Given** the built Storybook, **When** the axe runner serves it over HTTP and
    visits every story, **Then** every story's component host contains rendered
    content and the story count matches the catalogue's index.
-3. **Given** the 13 unmodified `packages/html-js` story files, **When** the build runs,
+3. **Given** the 13 unmodified `packages/styles` story files, **When** the build runs,
    **Then** none of them required edits to render.
 
 ---
@@ -50,14 +50,14 @@ for. Splitting them means a renderer regression cannot be confused with a deleti
 regression.
 
 **Independent Test**: Grep the repository and the lockfile for the retired names,
-and run the three affected workflows' project lists against the actual package set.
+and run the four affected workflows' project lists against the actual package set.
 
 **Acceptance Scenarios**:
 
 1. **Given** the merged branch, **When** `package.json` is inspected, **Then** no
-   `@angular/*`, `zone.js`, `ng-packagr`, `@nx/angular` or `@storybook/angular`
-   entry remains, and the lockfile agrees.
-2. **Given** the three workflows hardcoding `projects=tokens,angular,html-js`,
+   `@angular/*`, `@angular-devkit/*`, `zone.js`, `ng-packagr`, `@nx/angular` or
+   `@storybook/angular` entry remains, and the lockfile agrees.
+2. **Given** the four workflows naming the `angular` project or filtering on `packages/angular/**`,
    **When** they run, **Then** they reference only packages that exist.
 3. **Given** `commitlint.config.cjs`, **When** a commit uses the `angular` scope,
    **Then** it is rejected, because the scope has been retired.
@@ -117,8 +117,8 @@ remaining baseline has a live story and was re-shot under Vite.
 | FR-002 | Native CSS handling | As a contributor, I want the hand-written `webpackFinal` CSS rule replaced by Vite's native CSS handling so component styles load without a framework-scoped shim. | High | Open |
 | FR-003 | Delete the Angular package and project | As a maintainer, I want `packages/angular`, `angular.json` and `packages/angular/ng-package.json` removed so Angular is not the catalogue's build system. | High | Open |
 | FR-004 | Delete the Angular stories | As a maintainer, I want the 10 Angular story files removed so one story exists per component. | High | Open |
-| FR-005 | Remove Angular dependencies | As a maintainer, I want the 16 `@angular/*`, `zone.js`, `ng-packagr`, `@nx/angular` and `@storybook/angular` devDependencies removed from `package.json` and the lockfile. | High | Open |
-| FR-006 | Update the workflows | As a maintainer, I want `release.yml`, `storybook-deploy.yml` and `pr-preview.yml` to stop hardcoding `projects=tokens,angular,html-js`. | High | Open |
+| FR-005 | Remove Angular dependencies | As a maintainer, I want the 16 `@angular/*`, **`@angular-devkit/*`**, `zone.js`, `ng-packagr`, `@nx/angular` and `@storybook/angular` devDependencies removed from `package.json` and the lockfile. | High | Open |
+| FR-006 | Update the workflows | As a maintainer, I want `release.yml`, `storybook-deploy.yml` and `pr-preview.yml` to stop naming the deleted `angular` project — in the `--projects=` lists, in `release.yml`'s `for pkg in` dist audit, and in its `Publish @spec-kitty/angular` step — and `ci-quality.yml` / `storybook-deploy.yml` to stop filtering on `packages/angular/**`. | High | Open |
 | FR-007 | Retire the `angular` commitlint scope | As a maintainer, I want the `angular` scope removed from `commitlint.config.cjs` so it cannot be used. | Medium | Open |
 | FR-008 | Correct the story type imports | As a contributor, I want `Meta`/`StoryObj` imported from `@storybook/web-components` rather than `@storybook/html` so the declared type source matches the renderer. | Medium | Open |
 | FR-009 | Re-establish the baseline set | As a contributor, I want the 4 Angular-keyed baselines retired and the remaining 3 re-shot under the new builder so the visual suite reflects reality. | Medium | Open |
@@ -129,16 +129,16 @@ remaining baseline has a live story and was re-shot under Vite.
 |----|-------|-------------|----------|----------|--------|
 | NFR-001 | Storybook build time | The full catalogue builds under `@storybook/web-components-vite` in under 3 minutes (NFR-003 of the programme). | Performance | High | Open |
 | NFR-002 | Rendering proven, not asserted | Every remaining story is proven to render by the accessibility gate served over HTTP, which fails when a component host mounts no content. | Reliability | High | Open |
-| NFR-003 | Zero story rewrites | The 13 `packages/html-js` story files reach a rendering state with no content edits; only the type-import source (FR-008) may change. | Maintainability | High | Open |
-| NFR-004 | No dependency residue | Zero matches for `@angular/`, `zone.js`, `ng-packagr`, `@nx/angular`, `@storybook/angular` in `package.json`, the lockfile and the workflows. | Maintainability | High | Open |
+| NFR-003 | Zero story rewrites | The 13 `packages/styles` story files reach a rendering state with no content edits; only the type-import source (FR-008) may change. | Maintainability | High | Open |
+| NFR-004 | No dependency residue | Zero matches for `@angular/`, `@angular-devkit/`, `zone.js`, `ng-packagr`, `@nx/angular`, `@storybook/angular` in `package.json`, the lockfile and the workflows. | Maintainability | High | Open |
 
 ### Constraints
 
 | ID | Title | Constraint | Category | Priority | Status |
 |----|-------|------------|----------|----------|--------|
 | C-001 | ADR-13 governs | The renderer choice is decided (Option B). This mission implements it and does not re-open it. | Technical | High | Open |
-| C-002 | Storybook line | `@storybook/web-components-vite` must match the installed Storybook 10.5.x line. | Technical | High | Open |
-| C-003 | Out of scope | The generated Angular wrapper (deferred to M15/#81), any element code, and new component coverage beyond restoring baseline parity are excluded. | Technical | High | Open |
+| C-002 | Storybook line | `@storybook/web-components-vite` must match the **resolved** Storybook version in the lockfile — currently **10.5.10**. `package.json` carries the range `^10.3.6`; the range is not the version. Pin against the resolved value, not the range. | Technical | High | Open |
+| C-003 | Out of scope | The generated Angular wrapper (deferred to M15/#81), any element code, new component coverage beyond restoring baseline parity, and the consumer-facing documentation still describing `@spec-kitty/angular` (README, CLAUDE.md, llms.txt, llms-full.txt, `getting-started.mdx` — deferred to **#100** per DIRECTIVE_037) are excluded. | Technical | High | Open |
 | C-004 | Do not baseline a known defect | `LightMode` stories are reported broken in #93 (`:root[data-theme="light"]` cannot match a `<div>`). Re-shooting a baseline over that defect would freeze it. If the defect is still live, report it and do not certify "LightMode intact" — ADR-13's confirmation #3 conflicts with #93 and the conflict is escalated, not silently resolved. | Technical | High | Open |
 | C-005 | The a11y gate may not weaken | The gate's HTTP transport and mount assertion (landed in #91) must remain in force. A migration that makes the gate pass by rendering nothing is a failure of this mission, not a deferred issue. | Technical | High | Open |
 
@@ -146,7 +146,7 @@ remaining baseline has a live story and was re-shot under Vite.
 
 - **Storybook configuration** (`apps/storybook/.storybook/main.ts`): the framework
   binding and, currently, the hand-written CSS rule.
-- **Story files**: 13 in `packages/html-js` (retained, string-returning), 10 Angular
+- **Story files**: 13 in `packages/styles` (retained, string-returning), 10 Angular
   (deleted).
 - **Visual baselines** (`apps/storybook/src/tests/visual.spec.ts-snapshots/`): 7
   files, 4 Angular-keyed.
@@ -161,9 +161,9 @@ remaining baseline has a live story and was re-shot under Vite.
   in under 3 minutes.
 - **SC-002**: The accessibility gate, served over HTTP, visits every story in the
   catalogue index and reports zero unmounted component hosts.
-- **SC-003**: Zero of the 13 `packages/html-js` story files required a content
+- **SC-003**: Zero of the 13 `packages/styles` story files required a content
   rewrite to render.
-- **SC-004**: Zero matches for `@angular/`, `zone.js`, `ng-packagr`, `@nx/angular`
+- **SC-004**: Zero matches for `@angular/`, `@angular-devkit/`, `zone.js`, `ng-packagr`, `@nx/angular`
   and `@storybook/angular` across `package.json`, the lockfile and the three
   workflows; `packages/angular` and `angular.json` no longer exist.
 - **SC-005**: The visual baseline set contains no baseline without a live story,

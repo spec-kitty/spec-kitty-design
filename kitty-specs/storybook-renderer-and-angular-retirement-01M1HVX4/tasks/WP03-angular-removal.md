@@ -109,4 +109,4 @@ storybook-deploy.yml:39  --projects=tokens,angular,styles
 
 `README.md`, `CLAUDE.md`, `llms.txt`, `llms-full.txt` and `apps/storybook/src/stories/getting-started.mdx:20-22,43-45` all describe `@spec-kitty/angular` as a published package, and the last of those **renders inside the catalogue this mission migrates** (`main.ts:12` globs `../src/**/*.mdx`), telling readers to `npm install @spec-kitty/angular`.
 
-This WP does **not** update them: the docs surface is broader than this mission's scope and touching it would widen an already-large deletion. It is recorded here rather than omitted silently, per DIRECTIVE_037, and must be filed as a follow-up issue before this mission closes. Do not tick this WP's DoD while that issue does not exist.
+This WP does **not** update them: the docs surface is broader than this mission's scope and touching it would widen an already-large deletion. It is recorded here rather than omitted silently, per DIRECTIVE_037, and is filed as **#100**, which is blocked on this mission merging.
