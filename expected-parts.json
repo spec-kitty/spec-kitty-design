@@ -10,8 +10,15 @@
     "without a test \u2014 fails CI. Removing one is allowed and shrinks the count. Same shape as",
     "check-manifest-content.mjs: derive from the source of truth, refuse to pass vacuously.",
     "",
-    "When #72 lands sk-card with real parts, this file grows in the same PR as its tests."
+    "",
+    "#72 is the first growth this ratchet has had to gate: <sk-card> declares part \"card\",",
+    "recorded here in the same PR as the test that targets ::part(card) \u2014 which the ratchet now",
+    "requires, not merely assumes."
   ],
-  "total": 0,
-  "byElement": {}
+  "total": 1,
+  "byElement": {
+    "sk-card": [
+      "card"
+    ]
+  }
 }

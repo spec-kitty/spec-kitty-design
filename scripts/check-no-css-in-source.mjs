@@ -59,12 +59,24 @@ if (strayCss.length) {
 const files = globSync(`${ROOT}/**/*.{ts,js,mjs}`, {}).filter((f) => !IGNORED(f));
 let violations = [];
 for (const f of files) {
-  const text = readFileSync(f, 'utf8');
+  const raw = readFileSync(f, 'utf8');
   // The marker must be on the FIRST line. `text.includes(...)` anywhere made the
   // exemption self-service: pasting the generated header into a comment in a
   // hand-authored file disabled all five checks for it — a stronger version of the
   // `sk-stub.styles.css` evasion the glob above exists to catch.
-  if (text.startsWith(GENERATED_MARKER_LINE)) continue;
+  if (raw.startsWith(GENERATED_MARKER_LINE)) continue;
+
+  // Scan CODE, not comments. `\bcss\`` matched the prose `sk-card.css\`` — a FILENAME in a
+  // doc comment — and reported it as an inlined Lit template. CSS mentioned in a comment is
+  // not CSS inlined into source, and the first real component's docstring surfaced it.
+  //
+  // This is a narrowing of scope, not of the pattern: every FORBIDDEN entry still applies at
+  // full strength to executable code. Do NOT instead relax the regexes — a filename is the
+  // false positive, a template literal is the thing being caught, and they are only
+  // ambiguous inside a comment.
+  const text = raw
+    .replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, ' '))
+    .replace(/(^|[^:])\/\/[^\n]*/g, (m, p) => p + ' '.repeat(m.length - p.length));
   for (const [re, why] of FORBIDDEN) {
     const m = text.match(re);
     if (m) {
