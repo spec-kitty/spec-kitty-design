@@ -1,7 +1,7 @@
 {
-  "event_count": 16,
-  "last_event_id": "01M1JC1YC4ET9XD0GYMAJV150B",
-  "materialized_at": "2026-09-03T00:52:43.524334+00:00",
+  "event_count": 17,
+  "last_event_id": "01M1JC2842ACD0WNJ8QCXATNPH",
+  "materialized_at": "2026-09-03T00:52:53.506658+00:00",
   "mission_number": "",
   "mission_slug": "elements-package-foundation-01M1J7Q4",
   "mission_type": "software-dev",
@@ -9,12 +9,12 @@
     "approved": 0,
     "blocked": 0,
     "canceled": 0,
-    "claimed": 0,
+    "claimed": 1,
     "done": 0,
     "for_review": 2,
     "in_progress": 2,
     "in_review": 0,
-    "planned": 2
+    "planned": 1
   },
   "work_packages": {
     "WP01": {
@@ -60,11 +60,19 @@
       "role": "implementer"
     },
     "WP04": {
-      "actor": "finalize-tasks",
+      "actor": "claude",
+      "agent": "claude",
+      "agent_profile": "__resolved_profile_absent__",
+      "agent_profile_version": "__resolved_profile_version_absent__",
       "force_count": 0,
-      "lane": "planned",
-      "last_event_id": "01M1J9S9SHXQ4R1MTN5WEWCTFG",
-      "last_transition_at": "2026-09-03T00:13:03.153650+00:00"
+      "lane": "claimed",
+      "last_event_id": "01M1JC2842ACD0WNJ8QCXATNPH",
+      "last_transition_at": "2026-09-03T00:52:53.506658+00:00",
+      "model": "__resolved_model_absent__",
+      "provider": "__resolved_provider_absent__",
+      "role": "implementer",
+      "shell_pid": 2344968,
+      "shell_pid_created_at": "1788396772.4"
     },
     "WP05": {
       "actor": "claude",
@@ -77,10 +85,13 @@
       "last_event_id": "01M1JC1YC4ET9XD0GYMAJV150B",
       "last_transition_at": "2026-09-03T00:52:43.524334+00:00",
       "model": "__resolved_model_absent__",
+      "notes": [
+        "T015 moved to WP02/WP04 by the task file itself; T016 and T017 complete. Forced for the same CLI defect recorded on WP01: 'tasks mark-status' requires a monolithic tasks.md that the v0.9.0+ split tasks/ layout does not produce."
+      ],
       "provider": "__resolved_provider_absent__",
       "role": "implementer",
-      "shell_pid": 2331539,
-      "shell_pid_created_at": "1788396657.27"
+      "shell_pid": 2343282,
+      "shell_pid_created_at": "1788396762.41"
     },
     "WP06": {
       "actor": "finalize-tasks",
