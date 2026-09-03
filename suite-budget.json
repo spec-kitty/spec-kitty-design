@@ -19,9 +19,9 @@
   ],
   "covers": "npm run test (both lanes, chromium + webkit in CI)",
   "ceilingSeconds": 120,
-  "measuredSeconds": null,
-  "measuredAt": null,
-  "measuredOn": null,
-  "runUrl": null,
-  "sha": null
+  "measuredSeconds": 5.6,
+  "measuredAt": "2026-09-03T03:31:04Z",
+  "measuredOn": "ubuntu-latest, chromium + webkit, cold npm ci",
+  "runUrl": "https://github.com/spec-kitty/spec-kitty-design/actions/runs/33711416571",
+  "sha": "4a05a4a"
 }
