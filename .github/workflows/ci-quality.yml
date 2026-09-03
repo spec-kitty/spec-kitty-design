@@ -171,6 +171,14 @@ jobs:
         run: node scripts/check-no-css-in-source.mjs
       - name: "[ENFORCED] Generated CSS modules are current (ADR-10 generated-artifact contract)"
         run: node scripts/build-elements-css.mjs --check
+      # ADR-9 Confirmation #1, which the ADR requires by name and no mission had landed.
+      # #72 paid for its absence: sk-card.css carried two selectors that were INERT once the
+      # sheet was adopted — the themed ancestor sits outside the shadow root — with no error
+      # and no warning, and a LightMode story rendering dark styling. Note the check is
+      # stricter than ADR-9's four-token enumeration, deliberately: that enumeration catches
+      # only half of #72's actual defect (`.sk-light .sk-card--blue` is not in it).
+      - name: "[ENFORCED] Adopted CSS stays inside the element root (ADR-9 Confirmation #1)"
+        run: node scripts/check-adopted-css-boundaries.mjs
       # The manifest is a generated artifact under ADR-10's contract, and ADR-11
       # generates the React wrapper FROM it — a manifest that drifts from source
       # propagates into generated code two missions from now. The analyzer's own
