@@ -124,6 +124,11 @@ else {
     // from the gate: a table that stops running is a gate whose defeated forms quietly reopen.
     [/node\s+scripts\/build-react-wrappers\.mjs\s+--check(\s|$)/, 'the React wrapper drift gate', 'scripts/build-react-wrappers.mjs --check'],
     [/node\s+scripts\/build-react-wrappers\.mjs\s+--selftest(\s|$)/, "the wrapper gate's own probe table", 'scripts/build-react-wrappers.mjs --selftest'],
+    // #129. check-manifest-content.mjs was an ENFORCED step with NO entry here at all, so
+    // deleting its CI line was green — the exact episode the comment above records for
+    // check-element-css-hygiene, in the gate that had just gained the description ratchet.
+    [/node\s+scripts\/check-manifest-content\.mjs(?!\s*--selftest)(\s|$)/, 'the manifest content gate', 'scripts/check-manifest-content.mjs'],
+    [/node\s+scripts\/check-manifest-content\.mjs\s+--selftest(\s|$)/, "the manifest gate's own probe table", 'scripts/check-manifest-content.mjs --selftest'],
   ];
 
   /** A step that cannot fail the job is a step that is not running (B, C, D, E). */

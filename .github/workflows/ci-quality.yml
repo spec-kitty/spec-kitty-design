@@ -239,6 +239,7 @@ jobs:
           git diff --exit-code -- packages/elements/custom-elements.json \
             || { echo "::error::custom-elements.json is stale. Run: npx nx run elements:analyze"; exit 1; }
           node scripts/check-manifest-content.mjs
+          node scripts/check-manifest-content.mjs --selftest
       # C-007's anti-vacuity guard. The manifest declares 0 cssParts today, so SC-013's
       # "derived expected list" is a green assertion over nothing — this makes it
       # impossible for that list to GROW without a test landing in the same PR.
