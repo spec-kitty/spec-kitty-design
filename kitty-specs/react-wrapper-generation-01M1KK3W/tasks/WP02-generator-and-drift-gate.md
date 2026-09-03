@@ -1,8 +1,7 @@
 ---
 work_package_id: WP02
 title: The generator, the tagName filter, and a drift gate that refuses an empty set
-dependencies:
-- WP01
+dependencies: []
 requirement_refs:
 - FR-001
 - FR-002
@@ -49,10 +48,20 @@ tracker_refs: []
 
 # WP02 — Generate, commit, gate on drift
 
+**Dependency on WP01 removed at the post-tasks gate.** The generator script does not depend on
+manifest *content*; only the committed output does, and that is merge churn, not a data-flow
+edge. Keeping the edge would have stalled the whole mission behind WP01's open fork. Regenerate
+after WP01 lands and commit the churn.
+
 The post-tasks squad took this WP apart. Five of its findings are load-bearing and the WP is
 rewritten around them.
 
 ## Subtasks
+
+- **T003a (NEW) — add `fixtures/*` to root `workspaces`.** It is `["packages/*","apps/*"]`
+  today, so `fixtures/react-consumer/package.json` cannot declare its own React and WP03 would
+  be forced to put it in root `devDependencies` — satisfying NFR-003's letter while dropping its
+  point. One line here unblocks WP03 cleanly.
 
 - **T004 — the generator.** `scripts/build-react-wrappers.mjs` wrapping
   `generateReactWrappers(manifest, { outdir, modulePath })`.

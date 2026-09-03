@@ -28,9 +28,6 @@ create_intent:
 execution_mode: code_change
 owned_files:
 - fixtures/react-consumer/src/wrappers.test.tsx
-- behaviours.json
-- package.json
-- package-lock.json
 - fixtures/react-consumer/package.json
 - fixtures/react-consumer/tsconfig.json
 - fixtures/react-consumer/project.json
@@ -67,9 +64,13 @@ the *fixed* state, not the draft's.
 - **T007** — `fixtures/react-consumer/`, React as a devDependency **of the fixture only**.
 
   Two mechanical traps, both found by lenses:
-  * `package.json`'s `workspaces` is `["packages/*","apps/*"]` — `fixtures/*` is not a
-    workspace. Root `package.json`/`package-lock.json` are now owned by this WP so the install
-    does not require editing a file it does not own.
+  * `package.json`'s `workspaces` is `["packages/*","apps/*"]` — **`fixtures/*` is not a
+    workspace**, so `fixtures/react-consumer/package.json` cannot carry its own React.
+    `fixtures/elements-behaviour` gets away with it only because its sole devDependency is a
+    workspace-local package. **WP02 adds `fixtures/*` to `workspaces`** (it owns root
+    `package.json`); this WP then declares React in the fixture's own `package.json`, which is
+    what NFR-003 actually asks for. Do not let React land in root `devDependencies` — that
+    satisfies NFR-003's letter and drops its point.
   * `vitest.config.mts:96` includes `fixtures/**/src/**/*.test.ts` — **`.ts`, not `.tsx`**.
     A `.test.tsx` matches nothing, runs nowhere, and nothing reports it. Widen the include to
     `*.test.{ts,tsx}` deliberately, and probe that widening.
@@ -84,9 +85,13 @@ the *fixed* state, not the draft's.
   tests join the existing `browser` lane which already has tests. The only per-file protection
   is arm 5's `(id, subject file)` check, and `:123`'s `?? [null]` makes an id-only entry legal.
   **`git rm fixtures/react-consumer/src/wrappers.test.tsx` and the whole suite stays green.**
-  `behaviours.json`'s own `$comment` describes this exact failure. Add subject entries for the
-  React fixture under the existing event-contract and form-association ids — hence
-  `behaviours.json` in this WP's owned files.
+  `behaviours.json`'s own `$comment` describes this exact failure.
+
+  The fix is subject entries under the existing event-contract and form-association ids, and it
+  lands in **WP04 T014** — one WP owns the registry. Not fork-blocked: it concerns the two ids
+  that already exist, not the fifteenth. Stated here as an explicit cross-WP obligation rather
+  than left as a DoD line this WP cannot reach on its own, which is the mistake the post-tasks
+  gate caught between the first drafts of WP01 and WP02.
 
   **And measure the budget here, because this is the WP that spends it.** These tests run inside
   `suite-selftest.mjs`'s per-mutation loop — **42 times** — and again under `ceilingSeconds: 25`

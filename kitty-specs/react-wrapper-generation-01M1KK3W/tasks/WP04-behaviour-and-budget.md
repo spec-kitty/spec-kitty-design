@@ -21,6 +21,7 @@ authoritative_surface: behaviours.json
 create_intent: []
 execution_mode: code_change
 owned_files:
+- behaviours.json
 - mutations.json
 - suite-budget.json
 - scripts/suite-selftest.mjs
@@ -101,6 +102,15 @@ that would be *caused* by the register meant to stop it.
 
   If a ceiling does move, cite the CI run, not a workstation. The spec's "102.7s local" figure
   is withdrawn — it exists nowhere in the repo.
+
+- **T014 (NEW) — protect WP03's renders from deletion.** Separate from the fork above and
+  **not blocked by it**: this is about the two ids that already exist, not the fifteenth.
+  `floor-reporter.mjs:70` asserts each *lane* is non-empty and the React tests join a `browser`
+  lane that already has tests, so `git rm fixtures/react-consumer/src/wrappers.test.tsx` leaves
+  everything green. Add subject entries for the React fixture under the existing event-contract
+  and form-association ids. `behaviours.json` is owned here rather than in WP03 so that one WP
+  owns the registry; WP03's DoD line "deleting the fixture test turns something red" is
+  discharged by this subtask, and is tracked as a cross-WP obligation rather than left implicit.
 
 ## Definition of Done
 
