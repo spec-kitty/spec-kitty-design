@@ -17,9 +17,17 @@
  * actually took — otherwise this whole file is a no-op that looks like coverage.
  *
  * WHAT THIS FILE TESTS, AND WHAT IT DELIBERATELY DOES NOT. The tests carrying a behaviours.json
- * id assert the WRAPPER's contract only — props reach the element as properties, element events
- * reach React handlers. They do not re-assert the ELEMENT's contract, which
- * fixtures/elements-behaviour already owns.
+ * id target the WRAPPER's contract: props reach the element, element events reach React
+ * handlers. They are not meant to re-assert the ELEMENT's contract, which
+ * fixtures/elements-behaviour owns.
+ *
+ * Honest about how far that got. `[SC-006]` is fully decoupled — it dispatches its own event
+ * with a sentinel detail and asserts identity, so it depends on exactly one generated line and
+ * nothing about how the element fires. `[SC-002]` is NOT: it awaits `updateComplete` and reads
+ * `el.value` back, which runs through Lit's attribute-to-property mapping, so it asserts the
+ * wrapper-to-Lit HANDOFF rather than the wrapper alone. Removing `value` from the element's
+ * `static properties` would red it as collateral. #126's pre-merge squad caught the docstring
+ * claiming more separation than the test achieved; narrowed rather than left overstated.
  *
  * That separation is not tidiness, it is a harness requirement discovered the hard way: the
  * first version drove the element's own hamburger button and asserted real FormData, and
@@ -80,8 +88,12 @@ function render(ui: React.ReactNode) {
 }
 
 test('SC-306 guard — this file is actually executed by the browser lane', () => {
-  // Guards the include glob, not the wrappers. If someone narrows vitest.config.mts back to
-  // `*.test.ts` this file stops running — and nothing else in the repo would say so.
+  // Guards the include glob, not the wrappers — and it is nearly tautological, which is worth
+  // saying rather than leaving a reader to find out: if the include narrows, this file does not
+  // run, so this assertion does not run either. What actually catches that narrowing is
+  // floor-reporter.mjs's arm 5, because behaviours.json names this exact path as the subject for
+  // SC-002 and SC-006. This line only catches a rename to `.test.ts` that still collects — which
+  // esbuild rejects anyway for a file containing JSX.
   // In the browser lane import.meta.url is a served URL with a query string, so match on the
   // path rather than anchoring at the end.
   expect(new URL(import.meta.url).pathname).toMatch(/\.test\.tsx$/);

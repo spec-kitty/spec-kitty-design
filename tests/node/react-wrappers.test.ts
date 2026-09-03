@@ -49,11 +49,14 @@ test('[react-wrappers] the committed output is current (FR-002, SC-301)', { time
   expect(r.code).toBe(0);
 });
 
-test('[react-wrappers] the gate self-check is green and its probe table is not degenerate', { timeout: GATE_TIMEOUT_MS }, () => {
-  const r = gate('--selftest');
-  expect(r.code, r.out).toBe(0);
-  expect(r.out).toMatch(/All \d+ probes behaved as recorded/);
-});
+// DELIBERATELY NOT RE-RUN HERE: `--selftest`.
+//
+// It is an ENFORCED step in the `lint-code` job (ci-quality.yml), and `check-gate-wiring.mjs`
+// has a REQUIRED_LINT entry making deletion of that step red. Both jobs are unconditional, so
+// there is no trigger under which one runs and the other does not — the copy bought no
+// coverage. It cost 5.7s of the node lane against `suite-budget.json`'s 25s `ceilingSeconds`
+// for `npm run test`, which is 23% of a ceiling this mission would then have had to re-measure
+// to justify. `--check` stays: it is the cheap arm and the one a developer wants locally.
 
 test('[react-wrappers] the output directory is committed, not gitignored (NFR-001)', () => {
   // A TypeScript package's natural outdir is packages/react/dist/, and .gitignore ignores

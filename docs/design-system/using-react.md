@@ -101,7 +101,18 @@ function Field() {
 ```
 
 - **Everything in `packages/react/src/` is generated.** Do not hand-edit it: CI regenerates and
-  fails on drift, on orphaned files, and on an empty or shrunken output set.
+  fails on drift, on orphaned files, and on a shrunken output set (`.wrapper-floor` is a
+  committed ratchet; the gate refuses a missing or unparseable one rather than reading it as
+  no floor).
+- **`errorMessage` is deliberately not a prop.** It is Lit `state: true` — the element observes
+  no attribute for it — so under the deferred registration below it could never arrive on a
+  first render. Set it through `setCustomError()`, the element's own lever, and read it through
+  the ref. The manifest used to claim an attribute for it, because the analyzer does not honour
+  `state`; `normalise-manifest.mjs` now corrects that at source.
+- **Some prop descriptions still read `undefined`.** The analyzer does not propagate an inherited
+  field's JSDoc onto a subclass's attribute, so the eight properties inherited from
+  `FormControlBase` document themselves as `undefined` in your editor. Tracked on #75 — the types
+  are correct, only the prose is missing.
 - **Public inherited properties are props.** `value`, `label`, `name`, `required`, `disabled`,
   `description`, `errorMessage` and `invalid` all come from `FormControlBase` and are all
   settable from JSX. (An early draft of #75's FR-004 said inherited members must *not* become

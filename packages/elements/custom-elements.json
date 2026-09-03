@@ -477,7 +477,6 @@
               "description": "The message the error node renders. A reactive property rather than a read through\n`internals.validationMessage`, because Lit cannot observe a getter over internals — see\neach element's `static properties`.",
               "privacy": "public",
               "default": "''",
-              "attribute": "errorMessage",
               "inheritedFrom": {
                 "name": "FormControlBase",
                 "module": "packages/elements/src/form-control-base.ts"
@@ -767,14 +766,6 @@
               "fieldName": "disabled"
             },
             {
-              "name": "errorMessage",
-              "type": {
-                "text": "string"
-              },
-              "default": "''",
-              "fieldName": "errorMessage"
-            },
-            {
               "name": "invalid",
               "type": {
                 "text": "boolean"
@@ -957,7 +948,6 @@
               "description": "The message the error node renders. A reactive property rather than a read through\n`internals.validationMessage`, because Lit cannot observe a getter over internals — see\neach element's `static properties`.",
               "privacy": "public",
               "default": "''",
-              "attribute": "errorMessage",
               "inheritedFrom": {
                 "name": "FormControlBase",
                 "module": "packages/elements/src/form-control-base.ts"
@@ -1245,14 +1235,6 @@
                 "text": "boolean"
               },
               "fieldName": "disabled"
-            },
-            {
-              "name": "errorMessage",
-              "type": {
-                "text": "string"
-              },
-              "default": "''",
-              "fieldName": "errorMessage"
             },
             {
               "name": "invalid",

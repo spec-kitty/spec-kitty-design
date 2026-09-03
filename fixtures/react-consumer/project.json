@@ -12,7 +12,18 @@
         "{projectRoot}/**/*",
         "{workspaceRoot}/tsconfig.base.json"
       ]
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "options": {
+        "lintFilePatterns": [
+          "fixtures/react-consumer/src/**/*.tsx"
+        ]
+      }
     }
   },
-  "tags": []
+  "tags": [
+    "scope:fixture",
+    "type:app"
+  ]
 }

@@ -1,8 +1,9 @@
 import { expect, test } from 'vitest';
 import { createVitest } from 'vitest/node';
 import { readFileSync, mkdtempSync, writeFileSync, rmSync, globSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
-import { basename, join } from 'node:path';
+import { basename, join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 /**
@@ -233,8 +234,10 @@ test('[config] every element is a declared behaviour SUBJECT, and every subject 
     }
   }
 
-  // The element set and the MANIFEST's registered set must agree. Four scripts derive elements
-  // from `src/**/sk-*.ts`; check-manifest-content.mjs derives them from the registrations the
+  // The element set and the MANIFEST's registered set must agree. FIVE scripts now derive
+  // elements
+  // from `src/**/sk-*.ts` (#75 added build-react-wrappers.mjs); check-manifest-content.mjs
+  // derives them from the registrations the
   // analyzer found. An element file named otherwise — `widget/widget-element.ts` — is invisible
   // to all four and visible to the fifth, and nothing compared them. See #117.
   const manifest = JSON.parse(readFileSync('packages/elements/custom-elements.json', 'utf8')) as {
@@ -300,5 +303,76 @@ test('[config] every form-associated element is a subject of SC-002..SC-005 (FR-
         `<${tag}> declares static formAssociated but is not a subject of ${id}`,
       ).toContain(tag);
     }
+  }
+});
+
+test('[config] the browser lane pre-bundles React, including the DEV jsx runtime', async () => {
+  // THE ARM THAT WAS PROSE. #126 shipped `optimizeDeps.include` with a long comment and nothing
+  // asserting it — the same shape vitest.config.mts:50-61 records for the floor reporter ("all
+  // five of its arms hung off those 38 characters with nothing asserting they were present").
+  // Removing an entry does not fail loudly: Vite discovers the dep mid-run, reloads the page,
+  // and kills whichever module was mid-collection. CI caches ~/.npm but `npm ci` wipes
+  // node_modules, so `.vite` is cold on EVERY CI run and the discovery always happens. It cost
+  // one red cycle where two unrelated suites died with "Vitest failed to find the current suite"
+  // while passing locally on a warm cache.
+  //
+  // `react/jsx-dev-runtime` specifically: the automatic JSX transform imports a runtime no
+  // source file names, and in dev mode that is the DEV entry. Pinning only the production one
+  // left the hole.
+  //
+  // ASSERTED ON THE CONFIG MODULE, not the resolved config, and that limit is deliberate rather
+  // than lazy. For browser mode Vitest hands `optimizeDeps` to the BROWSER Vite server, which
+  // does not exist until a run starts: `createVitest()` reports the project's node-side
+  // `vite.config.optimizeDeps.include` as `[]` and `project.browser` as null. So the resolvable
+  // surface here is the declaration itself. Importing the module rather than grepping the file
+  // means a rename, a move between projects, or a typo in the key all fail — everything except
+  // Vite silently ceasing to honour the field, which the three cold-run measurements in the
+  // commit that added it cover instead.
+  const mod = (await import(pathToFileURL(resolve('vitest.config.mts')).href)) as {
+    default: {
+      test?: { projects?: { test?: { name?: string }; optimizeDeps?: { include?: string[] } }[] };
+    };
+  };
+  const projects = mod.default.test?.projects ?? [];
+  expect(projects.length, 'vitest.config.mts must declare projects').toBeGreaterThan(0);
+  const browser = projects.find((p) => p.test?.name === 'browser');
+  expect(browser, 'the browser project must be declared in vitest.config.mts').toBeTruthy();
+  const include = browser!.optimizeDeps?.include ?? [];
+  for (const dep of ['react', 'react-dom', 'react-dom/client', 'react/jsx-runtime', 'react/jsx-dev-runtime']) {
+    expect(include, `${dep} must be pre-bundled or Vite reloads mid-run`).toContain(dep);
+  }
+});
+
+test('[config] every project that should be typechecked is (SC-310)', () => {
+  // MEMBERSHIP, not a count. SC-310 said "the project list grows from 2 to 3, asserted" and
+  // nothing asserted it; the PR body said 4, the matrix said 3. A count rots on the next
+  // project added, and typecheck-all.mjs floors only at zero — so a project dropping out of
+  // `nx show projects --with-target typecheck` (renamed target, malformed project.json) left
+  // the gate green over a smaller set. That is the defect typecheck-all.mjs itself was written
+  // to close, one level up.
+  const out = execFileSync('npx', ['nx', 'show', 'projects', '--with-target', 'typecheck'], {
+    encoding: 'utf8',
+  });
+  const projects = JSON.parse(out) as string[];
+  for (const name of ['elements', 'elements-behaviour-fixture', 'react', 'react-consumer-fixture']) {
+    expect(projects, `${name} declares a typecheck target and must be picked up`).toContain(name);
+  }
+});
+
+test('[config] React is not a dependency of @spec-kitty/elements (NFR-003)', () => {
+  // "Green before and after" is exactly the kind of requirement that rots unnoticed, and the
+  // acceptance matrix called this a regression guard while nothing guarded it. React reaching
+  // the element package would put a framework in the base layer ADR-8 exists to keep framework
+  // -free.
+  const pkg = JSON.parse(readFileSync('packages/elements/package.json', 'utf8')) as Record<
+    string,
+    Record<string, string> | undefined
+  >;
+  for (const field of ['dependencies', 'peerDependencies', 'devDependencies']) {
+    const names = Object.keys(pkg[field] ?? {});
+    expect(
+      names.filter((n) => n === 'react' || n.startsWith('react-') || n === '@types/react'),
+      `@spec-kitty/elements must not declare React in ${field}`
+    ).toEqual([]);
   }
 });

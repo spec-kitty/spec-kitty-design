@@ -31,9 +31,6 @@ export interface SkFormTextareaProps extends Pick<
   description?: SkFormTextareaElement["description"];
 
   /** undefined */
-  errorMessage?: SkFormTextareaElement["errorMessage"];
-
-  /** undefined */
   label?: SkFormTextareaElement["label"];
 
   /** undefined */
@@ -79,7 +76,6 @@ export interface SkFormTextareaProps extends Pick<
  *
  * - `description`: undefined
  * - `disabled`: undefined
- * - `errorMessage`: undefined
  * - `invalid`: undefined
  * - `label`: undefined
  * - `name`: undefined

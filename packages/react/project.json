@@ -10,10 +10,12 @@
       },
       "inputs": [
         "{workspaceRoot}/packages/elements/custom-elements.json",
-        "{workspaceRoot}/scripts/build-react-wrappers.mjs"
+        "{workspaceRoot}/scripts/build-react-wrappers.mjs",
+        "{workspaceRoot}/packages/react/.wrapper-floor"
       ],
       "outputs": [
-        "{workspaceRoot}/packages/react/src"
+        "{workspaceRoot}/packages/react/src",
+        "{workspaceRoot}/packages/react/.wrapper-floor"
       ]
     },
     "typecheck": {
@@ -23,10 +25,22 @@
       },
       "inputs": [
         "{projectRoot}/src/**/*",
+        "{projectRoot}/type-tests/**/*",
         "{projectRoot}/tsconfig*.json",
         "{workspaceRoot}/tsconfig.base.json"
       ]
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "options": {
+        "lintFilePatterns": [
+          "packages/react/type-tests/**/*.tsx"
+        ]
+      }
     }
   },
-  "tags": []
+  "tags": [
+    "scope:react",
+    "type:publishable"
+  ]
 }

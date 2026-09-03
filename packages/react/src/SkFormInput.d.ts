@@ -31,9 +31,6 @@ export interface SkFormInputProps extends Pick<
   description?: SkFormInputElement["description"];
 
   /** undefined */
-  errorMessage?: SkFormInputElement["errorMessage"];
-
-  /** undefined */
   label?: SkFormInputElement["label"];
 
   /** undefined */
@@ -79,7 +76,6 @@ export interface SkFormInputProps extends Pick<
  *
  * - `description`: undefined
  * - `disabled`: undefined
- * - `errorMessage`: undefined
  * - `invalid`: undefined
  * - `label`: undefined
  * - `name`: undefined

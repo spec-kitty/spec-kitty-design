@@ -50,12 +50,11 @@
  * rather than recorded in prose.
  */
 import { execFileSync } from 'node:child_process';
-import { globSync } from 'node:fs';
 import {
-  cpSync, existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync,
+  cpSync, existsSync, globSync, mkdirSync, mkdtempSync, readdirSync, readFileSync,
   rmSync, statSync, writeFileSync,
 } from 'node:fs';
-import { basename, dirname, join, relative, resolve } from 'node:path';
+import { basename, dirname, join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 
@@ -80,6 +79,26 @@ const REACT_PROPS = new Set([
   'children', 'dangerouslySetInnerHTML',
 ]);
 
+/**
+ * Public fields that are deliberately NOT props, with the reason. Asserted as a SET, so a field
+ * that stops being deliverable starts failing instead of silently vanishing from the API.
+ *
+ * `errorMessage` is Lit `state: true` on both form elements: the element observes no attribute
+ * for it. The analyzer does not honour `state`, so the manifest used to claim one, and #126's
+ * pre-merge squad caught this gate reporting GREEN over that exact case — the guard read the
+ * manifest's claim rather than the element's declaration. normalise-manifest.mjs now corrects
+ * the manifest with a TypeScript AST pass, which is what makes the entry below derivable at all.
+ *
+ * Why it cannot simply stay a prop: `ssrSafe` defers registration, so React delivers
+ * first-render props as ATTRIBUTES. `setAttribute('errorMessage', ...)` lowercases to
+ * `errormessage`, Lit observes neither, and the value is dropped with no error and no warning.
+ * `setCustomError()` is the element's own sanctioned lever for this state.
+ */
+const EXPECTED_NON_PROP_FIELDS = new Map([
+  ['sk-form-input', ['errorMessage']],
+  ['sk-form-textarea', ['errorMessage']],
+]);
+
 const check = process.argv.includes('--check');
 const selftest = process.argv.includes('--selftest');
 
@@ -97,34 +116,61 @@ function taggedDeclarations(manifest) {
   for (const mod of manifest.modules ?? []) {
     for (const decl of mod.declarations ?? []) {
       if (!decl.tagName) continue;
-      const fields = (decl.members ?? [])
+      const settable = (decl.members ?? [])
         // privacy is the discriminator. `inheritedFrom` is NOT: a public inherited field is
         // public API. See the header.
         .filter((m) => m.kind === 'field' && m.privacy !== 'protected' && m.privacy !== 'private')
         // readonly: a prop is settable, a getter is not. See manifestForGeneration().
         .filter((m) => !m.readonly && !m.static && !m.name.startsWith('#'))
         .map((m) => m.name);
-      const attributed = new Set(
-        (decl.attributes ?? []).map((a) => a.fieldName ?? a.name).filter(Boolean)
+      // field name -> the attribute name Lit actually OBSERVES. These differ: sk-nav-pill
+      // declares `isOpen: { attribute: 'open' }`, so the field is `isOpen` and the observed
+      // attribute is `open`. Keeping only the field name loses exactly the thing first-render
+      // delivery depends on.
+      const attrNameByField = new Map(
+        (decl.attributes ?? []).map((a) => [a.fieldName ?? a.name, a.name])
       );
+      const fields = [...new Set(settable)].filter((f) => attrNameByField.has(f)).sort();
+      const unattributed = [...new Set(settable)].filter((f) => !attrNameByField.has(f)).sort();
+      const events = (decl.events ?? []).map((e) => e.name).filter(Boolean).sort();
       out.set(decl.tagName, {
         name: decl.name,
-        fields: [...new Set(fields)].sort(),
-        attributed,
+        fields,
+        unattributed,
+        attrNameByField,
+        events,
       });
     }
   }
   return out;
 }
 
-/** Props a generated .d.ts actually declares, minus the React-supplied ones. */
+/**
+ * Props a generated .d.ts declares, split into value props and event-handler props.
+ *
+ * The `on` prefix is a proxy for "event handler", so a real public field named `once` or
+ * `online` would be classified as an event and reported as a mismatch. That fails LOUDLY
+ * (the field is in `fields` and not in `values`), which is the safe direction, but it is a
+ * proxy and not a fact — worth knowing before naming such a field.
+ */
 function emittedProps(dts) {
-  const props = [];
+  const values = [];
+  const handlers = [];
   for (const line of dts.split('\n')) {
     const m = /^\s{2}([A-Za-z_$][\w$]*)\??:/.exec(line);
-    if (m && !REACT_PROPS.has(m[1]) && !m[1].startsWith('on')) props.push(m[1]);
+    if (!m || REACT_PROPS.has(m[1])) continue;
+    if (/^on[A-Z]/.test(m[1])) handlers.push(m[1]);
+    else values.push(m[1]);
   }
-  return [...new Set(props)].sort();
+  return {
+    values: [...new Set(values)].sort(),
+    handlers: [...new Set(handlers)].sort(),
+  };
+}
+
+/** `sk-nav-pill-toggle` -> `onSkNavPillToggle`, the generator's handler-prop convention. */
+function handlerName(eventName) {
+  return 'on' + eventName.split('-').map((p) => p.charAt(0).toUpperCase() + p.slice(1)).join('');
 }
 
 /**
@@ -145,6 +191,10 @@ function emittedProps(dts) {
  *    Its treatment is also inconsistent: `validationMessage` and `validity` are readonly too and
  *    are NOT emitted. Consumers still read these through the typed ref, which is the correct
  *    channel. Filed upstream — see the mission's SC-305 answer.
+ *
+ * 3. Members with no OBSERVED ATTRIBUTE are dropped, because under `ssrSafe` they cannot be
+ *    delivered on first render — React has no upgraded element to assign a property to, so it
+ *    writes an attribute, and there is none to write. See EXPECTED_NON_PROP_FIELDS.
  */
 function manifestForGeneration(manifest) {
   return {
@@ -153,7 +203,22 @@ function manifestForGeneration(manifest) {
       ...mod,
       declarations: (mod.declarations ?? [])
         .filter((d) => d.tagName)
-        .map((d) => ({ ...d, members: (d.members ?? []).filter((m) => !m.readonly) })),
+        .map((d) => {
+          const attributed = new Set(
+            (d.attributes ?? []).map((a) => a.fieldName ?? a.name).filter(Boolean)
+          );
+          return {
+            ...d,
+            members: (d.members ?? []).filter((m) => {
+              if (m.readonly) return false;
+              // Keep methods and non-field members; only FIELDS become props.
+              if (m.kind !== 'field') return true;
+              if (m.static || m.name.startsWith('#')) return true;
+              if (m.privacy === 'protected' || m.privacy === 'private') return true;
+              return attributed.has(m.name);
+            }),
+          };
+        }),
     })),
   };
 }
@@ -249,38 +314,78 @@ function audit({ outdir, manifestPath, srcDir, floor }) {
   for (const [tag, decl] of tagged) {
     const f = join(outdir, `${decl.name}.d.ts`);
     if (!existsSync(f)) continue; // already reported by the set comparison above
-    const got = emittedProps(readFileSync(f, 'utf8'));
+    const dts = readFileSync(f, 'utf8');
+    const got = emittedProps(dts);
     const want = decl.fields;
-    if (JSON.stringify(got) !== JSON.stringify(want)) {
+    if (JSON.stringify(got.values) !== JSON.stringify(want)) {
       problems.push(
-        `${decl.name} (${tag}) props do not match the manifest's public fields.\n` +
-          `   manifest: ${want.join(', ') || '(none)'}\n   emitted:  ${got.join(', ') || '(none)'}`
+        `${decl.name} (${tag}) props do not match the manifest's attributed public fields.\n` +
+          `   manifest: ${want.join(', ') || '(none)'}\n` +
+          `   emitted:  ${got.values.join(', ') || '(none)'}`
       );
     }
     // A per-element floor. Set equality alone is satisfied by both sides being empty.
-    if (want.length > 0 && got.length === 0) {
+    if (want.length > 0 && got.values.length === 0) {
       problems.push(`${decl.name} emitted ZERO props for ${want.length} public field(s).`);
     }
 
-    // EVERY PROP NEEDS AN ATTRIBUTE, and this is a consequence of the ssrSafe decision.
-    //
-    // ssrSafe defers `import("@spec-kitty/elements")` into a useEffect, so at FIRST render the
-    // custom element is not yet defined — and React, with no property to assign to on an
-    // unupgraded element, sets the value as an ATTRIBUTE. Measured in the React fixture: the
-    // `value` attribute appears on the node even though `value: { type: String }` is NOT
-    // reflected, so React put it there.
-    //
-    // It works today only because Lit maps that attribute back onto the property on upgrade.
-    // A prop the manifest gives no attribute would be delivered to nothing on first render,
-    // silently — no error, no warning, the element simply never receives it. Every prop has an
-    // attribute right now, so this is green on arrival and exists to stay that way.
-    const unattributed = want.filter((f) => !decl.attributed.has(f));
-    if (unattributed.length) {
+    // --- EVENTS. The same argument as props, and the first draft did not apply it. ---------
+    // File-set equality is insufficient because a generator emitting empty props objects
+    // satisfies it; verbatim, a generator emitting no event handlers satisfies the props arm.
+    // Only sk-nav-pill has an event today, so without this the NEXT element to gain a `@fires`
+    // would get no handler prop and nothing would say so.
+    const wantHandlers = decl.events.map(handlerName).sort();
+    if (JSON.stringify(got.handlers) !== JSON.stringify(wantHandlers)) {
       problems.push(
-        `${decl.name} (${tag}) has prop(s) with no attribute mapping: ${unattributed.join(', ')}.\n` +
-          '   ssrSafe defers element registration, so React delivers first-render props as\n' +
-          '   ATTRIBUTES. A prop with no attribute is dropped silently on first render. Either\n' +
-          '   give the property an attribute, or drop the ssrSafe decision (FR-009) knowingly.'
+        `${decl.name} (${tag}) event handlers do not match the manifest's events.\n` +
+          `   manifest: ${wantHandlers.join(', ') || '(none)'}\n` +
+          `   emitted:  ${got.handlers.join(', ') || '(none)'}`
+      );
+    }
+
+    // --- THE EMITTED KEY MUST BE THE OBSERVED ATTRIBUTE NAME -------------------------------
+    // Under ssrSafe React writes an ATTRIBUTE on first render, so the createElement key has to
+    // be the name Lit observes, not the field name. These diverge exactly once today:
+    // sk-nav-pill declares `isOpen: { attribute: 'open' }`, and the toolkit happens to emit
+    // `open:`. Nothing read that emitted key, so a toolkit change dropping the rename would
+    // emit `isOpen:` -> React writes `isopen` -> Lit observes `open` -> silently dropped, and
+    // the byte-diff would red exactly once before "just regenerate" made it green forever.
+    const js = join(outdir, `${decl.name}.js`);
+    if (existsSync(js)) {
+      const body = readFileSync(js, 'utf8');
+      for (const field of want) {
+        const attr = decl.attrNameByField.get(field);
+        if (attr === field) continue; // no rename to verify
+        const emitsAttr = new RegExp(`^\\s+${attr}:`, 'm').test(body);
+        if (!emitsAttr) {
+          problems.push(
+            `${decl.name} (${tag}) renames ${field} -> attribute "${attr}", but the emitted\n` +
+              `   createElement props do not carry a "${attr}" key. Under ssrSafe the first\n` +
+              '   render writes an attribute, so the key must be the observed attribute name.'
+          );
+        }
+      }
+    }
+
+    // WHICH PUBLIC FIELDS ARE NOT DELIVERABLE, asserted as a SET against a committed record.
+    //
+    // The first draft asserted "every prop has an attribute" and claimed to be "green on
+    // arrival". It was green over a live counter-example: `errorMessage` is Lit `state: true`,
+    // the element observes no attribute for it, and the analyzer recorded one anyway — so the
+    // guard read the manifest's claim instead of the element's declaration and passed. Found by
+    // #126's pre-merge squad. normalise-manifest.mjs now corrects the manifest at source.
+    //
+    // A set assertion rather than a floor: a field that stops being deliverable must start
+    // FAILING, not quietly disappear from the published API.
+    const expectedNonProp = [...(EXPECTED_NON_PROP_FIELDS.get(tag) ?? [])].sort();
+    if (JSON.stringify(decl.unattributed) !== JSON.stringify(expectedNonProp)) {
+      problems.push(
+        `${decl.name} (${tag}) non-deliverable public field set changed.\n` +
+          `   recorded: ${expectedNonProp.join(', ') || '(none)'}\n` +
+          `   actual:   ${decl.unattributed.join(', ') || '(none)'}\n` +
+          '   A public field with no observed attribute cannot reach the element on first\n' +
+          '   render under ssrSafe. Give it an attribute, or add it to EXPECTED_NON_PROP_FIELDS\n' +
+          '   with the reason in the same commit.'
       );
     }
   }
@@ -317,34 +422,69 @@ function audit({ outdir, manifestPath, srcDir, floor }) {
 if (selftest) {
   const BASE_MANIFEST = JSON.parse(readFileSync(MANIFEST, 'utf8'));
   const dir = mkdtempSync(join(tmpdir(), 'react-wrappers-selftest-'));
+  const FLOOR_UNDER_TEST = 5;
   let bad = 0;
   let caught = 0;
 
-  // Each probe mutates a freshly generated tree (or the manifest feeding it) and says whether
-  // `audit` must report a problem. Every "must catch" form here is one this gate was written
-  // for, or one that defeated an earlier draft of it.
+  /**
+   * Each row is [note, expect, mutate]. `expect` is a substring of the problem the row is
+   * SUPPOSED to trigger, or null for a row that must pass cleanly.
+   *
+   * SCOPE: these rows exercise `audit`, which runs over a FRESHLY GENERATED tree. The orphan
+   * sweep proper (a file committed under OUTDIR that the generator no longer emits) lives in
+   * the `--check` branch and compares committed-vs-generated, so this table cannot reach it.
+   * Its fail-closed behaviour was demonstrated by hand and recorded in the commit that added it;
+   * bringing it under a probe needs the check path factored out, and is filed rather than
+   * bodged in here. Two rows above previously CLAIMED to prove it and were in fact caught by
+   * the set comparison — corrected rather than relabelled.
+   *
+   * Matching the message rather than `problems.length > 0` is the whole point. With a boolean,
+   * three rows — including both rows that advertise the floor — passed because a DIFFERENT
+   * assertion fired, and the floor blocks could be deleted with all eleven probes still
+   * "behaving as recorded". #126's pre-merge squad traced that; the table now names its guard.
+   */
   const PROBES = [
-    ['the real thing, untouched', false, () => {}],
+    ['the real thing, untouched', null, () => {}],
     [
-      'a wrapper the generator no longer emits, left committed — git diff AND a per-file ' +
-        'compare are both green on this',
-      true,
+      'a file in the output tree that no tagged declaration justifies (a stale wrapper left ' +
+        'behind, in audit terms)',
+      'disagree',
       ({ out }) => cpSync(join(out, 'SkCard.d.ts'), join(out, 'SkGone.d.ts')),
     ],
     [
       'a hand-added file in the output directory',
-      true,
+      'disagree',
       ({ out }) => writeFileSync(join(out, 'SkHand.d.ts'), 'export const hand = 1;\n'),
     ],
     [
-      'one element deleted from the emitted set — the floor, not `length > 0`',
-      true,
-      ({ out }) => { rmSync(join(out, 'SkCard.d.ts')); rmSync(join(out, 'SkCard.js')); },
+      'one element missing from the emitted set while the manifest still declares it',
+      'disagree',
+      ({ out }) => {
+        rmSync(join(out, 'SkCard.d.ts'));
+        rmSync(join(out, 'SkCard.js'));
+      },
+    ],
+    [
+      'THE FLOOR IN ISOLATION: an element removed from disk AND from the manifest, so all ' +
+        'three counts agree and only the committed ratchet objects',
+      'Refusing to report green over a shrunken set',
+      ({ probeDir, out, src }) => {
+        rmSync(join(src, 'card'), { recursive: true, force: true });
+        const mp = join(probeDir, 'manifest.json');
+        const m = JSON.parse(readFileSync(mp, 'utf8'));
+        for (const mod of m.modules ?? []) {
+          mod.declarations = (mod.declarations ?? []).filter((d) => d.tagName !== 'sk-card');
+        }
+        writeFileSync(mp, JSON.stringify(m));
+        rmSync(out, { recursive: true, force: true });
+        mkdirSync(out, { recursive: true });
+        generate(mp, out);
+      },
     ],
     [
       'ALL elements deleted — the empty set, which build-elements-css.mjs still reports green ' +
         'over today (#123)',
-      true,
+      'Refusing to report green over a shrunken set',
       ({ out }) => {
         for (const f of readdirSync(out)) if (!NON_ELEMENT_FILES.has(f)) rmSync(join(out, f));
       },
@@ -352,41 +492,65 @@ if (selftest) {
     [
       'a declaration the generator skipped while the manifest still declares it — the ' +
         'TAUTOLOGY case, green if both sides read decl.tagName',
-      true,
-      ({ out }) => { rmSync(join(out, 'SkStub.d.ts')); rmSync(join(out, 'SkStub.js')); },
+      'disagree',
+      ({ out }) => {
+        rmSync(join(out, 'SkStub.d.ts'));
+        rmSync(join(out, 'SkStub.js'));
+      },
     ],
     [
       'props silently dropped from a wrapper — file set still equal',
-      true,
+      'props do not match',
       ({ out }) => {
         const f = join(out, 'SkFormInput.d.ts');
         writeFileSync(f, readFileSync(f, 'utf8').replace(/^ {2}value\?:.*$/m, '  // gone'));
       },
     ],
     [
-      'a wrapper emitting NO props at all for an element that has ten',
-      true,
+      'THE PER-ELEMENT PROP FLOOR IN ISOLATION: every prop stripped, file set intact',
+      'emitted ZERO props',
       ({ out }) => {
         const f = join(out, 'SkFormInput.d.ts');
-        writeFileSync(f, readFileSync(f, 'utf8').replace(/^ {2}\w+\?:.*$/gm, ''));
+        const kept = readFileSync(f, 'utf8')
+          .split('\n')
+          .filter((l) => !/^ {2}[A-Za-z_$][\w$]*\??:/.test(l))
+          .join('\n');
+        writeFileSync(f, kept);
+      },
+    ],
+    [
+      'the ONE event handler dropped — the props arm alone does not see events',
+      'event handlers do not match',
+      ({ out }) => {
+        const f = join(out, 'SkNavPill.d.ts');
+        writeFileSync(
+          f,
+          readFileSync(f, 'utf8').replace(/^ {2}onSkNavPillToggle\?:.*$/m, '  // gone')
+        );
+      },
+    ],
+    [
+      'the isOpen -> open attribute rename lost in the emitted runtime, so React would write ' +
+        '"isopen" and Lit would observe nothing',
+      'do not carry a "open" key',
+      ({ out }) => {
+        const f = join(out, 'SkNavPill.js');
+        writeFileSync(f, readFileSync(f, 'utf8').replace(/^(\s+)open:/m, '$1isOpen:'));
       },
     ],
     [
       'the "use client" directive stripped — FR-009 decided, then silently undecided',
-      true,
+      'no "use client" directive',
       ({ out }) => {
         const f = join(out, 'SkCard.js');
         writeFileSync(f, readFileSync(f, 'utf8').replace('"use client";\n', ''));
       },
     ],
     [
-      'a prop the manifest gives no attribute — silently undelivered on first render under ' +
-        'ssrSafe, because React has no upgraded element to assign a property to',
-      true,
+      'a public field that loses its observed attribute — undeliverable on first render under ' +
+        'ssrSafe, and the manifest cannot see Lit state: true unaided',
+      'non-deliverable public field set changed',
       ({ probeDir, out }) => {
-        // Strip sk-card's `variant` attribute while leaving the field, then regenerate so the
-        // emitted prop set still contains it. The audit must notice the prop can only be
-        // delivered as an attribute that no longer exists.
         const mp = join(probeDir, 'manifest.json');
         const m = JSON.parse(readFileSync(mp, 'utf8'));
         for (const mod of m.modules ?? []) {
@@ -399,12 +563,28 @@ if (selftest) {
           }
         }
         writeFileSync(mp, JSON.stringify(m));
-        generate(mp, out);
+        // Regenerate from the UNNARROWED prop set so `variant` is still emitted, which is what
+        // makes this the undeliverable case rather than a plain set mismatch.
+        const dts = join(out, 'SkCard.d.ts');
+        writeFileSync(dts, readFileSync(dts, 'utf8'));
+      },
+    ],
+    [
+      'the readonly filter removed, so a getter returns as a settable prop — the measured ' +
+        'off-the-shelf defect this gate narrows the manifest to prevent',
+      'props do not match',
+      ({ out }) => {
+        const f = join(out, 'SkFormInput.d.ts');
+        const body = readFileSync(f, 'utf8').replace(
+          /^ {2}value\?:/m,
+          '  error?: SkFormInputElement["error"];\n  value?:'
+        );
+        writeFileSync(f, body);
       },
     ],
     [
       'an element on disk that the manifest does not declare — the analyzer dropped it',
-      true,
+      'disagree',
       ({ src }) => {
         mkdirSync(join(src, 'ghost'), { recursive: true });
         writeFileSync(join(src, 'ghost/sk-ghost.ts'), 'export class SkGhost {}\n');
@@ -413,8 +593,8 @@ if (selftest) {
   ];
 
   try {
-    for (const [note, mustCatch, mutate] of PROBES) {
-      const probeDir = join(dir, `probe-${PROBES.indexOf(PROBES.find(([n]) => n === note))}`);
+    for (const [i, [note, expect, mutate]] of PROBES.entries()) {
+      const probeDir = join(dir, `probe-${i}`);
       const out = join(probeDir, 'out');
       const src = join(probeDir, 'src');
       mkdirSync(out, { recursive: true });
@@ -423,16 +603,25 @@ if (selftest) {
       writeFileSync(manifestPath, JSON.stringify(BASE_MANIFEST));
       generate(manifestPath, out);
       mutate({ out, src, probeDir });
-      const problems = audit({ outdir: out, manifestPath, srcDir: src, floor: 5 });
-      const didCatch = problems.length > 0;
-      if (didCatch !== mustCatch) {
+      const problems = audit({
+        outdir: out,
+        manifestPath,
+        srcDir: src,
+        floor: FLOOR_UNDER_TEST,
+      });
+      const joined = problems.join('\n');
+      const didCatch = expect === null ? problems.length === 0 : joined.includes(expect);
+      const wanted = expect === null ? 'no problem' : `a problem matching ${JSON.stringify(expect)}`;
+      if (!didCatch) {
         console.error(
-          `  ✗ ${note}\n     expected ${mustCatch ? 'a problem' : 'no problem'}, got ` +
-            `${didCatch ? problems.length + ' problem(s)' : 'none'}`
+          `  ✗ ${note}\n     expected ${wanted}, got ` +
+            (problems.length
+              ? `${problems.length} problem(s):\n       ${problems.join('\n       ')}`
+              : 'none')
         );
         bad++;
       }
-      if (mustCatch) caught++;
+      if (expect !== null) caught++;
     }
   } finally {
     rmSync(dir, { recursive: true, force: true });
@@ -442,18 +631,30 @@ if (selftest) {
     console.error(`\n❌ ${bad} of ${PROBES.length} probe(s) did not behave as recorded.`);
     process.exit(1);
   }
-  // A table with no "must catch" rows would pass with `audit` stubbed to return [].
-  if (caught < 8 || caught === PROBES.length) {
+
+  /**
+   * A SHRINK-ONLY FLOOR on the table itself, named rather than a copied literal.
+   *
+   * The first draft used `caught < 8` — lifted verbatim from check-elements-entries.mjs:90 —
+   * against a table with 10 must-catch rows, so two probes could be deleted with the gate still
+   * green, including the empty-set and tautology rows the header names as the reason this gate
+   * exists. check-adopted-css-boundaries.mjs:240-251 already argues this against its own earlier
+   * shape and uses a named two-dimensional floor; this follows it.
+   */
+  const FLOOR = { mustCatch: 14, mustPass: 1 };
+  const mustPass = PROBES.length - caught;
+  if (caught < FLOOR.mustCatch || mustPass < FLOOR.mustPass) {
     console.error(
-      `\n❌ Degenerate probe table: ${caught} must-catch row(s) of ${PROBES.length}. Every form ` +
-        'this gate has ever been defeated by must stay in the table, and at least one row must ' +
-        'expect a clean pass — otherwise `audit` returning a constant satisfies it.'
+      `\n❌ Degenerate probe table: ${caught} must-catch (floor ${FLOOR.mustCatch}), ` +
+        `${mustPass} must-pass (floor ${FLOOR.mustPass}).\n` +
+        '   Every form this gate has ever been defeated by must stay in the table, and at least\n' +
+        '   one row must expect a clean pass — otherwise `audit` returning a constant passes.\n' +
+        '   Raise the floor when you add a row; never lower it to make a deletion fit.'
     );
     process.exit(1);
   }
   console.log(
-    `\n✅ All ${PROBES.length} probes behaved as recorded (${caught} must-catch, ` +
-      `${PROBES.length - caught} must-pass).`
+    `\n✅ All ${PROBES.length} probes behaved as recorded (${caught} must-catch, ${mustPass} must-pass).`
   );
   process.exit(0);
 }
@@ -474,7 +675,25 @@ try {
   generate(MANIFEST, fresh);
 
   const floorPath = 'packages/react/.wrapper-floor';
-  const floor = existsSync(floorPath) ? Number(readFileSync(floorPath, 'utf8').trim()) : 0;
+  // ABSENCE IS A FAILURE, not a floor of zero, and a non-integer is a failure too.
+  //
+  // The first draft read `existsSync(p) ? Number(...) : 0`, so deleting the file set the floor
+    // to 0 and garbage in it produced NaN — and `n < NaN` is false. Both made the floor vacuous
+  // in silence, which is the certifying-absence shape this whole file argues against.
+  // check-part-ratchet.mjs:34-41 refuses absence for exactly this reason and says so.
+  if (!existsSync(floorPath)) {
+    console.error(
+      `❌ ${floorPath} is missing. It is the committed wrapper-count ratchet; treating its` +
+        ' absence as "no floor" is how a shrunken set ships. Restore it from git.'
+    );
+    process.exit(1);
+  }
+  const floorRaw = readFileSync(floorPath, 'utf8').trim();
+  if (!/^\d+$/.test(floorRaw)) {
+    console.error(`❌ ${floorPath} is not a non-negative integer (read ${JSON.stringify(floorRaw)}).`);
+    process.exit(1);
+  }
+  const floor = Number(floorRaw);
   const problems = audit({ outdir: fresh, manifestPath: MANIFEST, srcDir: SRC, floor });
   if (problems.length) {
     console.error('❌ build-react-wrappers:\n' + problems.map((p) => `   ${p}`).join('\n'));
@@ -552,7 +771,21 @@ try {
       cpSync(join(fresh, f), join(OUTDIR, f));
     }
     const count = generated.filter((f) => f.endsWith('.d.ts') && !NON_ELEMENT_FILES.has(f)).length;
-    writeFileSync(floorPath, `${count}\n`);
+    // RATCHET UP ONLY. The first draft wrote the count unconditionally, so removing an element
+    // rewrote 5 -> 4 as a side effect of the regenerate you are forced to run to make --check
+    // green: the guard lowered itself, with no decision and no justification, exactly as its own
+    // docstring instructed a human to do deliberately. Found by #126's pre-merge squad.
+    if (count > floor) {
+      writeFileSync(floorPath, `${count}\n`);
+      console.log(`build-react-wrappers: floor raised ${floor} -> ${count}`);
+    } else if (count < floor) {
+      console.error(
+        `❌ ${count} element(s) emitted but the committed floor is ${floor}.\n` +
+          `   Refusing to lower it as a side effect. If an element was deliberately removed,\n` +
+          `   edit ${floorPath} in the same commit and say why in the message.`
+      );
+      process.exit(1);
+    }
     console.log(`build-react-wrappers: wrote ${generated.length} file(s) to ${OUTDIR} (${count} element(s))`);
   }
 } finally {
