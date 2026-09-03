@@ -9,25 +9,38 @@
       "lane_id": "lane-a",
       "wp_ids": [
         "WP01",
-        "WP03",
-        "WP04"
+        "WP02",
+        "WP03"
       ],
       "write_scope": [
         "behaviours.json",
+        "expected-parts.json",
         "fixtures/elements-behaviour/src/sk-form-input.test.ts",
         "fixtures/elements-behaviour/src/sk-form-textarea.test.ts",
         "fixtures/elements-behaviour/tsconfig.json",
         "mutations.json",
         "mutations.selftest.json",
+        "packages/elements/custom-elements.json",
+        "packages/elements/src/elements.ts",
+        "packages/elements/src/form-control-base.ts",
+        "packages/elements/src/form-input/sk-form-input.css.d.ts",
+        "packages/elements/src/form-input/sk-form-input.css.js",
+        "packages/elements/src/form-input/sk-form-input.ts",
+        "packages/elements/src/form-textarea/sk-form-textarea.css.d.ts",
+        "packages/elements/src/form-textarea/sk-form-textarea.css.js",
         "packages/elements/src/form-textarea/sk-form-textarea.ts",
+        "packages/elements/src/index.ts",
         "packages/styles/src/form-input/sk-form-input.css",
         "packages/styles/src/form-textarea/sk-form-textarea.css",
         "scripts/check-adopted-css-boundaries.mjs",
         "suite-budget.json",
+        "tests/browser/registered-elements.test.ts",
         "tests/node/config-contract.test.ts"
       ],
       "predicted_surfaces": [
-        "legacy-cleanup"
+        "artifact-rendering",
+        "legacy-cleanup",
+        "tracker-integration"
       ],
       "depends_on_lanes": [],
       "parallel_group": 0
@@ -35,57 +48,40 @@
     {
       "lane_id": "lane-b",
       "wp_ids": [
-        "WP02"
+        "WP04"
       ],
       "write_scope": [
-        "packages/elements/src/elements.ts",
-        "packages/elements/src/form-control-base.ts",
-        "packages/elements/src/form-input/sk-form-input.ts",
-        "packages/elements/src/index.ts"
-      ],
-      "predicted_surfaces": [
-        "artifact-rendering"
-      ],
-      "depends_on_lanes": [],
-      "parallel_group": 0
-    },
-    {
-      "lane_id": "lane-c",
-      "wp_ids": [
-        "WP05"
-      ],
-      "write_scope": [
+        ".github/workflows/ci-quality.yml",
         "docs/design-system/using-components.md",
-        "expected-parts.json",
         "expected-stories.json",
         "packages/elements/src/form-input/sk-form-input.stories.ts",
         "packages/elements/src/form-textarea/sk-form-textarea.stories.ts",
         "scripts/run-axe-storybook.js"
       ],
       "predicted_surfaces": [
-        "artifact-rendering"
+        "legacy-cleanup"
       ],
       "depends_on_lanes": [],
       "parallel_group": 0
     }
   ],
-  "computed_at": "2026-09-03T10:10:13.788550+00:00",
+  "computed_at": "2026-09-03T10:21:06.475663+00:00",
   "computed_from": "dependency_graph+ownership",
   "planning_artifact_wps": [],
-  "planning_commit_sha": "efe71ad0e677eba45a55fabce430aacf0fcc9923",
+  "planning_commit_sha": "ab91650f2894c7944370f9189779e0a61388052c",
   "collapse_report": {
     "events": [
       {
         "wp_a": "WP01",
-        "wp_b": "WP04",
+        "wp_b": "WP03",
         "rule": "write_scope_overlap",
-        "evidence": "overlapping globs: 'packages/styles/src/form-input/sk-form-input.css' vs 'packages/styles/src/form-input/sk-form-input.css'"
+        "evidence": "overlapping globs: 'packages/styles/src/form-input/sk-form-input.css' vs 'packages/styles/src/form-input/sk-form-input.css', 'packages/elements/src/index.ts' vs 'packages/elements/src/index.ts', 'packages/elements/src/elements.ts' vs 'packages/elements/src/elements.ts', 'packages/elements/custom-elements.json' vs 'packages/elements/custom-elements.json'"
       },
       {
-        "wp_a": "WP03",
-        "wp_b": "WP04",
+        "wp_a": "WP02",
+        "wp_b": "WP03",
         "rule": "write_scope_overlap",
-        "evidence": "overlapping globs: 'behaviours.json' vs 'behaviours.json', 'mutations.json' vs 'mutations.json'"
+        "evidence": "overlapping globs: 'behaviours.json' vs 'behaviours.json', 'mutations.json' vs 'mutations.json', 'expected-parts.json' vs 'expected-parts.json', 'suite-budget.json' vs 'suite-budget.json'"
       }
     ],
     "total_merges": 2,
