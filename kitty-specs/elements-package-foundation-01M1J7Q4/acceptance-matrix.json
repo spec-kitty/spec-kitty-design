@@ -6,103 +6,259 @@
   "criteria": [
     {
       "criterion_id": "FR-001",
-      "description": "Verify FR-001 is satisfied",
+      "description": "packages/elements exists on Lit 3.3.x; nx graph shows an elements->styles edge; scope:elements depConstraints enforced and a lint target exists so nx affected actually lints it.",
       "proof_type": "automated_test",
       "evidence": null,
       "pass_fail": "pending",
       "verified_by": null,
       "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "notes": "Owned by WP02. Authored post-tasks squad; replaces the generated stub."
     },
     {
       "criterion_id": "FR-002",
-      "description": "Verify FR-002 is satisfied",
+      "description": "The build reads packages/styles/src/stub/sk-stub.css (source of record) and emits a constructed-stylesheet module; zero .css files under packages/elements/**.",
       "proof_type": "automated_test",
       "evidence": null,
       "pass_fail": "pending",
       "verified_by": null,
       "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "notes": "Owned by WP03. Authored post-tasks squad; replaces the generated stub."
     },
     {
       "criterion_id": "FR-003",
-      "description": "Verify FR-003 is satisfied",
+      "description": "dist/index.js is ESM with lit external; the Vite fixture consumes it and the element upgrades.",
       "proof_type": "automated_test",
       "evidence": null,
       "pass_fail": "pending",
       "verified_by": null,
       "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "notes": "Owned by WP04. Authored post-tasks squad; replaces the generated stub."
     },
     {
       "criterion_id": "FR-004",
-      "description": "Verify FR-004 is satisfied",
+      "description": "dist/elements.js is a self-contained IIFE that upgrades from file:// with no server and no bundler.",
       "proof_type": "automated_test",
       "evidence": null,
       "pass_fail": "pending",
       "verified_by": null,
       "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "notes": "Owned by WP04. Authored post-tasks squad; replaces the generated stub."
     },
     {
       "criterion_id": "FR-005",
-      "description": "Verify FR-005 is satisfied",
+      "description": "Loading both artifacts on one page warns and does not throw; asserted in a CI-executed Playwright spec.",
       "proof_type": "automated_test",
       "evidence": null,
       "pass_fail": "pending",
       "verified_by": null,
       "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "notes": "Owned by WP04. Authored post-tasks squad; replaces the generated stub."
     },
     {
       "criterion_id": "FR-006",
-      "description": "Verify FR-006 is satisfied",
+      "description": "custom-elements.json describes sk-stub by its real tag name, and contains NO definition named 'tag' (the ADR-10 \u00a75 guarded define breaks the analyzer -- measured).",
       "proof_type": "automated_test",
       "evidence": null,
       "pass_fail": "pending",
       "verified_by": null,
       "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "notes": "Owned by WP05. Authored post-tasks squad; replaces the generated stub."
     },
     {
       "criterion_id": "FR-007",
-      "description": "Verify FR-007 is satisfied",
+      "description": "All four shadow-blind sites pierce open shadow roots: root check :207, per-host :258, host enumeration :240-248, wait predicate :312-316.",
       "proof_type": "automated_test",
       "evidence": null,
       "pass_fail": "pending",
       "verified_by": null,
       "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "notes": "Owned by WP01. Authored post-tasks squad; replaces the generated stub."
     },
     {
       "criterion_id": "FR-008",
-      "description": "Verify FR-008 is satisfied",
+      "description": "packages/elements/** is in ci-quality.yml's components path filter.",
       "proof_type": "automated_test",
       "evidence": null,
       "pass_fail": "pending",
       "verified_by": null,
       "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "notes": "Owned by WP02. Authored post-tasks squad; replaces the generated stub."
     },
     {
       "criterion_id": "FR-009",
-      "description": "Verify FR-009 is satisfied",
+      "description": "A CI-enforced check rejects CSS text in hand-authored packages/elements/**/*.{ts,js,mjs}, red-first.",
       "proof_type": "automated_test",
       "evidence": null,
       "pass_fail": "pending",
       "verified_by": null,
       "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "notes": "Owned by WP03. Authored post-tasks squad; replaces the generated stub."
     },
     {
       "criterion_id": "FR-010",
-      "description": "Verify FR-010 is satisfied",
+      "description": "BLOCKED on an operator scope ruling. Vacuous over packages/elements (no CSS there); over packages/styles it fails sk-card.css:57,61,66,70 which C-003 forbids touching. Defer to #72, or allowlist per component.",
+      "proof_type": "manual_review",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Owned by WP06. Authored post-tasks squad; replaces the generated stub."
+    },
+    {
+      "criterion_id": "NFR-001",
+      "description": "Artifact sizes recorded in packages/elements/SIZES.md as raw / minified / minified+gzip, with the measuring command's raw output committed.",
+      "proof_type": "manual_review",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Owned by WP04. Added post-tasks: the scaffold covered only FR rows, while every WP DoD binds to these.",
+      "negative_invariants": []
+    },
+    {
+      "criterion_id": "NFR-002",
+      "description": "NEGATIVE INVARIANT. The six red-first shapes still fail TWICE OVER: in light DOM, and as the entire content of an open shadow root. Plus slotted-content passes, empty-slot fails, nested-host empty fails. Eleven cases.",
       "proof_type": "automated_test",
       "evidence": null,
       "pass_fail": "pending",
       "verified_by": null,
       "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "notes": "Owned by WP01. Added post-tasks: the scaffold covered only FR rows, while every WP DoD binds to these.",
+      "negative_invariants": [
+        "the six red-first shapes must still fail in BOTH DOMs"
+      ]
+    },
+    {
+      "criterion_id": "NFR-003",
+      "description": "Per-story result lines over the 74 existing stories are identical before and after, port-normalised. Cannot detect weakening -- NFR-002 is that guard.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Owned by WP01. Added post-tasks: the scaffold covered only FR rows, while every WP DoD binds to these.",
+      "negative_invariants": []
+    },
+    {
+      "criterion_id": "NFR-004",
+      "description": "No CSS inlined into TypeScript; .css files remain real files under stylelint.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Owned by WP03. Added post-tasks: the scaffold covered only FR rows, while every WP DoD binds to these.",
+      "negative_invariants": []
+    },
+    {
+      "criterion_id": "SC-001",
+      "description": "IIFE upgrades from file://; served over HTTP it executes with a matching integrity hash and is REFUSED with a wrong one.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Owned by WP04. Added post-tasks: the scaffold covered only FR rows, while every WP DoD binds to these.",
+      "negative_invariants": []
+    },
+    {
+      "criterion_id": "SC-002",
+      "description": "Generated module text byte-identical to the source .css; adoptedStyleSheets.length === 1 and zero <style> elements.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Owned by WP03. Added post-tasks: the scaffold covered only FR rows, while every WP DoD binds to these.",
+      "negative_invariants": []
+    },
+    {
+      "criterion_id": "SC-003",
+      "description": "Double registration warns, does not throw, asserted in a spec NAMED in ci-quality.yml's playwright step (it runs named files, not testDir).",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Owned by WP04. Added post-tasks: the scaffold covered only FR rows, while every WP DoD binds to these.",
+      "negative_invariants": []
+    },
+    {
+      "criterion_id": "SC-004",
+      "description": "Manifest describes sk-stub; regeneration check fails on drift.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Owned by WP05. Added post-tasks: the scaffold covered only FR rows, while every WP DoD binds to these.",
+      "negative_invariants": []
+    },
+    {
+      "criterion_id": "SC-005",
+      "description": "Eleven demonstrated cases with exit codes, including the three a real #72 component hits: slotted content, empty slot, nested host.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Owned by WP01. Added post-tasks: the scaffold covered only FR rows, while every WP DoD binds to these.",
+      "negative_invariants": []
+    },
+    {
+      "criterion_id": "SC-006",
+      "description": "Identical per-story lines over the 74 existing stories.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Owned by WP01. Added post-tasks: the scaffold covered only FR rows, while every WP DoD binds to these.",
+      "negative_invariants": []
+    },
+    {
+      "criterion_id": "SC-007",
+      "description": "Evidenced on a THROWAWAY branch touching only packages/elements/** -- unfalsifiable on this mission's own PR, which touches files already in the filter.",
+      "proof_type": "manual_review",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Owned by WP02. Added post-tasks: the scaffold covered only FR rows, while every WP DoD binds to these.",
+      "negative_invariants": []
+    },
+    {
+      "criterion_id": "SC-008",
+      "description": "sk-stub renders in Storybook AND in the Vite bundler fixture. Both halves.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Owned by WP04. Added post-tasks: the scaffold covered only FR rows, while every WP DoD binds to these.",
+      "negative_invariants": []
+    },
+    {
+      "criterion_id": "SC-009",
+      "description": "Artifacts emit at ADR-10 \u00a72's dist/index.js and dist/elements.js -- #71, #72 and #82 import them.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Owned by WP04. Added post-tasks: the scaffold covered only FR rows, while every WP DoD binds to these.",
+      "negative_invariants": []
+    },
+    {
+      "criterion_id": "SC-010",
+      "description": "An import from elements to a package outside styles/tokens fails lint, demonstrated.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Owned by WP02. Added post-tasks: the scaffold covered only FR rows, while every WP DoD binds to these.",
+      "negative_invariants": []
     }
   ],
   "negative_invariants": []
