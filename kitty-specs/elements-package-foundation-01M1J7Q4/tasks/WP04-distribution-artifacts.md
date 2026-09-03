@@ -45,24 +45,24 @@ Implements IC-03.
 
 ## Subtasks
 
-- **T011** — esbuild via `nx:run-commands` (mirroring `packages/tokens`): ESM with `lit` **external** → `dist/index.js`; IIFE with the runtime bundled → `dist/elements.js`. **The paths are ADR-10 §2's and are not negotiable** — #71, #72 and #82 all import them.
-- **T012** — A Vite fixture at `fixtures/vite-consumer/` importing the ESM artifact. Without it **nothing ever consumes FR-003's output** and "lit is external" is only checkable statically.
-- **T013** — A Playwright spec loading the IIFE from `file://`, and over HTTP with an `integrity` attribute.
-- **T014** — Record artifact sizes as **raw / minified / minified+gzip** into `packages/elements/SIZES.md`, **committing the measuring command and its raw output**. A baseline that lives only in a PR body is not inheritable, and this WP prompt hands you numbers — copying them satisfies nothing.
-- **T015** — Add `apps/storybook/src/tests/elements-load.spec.ts` **and wire it into CI**. `ci-quality.yml:240,246` runs two *named* spec files, not `testDir` — an unlisted spec never executes. Getting the IIFE served needs a `staticDirs` entry in `apps/storybook/.storybook/main.ts` (owned here) since `playwright.config.ts`'s webServer serves only `storybook-static`.
-- **T016** — Assert **FR-005 / SC-003** here: load both artifacts on one page, confirm a warning and no throw. `define.ts` is WP02's; the artifacts that exercise it are this WP's.
+- [x] **T011** — esbuild via `nx:run-commands` (mirroring `packages/tokens`): ESM with `lit` **external** → `dist/index.js`; IIFE with the runtime bundled → `dist/elements.js`. **The paths are ADR-10 §2's and are not negotiable** — #71, #72 and #82 all import them.
+- [x] **T012** — A Vite fixture at `fixtures/vite-consumer/` importing the ESM artifact. Without it **nothing ever consumes FR-003's output** and "lit is external" is only checkable statically.
+- [x] **T013** — A Playwright spec loading the IIFE from `file://`, and over HTTP with an `integrity` attribute.
+- [x] **T014** — Record artifact sizes as **raw / minified / minified+gzip** into `packages/elements/SIZES.md`, **committing the measuring command and its raw output**. A baseline that lives only in a PR body is not inheritable, and this WP prompt hands you numbers — copying them satisfies nothing.
+- [x] **T015** — Add `apps/storybook/src/tests/elements-load.spec.ts` **and wire it into CI**. `ci-quality.yml:240,246` runs two *named* spec files, not `testDir` — an unlisted spec never executes. Getting the IIFE served needs a `staticDirs` entry in `apps/storybook/.storybook/main.ts` (owned here) since `playwright.config.ts`'s webServer serves only `storybook-static`.
+- [x] **T016** — Assert **FR-005 / SC-003** here: load both artifacts on one page, confirm a warning and no throw. `define.ts` is WP02's; the artifacts that exercise it are this WP's.
 
 ## Definition of Done
 
-- [ ] Both artifacts emit at the ADR-10 §2 paths (SC-009).
-- [ ] The IIFE upgrades an element from a `file://` page with no server and no bundler (SC-001).
-- [ ] Served over HTTP with a **matching** `integrity` hash it executes; with a **wrong** one the browser refuses it. A literal CDN load is **#80's** — all three package names 404 on npm — and `file://` cannot exercise SRI at all.
-- [ ] The Vite fixture builds and the element upgrades in it (SC-008).
-- [ ] Sizes in `packages/elements/SIZES.md` with all three bases and the measuring command's raw output (NFR-001).
-- [ ] `elements-load.spec.ts` is named in `ci-quality.yml`'s playwright step and **executes in CI** — not a local transcript.
-- [ ] Loading both artifacts on one page warns and does not throw (FR-005, SC-003).
-- [ ] ADR-10 Confirmation #1's pair re-asserted **against both built artifacts**: `adoptedStyleSheets.length === 1`, `shadowRoot.querySelectorAll('style').length === 0`.
-- [ ] `sk-stub` renders **in Storybook** as well as in the Vite fixture — SC-008 and #70 exit criterion 2 require both halves.
+- [x] Both artifacts emit at the ADR-10 §2 paths (SC-009).
+- [x] The IIFE upgrades an element from a `file://` page with no server and no bundler (SC-001).
+- [x] Served over HTTP with a **matching** `integrity` hash it executes; with a **wrong** one the browser refuses it. A literal CDN load is **#80's** — all three package names 404 on npm — and `file://` cannot exercise SRI at all.
+- [x] The Vite fixture builds and the element upgrades in it (SC-008).
+- [x] Sizes in `packages/elements/SIZES.md` with all three bases and the measuring command's raw output (NFR-001).
+- [x] `elements-load.spec.ts` is named in `ci-quality.yml`'s playwright step and **executes in CI** — not a local transcript.
+- [x] Loading both artifacts on one page warns and does not throw (FR-005, SC-003).
+- [x] ADR-10 Confirmation #1's pair re-asserted **against both built artifacts**: `adoptedStyleSheets.length === 1`, `shadowRoot.querySelectorAll('style').length === 0`.
+- [x] `sk-stub` renders **in Storybook** as well as in the Vite fixture — SC-008 and #70 exit criterion 2 require both halves.
 
 ## Notes on NFR-001 — read before recording anything
 
