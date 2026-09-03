@@ -1,7 +1,7 @@
 {
-  "event_count": 9,
-  "last_event_id": "01M1JKF7REMY60A80J4ESZW4HJ",
-  "materialized_at": "2026-09-03T03:02:19.150340+00:00",
+  "event_count": 10,
+  "last_event_id": "01M1JKPEQ8B9MPE5QCBHER2HG4",
+  "materialized_at": "2026-09-03T03:06:15.656782+00:00",
   "mission_number": "",
   "mission_slug": "elements-verification-harness-01M1JGEZ",
   "mission_type": "software-dev",
@@ -9,12 +9,12 @@
     "approved": 0,
     "blocked": 0,
     "canceled": 0,
-    "claimed": 0,
+    "claimed": 1,
     "done": 0,
     "for_review": 0,
     "in_progress": 1,
     "in_review": 0,
-    "planned": 6
+    "planned": 5
   },
   "work_packages": {
     "WP01": {
@@ -34,11 +34,19 @@
       "shell_pid_created_at": "1788404538.02"
     },
     "WP02": {
-      "actor": "finalize-tasks",
+      "actor": "claude",
+      "agent": "claude",
+      "agent_profile": "__resolved_profile_absent__",
+      "agent_profile_version": "__resolved_profile_version_absent__",
       "force_count": 0,
-      "lane": "planned",
-      "last_event_id": "01M1JJJPZ6606QB48NKKQ6BZ68",
-      "last_transition_at": "2026-09-03T02:46:44.454118+00:00"
+      "lane": "claimed",
+      "last_event_id": "01M1JKPEQ8B9MPE5QCBHER2HG4",
+      "last_transition_at": "2026-09-03T03:06:15.656782+00:00",
+      "model": "__resolved_model_absent__",
+      "provider": "__resolved_provider_absent__",
+      "role": "implementer",
+      "shell_pid": 3047037,
+      "shell_pid_created_at": "1788404774.58"
     },
     "WP03": {
       "actor": "finalize-tasks",
