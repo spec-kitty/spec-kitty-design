@@ -4,6 +4,7 @@ export { SkCard } from './card/sk-card.js';
 export { SkNavPill } from './nav-pill/sk-nav-pill.js';
 export { SkFormInput } from './form-input/sk-form-input.js';
 export { SkFormTextarea } from './form-textarea/sk-form-textarea.js';
+export { SkGrid } from './grid/sk-grid.js';
 
 /**
  * The generated constructed stylesheet, exported so a test can assert PROVENANCE.
@@ -15,6 +16,11 @@ export { SkFormTextarea } from './form-textarea/sk-form-textarea.js';
  * reaching across a project boundary.
  */
 export { default as skStubSheet } from './stub/sk-stub.css.js';
+
+// Same reason, for sk-grid's [SC-014]: the claim is that the adopted sheet is the one
+// GENERATED from packages/styles/src/grid/sk-grid.css, and identity against the class's own
+// `static styles` would hold for any sheet at all.
+export { default as skGridSheet } from './grid/sk-grid.css.js';
 
 // The card's authored markup module, exported so the two failure policies are reachable
 // from the behaviour fixture. `cardClasses` is TOTAL (an unknown variant warns and degrades)
@@ -31,3 +37,18 @@ export {
   isCardVariant,
   type CardVariant,
 } from './card/sk-card.markup.js';
+
+// The grid's markup module, exported for the same reason as the card's: the two failure
+// policies are only a split if something can reach both. `gridClasses` warns and degrades,
+// `gridStaticHtml` throws.
+export {
+  GRID_AXES,
+  GRID_GAPS,
+  GRID_VARIANTS,
+  gridClasses,
+  gridStaticHtml,
+  isGridGap,
+  isGridVariant,
+  type GridGap,
+  type GridVariant,
+} from './grid/sk-grid.markup.js';

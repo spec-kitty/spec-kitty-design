@@ -15,7 +15,7 @@
  *
  * Usage: node scripts/build-element-markup.mjs [--check]
  */
-import { readFileSync, writeFileSync, existsSync, globSync, statSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, globSync, statSync, mkdirSync } from 'node:fs';
 import { basename, dirname } from 'node:path';
 import * as esbuild from 'esbuild';
 
@@ -71,7 +71,13 @@ for (const src of sources) {
   // name — for the very component the comment below says lands next.
   const camel = name.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
   const screaming = name.replace(/-/g, '_').toUpperCase();
-  const pascal = (x) => x.replace(/(^|-)([a-z])/g, (_, __, c) => c.toUpperCase());
+  // `[a-z0-9]`, NOT `[a-z]`. With the letter-only class, a variant key whose segment starts
+  // with a DIGIT does not match, the hyphen is never consumed, and the emitted line is
+  // `export const SkGridCols-2HTML = ...` — a hyphen in an identifier, which is a TypeScript
+  // syntax error. It was written to a committed file and `--check` then reported "up to date",
+  // because --check compares bytes and cannot parse what it emits. #77's `cols-2`/`cols-3`/
+  // `cols-4` are the first variant keys in the repo with a digit segment.
+  const pascal = (x) => x.replace(/(^|-)([a-z0-9])/g, (_, __, c) => c.toUpperCase());
   const comp = pascal(name);
 
   const staticHtml = mod[`${camel}StaticHtml`];
@@ -126,10 +132,22 @@ for (const src of sources) {
   const htmlPath = `packages/styles/src/${name}/sk-${name}.html`;
   const indexPath = `packages/styles/src/${name}/index.ts`;
 
+  // THE PLACEHOLDER IS THE MODULE'S, like the variants and the axes above.
+  //
+  // This call used to pass `'\n  Card content\n'` — a hardcoded second argument, in the loop
+  // that runs for EVERY component, one line below three guards that exist because a
+  // card-shaped constant leaked into the derived path. It did two wrong things at once: it
+  // put the noun "Card" into `sk-grid.html` and `sk-site-footer.html`, and it padded the
+  // `.html` while `index.ts` (which calls `staticHtml(opts)`) went unpadded, so the two
+  // generated artifacts of the same component disagreed about their own content.
+  //
+  // Both outputs now take the module's default parameter, which is the single place the
+  // placeholder is written. `sk-card.html` loses its indentation in this commit as a result;
+  // it is generated output and regenerates.
   const html = `${MARK}
 <!-- Authored source: ${src} — regenerate with: node scripts/build-element-markup.mjs -->
 <!-- Requires @spec-kitty/tokens to be loaded -->
-${staticHtml({}, '\n  Card content\n')}
+${staticHtml({})}
 `;
 
   // DERIVED from the module's own <COMPONENT>_VARIANTS, not a hardcoded table.
@@ -149,11 +167,32 @@ ${staticHtml({}, '\n  Card content\n')}
 ${forms.map(([n, opts]) => `export const ${n} = ${JSON.stringify(staticHtml(opts))};`).join('\n')}
 `;
 
+  // PARSE WHAT WE EMIT. The hyphen defect above reached a committed file and survived
+  // `--check` green, because --check is a byte comparison and byte comparison cannot tell
+  // valid TypeScript from invalid. Every emitted export name is checked against the
+  // identifier grammar before the file is written, in BOTH modes — a generator that cannot
+  // produce a loadable module has failed whether or not the bytes match what is on disk.
+  for (const [exportName] of forms) {
+    if (!/^[A-Za-z_$][A-Za-z0-9_$]*$/.test(exportName)) {
+      console.error(
+        `❌ ${src} would emit \`export const ${exportName}\` — not a valid identifier.\n` +
+          `   The name is derived from a ${screaming}_VARIANTS key or a ${screaming}_AXES\n` +
+          `   suffix; one of them contains a character that survives the PascalCase transform.`
+      );
+      process.exit(1);
+    }
+  }
+
   for (const [path, next] of [[htmlPath, html], [indexPath, index]]) {
     if (check) {
       const current = existsSync(path) ? readFileSync(path, 'utf8') : null;
       if (current !== next) drifted.push(path);
     } else {
+      // A new component reaches this line before `packages/styles/src/<name>/` exists, and
+      // writeFileSync then throws a raw ENOENT stack naming node:fs — the unnamed-failure
+      // class this file's other errors exist to close. The styles directory is a derived
+      // location, so deriving it is correct.
+      mkdirSync(dirname(path), { recursive: true });
       writeFileSync(path, next);
       console.log(`build-element-markup: ${src} -> ${path}`);
     }

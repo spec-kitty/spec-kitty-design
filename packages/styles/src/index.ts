@@ -17,7 +17,7 @@ export { skRibbonCardHTML, SkRibbonCardDefaultHTML, SkRibbonCardWithRibbonHTML }
 export { SkNavPillHTML } from './nav-pill/index';
 export { SkTagHTML, SkEyebrowPillHTML, SkPillTagHTML, type PillTagVariant } from './pill-tag/index';
 export { SkCardHTML, SkCardBlueHTML, SkCardPurpleHTML, SkCardInsetHTML } from './card/index';
-export { SkGridDefaultHTML, SkGridTwoColumnHTML, SkGridThreeColumnHTML, SkGridFourColumnHTML } from './grid/index';
+export { SkGridHTML, SkGridCols2HTML, SkGridCols3HTML, SkGridCols4HTML, SkGridGap3HTML, SkGridGap6HTML } from './grid/index';
 export {
   SkBlogCardDefaultHTML,
   SkBlogCardWithoutImageHTML,

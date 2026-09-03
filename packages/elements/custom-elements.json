@@ -289,6 +289,82 @@
           "customElement": true
         },
         {
+          "kind": "variable",
+          "name": "GRID_AXES",
+          "type": {
+            "text": "{\n  Gap3: { gap: 3 },\n  Gap6: { gap: 6 },\n}"
+          },
+          "default": "{ Gap3: { gap: 3 }, Gap6: { gap: 6 }, }",
+          "description": "The non-variant axes, as export-name-suffix → the options producing it.\n\nRequired by the generator even when empty — `?? {}` cannot distinguish \"this component has\nno axes\" from \"I looked for the wrong export name\"."
+        },
+        {
+          "kind": "variable",
+          "name": "GRID_GAPS",
+          "type": {
+            "text": "{\n  3: 'sk-grid--gap-3',\n  4: 'sk-grid--gap-4',\n  6: 'sk-grid--gap-6',\n}"
+          },
+          "default": "{ 3: 'sk-grid--gap-3', 4: 'sk-grid--gap-4', 6: 'sk-grid--gap-6', }",
+          "description": "The gap modifiers, which are an axis rather than a variant — a grid has a column count AND\na gap, not one or the other."
+        },
+        {
+          "kind": "variable",
+          "name": "GRID_VARIANTS",
+          "type": {
+            "text": "{\n  'cols-2': 'sk-grid--cols-2',\n  'cols-3': 'sk-grid--cols-3',\n  'cols-4': 'sk-grid--cols-4',\n}"
+          },
+          "default": "{ 'cols-2': 'sk-grid--cols-2', 'cols-3': 'sk-grid--cols-3', 'cols-4': 'sk-grid--cols-4', }",
+          "description": "The column-count modifiers this primitive supports, as variant name → BEM modifier."
+        },
+        {
+          "kind": "function",
+          "name": "gridClasses",
+          "return": {
+            "type": {
+              "text": "string"
+            }
+          },
+          "parameters": [
+            {
+              "name": "variant",
+              "optional": true,
+              "type": {
+                "text": "string"
+              }
+            },
+            {
+              "name": "gap",
+              "optional": true,
+              "type": {
+                "text": "number"
+              }
+            }
+          ],
+          "description": "The BEM class list for a grid. Warns and degrades on an unknown variant."
+        },
+        {
+          "kind": "function",
+          "name": "gridStaticHtml",
+          "return": {
+            "type": {
+              "text": "string"
+            }
+          },
+          "parameters": [
+            {
+              "name": "opts",
+              "default": "{}",
+              "type": {
+                "text": "GridStaticOptions"
+              }
+            },
+            {
+              "name": "content",
+              "default": "'Grid content'"
+            }
+          ],
+          "description": "The static form, for a consumer with no JavaScript. Throws on an unknown variant."
+        },
+        {
           "kind": "function",
           "name": "isCardVariant",
           "return": {
@@ -305,6 +381,40 @@
             }
           ],
           "description": "Whether `variant` names a real card modifier."
+        },
+        {
+          "kind": "function",
+          "name": "isGridGap",
+          "return": {
+            "type": {
+              "text": "gap is GridGap"
+            }
+          },
+          "parameters": [
+            {
+              "name": "gap",
+              "type": {
+                "text": "unknown"
+              }
+            }
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "isGridVariant",
+          "return": {
+            "type": {
+              "text": "variant is GridVariant"
+            }
+          },
+          "parameters": [
+            {
+              "name": "variant",
+              "type": {
+                "text": "string"
+              }
+            }
+          ]
         },
         {
           "kind": "class",
@@ -1359,6 +1469,71 @@
         },
         {
           "kind": "class",
+          "description": "A responsive grid layout primitive.\n\nBounded on purpose: it supports 2, 3 and 4 columns because that is what the blog listing and\nreference pages need. It is not a general-purpose grid system. Use `::part(grid)` for layouts\noutside that set rather than asking for another variant.",
+          "name": "SkGrid",
+          "cssParts": [
+            {
+              "description": "the grid container, for column and gap overrides beyond the provided set",
+              "name": "grid"
+            }
+          ],
+          "slots": [
+            {
+              "description": "the grid items, which become the grid's direct children",
+              "name": ""
+            }
+          ],
+          "members": [
+            {
+              "kind": "field",
+              "name": "gap",
+              "privacy": "public",
+              "type": {
+                "text": "number | undefined"
+              },
+              "description": "Gap between items, in token steps: 3, 4 or 6. Omit for the default (4).",
+              "attribute": "gap",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "variant",
+              "privacy": "public",
+              "type": {
+                "text": "'cols-2' | 'cols-3' | 'cols-4' | undefined"
+              },
+              "description": "Column count, as `cols-2`, `cols-3` or `cols-4`. Omit for a single column. An unknown\nvalue renders the base grid and warns rather than throwing.",
+              "attribute": "variant",
+              "reflects": true
+            }
+          ],
+          "attributes": [
+            {
+              "name": "gap",
+              "type": {
+                "text": "number | undefined"
+              },
+              "description": "Gap between items, in token steps: 3, 4 or 6. Omit for the default (4).",
+              "fieldName": "gap"
+            },
+            {
+              "name": "variant",
+              "type": {
+                "text": "'cols-2' | 'cols-3' | 'cols-4' | undefined"
+              },
+              "description": "Column count, as `cols-2`, `cols-3` or `cols-4`. Omit for a single column. An unknown\nvalue renders the base grid and warns rather than throwing.",
+              "fieldName": "variant"
+            }
+          ],
+          "superclass": {
+            "name": "LitElement",
+            "package": "lit"
+          },
+          "tagName": "sk-grid",
+          "customElement": true
+        },
+        {
+          "kind": "class",
           "description": "The navigation pill — a row of links that collapses to a hamburger and a panel.",
           "name": "SkNavPill",
           "cssParts": [
@@ -1559,6 +1734,23 @@
         },
         {
           "kind": "function",
+          "name": "unknownGapMessage",
+          "return": {
+            "type": {
+              "text": "string"
+            }
+          },
+          "parameters": [
+            {
+              "name": "gap",
+              "type": {
+                "text": "unknown"
+              }
+            }
+          ]
+        },
+        {
+          "kind": "function",
           "name": "unknownVariantMessage",
           "return": {
             "type": {
@@ -1635,9 +1827,81 @@
         },
         {
           "kind": "js",
+          "name": "GRID_AXES",
+          "declaration": {
+            "name": "GRID_AXES",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "GRID_GAPS",
+          "declaration": {
+            "name": "GRID_GAPS",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "GRID_VARIANTS",
+          "declaration": {
+            "name": "GRID_VARIANTS",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "gridClasses",
+          "declaration": {
+            "name": "gridClasses",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "GridGap",
+          "declaration": {
+            "name": "GridGap",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "gridStaticHtml",
+          "declaration": {
+            "name": "gridStaticHtml",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "GridVariant",
+          "declaration": {
+            "name": "GridVariant",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
           "name": "isCardVariant",
           "declaration": {
             "name": "isCardVariant",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "isGridGap",
+          "declaration": {
+            "name": "isGridGap",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "isGridVariant",
+          "declaration": {
+            "name": "isGridVariant",
             "module": "./dist/index.js"
           }
         },
@@ -1675,6 +1939,22 @@
         },
         {
           "kind": "js",
+          "name": "SkGrid",
+          "declaration": {
+            "name": "SkGrid",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "skGridSheet",
+          "declaration": {
+            "name": "default",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
           "name": "SkNavPill",
           "declaration": {
             "name": "SkNavPill",
@@ -1694,6 +1974,14 @@
           "name": "skStubSheet",
           "declaration": {
             "name": "default",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "unknownGapMessage",
+          "declaration": {
+            "name": "unknownGapMessage",
             "module": "./dist/index.js"
           }
         },
