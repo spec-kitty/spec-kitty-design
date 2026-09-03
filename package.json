@@ -7,15 +7,16 @@
     "apps/*"
   ],
   "scripts": {
+    "quality:all": "npm run quality:lint && npm run quality:stylelint && npm run quality:htmlhint",
+    "quality:commitlint": "commitlint --from=HEAD~1",
+    "quality:htmlhint": "htmlhint 'packages/styles/src/**/*.html' 'apps/demo/**/*.html' 'audit/*.html'",
     "quality:lint": "nx run-many --target=lint --all",
     "quality:stylelint": "stylelint --allow-empty-input 'packages/**/*.css' 'packages/**/*.scss'",
-    "quality:htmlhint": "htmlhint 'packages/styles/src/**/*.html' 'apps/demo/**/*.html' 'audit/*.html'",
-    "quality:commitlint": "commitlint --from=HEAD~1",
-    "quality:all": "npm run quality:lint && npm run quality:stylelint && npm run quality:htmlhint",
-    "tokens:catalogue": "node scripts/generate-token-catalogue.js",
     "render-diagrams": "node scripts/render-diagrams.js",
     "render-diagrams:check": "node scripts/render-diagrams.js --check",
-    "security:lockfile-check": "npm ci --dry-run --ignore-scripts"
+    "security:lockfile-check": "npm ci --dry-run --ignore-scripts",
+    "test": "vitest run",
+    "tokens:catalogue": "node scripts/generate-token-catalogue.js"
   },
   "overrides": {
     "brace-expansion": "^5.0.5",
@@ -41,6 +42,8 @@
     "@storybook/web-components-vite": "^10.6.0",
     "@typescript-eslint/eslint-plugin": "^8.59.1",
     "@typescript-eslint/parser": "^8.59.1",
+    "@vitest/browser": "4.1.11",
+    "@vitest/browser-playwright": "4.1.11",
     "axe-playwright": "^2.2.2",
     "esbuild": "0.28.1",
     "eslint": "^9.39.4",
@@ -50,11 +53,13 @@
     "js-yaml": "^4.1.1",
     "lit": "3.3.3",
     "nx": "^22.7.1",
+    "playwright": "1.62.1",
     "storybook": "^10.6.0",
     "stylelint": "^16.26.1",
     "stylelint-declaration-strict-value": "^1.11.1",
     "tslib": "^2.8.1",
-    "vite": "7.3.6"
+    "vite": "7.3.6",
+    "vitest": "4.1.11"
   },
   "customElements": "packages/elements/custom-elements.json"
 }

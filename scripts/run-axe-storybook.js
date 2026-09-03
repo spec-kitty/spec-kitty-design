@@ -513,10 +513,23 @@ if (require.main === module) (async () => {
         console.log(`✅ ${storyId}`);
       }
     } catch (err) {
-      // A story that does not render is a failure, not a warning. Treating it
-      // as skippable is what let this gate pass on an empty page.
-      loadFailures.push({ storyId, reason: err.message });
-      console.error(`❌ ${storyId}: did not render (${err.message})`);
+      // A story that does not render is a failure, not a warning. Treating it as skippable
+      // is what let this gate pass on an empty page.
+      //
+      // But NOT everything thrown here is a render failure. This catch wraps
+      // assertStoryRendered AND injectAxe/getViolations, so an axe-internal fault was
+      // reported as "did not render" — observed in CI as
+      //   ❌ elements-skstub--default: did not render (Axe is already running.)
+      // on a run whose tree was byte-identical to a green one, and which passed on re-run.
+      // Both are failures and both still fail the gate; conflating them sends the next
+      // reader to debug a render path that is fine. Name the real cause.
+      const axeFault = /\bAxe\b|axe-core/i.test(err.message);
+      loadFailures.push({ storyId, reason: err.message, kind: axeFault ? 'axe' : 'render' });
+      console.error(
+        axeFault
+          ? `❌ ${storyId}: the accessibility scanner itself faulted, the story rendered — ${err.message}`
+          : `❌ ${storyId}: did not render (${err.message})`
+      );
     } finally {
       await page.close();
     }
@@ -527,9 +540,19 @@ if (require.main === module) (async () => {
   server.close();
 
   if (loadFailures.length > 0) {
-    console.error(`\n❌ ${loadFailures.length} of ${testable.length} story/stories did not render:`);
-    loadFailures.forEach(({ storyId, reason }) => console.error(`   ${storyId} — ${reason}`));
-    console.error('   A story that does not render cannot be assessed for accessibility.');
+    const rendersFailed = loadFailures.filter((f) => f.kind !== 'axe');
+    const axeFaulted = loadFailures.filter((f) => f.kind === 'axe');
+    if (rendersFailed.length) {
+      console.error(`\n❌ ${rendersFailed.length} of ${testable.length} story/stories did not render:`);
+      rendersFailed.forEach(({ storyId, reason }) => console.error(`   ${storyId} — ${reason}`));
+      console.error('   A story that does not render cannot be assessed for accessibility.');
+    }
+    if (axeFaulted.length) {
+      console.error(`\n❌ ${axeFaulted.length} story/stories rendered but the SCANNER faulted:`);
+      axeFaulted.forEach(({ storyId, reason }) => console.error(`   ${storyId} — ${reason}`));
+      console.error('   Still a failure — an unscanned story is an unassessed one — but the');
+      console.error('   story is not the suspect. "Axe is already running" is a known flake here.');
+    }
   }
 
   if (totalViolations > 0) {

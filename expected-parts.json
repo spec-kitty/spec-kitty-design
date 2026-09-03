@@ -1,0 +1,17 @@
+{
+  "$comment": [
+    "The shrink-only ::part() ratchet (#71, C-007).",
+    "",
+    "ADR-11 item 6 says every ::part() the MANIFEST declares must be present and targetable.",
+    "That is the right mechanism and #72-#74 inherit it \u2014 but today it is vacuous: the manifest",
+    "declares 0 cssParts, so a 'derived expected list' is a green assertion over nothing.",
+    "",
+    "This file is the anti-vacuity guard. Adding a ::part() without updating it \u2014 and therefore",
+    "without a test \u2014 fails CI. Removing one is allowed and shrinks the count. Same shape as",
+    "check-manifest-content.mjs: derive from the source of truth, refuse to pass vacuously.",
+    "",
+    "When #72 lands sk-card with real parts, this file grows in the same PR as its tests."
+  ],
+  "total": 0,
+  "byElement": {}
+}

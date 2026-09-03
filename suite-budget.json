@@ -1,0 +1,33 @@
+{
+  "$comment": [
+    "The behaviour suite's CI time budget (#71, FR-013, NFR-001).",
+    "",
+    "The charter's Performance Benchmarks say 'Storybook CI build time under 3 minutes' and",
+    "contemplate no test suite at all - ADR-11's own Consequences say 'a new budget has to be",
+    "set rather than assumed'. This is that budget, ASSERTED rather than recorded: both jobs",
+    "fail above their ceiling, so neither number can go stale silently.",
+    "",
+    "There is deliberately NO `measuredSeconds` field. An earlier revision carried 5.6, which",
+    "was contradicted by the very run it cited (6.8s) and by head (11.9s) - a companion number",
+    "that nothing re-derives is the prose baseline this whole file argues against. The ceilings",
+    "are the record.",
+    "",
+    "TWO ceilings, because they measure different things and mixing them could not tell you",
+    "which had regressed. `ceilingSeconds` covers `npm run test` - both lanes, chromium and",
+    "webkit in CI. `selftestCeilingSeconds` covers scripts/suite-selftest.mjs, which runs one",
+    "full suite per mutation and is where this job's time actually goes. That second key was",
+    "read by NOTHING until the second gate pass caught it: an inert key documented as an",
+    "enforced ceiling, in the file whose thesis is that stale prose goes unnoticed.",
+    "",
+    "WHERE THIS BUDGET LIVES IS AN OPEN OPERATOR QUESTION. Amending the charter's Performance",
+    "Benchmarks may be the right home, but charter.md and charter.yaml contradict each other and",
+    "ADR-11's citation for how amendments happen does not check out - see the operator questions",
+    "on #71."
+  ],
+  "covers": "npm run test (both lanes, chromium + webkit in CI)",
+  "ceilingSeconds": 25,
+  "measuredOn": "ubuntu-latest, chromium + webkit, cold npm ci",
+  "runUrl": "https://github.com/spec-kitty/spec-kitty-design/actions/runs/33713144837",
+  "sha": "0f1df74",
+  "selftestCeilingSeconds": 180
+}

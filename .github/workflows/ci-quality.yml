@@ -186,6 +186,17 @@ jobs:
           git diff --exit-code -- packages/elements/custom-elements.json \
             || { echo "::error::custom-elements.json is stale. Run: npx nx run elements:analyze"; exit 1; }
           node scripts/check-manifest-content.mjs
+      # C-007's anti-vacuity guard. The manifest declares 0 cssParts today, so SC-013's
+      # "derived expected list" is a green assertion over nothing — this makes it
+      # impossible for that list to GROW without a test landing in the same PR.
+      - name: "[ENFORCED] ::part() ratchet (C-007, SC-013)"
+        run: node scripts/check-part-ratchet.mjs
+      # Asserts the gate below actually gates the test job. A push-and-revert of a broken
+      # workflow would produce a CI-run URL in a commit message — the transcript NFR-002
+      # rejects — and would not protect against the regression that will actually happen:
+      # a later PR adding `test_ok=...` to the skipped-tolerance block.
+      - name: "[ENFORCED] The gate actually gates the test job (FR-014)"
+        run: node scripts/check-gate-wiring.mjs
       - name: "[ENFORCED] commitlint (FR-020)"
         if: github.event_name == 'pull_request'
         run: npx commitlint --from=${{ github.event.pull_request.base.sha }} --to=${{ github.sha }}
@@ -315,6 +326,32 @@ jobs:
       - name: "[ENFORCED] Playwright suite (FR-023, FR-003, FR-004, FR-005)"
         run: npx playwright test
 
+  # ── Behaviour suite (ADR-11) ───────────────────────────────────────────────
+  # UNCONDITIONAL — no `if:`. FR-003: `nx affected --target=test` prints "No tasks were
+  # run" and EXITS 0, so a job wired to it is green forever if the target is misnamed or
+  # the affected computation misses. The gate therefore also tests this job STRICTLY:
+  # 'skipped' is never legitimate for a job that always runs.
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # actions/checkout v4.3.1
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e  # actions/setup-node v6.4.0
+        with: { node-version: '22', cache: 'npm' }
+      - run: npm ci --ignore-scripts
+      # Explicit: `--ignore-scripts` everywhere means nothing downloads browsers
+      # implicitly. Both engines — engine difference is ADR-11's strongest driver, and
+      # webkit CANNOT launch on the project workstation (Fedora, Ubuntu-targeted libs), so
+      # CI is the only place these behaviours meet WebKit at all.
+      - run: npx playwright install --with-deps chromium webkit
+      - name: "[ENFORCED] Behaviour suite (ADR-11 required behaviours)"
+        run: node scripts/measure-suite-time.mjs
+      # Re-derives every red-first claim in the suite. Without it, "demonstrated to fail
+      # before it passes" is a paste in a commit message.
+      - name: "[ENFORCED] Mutation harness — red-first is re-derived (NFR-002)"
+        run: node scripts/suite-selftest.mjs
+      - name: "[ENFORCED] Mutation harness guards are themselves exercised"
+        run: node scripts/suite-selftest.mjs --selftest
+
   # ── Lighthouse (advisory) ──────────────────────────────────────────────────
   lighthouse:
     runs-on: ubuntu-latest
@@ -341,7 +378,7 @@ jobs:
   # ── Merge gate ──────────────────────────────────────────────────────────────
   gate:
     runs-on: ubuntu-latest
-    needs: [changes, security, workflow-pin-check, lint-code, storybook-build, a11y, visual-regression, playwright]
+    needs: [changes, security, workflow-pin-check, lint-code, storybook-build, a11y, visual-regression, playwright, test]
     if: always()
     steps:
       - name: "[ENFORCED] All hard gates must pass (FR-026)"
@@ -354,6 +391,7 @@ jobs:
           echo "a11y: ${{ needs.a11y.result }}"
           echo "visual-regression: ${{ needs.visual-regression.result }}"
           echo "playwright: ${{ needs.playwright.result }}"
+          echo "test: ${{ needs.test.result }}"
           # a11y / visual-regression / playwright are skipped when storybook-build is skipped (no component changes)
           # storybook-build carries [ENFORCED] steps of its own (the Storybook
           # build and the demo-surface assembly check). Until it was added to
@@ -393,7 +431,13 @@ jobs:
               if [ "$pw_ok"   = "skipped" ]; then pw_ok="fail";   echo "playwright skipped despite relevant changes"; fi
               ;;
           esac
+          # `test` is tested STRICTLY, like `changes`, and deliberately has NO entry in
+          # the skipped-tolerance block above. It runs unconditionally, so 'skipped' is
+          # never legitimate for it — without this, a PR setting `if: false` on the test
+          # job would get 'skipped' and pass, which is the bypass the comment above
+          # records having closed once already for a11y.
           if [ "${{ needs.changes.result }}"           != "success" ] || \
+             [ "${{ needs.test.result }}"              != "success" ] || \
              [ "${{ needs.security.result }}"          != "success" ] || \
              [ "${{ needs.workflow-pin-check.result }}" != "success" ] || \
              [ "${{ needs.lint-code.result }}"          != "success" ] || \

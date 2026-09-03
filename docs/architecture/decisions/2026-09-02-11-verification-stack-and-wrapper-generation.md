@@ -85,14 +85,27 @@ A second correction to ADR-8's rationale, which does not change the operator's d
 #### Positive
 
 * Behaviour that no screenshot or axe scan can see becomes verifiable, in the engines that actually ship it.
-* One browser stack, one config, two lanes; no second install in CI.
+* One browser stack, one config, two lanes. **Amended by #71:** "no second install in CI"
+  was wrong. There is no cross-job browser cache in `ci-quality.yml` — `a11y`,
+  `visual-regression` and `playwright` each run their own `playwright install`, and the new
+  `test` job does too. The claim that holds is *no second browser STACK*: one engine family,
+  installed per job like every other browser job here. Measured cost: webkit 4.8 s,
+  chromium 11.7 s to download, plus the `--with-deps` apt transaction.
 * The required-behaviours list is portable — a runner change does not invalidate the standard.
 * Repairing the axe gate makes every existing a11y result meaningful for the first time.
 
 #### Negative
 
 * Vitest browser mode is the younger of the two credible options; Option B is the documented fallback.
-* CI time grows. The charter's Storybook budget (NFR-003, under three minutes) does not cover a test suite, and a new budget has to be set rather than assumed.
+* CI time grows. The charter's Storybook budget (NFR-003, under three minutes) does not
+  cover a test suite, and a new budget has to be set rather than assumed. **Set by #71** in
+  `suite-budget.json`: a ceiling the `test` job asserts rather than a number recorded in
+  prose, covering the suite only. The mutation harness runs fifteen more suites and is a
+  separate step — a ceiling that mixed them could not tell you which had regressed.
+  Where this budget ultimately belongs is an open operator question: the charter's
+  Performance Benchmarks would be the natural home, but `charter.md` and `charter.yaml`
+  currently contradict each other and ADR-11's own citation for how amendments happen
+  ("never by hand (CLAUDE.md §7)") does not check out — §7 is "Don't break the demo pages."
 * The eight orphaned Angular `*.spec.ts` files are removed with `packages/angular` rather than ported; nothing is lost, because nothing ran them.
 
 #### Neutral

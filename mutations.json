@@ -1,0 +1,118 @@
+{
+  "$comment": [
+    "One entry per required behaviour (#71, FR-008). scripts/suite-selftest.mjs applies each",
+    "to a COPY of the repo, runs the suite, and asserts the NAMED test goes red.",
+    "",
+    "`arm` names which assertion of a multi-arm behaviour this mutation is expected to red.",
+    "SC-014 is identity AND zero-<style>; SC-015 is three arms. One mutation cannot red them",
+    "all while staying collateral-clean, which is why guard 7 is a superset relation and not",
+    "set equality.",
+    "",
+    "TWO ENTRIES ARE DELIBERATELY NOT THE OBVIOUS FORM, and the spec pins both:",
+    "  SC-015 is NOT 'replace define with an empty function' \u2014 that unregisters sk-stub and",
+    "  reds every other elements-owned test, failing the collateral bound on the mission's own",
+    "  canonical mutation.",
+    "  SC-014 is NOT 'hand-author a new CSSStyleSheet()' \u2014 the generated module already exports",
+    "  exactly that and Lit adopts it by reference, so identity survives and the test stays"
+  ],
+  "mutations": [
+    {
+      "id": "SC-002",
+      "arm": "FormData entry",
+      "file": "fixtures/elements-behaviour/src/sk-behaviour-fixture.ts",
+      "from": "if (changed.has('value') || changed.has('disabled')) this.#syncFormValue();",
+      "to": "void changed;"
+    },
+    {
+      "id": "SC-003",
+      "arm": "validity message",
+      "file": "fixtures/elements-behaviour/src/sk-behaviour-fixture.ts",
+      "from": "{ customError: true }, 'value must not be \"invalid\"'",
+      "to": "{}, ''"
+    },
+    {
+      "id": "SC-004",
+      "arm": "reset restores",
+      "file": "fixtures/elements-behaviour/src/sk-behaviour-fixture.ts",
+      "from": "this.value = this.#initialValue;",
+      "to": "this.value = this.value;"
+    },
+    {
+      "id": "SC-005",
+      "arm": "disabled excluded",
+      "file": "fixtures/elements-behaviour/src/sk-behaviour-fixture.ts",
+      "from": "this.disabled ? null : this.value",
+      "to": "this.value"
+    },
+    {
+      "id": "SC-006",
+      "arm": "fires once",
+      "file": "fixtures/elements-behaviour/src/sk-behaviour-fixture.ts",
+      "from": "const proceed = this.dispatchEvent(event);",
+      "to": "this.dispatchEvent(event); const proceed = this.dispatchEvent(event);"
+    },
+    {
+      "id": "SC-007",
+      "arm": "detail shape",
+      "file": "fixtures/elements-behaviour/src/sk-behaviour-fixture.ts",
+      "from": "label: this.label,",
+      "to": "title: this.label,"
+    },
+    {
+      "id": "SC-008",
+      "arm": "composed",
+      "file": "fixtures/elements-behaviour/src/sk-behaviour-fixture.ts",
+      "from": "composed: true,",
+      "to": "composed: false,"
+    },
+    {
+      "id": "SC-009",
+      "arm": "preventDefault prevents",
+      "file": "fixtures/elements-behaviour/src/sk-behaviour-fixture.ts",
+      "from": "if (!proceed) this.open = !this.open;",
+      "to": "void proceed;"
+    },
+    {
+      "id": "SC-010",
+      "arm": "upgrade handling (non-reactive property)",
+      "file": "fixtures/elements-behaviour/src/sk-behaviour-fixture.ts",
+      "from": "this.#upgradeHint();",
+      "to": "void 0;"
+    },
+    {
+      "id": "SC-011",
+      "arm": "slot name",
+      "file": "fixtures/elements-behaviour/src/sk-behaviour-fixture.ts",
+      "from": "<slot name=\"panel\">",
+      "to": "<slot name=\"other\">"
+    },
+    {
+      "id": "SC-012",
+      "arm": "Escape closes",
+      "file": "fixtures/elements-behaviour/src/sk-behaviour-fixture.ts",
+      "from": "if (e.key === 'Escape' && this.open) {",
+      "to": "if (false) {"
+    },
+    {
+      "id": "SC-013",
+      "arm": "part present",
+      "file": "fixtures/elements-behaviour/src/sk-behaviour-fixture.ts",
+      "from": "<span part=\"label\">",
+      "to": "<span part=\"label-renamed\">"
+    },
+    {
+      "id": "SC-014",
+      "arm": "adopted sheet identity",
+      "file": "packages/elements/src/stub/sk-stub.ts",
+      "from": "static styles = [sheet];",
+      "to": "static styles = [new CSSStyleSheet()];"
+    },
+    {
+      "id": "SC-015",
+      "arm": "duplicate warns",
+      "file": "packages/elements/src/define.ts",
+      "from": "if (existing !== ctor) {",
+      "to": "if (false) {"
+    }
+  ]
+}

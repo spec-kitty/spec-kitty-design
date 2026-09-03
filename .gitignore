@@ -71,3 +71,9 @@ debug-storybook.log
 
 # Design reference working files (not distributed)
 tmp/
+
+# Vitest browser-mode failure artifacts. Six of these were committed by a red-first run and
+# nothing referenced them; the __screenshots__ DIRECTORY also matched a *.test.ts glob, which
+# is why check-part-ratchet.mjs needs its isFile() filter.
+.vitest-attachments/
+**/__screenshots__/

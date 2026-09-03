@@ -1,0 +1,33 @@
+{
+  "$comment": [
+    "The behaviour id registry (#71, FR-007). The single source that scripts/floor-reporter.mjs,",
+    "mutations.json and the conformance matrix all read. Tests are keyed by ID, never by title,",
+    "so renaming a test does not silently drop coverage or break the mutation harness.",
+    "",
+    "FOURTEEN entries, not the charter's fifteen. The fifteenth is generation determinism, and it",
+    "is deferred to #75: ADR-11 phrases it as 'regenerating WRAPPERS from an unchanged manifest',",
+    "the wrapper generator does not exist yet, and the artifacts that DO regenerate today",
+    "(custom-elements.json, the .css.js modules) already have enforced drift checks in lint-code.",
+    "A test here would be a green criterion with zero new coverage.",
+    "",
+    "A behaviour with no applicable subject is ABSENT from this file. It is never expressed as a",
+    "skip and never deferred to a matrix cell — that was FR-010's earlier shape and it made the",
+    "mission incoherent if the conformance matrix were dropped."
+  ],
+  "behaviours": [
+    { "id": "SC-002", "charter": "form association", "summary": "native form submit produces the expected FormData entry", "owner": "fixture", "applicable": true },
+    { "id": "SC-003", "charter": "form association", "summary": "setValidity blocks submission and the message reaches the a11y tree", "owner": "fixture", "applicable": true },
+    { "id": "SC-004", "charter": "form association", "summary": "form reset restores the initial value", "owner": "fixture", "applicable": true },
+    { "id": "SC-005", "charter": "form association", "summary": "a disabled control is excluded from submission", "owner": "fixture", "applicable": true },
+    { "id": "SC-006", "charter": "event contract", "summary": "fires exactly once", "owner": "fixture", "applicable": true },
+    { "id": "SC-007", "charter": "event contract", "summary": "the documented detail shape", "owner": "fixture", "applicable": true },
+    { "id": "SC-008", "charter": "event contract", "summary": "composed and bubbles as documented", "owner": "fixture", "applicable": true },
+    { "id": "SC-009", "charter": "event contract", "summary": "preventDefault demonstrably prevents where cancelable", "owner": "fixture", "applicable": true },
+    { "id": "SC-010", "charter": "property before upgrade", "summary": "a property assigned before the definition loads is applied on upgrade", "owner": "fixture", "applicable": true },
+    { "id": "SC-011", "charter": "slot contract", "summary": "content reaches the intended slot; fallback appears when empty", "owner": "fixture", "applicable": true },
+    { "id": "SC-012", "charter": "focus and keyboard", "summary": "Escape closes, focus returns to the invoker, aria-expanded tracks state", "owner": "fixture", "applicable": true },
+    { "id": "SC-013", "charter": "styling API", "summary": "every declared ::part() is present and targetable from outside", "owner": "fixture", "applicable": true, "note": "FIXTURE-owned. packages/elements/src contains no part= and no @csspart, and the manifest declares 0 cssParts — so an elements-owned mutation would have no pattern and the harness's guard 1 would fire by construction. The manifest-derived arm is WP04's ratchet." },
+    { "id": "SC-014", "charter": "style adoption", "summary": "adopts a constructed stylesheet by identity and injects no <style> element", "owner": "elements", "applicable": true },
+    { "id": "SC-015", "charter": "registry guard", "summary": "a second define warns, keeps the original constructor, and is silent for the same constructor", "owner": "elements", "applicable": true }
+  ]
+}

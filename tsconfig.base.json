@@ -10,6 +10,13 @@
     "experimentalDecorators": true,
     "importHelpers": true,
     "target": "ES2022",
+    // MUST be false. With target ES2022 and this flag unset, TypeScript (and esbuild,
+    // which follows it) defaults it TRUE and emits native class fields — which shadow
+    // Lit's reactive-property accessors and silently break property-before-upgrade.
+    // packages/elements/project.json builds the shipped artifact with a bare
+    // `esbuild --bundle` that resolves this file, so this is not a test-lane concern:
+    // it is the artifact's. Asserted by tests/node/config-contract.test.ts.
+    "useDefineForClassFields": false,
     "module": "ES2022",
     "lib": ["ES2022", "dom"],
     "skipLibCheck": true,
