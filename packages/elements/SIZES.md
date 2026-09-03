@@ -7,7 +7,7 @@ Components in these artifacts: sk-card, sk-form-input, sk-form-textarea, sk-nav-
 
 | artifact | raw | minified | min+gzip | notes |
 |---|---:|---:|---:|---|
-| `ESM  (dist/index.js)` | 49.3 KiB | 36.1 KiB | 9.3 KiB | `lit` external |
+| `ESM  (dist/index.js)` | 49.4 KiB | 36.2 KiB | 9.3 KiB | `lit` external |
 | `IIFE (dist/elements.js)` | 71.3 KiB | 50.5 KiB | 14.6 KiB | runtime bundled |
 
 ## The basis matters — read this before comparing against an ADR
@@ -35,7 +35,7 @@ figure it replaced, not more. Comparing them needs a per-component build; #81 ow
 measurement that produces one. Stating the basis is this section's whole point.
 
 What this script *does* establish is the shape of the relationship: the runtime is a
-fixed cost (22.0 KiB of the IIFE is Lit, since the
+fixed cost (21.9 KiB of the IIFE is Lit, since the
 ESM artifact holds the same element with `lit` external) and the per-component cost
 tracks its CSS. A batch mission adding a component should expect the IIFE to grow by
 roughly that component's CSS, not by a fixed per-component overhead.
@@ -51,8 +51,8 @@ bytes.
 ```
 $ npx nx run elements:build && node scripts/measure-elements-sizes.mjs
 packages/elements/dist/index.js
-  raw         50456 bytes  (49.3 KiB)
-  minified    37006 bytes  (36.1 KiB)
+  raw         50545 bytes  (49.4 KiB)
+  minified    37074 bytes  (36.2 KiB)
   gzip       12.0 KiB
   min+gzip    9.3 KiB
 packages/elements/dist/elements.js
