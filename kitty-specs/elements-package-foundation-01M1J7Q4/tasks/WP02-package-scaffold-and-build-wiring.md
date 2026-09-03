@@ -74,15 +74,15 @@ nx derives project edges here from **workspace `package.json` declarations**, no
 
 ## Definition of Done
 
-- [ ] `nx graph` shows an `elements → styles` edge (FR-001).
-- [ ] A `lint` target exists — **without it `nx affected --target=lint` never lints the package and SC-010's depConstraints are enforced only by hand**.
-- [ ] An import from `elements` to a package outside `styles`/`tokens` fails lint; demonstrate it (SC-010).
-- [ ] Editing `packages/styles/src/stub/sk-stub.css` busts the elements build cache; demonstrate hit-then-miss.
-- [ ] `packages/elements/**` is in the `components` path filter (**FR-008**).
-- [ ] All four workflows build `elements` (FR-001's wiring — not FR-008).
-- [ ] `npm ci --dry-run --ignore-scripts` passes and `scripts/npm-audit-gate.sh` clears the analyzer's 50 new packages.
-- [ ] `packages/elements/package.json` sets `"private": true` — #70 puts publishing out of scope, all three `@spec-kitty/*` names 404 on npm, and `release.yml`'s dist audit loops only `tokens styles`.
-- [ ] The three CI steps owed by WP01/WP03/WP05 are wired here, or explicitly recorded as not yet existing.
+- [x] `nx graph` shows an `elements → styles` edge (FR-001).
+- [x] A `lint` target exists — **without it `nx affected --target=lint` never lints the package and SC-010's depConstraints are enforced only by hand**.
+- [x] An import from `elements` to a package outside `styles`/`tokens` fails lint; demonstrate it (SC-010).
+- [x] Editing `packages/styles/src/stub/sk-stub.css` busts the elements build cache; demonstrate hit-then-miss.
+- [x] `packages/elements/**` is in the `components` path filter (**FR-008**).
+- [x] All four workflows build `elements` (FR-001's wiring — not FR-008).
+- [x] `npm ci --dry-run --ignore-scripts` passes and `scripts/npm-audit-gate.sh` clears the analyzer's 50 new packages.
+- [x] `packages/elements/package.json` sets `"private": true` — #70 puts publishing out of scope, all three `@spec-kitty/*` names 404 on npm, and `release.yml`'s dist audit loops only `tokens styles`.
+- [x] The three CI steps owed by WP01/WP03/WP05 are wired here, or explicitly recorded as not yet existing.
 - [ ] **SC-007 evidenced on a throwaway branch touching only `packages/elements/**`** — it cannot be shown on this mission's own PR, which necessarily touches `ci-quality.yml`, `scripts/**`, `nx.json` and the manifests, all already in the filter, so `components=true` regardless.
 
 ## Notes

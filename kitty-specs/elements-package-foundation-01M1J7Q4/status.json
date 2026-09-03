@@ -49,6 +49,7 @@
     },
     "WP03": {
       "actor": "claude",
+      "agent": "claude",
       "agent_profile": "__resolved_profile_absent__",
       "agent_profile_version": "__resolved_profile_version_absent__",
       "force_count": 1,
@@ -56,8 +57,13 @@
       "last_event_id": "01M1JCG9PT8BYWM8RHM1NPFCFM",
       "last_transition_at": "2026-09-03T01:00:33.882833+00:00",
       "model": "__resolved_model_absent__",
+      "notes": [
+        "DoD fully evidenced; forced for the tasks.md CLI defect recorded on WP01."
+      ],
       "provider": "__resolved_provider_absent__",
-      "role": "implementer"
+      "role": "implementer",
+      "shell_pid": 2405351,
+      "shell_pid_created_at": "1788397232.77"
     },
     "WP04": {
       "actor": "claude",
