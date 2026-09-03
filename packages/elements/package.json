@@ -1,0 +1,29 @@
+{
+  "name": "@spec-kitty/elements",
+  "version": "1.0.0",
+  "description": "Spec Kitty custom-element base layer (ADR-8)",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./elements.js": "./dist/elements.js",
+    "./custom-elements.json": "./custom-elements.json"
+  },
+  "customElements": "custom-elements.json",
+  "files": [
+    "dist/",
+    "custom-elements.json",
+    "README.md"
+  ],
+  "peerDependencies": {
+    "lit": "^3.3.3",
+    "@spec-kitty/styles": "^1.0.0",
+    "@spec-kitty/tokens": "^1.0.0"
+  }
+}

@@ -15,7 +15,8 @@ export default [
       '@nx/enforce-module-boundaries': ['error', {
         depConstraints: [
           { sourceTag: 'scope:styles',     onlyDependOnLibsWithTags: ['scope:tokens'] },
-          { sourceTag: 'scope:storybook',  onlyDependOnLibsWithTags: ['scope:tokens', 'scope:styles'] },
+          { sourceTag: 'scope:elements',   onlyDependOnLibsWithTags: ['scope:styles', 'scope:tokens'] },
+          { sourceTag: 'scope:storybook',  onlyDependOnLibsWithTags: ['scope:tokens', 'scope:styles', 'scope:elements'] },
           { sourceTag: 'type:publishable', notDependOnLibsWithTags: ['type:internal'] },
         ],
       }],

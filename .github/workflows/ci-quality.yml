@@ -43,6 +43,7 @@ jobs:
               - 'packages/tokens/**'
             components:
               - 'tsconfig.base.json'
+              - 'packages/elements/**'
               - 'packages/styles/**'
               - 'apps/storybook/**'
               # The demo pages are part of this surface: storybook-build is what
@@ -173,7 +174,7 @@ jobs:
       # on every PR instead of only on push to main.
       - name: "[ENFORCED] Demo surface assembles and every asset reference resolves"
         run: |
-          npx nx run-many --target=build --projects=tokens
+          npx nx run-many --target=build --projects=tokens,styles,elements
           bash scripts/assemble-demo-dist.sh apps/storybook/storybook-static
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # actions/upload-artifact v4.6.2
         with:

@@ -1,0 +1,18 @@
+{
+  "$schema": "../../node_modules/typescript/lib/tsconfig-schema.json",
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "declaration": true,
+    "declarationMap": true,
+    "inlineSources": true,
+    "types": []
+  },
+  "exclude": [
+    "src/**/*.spec.ts",
+    "src/**/*.test.ts",
+    "src/**/*.stories.ts"
+  ],
+  "include": ["src/**/*.ts"]
+}

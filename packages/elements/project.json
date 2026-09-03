@@ -1,0 +1,45 @@
+{
+  "name": "elements",
+  "projectType": "library",
+  "sourceRoot": "packages/elements/src",
+  "targets": {
+    "css": {
+      "executor": "nx:run-commands",
+      "options": { "command": "node scripts/build-elements-css.mjs" },
+      "inputs": [
+        "{workspaceRoot}/packages/styles/src/**/*.css",
+        "{workspaceRoot}/scripts/build-elements-css.mjs"
+      ],
+      "outputs": ["{workspaceRoot}/packages/elements/src/**/*.css.js"]
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "esbuild packages/elements/src/index.ts --bundle --format=esm --external:lit --outfile=packages/elements/dist/index.js",
+          "esbuild packages/elements/src/elements.ts --bundle --format=iife --outfile=packages/elements/dist/elements.js"
+        ],
+        "parallel": false
+      },
+      "dependsOn": ["css", "^build"],
+      "inputs": [
+        "{projectRoot}/**/*",
+        "{workspaceRoot}/packages/styles/src/**/*.css",
+        "{workspaceRoot}/package.json",
+        "{workspaceRoot}/package-lock.json"
+      ],
+      "outputs": ["{workspaceRoot}/packages/elements/dist"]
+    },
+    "analyze": {
+      "executor": "nx:run-commands",
+      "options": { "command": "cem analyze --config packages/elements/custom-elements-manifest.config.mjs" },
+      "dependsOn": ["css"],
+      "outputs": ["{workspaceRoot}/packages/elements/custom-elements.json"]
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "options": { "lintFilePatterns": ["packages/elements/**/*.ts"] }
+    }
+  },
+  "tags": ["scope:elements", "type:publishable"]
+}
