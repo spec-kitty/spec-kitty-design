@@ -10,3 +10,4 @@
 import './stub/sk-stub.js';
 import './card/sk-card.js';
 import './nav-pill/sk-nav-pill.js';
+import './form-input/sk-form-input.js';
