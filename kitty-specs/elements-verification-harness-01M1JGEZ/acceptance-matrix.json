@@ -6,154 +6,428 @@
   "criteria": [
     {
       "criterion_id": "FR-001",
-      "description": "Verify FR-001 is satisfied",
+      "description": "Vitest is a pinned dev dependency, with a single config defining a **browser** project (Playwright provider) and a **node** project.",
       "proof_type": "automated_test",
       "evidence": null,
       "pass_fail": "pending",
       "verified_by": null,
       "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "notes": "Owned by WP01. Authored post-tasks squad; replaces the generated stub."
     },
     {
       "criterion_id": "FR-002",
-      "description": "Verify FR-002 is satisfied",
+      "description": "`npm run test` runs both projects and exits non-zero if either fails.",
       "proof_type": "automated_test",
       "evidence": null,
       "pass_fail": "pending",
       "verified_by": null,
       "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "notes": "Owned by WP01. Authored post-tasks squad; replaces the generated stub."
     },
     {
       "criterion_id": "FR-003",
-      "description": "Verify FR-003 is satisfied",
+      "description": "The enforced CI job runs the suite **unconditionally** (`npm run test`), not `nx affected --target=test`. Verified: `nx affected --target=test` prints `No tasks were run` and **exits 0** \u2014 a job wired to it is green forever if the target is misnamed, the tag is wrong, or the affected computation misses. A `test` target may exist for local convenience; it is not the gate.",
       "proof_type": "automated_test",
       "evidence": null,
       "pass_fail": "pending",
       "verified_by": null,
       "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "notes": "Owned by WP06. Authored post-tasks squad; replaces the generated stub."
     },
     {
       "criterion_id": "FR-004",
-      "description": "Verify FR-004 is satisfied",
+      "description": "The browser lane resolves `@spec-kitty/elements` **from source** via an explicit alias, and the suite passes on a clean checkout with **no `packages/elements/dist` present**. Vite does not read `tsconfig` `paths` by default, and the lint job never builds \u2014 this cost #70 two CI failures.",
       "proof_type": "automated_test",
       "evidence": null,
       "pass_fail": "pending",
       "verified_by": null,
       "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
-    },
-    {
-      "criterion_id": "FR-005",
-      "description": "Verify FR-005 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
-    },
-    {
-      "criterion_id": "FR-006",
-      "description": "Verify FR-006 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
-    },
-    {
-      "criterion_id": "FR-007",
-      "description": "Verify FR-007 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
-    },
-    {
-      "criterion_id": "FR-008",
-      "description": "Verify FR-008 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
-    },
-    {
-      "criterion_id": "FR-009",
-      "description": "Verify FR-009 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
-    },
-    {
-      "criterion_id": "FR-010",
-      "description": "Verify FR-010 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
-    },
-    {
-      "criterion_id": "FR-011",
-      "description": "Verify FR-011 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
-    },
-    {
-      "criterion_id": "FR-012",
-      "description": "Verify FR-012 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
-    },
-    {
-      "criterion_id": "FR-013",
-      "description": "Verify FR-013 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
-    },
-    {
-      "criterion_id": "FR-014",
-      "description": "Verify FR-014 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "notes": "Owned by WP01. Authored post-tasks squad; replaces the generated stub."
     },
     {
       "criterion_id": "FR-015",
-      "description": "Verify FR-015 is satisfied",
+      "description": "`useDefineForClassFields: false` is set in **`tsconfig.base.json`**, not in a lane-local override, and a node-lane test asserts the value the **build** resolves. Measured: esbuild at `target: ES2022` with the flag unset emits native class fields identical to `=true`, SC-010 fails on the first attempt with Lit's class-field-shadowing error \u2014 and `packages/elements/project.json`'s bare `esbuild \u2026 --bundle` resolves the same `tsconfig.base.json`, so **the shipped artifact carries the hazard too**, dormant only because `SkStub` declares no reactive properties. Fixing it lane-locally would produce a green lane over a broken artifact.",
       "proof_type": "automated_test",
       "evidence": null,
       "pass_fail": "pending",
       "verified_by": null,
       "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "notes": "Owned by WP01. Authored post-tasks squad; replaces the generated stub."
+    },
+    {
+      "criterion_id": "FR-005",
+      "description": "The browser lane runs **chromium always, and webkit in CI**. Engine difference is ADR-11's strongest driver. But webkit **cannot launch on the operator's machine** \u2014 measured on Fedora 44: `Host system is missing dependencies \u2026 libgtk-4-1 libicu74 gstreamer1.0-libav`, and Playwright's webkit build targets Ubuntu. Making webkit unconditional would make `npm run test` \u2014 FR-002's headline command \u2014 fail on a clean local checkout. So webkit is env-gated and **mandatory when `CI` is set**, with the FR-009 reporter asserting both `browser (chromium)` and `browser (webkit)` executed there. Note the resolved project name carries the instance: `browser (chromium)`, not `browser`.",
+      "proof_type": "ci_run",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Owned by WP06. Authored post-tasks squad; replaces the generated stub."
+    },
+    {
+      "criterion_id": "FR-006",
+      "description": "The **fixture element lives outside `packages/elements`**, as its own nx project tagged `scope:fixture`. Every other location trips one of the five scanners above, and the tempting fix in each case is to weaken a #70 guard.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Owned by WP02. Authored post-tasks squad; replaces the generated stub."
+    },
+    {
+      "criterion_id": "FR-007",
+      "description": "The ADR-11 required-behaviours list is executable against that fixture, decomposed to the **fourteen** sub-behaviours in scope. The charter's Testing Standards enumerates fifteen; the fifteenth is generation determinism, deferred to #75 by the section below. A committed `behaviours.json` registry \u2014 id, charter clause, SC id, applicability \u2014 is the single source the floor, the mutation list and the matrix all read, and tests are keyed by **id**, never by title.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Owned by WP03. Authored post-tasks squad; replaces the generated stub."
+    },
+    {
+      "criterion_id": "FR-008",
+      "description": "`scripts/suite-selftest.mjs` carries a **committed mutation list** \u2014 one entry per required behaviour, `{id, file, from, to, expectFailingTest}` \u2014 applies each to a copy, runs the scoped test, and asserts it goes RED, plus one unmutated baseline that must be GREEN. This is the structural sibling of `scripts/gate-selftest.mjs` and it is what makes \"red-first\" re-derived on every run rather than pasted once.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Owned by WP05. Authored post-tasks squad; replaces the generated stub."
+    },
+    {
+      "criterion_id": "FR-009",
+      "description": "A **per-lane, per-behaviour floor**, implemented as a **custom Vitest reporter** \u2014 not over `--reporter=json`. Measured: `passWithNoTests` is per-RUN, so an empty lane beside a populated one exits 0 and is not even named; and the JSON reporter carries **no project attribution at all** and reports a lane whose browser failed to launch as `status: \"passed\"`, `numFailedTests: 0`, `success: true`. A floor built on that JSON would certify absence \u2014 the defect class this mission exists to close. The reporter reads `vitest.projects` (declared, including empty ones) against `testModule.project.name` (executed), and additionally gates on `reason !== 'passed'` and `unhandledErrors.length`.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Owned by WP01. Authored post-tasks squad; replaces the generated stub."
+    },
+    {
+      "criterion_id": "FR-010",
+      "description": "The enforced suite contains **zero skipped tests. Full stop.** A behaviour with no applicable subject is simply **not in `behaviours.json`** \u2014 it is not expressed as a skip, and it does not depend on FR-012's matrix existing. An author-written reason string is a self-service exemption, the same shape as the marker-anywhere bypass #106 closed in `check-no-css-in-source.mjs`. (An earlier revision routed this through the matrix, which made the whole mission incoherent if FR-012 were dropped; the post-tasks squad caught that the rewrite was claimed but never made.)",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Owned by WP01. Authored post-tasks squad; replaces the generated stub."
+    },
+    {
+      "criterion_id": "FR-011",
+      "description": "**`retry`** is 0 for every project. The Vitest 4 key is `retry`, not `retries` \u2014 `retries` is silently ignored, so a config written that way sets nothing and a test asserting it reads `undefined`. And since `retry` defaults to 0, asserting the raw config object is near-vacuous: assert the **resolved** per-project value via `createVitest('test', {config}).projects[].config.retry`. `playwright.config.ts` sets 2 in CI; inheriting that by analogy would absorb the flake ADR-11 says must be diagnosed.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Owned by WP01. Authored post-tasks squad; replaces the generated stub."
+    },
+    {
+      "criterion_id": "FR-012",
+      "description": "The conformance matrix emits a **committed machine-readable artifact** with a per-cell enum `{pass, fail, reserved, not-applicable, untested}`, plus guards that (a) refuse an all-reserved or all-not-applicable matrix, (b) assert `cells == surfaces \u00d7 behaviours` so a dropped row is not silence, and (c) assert the reserved set equals a committed expected set.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Owned by WP07. Authored post-tasks squad; replaces the generated stub."
+    },
+    {
+      "criterion_id": "FR-013",
+      "description": "The CI time budget is **asserted, not recorded**: the test job measures its own duration and fails above a committed ceiling; the ceiling file records `{budget, measured, run URL, sha}`. This is `measure-elements-sizes.mjs --check`'s pattern \u2014 as a ceiling, since wall-clock is noisy \u2014 and that script's own docstring names *this* mission as the beneficiary of not putting baselines in prose.",
+      "proof_type": "ci_run",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Owned by WP06. Authored post-tasks squad; replaces the generated stub."
+    },
+    {
+      "criterion_id": "FR-014",
+      "description": "New CI jobs are added to `gate`'s **`if:` condition**, not merely to `needs:` and its echo lines. A job present in `needs` but absent from the condition satisfies \"added to the required list\" and gates nothing.",
+      "proof_type": "ci_run",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Owned by WP06. Authored post-tasks squad; replaces the generated stub."
+    },
+    {
+      "criterion_id": "NFR-001",
+      "description": "The suite's CI wall-clock time is measured, and the measurement is the input to FR-013's ceiling rather than a sentence.",
+      "proof_type": "measurement",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Owned by WP06. Authored post-tasks squad; replaces the generated stub."
+    },
+    {
+      "criterion_id": "NFR-002",
+      "description": "**NEGATIVE INVARIANT.** Every gate this mission adds is demonstrated failing before it is claimed to pass, and the demonstration is a **committed, CI-executed artifact that re-derives the red on every run**. A transcript, a commit message, or a checked-in log file does not satisfy this.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Owned by WP05. Authored post-tasks squad; replaces the generated stub."
+    },
+    {
+      "criterion_id": "NFR-003",
+      "description": "No second browser **stack**. The lane uses Playwright browsers, installed in its own job as every other browser job here does \u2014 there is no cross-job browser cache in this workflow, so \"already installed\" was false and is withdrawn.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Owned by WP06. Authored post-tasks squad; replaces the generated stub."
+    },
+    {
+      "criterion_id": "NFR-004",
+      "description": "The a11y, visual-regression and Playwright jobs keep their current wiring and their current results. Falsified by: their job-level `conclusion` and their reported counts (76 stories, 27 tests, 3 baselines) before and after.",
+      "proof_type": "ci_run",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Owned by WP06. Authored post-tasks squad; replaces the generated stub."
+    },
+    {
+      "criterion_id": "SC-001",
+      "description": "`npm run test` runs both lanes, and each reports \u22651 executed test  \u2014  RED-FIRST: break one lane's `include` glob",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Owned by WP01. Authored post-tasks squad; replaces the generated stub."
+    },
+    {
+      "criterion_id": "SC-002",
+      "description": "A native form submit produces the expected `FormData` entry  \u2014  RED-FIRST: remove `setFormValue`",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Owned by WP03. Authored post-tasks squad; replaces the generated stub."
+    },
+    {
+      "criterion_id": "SC-003",
+      "description": "`setValidity` blocks submission and the message reaches the a11y tree  \u2014  RED-FIRST: drop the message argument",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Owned by WP03. Authored post-tasks squad; replaces the generated stub."
+    },
+    {
+      "criterion_id": "SC-004",
+      "description": "Form reset restores the initial value  \u2014  RED-FIRST: remove the `formResetCallback`",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Owned by WP03. Authored post-tasks squad; replaces the generated stub."
+    },
+    {
+      "criterion_id": "SC-005",
+      "description": "A disabled control is excluded from submission  \u2014  RED-FIRST: remove the disabled guard",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Owned by WP03. Authored post-tasks squad; replaces the generated stub."
+    },
+    {
+      "criterion_id": "SC-006",
+      "description": "The documented event fires **exactly once**, asserted with `toHaveBeenCalledTimes(1)`  \u2014  RED-FIRST: dispatch twice",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Owned by WP03. Authored post-tasks squad; replaces the generated stub."
+    },
+    {
+      "criterion_id": "SC-007",
+      "description": "The event's `detail` shape matches its documentation  \u2014  RED-FIRST: change a field name",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Owned by WP03. Authored post-tasks squad; replaces the generated stub."
+    },
+    {
+      "criterion_id": "SC-008",
+      "description": "`composed` and `bubbles` are as documented  \u2014  RED-FIRST: flip `composed`",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Owned by WP03. Authored post-tasks squad; replaces the generated stub."
+    },
+    {
+      "criterion_id": "SC-009",
+      "description": "`preventDefault()` demonstrably prevents, where cancelable  \u2014  RED-FIRST: drop `cancelable`",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Owned by WP03. Authored post-tasks squad; replaces the generated stub."
+    },
+    {
+      "criterion_id": "SC-010",
+      "description": "A property assigned **before** the definition loads is applied on upgrade \u2014 **fixture-owned**, mutated fixture-locally  \u2014  RED-FIRST: remove the fixture's upgrade handling. The `tsconfig.base.json` flag is FR-015's separate node-lane assertion, deliberately **not** a `behaviours.json` id: flipping it shadows every Lit accessor in the fixture, so it is not a guard-5-clean mutation.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Owned by WP03. Authored post-tasks squad; replaces the generated stub."
+    },
+    {
+      "criterion_id": "SC-011",
+      "description": "Slotted content reaches the intended slot, **and fallback appears when empty**  \u2014  RED-FIRST: rename the slot",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Owned by WP03. Authored post-tasks squad; replaces the generated stub."
+    },
+    {
+      "criterion_id": "SC-012",
+      "description": "Escape acts, focus returns to the invoker, `aria-expanded` tracks real state  \u2014  RED-FIRST: remove the Escape handler",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Owned by WP03. Authored post-tasks squad; replaces the generated stub."
+    },
+    {
+      "criterion_id": "SC-013",
+      "description": "The fixture's `::part()`s are present and targetable from outside \u2014 **fixture-owned**, because `packages/elements/src` contains no `part=` and no `@csspart` and the manifest declares **0** `cssParts`, so an elements-owned mutation has no subject and would fail the harness's pattern-not-found guard by construction. The manifest-derived arm is the WP04 ratchet, honestly vacuous at zero and guarded against growing silently.  \u2014  RED-FIRST: rename the fixture's internal element carrying the part",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Owned by WP03. Authored post-tasks squad; replaces the generated stub."
+    },
+    {
+      "criterion_id": "SC-014",
+      "description": "`shadowRoot.adoptedStyleSheets[0]` **is** `Ctor.styles[0]` \u2014 object identity \u2014 and the shadow root contains zero `<style>` elements  \u2014  RED-FIRST: substitute a Lit `css` CSSResult. NOT \"hand-author a `new CSSStyleSheet()`\": the generated module already exports exactly that and Lit adopts it by reference, so that substitution preserves identity and leaves the test **green**. Lit adopts `CSSResult.styleSheet`, not the CSSResult, so a `css` template breaks identity.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Owned by WP03. Authored post-tasks squad; replaces the generated stub."
+    },
+    {
+      "criterion_id": "SC-015",
+      "description": "A different-constructor re-`define` warns, leaves the **original** constructor registered, and a same-constructor re-`define` is silent  \u2014  RED-FIRST: `if (existing !== ctor) {` \u2192 `if (false) {`. NOT \"replace `define` with an empty function\": that leaves `sk-stub` unregistered, so every other elements-owned test reds too and the harness's collateral bound fails on the mission's own canonical mutation.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Owned by WP03. Authored post-tasks squad; replaces the generated stub."
+    },
+    {
+      "criterion_id": "SC-016",
+      "description": "`scripts/suite-selftest.mjs` runs in CI: every committed mutation produces its named failing test, and the unmutated baseline is green  \u2014  RED-FIRST: delete a mutation entry \u2014 the count assertion fails",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Owned by WP05. Authored post-tasks squad; replaces the generated stub."
+    },
+    {
+      "criterion_id": "SC-017",
+      "description": "An emptied **lane**, and an uncovered required-behaviour id, each fail  \u2014  RED-FIRST: empty one lane's globs",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Owned by WP01. Authored post-tasks squad; replaces the generated stub."
+    },
+    {
+      "criterion_id": "SC-018",
+      "description": "The enforced suite reports zero skipped tests  \u2014  RED-FIRST: add one `it.skip`",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Owned by WP01. Authored post-tasks squad; replaces the generated stub."
+    },
+    {
+      "criterion_id": "SC-019",
+      "description": "The matrix artifact carries the full cell enum; an all-reserved matrix, a wrong cell count, and an unexpected reserved set each fail  \u2014  RED-FIRST: mark every cell reserved",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Owned by WP07. Authored post-tasks squad; replaces the generated stub."
+    },
+    {
+      "criterion_id": "SC-020",
+      "description": "The suite exceeding its committed ceiling fails CI  \u2014  RED-FIRST: set the ceiling to 1s",
+      "proof_type": "ci_run",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Owned by WP06. Authored post-tasks squad; replaces the generated stub."
+    },
+    {
+      "criterion_id": "SC-021",
+      "description": "A failing test turns the **`gate`** job red, not merely the test job  \u2014  RED-FIRST: add a failing test and read `gate`",
+      "proof_type": "ci_run",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Owned by WP06. Authored post-tasks squad; replaces the generated stub."
+    },
+    {
+      "criterion_id": "SC-022",
+      "description": "The suite passes on a clean checkout with no `packages/elements/dist`  \u2014  RED-FIRST: delete `dist` and run",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Owned by WP01. Authored post-tasks squad; replaces the generated stub."
     }
   ],
-  "negative_invariants": []
+  "negative_invariants": [
+    {
+      "invariant_id": "NFR-002",
+      "description": "Every gate this mission adds is demonstrated FAILING before it is claimed to pass, and the demonstration is a committed, CI-executed artifact that re-derives the red on every run. A transcript, a commit message, or a checked-in log file does not satisfy this.",
+      "enforced_by": [
+        "scripts/suite-selftest.mjs",
+        "mutations.selftest.json",
+        "scripts/check-gate-wiring.mjs"
+      ],
+      "pass_fail": "pending",
+      "evidence": null,
+      "notes": "The mission's spine. Recorded here because the CLI stub left negative_invariants empty and both sibling missions did too \u2014 this is the one mission whose whole thesis is a negative invariant."
+    }
+  ],
+  "notes": "Replaces the CLI stub, which carried 15 FR rows with placeholder descriptions (\"Verify FR-001 is satisfied\"), no NFR or SC rows at all, and an empty negative_invariants. A criterion that reads \"verify X is satisfied\" cannot be failed by anyone but its author. Each row's description now carries the spec's own red-first falsifier, and every row names its owning work package."
 }

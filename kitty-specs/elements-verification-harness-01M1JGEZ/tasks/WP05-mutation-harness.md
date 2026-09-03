@@ -12,6 +12,7 @@ branch_strategy: Planning artifacts for this mission were generated on mission/e
 subtasks:
 - T012
 - T013
+- T014
 phase: Phase 3 - Red-first
 history:
 - timestamp: '2026-09-03T02:30:00Z'
@@ -57,8 +58,11 @@ Guard 4 is the one that will actually fire.
    too broad.
 6. **Baseline must have executed > 0**, not merely exited 0. A zero-test lane reports
    `passed`.
-7. **`mutations.json` ids ↔ `behaviours.json` ids, bidirectionally equal.** SC-016 requires
-   deleting an entry to fail; a *new* behaviour with no mutation must fail too.
+7. **`mutations.json` ids ⊇ `behaviours.json` ids**, and every mutation id is a known
+   behaviour. A **superset**, not set-equality: several behaviours have more than one arm
+   (SC-014 is identity *and* zero-`<style>`; SC-015 is three arms) and one mutation cannot
+   red them all while staying guard-5-clean. SC-016 still requires deleting an entry to
+   fail, and a behaviour with **no** mutation at all must fail.
 8. **`mutations.length > 0`** — an empty list makes the loop body never execute and prints
    "all mutations produced their named red".
 9. **No `-t` scoping.** It makes guard 4 undetectable, because a test that never loaded and
@@ -72,16 +76,32 @@ Guard 4 is the one that will actually fire.
 - **T012** — The harness. `node_modules` **symlinked, not copied** — it is 1.2 GB and this
   runs 16 times. Measured: 5.47 s symlinked vs 6.19 s copied for baseline + 2 mutations,
   ~1.8 s per suite run. Chromium-only.
-- **T013** — `mutations.json`: one entry per behaviour id, `{id, file, from, to,
-  expectFailingTest}`.
+- **T013** — `mutations.json`: `{id, file, from, to, expectFailingTest, arm}` — `arm`
+  names which assertion of a multi-arm behaviour this mutation is expected to red, because
+  guard 4 matches the named test and guard 5 requires every *other* behaviour test to
+  survive. Two entries the spec now pins because their obvious form is wrong:
+  **SC-015** must be `if (existing !== ctor) {` → `if (false) {`, never "replace `define`
+  with an empty function" — that unregisters `sk-stub` and reds every other elements-owned
+  test, failing guard 5 on the mission's own canonical mutation. **SC-014** must substitute
+  a Lit `css` CSSResult, never a `new CSSStyleSheet()` — the generated module already
+  exports exactly that and Lit adopts it by reference, so that substitution preserves
+  identity and leaves the test green.
+
+- **T014** — `mutations.selftest.json`: ten deliberately-bad entries, one per guard, run in
+  a self-check mode that asserts each is rejected **by its named guard**. Without it the
+  harness re-derives the mutations on every run while nothing re-derives the *guards* —
+  they would be demonstrated once, by hand, which is the degradation this WP diagnoses in
+  #70's NFR-003. Same shape as `packages/elements/src/__fixtures__/shapes.mjs` driving
+  `gate-selftest.mjs`, which this repo already ships.
 
 ## Definition of Done
 
 - [ ] All fourteen mutations produce their named failing test; the unmutated baseline is
       green with `executed > 0`.
-- [ ] Each of the ten guards is demonstrated firing — including guard 4 with a deliberate
-      syntax error, and guard 1 with a deliberately bogus `from`.
+- [ ] `mutations.selftest.json` runs in CI and every one of its ten bad entries is
+      rejected by the guard it names. Not a one-time hand demonstration.
 - [ ] Deleting a `mutations.json` entry fails the harness (SC-016).
 - [ ] Adding a behaviour to `behaviours.json` without a mutation fails the harness.
-- [ ] The harness runs in CI, and its wall-clock is priced into WP06's ceiling — it is
-      5–10× the suite it validates.
+- [ ] The harness exits non-zero when any mutation fails to produce its named red, when
+      run directly. **Wiring it into CI and pricing it into the ceiling are WP06's DoD
+      lines** — see WP04's note on boxes only another WP can satisfy.

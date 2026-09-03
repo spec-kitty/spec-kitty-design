@@ -1,7 +1,8 @@
 ---
 work_package_id: WP02
 title: The behaviour fixture element
-dependencies: []
+dependencies:
+- WP01
 requirement_refs:
 - FR-006
 planning_base_branch: mission/elements-verification-harness
@@ -81,11 +82,27 @@ cannot silently join the published workspace set.
 
 ## Definition of Done
 
-- [ ] The element owns every behaviour in `behaviours.json` that is marked applicable.
-- [ ] `lint` and `typecheck` both run against it, and `typecheck` covers the test files.
-- [ ] **No #70 gate changes behaviour because this fixture exists.** Demonstrated: run
-      `check-no-css-in-source.mjs`, `build-elements-css.mjs --check`,
-      `check-manifest-content.mjs`, `elements:analyze` + diff, and the Storybook build,
-      before and after. Identical results, and the story count is unchanged.
+- [ ] The element owns every behaviour listed in WP03's table of fourteen — enumerated
+      there, so this WP does not depend on the registry being complete.
+- [ ] **Every applicable behaviour is breakable by exactly ONE single-occurrence string
+      replacement in this file, and the fixture OWNS the behaviour rather than delegating
+      it to the UA.** WP05's guards 1–3 require a unique, single-occurrence, non-no-op
+      mutation per behaviour, and WP05 cannot edit this file. Two collisions to design
+      around, both already visible: `setFormValue` appears in both the value path (SC-002)
+      and `formResetCallback` (SC-004) — two occurrences trips guard 2; and if disabled
+      exclusion (SC-005) is left to the UA rather than owned by a `formDisabledCallback`,
+      it has no source-owned mutation subject at all and guard 1 fires. Review WP05's draft
+      mutation list against this file before approving.
+- [ ] The fixture's `package.json` declares `@spec-kitty/elements`, so an nx graph edge
+      exists. Without the edge the `scope:fixture` depConstraint binds nothing —
+      `eslint.config.mjs` argues at length that a constraint binding nothing is worse than
+      none, because the next reader believes it.
+- [ ] `lint` and `typecheck` both run against it, and the tsconfig `include` is a **glob**
+      that will pick up `src/*.test.ts` when WP03 lands them (they do not exist yet, so
+      "covers the test files" is not checkable here).
+- [ ] **No #70 gate changes behaviour because this fixture exists.** Evidence is
+      `lint-code` green on this WP's PR — it runs all five scanners and is unconditional —
+      plus `storybook-build`'s story count unchanged at 76. Not a hand-run before/after
+      comparison, which leaves no artifact.
 - [ ] The fixture appears in no published surface: not in `custom-elements.json`, not in
       `packages/elements/dist`, not in the IIFE bundle, not in the Storybook story list.

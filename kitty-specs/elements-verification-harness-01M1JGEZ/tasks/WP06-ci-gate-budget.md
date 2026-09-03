@@ -7,6 +7,7 @@ dependencies:
 - WP04
 - WP05
 requirement_refs:
+- FR-003
 - FR-005
 - FR-013
 - FR-014
@@ -21,6 +22,7 @@ subtasks:
 - T015
 - T016
 - T017
+- T018
 phase: Phase 4 - Gate
 history:
 - timestamp: '2026-09-03T02:30:00Z'
@@ -30,10 +32,12 @@ authoritative_surface: .github/workflows/ci-quality.yml
 create_intent:
 - scripts/measure-suite-time.mjs
 - suite-budget.json
+- scripts/check-gate-wiring.mjs
 execution_mode: code_change
 owned_files:
 - .github/workflows/ci-quality.yml
 - scripts/measure-suite-time.mjs
+- scripts/check-gate-wiring.mjs
 - suite-budget.json
 - docs/architecture/decisions/2026-09-02-11-verification-stack-and-wrapper-generation.md
 tags: []
@@ -75,7 +79,19 @@ either to break `always()` or to conclude the work was already done.
   installed" claim was false and is withdrawn; the install is priced, not avoided.
 - **T015** — Wire `check-part-ratchet.mjs` (WP04) into `lint-code`.
 - **T016** — The four gate edits above.
-- **T017** — `scripts/measure-suite-time.mjs` + `suite-budget.json` recording
+- **T017** — `scripts/check-gate-wiring.mjs`: parse `ci-quality.yml` and assert (1) `test`
+  is in `gate.needs`, (2) the `[ENFORCED]` disjunction carries a **strict**
+  `needs.test.result != success` clause, (3) `test` appears in **no** skipped-tolerance
+  branch. Committed, CI-executed, re-derived on every run.
+
+  This replaces "Demonstrated." NFR-002 requires a committed artifact that re-derives the
+  red every run and explicitly rejects a transcript — and a push-and-revert of a broken
+  workflow produces exactly a transcript, a CI-run URL in a commit message. Worse, it does
+  not protect against the regression that will actually happen: a later PR adding
+  `test_ok="…"` to the tolerance block. A static assertion does. Same shape as
+  `scripts/gate-selftest.mjs`, which this repo already ships for the a11y gate.
+
+- **T018** — `scripts/measure-suite-time.mjs` + `suite-budget.json` recording
   `{budget, measured, run URL, sha}`, failing above the ceiling. A **ceiling**, not
   exact-equality — wall-clock is noisy, unlike `measure-elements-sizes.mjs --check`'s byte
   counts. It reads wall-clock, which is in **no** reporter output, so it is not the same
@@ -83,11 +99,21 @@ either to break `always()` or to conclude the work was already done.
 
 ## Definition of Done
 
-- [ ] The suite runs on WebKit in CI, and any divergence from chromium is recorded — fixed
-      if it is the element's fault, documented if it is the engine's.
-- [ ] A failing test turns **`gate`** red, not merely the test job. Demonstrated.
-- [ ] A test job set to `if: false` **fails** `gate` rather than being tolerated.
-      Demonstrated — this is the bypass the strict treatment exists to close.
+- [ ] The suite runs on WebKit in CI. "No divergence found" is not a tickable null: the
+      floor reporter's `CI ⇒ webkit executed` assertion (WP01) is what distinguishes it from
+      "webkit never ran". Any divergence is fixed if it is the element's fault, documented
+      if it is the engine's.
+- [ ] `check-gate-wiring.mjs` runs in `lint-code` and asserts all three properties. It is
+      demonstrated red-first by deleting the strict clause from a scratch copy of the
+      workflow — a mechanical check, not a one-shot push of a deliberately broken workflow.
+- [ ] A failing test turns **`gate`** red, not merely the test job. Corroborated by an
+      actual CI run, which is evidence *alongside* the static assertion, not instead of it.
+- [ ] `check-part-ratchet.mjs` (WP04) is wired into `lint-code` and fails the job.
+- [ ] `suite-selftest.mjs` (WP05) is wired into CI and fails the job.
+- [ ] The test job does **not** depend on a build job, so SC-022 (passes with no
+      `packages/elements/dist`) stays true in CI and not just locally.
+- [ ] Exceeding the committed ceiling fails the job (SC-020), demonstrated by setting the
+      ceiling to 1s.
 - [ ] `suite-budget.json` records the measured figure with the run it came from, and
       states whether the ceiling covers the suite alone or suite + selftest. The selftest
       is 5–10× the suite, so this is not a detail.

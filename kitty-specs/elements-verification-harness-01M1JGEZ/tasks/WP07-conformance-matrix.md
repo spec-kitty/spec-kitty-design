@@ -50,12 +50,24 @@ The matrix is attributed to ADR-11 by issue #71 and by
 `docs/architecture/elements-first-programme.md:193`. **ADR-11 contains no conformance
 matrix and does not mention Svelte.** The four surfaces trace to ADR-8 Confirmation #1.
 
-## It is only droppable because FR-010 was rewritten
+## It is droppable only because FR-010 was rewritten — and that rewrite was CLAIMED before it was MADE
 
-FR-010's not-applicable escape hatch *was* this matrix's cell — so dropping this package
-would have left FR-010 referencing an artifact that does not exist. FR-010 now stands
-alone: **zero skips, full stop**, and a behaviour with no applicable subject is simply not
-in `behaviours.json`. Do not re-introduce the dependency.
+FR-010's not-applicable escape hatch *was* this matrix's cell. An earlier revision of this
+file and of `plan.md` both asserted the spec had been rewritten to break that dependency.
+**It had not been** — the post-tasks squad checked the spec text and found FR-010 still
+routing through FR-012. The rewrite is now actually in the spec: zero skips full stop, and
+a behaviour with no applicable subject is simply absent from `behaviours.json`.
+
+Do not re-introduce the dependency. And note that **SC-019 has no owner but this WP** — if
+it is dropped, SC-019 is dropped with it, explicitly rather than silently.
+
+## Its owned_files are deliberately incomplete
+
+This WP needs `package.json`/`package-lock.json` (WP01's) for the Svelte dependencies, and
+`ci-quality.yml` (WP06's) for a build step, and no WP owns a Svelte fixture project. That
+is not an oversight to patch — it is the strongest concrete argument that this belongs in
+its own mission, and it is left visible rather than smoothed over. If the operator
+authorises it here, the ownership hand-off must be written down first.
 
 ## Subtasks
 

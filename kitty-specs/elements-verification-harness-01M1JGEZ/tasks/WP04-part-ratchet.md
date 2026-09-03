@@ -1,10 +1,10 @@
 ---
 work_package_id: WP04
 title: The ::part() shrink-only ratchet
-dependencies:
-- WP03
+dependencies: []
 requirement_refs:
 - FR-007
+- C-007
 planning_base_branch: mission/elements-verification-harness
 merge_target_branch: mission/elements-verification-harness
 branch_strategy: Planning artifacts for this mission were generated on mission/elements-verification-harness. During /spec-kitty.implement this WP may branch from a dependency-specific base, but completed changes must merge back into mission/elements-verification-harness unless the human explicitly redirects the landing branch.
@@ -53,7 +53,9 @@ anti-vacuity guard and neither spec nor plan said what it was. This is it.
 
 ## Definition of Done
 
-- [ ] `check-part-ratchet.mjs` runs in `lint-code` (WP06 wires it).
+- [ ] `check-part-ratchet.mjs` exits non-zero on a violation when run directly. **Wiring it
+      into `lint-code` is WP06's DoD line, not this one** — a box here that only another WP
+      can satisfy ticks green with the script wired into nothing.
 - [ ] **Red-first, today**: add a `@csspart` JSDoc to `sk-stub`, regenerate the manifest,
       and the ratchet fails naming the undeclared part. Green when `expected-parts.json` is
       updated. Committed as the demonstration, not narrated.

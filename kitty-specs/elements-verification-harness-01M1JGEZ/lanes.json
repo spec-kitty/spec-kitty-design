@@ -11,7 +11,6 @@
         "WP01"
       ],
       "write_scope": [
-        "behaviours.json",
         "package-lock.json",
         "package.json",
         "scripts/floor-reporter.mjs",
@@ -37,6 +36,8 @@
         "fixtures/elements-behaviour/tsconfig.json"
       ],
       "predicted_surfaces": [
+        "api",
+        "artifact-rendering",
         "workspace"
       ],
       "depends_on_lanes": [],
@@ -48,11 +49,13 @@
         "WP03"
       ],
       "write_scope": [
+        "behaviours.json",
         "fixtures/elements-behaviour/src/behaviours.test.ts",
         "fixtures/elements-behaviour/src/elements-owned.test.ts"
       ],
       "predicted_surfaces": [
-        "artifact-rendering"
+        "artifact-rendering",
+        "legacy-cleanup"
       ],
       "depends_on_lanes": [],
       "parallel_group": 0
@@ -93,10 +96,13 @@
       "write_scope": [
         ".github/workflows/ci-quality.yml",
         "docs/architecture/decisions/2026-09-02-11-verification-stack-and-wrapper-generation.md",
+        "scripts/check-gate-wiring.mjs",
         "scripts/measure-suite-time.mjs",
         "suite-budget.json"
       ],
-      "predicted_surfaces": [],
+      "predicted_surfaces": [
+        "artifact-rendering"
+      ],
       "depends_on_lanes": [],
       "parallel_group": 0
     },
@@ -117,8 +123,8 @@
       "parallel_group": 0
     }
   ],
-  "computed_at": "2026-09-03T02:46:44.727276+00:00",
+  "computed_at": "2026-09-03T03:01:11.720245+00:00",
   "computed_from": "dependency_graph+ownership",
   "planning_artifact_wps": [],
-  "planning_commit_sha": "5bbddf5f293644380242c0b0ac7eb4f838149665"
+  "planning_commit_sha": "fcd081aa97e4b4bb2742b03ea287d59cc39bda41"
 }

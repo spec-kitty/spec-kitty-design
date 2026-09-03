@@ -17,7 +17,6 @@ branch_strategy: Planning artifacts for this mission were generated on mission/e
 subtasks:
 - T001
 - T002
-- T003
 - T004
 - T005
 phase: Phase 1 - Runner
@@ -28,12 +27,10 @@ history:
 authoritative_surface: vitest.config.mts
 create_intent:
 - vitest.config.mts
-- behaviours.json
 - scripts/floor-reporter.mjs
 execution_mode: code_change
 owned_files:
 - vitest.config.mts
-- behaviours.json
 - scripts/floor-reporter.mjs
 - package.json
 - package-lock.json
@@ -95,12 +92,13 @@ Four things that will each cost a cycle if ignored:
   otherwise, because **webkit cannot launch on the operator's Fedora machine** and
   unconditional webkit makes `npm run test` fail on a clean checkout.
 
-- **T003** — `behaviours.json`: the id registry. **Fourteen** entries — id, charter clause,
-  SC id, applicability. The charter enumerates fifteen; the fifteenth is generation
-  determinism, deferred to #75. Getting this wrong in either direction is load-bearing:
-  fifteen makes the floor permanently red, and an ad-hoc list makes FR-008's mutation set
-  and FR-012's matrix rows disagree with it. Tests are keyed by **id**, never by title, so
-  WP05 does not break when WP03 renames a test.
+*(T003 moved to WP03.)* `behaviours.json` is **owned by WP03**, which owns the behaviours
+themselves. One file, one owner — and it resolves the sequencing blocker cleanly: this WP's
+floor *reads* the registry if present, so the per-behaviour arm has nothing to check until
+WP03 declares ids, and WP03 adds each id in the same commit as its test. Shipping fourteen
+ids here would make `npm run test` red for WP02, WP03 and part of WP04 no matter what the
+seed covers; deferring the arm to mission level would reintroduce the escape hatch FR-010
+forbids. Neither is needed.
 
 - **T004** — `scripts/floor-reporter.mjs`. **A custom reporter, not `--reporter=json`.**
   Measured: that JSON has no project attribution at all, and reported a run where webkit
@@ -124,7 +122,10 @@ Four things that will each cost a cycle if ignored:
 - [ ] `npm run test` runs both projects and fails if either does.
 - [ ] The floor fails when a lane executes zero tests. **Demonstrated** by pointing one
       lane's `include` at a non-matching glob — measured to exit 0 without the floor.
-- [ ] The floor fails when a declared behaviour id has no covering test.
+- [ ] The floor fails when a declared behaviour id has no covering test — demonstrated
+      **here**, without WP03, by pointing the reporter at a temporary two-id fixture
+      registry in this WP's own node-lane test. The arm is proven at the commit that
+      builds it, not at the commit that first uses it.
 - [ ] The floor fails on a skipped test.
 - [ ] `retry` is 0 for **every** project, asserted on the RESOLVED config
       (`createVitest('test',{config}).projects[].config.retry`) — asserting the raw object
@@ -132,9 +133,19 @@ Four things that will each cost a cycle if ignored:
 - [ ] The suite passes with **no `packages/elements/dist` present** (SC-022).
 - [ ] A node-lane test asserts the build's resolved `useDefineForClassFields` is `false`,
       and fails when it is unset.
-- [ ] **One seed browser-lane test ships in this package**, carrying a registry id. Without
-      it the floor makes `npm run test` red for every package until WP03 lands, and this WP
-      would be un-mergeable on its own.
+- [ ] **One seed browser-lane test ships in this package** (`tests/browser/seed.test.ts`)
+      so the browser lane is non-empty and the per-lane arm is satisfiable from this
+      commit. It carries **no** registry id — the registry does not exist yet — so it does
+      not collide with WP03's coverage and the mutation harness's collateral bound stays
+      unambiguous. WP03 may delete it once real browser tests exist.
+- [ ] The node lane has at least one owned test (`tests/node/config-contract.test.ts`),
+      carrying the resolved-`retry` and resolved-`useDefineForClassFields` assertions. Both
+      SC-001 and the floor require the node lane to execute ≥1 test; no other WP owns a
+      node-lane file.
+- [ ] **When `CI` is set, the reporter asserts BOTH `browser (chromium)` and
+      `browser (webkit)` executed.** This is FR-005's clause and it belongs to the reporter,
+      which this WP owns. It is the only mechanism that catches webkit silently not running
+      — the exact failure the spike measured reporting `success: true`, `numFailedTests: 0`.
 
 ## Notes
 

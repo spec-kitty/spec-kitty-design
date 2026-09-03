@@ -10,6 +10,7 @@ planning_base_branch: mission/elements-verification-harness
 merge_target_branch: mission/elements-verification-harness
 branch_strategy: Planning artifacts for this mission were generated on mission/elements-verification-harness. During /spec-kitty.implement this WP may branch from a dependency-specific base, but completed changes must merge back into mission/elements-verification-harness unless the human explicitly redirects the landing branch.
 subtasks:
+- T003
 - T008
 - T009
 - T010
@@ -22,10 +23,12 @@ authoritative_surface: fixtures/elements-behaviour/src/
 create_intent:
 - fixtures/elements-behaviour/src/behaviours.test.ts
 - fixtures/elements-behaviour/src/elements-owned.test.ts
+- behaviours.json
 execution_mode: code_change
 owned_files:
 - fixtures/elements-behaviour/src/behaviours.test.ts
 - fixtures/elements-behaviour/src/elements-owned.test.ts
+- behaviours.json
 tags: []
 tracker_refs: []
 ---
@@ -67,10 +70,27 @@ checks in `lint-code`.
 
 ## Subtasks
 
+- **T003** — `behaviours.json`, the id registry: id, charter clause, SC id, applicability.
+  **Fourteen** entries, each added *in the same commit as its test*, so WP01's
+  per-behaviour floor arm never goes red mid-sequence. Owned here rather than in WP01
+  because this WP owns the behaviours; one file, one owner. Tests are keyed by **id**,
+  never by title, so WP05's mutation list does not break when a test is renamed.
+
 - **T008** — The eleven fixture-owned behaviours.
-- **T009** — The three elements-owned behaviours (SC-013 parts, SC-014 adoption, SC-015
-  registry guard), whose subject is `packages/elements/src` reached through WP01's alias.
-  Flag for WP05: mutating these requires **redirecting the alias**, not editing the copy.
+- **T009** — The **two** elements-owned behaviours: SC-014 (style adoption) and SC-015
+  (registry guard), whose subject is `packages/elements/src` reached through WP01's alias.
+  Mutating these requires **redirecting the alias**, not editing the copied fixture — flag
+  for WP05's guard 10.
+
+  **SC-013 is NOT one of them.** `packages/elements/src` contains no `part=` and no
+  `@csspart`, and the manifest declares zero `cssParts` — verified. So an elements-owned
+  `::part()` mutation has no pattern, WP05's guard 1 fires by construction, and its guard 7
+  set-equality becomes unsatisfiable. SC-013's test is **fixture-owned** against the ≥2
+  parts WP02 ships. The manifest-derived arm is WP04's ratchet, honestly vacuous at zero.
+
+  This WP also **adds the remaining thirteen entries to `behaviours.json`**, each in the
+  same commit as its test, so the floor's per-behaviour arm never goes red mid-sequence.
+  It removes WP01's seed id and seed test when the real coverage lands.
 - **T010** — SC-015 needs three assertions, not one. `expect(() => define(tag, Ctor))
   .not.toThrow()` is satisfied by an **empty function body** — a helper that registers
   nothing passes it perfectly. Assert: a different-constructor redefine warns; the
@@ -80,7 +100,8 @@ checks in `lint-code`.
 
 ## Definition of Done
 
-- [ ] Every id in `behaviours.json` has a covering test, and the floor agrees.
+- [ ] Every id in `behaviours.json` has exactly ONE covering test, and the floor agrees.
+      WP01's seed test and its registry entry are removed here.
 - [ ] No "it renders" assertion, no shadow-DOM snapshot, no test of Lit's own reactivity,
       no assertion on internal class names (C-003).
 - [ ] SC-006 uses `toHaveBeenCalledTimes(1)`.
