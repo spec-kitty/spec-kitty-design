@@ -24,7 +24,7 @@
     "a lens shipped eight part= attributes with an empty cssParts array and this ratchet stayed",
     "green at the old count, because it derives from the manifest and not from the rendered DOM."
   ],
-  "total": 9,
+  "total": 14,
   "byElement": {
     "sk-card": [
       "card"
@@ -35,6 +35,13 @@
       "nav"
     ],
     "sk-form-input": [
+      "control",
+      "description",
+      "error",
+      "field",
+      "label"
+    ],
+    "sk-form-textarea": [
       "control",
       "description",
       "error",

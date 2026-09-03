@@ -49,6 +49,10 @@
         {
           "name": "sk-form-input",
           "file": "fixtures/elements-behaviour/src/sk-form-input.test.ts"
+        },
+        {
+          "name": "sk-form-textarea",
+          "file": "fixtures/elements-behaviour/src/sk-form-textarea.test.ts"
         }
       ]
     },
@@ -66,6 +70,10 @@
         {
           "name": "sk-form-input",
           "file": "fixtures/elements-behaviour/src/sk-form-input.test.ts"
+        },
+        {
+          "name": "sk-form-textarea",
+          "file": "fixtures/elements-behaviour/src/sk-form-textarea.test.ts"
         }
       ]
     },
@@ -83,6 +91,10 @@
         {
           "name": "sk-form-input",
           "file": "fixtures/elements-behaviour/src/sk-form-input.test.ts"
+        },
+        {
+          "name": "sk-form-textarea",
+          "file": "fixtures/elements-behaviour/src/sk-form-textarea.test.ts"
         }
       ]
     },
@@ -100,6 +112,10 @@
         {
           "name": "sk-form-input",
           "file": "fixtures/elements-behaviour/src/sk-form-input.test.ts"
+        },
+        {
+          "name": "sk-form-textarea",
+          "file": "fixtures/elements-behaviour/src/sk-form-textarea.test.ts"
         }
       ]
     },
@@ -241,6 +257,10 @@
         {
           "name": "sk-form-input",
           "file": "fixtures/elements-behaviour/src/sk-form-input.test.ts"
+        },
+        {
+          "name": "sk-form-textarea",
+          "file": "fixtures/elements-behaviour/src/sk-form-textarea.test.ts"
         }
       ]
     },

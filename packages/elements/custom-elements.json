@@ -494,7 +494,6 @@
               "default": "false",
               "privacy": "public",
               "attribute": "disabled",
-              "reflects": true,
               "inheritedFrom": {
                 "name": "FormControlBase",
                 "module": "packages/elements/src/form-control-base.ts"
@@ -733,14 +732,415 @@
         },
         {
           "kind": "class",
-          "description": "The scaffold element for the ADR-8 custom-element base layer.",
-          "name": "SkStub",
-          "members": [],
+          "description": "A labelled multi-line text control that participates in a native form.",
+          "name": "SkFormTextarea",
+          "cssParts": [
+            {
+              "description": "the field wrapper",
+              "name": "field"
+            },
+            {
+              "description": "the label",
+              "name": "label"
+            },
+            {
+              "description": "the input",
+              "name": "control"
+            },
+            {
+              "description": "the helper text",
+              "name": "description"
+            },
+            {
+              "description": "the validation message",
+              "name": "error"
+            }
+          ],
+          "members": [
+            {
+              "kind": "field",
+              "name": "rows",
+              "privacy": "public",
+              "type": {
+                "text": "number"
+              },
+              "default": "4",
+              "attribute": "rows"
+            },
+            {
+              "kind": "field",
+              "name": "placeholder",
+              "privacy": "public",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "attribute": "placeholder"
+            },
+            {
+              "kind": "field",
+              "name": "invalid",
+              "privacy": "public",
+              "type": {
+                "text": "boolean"
+              },
+              "description": "Reflected so the adopted sheet can see the state from inside via `:host([invalid])` — a\ndescendant selector on a state-carrying ancestor would be inert once adopted (#72).",
+              "default": "false",
+              "attribute": "invalid",
+              "reflects": true
+            },
+            {
+              "kind": "method",
+              "name": "syncFormValue",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "description": "The only `setFormValue` call site in this element."
+            },
+            {
+              "kind": "method",
+              "name": "formResetCallback",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              }
+            },
+            {
+              "kind": "method",
+              "name": "formDisabledCallback",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "isDisabled",
+                  "type": {
+                    "text": "boolean"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "validate",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              }
+            },
+            {
+              "kind": "field",
+              "name": "#onInput",
+              "privacy": "private"
+            },
+            {
+              "kind": "field",
+              "name": "name",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "privacy": "public",
+              "attribute": "name",
+              "reflects": true,
+              "inheritedFrom": {
+                "name": "FormControlBase",
+                "module": "packages/elements/src/form-control-base.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "label",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "privacy": "public",
+              "attribute": "label",
+              "inheritedFrom": {
+                "name": "FormControlBase",
+                "module": "packages/elements/src/form-control-base.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "description",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "privacy": "public",
+              "attribute": "description",
+              "inheritedFrom": {
+                "name": "FormControlBase",
+                "module": "packages/elements/src/form-control-base.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "value",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "privacy": "public",
+              "attribute": "value",
+              "inheritedFrom": {
+                "name": "FormControlBase",
+                "module": "packages/elements/src/form-control-base.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "disabled",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "privacy": "public",
+              "attribute": "disabled",
+              "inheritedFrom": {
+                "name": "FormControlBase",
+                "module": "packages/elements/src/form-control-base.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "required",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "privacy": "public",
+              "attribute": "required",
+              "reflects": true,
+              "inheritedFrom": {
+                "name": "FormControlBase",
+                "module": "packages/elements/src/form-control-base.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "formAssociated",
+              "type": {
+                "text": "boolean"
+              },
+              "static": true,
+              "default": "true",
+              "inheritedFrom": {
+                "name": "FormControlBase",
+                "module": "packages/elements/src/form-control-base.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "internals",
+              "type": {
+                "text": "ElementInternals"
+              },
+              "privacy": "protected",
+              "inheritedFrom": {
+                "name": "FormControlBase",
+                "module": "packages/elements/src/form-control-base.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "initialValue",
+              "type": {
+                "text": "string"
+              },
+              "privacy": "protected",
+              "default": "''",
+              "description": "Captured on connect, restored by `formResetCallback`. `protected`, not `#private`: a\n`#`-private field is not visible to a subclass, and the reset anchor lives in the\nsubclass so its mutation reds exactly one element's test.",
+              "inheritedFrom": {
+                "name": "FormControlBase",
+                "module": "packages/elements/src/form-control-base.ts"
+              }
+            },
+            {
+              "kind": "method",
+              "name": "upgradeProperty",
+              "privacy": "protected",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "prop",
+                  "type": {
+                    "text": "'value' | 'disabled' | 'required'"
+                  }
+                }
+              ],
+              "description": "A property assigned before the definition loaded shadows the accessor the class installs on\nupgrade. Lit handles its own reactive properties; this covers the same ground explicitly so\nthe behaviour is the element's rather than a framework detail nothing asserts.",
+              "inheritedFrom": {
+                "name": "FormControlBase",
+                "module": "packages/elements/src/form-control-base.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "errorId",
+              "type": {
+                "text": "string"
+              },
+              "privacy": "protected",
+              "description": "The element's own id for its error node. Shadow-internal, so it never collides across\ninstances and never appears in the consumer's light DOM.",
+              "readonly": true,
+              "inheritedFrom": {
+                "name": "FormControlBase",
+                "module": "packages/elements/src/form-control-base.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "validity",
+              "type": {
+                "text": "ValidityState"
+              },
+              "readonly": true,
+              "inheritedFrom": {
+                "name": "FormControlBase",
+                "module": "packages/elements/src/form-control-base.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "validationMessage",
+              "type": {
+                "text": "string"
+              },
+              "readonly": true,
+              "inheritedFrom": {
+                "name": "FormControlBase",
+                "module": "packages/elements/src/form-control-base.ts"
+              }
+            },
+            {
+              "kind": "method",
+              "name": "checkValidity",
+              "return": {
+                "type": {
+                  "text": "boolean"
+                }
+              },
+              "inheritedFrom": {
+                "name": "FormControlBase",
+                "module": "packages/elements/src/form-control-base.ts"
+              }
+            },
+            {
+              "kind": "method",
+              "name": "reportValidity",
+              "return": {
+                "type": {
+                  "text": "boolean"
+                }
+              },
+              "inheritedFrom": {
+                "name": "FormControlBase",
+                "module": "packages/elements/src/form-control-base.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "error",
+              "type": {
+                "text": "string"
+              },
+              "description": "READ-ONLY, derived from validity — never a settable property.\n\nA settable `error` alongside `setValidity` is two sources of truth: `error=\"…\"` would paint\nthe error state on an element that still matches `:valid` and submits happily, the story\nwould render red, axe would pass, and nothing would notice.",
+              "readonly": true,
+              "inheritedFrom": {
+                "name": "FormControlBase",
+                "module": "packages/elements/src/form-control-base.ts"
+              }
+            }
+          ],
+          "attributes": [
+            {
+              "name": "name",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "name"
+            },
+            {
+              "name": "label",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "label"
+            },
+            {
+              "name": "description",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "description"
+            },
+            {
+              "name": "value",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "value"
+            },
+            {
+              "name": "rows",
+              "type": {
+                "text": "number"
+              },
+              "default": "4",
+              "fieldName": "rows"
+            },
+            {
+              "name": "placeholder",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "fieldName": "placeholder"
+            },
+            {
+              "name": "disabled",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "disabled"
+            },
+            {
+              "name": "required",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "required"
+            },
+            {
+              "name": "invalid",
+              "type": {
+                "text": "boolean"
+              },
+              "description": "Reflected so the adopted sheet can see the state from inside via `:host([invalid])` — a\ndescendant selector on a state-carrying ancestor would be inert once adopted (#72).",
+              "default": "false",
+              "fieldName": "invalid"
+            }
+          ],
           "superclass": {
-            "name": "LitElement",
-            "package": "lit"
+            "name": "FormControlBase",
+            "module": "/packages/elements/src/form-control-base.js"
           },
-          "tagName": "sk-stub",
+          "tagName": "sk-form-textarea",
           "customElement": true
         },
         {
@@ -921,6 +1321,18 @@
           },
           "tagName": "sk-nav-pill",
           "customElement": true
+        },
+        {
+          "kind": "class",
+          "description": "The scaffold element for the ADR-8 custom-element base layer.",
+          "name": "SkStub",
+          "members": [],
+          "superclass": {
+            "name": "LitElement",
+            "package": "lit"
+          },
+          "tagName": "sk-stub",
+          "customElement": true
         }
       ],
       "exports": [
@@ -969,6 +1381,14 @@
           "name": "SkFormInput",
           "declaration": {
             "name": "SkFormInput",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "SkFormTextarea",
+          "declaration": {
+            "name": "SkFormTextarea",
             "module": "./dist/index.js"
           }
         },

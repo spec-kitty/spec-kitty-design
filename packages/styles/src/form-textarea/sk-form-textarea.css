@@ -1,0 +1,139 @@
+/* @spec-kitty/styles — sk-form-textarea, the adopted sheet for <sk-form-textarea> */
+/* All values use --sk-* tokens only — no hardcoded values */
+
+/*
+ * ADDITIVE. `packages/styles/src/form-field/` is untouched and stays exactly as published:
+ * @spec-kitty/styles is public at 1.0.0, and removing `.sk-input` or the eight HTML string
+ * exports would be a semver-major on a live package. This file is a NEW path with NEW class
+ * names, so a consumer of 1.0.0 sees only an addition.
+ *
+ * WHY THE CLASS NAMES CHANGED. scripts/check-adopted-css-boundaries.mjs requires every rule's
+ * leftmost compound to belong to the element adopting it — a `.sk-<element>` class, `:host`,
+ * `::slotted(`, or a bare `slot`. `.sk-input` owns nothing under `sk-form-textarea`, so the
+ * original sheet is rejected 16 rules out of 16 under this element's name. That gate is the
+ * only mechanical check on ADR-9's cross-boundary rule, and making ownership configurable by
+ * the file being checked would gut it — so the sheet conforms rather than the gate relaxing.
+ *
+ * TWO THINGS FROM sk-form-field.css DELIBERATELY DID NOT COME ACROSS:
+ *
+ *   `.sk-input.is-focused` — a class that fakes a state the browser owns. The static markup
+ *   needed it to show a focus state in a screenshot; an element that can have real focus has
+ *   no business shipping a simulation of one, and it tells the accessibility tree something
+ *   untrue. There is no `is-focused` in this file, and WP01's DoD asserts that by grep.
+ *
+ *   `min-height: var(--sk-space-30, 120px)` (the textarea rule) — `--sk-space-30` is defined
+ *   nowhere in @spec-kitty/tokens; the scale runs --sk-space-1..12. The fallback was the only
+ *   live value, which makes it a hardcoded 120px wearing a token's clothes — and `min-height`
+ *   is not in stylelint's strict-value property list, so nothing objected. It is resolved
+ *   against a real token where it reappears (sk-form-textarea.css, WP03).
+ */
+
+/*
+ * THIS SHEET DUPLICATES sk-form-input.css, AND THAT IS NOT AN OVERSIGHT.
+ *
+ * The two differ in exactly two declarations — `min-height` and `resize` — so a shared base
+ * sheet is the obvious move, and the plan called for one. It cannot exist:
+ *
+ *   * scripts/build-elements-css.mjs globs ONLY `packages/styles/src/<name>/sk-*.css` per
+ *     element, with `dir === name` hard-enforced, so no single file is visible to both; and
+ *   * the module is built with `replaceSync`, which ignores `@import`, so one file cannot
+ *     pull in another.
+ *
+ * A "shared" sheet would therefore have to exist as two byte-identical copies in two
+ * directories — which is the duplication it was meant to remove, plus a second place to forget.
+ * Verified rather than assumed, and filed as part of #118.
+ *
+ * The `:host .sk-form-control` shape a lens measured as gate-legal is real and would work IF a
+ * shared file existed. No probe for it is added to check-adopted-css-boundaries.mjs's table:
+ * that table is shrink-only, and pinning it to a form this repo does not use is exactly the
+ * hazard the work package warned about.
+ */
+
+/* ── The field wrapper, inside the shadow root ─────────────────────────── */
+
+:host {
+  display: block;
+}
+
+.sk-form-textarea {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sk-space-2);
+}
+
+.sk-form-textarea__label {
+  font-family: var(--sk-font-sans);
+  font-size: var(--sk-text-sm);
+  font-weight: var(--sk-weight-medium);
+  color: var(--sk-fg-default);
+}
+
+/* ── The control ──────────────────────────────────────────────────────── */
+
+.sk-form-textarea__control {
+  width: 100%;
+  padding: var(--sk-space-3) var(--sk-space-4);
+  background: var(--sk-surface-input);
+  border: var(--sk-border-width-1) solid var(--sk-border-default);
+  border-radius: var(--sk-radius-sm);
+  font-family: var(--sk-font-sans);
+  font-size: var(--sk-text-base);
+  color: var(--sk-fg-default);
+  outline: none;
+  /* THE TWO DECLARATIONS THAT MAKE THIS A TEXTAREA AND NOT AN INPUT.
+     `min-height` was `var(--sk-space-30, 120px)` in the legacy sheet — a token defined nowhere,
+     so the fallback was the only live value: a hardcoded 120px wearing a token's clothes, on a
+     property stylelint's strict-value list omits. Resolved to --sk-space-12 (128px), the
+     nearest real step; scripts/check-element-css-hygiene.mjs now refuses the old shape. */
+  min-height: var(--sk-space-12);
+  resize: vertical;
+  transition:
+    border-color var(--sk-motion-duration-fast) var(--sk-motion-ease-out),
+    box-shadow var(--sk-motion-duration-fast) var(--sk-motion-ease-out);
+  box-sizing: border-box;
+}
+
+.sk-form-textarea__control::placeholder {
+  color: var(--sk-fg-muted);
+}
+
+/* Real focus only. The static sheet paired this with `.is-focused`; see the header. */
+.sk-form-textarea__control:focus {
+  border-color: var(--sk-border-focus);
+  box-shadow: var(--sk-shadow-focus);
+}
+
+.sk-form-textarea__control[aria-invalid="true"] {
+  border-color: var(--sk-color-red);
+}
+
+.sk-form-textarea__control:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ── Description and error ────────────────────────────────────────────── */
+
+.sk-form-textarea__description {
+  font-size: var(--sk-text-xs);
+  color: var(--sk-fg-muted);
+}
+
+/*
+ * The error text is the control's accessible description, so it must live in the SAME shadow
+ * root as the control — ADR-9 §4 measured that a cross-root `aria-describedby` does not
+ * resolve, because axe reads the attribute and scopes ID lookups to getRootNode().
+ *
+ * `:host([invalid])` rather than a `--error` modifier on an ancestor: the invalid state is
+ * owned by ElementInternals, reflected to the host, and this is the only selector form that
+ * can see it from inside. A descendant selector on a themed or state-carrying ancestor would
+ * be inert once adopted — that is the #72 defect, and the gate above now refuses it.
+ */
+.sk-form-textarea__error {
+  font-size: var(--sk-text-xs);
+  color: var(--sk-color-red);
+}
+
+:host(:not([invalid])) .sk-form-textarea__error {
+  display: none;
+}

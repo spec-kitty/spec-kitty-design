@@ -292,6 +292,46 @@
       "file": "packages/elements/src/form-input/sk-form-input.ts",
       "from": "        part=\"control\"",
       "to": "        data-part=\"control\""
+    },
+    {
+      "id": "SC-002",
+      "subject": "fixtures/elements-behaviour/src/sk-form-textarea.test.ts",
+      "arm": "FormData entry tracks the property",
+      "file": "packages/elements/src/form-textarea/sk-form-textarea.ts",
+      "from": "    if (changed.has('value') || changed.has('disabled')) this.syncFormValue();",
+      "to": "    void changed;"
+    },
+    {
+      "id": "SC-003",
+      "subject": "fixtures/elements-behaviour/src/sk-form-textarea.test.ts",
+      "arm": "validity message reaches the a11y tree",
+      "file": "packages/elements/src/form-textarea/sk-form-textarea.ts",
+      "from": "      this.internals.setValidity({ valueMissing: true }, `${this.label || 'This field'} is required`, control);",
+      "to": "      this.internals.setValidity({});"
+    },
+    {
+      "id": "SC-004",
+      "subject": "fixtures/elements-behaviour/src/sk-form-textarea.test.ts",
+      "arm": "reset restores the seeded value",
+      "file": "packages/elements/src/form-textarea/sk-form-textarea.ts",
+      "from": "    this.value = this.initialValue;",
+      "to": "    this.value = '';"
+    },
+    {
+      "id": "SC-005",
+      "subject": "fixtures/elements-behaviour/src/sk-form-textarea.test.ts",
+      "arm": "disabled excluded by the element",
+      "file": "packages/elements/src/form-textarea/sk-form-textarea.ts",
+      "from": "    this.internals.setFormValue(this.disabled ? null : this.value);",
+      "to": "    this.internals.setFormValue(this.value);"
+    },
+    {
+      "id": "SC-013",
+      "subject": "fixtures/elements-behaviour/src/sk-form-textarea.test.ts",
+      "arm": "form-textarea parts present",
+      "file": "packages/elements/src/form-textarea/sk-form-textarea.ts",
+      "from": "        part=\"control\"",
+      "to": "        data-part=\"control\""
     }
   ]
 }
