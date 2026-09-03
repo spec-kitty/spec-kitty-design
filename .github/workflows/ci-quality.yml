@@ -251,6 +251,16 @@ jobs:
         run: node scripts/build-element-markup.mjs --check
       - name: "[ENFORCED] ::part() ratchet (C-007, SC-013)"
         run: node scripts/check-part-ratchet.mjs
+      # #77. Two stories shipped `<div data-theme="light">`, which activates nothing — the
+      # token package anchors light on `:root[data-theme="light"], .sk-light` and `:root` only
+      # matches <html>, so both rendered the DARK palette on a light ground with every gate
+      # green. The rule was already written in three documents and the class had still recurred
+      # across ten story files; a gate closes it, a note defers it. Scoped to packages/elements
+      # today (zero hits) and widened by each batch mission as it converts a directory.
+      - name: "[ENFORCED] Light-mode story gate self-test (#93)"
+        run: node scripts/check-story-theme-wrapper.mjs --selftest
+      - name: "[ENFORCED] Light-mode stories activate light mode (#93)"
+        run: node scripts/check-story-theme-wrapper.mjs
       # Asserts the gate below actually gates the test job. A push-and-revert of a broken
       # workflow would produce a CI-run URL in a commit message — the transcript NFR-002
       # rejects — and would not protect against the regression that will actually happen:

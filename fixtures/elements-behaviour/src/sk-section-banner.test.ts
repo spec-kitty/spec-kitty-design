@@ -12,21 +12,9 @@ import {
   sectionBannerStaticHtml,
   skSectionBannerSheet,
 } from '@spec-kitty/elements';
-import tokensCss from '@spec-kitty/tokens/tokens.css?raw';
+import { installTokenSheet } from './token-sheet.js';
 
-const tokenStyle = () => {
-  const s = document.createElement('style');
-  s.textContent = tokensCss;
-  document.head.append(s);
-  return s;
-};
-
-let style: HTMLStyleElement;
-beforeEach(() => {
-  document.body.innerHTML = '';
-  style?.remove();
-  style = tokenStyle();
-});
+beforeEach(installTokenSheet);
 
 const mount = async (variant?: string, label = 'Version 1.x') => {
   const el = document.createElement('sk-section-banner');
@@ -87,6 +75,34 @@ test('the accessible name is the label alone — the dot is not announced', asyn
   // The label text is slotted, so it lives in the light DOM and is named by the slot.
   const slot = el.shadowRoot!.querySelector('slot') as HTMLSlotElement;
   expect(slot.assignedNodes().map((n) => n.textContent).join('')).toBe('Version 3.x');
+});
+
+test('each variant PAINTS, and the three are visually distinct', async () => {
+  // THE ASSERTION THIS FILE WAS MISSING, and the one that would have caught the bug this
+  // mission found: `--sk-surface-purple-tint` and `--sk-surface-green-tint` were defined
+  // nowhere in the token package, so `background: var(...)` was invalid at computed-value time
+  // and the purple and green banners rendered with NO background at all.
+  //
+  // check-element-css-hygiene.mjs now closes the undefined-token cause, but only that cause.
+  // Three neighbouring edits reproduce the identical symptom with every gate green: deleting
+  // the `background:` line; swapping it for a DEFINED but wrong token; or renaming the BEM
+  // modifier in the CSS only, which leaves sectionBannerClasses still emitting the old name so
+  // a classList assertion still passes against a rule that matches nothing. Every variant
+  // assertion in this file was a classList string until now.
+  const painted = new Map<string, string>();
+  for (const v of ['neutral', 'purple', 'green'] as const) {
+    const el = await mount(v);
+    const banner = el.shadowRoot!.querySelector('[part="banner"]')!;
+    const { backgroundColor, color } = getComputedStyle(banner);
+    expect(backgroundColor, `variant="${v}" has no background — its token resolved to nothing`)
+      .not.toBe('rgba(0, 0, 0, 0)');
+    expect(backgroundColor, `variant="${v}" background is transparent`).not.toBe('transparent');
+    expect(color, `variant="${v}" has no foreground`).not.toBe('');
+    painted.set(v, `${backgroundColor}|${color}`);
+  }
+  // Distinctness is the arm that survives a swap to a defined-but-wrong token: three variants
+  // that all resolve to --sk-surface-page would each be "painted" and indistinguishable.
+  expect(new Set(painted.values()).size, `the three variants are not visually distinct: ${[...painted].map(([k, v]) => `${k}=${v}`).join(', ')}`).toBe(3);
 });
 
 test('variants are attributes and map to the static layer\'s classes', async () => {

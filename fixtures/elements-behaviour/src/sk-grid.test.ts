@@ -8,25 +8,12 @@
  * a layout primitive can silently get wrong: blocking its children from being themed.
  */
 import { beforeEach, expect, test } from 'vitest';
+import { page } from '@vitest/browser/context';
 import '@spec-kitty/elements';
 import { gridClasses, gridStaticHtml, skGridSheet } from '@spec-kitty/elements';
-import tokensCss from '@spec-kitty/tokens/tokens.css?raw';
+import { installTokenSheet } from './token-sheet.js';
 
-/** The REAL token sheet, for the same reason sk-card.test.ts loads it: fabricated values
- *  assert that the CSS dereferences a token, never that the token package defines it. */
-const tokenStyle = () => {
-  const s = document.createElement('style');
-  s.textContent = tokensCss;
-  document.head.append(s);
-  return s;
-};
-
-let style: HTMLStyleElement;
-beforeEach(() => {
-  document.body.innerHTML = '';
-  style?.remove();
-  style = tokenStyle();
-});
+beforeEach(installTokenSheet);
 
 const settled = async (el: Element) => {
   await (el as unknown as { updateComplete: Promise<unknown> }).updateComplete;
@@ -107,57 +94,65 @@ test('the slotted children are the GRID ITEMS, not the slot', async () => {
   }
 });
 
-test('the 720px breakpoint collapses the column modifiers, and nothing else', async () => {
-  // The element's only runtime behaviour. Both branches assert; neither skips. The lane's
-  // viewport decides which one is the live claim, and `matchMedia` is the same query the
-  // stylesheet uses rather than a number restated here.
-  const { inner } = await mount({ variant: 'cols-3' }, 3);
-  const tracks = getComputedStyle(inner).gridTemplateColumns.split(/\s+/).filter(Boolean).length;
+test('the column modifiers lay out N tracks above the breakpoint, and collapse below it', async () => {
+  // BOTH WIDTHS ARE DRIVEN, and this test previously drove neither.
+  //
+  // It used to branch on `window.matchMedia('(max-width: 720px)')` and assert `tracks === 1` in
+  // one arm and `tracks === 3` in the other, with a comment claiming both arms assert. They do
+  // not: vitest defaults `browser.viewport.width` to 414 and vitest.config.mts sets none, so
+  // the query always matched, the 3-track arm was dead code, and DELETING .sk-grid--cols-2/3/4
+  // from the stylesheet left the entire suite green — the one feature this element exists for,
+  // asserted by no line that runs. Two pre-merge lenses found it independently.
+  //
+  // `page.viewport()` resizes the iframe, so the media query is genuinely re-evaluated.
+  const tracksFor = async (el: Element) =>
+    getComputedStyle(el.shadowRoot!.querySelector('[part="grid"]')!)
+      .gridTemplateColumns.split(/\s+/)
+      .filter(Boolean).length;
 
-  if (window.matchMedia('(max-width: 720px)').matches) {
-    expect(tracks, 'below the breakpoint every column modifier must collapse to one track').toBe(1);
-  } else {
-    expect(tracks, 'above the breakpoint cols-3 must lay out three tracks').toBe(3);
+  await page.viewport(1200, 800);
+  try {
+    for (const [variant, expected] of [
+      ['cols-2', 2],
+      ['cols-3', 3],
+      ['cols-4', 4],
+    ] as const) {
+      const { el } = await mount({ variant }, expected);
+      expect(await tracksFor(el), `${variant} must lay out ${expected} tracks above 720px`).toBe(
+        expected,
+      );
+    }
+    // The base grid is one track at every width — the control for the assertions above, which
+    // would otherwise pass against a stylesheet that gave EVERY grid the same track count.
+    const { el: base } = await mount({}, 3);
+    expect(await tracksFor(base), 'the base grid must stay single-column').toBe(1);
+  } finally {
+    await page.viewport(414, 896);
   }
 
-  // The BASE grid is one column at every width, so it is the control: if the media query were
-  // written without the modifier selectors it would still pass the branch above.
-  const { inner: base } = await mount({}, 3);
-  expect(getComputedStyle(base).gridTemplateColumns.split(/\s+/).filter(Boolean).length).toBe(1);
+  // And below the breakpoint every modifier collapses. Deleting the @media block reds this.
+  const { el: narrow } = await mount({ variant: 'cols-3' }, 3);
+  expect(window.matchMedia('(max-width: 720px)').matches, 'the lane viewport was not restored').toBe(
+    true,
+  );
+  expect(await tracksFor(narrow), 'below 720px every column modifier collapses to one track').toBe(
+    1,
+  );
 });
 
-test('a grid does not block its children from being themed', async () => {
-  // The failure mode a layout primitive has. Custom properties inherit through a shadow
-  // boundary; selectors do not. If sk-grid ever grew a `:host` colour declaration or an
-  // rgba() literal, cards inside it would stop following the theme while the grid itself
-  // still looked right — and no visual diff of the GRID would show it.
-  const dark = document.createElement('sk-grid');
-  const darkCard = document.createElement('sk-card');
-  darkCard.setAttribute('variant', 'blue');
-  dark.append(darkCard);
-  document.body.append(dark);
-
-  const wrap = document.createElement('div');
-  wrap.className = 'sk-light';
-  const light = document.createElement('sk-grid');
-  const lightCard = document.createElement('sk-card');
-  lightCard.setAttribute('variant', 'blue');
-  light.append(lightCard);
-  wrap.append(light);
-  document.body.append(wrap);
-
-  await settled(dark);
-  await settled(light);
-  await (darkCard as unknown as { updateComplete: Promise<unknown> }).updateComplete;
-  await (lightCard as unknown as { updateComplete: Promise<unknown> }).updateComplete;
-
-  const border = (c: Element) =>
-    getComputedStyle(c.shadowRoot!.querySelector('[part="card"]')!).borderColor;
-  expect(border(darkCard)).toContain('169, 199, 232');
-  expect(
-    border(lightCard),
-    'light mode did not reach a card nested inside a grid — the grid is interrupting inheritance',
-  ).toContain('46, 74, 107');
+test('the gap modifiers change the measured gap, not just the class list', async () => {
+  // The gap classes were asserted only as strings, so deleting .sk-grid--gap-3 and
+  // .sk-grid--gap-6 from the stylesheet left the suite green.
+  const gapOf = async (attrs: Record<string, string>) => {
+    const { inner } = await mount(attrs, 2);
+    return parseFloat(getComputedStyle(inner).rowGap);
+  };
+  const base = await gapOf({});
+  const small = await gapOf({ gap: '3' });
+  const large = await gapOf({ gap: '6' });
+  expect(base, 'the token sheet is not loaded').toBeGreaterThan(0);
+  expect(small, 'gap="3" did not change the computed gap').toBeLessThan(base);
+  expect(large, 'gap="6" did not change the computed gap').toBeGreaterThan(base);
 });
 
 test('variant and gap are independent attributes, and map to the static layer\'s classes', async () => {

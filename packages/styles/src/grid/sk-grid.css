@@ -9,6 +9,18 @@
    listing and reference preview pages need. It is NOT a general-purpose
    CSS Grid system. Column variants are limited to 2, 3, and 4 columns. */
 
+/* ── The host box ────────────────────────────────────────────────────────── */
+/* A custom element's UA default is `display: inline`, and `max-width` does not apply to a
+   non-replaced inline box. Without this, every `style="max-width: …"` a consumer or a story
+   puts on <sk-grid> is silently inert — five stories in this repo did exactly that and
+   rendered full-canvas. `sk-form-input.css` and `sk-form-textarea.css` already set this;
+   the layout primitive is the element that most needs it.
+   Inert in the static consumption path, where the root IS the .sk-grid div — the same
+   "inert in a document" shape the nav-pill drawer sheet documents. */
+:host {
+  display: block;
+}
+
 /* ── Base grid ───────────────────────────────────────────────────────────── */
 /* Default: single-column, gap matches --sk-space-4 (16px). */
 .sk-grid {

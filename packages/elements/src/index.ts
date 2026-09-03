@@ -43,24 +43,16 @@ export {
 // The grid's markup module, exported for the same reason as the card's: the two failure
 // policies are only a split if something can reach both. `gridClasses` warns and degrades,
 // `gridStaticHtml` throws.
-export {
-  GRID_AXES,
-  GRID_GAPS,
-  GRID_VARIANTS,
-  gridClasses,
-  gridStaticHtml,
-  isGridGap,
-  isGridVariant,
-  type GridGap,
-  type GridVariant,
-} from './grid/sk-grid.markup.js';
+export { gridClasses, gridStaticHtml, type GridGap, type GridVariant } from './grid/sk-grid.markup.js';
 
-// The remaining two markup modules of #77's layout batch, exported so both failure policies
-// are reachable from the behaviour fixture.
+// sk-section-banner's markup module, same reason.
+//
+// ONLY WHAT IS CONSUMED. An earlier revision re-exported the *_VARIANTS, *_AXES and is* names
+// for both components — eight symbols with no caller anywhere in the repo. They are not needed
+// by the generator, which evaluates the markup module directly from a data: URL and never goes
+// through this barrel, nor by the analyzer, which globs source. (sk-card's equivalents are
+// re-exported and equally unconsumed; that is inherited, not a precedent worth extending.)
 export {
-  SECTION_BANNER_AXES,
-  SECTION_BANNER_VARIANTS,
-  isSectionBannerVariant,
   sectionBannerClasses,
   sectionBannerStaticHtml,
   type SectionBannerVariant,

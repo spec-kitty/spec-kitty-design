@@ -300,11 +300,8 @@
         {
           "kind": "variable",
           "name": "GRID_AXES",
-          "type": {
-            "text": "{\n  Gap3: { gap: 3 },\n  Gap6: { gap: 6 },\n}"
-          },
-          "default": "{ Gap3: { gap: 3 }, Gap6: { gap: 6 }, }",
-          "description": "The non-variant axes, as export-name-suffix → the options producing it.\n\nRequired by the generator even when empty — `?? {}` cannot distinguish \"this component has\nno axes\" from \"I looked for the wrong export name\"."
+          "default": "Object.fromEntries( Object.keys(GRID_GAPS).map((g) => [`Gap${g}`, { gap: Number(g) }]), )",
+          "description": "The non-variant axes — DERIVED from GRID_GAPS, not hand-listed.\n\nRequired by the generator even when empty: `?? {}` cannot distinguish \"this component has no\naxes\" from \"I looked for the wrong export name\".\n\nIt was `{ Gap3: { gap: 3 }, Gap6: { gap: 6 } }` — a hand-maintained subset of GRID_GAPS, one\nfile over from the hardcoded variant table `build-element-markup.mjs` documents at length as\nthe reason `forms` is derived. Adding a gap to GRID_GAPS would have given the ELEMENT the new\ngap while the static consumers silently did not get an export, with `--check` green, because\nthe generator emits exactly what this module declares and cannot know it under-declared.\nDeriving it closes the other half of that class.\n\nGap4 is now emitted too, and that is correct rather than noise: `.sk-grid--gap-4` is the\ndefault gap restated, so a consumer pinning it explicitly is a real thing to express."
         },
         {
           "kind": "variable",
@@ -368,10 +365,9 @@
             },
             {
               "name": "content",
-              "default": "'Grid content'"
+              "default": "PLACEHOLDER_ITEMS"
             }
-          ],
-          "description": "The static form, for a consumer with no JavaScript. Throws on an unknown variant."
+          ]
         },
         {
           "kind": "function",

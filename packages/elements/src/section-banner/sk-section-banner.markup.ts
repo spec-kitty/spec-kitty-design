@@ -16,11 +16,9 @@ export const SECTION_BANNER_VARIANTS = {
 
 export type SectionBannerVariant = keyof typeof SECTION_BANNER_VARIANTS;
 
-const owns = (map: object, key: PropertyKey): boolean =>
-  Object.prototype.hasOwnProperty.call(map, key);
-
+// `Object.hasOwn`, matching sk-card.markup.ts:36. `in` reaches the prototype chain.
 export function isSectionBannerVariant(variant: string): variant is SectionBannerVariant {
-  return owns(SECTION_BANNER_VARIANTS, variant);
+  return Object.hasOwn(SECTION_BANNER_VARIANTS, variant);
 }
 
 export const unknownVariantMessage = (variant: string): string =>
@@ -38,10 +36,18 @@ export const unknownVariantMessage = (variant: string): string =>
  */
 export const DEFAULT_VARIANT: SectionBannerVariant = 'neutral';
 
-// A static member access, not a computed one — `SECTION_BANNER_VARIANTS[DEFAULT_VARIANT]`
-// indexes by a variable and eslint-plugin-security reports it as an injection sink even though
-// the key is a module constant.
-const DEFAULT_MODIFIER: string = SECTION_BANNER_VARIANTS.neutral;
+// DERIVED from DEFAULT_VARIANT, not written out again.
+//
+// This was `SECTION_BANNER_VARIANTS.neutral` — a static member access chosen to dodge
+// eslint-plugin-security, which reports a computed index even when the key is a module
+// constant. That made the default variant TWO constants with no link: DEFAULT_VARIANT fed only
+// the warning string, DEFAULT_MODIFIER fed the render, and setting DEFAULT_VARIANT to 'purple'
+// would have warned "using purple" while rendering neutral, with nothing red. A split-brain in
+// the one file this mission designated as the component's single authority is worse than a
+// suppressed lint warning, so the index is restored and the rule disabled on this line with its
+// reason: the key is a typed module constant, not input.
+// eslint-disable-next-line security/detect-object-injection -- key is a module constant of a literal union type
+const DEFAULT_MODIFIER: string = SECTION_BANNER_VARIANTS[DEFAULT_VARIANT];
 
 /** The class list. Warns and degrades to the default variant on an unknown one. */
 export function sectionBannerClasses(variant?: string): string {

@@ -18,7 +18,10 @@ import type { Meta, StoryObj } from '@storybook/web-components';
  * error. A screenshot of an empty grid and a screenshot of a correct one differ; axe's report
  * on them does not.
  */
-const GRID_MARKER = '>Grid content<';
+// The generated grid's placeholder children, as one literal. `gridStaticHtml` defaults to
+// three `<div>Grid item N</div>` children so the committed `.html` demonstrates the layout it
+// documents (ADR-10 §3's no-JavaScript consumer); the stories swap them for cards.
+const GRID_MARKER = '<div>Grid item 1</div><div>Grid item 2</div><div>Grid item 3</div>';
 const CARD_MARKER = '>Card content<';
 
 const card = (n: number) => {
@@ -35,16 +38,29 @@ const card = (n: number) => {
   );
 };
 
+/**
+ * Swaps the generated placeholder children for cards, and wraps for width.
+ *
+ * The width goes on an OUTER div rather than being injected into the generated element's own
+ * attributes: the story adds presentation around the component, never inside its markup, so
+ * nothing here can drift from what the generator emits.
+ *
+ * THROWS when the marker is absent, because `String.replace` with a string pattern returns its
+ * input UNCHANGED on no match — renaming `gridStaticHtml`'s default content would otherwise
+ * render every story with three grey placeholder divs and no error. It has already fired once,
+ * for exactly that reason, when #77's gate fold changed the default from a text node.
+ */
 const fill = (markup: string, count: number, style = '') => {
   if (!markup.includes(GRID_MARKER)) {
     throw new Error(
-      `sk-grid story: generated markup no longer contains ${JSON.stringify(GRID_MARKER)} — ` +
-        `fill() would have silently returned it unchanged. Update the marker alongside ` +
-        `gridStaticHtml()'s default content.`,
+      `sk-grid story: generated markup no longer contains the placeholder children ` +
+        `${JSON.stringify(GRID_MARKER)} — fill() would have silently returned it unchanged. ` +
+        `Update GRID_MARKER alongside gridStaticHtml()'s default content.`,
     );
   }
   const children = Array.from({ length: count }, (_, i) => card(i + 1)).join('\n  ');
-  return markup.replace(GRID_MARKER, `${style}>\n  ${children}\n<`);
+  const grid = markup.replace(GRID_MARKER, `\n  ${children}\n`);
+  return style ? `<div style="${style}">${grid}</div>` : grid;
 };
 
 const meta: Meta = {
@@ -62,22 +78,22 @@ type Story = StoryObj;
  * Responsive story demonstrates it.
  */
 export const Default: Story = {
-  render: () => fill(SkGridHTML, 3, ' style="max-width: 640px;"'),
+  render: () => fill(SkGridHTML, 3, 'max-width: 640px;'),
 };
 
 /** Two equal columns via `.sk-grid--cols-2`. Collapses to single column below 720 px. */
 export const TwoColumn: Story = {
-  render: () => fill(SkGridCols2HTML, 4, ' style="max-width: 640px;"'),
+  render: () => fill(SkGridCols2HTML, 4, 'max-width: 640px;'),
 };
 
 /** Three equal columns via `.sk-grid--cols-3`. Collapses to single column below 720 px. */
 export const ThreeColumn: Story = {
-  render: () => fill(SkGridCols3HTML, 3, ' style="max-width: 960px;"'),
+  render: () => fill(SkGridCols3HTML, 3, 'max-width: 960px;'),
 };
 
 /** Four equal columns via `.sk-grid--cols-4`. Collapses to single column below 720 px. */
 export const FourColumn: Story = {
-  render: () => fill(SkGridCols4HTML, 4, ' style="max-width: 1200px;"'),
+  render: () => fill(SkGridCols4HTML, 4, 'max-width: 1200px;'),
 };
 
 /**

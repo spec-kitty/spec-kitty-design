@@ -24,21 +24,24 @@ export const GRID_GAPS = {
 
 export type GridGap = keyof typeof GRID_GAPS;
 
-// `hasOwnProperty.call`, never `in` and never a truthiness test on the lookup. Both of the
-// obvious spellings reach the PROTOTYPE CHAIN: `'constructor' in GRID_GAPS` is true, and
-// `GRID_GAPS['constructor']` is a function — which `gridClasses` would then push into the
-// class list, emitting `class="sk-grid function Object() { [native code] }"`. sk-card paid for
+// `Object.hasOwn`, never `in` and never a truthiness test on the lookup. Both of the obvious
+// spellings reach the PROTOTYPE CHAIN: `'constructor' in GRID_GAPS` is true, and
+// `GRID_GAPS['constructor']` is a function — which `gridClasses` would then push into the class
+// list, emitting `class="sk-grid function Object() { [native code] }"`. sk-card paid for
 // exactly this once; the first draft of this file reproduced it in the gap arm, which the
 // variant arm had already been written to avoid.
-const owns = (map: object, key: PropertyKey): boolean =>
-  Object.prototype.hasOwnProperty.call(map, key);
-
+//
+// `Object.hasOwn` is the built-in and is what sk-card.markup.ts:36 already uses — an earlier
+// draft here hand-rolled a local `owns` wrapper around hasOwnProperty.call, which was a third
+// spelling of one predicate for no reason. ES2022 is in tsconfig.base.json's lib.
 export function isGridVariant(variant: string): variant is GridVariant {
-  return owns(GRID_VARIANTS, variant);
+  return Object.hasOwn(GRID_VARIANTS, variant);
 }
 
 export function isGridGap(gap: unknown): gap is GridGap {
-  return (typeof gap === 'number' || typeof gap === 'string') && owns(GRID_GAPS, gap);
+  return (
+    (typeof gap === 'number' || typeof gap === 'string') && Object.hasOwn(GRID_GAPS, gap)
+  );
 }
 
 export const unknownVariantMessage = (variant: string): string =>
@@ -84,7 +87,22 @@ export interface GridStaticOptions {
 }
 
 /** The static form, for a consumer with no JavaScript. Throws on an unknown variant. */
-export function gridStaticHtml(opts: GridStaticOptions = {}, content = 'Grid content'): string {
+/**
+ * The placeholder CHILDREN, not a text node.
+ *
+ * ADR-10 §3 keeps the static `.html` for the Django/Jekyll/Hugo consumer who renders without
+ * JavaScript. A three-column grid rendered as one text node shows that consumer nothing about
+ * the component they are copying — the exports this replaced each carried three or four child
+ * divs. The default is children again, so the artifact demonstrates the layout it documents.
+ */
+const PLACEHOLDER_ITEMS = ['Grid item 1', 'Grid item 2', 'Grid item 3']
+  .map((t) => `<div>${t}</div>`)
+  .join('');
+
+export function gridStaticHtml(
+  opts: GridStaticOptions = {},
+  content = PLACEHOLDER_ITEMS,
+): string {
   const { variant, gap } = opts;
   if (variant !== undefined && !isGridVariant(variant)) {
     throw new Error(unknownVariantMessage(variant));
@@ -96,12 +114,21 @@ export function gridStaticHtml(opts: GridStaticOptions = {}, content = 'Grid con
 }
 
 /**
- * The non-variant axes, as export-name-suffix → the options producing it.
+ * The non-variant axes — DERIVED from GRID_GAPS, not hand-listed.
  *
- * Required by the generator even when empty — `?? {}` cannot distinguish "this component has
- * no axes" from "I looked for the wrong export name".
+ * Required by the generator even when empty: `?? {}` cannot distinguish "this component has no
+ * axes" from "I looked for the wrong export name".
+ *
+ * It was `{ Gap3: { gap: 3 }, Gap6: { gap: 6 } }` — a hand-maintained subset of GRID_GAPS, one
+ * file over from the hardcoded variant table `build-element-markup.mjs` documents at length as
+ * the reason `forms` is derived. Adding a gap to GRID_GAPS would have given the ELEMENT the new
+ * gap while the static consumers silently did not get an export, with `--check` green, because
+ * the generator emits exactly what this module declares and cannot know it under-declared.
+ * Deriving it closes the other half of that class.
+ *
+ * Gap4 is now emitted too, and that is correct rather than noise: `.sk-grid--gap-4` is the
+ * default gap restated, so a consumer pinning it explicitly is a real thing to express.
  */
-export const GRID_AXES = {
-  Gap3: { gap: 3 },
-  Gap6: { gap: 6 },
-} as const;
+export const GRID_AXES = Object.fromEntries(
+  Object.keys(GRID_GAPS).map((g) => [`Gap${g}`, { gap: Number(g) }]),
+) as Record<string, GridStaticOptions>;

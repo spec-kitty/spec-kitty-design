@@ -172,6 +172,25 @@ ${forms.map(([n, opts]) => `export const ${n} = ${JSON.stringify(staticHtml(opts
   // valid TypeScript from invalid. Every emitted export name is checked against the
   // identifier grammar before the file is written, in BOTH modes — a generator that cannot
   // produce a loadable module has failed whether or not the bytes match what is on disk.
+  // COLLISION, not just shape. A _VARIANTS key and an _AXES suffix that PascalCase to the same
+  // string emit two `export const SkXFooHTML` lines: both are valid identifiers, both pass the
+  // regex below, the file is written, and `--check` reports byte-identical green while the
+  // module does not compile. That is the same "a generator that cannot produce a loadable
+  // module has failed" standard the shape check is held to, and it is not hypothetical — this
+  // repo already ships a `SkRibbonCardWithRibbonHTML`, so a `with-ribbon` variant beside a
+  // `WithRibbon` axis is one edit away. #77's derived GRID_AXES makes the two tables adjacent.
+  const names = forms.map(([n]) => n);
+  const duplicates = [...new Set(names.filter((n, i) => names.indexOf(n) !== i))];
+  if (duplicates.length) {
+    console.error(
+      `❌ ${src} would emit the same export name twice: ${duplicates.join(', ')}.\n` +
+        `   A ${screaming}_VARIANTS key and a ${screaming}_AXES suffix have collided after the\n` +
+        `   PascalCase transform. Both names are valid identifiers, so the module would be\n` +
+        `   written and --check would report it up to date, but it would not compile.`
+    );
+    process.exit(1);
+  }
+
   for (const [exportName] of forms) {
     if (!/^[A-Za-z_$][A-Za-z0-9_$]*$/.test(exportName)) {
       console.error(
