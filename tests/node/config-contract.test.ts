@@ -29,16 +29,78 @@ test('[config] retry is 0 for every project, on the RESOLVED config', async () =
   }
 });
 
-test('[config] the BUILD resolves useDefineForClassFields:false', () => {
-  // Not a lane-local override. esbuild at target ES2022 with this flag unset emits native
-  // class fields, which shadow Lit's accessors and break property-before-upgrade — and
-  // packages/elements/project.json's bare `esbuild --bundle` resolves this same base
-  // config, so the SHIPPED artifact carries the hazard too. Setting it only for the test
-  // lane would give a green lane over a broken artifact.
-  const base = JSON.parse(
-    readFileSync('tsconfig.base.json', 'utf8').replace(/^\s*\/\/.*$/gm, ''),
-  );
-  expect(base.compilerOptions.useDefineForClassFields).toBe(false);
+test('[config] the floor reporter is in the RESOLVED config', async () => {
+  // The arm that was missing. Asserting the npm script's text would be weaker — this reads
+  // what Vitest actually resolved, so moving the flag, renaming the file or dropping it
+  // from `reporters` all fail here rather than silently disabling all five floor arms.
+  const vitest = await createVitest('test', { watch: false });
+  try {
+    const configured = JSON.stringify(vitest.config.reporters ?? []);
+    expect(configured, 'scripts/floor-reporter.mjs must be a configured reporter').toContain(
+      'floor-reporter',
+    );
+  } finally {
+    await vitest.close();
+  }
+});
+
+test('[registry] behaviours.json declares exactly ADR-11\'s applicable behaviours', () => {
+  // behaviours.json drives the floor's coverage arm AND the mutation harness's id check,
+  // so both derive their expectations from it — deleting an entry deletes the expectation.
+  // A lens demonstrated it: dropping SC-012 from the registry, the mutation list and the
+  // test left everything green while printing the REDUCED count as if it were expected.
+  //
+  // expected-parts.json exists for exactly this reason on the parts side. This is the same
+  // argument for the registry that actually matters, bound to ADR-11's list rather than to
+  // itself.
+  const expected = [
+    'SC-002', 'SC-003', 'SC-004', 'SC-005', // form association
+    'SC-006', 'SC-007', 'SC-008', 'SC-009', // event contract
+    'SC-010',                               // property before upgrade
+    'SC-011',                               // slot contract
+    'SC-012',                               // focus and keyboard
+    'SC-013',                               // styling API
+    'SC-014',                               // style adoption
+    'SC-015',                               // registry guard
+    // The fifteenth, generation determinism, is deferred to #75 — its subject does not
+    // exist and the artifacts that do already carry enforced drift checks.
+  ];
+  const registry = JSON.parse(readFileSync('behaviours.json', 'utf8')) as {
+    behaviours: { id: string; applicable?: boolean }[];
+  };
+  const declared = registry.behaviours.filter((b) => b.applicable !== false).map((b) => b.id);
+  expect([...declared].sort()).toEqual([...expected].sort());
+});
+
+test('[config] the BUILD EMITS assignment semantics, not a native class field', async () => {
+  // Asserts the EMIT, not the key.
+  //
+  // An earlier version JSON.parsed tsconfig.base.json and checked one literal — which is
+  // exactly the "near-vacuous" shape this file argues against twenty lines above, for
+  // `retry`. The build's resolution is a chain: `esbuild packages/elements/src/index.ts`
+  // walks up to packages/elements/tsconfig.json, which extends the base. The key check
+  // stayed green if that intermediate set the flag true, dropped its `extends`, or if the
+  // build command gained its own --tsconfig. A pre-merge lens pointed out the acceptance
+  // matrix claimed this asserted "the value the BUILD resolves" and it did not.
+  //
+  // Transforming a probe through the SAME tsconfig the build resolves covers the whole
+  // chain, including the bundler flag.
+  const esbuild = await import('esbuild');
+  // buildSync with a tsconfig PATH, not transformSync with raw content: only the path form
+  // follows `extends`, and following it is the entire point — the flag lives in the base,
+  // two files up from where the build starts.
+  const probe = join(mkdtempSync(join(tmpdir(), 'ts-emit-')), 'probe.ts');
+  writeFileSync(probe, 'export class P { declared = "x"; }');
+  const out = esbuild.buildSync({
+    entryPoints: [probe],
+    tsconfig: 'packages/elements/tsconfig.json',
+    write: false,
+    format: 'esm',
+  });
+  const code = out.outputFiles[0].text;
+  // Define semantics emit a bare `declared = "x"` class field, which shadows Lit's
+  // prototype accessor. Assignment semantics hoist it into the constructor.
+  expect(code, `esbuild emitted a native class field:\n${code}`).toContain('this.declared');
 });
 
 test('[floor] the CI arm fails when webkit did not execute', async () => {

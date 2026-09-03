@@ -10,14 +10,23 @@
  * **0** cssParts today.
  *
  * So: a part may be REMOVED (the count shrinks, and this file is updated to match), but a
- * part may not be ADDED without updating this file in the same PR — which means without a
- * test. That makes "every declared part has a test" true by construction rather than by
- * a reviewer noticing.
+ * part may not be ADDED without updating this file in the same PR.
+ *
+ * That alone would NOT make "every declared part has a test" true — an earlier version of
+ * this docstring claimed it did, and a pre-merge lens pointed out the script never reads a
+ * test file at all: a #72 author could add `@csspart label`, regenerate, append "label"
+ * here, and ship with zero tests. The inference "updating this file means adding a test"
+ * was a convention enforced by a reviewer noticing, which is precisely what the sentence
+ * claimed to have replaced.
+ *
+ * So the script now also REQUIRES a `::part(<name>)` reference in the browser lane's test
+ * sources for every recorded part. Same shape as check-manifest-content.mjs: derive the
+ * obligation from the source of truth rather than trusting a convention.
  *
  * Same shape as scripts/check-manifest-content.mjs: derive from the source of truth and
  * refuse to pass vacuously.
  */
-import { readFileSync, existsSync } from 'node:fs';
+import { readFileSync, existsSync, globSync, statSync } from 'node:fs';
 
 const MANIFEST = 'packages/elements/custom-elements.json';
 const EXPECTED = 'expected-parts.json';
@@ -60,6 +69,25 @@ for (const [el, parts] of Object.entries(declared)) {
   const known = expected.byElement?.[el] ?? [];
   const added = parts.filter((p) => !known.includes(p));
   if (added.length) problems.push(`<${el}> declares undeclared part(s): ${added.join(', ')}`);
+}
+
+// Every RECORDED part must be targeted by a test. Without this the file is a list someone
+// keeps up to date, not an obligation.
+// globSync can return directories whose names match; filter to real files.
+const testSources = [...globSync('fixtures/**/src/**/*.test.ts', {}), ...globSync('tests/**/*.test.ts', {})]
+  .filter((f) => statSync(f).isFile())
+  .map((f) => readFileSync(f, 'utf8'))
+  .join('\n');
+for (const [el, parts] of Object.entries(expected.byElement ?? {})) {
+  for (const part of parts) {
+    if (!testSources.includes(`::part(${part})`)) {
+      problems.push(
+        `part "${part}" on <${el}> is recorded but no test targets \`::part(${part})\` — ` +
+          `recording a part is not the same as testing it, and this file's whole purpose is ` +
+          `that the two cannot drift`
+      );
+    }
+  }
 }
 
 if (problems.length) {

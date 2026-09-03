@@ -29,6 +29,11 @@ const wf = parse(raw);
 const gate = wf.jobs?.gate;
 const problems = [];
 
+// The job's ABSENCE is a failure, not a pass. `wf.jobs?.[JOB] && 'if' in ...` evaluated to
+// false when the job was deleted, so the script printed green over a workflow with no test
+// job at all — the certifying-absence shape check-part-ratchet.mjs goes out of its way to
+// refuse two files over. Found by a pre-merge lens.
+if (!wf.jobs?.[JOB]) problems.push(`there is no \`${JOB}\` job at all`);
 if (!gate) problems.push('there is no `gate` job');
 else {
   // 1. the job is a dependency at all
@@ -50,7 +55,19 @@ else {
 
   // 3. NOT in the skipped-tolerance block. This is the one a future PR will get wrong.
   const toleranceRe = /case\s+"\$relevant"[\s\S]*?esac/;
-  const tolerance = script.match(toleranceRe)?.[0] ?? '';
+  const toleranceMatch = script.match(toleranceRe);
+  // FAIL CLOSED. `?? ''` meant that if the tolerance block were ever restructured — renamed
+  // `$relevant`, switched to `if`/`[[ ]]`, split in two — the match returned null, the
+  // haystack became empty, and the check silently passed. The one check the author called
+  // "the one worth having" was guarded by a regex that disarms itself under exactly the
+  // refactor that would motivate reopening the bypass.
+  if (!toleranceMatch) {
+    problems.push(
+      'the skipped-tolerance block was not found — refusing to certify its absence. If it was ' +
+        'restructured, update this pattern deliberately rather than letting the check pass.'
+    );
+  }
+  const tolerance = toleranceMatch?.[0] ?? '';
   if (tolerance.includes(JOB)) {
     problems.push(
       `\`${JOB}\` appears in the skipped-tolerance block. It runs UNCONDITIONALLY, so ` +
@@ -66,6 +83,41 @@ else {
   // 4. the job itself must have no `if:`, or "unconditional" is a claim rather than a fact
   if (wf.jobs?.[JOB] && 'if' in wf.jobs[JOB]) {
     problems.push(`the \`${JOB}\` job carries an \`if:\` — FR-003 requires it to run unconditionally`);
+  }
+
+  // 5. THE PAYLOAD, not just the edge.
+  //
+  // Checks 1-4 all ask whether the gate LOOKS AT `needs.test.result`. None asked whether the
+  // job runs anything, or whether a failure can reach `result` at all. A pre-merge lens
+  // defeated the gate four separate ways while this script printed green: gutting the job to
+  // `echo ok`, and `continue-on-error: true` on the suite step, on the gate's own step, and
+  // on the job. The first is the plainest possible form of this programme's defect class; the
+  // second is this workflow's OWN IDIOM — ci-quality.yml already carries continue-on-error on
+  // steps named [ENFORCED] in lint-code, so a contributor copying the house style disarms the
+  // suite and the checker congratulates them.
+  const REQUIRED = [
+    ['scripts/measure-suite-time.mjs', 'the behaviour suite'],
+    ['scripts/suite-selftest.mjs', 'the mutation harness'],
+    ['scripts/suite-selftest.mjs --selftest', "the mutation harness's own guard self-check"],
+  ];
+  const steps = wf.jobs?.[JOB]?.steps ?? [];
+  const runs = steps.map((st) => String(st.run ?? '')).join('\n');
+  for (const [needle, what] of REQUIRED) {
+    if (!runs.includes(needle)) {
+      problems.push(`the \`${JOB}\` job never runs ${what} (${needle}) — the gate would guard an empty job`);
+    }
+  }
+
+  // `continue-on-error` anywhere in this chain makes a failure unreachable. lint-code uses it
+  // deliberately, rescued by an explicit "Fail if lint errors" step; nothing here is.
+  for (const [jobName, job] of Object.entries({ [JOB]: wf.jobs?.[JOB], gate })) {
+    if (!job) continue;
+    if (job['continue-on-error']) problems.push(`job \`${jobName}\` carries continue-on-error — its failure cannot reach the gate`);
+    for (const st of job.steps ?? []) {
+      if (st['continue-on-error']) {
+        problems.push(`step "${st.name ?? st.run}" in \`${jobName}\` carries continue-on-error — it cannot fail the job`);
+      }
+    }
   }
 }
 

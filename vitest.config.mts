@@ -47,6 +47,19 @@ export default defineConfig({
     },
   },
   test: {
+    // The floor lives HERE, not in package.json's test script.
+    //
+    // It was wired as `--reporter=./scripts/floor-reporter.mjs` on the npm script, and all
+    // five of its arms hung off those 38 characters with nothing asserting they were
+    // present. Deleting the flag left every CI step green while the floor was simply
+    // absent — including the two node-lane tests that "prove" the arms, which import the
+    // reporter by path and are structurally incapable of noticing it is disconnected.
+    // That is the seventh instance of this programme's defect class, inside the machinery
+    // built to close it, and a pre-merge lens found it by deleting the flag.
+    //
+    // In the config it is part of the RESOLVED config, which tests/node/config-contract
+    // asserts the same way it asserts `retry` — and for the same stated reason.
+    reporters: ['default', './scripts/floor-reporter.mjs'],
     // `retry`, NOT `retries`. `retries` is not in the Vitest 4 config type and is silently
     // ignored — a config written that way sets nothing, and an assertion on it reads
     // undefined. playwright.config.ts sets 2 in CI; inheriting that by analogy would

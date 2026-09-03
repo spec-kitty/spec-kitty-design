@@ -44,8 +44,14 @@ export default class FloorReporter {
       let n = 0;
       for (const test of mod.children?.allTests?.() ?? []) {
         const state = test.result?.()?.state;
-        if (state === 'skipped') skipped.push(`${project} › ${test.fullName}`);
-        else n++;
+        if (state === 'skipped') {
+          skipped.push(`${project} › ${test.fullName}`);
+          // A SKIPPED test does not cover its behaviour. Harvesting its id let a
+          // `test.skip('[SC-012] …')` satisfy arm 5, coupling it to arm 4 — harmless while
+          // arm 4 catches every skip, but the two arms are supposed to be independent.
+          continue;
+        }
+        n++;
         // Behaviour ids are carried in the test name as [SC-0xx]; tests are keyed by id,
         // never by title, so a rename does not silently drop coverage.
         for (const m of String(test.fullName).matchAll(/\[([A-Z]+-\d+)\]/g)) coveredIds.add(m[1]);

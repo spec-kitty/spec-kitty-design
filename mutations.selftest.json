@@ -9,7 +9,10 @@
     "is untried.",
     "",
     "Same shape as packages/elements/src/__fixtures__/shapes.mjs driving gate-selftest.mjs.",
-    "Run with: node scripts/suite-selftest.mjs --selftest"
+    "Run with: node scripts/suite-selftest.mjs --selftest",
+    "Every verdict the harness can emit must appear here as an expectRejectedBy \u2014 the script",
+    "asserts that set, so a new guard cannot ship without a self-check entry. Guards 6, 7, 8 and",
+    "guard 5's inverted arm previously had none, and guard 7 was disabled in selftest mode."
   ],
   "mutations": [
     {
@@ -63,6 +66,16 @@
       "from": "customElements.define('sk-behaviour-fixture', SkBehaviourFixture);",
       "to": "void SkBehaviourFixture;",
       "redTest": "SC-002"
+    },
+    {
+      "id": "guard5-inverted-collateral",
+      "expectRejectedBy": "collateral",
+      "redTest": "SC-006",
+      "expectCollateral": true,
+      "file": "fixtures/elements-behaviour/src/sk-behaviour-fixture.ts",
+      "from": "const proceed = this.dispatchEvent(event);",
+      "to": "this.dispatchEvent(event); const proceed = this.dispatchEvent(event);",
+      "$why": "Declares broad collateral on a surgical mutation. The inverted arm must reject it \u2014 that arm was dead code until now, with no entry in either file."
     }
   ]
 }

@@ -15,13 +15,23 @@
     "",
     "The ceiling covers the SUITE ONLY. scripts/suite-selftest.mjs runs fifteen more suites",
     "and is 5-10x this figure; it is a separate CI step and is deliberately not inside this",
-    "measurement, because a ceiling that mixes them cannot tell you which one regressed."
+    "The ceiling covers the SUITE ONLY, and it is 25s against a 5.6s measurement taken under",
+    "exactly the conditions the slack is for: ubuntu-latest, cold npm ci, chromium AND webkit.",
+    "An earlier value of 120s was 21x headroom with no stated basis \u2014 a ratchet that loose does",
+    "not ratchet, and a 3x regression would pass silently. 25s absorbs runner variance without",
+    "hiding a real regression.",
+    "",
+    "scripts/suite-selftest.mjs runs fifteen more suites and has its own ceiling in",
+    "selftestCeilingSeconds \u2014 it is where the time actually is (the whole job is ~2m07s, of",
+    "which this ceiling governs 5.6s), and mixing them into one number could not tell you which",
+    "had regressed."
   ],
   "covers": "npm run test (both lanes, chromium + webkit in CI)",
-  "ceilingSeconds": 120,
+  "ceilingSeconds": 25,
   "measuredSeconds": 5.6,
   "measuredAt": "2026-09-03T03:31:04Z",
   "measuredOn": "ubuntu-latest, chromium + webkit, cold npm ci",
-  "runUrl": "https://github.com/spec-kitty/spec-kitty-design/actions/runs/33711416571",
-  "sha": "4a05a4a"
+  "runUrl": "https://github.com/spec-kitty/spec-kitty-design/actions/runs/33712156362",
+  "sha": "996dab3",
+  "selftestCeilingSeconds": 180
 }

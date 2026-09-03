@@ -3,8 +3,12 @@ import { define, SkStub, skStubSheet } from '@spec-kitty/elements';
 
 /**
  * The TWO elements-owned behaviours. Their subject is `packages/elements/src`, reached
- * through the alias in vitest.config.mts — so the mutation harness must redirect that
- * alias rather than editing the copied fixture (WP05 guard 10).
+ * through the alias in vitest.config.mts.
+ *
+ * No alias redirection is needed, contrary to an earlier version of this comment: the
+ * harness copies `packages/` into its temp dir and the config resolves its alias against
+ * `dirname(import.meta.url)`, so the alias follows the copy. The comment also cited a
+ * "guard 10" that does not exist — there are eight numbered guards.
  *
  * SC-013 is NOT here: packages/elements/src contains no `part=` and no `@csspart`, and the
  * manifest declares zero cssParts, so an elements-owned part mutation would have no

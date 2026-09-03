@@ -15,7 +15,7 @@
     "render-diagrams": "node scripts/render-diagrams.js",
     "render-diagrams:check": "node scripts/render-diagrams.js --check",
     "security:lockfile-check": "npm ci --dry-run --ignore-scripts",
-    "test": "vitest run --reporter=default --reporter=./scripts/floor-reporter.mjs",
+    "test": "vitest run",
     "tokens:catalogue": "node scripts/generate-token-catalogue.js"
   },
   "overrides": {

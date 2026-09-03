@@ -47,12 +47,28 @@ test('[SC-003] setValidity blocks submission and the message reaches the a11y tr
 });
 
 test('[SC-004] a form reset restores the initial value', async () => {
-  el.value = 'changed';
-  await el.updateComplete;
+  // Seeded NON-EMPTY on purpose. `#initialValue` is captured in connectedCallback, and
+  // beforeEach appends without a value — so the initial value was always '', which is both
+  // the correct restored value AND what any blanking regression produces. A lens showed
+  // `formResetCallback() { this.value = ''; }` passing the old assertion.
+  const seeded = document.createElement('sk-behaviour-fixture') as SkBehaviourFixture;
+  seeded.setAttribute('name', 'seeded');
+  seeded.setAttribute('value', 'seed');
+  form.append(seeded);
+  await seeded.updateComplete;
+
+  seeded.value = 'changed';
+  await seeded.updateComplete;
+  // Deliberately NOT asserting the FormData entry here. That would depend on the
+  // value-TRACKING sync, which is SC-002's subject — and it made SC-002's mutation red this
+  // test too, which the harness's collateral bound correctly refused. A criterion should
+  // depend on its own behaviour and nothing else.
+  expect(seeded.value).toBe('changed');
+
   form.reset();
-  await el.updateComplete;
-  expect(el.value).toBe('');
-  expect(submitData().get('fixture')).toBe('');
+  await seeded.updateComplete;
+  expect(seeded.value).toBe('seed');
+  expect(new FormData(form).get('seeded')).toBe('seed');
 });
 
 test('[SC-005] a disabled control is excluded from submission', async () => {
@@ -79,14 +95,28 @@ test('[SC-007] the event carries the documented detail shape', async () => {
   expect(detail).toEqual({ open: true, label: 'fixture' });
 });
 
-test('[SC-008] the event is composed and bubbles, as documented', async () => {
+test('[SC-008] the event crosses a shadow boundary, as composed+bubbles promise', async () => {
+  // ACROSS A REAL BOUNDARY. The earlier version listened on document.body with the fixture
+  // in the light DOM — no boundary was crossed, so `bubbles` alone delivered it and
+  // `expect(seen.composed).toBe(true)` merely read back the flag that had been set. A lens
+  // pointed out the comment claimed a demonstration the test did not perform.
+  const host = document.createElement('div');
+  document.body.append(host);
+  const root = host.attachShadow({ mode: 'open' });
+  const inner = document.createElement('sk-behaviour-fixture') as SkBehaviourFixture;
+  root.append(inner);
+  await inner.updateComplete;
+
   let seen: Event | undefined;
-  document.body.addEventListener('sk-toggle', (e) => { seen = e; });
-  el.toggle();
-  // Observed from OUTSIDE the element, which is what composed+bubbles actually buys.
-  expect(seen).toBeDefined();
+  document.addEventListener('sk-toggle', (e) => { seen = e; }, { once: true });
+  inner.toggle();
+
+  // Reaching `document` at all is only possible with composed:true — a bubbling but
+  // non-composed event stops at the shadow root.
+  expect(seen, 'the event did not escape the shadow root').toBeDefined();
   expect(seen!.composed).toBe(true);
   expect(seen!.bubbles).toBe(true);
+  host.remove();
 });
 
 test('[SC-009] preventDefault demonstrably prevents', async () => {
@@ -150,13 +180,21 @@ test('[SC-012] Escape closes, focus returns to the invoker, and aria-expanded tr
   await el.updateComplete;
   expect(trigger.getAttribute('aria-expanded')).toBe('true');
 
+  // Focus must LEAVE first, or "returns to the invoker" is untested — nothing focuses
+  // anything when the panel opens, so the old assertion proved only "Escape focuses the
+  // trigger", which is strictly weaker than the criterion's name.
+  const panel = el.shadowRoot!.querySelector('[part="panel"]') as HTMLElement;
+  panel.tabIndex = -1;
+  panel.focus();
+  expect(el.shadowRoot!.activeElement).toBe(panel);
+
   const control = el.shadowRoot!.querySelector('[part="control"]') as HTMLElement;
   control.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
   await el.updateComplete;
 
   expect(el.open).toBe(false);
   expect(trigger.getAttribute('aria-expanded')).toBe('false');
-  expect(el.shadowRoot!.activeElement).toBe(trigger);
+  expect(el.shadowRoot!.activeElement, 'focus did not return to the invoker').toBe(trigger);
 });
 
 test('[SC-013] every declared ::part() is present and targetable from outside', async () => {

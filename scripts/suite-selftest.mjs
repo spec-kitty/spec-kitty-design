@@ -10,13 +10,20 @@
  * it is 1.2 GB and this runs fifteen times), apply one string replacement, run the suite,
  * and assert the NAMED test failed while every other behaviour test survived.
  *
- * TEN GUARDS, each of which exists because it was demonstrated failing during the
- * post-plan spike. Guard 4 is the one that will actually fire.
+ * EIGHT numbered guards plus a not-green-baseline check, each of which exists because it
+ * was demonstrated failing during the post-plan spike. Guard 4 is the one that will
+ * actually fire. (An earlier docstring said TEN, and said the self-check file held ten
+ * entries when it held seven — stale numbers in prose, in the harness whose thesis is that
+ * exactly that goes unnoticed. A pre-merge lens counted them.)
  *
  * Usage: node scripts/suite-selftest.mjs [--selftest]
- *   --selftest runs mutations.selftest.json instead: ten deliberately-bad entries, each of
- *   which must be REJECTED by the guard it names. Without it the harness re-derives the
- *   mutations while nothing re-derives the guards.
+ *   --selftest runs mutations.selftest.json: deliberately-bad entries, each of which must be
+ *   REJECTED by the guard it NAMES — rejection by a different guard is a failure, because it
+ *   means the guard under test never ran. Without this the harness re-derives the mutations
+ *   while nothing re-derives the guards.
+ *
+ *   The list must cover every verdict this script can emit; that is asserted below, so a new
+ *   guard cannot ship without a self-check entry.
  */
 import { execFileSync } from 'node:child_process';
 import { cpSync, mkdtempSync, readFileSync, writeFileSync, rmSync, symlinkSync, existsSync } from 'node:fs';
@@ -30,6 +37,25 @@ const repo = process.cwd();
 const list = JSON.parse(readFileSync(LIST, 'utf8'));
 const mutations = list.mutations ?? [];
 const behaviours = JSON.parse(readFileSync('behaviours.json', 'utf8')).behaviours.map((b) => b.id);
+
+/**
+ * Every verdict this script can emit must have a self-check entry.
+ *
+ * Guards 6, 7, 8 and guard 5's inverted arm had none, and guard 7 was additionally disabled
+ * in selftest mode — so the guard binding the two registries was the one guard the
+ * self-check provably never exercised. Asserting the SET closes the class: adding a guard
+ * without a self-check entry now fails here rather than being noticed by a reader.
+ */
+const EMITTABLE = ['pattern', 'ambiguous', 'noop', 'absent', 'green', 'collateral'];
+if (selftestMode) {
+  const covered = new Set(mutations.map((m) => m.expectRejectedBy));
+  const missing = EMITTABLE.filter((v) => !covered.has(v));
+  if (missing.length) {
+    console.error(`❌ ${LIST} has no entry exercising: ${missing.join(', ')}`);
+    console.error('   Every verdict this harness can emit needs one, or the guard is unproven.');
+    process.exit(1);
+  }
+}
 
 /** Guard 8 — an empty list makes the loop body never run and prints "all mutations red". */
 if (mutations.length === 0) {
@@ -141,8 +167,8 @@ for (const m of mutations) {
           /** Guard 4 — THE ONE THAT FIRES. A syntax-breaking mutation exits non-zero with
            *  the named test ABSENT from the report; an exit-code assertion reads that as
            *  success. Require the named test to be PRESENT and FAILED. */
-          if (named.length === 0) verdict = ['absent', `named test [${m.id}] is ABSENT from the report — red for the wrong reason`];
-          else if (!named.some((t) => t.status === 'failed')) verdict = ['green', `named test [${m.id}] still PASSED — the mutation is semantically inert`];
+          if (named.length === 0) verdict = ['absent', `named test [${key}] is ABSENT from the report — red for the wrong reason`];
+          else if (!named.some((t) => t.status === 'failed')) verdict = ['green', `named test [${key}] still PASSED — the mutation is semantically inert`];
           /** Guard 5 — collateral bound: the mutation must be surgical.
            *
            * A mutation may DECLARE broad collateral (`expectCollateral`), for a subject
