@@ -23,7 +23,20 @@
         "forwardAllArgs": false
       },
       "dependsOn": [
-        "^build"
+        "^build",
+        "elements:build",
+        "vite-consumer-fixture:build"
+      ],
+      "inputs": [
+        "{projectRoot}/**/*",
+        "{workspaceRoot}/packages/*/src/**/*",
+        "{workspaceRoot}/packages/*/assets/**/*",
+        "{workspaceRoot}/package.json",
+        "{workspaceRoot}/package-lock.json",
+        "{workspaceRoot}/tsconfig.base.json",
+        "{workspaceRoot}/packages/*/package.json",
+        "{workspaceRoot}/packages/elements/dist/**/*",
+        "{workspaceRoot}/fixtures/vite-consumer/dist/**/*"
       ]
     }
   },

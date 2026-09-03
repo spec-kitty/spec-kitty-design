@@ -188,6 +188,11 @@ jobs:
       # real consumer path. It also runs the same script the deploy runs, so the sed
       # rewrite, the asset mirroring and the reference-resolution check are exercised
       # on every PR instead of only on push to main.
+      # Runs in THIS job because it needs packages/elements/dist, which only exists
+      # after a build — dist/ is gitignored, so lint-code cannot check it. NFR-001's
+      # baseline is inheritable by #71/#72/#82 only if it stays current.
+      - name: "[ENFORCED] Artifact sizes are current (NFR-001)"
+        run: node scripts/measure-elements-sizes.mjs --check
       - name: "[ENFORCED] Demo surface assembles and every asset reference resolves"
         run: |
           npx nx run-many --target=build --projects=tokens,styles,elements
@@ -270,6 +275,13 @@ jobs:
       # page — the real no-build consumer path from the ADR-12 audit.
       - name: "[ENFORCED] Styles runtime behaviour — nav-pill drawer"
         run: npx playwright test apps/storybook/src/tests/nav-pill-behaviour.spec.ts
+      # Named explicitly because this job runs SPEC FILES, not `testDir` — an
+      # unlisted spec in apps/storybook/src/tests/ never executes. Covers
+      # SC-001 (IIFE from file://), SRI over HTTP, SC-003 (both artifacts on one
+      # page warn rather than throw), SC-008 (the Vite consumer upgrades), and
+      # ADR-10 Confirmation #1 asserted against the BUILT artifacts.
+      - name: "[ENFORCED] Distribution artifacts are consumable (FR-003, FR-004, FR-005)"
+        run: npx playwright test apps/storybook/src/tests/elements-load.spec.ts
 
   # ── Lighthouse (advisory) ──────────────────────────────────────────────────
   lighthouse:
