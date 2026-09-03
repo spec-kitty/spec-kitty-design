@@ -1,0 +1,62 @@
+---
+work_package_id: WP03
+title: CSS pipeline — adopt styles' .css as a constructed stylesheet
+dependencies:
+- WP02
+requirement_refs:
+- FR-002
+- FR-009
+- NFR-004
+planning_base_branch: mission/elements-package-foundation
+merge_target_branch: mission/elements-package-foundation
+branch_strategy: Planning artifacts for this mission were generated on mission/elements-package-foundation. During /spec-kitty.implement this WP may branch from a dependency-specific base, but completed changes must merge back into mission/elements-package-foundation unless the human explicitly redirects the landing branch.
+subtasks:
+- T008
+- T009
+- T010
+phase: Phase 3 - CSS
+history:
+- timestamp: '2026-09-03T00:00:00Z'
+  agent: system
+  action: Prompt generated via spec-kitty tasks
+authoritative_surface: packages/elements/src/stub/
+create_intent:
+- packages/elements/src/stub/**
+- scripts/build-elements-css.mjs
+execution_mode: code_change
+owned_files:
+- scripts/build-elements-css.mjs
+- packages/elements/src/stub/**
+tags: []
+tracker_refs: []
+---
+
+# Work Package Prompt: WP03 – CSS pipeline
+
+Implements IC-02.
+
+## The output location is forced, not a preference
+
+The generated module is **committed under `packages/elements/src/`**, not emitted to `dist/`. Two measured reasons:
+
+1. **Vite cannot perform the transform.** Rollup rejects `new CSSStyleSheet()` built from a CSS import — *"no default export from a CSS import"* — on the same source esbuild handles. So Storybook's Vite cannot generate it on the fly; it must be pre-generated.
+2. `dist/` is gitignored (`.gitignore:5-6`), so emitting there means a fresh CI clone has no CSS and `storybook-build` fails.
+
+Committing it also **dissolves FR-009's exclusion problem**: scoping the no-CSS-in-TS check to `packages/elements/**/*.ts` excludes the generated `.js` by construction, rather than by an exception list that would be either vacuous or a guaranteed false positive.
+
+## Subtasks
+
+- **T008** — `scripts/build-elements-css.mjs`: read `packages/styles/src/stub/sk-stub.css` (the **source of record**, ADR-8 constraint 1) and emit `packages/elements/src/stub/sk-stub.css.js` constructing a `CSSStyleSheet` via `replaceSync`. Commit the output; add a regeneration check (ADR-10's generated-artifact contract).
+- **T009** — `sk-stub.ts` sets `static styles = [sheet]`.
+- **T010** — FR-009's enforced check in CI: no ``css` `` tagged template and no inlined stylesheet text under `packages/elements/**/*.ts`, with a red-first test. Nothing catches this today — stylelint globs only `*.css` and no eslint rule inspects template literals, while `static styles = css\`…\`` is Lit's default idiom.
+
+## Definition of Done
+
+- [ ] The element adopts CSS read from `packages/styles`; **exactly one `sk-stub.css` exists in the repository** (SC-002). Copying it into `packages/elements` would pass a naive grep *and* stylelint while violating ADR-8.
+- [ ] ADR-10 Confirmation #1's two literal assertions hold, in both artifacts: **`adoptedStyleSheets.length === 1`** and **`shadowRoot.querySelectorAll('style').length === 0`**. A naive `import './x.css'` through esbuild's CSS loader injects a `<style>` tag and would satisfy a loosely-worded criterion while breaking the CSP guarantee kitty-desktop depends on.
+- [ ] FR-009's check is CI-enforced and demonstrated red-first.
+- [ ] The generated module is committed and a regeneration check fails when it drifts.
+
+## Notes
+
+**Settled — do not re-investigate.** A squad ran this end to end: a generated `CSSStyleSheet` adopted by a Lit element loaded as an IIFE from `file://` gave `adoptedStyleSheets: 1`, `<style>` count `0`, and every `--sk-*` token resolved through the shadow boundary. The worry that `.sk-stub`'s light-DOM class selectors would not match inside a shadow root was unfounded — the element's own template re-emits that markup, so nothing has to match from outside.
