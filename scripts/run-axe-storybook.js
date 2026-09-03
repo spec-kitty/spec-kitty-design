@@ -140,6 +140,204 @@ const RENDER_TIMEOUT_MS = 8000;
 let BASE_URL = null;
 
 /**
+ * THE render verdict. One function, one copy, used by BOTH the wait and the assertion.
+ *
+ * This replaces two hand-maintained copies of the flat-tree traversal. The pairing
+ * note this file used to carry -- "if you change one, change both" -- was a process
+ * rule standing where a structural constraint belongs, and it had already failed
+ * twice: #69 hardened the assertion and left the wait behind, and the pre-merge squad
+ * on #106 MEASURED the wait satisfying two shapes the assertion rejects. Equivalence
+ * is now by construction; there is nothing left to keep in sync.
+ *
+ * It is NOT the stringified-source hoist that #102 got wrong. Playwright serializes a
+ * function REFERENCE exactly as it serializes an inline arrow -- no `eval`, no global
+ * installed on the page. `page.evaluate` wants the object; `waitForFunction` wants a
+ * boolean and would treat `{ok:false}` as satisfied, so the caller passes
+ * `booleanOnly` and gets the right shape back.
+ *
+ * THE ONE RULE THAT MAKES THIS SAFE: this function must stay SELF-CONTAINED. It may
+ * close over nothing from this module -- everything arrives through its argument
+ * array. A reference to any module-scope identifier throws a ReferenceError inside
+ * the browser context, and waitForFunction would swallow it into the wait's catch.
+ */
+const computeRenderVerdict = ([rootSelectors, mediaSelector, booleanOnly]) => {
+  const verdict = (() => {
+      const root = rootSelectors.map((s) => document.querySelector(s)).find(Boolean);
+      if (!root) {
+        return { ok: false, reason: `no render root (looked for ${rootSelectors.join(', ')})` };
+      }
+      if (root.childElementCount === 0 && root.textContent.trim() === '') {
+        return { ok: false, reason: 'render root is empty' };
+      }
+      // The story's own host element always exists once the preview boots, so
+      // "root has a child" is not evidence the story rendered — an unmounted story
+      // has exactly that and nothing else. Requiring a descendant OF the host is
+      // what separates the two: measured over HTTP, rendered stories carry 3-4
+      // descendants, an unmounted one carries exactly 1 (the host).
+      //
+      // This replaces a check that flagged any hyphenated tag not registered with
+      // customElements. Angular component selectors — sk-button-primary,
+      // sk-form-field — are hyphenated by convention and are never registered, so
+      // that check failed every Angular story by construction, on a page that had
+      // rendered correctly. See #90.
+      // Counting descendants is not enough. It was calibrated on the unmounted
+      // html-js shape (exactly one descendant: the story host) — and those stories
+      // are excluded by UNRENDERABLE_IMPORT_PATTERN, so the count discriminated
+      // nothing about the population actually assessed. An Angular story nests the
+      // story host AND the component host, so it clears 2 descendants even when the
+      // component renders nothing: a story whose whole output is an empty <ul>
+      // passed this gate green.
+      //
+      // Evidence that the story's own content mounted, not just its wrappers.
+      // Content means TEXT or MEDIA -- never "a descendant that also carries an sk-*
+      // class". The earlier version accepted any sk-*-classed descendant, which let a
+      // host plus one empty BEM element (<div class="sk-stub"><span
+      // class="sk-stub__label"></span></div>) pass: the label satisfies the descendant
+      // test, and BEM ELEMENT classes are exempt from the per-host emptiness check
+      // below because they fail BLOCK_CLASS. The pre-merge squad demonstrated it by
+      // emptying 8 form-field stories plus stub -- 12 blank stories, all 12 green.
+      // That is verbatim the failure the comment above claims to have closed, so the
+      // descendant arm is gone rather than patched.
+      // Mirrors the wait predicate below; the selector is shared via
+      // CONTENT_MEDIA_SELECTOR so the list cannot drift between them.
+      // FLAT-TREE TRAVERSAL (#70). ADR-9 makes open shadow roots mandatory for every
+      // component, and neither `textContent` nor `querySelector` crosses a shadow
+      // boundary -- so before this, an element that rendered perfectly was reported as
+      // "did not render". Demonstrated live on elements-skstub--default.
+      //
+      // Two traps, both hit by earlier attempts:
+      //   * walk the shadow root INSTEAD of childNodes and slotted content becomes
+      //     invisible -- <sk-x>text</sk-x> with a <slot> fails as a correct element.
+      //     Walk BOTH.
+      //   * check a node's children's shadow roots but not its own, and the host
+      //     itself reports empty. Check `n.shadowRoot` FIRST.
+      // SLOTS. A <slot>'s CHILDREN are its FALLBACK content -- shown only when nothing
+      // is assigned to it. What actually paints is assignedNodes(), which live in the
+      // light DOM of the host's ancestor. Walking `.childNodes` and calling that "the
+      // flat tree" reports a correctly-slotted component as empty. Found by
+      // scripts/gate-selftest.mjs (case `slotted-content`), not in production.
+      //
+      // Note the `return` after the shadow root below: once a host has one, its light
+      // children are reachable ONLY through a <slot>. That is deliberate and it is
+      // what the browser paints -- unslotted light children render nowhere, so a gate
+      // that counted them as content would certify absence exactly as `textContent`
+      // did. Locked by case `unslotted-light-children`.
+      const flatChildren = (n) => {
+        if (n.localName === 'slot' && n.assignedNodes) {
+          const assigned = n.assignedNodes({ flatten: true });
+          if (assigned.length) return assigned;
+        }
+        return n.childNodes;
+      };
+      const flatText = (node) => {
+        let out = '';
+        const visit = (n) => {
+          if (n.nodeType === 3) { out += n.nodeValue; return; }
+          if (n.nodeType !== 1) return;
+          if (n.shadowRoot) { for (const c of n.shadowRoot.childNodes) visit(c); return; }
+          for (const c of flatChildren(n)) visit(c);
+        };
+        visit(node);
+        return out;
+      };
+      const flatMatch = (node, sel) => {
+        const visit = (n) => {
+          if (n.nodeType !== 1) return false;
+          if (n !== node && n.matches && n.matches(sel)) return true;
+          if (n.shadowRoot) {
+            for (const c of n.shadowRoot.children) if (visit(c)) return true;
+            return false;
+          }
+          for (const c of flatChildren(n)) if (visit(c)) return true;
+          return false;
+        };
+        return visit(node);
+      };
+      const flatElements = (node) => {
+        const acc = [];
+        const visit = (n) => {
+          if (n.nodeType !== 1) return;
+          if (n !== node) acc.push(n);
+          if (n.shadowRoot) { for (const c of n.shadowRoot.children) visit(c); return; }
+          for (const c of flatChildren(n)) visit(c);
+        };
+        visit(node);
+        return acc;
+      };
+      const hasOwnContent = (el) =>
+        flatText(el).trim().length > 0 || flatMatch(el, mediaSelector);
+
+      if (!hasOwnContent(root)) {
+        return {
+          ok: false,
+          reason: 'story wrappers mounted but the component did not — no text and no media element',
+        };
+      }
+
+      // Per component host, not just per root. An existential check over the whole
+      // render root passes as long as ANY component rendered: emptying
+      // sk-form-input's template left all 8 form stories green, because the parent
+      // sk-form-field still emitted its class. That is the same certifying-absence
+      // failure this gate exists to close, one nesting level down.
+      //
+      // TWO host shapes, because the repo has two. The tagName filter below was
+      // written when every component was an Angular element (<sk-card>). #69 deletes
+      // those: the packages/styles stories emit PLAIN HTML carrying sk-* CLASSES and
+      // no sk-* tagName at all, so on its own this filter would match zero elements
+      // after the migration and silently degrade the gate back to the existential
+      // root check above — the exact failure the block comment rejects. The class
+      // arm keeps it discriminating. Found by the post-tasks squad on #69.
+      // Compared against tagName.toUpperCase(): SVG-namespaced elements report a
+      // LOWERCASE tagName, so bare 'SVG'/'USE'/'PATH' entries never matched. That is not
+      // cosmetic — <svg class="sk-icon-sun"> carries a BLOCK class and would have been
+      // selected as a host with no text, failing the gate as "rendered nothing". Live in
+      // apps/demo today, one story away from being live here. Found by the pre-merge squad.
+      const VOID_OR_LEAF = new Set([
+        'IMG', 'INPUT', 'BR', 'HR', 'TEXTAREA', 'SELECT', 'SVG', 'USE', 'PATH',
+      ]);
+      // A BEM block (`sk-card`), not an element (`sk-card__title`) or modifier
+      // (`sk-card--blue`): blocks are the component hosts, and a block that rendered
+      // nothing is the defect. Elements and modifiers are parts of an already-checked
+      // block, so requiring content of each would fail on legitimately empty slots.
+      const BLOCK_CLASS = /^sk-[a-z0-9]+(?:-[a-z0-9]+)*$/;
+      // Enumerate across shadow boundaries as well: an sk-* host inside another
+      // element's shadow root is invisible to querySelectorAll, which crosses nothing.
+      const allDescendants = flatElements(root);
+      const hostsByTag = allDescendants.filter((el) => /^sk-/i.test(el.tagName));
+      const hostsByClass = allDescendants.filter(
+        (el) =>
+          el.classList &&
+          !VOID_OR_LEAF.has(el.tagName.toUpperCase()) &&
+          Array.from(el.classList).some((c) => BLOCK_CLASS.test(c))
+      );
+      const hosts = [...new Set([...hostsByTag, ...hostsByClass])];
+      if (hosts.length === 0) {
+        return {
+          ok: false,
+          reason:
+            'no component host found — no sk-* element and no sk-* block class; ' +
+            'the story mounted wrappers only',
+        };
+      }
+      const empty = hosts
+        .filter((el) => !hasOwnContent(el))
+        .map((el) =>
+          /^sk-/i.test(el.tagName)
+            ? el.tagName.toLowerCase()
+            : `${el.tagName.toLowerCase()}.${Array.from(el.classList).find((c) => BLOCK_CLASS.test(c))}`
+        );
+      if (empty.length > 0) {
+        return {
+          ok: false,
+          reason: `component host(s) rendered nothing: ${[...new Set(empty)].join(', ')}`,
+        };
+      }
+      return { ok: true };
+  })();
+  return booleanOnly ? verdict.ok : verdict;
+};
+
+/**
  * Assert the story actually rendered something.
  *
  * axe reports zero violations for a blank page, so without this check a story
@@ -162,179 +360,11 @@ let BASE_URL = null;
  * ADR-8 makes these real custom elements.
  */
 async function assertStoryRendered(page, selectors) {
-  const verdict = await page.evaluate(([rootSelectors, mediaSelector]) => {
-    const root = rootSelectors.map((s) => document.querySelector(s)).find(Boolean);
-    if (!root) {
-      return { ok: false, reason: `no render root (looked for ${rootSelectors.join(', ')})` };
-    }
-    if (root.childElementCount === 0 && root.textContent.trim() === '') {
-      return { ok: false, reason: 'render root is empty' };
-    }
-    // The story's own host element always exists once the preview boots, so
-    // "root has a child" is not evidence the story rendered — an unmounted story
-    // has exactly that and nothing else. Requiring a descendant OF the host is
-    // what separates the two: measured over HTTP, rendered stories carry 3-4
-    // descendants, an unmounted one carries exactly 1 (the host).
-    //
-    // This replaces a check that flagged any hyphenated tag not registered with
-    // customElements. Angular component selectors — sk-button-primary,
-    // sk-form-field — are hyphenated by convention and are never registered, so
-    // that check failed every Angular story by construction, on a page that had
-    // rendered correctly. See #90.
-    // Counting descendants is not enough. It was calibrated on the unmounted
-    // html-js shape (exactly one descendant: the story host) — and those stories
-    // are excluded by UNRENDERABLE_IMPORT_PATTERN, so the count discriminated
-    // nothing about the population actually assessed. An Angular story nests the
-    // story host AND the component host, so it clears 2 descendants even when the
-    // component renders nothing: a story whose whole output is an empty <ul>
-    // passed this gate green.
-    //
-    // Evidence that the story's own content mounted, not just its wrappers.
-    // Content means TEXT or MEDIA -- never "a descendant that also carries an sk-*
-    // class". The earlier version accepted any sk-*-classed descendant, which let a
-    // host plus one empty BEM element (<div class="sk-stub"><span
-    // class="sk-stub__label"></span></div>) pass: the label satisfies the descendant
-    // test, and BEM ELEMENT classes are exempt from the per-host emptiness check
-    // below because they fail BLOCK_CLASS. The pre-merge squad demonstrated it by
-    // emptying 8 form-field stories plus stub -- 12 blank stories, all 12 green.
-    // That is verbatim the failure the comment above claims to have closed, so the
-    // descendant arm is gone rather than patched.
-    // Mirrors the wait predicate below; the selector is shared via
-    // CONTENT_MEDIA_SELECTOR so the list cannot drift between them.
-    // FLAT-TREE TRAVERSAL (#70). ADR-9 makes open shadow roots mandatory for every
-    // component, and neither `textContent` nor `querySelector` crosses a shadow
-    // boundary -- so before this, an element that rendered perfectly was reported as
-    // "did not render". Demonstrated live on elements-skstub--default.
-    //
-    // Two traps, both hit by earlier attempts:
-    //   * walk the shadow root INSTEAD of childNodes and slotted content becomes
-    //     invisible -- <sk-x>text</sk-x> with a <slot> fails as a correct element.
-    //     Walk BOTH.
-    //   * check a node's children's shadow roots but not its own, and the host
-    //     itself reports empty. Check `n.shadowRoot` FIRST.
-    // SLOTS. A <slot>'s CHILDREN are its FALLBACK content -- shown only when nothing
-    // is assigned to it. What actually paints is assignedNodes(), which live in the
-    // light DOM of the host's ancestor. Walking `.childNodes` and calling that "the
-    // flat tree" reports a correctly-slotted component as empty. Found by
-    // scripts/gate-selftest.mjs (case `slotted-content`), not in production.
-    //
-    // Note the `return` after the shadow root below: once a host has one, its light
-    // children are reachable ONLY through a <slot>. That is deliberate and it is
-    // what the browser paints -- unslotted light children render nowhere, so a gate
-    // that counted them as content would certify absence exactly as `textContent`
-    // did. Locked by case `unslotted-light-children`.
-    const flatChildren = (n) => {
-      if (n.localName === 'slot' && n.assignedNodes) {
-        const assigned = n.assignedNodes({ flatten: true });
-        if (assigned.length) return assigned;
-      }
-      return n.childNodes;
-    };
-    const flatText = (node) => {
-      let out = '';
-      const visit = (n) => {
-        if (n.nodeType === 3) { out += n.nodeValue; return; }
-        if (n.nodeType !== 1) return;
-        if (n.shadowRoot) { for (const c of n.shadowRoot.childNodes) visit(c); return; }
-        for (const c of flatChildren(n)) visit(c);
-      };
-      visit(node);
-      return out;
-    };
-    const flatMatch = (node, sel) => {
-      const visit = (n) => {
-        if (n.nodeType !== 1) return false;
-        if (n !== node && n.matches && n.matches(sel)) return true;
-        if (n.shadowRoot) {
-          for (const c of n.shadowRoot.children) if (visit(c)) return true;
-          return false;
-        }
-        for (const c of flatChildren(n)) if (visit(c)) return true;
-        return false;
-      };
-      return visit(node);
-    };
-    const flatElements = (node) => {
-      const acc = [];
-      const visit = (n) => {
-        if (n.nodeType !== 1) return;
-        if (n !== node) acc.push(n);
-        if (n.shadowRoot) { for (const c of n.shadowRoot.children) visit(c); return; }
-        for (const c of flatChildren(n)) visit(c);
-      };
-      visit(node);
-      return acc;
-    };
-    const hasOwnContent = (el) =>
-      flatText(el).trim().length > 0 || flatMatch(el, mediaSelector);
-
-    if (!hasOwnContent(root)) {
-      return {
-        ok: false,
-        reason: 'story wrappers mounted but the component did not — no text and no media element',
-      };
-    }
-
-    // Per component host, not just per root. An existential check over the whole
-    // render root passes as long as ANY component rendered: emptying
-    // sk-form-input's template left all 8 form stories green, because the parent
-    // sk-form-field still emitted its class. That is the same certifying-absence
-    // failure this gate exists to close, one nesting level down.
-    //
-    // TWO host shapes, because the repo has two. The tagName filter below was
-    // written when every component was an Angular element (<sk-card>). #69 deletes
-    // those: the packages/styles stories emit PLAIN HTML carrying sk-* CLASSES and
-    // no sk-* tagName at all, so on its own this filter would match zero elements
-    // after the migration and silently degrade the gate back to the existential
-    // root check above — the exact failure the block comment rejects. The class
-    // arm keeps it discriminating. Found by the post-tasks squad on #69.
-    // Compared against tagName.toUpperCase(): SVG-namespaced elements report a
-    // LOWERCASE tagName, so bare 'SVG'/'USE'/'PATH' entries never matched. That is not
-    // cosmetic — <svg class="sk-icon-sun"> carries a BLOCK class and would have been
-    // selected as a host with no text, failing the gate as "rendered nothing". Live in
-    // apps/demo today, one story away from being live here. Found by the pre-merge squad.
-    const VOID_OR_LEAF = new Set([
-      'IMG', 'INPUT', 'BR', 'HR', 'TEXTAREA', 'SELECT', 'SVG', 'USE', 'PATH',
-    ]);
-    // A BEM block (`sk-card`), not an element (`sk-card__title`) or modifier
-    // (`sk-card--blue`): blocks are the component hosts, and a block that rendered
-    // nothing is the defect. Elements and modifiers are parts of an already-checked
-    // block, so requiring content of each would fail on legitimately empty slots.
-    const BLOCK_CLASS = /^sk-[a-z0-9]+(?:-[a-z0-9]+)*$/;
-    // Enumerate across shadow boundaries as well: an sk-* host inside another
-    // element's shadow root is invisible to querySelectorAll, which crosses nothing.
-    const allDescendants = flatElements(root);
-    const hostsByTag = allDescendants.filter((el) => /^sk-/i.test(el.tagName));
-    const hostsByClass = allDescendants.filter(
-      (el) =>
-        el.classList &&
-        !VOID_OR_LEAF.has(el.tagName.toUpperCase()) &&
-        Array.from(el.classList).some((c) => BLOCK_CLASS.test(c))
-    );
-    const hosts = [...new Set([...hostsByTag, ...hostsByClass])];
-    if (hosts.length === 0) {
-      return {
-        ok: false,
-        reason:
-          'no component host found — no sk-* element and no sk-* block class; ' +
-          'the story mounted wrappers only',
-      };
-    }
-    const empty = hosts
-      .filter((el) => !hasOwnContent(el))
-      .map((el) =>
-        /^sk-/i.test(el.tagName)
-          ? el.tagName.toLowerCase()
-          : `${el.tagName.toLowerCase()}.${Array.from(el.classList).find((c) => BLOCK_CLASS.test(c))}`
-      );
-    if (empty.length > 0) {
-      return {
-        ok: false,
-        reason: `component host(s) rendered nothing: ${[...new Set(empty)].join(', ')}`,
-      };
-    }
-    return { ok: true };
-  }, [selectors, CONTENT_MEDIA_SELECTOR]);
+  const verdict = await page.evaluate(computeRenderVerdict, [
+    selectors,
+    CONTENT_MEDIA_SELECTOR,
+    false,
+  ]);
 
   if (!verdict.ok) {
     throw new Error(verdict.reason);
@@ -362,66 +392,8 @@ async function checkStory(page, storyId) {
     let waitTimedOut = false;
     await page
       .waitForFunction(
-        ([rootSelectors, mediaSelector]) => {
-          const root = rootSelectors.map((s) => document.querySelector(s)).find(Boolean);
-          // Must match assertStoryRendered's hasOwnContent EXACTLY -- text or a
-          // media element, never "a descendant that also carries an sk-* class".
-          // It used to wait on childElementCount > 0 — which is the *unmounted*
-          // state, since the story host is always present once the preview boots —
-          // so it resolved immediately, the timeout was never spent, and the
-          // assertion then ran against a DOM nobody had waited for. That was the
-          // "3 of 57, different each run" flake, and no retry can fix a wait that
-          // does not wait. #69 broke this pairing once already by hardening the
-          // assertion and leaving the wait behind, which made the wait STRICTLY
-          // WEAKER than the assert: a story that paints its wrapper before filling
-          // its text would satisfy the wait and then fail the assert. Caught by the
-          // pre-merge squad. If you change one, change both.
-          // #70: the same flat-tree walk as the assertion. ADR-9 mandates open
-          // shadow roots, and neither textContent nor querySelector crosses one --
-          // so a light-DOM-only wait NEVER satisfies for an element story, burns
-          // the full RENDER_TIMEOUT_MS, and is then swallowed by the .catch below.
-          // Shadow root BEFORE children, and walk BOTH (slotted content lives in
-          // the light DOM). Written out here rather than shared as a source string
-          // and eval()-ed: that was tried in #102 and made waitForFunction throw
-          // into this same catch, silently disabling the wait.
-          if (!root) return false;
-          // Slot-aware, matching the assertion's flatChildren exactly. A wait that
-          // walks a <slot>'s fallback children never satisfies for a slotted
-          // component: it burns RENDER_TIMEOUT_MS and lands in the catch below.
-          const flatChildren = (n) => {
-            if (n.localName === 'slot' && n.assignedNodes) {
-              const assigned = n.assignedNodes({ flatten: true });
-              if (assigned.length) return assigned;
-            }
-            return n.childNodes;
-          };
-          const flatText = (node) => {
-            let out = '';
-            const visit = (n) => {
-              if (n.nodeType === 3) { out += n.nodeValue; return; }
-              if (n.nodeType !== 1) return;
-              if (n.shadowRoot) { for (const c of n.shadowRoot.childNodes) visit(c); return; }
-              for (const c of flatChildren(n)) visit(c);
-            };
-            visit(node);
-            return out;
-          };
-          const flatMatch = (node, sel) => {
-            const visit = (n) => {
-              if (n.nodeType !== 1) return false;
-              if (n !== node && n.matches && n.matches(sel)) return true;
-              if (n.shadowRoot) {
-                for (const c of n.shadowRoot.children) if (visit(c)) return true;
-                return false;
-              }
-              for (const c of flatChildren(n)) if (visit(c)) return true;
-              return false;
-            };
-            return visit(node);
-          };
-          return flatText(root).trim().length > 0 || flatMatch(root, mediaSelector);
-        },
-        [RENDER_ROOT_SELECTORS, CONTENT_MEDIA_SELECTOR],
+        computeRenderVerdict,
+        [RENDER_ROOT_SELECTORS, CONTENT_MEDIA_SELECTOR, true],
         { timeout: RENDER_TIMEOUT_MS }
       )
       .catch((err) => {
@@ -461,12 +433,16 @@ async function checkStory(page, storyId) {
   }
 }
 
-// Exposed so the gate self-test can assert the wait actually waited. A wait that
-// silently times out is invisible in the verdicts by construction (#69, #70).
+// Exposed for scripts/gate-selftest.mjs. A wait that silently stops waiting is
+// invisible in the verdicts by construction (#69, #70), so the self-test drives
+// `computeRenderVerdict` in BOTH shapes over the same fixtures and requires them to
+// agree — which, now that there is only one implementation, they cannot fail to do
+// unless the boolean/object plumbing itself breaks.
 module.exports = module.exports || {};
 module.exports.waitTimeouts = [];
+module.exports.computeRenderVerdict = computeRenderVerdict;
 // Exported for scripts/gate-selftest.mjs, which drives it against fixture pages so
-// the eleven shadow/light shapes are a standing regression guard rather than a
+// the shadow and light shapes are a standing regression guard rather than a
 // one-off transcript in a PR body.
 module.exports.assertStoryRendered = assertStoryRendered;
 module.exports.CONTENT_MEDIA_SELECTOR = CONTENT_MEDIA_SELECTOR;
@@ -577,16 +553,18 @@ if (require.main === module) (async () => {
     );
   }
 
-  if (loadFailures.length > 0 || totalViolations > 0 || module.exports.waitTimeouts.length > 0) {
-    process.exit(1);
-  }
-
-  // Reported unconditionally, INCLUDING the zero. "No warnings appeared" is
-  // absence of evidence, and a wait that silently stopped waiting produces exactly
-  // that -- it is how #69's divergence survived. State the number.
+  // Printed on EVERY run, including a failing one, and including the zero. "No
+  // warnings appeared" is absence of evidence, and a wait that silently stopped
+  // waiting produces exactly that -- it is how #69's divergence survived. An earlier
+  // cut of this block sat below the exit and called itself "unconditional", so the
+  // census could never be taken on the runs where it would have mattered.
   console.log(
     `   render wait: ${testable.length - module.exports.waitTimeouts.length}/${testable.length} ` +
       `satisfied, ${module.exports.waitTimeouts.length} timed out.`
   );
+
+  if (loadFailures.length > 0 || totalViolations > 0 || module.exports.waitTimeouts.length > 0) {
+    process.exit(1);
+  }
   console.log(`\n✅ Zero WCAG 2.1 AA violations across all ${testable.length} rendered story/stories.`);
 })();
