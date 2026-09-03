@@ -43,15 +43,22 @@ read at claim time:
 | `sk-stub` | 0 | 0 | 0 | 0 | 0 | 0 |
 | `sk-card` | 2 | 0 | 0 | 1 | **0** | 2 |
 | `sk-nav-pill` | 5 | 0 | 1 | 3 | 1 | 2 |
-| `sk-form-input` | 18 | **15** | 0 | 5 | 0 | 10 |
-| `sk-form-textarea` | 18 | **15** | 0 | 5 | 0 | 10 |
+| `sk-form-input` | 19 | **15** | 0 | 5 | 0 | 10 |
+| `sk-form-textarea` | 19 | **15** | 0 | 5 | 0 | 10 |
 
 Three facts in that table decide the mission's shape:
 
 1. **`sk-card` renders a `<slot>` and declares none.** `grep -c '<slot' sk-card.ts` → 1;
-   `grep -c '@slot'` → 0. So the manifest reports zero slots, and a generator typing `children`
-   from the manifest would give `<SkCard>` no children. **The manifest is only as good as the
-   JSDoc, and this is the first place that has cost anything.**
+   `grep -c '@slot'` → 0. So the manifest reports zero slots.
+
+   **Corrected after measurement.** This paragraph previously claimed a generator "would give
+   `<SkCard>` no children". A lens injected `slots: [{name: "", …}]` into the manifest and
+   regenerated: the only diff is six lines of class-level JSDoc. `children` arrives from
+   `Pick<React.AllHTMLAttributes<HTMLElement>, "children" | …>`, and `SkNavPill` — which *does*
+   declare `@slot` — carries the identical `Pick<>`. **Zero type consequence.** The cost is
+   documentation only, and FR-007 is worth doing on that basis alone. Left visible rather than
+   overwritten: the mission's opening premise about its own input was wrong, and the manifest
+   still had to be measured rather than read.
 2. **15 of the form elements' 18 public members are inherited** from `FormControlBase`. The
    analyzer *does* record `privacy: protected` and `inheritedFrom` correctly — verified — so a
    generator **can** filter. Whether it **does** is a thing to check, not assume: emitting
@@ -109,8 +116,13 @@ This is ADR-11's required behaviour 9 and the mission's hardest criterion.
 
 - **FR-001**: Wrappers are **generated** from `custom-elements.json` by a committed script, for
   every element that exists at that point — no hand-written `.tsx`.
-- **FR-002**: Generated output is committed, and CI asserts it is current (the contract
-  `build-elements-css.mjs` and `build-element-markup.mjs` already use).
+- **FR-002**: Generated output is committed, and CI asserts it is current. This is *nearly* the
+  contract `build-elements-css.mjs` and `build-element-markup.mjs` use — but those two do **not
+  agree with each other**, and the difference is the whole ballgame: run both from an empty
+  directory and the markup gate exits 1 ("refusing to report green over nothing") while the CSS
+  gate prints `✅ … (0 component(s))` and exits 0. Filed as #123. **This mission takes the
+  markup gate's half of the contract and the CSS gate's orphan sweep, which is the union
+  neither script currently has.**
 - **FR-003**: Regenerating from an unchanged manifest is a **no-op**, asserted — ADR-11's
   behaviour 9, which `behaviours.json` deliberately omitted until a subject existed.
 - **FR-004**: Only public API surfaces. `protected` and `inheritedFrom`-base members do not
@@ -121,7 +133,23 @@ This is ADR-11's required behaviour 9 and the mission's hardest criterion.
   omission is recorded with a reason. The manifest is the generator's only input and it is
   currently wrong about this element.
 - **FR-008**: The new behaviour gets a `behaviours.json` id, a subject, and a mutation, per the
-  machinery #71–#74 established.
+  machinery #71–#74 established. **See the fork on #75** — the mutation harness is browser-only
+  and this behaviour is node-lane work; that contradiction is not this spec's to settle.
+- **FR-009**: **The SSR/RSC boundary is decided and the decision is in the emitted output** —
+  a `'use client'` directive, or a recorded refusal to emit one. Issue #75 lists this in scope;
+  the first draft of this spec called it "a decision, not a default" and then made no decision,
+  which is the same as defaulting.
+- **FR-010**: **The wrapper package is typechecked.** `scripts/typecheck-all.mjs` derives its
+  project set from `nx show projects --with-target typecheck`, which returns exactly
+  `["elements-behaviour-fixture","elements"]` today. A wrapper package without a `typecheck`
+  target is compiled by nothing, and the mission's entire stated value — typed JSX, typed refs —
+  ships unverified. A deliberately-wrong prop and a `ref.current.setCustomError(…)` call are
+  both proven red-first.
+- **FR-011**: **The prop set is asserted positively, per element, against the manifest.** FR-001
+  and FR-004 are both satisfied by a generator that emits an empty props object. `sk-form-input`
+  could drop from 10 attributes to 2 and every gate in this mission stays green. The floor is
+  per-element and non-empty for every element with ≥1 public field; `sk-stub` (0 members) is the
+  named exemption, not the reason to drop the floor.
 
 ### Non-Functional Requirements
 
@@ -130,9 +158,22 @@ This is ADR-11's required behaviour 9 and the mission's hardest criterion.
   names manifest analysis, wrapper generation and its drift check as node-lane work.
 - **NFR-003**: React is a **devDependency of the wrapper package only**. It must not become a
   dependency of `@spec-kitty/elements`.
-- **NFR-004**: `suite-budget.json`'s ceilings are re-measured if the mutation set grows. At
-  41 mutations / 102.7s local and 141.6s CI against a 180s ceiling, roughly four more mutations
-  breach it — #74 recorded the slope.
+- **NFR-004**: `suite-budget.json`'s **two** ceilings are re-measured if the mutation set or the
+  test set grows. `selftestCeilingSeconds` (180) covers `suite-selftest.mjs`; `ceilingSeconds`
+  (25) covers `npm run test` across both lanes and both browsers, and no draft of this spec had
+  mentioned the second one.
+
+  **The slope is corrected.** The "≈10s per mutation" figure #74 recorded bundles two variables.
+  The harness runs one full suite per mutation, so from the two committed CI points
+  (39 mut/62 tests → 121.7s; 41/80 → 141.6s) the fit is `per-run ≈ 1.90s + 0.0183s × tests`.
+  A mutation with **no new tests costs ≈3.4s**, not 10s; the 10s was a mutation *plus nine
+  tests*. So one added mutation does not threaten the ceiling — **the React render tests do**,
+  because they run 42 times, and at a realistic 200–400ms per React mount that is +17s to +34s
+  against 38.4s of headroom. Whichever WP first adds those tests owns the measurement.
+
+  The earlier draft's "102.7s local" figure is **withdrawn**: it appears nowhere in the repo,
+  and `suite-budget.json` warns twice, in its own `$comment`, against exactly that — quoting a
+  workstation number as though it were binding.
 
 ### Constraints
 
@@ -171,6 +212,16 @@ This is ADR-11's required behaviour 9 and the mission's hardest criterion.
 - **SC-306**: `sk-nav-pill`'s event reaches a React handler in a real render.
 - **SC-307**: A form-associated wrapper submits inside a React `<form>`.
 - **SC-308**: `sk-card`'s slot situation is resolved and the manifest agrees with the element.
+- **SC-309**: The SSR/RSC decision is asserted by grep over the generated output, not by prose.
+- **SC-310**: `packages/react` has a `typecheck` target, `typecheck-all.mjs` picks it up
+  (the project list grows from 2 to 3, asserted), and a wrong prop and a wrong ref type are
+  both red in an expect-error fixture.
+- **SC-311**: For every element, the emitted prop set **equals** its public non-inherited
+  manifest field set, compared as sets, with a non-empty floor for every element that has one.
+- **SC-312**: The expected file set is derived from a source the generator does not consult.
+  Two readings of one predicate cannot disagree; three independent counts can —
+  elements on disk (`packages/elements/src/*/sk-*.ts`) → manifest `tagName`s → emitted files,
+  all three equal. `tests/node/config-contract.test.ts:236-252` already ties the first two.
 
 ## Out of scope
 

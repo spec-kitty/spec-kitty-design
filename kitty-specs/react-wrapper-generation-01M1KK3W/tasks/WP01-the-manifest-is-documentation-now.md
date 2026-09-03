@@ -34,46 +34,91 @@ tracker_refs: []
 
 Sequenced FIRST because fixing it changes every generated file downstream.
 
-The spike ran `@wc-toolkit/react-wrappers` against the real manifest. Three of its six findings
-are about what the manifest carries, not about the generator.
+**This WP does not depend on the generator, and must not.** The post-tasks squad found the
+first draft declared `dependencies: []` while its Definition of Done grepped output only WP02
+produces — circular, and unclosable without a throwaway generator nobody reviews. Every
+criterion below is therefore asserted **against the manifest**, which is the better gate anyway:
+it survives SC-305 concluding that no wrapper package ships at all.
 
 ## Subtasks
 
-- **T001** — **Twenty-four `/** undefined */` blocks reach consumer-facing types.**
+- **T001** — **Give the attributes descriptions. Read this before estimating it.**
 
-  | file | count |
-  |---|---:|
-  | `SkFormInput.d.ts` | 10 |
-  | `SkFormTextarea.d.ts` | 10 |
-  | `SkNavPill.d.ts` | 2 |
-  | `SkCard.d.ts` | 2 |
+  A lens measured the actual path and the obvious plan does not work:
 
-  The elements' reactive properties carry no JSDoc, so the manifest has no `description`, so the
-  generated prop documentation says the literal word `undefined` in a React consumer's editor.
-  Add one short line per public property. **Short** — C-005 applies with double force now: the
-  analyzer copies it verbatim, and it lands in IDE hovers AND in the wrapper.
+  * The generator reads **`attributes[].description`**, not `members[].description`.
+  * The analyzer propagates a field's JSDoc onto its attribute **only for own fields, never
+    inherited ones**.
+  * So **16 of the 24** `/** undefined */` blocks are backed by fields that already carry
+    JSDoc, on `FormControlBase`. `invalid` has a 173-character description and still renders
+    `/** undefined */`.
 
-- **T002** — **Move two review narratives out of `/** */`.** `SkFormInput.d.ts` currently
-  documents the `error` prop with:
+  Writing one line per property on the base class clears **8 of 24**. The remaining 16 need a
+  redeclaration in each subclass carrying duplicate prose — three files, nothing syncing them.
 
-  > *"This exists because a lens found the only lever a consumer HAD was `el.invalid = true` …
-  > the story would render red, axe would pass, and nothing would notice."*
+  **That is a standing-cost decision and it is FORKED to the operator on #75.** Do T001's
+  unambiguous half now: the 8 own-field attributes (`placeholder`, `type`, `rows`, `inset`,
+  `variant`, `sk-nav-pill`'s `label` and `open`). Hold the 16 until the fork is answered.
+  Do not silently soften the criterion to match whichever half got done — that is the move this
+  programme keeps catching.
 
-  That is squad-review narrative — right for a maintainer, wrong in a consumer's tooltip. The
-  surrounding convention is that rationale goes in `//`; `error` and `setCustomError` slipped.
-  Keep the reasoning, move it.
+- **T002** — **Move published rationale out of `/** */`. Four members, not two, and the one the
+  first draft named was the wrong one.**
+
+  | member | line | chars | reaches |
+  |---|---:|---:|---|
+  | `error` | `form-control-base.ts:97` | 303 | prop docs |
+  | `setCustomError` | `:110` | 809 | class-level `## Methods` bullet |
+  | `invalid` | — | 173 | manifest → IDE hovers |
+  | `errorMessage` | — | 206 | manifest → IDE hovers |
+
+  The first draft quoted *"a lens found the only lever a consumer HAD…"* as the `error` prop's
+  documentation. It is `setCustomError`'s. Editing the member the draft named would have left
+  the quoted text in place.
+
+  Note the convention claim honestly while you are in there: `//`-for-rationale is real and is
+  held to in the five element files, but `form-control-base.ts` is **9 blocks for 9**. It is one
+  non-compliant file, not two slips.
 
 - **T003** — **`sk-card` declares no `@slot` and renders one.** Add it.
 
-  **Correcting the spec's stated reason.** FR-007 implies a type-level consequence; the spike
-  shows there is none — `SkCard.d.ts` gets `children` from
-  `Pick<React.AllHTMLAttributes<HTMLElement>, "children" | …>`, not from the manifest's slot
-  list. The cost is documentation only. Still worth fixing; the spec is corrected rather than
-  left implying something measurably untrue.
+  The spec's fact-1 paragraph has been corrected: a lens injected the slot into the manifest and
+  regenerated — the only diff is six lines of class-level JSDoc, because `children` comes from
+  `Pick<React.AllHTMLAttributes<HTMLElement>, "children" | …>` either way. **Zero type
+  consequence.** FR-007's own text never claimed one and needs no edit; the sentence that was
+  wrong was in §"What the manifest actually contains today", and it is already fixed.
+
+- **T004 (NEW) — Type the event in the JSDoc. One line, and it closes S3 end-to-end.**
+
+  ```
+  @fires {CustomEvent<{ open: boolean }>} sk-nav-pill-toggle - …
+  ```
+
+  `sk-nav-pill.ts:42` has no `{Type}`, so the manifest carries `type: None`, so the wrapper emits
+  `onSkNavPillToggle?: (event: CustomEvent) => void` and drops the documented
+  `detail: { open: boolean }`. A lens verified the whole chain: the analyzer honours
+  `@fires {Type}`, and the generator honours `events[].type.text`.
+
+  This inverts the plan's sharpest finding. The lost event typing was **our JSDoc**, not the
+  generator's limit — which matters for SC-305, because it removes the strongest argument that
+  an off-the-shelf wrapper is inadequate.
+
+  **Do not reach for `stronglyTypedEvents: true`.** Measured: it emits
+  `TypedEvent<SkNavPillElement, E = Event>`, typing `.target` while downgrading the parameter
+  from `CustomEvent` to `Event`. Worse than the default.
 
 ## Definition of Done
 
-- Zero `undefined` descriptions in the regenerated wrappers, asserted by grep over the output.
-- No squad-review narrative in any `/** */` above an export in `packages/elements/src`.
-- `npx nx run elements:analyze` regenerates cleanly and `check-manifest-content.mjs` is green.
-- Published prose per declaration stays short — record the before/after character counts.
+Asserted against `packages/elements/custom-elements.json`, in the node lane — **not** by grep
+over generated wrappers, which this WP does not produce:
+
+- `check-manifest-content.mjs` requires a non-empty `description` on every **attribute** of
+  every `tagName`-bearing declaration, with the 16 inherited ones listed as an explicit,
+  dated, fork-referenced exemption if the fork is still open. An exemption list is acceptable;
+  a silently-narrowed criterion is not.
+- The manifest's `sk-nav-pill-toggle` event carries `type.text === "CustomEvent<{ open: boolean }>"`.
+- `sk-card`'s declaration carries a slot.
+- No `/** */` above a **public** member in `packages/elements/src` contains squad-review
+  narrative; the four in the table are moved. Record the before/after character counts.
+- `npx nx run elements:analyze` regenerates cleanly and the manifest `git diff --exit-code`
+  step is green.
