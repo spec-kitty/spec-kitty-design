@@ -88,3 +88,58 @@
     display: inline-flex;
   }
 }
+
+/* ── Element arrangement: one items container, two presentations ────────── */
+/*
+   ADDED for <sk-nav-pill> (#73), NOT a replacement. Every rule above stays: static
+   consumers still compose the two-container arrangement (a row plus a separate
+   .sk-nav-pill__drawer) and keep working until the migration batches reach them.
+
+   These rules are inert in a document. `:host` matches only when this sheet is ADOPTED
+   into a shadow root, so a plain <link> to this file cannot activate them — which is what
+   lets both arrangements live in one source of record.
+
+   WHY ONE CONTAINER. The consumer slots their nav items ONCE. Two slots cannot hold the
+   same nodes, so a two-container element would force the items to be authored twice — and
+   authoring them twice is exactly what dashboard-demo.html and the story do today, and what
+   FR-006 removes. Below the breakpoint the same container IS the panel.
+
+   The hamburger and the container share the element's shadow root, so the hamburger's
+   aria-controls resolves: ADR-9 records that axe scopes ID lookups to getRootNode() and no
+   cross-root reference resolves.
+*/
+@media (max-width: 720px) {
+  :host .sk-nav-pill__items {
+    display: none;
+  }
+
+  :host .sk-nav-pill__hamburger {
+    display: inline-flex;
+  }
+
+  /* The row becomes the panel. Same declarations as .sk-nav-pill__drawer.is-open above —
+     the collapsed presentation is the same design, reached by a different arrangement. */
+  :host([open]) .sk-nav-pill__items {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sk-space-1);
+    padding: var(--sk-space-3);
+    background: var(--sk-surface-card);
+    border: var(--sk-border-width-1) solid var(--sk-border-default);
+    border-radius: var(--sk-radius-md);
+    margin-top: var(--sk-space-2);
+  }
+
+  :host([open]) .sk-nav-pill__items ::slotted(a) {
+    width: 100%;
+    border-radius: var(--sk-radius-sm);
+    padding: var(--sk-space-3) var(--sk-space-4);
+  }
+}
+
+/* Open-state affordance on the trigger, mirroring the static arrangement's rule. */
+:host([open]) .sk-nav-pill__hamburger {
+  color: var(--sk-fg-default);
+  background: var(--sk-surface-card);
+  box-shadow: 0 0 0 var(--sk-border-width-1) var(--sk-border-default);
+}
