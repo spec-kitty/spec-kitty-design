@@ -49,7 +49,7 @@
       "wp": null
     },
     "#69": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "Prior mission M3, merged as ff952f4. Provides the web-components renderer this mission's element stories rely on. No work owed.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -57,7 +57,7 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
+      "verdict": "verified-already-fixed",
       "wp": null
     },
     "#70": {
