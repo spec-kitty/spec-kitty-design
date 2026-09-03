@@ -63,8 +63,9 @@ jobs:
               # legitimately skipped. Fifth occurrence of this class in this filter:
               # scripts/** after #90, ci-quality.yml after #94, then
               # playwright.config.ts/nx.json/package.json after #94. A sixth entry is
-              # not the fix — inverting this filter to deny-by-default is, and that is
-              # filed rather than smuggled into this PR.
+              # not the fix — inverting this filter to deny-by-default is. Filed as
+              # #108; deliberately not attempted here, because it changes which jobs
+              # run for every PR in the repo and deserves its own blast radius.
               - 'fixtures/**'
               # The gates' own runners live here. Without this,
               # run-axe-storybook.js could be edited without the a11y gate
