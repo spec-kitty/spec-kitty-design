@@ -8,6 +8,12 @@
       "declarations": [
         {
           "kind": "variable",
+          "name": "CARD_AXES",
+          "default": "{ Inset: { inset: true }, } as const satisfies Record<string, CardStaticOptions>",
+          "description": "The static forms this component publishes, BEYOND the base and one per variant.\n\nThe generator derives base + variants on its own; this names everything else. It exists\nbecause the generator used to emit `Sk<Comp>InsetHTML` unconditionally — `inset` is a CARD\naxis, and for `sk-nav-pill` or `sk-grid` that would have committed\n`class=\"sk-grid sk-grid--inset\"`, a class in no stylesheet, as generated output with\n`--check` green. A component with no extra axes exports an empty object; omitting it is an\nerror, because `?? {}` cannot distinguish \"none\" from \"I looked for the wrong name\"."
+        },
+        {
+          "kind": "variable",
           "name": "CARD_VARIANTS",
           "type": {
             "text": "{ blue: 'sk-card--blue', purple: 'sk-card--purple' }"
@@ -48,22 +54,17 @@
           },
           "parameters": [
             {
-              "name": "variant",
-              "optional": true,
+              "name": "opts",
+              "default": "{}",
               "type": {
-                "text": "string"
+                "text": "CardStaticOptions"
               }
-            },
-            {
-              "name": "inset",
-              "default": "false"
             },
             {
               "name": "content",
               "default": "'Card content'"
             }
-          ],
-          "description": "The static form, for consumers with no JavaScript.\n\n`<article>` rather than the element's `<div part=\"card\">`: the element needs the part for\nthe ADR-9 styling API, and a server-rendered card needs the semantics. Same classes, same\nCSS, one authored source for both — which is the point."
+          ]
         },
         {
           "kind": "class",
@@ -1525,6 +1526,14 @@
         }
       ],
       "exports": [
+        {
+          "kind": "js",
+          "name": "CARD_AXES",
+          "declaration": {
+            "name": "CARD_AXES",
+            "module": "./dist/index.js"
+          }
+        },
         {
           "kind": "js",
           "name": "CARD_VARIANTS",

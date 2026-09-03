@@ -78,10 +78,31 @@ export function cardClasses(variant?: string, inset = false): string {
  * the ADR-9 styling API, and a server-rendered card needs the semantics. Same classes, same
  * CSS, one authored source for both — which is the point.
  */
-export function cardStaticHtml(variant?: string, inset = false, content = 'Card content'): string {
+/** The options a static form can vary. One key per axis this component has. */
+export interface CardStaticOptions {
+  variant?: string;
+  inset?: boolean;
+}
+
+/**
+ * The static forms this component publishes, BEYOND the base and one per variant.
+ *
+ * The generator derives base + variants on its own; this names everything else. It exists
+ * because the generator used to emit `Sk<Comp>InsetHTML` unconditionally — `inset` is a CARD
+ * axis, and for `sk-nav-pill` or `sk-grid` that would have committed
+ * `class="sk-grid sk-grid--inset"`, a class in no stylesheet, as generated output with
+ * `--check` green. A component with no extra axes exports an empty object; omitting it is an
+ * error, because `?? {}` cannot distinguish "none" from "I looked for the wrong name".
+ */
+export const CARD_AXES = {
+  Inset: { inset: true },
+} as const satisfies Record<string, CardStaticOptions>;
+
+export function cardStaticHtml(opts: CardStaticOptions = {}, content = 'Card content'): string {
   // THROWS, where `cardClasses` warns. This is the authoring/build path — the generator and
   // server-side templates call it, nothing is painted yet, and committing a card with a
   // silently-dropped variant into generated output is the failure worth stopping.
+  const { variant, inset = false } = opts;
   if (variant !== undefined && !isCardVariant(variant)) {
     throw new Error(unknownVariantMessage(variant));
   }

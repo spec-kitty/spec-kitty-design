@@ -29,6 +29,8 @@ const OUT = 'packages/elements/SIZES.md';
 // ("IIFE raw 24.0 KB" is 24073/1000; "minified 15.9 KB" is 16264/1024), which is
 // how a 0.5 KB phantom discrepancy appears between two correct measurements.
 const kb = (n) => `${(n / 1024).toFixed(1)} KiB`;
+/** Whole KiB, for compressor output only — see the note at the artifact table below. */
+const wholeKb = (n) => `${Math.round(n / 1024)} KiB`;
 
 for (const a of ARTIFACTS) {
   if (!existsSync(a.path)) {
@@ -63,7 +65,7 @@ Components in these artifacts: ${COMPONENTS.join(', ')}.
 
 | artifact | raw | minified | min+gzip | notes |
 |---|---:|---:|---:|---|
-${ARTIFACTS.map((a) => `| \`${a.name}\` | ${kb(a.raw)} | ${kb(a.min)} | ${kb(a.mingzip)} | ${a.note} |`).join('\n')}
+${ARTIFACTS.map((a) => `| \`${a.name}\` | ${kb(a.raw)} | ${kb(a.min)} | ${wholeKb(a.mingzip)} | ${a.note} |`).join('\n')}
 
 ## The basis matters — read this before comparing against an ADR
 
@@ -109,19 +111,21 @@ ${ARTIFACTS.map(
   (a) =>
     `${a.path}\n  raw       ${String(a.raw).padStart(7)} bytes  (${kb(a.raw)})\n` +
     `  minified  ${String(a.min).padStart(7)} bytes  (${kb(a.min)})\n` +
-    // GZIP IS REPORTED IN KiB ONLY, and that is a correctness fix rather than a formatting
-    // preference. `zlib.gzipSync` output depends on the zlib version compiled into Node, so the
-    // exact byte count is NOT reproducible across machines — and `--check` asserts byte-equality
-    // of this whole file. It failed on CI at 11884 bytes against 11882 committed locally, with
-    // `raw` and `minified` IDENTICAL on both sides (47825 / 70265): the bundle had not changed
-    // at all, only the compressor's framing.
+    // GZIP IS ROUNDED TO WHOLE KiB, and that took two attempts.
     //
-    // Left as-is this gate would have failed intermittently forever, on every Node patch bump,
-    // and each failure would look like a size regression. The KiB figure was already identical
-    // on both sides (11.6), so rounding loses nothing anyone was using — the raw counts that
-    // matter for a diff, raw and minified, are deterministic esbuild output and keep theirs.
-    `  gzip      ${kb(a.gzip).padStart(9)}\n` +
-    `  min+gzip  ${kb(a.mingzip).padStart(9)}`,
+    // `zlib.gzipSync` output depends on the zlib version compiled into Node, so the byte count
+    // is NOT reproducible across machines — while `--check` asserts byte-equality of this whole
+    // file. It first failed at 11884 bytes against 11882 committed, with raw and minified
+    // IDENTICAL (47825 / 70265): the bundle had not changed at all, only the compressor's
+    // framing. Reporting tenths of a KiB was the first fix and it was insufficient — a
+    // different artifact then failed at 12.0 vs 12.1 KiB, because a small byte delta can still
+    // straddle a 0.1 KiB boundary.
+    //
+    // Whole KiB needs ~512 bytes of drift to move, which a compressor version does not produce.
+    // The figures that matter for spotting a real regression — raw and minified — are
+    // deterministic esbuild output and keep their exact byte counts.
+    `  gzip      ${wholeKb(a.gzip).padStart(9)}\n` +
+    `  min+gzip  ${wholeKb(a.mingzip).padStart(9)}`,
 ).join('\n')}
 \`\`\`
 `;
