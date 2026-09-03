@@ -474,6 +474,56 @@ if (require.main === module) (async () => {
     process.exit(1);
   }
 
+  // THE NAMED STORY SET (#74, expected-stories.json).
+  //
+  // The check above refuses a globally empty set and nothing else, so a component shipping one
+  // `Default` story reported green over one state. NFR-003 named that defect and supplied no
+  // mechanism; this is the mechanism. Shrink-only: adding stories is free, removing a listed
+  // one fails here by name.
+  // ABSENCE IS A FAILURE, not "no declared stories".
+  //
+  // This shipped as `if (existsSync(expectedPath))` — so `rm expected-stories.json` disarmed the
+  // whole arm silently and the gate printed green. All four pre-merge lenses found it
+  // independently, and the sibling gate added for the same purpose refuses exactly this, in as
+  // many words: check-part-ratchet.mjs — "Absence is a failure, not zero parts… refusing to
+  // treat its absence as 'no parts'." One file over, the opposite was written.
+  const expectedPath = 'expected-stories.json';
+  if (!existsSync(expectedPath)) {
+    console.error(`❌ ${expectedPath} is missing — refusing to treat its absence as "no declared`);
+    console.error('   stories". A ratchet you can disarm with `rm` is not a ratchet.');
+    server.close();
+    process.exit(1);
+  }
+  {
+    const expected = JSON.parse(readFileSync(expectedPath, 'utf8'));
+    const declared = Object.values(expected.byElement ?? {}).flat();
+    if (declared.length === 0) {
+      console.error(`❌ ${expectedPath} declares no stories — refusing to pass vacuously.`);
+      server.close();
+      process.exit(1);
+    }
+    if (declared.length !== expected.total) {
+      console.error(
+        `❌ ${expectedPath}: total says ${expected.total} but the lists hold ${declared.length}.`
+      );
+      server.close();
+      process.exit(1);
+    }
+    const present = new Set(storyIds.map((s) => s.id));
+    const missing = declared.filter((id) => !present.has(id));
+    if (missing.length) {
+      console.error('❌ Stories declared in expected-stories.json are absent from the build:');
+      for (const id of missing) console.error(`   ${id}`);
+      console.error(
+        '   Adding a story is free; removing one requires editing that file. A component whose\n' +
+          '   only story is its default state has had one of its states tested.'
+      );
+      server.close();
+      process.exit(1);
+    }
+    console.log(`✅ All ${declared.length} declared story id(s) present in the build.`);
+  }
+
   // #69 deleted UNRENDERABLE_IMPORT_PATTERN, so there is no filtered subset: every
   // story in the manifest is assessed. The evidence of coverage is the per-story
   // result lines below, NOT this count -- a single number compared against itself

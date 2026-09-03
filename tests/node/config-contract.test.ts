@@ -251,3 +251,54 @@ test('[config] every element is a declared behaviour SUBJECT, and every subject 
       'the two derivations is blind to a file the other can see',
   ).toEqual(elements.map((e) => `sk-${e}`));
 });
+
+test('[config] every form-associated element is a subject of SC-002..SC-005 (FR-009)', () => {
+  // THE ARM THAT MAKES THE FOUR-ID OBLIGATION REAL.
+  //
+  // #73's derived obligation is "at least one behaviour, in a file about the element". A lens
+  // showed that is not enough here: declaring the new elements as subjects of SC-013 and SC-014
+  // alone satisfies config-contract, the floor arm and harness guard 7 — with not one assertion
+  // about FormData, validity, reset or disabled exclusion. The synthetic fixture keeps carrying
+  // SC-002..SC-005, which is exactly the shape the subject dimension was built to close.
+  //
+  // MANIFEST-DERIVED, KEYED ON THE MEMBER NAME. Three things were measured:
+  //   * a source-text regex for `static formAssociated` sees NOTHING when the flag is inherited
+  //     from a base class — which is where it lives;
+  //   * `Object.prototype.hasOwnProperty.call(Subclass, 'formAssociated')` is `false` for the
+  //     same reason, so an own-property arm matches zero elements and reports green over an
+  //     empty set;
+  //   * the analyzer DOES propagate inherited statics, but records `static get formAssociated()`
+  //     with no `default` — so keying on `default === "true"` is evaded and keying on the NAME
+  //     fails closed.
+  //
+  // Post-hoc assignment still evades any static source. tests/browser/registered-elements.test.ts
+  // is the runtime companion that closes it.
+  const manifest = JSON.parse(readFileSync('packages/elements/custom-elements.json', 'utf8')) as {
+    modules: { declarations?: { tagName?: string; members?: { name: string; static?: boolean }[] }[] }[];
+  };
+  const registry = JSON.parse(readFileSync('behaviours.json', 'utf8')) as {
+    behaviours: { id: string; subjects?: { name: string; file: string }[] }[];
+  };
+  const subjectsOf = (id: string) =>
+    (registry.behaviours.find((b) => b.id === id)?.subjects ?? []).map((s) => s.name);
+
+  const formAssociated = manifest.modules
+    .flatMap((m) => m.declarations ?? [])
+    .filter((d) => d.tagName && (d.members ?? []).some((mem) => mem.static && mem.name === 'formAssociated'))
+    .map((d) => d.tagName!);
+
+  expect(
+    formAssociated.length,
+    'no form-associated element found in the manifest — if one exists, this arm has gone blind ' +
+      'and would report green over an empty set',
+  ).toBeGreaterThan(0);
+
+  for (const tag of formAssociated) {
+    for (const id of ['SC-002', 'SC-003', 'SC-004', 'SC-005']) {
+      expect(
+        subjectsOf(id),
+        `<${tag}> declares static formAssociated but is not a subject of ${id}`,
+      ).toContain(tag);
+    }
+  }
+});

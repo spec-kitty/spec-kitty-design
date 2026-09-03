@@ -72,8 +72,12 @@ Those look contradictory and are not: **they are different bases, and partly a
 different component.** ADR-10's SP-3 spike measured \`sk-card\`, not \`sk-stub\`.
 
 - ADR-10 §2's two figures are **unminified raw on \`sk-card\` ALONE** (3.7 / 26.6 KB).
-- ADR-8's ~6 KB is **minified+gzip** — corroborated here: the IIFE measures
-  ${kb(ARTIFACTS[1].mingzip)} min+gzip, directly measured. Note the basis: that artifact now
+- ADR-8's ~6 KB is **minified+gzip**, and the IIFE now measures ${kb(ARTIFACTS[1].mingzip)}
+  min+gzip — which does NOT corroborate it and is not meant to. That figure was a per-component
+  Lit-runtime estimate; this artifact carries the runtime plus every component in the package,
+  so the two are different bases and the gap grows with each component added. An earlier
+  revision kept the word "corroborated" through an edit that changed the number, which is the
+  stale-prose shape this whole section argues against. Note the basis: that artifact now
   carries ${COMPONENTS.length} component(s) (${COMPONENTS.join(', ')}), which is why the figure
   rose from the 7.7 KiB recorded when it held \`sk-stub\` alone. The component list is derived;
   an earlier version of this sentence hardcoded the mission number that added the second one,
@@ -105,8 +109,19 @@ ${ARTIFACTS.map(
   (a) =>
     `${a.path}\n  raw       ${String(a.raw).padStart(7)} bytes  (${kb(a.raw)})\n` +
     `  minified  ${String(a.min).padStart(7)} bytes  (${kb(a.min)})\n` +
-    `  gzip      ${String(a.gzip).padStart(7)} bytes  (${kb(a.gzip)})\n` +
-    `  min+gzip  ${String(a.mingzip).padStart(7)} bytes  (${kb(a.mingzip)})`,
+    // GZIP IS REPORTED IN KiB ONLY, and that is a correctness fix rather than a formatting
+    // preference. `zlib.gzipSync` output depends on the zlib version compiled into Node, so the
+    // exact byte count is NOT reproducible across machines — and `--check` asserts byte-equality
+    // of this whole file. It failed on CI at 11884 bytes against 11882 committed locally, with
+    // `raw` and `minified` IDENTICAL on both sides (47825 / 70265): the bundle had not changed
+    // at all, only the compressor's framing.
+    //
+    // Left as-is this gate would have failed intermittently forever, on every Node patch bump,
+    // and each failure would look like a size regression. The KiB figure was already identical
+    // on both sides (11.6), so rounding loses nothing anyone was using — the raw counts that
+    // matter for a diff, raw and minified, are deterministic esbuild output and keep theirs.
+    `  gzip      ${kb(a.gzip).padStart(9)}\n` +
+    `  min+gzip  ${kb(a.mingzip).padStart(9)}`,
 ).join('\n')}
 \`\`\`
 `;
@@ -114,7 +129,28 @@ ${ARTIFACTS.map(
 if (check) {
   const current = existsSync(OUT) ? readFileSync(OUT, 'utf8') : null;
   if (current !== body) {
+    // SAY WHAT DIFFERS. This printed "is stale" and nothing else, and when it fired on CI
+    // while passing on a clean local build — same commit, same lockfile, same step order —
+    // there was no way to tell whether the bundle had genuinely changed size or the generated
+    // prose had drifted. A gate that reports a mismatch without showing it makes the next
+    // person guess, which is the failure mode this repo keeps closing elsewhere.
     console.error(`❌ ${OUT} is stale. Run: node scripts/measure-elements-sizes.mjs`);
+    const a = (current ?? '').split('\n');
+    const b = body.split('\n');
+    console.error('   committed → generated:');
+    let shown = 0;
+    for (let i = 0; i < Math.max(a.length, b.length) && shown < 12; i += 1) {
+      if (a[i] !== b[i]) {
+        console.error(`   line ${i + 1}:`);
+        console.error(`     - ${a[i] ?? '(absent)'}`);
+        console.error(`     + ${b[i] ?? '(absent)'}`);
+        shown += 1;
+      }
+    }
+    for (const art of ARTIFACTS) {
+      const raw = statSync(art.path).size;
+      console.error(`   ${art.path}: ${raw} bytes raw`);
+    }
     process.exit(1);
   }
   console.log(`✅ ${OUT} is up to date.`);

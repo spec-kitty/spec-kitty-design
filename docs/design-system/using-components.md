@@ -157,26 +157,55 @@ import { SkCardComponent } from '@spec-kitty/angular';
 
 Labelled text inputs, selects, and validation states for data-entry surfaces.
 
-**Angular:**
+> **This section was wrong.** It documented an Angular `SkInputFieldComponent` and
+> `.sk-field` / `.sk-field__label` / `.sk-field__input` classes — none of which have ever
+> existed in this repository, and the Angular package was deleted in #69. Corrected in #74.
 
-```typescript
-import { SkInputFieldComponent } from '@spec-kitty/angular';
-```
-
-```html
-<sk-input-field label="Your name" placeholder="Jane Smith"></sk-input-field>
-```
-
-**HTML:**
+**Custom element** (`@spec-kitty/elements` — the supported form):
 
 ```html
-<div class="sk-field">
-  <label class="sk-field__label" for="name">Your name</label>
-  <input class="sk-field__input" id="name" type="text" placeholder="Jane Smith">
+<sk-form-input
+  name="fullName"
+  label="Your name"
+  placeholder="Jane Smith"
+  description="As it should appear on your invoice."
+></sk-form-input>
+
+<sk-form-textarea name="goal" label="What are you trying to ship?" rows="4"></sk-form-textarea>
+```
+
+The element owns its own label, description and validation message, and participates in a
+native `<form>`: put it inside one, give it a `name`, and its value arrives in `FormData`.
+
+**Why the label is a property and not a `<label>` you write.** ADR-9 §4 built four arrangements
+as real elements and ran axe over each. A consumer-supplied `<label>` pointing at a control
+inside the element's shadow root **fails** — axe resolves `aria-labelledby` from the attribute
+and scopes ID lookups to `getRootNode()`, so no cross-root reference resolves, and labelling the
+*host* does not label the inner control. The same applies to `description`, which reaches the
+control through `aria-describedby`. Both are therefore properties. There is no `for`/`id` pair
+to get wrong, because there is none.
+
+**There is no `<sk-form-field>` wrapper element**, for the same reason: its three accessible
+responsibilities — label, description, error region — all cross a root boundary. What a wrapper
+would have contributed is `display: flex; flex-direction: column; gap`, which the CSS-only
+`.sk-form-field` class already provides:
+
+```html
+<div class="sk-form-field">
+  <sk-form-input name="email" label="Email address"></sk-form-input>
 </div>
 ```
 
-[View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/components-form-fields--default)
+**CSS-only** (`@spec-kitty/styles`, no JavaScript — unchanged and still published):
+
+```html
+<div class="sk-form-field">
+  <label class="sk-form-field__label" for="name">Your name</label>
+  <input class="sk-input" id="name" type="text" placeholder="Jane Smith">
+</div>
+```
+
+[View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/elements-skforminput--default)
 
 ---
 

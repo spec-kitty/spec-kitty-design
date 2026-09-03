@@ -42,6 +42,12 @@ jobs:
             tokens:
               - 'packages/tokens/**'
             components:
+              - 'expected-stories.json'   # the story ratchet run-axe-storybook.js enforces
+              - 'expected-parts.json'      # the ::part() ratchet
+              - 'behaviours.json'          # the behaviour registry the floor reporter reads
+              - 'mutations.json'
+              - 'mutations.selftest.json'
+              - 'suite-budget.json'
               - 'tsconfig.base.json'
               # `packages/**`, not a hand-written list of two. storybook:build's own
               # inputs already glob `packages/*/src/**/*` and `packages/*/package.json`
@@ -186,6 +192,14 @@ jobs:
         run: node scripts/check-adopted-css-boundaries.mjs --selftest
       - name: "[ENFORCED] Adopted CSS stays inside the element root (ADR-9 Confirmation #1)"
         run: node scripts/check-adopted-css-boundaries.mjs
+      # Two things stylelint cannot see: a class that SIMULATES a state the browser owns
+      # (`.is-focused`, which the static sheets needed for a screenshot and which lies to the
+      # a11y tree), and a `var()` fallback naming a token that exists nowhere — a hardcoded
+      # number wearing a token's clothes, on a property stylelint's strict-value list omits.
+      # Parsed with postcss, not grepped: the first version of this check was a grep that
+      # matched the comment explaining why the thing was excluded.
+      - name: "[ENFORCED] Adopted CSS hygiene (SK-D01)"
+        run: node scripts/check-element-css-hygiene.mjs
       # The IIFE entry was a hand-maintained list of side-effect imports. #73 added an element
       # to index.ts and not to it, and everything stayed green — the test lane resolves the
       # package to index.ts, the analyzer reads source, Storybook has its own module graph.

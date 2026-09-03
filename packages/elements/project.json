@@ -44,7 +44,7 @@
     "analyze": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "cem analyze --config packages/elements/custom-elements-manifest.config.mjs"
+        "command": "cem analyze --config packages/elements/custom-elements-manifest.config.mjs && node scripts/normalise-manifest.mjs"
       },
       "dependsOn": [
         "css"
