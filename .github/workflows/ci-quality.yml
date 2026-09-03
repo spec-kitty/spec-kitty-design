@@ -136,6 +136,10 @@ jobs:
           fi
       - name: "[ENFORCED] HTMLHint (FR-019)"
         run: npm run quality:htmlhint
+      - name: "[ENFORCED] No CSS in elements source (FR-009, ADR-10 §1)"
+        run: node scripts/check-no-css-in-source.mjs
+      - name: "[ENFORCED] Generated CSS modules are current (ADR-10 generated-artifact contract)"
+        run: node scripts/build-elements-css.mjs --check
       - name: "[ENFORCED] commitlint (FR-020)"
         if: github.event_name == 'pull_request'
         run: npx commitlint --from=${{ github.event.pull_request.base.sha }} --to=${{ github.sha }}
