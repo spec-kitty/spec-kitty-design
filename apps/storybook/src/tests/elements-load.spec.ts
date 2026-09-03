@@ -97,12 +97,12 @@ test.describe('distribution artifacts', () => {
     const good = `sha384-${createHash('sha384').update(bytes).digest('base64')}`;
     const bad = `sha384-${createHash('sha384').update('not the artifact').digest('base64')}`;
 
-    for (const [label, integrity, shouldUpgrade] of [
+    for (const [label, integrity, shouldExecute] of [
       ['matching', good, true],
       ['wrong', bad, false],
     ] as const) {
       await page.goto('/iframe.html?viewMode=story&id=elements-skstub--default');
-      const upgraded = await page.evaluate(
+      const executed = await page.evaluate(
         ([src, hash]) =>
           new Promise<boolean>((resolveP) => {
             document.body.innerHTML = '<sk-stub id="sri"></sk-stub>';
@@ -115,7 +115,12 @@ test.describe('distribution artifacts', () => {
           }),
         ['/elements-dist/elements.js', integrity] as const,
       );
-      expect(upgraded, `${label} integrity hash: script executed?`).toBe(shouldUpgrade);
+      // Named `executed`, not `upgraded`: this observes whether the browser RAN the
+      // script, which is what SRI governs. Both iterations request the SAME URL and
+      // differ only in `integrity`, and the matching case asserts onload — so a 404
+      // would fail that first, which is what makes the pair prove integrity-refusal
+      // rather than a missing file.
+      expect(executed, `${label} integrity hash: script executed?`).toBe(shouldExecute);
     }
   });
 
@@ -139,6 +144,10 @@ test.describe('distribution artifacts', () => {
     await page.goto('/vite-consumer/index.html');
     await page.waitForFunction(() => !!document.querySelector('sk-stub')?.shadowRoot);
     const before = await page.evaluate(() => customElements.get('sk-stub')?.name);
+    // Cleared AFTER the first navigation: otherwise a warning emitted during the
+    // initial load would satisfy the assertion below, and the test would pass without
+    // the duplicate registration ever warning.
+    warnings.length = 0;
 
     // Second registration of the same tag, from the other artifact.
     await page.evaluate(
@@ -155,7 +164,9 @@ test.describe('distribution artifacts', () => {
 
     expect(errors, 'loading both artifacts must not throw').toEqual([]);
     expect(
-      warnings.some((w) => w.includes('already registered')),
+      // Scoped to the package's own prefix — `already registered` alone could come
+      // from anywhere on the page.
+      warnings.some((w) => w.includes('[@spec-kitty/elements]') && w.includes('already registered')),
       `expected a duplicate-registration warning, got: ${JSON.stringify(warnings)}`,
     ).toBe(true);
     // The FIRST registration must survive — define() keeps the incumbent.

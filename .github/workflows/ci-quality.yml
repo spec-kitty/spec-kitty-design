@@ -50,6 +50,16 @@ jobs:
               # runs assemble-demo-dist.sh, so a PR editing a demo asset path
               # must not skip it.
               - 'apps/demo/**'
+              # The consumability fixture. It carries an ENFORCED SC-008 assertion and
+              # is a declared input AND staticDir of storybook:build — yet a PR
+              # touching only fixtures/** would have skipped storybook-build, a11y,
+              # playwright, visual-regression and lighthouse, all recorded as
+              # legitimately skipped. Fifth occurrence of this class in this filter:
+              # scripts/** after #90, ci-quality.yml after #94, then
+              # playwright.config.ts/nx.json/package.json after #94. A sixth entry is
+              # not the fix — inverting this filter to deny-by-default is, and that is
+              # filed rather than smuggled into this PR.
+              - 'fixtures/**'
               # The gates' own runners live here. Without this,
               # run-axe-storybook.js could be edited without the a11y gate
               # running — which is exactly how four defects reached the train
@@ -136,6 +146,13 @@ jobs:
           fi
       - name: "[ENFORCED] HTMLHint (FR-019)"
         run: npm run quality:htmlhint
+      # packages/elements was the only TypeScript package in the repo with NO type
+      # checking of any kind: esbuild neither typechecks nor emits declarations, the
+      # eslint config is not type-aware, and until the CSS pipeline emitted a sibling
+      # .d.ts, `tsc` could not even resolve `import sheet from './sk-stub.css.js'`.
+      # It is the base layer for forty components. Found by the pre-merge squad.
+      - name: "[ENFORCED] Typecheck elements (ADR-8)"
+        run: npx nx run elements:typecheck
       - name: "[ENFORCED] No CSS in elements source (FR-009, ADR-10 §1)"
         run: node scripts/check-no-css-in-source.mjs
       - name: "[ENFORCED] Generated CSS modules are current (ADR-10 generated-artifact contract)"
@@ -147,11 +164,18 @@ jobs:
       # exits non-zero if any definition is named `tag`, which is what the guarded
       # define() helper produces if it ever stops being excluded. Verified by
       # removing the exclusion: cem exits 1 and writes no manifest.
+      # Two assertions, because `git diff --exit-code` alone proves only EQUALITY.
+      # Delete the `@element sk-stub` JSDoc, regenerate, commit: the manifest is
+      # internally consistent, the diff is clean, CI is green, and ADR-11's wrapper
+      # generator two missions from now receives a manifest describing no element at
+      # all. define.ts says "do not remove either without replacing the other" and
+      # only the negative half was asserted.
       - name: "[ENFORCED] Custom Elements Manifest is current (FR-006, SC-004)"
         run: |
           npx nx run elements:analyze
           git diff --exit-code -- packages/elements/custom-elements.json \
             || { echo "::error::custom-elements.json is stale. Run: npx nx run elements:analyze"; exit 1; }
+          node scripts/check-manifest-content.mjs
       - name: "[ENFORCED] commitlint (FR-020)"
         if: github.event_name == 'pull_request'
         run: npx commitlint --from=${{ github.event.pull_request.base.sha }} --to=${{ github.sha }}
@@ -247,6 +271,8 @@ jobs:
       # the matrix is filed as follow-up work.
       - run: npx playwright install --with-deps
       - name: "[ENFORCED] Visual regression (FR-024)"
+        env:
+          PW_INCLUDE_VISUAL: '1'
         run: npx playwright test apps/storybook/src/tests/visual.spec.ts --project=chromium
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # actions/upload-artifact v4.6.2
         if: failure()
@@ -267,21 +293,17 @@ jobs:
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c  # actions/download-artifact v8.0.1
         with: { name: storybook-static, path: apps/storybook/storybook-static }
       - run: npx playwright install --with-deps
-      - name: "[ENFORCED] Cross-browser smoke (FR-023)"
-        run: npx playwright test apps/storybook/src/tests/smoke.spec.ts
-      # sk-nav-pill.js is the only executable code in @spec-kitty/styles and had no
-      # test until M2 (#68). It runs here rather than in visual-regression because
-      # it asserts behaviour, not pixels, and because it drives the assembled demo
-      # page — the real no-build consumer path from the ADR-12 audit.
-      - name: "[ENFORCED] Styles runtime behaviour — nav-pill drawer"
-        run: npx playwright test apps/storybook/src/tests/nav-pill-behaviour.spec.ts
-      # Named explicitly because this job runs SPEC FILES, not `testDir` — an
-      # unlisted spec in apps/storybook/src/tests/ never executes. Covers
-      # SC-001 (IIFE from file://), SRI over HTTP, SC-003 (both artifacts on one
-      # page warn rather than throw), SC-008 (the Vite consumer upgrades), and
-      # ADR-10 Confirmation #1 asserted against the BUILT artifacts.
-      - name: "[ENFORCED] Distribution artifacts are consumable (FR-003, FR-004, FR-005)"
-        run: npx playwright test apps/storybook/src/tests/elements-load.spec.ts
+      # Runs the whole testDir, NOT a list of named files. The list was the standing
+      # hazard: an unlisted spec in apps/storybook/src/tests/ silently never executed,
+      # and twelve batch missions will each want to add one. Two comments in the tree
+      # warned about it; a comment is not a gate. visual.spec.ts is excluded via
+      # testIgnore in playwright.config.ts because visual-regression owns it.
+      #
+      # Covers smoke (FR-023), nav-pill runtime behaviour, and elements-load
+      # (SC-001 file://, SRI over HTTP, SC-003 duplicate registration, SC-008 Vite
+      # consumer, ADR-10 Confirmation #1 against the built artifacts).
+      - name: "[ENFORCED] Playwright suite (FR-023, FR-003, FR-004, FR-005)"
+        run: npx playwright test
 
   # ── Lighthouse (advisory) ──────────────────────────────────────────────────
   lighthouse:

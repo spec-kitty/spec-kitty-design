@@ -17,6 +17,10 @@ export default [
           { sourceTag: 'scope:styles',     onlyDependOnLibsWithTags: ['scope:tokens'] },
           { sourceTag: 'scope:elements',   onlyDependOnLibsWithTags: ['scope:styles', 'scope:tokens'] },
           { sourceTag: 'scope:storybook',  onlyDependOnLibsWithTags: ['scope:tokens', 'scope:styles', 'scope:elements'] },
+          // Consumability fixtures may reach the published packages and nothing else.
+          // Without an entry the tag is entirely unconstrained, which is how a
+          // fixture quietly becomes a second implementation.
+          { sourceTag: 'scope:fixture',    onlyDependOnLibsWithTags: ['scope:elements', 'scope:styles', 'scope:tokens'] },
           { sourceTag: 'type:publishable', notDependOnLibsWithTags: ['type:internal'] },
         ],
       }],

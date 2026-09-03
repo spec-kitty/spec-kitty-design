@@ -18,8 +18,7 @@
   "customElements": "custom-elements.json",
   "files": [
     "dist/",
-    "custom-elements.json",
-    "README.md"
+    "custom-elements.json"
   ],
   "peerDependencies": {
     "lit": "^3.3.3",

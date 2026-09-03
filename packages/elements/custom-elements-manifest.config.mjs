@@ -15,8 +15,10 @@ export default {
     // The guarded registration helper. Its `define(tag, ctor)` parameter is what
     // the analyzer mistakes for an element declaration named `tag`.
     'packages/elements/src/define.ts',
-    // Generated constructed-stylesheet modules — no element declarations.
+    // Generated constructed-stylesheet modules and their declarations — no element
+    // declarations, and the .d.ts would duplicate every class.
     'packages/elements/src/**/*.css.js',
+    'packages/elements/src/**/*.css.d.ts',
     // Storybook stories and the gate self-test fixtures are not part of the
     // public element surface.
     'packages/elements/src/**/*.stories.ts',
@@ -25,6 +27,39 @@ export default {
   outdir: 'packages/elements',
   litelement: true,
   plugins: [
+    {
+      /**
+       * Rewrite module paths to what a CONSUMER can actually resolve.
+       *
+       * `cem analyze` runs from the workspace root, so it bakes in cwd-relative
+       * paths: `packages/elements/src/stub/sk-stub.ts`. A consumer joins
+       * `modules[].path` onto the package name — and that path is workspace-relative,
+       * names a `.ts` file, and is not in `package.json`'s `files` at all, so nothing
+       * resolves. The same document already emitted `"./define.js"` for an export's
+       * module, package-relative and correct, so it was internally inconsistent too.
+       *
+       * ADR-11 generates the React wrapper FROM this manifest, and CI now asserts the
+       * committed copy byte-for-byte — so the wrong shape would have become the
+       * baseline, and fixing it later a manifest-breaking change rather than a fix.
+       * Found by the pre-merge squad.
+       *
+       * Everything the package publishes is bundled into `dist/index.js`, which is
+       * what `exports["."]` points at, so that is the honest target for every module.
+       */
+      name: 'package-relative-module-paths',
+      packageLinkPhase({ customElementsManifest }) {
+        const PUBLISHED = './dist/index.js';
+        for (const mod of customElementsManifest.modules ?? []) {
+          mod.path = PUBLISHED;
+          for (const exp of mod.exports ?? []) {
+            if (exp.declaration?.module) exp.declaration.module = PUBLISHED;
+          }
+          for (const dec of mod.declarations ?? []) {
+            if (dec.module) dec.module = PUBLISHED;
+          }
+        }
+      },
+    },
     {
       name: 'assert-no-bogus-tag-definition',
       packageLinkPhase({ customElementsManifest }) {

@@ -5,12 +5,28 @@
   "targets": {
     "css": {
       "executor": "nx:run-commands",
-      "options": { "command": "node scripts/build-elements-css.mjs" },
+      "options": {
+        "command": "node scripts/build-elements-css.mjs"
+      },
       "inputs": [
         "{workspaceRoot}/packages/styles/src/**/*.css",
         "{workspaceRoot}/scripts/build-elements-css.mjs"
       ],
-      "outputs": ["{workspaceRoot}/packages/elements/src/**/*.css.js"]
+      "outputs": [
+        "{workspaceRoot}/packages/elements/src/**/*.css.js"
+      ]
+    },
+    "types": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc -p packages/elements/tsconfig.lib.json --emitDeclarationOnly --outDir packages/elements/dist"
+      },
+      "dependsOn": [
+        "css"
+      ],
+      "outputs": [
+        "{workspaceRoot}/packages/elements/dist"
+      ]
     },
     "build": {
       "executor": "nx:run-commands",
@@ -21,25 +37,64 @@
         ],
         "parallel": false
       },
-      "dependsOn": ["css", "^build"],
+      "dependsOn": [
+        "css",
+        "types",
+        "^build"
+      ],
       "inputs": [
         "{projectRoot}/**/*",
         "{workspaceRoot}/packages/styles/src/**/*.css",
         "{workspaceRoot}/package.json",
         "{workspaceRoot}/package-lock.json"
       ],
-      "outputs": ["{workspaceRoot}/packages/elements/dist"]
+      "outputs": [
+        "{workspaceRoot}/packages/elements/dist"
+      ]
     },
     "analyze": {
       "executor": "nx:run-commands",
-      "options": { "command": "cem analyze --config packages/elements/custom-elements-manifest.config.mjs" },
-      "dependsOn": ["css"],
-      "outputs": ["{workspaceRoot}/packages/elements/custom-elements.json"]
+      "options": {
+        "command": "cem analyze --config packages/elements/custom-elements-manifest.config.mjs"
+      },
+      "dependsOn": [
+        "css"
+      ],
+      "outputs": [
+        "{workspaceRoot}/packages/elements/custom-elements.json"
+      ],
+      "inputs": [
+        "{projectRoot}/src/**/*",
+        "{projectRoot}/custom-elements-manifest.config.mjs",
+        "{workspaceRoot}/package.json",
+        "{workspaceRoot}/package-lock.json"
+      ]
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc -p packages/elements/tsconfig.lib.json --noEmit"
+      },
+      "dependsOn": [
+        "css"
+      ],
+      "inputs": [
+        "{projectRoot}/src/**/*",
+        "{projectRoot}/tsconfig*.json",
+        "{workspaceRoot}/tsconfig.base.json"
+      ]
     },
     "lint": {
       "executor": "@nx/eslint:lint",
-      "options": { "lintFilePatterns": ["packages/elements/**/*.ts"] }
+      "options": {
+        "lintFilePatterns": [
+          "packages/elements/**/*.ts"
+        ]
+      }
     }
   },
-  "tags": ["scope:elements", "type:publishable"]
+  "tags": [
+    "scope:elements",
+    "type:publishable"
+  ]
 }

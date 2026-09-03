@@ -35,11 +35,14 @@ for (const a of ARTIFACTS) {
     process.exit(1);
   }
   a.raw = statSync(a.path).size;
-  // Minify with the same esbuild the build uses, so the figure is reachable by a
-  // consumer rather than hypothetical.
-  a.min = execFileSync('npx', ['esbuild', a.path, '--minify'], { encoding: 'buffer' }).length;
+  // Minify ONCE and reuse the buffer. Minifying twice is not just two wasted npx
+  // spawns per artifact on every PR — it means `minified` and `min+gzip` would be
+  // computed from two different byte streams, which is a basis mismatch inside the
+  // script written to prevent basis mismatches.
+  const minified = execFileSync('npx', ['esbuild', a.path, '--minify'], { encoding: 'buffer' });
+  a.min = minified.length;
   a.gzip = gzipSync(readFileSync(a.path)).length;
-  a.mingzip = gzipSync(execFileSync('npx', ['esbuild', a.path, '--minify'], { encoding: 'buffer' })).length;
+  a.mingzip = gzipSync(minified).length;
 }
 
 const cssBytes = statSync('packages/styles/src/stub/sk-stub.css').size;

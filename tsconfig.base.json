@@ -11,27 +11,15 @@
     "importHelpers": true,
     "target": "ES2022",
     "module": "ES2022",
-    "lib": [
-      "ES2022",
-      "dom"
-    ],
+    "lib": ["ES2022", "dom"],
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@spec-kitty/tokens": [
-        "packages/tokens/src/index.ts"
-      ],
-      "@spec-kitty/styles": [
-        "packages/styles/src/index.ts"
-      ],
-      "@spec-kitty/elements": [
-        "packages/elements/src/index.ts"
-      ]
+      "@spec-kitty/tokens": ["packages/tokens/src/index.ts"],
+      "@spec-kitty/styles": ["packages/styles/src/index.ts"],
+      "@spec-kitty/elements": ["packages/elements/src/index.ts"]
     }
   },
-  "exclude": [
-    "node_modules",
-    "tmp"
-  ]
+  "exclude": ["node_modules", "tmp"]
 }

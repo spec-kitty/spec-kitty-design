@@ -1,5 +1,10 @@
 {
   "name": "@spec-kitty/storybook",
   "version": "0.0.0",
-  "private": true
+  "private": true,
+  "devDependencies": {
+    "@spec-kitty/elements": "^1.0.0",
+    "@spec-kitty/styles": "^1.0.0",
+    "@spec-kitty/tokens": "^1.0.0"
+  }
 }

@@ -4,13 +4,13 @@
   "modules": [
     {
       "kind": "javascript-module",
-      "path": "packages/elements/src/elements.ts",
+      "path": "./dist/index.js",
       "declarations": [],
       "exports": []
     },
     {
       "kind": "javascript-module",
-      "path": "packages/elements/src/index.ts",
+      "path": "./dist/index.js",
       "declarations": [],
       "exports": [
         {
@@ -18,7 +18,7 @@
           "name": "define",
           "declaration": {
             "name": "define",
-            "module": "./define.js"
+            "module": "./dist/index.js"
           }
         },
         {
@@ -26,14 +26,14 @@
           "name": "SkStub",
           "declaration": {
             "name": "SkStub",
-            "module": "./stub/sk-stub.js"
+            "module": "./dist/index.js"
           }
         }
       ]
     },
     {
       "kind": "javascript-module",
-      "path": "packages/elements/src/stub/sk-stub.ts",
+      "path": "./dist/index.js",
       "declarations": [
         {
           "kind": "class",
@@ -54,7 +54,7 @@
           "name": "SkStub",
           "declaration": {
             "name": "SkStub",
-            "module": "packages/elements/src/stub/sk-stub.ts"
+            "module": "./dist/index.js"
           }
         }
       ]
