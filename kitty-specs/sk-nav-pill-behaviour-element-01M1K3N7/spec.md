@@ -121,8 +121,15 @@ binds it: relative `../../packages/...` paths for `file://` dev, and the `sed`-r
 
 - **FR-001**: A custom element `sk-nav-pill` is registered through the guarded `define()`
   helper and exported from `@spec-kitty/elements`.
-- **FR-002**: The element exposes `open()`, `close()` and `toggle()` as public methods, and an
-  `open` boolean property reflected to an `open` attribute.
+- **FR-002**: The element exposes `open()`, `close()` and `toggle()` as public methods, and a
+  boolean state property reflected to an `open` attribute.
+
+  *Corrected during WP02.* An earlier draft of this line said the property is named `open`.
+  A class cannot carry both an `open` method and an `open` property, and the issue specifies
+  the methods. `<dialog>` hits the same wall and resolves it the same way (an `open` property
+  with `show()`/`close()` methods); here the methods keep their specified names and the
+  property is `isOpen`, reflecting to the idiomatic `open` attribute so `:host([open])` reads
+  like `<details open>`.
 - **FR-003**: The element fires a documented custom event on every state change and on no
   non-change. The event name, `detail` shape, `bubbles`, `composed` and `cancelable` are
   recorded in the element's published JSDoc and in the manifest.

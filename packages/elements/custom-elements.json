@@ -160,6 +160,185 @@
         },
         {
           "kind": "class",
+          "description": "The navigation pill — a row of links that collapses to a hamburger and a panel.",
+          "name": "SkNavPill",
+          "cssParts": [
+            {
+              "description": "the pill container",
+              "name": "nav"
+            },
+            {
+              "description": "the items row, which becomes the collapsed panel",
+              "name": "items"
+            },
+            {
+              "description": "the toggle control",
+              "name": "hamburger"
+            }
+          ],
+          "slots": [
+            {
+              "description": "the navigation items, authored once and presented in both the row and the panel",
+              "name": ""
+            }
+          ],
+          "members": [
+            {
+              "kind": "field",
+              "name": "isOpen",
+              "privacy": "public",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "attribute": "open",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "label",
+              "privacy": "public",
+              "type": {
+                "text": "string"
+              },
+              "default": "'Primary navigation'",
+              "attribute": "label"
+            },
+            {
+              "kind": "field",
+              "name": "#invoker",
+              "privacy": "private",
+              "type": {
+                "text": "HTMLElement | null"
+              },
+              "default": "null",
+              "description": "The control to return focus to. Not reflected, not an attribute — runtime state."
+            },
+            {
+              "kind": "method",
+              "name": "open",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "invoker",
+                  "optional": true,
+                  "type": {
+                    "text": "HTMLElement | null"
+                  },
+                  "description": "the control focus returns to on close. Defaults to whatever has focus,\nresolved through the composed path: `document.activeElement` inside a shadow root\nreports the HOST, not the inner control, so reading it directly returns this element."
+                }
+              ],
+              "description": "Open the panel."
+            },
+            {
+              "kind": "method",
+              "name": "close",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              }
+            },
+            {
+              "kind": "method",
+              "name": "toggle",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "invoker",
+                  "optional": true,
+                  "type": {
+                    "text": "HTMLElement | null"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "#activeControl",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "HTMLElement | null"
+                }
+              }
+            },
+            {
+              "kind": "method",
+              "name": "#setOpen",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "next",
+                  "type": {
+                    "text": "boolean"
+                  }
+                },
+                {
+                  "name": "invoker",
+                  "type": {
+                    "text": "HTMLElement | null"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "field",
+              "name": "#onKeydown",
+              "privacy": "private"
+            },
+            {
+              "kind": "field",
+              "name": "#onHamburger",
+              "privacy": "private"
+            }
+          ],
+          "events": [
+            {
+              "description": "before the open state changes; `detail: { open: boolean }` is the REQUESTED state, `cancelable`, `bubbles` and `composed`. Calling `preventDefault()` abandons the change.",
+              "name": "sk-nav-pill-toggle"
+            }
+          ],
+          "attributes": [
+            {
+              "name": "open",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "fieldName": "isOpen"
+            },
+            {
+              "name": "label",
+              "type": {
+                "text": "string"
+              },
+              "default": "'Primary navigation'",
+              "fieldName": "label"
+            }
+          ],
+          "superclass": {
+            "name": "LitElement",
+            "package": "lit"
+          },
+          "tagName": "sk-nav-pill",
+          "customElement": true
+        },
+        {
+          "kind": "class",
           "description": "The scaffold element for the ADR-8 custom-element base layer.",
           "name": "SkStub",
           "members": [],
@@ -193,6 +372,14 @@
           "name": "SkCard",
           "declaration": {
             "name": "SkCard",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "SkNavPill",
+          "declaration": {
+            "name": "SkNavPill",
             "module": "./dist/index.js"
           }
         },
