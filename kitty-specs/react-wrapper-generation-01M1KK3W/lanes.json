@@ -1,0 +1,85 @@
+{
+  "version": 1,
+  "mission_slug": "react-wrapper-generation-01M1KK3W",
+  "mission_id": "01M1KK3WWH0B626ZSS8WHF3S2W",
+  "mission_branch": "kitty/mission-react-wrapper-generation-01M1KK3W",
+  "target_branch": "mission/react-wrapper-generation",
+  "lanes": [
+    {
+      "lane_id": "lane-a",
+      "wp_ids": [
+        "WP01"
+      ],
+      "write_scope": [
+        "packages/elements/custom-elements.json",
+        "packages/elements/src/card/sk-card.ts",
+        "packages/elements/src/form-control-base.ts",
+        "packages/elements/src/form-input/sk-form-input.ts",
+        "packages/elements/src/form-textarea/sk-form-textarea.ts",
+        "packages/elements/src/nav-pill/sk-nav-pill.ts"
+      ],
+      "predicted_surfaces": [
+        "api",
+        "artifact-rendering"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    },
+    {
+      "lane_id": "lane-b",
+      "wp_ids": [
+        "WP02"
+      ],
+      "write_scope": [
+        ".github/workflows/ci-quality.yml",
+        "package-lock.json",
+        "package.json",
+        "packages/react/package.json",
+        "scripts/build-react-wrappers.mjs",
+        "scripts/check-gate-wiring.mjs"
+      ],
+      "predicted_surfaces": [],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    },
+    {
+      "lane_id": "lane-c",
+      "wp_ids": [
+        "WP03"
+      ],
+      "write_scope": [
+        "fixtures/react-consumer/package.json",
+        "fixtures/react-consumer/project.json",
+        "fixtures/react-consumer/src/wrappers.test.tsx",
+        "fixtures/react-consumer/tsconfig.json",
+        "vitest.config.mts"
+      ],
+      "predicted_surfaces": [
+        "artifact-rendering"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    },
+    {
+      "lane_id": "lane-d",
+      "wp_ids": [
+        "WP04"
+      ],
+      "write_scope": [
+        "behaviours.json",
+        "mutations.json",
+        "suite-budget.json",
+        "tests/node/config-contract.test.ts"
+      ],
+      "predicted_surfaces": [
+        "artifact-rendering"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    }
+  ],
+  "computed_at": "2026-09-03T12:34:13.233448+00:00",
+  "computed_from": "dependency_graph+ownership",
+  "planning_artifact_wps": [],
+  "planning_commit_sha": "a237582383f4a752b5b8042a021ff05bdf6ff2ea"
+}
