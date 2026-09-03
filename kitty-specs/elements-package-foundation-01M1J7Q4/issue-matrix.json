@@ -97,7 +97,7 @@
       "wp": null
     },
     "#79": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "Follow-up: #79 (M13) closes with the repository-wide 'no component markup authored twice' assertion that #105's orphaned sk-stub markup will trip.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -105,7 +105,7 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
+      "verdict": "deferred-with-followup",
       "wp": null
     },
     "#80": {
