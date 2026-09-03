@@ -1,0 +1,23 @@
+{
+  "name": "elements-behaviour-fixture",
+  "projectType": "application",
+  "sourceRoot": "fixtures/elements-behaviour/src",
+  "targets": {
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "options": {
+        "lintFilePatterns": ["fixtures/elements-behaviour/**/*.ts"]
+      }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": { "command": "tsc -p fixtures/elements-behaviour/tsconfig.json --noEmit" },
+      "inputs": [
+        "{projectRoot}/**/*",
+        "{workspaceRoot}/tsconfig.base.json",
+        "{workspaceRoot}/packages/elements/src/**/*"
+      ]
+    }
+  },
+  "tags": ["scope:fixture", "type:app"]
+}
