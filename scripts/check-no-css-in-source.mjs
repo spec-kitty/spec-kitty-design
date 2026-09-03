@@ -16,6 +16,7 @@
  */
 import { readFileSync } from 'node:fs';
 import { globSync } from 'node:fs';
+import * as esbuild from 'esbuild';
 
 // The whole package, not just src/. WP03's own T010 says "under
 // packages/elements/**" and ADR-10 Confirmation #4 says "any source file" — but this
@@ -35,6 +36,12 @@ const FORBIDDEN = [
   // the rest of the file. No deliberate evasion required. Narrowing the one pattern that
   // false-positived keeps every check at full strength over comments AND code.
   [/(^|[^.\w])css`/, 'Lit `css` tagged template — author CSS in @spec-kitty/styles instead'],
+  // The member-access form: `import * as lit from 'lit'; static styles = lit.css`…``. Real
+  // inlined CSS, which the narrowing above excludes BY CONSTRUCTION — a regression the
+  // narrowing introduced, not a pre-existing gap. Scanned over the comment-stripped
+  // rendition instead (see below), where the prose `sk-card.css` it was protecting against
+  // cannot appear. Deliberately broad: over code, `.css`` is never anything else.
+  [/\.css`/, 'Lit `css` reached through a member expression — same inlining', 'parsed'],
   [/\bunsafeCSS\s*\(/, 'unsafeCSS() — inlines CSS text into source'],
   [/new\s+CSSStyleSheet\s*\(/, 'hand-written CSSStyleSheet — use the generated module'],
   [/import\s+['"][^'"]+\.css['"]/, "bare CSS import — bundler-specific and not a constructed sheet"],
@@ -74,12 +81,46 @@ for (const f of files) {
   // `sk-stub.styles.css` evasion the glob above exists to catch.
   if (raw.startsWith(GENERATED_MARKER_LINE)) continue;
 
-  const text = raw;
-  for (const [re, why] of FORBIDDEN) {
+  // Two renditions, deliberately. The RAW text keeps every pattern at full strength over
+  // comments and code alike. The PARSED rendition exists only for patterns that would
+  // otherwise false-positive on a filename in prose (`sk-card.css` in a doc comment).
+  //
+  // esbuild, not a regex, does the stripping — and that distinction is the entire lesson
+  // from the earlier attempt: a regex "comment stripper" blanks comment-shaped text inside
+  // STRING literals too, so the ordinary glob `'packages/elements/src/*.ts'` opened a
+  // phantom comment and disabled every check for the rest of the file. esbuild is a real
+  // lexer, is already a pinned dependency, and a file it cannot parse fails the gate rather
+  // than being skipped.
+  let parsed;
+  const renditionFor = (kind) => {
+    if (kind !== 'parsed') return raw;
+    if (parsed === undefined) {
+      try {
+        parsed = esbuild.transformSync(raw, {
+          loader: f.endsWith('.ts') ? 'ts' : 'js',
+          format: 'esm',
+        }).code;
+      } catch (err) {
+        console.error(`❌ ${f} does not parse — FR-009 cannot be checked over it:`);
+        for (const l of String(err?.message ?? err).split('\n').slice(0, 3)) console.error(`   ${l}`);
+        process.exit(1);
+      }
+    }
+    return parsed;
+  };
+
+  for (const [re, why, kind] of FORBIDDEN) {
+    const text = renditionFor(kind);
     const m = text.match(re);
     if (m) {
       const line = text.slice(0, m.index).split('\n').length;
-      violations.push(`${f}:${line} — ${why}`);
+      // A parsed-rendition line number is not the authored line, so the message says so
+      // rather than pointing at a line the author cannot find.
+      violations.push(
+        kind === 'parsed'
+          ? `${f} (parsed line ${line}, comments stripped) — ${why}`
+          : `${f}:${line} — ${why}`
+      );
     }
   }
 }

@@ -3,22 +3,26 @@ import { define } from '../define.js';
 import sheet from './sk-card.css.js';
 import { cardClasses } from './sk-card.markup.js';
 
+// EVERYTHING IN THE `/** */` BELOW IS PUBLISHED API. The analyzer copies the class
+// description and each `@csspart` description verbatim into custom-elements.json, which IDE
+// hovers and docs sites render. #72 shipped a 1144-character `@csspart` blob that way, and
+// the first fix merely relocated 376 characters of it into the class description. Rationale
+// for maintainers belongs here, in `//` comments the analyzer does not read.
+//
+// THE ANNOTATIONS ARE REQUIRED, NOT DECORATIVE:
+//   * `@element sk-card` — registration goes through the guarded `define()` helper
+//     (ADR-10 §5) and the analyzer cannot follow that indirection. Without it the manifest
+//     carries no definition for this element and scripts/check-manifest-content.mjs fails.
+//   * `@csspart card` — ADR-9's rule is that a consumer restyles through the part, never by
+//     reaching into the shadow tree. An UNTERMINATED tag swallows everything after it, which
+//     is how the blob above happened; keep tag descriptions to one short line.
+//
+// The variant contract is not repeated in prose: the manifest already carries
+// `variant: 'blue' | 'purple' | undefined` from the field declaration below.
 /**
  * The card primitive — the first real component on the ADR-8 base layer.
  *
- * THE PART DESCRIPTION IS PUBLISHED API — IDE hovers and docs sites render it, and the
- * analyzer takes everything after `@csspart card - ` up to the next tag. An unterminated tag
- * swallowed this entire docblock into custom-elements.json, so all prose lives ABOVE the tag
- * block. The ADR-9 rule is that a consumer restyles through the part, never by reaching into
- * the shadow tree.
- *
  * @element sk-card
- *
- * The `@element` annotation is REQUIRED, not decorative: registration goes through the
- * guarded `define()` helper (ADR-10 §5) and the manifest analyzer cannot follow that
- * indirection. Without it the manifest carries no definition for this element, and
- * scripts/check-manifest-content.mjs fails.
- *
  * @csspart card - the card surface
  */
 export class SkCard extends LitElement {

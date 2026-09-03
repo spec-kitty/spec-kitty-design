@@ -16,12 +16,28 @@ import { SkCardHTML, SkCardBlueHTML, SkCardPurpleHTML, SkCardInsetHTML } from '.
  *
  * `wrap()` adds only presentation the story needs — width and text colour — never structure
  * or classes. Structure comes from the generated constant.
+ *
+ * It THROWS when the marker is absent, because `String.replace` with a string pattern
+ * returns its input UNCHANGED on no match. Two likely shape changes hit that silently:
+ * renaming the default content, and padding it the way the generator already pads the
+ * `.html` artifact but not `index.ts`. Either would strip `max-width` from every card
+ * story with no error, and a story chaining a second `wrap()` would drop its whole body.
+ * axe cannot see a missing `max-width`; a build failure is the only signal available.
  */
-const wrap = (markup: string, body: string) =>
-  markup.replace(
-    '>Card content<',
+const MARKER = '>Card content<';
+const wrap = (markup: string, body: string) => {
+  if (!markup.includes(MARKER)) {
+    throw new Error(
+      `sk-card story: generated markup no longer contains ${JSON.stringify(MARKER)} — ` +
+        `wrap() would have silently returned it unchanged. Update the marker alongside ` +
+        `cardStaticHtml()'s default content.`,
+    );
+  }
+  return markup.replace(
+    MARKER,
     ` style="max-width:360px"><p style="color:var(--sk-fg-default);margin:0">${body}</p><`,
   );
+};
 
 const meta: Meta = {
   title: 'Components/Card',

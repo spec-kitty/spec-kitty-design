@@ -54,7 +54,7 @@
 }
 
 /* NO light-mode overrides here, deliberately.
-   Light-mode variance lives in --sk-border-card-{blue,purple} in @spec-kitty/tokens.
+   Light-mode variance lives in --sk-border-tint-{sky,lilac} in @spec-kitty/tokens.
    The rules that used to sit here were `:root[data-theme="light"] .sk-card--blue` and
    `.sk-light .sk-card--blue` — BOTH cross a shadow boundary, and both are therefore inert
    once this CSS is adopted by <sk-card>: the themed ancestor is outside the shadow root

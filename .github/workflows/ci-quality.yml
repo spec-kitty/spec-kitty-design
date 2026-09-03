@@ -161,8 +161,12 @@ jobs:
       # Includes the vite-consumer fixture, whose scope:fixture depConstraint would
       # otherwise never be evaluated — nx affected --target=lint is the only ESLint
       # invocation in CI, and the fixture had no lint target.
-      - name: "[ENFORCED] Typecheck elements (ADR-8)"
-        run: npx nx run elements:typecheck
+      # DERIVED, not named. This step ran `nx run elements:typecheck` — one project by name —
+      # while a SECOND project (elements-behaviour-fixture) declared the same target and was
+      # never invoked. Its typecheck was red on a green pipeline. scripts/typecheck-all.mjs
+      # enumerates every project with the target and refuses an empty set.
+      - name: "[ENFORCED] Typecheck every project that declares it (ADR-8)"
+        run: node scripts/typecheck-all.mjs
       - name: "[ENFORCED] No CSS in elements source (FR-009, ADR-10 §1)"
         run: node scripts/check-no-css-in-source.mjs
       - name: "[ENFORCED] Generated CSS modules are current (ADR-10 generated-artifact contract)"

@@ -39,7 +39,7 @@ export const Inset: Story = {
  * `:root[data-theme="light"] .sk-card--blue` and `.sk-light .sk-card--blue`. Both cross a
  * shadow boundary, so inside <sk-card> both are inert — this story would have rendered
  * DARK borders on a light ground, with no error and no warning. Light-mode variance now
- * lives in `--sk-border-card-{blue,purple}`, and a custom property inherits through the
+ * lives in `--sk-border-tint-{sky,lilac}`, and a custom property inherits through the
  * boundary where a selector does not.
  *
  * The wrapper carries `class="sk-light"`, not `data-theme="light"`: the token package

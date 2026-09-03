@@ -1,5 +1,6 @@
 import './sk-grid.css';
 import '../card/sk-card.css';
+import { SkCardHTML } from '../card';
 import type { Meta, StoryObj } from '@storybook/web-components';
 
 const meta: Meta = {
@@ -11,11 +12,23 @@ const meta: Meta = {
 export default meta;
 type Story = StoryObj;
 
-/** Placeholder card content for grid demos. */
+/**
+ * Placeholder card content for grid demos — rendered from the GENERATED card markup, not
+ * hand-authored.
+ *
+ * This story file was the last `<article class="sk-card">` literal in the repository after
+ * #72 converted the card stories; a pre-merge lens found it and observed that the fold's
+ * commit claim ("zero hand-authored card markup in code") was true of one directory rather
+ * than of the repository. It is true here now. `packages/styles/src/blog-card/index.ts`
+ * still composes `sk-card` classes by hand — that is a DIFFERENT component's authored
+ * source, outside the card generator's remit, and #79's repository-wide "no component
+ * markup is authored twice" assertion is what covers it.
+ */
 const placeholderCard = (n: number) =>
-  `<article class="sk-card" style="padding: var(--sk-space-5);">
-    <p style="color: var(--sk-fg-muted); margin: 0; font-size: var(--sk-text-sm);">Card ${n}</p>
-  </article>`;
+  SkCardHTML.replace(
+    '>Card content<',
+    ` style="padding: var(--sk-space-5);"><p style="color: var(--sk-fg-muted); margin: 0; font-size: var(--sk-text-sm);">Card ${n}</p><`,
+  );
 
 const threeCards = [1, 2, 3].map(placeholderCard).join('\n  ');
 const fourCards  = [1, 2, 3, 4].map(placeholderCard).join('\n  ');

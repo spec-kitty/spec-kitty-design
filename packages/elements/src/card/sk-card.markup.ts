@@ -23,18 +23,44 @@ export const CARD_VARIANTS = { blue: 'sk-card--blue', purple: 'sk-card--purple' 
 
 export type CardVariant = keyof typeof CARD_VARIANTS;
 
+// PUBLISHED PROSE IS SHORT, DELIBERATELY. Everything in a `/** */` above an export is
+// lifted verbatim into custom-elements.json and rendered in IDE hovers and on docs sites —
+// #72 already shipped a 1144-character `@csspart` blob that way. Rationale for maintainers
+// goes in `//` comments, which the analyzer does not capture.
+//
+// `Object.hasOwn`, not `in`: `in` reaches the prototype chain, so `cardClasses('constructor')`
+// emitted `sk-card function Object() { [native code] }` as a class attribute — and because
+// this module also generates server-rendered HTML, that string reached real markup.
+/** Whether `variant` names a real card modifier. */
+export function isCardVariant(variant: string): variant is CardVariant {
+  return Object.hasOwn(CARD_VARIANTS, variant);
+}
+
+/** The shared diagnostic for an unrecognised variant. */
+export const unknownVariantMessage = (variant: string): string =>
+  `unknown card variant "${variant}" — expected one of ${Object.keys(CARD_VARIANTS).join(', ')}`;
+
+// WHY THIS IS TOTAL AND `cardStaticHtml` IS NOT — the load-bearing decision in this file.
+//
+// The previous fold made this THROW, and pass 2 measured the consequence: Lit rejects
+// `updateComplete`, `render()` never returns a tree, and `<sk-card variant="typo">` paints an
+// EMPTY shadow root with no `<slot>` — so the element silently eats its own light-DOM
+// children. That is strictly worse than the fail-open it replaced (wrong tint, content still
+// visible), and `variant` is untrusted markup input: a CMS field, a server template, a typo.
+// The platform contract for an unknown attribute value is graceful degradation —
+// `<input type="bogus">` becomes a text input; nothing blanks itself.
+//
+// The hard assertion belongs on the AUTHORING path, where a bad variant is a build error and
+// nothing is painted yet: see `cardStaticHtml`. The throw was also unreachable from the build
+// path it was justified for — the generator derives its variants from
+// `Object.keys(CARD_VARIANTS)` and cannot pass an unknown one. One module, two callers, two
+// failure policies; collapsing them into one function is what went wrong. Both halves are
+// asserted in fixtures/elements-behaviour/src/sk-card.test.ts.
+/** The card's class list. An unknown `variant` warns and degrades to the base card. */
 export function cardClasses(variant?: string, inset = false): string {
-  // `Object.hasOwn`, not `in`: `in` reaches the prototype chain, so `cardClasses('constructor')`
-  // emitted `sk-card function Object() { [native code] }` as a class attribute — and because
-  // this module now also generates server-rendered HTML, that string reached real markup.
-  //
-  // And it THROWS on an unknown variant rather than degrading silently. Swallowing it is
-  // fail-open: a typo produced a plain card with no signal anywhere, in the one module that
-  // is the authored source for two packages.
-  if (variant && !Object.hasOwn(CARD_VARIANTS, variant)) {
-    throw new Error(
-      `unknown card variant "${variant}" — expected one of ${Object.keys(CARD_VARIANTS).join(', ')}`,
-    );
+  if (variant && !isCardVariant(variant)) {
+    console.warn(`sk-card: ${unknownVariantMessage(variant)} — rendering the base card.`);
+    variant = undefined;
   }
   return [
     'sk-card',
@@ -53,5 +79,11 @@ export function cardClasses(variant?: string, inset = false): string {
  * CSS, one authored source for both — which is the point.
  */
 export function cardStaticHtml(variant?: string, inset = false, content = 'Card content'): string {
+  // THROWS, where `cardClasses` warns. This is the authoring/build path — the generator and
+  // server-side templates call it, nothing is painted yet, and committing a card with a
+  // silently-dropped variant into generated output is the failure worth stopping.
+  if (variant !== undefined && !isCardVariant(variant)) {
+    throw new Error(unknownVariantMessage(variant));
+  }
   return `<article class="${cardClasses(variant, inset)}">${content}</article>`;
 }

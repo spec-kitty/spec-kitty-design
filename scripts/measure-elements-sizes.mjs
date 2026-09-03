@@ -71,13 +71,17 @@ ADR-10 §2 quotes "~3.2 KB" ESM and "~26 KB" IIFE; ADR-8 quotes a "~6 KB Lit run
 Those look contradictory and are not: **they are different bases, and partly a
 different component.** ADR-10's SP-3 spike measured \`sk-card\`, not \`sk-stub\`.
 
-- ADR-10 §2's two figures are **unminified raw on \`sk-card\`** (3.7 / 26.6 KB).
-- ADR-8's ~6 KB is **minified+gzip** — and that is corroborated here: the
-  \`sk-stub\` IIFE measures ${kb(ARTIFACTS[1].mingzip)} min+gzip, directly measured.
+- ADR-10 §2's two figures are **unminified raw on \`sk-card\` ALONE** (3.7 / 26.6 KB).
+- ADR-8's ~6 KB is **minified+gzip** — corroborated here: the IIFE measures
+  ${kb(ARTIFACTS[1].mingzip)} min+gzip, directly measured. Note the basis: since #72 that
+  artifact carries ${COMPONENTS.length} component(s) (${COMPONENTS.join(', ')}), which is why
+  the figure rose from the 7.7 KiB recorded when it held \`sk-stub\` alone.
 
 The \`sk-card\` figures ADR-10 §2 rests on were inherited from the WP04 prompt when sk-card
-had no element. #72 built it, so the numbers above now MEASURE both components rather than
-extrapolating from one.
+had no element. #72 built it — but the table above is now a MULTI-component total, so it is
+**less** directly comparable to ADR-10 §2's per-component numbers than the single-component
+figure it replaced, not more. Comparing them needs a per-component build; #81 owns the cost
+measurement that produces one. Stating the basis is this section's whole point.
 
 What this script *does* establish is the shape of the relationship: the runtime is a
 fixed cost (${kb(ARTIFACTS[1].raw - ARTIFACTS[0].raw)} of the IIFE is Lit, since the

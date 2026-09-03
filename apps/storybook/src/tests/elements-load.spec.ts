@@ -42,7 +42,7 @@ const IIFE_PATH = join(REPO_ROOT, 'apps/storybook/storybook-static/elements-dist
 /** Parameterised over the tag so ADR-10 Confirmation #1 can be asserted for sk-card too. */
 async function elementRendered(page: Page, tag = 'sk-stub') {
   return page.evaluate((t) => {
-    const blank = { upgraded: false, text: '', adopted: -1, styleTags: -1, reason: '' };
+    const blank = { upgraded: false, text: '', markup: '', adopted: -1, styleTags: -1, reason: '' };
     const el = document.querySelector(t);
     if (!el) return { ...blank, reason: `no <${t}> on the page` };
     const sr = el.shadowRoot;
@@ -50,6 +50,16 @@ async function elementRendered(page: Page, tag = 'sk-stub') {
     return {
       upgraded: true,
       text: (sr.textContent ?? '').trim(),
+      // THE DISCRIMINATING FIELD. `text` is shadow textContent, and a shadow root whose
+      // only text sits behind a <slot> has none: sk-card's is `<div part="card"><slot>`,
+      // so `text` is '' and comparing it across two builds asserted `'' === ''`. That
+      // vacuous compare was written to close a blocker about a prose-only claim — the
+      // programme's own certifying-absence defect, occurrence #9, inside its own fix.
+      //
+      // The shadow tree's markup is what could actually differ between the ESM build and
+      // the IIFE: the part name, the class list the variant resolves to, the slot. Lit's
+      // marker comments are stripped — they encode template identity, not rendered output.
+      markup: sr.innerHTML.replace(/<!---->/g, '').trim(),
       adopted: sr.adoptedStyleSheets.length,
       styleTags: sr.querySelectorAll('style').length,
       reason: '',
@@ -104,14 +114,10 @@ test.describe('distribution artifacts', () => {
     await page.waitForFunction(() => !!document.querySelector('sk-card')?.shadowRoot);
     const viaFile = await elementRendered(page, 'sk-card');
 
-    // Path 2 — the ESM build, through a real bundler (the Vite consumer).
+    // Path 2 — the ESM build, through a real bundler (the Vite consumer). The fixture's
+    // own `<sk-card variant="blue">` is the subject; the fold appended a SECOND one here,
+    // which `querySelector` never returned, so that code asserted nothing at all.
     await page.goto('/vite-consumer/index.html');
-    await page.evaluate(() => {
-      const el = document.createElement('sk-card');
-      el.setAttribute('variant', 'blue');
-      el.textContent = 'Card content';
-      document.body.append(el);
-    });
     await page.waitForFunction(() => !!document.querySelector('sk-card')?.shadowRoot);
     const viaBundler = await elementRendered(page, 'sk-card');
 
@@ -122,8 +128,17 @@ test.describe('distribution artifacts', () => {
       expect(r.adopted, `${label}: adoptedStyleSheets.length`).toBe(1);
       expect(r.styleTags, `${label}: <style> count`).toBe(0);
     }
-    // "renders identically" — same rendered text from both builds.
-    expect(viaBundler.text).toBe(viaFile.text);
+    // "renders identically" — the same shadow tree from both builds, and a shadow tree
+    // that actually carries the variant. Asserting the resolved class list FIRST means a
+    // build rendering a bare `<div part="card">` down both paths cannot pass by agreeing
+    // with itself.
+    expect(viaFile.markup, 'file://: the variant must resolve to its modifier class').toContain(
+      'sk-card--blue',
+    );
+    expect(viaFile.markup, 'file://: the ADR-9 part must be present').toContain('part="card"');
+    expect(viaBundler.markup, 'the two builds must render the same shadow tree').toBe(
+      viaFile.markup,
+    );
   });
 
   test('IIFE upgrades an element from file:// — no server, no bundler (SC-001)', async ({

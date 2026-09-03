@@ -7,8 +7,8 @@ Components in these artifacts: sk-card, sk-stub.
 
 | artifact | raw | minified | min+gzip | notes |
 |---|---:|---:|---:|---|
-| `ESM  (dist/index.js)` | 6.0 KiB | 4.9 KiB | 2.2 KiB | `lit` external |
-| `IIFE (dist/elements.js)` | 27.9 KiB | 19.7 KiB | 7.8 KiB | runtime bundled |
+| `ESM  (dist/index.js)` | 6.5 KiB | 5.2 KiB | 2.4 KiB | `lit` external |
+| `IIFE (dist/elements.js)` | 28.1 KiB | 19.8 KiB | 7.8 KiB | runtime bundled |
 
 ## The basis matters — read this before comparing against an ADR
 
@@ -16,16 +16,20 @@ ADR-10 §2 quotes "~3.2 KB" ESM and "~26 KB" IIFE; ADR-8 quotes a "~6 KB Lit run
 Those look contradictory and are not: **they are different bases, and partly a
 different component.** ADR-10's SP-3 spike measured `sk-card`, not `sk-stub`.
 
-- ADR-10 §2's two figures are **unminified raw on `sk-card`** (3.7 / 26.6 KB).
-- ADR-8's ~6 KB is **minified+gzip** — and that is corroborated here: the
-  `sk-stub` IIFE measures 7.8 KiB min+gzip, directly measured.
+- ADR-10 §2's two figures are **unminified raw on `sk-card` ALONE** (3.7 / 26.6 KB).
+- ADR-8's ~6 KB is **minified+gzip** — corroborated here: the IIFE measures
+  7.8 KiB min+gzip, directly measured. Note the basis: since #72 that
+  artifact carries 2 component(s) (sk-card, sk-stub), which is why
+  the figure rose from the 7.7 KiB recorded when it held `sk-stub` alone.
 
 The `sk-card` figures ADR-10 §2 rests on were inherited from the WP04 prompt when sk-card
-had no element. #72 built it, so the numbers above now MEASURE both components rather than
-extrapolating from one.
+had no element. #72 built it — but the table above is now a MULTI-component total, so it is
+**less** directly comparable to ADR-10 §2's per-component numbers than the single-component
+figure it replaced, not more. Comparing them needs a per-component build; #81 owns the cost
+measurement that produces one. Stating the basis is this section's whole point.
 
 What this script *does* establish is the shape of the relationship: the runtime is a
-fixed cost (22.0 KiB of the IIFE is Lit, since the
+fixed cost (21.7 KiB of the IIFE is Lit, since the
 ESM artifact holds the same element with `lit` external) and the per-component cost
 tracks its CSS. A batch mission adding a component should expect the IIFE to grow by
 roughly that component's CSS, not by a fixed per-component overhead.
@@ -33,7 +37,7 @@ roughly that component's CSS, not by a fixed per-component overhead.
 An earlier draft of this work package recorded the **minified** figures under a "raw"
 heading and concluded ADR-10 was wrong. It was not. Always state the basis — and the
 unit: every figure in this file is KiB (1024), which is why the raw IIFE reads
-27.9 KiB here and "24.0 KB" in the WP prompt. Same 28602
+28.1 KiB here and "24.0 KB" in the WP prompt. Same 28801
 bytes.
 
 ## Raw output of the measuring command
@@ -41,13 +45,13 @@ bytes.
 ```
 $ npx nx run elements:build && node scripts/measure-elements-sizes.mjs
 packages/elements/dist/index.js
-  raw          6094 bytes  (6.0 KiB)
-  minified     5028 bytes  (4.9 KiB)
-  gzip         2484 bytes  (2.4 KiB)
-  min+gzip     2272 bytes  (2.2 KiB)
+  raw          6625 bytes  (6.5 KiB)
+  minified     5323 bytes  (5.2 KiB)
+  gzip         2632 bytes  (2.6 KiB)
+  min+gzip     2419 bytes  (2.4 KiB)
 packages/elements/dist/elements.js
-  raw         28602 bytes  (27.9 KiB)
-  minified    20142 bytes  (19.7 KiB)
-  gzip         9120 bytes  (8.9 KiB)
-  min+gzip     7939 bytes  (7.8 KiB)
+  raw         28801 bytes  (28.1 KiB)
+  minified    20237 bytes  (19.8 KiB)
+  gzip         9177 bytes  (9.0 KiB)
+  min+gzip     7977 bytes  (7.8 KiB)
 ```

@@ -1,6 +1,7 @@
 import { beforeEach, expect, test } from 'vitest';
 import '@spec-kitty/elements';
-import tokensCss from '../../../packages/tokens/src/tokens.css?raw';
+import { cardClasses, cardStaticHtml } from '@spec-kitty/elements';
+import tokensCss from '@spec-kitty/tokens/tokens.css?raw';
 
 /**
  * <sk-card> — ADR-8 confirmation #1, and the repair #72 carries.
@@ -100,4 +101,58 @@ test('the ADR-9 styling API is targetable from outside', async () => {
   } finally {
     s.remove();
   }
+});
+
+/**
+ * The unknown-variant policy, both halves.
+ *
+ * #72's first fold made `cardClasses` throw on an unknown variant, which was right for the
+ * build path and wrong for the render path: Lit rejects `updateComplete`, `render()` never
+ * returns a tree, and the element paints an EMPTY shadow root — no `<div part="card">`, no
+ * `<slot>`, so its light-DOM children vanish. Pass 2 measured exactly that. `variant` is
+ * untrusted markup input; blanking the element is worse than mis-tinting it.
+ *
+ * Neither half was asserted anywhere, which is why the regression was free to happen.
+ */
+test('an unknown variant degrades on the RENDER path — the card still paints and still slots', async () => {
+  const el = document.createElement('sk-card');
+  el.setAttribute('variant', 'definitely-not-a-variant');
+  el.textContent = 'IMPORTANT SLOTTED CONTENT';
+  document.body.append(el);
+
+  const warnings: unknown[][] = [];
+  const realWarn = console.warn;
+  console.warn = (...args: unknown[]) => void warnings.push(args);
+  try {
+    await (el as unknown as { updateComplete: Promise<unknown> }).updateComplete;
+  } finally {
+    console.warn = realWarn;
+  }
+
+  const inner = el.shadowRoot!.querySelector('[part="card"]') as HTMLElement | null;
+  expect(inner, 'the card must still render a part — a throw in render() blanks the root').not.toBe(
+    null,
+  );
+  expect(inner!.classList.contains('sk-card')).toBe(true);
+  // Degraded, not decorated with a garbage class.
+  expect(inner!.className.trim()).toBe('sk-card');
+  // The slot survives, so light-DOM children are still painted.
+  expect(el.shadowRoot!.querySelector('slot'), 'the slot must survive').not.toBe(null);
+  expect((el.shadowRoot!.querySelector('slot') as HTMLSlotElement).assignedNodes().length).toBe(1);
+  // And it is not silent.
+  expect(warnings.length, 'degrading must warn — fail-open with no signal is what this replaced').toBe(1);
+  expect(String(warnings[0]?.[0])).toContain('definitely-not-a-variant');
+});
+
+test('an unknown variant THROWS on the authoring path — a bad variant never reaches generated output', () => {
+  expect(() => cardStaticHtml('definitely-not-a-variant')).toThrow(/unknown card variant/);
+  // Prototype-chain keys are not variants. `in` reached them and emitted
+  // `sk-card function Object() { [native code] }` into real markup.
+  for (const key of ['constructor', '__proto__', 'toString', 'hasOwnProperty']) {
+    expect(() => cardStaticHtml(key), `${key} must not be accepted`).toThrow(/unknown card variant/);
+    expect(cardClasses(key).trim(), `${key} must degrade to the base card`).toBe('sk-card');
+  }
+  // The known variants still work on both paths.
+  expect(cardStaticHtml('blue')).toContain('sk-card--blue');
+  expect(cardClasses('purple')).toContain('sk-card--purple');
 });

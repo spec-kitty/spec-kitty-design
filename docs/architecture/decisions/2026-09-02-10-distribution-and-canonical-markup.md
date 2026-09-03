@@ -89,9 +89,14 @@ The docsite consumes `@spec-kitty/styles` only. DSD reached Baseline *widely ava
 1. `sk-card` renders identically from the ESM build in a bundler app and from the classic-script build in a bundler-free `file://` page, with `adoptedStyleSheets.length === 1` and zero `<style>` elements in both.
    **✅ Confirmed by #72**, asserted in `apps/storybook/src/tests/elements-load.spec.ts`
    (`[ADR-10 C#1]`) and re-derived on every CI run — both builds upgrade, both report
-   `adoptedStyleSheets.length === 1` and zero `<style>`, and both render the same text.
+   `adoptedStyleSheets.length === 1` and zero `<style>`, and both render the same shadow
+   tree, `<div part="card" class="sk-card sk-card--blue"><slot>`, compared as markup with
+   Lit's marker comments stripped.
    Recorded here rather than in a PR body: #72 first claimed this confirmation in prose while
-   `sk-card` appeared in that spec zero times, and three pre-merge lenses caught it.
+   `sk-card` appeared in that spec zero times, and three pre-merge lenses caught it. The
+   first attempt to close that then compared shadow `textContent`, which is empty for a
+   root whose only text sits behind a `<slot>` — it asserted `'' === ''`. Pass 2 measured
+   it. "Renders identically" is worth recording only if the compared value can differ.
 2. The generated static `.html` for a component regenerates byte-identically in CI, and contains no Lit marker comments.
    **✅ Confirmed by #72** — `scripts/build-element-markup.mjs --check`, enforced in
    `lint-code`. Note the generated file is NOT byte-identical to the hand-authored one it

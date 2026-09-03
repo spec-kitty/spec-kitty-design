@@ -17,6 +17,42 @@
         },
         {
           "kind": "function",
+          "name": "isCardVariant",
+          "return": {
+            "type": {
+              "text": "variant is CardVariant"
+            }
+          },
+          "parameters": [
+            {
+              "name": "variant",
+              "type": {
+                "text": "string"
+              }
+            }
+          ],
+          "description": "Whether `variant` names a real card modifier."
+        },
+        {
+          "kind": "function",
+          "name": "unknownVariantMessage",
+          "return": {
+            "type": {
+              "text": "string"
+            }
+          },
+          "parameters": [
+            {
+              "name": "variant",
+              "type": {
+                "text": "string"
+              }
+            }
+          ],
+          "description": "The shared diagnostic for an unrecognised variant."
+        },
+        {
+          "kind": "function",
           "name": "cardClasses",
           "return": {
             "type": {
@@ -35,7 +71,8 @@
               "name": "inset",
               "default": "false"
             }
-          ]
+          ],
+          "description": "The card's class list. An unknown `variant` warns and degrades to the base card."
         },
         {
           "kind": "function",
@@ -66,7 +103,7 @@
         },
         {
           "kind": "class",
-          "description": "The card primitive — the first real component on the ADR-8 base layer.\n\nTHE PART DESCRIPTION IS PUBLISHED API — IDE hovers and docs sites render it, and the\nanalyzer takes everything after `@csspart card - ` up to the next tag. An unterminated tag\nswallowed this entire docblock into custom-elements.json, so all prose lives ABOVE the tag\nblock. The ADR-9 rule is that a consumer restyles through the part, never by reaching into\nthe shadow tree.",
+          "description": "The card primitive — the first real component on the ADR-8 base layer.",
           "name": "SkCard",
           "cssParts": [
             {
@@ -188,6 +225,30 @@
           "name": "cardStaticHtml",
           "declaration": {
             "name": "cardStaticHtml",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "isCardVariant",
+          "declaration": {
+            "name": "isCardVariant",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "CardVariant",
+          "declaration": {
+            "name": "CardVariant",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "unknownVariantMessage",
+          "declaration": {
+            "name": "unknownVariantMessage",
             "module": "./dist/index.js"
           }
         }
