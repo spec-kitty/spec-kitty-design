@@ -102,4 +102,38 @@ export abstract class FormControlBase extends LitElement {
   get error(): string {
     return this.internals.validationMessage;
   }
+
+  /**
+   * Set or clear a validation error the element cannot derive itself — a server-side rejection,
+   * a cross-field rule. Pass `null` to clear it.
+   *
+   * This exists because a lens found the only lever a consumer HAD was `el.invalid = true`,
+   * and that produced the worst possible state: `:host([invalid])` painted the field red,
+   * `aria-invalid` said `true`, `aria-describedby` pointed at an error node rendering the
+   * EMPTY string — because `setValidity` had never been called — and `internals.validity.valid`
+   * stayed `true`, so the form submitted anyway. An error identified visually with no
+   * programmatic text, on a control that still submits (WCAG 3.3.1).
+   *
+   * Routing through `setValidity` keeps the one-source-of-truth the `error` getter above
+   * argues for: validity is the state, `invalid` and the message are both derived from it.
+   */
+  setCustomError(message: string | null): void {
+    const control = this.shadowRoot?.querySelector('input, textarea') ?? undefined;
+    if (message) this.internals.setValidity({ customError: true }, message, control as HTMLElement);
+    else this.internals.setValidity({});
+    this.customError = message ?? '';
+    // `customError` is deliberately NOT a reactive property — it is internal bookkeeping, and
+    // making it reactive would publish it. So the reflected state is set here explicitly;
+    // otherwise nothing schedules an update and the host attribute never changes, which is
+    // exactly how the first version of this method failed its own test.
+    this.invalid = Boolean(message);
+  }
+
+  /** Non-empty while a consumer-supplied error is active. Read by each element's `validate()`
+   *  so a derived rule cannot silently clobber a server-side one. */
+  protected customError = '';
+
+  /** Reflected invalid state. Declared here so `setCustomError` can set it; each element
+   *  registers it as a reactive property so the adopted sheet's `:host([invalid])` can see it. */
+  declare invalid: boolean;
 }

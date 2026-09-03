@@ -42,6 +42,12 @@ jobs:
             tokens:
               - 'packages/tokens/**'
             components:
+              - 'expected-stories.json'   # the story ratchet run-axe-storybook.js enforces
+              - 'expected-parts.json'      # the ::part() ratchet
+              - 'behaviours.json'          # the behaviour registry the floor reporter reads
+              - 'mutations.json'
+              - 'mutations.selftest.json'
+              - 'suite-budget.json'
               - 'tsconfig.base.json'
               # `packages/**`, not a hand-written list of two. storybook:build's own
               # inputs already glob `packages/*/src/**/*` and `packages/*/package.json`

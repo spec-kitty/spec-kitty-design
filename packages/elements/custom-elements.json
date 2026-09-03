@@ -157,6 +157,42 @@
               },
               "description": "READ-ONLY, derived from validity — never a settable property.\n\nA settable `error` alongside `setValidity` is two sources of truth: `error=\"…\"` would paint\nthe error state on an element that still matches `:valid` and submits happily, the story\nwould render red, axe would pass, and nothing would notice.",
               "readonly": true
+            },
+            {
+              "kind": "method",
+              "name": "setCustomError",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "message",
+                  "type": {
+                    "text": "string | null"
+                  }
+                }
+              ],
+              "description": "Set or clear a validation error the element cannot derive itself — a server-side rejection,\na cross-field rule. Pass `null` to clear it.\n\nThis exists because a lens found the only lever a consumer HAD was `el.invalid = true`,\nand that produced the worst possible state: `:host([invalid])` painted the field red,\n`aria-invalid` said `true`, `aria-describedby` pointed at an error node rendering the\nEMPTY string — because `setValidity` had never been called — and `internals.validity.valid`\nstayed `true`, so the form submitted anyway. An error identified visually with no\nprogrammatic text, on a control that still submits (WCAG 3.3.1).\n\nRouting through `setValidity` keeps the one-source-of-truth the `error` getter above\nargues for: validity is the state, `invalid` and the message are both derived from it."
+            },
+            {
+              "kind": "field",
+              "name": "customError",
+              "type": {
+                "text": "string"
+              },
+              "privacy": "protected",
+              "default": "''",
+              "description": "Non-empty while a consumer-supplied error is active. Read by each element's `validate()`\nso a derived rule cannot silently clobber a server-side one."
+            },
+            {
+              "kind": "field",
+              "name": "invalid",
+              "type": {
+                "text": "boolean"
+              },
+              "description": "Reflected invalid state. Declared here so `setCustomError` can set it; each element\nregisters it as a reactive property so the adopted sheet's `:host([invalid])` can see it."
             }
           ],
           "superclass": {
@@ -365,18 +401,6 @@
               "attribute": "placeholder"
             },
             {
-              "kind": "field",
-              "name": "invalid",
-              "privacy": "public",
-              "type": {
-                "text": "boolean"
-              },
-              "description": "Reflected so the adopted sheet can see the state from inside via `:host([invalid])` — a\ndescendant selector on a state-carrying ancestor would be inert once adopted (#72).",
-              "default": "false",
-              "attribute": "invalid",
-              "reflects": true
-            },
-            {
               "kind": "method",
               "name": "syncFormValue",
               "privacy": "private",
@@ -427,6 +451,22 @@
               "kind": "field",
               "name": "#onInput",
               "privacy": "private"
+            },
+            {
+              "kind": "field",
+              "name": "invalid",
+              "type": {
+                "text": "boolean"
+              },
+              "description": "Reflected invalid state. Declared here so `setCustomError` can set it; each element\nregisters it as a reactive property so the adopted sheet's `:host([invalid])` can see it.",
+              "privacy": "public",
+              "default": "false",
+              "attribute": "invalid",
+              "reflects": true,
+              "inheritedFrom": {
+                "name": "FormControlBase",
+                "module": "packages/elements/src/form-control-base.ts"
+              }
             },
             {
               "kind": "field",
@@ -648,6 +688,42 @@
               },
               "description": "READ-ONLY, derived from validity — never a settable property.\n\nA settable `error` alongside `setValidity` is two sources of truth: `error=\"…\"` would paint\nthe error state on an element that still matches `:valid` and submits happily, the story\nwould render red, axe would pass, and nothing would notice.",
               "readonly": true,
+              "inheritedFrom": {
+                "name": "FormControlBase",
+                "module": "packages/elements/src/form-control-base.ts"
+              }
+            },
+            {
+              "kind": "method",
+              "name": "setCustomError",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "message",
+                  "type": {
+                    "text": "string | null"
+                  }
+                }
+              ],
+              "description": "Set or clear a validation error the element cannot derive itself — a server-side rejection,\na cross-field rule. Pass `null` to clear it.\n\nThis exists because a lens found the only lever a consumer HAD was `el.invalid = true`,\nand that produced the worst possible state: `:host([invalid])` painted the field red,\n`aria-invalid` said `true`, `aria-describedby` pointed at an error node rendering the\nEMPTY string — because `setValidity` had never been called — and `internals.validity.valid`\nstayed `true`, so the form submitted anyway. An error identified visually with no\nprogrammatic text, on a control that still submits (WCAG 3.3.1).\n\nRouting through `setValidity` keeps the one-source-of-truth the `error` getter above\nargues for: validity is the state, `invalid` and the message are both derived from it.",
+              "inheritedFrom": {
+                "name": "FormControlBase",
+                "module": "packages/elements/src/form-control-base.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "customError",
+              "type": {
+                "text": "string"
+              },
+              "privacy": "protected",
+              "default": "''",
+              "description": "Non-empty while a consumer-supplied error is active. Read by each element's `validate()`\nso a derived rule cannot silently clobber a server-side one.",
               "inheritedFrom": {
                 "name": "FormControlBase",
                 "module": "packages/elements/src/form-control-base.ts"
@@ -718,7 +794,6 @@
               "type": {
                 "text": "boolean"
               },
-              "description": "Reflected so the adopted sheet can see the state from inside via `:host([invalid])` — a\ndescendant selector on a state-carrying ancestor would be inert once adopted (#72).",
               "default": "false",
               "fieldName": "invalid"
             }
@@ -744,7 +819,7 @@
               "name": "label"
             },
             {
-              "description": "the input",
+              "description": "the multi-line control",
               "name": "control"
             },
             {
@@ -776,18 +851,6 @@
               },
               "default": "''",
               "attribute": "placeholder"
-            },
-            {
-              "kind": "field",
-              "name": "invalid",
-              "privacy": "public",
-              "type": {
-                "text": "boolean"
-              },
-              "description": "Reflected so the adopted sheet can see the state from inside via `:host([invalid])` — a\ndescendant selector on a state-carrying ancestor would be inert once adopted (#72).",
-              "default": "false",
-              "attribute": "invalid",
-              "reflects": true
             },
             {
               "kind": "method",
@@ -840,6 +903,22 @@
               "kind": "field",
               "name": "#onInput",
               "privacy": "private"
+            },
+            {
+              "kind": "field",
+              "name": "invalid",
+              "type": {
+                "text": "boolean"
+              },
+              "description": "Reflected invalid state. Declared here so `setCustomError` can set it; each element\nregisters it as a reactive property so the adopted sheet's `:host([invalid])` can see it.",
+              "privacy": "public",
+              "default": "false",
+              "attribute": "invalid",
+              "reflects": true,
+              "inheritedFrom": {
+                "name": "FormControlBase",
+                "module": "packages/elements/src/form-control-base.ts"
+              }
             },
             {
               "kind": "field",
@@ -1065,6 +1144,42 @@
                 "name": "FormControlBase",
                 "module": "packages/elements/src/form-control-base.ts"
               }
+            },
+            {
+              "kind": "method",
+              "name": "setCustomError",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "message",
+                  "type": {
+                    "text": "string | null"
+                  }
+                }
+              ],
+              "description": "Set or clear a validation error the element cannot derive itself — a server-side rejection,\na cross-field rule. Pass `null` to clear it.\n\nThis exists because a lens found the only lever a consumer HAD was `el.invalid = true`,\nand that produced the worst possible state: `:host([invalid])` painted the field red,\n`aria-invalid` said `true`, `aria-describedby` pointed at an error node rendering the\nEMPTY string — because `setValidity` had never been called — and `internals.validity.valid`\nstayed `true`, so the form submitted anyway. An error identified visually with no\nprogrammatic text, on a control that still submits (WCAG 3.3.1).\n\nRouting through `setValidity` keeps the one-source-of-truth the `error` getter above\nargues for: validity is the state, `invalid` and the message are both derived from it.",
+              "inheritedFrom": {
+                "name": "FormControlBase",
+                "module": "packages/elements/src/form-control-base.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "customError",
+              "type": {
+                "text": "string"
+              },
+              "privacy": "protected",
+              "default": "''",
+              "description": "Non-empty while a consumer-supplied error is active. Read by each element's `validate()`\nso a derived rule cannot silently clobber a server-side one.",
+              "inheritedFrom": {
+                "name": "FormControlBase",
+                "module": "packages/elements/src/form-control-base.ts"
+              }
             }
           ],
           "attributes": [
@@ -1131,7 +1246,6 @@
               "type": {
                 "text": "boolean"
               },
-              "description": "Reflected so the adopted sheet can see the state from inside via `:host([invalid])` — a\ndescendant selector on a state-carrying ancestor would be inert once adopted (#72).",
               "default": "false",
               "fieldName": "invalid"
             }
@@ -1349,6 +1463,14 @@
           "name": "define",
           "declaration": {
             "name": "define",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "registeredTags",
+          "declaration": {
+            "name": "registeredTags",
             "module": "./dist/index.js"
           }
         },

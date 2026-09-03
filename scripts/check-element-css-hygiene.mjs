@@ -5,7 +5,12 @@
  *   1. No `is-focused`-style class that simulates a state the browser owns. The static sheets
  *      needed one to show focus in a screenshot; an element that can have real focus has no
  *      business shipping a simulation, and it tells the accessibility tree something untrue.
- *   2. No `var()` fallback naming a custom property that @spec-kitty/tokens does not define.
+ *   2. No `var()` reference to a custom property that @spec-kitty/tokens does not define.
+ *
+ * SCOPE: the sheets an ELEMENT adopts. The two examples below both live in
+ * `packages/styles/src/form-field/sk-form-field.css`, which has no element and is therefore
+ * NEVER OPENED by this gate — it is published `@spec-kitty/styles@1.0.0` surface that #74
+ * deliberately left untouched. A lens pointed out the docstring read as repository-wide.
  *      `min-height: var(--sk-space-30, 120px)` in the legacy form-field sheet is a hardcoded
  *      120px wearing a token's clothes — `--sk-space-30` exists nowhere, the scale runs 1..12,
  *      and `min-height` is not in stylelint's strict-value property list so nothing objected.
@@ -58,16 +63,38 @@ for (const name of elements) {
     root.walkRules((rule) => {
       ruleCount += 1;
       const line = rule.source?.start?.line ?? 0;
-      if (/\.is-[a-z-]*(focus|hover|active)/i.test(rule.selector)) {
+      // BROADER THAN `.is-`, because the message claims a semantic property and the first
+      // version implemented a two-token denylist. A lens got `.is-disabled`, `.is-checked`,
+      // `.isFocused`, `--focused` and `[data-focus]` all past it — and `.is-disabled` is the
+      // exact browser-owned state this mission spent a finding on.
+      const STATES = 'focus|focused|hover|hovered|active|disabled|checked|invalid|required|visited';
+      const simulated = new RegExp(`[.\\[](?:is[-_]?|state[-_]|data-)?[a-z-]*(?:${STATES})\\b`, 'i');
+      // A real pseudo-class in the same compound means the author is using the platform state,
+      // so `.sk-x__control:disabled` and `:host([invalid])` are fine; a CLASS or ATTRIBUTE
+      // spelling the state is not.
+      // ARIA attributes are EXEMPT: `[aria-invalid="true"]` reflects real state into the
+      // accessibility tree — it is the platform surface, not a simulation of it. Stripping
+      // pseudo-classes too, so `:disabled` and `:host([invalid])` (the reflected
+      // ElementInternals state the adopted sheet must see) do not trip the rule they exist to
+      // satisfy. Caught by running the widened rule against this mission's own sheets.
+      const stripped = rule.selector
+        .replace(/:[a-z-]+(\([^)]*\))?/gi, '')
+        .replace(/\[aria-[^\]]*\]/gi, '');
+      if (simulated.test(stripped)) {
         problems.push(
-          `${file}:${line} — ${rule.selector.trim()} — a class simulating a state the browser ` +
-            `owns; use the real pseudo-class`
+          `${file}:${line} — ${rule.selector.trim()} — a class or attribute simulating a state ` +
+            `the browser owns; use the real pseudo-class`
         );
       }
     });
     root.walkDecls((decl) => {
       const line = decl.source?.start?.line ?? 0;
-      for (const m of decl.value.matchAll(/var\(\s*(--sk-[a-z0-9-]+)\s*,/g)) {
+      // EVERY `--sk-*` reference, not only those followed by a comma. The first version matched
+      // `var(--sk-x, fallback)` alone, so `var(--sk-space-99)` with NO fallback passed — and
+      // that is the worse defect the docstring describes, because the declaration silently
+      // drops at computed-value time instead of quietly using a hardcoded number. Nested
+      // `var(--a, var(--b))` was missed for the same reason.
+      for (const m of decl.value.matchAll(/var\(\s*(--sk-[a-z0-9-]+)/g)) {
         if (!defined.has(m[1])) {
           problems.push(
             `${file}:${line} — ${decl.prop}: ${decl.value.trim()} — ${m[1]} is defined nowhere in ` +

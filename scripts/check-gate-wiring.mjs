@@ -116,6 +116,10 @@ else {
     [/node\s+scripts\/check-elements-entries\.mjs(?!\s*--selftest)(\s|$)/, 'the distribution-entry gate', 'scripts/check-elements-entries.mjs'],
     [/node\s+scripts\/check-elements-entries\.mjs\s+--selftest(\s|$)/, "the distribution-entry gate's own probe table", 'scripts/check-elements-entries.mjs --selftest'],
     [/node\s+scripts\/typecheck-all\.mjs(\s|$)/, 'the derived typecheck', 'scripts/typecheck-all.mjs'],
+    // Added with the gate itself this time. #74 shipped check-element-css-hygiene.mjs without an
+    // entry here, and a lens demonstrated the consequence: delete both its CI lines and this
+    // checker still printed green. That is the defect this list was created for, one gate later.
+    [/node\s+scripts\/check-element-css-hygiene\.mjs(\s|$)/, 'the adopted-CSS hygiene gate', 'scripts/check-element-css-hygiene.mjs'],
   ];
 
   /** A step that cannot fail the job is a step that is not running (B, C, D, E). */

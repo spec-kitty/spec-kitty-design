@@ -1,4 +1,4 @@
-export { define } from './define.js';
+export { define, registeredTags } from './define.js';
 export { SkStub } from './stub/sk-stub.js';
 export { SkCard } from './card/sk-card.js';
 export { SkNavPill } from './nav-pill/sk-nav-pill.js';

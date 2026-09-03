@@ -72,8 +72,12 @@ Those look contradictory and are not: **they are different bases, and partly a
 different component.** ADR-10's SP-3 spike measured \`sk-card\`, not \`sk-stub\`.
 
 - ADR-10 §2's two figures are **unminified raw on \`sk-card\` ALONE** (3.7 / 26.6 KB).
-- ADR-8's ~6 KB is **minified+gzip** — corroborated here: the IIFE measures
-  ${kb(ARTIFACTS[1].mingzip)} min+gzip, directly measured. Note the basis: that artifact now
+- ADR-8's ~6 KB is **minified+gzip**, and the IIFE now measures ${kb(ARTIFACTS[1].mingzip)}
+  min+gzip — which does NOT corroborate it and is not meant to. That figure was a per-component
+  Lit-runtime estimate; this artifact carries the runtime plus every component in the package,
+  so the two are different bases and the gap grows with each component added. An earlier
+  revision kept the word "corroborated" through an edit that changed the number, which is the
+  stale-prose shape this whole section argues against. Note the basis: that artifact now
   carries ${COMPONENTS.length} component(s) (${COMPONENTS.join(', ')}), which is why the figure
   rose from the 7.7 KiB recorded when it held \`sk-stub\` alone. The component list is derived;
   an earlier version of this sentence hardcoded the mission number that added the second one,

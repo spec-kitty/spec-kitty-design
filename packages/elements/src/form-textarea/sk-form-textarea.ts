@@ -31,7 +31,7 @@ import sheet from './sk-form-textarea.css.js';
  *
  * @csspart field - the field wrapper
  * @csspart label - the label
- * @csspart control - the input
+ * @csspart control - the multi-line control
  * @csspart description - the helper text
  * @csspart error - the validation message
  */
@@ -63,9 +63,6 @@ export class SkFormTextarea extends FormControlBase {
 
   declare rows: number;
   declare placeholder: string;
-  /** Reflected so the adopted sheet can see the state from inside via `:host([invalid])` — a
-   *  descendant selector on a state-carrying ancestor would be inert once adopted (#72). */
-  declare invalid: boolean;
 
   constructor() {
     super();
@@ -74,12 +71,26 @@ export class SkFormTextarea extends FormControlBase {
     this.invalid = false;
   }
 
+  // VALIDATION RUNS BEFORE RENDER, not after.
+  //
+  // It was in `updated()`, which meant `validate()` set the reactive `invalid` property AFTER
+  // the render that reads it — scheduling a second pass. A consumer doing
+  // `el.value = x; await el.updateComplete` then reading the DOM got a STALE `aria-invalid`,
+  // and since the adopted sheet paints the error border with `[aria-invalid="true"]` and hides
+  // the message with `:host(:not([invalid]))`, the visible state lagged too. Found by the test
+  // added for the `aria-invalid` mutation survivor, which failed on the second half.
+  //
+  // `willUpdate` is the Lit-sanctioned place to derive state from changed properties: setting a
+  // reactive property here is folded into the same update rather than queueing another.
+  willUpdate(changed: Map<string, unknown>) {
+    if (changed.has('value') || changed.has('required')) this.validate();
+  }
+
   updated(changed: Map<string, unknown>) {
     // MUTATION ANCHOR SC-002 — a native form submit produces the expected FormData entry.
     // The form value must track the PROPERTY, not just the initial state: `el.value = 'x'`
     // submitting the old value is a real failure the fixture records.
     if (changed.has('value') || changed.has('disabled')) this.syncFormValue();
-    if (changed.has('value') || changed.has('required')) this.validate();
   }
 
   /** The only `setFormValue` call site in this element. */
@@ -103,6 +114,13 @@ export class SkFormTextarea extends FormControlBase {
   }
 
   private validate(): void {
+    // A consumer-supplied error via `setCustomError()` outranks a derived rule and is not
+    // clobbered by the next keystroke. Without this, typing one character into a field the
+    // server rejected would silently clear the server's message.
+    if (this.customError) {
+      this.invalid = true;
+      return;
+    }
     const control = this.shadowRoot?.querySelector('textarea') ?? undefined;
     if (this.required && this.value === '') {
       // MUTATION ANCHOR SC-003 — setValidity blocks submission and the message reaches the

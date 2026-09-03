@@ -480,8 +480,21 @@ if (require.main === module) (async () => {
   // `Default` story reported green over one state. NFR-003 named that defect and supplied no
   // mechanism; this is the mechanism. Shrink-only: adding stories is free, removing a listed
   // one fails here by name.
+  // ABSENCE IS A FAILURE, not "no declared stories".
+  //
+  // This shipped as `if (existsSync(expectedPath))` — so `rm expected-stories.json` disarmed the
+  // whole arm silently and the gate printed green. All four pre-merge lenses found it
+  // independently, and the sibling gate added for the same purpose refuses exactly this, in as
+  // many words: check-part-ratchet.mjs — "Absence is a failure, not zero parts… refusing to
+  // treat its absence as 'no parts'." One file over, the opposite was written.
   const expectedPath = 'expected-stories.json';
-  if (existsSync(expectedPath)) {
+  if (!existsSync(expectedPath)) {
+    console.error(`❌ ${expectedPath} is missing — refusing to treat its absence as "no declared`);
+    console.error('   stories". A ratchet you can disarm with `rm` is not a ratchet.');
+    server.close();
+    process.exit(1);
+  }
+  {
     const expected = JSON.parse(readFileSync(expectedPath, 'utf8'));
     const declared = Object.values(expected.byElement ?? {}).flat();
     if (declared.length === 0) {

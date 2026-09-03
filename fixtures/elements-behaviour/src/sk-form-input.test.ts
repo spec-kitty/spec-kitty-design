@@ -16,6 +16,8 @@ import '@spec-kitty/elements';
  */
 
 type Input = HTMLElement & {
+  name: string;
+  setCustomError(message: string | null): void;
   value: string;
   label: string;
   description: string;
@@ -197,4 +199,141 @@ test('two instances in one form do not collide (SC-208)', async () => {
   expect(data.get('email')).toBe('ada@team.com');
   expect(data.get('backup')).toBe('grace@team.com');
   expect(form.querySelectorAll('[id]').length, 'no id may reach the light DOM').toBe(0);
+});
+
+/**
+ * THE CONSUMER SURFACE — everything above this line is form association, and a pre-merge lens
+ * showed that was all these tests covered.
+ *
+ * It applied 43 mutations and 15 survived a green 54-test suite, then proved ten of them were
+ * coverage gaps rather than equivalent mutants by writing the missing probe and showing it
+ * reds one-to-one. Every test below corresponds to one of those survivors. They are the parts
+ * of the element a consumer touches first: typing, the displayed value, the description, the
+ * invalid state, and the property routes for `name` and `disabled`.
+ */
+
+test('typing into the control updates the value and the submission', async () => {
+  // SURVIVOR: deleting `@input=${this.#onInput}`. SC-002 only ever writes `el.value = …` from
+  // script, so the round trip `user types → property → FormData` had no witness at all — on the
+  // element's primary interaction.
+  const [form, el] = await mount({ name: 'email' });
+  const c = control(el);
+  c.value = 'typed@team.com';
+  c.dispatchEvent(new Event('input', { bubbles: true }));
+  await el.updateComplete;
+
+  expect(el.value, 'the property must follow the control').toBe('typed@team.com');
+  expect(new FormData(form).get('email'), 'and so must the submission').toBe('typed@team.com');
+});
+
+test('the visible control displays the value', async () => {
+  // SURVIVOR: deleting `.value=${this.value}`. The field submitted correctly while rendering
+  // EMPTY — SC-002 reads FormData and the setFormValue spy, and neither looks at what the user
+  // sees.
+  const [, el] = await mount({ name: 'email' }, 'ada@team.com');
+  expect(control(el).value, 'a field that submits but shows nothing passes every other gate').toBe(
+    'ada@team.com',
+  );
+});
+
+test('[SC-005] setting the disabled PROPERTY excludes the field from submission', async () => {
+  // SURVIVOR: dropping `changed.has('disabled')` from the updated() sync guard. The other
+  // [SC-005] test uses the direct callback, which is the only route that both fires the callback
+  // and leaves the exclusion observable — but `el.disabled = true` is the ORDINARY consumer API
+  // (a declared reactive property), and line 81 is the only thing that serves it.
+  const [form, el] = await mount({ name: 'email' }, 'ada@team.com');
+  el.disabled = true;
+  await el.updateComplete;
+  expect(new FormData(form).has('email'), 'the property route must exclude too').toBe(false);
+});
+
+test('setting the name PROPERTY produces the FormData key', async () => {
+  // SURVIVOR: dropping `reflect: true` from `name`. Every other test sets it with setAttribute,
+  // so reflection — which is what makes the JS route reach ElementInternals — was never
+  // exercised.
+  const form = document.createElement('form');
+  const el = document.createElement('sk-form-input') as Input;
+  form.append(el);
+  document.body.append(el.parentElement!);
+  el.name = 'email';
+  el.value = 'ada@team.com';
+  await el.updateComplete;
+  expect(new FormData(form).get('email')).toBe('ada@team.com');
+});
+
+test('the description reaches the control accessible description', async () => {
+  // SURVIVOR: dropping `description` from the describedBy computation.
+  //
+  // This is the element's own headline rationale — "`description` is a property rather than a
+  // slot: it reaches the control through aria-describedby" — and it was the one claim in the
+  // file with no test. SC-003 asserts the ERROR path only; SC-013 asserts the description PART
+  // exists, not that anything references it. It is also the inference raised as operator
+  // question 3 on #74, so it is the last thing that should have been unasserted.
+  const [, el] = await mount({ name: 'email', description: "We'll never share it." });
+  await expect.element(control(el)).toHaveAccessibleDescription(/never share it/);
+});
+
+test('the invalid state reaches the accessibility tree and the host attribute', async () => {
+  // TWO SURVIVORS in one behaviour, both of which break the rendering as well as the a11y tree:
+  //   * `aria-invalid` hard-coded to "false" — and the adopted sheet paints the error border
+  //     with `[aria-invalid="true"]`, so the invalid state disappears visually too.
+  //   * dropping `reflect: true` from `invalid` — `:host(:not([invalid])) .…__error` is what
+  //     HIDES the error text, so without reflection it is permanently visible. The declaration
+  //     says reflection exists because a descendant selector would be inert once adopted (#72);
+  //     the fix for #72 was itself unguarded.
+  const [, el] = await mount({ name: 'email', label: 'Field', required: '' });
+  await el.updateComplete;
+
+  expect(control(el).getAttribute('aria-invalid'), 'the a11y tree AND the error border').toBe('true');
+  expect(el.hasAttribute('invalid'), 'reflected, or the error text never hides').toBe(true);
+
+  el.value = 'something';
+  await el.updateComplete;
+  expect(control(el).getAttribute('aria-invalid')).toBe('false');
+  expect(el.hasAttribute('invalid')).toBe(false);
+});
+
+test('disabled and required reach the inner control', async () => {
+  // SURVIVORS: dropping `?disabled` / `?required`. Without them the field is excluded from
+  // submission while still being typeable, and loses `required` from the accessibility tree.
+  const [, a] = await mount({ name: 'email', disabled: '' });
+  expect(control(a).disabled, 'excluded but still typeable is worse than either').toBe(true);
+  const [, b] = await mount({ name: 'backup', required: '' });
+  expect(control(b).required).toBe(true);
+});
+
+test('the error node announces, and carries the message text', async () => {
+  // SURVIVORS: removing `role="alert"`, and blanking the error span's text. The live-region
+  // announcement is the half of SC-003 that toHaveAccessibleDescription does not cover.
+  const [, el] = await mount({ name: 'email', label: 'Field', required: '' });
+  await el.updateComplete;
+  const err = el.shadowRoot!.querySelector('[part~="error"]') as HTMLElement;
+  expect(err.getAttribute('role'), 'the message must be announced, not just referenced').toBe('alert');
+  expect(err.textContent!.trim()).toMatch(/Field is required/);
+});
+
+test('a consumer can set a server-side error, and it reaches the a11y tree AND blocks submission', async () => {
+  // The hole a pre-merge lens found: `el.invalid = true` was the ONLY lever a consumer had, and
+  // it produced the worst state available — red border, `aria-invalid="true"`,
+  // `aria-describedby` pointing at an EMPTY error node, and `validity.valid === true` so the
+  // form submitted anyway. An error identified visually with no programmatic text, on a control
+  // that still submits.
+  const [form, el] = await mount({ name: 'email' }, 'taken@team.com');
+  expect(form.checkValidity(), 'precondition: valid before the server speaks').toBe(true);
+
+  el.setCustomError('That address is already registered.');
+  await el.updateComplete;
+
+  expect(form.checkValidity(), 'a server error must block submission').toBe(false);
+  expect(el.hasAttribute('invalid'), 'and reach the sheet through the host attribute').toBe(true);
+  await expect.element(control(el)).toHaveAccessibleDescription(/already registered/);
+
+  // And it must survive a keystroke — a derived rule may not clobber the server's message.
+  el.value = 'taken2@team.com';
+  await el.updateComplete;
+  expect(el.hasAttribute('invalid'), 'typing must not silently clear a server error').toBe(true);
+
+  el.setCustomError(null);
+  await el.updateComplete;
+  expect(form.checkValidity(), 'clearing it restores validity').toBe(true);
 });

@@ -332,6 +332,22 @@
       "file": "packages/elements/src/form-textarea/sk-form-textarea.ts",
       "from": "        part=\"control\"",
       "to": "        data-part=\"control\""
+    },
+    {
+      "id": "SC-005",
+      "subject": "fixtures/elements-behaviour/src/sk-form-input.test.ts",
+      "arm": "the disabled PROPERTY route excludes",
+      "file": "packages/elements/src/form-input/sk-form-input.ts",
+      "from": "    if (changed.has('value') || changed.has('disabled')) this.syncFormValue();",
+      "to": "    if (changed.has('value')) this.syncFormValue();"
+    },
+    {
+      "id": "SC-005",
+      "subject": "fixtures/elements-behaviour/src/sk-form-textarea.test.ts",
+      "arm": "the disabled PROPERTY route excludes",
+      "file": "packages/elements/src/form-textarea/sk-form-textarea.ts",
+      "from": "    if (changed.has('value') || changed.has('disabled')) this.syncFormValue();",
+      "to": "    if (changed.has('value')) this.syncFormValue();"
     }
   ]
 }

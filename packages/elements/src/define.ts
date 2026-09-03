@@ -20,6 +20,21 @@
  * contains no definition named "tag". Do not remove either without replacing the
  * other.
  */
+/**
+ * Every tag this package has registered, in registration order.
+ *
+ * `define()` is the single registration funnel for every shipped element — verified: no direct
+ * `customElements.define` exists outside the test fixtures. So this is the only enumeration of
+ * the package's own elements that cannot be evaded, and there is no DOM API that offers one.
+ *
+ * It exists because `tests/browser/registered-elements.test.ts` originally built its candidate
+ * list from `behaviours.json` — the artifact it was checking. A lens smuggled a second
+ * form-associated element registered from an existing element file and it was invisible to
+ * BOTH lanes: absent from the `sk-*.ts` glob, absent from the manifest, and absent from the
+ * candidate list, so the runtime backstop iterated right past it.
+ */
+export const registeredTags: string[] = [];
+
 export function define(tag: string, ctor: CustomElementConstructor): void {
   const existing = customElements.get(tag);
   if (existing) {
@@ -34,4 +49,5 @@ export function define(tag: string, ctor: CustomElementConstructor): void {
     return;
   }
   customElements.define(tag, ctor);
+  registeredTags.push(tag);
 }

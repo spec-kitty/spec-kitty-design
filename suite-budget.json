@@ -29,11 +29,16 @@
     "EVERY run and is wired into CI, so it reds at whichever commit pushes the set over, not at a",
     "tidy final measurement pass.",
     "",
-    "Local reference on the operator's workstation, chromium, warm cache: 29 mutations / 39 tests",
     "= 57.2s; 34 mutations / 47 tests = 79.5s. Note the harness spawns vitest with `CI: ''`, so it",
     "is CHROMIUM-ONLY \u2014 the second browser affects `ceilingSeconds`, not this one. An earlier plan",
     "draft conflated the two, which is precisely what the note above says the split exists to",
-    "prevent. Neither ceiling is raised: 79.5s of 180s, and the CI number is the one that binds."
+    "prevent. Neither ceiling is raised: 79.5s of 180s, and the CI number is the one that binds.",
+    "",
+    "Numbers at #74's gate fold: 41 mutations / 80 tests = 105.1s locally, chromium-only (the",
+    "harness spawns vitest with `CI: ''`). The BINDING number is CI's, which measured 121.7s at",
+    "39 mutations \u2014 a lens caught the PR body quoting the local figure as though it were the",
+    "ceiling-relevant one. Neither ceiling raised; the margin is now thinner and the next mission",
+    "that adds mutations should expect to raise selftestCeilingSeconds rather than assume it fits."
   ],
   "covers": "npm run test (both lanes, chromium + webkit in CI)",
   "ceilingSeconds": 25,
