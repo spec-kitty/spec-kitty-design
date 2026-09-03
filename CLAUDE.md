@@ -73,7 +73,7 @@ Existing components (use as patterns): `button`, `card`, `check-bullet`, `featur
 - **Title taxonomy** — pick the closest existing root: `Components/`, `Form/`, `Navigation/`, `Primitives/`, `Tags/`, `Tokens/`. Don't invent new top-level groups without a reason.
 - **Required exports per story file:** `Default`, plus variants for state/size/etc., plus `LightMode`. The `LightMode` story is enforced by review, not lint — don't skip it.
 - **Docs strings:** `parameters.docs.description.story` is encouraged for non-obvious behaviour.
-- **JS-dependent components:** when a component depends on a JS module function (e.g. drawer toggling), attach it via a story decorator. Reference pattern: `packages/styles/src/nav-pill/sk-nav-pill.stories.ts` (`CollapsedHamburger`).
+- **JS-dependent components:** when a component depends on a JS module function (e.g. drawer toggling), attach it via a story decorator. Reference pattern: `packages/elements/src/nav-pill/sk-nav-pill.stories.ts` (`Elements/SkNavPill`) — behaviour belongs in a custom element on the ADR-8 base layer, not in a story decorator that assigns to `window`. The `CollapsedHamburger` story this line used to name was removed in #73 along with the helper it wired.
 - **Backgrounds:** the `sk-light` and default backgrounds are configured in the Storybook preview; use `parameters.backgrounds.default: 'sk-light'` for the LightMode variant.
 
 ## 7. Spec Kitty governance

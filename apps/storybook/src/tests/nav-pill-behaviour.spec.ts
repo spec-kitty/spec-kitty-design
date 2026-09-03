@@ -83,7 +83,18 @@ test('sk-nav-pill opens and closes from the deployed artifact and tracks ARIA st
   await expect(hamburger).toHaveAttribute('aria-label', 'Close navigation');
   await expect(items).toBeVisible();
 
+  // A SECOND click closes. This is what `skToggleDrawer` existed to do, and a lens found it
+  // asserted nowhere in either lane: mutating `toggle()` to never close left 37 tests and the
+  // floor green, because the vitest arm only opened and the old version of this spec closed
+  // via Escape.
+  await hamburger.click();
+  await expect(host).not.toHaveAttribute('open', /.*/);
+  await expect(hamburger).toHaveAttribute('aria-expanded', 'false');
+  await expect(items).toBeHidden();
+
   // Escape closes and returns focus to the invoker — the keyboard path, on the real page.
+  await hamburger.click();
+  await expect(host).toHaveAttribute('open', /.*/);
   await page.keyboard.press('Escape');
   await expect(host).not.toHaveAttribute('open', /.*/);
   await expect(hamburger).toHaveAttribute('aria-expanded', 'false');

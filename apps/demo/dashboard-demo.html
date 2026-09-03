@@ -62,7 +62,10 @@
       gap: var(--sk-space-4);
       flex-shrink: 0;
       min-height: 52px;
-      position: relative;
+      /* `position: relative` stood here as the containing block for .dash-nav-drawer-wrap's
+         absolute positioning. Both are gone: there is no `position: absolute` left in this
+         file, and the element establishes its own containing block (:host, in
+         sk-nav-pill-drawer.css). Removing it is the rest of the residue the wrapper left. */
     }
 
     .dash-logo {
@@ -132,7 +135,9 @@
 
     /* -----------------------------------------------------------------------
        Nav pill in header — responsive override
-       The nav-pill sits in the header; the drawer drops below the header
+       The nav-pill sits in the header. The panel drops below the PILL, not below the header:
+       the element owns that positioning now (sk-nav-pill-drawer.css, the :host block), which
+       is the point of removing .dash-nav-drawer-wrap
     ----------------------------------------------------------------------- */
     /* THROUGH THE PART, not into the shadow tree — ADR-9's rule, and the reason the element
        declares `nav` as a ::part(). This used to be `.dash-header .sk-nav-pill`, a class

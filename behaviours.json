@@ -23,7 +23,12 @@
     "Each subject names the FILE that must carry the id. scripts/floor-reporter.mjs checks",
     "coverage per (id, subject file); scripts/suite-selftest.mjs's guard 7 compares mutations",
     "against the same pairs, and a mutation's optional `subject` narrows which file's named",
-    "test it must red."
+    "test it must red.",
+    "",
+    "A subject's `name` is what tests/node/config-contract.test.ts matches against the ELEMENT",
+    "glob, so it names the element (sk-stub, sk-card, sk-nav-pill), not the test file's role. A",
+    "lens added a real element with no entry here and every gate went green \u2014 this registry was",
+    "the last hand-maintained list deciding whether an element is tested at all."
   ],
   "behaviours": [
     {
@@ -208,6 +213,10 @@
         {
           "name": "sk-nav-pill",
           "file": "fixtures/elements-behaviour/src/sk-nav-pill.test.ts"
+        },
+        {
+          "name": "sk-card",
+          "file": "fixtures/elements-behaviour/src/sk-card.test.ts"
         }
       ]
     },
@@ -219,7 +228,7 @@
       "applicable": true,
       "subjects": [
         {
-          "name": "elements-owned",
+          "name": "sk-stub",
           "file": "fixtures/elements-behaviour/src/elements-owned.test.ts"
         }
       ]
@@ -232,7 +241,7 @@
       "applicable": true,
       "subjects": [
         {
-          "name": "elements-owned",
+          "name": "sk-stub",
           "file": "fixtures/elements-behaviour/src/elements-owned.test.ts"
         }
       ]

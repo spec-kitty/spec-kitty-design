@@ -75,8 +75,12 @@ test('[SC-007] the event carries the documented detail shape', async () => {
 test('[SC-008] the event is composed and bubbles as documented', async () => {
   const el = await mount();
   let evt: CustomEvent | null = null;
-  // Listening on DOCUMENT, not on the element: a non-bubbling or non-composed event never
-  // arrives here, which is the only way to tell the two flags actually hold.
+  // Listening on DOCUMENT proves `bubbles` STRUCTURALLY — a non-bubbling event dispatched on
+  // the host never arrives here. It proves nothing about `composed`: the host is in the light
+  // DOM, so the event reaches `document` either way. An earlier comment claimed the structural
+  // check was "the only way to tell the two flags actually hold", which had it backwards, and
+  // a lens measured it: flipping `composed` to false with the direct assertion removed left
+  // the suite green. `composed` is proven by dispatching from INSIDE a shadow root below.
   document.addEventListener('sk-nav-pill-toggle', (e) => void (evt = e as CustomEvent), {
     once: true,
   });
@@ -223,4 +227,141 @@ test('[SC-013] every declared ::part() is present and targetable from outside', 
   } finally {
     style.remove();
   }
+});
+
+test('[SC-008] the event escapes a shadow boundary — the composed flag, proven structurally', async () => {
+  // The host is in the light DOM, so listening on `document` cannot distinguish composed from
+  // non-composed. Nesting the pill inside ANOTHER shadow root can: a non-composed event stops
+  // at that boundary and never reaches the outer document.
+  const wrapper = document.createElement('div');
+  document.body.append(wrapper);
+  const root = wrapper.attachShadow({ mode: 'open' });
+  const el = document.createElement('sk-nav-pill') as Pill;
+  const a = document.createElement('a');
+  a.href = '#';
+  a.textContent = 'Item';
+  el.append(a);
+  root.append(el);
+  await el.updateComplete;
+
+  let reached = false;
+  document.addEventListener('sk-nav-pill-toggle', () => void (reached = true), { once: true });
+  el.open();
+  await el.updateComplete;
+
+  expect(reached, 'a non-composed event would stop at the wrapper shadow boundary').toBe(true);
+});
+
+test('[SC-006] toggle() closes an open panel — the one behaviour skToggleDrawer existed to provide', async () => {
+  const el = await mount();
+  const seen: unknown[] = [];
+  el.addEventListener('sk-nav-pill-toggle', (e) => seen.push(e));
+
+  // From the element's own control, the way a user reaches it.
+  hamburger(el).click();
+  await el.updateComplete;
+  expect(el.isOpen, 'the first activation opens').toBe(true);
+
+  hamburger(el).click();
+  await el.updateComplete;
+  expect(el.isOpen, 'the SECOND activation must close — this survived deletion untested').toBe(false);
+  expect(hamburger(el).getAttribute('aria-expanded')).toBe('false');
+  expect(seen.length, 'one event per change, two changes').toBe(2);
+
+  // And directly, so the method is covered independently of the control.
+  el.toggle();
+  await el.updateComplete;
+  expect(el.isOpen).toBe(true);
+  el.toggle();
+  await el.updateComplete;
+  expect(el.isOpen).toBe(false);
+});
+
+test('[SC-009] the event is dispatched BEFORE the state changes', async () => {
+  // Documented in `@fires`, in the README table and in the class comment — and asserted
+  // nowhere until a lens mutated the element to change state first and revert on cancel,
+  // which every existing test survived because they only read the FINAL state.
+  const el = await mount();
+  const stateAtDispatch: boolean[] = [];
+  el.addEventListener('sk-nav-pill-toggle', () => stateAtDispatch.push(el.isOpen));
+
+  el.open();
+  await el.updateComplete;
+  el.close();
+  await el.updateComplete;
+
+  // Opening: still closed when the listener runs. Closing: still open.
+  expect(stateAtDispatch, 'a listener must see the state it can still prevent').toEqual([false, true]);
+});
+
+test('[SC-012] Escape on a closed panel does not CONSUME the key', async () => {
+  // The guard at sk-nav-pill.ts's #onKeydown says why: "Consumers nest these inside dialogs;
+  // stealing the key from an outer handler is the easy bug here." Deleting that guard left
+  // the older test green — #setOpen is idempotent, so close() on a closed panel fires nothing
+  // and never focuses. The property that was never asserted is that the key is not consumed.
+  const el = await mount();
+
+  const closed = new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true });
+  el.dispatchEvent(closed);
+  await el.updateComplete;
+  expect(closed.defaultPrevented, 'a closed panel must leave Escape for an outer handler').toBe(false);
+
+  el.open();
+  await el.updateComplete;
+  const open = new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true });
+  el.dispatchEvent(open);
+  await el.updateComplete;
+  expect(open.defaultPrevented, 'an open panel consumes the key it acts on').toBe(true);
+  expect(el.isOpen).toBe(false);
+});
+
+test('[SC-012] the invoker is resolved through the composed path, not from document.activeElement', async () => {
+  // `document.activeElement` reports the HOST at each shadow level, so a control inside
+  // another element's shadow root reads as that element, not as the button. The walk in
+  // #activeControl exists for this and was covered by nothing: the existing focus-return test
+  // focuses a light-DOM button, where the walk never runs.
+  const el = await mount();
+  const wrapper = document.createElement('div');
+  document.body.append(wrapper);
+  const root = wrapper.attachShadow({ mode: 'open' });
+  const inner = document.createElement('button');
+  inner.textContent = 'consumer control in a shadow root';
+  root.append(inner);
+  inner.focus();
+
+  expect(document.activeElement, 'precondition: activeElement reports the host').toBe(wrapper);
+
+  el.open();
+  await el.updateComplete;
+
+  // MOVE FOCUS AWAY before closing. Without this the test is fakeable and a lens's mutation
+  // proved it: drop the walk and #invoker becomes the WRAPPER host, whose .focus() silently
+  // does nothing on a non-focusable <div> — so focus never left `inner` and the assertion
+  // passed while the behaviour was gone. Focus has to be somewhere else for "returns" to mean
+  // anything.
+  const elsewhere = document.createElement('button');
+  document.body.append(elsewhere);
+  elsewhere.focus();
+  expect(root.activeElement, 'precondition: focus has left the shadow control').not.toBe(inner);
+
+  el.close();
+  await el.updateComplete;
+
+  expect(
+    document.activeElement,
+    'the recorded invoker must be the wrapper the button lives in, not something else',
+  ).toBe(wrapper);
+  expect(
+    root.activeElement,
+    'focus must return to the button itself, not stop at the wrapper host',
+  ).toBe(inner);
+});
+
+test('the label property reaches the nav\'s accessible name', async () => {
+  // apps/demo/dashboard-demo.html sets label="Dashboard navigation" and expects it to land.
+  const el = await mount();
+  el.setAttribute('label', 'Dashboard navigation');
+  await el.updateComplete;
+  const nav = el.shadowRoot!.querySelector('[part="nav"]') as HTMLElement;
+  expect(nav.getAttribute('aria-label')).toBe('Dashboard navigation');
 });

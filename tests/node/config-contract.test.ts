@@ -1,8 +1,8 @@
 import { expect, test } from 'vitest';
 import { createVitest } from 'vitest/node';
-import { readFileSync, mkdtempSync, writeFileSync, rmSync } from 'node:fs';
+import { readFileSync, mkdtempSync, writeFileSync, rmSync, globSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { basename, join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 /**
@@ -173,5 +173,48 @@ test('[floor] the per-behaviour arm fails when a declared id has no covering tes
     expect(errors.join('\n')).toContain('SC-999');
   } finally {
     rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('[config] every element is a declared behaviour SUBJECT, and every subject list is non-empty', () => {
+  // THE HOLE THE SUBJECT DIMENSION LEFT OPEN.
+  //
+  // #73 gave behaviours.json a `subjects` list so the floor reporter could tell "the fixture
+  // covers SC-006" from "sk-nav-pill covers SC-006". A pre-merge lens then added a real
+  // element to the tree — wired into both distribution entries, own adopted sheet, reflected
+  // property, public method — with NO registry entry and NO test file, and every gate went
+  // green: entries, boundaries, CSS drift, manifest, part ratchet, typecheck, the floor, and
+  // all 21 mutations. The registry that decides whether an element is tested at all was
+  // itself the hand-maintained list this programme removed from the CSS pipeline in #71, from
+  // the markup generator in #72, and from the IIFE entry one commit ago.
+  //
+  // So the obligation is DERIVED from the element glob. Adding an element now fails here
+  // until it is entered as a subject of at least one behaviour.
+  const elements = globSync('packages/elements/src/**/sk-*.ts', {})
+    .filter((f) => /^sk-[a-z0-9-]+\.ts$/.test(basename(f)))
+    .map((f) => basename(f).replace(/^sk-/, '').replace(/\.ts$/, ''))
+    .sort();
+  expect(elements.length, 'no elements found — the glob has drifted').toBeGreaterThan(0);
+
+  const registry = JSON.parse(readFileSync('behaviours.json', 'utf8')) as {
+    behaviours: { id: string; applicable?: boolean; subjects?: { name: string; file: string }[] }[];
+  };
+  const applicable = registry.behaviours.filter((b) => b.applicable !== false);
+
+  // `subjects` is OPTIONAL in the reporter (`b.subjects ?? [null]`) so the mechanism could
+  // land without rewriting every entry. That fallback is the old id-only check — the one that
+  // was green with a whole behaviour file deleted — so nothing may be left on it.
+  for (const b of applicable) {
+    expect(b.subjects, `${b.id} declares no subjects — it falls back to the id-only check`).toBeDefined();
+    expect(b.subjects!.length, `${b.id} declares an empty subjects list`).toBeGreaterThan(0);
+  }
+
+  const named = new Set(applicable.flatMap((b) => (b.subjects ?? []).map((s) => s.name)));
+  for (const el of elements) {
+    expect(
+      named.has(`sk-${el}`),
+      `<sk-${el}> exists but is not a subject of any behaviour in behaviours.json — ` +
+        `it would ship with zero behaviour tests and every gate green`,
+    ).toBe(true);
   }
 });

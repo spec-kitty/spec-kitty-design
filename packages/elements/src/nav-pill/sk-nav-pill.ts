@@ -90,7 +90,10 @@ export class SkNavPill extends LitElement {
 
   #activeControl(): HTMLElement | null {
     let node: Element | null = document.activeElement;
-    // Walk INTO shadow roots: activeElement reports the host at each level.
+    // Walk INTO shadow roots: activeElement reports the host at each level, so a consumer's
+    // control inside their own shadow root reads as that host rather than as the button.
+    // Asserted in the behaviour fixture, and the assertion had to move focus away before
+    // closing to be load-bearing — a host that is not focusable swallows .focus() silently.
     while (node?.shadowRoot?.activeElement) node = node.shadowRoot.activeElement;
     return node instanceof HTMLElement && node !== this ? node : null;
   }

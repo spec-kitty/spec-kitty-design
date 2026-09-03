@@ -73,9 +73,11 @@ different component.** ADR-10's SP-3 spike measured \`sk-card\`, not \`sk-stub\`
 
 - ADR-10 §2's two figures are **unminified raw on \`sk-card\` ALONE** (3.7 / 26.6 KB).
 - ADR-8's ~6 KB is **minified+gzip** — corroborated here: the IIFE measures
-  ${kb(ARTIFACTS[1].mingzip)} min+gzip, directly measured. Note the basis: since #72 that
-  artifact carries ${COMPONENTS.length} component(s) (${COMPONENTS.join(', ')}), which is why
-  the figure rose from the 7.7 KiB recorded when it held \`sk-stub\` alone.
+  ${kb(ARTIFACTS[1].mingzip)} min+gzip, directly measured. Note the basis: that artifact now
+  carries ${COMPONENTS.length} component(s) (${COMPONENTS.join(', ')}), which is why the figure
+  rose from the 7.7 KiB recorded when it held \`sk-stub\` alone. The component list is derived;
+  an earlier version of this sentence hardcoded the mission number that added the second one,
+  which was wrong by the time a third arrived.
 
 The \`sk-card\` figures ADR-10 §2 rests on were inherited from the WP04 prompt when sk-card
 had no element. #72 built it — but the table above is now a MULTI-component total, so it is

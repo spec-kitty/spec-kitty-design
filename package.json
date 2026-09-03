@@ -55,6 +55,7 @@
     "nx": "^22.7.1",
     "playwright": "1.62.1",
     "postcss": "8.5.23",
+    "postcss-selector-parser": "7.1.5",
     "storybook": "^10.6.0",
     "stylelint": "^16.26.1",
     "stylelint-declaration-strict-value": "^1.11.1",

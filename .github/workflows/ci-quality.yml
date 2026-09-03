@@ -177,6 +177,13 @@ jobs:
       # and no warning, and a LightMode story rendering dark styling. Note the check is
       # stricter than ADR-9's four-token enumeration, deliberately: that enumeration catches
       # only half of #72's actual defect (`.sk-light .sk-card--blue` is not in it).
+      # TWO steps, and the second is the one ADR-9 actually asks for: "a lint rule rejects
+      # :root, html, body and :host-context() … WITH A RED-FIRST TEST". The probes existed only
+      # as prose in the script's docstring and in a PR body, which is how three holes survived
+      # review of a file whose entire subject is holes surviving review — a mixed :is() list, a
+      # forbidden token inside :is(), and a bare type selector naming the host all passed.
+      - name: "[ENFORCED] Cross-root selector gate self-check (ADR-9 Confirmation #1)"
+        run: node scripts/check-adopted-css-boundaries.mjs --selftest
       - name: "[ENFORCED] Adopted CSS stays inside the element root (ADR-9 Confirmation #1)"
         run: node scripts/check-adopted-css-boundaries.mjs
       # The IIFE entry was a hand-maintained list of side-effect imports. #73 added an element

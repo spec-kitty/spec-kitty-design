@@ -1,7 +1,12 @@
 /* @spec-kitty/styles — sk-nav-pill-drawer: hamburger trigger + collapsible drawer */
 /* Import this file IN ADDITION TO sk-nav-pill.css for responsive/collapsible nav behaviour. */
 /* Requires: sk-nav-pill.css (base pill layout must be loaded first) */
-/* JS dependency: skToggleDrawer() from sk-nav-pill.js must be wired to the hamburger button */
+/* NO JS SHIPS WITH THIS PACKAGE. The two-container arrangement below is CSS only: something
+   must toggle `is-open` on the drawer, and since #73 that something is the consumer's own
+   code — `<sk-nav-pill>` in @spec-kitty/elements is the supported version and owns its panel.
+   This header used to name a `skToggleDrawer()` helper that no longer exists, and because the
+   sheet is embedded verbatim into the adopted stylesheet it told every consumer of the
+   element to wire a function that had been deleted. */
 
 /* ── Collapsed / hamburger button (mobile) ─────────────────────────────── */
 
@@ -123,8 +128,11 @@
     display: inline-flex;
   }
 
-  /* The row becomes the panel. Same declarations as .sk-nav-pill__drawer.is-open above —
-     the collapsed presentation is the same design, reached by a different arrangement.
+  /* The row becomes the panel. The same DESIGN as .sk-nav-pill__drawer.is-open above,
+     reached by a different arrangement — but not the same declaration list, and the first
+     draft's comment claimed it was. The static drawer animates open from `max-height: 0`
+     because it is always in the tree; this container is `display: none` until the panel
+     opens, so there is no from-state to animate and the transition is deliberately absent.
 
      POSITIONED BY THE ELEMENT, not by the consumer. In the two-container arrangement the
      page had to place the panel itself: dashboard-demo.html carried a .dash-nav-drawer-wrap
@@ -146,7 +154,10 @@
     margin-top: var(--sk-space-2);
   }
 
-  :host([open]) .sk-nav-pill__items ::slotted(a) {
+  /* By CLASS, matching the base sheet — an earlier draft selected `::slotted(a)` by tag, so a
+     slotted <button> item got no panel padding and a classless <a> got panel padding with no
+     base styling. One contract for slotted items, not two. */
+  :host([open]) .sk-nav-pill__items ::slotted(.sk-nav-pill__item) {
     width: 100%;
     border-radius: var(--sk-radius-sm);
     padding: var(--sk-space-3) var(--sk-space-4);

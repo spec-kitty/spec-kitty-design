@@ -100,6 +100,11 @@
    `::slotted()` matches only DIRECTLY assigned children, which is the documented contract:
    nav items are children of <sk-nav-pill>, not grandchildren.
 */
+/* The `transition` below is NOT an oversight and NOT a copy of the static rule's — two lenses
+   independently caught its absence from the first draft of this block. It is here because a
+   slotted item and a static item should behave identically on hover; the seam only exists
+   because `::slotted()` cannot be merged into the static rule's selector list without risking
+   the whole rule being dropped by an engine that does not parse it. */
 ::slotted(.sk-nav-pill__item) {
   display: inline-flex;
   align-items: center;
@@ -110,6 +115,13 @@
   font-weight: var(--sk-weight-normal);
   color: var(--sk-fg-muted);
   text-decoration: none;
+  transition:
+    color var(--sk-motion-duration-fast) var(--sk-motion-ease-out),
+    background-color var(--sk-motion-duration-fast) var(--sk-motion-ease-out);
+}
+
+::slotted(.sk-nav-pill__item--active:hover) {
+  background: var(--sk-bg-pill);
 }
 
 ::slotted(.sk-nav-pill__item--active) {

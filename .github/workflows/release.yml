@@ -29,9 +29,11 @@ jobs:
       - name: Build all packages
         run: npx nx run-many --target=build --projects=tokens,styles,elements
 
-      - name: Copy behavior helper beside compiled output (styles nav-pill drawer)
-        run: cp packages/styles/src/nav-pill/sk-nav-pill.js packages/styles/dist/src/nav-pill/sk-nav-pill.js
-
+      # The `cp sk-nav-pill.js` step that stood here is gone with the helper (#73). It existed
+      # only because @nx/js:tsc copies **/*.{html,css} assets and not .js, and @spec-kitty/styles
+      # no longer ships any .js at all. Note this workflow runs ONLY on a v*.*.* tag, so no PR
+      # check exercises it: the step would have hard-failed the next release before either
+      # `npm publish`, and a pre-merge lens found it by reading rather than by running.
       - name: "[ENFORCED] Dist contents audit — no secrets/sourcemaps (ADR-005)"
         run: |
           for pkg in tokens styles; do

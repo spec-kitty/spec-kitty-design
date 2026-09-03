@@ -83,9 +83,14 @@ id to get wrong and nothing on `window`.
 | Keyboard | Escape closes and returns focus to whatever control opened it |
 | Styling | `::part(nav)`, `::part(items)`, `::part(hamburger)` — ADR-9's rule is that a consumer restyles through the part, never by reaching into the shadow tree |
 
-The two stylesheets in this package are unchanged and still shipped: a static consumer who
-wants the plain desktop pill, or the two-container drawer arrangement without JavaScript, links
-them exactly as before.
+The two stylesheets are unchanged and still shipped, and a static consumer links them exactly
+as before. Two honest caveats, because the first draft of this paragraph got both wrong:
+
+- The plain desktop pill is genuinely CSS-only.
+- The **two-container drawer arrangement was never JavaScript-free**. `.sk-nav-pill__drawer` is
+  `display: none` until `.is-open`, and the only thing that ever set that class was the helper
+  this release removes. The CSS is still here; the consumer now supplies the toggle, or uses
+  `<sk-nav-pill>`, which supplies it.
 
 ## Peer dependencies
 

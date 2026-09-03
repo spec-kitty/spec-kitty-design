@@ -188,6 +188,46 @@
       "file": "packages/elements/src/nav-pill/sk-nav-pill.ts",
       "from": "      <div part=\"items\" class=\"sk-nav-pill__items\" id=\"items\"><slot></slot></div>",
       "to": "      <div class=\"sk-nav-pill__items\" id=\"items\"><slot></slot></div>"
+    },
+    {
+      "id": "SC-013",
+      "subject": "fixtures/elements-behaviour/src/sk-card.test.ts",
+      "arm": "card part present",
+      "file": "packages/elements/src/card/sk-card.ts",
+      "from": "<div part=\"card\" class=${cardClasses(this.variant, this.inset)}>",
+      "to": "<div class=${cardClasses(this.variant, this.inset)}>"
+    },
+    {
+      "id": "SC-006",
+      "subject": "fixtures/elements-behaviour/src/sk-nav-pill.test.ts",
+      "arm": "toggle() closes",
+      "file": "packages/elements/src/nav-pill/sk-nav-pill.ts",
+      "from": "    if (this.isOpen) this.close();\n    else this.open(invoker);",
+      "to": "    this.open(invoker);"
+    },
+    {
+      "id": "SC-009",
+      "subject": "fixtures/elements-behaviour/src/sk-nav-pill.test.ts",
+      "arm": "dispatched before the change",
+      "file": "packages/elements/src/nav-pill/sk-nav-pill.ts",
+      "from": "    if (!this.dispatchEvent(evt)) return;",
+      "to": "    this.isOpen = next;\n    if (!this.dispatchEvent(evt)) {\n      this.isOpen = !next;\n      return;\n    }"
+    },
+    {
+      "id": "SC-012",
+      "subject": "fixtures/elements-behaviour/src/sk-nav-pill.test.ts",
+      "arm": "Escape does not consume the key when closed",
+      "file": "packages/elements/src/nav-pill/sk-nav-pill.ts",
+      "from": "    if (!this.isOpen) return;\n    ke.preventDefault();",
+      "to": "    ke.preventDefault();"
+    },
+    {
+      "id": "SC-012",
+      "subject": "fixtures/elements-behaviour/src/sk-nav-pill.test.ts",
+      "arm": "invoker resolved through the composed path",
+      "file": "packages/elements/src/nav-pill/sk-nav-pill.ts",
+      "from": "    while (node?.shadowRoot?.activeElement) node = node.shadowRoot.activeElement;",
+      "to": "    void 0;"
     }
   ]
 }
