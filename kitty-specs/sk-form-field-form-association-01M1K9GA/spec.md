@@ -194,11 +194,24 @@ CSS-only era where the wrapper carried the `for`/`id` pair the arrangement no lo
   because SC-202 previously named a property with no witness, and the inherited SC-003 test
   asserts `validationMessage` plus focus, neither of which is an accessibility tree.
 - **FR-006**: `label` is a property that names the **control**; no `for`/`id` pair crosses a root.
-- **FR-007**: `packages/styles/src/form-field/index.ts` is **deleted**, along with all eight
-  exports. `packages/styles/src/index.ts` drops its eight re-exports;
-  `packages/styles/src/form-field/sk-form-field-html.stories.ts` is deleted with them; and
-  `docs/design-system/using-components.md` — which documents a `<sk-input-field>` and
-  `.sk-field*` classes that exist nowhere in the repo — is corrected on the same pass.
+- **FR-007**: **ADDITIVE BY DEFAULT — the published surface is left intact.**
+  `packages/styles/src/form-field/` keeps its eight exports, its stylesheet and its stories
+  exactly as they are. The new element stylesheets are *new files in new directories*
+  (FR-012), with new class names (FR-013), and nothing a consumer of `@spec-kitty/styles@1.0.0`
+  links against changes. `docs/design-system/using-components.md` — which documents a
+  `<sk-input-field>` and `.sk-field*` classes that exist nowhere in the repo — is corrected on
+  the same pass, because that is a fix, not a break.
+
+  *Why this replaced "delete the eight exports".* The squad established that
+  `@spec-kitty/styles` is published publicly at 1.0.0, which the programme had been assuming
+  otherwise. Deleting public exports and renaming public classes is a semver-major on a live
+  package — an outward-facing, hard-to-reverse act, and not one to take on my own judgement
+  while a cheaper path exists. The additive path satisfies both gates, ships both elements, and
+  leaves the retirement as a deliberate, separately-approved change.
+
+  **The collapse is therefore DEFERRED, not abandoned.** The duplication is real and #79's
+  repository-wide "no component markup is authored twice" assertion is what forces it. Filed
+  with the reasoning, and the operator's ruling on question 2 can pull it back in.
 
   *No longer deferred to the plan.* The generator has already decided: a `*.markup.ts` here
   would replace `index.ts` wholesale with three exports derived from `<COMPONENT>_VARIANTS`,
@@ -233,9 +246,11 @@ CSS-only era where the wrapper carried the `for`/`id` pair the arrangement no lo
 - **FR-012**: `packages/styles/src/form-field/` is split into `packages/styles/src/form-input/`
   and `packages/styles/src/form-textarea/`, one stylesheet per element directory, so the CSS
   pipeline and the boundary gate can both resolve them (B1).
-- **FR-013**: `.sk-input*` → `.sk-form-input*` and `.sk-textarea*` → `.sk-form-textarea*`, so
-  every rule owns its leftmost compound under its element's name (B2). `audit/index.html`
-  hardcodes `packages/styles/dist/form-field/` paths and is updated with them.
+- **FR-013**: The **new** sheets use `.sk-form-input*` and `.sk-form-textarea*`, so every rule
+  owns its leftmost compound under its element's name (B2). The existing `.sk-input` /
+  `.sk-textarea` classes in `form-field/` are **not renamed** — see FR-007. `audit/index.html`
+  hardcodes `packages/styles/dist/form-field/` paths; under the additive path they keep
+  resolving and need no edit, which is checked rather than assumed.
 - **FR-014**: `.sk-input.is-focused` / `.sk-textarea.is-focused` are deleted from the
   stylesheet, not merely from the markup. A class that fakes a state the browser owns has no
   place in an element that can have the real one.
@@ -275,8 +290,8 @@ CSS-only era where the wrapper carried the `for`/`id` pair the arrangement no lo
   executable and are byte-duplicates of four of the exports; `llms-full.txt` claims they are
   "consumed by stories", which is false — the stories import the template literals. FR-007
   settles their fate rather than leaving them orphaned.
-- **C-007**: **`@spec-kitty/styles` is published publicly at 1.0.0.** FR-007's export removal and
-  FR-013's class rename are both semver-major on a live package. Escalated — see below.
+- **C-007**: **`@spec-kitty/styles` is published publicly at 1.0.0.** Nothing this mission does
+  may change its published surface. That constraint is what turned FR-007 and FR-013 additive.
 
 ### Key Entities
 
@@ -321,11 +336,13 @@ property it names was false. The construction is recorded with the criterion.
 - **SC-208**: Two instances in one form both appear in `FormData` under distinct names with
   distinct values, and neither adds an id to the light DOM on upgrade. *(A collision was
   impossible by construction across two shadow roots, so the old criterion asserted nothing.)*
-- **SC-209**: `packages/styles/src/form-field/index.ts` does not exist, `packages/styles/src/index.ts`
-  re-exports none of the eight names, and `npx nx run styles:lint` and the Storybook build are
-  green without them. *(Was a grep with a self-cancelling qualifier — no surviving export could
-  ever have "markup also authored in the element", so it went green with all eight intact, and
-  its globs missed `SkFormFieldHTML` entirely.)*
+- **SC-209**: The published surface is **unchanged**: `packages/styles/src/index.ts` exports the
+  same eight names it did at `train/elements-first`, `packages/styles/src/form-field/` is
+  byte-identical, and `npm pack --dry-run` on `packages/styles` lists the same files. Asserted
+  as a diff against the merge base, not as a grep. *(The original criterion was a grep with a
+  self-cancelling qualifier — no surviving export could ever have "markup also authored in the
+  element", so it went green with all eight intact, and its globs missed `SkFormFieldHTML`
+  anyway. The criterion now runs the other way: nothing published may move.)*
 - **SC-210**: The PR cites the CI run URL and the floor reporter's `browser (webkit)=N` line
   covering the new test files. *(Was satisfiable by typing a sentence, and its "deferred"
   branch could not fail.)*
@@ -358,9 +375,14 @@ consumers link against. The programme's standing assumption has been "nothing is
 a break is free" — true of `@spec-kitty/elements`, which is `"private": true`, and **false of
 `@spec-kitty/styles`**, which `release.yml` publishes with `--access public`.
 
-**Recommendation: take the break, in one deliberate 2.0.0.** #77–#79 migrate nine more
-components and will each want the same rename; doing it once here is cheaper than nine times.
-But it is a published-API decision and it is not mine.
+**Recommendation: take the break, in one deliberate 2.0.0** — #77–#79 migrate nine more
+components and will each want the same rename, so doing it once is cheaper than nine times.
+
+**But this mission does not wait for the answer and does not take the break.** FR-007 and
+FR-013 now describe the *additive* path: new directories, new class names, the published
+surface untouched. Both gates are satisfied, both elements ship, and the retirement stays
+available as a separately-approved change. An irreversible outward-facing act does not get made
+by a loop because it was the tidier option.
 
 ## Out of scope
 
