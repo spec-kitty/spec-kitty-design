@@ -40,7 +40,12 @@ const repo = process.cwd();
 
 const list = JSON.parse(readFileSync(LIST, 'utf8'));
 const mutations = list.mutations ?? [];
-const behaviours = JSON.parse(readFileSync('behaviours.json', 'utf8')).behaviours.map((b) => b.id);
+const registry = JSON.parse(readFileSync('behaviours.json', 'utf8')).behaviours;
+const behaviours = registry.map((b) => b.id);
+/** Every (behaviour, subject) pair the registry declares. Guard 7 compares against these. */
+const behaviourPairs = registry.flatMap((b) =>
+  (b.subjects ?? [{ file: null }]).map((s) => `${b.id}@${s.file ?? '*'}`)
+);
 
 /**
  * Every verdict this script can emit must have a self-check entry.
@@ -69,9 +74,9 @@ if (mutations.length === 0) {
 
 /** Guard 7 — ids ⊇ behaviours, and every mutation names a known behaviour. */
 if (!selftestMode) {
-  const ids = new Set(mutations.map((m) => m.id));
-  const uncovered = behaviours.filter((b) => !ids.has(b));
-  const unknown = [...ids].filter((i) => !behaviours.includes(i));
+  const ids = new Set(mutations.map((m) => `${m.id}@${m.subject ?? '*'}`));
+  const uncovered = behaviourPairs.filter((b) => !ids.has(b));
+  const unknown = [...ids].filter((i) => !behaviourPairs.includes(i));
   if (uncovered.length || unknown.length) {
     console.error('❌ mutations.json and behaviours.json disagree:');
     for (const b of uncovered) console.error(`   behaviour ${b} has no mutation — its red-first claim is unproven`);
@@ -95,9 +100,12 @@ function runSuite(dir, project) {
 }
 
 /** Every assertion in the report, flattened. */
+// The module FILE travels with each test. Behaviour ids are no longer unique across the
+// suite — `sk-nav-pill` and the synthetic fixture both carry [SC-006] — so an id-only match
+// would let a mutation red the fixture's test and be credited for the element's.
 const allTests = (report) =>
   (report.testResults ?? []).flatMap((f) => (f.assertionResults ?? []).map((a) => ({
-    name: a.fullName ?? a.title ?? '', status: a.status,
+    name: a.fullName ?? a.title ?? '', status: a.status, file: f.name ?? '',
   })));
 
 function prepare() {
@@ -168,14 +176,19 @@ for (const m of mutations) {
           // "named test" to find. The entry declares which behaviour test it should red
           // via `redTest`, so guards 4 and 5 can still be exercised honestly.
           const key = selftestMode ? (m.redTest ?? '__none__') : m.id;
-          const named = tests.filter((t) => t.name.includes(`[${key}]`));
-          const others = tests.filter((t) => !t.name.includes(`[${key}]`) && /\[SC-\d+\]/.test(t.name));
+          // `subject` narrows the match to one test file. Optional: entries predating the
+          // subject dimension match on the id alone, exactly as before.
+          const inSubject = (t) => !m.subject || t.file.endsWith(m.subject);
+          const isNamed = (t) => t.name.includes(`[${key}]`) && inSubject(t);
+          const named = tests.filter(isNamed);
+          const others = tests.filter((t) => !isNamed(t) && /\[SC-\d+\]/.test(t.name));
 
           /** Guard 4 — THE ONE THAT FIRES. A syntax-breaking mutation exits non-zero with
            *  the named test ABSENT from the report; an exit-code assertion reads that as
            *  success. Require the named test to be PRESENT and FAILED. */
-          if (named.length === 0) verdict = ['absent', `named test [${key}] is ABSENT from the report — red for the wrong reason`];
-          else if (!named.some((t) => t.status === 'failed')) verdict = ['green', `named test [${key}] still PASSED — the mutation is semantically inert`];
+          const where = m.subject ? `[${key}] in ${m.subject}` : `[${key}]`;
+          if (named.length === 0) verdict = ['absent', `named test ${where} is ABSENT from the report — red for the wrong reason`];
+          else if (!named.some((t) => t.status === 'failed')) verdict = ['green', `named test ${where} still PASSED — the mutation is semantically inert`];
           /** Guard 5 — collateral bound: the mutation must be surgical.
            *
            * A mutation may DECLARE broad collateral (`expectCollateral`), for a subject

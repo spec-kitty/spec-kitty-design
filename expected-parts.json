@@ -13,12 +13,22 @@
     "",
     "#72 is the first growth this ratchet has had to gate: <sk-card> declares part \"card\",",
     "recorded here in the same PR as the test that targets ::part(card) \u2014 which the ratchet now",
-    "requires, not merely assumes."
+    "requires, not merely assumes.",
+    "",
+    "#73 grows it again: <sk-nav-pill> declares nav, items and hamburger, each recorded here in",
+    "the same PR as the [SC-013] test that targets it from outside and the mutation that proves",
+    "that test goes red. The ratchet's known looseness is unchanged and still recorded: a mention",
+    "inside a comment or a test.skip() satisfies the source scan, and it is not scoped per element."
   ],
-  "total": 1,
+  "total": 4,
   "byElement": {
     "sk-card": [
       "card"
+    ],
+    "sk-nav-pill": [
+      "hamburger",
+      "items",
+      "nav"
     ]
   }
 }
