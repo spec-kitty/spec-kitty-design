@@ -1,7 +1,7 @@
 {
-  "event_count": 19,
-  "last_event_id": "01M1JCEJ0A2M3M0PMMJM0CP96Q",
-  "materialized_at": "2026-09-03T00:59:36.842886+00:00",
+  "event_count": 20,
+  "last_event_id": "01M1JCG9PT8BYWM8RHM1NPFCFM",
+  "materialized_at": "2026-09-03T01:00:33.882833+00:00",
   "mission_number": "",
   "mission_slug": "elements-package-foundation-01M1J7Q4",
   "mission_type": "software-dev",
@@ -11,8 +11,8 @@
     "canceled": 0,
     "claimed": 0,
     "done": 0,
-    "for_review": 3,
-    "in_progress": 2,
+    "for_review": 4,
+    "in_progress": 1,
     "in_review": 0,
     "planned": 1
   },
@@ -48,13 +48,13 @@
       "role": "implementer"
     },
     "WP03": {
-      "actor": "user",
+      "actor": "claude",
       "agent_profile": "__resolved_profile_absent__",
       "agent_profile_version": "__resolved_profile_version_absent__",
-      "force_count": 0,
-      "lane": "in_progress",
-      "last_event_id": "01M1JAZVH1MJKKNDS12ZSH0W4B",
-      "last_transition_at": "2026-09-03T00:34:06.497205+00:00",
+      "force_count": 1,
+      "lane": "for_review",
+      "last_event_id": "01M1JCG9PT8BYWM8RHM1NPFCFM",
+      "last_transition_at": "2026-09-03T01:00:33.882833+00:00",
       "model": "__resolved_model_absent__",
       "provider": "__resolved_provider_absent__",
       "role": "implementer"
