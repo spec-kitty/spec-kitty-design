@@ -1,6 +1,6 @@
 # spec-kitty-design
 
-> A token-driven, Storybook-published web component library. Tokens are the single source of truth; component packages depend only on @spec-kitty/tokens; colour pairings follow a semantic surface/foreground rule. Two demo pages (blog, dashboard) showcase real-world composition.
+> A token-driven, Storybook-published web component library. Tokens are the single source of truth; dependencies flow one way: tokens -> styles -> elements -> react; colour pairings follow a semantic surface/foreground rule. Two demo pages (blog, dashboard) showcase real-world composition.
 
 ## Live design system
 
@@ -17,8 +17,8 @@
 
 - [@spec-kitty/tokens README](https://github.com/stijn-dejongh/spec-kitty-design/blob/main/packages/tokens/README.md): Token categories, semantic pairing rules, light mode, linting.
 - [@spec-kitty/styles README](https://github.com/stijn-dejongh/spec-kitty-design/blob/main/packages/styles/README.md): Framework-agnostic CSS + minimal JS modules.
-- [@spec-kitty/elements README](https://github.com/stijn-dejongh/spec-kitty-design/blob/main/packages/elements/README.md): the Lit custom elements — the component layer since ADR-8.
-- [@spec-kitty/react README](https://github.com/stijn-dejongh/spec-kitty-design/blob/main/packages/react/README.md): GENERATED React wrappers. Never hand-edited; CI fails on drift.
+- [@spec-kitty/elements](https://github.com/stijn-dejongh/spec-kitty-design/tree/main/packages/elements): the Lit custom elements — the component layer since ADR-8.
+- [@spec-kitty/react](https://github.com/stijn-dejongh/spec-kitty-design/tree/main/packages/react): GENERATED React wrappers. Never hand-edited; CI fails on drift.
 
 ## Architecture & doctrine
 

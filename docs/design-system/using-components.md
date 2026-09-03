@@ -43,7 +43,7 @@ Primary and secondary call-to-action buttons used to drive user actions.
 
 Top-level navigation bar with logo, pill nav links, theme toggle, and external link pills.
 
-**As a custom element** — migrated:
+**The pill sub-component is migrated**; the nav bar itself is CSS only.
 
 ```html
 <sk-nav-pill label="Main">
@@ -139,7 +139,7 @@ Labelled text inputs, selects, and validation states for data-entry surfaces.
 
 > **This section was wrong.** It documented an Angular `SkInputFieldComponent` and
 > `.sk-field` / `.sk-field__label` / `.sk-field__input` classes — none of which have ever
-> existed in this repository, and the Angular package was deleted in #69. Corrected in #74.
+> existed in this repository, and the Angular package was deleted in #102. Corrected in #74.
 
 **Custom element** (`@spec-kitty/elements` — the supported form):
 
@@ -193,20 +193,7 @@ would have contributed is `display: flex; flex-direction: column; gap`, which th
 
 Full-width hero block with eyebrow, headline, lead copy, checkmark bullet list, and call-to-action buttons.
 
-**As a custom element** — migrated, and form-associated:
-
-```html
-<form>
-  <sk-form-input name="email" label="Email" required></sk-form-input>
-  <sk-form-textarea name="notes" label="Notes" rows="4"></sk-form-textarea>
-  <button type="submit">Send</button>
-</form>
-```
-
-They participate in the form natively via `ElementInternals`: the value submits under `name`, an
-empty `required` field blocks submission, and a containing `<fieldset>` disables them. Set a
-server-side or cross-field error with `el.setCustomError('…')` rather than assigning `invalid`,
-which would paint the error state without setting validity.
+**CSS only — not yet migrated.**
 
 **As CSS (every consumer):**
 

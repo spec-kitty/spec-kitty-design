@@ -32,7 +32,7 @@ Storybook publishes everything to [`https://stijn-dejongh.github.io/spec-kitty-d
 |------|-----------------|
 | `packages/tokens/src/tokens.css` | Every design token. Touch this when adding/changing design values. |
 | `packages/tokens/dist/token-catalogue.json` | Generated catalogue consumed by stylelint. Regenerate after token changes. |
-| `packages/styles/src/<component>/` | `sk-<name>.css` (styles), `sk-<name>.js` (optional ES module), `sk-<name>.stories.ts` (Storybook), `index.ts` (re-export). |
+| `packages/styles/src/<component>/` | `sk-<name>.css` (**authored**), `sk-<name>.stories.ts`. `sk-<name>.html` and `index.ts` are **generated** from the element's markup module — do not hand-edit. |
 | `packages/elements/src/<component>/` | `sk-<name>.ts` (the element), `sk-<name>.markup.ts` (**authored** markup — the `.html` and the styles module are generated from it), `sk-<name>.stories.ts`. |
 | `packages/react/src/` | **Generated** wrappers. Never hand-edited; CI fails on drift. |
 | `behaviours.json`, `mutations.json` | The behaviour registry (ADR-11) and one red-first mutation per subject. |
@@ -56,8 +56,8 @@ Storybook publishes everything to [`https://stijn-dejongh.github.io/spec-kitty-d
 2. **One-directional dependency boundary.** `packages/styles` imports only from `packages/tokens`; `elements` from styles and tokens; `react` from elements, styles and tokens. ESLint `@nx/enforce-module-boundaries` enforces it via `scope:` tags — and a project with **no** tag is not exempt, it is invisible to the rule, which reads the same from outside and is worse.
 3. **Semantic pairing.** Surface and foreground tokens come in pairs (e.g. `--sk-surface-page` ↔ `--sk-on-page`). Don't mix across pairs.
 4. **BEM naming.** `sk-block__element--modifier`. Block prefix is always `sk-`.
-5. **Conventional commits** with scopes: `tokens`, `storybook`, `doctrine`, `ci`, `docs`, `release`, `deps`, `security`, `styles`, `elements`, `react`. Note the Spec Kitty CLI's own bookkeeping commits are exempted by pattern in `commitlint.config.cjs`; yours are not. Packages not yet created (ADR-8). Subject lowercase. `commitlint` runs on PRs.
-6. **Every story has a `LightMode` variant.** Wraps output in `<div data-theme="light" style="background: var(--sk-surface-page); padding: var(--sk-space-6); display: inline-block;">` and sets `parameters.backgrounds.default: 'sk-light'`.
+5. **Conventional commits** with scopes: `tokens`, `storybook`, `doctrine`, `ci`, `docs`, `release`, `deps`, `security`, `styles`, `elements`, `react`. Note the Spec Kitty CLI's own bookkeeping commits are exempted by pattern in `commitlint.config.cjs`; yours are not. Subject lowercase. `commitlint` runs on PRs.
+6. **Every story has a `LightMode` variant**, wrapped in `class="sk-light"` — **not** `data-theme="light"`, which activates nothing on a wrapper (`:root` only matches `<html>`, #93). The recipe is authoritative here: [`docs/contributing/adding-a-component.md`](./docs/contributing/adding-a-component.md). There is no `backgrounds` config in the Storybook preview, so a `backgrounds` parameter does not apply the class.
 7. **Don't break the demo pages.** `apps/demo/*.html` link component CSS via relative paths (`../../packages/...`) for local file:// dev; `scripts/assemble-demo-dist.sh` rewrites those paths via `sed` before publishing (called by `storybook-deploy.yml`, and by `ci-quality.yml` so it is checked per PR). Verify both paths still resolve when adding a new component.
 
 ## 4. Common commands
@@ -94,8 +94,8 @@ Storybook publishes everything to [`https://stijn-dejongh.github.io/spec-kitty-d
 
 **Follow the recipe rather than this list:**
 [`./docs/contributing/adding-a-component.md`](./docs/contributing/adding-a-component.md). It
-names every gate a new component must pass — there are fourteen, several of which reject exactly
-what a first attempt looks like — and the three ratchets (`expected-parts.json`,
+names every gate a new component must pass — several of which reject exactly what a first
+attempt looks like — and the three ratchets (`expected-parts.json`,
 `expected-docs.json`, `behaviours.json`) that a new component must be registered in. This section
 deliberately does not restate them: two copies of a procedure drift.
 
@@ -134,7 +134,7 @@ This repo uses Spec Kitty for structured spec-driven development.
 
 ## 9. Common pitfalls
 
-- **Forgetting `LightMode` story** — CI lint won't catch it; reviewers will. Always add it.
+- Forgetting the `LightMode` story — no lint catches it, reviewers do. Wrap in `class="sk-light"` and assert the computed value differs between themes; see the recipe.
 - **Cross-package import** — `@nx/enforce-module-boundaries` will fail with a clear error pointing to the rule. Re-route through `@spec-kitty/tokens` or compose at the consumer level.
 - **Hardcoded colour / spacing in CSS** — stylelint fails with `Expected ... to be a token`. Add to `tokens.css` first, regenerate catalogue, then reference via `var(--sk-*)`.
 - **Stale token catalogue** — symptoms are stylelint failures on tokens you just added. Run `npx nx run tokens:catalogue`.

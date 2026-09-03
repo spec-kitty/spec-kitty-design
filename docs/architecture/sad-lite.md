@@ -102,11 +102,11 @@ This document describes the architecture of the Spec Kitty Design System — a m
 **Purpose:** Provide framework-specific component implementations that express the design language for their target rendering environment. Owns rendering ergonomics; does not own visual values.
 
 **Sub-contexts:**
-- **Custom Elements** (`@spec-kitty/elements`) — targets the platform, not a framework; inherits Lit's ular's 6-month LTS lifecycle
+- **Custom Elements** (`@spec-kitty/elements`) — targets the platform, not a framework. Lit is a build-time dependency with no LTS obligation, which is what ADR-8 bought
 - **HTML/JS Primitives** (`@spec-kitty/styles`) — framework-agnostic; no build step required for consumers
 
 **Inbound:** Token authority context (token values); Storybook stories (documentation obligation)
-**Outbound:** Published npm packages per framework target
+**Outbound:** One published custom-element package, plus a generated wrapper only where a consumer needs one (ADR-8)
 
 **Invariant:** Components render visual state using `--sk-*` tokens exclusively. Components do not override token values (ADR-001).
 
@@ -189,6 +189,14 @@ Full risk register in [`risk-register.md`](risk-register.md). Top-5 prioritised 
 | [ADR-003](decisions/2026-05-01-3-token-schema-naming-convention.md) | `--sk-<category>-<name>` schema; value reconciliation is a pre-implementation gate | Accepted |
 | [ADR-004](decisions/2026-05-01-4-org-layer-doctrine-distribution.md) | `doctrine/` as org-layer source for #832 | Accepted |
 | [ADR-005](decisions/2026-05-01-5-npm-supply-chain-security-posture.md) | npm security posture; residual risk explicitly accepted | Accepted |
+| [ADR-006](decisions/2026-05-01-6-storybook-multi-framework-rendering.md) | Storybook multi-framework rendering | Superseded by ADR-013 |
+| [ADR-007](decisions/2026-05-01-7-storybook-version-10x-adoption.md) | Storybook 10.x adoption | Superseded on the framework question by ADR-013 |
+| [ADR-8](decisions/2026-09-02-8-custom-elements-base-layer.md) | **Custom elements as the base layer; framework wrappers GENERATED from the manifest** | Accepted |
+| [ADR-9](decisions/2026-09-02-9-shadow-dom-and-styling-api.md) | Open shadow roots; consumers restyle through `::part()` | Accepted |
+| [ADR-10](decisions/2026-09-02-10-distribution-and-canonical-markup.md) | Constructed stylesheets, both distribution entries, markup authored once, guarded `define()` | Accepted |
+| [ADR-11](decisions/2026-09-02-11-verification-stack-and-wrapper-generation.md) | Required behaviours, each with a red-first mutation | Accepted |
+| [ADR-12](decisions/2026-09-02-12-consumer-audit-of-record.md) | The consumer set is recorded, not assumed | Accepted |
+| [ADR-13](decisions/2026-09-02-13-storybook-web-components-builder.md) | Storybook renders through `@storybook/web-components` | Accepted |
 
 ---
 
@@ -199,7 +207,7 @@ Constraints that have significant architectural consequence (full list in missio
 | Constraint | Implication |
 |---|---|
 | C-003 / C-009: no hardcoded values; no `*`/`latest` specifiers | Token authority rule is enforceable by linting; every value traces to `@spec-kitty/tokens` |
-| ~~C-007: Angular targets current LTS~~ **RETIRED by ADR-8.** The component layer is a custom element with no framework runtime, so there is no LTS rotation to track. `packages/angular` was deleted in #102. | ~~`@spec-kitty/angular` had an explicit maintenance lifecycle; must be tracked |~~ |
+| ~~C-007: Angular targets current LTS~~ **RETIRED by ADR-8** — the component layer is a custom element with no framework runtime, so there is no LTS rotation to track; `packages/angular` was deleted in #102 | — |
 | C-008: illustrations excluded from software packages | Enforced as SK-D02 directive; CI must gate on presence of illustration assets in distribution output |
 | FR-034 pre-implementation gate | No token package implementation begins before token schema ADR value reconciliation is complete |
 | ADR-005 pre-flight: scope ownership | `@spec-kitty` npm scope must be confirmed owned before any publishing CI work |

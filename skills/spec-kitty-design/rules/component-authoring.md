@@ -3,7 +3,7 @@
 > **Rewritten for the elements-first architecture (#76).** This file previously required
 > `Mobile` and `Desktop` story exports, described Angular-versus-HTML "framework isolation", and
 > pointed at `packages/angular/src/lib/stub/` — a package deleted in #102. It also listed four CI
-> gates when fourteen apply. It is the rule loaded for "writing component code", so #77–#79 would
+> gates when the recipe's block is far longer. It is the rule loaded for "writing component code", so #77–#79 would
 > have inherited every one of those.
 
 ## Where a component lives
@@ -19,13 +19,16 @@ Since ADR-8 the component **is** a custom element. Two packages, and you author 
 `packages/react/` is generated in full. You add nothing there.
 
 **Follow [`docs/contributing/adding-a-component.md`](../../../docs/contributing/adding-a-component.md)**
-— it is the maintained recipe and names every gate. This file is the story-and-a11y half.
+— it is the maintained recipe and the authority for gates, the markup contract and the
+ratchets. This file covers stories and a11y, and repeats the documentation rules below because an
+agent loads *this* file to write component code and must not need a second fetch to know that a
+doc comment is published. Where the two disagree, the recipe wins.
 
 ## Story structure (required)
 
 ```typescript
 export const Default: Story = {};      // MANDATORY
-export const LightMode: Story = {};    // MANDATORY — see below
+export const LightMode: Story = {};    // REQUIRED by review — see below
 ```
 
 Plus one export per meaningful state the component actually has (`Disabled`, `Error`, `Open`,
@@ -39,9 +42,17 @@ Wrap in `class="sk-light"` — **not** `data-theme="light"`. The token block anc
 `:root[data-theme="light"], .sk-light`, and `:root` only matches `<html>`, so `data-theme` on a
 wrapper element activates nothing (#93).
 
+**No lint catches a missing `LightMode`** — `expected-stories.json` covers only the form
+elements today, so this is enforced by review. `sk-nav-pill` currently ships without one, which
+makes it a poor model for this rule even though it is the right model for events.
+
 **Verify it renders light styling; do not assume it.** Assert a computed value under both themes
-and require them to differ. A `LightMode` story that renders dark is the failure this rule
-exists to catch, and it looks identical to a passing one in a screenshot.
+and require them to differ — `fixtures/elements-behaviour/src/sk-card.test.ts` is the only
+cross-theme assertion in the repo and the one to copy. A `LightMode` story that renders dark is
+the failure this rule exists to catch, and it looks identical to a passing one in a screenshot.
+
+**Do not copy a styles-layer story for this.** Six of the seven wrap in `data-theme="light"`,
+which is the inert form; `packages/styles/src/card` is the compliant one.
 
 ## a11y requirement
 
@@ -74,13 +85,15 @@ useful and still encouraged.
 
 ## Register the component in the three ratchets
 
-None is discoverable from the code, and each fails CI on its own:
+None is discoverable from the code. The first two always apply; the third only when the
+component owns behaviour — nothing detects that it should, so declaring an entry is what creates
+the obligation:
 
 | file | what to add |
 |---|---|
-| `expected-parts.json` | every `@csspart`, in the same PR as a test that targets it (shrink-only) |
-| `expected-docs.json` | a row with the element's attribute and method counts (**exact** equality) |
-| `behaviours.json` | a subject entry, if it owns behaviour, plus a mutation in `mutations.json` |
+| `expected-parts.json` | every `@csspart` **and bump `total`**; the test must live under `fixtures/**/src/**/*.test.ts` or `tests/**/*.test.ts` (shrink-only) |
+| `expected-docs.json` | a row with the element's attribute and method counts, **and bump `total`** (**exact** equality) |
+| `behaviours.json` | a **subject** entry on the ids it owns, plus a `mutations.json` entry naming the same subject file — only if it owns behaviour |
 
 ## Reference implementation
 
@@ -92,6 +105,6 @@ pattern to copy.
 ## CI gates a new component must pass
 
 The authoritative list is the recipe's §7. It is not duplicated here, because a second copy
-drifts — but it is **fourteen** commands, not the four this file used to name, and the ones most
-likely to reject a first attempt are the manifest content gate, the wrapper drift check, and the
+drifts. It is materially longer than the four commands this file used to name, and the ones
+most likely to reject a first attempt are the manifest content gate, the wrapper drift check, and the
 distribution-entry check. Run the recipe's block before opening a PR.

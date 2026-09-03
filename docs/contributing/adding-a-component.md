@@ -28,11 +28,14 @@ do not add anything there for a new component — get the manifest right and the
 
 > **This page used to say "There are no wrappers. ADR-8 confirmation #1 requires that none
 > exist." That was true when written, and no ADR was violated by its stopping being true.**
-> ADR-8 sets two confirmations *in sequence*: #1 is *"one component ships … into three
-> consumption paths … with **no wrapper package in existence**"*, and #2 is *"a generated React
+> ADR-8 lists **four** validation criteria, unordered. #1 is *"one component ships … into three
+> consumption paths … with **no wrapper package in existence**"*; #2 is *"a generated React
 > wrapper of that same component passes the conformance matrix … and CI fails if the generated
-> output drifts"*. #75 discharged #2, which necessarily creates a wrapper. The sentence froze a
-> moment rather than stating a rule.
+> output drifts"*. What sequences them is the programme, not the ADR:
+> `docs/architecture/elements-first-programme.md` assigns #1 to batch M6 (whose exit records
+> "no wrapper in existence") and #2 to M9. #75 was M9. So the old sentence froze a milestone
+> rather than stating a rule — and an earlier draft of *this* correction said the ADR itself
+> sequenced them, which it does not.
 
 ## Steps
 
@@ -53,11 +56,37 @@ boundary and a selector does not. Reuse the tint family — `--sk-surface-tint-*
 
 ### 2. Author the markup ONCE, in `packages/elements`
 
+**Only if the component has a static form.** The module is optional — the generator derives its
+work set by glob from the elements that have one, and #72 and #73 both declined it. `sk-card` is
+the only one today.
+
+It **must be a leaf module with no relative imports**: the generator evaluates it from a `data:`
+URL, which has no module base, and says so in a named error if you give it one.
+
 `packages/elements/src/<name>/sk-<name>.markup.ts` must export:
 
-- `<name>Classes(variant?, inset?)` — the BEM class list, throwing on an unknown variant;
-- `<name>StaticHtml(variant?, inset?, content?)` — the server-rendered form;
-- `<NAME>_VARIANTS` — the variant → modifier map the generator derives exports from.
+- `<NAME>_VARIANTS` — the variant → modifier map the generator derives its exports from;
+- `<NAME>_AXES` — the **other** axes, as a map of export-name-suffix to the options producing it
+  (`{ Inset: { inset: true } }` for card, **`{}`** for a component with none). Not optional:
+  `build-element-markup.mjs` exits with a named error if it is missing;
+- `<name>StaticHtml(opts, content?)` — the server-rendered form. **An options object, not
+  positionals.** The generator calls `staticHtml({}, content)` and `staticHtml(opts)`;
+- `<name>Classes(variant?, …)` — the BEM class list. Not required by the generator; it is the
+  element's own render helper.
+
+**The two entry points have deliberately different failure policies, and collapsing them is a
+regression this repo has already had — and reverted.** `<name>Classes` **warns and degrades** to
+the base class on an unknown variant. The throwing version was tried and measured: Lit rejects
+`updateComplete`, `render()` never returns a tree, and `<sk-card variant="typo">` paints an empty
+shadow root with no `<slot>` — so the element silently eats its own light-DOM children. `<name>StaticHtml` **throws**, because it runs at build time where a bad variant must not
+reach committed output. `sk-card.markup.ts` says so at the definition, and a test in
+`fixtures/elements-behaviour/src/sk-card.test.ts` pins it.
+
+> An earlier version of this page fixed the signature at `(variant, inset, content)` and
+> attributed the throw to `Classes`. Both were wrong: `inset` is a **card** axis, which is why
+> `_AXES` exists (#115/#121), and the throw belongs to `StaticHtml`. Following the old text
+> reintroduced a bug #72 had fixed, and the generator would have committed base-class-only HTML
+> for every variant while reporting success.
 
 ADR-10 §3: *the element's template is the sole authored source.* `sk-<name>.html` and
 `packages/styles/src/<name>/index.ts` are **generated** from this module by
@@ -97,14 +126,18 @@ for *what*.
 
 ### 4. Record the component in the three ratchets
 
-Three files hold the component's surface, and a new component fails CI without all three. None
-of them is discoverable from the code:
+Three files hold the component's surface. None is discoverable from the code:
 
 | file | what to add | what refuses you |
 |---|---|---|
-| `expected-parts.json` | every `@csspart`, in the same PR as a test targeting it | `check-part-ratchet.mjs` — shrink-only |
-| `expected-docs.json` | a row with the element's attribute and method counts | `check-manifest-content.mjs` — **exact** equality, so adding a documented property without updating this fails too |
-| `behaviours.json` | a subject entry, if it owns behaviour (see step 6) | `floor-reporter.mjs` arm 5, and `suite-selftest.mjs` guard 7 |
+| `expected-parts.json` | every `@csspart` **and bump `total`**, in the same PR as a test targeting it. The test must live in `fixtures/**/src/**/*.test.ts` or `tests/**/*.test.ts` — the ratchet scans nowhere else | `check-part-ratchet.mjs` — shrink-only, and it compares `total` |
+| `expected-docs.json` | a row with the element's attribute and method counts, **and bump `total`** | `check-manifest-content.mjs` — **exact** equality, so adding a documented property without updating this fails too |
+| `behaviours.json` | a **subject** entry on the ids the component owns, plus a matching `mutations.json` entry naming the same subject file — only if it owns behaviour (step 6) | `floor-reporter.mjs` arm 5 and `suite-selftest.mjs` guard 7 — **once declared** |
+
+**Two of those always; the third only when the component owns behaviour.** Nothing detects that
+a new component *should* have a behaviour entry — declaring one creates the obligation, and
+omitting it is silently green. That is a real gap, not a shortcut: step 6 is where you decide,
+and the decision is yours to get right.
 
 And if the component brings a new **package** rather than a new element, that project needs a
 `typecheck` target, a `scope:` tag and a `lint` target, or it sits outside `typecheck-all.mjs`
@@ -157,13 +190,14 @@ node scripts/build-react-wrappers.mjs       # rewrites packages/react/src
 
 # 2. build, then measure — measure-elements-sizes READS dist/ and does not build it
 npx nx run-many --target=build --projects=tokens,styles,elements
-node scripts/measure-elements-sizes.mjs
+node scripts/measure-elements-sizes.mjs        # WRITES packages/elements/SIZES.md — commit it
 
 # 3. the drift checks
 node scripts/build-elements-css.mjs --check
 node scripts/build-element-markup.mjs --check
 node scripts/build-react-wrappers.mjs --check
 git diff --exit-code -- packages/elements/custom-elements.json
+node scripts/measure-elements-sizes.mjs --check
 
 # 4. the content and hygiene gates
 node scripts/check-manifest-content.mjs
@@ -173,13 +207,22 @@ node scripts/check-adopted-css-boundaries.mjs
 node scripts/check-element-css-hygiene.mjs
 node scripts/check-part-ratchet.mjs
 node scripts/typecheck-all.mjs
+npm run quality:all                           # ESLint, Stylelint, HTMLHint — all ENFORCED,
+                                              # and named in no other step below
 
 # 5. the gates' own probe tables, and the wiring that keeps them running
 node scripts/build-react-wrappers.mjs --selftest
 node scripts/check-manifest-content.mjs --selftest
 node scripts/check-gate-wiring.mjs
 
-# 6. the suites
+# 6. COMMIT WHAT BLOCKS 1-2 REGENERATED, then confirm nothing is left over.
+#    Blocks 1 and 3 are self-confirming: block 3 compares against what block 1 just wrote, so
+#    they can never disagree locally. The real signal is an unstaged generated file — which CI
+#    sees as drift. Generated-and-committed: the .css.js/.css.d.ts modules, the styles-layer
+#    sk-<name>.html and index.ts, custom-elements.json, packages/react/src/**, and SIZES.md.
+git add -A && git status --porcelain   # must be empty before you open the PR
+
+# 7. the suites
 npm run test
 node scripts/suite-selftest.mjs             # slow; one full suite per mutation
 npx nx run storybook:storybook:build && node scripts/run-axe-storybook.js
