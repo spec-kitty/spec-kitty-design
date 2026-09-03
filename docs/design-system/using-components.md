@@ -1,12 +1,23 @@
 # Using components
 
-The Spec Kitty component libraries ship in two flavours: `@spec-kitty/angular` for Angular applications and `@spec-kitty/styles` for framework-agnostic HTML projects. Both require `@spec-kitty/tokens`.
+The Spec Kitty components ship as CSS in `@spec-kitty/styles`, and — for the components migrated
+so far — as **custom elements** in `@spec-kitty/elements`. Both require `@spec-kitty/tokens`.
+
+**Migration is in progress.** Five elements exist today: `sk-card`, `sk-nav-pill`,
+`sk-form-input`, `sk-form-textarea` and `sk-stub`. Everything else on this page is CSS only, and
+#77–#79 are the missions that move the rest. Each section below says which it is, because the
+difference decides how you use it.
+
+Because a custom element needs no wrapper, every framework can use the migrated ones directly. A
+generated React wrapper exists for JSX typing and typed refs — see
+[Using the elements from React](./using-react.md) for what it does and does not buy, measured.
 
 ## Installation
 
 ```bash
-npm install @spec-kitty/angular @spec-kitty/tokens    # Angular
-npm install @spec-kitty/styles @spec-kitty/tokens    # plain HTML/JS
+npm install @spec-kitty/styles @spec-kitty/tokens     # the CSS, every component
+npm install @spec-kitty/elements @spec-kitty/tokens   # the migrated custom elements
+npm install @spec-kitty/react                         # optional: JSX typing for React
 ```
 
 > Note: these packages must be published to npm before the import paths below work in consumer projects. Until then, install from the local repository using `npm link` or a path dependency.
@@ -16,17 +27,6 @@ npm install @spec-kitty/styles @spec-kitty/tokens    # plain HTML/JS
 ## Buttons
 
 Primary and secondary call-to-action buttons used to drive user actions.
-
-**Angular:**
-
-```typescript
-import { SkButtonPrimaryComponent, SkButtonSecondaryComponent } from '@spec-kitty/angular';
-```
-
-```html
-<sk-button-primary>Get started</sk-button-primary>
-<sk-button-secondary>Learn more</sk-button-secondary>
-```
 
 **HTML:**
 
@@ -43,17 +43,19 @@ import { SkButtonPrimaryComponent, SkButtonSecondaryComponent } from '@spec-kitt
 
 Top-level navigation bar with logo, pill nav links, theme toggle, and external link pills.
 
-**Angular:**
-
-```typescript
-import { SkNavComponent } from '@spec-kitty/angular';
-```
+**As a custom element** — migrated:
 
 ```html
-<sk-nav [links]="navLinks" logoSrc="/assets/logo.png"></sk-nav>
+<sk-nav-pill label="Main">
+  <a href="#" class="sk-nav-pill__item">Docs</a>
+  <a href="#" class="sk-nav-pill__item">About</a>
+</sk-nav-pill>
 ```
 
-**HTML:**
+It fires `sk-nav-pill-toggle` before the open state changes, with
+`detail: { open: boolean }`. The event is cancelable — `preventDefault()` abandons the change.
+
+**As CSS (every consumer):**
 
 ```html
 <nav class="sk-nav">
@@ -73,17 +75,6 @@ import { SkNavComponent } from '@spec-kitty/angular';
 
 Pill-shaped tags used to label and categorise content inline.
 
-**Angular:**
-
-```typescript
-import { SkPillTagComponent, SkEyebrowPillComponent } from '@spec-kitty/angular';
-```
-
-```html
-<sk-pill-tag>Design system</sk-pill-tag>
-<sk-eyebrow-pill>New</sk-eyebrow-pill>
-```
-
 **HTML:**
 
 ```html
@@ -98,17 +89,6 @@ import { SkPillTagComponent, SkEyebrowPillComponent } from '@spec-kitty/angular'
 ## Content markers
 
 Eyebrow labels and section banners used to introduce sections and add visual hierarchy.
-
-**Angular:**
-
-```typescript
-import { SkEyebrowComponent, SkSectionBannerComponent } from '@spec-kitty/angular';
-```
-
-```html
-<sk-eyebrow>Getting started</sk-eyebrow>
-<sk-section-banner>What's new</sk-section-banner>
-```
 
 **HTML:**
 
@@ -125,21 +105,21 @@ import { SkEyebrowComponent, SkSectionBannerComponent } from '@spec-kitty/angula
 
 Surface containers for grouping related content, used in feature grids, blog listings, and comparison layouts.
 
-**Angular:**
-
-```typescript
-import { SkCardComponent } from '@spec-kitty/angular';
-```
+**As a custom element** — migrated, so it needs no wrapper:
 
 ```html
-<sk-card>
-  <sk-eyebrow>Feature</sk-eyebrow>
+<script type="module" src="/node_modules/@spec-kitty/elements/dist/elements.js"></script>
+
+<sk-card variant="blue">
   <h3>Structured requirements</h3>
   <p>Developers spend time building, not being blocked on finalized requirements.</p>
 </sk-card>
 ```
 
-**HTML:**
+`variant` accepts `blue` or `purple`; omit it for the default surface. `inset` swaps the surface
+token for a card nested inside another.
+
+**As CSS (every consumer):**
 
 ```html
 <div class="sk-card">
@@ -213,23 +193,22 @@ would have contributed is `display: flex; flex-direction: column; gap`, which th
 
 Full-width hero block with eyebrow, headline, lead copy, checkmark bullet list, and call-to-action buttons.
 
-**Angular:**
-
-```typescript
-import { SkHeroComponent } from '@spec-kitty/angular';
-```
+**As a custom element** — migrated, and form-associated:
 
 ```html
-<sk-hero
-  eyebrow="Open-source"
-  headline="Bring structure to AI-assisted delivery"
-  [bullets]="['Spec -> Plan -> Implement', 'No requirement drift', 'Works with any AI coding tool']">
-  <sk-button-primary slot="cta-primary">Get started</sk-button-primary>
-  <sk-button-secondary slot="cta-secondary">View on GitHub</sk-button-secondary>
-</sk-hero>
+<form>
+  <sk-form-input name="email" label="Email" required></sk-form-input>
+  <sk-form-textarea name="notes" label="Notes" rows="4"></sk-form-textarea>
+  <button type="submit">Send</button>
+</form>
 ```
 
-**HTML:**
+They participate in the form natively via `ElementInternals`: the value submits under `name`, an
+empty `required` field blocks submission, and a containing `<fieldset>` disables them. Set a
+server-side or cross-field error with `el.setCustomError('…')` rather than assigning `invalid`,
+which would paint the error state without setting validity.
+
+**As CSS (every consumer):**
 
 ```html
 <section class="sk-hero">
@@ -255,21 +234,6 @@ import { SkHeroComponent } from '@spec-kitty/angular';
 ## Callout
 
 Two-column callout block used for "why/who" benefit statements with bullet lists.
-
-**Angular:**
-
-```typescript
-import { SkCalloutComponent } from '@spec-kitty/angular';
-```
-
-```html
-<sk-callout
-  leftHeading="Why teams use it"
-  [leftBullets]="['Catches requirement drift before code is written', 'Works alongside existing AI tools']"
-  rightHeading="Who it is for"
-  [rightBullets]="['Engineering leads', 'Product managers', 'AI coding tool users']">
-</sk-callout>
-```
 
 **HTML:**
 

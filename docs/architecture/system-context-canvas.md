@@ -38,7 +38,7 @@
 
 | Stakeholder group | Primary concern | Success looks like |
 |---|---|---|
-| SK dashboard developers | Can import design tokens and Angular components without re-implementing visual rules | Dashboard restyling requires only token value changes, not CSS archaeology |
+| SK dashboard developers | Can import design tokens and custom elements without re-implementing visual rules | Dashboard restyling requires only token value changes, not CSS archaeology |
 | Docsite / static HTML contributors | Can use token CSS with no build step; Jekyll/Hugo compatible | One `<link>` gives them the full token set |
 | AI coding agents (Claude Code, Codex, Cursor, etc.) | Have brand voice and visual identity rules as governance context during mission execution | Agents produce brand-compliant output without explicit per-task instruction |
 | Community contributors | Can add a new framework target without restructuring existing packages | A Vue or Svelte adapter can be contributed as an additive package |
@@ -66,7 +66,8 @@
 
 **In scope:**
 - CSS custom property token package (`@spec-kitty/tokens`)
-- Angular component library (`@spec-kitty/angular`)
+- Custom element library (`@spec-kitty/elements`)
+- Generated React wrappers (`@spec-kitty/react`), optional
 - Plain HTML/JS primitive package (`@spec-kitty/styles`)
 - Storybook (documentation + CI visual regression)
 - Brand voice and visual identity doctrine bundle
@@ -97,7 +98,7 @@
 
 **Market / competitive forces:** The frontend design system space is mature and crowded (shadcn, Tailwind, MUI, Radix). The design system does not compete with these — it complements them. The architecture explicitly accommodates Tailwind consumers mapping `--sk-*` into their config (ADR-001).
 
-**Technology shifts:** Angular's 6-month LTS cycle creates a recurring maintenance obligation for `@spec-kitty/angular`. Storybook's historically aggressive major release cadence (v6→v7→v8→v9) creates periodic CI tooling update risk. Both are addressed by the Dependabot configuration and major-version-bump policy (ADR-005).
+**Technology shifts:** ~~Angular's 6-month LTS cycle creates a recurring maintenance obligation for `@spec-kitty/angular`.~~ **That obligation ended with ADR-8** — the component layer is a custom element with no framework runtime. Storybook's historically aggressive major release cadence remains a live consideration, and ADR-13 moved the catalogue to the web-components renderer.
 
 **Organisational mandates:** All Priivacy-ai projects adopting Spec Kitty will inherit the org-layer doctrine bundle once #832 ships — making brand governance automatic rather than manual.
 
@@ -108,7 +109,7 @@
 | Constraint type | Description | Source |
 |---|---|---|
 | Technology | `--sk-*` custom properties are the only token distribution format; no hardcoded values | ADR-001, C-003 |
-| Technology | Angular targets current LTS only | C-007 |
+| Technology | ~~Angular targets current LTS only~~ **retired by ADR-8** — the component layer has no framework runtime | ~~C-007~~ |
 | Technology | Cartoon/mascot illustrations excluded from distribution packages | C-008, SK-D02 |
 | Security | All GitHub Actions pinned to commit SHAs | ADR-005, FR-043 |
 | Security | No `*` or `latest` version specifiers in `package.json` | C-009 |
@@ -124,6 +125,6 @@
 |---|---|---|---|
 | `@spec-kitty` npm scope is available and will be owned | Dependency confusion attack surface; all publishing blocked | Maintainer | Pre-flight check before release pipeline work |
 | Claude Design reference token values closely match live marketing site CSS | Token reconciliation (FR-034) requires significant rework before v1 | Maintainer | FR-034: audit and compare before implementation |
-| Angular LTS remains stable for the 18-month consumer update window | Consumers forced to upgrade earlier than planned | Package maintainer | Monitor Angular LTS calendar; initiate upgrade 3 months pre-expiry |
+| ~~Angular LTS remains stable for the 18-month consumer update window~~ **no longer an assumption** — ADR-8 removed the framework runtime | — | — | Discharged, not merely unmet |
 | PR preview deployment is achievable within the 10-minute CI budget (NFR-002) | NFR-002 breach; slow contributor feedback loop | Planner | Tooling selection deferred to planning (NFR-008) |
-| Storybook multi-framework rendering (Angular + plain HTML in one story) is achievable with the v8/v9 API | Storybook story count doubles (one per framework target) | Planner | Proof-of-concept in stub component (FR-032) |
+| ~~Storybook multi-framework rendering (Angular + plain HTML in one story) is achievable~~ **superseded by ADR-13** — one renderer, web-components | — | — | Discharged |

@@ -21,7 +21,7 @@ This document describes the architecture of the Spec Kitty Design System — a m
 - A per-component specification (see Storybook once built)
 - A live changelog (see `CHANGELOG.md` and ADRs)
 
-**Architectural vision:** The design system is *token-first, framework-progressive*. The `@spec-kitty/tokens` CSS custom property layer is the long-lived, framework-agnostic foundation. Framework packages (Angular, and future targets) are short-lived lifecycle adapters that consume tokens by reference and add component ergonomics for a specific rendering environment. When a framework ages out, only its adapter package changes — the token layer is untouched.
+**Architectural vision:** The design system is *token-first, framework-progressive*. The `@spec-kitty/tokens` CSS custom property layer is the long-lived, framework-agnostic foundation. Since ADR-8 the component layer is a **custom element**, which is the platform rather than a framework, so there is no adapter to age out. Framework packages still exist where a consumer needs one — `@spec-kitty/react` for JSX typing — but they are **generated from the Custom Elements Manifest**, not hand-maintained, and a wrapper is published only when a consumer exists. The original vision described Angular and future targets as short-lived lifecycle adapters; ADR-8 kept the reasoning and removed the hand-maintenance. When a framework ages out, only its adapter package changes — the token layer is untouched.
 
 ---
 
@@ -34,7 +34,8 @@ This document describes the architecture of the Spec Kitty Design System — a m
 
 | Entity | Role |
 |---|---|
-| Angular Developer | Imports `@spec-kitty/angular` and `@spec-kitty/tokens`; builds SK dashboard, custom apps |
+| Application Developer | Imports `@spec-kitty/elements` and `@spec-kitty/tokens` — the elements are custom elements, so no framework wrapper is required; builds SK dashboard, custom apps |
+| React Developer | May additionally import `@spec-kitty/react` for JSX typing and typed refs. Optional: React 19 uses custom elements natively |
 | Static/HTML Developer | Links `@spec-kitty/tokens` via CDN or file; no build step required |
 | AI Coding Agent | Reads `SKILL.md` and `doctrine/` artifacts to generate brand-compliant output |
 | `@spec-kitty` npm scope | Package registry; single distribution channel for all publishable artifacts |
@@ -56,8 +57,9 @@ This document describes the architecture of the Spec Kitty Design System — a m
 | Package | Responsibility | Consumers |
 |---|---|---|
 | `@spec-kitty/tokens` | Single source of truth for all `--sk-*` visual values; zero-build-step distribution | All other packages; any HTML/CSS surface |
-| `@spec-kitty/angular` | Angular LTS components consuming token values by reference; includes Storybook stories | Angular applications (SK dashboard, custom) |
-| `@spec-kitty/styles` | Framework-agnostic HTML primitives and ES module utilities; vanilla markup only | Static HTML surfaces, Jekyll/Hugo themes, non-Angular JS projects |
+| `@spec-kitty/styles` | The CSS source of record, plus **generated** static HTML | Static HTML surfaces, Jekyll/Hugo themes, any JS project |
+| `@spec-kitty/elements` | The Lit custom elements — the component layer since ADR-8 — and the **authored** markup module every static form is generated from | Every consumer; no framework wrapper required |
+| `@spec-kitty/react` | **Generated** React wrappers, for JSX typing and typed refs. Never hand-edited; CI fails on drift | React applications that want typing (optional) |
 | Storybook | Living documentation; visual regression CI surface; multi-framework renderer; deployed to GitHub Pages | Contributors, component consumers, CI |
 | `doctrine/` | Brand voice + visual identity governance for AI agents; org-layer doctrine bundle; SKILL.md | AI agents working on any Priivacy-ai project |
 | CI pipeline | Quality enforcement: CVE scan, linting, a11y, visual regression, cross-browser, Lighthouse, SBOM | Every PR and release |
@@ -65,7 +67,7 @@ This document describes the architecture of the Spec Kitty Design System — a m
 ### Dependency rules
 
 1. `@spec-kitty/tokens` has **no** dependencies on other packages in this repo.
-2. `@spec-kitty/angular` and `@spec-kitty/styles` depend on `@spec-kitty/tokens` as a peer dependency only — they do **not** bundle token values.
+2. `@spec-kitty/styles`, `@spec-kitty/elements` and `@spec-kitty/react` depend on `@spec-kitty/tokens` as a peer dependency only — they do **not** bundle token values.
 3. No framework package depends on another framework package.
 4. `doctrine/` is an independent directory with no npm dependency on any package.
 5. Storybook is a development tool; it is **not** a dependency of any published package.
@@ -100,7 +102,7 @@ This document describes the architecture of the Spec Kitty Design System — a m
 **Purpose:** Provide framework-specific component implementations that express the design language for their target rendering environment. Owns rendering ergonomics; does not own visual values.
 
 **Sub-contexts:**
-- **Angular Components** (`@spec-kitty/angular`) — targets Angular LTS; inherits Angular's 6-month LTS lifecycle
+- **Custom Elements** (`@spec-kitty/elements`) — targets the platform, not a framework; inherits Lit's ular's 6-month LTS lifecycle
 - **HTML/JS Primitives** (`@spec-kitty/styles`) — framework-agnostic; no build step required for consumers
 
 **Inbound:** Token authority context (token values); Storybook stories (documentation obligation)
@@ -172,7 +174,7 @@ Full risk register in [`risk-register.md`](risk-register.md). Top-5 prioritised 
 |---|---|---|---|---|
 | R01 | `@spec-kitty` npm scope not owned before publishing infrastructure is built | Critical | Medium | Pre-flight check before any release pipeline work (ADR-005) |
 | R02 | Token reconciliation (FR-034) reveals significant drift between Claude Design reference and live marketing site | High | Medium | FR-034 is a pre-implementation gate; ADR-003 |
-| R03 | Angular LTS rotation breaks `@spec-kitty/angular` consumers mid-dependency window | High | Medium | Charter consumer update policy; 3-month pre-LTS-expiry upgrade initiation |
+| R03 | ~~Angular LTS rotation breaks `@spec-kitty/angular` consumers mid-dependency window~~ **RETIRED by ADR-8** — no framework runtime, and `packages/angular` was deleted in #102 | — | — | No longer applicable; retained as the record of a risk that was discharged rather than mitigated |
 | R04 | CI pipeline exceeds 10-minute NFR-002 as component count grows | Medium | High | FR-035 path-scoped CI triggering from day one |
 | R05 | Storybook major version upgrade breaks CI visual regression baseline | Medium | High | Storybook pinned; Dependabot major bumps excluded from auto-merge |
 
@@ -197,7 +199,7 @@ Constraints that have significant architectural consequence (full list in missio
 | Constraint | Implication |
 |---|---|
 | C-003 / C-009: no hardcoded values; no `*`/`latest` specifiers | Token authority rule is enforceable by linting; every value traces to `@spec-kitty/tokens` |
-| C-007: Angular targets current LTS | `@spec-kitty/angular` has an explicit maintenance lifecycle; must be tracked |
+| ~~C-007: Angular targets current LTS~~ **RETIRED by ADR-8.** The component layer is a custom element with no framework runtime, so there is no LTS rotation to track. `packages/angular` was deleted in #102. | ~~`@spec-kitty/angular` had an explicit maintenance lifecycle; must be tracked |~~ |
 | C-008: illustrations excluded from software packages | Enforced as SK-D02 directive; CI must gate on presence of illustration assets in distribution output |
 | FR-034 pre-implementation gate | No token package implementation begins before token schema ADR value reconciliation is complete |
 | ADR-005 pre-flight: scope ownership | `@spec-kitty` npm scope must be confirmed owned before any publishing CI work |
