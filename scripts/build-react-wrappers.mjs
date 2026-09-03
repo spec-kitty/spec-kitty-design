@@ -35,8 +35,9 @@
  * The discriminator for a prop is `privacy`, NEVER `inheritedFrom`. FR-004 said "protected and
  * inheritedFrom-base members do not become props" through every draft and all three review
  * lenses, and it is wrong: value, label, name, required, disabled, description, errorMessage
- * and invalid are all inheritedFrom FormControlBase with privacy public, and all eight
- * correctly become props. Implemented literally it would emit a form wrapper with no `value`.
+ * and invalid are all inheritedFrom FormControlBase with privacy public, and SEVEN of the
+ * eight correctly become props. The eighth is errorMessage, excluded via
+ * EXPECTED_NON_PROP_FIELDS below because the element observes no attribute for it. Implemented literally it would emit a form wrapper with no `value`.
  *
  * OUTDIR IS UNDER src/, DELIBERATELY. `.gitignore:5-6` ignores `dist` both at the root and one level inside any package, and a
  * bare `dist/` matches a directory of that name at ANY depth. A TypeScript package's natural
@@ -281,11 +282,17 @@ function audit({ outdir, manifestPath, srcDir, floor }) {
   // --- FLOOR. A ratchet on a committed number, not `length > 0`. -------------------------
   // `> 0` is satisfied by ONE file: emit SkCard.d.ts alone, expected one, sets equal, green,
   // four of five elements missing. check-elements-entries.mjs:107-109 is the house pattern.
-  if (emittedClasses.length < floor) {
+  // EXACT EQUALITY, not `>=`. After any write run the two are equal by construction, so
+  // equality costs nothing — and `>=` leaves slack: edit .wrapper-floor down to 4 while five
+  // wrappers are emitted and --check stays green, because the auto-raise only runs on a local
+  // write and CI never performs one. A later commit could then remove an element under the
+  // weakened floor with every gate green. Found at the pre-merge gate's second pass.
+  if (emittedClasses.length !== floor) {
     problems.push(
-      `only ${emittedClasses.length} wrapper(s) emitted, floor is ${floor}. Refusing to report ` +
-        'green over a shrunken set. If an element was deliberately removed, lower the floor in ' +
-        'the same commit and say why.'
+      `${emittedClasses.length} wrapper(s) emitted but the committed floor is ${floor}. ` +
+        'Refusing to report green over a shrunken set, or over a floor that has been slackened ' +
+        'below the current count. If an element was deliberately removed, edit the floor in the ' +
+        'same commit and say why.'
     );
   }
 
@@ -295,7 +302,7 @@ function audit({ outdir, manifestPath, srcDir, floor }) {
   const tags = [...tagged.keys()].sort();
   if (JSON.stringify(tags) !== JSON.stringify(onDisk)) {
     problems.push(
-      `the manifest's tagged declarations and the source glob disagree.\n` +
+      `the source glob and the manifest disagree about which elements exist.\n` +
         `   manifest: ${tags.join(', ') || '(none)'}\n   on disk:  ${onDisk.join(', ') || '(none)'}`
     );
   }
@@ -304,7 +311,7 @@ function audit({ outdir, manifestPath, srcDir, floor }) {
   const expectedClasses = [...tagged.values()].map((d) => d.name).sort();
   if (JSON.stringify(emittedClasses) !== JSON.stringify(expectedClasses)) {
     problems.push(
-      `the emitted wrappers and the manifest's tagged declarations disagree.\n` +
+      `the emitted wrappers and the manifest's tagged declarations do not match.\n` +
         `   expected: ${expectedClasses.join(', ') || '(none)'}\n` +
         `   emitted:  ${emittedClasses.join(', ') || '(none)'}`
     );
@@ -448,17 +455,17 @@ if (selftest) {
     [
       'a file in the output tree that no tagged declaration justifies (a stale wrapper left ' +
         'behind, in audit terms)',
-      'disagree',
+      'do not match',
       ({ out }) => cpSync(join(out, 'SkCard.d.ts'), join(out, 'SkGone.d.ts')),
     ],
     [
       'a hand-added file in the output directory',
-      'disagree',
+      'do not match',
       ({ out }) => writeFileSync(join(out, 'SkHand.d.ts'), 'export const hand = 1;\n'),
     ],
     [
       'one element missing from the emitted set while the manifest still declares it',
-      'disagree',
+      'do not match',
       ({ out }) => {
         rmSync(join(out, 'SkCard.d.ts'));
         rmSync(join(out, 'SkCard.js'));
@@ -492,7 +499,7 @@ if (selftest) {
     [
       'a declaration the generator skipped while the manifest still declares it — the ' +
         'TAUTOLOGY case, green if both sides read decl.tagName',
-      'disagree',
+      'do not match',
       ({ out }) => {
         rmSync(join(out, 'SkStub.d.ts'));
         rmSync(join(out, 'SkStub.js'));
@@ -563,10 +570,11 @@ if (selftest) {
           }
         }
         writeFileSync(mp, JSON.stringify(m));
-        // Regenerate from the UNNARROWED prop set so `variant` is still emitted, which is what
-        // makes this the undeliverable case rather than a plain set mismatch.
-        const dts = join(out, 'SkCard.d.ts');
-        writeFileSync(dts, readFileSync(dts, 'utf8'));
+        // Only the MANIFEST is narrowed. The tree generated before this mutation already carries
+        // `variant`, which is what makes this the undeliverable-field case rather than a plain
+        // set mismatch — no regeneration is needed or performed. (An earlier version wrote the
+        // file back byte-for-byte under a comment claiming it regenerated; a no-op under a false
+        // comment, in the file whose thesis is that prose must not outrun code.)
       },
     ],
     [
@@ -584,7 +592,7 @@ if (selftest) {
     ],
     [
       'an element on disk that the manifest does not declare — the analyzer dropped it',
-      'disagree',
+      'source glob and the manifest disagree',
       ({ src }) => {
         mkdirSync(join(src, 'ghost'), { recursive: true });
         writeFileSync(join(src, 'ghost/sk-ghost.ts'), 'export class SkGhost {}\n');
@@ -689,8 +697,14 @@ try {
     process.exit(1);
   }
   const floorRaw = readFileSync(floorPath, 'utf8').trim();
-  if (!/^\d+$/.test(floorRaw)) {
-    console.error(`❌ ${floorPath} is not a non-negative integer (read ${JSON.stringify(floorRaw)}).`);
+  // >= 1, not >= 0. `/^\d+$/` admits "0", and `length < 0` is never true — a one-character
+  // edit would make the ratchet vacuous while every message still read as if a floor applied.
+  // This file's whole argument is that `> 0` is too weak; `>= 0` is weaker.
+  if (!/^\d+$/.test(floorRaw) || Number(floorRaw) < 1) {
+    console.error(
+      `❌ ${floorPath} must be a positive integer (read ${JSON.stringify(floorRaw)}). A package\n` +
+        '   that genuinely emits zero elements should delete this gate, not zero its floor.'
+    );
     process.exit(1);
   }
   const floor = Number(floorRaw);
@@ -779,6 +793,9 @@ try {
       writeFileSync(floorPath, `${count}\n`);
       console.log(`build-react-wrappers: floor raised ${floor} -> ${count}`);
     } else if (count < floor) {
+      // UNREACHABLE in practice: audit() ran above with the same floor over the same tree and
+      // exited. Kept as a backstop so the write path is safe if the two ever diverge — but
+      // audit owns this failure, and its message is the one a reader will actually see.
       console.error(
         `❌ ${count} element(s) emitted but the committed floor is ${floor}.\n` +
           `   Refusing to lower it as a side effect. If an element was deliberately removed,\n` +

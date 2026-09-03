@@ -65,32 +65,93 @@ function stateFields(modulePath) {
   // No try/catch: an unreadable source for a tagged declaration is a failure, not an empty set.
   const src = readFileSync(modulePath, 'utf8');
   const sf = ts.createSourceFile(modulePath, src, ts.ScriptTarget.ES2022, true);
+
+  /** `{...} as const` / `{...} satisfies X` still wrap an object literal. Unwrap to it. */
+  const unwrap = (node) => {
+    let n = node;
+    while (n && (ts.isAsExpression(n) || ts.isSatisfiesExpression(n) || ts.isParenthesizedExpression(n))) {
+      n = n.expression;
+    }
+    return n;
+  };
+
+  /**
+   * The object literal a `properties` member resolves to, for BOTH shapes the analyzer itself
+   * handles — `static properties = {...}` and `static get properties() { return {...} }`.
+   * Returns null when the member exists but does not resolve, which the caller treats as a
+   * hard failure rather than as "no state fields".
+   */
+  const propertiesObject = (member) => {
+    if (ts.isGetAccessorDeclaration(member)) {
+      const ret = member.body?.statements?.find(ts.isReturnStatement);
+      return ret?.expression ? unwrap(ret.expression) : null;
+    }
+    return member.initializer ? unwrap(member.initializer) : null;
+  };
+
+  let sawUnresolvable = null;
   const visit = (node) => {
-    if (
-      ts.isPropertyDeclaration(node) &&
+    // (a) the `state: true` entry inside a static properties block
+    const isStaticProps =
+      (ts.isPropertyDeclaration(node) || ts.isGetAccessorDeclaration(node)) &&
       node.modifiers?.some((m) => m.kind === ts.SyntaxKind.StaticKeyword) &&
-      node.name.getText(sf) === 'properties' &&
-      node.initializer &&
-      ts.isObjectLiteralExpression(node.initializer)
-    ) {
-      for (const prop of node.initializer.properties) {
-        if (!ts.isPropertyAssignment(prop) || !ts.isObjectLiteralExpression(prop.initializer)) continue;
-        const isState = prop.initializer.properties.some(
-          (o) =>
-            ts.isPropertyAssignment(o) &&
-            o.name.getText(sf) === 'state' &&
-            o.initializer.kind === ts.SyntaxKind.TrueKeyword
-        );
-        if (isState) found.add(prop.name.getText(sf).replace(/^['"]|['"]$/g, ''));
+      node.name?.getText(sf) === 'properties';
+    if (isStaticProps) {
+      const obj = propertiesObject(node);
+      if (!obj || !ts.isObjectLiteralExpression(obj)) {
+        // A shape this walk cannot read must FAIL. Returning an empty set here is precisely how
+        // the manifest came to claim an attribute for `errorMessage`: a silent miss reads
+        // identically to "this element has no state fields".
+        sawUnresolvable = `${modulePath}: \`static properties\` does not resolve to an object literal`;
+      } else {
+        for (const prop of obj.properties) {
+          if (ts.isSpreadAssignment(prop)) {
+            sawUnresolvable = `${modulePath}: \`static properties\` spreads another object`;
+            continue;
+          }
+          if (!ts.isPropertyAssignment(prop)) continue;
+          const value = unwrap(prop.initializer);
+          if (!ts.isObjectLiteralExpression(value)) continue;
+          const isState = value.properties.some(
+            (opt) =>
+              (ts.isPropertyAssignment(opt) &&
+                opt.name.getText(sf) === 'state' &&
+                opt.initializer.kind === ts.SyntaxKind.TrueKeyword) ||
+              // shorthand `{ type: String, state }`
+              (ts.isShorthandPropertyAssignment(opt) && opt.name.getText(sf) === 'state')
+          );
+          if (isState) found.add(prop.name.getText(sf).replace(/^['"]|['"]$/g, ''));
+        }
+      }
+    }
+    // (b) the `@state()` decorator form. cem's lit plugin only builds attributes from
+    // `@property`, so this never produces a FALSE attribute today — collected anyway so the
+    // two shapes cannot disagree if that ever changes.
+    if (ts.isPropertyDeclaration(node)) {
+      const decorated = ts.getDecorators?.(node) ?? [];
+      for (const dec of decorated) {
+        const expr = ts.isCallExpression(dec.expression) ? dec.expression.expression : dec.expression;
+        if (expr.getText(sf) === 'state') found.add(node.name.getText(sf).replace(/^['"]|['"]$/g, ''));
       }
     }
     ts.forEachChild(node, visit);
   };
   visit(sf);
+  if (sawUnresolvable) {
+    console.error(`❌ ${sawUnresolvable}.`);
+    console.error(
+      '   Refusing to normalise: this pass strips the attributes the analyzer wrongly records\n' +
+        '   for Lit `state: true` fields, and a shape it cannot read would silently strip none.\n' +
+        '   Extend stateFields() to handle it rather than letting it pass.'
+    );
+    process.exit(1);
+  }
   return found;
 }
 
+
 const path = process.argv[2] ?? 'packages/elements/custom-elements.json';
+const BASE_CLASS = 'packages/elements/src/form-control-base.ts';
 const manifest = JSON.parse(readFileSync(path, 'utf8'));
 
 const byName = (a, b) => String(a.name ?? '').localeCompare(String(b.name ?? ''));
@@ -118,7 +179,14 @@ for (const mod of manifest.modules) {
       );
       process.exit(1);
     }
-    const states = stateFields(source);
+    // The element's own file AND the shared base. `form-control-base.ts` declares fields that
+    // each element registers in its own `static properties`, so a `state: true` hoisted into the
+    // base would otherwise be invisible here. Deeper chains are NOT followed — there is one base
+    // class in this package, and a second would need this widened rather than assumed.
+    const states = new Set([
+      ...stateFields(source),
+      ...(existsSync(BASE_CLASS) ? stateFields(BASE_CLASS) : []),
+    ]);
     if (states.size === 0) continue;
     if (Array.isArray(decl.attributes)) {
       const before = decl.attributes.length;

@@ -32,9 +32,8 @@ function gate(...args: string[]): { code: number; out: string } {
 }
 
 /**
- * These two spawn the gate as a child process, and the gate generates the whole wrapper tree —
- * twice for `--check` (it asserts FR-003 by generating a second time), and once per probe for
- * `--selftest`, which is eleven full generations plus eleven manifest copies.
+ * This spawns the gate as a child process, and the gate generates the whole wrapper tree twice
+ * for `--check` (it asserts FR-003 by generating a second time).
  *
  * That is well past Vitest's 5s default. It passed locally at ~2.3s and timed out in CI at
  * 6.2s, which is the shape of every wall-clock assumption in this repo: fine on a warm
@@ -113,7 +112,7 @@ test('[react-wrappers] the SSR decision is in the output, not in prose (FR-009, 
 test('[react-wrappers] public inherited members ARE props (FR-004, as corrected)', () => {
   // The requirement said "protected and inheritedFrom-base members do not become props" through
   // every draft and all three review lenses. It is wrong: value/label/name/required/disabled/
-  // description/errorMessage/invalid are all inheritedFrom FormControlBase with privacy public,
+  // description/invalid are all inheritedFrom FormControlBase with privacy public,
   // and a form wrapper without `value` is not a form wrapper. privacy is the discriminator.
   const dts = readFileSync(`${OUTDIR}/SkFormInput.d.ts`, 'utf8');
   for (const prop of ['value', 'label', 'name', 'required', 'disabled']) {

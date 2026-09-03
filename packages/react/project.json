@@ -34,7 +34,8 @@
       "executor": "@nx/eslint:lint",
       "options": {
         "lintFilePatterns": [
-          "packages/react/type-tests/**/*.tsx"
+          "packages/react/type-tests/**/*.tsx",
+          "packages/react/src/**/*.d.ts"
         ]
       }
     }

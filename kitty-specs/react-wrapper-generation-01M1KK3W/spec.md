@@ -125,9 +125,19 @@ This is ADR-11's required behaviour 9 and the mission's hardest criterion.
   neither script currently has.**
 - **FR-003**: Regenerating from an unchanged manifest is a **no-op**, asserted — ADR-11's
   behaviour 9, which `behaviours.json` deliberately omitted until a subject existed.
-- **FR-004**: Only public API surfaces. **`privacy: protected` and `private` members do not
-  become props. `inheritedFrom` is irrelevant to that question** — a public inherited field is
-  public API and must be a prop.
+- **FR-004**: Only public API surfaces, and only *deliverable* ones. **`privacy: protected` and
+  `private` members do not become props. `inheritedFrom` is irrelevant to that question** — a
+  public inherited field is public API and must be a prop. **A public field with no observed
+  attribute is also not a prop**, because `ssrSafe` (FR-009) defers element registration and
+  React therefore delivers first-render props as attributes; a field with no attribute would be
+  dropped in silence. The set of such fields is committed and asserted, not discovered.
+
+  *Amended at the pre-merge gate.* The requirement previously enumerated `errorMessage` among
+  the inherited fields that MUST be props. It is Lit `state: true` — the element observes no
+  attribute for it — so it could never arrive on a first render, and the manifest's claim that
+  it had an attribute was an analyzer defect (now corrected at source by
+  `normalise-manifest.mjs`). Recording the amendment rather than letting the implementation
+  quietly diverge from the requirement.
 
   *Corrected at implementation, after the generator was actually run.* Every earlier draft of
   this requirement said "`protected` **and `inheritedFrom`-base** members do not become props",
@@ -166,8 +176,12 @@ This is ADR-11's required behaviour 9 and the mission's hardest criterion.
 - **NFR-001**: No hand edits to generated output — asserted, not asked for.
 - **NFR-002**: The generator runs in the **node** lane. ADR-11 §"a second, browserless subject"
   names manifest analysis, wrapper generation and its drift check as node-lane work.
-- **NFR-003**: React is a **devDependency of the wrapper package only**. It must not become a
-  dependency of `@spec-kitty/elements`.
+- **NFR-003**: React must not become a dependency of `@spec-kitty/elements`, in any dependency
+  map — asserted. The wrapper package declares React as a **peer**; the only devDependency on it
+  is the consumer fixture that actually renders. (The original wording said "a devDependency of
+  the wrapper package only", which the shipped shape improves on rather than meets: a peer is
+  the correct declaration for a package whose consumer supplies React. Amended to what is true
+  and asserted.)
 - **NFR-004**: `suite-budget.json`'s **two** ceilings are re-measured if the mutation set or the
   test set grows. `selftestCeilingSeconds` (180) covers `suite-selftest.mjs`; `ceilingSeconds`
   (25) covers `npm run test` across both lanes and both browsers, and no draft of this spec had
@@ -224,12 +238,16 @@ This is ADR-11's required behaviour 9 and the mission's hardest criterion.
 - **SC-307**: A form-associated wrapper submits inside a React `<form>`.
 - **SC-308**: `sk-card`'s slot situation is resolved and the manifest agrees with the element.
 - **SC-309**: The SSR/RSC decision is asserted by grep over the generated output, not by prose.
-- **SC-310**: `packages/react` has a `typecheck` target, `typecheck-all.mjs` picks it up
-  (the project list grows from 2 to 3, asserted), and a wrong prop and a wrong ref type are
-  both red in an expect-error fixture.
-- **SC-311**: For every element, the emitted prop set **equals** its **public** manifest field
-  set — inherited included, `protected`/`private` excluded — compared as sets, with a non-empty
-  floor for every element that has one. (This criterion said "non-inherited" when first written,
+- **SC-310**: `packages/react` has a `typecheck` target and `typecheck-all.mjs` picks it up —
+  asserted by MEMBERSHIP (`elements`, `elements-behaviour-fixture`, `react`,
+  `react-consumer-fixture` are each named), not by a count. A count rots on the next project
+  added, and three drafts of this criterion disagreed about whether it was 3 or 4. A wrong prop
+  and a wrong ref type are both red in an expect-error fixture.
+- **SC-311**: For every element, the emitted prop set **equals** its **public and attributed**
+  manifest field set — inherited included, `protected`/`private`/`readonly` excluded, and fields
+  with no observed attribute excluded per FR-004 — compared as sets, with a non-empty floor for
+  every element that has one. The excluded-but-public set is itself asserted against a committed
+  record, so a field losing its attribute fails rather than disappearing. (This criterion said "non-inherited" when first written,
   which would have demanded dropping the eight inherited props. Same error as FR-004's, made
   while folding the review that failed to catch it.)
 - **SC-312**: The expected file set is derived from a source the generator does not consult.

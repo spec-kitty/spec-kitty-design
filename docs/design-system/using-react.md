@@ -109,13 +109,22 @@ function Field() {
   first render. Set it through `setCustomError()`, the element's own lever, and read it through
   the ref. The manifest used to claim an attribute for it, because the analyzer does not honour
   `state`; `normalise-manifest.mjs` now corrects that at source.
-- **Some prop descriptions still read `undefined`.** The analyzer does not propagate an inherited
-  field's JSDoc onto a subclass's attribute, so the eight properties inherited from
-  `FormControlBase` document themselves as `undefined` in your editor. Tracked on #75 — the types
-  are correct, only the prose is missing.
+- **Prop descriptions read `undefined`.** Thirteen of them, across `sk-form-input` (9),
+  `sk-card` (2) and `sk-nav-pill` (2). Almost all of it is simply missing JSDoc: the reactive
+  properties carry no doc comment, so the manifest has no description to copy and the generator
+  writes the literal word. `invalid` is the single case that matches the more interesting
+  explanation — it *does* carry a base-class JSDoc, and the analyzer does not propagate an
+  inherited field's description onto a subclass's attribute.
+
+  (An earlier draft of this page blamed the analyzer for all of them and said "the eight
+  properties inherited from `FormControlBase`". Measured: `sk-card` extends `FormControlBase` at
+  all, and `placeholder`, `type`, `variant` and `inset` are own fields. One of thirteen fits
+  that story.)
+
+  Tracked on #75. The types are correct; only the prose is missing.
 - **Public inherited properties are props.** `value`, `label`, `name`, `required`, `disabled`,
-  `description`, `errorMessage` and `invalid` all come from `FormControlBase` and are all
-  settable from JSX. (An early draft of #75's FR-004 said inherited members must *not* become
+  `description` and `invalid` — seven of the eight that come from `FormControlBase` — are all
+  settable from JSX. The eighth is `errorMessage`, and it is the exception described above. (An early draft of #75's FR-004 said inherited members must *not* become
   props, which would have shipped a form wrapper with no `value`.)
 - **`'use client'` is emitted for you**, and element registration is deferred into a
   `useEffect` — a custom element cannot run in a server render.
