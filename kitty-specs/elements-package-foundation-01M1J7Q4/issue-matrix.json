@@ -121,7 +121,7 @@
       "wp": null
     },
     "#82": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "Follow-up: #82 (M16) is the no-build consumer and imports dist/elements.js, which is why SC-009 pins the ADR-10 \u00a72 artifact paths.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -129,7 +129,7 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
+      "verdict": "deferred-with-followup",
       "wp": null
     },
     "#90": {
