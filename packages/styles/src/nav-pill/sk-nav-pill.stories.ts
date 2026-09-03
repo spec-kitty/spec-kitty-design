@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/web-components';
 import './sk-nav-pill.css';
 import './sk-nav-pill-drawer.css';
-import { skToggleDrawer } from './index';
 
 const meta: Meta = {
   title: 'Navigation/SkNavPill (HTML)',
@@ -72,71 +71,19 @@ export const Mobile: Story = {
   parameters: { viewport: { defaultViewport: 'mobile1' } },
 };
 
-// ── Collapsed / responsive nav pill ──────────────────────────────────────
-// Shows hamburger button on narrow viewports; drawer slides open on click.
-// Add sk-nav-pill--responsive to enable the CSS breakpoint behaviour.
-// Add sk-nav-pill--has-drawer for the toggle button active-state styling.
-export const CollapsedHamburger: Story = {
-  name: 'Collapsed / Hamburger (responsive)',
-  parameters: {
-    viewport: { defaultViewport: 'mobile1' },
-    docs: {
-      description: {
-        story: 'Responsive nav pill that collapses to a hamburger at ≤ 720 px. ' +
-          'Requires both `sk-nav-pill.css` (base) and `sk-nav-pill-drawer.css` (drawer extension). ' +
-          'The drawer toggle also requires `skToggleDrawer` from `sk-nav-pill.js`. ' +
-          'Drag the right edge of the sandbox to cross the breakpoint.',
-      },
-    },
-  },
-  decorators: [
-    (story) => {
-      (window as any).__skToggleDrawer = skToggleDrawer;
-      return story();
-    },
-  ],
-  render: () => `
-<div style="resize:horizontal;overflow:hidden;min-width:220px;max-width:800px;border:1px dashed var(--sk-border-default);padding:var(--sk-space-4);">
-  <p style="font-size:var(--sk-text-xs);color:var(--sk-fg-muted);margin-bottom:var(--sk-space-3);font-family:var(--sk-font-mono);">
-    Drag the right edge to resize and watch the nav collapse below 720 px.
-  </p>
-  <nav class="sk-nav-pill sk-nav-pill--responsive sk-nav-pill--has-drawer" aria-label="Primary navigation">
-    <div class="sk-nav-pill__items">
-      <a href="#" class="sk-nav-pill__item">Platform</a>
-      <a href="#" class="sk-nav-pill__item sk-nav-pill__item--active" aria-current="page">Getting Started</a>
-      <a href="#" class="sk-nav-pill__item">About</a>
-      <a href="#" class="sk-nav-pill__item">Blog</a>
-      <a href="#" class="sk-nav-pill__item">Training</a>
-    </div>
-    <div class="sk-nav-pill__cta" style="display:flex;align-items:center;gap:var(--sk-space-2);">
-      <!-- Hamburger — hidden on desktop, shown on mobile -->
-      <button
-        class="sk-nav-pill__hamburger"
-        aria-label="Open navigation"
-        aria-expanded="false"
-        aria-controls="sk-nav-drawer"
-        type="button"
-        onclick="window.__skToggleDrawer && window.__skToggleDrawer(this)"
-      >
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
-          <line x1="4" y1="7" x2="20" y2="7"/>
-          <line x1="4" y1="12" x2="20" y2="12"/>
-          <line x1="4" y1="17" x2="20" y2="17"/>
-        </svg>
-      </button>
-      <button class="sk-nav-pill__cta-btn" type="button">Book Demo</button>
-    </div>
-  </nav>
-  <!-- Drawer: slides open on mobile when hamburger is toggled -->
-  <div id="sk-nav-drawer" class="sk-nav-pill__drawer">
-    <a href="#" class="sk-nav-pill__item">Platform</a>
-    <a href="#" class="sk-nav-pill__item sk-nav-pill__item--active" aria-current="page">Getting Started</a>
-    <a href="#" class="sk-nav-pill__item">About</a>
-    <a href="#" class="sk-nav-pill__item">Blog</a>
-    <a href="#" class="sk-nav-pill__item">Training</a>
-  </div>
-</div>`,
-};
+// ── The collapsed/drawer story has MOVED ─────────────────────────────────
+//
+// It lived here and it was interactive: the decorator put `skToggleDrawer` on `window` so an
+// inline `onclick` in the rendered string could resolve it. That helper is gone (#73) and its
+// behaviour is `<sk-nav-pill>` in @spec-kitty/elements — see Elements/SkNavPill, which has a
+// story rendering the panel already open so the a11y gate sees both states.
+//
+// It is NOT reproduced here as a static snapshot. packages/styles may depend only on
+// @spec-kitty/tokens (eslint depConstraints, scope:styles), so this file cannot import the
+// element; and a story that renders the drawer markup without the behaviour would assert that
+// a component works while being unable to open it. The two-container CSS itself is unchanged
+// and still shipped for static consumers — it is the story that had a JS dependency, not the
+// stylesheet.
 
 export const LightMode: Story = {
   parameters: { backgrounds: { default: 'sk-light' } },

@@ -91,6 +91,12 @@ const leftmostCompound = (selector) =>
 
 const ownsLeftmost = (compound, name) =>
   compound.startsWith(':host') ||
+  // `::slotted()` reaches the element's own directly-assigned children — inward through the
+  // composed tree, never outward to an ancestor. It is how an adopted sheet styles light-DOM
+  // content at all: an ordinary `.sk-nav-pill__item` selector in a shadow sheet matches
+  // nothing, which is why <sk-nav-pill>'s first a11y run reported colour-contrast failures on
+  // links the static stylesheet styles perfectly well in a document.
+  compound.startsWith('::slotted(') ||
   new RegExp(`(^|[.:\\[])sk-${name}(\\b|__|--)`).test(compound) ||
   compound === '*';
 

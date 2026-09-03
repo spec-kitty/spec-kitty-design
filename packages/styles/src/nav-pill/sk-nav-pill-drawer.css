@@ -109,6 +109,12 @@
    cross-root reference resolves.
 */
 @media (max-width: 720px) {
+  /* The containing block for the panel above. Scoped to the media query so the element adds
+     no stacking context at desktop widths. */
+  :host {
+    position: relative;
+  }
+
   :host .sk-nav-pill__items {
     display: none;
   }
@@ -118,8 +124,18 @@
   }
 
   /* The row becomes the panel. Same declarations as .sk-nav-pill__drawer.is-open above —
-     the collapsed presentation is the same design, reached by a different arrangement. */
+     the collapsed presentation is the same design, reached by a different arrangement.
+
+     POSITIONED BY THE ELEMENT, not by the consumer. In the two-container arrangement the
+     page had to place the panel itself: dashboard-demo.html carried a .dash-nav-drawer-wrap
+     with `position:absolute; top:100%` for exactly this. That is component layout leaking
+     into consumer CSS, and it went with the id contract. */
   :host([open]) .sk-nav-pill__items {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 100;
     display: flex;
     flex-direction: column;
     gap: var(--sk-space-1);

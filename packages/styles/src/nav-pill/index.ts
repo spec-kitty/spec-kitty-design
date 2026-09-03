@@ -10,4 +10,7 @@ export const SkNavPillHTML = `<nav class="sk-nav-pill" aria-label="Primary navig
   </div>
 </nav>`;
 
-export { skToggleDrawer } from './sk-nav-pill.js';
+// `skToggleDrawer` is GONE (#73). Its behaviour is `<sk-nav-pill>` in @spec-kitty/elements:
+// `open()` / `close()` / `toggle()` and a `sk-nav-pill-toggle` event, with no global
+// `id="sk-nav-drawer"` contract and nothing to attach to `window`. No compatibility shim —
+// nothing is published, so nothing imported it.

@@ -179,6 +179,12 @@ jobs:
       # only half of #72's actual defect (`.sk-light .sk-card--blue` is not in it).
       - name: "[ENFORCED] Adopted CSS stays inside the element root (ADR-9 Confirmation #1)"
         run: node scripts/check-adopted-css-boundaries.mjs
+      # The IIFE entry was a hand-maintained list of side-effect imports. #73 added an element
+      # to index.ts and not to it, and everything stayed green — the test lane resolves the
+      # package to index.ts, the analyzer reads source, Storybook has its own module graph.
+      # Only the deployed demo went quiet, and a Playwright failure found it.
+      - name: "[ENFORCED] Every element reaches both distribution entries (ADR-10 §2)"
+        run: node scripts/check-elements-entries.mjs
       # The manifest is a generated artifact under ADR-10's contract, and ADR-11
       # generates the React wrapper FROM it — a manifest that drifts from source
       # propagates into generated code two missions from now. The analyzer's own

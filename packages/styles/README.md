@@ -53,75 +53,39 @@ desktop pill, or load **both** stylesheets for the responsive/drawer pattern.
 <link rel="stylesheet" href="node_modules/@spec-kitty/styles/dist/nav-pill/sk-nav-pill-drawer.css">
 ```
 
-### Drawer ID contract
+### The drawer is a custom element now
 
-The drawer element MUST have `id="sk-nav-drawer"`. The `skToggleDrawer`
-function looks up the drawer by this exact ID. Only one drawer per page.
+`skToggleDrawer` and the `id="sk-nav-drawer"` contract are **gone** (#73). They required the
+consuming page to contain an element with that exact id, to wire an inline `onclick`, to
+assign the import to `window` first because an inline handler cannot see a module scope, and
+to author every nav item twice — once for the row and once for the drawer. The helper returned
+`false` and did nothing if any of that was missing.
+
+The behaviour lives in `<sk-nav-pill>` in **`@spec-kitty/elements`**:
 
 ```html
-<div id="sk-nav-drawer" class="sk-nav-pill__drawer">
+<script src="node_modules/@spec-kitty/elements/dist/elements.js"></script>
+
+<sk-nav-pill label="Primary navigation">
   <a href="#" class="sk-nav-pill__item">Platform</a>
   <a href="#" class="sk-nav-pill__item">About</a>
-</div>
+</sk-nav-pill>
 ```
 
-### Pattern 1 — `addEventListener` (preferred)
+The items are authored **once**; below 720px the same container becomes the panel. There is no
+id to get wrong and nothing on `window`.
 
-Cleaner separation between markup and behaviour. Works in modern build
-pipelines and module-friendly environments.
+| | |
+|---|---|
+| Methods | `open(invoker?)`, `close()`, `toggle(invoker?)` |
+| State | `isOpen` property, reflected to the `open` attribute |
+| Event | `sk-nav-pill-toggle` — fires **before** the change, `detail: { open: boolean }`, `bubbles`, `composed`, `cancelable`. `preventDefault()` abandons the change. |
+| Keyboard | Escape closes and returns focus to whatever control opened it |
+| Styling | `::part(nav)`, `::part(items)`, `::part(hamburger)` — ADR-9's rule is that a consumer restyles through the part, never by reaching into the shadow tree |
 
-```html
-<button id="hamburger"
-        class="sk-nav-pill__hamburger"
-        aria-label="Open navigation"
-        aria-expanded="false"
-        aria-controls="sk-nav-drawer">
-  <!-- hamburger icon SVG -->
-</button>
-
-<script type="module">
-  import { skToggleDrawer } from '@spec-kitty/styles';
-  document.getElementById('hamburger')
-    .addEventListener('click', (e) => skToggleDrawer(e.currentTarget));
-</script>
-```
-
-### Pattern 2 — inline `onclick`
-
-For static-HTML environments where wiring `addEventListener` is awkward
-(e.g. the demo pages in this repo). The function must be attached to
-`window` so the inline handler can resolve it.
-
-```html
-<button class="sk-nav-pill__hamburger"
-        aria-label="Open navigation"
-        aria-expanded="false"
-        aria-controls="sk-nav-drawer"
-        onclick="skToggleDrawer(this)">
-  <!-- hamburger icon SVG -->
-</button>
-
-<script type="module">
-  import { skToggleDrawer } from '@spec-kitty/styles';
-  window.skToggleDrawer = skToggleDrawer;
-</script>
-```
-
-### Function contract
-
-```ts
-function skToggleDrawer(button: HTMLElement | null): boolean;
-```
-
-- Returns the new open state — `true` if the drawer is now open, `false`
-  if it is now closed (or the call no-op'd).
-- Side effects are limited to: toggling `is-open` on the drawer, updating
-  `aria-expanded` and `aria-label` on the button.
-- No-ops (returns `false`) when the button is null/undefined or when no
-  `#sk-nav-drawer` element exists. Never throws.
-
-See the full contract in
-[`docs/contracts/nav-pill-drawer-module.md`](https://github.com/Stijn-Dejongh/spec-kitty-design/blob/main/kitty-specs/catalog-completeness-and-brand-consistency-01KQPDB5/contracts/nav-pill-drawer-module.md).
+The two stylesheets in this package are unchanged and still shipped: a static consumer who
+wants the plain desktop pill, or the two-container drawer arrangement without JavaScript, links
+them exactly as before.
 
 ## Peer dependencies
 

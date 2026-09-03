@@ -40,9 +40,18 @@ fi
 #   ../../packages/tokens/dist/tokens.css   -> ./tokens.css
 #   ../../packages/tokens/assets/<file>     -> ./assets/<file>
 #   ../../packages/styles/src/<comp>/<file> -> ./<comp>/<file>
+#   ../../packages/elements/dist/<file>     -> ./elements-dist/<file>
+#
+# The elements mapping arrived with #73, when dashboard-demo.html stopped importing a
+# hand-written `sk-nav-pill.js` from source and started loading the <sk-nav-pill> element's
+# IIFE. Unlike the component CSS this page links from source, that IS a build output — the
+# element is TypeScript. `./elements-dist/` is the path Storybook's own staticDirs already
+# publish it under (apps/storybook/.storybook/main.ts), so the two agree by name; the copy
+# below makes this script's guarantee independent of that rather than quietly reliant on it.
 sed -i \
   -e 's|\.\./\.\./packages/tokens/dist/tokens\.css|./tokens.css|g' \
   -e 's|\.\./\.\./packages/tokens/assets/|./assets/|g' \
+  -e 's|\.\./\.\./packages/elements/dist/|./elements-dist/|g' \
   -e 's|\.\./\.\./packages/styles/src/|./|g' \
   "${PAGES[@]}"
 
@@ -52,6 +61,21 @@ sed -i \
 if grep -nE '\.\./.*packages/' "${PAGES[@]}"; then
   echo "ERROR: residual monorepo-relative references found after rewrite" >&2
   exit 1
+fi
+
+# --- the elements bundle ----------------------------------------------------
+# Only when a page actually references it, so a demo surface with no custom elements does not
+# acquire a hard dependency on a build it does not use. When one DOES reference it, a missing
+# artifact is an error rather than a silent 404 at the reference check below — the same
+# distinction the fonts branch draws.
+if grep -q './elements-dist/' "${PAGES[@]}"; then
+  if [ ! -f packages/elements/dist/elements.js ]; then
+    echo "ERROR: a demo page references ./elements-dist/ but packages/elements/dist/elements.js is missing" >&2
+    echo "  Run \`npx nx run elements:build\` first." >&2
+    exit 1
+  fi
+  mkdir -p "$DIST/elements-dist"
+  cp packages/elements/dist/elements.js "$DIST/elements-dist/elements.js"
 fi
 
 # --- tokens, fonts, brand assets --------------------------------------------
