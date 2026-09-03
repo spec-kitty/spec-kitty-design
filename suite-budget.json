@@ -58,7 +58,9 @@
     "run that justifies it, rather than discover the breach.",
     "",
     "THE SLOPE, corrected. #74 recorded \"~10s per added mutation\" and #126 planned around it. That figure bundles two variables: the harness runs one FULL SUITE per mutation, so the two committed CI points (39 mut/62 tests -> 121.7s; 41/80 -> 141.6s) fit per-run ~= 1.90s + 0.0183s x tests. A mutation with no new tests costs ~3.4s; the 10s was a mutation PLUS nine tests. #126 predicted 151s on that fit and CI measured 161.1s, so the model under-predicts by ~7% \u2014 good enough to plan with, not good enough to quote.",
-    "NOT RAISED at #126, deliberately. Two mutations were added and the run still fits with 18.9s spare, so raising the ceiling would have been raising it from an arithmetic the run does not support \u2014 the defect this file records a lens catching twice. The next mission to add mutations should expect to raise it, and now has a real slope to do that from."
+    "NOT RAISED at #126, deliberately. Two mutations were added and the run still fits with 18.9s spare, so raising the ceiling would have been raising it from an arithmetic the run does not support \u2014 the defect this file records a lens catching twice. The next mission to add mutations should expect to raise it, and now has a real slope to do that from.",
+    "",
+    "TWO POINTS AT THE SAME COUNTS, 161.1s and 155.5s, both CI, both 43 mutations / 83 tests. That spread is runner variance, and it is recorded rather than averaged away: a single quoted figure is what this file exists to argue against. Plan against the SLOWER one."
   ],
   "covers": "npm run test (both lanes, chromium + webkit in CI)",
   "ceilingSeconds": 25,
@@ -78,6 +80,12 @@
       "mutations": 43,
       "tests": 83,
       "seconds": 161.1
+    },
+    {
+      "sha": "de4e914",
+      "mutations": 43,
+      "tests": 83,
+      "seconds": 155.5
     }
   ]
 }
