@@ -1,7 +1,7 @@
 {
-  "event_count": 5,
-  "last_event_id": "01M1JJJQ3ZBSZTP3P9NYFMW0A2",
-  "materialized_at": "2026-09-03T02:46:44.607763+00:00",
+  "event_count": 6,
+  "last_event_id": "01M1JJJQ58HHJCJT2T6H25XBBS",
+  "materialized_at": "2026-09-03T02:46:44.648288+00:00",
   "mission_number": "",
   "mission_slug": "elements-verification-harness-01M1JGEZ",
   "mission_type": "software-dev",
@@ -14,7 +14,7 @@
     "for_review": 0,
     "in_progress": 0,
     "in_review": 0,
-    "planned": 5
+    "planned": 6
   },
   "work_packages": {
     "WP01": {
@@ -51,6 +51,13 @@
       "lane": "planned",
       "last_event_id": "01M1JJJQ3ZBSZTP3P9NYFMW0A2",
       "last_transition_at": "2026-09-03T02:46:44.607763+00:00"
+    },
+    "WP06": {
+      "actor": "finalize-tasks",
+      "force_count": 0,
+      "lane": "planned",
+      "last_event_id": "01M1JJJQ58HHJCJT2T6H25XBBS",
+      "last_transition_at": "2026-09-03T02:46:44.648288+00:00"
     }
   }
 }
