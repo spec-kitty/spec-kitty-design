@@ -1,0 +1,27 @@
+{
+  "$comment": [
+    "The behaviour suite's CI time budget (#71, FR-013, NFR-001).",
+    "",
+    "The charter's Performance Benchmarks say 'Storybook CI build time under 3 minutes' and",
+    "contemplate no test suite at all \u2014 ADR-11's own Consequences say 'a new budget has to be",
+    "set rather than assumed'. This is that budget, ASSERTED rather than recorded: the job",
+    "fails above the ceiling, so the number cannot go stale silently.",
+    "",
+    "WHERE THIS LIVES IS AN OPEN OPERATOR QUESTION. Amending the charter's Performance",
+    "Benchmarks may be the right home, but charter.md and charter.yaml currently contradict",
+    "each other and the citation for how amendments happen does not check out \u2014 see the",
+    "operator questions on #71. Until that is settled the budget lives here and in ADR-11's",
+    "Consequences, both of which this mission may edit.",
+    "",
+    "The ceiling covers the SUITE ONLY. scripts/suite-selftest.mjs runs fifteen more suites",
+    "and is 5-10x this figure; it is a separate CI step and is deliberately not inside this",
+    "measurement, because a ceiling that mixes them cannot tell you which one regressed."
+  ],
+  "covers": "npm run test (both lanes, chromium + webkit in CI)",
+  "ceilingSeconds": 120,
+  "measuredSeconds": null,
+  "measuredAt": null,
+  "measuredOn": null,
+  "runUrl": null,
+  "sha": null
+}
