@@ -1,0 +1,32 @@
+{
+  "name": "react",
+  "projectType": "library",
+  "sourceRoot": "packages/react/src",
+  "targets": {
+    "wrappers": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node scripts/build-react-wrappers.mjs"
+      },
+      "inputs": [
+        "{workspaceRoot}/packages/elements/custom-elements.json",
+        "{workspaceRoot}/scripts/build-react-wrappers.mjs"
+      ],
+      "outputs": [
+        "{workspaceRoot}/packages/react/src"
+      ]
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc -p packages/react/tsconfig.json --noEmit"
+      },
+      "inputs": [
+        "{projectRoot}/src/**/*",
+        "{projectRoot}/tsconfig*.json",
+        "{workspaceRoot}/tsconfig.base.json"
+      ]
+    }
+  },
+  "tags": []
+}

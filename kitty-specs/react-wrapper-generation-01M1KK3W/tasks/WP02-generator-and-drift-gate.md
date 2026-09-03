@@ -100,6 +100,14 @@ rewritten around them.
   link to a chain that is otherwise closed. Account explicitly for `index.d.ts`, `index.js` and
   `react-utils.js`, which are always emitted and carry no `tagName`.
 
+  Operational detail found on the first run: **the generator reads `package.json` from `cwd` at
+  module load**, not from the manifest's location, and throws `ENOENT` without one. The script
+  must resolve the repo root explicitly rather than assume the caller's cwd — the same
+  assumption that makes `build-elements-css.mjs --check` print green from `/tmp` (#123).
+
+  Also measured: `SkStub` **is** emitted by default, so Lens 2's tautology scenario is latent
+  rather than active. The three-count assertion is what keeps it latent.
+
   Why filter at all, stated correctly: `out/FormControlBase.d.ts` is emitted for an abstract
   class, and `FormControlBase` is **not exported** from `src/index.ts` — so the generated import
   is a type error, and `FormControlBase.js:25` emits `React.createElement("undefined", …)`. The
@@ -153,9 +161,25 @@ rewritten around them.
 
 - **T010 (NEW) — assert the prop set positively (FR-011).** T005 compares the **file** set.
   Nothing yet compares the **prop** set, so a generator emitting empty props objects passes
-  every criterion in this mission: `sk-form-input` could drop 10 attributes to 2, green. Per
-  element, emitted props == public non-inherited manifest fields, as sets, non-empty floor for
-  every element that has one, `sk-stub` the named exemption.
+  every criterion in this mission: `sk-form-input` could drop 10 attributes to 2, green.
+
+  **Per element, emitted props == PUBLIC manifest fields — inherited included,
+  `protected`/`private` excluded** — as sets, non-empty floor for every element that has one,
+  `sk-stub` (0 members) the named exemption.
+
+  **Read FR-004's correction before writing this.** The requirement said "`protected` and
+  `inheritedFrom`-base members do not become props" through every draft and all three review
+  lenses, and it is wrong: `value`, `label`, `name`, `required`, `disabled`, `description`,
+  `errorMessage` and `invalid` are all `inheritedFrom: FormControlBase, privacy: public` and all
+  correctly become props. A "non-inherited" set comparison here would demand deleting eight of
+  `sk-form-input`'s ten props, including `value`. The discriminator is `privacy`, never
+  `inheritedFrom`.
+
+  Verified against a real run: `SkFormInput.d.ts` emits exactly
+  `disabled, invalid, required, description, errorMessage, label, name, placeholder, type,
+  value` plus `error`, and the React-supplied `className, exportparts, htmlFor, key, part, ref,
+  tabIndex`. The last group comes from `reactProps` and must be excluded from the comparison —
+  they are not manifest fields.
 
 ## Definition of Done
 

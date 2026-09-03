@@ -125,8 +125,18 @@ This is ADR-11's required behaviour 9 and the mission's hardest criterion.
   neither script currently has.**
 - **FR-003**: Regenerating from an unchanged manifest is a **no-op**, asserted — ADR-11's
   behaviour 9, which `behaviours.json` deliberately omitted until a subject existed.
-- **FR-004**: Only public API surfaces. `protected` and `inheritedFrom`-base members do not
-  become props.
+- **FR-004**: Only public API surfaces. **`privacy: protected` and `private` members do not
+  become props. `inheritedFrom` is irrelevant to that question** — a public inherited field is
+  public API and must be a prop.
+
+  *Corrected at implementation, after the generator was actually run.* Every earlier draft of
+  this requirement said "`protected` **and `inheritedFrom`-base** members do not become props",
+  and all three review lenses passed over it — one of them recording SC-304 as "already true".
+  It is not merely already-true, it is **wrong**: `value`, `label`, `name`, `required`,
+  `disabled`, `description`, `errorMessage` and `invalid` are all `inheritedFrom:
+  FormControlBase` with `privacy: public`, and all eight correctly become props. Implemented
+  literally, FR-004 would have produced a form wrapper with **no `value` prop** — 8 of
+  `sk-form-input`'s 10 stripped. The `protected` half is the real requirement and it holds.
 - **FR-005**: The event path is exercised by `sk-nav-pill`'s declared event, in a real render.
 - **FR-006**: A form-associated wrapper submits inside a React `<form>`.
 - **FR-007**: `sk-card`'s undeclared `@slot` is resolved — either the JSDoc is added or the
@@ -203,8 +213,9 @@ This is ADR-11's required behaviour 9 and the mission's hardest criterion.
 - **SC-302**: Running the generator twice on an unchanged manifest is byte-identical —
   asserted in the node lane, not by eye.
 - **SC-303**: Hand-editing a generated file fails CI, demonstrated.
-- **SC-304**: No `protected` or base-inherited member appears in any wrapper's public props.
-  Asserted against the manifest, so it cannot rot as the base class grows.
+- **SC-304**: No `protected` or `private` member appears in any wrapper's public props, asserted
+  against the manifest so it cannot rot as the base class grows. Public **inherited** members
+  are expected to appear and their absence is a failure — see FR-004's correction.
 - **SC-305**: **The mission states, with evidence, what the wrapper buys over React 19's native
   support.** If the answer is "nothing that matters", that is recorded as the finding and the
   package is not shipped. This criterion is satisfied by a defensible answer, not by a
@@ -216,8 +227,11 @@ This is ADR-11's required behaviour 9 and the mission's hardest criterion.
 - **SC-310**: `packages/react` has a `typecheck` target, `typecheck-all.mjs` picks it up
   (the project list grows from 2 to 3, asserted), and a wrong prop and a wrong ref type are
   both red in an expect-error fixture.
-- **SC-311**: For every element, the emitted prop set **equals** its public non-inherited
-  manifest field set, compared as sets, with a non-empty floor for every element that has one.
+- **SC-311**: For every element, the emitted prop set **equals** its **public** manifest field
+  set — inherited included, `protected`/`private` excluded — compared as sets, with a non-empty
+  floor for every element that has one. (This criterion said "non-inherited" when first written,
+  which would have demanded dropping the eight inherited props. Same error as FR-004's, made
+  while folding the review that failed to catch it.)
 - **SC-312**: The expected file set is derived from a source the generator does not consult.
   Two readings of one predicate cannot disagree; three independent counts can —
   elements on disk (`packages/elements/src/*/sk-*.ts`) → manifest `tagName`s → emitted files,

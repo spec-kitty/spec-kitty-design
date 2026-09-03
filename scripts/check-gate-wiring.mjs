@@ -120,6 +120,10 @@ else {
     // entry here, and a lens demonstrated the consequence: delete both its CI lines and this
     // checker still printed green. That is the defect this list was created for, one gate later.
     [/node\s+scripts\/check-element-css-hygiene\.mjs(\s|$)/, 'the adopted-CSS hygiene gate', 'scripts/check-element-css-hygiene.mjs'],
+    // #75, both entries with the gate itself. The gate's probe table is required separately
+    // from the gate: a table that stops running is a gate whose defeated forms quietly reopen.
+    [/node\s+scripts\/build-react-wrappers\.mjs\s+--check(\s|$)/, 'the React wrapper drift gate', 'scripts/build-react-wrappers.mjs --check'],
+    [/node\s+scripts\/build-react-wrappers\.mjs\s+--selftest(\s|$)/, "the wrapper gate's own probe table", 'scripts/build-react-wrappers.mjs --selftest'],
   ];
 
   /** A step that cannot fail the job is a step that is not running (B, C, D, E). */

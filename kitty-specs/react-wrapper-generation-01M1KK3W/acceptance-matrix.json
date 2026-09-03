@@ -36,7 +36,7 @@
     },
     {
       "criterion_id": "FR-004",
-      "description": "No protected or base-inherited member becomes a prop. Regression guard: true off the shelf, so it must be asserted against the manifest or it certifies nothing.",
+      "description": "No protected/private member becomes a prop. inheritedFrom is irrelevant: public inherited fields (value, label, name, required, disabled, description, errorMessage, invalid) MUST be props. The original 'and inheritedFrom-base' wording was wrong and would have stripped 8 of sk-form-input's 10.",
       "proof_type": "automated_test",
       "evidence": null,
       "pass_fail": "pending",
@@ -186,7 +186,7 @@
     },
     {
       "criterion_id": "SC-304",
-      "description": "No protected/inherited member in any wrapper's public props, asserted against the manifest. NOTE: already true off the shelf.",
+      "description": "No protected or private member in any wrapper's public props, asserted against the manifest. Public inherited members are expected to appear; their absence is a failure.",
       "proof_type": "automated_test",
       "evidence": null,
       "pass_fail": "pending",
@@ -256,7 +256,7 @@
     },
     {
       "criterion_id": "SC-311",
-      "description": "Emitted prop set equals public non-inherited manifest field set per element, non-empty floor, sk-stub the named exemption.",
+      "description": "Per element, emitted props == public manifest fields (inherited included, protected/private excluded), as sets, non-empty floor where applicable.",
       "proof_type": "automated_test",
       "evidence": null,
       "pass_fail": "pending",
@@ -278,7 +278,7 @@
   "negative_invariants": [
     {
       "id": "NI-01",
-      "description": "No protected or FormControlBase-inherited member appears as a prop in any generated wrapper.",
+      "description": "No protected or private member appears as a prop in any generated wrapper. (Public inherited members are required to appear \u2014 see FR-004.)",
       "pass_fail": "pending"
     },
     {
