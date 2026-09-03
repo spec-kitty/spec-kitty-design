@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "generated_at": "2026-05-03T09:33:03.341Z",
+  "generated_at": "2026-09-03T04:45:35.474Z",
   "generated_from": "packages/tokens/src/tokens.css",
   "categories": {
     "color": {
@@ -46,6 +46,18 @@
         "--sk-surface-tint-sky"
       ]
     },
+    "border": {
+      "prefix": "--sk-border-",
+      "tokens": [
+        "--sk-border-tint-sky",
+        "--sk-border-tint-lilac",
+        "--sk-border-default",
+        "--sk-border-strong",
+        "--sk-border-focus",
+        "--sk-border-width-1",
+        "--sk-border-width-2"
+      ]
+    },
     "on": {
       "prefix": "--sk-on-",
       "tokens": [
@@ -71,16 +83,6 @@
         "--sk-fg-placeholder",
         "--sk-fg-on-primary",
         "--sk-fg-on-card"
-      ]
-    },
-    "border": {
-      "prefix": "--sk-border-",
-      "tokens": [
-        "--sk-border-default",
-        "--sk-border-strong",
-        "--sk-border-focus",
-        "--sk-border-width-1",
-        "--sk-border-width-2"
       ]
     },
     "font": {

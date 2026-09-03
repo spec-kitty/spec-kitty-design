@@ -24,9 +24,21 @@ export const CARD_VARIANTS = { blue: 'sk-card--blue', purple: 'sk-card--purple' 
 export type CardVariant = keyof typeof CARD_VARIANTS;
 
 export function cardClasses(variant?: string, inset = false): string {
+  // `Object.hasOwn`, not `in`: `in` reaches the prototype chain, so `cardClasses('constructor')`
+  // emitted `sk-card function Object() { [native code] }` as a class attribute — and because
+  // this module now also generates server-rendered HTML, that string reached real markup.
+  //
+  // And it THROWS on an unknown variant rather than degrading silently. Swallowing it is
+  // fail-open: a typo produced a plain card with no signal anywhere, in the one module that
+  // is the authored source for two packages.
+  if (variant && !Object.hasOwn(CARD_VARIANTS, variant)) {
+    throw new Error(
+      `unknown card variant "${variant}" — expected one of ${Object.keys(CARD_VARIANTS).join(', ')}`,
+    );
+  }
   return [
     'sk-card',
-    variant && variant in CARD_VARIANTS ? CARD_VARIANTS[variant as CardVariant] : '',
+    variant ? CARD_VARIANTS[variant as CardVariant] : '',
     inset ? 'sk-card--inset' : '',
   ]
     .filter(Boolean)

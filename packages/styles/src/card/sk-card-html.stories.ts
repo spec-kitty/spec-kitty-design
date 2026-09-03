@@ -1,6 +1,27 @@
 import '../pill-tag/sk-pill-tag.css';
 import './sk-card.css';
 import type { Meta, StoryObj } from '@storybook/web-components';
+import { SkCardHTML, SkCardBlueHTML, SkCardPurpleHTML, SkCardInsetHTML } from './index';
+
+/**
+ * Renders from the GENERATED exports, not from hand-written markup.
+ *
+ * These stories were the fourth of the four places card markup lived, and #72's own
+ * docstring named them — nine `<article class="sk-card…">` literals survived a commit
+ * claiming "card markup authored exactly once". A pre-merge lens counted them.
+ *
+ * Converting them does two things: it makes that claim true, and it gives the generated
+ * SkCard*HTML exports their first consumer. They had none, which is why a generator defect
+ * that emitted `SkCardPurpleHTML` with no purple class went unnoticed.
+ *
+ * `wrap()` adds only presentation the story needs — width and text colour — never structure
+ * or classes. Structure comes from the generated constant.
+ */
+const wrap = (markup: string, body: string) =>
+  markup.replace(
+    '>Card content<',
+    ` style="max-width:360px"><p style="color:var(--sk-fg-default);margin:0">${body}</p><`,
+  );
 
 const meta: Meta = {
   title: 'Components/Card',
@@ -10,7 +31,7 @@ export default meta;
 type Story = StoryObj;
 
 export const Default: Story = {
-  render: () => `<article class="sk-card" style="max-width:360px"><p style="color:var(--sk-fg-default);margin:0">Default card content</p></article>`,
+  render: () => wrap(SkCardHTML, 'Default card content'),
 };
 
 export const Blue: Story = {
@@ -21,7 +42,7 @@ export const Blue: Story = {
       },
     },
   },
-  render: () => `<article class="sk-card sk-card--blue" style="max-width:360px"><p style="color:var(--sk-fg-default);margin:0">Blue tint card — information context. Hover to see full accent border.</p></article>`,
+  render: () => wrap(SkCardBlueHTML, 'Blue tint card — information context. Hover to see full accent border.'),
 };
 
 export const Purple: Story = {
@@ -32,16 +53,15 @@ export const Purple: Story = {
       },
     },
   },
-  render: () => `<article class="sk-card sk-card--purple" style="max-width:360px"><p style="color:var(--sk-fg-default);margin:0">Purple tint card — feature context. Hover to see full accent border.</p></article>`,
+  render: () => wrap(SkCardPurpleHTML, 'Purple tint card — feature context. Hover to see full accent border.'),
 };
 
 export const Inset: Story = {
-  render: () => `<article class="sk-card sk-card--inset" style="max-width:360px"><p style="color:var(--sk-fg-default);margin:0">Inset card — nested content</p></article>`,
+  render: () => wrap(SkCardInsetHTML, 'Inset card — nested content'),
 };
 
 export const BlogCardExample: Story = {
-  render: () => `
-    <article class="sk-card" style="max-width:400px">
+  render: () => wrap(SkCardHTML, '').replace('<p style="color:var(--sk-fg-default);margin:0"></p>', `
       <div style="display:flex;gap:var(--sk-space-2);margin-bottom:var(--sk-space-4)">
         <span class="sk-tag sk-tag--green">Release</span>
         <span class="sk-tag">v3.2.0</span>
@@ -54,18 +74,17 @@ export const BlogCardExample: Story = {
         without forking the CLI.
       </p>
       <a href="#" style="font-size:var(--sk-text-sm);color:var(--sk-color-yellow);text-decoration:none">Read the post →</a>
-    </article>
-  `,
+  `),
 };
 
 export const LightMode: Story = {
   parameters: { backgrounds: { default: 'sk-light' } },
   render: () => `
-    <div data-theme="light" style="background: var(--sk-surface-page); padding: var(--sk-space-6); display: flex; gap: var(--sk-space-4); flex-wrap: wrap;">
-      <article class="sk-card" style="max-width:200px">Default</article>
-      <article class="sk-card sk-card--blue" style="max-width:200px">Blue</article>
-      <article class="sk-card sk-card--purple" style="max-width:200px">Purple</article>
-      <article class="sk-card sk-card--inset" style="max-width:200px">Inset</article>
+    <div class="sk-light" style="background: var(--sk-surface-page); padding: var(--sk-space-6); display: flex; gap: var(--sk-space-4); flex-wrap: wrap;">
+      ${wrap(SkCardHTML, 'Default')}
+      ${wrap(SkCardBlueHTML, 'Blue')}
+      ${wrap(SkCardPurpleHTML, 'Purple')}
+      ${wrap(SkCardInsetHTML, 'Inset')}
     </div>
   `,
 };

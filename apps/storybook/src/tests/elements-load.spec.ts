@@ -39,6 +39,24 @@ const REPO_ROOT = resolve(__dirname, '../../../..');
 const IIFE_PATH = join(REPO_ROOT, 'apps/storybook/storybook-static/elements-dist/elements.js');
 
 /** The element's own content, as the a11y gate defines "rendered" (#70). */
+/** Parameterised over the tag so ADR-10 Confirmation #1 can be asserted for sk-card too. */
+async function elementRendered(page: Page, tag = 'sk-stub') {
+  return page.evaluate((t) => {
+    const blank = { upgraded: false, text: '', adopted: -1, styleTags: -1, reason: '' };
+    const el = document.querySelector(t);
+    if (!el) return { ...blank, reason: `no <${t}> on the page` };
+    const sr = el.shadowRoot;
+    if (!sr) return { ...blank, reason: `<${t}> did not upgrade — no shadow root` };
+    return {
+      upgraded: true,
+      text: (sr.textContent ?? '').trim(),
+      adopted: sr.adoptedStyleSheets.length,
+      styleTags: sr.querySelectorAll('style').length,
+      reason: '',
+    };
+  }, tag);
+}
+
 async function stubRendered(page: Page) {
   return page.evaluate(() => {
     const blank = { upgraded: false, text: '', adopted: -1, styleTags: -1, reason: '' };
@@ -57,6 +75,57 @@ async function stubRendered(page: Page) {
 }
 
 test.describe('distribution artifacts', () => {
+  /**
+   * ADR-10 Confirmation #1, stated about this component specifically:
+   *
+   *   "sk-card renders identically from the ESM build in a bundler app and from the
+   *    classic-script build in a bundler-free file:// page, with adoptedStyleSheets.length
+   *    === 1 and zero <style> elements in both."
+   *
+   * #72 originally claimed this confirmation in prose while `sk-card` appeared in this spec
+   * ZERO times — the harness that already proves all three paths for sk-stub was left
+   * untouched. Three pre-merge lenses caught it. This is the assertion.
+   */
+  test('[ADR-10 C#1] sk-card renders identically from the IIFE on file:// and the ESM bundle', async ({
+    page,
+  }) => {
+    const errors: string[] = [];
+    page.on('pageerror', (e) => errors.push(e.message));
+
+    // Path 1 — bundler-free file://, classic script.
+    const dir = mkdtempSync(join(tmpdir(), 'sk-card-iife-'));
+    writeFileSync(join(dir, 'elements.js'), readFileSync(IIFE_PATH));
+    writeFileSync(
+      join(dir, 'index.html'),
+      `<!doctype html><meta charset="utf-8"><sk-card variant="blue">Card content</sk-card>` +
+        `<script src="./elements.js"></script>`,
+    );
+    await page.goto(pathToFileURL(join(dir, 'index.html')).href);
+    await page.waitForFunction(() => !!document.querySelector('sk-card')?.shadowRoot);
+    const viaFile = await elementRendered(page, 'sk-card');
+
+    // Path 2 — the ESM build, through a real bundler (the Vite consumer).
+    await page.goto('/vite-consumer/index.html');
+    await page.evaluate(() => {
+      const el = document.createElement('sk-card');
+      el.setAttribute('variant', 'blue');
+      el.textContent = 'Card content';
+      document.body.append(el);
+    });
+    await page.waitForFunction(() => !!document.querySelector('sk-card')?.shadowRoot);
+    const viaBundler = await elementRendered(page, 'sk-card');
+
+    expect(errors, 'neither build may throw').toEqual([]);
+    for (const [label, r] of [['file://', viaFile], ['bundler', viaBundler]] as const) {
+      expect(r.upgraded, `${label}: ${r.reason}`).toBe(true);
+      // The two halves ADR-10 names explicitly — kitty-desktop's CSP depends on the second.
+      expect(r.adopted, `${label}: adoptedStyleSheets.length`).toBe(1);
+      expect(r.styleTags, `${label}: <style> count`).toBe(0);
+    }
+    // "renders identically" — same rendered text from both builds.
+    expect(viaBundler.text).toBe(viaFile.text);
+  });
+
   test('IIFE upgrades an element from file:// — no server, no bundler (SC-001)', async ({
     page,
   }) => {

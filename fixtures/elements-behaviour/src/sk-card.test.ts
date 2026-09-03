@@ -1,5 +1,6 @@
 import { beforeEach, expect, test } from 'vitest';
 import '@spec-kitty/elements';
+import tokensCss from '../../../packages/tokens/src/tokens.css?raw';
 
 /**
  * <sk-card> — ADR-8 confirmation #1, and the repair #72 carries.
@@ -11,14 +12,19 @@ import '@spec-kitty/elements';
  * behaviour-registry claims.
  */
 
+/**
+ * Loads the REAL @spec-kitty/tokens sheet.
+ *
+ * An earlier version injected fabricated values, which meant the test asserted only that
+ * sk-card.css DEREFERENCES the token — never that the token package DEFINES it. A lens
+ * measured the consequence: deleting the two light-block declarations from tokens.css
+ * killed light mode for every real card and this suite stayed 24/24 green. That is the
+ * eighth instance of this programme's defect class, inside the test the story docstring
+ * cites as "asserted, not eyeballed".
+ */
 const tokenStyle = () => {
-  // The token sheet is not loaded in the test page, so pull the two values under test in
-  // directly. Anything more would be testing Storybook's setup rather than the element.
   const s = document.createElement('style');
-  s.textContent = `
-    :root, .sk-light { --sk-border-card-blue: rgb(169, 199, 232); }
-    .sk-light { --sk-border-card-blue: rgb(46, 74, 107); }
-  `;
+  s.textContent = tokensCss;
   document.head.append(s);
   return s;
 };
@@ -54,10 +60,13 @@ test('the blue variant reads its border colour from a TOKEN, so light mode cross
   const border = (el: Element) =>
     getComputedStyle(el.shadowRoot!.querySelector('[part="card"]')!).borderColor;
 
-  expect(border(dark), 'the dark border did not resolve from the token').toContain('169, 199, 232');
+  // Values come from the SHIPPED sheet, so removing or breaking either declaration in
+  // packages/tokens/src/tokens.css fails here.
+  expect(border(dark), 'the dark border did not resolve from the shipped token').toContain('169, 199, 232');
   expect(
     border(light),
-    'light mode did not reach inside the shadow root — a selector was used where a token is required',
+    'light mode did not reach inside the shadow root — either a selector was used where a ' +
+      'token is required, or the light block no longer defines --sk-border-tint-sky',
   ).toContain('46, 74, 107');
   expect(border(dark)).not.toBe(border(light));
 });

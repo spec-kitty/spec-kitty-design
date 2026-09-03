@@ -6,6 +6,12 @@ import { cardClasses } from './sk-card.markup.js';
 /**
  * The card primitive — the first real component on the ADR-8 base layer.
  *
+ * THE PART DESCRIPTION IS PUBLISHED API — IDE hovers and docs sites render it, and the
+ * analyzer takes everything after `@csspart card - ` up to the next tag. An unterminated tag
+ * swallowed this entire docblock into custom-elements.json, so all prose lives ABOVE the tag
+ * block. The ADR-9 rule is that a consumer restyles through the part, never by reaching into
+ * the shadow tree.
+ *
  * @element sk-card
  *
  * The `@element` annotation is REQUIRED, not decorative: registration goes through the
@@ -13,23 +19,7 @@ import { cardClasses } from './sk-card.markup.js';
  * indirection. Without it the manifest carries no definition for this element, and
  * scripts/check-manifest-content.mjs fails.
  *
- * @csspart card - the card surface. The ADR-9 styling API: a consumer restyles through
- *                 this, never by reaching into the shadow tree.
- *
- * VARIANTS ARE ATTRIBUTES, NOT CLASSES. The static layer uses `.sk-card--blue`; here the
- * consumer writes `<sk-card variant="blue">`. The adopted stylesheet is byte-identical to
- * `packages/styles/src/card/sk-card.css`, so the class must still land on the internal
- * node — that mapping is this element's job and is why `part="card"` and the class list
- * sit on the same element.
- *
- * WHY THERE IS NO LIGHT-MODE HANDLING HERE. `sk-card.css` used to carry
- * `:root[data-theme="light"] .sk-card--blue` and `.sk-light .sk-card--blue`. Both cross a
- * shadow boundary and both are therefore INERT inside this element — the themed ancestor
- * is outside the shadow root and a descendant combinator cannot reach in. Silently: a
- * LightMode story would render dark styling with no error and no warning. Light-mode
- * variance now lives in `--sk-border-card-{blue,purple}`, because a custom property
- * inherits through the boundary and a selector does not. Do not reintroduce either
- * selector, and do not reach for `:host-context()` — Baseline limited, Chromium-only.
+ * @csspart card - the card surface
  */
 export class SkCard extends LitElement {
   static styles = [sheet];

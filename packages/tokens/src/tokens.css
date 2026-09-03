@@ -46,7 +46,12 @@
   --sk-surface-tint-lilac:  #1E1A2E;   /* dark: v2.x banner / purple */
   --sk-surface-tint-sky:    #14202E;   /* dark: muted info / blue */
 
-  /* ── Tinted-card borders ──────────────────────────────────────────────────
+  /* ── Tint borders — the third slot of the tint family ─────────────────────
+     Named for the TINT (sky/lilac), not the component. --sk-surface-tint-sky is
+     already shared by card and blog-card, and --sk-surface-tint-lilac by card and
+     pill-tag; a component-named border would have put this on an
+     N-components x M-variants path (--sk-border-feature-card-*, and so on) beside a
+     family that already scales. Completes surface-tint / on-tint / border-tint.
      These exist as TOKENS, not as theme-selector overrides in sk-card.css,
      because a custom property inherits THROUGH a shadow boundary and a selector
      does not. sk-card.css previously carried
@@ -56,8 +61,8 @@
      error, no warning — a LightMode story would simply render dark styling.
      `:host-context()` is not the escape hatch (Baseline limited, Chromium-only).
      Verified in this mission; see #72 and ADR-9. */
-  --sk-border-card-blue:    rgba(169, 199, 232, 0.20);  /* channels from --sk-color-blue */
-  --sk-border-card-purple:  rgba(184, 169, 224, 0.25);  /* channels from --sk-color-purple */
+  --sk-border-tint-sky:    rgba(169, 199, 232, 0.20);  /* channels from --sk-color-blue */
+  --sk-border-tint-lilac:  rgba(184, 169, 224, 0.25);  /* channels from --sk-color-purple */
 
   /* ── On-Tint Foregrounds ─────────── */
   --sk-on-tint-mint:        var(--sk-color-green);
@@ -232,9 +237,9 @@
   --sk-surface-tint-lilac:  #F0EAF8;
   --sk-surface-tint-sky:    #E4EDF8;
 
-  /* Tinted-card borders — darker channel extractions for a light ground */
-  --sk-border-card-blue:    rgba(46, 74, 107, 0.15);
-  --sk-border-card-purple:  rgba(74, 61, 120, 0.18);
+  /* Tint borders — darker channel extractions for a light ground */
+  --sk-border-tint-sky:    rgba(46, 74, 107, 0.15);
+  --sk-border-tint-lilac:  rgba(74, 61, 120, 0.18);
 
   /* On-tint inks: dark, accessible foregrounds */
   --sk-on-tint-mint:        #2D5A2D;
