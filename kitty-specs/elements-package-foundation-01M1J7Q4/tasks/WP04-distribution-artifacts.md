@@ -2,7 +2,7 @@
 work_package_id: WP04
 title: Two distribution artifacts, and proof each is consumable
 dependencies:
-- WP03
+- WP05
 requirement_refs:
 - FR-003
 - FR-004
@@ -22,16 +22,19 @@ history:
   action: Prompt generated via spec-kitty tasks
 authoritative_surface: fixtures/vite-consumer/
 create_intent:
-- fixtures/vite-consumer/**
 - packages/elements/src/index.ts
 - packages/elements/src/elements.ts
+- packages/elements/SIZES.md
+- fixtures/vite-consumer/**
 - apps/storybook/src/tests/elements-load.spec.ts
 execution_mode: code_change
 owned_files:
 - packages/elements/src/index.ts
 - packages/elements/src/elements.ts
+- packages/elements/SIZES.md
 - fixtures/vite-consumer/**
 - apps/storybook/src/tests/elements-load.spec.ts
+- apps/storybook/.storybook/main.ts
 tags: []
 tracker_refs: []
 ---

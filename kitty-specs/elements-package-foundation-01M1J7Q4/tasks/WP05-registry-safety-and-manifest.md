@@ -2,7 +2,7 @@
 work_package_id: WP05
 title: Guarded define AND the manifest — designed together, because one breaks the other
 dependencies:
-- WP02
+- WP03
 requirement_refs:
 - FR-005
 - FR-006
@@ -18,14 +18,12 @@ history:
 - timestamp: '2026-09-03T00:00:00Z'
   agent: system
   action: Prompt generated via spec-kitty tasks
-authoritative_surface: packages/elements/src/define.ts
+authoritative_surface: packages/elements/custom-elements.json
 create_intent:
-- packages/elements/src/define.ts
 - packages/elements/custom-elements-manifest.config.mjs
 - packages/elements/custom-elements.json
 execution_mode: code_change
 owned_files:
-- packages/elements/src/define.ts
 - packages/elements/custom-elements-manifest.config.mjs
 - packages/elements/custom-elements.json
 tags: []

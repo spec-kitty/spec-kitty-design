@@ -24,12 +24,16 @@ create_intent:
 - packages/elements/project.json
 - packages/elements/tsconfig.json
 - packages/elements/tsconfig.lib.json
+- packages/elements/src/define.ts
 execution_mode: code_change
 owned_files:
 - packages/elements/package.json
 - packages/elements/project.json
 - packages/elements/tsconfig.json
 - packages/elements/tsconfig.lib.json
+- packages/elements/src/define.ts
+- package.json
+- package-lock.json
 - eslint.config.mjs
 - .github/workflows/ci-quality.yml
 - .github/workflows/pr-preview.yml

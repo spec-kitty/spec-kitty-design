@@ -11,6 +11,7 @@
         "WP01"
       ],
       "write_scope": [
+        "packages/elements/src/__fixtures__/**",
         "scripts/run-axe-storybook.js"
       ],
       "predicted_surfaces": [
@@ -31,8 +32,11 @@
         ".github/workflows/release.yml",
         ".github/workflows/storybook-deploy.yml",
         "eslint.config.mjs",
+        "package-lock.json",
+        "package.json",
         "packages/elements/package.json",
         "packages/elements/project.json",
+        "packages/elements/src/define.ts",
         "packages/elements/tsconfig.json",
         "packages/elements/tsconfig.lib.json"
       ],
@@ -66,8 +70,10 @@
         "WP04"
       ],
       "write_scope": [
+        "apps/storybook/.storybook/main.ts",
         "apps/storybook/src/tests/elements-load.spec.ts",
         "fixtures/vite-consumer/**",
+        "packages/elements/SIZES.md",
         "packages/elements/src/elements.ts",
         "packages/elements/src/index.ts"
       ],
@@ -84,8 +90,7 @@
       ],
       "write_scope": [
         "packages/elements/custom-elements-manifest.config.mjs",
-        "packages/elements/custom-elements.json",
-        "packages/elements/src/define.ts"
+        "packages/elements/custom-elements.json"
       ],
       "predicted_surfaces": [
         "artifact-rendering"
@@ -106,8 +111,8 @@
       "parallel_group": 0
     }
   ],
-  "computed_at": "2026-09-03T00:13:03.265747+00:00",
+  "computed_at": "2026-09-03T00:26:41.403266+00:00",
   "computed_from": "dependency_graph+ownership",
   "planning_artifact_wps": [],
-  "planning_commit_sha": "b0df2c40dc2f3b4621ccfe399f8b153faf279e0b"
+  "planning_commit_sha": "9f0544c4112112b30a7b244e168c12a6eec006ce"
 }

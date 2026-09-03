@@ -2,7 +2,7 @@
 work_package_id: WP03
 title: CSS pipeline — adopt styles' .css as a constructed stylesheet
 dependencies:
-- WP02
+- WP01
 requirement_refs:
 - FR-002
 - FR-009
@@ -21,8 +21,8 @@ history:
   action: Prompt generated via spec-kitty tasks
 authoritative_surface: packages/elements/src/stub/
 create_intent:
-- packages/elements/src/stub/**
 - scripts/build-elements-css.mjs
+- packages/elements/src/stub/**
 execution_mode: code_change
 owned_files:
 - scripts/build-elements-css.mjs

@@ -1,7 +1,8 @@
 ---
 work_package_id: WP01
 title: Teach the axe gate to see inside open shadow roots
-dependencies: []
+dependencies:
+- WP02
 requirement_refs:
 - FR-007
 - NFR-002
@@ -20,10 +21,12 @@ history:
   agent: system
   action: Prompt generated via spec-kitty tasks
 authoritative_surface: scripts/run-axe-storybook.js
-create_intent: []
+create_intent:
+- packages/elements/src/__fixtures__/**
 execution_mode: code_change
 owned_files:
 - scripts/run-axe-storybook.js
+- packages/elements/src/__fixtures__/**
 tags: []
 tracker_refs: []
 ---
