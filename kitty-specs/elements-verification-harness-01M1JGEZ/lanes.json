@@ -1,0 +1,124 @@
+{
+  "version": 1,
+  "mission_slug": "elements-verification-harness-01M1JGEZ",
+  "mission_id": "01M1JGEZDC7REC5VP5G0PVBP1C",
+  "mission_branch": "kitty/mission-elements-verification-harness-01M1JGEZ",
+  "target_branch": "mission/elements-verification-harness",
+  "lanes": [
+    {
+      "lane_id": "lane-a",
+      "wp_ids": [
+        "WP01"
+      ],
+      "write_scope": [
+        "behaviours.json",
+        "package-lock.json",
+        "package.json",
+        "scripts/floor-reporter.mjs",
+        "tsconfig.base.json",
+        "vitest.config.mts"
+      ],
+      "predicted_surfaces": [
+        "artifact-rendering",
+        "legacy-cleanup"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    },
+    {
+      "lane_id": "lane-b",
+      "wp_ids": [
+        "WP02"
+      ],
+      "write_scope": [
+        "fixtures/elements-behaviour/package.json",
+        "fixtures/elements-behaviour/project.json",
+        "fixtures/elements-behaviour/src/sk-behaviour-fixture.ts",
+        "fixtures/elements-behaviour/tsconfig.json"
+      ],
+      "predicted_surfaces": [
+        "workspace"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    },
+    {
+      "lane_id": "lane-c",
+      "wp_ids": [
+        "WP03"
+      ],
+      "write_scope": [
+        "fixtures/elements-behaviour/src/behaviours.test.ts",
+        "fixtures/elements-behaviour/src/elements-owned.test.ts"
+      ],
+      "predicted_surfaces": [
+        "artifact-rendering"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    },
+    {
+      "lane_id": "lane-d",
+      "wp_ids": [
+        "WP04"
+      ],
+      "write_scope": [
+        "expected-parts.json",
+        "scripts/check-part-ratchet.mjs"
+      ],
+      "predicted_surfaces": [
+        "legacy-cleanup"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    },
+    {
+      "lane_id": "lane-e",
+      "wp_ids": [
+        "WP05"
+      ],
+      "write_scope": [
+        "mutations.json",
+        "scripts/suite-selftest.mjs"
+      ],
+      "predicted_surfaces": [],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    },
+    {
+      "lane_id": "lane-f",
+      "wp_ids": [
+        "WP06"
+      ],
+      "write_scope": [
+        ".github/workflows/ci-quality.yml",
+        "docs/architecture/decisions/2026-09-02-11-verification-stack-and-wrapper-generation.md",
+        "scripts/measure-suite-time.mjs",
+        "suite-budget.json"
+      ],
+      "predicted_surfaces": [],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    },
+    {
+      "lane_id": "lane-g",
+      "wp_ids": [
+        "WP07"
+      ],
+      "write_scope": [
+        "conformance-matrix.json",
+        "scripts/build-conformance-matrix.mjs"
+      ],
+      "predicted_surfaces": [
+        "api",
+        "artifact-rendering"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    }
+  ],
+  "computed_at": "2026-09-03T02:46:44.727276+00:00",
+  "computed_from": "dependency_graph+ownership",
+  "planning_artifact_wps": [],
+  "planning_commit_sha": "5bbddf5f293644380242c0b0ac7eb4f838149665"
+}
