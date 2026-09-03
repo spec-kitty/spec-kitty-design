@@ -73,6 +73,7 @@
       "agent": "claude",
       "agent_profile": "__resolved_profile_absent__",
       "agent_profile_version": "__resolved_profile_version_absent__",
+      "assignee": "claude",
       "force_count": 0,
       "lane": "in_progress",
       "last_event_id": "01M1JKZ3H4KE586CCCM8VR430D",
