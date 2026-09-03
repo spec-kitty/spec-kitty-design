@@ -72,12 +72,12 @@ Every traversal helper must check `n.shadowRoot` **before** walking `n.childNode
 
 ## Definition of Done
 
-- [ ] All four sites pierce open shadow roots (FR-007).
-- [ ] **Eight demonstrated cases** with exit codes: shadow-only element passes; the six NFR-002 shapes each fail *inside a shadow root*; the empty-block-beside-text case fails naming the block (SC-005).
-- [ ] The same six shapes still fail in **light DOM** — the list runs twice (NFR-002).
-- [ ] Per-story result lines over the 74 existing stories are identical before and after, after normalising `127.0.0.1:\d+` (NFR-003, SC-006).
-- [ ] The wait predicate and the assertion are equivalent, proven **mechanically, not in prose**. This DoD line was previously prose-satisfiable *and undetectable*: `waitForFunction` at `:312-316` has `.catch(() => {})` at `:320` and `:327` runs the assertion regardless, so an implementer who pierces the three assertion sites and leaves the wait light-DOM-only gets the **correct verdict on all eleven cases, on the light-DOM re-run, and on all 74 stories**. The only symptom is +8s (`RENDER_TIMEOUT_MS`) per shadow story. That is exactly the site #69 broke. Guard it by asserting the shadow-only fixture's wait **resolves** (instrument the swallowing catch) or that its per-story wall time is well under `RENDER_TIMEOUT_MS`.
-- [ ] The eleven cases land as a **permanent gate self-test**, not a transcript. Both branches of the old wording were bad: six fixtures deliberately fail `assertStoryRendered`, which throws — left inside Storybook's `packages/**` glob they make the a11y job permanently red; deleted, they destroy the only evidence and leave four newly shadow-aware sites with zero standing regression guard. Land them as fixture HTML plus a node harness driving `assertStoryRendered` directly, **outside** Storybook's story glob, wired into CI by WP02. C-003 is untouched because these are not catalogue stories.
+- [x] All four sites pierce open shadow roots (FR-007).
+- [x] **Eight demonstrated cases** with exit codes: shadow-only element passes; the six NFR-002 shapes each fail *inside a shadow root*; the empty-block-beside-text case fails naming the block (SC-005).
+- [x] The same six shapes still fail in **light DOM** — the list runs twice (NFR-002).
+- [x] Per-story result lines over the 74 existing stories are identical before and after, after normalising `127.0.0.1:\d+` (NFR-003, SC-006).
+- [x] The wait predicate and the assertion are equivalent, proven **mechanically, not in prose**. This DoD line was previously prose-satisfiable *and undetectable*: `waitForFunction` at `:312-316` has `.catch(() => {})` at `:320` and `:327` runs the assertion regardless, so an implementer who pierces the three assertion sites and leaves the wait light-DOM-only gets the **correct verdict on all eleven cases, on the light-DOM re-run, and on all 74 stories**. The only symptom is +8s (`RENDER_TIMEOUT_MS`) per shadow story. That is exactly the site #69 broke. Guard it by asserting the shadow-only fixture's wait **resolves** (instrument the swallowing catch) or that its per-story wall time is well under `RENDER_TIMEOUT_MS`.
+- [x] The eleven cases land as a **permanent gate self-test**, not a transcript. Both branches of the old wording were bad: six fixtures deliberately fail `assertStoryRendered`, which throws — left inside Storybook's `packages/**` glob they make the a11y job permanently red; deleted, they destroy the only evidence and leave four newly shadow-aware sites with zero standing regression guard. Land them as fixture HTML plus a node harness driving `assertStoryRendered` directly, **outside** Storybook's story glob, wired into CI by WP02. C-003 is untouched because these are not catalogue stories.
 
 ## Notes
 
