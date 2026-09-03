@@ -201,8 +201,72 @@ async function assertStoryRendered(page, selectors) {
     // descendant arm is gone rather than patched.
     // Mirrors the wait predicate below; the selector is shared via
     // CONTENT_MEDIA_SELECTOR so the list cannot drift between them.
+    // FLAT-TREE TRAVERSAL (#70). ADR-9 makes open shadow roots mandatory for every
+    // component, and neither `textContent` nor `querySelector` crosses a shadow
+    // boundary -- so before this, an element that rendered perfectly was reported as
+    // "did not render". Demonstrated live on elements-skstub--default.
+    //
+    // Two traps, both hit by earlier attempts:
+    //   * walk the shadow root INSTEAD of childNodes and slotted content becomes
+    //     invisible -- <sk-x>text</sk-x> with a <slot> fails as a correct element.
+    //     Walk BOTH.
+    //   * check a node's children's shadow roots but not its own, and the host
+    //     itself reports empty. Check `n.shadowRoot` FIRST.
+    // SLOTS. A <slot>'s CHILDREN are its FALLBACK content -- shown only when nothing
+    // is assigned to it. What actually paints is assignedNodes(), which live in the
+    // light DOM of the host's ancestor. Walking `.childNodes` and calling that "the
+    // flat tree" reports a correctly-slotted component as empty. Found by
+    // scripts/gate-selftest.mjs (case `slotted-content`), not in production.
+    //
+    // Note the `return` after the shadow root below: once a host has one, its light
+    // children are reachable ONLY through a <slot>. That is deliberate and it is
+    // what the browser paints -- unslotted light children render nowhere, so a gate
+    // that counted them as content would certify absence exactly as `textContent`
+    // did. Locked by case `unslotted-light-children`.
+    const flatChildren = (n) => {
+      if (n.localName === 'slot' && n.assignedNodes) {
+        const assigned = n.assignedNodes({ flatten: true });
+        if (assigned.length) return assigned;
+      }
+      return n.childNodes;
+    };
+    const flatText = (node) => {
+      let out = '';
+      const visit = (n) => {
+        if (n.nodeType === 3) { out += n.nodeValue; return; }
+        if (n.nodeType !== 1) return;
+        if (n.shadowRoot) { for (const c of n.shadowRoot.childNodes) visit(c); return; }
+        for (const c of flatChildren(n)) visit(c);
+      };
+      visit(node);
+      return out;
+    };
+    const flatMatch = (node, sel) => {
+      const visit = (n) => {
+        if (n.nodeType !== 1) return false;
+        if (n !== node && n.matches && n.matches(sel)) return true;
+        if (n.shadowRoot) {
+          for (const c of n.shadowRoot.children) if (visit(c)) return true;
+          return false;
+        }
+        for (const c of flatChildren(n)) if (visit(c)) return true;
+        return false;
+      };
+      return visit(node);
+    };
+    const flatElements = (node) => {
+      const acc = [];
+      const visit = (n) => {
+        if (n.nodeType !== 1) return;
+        if (n !== node) acc.push(n);
+        if (n.shadowRoot) { for (const c of n.shadowRoot.children) visit(c); return; }
+        for (const c of flatChildren(n)) visit(c);
+      };
+      visit(node);
+      return acc;
+    };
     const hasOwnContent = (el) =>
-      el.textContent.trim().length > 0 || el.querySelector(mediaSelector) !== null;
+      flatText(el).trim().length > 0 || flatMatch(el, mediaSelector);
 
     if (!hasOwnContent(root)) {
       return {
@@ -237,11 +301,13 @@ async function assertStoryRendered(page, selectors) {
     // nothing is the defect. Elements and modifiers are parts of an already-checked
     // block, so requiring content of each would fail on legitimately empty slots.
     const BLOCK_CLASS = /^sk-[a-z0-9]+(?:-[a-z0-9]+)*$/;
-    const hostsByTag = Array.from(root.querySelectorAll('*')).filter((el) =>
-      /^sk-/i.test(el.tagName)
-    );
-    const hostsByClass = Array.from(root.querySelectorAll('[class]')).filter(
+    // Enumerate across shadow boundaries as well: an sk-* host inside another
+    // element's shadow root is invisible to querySelectorAll, which crosses nothing.
+    const allDescendants = flatElements(root);
+    const hostsByTag = allDescendants.filter((el) => /^sk-/i.test(el.tagName));
+    const hostsByClass = allDescendants.filter(
       (el) =>
+        el.classList &&
         !VOID_OR_LEAF.has(el.tagName.toUpperCase()) &&
         Array.from(el.classList).some((c) => BLOCK_CLASS.test(c))
     );
@@ -293,6 +359,7 @@ async function checkStory(page, storyId) {
     // to be worth using across a whole catalogue — measured at over 500ms for
     // the first story of a run, and well under it for every story after. On
     // timeout we fall through: assertStoryRendered reports the precise reason.
+    let waitTimedOut = false;
     await page
       .waitForFunction(
         ([rootSelectors, mediaSelector]) => {
@@ -309,19 +376,78 @@ async function checkStory(page, storyId) {
           // WEAKER than the assert: a story that paints its wrapper before filling
           // its text would satisfy the wait and then fail the assert. Caught by the
           // pre-merge squad. If you change one, change both.
-          return (
-            !!root &&
-            (root.textContent.trim().length > 0 ||
-              root.querySelector(mediaSelector) !== null)
-          );
+          // #70: the same flat-tree walk as the assertion. ADR-9 mandates open
+          // shadow roots, and neither textContent nor querySelector crosses one --
+          // so a light-DOM-only wait NEVER satisfies for an element story, burns
+          // the full RENDER_TIMEOUT_MS, and is then swallowed by the .catch below.
+          // Shadow root BEFORE children, and walk BOTH (slotted content lives in
+          // the light DOM). Written out here rather than shared as a source string
+          // and eval()-ed: that was tried in #102 and made waitForFunction throw
+          // into this same catch, silently disabling the wait.
+          if (!root) return false;
+          // Slot-aware, matching the assertion's flatChildren exactly. A wait that
+          // walks a <slot>'s fallback children never satisfies for a slotted
+          // component: it burns RENDER_TIMEOUT_MS and lands in the catch below.
+          const flatChildren = (n) => {
+            if (n.localName === 'slot' && n.assignedNodes) {
+              const assigned = n.assignedNodes({ flatten: true });
+              if (assigned.length) return assigned;
+            }
+            return n.childNodes;
+          };
+          const flatText = (node) => {
+            let out = '';
+            const visit = (n) => {
+              if (n.nodeType === 3) { out += n.nodeValue; return; }
+              if (n.nodeType !== 1) return;
+              if (n.shadowRoot) { for (const c of n.shadowRoot.childNodes) visit(c); return; }
+              for (const c of flatChildren(n)) visit(c);
+            };
+            visit(node);
+            return out;
+          };
+          const flatMatch = (node, sel) => {
+            const visit = (n) => {
+              if (n.nodeType !== 1) return false;
+              if (n !== node && n.matches && n.matches(sel)) return true;
+              if (n.shadowRoot) {
+                for (const c of n.shadowRoot.children) if (visit(c)) return true;
+                return false;
+              }
+              for (const c of flatChildren(n)) if (visit(c)) return true;
+              return false;
+            };
+            return visit(node);
+          };
+          return flatText(root).trim().length > 0 || flatMatch(root, mediaSelector);
         },
         [RENDER_ROOT_SELECTORS, CONTENT_MEDIA_SELECTOR],
         { timeout: RENDER_TIMEOUT_MS }
       )
-      .catch(() => {});
+      .catch((err) => {
+        // #70: do NOT swallow silently. A wait that never resolves is the defect
+        // this pairing exists to prevent, and the old bare catch made it invisible
+        // -- the assertion still ran, still gave the right verdict, and the only
+        // symptom was +8s per story. Record it so the self-test can assert on it.
+        waitTimedOut = true;
+        void err;
+      });
 
     if (scriptErrors.length > 0) {
       throw new Error(`script error: ${scriptErrors[0]}`);
+    }
+
+    // #70: a wait that never resolved means the wait predicate and the assertion
+    // have diverged -- the assertion may still return the right verdict, so the
+    // ONLY symptom is a silent +RENDER_TIMEOUT_MS per story. That is exactly how
+    // #69's divergence survived its own eight test cases. Surface it.
+    if (waitTimedOut) {
+      module.exports.waitTimeouts.push(storyId);
+      console.error(
+        `⚠  ${storyId}: render wait timed out after ${RENDER_TIMEOUT_MS}ms. ` +
+          `The wait predicate and assertStoryRendered have diverged — fix both, ` +
+          `not one (see the pairing note above waitForFunction).`
+      );
     }
 
     await assertStoryRendered(page, RENDER_ROOT_SELECTORS);
@@ -335,9 +461,23 @@ async function checkStory(page, storyId) {
   }
 }
 
-// ── Main ──────────────────────────────────────────────────────────────────────
+// Exposed so the gate self-test can assert the wait actually waited. A wait that
+// silently times out is invisible in the verdicts by construction (#69, #70).
+module.exports = module.exports || {};
+module.exports.waitTimeouts = [];
+// Exported for scripts/gate-selftest.mjs, which drives it against fixture pages so
+// the eleven shadow/light shapes are a standing regression guard rather than a
+// one-off transcript in a PR body.
+module.exports.assertStoryRendered = assertStoryRendered;
+module.exports.CONTENT_MEDIA_SELECTOR = CONTENT_MEDIA_SELECTOR;
+module.exports.RENDER_ROOT_SELECTORS = RENDER_ROOT_SELECTORS;
 
-(async () => {
+// ── Main ──────────────────────────────────────────────────────────────────────
+//
+// Guarded so the module can be required by scripts/gate-selftest.mjs without
+// launching a full 76-story run as a side effect.
+
+if (require.main === module) (async () => {
   if (!existsSync(STORYBOOK_DIR)) {
     console.error(`❌ Storybook build not found at ${STORYBOOK_DIR}`);
     console.error('   Run: npx nx run storybook:storybook:build');
@@ -425,5 +565,12 @@ async function checkStory(page, storyId) {
     process.exit(1);
   }
 
+  // Reported unconditionally, INCLUDING the zero. "No warnings appeared" is
+  // absence of evidence, and a wait that silently stopped waiting produces exactly
+  // that -- it is how #69's divergence survived. State the number.
+  console.log(
+    `   render wait: ${testable.length - module.exports.waitTimeouts.length}/${testable.length} ` +
+      `satisfied, ${module.exports.waitTimeouts.length} timed out.`
+  );
   console.log(`\n✅ Zero WCAG 2.1 AA violations across all ${testable.length} rendered story/stories.`);
 })();

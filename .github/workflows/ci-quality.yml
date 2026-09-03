@@ -198,8 +198,17 @@ jobs:
       - run: npm ci --ignore-scripts
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c  # actions/download-artifact v8.0.1
         with: { name: storybook-static, path: apps/storybook/storybook-static }
+      - run: npx playwright install chromium
+      # Runs BEFORE the gate it guards. The gate's own output ("76 stories, zero
+      # violations") reads identically whether it assessed 76 stories or nothing
+      # at all -- this repo has shipped three separate variants of the latter. The
+      # self-test drives the gate's render assertion against twelve fixture shapes,
+      # six of which MUST be rejected, so a traversal that stops crossing shadow
+      # boundaries fails here instead of going quietly green below (#70, SC-005).
+      - name: "[ENFORCED] a11y gate self-test (SC-005)"
+        run: node scripts/gate-selftest.mjs
       - name: "[ENFORCED] axe WCAG 2.1 AA gate (FR-021)"
-        run: npx playwright install chromium && node scripts/run-axe-storybook.js
+        run: node scripts/run-axe-storybook.js
 
   # ── Visual regression ──────────────────────────────────────────────────────
   visual-regression:
