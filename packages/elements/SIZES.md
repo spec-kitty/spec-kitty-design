@@ -7,7 +7,7 @@ Component measured: `sk-stub` (CSS source of record: 420 bytes).
 
 | artifact | raw | minified | min+gzip | notes |
 |---|---:|---:|---:|---|
-| `ESM  (dist/index.js)` | 1.4 KiB | 1.1 KiB | 0.6 KiB | `lit` external |
+| `ESM  (dist/index.js)` | 1.5 KiB | 1.1 KiB | 0.7 KiB | `lit` external |
 | `IIFE (dist/elements.js)` | 23.5 KiB | 15.9 KiB | 6.2 KiB | runtime bundled |
 
 ## The basis matters — read this before comparing against an ADR
@@ -26,7 +26,7 @@ weigh. Treat them as the reconciliation's premise and re-measure them in #72, wh
 is the mission that actually builds it.
 
 What this script *does* establish is the shape of the relationship: the runtime is a
-fixed cost (22.1 KiB of the IIFE is Lit, since the
+fixed cost (22.0 KiB of the IIFE is Lit, since the
 ESM artifact holds the same element with `lit` external) and the per-component cost
 tracks its CSS. A batch mission adding a component should expect the IIFE to grow by
 roughly that component's CSS, not by a fixed per-component overhead.
@@ -34,7 +34,7 @@ roughly that component's CSS, not by a fixed per-component overhead.
 An earlier draft of this work package recorded the **minified** figures under a "raw"
 heading and concluded ADR-10 was wrong. It was not. Always state the basis — and the
 unit: every figure in this file is KiB (1024), which is why the raw IIFE reads
-23.5 KiB here and "24.0 KB" in the WP prompt. Same 24073
+23.5 KiB here and "24.0 KB" in the WP prompt. Same 24092
 bytes.
 
 ## Raw output of the measuring command
@@ -42,13 +42,13 @@ bytes.
 ```
 $ npx nx run elements:build && node scripts/measure-elements-sizes.mjs
 packages/elements/dist/index.js
-  raw          1479 bytes  (1.4 KiB)
-  minified     1092 bytes  (1.1 KiB)
-  gzip          757 bytes  (0.7 KiB)
-  min+gzip      663 bytes  (0.6 KiB)
+  raw          1532 bytes  (1.5 KiB)
+  minified     1114 bytes  (1.1 KiB)
+  gzip          773 bytes  (0.8 KiB)
+  min+gzip      674 bytes  (0.7 KiB)
 packages/elements/dist/elements.js
-  raw         24073 bytes  (23.5 KiB)
-  minified    16264 bytes  (15.9 KiB)
-  gzip         7464 bytes  (7.3 KiB)
-  min+gzip     6370 bytes  (6.2 KiB)
+  raw         24092 bytes  (23.5 KiB)
+  minified    16269 bytes  (15.9 KiB)
+  gzip         7466 bytes  (7.3 KiB)
+  min+gzip     6371 bytes  (6.2 KiB)
 ```

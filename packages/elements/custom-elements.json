@@ -35,6 +35,14 @@
             "name": "SkStub",
             "module": "./dist/index.js"
           }
+        },
+        {
+          "kind": "js",
+          "name": "skStubSheet",
+          "declaration": {
+            "name": "default",
+            "module": "./dist/index.js"
+          }
         }
       ]
     }
