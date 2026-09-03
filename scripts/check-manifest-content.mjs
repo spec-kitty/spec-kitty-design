@@ -19,6 +19,7 @@
  */
 import { readFileSync } from 'node:fs';
 import { globSync } from 'node:fs';
+import { createRequire } from 'node:module';
 
 const MANIFEST = 'packages/elements/custom-elements.json';
 const manifest = JSON.parse(readFileSync(MANIFEST, 'utf8'));
@@ -30,12 +31,29 @@ for (const mod of manifest.modules ?? []) {
   }
 }
 
-// What the package actually registers, read from source: every `define('<tag>', X)`.
+/**
+ * Strip comments before matching.
+ *
+ * Without this the scan matched two JSDoc EXAMPLES in define.ts — prose showing what
+ * the analyzer does and does not follow — so `registered` was non-empty even with the
+ * real `define('sk-stub', SkStub)` deleted, and the vacuity guard below could never
+ * fire. Demonstrated by a squad lens: it removed the registration and this script
+ * still printed a green line. A gate written to stop a vacuous pass, passing
+ * vacuously.
+ *
+ * Crude but adequate: this is a scan for a registration call, not a parser, and
+ * over-stripping can only make the check STRICTER (a missed registration fails).
+ */
+const stripComments = (src) =>
+  src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/.*$/gm, '$1');
+
+// What the package actually registers, read from source: `define('<tag>', X)` or Lit's
+// `@customElement('<tag>')` decorator, which the first cut missed entirely.
 const registered = new Set();
 for (const f of globSync('packages/elements/src/**/*.ts', {})) {
-  for (const m of readFileSync(f, 'utf8').matchAll(/\bdefine\(\s*['"]([a-z][a-z0-9]*-[a-z0-9-]*)['"]/g)) {
-    registered.add(m[1]);
-  }
+  const code = stripComments(readFileSync(f, 'utf8'));
+  const RE = /(?:\bdefine\(|@customElement\(|customElements\.define\()\s*['"]([a-z][a-z0-9]*-[a-z0-9-]*)['"]/g;
+  for (const m of code.matchAll(RE)) registered.add(m[1]);
 }
 
 const problems = [];
@@ -58,6 +76,40 @@ for (const tag of registered) {
 }
 for (const d of declared) {
   if (d.tag === 'tag') problems.push(`manifest declares an element literally named "tag" (${d.name})`);
+}
+
+/**
+ * Every module path must actually RESOLVE from the package name.
+ *
+ * This is the assertion that closes the class rather than pinning a better constant.
+ * Two shapes have already shipped here and both were unresolvable: a
+ * workspace-relative `packages/elements/src/stub/sk-stub.ts` (a .ts file outside
+ * `files`), and then `./dist/index.js`, which LOOKED right and threw
+ * ERR_PACKAGE_PATH_NOT_EXPORTED because `exports` declared no such subpath. A
+ * generator joins this path onto the package name; if that import throws, ADR-11's
+ * wrapper generation cannot reach the element it just read.
+ */
+const require_ = createRequire(import.meta.url);
+const PKG = JSON.parse(readFileSync('packages/elements/package.json', 'utf8')).name;
+const seenPaths = new Set();
+for (const mod of manifest.modules ?? []) {
+  if (seenPaths.has(mod.path)) {
+    problems.push(
+      `two modules share the path "${mod.path}" — generators that emit one file per ` +
+        `module collide, and which declaration survives is iteration order`
+    );
+  }
+  seenPaths.add(mod.path);
+
+  const spec = `${PKG}/${String(mod.path).replace(/^\.\//, '')}`;
+  try {
+    require_.resolve(spec);
+  } catch (err) {
+    problems.push(
+      `module path "${mod.path}" does not resolve as "${spec}" (${err.code ?? err.message}) — ` +
+        `add the subpath to package.json "exports", or point the path at one that is exported`
+    );
+  }
 }
 
 if (problems.length) {

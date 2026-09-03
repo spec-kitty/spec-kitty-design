@@ -66,7 +66,7 @@
     },
     {
       "criterion_id": "FR-007",
-      "description": "All four shadow-blind sites pierce open shadow roots: root check :207, per-host :258, host enumeration :240-248, wait predicate :312-316.",
+      "description": "The render assertion pierces open shadow roots everywhere it looks: root content, per component host, host enumeration, and the render wait. Those were four separate sites; they are now ONE function (computeRenderVerdict), so the piercing cannot be applied to some and not others.",
       "proof_type": "automated_test",
       "evidence": "https://github.com/spec-kitty/spec-kitty-design/actions/runs/33704251025 a11y, \"All 22 gate self-test shapes classified correctly (5 expected-render, 17 expected-reject), assertion and wait agreeing on every one\".",
       "pass_fail": "pass",
@@ -117,7 +117,7 @@
     },
     {
       "criterion_id": "NFR-002",
-      "description": "NEGATIVE INVARIANT. The six red-first shapes still fail TWICE OVER: in light DOM, and as the entire content of an open shadow root. Plus slotted-content passes, empty-slot fails, nested-host empty fails. Eleven cases.",
+      "description": "NEGATIVE INVARIANT. The six red-first shapes still fail TWICE OVER: in light DOM, and as the entire content of an open shadow root. Counts are not stated here on purpose \u2014 scripts/gate-selftest.mjs derives and prints them, after four earlier drafts each named a number that was wrong once the list grew.",
       "proof_type": "automated_test",
       "evidence": "https://github.com/spec-kitty/spec-kitty-design/actions/runs/33704251025 a11y. The six shapes run in light DOM as well as inside a shadow root, plus a light-DOM PASS control so the half cannot be satisfied by an assertion that rejects everything.",
       "pass_fail": "pass",
@@ -134,7 +134,7 @@
       "proof_type": "automated_test",
       "evidence": "Pre-WP01 gate vs current over the same storybook-static, 127.0.0.1 port normalised, verdict lines sorted: 74 of 76 byte-identical; the only diff is elements-skstub--default/--light-mode moving from \"did not render\" to pass. Captured in the commit body of the WP01 completion commit.",
       "pass_fail": "pass",
-      "verified_by": "ci @ 8ba154e + pre-merge adversarial squad (4 lenses)",
+      "verified_by": "local transcript in the WP01 completion commit body (NOT a CI job)",
       "verified_at": "2026-09-03T01:38:00Z",
       "notes": "Owned by WP01. Added post-tasks: the scaffold covered only FR rows, while every WP DoD binds to these.",
       "negative_invariants": []
@@ -174,7 +174,7 @@
     },
     {
       "criterion_id": "SC-003",
-      "description": "Double registration warns, does not throw, asserted in a spec NAMED in ci-quality.yml's playwright step (it runs named files, not testDir).",
+      "description": "Double registration warns and does not throw, asserted in a Playwright spec that runs via testDir (the job no longer names spec files, so a spec cannot silently stop executing).",
       "proof_type": "automated_test",
       "evidence": "https://github.com/spec-kitty/spec-kitty-design/actions/runs/33704251025 playwright. Spec now runs via testDir rather than a named list, so it cannot silently stop executing.",
       "pass_fail": "pass",
@@ -196,7 +196,7 @@
     },
     {
       "criterion_id": "SC-005",
-      "description": "Eleven demonstrated cases with exit codes, including the three a real #72 component hits: slotted content, empty slot, nested host.",
+      "description": "Demonstrated cases with exit codes, driven against the gate's own exported assertion, including the three a real #72 component hits (slotted content, empty slot, nested host) and the shapes added after mutation showed the corresponding code could be deleted without a red. Count derived by the harness, not stated.",
       "proof_type": "automated_test",
       "evidence": "https://github.com/spec-kitty/spec-kitty-design/actions/runs/33704251025 a11y: 22 shapes. Includes the three a real #72 component hits (slotted content, empty slot, nested host) and three added by the pre-merge squad after mutation found them dormant (sk-* host unslotted-light, sk-* host shadow text, icon-only in shadow).",
       "pass_fail": "pass",
@@ -211,7 +211,7 @@
       "proof_type": "automated_test",
       "evidence": "Same evidence as NFR-003.",
       "pass_fail": "pass",
-      "verified_by": "ci @ 8ba154e + pre-merge adversarial squad (4 lenses)",
+      "verified_by": "local transcript in the WP01 completion commit body (NOT a CI job)",
       "verified_at": "2026-09-03T01:38:00Z",
       "notes": "Owned by WP01. Added post-tasks: the scaffold covered only FR rows, while every WP DoD binds to these.",
       "negative_invariants": []
@@ -240,9 +240,9 @@
     },
     {
       "criterion_id": "SC-009",
-      "description": "Artifacts emit at ADR-10 \u00a72's dist/index.js and dist/elements.js -- #71, #72 and #82 import them.",
+      "description": "Artifacts emit at ADR-10 \u00a72's dist/index.js and dist/elements.js -- #71, #72 and #82 import them. Declarations emit alongside from the same build target, so package.json's \"types\" points at a real file.",
       "proof_type": "automated_test",
-      "evidence": "https://github.com/spec-kitty/spec-kitty-design/actions/runs/33704251025 storybook-build: dist/index.js and dist/elements.js emit at the ADR-10 \u00a72 paths, plus dist/*.d.ts now that a types target exists.",
+      "evidence": "https://github.com/spec-kitty/spec-kitty-design/actions/runs/33704251025 storybook-build: dist/index.js and dist/elements.js emit at the ADR-10 \u00a72 paths,. Declarations are emitted by the same build target; note NO CI step asserts the .d.ts files exist \u2014 measure-elements-sizes measures only the two .js artifacts and typecheck runs --noEmit. Gap recorded rather than papered over.",
       "pass_fail": "pass",
       "verified_by": "ci @ 8ba154e + pre-merge adversarial squad (4 lenses)",
       "verified_at": "2026-09-03T01:38:00Z",
@@ -255,12 +255,12 @@
       "proof_type": "automated_test",
       "evidence": "Demonstrated red-first: with `import \"@spec-kitty/styles\"` in elements, elements:lint passes; retagging styles to scope:other makes the SAME import error with \"A project tagged with \"scope:elements\" can only depend on libs tagged with \"scope:styles\", \"scope:tokens\"\"; green on restore. Note the rule fires at all only because this PR fixed tsconfig.base.json's empty `paths`.",
       "pass_fail": "pass",
-      "verified_by": "ci @ 8ba154e + pre-merge adversarial squad (4 lenses)",
+      "verified_by": "local red-first transcript (NOT a CI job)",
       "verified_at": "2026-09-03T01:38:00Z",
       "notes": "Owned by WP02. Added post-tasks: the scaffold covered only FR rows, while every WP DoD binds to these.",
       "negative_invariants": []
     }
   ],
   "negative_invariants": [],
-  "notes": "Evidence pinned to CI at 8ba154e. Two criteria remain pending and are NOT claimed: FR-010 awaits an operator scope ruling (WP06 unstarted), and SC-007 cannot be evidenced before merge for the structural reason recorded on its row. Every other row cites a CI job at this SHA rather than a local transcript."
+  "notes": "Evidence pinned to CI at a9de7dd and later. Two criteria are NOT claimed: FR-010 awaits an operator scope ruling (WP06 unstarted), and SC-007 cannot be evidenced before merge for the structural reason on its row.\n\nTHREE rows are backed by a local transcript rather than a CI job, and say so in verified_by: NFR-003 and SC-006 (the before/after per-story baseline, which needs the pre-WP01 gate and a built Storybook) and SC-010 (the boundary constraint red-first demonstration). An earlier revision of this file asserted \"every other row cites a CI job at this SHA\", which was false for exactly these three; a squad lens caught it."
 }

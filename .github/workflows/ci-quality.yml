@@ -43,8 +43,14 @@ jobs:
               - 'packages/tokens/**'
             components:
               - 'tsconfig.base.json'
-              - 'packages/elements/**'
-              - 'packages/styles/**'
+              # `packages/**`, not a hand-written list of two. storybook:build's own
+              # inputs already glob `packages/*/src/**/*` and `packages/*/package.json`
+              # — every package is load-bearing for this job — so enumerating two of
+              # them here is the same allow-list defect one dimension over: a new
+              # packages/<anything>/ matches no filter, storybook-build skips, and
+              # a11y/visual/playwright skip on `needs` with the gate accepting all
+              # four as legitimate. The nx input set is the honest spec.
+              - 'packages/**'
               - 'apps/storybook/**'
               # The demo pages are part of this surface: storybook-build is what
               # runs assemble-demo-dist.sh, so a PR editing a demo asset path
@@ -151,6 +157,9 @@ jobs:
       # eslint config is not type-aware, and until the CSS pipeline emitted a sibling
       # .d.ts, `tsc` could not even resolve `import sheet from './sk-stub.css.js'`.
       # It is the base layer for forty components. Found by the pre-merge squad.
+      # Includes the vite-consumer fixture, whose scope:fixture depConstraint would
+      # otherwise never be evaluated — nx affected --target=lint is the only ESLint
+      # invocation in CI, and the fixture had no lint target.
       - name: "[ENFORCED] Typecheck elements (ADR-8)"
         run: npx nx run elements:typecheck
       - name: "[ENFORCED] No CSS in elements source (FR-009, ADR-10 §1)"

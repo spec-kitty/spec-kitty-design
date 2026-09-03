@@ -89,6 +89,20 @@ export const SHAPES = [
     html: '<div id="storybook-root"><sk-x></sk-x></div>',
     shadow: { 'sk-x': '<div class="sk-x__body">hi</div>' } },
 
+  // The picture/video/canvas tightening in CONTENT_MEDIA_SELECTOR. Loosening those
+  // three arms to bare `picture, video, canvas` survived all 22 shapes — the fix
+  // shipped and the fixture that keeps it from being undone did not. An empty
+  // <picture> is a wrapper, not content, and this is the certifying-absence
+  // direction: without it the gate reports a blank card green. Found by mutation at
+  // the re-run gate.
+  { id: 'empty-picture-in-shadow', want: false,
+    html: '<div id="storybook-root"><sk-x></sk-x></div>',
+    shadow: { 'sk-x': '<div class="sk-x__body"><picture></picture><video></video><canvas width="0"></canvas></div>' } },
+  // ...and the legitimate half, so the arms cannot simply be deleted either.
+  { id: 'real-picture-in-shadow', want: true,
+    html: '<div id="storybook-root"><sk-x></sk-x></div>',
+    shadow: { 'sk-x': '<div class="sk-x__body"><picture><img alt="a cat"></picture></div>' } },
+
   // The icon-only case run-axe-storybook.js explicitly promises to keep green:
   // "<button class=\"sk-btn\" aria-label=\"Close\"><svg><path/></svg></button>".
   // No other shape puts MEDIA as the sole content of a shadow root, so flatMatch's

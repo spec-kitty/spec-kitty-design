@@ -12,8 +12,12 @@
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     },
-    "./elements.js": "./dist/elements.js",
-    "./custom-elements.json": "./custom-elements.json"
+    "./elements.js": {
+      "types": "./dist/elements.d.ts",
+      "default": "./dist/elements.js"
+    },
+    "./custom-elements.json": "./custom-elements.json",
+    "./dist/*": "./dist/*"
   },
   "customElements": "custom-elements.json",
   "files": [

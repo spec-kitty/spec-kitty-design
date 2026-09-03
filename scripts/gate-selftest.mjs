@@ -125,7 +125,8 @@ for (const shape of SHAPES) {
     } else {
       why =
         `assertion and wait DISAGREE — assertion says ${got}, wait says ${waited}. ` +
-        `They must be equivalent; see the pairing note in run-axe-storybook.js.`;
+        `They are the SAME function (computeRenderVerdict), so this is the ` +
+        `boolean/object plumbing or the timeout, not a logic drift.`;
     }
   }
   console.log(

@@ -24,19 +24,18 @@ const STORYBOOK_DIR = path.resolve('apps/storybook/storybook-static');
 const AXE_TAGS = ['wcag2a', 'wcag2aa'];
 
 
-// The media half of "this element rendered its own content", single-sourced.
+// The media half of "this element rendered its own content".
 //
-// Only the SELECTOR is hoisted, and it travels to the browser as DATA. Both the
-// render wait and the render assertion run in separate browser contexts, so the
-// predicate itself has to be written out on each side -- but the list that
-// actually drifts lives in one place.
+// It travels to the browser as DATA, in the argument array of computeRenderVerdict.
+// There is no longer a second copy to drift from: the wait and the assertion are one
+// function (see computeRenderVerdict below).
 //
-// Do not "fix" the remaining two-line duplication by shipping the predicate as a
-// source string and eval()-ing it in both contexts: that was tried and it made
-// waitForFunction throw, which the existing .catch() swallowed, silently turning
-// the wait into a no-op and reproducing the "3 of 57, different each run" flake
-// this pairing exists to prevent. Measured: stable 0/0 render failures before,
-// 0 then 4 after, different stories each run.
+// Do NOT reintroduce a predicate shipped as a source string and eval()-ed in the
+// browser context. That was tried in #102: eval throws inside waitForFunction, the
+// existing .catch() swallowed it, and the wait silently became a no-op — the
+// "3 of 57, different each run" flake, measured as a stable 0/0 before and 0-then-4
+// after, different stories each run. Passing a function REFERENCE, as this file now
+// does, is a different mechanism and is safe.
 //
 // Content means TEXT or MEDIA -- never "a descendant that also carries an sk-*
 // class", which is the hole that let a host plus one empty BEM element pass.
@@ -198,8 +197,6 @@ const computeRenderVerdict = ([rootSelectors, mediaSelector, booleanOnly]) => {
       // emptying 8 form-field stories plus stub -- 12 blank stories, all 12 green.
       // That is verbatim the failure the comment above claims to have closed, so the
       // descendant arm is gone rather than patched.
-      // Mirrors the wait predicate below; the selector is shared via
-      // CONTENT_MEDIA_SELECTOR so the list cannot drift between them.
       // FLAT-TREE TRAVERSAL (#70). ADR-9 makes open shadow roots mandatory for every
       // component, and neither `textContent` nor `querySelector` crosses a shadow
       // boundary -- so before this, an element that rendered perfectly was reported as
@@ -417,8 +414,10 @@ async function checkStory(page, storyId) {
       module.exports.waitTimeouts.push(storyId);
       console.error(
         `⚠  ${storyId}: render wait timed out after ${RENDER_TIMEOUT_MS}ms. ` +
-          `The wait predicate and assertStoryRendered have diverged — fix both, ` +
-          `not one (see the pairing note above waitForFunction).`
+          `The page never satisfied computeRenderVerdict within the timeout. Since the ` +
+          `wait and the assertion are ONE function, this is not a divergence: the story ` +
+          `genuinely did not render in time (slow boot, script error, or a real failure ` +
+          `the assertion below will name).`
       );
     }
 
@@ -548,8 +547,9 @@ if (require.main === module) (async () => {
     );
     module.exports.waitTimeouts.forEach((id) => console.error(`   ${id}`));
     console.error(
-      '   The wait predicate and assertStoryRendered have diverged. Fix BOTH — see the\n' +
-        '   pairing note above waitForFunction, and scripts/gate-selftest.mjs.'
+      '   These stories did not satisfy computeRenderVerdict within RENDER_TIMEOUT_MS.\n' +
+        '   The wait and the assertion are one function, so this is a real render\n' +
+        '   failure or a timing problem, not a drift between two copies.'
     );
   }
 

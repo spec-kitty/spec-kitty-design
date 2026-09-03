@@ -46,14 +46,29 @@ const OUT_DIR = 'packages/elements/src';
  * `packages/elements/src/card/sk-card.ts` in #72 automatically requires
  * `packages/styles/src/card/sk-card.css` to exist, and fails loudly if it does not.
  */
-const COMPONENTS = globSync(`${OUT_DIR}/*/sk-*.ts`, {})
-  // Element sources only: not stories, and not the `.css.d.ts` this script itself
-  // emits (which `sk-*.ts` otherwise matches, producing a component named
-  // "stub.css.d" and a nonsense source path).
-  .filter((f) => !/\.stories\.ts$/.test(f) && !/\.css\.d\.ts$/.test(f))
+const COMPONENTS = globSync(`${OUT_DIR}/**/sk-*.ts`, {})
+  // ALLOW-list, not two suffix denials. `.stories.ts` and `.css.d.ts` were excluded
+  // by name, which left `sk-card.spec.ts` yielding a component called "card.spec" and
+  // a hard exit 1 — and the denials had to stay in sync with tsconfig.lib.json's own,
+  // separate, exclude list. Only `sk-<name>.ts` is an element.
+  .filter((f) => /^sk-[a-z0-9-]+\.ts$/.test(basename(f)))
   .map((f) => {
     const name = basename(f).replace(/^sk-/, '').replace(/\.ts$/, '');
-    return { name, css: `packages/styles/src/${name}/sk-${name}.css` };
+    const dir = basename(dirname(f));
+    // The element's own DIRECTORY is where its generated module belongs. A first cut
+    // discarded it and rebuilt the path from `name`, so `src/card/sk-tile.ts` wrote to
+    // a phantom `src/tile/` that contained no element, while `src/card/`'s relative
+    // import of `./sk-tile.css.js` failed to resolve. The orphan sweep could not catch
+    // it either, because `expected` was built from the same wrong mapping.
+    if (dir !== name) {
+      console.error(
+        `build-elements-css: ${f} sits in "${dir}/" but names component "${name}".\n` +
+          `   The directory and the sk-<name> must agree — the generated module is a ` +
+          `sibling import.`
+      );
+      process.exit(1);
+    }
+    return { name, dir: dirname(f), css: `packages/styles/src/${name}/sk-${name}.css` };
   })
   .sort((a, b) => a.name.localeCompare(b.name));
 
@@ -91,32 +106,38 @@ export default sheet;
 
 let drifted = [];
 let orphans = [];
-for (const { name, css } of COMPONENTS) {
+for (const { name, dir, css } of COMPONENTS) {
   if (!existsSync(css)) {
     console.error(`build-elements-css: source of record missing: ${css}`);
     process.exit(1);
   }
   const cssText = readFileSync(css, 'utf8');
-  const outPath = join(OUT_DIR, name, `sk-${name}.css.js`);
+  const outPath = join(dir, `sk-${name}.css.js`);
   const next = moduleFor(cssText, css);
 
+  const typesPath = outPath.replace(/\.js$/, '.d.ts');
   if (check) {
     const current = existsSync(outPath) ? readFileSync(outPath, 'utf8') : null;
     if (current !== next) drifted.push(outPath);
+    // BOTH generated kinds. --check used to `continue` before the .d.ts was even
+    // considered, so a drifted or deleted declaration was invisible here and only
+    // surfaced as a typecheck failure elsewhere.
+    const currentTypes = existsSync(typesPath) ? readFileSync(typesPath, 'utf8') : null;
+    if (currentTypes !== TYPES) drifted.push(typesPath);
     continue;
   }
 
   mkdirSync(dirname(outPath), { recursive: true });
   writeFileSync(outPath, next);
-  writeFileSync(outPath.replace(/\.js$/, '.d.ts'), TYPES);
+  writeFileSync(typesPath, TYPES);
   console.log(`build-elements-css: ${css} -> ${outPath}`);
 }
 
 // A generated module with no source of record. See the COMPONENTS note above.
 const expected = new Set(
-  COMPONENTS.flatMap(({ name }) => [
-    join(OUT_DIR, name, `sk-${name}.css.js`),
-    join(OUT_DIR, name, `sk-${name}.css.d.ts`),
+  COMPONENTS.flatMap(({ name, dir }) => [
+    join(dir, `sk-${name}.css.js`),
+    join(dir, `sk-${name}.css.d.ts`),
   ])
 );
 for (const f of globSync(`${OUT_DIR}/**/*.css.{js,d.ts}`, {})) {

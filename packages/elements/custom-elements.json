@@ -5,35 +5,6 @@
     {
       "kind": "javascript-module",
       "path": "./dist/index.js",
-      "declarations": [],
-      "exports": []
-    },
-    {
-      "kind": "javascript-module",
-      "path": "./dist/index.js",
-      "declarations": [],
-      "exports": [
-        {
-          "kind": "js",
-          "name": "define",
-          "declaration": {
-            "name": "define",
-            "module": "./dist/index.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "SkStub",
-          "declaration": {
-            "name": "SkStub",
-            "module": "./dist/index.js"
-          }
-        }
-      ]
-    },
-    {
-      "kind": "javascript-module",
-      "path": "./dist/index.js",
       "declarations": [
         {
           "kind": "class",
@@ -49,6 +20,14 @@
         }
       ],
       "exports": [
+        {
+          "kind": "js",
+          "name": "define",
+          "declaration": {
+            "name": "define",
+            "module": "./dist/index.js"
+          }
+        },
         {
           "kind": "js",
           "name": "SkStub",
