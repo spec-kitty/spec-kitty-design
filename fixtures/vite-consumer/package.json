@@ -1,0 +1,13 @@
+{
+  "name": "vite-consumer-fixture",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "vite build",
+    "preview": "vite preview --port 4319 --strictPort"
+  },
+  "devDependencies": {
+    "@spec-kitty/elements": "^1.0.0"
+  }
+}

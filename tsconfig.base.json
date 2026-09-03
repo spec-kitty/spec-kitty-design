@@ -15,7 +15,11 @@
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
-    "paths": {}
+    "paths": {
+      "@spec-kitty/tokens": ["packages/tokens/src/index.ts"],
+      "@spec-kitty/styles": ["packages/styles/src/index.ts"],
+      "@spec-kitty/elements": ["packages/elements/src/index.ts"]
+    }
   },
   "exclude": ["node_modules", "tmp"]
 }

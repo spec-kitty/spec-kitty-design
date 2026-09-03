@@ -1,0 +1,149 @@
+{
+  "rows": {
+    "#102": {
+      "evidence_ref": "Prior mission (#69), merged as ff952f4. Cited in spec.md only to WITHDRAW a fabricated attribution; no work owed here.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "verified-already-fixed",
+      "wp": null
+    },
+    "#104": {
+      "evidence_ref": "Follow-up: #104 stays open. Its proposed stylesheet-coverage arm reads document.styleSheets, measured empty for an adopted constructed stylesheet -- it would fail every element story. Whichever lands second must account for the other.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
+    },
+    "#105": {
+      "evidence_ref": "Follow-up: #105 stays open. sk-stub's hand-authored markup is owned by no migration mission; this mission ADDS a third authoring site via the element's render(). Recorded in C-006 and in WP03's notes.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "deferred-with-followup",
+      "wp": "WP03"
+    },
+    "#66": {
+      "evidence_ref": "Parent epic; this mission is one of its missions. Verdict enum has no parent/context value.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "in-mission",
+      "wp": null
+    },
+    "#69": {
+      "evidence_ref": "Prior mission M3, merged as ff952f4. Provides the web-components renderer this mission's element stories rely on. No work owed.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "verified-already-fixed",
+      "wp": null
+    },
+    "#70": {
+      "evidence_ref": "This mission's own issue (M4).",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "in-mission",
+      "wp": "WP02"
+    },
+    "#71": {
+      "evidence_ref": "Follow-up: #71 (M5) owns the verification harness and the test runner. This mission deliberately introduces NO runner and evidences via scripted probes -- see plan.md Technical Context.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "deferred-with-followup",
+      "wp": null
+    },
+    "#72": {
+      "evidence_ref": "Follow-up: #72 (M6) is the first component migration and a candidate owner for FR-010's lint rule if the operator defers it.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "deferred-with-followup",
+      "wp": null
+    },
+    "#79": {
+      "evidence_ref": "Follow-up: #79 (M13) closes with the repository-wide 'no component markup authored twice' assertion that #105's orphaned sk-stub markup will trip.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "deferred-with-followup",
+      "wp": null
+    },
+    "#80": {
+      "evidence_ref": "Follow-up: #80 (M14) owns publication and the CDN + integrity-hash demonstration. Not performable here -- all three @spec-kitty/* names 404 on npm -- so SC-001 tests SRI over HTTP instead.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "deferred-with-followup",
+      "wp": null
+    },
+    "#82": {
+      "evidence_ref": "Follow-up: #82 (M16) is the no-build consumer and imports dist/elements.js, which is why SC-009 pins the ADR-10 \u00a72 artifact paths.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "deferred-with-followup",
+      "wp": null
+    },
+    "#90": {
+      "evidence_ref": "Historical prior art for the removed registration detector, quoted from run-axe-storybook.js:156-162. No work owed.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    }
+  },
+  "schema_version": 1
+}

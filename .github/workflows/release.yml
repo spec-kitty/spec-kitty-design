@@ -27,7 +27,7 @@ jobs:
         run: bash scripts/npm-audit-gate.sh
 
       - name: Build all packages
-        run: npx nx run-many --target=build --projects=tokens,styles
+        run: npx nx run-many --target=build --projects=tokens,styles,elements
 
       - name: Copy behavior helper beside compiled output (styles nav-pill drawer)
         run: cp packages/styles/src/nav-pill/sk-nav-pill.js packages/styles/dist/src/nav-pill/sk-nav-pill.js

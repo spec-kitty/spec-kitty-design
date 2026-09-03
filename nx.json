@@ -11,19 +11,7 @@
       "cache": true
     },
     "storybook:build": {
-      "dependsOn": [
-        "^build"
-      ],
-      "cache": true,
-      "inputs": [
-        "{projectRoot}/**/*",
-        "{workspaceRoot}/packages/*/src/**/*",
-        "{workspaceRoot}/packages/*/assets/**/*",
-        "{workspaceRoot}/package.json",
-        "{workspaceRoot}/package-lock.json",
-        "{workspaceRoot}/tsconfig.base.json",
-        "{workspaceRoot}/packages/*/package.json"
-      ]
+      "cache": true
     },
     "test": {
       "cache": true

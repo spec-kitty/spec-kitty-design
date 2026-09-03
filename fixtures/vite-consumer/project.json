@@ -1,0 +1,39 @@
+{
+  "name": "vite-consumer-fixture",
+  "projectType": "application",
+  "sourceRoot": "fixtures/vite-consumer/src",
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "vite build --config fixtures/vite-consumer/vite.config.mjs"
+      },
+      "dependsOn": [
+        "elements:build"
+      ],
+      "inputs": [
+        "{projectRoot}/**/*",
+        "{workspaceRoot}/packages/elements/dist/**/*",
+        "{workspaceRoot}/package.json",
+        "{workspaceRoot}/package-lock.json"
+      ],
+      "outputs": [
+        "{workspaceRoot}/fixtures/vite-consumer/dist"
+      ]
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "options": {
+        "lintFilePatterns": [
+          "fixtures/vite-consumer/**/*.ts",
+          "fixtures/vite-consumer/**/*.js",
+          "fixtures/vite-consumer/**/*.mjs"
+        ]
+      }
+    }
+  },
+  "tags": [
+    "scope:fixture",
+    "type:app"
+  ]
+}
