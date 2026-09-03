@@ -190,6 +190,11 @@ jobs:
       # to index.ts and not to it, and everything stayed green — the test lane resolves the
       # package to index.ts, the analyzer reads source, Storybook has its own module graph.
       # Only the deployed demo went quiet, and a Playwright failure found it.
+      # Same reason as the CSS gate's self-check one step up: this gate's commit message
+      # claimed six probed forms and a lens falsified two of them within the hour. A probe
+      # table nobody can run is not a probe table.
+      - name: "[ENFORCED] Distribution-entry gate self-check (ADR-10 §2)"
+        run: node scripts/check-elements-entries.mjs --selftest
       - name: "[ENFORCED] Every element reaches both distribution entries (ADR-10 §2)"
         run: node scripts/check-elements-entries.mjs
       # The manifest is a generated artifact under ADR-10's contract, and ADR-11

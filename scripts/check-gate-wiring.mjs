@@ -105,6 +105,19 @@ else {
     [/node\s+scripts\/suite-selftest\.mjs\s+--selftest(\s|$)/, "the mutation harness's own guard self-check", 'scripts/suite-selftest.mjs --selftest'],
   ];
 
+  // The SECOND job. This checker only ever looked at `test`, so #73's four new element gates
+  // — including the two self-checks that are the only thing catching a gutted checker — could
+  // be deleted from lint-code with this script still printing green. A pass-2 lens deleted the
+  // CSS gate's self-check step and watched exactly that happen. Same whole-command discipline:
+  // `check-adopted-css-boundaries.mjs` is a SUBSTRING of the same line with `--selftest`.
+  const REQUIRED_LINT = [
+    [/node\s+scripts\/check-adopted-css-boundaries\.mjs(?!\s*--selftest)(\s|$)/, 'the cross-root selector gate', 'scripts/check-adopted-css-boundaries.mjs'],
+    [/node\s+scripts\/check-adopted-css-boundaries\.mjs\s+--selftest(\s|$)/, "the cross-root gate's own probe table", 'scripts/check-adopted-css-boundaries.mjs --selftest'],
+    [/node\s+scripts\/check-elements-entries\.mjs(?!\s*--selftest)(\s|$)/, 'the distribution-entry gate', 'scripts/check-elements-entries.mjs'],
+    [/node\s+scripts\/check-elements-entries\.mjs\s+--selftest(\s|$)/, "the distribution-entry gate's own probe table", 'scripts/check-elements-entries.mjs --selftest'],
+    [/node\s+scripts\/typecheck-all\.mjs(\s|$)/, 'the derived typecheck', 'scripts/typecheck-all.mjs'],
+  ];
+
   /** A step that cannot fail the job is a step that is not running (B, C, D, E). */
   const neutered = (st) => {
     const why = [];
@@ -120,6 +133,21 @@ else {
       .split('\n')
       .map((l) => l.replace(/^\s*#.*$/, ''))
       .join('\n');
+
+  const lintSteps = wf.jobs?.['lint-code']?.steps ?? [];
+  if (lintSteps.length === 0) problems.push('the `lint-code` job has no steps — its gates cannot run');
+  for (const [re, what, label] of REQUIRED_LINT) {
+    const matching = lintSteps.filter((st) => re.test(commandLines(st)));
+    if (matching.length === 0) {
+      problems.push(`the \`lint-code\` job never runs ${what} (${label})`);
+      continue;
+    }
+    for (const st of matching) {
+      for (const why of neutered(st)) {
+        problems.push(`the step running ${what} ${why} — it cannot fail the job`);
+      }
+    }
+  }
 
   const steps = wf.jobs?.[JOB]?.steps ?? [];
   for (const [re, what, label] of REQUIRED) {

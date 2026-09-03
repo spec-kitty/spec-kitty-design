@@ -38,7 +38,20 @@ if (!Array.isArray(projects) || projects.length === 0) {
 }
 
 console.log(`typecheck-all: ${projects.length} project(s) — ${projects.join(', ')}`);
-execFileSync('npx', ['nx', 'run-many', '-t', 'typecheck', '--projects', projects.join(',')], {
-  stdio: 'inherit',
-});
+try {
+  execFileSync('npx', ['nx', 'run-many', '-t', 'typecheck', '--projects', projects.join(',')], {
+    stdio: 'inherit',
+  });
+} catch {
+  // A NAMED failure. `execFileSync` throws an Error whose message is the whole spawn record,
+  // so an unhandled one buried the tsc diagnostics — which nx has already printed above —
+  // under `status: 1, stdout: null, pid: …` and a Node banner. The useful output is already
+  // on screen; all this needs to add is which gate failed and why it matters.
+  console.error(
+    `\n❌ typecheck failed for one of ${projects.length} project(s): ${projects.join(', ')}.\n` +
+      '   The tsc diagnostics are above. This step exists because CI once ran ONE project by\n' +
+      '   name while a second declared the same target and sat red on a green pipeline.'
+  );
+  process.exit(1);
+}
 console.log(`✅ typecheck passed for ${projects.length} project(s).`);

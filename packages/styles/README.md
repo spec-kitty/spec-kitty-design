@@ -64,6 +64,7 @@ to author every nav item twice — once for the row and once for the drawer. The
 The behaviour lives in `<sk-nav-pill>` in **`@spec-kitty/elements`**:
 
 ```html
+<!-- @spec-kitty/elements is not published yet (#80); this is the shape it will take -->
 <script src="node_modules/@spec-kitty/elements/dist/elements.js"></script>
 
 <sk-nav-pill label="Primary navigation">

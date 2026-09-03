@@ -87,24 +87,59 @@ const forbiddenNode = (node) => {
  * For `:is()`/`:where()`/`:matches()`/`:not()`, EVERY branch must own it. One branch naming
  * the component used to launder the rest.
  */
-const FUNCTIONAL = new Set([':is', ':where', ':matches', ':-webkit-any', ':not']);
+// `:is()` / `:where()` / `:matches()` only. `:not()` is DELIBERATELY absent, and a pass-2 lens
+// showed why: with `:not` in this set, "every branch owns it" is semantically inverted. A
+// branch that owns guarantees the compound is NOT the component, so `:not(.sk-nav-pill) .x`
+// was ACCEPTED — an outside ancestor, the exact `:is(.sk-nav-pill, .sk-light)` laundering
+// shape one pseudo over — while `:not(.sk-light) .x` was rejected. A `:not()` argument now
+// confers nothing and vetoes nothing; it is simply not evidence of ownership either way.
+const FUNCTIONAL = new Set([':is', ':where', ':matches', ':-webkit-any']);
 
 function compoundOwns(nodes, name) {
-  const classRe = new RegExp(`^sk-${name}(\\b|__|--|$)`);
+  // `__` / `--` / end only. `\b` matched before a HYPHEN too, so `.sk-nav-pill-wrapper`
+  // laundered — and would launder for any future sibling element named `sk-nav-pill-menu`.
+  const classRe = new RegExp(`^sk-${name}($|__|--)`);
   let owned = false;
   for (const n of nodes) {
     if (n.type === 'class' && classRe.test(n.value)) owned = true;
-    if (n.type === 'attribute' && classRe.test(String(n.value ?? ''))) owned = true;
+    // NO attribute-value ownership. It tested the attribute's VALUE and ignored its NAME, so
+    // any outside ancestor carrying `[data-component="sk-nav-pill"]` was credited with owning
+    // the compound. A class is the only thing that names a component here.
     if (n.type === 'tag' && n.value === 'slot') owned = true;
     if (n.type === 'pseudo' && (n.value === ':host' || n.value === '::slotted')) owned = true;
     if (n.type === 'pseudo' && FUNCTIONAL.has(n.value) && n.nodes?.length) {
-      // Every branch, not any: `:is(.sk-nav-pill, .sk-light)` must NOT pass.
+      // ADDITIVE, never a veto. `:is()` confers ownership only when EVERY branch owns — that
+      // is what rejects `:is(.sk-nav-pill, .sk-light) .x`, since neither the list nor anything
+      // else in that compound owns. But an earlier version RETURNED FALSE when a branch did
+      // not own, which vetoed compounds that were already owned by their own class:
+      // `.sk-nav-pill__item:is(a, button)` is perfectly in-root and was rejected.
       if (n.nodes.every((sel) => compoundOwns(leadingCompound(sel.nodes), name))) owned = true;
-      else return false;
     }
   }
   return owned;
 }
+
+/**
+ * `::slotted()` matches an assigned child and is a PSEUDO-ELEMENT, so nothing can follow it:
+ * `::slotted(a) .x` is dropped by every engine. That is the same inert-selector class as the
+ * bare type selector this file already rejects, so it is rejected too rather than silently
+ * accepted as "owned".
+ */
+const slottedIsNotLast = (sel) => {
+  const compounds = [];
+  let current = [];
+  for (const n of sel.nodes) {
+    if (n.type === 'combinator') {
+      compounds.push(current);
+      current = [];
+    } else current.push(n);
+  }
+  compounds.push(current);
+  return compounds.some(
+    (c, i) =>
+      i < compounds.length - 1 && c.some((n) => n.type === 'pseudo' && n.value === '::slotted')
+  );
+};
 
 /** The nodes up to the first top-level combinator. */
 const leadingCompound = (nodes) => {
@@ -130,7 +165,11 @@ function violationsFor(selector, name) {
       const why = forbiddenNode(n);
       if (why) found.push(why);
     });
-    // 2. The general rule.
+    // 2. A pseudo-element with something after it never matches.
+    if (slottedIsNotLast(sel)) {
+      found.push('::slotted() is a pseudo-element — nothing may follow it; this never matches');
+    }
+    // 3. The general rule.
     if (!compoundOwns(leadingCompound(sel.nodes), name)) {
       found.push(
         `the leftmost compound "${String(sel).trim().split(/\s|>|\+|~/)[0]}" is not part of ` +
@@ -168,6 +207,21 @@ if (selftest) {
     ['slot[name="cta"]::slotted(a)', 'accept', 'named slot — lens find, was rejected'],
     ['slot', 'accept', 'the slot element — lens find, was rejected'],
     [':is(.sk-nav-pill, .sk-nav-pill__item) .sk-nav-pill__x', 'accept', 'every branch owns'],
+    // --- pass 2 finds. Each of these was measured ACCEPTED before this table grew. ---
+    [':not(.sk-nav-pill) .sk-nav-pill__items', 'reject', ':not() inverts "every branch owns"'],
+    ['[data-component="sk-nav-pill"] .sk-nav-pill__items', 'reject', 'attribute VALUE is not ownership'],
+    ['.sk-nav-pill-wrapper .sk-nav-pill__items', 'reject', 'a hyphen is not a name boundary'],
+    ['::slotted(a) .sk-nav-pill__items', 'reject', 'nothing may follow a pseudo-element'],
+    // --- and these exercise the FORBIDDEN-TOKEN walk in isolation. Every reject probe above
+    //     is also caught by the leftmost rule, so deleting the token walk entirely left the
+    //     table green — a red-first test that did not test the rule ADR-9 names. ---
+    ['.sk-nav-pill body', 'reject', 'ADR-9 token, NOT leftmost — token walk only'],
+    ['.sk-nav-pill :is(html)', 'reject', 'ADR-9 token nested and not leftmost'],
+    ['.sk-nav-pill__items :root', 'reject', ':root not leftmost'],
+    // --- false positives a lens constructed against the veto path. ---
+    ['.sk-nav-pill__item:not(.is-active)', 'accept', ':not() must not veto an owned compound'],
+    ['.sk-nav-pill:not([hidden])', 'accept', 'attribute :not() on an owned compound'],
+    ['.sk-nav-pill__item:is(a, button)', 'accept', ':is() of element types on an owned compound'],
   ];
   let bad = 0;
   for (const [sel, expected, note] of PROBES) {
@@ -180,11 +234,19 @@ if (selftest) {
     console.error(`\n❌ ${bad} of ${PROBES.length} probe(s) did not behave as recorded.`);
     process.exit(1);
   }
-  // A probe table with no rejections would pass vacuously.
+  // A FLOOR, not just "both kinds present". Cutting the table to one reject and one accept
+  // passed the earlier guard, which put the regression protection for every hole this gate has
+  // had one careless edit away. Shrink-only, the same shape as expected-parts.json.
   const rejects = PROBES.filter(([, e]) => e === 'reject').length;
   const accepts = PROBES.length - rejects;
-  if (rejects === 0 || accepts === 0) {
-    console.error('❌ Degenerate probe table — it must contain both accepted and rejected shapes.');
+  const FLOOR = { rejects: 19, accepts: 12 };
+  if (rejects < FLOOR.rejects || accepts < FLOOR.accepts) {
+    console.error(
+      `❌ Probe table shrank: ${rejects} reject / ${accepts} accept, floor is ` +
+        `${FLOOR.rejects} / ${FLOOR.accepts}. Every form this gate was ever defeated by must\n` +
+        '   stay in the table — the table IS the regression protection. Raise the floor when\n' +
+        '   you add probes; lower it only with a reason in the commit message.'
+    );
     process.exit(1);
   }
   console.log(`\n✅ All ${PROBES.length} probes behaved as recorded (${rejects} reject, ${accepts} accept).`);

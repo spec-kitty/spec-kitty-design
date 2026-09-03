@@ -209,12 +209,45 @@ test('[config] every element is a declared behaviour SUBJECT, and every subject 
     expect(b.subjects!.length, `${b.id} declares an empty subjects list`).toBeGreaterThan(0);
   }
 
-  const named = new Set(applicable.flatMap((b) => (b.subjects ?? []).map((s) => s.name)));
+  // THE NAME IS NOT ENOUGH. A pass-2 lens added a real element and pointed its subject entry
+  // at the SYNTHETIC FIXTURE's own test file — the one behaviours.json's docstring says covers
+  // every id — and everything went green: the floor arm and harness guard 7 both key on
+  // (id, FILE) and that file already carried the id, while this test only checked that the
+  // name appeared somewhere. So the subject's file must be about the element it names.
   for (const el of elements) {
+    const subs = applicable.flatMap((b) =>
+      (b.subjects ?? []).filter((s) => s.name === `sk-${el}`).map((s) => s.file),
+    );
     expect(
-      named.has(`sk-${el}`),
+      subs.length,
       `<sk-${el}> exists but is not a subject of any behaviour in behaviours.json — ` +
         `it would ship with zero behaviour tests and every gate green`,
-    ).toBe(true);
+    ).toBeGreaterThan(0);
+    for (const file of subs) {
+      expect(
+        file.includes(`sk-${el}.`) || file.includes(`/${el}/`),
+        `behaviours.json points subject "sk-${el}" at ${file}, which is not a test file about ` +
+          `sk-${el}. Pointing at a file that already carries the id satisfies the floor and the ` +
+          `mutation harness while asserting nothing about this element.`,
+      ).toBe(true);
+    }
   }
+
+  // The element set and the MANIFEST's registered set must agree. Four scripts derive elements
+  // from `src/**/sk-*.ts`; check-manifest-content.mjs derives them from the registrations the
+  // analyzer found. An element file named otherwise — `widget/widget-element.ts` — is invisible
+  // to all four and visible to the fifth, and nothing compared them. See #117.
+  const manifest = JSON.parse(readFileSync('packages/elements/custom-elements.json', 'utf8')) as {
+    modules: { declarations?: { tagName?: string }[] }[];
+  };
+  const registered = manifest.modules
+    .flatMap((m) => m.declarations ?? [])
+    .map((d) => d.tagName)
+    .filter((t): t is string => Boolean(t))
+    .sort();
+  expect(
+    registered,
+    'the manifest registers a different set of elements than the source glob finds — one of ' +
+      'the two derivations is blind to a file the other can see',
+  ).toEqual(elements.map((e) => `sk-${e}`));
 });

@@ -357,11 +357,54 @@ test('[SC-012] the invoker is resolved through the composed path, not from docum
   ).toBe(inner);
 });
 
-test('the label property reaches the nav\'s accessible name', async () => {
+test('[SC-013] the label reaches a real navigation LANDMARK, not just an attribute', async () => {
   // apps/demo/dashboard-demo.html sets label="Dashboard navigation" and expects it to land.
+  //
+  // The first version of this test asserted `nav.getAttribute('aria-label')` — a raw attribute
+  // string, which a role-less <div> carries just as happily while contributing no accessible
+  // name at all. A pass-2 lens changed the <nav> to a <div> and everything stayed green:
+  // 45 tests, Playwright 10/10, axe zero across 83 stories, manifest no-drift. The landmark
+  // and its name were both gone. Assert the element, not the attribute.
   const el = await mount();
   el.setAttribute('label', 'Dashboard navigation');
   await el.updateComplete;
+
   const nav = el.shadowRoot!.querySelector('[part="nav"]') as HTMLElement;
+  expect(nav.tagName, 'the pill must be a navigation landmark').toBe('NAV');
   expect(nav.getAttribute('aria-label')).toBe('Dashboard navigation');
+  // And reachable as a landmark from the composed tree, which is what a screen reader walks.
+  expect(
+    el.shadowRoot!.querySelector('nav[aria-label="Dashboard navigation"]'),
+    'a named navigation landmark must exist in the shadow tree',
+  ).not.toBe(null);
+});
+
+test('[SC-014] the element adopts its constructed sheet — no sheet is not "no styling"', async () => {
+  // `static styles = []` survived every vitest lane: 44/44 green with the element shipping
+  // completely unstyled, caught only by Playwright and axe downstream. SC-014 listed sk-stub
+  // as its only subject, so nothing asserted adoption for this element.
+  const el = await mount();
+  const sheets = el.shadowRoot!.adoptedStyleSheets;
+  expect(sheets.length, 'exactly one constructed sheet, per ADR-10 Confirmation #1').toBe(1);
+  expect(el.shadowRoot!.querySelectorAll('style').length, "kitty-desktop's CSP forbids <style>").toBe(0);
+  // PROVENANCE, not just presence: the sheet must be the one generated from @spec-kitty/styles.
+  // Asserting `length === 1` alone passes for any sheet, including a hand-authored one.
+  // Array.from, not spread: CSSRuleList is array-LIKE and has no Symbol.iterator in lib.dom.
+  const text = Array.from(sheets[0]!.cssRules, (r) => r.cssText).join('\n');
+  expect(text, 'the adopted sheet must be the nav-pill sheet').toContain('sk-nav-pill');
+  expect(text, 'and must carry the drawer sheet too — the component ships two').toContain('sk-nav-pill__hamburger');
+});
+
+test('[SC-013] the hamburger keeps an accessible name in both states', async () => {
+  // Its only child is aria-hidden, so without a label it is a nameless button. Nothing in
+  // vitest covered it, and the axe gate cannot: no story renders below the 720px breakpoint,
+  // so the collapsed control is never evaluated. Caught only by the Playwright spec.
+  const el = await mount();
+  const btn = hamburger(el);
+  expect(btn.getAttribute('aria-label')).toBe('Open navigation');
+  expect(btn.querySelector('svg')?.getAttribute('aria-hidden')).toBe('true');
+
+  el.open();
+  await el.updateComplete;
+  expect(btn.getAttribute('aria-label'), 'the name must track state').toBe('Close navigation');
 });

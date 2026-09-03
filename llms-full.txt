@@ -726,12 +726,19 @@ npm install @spec-kitty/tokens
 ```
 
 `@spec-kitty/styles` ships **no JavaScript**. Behaviour lives in `@spec-kitty/elements` as
-custom elements, loadable from a single self-contained script with no bundler and no import
-map:
+custom elements, designed to load from a single self-contained script with no bundler and no
+import map.
+
+**`@spec-kitty/elements` is not published yet.** `packages/elements/package.json` is
+`"private": true` and `release.yml` publishes only `tokens` and `styles`; #80 owns the
+release. There is deliberately no CDN URL here — an earlier revision of this section handed
+consumers an install snippet for a file that had just been deleted, and replacing it with a
+snippet for a package that does not exist would be the same mistake. The shape it will take:
 
 ```html
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@spec-kitty/tokens/dist/tokens.css">
-<script src="https://cdn.jsdelivr.net/npm/@spec-kitty/elements/dist/elements.js"></script>
+<!-- once #80 publishes @spec-kitty/elements -->
+<script src="…/@spec-kitty/elements/dist/elements.js"></script>
 
 <sk-nav-pill label="Primary navigation">
   <a href="#" class="sk-nav-pill__item">Platform</a>

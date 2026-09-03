@@ -229,7 +229,11 @@
       "subjects": [
         {
           "name": "sk-stub",
-          "file": "fixtures/elements-behaviour/src/elements-owned.test.ts"
+          "file": "fixtures/elements-behaviour/src/sk-stub.test.ts"
+        },
+        {
+          "name": "sk-nav-pill",
+          "file": "fixtures/elements-behaviour/src/sk-nav-pill.test.ts"
         }
       ]
     },
@@ -242,7 +246,7 @@
       "subjects": [
         {
           "name": "sk-stub",
-          "file": "fixtures/elements-behaviour/src/elements-owned.test.ts"
+          "file": "fixtures/elements-behaviour/src/sk-stub.test.ts"
         }
       ]
     }

@@ -10,8 +10,8 @@ A token-first, framework-progressive design system for the [Spec Kitty](https://
 
 Spec Kitty Design provides:
 - **Design tokens** (`@spec-kitty/tokens`) - CSS custom properties for colour, typography, spacing, motion, and radius. The single authoritative source for all visual values across the ecosystem.
-- **HTML/JS components** (`@spec-kitty/styles`) - framework-agnostic CSS and lightweight JS for core UI patterns (navigation, cards, tags, forms, banners, footer).
-- **Angular components** (`@spec-kitty/angular`) - Angular component wrappers for the same patterns.
+- **HTML components** (`@spec-kitty/styles`) - framework-agnostic CSS and markup for core UI patterns (navigation, cards, tags, forms, banners, footer). No JavaScript: the last helper it shipped moved into a custom element in #73.
+- **Custom elements** (`@spec-kitty/elements`) - the behaviour layer, on the ADR-8 base layer. **Not published yet** — the package is `private` and #80 owns the release.
 - **Brand assets** - fonts (Falling Sky, Swansea), logo, and visual identity artefacts.
 
 The design language targets the AI-tooling and spec-driven development context: dark-first, yellow-accented, technical-professional tone.
@@ -37,7 +37,7 @@ Then use `--sk-*` CSS custom properties anywhere in your styles:
 }
 ```
 
-### Use HTML/JS components
+### Use HTML components
 
 ```html
 <!-- After loading tokens.css, add the component stylesheet: -->

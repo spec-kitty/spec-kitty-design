@@ -1,3 +1,12 @@
+/**
+ * <sk-stub> — the behaviours the ELEMENTS package owns rather than the synthetic fixture.
+ *
+ * Named for its subject, not for its role. It was `elements-owned.test.ts`, and #73's
+ * derived subject obligation requires a subject's file to be about the element it names —
+ * because a pass-2 lens pointed a new element's subject entry at a file that already
+ * carried the id and every gate went green. A role-named file cannot satisfy that rule
+ * without special-casing, and the special case is what the rule exists to remove.
+ */
 import { expect, test, vi } from 'vitest';
 import { define, SkStub, skStubSheet } from '@spec-kitty/elements';
 
