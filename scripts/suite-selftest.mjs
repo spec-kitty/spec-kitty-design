@@ -40,7 +40,21 @@ const repo = process.cwd();
 
 const list = JSON.parse(readFileSync(LIST, 'utf8'));
 const mutations = list.mutations ?? [];
-const registry = JSON.parse(readFileSync('behaviours.json', 'utf8')).behaviours;
+// APPLICABLE behaviours only, matching floor-reporter.mjs:121.
+//
+// The two consumers of behaviours.json disagreed about what `applicable` means: the floor
+// reporter has always filtered on it, and this file did not — so a behaviour declared
+// inapplicable satisfied the reporter and then failed guard 7 here, demanding a mutation for a
+// behaviour that by definition has no test to mutate. #75 WP04 surfaced it by declaring SC-016
+// (generation determinism) inapplicable; the disagreement predates that and would have bitten
+// whoever used the flag first.
+//
+// `applicable: false` is not an escape hatch: config-contract.test.ts asserts the applicable set
+// equals ADR-11's list exactly, so an entry cannot be quietly demoted to dodge a mutation, and
+// the same test asserts SC-016 is present and carries a reason.
+const registry = JSON.parse(readFileSync('behaviours.json', 'utf8')).behaviours.filter(
+  (b) => b.applicable !== false
+);
 const behaviours = registry.map((b) => b.id);
 /** Every (behaviour, subject) pair the registry declares. Guard 7 compares against these. */
 const behaviourPairs = registry.flatMap((b) =>

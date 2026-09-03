@@ -66,14 +66,36 @@ test('[registry] behaviours.json declares exactly ADR-11\'s applicable behaviour
     'SC-013',                               // styling API
     'SC-014',                               // style adoption
     'SC-015',                               // registry guard
-    // The fifteenth, generation determinism, is deferred to #75 — its subject does not
-    // exist and the artifacts that do already carry enforced drift checks.
+    // The fifteenth, generation determinism, is DECLARED and inapplicable — asserted
+    // separately below, because a list that only counts applicable ids would let it be
+    // deleted silently.
   ];
   const registry = JSON.parse(readFileSync('behaviours.json', 'utf8')) as {
     behaviours: { id: string; applicable?: boolean }[];
   };
   const declared = registry.behaviours.filter((b) => b.applicable !== false).map((b) => b.id);
   expect([...declared].sort()).toEqual([...expected].sort());
+});
+
+test('[registry] the inapplicable behaviour is declared, and says what discharges it', () => {
+  // WITHOUT THIS, SC-016 IS DECORATIVE. The test above filters on `applicable !== false`, so an
+  // inapplicable entry is invisible to it and could be deleted with every gate green — the
+  // registry would quietly return to fourteen ids and nothing would say ADR-11 has fifteen.
+  //
+  // Asserting the REASON too, not just the id: `applicable: false` with no explanation is an
+  // escape hatch, and the whole argument for declaring SC-016 this way is that the discharge
+  // (build-react-wrappers.mjs --check) is recorded where a reader will look for it.
+  const registry = JSON.parse(readFileSync('behaviours.json', 'utf8')) as {
+    behaviours: { id: string; applicable?: boolean; inapplicableReason?: string }[];
+  };
+  const inapplicable = registry.behaviours.filter((b) => b.applicable === false);
+  expect(inapplicable.map((b) => b.id)).toEqual(['SC-016']);
+  for (const b of inapplicable) {
+    expect(
+      b.inapplicableReason ?? '',
+      `${b.id} is declared inapplicable with no reason — say what discharges it instead`
+    ).toMatch(/build-react-wrappers\.mjs/);
+  }
 });
 
 test('[config] the BUILD EMITS assignment semantics, not a native class field', async () => {
