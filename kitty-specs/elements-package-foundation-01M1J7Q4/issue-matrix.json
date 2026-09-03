@@ -109,7 +109,7 @@
       "wp": null
     },
     "#80": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "Follow-up: #80 (M14) owns publication and the CDN + integrity-hash demonstration. Not performable here -- all three @spec-kitty/* names 404 on npm -- so SC-001 tests SRI over HTTP instead.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -117,7 +117,7 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
+      "verdict": "deferred-with-followup",
       "wp": null
     },
     "#82": {
