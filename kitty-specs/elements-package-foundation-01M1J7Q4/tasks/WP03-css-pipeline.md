@@ -52,11 +52,11 @@ Committing it also **dissolves FR-009's exclusion problem**: scoping the no-CSS-
 
 ## Definition of Done
 
-- [ ] The element adopts CSS read from `packages/styles`; **zero `.css` files exist under `packages/elements/**`**, and the generated module's text is byte-identical to `packages/styles/src/stub/sk-stub.css`. (A name-literal "exactly one sk-stub.css" check is fakeable by copying it as `sk-stub.styles.css`.) Copying it into `packages/elements` would pass a naive grep *and* stylelint while violating ADR-8.
-- [ ] ADR-10 Confirmation #1's two literal assertions hold: **`adoptedStyleSheets.length === 1`** and **`shadowRoot.querySelectorAll('style').length === 0`**. Assert them on the element **in Storybook** here; the same pair is re-asserted against both built artifacts in WP04, which is where the artifacts exist.
+- [x] The element adopts CSS read from `packages/styles`; **zero `.css` files exist under `packages/elements/**`**, and the generated module's text is byte-identical to `packages/styles/src/stub/sk-stub.css`. (A name-literal "exactly one sk-stub.css" check is fakeable by copying it as `sk-stub.styles.css`.) Copying it into `packages/elements` would pass a naive grep *and* stylelint while violating ADR-8.
+- [x] ADR-10 Confirmation #1's two literal assertions hold: **`adoptedStyleSheets.length === 1`** and **`shadowRoot.querySelectorAll('style').length === 0`**. Assert them on the element **in Storybook** here; the same pair is re-asserted against both built artifacts in WP04, which is where the artifacts exist.
       *Corrected mechanism:* an earlier draft claimed esbuild's CSS loader "injects a `<style>` tag". It does not — it emits a **sidecar `.css` file** and leaves the JS nearly empty. The real hazard is the opposite shape: a document-level sidecar never reaches the shadow root, so `adoptedStyleSheets.length` would be **0**, not 1. The assertion pair is still the right check; only the stated failure mode was wrong.
-- [ ] FR-009's check is CI-enforced and demonstrated red-first.
-- [ ] The generated module is committed and a regeneration check fails when it drifts.
+- [x] FR-009's check is CI-enforced and demonstrated red-first.
+- [x] The generated module is committed and a regeneration check fails when it drifts.
 
 ## Notes
 

@@ -28,6 +28,22 @@ const FORBIDDEN = [
   [/\?inline['"]/, "Vite `?inline` CSS import — Vite-specific; esbuild cannot consume it"],
 ];
 
+// ADR-8 constraint 1: the CSS source of record lives in @spec-kitty/styles, and
+// `packages/elements` holds NONE. Checked by extension rather than by name, because
+// a name-literal "exactly one sk-stub.css" test is defeated by copying the file to
+// `sk-stub.styles.css` — which would also pass stylelint, and pass the token scan
+// below, while violating the constraint outright.
+const strayCss = globSync('packages/elements/**/*.{css,scss,sass,less}', {});
+if (strayCss.length) {
+  console.error('❌ CSS files exist under packages/elements (ADR-8 constraint 1, FR-009):');
+  for (const f of strayCss) console.error(`   ${f}`);
+  console.error(
+    '   The source of record is packages/styles/src/<component>/. Elements ADOPT it via\n' +
+      '   the generated module (scripts/build-elements-css.mjs); they never hold a copy.'
+  );
+  process.exit(1);
+}
+
 const files = globSync(`${ROOT}/**/*.{ts,js,mjs}`, {});
 let violations = [];
 for (const f of files) {
@@ -47,4 +63,7 @@ if (violations.length) {
   for (const v of violations) console.error(`   ${v}`);
   process.exit(1);
 }
-console.log(`✅ No CSS in hand-authored source across ${files.length} file(s).`);
+console.log(
+  `✅ No CSS in hand-authored source across ${files.length} file(s), ` +
+    `and no stylesheet files under packages/elements.`
+);

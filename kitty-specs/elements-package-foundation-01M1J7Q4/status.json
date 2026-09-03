@@ -70,10 +70,13 @@
       "last_event_id": "01M1JCEJ0A2M3M0PMMJM0CP96Q",
       "last_transition_at": "2026-09-03T00:59:36.842886+00:00",
       "model": "__resolved_model_absent__",
+      "notes": [
+        "T011-T016 complete; forced for the tasks.md CLI defect recorded on WP01."
+      ],
       "provider": "__resolved_provider_absent__",
       "role": "implementer",
-      "shell_pid": 2344968,
-      "shell_pid_created_at": "1788396772.4"
+      "shell_pid": 2400579,
+      "shell_pid_created_at": "1788397175.65"
     },
     "WP05": {
       "actor": "claude",
