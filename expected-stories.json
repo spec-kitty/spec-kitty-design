@@ -1,0 +1,38 @@
+{
+  "$comment": [
+    "The shrink-only STORY ratchet (#74), in the same shape as expected-parts.json.",
+    "",
+    "scripts/run-axe-storybook.js refuses only a GLOBALLY empty story set. Nothing required any",
+    "particular story to exist, so a component shipping one `Default` story reported axe-zero",
+    "over one state and the gate could not tell that from full coverage. NFR-003 named that",
+    "defect in its own sentence — 'a component whose only story is its default state has had one",
+    "of its states tested' — and then supplied no mechanism that closed it.",
+    "",
+    "This is the mechanism. Every story id listed here must exist in the built Storybook index;",
+    "a missing one fails the gate by name. Adding stories is free. REMOVING one requires editing",
+    "this file, which is the point: #74 deletes nothing, but it replaces eight hand-written",
+    "form-state HTML strings with element state, and the criterion that would have noticed their",
+    "loss was the one that could not.",
+    "",
+    "Scoped to the ELEMENTS, not the whole catalogue. The thirteen packages/styles story files",
+    "predate this and pinning them here would be a ratchet nobody agreed to; #77-#79 migrate them",
+    "and can opt each in as it lands."
+  ],
+  "byElement": {
+    "sk-form-input": [
+      "elements-skforminput--default",
+      "elements-skforminput--filled",
+      "elements-skforminput--error",
+      "elements-skforminput--disabled",
+      "elements-skforminput--light-mode"
+    ],
+    "sk-form-textarea": [
+      "elements-skformtextarea--default",
+      "elements-skformtextarea--filled",
+      "elements-skformtextarea--error",
+      "elements-skformtextarea--disabled",
+      "elements-skformtextarea--light-mode"
+    ]
+  },
+  "total": 10
+}
