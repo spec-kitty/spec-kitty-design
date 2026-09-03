@@ -101,6 +101,14 @@ const EXPECTED_NON_PROP_FIELDS = new Map([
 ]);
 
 const check = process.argv.includes('--check');
+// REFUSED TOGETHER. `--selftest` is tested first and exits 0 without consulting `check`, so
+// appending it to the drift step would turn an ENFORCED gate into a probe run that prints
+// green. check-gate-wiring's entry now carries a negative lookahead for the same reason; this
+// closes it at the other end, where a reader of the CI step will actually see it.
+if (check && process.argv.includes('--selftest')) {
+  console.error('❌ --check and --selftest are different jobs; run them as separate steps.');
+  process.exit(1);
+}
 const selftest = process.argv.includes('--selftest');
 
 /** Elements as they exist ON DISK — the third count, which the generator never consults. */

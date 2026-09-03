@@ -122,7 +122,7 @@ else {
     [/node\s+scripts\/check-element-css-hygiene\.mjs(\s|$)/, 'the adopted-CSS hygiene gate', 'scripts/check-element-css-hygiene.mjs'],
     // #75, both entries with the gate itself. The gate's probe table is required separately
     // from the gate: a table that stops running is a gate whose defeated forms quietly reopen.
-    [/node\s+scripts\/build-react-wrappers\.mjs\s+--check(\s|$)/, 'the React wrapper drift gate', 'scripts/build-react-wrappers.mjs --check'],
+    [/node\s+scripts\/build-react-wrappers\.mjs\s+--check(?!\s*--selftest)(\s|$)/, 'the React wrapper drift gate', 'scripts/build-react-wrappers.mjs --check'],
     [/node\s+scripts\/build-react-wrappers\.mjs\s+--selftest(\s|$)/, "the wrapper gate's own probe table", 'scripts/build-react-wrappers.mjs --selftest'],
     // #129. check-manifest-content.mjs was an ENFORCED step with NO entry here at all, so
     // deleting its CI line was green — the exact episode the comment above records for

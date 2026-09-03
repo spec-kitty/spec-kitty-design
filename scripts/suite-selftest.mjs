@@ -7,7 +7,7 @@
  * #70's NFR-003 degraded. This re-derives the red on every CI run.
  *
  * For each entry in mutations.json: copy the repo to a temp dir (node_modules SYMLINKED —
- * it is 1.2 GB and this runs fifteen times), apply one string replacement, run the suite,
+ * it is 1.2 GB and this runs once per mutation), apply one string replacement, run the suite,
  * and assert the NAMED test failed while every other behaviour test survived.
  *
  * EIGHT numbered guards plus a not-green-baseline check, each of which exists because it
@@ -27,7 +27,12 @@
  *   without touching it is still unexercised — the assertion catches a missing entry for a
  *   KNOWN verdict, not a new one. Guards 6, 7 and 8 exit before the loop and have no entry
  *   at all; guard 7 is disabled in selftest mode because the ids there name guards, not
- *   behaviours, which is defensible but means it is unproven here.
+ *   behaviours, which is defensible but means it is unproven here. Since #75 WP04 guard 7 also
+ *   applies a registry FILTER (applicable !== false) that --selftest likewise cannot reach.
+*   Its fail-closed property rests on guard 7's own `unknown` arm: over-filter and every
+ *   mutation becomes unknown; under-filter and the inapplicable id becomes uncovered. Both
+ *   exit 1, so there is no green-over-empty path — recorded so the next reader need not
+ *   re-derive it.
  */
 import { execFileSync } from 'node:child_process';
 import { cpSync, mkdtempSync, readFileSync, writeFileSync, rmSync, symlinkSync, existsSync } from 'node:fs';
@@ -55,7 +60,6 @@ const mutations = list.mutations ?? [];
 const registry = JSON.parse(readFileSync('behaviours.json', 'utf8')).behaviours.filter(
   (b) => b.applicable !== false
 );
-const behaviours = registry.map((b) => b.id);
 /** Every (behaviour, subject) pair the registry declares. Guard 7 compares against these. */
 const behaviourPairs = registry.flatMap((b) =>
   (b.subjects ?? [{ file: null }]).map((s) => `${b.id}@${s.file ?? '*'}`)
@@ -88,6 +92,14 @@ if (mutations.length === 0) {
 
 /** Guard 7 — ids ⊇ behaviours, and every mutation names a known behaviour. */
 if (!selftestMode) {
+  // The pair set is now FILTERED, so it can reach [] by editing `applicable` flags rather than
+  // by deleting entries — and `uncovered` over an empty set is vacuously satisfied.
+  // floor-reporter.mjs refuses the same shape by name. Guard 8 already does this for mutations;
+  // this is its mirror.
+  if (behaviourPairs.length === 0) {
+    console.error('❌ behaviours.json declares no applicable behaviours — refusing to pass vacuously.');
+    process.exit(1);
+  }
   const ids = new Set(mutations.map((m) => `${m.id}@${m.subject ?? '*'}`));
   const uncovered = behaviourPairs.filter((b) => !ids.has(b));
   const unknown = [...ids].filter((i) => !behaviourPairs.includes(i));

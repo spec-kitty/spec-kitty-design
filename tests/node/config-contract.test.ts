@@ -1,6 +1,6 @@
 import { expect, test } from 'vitest';
 import { createVitest } from 'vitest/node';
-import { readFileSync, mkdtempSync, writeFileSync, rmSync, globSync } from 'node:fs';
+import { existsSync, readFileSync, mkdtempSync, writeFileSync, rmSync, globSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import { basename, join, resolve } from 'node:path';
@@ -89,12 +89,19 @@ test('[registry] the inapplicable behaviour is declared, and says what discharge
     behaviours: { id: string; applicable?: boolean; inapplicableReason?: string }[];
   };
   const inapplicable = registry.behaviours.filter((b) => b.applicable === false);
-  expect(inapplicable.map((b) => b.id)).toEqual(['SC-016']);
+  expect(inapplicable.map((b) => b.id).sort()).toEqual(['SC-023']);
   for (const b of inapplicable) {
+    // The reason must name a gate that EXISTS and is invoked the way it claims. Matching the
+    // filename alone asserted a spelling: `"build-react-wrappers.mjs"` on its own passed, and
+    // so would a reason naming a script since deleted or a flag it no longer accepts.
     expect(
       b.inapplicableReason ?? '',
       `${b.id} is declared inapplicable with no reason — say what discharges it instead`
-    ).toMatch(/build-react-wrappers\.mjs/);
+    ).toMatch(/build-react-wrappers\.mjs --check/);
+    expect(
+      existsSync('scripts/build-react-wrappers.mjs'),
+      `${b.id}'s reason names a gate that does not exist`
+    ).toBe(true);
   }
 });
 
