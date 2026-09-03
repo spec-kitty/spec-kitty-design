@@ -1,0 +1,97 @@
+{
+  "version": 1,
+  "mission_slug": "sk-form-field-form-association-01M1K9GA",
+  "mission_id": "01M1K9GAG6GGYQ5HNK1ZT5W3MJ",
+  "mission_branch": "kitty/mission-sk-form-field-form-association-01M1K9GA",
+  "target_branch": "mission/sk-form-field-form-association",
+  "lanes": [
+    {
+      "lane_id": "lane-a",
+      "wp_ids": [
+        "WP01",
+        "WP03",
+        "WP04"
+      ],
+      "write_scope": [
+        "behaviours.json",
+        "fixtures/elements-behaviour/src/sk-form-input.test.ts",
+        "fixtures/elements-behaviour/src/sk-form-textarea.test.ts",
+        "fixtures/elements-behaviour/tsconfig.json",
+        "mutations.json",
+        "mutations.selftest.json",
+        "packages/elements/src/form-textarea/sk-form-textarea.ts",
+        "packages/styles/src/form-input/sk-form-input.css",
+        "packages/styles/src/form-textarea/sk-form-textarea.css",
+        "scripts/check-adopted-css-boundaries.mjs",
+        "suite-budget.json",
+        "tests/node/config-contract.test.ts"
+      ],
+      "predicted_surfaces": [
+        "legacy-cleanup"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    },
+    {
+      "lane_id": "lane-b",
+      "wp_ids": [
+        "WP02"
+      ],
+      "write_scope": [
+        "packages/elements/src/elements.ts",
+        "packages/elements/src/form-control-base.ts",
+        "packages/elements/src/form-input/sk-form-input.ts",
+        "packages/elements/src/index.ts"
+      ],
+      "predicted_surfaces": [
+        "artifact-rendering"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    },
+    {
+      "lane_id": "lane-c",
+      "wp_ids": [
+        "WP05"
+      ],
+      "write_scope": [
+        "docs/design-system/using-components.md",
+        "expected-parts.json",
+        "expected-stories.json",
+        "packages/elements/src/form-input/sk-form-input.stories.ts",
+        "packages/elements/src/form-textarea/sk-form-textarea.stories.ts",
+        "scripts/run-axe-storybook.js"
+      ],
+      "predicted_surfaces": [
+        "artifact-rendering"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    }
+  ],
+  "computed_at": "2026-09-03T10:10:13.788550+00:00",
+  "computed_from": "dependency_graph+ownership",
+  "planning_artifact_wps": [],
+  "planning_commit_sha": "efe71ad0e677eba45a55fabce430aacf0fcc9923",
+  "collapse_report": {
+    "events": [
+      {
+        "wp_a": "WP01",
+        "wp_b": "WP04",
+        "rule": "write_scope_overlap",
+        "evidence": "overlapping globs: 'packages/styles/src/form-input/sk-form-input.css' vs 'packages/styles/src/form-input/sk-form-input.css'"
+      },
+      {
+        "wp_a": "WP03",
+        "wp_b": "WP04",
+        "rule": "write_scope_overlap",
+        "evidence": "overlapping globs: 'behaviours.json' vs 'behaviours.json', 'mutations.json' vs 'mutations.json'"
+      }
+    ],
+    "total_merges": 2,
+    "independent_wps_collapsed": 2,
+    "by_rule": {
+      "write_scope_overlap": 2
+    }
+  }
+}
