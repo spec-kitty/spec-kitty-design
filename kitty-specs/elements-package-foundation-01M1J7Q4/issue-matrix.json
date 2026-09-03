@@ -24,6 +24,18 @@
       "verdict": "unknown",
       "wp": null
     },
+    "#105": {
+      "evidence_ref": "Follow-up: #105 stays open. sk-stub's hand-authored markup is owned by no migration mission; this mission ADDS a third authoring site via the element's render(). Recorded in C-006 and in WP03's notes.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "deferred-with-followup",
+      "wp": "WP03"
+    },
     "#66": {
       "evidence_ref": "<link or commit>",
       "fr": null,
