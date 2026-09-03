@@ -265,9 +265,16 @@ CSS-only era where the wrapper carried the `for`/`id` pair the arrangement no lo
 
 - **NFR-001**: No CSS authored in `packages/elements`; the source of record stays in
   `@spec-kitty/styles` and is adopted through the generated module (ADR-10 §1).
-- **NFR-002**: Every rule in each adopted sheet owns its leftmost compound under its own
-  element's name — the general rule #73 landed. After FR-012 and FR-013 this is achievable;
-  before them it is not, under any naming (B2).
+- **NFR-002**: Every rule in each adopted sheet owns its leftmost compound in one of the four
+  forms `scripts/check-adopted-css-boundaries.mjs` accepts — a `.sk-<element-name>` class,
+  `:host`, `::slotted(`, or a bare `slot`. After FR-012 and FR-013 this is achievable; before
+  them it is not, under any naming (B2).
+
+  *Restated after the post-plan squad.* This said "under its own element's name", full stop —
+  which is stricter than the gate that enforces it, and would have been broken by the
+  `:host`-anchored shape the same squad's measurement recommends. A criterion stricter than
+  anything that runs is the mirror image of this programme's recurring defect: it reads as
+  binding and nothing can ever check it.
 - **NFR-003**: axe reports zero for every **state**, and the states are enumerated in SC-206 so
   the criterion cannot be satisfied by shipping one story.
 - **NFR-004**: Every new behaviour test is proven red-first by mutation before it is counted.
