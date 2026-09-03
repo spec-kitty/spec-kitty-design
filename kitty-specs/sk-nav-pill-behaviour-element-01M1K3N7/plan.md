@@ -84,7 +84,7 @@ silently skips its own gates (the shape of #108).
 ### IC-01 — The element, and where the panel lives
 
 - **Purpose**: `sk-nav-pill` on the base layer, owning the control and the panel in one root.
-- **Requirements**: FR-001, FR-002, FR-004, FR-006
+- **Relevant requirements**: FR-001, FR-002, FR-004, FR-006
 - **Surfaces**: `packages/elements/src/nav-pill/sk-nav-pill.ts`, `packages/elements/src/index.ts`
 - **Approach**: shadow root holds `<nav>`, a single items container wrapping one `<slot>`, and
   the hamburger `<button>`. `aria-controls` names the items container — same root, so it
@@ -100,7 +100,7 @@ silently skips its own gates (the shape of #108).
 ### IC-02 — The event and method contract
 
 - **Purpose**: a public API that is observable, idempotent and cancellable.
-- **Requirements**: FR-002, FR-003 · **Behaviours**: SC-006, SC-007, SC-008, SC-009
+- **Relevant requirements**: FR-002, FR-003 · **Behaviours**: SC-006, SC-007, SC-008, SC-009
 - **Surfaces**: the element; `fixtures/elements-behaviour/src/sk-nav-pill.test.ts`
 - **Approach**: `open` reflected property/attribute; the state-change event fires only on a real
   change; `cancelable` on the *opening* transition so `preventDefault()` has something to
@@ -114,7 +114,7 @@ silently skips its own gates (the shape of #108).
 ### IC-03 — Keyboard, focus and the invoker
 
 - **Purpose**: Escape closes and focus returns to whatever opened it.
-- **Requirements**: FR-004, FR-005 · **Behaviours**: SC-012
+- **Relevant requirements**: FR-004, FR-005 · **Behaviours**: SC-012
 - **Surfaces**: the element; the behaviour test
 - **Approach**: record the invoker at open time (`document.activeElement` at the moment `open()`
   is called, or the event target when opened from the internal hamburger). Do not assume the
@@ -128,7 +128,7 @@ silently skips its own gates (the shape of #108).
 ### IC-04 — Deleting the helper, with nothing left behind
 
 - **Purpose**: `skToggleDrawer` and its id contract gone from the repository.
-- **Requirements**: FR-007, FR-008, FR-009 · **Success**: SC-102, SC-109
+- **Relevant requirements**: FR-007, FR-008, FR-009 · **Success**: SC-102, SC-109
 - **Surfaces**: `sk-nav-pill.js`, `sk-nav-pill.d.ts`, both `index.ts` files, `packages/styles/README.md`,
   `sk-nav-pill.stories.ts`, `apps/demo/dashboard-demo.html`
 - **Approach**: delete, then grep. SC-102's grep is the assertion; the frozen `kitty-specs/**`
@@ -141,7 +141,7 @@ silently skips its own gates (the shape of #108).
 ### IC-05 — Two stylesheets for one component
 
 - **Purpose**: the element adopts both nav-pill sheets without either being copied.
-- **Requirements**: FR-011, NFR-001, NFR-002 · **Success**: SC-107
+- **Relevant requirements**: FR-011, NFR-001, NFR-002 · **Success**: SC-107
 - **Surfaces**: `scripts/build-elements-css.mjs`, `packages/styles/src/nav-pill/sk-nav-pill-drawer.css`
 - **Approach**: the generator globs `sk-*.css` in the component's styles directory, sorted, and
   concatenates with per-file provenance. For a single-sheet component the output must be
@@ -158,7 +158,7 @@ silently skips its own gates (the shape of #108).
 ### IC-06 — Tests that cannot be deleted for free
 
 - **Purpose**: every new behaviour test is load-bearing, and the floor knows it exists.
-- **Requirements**: FR-010, FR-012, NFR-004 · **Success**: SC-103, SC-104, SC-105, SC-106, SC-110
+- **Relevant requirements**: FR-010, FR-012, NFR-004 · **Success**: SC-103, SC-104, SC-105, SC-106, SC-110
 - **Surfaces**: `behaviours.json`, `scripts/floor-reporter.mjs`, `mutations.json`, `scripts/suite-selftest.mjs`
 - **Approach**: `behaviours.json` entries gain a `subjects` list. The floor reporter checks
   coverage per **(id, subject)** rather than per id. Today it checks per id, and the synthetic
@@ -172,7 +172,7 @@ silently skips its own gates (the shape of #108).
 ### IC-07 — The a11y gate must see the open state
 
 - **Purpose**: the keyboard path is axe-clean, not just the closed default.
-- **Requirements**: NFR-003 · **Success**: SC-108
+- **Relevant requirements**: NFR-003 · **Success**: SC-108
 - **Surfaces**: `packages/elements/src/nav-pill/sk-nav-pill.stories.ts`
 - **Approach**: a story that renders with the panel **open**. The gate walks stories; a component
   whose only story is the closed state has had one of its two states tested.
