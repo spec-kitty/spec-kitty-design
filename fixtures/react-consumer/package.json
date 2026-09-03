@@ -1,0 +1,13 @@
+{
+  "name": "@spec-kitty/react-consumer-fixture",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "SC-305/306/307. Proves what the generated wrappers do in a REAL React render — not what their .d.ts says. React lives here and only here (NFR-003).",
+  "devDependencies": {
+    "@spec-kitty/elements": "^1.0.0",
+    "@spec-kitty/react": "^1.0.0",
+    "react": "19.2.0",
+    "react-dom": "19.2.0"
+  }
+}

@@ -348,6 +348,22 @@
       "file": "packages/elements/src/form-textarea/sk-form-textarea.ts",
       "from": "    if (changed.has('value') || changed.has('disabled')) this.syncFormValue();",
       "to": "    if (changed.has('value')) this.syncFormValue();"
+    },
+    {
+      "id": "SC-002",
+      "arm": "the wrapper stops passing `value` through to the element",
+      "file": "packages/react/src/SkFormInput.js",
+      "from": "      value: value,",
+      "to": "      value: undefined,",
+      "subject": "fixtures/react-consumer/src/wrappers.test.tsx"
+    },
+    {
+      "id": "SC-006",
+      "arm": "the wrapper stops subscribing to the element event",
+      "file": "packages/react/src/SkNavPill.js",
+      "from": "  useEventListener(ref, \"sk-nav-pill-toggle\", props.onSkNavPillToggle);",
+      "to": "  void props.onSkNavPillToggle;",
+      "subject": "fixtures/react-consumer/src/wrappers.test.tsx"
     }
   ]
 }

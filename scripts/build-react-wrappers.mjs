@@ -104,7 +104,14 @@ function taggedDeclarations(manifest) {
         // readonly: a prop is settable, a getter is not. See manifestForGeneration().
         .filter((m) => !m.readonly && !m.static && !m.name.startsWith('#'))
         .map((m) => m.name);
-      out.set(decl.tagName, { name: decl.name, fields: [...new Set(fields)].sort() });
+      const attributed = new Set(
+        (decl.attributes ?? []).map((a) => a.fieldName ?? a.name).filter(Boolean)
+      );
+      out.set(decl.tagName, {
+        name: decl.name,
+        fields: [...new Set(fields)].sort(),
+        attributed,
+      });
     }
   }
   return out;
@@ -254,6 +261,28 @@ function audit({ outdir, manifestPath, srcDir, floor }) {
     if (want.length > 0 && got.length === 0) {
       problems.push(`${decl.name} emitted ZERO props for ${want.length} public field(s).`);
     }
+
+    // EVERY PROP NEEDS AN ATTRIBUTE, and this is a consequence of the ssrSafe decision.
+    //
+    // ssrSafe defers `import("@spec-kitty/elements")` into a useEffect, so at FIRST render the
+    // custom element is not yet defined — and React, with no property to assign to on an
+    // unupgraded element, sets the value as an ATTRIBUTE. Measured in the React fixture: the
+    // `value` attribute appears on the node even though `value: { type: String }` is NOT
+    // reflected, so React put it there.
+    //
+    // It works today only because Lit maps that attribute back onto the property on upgrade.
+    // A prop the manifest gives no attribute would be delivered to nothing on first render,
+    // silently — no error, no warning, the element simply never receives it. Every prop has an
+    // attribute right now, so this is green on arrival and exists to stay that way.
+    const unattributed = want.filter((f) => !decl.attributed.has(f));
+    if (unattributed.length) {
+      problems.push(
+        `${decl.name} (${tag}) has prop(s) with no attribute mapping: ${unattributed.join(', ')}.\n` +
+          '   ssrSafe defers element registration, so React delivers first-render props as\n' +
+          '   ATTRIBUTES. A prop with no attribute is dropped silently on first render. Either\n' +
+          '   give the property an attribute, or drop the ssrSafe decision (FR-009) knowingly.'
+      );
+    }
   }
 
   // --- FR-009 / SC-309: the SSR decision is IN the output, not in prose -------------------
@@ -348,6 +377,29 @@ if (selftest) {
       ({ out }) => {
         const f = join(out, 'SkCard.js');
         writeFileSync(f, readFileSync(f, 'utf8').replace('"use client";\n', ''));
+      },
+    ],
+    [
+      'a prop the manifest gives no attribute — silently undelivered on first render under ' +
+        'ssrSafe, because React has no upgraded element to assign a property to',
+      true,
+      ({ probeDir, out }) => {
+        // Strip sk-card's `variant` attribute while leaving the field, then regenerate so the
+        // emitted prop set still contains it. The audit must notice the prop can only be
+        // delivered as an attribute that no longer exists.
+        const mp = join(probeDir, 'manifest.json');
+        const m = JSON.parse(readFileSync(mp, 'utf8'));
+        for (const mod of m.modules ?? []) {
+          for (const d of mod.declarations ?? []) {
+            if (d.tagName === 'sk-card') {
+              d.attributes = (d.attributes ?? []).filter(
+                (a) => (a.fieldName ?? a.name) !== 'variant'
+              );
+            }
+          }
+        }
+        writeFileSync(mp, JSON.stringify(m));
+        generate(mp, out);
       },
     ],
     [

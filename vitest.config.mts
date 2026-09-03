@@ -89,11 +89,24 @@ export default defineConfig({
               find: /^@spec-kitty\/elements$/,
               replacement: resolve(root, 'packages/elements/src/index.ts'),
             },
+            {
+              // Without this, suite-selftest.mjs's tmpdir resolves @spec-kitty/react back to
+              // the UNMUTATED original: it symlinks the real node_modules in, and npm-workspace
+              // symlinks under it are relative. Every mutation on packages/react would read as
+              // "semantically inert" and pass. Same reason the three aliases above exist.
+              find: /^@spec-kitty\/react$/,
+              replacement: resolve(root, 'packages/react/src/index.js'),
+            },
           ],
         },
         test: {
           name: 'browser',
-          include: ['tests/browser/**/*.test.ts', 'fixtures/**/src/**/*.test.ts'],
+          // `.tsx` is NOT covered by `*.test.ts` under any glob implementation, and a file
+          // that matches nothing runs nowhere and is reported by nothing — the floor reporter's
+          // arm 1 only catches a DECLARED lane that executed zero tests, and this lane has
+          // plenty. Widened deliberately for the React consumer fixture (#75 WP03); the
+          // corresponding assertion that it actually matched is in that fixture's own test.
+          include: ['tests/browser/**/*.test.ts', 'fixtures/**/src/**/*.test.{ts,tsx}'],
           retry: 0,
           browser: {
             enabled: true,
