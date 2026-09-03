@@ -1,0 +1,68 @@
+{
+  "$comment": [
+    "Deliberately-bad mutations, one per guard (#71, FR-008).",
+    "",
+    "The harness re-derives the MUTATIONS on every run. Without this file nothing re-derives",
+    "the GUARDS \u2014 they would be demonstrated once, by hand, which is precisely the degradation",
+    "this mission diagnoses in #70's NFR-003. Each entry names the guard that must reject it;",
+    "being rejected by a DIFFERENT guard is a failure, because it means the guard under test",
+    "is untried.",
+    "",
+    "Same shape as packages/elements/src/__fixtures__/shapes.mjs driving gate-selftest.mjs.",
+    "Run with: node scripts/suite-selftest.mjs --selftest"
+  ],
+  "mutations": [
+    {
+      "id": "guard1-pattern-missing",
+      "expectRejectedBy": "pattern",
+      "file": "fixtures/elements-behaviour/src/sk-behaviour-fixture.ts",
+      "from": "this string does not appear anywhere in the fixture",
+      "to": "irrelevant"
+    },
+    {
+      "id": "guard1-file-missing",
+      "expectRejectedBy": "pattern",
+      "file": "fixtures/elements-behaviour/src/no-such-file.ts",
+      "from": "anything",
+      "to": "irrelevant"
+    },
+    {
+      "id": "guard2-ambiguous",
+      "expectRejectedBy": "ambiguous",
+      "file": "fixtures/elements-behaviour/src/sk-behaviour-fixture.ts",
+      "from": "this.#syncFormValue();",
+      "to": "void 0;"
+    },
+    {
+      "id": "guard3-noop",
+      "expectRejectedBy": "noop",
+      "file": "fixtures/elements-behaviour/src/sk-behaviour-fixture.ts",
+      "from": "static formAssociated = true;",
+      "to": "static formAssociated = true;"
+    },
+    {
+      "id": "guard4-syntax-error",
+      "expectRejectedBy": "absent",
+      "file": "fixtures/elements-behaviour/src/sk-behaviour-fixture.ts",
+      "from": "static formAssociated = true;",
+      "to": "static formAssociated = true; ((((",
+      "redTest": "SC-002"
+    },
+    {
+      "id": "guard4-inert",
+      "expectRejectedBy": "green",
+      "file": "fixtures/elements-behaviour/src/sk-behaviour-fixture.ts",
+      "from": "this.label = 'fixture';",
+      "to": "this.label = 'fixture' ;",
+      "redTest": "SC-002"
+    },
+    {
+      "id": "guard5-collateral",
+      "expectRejectedBy": "collateral",
+      "file": "fixtures/elements-behaviour/src/sk-behaviour-fixture.ts",
+      "from": "customElements.define('sk-behaviour-fixture', SkBehaviourFixture);",
+      "to": "void SkBehaviourFixture;",
+      "redTest": "SC-002"
+    }
+  ]
+}

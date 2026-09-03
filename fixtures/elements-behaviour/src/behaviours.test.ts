@@ -99,10 +99,14 @@ test('[SC-009] preventDefault demonstrably prevents', async () => {
 });
 
 test('[SC-010] a property assigned BEFORE the definition loads is applied on upgrade', async () => {
-  // The real no-build shape: the element exists in markup and script order is not
-  // controlled, so a property lands on a plain HTMLElement first.
+  // The real no-build shape: the element is in markup and script order is not controlled,
+  // so the property lands on a plain HTMLElement first.
+  //
+  // Asserted on `hint`, which Lit does NOT manage. A reactive property would test Lit's own
+  // upgrade handling — forbidden by C-003, and the mutation harness proved it: breaking the
+  // element's dance for a reactive property changes nothing observable.
   const raw = document.createElement('sk-behaviour-fixture-late');
-  (raw as unknown as Record<string, unknown>)['label'] = 'set-before-upgrade';
+  (raw as unknown as Record<string, unknown>)['hint'] = 'set-before-upgrade';
   document.body.append(raw);
 
   class Late extends (customElements.get('sk-behaviour-fixture') as CustomElementConstructor) {}
@@ -110,8 +114,12 @@ test('[SC-010] a property assigned BEFORE the definition loads is applied on upg
   customElements.upgrade(raw);
   await (raw as unknown as SkBehaviourFixture).updateComplete;
 
-  expect((raw as unknown as SkBehaviourFixture).label).toBe('set-before-upgrade');
-  expect(raw.shadowRoot!.textContent).toContain('set-before-upgrade');
+  // The value survives...
+  expect((raw as unknown as { hint?: string }).hint).toBe('set-before-upgrade');
+  // ...and it is reached through the prototype ACCESSOR, not a stale own property. That
+  // second assertion is what makes this falsifiable: without the upgrade dance the own
+  // property shadows the accessor, the setter never runs, and every later write is lost.
+  expect(Object.prototype.hasOwnProperty.call(raw, 'hint')).toBe(false);
 });
 
 test('[SC-011] content reaches the intended slot, and fallback appears when it is empty', async () => {
@@ -156,12 +164,12 @@ test('[SC-013] every declared ::part() is present and targetable from outside', 
   // boundary. That is the regression an internal rename causes, and nothing else in the
   // pipeline detects it.
   const style = document.createElement('style');
-  style.textContent = `sk-behaviour-fixture::part(trigger) { outline-style: dotted; }`;
+  style.textContent = `sk-behaviour-fixture::part(label) { outline-style: dotted; }`;
   document.head.append(style);
   try {
-    const trigger = el.shadowRoot!.querySelector('[part="trigger"]') as HTMLElement;
-    expect(trigger).toBeTruthy();
-    expect(getComputedStyle(trigger).outlineStyle).toBe('dotted');
+    const label = el.shadowRoot!.querySelector('[part="label"]') as HTMLElement;
+    expect(label).toBeTruthy();
+    expect(getComputedStyle(label).outlineStyle).toBe('dotted');
   } finally {
     style.remove();
   }

@@ -40,7 +40,12 @@ export class SkBehaviourFixture extends LitElement {
     label: { type: String },
     value: { type: String },
     open: { type: Boolean, reflect: true },
-    disabled: { type: Boolean, reflect: true },
+    // NOT reflected. With a `disabled` attribute present the USER AGENT excludes a
+    // form-associated element from submission by itself, which makes the element's own
+    // exclusion unobservable — SC-005's mutation was semantically inert and the harness
+    // caught it. WP02's DoD requires the fixture to OWN each behaviour rather than
+    // delegate it to the UA, and this is what that means in practice.
+    disabled: { type: Boolean },
   };
 
   declare label: string;
@@ -51,6 +56,33 @@ export class SkBehaviourFixture extends LitElement {
   #internals: ElementInternals;
   #initialValue = '';
 
+  /**
+   * A NON-reactive property, deliberately.
+   *
+   * Lit re-applies *reactive* properties on upgrade by itself, and `declare` emits no
+   * class field for them, so `useDefineForClassFields` cannot clobber them either — a
+   * mutation there is inert, which the harness proved. Anything Lit does not manage is
+   * the ELEMENT's problem, and that is the case #72's components will actually meet.
+   */
+  #hint?: string;
+
+  /**
+   * Backed by a real prototype ACCESSOR, which is the whole point.
+   *
+   * A plain data property survives upgrade trivially — there is nothing to shadow, so the
+   * dance is unnecessary and a mutation removing it is inert. The harness proved that. An
+   * accessor is what a pre-upgrade own property actually shadows, and reclaiming it is
+   * what #upgradeHint exists to do.
+   */
+  get hint(): string | undefined {
+    return this.#hint;
+  }
+
+  set hint(v: string | undefined) {
+    this.#hint = v;
+    this.requestUpdate();
+  }
+
   constructor() {
     super();
     this.#internals = this.attachInternals();
@@ -58,12 +90,24 @@ export class SkBehaviourFixture extends LitElement {
     this.value = '';
     this.open = false;
     this.disabled = false;
-    // MUTATION ANCHOR SC-010 — property assigned before upgrade.
-    // A property set on the element before its definition loads becomes an own data
-    // property that shadows Lit's accessor. This reclaims it. Load-bearing for the
-    // no-build dashboard, where script order is not controlled.
+    // Reactive properties: Lit re-applies these itself, but the dance is kept so the
+    // fixture reads the way a real component does.
     this.#upgradeProperty('label');
     this.#upgradeProperty('value');
+    // MUTATION ANCHOR SC-010 — property assigned before upgrade, on the property Lit does
+    // NOT manage.
+    this.#upgradeHint();
+  }
+
+  #upgradeHint() {
+    if (Object.prototype.hasOwnProperty.call(this, 'hint')) {
+      const value = (this as unknown as Record<string, unknown>)['hint'];
+      // Delete the shadowing OWN property, then reassign so the value flows through the
+      // prototype accessor. Without the delete, every later read returns the stale own
+      // property and the setter never runs.
+      delete (this as unknown as Record<string, unknown>)['hint'];
+      this.hint = value as string | undefined;
+    }
   }
 
   #upgradeProperty(prop: 'label' | 'value') {
@@ -178,7 +222,12 @@ export class SkBehaviourFixture extends LitElement {
       @keydown=${this.#onKeydown}
     >
       <button part="trigger" aria-expanded=${String(this.open)} @click=${() => this.toggle()}>
-        ${this.label}
+        <!-- MUTATION ANCHOR SC-013 — a part queried by no other behaviour. The trigger
+             part is SC-012's focus target and the control part is SC-003's validity
+             anchor, so renaming either is real coupling and the harness's collateral
+             bound rightly refuses it. (No backticks in here: this comment is inside a
+             tagged template literal, and one would terminate it.) -->
+        <span part="label">${this.label}</span>
       </button>
       <!-- MUTATION ANCHOR SC-011 — content reaches the intended slot; fallback appears
            when it is empty. -->

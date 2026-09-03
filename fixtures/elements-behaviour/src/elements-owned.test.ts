@@ -1,5 +1,5 @@
 import { expect, test, vi } from 'vitest';
-import { define, SkStub } from '@spec-kitty/elements';
+import { define, SkStub, skStubSheet } from '@spec-kitty/elements';
 
 /**
  * The TWO elements-owned behaviours. Their subject is `packages/elements/src`, reached
@@ -21,13 +21,13 @@ test('[SC-014] the element adopts a constructed sheet BY IDENTITY and injects no
   // read-back, cssRules[].cssText, is CSSOM-normalised: comments stripped, shorthands
   // collapsed, colours re-serialised, and normalised DIFFERENTLY per engine on a lane that
   // runs two. Identity is exact and engine-independent.
-  // Compared against the class's OWN `static styles`, not a deep relative import of the
-  // generated module — that reached across a project boundary and the scope:fixture
-  // depConstraint correctly refused it. This is also the better assertion: it is the
-  // element's declared sheet that must be the adopted one.
-  const declared = (SkStub as unknown as { styles: CSSStyleSheet[] }).styles;
+  // PROVENANCE, not a tautology. Comparing the adopted sheet to the class's own
+  // `static styles` holds for ANY sheet — Lit adopts whatever the class declares — so it
+  // says nothing about where the CSS came from. This compares against the module
+  // GENERATED from @spec-kitty/styles, which is the actual claim, and it is what makes
+  // the red-first mutation (swap in a different CSSStyleSheet) meaningful.
   expect(sr.adoptedStyleSheets.length).toBe(1);
-  expect(sr.adoptedStyleSheets[0]).toBe(declared[0]);
+  expect(sr.adoptedStyleSheets[0]).toBe(skStubSheet);
 
   // ADR-11 item 7's second half. kitty-desktop's CSP strips injected <style> elements, so
   // "adopts a sheet" without this proves only half the claim.
