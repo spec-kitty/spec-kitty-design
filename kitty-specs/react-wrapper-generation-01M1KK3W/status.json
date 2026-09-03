@@ -1,7 +1,7 @@
 {
-  "event_count": 4,
-  "last_event_id": "01M1KM6DJB1NSFFYHPBZANWZ72",
-  "materialized_at": "2026-09-03T12:34:13.195256+00:00",
+  "event_count": 5,
+  "last_event_id": "01M1KNY27Q0XRZF2TYFMZXV157",
+  "materialized_at": "2026-09-03T13:04:36.599400+00:00",
   "mission_number": "",
   "mission_slug": "react-wrapper-generation-01M1KK3W",
   "mission_type": "software-dev",
@@ -9,12 +9,12 @@
     "approved": 0,
     "blocked": 0,
     "canceled": 0,
-    "claimed": 0,
+    "claimed": 1,
     "done": 0,
     "for_review": 0,
     "in_progress": 0,
     "in_review": 0,
-    "planned": 4
+    "planned": 3
   },
   "work_packages": {
     "WP01": {
@@ -25,11 +25,16 @@
       "last_transition_at": "2026-09-03T12:34:13.036683+00:00"
     },
     "WP02": {
-      "actor": "finalize-tasks",
+      "actor": "user",
+      "agent_profile": "__resolved_profile_absent__",
+      "agent_profile_version": "__resolved_profile_version_absent__",
       "force_count": 0,
-      "lane": "planned",
-      "last_event_id": "01M1KM6DEWNH1ZPJNMX1YT6XJG",
-      "last_transition_at": "2026-09-03T12:34:13.084947+00:00"
+      "lane": "claimed",
+      "last_event_id": "01M1KNY27Q0XRZF2TYFMZXV157",
+      "last_transition_at": "2026-09-03T13:04:36.599400+00:00",
+      "model": "__resolved_model_absent__",
+      "provider": "__resolved_provider_absent__",
+      "role": "implementer"
     },
     "WP03": {
       "actor": "finalize-tasks",
