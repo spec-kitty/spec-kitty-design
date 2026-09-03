@@ -561,7 +561,23 @@ if (require.main === module) (async () => {
     console.error(`\n❌ ${totalViolations} WCAG 2.1 AA violation(s) across ${failingStories.length} story/stories.`);
   }
 
-  if (loadFailures.length > 0 || totalViolations > 0) {
+  // FATAL, not advisory. A wait that never resolved means the predicate and the
+  // assertion have diverged, and the assertion may still return the right verdict
+  // -- so the verdicts cannot show you this and the only other symptom is
+  // +RENDER_TIMEOUT_MS per story. Printing it and carrying on is what "silently
+  // disabled the wait" looked like in #69. Exit non-zero.
+  if (module.exports.waitTimeouts.length > 0) {
+    console.error(
+      `\n❌ ${module.exports.waitTimeouts.length} story/stories timed out waiting to render:`
+    );
+    module.exports.waitTimeouts.forEach((id) => console.error(`   ${id}`));
+    console.error(
+      '   The wait predicate and assertStoryRendered have diverged. Fix BOTH — see the\n' +
+        '   pairing note above waitForFunction, and scripts/gate-selftest.mjs.'
+    );
+  }
+
+  if (loadFailures.length > 0 || totalViolations > 0 || module.exports.waitTimeouts.length > 0) {
     process.exit(1);
   }
 

@@ -58,6 +58,28 @@ export const SHAPES = [
     html: '<div id="storybook-root"><x-a>never painted</x-a></div>',
     shadow: { 'x-a': '<div class="sk-thing"></div>' } },
 
+  // --- the SAME six shapes, in LIGHT DOM (NFR-002) --------------------------
+  // The list runs twice on purpose. Piercing shadow roots is a widening change,
+  // and the cheapest way to make every shadow case pass is to weaken the content
+  // test itself — which would silently un-gate the 60-odd light-DOM stories that
+  // are most of the catalogue today. These are the regression half.
+  { id: 'light-empty-root', want: false,
+    html: '<div id="storybook-root"></div>' },
+  { id: 'light-wrapper-only', want: false,
+    html: '<div id="storybook-root"><div class="sk-thing"></div></div>' },
+  { id: 'light-bem-element-only', want: false,
+    html: '<div id="storybook-root"><div class="sk-thing"><span class="sk-thing__label"></span></div></div>' },
+  { id: 'light-empty-svg', want: false,
+    html: '<div id="storybook-root"><div class="sk-thing"><svg></svg></div></div>' },
+  { id: 'light-img-empty-alt', want: false,
+    html: '<div id="storybook-root"><div class="sk-thing"><img alt=""></div></div>' },
+  { id: 'light-empty-aria-label', want: false,
+    html: '<div id="storybook-root"><div class="sk-thing"><span aria-label="x"></span></div></div>' },
+  // Control: without this the light half is satisfiable by an assertion that
+  // rejects everything, which is a gate that fails closed on the whole catalogue.
+  { id: 'light-real', want: true,
+    html: '<div id="storybook-root"><div class="sk-thing"><span class="sk-thing__label">hello</span></div></div>' },
+
   { id: 'nested-host-empty', want: false,
     html: '<div id="storybook-root"><x-outer></x-outer></div>',
     shadow: { 'x-outer': '<span>outer text</span><x-a></x-a>',
