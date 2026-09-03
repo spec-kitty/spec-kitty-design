@@ -62,14 +62,18 @@ export class SkBehaviourFixture extends LitElement {
     // A property set on the element before its definition loads becomes an own data
     // property that shadows Lit's accessor. This reclaims it. Load-bearing for the
     // no-build dashboard, where script order is not controlled.
-    for (const p of ['label', 'value']) this.#upgradeProperty(p);
+    this.#upgradeProperty('label');
+    this.#upgradeProperty('value');
   }
 
-  #upgradeProperty(prop: string) {
+  #upgradeProperty(prop: 'label' | 'value') {
+    // Narrowed to a literal union rather than `string`, so the reads and writes below are
+    // not dynamic property access — eslint's security/detect-object-injection flags the
+    // generic form, and a warning nobody can act on is noise.
     if (Object.prototype.hasOwnProperty.call(this, prop)) {
-      const v = (this as never as Record<string, unknown>)[prop];
-      delete (this as never as Record<string, unknown>)[prop];
-      (this as never as Record<string, unknown>)[prop] = v;
+      const value = this[prop];
+      delete (this as Partial<Record<'label' | 'value', string>>)[prop];
+      this[prop] = value;
     }
   }
 
@@ -77,6 +81,33 @@ export class SkBehaviourFixture extends LitElement {
     super.connectedCallback();
     this.#initialValue = this.value;
     this.#syncFormValue();
+  }
+
+  updated(changed: Map<string, unknown>) {
+    // The form value must track the property, not just the initial state — otherwise
+    // `el.value = 'x'` submits the old value and SC-002 fails for a reason that has
+    // nothing to do with setFormValue. Routed through #syncFormValue so setFormValue
+    // still has exactly ONE call site (see the mutation contract).
+    if (changed.has('value') || changed.has('disabled')) this.#syncFormValue();
+  }
+
+  /**
+   * Proxy the internals' validity surface.
+   *
+   * `setValidity` alone makes the element match `:invalid` and blocks submission, but the
+   * MESSAGE is only reachable through ElementInternals — and SC-003 requires the message
+   * to reach the accessibility tree, not merely a flag to be set.
+   */
+  get validity(): ValidityState {
+    return this.#internals.validity;
+  }
+
+  get validationMessage(): string {
+    return this.#internals.validationMessage;
+  }
+
+  checkValidity(): boolean {
+    return this.#internals.checkValidity();
   }
 
   /** The ONLY `setFormValue` call site. See the mutation contract above. */
