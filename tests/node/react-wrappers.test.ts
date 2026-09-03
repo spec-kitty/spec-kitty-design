@@ -45,6 +45,14 @@ const GATE_TIMEOUT_MS = 120_000;
 test('[react-wrappers] the committed output is current (FR-002, SC-301)', { timeout: GATE_TIMEOUT_MS }, () => {
   const r = gate('--check');
   expect(r.out, 'the drift gate is red — run: node scripts/build-react-wrappers.mjs').toContain('up to date');
+  // AND the determinism half, which is the clause ONLY this gate proves. ADR-11 item 9 is two
+  // clauses — regeneration is a no-op, and drift fails CI — and behaviours.json's SC-023 cites
+  // this gate as discharging both. Asserting 'up to date' alone pins only the second: delete
+  // the double-generate block and the gate still exits 0, still prints that string, and
+  // nothing reds. This string is emitted only after the two runs are compared.
+  expect(r.out, 'the double-generation determinism check did not run').toContain(
+    'two runs are byte-identical'
+  );
   expect(r.code).toBe(0);
 });
 

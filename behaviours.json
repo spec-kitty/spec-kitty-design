@@ -4,15 +4,12 @@
     "mutations.json and the conformance matrix all read. Tests are keyed by ID, never by title,",
     "so renaming a test does not silently drop coverage or break the mutation harness.",
     "",
-    "FOURTEEN entries, not the charter's fifteen. The fifteenth is generation determinism, and it",
-    "is deferred to #75: ADR-11 phrases it as 'regenerating WRAPPERS from an unchanged manifest',",
-    "the wrapper generator does not exist yet, and the artifacts that DO regenerate today",
-    "(custom-elements.json, the .css.js modules) already have enforced drift checks in lint-code.",
-    "A test here would be a green criterion with zero new coverage.",
+    "FIFTEEN entries, fourteen of them APPLICABLE. The fifteenth is generation determinism (SC-023), declared with applicable:false and the gate that discharges it named on the entry. It was deferred while the wrapper generator did not exist; #126 built the generator and its --check gate, and #75 WP04 settled it.",
     "",
-    "A behaviour with no applicable subject is ABSENT from this file. It is never expressed as a",
-    "skip and never deferred to a matrix cell \u2014 that was FR-010's earlier shape and it made the",
-    "mission incoherent if the conformance matrix were dropped.",
+    "",
+    "A behaviour with no applicable subject is either ABSENT from this file, or DECLARED with applicable:false and an inapplicableReason naming the gate that discharges it. It is never expressed as a skip and never deferred to a matrix cell \u2014 that was FR-010's earlier shape and it made the mission incoherent if the conformance matrix were dropped.",
+    "The second form is for a behaviour ADR-11 states as a CI-gate obligation rather than a runtime one: it has no test to mutate, but omitting it would leave the registry silently short of the ADR's list. #75 WP04 added the first, SC-023. Declaring one is not an escape hatch \u2014 config-contract asserts the applicable set equals ADR-11's list exactly, so nothing can be demoted to dodge a mutation, and it asserts the inapplicable set exactly too.",
+    "",
     "",
     "SUBJECTS (#73, FR-010). A behaviour id is no longer unique across the suite: sk-nav-pill",
     "carries SC-006..SC-010 and SC-012, and the synthetic fixture carries them too. An id-only",
@@ -301,6 +298,14 @@
           "file": "fixtures/elements-behaviour/src/sk-stub.test.ts"
         }
       ]
+    },
+    {
+      "id": "SC-023",
+      "charter": "generation determinism",
+      "summary": "regenerating wrappers from an unchanged manifest is a no-op, and drift fails CI",
+      "owner": "gate",
+      "applicable": false,
+      "inapplicableReason": "ADR-11 item 9 assigns this to the NODE lane and states it as two clauses: regeneration is a no-op, AND drift fails CI. Both are enforced by scripts/build-react-wrappers.mjs --check, which generates twice and compares byte-for-byte before comparing against the committed tree, as an ENFORCED lint-code step with two REQUIRED_LINT entries. It is not a mutation-harness behaviour: suite-selftest.mjs runs the browser project only, and extending it to the node lane would add ~1.8s to each of 44 runs (~240s against a 180s ceiling) to re-prove what a --check gate already proves. Declared here rather than omitted so the registry mirrors ADR-11's fifteen and the discharge is recorded where a reader looks."
     }
   ]
 }
