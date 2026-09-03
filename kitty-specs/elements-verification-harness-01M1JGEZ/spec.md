@@ -13,12 +13,28 @@ of it**, verified on this branch at `b99c293`:
 
 - No `vitest`, `jest`, `karma`, `@web/test-runner` or `@testing-library/*` in
   `devDependencies`. No `test` target in any `project.json`. No `npm run test`.
-- The only executable checks are Playwright (visual baselines, cross-browser smoke,
-  the #70 distribution specs) and the axe gate.
+- There is no test **runner**. There are, however, seven enforced project checks that
+  #70 shipped, and an earlier draft of this survey wrongly said Playwright and axe were
+  "the only executable checks". That error mattered: five of those seven scan
+  `packages/elements/src`, and they are what the fixture in C-006 collides with.
 
 Neither of those can see a broken `setFormValue`, an event that fires twice, a property
 assigned before upgrade being dropped, or a renamed shadow part. Those are exactly the
 failures ADR-8 moves *into* this package, and #72–#74 begin shipping them.
+
+### The #70 mechanisms this mission must not disturb
+
+Five scanners run over `packages/elements`. A fixture element placed inside that package
+trips at least one of them, and the tempting fix in each case is to weaken a guard #70
+built to close this programme's defining defect. Verified on this branch:
+
+| Scanner | Glob | What it does to a fixture inside the package |
+|---|---|---|
+| `scripts/build-elements-css.mjs` | `src/**/sk-*.ts`, filtered `^sk-[a-z0-9-]+\.ts$` | Treats it as a shipped component: requires `packages/styles/src/<name>/sk-<name>.css` to exist and `exit(1)`s when the directory basename ≠ the component name |
+| `scripts/check-manifest-content.mjs` | `src/**/*.ts` — **no exclusions** | Every `define('<tag>')` it finds must appear in the committed manifest, or it fails |
+| `custom-elements-manifest.config.mjs` | `src/**/*.ts`, excludes `__fixtures__/**` | Keeps a fixture *out* of the manifest — which is exactly what makes the row above fire |
+| `scripts/check-no-css-in-source.mjs` | `packages/elements/**/*.{ts,js,mjs}` | Forbids `` css` ``, `unsafeCSS(`, `new CSSStyleSheet(`, bare `.css` imports; and any `.css` file under the package |
+| `.storybook/main.ts` | `packages/**/*.stories.@(ts|tsx)` | Any `.stories.ts` under `packages/` becomes a story, entering the axe gate and the visual set |
 
 **The premise this mission does NOT inherit.** ADR-11 and #71 both describe eight
 orphaned `*.spec.ts` files under `packages/angular/` to be "removed rather than ported".
@@ -136,78 +152,158 @@ results; adding a target adds a column, not a new test list.
 
 | ID | Requirement |
 |---|---|
-| FR-001 | Vitest is a dev dependency, pinned, with a single config defining a **browser** project (Playwright provider) and a **node** project. |
+| FR-001 | Vitest is a pinned dev dependency, with a single config defining a **browser** project (Playwright provider) and a **node** project. |
 | FR-002 | `npm run test` runs both projects and exits non-zero if either fails. |
-| FR-003 | A `test` target exists for the projects that own tests, so `nx affected --target=test` reaches them. |
-| FR-004 | The ADR-11 required-behaviours list is expressed as executable tests against a fixture element that exercises **form association, events, upgrade order, slots, focus/keyboard, `::part()`, style adoption and the registry guard**. |
-| FR-005 | The node lane tests generation determinism: regenerating from an unchanged manifest is a no-op, and drift fails. |
-| FR-006 | The conformance matrix runs the applicable behaviours against each declared surface: bundler-free page, Storybook, and a Svelte app; the React column is **reserved** and reports as such until #75. |
-| FR-007 | The suite refuses to report green over an empty test set. |
-| FR-008 | A skipped test in the enforced suite fails CI unless the skip is explicitly declared as *not applicable* with a reason. |
-| FR-009 | New CI jobs are added to `ci-quality.yml`'s `gate` required list, so a test failure blocks merge. |
-| FR-010 | A CI time budget for the suite is recorded, with the measured figure it is derived from. |
+| FR-003 | The enforced CI job runs the suite **unconditionally** (`npm run test`), not `nx affected --target=test`. Verified: `nx affected --target=test` prints `No tasks were run` and **exits 0** — a job wired to it is green forever if the target is misnamed, the tag is wrong, or the affected computation misses. A `test` target may exist for local convenience; it is not the gate. |
+| FR-004 | The browser lane resolves `@spec-kitty/elements` **from source** via an explicit alias, and the suite passes on a clean checkout with **no `packages/elements/dist` present**. Vite does not read `tsconfig` `paths` by default, and the lint job never builds — this cost #70 two CI failures. |
+| FR-005 | The browser lane runs on **chromium and webkit**. Engine difference is ADR-11's strongest stated driver — kitty-desktop runs WebKitGTK, and `adoptedStyleSheets` support decides whether Lit injects a `<style>` element a consumer CSP then strips. A chromium-only lane does not serve the decision that chose the tool. |
+| FR-006 | The **fixture element lives outside `packages/elements`**, as its own nx project tagged `scope:fixture`. Every other location trips one of the five scanners above, and the tempting fix in each case is to weaken a #70 guard. |
+| FR-007 | The ADR-11 required-behaviours list is executable against that fixture, decomposed to the **fifteen** sub-behaviours the charter's Testing Standards actually enumerates — not the nine headline nouns. |
+| FR-008 | `scripts/suite-selftest.mjs` carries a **committed mutation list** — one entry per required behaviour, `{id, file, from, to, expectFailingTest}` — applies each to a copy, runs the scoped test, and asserts it goes RED, plus one unmutated baseline that must be GREEN. This is the structural sibling of `scripts/gate-selftest.mjs` and it is what makes "red-first" re-derived on every run rather than pasted once. |
+| FR-009 | A **per-lane, per-behaviour floor** over `vitest run --reporter=json`: every declared project must report ≥1 executed test, and every required-behaviour id must be covered. Vitest's `passWithNoTests: false` only catches a run where *every* lane is empty; one lane going dark while the other keeps the run green is the shape this repo actually ships. |
+| FR-010 | The enforced suite contains **zero skipped tests**. A not-applicable behaviour is an explicit cell in the FR-012 matrix, never a skip. An author-written reason string is a self-service exemption — the same shape as the marker-anywhere bypass #106 had to close in `check-no-css-in-source.mjs`. |
+| FR-011 | Retries are **0** in the enforced config, asserted by a node-lane test that imports the config. `playwright.config.ts` sets `retries: 2` in CI; inheriting that by analogy would silently absorb the flake ADR-11 says must be diagnosed. |
+| FR-012 | The conformance matrix emits a **committed machine-readable artifact** with a per-cell enum `{pass, fail, reserved, not-applicable, untested}`, plus guards that (a) refuse an all-reserved or all-not-applicable matrix, (b) assert `cells == surfaces × behaviours` so a dropped row is not silence, and (c) assert the reserved set equals a committed expected set. |
+| FR-013 | The CI time budget is **asserted, not recorded**: the test job measures its own duration and fails above a committed ceiling; the ceiling file records `{budget, measured, run URL, sha}`. This is `measure-elements-sizes.mjs --check`'s pattern — as a ceiling, since wall-clock is noisy — and that script's own docstring names *this* mission as the beneficiary of not putting baselines in prose. |
+| FR-014 | New CI jobs are added to `gate`'s **`if:` condition**, not merely to `needs:` and its echo lines. A job present in `needs` but absent from the condition satisfies "added to the required list" and gates nothing. |
 
 ### Non-Functional Requirements
 
 | ID | Requirement |
 |---|---|
-| NFR-001 | The suite's wall-clock time in CI is measured and recorded. The charter's three-minute figure covers the Storybook build only and does not extend to a test suite. |
-| NFR-002 | **NEGATIVE INVARIANT.** Every gate this mission adds is demonstrated failing before it is claimed to pass, and the demonstration is committed, not narrated. |
-| NFR-003 | The browser lane uses the Playwright browsers already installed by CI. A second browser stack is a regression against ADR-11's stated driver. |
-| NFR-004 | Existing gate runtimes are not regressed: the a11y, visual and Playwright jobs keep their current wiring and their current results. |
+| NFR-001 | The suite's CI wall-clock time is measured, and the measurement is the input to FR-013's ceiling rather than a sentence. |
+| NFR-002 | **NEGATIVE INVARIANT.** Every gate this mission adds is demonstrated failing before it is claimed to pass, and the demonstration is a **committed, CI-executed artifact that re-derives the red on every run**. A transcript, a commit message, or a checked-in log file does not satisfy this. |
+| NFR-003 | No second browser **stack**. The lane uses Playwright browsers, installed in its own job as every other browser job here does — there is no cross-job browser cache in this workflow, so "already installed" was false and is withdrawn. |
+| NFR-004 | The a11y, visual-regression and Playwright jobs keep their current wiring and their current results. Falsified by: their job-level `conclusion` and their reported counts (76 stories, 27 tests, 3 baselines) before and after. |
 
 ### Constraints
 
 | ID | Constraint |
 |---|---|
-| C-001 | **The runner is decided.** ADR-11 selects Vitest browser mode on the Playwright provider. Do not re-evaluate; `@web/test-runner` is the recorded fallback only if browser mode proves unstable **in CI**, and that is an operator call. |
-| C-002 | No coverage threshold, then or now. The bar is the required-behaviours list. |
+| C-001 | **The runner is decided.** ADR-11 selects Vitest browser mode on the Playwright provider. `@web/test-runner` is the recorded fallback only if browser mode proves unstable **in CI**, and that is an operator call. |
+| C-002 | No coverage threshold. The bar is the required-behaviours list. |
 | C-003 | Explicitly not wanted: "it renders" assertions, shadow-DOM snapshots, tests of Lit's reactivity, assertions on internal class names. |
-| C-004 | Per-component tests beyond `sk-stub` and one placeholder are out of scope. Wrapper generation is #75's. The visual baseline set is #69's. |
-| C-005 | Charter changes go through `charter interview → generate → sync`, never by hand (CLAUDE.md §7). If FR-010's budget belongs in the charter, that is an operator action, not this mission's edit. |
-| C-006 | `sk-stub` owns no behaviour — no form association, no events, no parts. The fixture element that exercises the list is therefore **new**, and must be recognisable as a test fixture rather than shipped as a component. |
+| C-004 | Per-component tests beyond the fixture and `sk-stub` are out of scope. Wrapper generation is #75's. The visual baseline set is #69's. |
+| C-005 | **Charter venue is an open operator question — see below.** The claim that charter changes go "through `charter interview → generate → sync`, never by hand (CLAUDE.md §7)" is inherited from ADR-11 and **does not check out**: CLAUDE.md §7 is *"Don't break the demo pages."* This mission does not act on that citation. |
+| C-006 | `sk-stub` owns no behaviour — no `ElementInternals`, no `dispatchEvent`, no `part=`, no `static formAssociated`. Verified. The fixture is therefore new, and FR-006 places it. |
+| C-007 | The generic `::part()` check reads the **manifest**, per ADR-11 item 6, so #72–#74 inherit it. The fixture is deliberately outside the manifest, so it cannot serve that check — hence FR-007 splits item 6 into a manifest-driven presence check (honestly vacuous today over zero declared parts, with an anti-vacuity guard that fires once #72 lands) plus the fixture's own rename regression. |
 
 ### Key Entities
 
-- **Fixture element** — a custom element existing solely to exercise the required
-  behaviours. Not published, not in the catalogue, not a Storybook story.
-- **Conformance matrix** — the required behaviours × surfaces grid, executable, with
-  reserved columns for targets that do not exist yet.
+- **Fixture element** — exists solely to exercise the required behaviours. Its own nx
+  project outside `packages/elements`; not published, not in the manifest, not a story.
+- **Conformance matrix** — behaviours × surfaces, executable, emitting FR-012's artifact.
 - **Browser lane / node lane** — the two Vitest projects.
+- **`scripts/suite-selftest.mjs`** — the mutation harness that makes red-first re-derivable.
 
 ## Success Criteria *(mandatory)*
 
 ### Measurable Outcomes
 
-| ID | Criterion |
-|---|---|
-| SC-001 | `npm run test` runs both lanes and fails if either does. |
-| SC-002 | A removed `setFormValue` fails the suite; restored, it passes. Committed evidence. |
-| SC-003 | An event made to fire twice fails the suite on the call count. Committed evidence. |
-| SC-004 | A renamed internal element breaks a declared `::part()` and the suite catches it. |
-| SC-005 | A property assigned **before** the definition loads is applied on upgrade, and removing the upgrade handling fails the test. |
-| SC-006 | The element adopts a constructed sheet and injects zero `<style>` elements — asserted in the browser lane, complementing #70's assertion against the built artifacts. |
-| SC-007 | A second `define` of the same tag warns and no-ops rather than throwing. |
-| SC-008 | Regenerating from an unchanged manifest is a no-op; drift fails. |
-| SC-009 | An emptied test set fails rather than reporting green. |
-| SC-010 | A failing test turns the `gate` job red, demonstrated. |
-| SC-011 | The conformance matrix reports per surface, and a reserved column cannot read as a pass. |
-| SC-012 | The suite's CI wall-clock time is recorded with the run it was measured from. |
+Every criterion below names the mutation that must turn it red. A criterion whose red
+cannot be produced on demand is not a criterion.
+
+| ID | Criterion | Red-first mutation |
+|---|---|---|
+| SC-001 | `npm run test` runs both lanes, and each reports ≥1 executed test | break one lane's `include` glob |
+| SC-002 | A native form submit produces the expected `FormData` entry | remove `setFormValue` |
+| SC-003 | `setValidity` blocks submission and the message reaches the a11y tree | drop the message argument |
+| SC-004 | Form reset restores the initial value | remove the `formResetCallback` |
+| SC-005 | A disabled control is excluded from submission | remove the disabled guard |
+| SC-006 | The documented event fires **exactly once**, asserted with `toHaveBeenCalledTimes(1)` | dispatch twice |
+| SC-007 | The event's `detail` shape matches its documentation | change a field name |
+| SC-008 | `composed` and `bubbles` are as documented | flip `composed` |
+| SC-009 | `preventDefault()` demonstrably prevents, where cancelable | drop `cancelable` |
+| SC-010 | A property assigned **before** the definition loads is applied on upgrade | remove the upgrade handling |
+| SC-011 | Slotted content reaches the intended slot, **and fallback appears when empty** | rename the slot |
+| SC-012 | Escape acts, focus returns to the invoker, `aria-expanded` tracks real state | remove the Escape handler |
+| SC-013 | Every manifest-declared `::part()` is present and targetable, with the expected list **derived from `custom-elements.json`**, not hardcoded | rename the internal element carrying the part |
+| SC-014 | The adopted sheet's `cssText` equals the bytes of its `@spec-kitty/styles` source | hand-author the sheet in TypeScript |
+| SC-015 | A different-constructor re-`define` warns, leaves the **original** constructor registered, and a same-constructor re-`define` is silent | replace `define` with an empty function — which must fail |
+| SC-016 | `scripts/suite-selftest.mjs` runs in CI: every committed mutation produces its named failing test, and the unmutated baseline is green | delete a mutation entry — the count assertion fails |
+| SC-017 | An emptied **lane**, and an uncovered required-behaviour id, each fail | empty one lane's globs |
+| SC-018 | The enforced suite reports zero skipped tests | add one `it.skip` |
+| SC-019 | The matrix artifact carries the full cell enum; an all-reserved matrix, a wrong cell count, and an unexpected reserved set each fail | mark every cell reserved |
+| SC-020 | The suite exceeding its committed ceiling fails CI | set the ceiling to 1s |
+| SC-021 | A failing test turns the **`gate`** job red, not merely the test job | add a failing test and read `gate` |
+| SC-022 | The suite passes on a clean checkout with no `packages/elements/dist` | delete `dist` and run |
 
 ## Out of scope
 
 - Wrapper generation and generator selection (#75, SP-6).
 - Per-component tests for components that do not exist yet (#72–#74, #77–#79).
 - The visual baseline set (#69).
-- Amending the charter's Performance Benchmarks (C-005 — operator action).
-- Fixing `security:lockfile-check`, which is a working script wired into **no** workflow.
-  Observed while surveying; out of this mission's subject and recorded for the operator.
+- Amending the charter (C-005 — see the operator questions).
+- `scripts/build-elements-css.mjs --check` reporting green over zero components. Verified,
+  filed as #110; it is the sixth instance of this programme's defect class and the second
+  inside a guard written to prevent it. Out of this mission's subject.
+- `security:lockfile-check` — a working script wired into no workflow. Observed, recorded.
 
-## Open question for the operator
+## Generation determinism — subject named
 
-**FR-010 / C-005 — where does the CI time budget live?** The exit criteria require it to
-be written down. The charter's Performance Benchmarks say *"Storybook CI build time under
-3 minutes"* and contemplate no test suite. Amending the charter is an operator action via
-the interview flow. The alternatives are recording the budget in ADR-11, or in
-`docs/architecture/`. I will measure first and bring the number with a recommendation
-rather than choosing the venue.
+FR-007's item 9 is the one ADR-11 phrases against an artifact that does not exist: it says
+"regenerating **wrappers** from an unchanged manifest is a no-op", and the wrapper
+generator is deferred to #75 by ADR-11 itself and by C-004 here.
+
+The regenerable artifacts that *do* exist are `custom-elements.json` (`cem analyze`) and
+the `.css.js`/`.css.d.ts` modules — and **both already have enforced drift checks** in
+`lint-code`. So a node-lane test that shells out to them would deliver a green criterion
+and zero new coverage.
+
+**Decision: item 9 is deferred to #75**, where the generator exists and the criterion has
+a subject. It is not restated as a success criterion here, and this paragraph exists so a
+work package is not written against a phantom.
+
+## Operator questions
+
+Two, both raised by the post-spec squad and both verified before being escalated. Neither
+blocks the runner, the suite, or the gate wiring; I will proceed with those.
+
+### 1. Where does a charter amendment happen — and is the charter self-contradictory?
+
+ADR-11 says charter changes go "through `spec-kitty charter interview → generate → sync`,
+never by hand (CLAUDE.md §7)". Verified, and **the citation is wrong**: CLAUDE.md §7 is
+*"Don't break the demo pages."* My first draft of this spec repeated that citation without
+checking it, which is the fabricated-citation class this programme has hit before.
+
+What the tree actually shows:
+
+- `charter.md`'s own **Amendment Process** reads *"Charter and governance amendments via
+  PR with rationale comment; no special approval beyond the standard review policy."*
+- **O5 itself was a hand edit.** `901244f` touches `.kittify/charter/charter.md` and two
+  docs. No yaml, no interview.
+- `.kittify/charter/charter.yaml` **has never heard of Vitest** — `grep -ci vitest` is 0 —
+  and still reads `governance.testing = {min_coverage: 0, tdd_required: false,
+  framework: '', type_checking: ''}`. `charter context --action plan` returns *"No
+  activated directive set configured"* and *"Template set not selected in charter"*.
+
+So the machine-readable charter contradicts the prose charter, and #71 depends on O5
+precisely because *"a hard CI gate must not contradict the charter"*. **Question:** which
+is authoritative, and should `charter sync` be run before this gate lands? Until answered,
+FR-013's ceiling is recorded in ADR-11's Consequences, which already says *"a new budget
+has to be set rather than assumed"* — the natural home, and one this mission may edit.
+
+### 2. Should this be two missions?
+
+The planning lens argues one seam, cleanly: **M5a** (runner, behaviour suite, red-first
+harness, gate wiring, budget) is what #71's Intent and Exit criteria describe, and #72–#74
+are blocked on it. **M5b** (the conformance matrix across surfaces) has its only consumer
+in #75, two missions out, and carries the entire Svelte toolchain addition.
+
+The Svelte cost is real and was unpriced. `fixtures/vite-consumer/` is plain Vite +
+vanilla JS — Svelte appears nowhere in this repo outside ADR prose. FR-012's matrix
+therefore requires `svelte` and `@sveltejs/vite-plugin-svelte` as new dependencies (each a
+supply-chain review), a new nx project, and a CI build step — landing in the same PR as
+the repository's first test runner.
+
+**I am not splitting the mission on my own authority**, because scope is set by the issue.
+I have instead made FR-012 a P2 work package explicitly permitted to be dropped without
+failing the mission, and named the dependencies so they get reviewed rather than arriving
+as an implementation detail. **Question:** split, or keep as one with FR-012 droppable?
+
+### Provenance note
+
+The conformance matrix is attributed to ADR-11 by #71 and by
+`docs/architecture/elements-first-programme.md:193`. **ADR-11 contains no conformance
+matrix and does not mention Svelte.** The four surfaces trace to ADR-8 Confirmation #1.
+The attribution is inherited, not invented here, and is recorded so it stops propagating.
