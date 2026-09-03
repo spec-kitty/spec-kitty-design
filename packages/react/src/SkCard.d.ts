@@ -18,10 +18,11 @@ export interface SkCardProps extends Pick<
   | "onFocus"
   | "onBlur"
 > {
-  /** undefined */
+  /** Swaps the surface token for the inset (input) surface, for a card nested inside another. */
   inset?: boolean;
 
-  /** undefined */
+  /** Accent colour. Omit for the default surface; an unknown value renders the base card and
+warns rather than throwing. */
   variant?: SkCardElement["variant"];
 
   /** A space-separated list of the classes of the element. Classes allows CSS and JavaScript to select and access specific elements via the class selectors or functions like the method `Document.getElementsByClassName()`. */
@@ -53,8 +54,15 @@ export interface SkCardProps extends Pick<
  *
  * Component attributes and properties that can be applied to the element or by using JavaScript.
  *
- * - `inset`: undefined
- * - `variant`: undefined
+ * - `inset`: Swaps the surface token for the inset (input) surface, for a card nested inside another.
+ * - `variant`: Accent colour. Omit for the default surface; an unknown value renders the base card and
+ * warns rather than throwing.
+ *
+ * ## Slots
+ *
+ * Areas where markup can be added to the component.
+ *
+ * - `(default)`: the card's content
  *
  * ## CSS Parts
  *

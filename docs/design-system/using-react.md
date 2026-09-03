@@ -24,7 +24,7 @@ question was only ever ergonomics, and the honest measurement is below.
 | form participation | yes | yes |
 | **JSX prop typing** | none — unknown props are silently accepted | **yes** |
 | **typed ref to the element** | `useRef<HTMLElement>` and cast | **`useRef<SkFormInputElement>`, no cast** |
-| **event `detail` typing** | none | none today — see below |
+| **event `detail` typing** | none | **yes** — `CustomEvent<{ open: boolean }>` |
 | SSR / RSC | you write `'use client'` | emitted for you, plus a deferred import |
 
 Two of those rows are the whole value proposition, and both are real: `<SkFormInput required="yes" />`
@@ -34,16 +34,14 @@ asserts each with `@ts-expect-error`, which fails if the error ever stops occurr
 
 ### What it does not buy, stated plainly
 
-- **Event `detail` is still untyped.** The generated handler is
-  `onSkNavPillToggle?: (event: CustomEvent) => void`, with no detail generic, and
-  `sk-nav-pill-toggle` carries a documented `detail: { open: boolean }`.
+*(Event `detail` typing was in this list and is not any more. The generated handler now reads
+`onSkNavPillToggle?: (event: CustomEvent<{ open: boolean }>) => void`, so `e.detail.open`
+resolves with no cast. It was never a limitation of the generator — the generator honours
+`events[].type.text` and the analyzer honours `@fires {Type}`; `sk-nav-pill.ts` simply wrote
+`@fires` without one. One line of JSDoc. This was the plan's "single sharpest answer to
+SC-305", and it turned out to be ours.)*
 
-  **This is our fault, not the generator's.** The generator honours `events[].type.text`; the
-  analyzer honours `@fires {Type} name - desc`; `sk-nav-pill.ts` writes `@fires` with no type,
-  so the manifest carries `type: None`. One line of JSDoc closes it end-to-end. Tracked as
-  #75 WP01 T004. Until it lands, cast the detail.
-
-  Do **not** reach for the generator's `stronglyTypedEvents` option to fix this: measured, it
+  Do **not** reach for the generator's `stronglyTypedEvents` option if you meet this again: it
   emits `TypedEvent<SkNavPillElement, E = Event>` — it types `.target` and *downgrades* the
   parameter from `CustomEvent` to `Event`.
 
@@ -109,19 +107,14 @@ function Field() {
   first render. Set it through `setCustomError()`, the element's own lever, and read it through
   the ref. The manifest used to claim an attribute for it, because the analyzer does not honour
   `state`; `normalise-manifest.mjs` now corrects that at source.
-- **Prop descriptions read `undefined`.** Thirteen of them, across `sk-form-input` (9),
-  `sk-card` (2) and `sk-nav-pill` (2). Almost all of it is simply missing JSDoc: the reactive
-  properties carry no doc comment, so the manifest has no description to copy and the generator
-  writes the literal word. `invalid` is the single case that matches the more interesting
-  explanation — it *does* carry a base-class JSDoc, and the analyzer does not propagate an
-  inherited field's description onto a subclass's attribute.
-
-  (An earlier draft of this page blamed the analyzer for all of them and said "the eight
-  properties inherited from `FormControlBase`". Measured: `sk-card` extends `FormControlBase` at
-  all, and `placeholder`, `type`, `variant` and `inset` are own fields. One of thirteen fits
-  that story.)
-
-  Tracked on #75. The types are correct; only the prose is missing.
+- **Every prop is documented.** There were twenty-two `/** undefined */` blocks; there are now
+  none, and the public methods carry descriptions too. Twenty of the twenty-two attributes
+  simply had no JSDoc; the other two had it on `FormControlBase`, where the analyzer will not
+  propagate a description onto a subclass's attribute. `normalise-manifest.mjs` now does that
+  — and once the JSDoc was written it carries **fourteen** of the twenty-two, every inherited
+  field on both form elements. So a property is documented once, where it is declared, and
+  `check-manifest-content.mjs` refuses a manifest where any of them lost its description. Note the consequence: **base-class JSDoc is consumer-facing API documentation**, so
+  keep maintainer rationale in `//`.
 - **Public inherited properties are props.** `value`, `label`, `name`, `required`, `disabled`,
   `description` and `invalid` — seven of the eight that come from `FormControlBase` — are all
   settable from JSX. The eighth is `errorMessage`, and it is the exception described above. (An early draft of #75's FR-004 said inherited members must *not* become

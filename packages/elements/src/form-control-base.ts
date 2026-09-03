@@ -28,11 +28,31 @@ import { LitElement } from 'lit';
 export abstract class FormControlBase extends LitElement {
   static formAssociated = true;
 
+  // The JSDoc on these fields is PUBLISHED. normalise-manifest.mjs propagates a field's
+  // description onto its attribute (the analyzer only does that for own fields, not inherited
+  // ones), ADR-11's generator copies `attributes[].description` into the React prop docs, and
+  // editors show it on hover. So it is written for a consumer, and anything a maintainer needs
+  // to know goes in `//` — C-005, and the reason `invalid` below reads differently than it did.
+
+  /** The name submitted with the form value. Without it the field contributes no `FormData`
+   *  entry — though a required empty one still blocks its form. */
   declare name: string;
+
+  /** The visible label. Also the accessible name, so it is not optional in practice. */
   declare label: string;
+
+  /** Optional helper text rendered under the control and linked to it for screen readers. */
   declare description: string;
+
+  /** Excludes the field from submission and from user interaction. */
   declare disabled: boolean;
+
+  /** Marks the field required. An empty required field blocks submission and reports
+   *  `${label} is required`, or "This field is required" when `label` is empty. */
   declare required: boolean;
+
+  /** The current value, and what the form submits under `name` — unless `disabled`, which
+   *  submits nothing. */
   declare value: string;
 
   protected internals: ElementInternals;
@@ -86,36 +106,50 @@ export abstract class FormControlBase extends LitElement {
     return this.internals.validationMessage;
   }
 
+  /** Whether the field is currently valid. Silent — reports nothing to the user. */
   checkValidity(): boolean {
     return this.internals.checkValidity();
   }
 
+  /** Like `checkValidity()`, but also shows the browser's validation message. */
   reportValidity(): boolean {
     return this.internals.reportValidity();
   }
 
-  /** READ-ONLY, derived from validity — never a settable property.
-   *
-   *  A settable `error` alongside `setValidity` is two sources of truth: `error="…"` would paint
-   *  the error state on an element that still matches `:valid` and submits happily, the story
-   *  would render red, axe would pass, and nothing would notice. */
+  // WHY IT IS A GETTER. A settable `error` alongside `setValidity` is two sources of truth:
+  // `error="…"` would paint the error state on an element that still matches `:valid` and
+  // submits happily; the story would render red, axe would pass, and nothing would notice.
+  //
+  // Moved out of the `/** */` in #129. #126 stopped emitting it as a React prop (it is
+  // readonly), but the prose still reached IDE hovers through the manifest, and this file's
+  // own preamble says rationale belongs in `//`.
+  /** The current validation message, derived from validity. Read-only — set errors with
+   *  `setCustomError()`. */
   get error(): string {
     return this.internals.validationMessage;
   }
 
+  // WHY THIS METHOD EXISTS. A lens found the only lever a consumer HAD was `el.invalid = true`,
+  // and that produced the worst possible state: `:host([invalid])` painted the field red,
+  // `aria-invalid` said `true`, `aria-describedby` pointed at an error node rendering the EMPTY
+  // string — because `setValidity` had never been called — and `internals.validity.valid` stayed
+  // `true`, so the form submitted anyway. An error identified visually with no programmatic
+  // text, on a control that still submits (WCAG 3.3.1).
+  //
+  // Routing through `setValidity` keeps one source of truth: validity is the state, and both
+  // `invalid` and the message derive from it.
+  //
+  // This block was a `/** */` until #129. It shipped verbatim into SkFormInput.d.ts as consumer
+  // API documentation — 809 characters of review narrative in an editor hover — along with a
+  // dangling "the `error` getter above", which is not in the wrapper at all because #126 stopped
+  // emitting `error` as a prop. C-005 predicted exactly this, and the same gate caught it twice
+  // before it was actually fixed.
   /**
    * Set or clear a validation error the element cannot derive itself — a server-side rejection,
    * a cross-field rule. Pass `null` to clear it.
    *
-   * This exists because a lens found the only lever a consumer HAD was `el.invalid = true`,
-   * and that produced the worst possible state: `:host([invalid])` painted the field red,
-   * `aria-invalid` said `true`, `aria-describedby` pointed at an error node rendering the
-   * EMPTY string — because `setValidity` had never been called — and `internals.validity.valid`
-   * stayed `true`, so the form submitted anyway. An error identified visually with no
-   * programmatic text, on a control that still submits (WCAG 3.3.1).
-   *
-   * Routing through `setValidity` keeps the one-source-of-truth the `error` getter above
-   * argues for: validity is the state, `invalid` and the message are both derived from it.
+   * Prefer this over assigning `invalid`: it sets validity, so the field genuinely blocks
+   * submission rather than only looking wrong.
    */
   setCustomError(message: string | null): void {
     // RE-DERIVES, never resets. `setValidity` flags are a FULL REPLACEMENT, not a layer — so
@@ -145,12 +179,19 @@ export abstract class FormControlBase extends LitElement {
    *  so a derived rule cannot silently clobber a server-side one. */
   protected customError = '';
 
-  /** Reflected invalid state. Declared here so `setCustomError` can set it; each element
-   *  registers it as a reactive property so the adopted sheet's `:host([invalid])` can see it. */
+  // Declared here so `setCustomError` can set it; each element registers it as a reactive
+  // property so the adopted sheet's `:host([invalid])` can see it. That is maintainer
+  // rationale and it used to sit in the `/** */` below — where, once descriptions began
+  // propagating to attributes, it would have shipped into React consumers' editors verbatim.
+  /** Whether the field is showing an error. The element sets it from its own validity.
+   *  Assigning it directly paints the error state WITHOUT setting validity — the field looks
+   *  wrong and still submits — so use `setCustomError()` instead. */
   declare invalid: boolean;
 
-  /** The message the error node renders. A reactive property rather than a read through
-   *  `internals.validationMessage`, because Lit cannot observe a getter over internals — see
-   *  each element's `static properties`. */
+  // A reactive property rather than a read through `internals.validationMessage`, because Lit
+  // cannot observe a getter over internals — see each element's `static properties`. It is also
+  // `state: true` there, so it is deliberately NOT a React prop (#126): the element observes no
+  // attribute for it, and under `ssrSafe` a first render could never deliver it.
+  /** The error message currently shown. Read it; set it with `setCustomError()`. */
   declare errorMessage: string;
 }

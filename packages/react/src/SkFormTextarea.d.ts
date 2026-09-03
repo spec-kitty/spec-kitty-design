@@ -18,31 +18,37 @@ export interface SkFormTextareaProps extends Pick<
   | "onFocus"
   | "onBlur"
 > {
-  /** undefined */
+  /** Excludes the field from submission and from user interaction. */
   disabled?: boolean;
 
-  /** undefined */
+  /** Whether the field is showing an error. The element sets it from its own validity.
+Assigning it directly paints the error state WITHOUT setting validity — the field looks
+wrong and still submits — so use `setCustomError()` instead. */
   invalid?: boolean;
 
-  /** undefined */
+  /** Marks the field required. An empty required field blocks submission and reports
+`${label} is required`, or "This field is required" when `label` is empty. */
   required?: boolean;
 
-  /** undefined */
+  /** Optional helper text rendered under the control and linked to it for screen readers. */
   description?: SkFormTextareaElement["description"];
 
-  /** undefined */
+  /** The visible label. Also the accessible name, so it is not optional in practice. */
   label?: SkFormTextareaElement["label"];
 
-  /** undefined */
+  /** The name submitted with the form value. Without it the field contributes no `FormData`
+entry — though a required empty one still blocks its form. */
   name?: SkFormTextareaElement["name"];
 
-  /** undefined */
+  /** Placeholder text. Not a substitute for `label`: it disappears on input and is not a
+reliable accessible name. */
   placeholder?: SkFormTextareaElement["placeholder"];
 
-  /** undefined */
+  /** Visible height in text rows. */
   rows?: SkFormTextareaElement["rows"];
 
-  /** undefined */
+  /** The current value, and what the form submits under `name` — unless `disabled`, which
+submits nothing. */
   value?: SkFormTextareaElement["value"];
 
   /** A space-separated list of the classes of the element. Classes allows CSS and JavaScript to select and access specific elements via the class selectors or functions like the method `Document.getElementsByClassName()`. */
@@ -74,36 +80,36 @@ export interface SkFormTextareaProps extends Pick<
  *
  * Component attributes and properties that can be applied to the element or by using JavaScript.
  *
- * - `description`: undefined
- * - `disabled`: undefined
- * - `invalid`: undefined
- * - `label`: undefined
- * - `name`: undefined
- * - `placeholder`: undefined
- * - `required`: undefined
- * - `rows`: undefined
- * - `value`: undefined
+ * - `description`: Optional helper text rendered under the control and linked to it for screen readers.
+ * - `disabled`: Excludes the field from submission and from user interaction.
+ * - `invalid`: Whether the field is showing an error. The element sets it from its own validity.
+ * Assigning it directly paints the error state WITHOUT setting validity — the field looks
+ * wrong and still submits — so use `setCustomError()` instead.
+ * - `label`: The visible label. Also the accessible name, so it is not optional in practice.
+ * - `name`: The name submitted with the form value. Without it the field contributes no `FormData`
+ * entry — though a required empty one still blocks its form.
+ * - `placeholder`: Placeholder text. Not a substitute for `label`: it disappears on input and is not a
+ * reliable accessible name.
+ * - `required`: Marks the field required. An empty required field blocks submission and reports
+ * `${label} is required`, or "This field is required" when `label` is empty.
+ * - `rows`: Visible height in text rows.
+ * - `value`: The current value, and what the form submits under `name` — unless `disabled`, which
+ * submits nothing.
  *
  * ## Methods
  *
  * Methods that can be called to access component functionality.
  *
- * - `checkValidity() => boolean`: undefined
- * - `formDisabledCallback(isDisabled: boolean) => void`: undefined
- * - `formResetCallback() => void`: undefined
- * - `reportValidity() => boolean`: undefined
+ * - `checkValidity() => boolean`: Whether the field is currently valid. Silent — reports nothing to the user.
+ * - `formDisabledCallback(isDisabled: boolean) => void`: Called by the browser when a containing fieldset is disabled or re-enabled.
+ * - `formResetCallback() => void`: Called by the browser when the containing form resets. Restores the value the
+ * field had on connect.
+ * - `reportValidity() => boolean`: Like `checkValidity()`, but also shows the browser's validation message.
  * - `setCustomError(message: string | null) => void`: Set or clear a validation error the element cannot derive itself — a server-side rejection,
  * a cross-field rule. Pass `null` to clear it.
  *
- * This exists because a lens found the only lever a consumer HAD was `el.invalid = true`,
- * and that produced the worst possible state: `:host([invalid])` painted the field red,
- * `aria-invalid` said `true`, `aria-describedby` pointed at an error node rendering the
- * EMPTY string — because `setValidity` had never been called — and `internals.validity.valid`
- * stayed `true`, so the form submitted anyway. An error identified visually with no
- * programmatic text, on a control that still submits (WCAG 3.3.1).
- *
- * Routing through `setValidity` keeps the one-source-of-truth the `error` getter above
- * argues for: validity is the state, `invalid` and the message are both derived from it.
+ * Prefer this over assigning `invalid`: it sets validity, so the field genuinely blocks
+ * submission rather than only looking wrong.
  *
  * ## CSS Parts
  *

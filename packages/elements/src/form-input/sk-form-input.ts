@@ -24,6 +24,11 @@ import sheet from './sk-form-input.css.js';
 // control through aria-describedby, which resolves exactly the way aria-labelledby does. That
 // extension is an INFERENCE from ADR-9's measurement rather than something the ADR measured —
 // recorded as this mission's decision, and raised on #74 as an operator question.
+//
+// SINCE #129 THAT INCLUDES EVERY REACTIVE PROPERTY'S OWN `/** */`, and every public
+// method's: normalise-manifest.mjs propagates a field's description onto its attribute,
+// and the React generator copies it into the prop docs. check-manifest-content.mjs now
+// refuses a manifest where any of them is missing, so this is enforced, not advisory.
 /**
  * A labelled text input that participates in a native form.
  *
@@ -68,7 +73,11 @@ export class SkFormInput extends FormControlBase {
     errorMessage: { type: String, state: true },
   };
 
+  /** The native input type — `text`, `email`, `password`, and so on. */
   declare type: string;
+
+  /** Placeholder text. Not a substitute for `label`: it disappears on input and is not a
+   *  reliable accessible name. */
   declare placeholder: string;
 
   constructor() {
@@ -110,12 +119,15 @@ export class SkFormInput extends FormControlBase {
     this.internals.setFormValue(this.disabled ? null : this.value);
   }
 
+  /** Called by the browser when the containing form resets. Restores the value the
+   *  field had on connect. */
   formResetCallback(): void {
     // MUTATION ANCHOR SC-004 — form reset restores the initial value.
     this.value = this.initialValue;
     this.syncFormValue();
   }
 
+  /** Called by the browser when a containing fieldset is disabled or re-enabled. */
   formDisabledCallback(isDisabled: boolean): void {
     this.disabled = isDisabled;
     this.syncFormValue();

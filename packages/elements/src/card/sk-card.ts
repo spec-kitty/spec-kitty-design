@@ -19,10 +19,16 @@ import { cardClasses } from './sk-card.markup.js';
 //
 // The variant contract is not repeated in prose: the manifest already carries
 // `variant: 'blue' | 'purple' | undefined` from the field declaration below.
+//
+// SINCE #129 THAT INCLUDES EVERY REACTIVE PROPERTY'S OWN `/** */`, and every public
+// method's: normalise-manifest.mjs propagates a field's description onto its attribute,
+// and the React generator copies it into the prop docs. check-manifest-content.mjs now
+// refuses a manifest where any of them is missing, so this is enforced, not advisory.
 /**
  * The card primitive — the first real component on the ADR-8 base layer.
  *
  * @element sk-card
+ * @slot - the card's content
  * @csspart card - the card surface
  */
 export class SkCard extends LitElement {
@@ -33,7 +39,11 @@ export class SkCard extends LitElement {
     inset: { type: Boolean, reflect: true },
   };
 
+  /** Accent colour. Omit for the default surface; an unknown value renders the base card and
+   *  warns rather than throwing. */
   declare variant: 'blue' | 'purple' | undefined;
+
+  /** Swaps the surface token for the inset (input) surface, for a card nested inside another. */
   declare inset: boolean;
 
   constructor() {

@@ -1,0 +1,54 @@
+{
+  "$comment": [
+    "The published-documentation ratchet (#75 WP01, #129).",
+    "",
+    "Every public attribute and public method of a tagged declaration must carry a description:",
+    "the React generator copies attributes[].description into the emitted prop docs and the",
+    "class-level `## Methods` block, so one with none ships `/** undefined */` into a consumer's",
+    "editor. check-manifest-content.mjs asserts the descriptions are non-empty.",
+    "",
+    "THIS FILE IS THE ANTI-VACUITY HALF, and it exists because the first version of that gate",
+    "did not have one. It counted DECLARATIONS, not items, so a manifest with five tagged",
+    "elements and zero attributes and zero methods printed",
+    "",
+    "    \u2705 0 public attribute(s) and method(s) across 5 element(s) all carry a description.",
+    "",
+    "\u2014 a green line over an empty set, in the gate whose own docstring names that defect class.",
+    "Both pre-merge lenses found it independently. Same shape as expected-parts.json, and the",
+    "same reason.",
+    "",
+    "EXACT EQUALITY, not shrink-only. Removing a documented property or method is an API change",
+    "and should be a deliberate line in the same commit; adding one likewise. Either direction",
+    "silently moving is what this refuses. If a count changes, change it here and say why in the",
+    "commit message.",
+    "",
+    "Counts are of the PUBLISHED surface as the wrapper generator sees it: attributes[] entries,",
+    "and members[] of kind `method` that are not private/protected and do not start with `#`.",
+    "Note that `state: true` properties are deliberately absent from attributes[] \u2014 they observe",
+    "no attribute and cannot be delivered on a first render under ssrSafe \u2014 so they are not",
+    "counted here either. See scripts/normalise-manifest.mjs."
+  ],
+  "total": 35,
+  "elements": {
+    "sk-card": {
+      "attributes": 2,
+      "methods": 0
+    },
+    "sk-form-input": {
+      "attributes": 9,
+      "methods": 5
+    },
+    "sk-form-textarea": {
+      "attributes": 9,
+      "methods": 5
+    },
+    "sk-nav-pill": {
+      "attributes": 2,
+      "methods": 3
+    },
+    "sk-stub": {
+      "attributes": 0,
+      "methods": 0
+    }
+  }
+}
