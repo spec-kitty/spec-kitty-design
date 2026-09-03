@@ -7,8 +7,8 @@ Components in these artifacts: sk-card, sk-form-input, sk-form-textarea, sk-nav-
 
 | artifact | raw | minified | min+gzip | notes |
 |---|---:|---:|---:|---|
-| `ESM  (dist/index.js)` | 49.4 KiB | 36.2 KiB | 9.3 KiB | `lit` external |
-| `IIFE (dist/elements.js)` | 71.3 KiB | 50.5 KiB | 14.6 KiB | runtime bundled |
+| `ESM  (dist/index.js)` | 49.4 KiB | 36.2 KiB | 9 KiB | `lit` external |
+| `IIFE (dist/elements.js)` | 71.3 KiB | 50.5 KiB | 15 KiB | runtime bundled |
 
 ## The basis matters — read this before comparing against an ADR
 
@@ -53,11 +53,11 @@ $ npx nx run elements:build && node scripts/measure-elements-sizes.mjs
 packages/elements/dist/index.js
   raw         50545 bytes  (49.4 KiB)
   minified    37074 bytes  (36.2 KiB)
-  gzip       12.0 KiB
-  min+gzip    9.3 KiB
+  gzip         12 KiB
+  min+gzip      9 KiB
 packages/elements/dist/elements.js
   raw         73010 bytes  (71.3 KiB)
   minified    51746 bytes  (50.5 KiB)
-  gzip       18.3 KiB
-  min+gzip   14.6 KiB
+  gzip         18 KiB
+  min+gzip     15 KiB
 ```
