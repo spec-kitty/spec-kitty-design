@@ -28,11 +28,30 @@ import { LitElement } from 'lit';
 export abstract class FormControlBase extends LitElement {
   static formAssociated = true;
 
+  // The JSDoc on these fields is PUBLISHED. normalise-manifest.mjs propagates a field's
+  // description onto its attribute (the analyzer only does that for own fields, not inherited
+  // ones), ADR-11's generator copies `attributes[].description` into the React prop docs, and
+  // editors show it on hover. So it is written for a consumer, and anything a maintainer needs
+  // to know goes in `//` — C-005, and the reason `invalid` below reads differently than it did.
+
+  /** The name submitted with the form value. Required for the field to participate in
+   *  submission at all: a form control with no name contributes no `FormData` entry. */
   declare name: string;
+
+  /** The visible label. Also the accessible name, so it is not optional in practice. */
   declare label: string;
+
+  /** Optional helper text rendered under the control and linked to it for screen readers. */
   declare description: string;
+
+  /** Excludes the field from submission and from user interaction. */
   declare disabled: boolean;
+
+  /** Marks the field required. An empty required field blocks submission and reports
+   *  "&lt;label&gt; is required". */
   declare required: boolean;
+
+  /** The current value, and what the form submits under `name`. */
   declare value: string;
 
   protected internals: ElementInternals;
@@ -145,12 +164,18 @@ export abstract class FormControlBase extends LitElement {
    *  so a derived rule cannot silently clobber a server-side one. */
   protected customError = '';
 
-  /** Reflected invalid state. Declared here so `setCustomError` can set it; each element
-   *  registers it as a reactive property so the adopted sheet's `:host([invalid])` can see it. */
+  // Declared here so `setCustomError` can set it; each element registers it as a reactive
+  // property so the adopted sheet's `:host([invalid])` can see it. That is maintainer
+  // rationale and it used to sit in the `/** */` below — where, once descriptions began
+  // propagating to attributes, it would have shipped into React consumers' editors verbatim.
+  /** Whether the field is currently showing an error. Derived from validity — set it through
+   *  `setCustomError()` rather than assigning this directly. */
   declare invalid: boolean;
 
-  /** The message the error node renders. A reactive property rather than a read through
-   *  `internals.validationMessage`, because Lit cannot observe a getter over internals — see
-   *  each element's `static properties`. */
+  // A reactive property rather than a read through `internals.validationMessage`, because Lit
+  // cannot observe a getter over internals — see each element's `static properties`. It is also
+  // `state: true` there, so it is deliberately NOT a React prop (#126): the element observes no
+  // attribute for it, and under `ssrSafe` a first render could never deliver it.
+  /** The error message currently shown. Read it; set it with `setCustomError()`. */
   declare errorMessage: string;
 }

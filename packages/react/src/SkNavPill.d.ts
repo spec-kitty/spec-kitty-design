@@ -18,10 +18,10 @@ export interface SkNavPillProps extends Pick<
   | "onFocus"
   | "onBlur"
 > {
-  /** undefined */
+  /** Whether the navigation panel is open. Reflected as the `open` attribute. */
   isOpen?: boolean;
 
-  /** undefined */
+  /** Accessible name for the navigation landmark. */
   label?: SkNavPillElement["label"];
 
   /** A space-separated list of the classes of the element. Classes allows CSS and JavaScript to select and access specific elements via the class selectors or functions like the method `Document.getElementsByClassName()`. */
@@ -46,7 +46,7 @@ export interface SkNavPillProps extends Pick<
   tabIndex?: number;
 
   /** before the open state changes; `detail: { open: boolean }` is the REQUESTED state, `cancelable`, `bubbles` and `composed`. Calling `preventDefault()` abandons the change. */
-  onSkNavPillToggle?: (event: CustomEvent) => void;
+  onSkNavPillToggle?: (event: CustomEvent<{ open: boolean }>) => void;
 }
 
 /**
@@ -56,8 +56,8 @@ export interface SkNavPillProps extends Pick<
  *
  * Component attributes and properties that can be applied to the element or by using JavaScript.
  *
- * - `label`: undefined
- * - `open`/`isOpen`: undefined
+ * - `label`: Accessible name for the navigation landmark.
+ * - `open`/`isOpen`: Whether the navigation panel is open. Reflected as the `open` attribute.
  *
  * ## Events
  *

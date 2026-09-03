@@ -68,7 +68,11 @@ export class SkFormInput extends FormControlBase {
     errorMessage: { type: String, state: true },
   };
 
+  /** The native input type — `text`, `email`, `password`, and so on. */
   declare type: string;
+
+  /** Placeholder text. Not a substitute for `label`: it disappears on input and is not a
+   *  reliable accessible name. */
   declare placeholder: string;
 
   constructor() {

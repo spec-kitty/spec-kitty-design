@@ -96,6 +96,7 @@
               "type": {
                 "text": "string"
               },
+              "description": "Optional helper text rendered under the control and linked to it for screen readers.",
               "default": "''"
             },
             {
@@ -104,6 +105,7 @@
               "type": {
                 "text": "boolean"
               },
+              "description": "Excludes the field from submission and from user interaction.",
               "default": "false"
             },
             {
@@ -131,7 +133,7 @@
               "type": {
                 "text": "string"
               },
-              "description": "The message the error node renders. A reactive property rather than a read through\n`internals.validationMessage`, because Lit cannot observe a getter over internals — see\neach element's `static properties`."
+              "description": "The error message currently shown. Read it; set it with `setCustomError()`."
             },
             {
               "kind": "field",
@@ -166,7 +168,7 @@
               "type": {
                 "text": "boolean"
               },
-              "description": "Reflected invalid state. Declared here so `setCustomError` can set it; each element\nregisters it as a reactive property so the adopted sheet's `:host([invalid])` can see it."
+              "description": "Whether the field is currently showing an error. Derived from validity — set it through\n`setCustomError()` rather than assigning this directly."
             },
             {
               "kind": "field",
@@ -174,6 +176,7 @@
               "type": {
                 "text": "string"
               },
+              "description": "The visible label. Also the accessible name, so it is not optional in practice.",
               "default": "''"
             },
             {
@@ -182,6 +185,7 @@
               "type": {
                 "text": "string"
               },
+              "description": "The name submitted with the form value. Required for the field to participate in\nsubmission at all: a form control with no name contributes no `FormData` entry.",
               "default": "''"
             },
             {
@@ -199,6 +203,7 @@
               "type": {
                 "text": "boolean"
               },
+              "description": "Marks the field required. An empty required field blocks submission and reports\n\"&lt;label&gt; is required\".",
               "default": "false"
             },
             {
@@ -271,6 +276,7 @@
               "type": {
                 "text": "string"
               },
+              "description": "The current value, and what the form submits under `name`.",
               "default": "''"
             }
           ],
@@ -308,6 +314,12 @@
               "name": "card"
             }
           ],
+          "slots": [
+            {
+              "description": "the card's content",
+              "name": ""
+            }
+          ],
           "members": [
             {
               "kind": "field",
@@ -316,6 +328,7 @@
               "type": {
                 "text": "boolean"
               },
+              "description": "Swaps the surface token for the inset (input) surface, for a card nested inside another.",
               "default": "false",
               "attribute": "inset",
               "reflects": true
@@ -327,6 +340,7 @@
               "type": {
                 "text": "'blue' | 'purple' | undefined"
               },
+              "description": "Accent colour. Omit for the default surface; an unknown value renders the base card and\nwarns rather than throwing.",
               "attribute": "variant",
               "reflects": true
             }
@@ -337,6 +351,7 @@
               "type": {
                 "text": "boolean"
               },
+              "description": "Swaps the surface token for the inset (input) surface, for a card nested inside another.",
               "default": "false",
               "fieldName": "inset"
             },
@@ -345,6 +360,7 @@
               "type": {
                 "text": "'blue' | 'purple' | undefined"
               },
+              "description": "Accent colour. Omit for the default surface; an unknown value renders the base card and\nwarns rather than throwing.",
               "fieldName": "variant"
             }
           ],
@@ -420,6 +436,7 @@
               "type": {
                 "text": "string"
               },
+              "description": "Optional helper text rendered under the control and linked to it for screen readers.",
               "default": "''",
               "privacy": "public",
               "attribute": "description",
@@ -434,6 +451,7 @@
               "type": {
                 "text": "boolean"
               },
+              "description": "Excludes the field from submission and from user interaction.",
               "default": "false",
               "privacy": "public",
               "attribute": "disabled",
@@ -475,7 +493,7 @@
               "type": {
                 "text": "string"
               },
-              "description": "The message the error node renders. A reactive property rather than a read through\n`internals.validationMessage`, because Lit cannot observe a getter over internals — see\neach element's `static properties`.",
+              "description": "The error message currently shown. Read it; set it with `setCustomError()`.",
               "privacy": "public",
               "default": "''",
               "inheritedFrom": {
@@ -554,7 +572,7 @@
               "type": {
                 "text": "boolean"
               },
-              "description": "Reflected invalid state. Declared here so `setCustomError` can set it; each element\nregisters it as a reactive property so the adopted sheet's `:host([invalid])` can see it.",
+              "description": "Whether the field is currently showing an error. Derived from validity — set it through\n`setCustomError()` rather than assigning this directly.",
               "privacy": "public",
               "default": "false",
               "attribute": "invalid",
@@ -570,6 +588,7 @@
               "type": {
                 "text": "string"
               },
+              "description": "The visible label. Also the accessible name, so it is not optional in practice.",
               "default": "''",
               "privacy": "public",
               "attribute": "label",
@@ -584,6 +603,7 @@
               "type": {
                 "text": "string"
               },
+              "description": "The name submitted with the form value. Required for the field to participate in\nsubmission at all: a form control with no name contributes no `FormData` entry.",
               "default": "''",
               "privacy": "public",
               "attribute": "name",
@@ -600,6 +620,7 @@
               "type": {
                 "text": "string"
               },
+              "description": "Placeholder text. Not a substitute for `label`: it disappears on input and is not a\nreliable accessible name.",
               "default": "''",
               "attribute": "placeholder"
             },
@@ -622,6 +643,7 @@
               "type": {
                 "text": "boolean"
               },
+              "description": "Marks the field required. An empty required field blocks submission and reports\n\"&lt;label&gt; is required\".",
               "default": "false",
               "privacy": "public",
               "attribute": "required",
@@ -671,6 +693,7 @@
               "type": {
                 "text": "string"
               },
+              "description": "The native input type — `text`, `email`, `password`, and so on.",
               "default": "'text'",
               "attribute": "type"
             },
@@ -742,6 +765,7 @@
               "type": {
                 "text": "string"
               },
+              "description": "The current value, and what the form submits under `name`.",
               "default": "''",
               "privacy": "public",
               "attribute": "value",
@@ -757,14 +781,16 @@
               "type": {
                 "text": "string"
               },
-              "fieldName": "description"
+              "fieldName": "description",
+              "description": "Optional helper text rendered under the control and linked to it for screen readers."
             },
             {
               "name": "disabled",
               "type": {
                 "text": "boolean"
               },
-              "fieldName": "disabled"
+              "fieldName": "disabled",
+              "description": "Excludes the field from submission and from user interaction."
             },
             {
               "name": "invalid",
@@ -772,27 +798,31 @@
                 "text": "boolean"
               },
               "default": "false",
-              "fieldName": "invalid"
+              "fieldName": "invalid",
+              "description": "Whether the field is currently showing an error. Derived from validity — set it through\n`setCustomError()` rather than assigning this directly."
             },
             {
               "name": "label",
               "type": {
                 "text": "string"
               },
-              "fieldName": "label"
+              "fieldName": "label",
+              "description": "The visible label. Also the accessible name, so it is not optional in practice."
             },
             {
               "name": "name",
               "type": {
                 "text": "string"
               },
-              "fieldName": "name"
+              "fieldName": "name",
+              "description": "The name submitted with the form value. Required for the field to participate in\nsubmission at all: a form control with no name contributes no `FormData` entry."
             },
             {
               "name": "placeholder",
               "type": {
                 "text": "string"
               },
+              "description": "Placeholder text. Not a substitute for `label`: it disappears on input and is not a\nreliable accessible name.",
               "default": "''",
               "fieldName": "placeholder"
             },
@@ -801,13 +831,15 @@
               "type": {
                 "text": "boolean"
               },
-              "fieldName": "required"
+              "fieldName": "required",
+              "description": "Marks the field required. An empty required field blocks submission and reports\n\"&lt;label&gt; is required\"."
             },
             {
               "name": "type",
               "type": {
                 "text": "string"
               },
+              "description": "The native input type — `text`, `email`, `password`, and so on.",
               "default": "'text'",
               "fieldName": "type"
             },
@@ -816,7 +848,8 @@
               "type": {
                 "text": "string"
               },
-              "fieldName": "value"
+              "fieldName": "value",
+              "description": "The current value, and what the form submits under `name`."
             }
           ],
           "superclass": {
@@ -891,6 +924,7 @@
               "type": {
                 "text": "string"
               },
+              "description": "Optional helper text rendered under the control and linked to it for screen readers.",
               "default": "''",
               "privacy": "public",
               "attribute": "description",
@@ -905,6 +939,7 @@
               "type": {
                 "text": "boolean"
               },
+              "description": "Excludes the field from submission and from user interaction.",
               "default": "false",
               "privacy": "public",
               "attribute": "disabled",
@@ -946,7 +981,7 @@
               "type": {
                 "text": "string"
               },
-              "description": "The message the error node renders. A reactive property rather than a read through\n`internals.validationMessage`, because Lit cannot observe a getter over internals — see\neach element's `static properties`.",
+              "description": "The error message currently shown. Read it; set it with `setCustomError()`.",
               "privacy": "public",
               "default": "''",
               "inheritedFrom": {
@@ -1025,7 +1060,7 @@
               "type": {
                 "text": "boolean"
               },
-              "description": "Reflected invalid state. Declared here so `setCustomError` can set it; each element\nregisters it as a reactive property so the adopted sheet's `:host([invalid])` can see it.",
+              "description": "Whether the field is currently showing an error. Derived from validity — set it through\n`setCustomError()` rather than assigning this directly.",
               "privacy": "public",
               "default": "false",
               "attribute": "invalid",
@@ -1041,6 +1076,7 @@
               "type": {
                 "text": "string"
               },
+              "description": "The visible label. Also the accessible name, so it is not optional in practice.",
               "default": "''",
               "privacy": "public",
               "attribute": "label",
@@ -1055,6 +1091,7 @@
               "type": {
                 "text": "string"
               },
+              "description": "The name submitted with the form value. Required for the field to participate in\nsubmission at all: a form control with no name contributes no `FormData` entry.",
               "default": "''",
               "privacy": "public",
               "attribute": "name",
@@ -1071,6 +1108,7 @@
               "type": {
                 "text": "string"
               },
+              "description": "Placeholder text. Not a substitute for `label`: it disappears on input and is not a\nreliable accessible name.",
               "default": "''",
               "attribute": "placeholder"
             },
@@ -1093,6 +1131,7 @@
               "type": {
                 "text": "boolean"
               },
+              "description": "Marks the field required. An empty required field blocks submission and reports\n\"&lt;label&gt; is required\".",
               "default": "false",
               "privacy": "public",
               "attribute": "required",
@@ -1109,6 +1148,7 @@
               "type": {
                 "text": "number"
               },
+              "description": "Visible height in text rows.",
               "default": "4",
               "attribute": "rows"
             },
@@ -1213,6 +1253,7 @@
               "type": {
                 "text": "string"
               },
+              "description": "The current value, and what the form submits under `name`.",
               "default": "''",
               "privacy": "public",
               "attribute": "value",
@@ -1228,14 +1269,16 @@
               "type": {
                 "text": "string"
               },
-              "fieldName": "description"
+              "fieldName": "description",
+              "description": "Optional helper text rendered under the control and linked to it for screen readers."
             },
             {
               "name": "disabled",
               "type": {
                 "text": "boolean"
               },
-              "fieldName": "disabled"
+              "fieldName": "disabled",
+              "description": "Excludes the field from submission and from user interaction."
             },
             {
               "name": "invalid",
@@ -1243,27 +1286,31 @@
                 "text": "boolean"
               },
               "default": "false",
-              "fieldName": "invalid"
+              "fieldName": "invalid",
+              "description": "Whether the field is currently showing an error. Derived from validity — set it through\n`setCustomError()` rather than assigning this directly."
             },
             {
               "name": "label",
               "type": {
                 "text": "string"
               },
-              "fieldName": "label"
+              "fieldName": "label",
+              "description": "The visible label. Also the accessible name, so it is not optional in practice."
             },
             {
               "name": "name",
               "type": {
                 "text": "string"
               },
-              "fieldName": "name"
+              "fieldName": "name",
+              "description": "The name submitted with the form value. Required for the field to participate in\nsubmission at all: a form control with no name contributes no `FormData` entry."
             },
             {
               "name": "placeholder",
               "type": {
                 "text": "string"
               },
+              "description": "Placeholder text. Not a substitute for `label`: it disappears on input and is not a\nreliable accessible name.",
               "default": "''",
               "fieldName": "placeholder"
             },
@@ -1272,13 +1319,15 @@
               "type": {
                 "text": "boolean"
               },
-              "fieldName": "required"
+              "fieldName": "required",
+              "description": "Marks the field required. An empty required field blocks submission and reports\n\"&lt;label&gt; is required\"."
             },
             {
               "name": "rows",
               "type": {
                 "text": "number"
               },
+              "description": "Visible height in text rows.",
               "default": "4",
               "fieldName": "rows"
             },
@@ -1287,7 +1336,8 @@
               "type": {
                 "text": "string"
               },
-              "fieldName": "value"
+              "fieldName": "value",
+              "description": "The current value, and what the form submits under `name`."
             }
           ],
           "superclass": {
@@ -1392,6 +1442,7 @@
               "type": {
                 "text": "boolean"
               },
+              "description": "Whether the navigation panel is open. Reflected as the `open` attribute.",
               "default": "false",
               "attribute": "open",
               "reflects": true
@@ -1403,6 +1454,7 @@
               "type": {
                 "text": "string"
               },
+              "description": "Accessible name for the navigation landmark.",
               "default": "'Primary navigation'",
               "attribute": "label"
             },
@@ -1447,6 +1499,9 @@
           ],
           "events": [
             {
+              "type": {
+                "text": "CustomEvent<{ open: boolean }>"
+              },
               "description": "before the open state changes; `detail: { open: boolean }` is the REQUESTED state, `cancelable`, `bubbles` and `composed`. Calling `preventDefault()` abandons the change.",
               "name": "sk-nav-pill-toggle"
             }
@@ -1457,6 +1512,7 @@
               "type": {
                 "text": "string"
               },
+              "description": "Accessible name for the navigation landmark.",
               "default": "'Primary navigation'",
               "fieldName": "label"
             },
@@ -1465,6 +1521,7 @@
               "type": {
                 "text": "boolean"
               },
+              "description": "Whether the navigation panel is open. Reflected as the `open` attribute.",
               "default": "false",
               "fieldName": "isOpen"
             }

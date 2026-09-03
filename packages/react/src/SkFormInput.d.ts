@@ -18,31 +18,35 @@ export interface SkFormInputProps extends Pick<
   | "onFocus"
   | "onBlur"
 > {
-  /** undefined */
+  /** Excludes the field from submission and from user interaction. */
   disabled?: boolean;
 
-  /** undefined */
+  /** Whether the field is currently showing an error. Derived from validity — set it through
+`setCustomError()` rather than assigning this directly. */
   invalid?: boolean;
 
-  /** undefined */
+  /** Marks the field required. An empty required field blocks submission and reports
+"&lt;label&gt; is required". */
   required?: boolean;
 
-  /** undefined */
+  /** Optional helper text rendered under the control and linked to it for screen readers. */
   description?: SkFormInputElement["description"];
 
-  /** undefined */
+  /** The visible label. Also the accessible name, so it is not optional in practice. */
   label?: SkFormInputElement["label"];
 
-  /** undefined */
+  /** The name submitted with the form value. Required for the field to participate in
+submission at all: a form control with no name contributes no `FormData` entry. */
   name?: SkFormInputElement["name"];
 
-  /** undefined */
+  /** Placeholder text. Not a substitute for `label`: it disappears on input and is not a
+reliable accessible name. */
   placeholder?: SkFormInputElement["placeholder"];
 
-  /** undefined */
+  /** The native input type — `text`, `email`, `password`, and so on. */
   type?: SkFormInputElement["type"];
 
-  /** undefined */
+  /** The current value, and what the form submits under `name`. */
   value?: SkFormInputElement["value"];
 
   /** A space-separated list of the classes of the element. Classes allows CSS and JavaScript to select and access specific elements via the class selectors or functions like the method `Document.getElementsByClassName()`. */
@@ -74,15 +78,19 @@ export interface SkFormInputProps extends Pick<
  *
  * Component attributes and properties that can be applied to the element or by using JavaScript.
  *
- * - `description`: undefined
- * - `disabled`: undefined
- * - `invalid`: undefined
- * - `label`: undefined
- * - `name`: undefined
- * - `placeholder`: undefined
- * - `required`: undefined
- * - `type`: undefined
- * - `value`: undefined
+ * - `description`: Optional helper text rendered under the control and linked to it for screen readers.
+ * - `disabled`: Excludes the field from submission and from user interaction.
+ * - `invalid`: Whether the field is currently showing an error. Derived from validity — set it through
+ * `setCustomError()` rather than assigning this directly.
+ * - `label`: The visible label. Also the accessible name, so it is not optional in practice.
+ * - `name`: The name submitted with the form value. Required for the field to participate in
+ * submission at all: a form control with no name contributes no `FormData` entry.
+ * - `placeholder`: Placeholder text. Not a substitute for `label`: it disappears on input and is not a
+ * reliable accessible name.
+ * - `required`: Marks the field required. An empty required field blocks submission and reports
+ * "&lt;label&gt; is required".
+ * - `type`: The native input type — `text`, `email`, `password`, and so on.
+ * - `value`: The current value, and what the form submits under `name`.
  *
  * ## Methods
  *

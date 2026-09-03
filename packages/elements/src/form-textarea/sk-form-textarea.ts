@@ -68,7 +68,11 @@ export class SkFormTextarea extends FormControlBase {
     errorMessage: { type: String, state: true },
   };
 
+  /** Visible height in text rows. */
   declare rows: number;
+
+  /** Placeholder text. Not a substitute for `label`: it disappears on input and is not a
+   *  reliable accessible name. */
   declare placeholder: string;
 
   constructor() {

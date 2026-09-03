@@ -45,9 +45,12 @@ export function TypedRef() {
 }
 
 // --- events ------------------------------------------------------------------------------
-// WP01 T004 types this event's detail in the element's own @fires JSDoc. Until that lands the
-// handler receives a bare CustomEvent, so this asserts only that the handler EXISTS and is
-// wired. When WP01 lands, tighten this to read `e.detail.open` and drop the cast.
-export const withHandler = (
-  <SkNavPill onSkNavPillToggle={(e: CustomEvent) => void (e.detail as { open: boolean }).open} />
-);
+// TIGHTENED, now that WP01 T004 has landed. `sk-nav-pill.ts`'s `@fires` carries
+// `{CustomEvent<{ open: boolean }>}`, the analyzer records it as `events[].type.text`, and the
+// generator emits the generic — so `e.detail.open` resolves with no cast. That closes the gap
+// the plan called "the single sharpest answer to SC-305": the missing type was our JSDoc, not a
+// limitation of the generator.
+export const withHandler = <SkNavPill onSkNavPillToggle={(e) => void e.detail.open} />;
+
+// @ts-expect-error the detail is typed now, so a wrong field on it is an error rather than `any`
+export const wrongDetail = <SkNavPill onSkNavPillToggle={(e) => void e.detail.opened} />;

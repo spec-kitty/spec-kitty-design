@@ -39,7 +39,7 @@ import sheet from './sk-nav-pill.css.js';
  * @csspart nav - the pill container
  * @csspart items - the items row, which becomes the collapsed panel
  * @csspart hamburger - the toggle control
- * @fires sk-nav-pill-toggle - before the open state changes; `detail: { open: boolean }` is
+ * @fires {CustomEvent<{ open: boolean }>} sk-nav-pill-toggle - before the open state changes; `detail: { open: boolean }` is
  *   the REQUESTED state, `cancelable`, `bubbles` and `composed`. Calling `preventDefault()`
  *   abandons the change.
  */
@@ -55,7 +55,10 @@ export class SkNavPill extends LitElement {
     label: { type: String },
   };
 
+  /** Whether the navigation panel is open. Reflected as the `open` attribute. */
   declare isOpen: boolean;
+
+  /** Accessible name for the navigation landmark. */
   declare label: string;
 
   /** The control to return focus to. Not reflected, not an attribute — runtime state. */
