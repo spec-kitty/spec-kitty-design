@@ -350,10 +350,28 @@ test('[config] every project that should be typechecked is (SC-310)', () => {
   // `nx show projects --with-target typecheck` (renamed target, malformed project.json) left
   // the gate green over a smaller set. That is the defect typecheck-all.mjs itself was written
   // to close, one level up.
-  const out = execFileSync('npx', ['nx', 'show', 'projects', '--with-target', 'typecheck'], {
-    encoding: 'utf8',
-  });
-  const projects = JSON.parse(out) as string[];
+  // `--json`, AND a parse that survives either shape. Without the flag, nx printed a
+  // newline-separated list in CI while printing JSON on this workstation, so `JSON.parse` threw
+  // `Unexpected token 'e', "elements-b"...` on the runner and passed locally — a difference in
+  // the tool's output format between environments, not in the projects. scripts/typecheck-all.mjs
+  // already carries the `--json`-then-fallback pair for the same reason; this mirrors it rather
+  // than extracting a shared helper, because #117 owns that extraction and it should not be
+  // smuggled in here.
+  const run = (args: string[]) =>
+    execFileSync('npx', args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'inherit'] });
+  let out: string;
+  try {
+    out = run(['nx', 'show', 'projects', '--with-target', 'typecheck', '--json']);
+  } catch {
+    out = run(['nx', 'show', 'projects', '--with-target', 'typecheck']);
+  }
+  let projects: string[];
+  try {
+    projects = JSON.parse(out) as string[];
+  } catch {
+    projects = out.split('\n').map((l) => l.trim()).filter(Boolean);
+  }
+  expect(projects.length, 'nx reported no typecheck projects at all').toBeGreaterThan(0);
   for (const name of ['elements', 'elements-behaviour-fixture', 'react', 'react-consumer-fixture']) {
     expect(projects, `${name} declares a typecheck target and must be picked up`).toContain(name);
   }
