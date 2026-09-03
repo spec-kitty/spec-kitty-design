@@ -51,6 +51,16 @@ import { act } from 'react';
 import { afterEach, beforeEach, expect, test } from 'vitest';
 import { SkNavPill, SkFormInput } from '@spec-kitty/react';
 
+/**
+ * REQUIRED BY REACT, and its absence is not silent — it prints
+ * "The current testing environment is not configured to support act(...)" on every `act()`
+ * call, nine times in a full run. Without it React does not treat `act` as an act scope, so
+ * effects and state updates are not guaranteed flushed when `act` returns and every assertion
+ * below is racing the scheduler. The tests passed anyway, which is exactly why this is worth
+ * setting explicitly rather than leaving to luck.
+ */
+(globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+
 let host: HTMLDivElement;
 let root: Root;
 

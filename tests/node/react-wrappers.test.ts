@@ -31,13 +31,25 @@ function gate(...args: string[]): { code: number; out: string } {
   }
 }
 
-test('[react-wrappers] the committed output is current (FR-002, SC-301)', () => {
+/**
+ * These two spawn the gate as a child process, and the gate generates the whole wrapper tree —
+ * twice for `--check` (it asserts FR-003 by generating a second time), and once per probe for
+ * `--selftest`, which is eleven full generations plus eleven manifest copies.
+ *
+ * That is well past Vitest's 5s default. It passed locally at ~2.3s and timed out in CI at
+ * 6.2s, which is the shape of every wall-clock assumption in this repo: fine on a warm
+ * workstation, red on a cold runner. Generous rather than tuned — the number is not evidence
+ * of anything, it just must not be the thing that fails.
+ */
+const GATE_TIMEOUT_MS = 120_000;
+
+test('[react-wrappers] the committed output is current (FR-002, SC-301)', { timeout: GATE_TIMEOUT_MS }, () => {
   const r = gate('--check');
   expect(r.out, 'the drift gate is red — run: node scripts/build-react-wrappers.mjs').toContain('up to date');
   expect(r.code).toBe(0);
 });
 
-test('[react-wrappers] the gate self-check is green and its probe table is not degenerate', () => {
+test('[react-wrappers] the gate self-check is green and its probe table is not degenerate', { timeout: GATE_TIMEOUT_MS }, () => {
   const r = gate('--selftest');
   expect(r.code, r.out).toBe(0);
   expect(r.out).toMatch(/All \d+ probes behaved as recorded/);
