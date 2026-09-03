@@ -64,10 +64,13 @@ nx derives project edges here from **workspace `package.json` declarations**, no
 
 ## Subtasks
 
+- **T003a** — **Acquire the toolchain at the root — no other WP owns this.** Promote `lit` to a root devDependency, declare **and pin** `esbuild@0.28.1` (today a transitive of `vite@7.3.6` under `^0.27.0 || ^0.28.0`; a Vite minor can float it and silently change the elements build — DIRECTIVE_051), and install `@custom-elements-manifest/analyzer@0.11.0` (50 packages). Regenerate the lockfile. `ci-quality.yml:87` runs `npm ci --ignore-scripts` in **every** job and `:91` is an ENFORCED lockfile-integrity check — a new workspace with undeclared deps turns the whole mission red at the first job.
+- **T003b** — **`src/define.ts` is authored here**, not in WP05. ADR-10 §5 requires *every* registration to go through the guarded helper, so WP03's element and WP04's IIFE entry both need it to exist first. Registry *behaviour* is asserted in WP04 where the artifacts exist; the manifest interaction is WP05's.
 - **T004** — Create the package: `package.json` (declaring **`lit@^3.3.3`** and **`@spec-kitty/styles`** — ADR-10 §2 leaves `lit` a bare specifier in `dist/index.js`, so a package that never declares it ships a broken import), `tsconfig*.json`, `project.json` with `build`, **`lint`** and `analyze` targets.
 - **T005** — `project.json` must declare explicit `inputs` covering `{workspaceRoot}/packages/styles/src/**/*.css` and `outputs: ["{workspaceRoot}/packages/elements/dist"]`. Neither `styles` nor `tokens` declares outputs, so the shape being mirrored carries that hazard: without the input, editing `sk-stub.css` yields a cache hit and last build's output.
 - **T006** — `eslint.config.mjs`: `scope:elements → ['scope:styles', 'scope:tokens']`, using this repo's **`scope:`-prefixed** tag vocabulary.
-- **T007** — Add `packages/elements/**` to `ci-quality.yml`'s `components` filter, and add `elements` to all four workflows' project lists.
+- **T007** — Add `packages/elements/**` to `ci-quality.yml`'s `components` filter (**this is FR-008**), and add `elements` to all four workflows' project lists (this is FR-001's build wiring, not FR-008).
+- **T007b** — **This WP is the sole editor of `ci-quality.yml`.** Three other WPs owe enforced steps to it and own no workflow: WP01's gate self-test harness, WP03's FR-009 no-CSS-in-TS check, and WP05's manifest regeneration check. They supply the scripts; this WP wires them. The plan named this collision and the first task cut acted on neither of its two remedies.
 
 ## Definition of Done
 
@@ -75,7 +78,11 @@ nx derives project edges here from **workspace `package.json` declarations**, no
 - [ ] A `lint` target exists — **without it `nx affected --target=lint` never lints the package and SC-010's depConstraints are enforced only by hand**.
 - [ ] An import from `elements` to a package outside `styles`/`tokens` fails lint; demonstrate it (SC-010).
 - [ ] Editing `packages/styles/src/stub/sk-stub.css` busts the elements build cache; demonstrate hit-then-miss.
-- [ ] All four workflows build `elements` (FR-008).
+- [ ] `packages/elements/**` is in the `components` path filter (**FR-008**).
+- [ ] All four workflows build `elements` (FR-001's wiring — not FR-008).
+- [ ] `npm ci --dry-run --ignore-scripts` passes and `scripts/npm-audit-gate.sh` clears the analyzer's 50 new packages.
+- [ ] `packages/elements/package.json` sets `"private": true` — #70 puts publishing out of scope, all three `@spec-kitty/*` names 404 on npm, and `release.yml`'s dist audit loops only `tokens styles`.
+- [ ] The three CI steps owed by WP01/WP03/WP05 are wired here, or explicitly recorded as not yet existing.
 - [ ] **SC-007 evidenced on a throwaway branch touching only `packages/elements/**`** — it cannot be shown on this mission's own PR, which necessarily touches `ci-quality.yml`, `scripts/**`, `nx.json` and the manifests, all already in the filter, so `components=true` regardless.
 
 ## Notes

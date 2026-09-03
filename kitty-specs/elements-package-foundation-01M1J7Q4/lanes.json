@@ -15,8 +15,7 @@
         "scripts/run-axe-storybook.js"
       ],
       "predicted_surfaces": [
-        "artifact-rendering",
-        "legacy-cleanup"
+        "artifact-rendering"
       ],
       "depends_on_lanes": [],
       "parallel_group": 0
@@ -42,6 +41,7 @@
       ],
       "predicted_surfaces": [
         "api",
+        "artifact-rendering",
         "tracker-integration",
         "workspace"
       ],
@@ -58,6 +58,7 @@
         "scripts/build-elements-css.mjs"
       ],
       "predicted_surfaces": [
+        "api",
         "artifact-rendering",
         "tracker-integration"
       ],
@@ -111,8 +112,8 @@
       "parallel_group": 0
     }
   ],
-  "computed_at": "2026-09-03T00:26:41.403266+00:00",
+  "computed_at": "2026-09-03T00:28:18.864448+00:00",
   "computed_from": "dependency_graph+ownership",
   "planning_artifact_wps": [],
-  "planning_commit_sha": "9f0544c4112112b30a7b244e168c12a6eec006ce"
+  "planning_commit_sha": "5ecef1e61542873d6f0644584b73d65c42307777"
 }

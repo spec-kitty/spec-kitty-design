@@ -50,7 +50,7 @@ An earlier plan draft had this depend on the package scaffold "for a real elemen
 | `:240-248` | host enumeration (`hostsByTag` / `hostsByClass`) |
 | `:312-316` | the `waitForFunction` predicate |
 
-A squad confirmed there is **no fifth site**. Today a shadow-only element fails at `:207` with *"story wrappers mounted but the component did not"*, and burns the full 8s `RENDER_TIMEOUT_MS` first because the wait never satisfies.
+A squad confirmed there is no *sixth* site. `:170` (`root.childElementCount === 0 && root.textContent.trim() === ''`) is a fifth light-DOM-only predicate but needs **no change**: the shadow host is itself a light-DOM child of the render root, so it never false-fails a shadow-only story. Named here so nobody applying "make all traversal shadow-aware" wonders whether it was missed. Today a shadow-only element fails at `:207` with *"story wrappers mounted but the component did not"*, and burns the full 8s `RENDER_TIMEOUT_MS` first because the wait never satisfies.
 
 ## The trap inside the fix
 
@@ -60,8 +60,14 @@ Every traversal helper must check `n.shadowRoot` **before** walking `n.childNode
 
 ## Subtasks
 
-- **T001** — Add flat-tree traversal (shadow root before child nodes) and apply it at all four sites. Keep the wait predicate and the assertion sharing one selector constant, as they do today.
-- **T002** — Author throwaway fixture stories: one correctly-rendering shadow-only element, plus the six NFR-002 shapes as the entire content of an open shadow root, plus an empty `sk-*` block beside a text-bearing sibling in the same shadow root.
+- **T001** — Add flat-tree traversal and apply it at all four sites. **Base case: check `n.shadowRoot` before walking `n.childNodes`, and walk BOTH** — a squad's first attempt descended into children's shadow roots but not the node's own and rejected a correctly-rendered element; walking the shadow root *instead of* children breaks case 9. Sharing one selector constant is **not sufficient** any more: after this change the drift lives in the *traversal*, and the two sites cross separate serialization boundaries (`:271` vs `:318`). Hoist the traversal into one stringified source injected at both call sites — and note the lesson from #102, where an `eval`-based hoist made `waitForFunction` throw into that same swallowing catch and silently disabled the wait. Pass it as data, not code.
+- **T002** — Author throwaway fixture stories under `packages/elements/src/__fixtures__/` (this WP owns that path; `packages/elements/` exists because WP02 ran first). **Eleven cases, not eight** — the extra three are shapes a real #72 component hits:
+  1. shadow-only element renders → PASS
+  2-7. the six NFR-002 shapes as the **entire content** of an open shadow root → FAIL
+  8. empty `sk-*` block beside a text-bearing sibling in the same shadow root → FAIL
+  9. **slotted content**: `<sk-x>text</sk-x>` with shadow `<div><slot></slot></div>` → **PASS**. A literal reading of "shadow root *before* child nodes" that walks the shadow root *instead of* childNodes makes the light-DOM text invisible and fails a correct element. Nearly every migrated component takes children.
+  10. **slot with nothing assigned and nothing else in the shadow root** → FAIL.
+  11. **nested host**: an `sk-*` host inside another element's shadow root → the empty case must FAIL. `hostsByTag`/`hostsByClass` use `root.querySelectorAll('*')`, which crosses no boundary; the traversal must recurse arbitrarily, and all eight original cases sit at depth 1.
 - **T003** — Capture the before/after per-story baseline over the existing 74 stories, port-normalised.
 
 ## Definition of Done
@@ -70,8 +76,8 @@ Every traversal helper must check `n.shadowRoot` **before** walking `n.childNode
 - [ ] **Eight demonstrated cases** with exit codes: shadow-only element passes; the six NFR-002 shapes each fail *inside a shadow root*; the empty-block-beside-text case fails naming the block (SC-005).
 - [ ] The same six shapes still fail in **light DOM** — the list runs twice (NFR-002).
 - [ ] Per-story result lines over the 74 existing stories are identical before and after, after normalising `127.0.0.1:\d+` (NFR-003, SC-006).
-- [ ] The wait predicate and the assertion are still equivalent; state how that was checked.
-- [ ] Fixture stories are removed or clearly marked throwaway — they must not become permanent catalogue entries (C-003).
+- [ ] The wait predicate and the assertion are equivalent, proven **mechanically, not in prose**. This DoD line was previously prose-satisfiable *and undetectable*: `waitForFunction` at `:312-316` has `.catch(() => {})` at `:320` and `:327` runs the assertion regardless, so an implementer who pierces the three assertion sites and leaves the wait light-DOM-only gets the **correct verdict on all eleven cases, on the light-DOM re-run, and on all 74 stories**. The only symptom is +8s (`RENDER_TIMEOUT_MS`) per shadow story. That is exactly the site #69 broke. Guard it by asserting the shadow-only fixture's wait **resolves** (instrument the swallowing catch) or that its per-story wall time is well under `RENDER_TIMEOUT_MS`.
+- [ ] The eleven cases land as a **permanent gate self-test**, not a transcript. Both branches of the old wording were bad: six fixtures deliberately fail `assertStoryRendered`, which throws — left inside Storybook's `packages/**` glob they make the a11y job permanently red; deleted, they destroy the only evidence and leave four newly shadow-aware sites with zero standing regression guard. Land them as fixture HTML plus a node harness driving `assertStoryRendered` directly, **outside** Storybook's story glob, wired into CI by WP02. C-003 is untouched because these are not catalogue stories.
 
 ## Notes
 
