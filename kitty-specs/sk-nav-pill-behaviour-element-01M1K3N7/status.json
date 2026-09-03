@@ -1,7 +1,7 @@
 {
-  "event_count": 2,
-  "last_event_id": "01M1K43E1BQSADWX79ZZ93G2ZR",
-  "materialized_at": "2026-09-03T07:52:58.155021+00:00",
+  "event_count": 3,
+  "last_event_id": "01M1K43E329J65BQ10VJS4WQAV",
+  "materialized_at": "2026-09-03T07:52:58.210879+00:00",
   "mission_number": "",
   "mission_slug": "sk-nav-pill-behaviour-element-01M1K3N7",
   "mission_type": "software-dev",
@@ -14,7 +14,7 @@
     "for_review": 0,
     "in_progress": 0,
     "in_review": 0,
-    "planned": 2
+    "planned": 3
   },
   "work_packages": {
     "WP01": {
@@ -30,6 +30,13 @@
       "lane": "planned",
       "last_event_id": "01M1K43E1BQSADWX79ZZ93G2ZR",
       "last_transition_at": "2026-09-03T07:52:58.155021+00:00"
+    },
+    "WP03": {
+      "actor": "finalize-tasks",
+      "force_count": 0,
+      "lane": "planned",
+      "last_event_id": "01M1K43E329J65BQ10VJS4WQAV",
+      "last_transition_at": "2026-09-03T07:52:58.210879+00:00"
     }
   }
 }
