@@ -133,10 +133,36 @@ test('the column modifiers lay out N tracks above the breakpoint, and collapse b
   // asserted by no line that runs. Two pre-merge lenses found it independently.
   //
   // `page.viewport()` resizes the iframe, so the media query is genuinely re-evaluated.
-  const tracksFor = async (el: Element) =>
-    getComputedStyle(el.shadowRoot!.querySelector('[part="grid"]')!)
-      .gridTemplateColumns.split(/\s+/)
-      .filter(Boolean).length;
+  // POLLS, and reports the RAW computed value when it gives up.
+  //
+  // Two CI failures got me here and my first explanation was wrong. Waiting for `matchMedia` to
+  // agree was not enough: webkit flipped the query and still computed one track on the next
+  // line, so the media query and the style recalculation that follows it are not the same
+  // event. Rather than guess at a frame count, this waits for the quantity actually being
+  // measured and fails with what the engine returned — a track count alone cannot distinguish
+  // "the modifier did not apply" from "the value is a shape I did not anticipate".
+  const readTracks = (el: Element) =>
+    getComputedStyle(el.shadowRoot!.querySelector('[part="grid"]')!).gridTemplateColumns;
+
+  const tracksFor = async (el: Element, expected: number, label: string) => {
+    const deadline = Date.now() + 2000;
+    let raw = readTracks(el);
+    let count = raw.split(/\s+/).filter(Boolean).length;
+    while (count !== expected && Date.now() < deadline) {
+      await new Promise((resolve) => requestAnimationFrame(() => resolve(null)));
+      raw = readTracks(el);
+      count = raw.split(/\s+/).filter(Boolean).length;
+    }
+    // Returned rather than asserted here, so the caller owns the message and a genuine
+    // regression still reds — this only removes the race, it does not soften the claim.
+    return { count, raw, label };
+  };
+
+  const expectTracks = (r: { count: number; raw: string; label: string }, expected: number) =>
+    expect(
+      r.count,
+      `${r.label}: expected ${expected} track(s), computed ${JSON.stringify(r.raw)}`,
+    ).toBe(expected);
 
   await resizeTo(1200, 800, false);
   try {
@@ -146,23 +172,19 @@ test('the column modifiers lay out N tracks above the breakpoint, and collapse b
       ['cols-4', 4],
     ] as const) {
       const { el } = await mount({ variant }, expected);
-      expect(await tracksFor(el), `${variant} must lay out ${expected} tracks above 720px`).toBe(
-        expected,
-      );
+      expectTracks(await tracksFor(el, expected, `${variant} above 720px`), expected);
     }
     // The base grid is one track at every width — the control for the assertions above, which
     // would otherwise pass against a stylesheet that gave EVERY grid the same track count.
     const { el: base } = await mount({}, 3);
-    expect(await tracksFor(base), 'the base grid must stay single-column').toBe(1);
+    expectTracks(await tracksFor(base, 1, 'the base grid above 720px'), 1);
   } finally {
     await resizeTo(414, 896, true);
   }
 
   // And below the breakpoint every modifier collapses. Deleting the @media block reds this.
   const { el: narrow } = await mount({ variant: 'cols-3' }, 3);
-  expect(await tracksFor(narrow), 'below 720px every column modifier collapses to one track').toBe(
-    1,
-  );
+  expectTracks(await tracksFor(narrow, 1, 'cols-3 below 720px'), 1);
 });
 
 test('the gap modifiers change the measured gap, not just the class list', async () => {
