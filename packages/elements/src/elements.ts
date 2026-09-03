@@ -13,3 +13,4 @@ import './nav-pill/sk-nav-pill.js';
 import './form-input/sk-form-input.js';
 import './form-textarea/sk-form-textarea.js';
 import './grid/sk-grid.js';
+import './section-banner/sk-section-banner.js';

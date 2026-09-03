@@ -30,7 +30,8 @@
     "SC-002..SC-005 finally have a REAL subject (#74). They were written in #71 for this mission",
     "and until now were carried only by the synthetic fixture — which is why the id-only coverage",
     "check could not tell 'the fixture covers form association' from 'a shipped element does'.",
-    "#77 adds <sk-grid> as a subject of SC-013 and SC-014 — the two it genuinely owns. It is deliberately NOT added to SC-015: the registry guard is a claim about define(), not about any element that calls it, and listing every caller would make the id's subject list grow without adding an assertion."
+    "#77 adds <sk-grid> as a subject of SC-013 and SC-014 — the two it genuinely owns. It is deliberately NOT added to SC-015: the registry guard is a claim about define(), not about any element that calls it, and listing every caller would make the id's subject list grow without adding an assertion.",
+    "#77 adds <sk-section-banner> as a subject of SC-013 and SC-014 on the same basis as <sk-grid>: it declares parts and adopts a generated sheet. It does not join SC-015, and does not claim an event or form id it does not have."
   ],
   "behaviours": [
     {
@@ -271,6 +272,10 @@
         {
           "name": "sk-nav-pill",
           "file": "fixtures/elements-behaviour/src/sk-nav-pill.test.ts"
+        },
+        {
+          "name": "sk-section-banner",
+          "file": "fixtures/elements-behaviour/src/sk-section-banner.test.ts"
         }
       ]
     },
@@ -288,6 +293,10 @@
         {
           "name": "sk-nav-pill",
           "file": "fixtures/elements-behaviour/src/sk-nav-pill.test.ts"
+        },
+        {
+          "name": "sk-section-banner",
+          "file": "fixtures/elements-behaviour/src/sk-section-banner.test.ts"
         },
         {
           "name": "sk-stub",
@@ -314,7 +323,8 @@
       "summary": "regenerating wrappers from an unchanged manifest is a no-op, and drift fails CI",
       "owner": "gate",
       "applicable": false,
-      "inapplicableReason": "ADR-11 item 9 assigns this to the NODE lane and states it as two clauses: regeneration is a no-op, AND drift fails CI. Both are enforced by scripts/build-react-wrappers.mjs --check, which generates twice and compares byte-for-byte before comparing against the committed tree, as an ENFORCED lint-code step with two REQUIRED_LINT entries. It is not a mutation-harness behaviour: suite-selftest.mjs runs the browser project only, and extending it to the node lane would add ~1.8s to each of 44 runs (~240s against a 180s ceiling) to re-prove what a --check gate already proves. Declared here rather than omitted so the registry mirrors ADR-11's fifteen and the discharge is recorded where a reader looks."
+      "inapplicableReason": "ADR-11 item 9 assigns this to the NODE lane and states it as two clauses: regeneration is a no-op, AND drift fails CI. Both are enforced by scripts/build-react-wrappers.mjs --check, which generates twice and compares byte-for-byte before comparing against the committed tree, as an ENFORCED lint-code step with two REQUIRED_LINT entries. It is not a mutation-harness behaviour: suite-selftest.mjs runs the browser project only, and extending it to the node lane would add ~1.8s to each of 44 runs (~240s against a 180s ceiling) to re-prove what a --check gate already proves. Declared here rather than omitted so the registry mirrors ADR-11's fifteen and the discharge is recorded where a reader looks.",
+      "subjects": []
     }
   ]
 }

@@ -16,14 +16,26 @@
   color: var(--sk-fg-default);
 }
 
+/* --sk-surface-tint-lilac / --sk-on-tint-lilac, NOT --sk-surface-purple-tint.
+   The names this file used were defined nowhere in @spec-kitty/tokens, so `background:
+   var(--sk-surface-purple-tint)` was invalid at computed-value time and these two banners have
+   been rendering with NO background at all since they were written. Nothing caught it: the
+   hygiene gate that names undefined tokens runs on ADOPTED sheets, and section-banner had no
+   element until #77.
+   The tint family is the one this component was described in terms of — tokens.css:46 says
+   "dark: v2.x banner / purple" and :44 says "numbers banner / green", so the intended tokens
+   existed the whole time under the family's naming.
+   The foreground moves to the on-tint ink rather than --sk-color-purple: the colour tokens are
+   tuned for the dark page surface, and the light-mode tint surfaces are pastel, so the raw
+   colour on them is the low-contrast pairing --sk-on-tint-* exists to prevent. */
 .sk-section-banner--purple {
-  background: var(--sk-surface-purple-tint);
-  color: var(--sk-color-purple);
+  background: var(--sk-surface-tint-lilac);
+  color: var(--sk-on-tint-lilac);
 }
 
 .sk-section-banner--green {
-  background: var(--sk-surface-green-tint);
-  color: var(--sk-color-green);
+  background: var(--sk-surface-tint-mint);
+  color: var(--sk-on-tint-mint);
 }
 
 .sk-section-banner__dot {

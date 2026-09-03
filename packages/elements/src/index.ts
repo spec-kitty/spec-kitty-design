@@ -5,6 +5,7 @@ export { SkNavPill } from './nav-pill/sk-nav-pill.js';
 export { SkFormInput } from './form-input/sk-form-input.js';
 export { SkFormTextarea } from './form-textarea/sk-form-textarea.js';
 export { SkGrid } from './grid/sk-grid.js';
+export { SkSectionBanner } from './section-banner/sk-section-banner.js';
 
 /**
  * The generated constructed stylesheet, exported so a test can assert PROVENANCE.
@@ -21,6 +22,7 @@ export { default as skStubSheet } from './stub/sk-stub.css.js';
 // GENERATED from packages/styles/src/grid/sk-grid.css, and identity against the class's own
 // `static styles` would hold for any sheet at all.
 export { default as skGridSheet } from './grid/sk-grid.css.js';
+export { default as skSectionBannerSheet } from './section-banner/sk-section-banner.css.js';
 
 // The card's authored markup module, exported so the two failure policies are reachable
 // from the behaviour fixture. `cardClasses` is TOTAL (an unknown variant warns and degrades)
@@ -52,3 +54,15 @@ export {
   type GridGap,
   type GridVariant,
 } from './grid/sk-grid.markup.js';
+
+// The remaining two markup modules of #77's layout batch, exported so both failure policies
+// are reachable from the behaviour fixture.
+export {
+  SECTION_BANNER_AXES,
+  SECTION_BANNER_VARIANTS,
+  isSectionBannerVariant,
+  sectionBannerClasses,
+  sectionBannerStaticHtml,
+  type SectionBannerVariant,
+} from './section-banner/sk-section-banner.markup.js';
+

@@ -23,9 +23,10 @@
     "#74 adds five for <sk-form-input>. Note the @csspart JSDoc is what populates the manifest —",
     "a lens shipped eight part= attributes with an empty cssParts array and this ratchet stayed",
     "green at the old count, because it derives from the manifest and not from the rendered DOM.",
-    "#77 adds one for <sk-grid>: part \"grid\". A layout primitive's variants are a closed set, so the part is the only route a consumer has to a column count or gap the element does not offer — recorded here in the same PR as the [SC-013] test that targets it from outside."
+    "#77 adds one for <sk-grid>: part \"grid\". A layout primitive's variants are a closed set, so the part is the only route a consumer has to a column count or gap the element does not offer — recorded here in the same PR as the [SC-013] test that targets it from outside.",
+    "#77 adds three for <sk-section-banner> (banner, dot, label). <sk-site-footer> is deliberately not here — it is held out of this batch, see issue #77. Each is targeted from outside by the [SC-013] test in that element's own fixture file, not merely listed here — the ratchet derives from the manifest and cannot tell a declared part from a reachable one."
   ],
-  "total": 15,
+  "total": 18,
   "byElement": {
     "sk-card": [
       "card"
@@ -51,6 +52,11 @@
       "hamburger",
       "items",
       "nav"
+    ],
+    "sk-section-banner": [
+      "banner",
+      "dot",
+      "label"
     ]
   }
 }

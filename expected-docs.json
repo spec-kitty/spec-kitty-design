@@ -28,7 +28,7 @@
     "no attribute and cannot be delivered on a first render under ssrSafe — so they are not",
     "counted here either. See scripts/normalise-manifest.mjs."
   ],
-  "total": 37,
+  "total": 38,
   "elements": {
     "sk-card": {
       "attributes": 2,
@@ -49,6 +49,10 @@
     "sk-nav-pill": {
       "attributes": 2,
       "methods": 3
+    },
+    "sk-section-banner": {
+      "attributes": 1,
+      "methods": 0
     },
     "sk-stub": {
       "attributes": 0,
