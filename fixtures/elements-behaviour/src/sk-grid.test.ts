@@ -94,6 +94,34 @@ test('the slotted children are the GRID ITEMS, not the slot', async () => {
   }
 });
 
+/**
+ * Resize, then WAIT FOR THE MEDIA QUERY TO AGREE before returning.
+ *
+ * `await page.viewport()` resolves when the resize has been dispatched, NOT when the engine has
+ * re-evaluated media queries against the new size. Chromium happened to be fast enough that
+ * reading a computed style on the next line worked; webkit was not, and CI failed with
+ * "cols-2 must lay out 2 tracks: expected 1 to be 2" on the very first assertion — the test
+ * measuring the OLD viewport and reporting it as a broken stylesheet.
+ *
+ * So the precondition is asserted rather than assumed, and it throws with its own message if it
+ * never holds: a test that silently measured the wrong viewport is what this whole test exists
+ * to stop being.
+ */
+const resizeTo = async (width: number, height: number, expectNarrow: boolean) => {
+  await page.viewport(width, height);
+  const deadline = Date.now() + 2000;
+  while (window.matchMedia('(max-width: 720px)').matches !== expectNarrow) {
+    if (Date.now() > deadline) {
+      throw new Error(
+        `viewport(${width}, ${height}) did not re-evaluate the 720px media query within 2s — ` +
+          `matchMedia still reports ${!expectNarrow}. Every assertion after this point would ` +
+          `have measured the previous viewport.`,
+      );
+    }
+    await new Promise((resolve) => requestAnimationFrame(() => resolve(null)));
+  }
+};
+
 test('the column modifiers lay out N tracks above the breakpoint, and collapse below it', async () => {
   // BOTH WIDTHS ARE DRIVEN, and this test previously drove neither.
   //
@@ -110,7 +138,7 @@ test('the column modifiers lay out N tracks above the breakpoint, and collapse b
       .gridTemplateColumns.split(/\s+/)
       .filter(Boolean).length;
 
-  await page.viewport(1200, 800);
+  await resizeTo(1200, 800, false);
   try {
     for (const [variant, expected] of [
       ['cols-2', 2],
@@ -127,14 +155,11 @@ test('the column modifiers lay out N tracks above the breakpoint, and collapse b
     const { el: base } = await mount({}, 3);
     expect(await tracksFor(base), 'the base grid must stay single-column').toBe(1);
   } finally {
-    await page.viewport(414, 896);
+    await resizeTo(414, 896, true);
   }
 
   // And below the breakpoint every modifier collapses. Deleting the @media block reds this.
   const { el: narrow } = await mount({ variant: 'cols-3' }, 3);
-  expect(window.matchMedia('(max-width: 720px)').matches, 'the lane viewport was not restored').toBe(
-    true,
-  );
   expect(await tracksFor(narrow), 'below 720px every column modifier collapses to one track').toBe(
     1,
   );
