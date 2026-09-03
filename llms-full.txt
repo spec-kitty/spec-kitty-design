@@ -10,14 +10,22 @@ source of truth; this file mirrors what is in the repo at the time of writing.
 
 ## 1. Project overview
 
-`spec-kitty-design` is a token-driven, framework-progressive web design system
-for the Spec Kitty / Priivacy-ai ecosystem. A single CSS-custom-property token
-file (`@spec-kitty/tokens`) is the authoritative source for every visual value;
-two component packages (`@spec-kitty/styles` for framework-free CSS+HTML and
-`@spec-kitty/angular` for Angular wrappers) consume those tokens by reference,
-never by duplication. The system is published interactively as a Storybook
-catalogue and as two static demo pages (`blog-demo.html`, `dashboard-demo.html`),
-all deployed together to GitHub Pages.
+`spec-kitty-design` is a token-driven, **elements-first** web design system for
+the Spec Kitty / Priivacy-ai ecosystem. A single CSS-custom-property token file
+(`@spec-kitty/tokens`) is the authoritative source for every visual value.
+
+The component layer is a **custom element** (ADR-8): behaviour lives in a Lit
+element in `@spec-kitty/elements`, its CSS source of record lives in
+`@spec-kitty/styles`, and framework packages are **generated from the Custom
+Elements Manifest** rather than hand-maintained. `@spec-kitty/react` is the first
+and currently only such package, and every file in it is generated.
+
+This replaced a two-package topology in which `@spec-kitty/angular` held
+hand-written Angular wrappers. That package was deleted in #102 and Angular is
+not a target of this repo; references to it in older material are history.
+
+The system is published interactively as a Storybook catalogue and as two static
+demo pages (`blog-demo.html`, `dashboard-demo.html`), deployed to GitHub Pages.
 
 ### Repository layout
 
@@ -25,22 +33,32 @@ all deployed together to GitHub Pages.
 spec-kitty-design/
   packages/
     tokens/         # @spec-kitty/tokens — CSS custom properties + Falling Sky / Swansea / JetBrains Mono
-    styles/        # @spec-kitty/styles — framework-free CSS + lightweight JS components
-    angular/        # @spec-kitty/angular — Angular standalone component wrappers
+    styles/         # @spec-kitty/styles — the CSS source of record, plus GENERATED static HTML
+    elements/       # @spec-kitty/elements — the Lit custom elements, and the AUTHORED markup module
+    react/          # @spec-kitty/react — GENERATED React wrappers. Never hand-edited; CI fails on drift.
+  fixtures/
+    elements-behaviour/  # the behaviour suite's subjects
+    react-consumer/      # proves the wrappers work in a real React render
+    vite-consumer/       # proves the package resolves through a real bundler
   apps/
-    storybook/      # Storybook 10.x catalogue (Angular + HTML renderers)
+    storybook/      # Storybook 10.x catalogue (web-components renderer, ADR-13)
     demo/           # Static blog-demo.html, dashboard-demo.html, index.html
   docs/
     architecture/
-      decisions/    # ADRs (ADR-1 through ADR-7 + ADR-3 addendum)
+      decisions/    # ADRs (ADR-1 through ADR-13 + ADR-3 addendum)
       research/
       validation/
       assets/
+  behaviours.json        # the behaviour id registry (ADR-11) — 15 ids, 14 applicable
+  mutations.json         # one red-first mutation per (behaviour, subject) pair
+  expected-parts.json    # shrink-only ::part() ratchet
+  expected-docs.json     # exact-equality ratchet on documented attributes and methods
+  suite-budget.json      # the two CI time ceilings, with their measurements
   doctrine/         # Org-layer doctrine bundle (brand voice, visual identity, directives)
   kitty-specs/      # Mission specifications under spec-kitty governance
   .kittify/         # Spec Kitty runtime config and skills
   .github/workflows # CI: ci-quality.yml, pr-preview.yml, release.yml, storybook-deploy.yml
-  scripts/          # generate-token-catalogue.js, npm-audit-gate.sh, check-action-pins.sh, run-axe-storybook.js
+  scripts/          # the generators and the gates — see §"Gates" below
 ```
 
 ### Deployed surfaces
@@ -59,6 +77,14 @@ this file and `CLAUDE.md` disagree, `CLAUDE.md` wins.
 ---
 
 ## 2. Architecture (ADR summary)
+
+> **Reading order.** ADR-1 through ADR-7 are the original design and are
+> summarised as written, so they name Angular where the decision named it.
+> ADR-8 through ADR-13 are the elements-first architecture and are what the repo
+> does today. Where they disagree, the later ADR wins, and the summaries below
+> say so at the point of disagreement. **Nothing in this repo targets Angular:**
+> `packages/angular` was deleted in #102 and there is no Angular dependency in
+> any `package.json`.
 
 ADRs live under `docs/architecture/decisions/`. Status of every ADR below is
 **Accepted**. Each summary captures the canonical decision and its rationale.
@@ -80,9 +106,10 @@ repos.
 
 `docs/architecture/decisions/2026-05-01-2-monorepo-package-topology.md`.
 **Decision:** independently publishable packages in a single Nx monorepo, with
-a strictly one-directional dependency graph: `@spec-kitty/tokens ←
-@spec-kitty/angular`, `@spec-kitty/tokens ← @spec-kitty/styles`. No
-framework package may depend on another framework package. **Why:** an
+a strictly one-directional dependency graph. As shipped today that is
+`tokens ← styles ← elements ← react`, with fixtures allowed to depend on any of
+them; the ADR states the rule, and ADR-8 changed which packages it applies to.
+No framework package may depend on another framework package. **Why:** an
 Angular consumer should not pay for HTML/JS bytes and vice-versa; an Angular
 LTS major bump should not force a version bump on `@spec-kitty/tokens`; new
 framework targets (Vue, Svelte, React) must be additive without restructuring
@@ -162,6 +189,106 @@ is Angular 21.2.11. Storybook 10.x builds in ~10 s, well under the NFR-003
 ADR-006 already pre-authorised version adaptation. Notable 10.x differences
 versus 8.x: `addon-essentials` is merged into core, `docs.autodocs` was removed,
 `@storybook/blocks` moved to `@storybook/addon-docs/blocks`.
+
+> **ADR-6 and ADR-7 are superseded on the framework question.** Both reason about
+> rendering Angular stories. `packages/angular` was deleted in #102 and ADR-13
+> replaced the renderer with `@storybook/web-components`. They are summarised
+> above as the record of why the catalogue looks as it does, not as current
+> guidance.
+
+### ADR-8 — Custom Elements as the Base Layer
+
+`docs/architecture/decisions/2026-09-02-8-custom-elements-base-layer.md`.
+**Decision:** custom elements (Lit) are the shared base; framework packages
+become **thin wrappers generated from the Custom Elements Manifest**. A wrapper
+is published only when a consumer exists — frameworks with native custom-element
+support (Svelte, Vue, Solid, vanilla) get no package at all, because the manifest
+already gives them editor completion and type checking. React leads, because it
+had the one identified consumer waiting.
+
+**Two confirmations, in sequence.** #1: one component ships from a single CSS
+source and a single manifest into three consumption paths — a bundler-free HTML
+page, a Svelte app, and Storybook — **with no wrapper package in existence**.
+#2: a generated React wrapper of that same component passes the conformance
+matrix without hand editing, and CI fails if the output drifts. #75 discharged
+#2, which is why `packages/react` exists; #1 was not invalidated by it.
+
+### ADR-9 — Shadow DOM and the Styling API
+
+`docs/architecture/decisions/2026-09-02-9-shadow-dom-and-styling-api.md`.
+**Decision:** open shadow roots, and a consumer restyles through `::part()` —
+never by reaching into internals. Every declared part must be present and
+targetable. **Consequence that bites:** a selector whose leftmost compound
+targets an ancestor outside the shadow root is **inert** once the sheet is
+adopted, with no error and no warning.
+`scripts/check-adopted-css-boundaries.mjs` refuses those, and it is stricter
+than the ADR's own four-token enumeration because that enumeration catches only
+half of the defect that motivated it.
+
+### ADR-10 — Distribution and Canonical Markup
+
+`docs/architecture/decisions/2026-09-02-10-distribution-and-canonical-markup.md`.
+**§1** CSS reaches the element as a constructed stylesheet, never a `<style>`
+tag, so a consumer CSP without `style-src` cannot strip it.
+**§2** every element must reach **both** distribution entries — the ESM
+`index.ts` and the IIFE `elements.ts`; `check-elements-entries.mjs` enforces it,
+parsed from esbuild's metafile rather than matched as text.
+**§3** the element's template is the **sole authored source**: the static HTML
+and the styles-layer module are generated from it and CI fails on drift.
+**§5** registration goes through a guarded `define()` that warns and no-ops on a
+duplicate tag rather than throwing.
+
+### ADR-11 — Verification Stack and Wrapper Generation
+
+`docs/architecture/decisions/2026-09-02-11-verification-stack-and-wrapper-generation.md`.
+**Decision:** a named list of required behaviours, each with a test and a
+**red-first mutation** proving that test detects its own violation.
+`behaviours.json` is the registry, `mutations.json` the proofs, and
+`scripts/suite-selftest.mjs` runs one full suite per mutation and fails if any
+does not produce its named red.
+
+Item 9, **generation determinism**, is a Node-lane obligation: regenerating
+wrappers from an unchanged manifest is a no-op, and drift fails CI. It is
+declared in `behaviours.json` as SC-023 with `applicable: false`, because
+`build-react-wrappers.mjs --check` discharges it — the harness is browser-only
+and has no test to mutate here.
+
+### ADR-12 — Consumer Audit of Record
+
+`docs/architecture/decisions/2026-09-02-12-consumer-audit-of-record.md`.
+**Decision:** the set of real consumers is recorded rather than assumed, so
+"who breaks if this changes" has an answer that does not depend on memory.
+
+### ADR-13 — Storybook Web-Components Renderer
+
+`docs/architecture/decisions/2026-09-02-13-storybook-web-components-builder.md`.
+**Decision:** the catalogue renders through `@storybook/web-components`,
+replacing the Angular renderer ADR-6 and ADR-7 reason about.
+
+---
+
+## 2a. Gates
+
+CI runs these, and a component that passes only the obvious ones still fails.
+The authoritative list, and the order to run them in, is
+`docs/contributing/adding-a-component.md` §7 — kept there rather than duplicated
+here, because a second copy drifts.
+
+**Generators, all committed and all drift-checked:** `build-elements-css.mjs`,
+`build-element-markup.mjs`, `build-react-wrappers.mjs`, plus
+`nx run elements:analyze` for `custom-elements.json` (post-processed by
+`normalise-manifest.mjs`, which also corrects two things the analyzer gets
+wrong).
+
+**Content and hygiene:** `check-manifest-content.mjs` (every public attribute and
+method carries a description — `expected-docs.json` is an exact-equality
+ratchet), `check-elements-entries.mjs`, `check-adopted-css-boundaries.mjs`,
+`check-element-css-hygiene.mjs`, `check-no-css-in-source.mjs`,
+`check-part-ratchet.mjs`, `typecheck-all.mjs`.
+
+**Guarding the guards:** several gates ship a `--selftest` probe table, and
+`check-gate-wiring.mjs` asserts the CI job still invokes them — a gate deleted
+from the workflow is otherwise green.
 
 ---
 
@@ -390,91 +517,41 @@ fails contrast.
 
 Every component below has a Storybook entry. The catalogue's top-level
 taxonomy is fixed: `Components/`, `Form/`, `Navigation/`, `Primitives/`,
-`Tags/`, `Tokens/`. Per ADR-006 fallback, Angular and HTML stories appear as
-sibling entries with `(Angular)` / `(HTML)` suffixes. All Angular components
-are standalone (no NgModule).
+`Tags/`, `Tokens/`. Stories render through `@storybook/web-components`
+(ADR-13). A migrated component has an element story and, where it has a static
+form, a styles-layer story rendered from the GENERATED markup — never
+hand-written HTML in a story.
 
-### Angular package — `packages/angular/src/lib/`
+### elements package — `packages/elements/src/`
 
-#### sk-button-primary (Angular)
-- Path: `packages/angular/src/lib/button/sk-button-primary.component.ts` + `sk-button-primary.stories.ts`
-- Selector: `sk-button-primary`
-- Story title: `Components/ButtonPrimary`
-- Variants: `Default`, `Disabled`, `Small`, `LightMode`
-- Notes: yellow CTA button with dark ink (`--sk-fg-on-primary`); pill radius.
+The custom elements. Each is a Lit element registered through the guarded
+`define()` helper, with its CSS adopted as a constructed stylesheet generated
+from `packages/styles`, and its static HTML generated from the element's own
+markup module (ADR-10 §3).
 
-#### sk-button-secondary (Angular)
-- Path: `packages/angular/src/lib/button/sk-button-secondary.component.ts` + `sk-button-secondary.stories.ts`
-- Selector: `sk-button-secondary`
-- Story title: `Components/ButtonSecondary`
-- Variants: `Default`, `Disabled`, `Small`, `LightMode`
-- Notes: outlined / muted variant for non-primary actions.
+| element | owns behaviour | notes |
+|---|---|---|
+| `sk-card` | no | `variant` (blue/purple), `inset`; default slot |
+| `sk-nav-pill` | yes | fires `sk-nav-pill-toggle` with `detail: { open: boolean }`, cancelable; `isOpen` reflects as the `open` attribute |
+| `sk-form-input` | yes | form-associated via `ElementInternals`; `errorMessage` is `state: true` and deliberately not a React prop |
+| `sk-form-textarea` | yes | as `sk-form-input`, plus `rows` |
+| `sk-stub` | no | zero public members; the deliberate empty case several gates are floored against |
 
-#### sk-button-ghost (Angular)
-- Path: `packages/angular/src/lib/button/sk-button-ghost.component.ts`
-- Selector: `sk-button-ghost`
-- Notes: low-emphasis text-only button; no dedicated `.stories.ts` file (covered via `Components/Button (HTML)` showcase). Exported from `@spec-kitty/angular` index.
+The remaining catalogue components still live in `packages/styles` and have not
+yet been migrated — #77, #78 and #79 are the missions that move them.
 
-#### sk-card (Angular)
-- Path: `packages/angular/src/lib/card/sk-card.component.ts`
-- Selector: `sk-card`
-- Notes: container card surface; no dedicated Angular story file (variants demonstrated in `Components/Card` HTML story). Exported as `SkCardComponent`.
+### react package — `packages/react/src/`
 
-#### sk-check-bullet (Angular)
-- Path: `packages/angular/src/lib/check-bullet/sk-check-bullet.ts` + `sk-check-bullet.stories.ts`
-- Selector: `sk-check-bullet`
-- Story title: `Primitives/SkCheckBullet (Angular)`
-- Variants: `Default`, `ListOfThree`
-- Notes: green-check bullet item used in marketing feature lists.
+**Every file is generated** by `scripts/build-react-wrappers.mjs` from
+`custom-elements.json`, and committed. Never hand-edited: `--check` regenerates
+and fails on drift, on an orphaned file, and on a shrunken output set. One
+wrapper per element with a `tagName`, plus `index`, plus `react-utils`.
 
-#### sk-feature-card (Angular)
-- Path: `packages/angular/src/lib/feature-card/sk-feature-card.ts` + `sk-feature-card.stories.ts`
-- Selector: `sk-feature-card`
-- Story title: `Components/SkFeatureCard (Angular)`
-- Variants: `Default`, `GreenIcon`, `PurpleIcon`, `LightMode`
-- Notes: tinted feature card with icon, title, body; icon colour drives surface tint pairing.
-
-#### sk-form-field (Angular) — wraps `sk-form-input` and `sk-form-textarea`
-- Path: `packages/angular/src/lib/form-field/sk-form-field.ts` (+ `sk-form-input.ts`, `sk-form-textarea.ts`) + `sk-form-field.stories.ts`
-- Selectors: `sk-form-field`, `sk-form-input`, `sk-form-textarea`
-- Story title: `Form/FormInput (Angular)`
-- Variants: `FormInputDefault`, `FormInputFocus`, `FormInputError`, `FormInputDisabled`, `FormInputFilled`, `FormTextareaDefault`, `FormTextareaError`
-- Notes: label-wrapper container plus input/textarea atoms; supports error and disabled states via attribute bindings.
-
-#### sk-nav-pill (Angular)
-- Path: `packages/angular/src/lib/nav-pill/sk-nav-pill.ts` + `sk-nav-pill.stories.ts`
-- Selector: `sk-nav-pill`
-- Story title: `Navigation/SkNavPill (Angular)`
-- Variants: `Default`, `ActiveItem`, `FirstItemActive`, `LightMode`, `Mobile`
-- Notes: pill-shaped horizontal nav rail; exposes `NavPillItem` type for items array.
-
-#### sk-pill-tag (Angular) and sk-eyebrow-pill (Angular)
-- Paths: `packages/angular/src/lib/pill-tag/sk-pill-tag.ts` (+ `sk-eyebrow-pill.ts`) + `sk-pill-tag.stories.ts`
-- Selectors: `sk-pill-tag`, `sk-eyebrow-pill`
-- Story title: `Tags/SkPillTag (Angular)`
-- Variants: `Default`, `Green`, `Purple`, `Breaking`, `Yellow`, `AllVariants`, `LightMode`, `EyebrowPill`
-- Notes: small status / category chip; `PillTagVariant` type enumerates colourways. Eyebrow pill is the smaller rounded label variant rendered above headings.
-
-#### sk-ribbon-card (Angular)
-- Path: `packages/angular/src/lib/ribbon-card/sk-ribbon-card.ts` + `sk-ribbon-card.stories.ts`
-- Selector: `sk-ribbon-card`
-- Story title: `Components/SkRibbonCard (Angular)`
-- Variants: `Default`, `WithRibbon`, `RibbonGreen`, `RibbonPurple`, `LightMode`
-- Notes: card with optional corner ribbon; ribbon colour aligns with section tint family.
-
-#### sk-section-banner (Angular)
-- Path: `packages/angular/src/lib/section-banner/sk-section-banner.ts` + `sk-section-banner.stories.ts`
-- Selector: `sk-section-banner`
-- Story title: `Primitives/SkSectionBanner (Angular)`
-- Variants: `Neutral`, `Purple`, `Green`
-- Notes: section divider banner used between marketing rows.
-
-#### sk-stub (Angular)
-- Path: `packages/angular/src/lib/stub/sk-stub.ts` + `sk-stub.stories.ts`
-- Selector: `sk-stub`
-- Story title: `Primitives/SkStub (Angular)`
-- Variants: `Default`, `OnLightBackground`, `Mobile`, `Desktop`, `Hover`
-- Notes: WP04 proof-of-concept primitive that confirmed Storybook 10.x multi-framework rendering and viewport addons.
+Props are the element's public **attributed** fields — `state: true` properties
+are excluded, because `ssrSafe` defers registration and React delivers
+first-render props as attributes, so a property with no observed attribute could
+never arrive. Event handlers are `on<PascalCase>` of the declared event name and
+carry the detail generic from the element's `@fires {Type}`.
 
 ### styles package — `packages/styles/src/`
 
@@ -494,7 +571,7 @@ are standalone (no NgModule).
 - Path: `packages/styles/src/check-bullet/sk-check-bullet.css` + `sk-check-bullet.html` + `sk-check-bullet-html.stories.ts`
 - Story title: `Primitives/SkCheckBullet (HTML)`
 - Variants: `Default`, `ListOfThree`, `LightMode`
-- Notes: identical visual to Angular variant; pure CSS (no JS).
+- Notes: pure CSS (no JS).
 
 #### sk-feature-card (styles)
 - Path: `packages/styles/src/feature-card/sk-feature-card.css` + `sk-feature-card.html` + `sk-feature-card-html.stories.ts`
@@ -531,13 +608,13 @@ are standalone (no NgModule).
 - Path: `packages/styles/src/pill-tag/sk-pill-tag.css` + `sk-pill-tag.html` + `sk-pill-tag.stories.ts`
 - Story title: `Tags/SkPillTag (HTML)`
 - Variants: `Default`, `Green`, `Purple`, `Breaking`, `Yellow`, `AllVariants`, `EyebrowPill`, `LightMode`
-- Notes: exports both `SkPillTagHTML` and `SkEyebrowPillHTML`; same `PillTagVariant` type as Angular.
+- Notes: exports both `SkPillTagHTML` and `SkEyebrowPillHTML`; same `PillTagVariant` type.
 
 #### sk-ribbon-card (styles)
 - Path: `packages/styles/src/ribbon-card/sk-ribbon-card.css` + `sk-ribbon-card.html` + `sk-ribbon-card-plain.html` + `sk-ribbon-card-html.stories.ts`
 - Story title: `Components/SkRibbonCard (HTML)`
 - Variants: `Default`, `WithRibbon`, `RibbonYellow`, `RibbonGreen`, `RibbonPurple`, `LightMode`
-- Notes: styles variant adds `RibbonYellow` (Angular omits this colourway).
+- Notes: includes the `RibbonYellow` colourway.
 
 #### sk-section-banner (styles)
 - Path: `packages/styles/src/section-banner/sk-section-banner.css` + `sk-section-banner.html` + `sk-section-banner-html.stories.ts`
@@ -545,11 +622,11 @@ are standalone (no NgModule).
 - Variants: `Neutral`, `Purple`, `Green`, `LightMode`
 - Notes: exports `SkSectionBannerNeutralHTML`, `SkSectionBannerPurpleHTML`, `SkSectionBannerGreenHTML`.
 
-#### sk-site-footer (styles, no Angular twin)
+#### sk-site-footer (styles)
 - Path: `packages/styles/src/site-footer/sk-site-footer.css` + `sk-site-footer.stories.ts`
 - Story title: `Components/SiteFooter`
 - Variants: `Default`, `LightMode`
-- Notes: marketing footer with brand mark, link columns, legal line. styles only — no Angular wrapper exists.
+- Notes: marketing footer with brand mark, link columns, legal line.
 
 #### sk-stub (styles)
 - Path: `packages/styles/src/stub/sk-stub.css` + `sk-stub.html` + `sk-stub-html.stories.ts`
@@ -605,19 +682,18 @@ Actions `uses:` directives pinned to immutable commit SHAs).
   no-hardcoded-values rule (it defines them).
 - **ESLint** (`eslint.config.mjs`) — Nx flat-base plus
   `@nx/enforce-module-boundaries` with the ADR-002 dependency direction baked
-  in: `scope:angular` and `scope:styles` may only depend on `scope:tokens`;
-  `scope:docs` may depend on tokens / angular / styles; publishable packages
-  cannot depend on internal-tagged libs. `eslint-plugin-security` warns on
+  in: `scope:styles` may only depend on `scope:tokens`; `scope:elements` on
+  styles and tokens; `scope:react` on elements, styles and tokens; and a
+  `scope:fixture` on any of those. Publishable packages cannot depend on
+  internal-tagged libs. A project with no tag is not exempt from these rules —
+  it is invisible to them, which reads the same from outside and is worse. `eslint-plugin-security` warns on
   object-injection / non-literal-fs and errors on unsafe-regex.
 - **HTMLHint** (`.htmlhintrc`) — covers structural HTML quality on
   `packages/styles/src/**/*.html`, `apps/demo/**/*.html` and `audit/*.html`.
-  Enforcing: the command carries no `|| true`. `packages/angular` is deliberately
-  excluded — Angular templates are fragments, so `attr-lowercase` (`*ngIf`) and
-  `input-requires-label` are category errors there; #69 retires that package.
+  Enforcing: the command carries no `|| true`.
 - **commitlint** — extends `@commitlint/config-conventional`; the `scope-enum`
-  rule restricts scopes to: `tokens`, `angular`, `styles`, `storybook`,
-  `doctrine`, `ci`, `docs`, `release`, `deps`, `security`, plus `elements` and
-  `react` reserved for packages not yet created (ADR-8). Subject case must
+  rule restricts scopes to: `tokens`, `storybook`, `doctrine`, `ci`, `docs`,
+  `release`, `deps`, `security`, `styles`, `elements` and `react`. Subject case must
   not be upper / pascal / start case.
 
 ### CI workflow — `.github/workflows/ci-quality.yml`
@@ -746,31 +822,26 @@ snippet for a package that does not exist would be the same mistake. The shape i
 </sk-nav-pill>
 ```
 
-### Angular
+### React
 
 ```bash
-npm install @spec-kitty/angular @spec-kitty/tokens
+npm install @spec-kitty/react @spec-kitty/elements @spec-kitty/tokens
 ```
 
-```ts
-import { SkButtonPrimaryComponent } from '@spec-kitty/angular';
+```tsx
+import { SkFormInput, type SkFormInputElement } from '@spec-kitty/react';
+
+const ref = useRef<SkFormInputElement>(null);
+<SkFormInput ref={ref} name="email" label="Email" required />;
 ```
 
-All Angular components are standalone — import them directly into a
-`@Component({ imports: [...] })` declaration. The full export list lives at
-`packages/angular/src/index.ts` and includes: `SkStubComponent`,
-`SkButtonPrimaryComponent`, `SkButtonSecondaryComponent`,
-`SkButtonGhostComponent`, `SkCheckBulletComponent`, `SkSectionBannerComponent`,
-`SkFormFieldComponent`, `SkFormInputComponent`, `SkFormTextareaComponent`,
-`SkNavPillComponent` (+ `NavPillItem` type), `SkPillTagComponent` (+
-`PillTagVariant` type), `SkEyebrowPillComponent`, `SkFeatureCardComponent`,
-`SkRibbonCardComponent`, `SkCardComponent`.
+The wrappers buy JSX prop typing and a typed ref. They are **not** required:
+React 19 scores 16/16 on Custom Elements Everywhere for basic and advanced
+interop, so the elements work directly. `docs/design-system/using-react.md`
+records what the wrapper does and does not buy, measured.
 
-The token CSS must still be loaded once at the application root (typically via
-`styles.css` `@import` or a global `<link>`).
-
----
-
+`'use client'` is emitted for you and element registration is deferred into an
+effect, because a custom element cannot run in a server render.
 ## 8. Adding to the design system (agent recipe)
 
 Concise step-by-step that an LLM agent or contributor can follow to add a new
@@ -778,30 +849,37 @@ piece to the system without violating any gate.
 
 1. **Choose a package.**
    - New design value (colour, spacing step, radius, shadow, motion curve) — `@spec-kitty/tokens`.
-   - New framework-free component — `@spec-kitty/styles`.
-   - New Angular wrapper of an existing primitive — `@spec-kitty/angular`.
-   - New pattern that needs to land in both renderers — implement in `styles` first, then Angular wrapper that mirrors the markup.
+   - New component — the CSS source of record in `@spec-kitty/styles`, and the
+     custom element in `@spec-kitty/elements`. There is no third choice: since
+     ADR-8 the element is the component, and the static HTML is generated from it.
+   - A framework wrapper — you do not write one. `@spec-kitty/react` is generated
+     from the manifest, and a wrapper package exists only where a consumer needs
+     one (ADR-8). Getting the element and its JSDoc right is the whole job.
+
+   **Follow `docs/contributing/adding-a-component.md`** rather than this list —
+   it is the maintained recipe and it names every gate you must pass.
 
 2. **Create files** under the package:
    - `packages/<pkg>/src/<component>/<sk-name>.css` — styles.
-   - `packages/<pkg>/src/<component>/<sk-name>.html` — markup (styles) or `<sk-name>.component.html` (Angular).
+   - `packages/elements/src/<component>/sk-<name>.markup.ts` — the AUTHORED markup.
+     The `.html` and the styles-layer module are GENERATED from it (ADR-10 §3).
    - `packages/<pkg>/src/<component>/<sk-name>.stories.ts` — Storybook entry.
-   - Angular only: `<sk-name>.component.ts` (or `<sk-name>.ts`) plus `<sk-name>.spec.ts` for unit tests.
-   - Update the package's `src/index.ts` to export the new symbol (Angular: the component class; styles: an HTML string constant).
+   - `packages/elements/src/<component>/sk-<name>.ts` — the element, registered through `define()`.
+   - Update `packages/elements/src/index.ts` AND `src/elements.ts` — both distribution entries, or `check-elements-entries.mjs` fails.
 
 3. **CSS rules.**
    - Use only `var(--sk-*)` references. No raw `#hex`, `rgb()`, `rem`, `px` literals on the property families enforced by Stylelint (`color`, `background`, `background-color`, `font-family`, `padding`, `margin`, `border-radius`). Allowed literal values: `transparent`, `inherit`, `initial`, `unset`, `none`, `currentColor`, `0`.
    - Add new token values to `packages/tokens/src/tokens.css` first, then run `npx nx run tokens:catalogue` so the catalogue and Stylelint allowlist update before the consuming component CSS is committed.
 
 4. **Story file.**
-   - `title:` must match the existing taxonomy: `Components/<Name>`, `Form/<Name>`, `Navigation/<Name>`, `Primitives/<Name>`, `Tags/<Name>`, or `Tokens/<Name>`. Mirror Angular and styles entries with `(Angular)` / `(HTML)` suffixes per ADR-006 fallback.
+   - `title:` must match the existing taxonomy: `Components/<Name>`, `Form/<Name>`, `Navigation/<Name>`, `Primitives/<Name>`, `Tags/<Name>`, or `Tokens/<Name>`. A migrated component has an element story and, where it has a static form, a styles-layer story rendered from the generated markup.
    - Required exports: `Default` plus a `LightMode` variant. The `LightMode` story wraps the rendered output in `<div data-theme="light" style="background: var(--sk-surface-page); padding: var(--sk-space-7);">…</div>` and sets `parameters.backgrounds.default: 'sk-light'`.
    - Cover meaningful states: error, disabled, hover, focus, mobile viewport — each as a separate named export.
 
 5. **Naming.**
    - BEM with `sk-` block prefix: `sk-block`, `sk-block__element`, `sk-block--modifier`. JS state classes use the `is-` prefix (e.g. `is-active`).
-   - Selectors / Angular component selectors are kebab-case with `sk-` prefix (e.g. `sk-button-primary`).
-   - Angular class names: PascalCase ending in `Component` (e.g. `SkButtonPrimaryComponent`).
+   - Custom element tag names are kebab-case with the `sk-` prefix (e.g. `sk-nav-pill`), declared with an `@element` JSDoc.
+   - Element class names: PascalCase matching the tag (e.g. `SkNavPill`). The generated React wrapper reuses that name.
 
 6. **Run the local quality gates** before pushing:
    ```bash
@@ -814,7 +892,7 @@ piece to the system without violating any gate.
 
    ```
    feat(styles): add sk-modal primitive
-   feat(angular): add SkModalComponent wrapper
+   feat(elements): add sk-modal
    feat(tokens): add --sk-shadow-overlay token
    docs(docs): document sk-modal usage in storybook getting-started
    ```

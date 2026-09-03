@@ -17,7 +17,8 @@
 
 - [@spec-kitty/tokens README](https://github.com/stijn-dejongh/spec-kitty-design/blob/main/packages/tokens/README.md): Token categories, semantic pairing rules, light mode, linting.
 - [@spec-kitty/styles README](https://github.com/stijn-dejongh/spec-kitty-design/blob/main/packages/styles/README.md): Framework-agnostic CSS + minimal JS modules.
-- [@spec-kitty/angular README](https://github.com/stijn-dejongh/spec-kitty-design/blob/main/packages/angular/README.md): Angular component wrappers, peer deps Angular >=19.
+- [@spec-kitty/elements README](https://github.com/stijn-dejongh/spec-kitty-design/blob/main/packages/elements/README.md): the Lit custom elements — the component layer since ADR-8.
+- [@spec-kitty/react README](https://github.com/stijn-dejongh/spec-kitty-design/blob/main/packages/react/README.md): GENERATED React wrappers. Never hand-edited; CI fails on drift.
 
 ## Architecture & doctrine
 
