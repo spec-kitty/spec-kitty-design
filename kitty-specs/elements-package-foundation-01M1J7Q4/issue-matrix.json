@@ -85,7 +85,7 @@
       "wp": null
     },
     "#72": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "Follow-up: #72 (M6) is the first component migration and a candidate owner for FR-010's lint rule if the operator defers it.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -93,7 +93,7 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
+      "verdict": "deferred-with-followup",
       "wp": null
     },
     "#79": {
