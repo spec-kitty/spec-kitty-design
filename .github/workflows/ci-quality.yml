@@ -140,6 +140,18 @@ jobs:
         run: node scripts/check-no-css-in-source.mjs
       - name: "[ENFORCED] Generated CSS modules are current (ADR-10 generated-artifact contract)"
         run: node scripts/build-elements-css.mjs --check
+      # The manifest is a generated artifact under ADR-10's contract, and ADR-11
+      # generates the React wrapper FROM it — a manifest that drifts from source
+      # propagates into generated code two missions from now. The analyzer's own
+      # plugin (packages/elements/custom-elements-manifest.config.mjs) additionally
+      # exits non-zero if any definition is named `tag`, which is what the guarded
+      # define() helper produces if it ever stops being excluded. Verified by
+      # removing the exclusion: cem exits 1 and writes no manifest.
+      - name: "[ENFORCED] Custom Elements Manifest is current (FR-006, SC-004)"
+        run: |
+          npx nx run elements:analyze
+          git diff --exit-code -- packages/elements/custom-elements.json \
+            || { echo "::error::custom-elements.json is stale. Run: npx nx run elements:analyze"; exit 1; }
       - name: "[ENFORCED] commitlint (FR-020)"
         if: github.event_name == 'pull_request'
         run: npx commitlint --from=${{ github.event.pull_request.base.sha }} --to=${{ github.sha }}

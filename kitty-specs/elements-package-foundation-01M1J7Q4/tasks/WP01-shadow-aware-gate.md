@@ -60,15 +60,15 @@ Every traversal helper must check `n.shadowRoot` **before** walking `n.childNode
 
 ## Subtasks
 
-- **T001** — Add flat-tree traversal and apply it at all four sites. **Base case: check `n.shadowRoot` before walking `n.childNodes`, and walk BOTH** — a squad's first attempt descended into children's shadow roots but not the node's own and rejected a correctly-rendered element; walking the shadow root *instead of* children breaks case 9. Sharing one selector constant is **not sufficient** any more: after this change the drift lives in the *traversal*, and the two sites cross separate serialization boundaries (`:271` vs `:318`). Hoist the traversal into one stringified source injected at both call sites — and note the lesson from #102, where an `eval`-based hoist made `waitForFunction` throw into that same swallowing catch and silently disabled the wait. Pass it as data, not code.
-- **T002** — Author throwaway fixture stories under `packages/elements/src/__fixtures__/` (this WP owns that path; `packages/elements/` exists because WP02 ran first). **Eleven cases, not eight** — the extra three are shapes a real #72 component hits:
+- [x] **T001** — Add flat-tree traversal and apply it at all four sites. **Base case: check `n.shadowRoot` before walking `n.childNodes`, and walk BOTH** — a squad's first attempt descended into children's shadow roots but not the node's own and rejected a correctly-rendered element; walking the shadow root *instead of* children breaks case 9. Sharing one selector constant is **not sufficient** any more: after this change the drift lives in the *traversal*, and the two sites cross separate serialization boundaries (`:271` vs `:318`). Hoist the traversal into one stringified source injected at both call sites — and note the lesson from #102, where an `eval`-based hoist made `waitForFunction` throw into that same swallowing catch and silently disabled the wait. Pass it as data, not code.
+- [x] **T002** — Author throwaway fixture stories under `packages/elements/src/__fixtures__/` (this WP owns that path; `packages/elements/` exists because WP02 ran first). **Eleven cases, not eight** — the extra three are shapes a real #72 component hits:
   1. shadow-only element renders → PASS
   2-7. the six NFR-002 shapes as the **entire content** of an open shadow root → FAIL
   8. empty `sk-*` block beside a text-bearing sibling in the same shadow root → FAIL
   9. **slotted content**: `<sk-x>text</sk-x>` with shadow `<div><slot></slot></div>` → **PASS**. A literal reading of "shadow root *before* child nodes" that walks the shadow root *instead of* childNodes makes the light-DOM text invisible and fails a correct element. Nearly every migrated component takes children.
   10. **slot with nothing assigned and nothing else in the shadow root** → FAIL.
   11. **nested host**: an `sk-*` host inside another element's shadow root → the empty case must FAIL. `hostsByTag`/`hostsByClass` use `root.querySelectorAll('*')`, which crosses no boundary; the traversal must recurse arbitrarily, and all eight original cases sit at depth 1.
-- **T003** — Capture the before/after per-story baseline over the existing 74 stories, port-normalised.
+- [x] **T003** — Capture the before/after per-story baseline over the existing 74 stories, port-normalised.
 
 ## Definition of Done
 

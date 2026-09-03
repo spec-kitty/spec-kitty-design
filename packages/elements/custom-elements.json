@@ -1,0 +1,63 @@
+{
+  "schemaVersion": "1.0.0",
+  "readme": "",
+  "modules": [
+    {
+      "kind": "javascript-module",
+      "path": "packages/elements/src/elements.ts",
+      "declarations": [],
+      "exports": []
+    },
+    {
+      "kind": "javascript-module",
+      "path": "packages/elements/src/index.ts",
+      "declarations": [],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "define",
+          "declaration": {
+            "name": "define",
+            "module": "./define.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "SkStub",
+          "declaration": {
+            "name": "SkStub",
+            "module": "./stub/sk-stub.js"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "packages/elements/src/stub/sk-stub.ts",
+      "declarations": [
+        {
+          "kind": "class",
+          "description": "The scaffold element for the ADR-8 custom-element base layer.",
+          "name": "SkStub",
+          "members": [],
+          "superclass": {
+            "name": "LitElement",
+            "package": "lit"
+          },
+          "tagName": "sk-stub",
+          "customElement": true
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "SkStub",
+          "declaration": {
+            "name": "SkStub",
+            "module": "packages/elements/src/stub/sk-stub.ts"
+          }
+        }
+      ]
+    }
+  ]
+}
