@@ -35,6 +35,37 @@
  */
 export const registeredTags: string[] = [];
 
+/**
+ * Record from the PLATFORM entry point, not from this module's own function.
+ *
+ * The first version pushed inside `define()` and justified itself with "verified: no direct
+ * `customElements.define` exists outside the test fixtures" — a point-in-time grep with nothing
+ * keeping it true. A pass-2 lens defeated it with one character of indirection:
+ *
+ *     (customElements as unknown as Record<string, Function>)["define"]("sk-smuggled", Ctor);
+ *
+ * A literal `customElements.define(…)` call IS caught, indirectly: the manifest analyzer sees
+ * it, the manifest changes, and `git diff --exit-code` or config-contract's tag-set equality
+ * reds. Computed member access is invisible to all of it — the lens measured that element
+ * registered and form-associated at runtime with the manifest byte-identical, 80/80 tests
+ * green, and all seven static gates passing.
+ *
+ * So the array is populated by wrapping `customElements.define` itself. There is no way to
+ * register an element without going through it, which is what "unevadable" has to mean.
+ * `registeredTags` is then a genuine record rather than a claim about developer discipline.
+ */
+const nativeDefine = customElements.define.bind(customElements);
+customElements.define = function patchedDefine(
+  tag: string,
+  ctor: CustomElementConstructor,
+  options?: ElementDefinitionOptions,
+): void {
+  nativeDefine(tag, ctor, options);
+  // AFTER the native call, so a tag that throws (duplicate, invalid name) is not recorded as
+  // registered. Moving this above would make the array claim tags that never registered.
+  registeredTags.push(tag);
+} as typeof customElements.define;
+
 export function define(tag: string, ctor: CustomElementConstructor): void {
   const existing = customElements.get(tag);
   if (existing) {
@@ -49,5 +80,4 @@ export function define(tag: string, ctor: CustomElementConstructor): void {
     return;
   }
   customElements.define(tag, ctor);
-  registeredTags.push(tag);
 }

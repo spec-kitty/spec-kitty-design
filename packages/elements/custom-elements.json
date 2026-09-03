@@ -7,201 +7,6 @@
       "path": "./dist/index.js",
       "declarations": [
         {
-          "kind": "class",
-          "description": "",
-          "name": "FormControlBase",
-          "members": [
-            {
-              "kind": "field",
-              "name": "formAssociated",
-              "type": {
-                "text": "boolean"
-              },
-              "static": true,
-              "default": "true"
-            },
-            {
-              "kind": "field",
-              "name": "name",
-              "type": {
-                "text": "string"
-              },
-              "default": "''"
-            },
-            {
-              "kind": "field",
-              "name": "label",
-              "type": {
-                "text": "string"
-              },
-              "default": "''"
-            },
-            {
-              "kind": "field",
-              "name": "description",
-              "type": {
-                "text": "string"
-              },
-              "default": "''"
-            },
-            {
-              "kind": "field",
-              "name": "disabled",
-              "type": {
-                "text": "boolean"
-              },
-              "default": "false"
-            },
-            {
-              "kind": "field",
-              "name": "required",
-              "type": {
-                "text": "boolean"
-              },
-              "default": "false"
-            },
-            {
-              "kind": "field",
-              "name": "value",
-              "type": {
-                "text": "string"
-              },
-              "default": "''"
-            },
-            {
-              "kind": "field",
-              "name": "internals",
-              "type": {
-                "text": "ElementInternals"
-              },
-              "privacy": "protected"
-            },
-            {
-              "kind": "field",
-              "name": "initialValue",
-              "type": {
-                "text": "string"
-              },
-              "privacy": "protected",
-              "default": "''",
-              "description": "Captured on connect, restored by `formResetCallback`. `protected`, not `#private`: a\n`#`-private field is not visible to a subclass, and the reset anchor lives in the\nsubclass so its mutation reds exactly one element's test."
-            },
-            {
-              "kind": "method",
-              "name": "upgradeProperty",
-              "privacy": "protected",
-              "return": {
-                "type": {
-                  "text": "void"
-                }
-              },
-              "parameters": [
-                {
-                  "name": "prop",
-                  "type": {
-                    "text": "'value' | 'disabled' | 'required'"
-                  }
-                }
-              ],
-              "description": "A property assigned before the definition loaded shadows the accessor the class installs on\nupgrade. Lit handles its own reactive properties; this covers the same ground explicitly so\nthe behaviour is the element's rather than a framework detail nothing asserts."
-            },
-            {
-              "kind": "field",
-              "name": "errorId",
-              "type": {
-                "text": "string"
-              },
-              "privacy": "protected",
-              "description": "The element's own id for its error node. Shadow-internal, so it never collides across\ninstances and never appears in the consumer's light DOM.",
-              "readonly": true
-            },
-            {
-              "kind": "field",
-              "name": "validity",
-              "type": {
-                "text": "ValidityState"
-              },
-              "readonly": true
-            },
-            {
-              "kind": "field",
-              "name": "validationMessage",
-              "type": {
-                "text": "string"
-              },
-              "readonly": true
-            },
-            {
-              "kind": "method",
-              "name": "checkValidity",
-              "return": {
-                "type": {
-                  "text": "boolean"
-                }
-              }
-            },
-            {
-              "kind": "method",
-              "name": "reportValidity",
-              "return": {
-                "type": {
-                  "text": "boolean"
-                }
-              }
-            },
-            {
-              "kind": "field",
-              "name": "error",
-              "type": {
-                "text": "string"
-              },
-              "description": "READ-ONLY, derived from validity — never a settable property.\n\nA settable `error` alongside `setValidity` is two sources of truth: `error=\"…\"` would paint\nthe error state on an element that still matches `:valid` and submits happily, the story\nwould render red, axe would pass, and nothing would notice.",
-              "readonly": true
-            },
-            {
-              "kind": "method",
-              "name": "setCustomError",
-              "return": {
-                "type": {
-                  "text": "void"
-                }
-              },
-              "parameters": [
-                {
-                  "name": "message",
-                  "type": {
-                    "text": "string | null"
-                  }
-                }
-              ],
-              "description": "Set or clear a validation error the element cannot derive itself — a server-side rejection,\na cross-field rule. Pass `null` to clear it.\n\nThis exists because a lens found the only lever a consumer HAD was `el.invalid = true`,\nand that produced the worst possible state: `:host([invalid])` painted the field red,\n`aria-invalid` said `true`, `aria-describedby` pointed at an error node rendering the\nEMPTY string — because `setValidity` had never been called — and `internals.validity.valid`\nstayed `true`, so the form submitted anyway. An error identified visually with no\nprogrammatic text, on a control that still submits (WCAG 3.3.1).\n\nRouting through `setValidity` keeps the one-source-of-truth the `error` getter above\nargues for: validity is the state, `invalid` and the message are both derived from it."
-            },
-            {
-              "kind": "field",
-              "name": "customError",
-              "type": {
-                "text": "string"
-              },
-              "privacy": "protected",
-              "default": "''",
-              "description": "Non-empty while a consumer-supplied error is active. Read by each element's `validate()`\nso a derived rule cannot silently clobber a server-side one."
-            },
-            {
-              "kind": "field",
-              "name": "invalid",
-              "type": {
-                "text": "boolean"
-              },
-              "description": "Reflected invalid state. Declared here so `setCustomError` can set it; each element\nregisters it as a reactive property so the adopted sheet's `:host([invalid])` can see it."
-            }
-          ],
-          "superclass": {
-            "name": "LitElement",
-            "package": "lit"
-          },
-          "customElement": true
-        },
-        {
           "kind": "variable",
           "name": "CARD_VARIANTS",
           "type": {
@@ -209,42 +14,6 @@
           },
           "default": "{ blue: 'sk-card--blue', purple: 'sk-card--purple' }",
           "description": "Variant → BEM modifier. The static layer's classes are the contract; the element's\n`variant=\"blue\"` attribute is sugar over them."
-        },
-        {
-          "kind": "function",
-          "name": "isCardVariant",
-          "return": {
-            "type": {
-              "text": "variant is CardVariant"
-            }
-          },
-          "parameters": [
-            {
-              "name": "variant",
-              "type": {
-                "text": "string"
-              }
-            }
-          ],
-          "description": "Whether `variant` names a real card modifier."
-        },
-        {
-          "kind": "function",
-          "name": "unknownVariantMessage",
-          "return": {
-            "type": {
-              "text": "string"
-            }
-          },
-          "parameters": [
-            {
-              "name": "variant",
-              "type": {
-                "text": "string"
-              }
-            }
-          ],
-          "description": "The shared diagnostic for an unrecognised variant."
         },
         {
           "kind": "function",
@@ -298,6 +67,238 @@
         },
         {
           "kind": "class",
+          "description": "",
+          "name": "FormControlBase",
+          "members": [
+            {
+              "kind": "method",
+              "name": "checkValidity",
+              "return": {
+                "type": {
+                  "text": "boolean"
+                }
+              }
+            },
+            {
+              "kind": "field",
+              "name": "customError",
+              "type": {
+                "text": "string"
+              },
+              "privacy": "protected",
+              "default": "''",
+              "description": "Non-empty while a consumer-supplied error is active. Read by each element's `validate()`\nso a derived rule cannot silently clobber a server-side one."
+            },
+            {
+              "kind": "field",
+              "name": "description",
+              "type": {
+                "text": "string"
+              },
+              "default": "''"
+            },
+            {
+              "kind": "field",
+              "name": "disabled",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false"
+            },
+            {
+              "kind": "field",
+              "name": "error",
+              "type": {
+                "text": "string"
+              },
+              "description": "READ-ONLY, derived from validity — never a settable property.\n\nA settable `error` alongside `setValidity` is two sources of truth: `error=\"…\"` would paint\nthe error state on an element that still matches `:valid` and submits happily, the story\nwould render red, axe would pass, and nothing would notice.",
+              "readonly": true
+            },
+            {
+              "kind": "field",
+              "name": "errorId",
+              "type": {
+                "text": "string"
+              },
+              "privacy": "protected",
+              "description": "The element's own id for its error node. Shadow-internal, so it never collides across\ninstances and never appears in the consumer's light DOM.",
+              "readonly": true
+            },
+            {
+              "kind": "field",
+              "name": "errorMessage",
+              "type": {
+                "text": "string"
+              },
+              "description": "The message the error node renders. A reactive property rather than a read through\n`internals.validationMessage`, because Lit cannot observe a getter over internals — see\neach element's `static properties`."
+            },
+            {
+              "kind": "field",
+              "name": "formAssociated",
+              "type": {
+                "text": "boolean"
+              },
+              "static": true,
+              "default": "true"
+            },
+            {
+              "kind": "field",
+              "name": "initialValue",
+              "type": {
+                "text": "string"
+              },
+              "privacy": "protected",
+              "default": "''",
+              "description": "Captured on connect, restored by `formResetCallback`. `protected`, not `#private`: a\n`#`-private field is not visible to a subclass, and the reset anchor lives in the\nsubclass so its mutation reds exactly one element's test."
+            },
+            {
+              "kind": "field",
+              "name": "internals",
+              "type": {
+                "text": "ElementInternals"
+              },
+              "privacy": "protected"
+            },
+            {
+              "kind": "field",
+              "name": "invalid",
+              "type": {
+                "text": "boolean"
+              },
+              "description": "Reflected invalid state. Declared here so `setCustomError` can set it; each element\nregisters it as a reactive property so the adopted sheet's `:host([invalid])` can see it."
+            },
+            {
+              "kind": "field",
+              "name": "label",
+              "type": {
+                "text": "string"
+              },
+              "default": "''"
+            },
+            {
+              "kind": "field",
+              "name": "name",
+              "type": {
+                "text": "string"
+              },
+              "default": "''"
+            },
+            {
+              "kind": "method",
+              "name": "reportValidity",
+              "return": {
+                "type": {
+                  "text": "boolean"
+                }
+              }
+            },
+            {
+              "kind": "field",
+              "name": "required",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false"
+            },
+            {
+              "kind": "method",
+              "name": "setCustomError",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "message",
+                  "type": {
+                    "text": "string | null"
+                  }
+                }
+              ],
+              "description": "Set or clear a validation error the element cannot derive itself — a server-side rejection,\na cross-field rule. Pass `null` to clear it.\n\nThis exists because a lens found the only lever a consumer HAD was `el.invalid = true`,\nand that produced the worst possible state: `:host([invalid])` painted the field red,\n`aria-invalid` said `true`, `aria-describedby` pointed at an error node rendering the\nEMPTY string — because `setValidity` had never been called — and `internals.validity.valid`\nstayed `true`, so the form submitted anyway. An error identified visually with no\nprogrammatic text, on a control that still submits (WCAG 3.3.1).\n\nRouting through `setValidity` keeps the one-source-of-truth the `error` getter above\nargues for: validity is the state, `invalid` and the message are both derived from it."
+            },
+            {
+              "kind": "method",
+              "name": "upgradeProperty",
+              "privacy": "protected",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "prop",
+                  "type": {
+                    "text": "'value' | 'disabled' | 'required'"
+                  }
+                }
+              ],
+              "description": "A property assigned before the definition loaded shadows the accessor the class installs on\nupgrade. Lit handles its own reactive properties; this covers the same ground explicitly so\nthe behaviour is the element's rather than a framework detail nothing asserts."
+            },
+            {
+              "kind": "method",
+              "name": "validate",
+              "privacy": "protected",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "description": "Recompute validity from every source and reflect it.\n\nAbstract because the base cannot know a subclass's derived rules — and declaring it\nabstract is deliberate: an `abstract` class with no abstract members enforces nothing, and\na lens pointed out the real contract on a subclass was documented only in comments. An\nabstract declaration has no body, so it adds no mutation anchor."
+            },
+            {
+              "kind": "field",
+              "name": "validationMessage",
+              "type": {
+                "text": "string"
+              },
+              "readonly": true
+            },
+            {
+              "kind": "field",
+              "name": "validity",
+              "type": {
+                "text": "ValidityState"
+              },
+              "readonly": true
+            },
+            {
+              "kind": "field",
+              "name": "value",
+              "type": {
+                "text": "string"
+              },
+              "default": "''"
+            }
+          ],
+          "superclass": {
+            "name": "LitElement",
+            "package": "lit"
+          },
+          "customElement": true
+        },
+        {
+          "kind": "function",
+          "name": "isCardVariant",
+          "return": {
+            "type": {
+              "text": "variant is CardVariant"
+            }
+          },
+          "parameters": [
+            {
+              "name": "variant",
+              "type": {
+                "text": "string"
+              }
+            }
+          ],
+          "description": "Whether `variant` names a real card modifier."
+        },
+        {
+          "kind": "class",
           "description": "The card primitive — the first real component on the ADR-8 base layer.",
           "name": "SkCard",
           "cssParts": [
@@ -309,16 +310,6 @@
           "members": [
             {
               "kind": "field",
-              "name": "variant",
-              "privacy": "public",
-              "type": {
-                "text": "'blue' | 'purple' | undefined"
-              },
-              "attribute": "variant",
-              "reflects": true
-            },
-            {
-              "kind": "field",
               "name": "inset",
               "privacy": "public",
               "type": {
@@ -327,16 +318,19 @@
               "default": "false",
               "attribute": "inset",
               "reflects": true
-            }
-          ],
-          "attributes": [
+            },
             {
+              "kind": "field",
               "name": "variant",
+              "privacy": "public",
               "type": {
                 "text": "'blue' | 'purple' | undefined"
               },
-              "fieldName": "variant"
-            },
+              "attribute": "variant",
+              "reflects": true
+            }
+          ],
+          "attributes": [
             {
               "name": "inset",
               "type": {
@@ -344,6 +338,13 @@
               },
               "default": "false",
               "fieldName": "inset"
+            },
+            {
+              "name": "variant",
+              "type": {
+                "text": "'blue' | 'purple' | undefined"
+              },
+              "fieldName": "variant"
             }
           ],
           "superclass": {
@@ -359,14 +360,6 @@
           "name": "SkFormInput",
           "cssParts": [
             {
-              "description": "the field wrapper",
-              "name": "field"
-            },
-            {
-              "description": "the label",
-              "name": "label"
-            },
-            {
               "description": "the input",
               "name": "control"
             },
@@ -377,47 +370,130 @@
             {
               "description": "the validation message",
               "name": "error"
+            },
+            {
+              "description": "the field wrapper",
+              "name": "field"
+            },
+            {
+              "description": "the label",
+              "name": "label"
             }
           ],
           "members": [
             {
               "kind": "field",
-              "name": "type",
-              "privacy": "public",
-              "type": {
-                "text": "string"
+              "name": "#onInput",
+              "privacy": "private"
+            },
+            {
+              "kind": "method",
+              "name": "checkValidity",
+              "return": {
+                "type": {
+                  "text": "boolean"
+                }
               },
-              "default": "'text'",
-              "attribute": "type"
+              "inheritedFrom": {
+                "name": "FormControlBase",
+                "module": "packages/elements/src/form-control-base.ts"
+              }
             },
             {
               "kind": "field",
-              "name": "placeholder",
-              "privacy": "public",
+              "name": "customError",
+              "type": {
+                "text": "string"
+              },
+              "privacy": "protected",
+              "default": "''",
+              "description": "Non-empty while a consumer-supplied error is active. Read by each element's `validate()`\nso a derived rule cannot silently clobber a server-side one.",
+              "inheritedFrom": {
+                "name": "FormControlBase",
+                "module": "packages/elements/src/form-control-base.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "description",
               "type": {
                 "text": "string"
               },
               "default": "''",
-              "attribute": "placeholder"
+              "privacy": "public",
+              "attribute": "description",
+              "inheritedFrom": {
+                "name": "FormControlBase",
+                "module": "packages/elements/src/form-control-base.ts"
+              }
             },
             {
-              "kind": "method",
-              "name": "syncFormValue",
-              "privacy": "private",
-              "return": {
-                "type": {
-                  "text": "void"
-                }
+              "kind": "field",
+              "name": "disabled",
+              "type": {
+                "text": "boolean"
               },
-              "description": "The only `setFormValue` call site in this element."
+              "default": "false",
+              "privacy": "public",
+              "attribute": "disabled",
+              "inheritedFrom": {
+                "name": "FormControlBase",
+                "module": "packages/elements/src/form-control-base.ts"
+              }
             },
             {
-              "kind": "method",
-              "name": "formResetCallback",
-              "return": {
-                "type": {
-                  "text": "void"
-                }
+              "kind": "field",
+              "name": "error",
+              "type": {
+                "text": "string"
+              },
+              "description": "READ-ONLY, derived from validity — never a settable property.\n\nA settable `error` alongside `setValidity` is two sources of truth: `error=\"…\"` would paint\nthe error state on an element that still matches `:valid` and submits happily, the story\nwould render red, axe would pass, and nothing would notice.",
+              "readonly": true,
+              "inheritedFrom": {
+                "name": "FormControlBase",
+                "module": "packages/elements/src/form-control-base.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "errorId",
+              "type": {
+                "text": "string"
+              },
+              "privacy": "protected",
+              "description": "The element's own id for its error node. Shadow-internal, so it never collides across\ninstances and never appears in the consumer's light DOM.",
+              "readonly": true,
+              "inheritedFrom": {
+                "name": "FormControlBase",
+                "module": "packages/elements/src/form-control-base.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "errorMessage",
+              "type": {
+                "text": "string"
+              },
+              "description": "The message the error node renders. A reactive property rather than a read through\n`internals.validationMessage`, because Lit cannot observe a getter over internals — see\neach element's `static properties`.",
+              "privacy": "public",
+              "default": "''",
+              "attribute": "errorMessage",
+              "inheritedFrom": {
+                "name": "FormControlBase",
+                "module": "packages/elements/src/form-control-base.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "formAssociated",
+              "type": {
+                "text": "boolean"
+              },
+              "static": true,
+              "default": "true",
+              "inheritedFrom": {
+                "name": "FormControlBase",
+                "module": "packages/elements/src/form-control-base.ts"
               }
             },
             {
@@ -439,8 +515,7 @@
             },
             {
               "kind": "method",
-              "name": "validate",
-              "privacy": "private",
+              "name": "formResetCallback",
               "return": {
                 "type": {
                   "text": "void"
@@ -449,8 +524,29 @@
             },
             {
               "kind": "field",
-              "name": "#onInput",
-              "privacy": "private"
+              "name": "initialValue",
+              "type": {
+                "text": "string"
+              },
+              "privacy": "protected",
+              "default": "''",
+              "description": "Captured on connect, restored by `formResetCallback`. `protected`, not `#private`: a\n`#`-private field is not visible to a subclass, and the reset anchor lives in the\nsubclass so its mutation reds exactly one element's test.",
+              "inheritedFrom": {
+                "name": "FormControlBase",
+                "module": "packages/elements/src/form-control-base.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "internals",
+              "type": {
+                "text": "ElementInternals"
+              },
+              "privacy": "protected",
+              "inheritedFrom": {
+                "name": "FormControlBase",
+                "module": "packages/elements/src/form-control-base.ts"
+              }
             },
             {
               "kind": "field",
@@ -462,21 +558,6 @@
               "privacy": "public",
               "default": "false",
               "attribute": "invalid",
-              "reflects": true,
-              "inheritedFrom": {
-                "name": "FormControlBase",
-                "module": "packages/elements/src/form-control-base.ts"
-              }
-            },
-            {
-              "kind": "field",
-              "name": "name",
-              "type": {
-                "text": "string"
-              },
-              "default": "''",
-              "privacy": "public",
-              "attribute": "name",
               "reflects": true,
               "inheritedFrom": {
                 "name": "FormControlBase",
@@ -499,55 +580,13 @@
             },
             {
               "kind": "field",
-              "name": "description",
+              "name": "name",
               "type": {
                 "text": "string"
               },
               "default": "''",
               "privacy": "public",
-              "attribute": "description",
-              "inheritedFrom": {
-                "name": "FormControlBase",
-                "module": "packages/elements/src/form-control-base.ts"
-              }
-            },
-            {
-              "kind": "field",
-              "name": "value",
-              "type": {
-                "text": "string"
-              },
-              "default": "''",
-              "privacy": "public",
-              "attribute": "value",
-              "inheritedFrom": {
-                "name": "FormControlBase",
-                "module": "packages/elements/src/form-control-base.ts"
-              }
-            },
-            {
-              "kind": "field",
-              "name": "disabled",
-              "type": {
-                "text": "boolean"
-              },
-              "default": "false",
-              "privacy": "public",
-              "attribute": "disabled",
-              "inheritedFrom": {
-                "name": "FormControlBase",
-                "module": "packages/elements/src/form-control-base.ts"
-              }
-            },
-            {
-              "kind": "field",
-              "name": "required",
-              "type": {
-                "text": "boolean"
-              },
-              "default": "false",
-              "privacy": "public",
-              "attribute": "required",
+              "attribute": "name",
               "reflects": true,
               "inheritedFrom": {
                 "name": "FormControlBase",
@@ -556,116 +595,13 @@
             },
             {
               "kind": "field",
-              "name": "formAssociated",
-              "type": {
-                "text": "boolean"
-              },
-              "static": true,
-              "default": "true",
-              "inheritedFrom": {
-                "name": "FormControlBase",
-                "module": "packages/elements/src/form-control-base.ts"
-              }
-            },
-            {
-              "kind": "field",
-              "name": "internals",
-              "type": {
-                "text": "ElementInternals"
-              },
-              "privacy": "protected",
-              "inheritedFrom": {
-                "name": "FormControlBase",
-                "module": "packages/elements/src/form-control-base.ts"
-              }
-            },
-            {
-              "kind": "field",
-              "name": "initialValue",
+              "name": "placeholder",
+              "privacy": "public",
               "type": {
                 "text": "string"
               },
-              "privacy": "protected",
               "default": "''",
-              "description": "Captured on connect, restored by `formResetCallback`. `protected`, not `#private`: a\n`#`-private field is not visible to a subclass, and the reset anchor lives in the\nsubclass so its mutation reds exactly one element's test.",
-              "inheritedFrom": {
-                "name": "FormControlBase",
-                "module": "packages/elements/src/form-control-base.ts"
-              }
-            },
-            {
-              "kind": "method",
-              "name": "upgradeProperty",
-              "privacy": "protected",
-              "return": {
-                "type": {
-                  "text": "void"
-                }
-              },
-              "parameters": [
-                {
-                  "name": "prop",
-                  "type": {
-                    "text": "'value' | 'disabled' | 'required'"
-                  }
-                }
-              ],
-              "description": "A property assigned before the definition loaded shadows the accessor the class installs on\nupgrade. Lit handles its own reactive properties; this covers the same ground explicitly so\nthe behaviour is the element's rather than a framework detail nothing asserts.",
-              "inheritedFrom": {
-                "name": "FormControlBase",
-                "module": "packages/elements/src/form-control-base.ts"
-              }
-            },
-            {
-              "kind": "field",
-              "name": "errorId",
-              "type": {
-                "text": "string"
-              },
-              "privacy": "protected",
-              "description": "The element's own id for its error node. Shadow-internal, so it never collides across\ninstances and never appears in the consumer's light DOM.",
-              "readonly": true,
-              "inheritedFrom": {
-                "name": "FormControlBase",
-                "module": "packages/elements/src/form-control-base.ts"
-              }
-            },
-            {
-              "kind": "field",
-              "name": "validity",
-              "type": {
-                "text": "ValidityState"
-              },
-              "readonly": true,
-              "inheritedFrom": {
-                "name": "FormControlBase",
-                "module": "packages/elements/src/form-control-base.ts"
-              }
-            },
-            {
-              "kind": "field",
-              "name": "validationMessage",
-              "type": {
-                "text": "string"
-              },
-              "readonly": true,
-              "inheritedFrom": {
-                "name": "FormControlBase",
-                "module": "packages/elements/src/form-control-base.ts"
-              }
-            },
-            {
-              "kind": "method",
-              "name": "checkValidity",
-              "return": {
-                "type": {
-                  "text": "boolean"
-                }
-              },
-              "inheritedFrom": {
-                "name": "FormControlBase",
-                "module": "packages/elements/src/form-control-base.ts"
-              }
+              "attribute": "placeholder"
             },
             {
               "kind": "method",
@@ -682,12 +618,14 @@
             },
             {
               "kind": "field",
-              "name": "error",
+              "name": "required",
               "type": {
-                "text": "string"
+                "text": "boolean"
               },
-              "description": "READ-ONLY, derived from validity — never a settable property.\n\nA settable `error` alongside `setValidity` is two sources of truth: `error=\"…\"` would paint\nthe error state on an element that still matches `:valid` and submits happily, the story\nwould render red, axe would pass, and nothing would notice.",
-              "readonly": true,
+              "default": "false",
+              "privacy": "public",
+              "attribute": "required",
+              "reflects": true,
               "inheritedFrom": {
                 "name": "FormControlBase",
                 "module": "packages/elements/src/form-control-base.ts"
@@ -716,14 +654,97 @@
               }
             },
             {
+              "kind": "method",
+              "name": "syncFormValue",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "description": "The only `setFormValue` call site in this element."
+            },
+            {
               "kind": "field",
-              "name": "customError",
+              "name": "type",
+              "privacy": "public",
               "type": {
                 "text": "string"
               },
+              "default": "'text'",
+              "attribute": "type"
+            },
+            {
+              "kind": "method",
+              "name": "upgradeProperty",
               "privacy": "protected",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "prop",
+                  "type": {
+                    "text": "'value' | 'disabled' | 'required'"
+                  }
+                }
+              ],
+              "description": "A property assigned before the definition loaded shadows the accessor the class installs on\nupgrade. Lit handles its own reactive properties; this covers the same ground explicitly so\nthe behaviour is the element's rather than a framework detail nothing asserts.",
+              "inheritedFrom": {
+                "name": "FormControlBase",
+                "module": "packages/elements/src/form-control-base.ts"
+              }
+            },
+            {
+              "kind": "method",
+              "name": "validate",
+              "privacy": "protected",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "description": "Recompute validity from every source and reflect it.\n\nAbstract because the base cannot know a subclass's derived rules — and declaring it\nabstract is deliberate: an `abstract` class with no abstract members enforces nothing, and\na lens pointed out the real contract on a subclass was documented only in comments. An\nabstract declaration has no body, so it adds no mutation anchor.",
+              "inheritedFrom": {
+                "name": "FormControlBase",
+                "module": "packages/elements/src/form-control-base.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "validationMessage",
+              "type": {
+                "text": "string"
+              },
+              "readonly": true,
+              "inheritedFrom": {
+                "name": "FormControlBase",
+                "module": "packages/elements/src/form-control-base.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "validity",
+              "type": {
+                "text": "ValidityState"
+              },
+              "readonly": true,
+              "inheritedFrom": {
+                "name": "FormControlBase",
+                "module": "packages/elements/src/form-control-base.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "value",
+              "type": {
+                "text": "string"
+              },
               "default": "''",
-              "description": "Non-empty while a consumer-supplied error is active. Read by each element's `validate()`\nso a derived rule cannot silently clobber a server-side one.",
+              "privacy": "public",
+              "attribute": "value",
               "inheritedFrom": {
                 "name": "FormControlBase",
                 "module": "packages/elements/src/form-control-base.ts"
@@ -732,11 +753,34 @@
           ],
           "attributes": [
             {
-              "name": "name",
+              "name": "description",
               "type": {
                 "text": "string"
               },
-              "fieldName": "name"
+              "fieldName": "description"
+            },
+            {
+              "name": "disabled",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "disabled"
+            },
+            {
+              "name": "errorMessage",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "fieldName": "errorMessage"
+            },
+            {
+              "name": "invalid",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "fieldName": "invalid"
             },
             {
               "name": "label",
@@ -746,26 +790,11 @@
               "fieldName": "label"
             },
             {
-              "name": "description",
+              "name": "name",
               "type": {
                 "text": "string"
               },
-              "fieldName": "description"
-            },
-            {
-              "name": "value",
-              "type": {
-                "text": "string"
-              },
-              "fieldName": "value"
-            },
-            {
-              "name": "type",
-              "type": {
-                "text": "string"
-              },
-              "default": "'text'",
-              "fieldName": "type"
+              "fieldName": "name"
             },
             {
               "name": "placeholder",
@@ -776,13 +805,6 @@
               "fieldName": "placeholder"
             },
             {
-              "name": "disabled",
-              "type": {
-                "text": "boolean"
-              },
-              "fieldName": "disabled"
-            },
-            {
               "name": "required",
               "type": {
                 "text": "boolean"
@@ -790,12 +812,19 @@
               "fieldName": "required"
             },
             {
-              "name": "invalid",
+              "name": "type",
               "type": {
-                "text": "boolean"
+                "text": "string"
               },
-              "default": "false",
-              "fieldName": "invalid"
+              "default": "'text'",
+              "fieldName": "type"
+            },
+            {
+              "name": "value",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "value"
             }
           ],
           "superclass": {
@@ -811,14 +840,6 @@
           "name": "SkFormTextarea",
           "cssParts": [
             {
-              "description": "the field wrapper",
-              "name": "field"
-            },
-            {
-              "description": "the label",
-              "name": "label"
-            },
-            {
               "description": "the multi-line control",
               "name": "control"
             },
@@ -829,47 +850,130 @@
             {
               "description": "the validation message",
               "name": "error"
+            },
+            {
+              "description": "the field wrapper",
+              "name": "field"
+            },
+            {
+              "description": "the label",
+              "name": "label"
             }
           ],
           "members": [
             {
               "kind": "field",
-              "name": "rows",
-              "privacy": "public",
-              "type": {
-                "text": "number"
+              "name": "#onInput",
+              "privacy": "private"
+            },
+            {
+              "kind": "method",
+              "name": "checkValidity",
+              "return": {
+                "type": {
+                  "text": "boolean"
+                }
               },
-              "default": "4",
-              "attribute": "rows"
+              "inheritedFrom": {
+                "name": "FormControlBase",
+                "module": "packages/elements/src/form-control-base.ts"
+              }
             },
             {
               "kind": "field",
-              "name": "placeholder",
-              "privacy": "public",
+              "name": "customError",
+              "type": {
+                "text": "string"
+              },
+              "privacy": "protected",
+              "default": "''",
+              "description": "Non-empty while a consumer-supplied error is active. Read by each element's `validate()`\nso a derived rule cannot silently clobber a server-side one.",
+              "inheritedFrom": {
+                "name": "FormControlBase",
+                "module": "packages/elements/src/form-control-base.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "description",
               "type": {
                 "text": "string"
               },
               "default": "''",
-              "attribute": "placeholder"
+              "privacy": "public",
+              "attribute": "description",
+              "inheritedFrom": {
+                "name": "FormControlBase",
+                "module": "packages/elements/src/form-control-base.ts"
+              }
             },
             {
-              "kind": "method",
-              "name": "syncFormValue",
-              "privacy": "private",
-              "return": {
-                "type": {
-                  "text": "void"
-                }
+              "kind": "field",
+              "name": "disabled",
+              "type": {
+                "text": "boolean"
               },
-              "description": "The only `setFormValue` call site in this element."
+              "default": "false",
+              "privacy": "public",
+              "attribute": "disabled",
+              "inheritedFrom": {
+                "name": "FormControlBase",
+                "module": "packages/elements/src/form-control-base.ts"
+              }
             },
             {
-              "kind": "method",
-              "name": "formResetCallback",
-              "return": {
-                "type": {
-                  "text": "void"
-                }
+              "kind": "field",
+              "name": "error",
+              "type": {
+                "text": "string"
+              },
+              "description": "READ-ONLY, derived from validity — never a settable property.\n\nA settable `error` alongside `setValidity` is two sources of truth: `error=\"…\"` would paint\nthe error state on an element that still matches `:valid` and submits happily, the story\nwould render red, axe would pass, and nothing would notice.",
+              "readonly": true,
+              "inheritedFrom": {
+                "name": "FormControlBase",
+                "module": "packages/elements/src/form-control-base.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "errorId",
+              "type": {
+                "text": "string"
+              },
+              "privacy": "protected",
+              "description": "The element's own id for its error node. Shadow-internal, so it never collides across\ninstances and never appears in the consumer's light DOM.",
+              "readonly": true,
+              "inheritedFrom": {
+                "name": "FormControlBase",
+                "module": "packages/elements/src/form-control-base.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "errorMessage",
+              "type": {
+                "text": "string"
+              },
+              "description": "The message the error node renders. A reactive property rather than a read through\n`internals.validationMessage`, because Lit cannot observe a getter over internals — see\neach element's `static properties`.",
+              "privacy": "public",
+              "default": "''",
+              "attribute": "errorMessage",
+              "inheritedFrom": {
+                "name": "FormControlBase",
+                "module": "packages/elements/src/form-control-base.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "formAssociated",
+              "type": {
+                "text": "boolean"
+              },
+              "static": true,
+              "default": "true",
+              "inheritedFrom": {
+                "name": "FormControlBase",
+                "module": "packages/elements/src/form-control-base.ts"
               }
             },
             {
@@ -891,8 +995,7 @@
             },
             {
               "kind": "method",
-              "name": "validate",
-              "privacy": "private",
+              "name": "formResetCallback",
               "return": {
                 "type": {
                   "text": "void"
@@ -901,8 +1004,29 @@
             },
             {
               "kind": "field",
-              "name": "#onInput",
-              "privacy": "private"
+              "name": "initialValue",
+              "type": {
+                "text": "string"
+              },
+              "privacy": "protected",
+              "default": "''",
+              "description": "Captured on connect, restored by `formResetCallback`. `protected`, not `#private`: a\n`#`-private field is not visible to a subclass, and the reset anchor lives in the\nsubclass so its mutation reds exactly one element's test.",
+              "inheritedFrom": {
+                "name": "FormControlBase",
+                "module": "packages/elements/src/form-control-base.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "internals",
+              "type": {
+                "text": "ElementInternals"
+              },
+              "privacy": "protected",
+              "inheritedFrom": {
+                "name": "FormControlBase",
+                "module": "packages/elements/src/form-control-base.ts"
+              }
             },
             {
               "kind": "field",
@@ -914,21 +1038,6 @@
               "privacy": "public",
               "default": "false",
               "attribute": "invalid",
-              "reflects": true,
-              "inheritedFrom": {
-                "name": "FormControlBase",
-                "module": "packages/elements/src/form-control-base.ts"
-              }
-            },
-            {
-              "kind": "field",
-              "name": "name",
-              "type": {
-                "text": "string"
-              },
-              "default": "''",
-              "privacy": "public",
-              "attribute": "name",
               "reflects": true,
               "inheritedFrom": {
                 "name": "FormControlBase",
@@ -951,13 +1060,14 @@
             },
             {
               "kind": "field",
-              "name": "description",
+              "name": "name",
               "type": {
                 "text": "string"
               },
               "default": "''",
               "privacy": "public",
-              "attribute": "description",
+              "attribute": "name",
+              "reflects": true,
               "inheritedFrom": {
                 "name": "FormControlBase",
                 "module": "packages/elements/src/form-control-base.ts"
@@ -965,27 +1075,22 @@
             },
             {
               "kind": "field",
-              "name": "value",
+              "name": "placeholder",
+              "privacy": "public",
               "type": {
                 "text": "string"
               },
               "default": "''",
-              "privacy": "public",
-              "attribute": "value",
-              "inheritedFrom": {
-                "name": "FormControlBase",
-                "module": "packages/elements/src/form-control-base.ts"
-              }
+              "attribute": "placeholder"
             },
             {
-              "kind": "field",
-              "name": "disabled",
-              "type": {
-                "text": "boolean"
+              "kind": "method",
+              "name": "reportValidity",
+              "return": {
+                "type": {
+                  "text": "boolean"
+                }
               },
-              "default": "false",
-              "privacy": "public",
-              "attribute": "disabled",
               "inheritedFrom": {
                 "name": "FormControlBase",
                 "module": "packages/elements/src/form-control-base.ts"
@@ -1008,42 +1113,46 @@
             },
             {
               "kind": "field",
-              "name": "formAssociated",
+              "name": "rows",
+              "privacy": "public",
               "type": {
-                "text": "boolean"
+                "text": "number"
               },
-              "static": true,
-              "default": "true",
+              "default": "4",
+              "attribute": "rows"
+            },
+            {
+              "kind": "method",
+              "name": "setCustomError",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "message",
+                  "type": {
+                    "text": "string | null"
+                  }
+                }
+              ],
+              "description": "Set or clear a validation error the element cannot derive itself — a server-side rejection,\na cross-field rule. Pass `null` to clear it.\n\nThis exists because a lens found the only lever a consumer HAD was `el.invalid = true`,\nand that produced the worst possible state: `:host([invalid])` painted the field red,\n`aria-invalid` said `true`, `aria-describedby` pointed at an error node rendering the\nEMPTY string — because `setValidity` had never been called — and `internals.validity.valid`\nstayed `true`, so the form submitted anyway. An error identified visually with no\nprogrammatic text, on a control that still submits (WCAG 3.3.1).\n\nRouting through `setValidity` keeps the one-source-of-truth the `error` getter above\nargues for: validity is the state, `invalid` and the message are both derived from it.",
               "inheritedFrom": {
                 "name": "FormControlBase",
                 "module": "packages/elements/src/form-control-base.ts"
               }
             },
             {
-              "kind": "field",
-              "name": "internals",
-              "type": {
-                "text": "ElementInternals"
+              "kind": "method",
+              "name": "syncFormValue",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
               },
-              "privacy": "protected",
-              "inheritedFrom": {
-                "name": "FormControlBase",
-                "module": "packages/elements/src/form-control-base.ts"
-              }
-            },
-            {
-              "kind": "field",
-              "name": "initialValue",
-              "type": {
-                "text": "string"
-              },
-              "privacy": "protected",
-              "default": "''",
-              "description": "Captured on connect, restored by `formResetCallback`. `protected`, not `#private`: a\n`#`-private field is not visible to a subclass, and the reset anchor lives in the\nsubclass so its mutation reds exactly one element's test.",
-              "inheritedFrom": {
-                "name": "FormControlBase",
-                "module": "packages/elements/src/form-control-base.ts"
-              }
+              "description": "The only `setFormValue` call site in this element."
             },
             {
               "kind": "method",
@@ -1069,13 +1178,26 @@
               }
             },
             {
+              "kind": "method",
+              "name": "validate",
+              "privacy": "protected",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "description": "Recompute validity from every source and reflect it.\n\nAbstract because the base cannot know a subclass's derived rules — and declaring it\nabstract is deliberate: an `abstract` class with no abstract members enforces nothing, and\na lens pointed out the real contract on a subclass was documented only in comments. An\nabstract declaration has no body, so it adds no mutation anchor.",
+              "inheritedFrom": {
+                "name": "FormControlBase",
+                "module": "packages/elements/src/form-control-base.ts"
+              }
+            },
+            {
               "kind": "field",
-              "name": "errorId",
+              "name": "validationMessage",
               "type": {
                 "text": "string"
               },
-              "privacy": "protected",
-              "description": "The element's own id for its error node. Shadow-internal, so it never collides across\ninstances and never appears in the consumer's light DOM.",
               "readonly": true,
               "inheritedFrom": {
                 "name": "FormControlBase",
@@ -1096,86 +1218,13 @@
             },
             {
               "kind": "field",
-              "name": "validationMessage",
+              "name": "value",
               "type": {
                 "text": "string"
               },
-              "readonly": true,
-              "inheritedFrom": {
-                "name": "FormControlBase",
-                "module": "packages/elements/src/form-control-base.ts"
-              }
-            },
-            {
-              "kind": "method",
-              "name": "checkValidity",
-              "return": {
-                "type": {
-                  "text": "boolean"
-                }
-              },
-              "inheritedFrom": {
-                "name": "FormControlBase",
-                "module": "packages/elements/src/form-control-base.ts"
-              }
-            },
-            {
-              "kind": "method",
-              "name": "reportValidity",
-              "return": {
-                "type": {
-                  "text": "boolean"
-                }
-              },
-              "inheritedFrom": {
-                "name": "FormControlBase",
-                "module": "packages/elements/src/form-control-base.ts"
-              }
-            },
-            {
-              "kind": "field",
-              "name": "error",
-              "type": {
-                "text": "string"
-              },
-              "description": "READ-ONLY, derived from validity — never a settable property.\n\nA settable `error` alongside `setValidity` is two sources of truth: `error=\"…\"` would paint\nthe error state on an element that still matches `:valid` and submits happily, the story\nwould render red, axe would pass, and nothing would notice.",
-              "readonly": true,
-              "inheritedFrom": {
-                "name": "FormControlBase",
-                "module": "packages/elements/src/form-control-base.ts"
-              }
-            },
-            {
-              "kind": "method",
-              "name": "setCustomError",
-              "return": {
-                "type": {
-                  "text": "void"
-                }
-              },
-              "parameters": [
-                {
-                  "name": "message",
-                  "type": {
-                    "text": "string | null"
-                  }
-                }
-              ],
-              "description": "Set or clear a validation error the element cannot derive itself — a server-side rejection,\na cross-field rule. Pass `null` to clear it.\n\nThis exists because a lens found the only lever a consumer HAD was `el.invalid = true`,\nand that produced the worst possible state: `:host([invalid])` painted the field red,\n`aria-invalid` said `true`, `aria-describedby` pointed at an error node rendering the\nEMPTY string — because `setValidity` had never been called — and `internals.validity.valid`\nstayed `true`, so the form submitted anyway. An error identified visually with no\nprogrammatic text, on a control that still submits (WCAG 3.3.1).\n\nRouting through `setValidity` keeps the one-source-of-truth the `error` getter above\nargues for: validity is the state, `invalid` and the message are both derived from it.",
-              "inheritedFrom": {
-                "name": "FormControlBase",
-                "module": "packages/elements/src/form-control-base.ts"
-              }
-            },
-            {
-              "kind": "field",
-              "name": "customError",
-              "type": {
-                "text": "string"
-              },
-              "privacy": "protected",
               "default": "''",
-              "description": "Non-empty while a consumer-supplied error is active. Read by each element's `validate()`\nso a derived rule cannot silently clobber a server-side one.",
+              "privacy": "public",
+              "attribute": "value",
               "inheritedFrom": {
                 "name": "FormControlBase",
                 "module": "packages/elements/src/form-control-base.ts"
@@ -1184,11 +1233,34 @@
           ],
           "attributes": [
             {
-              "name": "name",
+              "name": "description",
               "type": {
                 "text": "string"
               },
-              "fieldName": "name"
+              "fieldName": "description"
+            },
+            {
+              "name": "disabled",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "disabled"
+            },
+            {
+              "name": "errorMessage",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "fieldName": "errorMessage"
+            },
+            {
+              "name": "invalid",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "fieldName": "invalid"
             },
             {
               "name": "label",
@@ -1198,26 +1270,11 @@
               "fieldName": "label"
             },
             {
-              "name": "description",
+              "name": "name",
               "type": {
                 "text": "string"
               },
-              "fieldName": "description"
-            },
-            {
-              "name": "value",
-              "type": {
-                "text": "string"
-              },
-              "fieldName": "value"
-            },
-            {
-              "name": "rows",
-              "type": {
-                "text": "number"
-              },
-              "default": "4",
-              "fieldName": "rows"
+              "fieldName": "name"
             },
             {
               "name": "placeholder",
@@ -1228,13 +1285,6 @@
               "fieldName": "placeholder"
             },
             {
-              "name": "disabled",
-              "type": {
-                "text": "boolean"
-              },
-              "fieldName": "disabled"
-            },
-            {
               "name": "required",
               "type": {
                 "text": "boolean"
@@ -1242,12 +1292,19 @@
               "fieldName": "required"
             },
             {
-              "name": "invalid",
+              "name": "rows",
               "type": {
-                "text": "boolean"
+                "text": "number"
               },
-              "default": "false",
-              "fieldName": "invalid"
+              "default": "4",
+              "fieldName": "rows"
+            },
+            {
+              "name": "value",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "value"
             }
           ],
           "superclass": {
@@ -1263,16 +1320,16 @@
           "name": "SkNavPill",
           "cssParts": [
             {
-              "description": "the pill container",
-              "name": "nav"
+              "description": "the toggle control",
+              "name": "hamburger"
             },
             {
               "description": "the items row, which becomes the collapsed panel",
               "name": "items"
             },
             {
-              "description": "the toggle control",
-              "name": "hamburger"
+              "description": "the pill container",
+              "name": "nav"
             }
           ],
           "slots": [
@@ -1283,25 +1340,14 @@
           ],
           "members": [
             {
-              "kind": "field",
-              "name": "isOpen",
-              "privacy": "public",
-              "type": {
-                "text": "boolean"
-              },
-              "default": "false",
-              "attribute": "open",
-              "reflects": true
-            },
-            {
-              "kind": "field",
-              "name": "label",
-              "privacy": "public",
-              "type": {
-                "text": "string"
-              },
-              "default": "'Primary navigation'",
-              "attribute": "label"
+              "kind": "method",
+              "name": "#activeControl",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "HTMLElement | null"
+                }
+              }
             },
             {
               "kind": "field",
@@ -1314,61 +1360,14 @@
               "description": "The control to return focus to. Not reflected, not an attribute — runtime state."
             },
             {
-              "kind": "method",
-              "name": "open",
-              "return": {
-                "type": {
-                  "text": "void"
-                }
-              },
-              "parameters": [
-                {
-                  "name": "invoker",
-                  "optional": true,
-                  "type": {
-                    "text": "HTMLElement | null"
-                  },
-                  "description": "the control focus returns to on close. Defaults to whatever has focus,\nresolved through the composed path: `document.activeElement` inside a shadow root\nreports the HOST, not the inner control, so reading it directly returns this element."
-                }
-              ],
-              "description": "Open the panel."
+              "kind": "field",
+              "name": "#onHamburger",
+              "privacy": "private"
             },
             {
-              "kind": "method",
-              "name": "close",
-              "return": {
-                "type": {
-                  "text": "void"
-                }
-              }
-            },
-            {
-              "kind": "method",
-              "name": "toggle",
-              "return": {
-                "type": {
-                  "text": "void"
-                }
-              },
-              "parameters": [
-                {
-                  "name": "invoker",
-                  "optional": true,
-                  "type": {
-                    "text": "HTMLElement | null"
-                  }
-                }
-              ]
-            },
-            {
-              "kind": "method",
-              "name": "#activeControl",
-              "privacy": "private",
-              "return": {
-                "type": {
-                  "text": "HTMLElement | null"
-                }
-              }
+              "kind": "field",
+              "name": "#onKeydown",
+              "privacy": "private"
             },
             {
               "kind": "method",
@@ -1395,14 +1394,72 @@
               ]
             },
             {
-              "kind": "field",
-              "name": "#onKeydown",
-              "privacy": "private"
+              "kind": "method",
+              "name": "close",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              }
             },
             {
               "kind": "field",
-              "name": "#onHamburger",
-              "privacy": "private"
+              "name": "isOpen",
+              "privacy": "public",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "attribute": "open",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "label",
+              "privacy": "public",
+              "type": {
+                "text": "string"
+              },
+              "default": "'Primary navigation'",
+              "attribute": "label"
+            },
+            {
+              "kind": "method",
+              "name": "open",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "invoker",
+                  "optional": true,
+                  "type": {
+                    "text": "HTMLElement | null"
+                  },
+                  "description": "the control focus returns to on close. Defaults to whatever has focus,\nresolved through the composed path: `document.activeElement` inside a shadow root\nreports the HOST, not the inner control, so reading it directly returns this element."
+                }
+              ],
+              "description": "Open the panel."
+            },
+            {
+              "kind": "method",
+              "name": "toggle",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "invoker",
+                  "optional": true,
+                  "type": {
+                    "text": "HTMLElement | null"
+                  }
+                }
+              ]
             }
           ],
           "events": [
@@ -1413,20 +1470,20 @@
           ],
           "attributes": [
             {
-              "name": "open",
-              "type": {
-                "text": "boolean"
-              },
-              "default": "false",
-              "fieldName": "isOpen"
-            },
-            {
               "name": "label",
               "type": {
                 "text": "string"
               },
               "default": "'Primary navigation'",
               "fieldName": "label"
+            },
+            {
+              "name": "open",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "fieldName": "isOpen"
             }
           ],
           "superclass": {
@@ -1447,81 +1504,27 @@
           },
           "tagName": "sk-stub",
           "customElement": true
+        },
+        {
+          "kind": "function",
+          "name": "unknownVariantMessage",
+          "return": {
+            "type": {
+              "text": "string"
+            }
+          },
+          "parameters": [
+            {
+              "name": "variant",
+              "type": {
+                "text": "string"
+              }
+            }
+          ],
+          "description": "The shared diagnostic for an unrecognised variant."
         }
       ],
       "exports": [
-        {
-          "kind": "js",
-          "name": "FormControlBase",
-          "declaration": {
-            "name": "FormControlBase",
-            "module": "./dist/index.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "define",
-          "declaration": {
-            "name": "define",
-            "module": "./dist/index.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "registeredTags",
-          "declaration": {
-            "name": "registeredTags",
-            "module": "./dist/index.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "SkStub",
-          "declaration": {
-            "name": "SkStub",
-            "module": "./dist/index.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "SkCard",
-          "declaration": {
-            "name": "SkCard",
-            "module": "./dist/index.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "SkNavPill",
-          "declaration": {
-            "name": "SkNavPill",
-            "module": "./dist/index.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "SkFormInput",
-          "declaration": {
-            "name": "SkFormInput",
-            "module": "./dist/index.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "SkFormTextarea",
-          "declaration": {
-            "name": "SkFormTextarea",
-            "module": "./dist/index.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "skStubSheet",
-          "declaration": {
-            "name": "default",
-            "module": "./dist/index.js"
-          }
-        },
         {
           "kind": "js",
           "name": "CARD_VARIANTS",
@@ -1548,6 +1551,30 @@
         },
         {
           "kind": "js",
+          "name": "CardVariant",
+          "declaration": {
+            "name": "CardVariant",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "define",
+          "declaration": {
+            "name": "define",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "FormControlBase",
+          "declaration": {
+            "name": "FormControlBase",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
           "name": "isCardVariant",
           "declaration": {
             "name": "isCardVariant",
@@ -1556,9 +1583,57 @@
         },
         {
           "kind": "js",
-          "name": "CardVariant",
+          "name": "registeredTags",
           "declaration": {
-            "name": "CardVariant",
+            "name": "registeredTags",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "SkCard",
+          "declaration": {
+            "name": "SkCard",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "SkFormInput",
+          "declaration": {
+            "name": "SkFormInput",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "SkFormTextarea",
+          "declaration": {
+            "name": "SkFormTextarea",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "SkNavPill",
+          "declaration": {
+            "name": "SkNavPill",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "SkStub",
+          "declaration": {
+            "name": "SkStub",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "skStubSheet",
+          "declaration": {
+            "name": "default",
             "module": "./dist/index.js"
           }
         },

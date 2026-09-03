@@ -59,6 +59,13 @@ export class SkFormTextarea extends FormControlBase {
     disabled: { type: Boolean },
     required: { type: Boolean, reflect: true },
     invalid: { type: Boolean, reflect: true },
+    // INTERNAL STATE, not an attribute. The rendered error node used to interpolate
+    // `this.validationMessage` — a getter over ElementInternals, which Lit cannot observe. So a
+    // message that changed WITHOUT flipping `invalid` never repainted: a pass-2 lens measured
+    // `validationMessage` reading "That address is already registered." while the DOM still
+    // said "Field is required". `aria-describedby` points at that node, so the stale text IS
+    // the programmatic message (WCAG 3.3.1), and `role="alert"` never re-announced either.
+    errorMessage: { type: String, state: true },
   };
 
   declare rows: number;
@@ -69,6 +76,7 @@ export class SkFormTextarea extends FormControlBase {
     this.rows = 4;
     this.placeholder = '';
     this.invalid = false;
+    this.errorMessage = '';
   }
 
   // VALIDATION RUNS BEFORE RENDER, not after.
@@ -83,7 +91,7 @@ export class SkFormTextarea extends FormControlBase {
   // `willUpdate` is the Lit-sanctioned place to derive state from changed properties: setting a
   // reactive property here is folded into the same update rather than queueing another.
   willUpdate(changed: Map<string, unknown>) {
-    if (changed.has('value') || changed.has('required')) this.validate();
+    if (changed.has('value') || changed.has('required') || changed.has('disabled')) this.validate();
   }
 
   updated(changed: Map<string, unknown>) {
@@ -113,29 +121,56 @@ export class SkFormTextarea extends FormControlBase {
     this.syncFormValue();
   }
 
-  private validate(): void {
-    // A consumer-supplied error via `setCustomError()` outranks a derived rule and is not
-    // clobbered by the next keystroke. Without this, typing one character into a field the
-    // server rejected would silently clear the server's message.
-    if (this.customError) {
-      this.invalid = true;
+  protected validate(): void {
+    // FLAGS ARE MERGED, not replaced. `valueMissing` and `customError` can be true at the same
+    // time — an empty required field the server also rejected — and a consumer branching on
+    // `el.validity.valueMissing` must not be told `false` just because a custom error arrived.
+    // A DISABLED CONTROL IS NEVER INVALID. The UA normally handles this by barring a disabled
+    // form-associated element from constraint validation — but `disabled` is deliberately NOT
+    // reflected here (that is what makes SC-005's mutation observable), so the UA cannot see it
+    // and the element must do it itself. Without this a disabled, required, empty field vetoes
+    // its whole form forever, and the user cannot clear it because the field is disabled.
+    if (this.disabled) {
+      this.internals.setValidity({});
+      this.invalid = false;
+      this.errorMessage = '';
       return;
     }
     const control = this.shadowRoot?.querySelector('textarea') ?? undefined;
+    const flags: ValidityStateFlags = {};
+    let message = '';
     if (this.required && this.value === '') {
       // MUTATION ANCHOR SC-003 — setValidity blocks submission and the message reaches the
       // accessibility tree.
-      //
+      flags.valueMissing = true;
+      message = `${this.label || 'This field'} is required`;
+    }
+    // The consumer's message WINS the announcement when both hold — it is the more specific
+    // one — while the derived flag stays set underneath.
+    if (this.customError) {
+      flags.customError = true;
+      message = this.customError;
+    }
+    if (Object.keys(flags).length > 0) {
       // The third argument is the FOCUS ANCHOR for reportValidity() — it points the UA's own
       // validation bubble and puts nothing in the accessibility tree. The message gets there
       // through aria-describedby to the error node in THIS shadow root, which is why the node
       // is rendered rather than merely held in internals.validationMessage.
-      this.internals.setValidity({ valueMissing: true }, `${this.label || 'This field'} is required`, control);
+      this.internals.setValidity(flags, message, control);
       this.invalid = true;
+      this.errorMessage = message;
     } else {
       this.internals.setValidity({});
       this.invalid = false;
+      this.errorMessage = '';
     }
+  }
+
+  /** Re-run validation once the shadow root exists, so `setValidity`'s focus anchor is a real
+   *  element. `willUpdate` runs BEFORE first render, where `querySelector` returns null — an
+   *  element that mounts already-invalid would otherwise report validity with no anchor. */
+  firstUpdated(): void {
+    this.validate();
   }
 
   render() {
@@ -163,7 +198,7 @@ export class SkFormTextarea extends FormControlBase {
           >`
         : ''}
       <span part="error" class="sk-form-textarea__error" id=${this.errorId} role="alert"
-        >${this.invalid ? this.validationMessage : ''}</span
+        >${this.errorMessage}</span
       >
     </div>`;
   }

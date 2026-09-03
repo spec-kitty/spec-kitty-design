@@ -26,6 +26,82 @@
 import { readFileSync, globSync } from 'node:fs';
 import { basename } from 'node:path';
 import postcss from 'postcss';
+import selectorParser from 'postcss-selector-parser';
+
+/**
+ * States the BROWSER owns. A class or data-attribute spelling one of these is simulating
+ * something the platform already exposes as a pseudo-class or a real attribute — and it lies to
+ * the accessibility tree, because only the platform state reaches it.
+ */
+const STATES = [
+  'focus', 'focused', 'hover', 'hovered', 'disabled', 'checked', 'readonly', 'indeterminate',
+  'placeholder-shown',
+];
+
+// DELIBERATELY NOT IN THE LIST, each for a measured reason. A first draft included them and
+// the gate immediately failed on this repo's own legitimate CSS:
+//
+//   active     `.sk-nav-pill__item--active` means the CURRENT page (aria-current), not
+//              `:active`, which is mousedown. BEM uses `--active` for "current" constantly.
+//   open       `:open` exists only for <details>/<dialog>. `.sk-nav-pill__drawer.is-open` is a
+//              consumer-toggled class on a <div>, and there is no platform state to use instead.
+//   selected, expanded, collapsed, pressed
+//              same shape — ARIA concepts with no CSS pseudo-class for arbitrary elements.
+//   invalid, valid, required
+//              too close to legitimate styling vocabulary to flag on the name alone.
+//
+// The rule only fires where a pseudo-class genuinely exists and the author used a class instead.
+
+/**
+ * Attributes that ARE the platform surface rather than a simulation of it. `aria-*` reflects
+ * state into the accessibility tree; the rest are real HTML attributes a native control inside
+ * the shadow root genuinely carries — these elements set them with `?disabled=${…}`. Flagging
+ * them was a false positive a lens caught.
+ */
+const PLATFORM_ATTRS = new Set([
+  'disabled', 'required', 'checked', 'readonly', 'open', 'hidden', 'selected', 'multiple',
+  'inert', 'contenteditable',
+]);
+
+/** A state token, bounded by a separator or the ends — so `interactive` does not match `active`
+ *  and `sk-form-input__disabled` does. */
+const spellsState = (name) =>
+  STATES.some((st) => new RegExp(`(^|[-_])${st}($|[-_])`, 'i').test(name));
+
+function simulatedStates(selector) {
+  const found = [];
+  let root;
+  try {
+    root = selectorParser().astSync(selector);
+  } catch {
+    return [`unparseable selector`];
+  }
+  root.walk((node) => {
+    if (node.type === 'class' && spellsState(node.value)) {
+      found.push(
+        `the class ".${node.value}" spells a state the browser owns; use the pseudo-class`
+      );
+    }
+    if (node.type === 'attribute') {
+      const attr = String(node.attribute ?? '');
+      if (attr.startsWith('aria-') || PLATFORM_ATTRS.has(attr)) return;
+      // An attribute inside `:host(...)` is the ELEMENT'S OWN reflected state — the sanctioned
+      // way for an adopted sheet to see ElementInternals-derived state from inside, and the
+      // thing #72's inert-selector defect was repaired with. Never a simulation.
+      for (let p = node.parent; p; p = p.parent) {
+        if (p.type === 'pseudo' && String(p.value).startsWith(':host')) return;
+      }
+      const value = String(node.value ?? '');
+      if (spellsState(attr) || spellsState(value)) {
+        found.push(
+          `the attribute "[${attr}${value ? `=${value}` : ''}]" spells a state the browser ` +
+            `owns; use the pseudo-class`
+        );
+      }
+    }
+  });
+  return found;
+}
 
 const OUT_DIR = 'packages/elements/src';
 
@@ -63,28 +139,19 @@ for (const name of elements) {
     root.walkRules((rule) => {
       ruleCount += 1;
       const line = rule.source?.start?.line ?? 0;
-      // BROADER THAN `.is-`, because the message claims a semantic property and the first
-      // version implemented a two-token denylist. A lens got `.is-disabled`, `.is-checked`,
-      // `.isFocused`, `--focused` and `[data-focus]` all past it — and `.is-disabled` is the
-      // exact browser-owned state this mission spent a finding on.
-      const STATES = 'focus|focused|hover|hovered|active|disabled|checked|invalid|required|visited';
-      const simulated = new RegExp(`[.\\[](?:is[-_]?|state[-_]|data-)?[a-z-]*(?:${STATES})\\b`, 'i');
-      // A real pseudo-class in the same compound means the author is using the platform state,
-      // so `.sk-x__control:disabled` and `:host([invalid])` are fine; a CLASS or ATTRIBUTE
-      // spelling the state is not.
-      // ARIA attributes are EXEMPT: `[aria-invalid="true"]` reflects real state into the
-      // accessibility tree — it is the platform surface, not a simulation of it. Stripping
-      // pseudo-classes too, so `:disabled` and `:host([invalid])` (the reflected
-      // ElementInternals state the adopted sheet must see) do not trip the rule they exist to
-      // satisfy. Caught by running the widened rule against this mission's own sheets.
-      const stripped = rule.selector
-        .replace(/:[a-z-]+(\([^)]*\))?/gi, '')
-        .replace(/\[aria-[^\]]*\]/gi, '');
-      if (simulated.test(stripped)) {
-        problems.push(
-          `${file}:${line} — ${rule.selector.trim()} — a class or attribute simulating a state ` +
-            `the browser owns; use the real pseudo-class`
-        );
+      // PARSED PER COMPOUND, not regexed over the whole selector string.
+      //
+      // The previous version stripped pseudo-classes with `:[a-z-]+(\([^)]*\))?` — which
+      // removes a functional pseudo TOGETHER WITH ITS ARGUMENTS, so `:is(.is-disabled)`,
+      // `:where(.is-focused)`, `:not(.is-hover)` and `:has(.is-disabled)` all disarmed the rule
+      // entirely. It also could not cross `_`, so every `__`-separated BEM name — the
+      // convention every sheet in this repo uses — escaped; and `interactive` matched because
+      // it contains `active`. A lens measured all of it.
+      //
+      // postcss-selector-parser walks classes and attributes wherever they appear, including
+      // inside functional pseudo arguments, and never sees a pseudo-class as text.
+      for (const why of simulatedStates(rule.selector)) {
+        problems.push(`${file}:${line} — ${rule.selector.trim()} — ${why}`);
       }
     });
     root.walkDecls((decl) => {

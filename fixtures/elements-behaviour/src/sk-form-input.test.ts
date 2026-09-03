@@ -17,6 +17,7 @@ import '@spec-kitty/elements';
 
 type Input = HTMLElement & {
   name: string;
+  readonly validity: ValidityState;
   setCustomError(message: string | null): void;
   value: string;
   label: string;
@@ -234,6 +235,19 @@ test('the visible control displays the value', async () => {
   expect(control(el).value, 'a field that submits but shows nothing passes every other gate').toBe(
     'ada@team.com',
   );
+
+  // AND AFTER A LATER ASSIGNMENT, on a control the user has already dirtied. The seed alone is
+  // witnessed by an ATTRIBUTE binding too, so `.value=` → `value=` would have passed — a
+  // pass-2 lens found that weaker substitution uncovered. A dirty control ignores the
+  // attribute, so only the property binding can update it.
+  control(el).value = 'typed-by-user';
+  control(el).dispatchEvent(new Event('input', { bubbles: true }));
+  await el.updateComplete;
+  el.value = 'set-from-script@team.com';
+  await el.updateComplete;
+  expect(control(el).value, 'the property binding must survive a dirtied control').toBe(
+    'set-from-script@team.com',
+  );
 });
 
 test('[SC-005] setting the disabled PROPERTY excludes the field from submission', async () => {
@@ -336,4 +350,73 @@ test('a consumer can set a server-side error, and it reaches the a11y tree AND b
   el.setCustomError(null);
   await el.updateComplete;
   expect(form.checkValidity(), 'clearing it restores validity').toBe(true);
+});
+
+test('a changed message repaints the error node, not just internals', async () => {
+  // A pass-2 lens found the rendered node interpolated `this.validationMessage` — a getter over
+  // ElementInternals, which Lit cannot observe. A message that changed WITHOUT flipping
+  // `invalid` left the DOM stale: internals said one thing, the node the user hears said
+  // another. `aria-describedby` points at that node, so the stale text IS the programmatic
+  // message, and `role="alert"` never re-announced.
+  const [, el] = await mount({ name: 'email', label: 'Field', required: '' });
+  await el.updateComplete;
+  const err = () => (el.shadowRoot!.querySelector('[part~="error"]') as HTMLElement).textContent!.trim();
+  expect(err()).toMatch(/Field is required/);
+
+  // `invalid` stays true across this change — which is exactly why the old code never repainted.
+  el.setCustomError('That address is already registered.');
+  await el.updateComplete;
+  expect(el.hasAttribute('invalid'), 'precondition: invalid did NOT flip').toBe(true);
+  expect(err(), 'the node must follow the message').toMatch(/already registered/);
+  await expect.element(control(el)).toHaveAccessibleDescription(/already registered/);
+
+  el.setCustomError('A second, different problem.');
+  await el.updateComplete;
+  expect(err(), 'and again, with invalid still true throughout').toMatch(/second, different/);
+});
+
+test('clearing a server error does NOT wipe a live required violation', async () => {
+  // THE FAKEABLE ASSERTION THIS REPLACES. The test above clears on a field that was never
+  // `required`, so `form.checkValidity() === true` holds both under the correct implementation
+  // AND under "wipe all validity unconditionally" — which is what the first version did, because
+  // setValidity flags are a full REPLACEMENT rather than a layer. An empty required field then
+  // submitted, with aria-invalid="false" and no host [invalid]. A pass-2 lens measured it.
+  const [form, el] = await mount({ name: 'email', label: 'Email', required: '' });
+  await el.updateComplete;
+  expect(form.checkValidity(), 'precondition: empty + required is invalid').toBe(false);
+
+  el.setCustomError('That address is already registered.');
+  await el.updateComplete;
+  // BOTH flags, not one replacing the other — a consumer branching on `validity.valueMissing`
+  // must not be told `false` merely because a server error arrived.
+  expect(el.validity.valueMissing, 'the derived flag survives underneath').toBe(true);
+  expect(el.validity.customError).toBe(true);
+
+  el.setCustomError(null);
+  await el.updateComplete;
+
+  expect(form.checkValidity(), 'still empty and still required — must NOT submit').toBe(false);
+  expect(el.validity.valueMissing, 'the required violation is re-derived, not erased').toBe(true);
+  expect(el.hasAttribute('invalid')).toBe(true);
+  await expect.element(control(el)).toHaveAccessibleDescription(/is required/);
+});
+
+test('a disabled required field does not veto its form', async () => {
+  // The UA bars a disabled form-associated element from constraint validation — but `disabled`
+  // is deliberately not reflected here (that is what makes SC-005's mutation observable), so
+  // the UA cannot see it and the element has to do it itself. A pass-2 lens measured the
+  // consequence: an empty required field, disabled, blocked submission forever, and the user
+  // could not clear it because the field was disabled.
+  const [form, el] = await mount({ name: 'email', label: 'Email', required: '' });
+  await el.updateComplete;
+  expect(form.checkValidity(), 'precondition: empty + required blocks').toBe(false);
+
+  el.disabled = true;
+  await el.updateComplete;
+  expect(form.checkValidity(), 'disabling must release the veto').toBe(true);
+  expect(el.hasAttribute('invalid')).toBe(false);
+
+  el.disabled = false;
+  await el.updateComplete;
+  expect(form.checkValidity(), 're-enabling restores it').toBe(false);
 });

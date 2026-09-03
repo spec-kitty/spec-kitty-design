@@ -266,8 +266,8 @@
       "subject": "fixtures/elements-behaviour/src/sk-form-input.test.ts",
       "arm": "validity message reaches the a11y tree",
       "file": "packages/elements/src/form-input/sk-form-input.ts",
-      "from": "      this.internals.setValidity({ valueMissing: true }, `${this.label || 'This field'} is required`, control);",
-      "to": "      this.internals.setValidity({});"
+      "from": "      flags.valueMissing = true;\n      message = `${this.label || 'This field'} is required`;",
+      "to": "      void 0;"
     },
     {
       "id": "SC-004",
@@ -306,8 +306,8 @@
       "subject": "fixtures/elements-behaviour/src/sk-form-textarea.test.ts",
       "arm": "validity message reaches the a11y tree",
       "file": "packages/elements/src/form-textarea/sk-form-textarea.ts",
-      "from": "      this.internals.setValidity({ valueMissing: true }, `${this.label || 'This field'} is required`, control);",
-      "to": "      this.internals.setValidity({});"
+      "from": "      flags.valueMissing = true;\n      message = `${this.label || 'This field'} is required`;",
+      "to": "      void 0;"
     },
     {
       "id": "SC-004",

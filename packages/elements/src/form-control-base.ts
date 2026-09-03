@@ -118,16 +118,28 @@ export abstract class FormControlBase extends LitElement {
    * argues for: validity is the state, `invalid` and the message are both derived from it.
    */
   setCustomError(message: string | null): void {
-    const control = this.shadowRoot?.querySelector('input, textarea') ?? undefined;
-    if (message) this.internals.setValidity({ customError: true }, message, control as HTMLElement);
-    else this.internals.setValidity({});
+    // RE-DERIVES, never resets. `setValidity` flags are a FULL REPLACEMENT, not a layer — so
+    // the first version's `setValidity({})` on clear wiped `valueMissing` too, and an empty
+    // required field then submitted with `aria-invalid="false"` and no host `[invalid]`. That
+    // is precisely the failure this method exists to prevent, reintroduced through the clear
+    // path, and the test missed it because it cleared on a field that was never `required`.
+    //
+    // Routing through `validate()` means the element recomputes the whole flag set from its
+    // current state, so a consumer error and a derived rule can both be true at once and
+    // neither erases the other.
     this.customError = message ?? '';
-    // `customError` is deliberately NOT a reactive property — it is internal bookkeeping, and
-    // making it reactive would publish it. So the reflected state is set here explicitly;
-    // otherwise nothing schedules an update and the host attribute never changes, which is
-    // exactly how the first version of this method failed its own test.
-    this.invalid = Boolean(message);
+    this.validate();
   }
+
+  /**
+   * Recompute validity from every source and reflect it.
+   *
+   * Abstract because the base cannot know a subclass's derived rules — and declaring it
+   * abstract is deliberate: an `abstract` class with no abstract members enforces nothing, and
+   * a lens pointed out the real contract on a subclass was documented only in comments. An
+   * abstract declaration has no body, so it adds no mutation anchor.
+   */
+  protected abstract validate(): void;
 
   /** Non-empty while a consumer-supplied error is active. Read by each element's `validate()`
    *  so a derived rule cannot silently clobber a server-side one. */
@@ -136,4 +148,9 @@ export abstract class FormControlBase extends LitElement {
   /** Reflected invalid state. Declared here so `setCustomError` can set it; each element
    *  registers it as a reactive property so the adopted sheet's `:host([invalid])` can see it. */
   declare invalid: boolean;
+
+  /** The message the error node renders. A reactive property rather than a read through
+   *  `internals.validationMessage`, because Lit cannot observe a getter over internals — see
+   *  each element's `static properties`. */
+  declare errorMessage: string;
 }

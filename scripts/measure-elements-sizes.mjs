@@ -109,8 +109,19 @@ ${ARTIFACTS.map(
   (a) =>
     `${a.path}\n  raw       ${String(a.raw).padStart(7)} bytes  (${kb(a.raw)})\n` +
     `  minified  ${String(a.min).padStart(7)} bytes  (${kb(a.min)})\n` +
-    `  gzip      ${String(a.gzip).padStart(7)} bytes  (${kb(a.gzip)})\n` +
-    `  min+gzip  ${String(a.mingzip).padStart(7)} bytes  (${kb(a.mingzip)})`,
+    // GZIP IS REPORTED IN KiB ONLY, and that is a correctness fix rather than a formatting
+    // preference. `zlib.gzipSync` output depends on the zlib version compiled into Node, so the
+    // exact byte count is NOT reproducible across machines — and `--check` asserts byte-equality
+    // of this whole file. It failed on CI at 11884 bytes against 11882 committed locally, with
+    // `raw` and `minified` IDENTICAL on both sides (47825 / 70265): the bundle had not changed
+    // at all, only the compressor's framing.
+    //
+    // Left as-is this gate would have failed intermittently forever, on every Node patch bump,
+    // and each failure would look like a size regression. The KiB figure was already identical
+    // on both sides (11.6), so rounding loses nothing anyone was using — the raw counts that
+    // matter for a diff, raw and minified, are deterministic esbuild output and keep theirs.
+    `  gzip      ${kb(a.gzip).padStart(9)}\n` +
+    `  min+gzip  ${kb(a.mingzip).padStart(9)}`,
 ).join('\n')}
 \`\`\`
 `;
