@@ -36,29 +36,59 @@ as part of this mission.
 
 Also observed: `playwright-core` resolves to 1.57.0 against `playwright` 1.62.1.
 
-### Settled by the post-spec squad — do not re-investigate
+### Settled by the squad — measured, do not re-investigate
 
-1. **`nx affected --target=test` exits 0 with no tasks.** Measured: prints
-   `NX No tasks were run`, exit code 0. The enforced job runs `npm run test`.
-2. **`passWithNoTests` defaults false but is per-RUN, not per-project.** An empty lane
-   beside a populated one is a green run. FR-009's floor is per-lane.
-3. **`adoptedStyleSheets.length === 1` proves nothing about provenance.** Lit's own
-   `static styles = css\`…\`` yields exactly that. SC-014 asserts byte equality with the
-   `@spec-kitty/styles` source instead.
-4. **The fixture cannot live in `packages/elements`.** Five scanners; see spec.
-5. **CLAUDE.md §7 does not say what ADR-11 attributes to it.** Escalated, not acted on.
+The post-plan feasibility lens installed Vitest 4 and ran both lanes. These are results,
+not readings.
 
-### Unresolved and deliberately not assumed
+1. **The Vitest 4 provider is a FUNCTION, not a string.** `import { playwright } from
+   '@vitest/browser-playwright'` then `provider: playwright()`. Verified running against a
+   real `HeadlessChrome/151`.
+2. **The resolved project name carries the instance** — `browser (chromium)`, not
+   `browser`. Any floor keyed on the literal `'browser'` matches nothing.
+3. **Use `vitest.config.mts`.** A `.ts` config in a package without `"type": "module"`
+   emits a Vite `configLoader` deprecation on *every* run.
+4. **`passWithNoTests` is per-RUN.** Three projects, one with a non-matching `include`:
+   `Test Files 2 passed`, **exit 0**, and the empty lane is not named, not warned, and
+   absent from `vitest list --json`. FR-009 is load-bearing.
+5. **`--reporter=json` cannot carry the floor.** `testResults[].name` is an absolute file
+   path; there is no project key anywhere. Worse — when webkit failed to launch, the JSON
+   said `success: true`, `numFailedTests: 0`, and two browser files `status: "passed"`
+   with zero assertions. **The specified mechanism was itself the defect class.** A ~30-line
+   custom reporter over `vitest.projects` × `testModule.project.name` works and was
+   verified.
+6. **`CSSStyleSheet` has no `cssText`.** It is `undefined`. The only read-back,
+   `cssRules[].cssText`, is CSSOM-normalised — comments stripped, shorthands collapsed,
+   `#010203` → `rgb(1, 2, 3)` — and normalised *differently per engine*, on a lane that
+   runs two. SC-014 is now identity: `adoptedStyleSheets[0] === Ctor.styles[0]`, measured
+   `true` against the repo's real shape.
+7. **`useDefineForClassFields` unset ≡ true, and the SHIPPED BUNDLE has it too.**
+   `packages/elements/project.json`'s bare `esbuild … --bundle` resolves the same
+   `tsconfig.base.json`. SC-010 fails on the first attempt with Lit's class-field-shadowing
+   error. A lane-local override would give a green lane over a broken artifact.
+8. **The Vitest 4 config key is `retry`, not `retries`** — and it defaults to 0, so
+   asserting the raw object is near-vacuous.
+9. **webkit cannot launch on the operator's machine** (Fedora 44, missing Ubuntu-targeted
+   libs). It works on `ubuntu-latest`. Download costs: webkit 4.8 s, chromium 11.7 s.
+10. **The suite is not the cost.** 5 files across both lanes, cold: **~1.5 s**. The CI job
+    is dominated by `npm ci` and `playwright install --with-deps`. But the mutation harness
+    runs 16 full suites at ~1.8 s each — *that* is what the ceiling will measure.
+11. **`gate`'s `if:` is `always()`** and must stay. The real gate is the shell disjunction
+    inside its `[ENFORCED]` step.
+12. **`fixtures/` beats `packages/elements-fixtures/`.** Storybook's story glob is
+    `packages/**`, so a sibling package is free of it only by the author remembering not to
+    add a `.stories.ts`. `fixtures/` is free by construction, already carries a
+    `scope:fixture` precedent, is already in the eslint glob and the `components` filter,
+    and is not an npm-workspace match.
+13. **Corrections to this plan's own first draft:** `playwright@1.62.1` resolves
+    `playwright-core@1.62.1` nested — the top-level `1.57.0` is mermaid's, so the "skew" I
+    reported did not exist. And a fresh pin resolves `vite 8.2.2`, not the tree's 7.3.6.
 
-- **Vitest's `projects` aggregation of the no-test-files check.** The post-spec lens could
-  not test it and neither can I without installing. IC-01 opens with a two-project spike:
-  one project with tests, one with a deliberately broken glob. FR-009's mechanism is
-  written *after* that spike, not before.
-- **Whether esbuild-in-Vitest honours `useDefineForClassFields`.** `tsconfig.base.json`
-  sets `target: ES2022` and leaves the flag unset, so TypeScript defaults it **true** —
-  the documented configuration that makes class fields clobber Lit accessors and breaks
-  property-before-upgrade. That makes SC-010 a genuinely repo-owned risk, but only if the
-  lane exercises the same transform the artifact ships. Settled in IC-02.
+### Still unverified, and it is the first thing IC-06 measures
+
+**No behaviour has been run on WebKit.** The spike could not launch it locally. Given
+engine-specific CSSOM and `ElementInternals` differences, expect at least one divergence.
+That is exactly the risk FR-005 exists to expose.
 
 ## Charter Check
 
@@ -73,88 +103,120 @@ Also observed: `playwright-core` resolves to 1.57.0 against `playwright` 1.62.1.
 ## Project Structure
 
 ```
-packages/elements-fixtures/          NEW — the behaviour fixture, scope:fixture
-  src/sk-behaviour-fixture.ts        owns form association, events, parts, slots, focus
-  src/*.test.ts                      browser-lane tests
-  project.json                       tags: [scope:fixture]; lint target
+fixtures/elements-behaviour/         NEW — the behaviour fixture, scope:fixture
+  src/sk-behaviour-fixture.ts        form association, events, parts, slots, focus
+  src/*.test.ts                      browser-lane tests (IC-04 owns these)
+  project.json                       tags: [scope:fixture]; lint + typecheck targets
+  tsconfig.json                      MUST include *.test.ts — tsconfig.lib.json excludes them
+behaviours.json                      NEW — the id registry; floor, mutations and matrix all read it
+vitest.config.mts                    NEW — two projects, retry 0, explicit alias
 scripts/
-  suite-selftest.mjs                 NEW — mutation harness (FR-008)
-  suite-floor.mjs                    NEW — per-lane/per-behaviour floor + zero-skip (FR-009, FR-010)
-  measure-suite-time.mjs             NEW — ceiling assertion (FR-013)
-vitest.config.ts                     NEW — two projects, retries 0, explicit alias
-.github/workflows/ci-quality.yml     test job + `gate` `if:` wiring (FR-014)
-docs/architecture/decisions/…-11-….md  budget recorded in Consequences
+  floor-reporter.mjs                 NEW — custom reporter: per-lane + per-behaviour + zero-skip
+  suite-selftest.mjs                 NEW — mutation harness
+  measure-suite-time.mjs             NEW — ceiling assertion (separate source from the floor)
+tsconfig.base.json                   useDefineForClassFields: false  (FR-015)
+.github/workflows/ci-quality.yml     test job + the gate's SHELL disjunction (not its `if:`)
+docs/architecture/decisions/…-11-….md  budget; and amend "no second install in CI", now false
 ```
 
-The fixture is a **new nx project outside `packages/elements`**, which is the only
-location free of all five scanners. `eslint.config.mjs` already permits `scope:fixture` to
-reach `scope:elements`, and `ci-quality.yml`'s `components` filter is already
-`packages/**`, so it is covered without touching either.
+`fixtures/` rather than a sibling package — see settled fact 12. Nothing in the four
+`nx run-many --target=build --projects=tokens,styles,elements` call sites needs editing:
+all four use an explicit project list, and the fixture needs no `build` target.
 
 ## Complexity Tracking
 
-The mission adds four scripts. That is a lot, and three of them exist only because a
-simpler expression is fakeable:
+Three new scripts plus a reporter. Each exists because a simpler expression is fakeable,
+and the first draft's instruction to merge two of them was **wrong**:
 
 | Script | Why not simpler |
 |---|---|
+| `floor-reporter.mjs` | Vitest has no per-project empty check; the JSON reporter has no project attribution and calls an unlaunched lane `passed` |
 | `suite-selftest.mjs` | "committed evidence" degrades to a paste; only a re-executed mutation proves red-first |
-| `suite-floor.mjs` | Vitest has no per-project empty check and no fail-on-skip |
-| `measure-suite-time.mjs` | a number in markdown is stale on the next merge |
-
-`suite-floor.mjs` and `measure-suite-time.mjs` both consume `vitest run --reporter=json`,
-so they are one reader with two assertions — **build them as one script with two modes**
-unless the spike shows the JSON shape makes that awkward.
+| `measure-suite-time.mjs` | a number in markdown is stale on the next merge — and it reads **wall-clock**, which is not in any reporter output, so it is *not* the same reader as the floor |
 
 ## Implementation Concern Map
 
-### IC-01 — Runner, two projects, and the floor *(sequenced FIRST)*
-Covers FR-001, FR-002, FR-003, FR-009, FR-011. Opens with the projects-aggregation spike,
-because FR-009's mechanism depends on its outcome. Delivers `vitest.config.ts` with both
-projects, `retries: 0`, `npm run test`, and the floor script. **Depends on nothing.**
+Eight concerns. The first draft had nine and three of them edited files a fourth owned —
+work-package overlap, which this project's doctrine forbids.
 
-### IC-02 — Module resolution and the artifact under test
-Covers FR-004, SC-022. Explicit alias so `@spec-kitty/elements` resolves from source;
-suite passes with no `dist/`. Settles the `useDefineForClassFields` question and records
-which transform the lane exercises. **Depends on IC-01.**
+### IC-01 — Runner, config, floor, and the id registry *(FIRST; depends on nothing)*
+Absorbs the old IC-02, IC-06 and IC-07, all of which edited `vitest.config.mts` or the
+floor. Delivers: `vitest.config.mts` (both projects, `retry: 0`, explicit alias,
+env-gated webkit instance); `behaviours.json`; `scripts/floor-reporter.mjs`;
+`npm run test`; the pinned deps (`vitest`, `@vitest/browser`,
+`@vitest/browser-playwright`, and **`playwright` directly** — `run-axe-storybook.js`
+already `require`s it transitively); `useDefineForClassFields: false` in
+`tsconfig.base.json` with a node-lane assertion on the value the *build* resolves.
 
-### IC-03 — The fixture element
-Covers FR-006, C-006, C-007. New nx project, `scope:fixture`, owning form association,
-a documented cancelable event, `::part()`s, slots with fallback, and focus/keyboard.
-Includes the negative assertion that **no #70 gate changes behaviour because it exists**.
-**Depends on IC-01.**
+**Ordering hazard, stated:** the floor makes `npm run test` red until IC-04 lands tests.
+IC-01 therefore ships **one seed browser-lane test** carrying a registry id, so the floor
+is satisfiable from its own commit.
 
-### IC-04 — The fifteen behaviours
-Covers FR-007 and SC-002 … SC-015. The browser-lane tests. **Depends on IC-02, IC-03.**
+### IC-02 — The fixture element *(parallel with IC-01)*
+`fixtures/elements-behaviour/`, `scope:fixture`, owning form association, a documented
+cancelable event, `::part()`s, slots with fallback, and focus/keyboard. Ships `lint` **and
+`typecheck`** targets — the fixture's TypeScript is otherwise checked by nothing, which is
+the hole `elements:typecheck` closed for `packages/elements` three missions ago. Owns
+`project.json` and the element; **IC-03 owns the `*.test.ts`.** Carries the negative
+assertion that no #70 gate changes behaviour because the fixture exists.
+
+### IC-03 — The fourteen behaviours
+The browser-lane tests, keyed by registry id. Covers SC-002 … SC-015. **Depends on IC-01,
+IC-02.** Two criteria carry corrections: SC-014 is identity plus zero `<style>`, and
+SC-013 needs the ratchet below.
+
+### IC-04 — The `::part()` ratchet
+SC-013 is vacuous today — the manifest declares **0** `cssParts`, so a "derived expected
+list" is a green assertion over nothing. Ships a committed `EXPECTED_PART_COUNT`, starting
+at 0, that fails when the manifest's part count exceeds it without the file being updated
+in the same PR. Shrink-only, red-first demonstrable today by adding a `@csspart` JSDoc.
+**Depends on IC-03.**
 
 ### IC-05 — The mutation harness
-Covers FR-008, NFR-002, SC-016. Committed mutation list, one entry per behaviour, applied
-to a copy, asserting the named test goes red plus a green baseline. **Depends on IC-04**,
-since it mutates those tests' subjects.
+`scripts/suite-selftest.mjs`, chromium-only, `node_modules` **symlinked** not copied (it is
+1.2 GB and the harness runs 16 times). Ten guards, each demonstrated live by the spike:
 
-### IC-06 — Engine coverage
-Covers FR-005, NFR-003. chromium and webkit. Prices the browser install into IC-08's
-measurement. **Depends on IC-01.**
+1. pattern not found → fail (the sixth-instance defect)
+2. pattern occurs more than once → fail
+3. replacement is a no-op → fail
+4. the **named** test must be **present and failed** — not merely `exit != 0`
+5. every *other* behaviour test must still pass (collateral bound)
+6. baseline must have **executed > 0**, not merely exited 0
+7. mutation ids ↔ `behaviours.json` equal **bidirectionally**
+8. `mutations.length > 0`
+9. no `-t` scoping — it makes guard 4 undetectable, and the full lane costs ~2 s
+10. elements-owned mutations (SC-013/014/015) must **redirect the alias**, since their
+    subject is `packages/elements/src`, not the copied fixture
 
-### IC-07 — Zero-skip discipline
-Covers FR-010, SC-018. Folded into the floor script rather than a separate reporter.
-**Depends on IC-01.**
+Guard 4 is the one that will actually fire: a syntax-breaking mutation exits 1 with the
+named test **absent** from the report, which an exit-code assertion reads as success.
+**Depends on IC-03.**
 
-### IC-08 — CI wiring, gate condition, and the budget
-Covers FR-013, FR-014, NFR-001, NFR-004, SC-020, SC-021. The test job; the `gate` `if:`
-edit, not just `needs:`; the measured ceiling recorded in ADR-11's Consequences.
-**Depends on IC-01, IC-06.**
+### IC-06 — Engine coverage in CI *(first task: run the suite on WebKit)*
+webkit is unverified against any behaviour. This IC's first act is to measure it on
+`ubuntu-latest`, before the rest of the wiring assumes it passes. Adds the explicit
+`npx playwright install --with-deps chromium webkit` step — `npm ci --ignore-scripts`
+means nothing downloads browsers implicitly. **Depends on IC-01, IC-03.**
 
-### IC-09 — Conformance matrix *(P2 — droppable, see operator question 2)*
-Covers FR-012, SC-019. Machine-readable artifact with the cell enum and its three guards.
-Carries the **Svelte toolchain addition** — `svelte` + `@sveltejs/vite-plugin-svelte`, new
-dependencies requiring supply-chain review, in a repo where Svelte currently appears only
-in ADR prose. **Depends on IC-04.** May be dropped without failing the mission.
+### IC-07 — CI wiring, the gate, and the budget
+The four **real** edits, since `gate`'s `if:` is `always()` and must stay: add `test` to
+`needs:`, add its echo line, add `[ "${{ needs.test.result }}" != "success" ]` to the
+shell disjunction, and give it **no** entry in the skipped-tolerance block — FR-003 makes
+the job unconditional, so `skipped` is never legitimate for it. Records the ceiling,
+stating whether it covers the suite alone or suite + selftest (the selftest is 5–10× the
+suite). Amends ADR-11's now-false *"no second install in CI"*. **Depends on IC-01, IC-06.**
+
+### IC-08 — Conformance matrix *(P2 — see operator question 2)*
+Machine-readable artifact with the cell enum and its three guards. Carries the Svelte
+toolchain addition and the only other lockfile edit. **Not cleanly droppable as the spec
+stands**: FR-010's not-applicable escape hatch *is* this matrix's cell. If it is dropped,
+FR-010 must stand alone — zero skips, full stop, and a behaviour with no applicable
+subject is simply not in `behaviours.json`. That wording is now in the spec, so dropping
+IC-08 is coherent. **Depends on IC-03.**
 
 ### Cross-cutting
 
-- **`playwright` gets pinned directly** (see Technical Context), in IC-01.
-- **Item 9, generation determinism, is deferred to #75** with the reasoning in the spec —
-  its subject does not exist, and the artifacts that do already have enforced drift checks.
-- Every IC that adds a gate carries its red-first probe in the same work package. NFR-002
-  is not satisfied by a commit message.
+- Item 9, generation determinism, is **deferred to #75** — its subject does not exist and
+  the artifacts that do already have enforced drift checks. That is why the registry holds
+  fourteen, not the charter's fifteen.
+- Every IC that adds a gate carries its red-first probe in the same work package.
