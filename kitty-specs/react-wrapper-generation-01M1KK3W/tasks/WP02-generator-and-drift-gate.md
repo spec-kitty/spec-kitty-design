@@ -16,9 +16,14 @@ planning_base_branch: mission/react-wrapper-generation
 merge_target_branch: mission/react-wrapper-generation
 branch_strategy: Planning artifacts for this mission were generated on mission/react-wrapper-generation. During /spec-kitty.implement this WP may branch from a dependency-specific base, but completed changes must merge back into mission/react-wrapper-generation unless the human explicitly redirects the landing branch.
 subtasks:
+- T003a
 - T004
 - T005
 - T006
+- T007
+- T008
+- T009
+- T010
 phase: Phase 2 - Generator
 history:
 - timestamp: '2026-09-03T13:00:00Z'
