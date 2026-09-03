@@ -1,3 +1,13 @@
+/* A custom element's UA default is `display: inline`, so without this the host cannot be sized
+   or spaced by a consumer and the inner flex row governs nothing outside itself. `inline-flex`
+   rather than `block` because a section banner is a badge that sits inline with surrounding
+   content — apps/demo/blog-demo.html already overrides the static form to `inline-flex` by
+   hand, which is the consumer telling us what the default should have been.
+   Inert in the static consumption path, where the root IS the .sk-section-banner div. */
+:host {
+  display: inline-flex;
+}
+
 .sk-section-banner {
   display: flex;
   align-items: center;
