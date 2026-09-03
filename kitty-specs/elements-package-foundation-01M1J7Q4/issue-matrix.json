@@ -1,7 +1,7 @@
 {
   "rows": {
     "#102": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "Prior mission (#69), merged as ff952f4. Cited in spec.md only to WITHDRAW a fabricated attribution; no work owed here.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -9,7 +9,7 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
+      "verdict": "verified-already-fixed",
       "wp": null
     },
     "#104": {
