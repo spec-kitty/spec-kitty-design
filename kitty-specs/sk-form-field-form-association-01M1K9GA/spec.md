@@ -216,8 +216,8 @@ CSS-only era where the wrapper carried the `for`/`id` pair the arrangement no lo
   *No longer deferred to the plan.* The generator has already decided: a `*.markup.ts` here
   would replace `index.ts` wholesale with three exports derived from `<COMPONENT>_VARIANTS`,
   hardcode the `.html` body to `Card content`, and emit `SkFormFieldInsetHTML` carrying a class
-  in no stylesheet (#115). So **no `*.markup.ts` is added** and the static exports go rather
-  than being regenerated wrong.
+  in no stylesheet (#115). So **no `*.markup.ts` is added**, and the static exports stay
+  hand-authored and untouched rather than being regenerated wrong.
 - **FR-008**: **`sk-form-field` is not built.** Its three accessible responsibilities — label,
   description, error region — all reach the control across a root boundary and were measured
   failing in ADR-9 §4. What remains is flex layout, which is a `<div>` the consumer already
@@ -370,10 +370,16 @@ Proceeding as one mission until told otherwise, sequenced so the split is still 
 
 ### 2. `@spec-kitty/styles` is published at 1.0.0 — is a semver-major acceptable here?
 
-FR-007 removes eight public exports; FR-013 renames `.sk-input` / `.sk-textarea`, which static
-consumers link against. The programme's standing assumption has been "nothing is published, so
-a break is free" — true of `@spec-kitty/elements`, which is `"private": true`, and **false of
-`@spec-kitty/styles`**, which `release.yml` publishes with `--access public`.
+*As first drafted* FR-007 removed eight public exports and FR-013 renamed `.sk-input` /
+`.sk-textarea`, which static consumers link against. The programme's standing assumption has
+been "nothing is published, so a break is free" — true of `@spec-kitty/elements`, which is
+`"private": true`, and **false of `@spec-kitty/styles`**, which `release.yml` publishes with
+`--access public`.
+
+Both FRs are now additive, so **this mission does not wait on the answer**. The question stands
+because the retirement still has to happen: the duplication is real, #79's repository-wide "no
+component markup is authored twice" assertion forces it, and #77–#79 will each want the same
+rename.
 
 **Recommendation: take the break, in one deliberate 2.0.0** — #77–#79 migrate nine more
 components and will each want the same rename, so doing it once is cheaper than nine times.
