@@ -13,7 +13,7 @@
       "wp": null
     },
     "#104": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "Follow-up: #104 stays open. Its proposed stylesheet-coverage arm reads document.styleSheets, measured empty for an adopted constructed stylesheet -- it would fail every element story. Whichever lands second must account for the other.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -21,8 +21,8 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
     },
     "#105": {
       "evidence_ref": "Follow-up: #105 stays open. sk-stub's hand-authored markup is owned by no migration mission; this mission ADDS a third authoring site via the element's render(). Recorded in C-006 and in WP03's notes.",
