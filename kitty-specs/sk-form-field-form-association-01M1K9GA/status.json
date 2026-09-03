@@ -1,7 +1,7 @@
 {
-  "event_count": 8,
-  "last_event_id": "01M1KCT3Z93D3W7GGTZXAA2T9N",
-  "materialized_at": "2026-09-03T10:25:10.121235+00:00",
+  "event_count": 9,
+  "last_event_id": "01M1KCT51BBS6F6V3GKXD74KFE",
+  "materialized_at": "2026-09-03T10:25:11.211793+00:00",
   "mission_number": "",
   "mission_slug": "sk-form-field-form-association-01M1K9GA",
   "mission_type": "software-dev",
@@ -9,12 +9,12 @@
     "approved": 0,
     "blocked": 0,
     "canceled": 0,
-    "claimed": 0,
+    "claimed": 1,
     "done": 0,
     "for_review": 1,
     "in_progress": 0,
     "in_review": 0,
-    "planned": 4
+    "planned": 3
   },
   "work_packages": {
     "WP01": {
@@ -30,11 +30,16 @@
       "role": "implementer"
     },
     "WP02": {
-      "actor": "finalize-tasks",
+      "actor": "user",
+      "agent_profile": "__resolved_profile_absent__",
+      "agent_profile_version": "__resolved_profile_version_absent__",
       "force_count": 0,
-      "lane": "planned",
-      "last_event_id": "01M1KBYRFNSM3MHK5YTT845FPN",
-      "last_transition_at": "2026-09-03T10:10:13.621381+00:00"
+      "lane": "claimed",
+      "last_event_id": "01M1KCT51BBS6F6V3GKXD74KFE",
+      "last_transition_at": "2026-09-03T10:25:11.211793+00:00",
+      "model": "__resolved_model_absent__",
+      "provider": "__resolved_provider_absent__",
+      "role": "implementer"
     },
     "WP03": {
       "actor": "finalize-tasks",
