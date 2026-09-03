@@ -50,16 +50,16 @@ So `custom-elements.json` would ship an element called `tag`, and SC-004 would p
 
 ## Subtasks
 
-- **T015** — *(moved)* `src/define.ts` is authored in **WP02**, because WP03's element and WP04's IIFE both need it before this WP runs; its runtime behaviour is asserted in **WP04**, where the artifacts exist. This WP keeps the half that cannot move: the manifest, and the collision below.
-- **T016** — CEM analyzer config and an `analyze` target; commit `custom-elements.json`; add a CI regeneration check (it is a generated artifact under ADR-10's contract).
-- **T017** — Resolve the collision. Either mandatory `@element <tag>` JSDoc **plus** an assertion that the manifest contains no `custom-element-definition` named `tag`, or a CEM plugin that follows the guarded helper. State which and why.
+- [x] **T015** — *(moved)* `src/define.ts` is authored in **WP02**, because WP03's element and WP04's IIFE both need it before this WP runs; its runtime behaviour is asserted in **WP04**, where the artifacts exist. This WP keeps the half that cannot move: the manifest, and the collision below.
+- [x] **T016** — CEM analyzer config and an `analyze` target; commit `custom-elements.json`; add a CI regeneration check (it is a generated artifact under ADR-10's contract).
+- [x] **T017** — Resolve the collision. Either mandatory `@element <tag>` JSDoc **plus** an assertion that the manifest contains no `custom-element-definition` named `tag`, or a CEM plugin that follows the guarded helper. State which and why.
 
 ## Definition of Done
 
-- [ ] *(FR-005 / SC-003 assertion moved to WP04, which owns the spec, the `staticDirs` entry and the artifacts. This WP no longer claims evidence it cannot produce.)*
-- [ ] `custom-elements.json` describes `sk-stub` **by its real tag name** (FR-006, SC-004).
-- [ ] The manifest contains **no** definition named `tag` — asserted, not eyeballed.
-- [ ] The regeneration check fails when the manifest drifts from source.
+- [x] *(FR-005 / SC-003 assertion moved to WP04, which owns the spec, the `staticDirs` entry and the artifacts. This WP no longer claims evidence it cannot produce.)*
+- [x] `custom-elements.json` describes `sk-stub` **by its real tag name** (FR-006, SC-004).
+- [x] The manifest contains **no** definition named `tag` — asserted, not eyeballed.
+- [x] The regeneration check fails when the manifest drifts from source.
 
 ## Notes
 
