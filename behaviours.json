@@ -53,6 +53,10 @@
         {
           "name": "sk-form-textarea",
           "file": "fixtures/elements-behaviour/src/sk-form-textarea.test.ts"
+        },
+        {
+          "name": "react-wrapper",
+          "file": "fixtures/react-consumer/src/wrappers.test.tsx"
         }
       ]
     },
@@ -133,6 +137,10 @@
         {
           "name": "sk-nav-pill",
           "file": "fixtures/elements-behaviour/src/sk-nav-pill.test.ts"
+        },
+        {
+          "name": "react-wrapper",
+          "file": "fixtures/react-consumer/src/wrappers.test.tsx"
         }
       ]
     },

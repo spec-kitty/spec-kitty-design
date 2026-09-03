@@ -89,11 +89,54 @@ export default defineConfig({
               find: /^@spec-kitty\/elements$/,
               replacement: resolve(root, 'packages/elements/src/index.ts'),
             },
+            {
+              // Without this, suite-selftest.mjs's tmpdir resolves @spec-kitty/react back to
+              // the UNMUTATED original: it symlinks the real node_modules in, and npm-workspace
+              // symlinks under it are relative. Every mutation on packages/react would read as
+              // "semantically inert" and pass. Same reason the three aliases above exist.
+              find: /^@spec-kitty\/react$/,
+              replacement: resolve(root, 'packages/react/src/index.js'),
+            },
+          ],
+        },
+        // PRE-DECLARED, because discovering them mid-run reloads the page.
+        //
+        // #75 added a React fixture, and on a COLD dep cache Vite discovered react and
+        // react-dom while tests were already executing, re-optimized, and reloaded:
+        //   [vitest] Vite unexpectedly reloaded a test. This may cause tests to fail, lead to
+        //   flaky behaviour or duplicated test runs.
+        // Locally the run survived the reload and reported 83/83, so this looked harmless.
+        // In CI it was not: `tests/browser/registered-elements.test.ts` and
+        // `fixtures/elements-behaviour/src/sk-stub.test.ts` both died with "Vitest failed to
+        // find the current suite" — the reload pulled the module graph out from under a
+        // collection already in progress. A warm local cache hid it entirely; the first cold
+        // run reproduced the warning.
+        //
+        // BOTH jsx runtimes, and the DEV one is the one that actually bit. The automatic JSX
+        // transform imports a runtime no source file names, and in dev mode that is
+        // `react/jsx-dev-runtime`, not `react/jsx-runtime`. Listing only the production entry
+        // left the dev one to be discovered mid-run:
+        //   [vite] new dependencies optimized: react/jsx-dev-runtime
+        //   [vite] optimized dependencies changed. reloading
+        // — arriving right after tests/browser/registered-elements.test.ts had collected,
+        // which is why that file and sk-stub.test.ts were the two that died in CI.
+        optimizeDeps: {
+          include: [
+            'react',
+            'react-dom',
+            'react-dom/client',
+            'react/jsx-runtime',
+            'react/jsx-dev-runtime',
           ],
         },
         test: {
           name: 'browser',
-          include: ['tests/browser/**/*.test.ts', 'fixtures/**/src/**/*.test.ts'],
+          // `.tsx` is NOT covered by `*.test.ts` under any glob implementation, and a file
+          // that matches nothing runs nowhere and is reported by nothing — the floor reporter's
+          // arm 1 only catches a DECLARED lane that executed zero tests, and this lane has
+          // plenty. Widened deliberately for the React consumer fixture (#75 WP03); the
+          // corresponding assertion that it actually matched is in that fixture's own test.
+          include: ['tests/browser/**/*.test.ts', 'fixtures/**/src/**/*.test.{ts,tsx}'],
           retry: 0,
           browser: {
             enabled: true,

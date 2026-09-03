@@ -15,6 +15,7 @@ for teams building Spec Kitty-branded interfaces.
 
 - [Using tokens](using-tokens.md) — install, load, and apply `--sk-*` custom properties
 - [Using components](using-components.md) — import and render each component category
+- [Using the elements from React](using-react.md) — the generated wrappers, and what they do and do not buy over React 19 natively
 - [Brand guidelines](brand-guidelines.md) — voice, colour, typography, iconography
 - [Changelog](changelog.md) — design system release history
 

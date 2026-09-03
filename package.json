@@ -4,7 +4,8 @@
   "private": true,
   "workspaces": [
     "packages/*",
-    "apps/*"
+    "apps/*",
+    "fixtures/*"
   ],
   "scripts": {
     "quality:all": "npm run quality:lint && npm run quality:stylelint && npm run quality:htmlhint",
@@ -44,6 +45,7 @@
     "@typescript-eslint/parser": "^8.59.1",
     "@vitest/browser": "4.1.11",
     "@vitest/browser-playwright": "4.1.11",
+    "@wc-toolkit/react-wrappers": "1.2.7",
     "axe-playwright": "^2.2.2",
     "esbuild": "0.28.1",
     "eslint": "^9.39.4",

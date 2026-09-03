@@ -1,0 +1,12 @@
+{
+  "$schema": "../../node_modules/typescript/lib/tsconfig-schema.json",
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "moduleResolution": "bundler",
+    "module": "ESNext",
+    "types": ["react", "vitest/globals"],
+    "noEmit": true
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx"]
+}

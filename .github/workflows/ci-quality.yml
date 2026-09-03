@@ -175,6 +175,15 @@ jobs:
         run: node scripts/typecheck-all.mjs
       - name: "[ENFORCED] No CSS in elements source (FR-009, ADR-10 §1)"
         run: node scripts/check-no-css-in-source.mjs
+      # #75. Generated React wrappers, same committed-artifact contract as the CSS and markup
+      # generators — with the union of their two halves, because those two do NOT agree:
+      # build-element-markup.mjs refuses an empty set and build-elements-css.mjs reports green
+      # over one (#123); build-elements-css.mjs sweeps orphans and build-element-markup.mjs
+      # does not. Both halves are load-bearing and a lens proved each independently.
+      - name: "[ENFORCED] Generated React wrappers are current (FR-002, FR-003, SC-301)"
+        run: node scripts/build-react-wrappers.mjs --check
+      - name: "[ENFORCED] The wrapper gate's own probe table (SC-311, SC-312)"
+        run: node scripts/build-react-wrappers.mjs --selftest
       - name: "[ENFORCED] Generated CSS modules are current (ADR-10 generated-artifact contract)"
         run: node scripts/build-elements-css.mjs --check
       # ADR-9 Confirmation #1, which the ADR requires by name and no mission had landed.
