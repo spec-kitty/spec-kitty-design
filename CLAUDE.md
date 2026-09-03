@@ -4,7 +4,25 @@ Read this first. It is the canonical entry point for any LLM coding agent (Claud
 
 ## 1. What this repo is
 
-A Nx monorepo for a token-driven web design system. Three published packages: `@spec-kitty/tokens` (CSS custom properties as the single source of truth for every design value), `@spec-kitty/styles` (framework-free web components — a `sk-<name>.css` file plus an optional minimal JS module per component), and `@spec-kitty/angular` (thin Angular wrappers around the styles building blocks). Tokens flow one direction: `tokens → styles → angular`. The token layer never depends on anything; consumer packages never bypass it.
+A Nx monorepo for a token-driven, **elements-first** web design system. **Four** packages:
+
+| package | what it is | you edit it |
+|---|---|---|
+| `@spec-kitty/tokens` | CSS custom properties — the single source of truth for every design value | yes |
+| `@spec-kitty/styles` | the `.css` source of record, plus **generated** static HTML | yes |
+| `@spec-kitty/elements` | the Lit **custom elements** — the component layer since ADR-8 — and the **authored** markup module every static form is generated from | yes |
+| `@spec-kitty/react` | **generated** React wrappers, for JSX typing and typed refs | **never** |
+
+Dependencies flow one direction: `tokens → styles → elements → react`. The token layer never
+depends on anything; consumer packages never bypass it.
+
+**`packages/react/src` is generated and committed.** Do not hand-edit it —
+`scripts/build-react-wrappers.mjs --check` regenerates and fails CI on any drift, on a file the
+generator no longer emits, and on a shrunken output set. You add nothing there for a new
+component: get the element and its JSDoc right and the wrapper follows.
+
+Angular is not a target. `packages/angular` was deleted in #102 and ADR-8 replaced hand-written
+wrappers with generated ones; older documents that mention it are history.
 
 Storybook publishes everything to [`https://stijn-dejongh.github.io/spec-kitty-design/`](https://stijn-dejongh.github.io/spec-kitty-design/). Two static demo pages — `blog-demo.html` and `dashboard-demo.html` — live at the deploy root and showcase realistic compositions of the components against the live token CSS.
 
@@ -14,8 +32,11 @@ Storybook publishes everything to [`https://stijn-dejongh.github.io/spec-kitty-d
 |------|-----------------|
 | `packages/tokens/src/tokens.css` | Every design token. Touch this when adding/changing design values. |
 | `packages/tokens/dist/token-catalogue.json` | Generated catalogue consumed by stylelint. Regenerate after token changes. |
-| `packages/styles/src/<component>/` | `sk-<name>.css` (styles), `sk-<name>.js` (optional ES module), `sk-<name>.stories.ts` (Storybook), `index.ts` (re-export). |
-| `packages/angular/src/lib/<component>/` | `*.component.ts/html/css`, `*.component.spec.ts`, `*.stories.ts`. |
+| `packages/styles/src/<component>/` | `sk-<name>.css` (**authored**), `sk-<name>.stories.ts`. `sk-<name>.html` and `index.ts` are **generated** from the element's markup module — do not hand-edit. |
+| `packages/elements/src/<component>/` | `sk-<name>.ts` (the element), `sk-<name>.markup.ts` (**authored** markup — the `.html` and the styles module are generated from it), `sk-<name>.stories.ts`. |
+| `packages/react/src/` | **Generated** wrappers. Never hand-edited; CI fails on drift. |
+| `behaviours.json`, `mutations.json` | The behaviour registry (ADR-11) and one red-first mutation per subject. |
+| `expected-parts.json`, `expected-docs.json` | Ratchets: `::part()` (shrink-only) and documented attributes/methods (**exact**). |
 | `apps/storybook/` | Storybook 10.x config; auto-emits `index.json` at build. |
 | `apps/demo/{blog-demo,dashboard-demo,index}.html` | Composed example pages served at the deploy root. |
 | `docs/architecture/` | ADRs (`decisions/`), `sad-lite.md`, `system-context-canvas.md`, `quality-attribute-assessment.md`, `risk-register.md`, `adversarial-squad-gate.md`, `research/`, `validation/`. |
@@ -32,11 +53,11 @@ Storybook publishes everything to [`https://stijn-dejongh.github.io/spec-kitty-d
 ## 3. Hard rules (non-negotiable)
 
 1. **Tokens first.** Every CSS value (colour, spacing, font-size, radius, shadow, motion, z-index) must reference a `var(--sk-*)` token defined in `packages/tokens/src/tokens.css`. No raw `rgba()`, `#hex`, or `Npx` literals in component CSS. Stylelint enforces via `stylelint-declaration-strict-value` against the generated catalogue.
-2. **Token-only dependency boundary.** `packages/styles` and `packages/angular` may import only from `packages/tokens`. ESLint `@nx/enforce-module-boundaries` enforces.
+2. **One-directional dependency boundary.** `packages/styles` imports only from `packages/tokens`; `elements` from styles and tokens; `react` from elements, styles and tokens. ESLint `@nx/enforce-module-boundaries` enforces it via `scope:` tags — and a project with **no** tag is not exempt, it is invisible to the rule, which reads the same from outside and is worse.
 3. **Semantic pairing.** Surface and foreground tokens come in pairs (e.g. `--sk-surface-page` ↔ `--sk-on-page`). Don't mix across pairs.
 4. **BEM naming.** `sk-block__element--modifier`. Block prefix is always `sk-`.
-5. **Conventional commits** with scopes: `tokens`, `angular`, `styles`, `storybook`, `doctrine`, `ci`, `docs`, `release`, `deps`, `security`, plus `elements` and `react` reserved for packages not yet created (ADR-8). Subject lowercase. `commitlint` runs on PRs.
-6. **Every story has a `LightMode` variant.** Wraps output in `<div data-theme="light" style="background: var(--sk-surface-page); padding: var(--sk-space-6); display: inline-block;">` and sets `parameters.backgrounds.default: 'sk-light'`.
+5. **Conventional commits** with scopes: `tokens`, `storybook`, `doctrine`, `ci`, `docs`, `release`, `deps`, `security`, `styles`, `elements`, `react`. Note the Spec Kitty CLI's own bookkeeping commits are exempted by pattern in `commitlint.config.cjs`; yours are not. Subject lowercase. `commitlint` runs on PRs.
+6. **Every story has a `LightMode` variant**, wrapped in `class="sk-light"` — **not** `data-theme="light"`, which activates nothing on a wrapper (`:root` only matches `<html>`, #93). The recipe is authoritative here: [`docs/contributing/adding-a-component.md`](./docs/contributing/adding-a-component.md). There is no `backgrounds` config in the Storybook preview, so a `backgrounds` parameter does not apply the class.
 7. **Don't break the demo pages.** `apps/demo/*.html` link component CSS via relative paths (`../../packages/...`) for local file:// dev; `scripts/assemble-demo-dist.sh` rewrites those paths via `sed` before publishing (called by `storybook-deploy.yml`, and by `ci-quality.yml` so it is checked per PR). Verify both paths still resolve when adding a new component.
 
 ## 4. Common commands
@@ -50,7 +71,9 @@ Storybook publishes everything to [`https://stijn-dejongh.github.io/spec-kitty-d
 | Build tokens + catalogue | `npx nx run tokens:build && npx nx run tokens:catalogue` |
 | Regenerate token catalogue only | `npx nx run tokens:catalogue` (or `npm run tokens:catalogue`) |
 | Build styles | `npx nx run styles:build` |
-| Build Angular | `npx nx run angular:build` |
+| Build elements | `npx nx run elements:build` |
+| Regenerate the manifest | `npx nx run elements:analyze` |
+| Regenerate the React wrappers | `node scripts/build-react-wrappers.mjs` |
 | Build Storybook | `npx nx run storybook:storybook:build` |
 | Run Storybook locally | `npx nx run storybook:storybook` |
 | Security gate (npm audit) | `bash scripts/npm-audit-gate.sh` |
@@ -62,11 +85,23 @@ Storybook publishes everything to [`https://stijn-dejongh.github.io/spec-kitty-d
 ## 5. Adding a new component (decision tree)
 
 - **Need a new design value?** Add it to `packages/tokens/src/tokens.css`, then run `npx nx run tokens:catalogue`. If introducing a new token category (e.g. a new prefix), also update [`./docs/contributing/adding-a-token.md`](./docs/contributing/adding-a-token.md).
-- **Framework-free component?** Create `packages/styles/src/<name>/`. Files: `sk-<name>.css`, optional `sk-<name>.js` ES module, `sk-<name>.stories.ts`, `index.ts` re-export. If the component has structural HTML, also include `sk-<name>.html` for reference and a `sk-<name>.d.ts` for the JS module.
-- **Angular wrapper?** Create `packages/angular/src/lib/<name>/`. Files: `*.component.{ts,html,css,spec.ts}`, `*.stories.ts`. Wrap an existing styles component when possible — keep CSS centralised in the styles package and reference it via the component's `styleUrls`.
-- **Full recipe:** [`./docs/contributing/adding-a-component.md`](./docs/contributing/adding-a-component.md).
+- **New component?** The CSS source of record goes in `packages/styles/src/<name>/`, and the
+  custom element in `packages/elements/src/<name>/`. There is no third choice: since ADR-8 the
+  element *is* the component, and its static HTML is generated from the element's own markup
+  module.
+- **A framework wrapper?** You do not write one. `@spec-kitty/react` is generated from the
+  manifest, and a wrapper package exists only where a consumer needs one.
 
-Existing components (use as patterns): `button`, `card`, `check-bullet`, `feature-card`, `form-field`, `nav-pill`, `pill-tag`, `ribbon-card`, `section-banner`, `site-footer` (styles only), `stub`.
+**Follow the recipe rather than this list:**
+[`./docs/contributing/adding-a-component.md`](./docs/contributing/adding-a-component.md). It
+names every gate a new component must pass — several of which reject exactly what a first
+attempt looks like — and the three ratchets (`expected-parts.json`,
+`expected-docs.json`, `behaviours.json`) that a new component must be registered in. This section
+deliberately does not restate them: two copies of a procedure drift.
+
+Migrated to custom elements so far: `sk-card`, `sk-nav-pill`, `sk-form-input`, `sk-form-textarea`,
+`sk-stub`. Everything else is still CSS-only in `packages/styles` — #77, #78 and #79 move the
+rest. Use a migrated one as the pattern.
 
 ## 6. Storybook conventions
 
@@ -99,7 +134,7 @@ This repo uses Spec Kitty for structured spec-driven development.
 
 ## 9. Common pitfalls
 
-- **Forgetting `LightMode` story** — CI lint won't catch it; reviewers will. Always add it.
+- Forgetting the `LightMode` story — no lint catches it, reviewers do. Wrap in `class="sk-light"` and assert the computed value differs between themes; see the recipe.
 - **Cross-package import** — `@nx/enforce-module-boundaries` will fail with a clear error pointing to the rule. Re-route through `@spec-kitty/tokens` or compose at the consumer level.
 - **Hardcoded colour / spacing in CSS** — stylelint fails with `Expected ... to be a token`. Add to `tokens.css` first, regenerate catalogue, then reference via `var(--sk-*)`.
 - **Stale token catalogue** — symptoms are stylelint failures on tokens you just added. Run `npx nx run tokens:catalogue`.

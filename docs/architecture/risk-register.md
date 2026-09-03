@@ -18,7 +18,7 @@
 1. The `@spec-kitty` npm scope is taken over before we claim it, enabling dependency confusion attacks against every Priivacy-ai project.
 2. The token reconciliation reveals deep divergence between the Claude Design reference and the live marketing site — v1 ships the wrong values, poisoning every downstream consumer.
 3. A supply chain attack via a compromised transitive Storybook or Playwright dependency exfiltrates contributor credentials during `npm install`.
-4. The Angular LTS expires before the design system team initiates the upgrade — consuming projects are left dependent on an unpatched framework version.
+4. ~~The Angular LTS expires before the design system team initiates the upgrade — consuming projects are left dependent on an unpatched framework version.~~ **DISCHARGED by ADR-8** (2026-09-02): the component layer became a custom element with no framework runtime, and `packages/angular` was deleted in #102. There is no LTS to expire.
 5. The CI pipeline becomes too slow to be useful as the component count grows, contributors start bypassing checks, and the quality gates become theatre.
 
 ---
@@ -30,7 +30,7 @@
 | R01 | `@spec-kitty` npm scope unclaimed; attacker publishes under it before we do | Security | Critical | Medium |
 | R02 | Token reconciliation (FR-034) reveals significant divergence; token values incorrect at v1 publish | Correctness | High | Medium |
 | R03 | Supply chain attack via compromised transitive dev-tool (Storybook, Playwright) dependency | Security | High | Low-Medium |
-| R04 | Angular LTS expiry before upgrade is initiated; consumers blocked on unpatched framework | Delivery / Security | High | Medium |
+| R04 | ~~Angular LTS expiry before upgrade is initiated; consumers blocked on unpatched framework~~ **DISCHARGED by ADR-8 — no framework runtime remains** | Delivery / Security | — | — |
 | R05 | CI pipeline breaches 10-minute NFR-002 as component count scales | Performance | Medium | High |
 | R06 | Storybook major version upgrade (v8→v9) breaks visual regression baseline and CI | Delivery | Medium | High |
 | R07 | Three-repo version synchronization gap: SK dashboard pins old design system version; diverges again | Correctness | Medium | Medium |
@@ -73,7 +73,7 @@
 | R01 | Claim `@spec-kitty` npm scope as first action before release pipeline work | Verify scope ownership before any `npm publish` step is written | Immediately claim scope; revoke any packages published under it | Maintainer |
 | R02 | FR-034 token reconciliation is a hard pre-implementation gate (ADR-003) | Diff `tmp/colors_and_type.css` against live site CSS; flag every divergence | Update ADR-003 addendum with resolution; republish corrected tokens as a patch | Maintainer |
 | R03 | `npm ci --ignore-scripts` in CI; security allowlist for postinstall exceptions; nightly `npm audit` | Dependabot security alert; `npm audit` output in CI | Immediate: pin to last safe version; assess blast radius; upgrade or remove dependency | Maintainer |
-| R04 | Monitor Angular LTS calendar; charter requires upgrade initiation 3 months before LTS expiry | Add Angular LTS expiry date to project calendar; review quarterly | Begin `@spec-kitty/angular` major upgrade mission; communicate window to consumers | Package maintainer |
+| R04 | ~~Monitor Angular LTS calendar~~ — discharged by ADR-8, not mitigated: there is no framework runtime and no LTS to expire | — | — | — |
 | R05 | FR-035: path-scoped CI triggering from day one; not added retroactively | CI wall time tracked in each run; alert if >8 minutes | Tune CI job parallelism; re-evaluate which checks run on which paths | CI maintainer |
 | R06 | Dependabot excludes Storybook major bumps from auto-merge; pin current major | Dependabot opens major version PR | Planned upgrade: test on a branch, re-establish visual baseline, then merge | Maintainer |
 | R07 | Charter consumer update policy: one major version compatibility window | Audit consuming repos quarterly for pinned version lag | Create a compatibility migration guide; alert consuming repo maintainers | Maintainer |
@@ -92,9 +92,9 @@
 
 - **Pre-flight checks** (one-time, before implementation): npm scope ownership, token reconciliation
 - **Each PR**: `npm audit`, lockfile integrity, SAST, axe-core, Playwright, Lighthouse, Actions SHA check
-- **Weekly**: Dependabot PR review; Storybook/Angular LTS calendar check
+- **Weekly**: Dependabot PR review; Storybook release-cadence check
 - **Nightly**: Scheduled `npm audit` on default branch
-- **Quarterly**: Consumer repo version audit; Angular LTS expiry calendar review
+- **Quarterly**: Consumer repo version audit
 - **At release**: CycloneDX SBOM, `npm pack --dry-run` dist contents audit, `--provenance` attestation
 
 **Escalation threshold:** Any HIGH impact risk moving from Low-Medium to Medium likelihood triggers an immediate mitigation review before the next PR is merged.

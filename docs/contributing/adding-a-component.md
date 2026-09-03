@@ -5,16 +5,37 @@
 > `packages/angular` was deleted in #102, ADR-8 moved behaviour into custom elements, and the
 > required theme variant is `LightMode`. Two pre-merge lenses flagged that this file was the
 > only doc a new implementer would open and that it was actively wrong.
+>
+> **Updated again for the React wrapper (#76).** #75 added a fourth package, `packages/react`,
+> whose contents are generated; made property and method JSDoc into enforced published API; and
+> added eight gates a component must pass that this page did not name. The Angular references
+> above are history, kept because they explain what changed — nothing in this repo targets
+> Angular.
 
-Components live in three packages:
+Components live in **four** packages, and you author in three of them:
 
-| package | holds | published |
-|---|---|---|
-| `packages/tokens` | `--sk-*` custom properties — the only place a colour is written | yes |
-| `packages/styles` | the `.css` source of record, plus **generated** static HTML | yes |
-| `packages/elements` | the custom element, and the **authored** markup module | not yet (#80) |
+| package | holds | you edit it | published |
+|---|---|---|---|
+| `packages/tokens` | `--sk-*` custom properties — the only place a colour is written | yes | yes |
+| `packages/styles` | the `.css` source of record, plus **generated** static HTML | yes | yes |
+| `packages/elements` | the custom element, and the **authored** markup module | yes | not yet (#80) |
+| `packages/react` | **generated** React wrappers | **never** | not yet (#80) |
 
-There are no wrappers. ADR-8 confirmation #1 requires that none exist.
+`packages/react/src/` is generated from `custom-elements.json` by
+`scripts/build-react-wrappers.mjs` and committed. Do not hand-edit it: `--check` regenerates and
+fails on any drift, on a file the generator no longer emits, and on a shrunken output set. You
+do not add anything there for a new component — get the manifest right and the wrapper follows.
+
+> **This page used to say "There are no wrappers. ADR-8 confirmation #1 requires that none
+> exist." That was true when written, and no ADR was violated by its stopping being true.**
+> ADR-8 lists **four** validation criteria, unordered. #1 is *"one component ships … into three
+> consumption paths … with **no wrapper package in existence**"*; #2 is *"a generated React
+> wrapper of that same component passes the conformance matrix … and CI fails if the generated
+> output drifts"*. What sequences them is the programme, not the ADR:
+> `docs/architecture/elements-first-programme.md` assigns #1 to batch M6 (whose exit records
+> "no wrapper in existence") and #2 to M9. #75 was M9. So the old sentence froze a milestone
+> rather than stating a rule — and an earlier draft of *this* correction said the ADR itself
+> sequenced them, which it does not.
 
 ## Steps
 
@@ -35,11 +56,37 @@ boundary and a selector does not. Reuse the tint family — `--sk-surface-tint-*
 
 ### 2. Author the markup ONCE, in `packages/elements`
 
+**Only if the component has a static form.** The module is optional — the generator derives its
+work set by glob from the elements that have one, and #72 and #73 both declined it. `sk-card` is
+the only one today.
+
+It **must be a leaf module with no relative imports**: the generator evaluates it from a `data:`
+URL, which has no module base, and says so in a named error if you give it one.
+
 `packages/elements/src/<name>/sk-<name>.markup.ts` must export:
 
-- `<name>Classes(variant?, inset?)` — the BEM class list, throwing on an unknown variant;
-- `<name>StaticHtml(variant?, inset?, content?)` — the server-rendered form;
-- `<NAME>_VARIANTS` — the variant → modifier map the generator derives exports from.
+- `<NAME>_VARIANTS` — the variant → modifier map the generator derives its exports from;
+- `<NAME>_AXES` — the **other** axes, as a map of export-name-suffix to the options producing it
+  (`{ Inset: { inset: true } }` for card, **`{}`** for a component with none). Not optional:
+  `build-element-markup.mjs` exits with a named error if it is missing;
+- `<name>StaticHtml(opts, content?)` — the server-rendered form. **An options object, not
+  positionals.** The generator calls `staticHtml({}, content)` and `staticHtml(opts)`;
+- `<name>Classes(variant?, …)` — the BEM class list. Not required by the generator; it is the
+  element's own render helper.
+
+**The two entry points have deliberately different failure policies, and collapsing them is a
+regression this repo has already had — and reverted.** `<name>Classes` **warns and degrades** to
+the base class on an unknown variant. The throwing version was tried and measured: Lit rejects
+`updateComplete`, `render()` never returns a tree, and `<sk-card variant="typo">` paints an empty
+shadow root with no `<slot>` — so the element silently eats its own light-DOM children. `<name>StaticHtml` **throws**, because it runs at build time where a bad variant must not
+reach committed output. `sk-card.markup.ts` says so at the definition, and a test in
+`fixtures/elements-behaviour/src/sk-card.test.ts` pins it.
+
+> An earlier version of this page fixed the signature at `(variant, inset, content)` and
+> attributed the throw to `Classes`. Both were wrong: `inset` is a **card** axis, which is why
+> `_AXES` exists (#115/#121), and the throw belongs to `StaticHtml`. Following the old text
+> reintroduced a bug #72 had fixed, and the generator would have committed base-class-only HTML
+> for every variant while reporting success.
 
 ADR-10 §3: *the element's template is the sole authored source.* `sk-<name>.html` and
 `packages/styles/src/<name>/index.ts` are **generated** from this module by
@@ -57,13 +104,50 @@ and do not hand-write markup in a story — render from the generated exports.
   without it;
 - declare every `::part()` with `@csspart`, and **terminate the tag before any prose** — the
   description is published API and swallows the rest of the docblock otherwise;
+- declare `@slot` for every slot you render. The analyzer will **not** infer one from a
+  `<slot>` in the template — `sk-card` shipped without it and nothing noticed until #75;
+- type every event: **`@fires {CustomEvent<{ open: boolean }>} sk-<name>-toggle - …`**. Without
+  the `{Type}` the manifest records `type: None` and the generated React handler receives a bare
+  `CustomEvent` with no detail. #75's plan called that gap the sharpest argument for a wrapper
+  package before measuring that it was one line of our own JSDoc;
+- **document every public reactive property and public method.** This is not style: the analyzer
+  copies each description into `custom-elements.json`, `normalise-manifest.mjs` propagates it
+  onto the attribute, and the React generator copies it into the prop docs a consumer reads in
+  their editor. `scripts/check-manifest-content.mjs` **refuses** a manifest where any public
+  attribute or method has no description, so an undocumented property fails CI;
 - export it from `src/index.ts` and side-effect import it in `src/elements.ts`.
 
-### 4. Record the parts
+**Write the doc comments for a consumer, and keep rationale in `//`.** Everything in a `/** */`
+above a public member is published verbatim — into the manifest, into IDE hovers, and into the
+React wrapper. #75 had to move four members' prose out after it shipped, including an
+809-character review narrative that referenced a getter the wrapper no longer emits. A `//`
+comment reaches none of those surfaces, so it is the right home for *why*; the doc comment is
+for *what*.
 
-Every `@csspart` must be added to `expected-parts.json` **in the same PR as a test that
-targets it**. `scripts/check-part-ratchet.mjs` is shrink-only: parts may be removed, never
-added silently.
+### 4. Record the component in the three ratchets
+
+Three files hold the component's surface. None is discoverable from the code:
+
+| file | what to add | what refuses you |
+|---|---|---|
+| `expected-parts.json` | every `@csspart` **and bump `total`**, in the same PR as a test targeting it. The test must live in `fixtures/**/src/**/*.test.ts` or `tests/**/*.test.ts` — the ratchet scans nowhere else | `check-part-ratchet.mjs` — shrink-only, and it compares `total` |
+| `expected-docs.json` | a row with the element's attribute and method counts, **and bump `total`** | `check-manifest-content.mjs` — **exact** equality, so adding a documented property without updating this fails too |
+| `behaviours.json` | a **subject** entry on the ids the component owns, plus a matching `mutations.json` entry naming the same subject file — only if it owns behaviour (step 6) | `floor-reporter.mjs` arm 5 and `suite-selftest.mjs` guard 7 — **once declared** |
+
+**Two of those always; the third only when the component owns behaviour.** Nothing detects that
+a new component *should* have a behaviour entry — declaring one creates the obligation, and
+omitting it is silently green. That is a real gap, not a shortcut: step 6 is where you decide,
+and the decision is yours to get right.
+
+And if the component brings a new **package** rather than a new element, that project needs a
+`typecheck` target, a `scope:` tag and a `lint` target, or it sits outside `typecheck-all.mjs`
+and ESLint's module boundaries entirely. #126 shipped a package with none of the three and #129
+had to fix it.
+
+The parts ratchet is shrink-only: parts may be removed, never added silently, and the test must
+land in the same PR as the entry. The docs ratchet is **exact** in both directions, because
+removing a documented property is an API change and should be a deliberate line rather than a
+number that quietly drops.
 
 ### 5. Stories
 
@@ -83,18 +167,71 @@ If the component has form association, events, focus or keyboard handling, add i
 contract first — every anchor must be unique, single-occurrence and non-inert, with an entry
 in `mutations.json`, or `scripts/suite-selftest.mjs` fails the build.
 
-A purely presentational component owns none of the fourteen and adds nothing there.
+A purely presentational component owns none of them and adds nothing there.
+
+The registry holds **fifteen** ids, fourteen of them applicable. The fifteenth (SC-023,
+generation determinism) is declared `applicable: false` because ADR-11 states it as a CI-gate
+obligation — `build-react-wrappers.mjs --check` discharges it — and it is in the file so the
+registry mirrors the ADR's list rather than being silently short of it. You will not add a
+subject for it.
 
 ### 7. Run the gates
 
+Every command below was run against this repo when this list was written. A recipe naming a
+script that has since been renamed is worse than one naming none, so if any of these fails to
+resolve, fix the list rather than working around it.
+
 ```bash
-node scripts/build-elements-css.mjs && node scripts/build-element-markup.mjs
+# 1. regenerate every committed artifact, then let the drift checks compare
+node scripts/build-elements-css.mjs
+node scripts/build-element-markup.mjs
+npx nx run elements:analyze                 # rewrites custom-elements.json
+node scripts/build-react-wrappers.mjs       # rewrites packages/react/src
+
+# 2. build, then measure — measure-elements-sizes READS dist/ and does not build it
 npx nx run-many --target=build --projects=tokens,styles,elements
+node scripts/measure-elements-sizes.mjs        # WRITES packages/elements/SIZES.md — commit it
+
+# 3. the drift checks
+node scripts/build-elements-css.mjs --check
+node scripts/build-element-markup.mjs --check
+node scripts/build-react-wrappers.mjs --check
+git diff --exit-code -- packages/elements/custom-elements.json
+node scripts/measure-elements-sizes.mjs --check
+
+# 4. the content and hygiene gates
+node scripts/check-manifest-content.mjs
+node scripts/check-no-css-in-source.mjs
+node scripts/check-elements-entries.mjs
+node scripts/check-adopted-css-boundaries.mjs
+node scripts/check-element-css-hygiene.mjs
+node scripts/check-part-ratchet.mjs
+node scripts/typecheck-all.mjs
+npm run quality:all                           # ESLint, Stylelint, HTMLHint — all ENFORCED,
+                                              # and named in no other step below
+
+# 5. the gates' own probe tables, and the wiring that keeps them running
+node scripts/build-react-wrappers.mjs --selftest
+node scripts/check-manifest-content.mjs --selftest
+node scripts/check-gate-wiring.mjs
+
+# 6. COMMIT WHAT BLOCKS 1-2 REGENERATED, then confirm nothing is left over.
+#    Blocks 1 and 3 are self-confirming: block 3 compares against what block 1 just wrote, so
+#    they can never disagree locally. The real signal is an unstaged generated file — which CI
+#    sees as drift. Generated-and-committed: the .css.js/.css.d.ts modules, the styles-layer
+#    sk-<name>.html and index.ts, custom-elements.json, packages/react/src/**, and SIZES.md.
+git add -A && git status --porcelain   # must be empty before you open the PR
+
+# 7. the suites
 npm run test
+node scripts/suite-selftest.mjs             # slow; one full suite per mutation
 npx nx run storybook:storybook:build && node scripts/run-axe-storybook.js
-node scripts/check-no-css-in-source.mjs && node scripts/check-part-ratchet.mjs
-node scripts/check-manifest-content.mjs && node scripts/measure-elements-sizes.mjs
 ```
+
+**On `measure-elements-sizes.mjs`:** it reads `packages/elements/dist/` and does **not** build
+it. Running it without building first records the bytes of whatever `dist/` is on disk, and the
+symptom is CI reporting different numbers for the same commit — which looks like
+non-reproducibility and is not. Build first.
 
 ### 8. Visual baseline
 
