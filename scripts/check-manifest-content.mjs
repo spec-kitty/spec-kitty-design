@@ -105,10 +105,26 @@ for (const mod of manifest.modules ?? []) {
   try {
     require_.resolve(spec);
   } catch (err) {
-    problems.push(
-      `module path "${mod.path}" does not resolve as "${spec}" (${err.code ?? err.message}) — ` +
-        `add the subpath to package.json "exports", or point the path at one that is exported`
-    );
+    // TWO different failures wear one exception, and only one is a defect.
+    //
+    //   ERR_PACKAGE_PATH_NOT_EXPORTED -- the package's `exports` map refuses this
+    //     subpath. The path can never resolve for anyone. This is the bug, and it is
+    //     what shipped at f2c4508.
+    //   MODULE_NOT_FOUND / ERR_MODULE_NOT_FOUND -- the exports map permits it and the
+    //     file is simply absent. `dist/` is gitignored and the lint-code job never
+    //     builds, so this is the NORMAL state there. Failing on it would make the
+    //     check environmental rather than structural — and an assertion that is red
+    //     for a reason unrelated to its claim gets disabled, not fixed.
+    if (err.code === 'ERR_PACKAGE_PATH_NOT_EXPORTED') {
+      problems.push(
+        `module path "${mod.path}" is not exported: "${spec}" throws ` +
+          `ERR_PACKAGE_PATH_NOT_EXPORTED. A generator joins this path onto the package ` +
+          `name, so it resolves for nobody. Add the subpath to package.json "exports", ` +
+          `or point the path at one that is already exported.`
+      );
+    } else if (err.code !== 'MODULE_NOT_FOUND' && err.code !== 'ERR_MODULE_NOT_FOUND') {
+      problems.push(`module path "${mod.path}" failed to resolve as "${spec}": ${err.code ?? err.message}`);
+    }
   }
 }
 
