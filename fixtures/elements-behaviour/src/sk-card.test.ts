@@ -145,14 +145,14 @@ test('an unknown variant degrades on the RENDER path — the card still paints a
 });
 
 test('an unknown variant THROWS on the authoring path — a bad variant never reaches generated output', () => {
-  expect(() => cardStaticHtml('definitely-not-a-variant')).toThrow(/unknown card variant/);
+  expect(() => cardStaticHtml({ variant: 'definitely-not-a-variant' })).toThrow(/unknown card variant/);
   // Prototype-chain keys are not variants. `in` reached them and emitted
   // `sk-card function Object() { [native code] }` into real markup.
   for (const key of ['constructor', '__proto__', 'toString', 'hasOwnProperty']) {
-    expect(() => cardStaticHtml(key), `${key} must not be accepted`).toThrow(/unknown card variant/);
+    expect(() => cardStaticHtml({ variant: key }), `${key} must not be accepted`).toThrow(/unknown card variant/);
     expect(cardClasses(key).trim(), `${key} must degrade to the base card`).toBe('sk-card');
   }
   // The known variants still work on both paths.
-  expect(cardStaticHtml('blue')).toContain('sk-card--blue');
+  expect(cardStaticHtml({ variant: 'blue' })).toContain('sk-card--blue');
   expect(cardClasses('purple')).toContain('sk-card--purple');
 });

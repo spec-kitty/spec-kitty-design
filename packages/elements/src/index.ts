@@ -24,6 +24,7 @@ export { default as skStubSheet } from './stub/sk-stub.css.js';
 // `//`, not `/** */`: a doc comment here would be lifted verbatim into custom-elements.json
 // and shown to consumers in IDE hovers.
 export {
+  CARD_AXES,
   CARD_VARIANTS,
   cardClasses,
   cardStaticHtml,
