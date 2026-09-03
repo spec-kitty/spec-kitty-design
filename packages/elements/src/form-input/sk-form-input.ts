@@ -45,7 +45,18 @@ export class SkFormInput extends FormControlBase {
     value: { type: String },
     type: { type: String },
     placeholder: { type: String },
-    disabled: { type: Boolean, reflect: true },
+    // NOT REFLECTED, and this is the difference between SC-005 asserting something and
+    // asserting nothing. A form-associated element carrying the `disabled` ATTRIBUTE is
+    // excluded from the entry list by the USER AGENT, unaided — so with reflection on,
+    // `formDisabledCallback(true)` sets the attribute, the UA excludes it, and the element's
+    // own `setFormValue(null)` becomes unobservable: the SC-005 mutation ran green.
+    //
+    // Without reflection the property is the element's own state, the UA does nothing, and the
+    // exclusion is ours to get right or wrong. `<sk-form-input disabled>` in markup still works
+    // — attribute→property is what `type: Boolean` does; `reflect` is the other direction — and
+    // the control's own `:disabled` styling is driven by `?disabled=${this.disabled}`, not by a
+    // host attribute selector.
+    disabled: { type: Boolean },
     required: { type: Boolean, reflect: true },
     invalid: { type: Boolean, reflect: true },
   };

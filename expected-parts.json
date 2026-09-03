@@ -18,9 +18,13 @@
     "#73 grows it again: <sk-nav-pill> declares nav, items and hamburger, each recorded here in",
     "the same PR as the [SC-013] test that targets it from outside and the mutation that proves",
     "that test goes red. The ratchet's known looseness is unchanged and still recorded: a mention",
-    "inside a comment or a test.skip() satisfies the source scan, and it is not scoped per element."
+    "inside a comment or a test.skip() satisfies the source scan, and it is not scoped per element.",
+    "",
+    "#74 adds five for <sk-form-input>. Note the @csspart JSDoc is what populates the manifest \u2014",
+    "a lens shipped eight part= attributes with an empty cssParts array and this ratchet stayed",
+    "green at the old count, because it derives from the manifest and not from the rendered DOM."
   ],
-  "total": 4,
+  "total": 9,
   "byElement": {
     "sk-card": [
       "card"
@@ -29,6 +33,13 @@
       "hamburger",
       "items",
       "nav"
+    ],
+    "sk-form-input": [
+      "control",
+      "description",
+      "error",
+      "field",
+      "label"
     ]
   }
 }
