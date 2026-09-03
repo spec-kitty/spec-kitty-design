@@ -1,7 +1,7 @@
 {
-  "event_count": 1,
-  "last_event_id": "01M1KBYRDM0R7KEYC584DM549B",
-  "materialized_at": "2026-09-03T10:10:13.556067+00:00",
+  "event_count": 2,
+  "last_event_id": "01M1KBYRFNSM3MHK5YTT845FPN",
+  "materialized_at": "2026-09-03T10:10:13.621381+00:00",
   "mission_number": "",
   "mission_slug": "sk-form-field-form-association-01M1K9GA",
   "mission_type": "software-dev",
@@ -14,7 +14,7 @@
     "for_review": 0,
     "in_progress": 0,
     "in_review": 0,
-    "planned": 1
+    "planned": 2
   },
   "work_packages": {
     "WP01": {
@@ -23,6 +23,13 @@
       "lane": "planned",
       "last_event_id": "01M1KBYRDM0R7KEYC584DM549B",
       "last_transition_at": "2026-09-03T10:10:13.556067+00:00"
+    },
+    "WP02": {
+      "actor": "finalize-tasks",
+      "force_count": 0,
+      "lane": "planned",
+      "last_event_id": "01M1KBYRFNSM3MHK5YTT845FPN",
+      "last_transition_at": "2026-09-03T10:10:13.621381+00:00"
     }
   }
 }
