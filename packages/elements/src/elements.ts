@@ -2,3 +2,4 @@
 // file:// and over HTTP with an integrity hash. Importing for side effects
 // registers every element via the guarded define().
 import './stub/sk-stub.js';
+import './card/sk-card.js';

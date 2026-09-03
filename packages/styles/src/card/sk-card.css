@@ -30,44 +30,35 @@
   border-color: var(--sk-border-default);
 }
 
-/* Blue tint variant — information/context cards
-   Deviation: border-color uses rgba() channel values derived from --sk-color-blue (#A9C7E8).
-   CSS relative colour syntax (rgba(from var(--sk-color-blue) r g b / 0.20)) has limited
-   browser support at time of authoring. Replace when broadly supported. (See DRIFT-2,
-   mission-review-01KQJNTP49SPQNNXQ1TG3BKKKW.md) */
+/* Blue tint variant — information/context cards.
+   The rgba() channel values that DRIFT-2 recorded as a deviation here have moved into
+   --sk-border-tint-sky in @spec-kitty/tokens (#72). They are still channel extractions
+   rather than relative colour syntax — `rgb(from var(--sk-color-blue) r g b / 0.20)` still
+   has limited support — but they are now a token, so this file has no hardcoded colour and
+   light-mode variance crosses the shadow boundary as a value rather than a selector. */
 .sk-card--blue {
   background: var(--sk-surface-tint-sky);
-  border-color: rgba(169, 199, 232, 0.20); /* channels from --sk-color-blue: #A9C7E8 */
+  border-color: var(--sk-border-tint-sky);
 }
 .sk-card--blue:hover {
   border-color: var(--sk-color-blue); /* full accent on hover — no size jump (still 2px) */
 }
 
-/* Purple tint variant — feature/architecture cards
-   Deviation: same rgba() pattern — channels from --sk-color-purple: #B8A9E0 */
+/* Purple tint variant — feature/architecture cards */
 .sk-card--purple {
   background: var(--sk-surface-tint-lilac);
-  border-color: rgba(184, 169, 224, 0.25); /* channels from --sk-color-purple: #B8A9E0 */
+  border-color: var(--sk-border-tint-lilac);
 }
 .sk-card--purple:hover {
   border-color: var(--sk-color-purple); /* no size jump */
 }
 
-/* Light mode overrides */
-:root[data-theme="light"] .sk-card--blue,
-.sk-light .sk-card--blue {
-  border-color: rgba(46, 74, 107, 0.15); /* darker channel extraction from --sk-color-blue */
-}
-:root[data-theme="light"] .sk-card--blue:hover,
-.sk-light .sk-card--blue:hover {
-  border-color: var(--sk-color-blue);
-}
-
-:root[data-theme="light"] .sk-card--purple,
-.sk-light .sk-card--purple {
-  border-color: rgba(74, 61, 120, 0.18); /* darker channel extraction from --sk-color-purple */
-}
-:root[data-theme="light"] .sk-card--purple:hover,
-.sk-light .sk-card--purple:hover {
-  border-color: var(--sk-color-purple);
-}
+/* NO light-mode overrides here, deliberately.
+   Light-mode variance lives in --sk-border-tint-{sky,lilac} in @spec-kitty/tokens.
+   The rules that used to sit here were `:root[data-theme="light"] .sk-card--blue` and
+   `.sk-light .sk-card--blue` — BOTH cross a shadow boundary, and both are therefore inert
+   once this CSS is adopted by <sk-card>: the themed ancestor is outside the shadow root
+   and a descendant combinator cannot reach in. Silently: no error, no warning, and a
+   LightMode story rendering dark styling.
+   A custom property inherits through the boundary; a selector does not. That is the whole
+   reason for the token pair. See #72 and SK-D01. */

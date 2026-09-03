@@ -46,6 +46,24 @@
   --sk-surface-tint-lilac:  #1E1A2E;   /* dark: v2.x banner / purple */
   --sk-surface-tint-sky:    #14202E;   /* dark: muted info / blue */
 
+  /* ── Tint borders — the third slot of the tint family ─────────────────────
+     Named for the TINT (sky/lilac), not the component. --sk-surface-tint-sky is
+     already shared by card and blog-card, and --sk-surface-tint-lilac by card and
+     pill-tag; a component-named border would have put this on an
+     N-components x M-variants path (--sk-border-feature-card-*, and so on) beside a
+     family that already scales. Completes surface-tint / on-tint / border-tint.
+     These exist as TOKENS, not as theme-selector overrides in sk-card.css,
+     because a custom property inherits THROUGH a shadow boundary and a selector
+     does not. sk-card.css previously carried
+       :root[data-theme="light"] .sk-card--blue, .sk-light .sk-card--blue { ... }
+     which is inert once the card is a custom element: the themed ancestor is
+     outside the shadow root and the descendant combinator cannot reach in. No
+     error, no warning — a LightMode story would simply render dark styling.
+     `:host-context()` is not the escape hatch (Baseline limited, Chromium-only).
+     Verified in this mission; see #72 and ADR-9. */
+  --sk-border-tint-sky:    rgba(169, 199, 232, 0.20);  /* channels from --sk-color-blue */
+  --sk-border-tint-lilac:  rgba(184, 169, 224, 0.25);  /* channels from --sk-color-purple */
+
   /* ── On-Tint Foregrounds ─────────── */
   --sk-on-tint-mint:        var(--sk-color-green);
   --sk-on-tint-butter:      var(--sk-color-yellow-soft);
@@ -218,6 +236,10 @@
   --sk-surface-tint-butter: #FFF6D9;
   --sk-surface-tint-lilac:  #F0EAF8;
   --sk-surface-tint-sky:    #E4EDF8;
+
+  /* Tint borders — darker channel extractions for a light ground */
+  --sk-border-tint-sky:    rgba(46, 74, 107, 0.15);
+  --sk-border-tint-lilac:  rgba(74, 61, 120, 0.18);
 
   /* On-tint inks: dark, accessible foregrounds */
   --sk-on-tint-mint:        #2D5A2D;

@@ -8,6 +8,8 @@
     <!-- If the ESM artifact is consumable and `lit` resolves, this upgrades and
          paints. If not, it stays an inert unknown element and the spec fails. -->
     <sk-stub id="subject"></sk-stub>
+    <!-- ADR-10 Confirmation #1: sk-card must render from the ESM build in a bundler app. -->
+    <sk-card variant="blue">Card content</sk-card>
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>

@@ -7,6 +7,158 @@
       "path": "./dist/index.js",
       "declarations": [
         {
+          "kind": "variable",
+          "name": "CARD_VARIANTS",
+          "type": {
+            "text": "{ blue: 'sk-card--blue', purple: 'sk-card--purple' }"
+          },
+          "default": "{ blue: 'sk-card--blue', purple: 'sk-card--purple' }",
+          "description": "Variant → BEM modifier. The static layer's classes are the contract; the element's\n`variant=\"blue\"` attribute is sugar over them."
+        },
+        {
+          "kind": "function",
+          "name": "isCardVariant",
+          "return": {
+            "type": {
+              "text": "variant is CardVariant"
+            }
+          },
+          "parameters": [
+            {
+              "name": "variant",
+              "type": {
+                "text": "string"
+              }
+            }
+          ],
+          "description": "Whether `variant` names a real card modifier."
+        },
+        {
+          "kind": "function",
+          "name": "unknownVariantMessage",
+          "return": {
+            "type": {
+              "text": "string"
+            }
+          },
+          "parameters": [
+            {
+              "name": "variant",
+              "type": {
+                "text": "string"
+              }
+            }
+          ],
+          "description": "The shared diagnostic for an unrecognised variant."
+        },
+        {
+          "kind": "function",
+          "name": "cardClasses",
+          "return": {
+            "type": {
+              "text": "string"
+            }
+          },
+          "parameters": [
+            {
+              "name": "variant",
+              "optional": true,
+              "type": {
+                "text": "string"
+              }
+            },
+            {
+              "name": "inset",
+              "default": "false"
+            }
+          ],
+          "description": "The card's class list. An unknown `variant` warns and degrades to the base card."
+        },
+        {
+          "kind": "function",
+          "name": "cardStaticHtml",
+          "return": {
+            "type": {
+              "text": "string"
+            }
+          },
+          "parameters": [
+            {
+              "name": "variant",
+              "optional": true,
+              "type": {
+                "text": "string"
+              }
+            },
+            {
+              "name": "inset",
+              "default": "false"
+            },
+            {
+              "name": "content",
+              "default": "'Card content'"
+            }
+          ],
+          "description": "The static form, for consumers with no JavaScript.\n\n`<article>` rather than the element's `<div part=\"card\">`: the element needs the part for\nthe ADR-9 styling API, and a server-rendered card needs the semantics. Same classes, same\nCSS, one authored source for both — which is the point."
+        },
+        {
+          "kind": "class",
+          "description": "The card primitive — the first real component on the ADR-8 base layer.",
+          "name": "SkCard",
+          "cssParts": [
+            {
+              "description": "the card surface",
+              "name": "card"
+            }
+          ],
+          "members": [
+            {
+              "kind": "field",
+              "name": "variant",
+              "privacy": "public",
+              "type": {
+                "text": "'blue' | 'purple' | undefined"
+              },
+              "attribute": "variant",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "inset",
+              "privacy": "public",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "attribute": "inset",
+              "reflects": true
+            }
+          ],
+          "attributes": [
+            {
+              "name": "variant",
+              "type": {
+                "text": "'blue' | 'purple' | undefined"
+              },
+              "fieldName": "variant"
+            },
+            {
+              "name": "inset",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "fieldName": "inset"
+            }
+          ],
+          "superclass": {
+            "name": "LitElement",
+            "package": "lit"
+          },
+          "tagName": "sk-card",
+          "customElement": true
+        },
+        {
           "kind": "class",
           "description": "The scaffold element for the ADR-8 custom-element base layer.",
           "name": "SkStub",
@@ -38,9 +190,65 @@
         },
         {
           "kind": "js",
+          "name": "SkCard",
+          "declaration": {
+            "name": "SkCard",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
           "name": "skStubSheet",
           "declaration": {
             "name": "default",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "CARD_VARIANTS",
+          "declaration": {
+            "name": "CARD_VARIANTS",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "cardClasses",
+          "declaration": {
+            "name": "cardClasses",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "cardStaticHtml",
+          "declaration": {
+            "name": "cardStaticHtml",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "isCardVariant",
+          "declaration": {
+            "name": "isCardVariant",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "CardVariant",
+          "declaration": {
+            "name": "CardVariant",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "unknownVariantMessage",
+          "declaration": {
+            "name": "unknownVariantMessage",
             "module": "./dist/index.js"
           }
         }

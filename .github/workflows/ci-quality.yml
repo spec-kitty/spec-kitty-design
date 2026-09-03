@@ -161,8 +161,12 @@ jobs:
       # Includes the vite-consumer fixture, whose scope:fixture depConstraint would
       # otherwise never be evaluated — nx affected --target=lint is the only ESLint
       # invocation in CI, and the fixture had no lint target.
-      - name: "[ENFORCED] Typecheck elements (ADR-8)"
-        run: npx nx run elements:typecheck
+      # DERIVED, not named. This step ran `nx run elements:typecheck` — one project by name —
+      # while a SECOND project (elements-behaviour-fixture) declared the same target and was
+      # never invoked. Its typecheck was red on a green pipeline. scripts/typecheck-all.mjs
+      # enumerates every project with the target and refuses an empty set.
+      - name: "[ENFORCED] Typecheck every project that declares it (ADR-8)"
+        run: node scripts/typecheck-all.mjs
       - name: "[ENFORCED] No CSS in elements source (FR-009, ADR-10 §1)"
         run: node scripts/check-no-css-in-source.mjs
       - name: "[ENFORCED] Generated CSS modules are current (ADR-10 generated-artifact contract)"
@@ -189,6 +193,12 @@ jobs:
       # C-007's anti-vacuity guard. The manifest declares 0 cssParts today, so SC-013's
       # "derived expected list" is a green assertion over nothing — this makes it
       # impossible for that list to GROW without a test landing in the same PR.
+      # ADR-10 §3: the element's template is the sole AUTHORED markup source, and the static
+      # .html plus the template-literal catalogue are generated from it. Criterion 3 is "no
+      # component markup is AUTHORED twice" — generated artifacts are exempt and required to
+      # be regenerable, which is what this enforces.
+      - name: "[ENFORCED] Generated markup is current (ADR-10 §3)"
+        run: node scripts/build-element-markup.mjs --check
       - name: "[ENFORCED] ::part() ratchet (C-007, SC-013)"
         run: node scripts/check-part-ratchet.mjs
       # Asserts the gate below actually gates the test job. A push-and-revert of a broken

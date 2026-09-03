@@ -67,7 +67,30 @@ export default defineConfig({
     retry: 0,
     projects: [
       {
-        resolve: { alias: { '@spec-kitty/elements': resolve(root, 'packages/elements/src/index.ts') } },
+        // A project-level `resolve` REPLACES the root one, so both entries live here.
+        //
+        // ARRAY form with a RegExp for the tokens stylesheet, not the object form. Vite's
+        // string aliases match on `id === find` or `id.startsWith(find + '/')`, so the key
+        // '@spec-kitty/tokens/tokens.css' never matched '…/tokens.css?raw' — the next
+        // character is '?'. Vite then fell through to real package resolution and reported
+        // `Missing "./tokens.css" specifier`, which is true: the package's exports map ships
+        // dist/, and dist/ is gitignored, so a subpath export would break SC-022 (the suite
+        // must pass with no dist/ present). The regexp keeps the query and reaches src/.
+        resolve: {
+          alias: [
+            {
+              // Unanchored at the end ON PURPOSE: the id carries its query (`?raw`), and
+              // `String.replace` substitutes only the matched prefix, so the query survives.
+              // An anchored `$` matched nothing and fell through to package resolution.
+              find: /^@spec-kitty\/tokens\/tokens\.css/,
+              replacement: resolve(root, 'packages/tokens/src/tokens.css'),
+            },
+            {
+              find: /^@spec-kitty\/elements$/,
+              replacement: resolve(root, 'packages/elements/src/index.ts'),
+            },
+          ],
+        },
         test: {
           name: 'browser',
           include: ['tests/browser/**/*.test.ts', 'fixtures/**/src/**/*.test.ts'],
