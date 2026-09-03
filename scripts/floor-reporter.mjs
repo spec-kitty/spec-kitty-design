@@ -38,6 +38,9 @@ export default class FloorReporter {
     const executed = new Map();
     const skipped = [];
     const coveredIds = new Set();
+    // id -> the module paths whose passing tests carry it. Compared by SUFFIX below: the
+    // reporter sees absolute module ids, the registry records repo-relative paths.
+    const coveredIn = new Map();
 
     for (const mod of testModules ?? []) {
       const project = mod.project?.name ?? '<unknown>';
@@ -54,7 +57,12 @@ export default class FloorReporter {
         n++;
         // Behaviour ids are carried in the test name as [SC-0xx]; tests are keyed by id,
         // never by title, so a rename does not silently drop coverage.
-        for (const m of String(test.fullName).matchAll(/\[([A-Z]+-\d+)\]/g)) coveredIds.add(m[1]);
+        const modulePath = mod.moduleId ?? mod.filepath ?? '';
+        for (const m of String(test.fullName).matchAll(/\[([A-Z]+-\d+)\]/g)) {
+          coveredIds.add(m[1]);
+          if (!coveredIn.has(m[1])) coveredIn.set(m[1], []);
+          coveredIn.get(m[1]).push(modulePath);
+        }
       }
       executed.set(project, (executed.get(project) ?? 0) + n);
     }
@@ -103,11 +111,32 @@ export default class FloorReporter {
     // reporter at a fixture registry (see tests/node/config-contract.test.ts).
     if (existsSync(REGISTRY)) {
       const registry = JSON.parse(readFileSync(REGISTRY, 'utf8'));
-      const ids = (registry.behaviours ?? []).filter((b) => b.applicable !== false).map((b) => b.id);
-      for (const id of ids) {
-        if (!coveredIds.has(id)) problems.push(`behaviour ${id} is declared in ${REGISTRY} but no test carries it`);
+      // PER (behaviour, SUBJECT), not per behaviour.
+      //
+      // The synthetic fixture covers every id `sk-nav-pill` also covers, so an id-only check
+      // stayed GREEN with the element's entire behaviour file deleted — the certifying-absence
+      // shape this reporter exists to catch, inside the reporter. A subject names the file
+      // that must carry the id; an entry with no `subjects` keeps the old id-only meaning, so
+      // nothing that predates this has changed.
+      const applicable = (registry.behaviours ?? []).filter((b) => b.applicable !== false);
+      for (const b of applicable) {
+        for (const subject of b.subjects ?? [null]) {
+          if (subject === null) {
+            if (!coveredIds.has(b.id)) {
+              problems.push(`behaviour ${b.id} is declared in ${REGISTRY} but no test carries it`);
+            }
+            continue;
+          }
+          const paths = coveredIn.get(b.id) ?? [];
+          if (!paths.some((f) => String(f).endsWith(subject.file))) {
+            problems.push(
+              `behaviour ${b.id} declares subject "${subject.name}" (${subject.file}) in ` +
+                `${REGISTRY}, but no passing test in that file carries [${b.id}]`
+            );
+          }
+        }
       }
-      if (ids.length === 0) problems.push(`${REGISTRY} declares no applicable behaviours — refusing to pass vacuously`);
+      if (applicable.length === 0) problems.push(`${REGISTRY} declares no applicable behaviours — refusing to pass vacuously`);
     }
 
     if (problems.length) {

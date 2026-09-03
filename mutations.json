@@ -13,7 +13,12 @@
     "  reds every other elements-owned test, failing the collateral bound on the mission's own",
     "  canonical mutation.",
     "  SC-014 is NOT 'hand-author a new CSSStyleSheet()' \u2014 the generated module already exports",
-    "  exactly that and Lit adopts it by reference, so identity survives and the test stays"
+    "  exactly that and Lit adopts it by reference, so identity survives and the test stays",
+    "",
+    "`subject` (#73) names the test FILE whose [id] must go red. Behaviour ids are no longer",
+    "unique across the suite \u2014 sk-nav-pill and the synthetic fixture both carry SC-006 \u2014 so an",
+    "id-only match would let a mutation red the fixture's test and be credited for the",
+    "element's. Guard 7 now compares (id, subject) pairs against behaviours.json's subjects."
   ],
   "mutations": [
     {
@@ -21,98 +26,232 @@
       "arm": "FormData entry",
       "file": "fixtures/elements-behaviour/src/sk-behaviour-fixture.ts",
       "from": "if (changed.has('value') || changed.has('disabled')) this.#syncFormValue();",
-      "to": "void changed;"
+      "to": "void changed;",
+      "subject": "fixtures/elements-behaviour/src/behaviours.test.ts"
     },
     {
       "id": "SC-003",
       "arm": "validity message",
       "file": "fixtures/elements-behaviour/src/sk-behaviour-fixture.ts",
       "from": "{ customError: true }, 'value must not be \"invalid\"'",
-      "to": "{}, ''"
+      "to": "{}, ''",
+      "subject": "fixtures/elements-behaviour/src/behaviours.test.ts"
     },
     {
       "id": "SC-004",
       "arm": "reset restores",
       "file": "fixtures/elements-behaviour/src/sk-behaviour-fixture.ts",
       "from": "this.value = this.#initialValue;",
-      "to": "this.value = this.value;"
+      "to": "this.value = this.value;",
+      "subject": "fixtures/elements-behaviour/src/behaviours.test.ts"
     },
     {
       "id": "SC-005",
       "arm": "disabled excluded",
       "file": "fixtures/elements-behaviour/src/sk-behaviour-fixture.ts",
       "from": "this.disabled ? null : this.value",
-      "to": "this.value"
+      "to": "this.value",
+      "subject": "fixtures/elements-behaviour/src/behaviours.test.ts"
     },
     {
       "id": "SC-006",
       "arm": "fires once",
       "file": "fixtures/elements-behaviour/src/sk-behaviour-fixture.ts",
       "from": "const proceed = this.dispatchEvent(event);",
-      "to": "this.dispatchEvent(event); const proceed = this.dispatchEvent(event);"
+      "to": "this.dispatchEvent(event); const proceed = this.dispatchEvent(event);",
+      "subject": "fixtures/elements-behaviour/src/behaviours.test.ts"
     },
     {
       "id": "SC-007",
       "arm": "detail shape",
       "file": "fixtures/elements-behaviour/src/sk-behaviour-fixture.ts",
       "from": "label: this.label,",
-      "to": "title: this.label,"
+      "to": "title: this.label,",
+      "subject": "fixtures/elements-behaviour/src/behaviours.test.ts"
     },
     {
       "id": "SC-008",
       "arm": "composed",
       "file": "fixtures/elements-behaviour/src/sk-behaviour-fixture.ts",
       "from": "composed: true,",
-      "to": "composed: false,"
+      "to": "composed: false,",
+      "subject": "fixtures/elements-behaviour/src/behaviours.test.ts"
     },
     {
       "id": "SC-009",
       "arm": "preventDefault prevents",
       "file": "fixtures/elements-behaviour/src/sk-behaviour-fixture.ts",
       "from": "if (!proceed) this.open = !this.open;",
-      "to": "void proceed;"
+      "to": "void proceed;",
+      "subject": "fixtures/elements-behaviour/src/behaviours.test.ts"
     },
     {
       "id": "SC-010",
       "arm": "upgrade handling (non-reactive property)",
       "file": "fixtures/elements-behaviour/src/sk-behaviour-fixture.ts",
       "from": "this.#upgradeHint();",
-      "to": "void 0;"
+      "to": "void 0;",
+      "subject": "fixtures/elements-behaviour/src/behaviours.test.ts"
     },
     {
       "id": "SC-011",
       "arm": "slot name",
       "file": "fixtures/elements-behaviour/src/sk-behaviour-fixture.ts",
       "from": "<slot name=\"panel\">",
-      "to": "<slot name=\"other\">"
+      "to": "<slot name=\"other\">",
+      "subject": "fixtures/elements-behaviour/src/behaviours.test.ts"
     },
     {
       "id": "SC-012",
       "arm": "Escape closes",
       "file": "fixtures/elements-behaviour/src/sk-behaviour-fixture.ts",
       "from": "if (e.key === 'Escape' && this.open) {",
-      "to": "if (false) {"
+      "to": "if (false) {",
+      "subject": "fixtures/elements-behaviour/src/behaviours.test.ts"
     },
     {
       "id": "SC-013",
       "arm": "part present",
       "file": "fixtures/elements-behaviour/src/sk-behaviour-fixture.ts",
       "from": "<span part=\"label\">",
-      "to": "<span part=\"label-renamed\">"
+      "to": "<span part=\"label-renamed\">",
+      "subject": "fixtures/elements-behaviour/src/behaviours.test.ts"
     },
     {
       "id": "SC-014",
       "arm": "adopted sheet identity",
       "file": "packages/elements/src/stub/sk-stub.ts",
       "from": "static styles = [sheet];",
-      "to": "static styles = [new CSSStyleSheet()];"
+      "to": "static styles = [new CSSStyleSheet()];",
+      "subject": "fixtures/elements-behaviour/src/sk-stub.test.ts"
     },
     {
       "id": "SC-015",
       "arm": "duplicate warns",
       "file": "packages/elements/src/define.ts",
       "from": "if (existing !== ctor) {",
-      "to": "if (false) {"
+      "to": "if (false) {",
+      "subject": "fixtures/elements-behaviour/src/sk-stub.test.ts"
+    },
+    {
+      "id": "SC-006",
+      "subject": "fixtures/elements-behaviour/src/sk-nav-pill.test.ts",
+      "arm": "fires once (idempotence)",
+      "file": "packages/elements/src/nav-pill/sk-nav-pill.ts",
+      "from": "    if (this.isOpen === next) return;",
+      "to": "    if (false as boolean) return;"
+    },
+    {
+      "id": "SC-007",
+      "subject": "fixtures/elements-behaviour/src/sk-nav-pill.test.ts",
+      "arm": "detail shape",
+      "file": "packages/elements/src/nav-pill/sk-nav-pill.ts",
+      "from": "      detail: { open: next },",
+      "to": "      detail: { isOpen: next },"
+    },
+    {
+      "id": "SC-008",
+      "subject": "fixtures/elements-behaviour/src/sk-nav-pill.test.ts",
+      "arm": "composed",
+      "file": "packages/elements/src/nav-pill/sk-nav-pill.ts",
+      "from": "      composed: true,",
+      "to": "      composed: false,"
+    },
+    {
+      "id": "SC-009",
+      "subject": "fixtures/elements-behaviour/src/sk-nav-pill.test.ts",
+      "arm": "preventDefault prevents",
+      "file": "packages/elements/src/nav-pill/sk-nav-pill.ts",
+      "from": "    if (!this.dispatchEvent(evt)) return;",
+      "to": "    this.dispatchEvent(evt);"
+    },
+    {
+      "id": "SC-010",
+      "subject": "fixtures/elements-behaviour/src/sk-nav-pill.test.ts",
+      "arm": "upgrade reaches the reflected attribute",
+      "file": "packages/elements/src/nav-pill/sk-nav-pill.ts",
+      "from": "    isOpen: { type: Boolean, reflect: true, attribute: 'open' },",
+      "to": "    isOpen: { type: Boolean, reflect: false, attribute: 'open' },"
+    },
+    {
+      "id": "SC-012",
+      "subject": "fixtures/elements-behaviour/src/sk-nav-pill.test.ts",
+      "arm": "focus returns to the invoker",
+      "file": "packages/elements/src/nav-pill/sk-nav-pill.ts",
+      "from": "      if (target?.isConnected) target.focus();",
+      "to": "      void target;"
+    },
+    {
+      "id": "SC-013",
+      "subject": "fixtures/elements-behaviour/src/sk-nav-pill.test.ts",
+      "arm": "declared part present",
+      "file": "packages/elements/src/nav-pill/sk-nav-pill.ts",
+      "from": "      <div part=\"items\" class=\"sk-nav-pill__items\" id=\"items\"><slot></slot></div>",
+      "to": "      <div class=\"sk-nav-pill__items\" id=\"items\"><slot></slot></div>"
+    },
+    {
+      "id": "SC-013",
+      "subject": "fixtures/elements-behaviour/src/sk-card.test.ts",
+      "arm": "card part present",
+      "file": "packages/elements/src/card/sk-card.ts",
+      "from": "<div part=\"card\" class=${cardClasses(this.variant, this.inset)}>",
+      "to": "<div class=${cardClasses(this.variant, this.inset)}>"
+    },
+    {
+      "id": "SC-006",
+      "subject": "fixtures/elements-behaviour/src/sk-nav-pill.test.ts",
+      "arm": "toggle() closes",
+      "file": "packages/elements/src/nav-pill/sk-nav-pill.ts",
+      "from": "    if (this.isOpen) this.close();\n    else this.open(invoker);",
+      "to": "    this.open(invoker);"
+    },
+    {
+      "id": "SC-009",
+      "subject": "fixtures/elements-behaviour/src/sk-nav-pill.test.ts",
+      "arm": "dispatched before the change",
+      "file": "packages/elements/src/nav-pill/sk-nav-pill.ts",
+      "from": "    if (!this.dispatchEvent(evt)) return;",
+      "to": "    this.isOpen = next;\n    if (!this.dispatchEvent(evt)) {\n      this.isOpen = !next;\n      return;\n    }"
+    },
+    {
+      "id": "SC-012",
+      "subject": "fixtures/elements-behaviour/src/sk-nav-pill.test.ts",
+      "arm": "Escape does not consume the key when closed",
+      "file": "packages/elements/src/nav-pill/sk-nav-pill.ts",
+      "from": "    if (!this.isOpen) return;\n    ke.preventDefault();",
+      "to": "    ke.preventDefault();"
+    },
+    {
+      "id": "SC-012",
+      "subject": "fixtures/elements-behaviour/src/sk-nav-pill.test.ts",
+      "arm": "invoker resolved through the composed path",
+      "file": "packages/elements/src/nav-pill/sk-nav-pill.ts",
+      "from": "    while (node?.shadowRoot?.activeElement) node = node.shadowRoot.activeElement;",
+      "to": "    void 0;"
+    },
+    {
+      "id": "SC-014",
+      "subject": "fixtures/elements-behaviour/src/sk-nav-pill.test.ts",
+      "arm": "nav-pill adopts its sheet",
+      "file": "packages/elements/src/nav-pill/sk-nav-pill.ts",
+      "from": "  static styles = [sheet];",
+      "to": "  static styles = [];"
+    },
+    {
+      "id": "SC-013",
+      "subject": "fixtures/elements-behaviour/src/sk-nav-pill.test.ts",
+      "arm": "the pill is a navigation landmark",
+      "file": "packages/elements/src/nav-pill/sk-nav-pill.ts",
+      "from": "    return html`<nav\n      part=\"nav\"",
+      "to": "    return html`<div\n      part=\"nav\""
+    },
+    {
+      "id": "SC-013",
+      "subject": "fixtures/elements-behaviour/src/sk-nav-pill.test.ts",
+      "arm": "the hamburger keeps its accessible name",
+      "file": "packages/elements/src/nav-pill/sk-nav-pill.ts",
+      "from": "        aria-label=${this.isOpen ? 'Close navigation' : 'Open navigation'}",
+      "to": "        data-label=${this.isOpen ? 'Close navigation' : 'Open navigation'}"
     }
   ]
 }

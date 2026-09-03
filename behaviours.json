@@ -11,23 +11,244 @@
     "A test here would be a green criterion with zero new coverage.",
     "",
     "A behaviour with no applicable subject is ABSENT from this file. It is never expressed as a",
-    "skip and never deferred to a matrix cell — that was FR-010's earlier shape and it made the",
-    "mission incoherent if the conformance matrix were dropped."
+    "skip and never deferred to a matrix cell \u2014 that was FR-010's earlier shape and it made the",
+    "mission incoherent if the conformance matrix were dropped.",
+    "",
+    "SUBJECTS (#73, FR-010). A behaviour id is no longer unique across the suite: sk-nav-pill",
+    "carries SC-006..SC-010 and SC-012, and the synthetic fixture carries them too. An id-only",
+    "coverage check therefore stayed GREEN with the ELEMENT's entire behaviour file deleted,",
+    "because the fixture still covered every id. That is this programme's certifying-absence",
+    "class, inside the reporter written to catch it.",
+    "",
+    "Each subject names the FILE that must carry the id. scripts/floor-reporter.mjs checks",
+    "coverage per (id, subject file); scripts/suite-selftest.mjs's guard 7 compares mutations",
+    "against the same pairs, and a mutation's optional `subject` narrows which file's named",
+    "test it must red.",
+    "",
+    "A subject's `name` is what tests/node/config-contract.test.ts matches against the ELEMENT",
+    "glob, so it names the element (sk-stub, sk-card, sk-nav-pill), not the test file's role. A",
+    "lens added a real element with no entry here and every gate went green \u2014 this registry was",
+    "the last hand-maintained list deciding whether an element is tested at all."
   ],
   "behaviours": [
-    { "id": "SC-002", "charter": "form association", "summary": "native form submit produces the expected FormData entry", "owner": "fixture", "applicable": true },
-    { "id": "SC-003", "charter": "form association", "summary": "setValidity blocks submission and the message reaches the a11y tree", "owner": "fixture", "applicable": true },
-    { "id": "SC-004", "charter": "form association", "summary": "form reset restores the initial value", "owner": "fixture", "applicable": true },
-    { "id": "SC-005", "charter": "form association", "summary": "a disabled control is excluded from submission", "owner": "fixture", "applicable": true },
-    { "id": "SC-006", "charter": "event contract", "summary": "fires exactly once", "owner": "fixture", "applicable": true },
-    { "id": "SC-007", "charter": "event contract", "summary": "the documented detail shape", "owner": "fixture", "applicable": true },
-    { "id": "SC-008", "charter": "event contract", "summary": "composed and bubbles as documented", "owner": "fixture", "applicable": true },
-    { "id": "SC-009", "charter": "event contract", "summary": "preventDefault demonstrably prevents where cancelable", "owner": "fixture", "applicable": true },
-    { "id": "SC-010", "charter": "property before upgrade", "summary": "a property assigned before the definition loads is applied on upgrade", "owner": "fixture", "applicable": true },
-    { "id": "SC-011", "charter": "slot contract", "summary": "content reaches the intended slot; fallback appears when empty", "owner": "fixture", "applicable": true },
-    { "id": "SC-012", "charter": "focus and keyboard", "summary": "Escape closes, focus returns to the invoker, aria-expanded tracks state", "owner": "fixture", "applicable": true },
-    { "id": "SC-013", "charter": "styling API", "summary": "every declared ::part() is present and targetable from outside", "owner": "fixture", "applicable": true, "note": "FIXTURE-owned. packages/elements/src contains no part= and no @csspart, and the manifest declares 0 cssParts — so an elements-owned mutation would have no pattern and the harness's guard 1 would fire by construction. The manifest-derived arm is WP04's ratchet." },
-    { "id": "SC-014", "charter": "style adoption", "summary": "adopts a constructed stylesheet by identity and injects no <style> element", "owner": "elements", "applicable": true },
-    { "id": "SC-015", "charter": "registry guard", "summary": "a second define warns, keeps the original constructor, and is silent for the same constructor", "owner": "elements", "applicable": true }
+    {
+      "id": "SC-002",
+      "charter": "form association",
+      "summary": "native form submit produces the expected FormData entry",
+      "owner": "fixture",
+      "applicable": true,
+      "subjects": [
+        {
+          "name": "sk-behaviour-fixture",
+          "file": "fixtures/elements-behaviour/src/behaviours.test.ts"
+        }
+      ]
+    },
+    {
+      "id": "SC-003",
+      "charter": "form association",
+      "summary": "setValidity blocks submission and the message reaches the a11y tree",
+      "owner": "fixture",
+      "applicable": true,
+      "subjects": [
+        {
+          "name": "sk-behaviour-fixture",
+          "file": "fixtures/elements-behaviour/src/behaviours.test.ts"
+        }
+      ]
+    },
+    {
+      "id": "SC-004",
+      "charter": "form association",
+      "summary": "form reset restores the initial value",
+      "owner": "fixture",
+      "applicable": true,
+      "subjects": [
+        {
+          "name": "sk-behaviour-fixture",
+          "file": "fixtures/elements-behaviour/src/behaviours.test.ts"
+        }
+      ]
+    },
+    {
+      "id": "SC-005",
+      "charter": "form association",
+      "summary": "a disabled control is excluded from submission",
+      "owner": "fixture",
+      "applicable": true,
+      "subjects": [
+        {
+          "name": "sk-behaviour-fixture",
+          "file": "fixtures/elements-behaviour/src/behaviours.test.ts"
+        }
+      ]
+    },
+    {
+      "id": "SC-006",
+      "charter": "event contract",
+      "summary": "fires exactly once",
+      "owner": "fixture",
+      "applicable": true,
+      "subjects": [
+        {
+          "name": "sk-behaviour-fixture",
+          "file": "fixtures/elements-behaviour/src/behaviours.test.ts"
+        },
+        {
+          "name": "sk-nav-pill",
+          "file": "fixtures/elements-behaviour/src/sk-nav-pill.test.ts"
+        }
+      ]
+    },
+    {
+      "id": "SC-007",
+      "charter": "event contract",
+      "summary": "the documented detail shape",
+      "owner": "fixture",
+      "applicable": true,
+      "subjects": [
+        {
+          "name": "sk-behaviour-fixture",
+          "file": "fixtures/elements-behaviour/src/behaviours.test.ts"
+        },
+        {
+          "name": "sk-nav-pill",
+          "file": "fixtures/elements-behaviour/src/sk-nav-pill.test.ts"
+        }
+      ]
+    },
+    {
+      "id": "SC-008",
+      "charter": "event contract",
+      "summary": "composed and bubbles as documented",
+      "owner": "fixture",
+      "applicable": true,
+      "subjects": [
+        {
+          "name": "sk-behaviour-fixture",
+          "file": "fixtures/elements-behaviour/src/behaviours.test.ts"
+        },
+        {
+          "name": "sk-nav-pill",
+          "file": "fixtures/elements-behaviour/src/sk-nav-pill.test.ts"
+        }
+      ]
+    },
+    {
+      "id": "SC-009",
+      "charter": "event contract",
+      "summary": "preventDefault demonstrably prevents where cancelable",
+      "owner": "fixture",
+      "applicable": true,
+      "subjects": [
+        {
+          "name": "sk-behaviour-fixture",
+          "file": "fixtures/elements-behaviour/src/behaviours.test.ts"
+        },
+        {
+          "name": "sk-nav-pill",
+          "file": "fixtures/elements-behaviour/src/sk-nav-pill.test.ts"
+        }
+      ]
+    },
+    {
+      "id": "SC-010",
+      "charter": "property before upgrade",
+      "summary": "a property assigned before the definition loads is applied on upgrade",
+      "owner": "fixture",
+      "applicable": true,
+      "subjects": [
+        {
+          "name": "sk-behaviour-fixture",
+          "file": "fixtures/elements-behaviour/src/behaviours.test.ts"
+        },
+        {
+          "name": "sk-nav-pill",
+          "file": "fixtures/elements-behaviour/src/sk-nav-pill.test.ts"
+        }
+      ]
+    },
+    {
+      "id": "SC-011",
+      "charter": "slot contract",
+      "summary": "content reaches the intended slot; fallback appears when empty",
+      "owner": "fixture",
+      "applicable": true,
+      "subjects": [
+        {
+          "name": "sk-behaviour-fixture",
+          "file": "fixtures/elements-behaviour/src/behaviours.test.ts"
+        }
+      ]
+    },
+    {
+      "id": "SC-012",
+      "charter": "focus and keyboard",
+      "summary": "Escape closes, focus returns to the invoker, aria-expanded tracks state",
+      "owner": "fixture",
+      "applicable": true,
+      "subjects": [
+        {
+          "name": "sk-behaviour-fixture",
+          "file": "fixtures/elements-behaviour/src/behaviours.test.ts"
+        },
+        {
+          "name": "sk-nav-pill",
+          "file": "fixtures/elements-behaviour/src/sk-nav-pill.test.ts"
+        }
+      ]
+    },
+    {
+      "id": "SC-013",
+      "charter": "styling API",
+      "summary": "every declared ::part() is present and targetable from outside",
+      "owner": "fixture",
+      "applicable": true,
+      "note": "FIXTURE-owned. packages/elements/src contains no part= and no @csspart, and the manifest declares 0 cssParts \u2014 so an elements-owned mutation would have no pattern and the harness's guard 1 would fire by construction. The manifest-derived arm is WP04's ratchet.",
+      "subjects": [
+        {
+          "name": "sk-behaviour-fixture",
+          "file": "fixtures/elements-behaviour/src/behaviours.test.ts"
+        },
+        {
+          "name": "sk-nav-pill",
+          "file": "fixtures/elements-behaviour/src/sk-nav-pill.test.ts"
+        },
+        {
+          "name": "sk-card",
+          "file": "fixtures/elements-behaviour/src/sk-card.test.ts"
+        }
+      ]
+    },
+    {
+      "id": "SC-014",
+      "charter": "style adoption",
+      "summary": "adopts a constructed stylesheet by identity and injects no <style> element",
+      "owner": "elements",
+      "applicable": true,
+      "subjects": [
+        {
+          "name": "sk-stub",
+          "file": "fixtures/elements-behaviour/src/sk-stub.test.ts"
+        },
+        {
+          "name": "sk-nav-pill",
+          "file": "fixtures/elements-behaviour/src/sk-nav-pill.test.ts"
+        }
+      ]
+    },
+    {
+      "id": "SC-015",
+      "charter": "registry guard",
+      "summary": "a second define warns, keeps the original constructor, and is silent for the same constructor",
+      "owner": "elements",
+      "applicable": true,
+      "subjects": [
+        {
+          "name": "sk-stub",
+          "file": "fixtures/elements-behaviour/src/sk-stub.test.ts"
+        }
+      ]
+    }
   ]
 }

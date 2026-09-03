@@ -20,9 +20,11 @@ import { pathToFileURL } from 'node:url';
  *     the two real artifacts on one page warn instead of throwing (SC-003), which
  *     is the failure that takes down a consumer's whole page.
  *
- * NOTE ON WIRING: ci-quality.yml's playwright job runs NAMED spec files, not
- * `testDir`. This spec is listed there explicitly. If you add a spec to this
- * directory it does not run in CI until you name it too.
+ * NOTE ON WIRING: ci-quality.yml's playwright job runs `npx playwright test` over the whole
+ * `testDir` (playwright.config.ts), so a spec added to this directory runs in CI without being
+ * registered anywhere. This comment previously said the opposite — that specs had to be named
+ * individually — which would have had a future author hand-registering files that need no
+ * registration, or reading an unlisted spec as dead.
  */
 
 const REPO_ROOT = resolve(__dirname, '../../../..');

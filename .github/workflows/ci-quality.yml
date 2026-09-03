@@ -171,6 +171,32 @@ jobs:
         run: node scripts/check-no-css-in-source.mjs
       - name: "[ENFORCED] Generated CSS modules are current (ADR-10 generated-artifact contract)"
         run: node scripts/build-elements-css.mjs --check
+      # ADR-9 Confirmation #1, which the ADR requires by name and no mission had landed.
+      # #72 paid for its absence: sk-card.css carried two selectors that were INERT once the
+      # sheet was adopted — the themed ancestor sits outside the shadow root — with no error
+      # and no warning, and a LightMode story rendering dark styling. Note the check is
+      # stricter than ADR-9's four-token enumeration, deliberately: that enumeration catches
+      # only half of #72's actual defect (`.sk-light .sk-card--blue` is not in it).
+      # TWO steps, and the second is the one ADR-9 actually asks for: "a lint rule rejects
+      # :root, html, body and :host-context() … WITH A RED-FIRST TEST". The probes existed only
+      # as prose in the script's docstring and in a PR body, which is how three holes survived
+      # review of a file whose entire subject is holes surviving review — a mixed :is() list, a
+      # forbidden token inside :is(), and a bare type selector naming the host all passed.
+      - name: "[ENFORCED] Cross-root selector gate self-check (ADR-9 Confirmation #1)"
+        run: node scripts/check-adopted-css-boundaries.mjs --selftest
+      - name: "[ENFORCED] Adopted CSS stays inside the element root (ADR-9 Confirmation #1)"
+        run: node scripts/check-adopted-css-boundaries.mjs
+      # The IIFE entry was a hand-maintained list of side-effect imports. #73 added an element
+      # to index.ts and not to it, and everything stayed green — the test lane resolves the
+      # package to index.ts, the analyzer reads source, Storybook has its own module graph.
+      # Only the deployed demo went quiet, and a Playwright failure found it.
+      # Same reason as the CSS gate's self-check one step up: this gate's commit message
+      # claimed six probed forms and a lens falsified two of them within the hour. A probe
+      # table nobody can run is not a probe table.
+      - name: "[ENFORCED] Distribution-entry gate self-check (ADR-10 §2)"
+        run: node scripts/check-elements-entries.mjs --selftest
+      - name: "[ENFORCED] Every element reaches both distribution entries (ADR-10 §2)"
+        run: node scripts/check-elements-entries.mjs
       # The manifest is a generated artifact under ADR-10's contract, and ADR-11
       # generates the React wrapper FROM it — a manifest that drifts from source
       # propagates into generated code two missions from now. The analyzer's own

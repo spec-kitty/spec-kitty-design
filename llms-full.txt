@@ -509,12 +509,23 @@ are standalone (no NgModule).
 - Notes: state markup is split into separate `.html` snippets (e.g. `sk-form-input-error.html`) consumed by stories.
 
 #### sk-nav-pill (styles)
-- Path: `packages/styles/src/nav-pill/sk-nav-pill.css` + `sk-nav-pill-drawer.css` + `sk-nav-pill.html` + `sk-nav-pill.js` + `sk-nav-pill.d.ts` + `sk-nav-pill.stories.ts`
+- Path: `packages/styles/src/nav-pill/sk-nav-pill.css` + `sk-nav-pill-drawer.css` + `sk-nav-pill.html` + `sk-nav-pill.stories.ts`
 - Story title: `Navigation/SkNavPill (HTML)`
-- Variants: `Default`, `ActiveItem`, `Mobile`, `CollapsedHamburger`, `LightMode`
-- Notes: only styles component with companion JS. The JS handles the
-  collapsed-hamburger drawer toggle on narrow viewports; ARIA roles applied via
-  template. Two CSS files: rail layout and the mobile drawer.
+- Variants: `Default`, `ActiveItem`, `Mobile`, `CollapsedStatic`, `LightMode`
+- Notes: CSS only. The `sk-nav-pill.js` helper (`skToggleDrawer`) and its `.d.ts` were
+  removed in #73 — `@spec-kitty/styles` now ships no JavaScript at all. Two CSS files: rail
+  layout and the mobile drawer. The drawer arrangement is markup + CSS; the consumer supplies
+  the toggle, or uses `<sk-nav-pill>` below, which supplies it.
+
+#### sk-nav-pill (element)
+- Path: `packages/elements/src/nav-pill/sk-nav-pill.ts` + `sk-nav-pill.stories.ts`
+- Story title: `Elements/SkNavPill`
+- Variants: `Default`, `Open`
+- API: methods `open(invoker?)` / `close()` / `toggle(invoker?)`; state `isOpen`, reflected to
+  the `open` attribute; event `sk-nav-pill-toggle` (fires BEFORE the change,
+  `detail: { open: boolean }`, bubbles, composed, cancelable); parts `nav`, `items`,
+  `hamburger`; one default slot for the items, authored once and presented as a row or a panel.
+- Notes: Escape closes and returns focus to whatever control opened it.
 
 #### sk-pill-tag (styles)
 - Path: `packages/styles/src/pill-tag/sk-pill-tag.css` + `sk-pill-tag.html` + `sk-pill-tag.stories.ts`
@@ -635,7 +646,7 @@ changes  ──┬──> security ──┐
 - `storybook-build` — gated on `tokens` or `components` path changes (`components` includes `apps/demo/**` and `scripts/assemble-demo-dist.sh`); builds Storybook, uploads the `storybook-static` artifact for downstream jobs, and runs `scripts/assemble-demo-dist.sh`, which assembles the demo surface and fails if any asset reference does not resolve.
 - `a11y` — runs `@axe-core` against the built Storybook for WCAG 2.1 AA (FR-021) using `scripts/run-axe-storybook.js`.
 - `visual-regression` — Playwright runs `apps/storybook/src/tests/visual.spec.ts` (FR-024); diff artifacts uploaded on failure.
-- `playwright` — cross-browser smoke `apps/storybook/src/tests/smoke.spec.ts` (FR-023), plus `apps/storybook/src/tests/nav-pill-behaviour.spec.ts`, which drives `skToggleDrawer` — the only executable code in `@spec-kitty/styles` — through the assembled demo page.
+- `playwright` — cross-browser smoke `apps/storybook/src/tests/smoke.spec.ts` (FR-023), plus `apps/storybook/src/tests/nav-pill-behaviour.spec.ts`, which drives `<sk-nav-pill>` through the assembled demo page — the deployed artifact loading the real self-contained IIFE with no bundler, which is the path a contract test cannot cover.
 - `lighthouse` — advisory only (`continue-on-error: true`), runs `lhci autorun` per `lighthouserc.cjs` (FR-022).
 - `gate` — final job that aggregates required results; treats `skipped` (no component changes) as acceptable for storybook-build / a11y / visual / smoke but fails if any of security / workflow-pin / lint / storybook-build / a11y / visual / smoke explicitly failed. `storybook-build` is a dependency because it carries `[ENFORCED]` steps of its own; without it a failure there merely skipped the three downstream jobs, and skipped counts as acceptable.
 
@@ -714,12 +725,25 @@ npm install @spec-kitty/tokens
 <button class="sk-button sk-button--primary">Click me</button>
 ```
 
-For components that ship companion JS (currently `sk-nav-pill`):
+`@spec-kitty/styles` ships **no JavaScript**. Behaviour lives in `@spec-kitty/elements` as
+custom elements, designed to load from a single self-contained script with no bundler and no
+import map.
+
+**`@spec-kitty/elements` is not published yet.** `packages/elements/package.json` is
+`"private": true` and `release.yml` publishes only `tokens` and `styles`; #80 owns the
+release. There is deliberately no CDN URL here — an earlier revision of this section handed
+consumers an install snippet for a file that had just been deleted, and replacing it with a
+snippet for a package that does not exist would be the same mistake. The shape it will take:
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@spec-kitty/styles/src/nav-pill/sk-nav-pill.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@spec-kitty/styles/src/nav-pill/sk-nav-pill-drawer.css">
-<script type="module" src="https://cdn.jsdelivr.net/npm/@spec-kitty/styles/src/nav-pill/sk-nav-pill.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@spec-kitty/tokens/dist/tokens.css">
+<!-- once #80 publishes @spec-kitty/elements -->
+<script src="…/@spec-kitty/elements/dist/elements.js"></script>
+
+<sk-nav-pill label="Primary navigation">
+  <a href="#" class="sk-nav-pill__item">Platform</a>
+  <a href="#" class="sk-nav-pill__item">About</a>
+</sk-nav-pill>
 ```
 
 ### Angular

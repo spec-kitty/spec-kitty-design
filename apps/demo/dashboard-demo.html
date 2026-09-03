@@ -62,7 +62,10 @@
       gap: var(--sk-space-4);
       flex-shrink: 0;
       min-height: 52px;
-      position: relative;
+      /* `position: relative` stood here as the containing block for .dash-nav-drawer-wrap's
+         absolute positioning. Both are gone: there is no `position: absolute` left in this
+         file, and the element establishes its own containing block (:host, in
+         sk-nav-pill-drawer.css). Removing it is the rest of the residue the wrapper left. */
     }
 
     .dash-logo {
@@ -132,9 +135,15 @@
 
     /* -----------------------------------------------------------------------
        Nav pill in header — responsive override
-       The nav-pill sits in the header; the drawer drops below the header
+       The nav-pill sits in the header. The panel drops below the PILL, not below the header:
+       the element owns that positioning now (sk-nav-pill-drawer.css, the :host block), which
+       is the point of removing .dash-nav-drawer-wrap
     ----------------------------------------------------------------------- */
-    .dash-header .sk-nav-pill {
+    /* THROUGH THE PART, not into the shadow tree — ADR-9's rule, and the reason the element
+       declares `nav` as a ::part(). This used to be `.dash-header .sk-nav-pill`, a class
+       selector on the consumer's own markup; the <nav> now lives in the element's shadow
+       root, where a descendant selector cannot reach it. */
+    .dash-header sk-nav-pill::part(nav) {
       background: transparent;
       border: none;
       border-radius: 0;
@@ -142,21 +151,9 @@
       gap: var(--sk-space-2);
     }
 
-    /* Drawer is positioned below the header, full-width */
-    .dash-nav-drawer-wrap {
-      position: absolute;
-      top: 100%;
-      left: 0;
-      right: 0;
-      padding: 0 var(--sk-space-6);
-      z-index: 100;
-      pointer-events: none;
-    }
-
-    .dash-nav-drawer-wrap .sk-nav-pill__drawer {
-      pointer-events: auto;
-      width: 100%;
-    }
+    /* .dash-nav-drawer-wrap is GONE. It positioned the drawer below the header — component
+       layout that the page was forced to own because the drawer was the page's element. The
+       element positions its own panel now (sk-nav-pill-drawer.css, the :host block). */
 
     /* -----------------------------------------------------------------------
        Mission summary bar (below header)
@@ -493,10 +490,15 @@
     };
 
   })();</script>
-  <script type="module">
-    import { skToggleDrawer } from '../../packages/styles/src/nav-pill/sk-nav-pill.js';
-    window.skToggleDrawer = skToggleDrawer;
-  </script>
+  <!-- The nav is a custom element now (#73). This is the self-contained IIFE build, so there
+       is no import map, no bundler and nothing assigned to `window`.
+
+       It is a BUILD OUTPUT, unlike the component CSS above which this page links from source:
+       the element is TypeScript and a browser cannot load that. Run
+       `npx nx run elements:build` once before opening this file from file://. The deploy path
+       rewrites this to ./elements-dist/elements.js, which scripts/assemble-demo-dist.sh
+       copies and then proves resolves. -->
+  <script src="../../packages/elements/dist/elements.js"></script>
   <style>
     [data-theme="light"] .sk-icon-sun  { display: none !important; }
     [data-theme="light"] .sk-icon-moon { display: block !important; }
@@ -522,30 +524,15 @@
       <span class="dash-progress-label">6 / 9 · 67%</span>
     </div>
 
-    <!-- Responsive nav pill with hamburger -->
-    <nav class="sk-nav-pill sk-nav-pill--responsive sk-nav-pill--has-drawer"
-         aria-label="Dashboard navigation"
-         style="flex:1;">
-      <div class="sk-nav-pill__items">
-        <a href="#" class="sk-nav-pill__item sk-nav-pill__item--active" aria-current="page">Board</a>
-        <a href="#" class="sk-nav-pill__item">Timeline</a>
-        <a href="#" class="sk-nav-pill__item">Agents</a>
-        <a href="#" class="sk-nav-pill__item">Logs</a>
-      </div>
-      <button class="sk-nav-pill__hamburger"
-              id="sk-nav-hamburger"
-              aria-label="Open navigation"
-              aria-expanded="false"
-              aria-controls="sk-nav-drawer"
-              onclick="skToggleDrawer(this)">
-        <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.75"
-             stroke-linecap="round" aria-hidden="true">
-          <line x1="2" y1="4.5"  x2="16" y2="4.5"/>
-          <line x1="2" y1="9"    x2="16" y2="9"/>
-          <line x1="2" y1="13.5" x2="16" y2="13.5"/>
-        </svg>
-      </button>
-    </nav>
+    <!-- Responsive nav pill. The items are authored ONCE: below 720px the same container
+         becomes the panel. This page used to carry them twice, here and again in a separate
+         #sk-nav-drawer below, and the two copies had already drifted apart. -->
+    <sk-nav-pill label="Dashboard navigation" style="flex:1;">
+      <a href="#" class="sk-nav-pill__item sk-nav-pill__item--active" aria-current="page">Board</a>
+      <a href="#" class="sk-nav-pill__item">Timeline</a>
+      <a href="#" class="sk-nav-pill__item">Agents</a>
+      <a href="#" class="sk-nav-pill__item">Logs</a>
+    </sk-nav-pill>
 
     <div class="dash-header-actions">
       <span class="sk-tag">lane-a</span>
@@ -564,15 +551,6 @@
       <a href="blog-demo.html" class="sk-btn sk-btn--ghost sk-btn--sm">← Blog demo</a>
     </div>
 
-    <!-- Drawer: positioned below header, full-width, shown when hamburger is active -->
-    <div class="dash-nav-drawer-wrap">
-      <div class="sk-nav-pill__drawer" id="sk-nav-drawer">
-        <a href="#" class="sk-nav-pill__item sk-nav-pill__item--active" aria-current="page">Board</a>
-        <a href="#" class="sk-nav-pill__item">Timeline</a>
-        <a href="#" class="sk-nav-pill__item">Agents</a>
-        <a href="#" class="sk-nav-pill__item">Logs</a>
-      </div>
-    </div>
   </header>
 
   <!-- =====================================================================

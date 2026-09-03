@@ -85,3 +85,60 @@
   outline: var(--sk-border-width-2) solid var(--sk-border-focus);
   outline-offset: 2px;
 }
+
+/* ── Slotted items, for the element arrangement ─────────────────────────── */
+/*
+   ADDED for <sk-nav-pill> (#73), and inert in a document — `::slotted()` matches only when
+   this sheet is ADOPTED into a shadow root, so a plain <link> to this file cannot activate it.
+
+   WHY IT IS NEEDED. A consumer writes their links in the LIGHT DOM. An adopted stylesheet
+   cannot style them with an ordinary `.sk-nav-pill__item` selector: light-DOM nodes are styled
+   by the document, and the shadow sheet only reaches them through `::slotted()`. Measured, not
+   assumed — the element's first a11y run reported colour-contrast violations on both stories
+   for exactly this, on links the static stylesheet above styles perfectly well in a document.
+
+   `::slotted()` matches only DIRECTLY assigned children, which is the documented contract:
+   nav items are children of <sk-nav-pill>, not grandchildren.
+*/
+/* The `transition` below is NOT an oversight and NOT a copy of the static rule's — two lenses
+   independently caught its absence from the first draft of this block. It is here because a
+   slotted item and a static item should behave identically on hover; the seam only exists
+   because `::slotted()` cannot be merged into the static rule's selector list without risking
+   the whole rule being dropped by an engine that does not parse it. */
+::slotted(.sk-nav-pill__item) {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--sk-space-2) var(--sk-space-3);
+  border-radius: var(--sk-radius-pill);
+  font-family: var(--sk-font-sans);
+  font-size: var(--sk-text-sm);
+  font-weight: var(--sk-weight-normal);
+  color: var(--sk-fg-muted);
+  text-decoration: none;
+  transition:
+    color var(--sk-motion-duration-fast) var(--sk-motion-ease-out),
+    background-color var(--sk-motion-duration-fast) var(--sk-motion-ease-out);
+}
+
+::slotted(.sk-nav-pill__item--active:hover) {
+  background: var(--sk-bg-pill);
+}
+
+::slotted(.sk-nav-pill__item--active) {
+  color: var(--sk-fg-default);
+  background: var(--sk-bg-pill);
+  border: var(--sk-border-width-1) solid var(--sk-border-strong);
+  font-weight: var(--sk-weight-semibold);
+}
+
+/* Hover and focus cannot be expressed as `::slotted(a:hover)` — the pseudo-class must sit
+   inside the argument, and it does. `:focus-visible` there is likewise legal. */
+::slotted(.sk-nav-pill__item:hover) {
+  color: var(--sk-fg-default);
+  background: var(--sk-bg-pill);
+}
+
+::slotted(.sk-nav-pill__item:focus-visible) {
+  outline: var(--sk-border-width-2) solid var(--sk-border-focus);
+  outline-offset: 2px;
+}

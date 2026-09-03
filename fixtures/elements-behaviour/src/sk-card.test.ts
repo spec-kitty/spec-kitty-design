@@ -87,7 +87,7 @@ test('variants are attributes, and they map to the static layer\'s classes', asy
   }
 });
 
-test('the ADR-9 styling API is targetable from outside', async () => {
+test('[SC-013] the ADR-9 styling API is targetable from outside', async () => {
   const el = document.createElement('sk-card');
   document.body.append(el);
   await (el as unknown as { updateComplete: Promise<unknown> }).updateComplete;
