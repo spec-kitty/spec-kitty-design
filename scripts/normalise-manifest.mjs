@@ -20,7 +20,7 @@
  * reads by name: check-manifest-content.mjs, check-part-ratchet.mjs, and the FR-009 arm in
  * config-contract.test.ts all look declarations up rather than indexing them.
  *
- * IT ALSO CORRECTS ONE THING THE ANALYZER GETS WRONG: Lit's `state: true`.
+ * IT ALSO CORRECTS TWO THINGS THE ANALYZER GETS WRONG. The first is Lit's `state: true`.
  *
  * `state: true` declares an INTERNAL reactive property — Lit observes no attribute for it.
  * The analyzer does not honour the flag, so it records the field in `attributes[]` anyway,
@@ -216,9 +216,10 @@ if (tagged === 0) {
 //
 // Measured on the merged #126 head: of 22 attributes across the five elements, ZERO carried a
 // description and exactly two (`invalid`, on both form elements) had a member description the
-// attribute lacked. So this is not the whole story of the missing docs — most fields simply have
-// no JSDoc yet, which is writing, not a defect — but it is the half no amount of writing can fix
-// from the declaring class.
+// attribute lacked. That was BEFORE the JSDoc existed, and quoting only it invites the wrong
+// conclusion, so measured again at the commit that adds this pass: it now supplies 14 of the
+// 22, every inherited field on both form elements. Delete this loop and fourteen
+// `/** undefined */` blocks come back. It is not a two-case edge.
 //
 // It matters because of what the alternative would have been. Without this, documenting an
 // inherited property means REDECLARING it in every subclass with duplicated prose, in three
@@ -228,12 +229,25 @@ if (tagged === 0) {
 // CONSEQUENCE, stated because it is easy to miss: base-class JSDoc is now consumer-facing API
 // documentation. C-005 applies to it — write for the consumer and keep maintainer rationale in
 // `//`, exactly as the element files already do.
+// RUNS AFTER the `state: true` strip, and the two are output-independent: stripping only
+// removes attributes[] entries, propagation only fills descriptions on the ones that remain,
+// so reversing them yields a byte-identical manifest. What DOES change is the reported count:
+// propagate first and `errorMessage` is described, then stripped, and the number rises by two
+// for a reason nobody could reconstruct later. Stated so the third correction has an ordering
+// note to imitate.
 let propagated = 0;
 for (const mod of manifest.modules) {
   for (const decl of mod.declarations ?? []) {
     if (!decl.tagName) continue;
+    // PUBLIC fields only. `internals`, `customError`, `errorId` and `initialValue` are
+    // protected and carry maintainer rationale; an attribute whose `fieldName` collided with
+    // one would publish that prose as consumer API, which is the exact class this pass's own
+    // note warns about. Not reachable today (Lit builds no attribute from a protected field),
+    // so this closes it by construction rather than by the absence of a path.
     const fieldByName = new Map(
-      (decl.members ?? []).filter((m) => m.kind === 'field').map((m) => [m.name, m])
+      (decl.members ?? [])
+        .filter((m) => m.kind === 'field' && m.privacy !== 'protected' && m.privacy !== 'private')
+        .map((m) => [m.name, m])
     );
     for (const attr of decl.attributes ?? []) {
       // Never overwrite. An attribute that already carries a description was written for the

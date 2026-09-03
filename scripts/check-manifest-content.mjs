@@ -128,6 +128,66 @@ for (const mod of manifest.modules ?? []) {
   }
 }
 
+/**
+ * EVERY PUBLIC ATTRIBUTE AND METHOD CARRIES A DESCRIPTION — WP01's Definition of Done, #75.
+ *
+ * The manifest is ADR-11's only input, and #126 made it consumer-facing: the React generator
+ * copies `attributes[].description` into the emitted prop docs, so an attribute with none ships
+ * `/** undefined *\/` into a consumer's editor. #129 cleared 22 of those blocks. Nothing held
+ * them cleared.
+ *
+ * A RATCHET, because the two gates that already run are EQUALITY checks, not floors: the
+ * manifest's `git diff --exit-code` and `build-react-wrappers.mjs --check` both compare
+ * committed-to-regenerated. Delete a JSDoc, re-run `nx run elements:analyze`, regenerate the
+ * wrappers, commit — everything agrees with everything, `undefined` is back, and CI is green.
+ * That is the shape this repo keeps re-learning, and the reason `.wrapper-floor`,
+ * `expected-parts.json` and `expected-stories.json` all exist.
+ *
+ * The floors below are not decoration. A gate that walks zero declarations and prints a green
+ * line is the defect class this programme has hit often enough to name, so an empty examined
+ * set fails, and a declaration is counted as examined even when it has nothing to examine —
+ * `sk-stub` has zero attributes and zero public methods, and without the second floor a
+ * regression could hide behind it.
+ */
+let examinedDeclarations = 0;
+let examinedDocs = 0;
+for (const mod of manifest.modules ?? []) {
+  for (const decl of mod.declarations ?? []) {
+    if (!decl.tagName) continue;
+    examinedDeclarations++;
+
+    for (const attr of decl.attributes ?? []) {
+      examinedDocs++;
+      if (!String(attr.description ?? '').trim()) {
+        problems.push(
+          `<${decl.tagName}> attribute "${attr.name}" has no description, so the generated ` +
+            'React prop documents itself as `undefined`. Add JSDoc to the property that ' +
+            'declares it — normalise-manifest.mjs propagates it, including from the base class.'
+        );
+      }
+    }
+
+    for (const mem of decl.members ?? []) {
+      if (mem.kind !== 'method') continue;
+      if (mem.privacy === 'protected' || mem.privacy === 'private') continue;
+      if (mem.static || mem.name.startsWith('#')) continue;
+      examinedDocs++;
+      if (!String(mem.description ?? '').trim()) {
+        problems.push(
+          `<${decl.tagName}> public method "${mem.name}()" has no description; it reaches the ` +
+            "wrapper's class-level `## Methods` block as `: undefined`."
+        );
+      }
+    }
+  }
+}
+if (examinedDeclarations === 0) {
+  problems.push(
+    'no tagged declaration was examined for documentation — refusing to report green over an ' +
+      'empty set. Either the manifest lost its elements or this walk stopped matching them.'
+  );
+}
+
 if (problems.length) {
   console.error(`❌ ${MANIFEST} does not describe the package's elements (FR-006, SC-004):`);
   for (const p of problems) console.error(`   ${p}`);
@@ -136,4 +196,8 @@ if (problems.length) {
 console.log(
   `✅ Manifest describes all ${registered.size} registered element(s) by real tag name: ` +
     declared.map((d) => `<${d.tag}> → ${d.name}`).join(', ')
+);
+console.log(
+  `✅ ${examinedDocs} public attribute(s) and method(s) across ${examinedDeclarations} ` +
+    'element(s) all carry a description.'
 );

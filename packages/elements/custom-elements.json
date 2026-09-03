@@ -78,7 +78,8 @@
                 "type": {
                   "text": "boolean"
                 }
-              }
+              },
+              "description": "Whether the field is currently valid. Silent — reports nothing to the user."
             },
             {
               "kind": "field",
@@ -114,7 +115,7 @@
               "type": {
                 "text": "string"
               },
-              "description": "READ-ONLY, derived from validity — never a settable property.\n\nA settable `error` alongside `setValidity` is two sources of truth: `error=\"…\"` would paint\nthe error state on an element that still matches `:valid` and submits happily, the story\nwould render red, axe would pass, and nothing would notice.",
+              "description": "The current validation message, derived from validity. Read-only — set errors with\n`setCustomError()`.",
               "readonly": true
             },
             {
@@ -168,7 +169,7 @@
               "type": {
                 "text": "boolean"
               },
-              "description": "Whether the field is currently showing an error. Derived from validity — set it through\n`setCustomError()` rather than assigning this directly."
+              "description": "Whether the field is showing an error. The element sets it from its own validity.\nAssigning it directly paints the error state WITHOUT setting validity — the field looks\nwrong and still submits — so use `setCustomError()` instead."
             },
             {
               "kind": "field",
@@ -185,7 +186,7 @@
               "type": {
                 "text": "string"
               },
-              "description": "The name submitted with the form value. Required for the field to participate in\nsubmission at all: a form control with no name contributes no `FormData` entry.",
+              "description": "The name submitted with the form value. Without it the field contributes no `FormData`\nentry — though a required empty one still blocks its form.",
               "default": "''"
             },
             {
@@ -195,7 +196,8 @@
                 "type": {
                   "text": "boolean"
                 }
-              }
+              },
+              "description": "Like `checkValidity()`, but also shows the browser's validation message."
             },
             {
               "kind": "field",
@@ -203,7 +205,7 @@
               "type": {
                 "text": "boolean"
               },
-              "description": "Marks the field required. An empty required field blocks submission and reports\n\"&lt;label&gt; is required\".",
+              "description": "Marks the field required. An empty required field blocks submission and reports\n`${label} is required`, or \"This field is required\" when `label` is empty.",
               "default": "false"
             },
             {
@@ -222,7 +224,7 @@
                   }
                 }
               ],
-              "description": "Set or clear a validation error the element cannot derive itself — a server-side rejection,\na cross-field rule. Pass `null` to clear it.\n\nThis exists because a lens found the only lever a consumer HAD was `el.invalid = true`,\nand that produced the worst possible state: `:host([invalid])` painted the field red,\n`aria-invalid` said `true`, `aria-describedby` pointed at an error node rendering the\nEMPTY string — because `setValidity` had never been called — and `internals.validity.valid`\nstayed `true`, so the form submitted anyway. An error identified visually with no\nprogrammatic text, on a control that still submits (WCAG 3.3.1).\n\nRouting through `setValidity` keeps the one-source-of-truth the `error` getter above\nargues for: validity is the state, `invalid` and the message are both derived from it."
+              "description": "Set or clear a validation error the element cannot derive itself — a server-side rejection,\na cross-field rule. Pass `null` to clear it.\n\nPrefer this over assigning `invalid`: it sets validity, so the field genuinely blocks\nsubmission rather than only looking wrong."
             },
             {
               "kind": "method",
@@ -276,7 +278,7 @@
               "type": {
                 "text": "string"
               },
-              "description": "The current value, and what the form submits under `name`.",
+              "description": "The current value, and what the form submits under `name` — unless `disabled`, which\nsubmits nothing.",
               "default": "''"
             }
           ],
@@ -411,6 +413,7 @@
                   "text": "boolean"
                 }
               },
+              "description": "Whether the field is currently valid. Silent — reports nothing to the user.",
               "inheritedFrom": {
                 "name": "FormControlBase",
                 "module": "packages/elements/src/form-control-base.ts"
@@ -466,7 +469,7 @@
               "type": {
                 "text": "string"
               },
-              "description": "READ-ONLY, derived from validity — never a settable property.\n\nA settable `error` alongside `setValidity` is two sources of truth: `error=\"…\"` would paint\nthe error state on an element that still matches `:valid` and submits happily, the story\nwould render red, axe would pass, and nothing would notice.",
+              "description": "The current validation message, derived from validity. Read-only — set errors with\n`setCustomError()`.",
               "readonly": true,
               "inheritedFrom": {
                 "name": "FormControlBase",
@@ -529,7 +532,8 @@
                     "text": "boolean"
                   }
                 }
-              ]
+              ],
+              "description": "Called by the browser when a containing fieldset is disabled or re-enabled."
             },
             {
               "kind": "method",
@@ -538,7 +542,8 @@
                 "type": {
                   "text": "void"
                 }
-              }
+              },
+              "description": "Called by the browser when the containing form resets. Restores the value the\nfield had on connect."
             },
             {
               "kind": "field",
@@ -572,7 +577,7 @@
               "type": {
                 "text": "boolean"
               },
-              "description": "Whether the field is currently showing an error. Derived from validity — set it through\n`setCustomError()` rather than assigning this directly.",
+              "description": "Whether the field is showing an error. The element sets it from its own validity.\nAssigning it directly paints the error state WITHOUT setting validity — the field looks\nwrong and still submits — so use `setCustomError()` instead.",
               "privacy": "public",
               "default": "false",
               "attribute": "invalid",
@@ -603,7 +608,7 @@
               "type": {
                 "text": "string"
               },
-              "description": "The name submitted with the form value. Required for the field to participate in\nsubmission at all: a form control with no name contributes no `FormData` entry.",
+              "description": "The name submitted with the form value. Without it the field contributes no `FormData`\nentry — though a required empty one still blocks its form.",
               "default": "''",
               "privacy": "public",
               "attribute": "name",
@@ -632,6 +637,7 @@
                   "text": "boolean"
                 }
               },
+              "description": "Like `checkValidity()`, but also shows the browser's validation message.",
               "inheritedFrom": {
                 "name": "FormControlBase",
                 "module": "packages/elements/src/form-control-base.ts"
@@ -643,7 +649,7 @@
               "type": {
                 "text": "boolean"
               },
-              "description": "Marks the field required. An empty required field blocks submission and reports\n\"&lt;label&gt; is required\".",
+              "description": "Marks the field required. An empty required field blocks submission and reports\n`${label} is required`, or \"This field is required\" when `label` is empty.",
               "default": "false",
               "privacy": "public",
               "attribute": "required",
@@ -669,7 +675,7 @@
                   }
                 }
               ],
-              "description": "Set or clear a validation error the element cannot derive itself — a server-side rejection,\na cross-field rule. Pass `null` to clear it.\n\nThis exists because a lens found the only lever a consumer HAD was `el.invalid = true`,\nand that produced the worst possible state: `:host([invalid])` painted the field red,\n`aria-invalid` said `true`, `aria-describedby` pointed at an error node rendering the\nEMPTY string — because `setValidity` had never been called — and `internals.validity.valid`\nstayed `true`, so the form submitted anyway. An error identified visually with no\nprogrammatic text, on a control that still submits (WCAG 3.3.1).\n\nRouting through `setValidity` keeps the one-source-of-truth the `error` getter above\nargues for: validity is the state, `invalid` and the message are both derived from it.",
+              "description": "Set or clear a validation error the element cannot derive itself — a server-side rejection,\na cross-field rule. Pass `null` to clear it.\n\nPrefer this over assigning `invalid`: it sets validity, so the field genuinely blocks\nsubmission rather than only looking wrong.",
               "inheritedFrom": {
                 "name": "FormControlBase",
                 "module": "packages/elements/src/form-control-base.ts"
@@ -765,7 +771,7 @@
               "type": {
                 "text": "string"
               },
-              "description": "The current value, and what the form submits under `name`.",
+              "description": "The current value, and what the form submits under `name` — unless `disabled`, which\nsubmits nothing.",
               "default": "''",
               "privacy": "public",
               "attribute": "value",
@@ -799,7 +805,7 @@
               },
               "default": "false",
               "fieldName": "invalid",
-              "description": "Whether the field is currently showing an error. Derived from validity — set it through\n`setCustomError()` rather than assigning this directly."
+              "description": "Whether the field is showing an error. The element sets it from its own validity.\nAssigning it directly paints the error state WITHOUT setting validity — the field looks\nwrong and still submits — so use `setCustomError()` instead."
             },
             {
               "name": "label",
@@ -815,7 +821,7 @@
                 "text": "string"
               },
               "fieldName": "name",
-              "description": "The name submitted with the form value. Required for the field to participate in\nsubmission at all: a form control with no name contributes no `FormData` entry."
+              "description": "The name submitted with the form value. Without it the field contributes no `FormData`\nentry — though a required empty one still blocks its form."
             },
             {
               "name": "placeholder",
@@ -832,7 +838,7 @@
                 "text": "boolean"
               },
               "fieldName": "required",
-              "description": "Marks the field required. An empty required field blocks submission and reports\n\"&lt;label&gt; is required\"."
+              "description": "Marks the field required. An empty required field blocks submission and reports\n`${label} is required`, or \"This field is required\" when `label` is empty."
             },
             {
               "name": "type",
@@ -849,7 +855,7 @@
                 "text": "string"
               },
               "fieldName": "value",
-              "description": "The current value, and what the form submits under `name`."
+              "description": "The current value, and what the form submits under `name` — unless `disabled`, which\nsubmits nothing."
             }
           ],
           "superclass": {
@@ -899,6 +905,7 @@
                   "text": "boolean"
                 }
               },
+              "description": "Whether the field is currently valid. Silent — reports nothing to the user.",
               "inheritedFrom": {
                 "name": "FormControlBase",
                 "module": "packages/elements/src/form-control-base.ts"
@@ -954,7 +961,7 @@
               "type": {
                 "text": "string"
               },
-              "description": "READ-ONLY, derived from validity — never a settable property.\n\nA settable `error` alongside `setValidity` is two sources of truth: `error=\"…\"` would paint\nthe error state on an element that still matches `:valid` and submits happily, the story\nwould render red, axe would pass, and nothing would notice.",
+              "description": "The current validation message, derived from validity. Read-only — set errors with\n`setCustomError()`.",
               "readonly": true,
               "inheritedFrom": {
                 "name": "FormControlBase",
@@ -1017,7 +1024,8 @@
                     "text": "boolean"
                   }
                 }
-              ]
+              ],
+              "description": "Called by the browser when a containing fieldset is disabled or re-enabled."
             },
             {
               "kind": "method",
@@ -1026,7 +1034,8 @@
                 "type": {
                   "text": "void"
                 }
-              }
+              },
+              "description": "Called by the browser when the containing form resets. Restores the value the\nfield had on connect."
             },
             {
               "kind": "field",
@@ -1060,7 +1069,7 @@
               "type": {
                 "text": "boolean"
               },
-              "description": "Whether the field is currently showing an error. Derived from validity — set it through\n`setCustomError()` rather than assigning this directly.",
+              "description": "Whether the field is showing an error. The element sets it from its own validity.\nAssigning it directly paints the error state WITHOUT setting validity — the field looks\nwrong and still submits — so use `setCustomError()` instead.",
               "privacy": "public",
               "default": "false",
               "attribute": "invalid",
@@ -1091,7 +1100,7 @@
               "type": {
                 "text": "string"
               },
-              "description": "The name submitted with the form value. Required for the field to participate in\nsubmission at all: a form control with no name contributes no `FormData` entry.",
+              "description": "The name submitted with the form value. Without it the field contributes no `FormData`\nentry — though a required empty one still blocks its form.",
               "default": "''",
               "privacy": "public",
               "attribute": "name",
@@ -1120,6 +1129,7 @@
                   "text": "boolean"
                 }
               },
+              "description": "Like `checkValidity()`, but also shows the browser's validation message.",
               "inheritedFrom": {
                 "name": "FormControlBase",
                 "module": "packages/elements/src/form-control-base.ts"
@@ -1131,7 +1141,7 @@
               "type": {
                 "text": "boolean"
               },
-              "description": "Marks the field required. An empty required field blocks submission and reports\n\"&lt;label&gt; is required\".",
+              "description": "Marks the field required. An empty required field blocks submission and reports\n`${label} is required`, or \"This field is required\" when `label` is empty.",
               "default": "false",
               "privacy": "public",
               "attribute": "required",
@@ -1168,7 +1178,7 @@
                   }
                 }
               ],
-              "description": "Set or clear a validation error the element cannot derive itself — a server-side rejection,\na cross-field rule. Pass `null` to clear it.\n\nThis exists because a lens found the only lever a consumer HAD was `el.invalid = true`,\nand that produced the worst possible state: `:host([invalid])` painted the field red,\n`aria-invalid` said `true`, `aria-describedby` pointed at an error node rendering the\nEMPTY string — because `setValidity` had never been called — and `internals.validity.valid`\nstayed `true`, so the form submitted anyway. An error identified visually with no\nprogrammatic text, on a control that still submits (WCAG 3.3.1).\n\nRouting through `setValidity` keeps the one-source-of-truth the `error` getter above\nargues for: validity is the state, `invalid` and the message are both derived from it.",
+              "description": "Set or clear a validation error the element cannot derive itself — a server-side rejection,\na cross-field rule. Pass `null` to clear it.\n\nPrefer this over assigning `invalid`: it sets validity, so the field genuinely blocks\nsubmission rather than only looking wrong.",
               "inheritedFrom": {
                 "name": "FormControlBase",
                 "module": "packages/elements/src/form-control-base.ts"
@@ -1253,7 +1263,7 @@
               "type": {
                 "text": "string"
               },
-              "description": "The current value, and what the form submits under `name`.",
+              "description": "The current value, and what the form submits under `name` — unless `disabled`, which\nsubmits nothing.",
               "default": "''",
               "privacy": "public",
               "attribute": "value",
@@ -1287,7 +1297,7 @@
               },
               "default": "false",
               "fieldName": "invalid",
-              "description": "Whether the field is currently showing an error. Derived from validity — set it through\n`setCustomError()` rather than assigning this directly."
+              "description": "Whether the field is showing an error. The element sets it from its own validity.\nAssigning it directly paints the error state WITHOUT setting validity — the field looks\nwrong and still submits — so use `setCustomError()` instead."
             },
             {
               "name": "label",
@@ -1303,7 +1313,7 @@
                 "text": "string"
               },
               "fieldName": "name",
-              "description": "The name submitted with the form value. Required for the field to participate in\nsubmission at all: a form control with no name contributes no `FormData` entry."
+              "description": "The name submitted with the form value. Without it the field contributes no `FormData`\nentry — though a required empty one still blocks its form."
             },
             {
               "name": "placeholder",
@@ -1320,7 +1330,7 @@
                 "text": "boolean"
               },
               "fieldName": "required",
-              "description": "Marks the field required. An empty required field blocks submission and reports\n\"&lt;label&gt; is required\"."
+              "description": "Marks the field required. An empty required field blocks submission and reports\n`${label} is required`, or \"This field is required\" when `label` is empty."
             },
             {
               "name": "rows",
@@ -1337,7 +1347,7 @@
                 "text": "string"
               },
               "fieldName": "value",
-              "description": "The current value, and what the form submits under `name`."
+              "description": "The current value, and what the form submits under `name` — unless `disabled`, which\nsubmits nothing."
             }
           ],
           "superclass": {
@@ -1433,7 +1443,8 @@
                 "type": {
                   "text": "void"
                 }
-              }
+              },
+              "description": "Close the panel. No-op when it is already closed."
             },
             {
               "kind": "field",
@@ -1494,7 +1505,8 @@
                     "text": "HTMLElement | null"
                   }
                 }
-              ]
+              ],
+              "description": "Open or close the panel. Pass the element that triggered it to return focus there\non close. Fires `sk-nav-pill-toggle` first, which can cancel the change."
             }
           ],
           "events": [

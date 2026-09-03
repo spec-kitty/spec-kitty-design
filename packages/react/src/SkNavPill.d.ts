@@ -75,9 +75,10 @@ export interface SkNavPillProps extends Pick<
  *
  * Methods that can be called to access component functionality.
  *
- * - `close() => void`: undefined
+ * - `close() => void`: Close the panel. No-op when it is already closed.
  * - `open(invoker?: HTMLElement | null) => void`: Open the panel.
- * - `toggle(invoker?: HTMLElement | null) => void`: undefined
+ * - `toggle(invoker?: HTMLElement | null) => void`: Open or close the panel. Pass the element that triggered it to return focus there
+ * on close. Fires `sk-nav-pill-toggle` first, which can cancel the change.
  *
  * ## CSS Parts
  *

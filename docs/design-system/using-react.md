@@ -107,11 +107,13 @@ function Field() {
   first render. Set it through `setCustomError()`, the element's own lever, and read it through
   the ref. The manifest used to claim an attribute for it, because the analyzer does not honour
   `state`; `normalise-manifest.mjs` now corrects that at source.
-- **Every prop is documented.** There were thirteen `/** undefined */` blocks; there are now
-  none. Twenty of the twenty-two attributes simply had no JSDoc, and the other two had it on
-  `FormControlBase` where the analyzer would not propagate it onto a subclass's attribute —
-  `normalise-manifest.mjs` now does that, so a property is documented once, where it is
-  declared. Note the consequence: **base-class JSDoc is consumer-facing API documentation**, so
+- **Every prop is documented.** There were twenty-two `/** undefined */` blocks; there are now
+  none, and the public methods carry descriptions too. Twenty of the twenty-two attributes
+  simply had no JSDoc; the other two had it on `FormControlBase`, where the analyzer will not
+  propagate a description onto a subclass's attribute. `normalise-manifest.mjs` now does that
+  — and once the JSDoc was written it carries **fourteen** of the twenty-two, every inherited
+  field on both form elements. So a property is documented once, where it is declared, and
+  `check-manifest-content.mjs` refuses a manifest where any of them lost its description. Note the consequence: **base-class JSDoc is consumer-facing API documentation**, so
   keep maintainer rationale in `//`.
 - **Public inherited properties are props.** `value`, `label`, `name`, `required`, `disabled`,
   `description` and `invalid` — seven of the eight that come from `FormControlBase` — are all

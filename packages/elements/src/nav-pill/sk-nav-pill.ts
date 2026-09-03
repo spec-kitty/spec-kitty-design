@@ -30,6 +30,11 @@ import sheet from './sk-nav-pill.css.js';
 // THE INVOKER IS RECORDED, NOT ASSUMED. `open()` is public, so a consumer's own control is a
 // legitimate invoker — that is the whole point of replacing a global helper. Escape returns
 // focus to whatever opened the panel, which is not necessarily the hamburger.
+//
+// SINCE #129 THAT INCLUDES EVERY REACTIVE PROPERTY'S OWN `/** */`, and every public
+// method's: normalise-manifest.mjs propagates a field's description onto its attribute,
+// and the React generator copies it into the prop docs. check-manifest-content.mjs now
+// refuses a manifest where any of them is missing, so this is enforced, not advisory.
 /**
  * The navigation pill — a row of links that collapses to a hamburger and a panel.
  *
@@ -82,10 +87,13 @@ export class SkNavPill extends LitElement {
     this.#setOpen(true, invoker ?? this.#activeControl());
   }
 
+  /** Close the panel. No-op when it is already closed. */
   close(): void {
     this.#setOpen(false, null);
   }
 
+  /** Open or close the panel. Pass the element that triggered it to return focus there
+   *  on close. Fires `sk-nav-pill-toggle` first, which can cancel the change. */
   toggle(invoker?: HTMLElement | null): void {
     if (this.isOpen) this.close();
     else this.open(invoker);
