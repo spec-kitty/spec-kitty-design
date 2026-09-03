@@ -32,6 +32,15 @@ const config: StorybookConfig = {
       from: path.resolve(__dirname, '../../../packages/elements/dist'),
       to: '/elements-dist',
     },
+    // The built tokens stylesheet. smoke.spec.ts's FR-012 test consumes it through a
+    // plain file:// reference, and it used to resolve packages/tokens/dist directly —
+    // which does not exist in CI's playwright job, because that job downloads
+    // storybook-static and never builds. The test therefore SKIPPED on every CI run
+    // since it was written, silently, while the job reported green.
+    {
+      from: path.resolve(__dirname, '../../../packages/tokens/dist'),
+      to: '/tokens-dist',
+    },
     // The Vite consumer's built app (FR-003 / SC-008). Building it proves the ESM
     // artifact is bundlable; only loading it proves the element actually upgrades.
     {

@@ -35,7 +35,8 @@
         "{workspaceRoot}/tsconfig.base.json",
         "{workspaceRoot}/packages/*/package.json",
         "{workspaceRoot}/packages/elements/dist/**/*",
-        "{workspaceRoot}/fixtures/vite-consumer/dist/**/*"
+        "{workspaceRoot}/fixtures/vite-consumer/dist/**/*",
+        "{workspaceRoot}/packages/tokens/dist/**/*"
       ]
     }
   },
