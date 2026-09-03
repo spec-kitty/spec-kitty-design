@@ -40,8 +40,10 @@
         "artifact-rendering",
         "workspace"
       ],
-      "depends_on_lanes": [],
-      "parallel_group": 0
+      "depends_on_lanes": [
+        "lane-a"
+      ],
+      "parallel_group": 1
     },
     {
       "lane_id": "lane-c",
@@ -57,8 +59,11 @@
         "artifact-rendering",
         "legacy-cleanup"
       ],
-      "depends_on_lanes": [],
-      "parallel_group": 0
+      "depends_on_lanes": [
+        "lane-a",
+        "lane-b"
+      ],
+      "parallel_group": 2
     },
     {
       "lane_id": "lane-d",
@@ -85,8 +90,10 @@
         "scripts/suite-selftest.mjs"
       ],
       "predicted_surfaces": [],
-      "depends_on_lanes": [],
-      "parallel_group": 0
+      "depends_on_lanes": [
+        "lane-c"
+      ],
+      "parallel_group": 3
     },
     {
       "lane_id": "lane-f",
@@ -103,8 +110,13 @@
       "predicted_surfaces": [
         "artifact-rendering"
       ],
-      "depends_on_lanes": [],
-      "parallel_group": 0
+      "depends_on_lanes": [
+        "lane-a",
+        "lane-c",
+        "lane-d",
+        "lane-e"
+      ],
+      "parallel_group": 4
     },
     {
       "lane_id": "lane-g",
@@ -119,12 +131,14 @@
         "api",
         "artifact-rendering"
       ],
-      "depends_on_lanes": [],
-      "parallel_group": 0
+      "depends_on_lanes": [
+        "lane-c"
+      ],
+      "parallel_group": 3
     }
   ],
   "computed_at": "2026-09-03T03:01:11.720245+00:00",
-  "computed_from": "dependency_graph+ownership",
+  "computed_from": "dependency_graph+ownership \u2014 CORRECTED BY HAND after `spec-kitty tasks`. The CLI regenerates this file on every run and flattens it: every lane comes back with depends_on_lanes [] and parallel_group 0, despite WP frontmatter declaring a real graph. Dispatched off the generated file, all seven lanes launch at once and WP03 starts before the fixture and the registry exist. WP frontmatter `dependencies` is authoritative where the two disagree. Re-apply this correction if `tasks` is run again.",
   "planning_artifact_wps": [],
   "planning_commit_sha": "fcd081aa97e4b4bb2742b03ea287d59cc39bda41"
 }
