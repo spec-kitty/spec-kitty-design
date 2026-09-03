@@ -1,7 +1,7 @@
 {
-  "event_count": 12,
-  "last_event_id": "01M1JKRKBFWYTZAERD72BCQCTP",
-  "materialized_at": "2026-09-03T03:07:25.935926+00:00",
+  "event_count": 13,
+  "last_event_id": "01M1JKS6J84T751FSVR3PE3SBQ",
+  "materialized_at": "2026-09-03T03:07:45.608223+00:00",
   "mission_number": "",
   "mission_slug": "elements-verification-harness-01M1JGEZ",
   "mission_type": "software-dev",
@@ -9,12 +9,12 @@
     "approved": 0,
     "blocked": 0,
     "canceled": 0,
-    "claimed": 0,
+    "claimed": 1,
     "done": 0,
     "for_review": 1,
     "in_progress": 1,
     "in_review": 0,
-    "planned": 5
+    "planned": 4
   },
   "work_packages": {
     "WP01": {
@@ -44,17 +44,28 @@
       "last_event_id": "01M1JKRKBFWYTZAERD72BCQCTP",
       "last_transition_at": "2026-09-03T03:07:25.935926+00:00",
       "model": "__resolved_model_absent__",
+      "notes": [
+        "DoD met; forced for the tasks.md CLI defect recorded on #70's WP01."
+      ],
       "provider": "__resolved_provider_absent__",
       "role": "implementer",
-      "shell_pid": 3047037,
-      "shell_pid_created_at": "1788404774.58"
+      "shell_pid": 3053137,
+      "shell_pid_created_at": "1788404844.82"
     },
     "WP03": {
-      "actor": "finalize-tasks",
+      "actor": "claude",
+      "agent": "claude",
+      "agent_profile": "__resolved_profile_absent__",
+      "agent_profile_version": "__resolved_profile_version_absent__",
       "force_count": 0,
-      "lane": "planned",
-      "last_event_id": "01M1JJJQ0FEVR3BT90806WVBG2",
-      "last_transition_at": "2026-09-03T02:46:44.495158+00:00"
+      "lane": "claimed",
+      "last_event_id": "01M1JKS6J84T751FSVR3PE3SBQ",
+      "last_transition_at": "2026-09-03T03:07:45.608223+00:00",
+      "model": "__resolved_model_absent__",
+      "provider": "__resolved_provider_absent__",
+      "role": "implementer",
+      "shell_pid": 3054725,
+      "shell_pid_created_at": "1788404864.51"
     },
     "WP04": {
       "actor": "finalize-tasks",
