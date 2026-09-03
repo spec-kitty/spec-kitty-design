@@ -184,8 +184,13 @@ export class SkBehaviourFixture extends LitElement {
     }
   }
 
+  /**
+   * The validity anchor must be FOCUSABLE, or `reportValidity()` cannot put the message in
+   * front of anyone — a non-focusable wrapper silently anchors to nothing. The trigger is
+   * the control a user actually interacts with.
+   */
   get #control(): HTMLElement {
-    return this.renderRoot.querySelector('[part="control"]') as HTMLElement;
+    return this.renderRoot.querySelector('[part="trigger"]') as HTMLElement;
   }
 
   toggle() {

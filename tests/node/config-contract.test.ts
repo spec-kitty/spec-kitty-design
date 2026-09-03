@@ -50,9 +50,12 @@ test('[registry] behaviours.json declares exactly ADR-11\'s applicable behaviour
   // A lens demonstrated it: dropping SC-012 from the registry, the mutation list and the
   // test left everything green while printing the REDUCED count as if it were expected.
   //
-  // expected-parts.json exists for exactly this reason on the parts side. This is the same
-  // argument for the registry that actually matters, bound to ADR-11's list rather than to
-  // itself.
+  // expected-parts.json exists for exactly this reason on the parts side. Be precise about
+  // what this is: ADR-11 states the behaviours as prose categories with no machine-readable
+  // ids, so this list is a hand transcription — a SECOND COPY, not a derivation. It catches
+  // a one-file edit (a rename fails three ways: here, floor arm 5, and harness guard 7);
+  // it does not catch someone editing both in the same PR. That is a reviewer's job, and
+  // saying so is better than claiming a binding this does not have.
   const expected = [
     'SC-002', 'SC-003', 'SC-004', 'SC-005', // form association
     'SC-006', 'SC-007', 'SC-008', 'SC-009', // event contract
@@ -84,7 +87,9 @@ test('[config] the BUILD EMITS assignment semantics, not a native class field', 
   // matrix claimed this asserted "the value the BUILD resolves" and it did not.
   //
   // Transforming a probe through the SAME tsconfig the build resolves covers the whole
-  // chain, including the bundler flag.
+  // tsconfig chain — verified red at all three positions: the base flipped, the intermediate
+  // overriding it, and the intermediate dropping its `extends`. It does NOT cover the build
+  // command gaining its own `--tsconfig=` flag; an earlier comment claimed it did.
   const esbuild = await import('esbuild');
   // buildSync with a tsconfig PATH, not transformSync with raw content: only the path form
   // follows `extends`, and following it is the entire point — the flag lives in the base,

@@ -44,6 +44,18 @@ test('[SC-003] setValidity blocks submission and the message reaches the a11y tr
   // The message must be readable, not merely set — this is the half a validity flag alone
   // does not give you.
   expect(el.validationMessage).toContain('must not be');
+  // ...and it must be ANCHORED to a focusable element, which is what actually puts it in
+  // front of a user. Dropping setValidity's third argument left every assertion above green
+  // — found at the second gate pass. reportValidity() focuses the anchor, so this is the
+  // arm that notices.
+  const trigger = el.shadowRoot!.querySelector('[part="trigger"]') as HTMLElement;
+  const panel = el.shadowRoot!.querySelector('[part="panel"]') as HTMLElement;
+  panel.tabIndex = -1;
+  panel.focus();                       // focus is elsewhere first, or "moves to" proves nothing
+  form.reportValidity();
+  expect(el.shadowRoot!.activeElement, 'the validity message is not anchored to a control').toBe(
+    trigger,
+  );
 });
 
 test('[SC-004] a form reset restores the initial value', async () => {
@@ -89,10 +101,15 @@ test('[SC-006] the documented event fires exactly once', async () => {
 });
 
 test('[SC-007] the event carries the documented detail shape', async () => {
+  // `label` is VARIED from the constructor default on purpose. With it left at 'fixture',
+  // hardcoding `label: 'fixture'` in the detail passed — the test read back a constant
+  // rather than the property. Found at the second gate pass.
+  el.label = 'varied';
+  await el.updateComplete;
   let detail: unknown;
   el.addEventListener('sk-toggle', (e) => { detail = (e as CustomEvent).detail; });
   el.toggle();
-  expect(detail).toEqual({ open: true, label: 'fixture' });
+  expect(detail).toEqual({ open: true, label: 'varied' });
 });
 
 test('[SC-008] the event crosses a shadow boundary, as composed+bubbles promise', async () => {

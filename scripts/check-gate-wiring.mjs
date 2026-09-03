@@ -95,27 +95,62 @@ else {
   // second is this workflow's OWN IDIOM — ci-quality.yml already carries continue-on-error on
   // steps named [ENFORCED] in lint-code, so a contributor copying the house style disarms the
   // suite and the checker congratulates them.
+  // Matched PER STEP, as whole commands. A joined blob was defeated five ways at the second
+  // gate pass, and the first of them is the subtle one: `scripts/suite-selftest.mjs` is a
+  // SUBSTRING of `scripts/suite-selftest.mjs --selftest`, so deleting the mutation-harness
+  // step entirely — NFR-002's centrepiece — was satisfied by the self-check step's line.
   const REQUIRED = [
-    ['scripts/measure-suite-time.mjs', 'the behaviour suite'],
-    ['scripts/suite-selftest.mjs', 'the mutation harness'],
-    ['scripts/suite-selftest.mjs --selftest', "the mutation harness's own guard self-check"],
+    [/node\s+scripts\/measure-suite-time\.mjs(\s|$)/, 'the behaviour suite', 'scripts/measure-suite-time.mjs'],
+    [/node\s+scripts\/suite-selftest\.mjs(?!\s*--selftest)(\s|$)/, 'the mutation harness', 'scripts/suite-selftest.mjs'],
+    [/node\s+scripts\/suite-selftest\.mjs\s+--selftest(\s|$)/, "the mutation harness's own guard self-check", 'scripts/suite-selftest.mjs --selftest'],
   ];
+
+  /** A step that cannot fail the job is a step that is not running (B, C, D, E). */
+  const neutered = (st) => {
+    const why = [];
+    if ('if' in st) why.push('carries an `if:`');
+    if (st['continue-on-error']) why.push('carries continue-on-error');
+    if (/\|\|\s*(true|:)\b/.test(String(st.run ?? ''))) why.push('swallows failure with `|| true`');
+    return why;
+  };
+
+  /** Strip comments so a needle mentioned only in a `#` line does not count as running. */
+  const commandLines = (st) =>
+    String(st.run ?? '')
+      .split('\n')
+      .map((l) => l.replace(/^\s*#.*$/, ''))
+      .join('\n');
+
   const steps = wf.jobs?.[JOB]?.steps ?? [];
-  const runs = steps.map((st) => String(st.run ?? '')).join('\n');
-  for (const [needle, what] of REQUIRED) {
-    if (!runs.includes(needle)) {
-      problems.push(`the \`${JOB}\` job never runs ${what} (${needle}) — the gate would guard an empty job`);
+  for (const [re, what, label] of REQUIRED) {
+    const matching = steps.filter((st) => re.test(commandLines(st)));
+    if (matching.length === 0) {
+      problems.push(`the \`${JOB}\` job never runs ${what} (${label}) — the gate would guard an empty job`);
+      continue;
+    }
+    for (const st of matching) {
+      for (const why of neutered(st)) {
+        problems.push(`the step running ${what} ${why} — it cannot fail the job, so the gate guards nothing`);
+      }
     }
   }
 
-  // `continue-on-error` anywhere in this chain makes a failure unreachable. lint-code uses it
-  // deliberately, rescued by an explicit "Fail if lint errors" step; nothing here is.
+  // The gate's OWN enforced step, and both jobs. `continue-on-error` or an `if:` anywhere in
+  // this chain makes a failure unreachable. lint-code uses continue-on-error deliberately,
+  // rescued by an explicit "Fail if lint errors" step; nothing here is.
   for (const [jobName, job] of Object.entries({ [JOB]: wf.jobs?.[JOB], gate })) {
     if (!job) continue;
     if (job['continue-on-error']) problems.push(`job \`${jobName}\` carries continue-on-error — its failure cannot reach the gate`);
     for (const st of job.steps ?? []) {
+      const enforced = String(st.name ?? '').includes('[ENFORCED]');
       if (st['continue-on-error']) {
         problems.push(`step "${st.name ?? st.run}" in \`${jobName}\` carries continue-on-error — it cannot fail the job`);
+      }
+      if (enforced && 'if' in st) {
+        problems.push(`[ENFORCED] step "${st.name}" in \`${jobName}\` carries an \`if:\` — it can be skipped`);
+      }
+      if (enforced && /\|\|\s*(true|:)\b/.test(String(st.run ?? ''))) {
+        problems.push(`[ENFORCED] step "${st.name}" in \`${jobName}\` swallows failure with \`|| true\``);
       }
     }
   }
