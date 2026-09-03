@@ -118,7 +118,28 @@ ${ARTIFACTS.map(
 if (check) {
   const current = existsSync(OUT) ? readFileSync(OUT, 'utf8') : null;
   if (current !== body) {
+    // SAY WHAT DIFFERS. This printed "is stale" and nothing else, and when it fired on CI
+    // while passing on a clean local build — same commit, same lockfile, same step order —
+    // there was no way to tell whether the bundle had genuinely changed size or the generated
+    // prose had drifted. A gate that reports a mismatch without showing it makes the next
+    // person guess, which is the failure mode this repo keeps closing elsewhere.
     console.error(`❌ ${OUT} is stale. Run: node scripts/measure-elements-sizes.mjs`);
+    const a = (current ?? '').split('\n');
+    const b = body.split('\n');
+    console.error('   committed → generated:');
+    let shown = 0;
+    for (let i = 0; i < Math.max(a.length, b.length) && shown < 12; i += 1) {
+      if (a[i] !== b[i]) {
+        console.error(`   line ${i + 1}:`);
+        console.error(`     - ${a[i] ?? '(absent)'}`);
+        console.error(`     + ${b[i] ?? '(absent)'}`);
+        shown += 1;
+      }
+    }
+    for (const art of ARTIFACTS) {
+      const raw = statSync(art.path).size;
+      console.error(`   ${art.path}: ${raw} bytes raw`);
+    }
     process.exit(1);
   }
   console.log(`✅ ${OUT} is up to date.`);
