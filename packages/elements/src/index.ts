@@ -5,6 +5,8 @@ export { SkNavPill } from './nav-pill/sk-nav-pill.js';
 export { SkFormInput } from './form-input/sk-form-input.js';
 export { SkFormTextarea } from './form-textarea/sk-form-textarea.js';
 export { SkGrid } from './grid/sk-grid.js';
+export { SkFeatureCard } from './feature-card/sk-feature-card.js';
+export { SkRibbonCard } from './ribbon-card/sk-ribbon-card.js';
 export { SkSectionBanner } from './section-banner/sk-section-banner.js';
 
 /**
@@ -22,6 +24,8 @@ export { default as skStubSheet } from './stub/sk-stub.css.js';
 // GENERATED from packages/styles/src/grid/sk-grid.css, and identity against the class's own
 // `static styles` would hold for any sheet at all.
 export { default as skGridSheet } from './grid/sk-grid.css.js';
+export { default as skFeatureCardSheet } from './feature-card/sk-feature-card.css.js';
+export { default as skRibbonCardSheet } from './ribbon-card/sk-ribbon-card.css.js';
 export { default as skSectionBannerSheet } from './section-banner/sk-section-banner.css.js';
 
 // The card's authored markup module, exported so the two failure policies are reachable
@@ -44,6 +48,32 @@ export {
 // policies are only a split if something can reach both. `gridClasses` warns and degrades,
 // `gridStaticHtml` throws.
 export { gridClasses, gridStaticHtml, type GridGap, type GridVariant } from './grid/sk-grid.markup.js';
+
+// sk-feature-card's markup module. Both class helpers are exported because the component has
+// TWO independent axes and each has its own degrade path.
+export {
+  // The maps are exported for the same reason RIBBON_CARD_COLOURS is: the behaviour fixture
+  // DERIVES its loops from them, so an accent or variant added without coverage fails instead
+  // of passing unobserved. feature-card's test hardcoded its three accents and a `.toBe(3)`
+  // until the pre-merge gate caught the asymmetry with its own sibling.
+  FEATURE_CARD_ACCENTS,
+  FEATURE_CARD_VARIANTS,
+  featureCardChipClasses,
+  featureCardClasses,
+  featureCardStaticHtml,
+  type FeatureCardAccent,
+  type FeatureCardVariant,
+} from './feature-card/sk-feature-card.markup.js';
+
+// sk-ribbon-card's markup module. Both class helpers, because the card and the ribbon each
+// have their own degrade path.
+export {
+  RIBBON_CARD_COLOURS,
+  ribbonCardClasses,
+  ribbonCardStaticHtml,
+  ribbonClasses,
+  type RibbonCardColour,
+} from './ribbon-card/sk-ribbon-card.markup.js';
 
 // sk-section-banner's markup module, same reason.
 //

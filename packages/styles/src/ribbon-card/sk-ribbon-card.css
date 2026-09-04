@@ -4,6 +4,30 @@
    (top:0, right:24px) for precise corner anchoring — accepted layout constant
    not representable as a spacing token. */
 
+/* A custom element defaults to `display: inline`, so without this the host cannot be sized or
+   spaced and a consumer's max-width on it is inert. `block` matches the static <article>; the
+   two consumption paths must agree about their own box (#77). Inert in the static path. */
+/* COLOUR ON THE HOST, so SLOTTED content is legible — and on the HOST specifically so the
+   static path cannot move.
+
+   The title and body classes style nodes in the shadow tree; slotted content is not in the
+   shadow tree, so those classes reach nothing and the text falls back to the UA default black
+   on a dark card surface. axe reported color-contrast on EVERY element story of this
+   component. `color` is inherited, and inheritance follows the FLATTENED tree, so a slotted
+   node inherits through the slot from `:host` — which a selector could never reach it with.
+
+   An earlier fix put this on the `.sk-<name>` class instead. That works for the element and
+   also changes the STATIC path, where that class is the article and its untinted descendants
+   would have picked up a new inherited colour — moving a committed visual baseline as a side
+   effect of an a11y fix. `:host` is inert in a document, so this cannot.
+
+   --sk-fg-body, not --sk-fg-on-card, for the reason sk-card.css records: the latter is defined
+   only in the dark block, so it would fall back to light grey inside a .sk-light subtree. */
+:host {
+  display: block;
+  color: var(--sk-fg-body);
+}
+
 .sk-ribbon-card {
   position: relative;
   padding: var(--sk-space-6);
@@ -32,11 +56,12 @@
   border-radius: 0 0 var(--sk-radius-sm) var(--sk-radius-sm);
 }
 
-.sk-ribbon-card__ribbon svg {
-  width: 12px;
-  height: 12px;
-  stroke-width: 2.4;
-}
+/* REMOVED at #78: the ribbon's label is a string property, rendered as a TEXT NODE by the
+   element, so no SVG can appear there. The documented contract is a label string.
+   Narrower than an earlier revision of this comment claimed: `ribbonCardStaticHtml` does raw
+   string concatenation, not escaping, so a caller passing markup on the STATIC path would
+   render it — "no SVG on either path" was wrong. `gap` on the ribbon is kept; the tab is still
+   a flex container. */
 
 /* Ribbon colour variants */
 /* Deviation: text colours for ribbon variants use dark warm-toned values
@@ -96,15 +121,28 @@
   margin-top: var(--sk-space-5);
 }
 
+/* BOTH SPELLINGS, ONE RULE, because the title and body are SLOTTED in the element path.
+   A shadow-tree selector cannot match a slotted node — slotted content stays in the light DOM —
+   so these rules applied on the static path and were INERT on the element path, and the two
+   consumption paths this component's markup module exists to keep identical rendered with
+   different fonts, sizes, weights and margins. `:host { color }` fixed only the CONTRAST slice,
+   which is the one axe could see; all three pre-merge lenses found the rest independently.
+   `::slotted()` is inert in a document and the bare class is inert in a shadow tree, so one
+   selector list serves both paths with no declaration written twice. `::slotted()` is an
+   accepted owning compound in check-adopted-css-boundaries.mjs, and sk-nav-pill.css has used
+   this shape since #73. */
 .sk-ribbon-card__content h3,
-.sk-ribbon-card__content h4 {
+.sk-ribbon-card__content h4,
+.sk-ribbon-card__content ::slotted(h3),
+.sk-ribbon-card__content ::slotted(h4) {
   margin: 0 0 var(--sk-space-2);
   font-family: var(--sk-font-sans);
   font-weight: var(--sk-weight-bold);
   color: var(--sk-fg-default);
 }
 
-.sk-ribbon-card__content p {
+.sk-ribbon-card__content p,
+.sk-ribbon-card__content ::slotted(p) {
   margin: 0;
   font-size: var(--sk-text-sm);
   line-height: 1.55;

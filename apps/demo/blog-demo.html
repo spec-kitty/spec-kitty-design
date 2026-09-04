@@ -345,7 +345,12 @@
       </h2>
       <div class="demo-feature-grid">
 
-        <div class="sk-feature-card">
+        <!-- h3, not the h4 the generated artifact uses: the heading LEVEL belongs to the page, not
+           to the component. This section sits under an <h2>, so h4 would skip a level — which is
+           exactly what an earlier revision of this file did while reconciling the element type,
+           and only a pre-merge lens caught it because nothing gates apps/demo. In the element the
+           heading is slotted, so the consumer picks the level there too. -->
+        <article class="sk-feature-card">
           <div class="sk-feature-card__icon-chip sk-feature-card__icon-chip--yellow">
             <!-- Clock icon -->
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
@@ -360,9 +365,9 @@
             Requirements are captured before code generation begins — not after
             the first review cycle.
           </p>
-        </div>
+        </article>
 
-        <div class="sk-feature-card">
+        <article class="sk-feature-card">
           <div class="sk-feature-card__icon-chip sk-feature-card__icon-chip--green">
             <!-- File icon -->
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
@@ -377,9 +382,9 @@
             Decisions, alternatives, and rationale live alongside the feature
             — not scattered across meeting notes.
           </p>
-        </div>
+        </article>
 
-        <div class="sk-feature-card">
+        <article class="sk-feature-card">
           <div class="sk-feature-card__icon-chip sk-feature-card__icon-chip--purple">
             <!-- Users icon -->
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
@@ -396,7 +401,7 @@
             Lane-based worktrees let multiple agents implement independent work
             packages without coordination overhead.
           </p>
-        </div>
+        </article>
 
       </div>
     </div>
