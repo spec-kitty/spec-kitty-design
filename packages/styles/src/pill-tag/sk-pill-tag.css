@@ -1,7 +1,14 @@
-/* @spec-kitty/styles — sk-tag + sk-eyebrow-pill styles — tokens only, no hardcoded values */
+/* @spec-kitty/styles — sk-pill-tag + sk-pill-tag--eyebrow styles — tokens only, no hardcoded values */
 
 /* ---- Base tag ---- */
-.sk-tag {
+/* A custom element defaults to `display: inline`; `inline-flex` matches the static form's own
+   display, which is what the two consumption paths must agree on (#77, #78). Inert in a
+   document, where the root IS the .sk-pill-tag span. */
+:host {
+  display: inline-flex;
+}
+
+.sk-pill-tag {
   display: inline-flex;
   align-items: center;
   padding: var(--sk-space-1) var(--sk-space-3);
@@ -20,38 +27,37 @@
    Fallback opaque colours are provided for environments that do not
    support CSS relative colour syntax (rgba(from var(...) r g b / α)). */
 
-.sk-tag--green {
+.sk-pill-tag--green {
   /* Fallback for older environments */
   background: var(--sk-surface-tint-mint);
   color: var(--sk-color-green);
 }
 
-.sk-tag--purple {
+.sk-pill-tag--purple {
   background: var(--sk-surface-tint-lilac);
   color: var(--sk-color-purple);
 }
 
-.sk-tag--breaking {
+.sk-pill-tag--breaking {
   background: var(--sk-surface-tint-sky);
   color: var(--sk-color-red);
 }
 
-.sk-tag--yellow {
+.sk-pill-tag--yellow {
   background: var(--sk-surface-tint-butter);
   color: var(--sk-color-yellow);
 }
 
-/* ---- Eyebrow pill ---- */
-.sk-eyebrow-pill {
-  display: inline-flex;
-  align-items: center;
+/* ---- Eyebrow: a SHAPE/SIZE modifier, not a second component ----
+   `.sk-eyebrow-pill` was a standalone class in this same file that restated the base
+   rule almost verbatim — same display, background, font family, weight, colour and
+   line-height — differing only in padding, corner radius and font size. #79 folded it
+   into `.sk-pill-tag--eyebrow` under the #139 ruling, so this file now describes one
+   component with two axes rather than two components sharing a directory.
+   Only the overrides remain: everything else comes from the base, which is what makes
+   it compose with the colour variants instead of competing with them. */
+.sk-pill-tag--eyebrow {
   padding: var(--sk-space-2) var(--sk-space-4);
-  background: var(--sk-bg-pill);
   border-radius: var(--sk-radius-sm);
-  font-family: var(--sk-font-sans);
   font-size: var(--sk-text-sm);
-  font-weight: var(--sk-weight-medium);
-  color: var(--sk-fg-muted);
-  white-space: nowrap;
-  line-height: 1.5;
 }

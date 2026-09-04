@@ -489,6 +489,30 @@
       "file": "packages/elements/src/button/sk-button.ts",
       "from": "  static styles = [sheet];",
       "to": "  static styles = [new CSSStyleSheet()];"
+    },
+    {
+      "id": "SC-013",
+      "subject": "fixtures/elements-behaviour/src/sk-pill-tag.test.ts",
+      "arm": "pill-tag part present",
+      "file": "packages/elements/src/pill-tag/sk-pill-tag.ts",
+      "from": "<span part=\"tag\" class=${pillTagClasses(this.variant, this.shape)}>",
+      "to": "<span class=${pillTagClasses(this.variant, this.shape)}>"
+    },
+    {
+      "id": "SC-014",
+      "subject": "fixtures/elements-behaviour/src/sk-pill-tag.test.ts",
+      "arm": "pill-tag adopts its generated sheet",
+      "file": "packages/elements/src/pill-tag/sk-pill-tag.ts",
+      "from": "  static styles = [sheet];",
+      "to": "  static styles = [];"
+    },
+    {
+      "id": "SC-014",
+      "subject": "fixtures/elements-behaviour/src/sk-pill-tag.test.ts",
+      "arm": "pill-tag adopts the sheet BY IDENTITY",
+      "file": "packages/elements/src/pill-tag/sk-pill-tag.ts",
+      "from": "  static styles = [sheet];",
+      "to": "  static styles = [new CSSStyleSheet()];"
     }
   ]
 }

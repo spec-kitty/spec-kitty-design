@@ -8,6 +8,7 @@ export { SkFormTextarea } from './form-textarea/sk-form-textarea.js';
 export { SkGrid } from './grid/sk-grid.js';
 export { SkFeatureCard } from './feature-card/sk-feature-card.js';
 export { SkRibbonCard } from './ribbon-card/sk-ribbon-card.js';
+export { SkPillTag } from './pill-tag/sk-pill-tag.js';
 export { SkSectionBanner } from './section-banner/sk-section-banner.js';
 
 /**
@@ -28,6 +29,7 @@ export { default as skGridSheet } from './grid/sk-grid.css.js';
 export { default as skButtonSheet } from './button/sk-button.css.js';
 export { default as skFeatureCardSheet } from './feature-card/sk-feature-card.css.js';
 export { default as skRibbonCardSheet } from './ribbon-card/sk-ribbon-card.css.js';
+export { default as skPillTagSheet } from './pill-tag/sk-pill-tag.css.js';
 export { default as skSectionBannerSheet } from './section-banner/sk-section-banner.css.js';
 
 // The card's authored markup module, exported so the two failure policies are reachable
@@ -76,6 +78,16 @@ export {
   type FeatureCardAccent,
   type FeatureCardVariant,
 } from './feature-card/sk-feature-card.markup.js';
+
+// sk-pill-tag's markup module. Both class helpers, because colour and shape each degrade.
+export {
+  PILL_TAG_SHAPES,
+  PILL_TAG_VARIANTS,
+  pillTagClasses,
+  pillTagStaticHtml,
+  type PillTagShape,
+  type PillTagVariant,
+} from './pill-tag/sk-pill-tag.markup.js';
 
 // sk-ribbon-card's markup module. Both class helpers, because the card and the ribbon each
 // have their own degrade path.

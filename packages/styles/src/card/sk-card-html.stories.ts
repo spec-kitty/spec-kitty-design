@@ -79,8 +79,8 @@ export const Inset: Story = {
 export const BlogCardExample: Story = {
   render: () => wrap(SkCardHTML, '').replace('<p style="color:var(--sk-fg-default);margin:0"></p>', `
       <div style="display:flex;gap:var(--sk-space-2);margin-bottom:var(--sk-space-4)">
-        <span class="sk-tag sk-tag--green">Release</span>
-        <span class="sk-tag">v3.2.0</span>
+        <span class="sk-pill-tag sk-pill-tag--green">Release</span>
+        <span class="sk-pill-tag">v3.2.0</span>
       </div>
       <h3 style="font-family:var(--sk-font-display);font-size:var(--sk-text-xl);font-weight:var(--sk-weight-bold);color:var(--sk-fg-default);margin:0 0 var(--sk-space-3)">
         Spec Kitty 3.2 ships with org-layer doctrine

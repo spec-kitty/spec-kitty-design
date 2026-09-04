@@ -670,6 +670,40 @@
         },
         {
           "kind": "function",
+          "name": "isPillTagShape",
+          "return": {
+            "type": {
+              "text": "s is PillTagShape"
+            }
+          },
+          "parameters": [
+            {
+              "name": "s",
+              "type": {
+                "text": "string"
+              }
+            }
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "isPillTagVariant",
+          "return": {
+            "type": {
+              "text": "v is PillTagVariant"
+            }
+          },
+          "parameters": [
+            {
+              "name": "v",
+              "type": {
+                "text": "string"
+              }
+            }
+          ]
+        },
+        {
+          "kind": "function",
           "name": "isRibbonCardColour",
           "return": {
             "type": {
@@ -718,6 +752,79 @@
               }
             }
           ]
+        },
+        {
+          "kind": "variable",
+          "name": "PILL_TAG_AXES",
+          "default": "Object.fromEntries( Object.keys(PILL_TAG_SHAPES).map((s) => [`${s.charAt(0).toUpperCase()}${s.slice(1)}`, { shape: s }]), )",
+          "description": "The non-variant axes, DERIVED from PILL_TAG_SHAPES so the two tables cannot diverge (#77)."
+        },
+        {
+          "kind": "variable",
+          "name": "PILL_TAG_SHAPES",
+          "type": {
+            "text": "{ eyebrow: 'sk-pill-tag--eyebrow' }"
+          },
+          "default": "{ eyebrow: 'sk-pill-tag--eyebrow' }",
+          "description": "The shape/size axis. Independent of colour: an eyebrow may be tinted or not."
+        },
+        {
+          "kind": "variable",
+          "name": "PILL_TAG_VARIANTS",
+          "type": {
+            "text": "{\n  green: 'sk-pill-tag--green',\n  purple: 'sk-pill-tag--purple',\n  breaking: 'sk-pill-tag--breaking',\n  yellow: 'sk-pill-tag--yellow',\n}"
+          },
+          "default": "{ green: 'sk-pill-tag--green', purple: 'sk-pill-tag--purple', breaking: 'sk-pill-tag--breaking', yellow: 'sk-pill-tag--yellow', }",
+          "description": "Colour modifiers — the tag's own root classes, so these are the generator's variants."
+        },
+        {
+          "kind": "function",
+          "name": "pillTagClasses",
+          "return": {
+            "type": {
+              "text": "string"
+            }
+          },
+          "parameters": [
+            {
+              "name": "variant",
+              "optional": true,
+              "type": {
+                "text": "string"
+              }
+            },
+            {
+              "name": "shape",
+              "optional": true,
+              "type": {
+                "text": "string"
+              }
+            }
+          ],
+          "description": "The tag's class list. Warns and degrades on an unknown variant or shape."
+        },
+        {
+          "kind": "function",
+          "name": "pillTagStaticHtml",
+          "return": {
+            "type": {
+              "text": "string"
+            }
+          },
+          "parameters": [
+            {
+              "name": "opts",
+              "default": "{}",
+              "type": {
+                "text": "PillTagStaticOptions"
+              }
+            },
+            {
+              "name": "content",
+              "default": "'Label'"
+            }
+          ],
+          "description": "The static form. Throws on an unknown variant or shape."
         },
         {
           "kind": "variable",
@@ -2349,6 +2456,71 @@
         },
         {
           "kind": "class",
+          "description": "A small inline label — a version tag, a status chip, or an eyebrow above a headline.\n\n`variant` sets the colour and `shape` sets the size; they are independent, so a tinted\neyebrow is expressible. The label is slotted, because the text is the consuming page's.",
+          "name": "SkPillTag",
+          "cssParts": [
+            {
+              "description": "the tag itself, for a treatment outside the provided variants",
+              "name": "tag"
+            }
+          ],
+          "slots": [
+            {
+              "description": "the label text",
+              "name": ""
+            }
+          ],
+          "members": [
+            {
+              "kind": "field",
+              "name": "shape",
+              "privacy": "public",
+              "type": {
+                "text": "'eyebrow' | undefined"
+              },
+              "description": "Shape: `eyebrow` for the larger, square-cornered lead-in label. Omit for the compact pill.",
+              "attribute": "shape",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "variant",
+              "privacy": "public",
+              "type": {
+                "text": "'green' | 'purple' | 'breaking' | 'yellow' | undefined"
+              },
+              "description": "Colour: `green`, `purple`, `breaking` or `yellow`. Omit for the neutral tag. An unknown\nvalue renders the base tag and warns rather than throwing.",
+              "attribute": "variant",
+              "reflects": true
+            }
+          ],
+          "attributes": [
+            {
+              "name": "shape",
+              "type": {
+                "text": "'eyebrow' | undefined"
+              },
+              "description": "Shape: `eyebrow` for the larger, square-cornered lead-in label. Omit for the compact pill.",
+              "fieldName": "shape"
+            },
+            {
+              "name": "variant",
+              "type": {
+                "text": "'green' | 'purple' | 'breaking' | 'yellow' | undefined"
+              },
+              "description": "Colour: `green`, `purple`, `breaking` or `yellow`. Omit for the neutral tag. An unknown\nvalue renders the base tag and warns rather than throwing.",
+              "fieldName": "variant"
+            }
+          ],
+          "superclass": {
+            "name": "LitElement",
+            "package": "lit"
+          },
+          "tagName": "sk-pill-tag",
+          "customElement": true
+        },
+        {
+          "kind": "class",
           "description": "A card with an optional diagonal ribbon tab in its corner.\n\nThe title and body are slotted, because they are the consuming page's content. The ribbon's\nLABEL is a property rather than a slot — it is a short string the component positions and\nrotates, and ADR-9 §4 took the same route for the form controls' `label`.\n\nThe two colour axes are independent: `variant` tints the card's border, `accent` tints\nthe tab, and a card may use either, both or neither.",
           "name": "SkRibbonCard",
           "cssParts": [
@@ -2550,6 +2722,23 @@
           "parameters": [
             {
               "name": "c",
+              "type": {
+                "text": "string"
+              }
+            }
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "unknownShapeMessage",
+          "return": {
+            "type": {
+              "text": "string"
+            }
+          },
+          "parameters": [
+            {
+              "name": "s",
               "type": {
                 "text": "string"
               }
@@ -2906,6 +3095,22 @@
         },
         {
           "kind": "js",
+          "name": "isPillTagShape",
+          "declaration": {
+            "name": "isPillTagShape",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "isPillTagVariant",
+          "declaration": {
+            "name": "isPillTagVariant",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
           "name": "isRibbonCardColour",
           "declaration": {
             "name": "isRibbonCardColour",
@@ -2925,6 +3130,62 @@
           "name": "isSectionBannerVariant",
           "declaration": {
             "name": "isSectionBannerVariant",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "PILL_TAG_AXES",
+          "declaration": {
+            "name": "PILL_TAG_AXES",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "PILL_TAG_SHAPES",
+          "declaration": {
+            "name": "PILL_TAG_SHAPES",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "PILL_TAG_VARIANTS",
+          "declaration": {
+            "name": "PILL_TAG_VARIANTS",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "pillTagClasses",
+          "declaration": {
+            "name": "pillTagClasses",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "PillTagShape",
+          "declaration": {
+            "name": "PillTagShape",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "pillTagStaticHtml",
+          "declaration": {
+            "name": "pillTagStaticHtml",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "PillTagVariant",
+          "declaration": {
+            "name": "PillTagVariant",
             "module": "./dist/index.js"
           }
         },
@@ -3122,6 +3383,22 @@
         },
         {
           "kind": "js",
+          "name": "SkPillTag",
+          "declaration": {
+            "name": "SkPillTag",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "skPillTagSheet",
+          "declaration": {
+            "name": "default",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
           "name": "SkRibbonCard",
           "declaration": {
             "name": "SkRibbonCard",
@@ -3189,6 +3466,14 @@
           "name": "unknownRibbonMessage",
           "declaration": {
             "name": "unknownRibbonMessage",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "unknownShapeMessage",
+          "declaration": {
+            "name": "unknownShapeMessage",
             "module": "./dist/index.js"
           }
         },

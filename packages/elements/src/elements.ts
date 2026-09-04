@@ -16,4 +16,5 @@ import './form-textarea/sk-form-textarea.js';
 import './grid/sk-grid.js';
 import './feature-card/sk-feature-card.js';
 import './ribbon-card/sk-ribbon-card.js';
+import './pill-tag/sk-pill-tag.js';
 import './section-banner/sk-section-banner.js';

@@ -29,7 +29,7 @@
     "#78 adds three for <sk-ribbon-card>. Note `ribbon` is ABSENT from the DOM on a plain card — the element renders `nothing`, not an empty div — so its [SC-013] case mounts a card that has one, and a separate assertion covers the absence.",
     "#79 adds one for <sk-button>: the rendered <button> or <a>. One part, because the element renders exactly one node and that node is its whole surface."
   ],
-  "total": 24,
+  "total": 25,
   "byElement": {
     "sk-button": [
       "button"
@@ -62,6 +62,9 @@
       "hamburger",
       "items",
       "nav"
+    ],
+    "sk-pill-tag": [
+      "tag"
     ],
     "sk-ribbon-card": [
       "card",

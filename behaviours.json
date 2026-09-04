@@ -284,6 +284,10 @@
           "file": "fixtures/elements-behaviour/src/sk-nav-pill.test.ts"
         },
         {
+          "name": "sk-pill-tag",
+          "file": "fixtures/elements-behaviour/src/sk-pill-tag.test.ts"
+        },
+        {
           "name": "sk-ribbon-card",
           "file": "fixtures/elements-behaviour/src/sk-ribbon-card.test.ts"
         },
@@ -315,6 +319,10 @@
         {
           "name": "sk-nav-pill",
           "file": "fixtures/elements-behaviour/src/sk-nav-pill.test.ts"
+        },
+        {
+          "name": "sk-pill-tag",
+          "file": "fixtures/elements-behaviour/src/sk-pill-tag.test.ts"
         },
         {
           "name": "sk-ribbon-card",

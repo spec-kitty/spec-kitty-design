@@ -5,6 +5,7 @@ export * from "./SkFormInput.js";
 export * from "./SkFormTextarea.js";
 export * from "./SkGrid.js";
 export * from "./SkNavPill.js";
+export * from "./SkPillTag.js";
 export * from "./SkRibbonCard.js";
 export * from "./SkSectionBanner.js";
 export * from "./SkStub.js";
