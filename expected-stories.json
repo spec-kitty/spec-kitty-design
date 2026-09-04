@@ -21,6 +21,13 @@
     "#79 opts in its own three. The previous note said sk-grid and sk-section-banner were still outside and 'not covered by #79 adds its own' — two lenses observed #79 then added none either, so this per-component chore had been skipped by two batches running. FIVE element story files remain outside, not three: an earlier revision of this note said 'sk-card, sk-grid and sk-section-banner remain outside' and undercounted by two. The full list is sk-card, sk-grid, sk-section-banner, sk-nav-pill and sk-stub. sk-stub is the synthetic probe component and is arguably exempt, but nothing here said so, and a reader acting on the old count would have left two migrated elements silently unratcheted."
   ],
   "byElement": {
+    "sk-blog-card": [
+      "elements-skblogcard--default",
+      "elements-skblogcard--without-image",
+      "elements-skblogcard--without-eyebrow",
+      "elements-skblogcard--long-title",
+      "elements-skblogcard--light-mode"
+    ],
     "sk-button": [
       "elements-skbutton--primary",
       "elements-skbutton--secondary",
@@ -79,5 +86,5 @@
       "elements-skribboncard--light-mode"
     ]
   },
-  "total": 43
+  "total": 48
 }

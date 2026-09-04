@@ -65,7 +65,12 @@
   justify-content: center;
   padding: var(--sk-space-2) var(--sk-space-4);
   background: var(--sk-color-accent);
-  color: var(--sk-fg-on-primary);
+  /* `--sk-color-accent-fg`, not `--sk-fg-on-primary` — the accent background's OWN designed
+     foreground. In dark mode the two tokens hold the identical value (#1A1408), so this is a
+     no-op there and no dark baseline moves. In light mode they diverge, and the old pairing
+     was dark ink (a token whose comment reads "dark ink on yellow buttons") on a sage button:
+     4.68:1 before the accent ramp fix and 3.53:1 after it. White on #3D7A3D is 5.19:1. */
+  color: var(--sk-color-accent-fg);
   border: none;
   border-radius: var(--sk-radius-pill);
   font-family: var(--sk-font-sans);

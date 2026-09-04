@@ -272,26 +272,75 @@ const violations = [];
 let ruleCount = 0;
 let sheetCount = 0;
 
+/**
+ * The sheets an element adopts, and WHICH COMPONENT OWNS EACH.
+ *
+ * Ownership follows the component that AUTHORED a sheet, not the element adopting it. That
+ * distinction is what ADR-9 Confirmation #1 actually turns on: the invariant is that nothing an
+ * element adopts reaches outside its own root, and `sk-card.css`'s rules satisfy that wherever
+ * the sheet is adopted, because they only ever name `.sk-card*`.
+ *
+ * Before #78 this was `packages/styles/src/<element>/sk-*.css` — the adopting element's own
+ * directory — which made declared REUSE inexpressible. sk-blog-card's own CSS states the
+ * contract its component has always had ("apply both classes; sk-card owns the frame"), and
+ * under the operator ruling on #78 it composes the two STYLESHEETS rather than nesting the two
+ * elements, so the bordered box stays one box and no declaration is written twice.
+ *
+ * DERIVED FROM THE ELEMENT'S OWN IMPORTS, not a hand-maintained map. The element already names
+ * every sheet it adopts — `import sheet from './sk-blog-card.css.js'`,
+ * `import cardSheet from '../card/sk-card.css.js'` — so the adopted set is readable from the
+ * source of truth and cannot drift from what Lit actually adopts. A declared map would be the
+ * fifth hand-maintained list this programme has removed.
+ *
+ * This does NOT widen what is accepted. Every rule is still checked, still against a component
+ * that owns it, and a rule naming a class no participating sheet owns is still rejected — the
+ * --selftest probes below cover exactly that.
+ */
+function adoptedSheets(name) {
+  const elementFile = `${OUT_DIR}/${name}/sk-${name}.ts`;
+  const out = [];
+  const seen = new Set();
+  let src = '';
+  try {
+    src = readFileSync(elementFile, 'utf8');
+  } catch {
+    return out;
+  }
+  for (const m of src.matchAll(/from\s+'(\.{1,2}\/(?:([a-z0-9-]+)\/)?)sk-([a-z0-9-]+)\.css\.js'/g)) {
+    // `./sk-x.css.js` -> this component; `../other/sk-other.css.js` -> that one.
+    const owner = m[2] ?? name;
+    for (const file of globSync(`packages/styles/src/${owner}/sk-*.css`, {}).sort()) {
+      if (seen.has(file)) continue;
+      seen.add(file);
+      out.push({ file, owner });
+    }
+  }
+  return out;
+}
+
 for (const name of components) {
-  const sheets = globSync(`packages/styles/src/${name}/sk-*.css`, {}).sort();
+  const sheets = adoptedSheets(name);
   // PER ELEMENT, not once globally. A global floor counted an element whose sheets it never
   // opened and still printed a green coverage line.
   if (sheets.length === 0) {
     violations.push(
-      `<sk-${name}> has no stylesheet under packages/styles/src/${name}/ — nothing was checked ` +
-        `for it, and a green line over zero sheets is the shape this file exists to refuse`
+      `<sk-${name}> adopts no stylesheet that this gate can find — nothing was checked for it, ` +
+        `and a green line over zero sheets is the shape this file exists to refuse. The adopted ` +
+        `set is derived from the element's own \`sk-*.css.js\` imports, so either it imports ` +
+        `none or the sheet it names does not exist.`
     );
     continue;
   }
   sheetCount += sheets.length;
-  for (const file of sheets) {
+  for (const { file, owner } of sheets) {
     const root = postcss.parse(readFileSync(file, 'utf8'), { from: file });
     root.walkRules((rule) => {
       // `@keyframes` steps are `0%`/`from`/`to`, not selectors.
       if (rule.parent?.type === 'atrule' && /keyframes$/i.test(rule.parent.name)) return;
       ruleCount += 1;
       const line = rule.source?.start?.line ?? 0;
-      for (const why of violationsFor(rule.selector, name)) {
+      // `owner`, not `name`: the sheet's author owns its rules.
+      for (const why of violationsFor(rule.selector, owner)) {
         violations.push(`${file}:${line} — ${rule.selector.trim()} — ${why}`);
       }
     });

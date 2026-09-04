@@ -8,6 +8,47 @@
       "declarations": [
         {
           "kind": "variable",
+          "name": "BLOG_CARD_AXES",
+          "type": {
+            "text": "{\n  WithImage: { thumbnail: PLACEHOLDER_THUMBNAIL, alt: PLACEHOLDER_ALT },\n  WithEyebrow: { eyebrow: 'Field notes' },\n  Full: { thumbnail: PLACEHOLDER_THUMBNAIL, alt: PLACEHOLDER_ALT, eyebrow: 'Field notes' },\n}"
+          },
+          "default": "{ WithImage: { thumbnail: PLACEHOLDER_THUMBNAIL, alt: PLACEHOLDER_ALT }, WithEyebrow: { eyebrow: 'Field notes' }, Full: { thumbnail: PLACEHOLDER_THUMBNAIL, alt: PLACEHOLDER_ALT, eyebrow: 'Field notes' }, }",
+          "description": "The axes, which are PRESENCE rather than colour.\n\nBefore #78 these were four hand-written exports — Default, WithoutImage, WithoutEyebrow,\nLongTitle — produced by a builder function taking booleans. Three of them are the two\noptional regions in combination, so they are axes and the generator derives them. The fourth,\nLongTitle, was a CONTENT variation and belongs in a story, which is where it now lives."
+        },
+        {
+          "kind": "variable",
+          "name": "BLOG_CARD_VARIANTS",
+          "type": {
+            "text": "{}"
+          },
+          "default": "{}",
+          "description": "No colour or shape variants — a blog card is one thing. Declared explicitly because the\ngenerator cannot distinguish an absent export from an empty one."
+        },
+        {
+          "kind": "function",
+          "name": "blogCardStaticHtml",
+          "return": {
+            "type": {
+              "text": "string"
+            }
+          },
+          "parameters": [
+            {
+              "name": "opts",
+              "default": "{}",
+              "type": {
+                "text": "BlogCardStaticOptions"
+              }
+            },
+            {
+              "name": "content",
+              "default": "'<h3 class=\"sk-blog-card__title\">Article title</h3>' +\n    '<p class=\"sk-blog-card__excerpt\">What the article is about.</p>' +\n    '<p class=\"sk-blog-card__meta\">Date · reading time</p>'"
+            }
+          ],
+          "description": "The static form.\n\nBOTH CLASSES ON ONE ELEMENT, which is the whole point of the composition ruling: this string\nis what the element renders too, so the two paths cannot diverge."
+        },
+        {
+          "kind": "variable",
           "name": "BUTTON_AXES",
           "default": "{ Sm: { size: 'sm', variant: 'primary' }, Link: { href: '#', variant: 'primary' }, } as const satisfies Record<string, ButtonStaticOptions>",
           "description": "The static forms this component publishes, beyond the base and one per variant.\n\n`Sm` is the small size in its primary tone; `Link` is the anchor form."
@@ -818,6 +859,15 @@
         },
         {
           "kind": "variable",
+          "name": "PLACEHOLDER_THUMBNAIL",
+          "type": {
+            "text": "string"
+          },
+          "default": "'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 1200 675%22%3E%3Crect width=%221200%22 height=%22675%22 fill=%22%2314202E%22/%3E%3Cpath d=%22M0 520 C240 410 410 600 630 460 C810 344 980 390 1200 250 L1200 675 L0 675 Z%22 fill=%22%23F5C518%22 opacity=%220.45%22/%3E%3Cpath d=%22M0 330 C260 250 440 420 690 280 C910 156 1030 220 1200 96%22 fill=%22none%22 stroke=%22%23A9C7E8%22 stroke-width=%2244%22 stroke-linecap=%22round%22 opacity=%220.75%22/%3E%3C/svg%3E'",
+          "description": "A placeholder thumbnail, carried here so the generated forms show a real image.\n\nThe same inline SVG the hand-written builder used before #78 — recovered rather than\nre-drawn, so the catalogue's committed visual baseline does not move."
+        },
+        {
+          "kind": "variable",
           "name": "RIBBON_CARD_AXES",
           "default": "{ WithRibbon: { ribbon: 'Primary Workshop' }, ...Object.fromEntries( RIBBON_CARD_COLOURS.map((c) => [ `Ribbon${c.charAt(0).toUpperCase()}${c.slice(1)}`, { ribbon: 'Primary Workshop', accent: c }, ]), ), }",
           "description": "The non-variant axes, DERIVED.\n\n`WithRibbon` reproduces the export name the styles layer already published, and the per-colour\nribbon forms are derived from RIBBON_CARD_COLOURS so a sixth colour cannot appear on one axis\nand not the other."
@@ -963,6 +1013,98 @@
             }
           ],
           "description": "The static form. Throws on an unknown variant — it runs on the build path, where a bad\nvariant must never reach committed output.\n\n`content` is the LABEL TEXT, and it is a placeholder here on purpose. Until #77 the three\ngenerated exports each carried a hardcoded version string (\"VERSION 1.X — FIRST STABLE\nRELEASE\" and two others), which made the component's own source the place a docsite's\ncontent lived — so changing a version number meant editing the component library. The\nlabel is the consumer's; only the structure is the component's."
+        },
+        {
+          "kind": "class",
+          "description": "A blog preview card: thumbnail, eyebrow, title, excerpt, meta and a read-more link.\n\nIt COMPOSES `sk-card`'s stylesheet rather than nesting the element, so the frame is authored\nonce in `sk-card.css` and this component's own sheet adds only blog layout — the contract its\nCSS header has always described, now true of the element as well as the static form.",
+          "name": "SkBlogCard",
+          "cssParts": [
+            {
+              "description": "the card frame, carrying both `sk-card` and `sk-blog-card`",
+              "name": "card"
+            },
+            {
+              "description": "the text column",
+              "name": "content"
+            },
+            {
+              "description": "the preview image, absent when no `thumbnail` is set",
+              "name": "thumbnail"
+            }
+          ],
+          "slots": [
+            {
+              "description": "the card's title, excerpt, meta and read-more link",
+              "name": ""
+            }
+          ],
+          "members": [
+            {
+              "kind": "field",
+              "name": "alt",
+              "privacy": "public",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "Alt text for the preview image. Set it whenever `thumbnail` is set.\n\nONE WORD, and I walked into the reason twice. This was `thumbnailAlt`, which Lit maps to a\nhyphenated `thumbnail-alt` attribute — and a hyphen is not a valid JS property key, so\n`build-react-wrappers.mjs` refuses it: the emitted createElement props cannot carry the\nkey, and under ssrSafe (where React delivers first-render props as ATTRIBUTES) the value\nwould never reach the element. sk-ribbon-card hit this at #78 and its comment records it;\nthis component hit it anyway. `alt` is also the HTML attribute it feeds.",
+              "attribute": "alt",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "eyebrow",
+              "privacy": "public",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "A short lead-in above the title, such as a category.",
+              "attribute": "eyebrow",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "thumbnail",
+              "privacy": "public",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "The preview image's URL. With none, no `<img>` is rendered at all — an empty one is a\nbroken-image icon rather than a neutral placeholder.",
+              "attribute": "thumbnail",
+              "reflects": true
+            }
+          ],
+          "attributes": [
+            {
+              "name": "alt",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "Alt text for the preview image. Set it whenever `thumbnail` is set.\n\nONE WORD, and I walked into the reason twice. This was `thumbnailAlt`, which Lit maps to a\nhyphenated `thumbnail-alt` attribute — and a hyphen is not a valid JS property key, so\n`build-react-wrappers.mjs` refuses it: the emitted createElement props cannot carry the\nkey, and under ssrSafe (where React delivers first-render props as ATTRIBUTES) the value\nwould never reach the element. sk-ribbon-card hit this at #78 and its comment records it;\nthis component hit it anyway. `alt` is also the HTML attribute it feeds.",
+              "fieldName": "alt"
+            },
+            {
+              "name": "eyebrow",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "A short lead-in above the title, such as a category.",
+              "fieldName": "eyebrow"
+            },
+            {
+              "name": "thumbnail",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "The preview image's URL. With none, no `<img>` is rendered at all — an empty one is a\nbroken-image icon rather than a neutral placeholder.",
+              "fieldName": "thumbnail"
+            }
+          ],
+          "superclass": {
+            "name": "LitElement",
+            "package": "lit"
+          },
+          "tagName": "sk-blog-card",
+          "customElement": true
         },
         {
           "kind": "class",
@@ -2790,6 +2932,30 @@
       "exports": [
         {
           "kind": "js",
+          "name": "BLOG_CARD_AXES",
+          "declaration": {
+            "name": "BLOG_CARD_AXES",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "BLOG_CARD_VARIANTS",
+          "declaration": {
+            "name": "BLOG_CARD_VARIANTS",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "blogCardStaticHtml",
+          "declaration": {
+            "name": "blogCardStaticHtml",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
           "name": "BUTTON_AXES",
           "declaration": {
             "name": "BUTTON_AXES",
@@ -3174,6 +3340,14 @@
         },
         {
           "kind": "js",
+          "name": "PLACEHOLDER_THUMBNAIL",
+          "declaration": {
+            "name": "PLACEHOLDER_THUMBNAIL",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
           "name": "registeredTags",
           "declaration": {
             "name": "registeredTags",
@@ -3286,6 +3460,22 @@
         },
         {
           "kind": "js",
+          "name": "SkBlogCard",
+          "declaration": {
+            "name": "SkBlogCard",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "skBlogCardSheet",
+          "declaration": {
+            "name": "default",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
           "name": "SkButton",
           "declaration": {
             "name": "SkButton",
@@ -3305,6 +3495,14 @@
           "name": "SkCard",
           "declaration": {
             "name": "SkCard",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "skCardSheet",
+          "declaration": {
+            "name": "default",
             "module": "./dist/index.js"
           }
         },

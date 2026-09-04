@@ -227,8 +227,18 @@
   --sk-border-default:      #EAE4D2;   /* hairline default */
   --sk-border-strong:       #D6CFB9;   /* card border / divider */
 
-  /* Light-mode link accent flips to sage */
-  --sk-color-accent:        var(--sk-color-sage);
+  /* Light-mode link accent flips to sage — sage-DEEP, and the shade is load-bearing.
+     This said `var(--sk-color-sage)`, and a token documented as a *link* accent has to be
+     readable as body-sized text. Measured: #4F8F4F is 3.58:1 on the cream page and 3.91:1 on
+     the white card — both under AA's 4.5. #3D7A3D is 4.76:1 and 5.19:1. Same hue, one step
+     down the ramp that was already defined.
+     `--sk-color-sage` itself is unchanged and still correct: its comment scopes it to
+     HEADINGS, and 3.58:1 clears AA's 3:1 for large text.
+     This also fixes the PAIR below, which was broken and merely unexercised — #FFFFFF on
+     #4F8F4F is 3.91:1, so any consumer using the accent background with its own designed
+     foreground failed AA. On #3D7A3D it is 5.19:1. Nothing used the pair correctly, which is
+     why nothing reported it; sk-nav-pill now does. */
+  --sk-color-accent:        var(--sk-color-sage-deep);
   --sk-color-accent-fg:     #FFFFFF;
 
   /* Pastel tint surfaces — high-key, high-readability */

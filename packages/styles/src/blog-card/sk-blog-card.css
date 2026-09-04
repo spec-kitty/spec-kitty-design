@@ -3,6 +3,18 @@
    sk-card owns the frame, surface, border, radius, padding, and transition.
    sk-blog-card adds only blog-specific layout and slots. */
 
+/* A custom element defaults to `display: inline`; `block` lets the frame's flex column lay out
+   and lets a consumer size the host. Inert in the static path, where the root IS the article.
+   NOT `flex` — the flex column belongs to .sk-blog-card, which the element also carries on its
+   single root; putting it on the host too would make the host a flex container of one item. */
+:host {
+  display: block;
+  /* Inherited colour for slotted nodes no rule matches — `color` follows the FLATTENED tree, so
+     a slotted node inherits through the slot from :host, which no selector could reach it with.
+     On the host specifically, so the static path cannot move (#78). */
+  color: var(--sk-fg-body);
+}
+
 .sk-blog-card {
   display: flex;
   flex-direction: column;
@@ -30,7 +42,14 @@
   gap: var(--sk-space-3);
 }
 
-.sk-blog-card__eyebrow {
+/* BOTH SPELLINGS, ONE RULE. The title, excerpt, meta and read-more link are SLOTTED in the
+   element path, and a shadow-tree selector cannot match a slotted node — so these rules applied
+   statically and were INERT as an element, leaving UA defaults on a dark card. axe reported
+   contrast on every element story. `::slotted()` is inert in a document and the bare class is
+   inert in a shadow tree, so one selector list serves both paths with nothing written twice —
+   the fix #78 established for feature-card and ribbon-card. */
+.sk-blog-card__eyebrow,
+::slotted(.sk-blog-card__eyebrow) {
   margin: 0;
   color: var(--sk-fg-muted);
   font-family: var(--sk-font-mono);
@@ -38,7 +57,8 @@
   text-transform: uppercase;
 }
 
-.sk-blog-card__title {
+.sk-blog-card__title,
+::slotted(.sk-blog-card__title) {
   display: -webkit-box;
   margin: 0;
   overflow: hidden;
@@ -49,19 +69,27 @@
   -webkit-line-clamp: 3;
 }
 
-.sk-blog-card__excerpt {
+.sk-blog-card__excerpt,
+::slotted(.sk-blog-card__excerpt) {
   margin: 0;
   color: var(--sk-fg-body);
   font-size: var(--sk-text-base);
 }
 
-.sk-blog-card__meta {
+/* --sk-fg-muted, NOT --sk-fg-subtle. On the LIGHT card surface (#FFFFFF) subtle is #8A8A7E =
+   3.49:1, below AA's 4.5; muted is #5C5C52 = 6.76:1. The failure was invisible until #78
+   retired this component's inert `data-theme="light"` story wrapper (#93) — the story had been
+   rendering the DARK palette, where subtle is fine, so the a11y gate never measured the light
+   pairing. Same shape as the pill-tag ink failure #79 found by the same route. */
+.sk-blog-card__meta,
+::slotted(.sk-blog-card__meta) {
   margin: 0;
-  color: var(--sk-fg-subtle);
+  color: var(--sk-fg-muted);
   font-size: var(--sk-text-sm);
 }
 
-.sk-blog-card__read-more {
+.sk-blog-card__read-more,
+::slotted(.sk-blog-card__read-more) {
   align-self: flex-start;
   color: var(--sk-color-accent);
   font-family: var(--sk-font-mono);
@@ -70,6 +98,15 @@
   text-underline-offset: var(--sk-space-1);
 }
 
+/* Hover thickens the rule; it does not recolour. This was `color: var(--sk-color-yellow-soft)`
+   — correct on a dark card and 1.52:1 on a white one, i.e. a light-mode hover state that all
+   but disappears. axe never caught it and never would: it does not simulate `:hover`.
+   A recolour cannot be fixed here either way. The value would have to differ per theme, and a
+   theme-conditional block inside a sheet this component ADOPTS is exactly what
+   check-adopted-css-boundaries rejects — `.sk-light .sk-blog-card__read-more` cannot reach into
+   a shadow root, and the gate has a planted probe for that shape. So the affordance moves to a
+   property that needs no theme knowledge and inherits its colour from the resting state. */
+::slotted(.sk-blog-card__read-more):hover,
 .sk-blog-card__read-more:hover {
-  color: var(--sk-color-yellow-soft);
+  text-decoration-thickness: var(--sk-border-width-2);
 }
