@@ -20,7 +20,7 @@ mission needs npm write access, and none has it.
 | 2 | Create the `spec-kitty` npm organisation | operator, **once** | the scope exists to publish into |
 | 3 | Enable 2FA on the org | operator, once | ADR-5 operational policy |
 | 4 | Add a granular publish token as `NPM_TOKEN` in repository secrets | operator, once | `release.yml` can authenticate — that secret name is what the workflow already reads |
-| 5 | `git tag v1.0.0 && git push origin v1.0.0` | operator | starts the release |
+| 5 | Re-run the release for the **existing** `v1.0.0` tag (see below) | operator | starts the release |
 | 6 | The workflow builds, audits, SBOMs, publishes, and creates a GitHub Release | CI | see below |
 
 Steps 2–4 are one-time. Tag `v1.0.0` was pushed on 2026-09-01 and failed 50 seconds later with
@@ -28,13 +28,27 @@ Steps 2–4 are one-time. Tag `v1.0.0` was pushed on 2026-09-01 and failed 50 se
 means the scope was not there to publish into. ADR-2 recorded scope ownership as a pre-flight and it
 had not been done.
 
+**So step 5 is not `git tag v1.0.0`.** That tag already exists on the remote (`ccb055c`), and
+creating it again fails with *"tag 'v1.0.0' already exists"*. Two options, and the first is
+preferred:
+
+1. **Re-run the existing tag's workflow** from the Actions UI — *Publish Release* → the failed run
+   → *Re-run all jobs*. Nothing about the tag needs to change; only the scope was missing.
+2. **Re-tag at the merged head**, if `main` has moved since and you want the release to include it:
+   `git push --delete origin v1.0.0 && git tag -d v1.0.0 && git tag v1.0.0 <sha> && git push origin v1.0.0`.
+   Deleting a published tag is safe here only because nothing was ever published from it.
+
+For every release after this one, step 5 is the ordinary `git tag vX.Y.Z && git push origin vX.Y.Z`.
+
 ## What the release workflow does
 
 1. **`npm audit` gate** (ADR-5 FR-041) — fails on high or critical
 2. **Resolves the publishable set** — `node scripts/release-graph.mjs`, derived from
    `packages/*/package.json`, refusing an empty result
 3. **Builds** the buildable subset
-4. **Contents audit** — `npm pack --dry-run` per package
+4. **Contents audit** — `check-release-graph.mjs` asserts each tarball's contents (entry points
+   resolve, no sourcemaps, tests or dev files), then `npm pack --dry-run` lists them for the log.
+   The assertion is the gate; the listing is for a human reading the release afterwards
 5. **CycloneDX SBOM** (ADR-5 FR-045)
 6. **Publishes** each package with `--provenance --access public` (ADR-5 FR-044)
 7. **GitHub Release** with the SBOM attached
@@ -47,8 +61,9 @@ them.
 
 `npm publish --dry-run` proves **packing, not publishing.**
 
-It short-circuits before `ensureProvenanceGeneration`, verified by running it with a full GitHub
-Actions environment faked — provenance was never exercised. So a green dry run says nothing about:
+It short-circuits before `ensureProvenanceGeneration` (`npm/lib/commands/publish.js` guards the
+call with `if (!dryRun)`), verified by running it with a full GitHub Actions environment faked —
+provenance was never exercised. So a green dry run says nothing about:
 
 - **provenance** — needs a real GHA OIDC token
 - **authentication** — needs `NPM_TOKEN`
@@ -90,7 +105,7 @@ The classic-script bundle works from `file://` with no network at all — assert
 to be zero.
 
 For a CDN load, pin it. The SRI hash is generated from the built artifact into
-`packages/elements/INTEGRITY.json` and re-derived by CI:
+the **Subresource Integrity** section of `packages/elements/SIZES.md`, regenerated and `--check`ed by CI:
 
 ```html
 <script src="https://cdn.example/@spec-kitty/elements@1.0.0/dist/elements.js"
@@ -98,7 +113,7 @@ For a CDN load, pin it. The SRI hash is generated from the built artifact into
         crossorigin="anonymous"></script>
 ```
 
-Take the `integrity` value from `INTEGRITY.json` at the tag you are loading. It changes with every
+Take the `integrity` value from `SIZES.md` at the tag you are loading. It changes with every
 build of the bundle, so a hash copied from another version will be rejected by the browser — which
 is the point.
 
@@ -118,10 +133,11 @@ it is the brand assets and 30 OTF font files that `FR-105` records as intended p
   package is private. The gate should have caught the second on the PR.
 - **`Provenance generation … requires "write" access to the "id-token" permission`** — the workflow's
   `permissions:` block lost `id-token: write`.
-- **A package published and another did not** — should be impossible: both loops run under
-  `set -euo pipefail`, so a failure inside the `for` fails the step. If it happens anyway, npm does
-  not support atomic multi-package publishes; re-run the tag after fixing, and expect
-  `EPUBLISHCONFLICT` from the ones that already went out.
+- **A package published and another did not** — this is **expected** on any mid-loop failure, not
+  impossible. npm has no atomic multi-package publish, so whatever went out stays out. The publish
+  step is built for it: an already-published version is skipped rather than treated as an error,
+  and real failures are collected and reported together. Fix the cause and re-run the same tag —
+  the retry skips what is already on the registry and completes the set.
 
 ## What this repo does not do
 

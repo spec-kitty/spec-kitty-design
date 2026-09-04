@@ -29,8 +29,16 @@ import { fileURLToPath } from 'node:url';
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const PACKAGES = join(ROOT, 'packages');
 
-/** Every package directory, publishable or not. Sorted, so all output is deterministic. */
-function scan() {
+/**
+ * Every package directory, publishable or not. Sorted, so all output is deterministic.
+ *
+ * `root` is injectable ONLY so the gate can point the real accessors at a fixture tree. Three
+ * lenses independently found that the empty-set refusal below was untested: the probe fed a
+ * synthetic `() => []` to the checker, so deleting BOTH `throw` blocks here left the selftest
+ * printing 14/14 green. A guard whose test does not call it is a comment.
+ */
+function scan(root = PACKAGES) {
+  const PACKAGES = root;
   if (!existsSync(PACKAGES)) throw new Error(`no packages/ directory at ${PACKAGES}`);
   const dirs = readdirSync(PACKAGES, { withFileTypes: true })
     .filter((d) => d.isDirectory())
@@ -56,16 +64,62 @@ function scan() {
       project,
       name: pkg.name,
       version: pkg.version,
-      private: pkg.private === true,
+      // TRUTHINESS, not `=== true`. npm's own test is truthy:
+      // libnpmpublish's caller does `if (workspace && manifest.private)`, so `"private": "true"`
+      // (a string), `1`, or any truthy value makes npm skip the package with a warning and exit
+      // 0. `=== true` classified that as publishable, and the gate certified green while npm
+      // published nothing — the mission's founding defect, reopened by one character. A lens
+      // demonstrated it live.
+      private: Boolean(pkg.private),
+      privateRaw: pkg.private,
       targets,
+      peerDependencies: pkg.peerDependencies,
+      dependencies: pkg.dependencies,
     };
   });
 }
 
-/** Packages that npm will actually publish: everything not marked private. */
-export function publishable() {
-  const all = scan();
-  const set = all.filter((p) => !p.private);
+/**
+ * Order the set so a package is published AFTER everything it depends on.
+ *
+ * ADR-2's topology is strictly one-directional: tokens <- styles <- elements <- react. A plain
+ * `readdirSync().sort()` publishes in the EXACT REVERSE of that — `elements` first, declaring
+ * peers on `@spec-kitty/styles` and `@spec-kitty/tokens` that are not on the registry yet, so
+ * during the window an install resolves peers that 404. The hand-written list this replaced
+ * happened to encode the right order (`tokens,styles,elements`) and deriving it alphabetically
+ * threw that away — a lens caught it.
+ *
+ * Derived from the declared peer/dependency edges rather than hard-coded, so adding a package
+ * orders itself. Cycles are impossible in a DAG this shape, but the guard is here rather than
+ * assumed: a cycle would otherwise silently truncate the output, which is an empty-set defect
+ * wearing a different hat.
+ */
+function topological(set) {
+  const byName = new Map(set.map((p) => [p.name, p]));
+  const deps = (p) =>
+    Object.keys({ ...(p.peerDependencies ?? {}), ...(p.dependencies ?? {}) }).filter((d) => byName.has(d));
+  const out = [];
+  const state = new Map(); // name -> 'visiting' | 'done'
+  const visit = (p) => {
+    const st = state.get(p.name);
+    if (st === 'done') return;
+    if (st === 'visiting') throw new Error(`dependency cycle in the package graph at ${p.name}`);
+    state.set(p.name, 'visiting');
+    for (const d of deps(p)) visit(byName.get(d));
+    state.set(p.name, 'done');
+    out.push(p);
+  };
+  for (const p of set) visit(p);
+  if (out.length !== set.length) {
+    throw new Error(`topological sort dropped packages: ${set.length} in, ${out.length} out`);
+  }
+  return out;
+}
+
+/** Packages that npm will actually publish: everything not marked private, in dependency order. */
+export function publishable(root) {
+  const all = scan(root);
+  const set = topological(all.filter((p) => !p.private));
   if (set.length === 0) {
     throw new Error(
       'the publishable set is EMPTY — every package under packages/ is marked private. ' +
@@ -76,8 +130,8 @@ export function publishable() {
 }
 
 /** Publishable packages that declare a `build` target. A strict subset, never a separate list. */
-export function buildable() {
-  const set = publishable().filter((p) => p.targets.includes('build'));
+export function buildable(root) {
+  const set = publishable(root).filter((p) => p.targets.includes('build'));
   if (set.length === 0) {
     throw new Error(
       'no publishable package declares a `build` target — refusing to emit an empty --projects list',
@@ -87,8 +141,8 @@ export function buildable() {
 }
 
 /** Everything, including private packages. For gates that need to report on what was excluded. */
-export function all() {
-  return scan();
+export function all(root) {
+  return scan(root);
 }
 
 // Run-as-CLI detection by resolved path. An `endsWith(basename)` check would also fire when this

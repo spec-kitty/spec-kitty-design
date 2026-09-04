@@ -26,46 +26,104 @@
  * ─────────────────────────────────────────────────────────────────────────────────────────────
  */
 import { chromium } from 'playwright';
-import { mkdtempSync, writeFileSync, copyFileSync, cpSync, existsSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
+import { mkdtempSync, writeFileSync, readFileSync, mkdirSync, existsSync, readdirSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-const BUNDLE = join(ROOT, 'packages/elements/dist/elements.js');
-const TOKENS = join(ROOT, 'packages/tokens/dist/tokens.css');
-const FONTS = join(ROOT, 'packages/tokens/fonts');
 
-// Asserted, not enumerated for display: if the page renders none of these the probe must fail,
-// and if the list itself were emptied the assertion below would pass over nothing.
-const TAGS = ['sk-button', 'sk-card', 'sk-grid', 'sk-site-footer', 'sk-pill-tag'];
+/**
+ * STAGED FROM REAL TARBALLS, not from the source tree.
+ *
+ * The first version copied `packages/elements/dist/elements.js` and `packages/tokens/dist/tokens.css`
+ * into a temp directory and dropped `packages/tokens/fonts` beside the CSS. That layout is one no
+ * consumer ever receives, and a lens showed what it hid: `files` listed `fonts/**`, so the fonts
+ * packed at the TARBALL ROOT while `tokens.css` packed at `dist/tokens.css` — and `@font-face
+ * src: url('./fonts/…')` resolves relative to the stylesheet, i.e. to `dist/fonts/`, which was not
+ * in the package. All 30 faces 404'd for every npm consumer, silently, because `font-display: swap`
+ * degrades quietly. The probe was green against a fiction.
+ *
+ * So it now runs `npm pack`, extracts what npm actually produces, and loads the page out of a
+ * `node_modules/@spec-kitty/*` tree. If the published layout is broken, this reds.
+ */
+function stagePackages() {
+  const dir = mkdtempSync(join(tmpdir(), 'sk-offline-'));
+  const modules = join(dir, 'node_modules', '@spec-kitty');
+  mkdirSync(modules, { recursive: true });
+  for (const pkg of ['tokens', 'elements']) {
+    const src = join(ROOT, 'packages', pkg);
+    const out = execFileSync('npm', ['pack', '--pack-destination', dir, '--json'], {
+      cwd: src, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'],
+    });
+    const tgz = join(dir, JSON.parse(out)[0].filename);
+    const dest = join(modules, pkg);
+    mkdirSync(dest, { recursive: true });
+    // --strip-components=1 removes npm's `package/` prefix, giving the node_modules layout.
+    execFileSync('tar', ['-xzf', tgz, '-C', dest, '--strip-components=1']);
+  }
+  return { dir, modules };
+}
+
+/**
+ * The tags to assert, DERIVED from the manifest.
+ *
+ * This was a hand-written list of five, in the mission whose thesis is that hand-written lists
+ * drift — three lenses said so. Its "floor" was `length === 0`, which a `const` literal cannot
+ * reach, so it guarded the one failure mode that could not occur while ignoring the real one:
+ * being short. The bundle registers fourteen.
+ */
+function manifestTags() {
+  const m = JSON.parse(readFileSync(join(ROOT, 'packages/elements/custom-elements.json'), 'utf8'));
+  const tags = [];
+  for (const mod of m.modules ?? []) for (const d of mod.declarations ?? []) if (d.tagName) tags.push(d.tagName);
+  const unique = [...new Set(tags)].sort();
+  if (unique.length < 10) {
+    console.error(`❌ derived only ${unique.length} tags from the manifest — refusing to assert over a near-empty set`);
+    process.exit(1);
+  }
+  return unique;
+}
 
 function stage(extraHead = '') {
-  for (const f of [BUNDLE, TOKENS]) {
-    if (!existsSync(f)) {
-      console.error(`❌ ${f} does not exist — build first (nx run-many --target=build --skip-nx-cache)`);
-      process.exit(1);
-    }
+  const { dir, modules } = stagePackages();
+
+  // FAIL CLOSED on the fonts. This was `if (existsSync(FONTS)) cpSync(...)` — a conditional copy
+  // with no else, in a function whose own comment said a silent 404 "would look like a pass". A
+  // lens moved the fonts away and the probe stayed green with all 30 faces missing.
+  const fontDir = join(modules, 'tokens', 'dist', 'fonts');
+  const fontCount = existsSync(fontDir) ? readdirSync(fontDir).length : 0;
+  const css = readFileSync(join(modules, 'tokens', 'dist', 'tokens.css'), 'utf8');
+  const declared = new Set([...css.matchAll(/url\('\.\/fonts\/([^']+)'\)/g)].map((m2) => m2[1]));
+  const missing = [...declared].filter((f) => !existsSync(join(fontDir, f)));
+  if (declared.size === 0) {
+    console.error('❌ tokens.css declares no @font-face sources — refusing to certify font loading over nothing');
+    process.exit(1);
   }
-  const dir = mkdtempSync(join(tmpdir(), 'sk-offline-'));
-  copyFileSync(BUNDLE, join(dir, 'elements.js'));
-  copyFileSync(TOKENS, join(dir, 'tokens.css'));
-  // tokens.css resolves its @font-face urls relative to itself, so the fonts must sit beside it
-  // or every face 404s — which on file:// is silent and would look like a pass.
-  if (existsSync(FONTS)) cpSync(FONTS, join(dir, 'fonts'), { recursive: true });
+  if (missing.length) {
+    console.error(
+      `❌ the PUBLISHED tokens package declares ${declared.size} @font-face sources and ships ` +
+        `${fontCount} font files, but ${missing.length} resolve to nothing relative to dist/tokens.css:\n   ` +
+        missing.slice(0, 5).join('\n   ') + (missing.length > 5 ? `\n   … and ${missing.length - 5} more` : ''),
+    );
+    process.exit(1);
+  }
+
+  const tags = manifestTags();
   const html = `<!doctype html>
 <meta charset="utf-8">
-<link rel="stylesheet" href="./tokens.css">
+<link rel="stylesheet" href="./node_modules/@spec-kitty/tokens/dist/tokens.css">
 ${extraHead}
-<script src="./elements.js"></script>
-${TAGS.map((t) => `<${t}></${t}>`).join('\n')}
+<script src="./node_modules/@spec-kitty/elements/dist/elements.js"></script>
+${tags.map((t) => `<${t}></${t}>`).join('\n')}
 `;
   const page = join(dir, 'index.html');
   writeFileSync(page, html);
-  return page;
+  return { page, tags, fontCount };
 }
 
-async function run(pagePath) {
+async function run(pagePath, tags) {
   const browser = await chromium.launch();
   const page = await browser.newPage();
   const offsite = [];
@@ -76,8 +134,18 @@ async function run(pagePath) {
     const url = req.url();
     if (!url.startsWith('file://')) offsite.push(url);
   });
+  // WEBSOCKETS NEED THEIR OWN LISTENER. The comment above used to claim `ws(s)` was covered by
+  // scheme filtering; it is not — `page.on('request')` never fires for a WebSocket handshake, and
+  // a lens proved the probe blind to `new WebSocket('wss://…')`. Same for the two other transports
+  // that bypass the request event.
+  page.on('websocket', (ws) => offsite.push(ws.url()));
   await page.goto(pathToFileURL(pagePath).href, { waitUntil: 'load' });
-  await page.evaluate(() => customElements.whenDefined('sk-button'));
+  await page.evaluate((t) => customElements.whenDefined(t), tags[0]);
+  // A SETTLE WINDOW. The browser used to close the moment the first element upgraded, so a
+  // request fired from a `setTimeout`, an idle callback, or a lazy import after load was invisible
+  // — a lens demonstrated it with a 1.5s delayed fetch. This is not a fix for an arbitrarily late
+  // request, and it is not claimed to be; it closes the common case.
+  await page.waitForTimeout(2000);
 
   const result = await page.evaluate((tags) => {
     const out = { upgraded: [], notUpgraded: [], styled: null };
@@ -88,22 +156,28 @@ async function run(pagePath) {
       if (el && el.shadowRoot) out.upgraded.push(t);
       else out.notUpgraded.push(t);
     }
-    const btn = document.querySelector('sk-button');
+    // FONTS, asserted rather than assumed. The probe copied fonts into place and then never
+    // looked at whether any of them loaded, so the whole paragraph about silent 404s guarded
+    // nothing observable.
+    out.fontsLoaded = [...document.fonts].filter((f) => f.status === 'loaded').length;
+    out.fontFaces = document.fonts.size;
+    const btn = document.querySelector(tags[0]);
     // Proof the ADOPTED sheet arrived, not just that the element exists: adoptedStyleSheets is
     // how ADR-10 §1 delivers CSS, so a non-empty list is the styling assertion.
     out.styled = btn?.shadowRoot ? btn.shadowRoot.adoptedStyleSheets.length : 0;
     return out;
-  }, TAGS);
+  }, tags);
 
   await browser.close();
   return { offsite, ...result };
 }
 
-function report(r, { expectOffsite }) {
+function report(r, { expectOffsite, tags }) {
   const problems = [];
-  if (TAGS.length === 0) problems.push('the TAGS list is empty — this probe would assert nothing');
+  if (tags.length === 0) problems.push('the tag list is empty — this probe would assert nothing');
   if (r.notUpgraded.length) problems.push(`did not upgrade: ${r.notUpgraded.join(', ')}`);
-  if (!r.styled) problems.push('sk-button adopted ZERO stylesheets — the bundle loaded but carries no CSS');
+  if (!r.styled) problems.push(`${tags[0]} adopted ZERO stylesheets — the bundle loaded but carries no CSS`);
+  if (!r.fontFaces) problems.push('the page registered ZERO @font-face rules — tokens.css did not apply');
   if (!expectOffsite && r.offsite.length) {
     problems.push(`${r.offsite.length} off-machine request(s): ${[...new Set(r.offsite)].join(', ')}`);
   }
@@ -118,9 +192,9 @@ const selftest = process.argv.includes('--selftest');
 if (selftest) {
   // A page that deliberately reaches off-machine. If the probe cannot see this, it cannot see
   // a repositioned @import either, and its green means nothing.
-  const page = stage('<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&display=swap">');
-  const r = await run(page);
-  const problems = report(r, { expectOffsite: true });
+  const { page, tags } = stage('<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&display=swap">');
+  const r = await run(page, tags);
+  const problems = report(r, { expectOffsite: true, tags });
   if (problems.length) {
     console.error('❌ the offline probe is blind:');
     problems.forEach((p) => console.error(`   ${p}`));
@@ -129,16 +203,17 @@ if (selftest) {
   console.log(`✅ probe sees an off-machine request when one is planted (${r.offsite.length} seen)`);
   console.log(`   ${[...new Set(r.offsite)].join('\n   ')}`);
 } else {
-  const page = stage();
-  const r = await run(page);
-  const problems = report(r, { expectOffsite: false });
+  const { page, tags, fontCount } = stage();
+  const r = await run(page, tags);
+  const problems = report(r, { expectOffsite: false, tags });
   if (problems.length) {
     console.error('❌ file:// load failed:');
     problems.forEach((p) => console.error(`   ${p}`));
     process.exit(1);
   }
   console.log(
-    `✅ file:// load: ${r.upgraded.length}/${TAGS.length} elements upgraded, ` +
-      `${r.styled} adopted sheet(s) on sk-button, ZERO off-machine requests.`,
+    `✅ file:// load from the PACKED tarballs: ${r.upgraded.length}/${tags.length} elements upgraded, ` +
+      `${r.styled} adopted sheet(s), ${r.fontFaces} @font-face rules with ${fontCount} font files ` +
+      `shipped, ZERO off-machine requests.`,
   );
 }

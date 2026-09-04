@@ -23,8 +23,9 @@
  * it can see; the probes are the evidence, the way build-react-wrappers.mjs --selftest is.
  */
 import { execFileSync } from 'node:child_process';
-import { readFileSync, readdirSync } from 'node:fs';
-import { join, dirname } from 'node:path';
+import { readFileSync, readdirSync, mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parse } from 'yaml';
 import { publishable, buildable, all } from './release-graph.mjs';
@@ -79,6 +80,44 @@ export function checkTarballsNonEmpty(tarballs) {
   for (const t of tarballs) {
     if (!t.files || t.files.length === 0) {
       problems.push(`${t.name} packed ZERO files — a published empty package is worse than none`);
+      continue;
+    }
+    // THE FLOOR WAS UNREACHABLE. npm ALWAYS packs package.json (and picks up README/LICENSE),
+    // so `files.length === 0` cannot happen for a real package: a lens created a package with
+    // `files: []` and `main` pointing at a path that does not exist, and this gate reported
+    // "all packing, all exports resolving" over a tarball containing nothing but its manifest.
+    // The floor has to be "something a consumer can actually use".
+    const payload = t.files.filter((f) => !/^(package\.json|README(\.md)?|LICENSE(\.md|\.txt)?)$/i.test(f));
+    if (payload.length === 0) {
+      problems.push(
+        `${t.name} packed only its manifest and boilerplate (${t.files.join(', ')}) — ` +
+          `npm always includes those, so this package ships nothing a consumer can use`,
+      );
+    }
+  }
+  return problems;
+}
+
+/**
+ * SC-002 — the legacy entry points, for a package with no `exports` map.
+ *
+ * checkExportsResolve only fires when `t.exports` is truthy, so a package declaring only `main`
+ * and `types` received ZERO entry-point validation. A lens got a package past the gate whose
+ * `main` pointed at a file that was not in the tarball.
+ */
+export function checkLegacyEntriesResolve(tarballs) {
+  const problems = [];
+  for (const t of tarballs) {
+    for (const field of ['main', 'types', 'module', 'browser']) {
+      const target = t[field];
+      if (typeof target !== 'string') continue;
+      const clean = target.replace(/^\.\//, '');
+      if (!t.files.includes(clean)) {
+        problems.push(`${t.name}: "${field}": "${target}" is not in the tarball`);
+      }
+    }
+    if (!t.exports && !t.main) {
+      problems.push(`${t.name} declares neither "exports" nor "main" — nothing states its entry point`);
     }
   }
   return problems;
@@ -172,8 +211,37 @@ export function checkWorkflowUsesDerivedSet(workflowText, packageNames, packageD
   if (!Array.isArray(steps) || steps.length === 0) {
     return ['release.yml has no release job steps to check'];
   }
-  const runs = steps.map((s) => ({ name: s.name ?? '(unnamed)', run: typeof s.run === 'string' ? s.run : '' }));
+  // THE WHOLE STEP, not just `run:`. A lens re-added the two original per-package steps verbatim
+  // —
+  //     - name: Publish @spec-kitty/tokens (FR-044)
+  //       run: npm publish --provenance --access public
+  //       working-directory: packages/tokens
+  //
+  // — and this check passed, because each step's package identity lives in `working-directory`
+  // and `name`, not in `run`. That is the EXACT shape of the drift this mission removed, so the
+  // check was blind to its own subject. `env` and `with` are folded in for the same reason.
+  const stepText = (s) =>
+    [s.name, s.run, s['working-directory'], ...Object.values(s.env ?? {}), ...Object.values(s.with ?? {})]
+      .filter((v) => typeof v === 'string')
+      .join('\n');
+  const runs = steps.map((s) => ({ name: s.name ?? '(unnamed)', run: stepText(s), isPerPackageDir: typeof s['working-directory'] === 'string' && /^packages\//.test(s['working-directory']) }));
   const joined = runs.map((r) => r.run).join('\n');
+
+  // THE PAYLOAD. A lens deleted the entire publish step and this check still exited 0: it
+  // asserted that the derived set was USED, never that anything was published. A release
+  // workflow that publishes nothing is the mission's own stated defect class.
+  const REQUIRED_STEPS = [
+    [/npm\s+publish\b[^\n]*--provenance[^\n]*--access\s+public/, 'publish with provenance'],
+    [/npm\s+pack\b/, 'the contents audit'],
+    [/cyclonedx/i, 'the SBOM'],
+    [/check-release-graph\.mjs/, 'the release-graph assertion on the publishing path'],
+  ];
+  for (const [re, what] of REQUIRED_STEPS) {
+    if (!re.test(joined)) problems.push(`release.yml has no step running ${what}`);
+  }
+  for (const s2 of steps) {
+    if (s2['continue-on-error']) problems.push(`release.yml step "${s2.name ?? s2.run}" carries continue-on-error`);
+  }
 
   if (!joined.includes('release-graph.mjs')) {
     problems.push('release.yml never invokes scripts/release-graph.mjs — the derived set is not used');
@@ -193,11 +261,28 @@ export function checkWorkflowUsesDerivedSet(workflowText, packageNames, packageD
   //
   // The lookbehind also stops `@spec-kitty/tokens` from being counted twice, once for the full
   // name and once for the bare `tokens` inside it: that `tokens` is preceded by `/`.
+  // ONE hand-written per-package step is already the failure mode — the original release.yml had
+  // exactly two, and neither enumerated anything. So a `working-directory: packages/<x>` is a hit
+  // on its own, without needing a second name in the same block.
+  const perPackage = runs.filter((r) => r.isPerPackageDir);
+  if (perPackage.length) {
+    problems.push(
+      `release.yml has ${perPackage.length} step(s) with a per-package \`working-directory\` ` +
+        `(${perPackage.map((r) => r.name).join(', ')}) — that is one hand-written step per package, ` +
+        `which is how the three lists drifted apart. Loop over the derived set instead.`,
+    );
+  }
+
   const ids = [...packageNames, ...packageDirs];
   for (const r of runs) {
-    if (r.run.includes('release-graph.mjs')) continue; // the deriving step names nothing
+    // Strip only the LINES that invoke the deriving script, not the whole block. Skipping the
+    // block let a lens reintroduce a full hand-written publish loop simply by adding a no-op
+    // `node scripts/release-graph.mjs --dirs > /dev/null` line beside it.
     // Shell comments are prose; a package named in one is documentation, not a second list.
-    const code = r.run.split('\n').filter((l) => !/^\s*#/.test(l)).join('\n');
+    const code = r.run
+      .split('\n')
+      .filter((l) => !/^\s*#/.test(l) && !l.includes('release-graph.mjs'))
+      .join('\n');
     const named = [...new Set(ids.filter((id) => new RegExp(`(?<![\\w@/-])${escapeRe(id)}(?![\\w/-])`).test(code)))];
     if (named.length >= 2) {
       problems.push(
@@ -209,21 +294,96 @@ export function checkWorkflowUsesDerivedSet(workflowText, packageNames, packageD
   return problems;
 }
 
-/** NFR-001 — the derived accessors refuse an empty set rather than returning one. */
+/**
+ * SC-004, widened — no hand-written package list in ANY workflow.
+ *
+ * checkWorkflowUsesDerivedSet reads release.yml only. The commit that introduced it announced
+ * "a FOURTH hand-written list turned up in ci-quality.yml" and fixed that one by hand — leaving
+ * it guarded by nothing. A lens then found two more, in storybook-deploy.yml and pr-preview.yml.
+ * Six lists, three of them outside the one file the check could see.
+ *
+ * So the scan is over every workflow. release.yml keeps its own deeper check (required payload
+ * steps, per-package working-directory); this is the floor that applies everywhere.
+ */
+export function checkNoHandWrittenListsAnywhere(workflows, packageNames, packageDirs) {
+  const problems = [];
+  if (workflows.length === 0) {
+    return ['no workflow files found — refusing to certify the absence of hand-written lists over nothing'];
+  }
+  const ids = [...packageNames, ...packageDirs];
+  for (const { file, text } of workflows) {
+    const wf = parse(text);
+    for (const [jobName, job] of Object.entries(wf?.jobs ?? {})) {
+      for (const st of job?.steps ?? []) {
+        const run = typeof st.run === 'string' ? st.run : '';
+        const code = run
+          .split('\n')
+          .filter((l) => !/^\s*#/.test(l) && !l.includes('release-graph.mjs'))
+          .join('\n');
+        const named = [...new Set(ids.filter((id) => new RegExp(`(?<![\\w@/-])${escapeRe(id)}(?![\\w/-])`).test(code)))];
+        if (named.length >= 2) {
+          problems.push(
+            `${file} job "${jobName}" step "${st.name ?? '(unnamed)'}" names ${named.length} packages ` +
+              `literally (${named.join(', ')}) — derive the list with scripts/release-graph.mjs instead`,
+          );
+        }
+      }
+    }
+  }
+  return problems;
+}
+
+/**
+ * NFR-001 / SC-003 — the REAL accessors refuse an empty set.
+ *
+ * The first version of this took the accessors and called them on the live tree, where they
+ * return four and three packages, so its "returned an empty array" branch was unreachable by
+ * construction. Three lenses found it independently, and one proved the consequence: deleting
+ * both `throw` blocks in release-graph.mjs left this file printing 14/14 probes green.
+ *
+ * So it builds a real fixture tree — a packages/ directory containing only private packages,
+ * and one containing nothing at all — and asserts the real functions THROW on it. `scan()`
+ * takes an injectable root for exactly this and for nothing else.
+ */
 export function checkGraphFailsClosed(accessors) {
   const problems = [];
-  for (const [name, fn] of Object.entries(accessors)) {
-    let threw = false;
+  const fixtures = [];
+  const mk = (name, build) => {
+    const dir = mkdtempSync(join(tmpdir(), `sk-graph-${name}-`));
+    build(dir);
+    fixtures.push(dir);
+    return dir;
+  };
+
+  const allPrivate = mk('private', (dir) => {
+    for (const n of ['a', 'b']) {
+      mkdirSync(join(dir, n), { recursive: true });
+      writeFileSync(join(dir, n, 'package.json'), JSON.stringify({ name: `@x/${n}`, version: '1.0.0', private: true }));
+    }
+  });
+  const noBuild = mk('nobuild', (dir) => {
+    mkdirSync(join(dir, 'a'), { recursive: true });
+    writeFileSync(join(dir, 'a', 'package.json'), JSON.stringify({ name: '@x/a', version: '1.0.0' }));
+  });
+  const empty = mk('empty', () => {});
+
+  const mustThrow = (label, fn) => {
     try {
       const v = fn();
-      if (Array.isArray(v) && v.length === 0) {
-        problems.push(`release-graph.${name}() returned an EMPTY array instead of throwing`);
-      }
+      problems.push(
+        `release-graph.${label} did NOT throw on ${label.includes('empty') ? 'an empty' : 'a degenerate'} ` +
+          `package tree — it returned ${JSON.stringify(Array.isArray(v) ? v.map((p) => p.name) : v)}`,
+      );
     } catch {
-      threw = true;
+      /* throwing is the contract */
     }
-    if (threw) continue;
-  }
+  };
+
+  mustThrow('publishable(all-private)', () => accessors.publishable(allPrivate));
+  mustThrow('publishable(empty-tree)', () => accessors.publishable(empty));
+  mustThrow('buildable(no-build-target)', () => accessors.buildable(noBuild));
+
+  for (const d of fixtures) rmSync(d, { recursive: true, force: true });
   return problems;
 }
 
@@ -258,6 +418,10 @@ function packOne(pkg) {
     size: entry.size,
     unpackedSize: entry.unpackedSize,
     exports: manifest.exports,
+    main: manifest.main,
+    types: manifest.types,
+    module: manifest.module,
+    browser: typeof manifest.browser === 'string' ? manifest.browser : undefined,
   };
 }
 
@@ -300,6 +464,63 @@ const PROBES = [
     what: 'subpath coverage asserted over zero component directories',
     run: () => checkSubpathCoverage([], ['.'], '@x/styles'),
   },
+  // Every probe below reproduces an attack a pass-1 lens actually got past this gate.
+  {
+    what: 'a tarball containing only its manifest (npm always packs package.json)',
+    run: () => checkTarballsNonEmpty([{ name: '@x/a', files: ['package.json'] }]),
+  },
+  {
+    what: 'a manifest-and-README tarball with no payload',
+    run: () => checkTarballsNonEmpty([{ name: '@x/a', files: ['package.json', 'README.md', 'LICENSE'] }]),
+  },
+  {
+    what: 'a "main" that is not in the tarball, with no exports map',
+    run: () => checkLegacyEntriesResolve([{ name: '@x/a', files: ['package.json'], main: './dist/index.js' }]),
+  },
+  {
+    what: 'a package declaring neither exports nor main',
+    run: () => checkLegacyEntriesResolve([{ name: '@x/a', files: ['package.json', 'dist/index.js'] }]),
+  },
+  {
+    what: 'a release workflow with no publish step at all',
+    run: () =>
+      checkWorkflowUsesDerivedSet(
+        'jobs:\n  release:\n    steps:\n      - run: |\n          node scripts/release-graph.mjs --dirs\n' +
+          '          echo "${{ steps.graph.outputs.projects }} ${{ steps.graph.outputs.dirs }}"\n',
+        ['@x/a'],
+        ['a'],
+      ),
+  },
+  {
+    what: 'one hand-written step per package, identified by working-directory',
+    run: () =>
+      checkWorkflowUsesDerivedSet(
+        'jobs:\n  release:\n    steps:\n      - name: Publish tokens\n        run: npm publish --provenance --access public\n' +
+          '        working-directory: packages/tokens\n',
+        ['@spec-kitty/tokens'],
+        ['tokens'],
+      ),
+  },
+  {
+    what: 'an enumeration smuggled into a block that also derives',
+    run: () =>
+      checkWorkflowUsesDerivedSet(
+        'jobs:\n  release:\n    steps:\n      - run: |\n          node scripts/release-graph.mjs --dirs > /dev/null\n' +
+          '          echo "${{ steps.graph.outputs.projects }} ${{ steps.graph.outputs.dirs }}"\n' +
+          '          for p in tokens styles elements react; do ( cd packages/$p && npm publish ); done\n',
+        ['@spec-kitty/tokens', '@spec-kitty/styles'],
+        ['tokens', 'styles'],
+      ),
+  },
+  {
+    what: 'a release step carrying continue-on-error',
+    run: () =>
+      checkWorkflowUsesDerivedSet(
+        'jobs:\n  release:\n    steps:\n      - run: npm publish --provenance --access public\n        continue-on-error: true\n',
+        ['@x/a'],
+        ['a'],
+      ),
+  },
   {
     what: 'a sourcemap in the tarball',
     run: () => checkForbiddenContents([{ name: '@x/a', files: ['dist/index.js', 'dist/index.js.map'] }]),
@@ -324,6 +545,19 @@ const PROBES = [
       ),
   },
   {
+    what: 'a hand-written list in a workflow other than release.yml',
+    run: () =>
+      checkNoHandWrittenListsAnywhere(
+        [{ file: 'x.yml', text: 'jobs:\n  b:\n    steps:\n      - run: nx run-many --projects=tokens,styles,elements\n' }],
+        ['@spec-kitty/tokens'],
+        ['tokens', 'styles', 'elements'],
+      ),
+  },
+  {
+    what: 'the all-workflow scan asserted over zero workflow files',
+    run: () => checkNoHandWrittenListsAnywhere([], ['@x/a'], ['a']),
+  },
+  {
     what: 'a graph accessor that returns an empty array instead of throwing',
     run: () => checkGraphFailsClosed({ publishable: () => [] }),
   },
@@ -346,8 +580,8 @@ function selftest() {
   }
   // The floor is asserted, not implied: a probe list that silently emptied would print nothing
   // and exit 0, which is the defect this script is about.
-  if (PROBES.length < 14) {
-    console.error(`❌ only ${PROBES.length} probes — the selftest floor is 14`);
+  if (PROBES.length < 24) {
+    console.error(`❌ only ${PROBES.length} probes — the selftest floor is 24`);
     process.exit(1);
   }
   console.log(`\n✅ all ${PROBES.length} probes tripped the gate.`);
@@ -373,6 +607,7 @@ function main() {
     ...checkNothingSilentlyPrivate(pkgs, EXPECTED_PRIVATE),
     ...checkTarballsNonEmpty(tarballs),
     ...checkExportsResolve(tarballs),
+    ...checkLegacyEntriesResolve(tarballs),
     ...checkForbiddenContents(tarballs),
     ...checkSubpathCoverage(
       readdirSync(join(ROOT, 'packages/styles/src'), { withFileTypes: true })
@@ -383,6 +618,13 @@ function main() {
       '@spec-kitty/styles',
     ),
     ...checkWorkflowUsesDerivedSet(readFileSync(join(ROOT, WORKFLOW), 'utf8'), pkgs.map((p) => p.name), pkgs.map((p) => p.dir)),
+    ...checkNoHandWrittenListsAnywhere(
+      readdirSync(join(ROOT, '.github/workflows'))
+        .filter((f) => /\.ya?ml$/.test(f))
+        .map((f) => ({ file: `.github/workflows/${f}`, text: readFileSync(join(ROOT, '.github/workflows', f), 'utf8') })),
+      pkgs.map((p) => p.name),
+      pkgs.map((p) => p.dir),
+    ),
     ...checkGraphFailsClosed({ publishable, buildable }),
   ];
 
@@ -394,5 +636,10 @@ function main() {
   console.log(`\n✅ release graph is coherent: ${pub.length} publishable packages, all packing, all exports resolving.`);
 }
 
-if (process.argv.includes('--selftest')) selftest();
-else main();
+// Run-as-CLI guard, matching release-graph.mjs. Without it, importing this module for its
+// exported checks ran main() — spawning `npm pack` for every package and calling process.exit —
+// which a lens hit while trying to unit-test the very functions the header advertises as pure.
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  if (process.argv.includes('--selftest')) selftest();
+  else main();
+}

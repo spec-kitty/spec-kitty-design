@@ -46,7 +46,7 @@ Design tokens as a single CSS file of custom properties, plus the brand fonts an
 - **Provenance and SBOM.** Every package publishes with `--provenance`, and a CycloneDX SBOM is
   attached to the GitHub Release (ADR-5 FR-044, FR-045).
 - **SRI.** The classic-script bundle's `sha384` integrity hash is recorded in
-  `packages/elements/INTEGRITY.json` and re-derived by CI.
+  the **Subresource Integrity** section of `packages/elements/SIZES.md`, regenerated and `--check`ed by CI.
 
 ### Fixed before first publish
 

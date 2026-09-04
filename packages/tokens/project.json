@@ -6,18 +6,25 @@
     "build": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "cp packages/tokens/src/tokens.css packages/tokens/dist/tokens.css && mkdir -p packages/tokens/dist/fonts && cp packages/tokens/fonts/* packages/tokens/dist/fonts/ && cp -r packages/tokens/assets packages/tokens/dist/assets"
+        "command": "rm -rf packages/tokens/dist/fonts packages/tokens/dist/assets && mkdir -p packages/tokens/dist/fonts packages/tokens/dist/assets && cp packages/tokens/src/tokens.css packages/tokens/dist/tokens.css && cp -r packages/tokens/fonts/. packages/tokens/dist/fonts/ && cp -r packages/tokens/assets/. packages/tokens/dist/assets/"
       }
     },
     "lint": {
       "executor": "nx:run-commands",
-      "options": { "command": "stylelint --allow-empty-input 'packages/tokens/src/**/*.css'" }
+      "options": {
+        "command": "stylelint --allow-empty-input 'packages/tokens/src/**/*.css'"
+      }
     },
     "catalogue": {
       "executor": "nx:run-commands",
-      "options": { "command": "node scripts/generate-token-catalogue.js" },
+      "options": {
+        "command": "node scripts/generate-token-catalogue.js"
+      },
       "dependsOn": []
     }
   },
-  "tags": ["scope:tokens", "type:publishable"]
+  "tags": [
+    "scope:tokens",
+    "type:publishable"
+  ]
 }

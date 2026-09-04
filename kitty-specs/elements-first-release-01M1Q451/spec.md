@@ -23,7 +23,7 @@ Creating the org, adding `NPM_TOKEN` and tagging remain the operator's, unchange
 
 Every finding below was measured on `75ca61e` and is reproducible from this branch. One earlier
 finding — that a missing `repository` field would fail provenance — was **retracted** after reading
-`libnpmpublish@11.17.0`; it does not appear as a requirement here.
+`libnpmpublish@10.0.2` (the version npm 10.9.x bundles, which is what `node-version: 22` gives CI); it does not appear as a requirement here.
 
 **`release.yml` has never been executed by any check.** It runs only on a `v*.*.*` tag, so no PR
 exercises it. That is not incidental: the `cp packages/html-js/src/nav-pill/sk-nav-pill.js` step
@@ -169,7 +169,6 @@ command in it either runs or is explicitly marked as the operator's to run.
 | FR-006 | Release runbook | As the operator, I want the post-merge sequence written down so that releasing does not require reading workflow YAML. | Medium | Open |
 | FR-007 | Single-version policy stated | As a consumer, I want the one-major-per-page constraint documented so that I do not discover it as a runtime throw. | Medium | Open |
 | FR-008 | CHANGELOG | As a consumer, I want a changelog for 1.0.0 so that I can see what the first release contains. | Medium | Open |
-| FR-009 | Mono font resolved without a network call | As a consumer, I want `--sk-font-mono` to resolve without a third-party request so that the no-network guarantee holds and the token means what it says. | Medium | Open |
 | FR-010 | styles subpath exports complete | As a consumer, I want every component's CSS reachable by subpath so that the export map is not a partial list. | Low | Open |
 
 ### Non-Functional Requirements
@@ -180,6 +179,22 @@ command in it either runs or is explicitly marked as the operator's to run.
 | NFR-002 | No network at runtime | A `file://` load of the classic-script bundle plus `tokens.css` issues **zero** network requests, asserted by request interception rather than by inspection. | Security | High | Open |
 | NFR-003 | Supply-chain controls preserved | ADR-5's release controls — `npm audit` gate, `--provenance`, CycloneDX SBOM, contents audit — apply to every package in the derived set, not a subset. | Security | High | Open |
 | NFR-004 | Install size is stated | Each package's packed and unpacked size is recorded from a real `npm pack`, and the record is regenerated rather than transcribed. | Performance | Medium | Open |
+
+### Withdrawn during implementation
+
+**FR-009 (mono font) and SC-008 are withdrawn from this mission**, and are removed from the tables
+above rather than struck through — a row in the table is a requirement of the mission regardless of
+its formatting.
+
+The mechanical half shipped: `tokens.css`'s dead Google Fonts `@import` is deleted, and there was
+never a request to remove because the rule was invalid and dropped (32 rules parsed, 0 imports,
+before and after). What did not ship is the half that makes the token honest — `--sk-font-mono`
+still names `'JetBrains Mono'`, which still does not load.
+
+Resolving that means either self-hosting the face or dropping it from the token so the declaration
+matches what resolves. **Both are brand decisions, not engineering ones**, and this mission does not
+take them; the choice is raised as fork 2 on #80. Leaving the requirement in the table while
+deferring the decision would have shipped a mission with a quietly unmet FR, which a lens caught.
 
 ### Constraints
 
@@ -207,6 +222,5 @@ command in it either runs or is explicitly marked as the operator's to run.
 - **SC-005**: The release gate runs on pull requests, and reverting any one packaging fact reds it.
 - **SC-006**: A `file://` page using the built classic-script bundle and `tokens.css` renders upgraded, styled components with **zero** intercepted network requests.
 - **SC-007**: The SRI hash for the classic-script bundle is generated from the built artifact, recorded, and re-derived by a check rather than transcribed.
-- **SC-008**: `--sk-font-mono` resolves to its intended family with no network request, or the token's declared family matches what actually loads.
 - **SC-009**: The runbook states the trigger is the tag and not the merge, and states that a dry run proves packing and not publishing.
 - **SC-010**: No tarball contains a sourcemap, a test file, or a dev-only dotfile.

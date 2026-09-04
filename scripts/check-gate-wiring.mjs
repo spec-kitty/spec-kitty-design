@@ -148,7 +148,7 @@ else {
     const why = [];
     if ('if' in st) why.push('carries an `if:`');
     if (st['continue-on-error']) why.push('carries continue-on-error');
-    if (/\|\|\s*(true|:)\b/.test(String(st.run ?? ''))) why.push('swallows failure with `|| true`');
+    if (/\|\|\s*(true|:|echo|cat|printf|exit\s+0)\b/.test(String(st.run ?? ''))) why.push('swallows failure with `|| true`');
     return why;
   };
 
@@ -200,7 +200,7 @@ else {
     [/node\s+scripts\/check-release-graph\.mjs\s+--selftest(\s|$)/, "the release gate's own probe table", 'scripts/check-release-graph.mjs --selftest'],
     [/node\s+scripts\/check-offline-load\.mjs(?!\s*--selftest)(\s|$)/, 'the file:// no-network probe', 'scripts/check-offline-load.mjs'],
     [/node\s+scripts\/check-offline-load\.mjs\s+--selftest(\s|$)/, "the offline probe's own blindness check", 'scripts/check-offline-load.mjs --selftest'],
-    [/node\s+scripts\/build-elements-integrity\.mjs\s+--check(\s|$)/, 'the SRI hash drift check', 'scripts/build-elements-integrity.mjs --check'],
+    [/node\s+scripts\/measure-elements-sizes\.mjs\s+--check(\s|$)/, 'the size and SRI drift check', 'scripts/measure-elements-sizes.mjs --check'],
   ];
   const releaseSteps = wf.jobs?.['release-gate']?.steps ?? [];
   for (const [re, what, label] of REQUIRED_RELEASE) {
@@ -231,7 +231,7 @@ else {
       if (enforced && 'if' in st) {
         problems.push(`[ENFORCED] step "${st.name}" in \`${jobName}\` carries an \`if:\` — it can be skipped`);
       }
-      if (enforced && /\|\|\s*(true|:)\b/.test(String(st.run ?? ''))) {
+      if (enforced && /\|\|\s*(true|:|echo|cat|printf|exit\s+0)\b/.test(String(st.run ?? ''))) {
         problems.push(`[ENFORCED] step "${st.name}" in \`${jobName}\` swallows failure with \`|| true\``);
       }
     }

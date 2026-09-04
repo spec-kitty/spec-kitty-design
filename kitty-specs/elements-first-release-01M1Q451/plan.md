@@ -39,7 +39,7 @@ that notices.
 | ADR-2: independently publishable packages per target | This mission is what makes `elements` and `react` publishable at all | Advanced |
 | ADR-2 pre-flight: `@spec-kitty` scope owned before publishing | Gates the **tag**, not this mission (#80's 2026-09-02 correction) | Out of scope, C-001 |
 | ADR-5 FR-041: `npm audit` gate before publish | Must apply to the derived set, not a subset — NFR-003 | Extended |
-| ADR-5 FR-044: `npm publish --provenance` | Already correct; guards are the GHA OIDC token and `--access public`, both set. **Not** the `repository` field — verified in `libnpmpublish@11.17.0`, and an earlier claim of mine to the contrary is retracted | Unchanged |
+| ADR-5 FR-044: `npm publish --provenance` | Already correct; guards are the GHA OIDC token and `--access public`, both set. **Not** the `repository` field — verified in `libnpmpublish@10.0.2`, the version npm 10.9.x bundles and therefore what `node-version: 22` gives CI, and an earlier claim of mine to the contrary is retracted | Unchanged |
 | ADR-5 FR-045: CycloneDX SBOM as a Release artifact | Already correct; unchanged | Unchanged |
 | ADR-5 contents audit: `npm pack --dry-run`, no secrets/sourcemaps/dev files | Currently loops two packages; becomes the derived set and gains assertions — FR-004, SC-010 | Extended |
 | ADR-5 2FA on the scope | Operational policy, operator's | Out of scope |
@@ -82,7 +82,6 @@ packages/
 docs/
 └── release-runbook.md             NEW
 CHANGELOG.md                       NEW
-packages/elements/INTEGRITY.json   NEW — generated, --check'd
 ```
 
 ## Complexity Tracking
@@ -122,7 +121,7 @@ packages/elements/INTEGRITY.json   NEW — generated, --check'd
 
 - **Purpose**: prove a `file://` page loads the classic-script bundle with zero network requests, and record an SRI hash for the CDN path.
 - **Relevant requirements**: FR-005, NFR-002, SC-006, SC-007
-- **Affected surfaces**: `scripts/check-offline-load.mjs`, `scripts/build-elements-integrity.mjs`, `packages/elements/INTEGRITY.json`
+- **Affected surfaces**: `scripts/check-offline-load.mjs`, `scripts/build-elements-integrity.mjs`, `packages/elements/SIZES.md`
 - **Sequencing/depends-on**: IC-01
 - **Risks**: **this criterion currently passes by accident.** The graph's only network dependency is `tokens.css`'s Google Fonts `@import`, which is invalid and dropped (verified in Chromium: 32 rules, 0 imports, the route never fired). A probe written today would go green without proving anything, and would stay green until someone repositioned the `@import`. The probe must therefore be red-first against a deliberately network-dependent fixture, not merely observed green against the current tree.
 

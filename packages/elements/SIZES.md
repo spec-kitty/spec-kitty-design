@@ -10,6 +10,35 @@ Components in these artifacts: sk-blog-card, sk-button, sk-card, sk-check-bullet
 | `ESM  (dist/index.js)` | 74.8 KiB | 46.5 KiB | 10 KiB | `lit` external |
 | `IIFE (dist/elements.js)` | 89.0 KiB | 55.3 KiB | 13 KiB | runtime bundled |
 
+## Subresource Integrity — the classic-script bundle (FR-005)
+
+For a CDN load of `dist/elements.js`, pin what the browser executes:
+
+```
+integrity="sha384-N5dMO+vTD9bzVgsVhPg0ZPTxn6j3xHRryriEHcYJwao1bTtRm7orOjBXtEnOVB4u"
+```
+
+Derived from the built artifact on every run and re-derived by `--check`, so it cannot be
+transcribed or go stale silently. It changes with every build of the bundle — a hash copied from
+another version will be refused by the browser, which is the point.
+
+NOTE ON REPRODUCIBILITY, because a lens measured it: esbuild writes module-path comments into the
+bundle, so a checkout whose `node_modules` resolves through a different path (a symlink, a pnpm
+store, a bind mount) produces a different byte count and therefore a different hash. The figure
+here is CI's. Anyone re-deriving it locally must match CI's layout; this is a limit of the build,
+not of the hash.
+
+## Published package sizes (NFR-004)
+
+What a consumer downloads, from a real `npm pack` of each package in the derived publishable set.
+
+| package | files | packed | unpacked |
+|---|---:|---:|---:|
+| `@spec-kitty/tokens` | 37 | 3812.1 KiB | 5749.5 KiB |
+| `@spec-kitty/styles` | 64 | 28.1 KiB | 119.8 KiB |
+| `@spec-kitty/elements` | 32 | 64.8 KiB | 351.5 KiB |
+| `@spec-kitty/react` | 32 | 9.6 KiB | 66.0 KiB |
+
 ## The basis matters — read this before comparing against an ADR
 
 ADR-10 §2 quotes "~3.2 KB" ESM and "~26 KB" IIFE; ADR-8 quotes a "~6 KB Lit runtime".

@@ -14,6 +14,7 @@
  * Usage: node scripts/measure-elements-sizes.mjs [--check]
  */
 import { execFileSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { readFileSync, writeFileSync, existsSync, statSync, globSync } from 'node:fs';
 import { basename } from 'node:path';
 import { gzipSync } from 'node:zlib';
@@ -31,6 +32,41 @@ const OUT = 'packages/elements/SIZES.md';
 const kb = (n) => `${(n / 1024).toFixed(1)} KiB`;
 /** Whole KiB, for compressor output only — see the note at the artifact table below. */
 const wholeKb = (n) => `${Math.round(n / 1024)} KiB`;
+
+/**
+ * The SRI hash for the classic-script bundle (#80, FR-005), recorded HERE rather than in a second
+ * file. It began life as a separate `INTEGRITY.json` and three lenses objected to that for
+ * three different reasons that all point the same way: it duplicated the byte count this file
+ * already records, it added a second drift gate over the same artifact, and it was absent from
+ * `docs/contributing/adding-a-component.md`'s regeneration list — so the next component PR would
+ * have followed that checklist exactly and reddened CI with no documented remedy.
+ *
+ * One generated record, already checklisted, already `--check`ed.
+ */
+const ALGO = 'sha384'; // the SRI default
+const sri = (path) => `${ALGO}-${createHash(ALGO).update(readFileSync(path)).digest('base64')}`;
+
+/**
+ * NFR-004 — packed and unpacked size per publishable package, from a real `npm pack`.
+ *
+ * An earlier revision met this by printing the figures in a CI log and arguing that a committed
+ * record would churn. A lens pointed out the contradiction: this very file IS a committed,
+ * generated size record with a `--check`, and the argument was made in the same commit that
+ * adopted the pattern for the SRI hash. A log line is not a record — it expires.
+ */
+const PACKAGES = JSON.parse(
+  execFileSync('node', ['scripts/release-graph.mjs', '--json'], { encoding: 'utf8' }),
+).publishable.map((p) => {
+  const out = execFileSync('npm', ['pack', '--dry-run', '--json'], {
+    cwd: `packages/${p.dir}`, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'],
+  });
+  const e = JSON.parse(out)[0];
+  return { name: p.name, files: e.entryCount, packed: e.size, unpacked: e.unpackedSize };
+});
+if (PACKAGES.length === 0) {
+  console.error('measure-elements-sizes: the publishable set is empty — refusing to record nothing');
+  process.exit(1);
+}
 
 for (const a of ARTIFACTS) {
   if (!existsSync(a.path)) {
@@ -66,6 +102,32 @@ Components in these artifacts: ${COMPONENTS.join(', ')}.
 | artifact | raw | minified | min+gzip | notes |
 |---|---:|---:|---:|---|
 ${ARTIFACTS.map((a) => `| \`${a.name}\` | ${kb(a.raw)} | ${kb(a.min)} | ${wholeKb(a.mingzip)} | ${a.note} |`).join('\n')}
+
+## Subresource Integrity — the classic-script bundle (FR-005)
+
+For a CDN load of \`dist/elements.js\`, pin what the browser executes:
+
+\`\`\`
+integrity="${sri('packages/elements/dist/elements.js')}"
+\`\`\`
+
+Derived from the built artifact on every run and re-derived by \`--check\`, so it cannot be
+transcribed or go stale silently. It changes with every build of the bundle — a hash copied from
+another version will be refused by the browser, which is the point.
+
+NOTE ON REPRODUCIBILITY, because a lens measured it: esbuild writes module-path comments into the
+bundle, so a checkout whose \`node_modules\` resolves through a different path (a symlink, a pnpm
+store, a bind mount) produces a different byte count and therefore a different hash. The figure
+here is CI's. Anyone re-deriving it locally must match CI's layout; this is a limit of the build,
+not of the hash.
+
+## Published package sizes (NFR-004)
+
+What a consumer downloads, from a real \`npm pack\` of each package in the derived publishable set.
+
+| package | files | packed | unpacked |
+|---|---:|---:|---:|
+${PACKAGES.map((p) => `| \`${p.name}\` | ${p.files} | ${kb(p.packed)} | ${kb(p.unpacked)} |`).join('\n')}
 
 ## The basis matters — read this before comparing against an ADR
 

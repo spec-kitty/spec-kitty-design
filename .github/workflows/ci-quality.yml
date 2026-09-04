@@ -480,8 +480,8 @@ jobs:
         run: npx nx run-many --target=build --projects=$(node scripts/release-graph.mjs --projects)
       - name: "[ENFORCED] Release graph is coherent (FR-003, FR-004, SC-001, SC-002, SC-004, SC-010)"
         run: node scripts/check-release-graph.mjs
-      - name: "[ENFORCED] The SRI hash matches the built bundle (FR-005, SC-007)"
-        run: node scripts/build-elements-integrity.mjs --check
+      - name: "[ENFORCED] Sizes and the SRI hash match the built artifacts (FR-005, SC-007, NFR-004)"
+        run: node scripts/measure-elements-sizes.mjs --check
       - run: npx playwright install chromium
       # The probe BEFORE the check, for the reason the script documents at length: SC-006
       # currently passes by accident. The graph's only network dependency is tokens.css's
