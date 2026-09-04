@@ -10,7 +10,14 @@ echo "Running npm audit..."
 # and `set -euo pipefail` turned that into a failed security gate on a PR with no high or
 # critical advisory at all. Found on #134, where the same commit range passed this gate an hour
 # earlier and then did not, with nothing in the diff touching dependencies.
-OUTPUT=$(npm audit --audit-level=high --json 2>/dev/null || true)
+# STDERR IS KEPT, in a separate file. `2>/dev/null` isolated stdout correctly but threw away
+# npm's own diagnostic, so when the parse below failed on #138 the message printed "First 200
+# characters of what it returned:" with nothing after it — a gate that fails closed and then
+# cannot say why. npm's error is the only thing that distinguishes a registry outage from a
+# shape change, and this gate now reports it.
+AUDIT_STDERR="$(mktemp)"
+trap 'rm -f "$AUDIT_STDERR"' EXIT
+OUTPUT=$(npm audit --audit-level=high --json 2>"$AUDIT_STDERR" || true)
 
 # AND THE PARSE FAILS LOUDLY. Even with stderr separated, an unparseable body — a registry
 # outage, a proxy error page, an npm version that changes the shape — must not be able to look
@@ -35,7 +42,17 @@ if (!counts) {
 const high = (counts.high || 0) + (counts.critical || 0);
 process.stdout.write(String(high));
 ") || {
-  echo "❌ npm audit gate could not determine the vulnerability count (see above)."
+  echo "❌ npm audit gate could not determine the vulnerability count."
+  if [ -s "$AUDIT_STDERR" ]; then
+    echo "   npm wrote this to stderr:"
+    sed 's/^/   | /' "$AUDIT_STDERR" | head -20
+  else
+    echo "   npm wrote nothing to stderr, so this is a response-shape problem rather than a"
+    echo "   reported failure. A well-formed report has metadata.vulnerabilities; a registry"
+    echo "   outage typically returns an error object. Re-run before investigating further —"
+    echo "   #138 saw this once, with the step taking 5m24s, and a local audit at the same"
+    echo "   commit returned a normal report."
+  fi
   exit 1
 }
 
