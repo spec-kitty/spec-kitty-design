@@ -480,6 +480,18 @@ jobs:
         run: npx nx run-many --target=build --projects=$(node scripts/release-graph.mjs --projects)
       - name: "[ENFORCED] Release graph is coherent (FR-003, FR-004, SC-001, SC-002, SC-004, SC-010)"
         run: node scripts/check-release-graph.mjs
+      - name: "[ENFORCED] The SRI hash matches the built bundle (FR-005, SC-007)"
+        run: node scripts/build-elements-integrity.mjs --check
+      - run: npx playwright install chromium
+      # The probe BEFORE the check, for the reason the script documents at length: SC-006
+      # currently passes by accident. The graph's only network dependency is tokens.css's
+      # Google Fonts @import, which is invalid and dropped, so a probe that merely observed the
+      # healthy tree would be green while blind. --selftest plants a page that does reach
+      # off-machine and asserts the probe reds on it.
+      - name: "[ENFORCED] The offline probe can see an off-machine request (SC-006)"
+        run: node scripts/check-offline-load.mjs --selftest
+      - name: "[ENFORCED] file:// load with zero network (NFR-002, SC-006)"
+        run: node scripts/check-offline-load.mjs
 
   gate:
     runs-on: ubuntu-latest

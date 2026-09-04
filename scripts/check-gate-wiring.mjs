@@ -198,6 +198,9 @@ else {
   const REQUIRED_RELEASE = [
     [/node\s+scripts\/check-release-graph\.mjs(?!\s*--selftest)(\s|$)/, 'the release graph gate', 'scripts/check-release-graph.mjs'],
     [/node\s+scripts\/check-release-graph\.mjs\s+--selftest(\s|$)/, "the release gate's own probe table", 'scripts/check-release-graph.mjs --selftest'],
+    [/node\s+scripts\/check-offline-load\.mjs(?!\s*--selftest)(\s|$)/, 'the file:// no-network probe', 'scripts/check-offline-load.mjs'],
+    [/node\s+scripts\/check-offline-load\.mjs\s+--selftest(\s|$)/, "the offline probe's own blindness check", 'scripts/check-offline-load.mjs --selftest'],
+    [/node\s+scripts\/build-elements-integrity\.mjs\s+--check(\s|$)/, 'the SRI hash drift check', 'scripts/build-elements-integrity.mjs --check'],
   ];
   const releaseSteps = wf.jobs?.['release-gate']?.steps ?? [];
   for (const [re, what, label] of REQUIRED_RELEASE) {
