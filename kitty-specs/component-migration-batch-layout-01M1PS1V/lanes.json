@@ -1,0 +1,67 @@
+{
+  "version": 1,
+  "mission_slug": "component-migration-batch-layout-01M1PS1V",
+  "mission_id": "01M1PS1V2SMGA0ZXVBX6CD5EPJ",
+  "mission_branch": "kitty/mission-component-migration-batch-layout-01M1PS1V",
+  "target_branch": "mission/component-migration-batch-layout",
+  "lanes": [
+    {
+      "lane_id": "lane-a",
+      "wp_ids": [
+        "WP01"
+      ],
+      "write_scope": [
+        "packages/elements/src/elements.ts",
+        "packages/elements/src/index.ts",
+        "packages/elements/src/site-footer/sk-site-footer.markup.ts",
+        "packages/elements/src/site-footer/sk-site-footer.ts"
+      ],
+      "predicted_surfaces": [
+        "app-shell",
+        "artifact-rendering"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    },
+    {
+      "lane_id": "lane-b",
+      "wp_ids": [
+        "WP02"
+      ],
+      "write_scope": [
+        "packages/styles/src/site-footer/sk-site-footer.css",
+        "packages/styles/src/site-footer/sk-site-footer.stories.ts"
+      ],
+      "predicted_surfaces": [
+        "artifact-rendering"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    },
+    {
+      "lane_id": "lane-c",
+      "wp_ids": [
+        "WP03"
+      ],
+      "write_scope": [
+        "behaviours.json",
+        "expected-docs.json",
+        "expected-inert-theme-wrappers.json",
+        "expected-parts.json",
+        "expected-stories.json",
+        "fixtures/elements-behaviour/src/sk-site-footer.test.ts",
+        "mutations.json",
+        "packages/react/.wrapper-floor"
+      ],
+      "predicted_surfaces": [
+        "artifact-rendering"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    }
+  ],
+  "computed_at": "2026-09-04T18:00:51.966950+00:00",
+  "computed_from": "dependency_graph+ownership",
+  "planning_artifact_wps": [],
+  "planning_commit_sha": "b6d08209ecce9fb81fbb581cc817d3209a62a8e5"
+}
