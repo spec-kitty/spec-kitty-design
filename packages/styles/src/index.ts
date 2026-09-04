@@ -1,5 +1,11 @@
 export { SkStubHTML } from './stub/index';
-export { SkButtonPrimaryHTML, SkButtonSecondaryHTML } from './button/index';
+export {
+  SkButtonHTML,
+  SkButtonPrimaryHTML,
+  SkButtonSecondaryHTML,
+  SkButtonGhostHTML,
+  SkButtonSmHTML,
+} from './button/index';
 export {
   SkFormFieldHTML,
   SkFormInputDefaultHTML,

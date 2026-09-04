@@ -8,6 +8,7 @@
 // resolves the package to index.ts, the analyzer reads source, and Storybook has its own
 // module graph. Only the deployed demo went quiet.
 import './stub/sk-stub.js';
+import './button/sk-button.js';
 import './card/sk-card.js';
 import './nav-pill/sk-nav-pill.js';
 import './form-input/sk-form-input.js';

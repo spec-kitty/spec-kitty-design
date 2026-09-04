@@ -1,7 +1,14 @@
 /* @spec-kitty/styles — sk-button shared styles */
 /* All values use --sk-* tokens only — no hardcoded values */
 
-.sk-btn {
+/* A custom element defaults to `display: inline`, so without this the host cannot be sized or
+   spaced by a consumer. `inline-flex` matches the static form's own display, which is what the
+   two consumption paths must agree on (#77, #78). Inert in the static path. */
+:host {
+  display: inline-flex;
+}
+
+.sk-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -22,51 +29,51 @@
 }
 
 /* Primary variant — yellow fill, dark ink text, pill shape */
-.sk-btn--primary {
+.sk-button--primary {
   background: var(--sk-color-yellow);
   color: var(--sk-fg-on-primary);
   border-color: transparent;
 }
 
-.sk-btn--primary:hover {
+.sk-button--primary:hover {
   box-shadow: var(--sk-shadow-glow-primary);
 }
 
-.sk-btn--primary:active {
+.sk-button--primary:active {
   transform: scale(0.97);
 }
 
 /* Secondary variant — transparent background, border, default text */
-.sk-btn--secondary {
+.sk-button--secondary {
   background: transparent;
   color: var(--sk-fg-default);
   border-color: var(--sk-border-default);
 }
 
-.sk-btn--secondary:hover {
+.sk-button--secondary:hover {
   border-color: var(--sk-border-strong);
 }
 
 /* Ghost variant — no border, transparent, muted text */
-.sk-btn--ghost {
+.sk-button--ghost {
   background: transparent;
   color: var(--sk-fg-muted);
   border-color: transparent;
 }
 
-.sk-btn--ghost:hover {
+.sk-button--ghost:hover {
   color: var(--sk-fg-default);
 }
 
 /* Small size modifier */
-.sk-btn--sm {
+.sk-button--sm {
   padding: var(--sk-space-2) var(--sk-space-5);
   font-size: var(--sk-text-sm);
 }
 
 /* Disabled state */
-.sk-btn:disabled,
-.sk-btn[disabled] {
+.sk-button:disabled,
+.sk-button[disabled] {
   opacity: 0.4;
   cursor: not-allowed;
 }

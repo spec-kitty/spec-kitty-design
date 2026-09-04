@@ -57,7 +57,7 @@ const AXE_TAGS = ['wcag2a', 'wcag2aa'];
 //                           passed green, and an empty <picture> paints nothing.
 //
 // This keeps the legitimate icon-only case green
-// (<button class="sk-btn" aria-label="Close"><svg><path/></svg></button>) while
+// (<button class="sk-button" aria-label="Close"><svg><path/></svg></button>) while
 // closing all three regressions, and produces output identical to the looser list
 // on all 74 real stories.
 const CONTENT_MEDIA_SELECTOR =

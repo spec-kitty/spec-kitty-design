@@ -22,7 +22,8 @@
     "#77 adds two for <sk-grid>, one per registry id it claims. Both mutate the ELEMENT rather than the test: dropping part=\"grid\" must red the [SC-013] test, and emptying `static styles` must red [SC-014]. Note the SC-014 arm empties the array rather than swapping in a fresh CSSStyleSheet the way sk-stub's does — sk-grid.test.ts asserts adoptedStyleSheets.length, so both spellings red it, and the empty form also proves the length arm is load-bearing.",
     "#77 adds two more for <sk-section-banner>. The SC-013 arm drops a part= attribute from a node the test targets by name; note it picks the DOT rather than the outermost part, because the outermost one is also a node the test queries to prove the element rendered at all, so removing it would red the test for the wrong reason.",
     "#77's pre-merge gate added a SECOND SC-014 arm per element. The first arm empties `static styles`, which reds the `adoptedStyleSheets.length` assertion FIRST — vitest aborts there, so the identity assertion on the next line was never shown to be load-bearing, in the behaviour whose id is literally about identity. Swapping in a fresh CSSStyleSheet keeps length at 1 and can only red the identity arm. Both spellings are kept: one proves the length assertion, the other proves the identity assertion, and neither alone proves both.",
-    "#78 adds SIX: three for <sk-feature-card> and three for <sk-ribbon-card>. the SC-013 arm drops the CHIP's part rather than the card's, because the card part is also the node several other tests query to prove the element rendered at all. Both SC-014 spellings are carried FOR BOTH, per #77's finding that emptying the array reds the LENGTH assertion first and never exercises the identity one. An earlier revision of this PR carried both for feature-card and only the identity arm for ribbon-card, while this sentence claimed otherwise — three pre-merge lenses caught the asymmetry between the rule and its application."
+    "#78 adds SIX: three for <sk-feature-card> and three for <sk-ribbon-card>. the SC-013 arm drops the CHIP's part rather than the card's, because the card part is also the node several other tests query to prove the element rendered at all. Both SC-014 spellings are carried FOR BOTH, per #77's finding that emptying the array reds the LENGTH assertion first and never exercises the identity one. An earlier revision of this PR carried both for feature-card and only the identity arm for ribbon-card, while this sentence claimed otherwise — three pre-merge lenses caught the asymmetry between the rule and its application.",
+    "#79 adds three for <sk-button>. The SC-013 arm drops the part from the ANCHOR branch, not the button branch: the [SC-013] test mounts without href and would red on either, but the anchor branch is the one no other test queries, so this arm cannot pass for an unrelated reason. Both SC-014 spellings, per #77."
   ],
   "mutations": [
     {
@@ -464,6 +465,30 @@
       "file": "packages/elements/src/ribbon-card/sk-ribbon-card.ts",
       "from": "  static styles = [sheet];",
       "to": "  static styles = [];"
+    },
+    {
+      "id": "SC-013",
+      "subject": "fixtures/elements-behaviour/src/sk-button.test.ts",
+      "arm": "button part present",
+      "file": "packages/elements/src/button/sk-button.ts",
+      "from": "<a part=\"button\" class=${cls} href=${this.href}>",
+      "to": "<a class=${cls} href=${this.href}>"
+    },
+    {
+      "id": "SC-014",
+      "subject": "fixtures/elements-behaviour/src/sk-button.test.ts",
+      "arm": "button adopts its generated sheet",
+      "file": "packages/elements/src/button/sk-button.ts",
+      "from": "  static styles = [sheet];",
+      "to": "  static styles = [];"
+    },
+    {
+      "id": "SC-014",
+      "subject": "fixtures/elements-behaviour/src/sk-button.test.ts",
+      "arm": "button adopts the sheet BY IDENTITY",
+      "file": "packages/elements/src/button/sk-button.ts",
+      "from": "  static styles = [sheet];",
+      "to": "  static styles = [new CSSStyleSheet()];"
     }
   ]
 }

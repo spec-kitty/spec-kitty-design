@@ -8,6 +8,79 @@
       "declarations": [
         {
           "kind": "variable",
+          "name": "BUTTON_AXES",
+          "default": "Object.fromEntries( Object.keys(BUTTON_SIZES).map((s) => [`${s.charAt(0).toUpperCase()}${s.slice(1)}`, { size: s }]), )",
+          "description": "The non-variant axes, DERIVED from BUTTON_SIZES so the two tables cannot diverge (#77)."
+        },
+        {
+          "kind": "variable",
+          "name": "BUTTON_SIZES",
+          "type": {
+            "text": "{ sm: 'sk-button--sm' }"
+          },
+          "default": "{ sm: 'sk-button--sm' }",
+          "description": "Size modifiers. A separate axis from tone: a button has a tone AND a size."
+        },
+        {
+          "kind": "variable",
+          "name": "BUTTON_VARIANTS",
+          "type": {
+            "text": "{\n  primary: 'sk-button--primary',\n  secondary: 'sk-button--secondary',\n  ghost: 'sk-button--ghost',\n}"
+          },
+          "default": "{ primary: 'sk-button--primary', secondary: 'sk-button--secondary', ghost: 'sk-button--ghost', }",
+          "description": "Tone modifiers — the button's own root classes, so these are the generator's variants."
+        },
+        {
+          "kind": "function",
+          "name": "buttonClasses",
+          "return": {
+            "type": {
+              "text": "string"
+            }
+          },
+          "parameters": [
+            {
+              "name": "variant",
+              "optional": true,
+              "type": {
+                "text": "string"
+              }
+            },
+            {
+              "name": "size",
+              "optional": true,
+              "type": {
+                "text": "string"
+              }
+            }
+          ],
+          "description": "The button's class list. Warns and degrades on an unknown variant or size."
+        },
+        {
+          "kind": "function",
+          "name": "buttonStaticHtml",
+          "return": {
+            "type": {
+              "text": "string"
+            }
+          },
+          "parameters": [
+            {
+              "name": "opts",
+              "default": "{}",
+              "type": {
+                "text": "ButtonStaticOptions"
+              }
+            },
+            {
+              "name": "content",
+              "default": "'Label'"
+            }
+          ],
+          "description": "The static form. Throws on an unknown variant or size.\n\nANCHOR OR BUTTON, decided by `href`, and this is not a convenience — it is what the\ncatalogue already does. Every real use of this class in `apps/demo` is an `<a href>` styled\nas a button; the stories use `<button>`. One primitive, two elements, and the class list is\nidentical on both. So the element switches on the same signal rather than forcing consumers\nto choose between a working link and a styled one."
+        },
+        {
+          "kind": "variable",
           "name": "CARD_AXES",
           "default": "{ Inset: { inset: true }, } as const satisfies Record<string, CardStaticOptions>",
           "description": "The static forms this component publishes, BEYOND the base and one per variant.\n\nThe generator derives base + variants on its own; this names everything else. It exists\nbecause the generator used to emit `Sk<Comp>InsetHTML` unconditionally — `inset` is a CARD\naxis, and for `sk-nav-pill` or `sk-grid` that would have committed\n`class=\"sk-grid sk-grid--inset\"`, a class in no stylesheet, as generated output with\n`--check` green. A component with no extra axes exports an empty object; omitting it is an\nerror, because `?? {}` cannot distinguish \"none\" from \"I looked for the wrong name\"."
@@ -477,6 +550,40 @@
         },
         {
           "kind": "function",
+          "name": "isButtonSize",
+          "return": {
+            "type": {
+              "text": "s is ButtonSize"
+            }
+          },
+          "parameters": [
+            {
+              "name": "s",
+              "type": {
+                "text": "string"
+              }
+            }
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "isButtonVariant",
+          "return": {
+            "type": {
+              "text": "v is ButtonVariant"
+            }
+          },
+          "parameters": [
+            {
+              "name": "v",
+              "type": {
+                "text": "string"
+              }
+            }
+          ]
+        },
+        {
+          "kind": "function",
           "name": "isCardVariant",
           "return": {
             "type": {
@@ -759,6 +866,109 @@
             }
           ],
           "description": "The static form. Throws on an unknown variant — it runs on the build path, where a bad\nvariant must never reach committed output.\n\n`content` is the LABEL TEXT, and it is a placeholder here on purpose. Until #77 the three\ngenerated exports each carried a hardcoded version string (\"VERSION 1.X — FIRST STABLE\nRELEASE\" and two others), which made the component's own source the place a docsite's\ncontent lived — so changing a version number meant editing the component library. The\nlabel is the consumer's; only the structure is the component's."
+        },
+        {
+          "kind": "class",
+          "description": "A button, or a link styled as one.\n\nSet `href` and it renders an anchor; omit it and you get a button. That is not a\nconvenience — every use of this primitive in the demo pages is an `<a href>` styled as a\nbutton, while the stories use `<button>`, so the catalogue already needs both and the class\nlist is identical either way.",
+          "name": "SkButton",
+          "cssParts": [
+            {
+              "description": "the rendered `<button>` or `<a>`",
+              "name": "button"
+            }
+          ],
+          "slots": [
+            {
+              "description": "the button's label",
+              "name": ""
+            }
+          ],
+          "members": [
+            {
+              "kind": "field",
+              "name": "disabled",
+              "privacy": "public",
+              "type": {
+                "text": "boolean"
+              },
+              "description": "Disables the button. Ignored when `href` is set — a disabled link is not a thing HTML\nhas, and faking one with pointer-events hides it from assistive technology.",
+              "attribute": "disabled",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "href",
+              "privacy": "public",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "When set, the element renders an anchor to this URL instead of a button.",
+              "attribute": "href",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "size",
+              "privacy": "public",
+              "type": {
+                "text": "'sm' | undefined"
+              },
+              "description": "Size: `sm`, or omit for the default.",
+              "attribute": "size",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "variant",
+              "privacy": "public",
+              "type": {
+                "text": "'primary' | 'secondary' | 'ghost' | undefined"
+              },
+              "description": "Tone: `primary`, `secondary` or `ghost`. Omit for the unstyled base. An unknown value\nrenders the base button and warns rather than throwing.",
+              "attribute": "variant",
+              "reflects": true
+            }
+          ],
+          "attributes": [
+            {
+              "name": "disabled",
+              "type": {
+                "text": "boolean"
+              },
+              "description": "Disables the button. Ignored when `href` is set — a disabled link is not a thing HTML\nhas, and faking one with pointer-events hides it from assistive technology.",
+              "fieldName": "disabled"
+            },
+            {
+              "name": "href",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "When set, the element renders an anchor to this URL instead of a button.",
+              "fieldName": "href"
+            },
+            {
+              "name": "size",
+              "type": {
+                "text": "'sm' | undefined"
+              },
+              "description": "Size: `sm`, or omit for the default.",
+              "fieldName": "size"
+            },
+            {
+              "name": "variant",
+              "type": {
+                "text": "'primary' | 'secondary' | 'ghost' | undefined"
+              },
+              "description": "Tone: `primary`, `secondary` or `ghost`. Omit for the unstyled base. An unknown value\nrenders the base button and warns rather than throwing.",
+              "fieldName": "variant"
+            }
+          ],
+          "superclass": {
+            "name": "LitElement",
+            "package": "lit"
+          },
+          "tagName": "sk-button",
+          "customElement": true
         },
         {
           "kind": "class",
@@ -2348,6 +2558,23 @@
         },
         {
           "kind": "function",
+          "name": "unknownSizeMessage",
+          "return": {
+            "type": {
+              "text": "string"
+            }
+          },
+          "parameters": [
+            {
+              "name": "s",
+              "type": {
+                "text": "string"
+              }
+            }
+          ]
+        },
+        {
+          "kind": "function",
           "name": "unknownVariantMessage",
           "return": {
             "type": {
@@ -2356,16 +2583,71 @@
           },
           "parameters": [
             {
-              "name": "variant",
+              "name": "v",
               "type": {
                 "text": "string"
               }
             }
-          ],
-          "description": "The shared diagnostic for an unrecognised variant."
+          ]
         }
       ],
       "exports": [
+        {
+          "kind": "js",
+          "name": "BUTTON_AXES",
+          "declaration": {
+            "name": "BUTTON_AXES",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "BUTTON_SIZES",
+          "declaration": {
+            "name": "BUTTON_SIZES",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "BUTTON_VARIANTS",
+          "declaration": {
+            "name": "BUTTON_VARIANTS",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "buttonClasses",
+          "declaration": {
+            "name": "buttonClasses",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "ButtonSize",
+          "declaration": {
+            "name": "ButtonSize",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "buttonStaticHtml",
+          "declaration": {
+            "name": "buttonStaticHtml",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "ButtonVariant",
+          "declaration": {
+            "name": "ButtonVariant",
+            "module": "./dist/index.js"
+          }
+        },
         {
           "kind": "js",
           "name": "CARD_AXES",
@@ -2568,6 +2850,22 @@
         },
         {
           "kind": "js",
+          "name": "isButtonSize",
+          "declaration": {
+            "name": "isButtonSize",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "isButtonVariant",
+          "declaration": {
+            "name": "isButtonVariant",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
           "name": "isCardVariant",
           "declaration": {
             "name": "isCardVariant",
@@ -2744,6 +3042,22 @@
         },
         {
           "kind": "js",
+          "name": "SkButton",
+          "declaration": {
+            "name": "SkButton",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "skButtonSheet",
+          "declaration": {
+            "name": "default",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
           "name": "SkCard",
           "declaration": {
             "name": "SkCard",
@@ -2875,6 +3189,14 @@
           "name": "unknownRibbonMessage",
           "declaration": {
             "name": "unknownRibbonMessage",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "unknownSizeMessage",
+          "declaration": {
+            "name": "unknownSizeMessage",
             "module": "./dist/index.js"
           }
         },

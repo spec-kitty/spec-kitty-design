@@ -1,5 +1,6 @@
 export { define, registeredTags } from './define.js';
 export { SkStub } from './stub/sk-stub.js';
+export { SkButton } from './button/sk-button.js';
 export { SkCard } from './card/sk-card.js';
 export { SkNavPill } from './nav-pill/sk-nav-pill.js';
 export { SkFormInput } from './form-input/sk-form-input.js';
@@ -24,6 +25,7 @@ export { default as skStubSheet } from './stub/sk-stub.css.js';
 // GENERATED from packages/styles/src/grid/sk-grid.css, and identity against the class's own
 // `static styles` would hold for any sheet at all.
 export { default as skGridSheet } from './grid/sk-grid.css.js';
+export { default as skButtonSheet } from './button/sk-button.css.js';
 export { default as skFeatureCardSheet } from './feature-card/sk-feature-card.css.js';
 export { default as skRibbonCardSheet } from './ribbon-card/sk-ribbon-card.css.js';
 export { default as skSectionBannerSheet } from './section-banner/sk-section-banner.css.js';
@@ -48,6 +50,16 @@ export {
 // policies are only a split if something can reach both. `gridClasses` warns and degrades,
 // `gridStaticHtml` throws.
 export { gridClasses, gridStaticHtml, type GridGap, type GridVariant } from './grid/sk-grid.markup.js';
+
+// sk-button's markup module. Both class helpers, because tone and size each degrade.
+export {
+  BUTTON_SIZES,
+  BUTTON_VARIANTS,
+  buttonClasses,
+  buttonStaticHtml,
+  type ButtonSize,
+  type ButtonVariant,
+} from './button/sk-button.markup.js';
 
 // sk-feature-card's markup module. Both class helpers are exported because the component has
 // TWO independent axes and each has its own degrade path.
