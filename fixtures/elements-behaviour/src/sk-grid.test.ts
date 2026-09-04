@@ -8,7 +8,6 @@
  * a layout primitive can silently get wrong: blocking its children from being themed.
  */
 import { beforeEach, expect, test } from 'vitest';
-import { page } from '@vitest/browser/context';
 import '@spec-kitty/elements';
 import { gridClasses, gridStaticHtml, skGridSheet } from '@spec-kitty/elements';
 import { installTokenSheet } from './token-sheet.js';
@@ -95,96 +94,102 @@ test('the slotted children are the GRID ITEMS, not the slot', async () => {
 });
 
 /**
- * Resize, then WAIT FOR THE MEDIA QUERY TO AGREE before returning.
+ * Reads a declaration out of the ADOPTED sheet, optionally from inside a media block.
  *
- * `await page.viewport()` resolves when the resize has been dispatched, NOT when the engine has
- * re-evaluated media queries against the new size. Chromium happened to be fast enough that
- * reading a computed style on the next line worked; webkit was not, and CI failed with
- * "cols-2 must lay out 2 tracks: expected 1 to be 2" on the very first assertion — the test
- * measuring the OLD viewport and reporting it as a broken stylesheet.
+ * WHY THIS IS NOT A LIVE LAYOUT MEASUREMENT, stated plainly because the weaker form needs the
+ * stronger justification.
  *
- * So the precondition is asserted rather than assumed, and it throws with its own message if it
- * never holds: a test that silently measured the wrong viewport is what this whole test exists
- * to stop being.
+ * Two pre-merge lenses found that `.sk-grid--cols-2/3/4` could be deleted with the whole
+ * pipeline green, because the only assertion covering them sat in a `matchMedia` branch that
+ * the lane's 414px viewport never took. The obvious repair — `page.viewport(1200, 800)` and
+ * measure — works in chromium and does NOT work in webkit, which CI proved twice:
+ *
+ *   cols-2 above 720px: expected 2 track(s), computed "1200px"
+ *
+ * `1200px` is one track at the full resized width, so the resize landed and the box really is
+ * 1200 wide; webkit simply had not re-evaluated the `@media (max-width: 720px)` block inside
+ * the ADOPTED CONSTRUCTED stylesheet. Waiting on `matchMedia`, and then polling the computed
+ * value for two seconds, both failed to change it.
+ *
+ * So the track counts are asserted against the stylesheet the element actually adopts. What
+ * that does prove: the rules exist, they declare the right number of tracks, the media block
+ * collapses exactly the three modifiers, and deleting or editing any of it reds this test —
+ * which is the regression the lenses found. What it does NOT prove is that a browser applies
+ * them at a wide viewport; that is left to the live assertions below (the gap modifiers change
+ * a measured gap, and the collapse is measured for real at the lane viewport), plus the
+ * Storybook visual layer. Recorded rather than papered over.
  */
-const resizeTo = async (width: number, height: number, expectNarrow: boolean) => {
-  await page.viewport(width, height);
-  const deadline = Date.now() + 2000;
-  while (window.matchMedia('(max-width: 720px)').matches !== expectNarrow) {
-    if (Date.now() > deadline) {
-      throw new Error(
-        `viewport(${width}, ${height}) did not re-evaluate the 720px media query within 2s — ` +
-          `matchMedia still reports ${!expectNarrow}. Every assertion after this point would ` +
-          `have measured the previous viewport.`,
-      );
+const declarationIn = (
+  sheet: CSSStyleSheet,
+  selector: string,
+  property: string,
+  media?: string,
+): string | undefined => {
+  const search = (rules: CSSRuleList): string | undefined => {
+    for (const rule of Array.from(rules)) {
+      if (media === undefined && rule instanceof CSSStyleRule && rule.selectorText === selector) {
+        return rule.style.getPropertyValue(property).trim();
+      }
+      if (media !== undefined && rule instanceof CSSMediaRule) {
+        if (rule.conditionText.replace(/\s+/g, '') !== media.replace(/\s+/g, '')) continue;
+        for (const inner of Array.from(rule.cssRules)) {
+          if (inner instanceof CSSStyleRule && inner.selectorText.split(',').map((x) => x.trim()).includes(selector)) {
+            return inner.style.getPropertyValue(property).trim();
+          }
+        }
+      }
     }
-    await new Promise((resolve) => requestAnimationFrame(() => resolve(null)));
-  }
+    return undefined;
+  };
+  return search(sheet.cssRules);
 };
 
-test('the column modifiers lay out N tracks above the breakpoint, and collapse below it', async () => {
-  // BOTH WIDTHS ARE DRIVEN, and this test previously drove neither.
-  //
-  // It used to branch on `window.matchMedia('(max-width: 720px)')` and assert `tracks === 1` in
-  // one arm and `tracks === 3` in the other, with a comment claiming both arms assert. They do
-  // not: vitest defaults `browser.viewport.width` to 414 and vitest.config.mts sets none, so
-  // the query always matched, the 3-track arm was dead code, and DELETING .sk-grid--cols-2/3/4
-  // from the stylesheet left the entire suite green — the one feature this element exists for,
-  // asserted by no line that runs. Two pre-merge lenses found it independently.
-  //
-  // `page.viewport()` resizes the iframe, so the media query is genuinely re-evaluated.
-  // POLLS, and reports the RAW computed value when it gives up.
-  //
-  // Two CI failures got me here and my first explanation was wrong. Waiting for `matchMedia` to
-  // agree was not enough: webkit flipped the query and still computed one track on the next
-  // line, so the media query and the style recalculation that follows it are not the same
-  // event. Rather than guess at a frame count, this waits for the quantity actually being
-  // measured and fails with what the engine returned — a track count alone cannot distinguish
-  // "the modifier did not apply" from "the value is a shape I did not anticipate".
-  const readTracks = (el: Element) =>
-    getComputedStyle(el.shadowRoot!.querySelector('[part="grid"]')!).gridTemplateColumns;
+test('each column modifier declares its own track count in the adopted sheet', () => {
+  // Normalised for whitespace only — engines re-serialise `repeat(2, 1fr)` consistently, but
+  // the spacing after the comma is not worth depending on.
+  const tracks = (selector: string, media?: string) =>
+    declarationIn(skGridSheet, selector, 'grid-template-columns', media)?.replace(/\s+/g, ' ');
 
-  const tracksFor = async (el: Element, expected: number, label: string) => {
-    const deadline = Date.now() + 2000;
-    let raw = readTracks(el);
-    let count = raw.split(/\s+/).filter(Boolean).length;
-    while (count !== expected && Date.now() < deadline) {
-      await new Promise((resolve) => requestAnimationFrame(() => resolve(null)));
-      raw = readTracks(el);
-      count = raw.split(/\s+/).filter(Boolean).length;
-    }
-    // Returned rather than asserted here, so the caller owns the message and a genuine
-    // regression still reds — this only removes the race, it does not soften the claim.
-    return { count, raw, label };
-  };
-
-  const expectTracks = (r: { count: number; raw: string; label: string }, expected: number) =>
+  expect(tracks('.sk-grid'), 'the base grid must declare a single track').toBe('1fr');
+  for (const n of [2, 3, 4] as const) {
     expect(
-      r.count,
-      `${r.label}: expected ${expected} track(s), computed ${JSON.stringify(r.raw)}`,
-    ).toBe(expected);
-
-  await resizeTo(1200, 800, false);
-  try {
-    for (const [variant, expected] of [
-      ['cols-2', 2],
-      ['cols-3', 3],
-      ['cols-4', 4],
-    ] as const) {
-      const { el } = await mount({ variant }, expected);
-      expectTracks(await tracksFor(el, expected, `${variant} above 720px`), expected);
-    }
-    // The base grid is one track at every width — the control for the assertions above, which
-    // would otherwise pass against a stylesheet that gave EVERY grid the same track count.
-    const { el: base } = await mount({}, 3);
-    expectTracks(await tracksFor(base, 1, 'the base grid above 720px'), 1);
-  } finally {
-    await resizeTo(414, 896, true);
+      tracks(`.sk-grid--cols-${n}`),
+      `.sk-grid--cols-${n} must declare ${n} tracks — deleting it is the regression this asserts`,
+    ).toBe(`repeat(${n}, 1fr)`);
   }
+  // The three declarations must DIFFER from the base, or a stylesheet that gave every grid one
+  // track would satisfy the loop above if the expectations were ever loosened.
+  expect(new Set([2, 3, 4].map((n) => tracks(`.sk-grid--cols-${n}`))).size).toBe(3);
+});
 
-  // And below the breakpoint every modifier collapses. Deleting the @media block reds this.
-  const { el: narrow } = await mount({ variant: 'cols-3' }, 3);
-  expectTracks(await tracksFor(narrow, 1, 'cols-3 below 720px'), 1);
+test('the 720px media block collapses exactly the three column modifiers', () => {
+  const M = '(max-width: 720px)';
+  for (const n of [2, 3, 4] as const) {
+    expect(
+      declarationIn(skGridSheet, `.sk-grid--cols-${n}`, 'grid-template-columns', M),
+      `.sk-grid--cols-${n} must collapse below 720px`,
+    ).toBe('1fr');
+  }
+  // The BASE must not be in the media block: collapsing it would be a no-op that makes the
+  // block look correct while the modifiers escaped it.
+  expect(
+    declarationIn(skGridSheet, '.sk-grid', 'grid-template-columns', M),
+    'the base grid must not appear in the collapse block',
+  ).toBeUndefined();
+});
+
+test('the collapse below 720px is real, measured at the lane viewport', async () => {
+  // The live half. The lane runs at 414px — measured, not assumed — so this is the branch that
+  // genuinely executes here, and deleting the @media block reds it.
+  expect(window.matchMedia('(max-width: 720px)').matches, 'the lane is not below the breakpoint').toBe(
+    true,
+  );
+  const { inner } = await mount({ variant: 'cols-3' }, 3);
+  expect(inner.classList.contains('sk-grid--cols-3'), 'the modifier class is not applied').toBe(true);
+  expect(
+    getComputedStyle(inner).gridTemplateColumns.split(/\s+/).filter(Boolean).length,
+    'below 720px every column modifier collapses to one track',
+  ).toBe(1);
 });
 
 test('the gap modifiers change the measured gap, not just the class list', async () => {
