@@ -126,9 +126,9 @@
     },
     {
       "criterion_id": "NFR-004",
-      "description": "Packed and unpacked size per package, recorded and regenerated",
+      "description": "File count and unpacked size per package are recorded; packed size is reported but not committed",
       "proof_type": "automated_test",
-      "evidence": "SIZES.md 'Published package sizes' table, from a real npm pack, with --check. Previously printed to a CI log only; a lens pointed out that a log line is not a record and that this repo's own convention is generate-and---check.",
+      "evidence": "SIZES.md 'Published package sizes'. Packed size was committed first and CI reddened on it immediately: 3812.1 KiB (workstation) vs 3827.7 KiB (CI) for identical @spec-kitty/tokens contents, while files and unpacked matched exactly. Packed is the gzipped tarball, so it varies with the running machine's zlib; committing it reds builds on untouched trees.",
       "pass_fail": "pass",
       "verified_by": "four-lens adversarial gate, pass 1 fold",
       "verified_at": "2026-09-04T22:07:25Z",
@@ -143,6 +143,16 @@
       "verified_by": "four-lens adversarial gate, pass 1 fold",
       "verified_at": "2026-09-04T22:07:25Z",
       "notes": "Removed from spec.md's FR table rather than struck through, per the repo convention that a row is a requirement regardless of formatting."
+    },
+    {
+      "criterion_id": "SC-011",
+      "description": "The committed size record contains only environment-independent figures",
+      "proof_type": "automated_test",
+      "evidence": "measure-elements-sizes.mjs --check passes in CI and locally on the same tree. The one field that did not (packed size) was removed from the record and is printed by check-release-graph.mjs instead.",
+      "pass_fail": "pass",
+      "verified_by": "CI, pass-1 fold",
+      "verified_at": "2026-09-04T22:14:07Z",
+      "notes": "Added after CI reddened on the first committed revision of this table."
     }
   ],
   "negative_invariants": [

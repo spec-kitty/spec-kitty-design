@@ -178,7 +178,7 @@ command in it either runs or is explicitly marked as the operator's to run.
 | NFR-001 | Gate refuses an empty set | The release gate fails when its derived package set is empty, and a test proves that by supplying one. | Reliability | High | Open |
 | NFR-002 | No network at runtime | A `file://` load of the classic-script bundle plus `tokens.css` issues **zero** network requests, asserted by request interception rather than by inspection. | Security | High | Open |
 | NFR-003 | Supply-chain controls preserved | ADR-5's release controls — `npm audit` gate, `--provenance`, CycloneDX SBOM, contents audit — apply to every package in the derived set, not a subset. | Security | High | Open |
-| NFR-004 | Install size is stated | Each package's packed and unpacked size is recorded from a real `npm pack`, and the record is regenerated rather than transcribed. | Performance | Medium | Open |
+| NFR-004 | Install size is stated | Each package's file count and unpacked size are recorded from a real `npm pack` and regenerated rather than transcribed. Packed size is reported on every run but not committed — it is the gzipped tarball and varies with the running machine's zlib. | Performance | Medium | Open |
 
 ### Withdrawn during implementation
 
@@ -222,5 +222,6 @@ deferring the decision would have shipped a mission with a quietly unmet FR, whi
 - **SC-005**: The release gate runs on pull requests, and reverting any one packaging fact reds it.
 - **SC-006**: A `file://` page using the built classic-script bundle and `tokens.css` renders upgraded, styled components with **zero** intercepted network requests.
 - **SC-007**: The SRI hash for the classic-script bundle is generated from the built artifact, recorded, and re-derived by a check rather than transcribed.
+- **SC-011**: The committed size record contains only environment-independent figures. A workstation and CI produce byte-identical values for every recorded field.
 - **SC-009**: The runbook states the trigger is the tag and not the merge, and states that a dry run proves packing and not publishing.
 - **SC-010**: No tarball contains a sourcemap, a test file, or a dev-only dotfile.

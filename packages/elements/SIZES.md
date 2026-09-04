@@ -32,12 +32,19 @@ not of the hash.
 
 What a consumer downloads, from a real `npm pack` of each package in the derived publishable set.
 
-| package | files | packed | unpacked |
-|---|---:|---:|---:|
-| `@spec-kitty/tokens` | 37 | 3812.1 KiB | 5749.5 KiB |
-| `@spec-kitty/styles` | 64 | 28.1 KiB | 119.8 KiB |
-| `@spec-kitty/elements` | 32 | 64.8 KiB | 351.5 KiB |
-| `@spec-kitty/react` | 32 | 9.6 KiB | 66.0 KiB |
+| package | files | unpacked |
+|---|---:|---:|
+| `@spec-kitty/tokens` | 37 | 5749.5 KiB |
+| `@spec-kitty/styles` | 64 | 119.8 KiB |
+| `@spec-kitty/elements` | 32 | 351.5 KiB |
+| `@spec-kitty/react` | 32 | 66.0 KiB |
+
+PACKED SIZE IS DELIBERATELY NOT IN THIS TABLE. It is the size of the gzipped tarball and therefore
+depends on the zlib build of the machine that runs `npm pack` — a workstation and CI measured
+3812.1 KiB and 3827.7 KiB for the same `@spec-kitty/tokens` contents, while `files` and
+`unpacked` were identical. Committing it would red the build on a tree nobody touched. It is
+printed by `scripts/check-release-graph.mjs` on every run instead, where a figure that moves with
+the environment does no harm.
 
 ## The basis matters — read this before comparing against an ADR
 

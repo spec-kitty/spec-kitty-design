@@ -47,12 +47,28 @@ const ALGO = 'sha384'; // the SRI default
 const sri = (path) => `${ALGO}-${createHash(ALGO).update(readFileSync(path)).digest('base64')}`;
 
 /**
- * NFR-004 — packed and unpacked size per publishable package, from a real `npm pack`.
+ * NFR-004 — install size per publishable package, from a real `npm pack`.
  *
  * An earlier revision met this by printing the figures in a CI log and arguing that a committed
- * record would churn. A lens pointed out the contradiction: this very file IS a committed,
+ * record would churn. A lens pointed out the contradiction — this very file IS a committed,
  * generated size record with a `--check`, and the argument was made in the same commit that
- * adopted the pattern for the SRI hash. A log line is not a record — it expires.
+ * adopted the pattern for the SRI hash. A log line is not a record; it expires. That was right.
+ *
+ * BUT PACKED SIZE IS NOT RECORDABLE, and CI proved it on the first run after the record was
+ * committed. `packed` is the size of the GZIPPED tarball, so it depends on the zlib build and
+ * compression level of whichever machine runs `npm pack`:
+ *
+ *     committed (workstation)  @spec-kitty/tokens  3812.1 KiB
+ *     generated (CI)           @spec-kitty/tokens  3827.7 KiB
+ *
+ * — a 0.4% delta on identical inputs. `unpacked` and `files` were byte-identical across the same
+ * two runs, and so was every artifact figure above, which is what isolates the cause to
+ * compression rather than to content.
+ *
+ * So the record holds what is deterministic: file count and unpacked size. Packed size is
+ * REPORTED on every run and deliberately not committed — committing it would red the build on any
+ * machine whose zlib differs, on a tree nobody touched, which is the churn the earlier revision
+ * feared and the wrong half of the argument to concede.
  */
 const PACKAGES = JSON.parse(
   execFileSync('node', ['scripts/release-graph.mjs', '--json'], { encoding: 'utf8' }),
@@ -125,9 +141,16 @@ not of the hash.
 
 What a consumer downloads, from a real \`npm pack\` of each package in the derived publishable set.
 
-| package | files | packed | unpacked |
-|---|---:|---:|---:|
-${PACKAGES.map((p) => `| \`${p.name}\` | ${p.files} | ${kb(p.packed)} | ${kb(p.unpacked)} |`).join('\n')}
+| package | files | unpacked |
+|---|---:|---:|
+${PACKAGES.map((p) => `| \`${p.name}\` | ${p.files} | ${kb(p.unpacked)} |`).join('\n')}
+
+PACKED SIZE IS DELIBERATELY NOT IN THIS TABLE. It is the size of the gzipped tarball and therefore
+depends on the zlib build of the machine that runs \`npm pack\` — a workstation and CI measured
+3812.1 KiB and 3827.7 KiB for the same \`@spec-kitty/tokens\` contents, while \`files\` and
+\`unpacked\` were identical. Committing it would red the build on a tree nobody touched. It is
+printed by \`scripts/check-release-graph.mjs\` on every run instead, where a figure that moves with
+the environment does no harm.
 
 ## The basis matters — read this before comparing against an ADR
 
