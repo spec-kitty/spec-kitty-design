@@ -56,10 +56,12 @@
   border-radius: 0 0 var(--sk-radius-sm) var(--sk-radius-sm);
 }
 
-/* REMOVED at #78: the ribbon's label is a string property rendered as a text node, and
-   ribbonCardStaticHtml interpolates it as text, so no SVG can appear in a ribbon on either
-   path. The rule matched nothing. `gap` on the ribbon is kept — it is harmless and the tab is
-   still a flex container. */
+/* REMOVED at #78: the ribbon's label is a string property, rendered as a TEXT NODE by the
+   element, so no SVG can appear there. The documented contract is a label string.
+   Narrower than an earlier revision of this comment claimed: `ribbonCardStaticHtml` does raw
+   string concatenation, not escaping, so a caller passing markup on the STATIC path would
+   render it — "no SVG on either path" was wrong. `gap` on the ribbon is kept; the tab is still
+   a flex container. */
 
 /* Ribbon colour variants */
 /* Deviation: text colours for ribbon variants use dark warm-toned values

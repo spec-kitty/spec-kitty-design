@@ -17,7 +17,7 @@
     "Scoped to the ELEMENTS, not the whole catalogue. The thirteen packages/styles story files",
     "predate this and pinning them here would be a ratchet nobody agreed to; #77-#79 migrate them",
     "and can opt each in as it lands.",
-    "#78 opts sk-feature-card and sk-ribbon-card in. The a11y gate is what caught this batch's slotted-content contrast defect, and it is the ONLY gate that would catch a recurrence — so retiring these stories must not be silent. A lens noted four migrated elements were sitting outside this ratchet; these two are now in, and #79 should add its own."
+    "#78 opts sk-feature-card and sk-ribbon-card in. The a11y gate is what caught this batch's slotted-content contrast defect, and it is the ONLY gate that would catch a recurrence — so retiring these stories must not be silent. A lens noted four migrated elements were sitting outside this ratchet. These two are now in; sk-grid and sk-section-banner (#77's) are STILL OUTSIDE and are not covered by '#79 adds its own' — they need opting in by whoever touches them next."
   ],
   "byElement": {
     "sk-feature-card": [

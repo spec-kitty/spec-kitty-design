@@ -583,6 +583,7 @@ carry the detail generic from the element's `@fires {Type}`.
 #### sk-feature-card (styles)
 - Path: `packages/styles/src/feature-card/sk-feature-card.css` (authored) + `sk-feature-card.html` and `index.ts` (**generated** from `packages/elements/src/feature-card/sk-feature-card.markup.ts`) + `sk-feature-card-html.stories.ts`
 - Story title: `Components/SkFeatureCard (HTML)`
+- Variants: `Default`, `GreenIcon`, `PurpleIcon`, `ColorizedBorders`, `Grid`, `LightMode`
 - Notes: migrated in #78. `accent` (icon chip) and `variant` (card border) are INDEPENDENT axes; the generated constants show them independently, and any pairing is a story-level choice.
 
 #### sk-form-field (styles)

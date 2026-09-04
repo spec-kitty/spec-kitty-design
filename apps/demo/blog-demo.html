@@ -345,6 +345,11 @@
       </h2>
       <div class="demo-feature-grid">
 
+        <!-- h3, not the h4 the generated artifact uses: the heading LEVEL belongs to the page, not
+           to the component. This section sits under an <h2>, so h4 would skip a level — which is
+           exactly what an earlier revision of this file did while reconciling the element type,
+           and only a pre-merge lens caught it because nothing gates apps/demo. In the element the
+           heading is slotted, so the consumer picks the level there too. -->
         <article class="sk-feature-card">
           <div class="sk-feature-card__icon-chip sk-feature-card__icon-chip--yellow">
             <!-- Clock icon -->
@@ -355,7 +360,7 @@
               <polyline points="12 7 12 12 15 14"/>
             </svg>
           </div>
-          <h4 class="sk-feature-card__title">Stay in flow</h4>
+          <h3 class="sk-feature-card__title">Stay in flow</h3>
           <p class="sk-feature-card__body">
             Requirements are captured before code generation begins — not after
             the first review cycle.
@@ -372,7 +377,7 @@
               <polyline points="14 3 14 8 19 8"/>
             </svg>
           </div>
-          <h4 class="sk-feature-card__title">Context stays put</h4>
+          <h3 class="sk-feature-card__title">Context stays put</h3>
           <p class="sk-feature-card__body">
             Decisions, alternatives, and rationale live alongside the feature
             — not scattered across meeting notes.
@@ -391,7 +396,7 @@
               <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
             </svg>
           </div>
-          <h4 class="sk-feature-card__title">Parallel by default</h4>
+          <h3 class="sk-feature-card__title">Parallel by default</h3>
           <p class="sk-feature-card__body">
             Lane-based worktrees let multiple agents implement independent work
             packages without coordination overhead.
