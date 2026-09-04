@@ -23,7 +23,7 @@
  * it can see; the probes are the evidence, the way build-react-wrappers.mjs --selftest is.
  */
 import { execFileSync } from 'node:child_process';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parse } from 'yaml';
@@ -117,6 +117,30 @@ export function checkExportsResolve(tarballs) {
       } else if (!t.files.includes(clean)) {
         problems.push(`${t.name}: exports target "${target}" is not in the tarball`);
       }
+    }
+  }
+  return problems;
+}
+
+/**
+ * FR-010 — every component directory is reachable by subpath.
+ *
+ * checkExportsResolve catches a BROKEN export. It cannot catch a MISSING one: @spec-kitty/styles
+ * shipped subpaths for 3 of its 15 component directories and every one of the three resolved, so
+ * the map was simultaneously correct and twelve entries short. The same shape as the hand-written
+ * barrel in packages/styles/src/index.ts, where #77 found SkGridGap4HTML simply absent.
+ *
+ * Directory-per-component is this package's layout, so the source tree is the authority for what
+ * the map should contain.
+ */
+export function checkSubpathCoverage(componentDirs, exportKeys, pkgName) {
+  const problems = [];
+  if (componentDirs.length === 0) {
+    return [`${pkgName}: no component directories found — refusing to certify coverage over nothing`];
+  }
+  for (const dir of componentDirs) {
+    if (!exportKeys.some((k) => k === `./${dir}/*` || k === `./${dir}`)) {
+      problems.push(`${pkgName}: component "${dir}" has no subpath export — its CSS is unreachable`);
     }
   }
   return problems;
@@ -269,6 +293,14 @@ const PROBES = [
     run: () => checkExportsResolve([{ name: '@x/a', files: ['dist/index.js'], exports: { '.': { types: './dist/nope.d.ts', default: './dist/index.js' } } }]),
   },
   {
+    what: 'a component directory with no subpath export',
+    run: () => checkSubpathCoverage(['button', 'card'], ['.', './button/*'], '@x/styles'),
+  },
+  {
+    what: 'subpath coverage asserted over zero component directories',
+    run: () => checkSubpathCoverage([], ['.'], '@x/styles'),
+  },
+  {
     what: 'a sourcemap in the tarball',
     run: () => checkForbiddenContents([{ name: '@x/a', files: ['dist/index.js', 'dist/index.js.map'] }]),
   },
@@ -314,8 +346,8 @@ function selftest() {
   }
   // The floor is asserted, not implied: a probe list that silently emptied would print nothing
   // and exit 0, which is the defect this script is about.
-  if (PROBES.length < 12) {
-    console.error(`❌ only ${PROBES.length} probes — the selftest floor is 12`);
+  if (PROBES.length < 14) {
+    console.error(`❌ only ${PROBES.length} probes — the selftest floor is 14`);
     process.exit(1);
   }
   console.log(`\n✅ all ${PROBES.length} probes tripped the gate.`);
@@ -342,6 +374,14 @@ function main() {
     ...checkTarballsNonEmpty(tarballs),
     ...checkExportsResolve(tarballs),
     ...checkForbiddenContents(tarballs),
+    ...checkSubpathCoverage(
+      readdirSync(join(ROOT, 'packages/styles/src'), { withFileTypes: true })
+        .filter((d) => d.isDirectory())
+        .map((d) => d.name)
+        .sort(),
+      Object.keys(JSON.parse(readFileSync(join(ROOT, 'packages/styles/package.json'), 'utf8')).exports ?? {}),
+      '@spec-kitty/styles',
+    ),
     ...checkWorkflowUsesDerivedSet(readFileSync(join(ROOT, WORKFLOW), 'utf8'), pkgs.map((p) => p.name), pkgs.map((p) => p.dir)),
     ...checkGraphFailsClosed({ publishable, buildable }),
   ];
