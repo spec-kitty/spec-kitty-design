@@ -41,6 +41,18 @@ do not add anything there for a new component — get the manifest right and the
 
 ### 1. Author the CSS in `packages/styles`
 
+**Give the host a box.** A custom element's UA default is `display: inline`, and `max-width`,
+`width`, `margin` and vertical padding do not apply to a non-replaced inline box — so a
+consumer's `style="max-width: 640px"` on your element is silently inert. Declare
+`:host { display: … }` in the component's `.css`, and make it agree with the static form's own
+display: `sk-section-banner` shipped `:host { display: inline-flex }` against a static
+`display: flex` for one commit, and the two consumption paths rendered differently.
+
+`:host` is accepted by `check-adopted-css-boundaries.mjs` and is inert in the static path, where
+the root element IS the `.sk-<name>` div. #77 found five committed stories whose `max-width` had
+never done anything.
+
+
 `packages/styles/src/<name>/sk-<name>.css`. This is the source of record and the only file
 stylelint's `--sk-*` rule can see.
 
@@ -131,6 +143,8 @@ Three files hold the component's surface. None is discoverable from the code:
 | file | what to add | what refuses you |
 |---|---|---|
 | `expected-parts.json` | every `@csspart` **and bump `total`**, in the same PR as a test targeting it. The test must live in `fixtures/**/src/**/*.test.ts` or `tests/**/*.test.ts` — the ratchet scans nowhere else | `check-part-ratchet.mjs` — shrink-only, and it compares `total` |
+node scripts/check-story-theme-wrapper.mjs            # no NEW inert `data-theme="light"` wrapper
+node scripts/check-story-theme-wrapper.mjs --selftest # the gate's own probe table
 | `expected-docs.json` | a row with the element's attribute and method counts, **and bump `total`** | `check-manifest-content.mjs` — **exact** equality, so adding a documented property without updating this fails too |
 | `behaviours.json` | a **subject** entry on the ids the component owns, plus a matching `mutations.json` entry naming the same subject file — only if it owns behaviour (step 6) | `floor-reporter.mjs` arm 5 and `suite-selftest.mjs` guard 7 — **once declared** |
 

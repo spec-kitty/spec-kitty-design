@@ -89,7 +89,7 @@ test('each variant PAINTS, and the three are visually distinct', async () => {
   // modifier in the CSS only, which leaves sectionBannerClasses still emitting the old name so
   // a classList assertion still passes against a rule that matches nothing. Every variant
   // assertion in this file was a classList string until now.
-  const painted = new Map<string, string>();
+  const painted = new Map<string, { backgroundColor: string; color: string }>();
   for (const v of ['neutral', 'purple', 'green'] as const) {
     const el = await mount(v);
     const banner = el.shadowRoot!.querySelector('[part="banner"]')!;
@@ -97,12 +97,28 @@ test('each variant PAINTS, and the three are visually distinct', async () => {
     expect(backgroundColor, `variant="${v}" has no background — its token resolved to nothing`)
       .not.toBe('rgba(0, 0, 0, 0)');
     expect(backgroundColor, `variant="${v}" background is transparent`).not.toBe('transparent');
-    expect(color, `variant="${v}" has no foreground`).not.toBe('');
-    painted.set(v, `${backgroundColor}|${color}`);
+    painted.set(v, { backgroundColor, color });
   }
-  // Distinctness is the arm that survives a swap to a defined-but-wrong token: three variants
-  // that all resolve to --sk-surface-page would each be "painted" and indistinguishable.
-  expect(new Set(painted.values()).size, `the three variants are not visually distinct: ${[...painted].map(([k, v]) => `${k}=${v}`).join(', ')}`).toBe(3);
+  // BACKGROUNDS ALONE, then the pair. A pass-2 lens showed the combined key was too weak: swap
+  // ONE variant's background to a defined-but-wrong token and the tuple still differs, because
+  // its foreground does — so the "survives a defined-but-wrong token" claim held only when all
+  // three were swapped together. The background arm is the one that closes the single-variant
+  // case, and `color` is no longer asserted non-empty: a computed color is never the empty
+  // string, so that assertion could not fail.
+  const backgrounds = [...painted.values()].map((v) => v.backgroundColor);
+  expect(
+    new Set(backgrounds).size,
+    `the three backgrounds are not distinct: ${backgrounds.join(', ')}`,
+  ).toBe(3);
+  expect(new Set([...painted.values()].map((v) => v.color)).size, 'the three foregrounds are not distinct').toBe(3);
+});
+
+test('the HOST is an inline-flex box, so a consumer can size and space it', async () => {
+  // Same class of fix as sk-grid's, and it shipped in the same fold with no test. A custom
+  // element defaults to `display: inline`, so without this the host cannot be sized or spaced
+  // and the inner flex row governs nothing outside itself.
+  const el = await mount('purple');
+  expect(getComputedStyle(el).display, 'the host must be an inline-flex box').toBe('inline-flex');
 });
 
 test('variants are attributes and map to the static layer\'s classes', async () => {

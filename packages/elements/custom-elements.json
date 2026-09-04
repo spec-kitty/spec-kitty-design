@@ -367,7 +367,8 @@
               "name": "content",
               "default": "PLACEHOLDER_ITEMS"
             }
-          ]
+          ],
+          "description": "The static form, for a consumer with no JavaScript. Throws on an unknown variant."
         },
         {
           "kind": "function",

@@ -86,7 +86,6 @@ export interface GridStaticOptions {
   gap?: number;
 }
 
-/** The static form, for a consumer with no JavaScript. Throws on an unknown variant. */
 /**
  * The placeholder CHILDREN, not a text node.
  *
@@ -99,6 +98,7 @@ const PLACEHOLDER_ITEMS = ['Grid item 1', 'Grid item 2', 'Grid item 3']
   .map((t) => `<div>${t}</div>`)
   .join('');
 
+/** The static form, for a consumer with no JavaScript. Throws on an unknown variant. */
 export function gridStaticHtml(
   opts: GridStaticOptions = {},
   content = PLACEHOLDER_ITEMS,

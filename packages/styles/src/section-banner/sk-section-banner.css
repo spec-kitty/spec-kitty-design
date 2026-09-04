@@ -8,8 +8,14 @@
   display: inline-flex;
 }
 
+/* `inline-flex`, matching :host above. These MUST agree: the element shrink-wraps and the
+   static form did not, so the two consumption paths this component's markup module exists to
+   keep identical rendered differently — a divergence introduced by the :host fix itself and
+   caught at the second gate pass. blog-demo.html's hand-override to inline-flex was the
+   consumer already working around the static default; that override is removed in the same
+   commit. */
 .sk-section-banner {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: var(--sk-space-3);
   padding: var(--sk-space-2) var(--sk-space-4);

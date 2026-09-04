@@ -115,9 +115,18 @@ test('the slotted children are the GRID ITEMS, not the slot', async () => {
  * that does prove: the rules exist, they declare the right number of tracks, the media block
  * collapses exactly the three modifiers, and deleting or editing any of it reds this test —
  * which is the regression the lenses found. What it does NOT prove is that a browser applies
- * them at a wide viewport; that is left to the live assertions below (the gap modifiers change
- * a measured gap, and the collapse is measured for real at the lane viewport), plus the
- * Storybook visual layer. Recorded rather than papered over.
+ * them at a wide viewport.
+ *
+ * THAT IS PROVED IN `apps/storybook/src/tests/sk-grid-layout.spec.ts`, which loads the real
+ * stories in chromium, firefox and webkit at a Desktop viewport. That lane creates its context
+ * at 1280 wide, so the media query is evaluated at the right width from first layout and the
+ * resize path that fails in webkit is never taken.
+ *
+ * An earlier revision of this paragraph named "the Storybook visual layer" as the residual net.
+ * It was not: visual.spec.ts carries exactly three baselines — sk-stub, sk-feature-card,
+ * sk-ribbon-card — and is chromium-only. Three pass-2 lenses caught that independently, in the
+ * note written to be honest about the gap. The spec above is the coverage this sentence used to
+ * claim.
  */
 const declarationIn = (
   sheet: CSSStyleSheet,
@@ -125,23 +134,37 @@ const declarationIn = (
   property: string,
   media?: string,
 ): string | undefined => {
-  const search = (rules: CSSRuleList): string | undefined => {
-    for (const rule of Array.from(rules)) {
-      if (media === undefined && rule instanceof CSSStyleRule && rule.selectorText === selector) {
-        return rule.style.getPropertyValue(property).trim();
-      }
-      if (media !== undefined && rule instanceof CSSMediaRule) {
-        if (rule.conditionText.replace(/\s+/g, '') !== media.replace(/\s+/g, '')) continue;
-        for (const inner of Array.from(rule.cssRules)) {
-          if (inner instanceof CSSStyleRule && inner.selectorText.split(',').map((x) => x.trim()).includes(selector)) {
-            return inner.style.getPropertyValue(property).trim();
-          }
+  // EVERY match, not the first. Returning the first is what makes a cascade regression
+  // invisible to a sheet-reading test: appending `.sk-grid--cols-3 { grid-template-columns: 1fr }`
+  // at the end of the sheet, or `!important` on the base rule, leaves the first match reading
+  // correctly while the modifier is dead in a browser. A pass-2 lens named that hole. Collecting
+  // all matches lets the caller refuse an ambiguous sheet outright.
+  const matches: string[] = [];
+  for (const rule of Array.from(sheet.cssRules)) {
+    if (media === undefined && rule instanceof CSSStyleRule && rule.selectorText === selector) {
+      matches.push(rule.style.getPropertyValue(property).trim());
+    }
+    if (media !== undefined && rule instanceof CSSMediaRule) {
+      if (rule.conditionText.replace(/\s+/g, '') !== media.replace(/\s+/g, '')) continue;
+      for (const inner of Array.from(rule.cssRules)) {
+        if (
+          inner instanceof CSSStyleRule &&
+          inner.selectorText.split(',').map((x) => x.trim()).includes(selector)
+        ) {
+          matches.push(inner.style.getPropertyValue(property).trim());
         }
       }
     }
-    return undefined;
-  };
-  return search(sheet.cssRules);
+  }
+  if (matches.length > 1) {
+    throw new Error(
+      `${selector} declares ${property} ${matches.length} times${media ? ` inside ${media}` : ''} ` +
+        `(${matches.map((m) => JSON.stringify(m)).join(', ')}). A later duplicate silently wins ` +
+        `in a browser, so this sheet is ambiguous and the single-value assertions below would ` +
+        `read the first one and pass.`,
+    );
+  }
+  return matches[0];
 };
 
 test('each column modifier declares its own track count in the adopted sheet', () => {
@@ -178,6 +201,21 @@ test('the 720px media block collapses exactly the three column modifiers', () =>
   ).toBeUndefined();
 });
 
+test('the HOST is a block box, so a consumer can size it', async () => {
+  // THE FOLD'S OWN FIX, ASSERTED. #77's pre-merge gate found that five committed stories put
+  // `style="max-width: …"` on <sk-grid> and every one was inert: a custom element defaults to
+  // `display: inline`, and max-width does not apply to a non-replaced inline box. The repair was
+  // one CSS line — and it shipped with no test, so deleting it would have reverted the bug with
+  // the whole pipeline green. A pass-2 lens caught that, in the fold that fixed it.
+  const el = document.createElement('sk-grid');
+  el.style.maxWidth = '640px';
+  document.body.append(el);
+  await settled(el);
+  expect(getComputedStyle(el).display, 'the host must be a block box').toBe('block');
+  // And the consequence, not just the property: max-width must actually constrain it.
+  expect(el.getBoundingClientRect().width, 'max-width did not apply to the host').toBeLessThanOrEqual(640);
+});
+
 test('the collapse below 720px is real, measured at the lane viewport', async () => {
   // The live half. The lane runs at 414px — measured, not assumed — so this is the branch that
   // genuinely executes here, and deleting the @media block reds it.
@@ -205,6 +243,53 @@ test('the gap modifiers change the measured gap, not just the class list', async
   expect(base, 'the token sheet is not loaded').toBeGreaterThan(0);
   expect(small, 'gap="3" did not change the computed gap').toBeLessThan(base);
   expect(large, 'gap="6" did not change the computed gap').toBeGreaterThan(base);
+  // gap="4" restates the default, so it has no ordering to assert — but the derived GRID_AXES
+  // now emits SkGridGap4HTML, so the value is a published surface and is checked for equality
+  // rather than left as the one modifier nothing covers.
+  expect(await gapOf({ gap: '4' }), 'gap="4" must equal the default gap').toBe(base);
+});
+
+// RESTORED. This test was deleted by accident in #77's pass-1 fold — a range replacement that
+// rewrote the block between two other tests swallowed it, and the 70-line commit body did not
+// mention it because I did not know. A pass-2 lens found it by diffing against the pass-1 head.
+// The file's own docstring still advertised the claim while the coverage was gone, which is the
+// certifying-absence shape this mission exists to close, produced by the fold that closes it.
+//
+// It is also load-bearing for a change made in that same fold: `:host { display: block }` was
+// added to sk-grid.css, and this test's comment names a `:host` declaration as exactly what it
+// guards against.
+test('a grid does not block its children from being themed', async () => {
+  // The failure mode a layout primitive has. Custom properties inherit through a shadow
+  // boundary; selectors do not. If sk-grid ever grew a `:host` colour declaration or an
+  // rgba() literal, cards inside it would stop following the theme while the grid itself
+  // still looked right — and no visual diff of the GRID would show it.
+  const dark = document.createElement('sk-grid');
+  const darkCard = document.createElement('sk-card');
+  darkCard.setAttribute('variant', 'blue');
+  dark.append(darkCard);
+  document.body.append(dark);
+
+  const wrap = document.createElement('div');
+  wrap.className = 'sk-light';
+  const light = document.createElement('sk-grid');
+  const lightCard = document.createElement('sk-card');
+  lightCard.setAttribute('variant', 'blue');
+  light.append(lightCard);
+  wrap.append(light);
+  document.body.append(wrap);
+
+  await settled(dark);
+  await settled(light);
+  await (darkCard as unknown as { updateComplete: Promise<unknown> }).updateComplete;
+  await (lightCard as unknown as { updateComplete: Promise<unknown> }).updateComplete;
+
+  const border = (c: Element) =>
+    getComputedStyle(c.shadowRoot!.querySelector('[part="card"]')!).borderColor;
+  expect(border(darkCard)).toContain('169, 199, 232');
+  expect(
+    border(lightCard),
+    'light mode did not reach a card nested inside a grid — the grid is interrupting inheritance',
+  ).toContain('46, 74, 107');
 });
 
 test('variant and gap are independent attributes, and map to the static layer\'s classes', async () => {

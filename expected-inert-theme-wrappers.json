@@ -1,0 +1,29 @@
+{
+  "$comment": [
+    "The shrink-only ratchet for inert light-mode story wrappers (#93, #77).",
+    "",
+    "`<div data-theme=\"light\">` around a story activates NOTHING: @spec-kitty/tokens anchors its",
+    "light block on `:root[data-theme=\"light\"], .sk-light`, and `:root` only ever matches <html>.",
+    "The story renders the DARK palette on a light background and every gate stays green — axe",
+    "included, because the contrast it measures is the dark palette's and that is fine.",
+    "",
+    "TEN, AND THE NUMBER MAY ONLY FALL. #77 migrated grid and section-banner and fixed those two",
+    "on the way past; the ten below are the remainder, all in packages/styles. They are #78's and",
+    "#79's to retire as those missions convert their components — lower the count in the same",
+    "commit that fixes them, which is what makes the improvement a deliberate line in the diff",
+    "rather than a silent one.",
+    "",
+    "WHY A COUNT AND NOT A DIRECTORY SCOPE. The first version of this gate scanned",
+    "packages/elements/** only, on the theory that each batch mission would widen it. A pass-2",
+    "lens showed that model had already failed twice before it was written: sk-stub and",
+    "sk-nav-pill are both MIGRATED elements whose styles-layer stories still offend. Migrating a",
+    "component does not move its styles-layer story into the elements directory, so a directory",
+    "scope keeps missing exactly the files it exists to catch — while",
+    "docs/contributing/adding-a-component.md tells authors to fix \"the styles-layer story\".",
+    "",
+    "WHY A COUNT AND NOT AN ALLOWLIST. Same reason expected-parts.json and .wrapper-floor are",
+    "counts: a path list rots on every rename and invites an entry being added rather than a bug",
+    "being fixed. A count cannot be added to."
+  ],
+  "count": 10
+}

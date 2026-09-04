@@ -9,92 +9,146 @@
  * dark palette's, which is fine. #77 found two stories in this state and neither had ever
  * been correct.
  *
- * WHY THIS EXISTS AS A GATE AND NOT AS A NOTE. Before #77 the rule was written down in three
- * places — CLAUDE.md, docs/contributing/adding-a-component.md and the authoring skill — and
- * the class had still recurred across ten story files. A process rule defers the next
- * occurrence; a gate closes the class.
+ * WHY A GATE AND NOT A NOTE. Before #77 the rule was written in three documents — CLAUDE.md,
+ * docs/contributing/adding-a-component.md and the authoring skill — and the class had still
+ * recurred across ten story files. A process rule defers the next occurrence; a gate closes it.
  *
- * SCOPE, AND WHY IT IS NARROW. Ten styles-layer stories still carry the inert form. They are
- * #78/#79's to convert, and a repo-wide gate could not land today without either failing on
- * work this mission does not own or carrying an allowlist that would rot. So the scan is
- * scoped to the ELEMENTS package, where it returns zero hits today and fails closed for every
- * future migration. Each batch mission widens SCAN as it converts its components — that
- * widening is the point, and a mission that converts a directory without adding it here has
- * left the gate behind.
+ * WHY REPO-WIDE WITH A SHRINK-ONLY COUNT, and not a directory scope.
+ *
+ * The first version of this gate scanned `packages/elements/**` only, on the theory that each
+ * batch mission would widen it as it converted components. A pass-2 lens showed that model had
+ * already failed twice before it was written: `sk-stub` and `sk-nav-pill` are both MIGRATED
+ * elements, and both still have an offending styles-layer story. Migrating a component does
+ * not move its styles-layer story into the scanned directory, so a directory scope keeps
+ * missing exactly the files it exists to catch — and `docs/contributing/adding-a-component.md`
+ * tells authors to fix "the styles-layer story", which the gate could not see.
+ *
+ * So it scans every story file and ratchets on the COUNT, which is the pattern this repo
+ * already uses for `expected-parts.json` and `packages/react/.wrapper-floor`: the number may
+ * fall and may never rise. A new offender fails immediately, wherever it lands, and the ten
+ * known ones can be retired one mission at a time without an allowlist to rot.
  *
  * Usage: node scripts/check-story-theme-wrapper.mjs [--selftest]
  */
-import { globSync, readFileSync } from 'node:fs';
+import { globSync, readFileSync, writeFileSync } from 'node:fs';
 
-const SCAN = ['packages/elements/src/**/*.stories.ts'];
+const SCAN = 'packages/**/*.stories.ts';
+const FLOOR_FILE = 'expected-inert-theme-wrappers.json';
 
-// The MARKUP form only. `data-theme="light"` appears legitimately in prose — every corrected
-// story carries a comment naming the attribute as the thing not to use — so matching the bare
-// attribute would flag the documentation of the fix. Requiring the tag opener immediately
-// before it matches what a browser would act on.
-const BAD = /<\w+[^>]*\bdata-theme\s*=\s*"light"/;
+/**
+ * Matches the MARKUP form on a tag opener.
+ *
+ * Deliberately tolerant where a browser is tolerant, because the first version was not and its
+ * own probe table certified coverage it did not have:
+ *   - `["']?` — HTML permits single-quoted and unquoted attribute values, and the first regex
+ *     required double quotes while a probe row labelled "single quotes" carried a double-quoted
+ *     payload. Three lenses caught that row independently.
+ *   - `i` — `DATA-THEME` is the same attribute.
+ *   - no per-line split — a prettier-wrapped opener puts the attribute on its own line, and
+ *     the first version scanned line by line so it could not see one. Note `[^>]*` already
+ *     spans newlines: a negated character class matches `\n`. An intermediate draft "improved"
+ *     this to `[\s\S]*?` and immediately produced two false positives — with `>` no longer
+ *     excluded, an earlier tag opener paired with a later `data-theme="light"` inside a
+ *     COMMENT explaining this very rule. `[^>]*` is what makes the anchor mean anything.
+ *
+ * `<\w+` anchors to a tag opener so the many `//` and `*` comments that NAME this attribute —
+ * including the ones explaining this rule — are not flagged.
+ */
+const BAD = /<\w+[^>]*\bdata-theme\s*=\s*["']?light\b/gi;
 
 export function offenders(files) {
   const out = [];
   for (const f of files) {
     const src = readFileSync(f, 'utf8');
-    src.split('\n').forEach((line, i) => {
-      if (BAD.test(line)) out.push(`${f}:${i + 1}`);
-    });
+    for (const m of src.matchAll(BAD)) {
+      out.push(`${f}:${src.slice(0, m.index).split('\n').length}`);
+    }
   }
-  return out;
+  return out.sort();
 }
 
 if (process.argv.includes('--selftest')) {
-  // Probe the REGEX, not a paraphrase of it. A gate whose evidence is a prose claim in a PR
-  // body is the shape this repo has already watched degrade.
   const PROBES = [
-    ['the inert wrapper', '<div data-theme="light" style="background: x">', true],
-    ['single quotes in a template literal', "<section data-theme=\"light\">", true],
-    ['spaced attribute', '<div  data-theme = "light" >', true],
+    ['the inert wrapper, double quoted', '<div data-theme="light" style="background: x">', true],
+    ['SINGLE quoted — the form the first regex missed', "<div data-theme='light'>", true],
+    ['UNQUOTED — also legal HTML', '<div data-theme=light>', true],
+    ['uppercase attribute', '<DIV DATA-THEME="LIGHT">', true],
+    ['a prettier-wrapped opener across lines', '<div\n  data-theme="light"\n  style="x"\n>', true],
     ['the CORRECT form', '<div class="sk-light" style="background: x">', false],
     ['a comment explaining the rule', ' * `class="sk-light"`, not `data-theme="light"` — see #93', false],
-    ['a comment naming the selector', " * anchors light on `:root[data-theme=\"light\"], .sk-light`", false],
+    ['a comment naming the selector', ' * anchors light on `:root[data-theme="light"], .sk-light`', false],
+    // The false positive an intermediate draft actually produced: a correct wrapper earlier in
+    // the file, and a comment about the rule later. With `>` not excluded these paired up.
+    [
+      'a correct wrapper followed later by a comment about the rule',
+      '<div class="sk-light">x</div>\n// use class="sk-light", never data-theme="light"',
+      false,
+    ],
     ['dark theme, which is not this rule', '<div data-theme="dark">', false],
   ];
   let bad = 0;
   let mustCatch = 0;
-  for (const [note, line, shouldFlag] of PROBES) {
-    const flagged = BAD.test(line);
+  for (const [note, text, shouldFlag] of PROBES) {
+    BAD.lastIndex = 0;
+    const flagged = BAD.test(text);
     if (shouldFlag) mustCatch++;
     if (flagged !== shouldFlag) {
       console.error(`  ✗ ${note}: expected ${shouldFlag ? 'a flag' : 'no flag'}, got the opposite`);
       bad++;
     }
   }
-  // An empty or all-negative table would pass vacuously.
-  if (mustCatch < 3) {
+
+  // PROBE THE READER, NOT ONLY THE REGEX. The first version tested `BAD` directly and never
+  // called offenders(), so a broken read, loop or line-number path would have self-tested green
+  // — a gate self-test that cannot see its own reporting code.
+  const tmp = `${process.env['TMPDIR'] ?? '/tmp'}/theme-probe-${process.pid}.stories.ts`;
+  writeFileSync(tmp, 'const a = 1;\nexport const X = `<div data-theme="light">y</div>`;\n');
+  const got = offenders([tmp]);
+  if (got.length !== 1 || !got[0].endsWith(':2')) {
+    console.error(`  ✗ offenders() did not report the offender at line 2 — got ${JSON.stringify(got)}`);
+    bad++;
+  }
+  const clean = offenders([]);
+  if (clean.length !== 0) {
+    console.error('  ✗ offenders([]) is not empty');
+    bad++;
+  }
+
+  if (mustCatch < 4) {
     console.error(`❌ degenerate probe table: only ${mustCatch} must-catch rows.`);
     process.exit(1);
   }
   if (bad) {
-    console.error(`\n❌ ${bad} of ${PROBES.length} probe(s) did not behave as recorded.`);
+    console.error(`\n❌ ${bad} probe(s) did not behave as recorded.`);
     process.exit(1);
   }
-  console.log(`✅ All ${PROBES.length} probes behaved as recorded (${mustCatch} must-catch).`);
+  console.log(`✅ All ${PROBES.length} regex probes plus 2 reader probes behaved as recorded (${mustCatch} must-catch).`);
   process.exit(0);
 }
 
-const files = SCAN.flatMap((g) => globSync(g, {}));
-// REFUSE AN EMPTY SET. A glob that stops matching — a directory rename, a stories convention
-// change — would otherwise print a green line over nothing, which is this programme's named
-// defect class and the reason every other gate here carries this floor.
+const files = globSync(SCAN, {});
+// REFUSE AN EMPTY SET — a glob that stops matching would print a green line over nothing.
 if (files.length === 0) {
   console.error(
-    `❌ no story files matched ${SCAN.join(', ')} — refusing to report green over nothing.\n` +
-      '   Either the glob has drifted or the elements package has no stories; both are bugs.'
+    `❌ no story files matched ${SCAN} — refusing to report green over nothing.\n` +
+      '   The glob has drifted, or the packages have moved.'
   );
   process.exit(1);
 }
 
 const found = offenders(files);
-if (found.length) {
-  console.error('❌ Story wrappers use `data-theme="light"`, which activates nothing:');
+const floor = JSON.parse(readFileSync(FLOOR_FILE, 'utf8'));
+const allowed = floor.count;
+if (!Number.isInteger(allowed) || allowed < 0) {
+  console.error(`❌ ${FLOOR_FILE} must record a non-negative integer count (read ${JSON.stringify(allowed)}).`);
+  process.exit(1);
+}
+
+if (found.length > allowed) {
+  console.error(
+    `❌ ${found.length} story wrapper(s) use \`data-theme="light"\`, which activates nothing — ` +
+      `the recorded count is ${allowed}:`
+  );
   for (const f of found) console.error(`   ${f}`);
   console.error(
     '\n   The token package anchors light on `:root[data-theme="light"], .sk-light`, and\n' +
@@ -102,4 +156,16 @@ if (found.length) {
   );
   process.exit(1);
 }
-console.log(`✅ ${files.length} element story file(s) activate light mode correctly.`);
+
+if (found.length < allowed) {
+  console.error(
+    `❌ ${found.length} offender(s) remain but ${FLOOR_FILE} still records ${allowed}.\n` +
+      `   This ratchet is shrink-only and does not lower itself: edit the count to ${found.length}\n` +
+      '   in the same commit that fixed them, so the improvement is a deliberate line in the diff.'
+  );
+  process.exit(1);
+}
+
+console.log(
+  `✅ ${files.length} story file(s) scanned; ${found.length} known inert theme wrapper(s), none new.`
+);
