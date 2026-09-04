@@ -6,8 +6,9 @@ so far — as **custom elements** in `@spec-kitty/elements`. Both require `@spec
 **Migration is in progress.** Twelve elements exist today: `sk-button`, `sk-card`,
 `sk-check-bullet`, `sk-feature-card`, `sk-form-input`, `sk-form-textarea`, `sk-grid`,
 `sk-nav-pill`, `sk-pill-tag`, `sk-ribbon-card`, `sk-section-banner` and `sk-stub`.
-Three components are still CSS only — `blog-card` (#78), `site-footer` (#77) and `form-field`
-(#141) — and each section below says which it is. Each section below says which it is, because the
+Three of the catalogue's component packages are still CSS only — `blog-card` (#78),
+`site-footer` (#77) and `form-field` (#141). Composite sections below such as Hero and Callout
+are CSS-only *patterns* rather than packages, and are not part of that count. Each section below says which it is, because the
 difference decides how you use it.
 
 Because a custom element needs no wrapper, every framework can use the migrated ones directly. A

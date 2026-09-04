@@ -272,6 +272,28 @@ Nine remaining components, three per mission. **layout:** grid, section-banner, 
 
 **The last batch to merge owns ADR-8 confirmation criterion #3** and asserts it repository-wide, in the restated form from ADR-10 §3: no component markup is *authored* twice.
 
+**#79 was that batch, and the criterion is NOT met. Recorded here rather than left to lapse.**
+
+Measured on #79's head: **8 of 12 migrated components have a `*.markup.ts`** — `button`, `card`,
+`check-bullet`, `feature-card`, `grid`, `pill-tag`, `ribbon-card`, `section-banner` — so their
+markup is authored exactly once and the static `.html` plus the styles-layer `index.ts` are
+generated from it with a drift gate.
+
+**Three do not, and their static markup is therefore authored a second time:** `nav-pill` (#73),
+`form-input` and `form-textarea` (#74). All three were migrated *before* the markup-module
+pattern was applied systematically — #72 introduced it for `sk-card`, and #77 was the first
+batch to make it the rule. (`stub` is synthetic and has no static form; it is not a gap.)
+
+Those three sit in missions that have already merged, so #79 could not adopt them without
+breaking the slug boundary every batch mission depends on. The work is filed rather than
+absorbed, and the criterion keeps an owner instead of losing one when the last batch merges.
+
+Two counts that look like violations and are not, checked so the next reader does not re-derive
+them: a story writing `class="sk-nav-pill__item"` is supplying **slotted content**, which is the
+consumer's job and the documented API, not a second copy of the component's structure; and the
+marker/replacement constants in the `fill()`-style story helpers are substitution machinery over
+a generated string, not an authoring site.
+
 ---
 
 ### M14 · `elements-first-release` — after M11–13

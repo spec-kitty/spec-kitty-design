@@ -12,7 +12,7 @@ export default meta;
 type Story = StoryObj;
 
 export const Default: Story = {
-  render: () => `<ul style="list-style:none;padding:0;margin:0">${SkCheckBulletHTML}</ul>`,
+  render: () => `<ul role="list" style="list-style:none;padding:0;margin:0">${SkCheckBulletHTML}</ul>`,
 };
 
 /**
@@ -53,7 +53,7 @@ export const LightMode: Story = {
   parameters: { backgrounds: { default: 'sk-light' } },
   render: () => `
     <div class="sk-light" style="background: var(--sk-surface-page); padding: var(--sk-space-6); display: inline-block;">
-      <ul style="list-style:none;padding:0;margin:0">${SkCheckBulletHTML}</ul>
+      <ul role="list" style="list-style:none;padding:0;margin:0">${SkCheckBulletHTML}</ul>
     </div>
   `,
 };

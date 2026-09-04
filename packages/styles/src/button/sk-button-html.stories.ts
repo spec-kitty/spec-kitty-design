@@ -21,16 +21,35 @@ import {
  */
 const MARKER = '>Label<';
 
-const label = (markup: string, text: string) => {
-  if (!markup.includes(MARKER)) {
+/**
+ * The ONE guarded substitution in this file. Every `.replace` here goes through it, because a
+ * story that guards its label swap and then hand-rolls two more unguarded ones has closed the
+ * class in the comment only — which a verification pass caught this file doing.
+ */
+const swap = (markup: string, find: string, put: string, what: string) => {
+  if (!markup.includes(find)) {
     throw new Error(
-      `sk-button story: generated markup no longer contains ${JSON.stringify(MARKER)} — ` +
-        `label() would have silently returned it unchanged. Update MARKER alongside ` +
-        `buttonStaticHtml()'s default content.`,
+      `sk-button story: generated markup no longer contains ${JSON.stringify(find)} (${what}) — ` +
+        `the replacement would have silently returned it unchanged. Update this story alongside ` +
+        `buttonStaticHtml().`,
     );
   }
-  return markup.replace(MARKER, `>${text}<`);
+  return markup.replace(find, put);
 };
+
+const label = (markup: string, text: string) => swap(markup, MARKER, `>${text}<`, 'the label');
+
+/**
+ * Adds a tone to a generated form that has none.
+ *
+ * `SkButtonSmHTML` is `sk-button sk-button--sm` — SIZE ONLY — and the base class sets no
+ * background or colour, so rendering it bare paints a tone-less button. An earlier revision of
+ * this fold did exactly that, and the Small story stopped showing anything: a regression
+ * introduced while removing hand-authored markup. Composing a class onto a generated string is
+ * not a second authoring site, so ADR-8 criterion 3 is unaffected.
+ */
+const withTone = (markup: string, tone: 'primary' | 'secondary' | 'ghost') =>
+  swap(markup, 'class="sk-button', `class="sk-button sk-button--${tone}`, 'the class list');
 
 const meta: Meta = {
   title: 'Components/Button (HTML)',
@@ -43,7 +62,9 @@ type Story = StoryObj;
 export const Default: Story = { render: () => label(SkButtonPrimaryHTML, 'Get started') };
 export const Secondary: Story = { render: () => label(SkButtonSecondaryHTML, 'Star on GitHub') };
 export const Ghost: Story = { render: () => label(SkButtonGhostHTML, 'Read the docs') };
-export const Small: Story = { render: () => label(SkButtonSmHTML, 'Book Demo') };
+export const Small: Story = {
+  render: () => label(withTone(SkButtonSmHTML, 'primary'), 'Book Demo'),
+};
 
 /**
  * `disabled` is authored here rather than generated: it is a STATE, not a variant, so it is not
@@ -51,7 +72,7 @@ export const Small: Story = { render: () => label(SkButtonSmHTML, 'Book Demo') }
  * `disabled` already exposes that to assistive technology, and adding both is redundant.
  */
 export const Disabled: Story = {
-  render: () => label(SkButtonPrimaryHTML, 'Disabled').replace('<button ', '<button disabled '),
+  render: () => swap(label(SkButtonPrimaryHTML, 'Disabled'), '<button ', '<button disabled ', 'the opening tag'),
 };
 
 export const AllVariants: Story = {
@@ -60,7 +81,7 @@ export const AllVariants: Story = {
       ${label(SkButtonPrimaryHTML, 'Get started')}
       ${label(SkButtonSecondaryHTML, 'Star on GitHub')}
       ${label(SkButtonGhostHTML, 'Read the docs')}
-      ${label(SkButtonSmHTML, 'Book Demo')}
+      ${label(withTone(SkButtonSmHTML, 'primary'), 'Book Demo')}
     </div>
   `,
 };

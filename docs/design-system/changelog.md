@@ -27,8 +27,13 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) conve
 - **Tinted `sk-pill-tag` variants now use the `--sk-on-tint-*` inks** rather than `--sk-color-*`
   (#79). This is a **WCAG AA fix**, not a preference: the raw colour tokens are tuned for the
   dark page surface, and against the pastel light-mode tints they measured 1.51:1 (yellow),
-  1.67:1 (green) and 1.82:1 (purple) against AA's 4.5. They now measure 6.28:1, 7.10:1 and
-  8.00:1. The failure had been invisible because this component's LightMode story carried the
+  1.67:1 (green), 1.82:1 (purple) and 2.48:1 (breaking) against AA's 4.5. They now measure
+  6.28:1, 7.10:1, 8.00:1 and 7.70:1.
+  **The DARK-theme ink changes too, for two variants** — `breaking` moves from `--sk-color-red`
+  to `--sk-on-tint-sky`, so a Breaking badge is no longer red on the dark page, and `yellow`
+  shifts to the softer `--sk-color-yellow-soft`. Both follow from adopting the on-tint family,
+  and `breaking` already sat on a sky-blue tint; called out because a consumer reading this as a
+  light-mode fix would otherwise be surprised by a dark-theme recolour. The failure had been invisible because this component's LightMode story carried the
   inert `data-theme="light"` wrapper (#93), so it rendered the dark palette and the a11y gate
   never saw the light pairing.
 
@@ -40,21 +45,6 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) conve
   ancestor**; a bare bullet is now correctly reported as `aria-required-parent`.
   The `styles` check-bullet is unaffected — it emits a real `<li>` with no host
   element to interpose.
-
-### Removed
-
-- **`SkTagHTML()`, `SkEyebrowPillHTML()` and the `PillTagVariant` type** from
-  `@spec-kitty/styles` (#79). The styles layer no longer exports markup BUILDER FUNCTIONS: the
-  markup is authored once in the element's markup module and generated, so the exports are
-  constants like every other component's. `SkPillTagHTML` changes from a function *result* to a
-  constant, and per-variant constants (`SkPillTagGreenHTML`, `SkPillTagEyebrowHTML`, …) replace
-  the function's arguments.
-- **`sk-button-primary.html` and `sk-button-secondary.html`** (#79) — hand-authored duplicates
-  of what `sk-button.html` is now generated to contain (ADR-10 §3).
-- **`sk-ribbon-card-plain.html` and the `skRibbonCardHTML()` builder** (#78), for the same
-  reason; the ribbonless form is the generated base export.
-- **`.sk-check-bullet__text`** from published check-bullet markup (#79) — a class defined in no
-  stylesheet anywhere in the repo.
 
 ### Added
 
@@ -70,3 +60,18 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) conve
 
 *Releases are tagged on the `main` branch following semantic versioning.*
 *Breaking `--sk-*` token name changes increment the major version.*
+
+### Removed
+
+- **`SkTagHTML()`, `SkEyebrowPillHTML()` and the `PillTagVariant` type** from
+  `@spec-kitty/styles` (#79). The styles layer no longer exports markup BUILDER FUNCTIONS: the
+  markup is authored once in the element's markup module and generated, so the exports are
+  constants like every other component's. `SkPillTagHTML` changes from a function *result* to a
+  constant, and per-variant constants (`SkPillTagGreenHTML`, `SkPillTagEyebrowHTML`, …) replace
+  the function's arguments.
+- **`sk-button-primary.html` and `sk-button-secondary.html`** (#79) — hand-authored duplicates
+  of what `sk-button.html` is now generated to contain (ADR-10 §3).
+- **`sk-ribbon-card-plain.html` and the `skRibbonCardHTML()` builder** (#78), for the same
+  reason; the ribbonless form is the generated base export.
+- **`.sk-check-bullet__text`** from published check-bullet markup (#79) — a class defined in no
+  stylesheet anywhere in the repo.
