@@ -34,7 +34,8 @@
     "#77 adds <sk-section-banner> as a subject of SC-013 and SC-014 on the same basis as <sk-grid>: it declares parts and adopts a generated sheet. It does not join SC-015, and does not claim an event or form id it does not have.",
     "#78 adds <sk-feature-card> AND <sk-ribbon-card> as subjects of SC-013 and SC-014, on the same basis as #77's two: each declares parts and adopts a generated sheet. An earlier revision of this note named only feature-card while the data below added both.",
     "#79 adds sk-button, sk-pill-tag and sk-check-bullet to SC-013 and SC-014. None claims an event or form id: button renders a real control and lets the platform supply the behaviour, and the other two are presentational.",
-    "#78 adds <sk-blog-card> to SC-013 and SC-014. Its SC-014 case is the only one in the repo that asserts TWO adopted sheets by identity and in order — the operator ruling has it compose sk-card's stylesheet rather than nest the element, so 'adopts the generated sheet' becomes 'adopts both, sk-card's first'."
+    "#78 adds <sk-blog-card> to SC-013 and SC-014. Its SC-014 case is the only one in the repo that asserts TWO adopted sheets by identity and in order — the operator ruling has it compose sk-card's stylesheet rather than nest the element, so 'adopts the generated sheet' becomes 'adopts both, sk-card's first'.",
+    "#77 adds sk-site-footer to SC-013 and SC-014. Declaring the subject is what CREATES the obligation — nothing detects that a new element should have behaviour tests, and the suite's own floor proved it: with the tests written and passing but no subject declared, the run failed with '<sk-site-footer> exists but is not a subject of any behaviour ... it would ship with zero behaviour tests and every gate green'. That is the gate working."
   ],
   "behaviours": [
     {
@@ -303,6 +304,10 @@
         {
           "name": "sk-section-banner",
           "file": "fixtures/elements-behaviour/src/sk-section-banner.test.ts"
+        },
+        {
+          "name": "sk-site-footer",
+          "file": "fixtures/elements-behaviour/src/sk-site-footer.test.ts"
         }
       ]
     },
@@ -348,6 +353,10 @@
         {
           "name": "sk-section-banner",
           "file": "fixtures/elements-behaviour/src/sk-section-banner.test.ts"
+        },
+        {
+          "name": "sk-site-footer",
+          "file": "fixtures/elements-behaviour/src/sk-site-footer.test.ts"
         },
         {
           "name": "sk-stub",

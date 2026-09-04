@@ -1,6 +1,30 @@
 /* @spec-kitty/styles — sk-site-footer */
 /* All values use --sk-* tokens only */
 
+/* A custom element defaults to `display: inline`; `block` lets the footer fill its column and
+   lets a consumer size the host. Inert in the static path, where the root IS the <footer>. */
+:host {
+  display: block;
+}
+
+/* WHAT THIS SHEET REACHES IN EACH PATH.
+
+   Under the #77 ruling the element owns the whole structure — the grid, the <nav>s, the
+   headings, the <ul>s, the divider and the legal line — and text arrives as PROPERTIES. So every
+   rule below except the link rule targets a node in the element's own shadow tree, and a bare
+   class selector serves both paths.
+
+   The one slotted thing is the link ITEM: a consumer supplies <li> elements that land directly
+   inside the element's <ul>, so `::slotted(li)` reaches them — directly assigned, which is
+   exactly why the ruling put the boundary there rather than around the whole column.
+
+   The <a> INSIDE each <li> is a grandchild and is not reachable from here. That is deliberate
+   and is the ruling's stated trade: the anchor keeps its own light-DOM class from this same
+   sheet, loaded in the consumer's document, which they are already doing for the static path.
+
+   AND A STATE PSEUDO-CLASS MUST SIT INSIDE `::slotted()`. `::slotted(x):hover` does not parse,
+   and one invalid selector invalidates its whole comma list (#143). The gate rejects it. */
+
 .sk-site-footer {
   padding: var(--sk-space-11) 0 var(--sk-space-8);
   border-top: 1px solid var(--sk-border-default);
@@ -14,6 +38,13 @@
 
 @media (max-width: 640px) {
   .sk-site-footer__grid { grid-template-columns: 1fr; gap: var(--sk-space-8); }
+}
+
+/* The grid's direct children, in both paths. `::slotted()` reaches these because they ARE the
+   assigned nodes; the bare class serves the document. */
+.sk-site-footer__column,
+::slotted(.sk-site-footer__column) {
+  min-width: 0;
 }
 
 .sk-site-footer__brand {
@@ -49,6 +80,12 @@
   margin-bottom: var(--sk-space-5);
 }
 
+/* The slotted <li> items, reachable because they are DIRECTLY assigned into the element's own
+   <ul>. The bare selector serves the static path, where the <li> is an ordinary child. */
+::slotted(li) {
+  margin: 0;
+}
+
 .sk-site-footer__links {
   list-style: none;
   padding: 0;
@@ -58,7 +95,7 @@
   gap: var(--sk-space-3);
 }
 
-.sk-footer-link {
+.sk-site-footer__link {
   color: var(--sk-fg-muted);
   font-size: var(--sk-text-sm);
   font-weight: var(--sk-weight-medium);
@@ -72,7 +109,7 @@
     text-decoration-color var(--sk-motion-duration-fast) var(--sk-motion-ease-out);
 }
 
-.sk-footer-link:hover {
+.sk-site-footer__link:hover {
   color: var(--sk-fg-default);
   text-decoration-color: var(--sk-color-yellow);
 }

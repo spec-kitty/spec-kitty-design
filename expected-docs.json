@@ -26,9 +26,10 @@
     "and members[] of kind `method` that are not private/protected and do not start with `#`.",
     "Note that `state: true` properties are deliberately absent from attributes[] — they observe",
     "no attribute and cannot be delivered on a first render under ssrSafe — so they are not",
-    "counted here either. See scripts/normalise-manifest.mjs."
+    "counted here either. See scripts/normalise-manifest.mjs.",
+    "#77 adds <sk-site-footer> with FIVE attributes and zero methods: wordmark, tagline, legal, column-one-heading and column-two-heading. Every one is a string, which is the operator's ruling on #77 working around a constraint this ratchet's sibling gate enforces — the React wrappers' ssrSafe mode delivers first-render props as ATTRIBUTES, which carry only strings, so structured data would not survive. The link ITEMS are slotted instead. An earlier revision of this entry recorded 0/0 for a slot-only design that contradicted that ruling; the rebuild is why the numbers moved."
   ],
-  "total": 53,
+  "total": 58,
   "elements": {
     "sk-blog-card": {
       "attributes": 3,
@@ -80,6 +81,10 @@
     },
     "sk-stub": {
       "attributes": 0,
+      "methods": 0
+    },
+    "sk-site-footer": {
+      "attributes": 5,
       "methods": 0
     }
   }

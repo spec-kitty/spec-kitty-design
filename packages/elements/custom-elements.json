@@ -868,6 +868,11 @@
         },
         {
           "kind": "variable",
+          "name": "PLACEHOLDER_LEGAL",
+          "description": "The legal placeholder, exported so a test can assert it carries no year."
+        },
+        {
+          "kind": "variable",
           "name": "PLACEHOLDER_THUMBNAIL",
           "type": {
             "text": "string"
@@ -1022,6 +1027,52 @@
             }
           ],
           "description": "The static form. Throws on an unknown variant — it runs on the build path, where a bad\nvariant must never reach committed output.\n\n`content` is the LABEL TEXT, and it is a placeholder here on purpose. Until #77 the three\ngenerated exports each carried a hardcoded version string (\"VERSION 1.X — FIRST STABLE\nRELEASE\" and two others), which made the component's own source the place a docsite's\ncontent lived — so changing a version number meant editing the component library. The\nlabel is the consumer's; only the structure is the component's."
+        },
+        {
+          "kind": "variable",
+          "name": "SITE_FOOTER_AXES",
+          "type": {
+            "text": "{}"
+          },
+          "default": "{}",
+          "description": "No non-variant axes."
+        },
+        {
+          "kind": "variable",
+          "name": "SITE_FOOTER_CLASSES",
+          "type": {
+            "text": "{\n  root: 'sk-site-footer',\n  grid: 'sk-site-footer__grid',\n  column: 'sk-site-footer__column',\n  brand: 'sk-site-footer__brand',\n  wordmark: 'sk-site-footer__wordmark',\n  tagline: 'sk-site-footer__tagline',\n  heading: 'sk-site-footer__heading',\n  links: 'sk-site-footer__links',\n  link: 'sk-site-footer__link',\n  divider: 'sk-site-footer__divider',\n  legal: 'sk-site-footer__legal',\n}"
+          },
+          "default": "{ root: 'sk-site-footer', grid: 'sk-site-footer__grid', column: 'sk-site-footer__column', brand: 'sk-site-footer__brand', wordmark: 'sk-site-footer__wordmark', tagline: 'sk-site-footer__tagline', heading: 'sk-site-footer__heading', links: 'sk-site-footer__links', link: 'sk-site-footer__link', divider: 'sk-site-footer__divider', legal: 'sk-site-footer__legal', }",
+          "description": "The class names this component renders, named once.\n\nThe element imports these rather than re-typing them (ADR-8 criterion 3)."
+        },
+        {
+          "kind": "variable",
+          "name": "SITE_FOOTER_VARIANTS",
+          "type": {
+            "text": "{}"
+          },
+          "default": "{}",
+          "description": "No colour or shape variants — a site footer is one thing."
+        },
+        {
+          "kind": "function",
+          "name": "siteFooterStaticHtml",
+          "return": {
+            "type": {
+              "text": "string"
+            }
+          },
+          "parameters": [
+            {
+              "name": "opts",
+              "default": "{}",
+              "type": {
+                "text": "SiteFooterStaticOptions"
+              }
+            }
+          ],
+          "description": "The static form, for a consumer with no JavaScript.\n\nThe element renders the same structure from the same class map, so the two paths cannot\ndiverge — the difference is only where the content comes from: properties there, literals here."
         },
         {
           "kind": "class",
@@ -2858,6 +2909,163 @@
         },
         {
           "kind": "class",
+          "description": "A site footer: a brand column, two link columns, and a legal line.\n\nThe element owns the structure — the grid, the `<nav>`s, the headings, the `<ul>`s, the divider\nand the legal line. Text arrives as properties; only the link ITEMS are slotted, as `<li>`\nelements that land directly inside the element's own `<ul>`.",
+          "name": "SkSiteFooter",
+          "cssParts": [
+            {
+              "description": "the rule above the legal line, absent when `legal` is empty",
+              "name": "divider"
+            },
+            {
+              "description": "the footer element, for padding and border overrides",
+              "name": "footer"
+            },
+            {
+              "description": "the column grid, for layouts outside the provided one",
+              "name": "grid"
+            },
+            {
+              "description": "the legal line",
+              "name": "legal"
+            }
+          ],
+          "slots": [
+            {
+              "description": "`<li>` items for the first link column",
+              "name": "column-one"
+            },
+            {
+              "description": "`<li>` items for the second link column The slot NAMES keep their hyphens — a slot name is a string, not a property key, so the constraint that shaped `headingOne`/`headingTwo` does not reach them.",
+              "name": "column-two"
+            }
+          ],
+          "members": [
+            {
+              "kind": "method",
+              "name": "#column",
+              "privacy": "private",
+              "parameters": [
+                {
+                  "name": "heading",
+                  "type": {
+                    "text": "string | undefined"
+                  }
+                },
+                {
+                  "name": "slot",
+                  "type": {
+                    "text": "string"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "field",
+              "name": "headingOne",
+              "privacy": "public",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "Heading for the first link column.",
+              "attribute": "headingOne",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "headingTwo",
+              "privacy": "public",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "Heading for the second link column.",
+              "attribute": "headingTwo",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "legal",
+              "privacy": "public",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "The copyright line. Omit it and the divider above it is not rendered either.",
+              "attribute": "legal",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "tagline",
+              "privacy": "public",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "One sentence under the wordmark.",
+              "attribute": "tagline",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "wordmark",
+              "privacy": "public",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "The brand wordmark.",
+              "attribute": "wordmark",
+              "reflects": true
+            }
+          ],
+          "attributes": [
+            {
+              "name": "headingOne",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "Heading for the first link column.",
+              "fieldName": "headingOne"
+            },
+            {
+              "name": "headingTwo",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "Heading for the second link column.",
+              "fieldName": "headingTwo"
+            },
+            {
+              "name": "legal",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "The copyright line. Omit it and the divider above it is not rendered either.",
+              "fieldName": "legal"
+            },
+            {
+              "name": "tagline",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "One sentence under the wordmark.",
+              "fieldName": "tagline"
+            },
+            {
+              "name": "wordmark",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "The brand wordmark.",
+              "fieldName": "wordmark"
+            }
+          ],
+          "superclass": {
+            "name": "LitElement",
+            "package": "lit"
+          },
+          "tagName": "sk-site-footer",
+          "customElement": true
+        },
+        {
+          "kind": "class",
           "description": "The scaffold element for the ADR-8 custom-element base layer.",
           "name": "SkStub",
           "members": [],
@@ -3357,6 +3565,14 @@
         },
         {
           "kind": "js",
+          "name": "PLACEHOLDER_LEGAL",
+          "declaration": {
+            "name": "PLACEHOLDER_LEGAL",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
           "name": "PLACEHOLDER_THUMBNAIL",
           "declaration": {
             "name": "PLACEHOLDER_THUMBNAIL",
@@ -3472,6 +3688,38 @@
           "name": "SectionBannerVariant",
           "declaration": {
             "name": "SectionBannerVariant",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "SITE_FOOTER_AXES",
+          "declaration": {
+            "name": "SITE_FOOTER_AXES",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "SITE_FOOTER_CLASSES",
+          "declaration": {
+            "name": "SITE_FOOTER_CLASSES",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "SITE_FOOTER_VARIANTS",
+          "declaration": {
+            "name": "SITE_FOOTER_VARIANTS",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "siteFooterStaticHtml",
+          "declaration": {
+            "name": "siteFooterStaticHtml",
             "module": "./dist/index.js"
           }
         },
@@ -3638,6 +3886,22 @@
         {
           "kind": "js",
           "name": "skSectionBannerSheet",
+          "declaration": {
+            "name": "default",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "SkSiteFooter",
+          "declaration": {
+            "name": "SkSiteFooter",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "skSiteFooterSheet",
           "declaration": {
             "name": "default",
             "module": "./dist/index.js"
