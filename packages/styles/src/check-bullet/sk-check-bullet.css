@@ -1,3 +1,9 @@
+/* A custom element defaults to `display: inline`; `block` lets the wrapper's flex row lay out
+   and lets a consumer size the host. Inert in the static path, where the root IS the <li>. */
+:host {
+  display: block;
+}
+
 .sk-check-bullet {
   display: flex;
   align-items: flex-start;

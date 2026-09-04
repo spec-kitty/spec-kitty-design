@@ -2,6 +2,7 @@ export { define, registeredTags } from './define.js';
 export { SkStub } from './stub/sk-stub.js';
 export { SkButton } from './button/sk-button.js';
 export { SkCard } from './card/sk-card.js';
+export { SkCheckBullet } from './check-bullet/sk-check-bullet.js';
 export { SkNavPill } from './nav-pill/sk-nav-pill.js';
 export { SkFormInput } from './form-input/sk-form-input.js';
 export { SkFormTextarea } from './form-textarea/sk-form-textarea.js';
@@ -27,6 +28,7 @@ export { default as skStubSheet } from './stub/sk-stub.css.js';
 // `static styles` would hold for any sheet at all.
 export { default as skGridSheet } from './grid/sk-grid.css.js';
 export { default as skButtonSheet } from './button/sk-button.css.js';
+export { default as skCheckBulletSheet } from './check-bullet/sk-check-bullet.css.js';
 export { default as skFeatureCardSheet } from './feature-card/sk-feature-card.css.js';
 export { default as skRibbonCardSheet } from './ribbon-card/sk-ribbon-card.css.js';
 export { default as skPillTagSheet } from './pill-tag/sk-pill-tag.css.js';
@@ -62,6 +64,15 @@ export {
   type ButtonSize,
   type ButtonVariant,
 } from './button/sk-button.markup.js';
+
+// sk-check-bullet's markup module. No variants and no axes, both declared explicitly.
+export {
+  CHECK_BULLET_AXES,
+  CHECK_BULLET_VARIANTS,
+  DEFAULT_ICON,
+  checkBulletClasses,
+  checkBulletStaticHtml,
+} from './check-bullet/sk-check-bullet.markup.js';
 
 // sk-feature-card's markup module. Both class helpers are exported because the component has
 // TWO independent axes and each has its own degrade path.

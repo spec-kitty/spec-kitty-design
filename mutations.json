@@ -23,7 +23,8 @@
     "#77 adds two more for <sk-section-banner>. The SC-013 arm drops a part= attribute from a node the test targets by name; note it picks the DOT rather than the outermost part, because the outermost one is also a node the test queries to prove the element rendered at all, so removing it would red the test for the wrong reason.",
     "#77's pre-merge gate added a SECOND SC-014 arm per element. The first arm empties `static styles`, which reds the `adoptedStyleSheets.length` assertion FIRST — vitest aborts there, so the identity assertion on the next line was never shown to be load-bearing, in the behaviour whose id is literally about identity. Swapping in a fresh CSSStyleSheet keeps length at 1 and can only red the identity arm. Both spellings are kept: one proves the length assertion, the other proves the identity assertion, and neither alone proves both.",
     "#78 adds SIX: three for <sk-feature-card> and three for <sk-ribbon-card>. the SC-013 arm drops the CHIP's part rather than the card's, because the card part is also the node several other tests query to prove the element rendered at all. Both SC-014 spellings are carried FOR BOTH, per #77's finding that emptying the array reds the LENGTH assertion first and never exercises the identity one. An earlier revision of this PR carried both for feature-card and only the identity arm for ribbon-card, while this sentence claimed otherwise — three pre-merge lenses caught the asymmetry between the rule and its application.",
-    "#79 adds three for <sk-button>. The SC-013 arm drops the part from the ANCHOR branch, not the button branch: the [SC-013] test mounts without href and would red on either, but the anchor branch is the one no other test queries, so this arm cannot pass for an unrelated reason. Both SC-014 spellings, per #77."
+    "#79 adds three for <sk-button>. The SC-013 arm drops the part from the ANCHOR branch. That was SEMANTICALLY INERT when first written — the [SC-013] test mounted without href, so it rendered the button branch and never saw the mutation, and the harness said so. The test now exercises both branches, which is what a part rendered by two code paths needs. Both SC-014 spellings, per #77.",
+    "#79 adds nine: three per component. The check-bullet SC-013 arm drops the ICON's part rather than the bullet's, because the bullet part is also the node other tests query to prove the element rendered."
   ],
   "mutations": [
     {
@@ -511,6 +512,30 @@
       "subject": "fixtures/elements-behaviour/src/sk-pill-tag.test.ts",
       "arm": "pill-tag adopts the sheet BY IDENTITY",
       "file": "packages/elements/src/pill-tag/sk-pill-tag.ts",
+      "from": "  static styles = [sheet];",
+      "to": "  static styles = [new CSSStyleSheet()];"
+    },
+    {
+      "id": "SC-013",
+      "subject": "fixtures/elements-behaviour/src/sk-check-bullet.test.ts",
+      "arm": "check-bullet icon part present",
+      "file": "packages/elements/src/check-bullet/sk-check-bullet.ts",
+      "from": "<span part=\"icon\" class=\"sk-check-bullet__icon\" aria-hidden=\"true\">",
+      "to": "<span class=\"sk-check-bullet__icon\" aria-hidden=\"true\">"
+    },
+    {
+      "id": "SC-014",
+      "subject": "fixtures/elements-behaviour/src/sk-check-bullet.test.ts",
+      "arm": "check-bullet adopts its generated sheet",
+      "file": "packages/elements/src/check-bullet/sk-check-bullet.ts",
+      "from": "  static styles = [sheet];",
+      "to": "  static styles = [];"
+    },
+    {
+      "id": "SC-014",
+      "subject": "fixtures/elements-behaviour/src/sk-check-bullet.test.ts",
+      "arm": "check-bullet adopts the sheet BY IDENTITY",
+      "file": "packages/elements/src/check-bullet/sk-check-bullet.ts",
       "from": "  static styles = [sheet];",
       "to": "  static styles = [new CSSStyleSheet()];"
     }

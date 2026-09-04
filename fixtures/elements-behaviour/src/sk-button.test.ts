@@ -29,15 +29,25 @@ const mount = async (attrs: Record<string, string> = {}, label = 'Label') => {
 
 const partOf = (el: Element) => el.shadowRoot!.querySelector('[part="button"]') as HTMLElement;
 
-test('[SC-013] the declared part is targetable from outside', async () => {
-  const el = await mount({ variant: 'primary' });
+test('[SC-013] the declared part is targetable from outside, on BOTH branches', async () => {
+  // BOTH BRANCHES, because this element renders two different nodes. An earlier version mounted
+  // only the button branch, which made the mutation covering the ANCHOR branch semantically
+  // inert — the harness caught that, and it is the same hole in reverse: a part declared once
+  // but rendered by two code paths needs both exercised or half of it is unheld.
   const s = document.createElement('style');
   s.textContent = 'sk-button::part(button) { outline-style: dashed; }';
   document.head.append(s);
   try {
-    const node = partOf(el);
-    expect(node, 'part="button" is declared but not rendered').not.toBe(null);
-    expect(getComputedStyle(node).outlineStyle, '::part(button) is not targetable').toBe('dashed');
+    for (const attrs of [{ variant: 'primary' }, { variant: 'primary', href: '#x' }]) {
+      const el = await mount(attrs);
+      const node = partOf(el);
+      const branch = 'href' in attrs ? 'anchor' : 'button';
+      expect(node, `part="button" is not rendered on the ${branch} branch`).not.toBe(null);
+      expect(
+        getComputedStyle(node).outlineStyle,
+        `::part(button) is not targetable on the ${branch} branch`,
+      ).toBe('dashed');
+    }
   } finally {
     s.remove();
   }

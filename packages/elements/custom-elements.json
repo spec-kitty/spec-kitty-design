@@ -141,11 +141,69 @@
         },
         {
           "kind": "variable",
+          "name": "CHECK_BULLET_AXES",
+          "type": {
+            "text": "{}"
+          },
+          "default": "{}",
+          "description": "No non-variant axes either, declared for the same reason."
+        },
+        {
+          "kind": "variable",
+          "name": "CHECK_BULLET_VARIANTS",
+          "type": {
+            "text": "{}"
+          },
+          "default": "{}",
+          "description": "No colour or shape variants — a check bullet is one thing. Declared explicitly because the\ngenerator cannot distinguish an absent export from an empty one."
+        },
+        {
+          "kind": "function",
+          "name": "checkBulletClasses",
+          "return": {
+            "type": {
+              "text": "string"
+            }
+          }
+        },
+        {
+          "kind": "function",
+          "name": "checkBulletStaticHtml",
+          "return": {
+            "type": {
+              "text": "string"
+            }
+          },
+          "parameters": [
+            {
+              "name": "opts",
+              "default": "{}",
+              "type": {
+                "text": "CheckBulletStaticOptions"
+              }
+            },
+            {
+              "name": "content",
+              "default": "'Feature description here'"
+            }
+          ],
+          "description": "The static form — an `<li>`, because the static path sits inside a real `<ul>`.\n\nThe ELEMENT cannot be an `<li>`: a custom element inside a `<ul>` is not a list item, so it\ncarries `role=\"listitem\"` on the host instead. That is the one place these two paths differ\nstructurally, and it is unavoidable rather than an oversight — recorded on the element."
+        },
+        {
+          "kind": "variable",
           "name": "DEFAULT_ACCENT",
           "type": {
             "text": "FeatureCardAccent"
           },
           "default": "'yellow'"
+        },
+        {
+          "kind": "variable",
+          "name": "DEFAULT_ICON",
+          "type": {
+            "text": "string"
+          },
+          "default": "'✓'"
         },
         {
           "kind": "variable",
@@ -1142,6 +1200,56 @@
             "package": "lit"
           },
           "tagName": "sk-card",
+          "customElement": true
+        },
+        {
+          "kind": "class",
+          "description": "A checked feature bullet, for the tick-lists on marketing and reference pages.\n\nPut it inside a `<ul role=\"list\">`. The element sets `role=\"listitem\"` on itself, because a\ncustom element inside a `<ul>` is NOT a list item — the static form is a real `<li>`, and\nthis is the one place the two consumption paths differ structurally.",
+          "name": "SkCheckBullet",
+          "cssParts": [
+            {
+              "description": "the bullet row",
+              "name": "bullet"
+            },
+            {
+              "description": "the tick, which is decorative and hidden from assistive technology",
+              "name": "icon"
+            }
+          ],
+          "slots": [
+            {
+              "description": "the bullet's text",
+              "name": ""
+            }
+          ],
+          "members": [
+            {
+              "kind": "field",
+              "name": "icon",
+              "privacy": "public",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "The tick glyph. Defaults to ✓; set it to use a different mark.",
+              "attribute": "icon",
+              "reflects": true
+            }
+          ],
+          "attributes": [
+            {
+              "name": "icon",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "The tick glyph. Defaults to ✓; set it to use a different mark.",
+              "fieldName": "icon"
+            }
+          ],
+          "superclass": {
+            "name": "LitElement",
+            "package": "lit"
+          },
+          "tagName": "sk-check-bullet",
           "customElement": true
         },
         {
@@ -2879,9 +2987,49 @@
         },
         {
           "kind": "js",
+          "name": "CHECK_BULLET_AXES",
+          "declaration": {
+            "name": "CHECK_BULLET_AXES",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "CHECK_BULLET_VARIANTS",
+          "declaration": {
+            "name": "CHECK_BULLET_VARIANTS",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "checkBulletClasses",
+          "declaration": {
+            "name": "checkBulletClasses",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "checkBulletStaticHtml",
+          "declaration": {
+            "name": "checkBulletStaticHtml",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
           "name": "DEFAULT_ACCENT",
           "declaration": {
             "name": "DEFAULT_ACCENT",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "DEFAULT_ICON",
+          "declaration": {
+            "name": "DEFAULT_ICON",
             "module": "./dist/index.js"
           }
         },
@@ -3322,6 +3470,22 @@
           "name": "SkCard",
           "declaration": {
             "name": "SkCard",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "SkCheckBullet",
+          "declaration": {
+            "name": "SkCheckBullet",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "skCheckBulletSheet",
+          "declaration": {
+            "name": "default",
             "module": "./dist/index.js"
           }
         },
