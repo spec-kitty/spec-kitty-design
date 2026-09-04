@@ -24,7 +24,8 @@
     "WHY A COUNT AND NOT AN ALLOWLIST. Same reason expected-parts.json and .wrapper-floor are",
     "counts: a path list rots on every rename and invites an entry being added rather than a bug",
     "being fixed. A count cannot be added to.",
-    "#78 retires feature-card's, 10 -> 9. blog-card's and ribbon-card's follow in the same mission."
+    "#78 retires feature-card's, 10 -> 9. blog-card's and ribbon-card's follow in the same mission.",
+    "#78 retires ribbon-card's, 9 -> 8."
   ],
-  "count": 9
+  "count": 8
 }

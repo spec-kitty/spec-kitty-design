@@ -4,6 +4,13 @@
    (top:0, right:24px) for precise corner anchoring — accepted layout constant
    not representable as a spacing token. */
 
+/* A custom element defaults to `display: inline`, so without this the host cannot be sized or
+   spaced and a consumer's max-width on it is inert. `block` matches the static <article>; the
+   two consumption paths must agree about their own box (#77). Inert in the static path. */
+:host {
+  display: block;
+}
+
 .sk-ribbon-card {
   position: relative;
   padding: var(--sk-space-6);

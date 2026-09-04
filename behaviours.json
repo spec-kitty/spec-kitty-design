@@ -279,6 +279,10 @@
           "file": "fixtures/elements-behaviour/src/sk-nav-pill.test.ts"
         },
         {
+          "name": "sk-ribbon-card",
+          "file": "fixtures/elements-behaviour/src/sk-ribbon-card.test.ts"
+        },
+        {
           "name": "sk-section-banner",
           "file": "fixtures/elements-behaviour/src/sk-section-banner.test.ts"
         }
@@ -302,6 +306,10 @@
         {
           "name": "sk-nav-pill",
           "file": "fixtures/elements-behaviour/src/sk-nav-pill.test.ts"
+        },
+        {
+          "name": "sk-ribbon-card",
+          "file": "fixtures/elements-behaviour/src/sk-ribbon-card.test.ts"
         },
         {
           "name": "sk-section-banner",

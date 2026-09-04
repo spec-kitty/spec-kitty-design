@@ -21,7 +21,15 @@ export {
   SkFeatureCardBorderGreenHTML,
   SkFeatureCardBorderPurpleHTML,
 } from './feature-card/index';
-export { skRibbonCardHTML, SkRibbonCardDefaultHTML, SkRibbonCardWithRibbonHTML } from './ribbon-card/index';
+export {
+  SkRibbonCardHTML,
+  SkRibbonCardWithRibbonHTML,
+  SkRibbonCardBorderYellowHTML,
+  SkRibbonCardBorderGreenHTML,
+  SkRibbonCardBorderPurpleHTML,
+  SkRibbonCardBorderBlueHTML,
+  SkRibbonCardBorderRedHTML,
+} from './ribbon-card/index';
 export { SkNavPillHTML } from './nav-pill/index';
 export { SkTagHTML, SkEyebrowPillHTML, SkPillTagHTML, type PillTagVariant } from './pill-tag/index';
 export { SkCardHTML, SkCardBlueHTML, SkCardPurpleHTML, SkCardInsetHTML } from './card/index';

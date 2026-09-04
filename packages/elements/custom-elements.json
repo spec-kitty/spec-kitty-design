@@ -76,6 +76,14 @@
         },
         {
           "kind": "variable",
+          "name": "DEFAULT_RIBBON",
+          "type": {
+            "text": "RibbonCardColour"
+          },
+          "default": "'yellow'"
+        },
+        {
+          "kind": "variable",
           "name": "DEFAULT_VARIANT",
           "type": {
             "text": "SectionBannerVariant"
@@ -555,6 +563,40 @@
         },
         {
           "kind": "function",
+          "name": "isRibbonCardColour",
+          "return": {
+            "type": {
+              "text": "c is RibbonCardColour"
+            }
+          },
+          "parameters": [
+            {
+              "name": "c",
+              "type": {
+                "text": "string"
+              }
+            }
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "isRibbonCardVariant",
+          "return": {
+            "type": {
+              "text": "boolean"
+            }
+          },
+          "parameters": [
+            {
+              "name": "v",
+              "type": {
+                "text": "string"
+              }
+            }
+          ]
+        },
+        {
+          "kind": "function",
           "name": "isSectionBannerVariant",
           "return": {
             "type": {
@@ -569,6 +611,94 @@
               }
             }
           ]
+        },
+        {
+          "kind": "variable",
+          "name": "RIBBON_CARD_AXES",
+          "default": "{ WithRibbon: { ribbon: 'Primary Workshop' }, ...Object.fromEntries( RIBBON_CARD_COLOURS.map((c) => [ `Ribbon${c.charAt(0).toUpperCase()}${c.slice(1)}`, { ribbon: 'Primary Workshop', accent: c }, ]), ), }",
+          "description": "The non-variant axes, DERIVED.\n\n`WithRibbon` reproduces the export name the styles layer already published, and the per-colour\nribbon forms are derived from RIBBON_CARD_COLOURS so a sixth colour cannot appear on one axis\nand not the other."
+        },
+        {
+          "kind": "variable",
+          "name": "RIBBON_CARD_COLOURS",
+          "type": {
+            "text": "['yellow', 'green', 'purple', 'blue', 'red']"
+          },
+          "default": "['yellow', 'green', 'purple', 'blue', 'red']",
+          "description": "The five brand colours both axes draw on."
+        },
+        {
+          "kind": "variable",
+          "name": "RIBBON_CARD_RIBBONS",
+          "default": "Object.fromEntries( RIBBON_CARD_COLOURS.map((c) => [c, `sk-ribbon-card__ribbon--${c}`]), )",
+          "description": "Ribbon colour modifiers — an INNER class, so an axis rather than a variant."
+        },
+        {
+          "kind": "variable",
+          "name": "RIBBON_CARD_VARIANTS",
+          "default": "Object.fromEntries( RIBBON_CARD_COLOURS.map((c) => [`border-${c}`, `sk-ribbon-card--border-${c}`]), )",
+          "description": "Border modifiers — the card's own classes, so these are the variants."
+        },
+        {
+          "kind": "function",
+          "name": "ribbonCardClasses",
+          "return": {
+            "type": {
+              "text": "string"
+            }
+          },
+          "parameters": [
+            {
+              "name": "variant",
+              "optional": true,
+              "type": {
+                "text": "string"
+              }
+            }
+          ],
+          "description": "The card's class list. Warns and degrades on an unknown variant."
+        },
+        {
+          "kind": "function",
+          "name": "ribbonCardStaticHtml",
+          "return": {
+            "type": {
+              "text": "string"
+            }
+          },
+          "parameters": [
+            {
+              "name": "opts",
+              "default": "{}",
+              "type": {
+                "text": "RibbonCardStaticOptions"
+              }
+            },
+            {
+              "name": "content",
+              "default": "PLACEHOLDER_CONTENT"
+            }
+          ],
+          "description": "The static form. Throws on an unknown variant or ribbon colour."
+        },
+        {
+          "kind": "function",
+          "name": "ribbonClasses",
+          "return": {
+            "type": {
+              "text": "string"
+            }
+          },
+          "parameters": [
+            {
+              "name": "colour",
+              "optional": true,
+              "type": {
+                "text": "string"
+              }
+            }
+          ],
+          "description": "The ribbon's class list. Warns and degrades to the default colour."
         },
         {
           "kind": "variable",
@@ -2009,6 +2139,98 @@
         },
         {
           "kind": "class",
+          "description": "A card with an optional diagonal ribbon tab in its corner.\n\nThe title and body are slotted, because they are the consuming page's content. The ribbon's\nLABEL is a property rather than a slot — it is a short string the component positions and\nrotates, and ADR-9 §4 took the same route for the form controls' `label`.\n\nThe two colour axes are independent: `variant` tints the card's border, `accent` tints\nthe tab, and a card may use either, both or neither.",
+          "name": "SkRibbonCard",
+          "cssParts": [
+            {
+              "description": "the card frame",
+              "name": "card"
+            },
+            {
+              "description": "the content wrapper",
+              "name": "content"
+            },
+            {
+              "description": "the ribbon tab, absent from the DOM when no `ribbon` label is set",
+              "name": "ribbon"
+            }
+          ],
+          "slots": [
+            {
+              "description": "the card's title and body",
+              "name": ""
+            }
+          ],
+          "members": [
+            {
+              "kind": "field",
+              "name": "accent",
+              "privacy": "public",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "The ribbon's colour: `yellow` (the default), `green`, `purple`, `blue` or `red`. Ignored\nwhen no `ribbon` label is set.",
+              "attribute": "accent",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "ribbon",
+              "privacy": "public",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "The ribbon's label. The ribbon is rendered ONLY when this is set — an empty tab is a\ncoloured shape with no text, which reads as a bug rather than as a plain card.",
+              "attribute": "ribbon",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "variant",
+              "privacy": "public",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "Border colour: `border-yellow`, `-green`, `-purple`, `-blue` or `-red`. Omit for the\ndefault neutral hairline. An unknown value renders the plain card and warns.",
+              "attribute": "variant",
+              "reflects": true
+            }
+          ],
+          "attributes": [
+            {
+              "name": "accent",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "The ribbon's colour: `yellow` (the default), `green`, `purple`, `blue` or `red`. Ignored\nwhen no `ribbon` label is set.",
+              "fieldName": "accent"
+            },
+            {
+              "name": "ribbon",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "The ribbon's label. The ribbon is rendered ONLY when this is set — an empty tab is a\ncoloured shape with no text, which reads as a bug rather than as a plain card.",
+              "fieldName": "ribbon"
+            },
+            {
+              "name": "variant",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "Border colour: `border-yellow`, `-green`, `-purple`, `-blue` or `-red`. Omit for the\ndefault neutral hairline. An unknown value renders the plain card and warns.",
+              "fieldName": "variant"
+            }
+          ],
+          "superclass": {
+            "name": "LitElement",
+            "package": "lit"
+          },
+          "tagName": "sk-ribbon-card",
+          "customElement": true
+        },
+        {
+          "kind": "class",
           "description": "A mono-caps banner that delineates a version or section block.\n\nNon-interactive by design: it has no hover, focus or disabled state, and the colour variant\nIS the state. The label is slotted content, not a property — a banner's text is the\nconsuming page's, and hardcoding it in the component is what this element replaced.",
           "name": "SkSectionBanner",
           "cssParts": [
@@ -2109,6 +2331,23 @@
         },
         {
           "kind": "function",
+          "name": "unknownRibbonMessage",
+          "return": {
+            "type": {
+              "text": "string"
+            }
+          },
+          "parameters": [
+            {
+              "name": "c",
+              "type": {
+                "text": "string"
+              }
+            }
+          ]
+        },
+        {
+          "kind": "function",
           "name": "unknownVariantMessage",
           "return": {
             "type": {
@@ -2172,6 +2411,14 @@
           "name": "DEFAULT_ACCENT",
           "declaration": {
             "name": "DEFAULT_ACCENT",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "DEFAULT_RIBBON",
+          "declaration": {
+            "name": "DEFAULT_RIBBON",
             "module": "./dist/index.js"
           }
         },
@@ -2361,6 +2608,22 @@
         },
         {
           "kind": "js",
+          "name": "isRibbonCardColour",
+          "declaration": {
+            "name": "isRibbonCardColour",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "isRibbonCardVariant",
+          "declaration": {
+            "name": "isRibbonCardVariant",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
           "name": "isSectionBannerVariant",
           "declaration": {
             "name": "isSectionBannerVariant",
@@ -2372,6 +2635,70 @@
           "name": "registeredTags",
           "declaration": {
             "name": "registeredTags",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "RIBBON_CARD_AXES",
+          "declaration": {
+            "name": "RIBBON_CARD_AXES",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "RIBBON_CARD_COLOURS",
+          "declaration": {
+            "name": "RIBBON_CARD_COLOURS",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "RIBBON_CARD_RIBBONS",
+          "declaration": {
+            "name": "RIBBON_CARD_RIBBONS",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "RIBBON_CARD_VARIANTS",
+          "declaration": {
+            "name": "RIBBON_CARD_VARIANTS",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "ribbonCardClasses",
+          "declaration": {
+            "name": "ribbonCardClasses",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "RibbonCardColour",
+          "declaration": {
+            "name": "RibbonCardColour",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "ribbonCardStaticHtml",
+          "declaration": {
+            "name": "ribbonCardStaticHtml",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "ribbonClasses",
+          "declaration": {
+            "name": "ribbonClasses",
             "module": "./dist/index.js"
           }
         },
@@ -2481,6 +2808,22 @@
         },
         {
           "kind": "js",
+          "name": "SkRibbonCard",
+          "declaration": {
+            "name": "SkRibbonCard",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "skRibbonCardSheet",
+          "declaration": {
+            "name": "default",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
           "name": "SkSectionBanner",
           "declaration": {
             "name": "SkSectionBanner",
@@ -2524,6 +2867,14 @@
           "name": "unknownGapMessage",
           "declaration": {
             "name": "unknownGapMessage",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "unknownRibbonMessage",
+          "declaration": {
+            "name": "unknownRibbonMessage",
             "module": "./dist/index.js"
           }
         },

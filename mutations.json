@@ -440,6 +440,22 @@
       "file": "packages/elements/src/feature-card/sk-feature-card.ts",
       "from": "  static styles = [sheet];",
       "to": "  static styles = [new CSSStyleSheet()];"
+    },
+    {
+      "id": "SC-013",
+      "subject": "fixtures/elements-behaviour/src/sk-ribbon-card.test.ts",
+      "arm": "ribbon-card content part present",
+      "file": "packages/elements/src/ribbon-card/sk-ribbon-card.ts",
+      "from": "<div part=\"content\" class=\"sk-ribbon-card__content\">",
+      "to": "<div class=\"sk-ribbon-card__content\">"
+    },
+    {
+      "id": "SC-014",
+      "subject": "fixtures/elements-behaviour/src/sk-ribbon-card.test.ts",
+      "arm": "ribbon-card adopts the sheet BY IDENTITY",
+      "file": "packages/elements/src/ribbon-card/sk-ribbon-card.ts",
+      "from": "  static styles = [sheet];",
+      "to": "  static styles = [new CSSStyleSheet()];"
     }
   ]
 }
