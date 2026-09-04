@@ -1,7 +1,7 @@
 {
-  "event_count": 4,
-  "last_event_id": "01M1Q4WSM3C2TH8XJBJRCRBQPN",
-  "materialized_at": "2026-09-04T21:23:46.947223+00:00",
+  "event_count": 5,
+  "last_event_id": "01M1Q4WSQEQWNTRPNJWCV44A1C",
+  "materialized_at": "2026-09-04T21:23:47.054794+00:00",
   "mission_number": "",
   "mission_slug": "elements-first-release-01M1Q451",
   "mission_type": "software-dev",
@@ -14,7 +14,7 @@
     "for_review": 0,
     "in_progress": 0,
     "in_review": 0,
-    "planned": 4
+    "planned": 5
   },
   "work_packages": {
     "WP01": {
@@ -44,6 +44,13 @@
       "lane": "planned",
       "last_event_id": "01M1Q4WSM3C2TH8XJBJRCRBQPN",
       "last_transition_at": "2026-09-04T21:23:46.947223+00:00"
+    },
+    "WP05": {
+      "actor": "finalize-tasks",
+      "force_count": 0,
+      "lane": "planned",
+      "last_event_id": "01M1Q4WSQEQWNTRPNJWCV44A1C",
+      "last_transition_at": "2026-09-04T21:23:47.054794+00:00"
     }
   }
 }
