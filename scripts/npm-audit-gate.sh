@@ -17,7 +17,31 @@ echo "Running npm audit..."
 # shape change, and this gate now reports it.
 AUDIT_STDERR="$(mktemp)"
 trap 'rm -f "$AUDIT_STDERR"' EXIT
-OUTPUT=$(npm audit --audit-level=high --json 2>"$AUDIT_STDERR" || true)
+
+# RETRIED, because a 503 is not a verdict. #138 hit
+#   npm warn audit 503 Service Unavailable - POST .../security/audits/quick
+# twice in a row: npmjs.org's audit endpoint was down, and a gate that fails closed on the
+# first transient error blocks every merge for the duration of someone else's outage.
+#
+# Retrying does NOT weaken the gate. All three attempts must fail to produce an unreadable
+# report before it gives up, and it still refuses to report a pass over one — an outage means
+# we do not know whether there are vulnerabilities, which is not the same as there being none,
+# and the pre-#134 code treated those as identical.
+OUTPUT=""
+for attempt in 1 2 3; do
+  OUTPUT=$(npm audit --audit-level=high --json 2>"$AUDIT_STDERR" || true)
+  if printf '%s' "$OUTPUT" | node -e "
+    try {
+      process.exit(JSON.parse(require('fs').readFileSync('/dev/stdin','utf8')).metadata?.vulnerabilities ? 0 : 1);
+    } catch { process.exit(1); }
+  "; then
+    break
+  fi
+  if [ "$attempt" -lt 3 ]; then
+    echo "   attempt $attempt did not return a readable report; retrying in $((attempt * 10))s"
+    sleep $((attempt * 10))
+  fi
+done
 
 # AND THE PARSE FAILS LOUDLY. Even with stderr separated, an unparseable body — a registry
 # outage, a proxy error page, an npm version that changes the shape — must not be able to look
