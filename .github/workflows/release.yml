@@ -26,8 +26,26 @@ jobs:
       - name: "[ENFORCED] Security gate before publish (ADR-005)"
         run: bash scripts/npm-audit-gate.sh
 
+      # DERIVED, not listed. This step read `--projects=tokens,styles,elements` while the publish
+      # steps below named two packages and the contents audit looped over the same two — three
+      # hand-written lists that had already drifted apart. `elements` was built here on every
+      # release and then never published; `react` appeared in none of the three. Nothing could see
+      # it, because this workflow runs only on a v*.*.* tag and no PR has ever executed it.
+      # scripts/release-graph.mjs is now the single source, and it refuses an empty set.
+      #
+      # `--projects` is NOT the same list as `--dirs`: @spec-kitty/react is publishable but has no
+      # `build` target (it ships the generated wrappers as committed source, gated by
+      # build-react-wrappers.mjs --check on every PR). The script derives both facets from one scan
+      # rather than leaving the difference to be remembered.
+      - name: Resolve the publishable package set
+        id: graph
+        run: |
+          echo "projects=$(node scripts/release-graph.mjs --projects)" >> "$GITHUB_OUTPUT"
+          echo "dirs=$(node scripts/release-graph.mjs --dirs)" >> "$GITHUB_OUTPUT"
+          echo "Publishing: $(node scripts/release-graph.mjs --dirs)"
+
       - name: Build all packages
-        run: npx nx run-many --target=build --projects=tokens,styles,elements
+        run: npx nx run-many --target=build --projects=${{ steps.graph.outputs.projects }}
 
       # The `cp sk-nav-pill.js` step that stood here is gone with the helper (#73). It existed
       # only because @nx/js:tsc copies **/*.{html,css} assets and not .js, and @spec-kitty/styles
@@ -36,10 +54,10 @@ jobs:
       # `npm publish`, and a pre-merge lens found it by reading rather than by running.
       - name: "[ENFORCED] Dist contents audit — no secrets/sourcemaps (ADR-005)"
         run: |
-          for pkg in tokens styles; do
+          set -euo pipefail
+          for pkg in ${{ steps.graph.outputs.dirs }}; do
             echo "=== packages/$pkg ==="
-            cd packages/$pkg && npm pack --dry-run 2>&1 | grep "npm notice" | grep -v "==="
-            cd ../..
+            ( cd "packages/$pkg" && npm pack --dry-run 2>&1 | grep "npm notice" | grep -v "===" )
           done
 
       - name: Generate CycloneDX SBOM (FR-045)
@@ -49,13 +67,20 @@ jobs:
             --output-file spec-kitty-design-sbom.cdx.json
           echo "SBOM components: $(node -e "const d=require('./spec-kitty-design-sbom.cdx.json'); console.log(d.components.length)")"
 
-      - name: Publish @spec-kitty/tokens (FR-044)
-        run: npm publish --provenance --access public
-        working-directory: packages/tokens
-
-      - name: Publish @spec-kitty/styles (FR-044)
-        run: npm publish --provenance --access public
-        working-directory: packages/styles
+      # ONE step over the derived set, not one hand-written step per package. Two steps named
+      # `tokens` and `styles` are how `elements` and `react` came to be absent without anyone
+      # noticing: adding a package to the repo did not add it here, and nothing compared the two.
+      #
+      # `set -euo pipefail` is load-bearing. Without it a failing `npm publish` inside a `for` loop
+      # does not fail the step, and the workflow would report a successful release having published
+      # a subset — the same silent-partial-success this whole rewrite is about.
+      - name: Publish every package in the derived set (FR-044)
+        run: |
+          set -euo pipefail
+          for pkg in ${{ steps.graph.outputs.dirs }}; do
+            echo "=== publishing packages/$pkg ==="
+            ( cd "packages/$pkg" && npm publish --provenance --access public )
+          done
 
       - name: Create GitHub Release with SBOM
         uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda  # softprops/action-gh-release v3.0.0
