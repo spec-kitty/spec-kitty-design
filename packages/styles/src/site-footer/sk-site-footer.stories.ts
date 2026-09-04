@@ -7,9 +7,10 @@ import { SkSiteFooterHTML } from './index';
  *
  * This file used to import a hand-written `index.ts` that built the markup inline and computed
  * `new Date().getFullYear()` at module load. Both are gone: the markup is authored once in
- * `packages/elements/src/site-footer/sk-site-footer.markup.ts`, and the year is a pinned
- * placeholder because a generated artifact whose bytes depend on the wall clock stops matching a
- * fresh generation on 1 January (ADR-11 item 9).
+ * `packages/elements/src/site-footer/sk-site-footer.markup.ts`, and the placeholder carries no
+ * year at all — `© YYYY` — because a generated artifact whose bytes depend on the wall clock
+ * stops matching a fresh generation on 1 January (ADR-11 item 9), and a PINNED year would only
+ * move the staleness into what a consumer reads in 2028.
  */
 const meta: Meta = {
   title: 'Components/SiteFooter (HTML)',

@@ -869,11 +869,7 @@
         {
           "kind": "variable",
           "name": "PLACEHOLDER_LEGAL",
-          "type": {
-            "text": "string"
-          },
-          "default": "'© <year> Your Company. All rights reserved.'",
-          "description": "The legal line's placeholder, for the generated static form.\n\nNO YEAR AT ALL, not even a pinned one. A pinned `2026` delivered determinism — the artifact\nstops depending on the clock — but it MOVED the staleness rather than removing it: the\ngenerated `.html`, the styles barrel and the autodocs page would all read \"© 2026\" to a\nconsumer in 2028. A lens made the point, and it is right: nothing requires the placeholder to\nlook like a year. `<year>` is deterministic, obviously a template, and cannot read stale.\n\nIt also makes the determinism test discriminating instead of decorative — see the fixture.\nA consumer replaces the whole line; it is not a default the element falls back to."
+          "description": "The legal placeholder, exported so a test can assert it carries no year."
         },
         {
           "kind": "variable",
@@ -1048,7 +1044,7 @@
             "text": "{\n  root: 'sk-site-footer',\n  grid: 'sk-site-footer__grid',\n  column: 'sk-site-footer__column',\n  brand: 'sk-site-footer__brand',\n  wordmark: 'sk-site-footer__wordmark',\n  tagline: 'sk-site-footer__tagline',\n  heading: 'sk-site-footer__heading',\n  links: 'sk-site-footer__links',\n  link: 'sk-site-footer__link',\n  divider: 'sk-site-footer__divider',\n  legal: 'sk-site-footer__legal',\n}"
           },
           "default": "{ root: 'sk-site-footer', grid: 'sk-site-footer__grid', column: 'sk-site-footer__column', brand: 'sk-site-footer__brand', wordmark: 'sk-site-footer__wordmark', tagline: 'sk-site-footer__tagline', heading: 'sk-site-footer__heading', links: 'sk-site-footer__links', link: 'sk-site-footer__link', divider: 'sk-site-footer__divider', legal: 'sk-site-footer__legal', }",
-          "description": "The class names this component renders, named once.\n\nThe element imports these rather than re-typing them. #78's blog-card shipped the opposite —\nthe only element in the repo that imported nothing from its own markup module — and four class\nstrings were authored twice on the component whose whole argument was that the two paths are\none shape. That is ADR-8 criterion 3, and it is measured by a proxy that has now been wrong\ntwice (#142), so the safe construction is to leave no literal in `render()` at all."
+          "description": "The class names this component renders, named once.\n\nThe element imports these rather than re-typing them (ADR-8 criterion 3)."
         },
         {
           "kind": "variable",
@@ -1074,13 +1070,9 @@
               "type": {
                 "text": "SiteFooterStaticOptions"
               }
-            },
-            {
-              "name": "content",
-              "default": "PLACEHOLDER_COLUMNS"
             }
           ],
-          "description": "The static form, for a consumer with no JavaScript.\n\nThe link columns are the `content` argument, which is deliberately RAW — a footer's columns are\nmarkup, not text, so escaping them would break the documented use. That is the same convention\nevery sibling keeps for its content slot, and the residual is recorded in #163."
+          "description": "The static form, for a consumer with no JavaScript.\n\nThe element renders the same structure from the same class map, so the two paths cannot\ndiverge — the difference is only where the content comes from: properties there, literals here."
         },
         {
           "kind": "class",
@@ -2917,11 +2909,11 @@
         },
         {
           "kind": "class",
-          "description": "A site footer: a brand column, link columns, and a legal line.\n\nThe component owns the layout — a responsive grid that collapses to one column, and the\ndivider above the legal line. Everything a reader sees is yours, supplied through the slots.",
+          "description": "A site footer: a brand column, two link columns, and a legal line.\n\nThe element owns the structure — the grid, the `<nav>`s, the headings, the `<ul>`s, the divider\nand the legal line. Text arrives as properties; only the link ITEMS are slotted, as `<li>`\nelements that land directly inside the element's own `<ul>`.",
           "name": "SkSiteFooter",
           "cssParts": [
             {
-              "description": "the rule above the legal line",
+              "description": "the rule above the legal line, absent when `legal` is empty",
               "name": "divider"
             },
             {
@@ -2939,30 +2931,132 @@
           ],
           "slots": [
             {
-              "description": "one element per link column, each becoming a grid item",
-              "name": ""
+              "description": "`<li>` items for the first link column",
+              "name": "column-one"
             },
             {
-              "description": "a SINGLE element containing the mark, wordmark and tagline. Each assigned node becomes its own grid item, so wrap them in one box.",
-              "name": "brand"
-            },
-            {
-              "description": "the copyright line. When empty, the divider and legal row are not rendered.",
-              "name": "legal"
+              "description": "`<li>` items for the second link column The slot NAMES keep their hyphens — a slot name is a string, not a property key, so the constraint that shaped `headingOne`/`headingTwo` does not reach them.",
+              "name": "column-two"
             }
           ],
           "members": [
             {
+              "kind": "method",
+              "name": "#column",
+              "privacy": "private",
+              "parameters": [
+                {
+                  "name": "heading",
+                  "type": {
+                    "text": "string | undefined"
+                  }
+                },
+                {
+                  "name": "slot",
+                  "type": {
+                    "text": "string"
+                  }
+                }
+              ]
+            },
+            {
               "kind": "field",
-              "name": "hasLegal",
+              "name": "headingOne",
               "privacy": "public",
               "type": {
-                "text": "boolean"
+                "text": "string | undefined"
               },
-              "default": "false"
+              "description": "Heading for the first link column.",
+              "attribute": "headingOne",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "headingTwo",
+              "privacy": "public",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "Heading for the second link column.",
+              "attribute": "headingTwo",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "legal",
+              "privacy": "public",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "The copyright line. Omit it and the divider above it is not rendered either.",
+              "attribute": "legal",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "tagline",
+              "privacy": "public",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "One sentence under the wordmark.",
+              "attribute": "tagline",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "wordmark",
+              "privacy": "public",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "The brand wordmark.",
+              "attribute": "wordmark",
+              "reflects": true
             }
           ],
-          "attributes": [],
+          "attributes": [
+            {
+              "name": "headingOne",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "Heading for the first link column.",
+              "fieldName": "headingOne"
+            },
+            {
+              "name": "headingTwo",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "Heading for the second link column.",
+              "fieldName": "headingTwo"
+            },
+            {
+              "name": "legal",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "The copyright line. Omit it and the divider above it is not rendered either.",
+              "fieldName": "legal"
+            },
+            {
+              "name": "tagline",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "One sentence under the wordmark.",
+              "fieldName": "tagline"
+            },
+            {
+              "name": "wordmark",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "The brand wordmark.",
+              "fieldName": "wordmark"
+            }
+          ],
           "superclass": {
             "name": "LitElement",
             "package": "lit"

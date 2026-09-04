@@ -100,9 +100,13 @@ asserts every ink the component sets, and proves the two themes resolved differe
 
 ### Key Entities
 
-- **Link group** — a heading plus a list of links. The component renders the group; the consumer
-  supplies the labels and hrefs.
-- **Brand mark** — an image and a wordmark, both consumer-supplied.
+- **Link group** — a heading plus a list of links, authored **entirely by the consumer** and
+  slotted. The component renders only the grid that lays the columns out. An earlier revision of
+  this line said "the component renders the group", which was true of the design considered
+  during planning and false of the one that shipped — two lenses caught the entity model never
+  being reconciled when the design moved to full slotting.
+- **Brand mark** — consumer-supplied and slotted. The image is gone entirely: the markup this
+  replaces carried a repo-relative `src` no consumer could resolve.
 
 ## Success Criteria *(mandatory)*
 

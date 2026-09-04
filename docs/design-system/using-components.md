@@ -172,25 +172,31 @@ A brand column, link columns and a legal line, in a grid that collapses to one c
 
 ```html
 <script type="module" src="/node_modules/@spec-kitty/elements/dist/elements.js"></script>
-<link rel="stylesheet" href="/node_modules/@spec-kitty/styles/site-footer/sk-site-footer.css" />
+<link rel="stylesheet" href="/node_modules/@spec-kitty/styles/dist/site-footer/sk-site-footer.css" />
 
-<sk-site-footer>
-  <div slot="brand" class="sk-site-footer__column">…</div>
-  <nav class="sk-site-footer__column" aria-label="Product links">…</nav>
-  <span slot="legal">© 2026 Your Company.</span>
+<sk-site-footer
+  wordmark="Your Brand"
+  tagline="One sentence on what you do."
+  headingone="Product"
+  headingtwo="Connect"
+  legal="© 2026 Your Company."
+>
+  <li slot="column-one"><a href="#" class="sk-site-footer__link">Platform</a></li>
+  <li slot="column-two"><a href="#" class="sk-site-footer__link">Contact</a></li>
 </sk-site-footer>
 ```
 
-**The stylesheet link is required for this component, and it is the only one where that is
-true.** Everything a reader sees here is yours, slotted — and `::slotted()` reaches only
-*directly assigned* children, so the element's own adopted sheet styles the column boxes but
-nothing nested inside them. Without the sheet in your document, the links fall back to the
-browser's default blue, which fails contrast on the dark theme. It is the same single CSS file
-the element adopts; it just also has to be where your markup is.
+**Text is a property; only the link items are slotted.** The element owns the grid, both `<nav>`s,
+the headings, the `<ul>`s, the divider and the legal line — so `<ul>`/`<li>` semantics stay intact
+and your `<li>` lands directly inside the element's own list.
 
-The component owns the grid, the divider and the spacing. It authors no text — including the
-copyright, because a component should not assert your legal line. Omit the `legal` slot and the
-divider is not rendered either.
+**The stylesheet link is needed for the link colour**, and only for that: everything else is a
+shadow node the element styles itself, and your `<li>` is reachable via `::slotted(li)` because it
+is directly assigned. The `<a>` inside it is one level deeper, so it takes its colour from the
+same sheet loaded in your document. Without it those links fall back to the browser's default
+blue, which fails contrast on the dark theme.
+
+Omit `legal` and the divider above it is not rendered either.
 
 Use `sk-site-footer::part(grid)` for a column layout outside the provided `1.5fr 1fr 1fr`.
 

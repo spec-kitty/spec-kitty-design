@@ -1,23 +1,18 @@
 import type { Meta, StoryObj } from '@storybook/web-components';
 import './sk-site-footer.js';
-// THE SAME SHEET, ADOPTED INTO THE DOCUMENT — not a bare `.css` import.
-//
-// This story slots NESTED markup, and `::slotted()` reaches only DIRECTLY assigned children, so
-// the shadow-adopted sheet styles the column boxes and nothing inside them. Without the sheet in
-// the document the slotted links fall back to the UA's `-webkit-link` blue, which axe measured
-// as a genuine contrast violation on the dark page — found by the gate, not reasoned about.
-// sk-nav-pill needs none of this because its consumers slot the anchors DIRECTLY, so its
-// `::slotted()` rules match them.
-//
-// The first attempt used a bare stylesheet import of the styles-layer file, which trips
-// `check-no-css-in-source` — an ENFORCED gate whose whole point is that
-// `packages/elements` ships CONSTRUCTED stylesheets, never bundler-specific CSS imports
-// (FR-009, ADR-10 §1). A lens caught it, and caught that the "static gates green" claim had been
-// measured BEFORE the import was added and never re-run. Adopting the generated module is both
-// gate-clean and closer to what a consumer does: it is the identical sheet the element adopts,
-// placed where slotted light-DOM content can see it.
 import documentSheet from './sk-site-footer.css.js';
 
+// THE ANCHOR'S COLOUR, and nothing else, needs this. Under the #77 ruling the element owns the
+// structure, so the grid, headings, lists, divider and legal line are all shadow nodes styled by
+// the adopted sheet — and the slotted `<li>` is reachable via `::slotted(li)` because it is
+// DIRECTLY assigned. The `<a>` inside each `<li>` is one level deeper, so it keeps its light-DOM
+// class from this same sheet loaded in the document. The ruling names that trade explicitly.
+//
+// This is a far smaller obligation than the design it replaced, where whole columns were slotted
+// and the headings and lists were unreachable too. Not a bare `.css` import: `check-no-css-in-source`
+// requires a constructed sheet here (FR-009, ADR-10 §1), and the generated module is one. Do not
+// spell the rejected import form literally in a comment — the gate greps the file, not the syntax
+// tree, and quoting it fails the gate on the comment explaining the fix.
 if (!document.adoptedStyleSheets.includes(documentSheet)) {
   document.adoptedStyleSheets = [...document.adoptedStyleSheets, documentSheet];
 }
@@ -25,14 +20,16 @@ if (!document.adoptedStyleSheets.includes(documentSheet)) {
 /**
  * <sk-site-footer> — the ELEMENT.
  *
- * The component owns the grid, the divider and the spacing. Everything a reader sees is the
- * consumer's, supplied through three slots — which is #77's content-as-property direction applied
- * to a component whose content is almost entirely site-specific.
+ * The shape is the operator's ruling on #77: the element owns the structure — the grid, the
+ * <nav>s, the headings, the <ul>s, the divider and the legal line — and text arrives as
+ * PROPERTIES. Only the link ITEMS are slotted, as <li> elements that land directly inside the
+ * element's own <ul>, so `::slotted(li)` reaches them.
  *
- * SLOTTED CONTENT IS LIGHT DOM, so it renders before the element upgrades. That is why slots were
- * chosen over an array property here: a `.columns` property could not carry an attribute, and the
- * wrapper generator's own guard says a field with no observed attribute cannot reach the element
- * on a React first render — which for a full-width footer is a visible layout shift.
+ * NO DOCUMENT STYLESHEET IS NEEDED FOR THE STRUCTURE. An earlier revision of this component
+ * slotted whole columns, which put the headings and lists out of `::slotted()`'s reach and made
+ * a document sheet mandatory just to render legibly — axe caught that as a real contrast
+ * violation. Under the ruling the only thing still document-styled is the `<a>` inside each
+ * `<li>`, which is why these stories carry `class="sk-site-footer__link"` on the anchors.
  */
 const meta: Meta = {
   title: 'Elements/SkSiteFooter',
@@ -42,35 +39,43 @@ const meta: Meta = {
 export default meta;
 type Story = StoryObj;
 
-const columns = () => `
-  <nav class="sk-site-footer__column" aria-label="Product links">
-    <div class="sk-site-footer__heading">Product</div>
-    <ul class="sk-site-footer__links">
-      <li><a href="#" class="sk-site-footer__link">Platform</a></li>
-      <li><a href="#" class="sk-site-footer__link">Docs</a></li>
-    </ul>
-  </nav>
-  <nav class="sk-site-footer__column" aria-label="Connect links">
-    <div class="sk-site-footer__heading">Connect</div>
-    <ul class="sk-site-footer__links">
-      <li><a href="#" class="sk-site-footer__link">Contact</a></li>
-      <li><a href="#" class="sk-site-footer__link">GitHub</a></li>
-    </ul>
-  </nav>
-`;
+const items = (labels: readonly [string, string], slot: string) =>
+  labels
+    .map(
+      (l) =>
+        `<li slot="${slot}"><a href="#" class="sk-site-footer__link">${l}</a></li>`,
+    )
+    .join('');
 
 const footer = () => `
-  <sk-site-footer>
-    <div slot="brand" class="sk-site-footer__column">
-      <div class="sk-site-footer__brand"><span class="sk-site-footer__wordmark">Your Brand</span></div>
-      <p class="sk-site-footer__tagline">One sentence on what you do.</p>
-    </div>
-    ${columns()}
-    <span slot="legal">© 2026 Your Company. All rights reserved.</span>
+  <sk-site-footer
+    wordmark="Your Brand"
+    tagline="One sentence on what you do."
+    headingone="Product"
+    headingtwo="Connect"
+    legal="© YYYY Your Company. All rights reserved."
+  >
+    ${items(['Platform', 'Docs'], 'column-one')}
+    ${items(['Contact', 'GitHub'], 'column-two')}
   </sk-site-footer>
 `;
 
 export const Default: Story = { render: footer };
+
+/**
+ * No `legal` — the divider above it is not rendered either.
+ *
+ * The element reads the property synchronously during render, so there is no frame in which the
+ * separator is drawn over nothing and no second update after `updateComplete` resolves.
+ */
+export const WithoutLegal: Story = {
+  render: () => `
+    <sk-site-footer wordmark="Your Brand" headingone="Product" headingtwo="Connect">
+      ${items(['Platform', 'Docs'], 'column-one')}
+      ${items(['Contact', 'GitHub'], 'column-two')}
+    </sk-site-footer>
+  `,
+};
 
 /** `class="sk-light"`, NOT `data-theme="light"` — the attribute form activates nothing (#93). */
 export const LightMode: Story = {
@@ -81,8 +86,3 @@ export const LightMode: Story = {
     </div>
   `,
 };
-
-// NOTE FOR THE NEXT READER: do not spell the rejected import form literally in a comment here.
-// The gate greps the file, not the syntax tree, so quoting the bad statement in prose fails the
-// gate on the comment that explains the fix — which is exactly what happened, and is the same
-// shape as #143's `::part(tag)` comment defeating the ratchet it was describing.

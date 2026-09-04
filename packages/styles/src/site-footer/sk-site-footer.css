@@ -7,26 +7,23 @@
   display: block;
 }
 
-/* WHAT THIS SHEET CAN AND CANNOT REACH IN THE ELEMENT PATH — stated here because the answer is
-   not symmetric between the two consumption paths, and discovering that at a call site is worse
-   than reading it once.
+/* WHAT THIS SHEET REACHES IN EACH PATH.
 
-   SHADOW, so a bare class selector works on both paths: the footer root, the grid, the divider
-   and the legal paragraph. Those are the component's own surface.
+   Under the #77 ruling the element owns the whole structure — the grid, the <nav>s, the
+   headings, the <ul>s, the divider and the legal line — and text arrives as PROPERTIES. So every
+   rule below except the link rule targets a node in the element's own shadow tree, and a bare
+   class selector serves both paths.
 
-   SLOTTED, and only the DIRECTLY assigned nodes are reachable via `::slotted()`: the brand box
-   and the column boxes. Everything INSIDE a slotted column — the heading, the list, the links —
-   is a grandchild, and `::slotted()` matches only directly assigned children. A shadow-tree
-   class selector cannot match a slotted node either, so those rules serve the DOCUMENT path
-   only. An element consumer gets them from this same sheet loaded in their page; it is one CSS
-   source, not two, but the element alone does not style arbitrary nested consumer markup.
+   The one slotted thing is the link ITEM: a consumer supplies <li> elements that land directly
+   inside the element's <ul>, so `::slotted(li)` reaches them — directly assigned, which is
+   exactly why the ruling put the boundary there rather than around the whole column.
 
-   That asymmetry is the open question on #77 — content-as-property would remove it, at the cost
-   of the columns not reaching the element on a React first render. Not decided here.
+   The <a> INSIDE each <li> is a grandchild and is not reachable from here. That is deliberate
+   and is the ruling's stated trade: the anchor keeps its own light-DOM class from this same
+   sheet, loaded in the consumer's document, which they are already doing for the static path.
 
    AND A STATE PSEUDO-CLASS MUST SIT INSIDE `::slotted()`. `::slotted(x):hover` does not parse,
-   and one invalid selector invalidates its entire comma list — #143 shipped exactly that and
-   silently deleted a working hover on both paths. The gate now rejects it. */
+   and one invalid selector invalidates its whole comma list (#143). The gate rejects it. */
 
 .sk-site-footer {
   padding: var(--sk-space-11) 0 var(--sk-space-8);
@@ -81,6 +78,12 @@
   text-transform: uppercase;
   color: var(--sk-fg-muted);
   margin-bottom: var(--sk-space-5);
+}
+
+/* The slotted <li> items, reachable because they are DIRECTLY assigned into the element's own
+   <ul>. The bare selector serves the static path, where the <li> is an ordinary child. */
+::slotted(li) {
+  margin: 0;
 }
 
 .sk-site-footer__links {

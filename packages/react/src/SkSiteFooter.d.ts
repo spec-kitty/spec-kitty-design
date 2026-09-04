@@ -18,6 +18,21 @@ export interface SkSiteFooterProps extends Pick<
   | "onFocus"
   | "onBlur"
 > {
+  /** Heading for the first link column. */
+  headingOne?: SkSiteFooterElement["headingOne"];
+
+  /** Heading for the second link column. */
+  headingTwo?: SkSiteFooterElement["headingTwo"];
+
+  /** The copyright line. Omit it and the divider above it is not rendered either. */
+  legal?: SkSiteFooterElement["legal"];
+
+  /** One sentence under the wordmark. */
+  tagline?: SkSiteFooterElement["tagline"];
+
+  /** The brand wordmark. */
+  wordmark?: SkSiteFooterElement["wordmark"];
+
   /** A space-separated list of the classes of the element. Classes allows CSS and JavaScript to select and access specific elements via the class selectors or functions like the method `Document.getElementsByClassName()`. */
   className?: string;
 
@@ -41,24 +56,34 @@ export interface SkSiteFooterProps extends Pick<
 }
 
 /**
- * A site footer: a brand column, link columns, and a legal line.
+ * A site footer: a brand column, two link columns, and a legal line.
  *
- * The component owns the layout — a responsive grid that collapses to one column, and the
- * divider above the legal line. Everything a reader sees is yours, supplied through the slots.
+ * The element owns the structure — the grid, the `<nav>`s, the headings, the `<ul>`s, the divider
+ * and the legal line. Text arrives as properties; only the link ITEMS are slotted, as `<li>`
+ * elements that land directly inside the element's own `<ul>`.
+ *
+ * ## Attributes & Properties
+ *
+ * Component attributes and properties that can be applied to the element or by using JavaScript.
+ *
+ * - `headingOne`: Heading for the first link column.
+ * - `headingTwo`: Heading for the second link column.
+ * - `legal`: The copyright line. Omit it and the divider above it is not rendered either.
+ * - `tagline`: One sentence under the wordmark.
+ * - `wordmark`: The brand wordmark.
  *
  * ## Slots
  *
  * Areas where markup can be added to the component.
  *
- * - `(default)`: one element per link column, each becoming a grid item
- * - `brand`: a SINGLE element containing the mark, wordmark and tagline. Each assigned node becomes its own grid item, so wrap them in one box.
- * - `legal`: the copyright line. When empty, the divider and legal row are not rendered.
+ * - `column-one`: `<li>` items for the first link column
+ * - `column-two`: `<li>` items for the second link column The slot NAMES keep their hyphens — a slot name is a string, not a property key, so the constraint that shaped `headingOne`/`headingTwo` does not reach them.
  *
  * ## CSS Parts
  *
  * Custom selectors for styling elements within the component.
  *
- * - `divider`: the rule above the legal line
+ * - `divider`: the rule above the legal line, absent when `legal` is empty
  * - `footer`: the footer element, for padding and border overrides
  * - `grid`: the column grid, for layouts outside the provided one
  * - `legal`: the legal line

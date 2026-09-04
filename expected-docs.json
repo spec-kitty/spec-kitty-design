@@ -27,9 +27,9 @@
     "Note that `state: true` properties are deliberately absent from attributes[] — they observe",
     "no attribute and cannot be delivered on a first render under ssrSafe — so they are not",
     "counted here either. See scripts/normalise-manifest.mjs.",
-    "#77 adds <sk-site-footer> with ZERO attributes and zero methods, which is the point rather than an omission: the component owns the grid, the divider and the spacing, and every word a reader sees arrives through one of three slots. It is the SECOND element with no reactive property at all — sk-stub is also 0/0, recorded two rows above, and an earlier revision of this note claimed 'first'. A lens caught it. Note this ratchet is exact-equality, so a property added later fails here until it is documented — which is the intended pressure."
+    "#77 adds <sk-site-footer> with FIVE attributes and zero methods: wordmark, tagline, legal, column-one-heading and column-two-heading. Every one is a string, which is the operator's ruling on #77 working around a constraint this ratchet's sibling gate enforces — the React wrappers' ssrSafe mode delivers first-render props as ATTRIBUTES, which carry only strings, so structured data would not survive. The link ITEMS are slotted instead. An earlier revision of this entry recorded 0/0 for a slot-only design that contradicted that ruling; the rebuild is why the numbers moved."
   ],
-  "total": 53,
+  "total": 58,
   "elements": {
     "sk-blog-card": {
       "attributes": 3,
@@ -84,7 +84,7 @@
       "methods": 0
     },
     "sk-site-footer": {
-      "attributes": 0,
+      "attributes": 5,
       "methods": 0
     }
   }

@@ -647,9 +647,9 @@ carry the detail generic from the element's `@fires {Type}`.
   `index.ts` are (**generated** from the markup module)
 - Story titles: `Elements/SkSiteFooter` and `Components/SiteFooter (HTML)`
 - Slots: `brand` (one element), default (one per link column), `legal`. The element authors NO
-  text — not even the copyright year, which is why the generated placeholder reads `© <year>`
+  text — not even the copyright year, which is why the generated placeholder reads `© YYYY`
   rather than a real one: a clock-derived byte would make the artifact stop matching a fresh
-  generation on 1 January (ADR-11 item 9).
+  generation on 1 January (ADR-11 item 9), and a pinned year would only move the staleness.
 - Parts: `footer`, `grid`, `divider`, `legal`
 - **Element consumers must also load the stylesheet in their document** —
   `@spec-kitty/styles/site-footer/sk-site-footer.css`. The content is slotted and `::slotted()`

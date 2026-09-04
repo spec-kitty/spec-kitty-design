@@ -3,15 +3,19 @@
 //
 // LEAF MODULE, no relative imports: the generator evaluates it from a `data:` URL, which has no
 // module base.
+//
+// THE SHAPE HERE IS THE OPERATOR'S RULING ON #77 (2026-09-04), not a choice made in this file:
+// the element owns the whole structure — the <nav>s, the headings, the <ul>s, the divider and the
+// legal line — and content arrives as PROPERTIES. One string property per simple field, and only
+// the link LISTS are slotted, as <li> elements directly inside the element-owned <ul>. That keeps
+// <ul>/<li> semantics, makes every rule in the sheet reachable, and keeps structured data off an
+// attribute boundary — the ruling worked that sub-decision through explicitly, because the React
+// wrappers' ssrSafe mode delivers first-render props as ATTRIBUTES, which carry only strings.
 
 /**
  * The class names this component renders, named once.
  *
- * The element imports these rather than re-typing them. #78's blog-card shipped the opposite —
- * the only element in the repo that imported nothing from its own markup module — and four class
- * strings were authored twice on the component whose whole argument was that the two paths are
- * one shape. That is ADR-8 criterion 3, and it is measured by a proxy that has now been wrong
- * twice (#142), so the safe construction is to leave no literal in `render()` at all.
+ * The element imports these rather than re-typing them (ADR-8 criterion 3).
  */
 export const SITE_FOOTER_CLASSES = {
   root: 'sk-site-footer',
@@ -30,102 +34,75 @@ export const SITE_FOOTER_CLASSES = {
 /** No colour or shape variants — a site footer is one thing. */
 export const SITE_FOOTER_VARIANTS = {} as const;
 
-// BOTH ARE DECLARED EMPTY ON PURPOSE, and omitting either is an error: the generator HARD-FAILS
-// rather than reading `?? {}`, which could not distinguish "this component has none" from "I
-// looked for the wrong export name".
-
 /** No non-variant axes. */
 export const SITE_FOOTER_AXES = {} as const;
 
-// NO CLOCK. THIS IS THE POINT OF THE MISSION.
+// NO CLOCK, WHICH THE RULING ALSO SETTLED. The barrel this replaces opened with
+// `new Date().getFullYear()`. Harmless in a hand-authored module a consumer imports at runtime;
+// not harmless once GENERATED, because the generator calls it at build time and commits the
+// result — so the year is baked in and `--check` fails on 1 January against a tree nobody
+// touched (ADR-11 item 9). The legal line is a property, so no date is ever generated.
 //
-// The hand-written barrel this replaces opened with `const year = new Date().getFullYear()` and
-// interpolated it into the legal line. That was invisible while the file was hand-written and
-// nothing regenerated it — but this module's output is now a COMMITTED, DRIFT-GATED artifact, and
-// an artifact whose bytes depend on the wall clock stops matching a fresh generation on 1 January:
-// CI red for everyone, no code change, and the "fix" is to re-run the generator. ADR-11 item 9
-// names exactly that as generation determinism, and #140 found the same class making the manifest
-// gate a coin flip.
-//
-// So the year is a PLACEHOLDER constant, pinned, in the same family as sk-card's `Card content`
-// and sk-blog-card's PLACEHOLDER_THUMBNAIL: it exists so the generated artifact demonstrates the
-// structure it documents. The element never renders it — the legal line is slotted, because a
-// consumer's copyright is their own text and no component should be asserting it for them.
-/**
- * The legal line's placeholder, for the generated static form.
- *
- * NO YEAR AT ALL, not even a pinned one. A pinned `2026` delivered determinism — the artifact
- * stops depending on the clock — but it MOVED the staleness rather than removing it: the
- * generated `.html`, the styles barrel and the autodocs page would all read "© 2026" to a
- * consumer in 2028. A lens made the point, and it is right: nothing requires the placeholder to
- * look like a year. `YYYY` is deterministic, obviously a template, and cannot read stale.
- *
- * NOT `<year>`, which the first attempt used: htmlhint parses it as an unclosed HTML TAG in the
- * generated `.html` and fails the gate. A placeholder still has to be valid markup.
- *
- * It also makes the determinism test discriminating instead of decorative — see the fixture.
- * A consumer replaces the whole line; it is not a default the element falls back to.
- */
-export const PLACEHOLDER_LEGAL = '© YYYY Your Company. All rights reserved.';
+// The placeholder carries no year either: not a pinned one, which would only move the staleness
+// into what a consumer reads in 2028, and not `<year>`, which htmlhint parses as an unclosed tag.
 
 export interface SiteFooterStaticOptions {
-  /** The brand column: a mark and a tagline. Omitted entirely when absent. */
-  brand?: string;
-  /** The legal line. Defaults to the placeholder above. */
+  wordmark?: string;
+  tagline?: string;
+  headingOne?: string;
+  headingTwo?: string;
   legal?: string;
 }
 
-/**
- * A placeholder brand column.
- *
- * NO LOGO `src`. The markup this replaces carried
- * `src="../../packages/tokens/assets/logo.webp"` — a REPO-relative path, so every consumer who
- * copied the snippet got a broken image. The asset does ship (`packages/tokens/package.json`
- * lists `assets/**`), but at `@spec-kitty/tokens/assets/logo.webp`, which is not that path. A
- * consumer's footer carries their own mark anyway, so the brand column is a slot and the
- * placeholder shows the shape without asserting an image that cannot resolve.
- */
-const PLACEHOLDER_BRAND =
-  `<div class="${SITE_FOOTER_CLASSES.column}"><div class="${SITE_FOOTER_CLASSES.brand}">` +
-  `<span class="${SITE_FOOTER_CLASSES.wordmark}">Your Brand</span></div>` +
-  `<p class="${SITE_FOOTER_CLASSES.tagline}">One sentence on what you do.</p></div>`;
+const DEFAULTS = {
+  wordmark: 'Your Brand',
+  tagline: 'One sentence on what you do.',
+  headingOne: 'Product',
+  headingTwo: 'Connect',
+  legal: '© YYYY Your Company. All rights reserved.',
+} as const;
 
-/**
- * Placeholder link columns — CHILDREN, not a text node.
- *
- * #77 learned this in the other direction: sk-grid's generated artifact was a single text node,
- * which showed ADR-10 §3's no-JavaScript consumer nothing about the component they were copying.
- * Two columns, because the grid is `1.5fr 1fr 1fr` and one column would not show the layout.
- */
-const PLACEHOLDER_COLUMNS = ['Product', 'Connect']
-  .map(
-    (heading) =>
-      `<nav class="${SITE_FOOTER_CLASSES.column}" aria-label="${heading} links">` +
-      `<div class="${SITE_FOOTER_CLASSES.heading}">${heading}</div>` +
-      `<ul class="${SITE_FOOTER_CLASSES.links}">` +
-      `<li><a href="#" class="${SITE_FOOTER_CLASSES.link}">First link</a></li>` +
-      `<li><a href="#" class="${SITE_FOOTER_CLASSES.link}">Second link</a></li>` +
-      `</ul></nav>`,
-  )
-  .join('');
+// Escaping, leaf-local: the generator evaluates this module from a `data:` URL with no module
+// base, so it cannot import a helper. `attr` is `text` plus the quote characters — derived, so
+// the canonical list exists once. #163 tracks making the generator bundle so this can be shared.
+const text = (v: string): string =>
+  v.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+const attr = (v: string): string => text(v).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+
+/** Placeholder link items, so the generated artifact demonstrates the structure it documents. */
+const PLACEHOLDER_ITEMS = (labels: readonly string[]): string =>
+  labels
+    .map((l) => `<li><a href="#" class="${SITE_FOOTER_CLASSES.link}">${text(l)}</a></li>`)
+    .join('');
+
+const column = (heading: string, items: string): string =>
+  `<nav class="${SITE_FOOTER_CLASSES.column}" aria-label="${attr(heading)} links">` +
+  `<div class="${SITE_FOOTER_CLASSES.heading}">${text(heading)}</div>` +
+  `<ul class="${SITE_FOOTER_CLASSES.links}">${items}</ul></nav>`;
 
 /**
  * The static form, for a consumer with no JavaScript.
  *
- * The link columns are the `content` argument, which is deliberately RAW — a footer's columns are
- * markup, not text, so escaping them would break the documented use. That is the same convention
- * every sibling keeps for its content slot, and the residual is recorded in #163.
+ * The element renders the same structure from the same class map, so the two paths cannot
+ * diverge — the difference is only where the content comes from: properties there, literals here.
  */
-export function siteFooterStaticHtml(
-  opts: SiteFooterStaticOptions = {},
-  content = PLACEHOLDER_COLUMNS,
-): string {
-  const { brand = PLACEHOLDER_BRAND, legal = PLACEHOLDER_LEGAL } = opts;
+export function siteFooterStaticHtml(opts: SiteFooterStaticOptions = {}): string {
+  const o = { ...DEFAULTS, ...opts };
   return (
     `<footer class="${SITE_FOOTER_CLASSES.root}">` +
-    `<div class="${SITE_FOOTER_CLASSES.grid}">${brand}${content}</div>` +
+    `<div class="${SITE_FOOTER_CLASSES.grid}">` +
+    `<div class="${SITE_FOOTER_CLASSES.column}">` +
+    `<div class="${SITE_FOOTER_CLASSES.brand}">` +
+    `<span class="${SITE_FOOTER_CLASSES.wordmark}">${text(o.wordmark)}</span></div>` +
+    `<p class="${SITE_FOOTER_CLASSES.tagline}">${text(o.tagline)}</p></div>` +
+    column(o.headingOne, PLACEHOLDER_ITEMS(['Platform', 'Docs'])) +
+    column(o.headingTwo, PLACEHOLDER_ITEMS(['Contact', 'GitHub'])) +
+    `</div>` +
     `<hr class="${SITE_FOOTER_CLASSES.divider}" />` +
-    `<p class="${SITE_FOOTER_CLASSES.legal}">${legal}</p>` +
+    `<p class="${SITE_FOOTER_CLASSES.legal}">${text(o.legal)}</p>` +
     `</footer>`
   );
 }
+
+/** The legal placeholder, exported so a test can assert it carries no year. */
+export const PLACEHOLDER_LEGAL = DEFAULTS.legal;

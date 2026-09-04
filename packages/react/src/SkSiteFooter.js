@@ -5,8 +5,19 @@ import { createForwardedRefHandler } from "./react-utils.js";
 
 export const SkSiteFooter = forwardRef((props, forwardedRef) => {
   const ref = useRef(null);
-  const { className, exportparts, htmlFor, part, tabIndex, ...restProps } =
-    props;
+  const {
+    headingOne,
+    headingTwo,
+    legal,
+    tagline,
+    wordmark,
+    className,
+    exportparts,
+    htmlFor,
+    part,
+    tabIndex,
+    ...restProps
+  } = props;
 
   /** Waits for the client before loading the custom element */
   useEffect(() => {
@@ -18,6 +29,11 @@ export const SkSiteFooter = forwardRef((props, forwardedRef) => {
     {
       ref: createForwardedRefHandler(ref, forwardedRef),
       ...restProps,
+      headingOne: headingOne,
+      headingTwo: headingTwo,
+      legal: legal,
+      tagline: tagline,
+      wordmark: wordmark,
       class: className,
       exportparts: exportparts,
       for: htmlFor ?? props["for"],
