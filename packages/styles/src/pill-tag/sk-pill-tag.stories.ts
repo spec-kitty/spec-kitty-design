@@ -36,7 +36,12 @@ const label = (markup: string, text: string) => {
 };
 
 const meta: Meta = {
-  title: 'Primitives/SkPillTag',
+  // `(HTML)` IS NOT DECORATION. Every styles-layer story carries it, including the
+  // Primitives/SkCheckBullet (HTML) added by this same batch, and `Elements/SkPillTag` exists
+  // separately — without the marker the two are indistinguishable in the sidebar, which is
+  // exactly the distinction using-components.md tells a reader decides how they consume it.
+  // An earlier revision of this retitle dropped it; two lenses flagged that.
+  title: 'Primitives/SkPillTag (HTML)',
   tags: ['autodocs'],
   parameters: {
     a11y: { disable: false },

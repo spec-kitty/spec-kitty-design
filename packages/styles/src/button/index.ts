@@ -5,4 +5,5 @@ export const SkButtonHTML = "<button class=\"sk-button\" type=\"button\">Label</
 export const SkButtonPrimaryHTML = "<button class=\"sk-button sk-button--primary\" type=\"button\">Label</button>";
 export const SkButtonSecondaryHTML = "<button class=\"sk-button sk-button--secondary\" type=\"button\">Label</button>";
 export const SkButtonGhostHTML = "<button class=\"sk-button sk-button--ghost\" type=\"button\">Label</button>";
-export const SkButtonSmHTML = "<button class=\"sk-button sk-button--sm\" type=\"button\">Label</button>";
+export const SkButtonSmHTML = "<button class=\"sk-button sk-button--primary sk-button--sm\" type=\"button\">Label</button>";
+export const SkButtonLinkHTML = "<a class=\"sk-button sk-button--primary\" href=\"#\">Label</a>";

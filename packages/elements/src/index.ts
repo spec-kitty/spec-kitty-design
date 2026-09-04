@@ -55,24 +55,30 @@ export {
 // `gridStaticHtml` throws.
 export { gridClasses, gridStaticHtml, type GridGap, type GridVariant } from './grid/sk-grid.markup.js';
 
-// sk-button's markup module. Both class helpers, because tone and size each degrade.
+// sk-button's markup module. The two maps because the behaviour fixture derives its loops from
+// them; both class helpers because tone and size each degrade.
+//
+// `ButtonSize`/`ButtonVariant` are NOT re-exported — see the ONLY WHAT IS CONSUMED note below.
+// A lens suggested the alternative of keeping them and using them for the element's `declare`
+// lines, which would have given them a consumer. Declined deliberately: those declarations are
+// PUBLISHED API, and `declare variant: ButtonVariant | undefined` shows a consumer the alias
+// name in an IDE hover where the literal union shows them the actual accepted values. The
+// restatement is worth the clarity; the unconsumed export is not.
 export {
   BUTTON_SIZES,
   BUTTON_VARIANTS,
   buttonClasses,
   buttonStaticHtml,
-  type ButtonSize,
-  type ButtonVariant,
 } from './button/sk-button.markup.js';
 
-// sk-check-bullet's markup module. No variants and no axes, both declared explicitly.
-export {
-  CHECK_BULLET_AXES,
-  CHECK_BULLET_VARIANTS,
-  DEFAULT_ICON,
-  checkBulletClasses,
-  checkBulletStaticHtml,
-} from './check-bullet/sk-check-bullet.markup.js';
+// sk-check-bullet's markup module. Only the static form, which the fixture calls.
+//
+// `CHECK_BULLET_AXES` and `CHECK_BULLET_VARIANTS` are declared in the markup module because the
+// GENERATOR requires them there and cannot tell an absent export from an empty one — that
+// obligation is on the module, not on this barrel, and an earlier revision of this block cited
+// it as though it were. `DEFAULT_ICON` and `checkBulletClasses` are used only by
+// sk-check-bullet.ts, which imports them straight from the markup module.
+export { checkBulletStaticHtml } from './check-bullet/sk-check-bullet.markup.js';
 
 // sk-feature-card's markup module. Both class helpers are exported because the component has
 // TWO independent axes and each has its own degrade path.
@@ -90,14 +96,14 @@ export {
   type FeatureCardVariant,
 } from './feature-card/sk-feature-card.markup.js';
 
-// sk-pill-tag's markup module. Both class helpers, because colour and shape each degrade.
+// sk-pill-tag's markup module. Both class helpers, because colour and shape each degrade; the
+// maps because the fixture derives its loops from them. The `PillTagShape`/`PillTagVariant`
+// aliases are not re-exported, for the reason given in the sk-button block above.
 export {
   PILL_TAG_SHAPES,
   PILL_TAG_VARIANTS,
   pillTagClasses,
   pillTagStaticHtml,
-  type PillTagShape,
-  type PillTagVariant,
 } from './pill-tag/sk-pill-tag.markup.js';
 
 // sk-ribbon-card's markup module. Both class helpers, because the card and the ribbon each

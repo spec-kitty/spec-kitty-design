@@ -36,7 +36,13 @@ test('[SC-013] the declared part is targetable from outside', async () => {
   try {
     const node = partOf(el);
     expect(node, 'part="tag" is declared but not rendered').not.toBe(null);
-    expect(getComputedStyle(node).outlineStyle, '::part(tag) is not targetable').toBe('dashed');
+    // Interpolated so the only literal `::part(tag)` in this file is the real selector
+    // above — check-part-ratchet.mjs greps for that literal, so a copy in a message would
+    // keep the ratchet green if the rule were deleted.
+    expect(
+      getComputedStyle(node).outlineStyle,
+      `::part(${'tag'}) is not targetable`,
+    ).toBe('dashed');
   } finally {
     s.remove();
   }
@@ -67,8 +73,10 @@ test('every colour PAINTS and the colours are distinct', async () => {
 
 test('every tinted variant meets AA contrast in BOTH themes', async () => {
   // THE BUG THE INERT WRAPPER WAS HIDING. Every tinted variant paired --sk-color-* (tuned for
-  // the dark page) with --sk-surface-tint-* (pastel in light mode): 1.51:1 yellow, 1.67:1
-  // green, 1.82:1 purple, against AA's 4.5. The a11y gate never saw it because this
+  // the dark page) with --sk-surface-tint-* (pastel in light mode), against AA's 4.5: 1.51:1
+  // yellow, 1.67:1 green, 1.82:1 purple and 2.48:1 breaking — all FOUR, where an earlier
+  // revision of this note listed three and left out the one that moved furthest. The gate
+  // never saw it because this
   // component's LightMode story carried the inert `data-theme="light"` wrapper, so it rendered
   // the DARK palette (#93). Retiring that wrapper in #79 exposed it; the on-tint inks fix it.
   //

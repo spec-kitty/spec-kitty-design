@@ -4,7 +4,8 @@
 /*
  * SUPERSEDED BY #139 — read the note below with that in mind. #79 renamed `.sk-btn` and
  * `.sk-tag` outright on the operator's ruling, on the basis the programme records at
- * elements-first-programme.md:279 and ADR-8:83 — nothing was ever installed, so 1.0.0 is
+ * elements-first-programme.md under `M14 · elements-first-release`, and ADR-8:83 — nothing
+ * was ever installed, so 1.0.0 is
  * still free and a rename breaks no consumer. The reasoning below was right when written and
  * its premise is now retired; #141 owns form-field and should rename `.sk-input`/`.sk-textarea`
  * rather than inherit the additive workaround, which currently leaves them authored twice.

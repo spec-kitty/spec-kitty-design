@@ -92,7 +92,7 @@ figure it replaced, not more. Comparing them needs a per-component build; #81 ow
 measurement that produces one. Stating the basis is this section's whole point.
 
 What this script *does* establish is the shape of the relationship: the runtime is a
-fixed cost (${kb(ARTIFACTS[1].raw - ARTIFACTS[0].raw)} of the IIFE is Lit, since the
+runtime cost MEASURED AT THIS BUILD (${kb(ARTIFACTS[1].raw - ARTIFACTS[0].raw)} of the IIFE is Lit, since the
 ESM artifact holds the same element with \`lit\` external) and the per-component cost
 tracks its CSS. A batch mission adding a component should expect the IIFE to grow by
 roughly that component's CSS, not by a fixed per-component overhead.

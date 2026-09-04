@@ -45,12 +45,38 @@ test('[SC-013] the declared part is targetable from outside, on BOTH branches', 
       expect(node, `part="button" is not rendered on the ${branch} branch`).not.toBe(null);
       expect(
         getComputedStyle(node).outlineStyle,
-        `::part(button) is not targetable on the ${branch} branch`,
+        // INTERPOLATED, and that is load-bearing. check-part-ratchet.mjs greps the
+        // concatenated test sources for the literal `::part(<name>)`; a failure message
+        // carrying that literal is a second, non-selector occurrence, so deleting the real
+        // rule above would leave the ratchet arm green over nothing. A lens caught this.
+        `::part(${'button'}) is not targetable on the ${branch} branch`,
       ).toBe('dashed');
     }
   } finally {
     s.remove();
   }
+});
+
+test('removing href reverts the anchor to a button', async () => {
+  // THE REGRESSION THIS ARM EXISTS FOR. `render()` tested `this.href === undefined`, but Lit
+  // assigns a String property `null` when its attribute is removed — so the anchor branch was
+  // taken with `href=${null}`, which lit-html commits as `href=""`. The element stayed an <a>,
+  // a click reloaded the page, and AT still announced "link".
+  //
+  // Nothing in the suite could see it: `mount()` only ever setAttribute's and never mutates
+  // after mount, so no arm exercised a property going BACK to absent. A lens found it by
+  // reading Lit's converter. This asserts the transition, not just the two static states.
+  const el = await mount({ variant: 'primary', href: '/docs' });
+  expect(partOf(el).tagName, 'href should render an anchor').toBe('A');
+
+  el.removeAttribute('href');
+  await (el as unknown as { updateComplete: Promise<unknown> }).updateComplete;
+
+  const node = partOf(el);
+  expect(node.tagName, 'removing href should revert to a <button>').toBe('BUTTON');
+  // Belt and braces: the pre-fix failure produced an anchor with an EMPTY href rather than no
+  // anchor, so a tagName-only assertion in a future refactor could pass on `<a href="">`.
+  expect(node.hasAttribute('href'), 'the reverted control must carry no href').toBe(false);
 });
 
 test('[SC-014] the element adopts the GENERATED sheet by identity and injects no <style>', async () => {

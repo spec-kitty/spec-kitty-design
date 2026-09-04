@@ -82,6 +82,55 @@ test('the tick is decorative and the text is the accessible content', async () =
   expect(slot.assignedNodes().map((n) => n.textContent).join('')).toBe('Requirements captured up front');
 });
 
+test('the tick meets AA contrast in BOTH themes — axe structurally cannot', async () => {
+  // ASSERTED HERE BECAUSE THE A11Y GATE IS BLIND TO IT, permanently and silently. `✓` (U+2713)
+  // and `★` (U+2605) both sit inside axe-core's non-BMP range, so `textIsEmojis` is true,
+  // `colorContrastEvaluate` returns an INCOMPLETE instead of a violation, and
+  // run-axe-storybook.js reads `getViolations`, which drops incompletes. So this component's
+  // only coloured glyph has never been contrast-checked by the gate and would not be after a
+  // regression either. Filed as #151; this arm is the local cover until it lands.
+  //
+  // Held to 4.5 (text contrast) even though an aria-hidden decorative glyph is arguably exempt
+  // and 1.4.11's 3:1 would be the lenient floor. The tick is the component's only visual
+  // signal for "checked", the fix clears 7.38:1, and the stricter floor catches a regression
+  // sooner. Deliberately stricter, not accidentally.
+  const contrast = (fg: string, bg: string) => {
+    const channel = (v: number) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4);
+    const lum = (c: string) => {
+      const [r, g, b] = c.match(/\d+/g)!.slice(0, 3).map((n) => channel(Number(n) / 255));
+      return 0.2126 * r! + 0.7152 * g! + 0.0722 * b!;
+    };
+    const [a, z] = [lum(fg), lum(bg)].sort((x, y) => y - x);
+    return (a! + 0.05) / (z! + 0.05);
+  };
+
+  for (const theme of ['dark', 'light'] as const) {
+    const wrap = document.createElement('div');
+    if (theme === 'light') wrap.className = 'sk-light';
+    // The tick has no background of its own, so the comparison surface is the page. Painting it
+    // explicitly from the token makes the assertion independent of whatever the harness body
+    // happens to be, and it resolves per theme because the wrapper carries the theme class.
+    wrap.style.background = 'var(--sk-surface-page)';
+    document.body.append(wrap);
+
+    const ul = document.createElement('ul');
+    ul.setAttribute('role', 'list');
+    const el = document.createElement('sk-check-bullet');
+    el.textContent = 'Requirements captured up front';
+    ul.append(el);
+    wrap.append(ul);
+    await (el as unknown as { updateComplete: Promise<unknown> }).updateComplete;
+
+    const fg = getComputedStyle(partOf(el, 'icon')).color;
+    const bg = getComputedStyle(wrap).backgroundColor;
+    const ratio = contrast(fg, bg);
+    expect(
+      ratio,
+      `the tick in ${theme} mode is ${ratio.toFixed(2)}:1 (${fg} on ${bg}) — AA needs 4.5`,
+    ).toBeGreaterThanOrEqual(4.5);
+  }
+});
+
 test('the icon is a property, and the class list matches the static path', async () => {
   const el = await mount({ icon: '★' });
   expect(partOf(el, 'icon').textContent).toBe('★');

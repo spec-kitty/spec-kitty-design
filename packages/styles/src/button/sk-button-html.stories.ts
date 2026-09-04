@@ -39,17 +39,13 @@ const swap = (markup: string, find: string, put: string, what: string) => {
 
 const label = (markup: string, text: string) => swap(markup, MARKER, `>${text}<`, 'the label');
 
-/**
- * Adds a tone to a generated form that has none.
- *
- * `SkButtonSmHTML` is `sk-button sk-button--sm` — SIZE ONLY — and the base class sets no
- * background or colour, so rendering it bare paints a tone-less button. An earlier revision of
- * this fold did exactly that, and the Small story stopped showing anything: a regression
- * introduced while removing hand-authored markup. Composing a class onto a generated string is
- * not a second authoring site, so ADR-8 criterion 3 is unaffected.
- */
-const withTone = (markup: string, tone: 'primary' | 'secondary' | 'ghost') =>
-  swap(markup, 'class="sk-button', `class="sk-button sk-button--${tone}`, 'the class list');
+// `withTone()` USED TO LIVE HERE and is deliberately gone. It composed a tone class onto
+// `SkButtonSmHTML`, which the generator emitted as `sk-button sk-button--sm` — size only, and
+// the base class paints nothing, so the Small story rendered an invisible button until the
+// helper patched it. That was treating the symptom: the cause was `BUTTON_AXES` being derived
+// from `BUTTON_SIZES`, conflating "size modifiers" with "static forms worth publishing". The
+// axis now declares its tone, so the generated string is already painted and the story
+// composes nothing. Do not reintroduce a class-composing helper here; fix the axis instead.
 
 const meta: Meta = {
   title: 'Components/Button (HTML)',
@@ -63,7 +59,7 @@ export const Default: Story = { render: () => label(SkButtonPrimaryHTML, 'Get st
 export const Secondary: Story = { render: () => label(SkButtonSecondaryHTML, 'Star on GitHub') };
 export const Ghost: Story = { render: () => label(SkButtonGhostHTML, 'Read the docs') };
 export const Small: Story = {
-  render: () => label(withTone(SkButtonSmHTML, 'primary'), 'Book Demo'),
+  render: () => label(SkButtonSmHTML, 'Book Demo'),
 };
 
 /**
@@ -81,7 +77,7 @@ export const AllVariants: Story = {
       ${label(SkButtonPrimaryHTML, 'Get started')}
       ${label(SkButtonSecondaryHTML, 'Star on GitHub')}
       ${label(SkButtonGhostHTML, 'Read the docs')}
-      ${label(withTone(SkButtonSmHTML, 'primary'), 'Book Demo')}
+      ${label(SkButtonSmHTML, 'Book Demo')}
     </div>
   `,
 };

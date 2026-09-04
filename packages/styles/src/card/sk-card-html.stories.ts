@@ -1,10 +1,17 @@
+// ALL IMPORTS FIRST. `tag()` used to sit between the pill-tag import above and the three
+// imports below, which breaks `import/first` and — because the two CSS imports' ORDER sets the
+// cascade — invited a reader to reorder them believing the const was a barrier. It is not.
 import '../pill-tag/sk-pill-tag.css';
 // Pill-tag markup comes from ITS OWN generated exports — a card story is not an authoring
 // site for another component's markup (ADR-8 criterion 3).
 import { SkPillTagHTML, SkPillTagGreenHTML } from '../pill-tag';
+import './sk-card.css';
+import type { Meta, StoryObj } from '@storybook/web-components';
+import { SkCardHTML, SkCardBlueHTML, SkCardPurpleHTML, SkCardInsetHTML } from './index';
 
 /** Guarded, for the reason the button story states: String.replace returns its input unchanged
- *  on no match, so an unguarded swap renders "Label" silently. */
+ *  on no match, so an unguarded swap renders "Label" silently. One of nine such helpers across
+ *  the styles-layer stories; consolidating them is filed as #157. */
 const tag = (markup: string, text: string) => {
   if (!markup.includes('>Label<')) {
     throw new Error(
@@ -14,9 +21,6 @@ const tag = (markup: string, text: string) => {
   }
   return markup.replace('>Label<', `>${text}<`);
 };
-import './sk-card.css';
-import type { Meta, StoryObj } from '@storybook/web-components';
-import { SkCardHTML, SkCardBlueHTML, SkCardPurpleHTML, SkCardInsetHTML } from './index';
 
 /**
  * Renders from the GENERATED exports, not from hand-written markup.

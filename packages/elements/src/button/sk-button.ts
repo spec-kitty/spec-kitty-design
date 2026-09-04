@@ -1,4 +1,4 @@
-import { LitElement, html, nothing } from 'lit';
+import { LitElement, html } from 'lit';
 import { define } from '../define.js';
 import sheet from './sk-button.css.js';
 import { buttonClasses } from './sk-button.markup.js';
@@ -45,11 +45,28 @@ export class SkButton extends LitElement {
     // classes the static form puts on its own root — so one CSS source serves both paths with
     // nothing written twice. That is the divergence #78 had to repair after the fact.
     //
-    // KNOWN LIMITATION, stated rather than discovered later: a <button> inside a shadow root
-    // does not submit an enclosing form. No form exists in this repo today — grepped — and
-    // ADR-9 §4 plus #74's ElementInternals work is the mechanism if one ever does. Filed
-    // rather than half-built.
-    return this.href === undefined
+    // KNOWN LIMITATIONS, stated rather than discovered later. Both are filed as #153.
+    //
+    // 1. A <button> inside a shadow root does not submit an enclosing form, and `type="button"`
+    //    below is hard-coded, so this element can never be a submit button. ADR-9 §4 plus #74's
+    //    ElementInternals work is the mechanism if one is ever wanted. An earlier revision of
+    //    this comment claimed "no form exists in this repo today — grepped"; that was false when
+    //    written — fixtures/react-consumer/src/wrappers.test.tsx:156 renders one, and a lens
+    //    refuted the claim. The limitation is real; the supporting fact was not.
+    // 2. The interactive node lives in the shadow root with no `delegatesFocus`, so
+    //    `hostEl.focus()` is a silent no-op (the trap sk-nav-pill.ts:107 already names), and
+    //    `aria-label` on the host is ignored because the host's role is generic. So the
+    //    icon-only button the a11y gate keeps green cannot be expressed through <sk-button>.
+    //
+    // `== null`, NOT `=== undefined`. Lit assigns a String property `null` — not `undefined` —
+    // when its attribute is removed: reactive-element's `fromAttribute(null, String)` returns
+    // null, and `__defaultValues` is only populated under `useDefault`, which nothing here
+    // declares. With a strict `=== undefined` check, `removeAttribute('href')` took the ANCHOR
+    // branch with `href=${null}`, and lit-html commits `setAttribute(name, value ?? '')` — so
+    // the element became `<a href="">` instead of reverting to `<button>`: a click reloaded the
+    // page and AT still announced "link". sk-ribbon-card.ts:63 was immune only because it tests
+    // truthiness. Found by a lens, not by the suite — `mount()` never mutated after mount.
+    return this.href == null
       ? html`<button part="button" class=${cls} type="button" ?disabled=${this.disabled}>
           <slot></slot>
         </button>`

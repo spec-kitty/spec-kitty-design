@@ -12,11 +12,15 @@
 // sk-check-bullet-html.stories.ts hand-wrote the whole <li> three times. Two pre-merge
 // lenses caught the false claim; that story now renders the generated export.
 
-/** No colour or shape variants — a check bullet is one thing. Declared explicitly because the
- *  generator cannot distinguish an absent export from an empty one. */
+// BOTH ARE DECLARED EMPTY ON PURPOSE, and omitting either is an error: the generator reads
+// `?? {}`, which cannot distinguish "this component has none" from "I looked for the wrong
+// export name". That rationale is a maintainer's, so it lives here — the doc comments below go
+// verbatim into custom-elements.json and IDE hovers, and one of them previously read "declared
+// for the same reason", a cross-reference that dangles once it is read on its own in a hover.
+/** No colour or shape variants — a check bullet is one thing. */
 export const CHECK_BULLET_VARIANTS = {} as const;
 
-/** No non-variant axes either, declared for the same reason. */
+/** No non-variant axes. */
 export const CHECK_BULLET_AXES = {} as const;
 
 export interface CheckBulletStaticOptions {

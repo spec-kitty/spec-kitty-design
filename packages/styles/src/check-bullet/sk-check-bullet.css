@@ -15,8 +15,26 @@
   line-height: 1.55;
 }
 
+/* THE INK IS THEME-AWARE, and it has to be. This was `--sk-color-green` (#8FCB8F), which is
+   tuned for the dark page: 10.21:1 there, but **1.73:1** on the cream light page and 1.89:1 on
+   the white card. Retiring this component's inert `data-theme="light"` wrapper in #79 is what
+   made the light stories render the light palette for the first time — the identical defect
+   this same PR fixes for pill-tag, which had been applied to two of the batch's three
+   components and not the third. Two lenses caught it independently.
+
+   `--sk-on-tint-mint` is the only theme-aware green in the token set: it resolves to
+   `var(--sk-color-green)` in dark — byte-identical to the old value, so no dark baseline moves
+   — and to #2D5A2D in light, which is 7.38:1 on the cream page. Its NAME says "ink on a mint
+   tint" while the tick sits on the page; that is a mild semantic stretch, taken deliberately
+   because the alternative is overriding `--sk-color-green` in the light block, which would move
+   ribbon-card and feature-card too — components this mission does not own.
+
+   NO GATE CAN CATCH A REGRESSION HERE, which is why the fixture asserts it instead. `✓` is
+   U+2713, inside axe-core's non-BMP range, so `textIsEmojis` is true and colour-contrast
+   returns INCOMPLETE rather than a violation — and run-axe-storybook.js reads `getViolations`,
+   which drops incompletes. Filed as #151. */
 .sk-check-bullet__icon {
-  color: var(--sk-color-green);
+  color: var(--sk-on-tint-mint);
   font-weight: var(--sk-weight-bold);
   flex-shrink: 0;
   margin-top: 0.1em;

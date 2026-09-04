@@ -69,8 +69,12 @@ boundary and a selector does not. Reuse the tint family — `--sk-surface-tint-*
 ### 2. Author the markup ONCE, in `packages/elements`
 
 **Only if the component has a static form.** The module is optional — the generator derives its
-work set by glob from the elements that have one, and #72 and #73 both declined it. `sk-card` is
-the only one today.
+work set by glob from the elements that have one, and #72 and #73 both declined it.
+
+The count moves every batch, so it is deliberately not stated here —
+`git ls-files 'packages/elements/src/*/*.markup.ts'` is the answer. It was eight of twelve when
+#79's batch landed. (This paragraph used to end "`sk-card` is the only one today", which had
+gone stale three batches before a lens caught it — on the one page a new implementer opens.)
 
 It **must be a leaf module with no relative imports**: the generator evaluates it from a `data:`
 URL, which has no module base, and says so in a named error if you give it one.

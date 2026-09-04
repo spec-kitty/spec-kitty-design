@@ -14,7 +14,9 @@
 // not a component — so it is one now, and it composes with the colour variants rather than
 // competing with them.
 
-/** Colour modifiers — the tag's own root classes, so these are the generator's variants. */
+// The generator's variant table: one static export per entry. Rationale here rather than in
+// the doc comment, which is published verbatim to consumers.
+/** The tag's colour modifiers. */
 export const PILL_TAG_VARIANTS = {
   green: 'sk-pill-tag--green',
   purple: 'sk-pill-tag--purple',
@@ -78,7 +80,12 @@ export function pillTagStaticHtml(opts: PillTagStaticOptions = {}, content = 'La
   return `<span class="${pillTagClasses(variant, shape)}">${content}</span>`;
 }
 
-/** The non-variant axes, DERIVED from PILL_TAG_SHAPES so the two tables cannot diverge (#77). */
+// DERIVED, and here that is correct — unlike sk-button, where the equivalent derivation was
+// wrong and has been replaced by an explicit table. A pill-tag SHAPE is itself a static form
+// worth publishing (the base class paints its own background and ink, so every shape renders
+// something), which makes shapes and axes the same set. sk-button's sizes were not: a size on
+// its own paints nothing, so deriving axes from sizes published an invisible export.
+/** The non-variant axes: one per shape. */
 export const PILL_TAG_AXES = Object.fromEntries(
   Object.keys(PILL_TAG_SHAPES).map((s) => [`${s.charAt(0).toUpperCase()}${s.slice(1)}`, { shape: s }]),
 ) as Record<string, PillTagStaticOptions>;

@@ -1,62 +1,30 @@
-export { SkStubHTML } from './stub/index';
-export {
-  SkButtonHTML,
-  SkButtonPrimaryHTML,
-  SkButtonSecondaryHTML,
-  SkButtonGhostHTML,
-  SkButtonSmHTML,
-} from './button/index';
-export {
-  SkFormFieldHTML,
-  SkFormInputDefaultHTML,
-  SkFormInputFocusHTML,
-  SkFormInputErrorHTML,
-  SkFormInputDisabledHTML,
-  SkFormInputFilledHTML,
-  SkFormTextareaDefaultHTML,
-  SkFormTextareaErrorHTML,
-} from './form-field/index';
-export { SkCheckBulletHTML } from './check-bullet/index';
-export { SkSectionBannerHTML, SkSectionBannerNeutralHTML, SkSectionBannerPurpleHTML, SkSectionBannerGreenHTML } from './section-banner/index';
-export {
-  SkFeatureCardHTML,
-  SkFeatureCardYellowHTML,
-  SkFeatureCardGreenHTML,
-  SkFeatureCardPurpleHTML,
-  SkFeatureCardBorderYellowHTML,
-  SkFeatureCardBorderGreenHTML,
-  SkFeatureCardBorderPurpleHTML,
-} from './feature-card/index';
-export {
-  SkRibbonCardHTML,
-  SkRibbonCardWithRibbonHTML,
-  SkRibbonCardBorderYellowHTML,
-  SkRibbonCardBorderGreenHTML,
-  SkRibbonCardBorderPurpleHTML,
-  SkRibbonCardBorderBlueHTML,
-  SkRibbonCardBorderRedHTML,
-  SkRibbonCardRibbonYellowHTML,
-  SkRibbonCardRibbonGreenHTML,
-  SkRibbonCardRibbonPurpleHTML,
-  SkRibbonCardRibbonBlueHTML,
-  SkRibbonCardRibbonRedHTML,
-} from './ribbon-card/index';
-export { SkNavPillHTML } from './nav-pill/index';
-export {
-  SkPillTagHTML,
-  SkPillTagGreenHTML,
-  SkPillTagPurpleHTML,
-  SkPillTagBreakingHTML,
-  SkPillTagYellowHTML,
-  SkPillTagEyebrowHTML,
-} from './pill-tag/index';
-export { SkCardHTML, SkCardBlueHTML, SkCardPurpleHTML, SkCardInsetHTML } from './card/index';
-export { SkGridHTML, SkGridCols2HTML, SkGridCols3HTML, SkGridCols4HTML, SkGridGap3HTML, SkGridGap6HTML } from './grid/index';
-export {
-  SkBlogCardDefaultHTML,
-  SkBlogCardWithoutImageHTML,
-  SkBlogCardWithoutEyebrowHTML,
-  SkBlogCardLongTitleHTML,
-} from './blog-card/index';
-
-export { SkSiteFooterHTML } from './site-footer/index';
+// The package entry point. ONE LINE PER COMPONENT DIRECTORY, and `export *` rather than a named
+// list, which is the whole point.
+//
+// This file used to name every export by hand — twelve blocks, 61 names. Each per-component
+// `index.ts` is GENERATED from that component's markup module, and nothing regenerated or
+// checked this file: `build-element-markup.mjs --check` compares only the per-component
+// `sk-<c>.html` and `index.ts`, and no script referenced this path at all. So adding a variant
+// regenerated the component barrel with `--check` green while the published entry point
+// silently omitted the new export.
+//
+// That was not hypothetical. When a lens found this, `SkGridGap4HTML` — emitted by
+// `grid/index.ts` ever since #77 derived GRID_AXES from GRID_GAPS — was already missing here,
+// and every gate was green. `export *` removes the class by construction; the gate that keeps
+// it closed is filed as #156.
+//
+// Safe because every per-component barrel exports only `Sk*HTML` consts, verified collision-free
+// across all of them.
+export * from './blog-card/index';
+export * from './button/index';
+export * from './card/index';
+export * from './check-bullet/index';
+export * from './feature-card/index';
+export * from './form-field/index';
+export * from './grid/index';
+export * from './nav-pill/index';
+export * from './pill-tag/index';
+export * from './ribbon-card/index';
+export * from './section-banner/index';
+export * from './site-footer/index';
+export * from './stub/index';

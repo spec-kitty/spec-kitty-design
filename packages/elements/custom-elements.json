@@ -9,8 +9,8 @@
         {
           "kind": "variable",
           "name": "BUTTON_AXES",
-          "default": "Object.fromEntries( Object.keys(BUTTON_SIZES).map((s) => [`${s.charAt(0).toUpperCase()}${s.slice(1)}`, { size: s }]), )",
-          "description": "The non-variant axes, DERIVED from BUTTON_SIZES so the two tables cannot diverge (#77)."
+          "default": "{ Sm: { size: 'sm', variant: 'primary' }, Link: { href: '#', variant: 'primary' }, } as const satisfies Record<string, ButtonStaticOptions>",
+          "description": "The static forms this component publishes, beyond the base and one per variant.\n\n`Sm` is the small size in its primary tone; `Link` is the anchor form."
         },
         {
           "kind": "variable",
@@ -28,7 +28,7 @@
             "text": "{\n  primary: 'sk-button--primary',\n  secondary: 'sk-button--secondary',\n  ghost: 'sk-button--ghost',\n}"
           },
           "default": "{ primary: 'sk-button--primary', secondary: 'sk-button--secondary', ghost: 'sk-button--ghost', }",
-          "description": "Tone modifiers — the button's own root classes, so these are the generator's variants."
+          "description": "The button's tone modifiers."
         },
         {
           "kind": "function",
@@ -76,8 +76,7 @@
               "name": "content",
               "default": "'Label'"
             }
-          ],
-          "description": "The static form. Throws on an unknown variant or size.\n\nANCHOR OR BUTTON, decided by `href`, and this is not a convenience — it is what the\ncatalogue already does. Every real use of this class in `apps/demo` is an `<a href>` styled\nas a button; the stories use `<button>`. One primitive, two elements, and the class list is\nidentical on both. So the element switches on the same signal rather than forcing consumers\nto choose between a working link and a styled one."
+          ]
         },
         {
           "kind": "variable",
@@ -146,7 +145,7 @@
             "text": "{}"
           },
           "default": "{}",
-          "description": "No non-variant axes either, declared for the same reason."
+          "description": "No non-variant axes."
         },
         {
           "kind": "variable",
@@ -155,7 +154,7 @@
             "text": "{}"
           },
           "default": "{}",
-          "description": "No colour or shape variants — a check bullet is one thing. Declared explicitly because the\ngenerator cannot distinguish an absent export from an empty one."
+          "description": "No colour or shape variants — a check bullet is one thing."
         },
         {
           "kind": "function",
@@ -815,7 +814,7 @@
           "kind": "variable",
           "name": "PILL_TAG_AXES",
           "default": "Object.fromEntries( Object.keys(PILL_TAG_SHAPES).map((s) => [`${s.charAt(0).toUpperCase()}${s.slice(1)}`, { shape: s }]), )",
-          "description": "The non-variant axes, DERIVED from PILL_TAG_SHAPES so the two tables cannot diverge (#77)."
+          "description": "The non-variant axes: one per shape."
         },
         {
           "kind": "variable",
@@ -833,7 +832,7 @@
             "text": "{\n  green: 'sk-pill-tag--green',\n  purple: 'sk-pill-tag--purple',\n  breaking: 'sk-pill-tag--breaking',\n  yellow: 'sk-pill-tag--yellow',\n}"
           },
           "default": "{ green: 'sk-pill-tag--green', purple: 'sk-pill-tag--purple', breaking: 'sk-pill-tag--breaking', yellow: 'sk-pill-tag--yellow', }",
-          "description": "Colour modifiers — the tag's own root classes, so these are the generator's variants."
+          "description": "The tag's colour modifiers."
         },
         {
           "kind": "function",
@@ -2880,12 +2879,13 @@
           },
           "parameters": [
             {
-              "name": "v",
+              "name": "variant",
               "type": {
                 "text": "string"
               }
             }
-          ]
+          ],
+          "description": "The shared diagnostic for an unrecognised variant."
         }
       ],
       "exports": [
@@ -2923,25 +2923,9 @@
         },
         {
           "kind": "js",
-          "name": "ButtonSize",
-          "declaration": {
-            "name": "ButtonSize",
-            "module": "./dist/index.js"
-          }
-        },
-        {
-          "kind": "js",
           "name": "buttonStaticHtml",
           "declaration": {
             "name": "buttonStaticHtml",
-            "module": "./dist/index.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "ButtonVariant",
-          "declaration": {
-            "name": "ButtonVariant",
             "module": "./dist/index.js"
           }
         },
@@ -3315,25 +3299,9 @@
         },
         {
           "kind": "js",
-          "name": "PillTagShape",
-          "declaration": {
-            "name": "PillTagShape",
-            "module": "./dist/index.js"
-          }
-        },
-        {
-          "kind": "js",
           "name": "pillTagStaticHtml",
           "declaration": {
             "name": "pillTagStaticHtml",
-            "module": "./dist/index.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "PillTagVariant",
-          "declaration": {
-            "name": "PillTagVariant",
             "module": "./dist/index.js"
           }
         },

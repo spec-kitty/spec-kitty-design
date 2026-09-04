@@ -9,7 +9,11 @@
 // alternative was a hand-maintained prefix map, which is the shape this programme has removed
 // from four other places.
 
-/** Tone modifiers — the button's own root classes, so these are the generator's variants. */
+// The generator treats this map as the component's VARIANTS and emits one static export per
+// entry. Kept out of the doc comment below because that prose is published verbatim into
+// custom-elements.json and a consumer's IDE hover, where "the generator's variants" means
+// nothing — a lens found six such leaks across this batch's markup modules.
+/** The button's tone modifiers. */
 export const BUTTON_VARIANTS = {
   primary: 'sk-button--primary',
   secondary: 'sk-button--secondary',
@@ -75,6 +79,15 @@ export interface ButtonStaticOptions {
  * identical on both. So the element switches on the same signal rather than forcing consumers
  * to choose between a working link and a styled one.
  */
+// `href` is the first caller-supplied value this module interpolates into ATTRIBUTE position.
+// Every other interpolation here is a closed-set class name or slotted text. `buttonStaticHtml`
+// is public API, so `buttonStaticHtml({ href: '" onfocus=alert(1) x="' })` would otherwise
+// break out of the attribute and emit an event handler into committed markup. A lens found it.
+// Minimal and local because a markup module must be a LEAF — the generator evaluates it from a
+// `data:` URL, which has no module base, so it cannot import a shared helper.
+const attr = (value: string): string =>
+  value.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
 export function buttonStaticHtml(opts: ButtonStaticOptions = {}, content = 'Label'): string {
   const { variant, size, href } = opts;
   if (variant !== undefined && !isButtonVariant(variant)) throw new Error(unknownVariantMessage(variant));
@@ -82,10 +95,28 @@ export function buttonStaticHtml(opts: ButtonStaticOptions = {}, content = 'Labe
   const cls = buttonClasses(variant, size);
   return href === undefined
     ? `<button class="${cls}" type="button">${content}</button>`
-    : `<a class="${cls}" href="${href}">${content}</a>`;
+    : `<a class="${cls}" href="${attr(href)}">${content}</a>`;
 }
 
-/** The non-variant axes, DERIVED from BUTTON_SIZES so the two tables cannot diverge (#77). */
-export const BUTTON_AXES = Object.fromEntries(
-  Object.keys(BUTTON_SIZES).map((s) => [`${s.charAt(0).toUpperCase()}${s.slice(1)}`, { size: s }]),
-) as Record<string, ButtonStaticOptions>;
+// DECLARED, NOT DERIVED — and the previous revision's "DERIVED so the two tables cannot
+// diverge (#77)" was false safety, because they are not the same table. `BUTTON_SIZES` is the
+// set of size modifiers; `_AXES` is the set of static forms worth PUBLISHING, which is what
+// sk-card.markup.ts argues at length. Deriving one from the other emitted
+// `SkButtonSmHTML = "sk-button sk-button--sm"` — size only — and `.sk-button` sets no
+// background and no colour, so that published export painted nothing. The mission measured
+// exactly that and patched the symptom with a `withTone()` helper in the story instead of
+// fixing the cause; a lens caught it. Both entries below carry a tone for that reason.
+//
+// `Link` gives the ANCHOR branch of `buttonStaticHtml` its first generated export and its
+// first coverage. Until now the branch the docblock calls the one every real consumer uses —
+// every use in apps/demo is an `<a href>` — was the one shape the no-JavaScript consumer had
+// to retype by hand, which is the criterion-3 duplication ADR-10 §3 exists to remove.
+/**
+ * The static forms this component publishes, beyond the base and one per variant.
+ *
+ * `Sm` is the small size in its primary tone; `Link` is the anchor form.
+ */
+export const BUTTON_AXES = {
+  Sm: { size: 'sm', variant: 'primary' },
+  Link: { href: '#', variant: 'primary' },
+} as const satisfies Record<string, ButtonStaticOptions>;
