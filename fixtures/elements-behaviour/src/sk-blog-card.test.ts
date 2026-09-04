@@ -39,8 +39,16 @@ test('the ::slotted() rules actually reach slotted content, resting and on hover
   // It cost a real defect: the hover rule shipped as `::slotted(.x):hover` — the pseudo-class
   // OUTSIDE the pseudo-element, which no engine parses. One invalid selector invalidates the
   // whole comma list, so the static-path half died with it and the link had no hover state on
-  // either path. A computed style off a slotted node is what catches that; a selector-text
-  // assertion would not, because postcss accepts what browsers reject.
+  // either path.
+  //
+  // TWO DIFFERENT MECHANISMS BELOW, and the distinction is the point. The resting rules are held
+  // by a COMPUTED STYLE off a slotted node — the only thing that proves `::slotted()` actually
+  // reaches slotted content. The hover rule cannot be: `:hover` is not simulable here. It is
+  // held instead by the ENGINE's `cssRules` view, which is not the same as a selector-text
+  // assertion over the source — postcss accepts what browsers reject, and a rule the engine
+  // refused to parse is simply ABSENT from `cssRules`. An earlier revision of this comment
+  // promised a `text-decoration-thickness` computed-style check that the test never made, and
+  // left six lines of setup for it that nothing read. Two lenses caught that.
   const el = await mount();
   const title = el.querySelector('.sk-blog-card__title') as HTMLElement;
   const excerpt = el.querySelector('.sk-blog-card__excerpt') as HTMLElement;
@@ -51,15 +59,8 @@ test('the ::slotted() rules actually reach slotted content, resting and on hover
   );
   expect(getComputedStyle(excerpt).margin, 'the excerpt rule must reach slotted content').toBe('0px');
 
-  // Hover: mount a read-more link and prove the rule PARSED. `text-decoration-thickness`
-  // resolves to `auto` when no rule applies, so a dropped rule is visibly distinguishable.
-  const link = document.createElement('a');
-  link.className = 'sk-blog-card__read-more';
-  link.href = '#';
-  link.textContent = 'Read more';
-  el.append(link);
-  await (el as unknown as { updateComplete: Promise<unknown> }).updateComplete;
-
+  // Hover: prove the rule PARSED. No link is mounted — an earlier revision created one, gave it
+  // a class, an href and text, appended it and awaited the element, then never read it again.
   const sheet = [...el.shadowRoot!.adoptedStyleSheets].find((s) =>
     Array.from(s.cssRules).some((r) => r.cssText.includes('sk-blog-card__read-more')),
   );
@@ -86,14 +87,21 @@ test('the static form escapes caller strings, and refuses a thumbnail with no al
   // and `alt` straight into attribute position, so a caller could close the attribute and emit a
   // live event handler — no `javascript:` scheme needed. #140 closed exactly this class in
   // sk-button one commit earlier and this component reopened it in public API.
-  const hostile = blogCardStaticHtml({ thumbnail: 'x.png" onerror="alert(1)', alt: 'a' });
-  const img = new DOMParser().parseFromString(hostile, 'text/html').querySelector('img')!;
-  expect(img.getAttributeNames().sort(), 'no attribute may be injected').toEqual([
-    'alt',
-    'class',
-    'src',
-  ]);
-  expect(img.getAttribute('src')).toBe('x.png" onerror="alert(1)');
+  // BOTH attribute vectors, because a lens found `alt` was claimed as covered and was not:
+  // every call passed a benign alt, so deleting `attr()` from it went green.
+  for (const [label, opts, field, raw] of [
+    ['thumbnail', { thumbnail: 'x.png" onerror="alert(1)', alt: 'a' }, 'src', 'x.png" onerror="alert(1)'],
+    ['alt', { thumbnail: 'x.png', alt: 'a" onerror="alert(1)' }, 'alt', 'a" onerror="alert(1)'],
+  ] as const) {
+    const img = new DOMParser()
+      .parseFromString(blogCardStaticHtml(opts), 'text/html')
+      .querySelector('img')!;
+    expect(
+      img.getAttributeNames().sort(),
+      `no attribute may be injected via ${label}`,
+    ).toEqual(['alt', 'class', 'src']);
+    expect(img.getAttribute(field), `${label} must survive as a value`).toBe(raw);
+  }
 
   // The same for text position, where the vector is a tag rather than a quote.
   const evil = blogCardStaticHtml({ eyebrow: '<img src=x onerror=alert(2)>' });
@@ -111,9 +119,52 @@ test('the static form escapes caller strings, and refuses a thumbnail with no al
   // AUTHORING PATH THROWS, render path warns — the split every other markup module keeps, and
   // the one this component had neither half of. `alt=""` is not a missing label: it positively
   // asserts the image is decorative, so a screen reader skips it.
-  expect(() => blogCardStaticHtml({ thumbnail: 'photo.png' })).toThrow(/alt/i);
-  expect(() => blogCardStaticHtml({ thumbnail: 'photo.png', alt: '' })).toThrow(/alt/i);
+  // Matched on the DIAGNOSTIC, not on any error containing "alt" — a lens noted the loose form
+  // would survive the throw being repurposed for something else entirely.
+  const missingAlt = /`thumbnail` is set but `alt` is missing or empty/;
+  expect(() => blogCardStaticHtml({ thumbnail: 'photo.png' })).toThrow(missingAlt);
+  expect(() => blogCardStaticHtml({ thumbnail: 'photo.png', alt: '' })).toThrow(missingAlt);
   expect(() => blogCardStaticHtml({ thumbnail: 'photo.png', alt: 'A diagram' })).not.toThrow();
+  // AND AN EMPTY THUMBNAIL IS NOT A THUMBNAIL. The guard used to test a different predicate than
+  // the `<img>` emission, so this threw about an image that would never be rendered.
+  expect(() => blogCardStaticHtml({ thumbnail: '' })).not.toThrow();
+  expect(blogCardStaticHtml({ thumbnail: '' })).not.toContain('<img');
+});
+
+test('a thumbnail with no alt WARNS on the render path and still renders', async () => {
+  // THE OTHER HALF OF THE SPLIT. The authoring path throws; the render path must warn and
+  // degrade, because a throw inside render() makes Lit reject `updateComplete` and paint an
+  // empty shadow root with no <slot>, silently eating the light-DOM children. Every sibling
+  // component has this arm — sk-button, sk-card, sk-feature-card, sk-grid, sk-pill-tag,
+  // sk-ribbon-card, sk-section-banner — and blog-card did not, so deleting the warn entirely
+  // left the whole suite green. A lens counted that.
+  const warnings: string[] = [];
+  const original = console.warn;
+  console.warn = (...args: unknown[]) => void warnings.push(args.join(' '));
+  try {
+    const el = await mount({ thumbnail: PLACEHOLDER_THUMBNAIL });
+    // DEGRADES, never throws: the tree survives and the slot still holds its assigned nodes.
+    expect(partOf(el, 'card'), 'the card must still render').not.toBe(null);
+    expect(partOf(el, 'thumbnail'), 'the image must still render').not.toBe(null);
+    const slot = el.shadowRoot!.querySelector('slot') as HTMLSlotElement;
+    expect(slot.assignedNodes().length, 'slotted content must survive the degrade').toBeGreaterThan(0);
+    expect(warnings.length, 'degrading must warn — fail-open with no signal is what this replaced').toBe(1);
+    expect(warnings[0]).toContain('`thumbnail` is set but `alt` is missing or empty');
+  } finally {
+    console.warn = original;
+  }
+
+  // And an EMPTY thumbnail is not a thumbnail, so it must not warn — the render guard and the
+  // <img> emission have to agree, the same way the authoring path's do.
+  const quiet: string[] = [];
+  console.warn = (...args: unknown[]) => void quiet.push(args.join(' '));
+  try {
+    const el = await mount({ thumbnail: '' });
+    expect(partOf(el, 'thumbnail'), 'an empty thumbnail renders no image').toBe(null);
+    expect(quiet.length, 'no image means nothing to warn about').toBe(0);
+  } finally {
+    console.warn = original;
+  }
 });
 
 test('[SC-013] every declared part is targetable from outside', async () => {
@@ -142,8 +193,13 @@ test('[SC-013] every declared part is targetable from outside', async () => {
 test('[SC-014] the element adopts BOTH generated sheets by identity and injects no <style>', async () => {
   // TWO sheets, by identity, in order. This is the composition ruling's whole mechanism: the
   // frame is authored once in sk-card.css and IMPORTED here, never copied — which is the
-  // distinction ADR-8 criterion 3 turns on. Order is load-bearing: sk-card first, so
-  // blog-card's rules win where the two touch.
+  // distinction ADR-8 criterion 3 turns on.
+  //
+  // ORDER IS A CONVENTION, not a currently-observable behaviour, and this assertion is what
+  // holds it. The two sheets contest ZERO declarations today, so swapping them changes no
+  // computed style — which is why the guard has to be structural (identity at a fixed index)
+  // rather than a rendered value. The claim was retracted in sk-blog-card.ts and left standing
+  // here, on the very assertion the convention rests on; two lenses caught that.
   const el = await mount();
   const sr = el.shadowRoot!;
   expect(sr.adoptedStyleSheets.length, 'both sheets must be adopted').toBe(2);

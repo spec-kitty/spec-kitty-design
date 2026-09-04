@@ -35,9 +35,14 @@ beforeEach(installTokenSheet);
 /**
  * Adopt the component's real sheet into the DOCUMENT and hand it back.
  *
- * Called from inside the test, not from `beforeEach`: the harness resets the document between
- * the two, so a sheet adopted in an async `beforeEach` is gone by the time the test runs — which
- * silently produced a transparent background and a 1.00:1 reading rather than any error.
+ * Called from inside the test rather than from `beforeEach`. An earlier revision of this note
+ * claimed "the harness resets the document between the two", and a lens checked: it does not.
+ * `installTokenSheet` clears `document.body` and removes its own `<style>`, and touches
+ * `document.adoptedStyleSheets` not at all, so a sheet adopted in a hook would survive. The
+ * observed symptom — a transparent background reading 1.00:1 — was real; that explanation of it
+ * was not, and a wrong diagnosis recorded in a comment is worse than none, because the next
+ * reader will not re-derive it. Keeping the adoption in the test is still right: it is where the
+ * sheet is used, and the wiring guard below can then assert it in the same scope.
  */
 const adoptNavPillSheetIntoDocument = async () => {
   const probe = document.createElement('sk-nav-pill');

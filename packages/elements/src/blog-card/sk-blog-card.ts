@@ -77,10 +77,16 @@ export class SkBlogCard extends LitElement {
     // element paints an empty shadow root with NO <slot>, silently eating its own light-DOM
     // children. The authoring path (`blogCardStaticHtml`) throws instead, because bad output
     // must never reach committed artifacts.
-    if (this.thumbnail != null && !this.alt) {
+    // SAME PREDICATE AND SAME WORDING as blogCardStaticHtml's throw. An earlier revision used
+    // `!= null` here against the module's `!== undefined`, and a different message text — two
+    // spellings of one rule across the leaf boundary, which a lens flagged. The module cannot be
+    // imported for the string (the generator evaluates it from a `data:` URL), so the wording is
+    // kept identical by hand and by the test that asserts both paths reject the same inputs.
+    if (this.thumbnail && !this.alt) {
       console.warn(
         'sk-blog-card: `thumbnail` is set but `alt` is missing or empty. An empty alt asserts ' +
-          'the image is decorative and hides it from assistive technology — set `alt`.',
+          'the image is decorative and hides it from assistive technology — pass alt text, or ' +
+          'omit the thumbnail.',
       );
     }
 

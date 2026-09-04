@@ -274,18 +274,27 @@ Nine remaining components, three per mission. **layout:** grid, section-banner, 
 
 **#79 was that batch, and the criterion is NOT met. Recorded here rather than left to lapse.**
 
-**THE MEASURE IS NOT "HAS A `*.markup.ts`".** It is *has a markup module **and the element
-renders from it***, and the difference is not pedantic: #78's `blog-card` shipped a markup module
-whose element re-typed the same four class strings in its own `render()`, so it would have counted
-as compliant by the old proxy while being the counter-example — markup authored twice, on the one
-component whose whole argument is that the two paths are one shape. A lens caught it, and the
-element now renders from `BLOG_CARD_CLASSES`. The proxy is corrected here so it cannot go
-false-green again.
+**THE MEASURE IS NOT "HAS A `*.markup.ts`", AND IT IS STILL A PROXY — read both sentences.**
+The first correction came from #78: `blog-card` shipped a markup module whose element re-typed
+four class strings in its own `render()`, so it counted as compliant by the old proxy while being
+the counter-example. A lens caught it, the element now renders from `BLOG_CARD_CLASSES`, and the
+measure became *has a markup module **and the element renders its class list from it***.
 
-Measured on #78's head: **9 of 13 migrated components** author their markup once and render from
-it — `blog-card`, `button`, `card`, `check-bullet`, `feature-card`, `grid`, `pill-tag`,
-`ribbon-card`, `section-banner` — with the static `.html` plus the styles-layer `index.ts`
-generated from that module and held by a drift gate.
+**That is a better proxy, not the property itself**, and a second lens said so in the same gate —
+this paragraph previously claimed the correction meant it "cannot go false-green again", which was
+unsupported: nothing enforces it, the count is hand-maintained prose, and there is no gate. Stating
+it plainly instead:
+
+- **9 of 13** route their ROOT class list through the markup module, with the static `.html` and
+  the styles-layer `index.ts` generated from it and held by a drift gate: `blog-card`, `button`,
+  `card`, `check-bullet`, `feature-card`, `grid`, `pill-tag`, `ribbon-card`, `section-banner`.
+- **1 of 13** — `blog-card` — additionally names EVERY per-node class there, so no class string
+  in it is authored twice.
+- **3 of those 9** still hardcode a BEM sub-element class in `render()` that their markup module
+  writes independently: `sk-check-bullet` (`__icon`), `sk-ribbon-card` (`__content`) and
+  `sk-section-banner` (`__dot`, `__label`). Under the criterion's own words — *no component markup
+  is AUTHORED twice* — those strings are authored twice. Filed against #142, which tracks
+  criterion 3 and whose wording still describes only the "no markup module" half of the gap.
 
 **Three do not, and their static markup is therefore authored a second time:** `nav-pill` (#73),
 `form-input` and `form-textarea` (#74). All three were migrated *before* the markup-module

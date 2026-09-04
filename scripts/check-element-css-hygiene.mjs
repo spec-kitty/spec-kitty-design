@@ -22,7 +22,7 @@
  * per-element floor tolerate an authoring-free component, not to duplicate the import
  * derivation into a second gate.
  *
- * SCOPE (restated for the code below): the sheets an ELEMENT adopts. The two examples below both live in
+ * The example below is the reason the per-element floor exists at all:. The two examples below both live in
  * `packages/styles/src/form-field/sk-form-field.css`, which has no element and is therefore
  * NEVER OPENED by this gate — it is published `@spec-kitty/styles@1.0.0` surface that #74
  * deliberately left untouched. A lens pointed out the docstring read as repository-wide.

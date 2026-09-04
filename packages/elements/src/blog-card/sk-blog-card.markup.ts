@@ -31,35 +31,42 @@ export interface BlogCardStaticOptions {
   eyebrow?: string;
 }
 
-// ESCAPING, LEAF-LOCAL. `blogCardStaticHtml` is public API and interpolates caller strings into
-// ATTRIBUTE position, and an earlier revision did it raw — so
+// ESCAPING. `blogCardStaticHtml` is public API and interpolates caller strings into ATTRIBUTE
+// position, and an earlier revision did it raw — so
 // `blogCardStaticHtml({ thumbnail: 'x.png" onerror="alert(1)' })` emitted a live event handler
 // into committed markup, with no `javascript:` scheme needed. #140 closed exactly this class in
-// sk-button one commit earlier and this component reopened it; a lens measured all three
-// vectors (`thumbnail`, `alt`, and `eyebrow` in text position).
+// sk-button one commit earlier and this component reopened it.
 //
-// Local rather than shared because a markup module must be a LEAF — the generator evaluates it
-// from a `data:` URL, which has no module base, so it cannot import a helper. That constraint is
-// also why this duplication is not a reduction defect: it is the second copy by necessity, and
-// the structural close (a gate that rejects an unescaped interpolation inside a quoted attribute
-// in any `*.markup.ts`) is filed rather than hand-rolled a third time.
-const attr = (value: string): string =>
-  value
-    .replace(/&/g, '&amp;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
-
-// TEXT position, not attribute: only the markup-significant characters need neutralising.
+// WHAT IS AND IS NOT ESCAPED, stated fully because an earlier revision of this comment claimed
+// "all three vectors" and a lens counted four. `thumbnail` and `alt` go through `attr()` into
+// quoted attributes; `eyebrow` goes through `text()` into a text node. `content` is the fourth
+// caller-supplied value and is deliberately RAW — it is the slot for the title, excerpt and
+// meta markup, so escaping it would break the documented use. That is the same convention
+// sk-button records for its own `content`, and it means "this module escapes caller input" is
+// never wholly true. A consumer passing untrusted text should escape it themselves.
+//
+// Local rather than shared because the generator evaluates this module from a `data:` URL, which
+// has no module base, so a relative import fails. Note that is a property of the CURRENT
+// generator, not of the architecture — a lens showed `esbuild.build({ bundle: true })` would
+// inline a shared helper, which is how the runtime bundle already ships this function. Both the
+// bundling fix and a gate for the class are filed as #163; this is the second copy until then.
+// ONE canonical list. `attr` is `text` plus the two quote characters — derived rather than
+// respelled, because an earlier revision wrote the `& < >` chain twice inside eleven lines and
+// a lens pointed out that two copies of one escaping rule is exactly what drifts.
 const text = (value: string): string =>
   value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-/** The shared diagnostic for a thumbnail with no alt text. */
-const missingAltMessage = (): string =>
-  'sk-blog-card: `thumbnail` is set but `alt` is missing or empty. An empty alt asserts the ' +
-  'image is decorative and hides it from assistive technology — pass alt text, or omit the ' +
-  'thumbnail.';
+const attr = (value: string): string =>
+  text(value).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+
+// The diagnostic is INLINED at its one call site below, not wrapped in a helper. An earlier
+// revision declared `missingAltMessage()` — a zero-argument function returning a constant,
+// documented as "shared" while being unexported with a single caller, so the element's warn
+// re-typed the text and the two copies already disagreed. That is the same defect this fold's
+// headline change removes (the element re-typing class strings), reintroduced one file over. A
+// lens caught it. The leaf constraint means the element genuinely cannot import it, so the
+// honest fix is one message per path with the SAME wording, not a helper that pretends to
+// share.
 
 /**
  * The class names this component renders, named once.
@@ -106,13 +113,25 @@ export function blogCardStaticHtml(
   // is a positive assertion that the image is decorative, so a screen reader skips it entirely.
   // Both this module's own interface comment and the element's JSDoc already called `alt`
   // required whenever `thumbnail` is set; nothing enforced it. A lens measured it.
-  if (thumbnail !== undefined && (alt === undefined || alt === '')) {
-    throw new Error(missingAltMessage());
+  // THE GUARD LIVES INSIDE THE BRANCH THAT EMITS THE IMAGE, so the two cannot disagree and the
+  // narrowing is real. An earlier revision guarded separately on `thumbnail !== undefined` while
+  // the image was emitted on truthiness — so `blogCardStaticHtml({ thumbnail: '' })`, which is
+  // type-legal and documented to mean "no image", threw demanding alt text for an `<img>` that
+  // would never be emitted: a behaviour regression in public API with an actively misleading
+  // message. Two lenses caught it. The separate guard also left TypeScript unable to narrow
+  // `alt`, which is why that revision carried an `alt ?? ''` fallback emitting the very
+  // `alt=""` the throw exists to forbid.
+  let image = '';
+  if (thumbnail) {
+    if (!alt) {
+      throw new Error(
+        'sk-blog-card: `thumbnail` is set but `alt` is missing or empty. An empty alt asserts ' +
+          'the image is decorative and hides it from assistive technology — pass alt text, or ' +
+          'omit the thumbnail.',
+      );
+    }
+    image = `<img class="${BLOG_CARD_CLASSES.thumbnail}" src="${attr(thumbnail)}" alt="${attr(alt)}">`;
   }
-
-  const image = thumbnail
-    ? `<img class="${BLOG_CARD_CLASSES.thumbnail}" src="${attr(thumbnail)}" alt="${attr(alt ?? '')}">`
-    : '';
   const lead = eyebrow
     ? `<p class="${BLOG_CARD_CLASSES.eyebrow}">${text(eyebrow)}</p>`
     : '';
