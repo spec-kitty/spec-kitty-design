@@ -128,6 +128,7 @@ else {
     [/node\s+scripts\/check-elements-entries\.mjs(?!\s*--selftest)(\s|$)/, 'the distribution-entry gate', 'scripts/check-elements-entries.mjs'],
     [/node\s+scripts\/check-elements-entries\.mjs\s+--selftest(\s|$)/, "the distribution-entry gate's own probe table", 'scripts/check-elements-entries.mjs --selftest'],
     [/node\s+scripts\/typecheck-all\.mjs(\s|$)/, 'the derived typecheck', 'scripts/typecheck-all.mjs'],
+    [/node\s+scripts\/build-vue-types\.mjs\s+--check(\s|$)/, 'the Vue types drift check', 'scripts/build-vue-types.mjs --check'],
     // Added with the gate itself this time. #74 shipped check-element-css-hygiene.mjs without an
     // entry here, and a lens demonstrated the consequence: delete both its CI lines and this
     // checker still printed green. That is the defect this list was created for, one gate later.

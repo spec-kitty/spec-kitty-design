@@ -80,6 +80,59 @@ The framework-target schema `research/001` §163 asked for: a target package is 
 
 A second correction to ADR-8's rationale, which does not change the operator's decision that React leads: React 19 scores 16/16 on Custom Elements Everywhere for both basic and advanced interop, as does Angular. A React wrapper buys JSX-level types, typed refs and SSR attribute handling — real ergonomics, but not interop. Size the wrapper mission accordingly.
 
+### The fourth-target extension cost — MEASURED (#81, ADR-8 confirmation #4)
+
+ADR-8's confirmation criterion #4 is the claim this programme rests on: that adding a framework
+target is additive and cheap. #81 required it be measured, with the target chosen and written down
+*before* the work so the result could not be shaped by what turned out easy.
+
+**Target: Vue 3, declared on #81 at 2026-09-04T22:53:20Z**, deliberately as the harder of the two
+candidates — Solid compiles element creation directly and would have flattered the result.
+
+**Measured elapsed: 6 minutes**, against a one-day timebox. #81 states the diagnostic value
+of the opposite outcome: *"if it takes a week, the generator is not finished and #70 was not done."*
+
+**Result: no package.** Vue 3 uses the elements directly. Measured in a real Vue render against the
+built bundle (`fixtures/vue-consumer/`), not read from documentation: elements upgrade and adopt
+their sheets, string attributes pass through, a reactive value bound with `.prop` reaches a DOM
+property and stays reactive across updates, and a hyphenated custom event reaches a Vue handler.
+None of that needed a wrapper — the same conclusion this ADR already records for React 19, that a
+wrapper buys ergonomics rather than interop, arrived at independently for a second framework.
+
+What the target *did* need was a generator emitting one `.d.ts` from the same
+`custom-elements.json` the React generator reads, and one documentation page. For comparison,
+`build-react-wrappers.mjs` is 843 lines and produces a published package, because React below 19
+set every prop as an attribute and non-string values never reached the element.
+
+**One prediction recorded in advance was wrong, and the correction is the useful part.** I predicted
+the cost would be `compilerOptions.isCustomElement` configuration. Measured, Vue 3.5 consults the
+`CustomElementRegistry` at runtime:
+
+| tag | registered | Vue warnings |
+|---|---|---|
+| `sk-button` | yes | **0** |
+| `not-registered-el` | no | 1 |
+| `NotAThing` | no | 1 |
+| `blahtag` | no | 1 |
+
+Vue was confirmed to be in dev mode first — a production build strips warnings entirely and would
+have produced the same silence for an unrelated reason.
+
+So the discriminator is the registry, not the hyphen, and for the runtime compiler the real
+requirement is **import order** rather than configuration. The configuration *is* required for
+Single File Components, because `@vitejs/plugin-vue` compiles at build time when no registry
+exists — asserted against `@vue/compiler-dom` directly: without `isCustomElement` the compiler
+emits `resolveComponent`, with it `createElementBlock`. Both halves are in
+`docs/consuming-from-vue.md`; neither is stated without a measurement behind it.
+
+**What this does and does not establish.** It is one target, measured once, by someone who already
+knew the codebase — a floor on the cost, not an average, and an unfamiliar maintainer would take
+longer. It says nothing about a framework with poor custom-element support; Vue and React both
+score well on Custom Elements Everywhere, and a target that scored badly is where the additive
+claim would actually be tested. What it does establish is that for a modern framework the manifest
+is sufficient, and that the schema in `research/001` §163 — *"a target package is valid when it is
+generated from custom-elements.json"* — held without modification for a second target.
+
 ### Consequences
 
 #### Positive

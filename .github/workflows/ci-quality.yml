@@ -184,6 +184,9 @@ jobs:
         run: node scripts/build-react-wrappers.mjs --check
       - name: "[ENFORCED] The wrapper gate's own probe table (SC-311, SC-312)"
         run: node scripts/build-react-wrappers.mjs --selftest
+      # #81. Same generated-artifact contract as the CSS, markup and React generators.
+      - name: "[ENFORCED] Generated Vue types are current (#81, ADR-8 confirmation #4)"
+        run: node scripts/build-vue-types.mjs --check
       - name: "[ENFORCED] Generated CSS modules are current (ADR-10 generated-artifact contract)"
         run: node scripts/build-elements-css.mjs --check
       # ADR-9 Confirmation #1, which the ADR requires by name and no mission had landed.
