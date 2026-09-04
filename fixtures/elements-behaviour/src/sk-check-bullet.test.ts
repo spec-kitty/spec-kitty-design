@@ -8,6 +8,7 @@ import { beforeEach, expect, test } from 'vitest';
 import '@spec-kitty/elements';
 import { checkBulletStaticHtml, skCheckBulletSheet } from '@spec-kitty/elements';
 import { installTokenSheet } from './token-sheet.js';
+import { contrast, assertThemesDiffered } from './contrast.js';
 
 beforeEach(installTokenSheet);
 
@@ -94,15 +95,8 @@ test('the tick meets AA contrast in BOTH themes — axe structurally cannot', as
   // and 1.4.11's 3:1 would be the lenient floor. The tick is the component's only visual
   // signal for "checked", the fix clears 7.38:1, and the stricter floor catches a regression
   // sooner. Deliberately stricter, not accidentally.
-  const contrast = (fg: string, bg: string) => {
-    const channel = (v: number) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4);
-    const lum = (c: string) => {
-      const [r, g, b] = c.match(/\d+/g)!.slice(0, 3).map((n) => channel(Number(n) / 255));
-      return 0.2126 * r! + 0.7152 * g! + 0.0722 * b!;
-    };
-    const [a, z] = [lum(fg), lum(bg)].sort((x, y) => y - x);
-    return (a! + 0.05) / (z! + 0.05);
-  };
+  // Records the surface each theme resolved, so the loop can prove it saw TWO themes.
+  const surfaces = new Map<string, string>();
 
   for (const theme of ['dark', 'light'] as const) {
     const wrap = document.createElement('div');
@@ -123,12 +117,16 @@ test('the tick meets AA contrast in BOTH themes — axe structurally cannot', as
 
     const fg = getComputedStyle(partOf(el, 'icon')).color;
     const bg = getComputedStyle(wrap).backgroundColor;
+    surfaces.set(theme, bg);
     const ratio = contrast(fg, bg);
     expect(
       ratio,
       `the tick in ${theme} mode is ${ratio.toFixed(2)}:1 (${fg} on ${bg}) — AA needs 4.5`,
     ).toBeGreaterThanOrEqual(4.5);
   }
+
+  // Without this, a light arm that silently rendered the dark palette would pass at 10.21:1.
+  assertThemesDiffered(surfaces);
 });
 
 test('the icon is a property, and the class list matches the static path', async () => {

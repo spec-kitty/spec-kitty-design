@@ -31,18 +31,18 @@ export const PILL_TAG_SHAPES = { eyebrow: 'sk-pill-tag--eyebrow' } as const;
 
 export type PillTagShape = keyof typeof PILL_TAG_SHAPES;
 
-export function isPillTagVariant(v: string): v is PillTagVariant {
+function isPillTagVariant(v: string): v is PillTagVariant {
   return Object.hasOwn(PILL_TAG_VARIANTS, v);
 }
 
-export function isPillTagShape(s: string): s is PillTagShape {
+function isPillTagShape(s: string): s is PillTagShape {
   return Object.hasOwn(PILL_TAG_SHAPES, s);
 }
 
-export const unknownVariantMessage = (v: string): string =>
+const unknownVariantMessage = (v: string): string =>
   `unknown pill-tag variant "${v}" — expected one of ${Object.keys(PILL_TAG_VARIANTS).join(', ')}`;
 
-export const unknownShapeMessage = (s: string): string =>
+const unknownShapeMessage = (s: string): string =>
   `unknown pill-tag shape "${s}" — expected one of ${Object.keys(PILL_TAG_SHAPES).join(', ')}`;
 
 // Two callers, two failure policies — warn and degrade on the render path, throw on the

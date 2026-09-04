@@ -96,6 +96,32 @@ const check = process.argv.includes('--check');
  * requires `adoptedStyleSheets.length === 1` AND zero `<style>` elements in the
  * shadow root — kitty-desktop's CSP depends on the second half.
  */
+/**
+ * Strip CSS comments from the SHIPPED text.
+ *
+ * The authored sheets in packages/styles carry long rationale — measured contrast figures, why
+ * an ink is theme-aware, which regression a rule reverts — and this generator used to pass
+ * `cssText` into `replaceSync` verbatim, so every word of it was downloaded and parsed by every
+ * browser. Measured when a lens caught it: **62% of the twelve adopted sheets was comment**
+ * (sk-check-bullet 79%, sk-pill-tag 73%), and the entire measured growth of the published
+ * bundle in #79's fold was prose, not declarations.
+ *
+ * packages/styles remains the source of record and keeps every word — this only affects what
+ * ships. Both gates that read these rules (check-adopted-css-boundaries, check-element-css-hygiene)
+ * parse `packages/styles/src/<c>/sk-*.css`, never this module, so nothing is weakened.
+ *
+ * Non-greedy and comment-only: CSS has no string escape that can contain an unbalanced `*​/`,
+ * and these sheets contain no `url()` with a literal `*​/` inside it — asserted by the
+ * declaration-count check in `--check` rather than assumed.
+ */
+function stripCssComments(cssText) {
+  return cssText
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .replace(/[ \t]+$/gm, '')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
 function moduleFor(cssText, sourcePaths) {
   // One `Source of record:` line per sheet. For a single source this is the exact header
   // this script emitted before multi-sheet support, which is what keeps sk-card.css.js
@@ -105,7 +131,7 @@ function moduleFor(cssText, sourcePaths) {
 ${provenance}
 // Regenerate: node scripts/build-elements-css.mjs
 const sheet = new CSSStyleSheet();
-sheet.replaceSync(${JSON.stringify(cssText)});
+sheet.replaceSync(${JSON.stringify(stripCssComments(cssText))});
 export default sheet;
 `;
 }

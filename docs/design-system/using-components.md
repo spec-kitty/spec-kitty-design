@@ -95,7 +95,7 @@ It fires `sk-nav-pill-toggle` before the open state changes, with
 </nav>
 ```
 
-[View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/components-navigation--default)
+[View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/navigation-sknavpill-html--default)
 
 ---
 
@@ -142,9 +142,12 @@ Ticked list items, for feature and requirement lists.
 </ul>
 ```
 
-`role="list"` on the `<ul>` is required, not optional: a custom element between a `<ul>` and
-its content is not a list item, so the element sets `role="listitem"` on itself and the list
-needs its role restated for the pairing to survive. The tick is `aria-hidden` — the slotted
+Keep `role="list"` on the `<ul>`. The element sets `role="listitem"` on itself, because a
+custom element between a `<ul>` and its content is not a list item — that half is the element's
+job. The `role="list"` is needed for a different reason: `list-style: none` makes several
+browsers drop the list semantics entirely, and these styles remove the bullets. An earlier
+revision of this paragraph claimed the `<ul>`'s role had to be "restated for the pairing to
+survive", which is not how ARIA works — a `<ul>` already maps to `role=list`. A lens caught it. The tick is `aria-hidden` — the slotted
 text is the accessible content — and `icon` replaces it. Two parts: `bullet` (the row) and
 `icon` (the tick).
 
@@ -156,6 +159,8 @@ text is the accessible content — and `icon` replaces it. Two parts: `bullet` (
   Requirements captured up front
 </li>
 ```
+
+[View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/primitives-skcheckbullet-html--default)
 
 ---
 
@@ -189,7 +194,7 @@ The variant class is required — `.sk-section-banner` alone sets no colour. Thi
 generated; copy it from `packages/styles/src/section-banner/sk-section-banner.html` rather than
 retyping it.
 
-[View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/components-content-markers--default)
+[View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/primitives-sksectionbanner-html--default)
 
 ---
 
@@ -249,7 +254,7 @@ token for a card nested inside another.
 </div>
 ```
 
-[View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/components-cards--default)
+[View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/components-card--default)
 
 ---
 
@@ -334,7 +339,7 @@ Full-width hero block with eyebrow, headline, lead copy, checkmark bullet list, 
 </section>
 ```
 
-[View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/components-hero--default)
+_No Storybook entry: this is a CSS-only pattern with no story._
 
 ---
 
@@ -364,7 +369,7 @@ Two-column callout block used for "why/who" benefit statements with bullet lists
 </div>
 ```
 
-[View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/components-callout--default)
+_No Storybook entry: this is a CSS-only pattern with no story._
 
 ---
 

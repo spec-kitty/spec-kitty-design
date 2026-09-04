@@ -5,6 +5,7 @@ import {
   SkButtonSecondaryHTML,
   SkButtonGhostHTML,
   SkButtonSmHTML,
+  SkButtonLinkHTML,
 } from './index';
 
 /**
@@ -63,6 +64,18 @@ export const Small: Story = {
 };
 
 /**
+ * The ANCHOR form, and the reason it has a story at all.
+ *
+ * `SkButtonLinkHTML` was added to `BUTTON_AXES` because every button-styled thing in
+ * `apps/demo` is an `<a href>` and the no-JavaScript consumer had to hand-write it. But a
+ * generated export with no consumer is the exact defect that addition was fixing — a lens
+ * caught that the new export shipped with zero references and the anchor branch of
+ * `buttonStaticHtml` still had no coverage anywhere. This story is its consumer, and it also
+ * gives the a11y gate the class-path anchor form to check.
+ */
+export const Link: Story = { render: () => label(SkButtonLinkHTML, 'Read the docs') };
+
+/**
  * `disabled` is authored here rather than generated: it is a STATE, not a variant, so it is not
  * one of the generator's forms. `aria-disabled` is deliberately absent — a real `<button>` with
  * `disabled` already exposes that to assistive technology, and adding both is redundant.
@@ -78,6 +91,7 @@ export const AllVariants: Story = {
       ${label(SkButtonSecondaryHTML, 'Star on GitHub')}
       ${label(SkButtonGhostHTML, 'Read the docs')}
       ${label(SkButtonSmHTML, 'Book Demo')}
+      ${label(SkButtonLinkHTML, 'Read the docs')}
     </div>
   `,
 };

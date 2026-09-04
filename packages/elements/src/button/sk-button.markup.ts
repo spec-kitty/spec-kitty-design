@@ -27,18 +27,18 @@ export const BUTTON_SIZES = { sm: 'sk-button--sm' } as const;
 
 export type ButtonSize = keyof typeof BUTTON_SIZES;
 
-export function isButtonVariant(v: string): v is ButtonVariant {
+function isButtonVariant(v: string): v is ButtonVariant {
   return Object.hasOwn(BUTTON_VARIANTS, v);
 }
 
-export function isButtonSize(s: string): s is ButtonSize {
+function isButtonSize(s: string): s is ButtonSize {
   return Object.hasOwn(BUTTON_SIZES, s);
 }
 
-export const unknownVariantMessage = (v: string): string =>
+const unknownVariantMessage = (v: string): string =>
   `unknown button variant "${v}" — expected one of ${Object.keys(BUTTON_VARIANTS).join(', ')}`;
 
-export const unknownSizeMessage = (s: string): string =>
+const unknownSizeMessage = (s: string): string =>
   `unknown button size "${s}" — expected one of ${Object.keys(BUTTON_SIZES).join(', ')}`;
 
 // Two callers, two failure policies — warn and degrade on the render path, throw on the
@@ -70,6 +70,35 @@ export interface ButtonStaticOptions {
   href?: string;
 }
 
+// `href` is the only caller-supplied value this module puts in ATTRIBUTE position, and
+// `buttonStaticHtml` is public API, so `buttonStaticHtml({ href: '" onfocus=alert(1) x="' })`
+// would otherwise close the attribute and emit an event handler into committed markup. Asserted
+// by parsing in sk-button.test.ts, not by substring — see the note there.
+//
+// WHAT THIS DOES NOT CLOSE, stated because an earlier revision of this comment claimed a wider
+// audit than it had performed and two lenses called it:
+//   * `content` (below) is also caller-supplied and is deliberately left RAW. It lands in
+//     element-content position, where callers legitimately pass markup fragments — the ribbon
+//     and icon options in sibling modules do the same. In-repo callers only ever pass plain
+//     text. It is a latent issue, not a live one, and escaping it would break the fragment use.
+//   * The `javascript:` SCHEME survives escaping intact — `href="javascript:alert(1)"` reaches
+//     script execution without ever breaking out of the attribute. Escaping is not a URL
+//     allowlist. Filed as #159.
+//
+// Local rather than shared because a markup module must be a LEAF: the generator evaluates it
+// from a `data:` URL, which has no module base, so it cannot import a helper.
+//
+// `'` is escaped too. It is not strictly needed while the template below uses double quotes,
+// but this helper carries a generic name and sits one edit away from a single-quoted attribute.
+const attr = (value: string): string =>
+  value
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+
+
 /**
  * The static form. Throws on an unknown variant or size.
  *
@@ -79,21 +108,12 @@ export interface ButtonStaticOptions {
  * identical on both. So the element switches on the same signal rather than forcing consumers
  * to choose between a working link and a styled one.
  */
-// `href` is the first caller-supplied value this module interpolates into ATTRIBUTE position.
-// Every other interpolation here is a closed-set class name or slotted text. `buttonStaticHtml`
-// is public API, so `buttonStaticHtml({ href: '" onfocus=alert(1) x="' })` would otherwise
-// break out of the attribute and emit an event handler into committed markup. A lens found it.
-// Minimal and local because a markup module must be a LEAF — the generator evaluates it from a
-// `data:` URL, which has no module base, so it cannot import a shared helper.
-const attr = (value: string): string =>
-  value.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-
 export function buttonStaticHtml(opts: ButtonStaticOptions = {}, content = 'Label'): string {
   const { variant, size, href } = opts;
   if (variant !== undefined && !isButtonVariant(variant)) throw new Error(unknownVariantMessage(variant));
   if (size !== undefined && !isButtonSize(size)) throw new Error(unknownSizeMessage(size));
   const cls = buttonClasses(variant, size);
-  return href === undefined
+  return href == null
     ? `<button class="${cls}" type="button">${content}</button>`
     : `<a class="${cls}" href="${attr(href)}">${content}</a>`;
 }
@@ -107,10 +127,17 @@ export function buttonStaticHtml(opts: ButtonStaticOptions = {}, content = 'Labe
 // exactly that and patched the symptom with a `withTone()` helper in the story instead of
 // fixing the cause; a lens caught it. Both entries below carry a tone for that reason.
 //
-// `Link` gives the ANCHOR branch of `buttonStaticHtml` its first generated export and its
-// first coverage. Until now the branch the docblock calls the one every real consumer uses —
-// every use in apps/demo is an `<a href>` — was the one shape the no-JavaScript consumer had
-// to retype by hand, which is the criterion-3 duplication ADR-10 §3 exists to remove.
+// `Link` gives the ANCHOR branch of `buttonStaticHtml` its first generated export. Until now
+// the branch the docblock calls the one every real consumer uses — every use in apps/demo is an
+// `<a href>` — was the one shape the no-JavaScript consumer had to retype by hand, which is the
+// criterion-3 duplication ADR-10 §3 exists to remove.
+//
+// An earlier revision of this comment also claimed "and its first coverage", which was FALSE
+// when written: the export had zero references repo-wide and no test called `buttonStaticHtml`
+// with an href, so the axe run never rendered it either. Two lenses caught that. The coverage
+// is real now and is named so this claim stays checkable — the `Link` and `AllVariants` stories
+// in sk-button-html.stories.ts render it, and sk-button.test.ts asserts the branch's output and
+// the escaper by parsing the result.
 /**
  * The static forms this component publishes, beyond the base and one per variant.
  *

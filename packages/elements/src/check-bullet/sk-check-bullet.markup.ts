@@ -12,9 +12,11 @@
 // sk-check-bullet-html.stories.ts hand-wrote the whole <li> three times. Two pre-merge
 // lenses caught the false claim; that story now renders the generated export.
 
-// BOTH ARE DECLARED EMPTY ON PURPOSE, and omitting either is an error: the generator reads
-// `?? {}`, which cannot distinguish "this component has none" from "I looked for the wrong
-// export name". That rationale is a maintainer's, so it lives here — the doc comments below go
+// BOTH ARE DECLARED EMPTY ON PURPOSE, and omitting either is an error — the generator
+// HARD-FAILS and exits, precisely so that it never has to read `?? {}`, which could not
+// distinguish "this component has none" from "I looked for the wrong export name". An earlier
+// revision of this comment said the generator *does* read `?? {}`, which contradicted its own
+// next clause: if it did, omitting an export would be silently green rather than an error. That rationale is a maintainer's, so it lives here — the doc comments below go
 // verbatim into custom-elements.json and IDE hovers, and one of them previously read "declared
 // for the same reason", a cross-reference that dangles once it is read on its own in a hover.
 /** No colour or shape variants — a check bullet is one thing. */

@@ -121,8 +121,21 @@ export {
 // ONLY WHAT IS CONSUMED. An earlier revision re-exported the *_VARIANTS, *_AXES and is* names
 // for both components — eight symbols with no caller anywhere in the repo. They are not needed
 // by the generator, which evaluates the markup module directly from a data: URL and never goes
-// through this barrel, nor by the analyzer, which globs source. (sk-card's equivalents are
-// re-exported and equally unconsumed; that is inherited, not a precedent worth extending.)
+// through this barrel, nor by the analyzer, which globs source.
+//
+// APPLIED TO TWO COMPONENTS SO FAR, and the rest is a KNOWN, SCOPED gap rather than an
+// oversight — a lens enumerated it and it is worth stating plainly instead of leaving the rule
+// looking uniformly applied. Ten re-exports below still have no consumer anywhere:
+// `CARD_AXES`, `CARD_VARIANTS`, `isCardVariant`, and the six type aliases `CardVariant`,
+// `GridGap`, `GridVariant`, `FeatureCardAccent`, `FeatureCardVariant`, `RibbonCardColour`,
+// `SectionBannerVariant`. Those six are the exact category `ButtonSize`/`ButtonVariant`/
+// `PillTagShape`/`PillTagVariant` were just deleted from, and the argument for deleting them
+// (a literal union is better published API than an alias name) applies equally.
+//
+// They stay because #79 owns button, pill-tag and check-bullet, and its boundary rule is that a
+// mission owns exactly the components in its slug — sweeping grid, feature-card, ribbon-card and
+// section-banner here would be the "while we're here" edit that rule exists to prevent. Nothing
+// is unreachable for a consumer either way: `keyof typeof GRID_VARIANTS` recovers any of them.
 export {
   sectionBannerClasses,
   sectionBannerStaticHtml,

@@ -82,6 +82,26 @@ export default {
         const target = (srcPath) =>
           ENTRY[srcPath.split('/').pop()] ?? './dist/index.js';
 
+        // SORT BY SOURCE PATH BEFORE ANYTHING BELOW REWRITES IT. The merge further down
+        // de-duplicates declarations and exports BY NAME, keeping the first — so whichever
+        // module the analyzer happened to visit first won, and the analyzer's traversal order
+        // is not stable. Seven markup modules export `unknownVariantMessage`, so three fresh
+        // `cem analyze` runs produced two different manifests, flipping that declaration
+        // between sk-button's `(v: string)` form and sk-card's `(variant: string)` form.
+        //
+        // That made the CI drift gate (`analyze` + `git diff --exit-code`) a COIN FLIP for
+        // every PR, and it had been passing on luck. It is exactly the failure ADR-11 item 9
+        // names — generation determinism — in the generator that ADR-11 builds the React
+        // wrappers from. Caught when a fold changed the barrel and the flip landed the other
+        // way; `nx` had been serving a cached `analyze` locally, which hid it from every
+        // local check.
+        //
+        // The comment below already knew iteration order decides which module survives. That
+        // was addressed for the path collision and not for this dedupe.
+        customElementsManifest.modules.sort((a, b) =>
+          String(a.path ?? '').localeCompare(String(b.path ?? ''))
+        );
+
         // Modules with neither declarations nor exports carry no information and
         // would only duplicate a path. Drop them rather than emit a collision.
         customElementsManifest.modules = (customElementsManifest.modules ?? []).filter(

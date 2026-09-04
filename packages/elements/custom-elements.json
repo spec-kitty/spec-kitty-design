@@ -76,7 +76,8 @@
               "name": "content",
               "default": "'Label'"
             }
-          ]
+          ],
+          "description": "The static form. Throws on an unknown variant or size.\n\nANCHOR OR BUTTON, decided by `href`, and this is not a convenience — it is what the\ncatalogue already does. Every real use of this class in `apps/demo` is an `<a href>` styled\nas a button; the stories use `<button>`. One primitive, two elements, and the class list is\nidentical on both. So the element switches on the same signal rather than forcing consumers\nto choose between a working link and a styled one."
         },
         {
           "kind": "variable",
@@ -607,40 +608,6 @@
         },
         {
           "kind": "function",
-          "name": "isButtonSize",
-          "return": {
-            "type": {
-              "text": "s is ButtonSize"
-            }
-          },
-          "parameters": [
-            {
-              "name": "s",
-              "type": {
-                "text": "string"
-              }
-            }
-          ]
-        },
-        {
-          "kind": "function",
-          "name": "isButtonVariant",
-          "return": {
-            "type": {
-              "text": "v is ButtonVariant"
-            }
-          },
-          "parameters": [
-            {
-              "name": "v",
-              "type": {
-                "text": "string"
-              }
-            }
-          ]
-        },
-        {
-          "kind": "function",
           "name": "isCardVariant",
           "return": {
             "type": {
@@ -719,40 +686,6 @@
           "parameters": [
             {
               "name": "variant",
-              "type": {
-                "text": "string"
-              }
-            }
-          ]
-        },
-        {
-          "kind": "function",
-          "name": "isPillTagShape",
-          "return": {
-            "type": {
-              "text": "s is PillTagShape"
-            }
-          },
-          "parameters": [
-            {
-              "name": "s",
-              "type": {
-                "text": "string"
-              }
-            }
-          ]
-        },
-        {
-          "kind": "function",
-          "name": "isPillTagVariant",
-          "return": {
-            "type": {
-              "text": "v is PillTagVariant"
-            }
-          },
-          "parameters": [
-            {
-              "name": "v",
               "type": {
                 "text": "string"
               }
@@ -2837,40 +2770,6 @@
         },
         {
           "kind": "function",
-          "name": "unknownShapeMessage",
-          "return": {
-            "type": {
-              "text": "string"
-            }
-          },
-          "parameters": [
-            {
-              "name": "s",
-              "type": {
-                "text": "string"
-              }
-            }
-          ]
-        },
-        {
-          "kind": "function",
-          "name": "unknownSizeMessage",
-          "return": {
-            "type": {
-              "text": "string"
-            }
-          },
-          "parameters": [
-            {
-              "name": "s",
-              "type": {
-                "text": "string"
-              }
-            }
-          ]
-        },
-        {
-          "kind": "function",
           "name": "unknownVariantMessage",
           "return": {
             "type": {
@@ -3171,22 +3070,6 @@
         },
         {
           "kind": "js",
-          "name": "isButtonSize",
-          "declaration": {
-            "name": "isButtonSize",
-            "module": "./dist/index.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "isButtonVariant",
-          "declaration": {
-            "name": "isButtonVariant",
-            "module": "./dist/index.js"
-          }
-        },
-        {
-          "kind": "js",
           "name": "isCardVariant",
           "declaration": {
             "name": "isCardVariant",
@@ -3222,22 +3105,6 @@
           "name": "isGridVariant",
           "declaration": {
             "name": "isGridVariant",
-            "module": "./dist/index.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "isPillTagShape",
-          "declaration": {
-            "name": "isPillTagShape",
-            "module": "./dist/index.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "isPillTagVariant",
-          "declaration": {
-            "name": "isPillTagVariant",
             "module": "./dist/index.js"
           }
         },
@@ -3598,22 +3465,6 @@
           "name": "unknownRibbonMessage",
           "declaration": {
             "name": "unknownRibbonMessage",
-            "module": "./dist/index.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "unknownShapeMessage",
-          "declaration": {
-            "name": "unknownShapeMessage",
-            "module": "./dist/index.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "unknownSizeMessage",
-          "declaration": {
-            "name": "unknownSizeMessage",
             "module": "./dist/index.js"
           }
         },

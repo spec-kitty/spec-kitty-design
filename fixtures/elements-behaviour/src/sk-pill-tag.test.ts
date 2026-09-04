@@ -14,6 +14,7 @@ import {
   skPillTagSheet,
 } from '@spec-kitty/elements';
 import { installTokenSheet } from './token-sheet.js';
+import { contrast, assertThemesDiffered } from './contrast.js';
 
 beforeEach(installTokenSheet);
 
@@ -36,9 +37,14 @@ test('[SC-013] the declared part is targetable from outside', async () => {
   try {
     const node = partOf(el);
     expect(node, 'part="tag" is declared but not rendered').not.toBe(null);
-    // Interpolated so the only literal `::part(tag)` in this file is the real selector
-    // above — check-part-ratchet.mjs greps for that literal, so a copy in a message would
-    // keep the ratchet green if the rule were deleted.
+    // Interpolated so the only literal `::part(<name>)` in this file is the real selector
+    // above — check-part-ratchet.mjs greps the CONCATENATED test sources for that literal, so
+    // a copy in a message would keep the ratchet green if the rule were deleted.
+    //
+    // AND THE PLACEHOLDER FORM IS THE POINT: an earlier revision of this very comment spelled
+    // the real part name, which put the grep target back into the file and defeated the fix it
+    // was explaining. A lens simulated deleting the rule above and found the ratchet still
+    // green. sk-button.test.ts got this right; these two disagreed until now.
     expect(
       getComputedStyle(node).outlineStyle,
       `::part(${'tag'}) is not targetable`,
@@ -82,20 +88,15 @@ test('every tinted variant meets AA contrast in BOTH themes', async () => {
   //
   // Asserted here as well as in axe, because axe only sees the stories that exist — this holds
   // for every variant in the module map, in both themes, whether or not a story renders it.
-  const contrast = (fg: string, bg: string) => {
-    const channel = (v: number) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4);
-    const lum = (c: string) => {
-      const [r, g, b] = c.match(/\d+/g)!.slice(0, 3).map((n) => channel(Number(n) / 255));
-      return 0.2126 * r! + 0.7152 * g! + 0.0722 * b!;
-    };
-    const [a, z] = [lum(fg), lum(bg)].sort((x, y) => y - x);
-    return (a! + 0.05) / (z! + 0.05);
-  };
+  // Records the surface each theme resolved, so the loop can prove it saw TWO themes.
+  const surfaces = new Map<string, string>();
 
   for (const theme of ['dark', 'light'] as const) {
     const wrap = document.createElement('div');
     if (theme === 'light') wrap.className = 'sk-light';
+    wrap.style.background = 'var(--sk-surface-page)';
     document.body.append(wrap);
+    surfaces.set(theme, getComputedStyle(wrap).backgroundColor);
     for (const variant of Object.keys(PILL_TAG_VARIANTS)) {
       const el = document.createElement('sk-pill-tag');
       el.setAttribute('variant', variant);
@@ -110,6 +111,9 @@ test('every tinted variant meets AA contrast in BOTH themes', async () => {
       ).toBeGreaterThanOrEqual(4.5);
     }
   }
+
+  // Without this, a light arm that silently rendered the dark palette would pass.
+  assertThemesDiffered(surfaces);
 });
 
 test('the EYEBROW shape composes with colour — it is an axis, not a second component', async () => {

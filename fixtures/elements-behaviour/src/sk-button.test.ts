@@ -74,9 +74,15 @@ test('removing href reverts the anchor to a button', async () => {
 
   const node = partOf(el);
   expect(node.tagName, 'removing href should revert to a <button>').toBe('BUTTON');
-  // Belt and braces: the pre-fix failure produced an anchor with an EMPTY href rather than no
-  // anchor, so a tagName-only assertion in a future refactor could pass on `<a href="">`.
-  expect(node.hasAttribute('href'), 'the reverted control must carry no href').toBe(false);
+  // ASSERTED ON THE SHADOW ROOT, because that is the thing that regresses. The first version
+  // of this line checked `node.hasAttribute('href')` and justified it as belt-and-braces
+  // against `<a href="">` — but the assertion above already pins tagName to BUTTON, which
+  // `<a href="">` cannot satisfy, and a `<button>` never carries href. It could not fail. A
+  // lens called it a wiring-only assertion with an incorrect reason, and it was right.
+  expect(
+    el.shadowRoot!.querySelector('a'),
+    'no anchor may survive in the shadow root after href is removed',
+  ).toBe(null);
 });
 
 test('[SC-014] the element adopts the GENERATED sheet by identity and injects no <style>', async () => {
@@ -117,6 +123,42 @@ test('the class list is identical on both paths', async () => {
   expect(buttonStaticHtml({ variant: 'secondary', size: 'sm' })).toContain(
     'class="sk-button sk-button--secondary sk-button--sm"',
   );
+});
+
+test('the static ANCHOR branch renders, and href cannot break out of the attribute', async () => {
+  // FIRST COVERAGE OF THIS BRANCH. `buttonStaticHtml`'s anchor arm and the `attr()` escaper
+  // beside it were both added by #79's fold and a lens found them shipping untested — with a
+  // comment in the markup module claiming the opposite. The docblock calls the anchor the form
+  // every real consumer uses, so it was also the one arm with no assertion at all.
+  const plain = buttonStaticHtml({ variant: 'primary', href: '/docs' });
+  expect(plain).toBe('<a class="sk-button sk-button--primary" href="/docs">Label</a>');
+
+  // ATTRIBUTE-POSITION INJECTION. This is the only caller-supplied value any markup module
+  // interpolates into an attribute, and the module is public API, so an unescaped quote would
+  // let a caller emit an event handler into committed markup.
+  //
+  // ASSERTED BY PARSING, not by substring. The first version of this arm checked that the
+  // output did `not.toContain('onfocus=alert')` and failed against a CORRECTLY escaped string:
+  // the quotes become `&quot;`, so nothing breaks out, but the characters `onfocus=alert` are
+  // still there as inert text inside the value. The question is whether the parser sees an
+  // ATTRIBUTE, so the test asks the parser.
+  const hostile = buttonStaticHtml({ href: '" onfocus=alert(1) x="' });
+  const parsed = new DOMParser().parseFromString(hostile, 'text/html');
+  const anchor = parsed.querySelector('a')!;
+  expect(anchor, 'the hostile input must still produce exactly one anchor').not.toBe(null);
+  expect(anchor.getAttributeNames().sort(), 'no attribute may be injected').toEqual([
+    'class',
+    'href',
+  ]);
+  // The whole hostile string survives as the href's VALUE — escaped, not executed, not dropped.
+  expect(anchor.getAttribute('href')).toBe('" onfocus=alert(1) x="');
+
+  // A legitimate URL with an ampersand must round-trip: `&amp;` in the markup, `&` once parsed.
+  const amp = buttonStaticHtml({ href: '/s?a=1&b=2' });
+  expect(amp).toContain('href="/s?a=1&amp;b=2"');
+  expect(
+    new DOMParser().parseFromString(amp, 'text/html').querySelector('a')!.getAttribute('href'),
+  ).toBe('/s?a=1&b=2');
 });
 
 test('the primary tone PAINTS, and the three tones are distinct', async () => {

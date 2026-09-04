@@ -54,7 +54,9 @@ export class SkButton extends LitElement {
     //    written — fixtures/react-consumer/src/wrappers.test.tsx:156 renders one, and a lens
     //    refuted the claim. The limitation is real; the supporting fact was not.
     // 2. The interactive node lives in the shadow root with no `delegatesFocus`, so
-    //    `hostEl.focus()` is a silent no-op (the trap sk-nav-pill.ts:107 already names), and
+    //    `hostEl.focus()` is a silent no-op — the trap sk-nav-pill.ts names on its
+    //    activeElement walk (cited by symbol, not line: a lens found the line pin already off
+    //    by one, the same defect this fold removed from a programme-doc citation) — and
     //    `aria-label` on the host is ignored because the host's role is generic. So the
     //    icon-only button the a11y gate keeps green cannot be expressed through <sk-button>.
     //
