@@ -54,7 +54,9 @@ export function ribbonCardClasses(variant?: string): string {
     console.warn(`sk-ribbon-card: ${unknownVariantMessage(variant)} — rendering the plain card.`);
     variant = undefined;
   }
-  return ['sk-ribbon-card', variant ? RIBBON_CARD_VARIANTS[variant] : ''].filter(Boolean).join(' ');
+  // eslint-disable-next-line security/detect-object-injection -- narrowed by isRibbonCardVariant above
+  const modifier = variant ? RIBBON_CARD_VARIANTS[variant] : '';
+  return ['sk-ribbon-card', modifier].filter(Boolean).join(' ');
 }
 
 /** The ribbon's class list. Warns and degrades to the default colour. */

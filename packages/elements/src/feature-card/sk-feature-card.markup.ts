@@ -66,8 +66,8 @@ export function featureCardChipClasses(accent?: string): string {
     console.warn(`sk-feature-card: ${unknownAccentMessage(accent)} — using ${DEFAULT_ACCENT}.`);
     accent = undefined;
   }
-  const key = (accent ?? DEFAULT_ACCENT) as FeatureCardAccent;
-  return `sk-feature-card__icon-chip ${FEATURE_CARD_ACCENTS[key]}`;
+  const modifier = FEATURE_CARD_ACCENTS[(accent ?? DEFAULT_ACCENT) as FeatureCardAccent];
+  return `sk-feature-card__icon-chip ${modifier}`;
 }
 
 export interface FeatureCardStaticOptions {

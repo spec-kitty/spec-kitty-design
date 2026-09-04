@@ -7,7 +7,7 @@ Components in these artifacts: sk-card, sk-feature-card, sk-form-input, sk-form-
 
 | artifact | raw | minified | min+gzip | notes |
 |---|---:|---:|---:|---|
-| `ESM  (dist/index.js)` | 75.7 KiB | 55.5 KiB | 14 KiB | `lit` external |
+| `ESM  (dist/index.js)` | 75.8 KiB | 55.5 KiB | 14 KiB | `lit` external |
 | `IIFE (dist/elements.js)` | 94.9 KiB | 67.9 KiB | 19 KiB | runtime bundled |
 
 ## The basis matters — read this before comparing against an ADR
@@ -43,7 +43,7 @@ roughly that component's CSS, not by a fixed per-component overhead.
 An earlier draft of this work package recorded the **minified** figures under a "raw"
 heading and concluded ADR-10 was wrong. It was not. Always state the basis — and the
 unit: every figure in this file is KiB (1024), which is why the raw IIFE reads
-94.9 KiB here and "24.0 KB" in the WP prompt. Same 97131
+94.9 KiB here and "24.0 KB" in the WP prompt. Same 97172
 bytes.
 
 ## Raw output of the measuring command
@@ -51,12 +51,12 @@ bytes.
 ```
 $ npx nx run elements:build && node scripts/measure-elements-sizes.mjs
 packages/elements/dist/index.js
-  raw         77549 bytes  (75.7 KiB)
+  raw         77588 bytes  (75.8 KiB)
   minified    56875 bytes  (55.5 KiB)
   gzip         18 KiB
   min+gzip     14 KiB
 packages/elements/dist/elements.js
-  raw         97131 bytes  (94.9 KiB)
+  raw         97172 bytes  (94.9 KiB)
   minified    69543 bytes  (67.9 KiB)
   gzip         24 KiB
   min+gzip     19 KiB
