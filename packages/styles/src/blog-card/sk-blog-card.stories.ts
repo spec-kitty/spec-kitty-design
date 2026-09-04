@@ -1,5 +1,12 @@
-import './sk-blog-card.css';
+// SK-CARD FIRST, MATCHING THE ELEMENT. `sk-blog-card.ts` adopts `[cardSheet, sheet]`, and the
+// two consumption paths must load the two sheets in the SAME order or the cascade differs
+// between them — which is the divergence this whole component exists to disprove. An earlier
+// revision of this PR flipped these two imports, so the element resolved ties to blog-card and
+// the static path resolved them to sk-card. A lens caught it; nothing else could have, because
+// SC-014 asserts the ELEMENT's adoptedStyleSheets order and no gate reads a story's import
+// order.
 import '../card/sk-card.css';
+import './sk-blog-card.css';
 import type { Meta, StoryObj } from '@storybook/web-components';
 import {
   SkBlogCardHTML,

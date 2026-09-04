@@ -2,6 +2,7 @@ import { LitElement, html, nothing } from 'lit';
 import { define } from '../define.js';
 import cardSheet from '../card/sk-card.css.js';
 import sheet from './sk-blog-card.css.js';
+import { BLOG_CARD_CLASSES } from './sk-blog-card.markup.js';
 
 /**
  * A blog preview card: thumbnail, eyebrow, title, excerpt, meta and a read-more link.
@@ -17,10 +18,28 @@ import sheet from './sk-blog-card.css.js';
  * @csspart content - the text column
  */
 export class SkBlogCard extends LitElement {
-  // BOTH SHEETS, and the order is load-bearing: sk-card first, so blog-card's rules win where
-  // the two touch. This is the composition the #78 ruling chose over nesting a real <sk-card>,
-  // which would have moved the bordered box a shadow root deeper and forced every shared
-  // declaration to be written twice — once plain, once through ::part(card).
+  // BOTH SHEETS, sk-card FIRST. This is the composition the #78 ruling chose over nesting a
+  // real <sk-card>, which would have moved the bordered box a shadow root deeper and forced
+  // every shared declaration to be written twice — once plain, once through ::part(card).
+  //
+  // THE ORDER IS A CONVENTION, NOT A CURRENTLY-OBSERVABLE BEHAVIOUR, and saying so precisely
+  // matters. An earlier revision of this comment called it "load-bearing: sk-card first, so
+  // blog-card's rules win where the two touch" — but a lens diffed the two sheets and found
+  // `color` was their ONLY overlapping declaration, with the same value on both sides, so
+  // swapping them changed no computed style anywhere. That duplicate has now been removed from
+  // sk-blog-card.css, which means the two sheets share zero declarations and the order is
+  // currently unobservable by design.
+  //
+  // It is still fixed, and still asserted, because the invariant is that blog-card MUST be able
+  // to win: the moment either sheet grows a declaration the other already sets, this order is
+  // what decides it, and discovering that at the point of collision is too late. The static
+  // path loads the same two sheets in the same order (styles/src/blog-card/sk-blog-card.stories.ts)
+  // — an earlier revision of this PR shipped them REVERSED there, which is the divergence the
+  // whole component exists to disprove.
+  //
+  // The [SC-014] arm therefore asserts sheet IDENTITY and ORDER structurally rather than through
+  // a computed style, and the swap mutation reds that assertion. That is honest coverage of a
+  // convention, not a behavioural claim dressed up as one.
   //
   // check-adopted-css-boundaries.mjs derives this adopted set from these very imports and
   // checks each sheet's rules against the component that AUTHORED it, so sk-card.css is held to
@@ -53,19 +72,33 @@ export class SkBlogCard extends LitElement {
   declare eyebrow: string | undefined;
 
   render() {
+    // WARN AND DEGRADE, never throw — the split every markup module in this repo keeps. A throw
+    // inside render() makes Lit reject `updateComplete`, so render() returns no tree and the
+    // element paints an empty shadow root with NO <slot>, silently eating its own light-DOM
+    // children. The authoring path (`blogCardStaticHtml`) throws instead, because bad output
+    // must never reach committed artifacts.
+    if (this.thumbnail != null && !this.alt) {
+      console.warn(
+        'sk-blog-card: `thumbnail` is set but `alt` is missing or empty. An empty alt asserts ' +
+          'the image is decorative and hides it from assistive technology — set `alt`.',
+      );
+    }
+
     // ONE root carrying BOTH classes — structurally identical to the static form, which is what
     // lets `.sk-blog-card:hover { border-color }` work on both paths with one declaration.
-    return html`<article part="card" class="sk-card sk-blog-card">
+    return html`<article part="card" class=${BLOG_CARD_CLASSES.root}>
       ${this.thumbnail
         ? html`<img
             part="thumbnail"
-            class="sk-blog-card__thumbnail"
+            class=${BLOG_CARD_CLASSES.thumbnail}
             src=${this.thumbnail}
             alt=${this.alt ?? ''}
           />`
         : nothing}
-      <div part="content" class="sk-blog-card__content">
-        ${this.eyebrow ? html`<p class="sk-blog-card__eyebrow">${this.eyebrow}</p>` : nothing}
+      <div part="content" class=${BLOG_CARD_CLASSES.content}>
+        ${this.eyebrow
+          ? html`<p class=${BLOG_CARD_CLASSES.eyebrow}>${this.eyebrow}</p>`
+          : nothing}
         <slot></slot>
       </div>
     </article>`;

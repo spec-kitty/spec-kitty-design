@@ -17,6 +17,15 @@
         },
         {
           "kind": "variable",
+          "name": "BLOG_CARD_CLASSES",
+          "type": {
+            "text": "{\n  root: 'sk-card sk-blog-card',\n  thumbnail: 'sk-blog-card__thumbnail',\n  content: 'sk-blog-card__content',\n  eyebrow: 'sk-blog-card__eyebrow',\n}"
+          },
+          "default": "{ root: 'sk-card sk-blog-card', thumbnail: 'sk-blog-card__thumbnail', content: 'sk-blog-card__content', eyebrow: 'sk-blog-card__eyebrow', }",
+          "description": "The class names this component renders, named once.\n\n`root` carries BOTH classes, which is the whole point of the composition ruling — one box\nstyled by two adopted sheets rather than a nested element."
+        },
+        {
+          "kind": "variable",
           "name": "BLOG_CARD_VARIANTS",
           "type": {
             "text": "{}"
@@ -45,7 +54,7 @@
               "default": "'<h3 class=\"sk-blog-card__title\">Article title</h3>' +\n    '<p class=\"sk-blog-card__excerpt\">What the article is about.</p>' +\n    '<p class=\"sk-blog-card__meta\">Date · reading time</p>'"
             }
           ],
-          "description": "The static form.\n\nBOTH CLASSES ON ONE ELEMENT, which is the whole point of the composition ruling: this string\nis what the element renders too, so the two paths cannot diverge."
+          "description": "The static form.\n\nBOTH CLASSES ON ONE ELEMENT. The element renders from the same `BLOG_CARD_CLASSES` above, so\nthe two paths cannot diverge — that is now enforced by construction rather than asserted."
         },
         {
           "kind": "variable",
@@ -2935,6 +2944,14 @@
           "name": "BLOG_CARD_AXES",
           "declaration": {
             "name": "BLOG_CARD_AXES",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "BLOG_CARD_CLASSES",
+          "declaration": {
+            "name": "BLOG_CARD_CLASSES",
             "module": "./dist/index.js"
           }
         },

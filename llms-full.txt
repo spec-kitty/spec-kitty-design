@@ -328,15 +328,15 @@ amendment.
 | `--sk-color-green-bg` | `#15241A` | dark green surface behind numbers banner |
 | `--sk-color-red` | `#E97373` | validation errors |
 | `--sk-color-red-soft` | `#F0A0A0` | softer red |
-| `--sk-color-sage` | `#4F8F4F` | heading sage on cream (light-mode link accent) |
-| `--sk-color-sage-deep` | `#3D7A3D` | hover / pressed sage |
+| `--sk-color-sage` | `#4F8F4F` | heading sage on cream (LARGE text only — 3.58:1, under AA for body text) |
+| `--sk-color-sage-deep` | `#3D7A3D` | hover / pressed sage, AND the light-mode `--sk-color-accent` (4.76:1 on cream, 5.19:1 on the card) |
 | `--sk-color-sage-soft` | `#7CAE7C` | dim / 70 % sage for chips |
 
 ### Accent
 
 | Token | Value |
 |---|---|
-| `--sk-color-accent` | `#F5C518` (= yellow; flips to `--sk-color-sage` in light mode) |
+| `--sk-color-accent` | `#F5C518` (= yellow; flips to `--sk-color-sage-deep` in light mode) |
 | `--sk-color-accent-fg` | `#1A1408` (dark ink on yellow buttons; flips to `#FFFFFF` in light mode) |
 
 ### Surface (dark mode default)
@@ -498,7 +498,7 @@ motion are *not* overridden — they are theme-agnostic.
   --sk-surface-page:        #F8F5EC;   /* warm cream */
   --sk-surface-card:        #FFFFFF;   /* lifted white */
   --sk-fg-default:          #1A1A14;   /* near-black ink */
-  --sk-color-accent:        var(--sk-color-sage);
+  --sk-color-accent:        var(--sk-color-sage-deep);
   --sk-color-accent-fg:     #FFFFFF;
   /* ...full list re-binds: surface-{page|hero|card|input|pill|muted},
      fg-{default|body|muted|subtle|placeholder}, border-{default|strong},
@@ -546,8 +546,10 @@ markup module (ADR-10 §3).
 
 The remaining catalogue components still live in `packages/styles` and have not
 yet been migrated. #77 migrated `grid` and `section-banner`; #78 `feature-card` and
-`ribbon-card`; #79 `button`, `pill-tag` and `check-bullet`. Three remain styles-only:
-`site-footer` (#77) and `blog-card` (#78), each awaiting a recorded design ruling, and
+`ribbon-card`; #79 `button`, `pill-tag` and `check-bullet`; #78 also migrated `blog-card`,
+which COMPOSES sk-card's stylesheet (`static styles = [cardSheet, sheet]`, sk-card first) rather
+than nesting a real `<sk-card>` — the first cross-component sheet adoption in the repo. Two
+remain styles-only: `site-footer` (#77), still awaiting a recorded design ruling, and
 `form-field`, which had no owning mission until #141.
 
 ### react package — `packages/react/src/`
@@ -756,7 +758,7 @@ Other workflows:
   values, type scale, weights, spacing, radius, and motion are theme-agnostic
   and stay constant.
 - The light-mode accent intentionally flips from yellow to sage
-  (`--sk-color-accent: var(--sk-color-sage)`, `--sk-color-accent-fg: #FFFFFF`)
+  (`--sk-color-accent: var(--sk-color-sage-deep)`, `--sk-color-accent-fg: #FFFFFF`)
   because yellow on cream fails contrast.
 - **Storybook convention** — every component story exposes a `LightMode`
   named export. The convention is:

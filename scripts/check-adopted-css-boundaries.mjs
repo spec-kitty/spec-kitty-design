@@ -135,10 +135,19 @@ const slottedIsNotLast = (sel) => {
     } else current.push(n);
   }
   compounds.push(current);
-  return compounds.some(
-    (c, i) =>
-      i < compounds.length - 1 && c.some((n) => n.type === 'pseudo' && n.value === '::slotted')
-  );
+  return compounds.some((c, i) => {
+    const at = c.findIndex((n) => n.type === 'pseudo' && n.value === '::slotted');
+    if (at === -1) return false;
+    // Something follows it in a LATER compound — `::slotted(a) .x`.
+    if (i < compounds.length - 1) return true;
+    // Or something follows it WITHIN the same compound — `::slotted(a):hover`. This arm was
+    // missing, and the omission cost a real defect: #78 shipped
+    // `::slotted(.sk-blog-card__read-more):hover`, which both Chromium and Firefox drop, taking
+    // the comma-listed static-path half with it — while this function's own message already
+    // said "nothing may follow it". postcss accepts what the engines reject, so neither this
+    // gate nor check-element-css-hygiene noticed. A lens measured the dropped rule.
+    return at < c.length - 1;
+  });
 };
 
 /** The nodes up to the first top-level combinator. */
@@ -219,6 +228,9 @@ if (selftest) {
     ['.sk-nav-pill :is(html)', 'reject', 'ADR-9 token nested and not leftmost'],
     ['.sk-nav-pill__items :root', 'reject', ':root not leftmost'],
     // --- false positives a lens constructed against the veto path. ---
+    ['::slotted(.sk-nav-pill__item):hover', 'reject', 'pseudo-class AFTER ::slotted — engines drop the rule (#78)'],
+    ['::slotted(.sk-nav-pill__item):focus-visible', 'reject', 'same shape, second spelling'],
+    ['::slotted(.sk-nav-pill__item:hover)', 'accept', 'the CORRECT inside form must still pass'],
     ['.sk-nav-pill__item:not(.is-active)', 'accept', ':not() must not veto an owned compound'],
     ['.sk-nav-pill:not([hidden])', 'accept', 'attribute :not() on an owned compound'],
     ['.sk-nav-pill__item:is(a, button)', 'accept', ':is() of element types on an owned compound'],
@@ -239,7 +251,7 @@ if (selftest) {
   // had one careless edit away. Shrink-only, the same shape as expected-parts.json.
   const rejects = PROBES.filter(([, e]) => e === 'reject').length;
   const accepts = PROBES.length - rejects;
-  const FLOOR = { rejects: 19, accepts: 12 };
+  const FLOOR = { rejects: 21, accepts: 13 };
   if (rejects < FLOOR.rejects || accepts < FLOOR.accepts) {
     console.error(
       `❌ Probe table shrank: ${rejects} reject / ${accepts} accept, floor is ` +
@@ -249,7 +261,52 @@ if (selftest) {
     );
     process.exit(1);
   }
-  console.log(`\n✅ All ${PROBES.length} probes behaved as recorded (${rejects} reject, ${accepts} accept).`);
+  // -------------------------------------------------------------------------
+  // OWNERSHIP DERIVATION PROBES. The selector table above never reaches
+  // `adoptedSheets()`, so before these existed the file's only new logic — deriving the adopted
+  // set from the element's own imports — shipped with no red-first coverage at all, while the
+  // docstring claimed otherwise. These drive the real function against the real tree.
+  // -------------------------------------------------------------------------
+  const owners = (name) => adoptedSheets(name).map((x) => `${x.owner}:${basename(x.file)}`).sort();
+
+  const OWNERSHIP = [
+    // [component, expected entries, note]
+    ['blog-card',
+     ['blog-card:sk-blog-card.css', 'card:sk-card.css'],
+     'composes a FOREIGN sheet — each is attributed to the component that AUTHORED it (#78)'],
+    ['card',
+     ['card:sk-card.css'],
+     'a component adopting only its own sheet enrols only its own'],
+    ['nav-pill',
+     ['nav-pill:sk-nav-pill-drawer.css', 'nav-pill:sk-nav-pill.css'],
+     'ONE generated module, TWO source sheets — why ownership globs the directory'],
+  ];
+
+  let obad = 0;
+  for (const [name, expected, note] of OWNERSHIP) {
+    const got = owners(name);
+    const ok = got.length === expected.length && got.every((v, i) => v === expected[i]);
+    if (!ok) obad += 1;
+    console.log(
+      `${ok ? '✅' : '❌'} owns   ${`<sk-${name}>`.padEnd(52)} ${note}` +
+        (ok ? '' : `\n     expected ${JSON.stringify(expected)}\n     got      ${JSON.stringify(got)}`)
+    );
+  }
+  if (obad) {
+    console.error(`\n❌ ${obad} of ${OWNERSHIP.length} ownership probe(s) did not behave as recorded.`);
+    process.exit(1);
+  }
+  // A floor here too, for the same reason the selector table has one: a table trimmed to the
+  // single easy case is regression protection in name only.
+  if (OWNERSHIP.length < 3) {
+    console.error('❌ Ownership probe table shrank below its floor of 3.');
+    process.exit(1);
+  }
+
+  console.log(
+    `\n✅ All ${PROBES.length} selector probes behaved as recorded ` +
+      `(${rejects} reject, ${accepts} accept), and all ${OWNERSHIP.length} ownership probes.`
+  );
   process.exit(0);
 }
 
@@ -293,8 +350,19 @@ let sheetCount = 0;
  * fifth hand-maintained list this programme has removed.
  *
  * This does NOT widen what is accepted. Every rule is still checked, still against a component
- * that owns it, and a rule naming a class no participating sheet owns is still rejected — the
- * --selftest probes below cover exactly that.
+ * that owns it, and a rule naming a class no participating sheet owns is still rejected.
+ *
+ * THE OWNERSHIP DERIVATION HAS ITS OWN PROBES, in the --selftest table's second half. An earlier
+ * revision of this docstring claimed "the --selftest probes below cover exactly that" while every
+ * probe in the table called `violationsFor(sel, 'nav-pill')` and none reached this function — so
+ * the only new logic in the file shipped unexercised by the gate's own red-first table, which is
+ * precisely the certifying-absence shape this gate exists to refuse. A lens caught it.
+ *
+ * THE DIRECTORY GLOB IS DELIBERATE, not a coarse shortcut, and the same lens read it the other
+ * way. One generated `.css.js` can be built from SEVERAL source sheets: sk-nav-pill.css.js
+ * carries both `sk-nav-pill.css` and `sk-nav-pill-drawer.css`, and the element imports one
+ * module. Selecting by the captured basename instead would silently stop checking the drawer
+ * sheet — the glob is what keeps every source sheet behind an adopted module in scope.
  */
 function adoptedSheets(name) {
   const elementFile = `${OUT_DIR}/${name}/sk-${name}.ts`;
@@ -306,13 +374,46 @@ function adoptedSheets(name) {
   } catch {
     return out;
   }
-  for (const m of src.matchAll(/from\s+'(\.{1,2}\/(?:([a-z0-9-]+)\/)?)sk-([a-z0-9-]+)\.css\.js'/g)) {
+  // Local identifier -> owning component, for every sheet imported by a direct relative path.
+  const bound = new Map();
+  for (const m of src.matchAll(
+    /import\s+([A-Za-z_$][\w$]*)\s+from\s+'(\.{1,2}\/(?:([a-z0-9-]+)\/)?)sk-([a-z0-9-]+)\.css\.js'/g
+  )) {
     // `./sk-x.css.js` -> this component; `../other/sk-other.css.js` -> that one.
-    const owner = m[2] ?? name;
+    const owner = m[3] ?? name;
+    bound.set(m[1], owner);
     for (const file of globSync(`packages/styles/src/${owner}/sk-*.css`, {}).sort()) {
       if (seen.has(file)) continue;
       seen.add(file);
       out.push({ file, owner });
+    }
+  }
+
+  // EVERY ENTRY IN `static styles` MUST BE ACCOUNTED FOR, or this function fails OPEN.
+  //
+  // The derivation above reads import SPECIFIERS. An element that adopts a sheet some other way
+  // — `import { skCardSheet } from '../index.js'`, or from '@spec-kitty/elements' — matches
+  // nothing here, so that sheet is never checked; and because the element still imports its own
+  // `./sk-x.css.js`, the "adopts no stylesheet" guard below does not fire either. Silent, and
+  // in the accepting direction.
+  //
+  // That is not hypothetical: #78 made `skCardSheet` a PUBLIC BARREL EXPORT for the first time,
+  // which makes the invisible spelling the ergonomic one. A lens found the hole in the same
+  // change that opened it. So the identifiers are reconciled against the array rather than
+  // trusted.
+  const styles = /static\s+styles\s*=\s*\[([^\]]*)\]/.exec(src);
+  if (styles) {
+    for (const ident of styles[1].split(',').map((x) => x.trim()).filter(Boolean)) {
+      if (!/^[A-Za-z_$][\w$]*$/.test(ident) || !bound.has(ident)) {
+        out.push({
+          file: null,
+          owner: null,
+          unresolved: `<sk-${name}> adopts \`${ident}\` in \`static styles\`, but this gate cannot ` +
+            `trace it to a direct \`./sk-*.css.js\` import — so its rules would go UNCHECKED. ` +
+            `Import the sheet by relative path rather than through a barrel; a sheet this gate ` +
+            `cannot see is a sheet ADR-9 Confirmation #1 does not cover.`,
+        });
+      }
     }
   }
   return out;
@@ -320,9 +421,10 @@ function adoptedSheets(name) {
 
 for (const name of components) {
   const sheets = adoptedSheets(name);
+  for (const u of sheets.filter((x) => x.unresolved)) violations.push(u.unresolved);
   // PER ELEMENT, not once globally. A global floor counted an element whose sheets it never
   // opened and still printed a green coverage line.
-  if (sheets.length === 0) {
+  if (sheets.filter((x) => x.file).length === 0) {
     violations.push(
       `<sk-${name}> adopts no stylesheet that this gate can find — nothing was checked for it, ` +
         `and a green line over zero sheets is the shape this file exists to refuse. The adopted ` +
@@ -332,7 +434,7 @@ for (const name of components) {
     continue;
   }
   sheetCount += sheets.length;
-  for (const { file, owner } of sheets) {
+  for (const { file, owner } of sheets.filter((x) => x.file)) {
     const root = postcss.parse(readFileSync(file, 'utf8'), { from: file });
     root.walkRules((rule) => {
       // `@keyframes` steps are `0%`/`from`/`to`, not selectors.

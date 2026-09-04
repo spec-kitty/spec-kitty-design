@@ -14,7 +14,6 @@
 // hunk as a convention and flagged the third for breaking it. Append new elements; do not
 // reshuffle for tidiness.
 import './stub/sk-stub.js';
-import './blog-card/sk-blog-card.js';
 import './button/sk-button.js';
 import './card/sk-card.js';
 import './check-bullet/sk-check-bullet.js';
@@ -26,3 +25,4 @@ import './feature-card/sk-feature-card.js';
 import './ribbon-card/sk-ribbon-card.js';
 import './pill-tag/sk-pill-tag.js';
 import './section-banner/sk-section-banner.js';
+import './blog-card/sk-blog-card.js';

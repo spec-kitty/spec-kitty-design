@@ -29,6 +29,93 @@ const mount = async (attrs: Record<string, string> = {}) => {
 const partOf = (el: Element, name: string) =>
   el.shadowRoot!.querySelector(`[part="${name}"]`) as HTMLElement | null;
 
+test('the ::slotted() rules actually reach slotted content, resting and on hover', async () => {
+  // THE HEADLINE CSS CLAIM OF THIS COMPONENT, and until now nothing asserted it. Every text
+  // region here is SLOTTED, and a shadow-tree class selector cannot match a slotted node — so
+  // `.sk-blog-card__title` alone is inert as an element and `::slotted(...)` alone is inert in a
+  // document. The sheet carries both spellings in one selector list for exactly that reason,
+  // and the test read only shadow-root children, never a slotted one.
+  //
+  // It cost a real defect: the hover rule shipped as `::slotted(.x):hover` — the pseudo-class
+  // OUTSIDE the pseudo-element, which no engine parses. One invalid selector invalidates the
+  // whole comma list, so the static-path half died with it and the link had no hover state on
+  // either path. A computed style off a slotted node is what catches that; a selector-text
+  // assertion would not, because postcss accepts what browsers reject.
+  const el = await mount();
+  const title = el.querySelector('.sk-blog-card__title') as HTMLElement;
+  const excerpt = el.querySelector('.sk-blog-card__excerpt') as HTMLElement;
+
+  // Resting: the adopted sheet reaches the slotted nodes at all.
+  expect(getComputedStyle(title).fontFamily, 'the title rule must reach slotted content').toContain(
+    'Falling Sky',
+  );
+  expect(getComputedStyle(excerpt).margin, 'the excerpt rule must reach slotted content').toBe('0px');
+
+  // Hover: mount a read-more link and prove the rule PARSED. `text-decoration-thickness`
+  // resolves to `auto` when no rule applies, so a dropped rule is visibly distinguishable.
+  const link = document.createElement('a');
+  link.className = 'sk-blog-card__read-more';
+  link.href = '#';
+  link.textContent = 'Read more';
+  el.append(link);
+  await (el as unknown as { updateComplete: Promise<unknown> }).updateComplete;
+
+  const sheet = [...el.shadowRoot!.adoptedStyleSheets].find((s) =>
+    Array.from(s.cssRules).some((r) => r.cssText.includes('sk-blog-card__read-more')),
+  );
+  // BOTH conditions: the first rule merely containing ':hover' is `.sk-blog-card:hover`, which
+  // has nothing to do with slotted content and made an earlier version of this assertion compare
+  // against the wrong rule entirely.
+  const hoverRule = Array.from(sheet!.cssRules).find(
+    (r) => r.cssText.includes('read-more') && r.cssText.includes(':hover'),
+  );
+  // The ENGINE's view, not postcss's: a rule the browser refused to parse is simply absent from
+  // cssRules, so finding it here is the proof that the selector is valid.
+  expect(
+    hoverRule,
+    'the read-more hover rule is absent from cssRules — the engine refused to parse its selector',
+  ).toBeDefined();
+  expect(
+    hoverRule!.cssText,
+    'the slotted half must survive parsing — `::slotted(x):hover` does not',
+  ).toContain('::slotted(.sk-blog-card__read-more:hover)');
+});
+
+test('the static form escapes caller strings, and refuses a thumbnail with no alt', async () => {
+  // THE DEFECT THIS COVERS was measured by a lens: `blogCardStaticHtml` interpolated `thumbnail`
+  // and `alt` straight into attribute position, so a caller could close the attribute and emit a
+  // live event handler — no `javascript:` scheme needed. #140 closed exactly this class in
+  // sk-button one commit earlier and this component reopened it in public API.
+  const hostile = blogCardStaticHtml({ thumbnail: 'x.png" onerror="alert(1)', alt: 'a' });
+  const img = new DOMParser().parseFromString(hostile, 'text/html').querySelector('img')!;
+  expect(img.getAttributeNames().sort(), 'no attribute may be injected').toEqual([
+    'alt',
+    'class',
+    'src',
+  ]);
+  expect(img.getAttribute('src')).toBe('x.png" onerror="alert(1)');
+
+  // The same for text position, where the vector is a tag rather than a quote.
+  const evil = blogCardStaticHtml({ eyebrow: '<img src=x onerror=alert(2)>' });
+  expect(
+    new DOMParser().parseFromString(evil, 'text/html').querySelectorAll('img').length,
+    'an eyebrow string must not become an element',
+  ).toBe(0);
+
+  // A legitimate ampersand must round-trip rather than be mangled.
+  const amp = blogCardStaticHtml({ thumbnail: '/i?a=1&b=2', alt: 'x' });
+  expect(
+    new DOMParser().parseFromString(amp, 'text/html').querySelector('img')!.getAttribute('src'),
+  ).toBe('/i?a=1&b=2');
+
+  // AUTHORING PATH THROWS, render path warns — the split every other markup module keeps, and
+  // the one this component had neither half of. `alt=""` is not a missing label: it positively
+  // asserts the image is decorative, so a screen reader skips it.
+  expect(() => blogCardStaticHtml({ thumbnail: 'photo.png' })).toThrow(/alt/i);
+  expect(() => blogCardStaticHtml({ thumbnail: 'photo.png', alt: '' })).toThrow(/alt/i);
+  expect(() => blogCardStaticHtml({ thumbnail: 'photo.png', alt: 'A diagram' })).not.toThrow();
+});
+
 test('[SC-013] every declared part is targetable from outside', async () => {
   // Mounted WITH a thumbnail, because that part is absent without one — asserted separately.
   const el = await mount({ thumbnail: PLACEHOLDER_THUMBNAIL, 'alt': 'diagram' });

@@ -31,11 +31,65 @@ export interface BlogCardStaticOptions {
   eyebrow?: string;
 }
 
+// ESCAPING, LEAF-LOCAL. `blogCardStaticHtml` is public API and interpolates caller strings into
+// ATTRIBUTE position, and an earlier revision did it raw — so
+// `blogCardStaticHtml({ thumbnail: 'x.png" onerror="alert(1)' })` emitted a live event handler
+// into committed markup, with no `javascript:` scheme needed. #140 closed exactly this class in
+// sk-button one commit earlier and this component reopened it; a lens measured all three
+// vectors (`thumbnail`, `alt`, and `eyebrow` in text position).
+//
+// Local rather than shared because a markup module must be a LEAF — the generator evaluates it
+// from a `data:` URL, which has no module base, so it cannot import a helper. That constraint is
+// also why this duplication is not a reduction defect: it is the second copy by necessity, and
+// the structural close (a gate that rejects an unescaped interpolation inside a quoted attribute
+// in any `*.markup.ts`) is filed rather than hand-rolled a third time.
+const attr = (value: string): string =>
+  value
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+
+// TEXT position, not attribute: only the markup-significant characters need neutralising.
+const text = (value: string): string =>
+  value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+/** The shared diagnostic for a thumbnail with no alt text. */
+const missingAltMessage = (): string =>
+  'sk-blog-card: `thumbnail` is set but `alt` is missing or empty. An empty alt asserts the ' +
+  'image is decorative and hides it from assistive technology — pass alt text, or omit the ' +
+  'thumbnail.';
+
+/**
+ * The class names this component renders, named once.
+ *
+ * `root` carries BOTH classes, which is the whole point of the composition ruling — one box
+ * styled by two adopted sheets rather than a nested element.
+ */
+export const BLOG_CARD_CLASSES = {
+  root: 'sk-card sk-blog-card',
+  thumbnail: 'sk-blog-card__thumbnail',
+  content: 'sk-blog-card__content',
+  eyebrow: 'sk-blog-card__eyebrow',
+} as const;
+
+// A CONST, NOT A ZERO-ARGUMENT `blogCardClasses()`. The siblings export a function because they
+// have variants to narrow; this component has none, so a function would be a call that can only
+// ever return one string — the shape a lens flagged on sk-check-bullet's equivalent.
+//
+// WHY IT EXISTS AT ALL: the element used to re-type these four strings in its own `render()`,
+// so `sk-blog-card` was the only component in the repo with a markup module its element did not
+// render from — markup AUTHORED TWICE, which is exactly what ADR-8 criterion 3 forbids, on the
+// component whose entire argument is that the two paths are one shape. Worse, the programme
+// doc's measure of that criterion is "has a `*.markup.ts`", so blog-card counted as compliant
+// while being the counter-example. A lens caught it.
+
 /**
  * The static form.
  *
- * BOTH CLASSES ON ONE ELEMENT, which is the whole point of the composition ruling: this string
- * is what the element renders too, so the two paths cannot diverge.
+ * BOTH CLASSES ON ONE ELEMENT. The element renders from the same `BLOG_CARD_CLASSES` above, so
+ * the two paths cannot diverge — that is now enforced by construction rather than asserted.
  */
 export function blogCardStaticHtml(
   opts: BlogCardStaticOptions = {},
@@ -43,15 +97,29 @@ export function blogCardStaticHtml(
     '<p class="sk-blog-card__excerpt">What the article is about.</p>' +
     '<p class="sk-blog-card__meta">Date · reading time</p>',
 ): string {
-  const { thumbnail, alt = '', eyebrow } = opts;
+  const { thumbnail, alt, eyebrow } = opts;
+
+  // THROWS ON THE AUTHORING PATH. Every other static helper in this repo does — button, card,
+  // feature-card, grid, pill-tag, ribbon-card, section-banner — and this one did neither that
+  // nor the render path's warn, so `blogCardStaticHtml({ thumbnail: 'photo.png' })` emitted
+  // `alt=""` into COMMITTED generated output with no signal. `alt=""` is not a missing label; it
+  // is a positive assertion that the image is decorative, so a screen reader skips it entirely.
+  // Both this module's own interface comment and the element's JSDoc already called `alt`
+  // required whenever `thumbnail` is set; nothing enforced it. A lens measured it.
+  if (thumbnail !== undefined && (alt === undefined || alt === '')) {
+    throw new Error(missingAltMessage());
+  }
+
   const image = thumbnail
-    ? `<img class="sk-blog-card__thumbnail" src="${thumbnail}" alt="${alt}">`
+    ? `<img class="${BLOG_CARD_CLASSES.thumbnail}" src="${attr(thumbnail)}" alt="${attr(alt ?? '')}">`
     : '';
-  const lead = eyebrow ? `<p class="sk-blog-card__eyebrow">${eyebrow}</p>` : '';
+  const lead = eyebrow
+    ? `<p class="${BLOG_CARD_CLASSES.eyebrow}">${text(eyebrow)}</p>`
+    : '';
   return (
-    `<article class="sk-card sk-blog-card">` +
+    `<article class="${BLOG_CARD_CLASSES.root}">` +
     image +
-    `<div class="sk-blog-card__content">${lead}${content}</div>` +
+    `<div class="${BLOG_CARD_CLASSES.content}">${lead}${content}</div>` +
     `</article>`
   );
 }

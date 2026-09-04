@@ -274,10 +274,18 @@ Nine remaining components, three per mission. **layout:** grid, section-banner, 
 
 **#79 was that batch, and the criterion is NOT met. Recorded here rather than left to lapse.**
 
-Measured on #79's head: **8 of 12 migrated components have a `*.markup.ts`** — `button`, `card`,
-`check-bullet`, `feature-card`, `grid`, `pill-tag`, `ribbon-card`, `section-banner` — so their
-markup is authored exactly once and the static `.html` plus the styles-layer `index.ts` are
-generated from it with a drift gate.
+**THE MEASURE IS NOT "HAS A `*.markup.ts`".** It is *has a markup module **and the element
+renders from it***, and the difference is not pedantic: #78's `blog-card` shipped a markup module
+whose element re-typed the same four class strings in its own `render()`, so it would have counted
+as compliant by the old proxy while being the counter-example — markup authored twice, on the one
+component whose whole argument is that the two paths are one shape. A lens caught it, and the
+element now renders from `BLOG_CARD_CLASSES`. The proxy is corrected here so it cannot go
+false-green again.
+
+Measured on #78's head: **9 of 13 migrated components** author their markup once and render from
+it — `blog-card`, `button`, `card`, `check-bullet`, `feature-card`, `grid`, `pill-tag`,
+`ribbon-card`, `section-banner` — with the static `.html` plus the styles-layer `index.ts`
+generated from that module and held by a drift gate.
 
 **Three do not, and their static markup is therefore authored a second time:** `nav-pill` (#73),
 `form-input` and `form-textarea` (#74). All three were migrated *before* the markup-module

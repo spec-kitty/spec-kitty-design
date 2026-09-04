@@ -24,7 +24,10 @@
   --sk-color-red:           #E97373;   /* validation errors */
   --sk-color-red-soft:      #F0A0A0;
   --sk-color-sage:          #4F8F4F;   /* heading sage on cream (light-mode only) */
-  --sk-color-sage-deep:     #3D7A3D;   /* hover / pressed */
+  --sk-color-sage-deep:     #3D7A3D;   /* hover / pressed — AND the light-mode --sk-color-accent
+                                            since #78, so the light ramp has no darker sage left
+                                            for an accent hover state. Extend the ramp if one is
+                                            ever needed rather than reusing -soft upward. */
   --sk-color-sage-soft:     #7CAE7C;   /* dim / 70% sage for chips */
 
   /* ── Accent ──────────────────────── */
@@ -234,6 +237,17 @@
      down the ramp that was already defined.
      `--sk-color-sage` itself is unchanged and still correct: its comment scopes it to
      HEADINGS, and 3.58:1 clears AA's 3:1 for large text.
+
+     THIS TOKEN CARRIES THREE ROLES WITH THREE DIFFERENT CONTRAST CONTRACTS, and the ramp step
+     was chosen against the strictest of them. A lens is right that this is worth stating rather
+     than leaving implicit: (a) link TEXT in sk-blog-card, which needs AA 4.5 and is what forced
+     the change; (b) a hover BORDER in the same component, non-text, 3:1 at most; (c) a CTA
+     button FILL in sk-nav-pill, where the contract is on the paired foreground, not on the fill.
+     Consequence for (c) is a real visual change to a shipped component that is not blog-card —
+     the light-mode CTA fill moves #4F8F4F to #3D7A3D. That is a deliberate design change riding
+     along with a contrast fix, and it is named here so it is not discovered as a surprise.
+     Splitting the link role into its own token is the alternative if the roles ever diverge
+     further.
      This also fixes the PAIR below, which was broken and merely unexercised — #FFFFFF on
      #4F8F4F is 3.91:1, so any consumer using the accent background with its own designed
      foreground failed AA. On #3D7A3D it is 5.19:1. Nothing used the pair correctly, which is
