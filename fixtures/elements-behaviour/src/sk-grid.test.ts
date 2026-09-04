@@ -136,9 +136,14 @@ const declarationIn = (
 ): string | undefined => {
   // EVERY match, not the first. Returning the first is what makes a cascade regression
   // invisible to a sheet-reading test: appending `.sk-grid--cols-3 { grid-template-columns: 1fr }`
-  // at the end of the sheet, or `!important` on the base rule, leaves the first match reading
-  // correctly while the modifier is dead in a browser. A pass-2 lens named that hole. Collecting
-  // all matches lets the caller refuse an ambiguous sheet outright.
+  // at the end of the sheet leaves the first match reading correctly while the modifier is dead
+  // in a browser. A pass-2 lens named that hole. Collecting all matches lets the caller refuse
+  // an ambiguous sheet outright.
+  //
+  // It does NOT catch `!important` on the base rule — a different selector, and
+  // getPropertyValue does not carry priority. That case is covered live, in a real browser, by
+  // apps/storybook/src/tests/sk-grid-layout.spec.ts. An earlier version of this comment claimed
+  // both, which is the overclaim this file has already been caught making twice.
   const matches: string[] = [];
   for (const rule of Array.from(sheet.cssRules)) {
     if (media === undefined && rule instanceof CSSStyleRule && rule.selectorText === selector) {
@@ -208,12 +213,16 @@ test('the HOST is a block box, so a consumer can size it', async () => {
   // one CSS line — and it shipped with no test, so deleting it would have reverted the bug with
   // the whole pipeline green. A pass-2 lens caught that, in the fold that fixed it.
   const el = document.createElement('sk-grid');
-  el.style.maxWidth = '640px';
   document.body.append(el);
   await settled(el);
   expect(getComputedStyle(el).display, 'the host must be a block box').toBe('block');
-  // And the consequence, not just the property: max-width must actually constrain it.
-  expect(el.getBoundingClientRect().width, 'max-width did not apply to the host').toBeLessThanOrEqual(640);
+  // And the consequence, not just the property. The width must be one the LANE can
+  // distinguish: at 414px a `max-width: 640px` host measures 414 and an inline one measures 0,
+  // so both would pass — the cannot-fail shape this fold removed two files over, reintroduced
+  // here and caught on verification. 200px separates them.
+  el.style.maxWidth = '200px';
+  await settled(el);
+  expect(Math.round(el.getBoundingClientRect().width), 'max-width did not apply to the host').toBe(200);
 });
 
 test('the collapse below 720px is real, measured at the lane viewport', async () => {

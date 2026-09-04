@@ -255,8 +255,14 @@ jobs:
       # token package anchors light on `:root[data-theme="light"], .sk-light` and `:root` only
       # matches <html>, so both rendered the DARK palette on a light ground with every gate
       # green. The rule was already written in three documents and the class had still recurred
-      # across ten story files; a gate closes it, a note defers it. Scoped to packages/elements
-      # today (zero hits) and widened by each batch mission as it converts a directory.
+      # across ten story files; a gate closes it, a note defers it.
+      #
+      # Repo-wide, with a shrink-only COUNT in expected-inert-theme-wrappers.json — currently
+      # 10, all in packages/styles. An earlier revision of this comment described a
+      # packages/elements scope widened by each batch mission; that model was shown to have
+      # already failed (sk-stub and sk-nav-pill are migrated elements whose styles-layer
+      # stories still offend), and the comment outlived the rewrite because the workflow file
+      # was not in that commit's diff. To retire an offender, fix it and LOWER the count.
       - name: "[ENFORCED] Light-mode story gate self-test (#93)"
         run: node scripts/check-story-theme-wrapper.mjs --selftest
       - name: "[ENFORCED] Light-mode stories activate light mode (#93)"

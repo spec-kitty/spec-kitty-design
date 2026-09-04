@@ -138,17 +138,16 @@ for *what*.
 
 ### 4. Record the component in the three ratchets
 
-Three files hold the component's surface. None is discoverable from the code:
+**Four** files hold the component's surface. None is discoverable from the code:
 
 | file | what to add | what refuses you |
 |---|---|---|
 | `expected-parts.json` | every `@csspart` **and bump `total`**, in the same PR as a test targeting it. The test must live in `fixtures/**/src/**/*.test.ts` or `tests/**/*.test.ts` — the ratchet scans nowhere else | `check-part-ratchet.mjs` — shrink-only, and it compares `total` |
-node scripts/check-story-theme-wrapper.mjs            # no NEW inert `data-theme="light"` wrapper
-node scripts/check-story-theme-wrapper.mjs --selftest # the gate's own probe table
 | `expected-docs.json` | a row with the element's attribute and method counts, **and bump `total`** | `check-manifest-content.mjs` — **exact** equality, so adding a documented property without updating this fails too |
 | `behaviours.json` | a **subject** entry on the ids the component owns, plus a matching `mutations.json` entry naming the same subject file — only if it owns behaviour (step 6) | `floor-reporter.mjs` arm 5 and `suite-selftest.mjs` guard 7 — **once declared** |
+| `expected-inert-theme-wrappers.json` | nothing, if you write `class="sk-light"`. If you FIX one of the remaining inert `data-theme="light"` wrappers, lower `count` in the same commit | `check-story-theme-wrapper.mjs` — shrink-only, and it fails if you fix one without lowering the count |
 
-**Two of those always; the third only when the component owns behaviour.** Nothing detects that
+**The first two always. `behaviours.json` only when the component owns behaviour, and `expected-inert-theme-wrappers.json` only when you retire one of the remaining inert wrappers.** Nothing detects that
 a new component *should* have a behaviour entry — declaring one creates the obligation, and
 omitting it is silently green. That is a real gap, not a shortcut: step 6 is where you decide,
 and the decision is yours to get right.
@@ -220,6 +219,8 @@ node scripts/check-elements-entries.mjs
 node scripts/check-adopted-css-boundaries.mjs
 node scripts/check-element-css-hygiene.mjs
 node scripts/check-part-ratchet.mjs
+node scripts/check-story-theme-wrapper.mjs            # no NEW inert `data-theme="light"` wrapper
+node scripts/check-story-theme-wrapper.mjs --selftest # the gate's own probe table
 node scripts/typecheck-all.mjs
 npm run quality:all                           # ESLint, Stylelint, HTMLHint — all ENFORCED,
                                               # and named in no other step below
