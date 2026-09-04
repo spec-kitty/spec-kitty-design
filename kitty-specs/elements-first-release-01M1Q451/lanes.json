@@ -1,0 +1,95 @@
+{
+  "version": 1,
+  "mission_slug": "elements-first-release-01M1Q451",
+  "mission_id": "01M1Q451EH4ZDCD4VJ6VYB7JWA",
+  "mission_branch": "kitty/mission-elements-first-release-01M1Q451",
+  "target_branch": "mission/elements-first-release",
+  "lanes": [
+    {
+      "lane_id": "lane-a",
+      "wp_ids": [
+        "WP01"
+      ],
+      "write_scope": [
+        ".github/workflows/release.yml",
+        "packages/elements/package.json",
+        "packages/react/package.json",
+        "scripts/release-graph.mjs"
+      ],
+      "predicted_surfaces": [
+        "legacy-cleanup",
+        "workspace"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    },
+    {
+      "lane_id": "lane-b",
+      "wp_ids": [
+        "WP02"
+      ],
+      "write_scope": [
+        ".github/workflows/ci-quality.yml",
+        "scripts/check-gate-wiring.mjs",
+        "scripts/check-release-graph.mjs"
+      ],
+      "predicted_surfaces": [
+        "legacy-cleanup"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    },
+    {
+      "lane_id": "lane-c",
+      "wp_ids": [
+        "WP03"
+      ],
+      "write_scope": [
+        "packages/elements/INTEGRITY.json",
+        "scripts/build-elements-integrity.mjs",
+        "scripts/check-offline-load.mjs"
+      ],
+      "predicted_surfaces": [
+        "api",
+        "artifact-rendering",
+        "legacy-cleanup"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    },
+    {
+      "lane_id": "lane-d",
+      "wp_ids": [
+        "WP04"
+      ],
+      "write_scope": [
+        "packages/styles/package.json"
+      ],
+      "predicted_surfaces": [
+        "api",
+        "legacy-cleanup"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    },
+    {
+      "lane_id": "lane-e",
+      "wp_ids": [
+        "WP05"
+      ],
+      "write_scope": [
+        "CHANGELOG.md",
+        "docs/release-runbook.md"
+      ],
+      "predicted_surfaces": [
+        "legacy-cleanup"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    }
+  ],
+  "computed_at": "2026-09-04T21:23:47.133195+00:00",
+  "computed_from": "dependency_graph+ownership",
+  "planning_artifact_wps": [],
+  "planning_commit_sha": "933629120eaee7e9d3931b95dbebc878fc5879f0"
+}
