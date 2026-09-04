@@ -10,4 +10,5 @@ export * from "./SkNavPill.js";
 export * from "./SkPillTag.js";
 export * from "./SkRibbonCard.js";
 export * from "./SkSectionBanner.js";
+export * from "./SkSiteFooter.js";
 export * from "./SkStub.js";

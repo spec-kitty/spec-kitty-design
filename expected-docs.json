@@ -26,7 +26,8 @@
     "and members[] of kind `method` that are not private/protected and do not start with `#`.",
     "Note that `state: true` properties are deliberately absent from attributes[] — they observe",
     "no attribute and cannot be delivered on a first render under ssrSafe — so they are not",
-    "counted here either. See scripts/normalise-manifest.mjs."
+    "counted here either. See scripts/normalise-manifest.mjs.",
+    "#77 adds <sk-site-footer> with ZERO attributes and zero methods, which is the point rather than an omission: the component owns the grid, the divider and the spacing, and every word a reader sees arrives through one of three slots. It is the first element in the catalogue with no reactive property at all. Note this ratchet is exact-equality, so a property added later fails here until it is documented — which is the intended pressure."
   ],
   "total": 53,
   "elements": {
@@ -79,6 +80,10 @@
       "methods": 0
     },
     "sk-stub": {
+      "attributes": 0,
+      "methods": 0
+    },
+    "sk-site-footer": {
       "attributes": 0,
       "methods": 0
     }

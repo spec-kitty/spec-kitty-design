@@ -19,7 +19,8 @@
     "and can opt each in as it lands.",
     "#78 opts sk-feature-card and sk-ribbon-card in. The a11y gate is what caught this batch's slotted-content contrast defect, and it is the ONLY gate that would catch a recurrence — so retiring these stories must not be silent. A lens noted four migrated elements were sitting outside this ratchet. These two are now in; sk-grid and sk-section-banner (#77's) are STILL OUTSIDE and are not covered by '#79 adds its own' — they need opting in by whoever touches them next.",
     "#79 opts in its own three. The previous note said sk-grid and sk-section-banner were still outside and 'not covered by #79 adds its own' — two lenses observed #79 then added none either, so this per-component chore had been skipped by two batches running. FIVE element story files remain outside, not three: an earlier revision of this note said 'sk-card, sk-grid and sk-section-banner remain outside' and undercounted by two. The full list is sk-card, sk-grid, sk-section-banner, sk-nav-pill and sk-stub. sk-stub is the synthetic probe component and is arguably exempt, but nothing here said so, and a reader acting on the old count would have left two migrated elements silently unratcheted.",
-    "#78 opts sk-blog-card in: five ids, total 43 -> 48. Recorded because this is the ratchet a lens found gaining data silently while behaviours.json, expected-parts.json, mutations.json and expected-inert-theme-wrappers.json each recorded why they moved — and because the note above enumerates which element story files remain OUTSIDE, so a reader had no way to tell blog-card had been opted in. With blog-card in, the five still outside are sk-card, sk-grid, sk-section-banner, sk-nav-pill and sk-stub."
+    "#78 opts sk-blog-card in: five ids, total 43 -> 48. Recorded because this is the ratchet a lens found gaining data silently while behaviours.json, expected-parts.json, mutations.json and expected-inert-theme-wrappers.json each recorded why they moved — and because the note above enumerates which element story files remain OUTSIDE, so a reader had no way to tell blog-card had been opted in. With blog-card in, the five still outside are sk-card, sk-grid, sk-section-banner, sk-nav-pill and sk-stub.",
+    "#77 opts sk-site-footer in: two ids, total 48 -> 50. With it in, the elements still outside this ratchet are sk-card, sk-grid, sk-section-banner, sk-nav-pill and sk-stub — unchanged, since this mission owns only site-footer. The `--docs` entry Storybook generates from the autodocs tag is not listed: it is a generated page, not a story, and no other element records one."
   ],
   "byElement": {
     "sk-blog-card": [
@@ -85,7 +86,11 @@
       "elements-skribboncard--ribbon-colours",
       "elements-skribboncard--bordered-variants",
       "elements-skribboncard--light-mode"
+    ],
+    "sk-site-footer": [
+      "elements-sksitefooter--default",
+      "elements-sksitefooter--light-mode"
     ]
   },
-  "total": 48
+  "total": 50
 }

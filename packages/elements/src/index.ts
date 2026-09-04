@@ -12,6 +12,7 @@ export { SkFeatureCard } from './feature-card/sk-feature-card.js';
 export { SkRibbonCard } from './ribbon-card/sk-ribbon-card.js';
 export { SkPillTag } from './pill-tag/sk-pill-tag.js';
 export { SkSectionBanner } from './section-banner/sk-section-banner.js';
+export { SkSiteFooter } from './site-footer/sk-site-footer.js';
 
 /**
  * The generated constructed stylesheet, exported so a test can assert PROVENANCE.
@@ -40,6 +41,7 @@ export { default as skFeatureCardSheet } from './feature-card/sk-feature-card.cs
 export { default as skRibbonCardSheet } from './ribbon-card/sk-ribbon-card.css.js';
 export { default as skPillTagSheet } from './pill-tag/sk-pill-tag.css.js';
 export { default as skSectionBannerSheet } from './section-banner/sk-section-banner.css.js';
+export { default as skSiteFooterSheet } from './site-footer/sk-site-footer.css.js';
 
 // The card's authored markup module, exported so the two failure policies are reachable
 // from the behaviour fixture. `cardClasses` is TOTAL (an unknown variant warns and degrades)
@@ -112,6 +114,14 @@ export {
   type FeatureCardAccent,
   type FeatureCardVariant,
 } from './feature-card/sk-feature-card.markup.js';
+
+// sk-site-footer's markup module. Only the static form and the legal placeholder: the class map
+// is imported by the element straight from the module, and _VARIANTS/_AXES are the generator's
+// requirement on the module rather than on this barrel — see the ONLY WHAT IS CONSUMED note below.
+export {
+  PLACEHOLDER_LEGAL,
+  siteFooterStaticHtml,
+} from './site-footer/sk-site-footer.markup.js';
 
 // sk-pill-tag's markup module. Both class helpers, because colour and shape each degrade; the
 // maps because the fixture derives its loops from them. The `PillTagShape`/`PillTagVariant`

@@ -1,6 +1,33 @@
 /* @spec-kitty/styles — sk-site-footer */
 /* All values use --sk-* tokens only */
 
+/* A custom element defaults to `display: inline`; `block` lets the footer fill its column and
+   lets a consumer size the host. Inert in the static path, where the root IS the <footer>. */
+:host {
+  display: block;
+}
+
+/* WHAT THIS SHEET CAN AND CANNOT REACH IN THE ELEMENT PATH — stated here because the answer is
+   not symmetric between the two consumption paths, and discovering that at a call site is worse
+   than reading it once.
+
+   SHADOW, so a bare class selector works on both paths: the footer root, the grid, the divider
+   and the legal paragraph. Those are the component's own surface.
+
+   SLOTTED, and only the DIRECTLY assigned nodes are reachable via `::slotted()`: the brand box
+   and the column boxes. Everything INSIDE a slotted column — the heading, the list, the links —
+   is a grandchild, and `::slotted()` matches only directly assigned children. A shadow-tree
+   class selector cannot match a slotted node either, so those rules serve the DOCUMENT path
+   only. An element consumer gets them from this same sheet loaded in their page; it is one CSS
+   source, not two, but the element alone does not style arbitrary nested consumer markup.
+
+   That asymmetry is the open question on #77 — content-as-property would remove it, at the cost
+   of the columns not reaching the element on a React first render. Not decided here.
+
+   AND A STATE PSEUDO-CLASS MUST SIT INSIDE `::slotted()`. `::slotted(x):hover` does not parse,
+   and one invalid selector invalidates its entire comma list — #143 shipped exactly that and
+   silently deleted a working hover on both paths. The gate now rejects it. */
+
 .sk-site-footer {
   padding: var(--sk-space-11) 0 var(--sk-space-8);
   border-top: 1px solid var(--sk-border-default);
@@ -14,6 +41,13 @@
 
 @media (max-width: 640px) {
   .sk-site-footer__grid { grid-template-columns: 1fr; gap: var(--sk-space-8); }
+}
+
+/* The grid's direct children, in both paths. `::slotted()` reaches these because they ARE the
+   assigned nodes; the bare class serves the document. */
+.sk-site-footer__column,
+::slotted(.sk-site-footer__column) {
+  min-width: 0;
 }
 
 .sk-site-footer__brand {
@@ -58,7 +92,7 @@
   gap: var(--sk-space-3);
 }
 
-.sk-footer-link {
+.sk-site-footer__link {
   color: var(--sk-fg-muted);
   font-size: var(--sk-text-sm);
   font-weight: var(--sk-weight-medium);
@@ -72,7 +106,7 @@
     text-decoration-color var(--sk-motion-duration-fast) var(--sk-motion-ease-out);
 }
 
-.sk-footer-link:hover {
+.sk-site-footer__link:hover {
   color: var(--sk-fg-default);
   text-decoration-color: var(--sk-color-yellow);
 }
