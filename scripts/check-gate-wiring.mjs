@@ -22,7 +22,12 @@ import { readFileSync } from 'node:fs';
 import { parse } from 'yaml';
 
 const WORKFLOW = '.github/workflows/ci-quality.yml';
-const JOB = 'test';
+// A LIST, not a name. This was `const JOB = 'test'` — one job, hard-coded — in the script whose
+// entire purpose is noticing a job that cannot block a merge. #80 added `release-gate`, which the
+// single-name version could not have seen: the gate could have gone red while the merge stayed
+// green, the exact condition this file exists to refuse. Every job that runs unconditionally and
+// must be strictly required belongs here.
+const JOBS = ['test', 'release-gate'];
 
 const raw = readFileSync(WORKFLOW, 'utf8');
 const wf = parse(raw);
@@ -33,25 +38,13 @@ const problems = [];
 // false when the job was deleted, so the script printed green over a workflow with no test
 // job at all — the certifying-absence shape check-part-ratchet.mjs goes out of its way to
 // refuse two files over. Found by a pre-merge lens.
-if (!wf.jobs?.[JOB]) problems.push(`there is no \`${JOB}\` job at all`);
+for (const JOB of JOBS) {
+  if (!wf.jobs?.[JOB]) problems.push(`there is no \`${JOB}\` job at all`);
+}
 if (!gate) problems.push('there is no `gate` job');
 else {
-  // 1. the job is a dependency at all
-  if (!(gate.needs ?? []).includes(JOB)) {
-    problems.push(`\`${JOB}\` is not in gate.needs — its result is not even visible to the gate`);
-  }
-
   const step = (gate.steps ?? []).find((s) => String(s.name ?? '').includes('[ENFORCED]'));
   const script = String(step?.run ?? '');
-
-  // 2. a STRICT clause in the failure disjunction
-  const strict = new RegExp(String.raw`\[\s*"\$\{\{\s*needs\.${JOB}\.result\s*\}\}"\s*!=\s*"success"\s*\]`);
-  if (!strict.test(script)) {
-    problems.push(
-      `the gate's [ENFORCED] step has no strict \`needs.${JOB}.result != success\` clause — ` +
-        `the job can fail without blocking the merge`
-    );
-  }
 
   // 3. NOT in the skipped-tolerance block. This is the one a future PR will get wrong.
   const toleranceRe = /case\s+"\$relevant"[\s\S]*?esac/;
@@ -68,21 +61,40 @@ else {
     );
   }
   const tolerance = toleranceMatch?.[0] ?? '';
-  if (tolerance.includes(JOB)) {
-    problems.push(
-      `\`${JOB}\` appears in the skipped-tolerance block. It runs UNCONDITIONALLY, so ` +
-        `'skipped' is never legitimate for it — tolerating it reopens the green-by-skip ` +
-        `bypass the workflow's own comments record closing for a11y.`
-    );
-  }
-  const okVar = new RegExp(String.raw`${JOB}_ok\s*=`);
-  if (okVar.test(script)) {
-    problems.push(`\`${JOB}_ok\` normalisation found — that is how 'skipped' becomes acceptable`);
-  }
 
-  // 4. the job itself must have no `if:`, or "unconditional" is a claim rather than a fact
-  if (wf.jobs?.[JOB] && 'if' in wf.jobs[JOB]) {
-    problems.push(`the \`${JOB}\` job carries an \`if:\` — FR-003 requires it to run unconditionally`);
+  // Checks 1-4 hold for EVERY strictly-required job, not for one hard-coded name.
+  for (const JOB of JOBS) {
+    // 1. the job is a dependency at all
+    if (!(gate.needs ?? []).includes(JOB)) {
+      problems.push(`\`${JOB}\` is not in gate.needs — its result is not even visible to the gate`);
+    }
+
+    // 2. a STRICT clause in the failure disjunction
+    const strict = new RegExp(String.raw`\[\s*"\$\{\{\s*needs\.${JOB}\.result\s*\}\}"\s*!=\s*"success"\s*\]`);
+    if (!strict.test(script)) {
+      problems.push(
+        `the gate's [ENFORCED] step has no strict \`needs.${JOB}.result != success\` clause — ` +
+          `the job can fail without blocking the merge`
+      );
+    }
+
+    // 3 (continued)
+    if (tolerance.includes(JOB)) {
+      problems.push(
+        `\`${JOB}\` appears in the skipped-tolerance block. It runs UNCONDITIONALLY, so ` +
+          `'skipped' is never legitimate for it — tolerating it reopens the green-by-skip ` +
+          `bypass the workflow's own comments record closing for a11y.`
+      );
+    }
+    const okVar = new RegExp(String.raw`${JOB.replace(/-/g, '[-_]')}_ok\s*=`);
+    if (okVar.test(script)) {
+      problems.push(`\`${JOB}_ok\` normalisation found — that is how 'skipped' becomes acceptable`);
+    }
+
+    // 4. the job itself must have no `if:`, or "unconditional" is a claim rather than a fact
+    if (wf.jobs?.[JOB] && 'if' in wf.jobs[JOB]) {
+      problems.push(`the \`${JOB}\` job carries an \`if:\` — FR-003 requires it to run unconditionally`);
+    }
   }
 
   // 5. THE PAYLOAD, not just the edge.
@@ -162,11 +174,36 @@ else {
     }
   }
 
-  const steps = wf.jobs?.[JOB]?.steps ?? [];
+  // REQUIRED describes the `test` job's payload specifically, so it is named rather than looped.
+  const steps = wf.jobs?.test?.steps ?? [];
   for (const [re, what, label] of REQUIRED) {
     const matching = steps.filter((st) => re.test(commandLines(st)));
     if (matching.length === 0) {
-      problems.push(`the \`${JOB}\` job never runs ${what} (${label}) — the gate would guard an empty job`);
+      problems.push(`the \`test\` job never runs ${what} (${label}) — the gate would guard an empty job`);
+      continue;
+    }
+    for (const st of matching) {
+      for (const why of neutered(st)) {
+        problems.push(`the step running ${what} ${why} — it cannot fail the job, so the gate guards nothing`);
+      }
+    }
+  }
+
+  // THE THIRD JOB, added with the job itself rather than one mission later. #74 shipped a gate
+  // with no entry in this file and a lens proved the consequence: both its CI lines could be
+  // deleted with this checker still green. `release-gate` exists to run a workflow that no PR had
+  // ever executed, so a `release-gate` job reduced to `echo ok` would restore precisely the
+  // condition it was built to end. Whole-command matching, because
+  // `check-release-graph.mjs` is a SUBSTRING of the same line with `--selftest`.
+  const REQUIRED_RELEASE = [
+    [/node\s+scripts\/check-release-graph\.mjs(?!\s*--selftest)(\s|$)/, 'the release graph gate', 'scripts/check-release-graph.mjs'],
+    [/node\s+scripts\/check-release-graph\.mjs\s+--selftest(\s|$)/, "the release gate's own probe table", 'scripts/check-release-graph.mjs --selftest'],
+  ];
+  const releaseSteps = wf.jobs?.['release-gate']?.steps ?? [];
+  for (const [re, what, label] of REQUIRED_RELEASE) {
+    const matching = releaseSteps.filter((st) => re.test(commandLines(st)));
+    if (matching.length === 0) {
+      problems.push(`the \`release-gate\` job never runs ${what} (${label}) — the gate would guard an empty job`);
       continue;
     }
     for (const st of matching) {
@@ -179,7 +216,8 @@ else {
   // The gate's OWN enforced step, and both jobs. `continue-on-error` or an `if:` anywhere in
   // this chain makes a failure unreachable. lint-code uses continue-on-error deliberately,
   // rescued by an explicit "Fail if lint errors" step; nothing here is.
-  for (const [jobName, job] of Object.entries({ [JOB]: wf.jobs?.[JOB], gate })) {
+  const guarded = Object.fromEntries(JOBS.map((j) => [j, wf.jobs?.[j]]));
+  for (const [jobName, job] of Object.entries({ ...guarded, gate })) {
     if (!job) continue;
     if (job['continue-on-error']) problems.push(`job \`${jobName}\` carries continue-on-error — its failure cannot reach the gate`);
     for (const st of job.steps ?? []) {
@@ -198,8 +236,8 @@ else {
 }
 
 if (problems.length) {
-  console.error(`❌ ${WORKFLOW}: the gate does not gate \`${JOB}\` (FR-014):`);
+  console.error(`❌ ${WORKFLOW}: the gate does not gate \`${JOBS.join('`, `')}\` (FR-014):`);
   for (const p of problems) console.error(`   ${p}`);
   process.exit(1);
 }
-console.log(`✅ gate wiring: \`${JOB}\` is in needs, tested strictly, absent from the skip tolerance, and unconditional.`);
+console.log(`✅ gate wiring: \`${JOBS.join('`, `')}\` are in needs, tested strictly, absent from the skip tolerance, and unconditional.`);

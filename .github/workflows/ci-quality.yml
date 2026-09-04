@@ -316,7 +316,7 @@ jobs:
         run: node scripts/measure-elements-sizes.mjs --check
       - name: "[ENFORCED] Demo surface assembles and every asset reference resolves"
         run: |
-          npx nx run-many --target=build --projects=tokens,styles,elements
+          npx nx run-many --target=build --projects=$(node scripts/release-graph.mjs --projects)
           bash scripts/assemble-demo-dist.sh apps/storybook/storybook-static
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # actions/upload-artifact v4.6.2
         with:
@@ -452,9 +452,38 @@ jobs:
           node -e "const r=require('./lighthouse-report.json'); for (const [k,v] of Object.entries(r.categories)) console.log(k+': '+Math.round(v.score*100))" || true
 
   # ── Merge gate ──────────────────────────────────────────────────────────────
+  # #80. release.yml triggers on `push: tags: ['v*.*.*']` and nothing else, so no pull request
+  # had ever executed it. The `cp packages/html-js/src/nav-pill/sk-nav-pill.js` step #73 removed
+  # would have hard-failed the next release and was found by a lens READING the file; three
+  # hand-written package lists drifted apart in that workflow for the same reason. This job is the
+  # thing that runs.
+  #
+  # DELIBERATELY UNCONDITIONAL — no `if:`, and not behind the `changes` filter. A packaging-only
+  # PR (a `files` array, an `exports` map, a `private` flag) is precisely the PR this gate exists
+  # for, and a filtered job would skip on it. `storybook-build` legitimately skips when no
+  # component changed; this must not.
+  #
+  # It builds rather than reusing another job's artifact because `npm pack` resolves `exports`
+  # against real files and `dist/` is gitignored.
+  release-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # actions/checkout v4.3.1
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e  # actions/setup-node v6.4.0
+        with: { node-version: '22', cache: 'npm' }
+      - run: npm ci --ignore-scripts
+      # The probes FIRST. A gate observed green on a healthy tree has demonstrated nothing about
+      # what it can see, and this one asserts tarball contents that are easy to get vacuously right.
+      - name: "[ENFORCED] The release gate can see its own failures (SC-003)"
+        run: node scripts/check-release-graph.mjs --selftest
+      - name: Build the publishable graph
+        run: npx nx run-many --target=build --projects=$(node scripts/release-graph.mjs --projects)
+      - name: "[ENFORCED] Release graph is coherent (FR-003, FR-004, SC-001, SC-002, SC-004, SC-010)"
+        run: node scripts/check-release-graph.mjs
+
   gate:
     runs-on: ubuntu-latest
-    needs: [changes, security, workflow-pin-check, lint-code, storybook-build, a11y, visual-regression, playwright, test]
+    needs: [changes, security, workflow-pin-check, lint-code, storybook-build, a11y, visual-regression, playwright, test, release-gate]
     if: always()
     steps:
       - name: "[ENFORCED] All hard gates must pass (FR-026)"
@@ -468,6 +497,7 @@ jobs:
           echo "visual-regression: ${{ needs.visual-regression.result }}"
           echo "playwright: ${{ needs.playwright.result }}"
           echo "test: ${{ needs.test.result }}"
+          echo "release-gate: ${{ needs.release-gate.result }}"
           # a11y / visual-regression / playwright are skipped when storybook-build is skipped (no component changes)
           # storybook-build carries [ENFORCED] steps of its own (the Storybook
           # build and the demo-surface assembly check). Until it was added to
@@ -512,8 +542,13 @@ jobs:
           # never legitimate for it — without this, a PR setting `if: false` on the test
           # job would get 'skipped' and pass, which is the bypass the comment above
           # records having closed once already for a11y.
+          # `release-gate` joins `changes` and `test` in the STRICT list, with no entry in the
+          # skipped-tolerance block. It has no `if:` and is not behind the `changes` filter, so
+          # 'skipped' is never legitimate for it — and a packaging-only PR is exactly the shape
+          # where a tolerated skip would matter most (#80).
           if [ "${{ needs.changes.result }}"           != "success" ] || \
              [ "${{ needs.test.result }}"              != "success" ] || \
+             [ "${{ needs.release-gate.result }}"      != "success" ] || \
              [ "${{ needs.security.result }}"          != "success" ] || \
              [ "${{ needs.workflow-pin-check.result }}" != "success" ] || \
              [ "${{ needs.lint-code.result }}"          != "success" ] || \
