@@ -135,6 +135,7 @@ This repo uses Spec Kitty for structured spec-driven development.
 ## 9. Common pitfalls
 
 - Forgetting the `LightMode` story — no lint catches it, reviewers do. Wrap in `class="sk-light"` and assert the computed value differs between themes; see the recipe.
+- Forgetting `:host { display: … }` — a custom element defaults to `display: inline`, so a consumer's `max-width` on it is inert. Make it agree with the static form's display.
 - **Cross-package import** — `@nx/enforce-module-boundaries` will fail with a clear error pointing to the rule. Re-route through `@spec-kitty/tokens` or compose at the consumer level.
 - **Hardcoded colour / spacing in CSS** — stylelint fails with `Expected ... to be a token`. Add to `tokens.css` first, regenerate catalogue, then reference via `var(--sk-*)`.
 - **Stale token catalogue** — symptoms are stylelint failures on tokens you just added. Run `npx nx run tokens:catalogue`.

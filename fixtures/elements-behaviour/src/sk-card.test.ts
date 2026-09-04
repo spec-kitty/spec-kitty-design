@@ -1,7 +1,7 @@
 import { beforeEach, expect, test } from 'vitest';
 import '@spec-kitty/elements';
 import { cardClasses, cardStaticHtml } from '@spec-kitty/elements';
-import tokensCss from '@spec-kitty/tokens/tokens.css?raw';
+import { installTokenSheet } from './token-sheet.js';
 
 /**
  * <sk-card> — ADR-8 confirmation #1, and the repair #72 carries.
@@ -13,29 +13,8 @@ import tokensCss from '@spec-kitty/tokens/tokens.css?raw';
  * behaviour-registry claims.
  */
 
-/**
- * Loads the REAL @spec-kitty/tokens sheet.
- *
- * An earlier version injected fabricated values, which meant the test asserted only that
- * sk-card.css DEREFERENCES the token — never that the token package DEFINES it. A lens
- * measured the consequence: deleting the two light-block declarations from tokens.css
- * killed light mode for every real card and this suite stayed 24/24 green. That is the
- * eighth instance of this programme's defect class, inside the test the story docstring
- * cites as "asserted, not eyeballed".
- */
-const tokenStyle = () => {
-  const s = document.createElement('style');
-  s.textContent = tokensCss;
-  document.head.append(s);
-  return s;
-};
 
-let style: HTMLStyleElement;
-beforeEach(() => {
-  document.body.innerHTML = '';
-  style?.remove();
-  style = tokenStyle();
-});
+beforeEach(installTokenSheet);
 
 test('the blue variant reads its border colour from a TOKEN, so light mode crosses the shadow boundary', async () => {
   // This is the mission's known repair, asserted rather than assumed.

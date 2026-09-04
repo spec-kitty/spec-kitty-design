@@ -41,6 +41,18 @@ do not add anything there for a new component — get the manifest right and the
 
 ### 1. Author the CSS in `packages/styles`
 
+**Give the host a box.** A custom element's UA default is `display: inline`, and `max-width`,
+`width`, `margin` and vertical padding do not apply to a non-replaced inline box — so a
+consumer's `style="max-width: 640px"` on your element is silently inert. Declare
+`:host { display: … }` in the component's `.css`, and make it agree with the static form's own
+display: `sk-section-banner` shipped `:host { display: inline-flex }` against a static
+`display: flex` for one commit, and the two consumption paths rendered differently.
+
+`:host` is accepted by `check-adopted-css-boundaries.mjs` and is inert in the static path, where
+the root element IS the `.sk-<name>` div. #77 found five committed stories whose `max-width` had
+never done anything.
+
+
 `packages/styles/src/<name>/sk-<name>.css`. This is the source of record and the only file
 stylelint's `--sk-*` rule can see.
 
@@ -126,15 +138,16 @@ for *what*.
 
 ### 4. Record the component in the three ratchets
 
-Three files hold the component's surface. None is discoverable from the code:
+**Four** files hold the component's surface. None is discoverable from the code:
 
 | file | what to add | what refuses you |
 |---|---|---|
 | `expected-parts.json` | every `@csspart` **and bump `total`**, in the same PR as a test targeting it. The test must live in `fixtures/**/src/**/*.test.ts` or `tests/**/*.test.ts` — the ratchet scans nowhere else | `check-part-ratchet.mjs` — shrink-only, and it compares `total` |
 | `expected-docs.json` | a row with the element's attribute and method counts, **and bump `total`** | `check-manifest-content.mjs` — **exact** equality, so adding a documented property without updating this fails too |
 | `behaviours.json` | a **subject** entry on the ids the component owns, plus a matching `mutations.json` entry naming the same subject file — only if it owns behaviour (step 6) | `floor-reporter.mjs` arm 5 and `suite-selftest.mjs` guard 7 — **once declared** |
+| `expected-inert-theme-wrappers.json` | nothing, if you write `class="sk-light"`. If you FIX one of the remaining inert `data-theme="light"` wrappers, lower `count` in the same commit | `check-story-theme-wrapper.mjs` — shrink-only, and it fails if you fix one without lowering the count |
 
-**Two of those always; the third only when the component owns behaviour.** Nothing detects that
+**The first two always. `behaviours.json` only when the component owns behaviour, and `expected-inert-theme-wrappers.json` only when you retire one of the remaining inert wrappers.** Nothing detects that
 a new component *should* have a behaviour entry — declaring one creates the obligation, and
 omitting it is silently green. That is a real gap, not a shortcut: step 6 is where you decide,
 and the decision is yours to get right.
@@ -206,6 +219,8 @@ node scripts/check-elements-entries.mjs
 node scripts/check-adopted-css-boundaries.mjs
 node scripts/check-element-css-hygiene.mjs
 node scripts/check-part-ratchet.mjs
+node scripts/check-story-theme-wrapper.mjs            # no NEW inert `data-theme="light"` wrapper
+node scripts/check-story-theme-wrapper.mjs --selftest # the gate's own probe table
 node scripts/typecheck-all.mjs
 npm run quality:all                           # ESLint, Stylelint, HTMLHint — all ENFORCED,
                                               # and named in no other step below

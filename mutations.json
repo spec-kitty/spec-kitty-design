@@ -9,16 +9,19 @@
     "set equality.",
     "",
     "TWO ENTRIES ARE DELIBERATELY NOT THE OBVIOUS FORM, and the spec pins both:",
-    "  SC-015 is NOT 'replace define with an empty function' \u2014 that unregisters sk-stub and",
+    "  SC-015 is NOT 'replace define with an empty function' — that unregisters sk-stub and",
     "  reds every other elements-owned test, failing the collateral bound on the mission's own",
     "  canonical mutation.",
-    "  SC-014 is NOT 'hand-author a new CSSStyleSheet()' \u2014 the generated module already exports",
+    "  SC-014 is NOT 'hand-author a new CSSStyleSheet()' — the generated module already exports",
     "  exactly that and Lit adopts it by reference, so identity survives and the test stays",
     "",
     "`subject` (#73) names the test FILE whose [id] must go red. Behaviour ids are no longer",
-    "unique across the suite \u2014 sk-nav-pill and the synthetic fixture both carry SC-006 \u2014 so an",
+    "unique across the suite — sk-nav-pill and the synthetic fixture both carry SC-006 — so an",
     "id-only match would let a mutation red the fixture's test and be credited for the",
-    "element's. Guard 7 now compares (id, subject) pairs against behaviours.json's subjects."
+    "element's. Guard 7 now compares (id, subject) pairs against behaviours.json's subjects.",
+    "#77 adds two for <sk-grid>, one per registry id it claims. Both mutate the ELEMENT rather than the test: dropping part=\"grid\" must red the [SC-013] test, and emptying `static styles` must red [SC-014]. Note the SC-014 arm empties the array rather than swapping in a fresh CSSStyleSheet the way sk-stub's does — sk-grid.test.ts asserts adoptedStyleSheets.length, so both spellings red it, and the empty form also proves the length arm is load-bearing.",
+    "#77 adds two more for <sk-section-banner>. The SC-013 arm drops a part= attribute from a node the test targets by name; note it picks the DOT rather than the outermost part, because the outermost one is also a node the test queries to prove the element rendered at all, so removing it would red the test for the wrong reason.",
+    "#77's pre-merge gate added a SECOND SC-014 arm per element. The first arm empties `static styles`, which reds the `adoptedStyleSheets.length` assertion FIRST — vitest aborts there, so the identity assertion on the next line was never shown to be load-bearing, in the behaviour whose id is literally about identity. Swapping in a fresh CSSStyleSheet keeps length at 1 and can only red the identity arm. Both spellings are kept: one proves the length assertion, the other proves the identity assertion, and neither alone proves both."
   ],
   "mutations": [
     {
@@ -364,6 +367,54 @@
       "from": "  useEventListener(ref, \"sk-nav-pill-toggle\", props.onSkNavPillToggle);",
       "to": "  void props.onSkNavPillToggle;",
       "subject": "fixtures/react-consumer/src/wrappers.test.tsx"
+    },
+    {
+      "id": "SC-013",
+      "subject": "fixtures/elements-behaviour/src/sk-grid.test.ts",
+      "arm": "grid part present",
+      "file": "packages/elements/src/grid/sk-grid.ts",
+      "from": "<div part=\"grid\" class=${gridClasses(this.variant, this.gap)}>",
+      "to": "<div class=${gridClasses(this.variant, this.gap)}>"
+    },
+    {
+      "id": "SC-014",
+      "subject": "fixtures/elements-behaviour/src/sk-grid.test.ts",
+      "arm": "grid adopts its generated sheet",
+      "file": "packages/elements/src/grid/sk-grid.ts",
+      "from": "  static styles = [sheet];",
+      "to": "  static styles = [];"
+    },
+    {
+      "id": "SC-013",
+      "subject": "fixtures/elements-behaviour/src/sk-section-banner.test.ts",
+      "arm": "section-banner dot part present",
+      "file": "packages/elements/src/section-banner/sk-section-banner.ts",
+      "from": "<span part=\"dot\" class=\"sk-section-banner__dot\" aria-hidden=\"true\">",
+      "to": "<span class=\"sk-section-banner__dot\" aria-hidden=\"true\">"
+    },
+    {
+      "id": "SC-014",
+      "subject": "fixtures/elements-behaviour/src/sk-section-banner.test.ts",
+      "arm": "section-banner adopts its generated sheet",
+      "file": "packages/elements/src/section-banner/sk-section-banner.ts",
+      "from": "  static styles = [sheet];",
+      "to": "  static styles = [];"
+    },
+    {
+      "id": "SC-014",
+      "subject": "fixtures/elements-behaviour/src/sk-grid.test.ts",
+      "arm": "grid adopts the sheet BY IDENTITY",
+      "file": "packages/elements/src/grid/sk-grid.ts",
+      "from": "  static styles = [sheet];",
+      "to": "  static styles = [new CSSStyleSheet()];"
+    },
+    {
+      "id": "SC-014",
+      "subject": "fixtures/elements-behaviour/src/sk-section-banner.test.ts",
+      "arm": "section-banner adopts the sheet BY IDENTITY",
+      "file": "packages/elements/src/section-banner/sk-section-banner.ts",
+      "from": "  static styles = [sheet];",
+      "to": "  static styles = [new CSSStyleSheet()];"
     }
   ]
 }

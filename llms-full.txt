@@ -535,10 +535,14 @@ markup module (ADR-10 §3).
 | `sk-nav-pill` | yes | fires `sk-nav-pill-toggle` with `detail: { open: boolean }`, cancelable; `isOpen` reflects as the `open` attribute |
 | `sk-form-input` | yes | form-associated via `ElementInternals`; `errorMessage` is `state: true` and deliberately not a React prop |
 | `sk-form-textarea` | yes | as `sk-form-input`, plus `rows` |
+| `sk-grid` | no | `variant` (cols-2/3/4), `gap` (3/4/6); default slot; collapses to one column below 720px |
+| `sk-section-banner` | no | `variant` (neutral/purple/green), defaulting to neutral on BOTH paths because the base class paints nothing; label is slotted |
 | `sk-stub` | no | zero public members; the deliberate empty case several gates are floored against |
 
 The remaining catalogue components still live in `packages/styles` and have not
-yet been migrated — #77, #78 and #79 are the missions that move them.
+yet been migrated — #78 and #79 are the missions that move them. #77 migrated
+`grid` and `section-banner`; `site-footer` is still styles-only, deferred on a
+design fork recorded on that issue.
 
 ### react package — `packages/react/src/`
 
@@ -617,10 +621,10 @@ carry the detail generic from the element's `@fires {Type}`.
 - Notes: includes the `RibbonYellow` colourway.
 
 #### sk-section-banner (styles)
-- Path: `packages/styles/src/section-banner/sk-section-banner.css` + `sk-section-banner.html` + `sk-section-banner-html.stories.ts`
+- Path: `packages/styles/src/section-banner/sk-section-banner.css` (authored) + `sk-section-banner.html` and `index.ts` (**generated** from `packages/elements/src/section-banner/sk-section-banner.markup.ts`) + `sk-section-banner-html.stories.ts`
 - Story title: `Primitives/SkSectionBanner (HTML)`
 - Variants: `Neutral`, `Purple`, `Green`, `LightMode`
-- Notes: exports `SkSectionBannerNeutralHTML`, `SkSectionBannerPurpleHTML`, `SkSectionBannerGreenHTML`.
+- Notes: exports `SkSectionBannerHTML` (the base, identical to neutral), `SkSectionBannerNeutralHTML`, `SkSectionBannerPurpleHTML`, `SkSectionBannerGreenHTML`. The labels are placeholders — version strings live in the stories, not in the component (#77).
 
 #### sk-site-footer (styles)
 - Path: `packages/styles/src/site-footer/sk-site-footer.css` + `sk-site-footer.stories.ts`

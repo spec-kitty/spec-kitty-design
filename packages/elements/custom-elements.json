@@ -67,6 +67,15 @@
           ]
         },
         {
+          "kind": "variable",
+          "name": "DEFAULT_VARIANT",
+          "type": {
+            "text": "SectionBannerVariant"
+          },
+          "default": "'neutral'",
+          "description": "The DEFAULT variant, and the reason there is one.\n\nUnlike sk-card, the base `.sk-section-banner` class sets no background and no colour — the\nvariant carries both. A base form with no variant is therefore not a plainer banner, it is\nan unpainted one, so `neutral` is the default on both paths rather than leaving the\ngenerator's base export rendering an invisible banner."
+        },
+        {
           "kind": "class",
           "description": "",
           "name": "FormControlBase",
@@ -289,6 +298,79 @@
           "customElement": true
         },
         {
+          "kind": "variable",
+          "name": "GRID_AXES",
+          "default": "Object.fromEntries( Object.keys(GRID_GAPS).map((g) => [`Gap${g}`, { gap: Number(g) }]), )",
+          "description": "The non-variant axes — DERIVED from GRID_GAPS, not hand-listed.\n\nRequired by the generator even when empty: `?? {}` cannot distinguish \"this component has no\naxes\" from \"I looked for the wrong export name\".\n\nIt was `{ Gap3: { gap: 3 }, Gap6: { gap: 6 } }` — a hand-maintained subset of GRID_GAPS, one\nfile over from the hardcoded variant table `build-element-markup.mjs` documents at length as\nthe reason `forms` is derived. Adding a gap to GRID_GAPS would have given the ELEMENT the new\ngap while the static consumers silently did not get an export, with `--check` green, because\nthe generator emits exactly what this module declares and cannot know it under-declared.\nDeriving it closes the other half of that class.\n\nGap4 is now emitted too, and that is correct rather than noise: `.sk-grid--gap-4` is the\ndefault gap restated, so a consumer pinning it explicitly is a real thing to express."
+        },
+        {
+          "kind": "variable",
+          "name": "GRID_GAPS",
+          "type": {
+            "text": "{\n  3: 'sk-grid--gap-3',\n  4: 'sk-grid--gap-4',\n  6: 'sk-grid--gap-6',\n}"
+          },
+          "default": "{ 3: 'sk-grid--gap-3', 4: 'sk-grid--gap-4', 6: 'sk-grid--gap-6', }",
+          "description": "The gap modifiers, which are an axis rather than a variant — a grid has a column count AND\na gap, not one or the other."
+        },
+        {
+          "kind": "variable",
+          "name": "GRID_VARIANTS",
+          "type": {
+            "text": "{\n  'cols-2': 'sk-grid--cols-2',\n  'cols-3': 'sk-grid--cols-3',\n  'cols-4': 'sk-grid--cols-4',\n}"
+          },
+          "default": "{ 'cols-2': 'sk-grid--cols-2', 'cols-3': 'sk-grid--cols-3', 'cols-4': 'sk-grid--cols-4', }",
+          "description": "The column-count modifiers this primitive supports, as variant name → BEM modifier."
+        },
+        {
+          "kind": "function",
+          "name": "gridClasses",
+          "return": {
+            "type": {
+              "text": "string"
+            }
+          },
+          "parameters": [
+            {
+              "name": "variant",
+              "optional": true,
+              "type": {
+                "text": "string"
+              }
+            },
+            {
+              "name": "gap",
+              "optional": true,
+              "type": {
+                "text": "number"
+              }
+            }
+          ],
+          "description": "The BEM class list for a grid. Warns and degrades on an unknown variant or gap."
+        },
+        {
+          "kind": "function",
+          "name": "gridStaticHtml",
+          "return": {
+            "type": {
+              "text": "string"
+            }
+          },
+          "parameters": [
+            {
+              "name": "opts",
+              "default": "{}",
+              "type": {
+                "text": "GridStaticOptions"
+              }
+            },
+            {
+              "name": "content",
+              "default": "PLACEHOLDER_ITEMS"
+            }
+          ],
+          "description": "The static form, for a consumer with no JavaScript. Throws on an unknown variant."
+        },
+        {
           "kind": "function",
           "name": "isCardVariant",
           "return": {
@@ -305,6 +387,117 @@
             }
           ],
           "description": "Whether `variant` names a real card modifier."
+        },
+        {
+          "kind": "function",
+          "name": "isGridGap",
+          "return": {
+            "type": {
+              "text": "gap is GridGap"
+            }
+          },
+          "parameters": [
+            {
+              "name": "gap",
+              "type": {
+                "text": "unknown"
+              }
+            }
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "isGridVariant",
+          "return": {
+            "type": {
+              "text": "variant is GridVariant"
+            }
+          },
+          "parameters": [
+            {
+              "name": "variant",
+              "type": {
+                "text": "string"
+              }
+            }
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "isSectionBannerVariant",
+          "return": {
+            "type": {
+              "text": "variant is SectionBannerVariant"
+            }
+          },
+          "parameters": [
+            {
+              "name": "variant",
+              "type": {
+                "text": "string"
+              }
+            }
+          ]
+        },
+        {
+          "kind": "variable",
+          "name": "SECTION_BANNER_AXES",
+          "type": {
+            "text": "{}"
+          },
+          "default": "{}",
+          "description": "No non-variant axes. Declared explicitly rather than omitted — `?? {}` cannot distinguish\n\"this component has none\" from \"I looked for the wrong export name\", which is a defect this\ngenerator has already had."
+        },
+        {
+          "kind": "variable",
+          "name": "SECTION_BANNER_VARIANTS",
+          "type": {
+            "text": "{\n  neutral: 'sk-section-banner--neutral',\n  purple: 'sk-section-banner--purple',\n  green: 'sk-section-banner--green',\n}"
+          },
+          "default": "{ neutral: 'sk-section-banner--neutral', purple: 'sk-section-banner--purple', green: 'sk-section-banner--green', }",
+          "description": "The colour variants. `neutral` is the default; the base form is not a distinct look."
+        },
+        {
+          "kind": "function",
+          "name": "sectionBannerClasses",
+          "return": {
+            "type": {
+              "text": "string"
+            }
+          },
+          "parameters": [
+            {
+              "name": "variant",
+              "optional": true,
+              "type": {
+                "text": "string"
+              }
+            }
+          ],
+          "description": "The class list. Warns and degrades to the default variant on an unknown one."
+        },
+        {
+          "kind": "function",
+          "name": "sectionBannerStaticHtml",
+          "return": {
+            "type": {
+              "text": "string"
+            }
+          },
+          "parameters": [
+            {
+              "name": "opts",
+              "default": "{}",
+              "type": {
+                "text": "SectionBannerStaticOptions"
+              }
+            },
+            {
+              "name": "content",
+              "default": "'Section label'"
+            }
+          ],
+          "description": "The static form. Throws on an unknown variant — it runs on the build path, where a bad\nvariant must never reach committed output.\n\n`content` is the LABEL TEXT, and it is a placeholder here on purpose. Until #77 the three\ngenerated exports each carried a hardcoded version string (\"VERSION 1.X — FIRST STABLE\nRELEASE\" and two others), which made the component's own source the place a docsite's\ncontent lived — so changing a version number meant editing the component library. The\nlabel is the consumer's; only the structure is the component's."
         },
         {
           "kind": "class",
@@ -1359,6 +1552,71 @@
         },
         {
           "kind": "class",
+          "description": "A responsive grid layout primitive.\n\nBounded on purpose: it supports 2, 3 and 4 columns because that is what the blog listing and\nreference pages need. It is not a general-purpose grid system. Use `::part(grid)` for layouts\noutside that set rather than asking for another variant.",
+          "name": "SkGrid",
+          "cssParts": [
+            {
+              "description": "the grid container, for column and gap overrides beyond the provided set",
+              "name": "grid"
+            }
+          ],
+          "slots": [
+            {
+              "description": "the grid items, which become the grid's direct children",
+              "name": ""
+            }
+          ],
+          "members": [
+            {
+              "kind": "field",
+              "name": "gap",
+              "privacy": "public",
+              "type": {
+                "text": "number | undefined"
+              },
+              "description": "Gap between items, in token steps: 3, 4 or 6. Omit for the default (4).",
+              "attribute": "gap",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "variant",
+              "privacy": "public",
+              "type": {
+                "text": "'cols-2' | 'cols-3' | 'cols-4' | undefined"
+              },
+              "description": "Column count, as `cols-2`, `cols-3` or `cols-4`. Omit for a single column. An unknown\nvalue renders the base grid and warns rather than throwing.",
+              "attribute": "variant",
+              "reflects": true
+            }
+          ],
+          "attributes": [
+            {
+              "name": "gap",
+              "type": {
+                "text": "number | undefined"
+              },
+              "description": "Gap between items, in token steps: 3, 4 or 6. Omit for the default (4).",
+              "fieldName": "gap"
+            },
+            {
+              "name": "variant",
+              "type": {
+                "text": "'cols-2' | 'cols-3' | 'cols-4' | undefined"
+              },
+              "description": "Column count, as `cols-2`, `cols-3` or `cols-4`. Omit for a single column. An unknown\nvalue renders the base grid and warns rather than throwing.",
+              "fieldName": "variant"
+            }
+          ],
+          "superclass": {
+            "name": "LitElement",
+            "package": "lit"
+          },
+          "tagName": "sk-grid",
+          "customElement": true
+        },
+        {
+          "kind": "class",
           "description": "The navigation pill — a row of links that collapses to a hamburger and a panel.",
           "name": "SkNavPill",
           "cssParts": [
@@ -1547,6 +1805,60 @@
         },
         {
           "kind": "class",
+          "description": "A mono-caps banner that delineates a version or section block.\n\nNon-interactive by design: it has no hover, focus or disabled state, and the colour variant\nIS the state. The label is slotted content, not a property — a banner's text is the\nconsuming page's, and hardcoding it in the component is what this element replaced.",
+          "name": "SkSectionBanner",
+          "cssParts": [
+            {
+              "description": "the banner container",
+              "name": "banner"
+            },
+            {
+              "description": "the leading dot, which is decorative and hidden from assistive technology",
+              "name": "dot"
+            },
+            {
+              "description": "the label text wrapper",
+              "name": "label"
+            }
+          ],
+          "slots": [
+            {
+              "description": "the banner label",
+              "name": ""
+            }
+          ],
+          "members": [
+            {
+              "kind": "field",
+              "name": "variant",
+              "privacy": "public",
+              "type": {
+                "text": "'neutral' | 'purple' | 'green' | undefined"
+              },
+              "description": "Colour variant: `neutral` (the default), `purple` or `green`. An unknown value renders\nthe neutral banner and warns rather than throwing.",
+              "attribute": "variant",
+              "reflects": true
+            }
+          ],
+          "attributes": [
+            {
+              "name": "variant",
+              "type": {
+                "text": "'neutral' | 'purple' | 'green' | undefined"
+              },
+              "description": "Colour variant: `neutral` (the default), `purple` or `green`. An unknown value renders\nthe neutral banner and warns rather than throwing.",
+              "fieldName": "variant"
+            }
+          ],
+          "superclass": {
+            "name": "LitElement",
+            "package": "lit"
+          },
+          "tagName": "sk-section-banner",
+          "customElement": true
+        },
+        {
+          "kind": "class",
           "description": "The scaffold element for the ADR-8 custom-element base layer.",
           "name": "SkStub",
           "members": [],
@@ -1556,6 +1868,23 @@
           },
           "tagName": "sk-stub",
           "customElement": true
+        },
+        {
+          "kind": "function",
+          "name": "unknownGapMessage",
+          "return": {
+            "type": {
+              "text": "string"
+            }
+          },
+          "parameters": [
+            {
+              "name": "gap",
+              "type": {
+                "text": "unknown"
+              }
+            }
+          ]
         },
         {
           "kind": "function",
@@ -1619,6 +1948,14 @@
         },
         {
           "kind": "js",
+          "name": "DEFAULT_VARIANT",
+          "declaration": {
+            "name": "DEFAULT_VARIANT",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
           "name": "define",
           "declaration": {
             "name": "define",
@@ -1635,6 +1972,62 @@
         },
         {
           "kind": "js",
+          "name": "GRID_AXES",
+          "declaration": {
+            "name": "GRID_AXES",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "GRID_GAPS",
+          "declaration": {
+            "name": "GRID_GAPS",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "GRID_VARIANTS",
+          "declaration": {
+            "name": "GRID_VARIANTS",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "gridClasses",
+          "declaration": {
+            "name": "gridClasses",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "GridGap",
+          "declaration": {
+            "name": "GridGap",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "gridStaticHtml",
+          "declaration": {
+            "name": "gridStaticHtml",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "GridVariant",
+          "declaration": {
+            "name": "GridVariant",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
           "name": "isCardVariant",
           "declaration": {
             "name": "isCardVariant",
@@ -1643,9 +2036,73 @@
         },
         {
           "kind": "js",
+          "name": "isGridGap",
+          "declaration": {
+            "name": "isGridGap",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "isGridVariant",
+          "declaration": {
+            "name": "isGridVariant",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "isSectionBannerVariant",
+          "declaration": {
+            "name": "isSectionBannerVariant",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
           "name": "registeredTags",
           "declaration": {
             "name": "registeredTags",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "SECTION_BANNER_AXES",
+          "declaration": {
+            "name": "SECTION_BANNER_AXES",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "SECTION_BANNER_VARIANTS",
+          "declaration": {
+            "name": "SECTION_BANNER_VARIANTS",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "sectionBannerClasses",
+          "declaration": {
+            "name": "sectionBannerClasses",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "sectionBannerStaticHtml",
+          "declaration": {
+            "name": "sectionBannerStaticHtml",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "SectionBannerVariant",
+          "declaration": {
+            "name": "SectionBannerVariant",
             "module": "./dist/index.js"
           }
         },
@@ -1675,9 +2132,41 @@
         },
         {
           "kind": "js",
+          "name": "SkGrid",
+          "declaration": {
+            "name": "SkGrid",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "skGridSheet",
+          "declaration": {
+            "name": "default",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
           "name": "SkNavPill",
           "declaration": {
             "name": "SkNavPill",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "SkSectionBanner",
+          "declaration": {
+            "name": "SkSectionBanner",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "skSectionBannerSheet",
+          "declaration": {
+            "name": "default",
             "module": "./dist/index.js"
           }
         },
@@ -1694,6 +2183,14 @@
           "name": "skStubSheet",
           "declaration": {
             "name": "default",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "unknownGapMessage",
+          "declaration": {
+            "name": "unknownGapMessage",
             "module": "./dist/index.js"
           }
         },

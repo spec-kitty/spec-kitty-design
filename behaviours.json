@@ -7,8 +7,8 @@
     "FIFTEEN entries, fourteen of them APPLICABLE. The fifteenth is generation determinism (SC-023), declared with applicable:false and the gate that discharges it named on the entry. It was deferred while the wrapper generator did not exist; #126 built the generator and its --check gate, and #75 WP04 settled it.",
     "",
     "",
-    "A behaviour with no applicable subject is either ABSENT from this file, or DECLARED with applicable:false and an inapplicableReason naming the gate that discharges it. It is never expressed as a skip and never deferred to a matrix cell \u2014 that was FR-010's earlier shape and it made the mission incoherent if the conformance matrix were dropped.",
-    "The second form is for a behaviour ADR-11 states as a CI-gate obligation rather than a runtime one: it has no test to mutate, but omitting it would leave the registry silently short of the ADR's list. #75 WP04 added the first, SC-023. Declaring one is not an escape hatch \u2014 config-contract asserts the applicable set equals ADR-11's list exactly, so nothing can be demoted to dodge a mutation, and it asserts the inapplicable set exactly too.",
+    "A behaviour with no applicable subject is either ABSENT from this file, or DECLARED with applicable:false and an inapplicableReason naming the gate that discharges it. It is never expressed as a skip and never deferred to a matrix cell — that was FR-010's earlier shape and it made the mission incoherent if the conformance matrix were dropped.",
+    "The second form is for a behaviour ADR-11 states as a CI-gate obligation rather than a runtime one: it has no test to mutate, but omitting it would leave the registry silently short of the ADR's list. #75 WP04 added the first, SC-023. Declaring one is not an escape hatch — config-contract asserts the applicable set equals ADR-11's list exactly, so nothing can be demoted to dodge a mutation, and it asserts the inapplicable set exactly too.",
     "",
     "",
     "SUBJECTS (#73, FR-010). A behaviour id is no longer unique across the suite: sk-nav-pill",
@@ -24,12 +24,14 @@
     "",
     "A subject's `name` is what tests/node/config-contract.test.ts matches against the ELEMENT",
     "glob, so it names the element (sk-stub, sk-card, sk-nav-pill), not the test file's role. A",
-    "lens added a real element with no entry here and every gate went green \u2014 this registry was",
+    "lens added a real element with no entry here and every gate went green — this registry was",
     "the last hand-maintained list deciding whether an element is tested at all.",
     "",
     "SC-002..SC-005 finally have a REAL subject (#74). They were written in #71 for this mission",
-    "and until now were carried only by the synthetic fixture \u2014 which is why the id-only coverage",
-    "check could not tell 'the fixture covers form association' from 'a shipped element does'."
+    "and until now were carried only by the synthetic fixture — which is why the id-only coverage",
+    "check could not tell 'the fixture covers form association' from 'a shipped element does'.",
+    "#77 adds <sk-grid> as a subject of SC-013 and SC-014 — the two it genuinely owns. It is deliberately NOT added to SC-015: the registry guard is a claim about define(), not about any element that calls it, and listing every caller would make the id's subject list grow without adding an assertion.",
+    "#77 adds <sk-section-banner> as a subject of SC-013 and SC-014 on the same basis as <sk-grid>: it declares parts and adopts a generated sheet. It does not join SC-015, and does not claim an event or form id it does not have."
   ],
   "behaviours": [
     {
@@ -245,15 +247,11 @@
       "summary": "every declared ::part() is present and targetable from outside",
       "owner": "fixture",
       "applicable": true,
-      "note": "FIXTURE-owned. packages/elements/src contains no part= and no @csspart, and the manifest declares 0 cssParts \u2014 so an elements-owned mutation would have no pattern and the harness's guard 1 would fire by construction. The manifest-derived arm is WP04's ratchet.",
+      "note": "FIXTURE-owned. packages/elements/src contains no part= and no @csspart, and the manifest declares 0 cssParts — so an elements-owned mutation would have no pattern and the harness's guard 1 would fire by construction. The manifest-derived arm is WP04's ratchet.",
       "subjects": [
         {
           "name": "sk-behaviour-fixture",
           "file": "fixtures/elements-behaviour/src/behaviours.test.ts"
-        },
-        {
-          "name": "sk-nav-pill",
-          "file": "fixtures/elements-behaviour/src/sk-nav-pill.test.ts"
         },
         {
           "name": "sk-card",
@@ -266,6 +264,18 @@
         {
           "name": "sk-form-textarea",
           "file": "fixtures/elements-behaviour/src/sk-form-textarea.test.ts"
+        },
+        {
+          "name": "sk-grid",
+          "file": "fixtures/elements-behaviour/src/sk-grid.test.ts"
+        },
+        {
+          "name": "sk-nav-pill",
+          "file": "fixtures/elements-behaviour/src/sk-nav-pill.test.ts"
+        },
+        {
+          "name": "sk-section-banner",
+          "file": "fixtures/elements-behaviour/src/sk-section-banner.test.ts"
         }
       ]
     },
@@ -277,12 +287,20 @@
       "applicable": true,
       "subjects": [
         {
-          "name": "sk-stub",
-          "file": "fixtures/elements-behaviour/src/sk-stub.test.ts"
+          "name": "sk-grid",
+          "file": "fixtures/elements-behaviour/src/sk-grid.test.ts"
         },
         {
           "name": "sk-nav-pill",
           "file": "fixtures/elements-behaviour/src/sk-nav-pill.test.ts"
+        },
+        {
+          "name": "sk-section-banner",
+          "file": "fixtures/elements-behaviour/src/sk-section-banner.test.ts"
+        },
+        {
+          "name": "sk-stub",
+          "file": "fixtures/elements-behaviour/src/sk-stub.test.ts"
         }
       ]
     },
@@ -305,7 +323,8 @@
       "summary": "regenerating wrappers from an unchanged manifest is a no-op, and drift fails CI",
       "owner": "gate",
       "applicable": false,
-      "inapplicableReason": "ADR-11 item 9 assigns this to the NODE lane and states it as two clauses: regeneration is a no-op, AND drift fails CI. Both are enforced by scripts/build-react-wrappers.mjs --check, which generates twice and compares byte-for-byte before comparing against the committed tree, as an ENFORCED lint-code step with two REQUIRED_LINT entries. It is not a mutation-harness behaviour: suite-selftest.mjs runs the browser project only, and extending it to the node lane would add ~1.8s to each of 44 runs (~240s against a 180s ceiling) to re-prove what a --check gate already proves. Declared here rather than omitted so the registry mirrors ADR-11's fifteen and the discharge is recorded where a reader looks."
+      "inapplicableReason": "ADR-11 item 9 assigns this to the NODE lane and states it as two clauses: regeneration is a no-op, AND drift fails CI. Both are enforced by scripts/build-react-wrappers.mjs --check, which generates twice and compares byte-for-byte before comparing against the committed tree, as an ENFORCED lint-code step with two REQUIRED_LINT entries. It is not a mutation-harness behaviour: suite-selftest.mjs runs the browser project only, and extending it to the node lane would add ~1.8s to each of 44 runs (~240s against a 180s ceiling) to re-prove what a --check gate already proves. Declared here rather than omitted so the registry mirrors ADR-11's fifteen and the discharge is recorded where a reader looks.",
+      "subjects": []
     }
   ]
 }

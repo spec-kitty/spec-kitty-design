@@ -437,7 +437,32 @@ function audit({ outdir, manifestPath, srcDir, floor }) {
 if (selftest) {
   const BASE_MANIFEST = JSON.parse(readFileSync(MANIFEST, 'utf8'));
   const dir = mkdtempSync(join(tmpdir(), 'react-wrappers-selftest-'));
-  const FLOOR_UNDER_TEST = 5;
+  // DERIVED from the manifest the probes actually run against, not a literal.
+  //
+  // This was `= 5`, the element count on the day the probe table was written. `audit()` runs
+  // over BASE_MANIFEST — the REAL packages/elements/custom-elements.json — so the first
+  // mission to add an element made the must-pass row ("the real thing, untouched") report a
+  // floor violation, and `--selftest` went red in CI on a tree where nothing was wrong. #77
+  // added two elements and hit it. Every element-adding mission would have.
+  //
+  // The floor is a property of the fixture, so it is computed from the fixture. Note this does
+  // NOT make the floor arm probed — no row asserts its message, which the SCOPE note above
+  // already records as filed rather than bodged; it makes the arm stop firing spuriously.
+  // `.size` — taggedDeclarations returns a MAP. `.length` on it is `undefined`, and the first
+  // draft of this line used it: the floor became undefined, `emittedClasses.length !== undefined`
+  // was true, and the probe failed with "the committed floor is undefined". The `< 1` guard
+  // below did not catch it either, because `undefined < 1` is false — the exact comparison trap
+  // this file already documents for NaN at the .wrapper-floor read. So the guard tests the TYPE.
+  const FLOOR_UNDER_TEST = taggedDeclarations(BASE_MANIFEST).size;
+  if (!Number.isInteger(FLOOR_UNDER_TEST) || FLOOR_UNDER_TEST < 1) {
+    console.error(
+      `❌ the self-test fixture floor computed as ${JSON.stringify(FLOOR_UNDER_TEST)}, not a\n` +
+        '   positive integer. Either the fixture manifest declares no tagged elements — in which\n' +
+        '   case every probe runs against an empty tree and the table is vacuous — or the count\n' +
+        '   was read off the wrong shape.'
+    );
+    process.exit(1);
+  }
   let bad = 0;
   let caught = 0;
 

@@ -3,16 +3,16 @@
     "The shrink-only ::part() ratchet (#71, C-007).",
     "",
     "ADR-11 item 6 says every ::part() the MANIFEST declares must be present and targetable.",
-    "That is the right mechanism and #72-#74 inherit it \u2014 but today it is vacuous: the manifest",
+    "That is the right mechanism and #72-#74 inherit it — but today it is vacuous: the manifest",
     "declares 0 cssParts, so a 'derived expected list' is a green assertion over nothing.",
     "",
-    "This file is the anti-vacuity guard. Adding a ::part() without updating it \u2014 and therefore",
-    "without a test \u2014 fails CI. Removing one is allowed and shrinks the count. Same shape as",
+    "This file is the anti-vacuity guard. Adding a ::part() without updating it — and therefore",
+    "without a test — fails CI. Removing one is allowed and shrinks the count. Same shape as",
     "check-manifest-content.mjs: derive from the source of truth, refuse to pass vacuously.",
     "",
     "",
     "#72 is the first growth this ratchet has had to gate: <sk-card> declares part \"card\",",
-    "recorded here in the same PR as the test that targets ::part(card) \u2014 which the ratchet now",
+    "recorded here in the same PR as the test that targets ::part(card) — which the ratchet now",
     "requires, not merely assumes.",
     "",
     "#73 grows it again: <sk-nav-pill> declares nav, items and hamburger, each recorded here in",
@@ -20,19 +20,16 @@
     "that test goes red. The ratchet's known looseness is unchanged and still recorded: a mention",
     "inside a comment or a test.skip() satisfies the source scan, and it is not scoped per element.",
     "",
-    "#74 adds five for <sk-form-input>. Note the @csspart JSDoc is what populates the manifest \u2014",
+    "#74 adds five for <sk-form-input>. Note the @csspart JSDoc is what populates the manifest —",
     "a lens shipped eight part= attributes with an empty cssParts array and this ratchet stayed",
-    "green at the old count, because it derives from the manifest and not from the rendered DOM."
+    "green at the old count, because it derives from the manifest and not from the rendered DOM.",
+    "#77 adds one for <sk-grid>: part \"grid\". A layout primitive's variants are a closed set, so the part is the only route a consumer has to a column count or gap the element does not offer — recorded here in the same PR as the [SC-013] test that targets it from outside.",
+    "#77 adds three for <sk-section-banner> (banner, dot, label). <sk-site-footer> is deliberately not here — it is held out of this batch, see issue #77. Each is targeted from outside by the [SC-013] test in that element's own fixture file. Note what the RATCHET can and cannot hold: check-part-ratchet.mjs scans the concatenated test sources for the literal `::part(<name>)`, so it is not scoped per element — `::part(label)` already appears in three other files, and deleting section-banner's own label case would leave the ratchet green. `banner` and `dot` are currently unique and so are genuinely bound. The per-element binding is a property of the tests as written, not something this file enforces."
   ],
-  "total": 14,
+  "total": 18,
   "byElement": {
     "sk-card": [
       "card"
-    ],
-    "sk-nav-pill": [
-      "hamburger",
-      "items",
-      "nav"
     ],
     "sk-form-input": [
       "control",
@@ -46,6 +43,19 @@
       "description",
       "error",
       "field",
+      "label"
+    ],
+    "sk-grid": [
+      "grid"
+    ],
+    "sk-nav-pill": [
+      "hamburger",
+      "items",
+      "nav"
+    ],
+    "sk-section-banner": [
+      "banner",
+      "dot",
       "label"
     ]
   }

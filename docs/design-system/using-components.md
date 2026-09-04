@@ -90,14 +90,61 @@ Pill-shaped tags used to label and categorise content inline.
 
 Eyebrow labels and section banners used to introduce sections and add visual hierarchy.
 
+**As a custom element** — `sk-section-banner` is migrated, so it needs no wrapper:
+
+```html
+<script type="module" src="/node_modules/@spec-kitty/elements/dist/elements.js"></script>
+
+<sk-section-banner variant="purple">Version 2.x — event architecture</sk-section-banner>
+```
+
+The label is slotted content, not a property: a banner's text belongs to your page. Omit
+`variant` and you get the neutral banner — the base class paints no background of its own, so
+there is no "plain" form to fall back to.
+
 **HTML:**
 
 ```html
 <span class="sk-eyebrow">Getting started</span>
-<div class="sk-section-banner">What's new</div>
+<div class="sk-section-banner sk-section-banner--neutral">
+  <span class="sk-section-banner__dot" aria-hidden="true">●</span>
+  <span class="sk-section-banner__label">What's new</span>
+</div>
 ```
 
+The variant class is required — `.sk-section-banner` alone sets no colour. This markup is
+generated; copy it from `packages/styles/src/section-banner/sk-section-banner.html` rather than
+retyping it.
+
 [View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/components-content-markers--default)
+
+---
+
+## Layout
+
+A responsive grid for card listings and reference pages. Bounded on purpose: two, three or four
+columns, all collapsing to one below 720px.
+
+**As a custom element** — `sk-grid` is migrated, so it needs no wrapper:
+
+```html
+<sk-grid variant="cols-3" gap="6">
+  <sk-card>…</sk-card>
+  <sk-card>…</sk-card>
+  <sk-card>…</sk-card>
+</sk-grid>
+```
+
+Need a layout outside that set? Use `sk-grid::part(grid)` rather than asking for another
+variant — the part exists for exactly that.
+
+**HTML:**
+
+```html
+<div class="sk-grid sk-grid--cols-3 sk-grid--gap-6">
+  <article class="sk-card">…</article>
+</div>
+```
 
 ---
 
