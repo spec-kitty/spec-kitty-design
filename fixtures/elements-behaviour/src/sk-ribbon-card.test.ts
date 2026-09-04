@@ -69,10 +69,19 @@ test('SLOTTED content inherits a legible colour from the host', async () => {
   // dark card. `color` on :host reaches it, because inheritance follows the flattened tree.
   //
   // Asserted on a slotted node with NO colour of its own — the case that was broken — and
-  // against the token's own value, so replacing it with a hardcoded colour or deleting the
-  // declaration both red.
+  // against the token's own value, so DELETING the declaration reds. Replacing it with a
+  // hardcoded colour would not red here: stylelint's declaration-strict-value rule is what
+  // refuses that, which an earlier version of this comment credited to the test.
+  // A SLOTTED NODE NO RULE MATCHES. `.sk-ribbon-card__content ::slotted(p)` now sets the body
+  // colour explicitly — correctly, so the element and static paths agree — which means a <p>
+  // would pass this test even with the :host declaration deleted. A <span> has no rule, so it
+  // can only get its colour by inheriting from the host, which is the claim under test.
   const el = await mount();
-  const slotted = el.querySelector('p')!;
+  const span = document.createElement('span');
+  span.textContent = 'unstyled slotted text';
+  el.append(span);
+  await (el as unknown as { updateComplete: Promise<unknown> }).updateComplete;
+  const slotted = span;
   const expected = getComputedStyle(document.documentElement)
     .getPropertyValue('--sk-fg-body')
     .trim();
@@ -100,6 +109,18 @@ test('the HOST is a block box, so a consumer can size it', async () => {
   expect(Math.round(el.getBoundingClientRect().width), 'max-width did not apply to the host').toBe(200);
 });
 
+test('SLOTTED typography matches the static path, not just the colour', async () => {
+  // Same class as sk-feature-card's: `.sk-ribbon-card__content h4` is a shadow-tree descendant
+  // selector and cannot match a slotted heading, so the element path rendered UA defaults while
+  // the static path applied the design system's. Fixed with a `::slotted()` branch on the same
+  // rule; asserted here on a non-colour property so it cannot pass on the :host colour alone.
+  const el = await mount();
+  const heading = el.querySelector('h4')!;
+  const body = el.querySelector('p')!;
+  expect(getComputedStyle(heading).marginTop, 'the slotted heading did not receive its rule').toBe('0px');
+  expect(getComputedStyle(body).marginTop, 'the slotted body did not receive its rule').toBe('0px');
+});
+
 test('with no label the ribbon is ABSENT, not an empty tab', async () => {
   // The element renders `nothing`, not ''. An empty coloured tab reads as a rendering bug, and
   // a consumer's `::part(ribbon)` rule must have nothing to match on a plain card.
@@ -125,7 +146,11 @@ test('every ribbon colour PAINTS, and they are distinct', async () => {
     backgrounds.set(colour, bg);
   }
   // Derived from the module's own list, so a sixth colour cannot be added without being covered.
-  expect(backgrounds.size, 'the colour list went empty').toBe(RIBBON_CARD_COLOURS.length);
+  // The literal floor is the half that matters for SHRINKAGE: `size === COLOURS.length` is true
+  // by construction, and an empty list satisfies it — the annotation "the colour list went
+  // empty" certified exactly the absence it named. A lens caught that.
+  expect(RIBBON_CARD_COLOURS.length, 'the colour list changed size').toBe(5);
+  expect(backgrounds.size, 'not every colour was mounted').toBe(RIBBON_CARD_COLOURS.length);
   expect(
     new Set(backgrounds.values()).size,
     `ribbon colours are not distinct: ${[...backgrounds].map(([k, v]) => `${k}=${v}`).join(', ')}`,
@@ -146,6 +171,15 @@ test('the border variants change the border, and leave the ribbon alone', async 
     expect(getComputedStyle(partOf(el, 'ribbon')!).backgroundColor).toBe(plainRibbon);
   }
   expect(borders.size, 'the border variants are not distinct').toBe(RIBBON_CARD_COLOURS.length);
+
+  // The other direction: a ribbon colour must not move the card's border.
+  for (const colour of RIBBON_CARD_COLOURS) {
+    const el = await mount({ ribbon: 'Tab', accent: colour });
+    expect(
+      getComputedStyle(partOf(el, 'card')!).borderColor,
+      `accent="${colour}" changed the card border — the axes are coupled`,
+    ).toBe(plainBorder);
+  }
 });
 
 test('an unknown variant or ribbon colour degrades on RENDER and throws on AUTHORING', async () => {

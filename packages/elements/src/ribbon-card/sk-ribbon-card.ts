@@ -45,13 +45,20 @@ export class SkRibbonCard extends LitElement {
     // absence must be absence — the [SC-013] test asserts `[part="ribbon"]` is null on a plain
     // card, and a consumer's `::part(ribbon)` rule must have nothing to match.
     //
-    // ONE WORD ON PURPOSE, and it cost a gate failure to learn. This was `ribbonColour` with
-    // `attribute: 'ribbon-colour'`, which the manifest recorded correctly and the React wrapper
-    // generator then refused: a hyphenated attribute name is not a valid JS property key, so
-    // the emitted createElement props could not carry it, and under ssrSafe — where React
-    // delivers first-render props as ATTRIBUTES — the value would never reach the element.
-    // `accent` needs no rename, and it is the word sk-feature-card already uses in this same
-    // batch for the same idea: the colour of the accent element inside the card.
+    // ONE WORD, CHOSEN FOR VOCABULARY — and the first version of this comment overstated why.
+    //
+    // It claimed the rename was FORCED. It was not: a field name may differ from its attribute
+    // name and that path is supported and tested — sk-nav-pill declares `isOpen` with
+    // `attribute: 'open'` and packages/react/src/SkNavPill.js emits `open: isOpen`, with a gate
+    // in build-react-wrappers.mjs covering exactly that rename. The real constraint is narrower:
+    // an explicitly HYPHENATED `attribute:` value is not a valid JS property key, so the emitted
+    // createElement props cannot carry it. `ribbonColour` with Lit's default attribute
+    // (`ribboncolour`) would have round-tripped fine.
+    //
+    // So this is a naming decision, not a forced one, and it stands on its own merit: `accent`
+    // is the word sk-feature-card uses in this same batch for the same idea — the colour of the
+    // accent element inside the card — and a shared vocabulary across the catalogue is worth
+    // more than a component-local noun.
     return html`<article part="card" class=${ribbonCardClasses(this.variant)}>
       ${this.ribbon
         ? html`<div part="ribbon" class=${ribbonClasses(this.accent)}>${this.ribbon}</div>`

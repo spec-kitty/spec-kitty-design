@@ -11,8 +11,15 @@
 // THE TITLE IS NOT HERE. The static form carried `<h4 class="sk-h4">`, a typography utility
 // from another package's sheet. Inside a shadow root that class reaches nothing, and putting it
 // in this component's adopted sheet is rejected by check-adopted-css-boundaries.mjs — correctly,
-// since `.sk-h4` is not owned by sk-ribbon-card. It is content, so it is slotted: slotted nodes
-// stay in the consumer's light DOM, where the global sheet already reaches them.
+// since `.sk-h4` is not owned by sk-ribbon-card. It is content, so it is slotted.
+//
+// AND `.sk-h4` IS DEFINED NOWHERE. An earlier version of this comment said slotted nodes "stay
+// in the consumer's light DOM, where the global sheet already reaches them" — two pre-merge
+// lenses grepped for it and there is no such sheet: `.sk-h4` has no CSS definition anywhere in
+// this repo, and tokens.css declares variables only. The class is inert wherever it appears.
+// What actually styles the heading is the `.sk-ribbon-card__content h4` rule (and its
+// `::slotted()` branch), so dropping the class from the generated artifact changes nothing.
+// The conclusion was right; the reason given for it was not.
 
 /** The five brand colours both axes draw on. */
 export const RIBBON_CARD_COLOURS = ['yellow', 'green', 'purple', 'blue', 'red'] as const;

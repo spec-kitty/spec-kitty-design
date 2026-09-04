@@ -16,9 +16,19 @@
     "",
     "Scoped to the ELEMENTS, not the whole catalogue. The thirteen packages/styles story files",
     "predate this and pinning them here would be a ratchet nobody agreed to; #77-#79 migrate them",
-    "and can opt each in as it lands."
+    "and can opt each in as it lands.",
+    "#78 opts sk-feature-card and sk-ribbon-card in. The a11y gate is what caught this batch's slotted-content contrast defect, and it is the ONLY gate that would catch a recurrence — so retiring these stories must not be silent. A lens noted four migrated elements were sitting outside this ratchet; these two are now in, and #79 should add its own."
   ],
   "byElement": {
+    "sk-feature-card": [
+      "elements-skfeaturecard--default",
+      "elements-skfeaturecard--yellow",
+      "elements-skfeaturecard--green",
+      "elements-skfeaturecard--purple",
+      "elements-skfeaturecard--bordered-variants",
+      "elements-skfeaturecard--mixed-axes",
+      "elements-skfeaturecard--light-mode"
+    ],
     "sk-form-input": [
       "elements-skforminput--default",
       "elements-skforminput--filled",
@@ -32,7 +42,14 @@
       "elements-skformtextarea--error",
       "elements-skformtextarea--disabled",
       "elements-skformtextarea--light-mode"
+    ],
+    "sk-ribbon-card": [
+      "elements-skribboncard--default",
+      "elements-skribboncard--with-ribbon",
+      "elements-skribboncard--ribbon-colours",
+      "elements-skribboncard--bordered-variants",
+      "elements-skribboncard--light-mode"
     ]
   },
-  "total": 10
+  "total": 22
 }

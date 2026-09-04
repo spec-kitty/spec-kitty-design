@@ -56,11 +56,10 @@
   border-radius: 0 0 var(--sk-radius-sm) var(--sk-radius-sm);
 }
 
-.sk-ribbon-card__ribbon svg {
-  width: 12px;
-  height: 12px;
-  stroke-width: 2.4;
-}
+/* REMOVED at #78: the ribbon's label is a string property rendered as a text node, and
+   ribbonCardStaticHtml interpolates it as text, so no SVG can appear in a ribbon on either
+   path. The rule matched nothing. `gap` on the ribbon is kept — it is harmless and the tab is
+   still a flex container. */
 
 /* Ribbon colour variants */
 /* Deviation: text colours for ribbon variants use dark warm-toned values
@@ -120,15 +119,28 @@
   margin-top: var(--sk-space-5);
 }
 
+/* BOTH SPELLINGS, ONE RULE, because the title and body are SLOTTED in the element path.
+   A shadow-tree selector cannot match a slotted node — slotted content stays in the light DOM —
+   so these rules applied on the static path and were INERT on the element path, and the two
+   consumption paths this component's markup module exists to keep identical rendered with
+   different fonts, sizes, weights and margins. `:host { color }` fixed only the CONTRAST slice,
+   which is the one axe could see; all three pre-merge lenses found the rest independently.
+   `::slotted()` is inert in a document and the bare class is inert in a shadow tree, so one
+   selector list serves both paths with no declaration written twice. `::slotted()` is an
+   accepted owning compound in check-adopted-css-boundaries.mjs, and sk-nav-pill.css has used
+   this shape since #73. */
 .sk-ribbon-card__content h3,
-.sk-ribbon-card__content h4 {
+.sk-ribbon-card__content h4,
+.sk-ribbon-card__content ::slotted(h3),
+.sk-ribbon-card__content ::slotted(h4) {
   margin: 0 0 var(--sk-space-2);
   font-family: var(--sk-font-sans);
   font-weight: var(--sk-weight-bold);
   color: var(--sk-fg-default);
 }
 
-.sk-ribbon-card__content p {
+.sk-ribbon-card__content p,
+.sk-ribbon-card__content ::slotted(p) {
   margin: 0;
   font-size: var(--sk-text-sm);
   line-height: 1.55;

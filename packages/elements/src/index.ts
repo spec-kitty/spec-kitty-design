@@ -52,6 +52,12 @@ export { gridClasses, gridStaticHtml, type GridGap, type GridVariant } from './g
 // sk-feature-card's markup module. Both class helpers are exported because the component has
 // TWO independent axes and each has its own degrade path.
 export {
+  // The maps are exported for the same reason RIBBON_CARD_COLOURS is: the behaviour fixture
+  // DERIVES its loops from them, so an accent or variant added without coverage fails instead
+  // of passing unobserved. feature-card's test hardcoded its three accents and a `.toBe(3)`
+  // until the pre-merge gate caught the asymmetry with its own sibling.
+  FEATURE_CARD_ACCENTS,
+  FEATURE_CARD_VARIANTS,
   featureCardChipClasses,
   featureCardClasses,
   featureCardStaticHtml,

@@ -87,7 +87,18 @@
   border-color: var(--sk-color-purple);
 }
 
-.sk-feature-card__title {
+/* BOTH SPELLINGS, ONE RULE, because the title and body are SLOTTED in the element path.
+   A shadow-tree selector cannot match a slotted node — slotted content stays in the light DOM —
+   so these rules applied on the static path and were INERT on the element path, and the two
+   consumption paths this component's markup module exists to keep identical rendered with
+   different fonts, sizes, weights and margins. `:host { color }` fixed only the CONTRAST slice,
+   which is the one axe could see; all three pre-merge lenses found the rest independently.
+   `::slotted()` is inert in a document and the bare class is inert in a shadow tree, so one
+   selector list serves both paths with no declaration written twice. `::slotted()` is an
+   accepted owning compound in check-adopted-css-boundaries.mjs, and sk-nav-pill.css has used
+   this shape since #73. */
+.sk-feature-card__title,
+::slotted(.sk-feature-card__title) {
   font-family: var(--sk-font-sans);
   font-size: var(--sk-text-lg);
   font-weight: var(--sk-weight-bold);
@@ -95,7 +106,8 @@
   margin: 0;
 }
 
-.sk-feature-card__body {
+.sk-feature-card__body,
+::slotted(.sk-feature-card__body) {
   font-size: var(--sk-text-sm);
   color: var(--sk-fg-muted);
   margin: 0;

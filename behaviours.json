@@ -32,7 +32,7 @@
     "check could not tell 'the fixture covers form association' from 'a shipped element does'.",
     "#77 adds <sk-grid> as a subject of SC-013 and SC-014 — the two it genuinely owns. It is deliberately NOT added to SC-015: the registry guard is a claim about define(), not about any element that calls it, and listing every caller would make the id's subject list grow without adding an assertion.",
     "#77 adds <sk-section-banner> as a subject of SC-013 and SC-014 on the same basis as <sk-grid>: it declares parts and adopts a generated sheet. It does not join SC-015, and does not claim an event or form id it does not have.",
-    "#78 adds <sk-feature-card> as a subject of SC-013 and SC-014, on the same basis as #77's two: it declares parts and adopts a generated sheet."
+    "#78 adds <sk-feature-card> AND <sk-ribbon-card> as subjects of SC-013 and SC-014, on the same basis as #77's two: each declares parts and adopts a generated sheet. An earlier revision of this note named only feature-card while the data below added both."
   ],
   "behaviours": [
     {

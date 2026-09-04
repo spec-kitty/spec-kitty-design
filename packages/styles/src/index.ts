@@ -29,6 +29,11 @@ export {
   SkRibbonCardBorderPurpleHTML,
   SkRibbonCardBorderBlueHTML,
   SkRibbonCardBorderRedHTML,
+  SkRibbonCardRibbonYellowHTML,
+  SkRibbonCardRibbonGreenHTML,
+  SkRibbonCardRibbonPurpleHTML,
+  SkRibbonCardRibbonBlueHTML,
+  SkRibbonCardRibbonRedHTML,
 } from './ribbon-card/index';
 export { SkNavPillHTML } from './nav-pill/index';
 export { SkTagHTML, SkEyebrowPillHTML, SkPillTagHTML, type PillTagVariant } from './pill-tag/index';

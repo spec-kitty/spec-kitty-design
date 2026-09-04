@@ -537,12 +537,15 @@ markup module (ADR-10 §3).
 | `sk-form-textarea` | yes | as `sk-form-input`, plus `rows` |
 | `sk-grid` | no | `variant` (cols-2/3/4), `gap` (3/4/6); default slot; collapses to one column below 720px |
 | `sk-section-banner` | no | `variant` (neutral/purple/green), defaulting to neutral on BOTH paths because the base class paints nothing; label is slotted |
+| `sk-feature-card` | no | `accent` (yellow/green/purple, the chip) and `variant` (border-*, the frame) — two independent axes; icon, title and body slotted |
+| `sk-ribbon-card` | no | `ribbon` (label; the tab renders only when set), `accent` (tab colour), `variant` (border) over five shared colours; title and body slotted |
 | `sk-stub` | no | zero public members; the deliberate empty case several gates are floored against |
 
 The remaining catalogue components still live in `packages/styles` and have not
-yet been migrated — #78 and #79 are the missions that move them. #77 migrated
-`grid` and `section-banner`; `site-footer` is still styles-only, deferred on a
-design fork recorded on that issue.
+yet been migrated — #79 is the mission that moves the rest. #77 migrated `grid`
+and `section-banner`; #78 migrated `feature-card` and `ribbon-card`. `site-footer`
+and `blog-card` are still styles-only, each deferred on a design fork recorded on
+its issue (#77, #78).
 
 ### react package — `packages/react/src/`
 
@@ -578,10 +581,9 @@ carry the detail generic from the element's `@fires {Type}`.
 - Notes: pure CSS (no JS).
 
 #### sk-feature-card (styles)
-- Path: `packages/styles/src/feature-card/sk-feature-card.css` + `sk-feature-card.html` + `sk-feature-card-html.stories.ts`
+- Path: `packages/styles/src/feature-card/sk-feature-card.css` (authored) + `sk-feature-card.html` and `index.ts` (**generated** from `packages/elements/src/feature-card/sk-feature-card.markup.ts`) + `sk-feature-card-html.stories.ts`
 - Story title: `Components/SkFeatureCard (HTML)`
-- Variants: `Default`, `GreenIcon`, `PurpleIcon`, `LightMode`, `Grid`
-- Notes: `Grid` shows three feature cards in a responsive 3-up grid; exports `SkFeatureCardYellowHTML`, `SkFeatureCardGreenHTML`, `SkFeatureCardPurpleHTML`.
+- Notes: migrated in #78. `accent` (icon chip) and `variant` (card border) are INDEPENDENT axes; the generated constants show them independently, and any pairing is a story-level choice.
 
 #### sk-form-field (styles)
 - Path: `packages/styles/src/form-field/sk-form-field.css` + `sk-form-field.html` + per-state HTML files + `sk-form-field-html.stories.ts`
@@ -615,10 +617,10 @@ carry the detail generic from the element's `@fires {Type}`.
 - Notes: exports both `SkPillTagHTML` and `SkEyebrowPillHTML`; same `PillTagVariant` type.
 
 #### sk-ribbon-card (styles)
-- Path: `packages/styles/src/ribbon-card/sk-ribbon-card.css` + `sk-ribbon-card.html` + `sk-ribbon-card-plain.html` + `sk-ribbon-card-html.stories.ts`
+- Path: `packages/styles/src/ribbon-card/sk-ribbon-card.css` (authored) + `sk-ribbon-card.html` and `index.ts` (**generated** from `packages/elements/src/ribbon-card/sk-ribbon-card.markup.ts`) + `sk-ribbon-card-html.stories.ts`
 - Story title: `Components/SkRibbonCard (HTML)`
-- Variants: `Default`, `WithRibbon`, `RibbonYellow`, `RibbonGreen`, `RibbonPurple`, `LightMode`
-- Notes: includes the `RibbonYellow` colourway.
+- Variants: `Default`, `WithRibbon`, `BorderYellow`, `BorderGreen`, `BorderPurple`, `AllBorders`, `LightMode`
+- Notes: migrated in #78. `sk-ribbon-card-plain.html` and the hand-written `skRibbonCardHTML()` builder are DELETED — the ribbonless form is now the generated base export, `SkRibbonCardHTML` (formerly `SkRibbonCardDefaultHTML`). Border and ribbon colour are independent axes over the same five colours.
 
 #### sk-section-banner (styles)
 - Path: `packages/styles/src/section-banner/sk-section-banner.css` (authored) + `sk-section-banner.html` and `index.ts` (**generated** from `packages/elements/src/section-banner/sk-section-banner.markup.ts`) + `sk-section-banner-html.stories.ts`
