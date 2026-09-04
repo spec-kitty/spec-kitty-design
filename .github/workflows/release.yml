@@ -83,6 +83,11 @@ jobs:
       # and no SRI verification, while the audit step below still wore an [ENFORCED] label.
       #
       # AFTER the build, not before: both read packages/*/dist, which is gitignored.
+      # The blindness check runs HERE too, by this file's own argument: a tag can sit on a commit
+      # ci-quality.yml never saw, so a gate that only self-tests at PR time is a gate that has not
+      # self-tested on the path that publishes.
+      - name: "[ENFORCED] The release gate can see its own failures (SC-003)"
+        run: node scripts/check-release-graph.mjs --selftest
       - name: "[ENFORCED] Release graph is coherent (FR-003, FR-004)"
         run: node scripts/check-release-graph.mjs
       - name: "[ENFORCED] Sizes and the SRI hash match the built artifacts (FR-005, NFR-004)"
@@ -90,7 +95,12 @@ jobs:
       - name: "[ENFORCED] Dist contents audit — no secrets/sourcemaps (ADR-005)"
         run: |
           set -euo pipefail
-          for pkg in ${{ steps.graph.outputs.dirs }}; do
+          # Each consuming loop asserts its OWN input. The floor in the producing step is not
+          # enough: `steps.graph.outputs.dirs` on a deleted or renamed step id resolves to the
+          # empty string, and `for pkg in ; do` iterates zero times and exits 0.
+          PKGS="${{ steps.graph.outputs.dirs }}"
+          [ -n "$PKGS" ] || { echo "::error::empty publish set reached the audit loop"; exit 1; }
+          for pkg in $PKGS; do
             echo "=== packages/$pkg ==="
             ( cd "packages/$pkg" && npm pack --dry-run 2>&1 | grep "npm notice" | grep -v "===" )
           done
@@ -116,23 +126,58 @@ jobs:
       # failed were never retried and the release stayed wedged at that version. A lens walked
       # through it.
       #
-      # So an already-published version is a SKIP, not a failure, and real failures are collected
-      # and reported together at the end. Note `set -e` is deliberately absent here: failures are
-      # handled explicitly, and `-e` would defeat the handling.
+      # So an already-published version is a SKIP, not a failure.
+      #
+      # `set -euo pipefail` is RESTORED here. An earlier revision dropped `-e` on the stated
+      # grounds that it "would defeat the handling" — that is false, and a lens measured it: POSIX
+      # exempts the condition of an `if` from `set -e`, and both handled commands are if-conditions.
+      # Dropping `-e` therefore bought nothing and silently removed protection from every
+      # *unhandled* command in the block.
       - name: Publish every package in the derived set (FR-044)
         run: |
-          set -uo pipefail
+          set -euo pipefail
+          PKGS="${{ steps.graph.outputs.dirs }}"
+          [ -n "$PKGS" ] || { echo "::error::empty publish set reached the publish loop"; exit 1; }
           failed=""
-          for pkg in ${{ steps.graph.outputs.dirs }}; do
+          for pkg in $PKGS; do
             echo "=== publishing packages/$pkg ==="
             if out="$( cd "packages/$pkg" && npm publish --provenance --access public 2>&1 )"; then
               echo "$out"
             else
               echo "$out"
-              if echo "$out" | grep -qi "EPUBLISHCONFLICT\|previously published\|cannot publish over"; then
-                echo "::notice::packages/$pkg is already published at this version — skipping"
+              # ANCHORED ON THE ERROR CODE. Matching prose ("previously published", "cannot publish
+              # over") means any error whose body happens to quote those words is swallowed as a
+              # skip — a lens built a synthetic 403 that did exactly that. npm prints a stable
+              # `npm error code EPUBLISHCONFLICT` line; that is the signal.
+              if echo "$out" | grep -qE "code (EPUBLISHCONFLICT|E409)"; then
+                # A conflict on a RETRY is resumption. A conflict on the first attempt means the
+                # name+version is on the registry and this workflow did not put it there — these
+                # names have never been published, so that is someone else's package, not ours.
+                # Warning, not notice, and never on attempt 1.
+                if [ "${GITHUB_RUN_ATTEMPT:-1}" -gt 1 ]; then
+                  echo "::warning::packages/$pkg is already published at this version — skipping (run attempt ${GITHUB_RUN_ATTEMPT})"
+                else
+                  echo "::error::packages/$pkg reports an existing $pkg version on the FIRST attempt."
+                  echo "Nothing under @spec-kitty has ever been published, so this is not a resumption."
+                  echo "Verify ownership before re-running: npm view <name>@<version> _npmUser.name"
+                  failed="$failed $pkg"
+                  break
+                fi
               else
+                # HALT, do not accumulate. The set is published in TOPOLOGICAL order precisely so a
+                # package goes out after everything it depends on. Continuing past a real failure
+                # spends that guarantee in the only path it was for: if `tokens` fails, `styles`,
+                # `elements` and `react` publish anyway, `npm publish` does not resolve peers so all
+                # three succeed, and every consumer install then hard-fails E404 on the peer that is
+                # missing. Those versions are permanent — a version cannot be republished and the
+                # unpublish window is 72h and conditional.
+                #
+                # A lens caught this: the resumability of this loop comes entirely from the
+                # skip-on-conflict branch above, not from continuing past real failures. Halting
+                # loses nothing, because the retry resumes from here.
+                echo "::error::halting — every package after $pkg in the derived set may depend on it"
                 failed="$failed $pkg"
+                break
               fi
             fi
           done

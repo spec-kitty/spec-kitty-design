@@ -27,11 +27,11 @@
     {
       "criterion_id": "FR-003",
       "description": "The release path is exercised on every pull request",
-      "proof_type": "automated_test",
-      "evidence": "New unconditional `release-gate` job in ci-quality.yml, in `gate`'s strict list with no skipped-tolerance entry. `check-gate-wiring.mjs` REQUIRED_RELEASE asserts its payload; 16 disarm probes (if:, continue-on-error, needs removal, gutted payload, `|| echo`) all red.",
+      "proof_type": "manual_review",
+      "evidence": "New unconditional `release-gate` job in ci-quality.yml, in `gate`'s strict list with no skipped-tolerance entry, and required by check-gate-wiring.mjs's REQUIRED_RELEASE payload table. The 16 disarm results quoted earlier were a HAND exercise by a review lens, not a shipped harness \u2014 check-gate-wiring.mjs has no probe table of its own. Recorded as manual so a future auditor does not look for a selftest that does not exist.",
       "pass_fail": "pass",
-      "verified_by": "four-lens adversarial gate, pass 1 fold",
-      "verified_at": "2026-09-04T22:07:25Z",
+      "verified_by": "four-lens adversarial gate, pass 2 fold",
+      "verified_at": "2026-09-04T22:39:08Z",
       "notes": "Verified at de1ea2e. CI green on the head; every claim re-derived locally."
     },
     {
@@ -57,31 +57,31 @@
     {
       "criterion_id": "FR-006",
       "description": "The release runbook states the post-merge sequence and each step's owner",
-      "proof_type": "automated_test",
-      "evidence": "docs/release-runbook.md. Corrected during the gate: step 5 no longer instructs creating a tag that already exists on the remote, and the partial-publish bullet no longer claims the condition is impossible.",
+      "proof_type": "manual_review",
+      "evidence": "docs/release-runbook.md. No automated check asserts prose. Corrected twice during the gate: step 5 no longer instructs creating a tag that already exists, and \u2014 found in pass 2 \u2014 no longer recommends re-running the existing v1.0.0 tag, which points at ccb055c (packages angular/html-js/tokens, old workflow) and would have published two deleted packages, none of the epic, and burned 1.0.0 irreversibly.",
       "pass_fail": "pass",
-      "verified_by": "four-lens adversarial gate, pass 1 fold",
-      "verified_at": "2026-09-04T22:07:25Z",
+      "verified_by": "four-lens adversarial gate, pass 2 fold",
+      "verified_at": "2026-09-04T22:39:08Z",
       "notes": "Verified at de1ea2e. CI green on the head; every claim re-derived locally."
     },
     {
       "criterion_id": "FR-007",
       "description": "The single-version policy is stated where a consumer meets it",
-      "proof_type": "automated_test",
-      "evidence": "Runbook + CHANGELOG: customElements.define is global and throws on a duplicate tag, so two majors on one page is a hard runtime failure; peer-depend rather than direct-depend.",
+      "proof_type": "manual_review",
+      "evidence": "Stated in docs/release-runbook.md and CHANGELOG.md. No automated check; customElements.define's throw-on-duplicate is a browser behaviour, not a repo invariant.",
       "pass_fail": "pass",
-      "verified_by": "four-lens adversarial gate, pass 1 fold",
-      "verified_at": "2026-09-04T22:07:25Z",
+      "verified_by": "four-lens adversarial gate, pass 2 fold",
+      "verified_at": "2026-09-04T22:39:08Z",
       "notes": "Verified at de1ea2e. CI green on the head; every claim re-derived locally."
     },
     {
       "criterion_id": "FR-008",
       "description": "CHANGELOG for 1.0.0",
       "proof_type": "automated_test",
-      "evidence": "CHANGELOG.md. Its 14 element tags are derived-and-checked against custom-elements.json rather than hand-written; both lists match exactly.",
+      "evidence": "CHANGELOG.md, with checkChangelogTagsMatchManifest comparing its `sk-*` list against custom-elements.json in both directions and refusing an empty list on either side. An earlier version of THIS ROW claimed the list was derived-and-checked when nothing in the repo read CHANGELOG.md at all \u2014 a lens caught it, and the check was written to make the claim true rather than the claim weakened to match.",
       "pass_fail": "pass",
-      "verified_by": "four-lens adversarial gate, pass 1 fold",
-      "verified_at": "2026-09-04T22:07:25Z",
+      "verified_by": "four-lens adversarial gate, pass 2 fold",
+      "verified_at": "2026-09-04T22:39:08Z",
       "notes": "Verified at de1ea2e. CI green on the head; every claim re-derived locally."
     },
     {
@@ -108,7 +108,7 @@
       "criterion_id": "NFR-002",
       "description": "A file:// load issues zero off-machine requests, asserted by interception",
       "proof_type": "automated_test",
-      "evidence": "check-offline-load.mjs stages from real `npm pack` tarballs in a node_modules layout, intercepts requests AND websockets, waits a settle window, and asserts 14/14 elements upgraded with 30 @font-face rules resolving. --selftest plants an off-machine request and requires the probe to red on it.",
+      "evidence": "check-offline-load.mjs stages from real `npm pack` tarballs in a node_modules layout, intercepts requests AND websockets, waits 2s past load, and asserts 14/14 elements upgraded. The 30 @font-face sources are resolved against the packed tarball on DISK in stage(); the browser-side assertion is that at least one @font-face rule registered. Stated separately because an earlier version of this row implied both were browser assertions.",
       "pass_fail": "pass",
       "verified_by": "four-lens adversarial gate, pass 1 fold",
       "verified_at": "2026-09-04T22:07:25Z",
@@ -118,10 +118,10 @@
       "criterion_id": "NFR-003",
       "description": "ADR-5's release controls apply to every package in the derived set",
       "proof_type": "automated_test",
-      "evidence": "audit, provenance, SBOM and contents audit all loop the derived list. The contents audit is now backed by check-release-graph.mjs ON THE RELEASE PATH \u2014 previously every assertion lived in ci-quality.yml, which a tag does not trigger.",
+      "evidence": "provenance and the contents audit loop the derived set; check-release-graph.mjs asserts tarball contents on the release path. NOT looped, stated precisely because an earlier version of this row overstated it: npm-audit-gate.sh runs one workspace-wide `npm audit --audit-level=high`, and CycloneDX runs once at the repo root. Both are whole-workspace controls by design, which covers the derived set without iterating it.",
       "pass_fail": "pass",
-      "verified_by": "four-lens adversarial gate, pass 1 fold",
-      "verified_at": "2026-09-04T22:07:25Z",
+      "verified_by": "four-lens adversarial gate, pass 2 fold",
+      "verified_at": "2026-09-04T22:39:08Z",
       "notes": "Verified at de1ea2e. CI green on the head; every claim re-derived locally."
     },
     {
@@ -137,18 +137,18 @@
     {
       "criterion_id": "FR-009",
       "description": "WITHDRAWN \u2014 mono font resolution is a brand decision (fork 2 on #80)",
-      "proof_type": "manual",
+      "proof_type": "manual_review",
       "evidence": "The dead @import is deleted (mechanical, no behaviour change: 32 rules / 0 imports before and after). The token still names a family that does not load; self-hosting vs dropping it is the operator's.",
-      "pass_fail": "n/a",
+      "pass_fail": "fail",
       "verified_by": "four-lens adversarial gate, pass 1 fold",
       "verified_at": "2026-09-04T22:07:25Z",
-      "notes": "Removed from spec.md's FR table rather than struck through, per the repo convention that a row is a requirement regardless of formatting."
+      "notes": "WITHDRAWN from spec.md's tables, so this row records the withdrawal rather than a pass. Marked fail rather than n/a: the verdict enum has no not-applicable value, and recording a withdrawn requirement as passing would be false."
     },
     {
       "criterion_id": "SC-011",
-      "description": "The committed size record contains only environment-independent figures",
+      "description": "Every committed size figure is a deterministic function of the built artifacts",
       "proof_type": "automated_test",
-      "evidence": "measure-elements-sizes.mjs --check passes in CI and locally on the same tree. The one field that did not (packed size) was removed from the record and is printed by check-release-graph.mjs instead.",
+      "evidence": "packed tarball size varies with zlib on IDENTICAL inputs (3812.1 vs 3827.7 KiB) and is excluded from the record; files/unpacked/raw/minified vary only when the artifact itself differs. Note SIZES.md states its own basis: esbuild embeds module paths, so a checkout whose node_modules resolves differently changes the byte count and the SRI hash \u2014 the committed figures are CI's, which is a property of the build, not of the record.",
       "pass_fail": "pass",
       "verified_by": "CI, pass-1 fold",
       "verified_at": "2026-09-04T22:14:07Z",

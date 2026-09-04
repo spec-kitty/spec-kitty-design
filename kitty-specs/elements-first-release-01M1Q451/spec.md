@@ -222,6 +222,6 @@ deferring the decision would have shipped a mission with a quietly unmet FR, whi
 - **SC-005**: The release gate runs on pull requests, and reverting any one packaging fact reds it.
 - **SC-006**: A `file://` page using the built classic-script bundle and `tokens.css` renders upgraded, styled components with **zero** intercepted network requests.
 - **SC-007**: The SRI hash for the classic-script bundle is generated from the built artifact, recorded, and re-derived by a check rather than transcribed.
-- **SC-011**: The committed size record contains only environment-independent figures. A workstation and CI produce byte-identical values for every recorded field.
+- **SC-011**: No figure in the committed size record varies with compression or with the clock. Packed tarball size — which differs across machines on *identical* inputs because it is gzipped — is reported at runtime and never committed. Figures that vary only when the built artifact itself differs (raw and minified byte counts, and the SRI hash) *are* committed, and `SIZES.md` states their one known dependency: esbuild embeds module paths, so a checkout whose `node_modules` resolves through a symlink, a pnpm store or a bind mount produces a different artifact and therefore different figures. Those are CI's values; regenerate in a plain `npm ci` checkout or take them from CI.
 - **SC-009**: The runbook states the trigger is the tag and not the merge, and states that a dry run proves packing and not publishing.
 - **SC-010**: No tarball contains a sourcemap, a test file, or a dev-only dotfile.

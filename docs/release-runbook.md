@@ -28,15 +28,43 @@ Steps 2–4 are one-time. Tag `v1.0.0` was pushed on 2026-09-01 and failed 50 se
 means the scope was not there to publish into. ADR-2 recorded scope ownership as a pre-flight and it
 had not been done.
 
-**So step 5 is not `git tag v1.0.0`.** That tag already exists on the remote (`ccb055c`), and
-creating it again fails with *"tag 'v1.0.0' already exists"*. Two options, and the first is
-preferred:
+**So step 5 is not `git tag v1.0.0`** — that tag already exists on the remote and creating it again
+fails with *"tag 'v1.0.0' already exists"*.
 
-1. **Re-run the existing tag's workflow** from the Actions UI — *Publish Release* → the failed run
-   → *Re-run all jobs*. Nothing about the tag needs to change; only the scope was missing.
-2. **Re-tag at the merged head**, if `main` has moved since and you want the release to include it:
-   `git push --delete origin v1.0.0 && git tag -d v1.0.0 && git tag v1.0.0 <sha> && git push origin v1.0.0`.
-   Deleting a published tag is safe here only because nothing was ever published from it.
+**And it is emphatically not "re-run the existing tag's workflow".** An earlier revision of this
+runbook recommended exactly that, and it is destructive. `v1.0.0` points at `ccb055c`
+(*"fix: make all three packages publishable and fully styled (#64)"*, 2026-09-01), which predates
+this entire epic:
+
+| | at `v1.0.0` (`ccb055c`) | at `main` today |
+|---|---|---|
+| packages | `angular`, `html-js`, `tokens` | `elements`, `react`, `styles`, `tokens` |
+| `release.yml` publishes | `tokens`, `angular`, `html-js` | the derived set |
+
+GitHub re-runs a workflow **at the run's original commit**, so re-running that run executes the old
+workflow against the old tree. With the scope now created it would **succeed**, and it would:
+
+- publish `@spec-kitty/angular@1.0.0` and `@spec-kitty/html-js@1.0.0` — packages that no longer
+  exist — plus a stale `@spec-kitty/tokens@1.0.0`
+- publish **none** of `@spec-kitty/elements`, `@spec-kitty/react` or `@spec-kitty/styles`, which did
+  not exist at that commit
+- **permanently occupy `1.0.0`.** npm does not allow republishing a version, and does not allow
+  reusing an unpublished one. There is no undo.
+- run none of the assertions described below — no derived set, no `check-release-graph.mjs`, no SRI
+  check. They did not exist at that commit either.
+
+**Step 5 is therefore: move the tag.**
+
+```bash
+git push --delete origin v1.0.0
+git tag -d v1.0.0
+git tag v1.0.0 <the merged main sha>
+git push origin v1.0.0
+```
+
+Deleting a published tag is normally something to avoid. It is safe here, and only here, because
+**nothing was ever published from it** — the run 404'd before any `npm publish` completed. Confirm
+that first with `npm view @spec-kitty/tokens` returning `404` before deleting anything.
 
 For every release after this one, step 5 is the ordinary `git tag vX.Y.Z && git push origin vX.Y.Z`.
 

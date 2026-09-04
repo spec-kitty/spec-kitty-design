@@ -23,7 +23,7 @@
  * it can see; the probes are the evidence, the way build-react-wrappers.mjs --selftest is.
  */
 import { execFileSync } from 'node:child_process';
-import { readFileSync, readdirSync, mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
+import { readFileSync, readdirSync, existsSync, mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -225,7 +225,12 @@ export function checkWorkflowUsesDerivedSet(workflowText, packageNames, packageD
       .filter((v) => typeof v === 'string')
       .join('\n');
   const runs = steps.map((s) => ({ name: s.name ?? '(unnamed)', run: stepText(s), isPerPackageDir: typeof s['working-directory'] === 'string' && /^packages\//.test(s['working-directory']) }));
-  const joined = runs.map((r) => r.run).join('\n');
+  // COMMANDS ONLY for the payload assertions. `stepText` deliberately folds `name` and
+  // `working-directory` in, because that is where a hand-written per-package step hides its
+  // identity — but using the SAME haystack for "does this workflow actually publish" made the
+  // requirement satisfiable by PROSE. A lens deleted the publish step, left a step titled
+  // `was: npm publish --provenance --access public over the derived set`, and the gate went green.
+  const commands = steps.map((s) => (typeof s.run === 'string' ? s.run : '')).join('\n');
 
   // THE PAYLOAD. A lens deleted the entire publish step and this check still exited 0: it
   // asserted that the derived set was USED, never that anything was published. A release
@@ -234,20 +239,31 @@ export function checkWorkflowUsesDerivedSet(workflowText, packageNames, packageD
     [/npm\s+publish\b[^\n]*--provenance[^\n]*--access\s+public/, 'publish with provenance'],
     [/npm\s+pack\b/, 'the contents audit'],
     [/cyclonedx/i, 'the SBOM'],
-    [/check-release-graph\.mjs/, 'the release-graph assertion on the publishing path'],
+    [/check-release-graph\.mjs(?!\s*--selftest)/, 'the release-graph assertion on the publishing path'],
+    [/check-release-graph\.mjs\s+--selftest/, "the gate's own blindness check on the publishing path"],
+    [/measure-elements-sizes\.mjs\s+--check/, 'the size and SRI drift check on the publishing path'],
   ];
   for (const [re, what] of REQUIRED_STEPS) {
-    if (!re.test(joined)) problems.push(`release.yml has no step running ${what}`);
+    if (!re.test(commands)) problems.push(`release.yml has no step running ${what}`);
   }
   for (const s2 of steps) {
     if (s2['continue-on-error']) problems.push(`release.yml step "${s2.name ?? s2.run}" carries continue-on-error`);
   }
 
-  if (!joined.includes('release-graph.mjs')) {
-    problems.push('release.yml never invokes scripts/release-graph.mjs — the derived set is not used');
+  // ANCHORED ON THE INVOCATION, not on the filename appearing anywhere. `check-release-graph.mjs`
+  // CONTAINS the substring `release-graph.mjs`, so the [ENFORCED] assertion step this same fold
+  // added to release.yml made this test unconditionally true — the deriving step could then be
+  // deleted entirely with the gate still green, and `steps.graph.outputs.dirs` on a missing step id
+  // resolves to the empty string, so both loops iterate zero times and the release publishes
+  // nothing. A lens reproduced exactly that.
+  if (!/scripts\/release-graph\.mjs\s+--(projects|dirs|json)\b/.test(commands)) {
+    problems.push('release.yml never invokes scripts/release-graph.mjs to derive the set');
+  }
+  if (!/id:\s*graph\b/.test(workflowText)) {
+    problems.push('release.yml has no step with `id: graph` — the `steps.graph.outputs.*` references below resolve to the empty string');
   }
   for (const key of ['outputs.projects', 'outputs.dirs']) {
-    if (!joined.includes(key)) {
+    if (!commands.includes(key)) {
       problems.push(`release.yml does not consume steps.graph.${key}`);
     }
   }
@@ -295,6 +311,31 @@ export function checkWorkflowUsesDerivedSet(workflowText, packageNames, packageD
 }
 
 /**
+ * FR-008 — the CHANGELOG's element list matches the manifest.
+ *
+ * The acceptance matrix claimed this list was "derived-and-checked against custom-elements.json
+ * rather than hand-written". A lens checked: NOTHING in the repo reads CHANGELOG.md. The list was
+ * correct on the day it was written with nothing keeping it correct — the drift shape this whole
+ * mission is about, recorded as if it were automated. Rather than weaken the claim to match the
+ * code, here is the code that makes the claim true.
+ */
+export function checkChangelogTagsMatchManifest(changelogText, manifestTags) {
+  const problems = [];
+  if (manifestTags.length === 0) {
+    return ['no tags found in custom-elements.json — refusing to compare the CHANGELOG against nothing'];
+  }
+  const listed = [...new Set([...changelogText.matchAll(/`(sk-[a-z][a-z0-9-]*)`/g)].map((m) => m[1]))];
+  if (listed.length === 0) {
+    return ['CHANGELOG.md names no `sk-*` element — refusing to certify a match over an empty list'];
+  }
+  const missing = manifestTags.filter((t) => !listed.includes(t));
+  const extra = listed.filter((t) => !manifestTags.includes(t));
+  if (missing.length) problems.push(`CHANGELOG.md does not mention: ${missing.join(', ')}`);
+  if (extra.length) problems.push(`CHANGELOG.md names elements that are not in the manifest: ${extra.join(', ')}`);
+  return problems;
+}
+
+/**
  * SC-004, widened — no hand-written package list in ANY workflow.
  *
  * checkWorkflowUsesDerivedSet reads release.yml only. The commit that introduced it announced
@@ -311,16 +352,48 @@ export function checkNoHandWrittenListsAnywhere(workflows, packageNames, package
     return ['no workflow files found — refusing to certify the absence of hand-written lists over nothing'];
   }
   const ids = [...packageNames, ...packageDirs];
+  const names = (text) =>
+    [...new Set(ids.filter((id) => new RegExp(`(?<![\\w@/-])${escapeRe(id)}(?![\\w/-])`).test(text)))];
+
+  // EVERY PLACE A LIST CAN LIVE. The first version read `st.run` and nothing else, while its
+  // release.yml sibling already folded in name/working-directory/env/with — so the check that
+  // exists BECAUSE three lists were found outside release.yml was the weaker of the two. A lens
+  // walked a package list past it through `strategy.matrix`, a step `with:`, a step `env:`, a
+  // job-level `env:`, a per-package `working-directory`, and a composite action, all green.
+  const scalars = (node, out = []) => {
+    if (typeof node === 'string' || typeof node === 'number') out.push(String(node));
+    else if (Array.isArray(node)) node.forEach((n) => scalars(n, out));
+    else if (node && typeof node === 'object') Object.values(node).forEach((n) => scalars(n, out));
+    return out;
+  };
+
   for (const { file, text } of workflows) {
     const wf = parse(text);
     for (const [jobName, job] of Object.entries(wf?.jobs ?? {})) {
+      // Job-level env and the build matrix, which is the idiomatic way to write a per-package list.
+      const jobLevel = scalars([job?.env, job?.strategy?.matrix]).join('\n');
+      const jobNamed = names(jobLevel);
+      if (jobNamed.length >= 2) {
+        problems.push(
+          `${file} job "${jobName}" names ${jobNamed.length} packages in its env/matrix ` +
+            `(${jobNamed.join(', ')}) — derive the list with scripts/release-graph.mjs instead`,
+        );
+      }
       for (const st of job?.steps ?? []) {
-        const run = typeof st.run === 'string' ? st.run : '';
-        const code = run
+        const wd = st?.['working-directory'];
+        if (typeof wd === 'string' && /^packages\/[^/]+\/?$/.test(wd)) {
+          problems.push(
+            `${file} job "${jobName}" step "${st.name ?? '(unnamed)'}" has a per-package ` +
+              `\`working-directory: ${wd}\` — one hand-written step per package is the shape this rejects`,
+          );
+        }
+        // The whole step, minus the lines that invoke the deriving script and minus comments.
+        const stepScalars = scalars([st.name, st.run, wd, st.env, st.with, st.uses]).join('\n');
+        const code = stepScalars
           .split('\n')
           .filter((l) => !/^\s*#/.test(l) && !l.includes('release-graph.mjs'))
           .join('\n');
-        const named = [...new Set(ids.filter((id) => new RegExp(`(?<![\\w@/-])${escapeRe(id)}(?![\\w/-])`).test(code)))];
+        const named = names(code);
         if (named.length >= 2) {
           problems.push(
             `${file} job "${jobName}" step "${st.name ?? '(unnamed)'}" names ${named.length} packages ` +
@@ -374,8 +447,12 @@ export function checkGraphFailsClosed(accessors) {
         `release-graph.${label} did NOT throw on ${label.includes('empty') ? 'an empty' : 'a degenerate'} ` +
           `package tree — it returned ${JSON.stringify(Array.isArray(v) ? v.map((p) => p.name) : v)}`,
       );
-    } catch {
-      /* throwing is the contract */
+    } catch (err) {
+      // A BARE catch scored `TypeError: accessors.buildable is not a function` as success, so an
+      // incomplete stub proved the contract it was meant to test. A lens caught it.
+      if (err instanceof TypeError) {
+        problems.push(`release-graph.${label} threw a TypeError (${err.message}) — that is a broken probe, not a refusal`);
+      }
     }
   };
 
@@ -411,12 +488,16 @@ function packOne(pkg) {
   const parsed = JSON.parse(raw);
   const entry = Array.isArray(parsed) ? parsed[0] : parsed;
   const manifest = JSON.parse(readFileSync(join(dir, 'package.json'), 'utf8'));
+  // `unpackedSize` and `dir` are deliberately NOT carried here. measure-elements-sizes.mjs runs
+  // its own pack sweep for the committed record — a lens asked whether that duplication should be
+  // collapsed. It should not: this script must keep working when the record does not exist yet
+  // (it runs before it on a fresh clone), and it is a gate rather than a generator. Two sweeps
+  // cost ~3.5s in a job that also installs chromium. Carrying fields nothing reads is the part
+  // that was wrong, so they are gone.
   return {
     name: pkg.name,
-    dir: pkg.dir,
     files: (entry.files ?? []).map((f) => f.path),
     size: entry.size,
-    unpackedSize: entry.unpackedSize,
     exports: manifest.exports,
     main: manifest.main,
     types: manifest.types,
@@ -426,6 +507,62 @@ function packOne(pkg) {
 }
 
 /* ─────────────────────────────────── selftest ─────────────────────────────────── */
+
+/**
+ * A release job that SHOULD pass, so each workflow probe can inject exactly one defect.
+ *
+ * The workflow probes used to be hand-built fragments that were invalid in several ways at once,
+ * so every one of them tripped on `REQUIRED_STEPS` regardless of its stated subject. A lens
+ * mutation-tested it: deleting the per-package `working-directory` check, or the
+ * `continue-on-error` check, stopped NO probe from tripping — two of this file's newest and most
+ * specific checks had zero discriminating coverage while the floor counted them as proven.
+ *
+ * Starting from a valid baseline is what makes a probe mean "this defect is caught" rather than
+ * "this fixture is invalid somehow".
+ */
+const VALID_RELEASE_WORKFLOW = `jobs:
+  release:
+    steps:
+      - name: Resolve the publishable package set
+        id: graph
+        run: |
+          PROJECTS="$(node scripts/release-graph.mjs --projects)"
+          DIRS="$(node scripts/release-graph.mjs --dirs)"
+          echo "projects=$PROJECTS" >> "$GITHUB_OUTPUT"
+          echo "dirs=$DIRS" >> "$GITHUB_OUTPUT"
+      - name: Build
+        run: npx nx run-many --target=build --projects=\${{ steps.graph.outputs.projects }}
+      - name: Assert
+        run: node scripts/check-release-graph.mjs
+      - name: Selftest
+        run: node scripts/check-release-graph.mjs --selftest
+      - name: Sizes
+        run: node scripts/measure-elements-sizes.mjs --check
+      - name: Audit
+        run: |
+          for pkg in \${{ steps.graph.outputs.dirs }}; do ( cd "packages/$pkg" && npm pack --dry-run ); done
+      - name: SBOM
+        run: npx @cyclonedx/cyclonedx-npm --output-file sbom.json
+      - name: Publish
+        run: |
+          for pkg in \${{ steps.graph.outputs.dirs }}; do ( cd "packages/$pkg" && npm publish --provenance --access public ); done
+`;
+
+/**
+ * The baseline plus one injected defect.
+ *
+ * THROWS if the anchor is not found. A silent no-op here would hand every probe the pristine
+ * baseline, which passes — so the probe would report "did not trip" for the wrong reason, or worse,
+ * a future edit to the baseline would quietly disarm probes while the count stayed at 24. That is
+ * the same certifying-absence shape this whole file is about, one level up in the test harness.
+ */
+const withDefect = (anchor, withText) => {
+  const out = VALID_RELEASE_WORKFLOW.replace(anchor, withText);
+  if (out === VALID_RELEASE_WORKFLOW) {
+    throw new Error(`probe anchor not found in the baseline workflow: ${String(anchor).slice(0, 60)}`);
+  }
+  return out;
+};
 
 const PROBES = [
   {
@@ -466,8 +603,8 @@ const PROBES = [
   },
   // Every probe below reproduces an attack a pass-1 lens actually got past this gate.
   {
-    what: 'a tarball containing only its manifest (npm always packs package.json)',
-    run: () => checkTarballsNonEmpty([{ name: '@x/a', files: ['package.json'] }]),
+    what: 'an exports map from which no target path can be read',
+    run: () => checkExportsResolve([{ name: '@x/a', files: ['package.json', 'dist/index.js'], exports: {} }]),
   },
   {
     what: 'a manifest-and-README tarball with no payload',
@@ -485,40 +622,51 @@ const PROBES = [
     what: 'a release workflow with no publish step at all',
     run: () =>
       checkWorkflowUsesDerivedSet(
-        'jobs:\n  release:\n    steps:\n      - run: |\n          node scripts/release-graph.mjs --dirs\n' +
-          '          echo "${{ steps.graph.outputs.projects }} ${{ steps.graph.outputs.dirs }}"\n',
-        ['@x/a'],
-        ['a'],
+        withDefect(/for pkg in [^\n]*npm publish[^\n]*done/, 'echo "release complete"'),
+        ['@spec-kitty/tokens'], ['tokens'],
+      ),
+  },
+  {
+    what: 'a publish step satisfied only by its NAME, not by a command',
+    run: () =>
+      checkWorkflowUsesDerivedSet(
+        withDefect(
+          /      - name: Publish\n        run: \|\n          for pkg in[^\n]*\n/,
+          '      - name: "was: npm publish --provenance --access public over the derived set"\n        run: echo done\n',
+        ),
+        ['@spec-kitty/tokens'], ['tokens'],
+      ),
+  },
+  {
+    what: 'the deriving step deleted, leaving only check-release-graph.mjs (a substring match)',
+    run: () =>
+      checkWorkflowUsesDerivedSet(
+        withDefect(/          PROJECTS=[^\n]*\n          DIRS=[^\n]*\n/, '          echo derived\n'),
+        ['@spec-kitty/tokens'], ['tokens'],
       ),
   },
   {
     what: 'one hand-written step per package, identified by working-directory',
     run: () =>
       checkWorkflowUsesDerivedSet(
-        'jobs:\n  release:\n    steps:\n      - name: Publish tokens\n        run: npm publish --provenance --access public\n' +
-          '        working-directory: packages/tokens\n',
-        ['@spec-kitty/tokens'],
-        ['tokens'],
+        withDefect('      - name: SBOM', '      - name: Publish tokens\n        run: npm publish --provenance --access public\n        working-directory: packages/tokens\n      - name: SBOM'),
+        ['@spec-kitty/tokens'], ['tokens'],
       ),
   },
   {
     what: 'an enumeration smuggled into a block that also derives',
     run: () =>
       checkWorkflowUsesDerivedSet(
-        'jobs:\n  release:\n    steps:\n      - run: |\n          node scripts/release-graph.mjs --dirs > /dev/null\n' +
-          '          echo "${{ steps.graph.outputs.projects }} ${{ steps.graph.outputs.dirs }}"\n' +
-          '          for p in tokens styles elements react; do ( cd packages/$p && npm publish ); done\n',
-        ['@spec-kitty/tokens', '@spec-kitty/styles'],
-        ['tokens', 'styles'],
+        withDefect('          echo "dirs=$DIRS" >> "$GITHUB_OUTPUT"', '          echo "dirs=$DIRS" >> "$GITHUB_OUTPUT"\n          for p in tokens styles elements react; do echo $p; done'),
+        ['@spec-kitty/tokens', '@spec-kitty/styles'], ['tokens', 'styles', 'elements', 'react'],
       ),
   },
   {
     what: 'a release step carrying continue-on-error',
     run: () =>
       checkWorkflowUsesDerivedSet(
-        'jobs:\n  release:\n    steps:\n      - run: npm publish --provenance --access public\n        continue-on-error: true\n',
-        ['@x/a'],
-        ['a'],
+        withDefect('      - name: Publish\n', '      - name: Publish\n        continue-on-error: true\n'),
+        ['@spec-kitty/tokens'], ['tokens'],
       ),
   },
   {
@@ -528,21 +676,6 @@ const PROBES = [
   {
     what: 'a test file in the tarball',
     run: () => checkForbiddenContents([{ name: '@x/a', files: ['src/thing.test.ts'] }]),
-  },
-  {
-    what: 'a workflow that never calls release-graph.mjs',
-    run: () => checkWorkflowUsesDerivedSet('jobs:\n  release:\n    steps:\n      - run: npm publish\n', ['@x/a'], ['a']),
-  },
-  {
-    what: 'a workflow with a hand-written package enumeration beside the derived set',
-    run: () =>
-      checkWorkflowUsesDerivedSet(
-        'jobs:\n  release:\n    steps:\n      - run: node scripts/release-graph.mjs --dirs\n' +
-          '      - run: echo "${{ steps.graph.outputs.projects }} ${{ steps.graph.outputs.dirs }}"\n' +
-          '      - run: for p in tokens styles; do echo $p; done\n',
-        ['@spec-kitty/tokens', '@spec-kitty/styles'],
-        ['tokens', 'styles'],
-      ),
   },
   {
     what: 'a hand-written list in a workflow other than release.yml',
@@ -556,6 +689,18 @@ const PROBES = [
   {
     what: 'the all-workflow scan asserted over zero workflow files',
     run: () => checkNoHandWrittenListsAnywhere([], ['@x/a'], ['a']),
+  },
+  {
+    what: 'a CHANGELOG missing an element the manifest registers',
+    run: () => checkChangelogTagsMatchManifest('ships `sk-button`', ['sk-button', 'sk-card']),
+  },
+  {
+    what: 'a CHANGELOG naming an element the manifest does not have',
+    run: () => checkChangelogTagsMatchManifest('ships `sk-button` and `sk-ghost`', ['sk-button']),
+  },
+  {
+    what: 'the CHANGELOG comparison asserted over zero manifest tags',
+    run: () => checkChangelogTagsMatchManifest('ships `sk-button`', []),
   },
   {
     what: 'a graph accessor that returns an empty array instead of throwing',
@@ -580,8 +725,8 @@ function selftest() {
   }
   // The floor is asserted, not implied: a probe list that silently emptied would print nothing
   // and exit 0, which is the defect this script is about.
-  if (PROBES.length < 24) {
-    console.error(`❌ only ${PROBES.length} probes — the selftest floor is 24`);
+  if (PROBES.length < 27) {
+    console.error(`❌ only ${PROBES.length} probes — the selftest floor is 27`);
     process.exit(1);
   }
   console.log(`\n✅ all ${PROBES.length} probes tripped the gate.`);
@@ -600,7 +745,9 @@ function main() {
 
   const tarballs = pub.map(packOne);
   for (const t of tarballs) {
-    console.log(`  ${t.name}: ${t.files.length} files, ${(t.size / 1024).toFixed(1)} KB packed`);
+    // KiB, labelled KiB. SIZES.md devotes a paragraph to a basis mistake that turned 24073 bytes
+    // into "24.0 KB", and sends readers here for packed size — so this line must not repeat it.
+    console.log(`  ${t.name}: ${t.files.length} files, ${(t.size / 1024).toFixed(1)} KiB packed (gzipped; varies by machine)`);
   }
 
   const problems = [
@@ -619,11 +766,33 @@ function main() {
     ),
     ...checkWorkflowUsesDerivedSet(readFileSync(join(ROOT, WORKFLOW), 'utf8'), pkgs.map((p) => p.name), pkgs.map((p) => p.dir)),
     ...checkNoHandWrittenListsAnywhere(
-      readdirSync(join(ROOT, '.github/workflows'))
-        .filter((f) => /\.ya?ml$/.test(f))
-        .map((f) => ({ file: `.github/workflows/${f}`, text: readFileSync(join(ROOT, '.github/workflows', f), 'utf8') })),
+      // Composite actions too: a list moved into .github/actions/*/action.yml was invisible,
+      // because only .github/workflows was ever read.
+      [
+        ...readdirSync(join(ROOT, '.github/workflows'))
+          .filter((f) => /\.ya?ml$/.test(f))
+          .map((f) => ({ file: `.github/workflows/${f}`, text: readFileSync(join(ROOT, '.github/workflows', f), 'utf8') })),
+        ...(existsSync(join(ROOT, '.github/actions'))
+          ? readdirSync(join(ROOT, '.github/actions'), { withFileTypes: true })
+              .filter((d) => d.isDirectory())
+              .flatMap((d) =>
+                ['action.yml', 'action.yaml']
+                  .filter((n) => existsSync(join(ROOT, '.github/actions', d.name, n)))
+                  .map((n) => ({ file: `.github/actions/${d.name}/${n}`, text: readFileSync(join(ROOT, '.github/actions', d.name, n), 'utf8') })),
+              )
+          : []),
+      ],
       pkgs.map((p) => p.name),
       pkgs.map((p) => p.dir),
+    ),
+    ...checkChangelogTagsMatchManifest(
+      readFileSync(join(ROOT, 'CHANGELOG.md'), 'utf8'),
+      (() => {
+        const m = JSON.parse(readFileSync(join(ROOT, 'packages/elements/custom-elements.json'), 'utf8'));
+        const tags = [];
+        for (const mod of m.modules ?? []) for (const d of mod.declarations ?? []) if (d.tagName) tags.push(d.tagName);
+        return [...new Set(tags)].sort();
+      })(),
     ),
     ...checkGraphFailsClosed({ publishable, buildable }),
   ];

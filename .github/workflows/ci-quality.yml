@@ -316,7 +316,10 @@ jobs:
         run: node scripts/measure-elements-sizes.mjs --check
       - name: "[ENFORCED] Demo surface assembles and every asset reference resolves"
         run: |
-          npx nx run-many --target=build --projects=$(node scripts/release-graph.mjs --projects)
+          set -euo pipefail
+          PROJECTS="$(node scripts/release-graph.mjs --projects)"
+          [ -n "$PROJECTS" ] || { echo "::error::empty build set"; exit 1; }
+          npx nx run-many --target=build --projects="$PROJECTS"
           bash scripts/assemble-demo-dist.sh apps/storybook/storybook-static
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # actions/upload-artifact v4.6.2
         with:
@@ -477,17 +480,20 @@ jobs:
       - name: "[ENFORCED] The release gate can see its own failures (SC-003)"
         run: node scripts/check-release-graph.mjs --selftest
       - name: Build the publishable graph
-        run: npx nx run-many --target=build --projects=$(node scripts/release-graph.mjs --projects)
+        run: |
+          set -euo pipefail
+          PROJECTS="$(node scripts/release-graph.mjs --projects)"
+          [ -n "$PROJECTS" ] || { echo "::error::empty build set"; exit 1; }
+          npx nx run-many --target=build --projects="$PROJECTS"
       - name: "[ENFORCED] Release graph is coherent (FR-003, FR-004, SC-001, SC-002, SC-004, SC-010)"
         run: node scripts/check-release-graph.mjs
       - name: "[ENFORCED] Sizes and the SRI hash match the built artifacts (FR-005, SC-007, NFR-004)"
         run: node scripts/measure-elements-sizes.mjs --check
       - run: npx playwright install chromium
-      # The probe BEFORE the check, for the reason the script documents at length: SC-006
-      # currently passes by accident. The graph's only network dependency is tokens.css's
-      # Google Fonts @import, which is invalid and dropped, so a probe that merely observed the
-      # healthy tree would be green while blind. --selftest plants a page that does reach
-      # off-machine and asserts the probe reds on it.
+      # The probe BEFORE the check. The graph has no network dependency at all now, so this
+      # probe's green is indistinguishable from a probe that cannot see — --selftest plants a page
+      # that does reach off-machine and requires the probe to red on it. See the script's header
+      # for the accident this was originally written to survive.
       - name: "[ENFORCED] The offline probe can see an off-machine request (SC-006)"
         run: node scripts/check-offline-load.mjs --selftest
       - name: "[ENFORCED] file:// load with zero network (NFR-002, SC-006)"

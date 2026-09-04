@@ -11,20 +11,13 @@
     },
     "lint": {
       "executor": "nx:run-commands",
-      "options": {
-        "command": "stylelint --allow-empty-input 'packages/tokens/src/**/*.css'"
-      }
+      "options": { "command": "stylelint --allow-empty-input 'packages/tokens/src/**/*.css'" }
     },
     "catalogue": {
       "executor": "nx:run-commands",
-      "options": {
-        "command": "node scripts/generate-token-catalogue.js"
-      },
+      "options": { "command": "node scripts/generate-token-catalogue.js" },
       "dependsOn": []
     }
   },
-  "tags": [
-    "scope:tokens",
-    "type:publishable"
-  ]
+  "tags": ["scope:tokens", "type:publishable"]
 }

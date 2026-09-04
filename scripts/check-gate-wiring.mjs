@@ -148,7 +148,7 @@ else {
     const why = [];
     if ('if' in st) why.push('carries an `if:`');
     if (st['continue-on-error']) why.push('carries continue-on-error');
-    if (/\|\|\s*(true|:|echo|cat|printf|exit\s+0)\b/.test(String(st.run ?? ''))) why.push('swallows failure with `|| true`');
+    if (/\|\|\s*(:|true\b|echo\b|cat\b|printf\b|exit\s+0)/.test(String(st.run ?? ''))) why.push('swallows failure with `|| true`');
     return why;
   };
 
@@ -201,6 +201,7 @@ else {
     [/node\s+scripts\/check-offline-load\.mjs(?!\s*--selftest)(\s|$)/, 'the file:// no-network probe', 'scripts/check-offline-load.mjs'],
     [/node\s+scripts\/check-offline-load\.mjs\s+--selftest(\s|$)/, "the offline probe's own blindness check", 'scripts/check-offline-load.mjs --selftest'],
     [/node\s+scripts\/measure-elements-sizes\.mjs\s+--check(\s|$)/, 'the size and SRI drift check', 'scripts/measure-elements-sizes.mjs --check'],
+    [/node\s+scripts\/measure-elements-sizes\.mjs\s+--check(\s|$)/, 'the size and SRI drift check', 'scripts/measure-elements-sizes.mjs --check'],
   ];
   const releaseSteps = wf.jobs?.['release-gate']?.steps ?? [];
   for (const [re, what, label] of REQUIRED_RELEASE) {
@@ -231,8 +232,30 @@ else {
       if (enforced && 'if' in st) {
         problems.push(`[ENFORCED] step "${st.name}" in \`${jobName}\` carries an \`if:\` — it can be skipped`);
       }
-      if (enforced && /\|\|\s*(true|:|echo|cat|printf|exit\s+0)\b/.test(String(st.run ?? ''))) {
-        problems.push(`[ENFORCED] step "${st.name}" in \`${jobName}\` swallows failure with \`|| true\``);
+      // INVERTED, not enumerated. This was a list of swallows — `|| true`, then `|| :`, then
+      // `|| echo` — and a lens walked past every version of it three ways: `set +e`, a trailing
+      // bare `exit 0`, and `|| /bin/true`. Enumerating the ways to ignore a failure is a losing
+      // game; an [ENFORCED] step has no legitimate reason to contain any of these constructs, so
+      // the rule is stated positively and the exception, if one is ever needed, is a deliberate
+      // edit here rather than a spelling the list happens not to cover.
+      const body = String(st.run ?? '');
+      if (enforced) {
+        const swallows = [];
+        if (/(^|\n)\s*set\s+\+e\b/.test(body)) swallows.push('`set +e`');
+        if (/(^|\n)\s*exit\s+0\s*(#.*)?$/m.test(body)) swallows.push('a trailing `exit 0`');
+        // A `||` whose line is NOT part of a test condition. The gate's own [ENFORCED] step is a
+        // legitimate multi-line `[ ... ] || [ ... ]` disjunction, so a blanket ban is wrong — but
+        // `cmd || anything` outside a test is a fallback, whatever the fallback happens to be.
+        // That is what makes this robust where the previous enumeration was not: a lens walked
+        // past `|| true`, `|| :` and `|| echo` in turn, and then past the widened list with
+        // `|| /bin/true` and `|| test 1`.
+        const fallbackLines = body
+          .split('\n')
+          .filter((l) => l.includes('||') && !/[[]|(^|\s)if\s|(^|\s)while\s/.test(l));
+        if (fallbackLines.length) swallows.push(`a \`||\` fallback (${fallbackLines[0].trim().slice(0, 60)})`);
+        for (const why of swallows) {
+          problems.push(`[ENFORCED] step "${st.name}" in \`${jobName}\` contains ${why} — it can pass over a failure`);
+        }
       }
     }
   }

@@ -23,8 +23,8 @@ that notices.
 ## Technical Context
 
 **Language/Version**: Node 22 (CI), ES2022 modules; workflow YAML
-**Primary Dependencies**: npm 11 CLI (`npm pack --dry-run --json`), `yaml` (already used by `check-gate-wiring.mjs`), Playwright chromium (already in CI), `@cyclonedx/cyclonedx-npm`
-**Storage**: N/A — committed generated artifacts only (`INTEGRITY.json`, `CHANGELOG.md`)
+**Primary Dependencies**: npm 10.9.x CLI (what `node-version: 22` provides) (`npm pack --dry-run --json`), `yaml` (already used by `check-gate-wiring.mjs`), Playwright chromium (already in CI), `@cyclonedx/cyclonedx-npm`
+**Storage**: N/A — committed generated artifacts only (`SIZES.md`, `CHANGELOG.md`)
 **Testing**: static gates as `scripts/*.mjs` with `--check`/`--selftest`, matching the repo's existing generated-artifact contract; one Playwright-driven offline probe. **No additions to the vitest behaviour suite** — see IC-05.
 **Target Platform**: GitHub Actions `ubuntu-latest`; consumers on npm, a CDN, and `file://`
 **Project Type**: single (monorepo tooling)
@@ -65,7 +65,6 @@ kitty-specs/elements-first-release-01M1Q451/
 scripts/
 ├── release-graph.mjs              NEW — derives the publishable set; the single source
 ├── check-release-graph.mjs        NEW — the PR-time gate + --selftest probes
-├── build-elements-integrity.mjs   NEW — SRI hash for the classic-script bundle, with --check
 ├── check-offline-load.mjs         NEW — file:// no-network probe (Playwright)
 └── check-gate-wiring.mjs          CHANGED — generalised from one job name to a list
 
@@ -89,7 +88,7 @@ CHANGELOG.md                       NEW
 | Violation | Why Needed | Simpler Alternative Rejected Because |
 |---|---|---|
 | A new CI job rather than a step in `lint-code` | The offline probe needs a browser, and `lint-code` runs `npm ci --ignore-scripts`, so no browser is installed there | Adding a browser install to `lint-code` slows the repo's most-run job for one probe. Putting the probe in the existing `playwright` job was rejected because that job is `needs: [storybook-build]` and skips when no component changed — a packaging-only PR is exactly the PR this gate exists for, and it would skip on it |
-| A generated `INTEGRITY.json` committed to the repo | SC-007 requires the hash be re-derived by a check rather than transcribed | A hash written into prose is the "companion number nothing re-derives" that `suite-budget.json` argues against at length. This follows `SIZES.md`'s existing contract instead |
+| The SRI hash committed to a generated record | SC-007 requires the hash be re-derived by a check rather than transcribed | A hash written into prose is the "companion number nothing re-derives" that `suite-budget.json` argues against at length. This follows `SIZES.md`'s existing contract instead |
 
 ## Implementation Concern Map
 
@@ -121,7 +120,7 @@ CHANGELOG.md                       NEW
 
 - **Purpose**: prove a `file://` page loads the classic-script bundle with zero network requests, and record an SRI hash for the CDN path.
 - **Relevant requirements**: FR-005, NFR-002, SC-006, SC-007
-- **Affected surfaces**: `scripts/check-offline-load.mjs`, `scripts/build-elements-integrity.mjs`, `packages/elements/SIZES.md`
+- **Affected surfaces**: `scripts/check-offline-load.mjs`, `scripts/measure-elements-sizes.mjs`, `packages/elements/SIZES.md`
 - **Sequencing/depends-on**: IC-01
 - **Risks**: **this criterion currently passes by accident.** The graph's only network dependency is `tokens.css`'s Google Fonts `@import`, which is invalid and dropped (verified in Chromium: 32 rules, 0 imports, the route never fired). A probe written today would go green without proving anything, and would stay green until someone repositioned the `@import`. The probe must therefore be red-first against a deliberately network-dependent fixture, not merely observed green against the current tree.
 

@@ -10,19 +10,24 @@
  * ─────────────────────────────────────────────────────────────────────────────────────────────
  * WHY THIS PROBE IS RED-FIRST AND NOT MERELY GREEN
  *
- * This criterion currently passes BY ACCIDENT, and a probe that only observes the healthy tree
- * would prove nothing while looking authoritative.
+ * When this probe was written the criterion passed BY ACCIDENT, and that is why it is built the
+ * way it is.
  *
- * The one network dependency in the graph is tokens.css's
+ * tokens.css then carried
  *   @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono…')
- * and it is INVALID: it sits at line 162 while `:root {` opens at line 3, and CSS requires
- * @import to precede every style rule. Measured in chromium — 32 rules parsed, 0 import rules,
- * and a route watching fonts.googleapis.com never fired. So the mono font has never loaded for
- * anyone, and "zero network requests" has been true because the only request was dead code.
+ * positioned AFTER a style rule, which CSS forbids — so every browser dropped it. Measured in
+ * chromium at the time: 32 rules parsed, 0 import rules, and a route watching
+ * fonts.googleapis.com never fired. "Zero network requests" was true because the graph's only
+ * network dependency was dead code, and a probe that merely observed the healthy tree would have
+ * been green and blind.
  *
- * `--selftest` therefore plants a page that DOES fetch something and asserts this probe reds on
- * it. Without that, the day someone repositions the @import — the obvious "fix" — this check
- * would go on passing or start failing for reasons no one could attribute.
+ * THAT LINE IS NOW DELETED (same PR, WP04), so the accident is gone — but the reasoning is not
+ * historical trivia. The graph has no network dependency today, which means this probe's green is
+ * indistinguishable from a probe that cannot see, and the only thing separating them is
+ * `--selftest`: it plants a page that DOES fetch something and requires this probe to red on it.
+ * A future change that reintroduces a fetch — a self-hosted webfont pulled from a CDN, an
+ * analytics snippet, a repositioned @import — is exactly what this must catch, and the blindness
+ * check is the reason it will.
  * ─────────────────────────────────────────────────────────────────────────────────────────────
  */
 import { chromium } from 'playwright';
@@ -95,10 +100,40 @@ function stage(extraHead = '') {
   const fontDir = join(modules, 'tokens', 'dist', 'fonts');
   const fontCount = existsSync(fontDir) ? readdirSync(fontDir).length : 0;
   const css = readFileSync(join(modules, 'tokens', 'dist', 'tokens.css'), 'utf8');
-  const declared = new Set([...css.matchAll(/url\('\.\/fonts\/([^']+)'\)/g)].map((m2) => m2[1]));
-  const missing = [...declared].filter((f) => !existsSync(join(fontDir, f)));
+  // BOTH quote styles and bare urls. The first version matched only `url('...')`, so reformatting
+  // tokens.css to double quotes would have silently halved the checked set — the same
+  // hand-written-narrowness the tag list was fixed for. Query strings and fragments are stripped:
+  // `url('./fonts/x.otf?v=2')` resolves to the file, not to the literal.
+  // EVERY url() form, and every @font-face counted. A lens walked three shapes past the first
+  // version — `url("...")`, `url(...)` unquoted, and `url('../fonts/...')` — because it matched
+  // only single-quoted `./fonts/`. The floor was `declared.size === 0`, which fires only if EVERY
+  // face changes form; the failure that occurs is one face slipping through.
+  const declared = new Set(
+    [...css.matchAll(/url\(\s*['"]?([^'")]+?)['"]?\s*\)/g)]
+      .map((m2) => m2[1].split(/[?#]/)[0])
+      .filter((u) => !/^(https?:|data:|\/)/.test(u)),
+  );
+  const faceCount = (css.match(/@font-face/g) ?? []).length;
+  if (declared.size < faceCount) {
+    console.error(
+      `❌ tokens.css has ${faceCount} @font-face rules but only ${declared.size} resolvable local ` +
+        `src urls — a face is declared in a form this check does not parse, which is how one slips through`,
+    );
+    process.exit(1);
+  }
+  // Resolved RELATIVE TO THE STYLESHEET, which is what the browser does — `./fonts/x` and
+  // `../fonts/x` are different files and the first version treated both as basenames.
+  const cssDir = join(modules, 'tokens', 'dist');
+  const missing = [...declared].filter((f) => !existsSync(join(cssDir, f)));
   if (declared.size === 0) {
     console.error('❌ tokens.css declares no @font-face sources — refusing to certify font loading over nothing');
+    process.exit(1);
+  }
+  // A FLOOR THAT CAN ACTUALLY FIRE. `declared.size === 0` above guards the case a real stylesheet
+  // cannot reach; shipping FEWER files than the sheet declares is the case that occurs, and it is
+  // what the old `if (existsSync(FONTS))` let through silently.
+  if (fontCount < declared.size) {
+    console.error(`❌ tokens.css declares ${declared.size} @font-face sources but the package ships ${fontCount} font files`);
     process.exit(1);
   }
   if (missing.length) {
@@ -159,7 +194,6 @@ async function run(pagePath, tags) {
     // FONTS, asserted rather than assumed. The probe copied fonts into place and then never
     // looked at whether any of them loaded, so the whole paragraph about silent 404s guarded
     // nothing observable.
-    out.fontsLoaded = [...document.fonts].filter((f) => f.status === 'loaded').length;
     out.fontFaces = document.fonts.size;
     const btn = document.querySelector(tags[0]);
     // Proof the ADOPTED sheet arrived, not just that the element exists: adoptedStyleSheets is
