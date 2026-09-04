@@ -25,7 +25,7 @@
     "counts: a path list rots on every rename and invites an entry being added rather than a bug",
     "being fixed. A count cannot be added to.",
     "#78 retires feature-card's and ribbon-card's, 10 -> 8. blog-card's does NOT follow in this mission: that component is deferred pending an operator ruling (see #78), so its wrapper is one of the eight that remain.",
-    "#79 retires pill-tag's while rewriting its stories onto the generated exports, 8 -> 7. button and check-bullet follow in the same mission."
+    "#79 retires all three of its own components' wrappers — pill-tag, button and check-bullet — 8 -> 5. An earlier revision of this line claimed button and check-bullet 'follow in the same mission' while leaving both in place, and the button one sat in a line region that same PR had edited for the class rename; three pre-merge lenses caught the false claim. Retiring pill-tag's is also what EXPOSED a real WCAG failure the inert wrapper had been hiding: the tinted variants paired dark-tuned inks with pastel light tints at 1.51:1. Five remain: blog-card, form-field, nav-pill, site-footer and the styles-layer stub."
   ],
-  "count": 7
+  "count": 5
 }

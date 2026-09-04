@@ -22,7 +22,15 @@
   line-height: 1.5;
 }
 
-/* ---- Colour variants ---- */
+/* ---- Colour variants ----
+   THE INK IS --sk-on-tint-*, NOT --sk-color-*, and this is a WCAG fix rather than a preference.
+   The raw colour tokens are tuned for the DARK page surface; the light-mode tints are pastel,
+   so pairing them gives 1.51:1 (yellow), 1.67:1 (green) and 1.82:1 (purple) against AA's 4.5.
+   The on-tint inks give 6.28:1, 7.10:1 and 8.00:1.
+   This is the identical defect #77 fixed in sk-section-banner, and it survived here because
+   this component's LightMode story carried the INERT `data-theme="light"` wrapper (#93) — so
+   the story rendered the DARK palette and the a11y gate never saw the light pairing. Retiring
+   that wrapper in #79 is what exposed it. */
 /* Using colour channels approach for broad compatibility.
    Fallback opaque colours are provided for environments that do not
    support CSS relative colour syntax (rgba(from var(...) r g b / α)). */
@@ -30,22 +38,22 @@
 .sk-pill-tag--green {
   /* Fallback for older environments */
   background: var(--sk-surface-tint-mint);
-  color: var(--sk-color-green);
+  color: var(--sk-on-tint-mint);
 }
 
 .sk-pill-tag--purple {
   background: var(--sk-surface-tint-lilac);
-  color: var(--sk-color-purple);
+  color: var(--sk-on-tint-lilac);
 }
 
 .sk-pill-tag--breaking {
   background: var(--sk-surface-tint-sky);
-  color: var(--sk-color-red);
+  color: var(--sk-on-tint-sky);
 }
 
 .sk-pill-tag--yellow {
   background: var(--sk-surface-tint-butter);
-  color: var(--sk-color-yellow);
+  color: var(--sk-on-tint-butter);
 }
 
 /* ---- Eyebrow: a SHAPE/SIZE modifier, not a second component ----

@@ -85,16 +85,20 @@ test('the class list is identical on both paths', async () => {
   // static form puts on its own root, so the sheet needs no second spelling — the divergence
   // #78 had to repair after the fact.
   const el = await mount({ variant: 'secondary', size: 'sm' });
-  const cls = partOf(el).className;
-  expect(cls).toContain('sk-button');
-  expect(cls).toContain('sk-button--secondary');
-  expect(cls).toContain('sk-button--sm');
+  // toBe, not toContain: the test is named "identical", and three toContain calls would pass
+  // on an extra or reordered class. The sibling pill-tag test already does this.
+  expect(partOf(el).className).toBe('sk-button sk-button--secondary sk-button--sm');
   expect(buttonStaticHtml({ variant: 'secondary', size: 'sm' })).toContain(
     'class="sk-button sk-button--secondary sk-button--sm"',
   );
 });
 
-test('every tone PAINTS and the tones are distinct', async () => {
+test('the primary tone PAINTS, and the three tones are distinct', async () => {
+  // RENAMED AND STRENGTHENED. The old name said "every tone PAINTS" and no assertion proved any
+  // tone painted: deleting `background: var(--sk-color-yellow)` from --primary left three still
+  // distinct triples, so the component's whole visual contract was deletable green. A lens
+  // caught it. `secondary` and `ghost` are transparent BY DESIGN, so a blanket paint assertion
+  // is impossible — primary is the one with a fill and it is asserted directly.
   // Derived from the module's own map with a literal floor, per #78's finding that a hardcoded
   // list lets a fourth value ship with no coverage.
   const variants = Object.keys(BUTTON_VARIANTS);
@@ -103,6 +107,10 @@ test('every tone PAINTS and the tones are distinct', async () => {
   for (const variant of variants) {
     const el = await mount({ variant });
     const cs = getComputedStyle(partOf(el));
+    if (variant === 'primary') {
+      expect(cs.backgroundColor, 'the primary button has no fill').not.toBe('rgba(0, 0, 0, 0)');
+      expect(cs.backgroundColor, 'the primary fill is transparent').not.toBe('transparent');
+    }
     seen.set(variant, `${cs.backgroundColor}|${cs.color}|${cs.borderColor}`);
   }
   expect(

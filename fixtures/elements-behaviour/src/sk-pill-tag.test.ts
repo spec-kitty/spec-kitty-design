@@ -65,6 +65,45 @@ test('every colour PAINTS and the colours are distinct', async () => {
   ).toBe(variants.length);
 });
 
+test('every tinted variant meets AA contrast in BOTH themes', async () => {
+  // THE BUG THE INERT WRAPPER WAS HIDING. Every tinted variant paired --sk-color-* (tuned for
+  // the dark page) with --sk-surface-tint-* (pastel in light mode): 1.51:1 yellow, 1.67:1
+  // green, 1.82:1 purple, against AA's 4.5. The a11y gate never saw it because this
+  // component's LightMode story carried the inert `data-theme="light"` wrapper, so it rendered
+  // the DARK palette (#93). Retiring that wrapper in #79 exposed it; the on-tint inks fix it.
+  //
+  // Asserted here as well as in axe, because axe only sees the stories that exist — this holds
+  // for every variant in the module map, in both themes, whether or not a story renders it.
+  const contrast = (fg: string, bg: string) => {
+    const channel = (v: number) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4);
+    const lum = (c: string) => {
+      const [r, g, b] = c.match(/\d+/g)!.slice(0, 3).map((n) => channel(Number(n) / 255));
+      return 0.2126 * r! + 0.7152 * g! + 0.0722 * b!;
+    };
+    const [a, z] = [lum(fg), lum(bg)].sort((x, y) => y - x);
+    return (a! + 0.05) / (z! + 0.05);
+  };
+
+  for (const theme of ['dark', 'light'] as const) {
+    const wrap = document.createElement('div');
+    if (theme === 'light') wrap.className = 'sk-light';
+    document.body.append(wrap);
+    for (const variant of Object.keys(PILL_TAG_VARIANTS)) {
+      const el = document.createElement('sk-pill-tag');
+      el.setAttribute('variant', variant);
+      el.textContent = 'Label';
+      wrap.append(el);
+      await (el as unknown as { updateComplete: Promise<unknown> }).updateComplete;
+      const cs = getComputedStyle(el.shadowRoot!.querySelector('[part="tag"]')!);
+      const ratio = contrast(cs.color, cs.backgroundColor);
+      expect(
+        ratio,
+        `variant="${variant}" in ${theme} mode is ${ratio.toFixed(2)}:1 — WCAG AA needs 4.5`,
+      ).toBeGreaterThanOrEqual(4.5);
+    }
+  }
+});
+
 test('the EYEBROW shape composes with colour — it is an axis, not a second component', async () => {
   // The modelling claim this migration makes. `.sk-eyebrow-pill` used to be a standalone class
   // restating the base rule, exported as its own function, so a tinted eyebrow was not
@@ -77,13 +116,15 @@ test('the EYEBROW shape composes with colour — it is an axis, not a second com
   const basePad = parseFloat(getComputedStyle(partOf(base)).paddingLeft);
   const eyebrowPad = parseFloat(getComputedStyle(partOf(eyebrow)).paddingLeft);
   expect(eyebrowPad, 'the eyebrow shape did not change the padding').toBeGreaterThan(basePad);
-  // It inherits the base's own properties rather than restating them — the reduction that made
-  // it a modifier. If the rule were standalone again, the base background would not apply.
+  // It inherits the base's background rather than restating it.
   expect(getComputedStyle(partOf(eyebrow)).backgroundColor).toBe(
     getComputedStyle(partOf(base)).backgroundColor,
   );
 
-  // And the two axes compose: a tinted eyebrow keeps the tint AND the shape.
+  // AND THE TWO AXES COMPOSE — this is the assertion that actually holds the modelling claim.
+  // A lens pointed out the comment above was on the wrong line: a re-split that restated the
+  // base background verbatim would leave that assertion green, whereas a tinted eyebrow keeping
+  // BOTH the tint and the shape can only pass if --eyebrow sets no colour of its own.
   const tinted = await mount({ shape: 'eyebrow', variant: 'purple' });
   const purple = await mount({ variant: 'purple' });
   expect(getComputedStyle(partOf(tinted)).backgroundColor, 'the tint was lost').toBe(

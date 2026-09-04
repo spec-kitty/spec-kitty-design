@@ -7,8 +7,8 @@ Components in these artifacts: sk-button, sk-card, sk-check-bullet, sk-feature-c
 
 | artifact | raw | minified | min+gzip | notes |
 |---|---:|---:|---:|---|
-| `ESM  (dist/index.js)` | 92.5 KiB | 69.1 KiB | 17 KiB | `lit` external |
-| `IIFE (dist/elements.js)` | 109.9 KiB | 80.3 KiB | 22 KiB | runtime bundled |
+| `ESM  (dist/index.js)` | 93.7 KiB | 70.4 KiB | 18 KiB | `lit` external |
+| `IIFE (dist/elements.js)` | 111.1 KiB | 81.5 KiB | 22 KiB | runtime bundled |
 
 ## The basis matters — read this before comparing against an ADR
 
@@ -17,7 +17,7 @@ Those look contradictory and are not: **they are different bases, and partly a
 different component.** ADR-10's SP-3 spike measured `sk-card`, not `sk-stub`.
 
 - ADR-10 §2's two figures are **unminified raw on `sk-card` ALONE** (3.7 / 26.6 KB).
-- ADR-8's ~6 KB is **minified+gzip**, and the IIFE now measures 21.6 KiB
+- ADR-8's ~6 KB is **minified+gzip**, and the IIFE now measures 22.1 KiB
   min+gzip — which does NOT corroborate it and is not meant to. That figure was a per-component
   Lit-runtime estimate; this artifact carries the runtime plus every component in the package,
   so the two are different bases and the gap grows with each component added. An earlier
@@ -43,7 +43,7 @@ roughly that component's CSS, not by a fixed per-component overhead.
 An earlier draft of this work package recorded the **minified** figures under a "raw"
 heading and concluded ADR-10 was wrong. It was not. Always state the basis — and the
 unit: every figure in this file is KiB (1024), which is why the raw IIFE reads
-109.9 KiB here and "24.0 KB" in the WP prompt. Same 112496
+111.1 KiB here and "24.0 KB" in the WP prompt. Same 113749
 bytes.
 
 ## Raw output of the measuring command
@@ -51,13 +51,13 @@ bytes.
 ```
 $ npx nx run elements:build && node scripts/measure-elements-sizes.mjs
 packages/elements/dist/index.js
-  raw         94688 bytes  (92.5 KiB)
-  minified    70803 bytes  (69.1 KiB)
+  raw         95941 bytes  (93.7 KiB)
+  minified    72049 bytes  (70.4 KiB)
   gzip         22 KiB
-  min+gzip     17 KiB
+  min+gzip     18 KiB
 packages/elements/dist/elements.js
-  raw        112496 bytes  (109.9 KiB)
-  minified    82220 bytes  (80.3 KiB)
+  raw        113749 bytes  (111.1 KiB)
+  minified    83466 bytes  (81.5 KiB)
   gzip         27 KiB
   min+gzip     22 KiB
 ```

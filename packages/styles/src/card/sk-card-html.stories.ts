@@ -1,4 +1,7 @@
 import '../pill-tag/sk-pill-tag.css';
+// Pill-tag markup comes from ITS OWN generated exports — a card story is not an authoring
+// site for another component's markup (ADR-8 criterion 3).
+import { SkPillTagHTML, SkPillTagGreenHTML } from '../pill-tag';
 import './sk-card.css';
 import type { Meta, StoryObj } from '@storybook/web-components';
 import { SkCardHTML, SkCardBlueHTML, SkCardPurpleHTML, SkCardInsetHTML } from './index';
@@ -79,8 +82,8 @@ export const Inset: Story = {
 export const BlogCardExample: Story = {
   render: () => wrap(SkCardHTML, '').replace('<p style="color:var(--sk-fg-default);margin:0"></p>', `
       <div style="display:flex;gap:var(--sk-space-2);margin-bottom:var(--sk-space-4)">
-        <span class="sk-pill-tag sk-pill-tag--green">Release</span>
-        <span class="sk-pill-tag">v3.2.0</span>
+        ${SkPillTagGreenHTML.replace('>Label<', '>Release<')}
+        ${SkPillTagHTML.replace('>Label<', '>v3.2.0<')}
       </div>
       <h3 style="font-family:var(--sk-font-display);font-size:var(--sk-text-xl);font-weight:var(--sk-weight-bold);color:var(--sk-fg-default);margin:0 0 var(--sk-space-3)">
         Spec Kitty 3.2 ships with org-layer doctrine

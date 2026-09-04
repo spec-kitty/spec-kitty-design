@@ -3,9 +3,11 @@
 The Spec Kitty components ship as CSS in `@spec-kitty/styles`, and — for the components migrated
 so far — as **custom elements** in `@spec-kitty/elements`. Both require `@spec-kitty/tokens`.
 
-**Migration is in progress.** Five elements exist today: `sk-card`, `sk-nav-pill`,
-`sk-form-input`, `sk-form-textarea` and `sk-stub`. Everything else on this page is CSS only, and
-#77–#79 are the missions that move the rest. Each section below says which it is, because the
+**Migration is in progress.** Twelve elements exist today: `sk-button`, `sk-card`,
+`sk-check-bullet`, `sk-feature-card`, `sk-form-input`, `sk-form-textarea`, `sk-grid`,
+`sk-nav-pill`, `sk-pill-tag`, `sk-ribbon-card`, `sk-section-banner` and `sk-stub`.
+Three components are still CSS only — `blog-card` (#78), `site-footer` (#77) and `form-field`
+(#141) — and each section below says which it is. Each section below says which it is, because the
 difference decides how you use it.
 
 Because a custom element needs no wrapper, every framework can use the migrated ones directly. A
@@ -31,8 +33,8 @@ Primary and secondary call-to-action buttons used to drive user actions.
 **HTML:**
 
 ```html
-<button class="sk-btn sk-btn--primary">Get started</button>
-<button class="sk-btn sk-btn--secondary">Learn more</button>
+<button class="sk-button sk-button--primary">Get started</button>
+<button class="sk-button sk-button--secondary">Learn more</button>
 ```
 
 [View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/components-buttons--default)
@@ -79,7 +81,7 @@ Pill-shaped tags used to label and categorise content inline.
 
 ```html
 <span class="sk-pill-tag">Design system</span>
-<span class="sk-eyebrow-pill">New</span>
+<span class="sk-pill-tag sk-pill-tag--eyebrow">New</span>
 ```
 
 [View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/components-tags--default)
@@ -255,8 +257,8 @@ Full-width hero block with eyebrow, headline, lead copy, checkmark bullet list, 
     <li>Works with any AI coding tool</li>
   </ul>
   <div class="sk-hero__ctas">
-    <button class="sk-btn sk-btn--primary">Get started</button>
-    <button class="sk-btn sk-btn--secondary">View on GitHub</button>
+    <button class="sk-button sk-button--primary">Get started</button>
+    <button class="sk-button sk-button--secondary">View on GitHub</button>
   </div>
 </section>
 ```

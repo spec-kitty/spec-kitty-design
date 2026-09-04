@@ -8,7 +8,9 @@
 // `.sk-check-bullet__text` IS DROPPED. It appeared in the published markup and is defined in
 // no stylesheet anywhere in this repo — a class that styles nothing, on the element whose text
 // is slotted in the element path anyway. A pre-merge lens on #138 flagged it while auditing
-// this batch in advance. There are no in-repo consumers.
+// this batch in advance. It had THREE in-repo consumers when that sentence was written:
+// sk-check-bullet-html.stories.ts hand-wrote the whole <li> three times. Two pre-merge
+// lenses caught the false claim; that story now renders the generated export.
 
 /** No colour or shape variants — a check bullet is one thing. Declared explicitly because the
  *  generator cannot distinguish an absent export from an empty one. */
