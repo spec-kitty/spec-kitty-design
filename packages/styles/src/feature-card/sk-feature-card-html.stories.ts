@@ -14,6 +14,40 @@ import {
   SkFeatureCardBorderPurpleHTML,
 } from './index';
 
+/**
+ * Swaps the generated placeholder copy for this catalogue's own.
+ *
+ * The generated exports carry structural placeholder text, because the copy is the consuming
+ * page's rather than the component's — the rule #77 established when sk-section-banner's three
+ * exports were found carrying hardcoded version strings. The strings below are the ones this
+ * catalogue has always shown, kept verbatim so `visual.spec.ts`'s committed baseline still
+ * measures STYLING rather than a copy change.
+ *
+ * THROWS when the marker is absent, because `String.replace` with a string pattern returns its
+ * input unchanged on no match.
+ */
+const MARKER =
+  '<h4 class="sk-feature-card__title">Feature title</h4>' +
+  '<p class="sk-feature-card__body">What this feature does for the reader.</p>';
+
+const fill = (markup: string, title: string, body: string) => {
+  if (!markup.includes(MARKER)) {
+    throw new Error(
+      `sk-feature-card story: generated markup no longer contains the placeholder copy — ` +
+        `fill() would have silently returned it unchanged. Update MARKER alongside ` +
+        `featureCardStaticHtml()'s default content.`,
+    );
+  }
+  return markup.replace(
+    MARKER,
+    `<h4 class="sk-feature-card__title">${title}</h4><p class="sk-feature-card__body">${body}</p>`,
+  );
+};
+
+const FLOW = ['Stay in flow', 'When requirements are scattered across meetings, tickets, and chat — Spec Kitty keeps context in one place.'] as const;
+const CONTEXT = ['Context stays put', 'Decisions, alternatives, and rationale live with the feature itself — never lost in a thread.'] as const;
+const REVIEW = ['Review with confidence', 'Every PR comes with a spec reviewers can check against — no guessing what done looks like.'] as const;
+
 const meta: Meta = {
   title: 'Components/SkFeatureCard (HTML)',
   tags: ['autodocs'],
@@ -39,7 +73,7 @@ export const Default: Story = {
       },
     },
   },
-  render: () => SkFeatureCardYellowHTML,
+  render: () => fill(SkFeatureCardYellowHTML, ...FLOW),
 };
 
 export const GreenIcon: Story = {
@@ -50,7 +84,7 @@ export const GreenIcon: Story = {
       },
     },
   },
-  render: () => SkFeatureCardGreenHTML,
+  render: () => fill(SkFeatureCardGreenHTML, ...CONTEXT),
 };
 
 export const PurpleIcon: Story = {
@@ -61,7 +95,7 @@ export const PurpleIcon: Story = {
       },
     },
   },
-  render: () => SkFeatureCardPurpleHTML,
+  render: () => fill(SkFeatureCardPurpleHTML, ...REVIEW),
 };
 
 export const ColorizedBorders: Story = {
@@ -75,9 +109,9 @@ export const ColorizedBorders: Story = {
   },
   render: () => `
     <div style="display:grid;grid-template-columns:repeat(3, minmax(0, 1fr));gap:var(--sk-space-4);max-width:900px;">
-      ${SkFeatureCardBorderYellowHTML}
-      ${SkFeatureCardBorderGreenHTML}
-      ${SkFeatureCardBorderPurpleHTML}
+      ${fill(SkFeatureCardBorderYellowHTML, 'Stay in flow', 'Yellow-bordered card variant — emphasises a primary feature against the surrounding neutral catalog.')}
+      ${fill(SkFeatureCardBorderGreenHTML, 'Context stays put', 'Green-bordered card variant — flags a stable / verified feature in the catalog.')}
+      ${fill(SkFeatureCardBorderPurpleHTML, 'Review with confidence', 'Purple-bordered card variant — earmarks an evolution / preview feature in the catalog.')}
     </div>
   `,
 };
@@ -91,9 +125,9 @@ export const Grid: Story = {
     },
   },
   render: () => `<div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-space-4);max-width:600px;">
-    ${SkFeatureCardYellowHTML}
-    ${SkFeatureCardGreenHTML}
-    ${SkFeatureCardPurpleHTML}
+    ${fill(SkFeatureCardYellowHTML, ...FLOW)}
+    ${fill(SkFeatureCardGreenHTML, ...CONTEXT)}
+    ${fill(SkFeatureCardPurpleHTML, ...REVIEW)}
   </div>`,
 };
 
@@ -110,9 +144,9 @@ export const LightMode: Story = {
   render: () => `
     <div class="sk-light" style="background: var(--sk-surface-page); padding: var(--sk-space-6); display: inline-block;">
       <div style="display:grid;grid-template-columns:repeat(3, minmax(0, 1fr));gap:var(--sk-space-4);max-width:900px;">
-        ${SkFeatureCardBorderYellowHTML}
-        ${SkFeatureCardBorderGreenHTML}
-        ${SkFeatureCardBorderPurpleHTML}
+        ${fill(SkFeatureCardBorderYellowHTML, 'Stay in flow', 'Yellow-bordered card variant — emphasises a primary feature against the surrounding neutral catalog.')}
+        ${fill(SkFeatureCardBorderGreenHTML, 'Context stays put', 'Green-bordered card variant — flags a stable / verified feature in the catalog.')}
+        ${fill(SkFeatureCardBorderPurpleHTML, 'Review with confidence', 'Purple-bordered card variant — earmarks an evolution / preview feature in the catalog.')}
       </div>
     </div>
   `,

@@ -63,7 +63,7 @@ export const Default: Story = {
 
 export const WithRibbon: Story = {
   render: () =>
-    fill(SkRibbonCardWithRibbonHTML, 'Full-day rollout workshop', 'Get product, engineering and reviewers aligned in your environment.'),
+    fill(SkRibbonCardWithRibbonHTML, 'Full-day rollout workshop', 'Get product, engineering, and reviewers aligned on Spec Kitty in your environment.'),
 };
 
 /**

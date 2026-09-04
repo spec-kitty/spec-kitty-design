@@ -62,6 +62,36 @@ test('[SC-014] the element adopts the GENERATED sheet by identity and injects no
   expect(sr.querySelectorAll('style').length).toBe(0);
 });
 
+test('SLOTTED content inherits a legible colour from the host', async () => {
+  // The a11y gate reported color-contrast on EVERY element story of this component before this
+  // was fixed. The title and body classes style shadow-tree nodes; slotted content is not in
+  // the shadow tree, so those classes reach nothing and the text fell back to UA black on a
+  // dark card. `color` on :host reaches it, because inheritance follows the flattened tree.
+  //
+  // Asserted on a slotted node with NO colour of its own — the case that was broken — and
+  // against the token's own value, so replacing it with a hardcoded colour or deleting the
+  // declaration both red.
+  const el = await mount();
+  const slotted = el.querySelector('p')!;
+  const expected = getComputedStyle(document.documentElement)
+    .getPropertyValue('--sk-fg-body')
+    .trim();
+  expect(expected, '--sk-fg-body is not defined — the token sheet is not loaded').not.toBe('');
+  const asColour = (value: string) => {
+    const probe = document.createElement('span');
+    probe.style.color = value;
+    document.body.append(probe);
+    const resolved = getComputedStyle(probe).color;
+    probe.remove();
+    return resolved;
+  };
+  expect(getComputedStyle(slotted).color, 'slotted text does not inherit the card colour').toBe(
+    asColour(expected),
+  );
+  // And it is not the UA default, which is what the bug looked like.
+  expect(getComputedStyle(slotted).color).not.toBe('rgb(0, 0, 0)');
+});
+
 test('the HOST is a block box, so a consumer can size it', async () => {
   const el = await mount();
   expect(getComputedStyle(el).display, 'the host must be a block box').toBe('block');

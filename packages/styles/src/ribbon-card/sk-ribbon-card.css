@@ -7,8 +7,25 @@
 /* A custom element defaults to `display: inline`, so without this the host cannot be sized or
    spaced and a consumer's max-width on it is inert. `block` matches the static <article>; the
    two consumption paths must agree about their own box (#77). Inert in the static path. */
+/* COLOUR ON THE HOST, so SLOTTED content is legible — and on the HOST specifically so the
+   static path cannot move.
+
+   The title and body classes style nodes in the shadow tree; slotted content is not in the
+   shadow tree, so those classes reach nothing and the text falls back to the UA default black
+   on a dark card surface. axe reported color-contrast on EVERY element story of this
+   component. `color` is inherited, and inheritance follows the FLATTENED tree, so a slotted
+   node inherits through the slot from `:host` — which a selector could never reach it with.
+
+   An earlier fix put this on the `.sk-<name>` class instead. That works for the element and
+   also changes the STATIC path, where that class is the article and its untinted descendants
+   would have picked up a new inherited colour — moving a committed visual baseline as a side
+   effect of an a11y fix. `:host` is inert in a document, so this cannot.
+
+   --sk-fg-body, not --sk-fg-on-card, for the reason sk-card.css records: the latter is defined
+   only in the dark block, so it would fall back to light grey inside a .sk-light subtree. */
 :host {
   display: block;
+  color: var(--sk-fg-body);
 }
 
 .sk-ribbon-card {
