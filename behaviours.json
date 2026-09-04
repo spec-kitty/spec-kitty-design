@@ -32,7 +32,8 @@
     "check could not tell 'the fixture covers form association' from 'a shipped element does'.",
     "#77 adds <sk-grid> as a subject of SC-013 and SC-014 — the two it genuinely owns. It is deliberately NOT added to SC-015: the registry guard is a claim about define(), not about any element that calls it, and listing every caller would make the id's subject list grow without adding an assertion.",
     "#77 adds <sk-section-banner> as a subject of SC-013 and SC-014 on the same basis as <sk-grid>: it declares parts and adopts a generated sheet. It does not join SC-015, and does not claim an event or form id it does not have.",
-    "#78 adds <sk-feature-card> AND <sk-ribbon-card> as subjects of SC-013 and SC-014, on the same basis as #77's two: each declares parts and adopts a generated sheet. An earlier revision of this note named only feature-card while the data below added both."
+    "#78 adds <sk-feature-card> AND <sk-ribbon-card> as subjects of SC-013 and SC-014, on the same basis as #77's two: each declares parts and adopts a generated sheet. An earlier revision of this note named only feature-card while the data below added both.",
+    "#79 adds sk-button, sk-pill-tag and sk-check-bullet to SC-013 and SC-014. None claims an event or form id: button renders a real control and lets the platform supply the behaviour, and the other two are presentational."
   ],
   "behaviours": [
     {
@@ -255,8 +256,16 @@
           "file": "fixtures/elements-behaviour/src/behaviours.test.ts"
         },
         {
+          "name": "sk-button",
+          "file": "fixtures/elements-behaviour/src/sk-button.test.ts"
+        },
+        {
           "name": "sk-card",
           "file": "fixtures/elements-behaviour/src/sk-card.test.ts"
+        },
+        {
+          "name": "sk-check-bullet",
+          "file": "fixtures/elements-behaviour/src/sk-check-bullet.test.ts"
         },
         {
           "name": "sk-feature-card",
@@ -279,6 +288,10 @@
           "file": "fixtures/elements-behaviour/src/sk-nav-pill.test.ts"
         },
         {
+          "name": "sk-pill-tag",
+          "file": "fixtures/elements-behaviour/src/sk-pill-tag.test.ts"
+        },
+        {
           "name": "sk-ribbon-card",
           "file": "fixtures/elements-behaviour/src/sk-ribbon-card.test.ts"
         },
@@ -296,6 +309,14 @@
       "applicable": true,
       "subjects": [
         {
+          "name": "sk-button",
+          "file": "fixtures/elements-behaviour/src/sk-button.test.ts"
+        },
+        {
+          "name": "sk-check-bullet",
+          "file": "fixtures/elements-behaviour/src/sk-check-bullet.test.ts"
+        },
+        {
           "name": "sk-feature-card",
           "file": "fixtures/elements-behaviour/src/sk-feature-card.test.ts"
         },
@@ -306,6 +327,10 @@
         {
           "name": "sk-nav-pill",
           "file": "fixtures/elements-behaviour/src/sk-nav-pill.test.ts"
+        },
+        {
+          "name": "sk-pill-tag",
+          "file": "fixtures/elements-behaviour/src/sk-pill-tag.test.ts"
         },
         {
           "name": "sk-ribbon-card",

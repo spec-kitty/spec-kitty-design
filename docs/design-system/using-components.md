@@ -3,9 +3,12 @@
 The Spec Kitty components ship as CSS in `@spec-kitty/styles`, and — for the components migrated
 so far — as **custom elements** in `@spec-kitty/elements`. Both require `@spec-kitty/tokens`.
 
-**Migration is in progress.** Five elements exist today: `sk-card`, `sk-nav-pill`,
-`sk-form-input`, `sk-form-textarea` and `sk-stub`. Everything else on this page is CSS only, and
-#77–#79 are the missions that move the rest. Each section below says which it is, because the
+**Migration is in progress.** Twelve elements exist today: `sk-button`, `sk-card`,
+`sk-check-bullet`, `sk-feature-card`, `sk-form-input`, `sk-form-textarea`, `sk-grid`,
+`sk-nav-pill`, `sk-pill-tag`, `sk-ribbon-card`, `sk-section-banner` and `sk-stub`.
+Three of the catalogue's component packages are still CSS only — `blog-card` (#78),
+`site-footer` (#77) and `form-field` (#141). Composite sections below such as Hero and Callout
+are CSS-only *patterns* rather than packages, and are not part of that count. Each section below says which it is, because the
 difference decides how you use it.
 
 Because a custom element needs no wrapper, every framework can use the migrated ones directly. A
@@ -28,14 +31,39 @@ npm install @spec-kitty/react                         # optional: JSX typing for
 
 Primary and secondary call-to-action buttons used to drive user actions.
 
+**As a custom element** — `sk-button` is migrated, so it needs no wrapper:
+
+```html
+<script type="module" src="/node_modules/@spec-kitty/elements/dist/elements.js"></script>
+
+<sk-button variant="primary">Get started</sk-button>
+<sk-button variant="secondary">Learn more</sk-button>
+<sk-button variant="primary" size="sm">Book demo</sk-button>
+```
+
+Set `href` and it renders an anchor instead of a button, with the same class list — which is
+what the demo pages actually need, since every button-styled thing there is a link:
+
+```html
+<sk-button variant="primary" href="/docs">Read the docs</sk-button>
+```
+
+The label is slotted content. `disabled` reaches the real `<button>` and is deliberately
+ignored on the anchor form, because a disabled link is not a thing HTML has. Use
+`sk-button::part(button)` to reach the rendered `<button>` or `<a>`.
+
+Two limitations, both tracked in #153: the control lives in a shadow root, so it cannot submit
+an enclosing form, and `aria-label` on the host is ignored — an icon-only button needs the
+CSS-only form below for now.
+
 **HTML:**
 
 ```html
-<button class="sk-btn sk-btn--primary">Get started</button>
-<button class="sk-btn sk-btn--secondary">Learn more</button>
+<button class="sk-button sk-button--primary">Get started</button>
+<button class="sk-button sk-button--secondary">Learn more</button>
 ```
 
-[View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/components-buttons--default)
+[View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/components-button-html--default)
 
 ---
 
@@ -67,7 +95,7 @@ It fires `sk-nav-pill-toggle` before the open state changes, with
 </nav>
 ```
 
-[View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/components-navigation--default)
+[View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/navigation-sknavpill-html--default)
 
 ---
 
@@ -75,14 +103,64 @@ It fires `sk-nav-pill-toggle` before the open state changes, with
 
 Pill-shaped tags used to label and categorise content inline.
 
+**As a custom element** — `sk-pill-tag` is migrated, so it needs no wrapper:
+
+```html
+<script type="module" src="/node_modules/@spec-kitty/elements/dist/elements.js"></script>
+
+<sk-pill-tag>Design system</sk-pill-tag>
+<sk-pill-tag variant="green">Shipped</sk-pill-tag>
+<sk-pill-tag shape="eyebrow">New</sk-pill-tag>
+```
+
+`variant` (colour) and `shape` (the eyebrow form) are independent axes and compose. The label
+is slotted content. Use `sk-pill-tag::part(tag)` to reach the pill itself.
+
 **HTML:**
 
 ```html
 <span class="sk-pill-tag">Design system</span>
-<span class="sk-eyebrow-pill">New</span>
+<span class="sk-pill-tag sk-pill-tag--eyebrow">New</span>
 ```
 
-[View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/components-tags--default)
+[View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/primitives-skpilltag-html--default)
+
+---
+
+## Check bullets
+
+Ticked list items, for feature and requirement lists.
+
+**As a custom element** — `sk-check-bullet` is migrated, so it needs no wrapper:
+
+```html
+<script type="module" src="/node_modules/@spec-kitty/elements/dist/elements.js"></script>
+
+<ul role="list">
+  <sk-check-bullet>Requirements captured up front</sk-check-bullet>
+  <sk-check-bullet icon="★">Decisions live with the feature</sk-check-bullet>
+</ul>
+```
+
+Keep `role="list"` on the `<ul>`. The element sets `role="listitem"` on itself, because a
+custom element between a `<ul>` and its content is not a list item — that half is the element's
+job. The `role="list"` is needed for a different reason: `list-style: none` makes several
+browsers drop the list semantics entirely, and these styles remove the bullets. An earlier
+revision of this paragraph claimed the `<ul>`'s role had to be "restated for the pairing to
+survive", which is not how ARIA works — a `<ul>` already maps to `role=list`. A lens caught it. The tick is `aria-hidden` — the slotted
+text is the accessible content — and `icon` replaces it. Two parts: `bullet` (the row) and
+`icon` (the tick).
+
+**HTML:**
+
+```html
+<li class="sk-check-bullet">
+  <span class="sk-check-bullet__icon" aria-hidden="true">✓</span>
+  Requirements captured up front
+</li>
+```
+
+[View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/primitives-skcheckbullet-html--default)
 
 ---
 
@@ -116,7 +194,7 @@ The variant class is required — `.sk-section-banner` alone sets no colour. Thi
 generated; copy it from `packages/styles/src/section-banner/sk-section-banner.html` rather than
 retyping it.
 
-[View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/components-content-markers--default)
+[View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/primitives-sksectionbanner-html--default)
 
 ---
 
@@ -176,7 +254,7 @@ token for a card nested inside another.
 </div>
 ```
 
-[View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/components-cards--default)
+[View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/components-card--default)
 
 ---
 
@@ -255,13 +333,13 @@ Full-width hero block with eyebrow, headline, lead copy, checkmark bullet list, 
     <li>Works with any AI coding tool</li>
   </ul>
   <div class="sk-hero__ctas">
-    <button class="sk-btn sk-btn--primary">Get started</button>
-    <button class="sk-btn sk-btn--secondary">View on GitHub</button>
+    <button class="sk-button sk-button--primary">Get started</button>
+    <button class="sk-button sk-button--secondary">View on GitHub</button>
   </div>
 </section>
 ```
 
-[View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/components-hero--default)
+_No Storybook entry: this is a CSS-only pattern with no story._
 
 ---
 
@@ -291,7 +369,7 @@ Two-column callout block used for "why/who" benefit statements with bullet lists
 </div>
 ```
 
-[View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/components-callout--default)
+_No Storybook entry: this is a CSS-only pattern with no story._
 
 ---
 

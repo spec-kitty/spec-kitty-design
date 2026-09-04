@@ -104,14 +104,14 @@ export const SHAPES = [
     shadow: { 'sk-x': '<div class="sk-x__body"><picture><img alt="a cat"></picture></div>' } },
 
   // The icon-only case run-axe-storybook.js explicitly promises to keep green:
-  // "<button class=\"sk-btn\" aria-label=\"Close\"><svg><path/></svg></button>".
+  // "<button class=\"sk-button\" aria-label=\"Close\"><svg><path/></svg></button>".
   // No other shape puts MEDIA as the sole content of a shadow root, so flatMatch's
   // shadow-crossing could be removed silently. That failure is fail-CLOSED rather
   // than green — but it would red-line every icon component in #72 and be
   // misattributed to the story rather than to the gate.
   { id: 'icon-only-in-shadow', want: true,
     html: '<div id="storybook-root"><sk-x></sk-x></div>',
-    shadow: { 'sk-x': '<button class="sk-btn" aria-label="Close"><svg><path/></svg></button>' } },
+    shadow: { 'sk-x': '<button class="sk-button" aria-label="Close"><svg><path/></svg></button>' } },
 
   // --- the SAME six shapes, in LIGHT DOM (NFR-002) --------------------------
   // The list runs twice on purpose. Piercing shadow roots is a widening change,

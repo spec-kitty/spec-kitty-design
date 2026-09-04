@@ -1,7 +1,26 @@
+// ALL IMPORTS FIRST. `tag()` used to sit between the pill-tag import above and the three
+// imports below, which breaks `import/first` and — because the two CSS imports' ORDER sets the
+// cascade — invited a reader to reorder them believing the const was a barrier. It is not.
 import '../pill-tag/sk-pill-tag.css';
+// Pill-tag markup comes from ITS OWN generated exports — a card story is not an authoring
+// site for another component's markup (ADR-8 criterion 3).
+import { SkPillTagHTML, SkPillTagGreenHTML } from '../pill-tag';
 import './sk-card.css';
 import type { Meta, StoryObj } from '@storybook/web-components';
 import { SkCardHTML, SkCardBlueHTML, SkCardPurpleHTML, SkCardInsetHTML } from './index';
+
+/** Guarded, for the reason the button story states: String.replace returns its input unchanged
+ *  on no match, so an unguarded swap renders "Label" silently. One of nine such helpers across
+ *  the styles-layer stories; consolidating them is filed as #157. */
+const tag = (markup: string, text: string) => {
+  if (!markup.includes('>Label<')) {
+    throw new Error(
+      'sk-card story: pill-tag markup no longer contains ">Label<" — the swap would have ' +
+        'silently returned it unchanged. Update alongside pillTagStaticHtml().',
+    );
+  }
+  return markup.replace('>Label<', `>${text}<`);
+};
 
 /**
  * Renders from the GENERATED exports, not from hand-written markup.
@@ -79,8 +98,8 @@ export const Inset: Story = {
 export const BlogCardExample: Story = {
   render: () => wrap(SkCardHTML, '').replace('<p style="color:var(--sk-fg-default);margin:0"></p>', `
       <div style="display:flex;gap:var(--sk-space-2);margin-bottom:var(--sk-space-4)">
-        <span class="sk-tag sk-tag--green">Release</span>
-        <span class="sk-tag">v3.2.0</span>
+        ${tag(SkPillTagGreenHTML, 'Release')}
+        ${tag(SkPillTagHTML, 'v3.2.0')}
       </div>
       <h3 style="font-family:var(--sk-font-display);font-size:var(--sk-text-xl);font-weight:var(--sk-weight-bold);color:var(--sk-fg-default);margin:0 0 var(--sk-space-3)">
         Spec Kitty 3.2 ships with org-layer doctrine

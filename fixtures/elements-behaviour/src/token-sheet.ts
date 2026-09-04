@@ -6,7 +6,10 @@
  * which meant it asserted only that a component's CSS DEREFERENCES a token — never that the
  * token package DEFINES it. A lens measured the consequence: deleting the two light-block
  * declarations from tokens.css killed light mode for every real card and the suite stayed
- * green. Three test files now depend on this, and the reason travels with the helper.
+ * green. Every test that asserts a computed value depends on this, and the reason travels
+ * with the helper. An earlier revision said "three test files"; it was five when written and is
+ * eight now, and a lens has caught the number stale in three separate missions — so it is
+ * deliberately no longer stated here. `git grep -l token-sheet.js -- fixtures/` is the answer.
  *
  * WHY THIS IS NOT A vitest `setupFiles` ENTRY. sk-nav-pill, sk-form-input, sk-form-textarea
  * and sk-stub deliberately do NOT load the token sheet, and a global setup would silently

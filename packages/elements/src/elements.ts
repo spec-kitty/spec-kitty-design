@@ -7,12 +7,21 @@
 // sk-nav-pill to index.ts and not to this file, and every gate stayed green — the vitest lane
 // resolves the package to index.ts, the analyzer reads source, and Storybook has its own
 // module graph. Only the deployed demo went quiet.
+//
+// ORDER IS NOT SIGNIFICANT and is not checked: the gate derives the element list from the tree
+// and asserts MEMBERSHIP, and `define()` is guarded so registration order cannot matter. This
+// list is historical, not alphabetical — a lens read the two alphabetical insertions in one
+// hunk as a convention and flagged the third for breaking it. Append new elements; do not
+// reshuffle for tidiness.
 import './stub/sk-stub.js';
+import './button/sk-button.js';
 import './card/sk-card.js';
+import './check-bullet/sk-check-bullet.js';
 import './nav-pill/sk-nav-pill.js';
 import './form-input/sk-form-input.js';
 import './form-textarea/sk-form-textarea.js';
 import './grid/sk-grid.js';
 import './feature-card/sk-feature-card.js';
 import './ribbon-card/sk-ribbon-card.js';
+import './pill-tag/sk-pill-tag.js';
 import './section-banner/sk-section-banner.js';

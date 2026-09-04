@@ -8,6 +8,79 @@
       "declarations": [
         {
           "kind": "variable",
+          "name": "BUTTON_AXES",
+          "default": "{ Sm: { size: 'sm', variant: 'primary' }, Link: { href: '#', variant: 'primary' }, } as const satisfies Record<string, ButtonStaticOptions>",
+          "description": "The static forms this component publishes, beyond the base and one per variant.\n\n`Sm` is the small size in its primary tone; `Link` is the anchor form."
+        },
+        {
+          "kind": "variable",
+          "name": "BUTTON_SIZES",
+          "type": {
+            "text": "{ sm: 'sk-button--sm' }"
+          },
+          "default": "{ sm: 'sk-button--sm' }",
+          "description": "Size modifiers. A separate axis from tone: a button has a tone AND a size."
+        },
+        {
+          "kind": "variable",
+          "name": "BUTTON_VARIANTS",
+          "type": {
+            "text": "{\n  primary: 'sk-button--primary',\n  secondary: 'sk-button--secondary',\n  ghost: 'sk-button--ghost',\n}"
+          },
+          "default": "{ primary: 'sk-button--primary', secondary: 'sk-button--secondary', ghost: 'sk-button--ghost', }",
+          "description": "The button's tone modifiers."
+        },
+        {
+          "kind": "function",
+          "name": "buttonClasses",
+          "return": {
+            "type": {
+              "text": "string"
+            }
+          },
+          "parameters": [
+            {
+              "name": "variant",
+              "optional": true,
+              "type": {
+                "text": "string"
+              }
+            },
+            {
+              "name": "size",
+              "optional": true,
+              "type": {
+                "text": "string"
+              }
+            }
+          ],
+          "description": "The button's class list. Warns and degrades on an unknown variant or size."
+        },
+        {
+          "kind": "function",
+          "name": "buttonStaticHtml",
+          "return": {
+            "type": {
+              "text": "string"
+            }
+          },
+          "parameters": [
+            {
+              "name": "opts",
+              "default": "{}",
+              "type": {
+                "text": "ButtonStaticOptions"
+              }
+            },
+            {
+              "name": "content",
+              "default": "'Label'"
+            }
+          ],
+          "description": "The static form. Throws on an unknown variant or size.\n\nANCHOR OR BUTTON, decided by `href`, and this is not a convenience — it is what the\ncatalogue already does. Every real use of this class in `apps/demo` is an `<a href>` styled\nas a button; the stories use `<button>`. One primitive, two elements, and the class list is\nidentical on both. So the element switches on the same signal rather than forcing consumers\nto choose between a working link and a styled one."
+        },
+        {
+          "kind": "variable",
           "name": "CARD_AXES",
           "default": "{ Inset: { inset: true }, } as const satisfies Record<string, CardStaticOptions>",
           "description": "The static forms this component publishes, BEYOND the base and one per variant.\n\nThe generator derives base + variants on its own; this names everything else. It exists\nbecause the generator used to emit `Sk<Comp>InsetHTML` unconditionally — `inset` is a CARD\naxis, and for `sk-nav-pill` or `sk-grid` that would have committed\n`class=\"sk-grid sk-grid--inset\"`, a class in no stylesheet, as generated output with\n`--check` green. A component with no extra axes exports an empty object; omitting it is an\nerror, because `?? {}` cannot distinguish \"none\" from \"I looked for the wrong name\"."
@@ -68,11 +141,69 @@
         },
         {
           "kind": "variable",
+          "name": "CHECK_BULLET_AXES",
+          "type": {
+            "text": "{}"
+          },
+          "default": "{}",
+          "description": "No non-variant axes."
+        },
+        {
+          "kind": "variable",
+          "name": "CHECK_BULLET_VARIANTS",
+          "type": {
+            "text": "{}"
+          },
+          "default": "{}",
+          "description": "No colour or shape variants — a check bullet is one thing."
+        },
+        {
+          "kind": "function",
+          "name": "checkBulletClasses",
+          "return": {
+            "type": {
+              "text": "string"
+            }
+          }
+        },
+        {
+          "kind": "function",
+          "name": "checkBulletStaticHtml",
+          "return": {
+            "type": {
+              "text": "string"
+            }
+          },
+          "parameters": [
+            {
+              "name": "opts",
+              "default": "{}",
+              "type": {
+                "text": "CheckBulletStaticOptions"
+              }
+            },
+            {
+              "name": "content",
+              "default": "'Feature description here'"
+            }
+          ],
+          "description": "The static form — an `<li>`, because the static path sits inside a real `<ul>`.\n\nThe ELEMENT cannot be an `<li>`: a custom element inside a `<ul>` is not a list item, so it\ncarries `role=\"listitem\"` on the host instead. That is the one place these two paths differ\nstructurally, and it is unavoidable rather than an oversight — recorded on the element."
+        },
+        {
+          "kind": "variable",
           "name": "DEFAULT_ACCENT",
           "type": {
             "text": "FeatureCardAccent"
           },
           "default": "'yellow'"
+        },
+        {
+          "kind": "variable",
+          "name": "DEFAULT_ICON",
+          "type": {
+            "text": "string"
+          },
+          "default": "'✓'"
         },
         {
           "kind": "variable",
@@ -614,6 +745,79 @@
         },
         {
           "kind": "variable",
+          "name": "PILL_TAG_AXES",
+          "default": "Object.fromEntries( Object.keys(PILL_TAG_SHAPES).map((s) => [`${s.charAt(0).toUpperCase()}${s.slice(1)}`, { shape: s }]), )",
+          "description": "The non-variant axes: one per shape."
+        },
+        {
+          "kind": "variable",
+          "name": "PILL_TAG_SHAPES",
+          "type": {
+            "text": "{ eyebrow: 'sk-pill-tag--eyebrow' }"
+          },
+          "default": "{ eyebrow: 'sk-pill-tag--eyebrow' }",
+          "description": "The shape/size axis. Independent of colour: an eyebrow may be tinted or not."
+        },
+        {
+          "kind": "variable",
+          "name": "PILL_TAG_VARIANTS",
+          "type": {
+            "text": "{\n  green: 'sk-pill-tag--green',\n  purple: 'sk-pill-tag--purple',\n  breaking: 'sk-pill-tag--breaking',\n  yellow: 'sk-pill-tag--yellow',\n}"
+          },
+          "default": "{ green: 'sk-pill-tag--green', purple: 'sk-pill-tag--purple', breaking: 'sk-pill-tag--breaking', yellow: 'sk-pill-tag--yellow', }",
+          "description": "The tag's colour modifiers."
+        },
+        {
+          "kind": "function",
+          "name": "pillTagClasses",
+          "return": {
+            "type": {
+              "text": "string"
+            }
+          },
+          "parameters": [
+            {
+              "name": "variant",
+              "optional": true,
+              "type": {
+                "text": "string"
+              }
+            },
+            {
+              "name": "shape",
+              "optional": true,
+              "type": {
+                "text": "string"
+              }
+            }
+          ],
+          "description": "The tag's class list. Warns and degrades on an unknown variant or shape."
+        },
+        {
+          "kind": "function",
+          "name": "pillTagStaticHtml",
+          "return": {
+            "type": {
+              "text": "string"
+            }
+          },
+          "parameters": [
+            {
+              "name": "opts",
+              "default": "{}",
+              "type": {
+                "text": "PillTagStaticOptions"
+              }
+            },
+            {
+              "name": "content",
+              "default": "'Label'"
+            }
+          ],
+          "description": "The static form. Throws on an unknown variant or shape."
+        },
+        {
+          "kind": "variable",
           "name": "RIBBON_CARD_AXES",
           "default": "{ WithRibbon: { ribbon: 'Primary Workshop' }, ...Object.fromEntries( RIBBON_CARD_COLOURS.map((c) => [ `Ribbon${c.charAt(0).toUpperCase()}${c.slice(1)}`, { ribbon: 'Primary Workshop', accent: c }, ]), ), }",
           "description": "The non-variant axes, DERIVED.\n\n`WithRibbon` reproduces the export name the styles layer already published, and the per-colour\nribbon forms are derived from RIBBON_CARD_COLOURS so a sixth colour cannot appear on one axis\nand not the other."
@@ -762,6 +966,109 @@
         },
         {
           "kind": "class",
+          "description": "A button, or a link styled as one.\n\nSet `href` and it renders an anchor; omit it and you get a button. That is not a\nconvenience — every use of this primitive in the demo pages is an `<a href>` styled as a\nbutton, while the stories use `<button>`, so the catalogue already needs both and the class\nlist is identical either way.",
+          "name": "SkButton",
+          "cssParts": [
+            {
+              "description": "the rendered `<button>` or `<a>`",
+              "name": "button"
+            }
+          ],
+          "slots": [
+            {
+              "description": "the button's label",
+              "name": ""
+            }
+          ],
+          "members": [
+            {
+              "kind": "field",
+              "name": "disabled",
+              "privacy": "public",
+              "type": {
+                "text": "boolean"
+              },
+              "description": "Disables the button. Ignored when `href` is set — a disabled link is not a thing HTML\nhas, and faking one with pointer-events hides it from assistive technology.",
+              "attribute": "disabled",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "href",
+              "privacy": "public",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "When set, the element renders an anchor to this URL instead of a button.",
+              "attribute": "href",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "size",
+              "privacy": "public",
+              "type": {
+                "text": "'sm' | undefined"
+              },
+              "description": "Size: `sm`, or omit for the default.",
+              "attribute": "size",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "variant",
+              "privacy": "public",
+              "type": {
+                "text": "'primary' | 'secondary' | 'ghost' | undefined"
+              },
+              "description": "Tone: `primary`, `secondary` or `ghost`. Omit for the unstyled base. An unknown value\nrenders the base button and warns rather than throwing.",
+              "attribute": "variant",
+              "reflects": true
+            }
+          ],
+          "attributes": [
+            {
+              "name": "disabled",
+              "type": {
+                "text": "boolean"
+              },
+              "description": "Disables the button. Ignored when `href` is set — a disabled link is not a thing HTML\nhas, and faking one with pointer-events hides it from assistive technology.",
+              "fieldName": "disabled"
+            },
+            {
+              "name": "href",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "When set, the element renders an anchor to this URL instead of a button.",
+              "fieldName": "href"
+            },
+            {
+              "name": "size",
+              "type": {
+                "text": "'sm' | undefined"
+              },
+              "description": "Size: `sm`, or omit for the default.",
+              "fieldName": "size"
+            },
+            {
+              "name": "variant",
+              "type": {
+                "text": "'primary' | 'secondary' | 'ghost' | undefined"
+              },
+              "description": "Tone: `primary`, `secondary` or `ghost`. Omit for the unstyled base. An unknown value\nrenders the base button and warns rather than throwing.",
+              "fieldName": "variant"
+            }
+          ],
+          "superclass": {
+            "name": "LitElement",
+            "package": "lit"
+          },
+          "tagName": "sk-button",
+          "customElement": true
+        },
+        {
+          "kind": "class",
           "description": "The card primitive — the first real component on the ADR-8 base layer.",
           "name": "SkCard",
           "cssParts": [
@@ -825,6 +1132,56 @@
             "package": "lit"
           },
           "tagName": "sk-card",
+          "customElement": true
+        },
+        {
+          "kind": "class",
+          "description": "A checked feature bullet, for the tick-lists on marketing and reference pages.\n\nPut it inside a `<ul role=\"list\">`. The element sets `role=\"listitem\"` on itself, because a\ncustom element inside a `<ul>` is NOT a list item — the static form is a real `<li>`, and\nthis is the one place the two consumption paths differ structurally.",
+          "name": "SkCheckBullet",
+          "cssParts": [
+            {
+              "description": "the bullet row",
+              "name": "bullet"
+            },
+            {
+              "description": "the tick, which is decorative and hidden from assistive technology",
+              "name": "icon"
+            }
+          ],
+          "slots": [
+            {
+              "description": "the bullet's text",
+              "name": ""
+            }
+          ],
+          "members": [
+            {
+              "kind": "field",
+              "name": "icon",
+              "privacy": "public",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "The tick glyph. Defaults to ✓; set it to use a different mark.",
+              "attribute": "icon",
+              "reflects": true
+            }
+          ],
+          "attributes": [
+            {
+              "name": "icon",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "The tick glyph. Defaults to ✓; set it to use a different mark.",
+              "fieldName": "icon"
+            }
+          ],
+          "superclass": {
+            "name": "LitElement",
+            "package": "lit"
+          },
+          "tagName": "sk-check-bullet",
           "customElement": true
         },
         {
@@ -2139,6 +2496,71 @@
         },
         {
           "kind": "class",
+          "description": "A small inline label — a version tag, a status chip, or an eyebrow above a headline.\n\n`variant` sets the colour and `shape` sets the size; they are independent, so a tinted\neyebrow is expressible. The label is slotted, because the text is the consuming page's.",
+          "name": "SkPillTag",
+          "cssParts": [
+            {
+              "description": "the tag itself, for a treatment outside the provided variants",
+              "name": "tag"
+            }
+          ],
+          "slots": [
+            {
+              "description": "the label text",
+              "name": ""
+            }
+          ],
+          "members": [
+            {
+              "kind": "field",
+              "name": "shape",
+              "privacy": "public",
+              "type": {
+                "text": "'eyebrow' | undefined"
+              },
+              "description": "Shape: `eyebrow` for the larger, square-cornered lead-in label. Omit for the compact pill.",
+              "attribute": "shape",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "variant",
+              "privacy": "public",
+              "type": {
+                "text": "'green' | 'purple' | 'breaking' | 'yellow' | undefined"
+              },
+              "description": "Colour: `green`, `purple`, `breaking` or `yellow`. Omit for the neutral tag. An unknown\nvalue renders the base tag and warns rather than throwing.",
+              "attribute": "variant",
+              "reflects": true
+            }
+          ],
+          "attributes": [
+            {
+              "name": "shape",
+              "type": {
+                "text": "'eyebrow' | undefined"
+              },
+              "description": "Shape: `eyebrow` for the larger, square-cornered lead-in label. Omit for the compact pill.",
+              "fieldName": "shape"
+            },
+            {
+              "name": "variant",
+              "type": {
+                "text": "'green' | 'purple' | 'breaking' | 'yellow' | undefined"
+              },
+              "description": "Colour: `green`, `purple`, `breaking` or `yellow`. Omit for the neutral tag. An unknown\nvalue renders the base tag and warns rather than throwing.",
+              "fieldName": "variant"
+            }
+          ],
+          "superclass": {
+            "name": "LitElement",
+            "package": "lit"
+          },
+          "tagName": "sk-pill-tag",
+          "customElement": true
+        },
+        {
+          "kind": "class",
           "description": "A card with an optional diagonal ribbon tab in its corner.\n\nThe title and body are slotted, because they are the consuming page's content. The ribbon's\nLABEL is a property rather than a slot — it is a short string the component positions and\nrotates, and ADR-9 §4 took the same route for the form controls' `label`.\n\nThe two colour axes are independent: `variant` tints the card's border, `accent` tints\nthe tab, and a card may use either, both or neither.",
           "name": "SkRibbonCard",
           "cssParts": [
@@ -2368,6 +2790,46 @@
       "exports": [
         {
           "kind": "js",
+          "name": "BUTTON_AXES",
+          "declaration": {
+            "name": "BUTTON_AXES",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "BUTTON_SIZES",
+          "declaration": {
+            "name": "BUTTON_SIZES",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "BUTTON_VARIANTS",
+          "declaration": {
+            "name": "BUTTON_VARIANTS",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "buttonClasses",
+          "declaration": {
+            "name": "buttonClasses",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "buttonStaticHtml",
+          "declaration": {
+            "name": "buttonStaticHtml",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
           "name": "CARD_AXES",
           "declaration": {
             "name": "CARD_AXES",
@@ -2408,9 +2870,49 @@
         },
         {
           "kind": "js",
+          "name": "CHECK_BULLET_AXES",
+          "declaration": {
+            "name": "CHECK_BULLET_AXES",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "CHECK_BULLET_VARIANTS",
+          "declaration": {
+            "name": "CHECK_BULLET_VARIANTS",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "checkBulletClasses",
+          "declaration": {
+            "name": "checkBulletClasses",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "checkBulletStaticHtml",
+          "declaration": {
+            "name": "checkBulletStaticHtml",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
           "name": "DEFAULT_ACCENT",
           "declaration": {
             "name": "DEFAULT_ACCENT",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "DEFAULT_ICON",
+          "declaration": {
+            "name": "DEFAULT_ICON",
             "module": "./dist/index.js"
           }
         },
@@ -2632,6 +3134,46 @@
         },
         {
           "kind": "js",
+          "name": "PILL_TAG_AXES",
+          "declaration": {
+            "name": "PILL_TAG_AXES",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "PILL_TAG_SHAPES",
+          "declaration": {
+            "name": "PILL_TAG_SHAPES",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "PILL_TAG_VARIANTS",
+          "declaration": {
+            "name": "PILL_TAG_VARIANTS",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "pillTagClasses",
+          "declaration": {
+            "name": "pillTagClasses",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "pillTagStaticHtml",
+          "declaration": {
+            "name": "pillTagStaticHtml",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
           "name": "registeredTags",
           "declaration": {
             "name": "registeredTags",
@@ -2744,9 +3286,41 @@
         },
         {
           "kind": "js",
+          "name": "SkButton",
+          "declaration": {
+            "name": "SkButton",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "skButtonSheet",
+          "declaration": {
+            "name": "default",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
           "name": "SkCard",
           "declaration": {
             "name": "SkCard",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "SkCheckBullet",
+          "declaration": {
+            "name": "SkCheckBullet",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "skCheckBulletSheet",
+          "declaration": {
+            "name": "default",
             "module": "./dist/index.js"
           }
         },
@@ -2803,6 +3377,22 @@
           "name": "SkNavPill",
           "declaration": {
             "name": "SkNavPill",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "SkPillTag",
+          "declaration": {
+            "name": "SkPillTag",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "skPillTagSheet",
+          "declaration": {
+            "name": "default",
             "module": "./dist/index.js"
           }
         },

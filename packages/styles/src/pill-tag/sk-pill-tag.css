@@ -1,7 +1,14 @@
-/* @spec-kitty/styles — sk-tag + sk-eyebrow-pill styles — tokens only, no hardcoded values */
+/* @spec-kitty/styles — sk-pill-tag + sk-pill-tag--eyebrow styles — tokens only, no hardcoded values */
 
 /* ---- Base tag ---- */
-.sk-tag {
+/* A custom element defaults to `display: inline`; `inline-flex` matches the static form's own
+   display, which is what the two consumption paths must agree on (#77, #78). Inert in a
+   document, where the root IS the .sk-pill-tag span. */
+:host {
+  display: inline-flex;
+}
+
+.sk-pill-tag {
   display: inline-flex;
   align-items: center;
   padding: var(--sk-space-1) var(--sk-space-3);
@@ -15,43 +22,62 @@
   line-height: 1.5;
 }
 
-/* ---- Colour variants ---- */
-/* Using colour channels approach for broad compatibility.
-   Fallback opaque colours are provided for environments that do not
-   support CSS relative colour syntax (rgba(from var(...) r g b / α)). */
+/* ---- Colour variants ----
+   THE INK IS --sk-on-tint-*, NOT --sk-color-*, and this is a WCAG fix rather than a preference.
+   The raw colour tokens are tuned for the DARK page surface; the light-mode tints are pastel,
+   so pairing them fails AA in light mode. ALL FOUR tinted variants, measured — an earlier
+   revision of this note gave three and omitted `breaking`, which had moved the furthest:
 
-.sk-tag--green {
-  /* Fallback for older environments */
+     yellow    1.51:1 -> 6.28:1      green      1.67:1 -> 7.10:1
+     purple    1.82:1 -> 8.00:1      breaking   2.48:1 -> 7.70:1
+
+   `breaking` also RECOLOURS in dark mode, from red to blue, because `--sk-on-tint-sky`
+   resolves to `--sk-color-blue` there (5.62:1 -> 9.42:1). That is a deliberate visual change
+   and not merely a contrast fix, which is why it is stated here and not only in the changelog.
+
+   This is the identical defect #77 fixed in sk-section-banner, and it survived here because
+   this component's LightMode story carried the INERT `data-theme="light"` wrapper (#93) — so
+   the story rendered the DARK palette and the a11y gate never saw the light pairing. Retiring
+   that wrapper in #79 is what exposed it. */
+
+/* EVERY VARIANT BELOW IS TWO PLAIN var() DECLARATIONS. Two comments used to sit in this block
+   describing machinery that was not here: one claimed a "colour channels approach for broad
+   compatibility" with opaque fallbacks "for environments that do not support CSS relative
+   colour syntax", and the green variant carried a "fallback for older environments" marker.
+   There was no relative-colour syntax and no fallback pair anywhere in the file — a lens
+   checked and found the only occurrence of that syntax was inside the comment claiming it.
+   All four variants were rewritten by #79 with those comments left standing above them. */
+
+.sk-pill-tag--green {
   background: var(--sk-surface-tint-mint);
-  color: var(--sk-color-green);
+  color: var(--sk-on-tint-mint);
 }
 
-.sk-tag--purple {
+.sk-pill-tag--purple {
   background: var(--sk-surface-tint-lilac);
-  color: var(--sk-color-purple);
+  color: var(--sk-on-tint-lilac);
 }
 
-.sk-tag--breaking {
+.sk-pill-tag--breaking {
   background: var(--sk-surface-tint-sky);
-  color: var(--sk-color-red);
+  color: var(--sk-on-tint-sky);
 }
 
-.sk-tag--yellow {
+.sk-pill-tag--yellow {
   background: var(--sk-surface-tint-butter);
-  color: var(--sk-color-yellow);
+  color: var(--sk-on-tint-butter);
 }
 
-/* ---- Eyebrow pill ---- */
-.sk-eyebrow-pill {
-  display: inline-flex;
-  align-items: center;
+/* ---- Eyebrow: a SHAPE/SIZE modifier, not a second component ----
+   `.sk-eyebrow-pill` was a standalone class in this same file that restated the base
+   rule almost verbatim — same display, background, font family, weight, colour and
+   line-height — differing only in padding, corner radius and font size. #79 folded it
+   into `.sk-pill-tag--eyebrow` under the #139 ruling, so this file now describes one
+   component with two axes rather than two components sharing a directory.
+   Only the overrides remain: everything else comes from the base, which is what makes
+   it compose with the colour variants instead of competing with them. */
+.sk-pill-tag--eyebrow {
   padding: var(--sk-space-2) var(--sk-space-4);
-  background: var(--sk-bg-pill);
   border-radius: var(--sk-radius-sm);
-  font-family: var(--sk-font-sans);
   font-size: var(--sk-text-sm);
-  font-weight: var(--sk-weight-medium);
-  color: var(--sk-fg-muted);
-  white-space: nowrap;
-  line-height: 1.5;
 }

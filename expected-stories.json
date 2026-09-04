@@ -17,9 +17,26 @@
     "Scoped to the ELEMENTS, not the whole catalogue. The thirteen packages/styles story files",
     "predate this and pinning them here would be a ratchet nobody agreed to; #77-#79 migrate them",
     "and can opt each in as it lands.",
-    "#78 opts sk-feature-card and sk-ribbon-card in. The a11y gate is what caught this batch's slotted-content contrast defect, and it is the ONLY gate that would catch a recurrence — so retiring these stories must not be silent. A lens noted four migrated elements were sitting outside this ratchet. These two are now in; sk-grid and sk-section-banner (#77's) are STILL OUTSIDE and are not covered by '#79 adds its own' — they need opting in by whoever touches them next."
+    "#78 opts sk-feature-card and sk-ribbon-card in. The a11y gate is what caught this batch's slotted-content contrast defect, and it is the ONLY gate that would catch a recurrence — so retiring these stories must not be silent. A lens noted four migrated elements were sitting outside this ratchet. These two are now in; sk-grid and sk-section-banner (#77's) are STILL OUTSIDE and are not covered by '#79 adds its own' — they need opting in by whoever touches them next.",
+    "#79 opts in its own three. The previous note said sk-grid and sk-section-banner were still outside and 'not covered by #79 adds its own' — two lenses observed #79 then added none either, so this per-component chore had been skipped by two batches running. FIVE element story files remain outside, not three: an earlier revision of this note said 'sk-card, sk-grid and sk-section-banner remain outside' and undercounted by two. The full list is sk-card, sk-grid, sk-section-banner, sk-nav-pill and sk-stub. sk-stub is the synthetic probe component and is arguably exempt, but nothing here said so, and a reader acting on the old count would have left two migrated elements silently unratcheted."
   ],
   "byElement": {
+    "sk-button": [
+      "elements-skbutton--primary",
+      "elements-skbutton--secondary",
+      "elements-skbutton--ghost",
+      "elements-skbutton--small",
+      "elements-skbutton--as-link",
+      "elements-skbutton--disabled",
+      "elements-skbutton--all-variants",
+      "elements-skbutton--light-mode"
+    ],
+    "sk-check-bullet": [
+      "elements-skcheckbullet--default",
+      "elements-skcheckbullet--single",
+      "elements-skcheckbullet--custom-icon",
+      "elements-skcheckbullet--light-mode"
+    ],
     "sk-feature-card": [
       "elements-skfeaturecard--default",
       "elements-skfeaturecard--yellow",
@@ -43,6 +60,17 @@
       "elements-skformtextarea--disabled",
       "elements-skformtextarea--light-mode"
     ],
+    "sk-pill-tag": [
+      "elements-skpilltag--default",
+      "elements-skpilltag--green",
+      "elements-skpilltag--purple",
+      "elements-skpilltag--breaking",
+      "elements-skpilltag--yellow",
+      "elements-skpilltag--eyebrow",
+      "elements-skpilltag--tinted-eyebrow",
+      "elements-skpilltag--all-variants",
+      "elements-skpilltag--light-mode"
+    ],
     "sk-ribbon-card": [
       "elements-skribboncard--default",
       "elements-skribboncard--with-ribbon",
@@ -51,5 +79,5 @@
       "elements-skribboncard--light-mode"
     ]
   },
-  "total": 22
+  "total": 43
 }

@@ -92,16 +92,20 @@ figure it replaced, not more. Comparing them needs a per-component build; #81 ow
 measurement that produces one. Stating the basis is this section's whole point.
 
 What this script *does* establish is the shape of the relationship: the runtime is a
-fixed cost (${kb(ARTIFACTS[1].raw - ARTIFACTS[0].raw)} of the IIFE is Lit, since the
+runtime cost MEASURED AT THIS BUILD (${kb(ARTIFACTS[1].raw - ARTIFACTS[0].raw)} of the IIFE is Lit, since the
 ESM artifact holds the same element with \`lit\` external) and the per-component cost
 tracks its CSS. A batch mission adding a component should expect the IIFE to grow by
 roughly that component's CSS, not by a fixed per-component overhead.
 
 An earlier draft of this work package recorded the **minified** figures under a "raw"
 heading and concluded ADR-10 was wrong. It was not. Always state the basis — and the
-unit: every figure in this file is KiB (1024), which is why the raw IIFE reads
-${kb(ARTIFACTS[1].raw)} here and "24.0 KB" in the WP prompt. Same ${ARTIFACTS[1].raw}
-bytes.
+unit: every figure in this file is KiB (1024). The WP prompt recorded the IIFE as
+"24.0 KB" where this file would have read 23.5 KiB — **24073 bytes either way**.
+Those two numbers are pinned historical values on purpose. An earlier revision of this
+paragraph interpolated the CURRENT raw size into that comparison, so once the artifact
+grew it asserted that ${ARTIFACTS[1].raw} bytes are "24.0 KB" — false by a factor of
+five, in the one paragraph whose whole lesson is to state the basis and the unit. A lens
+caught it.
 
 ## Raw output of the measuring command
 

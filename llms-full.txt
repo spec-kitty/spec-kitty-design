@@ -537,15 +537,18 @@ markup module (ADR-10 §3).
 | `sk-form-textarea` | yes | as `sk-form-input`, plus `rows` |
 | `sk-grid` | no | `variant` (cols-2/3/4), `gap` (3/4/6); default slot; collapses to one column below 720px |
 | `sk-section-banner` | no | `variant` (neutral/purple/green), defaulting to neutral on BOTH paths because the base class paints nothing; label is slotted |
+| `sk-button` | no | `variant` (primary/secondary/ghost), `size` (sm), `href` (renders an anchor instead of a button), `disabled`; label slotted |
+| `sk-check-bullet` | no | `icon` (the tick); sets `role="listitem"` on its host because a custom element inside a `<ul>` is not a list item; text slotted |
 | `sk-feature-card` | no | `accent` (yellow/green/purple, the chip) and `variant` (border-*, the frame) — two independent axes; icon, title and body slotted |
+| `sk-pill-tag` | no | `variant` (green/purple/breaking/yellow) and `shape` (eyebrow) as INDEPENDENT axes; label slotted |
 | `sk-ribbon-card` | no | `ribbon` (label; the tab renders only when set), `accent` (tab colour), `variant` (border) over five shared colours; title and body slotted |
 | `sk-stub` | no | zero public members; the deliberate empty case several gates are floored against |
 
 The remaining catalogue components still live in `packages/styles` and have not
-yet been migrated — #79 is the mission that moves the rest. #77 migrated `grid`
-and `section-banner`; #78 migrated `feature-card` and `ribbon-card`. `site-footer`
-and `blog-card` are still styles-only, each deferred on a design fork recorded on
-its issue (#77, #78).
+yet been migrated. #77 migrated `grid` and `section-banner`; #78 `feature-card` and
+`ribbon-card`; #79 `button`, `pill-tag` and `check-bullet`. Three remain styles-only:
+`site-footer` (#77) and `blog-card` (#78), each awaiting a recorded design ruling, and
+`form-field`, which had no owning mission until #141.
 
 ### react package — `packages/react/src/`
 
@@ -563,10 +566,10 @@ carry the detail generic from the element's `@fires {Type}`.
 ### styles package — `packages/styles/src/`
 
 #### sk-button (styles)
-- Path: `packages/styles/src/button/sk-button.css` + `sk-button-primary.html` + `sk-button-secondary.html` + `sk-button-html.stories.ts`
+- Path: `packages/styles/src/button/sk-button.css` (authored) + `sk-button.html` and `index.ts` (**generated** from `packages/elements/src/button/sk-button.markup.ts`) + `sk-button-html.stories.ts`
 - Story title: `Components/Button (HTML)`
-- Variants: `Default` (Primary), `Secondary`, `Ghost`, `Small`, `Disabled`, `AllVariants`, `LightMode`
-- Notes: BEM classes `sk-button`, `sk-button--primary`, `sk-button--secondary`, `sk-button--ghost`, `sk-button--small`. Single CSS file covers all variants.
+- Variants: `Default`, `Secondary`, `Ghost`, `Small`, `Disabled`, `AllVariants`, `LightMode`
+- Notes: migrated in #79. The class family was RENAMED `.sk-btn*` -> `.sk-button*` under the #139 ruling, so the component's classes are prefixed with its own name and the ADR-9 ownership gate can verify it. `sk-button-primary.html` and `sk-button-secondary.html` are DELETED — the generated `sk-button.html` replaces them. Modifiers are `--primary`, `--secondary`, `--ghost` and `--sm` (not `--small`).
 
 #### sk-card (styles)
 - Path: `packages/styles/src/card/sk-card.css` + `sk-card.html` + `sk-card-html.stories.ts`
@@ -612,10 +615,10 @@ carry the detail generic from the element's `@fires {Type}`.
 - Notes: Escape closes and returns focus to whatever control opened it.
 
 #### sk-pill-tag (styles)
-- Path: `packages/styles/src/pill-tag/sk-pill-tag.css` + `sk-pill-tag.html` + `sk-pill-tag.stories.ts`
-- Story title: `Tags/SkPillTag (HTML)`
-- Variants: `Default`, `Green`, `Purple`, `Breaking`, `Yellow`, `AllVariants`, `EyebrowPill`, `LightMode`
-- Notes: exports both `SkPillTagHTML` and `SkEyebrowPillHTML`; same `PillTagVariant` type.
+- Path: `packages/styles/src/pill-tag/sk-pill-tag.css` (authored) + `sk-pill-tag.html` and `index.ts` (**generated** from `packages/elements/src/pill-tag/sk-pill-tag.markup.ts`) + `sk-pill-tag.stories.ts`
+- Story title: `Primitives/SkPillTag`
+- Variants: `Default`, `Green`, `Purple`, `Breaking`, `Yellow`, `AllVariants`, `Eyebrow`, `LightMode`
+- Notes: migrated in #79. `.sk-tag*` -> `.sk-pill-tag*` under the #139 ruling, and `.sk-eyebrow-pill` — a second component sharing this directory — became `.sk-pill-tag--eyebrow`, a SHAPE axis that composes with the colour variants. The builder functions `SkTagHTML()` and `SkEyebrowPillHTML()` and the `PillTagVariant` type are REMOVED; exports are constants. Tinted variants use the `--sk-on-tint-*` inks, not `--sk-color-*`, which is a WCAG AA fix.
 
 #### sk-ribbon-card (styles)
 - Path: `packages/styles/src/ribbon-card/sk-ribbon-card.css` (authored) + `sk-ribbon-card.html` and `index.ts` (**generated** from `packages/elements/src/ribbon-card/sk-ribbon-card.markup.ts`) + `sk-ribbon-card-html.stories.ts`
