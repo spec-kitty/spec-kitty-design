@@ -7,7 +7,22 @@
  *      business shipping a simulation, and it tells the accessibility tree something untrue.
  *   2. No `var()` reference to a custom property that @spec-kitty/tokens does not define.
  *
- * SCOPE: the sheets an ELEMENT adopts. The two examples below both live in
+ * SCOPE: the sheets under an element's OWN directory — deliberately NOT the same set as
+ * check-adopted-css-boundaries.mjs, which since #78 derives its set from the element's imports
+ * and so follows a composed foreign sheet. Measured at that change: boundaries sees 15 sheets,
+ * this gate 14. Nothing escapes today, because a composed sheet is still hygiene-checked under
+ * the component that AUTHORS it, and that is the right owner for a token-usage rule — hygiene
+ * asks "does this sheet only use --sk-* tokens", which is a property of the sheet's author, not
+ * of whoever adopts it.
+ *
+ * WHERE IT WILL BITE, recorded rather than left to be discovered: a component that composes a
+ * foreign sheet and authors NONE of its own would pass boundaries and fail here with the false
+ * message "has no stylesheet under packages/styles/src/<name>/". No such component exists yet;
+ * blog-card authors its own. A lens flagged the divergence — the resolution is to make that
+ * per-element floor tolerate an authoring-free component, not to duplicate the import
+ * derivation into a second gate.
+ *
+ * The example below is the reason the per-element floor exists at all:. The two examples below both live in
  * `packages/styles/src/form-field/sk-form-field.css`, which has no element and is therefore
  * NEVER OPENED by this gate — it is published `@spec-kitty/styles@1.0.0` surface that #74
  * deliberately left untouched. A lens pointed out the docstring read as repository-wide.

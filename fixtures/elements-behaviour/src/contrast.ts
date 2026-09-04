@@ -13,7 +13,20 @@
 export function contrast(fg: string, bg: string): number {
   const channel = (v: number) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4);
   const lum = (c: string) => {
-    const [r, g, b] = c.match(/\d+/g)!.slice(0, 3).map((n) => channel(Number(n) / 255));
+    const parts = c.match(/[\d.]+/g);
+    // REFUSE A TRANSLUCENT SURFACE rather than scoring it as opaque. `getComputedStyle` returns
+    // `rgba(0, 0, 0, 0)` for an unset background, and the old code sliced off the alpha and
+    // measured pure black — which fails PERMISSIVELY in the direction that matters: a white ink
+    // on "nothing" reads 21:1 and passes. A lens flagged that the docstring advertised rgba()
+    // support while silently discarding the channel that makes it meaningful.
+    if (parts && parts.length > 3 && Number(parts[3]) !== 1) {
+      throw new Error(
+        `contrast() was given ${c}, which is not opaque. Alpha is discarded by the WCAG formula, ` +
+          `so measuring it would score a colour that is not what renders — most likely the ` +
+          `surface under test was never painted. Paint it, or composite it yourself first.`,
+      );
+    }
+    const [r, g, b] = parts!.slice(0, 3).map((n) => channel(Number(n) / 255));
     return 0.2126 * r! + 0.7152 * g! + 0.0722 * b!;
   };
   const [a, z] = [lum(fg), lum(bg)].sort((x, y) => y - x);
@@ -34,6 +47,17 @@ export function contrast(fg: string, bg: string): number {
  * the contrast arms did not.
  */
 export function assertThemesDiffered(seen: Map<string, string>): void {
+  // A FLOOR FIRST. `new Set(values).size === seen.size` is trivially true for a map with one
+  // entry and for an EMPTY one, so a loop that visited one theme — or none — passed the guard
+  // that exists precisely because the loop cannot be trusted. That is a green line over an
+  // empty set, inside the helper written to refuse green lines over empty sets; a lens caught
+  // it. Every caller loops a literal two-element array today, so nothing was live.
+  if (seen.size < 2) {
+    throw new Error(
+      `assertThemesDiffered saw ${seen.size} theme(s); it needs at least two to compare. The ` +
+        `loop that fills this map did not run over both themes.`,
+    );
+  }
   const values = new Set(seen.values());
   if (values.size === seen.size) return;
   throw new Error(

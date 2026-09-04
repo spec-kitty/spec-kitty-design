@@ -3,12 +3,36 @@
    sk-card owns the frame, surface, border, radius, padding, and transition.
    sk-blog-card adds only blog-specific layout and slots. */
 
+/* A custom element defaults to `display: inline`; `block` lets the frame's flex column lay out
+   and lets a consumer size the host. Inert in the static path, where the root IS the article.
+   NOT `flex` — the flex column belongs to .sk-blog-card, which the element also carries on its
+   single root; putting it on the host too would make the host a flex container of one item. */
+:host {
+  display: block;
+  /* THE HOST IS THE GRID ITEM in the element path, not the article inside it. `min-width: 0` on
+     the article (below) only reduces the ARTICLE's minimum; the host keeps `min-width: auto`,
+     so its min-content contribution is unchanged and a long unbroken token in an excerpt makes
+     an <sk-grid> track overflow — while the static form, where `.sk-blog-card` IS the grid item,
+     clips correctly. Two paths, two layouts, which is the divergence composition exists to
+     prevent. sk-grid uses `repeat(N, 1fr)` rather than `minmax(0, 1fr)`, so the item's minimum
+     is what decides it. Inert in the document path, exactly like `display: block` above. */
+  min-width: 0;
+  /* Inherited colour for slotted nodes no rule matches — `color` follows the FLATTENED tree, so
+     a slotted node inherits through the slot from :host, which no selector could reach it with.
+     On the host specifically, so the static path cannot move (#78). */
+  color: var(--sk-fg-body);
+}
+
+/* NO `color` HERE. `.sk-card` already sets `color: var(--sk-fg-body)` and this rule lands on the
+   SAME single root under the composition ruling, so restating it was the one frame declaration
+   the composition failed to remove — a lens diffed the two sheets property-by-property and it
+   was the only overlap. `:host` above covers the inherited and slotted cases, which is the
+   convention feature-card and ribbon-card already follow. */
 .sk-blog-card {
   display: flex;
   flex-direction: column;
   gap: var(--sk-space-4);
   min-width: 0;
-  color: var(--sk-fg-body);
 }
 
 .sk-blog-card:hover {
@@ -30,7 +54,14 @@
   gap: var(--sk-space-3);
 }
 
-.sk-blog-card__eyebrow {
+/* BOTH SPELLINGS, ONE RULE. The title, excerpt, meta and read-more link are SLOTTED in the
+   element path, and a shadow-tree selector cannot match a slotted node — so these rules applied
+   statically and were INERT as an element, leaving UA defaults on a dark card. axe reported
+   contrast on every element story. `::slotted()` is inert in a document and the bare class is
+   inert in a shadow tree, so one selector list serves both paths with nothing written twice —
+   the fix #78 established for feature-card and ribbon-card. */
+.sk-blog-card__eyebrow,
+::slotted(.sk-blog-card__eyebrow) {
   margin: 0;
   color: var(--sk-fg-muted);
   font-family: var(--sk-font-mono);
@@ -38,7 +69,8 @@
   text-transform: uppercase;
 }
 
-.sk-blog-card__title {
+.sk-blog-card__title,
+::slotted(.sk-blog-card__title) {
   display: -webkit-box;
   margin: 0;
   overflow: hidden;
@@ -49,19 +81,27 @@
   -webkit-line-clamp: 3;
 }
 
-.sk-blog-card__excerpt {
+.sk-blog-card__excerpt,
+::slotted(.sk-blog-card__excerpt) {
   margin: 0;
   color: var(--sk-fg-body);
   font-size: var(--sk-text-base);
 }
 
-.sk-blog-card__meta {
+/* --sk-fg-muted, NOT --sk-fg-subtle. On the LIGHT card surface (#FFFFFF) subtle is #8A8A7E =
+   3.49:1, below AA's 4.5; muted is #5C5C52 = 6.76:1. The failure was invisible until #78
+   retired this component's inert `data-theme="light"` story wrapper (#93) — the story had been
+   rendering the DARK palette, where subtle is fine, so the a11y gate never measured the light
+   pairing. Same shape as the pill-tag ink failure #79 found by the same route. */
+.sk-blog-card__meta,
+::slotted(.sk-blog-card__meta) {
   margin: 0;
-  color: var(--sk-fg-subtle);
+  color: var(--sk-fg-muted);
   font-size: var(--sk-text-sm);
 }
 
-.sk-blog-card__read-more {
+.sk-blog-card__read-more,
+::slotted(.sk-blog-card__read-more) {
   align-self: flex-start;
   color: var(--sk-color-accent);
   font-family: var(--sk-font-mono);
@@ -70,6 +110,36 @@
   text-underline-offset: var(--sk-space-1);
 }
 
+/* Hover thickens the rule; it does not recolour. This was `color: var(--sk-color-yellow-soft)`
+   — correct on a dark card and 1.38:1 on a white one, i.e. a light-mode hover state that all
+   but disappears. axe never caught it and never would: it does not simulate `:hover`.
+   A recolour cannot be fixed with a SELECTOR here: the value would have to differ per theme, and
+   a theme-conditional block inside a sheet this component ADOPTS is exactly what
+   check-adopted-css-boundaries rejects — `.sk-light .sk-blog-card__read-more` cannot reach into
+   a shadow root, and the gate has a planted probe for that shape.
+
+   IT COULD HAVE BEEN FIXED WITH A NEW TOKEN, and an earlier revision of this note said
+   flatly that "a component-scoped fix was not available", which overstated it. A lens was right
+   to push: a custom property inherits through the shadow boundary where a selector does not, so
+   #72 solved exactly this shape by ADDING `--sk-border-tint-sky` in both theme blocks rather
+   than by changing an existing token. That route was open here too and has zero blast radius.
+   The shared token was changed instead because `--sk-color-accent` was wrong for its OWN
+   documented contract — its comment scopes it to the light-mode link accent, and it measured
+   3.58:1 — so adding a second token would have left a documented-as-link token failing link
+   contrast for the next consumer to find. That is the argument; it is a judgement, not a
+   necessity, and it is recorded here rather than asserted as the only option.
+
+   The hover affordance still moves to a property that needs no theme knowledge and inherits its
+   colour from the resting state. */
+/* `::slotted(.x:hover)`, NOT `::slotted(.x):hover`. `::slotted()` is a pseudo-element and
+   nothing may follow it, so the outside form does not parse — and because ONE invalid selector
+   invalidates an entire comma list, the `.sk-blog-card__read-more:hover` half went with it. An
+   earlier revision of this PR shipped exactly that: it deleted a working hover and replaced it
+   with a rule both Chromium and Firefox drop, leaving the link with no hover state on EITHER
+   path. A lens measured it — postcss parses 11 rules from this file, the engines accept 10.
+   sk-nav-pill.css already states the rule ("the pseudo-class must sit inside") and this was the
+   repo's only occurrence of the outside form. check-adopted-css-boundaries now rejects it. */
+::slotted(.sk-blog-card__read-more:hover),
 .sk-blog-card__read-more:hover {
-  color: var(--sk-color-yellow-soft);
+  text-decoration-thickness: var(--sk-border-width-2);
 }

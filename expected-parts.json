@@ -27,10 +27,16 @@
     "#77 adds three for <sk-section-banner> (banner, dot, label). <sk-site-footer> is deliberately not here — it is held out of this batch, see issue #77. Each is targeted from outside by the [SC-013] test in that element's own fixture file. Note what the RATCHET can and cannot hold: check-part-ratchet.mjs scans the concatenated test sources for the literal `::part(<name>)`, so it is not scoped per element — `::part(label)` already appears in three other files, and deleting section-banner's own label case would leave the ratchet green. `banner` and `dot` are currently unique and so are genuinely bound. The per-element binding is a property of the tests as written, not something this file enforces.",
     "#78 adds two for <sk-feature-card>: card and chip. `chip` is the accent surface — the accent set is closed, so the part is the only route to one outside it, the same argument sk-grid's `grid` part carries.",
     "#78 adds three for <sk-ribbon-card>. Note `ribbon` is ABSENT from the DOM on a plain card — the element renders `nothing`, not an empty div — so its [SC-013] case mounts a card that has one, and a separate assertion covers the absence.",
-    "#79 adds FOUR across its three components, and an earlier revision of this note said 'adds one' while the data below added all four — the identical note/data asymmetry #78's note two lines up already records being caught for. <sk-button>: `button`, the rendered <button> or <a>, one part because that node is its whole surface. <sk-check-bullet>: `bullet` and `icon`. <sk-pill-tag>: `tag`. total moves 23 -> 27."
+    "#79 adds FOUR across its three components, and an earlier revision of this note said 'adds one' while the data below added all four — the identical note/data asymmetry #78's note two lines up already records being caught for. <sk-button>: `button`, the rendered <button> or <a>, one part because that node is its whole surface. <sk-check-bullet>: `bullet` and `icon`. <sk-pill-tag>: `tag`. total moves 23 -> 27.",
+    "#78 adds three for <sk-blog-card>: card, content and thumbnail. `card` carries BOTH `sk-card` and `sk-blog-card` — the composition ruling means one root, so one part covers the frame both sheets style. `thumbnail` is absent from the DOM when no thumbnail is set, so its [SC-013] case mounts one that has it."
   ],
-  "total": 27,
+  "total": 30,
   "byElement": {
+    "sk-blog-card": [
+      "card",
+      "content",
+      "thumbnail"
+    ],
     "sk-button": [
       "button"
     ],

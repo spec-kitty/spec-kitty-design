@@ -79,6 +79,21 @@ gone stale three batches before a lens caught it — on the one page a new imple
 It **must be a leaf module with no relative imports**: the generator evaluates it from a `data:`
 URL, which has no module base, and says so in a named error if you give it one.
 
+**Composing another component's stylesheet.** A component may adopt a sheet it does not author:
+`sk-blog-card` does `static styles = [cardSheet, sheet]` so one box is styled by both `sk-card`
+and `sk-blog-card` rather than nesting a real `<sk-card>` a shadow root deeper. Two rules if you
+do this:
+
+- **Import the sheet by relative path**, never through the package barrel. `check-adopted-css-boundaries.mjs`
+  derives the adopted set from those import specifiers and now REJECTS a `static styles` entry it
+  cannot trace to one — a sheet the gate cannot see is a sheet ADR-9 Confirmation #1 does not
+  cover.
+- **The foreign sheet goes first**, and the static path must import the two sheets in the same
+  order. The element and the story are two consumption paths of one component; if their cascades
+  differ, the component has diverged from itself. Nothing computes a difference today (the two
+  sheets deliberately share no declaration), so this is a convention held by an identity-and-order
+  assertion, not by a computed style.
+
 `packages/elements/src/<name>/sk-<name>.markup.ts` must export:
 
 - `<NAME>_VARIANTS` — the variant → modifier map the generator derives its exports from;

@@ -1,5 +1,6 @@
 export { define, registeredTags } from './define.js';
 export { SkStub } from './stub/sk-stub.js';
+export { SkBlogCard } from './blog-card/sk-blog-card.js';
 export { SkButton } from './button/sk-button.js';
 export { SkCard } from './card/sk-card.js';
 export { SkCheckBullet } from './check-bullet/sk-check-bullet.js';
@@ -27,6 +28,12 @@ export { default as skStubSheet } from './stub/sk-stub.css.js';
 // GENERATED from packages/styles/src/grid/sk-grid.css, and identity against the class's own
 // `static styles` would hold for any sheet at all.
 export { default as skGridSheet } from './grid/sk-grid.css.js';
+export { default as skBlogCardSheet } from './blog-card/sk-blog-card.css.js';
+// sk-card's sheet, exported for the FIRST time at #78 and for a reason worth stating: it is
+// the only sheet in the repo adopted by a component other than its author, so blog-card's
+// [SC-014] identity assertion needs it to prove the frame is IMPORTED rather than copied.
+// Without it that test could only count sheets, not identify them.
+export { default as skCardSheet } from './card/sk-card.css.js';
 export { default as skButtonSheet } from './button/sk-button.css.js';
 export { default as skCheckBulletSheet } from './check-bullet/sk-check-bullet.css.js';
 export { default as skFeatureCardSheet } from './feature-card/sk-feature-card.css.js';
@@ -54,6 +61,16 @@ export {
 // policies are only a split if something can reach both. `gridClasses` warns and degrades,
 // `gridStaticHtml` throws.
 export { gridClasses, gridStaticHtml, type GridGap, type GridVariant } from './grid/sk-grid.markup.js';
+
+// sk-blog-card's markup module. `BLOG_CARD_AXES` and `BLOG_CARD_VARIANTS` are NOT re-exported:
+// they are declared in the markup module because the GENERATOR requires them there and cannot
+// tell an absent export from an empty one, and that obligation is on the module, not on this
+// barrel. Same call as sk-check-bullet's, per the ONLY WHAT IS CONSUMED note below — applied
+// here on the rebase so blog-card does not land as the one exception to a rule #79 just set.
+export {
+  PLACEHOLDER_THUMBNAIL,
+  blogCardStaticHtml,
+} from './blog-card/sk-blog-card.markup.js';
 
 // sk-button's markup module. The two maps because the behaviour fixture derives its loops from
 // them; both class helpers because tone and size each degrade.

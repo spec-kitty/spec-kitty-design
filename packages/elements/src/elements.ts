@@ -25,3 +25,4 @@ import './feature-card/sk-feature-card.js';
 import './ribbon-card/sk-ribbon-card.js';
 import './pill-tag/sk-pill-tag.js';
 import './section-banner/sk-section-banner.js';
+import './blog-card/sk-blog-card.js';
