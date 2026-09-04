@@ -1,4 +1,9 @@
 import './sk-feature-card.css';
+// LightMode below carries `class="sk-light"`, not `data-theme="light"`. The attribute form
+// activates nothing — the token package anchors light on `:root[data-theme="light"], .sk-light`
+// and `:root` only ever matches <html> — so this story had been rendering the DARK palette on a
+// light ground with every gate green (#93). #78 retires it and lowers the count in
+// expected-inert-theme-wrappers.json in the same commit, which that ratchet requires.
 import type { Meta, StoryObj } from '@storybook/web-components';
 import {
   SkFeatureCardYellowHTML,
@@ -103,7 +108,7 @@ export const LightMode: Story = {
     },
   },
   render: () => `
-    <div data-theme="light" style="background: var(--sk-surface-page); padding: var(--sk-space-6); display: inline-block;">
+    <div class="sk-light" style="background: var(--sk-surface-page); padding: var(--sk-space-6); display: inline-block;">
       <div style="display:grid;grid-template-columns:repeat(3, minmax(0, 1fr));gap:var(--sk-space-4);max-width:900px;">
         ${SkFeatureCardBorderYellowHTML}
         ${SkFeatureCardBorderGreenHTML}

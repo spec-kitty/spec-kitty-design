@@ -24,12 +24,17 @@
     "a lens shipped eight part= attributes with an empty cssParts array and this ratchet stayed",
     "green at the old count, because it derives from the manifest and not from the rendered DOM.",
     "#77 adds one for <sk-grid>: part \"grid\". A layout primitive's variants are a closed set, so the part is the only route a consumer has to a column count or gap the element does not offer — recorded here in the same PR as the [SC-013] test that targets it from outside.",
-    "#77 adds three for <sk-section-banner> (banner, dot, label). <sk-site-footer> is deliberately not here — it is held out of this batch, see issue #77. Each is targeted from outside by the [SC-013] test in that element's own fixture file. Note what the RATCHET can and cannot hold: check-part-ratchet.mjs scans the concatenated test sources for the literal `::part(<name>)`, so it is not scoped per element — `::part(label)` already appears in three other files, and deleting section-banner's own label case would leave the ratchet green. `banner` and `dot` are currently unique and so are genuinely bound. The per-element binding is a property of the tests as written, not something this file enforces."
+    "#77 adds three for <sk-section-banner> (banner, dot, label). <sk-site-footer> is deliberately not here — it is held out of this batch, see issue #77. Each is targeted from outside by the [SC-013] test in that element's own fixture file. Note what the RATCHET can and cannot hold: check-part-ratchet.mjs scans the concatenated test sources for the literal `::part(<name>)`, so it is not scoped per element — `::part(label)` already appears in three other files, and deleting section-banner's own label case would leave the ratchet green. `banner` and `dot` are currently unique and so are genuinely bound. The per-element binding is a property of the tests as written, not something this file enforces.",
+    "#78 adds two for <sk-feature-card>: card and chip. `chip` is the accent surface — the accent set is closed, so the part is the only route to one outside it, the same argument sk-grid's `grid` part carries."
   ],
-  "total": 18,
+  "total": 20,
   "byElement": {
     "sk-card": [
       "card"
+    ],
+    "sk-feature-card": [
+      "card",
+      "chip"
     ],
     "sk-form-input": [
       "control",

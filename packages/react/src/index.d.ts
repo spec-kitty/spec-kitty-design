@@ -1,4 +1,5 @@
 export * from "./SkCard.js";
+export * from "./SkFeatureCard.js";
 export * from "./SkFormInput.js";
 export * from "./SkFormTextarea.js";
 export * from "./SkGrid.js";

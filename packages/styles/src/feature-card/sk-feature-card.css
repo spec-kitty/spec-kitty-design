@@ -5,6 +5,15 @@
    calculations where CSS relative colour syntax is not yet universally
    supported). Opacity value (0.10–0.15) is the only non-token value. */
 
+/* A custom element defaults to `display: inline`, so without this the host cannot be sized or
+   spaced by a consumer and a `max-width` on it is silently inert — the defect #77 found across
+   five sk-grid stories. `block` matches the static form, which is an <article>: the two
+   consumption paths must agree about their own box, and #77 shipped a version where they did
+   not. Inert in the static path, where the root IS the .sk-feature-card article. */
+:host {
+  display: block;
+}
+
 .sk-feature-card {
   padding: var(--sk-space-6);
   background: var(--sk-surface-card);

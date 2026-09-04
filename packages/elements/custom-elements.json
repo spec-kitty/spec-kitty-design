@@ -68,12 +68,109 @@
         },
         {
           "kind": "variable",
+          "name": "DEFAULT_ACCENT",
+          "type": {
+            "text": "FeatureCardAccent"
+          },
+          "default": "'yellow'"
+        },
+        {
+          "kind": "variable",
           "name": "DEFAULT_VARIANT",
           "type": {
             "text": "SectionBannerVariant"
           },
           "default": "'neutral'",
           "description": "The DEFAULT variant, and the reason there is one.\n\nUnlike sk-card, the base `.sk-section-banner` class sets no background and no colour — the\nvariant carries both. A base form with no variant is therefore not a plainer banner, it is\nan unpainted one, so `neutral` is the default on both paths rather than leaving the\ngenerator's base export rendering an invisible banner."
+        },
+        {
+          "kind": "variable",
+          "name": "FEATURE_CARD_ACCENTS",
+          "type": {
+            "text": "{\n  yellow: 'sk-feature-card__icon-chip--yellow',\n  green: 'sk-feature-card__icon-chip--green',\n  purple: 'sk-feature-card__icon-chip--purple',\n}"
+          },
+          "default": "{ yellow: 'sk-feature-card__icon-chip--yellow', green: 'sk-feature-card__icon-chip--green', purple: 'sk-feature-card__icon-chip--purple', }",
+          "description": "Accent colours for the icon chip. An INNER class, not the card's."
+        },
+        {
+          "kind": "variable",
+          "name": "FEATURE_CARD_AXES",
+          "default": "Object.fromEntries( Object.keys(FEATURE_CARD_ACCENTS).map((a) => [ a.charAt(0).toUpperCase() + a.slice(1), { accent: a }, ]), )",
+          "description": "The accent axes, DERIVED from FEATURE_CARD_ACCENTS.\n\nHand-listing a subset here is the defect #77's gate pass found in sk-grid: add an accent and\nthe element gains it while the static consumers silently do not, with `--check` green,\nbecause the generator emits exactly what this module declares and cannot know it\nunder-declared. Deriving closes that by construction."
+        },
+        {
+          "kind": "variable",
+          "name": "FEATURE_CARD_VARIANTS",
+          "type": {
+            "text": "{\n  'border-yellow': 'sk-feature-card--border-yellow',\n  'border-green': 'sk-feature-card--border-green',\n  'border-purple': 'sk-feature-card--border-purple',\n}"
+          },
+          "default": "{ 'border-yellow': 'sk-feature-card--border-yellow', 'border-green': 'sk-feature-card--border-green', 'border-purple': 'sk-feature-card--border-purple', }",
+          "description": "Border modifiers — the card's own classes, so these are the variants."
+        },
+        {
+          "kind": "function",
+          "name": "featureCardChipClasses",
+          "return": {
+            "type": {
+              "text": "string"
+            }
+          },
+          "parameters": [
+            {
+              "name": "accent",
+              "optional": true,
+              "type": {
+                "text": "string"
+              }
+            }
+          ],
+          "description": "The icon chip's class list. Warns and degrades to the default accent."
+        },
+        {
+          "kind": "function",
+          "name": "featureCardClasses",
+          "return": {
+            "type": {
+              "text": "string"
+            }
+          },
+          "parameters": [
+            {
+              "name": "variant",
+              "optional": true,
+              "type": {
+                "text": "string"
+              }
+            }
+          ],
+          "description": "The card's class list. Warns and degrades on an unknown variant."
+        },
+        {
+          "kind": "function",
+          "name": "featureCardStaticHtml",
+          "return": {
+            "type": {
+              "text": "string"
+            }
+          },
+          "parameters": [
+            {
+              "name": "opts",
+              "default": "{}",
+              "type": {
+                "text": "FeatureCardStaticOptions"
+              }
+            },
+            {
+              "name": "content",
+              "default": "PLACEHOLDER_BODY"
+            },
+            {
+              "name": "icon",
+              "default": "PLACEHOLDER_ICON"
+            }
+          ],
+          "description": "The static form. Throws on an unknown variant or accent."
         },
         {
           "kind": "class",
@@ -390,6 +487,40 @@
         },
         {
           "kind": "function",
+          "name": "isFeatureCardAccent",
+          "return": {
+            "type": {
+              "text": "a is FeatureCardAccent"
+            }
+          },
+          "parameters": [
+            {
+              "name": "a",
+              "type": {
+                "text": "string"
+              }
+            }
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "isFeatureCardVariant",
+          "return": {
+            "type": {
+              "text": "v is FeatureCardVariant"
+            }
+          },
+          "parameters": [
+            {
+              "name": "v",
+              "type": {
+                "text": "string"
+              }
+            }
+          ]
+        },
+        {
+          "kind": "function",
           "name": "isGridGap",
           "return": {
             "type": {
@@ -564,6 +695,79 @@
             "package": "lit"
           },
           "tagName": "sk-card",
+          "customElement": true
+        },
+        {
+          "kind": "class",
+          "description": "A feature card: an accented icon chip above a title and a short body.\n\nThe icon, title and body are all slotted, because they are the consuming page's content. The\ncomponent owns the frame, the chip and the two colour axes — which are independent: `accent`\ncolours the chip, `variant` colours the card's border, and a card may have either, both or\nneither.",
+          "name": "SkFeatureCard",
+          "cssParts": [
+            {
+              "description": "the card frame",
+              "name": "card"
+            },
+            {
+              "description": "the icon chip, for an accent outside the provided set",
+              "name": "chip"
+            }
+          ],
+          "slots": [
+            {
+              "description": "the card's title and body",
+              "name": ""
+            },
+            {
+              "description": "the chip's glyph, typically an inline SVG. Mark it `aria-hidden` unless it carries meaning the title does not.",
+              "name": "icon"
+            }
+          ],
+          "members": [
+            {
+              "kind": "field",
+              "name": "accent",
+              "privacy": "public",
+              "type": {
+                "text": "'yellow' | 'green' | 'purple' | undefined"
+              },
+              "description": "Icon-chip colour: `yellow` (the default), `green` or `purple`. An unknown value uses the\ndefault and warns.",
+              "attribute": "accent",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "variant",
+              "privacy": "public",
+              "type": {
+                "text": "'border-yellow' | 'border-green' | 'border-purple' | undefined"
+              },
+              "description": "Border colour: `border-yellow`, `border-green` or `border-purple`. Omit for the default\nneutral hairline. An unknown value renders the plain card and warns rather than throwing.",
+              "attribute": "variant",
+              "reflects": true
+            }
+          ],
+          "attributes": [
+            {
+              "name": "accent",
+              "type": {
+                "text": "'yellow' | 'green' | 'purple' | undefined"
+              },
+              "description": "Icon-chip colour: `yellow` (the default), `green` or `purple`. An unknown value uses the\ndefault and warns.",
+              "fieldName": "accent"
+            },
+            {
+              "name": "variant",
+              "type": {
+                "text": "'border-yellow' | 'border-green' | 'border-purple' | undefined"
+              },
+              "description": "Border colour: `border-yellow`, `border-green` or `border-purple`. Omit for the default\nneutral hairline. An unknown value renders the plain card and warns rather than throwing.",
+              "fieldName": "variant"
+            }
+          ],
+          "superclass": {
+            "name": "LitElement",
+            "package": "lit"
+          },
+          "tagName": "sk-feature-card",
           "customElement": true
         },
         {
@@ -1871,6 +2075,23 @@
         },
         {
           "kind": "function",
+          "name": "unknownAccentMessage",
+          "return": {
+            "type": {
+              "text": "string"
+            }
+          },
+          "parameters": [
+            {
+              "name": "a",
+              "type": {
+                "text": "string"
+              }
+            }
+          ]
+        },
+        {
+          "kind": "function",
           "name": "unknownGapMessage",
           "return": {
             "type": {
@@ -1948,6 +2169,14 @@
         },
         {
           "kind": "js",
+          "name": "DEFAULT_ACCENT",
+          "declaration": {
+            "name": "DEFAULT_ACCENT",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
           "name": "DEFAULT_VARIANT",
           "declaration": {
             "name": "DEFAULT_VARIANT",
@@ -1959,6 +2188,70 @@
           "name": "define",
           "declaration": {
             "name": "define",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "FEATURE_CARD_ACCENTS",
+          "declaration": {
+            "name": "FEATURE_CARD_ACCENTS",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "FEATURE_CARD_AXES",
+          "declaration": {
+            "name": "FEATURE_CARD_AXES",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "FEATURE_CARD_VARIANTS",
+          "declaration": {
+            "name": "FEATURE_CARD_VARIANTS",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "FeatureCardAccent",
+          "declaration": {
+            "name": "FeatureCardAccent",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "featureCardChipClasses",
+          "declaration": {
+            "name": "featureCardChipClasses",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "featureCardClasses",
+          "declaration": {
+            "name": "featureCardClasses",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "featureCardStaticHtml",
+          "declaration": {
+            "name": "featureCardStaticHtml",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "FeatureCardVariant",
+          "declaration": {
+            "name": "FeatureCardVariant",
             "module": "./dist/index.js"
           }
         },
@@ -2031,6 +2324,22 @@
           "name": "isCardVariant",
           "declaration": {
             "name": "isCardVariant",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "isFeatureCardAccent",
+          "declaration": {
+            "name": "isFeatureCardAccent",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "isFeatureCardVariant",
+          "declaration": {
+            "name": "isFeatureCardVariant",
             "module": "./dist/index.js"
           }
         },
@@ -2116,6 +2425,22 @@
         },
         {
           "kind": "js",
+          "name": "SkFeatureCard",
+          "declaration": {
+            "name": "SkFeatureCard",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "skFeatureCardSheet",
+          "declaration": {
+            "name": "default",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
           "name": "SkFormInput",
           "declaration": {
             "name": "SkFormInput",
@@ -2183,6 +2508,14 @@
           "name": "skStubSheet",
           "declaration": {
             "name": "default",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "unknownAccentMessage",
+          "declaration": {
+            "name": "unknownAccentMessage",
             "module": "./dist/index.js"
           }
         },

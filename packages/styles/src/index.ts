@@ -12,7 +12,15 @@ export {
 } from './form-field/index';
 export { SkCheckBulletHTML } from './check-bullet/index';
 export { SkSectionBannerHTML, SkSectionBannerNeutralHTML, SkSectionBannerPurpleHTML, SkSectionBannerGreenHTML } from './section-banner/index';
-export { SkFeatureCardYellowHTML, SkFeatureCardGreenHTML, SkFeatureCardPurpleHTML } from './feature-card/index';
+export {
+  SkFeatureCardHTML,
+  SkFeatureCardYellowHTML,
+  SkFeatureCardGreenHTML,
+  SkFeatureCardPurpleHTML,
+  SkFeatureCardBorderYellowHTML,
+  SkFeatureCardBorderGreenHTML,
+  SkFeatureCardBorderPurpleHTML,
+} from './feature-card/index';
 export { skRibbonCardHTML, SkRibbonCardDefaultHTML, SkRibbonCardWithRibbonHTML } from './ribbon-card/index';
 export { SkNavPillHTML } from './nav-pill/index';
 export { SkTagHTML, SkEyebrowPillHTML, SkPillTagHTML, type PillTagVariant } from './pill-tag/index';
