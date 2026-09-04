@@ -1,0 +1,166 @@
+{
+  "mission_slug": "elements-first-release-01M1Q451",
+  "mission_number": "",
+  "mission_type": "software-dev",
+  "overall_verdict": "pass",
+  "criteria": [
+    {
+      "criterion_id": "FR-001",
+      "description": "@spec-kitty/elements and @spec-kitty/react are publishable and appear in the derived set",
+      "proof_type": "automated_test",
+      "evidence": "`node scripts/release-graph.mjs --dirs` emits all four packages; re-adding `private: true` to either reds `check-release-graph.mjs` (probe: 'a package marked private with no EXPECTED_PRIVATE entry'). npm's own test is truthy, so `Boolean(pkg.private)` is used \u2014 `\"private\": \"true\"` as a string is also caught.",
+      "pass_fail": "pass",
+      "verified_by": "four-lens adversarial gate, pass 1 fold",
+      "verified_at": "2026-09-04T22:07:25Z",
+      "notes": "Verified at de1ea2e. CI green on the head; every claim re-derived locally."
+    },
+    {
+      "criterion_id": "FR-002",
+      "description": "release.yml's build, publish and audit steps consume one derived list",
+      "proof_type": "automated_test",
+      "evidence": "`checkWorkflowUsesDerivedSet` requires steps.graph.outputs.* and rejects any run block naming >=2 packages, any per-package `working-directory`, and a step that also derives. `checkNoHandWrittenListsAnywhere` extends the floor to every workflow \u2014 three more lists were found by a lens and fixed.",
+      "pass_fail": "pass",
+      "verified_by": "four-lens adversarial gate, pass 1 fold",
+      "verified_at": "2026-09-04T22:07:25Z",
+      "notes": "Verified at de1ea2e. CI green on the head; every claim re-derived locally."
+    },
+    {
+      "criterion_id": "FR-003",
+      "description": "The release path is exercised on every pull request",
+      "proof_type": "manual_review",
+      "evidence": "New unconditional `release-gate` job in ci-quality.yml, in `gate`'s strict list with no skipped-tolerance entry, and required by check-gate-wiring.mjs's REQUIRED_RELEASE payload table. The 16 disarm results quoted earlier were a HAND exercise by a review lens, not a shipped harness \u2014 check-gate-wiring.mjs has no probe table of its own. Recorded as manual so a future auditor does not look for a selftest that does not exist.",
+      "pass_fail": "pass",
+      "verified_by": "four-lens adversarial gate, pass 2 fold",
+      "verified_at": "2026-09-04T22:39:08Z",
+      "notes": "Verified at de1ea2e. CI green on the head; every claim re-derived locally."
+    },
+    {
+      "criterion_id": "FR-004",
+      "description": "Each tarball's contents are asserted, never its exit code",
+      "proof_type": "automated_test",
+      "evidence": "`npm pack --dry-run --json` per package; exports wildcards expanded with zero-match rejected; legacy main/types/module validated when exports is absent; a manifest-only tarball rejected. `npm publish` on a private package exits 0, which is why no check reads an exit code.",
+      "pass_fail": "pass",
+      "verified_by": "four-lens adversarial gate, pass 1 fold",
+      "verified_at": "2026-09-04T22:07:25Z",
+      "notes": "Verified at de1ea2e. CI green on the head; every claim re-derived locally."
+    },
+    {
+      "criterion_id": "FR-005",
+      "description": "A published SRI hash for the classic-script bundle, re-derived not transcribed",
+      "proof_type": "automated_test",
+      "evidence": "sha384 recorded in packages/elements/SIZES.md, regenerated and `--check`ed in both ci-quality and release.yml. Folded out of a separate INTEGRITY.json after three lenses objected to the duplicate byte record and its absence from the regeneration checklist.",
+      "pass_fail": "pass",
+      "verified_by": "four-lens adversarial gate, pass 1 fold",
+      "verified_at": "2026-09-04T22:07:25Z",
+      "notes": "Verified at de1ea2e. CI green on the head; every claim re-derived locally."
+    },
+    {
+      "criterion_id": "FR-006",
+      "description": "The release runbook states the post-merge sequence and each step's owner",
+      "proof_type": "manual_review",
+      "evidence": "docs/release-runbook.md. No automated check asserts prose. Corrected twice during the gate: step 5 no longer instructs creating a tag that already exists, and \u2014 found in pass 2 \u2014 no longer recommends re-running the existing v1.0.0 tag, which points at ccb055c (packages angular/html-js/tokens, old workflow) and would have published two deleted packages, none of the epic, and burned 1.0.0 irreversibly.",
+      "pass_fail": "pass",
+      "verified_by": "four-lens adversarial gate, pass 2 fold",
+      "verified_at": "2026-09-04T22:39:08Z",
+      "notes": "Verified at de1ea2e. CI green on the head; every claim re-derived locally."
+    },
+    {
+      "criterion_id": "FR-007",
+      "description": "The single-version policy is stated where a consumer meets it",
+      "proof_type": "manual_review",
+      "evidence": "Stated in docs/release-runbook.md and CHANGELOG.md. No automated check; customElements.define's throw-on-duplicate is a browser behaviour, not a repo invariant.",
+      "pass_fail": "pass",
+      "verified_by": "four-lens adversarial gate, pass 2 fold",
+      "verified_at": "2026-09-04T22:39:08Z",
+      "notes": "Verified at de1ea2e. CI green on the head; every claim re-derived locally."
+    },
+    {
+      "criterion_id": "FR-008",
+      "description": "CHANGELOG for 1.0.0",
+      "proof_type": "automated_test",
+      "evidence": "CHANGELOG.md, with checkChangelogTagsMatchManifest comparing its `sk-*` list against custom-elements.json in both directions and refusing an empty list on either side. An earlier version of THIS ROW claimed the list was derived-and-checked when nothing in the repo read CHANGELOG.md at all \u2014 a lens caught it, and the check was written to make the claim true rather than the claim weakened to match.",
+      "pass_fail": "pass",
+      "verified_by": "four-lens adversarial gate, pass 2 fold",
+      "verified_at": "2026-09-04T22:39:08Z",
+      "notes": "Verified at de1ea2e. CI green on the head; every claim re-derived locally."
+    },
+    {
+      "criterion_id": "FR-010",
+      "description": "Every component's CSS is reachable by subpath",
+      "proof_type": "automated_test",
+      "evidence": "All 15 of packages/styles/src's component directories now have subpath exports, up from 3. `checkSubpathCoverage` compares export keys against directories on disk, because checkExportsResolve catches a broken export but not a missing one; removing any single entry reds the gate.",
+      "pass_fail": "pass",
+      "verified_by": "four-lens adversarial gate, pass 1 fold",
+      "verified_at": "2026-09-04T22:07:25Z",
+      "notes": "Verified at de1ea2e. CI green on the head; every claim re-derived locally."
+    },
+    {
+      "criterion_id": "NFR-001",
+      "description": "The gate refuses an empty set, proven by supplying one",
+      "proof_type": "automated_test",
+      "evidence": "`checkGraphFailsClosed` builds real fixture package trees (all-private, empty, no build target) and asserts the REAL accessors throw. Deleting both throws in release-graph.mjs reds the gate \u2014 verified. The earlier version passed synthetic stubs and could not fire.",
+      "pass_fail": "pass",
+      "verified_by": "four-lens adversarial gate, pass 1 fold",
+      "verified_at": "2026-09-04T22:07:25Z",
+      "notes": "Verified at de1ea2e. CI green on the head; every claim re-derived locally."
+    },
+    {
+      "criterion_id": "NFR-002",
+      "description": "A file:// load issues zero off-machine requests, asserted by interception",
+      "proof_type": "automated_test",
+      "evidence": "check-offline-load.mjs stages from real `npm pack` tarballs in a node_modules layout, intercepts requests AND websockets, waits 2s past load, and asserts 14/14 elements upgraded. The 30 @font-face sources are resolved against the packed tarball on DISK in stage(); the browser-side assertion is that at least one @font-face rule registered. Stated separately because an earlier version of this row implied both were browser assertions.",
+      "pass_fail": "pass",
+      "verified_by": "four-lens adversarial gate, pass 1 fold",
+      "verified_at": "2026-09-04T22:07:25Z",
+      "notes": "Verified at de1ea2e. CI green on the head; every claim re-derived locally."
+    },
+    {
+      "criterion_id": "NFR-003",
+      "description": "ADR-5's release controls apply to every package in the derived set",
+      "proof_type": "automated_test",
+      "evidence": "provenance and the contents audit loop the derived set; check-release-graph.mjs asserts tarball contents on the release path. NOT looped, stated precisely because an earlier version of this row overstated it: npm-audit-gate.sh runs one workspace-wide `npm audit --audit-level=high`, and CycloneDX runs once at the repo root. Both are whole-workspace controls by design, which covers the derived set without iterating it.",
+      "pass_fail": "pass",
+      "verified_by": "four-lens adversarial gate, pass 2 fold",
+      "verified_at": "2026-09-04T22:39:08Z",
+      "notes": "Verified at de1ea2e. CI green on the head; every claim re-derived locally."
+    },
+    {
+      "criterion_id": "NFR-004",
+      "description": "File count and unpacked size per package are recorded; packed size is reported but not committed",
+      "proof_type": "automated_test",
+      "evidence": "SIZES.md 'Published package sizes'. Packed size was committed first and CI reddened on it immediately: 3812.1 KiB (workstation) vs 3827.7 KiB (CI) for identical @spec-kitty/tokens contents, while files and unpacked matched exactly. Packed is the gzipped tarball, so it varies with the running machine's zlib; committing it reds builds on untouched trees.",
+      "pass_fail": "pass",
+      "verified_by": "four-lens adversarial gate, pass 1 fold",
+      "verified_at": "2026-09-04T22:07:25Z",
+      "notes": "Verified at de1ea2e. CI green on the head; every claim re-derived locally."
+    },
+    {
+      "criterion_id": "FR-009",
+      "description": "WITHDRAWN \u2014 mono font resolution is a brand decision (fork 2 on #80)",
+      "proof_type": "manual_review",
+      "evidence": "The dead @import is deleted (mechanical, no behaviour change: 32 rules / 0 imports before and after). The token still names a family that does not load; self-hosting vs dropping it is the operator's.",
+      "pass_fail": "fail",
+      "verified_by": "four-lens adversarial gate, pass 1 fold",
+      "verified_at": "2026-09-04T22:07:25Z",
+      "notes": "WITHDRAWN from spec.md's tables, so this row records the withdrawal rather than a pass. Marked fail rather than n/a: the verdict enum has no not-applicable value, and recording a withdrawn requirement as passing would be false."
+    },
+    {
+      "criterion_id": "SC-011",
+      "description": "Every committed size figure is a deterministic function of the built artifacts",
+      "proof_type": "automated_test",
+      "evidence": "packed tarball size varies with zlib on IDENTICAL inputs (3812.1 vs 3827.7 KiB) and is excluded from the record; files/unpacked/raw/minified vary only when the artifact itself differs. Note SIZES.md states its own basis: esbuild embeds module paths, so a checkout whose node_modules resolves differently changes the byte count and the SRI hash \u2014 the committed figures are CI's, which is a property of the build, not of the record.",
+      "pass_fail": "pass",
+      "verified_by": "CI, pass-1 fold",
+      "verified_at": "2026-09-04T22:14:07Z",
+      "notes": "Added after CI reddened on the first committed revision of this table."
+    }
+  ],
+  "negative_invariants": [
+    "A release must never report success having published nothing: release-graph.mjs's output is captured into shell variables and asserted non-empty, because `echo \"x=$(failing-cmd)\"` exits 0 and `for pkg in ; do` iterates zero times.",
+    "A gate must never read an exit code where npm returns 0 for a no-op: `npm publish` on a private package warns and exits 0.",
+    "An exports wildcard matching zero files is a failure, not a pass.",
+    "A tarball containing only package.json/README/LICENSE ships nothing usable, even though npm always includes them.",
+    "A hand-written package list in any workflow is a second source of truth and is rejected.",
+    "The offline probe must red on a planted off-machine request, or its green means nothing."
+  ]
+}

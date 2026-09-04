@@ -5,8 +5,18 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "declaration": true,
-    "declarationMap": true,
-    "inlineSources": true,
+    // NO MAPS IN A PUBLISHED PACKAGE. ADR-5's contents audit requires "no secrets, source maps,
+    // or dev files" in the tarball, and this package shipped 28 of them — 14 .js.map and 14
+    // .d.ts.map — because the audit step only PRINTED `npm notice` lines for a human to read, and
+    // no human ever could: release.yml runs solely on a v*.*.* tag, so the audit had never
+    // executed. Found the first time scripts/check-release-graph.mjs ran against a real tarball.
+    //
+    // `inlineSources` was the sharper half: it embeds the original TypeScript INTO the .map files,
+    // so the published package carried its own source. `sourceMap` is inherited from
+    // tsconfig.base.json, which is correct for local development and wrong for dist/, so it is
+    // overridden here rather than turned off at the base.
+    "declarationMap": false,
+    "sourceMap": false,
     "types": []
   },
   "exclude": [

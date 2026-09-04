@@ -26,20 +26,83 @@ jobs:
       - name: "[ENFORCED] Security gate before publish (ADR-005)"
         run: bash scripts/npm-audit-gate.sh
 
+      # DERIVED, not listed. This step read a hand-written `--projects=` list while the publish
+      # steps below named two packages and the contents audit looped over the same two — three
+      # hand-written lists that had already drifted apart. `elements` was built here on every
+      # release and then never published; `react` appeared in none of the three. Nothing could see
+      # it, because this workflow runs only on a v*.*.* tag and no PR has ever executed it.
+      # scripts/release-graph.mjs is now the single source, and it refuses an empty set.
+      #
+      # `--projects` is NOT the same list as `--dirs`: @spec-kitty/react is publishable but has no
+      # `build` target (it ships the generated wrappers as committed source, gated by
+      # build-react-wrappers.mjs --check on every PR). The script derives both facets from one scan
+      # rather than leaving the difference to be remembered.
+      # CAPTURED INTO VARIABLES AND ASSERTED, NOT INTERPOLATED INTO `echo`.
+      #
+      # The first draft was `echo "projects=$(node scripts/release-graph.mjs --projects)"`, and
+      # that voided the whole fail-closed design at the shell boundary. `set -e` does NOT
+      # propagate a failed command substitution when the enclosing command is `echo` — measured:
+      # the substitution fails, `projects=` is written empty, and the step exits 0. Downstream,
+      # `nx run-many --projects=` treats an empty filter as ALL projects, and `for pkg in ; do`
+      # iterates zero times and succeeds. The release would then run green to completion, create
+      # the GitHub Release, and publish NOTHING — the exact green-over-an-empty-set shape this
+      # mission exists to end, one layer above where the refusal was written.
+      #
+      # A bare assignment DOES trip `set -e`, so the assignments below fail the step. The
+      # explicit emptiness tests are belt and braces: they cost nothing and they are what a
+      # reader can see.
+      - name: Resolve the publishable package set
+        id: graph
+        run: |
+          set -euo pipefail
+          PROJECTS="$(node scripts/release-graph.mjs --projects)"
+          DIRS="$(node scripts/release-graph.mjs --dirs)"
+          [ -n "$PROJECTS" ] || { echo "::error::empty build set"; exit 1; }
+          [ -n "$DIRS" ]     || { echo "::error::empty publish set"; exit 1; }
+          echo "projects=$PROJECTS" >> "$GITHUB_OUTPUT"
+          echo "dirs=$DIRS" >> "$GITHUB_OUTPUT"
+          echo "Publishing: $DIRS"
+
+
       - name: Build all packages
-        run: npx nx run-many --target=build --projects=tokens,styles,elements
+        run: npx nx run-many --target=build --projects=${{ steps.graph.outputs.projects }}
 
       # The `cp sk-nav-pill.js` step that stood here is gone with the helper (#73). It existed
       # only because @nx/js:tsc copies **/*.{html,css} assets and not .js, and @spec-kitty/styles
       # no longer ships any .js at all. Note this workflow runs ONLY on a v*.*.* tag, so no PR
       # check exercises it: the step would have hard-failed the next release before either
       # `npm publish`, and a pre-merge lens found it by reading rather than by running.
+      # This step PRINTED for a human to read, under an [ENFORCED] label, and that is exactly
+      # how @spec-kitty/styles shipped 28 sourcemaps: no human ever read it, because this
+      # workflow had never run. The listing stays — it is useful in a release log — but the
+      # assertion above it is what makes the label true.
+      # THE ASSERTIONS RUN ON THE RELEASE PATH, not only at PR time. Two lenses found this
+      # independently: every check this mission added lived in ci-quality.yml, which triggers on
+      # pull_request and on push to [main, train/**] — and NOT on tags. So a tag placed on any
+      # commit that had not been through that workflow got no contents audit, no exports check
+      # and no SRI verification, while the audit step below still wore an [ENFORCED] label.
+      #
+      # AFTER the build, not before: both read packages/*/dist, which is gitignored.
+      # The blindness check runs HERE too, by this file's own argument: a tag can sit on a commit
+      # ci-quality.yml never saw, so a gate that only self-tests at PR time is a gate that has not
+      # self-tested on the path that publishes.
+      - name: "[ENFORCED] The release gate can see its own failures (SC-003)"
+        run: node scripts/check-release-graph.mjs --selftest
+      - name: "[ENFORCED] Release graph is coherent (FR-003, FR-004)"
+        run: node scripts/check-release-graph.mjs
+      - name: "[ENFORCED] Sizes and the SRI hash match the built artifacts (FR-005, NFR-004)"
+        run: node scripts/measure-elements-sizes.mjs --check
       - name: "[ENFORCED] Dist contents audit — no secrets/sourcemaps (ADR-005)"
         run: |
-          for pkg in tokens styles; do
+          set -euo pipefail
+          # Each consuming loop asserts its OWN input. The floor in the producing step is not
+          # enough: `steps.graph.outputs.dirs` on a deleted or renamed step id resolves to the
+          # empty string, and `for pkg in ; do` iterates zero times and exits 0.
+          PKGS="${{ steps.graph.outputs.dirs }}"
+          [ -n "$PKGS" ] || { echo "::error::empty publish set reached the audit loop"; exit 1; }
+          for pkg in $PKGS; do
             echo "=== packages/$pkg ==="
-            cd packages/$pkg && npm pack --dry-run 2>&1 | grep "npm notice" | grep -v "==="
-            cd ../..
+            ( cd "packages/$pkg" && npm pack --dry-run 2>&1 | grep "npm notice" | grep -v "===" )
           done
 
       - name: Generate CycloneDX SBOM (FR-045)
@@ -49,13 +112,82 @@ jobs:
             --output-file spec-kitty-design-sbom.cdx.json
           echo "SBOM components: $(node -e "const d=require('./spec-kitty-design-sbom.cdx.json'); console.log(d.components.length)")"
 
-      - name: Publish @spec-kitty/tokens (FR-044)
-        run: npm publish --provenance --access public
-        working-directory: packages/tokens
-
-      - name: Publish @spec-kitty/styles (FR-044)
-        run: npm publish --provenance --access public
-        working-directory: packages/styles
+      # ONE step over the derived set, not one hand-written step per package. Two steps named
+      # `tokens` and `styles` are how `elements` and `react` came to be absent without anyone
+      # noticing: adding a package to the repo did not add it here, and nothing compared the two.
+      #
+      # `set -euo pipefail` is load-bearing. Without it a failing `npm publish` inside a `for` loop
+      # does not fail the step, and the workflow would report a successful release having published
+      # a subset — the same silent-partial-success this whole rewrite is about.
+      # RESUMABLE, AND IT ACCUMULATES. `set -e` with a bare loop aborts on the first failure,
+      # which is not a recovery strategy — npm has no atomic multi-package publish, so a failure
+      # part-way leaves earlier packages on the registry permanently. Re-running then aborted on
+      # the FIRST package, which is the already-published one, so the packages that actually
+      # failed were never retried and the release stayed wedged at that version. A lens walked
+      # through it.
+      #
+      # So an already-published version is a SKIP, not a failure.
+      #
+      # `set -euo pipefail` is RESTORED here. An earlier revision dropped `-e` on the stated
+      # grounds that it "would defeat the handling" — that is false, and a lens measured it: POSIX
+      # exempts the condition of an `if` from `set -e`, and both handled commands are if-conditions.
+      # Dropping `-e` therefore bought nothing and silently removed protection from every
+      # *unhandled* command in the block.
+      - name: Publish every package in the derived set (FR-044)
+        run: |
+          set -euo pipefail
+          PKGS="${{ steps.graph.outputs.dirs }}"
+          [ -n "$PKGS" ] || { echo "::error::empty publish set reached the publish loop"; exit 1; }
+          failed=""
+          for pkg in $PKGS; do
+            echo "=== publishing packages/$pkg ==="
+            if out="$( cd "packages/$pkg" && npm publish --provenance --access public 2>&1 )"; then
+              echo "$out"
+            else
+              echo "$out"
+              # ANCHORED ON THE ERROR CODE. Matching prose ("previously published", "cannot publish
+              # over") means any error whose body happens to quote those words is swallowed as a
+              # skip — a lens built a synthetic 403 that did exactly that. npm prints a stable
+              # `npm error code EPUBLISHCONFLICT` line; that is the signal.
+              if echo "$out" | grep -qE "code (EPUBLISHCONFLICT|E409)"; then
+                # A conflict on a RETRY is resumption. A conflict on the first attempt means the
+                # name+version is on the registry and this workflow did not put it there — these
+                # names have never been published, so that is someone else's package, not ours.
+                # Warning, not notice, and never on attempt 1.
+                if [ "${GITHUB_RUN_ATTEMPT:-1}" -gt 1 ]; then
+                  echo "::warning::packages/$pkg is already published at this version — skipping (run attempt ${GITHUB_RUN_ATTEMPT})"
+                else
+                  echo "::error::packages/$pkg reports an existing $pkg version on the FIRST attempt."
+                  echo "Nothing under @spec-kitty has ever been published, so this is not a resumption."
+                  echo "Verify ownership before re-running: npm view <name>@<version> _npmUser.name"
+                  failed="$failed $pkg"
+                  break
+                fi
+              else
+                # HALT, do not accumulate. The set is published in TOPOLOGICAL order precisely so a
+                # package goes out after everything it depends on. Continuing past a real failure
+                # spends that guarantee in the only path it was for: if `tokens` fails, `styles`,
+                # `elements` and `react` publish anyway, `npm publish` does not resolve peers so all
+                # three succeed, and every consumer install then hard-fails E404 on the peer that is
+                # missing. Those versions are permanent — a version cannot be republished and the
+                # unpublish window is 72h and conditional.
+                #
+                # A lens caught this: the resumability of this loop comes entirely from the
+                # skip-on-conflict branch above, not from continuing past real failures. Halting
+                # loses nothing, because the retry resumes from here.
+                echo "::error::halting — every package after $pkg in the derived set may depend on it"
+                failed="$failed $pkg"
+                break
+              fi
+            fi
+          done
+          if [ -n "$failed" ]; then
+            echo "::error::failed to publish:$failed"
+            echo "Packages published before the failure remain on the registry; npm has no atomic"
+            echo "multi-package publish. Fix the cause and re-run this tag — already-published"
+            echo "packages are skipped, so the retry completes the set."
+            exit 1
+          fi
 
       - name: Create GitHub Release with SBOM
         uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda  # softprops/action-gh-release v3.0.0

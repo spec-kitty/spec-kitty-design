@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "Spec Kitty custom-element base layer (ADR-8)",
   "license": "MIT",
-  "private": true,
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

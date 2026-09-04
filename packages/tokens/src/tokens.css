@@ -158,8 +158,23 @@
 
 /* ── Font loading ────────────────────────────────────────────────────────── */
 
-/* JetBrains Mono via Google Fonts CDN */
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,700;1,400&display=swap');
+/* JetBrains Mono is NOT loaded here, and was not loaded before either.
+   This carried:
+     @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono...');
+   at this position — which is invalid. CSS requires @import to precede every style rule, and
+   `:root {` opens at line 3 of this file, so the browser dropped it. Measured in chromium:
+   32 rules parsed, 0 import rules, and a route watching fonts.googleapis.com never fired.
+   `--sk-font-mono` has therefore always resolved to `ui-monospace` and its fallbacks.
+
+   DO NOT "FIX" THIS BY MOVING AN @import TO THE TOP OF THE FILE. That is the obvious repair and
+   it breaks a requirement in the same edit: SC-006 asserts a file:// page loads with zero
+   off-machine requests, and scripts/check-offline-load.mjs would red on the request the
+   repositioned @import would finally make. It would also add an unpinned third-party runtime
+   dependency to every consumer page, which ADR-5's control table does not cover.
+
+   Whether JetBrains Mono should be self-hosted (OFL permits it) or dropped from --sk-font-mono
+   so the token declares what actually resolves is a brand decision, raised as fork 2 on #80.
+   Removing the dead line changes nothing observable; it only stops inviting the wrong fix. */
 
 /* --- Falling Sky: upright weights --- */
 @font-face { font-family: 'Falling Sky'; src: url('./fonts/FallingSkyLight-K2EX.otf') format('opentype');     font-weight: 300; font-style: normal;  font-display: swap; }

@@ -6,7 +6,7 @@
     "build": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "cp packages/tokens/src/tokens.css packages/tokens/dist/tokens.css && mkdir -p packages/tokens/dist/fonts && cp packages/tokens/fonts/* packages/tokens/dist/fonts/ && cp -r packages/tokens/assets packages/tokens/dist/assets"
+        "command": "rm -rf packages/tokens/dist/fonts packages/tokens/dist/assets && mkdir -p packages/tokens/dist/fonts packages/tokens/dist/assets && cp packages/tokens/src/tokens.css packages/tokens/dist/tokens.css && cp -r packages/tokens/fonts/. packages/tokens/dist/fonts/ && cp -r packages/tokens/assets/. packages/tokens/dist/assets/"
       }
     },
     "lint": {
