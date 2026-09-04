@@ -98,6 +98,13 @@ const REACT_PROPS = new Set([
 const EXPECTED_NON_PROP_FIELDS = new Map([
   ['sk-form-input', ['errorMessage']],
   ['sk-form-textarea', ['errorMessage']],
+  // DERIVED FROM SLOTTED CONTENT, so an attribute would let the two disagree. `hasLegal` is Lit
+  // `state: true`, set from the legal slot's `slotchange`, and it exists so the divider is not
+  // drawn above nothing. A consumer never sets it — they slot a legal line or they do not — so
+  // "cannot reach the element on first render" is not a defect here: the slot content IS light
+  // DOM and is present before upgrade, and the first render simply draws no divider until the
+  // slotchange fires. Recorded rather than given an attribute, which is what this map is for.
+  ['sk-site-footer', ['hasLegal']],
 ]);
 
 const check = process.argv.includes('--check');

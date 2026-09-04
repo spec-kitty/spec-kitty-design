@@ -544,13 +544,20 @@ markup module (ADR-10 §3).
 | `sk-ribbon-card` | no | `ribbon` (label; the tab renders only when set), `accent` (tab colour), `variant` (border) over five shared colours; title and body slotted |
 | `sk-stub` | no | zero public members; the deliberate empty case several gates are floored against |
 
-The remaining catalogue components still live in `packages/styles` and have not
-yet been migrated. #77 migrated `grid` and `section-banner`; #78 `feature-card` and
-`ribbon-card`; #79 `button`, `pill-tag` and `check-bullet`; #78 also migrated `blog-card`,
-which COMPOSES sk-card's stylesheet (`static styles = [cardSheet, sheet]`, sk-card first) rather
-than nesting a real `<sk-card>` — the first cross-component sheet adoption in the repo. Two
-remain styles-only: `site-footer` (#77), still awaiting a recorded design ruling, and
-`form-field`, which had no owning mission until #141.
+Migration is complete apart from one component. #77 migrated `grid`, `section-banner` and
+`site-footer`; #78 `feature-card`, `ribbon-card` and `blog-card`; #79 `button`, `pill-tag` and
+`check-bullet`.
+
+Two of those carry a design decision worth knowing. `blog-card` COMPOSES sk-card's stylesheet
+(`static styles = [cardSheet, sheet]`, sk-card first) rather than nesting a real `<sk-card>` —
+the first cross-component sheet adoption in the repo. `site-footer`'s content is entirely
+SLOTTED, because a footer's words belong to the site rather than to the component; the trade is
+that its element consumers must also load the stylesheet in their document, since `::slotted()`
+cannot reach nested children.
+
+**`form-field` is the only component still styles-only**, and it had no owning mission until
+#141.
+
 
 ### react package — `packages/react/src/`
 
@@ -634,9 +641,20 @@ carry the detail generic from the element's `@fires {Type}`.
 - Variants: `Neutral`, `Purple`, `Green`, `LightMode`
 - Notes: exports `SkSectionBannerHTML` (the base, identical to neutral), `SkSectionBannerNeutralHTML`, `SkSectionBannerPurpleHTML`, `SkSectionBannerGreenHTML`. The labels are placeholders — version strings live in the stories, not in the component (#77).
 
-#### sk-site-footer (styles)
-- Path: `packages/styles/src/site-footer/sk-site-footer.css` + `sk-site-footer.stories.ts`
-- Story title: `Components/SiteFooter`
+#### sk-site-footer (element)
+- Path: `packages/elements/src/site-footer/sk-site-footer.ts` + `sk-site-footer.markup.ts`
+- Styles: `packages/styles/src/site-footer/sk-site-footer.css`; `sk-site-footer.html` and
+  `index.ts` are (**generated** from the markup module)
+- Story titles: `Elements/SkSiteFooter` and `Components/SiteFooter (HTML)`
+- Slots: `brand` (one element), default (one per link column), `legal`. The element authors NO
+  text — not even the copyright year, which is why the generated placeholder reads `© <year>`
+  rather than a real one: a clock-derived byte would make the artifact stop matching a fresh
+  generation on 1 January (ADR-11 item 9).
+- Parts: `footer`, `grid`, `divider`, `legal`
+- **Element consumers must also load the stylesheet in their document** —
+  `@spec-kitty/styles/site-footer/sk-site-footer.css`. The content is slotted and `::slotted()`
+  reaches only directly assigned children, so nested links are otherwise unstyled and fail
+  contrast on the dark theme. This is the only component in the catalogue with that obligation.
 - Variants: `Default`, `LightMode`
 - Notes: marketing footer with brand mark, link columns, legal line.
 

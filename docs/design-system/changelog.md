@@ -26,6 +26,16 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) conve
   **Consumers copying markup must update these class names.** Nothing was installed from a
   registry at the time of the change (ADR-8, and the programme's semver position), so the
   break is to copied snippets rather than to installs.
+- **BREAKING — `.sk-footer-link` renamed** to `.sk-site-footer__link` in `@spec-kitty/styles`
+  (#77), 20 occurrences. Same shape and same reason as the rename above: a component's classes
+  must be prefixed with its own tag name or `check-adopted-css-boundaries.mjs` rejects the sheet
+  as unowned, so the migration could not land without it. **Consumers copying footer markup must
+  update this class name.**
+- **`@spec-kitty/styles` now exports `./site-footer/*`.** Element consumers of `sk-site-footer`
+  must load that sheet in their document — the component's content is slotted, and `::slotted()`
+  cannot reach nested children, so without it the footer links fall back to the browser default
+  and fail contrast on the dark theme. The subpath was previously unexported, which would have
+  made that obligation impossible to discharge.
 - **BREAKING — `.sk-eyebrow-pill` folded into `.sk-pill-tag--eyebrow`** (#79). It was a second
   component sharing pill-tag's directory whose rule restated the base almost verbatim,
   differing only in padding, corner radius and font size. It is now a shape MODIFIER and must

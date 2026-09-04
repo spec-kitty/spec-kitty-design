@@ -1,7 +1,7 @@
 {
   "name": "@spec-kitty/styles",
   "version": "1.0.0",
-  "description": "Spec Kitty HTML primitives — CSS and markup only, no JavaScript",
+  "description": "Spec Kitty HTML primitives \u2014 CSS and markup only, no JavaScript",
   "license": "MIT",
   "main": "./dist/src/index.js",
   "types": "./dist/src/index.d.ts",
@@ -11,6 +11,7 @@
       "default": "./dist/src/index.js"
     },
     "./button/*": "./dist/button/*",
+    "./site-footer/*": "./dist/site-footer/*",
     "./stub/*": "./dist/stub/*"
   },
   "files": [

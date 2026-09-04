@@ -1,12 +1,26 @@
 import type { Meta, StoryObj } from '@storybook/web-components';
 import './sk-site-footer.js';
-// THE DOCUMENT SHEET, because this story slots NESTED markup and a real consumer would.
-// `::slotted()` reaches only DIRECTLY assigned children, so the adopted sheet styles the column
-// boxes and nothing inside them. Without this import the slotted links fall back to the UA's
-// `-webkit-link` blue, which axe measured at a genuine contrast violation on the dark page —
-// found by the gate, not reasoned about. sk-nav-pill does not need this because its consumers
-// slot the anchors DIRECTLY, so its ::slotted() rules match them.
-import '../../../styles/src/site-footer/sk-site-footer.css';
+// THE SAME SHEET, ADOPTED INTO THE DOCUMENT — not a bare `.css` import.
+//
+// This story slots NESTED markup, and `::slotted()` reaches only DIRECTLY assigned children, so
+// the shadow-adopted sheet styles the column boxes and nothing inside them. Without the sheet in
+// the document the slotted links fall back to the UA's `-webkit-link` blue, which axe measured
+// as a genuine contrast violation on the dark page — found by the gate, not reasoned about.
+// sk-nav-pill needs none of this because its consumers slot the anchors DIRECTLY, so its
+// `::slotted()` rules match them.
+//
+// The first attempt used a bare stylesheet import of the styles-layer file, which trips
+// `check-no-css-in-source` — an ENFORCED gate whose whole point is that
+// `packages/elements` ships CONSTRUCTED stylesheets, never bundler-specific CSS imports
+// (FR-009, ADR-10 §1). A lens caught it, and caught that the "static gates green" claim had been
+// measured BEFORE the import was added and never re-run. Adopting the generated module is both
+// gate-clean and closer to what a consumer does: it is the identical sheet the element adopts,
+// placed where slotted light-DOM content can see it.
+import documentSheet from './sk-site-footer.css.js';
+
+if (!document.adoptedStyleSheets.includes(documentSheet)) {
+  document.adoptedStyleSheets = [...document.adoptedStyleSheets, documentSheet];
+}
 
 /**
  * <sk-site-footer> — the ELEMENT.
@@ -67,3 +81,8 @@ export const LightMode: Story = {
     </div>
   `,
 };
+
+// NOTE FOR THE NEXT READER: do not spell the rejected import form literally in a comment here.
+// The gate greps the file, not the syntax tree, so quoting the bad statement in prose fails the
+// gate on the comment that explains the fix — which is exactly what happened, and is the same
+// shape as #143's `::part(tag)` comment defeating the ratchet it was describing.

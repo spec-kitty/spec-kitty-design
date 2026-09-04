@@ -50,9 +50,9 @@ export interface SkSiteFooterProps extends Pick<
  *
  * Areas where markup can be added to the component.
  *
- * - `(default)`: the link columns, which become the grid's remaining children
- * - `brand`: the brand column: a mark, a wordmark and a tagline
- * - `legal`: the copyright line
+ * - `(default)`: one element per link column, each becoming a grid item
+ * - `brand`: a SINGLE element containing the mark, wordmark and tagline. Each assigned node becomes its own grid item, so wrap them in one box.
+ * - `legal`: the copyright line. When empty, the divider and legal row are not rendered.
  *
  * ## CSS Parts
  *

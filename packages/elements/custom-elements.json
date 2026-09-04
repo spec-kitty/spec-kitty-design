@@ -869,8 +869,11 @@
         {
           "kind": "variable",
           "name": "PLACEHOLDER_LEGAL",
-          "default": "`© ${PLACEHOLDER_YEAR} Your Company. All rights reserved.`",
-          "description": "The legal line's placeholder, for the generated static form.\n\nA consumer replaces the whole line. It is not a default the element falls back to."
+          "type": {
+            "text": "string"
+          },
+          "default": "'© <year> Your Company. All rights reserved.'",
+          "description": "The legal line's placeholder, for the generated static form.\n\nNO YEAR AT ALL, not even a pinned one. A pinned `2026` delivered determinism — the artifact\nstops depending on the clock — but it MOVED the staleness rather than removing it: the\ngenerated `.html`, the styles barrel and the autodocs page would all read \"© 2026\" to a\nconsumer in 2028. A lens made the point, and it is right: nothing requires the placeholder to\nlook like a year. `<year>` is deterministic, obviously a template, and cannot read stale.\n\nIt also makes the determinism test discriminating instead of decorative — see the fixture.\nA consumer replaces the whole line; it is not a default the element falls back to."
         },
         {
           "kind": "variable",
@@ -1042,9 +1045,9 @@
           "kind": "variable",
           "name": "SITE_FOOTER_CLASSES",
           "type": {
-            "text": "{\n  root: 'sk-site-footer',\n  grid: 'sk-site-footer__grid',\n  brand: 'sk-site-footer__brand',\n  wordmark: 'sk-site-footer__wordmark',\n  tagline: 'sk-site-footer__tagline',\n  heading: 'sk-site-footer__heading',\n  links: 'sk-site-footer__links',\n  link: 'sk-site-footer__link',\n  divider: 'sk-site-footer__divider',\n  legal: 'sk-site-footer__legal',\n}"
+            "text": "{\n  root: 'sk-site-footer',\n  grid: 'sk-site-footer__grid',\n  column: 'sk-site-footer__column',\n  brand: 'sk-site-footer__brand',\n  wordmark: 'sk-site-footer__wordmark',\n  tagline: 'sk-site-footer__tagline',\n  heading: 'sk-site-footer__heading',\n  links: 'sk-site-footer__links',\n  link: 'sk-site-footer__link',\n  divider: 'sk-site-footer__divider',\n  legal: 'sk-site-footer__legal',\n}"
           },
-          "default": "{ root: 'sk-site-footer', grid: 'sk-site-footer__grid', brand: 'sk-site-footer__brand', wordmark: 'sk-site-footer__wordmark', tagline: 'sk-site-footer__tagline', heading: 'sk-site-footer__heading', links: 'sk-site-footer__links', link: 'sk-site-footer__link', divider: 'sk-site-footer__divider', legal: 'sk-site-footer__legal', }",
+          "default": "{ root: 'sk-site-footer', grid: 'sk-site-footer__grid', column: 'sk-site-footer__column', brand: 'sk-site-footer__brand', wordmark: 'sk-site-footer__wordmark', tagline: 'sk-site-footer__tagline', heading: 'sk-site-footer__heading', links: 'sk-site-footer__links', link: 'sk-site-footer__link', divider: 'sk-site-footer__divider', legal: 'sk-site-footer__legal', }",
           "description": "The class names this component renders, named once.\n\nThe element imports these rather than re-typing them. #78's blog-card shipped the opposite —\nthe only element in the repo that imported nothing from its own markup module — and four class\nstrings were authored twice on the component whose whole argument was that the two paths are\none shape. That is ADR-8 criterion 3, and it is measured by a proxy that has now been wrong\ntwice (#142), so the safe construction is to leave no literal in `render()` at all."
         },
         {
@@ -2936,19 +2939,30 @@
           ],
           "slots": [
             {
-              "description": "the link columns, which become the grid's remaining children",
+              "description": "one element per link column, each becoming a grid item",
               "name": ""
             },
             {
-              "description": "the brand column: a mark, a wordmark and a tagline",
+              "description": "a SINGLE element containing the mark, wordmark and tagline. Each assigned node becomes its own grid item, so wrap them in one box.",
               "name": "brand"
             },
             {
-              "description": "the copyright line",
+              "description": "the copyright line. When empty, the divider and legal row are not rendered.",
               "name": "legal"
             }
           ],
-          "members": [],
+          "members": [
+            {
+              "kind": "field",
+              "name": "hasLegal",
+              "privacy": "public",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false"
+            }
+          ],
+          "attributes": [],
           "superclass": {
             "name": "LitElement",
             "package": "lit"

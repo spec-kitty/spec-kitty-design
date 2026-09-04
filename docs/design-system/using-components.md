@@ -3,11 +3,11 @@
 The Spec Kitty components ship as CSS in `@spec-kitty/styles`, and — for the components migrated
 so far — as **custom elements** in `@spec-kitty/elements`. Both require `@spec-kitty/tokens`.
 
-**Migration is in progress.** Thirteen elements exist today: `sk-blog-card`, `sk-button`,
+**Migration is in progress.** Fourteen elements exist today: `sk-blog-card`, `sk-button`,
 `sk-card`, `sk-check-bullet`, `sk-feature-card`, `sk-form-input`, `sk-form-textarea`, `sk-grid`,
-`sk-nav-pill`, `sk-pill-tag`, `sk-ribbon-card`, `sk-section-banner` and `sk-stub`.
-Two of the catalogue's component packages are still CSS only — `site-footer` (#77) and
-`form-field` (#141). Composite sections below such as Hero and Callout
+`sk-nav-pill`, `sk-pill-tag`, `sk-ribbon-card`, `sk-section-banner`, `sk-site-footer` and
+`sk-stub`.
+One of the catalogue's component packages is still CSS only — `form-field` (#141). Composite sections below such as Hero and Callout
 are CSS-only *patterns* rather than packages, and are not part of that count. Each section below says which it is, because the
 difference decides how you use it.
 
@@ -161,6 +161,46 @@ text is the accessible content — and `icon` replaces it. Two parts: `bullet` (
 ```
 
 [View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/primitives-skcheckbullet-html--default)
+
+---
+
+## Site footer
+
+A brand column, link columns and a legal line, in a grid that collapses to one column.
+
+**As a custom element** — `sk-site-footer` is migrated, so it needs no wrapper:
+
+```html
+<script type="module" src="/node_modules/@spec-kitty/elements/dist/elements.js"></script>
+<link rel="stylesheet" href="/node_modules/@spec-kitty/styles/site-footer/sk-site-footer.css" />
+
+<sk-site-footer>
+  <div slot="brand" class="sk-site-footer__column">…</div>
+  <nav class="sk-site-footer__column" aria-label="Product links">…</nav>
+  <span slot="legal">© 2026 Your Company.</span>
+</sk-site-footer>
+```
+
+**The stylesheet link is required for this component, and it is the only one where that is
+true.** Everything a reader sees here is yours, slotted — and `::slotted()` reaches only
+*directly assigned* children, so the element's own adopted sheet styles the column boxes but
+nothing nested inside them. Without the sheet in your document, the links fall back to the
+browser's default blue, which fails contrast on the dark theme. It is the same single CSS file
+the element adopts; it just also has to be where your markup is.
+
+The component owns the grid, the divider and the spacing. It authors no text — including the
+copyright, because a component should not assert your legal line. Omit the `legal` slot and the
+divider is not rendered either.
+
+Use `sk-site-footer::part(grid)` for a column layout outside the provided `1.5fr 1fr 1fr`.
+
+**HTML:**
+
+```html
+<footer class="sk-site-footer">…</footer>
+```
+
+[View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/components-sitefooter-html--default)
 
 ---
 

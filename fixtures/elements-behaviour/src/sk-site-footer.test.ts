@@ -7,11 +7,33 @@
  */
 import { beforeEach, expect, test } from 'vitest';
 import '@spec-kitty/elements';
+// THROUGH THE PACKAGE SCOPE, not a deep relative path. A cross-project relative import trips
+// `@nx/enforce-module-boundaries`, which is exactly the edge that rule exists to make visible —
+// and the sheet is already a barrel export, so there was never a need to reach past it.
 import { PLACEHOLDER_LEGAL, siteFooterStaticHtml, skSiteFooterSheet } from '@spec-kitty/elements';
 import { installTokenSheet } from './token-sheet.js';
 import { contrast, assertThemesDiffered } from './contrast.js';
 
 beforeEach(installTokenSheet);
+
+/**
+ * Put the component's own sheet in the DOCUMENT, and hand it back.
+ *
+ * Slotted content is light DOM, and `::slotted()` reaches only directly assigned children — so
+ * the nested links and headings are styled only when a consumer loads this sheet. That is this
+ * component's documented obligation, so measuring the inks without it would measure UA defaults
+ * rather than the shipped design.
+ *
+ * CALLED FROM INSIDE THE TEST, not from `beforeEach`. Adopting it in a hook does not survive to
+ * the test body here — the first attempt did exactly that and the wrapper's background came back
+ * `rgba(0, 0, 0, 0)`, which `contrast()`'s alpha guard rejected outright rather than scoring
+ * transparent-as-black. Same lesson the sk-nav-pill CTA fixture records.
+ */
+const adoptSheetIntoDocument = () => {
+  if (!document.adoptedStyleSheets.includes(skSiteFooterSheet)) {
+    document.adoptedStyleSheets = [...document.adoptedStyleSheets, skSiteFooterSheet];
+  }
+};
 
 const mount = async () => {
   const el = document.createElement('sk-site-footer');
@@ -84,6 +106,14 @@ test('the content is the CONSUMER\'S — all three slots reach their region', as
   expect(columns.length, 'the default slot takes the link columns').toBe(1);
   expect(columns[0]!.tagName).toBe('NAV');
   expect(getComputedStyle(partOf(el, 'grid')!).display).toBe('grid');
+  // AND THE SLOT MUST STAY `display: contents`, which is what makes the assigned nodes grid
+  // ITEMS rather than the slot being one item containing them. The element's own comment names
+  // `display: block` on the slot as the breaking change; without this assertion, adding that
+  // rule leaves every other assertion here green. A lens caught the gap.
+  expect(
+    getComputedStyle(el.shadowRoot!.querySelector('slot:not([name])') as HTMLElement).display,
+    'a slot must stay display:contents or its assigned nodes stop being grid items',
+  ).toBe('contents');
 });
 
 test('the generated form does not read the clock', async () => {
@@ -92,23 +122,41 @@ test('the generated form does not read the clock', async () => {
   // clock-dependent byte means the committed file stops matching a fresh generation on 1 January
   // — CI red for everyone, with no code change. ADR-11 item 9.
   //
-  // Asserted two ways: the placeholder is a fixed string, and generating twice is identical.
-  // A year-shaped assertion alone would pass in 2026 for the wrong reason.
-  expect(PLACEHOLDER_LEGAL).not.toMatch(new RegExp(String(new Date().getFullYear() + 1)));
-  expect(PLACEHOLDER_LEGAL).toContain('2026');
-  expect(siteFooterStaticHtml()).toBe(siteFooterStaticHtml());
+  // ONE ASSERTION THAT ACTUALLY DISCRIMINATES, replacing three that did not. Two lenses
+  // independently showed the previous version could not fail on the defect it names:
+  //   * `not.toMatch(nextYear)` passes whether or not the clock is read — a clock read yields
+  //     THIS year, a pinned value yields 2026, and neither is next year. True in every year.
+  //   * `toBe()` on two calls in the same tick compares a value that is stable within a tick and
+  //     stable for a whole YEAR, so a clock read satisfies it too.
+  //   * `toContain('2026')` only discriminates from 2027 onward.
+  // And the comment above them claimed "asserted two ways", which is the shape this programme
+  // keeps catching: prose asserting rigour the code does not have.
+  //
+  // The placeholder is now year-FREE, so the check is simply that no four-digit year reaches the
+  // generated output. Reintroduce `new Date().getFullYear()` and this reds TODAY, in any year.
+  expect(PLACEHOLDER_LEGAL, 'the placeholder must not contain a year at all').not.toMatch(/\d{4}/);
+  expect(
+    siteFooterStaticHtml(),
+    'no four-digit year may reach the generated markup — that is the clock leaking in',
+  ).not.toMatch(/\d{4}/);
 
   // And the element renders NO year of its own: the legal line is slotted, because a component
   // asserting a consumer's copyright is wrong on its own terms.
   const el = await mount();
-  const legal = partOf(el, 'legal')!;
-  expect(legal.textContent!.trim(), 'the element must not author a legal line').toBe('');
+  // OVER THE WHOLE SHADOW TREE, not just the legal part: the claim is that the ELEMENT authors
+  // no year anywhere, and `partOf(el,'legal').textContent` sees only slot fallback content, so
+  // it would pass even if the slot were deleted entirely. A lens narrowed this correctly.
+  expect(
+    el.shadowRoot!.textContent!.trim(),
+    'the element must author no text of its own — every word is the consumer\'s',
+  ).toBe('');
 });
 
 test('every ink meets AA in BOTH themes', async () => {
   // Retiring this component's inert `data-theme="light"` wrapper (#93) is what makes its light
   // stories render the light palette for the first time. The same move exposed four failing
   // pill-tag variants and a 1.73:1 check-bullet tick, so this is measured rather than assumed.
+  adoptSheetIntoDocument();
   const surfaces = new Map<string, string>();
 
   for (const theme of ['dark', 'light'] as const) {
@@ -117,19 +165,46 @@ test('every ink meets AA in BOTH themes', async () => {
     wrap.style.background = 'var(--sk-surface-page)';
     document.body.append(wrap);
 
+    // THE FULL SLOTTED CONTENT, not just a legal line. An earlier revision mounted only the
+    // legal span and measured only that ink, while the test was named "every ink" and the PR
+    // and the ratchet note both cited the 16.03:1 wordmark figure as evidence — a figure no
+    // test touched. A lens caught the gap between the name and the coverage.
     const el = document.createElement('sk-site-footer');
-    el.innerHTML = '<span slot="legal">© 2026 Your Company.</span>';
+    el.innerHTML =
+      '<div slot="brand" class="sk-site-footer__column">' +
+      '<div class="sk-site-footer__brand">' +
+      '<span class="sk-site-footer__wordmark">Brand</span></div>' +
+      '<p class="sk-site-footer__tagline">Tagline</p></div>' +
+      '<nav class="sk-site-footer__column"><div class="sk-site-footer__heading">Product</div>' +
+      '<ul class="sk-site-footer__links">' +
+      '<li><a href="#" class="sk-site-footer__link">Docs</a></li></ul></nav>' +
+      '<span slot="legal">© Your Company.</span>';
     wrap.append(el);
     await (el as unknown as { updateComplete: Promise<unknown> }).updateComplete;
 
     const bg = getComputedStyle(wrap).backgroundColor;
     surfaces.set(theme, bg);
 
-    const ratio = contrast(getComputedStyle(partOf(el, 'legal')!).color, bg);
-    expect(
-      ratio,
-      `the legal line in ${theme} mode is ${ratio.toFixed(2)}:1 — AA needs 4.5`,
-    ).toBeGreaterThanOrEqual(4.5);
+    // Every ink this component sets, shadow and slotted. The slotted ones are reachable here
+    // because the fixture loads the sheet into the document — which is the consumer obligation
+    // this component carries, so measuring it is measuring the real deployment.
+    const inks: readonly (readonly [string, HTMLElement])[] = [
+      ['legal', partOf(el, 'legal')!],
+      ['wordmark', el.querySelector('.sk-site-footer__wordmark') as HTMLElement],
+      ['tagline', el.querySelector('.sk-site-footer__tagline') as HTMLElement],
+      ['heading', el.querySelector('.sk-site-footer__heading') as HTMLElement],
+      ['link', el.querySelector('.sk-site-footer__link') as HTMLElement],
+    ];
+    expect(inks.length, 'every ink the sheet sets must have a case here').toBe(5);
+
+    for (const [name, node] of inks) {
+      expect(node, `${name} must be present to be measured`).not.toBe(null);
+      const ratio = contrast(getComputedStyle(node).color, bg);
+      expect(
+        ratio,
+        `${name} in ${theme} mode is ${ratio.toFixed(2)}:1 — AA needs 4.5`,
+      ).toBeGreaterThanOrEqual(4.5);
+    }
   }
 
   // Without this a light arm silently rendering the dark palette passes every ratio above.

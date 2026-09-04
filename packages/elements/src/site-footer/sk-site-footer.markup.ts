@@ -16,6 +16,7 @@
 export const SITE_FOOTER_CLASSES = {
   root: 'sk-site-footer',
   grid: 'sk-site-footer__grid',
+  column: 'sk-site-footer__column',
   brand: 'sk-site-footer__brand',
   wordmark: 'sk-site-footer__wordmark',
   tagline: 'sk-site-footer__tagline',
@@ -50,14 +51,22 @@ export const SITE_FOOTER_AXES = {} as const;
 // and sk-blog-card's PLACEHOLDER_THUMBNAIL: it exists so the generated artifact demonstrates the
 // structure it documents. The element never renders it — the legal line is slotted, because a
 // consumer's copyright is their own text and no component should be asserting it for them.
-const PLACEHOLDER_YEAR = '2026';
-
 /**
  * The legal line's placeholder, for the generated static form.
  *
- * A consumer replaces the whole line. It is not a default the element falls back to.
+ * NO YEAR AT ALL, not even a pinned one. A pinned `2026` delivered determinism — the artifact
+ * stops depending on the clock — but it MOVED the staleness rather than removing it: the
+ * generated `.html`, the styles barrel and the autodocs page would all read "© 2026" to a
+ * consumer in 2028. A lens made the point, and it is right: nothing requires the placeholder to
+ * look like a year. `YYYY` is deterministic, obviously a template, and cannot read stale.
+ *
+ * NOT `<year>`, which the first attempt used: htmlhint parses it as an unclosed HTML TAG in the
+ * generated `.html` and fails the gate. A placeholder still has to be valid markup.
+ *
+ * It also makes the determinism test discriminating instead of decorative — see the fixture.
+ * A consumer replaces the whole line; it is not a default the element falls back to.
  */
-export const PLACEHOLDER_LEGAL = `© ${PLACEHOLDER_YEAR} Your Company. All rights reserved.`;
+export const PLACEHOLDER_LEGAL = '© YYYY Your Company. All rights reserved.';
 
 export interface SiteFooterStaticOptions {
   /** The brand column: a mark and a tagline. Omitted entirely when absent. */
@@ -65,6 +74,40 @@ export interface SiteFooterStaticOptions {
   /** The legal line. Defaults to the placeholder above. */
   legal?: string;
 }
+
+/**
+ * A placeholder brand column.
+ *
+ * NO LOGO `src`. The markup this replaces carried
+ * `src="../../packages/tokens/assets/logo.webp"` — a REPO-relative path, so every consumer who
+ * copied the snippet got a broken image. The asset does ship (`packages/tokens/package.json`
+ * lists `assets/**`), but at `@spec-kitty/tokens/assets/logo.webp`, which is not that path. A
+ * consumer's footer carries their own mark anyway, so the brand column is a slot and the
+ * placeholder shows the shape without asserting an image that cannot resolve.
+ */
+const PLACEHOLDER_BRAND =
+  `<div class="${SITE_FOOTER_CLASSES.column}"><div class="${SITE_FOOTER_CLASSES.brand}">` +
+  `<span class="${SITE_FOOTER_CLASSES.wordmark}">Your Brand</span></div>` +
+  `<p class="${SITE_FOOTER_CLASSES.tagline}">One sentence on what you do.</p></div>`;
+
+/**
+ * Placeholder link columns — CHILDREN, not a text node.
+ *
+ * #77 learned this in the other direction: sk-grid's generated artifact was a single text node,
+ * which showed ADR-10 §3's no-JavaScript consumer nothing about the component they were copying.
+ * Two columns, because the grid is `1.5fr 1fr 1fr` and one column would not show the layout.
+ */
+const PLACEHOLDER_COLUMNS = ['Product', 'Connect']
+  .map(
+    (heading) =>
+      `<nav class="${SITE_FOOTER_CLASSES.column}" aria-label="${heading} links">` +
+      `<div class="${SITE_FOOTER_CLASSES.heading}">${heading}</div>` +
+      `<ul class="${SITE_FOOTER_CLASSES.links}">` +
+      `<li><a href="#" class="${SITE_FOOTER_CLASSES.link}">First link</a></li>` +
+      `<li><a href="#" class="${SITE_FOOTER_CLASSES.link}">Second link</a></li>` +
+      `</ul></nav>`,
+  )
+  .join('');
 
 /**
  * The static form, for a consumer with no JavaScript.
@@ -86,37 +129,3 @@ export function siteFooterStaticHtml(
     `</footer>`
   );
 }
-
-/**
- * A placeholder brand column.
- *
- * NO LOGO `src`. The markup this replaces carried
- * `src="../../packages/tokens/assets/logo.webp"` — a REPO-relative path, so every consumer who
- * copied the snippet got a broken image. The asset does ship (`packages/tokens/package.json`
- * lists `assets/**`), but at `@spec-kitty/tokens/assets/logo.webp`, which is not that path. A
- * consumer's footer carries their own mark anyway, so the brand column is a slot and the
- * placeholder shows the shape without asserting an image that cannot resolve.
- */
-const PLACEHOLDER_BRAND =
-  `<div><div class="${SITE_FOOTER_CLASSES.brand}">` +
-  `<span class="${SITE_FOOTER_CLASSES.wordmark}">Your Brand</span></div>` +
-  `<p class="${SITE_FOOTER_CLASSES.tagline}">One sentence on what you do.</p></div>`;
-
-/**
- * Placeholder link columns — CHILDREN, not a text node.
- *
- * #77 learned this in the other direction: sk-grid's generated artifact was a single text node,
- * which showed ADR-10 §3's no-JavaScript consumer nothing about the component they were copying.
- * Two columns, because the grid is `1.5fr 1fr 1fr` and one column would not show the layout.
- */
-const PLACEHOLDER_COLUMNS = ['Product', 'Connect']
-  .map(
-    (heading) =>
-      `<nav aria-label="${heading} links">` +
-      `<div class="${SITE_FOOTER_CLASSES.heading}">${heading}</div>` +
-      `<ul class="${SITE_FOOTER_CLASSES.links}">` +
-      `<li><a href="#" class="${SITE_FOOTER_CLASSES.link}">First link</a></li>` +
-      `<li><a href="#" class="${SITE_FOOTER_CLASSES.link}">Second link</a></li>` +
-      `</ul></nav>`,
-  )
-  .join('');

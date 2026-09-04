@@ -1,4 +1,4 @@
-import { LitElement, html } from 'lit';
+import { LitElement, html, nothing } from 'lit';
 import { define } from '../define.js';
 import sheet from './sk-site-footer.css.js';
 import { SITE_FOOTER_CLASSES } from './sk-site-footer.markup.js';
@@ -22,9 +22,10 @@ import { SITE_FOOTER_CLASSES } from './sk-site-footer.markup.js';
  * divider above the legal line. Everything a reader sees is yours, supplied through the slots.
  *
  * @element sk-site-footer
- * @slot brand - the brand column: a mark, a wordmark and a tagline
- * @slot - the link columns, which become the grid's remaining children
- * @slot legal - the copyright line
+ * @slot brand - a SINGLE element containing the mark, wordmark and tagline. Each assigned node
+ *   becomes its own grid item, so wrap them in one box.
+ * @slot - one element per link column, each becoming a grid item
+ * @slot legal - the copyright line. When empty, the divider and legal row are not rendered.
  * @csspart footer - the footer element, for padding and border overrides
  * @csspart grid - the column grid, for layouts outside the provided one
  * @csspart divider - the rule above the legal line
@@ -33,12 +34,33 @@ import { SITE_FOOTER_CLASSES } from './sk-site-footer.markup.js';
 export class SkSiteFooter extends LitElement {
   static styles = [sheet];
 
+  static properties = {
+    // Internal, not an attribute: it is derived from what the consumer slotted, so an attribute
+    // would let the two disagree.
+    hasLegal: { state: true },
+  };
+
+  /** @internal Whether the `legal` slot has assigned content. */
+  declare hasLegal: boolean;
+
+  constructor() {
+    super();
+    this.hasLegal = false;
+  }
+
   render() {
     // A wrapper div carries the grid, and the slotted children still become its grid items —
     // because a `<slot>` is `display: contents` by default, so it does not itself participate in
     // layout and its assigned nodes are laid out as children of the div. Setting `display: block`
     // on the slot would break that and make the slot the single grid item. sk-grid records the
     // same reasoning; this is the second component to depend on it.
+    //
+    // THE DIVIDER IS CONDITIONAL. A lens found that an unconditional `<hr>` renders over
+    // nothing when a consumer slots no legal line: `<p part="legal">` collapses to zero height,
+    // but the rule still draws with `margin: var(--sk-space-7) 0` above the root's
+    // `--sk-space-8` bottom padding — a separator introducing nothing, which AT announces as
+    // `role="separator"`. The static path never showed it because `siteFooterStaticHtml`
+    // defaults `legal` to the placeholder, so this was an element/static divergence too.
     //
     // NO YEAR, AND NO FALLBACK LEGAL TEXT. The barrel this replaces computed
     // `new Date().getFullYear()` at module load. A component asserting a consumer's copyright is
@@ -50,8 +72,17 @@ export class SkSiteFooter extends LitElement {
         <slot name="brand"></slot>
         <slot></slot>
       </div>
-      <hr part="divider" class=${SITE_FOOTER_CLASSES.divider} />
-      <p part="legal" class=${SITE_FOOTER_CLASSES.legal}><slot name="legal"></slot></p>
+      ${this.hasLegal
+        ? html`<hr part="divider" class=${SITE_FOOTER_CLASSES.divider} />`
+        : nothing}
+      <p part="legal" class=${SITE_FOOTER_CLASSES.legal}>
+        <slot
+          name="legal"
+          @slotchange=${(e: Event) => {
+            this.hasLegal = (e.target as HTMLSlotElement).assignedNodes().length > 0;
+          }}
+        ></slot>
+      </p>
     </footer>`;
   }
 }
