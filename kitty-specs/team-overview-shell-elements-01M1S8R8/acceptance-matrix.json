@@ -238,10 +238,10 @@
       "criterion_id": "NFR-007",
       "description": "Every new behavior mutation is uniquely killed without collateral failures.",
       "proof_type": "automated_test",
-      "evidence": "Owner WP04: execute all 15 new SC-010/SC-013/SC-014 arms individually, then the complete mutation suite, mutation self-test, and suite self-tests.",
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "Verified on aggregate lane 89bbf7eb6fb12ca6aab0a780673ac93f506316e0: focused identity mutants each had one named red/245 collateral green; complete suite-selftest baseline 246/246 and all 94/94 named mutations isolated; 8/8 harness guard selftests passed.",
+      "pass_fail": "pass",
+      "verified_by": "codex/frontend-freddy/WP04",
+      "verified_at": "2026-09-05T23:34:25.841866+00:00",
       "notes": "Planned evidence mapping; populate the exact command result and immutable SHA when the owning WP or wrap-up step executes."
     },
     {
