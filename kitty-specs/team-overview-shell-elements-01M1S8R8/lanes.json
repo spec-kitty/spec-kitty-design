@@ -1,0 +1,121 @@
+{
+  "version": 1,
+  "mission_slug": "team-overview-shell-elements-01M1S8R8",
+  "mission_id": "01M1S8R8V0M79QTX5Y710CMYQ0",
+  "mission_branch": "kitty/mission-team-overview-shell-elements-01M1S8R8",
+  "target_branch": "mission/team-overview-shell-elements",
+  "lanes": [
+    {
+      "lane_id": "lane-a",
+      "wp_ids": [
+        "WP01"
+      ],
+      "write_scope": [
+        "fixtures/elements-behaviour/src/sk-app-shell.test.ts",
+        "fixtures/elements-behaviour/src/sk-personal-rail.test.ts",
+        "packages/elements/src/app-shell/**",
+        "packages/elements/src/personal-rail/**",
+        "packages/styles/src/app-shell/**",
+        "packages/styles/src/personal-rail/**",
+        "packages/tokens/dist/token-catalogue.json",
+        "packages/tokens/src/tokens.css"
+      ],
+      "predicted_surfaces": [
+        "api",
+        "app-shell",
+        "artifact-rendering"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    },
+    {
+      "lane_id": "lane-b",
+      "wp_ids": [
+        "WP02"
+      ],
+      "write_scope": [
+        "fixtures/elements-behaviour/src/sk-context-sidebar.test.ts",
+        "fixtures/elements-behaviour/src/sk-page-header.test.ts",
+        "packages/elements/src/context-sidebar/**",
+        "packages/elements/src/page-header/**",
+        "packages/styles/src/context-sidebar/**",
+        "packages/styles/src/page-header/**"
+      ],
+      "predicted_surfaces": [
+        "api",
+        "app-shell",
+        "artifact-rendering",
+        "tracker-integration"
+      ],
+      "depends_on_lanes": [
+        "lane-a"
+      ],
+      "parallel_group": 1
+    },
+    {
+      "lane_id": "lane-c",
+      "wp_ids": [
+        "WP03"
+      ],
+      "write_scope": [
+        "fixtures/elements-behaviour/src/sk-button.test.ts",
+        "packages/elements/src/button/sk-button.css.d.ts",
+        "packages/elements/src/button/sk-button.css.js",
+        "packages/elements/src/button/sk-button.markup.ts",
+        "packages/elements/src/button/sk-button.stories.ts",
+        "packages/elements/src/button/sk-button.ts",
+        "packages/styles/src/button/sk-button.css"
+      ],
+      "predicted_surfaces": [
+        "api",
+        "artifact-rendering"
+      ],
+      "depends_on_lanes": [
+        "lane-b"
+      ],
+      "parallel_group": 2
+    },
+    {
+      "lane_id": "lane-d",
+      "wp_ids": [
+        "WP04"
+      ],
+      "write_scope": [
+        "apps/storybook/src/tests/sk-team-overview-shell-layout.spec.ts",
+        "apps/storybook/src/tests/visual.spec.ts",
+        "behaviours.json",
+        "docs/design-system/changelog.md",
+        "docs/design-system/using-components.md",
+        "expected-docs.json",
+        "expected-parts.json",
+        "expected-stories.json",
+        "mutations.json",
+        "packages/elements/SIZES.md",
+        "packages/elements/custom-elements.json",
+        "packages/elements/src/elements.ts",
+        "packages/elements/src/index.ts",
+        "packages/elements/vue.d.ts",
+        "packages/react/.wrapper-floor",
+        "packages/react/src/**",
+        "packages/styles/package.json"
+      ],
+      "predicted_surfaces": [
+        "api",
+        "app-shell",
+        "artifact-rendering",
+        "legacy-cleanup",
+        "tracker-integration"
+      ],
+      "depends_on_lanes": [
+        "lane-a",
+        "lane-b",
+        "lane-c"
+      ],
+      "parallel_group": 3
+    }
+  ],
+  "computed_at": "2026-09-05T18:03:52.886388+00:00",
+  "computed_from": "dependency_graph+ownership",
+  "planning_artifact_wps": [],
+  "planning_commit_sha": "917b8386242e62608da806909d5e4666b1546027"
+}

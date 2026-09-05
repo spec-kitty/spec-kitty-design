@@ -1,0 +1,137 @@
+{
+  "rows": {
+    "#112": {
+      "evidence_ref": "Follow-up: #112 remains the open conformance-matrix mission. Mission wrap-up owns checking its current train/gate state before consolidation and recording the result; this mission neither implements nor closes #112.",
+      "fr": "FR-011,FR-013,FR-014",
+      "nfr": "NFR-001,NFR-007,NFR-008",
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": "SC-009,SC-011,SC-012",
+      "scope": "Open train-conformance dependency checked at wrap-up, not authored here.",
+      "source_file": "plan.md",
+      "title": "Elements conformance matrix and Svelte target",
+      "verdict": "deferred-with-followup",
+      "wp": "mission-wrap-up"
+    },
+    "#125": {
+      "evidence_ref": "Follow-up: #125 remains the open programme tracker. Mission wrap-up owns recording the #145 train PR as this mission's contribution; it must not close #125.",
+      "fr": "FR-001–FR-017",
+      "nfr": "NFR-001–NFR-008",
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": "SC-001–SC-012",
+      "scope": "Parent component-library conversion tracker; this mission contributes only the shell and button-extension slice.",
+      "source_file": "spec.md",
+      "title": "Finish shared component-library conversion and later Team Kitty adoption",
+      "verdict": "deferred-with-followup",
+      "wp": "mission-wrap-up"
+    },
+    "#144": {
+      "evidence_ref": "Follow-up: #144 remains the open Team overview design-system epic with sibling #146–#150 work. Mission wrap-up owns verifying #145 stayed inside the shell boundary and recording its train PR; it must not close #144.",
+      "fr": "FR-001–FR-017",
+      "nfr": "NFR-001–NFR-008",
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": "SC-001–SC-012",
+      "scope": "Parent epic and binding library/application ownership boundary.",
+      "source_file": "spec.md",
+      "title": "Epic: stateless Team overview design-system elements",
+      "verdict": "deferred-with-followup",
+      "wp": "mission-wrap-up"
+    },
+    "#145": {
+      "evidence_ref": "Issue #145 is this mission. WP01–WP04 own implementation evidence; mission wrap-up owns changing this row from in-mission only after the exact train-target PR head passes all gates and is merged. The mission does not close the GitHub issue.",
+      "fr": "FR-001–FR-017",
+      "nfr": "NFR-001–NFR-008",
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": "SC-001–SC-012",
+      "scope": "Mission issue for app-shell, personal-rail, context-sidebar, page-header, and the narrow sk-button extension.",
+      "source_file": "spec.md",
+      "title": "[TKO1] Team overview shell elements",
+      "verdict": "in-mission",
+      "wp": "mission-wrap-up"
+    },
+    "#146": {
+      "evidence_ref": "Follow-up: #146 is the parallel feed-elements mission. WP04 and mission wrap-up own preserving any landed authored sources and reconciling only shared generated/entry/ratchet files; this mission does not close #146.",
+      "fr": null,
+      "nfr": "NFR-006,NFR-008",
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": "SC-010,SC-012",
+      "scope": "Parallel sibling with disjoint authored sources and colliding generated artifacts.",
+      "source_file": "plan.md",
+      "title": "[TKO2] Team overview feed elements",
+      "verdict": "deferred-with-followup",
+      "wp": "WP04"
+    },
+    "#149": {
+      "evidence_ref": "Issue #149 is closed and its transition-matrix mission landed through PR #171 at train commit 8e654e858c7e09acf48ddafdd99a5349fae92d87. Mission wrap-up owns preserving it during refresh/regeneration; no work or issue closure is owed here.",
+      "fr": null,
+      "nfr": "NFR-006,NFR-008",
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": "SC-012",
+      "scope": "Verified landed sibling cited only as programme sequencing context.",
+      "source_file": "plan.md",
+      "title": "[TKO5] Flow-health transition matrix",
+      "verdict": "verified-already-fixed",
+      "wp": "mission-wrap-up"
+    },
+    "#150": {
+      "evidence_ref": "Follow-up: #150 remains the open final Team overview pattern-composition mission. WP04 owns keeping its generic shell evidence below that boundary; mission wrap-up records the #145 train result without closing #150.",
+      "fr": "FR-001,FR-003",
+      "nfr": "NFR-003,NFR-004,NFR-005",
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": "SC-001,SC-002",
+      "scope": "Explicitly excluded full-page product composition follow-up.",
+      "source_file": "plan.md",
+      "title": "[TKO6] Team overview pattern story",
+      "verdict": "deferred-with-followup",
+      "wp": "WP04"
+    },
+    "#153": {
+      "evidence_ref": "Issue #153 supplies the accessible-name and delegatesFocus defect contract. WP03 owns the fix and exact behavior evidence; mission wrap-up owns recording the landed train commit without closing the issue.",
+      "fr": "FR-012,FR-013,FR-014,FR-017",
+      "nfr": "NFR-001,NFR-002,NFR-004",
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": "SC-007,SC-008,SC-010",
+      "scope": "In-mission sk-button label and focus-delegation defect.",
+      "source_file": "plan.md",
+      "title": "sk-button accessible name and delegatesFocus",
+      "verdict": "in-mission",
+      "wp": "WP03"
+    },
+    "#154": {
+      "evidence_ref": "Follow-up: #154 remains open and owns the generated React wrapper tabIndex policy. WP03 and mission wrap-up own proving this mission adds no host tabIndex or generator-policy change; they must not close #154.",
+      "fr": "FR-014,FR-017",
+      "nfr": "NFR-002",
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": "SC-008,SC-010",
+      "scope": "Explicitly excluded wrapper-generator follow-up; only the no-duplicate-tab-stop boundary is verified here.",
+      "source_file": "spec.md",
+      "title": "React wrappers place tabIndex on the host",
+      "verdict": "deferred-with-followup",
+      "wp": "WP03"
+    },
+    "#76": {
+      "evidence_ref": "Issue #76 is closed and its elements-first authoring recipe is present at docs/contributing/adding-a-component.md. Every WP owns following that landed recipe; no work or issue closure is owed here.",
+      "fr": "FR-011,FR-017",
+      "nfr": "NFR-006,NFR-007",
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": "SC-009,SC-010,SC-011",
+      "scope": "Verified landed authoring/generation precedent.",
+      "source_file": "research.md",
+      "title": "Elements-first component authoring recipe",
+      "verdict": "verified-already-fixed",
+      "wp": "WP04"
+    },
+    "#79": {
+      "evidence_ref": "Issue #79 is closed and its primitives landed through PR #140 at train commit 70742b8436ca89e09cb6e0416c0830f4bded3289. WP03 owns compatibility verification against that existing button contract; this mission does not reopen or close #79.",
+      "fr": "FR-012,FR-017",
+      "nfr": "NFR-006",
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": "SC-010",
+      "scope": "Verified landed prerequisite and compatibility baseline for the existing sk-button.",
+      "source_file": "research.md",
+      "title": "Primitive migration: button, pill-tag, and check-bullet",
+      "verdict": "verified-already-fixed",
+      "wp": "WP03"
+    }
+  },
+  "schema_version": 1
+}

@@ -1,0 +1,386 @@
+{
+  "mission_slug": "team-overview-shell-elements-01M1S8R8",
+  "mission_number": "",
+  "mission_type": "software-dev",
+  "overall_verdict": "pending",
+  "criteria": [
+    {
+      "criterion_id": "FR-001",
+      "description": "The shell exposes personal-rail, context-sidebar, page-header, and default slots in reading order.",
+      "proof_type": "automated_test",
+      "evidence": "Owner WP01: fixtures/elements-behaviour/src/sk-app-shell.test.ts asserts assigned slots, empty projections, and DOM order.",
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Planned evidence mapping; populate the exact command result and immutable SHA when the owning WP or wrap-up step executes."
+    },
+    {
+      "criterion_id": "FR-002",
+      "description": "The shell resolves 56px and 240px navigation columns with a shrink-safe remaining column at 1280px and 1440px.",
+      "proof_type": "automated_test",
+      "evidence": "Owner WP01: sk-app-shell focused geometry probes measure rendered columns at both desktop widths and assert minmax(0, 1fr)-equivalent containment.",
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Planned evidence mapping; populate the exact command result and immutable SHA when the owning WP or wrap-up step executes."
+    },
+    {
+      "criterion_id": "FR-003",
+      "description": "Narrow shell reflow preserves every supplied region without element-owned open or visibility state.",
+      "proof_type": "automated_test",
+      "evidence": "Owner WP01, aggregate confirmation WP04: focused shell tests and sk-team-overview-shell-layout.spec.ts assert 390px/414px reachability and absence of internal open/selected behavior.",
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Planned evidence mapping; populate the exact command result and immutable SHA when the owning WP or wrap-up step executes."
+    },
+    {
+      "criterion_id": "FR-004",
+      "description": "Personal rail exposes primary, utilities, account, and logout groups with account above logout and a divider.",
+      "proof_type": "automated_test",
+      "evidence": "Owner WP01: fixtures/elements-behaviour/src/sk-personal-rail.test.ts asserts exact slot/group order and divider placement.",
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Planned evidence mapping; populate the exact command result and immutable SHA when the owning WP or wrap-up step executes."
+    },
+    {
+      "criterion_id": "FR-005",
+      "description": "The approved composition contains one consumer identity location and the rail synthesizes none.",
+      "proof_type": "automated_test",
+      "evidence": "Owner WP01, aggregate confirmation WP04: personal-rail fixtures and the Storybook composition count one account anchor and zero identity anchors in primary.",
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Planned evidence mapping; populate the exact command result and immutable SHA when the owning WP or wrap-up step executes."
+    },
+    {
+      "criterion_id": "FR-006",
+      "description": "Personal rail has a reflected label property that survives late definition and names its navigation landmark.",
+      "proof_type": "automated_test",
+      "evidence": "Owner WP01: SC-010 late-definition and landmark-name probes assert exact property, reflected attribute, and nav aria-label projection.",
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Planned evidence mapping; populate the exact command result and immutable SHA when the owning WP or wrap-up step executes."
+    },
+    {
+      "criterion_id": "FR-007",
+      "description": "Context sidebar projects header, default content, and footer inside a labelled complementary region.",
+      "proof_type": "automated_test",
+      "evidence": "Owner WP02: fixtures/elements-behaviour/src/sk-context-sidebar.test.ts asserts slots, fallback label, reflected label, and the real aside landmark.",
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Planned evidence mapping; populate the exact command result and immutable SHA when the owning WP or wrap-up step executes."
+    },
+    {
+      "criterion_id": "FR-008",
+      "description": "Long context labels truncate only visually and retain their full DOM/accessibility text.",
+      "proof_type": "automated_test",
+      "evidence": "Owner WP02, aggregate confirmation WP04: focused ellipsis probes and Storybook browser accessibility inspection assert full supplied text/name.",
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Planned evidence mapping; populate the exact command result and immutable SHA when the owning WP or wrap-up step executes."
+    },
+    {
+      "criterion_id": "FR-009",
+      "description": "Page header preserves all five slots and consumer heading semantics.",
+      "proof_type": "automated_test",
+      "evidence": "Owner WP02: fixtures/elements-behaviour/src/sk-page-header.test.ts asserts exact slot projection, parts, and unchanged consumer heading level.",
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Planned evidence mapping; populate the exact command result and immutable SHA when the owning WP or wrap-up step executes."
+    },
+    {
+      "criterion_id": "FR-010",
+      "description": "Page header preserves sync copy byte-for-byte and performs no clock or timer work.",
+      "proof_type": "automated_test",
+      "evidence": "Owner WP02: controlled elapsed-time tests assert unchanged text and zero Date.now, setTimeout, and setInterval calls.",
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Planned evidence mapping; populate the exact command result and immutable SHA when the owning WP or wrap-up step executes."
+    },
+    {
+      "criterion_id": "FR-011",
+      "description": "All documented public parts are present and externally targetable.",
+      "proof_type": "automated_test",
+      "evidence": "Owner WP04: exact expected-parts ratchet plus focused SC-013 tests and 4 unique part-removal mutations cover all four elements.",
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Planned evidence mapping; populate the exact command result and immutable SHA when the owning WP or wrap-up step executes."
+    },
+    {
+      "criterion_id": "FR-012",
+      "description": "Icon-size sk-button keeps native button/link branches and produces a 40px square real control.",
+      "proof_type": "automated_test",
+      "evidence": "Owner WP03: focused BUTTON and A probes assert branch type and exact rendered width/height.",
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Planned evidence mapping; populate the exact command result and immutable SHA when the owning WP or wrap-up step executes."
+    },
+    {
+      "criterion_id": "FR-013",
+      "description": "A non-empty supplied label reaches the real icon control unchanged and gives it an accessible name.",
+      "proof_type": "automated_test",
+      "evidence": "Owner WP03: exact inner aria-label and toHaveAccessibleName probes cover both branches, including a deliberate whitespace-bearing label.",
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Planned evidence mapping; populate the exact command result and immutable SHA when the owning WP or wrap-up step executes."
+    },
+    {
+      "criterion_id": "FR-014",
+      "description": "Host focus reaches the real control with one tab stop and a visible focus indicator in both themes.",
+      "proof_type": "automated_test",
+      "evidence": "Owner WP03: focus delegation, tab sequence, and computed focus-visible geometry/style probes cover dark and light fixtures.",
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Planned evidence mapping; populate the exact command result and immutable SHA when the owning WP or wrap-up step executes."
+    },
+    {
+      "criterion_id": "FR-015",
+      "description": "Shell elements preserve native descendant events and invent no application event vocabulary.",
+      "proof_type": "automated_test",
+      "evidence": "Owners WP01/WP02: focused document-boundary event-count probes assert pass-through without interception or redispatch.",
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Planned evidence mapping; populate the exact command result and immutable SHA when the owning WP or wrap-up step executes."
+    },
+    {
+      "criterion_id": "FR-016",
+      "description": "Button glyph content remains consumer-owned.",
+      "proof_type": "automated_test",
+      "evidence": "Owner WP03: distinct slotted glyph fixtures render without component-selected SVG, path, icon catalogue, or action meaning.",
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Planned evidence mapping; populate the exact command result and immutable SHA when the owning WP or wrap-up step executes."
+    },
+    {
+      "criterion_id": "FR-017",
+      "description": "All landed #79 button paths remain compatible.",
+      "proof_type": "automated_test",
+      "evidence": "Owner WP03: the complete existing sk-button fixture plus static markup checks cover text, sm, tones, button/link, disabled, unknown-value, and static paths.",
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Planned evidence mapping; populate the exact command result and immutable SHA when the owning WP or wrap-up step executes."
+    },
+    {
+      "criterion_id": "NFR-001",
+      "description": "Every added or changed story is non-empty and has zero axe WCAG 2.1 AA violations.",
+      "proof_type": "automated_test",
+      "evidence": "Owner WP04: Storybook build followed by node scripts/run-axe-storybook.js covers the exact expected-stories ratchet and fails on empty/broken renders.",
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Planned evidence mapping; populate the exact command result and immutable SHA when the owning WP or wrap-up step executes."
+    },
+    {
+      "criterion_id": "NFR-002",
+      "description": "Interactive controls remain keyboard reachable in DOM order with visible focus.",
+      "proof_type": "automated_test",
+      "evidence": "Owner WP04: sk-team-overview-shell-layout.spec.ts tabs the desktop and 390px compositions; WP03 directly proves inner-control focus visibility.",
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Planned evidence mapping; populate the exact command result and immutable SHA when the owning WP or wrap-up step executes."
+    },
+    {
+      "criterion_id": "NFR-003",
+      "description": "The 390px, 414px, 1280px, and 1440px compositions have no page-level overflow or clipped main content.",
+      "proof_type": "automated_test",
+      "evidence": "Owner WP04: Storybook layout browser tests compare scrollWidth/clientWidth and all region bounds at every required viewport.",
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Planned evidence mapping; populate the exact command result and immutable SHA when the owning WP or wrap-up step executes."
+    },
+    {
+      "criterion_id": "NFR-004",
+      "description": "Every new element and icon button has real dark and LightMode story coverage.",
+      "proof_type": "automated_test",
+      "evidence": "Owner WP04: exact story ratchet, non-empty render checks, and resolved-surface comparisons prove both contexts.",
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Planned evidence mapping; populate the exact command result and immutable SHA when the owning WP or wrap-up step executes."
+    },
+    {
+      "criterion_id": "NFR-005",
+      "description": "Approved shell geometry and focus visuals match CI-authoritative baselines.",
+      "proof_type": "manual_review",
+      "evidence": "Owner mission wrap-up: retrieve actual PNGs only from the draft PR visual-regression-diffs artifact, compare with the operator-approved export, commit accepted bytes, and run `PW_INCLUDE_VISUAL=1 npx playwright test apps/storybook/src/tests/visual.spec.ts --project=chromium` on the resulting exact head.",
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Planned evidence mapping; populate the exact command result and immutable SHA when the owning WP or wrap-up step executes."
+    },
+    {
+      "criterion_id": "NFR-006",
+      "description": "Stable generators are deterministic and the timestamped token catalogue exactly matches its source outside generated_at.",
+      "proof_type": "automated_test",
+      "evidence": "Owners WP01/WP04/mission wrap-up: run the plan's read-only source/catalogue comparator after WP01 generation and final refresh; run --check or exact diff gates for CSS, markup, CEM, React, Vue, and SIZES.",
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Planned evidence mapping; populate the exact command result and immutable SHA when the owning WP or wrap-up step executes."
+    },
+    {
+      "criterion_id": "NFR-007",
+      "description": "Every new behavior mutation is uniquely killed without collateral failures.",
+      "proof_type": "automated_test",
+      "evidence": "Owner WP04: execute all 15 new SC-010/SC-013/SC-014 arms individually, then the complete mutation suite, mutation self-test, and suite self-tests.",
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Planned evidence mapping; populate the exact command result and immutable SHA when the owning WP or wrap-up step executes."
+    },
+    {
+      "criterion_id": "NFR-008",
+      "description": "The final PR head passes every repository and CI-equivalent gate after SK-179 consolidation without a later rebase.",
+      "proof_type": "automated_test",
+      "evidence": "Owner mission wrap-up: run every current-train [ENFORCED] command mapped in plan.md, record current train SHA, consolidated head SHA, exact commands/results, clean status, PR head equality, CI evidence, and fresh three-lens/maintainer evidence on external immutable PR/check surfaces under the SK-178 waiver.",
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Planned evidence mapping; populate the exact command result and immutable SHA when the owning WP or wrap-up step executes."
+    },
+    {
+      "criterion_id": "SC-001",
+      "description": "Desktop composition measures 56px, 240px, and a non-clipping remainder.",
+      "proof_type": "automated_test",
+      "evidence": "Owner WP01, aggregate confirmation WP04: direct rendered geometry at 1280px and 1440px.",
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Planned evidence mapping; populate the exact command result and immutable SHA when the owning WP or wrap-up step executes."
+    },
+    {
+      "criterion_id": "SC-002",
+      "description": "Narrow composition has no horizontal overflow and preserves region/control order.",
+      "proof_type": "automated_test",
+      "evidence": "Owner WP04: black-box Storybook checks at 390px and 414px.",
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Planned evidence mapping; populate the exact command result and immutable SHA when the owning WP or wrap-up step executes."
+    },
+    {
+      "criterion_id": "SC-003",
+      "description": "The approved rail contains exactly one account anchor in account and none in primary.",
+      "proof_type": "automated_test",
+      "evidence": "Owner WP04: composition locator counts and ordering assertions.",
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Planned evidence mapping; populate the exact command result and immutable SHA when the owning WP or wrap-up step executes."
+    },
+    {
+      "criterion_id": "SC-004",
+      "description": "Slots project supplied content, empty slots invent nothing, and shells attach no action listeners.",
+      "proof_type": "automated_test",
+      "evidence": "Owners WP01/WP02: focused slot and native-event probes for all four elements.",
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Planned evidence mapping; populate the exact command result and immutable SHA when the owning WP or wrap-up step executes."
+    },
+    {
+      "criterion_id": "SC-005",
+      "description": "Long context labels retain full text/name under visual truncation.",
+      "proof_type": "automated_test",
+      "evidence": "Owner WP02: direct DOM text, accessible-name, and computed overflow/ellipsis assertions.",
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Planned evidence mapping; populate the exact command result and immutable SHA when the owning WP or wrap-up step executes."
+    },
+    {
+      "criterion_id": "SC-006",
+      "description": "Sync content remains unchanged under elapsed time and no clock/timer is invoked.",
+      "proof_type": "automated_test",
+      "evidence": "Owner WP02: byte comparison under controlled clock spies with zero-call assertions.",
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Planned evidence mapping; populate the exact command result and immutable SHA when the owning WP or wrap-up step executes."
+    },
+    {
+      "criterion_id": "SC-007",
+      "description": "Both icon-button branches are 40px and preserve the supplied label contract.",
+      "proof_type": "automated_test",
+      "evidence": "Owner WP03: BUTTON/A geometry, exact aria-label, whitespace-bearing value, and computed accessible-name probes.",
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Planned evidence mapping; populate the exact command result and immutable SHA when the owning WP or wrap-up step executes."
+    },
+    {
+      "criterion_id": "SC-008",
+      "description": "Host focus delegates to one real control with a visible token-driven indicator in dark and light.",
+      "proof_type": "automated_test",
+      "evidence": "Owner WP03: activeElement, tab-stop, outline geometry/color, and theme-context assertions.",
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Planned evidence mapping; populate the exact command result and immutable SHA when the owning WP or wrap-up step executes."
+    },
+    {
+      "criterion_id": "SC-009",
+      "description": "Every declared part is targetable and every new element adopts its named generated sheet by identity.",
+      "proof_type": "automated_test",
+      "evidence": "Owner WP04: exact parts ratchet, SC-013 external styling probes, SC-014 length/identity probes, and 12 associated mutations.",
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Planned evidence mapping; populate the exact command result and immutable SHA when the owning WP or wrap-up step executes."
+    },
+    {
+      "criterion_id": "SC-010",
+      "description": "Existing button compatibility and generated React/Vue public surfaces remain current.",
+      "proof_type": "automated_test",
+      "evidence": "Owners WP03/WP04: complete #79 fixture and static paths pass; uncached CEM plus generated-wrapper/type checks expose icon size and label without hand edits.",
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Planned evidence mapping; populate the exact command result and immutable SHA when the owning WP or wrap-up step executes."
+    },
+    {
+      "criterion_id": "SC-011",
+      "description": "All 15 new mutation arms fail only their named assertions and the full harness passes.",
+      "proof_type": "automated_test",
+      "evidence": "Owner WP04: per-arm evidence identifies subject/test/failure, followed by complete mutation and harness self-tests.",
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Planned evidence mapping; populate the exact command result and immutable SHA when the owning WP or wrap-up step executes."
+    },
+    {
+      "criterion_id": "SC-012",
+      "description": "The post-consolidation exact head passes local, CI, approved visual, squad, and maintainer gates.",
+      "proof_type": "manual_review",
+      "evidence": "Owner mission wrap-up: pin all evidence to the PR head after authoritative PNG commit and record it externally on immutable PR comment/check surfaces; under the SK-178 waiver do not run a tracked acceptance writer that changes the certified head, and stop for maintainer disposition if no non-mutating verdict surface exists. Any other push invalidates evidence and train movement requires an explicit rebaseline decision.",
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Planned evidence mapping; populate the exact command result and immutable SHA when the owning WP or wrap-up step executes."
+    }
+  ],
+  "negative_invariants": [
+    "Owner WP04 — no application state/imports: `! rg -n \"^import .*['\\\"][^'\\\"]*(team-kitty|router|store)[^'\\\"]*['\\\"]|fetch\\\\(|Date\\\\.now\\\\(|setInterval\\\\(|setTimeout\\\\(|declare (open|selected|active)|\\\\b(open|selected|active): \\\\{\" packages/elements/src/{app-shell,personal-rail,context-sidebar,page-header}` must exit 0 on the aggregate lane.",
+    "Owner WP04 — no prohibited static fallback markup: `test ! -e packages/elements/src/app-shell/sk-app-shell.markup.ts && test ! -e packages/elements/src/personal-rail/sk-personal-rail.markup.ts && test ! -e packages/elements/src/context-sidebar/sk-context-sidebar.markup.ts && test ! -e packages/elements/src/page-header/sk-page-header.markup.ts && test ! -e packages/styles/src/app-shell/index.ts && test ! -e packages/styles/src/personal-rail/index.ts && test ! -e packages/styles/src/context-sidebar/index.ts && test ! -e packages/styles/src/page-header/index.ts` must pass.",
+    "Owner WP04 — local PNGs never become authority: `test -z \"$(git diff --name-only <WP03-approved-sha>..HEAD -- apps/storybook/src/tests/visual.spec.ts-snapshots)\"` must pass at WP04 approval; only mission wrap-up may later add CI-artifact baseline bytes.",
+    "Owner mission wrap-up — train-only/no-main: `test \"$(gh pr view --json baseRefName --jq .baseRefName)\" = train/elements-first` must pass, the PR body must contain `Refs #145`, and no command may push or merge `main`.",
+    "Owner mission wrap-up — exact-SHA final evidence: `test \"$(gh pr view --json headRefOid --jq .headRefOid)\" = \"$(git rev-parse HEAD)\" && test -z \"$(git status --porcelain)\" && git diff --check <current-train-sha>..HEAD` must pass after the authoritative baseline commit; every gate, squad, and maintainer result must name that same head and be recorded externally under the SK-178 waiver, never by a tracked acceptance auto-commit that would invalidate the evidence it contains.",
+    "Owner WP01 and mission wrap-up — token catalogue source equality: the exact read-only Node comparator in plan.md must pass after each authorized catalogue generation and may ignore only the validated generated_at timestamp value."
+  ]
+}
