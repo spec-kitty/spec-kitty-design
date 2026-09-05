@@ -7,7 +7,8 @@
  * elements-first-programme.md under `M14 · elements-first-release`, and ADR-8:83 — nothing
  * was ever installed, so 1.0.0 is
  * still free and a rename breaks no consumer. The reasoning below was right when written and
- * its premise is now retired; #141 owns form-field and should rename `.sk-input`/`.sk-textarea`
+ * its premise is now retired; the rename of `.sk-input`/`.sk-textarea` is DEFERRED with an owner (see ADR-10, form-field is
+ * deliberately styles-only) rather than owned by #141, which is closed
  * rather than inherit the additive workaround, which currently leaves them authored twice.
  *
  * ADDITIVE. `packages/styles/src/form-field/` is untouched and stays exactly as published:

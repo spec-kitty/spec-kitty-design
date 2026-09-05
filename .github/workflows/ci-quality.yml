@@ -208,6 +208,11 @@ jobs:
         run: node scripts/build-react-wrappers.mjs --check
       - name: "[ENFORCED] The wrapper gate's own probe table (SC-311, SC-312)"
         run: node scripts/build-react-wrappers.mjs --selftest
+      # #141. form-field is deliberately styles-only, so build-element-markup.mjs (which reads a
+      # .markup.ts under packages/elements) cannot generate its barrel. Without this the barrel was
+      # hand-written beside the .html files — two authored sources, and three exports had no file.
+      - name: "[ENFORCED] Styles-only barrels are generated (#141, ADR-10 §3)"
+        run: node scripts/build-styles-only-markup.mjs --check
       # #81. Same generated-artifact contract as the CSS, markup and React generators.
       - name: "[ENFORCED] Generated Vue types are current (#81, ADR-8 confirmation #4)"
         run: node scripts/build-vue-types.mjs --check

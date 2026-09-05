@@ -7,7 +7,7 @@ so far — as **custom elements** in `@spec-kitty/elements`. Both require `@spec
 `sk-card`, `sk-check-bullet`, `sk-feature-card`, `sk-form-input`, `sk-form-textarea`, `sk-grid`,
 `sk-nav-pill`, `sk-pill-tag`, `sk-ribbon-card`, `sk-section-banner`, `sk-site-footer` and
 `sk-stub`.
-One of the catalogue's component packages is still CSS only — `form-field` (#141). Composite sections below such as Hero and Callout
+One of the catalogue's component packages is CSS only by a recorded decision — `form-field`. See ADR-10, *form-field is deliberately styles-only*. Composite sections below such as Hero and Callout
 are CSS-only *patterns* rather than packages, and are not part of that count. Each section below says which it is, because the
 difference decides how you use it.
 
