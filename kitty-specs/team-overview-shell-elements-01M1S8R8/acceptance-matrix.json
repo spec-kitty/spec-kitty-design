@@ -423,6 +423,14 @@
       "verification_command": "test \"$(gh pr view --json headRefOid --jq .headRefOid)\" = \"$(git rev-parse HEAD)\" && test -z \"$(git status --porcelain)\" && git diff --check <current-train-sha>..HEAD",
       "result": "pending",
       "evidence": null
+    },
+    {
+      "invariant_id": "NI-006",
+      "description": "Only #145 and #153 close after verified train merge; governed sibling and parent issue states remain byte-for-byte unchanged.",
+      "verification_method": "custom_command",
+      "verification_command": "for id in 112 125 144 146 147 148 150 154; do gh issue view \"$id\" --repo spec-kitty/spec-kitty-design --json number,state --jq \"[.number,.state]|@tsv\"; done > /tmp/sk145-nontarget-before.tsv; gh pr view <pr-number> --repo spec-kitty/spec-kitty-design --json baseRefName,mergedAt,mergeCommit; cmp /tmp/sk145-nontarget-before.tsv /tmp/sk145-nontarget-after.tsv",
+      "result": "pending",
+      "evidence": null
     }
   ],
   "legacy_negative_invariants": [
