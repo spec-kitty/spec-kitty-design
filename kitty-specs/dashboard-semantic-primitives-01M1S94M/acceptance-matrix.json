@@ -28,11 +28,11 @@
       "criterion_id": "SC-003",
       "description": "The narrow-width table keeps its headers and is keyboard-reachable: at a narrow viewport the scroll container (.sk-data-table__scroller) is focusable (tabindex=\"0\"), has an accessible name (aria-label or aria-labelledby), and <th scope> association is intact.",
       "proof_type": "manual_qa",
-      "evidence": "Static markup review of sk-data-table-narrow-scrollable.html: .sk-data-table__scroller carries role=\"region\" aria-label=\"Recent builds\" tabindex=\"0\"; every <th scope=\"col\"> inside is unchanged from the Default exemplar. Full keyboard/Storybook accessibility-tree confirmation deferred to the pre-merge gate's axe/Storybook build pass (blocked locally by host resource constraints -- see report).",
+      "evidence": "Re-stated at head (pre-merge gate pass 2 found the prior evidence stale on both counts -- wrong aria-label text, and claiming deferral after the proof had already arrived). sk-data-table-narrow-scrollable.html's .sk-data-table__scroller carries role=\"region\" aria-label=\"Recent builds, narrow view\" tabindex=\"0\" (distinct from <caption>Recent builds</caption>, per the duplicate-name defect this exemplar's own comment calls out) and a baked-in max-width: 320px so it genuinely overflows at any viewport, not only inside its own story. run-axe-storybook.js's full pass (zero violations across every story, this mission's included) is the Storybook/axe accessibility-tree confirmation -- see SC-007's evidence for the exact run. Every <th scope=\"col\"> is unchanged from the Default exemplar's markup.",
       "pass_fail": "pass",
       "verified_by": "claude-implementer (mission dashboard-semantic-primitives-01M1S94M)",
       "verified_at": "2026-09-05T19:56:46Z",
-      "notes": "Devtools/accessibility-tree inspection, recorded concretely (tool used, what was observed) -- see WP03 T018. Not an automated test; packages/styles has no test target."
+      "notes": "Devtools/accessibility-tree inspection plus the full axe pass -- see WP03 T018 and SC-007. Not an automated test; packages/styles has no test target."
     },
     {
       "criterion_id": "SC-004",

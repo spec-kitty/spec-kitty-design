@@ -86,7 +86,9 @@ so no shadow-root/CEM/React-wrapper concern applies
 component directories, no new package, no `packages/elements` or `packages/react` change
 **Performance Goals**: N/A — CSS only, no runtime cost. The existing charter "Storybook build < 3
 min" budget applies as an umbrella gate; no new per-component performance target is introduced.
-**Constraints**: Token-only CSS (stylelint `declaration-strict-value`, zero new exceptions);
+**Constraints**: Token-only CSS (stylelint `declaration-strict-value`, zero exceptions beyond
+the six recorded, additive forced-colors system-color keywords — see NFR-001, amended at
+pre-merge gate pass 2);
 light-DOM only — no `sk-*` custom element ships (C-001); tone-free — no `--sk-status-*`/
 `--sk-chart-*` token exists or is invented (C-002); no JS, no sort/filter/paginate/virtualize/
 select/resize (C-003); no Team Kitty/Factory Dashboard domain copy (C-004); `LightMode` stories
@@ -120,7 +122,7 @@ still bind and are unaffected by that supersession.*
 | Obligation | Plan response |
 |---|---|
 | Component-done definition (Storybook story, axe zero-violation, visual review, token-dependency doc, ADR-11 behaviour list) | Each primitive gets a story with `Default`, its documented variants, and `LightMode`. axe must be zero across all of them. No ADR-11 behaviour item applies — these primitives own no behaviour (no form association, no events, no focus/keyboard handling beyond what the native elements already provide for free); this is stated explicitly as an inapplicability, not a silent skip. |
-| CSS/SCSS token-only rule | `stylelint`'s `declaration-strict-value` must pass with zero new `ignoreValues`/inline exceptions. |
+| CSS/SCSS token-only rule | `stylelint`'s `declaration-strict-value` must pass with no exception beyond the six system-color keywords this mission adds to `ignoreValues` (NFR-001, amended). |
 | Conventional commits | scope `styles`, per `commitlint.config.cjs`. |
 | Adversarial squad cadence | The operator has added an explicit post-tasks point-cut for #176 (this issue declares no tier) — same treatment as #180. The pre-merge gate in the run-prompt's step 6 is separate and always runs regardless of tier. |
 | One maintainer approval for component-file PRs | Applies at PR review; out of scope for planning. |
@@ -409,7 +411,7 @@ grep covering all five primitives (see IC-09 below).
 ```sh
 node scripts/build-styles-only-markup.mjs           # regenerate the five new barrels
 node scripts/build-styles-only-markup.mjs --check   # must be clean afterwards
-npx stylelint "packages/styles/src/**/*.css"        # declaration-strict-value, zero new exceptions
+npx stylelint "packages/styles/src/**/*.css"        # declaration-strict-value, only the recorded 6-keyword exception
 npm run -s quality:htmlhint                          # packages/styles/src/**/*.html
 npm run -s quality:lint                              # nx run-many --target=lint --all
 node scripts/check-story-theme-wrapper.mjs           # repo-wide LightMode-wrapper ratchet; new stories must not add an offender
@@ -504,11 +506,14 @@ Before the final gate: rebase the branch on the current `train/elements-first` a
 - **Risks**: (1) a second reduced-motion convention diverging between WP02's two primitives —
   mitigated by both using the same scoped-per-declaration shape, never a wildcard; (2) the
   forced-colors declarations tripping `declaration-strict-value` — mitigated by the sanctioned
-  unpoliced-shorthand pattern (`border:`/`outline:` shorthand, never `-color` longhand) recorded
-  once in "Sanctioned forced-colors CSS pattern" above, since WP02 and WP03 are both
-  `parallel_group: 0` and must not invent divergent answers to the same stylelint question; (3)
-  `forced-color-adjust: none` on the disclosure marker, which reproduces the exact invisibility
-  FR-009 exists to prevent — forbidden outright, see the Public Contract section.
+  **longhand `-color` property plus a `stylelint.config.mjs` `ignoreValues` allowlist** (the six
+  system-color keywords), recorded once in "Sanctioned forced-colors CSS pattern" above. The
+  shorthand-dodges-the-policed-list alternative is **withdrawn** — pre-merge gate pass 2 found it
+  makes the gate blind rather than satisfied, since `border`/`outline` shorthands are not policed
+  regardless of value. WP02 and WP03 are both `parallel_group: 0` and must not invent divergent
+  answers to the same stylelint question; (3) `forced-color-adjust: none` on the disclosure
+  marker, which reproduces the exact invisibility FR-009 exists to prevent — forbidden outright,
+  see the Public Contract section.
 
 ### IC-09 — Mission-wide verification aggregation
 
@@ -622,7 +627,7 @@ branch.
 | axe finds a violation only visible once real stories are built (not caught by stylelint/htmlhint alone) | `run-axe-storybook.js` after a real Storybook build | Build Storybook and run axe locally before claiming NFR-002 |
 | Skip link's off-screen `transform` is a no-op because `<a>` is inline | `elementFromPoint()` at the link's visual center still returns the anchor; it visibly sits at the page's top-left at all times | Use `clip-path` (or the classic clip/absolute-position recipe); if `transform` is used anyway, pair it with an explicit `display: block`/`inline-block` |
 | Disclosure marker uses `forced-color-adjust: none` on a background-drawn icon | Invisible against dark-HC background (majority scheme) — probed as `rgb(51,51,51)` on `Canvas` | Use a `content`-drawn or `border`-drawn marker instead; never `forced-color-adjust: none` on the affordance |
-| Forced-colors declarations trip `declaration-strict-value` because WP02/WP03 wrote the `-color` longhand | stylelint fails on `border-color`/`outline-color` with a `Highlight`/`CanvasText` value | Use the sanctioned unpoliced shorthand (`border:`/`outline:`) recorded once in this plan; do not add a stylelint exception |
+| Forced-colors declarations use the withdrawn unpoliced shorthand (`border:`/`outline:`) instead of the sanctioned longhand | The gate passes with zero exceptions over a hardcoded, non-token color — a `border-left: 3px solid #ff0000` would pass identically to a compliant declaration, because `border`/`outline` shorthands are not policed at all | Use the LONGHAND `-color` properties (`border-left-color`, `outline-color`) with the six system-color keywords added to `stylelint.config.mjs`'s `ignoreValues`; a green gate over the shorthand form proves nothing and must not be read as compliance |
 | `display: flex`/`grid` on `<summary>` silently removes the native marker | Visual only — `listStyleType` still reports `disclosure-closed` | Never `display: flex`/`grid` on `<summary>` without a replacement marker in the same rule |
 | Nested disclosure exemplar ships the bug it should catch (outer `[open]` flips inner's closed marker) | A descendant-combinator `[open] .foo` selector matches the inner summary too | Use child combinators (`[open] > .foo`) on every marker rule; the nested story must check the inner marker's state independently |
 | Skip-link `Focused` story uses a simulated `is-focused` class | Demonstrates a state the shipped CSS never enters (`:focus-visible` has no class form); `sk-form-input.css` already records `is-focused` as a removed anti-pattern | Use a `play()` function that calls real `.focus()`; no simulated-class alternative in the file list |

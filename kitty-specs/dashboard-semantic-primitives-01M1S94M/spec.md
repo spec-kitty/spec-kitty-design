@@ -121,8 +121,19 @@ against the current base:
 
 ### Non-functional
 
-- **NFR-001**: Token-only CSS. Every colour, space, radius and border value is an `--sk-*` token;
-  `stylelint`'s `declaration-strict-value` must pass without new exceptions.
+- **NFR-001**: Token-only CSS. Every colour, space, radius and border value is an `--sk-*` token,
+  **or one of the six CSS system-color keywords this mission adds to
+  `stylelint.config.mjs`'s `ignoreValues`** (`Canvas`, `CanvasText`, `Highlight`, `HighlightText`,
+  `ButtonText`, `LinkText`), used only on the LONGHAND `-color` properties inside
+  `@media (forced-colors: active)` blocks, per the pattern recorded in
+  `docs/contributing/adding-a-component.md`. `stylelint`'s `declaration-strict-value` must pass
+  with no exception beyond that recorded, additive, six-keyword allowlist — amended here at
+  pre-merge gate pass 2, because the original wording ("without new exceptions") was graded
+  against code that needed one, and an unamended requirement next to amended code is itself a
+  defect. The withdrawn alternative — an unpoliced `border`/`outline` shorthand that dodges the
+  policed-property list entirely rather than adding a certified exception — is not a valid
+  reading of this requirement: a rule that never inspects a declaration does not satisfy a
+  token-only obligation over it.
 - **NFR-002**: axe reports zero violations on every story, in both the default and `LightMode`
   arrangements.
 - **NFR-003**: A screen-reader user recovers term→value pairing, header→cell association and
