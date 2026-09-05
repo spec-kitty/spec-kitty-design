@@ -1,7 +1,7 @@
 {
-  "event_count": 29,
-  "last_event_id": "01M1SQ897X4HPBR3075SMNFGAF",
-  "materialized_at": "2026-09-05T21:23:06.621862+00:00",
+  "event_count": 31,
+  "last_event_id": "01M1SQ9DVVWT1FVE2HT4FCD2PN",
+  "materialized_at": "2026-09-05T21:23:44.122743+00:00",
   "mission_number": "",
   "mission_slug": "team-overview-shell-elements-01M1S8R8",
   "mission_type": "software-dev",
@@ -12,9 +12,9 @@
     "claimed": 0,
     "done": 0,
     "for_review": 0,
-    "in_progress": 0,
+    "in_progress": 1,
     "in_review": 0,
-    "planned": 1
+    "planned": 0
   },
   "work_packages": {
     "WP01": {
@@ -115,11 +115,14 @@
       }
     },
     "WP04": {
-      "actor": "finalize-tasks",
+      "actor": "codex",
+      "agent": "codex",
       "force_count": 0,
-      "lane": "planned",
-      "last_event_id": "01M1SA7KD0HJFKB59CGRNGX254",
-      "last_transition_at": "2026-09-05T17:35:32.768707+00:00"
+      "lane": "in_progress",
+      "last_event_id": "01M1SQ9DVVWT1FVE2HT4FCD2PN",
+      "last_transition_at": "2026-09-05T21:23:44.122743+00:00",
+      "shell_pid": 2459900,
+      "shell_pid_created_at": "1788535195.17"
     }
   }
 }
