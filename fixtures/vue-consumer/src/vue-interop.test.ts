@@ -12,6 +12,14 @@
  * assertion; #75's own fixture makes the point for React: "an ergonomics claim has to be exercised
  * rather than asserted."
  *
+ * THE BARE `@spec-kitty/elements` SPECIFIER, like every other browser test. The subpath
+ * `@spec-kitty/elements/elements.js` resolves through package `exports` to `dist/elements.js`,
+ * which DOES NOT EXIST in the `test` job — that job never builds, and `dist/` is gitignored.
+ * vitest.config.mts carries an alias mapping the bare specifier to `src/index.ts` for exactly this
+ * reason, and its comment records that the same mistake cost #70 two CI failures. The alias does
+ * not cover subpaths. My local run was green only because I had built; a local green with `dist/`
+ * present proves nothing about this lane.
+ *
  * The full `vue/dist/vue.esm-bundler.js` build is imported deliberately, not the runtime-only
  * default: `app.config.compilerOptions.isCustomElement` is a RUNTIME-COMPILER option, so a
  * runtime-only build would silently ignore the very configuration this file exists to measure,
@@ -19,7 +27,7 @@
  */
 import { describe, expect, it } from 'vitest';
 import { createApp, h, ref } from 'vue/dist/vue.esm-bundler.js';
-import '@spec-kitty/elements/elements.js';
+import '@spec-kitty/elements';
 
 /** Mount a Vue app on a detached host and return it, with a disposer. */
 function mount(options: Record<string, unknown>, configure?: (app: any) => void) {
@@ -41,7 +49,12 @@ describe('[SC-401] a Vue consumer needs no wrapper package for the elements to w
     const el = host.querySelector('sk-button');
     expect(el, 'the element is in the DOM').toBeTruthy();
     expect(el!.shadowRoot, 'the element upgraded — Vue did not swallow it').toBeTruthy();
-    expect(el!.shadowRoot!.adoptedStyleSheets.length, 'it adopted its sheet').toBeGreaterThan(0);
+    // DELIBERATELY NOT asserting adoptedStyleSheets here. It was, and the mutation harness caught
+    // the consequence: a mutation targeting SC-014 ("button adopts its generated sheet") also
+    // failed this test, so the harness reported collateral and could no longer attribute the red.
+    // The elements' styling contract is SC-014's, tested exhaustively in the behaviour suite; this
+    // file's subject is what VUE does with the element, and asserting someone else's contract here
+    // buys no coverage and costs attribution.
     destroy();
   });
 
