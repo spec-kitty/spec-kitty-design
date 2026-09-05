@@ -2,31 +2,98 @@
 
 The loop prompt for driving the elements-first programme. One iteration = one mission. Paste it as-is, or point a loop at this file.
 
-**Repo:** `spec-kitty/spec-kitty-design` · **Epic:** #66 · **Integration branch:** `train/elements-first`
+**Repo:** `spec-kitty/spec-kitty-design` · **Integration branch:** `train/elements-first`
+
+**Live programmes** — the loop draws from all three, not from a number range:
+
+| epic | scope | children |
+|---|---|---|
+| #66 | Elements-first foundation | #82 only; the rest are closed |
+| #144 | Team overview (Team Kitty redesign) | #145–#150 |
+| #183 | Factory dashboard (operational components) | #176–#180, #182 |
 
 ---
 
 ## The prompt
 
-> Drive one mission from epic #66 in `spec-kitty/spec-kitty-design`. Follow the procedure in `docs/architecture/elements-first-run-prompt.md` exactly: select an unclaimed, unblocked issue, claim it before doing any work, drive it to a PR into `train/elements-first`, then release or close the claim. Do not make architectural decisions — every one you need is already in an ADR, and if one is missing, stop and say so.
+> Drive one mission from the live programmes in `spec-kitty/spec-kitty-design` — epics #66, #144 and #183. Follow the procedure in `docs/architecture/elements-first-run-prompt.md` exactly: select an unclaimed, unblocked issue, claim it before doing any work, drive it to a PR into `train/elements-first`, then release or close the claim. Do not make architectural decisions — every one you need is already in an ADR, and if one is missing, stop and say so.
 
 ---
 
 ## 1. Select
 
+The eligible set is an **explicit list**, kept in this file beside the dependency table. Update both
+together.
+
 ```sh
-gh issue list --repo spec-kitty/spec-kitty-design --state open \
-  --json number,title,assignees --jq \
-  '.[] | select(.number >= 67 and .number <= 82) | select(.assignees | length == 0) | "\(.number)\t\(.title)"'
+# Every issue the loop may drive. Membership is curated — see "why this is a list" below.
+CANDIDATES="82 145 146 147 148 149 150 176 177 178 179 180 182"
+
+for n in $CANDIDATES; do
+  gh issue view "$n" --repo spec-kitty/spec-kitty-design \
+    --json number,title,state,assignees --jq \
+    'select(.state == "OPEN") | select(.assignees | length == 0) | "\(.number)\t\(.title)"'
+done
 ```
 
-Take the **lowest-numbered** issue whose dependencies (listed in its body as `Depends on:`) are all **closed**. Lower numbers are earlier in the critical path, so this walks the graph in order without needing a scheduler.
+That prints **candidates, not eligible missions**. Apply the dependency table before claiming: an
+issue whose prerequisites are open is not eligible, however inviting it looks.
 
-An issue with an assignee is claimed — skip it, even if it looks stalled. If nothing is both unassigned and unblocked, **stop and report which issues are blocked on what.** Do not invent work.
+### Why this is a list and not a query
+
+Three derivations were tried and each is broken:
+
+- **A number range.** `select(.number >= 67 and .number <= 82)` was here, and it silently excluded
+  every issue in #144 and #183 — the loop reported "nothing unblocked" while two whole programmes
+  sat open. This is the failure that motivated the rewrite.
+- **Grepping `#NNN` out of the epic bodies.** Measured across #66, #144 and #183 it returns 38
+  numbers, among them `1 2 3 4` (ADR section references), `92`, `125`, and `648`/`650` from another
+  repository. The noise is not filterable without knowing the answer already.
+- **GitHub's native sub-issues.** `repos/.../issues/183/sub_issues` is empty for all three epics;
+  the relationship is not modelled. #144 does not even mention #145–#150 in its body — its children
+  are identifiable only from their `[TKO*]` title prefixes.
+
+So the list is curated. That is a real maintenance cost, paid deliberately: a wrong list fails
+loudly at the next iteration, whereas a clever derivation fails silently and did.
+
+### Dependency state
+
+Prerequisites are stated in prose in the issue bodies (`Depends on:`, `after #N`), which is not
+reliably machine-readable. **Re-verify against the issue before trusting this table** — it is a
+convenience, not the source of truth.
+
+| issue | programme | depends on | state |
+|---|---|---|---|
+| #82 | #66 | — | eligible; rescoped by the operator to the demo-site dashboard, `apps/demo/dashboard-demo.html` |
+| #145 | #144 | #79 ✅ | eligible |
+| #146 | #144 | #79 ✅ | eligible |
+| #147 | #144 | #79 ✅ | eligible; shares the `ssrSafe` boundary with #179/#180 |
+| #148 | #144 | #79 ✅ | claimed; establishes shared visualization conventions first |
+| #149 | #144 | #79 ✅ | **work already merged in #171** — close it, do not start it |
+| #150 | #144 | #145–#149 | blocked; the composition story, genuinely last |
+| #176 | #183 | — | wave 1 |
+| #180 | #183 | — | wave 1; consumes #176's forced-colors baseline |
+| #177 | #183 | #176, #146 | wave 2 |
+| #178 | #183 | #177, #146 | wave 3 |
+| #182 | #183 | #145, #176 | wave 3 |
+| #179 | #183 | #148, #176 | wave 4 |
+
+Loose defect, CI and a11y issues (#151–#168, #173, #174) belong to no epic and are **not** in the
+loop's eligible set. They are operator-scheduled: take one only when told to.
+
+If nothing is open, unassigned and unblocked, **stop and report which issues are blocked on what.**
+Do not invent work, and do not start a blocked issue because its prerequisite "looks nearly done".
 
 ## 2. Claim it — before any other action
 
-Claiming is not bookkeeping; it is the concurrency guard. Two loop iterations that both start work on #70 will both scaffold `packages/elements`.
+Claiming is not bookkeeping; it is the concurrency guard. Two loop iterations that both start work on #176 will both author five new `packages/styles/src` directories and both regenerate the same barrels.
+
+**The guard is blind between sessions sharing a GitHub account.** Observed 2026-09-05: two
+concurrent loops both ran as `MOES-Media`, so "an issue with an assignee is claimed — skip it"
+could not distinguish one session's claims from the other's, and each saw the other's in-flight
+work as its own. If more than one loop runs under one account, the assignee field is not a guard.
+Compensate by naming the session in the claim comment (below) and reading the comments, not just
+the assignee — and prefer distinct accounts per loop, which restores the guard properly.
 
 ```sh
 gh issue edit <N> --repo spec-kitty/spec-kitty-design --add-assignee @me
@@ -48,7 +115,7 @@ Then post the claim comment. It exists so a human watching the epic can see what
 
 ```sh
 gh issue comment <N> --repo spec-kitty/spec-kitty-design --body "$(cat <<'EOF'
-🔨 **Claimed** — starting this mission.
+🔨 **Claimed** — starting this mission. _(session `<short session id>`)_
 
 - **Branch:** `mission/<slug>` off `train/elements-first`
 - **Squad tier:** <tier from the issue body>
@@ -215,7 +282,7 @@ The claim protocol already makes concurrent loops *safe*. These four rules make 
 
 ### 1. Cap it at two
 
-The dependency graph permits at most two independent missions for most of the programme — `#69 ∥ #70`, then `#73 ∥ #74` — and three only at the batches, conditionally. A third loop spends its time losing claim races and reporting "nothing unblocked". Two is the number.
+The dependency graph rarely permits more than two independent missions — currently `#176 ∥ #180`, and `#145 ∥ #146` once those land. A third loop spends its time losing claim races and reporting "nothing unblocked". Two is the number.
 
 ### 2. Every loop gets its own clone
 
@@ -244,11 +311,29 @@ git push --force-with-lease
 
 ### Which pairs are actually safe
 
-- **`#69 ∥ #70`** — disjoint. #69 owns `release.yml`, `storybook-deploy.yml` and `pr-preview.yml`; #70 owns `ci-quality.yml`. Verified non-overlapping.
-- **`#73 ∥ #74`** — disjoint component directories. Both may extend the conformance matrix #71 established; if both do, the second to merge rebases and re-runs the gate per rule 4.
-- **`#77 ∥ #78 ∥ #79`** — only if ADR-11 rules that generated wrapper output and the manifest are **CI-generated rather than committed**. If they are committed, all three collide on the same generated files and must serialise. **Check that ruling before launching them in parallel.**
+The named pairs that used to live here — `#69 ∥ #70`, `#73 ∥ #74`, `#77 ∥ #78 ∥ #79` — are all
+merged. The current answer:
 
-Everything else in the graph is a chain. Do not invent parallelism the dependency lines do not permit — they encode real coupling, not caution. Stop when nothing is both unassigned and unblocked, and report the state of the epic.
+- **`#176 ∥ #180`** — sanctioned by #180's own sequencing note; authored sources are disjoint
+  (`packages/styles/src/{facts,disclosure,data-table,empty-state,skip-link}` versus
+  `packages/elements/src/form-input`). #180 consumes #176's forced-colors baseline, so if #176 has
+  not landed it, #180 records the dependency rather than re-deciding it.
+- **`#145 ∥ #146`** — disjoint component directories, both depending only on the closed #79. #145
+  additionally extends `sk-button` with an icon-only size; #146 does not touch it.
+- **`#147`** — disjoint from both, and it shares the React-wrapper `ssrSafe` boundary with #179 and
+  #180. Per epic #183, whichever mission resolves that boundary first records the reusable answer
+  for the others; the later ones consume it rather than re-measuring.
+- **Everything in #183's waves 2–4** is a chain. Do not start one because its prerequisite looks
+  nearly done.
+
+**All concurrent missions collide on the generated artifacts** regardless of how disjoint their
+authored sources are: `custom-elements.json`, `SIZES.md`, the generated `sk-*.css.js`,
+`packages/react/src`, and every `expected-*.json`. That collision is handled by rule 4 below —
+the second to merge rebases, regenerates, and re-runs its gate — not by avoiding parallelism. Both
+#176 and #183's programme requirements state this as an exit criterion.
+
+Do not invent parallelism the dependency lines do not permit; they encode real coupling, not
+caution. Stop when nothing is both unassigned and unblocked, and report the state of the epics.
 
 ---
 
@@ -259,4 +344,4 @@ Everything else in the graph is a chain. Do not invent parallelism the dependenc
 - **Write an ADR** outside #67.
 - **Hand-edit `kitty-specs/`.** Those artefacts desync runtime state (CLAUDE.md §7). The charter is different: `charter.md` is curated by hand and is the only home of project policy — but changing it is never part of a mission's diff.
 - **Touch `kitty-specs/**`, `docs/architecture/validation/**` or `docs/learnings/**`** — frozen historical record, including during the rename in #68.
-- **Start a mission whose dependencies are still open**, however tempting the parallelism looks. The dependency lines encode real coupling: #70 before #71 because a gate cannot precede the thing it gates; #76 before the batches because nine components authored from the old recipe rebuild the duplication.
+- **Start a mission whose dependencies are still open**, however tempting the parallelism looks. The dependency lines encode real coupling: #176 before #177 because the tone axis needs the primitives it colours; #148 before #179 because the bar chart establishes the visualization conventions the line chart follows; #146 before #178 because a block-level notice and an inline status indicator must not each invent a tone vocabulary.
