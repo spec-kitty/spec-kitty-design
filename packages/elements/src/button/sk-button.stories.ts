@@ -42,6 +42,24 @@ export const Disabled: Story = {
   render: () => '<sk-button variant="primary" disabled>Disabled</sk-button>',
 };
 
+/** The accessible name reaches the real button; the consumer supplies the glyph. */
+export const Icon: Story = {
+  render: () =>
+    '<sk-button variant="primary" size="icon" label="Notifications"><span aria-hidden="true">●</span></sk-button>',
+};
+
+/** Icon sizing composes with the native anchor branch. */
+export const IconLink: Story = {
+  render: () =>
+    '<sk-button variant="ghost" size="icon" label="Open settings" href="#settings"><span aria-hidden="true">★</span></sk-button>',
+};
+
+/** Focus the host to preview the delegated focus-visible treatment on the real control. */
+export const IconFocus: Story = {
+  render: () =>
+    '<sk-button variant="secondary" size="icon" label="Focus preview"><span aria-hidden="true">+</span></sk-button>',
+};
+
 export const AllVariants: Story = {
   render: () => `
     <div style="display:flex; gap:var(--sk-space-4); align-items:center; flex-wrap:wrap;">
@@ -61,6 +79,8 @@ export const LightMode: Story = {
       <sk-button variant="primary">Primary</sk-button>
       <sk-button variant="secondary">Secondary</sk-button>
       <sk-button variant="ghost">Ghost</sk-button>
+      <sk-button variant="primary" size="icon" label="Notifications"><span aria-hidden="true">●</span></sk-button>
+      <sk-button variant="ghost" size="icon" label="Open settings" href="#settings"><span aria-hidden="true">★</span></sk-button>
     </div>
   `,
 };

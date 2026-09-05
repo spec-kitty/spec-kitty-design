@@ -10,6 +10,7 @@ import '@spec-kitty/elements';
 import {
   BUTTON_SIZES,
   BUTTON_VARIANTS,
+  SkButton,
   buttonClasses,
   buttonStaticHtml,
   skButtonSheet,
@@ -28,6 +29,151 @@ const mount = async (attrs: Record<string, string> = {}, label = 'Label') => {
 };
 
 const partOf = (el: Element) => el.shadowRoot!.querySelector('[part="button"]') as HTMLElement;
+
+test('icon button and link branches expose the supplied label as their accessible name', async () => {
+  const button = await mount({ variant: 'primary', size: 'icon', label: 'Notifications' }, '●');
+  const buttonControl = partOf(button);
+  expect(buttonControl.tagName).toBe('BUTTON');
+  expect(buttonControl.getAttribute('aria-label')).toBe('Notifications');
+  await expect.element(buttonControl).toHaveAccessibleName('Notifications');
+
+  const link = await mount(
+    { variant: 'ghost', size: 'icon', label: 'Open settings', href: '#settings' },
+    '★',
+  );
+  const linkControl = partOf(link);
+  expect(linkControl.tagName).toBe('A');
+  expect(linkControl.getAttribute('aria-label')).toBe('Open settings');
+  await expect.element(linkControl).toHaveAccessibleName('Open settings');
+
+  expect(button.textContent).toBe('●');
+  expect(link.textContent).toBe('★');
+  expect(button.shadowRoot!.querySelector('svg')).toBe(null);
+  expect(link.shadowRoot!.querySelector('svg')).toBe(null);
+});
+
+test('invalid icon labels warn once per invalid value transition without swallowing content', async () => {
+  const warnings: unknown[][] = [];
+  const realWarn = console.warn;
+  console.warn = (...args: unknown[]) => void warnings.push(args);
+  try {
+    const el = await mount({ variant: 'primary', size: 'icon' }, '●');
+    expect(warnings).toHaveLength(1);
+    expect(String(warnings[0]?.[0])).toMatch(/sk-button.*icon.*label/i);
+    const slot = el.shadowRoot!.querySelector('slot') as HTMLSlotElement;
+    expect(slot.assignedNodes().map((node) => node.textContent).join('').trim()).toBe('●');
+
+    el.setAttribute('variant', 'secondary');
+    await (el as unknown as { updateComplete: Promise<unknown> }).updateComplete;
+    expect(warnings, 'an unrelated update must not repeat the same invalid-label warning').toHaveLength(1);
+
+    el.setAttribute('label', '   ');
+    await (el as unknown as { updateComplete: Promise<unknown> }).updateComplete;
+    expect(warnings, 'a distinct blank label is a new invalid value transition').toHaveLength(2);
+    expect(partOf(el).hasAttribute('aria-label')).toBe(false);
+
+    el.setAttribute('label', 'Notifications');
+    await (el as unknown as { updateComplete: Promise<unknown> }).updateComplete;
+    expect(warnings, 'recovery to a valid label must not warn').toHaveLength(2);
+    expect(partOf(el).getAttribute('aria-label')).toBe('Notifications');
+
+    el.setAttribute('label', '   ');
+    await (el as unknown as { updateComplete: Promise<unknown> }).updateComplete;
+    expect(warnings, 'the same invalid value must warn again after a valid recovery').toHaveLength(3);
+    expect(partOf(el).hasAttribute('aria-label')).toBe(false);
+  } finally {
+    console.warn = realWarn;
+  }
+});
+
+test('strict static icon authoring requires a label and escapes valid label bytes', () => {
+  expect(() => buttonStaticHtml({ variant: 'primary', size: 'icon' })).toThrow(/icon.*label/i);
+  expect(() => buttonStaticHtml({ variant: 'primary', size: 'icon', label: '   ' })).toThrow(
+    /icon.*label/i,
+  );
+
+  const exact = '  Alerts & "mentions"  ';
+  const markup = buttonStaticHtml({ variant: 'primary', size: 'icon', label: exact }, '●');
+  const parsed = new DOMParser().parseFromString(markup, 'text/html');
+  const control = parsed.querySelector('button')!;
+  expect(control.getAttribute('aria-label')).toBe(exact);
+  expect(control.textContent).toBe('●');
+  expect(markup).toContain('aria-label="  Alerts &amp; &quot;mentions&quot;  "');
+});
+
+test('[SC-010] a whitespace-bearing label assigned before definition survives upgrade exactly', async () => {
+  const exact = '  Pre-upgrade button label  ';
+  const el = document.createElement('sk-button-late') as SkButton;
+  el.setAttribute('size', 'icon');
+  el.label = exact;
+  el.textContent = '●';
+  document.body.append(el);
+
+  customElements.define('sk-button-late', class extends SkButton {});
+  await customElements.whenDefined('sk-button-late');
+  await el.updateComplete;
+
+  expect(el.label).toBe(exact);
+  expect(el.getAttribute('label')).toBe(exact);
+  const control = partOf(el);
+  expect(control.getAttribute('aria-label')).toBe(exact);
+  await expect.element(control).toHaveAccessibleName('Pre-upgrade button label');
+});
+
+test('host focus delegates to one real native control without adding a host tab stop', async () => {
+  for (const attrs of [
+    { variant: 'primary', size: 'icon', label: 'Notifications' },
+    { variant: 'ghost', size: 'icon', label: 'Settings', href: '#settings' },
+  ]) {
+    const el = await mount(attrs, '●');
+    (el as HTMLElement).focus();
+    expect(el.shadowRoot!.activeElement).toBe(partOf(el));
+    expect(el.hasAttribute('tabindex'), 'delegation must not create a second host tab stop').toBe(false);
+    expect((el as HTMLElement).tabIndex).toBe(-1);
+  }
+});
+
+test('icon controls are exactly 40px square and token-focus-visible in both themes', async () => {
+  for (const theme of ['dark', 'light']) {
+    for (const attrs of [
+      { variant: 'primary', size: 'icon', label: `${theme} notifications` },
+      { variant: 'ghost', size: 'icon', label: `${theme} settings`, href: '#settings' },
+    ]) {
+      const frame = document.createElement('div');
+      if (theme === 'light') frame.className = 'sk-light';
+      document.body.append(frame);
+      const el = document.createElement('sk-button');
+      for (const [key, value] of Object.entries(attrs)) el.setAttribute(key, value);
+      el.textContent = '●';
+      frame.append(el);
+      await (el as unknown as { updateComplete: Promise<unknown> }).updateComplete;
+
+      const control = partOf(el);
+      const bounds = control.getBoundingClientRect();
+      expect(Math.round(bounds.width), `${theme} ${control.tagName} width`).toBe(40);
+      expect(Math.round(bounds.height), `${theme} ${control.tagName} height`).toBe(40);
+
+      (el as HTMLElement).focus();
+      const computed = getComputedStyle(control);
+      const tokenProbe = document.createElement('span');
+      tokenProbe.style.borderTop =
+        'var(--sk-border-width-2) solid var(--sk-border-focus)';
+      frame.append(tokenProbe);
+      const resolvedTokens = getComputedStyle(tokenProbe);
+      expect(computed.outlineStyle, `${theme} ${control.tagName} focus style`).toBe('solid');
+      expect(computed.outlineWidth, `${theme} ${control.tagName} focus width token`).toBe(
+        resolvedTokens.borderTopWidth,
+      );
+      expect(computed.outlineColor, `${theme} ${control.tagName} focus colour token`).toBe(
+        resolvedTokens.borderTopColor,
+      );
+      expect(computed.outlineOffset, `${theme} ${control.tagName} focus offset token`).toBe(
+        resolvedTokens.borderTopWidth,
+      );
+      frame.remove();
+    }
+  }
+});
 
 test('[SC-013] the declared part is targetable from outside, on BOTH branches', async () => {
   // BOTH BRANCHES, because this element renders two different nodes. An earlier version mounted
@@ -189,14 +335,18 @@ test('the primary tone PAINTS, and the three tones are distinct', async () => {
 
 test('size is an axis independent of tone', async () => {
   const sizes = Object.keys(BUTTON_SIZES);
-  expect(sizes.length, 'the size map went empty or grew uncovered').toBe(1);
+  expect(sizes, 'the size map went empty or grew uncovered').toEqual(['sm', 'icon']);
   const base = await mount({ variant: 'primary' });
   const small = await mount({ variant: 'primary', size: 'sm' });
+  const icon = await mount({ variant: 'primary', size: 'icon', label: 'Notifications' }, '●');
   const basePad = parseFloat(getComputedStyle(partOf(base)).paddingLeft);
   const smallPad = parseFloat(getComputedStyle(partOf(small)).paddingLeft);
   expect(smallPad, 'size="sm" did not change the padding').toBeLessThan(basePad);
   // And it leaves the tone alone — the other direction of the coupling check.
   expect(getComputedStyle(partOf(small)).backgroundColor).toBe(
+    getComputedStyle(partOf(base)).backgroundColor,
+  );
+  expect(getComputedStyle(partOf(icon)).backgroundColor).toBe(
     getComputedStyle(partOf(base)).backgroundColor,
   );
 });

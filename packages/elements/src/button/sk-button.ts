@@ -1,4 +1,5 @@
 import { LitElement, html } from 'lit';
+import { ifDefined } from 'lit/directives/if-defined.js';
 import { define } from '../define.js';
 import sheet from './sk-button.css.js';
 import { buttonClasses } from './sk-button.markup.js';
@@ -12,15 +13,17 @@ import { buttonClasses } from './sk-button.markup.js';
  * list is identical either way.
  *
  * @element sk-button
- * @slot - the button's label
+ * @slot - the visible label or consumer-supplied glyph
  * @csspart button - the rendered `<button>` or `<a>`
  */
 export class SkButton extends LitElement {
   static styles = [sheet];
+  static shadowRootOptions = { ...LitElement.shadowRootOptions, delegatesFocus: true };
 
   static properties = {
     variant: { type: String, reflect: true },
     size: { type: String, reflect: true },
+    label: { type: String, reflect: true },
     href: { type: String, reflect: true },
     disabled: { type: Boolean, reflect: true },
   };
@@ -29,8 +32,11 @@ export class SkButton extends LitElement {
    *  renders the base button and warns rather than throwing. */
   declare variant: 'primary' | 'secondary' | 'ghost' | undefined;
 
-  /** Size: `sm`, or omit for the default. */
-  declare size: 'sm' | undefined;
+  /** Size: `sm`, `icon`, or omit for the default. */
+  declare size: 'sm' | 'icon' | undefined;
+
+  /** Accessible name forwarded unchanged to the real control. Required for the `icon` size. */
+  declare label: string | undefined;
 
   /** When set, the element renders an anchor to this URL instead of a button. */
   declare href: string | undefined;
@@ -39,26 +45,37 @@ export class SkButton extends LitElement {
    *  has, and faking one with pointer-events hides it from assistive technology. */
   declare disabled: boolean;
 
+  #hasWarnedInvalidIconLabel = false;
+  #lastInvalidIconLabel: string | undefined;
+
   render() {
     const cls = buttonClasses(this.variant, this.size);
+    const validLabel = typeof this.label === 'string' && this.label.trim() ? this.label : undefined;
+    const invalidIconLabel = this.size === 'icon' && validLabel === undefined;
+    if (invalidIconLabel) {
+      if (!this.#hasWarnedInvalidIconLabel || this.#lastInvalidIconLabel !== this.label) {
+        console.warn(
+          'sk-button: size="icon" requires a non-empty label — rendering the control without aria-label.',
+        );
+      }
+      this.#hasWarnedInvalidIconLabel = true;
+      this.#lastInvalidIconLabel = this.label;
+    } else {
+      this.#hasWarnedInvalidIconLabel = false;
+      this.#lastInvalidIconLabel = undefined;
+    }
     // THE INTERACTIVE ELEMENT IS REAL, and it is inside the shadow root carrying the same
     // classes the static form puts on its own root — so one CSS source serves both paths with
     // nothing written twice. That is the divergence #78 had to repair after the fact.
     //
-    // KNOWN LIMITATIONS, stated rather than discovered later. Both are filed as #153.
+    // KNOWN FORM LIMITATION, stated rather than discovered later.
     //
-    // 1. A <button> inside a shadow root does not submit an enclosing form, and `type="button"`
-    //    below is hard-coded, so this element can never be a submit button. ADR-9 §4 plus #74's
-    //    ElementInternals work is the mechanism if one is ever wanted. An earlier revision of
-    //    this comment claimed "no form exists in this repo today — grepped"; that was false when
-    //    written — fixtures/react-consumer/src/wrappers.test.tsx:156 renders one, and a lens
-    //    refuted the claim. The limitation is real; the supporting fact was not.
-    // 2. The interactive node lives in the shadow root with no `delegatesFocus`, so
-    //    `hostEl.focus()` is a silent no-op — the trap sk-nav-pill.ts names on its
-    //    activeElement walk (cited by symbol, not line: a lens found the line pin already off
-    //    by one, the same defect this fold removed from a programme-doc citation) — and
-    //    `aria-label` on the host is ignored because the host's role is generic. So the
-    //    icon-only button the a11y gate keeps green cannot be expressed through <sk-button>.
+    // A <button> inside a shadow root does not submit an enclosing form, and `type="button"`
+    // below is hard-coded, so this element can never be a submit button. ADR-9 §4 plus #74's
+    // ElementInternals work is the mechanism if one is ever wanted. An earlier revision of
+    // this comment claimed "no form exists in this repo today — grepped"; that was false when
+    // written — fixtures/react-consumer/src/wrappers.test.tsx:156 renders one, and a lens
+    // refuted the claim. The limitation is real; the supporting fact was not.
     //
     // `== null`, NOT `=== undefined`. Lit assigns a String property `null` — not `undefined` —
     // when its attribute is removed: reactive-element's `fromAttribute(null, String)` returns
@@ -69,10 +86,18 @@ export class SkButton extends LitElement {
     // page and AT still announced "link". sk-ribbon-card.ts:63 was immune only because it tests
     // truthiness. Found by a lens, not by the suite — `mount()` never mutated after mount.
     return this.href == null
-      ? html`<button part="button" class=${cls} type="button" ?disabled=${this.disabled}>
+      ? html`<button
+          part="button"
+          class=${cls}
+          type="button"
+          aria-label=${ifDefined(validLabel)}
+          ?disabled=${this.disabled}
+        >
           <slot></slot>
         </button>`
-      : html`<a part="button" class=${cls} href=${this.href}><slot></slot></a>`;
+      : html`<a part="button" class=${cls} href=${this.href} aria-label=${ifDefined(validLabel)}
+          ><slot></slot
+        ></a>`;
   }
 }
 
