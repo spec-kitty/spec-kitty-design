@@ -69,8 +69,13 @@ The docsite consumes `@spec-kitty/styles` only. DSD reached Baseline *widely ava
 ### `form-field` is deliberately styles-only (#141)
 
 Epic #66's completion criterion is that **no component in `packages/styles/src/` is styles-only
-except by a recorded, deliberate decision.** `form-field` is the one exception, and this is the
-record.
+except by a recorded, deliberate decision.** `form-field` is the one exception.
+
+This **ratifies and supersedes** the reason already published in
+`docs/design-system/using-components.md`, which reached the same conclusion — no `<sk-form-field>`
+element — on different grounds (its three accessible responsibilities cross a root boundary). Both
+rationales are sound; a lens caught that neither document referenced the other, which is how two
+records of one decision drift apart. This ADR is now the record and that page points here.
 
 **There is no `<sk-form-field>` element and there should not be.** The element path for a labelled
 field is `sk-form-input` and `sk-form-textarea`, which render the *whole* field themselves —
@@ -94,14 +99,44 @@ label, description and error. The ruling was not wrong when made; the control ab
 job afterwards. The operator has re-ruled on the current state: styles-only, deliberately.
 
 **What `form-field` still is.** The static-path field markup for the no-JavaScript consumer that
-ADR-10 §3 exists to serve: eight `.html` forms composing a label, a control and a description, in
-default, focus, error, disabled and filled states, for both `input` and `textarea`.
+ADR-10 §3 exists to serve: eight `.html` forms — the bare wrapper, `input` in default, focus, error,
+disabled and filled states, and `textarea` in default and error. (An earlier version of this
+sentence said five states for both controls; textarea has two.)
 
-**The two class families are correct, not duplication.** `.sk-form-field__label` and
-`.sk-form-input__label` carry identical declarations, which looks like a violation of ADR-8
-criterion #1 and is not: the element's CSS is *adopted into its shadow root*, which cannot see
-light-DOM classes. They style different trees and both derive from the same `--sk-*` tokens. A
-single class family here is not achievable and would not be desirable.
+**The two class families are correct, not duplication — but not for the reason first recorded here.**
+`.sk-form-field__label` and `.sk-form-input__label` carry identical declarations, which looks like a
+violation of ADR-8 criterion #1.
+
+The first version of this paragraph said they "style different trees" because the element's CSS is
+adopted into its shadow root. **That is false**, and a lens caught it: `@spec-kitty/styles` exports
+`./form-input/*` and ships `dist/form-input/sk-form-input.css`, so a static consumer can `<link>`
+that sheet into the **light DOM** alongside form-field's, and both families then live in one cascade.
+
+The reason that does hold is #139's prefix rule: these are **two components**, and each component's
+classes must carry its own name. Criterion #1 requires one CSS source *per component*, not that two
+components never share a declaration — both derive from the same `--sk-*` tokens, which is where the
+single source of truth actually lives. A merged class family would violate #139 and could not be
+adopted into a shadow root under either component's name.
+
+**One obligation is deliberately deferred, and it is not the one above.** `sk-form-input.css` carries
+a note addressed to this mission by number: *"#141 owns form-field and should rename
+`.sk-input`/`.sk-textarea` rather than inherit the additive workaround, which currently leaves them
+authored twice."* Those two classes live in `sk-form-field.css` and are **not** prefixed with their
+component's name, so #139's rule does condemn them — and `.sk-input` duplicates
+`.sk-form-input__control` more substantially than the `__label` pair discussed above.
+
+That rename is **not** done here. It changes class names that appear in eight published static HTML
+forms a consumer copies by hand, and doing it as an unreviewed addendum at the end of the epic is
+worse than doing it deliberately. It is filed as **#173**, with an owner, rather than left pointing at a closed issue. Two lenses flagged that closing #141 silently would leave a live instruction addressed to a
+number nobody owns.
+
+**Two known defects are carried forward with this component, recorded because it is now frozen.**
+`sk-form-field.css` uses `min-height: var(--sk-space-30, 120px)` — `--sk-space-30` is not defined in
+`@spec-kitty/tokens`, so it is a hardcoded 120px wearing a token's clothes — and `.is-focused` fakes
+a state the browser owns, telling the accessibility tree something untrue. Both are recorded in
+`sk-form-input.css` as things the element layer deliberately refused to inherit. They stay in the
+static layer, and a mission that declares a component permanently styles-only should say so rather
+than leave them to be rediscovered.
 
 **One authored source, now enforced.** The barrel was hand-written beside the `.html` files —
 exporting **eight** strings while the directory held **five** files, so `SkFormInputFocusHTML`,

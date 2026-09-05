@@ -4,12 +4,12 @@
     "",
     "`<div data-theme=\"light\">` around a story activates NOTHING: @spec-kitty/tokens anchors its",
     "light block on `:root[data-theme=\"light\"], .sk-light`, and `:root` only ever matches <html>.",
-    "The story renders the DARK palette on a light background and every gate stays green — axe",
+    "The story renders the DARK palette on a light background and every gate stays green \u2014 axe",
     "included, because the contrast it measures is the dark palette's and that is fine.",
     "",
     "TEN, AND THE NUMBER MAY ONLY FALL. #77 migrated grid and section-banner and fixed those two",
     "on the way past; the ten below are the remainder, all in packages/styles. They are #78's and",
-    "#79's to retire as those missions convert their components — lower the count in the same",
+    "#79's to retire as those missions convert their components \u2014 lower the count in the same",
     "commit that fixes them, which is what makes the improvement a deliberate line in the diff",
     "rather than a silent one.",
     "",
@@ -18,16 +18,17 @@
     "lens showed that model had already failed twice before it was written: sk-stub and",
     "sk-nav-pill are both MIGRATED elements whose styles-layer stories still offend. Migrating a",
     "component does not move its styles-layer story into the elements directory, so a directory",
-    "scope keeps missing exactly the files it exists to catch — while",
+    "scope keeps missing exactly the files it exists to catch \u2014 while",
     "docs/contributing/adding-a-component.md tells authors to fix \"the styles-layer story\".",
     "",
     "WHY A COUNT AND NOT AN ALLOWLIST. Same reason expected-parts.json and .wrapper-floor are",
     "counts: a path list rots on every rename and invites an entry being added rather than a bug",
     "being fixed. A count cannot be added to.",
     "#78 retires feature-card's and ribbon-card's, 10 -> 8. blog-card's does NOT follow in this mission: that component is deferred pending an operator ruling (see #78), so its wrapper is one of the eight that remain.",
-    "#79 retires all three of its own components' wrappers — pill-tag, button and check-bullet — 8 -> 5. An earlier revision of this line claimed button and check-bullet 'follow in the same mission' while leaving both in place, and the button one sat in a line region that same PR had edited for the class rename; three pre-merge lenses caught the false claim. Retiring pill-tag's is also what EXPOSED a real WCAG failure the inert wrapper had been hiding: the tinted variants paired dark-tuned inks with pastel light tints at 1.51:1. Five remain: blog-card, form-field, nav-pill, site-footer and the styles-layer stub.",
+    "#79 retires all three of its own components' wrappers \u2014 pill-tag, button and check-bullet \u2014 8 -> 5. An earlier revision of this line claimed button and check-bullet 'follow in the same mission' while leaving both in place, and the button one sat in a line region that same PR had edited for the class rename; three pre-merge lenses caught the false claim. Retiring pill-tag's is also what EXPOSED a real WCAG failure the inert wrapper had been hiding: the tinted variants paired dark-tuned inks with pastel light tints at 1.51:1. Five remain: blog-card, form-field, nav-pill, site-footer and the styles-layer stub.",
     "#78 retires blog-card's while rewriting its story onto the generated exports, 5 -> 4. Four remain: form-field (#141), nav-pill, site-footer (#77) and the styles-layer stub.",
-    "#77 retires site-footer's, taking the count 4 -> 3. The three that remain are form-field, nav-pill and stub — NOT blog-card, which #78 already retired and which an earlier revision of this note wrongly listed. A lens caught it; that is the fourth time in this programme a ratchet note has named different data than the ratchet holds, which is an argument for deriving these lists rather than typing them. Measured before assuming: site-footer's inks are --sk-fg-muted at 6.20:1 and --sk-fg-default at 16.03:1 on the light page, so unlike pill-tag (four variants at 1.51-2.48:1) and check-bullet (1.73:1) this wrapper was hiding nothing. The difference is not luck — site-footer styles with SEMANTIC --sk-fg-* tokens, while the two that failed paired raw --sk-color-* palette values against tint surfaces. That is the shape to look for in the three that are left."
+    "#77 retires site-footer's, taking the count 4 -> 3. The three that remain are form-field, nav-pill and stub \u2014 NOT blog-card, which #78 already retired and which an earlier revision of this note wrongly listed. A lens caught it; that is the fourth time in this programme a ratchet note has named different data than the ratchet holds, which is an argument for deriving these lists rather than typing them. Measured before assuming: site-footer's inks are --sk-fg-muted at 6.20:1 and --sk-fg-default at 16.03:1 on the light page, so unlike pill-tag (four variants at 1.51-2.48:1) and check-bullet (1.73:1) this wrapper was hiding nothing. The difference is not luck \u2014 site-footer styles with SEMANTIC --sk-fg-* tokens, while the two that failed paired raw --sk-color-* palette values against tint surfaces. That is the shape to look for in the three that are left.",
+    "RETIRED FOR form-field AT #141, 3 -> 2. The wrapper was a <div data-theme=\"light\"> and therefore inert: tokens anchor the light block on :root[data-theme=\"light\"], .sk-light, and :root only ever matches <html>. Removing the attribute changes nothing visually \u2014 which is the point, and why it was safe to do in the commit that closes this component out. The remaining two are nav-pill and stub. NOT DONE, and filed rather than left implicit: making this story GENUINELY light-mode (a .sk-light wrapper) is a separate change, and the log above records that doing exactly that for pill-tag exposed a real 1.51:1 contrast failure it had been hiding. sk-form-field.css has the same shape the log names \u2014 .sk-form-field--error .sk-form-field__description uses a raw var(--sk-color-red) against a tint surface \u2014 and it should be measured by someone who can run axe."
   ],
-  "count": 3
+  "count": 2
 }

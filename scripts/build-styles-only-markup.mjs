@@ -36,7 +36,10 @@ function stylesOnly() {
   const dirs = readdirSync(STYLES, { withFileTypes: true })
     .filter((d) => d.isDirectory())
     .map((d) => d.name)
-    .filter((n) => !existsSync(join(ELEMENTS, n)))
+    // A .css is what makes a directory a COMPONENT. The docstring said "components with CSS but
+    // no element" and the code only checked the second half, so any future `__tests__` or `_shared`
+    // directory would hard-fail this gate with a message reading like a component defect.
+    .filter((n) => !existsSync(join(ELEMENTS, n)) && readdirSync(join(STYLES, n)).some((f) => f.endsWith('.css')))
     .sort();
   if (dirs.length === 0) {
     throw new Error(
@@ -51,28 +54,56 @@ function stylesOnly() {
 const exportName = (file) =>
   basename(file, '.html')
     .split('-')
+    .filter(Boolean) // a `--` or a leading/trailing dash yields an empty segment; `p[0]` then throws
     .map((p) => p[0].toUpperCase() + p.slice(1))
     .join('') + 'HTML';
 
 function render(name) {
   const dir = join(STYLES, name);
-  const files = readdirSync(dir).filter((f) => f.endsWith('.html')).sort();
+  const files = readdirSync(dir).filter((f) => f.toLowerCase().endsWith('.html')).sort();
   if (files.length === 0) throw new Error(`packages/styles/src/${name} has no .html to generate from`);
+
+  // PARSE-SAFE NAMES, AND NO DUPLICATES — lifted from build-element-markup.mjs, which carries both
+  // guards and a comment explaining why. This script's own docstring claimed "FAILS CLOSED, like
+  // its sibling" while carrying neither, and a lens showed what that bought: `2col.html` emits
+  // `export const 2colHTML`, which does not parse, and `--check` reports it CURRENT because a byte
+  // comparison cannot tell valid TypeScript from invalid. The repo has already paid for this class
+  // once — `SkGridCols-2HTML`, recorded at build-element-markup.mjs:73-78.
+  const names = files.map(exportName);
+  const dupes = names.filter((n, i) => names.indexOf(n) !== i);
+  if (dupes.length) {
+    throw new Error(
+      `packages/styles/src/${name}: two .html files produce the same export ${[...new Set(dupes)].join(', ')} — ` +
+        `rename one, or the second silently shadows the first`,
+    );
+  }
+  for (const n of names) {
+    if (!/^[A-Za-z_$][A-Za-z0-9_$]*$/.test(n)) {
+      throw new Error(
+        `packages/styles/src/${name}: "${n}" is not a valid identifier, so the generated barrel would ` +
+          `not parse. Rename the source file.`,
+      );
+    }
+  }
 
   const body = files
     .map((f) => {
       // LEADING comments are the published header; a comment AFTER markup begins is content.
       //
-      // That distinction is the whole rule, and I got it wrong twice writing it. Filtering every
-      // `<!--` line ate `<!-- input or textarea goes here -->` from sk-form-field.html — not a
-      // header but the wrapper's own instruction saying where the control goes, which is the most
-      // load-bearing line in the file. Then enumerating the known header texts missed a third one
-      // (`aria-invalid + aria-describedby required for axe compliance`) on the error variants and
-      // emitted it as markup. Position decides it, not content.
-      const lines = readFileSync(join(dir, f), 'utf8').split('\n');
-      let i = 0;
-      while (i < lines.length && (lines[i].trim() === '' || /^<!--[\s\S]*-->$/.test(lines[i].trim()))) i++;
-      const html = lines.slice(i).join('\n').trim();
+      // Scanned over the JOINED text, not line by line, and with a LAZY quantifier. Three lenses'
+      // worth of near-misses live in this one regex:
+      //   - filtering every `<!--` line ate `<!-- input or textarea goes here -->`, which is not a
+      //     header but the wrapper's own instruction saying where the control goes
+      //   - enumerating the known header texts missed a third one on the error variants
+      //   - a per-line `^<!--[\s\S]*-->$` with a GREEDY quantifier spanned an interior `-->`, so
+      //     `<!-- h --><div>REAL MARKUP</div><!-- t -->` dropped the markup silently
+      //   - and a line-at-a-time loop could not see a multi-line `<!--\n … \n-->` header at all,
+      //     emitting it as markup — the shape every CSS file in this repo already uses
+      const raw = readFileSync(join(dir, f), 'utf8');
+      const html = raw.replace(/^(?:\s*<!--[\s\S]*?-->)+\s*/, '').trim();
+      if (!html) {
+        throw new Error(`packages/styles/src/${name}/${f} has no markup after its header comments`);
+      }
 
       return `export const ${exportName(f)} = ${JSON.stringify(html)};`;
     })
