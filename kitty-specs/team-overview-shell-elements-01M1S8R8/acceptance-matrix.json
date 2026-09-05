@@ -383,6 +383,14 @@
       "verification_command": "! rg -n \"^import .*[\"\\\"][^\\\"\"]*(team-kitty|router|store)[^\"\\\"]*[\\\"\"]|fetch\\\\(|Date\\\\.now\\\\(|setInterval\\\\(|setTimeout\\\\(|declare (open|selected|active)|\\\\b(open|selected|active): \\\\{\" packages/elements/src/{app-shell,personal-rail,context-sidebar,page-header}",
       "result": "confirmed_absent",
       "evidence": "Command exited 0: "
+    },
+    {
+      "invariant_id": "NI-002",
+      "description": "No prohibited static fallback markup exists at any of the twelve enumerated element/style paths.",
+      "verification_method": "custom_command",
+      "verification_command": "test ! -e packages/elements/src/app-shell/sk-app-shell.markup.ts && test ! -e packages/elements/src/personal-rail/sk-personal-rail.markup.ts && test ! -e packages/elements/src/context-sidebar/sk-context-sidebar.markup.ts && test ! -e packages/elements/src/page-header/sk-page-header.markup.ts && test ! -e packages/styles/src/app-shell/sk-app-shell.html && test ! -e packages/styles/src/personal-rail/sk-personal-rail.html && test ! -e packages/styles/src/context-sidebar/sk-context-sidebar.html && test ! -e packages/styles/src/page-header/sk-page-header.html && test ! -e packages/styles/src/app-shell/index.ts && test ! -e packages/styles/src/personal-rail/index.ts && test ! -e packages/styles/src/context-sidebar/index.ts && test ! -e packages/styles/src/page-header/index.ts",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: "
     }
   ],
   "legacy_negative_invariants": [
