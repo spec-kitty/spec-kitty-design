@@ -391,6 +391,14 @@
       "verification_command": "test ! -e packages/elements/src/app-shell/sk-app-shell.markup.ts && test ! -e packages/elements/src/personal-rail/sk-personal-rail.markup.ts && test ! -e packages/elements/src/context-sidebar/sk-context-sidebar.markup.ts && test ! -e packages/elements/src/page-header/sk-page-header.markup.ts && test ! -e packages/styles/src/app-shell/sk-app-shell.html && test ! -e packages/styles/src/personal-rail/sk-personal-rail.html && test ! -e packages/styles/src/context-sidebar/sk-context-sidebar.html && test ! -e packages/styles/src/page-header/sk-page-header.html && test ! -e packages/styles/src/app-shell/index.ts && test ! -e packages/styles/src/personal-rail/index.ts && test ! -e packages/styles/src/context-sidebar/index.ts && test ! -e packages/styles/src/page-header/index.ts",
       "result": "confirmed_absent",
       "evidence": "Command exited 0: "
+    },
+    {
+      "invariant_id": "NI-003",
+      "description": "WP04 introduces no locally generated authoritative visual baseline PNGs.",
+      "verification_method": "custom_command",
+      "verification_command": "test -z \"$(git diff --name-only 5db5ec9bf191064a6fa6471cdb43dd4d702bee19..HEAD -- apps/storybook/src/tests/visual.spec.ts-snapshots)\"",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: "
     }
   ],
   "legacy_negative_invariants": [
