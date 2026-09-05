@@ -117,8 +117,11 @@ plain `:` form is enough.
 ## Events
 
 Elements currently dispatch `sk-nav-pill-toggle` from `sk-nav-pill` and
-`sk-transition-matrix-select` from `sk-transition-matrix`. Both are controlled intent events: the
-consumer owns the resulting state change. Everything else you will listen for is native.
+`sk-transition-matrix-select` from `sk-transition-matrix`. The nav-pill event is cancelable and
+fires before the component changes its own open state, so `preventDefault()` vetoes that default
+action. The transition-matrix event is a non-cancelable controlled intent: the consumer owns
+selection state and the element does not update `selectedRouteId`. Everything else you will listen
+for is native.
 
 Form input does **not** emit a custom event. The inner `<input>`'s native `input` event is
 `composed`, so it crosses the shadow boundary and `$event.target` retargets to the host, whose
