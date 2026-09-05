@@ -27,6 +27,17 @@ const SPEC_KITTY_AUTO_COMMIT_PATTERNS = [
   (msg) => /^(Add|Map|Update) (tasks|plan|meta|charter|requirements?) /i.test(msg),
   // spec: Initial mission spec (Spec Kitty creation step)
   (msg) => /^spec: /.test(msg),
+  // op(<profile-id>): <action> [<invocation-id>] — the Op record `spec-kitty dispatch` commits
+  // for every governed invocation. Same class as the entries above: a CLI-authored message this
+  // project does not control. It fails BOTH enums — `op` is not a conventional type, and a
+  // profile id is not a package scope — so without this every mission that deploys the
+  // adversarial squad reds `[ENFORCED] commitlint (FR-020)`, which runs across all branch
+  // commits (`--from=base.sha --to=head.sha`).
+  //
+  // Anchored to end-of-LINE like its siblings, and the action/id shapes are constrained rather
+  // than left open: an unanchored /^op\(/ would exempt anything starting with `op(` from EVERY
+  // rule, which is the trap the `chore(spec-kitty)` comment above records.
+  (msg) => /^op\([a-z][a-z0-9-]*\): [a-z][a-z-]* \[[0-9A-Z]{6,}\]\s*(\n|$)/.test(msg),
 ];
 
 module.exports = {
