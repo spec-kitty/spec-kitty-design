@@ -4,26 +4,26 @@ artifact_type: spec-kitty.analysis-report
 command: /spec-kitty.analyze
 mission_slug: team-overview-shell-elements-01M1S8R8
 mission_id: 01M1S8R8V0M79QTX5Y710CMYQ0
-generated_at: '2026-09-05T18:20:19.859757+00:00'
+generated_at: '2026-09-05T18:34:31.274228+00:00'
 analyzer_agent: codex
 input_artifacts:
   spec.md:
     path: kitty-specs/team-overview-shell-elements-01M1S8R8/spec.md
-    sha256: 7b1f6016895c15aeae12bdd82c714535167dddfb9c4d8836f4a91c30957fbb7b
+    sha256: 05bc45fa18798ace1da053321f2e5481d7c4025e2a8d5b8ef9061abd8523e586
   plan.md:
     path: kitty-specs/team-overview-shell-elements-01M1S8R8/plan.md
-    sha256: ffe516e99b73efac4bda3923024944eacc249dd96ab860ba7cef52432539184b
+    sha256: 8772756365f285c97b7d7325b73f27470f11f284bf57aab3e2e8a5a6890a5978
   tasks.md:
     path: kitty-specs/team-overview-shell-elements-01M1S8R8/tasks.md
-    sha256: f7a8bde77c937cc013e47e0594de7babdc9d78ec84b66567072fbaeb1b90b97a
+    sha256: c239a04edb4037fcaa07e8e15bd8c0abcd9ab6ccf87a7af09f6511cecb498658
   charter:
     path: .kittify/charter/charter.yaml
     sha256: 027fa1ef1a203b970e2688e837774cfeadacbdcec1e42897633d0a243ace0071
 verdict: ready
 issue_counts:
   critical: 0
-  medium: 0
   low: 0
+  medium: 0
   high: 0
   info: 0
 findings: []
@@ -35,10 +35,11 @@ findings: []
 
 This report records planning-repair evidence for issue #145 only. The prior mandatory post-tasks
 three-lens review examined exact SHA `09b018e07b20019f40a7826f51cba572c8c2f31c` and returned
-**FAIL**. The planning tree was then repaired and normalized. Immediately before this analysis was
-recorded, local and remote branch head were both
-`2f4ee35d140c095fdc890dedd4a5a86f201dfa59`, based on current
-`origin/train/elements-first` SHA `dcf7af26ff8f14d0d8b5a8e45c7eb9d64201e053`.
+**FAIL**. The planning tree was then repaired and normalized. Before this refreshed analysis was
+recorded, the local planning-repair head was
+`729420aa67681c507ef7f1f9200206d8628f7b67`, while the remote mission branch remained at the
+pre-rebase lease anchor `0ccf0e800e07fbcc91c1bf711159ed0f7a29bd4f`. The branch is now based on
+current `origin/train/elements-first` SHA `37662678938c0e76455760e435c5ea626aac8056`.
 
 Recording this report and running canonical task finalization will create newer commits. Therefore
 the SHA above is provenance for the checks summarized here, not a claim that it remains the final
@@ -50,13 +51,13 @@ against the resulting frozen head before the independent exact-SHA squad begins.
 | Finding from failed review | Repaired disposition |
 |---|---|
 | WP04 could not truthfully approve CI-authoritative baseline PNGs before the draft PR that creates them existed. | WP04 now authors the five visual cases and proves only locally executable, visible, non-empty diagnostics. CI artifact retrieval, approved-reference comparison, PNG commit, and passing exact Chromium rerun belong wholly to post-consolidation mission wrap-up. |
-| Acceptance-matrix rows were placeholders and negative invariants were incomplete. | `acceptance-matrix.json` now has 37 unique concrete FR/NFR/SC evidence mappings with explicit WP or mission-wrap-up owners, plus six executable negative invariants covering application-state/import isolation, forbidden static fallbacks, local-PNG non-authority, train-only/no-main, exact-SHA evidence, and token-catalogue equality. |
+| Acceptance-matrix rows were placeholders and negative invariants were incomplete. | `acceptance-matrix.json` now has 37 unique concrete FR/NFR/SC evidence mappings with explicit WP or mission-wrap-up owners, plus seven executable negative invariants covering application-state/import isolation, forbidden static fallbacks, local-PNG non-authority, train-only/no-main, exact-SHA evidence, token-catalogue equality, and the exact post-merge issue-resolution set. |
 | ADR-11 SC-010 property-before-upgrade/reflection evidence and mutations were absent. | WP01, WP02, and WP03 now require late-definition/property-before-upgrade tests for the reflected labels on `sk-personal-rail`, `sk-context-sidebar`, and `sk-button`. WP04 adds three uniquely attributable `reflect: true` to `reflect: false` mutations. The mission now requires 15 new arms across 11 `(id, subject)` pairs while retaining the original SC-013/SC-014 arms. |
 | Timestamped token catalogue handling lacked an exact source comparison. | `plan.md` contains a read-only set/order comparator reconstructing the complete non-time payload from `tokens.css`; it ignores only the validated `generated_at` value. WP01 runs it after the one-time catalogue generation and mission wrap-up reruns it after any final authorized refresh. |
 | Label handling drifted from the verbatim issue contract. | The spec, plan, data model, and WP prompts use trimming only to decide whether a value is blank. Any supplied nonblank label, including deliberate surrounding whitespace, is forwarded byte-for-byte to the real control or landmark `aria-label`, with exact property/attribute/accessibility probes. |
 | Plan provenance cited an unreachable historical spec SHA. | The plan now identifies the in-tree spec as part of the same frozen planning revision and delegates canonical reachable identity to `lanes.json.planning_commit_sha`; it no longer cites the orphan SHA. |
 | Planning artifacts contained `git diff --check` failures and did not gate them. | Whitespace defects were removed. Pre-execution and mission-wrap-up gates now run `git diff --check <current-train-sha>..HEAD`. |
-| Governed issue-resolution ownership was incomplete. | `issue-matrix.json` now has explicit repository, evidence, owner, and governed disposition for all 11 admitted references, including #144, #145, #153, and #79. It assigns `WP03`, `WP04`, or `mission-wrap-up` ownership and explicitly prohibits issue closure by this mission. |
+| Governed issue-resolution ownership was incomplete. | `issue-matrix.json` now has explicit repository, evidence, owner, and governed disposition for all 13 admitted references, including #144, #145, #147, #148, #153, and #79. WP workers close nothing. Mission/orchestrator wrap-up closes exactly #145 and #153 only after verifying the authorized train merge, with the merged PR/commit evidence; it snapshots and preserves every parent/sibling/follow-up issue state. |
 
 Two later cross-mission defects were also repaired. The exact-head command list now maps every
 current `[ENFORCED]` CI command, including affected ESLint, Stylelint, HTMLHint, lockfile dry-run,
@@ -67,6 +68,23 @@ apps/storybook/storybook-static`, and the exact visual invocation
 maintainer evidence is recorded on immutable external PR/comment/check surfaces, never through a
 tracked acceptance auto-commit that would invalidate the SHA it claims to certify. If no
 non-mutating acceptance surface exists, mission wrap-up stops for maintainer disposition.
+
+### Latest-train refresh and closure-authority repair
+
+Before any WP allocation, the clean mission branch fetched and rebased without conflict from
+`dcf7af26ff8f14d0d8b5a8e45c7eb9d64201e053` onto exact live train
+`37662678938c0e76455760e435c5ea626aac8056`. The intervening train change came from docs-only PR
+#184 and touches only `docs/architecture/elements-first-run-prompt.md`, disjoint from all mission
+artifacts and authored implementation paths.
+
+The prior artifacts also contained a binding operator-instruction contradiction: issue-matrix
+rows and WP04 said #145/#153 would never be closed. That is now resolved consistently across the
+spec, plan, tasks, WP04 prompt, acceptance matrix, and issue matrix. Every WP worker is forbidden
+from issue mutation. After all exact-head gates and explicit merge authorization, the orchestrator
+verifies that the PR merged into `train/elements-first`, resolves the train merge commit, and
+immediately closes #145 and #153 with that merged PR/commit evidence. It snapshots #112, #125,
+#144, #146, #147, #148, #150, and #154 before the closure operation and proves their states are
+unchanged afterward; separately completed states are recorded and preserved as external work.
 
 ### Repaired-tree validation evidence
 
@@ -86,14 +104,15 @@ The following checks passed on the normalized pre-analysis head:
   team-overview-shell-elements-01M1S8R8 --json`: all four valid. Each reports only the expected
   pre-implementation `Missing Activity Log section` warning.
 - Acceptance-matrix structural probe: 37 unique criteria, 37 explicit owner/evidence mappings,
-  and six negative invariants.
-- Issue-matrix structural probe: 11 admitted references, each with nonempty owner/evidence and an
+  and seven negative invariants.
+- Issue-matrix structural probe: 13 admitted references, each with nonempty owner/evidence and an
   allowed governed disposition.
 - Exact read-only `tokens.css` versus `token-catalogue.json` comparator: pass.
 - Current-train enforced-command mapping probe: pass for all 47 command/terminal-gate probes.
-- `npx commitlint --from=dcf7af26ff8f14d0d8b5a8e45c7eb9d64201e053 --to=HEAD`: pass.
-- `git diff --check dcf7af26ff8f14d0d8b5a8e45c7eb9d64201e053..HEAD`: pass.
-- `git status --porcelain`: empty, and local/remote branch heads matched.
+- `npx commitlint --from=37662678938c0e76455760e435c5ea626aac8056 --to=HEAD`: pass.
+- `git diff --check 37662678938c0e76455760e435c5ea626aac8056..HEAD`: pass.
+- `git status --porcelain`: empty. The remote branch remains the exact force-with-lease anchor
+  recorded above until this fully revalidated pre-allocation rewrite is pushed.
 
 No implementation, generated component output, WP claim, PR mutation, issue closure, merge,
 publication, deployment, or `main` operation is represented by this analysis.
