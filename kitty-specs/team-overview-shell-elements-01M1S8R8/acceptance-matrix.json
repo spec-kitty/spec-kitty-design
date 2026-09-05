@@ -415,6 +415,14 @@
       "verification_command": "test \"$(gh pr view --json baseRefName --jq .baseRefName)\" = train/elements-first && gh pr view --json body --jq .body | rg -q \"Refs #145\"",
       "result": "pending",
       "evidence": null
+    },
+    {
+      "invariant_id": "NI-005",
+      "description": "Final external evidence, PR head, clean worktree, and train diff all identify the same post-baseline exact SHA.",
+      "verification_method": "custom_command",
+      "verification_command": "test \"$(gh pr view --json headRefOid --jq .headRefOid)\" = \"$(git rev-parse HEAD)\" && test -z \"$(git status --porcelain)\" && git diff --check <current-train-sha>..HEAD",
+      "result": "pending",
+      "evidence": null
     }
   ],
   "legacy_negative_invariants": [
