@@ -95,7 +95,7 @@ packages/elements/src/
 │   └── sk-form-textarea.ts              # UNCHANGED behaviour; only benefits from any shared
 │                                         #   plumbing #122 lands in form-control-base.ts
 packages/elements/custom-elements.json    # regenerated (new attributes/members on sk-form-input)
-packages/react/src/SkFormInput.{tsx,d.ts} # regenerated (new props; option model via useProperties)
+packages/react/src/SkFormInput.{js,d.ts} # regenerated (new props; option model via useProperties)
 packages/styles/src/form-input/*.html     # regenerated static markup (new attrs where present)
 fixtures/elements-behaviour/src/sk-form-input.test.ts   # + new behaviour ids
 fixtures/react-consumer/src/sk-form-input-options.test.tsx  # new — NFR-001/SC-006 measurement
@@ -233,7 +233,7 @@ artifacts (manifest, wrappers, styles-only barrel) are regenerated, never hand-e
   `scripts/normalise-manifest.mjs`'s `propertyOnlyFields()` AST walk requires (a public, settable,
   non-readonly, non-static, non-`#private` field; a `ReadonlyArray<…>`-shaped normalized type if an
   empty-array reset is wanted, matching `sk-transition-matrix`'s `columns`/`routes`).
-  `packages/react/src/SkFormInput.{tsx,d.ts}` — regenerated, not hand-edited: the generator should
+  `packages/react/src/SkFormInput.{js,d.ts}` — regenerated, not hand-edited: the generator should
   emit a `useProperties(ref, 'options', options, () => Object.freeze([]))` call, exactly as it does
   for `columns`/`routes`. `fixtures/react-consumer/src/sk-form-input-options.test.tsx` — new,
   structured like `sk-transition-matrix.test.tsx`'s `[SC-010]` test: assert the option array
