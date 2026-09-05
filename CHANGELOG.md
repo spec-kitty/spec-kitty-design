@@ -13,12 +13,13 @@ compatibility window to honour and no deprecation cycle to run.
 
 ### `@spec-kitty/elements`
 
-The custom-element base layer (ADR-8): fifteen components as standard custom elements, built on
+The custom-element base layer (ADR-8): nineteen components as standard custom elements, built on
 Lit, with styling delivered through constructed stylesheets and a closed styling API (ADR-9).
 
-- `sk-blog-card`, `sk-button`, `sk-card`, `sk-check-bullet`, `sk-feature-card`, `sk-form-input`,
-  `sk-form-textarea`, `sk-grid`, `sk-nav-pill`, `sk-pill-tag`, `sk-ribbon-card`, `sk-section-banner`,
-  `sk-site-footer`, `sk-stub`, `sk-transition-matrix`
+- `sk-app-shell`, `sk-blog-card`, `sk-button`, `sk-card`, `sk-check-bullet`, `sk-context-sidebar`,
+  `sk-feature-card`, `sk-form-input`, `sk-form-textarea`, `sk-grid`, `sk-nav-pill`, `sk-page-header`,
+  `sk-personal-rail`, `sk-pill-tag`, `sk-ribbon-card`, `sk-section-banner`, `sk-site-footer`,
+  `sk-stub`, `sk-transition-matrix`
 - Two distribution entries (ADR-10 §2): an ESM build with `lit` external, and a self-contained
   classic-script IIFE that loads from `file://` with no network
 - `custom-elements.json` manifest, generated and drift-checked
