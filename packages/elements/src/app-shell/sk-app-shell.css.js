@@ -2,5 +2,5 @@
 // Source of record: packages/styles/src/app-shell/sk-app-shell.css
 // Regenerate: node scripts/build-elements-css.mjs
 const sheet = new CSSStyleSheet();
-sheet.replaceSync(":host {\n  display: block;\n}");
+sheet.replaceSync(":host {\n  display: block;\n  width: 100%;\n  min-width: 0;\n  container-type: inline-size;\n}\n\n.sk-app-shell {\n  display: grid;\n  width: 100%;\n  min-width: 0;\n  grid-template-columns:\n    var(--sk-layout-personal-rail-width)\n    var(--sk-layout-context-sidebar-width)\n    minmax(0, 1fr);\n}\n\n.sk-app-shell__personal,\n.sk-app-shell__context,\n.sk-app-shell__content,\n.sk-app-shell__header,\n.sk-app-shell__main {\n  min-width: 0;\n}\n\n@container (max-width: 720px) {\n  .sk-app-shell {\n    grid-template-columns: minmax(0, 1fr);\n  }\n}");
 export default sheet;
