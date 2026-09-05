@@ -1,0 +1,89 @@
+{
+  "rows": {
+    "#76": {
+      "evidence_ref": "Issue #76 is closed and its elements-first recipe is present at docs/contributing/adding-a-component.md on the recorded train base.",
+      "fr": "FR-001–FR-020",
+      "nfr": "NFR-006–NFR-008, NFR-010",
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": "SC-002, SC-010, SC-012",
+      "scope": "Verified prerequisite: the authoring recipe governs component structure and generated artifacts; no work from #76 is reopened here.",
+      "source_file": "plan.md",
+      "title": "[M10] elements-first-authoring-recipe — rewrite the recipe before the batches",
+      "verdict": "verified-already-fixed",
+      "wp": "WP03"
+    },
+    "#79": {
+      "evidence_ref": "https://github.com/spec-kitty/spec-kitty-design/pull/140 merged to train as 70742b8436ca89e09cb6e0416c0830f4bded3289",
+      "fr": "FR-005, FR-010",
+      "nfr": null,
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": "SC-005, SC-008",
+      "scope": "Verified prerequisite: reuse landed sk-button and sk-pill-tag; do not modify or recreate them.",
+      "source_file": "spec.md",
+      "title": "[M13] component-migration-batch-primitives — button, pill-tag, check-bullet",
+      "verdict": "verified-already-fixed",
+      "wp": "WP03"
+    },
+    "#92": {
+      "evidence_ref": "https://github.com/spec-kitty/spec-kitty-design/issues/92 is closed after #140 established consumer-owned native list semantics.",
+      "fr": "FR-016",
+      "nfr": "NFR-001",
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": "SC-001",
+      "scope": "Verified prerequisite and regression constraint: consumers retain native ul/li; this mission adds no list component or role.",
+      "source_file": "spec.md",
+      "title": "[a11y] sk-check-bullet breaks list semantics: the <li> is nested inside its own host element",
+      "verdict": "verified-already-fixed",
+      "wp": "WP03"
+    },
+    "#112": {
+      "evidence_ref": "Issue #112 remains open. Reinspect the held train during wrap-up and run its canonical conformance commands only if they have landed; no matrix or Svelte dependency is invented here.",
+      "fr": "FR-019",
+      "nfr": "NFR-007–NFR-008",
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": "SC-002, SC-010",
+      "scope": "Deferred external dependency: machine-readable multi-surface conformance matrix and Svelte decision are owned by #112.",
+      "source_file": "plan.md",
+      "title": "[M5b] elements-conformance-matrix — the surfaces grid, and the Svelte target",
+      "verdict": "deferred-with-followup",
+      "wp": "WP03"
+    },
+    "#125": {
+      "evidence_ref": "Issue #125 remains open as the programme parent; #146 supplies only four feed primitives and does not publish npm packages or integrate Team Kitty.",
+      "fr": "FR-001–FR-020",
+      "nfr": "NFR-001–NFR-010",
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": "SC-001–SC-012",
+      "scope": "Deferred parent scope: finish/publish the full component conversion and consume it in Team Kitty outside this mission.",
+      "source_file": "tasks.md",
+      "title": "Finish shared component-library conversion (est. 20–30 hrs), test, push to npm; implement into Team Kitty during UI redesign",
+      "verdict": "deferred-with-followup",
+      "wp": "WP03"
+    },
+    "#144": {
+      "evidence_ref": "Parent epic remains open across child issues #145–#150; this mission owns only child #146.",
+      "fr": "FR-001–FR-020",
+      "nfr": "NFR-001–NFR-010",
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": "SC-001–SC-012",
+      "scope": "Deferred parent epic; completion is not implied by this child mission.",
+      "source_file": "spec.md",
+      "title": "Epic: Team overview — stateless dashboard elements for the approved redesign",
+      "verdict": "deferred-with-followup",
+      "wp": "WP03"
+    },
+    "#146": {
+      "evidence_ref": "Implemented across WP01–WP03; keep in-mission until exact-head CI/visual/squad/acceptance/approval gates and the authorized train merge all complete.",
+      "fr": "FR-001–FR-020",
+      "nfr": "NFR-001–NFR-010",
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": "SC-001–SC-012",
+      "scope": "The mission issue. WP03 reconciles pending evidence; wrap-up alone may set the final fixed verdict after train merge.",
+      "source_file": "spec.md",
+      "title": "[TKO2] team-overview-feed-elements — section-header, action-row, status-indicator, entity-marker",
+      "verdict": "in-mission",
+      "wp": "WP03"
+    }
+  },
+  "schema_version": 1
+}
