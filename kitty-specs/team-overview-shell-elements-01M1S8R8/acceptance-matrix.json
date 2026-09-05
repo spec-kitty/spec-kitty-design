@@ -18,10 +18,10 @@
       "criterion_id": "FR-002",
       "description": "The shell resolves 56px and 240px navigation columns with a shrink-safe remaining column at 1280px and 1440px.",
       "proof_type": "automated_test",
-      "evidence": "Owner WP01: sk-app-shell focused geometry probes measure rendered columns at both desktop widths and assert minmax(0, 1fr)-equivalent containment.",
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "Verified on aggregate lane 89bbf7eb6fb12ca6aab0a780673ac93f506316e0: npm run test passed 278/278 (32 node + 246 Chromium); focused fixtures, exact parts/label/sheet contracts, generated public surfaces, and compatibility checks all green.",
+      "pass_fail": "pass",
+      "verified_by": "codex/frontend-freddy/WP04",
+      "verified_at": "2026-09-05T23:33:37.420234+00:00",
       "notes": "Planned evidence mapping; populate the exact command result and immutable SHA when the owning WP or wrap-up step executes."
     },
     {
