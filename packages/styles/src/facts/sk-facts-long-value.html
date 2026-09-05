@@ -1,5 +1,9 @@
 <!-- @spec-kitty/styles — sk-facts (long term / long value, proving no truncation) -->
-<dl class="sk-facts">
+<!-- Targets --two-col deliberately: the stacked default has no width constraint at all,
+     so nothing here could ever wrap or overflow oddly -- the grid's `max-content 1fr`
+     columns are the one place a long value has a real constraint to prove correct
+     against. -->
+<dl class="sk-facts sk-facts--two-col">
   <dt class="sk-facts__term">Deployment strategy and rollback policy</dt>
   <dd class="sk-facts__value">Blue-green with automatic rollback if the error rate exceeds 1% within the first ten minutes after a release, or if any readiness probe fails for more than three consecutive checks.</dd>
   <dt class="sk-facts__term">Owner</dt>

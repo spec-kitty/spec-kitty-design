@@ -83,7 +83,9 @@ copy: `@media (prefers-reduced-motion: reduce)` scoped to the exact selector and
 transitioning property your component owns — never a wildcard over the component's own subtree.
 
 **Forced-colors is genuinely new territory** — no `forced-colors` block existed anywhere in the
-repo before #176. Three things are true and easy to get backwards:
+repo before #176. What follows was corrected once already, at #176's own pre-merge gate: an
+earlier revision of this section named the wrong recolor mechanism. Read the correction, not just
+the rule, or the next component will re-derive the wrong reason for the right-looking code.
 
 - A plain `border` already survives `forced-colors: active` with **zero** author CSS — the
   browser remaps border colors to a system color automatically. `background`/`background-color`
@@ -91,19 +93,40 @@ repo before #176. Three things are true and easy to get backwards:
   `declaration-strict-value` regardless. `box-shadow` also does **not** survive — it computes
   away entirely under forced-colors, so a focus ring built from `box-shadow` alone disappears.
   Use `outline` for focus rings; it is preserved/remapped automatically the same way `border` is.
-- A `content`-drawn or `border`-drawn marker/icon survives (forced-colors maps text and border
-  colors to `CanvasText`); a `background`-drawn icon does not, and forcing it to survive with
-  `forced-color-adjust: none` freezes it at its **authored** color, which is frequently invisible
-  against the forced-colors background — measured dark-grey-on-black in one probe. Never set
-  `forced-color-adjust: none` on an affordance that must remain visible.
+- **A `<summary>` (like `<a>`) recolors under forced-colors intrinsically — this is a
+  link-element-specific mapping to the `LinkText` system color, not a general rule that "content
+  glyphs get recolored automatically".** An earlier revision of this section claimed the latter;
+  isolated measurement disproves it: a bare, unstyled `<details><summary>` recolors identically
+  with no CSS at all, and the actual measured colors (`rgb(255,255,0)` dark scheme /
+  `rgb(0,0,159)` light scheme) are `LinkText`, not `CanvasText` (which is white/black). What IS
+  still true and still load-bearing: a `background`-drawn marker/icon gets **none** of this
+  automatic treatment, and forcing it to survive with `forced-color-adjust: none` freezes it at
+  its **authored** color, which is frequently invisible against the forced-colors background —
+  measured dark-grey-on-black in one probe. Never set `forced-color-adjust: none` on an
+  affordance that must remain visible; use a content- or border-drawn technique instead, and
+  verify the actual recolor mechanism for the specific element you're styling rather than
+  assuming this `<summary>`-specific mapping generalizes to other elements.
   See `packages/styles/src/disclosure/sk-disclosure.css` for the worked example and its comments.
-- `stylelint`'s `declaration-strict-value` polices `/color/` as a substring match — it catches
-  `border-color`, `outline-color`, and plain `color`, not just the obvious ones. The **unpoliced**
-  shorthand forms (`border: 1px solid CanvasText;`, `outline: 2px solid Highlight;`) satisfy
-  NFR-style token-only rules with **zero** new stylelint exceptions; the `-color` longhand forms
-  do not and should not be worked around with an exception. `packages/styles/src/skip-link/sk-skip-link.css`
-  and `packages/styles/src/data-table/sk-data-table.css` both use this pattern — copy it rather
-  than re-deriving a new one per component.
+- **A CSS Generated Content glyph is part of the accessible name unless you say otherwise.**
+  Measured in-engine: `.sk-disclosure__summary::before { content: '▸'; }` made the CDP
+  accessibility tree report `"▸ Deployment history"` for the whole summary — every disclosure
+  announced the decorative marker before its own label. Fix: `content: '▸' / '';` — CSS Generated
+  Content's alt-text syntax (a second string after `/`) replaces what the glyph contributes to the
+  accessible name, independent of what it paints. Use this for any `content`-drawn decorative
+  glyph on a labelled control.
+- `stylelint`'s `declaration-strict-value` polices `/color/` as a substring match (`border-color`,
+  `outline-color`, plain `color`) plus the literal properties `background`/`background-color`. It
+  does **not** police the `border`/`outline` **shorthand** forms at all, regardless of value — a
+  hardcoded, non-token color in shorthand form passes identically to a compliant one. That is a
+  gate being blind, not a gate being satisfied, and an earlier revision of this section
+  recommended exactly that shorthand-to-dodge-the-policed-list trick. **Use the LONGHAND
+  `-color` properties instead** (`border-left-color`, `outline-color`), and add the specific
+  system-color keywords you use (this repo's set so far: `Canvas`, `CanvasText`, `Highlight`,
+  `HighlightText`, `ButtonText`, `LinkText`) to `stylelint.config.mjs`'s `ignoreValues` — a single,
+  additive, reviewable list the gate then positively certifies against, rather than a property
+  family it never inspects. `packages/styles/src/skip-link/sk-skip-link.css` and
+  `packages/styles/src/data-table/sk-data-table.css` both use this pattern — copy it rather than
+  re-deriving a new one per component.
 
 ### 2. Author the markup ONCE, in `packages/elements`
 
