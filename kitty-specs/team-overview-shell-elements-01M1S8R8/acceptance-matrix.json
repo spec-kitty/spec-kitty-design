@@ -368,10 +368,10 @@
       "criterion_id": "SC-012",
       "description": "The post-consolidation exact head passes local, CI, approved visual, squad, and maintainer gates.",
       "proof_type": "manual_review",
-      "evidence": "Owner mission wrap-up: pin all evidence to the PR head after authoritative PNG commit and record it externally on immutable PR comment/check surfaces; under the SK-178 waiver do not run a tracked acceptance writer that changes the certified head, and stop for maintainer disposition if no non-mutating verdict surface exists. Any other push invalidates evidence and train movement requires an explicit rebaseline decision. Once that authorized PR is verified merged into the train, close #145/#153 with merged PR/commit evidence and prove the governed non-target issue states did not change.",
+      "evidence": "Pending required SK-179 consolidation, draft train/elements-first PR, CI-authoritative visual baseline commit, exact-PR-head gates, independent lenses, maintainer approval, verified train merge, and governed #145/#153 closeout. WP04 lane evidence is pinned to 89bbf7eb6fb12ca6aab0a780673ac93f506316e0.",
       "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "verified_by": "codex/frontend-freddy/WP04",
+      "verified_at": "2026-09-05T23:34:32.547914+00:00",
       "notes": "Planned evidence mapping; populate the exact command result and immutable SHA when the owning WP or wrap-up step executes."
     }
   ],
