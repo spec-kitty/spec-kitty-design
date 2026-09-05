@@ -500,7 +500,7 @@ The `open` attribute is entirely the consumer's — the platform owns open/close
 class family only styles it. The marker is a `content`-drawn glyph with its accessible-name
 contribution suppressed (`content: '▸' / '';`), never the sole affordance for state.
 
-[View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/primitives-skdisclosure-html--closed-default)
+[View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/primitives-skdisclosure-html--closed)
 
 ---
 
@@ -512,32 +512,41 @@ documented narrow-width treatment that never reflows cells.
 **CSS-only** (`@spec-kitty/styles`, no JavaScript, no `sk-*` element — #176):
 
 ```html
-<table class="sk-data-table">
-  <caption>Recent builds</caption>
-  <thead>
-    <tr><th scope="col">Build</th><th scope="col">Status</th><th scope="col">Cost</th></tr>
-  </thead>
-  <tbody>
-    <tr><td>#1042</td><td>Passed</td><td class="sk-data-table__cell--numeric">$0.42</td></tr>
-  </tbody>
-</table>
+<div class="sk-data-table__scroller">
+  <table class="sk-data-table">
+    <caption>Recent builds</caption>
+    <thead>
+      <tr><th scope="col">Build</th><th scope="col">Status</th><th scope="col">Cost</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>#1042</td><td>Passed</td><td class="sk-data-table__cell--numeric">$0.42</td></tr>
+    </tbody>
+  </table>
+</div>
 ```
 
-At a narrow width, wrap the (still intact) table in a labelled, keyboard-scrollable region instead
-of reflowing cells — block-reflow drops header association and is explicitly rejected:
+`.sk-data-table__scroller` is part of the markup contract, not an optional narrow-width extra —
+all three authored exemplars carry it. Without it there is no `overflow-x`, and
+`.sk-data-table--sticky-header` has no scrolling ancestor to pin against, so the modifier does
+nothing.
+
+At a narrow width, add a labelled, keyboard-scrollable region to that same wrapper instead of
+reflowing cells — block-reflow drops header association and is explicitly rejected:
 
 ```html
-<div class="sk-data-table__scroller" role="region" aria-label="Recent builds" tabindex="0">
+<div class="sk-data-table__scroller" role="region" aria-label="Recent builds, narrow view" tabindex="0">
   <table class="sk-data-table">…</table>
 </div>
 ```
 
 Only give the scroller `role="region"`/`tabindex="0"` when it genuinely overflows — on a table
-that already fits, that triad is a dead tab stop and a duplicate landmark of `<caption>`. If you
-constrain a wide table's height or width yourself (e.g. `max-height` for a long list), and that
-constraint makes the scroller genuinely scrollable where it wasn't before, add the triad at that
-point — a scrollable region with no way to reach it by keyboard is a real accessibility defect,
-not a style choice. `.sk-data-table--sticky-header` pins the header row while the body scrolls
+that already fits, that triad is a dead tab stop and a duplicate landmark of `<caption>`; the
+accessible name must also be distinct from `<caption>`'s own text ("narrow view", not "Recent
+builds" again — a duplicate name is itself a defect). If you constrain a wide table's height or
+width yourself (e.g. `max-height` for a long list), and that constraint makes the scroller
+genuinely scrollable where it wasn't before, add the triad at that point — a scrollable region
+with no way to reach it by keyboard is a real accessibility defect, not a style choice.
+`.sk-data-table--sticky-header` pins the header row while the body scrolls
 (requires the scroller above as its scrolling ancestor). This mission is tone-free by epic ruling
 — no status/tone row colouring; that waits on a semantic status-token axis that doesn't exist yet.
 
