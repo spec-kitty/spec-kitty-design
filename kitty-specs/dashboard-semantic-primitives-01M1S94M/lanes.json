@@ -74,12 +74,16 @@
         "dashboard",
         "legacy-cleanup"
       ],
-      "depends_on_lanes": [],
-      "parallel_group": 0
+      "depends_on_lanes": [
+        "lane-a",
+        "lane-b",
+        "lane-c"
+      ],
+      "parallel_group": 1
     }
   ],
-  "computed_at": "2026-09-05T18:43:09.738870+00:00",
+  "computed_at": "2026-09-05T18:44:06.659038+00:00",
   "computed_from": "dependency_graph+ownership",
   "planning_artifact_wps": [],
-  "planning_commit_sha": "4c13c2ae18dc7080363a2651a2f9e779c71739f2"
+  "planning_commit_sha": "1c44f33750017a6c4f505e7a675d6cdc146bb873"
 }

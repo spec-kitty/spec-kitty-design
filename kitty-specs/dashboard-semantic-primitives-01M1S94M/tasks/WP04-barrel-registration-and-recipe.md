@@ -1,7 +1,10 @@
 ---
 work_package_id: WP04
 title: Barrel registration, entry point, and authoring recipe
-dependencies: []
+dependencies:
+- WP01
+- WP02
+- WP03
 requirement_refs:
 - FR-007
 - FR-008
