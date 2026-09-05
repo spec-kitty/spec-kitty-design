@@ -9,8 +9,8 @@ so far — as **custom elements** in `@spec-kitty/elements`. Both require `@spec
 `sk-personal-rail`, `sk-pill-tag`, `sk-ribbon-card`, `sk-section-banner`, `sk-site-footer`,
 `sk-stub`, and `sk-transition-matrix`.
 One of the catalogue's component packages is CSS only by a recorded decision — `form-field`. See
-ADR-10, _form-field is deliberately styles-only_. Composite sections below such as Hero and Callout
-are CSS-only _patterns_ rather than packages, and are not part of that count. Each section below says which it is, because the
+ADR-10, *form-field is deliberately styles-only*. Composite sections below such as Hero and Callout
+are CSS-only *patterns* rather than packages, and are not part of that count. Each section below says which it is, because the
 difference decides how you use it.
 
 Because a custom element needs no wrapper, every framework can use the migrated ones directly. A
@@ -71,22 +71,22 @@ element remain the original native controls and keep their native events.
 the structured inputs as JavaScript properties; arrays are not serialized to attributes.
 
 ```js
-const matrix = document.querySelector("sk-transition-matrix");
+const matrix = document.querySelector('sk-transition-matrix');
 matrix.columns = Object.freeze([
-  Object.freeze({ id: "previous", label: "Previous" }),
-  Object.freeze({ id: "current", label: "Current" }),
+  Object.freeze({ id: 'previous', label: 'Previous' }),
+  Object.freeze({ id: 'current', label: 'Current' }),
 ]);
 matrix.routes = Object.freeze([
   Object.freeze({
-    id: "queued-active",
-    label: "Queued to active",
-    tone: "forward",
+    id: 'queued-active',
+    label: 'Queued to active',
+    tone: 'forward',
     values: Object.freeze({ previous: 3, current: 5 }),
   }),
 ]);
 matrix.selectable = true;
-matrix.selectedRouteId = "queued-active";
-matrix.addEventListener("sk-transition-matrix-select", (event) => {
+matrix.selectedRouteId = 'queued-active';
+matrix.addEventListener('sk-transition-matrix-select', (event) => {
   // The event requests a change. The consumer remains the owner of selectedRouteId.
   matrix.selectedRouteId = event.detail.routeId;
 });
@@ -117,10 +117,7 @@ Primary and secondary call-to-action buttons used to drive user actions.
 **As a custom element** — `sk-button` is migrated, so it needs no wrapper:
 
 ```html
-<script
-  type="module"
-  src="/node_modules/@spec-kitty/elements/dist/elements.js"
-></script>
+<script type="module" src="/node_modules/@spec-kitty/elements/dist/elements.js"></script>
 
 <sk-button variant="primary">Get started</sk-button>
 <sk-button variant="secondary">Learn more</sk-button>
@@ -175,9 +172,7 @@ It fires `sk-nav-pill-toggle` before the open state changes, with
 
 ```html
 <nav class="sk-nav">
-  <a class="sk-nav__logo" href="/"
-    ><img src="/assets/logo.png" alt="Spec Kitty"
-  /></a>
+  <a class="sk-nav__logo" href="/"><img src="/assets/logo.png" alt="Spec Kitty"></a>
   <ul class="sk-nav__links">
     <li><a class="sk-nav__pill" href="/platform">Platform</a></li>
     <li><a class="sk-nav__pill" href="/docs">Docs</a></li>
@@ -196,10 +191,7 @@ Pill-shaped tags used to label and categorise content inline.
 **As a custom element** — `sk-pill-tag` is migrated, so it needs no wrapper:
 
 ```html
-<script
-  type="module"
-  src="/node_modules/@spec-kitty/elements/dist/elements.js"
-></script>
+<script type="module" src="/node_modules/@spec-kitty/elements/dist/elements.js"></script>
 
 <sk-pill-tag>Design system</sk-pill-tag>
 <sk-pill-tag variant="green">Shipped</sk-pill-tag>
@@ -227,10 +219,7 @@ Ticked list items, for feature and requirement lists.
 **As a custom element** — `sk-check-bullet` is migrated, so it needs no wrapper:
 
 ```html
-<script
-  type="module"
-  src="/node_modules/@spec-kitty/elements/dist/elements.js"
-></script>
+<script type="module" src="/node_modules/@spec-kitty/elements/dist/elements.js"></script>
 
 <ul role="list">
   <sk-check-bullet>Requirements captured up front</sk-check-bullet>
@@ -267,14 +256,8 @@ A brand column, link columns and a legal line, in a grid that collapses to one c
 **As a custom element** — `sk-site-footer` is migrated, so it needs no wrapper:
 
 ```html
-<script
-  type="module"
-  src="/node_modules/@spec-kitty/elements/dist/elements.js"
-></script>
-<link
-  rel="stylesheet"
-  href="/node_modules/@spec-kitty/styles/dist/site-footer/sk-site-footer.css"
-/>
+<script type="module" src="/node_modules/@spec-kitty/elements/dist/elements.js"></script>
+<link rel="stylesheet" href="/node_modules/@spec-kitty/styles/dist/site-footer/sk-site-footer.css" />
 
 <sk-site-footer
   wordmark="Your Brand"
@@ -283,12 +266,8 @@ A brand column, link columns and a legal line, in a grid that collapses to one c
   headingtwo="Connect"
   legal="© 2026 Your Company."
 >
-  <li slot="column-one">
-    <a href="#" class="sk-site-footer__link">Platform</a>
-  </li>
-  <li slot="column-two">
-    <a href="#" class="sk-site-footer__link">Contact</a>
-  </li>
+  <li slot="column-one"><a href="#" class="sk-site-footer__link">Platform</a></li>
+  <li slot="column-two"><a href="#" class="sk-site-footer__link">Contact</a></li>
 </sk-site-footer>
 ```
 
@@ -323,14 +302,9 @@ Eyebrow labels and section banners used to introduce sections and add visual hie
 **As a custom element** — `sk-section-banner` is migrated, so it needs no wrapper:
 
 ```html
-<script
-  type="module"
-  src="/node_modules/@spec-kitty/elements/dist/elements.js"
-></script>
+<script type="module" src="/node_modules/@spec-kitty/elements/dist/elements.js"></script>
 
-<sk-section-banner variant="purple"
-  >Version 2.x — event architecture</sk-section-banner
->
+<sk-section-banner variant="purple">Version 2.x — event architecture</sk-section-banner>
 ```
 
 The label is slotted content, not a property: a banner's text belongs to your page. Omit
@@ -390,16 +364,11 @@ Surface containers for grouping related content, used in feature grids, blog lis
 **As a custom element** — migrated, so it needs no wrapper:
 
 ```html
-<script
-  type="module"
-  src="/node_modules/@spec-kitty/elements/dist/elements.js"
-></script>
+<script type="module" src="/node_modules/@spec-kitty/elements/dist/elements.js"></script>
 
 <sk-card variant="blue">
   <h3>Structured requirements</h3>
-  <p>
-    Developers spend time building, not being blocked on finalized requirements.
-  </p>
+  <p>Developers spend time building, not being blocked on finalized requirements.</p>
 </sk-card>
 ```
 
@@ -412,9 +381,7 @@ token for a card nested inside another.
 <div class="sk-card">
   <span class="sk-eyebrow">Feature</span>
   <h3>Structured requirements</h3>
-  <p>
-    Developers spend time building, not being blocked on finalized requirements.
-  </p>
+  <p>Developers spend time building, not being blocked on finalized requirements.</p>
 </div>
 ```
 
@@ -440,11 +407,7 @@ Labelled text inputs, selects, and validation states for data-entry surfaces.
   description="As it should appear on your invoice."
 ></sk-form-input>
 
-<sk-form-textarea
-  name="goal"
-  label="What are you trying to ship?"
-  rows="4"
-></sk-form-textarea>
+<sk-form-textarea name="goal" label="What are you trying to ship?" rows="4"></sk-form-textarea>
 ```
 
 The element owns its own label, description and validation message, and participates in a
@@ -454,7 +417,7 @@ native `<form>`: put it inside one, give it a `name`, and its value arrives in `
 as real elements and ran axe over each. A consumer-supplied `<label>` pointing at a control
 inside the element's shadow root **fails** — axe resolves `aria-labelledby` from the attribute
 and scopes ID lookups to `getRootNode()`, so no cross-root reference resolves, and labelling the
-_host_ does not label the inner control. The same applies to `description`, which reaches the
+*host* does not label the inner control. The same applies to `description`, which reaches the
 control through `aria-describedby`. Both are therefore properties. There is no `for`/`id` pair
 to get wrong, because there is none.
 
@@ -474,7 +437,7 @@ would have contributed is `display: flex; flex-direction: column; gap`, which th
 ```html
 <div class="sk-form-field">
   <label class="sk-form-field__label" for="name">Your name</label>
-  <input class="sk-input" id="name" type="text" placeholder="Jane Smith" />
+  <input class="sk-input" id="name" type="text" placeholder="Jane Smith">
 </div>
 ```
 
@@ -494,9 +457,7 @@ Full-width hero block with eyebrow, headline, lead copy, checkmark bullet list, 
 <section class="sk-hero">
   <span class="sk-eyebrow">Open-source</span>
   <h1 class="sk-hero__headline">Bring structure to AI-assisted delivery</h1>
-  <p class="sk-hero__lead">
-    Developers spend time building, not being blocked on finalized requirements.
-  </p>
+  <p class="sk-hero__lead">Developers spend time building, not being blocked on finalized requirements.</p>
   <ul class="sk-hero__bullets">
     <li>Spec -> Plan -> Implement</li>
     <li>No requirement drift</li>

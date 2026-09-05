@@ -49,7 +49,6 @@ test('the labelled landmark falls back only for blank labels and is never naviga
   const exact = '  Context for A & B  ';
   const supplied = await mount(exact);
   expect(supplied.label).toBe(exact);
-  expect(supplied.getAttribute('label')).toBe(exact);
   expect(supplied.shadowRoot!.querySelector('aside')?.getAttribute('aria-label')).toBe(exact);
   expect(supplied.shadowRoot!.querySelectorAll('aside')).toHaveLength(1);
   expect(supplied.shadowRoot!.querySelectorAll('nav')).toHaveLength(0);

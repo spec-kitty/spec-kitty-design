@@ -1,4 +1,4 @@
-import { test, expect, type Locator, type Page } from "@playwright/test";
+import { test, expect, type Locator, type Page } from '@playwright/test';
 
 test.setTimeout(60000);
 
@@ -34,79 +34,52 @@ test.setTimeout(60000);
 // each test waits on its component's selector. Do not replace a waitForSelector with a
 // bare waitForLoadState, and do not un-clip the screenshots.
 
-test("SK-stub HTML default — visual baseline", async ({ page }) => {
-  await page.goto(
-    "/iframe.html?id=primitives-skstub-html--default&viewMode=story",
-  );
-  const target = page.locator(".sk-stub").first();
-  await target.waitFor({ state: "visible", timeout: 20000 });
-  await expect(target).toHaveScreenshot("sk-stub-html-default.png", {
-    threshold: 0.02,
-    maxDiffPixelRatio: 0.02,
-  });
+test('SK-stub HTML default — visual baseline', async ({ page }) => {
+  await page.goto('/iframe.html?id=primitives-skstub-html--default&viewMode=story');
+  const target = page.locator('.sk-stub').first();
+  await target.waitFor({ state: 'visible', timeout: 20000 });
+  await expect(target).toHaveScreenshot('sk-stub-html-default.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
 });
 
-test("SK-feature-card HTML default — visual baseline", async ({ page }) => {
-  await page.goto(
-    "/iframe.html?id=components-skfeaturecard-html--default&viewMode=story",
-  );
-  const target = page.locator(".sk-feature-card").first();
-  await target.waitFor({ state: "visible", timeout: 20000 });
-  await expect(target).toHaveScreenshot("sk-feature-card-html-default.png", {
-    threshold: 0.02,
-    maxDiffPixelRatio: 0.02,
-  });
+test('SK-feature-card HTML default — visual baseline', async ({ page }) => {
+  await page.goto('/iframe.html?id=components-skfeaturecard-html--default&viewMode=story');
+  const target = page.locator('.sk-feature-card').first();
+  await target.waitFor({ state: 'visible', timeout: 20000 });
+  await expect(target).toHaveScreenshot('sk-feature-card-html-default.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
 });
 
-test("SK-ribbon-card HTML with ribbon — visual baseline", async ({ page }) => {
-  await page.goto(
-    "/iframe.html?id=components-skribboncard-html--with-ribbon&viewMode=story",
-  );
-  const target = page.locator(".sk-ribbon-card").first();
-  await target.waitFor({ state: "visible", timeout: 20000 });
-  await expect(target).toHaveScreenshot("sk-ribbon-card-html-with-ribbon.png", {
-    threshold: 0.02,
-    maxDiffPixelRatio: 0.02,
-  });
+test('SK-ribbon-card HTML with ribbon — visual baseline', async ({ page }) => {
+  await page.goto('/iframe.html?id=components-skribboncard-html--with-ribbon&viewMode=story');
+  const target = page.locator('.sk-ribbon-card').first();
+  await target.waitFor({ state: 'visible', timeout: 20000 });
+  await expect(target).toHaveScreenshot('sk-ribbon-card-html-with-ribbon.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
 });
 
-const transitionMatrixStory = async (
-  page: Page,
-  id: string,
-): Promise<Locator> => {
-  await page.goto(
-    `/iframe.html?id=elements-sktransitionmatrix--${id}&viewMode=story`,
-  );
-  const host = page.locator("sk-transition-matrix").first();
-  await host.waitFor({ state: "visible", timeout: 20000 });
-  await expect(host.locator("table")).toBeVisible();
+const transitionMatrixStory = async (page: Page, id: string): Promise<Locator> => {
+  await page.goto(`/iframe.html?id=elements-sktransitionmatrix--${id}&viewMode=story`);
+  const host = page.locator('sk-transition-matrix').first();
+  await host.waitFor({ state: 'visible', timeout: 20000 });
+  await expect(host.locator('table')).toBeVisible();
   return host;
 };
 
-const teamOverviewShellStory = async (
-  page: Page,
-  light = false,
-): Promise<Locator> => {
-  await page.goto(
-    "/iframe.html?id=elements-skappshell--desktop-composition&viewMode=story",
-  );
-  await page.addScriptTag({ url: "/elements-dist/elements.js" });
+const teamOverviewShellStory = async (page: Page, light = false): Promise<Locator> => {
+  await page.goto('/iframe.html?id=elements-skappshell--desktop-composition&viewMode=story');
+  await page.addScriptTag({ url: '/elements-dist/elements.js' });
   await page.evaluate(async (isLight) => {
-    await Promise.all(
-      [
-        "sk-app-shell",
-        "sk-personal-rail",
-        "sk-context-sidebar",
-        "sk-page-header",
-        "sk-button",
-      ].map((tag) => customElements.whenDefined(tag)),
-    );
-    const root = document.querySelector<HTMLElement>("#storybook-root")!;
-    root.classList.toggle("sk-light", isLight);
-    root.style.minHeight = "100vh";
-    root.style.color = "var(--sk-fg-body)";
-    root.style.background = "var(--sk-surface-page)";
-    root.style.fontFamily = "var(--sk-font-sans)";
+    await Promise.all([
+      'sk-app-shell',
+      'sk-personal-rail',
+      'sk-context-sidebar',
+      'sk-page-header',
+      'sk-button',
+    ].map((tag) => customElements.whenDefined(tag)));
+    const root = document.querySelector<HTMLElement>('#storybook-root')!;
+    root.classList.toggle('sk-light', isLight);
+    root.style.minHeight = '100vh';
+    root.style.color = 'var(--sk-fg-body)';
+    root.style.background = 'var(--sk-surface-page)';
+    root.style.fontFamily = 'var(--sk-font-sans)';
     root.innerHTML = `
       <sk-app-shell data-visual-shell>
         <sk-personal-rail slot="personal-rail" label="Product areas">
@@ -130,176 +103,115 @@ const teamOverviewShellStory = async (
         <section aria-label="Delivery content"><p>Consumer-owned page content.</p></section>
       </sk-app-shell>`;
     const elements = root.querySelectorAll<HTMLElement>(
-      "sk-app-shell, sk-personal-rail, sk-context-sidebar, sk-page-header, sk-button",
+      'sk-app-shell, sk-personal-rail, sk-context-sidebar, sk-page-header, sk-button'
     );
-    await Promise.all(
-      [...elements].map(
-        (element) =>
-          (element as HTMLElement & { updateComplete?: Promise<unknown> })
-            .updateComplete,
-      ),
-    );
+    await Promise.all([...elements].map((element) =>
+      (element as HTMLElement & { updateComplete?: Promise<unknown> }).updateComplete
+    ));
   }, light);
-  const host = page.locator("sk-app-shell[data-visual-shell]").first();
-  await host.waitFor({ state: "visible", timeout: 20000 });
+  const host = page.locator('sk-app-shell[data-visual-shell]').first();
+  await host.waitFor({ state: 'visible', timeout: 20000 });
   await expect(host).not.toBeEmpty();
   return host;
 };
 
-test("SK-team-overview shell desktop dark — visual baseline", async ({
-  page,
-}) => {
+test('SK-team-overview shell desktop dark — visual baseline', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   const host = await teamOverviewShellStory(page);
-  await expect(host).toHaveScreenshot(
-    "sk-team-overview-shell-desktop-dark.png",
-    { threshold: 0.02, maxDiffPixelRatio: 0.02 },
-  );
+  await expect(host).toHaveScreenshot('sk-team-overview-shell-desktop-dark.png', {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+  });
 });
 
-test("SK-team-overview shell desktop light — visual baseline", async ({
-  page,
-}) => {
+test('SK-team-overview shell desktop light — visual baseline', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   const host = await teamOverviewShellStory(page, true);
-  await expect(host).toHaveScreenshot(
-    "sk-team-overview-shell-desktop-light.png",
-    { threshold: 0.02, maxDiffPixelRatio: 0.02 },
-  );
+  await expect(host).toHaveScreenshot('sk-team-overview-shell-desktop-light.png', {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+  });
 });
 
-test("SK-team-overview shell narrow — visual baseline", async ({ page }) => {
+test('SK-team-overview shell narrow — visual baseline', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 900 });
   const host = await teamOverviewShellStory(page);
-  await expect(host).toHaveScreenshot("sk-team-overview-shell-narrow.png", {
+  await expect(host).toHaveScreenshot('sk-team-overview-shell-narrow.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
   });
 });
 
 for (const light of [false, true]) {
-  test(`SK-icon button focus ${light ? "light" : "dark"} — visual baseline`, async ({
-    page,
-  }) => {
+  test(`SK-icon button focus ${light ? 'light' : 'dark'} — visual baseline`, async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await teamOverviewShellStory(page, light);
-    const control = page.getByRole("button", { name: "Refresh evidence" });
+    const control = page.getByRole('button', { name: 'Refresh evidence' });
     await control.focus();
     await expect(control).toBeFocused();
-    await expect(control).toHaveScreenshot(
-      `sk-icon-button-focus-${light ? "light" : "dark"}.png`,
-      { threshold: 0.02, maxDiffPixelRatio: 0.02 },
-    );
+    await expect(control).toHaveScreenshot(`sk-icon-button-focus-${light ? 'light' : 'dark'}.png`, {
+      threshold: 0.02,
+      maxDiffPixelRatio: 0.02,
+    });
   });
 }
 
-test("SK-transition-matrix approved dark — visual baseline", async ({
-  page,
-}) => {
-  const host = await transitionMatrixStory(page, "approved-example");
-  await expect(host).toHaveScreenshot(
-    "sk-transition-matrix-approved-dark.png",
-    { threshold: 0.02, maxDiffPixelRatio: 0.02 },
-  );
+test('SK-transition-matrix approved dark — visual baseline', async ({ page }) => {
+  const host = await transitionMatrixStory(page, 'approved-example');
+  await expect(host).toHaveScreenshot('sk-transition-matrix-approved-dark.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
 });
 
-test("SK-transition-matrix light — visual baseline", async ({ page }) => {
-  const host = await transitionMatrixStory(page, "light-mode");
-  await expect(host).toHaveScreenshot("sk-transition-matrix-light.png", {
-    threshold: 0.02,
-    maxDiffPixelRatio: 0.02,
-  });
+test('SK-transition-matrix light — visual baseline', async ({ page }) => {
+  const host = await transitionMatrixStory(page, 'light-mode');
+  await expect(host).toHaveScreenshot('sk-transition-matrix-light.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
 });
 
-test("SK-transition-matrix selectable rest and hover — visual baselines", async ({
-  page,
-}) => {
-  await transitionMatrixStory(page, "selectable-states");
-  const host = page
-    .locator("sk-transition-matrix[data-selectable-states]")
-    .first();
+test('SK-transition-matrix selectable rest and hover — visual baselines', async ({ page }) => {
+  await transitionMatrixStory(page, 'selectable-states');
+  const host = page.locator('sk-transition-matrix[data-selectable-states]').first();
   const row = host.locator('[data-route-id="planned-progress"]');
-  await expect(host).toHaveScreenshot(
-    "sk-transition-matrix-selectable-rest.png",
-    { threshold: 0.02, maxDiffPixelRatio: 0.02 },
-  );
+  await expect(host).toHaveScreenshot('sk-transition-matrix-selectable-rest.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
   await row.hover();
-  await expect(host).toHaveScreenshot(
-    "sk-transition-matrix-selectable-hover.png",
-    { threshold: 0.02, maxDiffPixelRatio: 0.02 },
-  );
+  await expect(host).toHaveScreenshot('sk-transition-matrix-selectable-hover.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
 });
 
-test("SK-transition-matrix keyboard focus and pressed — visual baselines", async ({
-  page,
-}) => {
-  await transitionMatrixStory(page, "selectable-states");
-  const host = page
-    .locator("sk-transition-matrix[data-selectable-states]")
-    .first();
+test('SK-transition-matrix keyboard focus and pressed — visual baselines', async ({ page }) => {
+  await transitionMatrixStory(page, 'selectable-states');
+  const host = page.locator('sk-transition-matrix[data-selectable-states]').first();
   const row = host.locator('[data-route-id="planned-progress"]');
   await row.focus();
-  await expect(host).toHaveScreenshot(
-    "sk-transition-matrix-selectable-focus-visible.png",
-    { threshold: 0.02, maxDiffPixelRatio: 0.02 },
-  );
-  await page.keyboard.down("Space");
-  await expect(row).toHaveAttribute("data-pressed", "true");
-  await expect(host).toHaveScreenshot(
-    "sk-transition-matrix-selectable-keyboard-pressed.png",
-    { threshold: 0.02, maxDiffPixelRatio: 0.02 },
-  );
-  await page.keyboard.up("Space");
+  await expect(host).toHaveScreenshot('sk-transition-matrix-selectable-focus-visible.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  await page.keyboard.down('Space');
+  await expect(row).toHaveAttribute('data-pressed', 'true');
+  await expect(host).toHaveScreenshot('sk-transition-matrix-selectable-keyboard-pressed.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  await page.keyboard.up('Space');
 });
 
-test("SK-transition-matrix pointer active — visual baseline", async ({
-  page,
-}) => {
-  await transitionMatrixStory(page, "selectable-states");
-  const host = page
-    .locator("sk-transition-matrix[data-selectable-states]")
-    .first();
+test('SK-transition-matrix pointer active — visual baseline', async ({ page }) => {
+  await transitionMatrixStory(page, 'selectable-states');
+  const host = page.locator('sk-transition-matrix[data-selectable-states]').first();
   const row = host.locator('[data-route-id="planned-progress"]');
   const box = await row.boundingBox();
   expect(box).not.toBe(null);
   await page.mouse.move(box!.x + box!.width / 2, box!.y + box!.height / 2);
   await page.mouse.down();
-  await expect(row).toHaveAttribute("data-pressed", "true");
-  await expect(host).toHaveScreenshot(
-    "sk-transition-matrix-selectable-pointer-active.png",
-    { threshold: 0.02, maxDiffPixelRatio: 0.02 },
-  );
+  await expect(row).toHaveAttribute('data-pressed', 'true');
+  await expect(host).toHaveScreenshot('sk-transition-matrix-selectable-pointer-active.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
   await page.mouse.up();
 });
 
-test("SK-transition-matrix non-selectable analogue — visual baseline", async ({
-  page,
-}) => {
-  await transitionMatrixStory(page, "selectable-states");
-  const host = page
-    .locator("sk-transition-matrix[data-disabled-analogue]")
-    .first();
-  await expect(host.locator("table")).toBeVisible();
-  await expect(host).toHaveScreenshot(
-    "sk-transition-matrix-non-selectable.png",
-    { threshold: 0.02, maxDiffPixelRatio: 0.02 },
-  );
+test('SK-transition-matrix non-selectable analogue — visual baseline', async ({ page }) => {
+  await transitionMatrixStory(page, 'selectable-states');
+  const host = page.locator('sk-transition-matrix[data-disabled-analogue]').first();
+  await expect(host.locator('table')).toBeVisible();
+  await expect(host).toHaveScreenshot('sk-transition-matrix-non-selectable.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
 });
 
-test("SK-transition-matrix narrow scrolled ownership — visual baseline", async ({
-  page,
-}) => {
+test('SK-transition-matrix narrow scrolled ownership — visual baseline', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  const host = await transitionMatrixStory(page, "approved-example");
+  const host = await transitionMatrixStory(page, 'approved-example');
   const scroller = host.locator('[part~="scroller"]');
-  await scroller.evaluate((node) => {
-    node.scrollLeft = node.scrollWidth;
-  });
-  await expect
-    .poll(() => scroller.evaluate((node) => node.scrollLeft))
-    .toBeGreaterThan(0);
-  await expect(host).toHaveScreenshot(
-    "sk-transition-matrix-narrow-scrolled.png",
-    { threshold: 0.02, maxDiffPixelRatio: 0.02 },
-  );
+  await scroller.evaluate((node) => { node.scrollLeft = node.scrollWidth; });
+  await expect.poll(() => scroller.evaluate((node) => node.scrollLeft)).toBeGreaterThan(0);
+  await expect(host).toHaveScreenshot('sk-transition-matrix-narrow-scrolled.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
 });

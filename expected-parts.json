@@ -41,16 +41,53 @@
       "personal",
       "shell"
     ],
-    "sk-blog-card": ["card", "content", "thumbnail"],
-    "sk-button": ["button"],
-    "sk-card": ["card"],
-    "sk-check-bullet": ["bullet", "icon"],
-    "sk-context-sidebar": ["content", "footer", "header", "sidebar"],
-    "sk-feature-card": ["card", "chip"],
-    "sk-form-input": ["control", "description", "error", "field", "label"],
-    "sk-form-textarea": ["control", "description", "error", "field", "label"],
-    "sk-grid": ["grid"],
-    "sk-nav-pill": ["hamburger", "items", "nav"],
+    "sk-blog-card": [
+      "card",
+      "content",
+      "thumbnail"
+    ],
+    "sk-button": [
+      "button"
+    ],
+    "sk-card": [
+      "card"
+    ],
+    "sk-check-bullet": [
+      "bullet",
+      "icon"
+    ],
+    "sk-context-sidebar": [
+      "content",
+      "footer",
+      "header",
+      "sidebar"
+    ],
+    "sk-feature-card": [
+      "card",
+      "chip"
+    ],
+    "sk-form-input": [
+      "control",
+      "description",
+      "error",
+      "field",
+      "label"
+    ],
+    "sk-form-textarea": [
+      "control",
+      "description",
+      "error",
+      "field",
+      "label"
+    ],
+    "sk-grid": [
+      "grid"
+    ],
+    "sk-nav-pill": [
+      "hamburger",
+      "items",
+      "nav"
+    ],
     "sk-page-header": [
       "actions",
       "eyebrow",
@@ -70,10 +107,25 @@
       "rail",
       "utilities"
     ],
-    "sk-pill-tag": ["tag"],
-    "sk-ribbon-card": ["card", "content", "ribbon"],
-    "sk-section-banner": ["banner", "dot", "label"],
-    "sk-site-footer": ["divider", "footer", "grid", "legal"],
+    "sk-pill-tag": [
+      "tag"
+    ],
+    "sk-ribbon-card": [
+      "card",
+      "content",
+      "ribbon"
+    ],
+    "sk-section-banner": [
+      "banner",
+      "dot",
+      "label"
+    ],
+    "sk-site-footer": [
+      "divider",
+      "footer",
+      "grid",
+      "legal"
+    ],
     "sk-transition-matrix": [
       "bar",
       "empty-state",

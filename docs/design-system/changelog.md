@@ -17,8 +17,8 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) conve
   other places.
   **An earlier revision of this entry claimed that ownership derivation "is the mechanism that
   makes ADR-9 Confirmation #1 checkable at all". That attribution was wrong**, and a lens
-  refuted it: Confirmation #1 is _"a lint rule rejects `:root`, `html`, `body` and
-  `:host-context()`"_, which is checkable whatever the class prefix, and ADR-9 §2 requires only
+  refuted it: Confirmation #1 is *"a lint rule rejects `:root`, `html`, `body` and
+  `:host-context()`"*, which is checkable whatever the class prefix, and ADR-9 §2 requires only
   that internal classes keep the `sk-` prefix — not that the family match the tag name. The
   rule is the gate's own generalisation beyond ADR-9's text, and it is now prescriptive for
   future missions, so **it needs to be written into an ADR**: filed as #152. ADR-9 is also
@@ -89,14 +89,14 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) conve
 - **`SkTagHTML()`, `SkEyebrowPillHTML()` and the `PillTagVariant` type** from
   `@spec-kitty/styles` (#79). The styles layer no longer exports markup BUILDER FUNCTIONS: the
   markup is authored once in the element's markup module and generated, so the exports are
-  constants like every other component's. `SkPillTagHTML` changes from a function _result_ to a
+  constants like every other component's. `SkPillTagHTML` changes from a function *result* to a
   constant, and per-variant constants (`SkPillTagGreenHTML`, `SkPillTagEyebrowHTML`, …) replace
   the function's arguments.
 - **`sk-button-primary.html` and `sk-button-secondary.html`** (#79) — hand-authored markup,
   replaced by generated exports (ADR-10 §3). These were published paths
   (`@spec-kitty/styles/button/*`), so this is a break for anyone who fetched them directly.
-  An earlier revision of this entry called them _"duplicates of what `sk-button.html` is now
-  generated to contain"_; **that was inaccurate** and a lens caught it — `sk-button.html` is
+  An earlier revision of this entry called them *"duplicates of what `sk-button.html` is now
+  generated to contain"*; **that was inaccurate** and a lens caught it — `sk-button.html` is
   the unmodified base (`<button class="sk-button">`), which carries neither modifier and, since
   `.sk-button` sets no background, paints nothing on its own. The tone-carrying equivalents are
   `SkButtonPrimaryHTML` and `SkButtonSecondaryHTML` in `@spec-kitty/styles`, generated per
@@ -113,5 +113,5 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) conve
 
 ---
 
-_Releases are tagged on the `main` branch following semantic versioning._
-_Breaking `--sk-*` token name changes increment the major version._
+*Releases are tagged on the `main` branch following semantic versioning.*
+*Breaking `--sk-*` token name changes increment the major version.*

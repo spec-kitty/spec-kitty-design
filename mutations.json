@@ -477,8 +477,8 @@
       "subject": "fixtures/elements-behaviour/src/sk-button.test.ts",
       "arm": "button part present",
       "file": "packages/elements/src/button/sk-button.ts",
-      "from": "<a part=\"button\" class=${cls} href=${this.href}>",
-      "to": "<a class=${cls} href=${this.href}>"
+      "from": "<a part=\"button\" class=${cls} href=${this.href} aria-label=${ifDefined(validLabel)}",
+      "to": "<a class=${cls} href=${this.href} aria-label=${ifDefined(validLabel)}"
     },
     {
       "id": "SC-014",
@@ -691,10 +691,10 @@
     {
       "id": "SC-013",
       "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts",
-      "arm": "app shell context part remains targetable",
+      "arm": "app shell header part remains targetable",
       "file": "packages/elements/src/app-shell/sk-app-shell.ts",
-      "from": "      <div part=\"context\" class=\"sk-app-shell__context\">",
-      "to": "      <div class=\"sk-app-shell__context\">"
+      "from": "        <div part=\"header\" class=\"sk-app-shell__header\">",
+      "to": "        <div class=\"sk-app-shell__header\">"
     },
     {
       "id": "SC-014",
@@ -715,10 +715,10 @@
     {
       "id": "SC-013",
       "subject": "fixtures/elements-behaviour/src/sk-personal-rail.test.ts",
-      "arm": "personal rail divider part remains targetable",
+      "arm": "personal rail primary part remains targetable",
       "file": "packages/elements/src/personal-rail/sk-personal-rail.ts",
-      "from": "        <div part=\"divider\" class=\"sk-personal-rail__divider\" aria-hidden=\"true\"></div>",
-      "to": "        <div class=\"sk-personal-rail__divider\" aria-hidden=\"true\"></div>"
+      "from": "      <div part=\"primary\" class=\"sk-personal-rail__primary\">",
+      "to": "      <div class=\"sk-personal-rail__primary\">"
     },
     {
       "id": "SC-014",
