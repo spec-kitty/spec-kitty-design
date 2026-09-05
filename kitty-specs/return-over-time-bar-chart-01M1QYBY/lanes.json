@@ -1,0 +1,85 @@
+{
+  "version": 1,
+  "mission_slug": "return-over-time-bar-chart-01M1QYBY",
+  "mission_id": "01M1QYBY415AKWVH4HX2MT762Q",
+  "mission_branch": "kitty/mission-return-over-time-bar-chart-01M1QYBY",
+  "target_branch": "mission/return-over-time-bar-chart",
+  "lanes": [
+    {
+      "lane_id": "lane-a",
+      "wp_ids": [
+        "WP01",
+        "WP02",
+        "WP03"
+      ],
+      "write_scope": [
+        "CHANGELOG.md",
+        "apps/storybook/src/tests/sk-bar-chart.spec.ts",
+        "apps/storybook/src/tests/visual.spec.ts",
+        "apps/storybook/src/tests/visual.spec.ts-snapshots",
+        "behaviours.json",
+        "docs",
+        "expected-docs.json",
+        "expected-parts.json",
+        "expected-stories.json",
+        "fixtures/elements-behaviour/src/sk-bar-chart.test.ts",
+        "fixtures/react-consumer/src/sk-bar-chart.test.tsx",
+        "fixtures/vue-consumer/src/Good.vue",
+        "fixtures/vue-consumer/src/types.test-d.ts",
+        "fixtures/vue-consumer/src/vue-interop.test.ts",
+        "mutations.json",
+        "packages/elements/SIZES.md",
+        "packages/elements/custom-elements.json",
+        "packages/elements/src/bar-chart/sk-bar-chart.css.d.ts",
+        "packages/elements/src/bar-chart/sk-bar-chart.css.js",
+        "packages/elements/src/bar-chart/sk-bar-chart.stories.ts",
+        "packages/elements/src/bar-chart/sk-bar-chart.ts",
+        "packages/elements/src/elements.ts",
+        "packages/elements/src/index.ts",
+        "packages/elements/vue.d.ts",
+        "packages/react/.wrapper-floor",
+        "packages/react/src",
+        "packages/react/type-tests/wrappers.type-test.tsx",
+        "packages/styles/package.json",
+        "packages/styles/src/bar-chart/sk-bar-chart.css",
+        "packages/tokens/dist/token-catalogue.json",
+        "packages/tokens/src/tokens.css",
+        "scripts/check-vue-packed-types.mjs"
+      ],
+      "predicted_surfaces": [
+        "api",
+        "app-shell",
+        "artifact-rendering",
+        "legacy-cleanup",
+        "workspace"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    }
+  ],
+  "computed_at": "2026-09-05T16:43:57.609726+00:00",
+  "computed_from": "dependency_graph+ownership",
+  "planning_artifact_wps": [],
+  "planning_commit_sha": "c6d0464117bf51dedc95c8af38cd1a0c07b49f0a",
+  "collapse_report": {
+    "events": [
+      {
+        "wp_a": "WP01",
+        "wp_b": "WP02",
+        "rule": "write_scope_overlap",
+        "evidence": "overlapping globs: 'packages/styles/src/bar-chart/sk-bar-chart.css' vs 'packages/styles/src/bar-chart/sk-bar-chart.css', 'packages/elements/src/bar-chart/sk-bar-chart.ts' vs 'packages/elements/src/bar-chart/sk-bar-chart.ts', 'packages/elements/src/bar-chart/sk-bar-chart.css.js' vs 'packages/elements/src/bar-chart/sk-bar-chart.css.js', 'packages/elements/src/bar-chart/sk-bar-chart.css.d.ts' vs 'packages/elements/src/bar-chart/sk-bar-chart.css.d.ts', 'fixtures/elements-behaviour/src/sk-bar-chart.test.ts' vs 'fixtures/elements-behaviour/src/sk-bar-chart.test.ts', 'behaviours.json' vs 'behaviours.json', 'mutations.json' vs 'mutations.json'; WP02 depends on WP01"
+      },
+      {
+        "wp_a": "WP01",
+        "wp_b": "WP03",
+        "rule": "write_scope_overlap",
+        "evidence": "overlapping globs: 'behaviours.json' vs 'behaviours.json', 'mutations.json' vs 'mutations.json'"
+      }
+    ],
+    "total_merges": 2,
+    "independent_wps_collapsed": 0,
+    "by_rule": {
+      "write_scope_overlap": 2
+    }
+  }
+}
