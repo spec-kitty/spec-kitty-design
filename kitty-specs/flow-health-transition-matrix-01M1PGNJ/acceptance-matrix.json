@@ -516,11 +516,10 @@
     {
       "invariant_id": "NI-03",
       "description": "The transition-matrix source contains no router, store, fetch, polling, timer, clock, currency, outcome, inventory, navigation, or Team Kitty dependency.",
-      "verification_method": "grep_absence",
-      "verification_command": "router|store|fetch\\(|poll|setInterval|setTimeout|Date\\(|currency|outcome|open WPs|team-kitty",
-      "result": "verification_error",
-      "evidence": "grep verification failed (exit 2): grep: Unmatched ( or \\(",
-      "scope": "packages/elements/src/transition-matrix packages/styles/src/transition-matrix"
+      "verification_method": "custom_command",
+      "verification_command": "rg -n -- 'router|store|fetch\\(|poll|setInterval|setTimeout|Date\\(|currency|outcome|open WPs|team-kitty' packages/elements/src/transition-matrix packages/styles/src/transition-matrix 1>&2; scan_status=$?; case \"$scan_status\" in 1) exit 0;; 0) exit 1;; *) exit \"$scan_status\";; esac",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: "
     },
     {
       "invariant_id": "NI-04",
@@ -541,11 +540,10 @@
     {
       "invariant_id": "NI-06",
       "description": "Component CSS contains no shadow-crossing theme selector or raw colour literal.",
-      "verification_method": "grep_absence",
-      "verification_command": ":host-context|data-theme|\\.sk-light|#[0-9a-fA-F]{3,8}|rgba?\\(",
-      "result": "verification_error",
-      "evidence": "grep verification failed (exit 2): grep: Unmatched ( or \\(",
-      "scope": "packages/styles/src/transition-matrix/sk-transition-matrix.css"
+      "verification_method": "custom_command",
+      "verification_command": "rg -n -- '(?:host-context|data-theme|\\.sk-light|#[0-9a-fA-F]{3,8}|rgba?\\()' packages/styles/src/transition-matrix/sk-transition-matrix.css 1>&2; scan_status=$?; case \"$scan_status\" in 1) exit 0;; 0) exit 1;; *) exit \"$scan_status\";; esac",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: "
     },
     {
       "invariant_id": "NI-07",
