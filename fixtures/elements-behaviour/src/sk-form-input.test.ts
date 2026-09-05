@@ -581,7 +581,17 @@ test('[SC-002][SC-003] a readonly control still submits but is barred from const
   expect(el2.validity.valid, 'a failing pattern must also be barred when readonly').toBe(true);
 });
 
-test('[SC-004] a form reset that restores a satisfying value reports valid immediately', async () => {
+test('[SC-003] a form reset that restores a satisfying value reports valid immediately', async () => {
+  // RE-SITED FROM SC-004 (CI collateral, both directions): the assertion this test makes is
+  // about MERGED VALIDITY being current, not about the VALUE restoration SC-004's charter
+  // ("reset restores the seeded value") already owns — `el.value` correctness after reset is
+  // the EXISTING SC-004 test above, unaffected by anything here. This test's own precondition
+  // (`validity.valid === false` before reset) depends on the merge for-loop, so mutating that
+  // for-loop already reds this test the same way it reds the mount-time/post-mount-mutation
+  // tests — correctly, as a fellow SC-003 arm, not as SC-004 collateral. And the shared
+  // probe-value-sync line this test's own anchor targets is NOT reset-specific machinery: it
+  // is the same sync every merge test above depends on, so anchoring it under a DIFFERENT id
+  // than theirs was exactly what produced the two-directional collateral CI caught.
   // SAME ROOT CAUSE AS THE MERGE-TIMING FIX, different call site: formResetCallback assigns
   // `this.value` the normal reactive-property way, so without the sync-before-read step this
   // would read the PRE-reset (invalid) DOM state.

@@ -321,9 +321,9 @@
       "to": "    void 0;"
     },
     {
-      "id": "SC-004",
+      "id": "SC-003",
       "subject": "fixtures/elements-behaviour/src/sk-form-input.test.ts",
-      "arm": "a form reset that restores a satisfying value reports valid immediately (#180)",
+      "arm": "a form reset that restores a satisfying value reports valid immediately (#180) — re-sited from SC-004: this is a merged-validity claim, not a value-restoration one, and the anchor line is the same shared probe sync every SC-003 merge arm depends on, not reset-specific machinery. Anchoring it under a different id than its sibling arms produced two-directional CI collateral (SC-003 mutations reddening this test, this mutation reddening SC-003 tests) that only resolved once all four shared one id.",
       "file": "packages/elements/src/form-input/sk-form-input.ts",
       "from": "    this.#probe.value = this.value;",
       "to": "    void 0;"

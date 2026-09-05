@@ -293,7 +293,10 @@ export class SkFormInput extends FormControlBase {
     // instead makes the merge available on the SAME pass as every other property, mount
     // included, and removes the two-cycle gap rather than working around it.
     //
-    // MUTATION ANCHOR SC-004 (post-reset arm, #180) — `formResetCallback()` assigns
+    // MUTATION ANCHOR SC-003 (post-reset arm, #180 — re-sited from SC-004 after CI found
+    // two-directional mutation collateral between the two ids: this line is the SAME shared
+    // sync every merge-dependent SC-003 arm below already depends on, not machinery specific to
+    // reset, so it belongs under their id, not a separate one). `formResetCallback()` assigns
     // `this.value` the ordinary reactive-property way, which reaches THIS line through the
     // same `willUpdate` -> `validate()` path as any other value change; a reset that restores a
     // satisfying value must report valid immediately, not the stale pre-reset state.

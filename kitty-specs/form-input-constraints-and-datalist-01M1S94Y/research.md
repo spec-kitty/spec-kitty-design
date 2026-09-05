@@ -293,8 +293,18 @@ copied from the squad's report.
   - Readonly's split behaviour → **`SC-002`** for the "still submits" half (FormData category) and
     **`SC-003`** for the "barred, no message, host reports valid" half — one behaviour, two facets,
     two existing categories.
-  - Post-reset validity correctness → **`SC-004`** (reset restores the seeded value is already
-    this category; "and the restored value is not left invalid" is the same fact, one arm deeper).
+  - Post-reset validity correctness → **`SC-003`, corrected post-CI (originally sited at `SC-004`
+    here, which was wrong)**. The mapping this document originally proposed — SC-004, on the
+    reasoning "reset restores the seeded value is already this category" — read as a plausible
+    fit but was never checked against the ANCHOR LINE the arm would actually mutate. That line
+    (`this.#probe.value = this.value;`) is the same shared value-sync every SC-003 merge arm
+    already depends on, not machinery specific to reset. CI caught the consequence directly:
+    mutating it reddened three SC-003-tagged tests as uncounted collateral, and mutating the
+    SC-003 merge for-loop reddened this arm's own precondition as collateral in the other
+    direction — a mutation-harness id boundary drawn where the CODE draws none. Re-sited under
+    SC-003 alongside its actual sibling arms; SC-004's own charter ("reset restores the seeded
+    value") is fully discharged by the pre-existing `el.value` assertion already there, which
+    this arm's `el.validity` assertion never touched.
   - Constraint-attribute forwarding reaching the inner control, and the datalist's node-identity
     reachability, do **not** map cleanly onto any of the 14 existing categories (they are not
     slot/parts/style-adoption/event/focus-keyboard/property-before-upgrade behaviours in ADR-11's
