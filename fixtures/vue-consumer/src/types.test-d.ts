@@ -21,13 +21,36 @@ type PropsOf<C> = C extends abstract new (...args: never) => { $props: infer P }
 
 type Footer = PropsOf<GlobalComponents['sk-site-footer']>;
 type PillTag = PropsOf<GlobalComponents['sk-pill-tag']>;
+type TransitionMatrix = PropsOf<GlobalComponents['sk-transition-matrix']>;
 
 // Props are typed from the manifest, not `any`.
 const legal: Footer['legal'] = '© 2026 Example';
 const variant: PillTag['variant'] = 'green';
+const columns: NonNullable<TransitionMatrix['columns']> = Object.freeze([
+  Object.freeze({ id: 'fri-4', label: 'Today · Fri 4' }),
+]);
+const routes: NonNullable<TransitionMatrix['routes']> = Object.freeze([
+  Object.freeze({
+    id: 'planned-progress',
+    label: 'Planned → In progress',
+    tone: 'forward',
+    values: Object.freeze({ 'fri-4': 5 }),
+  }),
+]);
 
 // @ts-expect-error 'chartreuse' is not one of the declared variants
 const bad: PillTag['variant'] = 'chartreuse';
 
-export type { Footer, PillTag };
-export { legal, variant, bad };
+// @ts-expect-error a transition column requires consumer-owned visible label text
+const badColumn: NonNullable<TransitionMatrix['columns']>[number] = { id: 'fri-4' };
+
+const badRoute: NonNullable<TransitionMatrix['routes']>[number] = {
+  id: 'planned-progress',
+  label: 'Planned → In progress',
+  // @ts-expect-error route tone remains the exported semantic union, never an arbitrary string
+  tone: 'warning',
+  values: { 'fri-4': 5 },
+};
+
+export type { Footer, PillTag, TransitionMatrix };
+export { legal, variant, columns, routes, bad, badColumn, badRoute };

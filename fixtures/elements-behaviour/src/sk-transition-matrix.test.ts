@@ -138,8 +138,12 @@ test('[SC-006] selectable pointer, Enter, and Space each emit exactly one intent
   row.click();
   row.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
   row.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true, cancelable: true }));
-  row.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true, repeat: true }));
+  const repeatedSpace = new KeyboardEvent('keydown', {
+    key: ' ', bubbles: true, cancelable: true, repeat: true,
+  });
+  row.dispatchEvent(repeatedSpace);
   expect(events).toHaveLength(3);
+  expect(repeatedSpace.defaultPrevented, 'held Space must remain scroll-safe without reactivating').toBe(true);
 });
 
 test('[SC-007] selection intent carries exactly the stable route id', async () => {

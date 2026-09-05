@@ -192,24 +192,72 @@ test('FiftyActiveWPs uses aggregate routes and exposes no per-WP target', async 
 
 test('pointer, Enter, and Space emit equal controlled non-cancelable intent without key-repeat duplication', async ({ page }) => {
   const host = await story(page, 'approved-example');
-  const events = await host.evaluate(async (element) => {
+  const row = host.locator('[data-route-id="progress-review"]');
+  await host.evaluate(async (element) => {
     const matrix = element as HTMLElement & { updateComplete: Promise<unknown>; selectedRouteId?: string };
-    const row = matrix.shadowRoot!.querySelector<HTMLElement>('[data-route-id="progress-review"]')!;
-    const seen: Array<{ detail: unknown; bubbles: boolean; composed: boolean; cancelable: boolean }> = [];
+    const target = window as typeof window & {
+      __matrixEvents?: Array<{ detail: unknown; bubbles: boolean; composed: boolean; cancelable: boolean }>;
+      __matrixKeys?: Array<{ key: string; repeat: boolean; defaultPrevented: boolean }>;
+    };
+    target.__matrixEvents = [];
+    target.__matrixKeys = [];
     matrix.addEventListener('sk-transition-matrix-select', (event) => {
       const custom = event as CustomEvent;
-      seen.push({ detail: custom.detail, bubbles: custom.bubbles, composed: custom.composed, cancelable: custom.cancelable });
+      target.__matrixEvents!.push({
+        detail: custom.detail,
+        bubbles: custom.bubbles,
+        composed: custom.composed,
+        cancelable: custom.cancelable,
+      });
+    });
+    matrix.addEventListener('keydown', (event) => {
+      const keyboard = event as KeyboardEvent;
+      target.__matrixKeys!.push({
+        key: keyboard.key,
+        repeat: keyboard.repeat,
+        defaultPrevented: keyboard.defaultPrevented,
+      });
     });
     matrix.selectedRouteId = 'planned-progress';
     await matrix.updateComplete;
-    row.click();
-    row.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
-    row.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true, cancelable: true }));
-    row.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true, repeat: true }));
+  });
+
+  await row.click();
+  await row.focus();
+  await page.keyboard.press('Enter');
+
+  await page.evaluate(() => {
+    document.body.style.minHeight = '3000px';
+    window.scrollTo(0, 0);
+  });
+  const scrollBeforeSpace = await page.evaluate(() => window.scrollY);
+  await row.focus();
+  await page.keyboard.down('Space');
+  await page.keyboard.down('Space');
+  await page.keyboard.up('Space');
+  await page.evaluate(() => new Promise<void>((resolve) => requestAnimationFrame(() => resolve())));
+
+  const events = await host.evaluate(async (element) => {
+    const matrix = element as HTMLElement & { updateComplete: Promise<unknown>; selectedRouteId?: string };
+    const target = window as typeof window & {
+      __matrixEvents?: Array<{ detail: unknown; bubbles: boolean; composed: boolean; cancelable: boolean }>;
+      __matrixKeys?: Array<{ key: string; repeat: boolean; defaultPrevented: boolean }>;
+    };
     await matrix.updateComplete;
-    return { seen, selected: matrix.selectedRouteId, rendered: matrix.shadowRoot!.querySelector('[aria-selected="true"]')?.getAttribute('data-route-id') };
+    return {
+      seen: target.__matrixEvents,
+      keys: target.__matrixKeys,
+      selected: matrix.selectedRouteId,
+      rendered: matrix.shadowRoot!.querySelector('[aria-selected="true"]')?.getAttribute('data-route-id'),
+    };
   });
   expect(events.seen).toEqual(Array.from({ length: 3 }, () => ({ detail: { routeId: 'progress-review' }, bubbles: true, composed: true, cancelable: false })));
+  expect(events.keys).toEqual([
+    { key: 'Enter', repeat: false, defaultPrevented: false },
+    { key: ' ', repeat: false, defaultPrevented: true },
+    { key: ' ', repeat: true, defaultPrevented: true },
+  ]);
+  expect(await page.evaluate(() => window.scrollY)).toBe(scrollBeforeSpace);
   expect(events.selected).toBe('planned-progress');
   expect(events.rendered).toBe('planned-progress');
 });

@@ -8,14 +8,14 @@ Components in these artifacts: sk-blog-card, sk-button, sk-card, sk-check-bullet
 | artifact | raw | minified | min+gzip | notes |
 |---|---:|---:|---:|---|
 | `ESM  (dist/index.js)` | 93.5 KiB | 61.0 KiB | 13 KiB | `lit` external |
-| `IIFE (dist/elements.js)` | 107.6 KiB | 69.7 KiB | 16 KiB | runtime bundled |
+| `IIFE (dist/elements.js)` | 107.7 KiB | 69.7 KiB | 16 KiB | runtime bundled |
 
 ## Subresource Integrity — the classic-script bundle (FR-005)
 
 For a CDN load of `dist/elements.js`, pin what the browser executes:
 
 ```
-integrity="sha384-Twi++34NJgwM5SMha70Mb/quMaANGb76ApuNLibzj5zVrwjsVKycrEd2ijDAhZm0"
+integrity="sha384-6N33qiAvIVEQ+SENrOrgqgWuIYJaov9gNiHMxkFMR3fAIzy0Q3bl44z7qsu/1SHq"
 ```
 
 Derived from the built artifact on every run and re-derived by `--check`, so it cannot be
@@ -82,7 +82,7 @@ unit: every figure in this file is KiB (1024). The WP prompt recorded the IIFE a
 "24.0 KB" where this file would have read 23.5 KiB — **24073 bytes either way**.
 Those two numbers are pinned historical values on purpose. An earlier revision of this
 paragraph interpolated the CURRENT raw size into that comparison, so once the artifact
-grew it asserted that 110224 bytes are "24.0 KB" — false by a factor of
+grew it asserted that 110240 bytes are "24.0 KB" — false by a factor of
 five, in the one paragraph whose whole lesson is to state the basis and the unit. A lens
 caught it.
 
@@ -91,13 +91,13 @@ caught it.
 ```
 $ npx nx run elements:build && node scripts/measure-elements-sizes.mjs
 packages/elements/dist/index.js
-  raw         95743 bytes  (93.5 KiB)
-  minified    62508 bytes  (61.0 KiB)
+  raw         95757 bytes  (93.5 KiB)
+  minified    62511 bytes  (61.0 KiB)
   gzip         20 KiB
   min+gzip     13 KiB
 packages/elements/dist/elements.js
-  raw        110224 bytes  (107.6 KiB)
-  minified    71369 bytes  (69.7 KiB)
+  raw        110240 bytes  (107.7 KiB)
+  minified    71372 bytes  (69.7 KiB)
   gzip         24 KiB
   min+gzip     16 KiB
 ```

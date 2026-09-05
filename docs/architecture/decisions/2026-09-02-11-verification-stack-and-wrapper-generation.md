@@ -168,9 +168,9 @@ claim would actually be tested. It says nothing about **SSR**, which is where th
 (`ssrSafe`, `"use client"`, a deferred element import, attribute-only first render). The Vue result
 is a client-side render only. Measured afterwards with `@vue/server-renderer`: string, number and
 boolean `.prop` bindings serialise as attributes, but an **object** `.prop` is dropped entirely.
-None of today's fourteen elements takes an object prop, so nothing is broken — but `.prop` is the
-binding the documentation recommends *for non-strings*, and the first element with an object prop
-breaks Nuxt silently.
+`sk-transition-matrix` now takes readonly arrays through `.prop`, so this is an active SSR
+limitation: structured data must be assigned during client hydration. Supporting that input during
+SSR needs a separate serialization design; the client-side Vue declaration does not solve it.
 
 And it does **not** establish the schema's third clause. `research/001` §163 reads in full: *"a
 target package is valid when it is generated from `custom-elements.json`, adds no markup, CSS or

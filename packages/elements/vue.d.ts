@@ -284,7 +284,7 @@ declare module 'vue' {
     }>;
     /** The scaffold element for the ADR-8 custom-element base layer. */
     'sk-stub': SkElement<{
-      // no attributes
+      // no declared props
     }>;
     /**
      * An aggregate route-by-time-bucket transition matrix with controlled route-selection intent.
@@ -309,6 +309,10 @@ declare module 'vue' {
       'selection-hint'?: string;
       /** Optional consumer-authored label for the reporting window. */
       'window-label'?: string;
+      /** Consumer-labelled time buckets, assigned as a JavaScript property. */
+      'columns'?: import('@spec-kitty/elements').SkTransitionMatrix["columns"];
+      /** Aggregate transition routes, assigned as a JavaScript property. */
+      'routes'?: import('@spec-kitty/elements').SkTransitionMatrix["routes"];
     }>;
   }
 }

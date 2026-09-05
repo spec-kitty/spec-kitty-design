@@ -26,6 +26,12 @@ Components live in **four** packages, and you author in three of them:
 fails on any drift, on a file the generator no longer emits, and on a shrunken output set. You
 do not add anything there for a new component — get the manifest right and the wrapper follows.
 
+`packages/elements/vue.d.ts` is generated from the same manifest by
+`scripts/build-vue-types.mjs` and committed. It includes observed attributes plus fields explicitly
+marked `x-spec-kitty-property-only` by the manifest plugin. Do not hand-edit it: the generator
+parses its own output and reconciles every emitted component and prop before `--check` compares
+bytes.
+
 > **This page used to say "There are no wrappers. ADR-8 confirmation #1 requires that none
 > exist." That was true when written, and no ADR was violated by its stopping being true.**
 > ADR-8 lists **four** validation criteria, unordered. #1 is *"one component ships … into three
@@ -219,6 +225,7 @@ node scripts/build-elements-css.mjs
 node scripts/build-element-markup.mjs
 npx nx run elements:analyze                 # rewrites custom-elements.json
 node scripts/build-react-wrappers.mjs       # rewrites packages/react/src
+node scripts/build-vue-types.mjs            # rewrites packages/elements/vue.d.ts
 
 # 2. build, then measure — measure-elements-sizes READS dist/ and does not build it
 npx nx run-many --target=build --projects=tokens,styles,elements
@@ -228,6 +235,7 @@ node scripts/measure-elements-sizes.mjs        # WRITES packages/elements/SIZES.
 node scripts/build-elements-css.mjs --check
 node scripts/build-element-markup.mjs --check
 node scripts/build-react-wrappers.mjs --check
+node scripts/build-vue-types.mjs --check
 git diff --exit-code -- packages/elements/custom-elements.json
 node scripts/measure-elements-sizes.mjs --check
 
@@ -253,7 +261,8 @@ node scripts/check-gate-wiring.mjs
 #    Blocks 1 and 3 are self-confirming: block 3 compares against what block 1 just wrote, so
 #    they can never disagree locally. The real signal is an unstaged generated file — which CI
 #    sees as drift. Generated-and-committed: the .css.js/.css.d.ts modules, the styles-layer
-#    sk-<name>.html and index.ts, custom-elements.json, packages/react/src/**, and SIZES.md.
+#    sk-<name>.html and index.ts, custom-elements.json, packages/react/src/**,
+#    packages/elements/vue.d.ts, and SIZES.md.
 git add -A && git status --porcelain   # must be empty before you open the PR
 
 # 7. the suites

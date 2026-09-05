@@ -94,11 +94,47 @@ describe('[SC-401] a Vue consumer needs no wrapper package for the elements to w
     destroy();
   });
 
+  it('keeps structured transition-matrix properties reactive without serializing them', async () => {
+    const firstColumns = Object.freeze([Object.freeze({ id: 'fri-4', label: 'Today · Fri 4' })]);
+    const secondColumns = Object.freeze([Object.freeze({ id: 'sat-5', label: 'Sat 5' })]);
+    const routes = Object.freeze([
+      Object.freeze({
+        id: 'planned-progress',
+        label: 'Planned → In progress',
+        tone: 'forward',
+        values: Object.freeze({ 'fri-4': 5 }),
+      }),
+    ]);
+    const columns = ref(firstColumns);
+    const routeData = ref(routes);
+    const { host, destroy } = mount(
+      {
+        setup: () => ({ columns, routeData }),
+        template: `<sk-transition-matrix :columns.prop="columns" :routes.prop="routeData"></sk-transition-matrix>`,
+      },
+      (app) => { app.config.compilerOptions.isCustomElement = (tag: string) => tag.startsWith('sk-'); },
+    );
+    await customElements.whenDefined('sk-transition-matrix');
+    const el = host.querySelector('sk-transition-matrix')! as HTMLElement & {
+      columns?: ReadonlyArray<unknown>;
+      routes?: ReadonlyArray<unknown>;
+    };
+    expect(el.columns, 'the readonly array reaches the property by identity').toBe(firstColumns);
+    expect(el.routes, 'the nested route data is not stringified').toBe(routes);
+    expect(el.hasAttribute('columns')).toBe(false);
+    expect(el.hasAttribute('routes')).toBe(false);
+
+    columns.value = secondColumns;
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(el.columns, 'a later structured assignment remains reactive').toBe(secondColumns);
+    destroy();
+  });
+
   /**
    * THE REAL EVENT, not an invented one. This dispatched `sk-ping` — a name no element fires —
    * so it proved Vue's listener plumbing against a synthetic event and nothing about the elements.
-   * `sk-nav-pill-toggle` is the one custom event the catalogue actually dispatches (it is the only
-   * `events[]` entry in custom-elements.json), it is hyphenated, and it is `composed`, so it
+   * `sk-nav-pill-toggle` is a custom event the catalogue actually dispatches, it is hyphenated,
+   * and it is `composed`, so it
    * exercises the same Vue plumbing AND the real event surface. A lens pointed out that using the
    * real one would likely have caught the `sk-change` invention in the docs; it would have.
    */

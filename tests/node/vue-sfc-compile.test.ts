@@ -15,8 +15,81 @@
  */
 import { describe, expect, it } from 'vitest';
 import { compile } from '@vue/compiler-dom';
+import { readFileSync } from 'node:fs';
+import ts from 'typescript';
+
+const memberName = (member: ts.TypeElement): string | null => {
+  const name = member.name;
+  return name && (ts.isStringLiteral(name) || ts.isIdentifier(name)) ? name.text : null;
+};
+
+const generatedVueProps = (): Map<string, string[]> => {
+  const source = readFileSync('packages/elements/vue.d.ts', 'utf8');
+  const file = ts.createSourceFile('vue.d.ts', source, ts.ScriptTarget.ESNext, true, ts.ScriptKind.TS);
+  const result = new Map<string, string[]>();
+  const visit = (node: ts.Node): void => {
+    if (ts.isInterfaceDeclaration(node) && node.name.text === 'GlobalComponents') {
+      for (const component of node.members) {
+        const tag = memberName(component);
+        expect(tag, 'every generated component key is statically readable').not.toBe(null);
+        expect(ts.isPropertySignature(component), `${tag} is a property signature`).toBe(true);
+        if (!ts.isPropertySignature(component)) throw new Error(`${tag} is not a property signature`);
+        expect(component.type && ts.isTypeReferenceNode(component.type)).toBe(true);
+        const props = (component.type as ts.TypeReferenceNode).typeArguments?.[0];
+        expect(props && ts.isTypeLiteralNode(props), `${tag} exposes a prop type literal`).toBe(true);
+        result.set(
+          tag!,
+          (props as ts.TypeLiteralNode).members.map(memberName).filter((name): name is string => name !== null).sort(),
+        );
+      }
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(file);
+  return result;
+};
+
+const manifestVueProps = (): Map<string, string[]> => {
+  const manifest = JSON.parse(readFileSync('packages/elements/custom-elements.json', 'utf8')) as {
+    modules?: Array<{ declarations?: Array<{
+      tagName?: string;
+      attributes?: Array<{ name: string }>;
+      members?: Array<{ name?: string; kind?: string; privacy?: string; 'x-spec-kitty-property-only'?: boolean }>;
+    }> }>;
+  };
+  const result = new Map<string, string[]>();
+  for (const module of manifest.modules ?? []) {
+    for (const declaration of module.declarations ?? []) {
+      if (!declaration.tagName) continue;
+      const attributes = (declaration.attributes ?? []).map((attribute) => attribute.name);
+      const propertyOnly = (declaration.members ?? [])
+        .filter((member) => member['x-spec-kitty-property-only'] === true)
+        .map((member) => member.name)
+        .filter((name): name is string => typeof name === 'string');
+      result.set(declaration.tagName, [...attributes, ...propertyOnly].sort());
+    }
+  }
+  return result;
+};
 
 describe('[SC-403] the cost that IS real, and it is build-time only', () => {
+  it('the generated Vue prop surface exactly includes manifest property-only fields', () => {
+    const expected = manifestVueProps();
+    const generated = generatedVueProps();
+    expect(Object.fromEntries(generated), 'no component or public prop may disappear').toEqual(
+      Object.fromEntries(expected),
+    );
+    expect(generated.get('sk-transition-matrix')).toEqual([
+      'columns',
+      'description',
+      'routes',
+      'selectable',
+      'selected-route-id',
+      'selection-hint',
+      'window-label',
+    ]);
+  });
+
   /**
    * `@vitejs/plugin-vue` compiles an SFC at BUILD time, when no CustomElementRegistry exists — so
    * the runtime registry check that makes `isCustomElement` unnecessary for string templates

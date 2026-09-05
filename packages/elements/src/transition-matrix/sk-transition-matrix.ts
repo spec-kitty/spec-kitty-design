@@ -160,8 +160,9 @@ export class SkTransitionMatrix extends LitElement {
   }
 
   #onKeyDown(event: KeyboardEvent, routeId: string): void {
-    if (!this.selectable || event.repeat || (event.key !== 'Enter' && event.key !== ' ')) return;
+    if (!this.selectable || (event.key !== 'Enter' && event.key !== ' ')) return;
     if (event.key === ' ') event.preventDefault();
+    if (event.repeat) return;
     this.#pressedRouteId = routeId;
     this.requestUpdate();
     this.#activate(routeId);
