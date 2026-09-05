@@ -194,8 +194,9 @@ git diff --check
    run it and attach earlier reviews to its new head.
 9. Require one maintainer approval on that same exact SHA. Any push invalidates acceptance and
    approval; a train advance blocks the mission under step 3.
-10. Merge only into the train after explicit operator authorization. Never touch main, publish or
-    deploy.
+10. Merge only into the train after explicit operator authorization and verify it contains the exact
+    accepted head. Orchestrator wrap-up then closes #146 immediately; this WP worker never closes an
+    issue, and #144, #125, #112 and unfinished siblings stay open. Never touch main, publish or deploy.
 
 ## Definition of Done
 

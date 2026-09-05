@@ -21,7 +21,8 @@ pre-merge squad, external acceptance attestation (or explicit SK-178 waiver) and
 approval on the same exact head SHA. Any push invalidates affected evidence. If the recorded train
 hold advances after consolidation, SK-179 leaves no truthful rebase path: mark the mission BLOCKED.
 Merge is allowed only into `train/elements-first` after explicit operator authorization. Never touch
-`main`, publish or deploy.
+`main`, publish or deploy. Once that train merge is verified, the orchestrator immediately closes
+#146; WP workers never close it, and #144, #125, #112 and unfinished siblings remain open.
 
 ## Subtask index
 

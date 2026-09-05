@@ -396,7 +396,7 @@
     },
     {
       "criterion_id": "C-010",
-      "description": "Exactly one PR targets train/elements-first, uses Refs #146 (not a closing keyword), and no WP-specific PR exists.",
+      "description": "Exactly one PR targets train/elements-first, uses Refs #146 (not a closing keyword), and no WP-specific PR exists; after its verified train merge, orchestrator wrap-up closes #146 and leaves parent/deferred/sibling issues open.",
       "proof_type": "manual_review",
       "evidence": null,
       "pass_fail": "pending",
@@ -515,7 +515,7 @@
     },
     {
       "id": "NI-12",
-      "description": "No WP PR, closing keyword, main push/merge, package publish or deployment occurs in this mission.",
+      "description": "No PR uses a closing keyword and no WP worker closes an issue; orchestrator closes only #146 after verified train merge, with no main push/merge, package publish or deployment.",
       "pass_fail": "pending",
       "evidence": null,
       "owner": "Mission wrap-up"

@@ -73,12 +73,12 @@
       "wp": "WP03"
     },
     "#146": {
-      "evidence_ref": "Implemented across WP01–WP03; keep in-mission until exact-head CI/visual/squad/acceptance/approval gates and the authorized train merge all complete.",
+      "evidence_ref": "Implemented across WP01–WP03; keep in-mission until exact-head CI/visual/squad/acceptance/approval gates and the authorized train merge all complete. After verifying that merge, orchestrator wrap-up closes #146 immediately.",
       "fr": "FR-001–FR-020",
       "nfr": "NFR-001–NFR-010",
       "repo": "spec-kitty/spec-kitty-design",
       "sc": "SC-001–SC-012",
-      "scope": "The mission issue. WP03 reconciles pending evidence; wrap-up alone may set the final fixed verdict after train merge.",
+      "scope": "The mission issue. WP03 reconciles pending evidence; wrap-up alone may set the final fixed verdict and close #146 after the train merge is verified.",
       "source_file": "spec.md",
       "title": "[TKO2] team-overview-feed-elements — section-header, action-row, status-indicator, entity-marker",
       "verdict": "in-mission",
