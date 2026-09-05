@@ -97,7 +97,11 @@ test.each([
   ['no columns', Object.freeze([]), approvedRoutes],
   ['no routes', approvedColumns, Object.freeze([])],
   ['duplicate column id', Object.freeze([approvedColumns[0], approvedColumns[0]]), approvedRoutes],
-  ['empty column id', Object.freeze([{ ...approvedColumns[0], id: '' }]), approvedRoutes],
+  [
+    'empty column id',
+    Object.freeze([{ id: '', label: 'Empty id' }]),
+    Object.freeze([{ id: 'route', label: 'Route', tone: 'forward' as const, values: Object.freeze({ '': 1 }) }]),
+  ],
   ['empty route id', approvedColumns, Object.freeze([{ ...approvedRoutes[0], id: '' }])],
   ['duplicate route id', approvedColumns, Object.freeze([approvedRoutes[0], approvedRoutes[0]])],
   ['unknown runtime tone', approvedColumns, Object.freeze([{ ...approvedRoutes[0], tone: 'warning' as TransitionTone }])],

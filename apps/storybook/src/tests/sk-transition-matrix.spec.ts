@@ -156,7 +156,6 @@ test('Default dark and LightMode preserve equivalent content and table relations
   };
   for (const theme of [dark.theme, light.theme]) {
     expect(theme.tones.map(({ tone }) => tone)).toEqual(Object.keys(expectedToneLabels));
-    expect(new Set(theme.tones.map(({ colour }) => colour)).size).toBe(5);
     for (const tone of theme.tones) {
       const expectedToken = theme.toneTokens[tone.tone as keyof typeof theme.toneTokens];
       expect(tone.colour).toBe(expectedToken);
@@ -166,6 +165,7 @@ test('Default dark and LightMode preserve equivalent content and table relations
       expect(tone.routeLabel).toBe(expectedRouteLabels[tone.tone as keyof typeof expectedRouteLabels]);
       expect(tone.routeHasIcon).toBe(true);
     }
+    expect(new Set(theme.tones.map(({ colour }) => colour)).size).toBe(5);
   }
 });
 
