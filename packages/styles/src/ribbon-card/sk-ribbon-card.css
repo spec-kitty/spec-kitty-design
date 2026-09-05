@@ -146,7 +146,10 @@
   border-color: var(--sk-color-red);
 }
 
-/* Card content — pushed clear of the corner ribbon's chord. */
+/* Card content — the top margin predates the corner ribbon (it spaced a drop tab) and is kept
+   only because it still reads well; it is NOT derived from the ribbon geometry, and it applies
+   to ribbon-less cards too. The content column is at the card's top-LEFT; the ribbon is at the
+   top-RIGHT and out of flow, so it does not push this. */
 .sk-ribbon-card__content {
   margin-top: var(--sk-space-5);
 }

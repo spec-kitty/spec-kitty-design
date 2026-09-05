@@ -171,6 +171,14 @@
      slotted <button> item got no panel padding and a classless <a> got panel padding with no
      base styling. One contract for slotted items, not two. */
   :host([open]) .sk-nav-pill__items ::slotted(.sk-nav-pill__item) {
+    /* BORDER-BOX HERE TOO. This is the ELEMENT path's copy of the rule fixed above, and it is
+       the supported one — the bare descendant selector cannot match a slotted node, so fixing
+       only that rule left `<sk-nav-pill>` broken while the static arrangement was correct: the
+       exact cross-path divergence ADR-8 criterion 1 exists to prevent. Measured before the fix:
+       the item's border box overflowed the panel's content box by 16px on EACH side and ran 3px
+       past the panel's border. This panel is `overflow: visible`, so unlike the static drawer it
+       was not even clipped — the row's background painted over the panel's rounded corner. */
+    box-sizing: border-box;
     width: 100%;
     border-radius: var(--sk-radius-sm);
     padding: var(--sk-space-3) var(--sk-space-4);

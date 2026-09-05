@@ -53,6 +53,11 @@
       padding: 0 var(--sk-space-6);
     }
 
+    /* sk-site-footer owns its own horizontal gutter, so the wrapper must not add a second one. */
+    .demo-container--flush {
+      padding: 0;
+    }
+
     .demo-section {
       padding: var(--sk-space-11) 0;
     }
@@ -409,7 +414,7 @@
 
   <!-- ── Footer — sk-site-footer component ───────────────────────────────── -->
   <link rel="stylesheet" href="../../packages/styles/src/site-footer/sk-site-footer.css" />
-  <div class="demo-container">
+  <div class="demo-container demo-container--flush">
     <footer class="sk-site-footer">
       <div class="sk-site-footer__grid">
         <div>

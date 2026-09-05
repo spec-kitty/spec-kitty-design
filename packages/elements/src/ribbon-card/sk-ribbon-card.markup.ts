@@ -67,30 +67,39 @@ export function ribbonCardClasses(variant?: string): string {
 }
 
 /**
- * The most characters that fit inside the clipped corner — MEASURED, not chosen.
+ * The most characters that fit inside the clipped corner — MEASURED BY INK, not by geometry.
  *
  * The bar is centred ON the card's corner and the label is centred IN the bar, so a long label
- * runs past the card edge and is cut off by the card's `overflow: hidden`. The font is
- * --sk-font-mono, so this is an exact character count rather than an estimate. Measured in
- * chromium against the shipped geometry (a = 88px, see sk-ribbon-card.css) by mapping the text
- * run's four rotated corners through the transform matrix:
+ * runs past the card edge and is cut by the card's `overflow: hidden`.
  *
- *   NEW (3)                 31px   23px spare
- *   BETA (4)                37px   19px spare
- *   LIMITED (7)             56px    5px spare
- *   SOLD OUT (8)            62px    1px spare   <- the budget
- *   BESTSELLER (10)         75px   clips by  8px
- *   PRIMARY WORKSHOP (16)  112px   clips by 35px
+ * HOW THIS IS MEASURED, because the obvious way is wrong and was used here once. Taking
+ * `getBoundingClientRect()` of the text inside the already-rotated bar returns the AXIS-ALIGNED
+ * ENVELOPE of the rotated run, not the run's width; mapping that envelope through the rotation
+ * matrix a second time double-transforms it and understates the budget badly. The first version
+ * of this constant said 8 characters for exactly that reason. What is measured instead: paint
+ * the label, screenshot the card with `overflow: hidden` and again with `overflow: visible`, and
+ * count the label pixels that differ. That number IS the clipped ink.
  *
- * The budget scales with `a` (the geometry note in sk-ribbon-card.css owns that derivation);
- * 8 is what this size buys. Four of the six distinct labels in this component's own stories
- * exceeded it, which is how the clipping shipped.
+ *   characters:   3    8   10   12   13   14   15   16
+ *   ink lost:     0    0    0    0    0    2   26   53
+ *
+ * So 13 fits and 14 starts to lose ink. Every label this repo ships is inside that.
+ *
+ * TWO THINGS THIS NUMBER IS RELATIVE TO, both of which the previous version asserted away:
+ *  - The FONT. `--sk-font-mono` resolves to a fallback stack; tokens.css records that JetBrains
+ *    Mono is not actually loaded. The measured face here advances 8.88px/char, so width is
+ *    linear in character count and a count is a fair budget — but a narrower or wider mono on
+ *    another platform shifts it. This is a per-platform constant presented as guidance.
+ *  - The ROOT FONT SIZE. The bar's height is rem-derived while its width/top/right are px, so
+ *    the derivation in sk-ribbon-card.css holds at a 16px root. At 20px the budget falls to ~9.
+ *
+ * It warns rather than enforcing, which is the right strength for a number with those caveats.
  */
-const RIBBON_LABEL_MAX = 8;
+const RIBBON_LABEL_MAX = 13;
 
 const overlongRibbonMessage = (label: string): string =>
   `ribbon label "${label}" is ${label.length} characters; at most ${RIBBON_LABEL_MAX} fit inside ` +
-  `the corner and the rest is clipped. Use a short badge like NEW, BETA or SOLD OUT.`;
+  `the corner at this size and the rest is clipped. Use a shorter badge.`;
 
 /** Warns on BOTH paths — a clipped label is legible-but-wrong, which is what a warning is for.
  *  Never throws (it would take out the whole card mid-render) and never truncates (it would
