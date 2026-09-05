@@ -218,10 +218,10 @@
       "criterion_id": "NFR-005",
       "description": "Approved shell geometry and focus visuals match CI-authoritative baselines.",
       "proof_type": "manual_review",
-      "evidence": "Owner mission wrap-up: retrieve actual PNGs only from the draft PR visual-regression-diffs artifact, compare with the operator-approved export, commit accepted bytes, and run `PW_INCLUDE_VISUAL=1 npx playwright test apps/storybook/src/tests/visual.spec.ts --project=chromium` on the resulting exact head.",
+      "evidence": "Pending mission wrap-up CI-authoritative baselines. WP04 local diagnostic on 89bbf7eb6fb12ca6aab0a780673ac93f506316e0 reached all 5 visible non-empty targets, produced expected missing-baseline actuals, and removed all local PNGs; no visual approval claimed.",
       "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "verified_by": "codex/frontend-freddy/WP04",
+      "verified_at": "2026-09-05T23:34:29.228044+00:00",
       "notes": "Planned evidence mapping; populate the exact command result and immutable SHA when the owning WP or wrap-up step executes."
     },
     {
