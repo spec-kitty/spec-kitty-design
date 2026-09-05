@@ -1,6 +1,14 @@
-// The package entry point: one line per component directory THAT HAS an `index.ts` — 13 of the
-// 15 directories under `packages/styles/src` (`form-input` and `form-textarea` are CSS-only).
+// The package entry point: one line per component directory THAT HAS an `index.ts`.
 // `export *` rather than a named list, which is the whole point.
+//
+// The exact directory/export COUNT is deliberately not stated here — this comment's own
+// history is two prior lenses catching a stale count (it once undercounted CSS-only
+// directories by one, naming only `form-input`/`form-textarea` when `transition-matrix` is
+// also CSS-only). A number that must be hand-recomputed every time a directory is added is
+// exactly the kind of drift this file already exists to close the OTHER half of. The set of
+// CSS-only directories (no `index.ts`, so no line below) is derived by
+// `scripts/build-styles-only-markup.mjs`'s own `stylesOnly()` logic — read that script for
+// the current, authoritative list rather than trusting a number here.
 //
 // This file used to name every export by hand — 13 statements, 60 names, becoming 62 here
 // (gaining exactly `SkGridGap4HTML` and `SkButtonLinkHTML`; nothing was lost). An earlier
@@ -31,6 +39,10 @@ export * from './blog-card/index';
 export * from './button/index';
 export * from './card/index';
 export * from './check-bullet/index';
+export * from './data-table/index';
+export * from './disclosure/index';
+export * from './empty-state/index';
+export * from './facts/index';
 export * from './feature-card/index';
 export * from './form-field/index';
 export * from './grid/index';
@@ -39,4 +51,5 @@ export * from './pill-tag/index';
 export * from './ribbon-card/index';
 export * from './section-banner/index';
 export * from './site-footer/index';
+export * from './skip-link/index';
 export * from './stub/index';

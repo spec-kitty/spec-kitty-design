@@ -72,6 +72,39 @@ boundary and a selector does not. Reuse the tint family — `--sk-surface-tint-*
 `--sk-on-tint-*`, `--sk-border-tint-*` — rather than inventing a component-named token.
 `:host-context()` is not an escape hatch: Baseline limited, Chromium-only.
 
+### Forced-colors and reduced-motion baselines (#176)
+
+**Reduced-motion has no working precedent to copy the effect of.** A block at
+`packages/styles/src/transition-matrix/sk-transition-matrix.css:237` looks like one but isn't:
+it guards `scroll-behavior`, and no component in this repo sets `scroll-behavior: smooth`, so it
+disables nothing. #176 is what establishes the first real guard — `packages/styles/src/disclosure/sk-disclosure.css`
+and `packages/styles/src/skip-link/sk-skip-link.css` are the working examples. The **shape** to
+copy: `@media (prefers-reduced-motion: reduce)` scoped to the exact selector and the exact
+transitioning property your component owns — never a wildcard over the component's own subtree.
+
+**Forced-colors is genuinely new territory** — no `forced-colors` block existed anywhere in the
+repo before #176. Three things are true and easy to get backwards:
+
+- A plain `border` already survives `forced-colors: active` with **zero** author CSS — the
+  browser remaps border colors to a system color automatically. `background`/`background-color`
+  do **not** survive; they flatten to `Canvas`, and both are explicitly policed by stylelint's
+  `declaration-strict-value` regardless. `box-shadow` also does **not** survive — it computes
+  away entirely under forced-colors, so a focus ring built from `box-shadow` alone disappears.
+  Use `outline` for focus rings; it is preserved/remapped automatically the same way `border` is.
+- A `content`-drawn or `border`-drawn marker/icon survives (forced-colors maps text and border
+  colors to `CanvasText`); a `background`-drawn icon does not, and forcing it to survive with
+  `forced-color-adjust: none` freezes it at its **authored** color, which is frequently invisible
+  against the forced-colors background — measured dark-grey-on-black in one probe. Never set
+  `forced-color-adjust: none` on an affordance that must remain visible.
+  See `packages/styles/src/disclosure/sk-disclosure.css` for the worked example and its comments.
+- `stylelint`'s `declaration-strict-value` polices `/color/` as a substring match — it catches
+  `border-color`, `outline-color`, and plain `color`, not just the obvious ones. The **unpoliced**
+  shorthand forms (`border: 1px solid CanvasText;`, `outline: 2px solid Highlight;`) satisfy
+  NFR-style token-only rules with **zero** new stylelint exceptions; the `-color` longhand forms
+  do not and should not be worked around with an exception. `packages/styles/src/skip-link/sk-skip-link.css`
+  and `packages/styles/src/data-table/sk-data-table.css` both use this pattern — copy it rather
+  than re-deriving a new one per component.
+
 ### 2. Author the markup ONCE, in `packages/elements`
 
 **Only if the component has a static form.** The module is optional — the generator derives its
