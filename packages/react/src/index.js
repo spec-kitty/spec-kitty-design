@@ -12,3 +12,4 @@ export * from "./SkRibbonCard.js";
 export * from "./SkSectionBanner.js";
 export * from "./SkSiteFooter.js";
 export * from "./SkStub.js";
+export * from "./SkTransitionMatrix.js";

@@ -1,0 +1,605 @@
+{
+  "mission_slug": "flow-health-transition-matrix-01M1PGNJ",
+  "mission_number": "",
+  "mission_type": "software-dev",
+  "overall_verdict": "fail",
+  "criteria": [
+    {
+      "criterion_id": "FR-001",
+      "description": "The built elements package registers and exports sk-transition-matrix and SkTransitionMatrix through its public ESM and IIFE entry paths.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Target: check-elements-entries plus package import/registration assertions; a missing tag or export must fail."
+    },
+    {
+      "criterion_id": "FR-002",
+      "description": "The element exposes exactly columns, routes, selectedRouteId, selectable, windowLabel, description and selectionHint with the specified readonly types and defaults; only columns/routes are property-only.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Target: element behavior/type tests and normalized-manifest exact member-set assertion."
+    },
+    {
+      "criterion_id": "FR-003",
+      "description": "Route, group, column, window, description and hint strings render verbatim; a matrix omitting the copy props contains no last-72-hours, day or WP claim.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Target: behavior/Playwright custom-string round trip and clean-v4-copy absence test on Default."
+    },
+    {
+      "criterion_id": "FR-004",
+      "description": "A valid R-route by C-column input renders exactly R*C labelled magnitude cells, each still owned by its route after horizontal scrolling.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Target: approved 6x4 behavior assertion and narrow Playwright ownership assertion."
+    },
+    {
+      "criterion_id": "FR-005",
+      "description": "Without total inputs, the approved cells derive route totals 21/17/11/6/4/3 and overall total 62; replacing cells recomputes both.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Target: named behavior tests with a recorded source-break red for total derivation."
+    },
+    {
+      "criterion_id": "FR-006",
+      "description": "Every matrix aggregate is labelled as moves and the public member set and rendered component contain no current/open-WP input, metric or equality claim.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Target: manifest member-set and Playwright negative content assertions."
+    },
+    {
+      "criterion_id": "FR-007",
+      "description": "Every non-zero bar ratio equals value/currentGlobalMax, every zero ratio is 0, and all ratios recompute when reassignment changes the maximum.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Target: behavior plus Playwright computed-ratio assertions and a recorded proportional-formula source mutation."
+    },
+    {
+      "criterion_id": "FR-008",
+      "description": "Only the five allowed tone values typecheck, and the visible legend equals the present-tone set in fixed forward/completed/blocked/recovery/backward order.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Target: type negative and sparse/all-tone behavior tests."
+    },
+    {
+      "criterion_id": "FR-009",
+      "description": "Both themes pair every tone with visible text and distinct non-colour semantics; recovery is purple, blocked is danger-red, and backward remains neutral.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Target: DOM/icon/text assertions, computed token-colour assertions and approved visual captures."
+    },
+    {
+      "criterion_id": "FR-010",
+      "description": "Each contiguous named group renders one accessible separator and labelled tbody while every member route retains its own row header.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Target: behavior table-semantics assertions for grouped and ungrouped runs."
+    },
+    {
+      "criterion_id": "FR-011",
+      "description": "Activation never changes selectedRouteId or aria-selected; only a subsequent consumer property assignment changes projected selection.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Target: controlled-selection behavior and ControlledSelection story tests with recorded source-break red."
+    },
+    {
+      "criterion_id": "FR-012",
+      "description": "One selectable activation emits one sk-transition-matrix-select with exact {routeId}, bubbles=true, composed=true and cancelable=false, and the manifest documents those facts.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Target: ADR SC-006/007/008 element pairs, mutations, manifest and document-boundary listener."
+    },
+    {
+      "criterion_id": "FR-013",
+      "description": "Pointer, Enter and Space produce equivalent one-event intent and selectable rows show measurable hover, focus-visible, pointer-active and keyboard-pressed style changes from rest, driven by real input rather than a story-only class.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Target: behavior input-parity test and SelectableStates Playwright rest/hover/focus-visible/pointer-active/keyboard-pressed computed-style assertions, including pressed-state release."
+    },
+    {
+      "criterion_id": "FR-014",
+      "description": "selectable defaults false; absent mode is the component's disabled-interaction analogue and has zero row tab stops, activation events, pointer cursor, hover/focus/active change, pressed state or hint even with selectedRouteId, while present mode enables all three inputs without adding a disabled prop or tenth story.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Target: paired positive/negative behavior and Playwright assertions in the existing ControlledSelection and SelectableStates stories."
+    },
+    {
+      "criterion_id": "FR-015",
+      "description": "The native table has scoped column and row headers; each magnitude and total has explicit resolvable header relationships and selected rows expose aria-selected.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Target: DOM relationship assertions plus axe; a removed headers token must produce a named red."
+    },
+    {
+      "criterion_id": "FR-016",
+      "description": "At the narrow viewport the scroller overflows horizontally, the opaque sticky Route header/cells remain visible, and long labels/counts/bars/totals do not overlap.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Target: bounding-box and scroll-position Playwright assertions plus narrow visual capture."
+    },
+    {
+      "criterion_id": "FR-017",
+      "description": "Empty routes or columns and every invalid shape render a labelled unavailable/empty state with no cells, fabricated totals, legend entries or focus targets; all-zero rectangular data remains a real zero table.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Target: exhaustive behavior boundaries and non-empty Empty story assertion."
+    },
+    {
+      "criterion_id": "FR-018",
+      "description": "The manifest/doc ratchets exactly document seven properties, one event, zero methods/slots, ten parts, and a published token list equal to distinct CSS token references.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Target: manifest-content/part/docs ratchets and CSS-to-JSDoc/Storybook token-set equality test."
+    },
+    {
+      "criterion_id": "FR-019",
+      "description": "Generated React types expose both readonly arrays, three copy strings, controlled selection, selectable and typed callback; runtime preserves array identities, never creates array attributes, and resets removed arrays to fresh frozen empty values.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Target: dedicated transition React subject, type test, generator selftests and wrapper drift gate."
+    },
+    {
+      "criterion_id": "FR-020",
+      "description": "Storybook index contains exactly the required Default, ApprovedExample, FiftyActiveWPs, SparseData, EqualTotalsDifferentDistribution, Empty, ControlledSelection, SelectableStates and LightMode ids; SelectableStates covers real rest/hover/focus-visible/active-or-pressed and the non-selectable disabled-interaction analogue without a tenth story.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Target: expected-stories ratchet/index check and per-story non-empty axe traversal."
+    },
+    {
+      "criterion_id": "FR-021",
+      "description": "Only applicable ADR SC-006/007/008/010/013/014 matrix pairs are registered, element and React use distinct subject files, every pair has a unique source mutation, and non-registry acceptance reds are recorded without bracketed/invented ids.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Target: behavior floor, main suite-selftest, selftest, registry-set assertion and WP red/green evidence record."
+    },
+    {
+      "criterion_id": "FR-022",
+      "description": "The transition-matrix source graph contains no application router/store, network, timer, clock, currency, outcome, inventory, navigation or Team Kitty-domain import/calculation.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Target: Nx boundaries/build plus explicit forbidden-import/source scan."
+    },
+    {
+      "criterion_id": "FR-023",
+      "description": "The component has one authored CSS source, adopts its generated sheet, and creates no transition-matrix markup module, static HTML or styles-layer index.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Target: CSS/markup drift gates, adopted-boundary gate and absence invariant."
+    },
+    {
+      "criterion_id": "FR-024",
+      "description": "CSS module with skTransitionMatrixSheet export, CEM, React wrapper/indexes, wrapper floor, entries, docs/parts/stories registries and SIZES.md are regenerated, committed and drift-clean.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Target: ordered generation, drift/content/entry/size gates and clean git status."
+    },
+    {
+      "criterion_id": "NFR-001",
+      "description": "All nine required transition-matrix stories load a non-empty component root and each returns exactly zero axe WCAG 2.1 AA violations; SelectableStates also returns zero violations after real hover, focus-visible, pointer-active and keyboard-pressed input.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Target: Storybook build, run-axe-storybook.js with exact index count/load guards, and state-specific Playwright axe runs after each real interaction transition."
+    },
+    {
+      "criterion_id": "NFR-002",
+      "description": "Pointer, Enter and Space each emit one equal typed non-cancelable event in selectable mode and expose real input-driven pressed treatment; absent mode is the disabled-interaction analogue and emits none with no keyboard, hover, focus, active or pressed affordance.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Target: behavior and Playwright parity/absence assertions including repeat keydown."
+    },
+    {
+      "criterion_id": "NFR-003",
+      "description": "FiftyActiveWPs renders route rows/targets based only on supplied aggregate routes, with zero per-WP label, edge, connector or target and no total-equals-inventory claim.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Target: exact story DOM counts and forbidden-content assertions."
+    },
+    {
+      "criterion_id": "NFR-004",
+      "description": "Elements and React typechecks accept all seven properties and typed event callback while invalid tone/count/detail/copy shapes fail under @ts-expect-error with no explicit or inferred any.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Target: typecheck-all.mjs and packages/react/type-tests/wrappers.type-test.tsx."
+    },
+    {
+      "criterion_id": "NFR-005",
+      "description": "Default-dark and .sk-light stories expose equal content/relationships/interaction while at least one paired computed token value differs and no theme selector crosses shadow DOM.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Target: theme-wrapper gate, computed-style test, axe and dark/light captures."
+    },
+    {
+      "criterion_id": "NFR-006",
+      "description": "After WP03 approval and final train consolidation, the one draft PR generates nine CI-authoritative Chromium actual PNGs containing the approved 6x4/62-move facts and excluding Current/open-WPs; those exact bytes show dark, light, narrow, selectable rest/hover/focus-visible/active-or-pressed and non-selectable states, are approved against clean-v4, committed as baselines to the same PR, and pass final exact-head visual regression.",
+      "proof_type": "manual_review",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Target: first draft-PR PW_INCLUDE_VISUAL=1 Chromium artifact provides all nine actuals; byte-provenance/comparison record plus same-PR baseline commit and final exact-head visual pass. Local captures are diagnostic only."
+    },
+    {
+      "criterion_id": "NFR-007",
+      "description": "Every authored CSS design value uses an existing --sk-* token, no shadow-crossing theme selector exists, and the published token dependency set exactly matches source references.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Target: stylelint/CSS hygiene/theme gates and token-list equality test."
+    },
+    {
+      "criterion_id": "NFR-008",
+      "description": "Under prefers-reduced-motion: reduce the same content, selection and pointer/keyboard operations remain available with no information dependent on animation.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Target: reduced-motion Playwright behavior/computed-transition assertion."
+    },
+    {
+      "criterion_id": "NFR-009",
+      "description": "The main mutation harness re-derives a named red for every new applicable registry pair; every non-registry mission behavior has a recorded real source-break red and restored green, with no render-only/snapshot substitute. The reproducible local guard-4 selftest hang is recorded as a pre-existing harness/environment blocker, while the exact node scripts/suite-selftest.mjs --selftest command passes in final exact-head CI.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Target: passing local main suite and WP red/green evidence; recorded bounded local guard-4 diagnostic; exact guard-selftest command green in final exact-head CI."
+    },
+    {
+      "criterion_id": "NFR-010",
+      "description": "After WP03 approval, mission wrap-up rebases/regenerates and every runnable local gate passes with functional Playwright qualified to Chromium and Firefox. At the exact final PR head, CI passes the exact guard selftest, unqualified functional Playwright including WebKit, Chromium visual regression against all nine CI-sourced committed baselines, the mutation budget, Storybook, axe and every hard gate; the successful Storybook build step records URL/SHA/start/end/duration evidence strictly below 180 seconds.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Target: WP02 handoff plus post-WP03 consolidation log; final CI Quality run at exact SHA with guard-selftest, unqualified WebKit-inclusive Playwright, nine-baseline visual pass, budget result and fail-closed NI-13 timing. Local environment exceptions never substitute for final CI."
+    },
+    {
+      "criterion_id": "SC-001",
+      "description": "ApprovedExample renders 6 routes, 4 columns, 24 magnitudes, route totals 21/17/11/6/4/3 and 62 moves without supplied totals.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Mission-local SC; target exact fixture assertions in behavior and Playwright."
+    },
+    {
+      "criterion_id": "SC-002",
+      "description": "Reordering route/column arrays with unchanged ids preserves every id-keyed value and leaves the frozen input graph byte-for-byte/deep-equal unchanged.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Mission-local SC; target reorder/non-mutation behavior assertion."
+    },
+    {
+      "criterion_id": "SC-003",
+      "description": "Equal totals with different distributions remain equal while non-zero bar ratios equal value/globalMax, zeros equal 0, and maximum-changing reassignment recomputes ratios.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Mission-local SC; target exact ratio assertions and named formula source-break red."
+    },
+    {
+      "criterion_id": "SC-004",
+      "description": "For every fixture, legend labels equal the unique supplied-tone set in fixed order and contain no absent tone.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Mission-local SC; target sparse and all-tone behavior tests."
+    },
+    {
+      "criterion_id": "SC-005",
+      "description": "Every magnitude exposes resolvable route/column/value/route-total relationships, selected rows expose state, and all nine stories load and pass axe.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Mission-local SC; target header graph assertions and axe."
+    },
+    {
+      "criterion_id": "SC-006",
+      "description": "For one route, separate pointer, Enter and Space runs each emit exactly one equal {routeId} event with bubbles/composed true and cancelable false.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Mission-local SC; ADR registry labels appear only on actually mapped element/React tests."
+    },
+    {
+      "criterion_id": "SC-007",
+      "description": "Activation with no consumer reassignment leaves selectedRouteId and rendered selected state unchanged; a later assignment alone changes both.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Mission-local SC; target controlled-selection test and source-break red."
+    },
+    {
+      "criterion_id": "SC-008",
+      "description": "With selectable absent, row tab stops, events, cursor/hover/focus/active affordances, pressed state and hint all count zero even when selectedRouteId is present; this is the component's disabled-interaction analogue.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Mission-local SC; target behavior/Playwright absence plus positive SelectableStates counterpart."
+    },
+    {
+      "criterion_id": "SC-009",
+      "description": "After horizontal scroll at narrow width every visible magnitude retains a visible sticky route owner and no route label overlaps or becomes a connector.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Mission-local SC, not ADR cancellation SC-009; target bounding-box Playwright test."
+    },
+    {
+      "criterion_id": "SC-010",
+      "description": "FiftyActiveWPs contains zero per-WP labels/edges/targets and its route-row count equals supplied routes rather than fifty.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Mission-local SC, separate from ADR property-before-upgrade SC-010."
+    },
+    {
+      "criterion_id": "SC-011",
+      "description": "Dark and .sk-light stories pass axe, differ on a paired computed token value, preserve equivalent semantics, and their CI-generated actual PNG bytes are approved, committed as baselines to the one draft PR, and green in final exact-head visual regression.",
+      "proof_type": "manual_review",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Mission-local SC; automated axe/style plus CI-actual provenance, operator comparison, same-PR baseline commit and final visual pass."
+    },
+    {
+      "criterion_id": "SC-012",
+      "description": "Generated React declarations accept arrays, copy, selected id and selectable; callback detail is {routeId:string}; removing arrays resets both element properties to frozen empty arrays with no stale identity.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Mission-local SC, explicitly not ADR Escape/focus-return/aria-expanded SC-012."
+    },
+    {
+      "criterion_id": "SC-013",
+      "description": "All ten declared parts are in CEM/ratchet and externally targetable; all seven properties and the event are documented with exact doc counts and token dependencies.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Mission-local SC; target ADR SC-013 pair plus manifest/docs/token ratchets."
+    },
+    {
+      "criterion_id": "SC-014",
+      "description": "Main suite-selftest re-derives every new applicable registry-pair red and restored source passes; every non-registry acceptance red record names a real source break and intended test; final exact-head CI also passes the exact suite-selftest guard command despite the documented local guard-4 hang.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Mission-local SC, separate from ADR style-adoption SC-014; local main mutation run plus final exact-head guard-selftest pass are both required."
+    },
+    {
+      "criterion_id": "SC-015",
+      "description": "After WP03 approval, mission wrap-up rebases the integrated branch on current train/elements-first, regenerates in order and passes every runnable local gate with no sibling authored-source diff. The one draft PR then supplies nine CI actuals that are approved and committed as baselines to the same PR; its final exact head passes guard selftest, unqualified Playwright including WebKit, visual regression, mutation budget and all hard gates, records Storybook duration below 180 seconds, has SHA-pinned full squad evidence and one maintainer approval on that same head.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Mission-local SC, not ADR registry-guard SC-015; target post-WP03 consolidation log, nine-byte baseline provenance, exact-head CI/squad record, NI-13 timing and NI-12 current-head maintainer approval."
+    }
+  ],
+  "negative_invariants": [
+    {
+      "invariant_id": "NI-01",
+      "description": "Reusable element source contains no screenshot/domain copy for last 72 hours, grouping by day, or inspecting WPs.",
+      "verification_method": "grep_absence",
+      "verification_command": "last 72 hours|Moves grouped by route and day|Select any row to inspect its WPs",
+      "result": "confirmed_absent",
+      "evidence": "grep found zero matches",
+      "scope": "packages/elements/src/transition-matrix/sk-transition-matrix.ts"
+    },
+    {
+      "invariant_id": "NI-02",
+      "description": "No transition-matrix static HTML, markup module, or styles-layer index is created.",
+      "verification_method": "custom_command",
+      "verification_command": "test ! -e packages/elements/src/transition-matrix/sk-transition-matrix.markup.ts && test ! -e packages/styles/src/transition-matrix/sk-transition-matrix.html && test ! -e packages/styles/src/transition-matrix/index.ts",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: "
+    },
+    {
+      "invariant_id": "NI-03",
+      "description": "The transition-matrix source contains no router, store, fetch, polling, timer, clock, currency, outcome, inventory, navigation, or Team Kitty dependency.",
+      "verification_method": "custom_command",
+      "verification_command": "rg -n -- 'router|store|fetch\\(|poll|setInterval|setTimeout|Date\\(|currency|outcome|open WPs|team-kitty' packages/elements/src/transition-matrix packages/styles/src/transition-matrix 1>&2; scan_status=$?; case \"$scan_status\" in 1) exit 0;; 0) exit 1;; *) exit \"$scan_status\";; esac",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: "
+    },
+    {
+      "invariant_id": "NI-04",
+      "description": "Generated runtime never serializes columns or routes as attributes.",
+      "verification_method": "custom_command",
+      "verification_command": "node -e 'const fs=require(\"fs\"); const s=fs.readFileSync(\"packages/react/src/SkTransitionMatrix.js\",\"utf8\"); process.exit(/^\\s+(columns|routes):/m.test(s)?1:0)'",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: "
+    },
+    {
+      "invariant_id": "NI-05",
+      "description": "sk-transition-matrix is not registered under inapplicable ADR SC-009, SC-011, SC-012, or SC-015.",
+      "verification_method": "custom_command",
+      "verification_command": "node -e \"const b=require('./behaviours.json').behaviours; const bad=new Set(['SC-009','SC-011','SC-012','SC-015']); process.exit(b.some(x=>bad.has(x.id)&&(x.subjects||[]).some(s=>s.name==='sk-transition-matrix'||s.name==='react-sk-transition-matrix'))?1:0)\"",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: "
+    },
+    {
+      "invariant_id": "NI-06",
+      "description": "Component CSS contains no shadow-crossing theme selector or raw colour literal.",
+      "verification_method": "custom_command",
+      "verification_command": "rg -n -- '(?:host-context|data-theme|\\.sk-light|#[0-9a-fA-F]{3,8}|rgba?\\()' packages/styles/src/transition-matrix/sk-transition-matrix.css 1>&2; scan_status=$?; case \"$scan_status\" in 1) exit 0;; 0) exit 1;; *) exit \"$scan_status\";; esac",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: "
+    },
+    {
+      "invariant_id": "NI-07",
+      "description": "Final mission diff may change only packages/styles/package.json among package manifests; it contains no lockfile, token, ADR, or sibling authored component-source change.",
+      "verification_method": "custom_command",
+      "verification_command": "node -e \"const {execFileSync}=require(\\\"child_process\\\"); const files=execFileSync(\\\"git\\\",[\\\"diff\\\",\\\"--name-only\\\",\\\"origin/train/elements-first...HEAD\\\"],{encoding:\\\"utf8\\\"}).trim().split(\\\"\\\\n\\\").filter(Boolean); const packageManifest=f=>/(^|\\\\/)package\\\\.json$/.test(f); const lockfile=f=>/(^|\\\\/)(package-lock\\\\.json|npm-shrinkwrap\\\\.json|pnpm-lock\\\\.yaml|yarn\\\\.lock)$/.test(f); const bad=files.filter(f=>(packageManifest(f)&&f!==\\\"packages/styles/package.json\\\")||lockfile(f)||/^packages\\\\/tokens\\\\//.test(f)||/^docs\\\\/architecture\\\\/decisions\\\\//.test(f)||(/^packages\\\\/(elements|styles)\\\\/src\\\\//.test(f)&&!f.includes(\\\"transition-matrix\\\")&&!/^packages\\\\/elements\\\\/src\\\\/(index\\\\.ts|elements\\\\.ts)$/.test(f))); if(bad.length){console.error(bad.join(\\\"\\\\n\\\"));process.exit(1)}\"",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: "
+    },
+    {
+      "invariant_id": "NI-08",
+      "description": "The matrix exposes no total or current/open-WP public input in the normalized manifest.",
+      "verification_method": "custom_command",
+      "verification_command": "node -e \"const m=require('./packages/elements/custom-elements.json'); const d=m.modules.flatMap(x=>x.declarations||[]).find(x=>x.tagName==='sk-transition-matrix'); const names=[...(d?.members||[]).map(x=>x.name),...(d?.attributes||[]).map(x=>x.name)]; process.exit(names.some(x=>/total|open.?wp|inventory/i.test(x))?1:0)\"",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: "
+    },
+    {
+      "invariant_id": "NI-09",
+      "description": "The non-selectable disabled-interaction analogue contains no tab stop, selection event, hover/focus/active style delta, pressed state, pointer cursor, or selection hint.",
+      "verification_method": "custom_command",
+      "verification_command": "npx playwright test apps/storybook/src/tests/sk-transition-matrix.spec.ts --project=chromium --project=firefox --grep 'non-selectable.*zero interaction residue'",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: Running 2 tests using 2 workers\n\n\n\n\n\n[1/2] [firefox] \u203a apps/storybook/src/tests/sk-transition-matrix.spec.ts:150:5 \u203a non-selectable selected data has zero interaction residue\n[2/2] [chromium] \u203a apps/s"
+    },
+    {
+      "invariant_id": "NI-10",
+      "description": "Exactly one mission PR uses head mission/flow-health-transition-matrix, base train/elements-first and a Refs #149 body; no issue-149/flow-health WP-specific PR exists.",
+      "verification_method": "custom_command",
+      "verification_command": "gh pr list --repo spec-kitty/spec-kitty-design --state all --limit 1000 --json number,headRefName,baseRefName,body | jq -e --arg head \"mission/flow-health-transition-matrix\" --arg base \"train/elements-first\" '[.[] | select(.headRefName == $head)] as $mission | [.[] | select(.headRefName != $head and (.headRefName | test(\"(?i)(flow-health-transition-matrix|149)\")) and (.headRefName | test(\"(?i)(^|[-_/])wp0?[1-3]($|[-_/])\")))] as $wp | (($mission | length) == 1 and $mission[0].baseRefName == $base and (($mission[0].body // \"\") | test(\"(?im)^\\\\s*Refs\\\\s+#149(?:\\\\s|$)\")) and ($wp | length) == 0)'",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: true"
+    },
+    {
+      "invariant_id": "NI-11",
+      "description": "Final checkout has no unstaged tracked, staged, or untracked non-ignored mission drift; the preserved active Spec Kitty .worktrees directory is runtime state and is never staged.",
+      "verification_method": "custom_command",
+      "verification_command": "git diff --exit-code && git diff --cached --exit-code && test -z \"$(git ls-files --others --exclude-standard -- . ':(exclude).worktrees/**')\"",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: "
+    },
+    {
+      "invariant_id": "NI-12",
+      "description": "The one mission PR has at least one maintainer approval whose review commit_id equals the current PR head before merge to train/elements-first; a later push invalidates the approval, and train-to-main remains operator-only.",
+      "verification_method": "custom_command",
+      "verification_command": "bash -euo pipefail -c 'repo=spec-kitty/spec-kitty-design; branch=mission/flow-health-transition-matrix; head=$(git rev-parse HEAD); pr=$(gh pr list --repo \"$repo\" --state open --head \"$branch\" --base train/elements-first --json number --jq \"if length == 1 then .[0].number else empty end\"); test -n \"$pr\"; remote_head=$(gh pr view \"$pr\" --repo \"$repo\" --json headRefOid --jq .headRefOid); test \"$remote_head\" = \"$head\"; test \"$(gh pr view \"$pr\" --repo \"$repo\" --json reviewDecision --jq .reviewDecision)\" = APPROVED; reviewers=$(gh api --paginate \"repos/$repo/pulls/$pr/reviews\" | jq -r --arg head \"$head\" \"[.[] | select(.state == \\\"APPROVED\\\" and .commit_id == \\$head) | .user.login] | unique[]\"); test -n \"$reviewers\"; while IFS= read -r reviewer; do permission=$(gh api \"repos/$repo/collaborators/$reviewer/permission\" --jq .permission); case \"$permission\" in admin|maintain|write) printf '\"'\"'{\"head_sha\":\"%s\",\"reviewer\":\"%s\",\"permission\":\"%s\"}\\n'\"'\"' \"$head\" \"$reviewer\" \"$permission\"; exit 0;; esac; done <<< \"$reviewers\"; exit 1'",
+      "result": "still_present",
+      "evidence": "Command exited 1: "
+    },
+    {
+      "invariant_id": "NI-13",
+      "description": "The exact final PR head has one successful CI Quality Storybook build step with recorded URL/SHA/start/end/duration evidence and elapsed time strictly below 180 seconds; missing/skipped evidence or duration >=180 seconds blocks merge.",
+      "verification_method": "custom_command",
+      "verification_command": "bash -euo pipefail -c 'repo=spec-kitty/spec-kitty-design; head=$(git rev-parse HEAD); run=$(gh run list --repo \"$repo\" --workflow \"CI Quality\" --commit \"$head\" --event pull_request --status completed --limit 20 --json databaseId,conclusion,headSha,createdAt --jq \"map(select(.conclusion == \\\"success\\\")) | sort_by(.createdAt) | last | .databaseId\"); test -n \"$run\"; gh run view \"$run\" --repo \"$repo\" --json jobs,url,headSha | jq -e --arg head \"$head\" '\"'\"'[.jobs[] | select(.name == \"storybook-build\") | .steps[] | select(.name == \"[ENFORCED] Storybook build (NFR-003 < 3 min)\")] as $s | select(($s|length)==1) | {run_url:.url,head_sha:.headSha,step_name:$s[0].name,conclusion:$s[0].conclusion,started_at:$s[0].startedAt,completed_at:$s[0].completedAt,duration_seconds:(($s[0].completedAt|fromdateiso8601)-($s[0].startedAt|fromdateiso8601))} | select(.head_sha==$head and .conclusion==\"success\" and .duration_seconds < 180)'\"'\"''",
+      "result": "still_present",
+      "evidence": "Command exited 1: "
+    }
+  ]
+}

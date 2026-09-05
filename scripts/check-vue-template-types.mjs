@@ -107,4 +107,7 @@ if (problems.length) {
   problems.forEach((p) => console.error(`   ${p}`));
   process.exit(1);
 }
-console.log(`✅ Vue template types reach a real SFC: Good.vue clean, Bad.vue rejects an undeclared variant.`);
+
+console.log(
+  `✅ Vue template types reach a real SFC: Good.vue clean, Bad.vue rejects an undeclared variant.`,
+);

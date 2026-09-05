@@ -116,8 +116,12 @@ plain `:` form is enough.
 
 ## Events
 
-Our elements dispatch **one** custom event: `sk-nav-pill-toggle`, from `sk-nav-pill`. Everything
-else you will listen for is native.
+Elements currently dispatch `sk-nav-pill-toggle` from `sk-nav-pill` and
+`sk-transition-matrix-select` from `sk-transition-matrix`. The nav-pill event is cancelable and
+fires before the component changes its own open state, so `preventDefault()` vetoes that default
+action. The transition-matrix event is a non-cancelable controlled intent: the consumer owns
+selection state and the element does not update `selectedRouteId`. Everything else you will listen
+for is native.
 
 Form input does **not** emit a custom event. The inner `<input>`'s native `input` event is
 `composed`, so it crosses the shadow boundary and `$event.target` retargets to the host, whose
@@ -137,18 +141,20 @@ Opt in with one reference, in any `.d.ts` in your project:
 /// <reference types="@spec-kitty/elements/vue" />
 ```
 
-That augments Vue's `GlobalComponents` with all 14 elements and their props, generated from
-`custom-elements.json`. It is opt-in rather than automatic because augmenting the `vue` module
-unconditionally would force a `vue` dependency on every consumer of `@spec-kitty/elements`,
-including the ones using React or no framework.
+That augments Vue's `GlobalComponents` with every registered element and its public attributes and
+property-only inputs, generated from `custom-elements.json`. It is opt-in rather than automatic
+because augmenting the `vue` module unconditionally would force a `vue` dependency on every
+consumer of `@spec-kitty/elements`, including the ones using React or no framework.
 
-**Known gap:** the generated types cover props, not events. `@sk-nav-pill-toggle` is untyped.
+**Known gap:** the generated types cover props, not events. The two custom event listeners remain
+untyped in Vue templates.
 
 ## Verified by
 
 `fixtures/vue-consumer/` runs a real Vue render against the elements on every PR — upgrade, plain
-`:` binding taking the property route, `.prop` reactivity, `v-model` in both directions, the real
-`sk-nav-pill-toggle` event, `@input` retargeting from `sk-form-input`, and the warning matrix above.
+`:` binding taking the property route, `.prop` reactivity for scalars and structured matrix data,
+`v-model` in both directions, the real custom-event surface, `@input` retargeting from
+`sk-form-input`, and the warning matrix above.
 `tests/node/vue-sfc-compile.test.ts` asserts the two compile paths. The generated types are compiled
 by `nx run vue-consumer-fixture:typecheck`, including a `@ts-expect-error` that fails if the prop
 unions ever degrade to `any`.

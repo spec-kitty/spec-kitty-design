@@ -22,15 +22,16 @@ export function createForwardedRefHandler(localRef, forwardedRef) {
   };
 }
 
-export function useProperties(targetElement, propName, value) {
+export function useProperties(targetElement, propName, value, resetValue) {
   useEffect(() => {
     const el = targetElement?.current;
-    if (!el || value === undefined || el[propName] === value) {
+    const nextValue = value === undefined && resetValue ? resetValue() : value;
+    if (!el || nextValue === undefined || el[propName] === nextValue) {
       return;
     }
 
     try {
-      el[propName] = value;
+      el[propName] = nextValue;
     } catch (e) {
       console.warn(e);
     }

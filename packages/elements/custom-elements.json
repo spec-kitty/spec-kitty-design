@@ -3077,6 +3077,377 @@
           "customElement": true
         },
         {
+          "kind": "class",
+          "description": "An aggregate route-by-time-bucket transition matrix with controlled route-selection intent.\n\nToken dependencies: --sk-border-default, --sk-border-focus, --sk-border-strong,\n--sk-border-width-1, --sk-border-width-2, --sk-color-blue, --sk-color-green,\n--sk-color-purple, --sk-color-red, --sk-fg-body, --sk-fg-default, --sk-fg-muted,\n--sk-fg-on-card, --sk-font-mono, --sk-font-sans, --sk-radius-lg, --sk-radius-sm,\n--sk-space-1, --sk-space-2, --sk-space-3, --sk-space-4, --sk-space-5,\n--sk-space-6, --sk-space-10, --sk-space-12, --sk-surface-card,\n--sk-surface-muted, --sk-surface-pill, --sk-text-lg, --sk-text-sm, --sk-text-xs,\n--sk-weight-medium, --sk-weight-semibold.",
+          "name": "SkTransitionMatrix",
+          "cssParts": [
+            {
+              "description": "A proportional magnitude bar.",
+              "name": "bar"
+            },
+            {
+              "description": "Labelled empty or invalid-data state.",
+              "name": "empty-state"
+            },
+            {
+              "description": "Visible separator for a contiguous named route group.",
+              "name": "group"
+            },
+            {
+              "description": "Title, derived move total, and consumer-supplied window label.",
+              "name": "header"
+            },
+            {
+              "description": "Ordered labels for the tones present in the supplied routes.",
+              "name": "legend"
+            },
+            {
+              "description": "A route row header.",
+              "name": "route"
+            },
+            {
+              "description": "A route row.",
+              "name": "row"
+            },
+            {
+              "description": "Horizontally scrollable table viewport.",
+              "name": "scroller"
+            },
+            {
+              "description": "Native transition matrix table.",
+              "name": "table"
+            },
+            {
+              "description": "A derived route total.",
+              "name": "total"
+            }
+          ],
+          "members": [
+            {
+              "kind": "method",
+              "name": "#activate",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "routeId",
+                  "type": {
+                    "text": "string"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "#clearPressed",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "routeId",
+                  "type": {
+                    "text": "string"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "#id",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "string"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "suffix",
+                  "type": {
+                    "text": "string"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "field",
+              "name": "#idPrefix",
+              "privacy": "private",
+              "readonly": true,
+              "default": "`sk-transition-matrix-${++nextMatrixInstanceId}`"
+            },
+            {
+              "kind": "method",
+              "name": "#onClick",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "event",
+                  "type": {
+                    "text": "Event"
+                  }
+                },
+                {
+                  "name": "routeId",
+                  "type": {
+                    "text": "string"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "#onKeyDown",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "event",
+                  "type": {
+                    "text": "KeyboardEvent"
+                  }
+                },
+                {
+                  "name": "routeId",
+                  "type": {
+                    "text": "string"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "field",
+              "name": "#pressedRouteId",
+              "privacy": "private",
+              "type": {
+                "text": "string | null"
+              },
+              "default": "null"
+            },
+            {
+              "kind": "method",
+              "name": "#renderBodies",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "ReadonlyArray<TemplateResult>"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "matrix",
+                  "type": {
+                    "text": "ValidMatrix"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "#renderLegend",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "TemplateResult"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "routes",
+                  "type": {
+                    "text": "ReadonlyArray<TransitionRoute>"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "#renderRoute",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "TemplateResult"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "route",
+                  "type": {
+                    "text": "TransitionRoute"
+                  }
+                },
+                {
+                  "name": "routeIndex",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "matrix",
+                  "type": {
+                    "text": "ValidMatrix"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "field",
+              "name": "columns",
+              "privacy": "public",
+              "type": {
+                "text": "ReadonlyArray<TransitionColumn>"
+              },
+              "description": "Consumer-labelled time buckets, assigned as a JavaScript property.",
+              "x-spec-kitty-property-only": true,
+              "x-spec-kitty-property-reset": "empty-array"
+            },
+            {
+              "kind": "field",
+              "name": "description",
+              "privacy": "public",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "description": "Optional consumer-authored explanation shown above the matrix.",
+              "attribute": "description"
+            },
+            {
+              "kind": "field",
+              "name": "routes",
+              "privacy": "public",
+              "type": {
+                "text": "ReadonlyArray<TransitionRoute>"
+              },
+              "description": "Aggregate transition routes, assigned as a JavaScript property.",
+              "x-spec-kitty-property-only": true,
+              "x-spec-kitty-property-reset": "empty-array"
+            },
+            {
+              "kind": "field",
+              "name": "selectable",
+              "privacy": "public",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "description": "Enables route-selection intent without taking ownership of selection.",
+              "attribute": "selectable",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "selectedRouteId",
+              "privacy": "public",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "Consumer-controlled selected route id.",
+              "attribute": "selected-route-id"
+            },
+            {
+              "kind": "field",
+              "name": "selectionHint",
+              "privacy": "public",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "description": "Optional consumer-authored selectable-row instruction.",
+              "attribute": "selection-hint"
+            },
+            {
+              "kind": "field",
+              "name": "windowLabel",
+              "privacy": "public",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "description": "Optional consumer-authored label for the reporting window.",
+              "attribute": "window-label"
+            }
+          ],
+          "events": [
+            {
+              "name": "sk-transition-matrix-select",
+              "type": {
+                "text": "CustomEvent<TransitionMatrixSelectDetail>"
+              },
+              "description": "Requests that the consumer inspect a route. The event bubbles, is composed, and is not cancelable."
+            }
+          ],
+          "attributes": [
+            {
+              "name": "description",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "description": "Optional consumer-authored explanation shown above the matrix.",
+              "fieldName": "description"
+            },
+            {
+              "name": "selectable",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "description": "Enables route-selection intent without taking ownership of selection.",
+              "fieldName": "selectable"
+            },
+            {
+              "name": "selected-route-id",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "Consumer-controlled selected route id.",
+              "fieldName": "selectedRouteId"
+            },
+            {
+              "name": "selection-hint",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "description": "Optional consumer-authored selectable-row instruction.",
+              "fieldName": "selectionHint"
+            },
+            {
+              "name": "window-label",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "description": "Optional consumer-authored label for the reporting window.",
+              "fieldName": "windowLabel"
+            }
+          ],
+          "superclass": {
+            "name": "LitElement",
+            "package": "lit"
+          },
+          "tagName": "sk-transition-matrix",
+          "customElement": true
+        },
+        {
           "kind": "function",
           "name": "unknownAccentMessage",
           "return": {
@@ -3920,6 +4291,62 @@
           "name": "skStubSheet",
           "declaration": {
             "name": "default",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "SkTransitionMatrix",
+          "declaration": {
+            "name": "SkTransitionMatrix",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "skTransitionMatrixSheet",
+          "declaration": {
+            "name": "default",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "TransitionColumn",
+          "declaration": {
+            "name": "TransitionColumn",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "TransitionMatrixProperties",
+          "declaration": {
+            "name": "TransitionMatrixProperties",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "TransitionMatrixSelectDetail",
+          "declaration": {
+            "name": "TransitionMatrixSelectDetail",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "TransitionRoute",
+          "declaration": {
+            "name": "TransitionRoute",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "TransitionTone",
+          "declaration": {
+            "name": "TransitionTone",
             "module": "./dist/index.js"
           }
         },

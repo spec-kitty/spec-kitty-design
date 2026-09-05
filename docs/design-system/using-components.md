@@ -3,17 +3,51 @@
 The Spec Kitty components ship as CSS in `@spec-kitty/styles`, and — for the components migrated
 so far — as **custom elements** in `@spec-kitty/elements`. Both require `@spec-kitty/tokens`.
 
-**Migration is in progress.** Fourteen elements exist today: `sk-blog-card`, `sk-button`,
+**Migration is in progress.** Fifteen elements exist today: `sk-blog-card`, `sk-button`,
 `sk-card`, `sk-check-bullet`, `sk-feature-card`, `sk-form-input`, `sk-form-textarea`, `sk-grid`,
-`sk-nav-pill`, `sk-pill-tag`, `sk-ribbon-card`, `sk-section-banner`, `sk-site-footer` and
-`sk-stub`.
-One of the catalogue's component packages is CSS only by a recorded decision — `form-field`. See ADR-10, *form-field is deliberately styles-only*. Composite sections below such as Hero and Callout
+`sk-nav-pill`, `sk-pill-tag`, `sk-ribbon-card`, `sk-section-banner`, `sk-site-footer`, `sk-stub`,
+and `sk-transition-matrix`.
+One of the catalogue's component packages is CSS only by a recorded decision — `form-field`. See
+ADR-10, *form-field is deliberately styles-only*. Composite sections below such as Hero and Callout
 are CSS-only *patterns* rather than packages, and are not part of that count. Each section below says which it is, because the
 difference decides how you use it.
 
 Because a custom element needs no wrapper, every framework can use the migrated ones directly. A
 generated React wrapper exists for JSX typing and typed refs — see
 [Using the elements from React](./using-react.md) for what it does and does not buy, measured.
+
+## Transition matrix
+
+`sk-transition-matrix` presents aggregate moves by route and consumer-labelled time bucket. Assign
+the structured inputs as JavaScript properties; arrays are not serialized to attributes.
+
+```js
+const matrix = document.querySelector('sk-transition-matrix');
+matrix.columns = Object.freeze([
+  Object.freeze({ id: 'previous', label: 'Previous' }),
+  Object.freeze({ id: 'current', label: 'Current' }),
+]);
+matrix.routes = Object.freeze([
+  Object.freeze({
+    id: 'queued-active',
+    label: 'Queued to active',
+    tone: 'forward',
+    values: Object.freeze({ previous: 3, current: 5 }),
+  }),
+]);
+matrix.selectable = true;
+matrix.selectedRouteId = 'queued-active';
+matrix.addEventListener('sk-transition-matrix-select', (event) => {
+  // The event requests a change. The consumer remains the owner of selectedRouteId.
+  matrix.selectedRouteId = event.detail.routeId;
+});
+```
+
+The seven public properties are `columns`, `routes`, `selectedRouteId`, `selectable`,
+`windowLabel`, `description`, and `selectionHint`. The selection event bubbles across shadow
+boundaries and is non-cancelable because the element has no default selection action to prevent.
+The element derives move totals and bar ratios from supplied cells. It does not accept or calculate
+current inventory, fetch data, format dates, navigate, or update application state.
 
 ## Installation
 

@@ -22,8 +22,22 @@
   <sk-button variant="primary">Save</sk-button>
   <sk-pill-tag variant="green">Ready</sk-pill-tag>
   <sk-site-footer :legal="legal" />
+  <sk-transition-matrix :columns.prop="columns" :routes.prop="routes" />
 </template>
 
 <script setup lang="ts">
+import type { TransitionColumn, TransitionRoute } from '@spec-kitty/elements';
+
 const legal = '© 2026 Example';
+const columns = Object.freeze([
+  Object.freeze({ id: 'fri-4', label: 'Today · Fri 4' }),
+] satisfies ReadonlyArray<TransitionColumn>);
+const routes = Object.freeze([
+  Object.freeze({
+    id: 'planned-progress',
+    label: 'Planned → In progress',
+    tone: 'forward',
+    values: Object.freeze({ 'fri-4': 5 }),
+  }),
+] satisfies ReadonlyArray<TransitionRoute>);
 </script>

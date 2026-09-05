@@ -66,6 +66,9 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) conve
 
 ### Added
 
+- Added the controlled `sk-transition-matrix` element for accessible aggregate route-by-time-bucket
+  moves, including typed intent events, responsive table semantics, and generated React delivery.
+
 - Initial token layer (`@spec-kitty/tokens`) with 93 design tokens across 13 categories
 - Brand fonts bundled: Falling Sky family (30 files), Swansea family
 - Brand assets: logo, favicon

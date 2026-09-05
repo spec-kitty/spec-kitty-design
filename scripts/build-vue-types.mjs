@@ -26,6 +26,7 @@ import { fileURLToPath } from 'node:url';
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const MANIFEST = 'packages/elements/custom-elements.json';
 const OUT = 'packages/elements/vue.d.ts';
+const PROPERTY_ONLY_MARKER = 'x-spec-kitty-property-only';
 
 function tags() {
   const m = JSON.parse(readFileSync(join(ROOT, MANIFEST), 'utf8'));
@@ -33,6 +34,63 @@ function tags() {
   for (const mod of m.modules ?? []) {
     for (const d of mod.declarations ?? []) {
       if (!d.tagName) continue;
+      const attributes = (d.attributes ?? []).map((a) => ({
+        name: a.name,
+        type: a.type?.text ?? 'string',
+        description: (a.description ?? '').trim(),
+      }));
+      const attributeFields = new Set(
+        (d.attributes ?? []).map((a) => a.fieldName).filter((name) => typeof name === 'string'),
+      );
+      const propertyOnly = (d.members ?? [])
+        .filter((member) => member[PROPERTY_ONLY_MARKER] === true)
+        .map((member) => {
+          if (
+            member.kind !== 'field' ||
+            (member.privacy !== undefined && member.privacy !== 'public') ||
+            member.attribute !== undefined ||
+            typeof member.name !== 'string' ||
+            !/^[A-Za-z_$][A-Za-z0-9_$]*$/.test(member.name)
+          ) {
+            throw new Error(
+              `${d.tagName}: ${PROPERTY_ONLY_MARKER} must identify a public settable field with an emittable name`,
+            );
+          }
+          if (typeof d.name !== 'string' || !/^[A-Za-z_$][A-Za-z0-9_$]*$/.test(d.name)) {
+            throw new Error(`${d.tagName}: property-only fields require an emittable declaration name`);
+          }
+          if (!/^sk-[a-z0-9]+(?:-[a-z0-9]+)*$/.test(d.tagName)) {
+            throw new Error(
+              `${d.tagName}: property-only fields require the published sk-<component> directory convention`,
+            );
+          }
+          if (attributeFields.has(member.name)) {
+            throw new Error(`${d.tagName}.${member.name} is both property-only and an observed attribute`);
+          }
+          const component = d.tagName.slice('sk-'.length);
+          return {
+            name: member.name,
+            // Index the element's NARROW published declaration, not the package root. This
+            // preserves structured and future generic types without manufacturing an import list.
+            // The root barrel also exports constructed stylesheets; importing it from this .d.ts
+            // made a packed Vue consumer resolve every stylesheet declaration in the package.
+            // The component-local declaration is shipped under the public ./dist/* export and
+            // reaches exactly the field whose type the manifest classified.
+            type:
+              `import('@spec-kitty/elements/dist/${component}/${d.tagName}.js')` +
+              `.${d.name}[${JSON.stringify(member.name)}]`,
+            description: (member.description ?? '').trim(),
+          };
+        });
+      const props = [...attributes, ...propertyOnly];
+      const duplicateProps = props
+        .map((prop) => prop.name)
+        .filter((name, index, names) => names.indexOf(name) !== index);
+      if (duplicateProps.length) {
+        throw new Error(
+          `${d.tagName}: duplicate emitted prop name(s): ${[...new Set(duplicateProps)].join(', ')}`,
+        );
+      }
       out.push({
         tag: d.tagName,
         // FULL text, not `.split('\n')[0]`. Taking the first line truncated 23 of 45 attribute
@@ -42,11 +100,7 @@ function tags() {
         // this was a regression against an existing generator, not a house pattern. A lens
         // measured the counts.
         description: (d.description ?? '').trim(),
-        attributes: (d.attributes ?? []).map((a) => ({
-          name: a.name,
-          type: a.type?.text ?? 'string',
-          description: (a.description ?? '').trim(),
-        })),
+        props,
       });
     }
   }
@@ -59,15 +113,15 @@ function tags() {
   if (dupes.length) throw new Error(`${MANIFEST} declares duplicate tagName(s): ${[...new Set(dupes)].join(', ')}`);
 
   for (const t of out) {
-    for (const a of t.attributes) {
+    for (const a of t.props) {
       if (!a.name || !/^[A-Za-z_][A-Za-z0-9_-]*$/.test(a.name)) {
-        throw new Error(`${t.tag}: attribute name ${JSON.stringify(a.name)} is not emittable`);
+        throw new Error(`${t.tag}: prop name ${JSON.stringify(a.name)} is not emittable`);
       }
     }
   }
   // CODEPOINT ORDER, not localeCompare: ICU treats `-` as ignorable at primary strength, so a
   // future tag could sort differently between a workstation and a runner and red `--check` with
-  // nothing wrong. A lens verified today's 14 tags are stable across five locales — latent, and
+  // nothing wrong. A lens verified the then-current tag set across five locales — latent, and
   // cheap to close.
   return out.sort((a, b) => (a.tag < b.tag ? -1 : a.tag > b.tag ? 1 : 0));
 }
@@ -118,7 +172,7 @@ declare module 'vue' {
 ${list
   .map(
     (t) => `${jsdoc(t.description || t.tag, '    ')}    '${t.tag}': SkElement<{
-${t.attributes.length ? t.attributes.map(propLine).join('\n') : '      // no attributes'}
+${t.props.length ? t.props.map(propLine).join('\n') : '      // no declared props'}
     }>;`,
   )
   .join('\n')}
@@ -214,11 +268,75 @@ function assertMembersMatch(ts, sf, expected) {
   }
 }
 
+/**
+ * Reconcile every generated component's prop keys with the manifest-derived model.
+ *
+ * The tag-level audit above cannot see a generator that emits the component while silently
+ * dropping its property-only inputs. Parse the actual type literal so a render regression,
+ * balanced manifest injection, or duplicate prop cannot hide behind a byte-current file.
+ */
+function assertPropsMatch(ts, sf, expected) {
+  const found = new Map();
+  const problems = [];
+  const memberName = (member) => {
+    const name = member.name;
+    return name && (ts.isStringLiteral(name) || ts.isIdentifier(name)) ? name.text : null;
+  };
+
+  const visit = (node) => {
+    if (ts.isInterfaceDeclaration(node) && node.name.text === 'GlobalComponents') {
+      for (const member of node.members) {
+        const tag = memberName(member);
+        if (!tag || !ts.isPropertySignature(member) || !member.type || !ts.isTypeReferenceNode(member.type)) {
+          problems.push('GlobalComponents contains an unreadable component member');
+          continue;
+        }
+        const props = member.type.typeArguments?.[0];
+        if (!props || !ts.isTypeLiteralNode(props)) {
+          problems.push(`${tag}: SkElement does not contain a readable prop type literal`);
+          continue;
+        }
+        const names = props.members.map(memberName).filter((name) => name !== null);
+        if (names.length !== props.members.length) {
+          problems.push(`${tag}: generated prop set contains an unreadable member`);
+        }
+        if (new Set(names).size !== names.length) {
+          problems.push(`${tag}: generated prop set contains duplicate keys`);
+        }
+        found.set(tag, names.sort());
+      }
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(sf);
+
+  for (const component of expected) {
+    const want = component.props.map((prop) => prop.name).sort();
+    const got = found.get(component.tag) ?? [];
+    const extra = got.filter((name) => !want.includes(name));
+    const missing = want.filter((name) => !got.includes(name));
+    if (extra.length || missing.length) {
+      problems.push(
+        `${component.tag}: generated prop set differs from the manifest` +
+          `${missing.length ? `; missing ${missing.join(', ')}` : ''}` +
+          `${extra.length ? `; extra ${extra.join(', ')}` : ''}`,
+      );
+    }
+  }
+
+  if (problems.length) {
+    console.error('❌ the generated declaration prop surface is inconsistent:');
+    problems.forEach((problem) => console.error(`   ${problem}`));
+    process.exit(1);
+  }
+}
+
 const list = tags();
 const body = render(list);
 const ts = (await import('typescript')).default;
 const parsed = await assertParses(body);
 assertMembersMatch(ts, parsed, list.map((t) => t.tag));
+assertPropsMatch(ts, parsed, list);
 const check = process.argv.includes('--check');
 const path = join(ROOT, OUT);
 

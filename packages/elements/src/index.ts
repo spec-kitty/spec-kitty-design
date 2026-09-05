@@ -13,6 +13,14 @@ export { SkRibbonCard } from './ribbon-card/sk-ribbon-card.js';
 export { SkPillTag } from './pill-tag/sk-pill-tag.js';
 export { SkSectionBanner } from './section-banner/sk-section-banner.js';
 export { SkSiteFooter } from './site-footer/sk-site-footer.js';
+export {
+  SkTransitionMatrix,
+  type TransitionColumn,
+  type TransitionMatrixProperties,
+  type TransitionMatrixSelectDetail,
+  type TransitionRoute,
+  type TransitionTone,
+} from './transition-matrix/sk-transition-matrix.js';
 
 /**
  * The generated constructed stylesheet, exported so a test can assert PROVENANCE.
@@ -42,6 +50,7 @@ export { default as skRibbonCardSheet } from './ribbon-card/sk-ribbon-card.css.j
 export { default as skPillTagSheet } from './pill-tag/sk-pill-tag.css.js';
 export { default as skSectionBannerSheet } from './section-banner/sk-section-banner.css.js';
 export { default as skSiteFooterSheet } from './site-footer/sk-site-footer.css.js';
+export { default as skTransitionMatrixSheet } from './transition-matrix/sk-transition-matrix.css.js';
 
 // The card's authored markup module, exported so the two failure policies are reachable
 // from the behaviour fixture. `cardClasses` is TOTAL (an unknown variant warns and degrades)
@@ -168,4 +177,3 @@ export {
   sectionBannerStaticHtml,
   type SectionBannerVariant,
 } from './section-banner/sk-section-banner.markup.js';
-

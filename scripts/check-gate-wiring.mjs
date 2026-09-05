@@ -204,7 +204,7 @@ else {
     [/node\s+scripts\/check-offline-load\.mjs(?!\s*--selftest)(\s|$)/, 'the file:// no-network probe', 'scripts/check-offline-load.mjs'],
     [/node\s+scripts\/check-offline-load\.mjs\s+--selftest(\s|$)/, "the offline probe's own blindness check", 'scripts/check-offline-load.mjs --selftest'],
     [/node\s+scripts\/measure-elements-sizes\.mjs\s+--check(\s|$)/, 'the size and SRI drift check', 'scripts/measure-elements-sizes.mjs --check'],
-    [/node\s+scripts\/measure-elements-sizes\.mjs\s+--check(\s|$)/, 'the size and SRI drift check', 'scripts/measure-elements-sizes.mjs --check'],
+    [/node\s+scripts\/check-vue-packed-types\.mjs(\s|$)/, 'the packed Vue declaration gate', 'scripts/check-vue-packed-types.mjs'],
   ];
   const releaseSteps = wf.jobs?.['release-gate']?.steps ?? [];
   for (const [re, what, label] of REQUIRED_RELEASE) {

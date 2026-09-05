@@ -31,7 +31,7 @@
     "#78 adds three for <sk-blog-card>: card, content and thumbnail. `card` carries BOTH `sk-card` and `sk-blog-card` — the composition ruling means one root, so one part covers the frame both sheets style. `thumbnail` is absent from the DOM when no thumbnail is set, so its [SC-013] case mounts one that has it.",
     "#77 adds FOUR for <sk-site-footer>: footer, grid, divider, legal. Total 30 -> 34. Each is a SHADOW node — the component's own surface — which is exactly why they are the parts: everything a reader sees is slotted and therefore already the consumer's to style. `grid` is the escape hatch for a layout outside the provided `1.5fr 1fr 1fr`, the same argument sk-grid's `grid` part carries. Naming all four here rather than one, because three separate gates have now caught a note claiming a different number than its own data."
   ],
-  "total": 34,
+  "total": 44,
   "byElement": {
     "sk-blog-card": [
       "card",
@@ -92,6 +92,18 @@
       "footer",
       "grid",
       "legal"
+    ],
+    "sk-transition-matrix": [
+      "bar",
+      "empty-state",
+      "group",
+      "header",
+      "legend",
+      "route",
+      "row",
+      "scroller",
+      "table",
+      "total"
     ]
   }
 }

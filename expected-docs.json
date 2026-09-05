@@ -2,16 +2,17 @@
   "$comment": [
     "The published-documentation ratchet (#75 WP01, #129).",
     "",
-    "Every public attribute and public method of a tagged declaration must carry a description:",
-    "the React generator copies attributes[].description into the emitted prop docs and the",
+    "Every public attribute, explicit property-only field, and public method of a tagged",
+    "declaration must carry a description: the React generator copies their descriptions into",
+    "the emitted prop docs and the",
     "class-level `## Methods` block, so one with none ships `/** undefined */` into a consumer's",
     "editor. check-manifest-content.mjs asserts the descriptions are non-empty.",
     "",
     "THIS FILE IS THE ANTI-VACUITY HALF, and it exists because the first version of that gate",
     "did not have one. It counted DECLARATIONS, not items, so a manifest with five tagged",
-    "elements and zero attributes and zero methods printed",
+    "elements and zero attributes, property-only fields, and methods printed",
     "",
-    "    ✅ 0 public attribute(s) and method(s) across 5 element(s) all carry a description.",
+    "    ✅ 0 public attribute(s), property-only field(s), and method(s) across 5 element(s).",
     "",
     "— a green line over an empty set, in the gate whose own docstring names that defect class.",
     "Both pre-merge lenses found it independently. Same shape as expected-parts.json, and the",
@@ -23,68 +24,88 @@
     "commit message.",
     "",
     "Counts are of the PUBLISHED surface as the wrapper generator sees it: attributes[] entries,",
-    "and members[] of kind `method` that are not private/protected and do not start with `#`.",
+    "members[] explicitly marked x-spec-kitty-property-only, and members[] of kind `method` that",
+    "are not private/protected and do not start with `#`. `total` is the sum of all three.",
     "Note that `state: true` properties are deliberately absent from attributes[] — they observe",
     "no attribute and cannot be delivered on a first render under ssrSafe — so they are not",
     "counted here either. See scripts/normalise-manifest.mjs.",
     "#77 adds <sk-site-footer> with FIVE attributes and zero methods: wordmark, tagline, legal, column-one-heading and column-two-heading. Every one is a string, which is the operator's ruling on #77 working around a constraint this ratchet's sibling gate enforces — the React wrappers' ssrSafe mode delivers first-render props as ATTRIBUTES, which carry only strings, so structured data would not survive. The link ITEMS are slotted instead. An earlier revision of this entry recorded 0/0 for a slot-only design that contradicted that ruling; the rebuild is why the numbers moved."
   ],
-  "total": 58,
+  "total": 65,
   "elements": {
     "sk-blog-card": {
       "attributes": 3,
+      "properties": 0,
       "methods": 0
     },
     "sk-button": {
       "attributes": 4,
+      "properties": 0,
       "methods": 0
     },
     "sk-card": {
       "attributes": 2,
+      "properties": 0,
       "methods": 0
     },
     "sk-check-bullet": {
       "attributes": 1,
+      "properties": 0,
       "methods": 0
     },
     "sk-feature-card": {
       "attributes": 2,
+      "properties": 0,
       "methods": 0
     },
     "sk-form-input": {
       "attributes": 9,
+      "properties": 0,
       "methods": 5
     },
     "sk-form-textarea": {
       "attributes": 9,
+      "properties": 0,
       "methods": 5
     },
     "sk-grid": {
       "attributes": 2,
+      "properties": 0,
       "methods": 0
     },
     "sk-nav-pill": {
       "attributes": 2,
+      "properties": 0,
       "methods": 3
     },
     "sk-pill-tag": {
       "attributes": 2,
+      "properties": 0,
       "methods": 0
     },
     "sk-ribbon-card": {
       "attributes": 3,
+      "properties": 0,
       "methods": 0
     },
     "sk-section-banner": {
       "attributes": 1,
+      "properties": 0,
       "methods": 0
     },
     "sk-stub": {
       "attributes": 0,
+      "properties": 0,
       "methods": 0
     },
     "sk-site-footer": {
       "attributes": 5,
+      "properties": 0,
+      "methods": 0
+    },
+    "sk-transition-matrix": {
+      "attributes": 5,
+      "properties": 2,
       "methods": 0
     }
   }

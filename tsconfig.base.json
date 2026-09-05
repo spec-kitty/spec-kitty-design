@@ -25,7 +25,12 @@
     "paths": {
       "@spec-kitty/tokens": ["packages/tokens/src/index.ts"],
       "@spec-kitty/styles": ["packages/styles/src/index.ts"],
-      "@spec-kitty/elements": ["packages/elements/src/index.ts"]
+      "@spec-kitty/elements": ["packages/elements/src/index.ts"],
+      // Generated Vue declarations index property-only fields through the narrow published
+      // ./dist/* subpath so packed consumers do not pull in the broad root declaration. CI's
+      // source-only typecheck runs before dist exists, so mirror that public subpath onto source
+      // here. The packed-consumer gate deliberately uses no tsconfig and cannot see this alias.
+      "@spec-kitty/elements/dist/*": ["packages/elements/src/*"]
     }
   },
   "exclude": ["node_modules", "tmp"]

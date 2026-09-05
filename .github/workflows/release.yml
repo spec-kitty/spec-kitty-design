@@ -91,6 +91,8 @@ jobs:
         run: node scripts/check-release-graph.mjs --selftest
       - name: "[ENFORCED] Release graph is coherent (FR-003, FR-004)"
         run: node scripts/check-release-graph.mjs
+      - name: "[ENFORCED] Packed Vue declarations compile without workspace paths (#149)"
+        run: node scripts/check-vue-packed-types.mjs
       - name: "[ENFORCED] Sizes and the SRI hash match the built artifacts (FR-005, NFR-004)"
         run: node scripts/measure-elements-sizes.mjs --check
       - name: "[ENFORCED] Dist contents audit — no secrets/sourcemaps (ADR-005)"

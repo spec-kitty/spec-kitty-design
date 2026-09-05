@@ -591,6 +591,78 @@
       "file": "packages/elements/src/site-footer/sk-site-footer.ts",
       "from": "static styles = [sheet];",
       "to": "static styles = [new CSSStyleSheet()];"
+    },
+    {
+      "id": "SC-006",
+      "subject": "fixtures/elements-behaviour/src/sk-transition-matrix.test.ts",
+      "arm": "one event per route activation",
+      "file": "packages/elements/src/transition-matrix/sk-transition-matrix.ts",
+      "from": "    if (!event.defaultPrevented) this.#activate(routeId);",
+      "to": "    if (!event.defaultPrevented) { this.#activate(routeId); this.#activate(routeId); }"
+    },
+    {
+      "id": "SC-007",
+      "subject": "fixtures/elements-behaviour/src/sk-transition-matrix.test.ts",
+      "arm": "stable route id detail",
+      "file": "packages/elements/src/transition-matrix/sk-transition-matrix.ts",
+      "from": "      detail: { routeId }, bubbles: true, composed: true, cancelable: false,",
+      "to": "      detail: { routeId: '' }, bubbles: true, composed: true, cancelable: false,"
+    },
+    {
+      "id": "SC-008",
+      "subject": "fixtures/elements-behaviour/src/sk-transition-matrix.test.ts",
+      "arm": "bubbling and composed event flags",
+      "file": "packages/elements/src/transition-matrix/sk-transition-matrix.ts",
+      "from": "      detail: { routeId }, bubbles: true, composed: true, cancelable: false,",
+      "to": "      detail: { routeId }, bubbles: false, composed: false, cancelable: false,"
+    },
+    {
+      "id": "SC-010",
+      "subject": "fixtures/elements-behaviour/src/sk-transition-matrix.test.ts",
+      "arm": "pre-upgrade structured property preservation",
+      "file": "packages/elements/src/transition-matrix/sk-transition-matrix.ts",
+      "from": "    columns: { attribute: false },\n    routes: { attribute: false },",
+      "to": "    routes: { attribute: false },"
+    },
+    {
+      "id": "SC-013",
+      "subject": "fixtures/elements-behaviour/src/sk-transition-matrix.test.ts",
+      "arm": "group part remains targetable",
+      "file": "packages/elements/src/transition-matrix/sk-transition-matrix.ts",
+      "from": "<th part=\"group\" class=\"sk-transition-matrix__group\"",
+      "to": "<th class=\"sk-transition-matrix__group\""
+    },
+    {
+      "id": "SC-014",
+      "subject": "fixtures/elements-behaviour/src/sk-transition-matrix.test.ts",
+      "arm": "transition matrix adopts one generated sheet",
+      "file": "packages/elements/src/transition-matrix/sk-transition-matrix.ts",
+      "from": "  static styles = [sheet];",
+      "to": "  static styles = [];"
+    },
+    {
+      "id": "SC-014",
+      "subject": "fixtures/elements-behaviour/src/sk-transition-matrix.test.ts",
+      "arm": "transition matrix adopts the named sheet by identity",
+      "file": "packages/elements/src/transition-matrix/sk-transition-matrix.ts",
+      "from": "  static styles = [sheet];",
+      "to": "  static styles = [new CSSStyleSheet()];"
+    },
+    {
+      "id": "SC-006",
+      "subject": "fixtures/react-consumer/src/sk-transition-matrix.test.tsx",
+      "arm": "transition matrix wrapper subscribes to the typed selection event",
+      "file": "packages/react/src/SkTransitionMatrix.js",
+      "from": "  useEventListener(\n    ref,\n    \"sk-transition-matrix-select\",\n    props.onSkTransitionMatrixSelect,\n  );",
+      "to": "  void props.onSkTransitionMatrixSelect;"
+    },
+    {
+      "id": "SC-010",
+      "subject": "fixtures/react-consumer/src/sk-transition-matrix.test.tsx",
+      "arm": "transition matrix wrapper delivers and resets structured columns",
+      "file": "packages/react/src/SkTransitionMatrix.js",
+      "from": "  useProperties(ref, \"columns\", columns, () => Object.freeze([]));",
+      "to": "  void columns;"
     }
   ]
 }

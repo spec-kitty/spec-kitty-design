@@ -56,6 +56,76 @@
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import ts from 'typescript';
 
+/** `{...} as const` / `{...} satisfies X` still wrap the expression we need to inspect. */
+const unwrap = (node) => {
+  let current = node;
+  while (
+    current &&
+    (ts.isAsExpression(current) ||
+      ts.isSatisfiesExpression(current) ||
+      ts.isParenthesizedExpression(current))
+  ) {
+    current = current.expression;
+  }
+  return current;
+};
+
+/** Static `properties = {}` and `static get properties() { return {}; }` share this path. */
+const propertiesObject = (member) => {
+  if (ts.isGetAccessorDeclaration(member)) {
+    const returned = member.body?.statements?.find(ts.isReturnStatement);
+    return returned?.expression ? unwrap(returned.expression) : null;
+  }
+  return member.initializer ? unwrap(member.initializer) : null;
+};
+
+const plainName = (name, sourceFile) => {
+  if (ts.isIdentifier(name) || ts.isStringLiteral(name) || ts.isNumericLiteral(name)) {
+    return name.getText(sourceFile).replace(/^['"]|['"]$/g, '');
+  }
+  return null;
+};
+
+const sourceLocation = (node, sourceFile) => {
+  const { line, character } = sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile));
+  return `${sourceFile.fileName}:${line + 1}:${character + 1}`;
+};
+
+const hasModifier = (node, kind) => node.modifiers?.some((modifier) => modifier.kind === kind);
+
+const isPublicSettableField = (member) =>
+  ts.isPropertyDeclaration(member) &&
+  !ts.isPrivateIdentifier(member.name) &&
+  !hasModifier(member, ts.SyntaxKind.PrivateKeyword) &&
+  !hasModifier(member, ts.SyntaxKind.ProtectedKeyword) &&
+  !hasModifier(member, ts.SyntaxKind.ReadonlyKeyword) &&
+  !hasModifier(member, ts.SyntaxKind.StaticKeyword);
+
+const isReadonlyArrayTypeNode = (type) => {
+  if (!type) return false;
+  if (ts.isTypeReferenceNode(type) && type.typeName.getText() === 'ReadonlyArray') return true;
+  return (
+    ts.isTypeOperatorNode(type) &&
+    type.operator === ts.SyntaxKind.ReadonlyKeyword &&
+    ts.isArrayTypeNode(type.type)
+  );
+};
+
+const hasFrozenEmptyArrayInitializer = (member) => {
+  const initializer = unwrap(member.initializer);
+  if (!initializer || !ts.isCallExpression(initializer) || initializer.arguments.length !== 1) {
+    return false;
+  }
+  if (initializer.expression.getText() !== 'Object.freeze') return false;
+  const argument = unwrap(initializer.arguments[0]);
+  return ts.isArrayLiteralExpression(argument) && argument.elements.length === 0;
+};
+
+const normalizedTypeIsReadonlyArray = (member) => {
+  const text = String(member?.type?.text ?? '').trim();
+  return /^ReadonlyArray\s*</.test(text) || /^readonly\s+.+\[\]$/.test(text);
+};
+
 /**
  * Field names declared `state: true` in a module's `static properties` initialiser.
  * Returns an empty set for a module with no such block, which is the common case.
@@ -65,29 +135,6 @@ function stateFields(modulePath) {
   // No try/catch: an unreadable source for a tagged declaration is a failure, not an empty set.
   const src = readFileSync(modulePath, 'utf8');
   const sf = ts.createSourceFile(modulePath, src, ts.ScriptTarget.ES2022, true);
-
-  /** `{...} as const` / `{...} satisfies X` still wrap an object literal. Unwrap to it. */
-  const unwrap = (node) => {
-    let n = node;
-    while (n && (ts.isAsExpression(n) || ts.isSatisfiesExpression(n) || ts.isParenthesizedExpression(n))) {
-      n = n.expression;
-    }
-    return n;
-  };
-
-  /**
-   * The object literal a `properties` member resolves to, for BOTH shapes the analyzer itself
-   * handles — `static properties = {...}` and `static get properties() { return {...} }`.
-   * Returns null when the member exists but does not resolve, which the caller treats as a
-   * hard failure rather than as "no state fields".
-   */
-  const propertiesObject = (member) => {
-    if (ts.isGetAccessorDeclaration(member)) {
-      const ret = member.body?.statements?.find(ts.isReturnStatement);
-      return ret?.expression ? unwrap(ret.expression) : null;
-    }
-    return member.initializer ? unwrap(member.initializer) : null;
-  };
 
   let sawUnresolvable = null;
   const visit = (node) => {
@@ -110,6 +157,10 @@ function stateFields(modulePath) {
             continue;
           }
           if (!ts.isPropertyAssignment(prop)) continue;
+          if (!plainName(prop.name, sf)) {
+            sawUnresolvable = `${modulePath}: \`static properties\` contains a computed key`;
+            continue;
+          }
           const value = unwrap(prop.initializer);
           if (!ts.isObjectLiteralExpression(value)) continue;
           const isState = value.properties.some(
@@ -118,7 +169,7 @@ function stateFields(modulePath) {
                 opt.name.getText(sf) === 'state' &&
                 opt.initializer.kind === ts.SyntaxKind.TrueKeyword) ||
               // shorthand `{ type: String, state }`
-              (ts.isShorthandPropertyAssignment(opt) && opt.name.getText(sf) === 'state')
+              (ts.isShorthandPropertyAssignment(opt) && opt.name.getText(sf) === 'state'),
           );
           if (isState) found.add(prop.name.getText(sf).replace(/^['"]|['"]$/g, ''));
         }
@@ -130,8 +181,11 @@ function stateFields(modulePath) {
     if (ts.isPropertyDeclaration(node)) {
       const decorated = ts.getDecorators?.(node) ?? [];
       for (const dec of decorated) {
-        const expr = ts.isCallExpression(dec.expression) ? dec.expression.expression : dec.expression;
-        if (expr.getText(sf) === 'state') found.add(node.name.getText(sf).replace(/^['"]|['"]$/g, ''));
+        const expr = ts.isCallExpression(dec.expression)
+          ? dec.expression.expression
+          : dec.expression;
+        if (expr.getText(sf) === 'state')
+          found.add(node.name.getText(sf).replace(/^['"]|['"]$/g, ''));
       }
     }
     ts.forEachChild(node, visit);
@@ -142,13 +196,177 @@ function stateFields(modulePath) {
     console.error(
       '   Refusing to normalise: this pass strips the attributes the analyzer wrongly records\n' +
         '   for Lit `state: true` fields, and a shape it cannot read would silently strip none.\n' +
-        '   Extend stateFields() to handle it rather than letting it pass.'
+        '   Extend stateFields() to handle it rather than letting it pass.',
     );
     process.exit(1);
   }
   return found;
 }
 
+/**
+ * Explicit public `attribute: false` fields proven from one tagged class's TypeScript source.
+ * The returned reset flag is source-side proof only; normalized CEM type proof is checked where
+ * the marker is applied, so neither representation can authorize a reset by itself.
+ */
+function propertyOnlyFields(modulePath, className) {
+  const source = readFileSync(modulePath, 'utf8');
+  const sourceFile = ts.createSourceFile(modulePath, source, ts.ScriptTarget.ES2022, true);
+  const classDeclaration = sourceFile.statements.find(
+    (statement) => ts.isClassDeclaration(statement) && statement.name?.text === className,
+  );
+  if (!classDeclaration) {
+    throw new Error(
+      `${modulePath}: cannot find class ${className} for property-only classification`,
+    );
+  }
+
+  const publicFields = new Map();
+  for (const member of classDeclaration.members) {
+    if (!isPublicSettableField(member)) continue;
+    const name = plainName(member.name, sourceFile);
+    if (name) publicFields.set(name, member);
+  }
+
+  const explicit = new Set();
+  const fail = (message) => {
+    throw new Error(`${modulePath}: ${message}`);
+  };
+  const inspectLiteralOptions = (fieldName, value, origin) => {
+    let attributeFalse = false;
+    let stateTrue = false;
+    for (const option of value.properties) {
+      if (ts.isSpreadAssignment(option)) fail(`${origin} for ${fieldName} spreads options`);
+      if (!ts.isPropertyAssignment(option) && !ts.isShorthandPropertyAssignment(option)) {
+        fail(`${origin} for ${fieldName} contains an unsupported option`);
+      }
+      const optionName = plainName(option.name, sourceFile);
+      if (!optionName) fail(`${origin} for ${fieldName} contains a computed option`);
+      if (ts.isShorthandPropertyAssignment(option)) {
+        if (optionName === 'attribute' || optionName === 'state') {
+          const accepted =
+            optionName === 'attribute' ? 'true, false, or a string' : 'true or false';
+          fail(
+            `${sourceLocation(option, sourceFile)}: ${origin} for ${fieldName} has an ` +
+              `unresolved ${optionName} option; use a literal ${accepted}`,
+          );
+        }
+        continue;
+      }
+      const optionValue = unwrap(option.initializer);
+      if (optionName === 'attribute') {
+        if (optionValue.kind === ts.SyntaxKind.FalseKeyword) {
+          attributeFalse = true;
+        } else if (
+          optionValue.kind !== ts.SyntaxKind.TrueKeyword &&
+          !ts.isStringLiteral(optionValue)
+        ) {
+          fail(
+            `${sourceLocation(option.initializer, sourceFile)}: ${origin} for ${fieldName} has ` +
+              'an unresolved attribute option; use a literal true, false, or a string',
+          );
+        }
+      }
+      if (optionName === 'state') {
+        if (optionValue.kind === ts.SyntaxKind.TrueKeyword) {
+          stateTrue = true;
+        } else if (optionValue.kind !== ts.SyntaxKind.FalseKeyword) {
+          fail(
+            `${sourceLocation(option.initializer, sourceFile)}: ${origin} for ${fieldName} has ` +
+              'an unresolved state option; use a literal true or false',
+          );
+        }
+      }
+    }
+    return { attributeFalse, stateTrue };
+  };
+  const inspectOptions = (fieldName, options, origin) => {
+    const value = unwrap(options);
+    if (!ts.isObjectLiteralExpression(value)) {
+      fail(`${origin} for ${fieldName} does not resolve to an object literal`);
+    }
+    const { attributeFalse, stateTrue } = inspectLiteralOptions(fieldName, value, origin);
+    if (attributeFalse && !stateTrue) explicit.add(fieldName);
+  };
+
+  for (const member of classDeclaration.members) {
+    const isStaticProperties =
+      (ts.isPropertyDeclaration(member) || ts.isGetAccessorDeclaration(member)) &&
+      hasModifier(member, ts.SyntaxKind.StaticKeyword) &&
+      plainName(member.name, sourceFile) === 'properties';
+    if (isStaticProperties) {
+      const object = propertiesObject(member);
+      if (!object || !ts.isObjectLiteralExpression(object)) {
+        fail('`static properties` does not resolve to an object literal');
+      }
+      for (const property of object.properties) {
+        if (ts.isSpreadAssignment(property)) fail('`static properties` spreads another object');
+        if (!ts.isPropertyAssignment(property)) {
+          fail('`static properties` contains an unsupported declaration');
+        }
+        const fieldName = plainName(property.name, sourceFile);
+        if (!fieldName) fail('`static properties` contains a computed key');
+        inspectOptions(fieldName, property.initializer, '`static properties`');
+      }
+    }
+
+    if (!ts.isPropertyDeclaration(member)) continue;
+    const propertyDecorators = (ts.getDecorators?.(member) ?? []).filter((decorator) => {
+      if (!ts.isCallExpression(decorator.expression)) return false;
+      const called = decorator.expression.expression.getText(sourceFile);
+      return called === 'property' || called.endsWith('.property');
+    });
+    if (propertyDecorators.length === 0 || !isPublicSettableField(member)) continue;
+
+    const fieldName = plainName(member.name, sourceFile);
+    if (!fieldName) {
+      for (const decorator of propertyDecorators) {
+        if (decorator.expression.arguments.length !== 1) {
+          fail(
+            `${sourceLocation(member.name, sourceFile)}: computed @property declaration must ` +
+              'carry one literal options object',
+          );
+        }
+        const options = unwrap(decorator.expression.arguments[0]);
+        if (!ts.isObjectLiteralExpression(options)) {
+          fail(
+            `${sourceLocation(member.name, sourceFile)}: computed @property options do not ` +
+              'resolve to an object literal',
+          );
+        }
+        const { attributeFalse, stateTrue } = inspectLiteralOptions(
+          'computed field',
+          options,
+          '@property',
+        );
+        if (attributeFalse && !stateTrue) {
+          fail(
+            `${sourceLocation(member.name, sourceFile)}: @property({ attribute: false }) ` +
+              'decorates a computed field name; use an identifier or string-literal name so ' +
+              'the property-only public API can be classified',
+          );
+        }
+      }
+      continue;
+    }
+    for (const decorator of propertyDecorators) {
+      if (decorator.expression.arguments.length !== 1) {
+        fail(`@property for ${fieldName} must carry one literal options object`);
+      }
+      inspectOptions(fieldName, decorator.expression.arguments[0], '@property');
+    }
+  }
+
+  const result = new Map();
+  for (const name of explicit) {
+    const field = publicFields.get(name);
+    if (!field) continue;
+    result.set(name, {
+      resetToEmptyArray:
+        isReadonlyArrayTypeNode(field.type) && hasFrozenEmptyArrayInitializer(field),
+    });
+  }
+  return result;
+}
 
 const path = process.argv[2] ?? 'packages/elements/custom-elements.json';
 const BASE_CLASS = 'packages/elements/src/form-control-base.ts';
@@ -164,6 +382,8 @@ if (!Array.isArray(manifest.modules) || manifest.modules.length === 0) {
 // Correct `state: true` BEFORE sorting, so the two passes are independent.
 let corrected = 0;
 let tagged = 0;
+let propertyOnly = 0;
+let emptyArrayResets = 0;
 for (const mod of manifest.modules) {
   for (const decl of mod.declarations ?? []) {
     if (!decl.tagName) continue;
@@ -175,7 +395,7 @@ for (const mod of manifest.modules) {
         `❌ ${decl.tagName} declares a tag but ${source} does not exist, so its` +
           '  `state: true` fields cannot be read. Refusing to normalise: treating that as' +
           '  "no state fields" is how the manifest came to claim an attribute for' +
-          '  errorMessage in the first place.'
+          '  errorMessage in the first place.',
       );
       process.exit(1);
     }
@@ -187,7 +407,6 @@ for (const mod of manifest.modules) {
       ...stateFields(source),
       ...(existsSync(BASE_CLASS) ? stateFields(BASE_CLASS) : []),
     ]);
-    if (states.size === 0) continue;
     if (Array.isArray(decl.attributes)) {
       const before = decl.attributes.length;
       decl.attributes = decl.attributes.filter((a) => !states.has(a.fieldName ?? a.name));
@@ -197,6 +416,47 @@ for (const mod of manifest.modules) {
       // The member STAYS — it is public API and reachable as a property after upgrade. Only the
       // false claim that an observed attribute exists for it is removed.
       if (states.has(mem.name)) delete mem.attribute;
+    }
+
+    let properties;
+    try {
+      properties = propertyOnlyFields(source, decl.name);
+    } catch (error) {
+      console.error(`❌ ${error.message}.`);
+      console.error(
+        '   Refusing to normalise: intentional property-only inputs must be proven from a\n' +
+          '   literal TypeScript declaration. Extend the AST walk instead of publishing a guess.',
+      );
+      process.exit(1);
+    }
+    const memberByName = new Map((decl.members ?? []).map((member) => [member.name, member]));
+    for (const [name, facts] of properties) {
+      const member = memberByName.get(name);
+      if (
+        !member ||
+        member.kind !== 'field' ||
+        member.readonly ||
+        member.static ||
+        member.name.startsWith('#') ||
+        member.privacy === 'protected' ||
+        member.privacy === 'private'
+      ) {
+        continue;
+      }
+      member['x-spec-kitty-property-only'] = true;
+      propertyOnly++;
+      if (facts.resetToEmptyArray && normalizedTypeIsReadonlyArray(member)) {
+        member['x-spec-kitty-property-reset'] = 'empty-array';
+        emptyArrayResets++;
+      }
+      if (Array.isArray(decl.attributes)) {
+        const before = decl.attributes.length;
+        decl.attributes = decl.attributes.filter(
+          (attribute) => (attribute.fieldName ?? attribute.name) !== name,
+        );
+        corrected += before - decl.attributes.length;
+      }
+      delete member.attribute;
     }
   }
 }
@@ -247,7 +507,7 @@ for (const mod of manifest.modules) {
     const fieldByName = new Map(
       (decl.members ?? [])
         .filter((m) => m.kind === 'field' && m.privacy !== 'protected' && m.privacy !== 'private')
-        .map((m) => [m.name, m])
+        .map((m) => [m.name, m]),
     );
     for (const attr of decl.attributes ?? []) {
       // Never overwrite. An attribute that already carries a description was written for the
@@ -278,5 +538,6 @@ for (const mod of manifest.modules) {
 writeFileSync(path, `${JSON.stringify(manifest, null, 2)}\n`);
 console.log(
   `normalise-manifest: ${path} sorted (${manifest.modules.length} module(s), ` +
-    `${corrected} false attribute(s) removed, ${propagated} description(s) propagated)`
+    `${corrected} false attribute(s) removed, ${propagated} description(s) propagated, ` +
+    `${propertyOnly} property-only field(s), ${emptyArrayResets} empty-array reset(s))`,
 );
