@@ -109,26 +109,26 @@ export class SkFormInput extends FormControlBase {
 
   /** A regular expression the value must match. Forwarded verbatim to the inner control; the
    *  platform performs the match, this element does not re-validate it. */
-  declare pattern: string | undefined;
+  declare pattern: string | null | undefined;
 
   /** The minimum value, for numeric and date/time input types. A string, matching the native
    *  HTML attribute's own contract. */
-  declare min: string | undefined;
+  declare min: string | null | undefined;
 
   /** The maximum value, for numeric and date/time input types. A string, matching the native
    *  HTML attribute's own contract. */
-  declare max: string | undefined;
+  declare max: string | null | undefined;
 
   /** The granularity the value must adhere to, for numeric and date/time input types. `"any"`
    *  is a legal value the platform itself interprets. */
-  declare step: string | undefined;
+  declare step: string | null | undefined;
 
   /** A hint to the browser about the kind of on-screen keyboard to display. Hinting only — it
    *  carries no validation semantics. */
-  declare inputmode: string | undefined;
+  declare inputmode: string | null | undefined;
 
   /** Forwarded to the inner control's `autocomplete` attribute, verbatim. */
-  declare autocomplete: string | undefined;
+  declare autocomplete: string | null | undefined;
 
   /** Marks the field read-only. The value is still submitted with the form, unlike `disabled` —
    *  but the field is barred from constraint validation, so a `required` read-only field never
@@ -177,15 +177,9 @@ export class SkFormInput extends FormControlBase {
   // `willUpdate` is the Lit-sanctioned place to derive state from changed properties: setting a
   // reactive property here is folded into the same update rather than queueing another.
   //
-  // #180 ADDED A SECOND REASON THIS MUST STAY IN `willUpdate`, NOT MOVE TO `updated`: the merged
-  // UA validity flags `validate()` now reads come from a DETACHED PROBE `<input>` (see the
-  // `#probe` field and the comment in `validate()`), synced to the CURRENT update's constraint
-  // properties before every read — never from the RENDERED control, which does not exist at all
-  // during the very first pass (mount) and would reintroduce this exact historical bug through
-  // `firstUpdated()`'s rescue call otherwise. Moving `validate()` itself to `updated()` was
-  // considered and rejected for the same reason this comment already gives: a reactive-property
-  // write from `updated()` (`this.invalid`, `this.errorMessage` below) schedules a SECOND update
-  // cycle that a single `await el.updateComplete` does not wait for.
+  // #180: this is also why merged UA flags are read from the `#probe` field above rather than
+  // the rendered control — see that field's comment. Moving `validate()` to `updated()` would
+  // reintroduce the exact bug this comment already describes, one level up.
   willUpdate(changed: Map<string, unknown>) {
     if (
       changed.has('value') ||
@@ -196,7 +190,12 @@ export class SkFormInput extends FormControlBase {
       changed.has('min') ||
       changed.has('max') ||
       changed.has('step') ||
-      changed.has('type')
+      changed.has('type') ||
+      // `label` feeds the required-empty MESSAGE text (`${this.label || 'This field'} is
+      // required`, below) but was missing here — changing `label` on an already-invalid field
+      // left the `role="alert"` node and `internals.validationMessage` showing the OLD label
+      // until some UNRELATED trigger happened to re-run validate() next.
+      changed.has('label')
     )
       this.validate();
   }
@@ -223,9 +222,23 @@ export class SkFormInput extends FormControlBase {
 
   /** Sets `name` on `target` to `value` when defined, or REMOVES the attribute — never sets an
    *  empty string. See the call site in `validate()` for why: `pattern=""` is not "no pattern",
-   *  it is "the empty string is the only valid value." */
-  #syncOptionalAttribute(target: HTMLInputElement, name: string, value: string | undefined): void {
-    if (value === undefined) {
+   *  it is "the empty string is the only valid value."
+   *
+   *  BOTH `undefined` AND `null` mean "removed" — measured, not assumed: Lit's default `String`
+   *  converter hands a REMOVED reflected attribute's `fromAttribute` result straight through,
+   *  which is `null` (from `getAttribute`), not `undefined` — so a consumer's
+   *  `el.removeAttribute('pattern')` deliveres `this.pattern === null` here, a value the
+   *  ORIGINAL `string | undefined` declaration did not admit at all. Checking only `undefined`
+   *  let `null` fall to the `else` branch: `target.setAttribute('pattern', null)` stringifies
+   *  to the literal text `"null"`, which compiles to `^(?:null)$` — a field permanently invalid
+   *  for every value except the four characters "null", with NO visible `pattern` attribute in
+   *  the shadow DOM at all to explain why. */
+  #syncOptionalAttribute(
+    target: HTMLInputElement,
+    name: string,
+    value: string | null | undefined,
+  ): void {
+    if (value === undefined || value === null) {
       target.removeAttribute(name);
     } else {
       target.setAttribute(name, value);
@@ -261,12 +274,9 @@ export class SkFormInput extends FormControlBase {
       this.errorMessage = '';
       return;
     }
-    // MUTATION ANCHOR SC-003 (readonly barring arm, #180) — readonly is barred from constraint
-    // validation but its value IS still submitted (syncFormValue, unaffected above, deliberately
-    // has no `readonly` branch of its own) — the one place this element's readonly and disabled
-    // paths diverge. NOT REFLECTED, deliberately (see the `readonly` property declaration
-    // above): reflecting it would let the UA itself bar constraint validation on the attribute
-    // alone, making this branch an unobservable, near-dead mutation anchor.
+    // MUTATION ANCHOR SC-003 (readonly barring arm, #180) — barred from constraint validation,
+    // value still submitted (`syncFormValue` above has no `readonly` branch, deliberately). See
+    // the `readonly` property declaration for why it stays unreflected.
     if (this.readonly) {
       this.internals.setValidity({});
       this.invalid = false;
@@ -293,15 +303,25 @@ export class SkFormInput extends FormControlBase {
     // instead makes the merge available on the SAME pass as every other property, mount
     // included, and removes the two-cycle gap rather than working around it.
     //
-    // MUTATION ANCHOR SC-003 (post-reset arm, #180 — re-sited from SC-004 after CI found
-    // two-directional mutation collateral between the two ids: this line is the SAME shared
-    // sync every merge-dependent SC-003 arm below already depends on, not machinery specific to
-    // reset, so it belongs under their id, not a separate one). `formResetCallback()` assigns
-    // `this.value` the ordinary reactive-property way, which reaches THIS line through the
-    // same `willUpdate` -> `validate()` path as any other value change; a reset that restores a
-    // satisfying value must report valid immediately, not the stale pre-reset state.
-    this.#probe.value = this.value;
+    // MUTATION ANCHOR SC-003 (post-reset arm, #180 — re-sited from SC-004, see research.md R6).
+    // `formResetCallback()`'s `this.value` assignment reaches THIS line the ordinary way, so a
+    // reset restoring a satisfying value must report valid immediately, not the stale prior
+    // state.
+    // ORDER MATTERS — `type` MUST be assigned before `value`, matching `render()`'s own
+    // `.type`-then-`.value` binding order six lines below in that method. The probe is
+    // long-lived (one instance, reused across every `validate()` call), so assigning in the
+    // other order lets a same-update `type`+`value` change validate the NEW value against the
+    // STALE (pre-update) type. Measured: `type` number->text with `value` '123'->'abc' and
+    // `pattern="\d+"` in one update, assigned value-then-type — setting `probe.value = 'abc'`
+    // while `probe.type` was still `'number'` SILENTLY SANITIZES an unparseable number-typed
+    // assignment to `''` (a property assignment, unlike user typing, raises no flag at all, not
+    // even `badInput`); `probe.type` then flips to `'text'`, but the value stays the ALREADY
+    // -sanitized `''`, and an empty value never mismatches a pattern — so the merge saw no flags
+    // and the host reported valid while the real, rendered control (type text, value 'abc')
+    // genuinely mismatched `\d+`. Assigning `type` first means `value` is sanitized against the
+    // type it will actually hold, closing the gap.
     this.#probe.type = this.type;
+    this.#probe.value = this.value;
     // SET-OR-REMOVE, never an empty string. `el.pattern = ''` does not mean "no pattern" — the
     // HTML pattern algorithm compiles the ATTRIBUTE VALUE into `^(?:<value>)$`, so an empty
     // string compiles to `^(?:)$`, which matches ONLY the empty string. Measured directly: a
@@ -350,9 +370,32 @@ export class SkFormInput extends FormControlBase {
     // exists to fix: a user cannot type into a control that has not rendered yet, so `control`
     // is never undefined when `badInput` could genuinely be true.
     if (control?.validity.badInput) flags.badInput = true;
+    // OPERATOR RULING (#180, fork resolved 2026-09 — see research.md R2 "value authority" for
+    // the full three-option writeup): `setFormValue(this.value)` stays RAW and untouched — this
+    // element still submits exactly what the consumer set, not a sanitized substitute. What
+    // changed is DETECTION: a non-empty `this.value` that the CURRENT type cannot represent is
+    // the PROGRAMMATIC analogue of `badInput` — the probe above has already been synced to
+    // `this.type`/`this.value` (and pattern/min/max/step), so an empty probe value against a
+    // non-empty property means the UA silently sanitized the property's value away entirely
+    // (measured: `type="date"`, `value="2026-13-45"` — an out-of-range/malformed date — leaves
+    // `probe.value === ''`; `type="number"`, `value="1,5"` — a UA-unparseable numeral — does the
+    // same). A type that does NOT sanitize on an invalid value (`type="email"` with
+    // `value="notanemail"`, `type="text"` always) leaves `probe.value` non-empty, so this branch
+    // does not fire there — `typeMismatch` from the merge loop above already covers that case.
+    // Does not double-report against the REAL user-typing branch immediately above: while a
+    // user is actively typing an unparseable value, `#onInput` deliberately does NOT write
+    // `this.value` (see that handler), so `this.value` stays the last GOOD value during the
+    // edit and `this.#probe.value` (synced from that same stale-but-valid `this.value`) is
+    // non-empty — this branch is silent for the exact duration the real-control branch already
+    // has it covered, and picks up only the property-assignment path that branch cannot reach.
+    if (this.value !== '' && this.#probe.value === '') flags.badInput = true;
     // The consumer's message WINS the announcement when both hold — it is the more specific
-    // one — while the derived flag stays set underneath.
-    if (this.customError) {
+    // one — while the derived flag stays set underneath. TRIMMED, not a bare truthy check: a
+    // whitespace-only `customError` (e.g. `setCustomError(' ')`) is truthy as a string, so the
+    // untrimmed check set `invalid`/`aria-describedby` for a message that RENDERED as visually
+    // blank — `invalid: true` with nothing a user could read. Falling through when trimmed-empty
+    // lets the fallback-message step below (or the plain "no flags" branch) take over instead.
+    if (this.customError.trim() !== '') {
       flags.customError = true;
       message = this.customError;
     }
@@ -428,7 +471,7 @@ export class SkFormInput extends FormControlBase {
         ?readonly=${this.readonly}
         list=${hasOptions ? 'options' : nothing}
         aria-invalid=${this.invalid ? 'true' : 'false'}
-        aria-describedby=${describedBy || undefined}
+        aria-describedby=${describedBy || nothing}
         @input=${this.#onInput}
       />
       ${hasOptions
@@ -450,7 +493,26 @@ export class SkFormInput extends FormControlBase {
   }
 
   #onInput = (e: Event): void => {
-    this.value = (e.target as HTMLInputElement).value;
+    const control = e.target as HTMLInputElement;
+    // DO NOT COPY A SANITIZED VALUE BACK ONTO THE CONTROL THE USER IS STILL EDITING (#180).
+    // While `badInput` is true the UA has sanitized `.value` (often to `''`, sometimes to a
+    // best-effort partial) but keeps the user's RAW, unparsed text in the control's own
+    // internal edit buffer — measured: `type="date"` starting `2026-12-25`, deleting only the
+    // year and typing `2027`, produced `.value === ''` mid-edit with `badInput` true. Assigning
+    // that sanitized value to `this.value` and letting the NEXT render's `.value=` binding
+    // commit it back to the SAME control (which Lit will do the moment any OTHER reactive
+    // property changes, e.g. `invalid`) overwrites that raw buffer — the field then resolves to
+    // a value the user never typed once editing finishes, rather than what they actually typed.
+    // Skipping the `this.value` write here means the `.value=` binding never re-commits (its
+    // last committed value is unchanged, so Lit's own dirty-check skips it), leaving the
+    // control's buffer untouched. `validate()` still runs directly, reading `badInput` off THIS
+    // SAME control (not the probe — see the merge loop above), so the flag merges immediately
+    // without needing `this.value` to change at all.
+    if (control.validity.badInput) {
+      this.validate();
+      return;
+    }
+    this.value = control.value;
   };
 }
 

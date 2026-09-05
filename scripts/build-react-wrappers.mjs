@@ -126,31 +126,20 @@ const EXPECTED_NON_PROP_FIELDS = new Map([
 ]);
 
 /**
- * KNOWN HTML ATTRIBUTE RENAMES, not a denylist and not element-scoped — these are GLOBAL,
- * because the rename comes from the platform's own naming split, not from anything an element
- * author chooses. `@wc-toolkit/react-wrappers` hard-codes a table of well-known global HTML
- * attributes to their real React/JSX prop names (`node_modules/@wc-toolkit/react-wrappers/dist/
- * index.js`, the `propName`/`fieldName` pairs near its top) — `readonly` -> `readOnly`,
- * `autocomplete` -> `autoComplete`, `inputmode` -> `inputMode`, and others this repo has not
- * used yet — because that IS React's own convention for native elements (`<input readOnly>`,
- * not `<input readonly>`), independent of Lit or this manifest.
+ * PROP-NAME CASE FOLDING, not a rename table (simplified #180, debugger pass 1). An earlier
+ * version of this file carried a 3-entry `KNOWN_REACT_PROP_RENAMES` map (`readonly`/
+ * `autocomplete`/`inputmode`) mirroring three rows of `@wc-toolkit/react-wrappers`' own,
+ * NOT-EXPORTED nineteen-entry table of well-known global HTML attributes renamed to their
+ * React/JSX form (`node_modules/@wc-toolkit/react-wrappers/dist/index.js`, the
+ * `propName`/`fieldName` pairs near its top — `readonly` -> `readOnly`, `maxlength` ->
+ * `maxLength`, and sixteen more this repo has not used yet). A hand-mirrored SUBSET of an
+ * un-exported table reds this gate the next time an element declares field #4 of that
+ * nineteen — a false "rename drift" for a rename this generator has always made.
  *
- * #180 is the first element in this repo to declare a Lit field matching one of these names
- * verbatim (`readonly`/`autocomplete`/`inputmode` on `sk-form-input`, chosen to match the
- * native HTML attribute spelling, same as every other property on that element) — so this is
- * the first time the mismatch between "the Lit field name" and "the emitted React prop name"
- * became observable. Measured directly against the installed generator: regenerating with the
- * field name assumed to equal the prop name produced `manifest: …autocomplete…inputmode…
- * readonly… / emitted: …autoComplete…inputMode…readOnly…` and this check (rightly) failed.
- *
- * Extend this map only for a rename CONFIRMED against the installed generator version when a
- * future element hits it — do not guess ahead of what an element actually uses.
+ * Every entry in the real table is CASE-ONLY. The invariant this gate actually owns is the
+ * field SET, not its casing — so fold both sides to lower-case before comparing, and keep the
+ * RAW (un-folded) values in the error message below so a genuine mismatch stays readable.
  */
-const KNOWN_REACT_PROP_RENAMES = new Map([
-  ['readonly', 'readOnly'],
-  ['autocomplete', 'autoComplete'],
-  ['inputmode', 'inputMode'],
-]);
 
 const check = process.argv.includes('--check');
 // REFUSED TOGETHER. `--selftest` is tested first and exits 0 without consulting `check`, so
@@ -631,10 +620,10 @@ function audit({ outdir, manifestPath, srcDir, floor, allowFloorGrowth = false }
     if (!existsSync(f)) continue; // already reported by the set comparison above
     const dts = readFileSync(f, 'utf8');
     const got = emittedProps(dts);
-    const want = decl.fields
-      .map((field) => KNOWN_REACT_PROP_RENAMES.get(field) ?? field)
-      .sort();
-    if (JSON.stringify(got.values) !== JSON.stringify(want)) {
+    const want = decl.fields.slice().sort();
+    const wantFolded = want.map((field) => field.toLowerCase());
+    const gotFolded = got.values.map((field) => field.toLowerCase()).sort();
+    if (JSON.stringify(gotFolded) !== JSON.stringify(wantFolded.slice().sort())) {
       problems.push(
         `${decl.name} (${tag}) props do not match the manifest's attributed and explicit ` +
           `property-only public fields.\n` +

@@ -117,6 +117,21 @@ property assignment cannot reproduce it — measured directly on a bare native `
 user cannot type into a control that has not rendered yet, so this carries none of the mount-time
 risk the probe exists to close.
 
+**Submitted vs. validated, new — the asymmetry is DELIBERATE, operator-ruled (research.md R9)**:
+what `FormData` receives and what `validate()` blocks on are not the same value, on purpose.
+`setFormValue(this.value)` submits the RAW property exactly as the consumer set it — this
+contract is UNCHANGED by this mission, and stays that way specifically so `sk-form-textarea` and
+any future shared base-class work (R5) do not inherit a submission-contract change this mission
+was never scoped to make. What DOES reach the host's validity is a check the raw value cannot
+dodge: if `this.value` is non-empty but the current `type` cannot represent it at all (the probe,
+synced to the current `type`/`value`, comes back empty), that is the PROGRAMMATIC analogue of
+`badInput` and it blocks the form with a message — a value a real user could never have typed
+into this control (the UA would have sanitized or barred it) does not get a silent pass just
+because it arrived by property assignment. Two things a consumer could reasonably ask, answered
+directly: "does an invalid date still get submitted if I bypass validation?" — no, blocked, same
+as if a person had typed it. "does the FormData entry ever contain something other than what I
+set?" — no, never; only the reported VALIDITY differs from doing nothing.
+
 ## React wrapper contract (delta) — **prop naming corrected twice — second correction is the measured one**
 
 ```tsx
@@ -143,10 +158,13 @@ index.js`) — `readonly`/`autocomplete`/`inputmode` are three of them, matching
 names these props for native elements (`<input readOnly autoComplete="off">`), independent of
 what the Lit field or attribute is named. `sk-form-input` is the first element in this repo to
 use a field name matching one of those well-known attributes, so the mismatch was never visible
-before. `scripts/build-react-wrappers.mjs` now carries a `KNOWN_REACT_PROP_RENAMES` map so its
-own consistency check expects this rename rather than treating it as drift. Confirm against the
-regenerated `packages/react/src/SkFormInput.js`/`.d.ts` — reading the generator's actual output
-is what caught both the original wrong guess and this contract's own first "correction."
+before. A hand-mirrored rename table would only ever cover the entries this repo happens to have
+used so far — the pre-merge debugger lens found this fragile and simplified it: every rename in
+the generator's own (un-exported) table is CASE-ONLY, so `scripts/build-react-wrappers.mjs`'s own
+consistency check now folds both the expected and emitted prop-NAME SETS to lower-case before
+comparing, rather than carrying any rename table of its own. Confirm against the regenerated
+`packages/react/src/SkFormInput.js`/`.d.ts` — reading the generator's actual output is what caught
+both the original wrong guess and this contract's own first "correction."
 
 `options` is delivered as a JS property via the generated `useProperties` hook (not an attribute),
 surviving delivery before the custom element is defined and resetting to a fresh frozen `[]` when

@@ -53,103 +53,101 @@ copied from the squad's report.
   an emergent side-effect of what the UA happens to do with a reflected attribute it was never
   asked to interpret.
 
-## R2 — Merging validity flags without replacing them (FR-002) — **REVISED post-squad, timing + throw defects found**
+## R2 — Merging validity flags without replacing them (FR-002) — **REVISED post-squad, then CORRECTED again by the pre-merge debugger lens (its prescribed fix mechanism was itself wrong)**
 
-- **Decision (revised)**: `validate()` still reads the inner `<input>`'s own `ValidityState`, but
-  two additional, measured defects change HOW:
-  1. **Read-before-write ordering bug.** `validate()` runs from `willUpdate()`, which fires
-     **before** Lit's `render()` commits the current update's attribute/property bindings
-     (`.value=`, `pattern=`, `min=`, …) to the live DOM. Reproduced end-to-end: mount with
-     `pattern="[a-z]+"`, then assign `el.value = '123'` — the host reports valid and a real
-     `form.requestSubmit()` succeeds with `123` in the `FormData`, because `control.validity` at
-     the point `validate()` reads it still reflects what the PREVIOUS render committed, not what
-     this update is about to commit. User typing is unaffected (the browser updates the live
-     `<input>`'s own DOM state and validity synchronously as part of the native keystroke, before
-     Lit's cycle even starts), which is why this defect is invisible in Storybook/manual testing
-     and only bites programmatic assignment — exactly the shape the React wrapper (`useProperties`)
-     and this WP's own test-writing recipe (`el.value = 'x'; await el.updateComplete`) both use.
-     **Fix**: inside `validate()`, before reading `control.validity`, imperatively sync the
-     control's own DOM state to the CURRENT reactive-property values — `control.value = this.value`,
-     `control.type = this.type`, `control.pattern`, `control.min`, `control.max`, `control.step` —
-     so validity is always computed against what THIS update is rendering, not the last one. This
-     keeps `validate()` in `willUpdate()` (preserving the existing, tested "no second render pass"
-     invariant the file's own comment block already documents) rather than moving it to
-     `updated()`, which would risk reintroducing the ORIGINAL historical bug that comment block
-     describes (a reactive-property assignment — `this.invalid`/`this.errorMessage` — made from
-     inside `updated()` schedules a second update cycle, and the ALREADY-EXISTING mount-time
-     `aria-invalid` test was written specifically to catch that). The `willUpdate`
-     rationale block at `sk-form-input.ts:91-101` must be AMENDED to document this new subtlety
-     (why a pre-sync step exists), not contradicted by moving validation elsewhere.
-  2. **`setValidity(flags, '')` throws when any flag is `true`.** Measured, both engines: an empty
-     message string is not accepted when the flags object has a true entry (`updateComplete`
-     rejects; `updated()` — and therefore `syncFormValue()` — never runs; the field silently
-     disappears from `FormData` with no error surfaced to the caller). The ORIGINAL merge design
-     (the original merge design, superseded) said to pass "whatever `message` happens to be," which is empty for
-     a UA-raised flag with no `required`/`customError` also true — a form-associated custom
-     element has no UA-authored message to inherit, unlike a plain `<input>`, whose own
-     `reportValidity()` bubble supplies one for free. **Fix**: a per-flag fallback message table
-     (e.g. `patternMismatch` → "Value does not match the required pattern", `rangeUnderflow`/
-     `rangeOverflow` → phrased against `this.min`/`this.max`, `stepMismatch`, `typeMismatch`,
-     `badInput` → each a plain-language sentence), assigned when `message` is still empty after
-     the existing `required`/`customError` checks and at least one UA flag merged true. The
-     behaviour test must assert the text reaches the `role="alert"` node (`errorMessage`/
-     `aria-describedby`), not merely that the flag is set — a message-shaped assertion, because a
-     flag with no reachable text is exactly the WCAG 3.3.1 failure this file's other comments
-     already warn about for a different code path.
-  3. **The merged-flag SET was wrong in both directions.** `badInput` is reachable TODAY with no
-     new attribute at all (`type="number"`, a value the UA cannot parse — e.g. `12e` — produces
-     `value === ''` and `badInput: true`) and is exactly the "looks fine, silently submits
-     rejected data" failure FR-002 names; it belongs in the merge list. `tooLong`/`tooShort`
-     require `maxlength`/`minlength`, which this mission does not forward — their mutation arms
-     would be permanently inert (never reachable, so a broken merge for them would never red).
-     **Fix**: merge `patternMismatch`, `rangeUnderflow`, `rangeOverflow`, `stepMismatch`,
-     `typeMismatch`, `badInput`; drop `tooLong`/`tooShort` from the list (they can be added back
-     the day `maxlength`/`minlength` are forwarded, which is out of this mission's scope).
-  4. **`type` was missing from `willUpdate()`'s trigger set** while `typeMismatch` is in the merge
-     list. Measured: set `value`, then change `type` alone (e.g. `'text'` → `'email'`) — the host
-     stays valid while the inner control's own `typeMismatch` is now true, until some unrelated
-     property change next fires `validate()`. **Fix**: add `changed.has('type')` to the trigger
-     condition alongside the constraint properties already added there.
-  5. **The reset path shares this exact root cause.** `formResetCallback()` sets
-     `this.value = this.initialValue` (a plain reactive-property assignment), which schedules
-     `willUpdate()` → `validate()` the normal way — but WITHOUT fix (1) above, that call reads
-     `control.validity` off the stale, pre-reset DOM, so a field left invalid before reset stays
-     reported invalid AFTER a reset that restores a satisfying value: `aria-invalid="true"`
-     persists, the error node keeps stale text, and the form stays blocked. Fix (1)'s sync-before
-     -read step resolves this the same way it resolves the general case — no separate code path
-     is needed — but a DEDICATED test is, because it is a different call site (`formResetCallback`,
-     not a direct property assignment) even though the underlying defect is identical.
-- **Rationale**: `ElementInternals.setValidity` still REPLACES the host's reported validity
-  wholesale, as originally recorded — that half of R2 is unchanged. What changed is WHEN the
-  inner control's own validity can be trusted to reflect the update actually being processed, and
-  what argument `setValidity` can legally be called with.
-- **Alternatives considered (unchanged)**: re-deriving each constraint's validity in the element
-  itself — still rejected, for the same reason (a second, possibly-disagreeing source of truth).
-  **New alternative considered and rejected**: moving `validate()`'s UA-merge half into `updated()`
-  (post-render, so `control.validity` is naturally current with no pre-sync step needed) — this
-  would work for THIS defect in isolation, but risks reproducing the file's own documented
-  historical bug for any reactive-property write `validate()` makes (`this.invalid`,
-  `this.errorMessage`), and would leave the `willUpdate` rationale block actively contradicted
-  rather than merely incomplete. The pre-sync-then-read-in-willUpdate fix keeps the single-pass
-  invariant intact and is amendment, not architecture change.
-
-## R2 — Merging validity flags without replacing them (FR-002)
-
-- **Decision**: `validate()` reads `this.shadowRoot?.querySelector('input')?.validity` (the same
-  node reference already resolved for the `setValidity` focus anchor) and copies every `true` flag
-  from it into the flags object already being built from `required`/`customError`, before calling
-  `internals.setValidity(flags, message, control)`.
-- **Rationale**: `ElementInternals.setValidity` REPLACES the host's reported validity wholesale —
-  it does not merge with whatever the inner control's own attributes would imply, because the
-  inner control's validity is never consulted by anything today. Confirmed by reading
-  `sk-form-input.ts:136-178`: the `flags` object is built from scratch from `this.required` and
-  `this.customError` only. Forwarding `pattern`/`min`/`max`/`step` (IC-01) without this merge would
-  make the input itself invalid (`input.validity.patternMismatch === true`) while the host reports
-  valid — a field that "looks fine and silently submits rejected data," in spec.md's own words.
-- **Alternatives considered**: Re-deriving each constraint's validity in the element itself
-  (parsing `pattern` as a regex, comparing `min`/`max` numerically) — rejected as needless
-  reimplementation of what the UA already computes correctly on the real `<input>`, and a second
-  source of truth that could disagree with the UA's own judgement.
+- **Decision (final, as shipped)**: `validate()` merges UA-computed validity flags from a
+  **detached validation probe** (`#probe: HTMLInputElement`, created once, never rendered or
+  connected to the DOM) for the five constraint flags, and from the REAL rendered control for
+  `badInput` only — NOT, as both earlier drafts of this section said, by reading or syncing the
+  rendered control for everything. `ElementInternals.setValidity` still REPLACES the host's
+  reported validity wholesale (unchanged since the original draft).
+- **History — three passes, two of them wrong, each caught by measurement**:
+  1. *Original draft*: read `this.shadowRoot?.querySelector('input')?.validity` directly, no sync
+     step, and merge every true flag into `setValidity`. Superseded by pass 2 below — it has the
+     read-before-write timing bug pass 2 found.
+  2. *Squad-fold revision*: found the timing bug for real (`willUpdate()` fires BEFORE `render()`
+     commits the current update's bindings, so `control.validity` at read time still reflects the
+     PREVIOUS render, not the one about to commit — reproduced end-to-end: mount with
+     `pattern="[a-z]+"`, assign `el.value = '123'`, host reports valid and a real
+     `form.requestSubmit()` succeeds with `123` in `FormData`), plus the `setValidity(flags, '')`
+     throw-on-empty-message bug, plus the wrong merge set (`badInput` missing, `tooLong`/
+     `tooShort` wrongly included), plus `type` missing from `willUpdate`'s trigger set. All four
+     of those findings were CORRECT and are unchanged below. But this revision's prescribed FIX
+     for the timing bug — "imperatively sync the control's own DOM state to the current
+     reactive-property values before reading its validity" (`control.value = this.value`,
+     `control.pattern = this.pattern ?? ''`, etc.) — was itself wrong, caught by the pre-merge
+     debugger lens (pass 3): `?? ''` compiles an unset `pattern` to `^(?:)$` (which matches only
+     the empty string, not "no pattern constraint"), and syncing the RENDERED control specifically
+     cannot fix a field that mounts already-invalid, because the control does not exist during the
+     very first `willUpdate` pass at all — there is nothing to sync onto yet.
+  3. *Pre-merge debugger lens (what shipped)*: replaces "sync the rendered control" with a
+     **detached validation probe** — a private `<input>` that is created once, never rendered, and
+     needs no DOM connection — so constraint validity can be computed correctly regardless of
+     render timing or mount-time state. Two further engine-measured defects were found and folded
+     in during this same pass: a probe assignment-order bug (see below), and confirmation that
+     `setValidity`'s throw-on-empty-message-with-a-true-flag (pass 2's finding) still applies and
+     still needs the fallback-message fix.
+- **The shipped mechanism** (see `data-model.md`'s "Validity-flag derivation" for the full
+  pseudocode):
+  1. `probe.type = this.type` THEN `probe.value = this.value` — order matters. The probe is
+     long-lived (one instance, reused every call); assigning `value` before `type` validates the
+     NEW value against the STALE type until the next call self-corrects (measured: `number`→`text`
+     + `'123'`→`'abc'` + `pattern="\d+"` reported host-valid for one entire update pass).
+  2. `pattern`/`min`/`max`/`step` are set-or-removed on the probe from the CURRENT reactive
+     property values (`null` and `undefined` both mean "removed" — see `data-model.md`'s property
+     table note on Lit's `null`-on-attribute-removal behaviour — never `?? ''`).
+  3. `patternMismatch`, `rangeUnderflow`, `rangeOverflow`, `stepMismatch`, `typeMismatch` merge
+     from the PROBE. `badInput` merges separately, from the REAL rendered control — it is set ONLY
+     by genuine user keystrokes, never by a property assignment (measured on a bare native
+     `<input>`: assigning `.value` directly, even with a dispatched `input` event, never sets
+     `badInput`), so the probe (which only ever receives property assignments) can never observe
+     it; the real control, which is guaranteed to exist by the time a user could have typed into
+     it, is the only correct source. `tooLong`/`tooShort` are dropped from the merge list — they
+     require `maxlength`/`minlength`, which this mission does not forward, so their mutation arms
+     would be permanently inert.
+  4. `customError.trim() !== ''` gates the `customError` flag — a whitespace-only value is truthy
+     as a string but renders as a blank, unreadable error (a debugger-pass finding, not present in
+     either earlier draft).
+  5. If any flag is true and `message` is still empty, a per-flag fallback message is assigned
+     before `setValidity` is called, preventing the throw pass 2 found (`setValidity(flags, '')`
+     rejects when any flag is true — `updated()`, and therefore `syncFormValue()`, never runs, and
+     the field silently disappears from `FormData` with no error surfaced). The behaviour test
+     asserts the text reaches the `role="alert"` node, not merely that the flag is set.
+  6. `willUpdate()`'s trigger condition includes `type` (pass 2's finding: `typeMismatch` is in
+     the merge list, but nothing re-ran `validate()` when `type` alone changed) and, found by the
+     debugger lens in the same pass as the probe fix, `label` (it feeds the required-empty
+     MESSAGE text but was absent from the trigger set — changing `label` on an already-invalid
+     field left the error node showing the OLD label).
+  7. The reset path (`formResetCallback`) needs no separate code change — `this.value =
+     this.initialValue` is a plain reactive-property write that goes through the same
+     `willUpdate()` → `validate()` path, and the probe-sync step fixes the reset case for free.
+     It still needs its own DEDICATED test (a different call site, same underlying defect) — its
+     mutation anchor sits under the merge arms' id, not a separate one (see R6).
+  8. `#onInput` does not always write `this.value`: while the real control's `validity.badInput`
+     is true, its sanitized `.value` must NOT be copied into `this.value` — doing so would let the
+     next render's `.value=` binding commit the sanitized value back onto the SAME control the
+     user is still editing, destroying the UA's own in-progress edit buffer (measured: a
+     `type="date"` field mid-edit resolved to a fabricated wrong date instead of what was actually
+     typed). `validate()` is called directly from the input handler in that branch instead.
+- **Rationale for reading TWO sources (probe for five flags, the real control for `badInput`)**:
+  constraint validation for pattern/range/step/type is a pure attribute+value computation with no
+  render dependency, so a detached probe (synced fresh every call) is both correct and immune to
+  mount-time/render-timing races. `badInput` is the opposite case — it exists only as the UA's own
+  record of genuine keystrokes into a specific widget, which a probe (property-assignment-only)
+  can never produce.
+- **`valueMissing` is not pulled from either source** — it stays element-derived (`required &&
+  value === ''`), unchanged since the original draft.
+- **Alternatives considered and rejected**: (a) re-deriving each constraint's validity in the
+  element itself (parsing `pattern` as a regex, comparing `min`/`max` numerically) — needless
+  reimplementation of what the UA already computes correctly, and a second source of truth that
+  could disagree with the UA's own judgement (original draft's finding, still holds). (b) moving
+  `validate()`'s UA-merge half into `updated()` so the rendered control is naturally current with
+  no sync step needed — this was considered during the squad-fold revision and would have worked
+  for the timing bug in isolation, but risks reproducing this file's own documented historical bug
+  for any reactive-property write `validate()` makes (`this.invalid`, `this.errorMessage`), and
+  would leave the `willUpdate` rationale block actively contradicted. The detached-probe fix keeps
+  the single-pass invariant intact without this risk, and additionally solves the mount-time-
+  invalid case that neither (a) nor (b) could.
 
 ## R3 — Shadow-root datalist reachability (FR-005)
 
@@ -375,6 +373,66 @@ copied from the squad's report.
   `sk-form-input`'s current entry lists five story ids; WP01's new constraint/readonly/datalist
   story arms are ADDITIONS, and adding an unlisted story is free under this gate — only REMOVING
   a listed one requires editing this file. No new WP02 subtask is needed for it.
+
+## R9 — Value authority: raw vs. sanitized `this.value` on submission (FR-002, #180's comment thread) — **operator-ruled, not implementer-decided**
+
+- **The fork, found by the pre-merge debugger lens and correctly NOT decided by the
+  implementer**: `setFormValue(this.value)` submits whatever the consumer set on the property,
+  even when the current `type` cannot represent it — e.g. `<sk-form-input type="date" name="when"
+  value="2026-13-45" required>` submits the literal string `when=2026-13-45` in `FormData`, while
+  the native platform table this mission's R1 already measured shows a bare `<input type="date">`
+  either sanitizing the value away or reporting `badInput` and blocking. Before this ruling,
+  neither this element's `validate()` nor its `FormData` entry treated that divergence as
+  anything at all — a value the UA itself could never produce from user typing would still
+  submit as if it were ordinary text.
+- **Three options were put to the operator, via #180's comment thread**:
+  1. **Detect and flag only** (chosen): keep submitting the raw `this.value` untouched — no
+     change to `setFormValue`'s contract — but treat a non-empty value the current type cannot
+     represent as the PROGRAMMATIC analogue of `badInput`, merging it into `validate()`'s flags
+     and blocking submission with a message, exactly as genuine user-typed `badInput` already
+     does.
+  2. **Submit the sanitized value instead** (declined, not implemented): would change
+     `setFormValue`'s contract from "whatever the consumer set" to "whatever the UA can parse
+     from it" — a real behaviour change to a submission contract that predates this mission and
+     that `sk-form-textarea` and #122's future shared-base work both depend on continuing to mean
+     the same thing. Declined specifically because it changes something OUTSIDE this mission's
+     already-drawn boundary (R5), not because it is wrong in the abstract.
+  3. **Rebase `valueMissing` on the sanitized string** (declined, not implemented): would make an
+     empty-but-unparseable value ALSO trigger `valueMissing` (today `valueMissing` is purely
+     `required && this.value === ''`, unaffected by parseability) — declined for the same
+     "changes a contract outside this mission's scope" reason as option 2, and left, like option
+     2, as a deliberate LATER decision for whichever mission next has `sk-form-textarea` in scope
+     to make alongside it, not something this mission's narrower fix should quietly fold in.
+- **Decision (final, as shipped)**: option 1. In `validate()`, after the probe has been synced to
+  the current `type`/`value`/pattern/min/max/step (the same probe R2 already established), the
+  divergence test is `this.value !== '' && this.#probe.value === ''` — the probe already carries
+  what the UA would make of the CURRENT property value under the CURRENT type, so an empty probe
+  against a non-empty property means the UA sanitized the value away entirely. Merged as
+  `flags.badInput = true`, sharing the SAME fallback message table entry (`badInput`: "Value
+  could not be interpreted.") the real-control `badInput` merge (R2) already uses — no new
+  fallback text needed, since it is the same flag.
+- **Why this does not double-report against the real-control `badInput` branch (R2)**: while a
+  user is actively typing an unparseable value, `#onInput` (R2's fix 8) deliberately does NOT
+  write `this.value` — so during a live edit, `this.value` stays the last GOOD value, the probe
+  (synced from that same stale-but-valid value) is non-empty, and this branch stays silent for
+  exactly the window the real-control branch already covers. This branch only ever fires for the
+  property-assignment path (mount-time or a direct `el.value = …`), which the real-control branch
+  structurally cannot reach (nothing was ever typed).
+- **Why this does not over-fire on types that merely reject rather than sanitize**: `type="email"`
+  with an invalid address (e.g. `notanemail`) is NOT sanitized away by the UA — the raw text
+  stays on the control and `typeMismatch` is reported instead, so the probe's `.value` stays
+  non-empty and this branch's condition is false. `type="text"` never sanitizes at all. Proven by
+  a dedicated negative test (`fixtures/elements-behaviour/src/sk-form-input.test.ts`), not merely
+  asserted in prose.
+- **Test arms added**: `type="date"` with `value="2026-13-45" required` and `type="number"` with
+  `value="1,5"`, both asserting `validity.valid === false`, a real `form.requestSubmit()` blocked,
+  and a non-empty message reaching the `role="alert"` node; plus the negative `type="email"` case
+  above. All three reuse the existing `SC-003` id (R6's registry-numbering finding governs why no
+  new id is minted) rather than being a separate mutation-anchored id.
+- **What is NOT recorded as decided**: options 2 and 3 remain open, named, and explicitly deferred
+  to whichever future mission puts `sk-form-textarea` back in scope alongside `sk-form-input` — 
+  see R5's own "candidates for a FUTURE mission" language, which this ruling extends to cover the
+  value-authority question too.
 
 ## Adversarial evidence disposition
 

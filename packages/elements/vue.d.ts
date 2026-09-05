@@ -113,7 +113,7 @@ declare module 'vue' {
     /** A labelled text input that participates in a native form. */
     'sk-form-input': SkElement<{
       /** Forwarded to the inner control's `autocomplete` attribute, verbatim. */
-      'autocomplete'?: string | undefined;
+      'autocomplete'?: string | null | undefined;
       /** Optional helper text rendered under the control and linked to it for screen readers. */
       'description'?: string;
       /** Excludes the field from submission and from user interaction. */
@@ -122,7 +122,7 @@ declare module 'vue' {
        * A hint to the browser about the kind of on-screen keyboard to display. Hinting only — it
        * carries no validation semantics.
        */
-      'inputmode'?: string | undefined;
+      'inputmode'?: string | null | undefined;
       /**
        * Whether the field is showing an error. The element sets it from its own validity.
        * Assigning it directly paints the error state WITHOUT setting validity — the field looks
@@ -135,12 +135,12 @@ declare module 'vue' {
        * The maximum value, for numeric and date/time input types. A string, matching the native
        * HTML attribute's own contract.
        */
-      'max'?: string | undefined;
+      'max'?: string | null | undefined;
       /**
        * The minimum value, for numeric and date/time input types. A string, matching the native
        * HTML attribute's own contract.
        */
-      'min'?: string | undefined;
+      'min'?: string | null | undefined;
       /**
        * The name submitted with the form value. Without it the field contributes no `FormData`
        * entry — though a required empty one still blocks its form.
@@ -150,7 +150,7 @@ declare module 'vue' {
        * A regular expression the value must match. Forwarded verbatim to the inner control; the
        * platform performs the match, this element does not re-validate it.
        */
-      'pattern'?: string | undefined;
+      'pattern'?: string | null | undefined;
       /**
        * Placeholder text. Not a substitute for `label`: it disappears on input and is not a
        * reliable accessible name.
@@ -171,7 +171,7 @@ declare module 'vue' {
        * The granularity the value must adhere to, for numeric and date/time input types. `"any"`
        * is a legal value the platform itself interprets.
        */
-      'step'?: string | undefined;
+      'step'?: string | null | undefined;
       /** The native input type — `text`, `email`, `password`, and so on. */
       'type'?: string;
       /**

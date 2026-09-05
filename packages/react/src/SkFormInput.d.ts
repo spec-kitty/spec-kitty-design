@@ -36,14 +36,14 @@ blocks its form. */
   required?: boolean;
 
   /** Forwarded to the inner control's `autocomplete` attribute, verbatim. */
-  autoComplete?: string | undefined;
+  autoComplete?: string | null | undefined;
 
   /** Optional helper text rendered under the control and linked to it for screen readers. */
   description?: SkFormInputElement["description"];
 
   /** A hint to the browser about the kind of on-screen keyboard to display. Hinting only — it
 carries no validation semantics. */
-  inputMode?: string | undefined;
+  inputMode?: string | null | undefined;
 
   /** The visible label. Also the accessible name, so it is not optional in practice. */
   label?: SkFormInputElement["label"];

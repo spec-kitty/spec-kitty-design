@@ -7,15 +7,15 @@ Components in these artifacts: sk-blog-card, sk-button, sk-card, sk-check-bullet
 
 | artifact | raw | minified | min+gzip | notes |
 |---|---:|---:|---:|---|
-| `ESM  (dist/index.js)` | 101.5 KiB | 63.5 KiB | 14 KiB | `lit` external |
-| `IIFE (dist/elements.js)` | 115.8 KiB | 72.2 KiB | 17 KiB | runtime bundled |
+| `ESM  (dist/index.js)` | 102.3 KiB | 63.7 KiB | 14 KiB | `lit` external |
+| `IIFE (dist/elements.js)` | 116.6 KiB | 72.3 KiB | 17 KiB | runtime bundled |
 
 ## Subresource Integrity — the classic-script bundle (FR-005)
 
 For a CDN load of `dist/elements.js`, pin what the browser executes:
 
 ```
-integrity="sha384-nSDa/i23Z1QJkpSVdqorEd/t0Pu7oPzf6ODy+VcibtsaZPCdZXmOvYXq42p64Muy"
+integrity="sha384-kkREAQ1QboWinsjNovYKqssEl+/D37rzoehIbS6dAMdumGo0UwKJnOSQ90u+2aDc"
 ```
 
 Derived from the built artifact on every run and re-derived by `--check`, so it cannot be
@@ -36,8 +36,8 @@ What a consumer downloads, from a real `npm pack` of each package in the derived
 |---|---:|---:|
 | `@spec-kitty/tokens` | 37 | 5749.5 KiB |
 | `@spec-kitty/styles` | 68 | 134.4 KiB |
-| `@spec-kitty/elements` | 34 | 451.3 KiB |
-| `@spec-kitty/react` | 34 | 76.5 KiB |
+| `@spec-kitty/elements` | 34 | 453.9 KiB |
+| `@spec-kitty/react` | 34 | 76.6 KiB |
 
 PACKED SIZE IS DELIBERATELY NOT IN THIS TABLE. It is the size of the gzipped tarball and therefore
 depends on the zlib build of the machine that runs `npm pack` — a workstation and CI measured
@@ -71,7 +71,7 @@ figure it replaced, not more. Comparing them needs a per-component build; #81 ow
 measurement that produces one. Stating the basis is this section's whole point.
 
 What this script *does* establish is the shape of the relationship: the runtime is a
-runtime cost MEASURED AT THIS BUILD (14.2 KiB of the IIFE is Lit, since the
+runtime cost MEASURED AT THIS BUILD (14.3 KiB of the IIFE is Lit, since the
 ESM artifact holds the same element with `lit` external) and the per-component cost
 tracks its CSS. A batch mission adding a component should expect the IIFE to grow by
 roughly that component's CSS, not by a fixed per-component overhead.
@@ -82,7 +82,7 @@ unit: every figure in this file is KiB (1024). The WP prompt recorded the IIFE a
 "24.0 KB" where this file would have read 23.5 KiB — **24073 bytes either way**.
 Those two numbers are pinned historical values on purpose. An earlier revision of this
 paragraph interpolated the CURRENT raw size into that comparison, so once the artifact
-grew it asserted that 118533 bytes are "24.0 KB" — false by a factor of
+grew it asserted that 119386 bytes are "24.0 KB" — false by a factor of
 five, in the one paragraph whose whole lesson is to state the basis and the unit. A lens
 caught it.
 
@@ -91,13 +91,13 @@ caught it.
 ```
 $ npx nx run elements:build && node scripts/measure-elements-sizes.mjs
 packages/elements/dist/index.js
-  raw        103947 bytes  (101.5 KiB)
-  minified    65065 bytes  (63.5 KiB)
+  raw        104779 bytes  (102.3 KiB)
+  minified    65195 bytes  (63.7 KiB)
   gzip         23 KiB
   min+gzip     14 KiB
 packages/elements/dist/elements.js
-  raw        118533 bytes  (115.8 KiB)
-  minified    73893 bytes  (72.2 KiB)
+  raw        119386 bytes  (116.6 KiB)
+  minified    74023 bytes  (72.3 KiB)
   gzip         27 KiB
   min+gzip     17 KiB
 ```
