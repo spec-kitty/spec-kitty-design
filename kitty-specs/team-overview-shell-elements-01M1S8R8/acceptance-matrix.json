@@ -228,10 +228,10 @@
       "criterion_id": "NFR-006",
       "description": "Stable generators are deterministic and the timestamped token catalogue exactly matches its source outside generated_at.",
       "proof_type": "automated_test",
-      "evidence": "Verified on aggregate lane 89bbf7eb6fb12ca6aab0a780673ac93f506316e0: canonical generator order and repeat-generation checks were byte-stable; all generated-surface drift/ratchet gates passed; NI-002 12-path absence and NI-007 token source/catalogue comparator are confirmed_absent.",
+      "evidence": "Verified on correction lane 5581db93adc567ffa27b146698534fdf6a9867a9: fresh uncached elements build preceded authoritative SIZES generation; repeat uncached build plus measure-elements-sizes.mjs --check passed; CSS/markup/CEM/React/Vue/manifest/entries checks and release-graph 28/28 selftest plus live 4-package graph passed.",
       "pass_fail": "pass",
-      "verified_by": "codex/frontend-freddy/WP04",
-      "verified_at": "2026-09-05T23:34:24.181977+00:00",
+      "verified_by": "codex/frontend-freddy/WP04-correction-1",
+      "verified_at": "2026-09-05T23:49:03.133690+00:00",
       "notes": "Planned evidence mapping; populate the exact command result and immutable SHA when the owning WP or wrap-up step executes."
     },
     {
