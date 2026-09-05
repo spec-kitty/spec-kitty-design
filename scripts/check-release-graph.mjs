@@ -241,6 +241,7 @@ export function checkWorkflowUsesDerivedSet(workflowText, packageNames, packageD
     [/cyclonedx/i, 'the SBOM'],
     [/check-release-graph\.mjs(?!\s*--selftest)/, 'the release-graph assertion on the publishing path'],
     [/check-release-graph\.mjs\s+--selftest/, "the gate's own blindness check on the publishing path"],
+    [/check-vue-packed-types\.mjs/, 'the packed Vue declaration check on the publishing path'],
     [/measure-elements-sizes\.mjs\s+--check/, 'the size and SRI drift check on the publishing path'],
   ];
   for (const [re, what] of REQUIRED_STEPS) {
@@ -536,6 +537,8 @@ const VALID_RELEASE_WORKFLOW = `jobs:
         run: node scripts/check-release-graph.mjs
       - name: Selftest
         run: node scripts/check-release-graph.mjs --selftest
+      - name: Packed Vue declarations
+        run: node scripts/check-vue-packed-types.mjs
       - name: Sizes
         run: node scripts/measure-elements-sizes.mjs --check
       - name: Audit
@@ -623,6 +626,17 @@ const PROBES = [
     run: () =>
       checkWorkflowUsesDerivedSet(
         withDefect(/for pkg in [^\n]*npm publish[^\n]*done/, 'echo "release complete"'),
+        ['@spec-kitty/tokens'], ['tokens'],
+      ),
+  },
+  {
+    what: 'a release workflow with no packed Vue declaration check',
+    run: () =>
+      checkWorkflowUsesDerivedSet(
+        withDefect(
+          '      - name: Packed Vue declarations\n        run: node scripts/check-vue-packed-types.mjs\n',
+          '',
+        ),
         ['@spec-kitty/tokens'], ['tokens'],
       ),
   },
