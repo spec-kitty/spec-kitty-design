@@ -6,163 +6,163 @@
   "criteria": [
     {
       "criterion_id": "FR-001",
-      "description": "Verify FR-001 is satisfied",
+      "description": "sk-metric renders the supplied label and displayValue verbatim, including currency-looking, percentage-looking, large and nonnumeric strings.",
       "proof_type": "automated_test",
       "evidence": null,
       "pass_fail": "pending",
       "verified_by": null,
       "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "notes": "WP01: focused browser behavior assertions plus named production-source red reversal."
     },
     {
       "criterion_id": "FR-002",
-      "description": "Verify FR-002 is satisfied",
+      "description": "sk-metric renders an optional annotation through a real sk-pill-tag and emits no annotation container when the value is absent.",
       "proof_type": "automated_test",
       "evidence": null,
       "pass_fail": "pending",
       "verified_by": null,
       "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "notes": "WP01: DOM/composition assertions cover present and omitted annotation states."
     },
     {
       "criterion_id": "FR-003",
-      "description": "Verify FR-003 is satisfied",
+      "description": "sk-metric provides the approved eyebrow and strong tabular-value hierarchy plus a presentation-only compact mode.",
       "proof_type": "automated_test",
       "evidence": null,
       "pass_fail": "pending",
       "verified_by": null,
       "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "notes": "WP01: focused behavior/style proof and the Default, Compact and LongContent stories."
     },
     {
       "criterion_id": "FR-004",
-      "description": "Verify FR-004 is satisfied",
+      "description": "Neither component parses, normalizes, calculates or infers domain meaning from supplied display strings.",
       "proof_type": "automated_test",
       "evidence": null,
       "pass_fail": "pending",
       "verified_by": null,
       "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "notes": "WP01/WP02: opaque-byte assertions and negative source/public-surface review."
     },
     {
       "criterion_id": "FR-005",
-      "description": "Verify FR-005 is satisfied",
+      "description": "A metric exposes one native definition relationship without claiming a surrounding heading or description.",
       "proof_type": "automated_test",
       "evidence": null,
       "pass_fail": "pending",
       "verified_by": null,
       "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "notes": "WP01: native dl/dt/dd relationship and absence-of-heading assertions."
     },
     {
       "criterion_id": "FR-006",
-      "description": "Verify FR-006 is satisfied",
+      "description": "sk-evidence-chain accepts exactly one property-only readonly array of immutable stage records with an analyzer-safe structural type.",
       "proof_type": "automated_test",
       "evidence": null,
       "pass_fail": "pending",
       "verified_by": null,
       "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "notes": "WP02 behavior/type proof; WP03 normalized manifest and generated React/Vue inspection."
     },
     {
       "criterion_id": "FR-007",
-      "description": "Verify FR-007 is satisfied",
+      "description": "The chain rejects blank or duplicate IDs, preserves supplied order and caller data, and uses valid stable IDs only for rendered node identity.",
       "proof_type": "automated_test",
       "evidence": null,
       "pass_fail": "pending",
       "verified_by": null,
       "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "notes": "WP02: deeply frozen fixtures, replacement ordering and same-ID DOM identity assertions."
     },
     {
       "criterion_id": "FR-008",
-      "description": "Verify FR-008 is satisfied",
+      "description": "Every valid evidence stage renders through one actual sk-metric rather than duplicated label/value markup.",
       "proof_type": "automated_test",
       "evidence": null,
       "pass_fail": "pending",
       "verified_by": null,
       "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "notes": "WP02: custom-element composition and exact stage-to-metric count assertions."
     },
     {
       "criterion_id": "FR-009",
-      "description": "Verify FR-009 is satisfied",
+      "description": "A valid N-stage chain renders exactly N-1 visible decorative connectors, only between adjacent stages.",
       "proof_type": "automated_test",
       "evidence": null,
       "pass_fail": "pending",
       "verified_by": null,
       "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "notes": "WP02 behavior tests and WP03 focused Storybook Playwright assertions."
     },
     {
       "criterion_id": "FR-010",
-      "description": "Verify FR-010 is satisfied",
+      "description": "Stages form one native ordered list with direct list items while connectors add no accessible item or spoken content.",
       "proof_type": "automated_test",
       "evidence": null,
       "pass_fail": "pending",
       "verified_by": null,
       "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "notes": "WP02 same-root semantics assertions plus WP03 axe and functional browser proof."
     },
     {
       "criterion_id": "FR-011",
-      "description": "Verify FR-011 is satisfied",
+      "description": "Two-, four- and six-stage inputs retain item count and order while CSS alone changes wide horizontal flow to narrow vertical flow.",
       "proof_type": "automated_test",
       "evidence": null,
       "pass_fail": "pending",
       "verified_by": null,
       "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "notes": "WP02 behavior/stories and WP03 narrow computed-layout/DOM-order Playwright proof."
     },
     {
       "criterion_id": "FR-012",
-      "description": "Verify FR-012 is satisfied",
+      "description": "Empty, non-array or structurally invalid stage input fails closed to one generic empty state with no partial list, metric or connector.",
       "proof_type": "automated_test",
       "evidence": null,
       "pass_fail": "pending",
       "verified_by": null,
       "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "notes": "WP02 invalid-input matrix and named validator source-break red."
     },
     {
       "criterion_id": "FR-013",
-      "description": "Verify FR-013 is satisfied",
+      "description": "Public tones are limited to neutral, info, success and attention and do not encode Team Kitty workflow states.",
       "proof_type": "automated_test",
       "evidence": null,
       "pass_fail": "pending",
       "verified_by": null,
       "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "notes": "WP01/WP02 type and rendering assertions; WP03 manifest and forbidden-name scan."
     },
     {
       "criterion_id": "FR-014",
-      "description": "Verify FR-014 is satisfied",
+      "description": "Generated manifest, React wrappers and Vue declarations expose the complete contract; stages stays property-only and readonly with no any or unimported alias.",
       "proof_type": "automated_test",
       "evidence": null,
       "pass_fail": "pending",
       "verified_by": null,
       "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "notes": "WP03: ordered generation, exact generated-output inspection, type negatives and React runtime identity/reset fixture."
     },
     {
       "criterion_id": "FR-015",
-      "description": "Verify FR-015 is satisfied",
+      "description": "Exactly six metric and nine evidence-chain stories cover generic defaults, the approved Delivery-return fixture, long content, two/four/six stages, narrow reflow and real .sk-light wrappers.",
       "proof_type": "automated_test",
       "evidence": null,
       "pass_fail": "pending",
       "verified_by": null,
       "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "notes": "WP01/WP02 authored story sets; WP03 built index ratchet, nonblank loads, axe and visual coverage."
     },
     {
       "criterion_id": "FR-016",
-      "description": "Verify FR-016 is satisfied",
+      "description": "All six public properties and all nine declared parts are documented, represented by exact ratchets and backed by external ::part targeting tests.",
       "proof_type": "automated_test",
       "evidence": null,
       "pass_fail": "pending",
       "verified_by": null,
       "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "notes": "WP03: normalized manifest/docs/parts ratchets with exact +6/+9 deltas and literal selector coverage."
     }
   ],
   "negative_invariants": []
