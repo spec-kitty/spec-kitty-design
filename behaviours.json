@@ -236,6 +236,10 @@
         {
           "name": "react-transition-matrix",
           "file": "fixtures/react-consumer/src/sk-transition-matrix.test.tsx"
+        },
+        {
+          "name": "react-form-input",
+          "file": "fixtures/react-consumer/src/sk-form-input-options.test.tsx"
         }
       ]
     },

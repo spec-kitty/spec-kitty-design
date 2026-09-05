@@ -1,4 +1,5 @@
 import { beforeEach, expect, test } from 'vitest';
+import { userEvent } from '@vitest/browser/context';
 import '@spec-kitty/elements';
 
 /**
@@ -29,6 +30,16 @@ type Input = HTMLElement & {
   checkValidity(): boolean;
   formDisabledCallback(disabled: boolean): void;
   updateComplete: Promise<unknown>;
+  // #180 additions
+  type: string;
+  pattern: string | undefined;
+  min: string | undefined;
+  max: string | undefined;
+  step: string | undefined;
+  inputmode: string | undefined;
+  autocomplete: string | undefined;
+  readonly: boolean;
+  options: ReadonlyArray<{ value: string; label?: string }>;
 };
 
 const mount = async (attrs: Record<string, string> = {}, seed = ''): Promise<[HTMLFormElement, Input]> => {
@@ -399,6 +410,225 @@ test('clearing a server error does NOT wipe a live required violation', async ()
   expect(el.validity.valueMissing, 'the required violation is re-derived, not erased').toBe(true);
   expect(el.hasAttribute('invalid')).toBe(true);
   await expect.element(control(el)).toHaveAccessibleDescription(/is required/);
+});
+
+/**
+ * #180 — native constraint forwarding, merged UA validity, corrected readonly semantics, and a
+ * shadow-root datalist. WP01 T001 (forwarding), T002 (readonly + merged validity), T003
+ * (datalist) — merged with their tests per the coordinator's DIRECTIVE_034 fold-in: each test
+ * below sits in the same subtask as the code it covers, not a later one.
+ */
+
+test('[SC-013] pattern/min/max/step/inputmode/autocomplete reach the inner control', async () => {
+  // SIX ATTRIBUTES, ONE TEST — a dropped forwarding for any one of them is a distinguishable
+  // mutation target (the render() binding line for that attribute), so a single parameterized
+  // assertion set still gives per-attribute mutation coverage.
+  const cases: Array<[keyof Input, string]> = [
+    ['pattern', '[a-z]+'],
+    ['min', '3'],
+    ['max', '9'],
+    ['step', '2'],
+    ['inputmode', 'numeric'],
+    ['autocomplete', 'off'],
+  ];
+  const [, el] = await mount({ name: 'signal' });
+  for (const [prop, value] of cases) {
+    (el as unknown as Record<string, unknown>)[prop] = value;
+  }
+  await el.updateComplete;
+  const inner = control(el);
+  for (const [prop, value] of cases) {
+    expect(
+      inner.getAttribute(prop as string),
+      `${String(prop)} must reach the inner control as a real attribute`,
+    ).toBe(value);
+  }
+  // Attribute -> property also works, for every one of them (Lit's own `type: String` handles
+  // this; asserted once as a precondition the rest of the test relies on).
+  const [, el2] = await mount({ pattern: '[0-9]+', min: '1', max: '5', step: '1', inputmode: 'tel', autocomplete: 'on' });
+  expect(el2.pattern).toBe('[0-9]+');
+  expect(el2.min).toBe('1');
+  expect(el2.max).toBe('5');
+  expect(el2.step).toBe('1');
+  expect(el2.inputmode).toBe('tel');
+  expect(el2.autocomplete).toBe('on');
+
+  // UNSET must OMIT the attribute entirely on the rendered control, not forward an empty
+  // string. This is not merely cosmetic: an empty `pattern=""` is not "no pattern" — it compiles
+  // to a regex that matches ONLY the empty string, so a plain input like "x" would fail it.
+  // Measured directly while building the merge (below): the same trap exists internally for the
+  // detached validation probe, and is guarded there for the same reason.
+  const [, el3] = await mount({ name: 'plain' });
+  const inner3 = control(el3);
+  for (const attr of ['pattern', 'min', 'max', 'step']) {
+    expect(inner3.hasAttribute(attr), `unset ${attr} must be ABSENT, not empty`).toBe(false);
+  }
+});
+
+test('[SC-003] readonly reaches the inner control but is NOT reflected on the host', async () => {
+  // ATTRIBUTE -> PROPERTY works (markup authoring); PROPERTY -> ATTRIBUTE is DELIBERATELY absent
+  // — reflecting `readonly` would let the UA bar constraint validation on the host attribute
+  // alone, making the element's own barring branch an unobservable mutation anchor (research.md
+  // R1). This test's second half is the one that would silently pass for the wrong reason if
+  // `reflect: true` were mistakenly restored.
+  const [, el] = await mount({ readonly: '' });
+  expect(el.readonly, 'attribute -> property must still work').toBe(true);
+  expect(control(el).readOnly, 'the inner control must be driven from the property').toBe(true);
+
+  const [, el2] = await mount({});
+  el2.readonly = true;
+  await el2.updateComplete;
+  expect(
+    el2.hasAttribute('readonly'),
+    'readonly is deliberately NOT reflected — this must stay false',
+  ).toBe(false);
+});
+
+test('[SC-003] a merged UA validity flag blocks a real submit and carries a message — mount-time', async () => {
+  const [form, el] = await mount({ name: 'branch', pattern: '[a-z]+' }, '123');
+  await el.updateComplete;
+
+  expect(el.validity.patternMismatch, 'the UA flag must be merged onto the host').toBe(true);
+  expect(el.checkValidity()).toBe(false);
+
+  let fired = 0;
+  form.addEventListener('submit', (e) => {
+    e.preventDefault(); // never let a genuinely-firing submit actually navigate the test iframe
+    fired += 1;
+  });
+  form.requestSubmit();
+  expect(fired, 'a patternMismatch value must never reach a submit handler').toBe(0);
+
+  // The message reaches the a11y tree, not merely the flag.
+  const err = el.shadowRoot!.querySelector('[part~="error"]') as HTMLElement;
+  expect(err.textContent!.trim().length, 'a UA-raised flag must carry a non-empty message').toBeGreaterThan(0);
+
+  // And the valid path still works.
+  el.value = 'abc';
+  await el.updateComplete;
+  form.requestSubmit();
+  expect(fired, 'a valid value must still submit').toBe(1);
+});
+
+test('[SC-003] a constraint attribute changed AFTER mount reaches the host validity — the read-before-write ordering fix', async () => {
+  // THE ARM THAT CATCHES THE CRITICAL DEFECT. Mount with a VALID value, THEN mutate — this is
+  // what programmatic assignment (and the React wrapper) actually does, and it is the case
+  // `willUpdate` running before `render()` commits bindings would otherwise miss: without the
+  // sync-before-read step in validate(), `control.validity` here would still reflect the
+  // PREVIOUS render's (valid) state.
+  const [form, el] = await mount({ name: 'branch', pattern: '[a-z]+' }, 'abc');
+  await el.updateComplete;
+  expect(el.validity.valid, 'precondition: valid at mount').toBe(true);
+
+  el.value = '123';
+  await el.updateComplete;
+
+  expect(el.validity.patternMismatch, 'the flag must be current after a post-mount mutation').toBe(true);
+  expect(el.checkValidity()).toBe(false);
+
+  let fired = 0;
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    fired += 1;
+  });
+  form.requestSubmit();
+  expect(fired, 'a post-mount-mutated invalid value must still block submission').toBe(0);
+});
+
+test('[SC-003] a UA flag with no required/customError still gets a non-empty message — the setValidity throw fix', async () => {
+  // THE ARM THAT CATCHES THE OTHER CRITICAL DEFECT. `required` is NOT set here, so the only
+  // source of a true flag is the merged UA flag — `setValidity(flags, '')` throws in that case
+  // unless a fallback message is authored. The test simply completing (updateComplete resolving,
+  // not rejecting) is part of the assertion.
+  const [, el] = await mount({ name: 'branch', pattern: '[a-z]+' }, '123');
+  // Reaching this line at all is part of the assertion: `setValidity(flags, '')` throwing would
+  // reject `updateComplete` (awaited inside `mount`), failing the test before this line runs.
+  const err = el.shadowRoot!.querySelector('[part~="error"]') as HTMLElement;
+  expect(err.textContent!.trim().length, 'a bare UA flag must still get a message').toBeGreaterThan(0);
+});
+
+test('[SC-003] badInput reaches the host — REAL typing only, never a property assignment', async () => {
+  // MEASURED, NOT ASSUMED: `el.value = '12e'` (property assignment) on a bare native
+  // `<input type="number">` sanitizes silently to `''` with `badInput` staying `false` — even
+  // with a dispatched `input` event. `badInput` is set ONLY by the UA's own response to genuine
+  // user keystrokes into the widget. That is why this merge is read from the REAL rendered
+  // control (not the detached validation probe every other flag in this file is merged from —
+  // a probe driven by property assignment could never observe this flag at all) and why this
+  // test uses `userEvent.type`, not `el.value = …`.
+  const [, el] = await mount({ name: 'qty', type: 'number' });
+  const inner = control(el);
+  await userEvent.type(inner, '12');
+  await userEvent.type(inner, 'e');
+  await el.updateComplete;
+
+  expect(el.validity.badInput, 'real typing of an unparseable number must merge badInput').toBe(true);
+  expect(el.validity.valid).toBe(false);
+});
+
+test('[SC-002][SC-003] a readonly control still submits but is barred from constraint validation', async () => {
+  const [form, el] = await mount({ name: 'region', label: 'Region', required: '', readonly: '' });
+  await el.updateComplete;
+
+  expect(el.validity.valid, 'barred, not merely passing').toBe(true);
+  expect(el.checkValidity()).toBe(true);
+  // PRESENCE, not absence — the exact line that distinguishes readonly from disabled.
+  expect(new FormData(form).has('region'), 'a readonly control still submits its (empty) value').toBe(true);
+
+  // The subtlest arm: a pattern mismatch ALSO present must not leak through — proves the
+  // readonly early return precedes the merge code, not merely that empty+required is barred.
+  const [, el2] = await mount({ name: 'region2', required: '', readonly: '', pattern: '[a-z]+' }, '123');
+  await el2.updateComplete;
+  expect(el2.validity.valid, 'a failing pattern must also be barred when readonly').toBe(true);
+});
+
+test('[SC-004] a form reset that restores a satisfying value reports valid immediately', async () => {
+  // SAME ROOT CAUSE AS THE MERGE-TIMING FIX, different call site: formResetCallback assigns
+  // `this.value` the normal reactive-property way, so without the sync-before-read step this
+  // would read the PRE-reset (invalid) DOM state.
+  const [form, el] = await mount({ name: 'branch', pattern: '[a-z]+' }, 'abc');
+  await el.updateComplete;
+  el.value = '123';
+  await el.updateComplete;
+  expect(el.validity.valid, 'precondition: invalid before reset').toBe(false);
+
+  form.reset();
+  await el.updateComplete;
+
+  expect(el.validity.valid, 'a reset that restores a satisfying value must report valid').toBe(true);
+  const err = el.shadowRoot!.querySelector('[part~="error"]') as HTMLElement;
+  expect(err.textContent!.trim()).toBe('');
+});
+
+test('[SC-013] the datalist is reachable from the inner input by node identity', async () => {
+  const [, el] = await mount({ name: 'branch' });
+  el.options = Object.freeze([
+    { value: 'main' },
+    { value: 'release/2026.09', label: 'Release 2026.09' },
+  ]);
+  await el.updateComplete;
+
+  const inner = control(el);
+  const datalist = el.shadowRoot!.querySelector('datalist');
+  // NODE IDENTITY, not attribute-string equality — a string match would pass even if `list`
+  // pointed at a same-id node in the WRONG root, or at nothing.
+  expect(inner.list, 'the input must resolve `list` to THIS datalist, by identity').toBe(datalist);
+  expect(datalist!.children.length).toBe(2);
+  expect((datalist!.children[1] as HTMLOptionElement).label).toBe('Release 2026.09');
+});
+
+test('[SC-013] no options means no list attribute and no datalist element', async () => {
+  const [, el] = await mount({ name: 'branch' });
+  await el.updateComplete;
+  expect(control(el).list, 'absent, not pointing at nothing').toBe(null);
+  expect(el.shadowRoot!.querySelector('datalist')).toBe(null);
+});
+
+test('[FR-006] a value matching no option stays valid', async () => {
+  const [, el] = await mount({ name: 'branch' });
+  el.options = Object.freeze([{ value: 'main' }]);
+  el.value = 'not-in-the-list';
+  await el.updateComplete;
+  expect(el.validity.valid, 'the datalist is a suggestion, not a closed enum').toBe(true);
 });
 
 test('a disabled required field does not veto its form', async () => {

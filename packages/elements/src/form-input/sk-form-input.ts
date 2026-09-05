@@ -1,4 +1,4 @@
-import { html } from 'lit';
+import { html, nothing } from 'lit';
 import { define } from '../define.js';
 import { FormControlBase } from '../form-control-base.js';
 import sheet from './sk-form-input.css.js';
@@ -71,6 +71,33 @@ export class SkFormInput extends FormControlBase {
     // said "Field is required". `aria-describedby` points at that node, so the stale text IS
     // the programmatic message (WCAG 3.3.1), and `role="alert"` never re-announced either.
     errorMessage: { type: String, state: true },
+    // FORWARDED CONSTRAINT/HINTING ATTRIBUTES (#180). Plain strings, reflected, forwarded
+    // verbatim to the inner control — the platform validates them; this element does not
+    // reinterpret them. Not gated on `type`: the platform itself ignores e.g. `min`/`max`/`step`
+    // on a `type` they do not apply to, so element-side type-gating would be a second, possibly
+    // -wrong source of truth.
+    pattern: { type: String, reflect: true },
+    min: { type: String, reflect: true },
+    max: { type: String, reflect: true },
+    step: { type: String, reflect: true },
+    inputmode: { type: String, reflect: true },
+    autocomplete: { type: String, reflect: true },
+    // NOT REFLECTED — deliberately, and for the SAME reason `disabled` above is not. Measured
+    // (#180): reflecting `readonly` to the HOST attribute of a form-associated custom element
+    // makes the USER AGENT itself bar it from constraint validation on the attribute alone —
+    // `willValidate` false, `checkValidity()` true, with no `setValidity` call needed from this
+    // element's own code at all. That would make the `readonly` branch in `validate()` below an
+    // UNOBSERVABLE, near-dead mutation anchor (three of its four assertions would still pass
+    // with the branch deleted) — the exact SC-005 collateral shape `disabled`'s own
+    // non-reflection already exists to avoid. Keeping `readonly` unreflected keeps THIS
+    // element's own barring branch the sole, testable authority, exactly like `disabled`.
+    // `<sk-form-input readonly>` in markup still works (attribute→property needs no `reflect`);
+    // only the reverse direction is withheld.
+    readonly: { type: Boolean },
+    // PROPERTY-ONLY, deliberately, and declared with a LITERAL FIELD INITIALIZER below rather
+    // than a `declare` field with a constructor default — see the field declaration for why
+    // that specific shape is load-bearing for the generated React wrapper.
+    options: { attribute: false },
   };
 
   /** The native input type — `text`, `email`, `password`, and so on. */
@@ -80,12 +107,62 @@ export class SkFormInput extends FormControlBase {
    *  reliable accessible name. */
   declare placeholder: string;
 
+  /** A regular expression the value must match. Forwarded verbatim to the inner control; the
+   *  platform performs the match, this element does not re-validate it. */
+  declare pattern: string | undefined;
+
+  /** The minimum value, for numeric and date/time input types. A string, matching the native
+   *  HTML attribute's own contract. */
+  declare min: string | undefined;
+
+  /** The maximum value, for numeric and date/time input types. A string, matching the native
+   *  HTML attribute's own contract. */
+  declare max: string | undefined;
+
+  /** The granularity the value must adhere to, for numeric and date/time input types. `"any"`
+   *  is a legal value the platform itself interprets. */
+  declare step: string | undefined;
+
+  /** A hint to the browser about the kind of on-screen keyboard to display. Hinting only — it
+   *  carries no validation semantics. */
+  declare inputmode: string | undefined;
+
+  /** Forwarded to the inner control's `autocomplete` attribute, verbatim. */
+  declare autocomplete: string | undefined;
+
+  /** Marks the field read-only. The value is still submitted with the form, unlike `disabled` —
+   *  but the field is barred from constraint validation, so a `required` read-only field never
+   *  blocks its form. */
+  declare readonly: boolean;
+
+  // PLAIN FIELD, LITERAL INITIALIZER — not `declare` + a constructor default, unlike every other
+  // property above. scripts/normalise-manifest.mjs's hasFrozenEmptyArrayInitializer() reads this
+  // field's AST initializer directly to mark the manifest's x-spec-kitty-property-reset, which
+  // the generated React wrapper's useProperties() reset depends on (see sk-transition-matrix's
+  // `columns`/`routes` for the precedent this mirrors). A `declare` field has no initializer at
+  // all, so it would silently fail to earn that marker despite type-checking identically.
+  /** Suggested values shown in a native datalist alongside the input. A typed value matching no
+   *  option stays valid unless a forwarded constraint says otherwise — this is a suggestion
+   *  list, not a closed set. */
+  options: ReadonlyArray<{ value: string; label?: string }> = Object.freeze([]);
+
+  // A DETACHED VALIDATION PROBE — never rendered, never connected to any document. See the
+  // comment in `validate()` for why the RENDERED control cannot be the sole source of merged UA
+  // flags: it does not exist yet on the very first `willUpdate` pass (mount), and repairing that
+  // gap from `firstUpdated()` lands the fix a Lit update cycle too late for a single
+  // `await el.updateComplete` to observe. Constraint validation (`patternMismatch`, range/step/
+  // type/`badInput`) is a pure attribute+value computation — it needs no layout and no DOM
+  // connection — so a private, permanently-detached `<input>` gives `validate()` a real
+  // `ValidityState` to read on every pass, mount included, with no render dependency at all.
+  #probe: HTMLInputElement = document.createElement('input');
+
   constructor() {
     super();
     this.type = 'text';
     this.placeholder = '';
     this.invalid = false;
     this.errorMessage = '';
+    this.readonly = false;
   }
 
   // VALIDATION RUNS BEFORE RENDER, not after.
@@ -99,8 +176,29 @@ export class SkFormInput extends FormControlBase {
   //
   // `willUpdate` is the Lit-sanctioned place to derive state from changed properties: setting a
   // reactive property here is folded into the same update rather than queueing another.
+  //
+  // #180 ADDED A SECOND REASON THIS MUST STAY IN `willUpdate`, NOT MOVE TO `updated`: the merged
+  // UA validity flags `validate()` now reads come from a DETACHED PROBE `<input>` (see the
+  // `#probe` field and the comment in `validate()`), synced to the CURRENT update's constraint
+  // properties before every read — never from the RENDERED control, which does not exist at all
+  // during the very first pass (mount) and would reintroduce this exact historical bug through
+  // `firstUpdated()`'s rescue call otherwise. Moving `validate()` itself to `updated()` was
+  // considered and rejected for the same reason this comment already gives: a reactive-property
+  // write from `updated()` (`this.invalid`, `this.errorMessage` below) schedules a SECOND update
+  // cycle that a single `await el.updateComplete` does not wait for.
   willUpdate(changed: Map<string, unknown>) {
-    if (changed.has('value') || changed.has('required') || changed.has('disabled')) this.validate();
+    if (
+      changed.has('value') ||
+      changed.has('required') ||
+      changed.has('disabled') ||
+      changed.has('readonly') ||
+      changed.has('pattern') ||
+      changed.has('min') ||
+      changed.has('max') ||
+      changed.has('step') ||
+      changed.has('type')
+    )
+      this.validate();
   }
 
   updated(changed: Map<string, unknown>) {
@@ -116,7 +214,22 @@ export class SkFormInput extends FormControlBase {
     // Owned here rather than left to the UA: with a `disabled` ATTRIBUTE present the user agent
     // excludes a form-associated element by itself, which makes the element's own exclusion
     // unobservable and the mutation semantically inert. Measured across four toggle routes.
+    //
+    // `readonly` DOES NOT APPEAR HERE, deliberately: unlike `disabled`, a readonly control's
+    // value IS submitted — that is the one place #180's `readonly` and `disabled` paths
+    // diverge. Resist adding a `this.readonly` branch to this predicate; there is none.
     this.internals.setFormValue(this.disabled ? null : this.value);
+  }
+
+  /** Sets `name` on `target` to `value` when defined, or REMOVES the attribute — never sets an
+   *  empty string. See the call site in `validate()` for why: `pattern=""` is not "no pattern",
+   *  it is "the empty string is the only valid value." */
+  #syncOptionalAttribute(target: HTMLInputElement, name: string, value: string | undefined): void {
+    if (value === undefined) {
+      target.removeAttribute(name);
+    } else {
+      target.setAttribute(name, value);
+    }
   }
 
   /** Called by the browser when the containing form resets. Restores the value the
@@ -148,7 +261,54 @@ export class SkFormInput extends FormControlBase {
       this.errorMessage = '';
       return;
     }
+    // MUTATION ANCHOR SC-003 (readonly barring arm, #180) — readonly is barred from constraint
+    // validation but its value IS still submitted (syncFormValue, unaffected above, deliberately
+    // has no `readonly` branch of its own) — the one place this element's readonly and disabled
+    // paths diverge. NOT REFLECTED, deliberately (see the `readonly` property declaration
+    // above): reflecting it would let the UA itself bar constraint validation on the attribute
+    // alone, making this branch an unobservable, near-dead mutation anchor.
+    if (this.readonly) {
+      this.internals.setValidity({});
+      this.invalid = false;
+      this.errorMessage = '';
+      return;
+    }
     const control = this.shadowRoot?.querySelector('input') ?? undefined;
+    // A DETACHED PROBE, not the rendered control (#180, second measured defect in this area).
+    // `willUpdate` runs BEFORE `render()` commits this update's bindings — including the VERY
+    // FIRST render, where the rendered `<input>` does not exist at all yet (`control` above is
+    // `undefined` on that pass). The obvious fix — sync the REAL control, then read its
+    // `.validity` — works for every update AFTER the first, but not for a field that mounts
+    // ALREADY invalid: `firstUpdated()` below re-runs `validate()` once the shadow root exists,
+    // and that second call's `this.invalid`/`this.errorMessage` writes land in a SEPARATE
+    // update cycle (Lit's own `updateComplete` resolves `false`, not "wait for the cascade,"
+    // when a property changes inside `firstUpdated`/`updated`) — so a single
+    // `await el.updateComplete` after mount sees the FIRST cycle's (merge-less) result, not the
+    // corrected one. Measured directly: a real form submit on a field mounted with `pattern`
+    // already failing passed through until a second `updateComplete` was awaited.
+    //
+    // A DETACHED `<input>` created once and kept in memory needs no render to exist and no DOM
+    // connection to compute constraint validation correctly (patternMismatch/range/step/type/
+    // badInput are pure attribute+value computations, not layout-dependent) — so syncing IT
+    // instead makes the merge available on the SAME pass as every other property, mount
+    // included, and removes the two-cycle gap rather than working around it.
+    //
+    // MUTATION ANCHOR SC-004 (post-reset arm, #180) — `formResetCallback()` assigns
+    // `this.value` the ordinary reactive-property way, which reaches THIS line through the
+    // same `willUpdate` -> `validate()` path as any other value change; a reset that restores a
+    // satisfying value must report valid immediately, not the stale pre-reset state.
+    this.#probe.value = this.value;
+    this.#probe.type = this.type;
+    // SET-OR-REMOVE, never an empty string. `el.pattern = ''` does not mean "no pattern" — the
+    // HTML pattern algorithm compiles the ATTRIBUTE VALUE into `^(?:<value>)$`, so an empty
+    // string compiles to `^(?:)$`, which matches ONLY the empty string. Measured directly: a
+    // probe with `pattern=""` reported `patternMismatch: true` for a plain, unconstrained "x".
+    // `render()`'s own binding avoids this with Lit's `nothing` sentinel (omits the attribute
+    // entirely); the probe needs the same omission, done by hand since it is plain DOM, not Lit.
+    this.#syncOptionalAttribute(this.#probe, 'pattern', this.pattern);
+    this.#syncOptionalAttribute(this.#probe, 'min', this.min);
+    this.#syncOptionalAttribute(this.#probe, 'max', this.max);
+    this.#syncOptionalAttribute(this.#probe, 'step', this.step);
     const flags: ValidityStateFlags = {};
     let message = '';
     if (this.required && this.value === '') {
@@ -157,11 +317,58 @@ export class SkFormInput extends FormControlBase {
       flags.valueMissing = true;
       message = `${this.label || 'This field'} is required`;
     }
+    // MUTATION ANCHOR SC-003 (merged-validity arm, #180) — the UA's OWN validity flags are
+    // MERGED, not read-and-discarded. Without this, forwarding pattern/min/max/step (see the
+    // property declarations above) makes the INNER <input> invalid while the HOST still reports
+    // valid — ElementInternals.setValidity REPLACES whatever this element passes it, and
+    // nothing else consults control.validity. A field that looks fine and silently submits
+    // rejected data is exactly the failure this line exists to prevent.
+    //
+    // `tooLong`/`tooShort` are DELIBERATELY ABSENT: this mission forwards no
+    // `maxlength`/`minlength`, so neither flag is ever reachable — carrying them would be an
+    // inert mutation target.
+    for (const key of [
+      'patternMismatch',
+      'rangeUnderflow',
+      'rangeOverflow',
+      'stepMismatch',
+      'typeMismatch',
+    ] as const) {
+      if (this.#probe.validity[key]) flags[key] = true;
+    }
+    // `badInput` is MERGED FROM THE REAL RENDERED CONTROL, not the probe above — measured
+    // directly, this is not a stylistic choice. `badInput` reflects the browser's own
+    // "unparseable raw text the user typed" state (e.g. `type="number"` with "12e"); it is only
+    // ever set by the UA in response to genuine user typing, and property assignment SILENTLY
+    // SANITIZES an unparseable value to `''` with `badInput` staying `false` — measured on a
+    // bare native `<input type="number">`, not assumed. Copying `this.value` onto the detached
+    // probe is therefore a property assignment and can NEVER reproduce it; only the control the
+    // user actually typed into carries it. This is safe from the mount-time race the probe
+    // exists to fix: a user cannot type into a control that has not rendered yet, so `control`
+    // is never undefined when `badInput` could genuinely be true.
+    if (control?.validity.badInput) flags.badInput = true;
     // The consumer's message WINS the announcement when both hold — it is the more specific
     // one — while the derived flag stays set underneath.
     if (this.customError) {
       flags.customError = true;
       message = this.customError;
+    }
+    // FALLBACK MESSAGE (#180) — `internals.setValidity(flags, message, anchor)` THROWS when any
+    // flag is true and `message` is an empty string (measured, Chromium and Firefox both). A
+    // form-associated custom element has no free UA-authored message the way a plain `<input>`'s
+    // own `reportValidity()` bubble would supply — so if a UA flag merged above is the ONLY
+    // reason `flags` is non-empty, author a message rather than let the call throw.
+    if (Object.keys(flags).length > 0 && message === '') {
+      const fallback: Partial<Record<string, string>> = {
+        patternMismatch: 'Value does not match the required pattern.',
+        rangeUnderflow: `Value must be ${this.min ?? 'a minimum value'} or more.`,
+        rangeOverflow: `Value must be ${this.max ?? 'a maximum value'} or less.`,
+        stepMismatch: 'Value does not match the allowed increment.',
+        typeMismatch: 'Value is not in the correct format.',
+        badInput: 'Value could not be interpreted.',
+      };
+      const firstTrueFlag = Object.keys(flags).find((key) => flags[key as keyof ValidityStateFlags]);
+      message = (firstTrueFlag && fallback[firstTrueFlag]) || 'Value is invalid.';
     }
     if (Object.keys(flags).length > 0) {
       // The third argument is the FOCUS ANCHOR for reportValidity() — it points the UA's own
@@ -189,6 +396,15 @@ export class SkFormInput extends FormControlBase {
     const describedBy = [this.description ? 'description' : '', this.invalid ? this.errorId : '']
       .filter(Boolean)
       .join(' ');
+    // THE DATALIST LIVES IN THIS SHADOW ROOT, and this is not a style choice.
+    // <input list="x"> resolves "x" in the INPUT'S OWN TREE (MDN, "Reflected attributes §
+    // Reflected element references" — the same resolution rule ADR-9 §4 already cites for why
+    // aria-labelledby cannot cross a shadow boundary). The input lives in this shadow root under
+    // Arrangement B, so neither a consumer's light-DOM <datalist> nor a slotted one can ever be
+    // referenced by `list` — there is no tree in which both nodes are visible to each other. A
+    // fixed id is safe here (unlike a light-DOM id) because each INSTANCE has its own shadow
+    // root: "options" cannot collide with another <sk-form-input>'s own "options".
+    const hasOptions = Boolean(this.options?.length);
     return html`<div part="field" class="sk-form-input">
       <label part="label" class="sk-form-input__label" for="control">${this.label}</label>
       <input
@@ -198,12 +414,27 @@ export class SkFormInput extends FormControlBase {
         .type=${this.type}
         .value=${this.value}
         placeholder=${this.placeholder}
+        pattern=${this.pattern ?? nothing}
+        min=${this.min ?? nothing}
+        max=${this.max ?? nothing}
+        step=${this.step ?? nothing}
+        inputmode=${this.inputmode ?? nothing}
+        autocomplete=${this.autocomplete ?? nothing}
         ?disabled=${this.disabled}
         ?required=${this.required}
+        ?readonly=${this.readonly}
+        list=${hasOptions ? 'options' : nothing}
         aria-invalid=${this.invalid ? 'true' : 'false'}
         aria-describedby=${describedBy || undefined}
         @input=${this.#onInput}
       />
+      ${hasOptions
+        ? html`<datalist id="options">
+            ${this.options.map(
+              (o) => html`<option value=${o.value} label=${o.label ?? nothing}></option>`,
+            )}
+          </datalist>`
+        : ''}
       ${this.description
         ? html`<span part="description" class="sk-form-input__description" id="description"
             >${this.description}</span

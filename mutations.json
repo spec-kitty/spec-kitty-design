@@ -305,6 +305,46 @@
       "to": "        data-part=\"control\""
     },
     {
+      "id": "SC-003",
+      "subject": "fixtures/elements-behaviour/src/sk-form-input.test.ts",
+      "arm": "readonly is barred from constraint validation while still submitting its value (#180)",
+      "file": "packages/elements/src/form-input/sk-form-input.ts",
+      "from": "    if (this.readonly) {\n      this.internals.setValidity({});\n      this.invalid = false;\n      this.errorMessage = '';\n      return;\n    }",
+      "to": "    void this.readonly;"
+    },
+    {
+      "id": "SC-003",
+      "subject": "fixtures/elements-behaviour/src/sk-form-input.test.ts",
+      "arm": "a merged UA validity flag reaches the host and blocks a real submit, with a fallback message (#180)",
+      "file": "packages/elements/src/form-input/sk-form-input.ts",
+      "from": "    for (const key of [\n      'patternMismatch',\n      'rangeUnderflow',\n      'rangeOverflow',\n      'stepMismatch',\n      'typeMismatch',\n    ] as const) {\n      if (this.#probe.validity[key]) flags[key] = true;\n    }",
+      "to": "    void 0;"
+    },
+    {
+      "id": "SC-004",
+      "subject": "fixtures/elements-behaviour/src/sk-form-input.test.ts",
+      "arm": "a form reset that restores a satisfying value reports valid immediately (#180)",
+      "file": "packages/elements/src/form-input/sk-form-input.ts",
+      "from": "    this.#probe.value = this.value;",
+      "to": "    void 0;"
+    },
+    {
+      "id": "SC-013",
+      "subject": "fixtures/elements-behaviour/src/sk-form-input.test.ts",
+      "arm": "the datalist is reachable from the shadow-root input by node identity (#180 — judgement call, no ADR-11 category fits a datalist reference cleanly; flagged for the pre-merge squad)",
+      "file": "packages/elements/src/form-input/sk-form-input.ts",
+      "from": "        list=${hasOptions ? 'options' : nothing}",
+      "to": "        list=${nothing}"
+    },
+    {
+      "id": "SC-013",
+      "subject": "fixtures/elements-behaviour/src/sk-form-input.test.ts",
+      "arm": "a forwarded constraint attribute (pattern) reaches the inner control (#180 — same judgement call as the datalist arm above: constraint forwarding has no clean ADR-11 category either)",
+      "file": "packages/elements/src/form-input/sk-form-input.ts",
+      "from": "        pattern=${this.pattern ?? nothing}",
+      "to": "        pattern=${nothing}"
+    },
+    {
       "id": "SC-002",
       "subject": "fixtures/elements-behaviour/src/sk-form-textarea.test.ts",
       "arm": "FormData entry tracks the property",
@@ -663,6 +703,14 @@
       "file": "packages/react/src/SkTransitionMatrix.js",
       "from": "  useProperties(ref, \"columns\", columns, () => Object.freeze([]));",
       "to": "  void columns;"
+    },
+    {
+      "id": "SC-010",
+      "subject": "fixtures/react-consumer/src/sk-form-input-options.test.tsx",
+      "arm": "form-input wrapper delivers and resets structured options",
+      "file": "packages/react/src/SkFormInput.js",
+      "from": "  useProperties(ref, \"options\", options, () => Object.freeze([]));",
+      "to": "  void options;"
     }
   ]
 }
