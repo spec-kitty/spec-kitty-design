@@ -173,3 +173,9 @@ Use Spec Kitty's targeted commit/review flow. Require a clean worktree after the
 ## Reviewer guidance
 
 Reject if any changed file is outside frontmatter, if the annotation is not an actual `sk-pill-tag`, if display content is parsed/normalized, if the component owns an event/selection/action, if semantics depend on surrounding layout, if a public part is untested, if a static markup source is added, or if focused evidence lacks a real red reversal. Approval is for WP01 only and grants no PR/merge authority.
+
+## Activity Log
+
+> **CRITICAL**: Activity log entries MUST be in chronological order (oldest first, newest last).
+
+- 2026-09-06T00:00:00Z – system – Planning prompt finalized; implementation has not started.

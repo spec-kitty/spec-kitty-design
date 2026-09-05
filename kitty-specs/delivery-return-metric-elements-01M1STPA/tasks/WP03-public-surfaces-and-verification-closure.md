@@ -234,3 +234,9 @@ The visual command may fail only because approved baselines are absent; record t
 ## Reviewer guidance
 
 Reject for any out-of-frontmatter diff, hand-edited generated file, missing/runtime-erased entry, unexported CSS subpath, incorrect ratchet counts, untyped/attributed stage prop, stale React reset, Team-specific public API/default, behavior/mutation registration, local baseline substitution, sibling authored change, new token/dependency, incomplete gate evidence, dirty worktree, push/PR, or a claim that WP03 approval authorizes merge. Approval covers WP03 only.
+
+## Activity Log
+
+> **CRITICAL**: Activity log entries MUST be in chronological order (oldest first, newest last).
+
+- 2026-09-06T00:00:00Z – system – Planning prompt finalized; implementation has not started.

@@ -178,3 +178,9 @@ Use Spec Kitty's targeted commit/review flow, require a clean worktree after the
 ## Reviewer guidance
 
 Reject on any out-of-frontmatter write, consumer-data mutation, JSON attribute, partial invalid rendering, sorting, Team-specific API/default, event/action/selection, cross-root list item, missing actual `sk-metric`, incorrect connector count/a11y, static markup, new token/dependency, behavior registry entry, or missing direct red evidence. Approval covers WP02 only and grants no PR/merge authority.
+
+## Activity Log
+
+> **CRITICAL**: Activity log entries MUST be in chronological order (oldest first, newest last).
+
+- 2026-09-06T00:00:00Z – system – Planning prompt finalized; implementation has not started.
