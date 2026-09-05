@@ -116,7 +116,7 @@
     },
     "WP04": {
       "actor": "user",
-      "agent": "codex",
+      "agent": null,
       "agent_profile": "__resolved_profile_absent__",
       "agent_profile_version": "__resolved_profile_version_absent__",
       "force_count": 1,
@@ -128,6 +128,7 @@
         "Ready for review: lane 89bbf7eb6fb12ca6aab0a780673ac93f506316e0; 278/278 tests, 94/94 mutation replay, 8/8 guard selftests, 177/177 axe, Chromium+Firefox 70/70, five expected-red visual diagnostics with no PNG retention; WebKit blocked only by documented missing host libraries."
       ],
       "provider": "__resolved_provider_absent__",
+      "review": null,
       "review_result": {
         "feedback_path": "/home/jeroennouws/dev/team-kitty-missions/design-145/kitty-specs/team-overview-shell-elements-01M1S8R8/tasks/WP04-generated-integration-and-gate-closure/review-cycle-1.md",
         "reference": "review-cycle://team-overview-shell-elements-01M1S8R8/WP04-generated-integration-and-gate-closure/review-cycle-1.md",
@@ -135,14 +136,14 @@
         "verdict": "changes_requested"
       },
       "role": "reviewer",
-      "shell_pid": 2459900,
-      "shell_pid_created_at": "1788535195.17",
+      "shell_pid": null,
+      "shell_pid_created_at": null,
       "subtasks": {
-        "T013": "done",
-        "T014": "done",
-        "T015": "done",
-        "T016": "done",
-        "T017": "done"
+        "T013": "planned",
+        "T014": "planned",
+        "T015": "planned",
+        "T016": "planned",
+        "T017": "planned"
       }
     }
   }
