@@ -389,8 +389,8 @@
       "subject": "fixtures/elements-behaviour/src/sk-form-input.test.ts",
       "arm": "bad-input control keeps the user's buffer instead of being overwritten mid-edit (#180, debugger pass 1)",
       "file": "packages/elements/src/form-input/sk-form-input.ts",
-      "from": "    if (control.validity.badInput) {\n      this.validate();\n      return;\n    }\n    this.value = control.value;",
-      "to": "    this.value = control.value;"
+      "from": "    if (!control.validity.badInput) {\n      this.value = control.value;\n    }\n",
+      "to": "    this.value = control.value;\n"
     },
     {
       "id": "SC-002",
@@ -765,8 +765,24 @@
       "subject": "fixtures/elements-behaviour/src/sk-form-input.test.ts",
       "arm": "the programmatic badInput divergence detects a value the type cannot represent (#180, operator ruling)",
       "file": "packages/elements/src/form-input/sk-form-input.ts",
-      "from": "    if (this.value !== '' && this.#probe.value === '') flags.badInput = true;\n",
+      "from": "    if (this.value.trim() !== '' && this.#probe.value === '') flags.badInput = true;\n",
       "to": "    if (false) flags.badInput = true;\n"
+    },
+    {
+      "id": "SC-003",
+      "subject": "fixtures/elements-behaviour/src/sk-form-input.test.ts",
+      "arm": "#onInput calls validate() unconditionally, not only inside the badInput branch (#180, pre-merge review pass 2)",
+      "file": "packages/elements/src/form-input/sk-form-input.ts",
+      "from": "    this.validate();\n  };\n}\n",
+      "to": "  };\n}\n"
+    },
+    {
+      "id": "SC-003",
+      "subject": "fixtures/elements-behaviour/src/sk-form-input.test.ts",
+      "arm": "the divergence branch is gated on trim(), not a bare non-empty check, so pure-whitespace sanitization is not a false positive (#180, pre-merge review pass 2)",
+      "file": "packages/elements/src/form-input/sk-form-input.ts",
+      "from": "if (this.value.trim() !== '' && this.#probe.value === '') flags.badInput = true;",
+      "to": "if (this.value !== '' && this.#probe.value === '') flags.badInput = true;"
     }
   ]
 }

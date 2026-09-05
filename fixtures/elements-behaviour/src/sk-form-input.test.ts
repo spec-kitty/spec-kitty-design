@@ -618,6 +618,69 @@ test('[SC-003] a bad-input control keeps the user\'s buffer, rather than being o
   expect(el.validity.valid).toBe(true);
 });
 
+test('[SC-003] undoing a bad keystroke back to the IDENTICAL prior value still re-validates — the unconditional validate() fix', async () => {
+  // THE REGRESSION #187's pre-merge review pass 2 caught: the buffer-preservation fix above
+  // skips `this.value = control.value` while `badInput` is true, which is correct for the
+  // MIDDLE of a keystroke sequence — but if the user backs out to the EXACT prior value,
+  // `this.value = control.value` becomes a NO-OP once badInput clears (Lit's dirty-check sees no
+  // change and never reschedules `willUpdate`), so the invalid state computed while badInput was
+  // momentarily true was left standing FOREVER — a field the user LEFT VALID reported invalid
+  // with no property change able to recover it. `#onInput` calling `validate()`
+  // unconditionally, not only inside the badInput branch, is the fix under test here.
+  const [form, el] = await mount({ name: 'qty', type: 'number' }, '5');
+  await el.updateComplete;
+  expect(el.validity.valid, 'precondition: valid at mount').toBe(true);
+
+  const inner = control(el);
+  await userEvent.type(inner, '{End}e'); // "5e" — badInput mid-sequence
+  await el.updateComplete;
+  expect(el.validity.badInput, 'precondition: badInput while "5e" is on the control').toBe(true);
+
+  await userEvent.keyboard('{Backspace}'); // undo back to "5" — IDENTICAL to this.value already
+  await el.updateComplete;
+
+  expect(el.value, 'the property must reflect the undone control value').toBe('5');
+  expect(el.validity.badInput, 'badInput must clear once the control is valid again').toBe(false);
+  expect(el.validity.valid, 'the host must recover — this is the regression').toBe(true);
+
+  let fired = 0;
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    fired += 1;
+  });
+  form.requestSubmit();
+  expect(fired, 'a recovered value must submit, not stay silently blocked').toBe(1);
+});
+
+test('[SC-003] an untouched-looking empty number field survives a mistype-and-undo — the user-visible shape of the same regression', async () => {
+  // The narrower, more alarming shape of the same bug: an OPTIONAL, EMPTY field a user merely
+  // brushes against (types a stray character, then corrects it) must not end up vetoing its
+  // whole form. Pre-fix-3 this was already valid; the buffer-preservation fix alone regressed
+  // it to permanently invalid; this test proves the unconditional validate() fix restores it.
+  const [form, el] = await mount({ name: 'qty', type: 'number' });
+  await el.updateComplete;
+  expect(el.validity.valid, 'precondition: an empty, non-required number field is valid').toBe(
+    true,
+  );
+
+  const inner = control(el);
+  await userEvent.type(inner, 'e');
+  await el.updateComplete;
+  await userEvent.keyboard('{Backspace}');
+  await el.updateComplete;
+
+  expect(el.value).toBe('');
+  expect(el.validity.valid, 'an untouched-looking empty field must not lock invalid').toBe(true);
+
+  let fired = 0;
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    fired += 1;
+  });
+  form.requestSubmit();
+  expect(fired).toBe(1);
+});
+
 test('[SC-003] a value the current type cannot represent blocks a real submit — the programmatic badInput divergence (operator ruling)', async () => {
   // #180's value-authority fork, resolved by the operator: `this.value` stays RAW (still what
   // gets submitted on a valid path), but a non-empty value the UA sanitizes AWAY ENTIRELY for
@@ -682,6 +745,22 @@ test('[SC-003] an unparseable-looking but non-sanitizing value reports typeMisma
     'the programmatic divergence must not fire for a type that keeps the raw text',
   ).toBe(false);
   expect(el.validity.valid).toBe(false);
+});
+
+test('[SC-003] a value that sanitizes to empty ONLY because it is pure whitespace does not trigger the divergence — the `.trim()` fix', async () => {
+  // #187's pre-merge review pass 2 measured that `text`/`search`/`password` inputs strip `\r`/
+  // `\n` from their sanitized value, so a value that is ENTIRELY newline sanitizes to `''` too —
+  // the same shape as `2026-13-45`/`1,5`, but not a genuine "unrepresentable content" case, just
+  // whitespace the UA discarded. A bare `this.value !== ''` check would have merged this as
+  // `badInput` and blocked the field; `.trim() !== ''` correctly stays silent for it.
+  const [, el] = await mount({ name: 'notes', type: 'text' }, '\n');
+  await el.updateComplete;
+
+  expect(
+    el.validity.badInput,
+    'a pure-whitespace value must not read as an unrepresentable divergence',
+  ).toBe(false);
+  expect(el.validity.valid).toBe(true);
 });
 
 test('[SC-002][SC-003] a readonly control still submits but is barred from constraint validation', async () => {

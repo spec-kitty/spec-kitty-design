@@ -100,7 +100,7 @@ validate():
                                                                      # flag at all (measured on a
                                                                      # bare native <input>)
 
-  if value !== '' and probe.value === '': flags.badInput = true     # PROGRAMMATIC divergence
+  if value.trim() !== '' and probe.value === '': flags.badInput = true # PROGRAMMATIC divergence
                                                                      # (#180, operator ruling, R9)
                                                                      # — the probe is ALREADY
                                                                      # synced to the current type/
@@ -170,9 +170,19 @@ represent at all") from a source available at mount time, closing the one gap ne
 true, the sanitized `.value` it reports must NOT be copied into `this.value` — doing so and
 letting the next render's `.value=` binding commit it back onto the SAME control the user is
 still editing destroys the UA's own in-progress edit buffer (measured: a `type="date"` field mid
--edit resolved to a fabricated wrong date instead of what was actually typed). `validate()` is
-called directly from the input handler in that branch instead, so the flag still merges (reading
-the real control fresh, as above) without ever touching the value being edited.
+-edit resolved to a fabricated wrong date instead of what was actually typed).
+
+**`#onInput` calls `validate()` UNCONDITIONALLY, not only when `badInput` is true — corrected
+post-#187-review-pass-2, a regression the buffer-preservation fix above introduced.**
+`validate()` is otherwise reachable only from `willUpdate` on a CHANGED reactive property (plus
+`firstUpdated`). Skipping the `this.value` write while `badInput` holds means that write can
+become a NO-OP the moment the user undoes a bad keystroke back to the IDENTICAL prior value —
+Lit's dirty-check sees no change, schedules no update, `willUpdate` never runs, and the invalid
+state computed while `badInput` was momentarily true is left standing forever (measured: an
+untouched-looking `type="number"` field the user merely mistyped into and corrected stayed
+permanently invalid, blocking its whole form). Calling `validate()` at the end of the handler
+regardless of which branch ran closes the gap — it is idempotent, so the cost is paying for one
+extra recompute on every keystroke, not a correctness risk.
 
 **The reset path (`formResetCallback`) needs no separate code change.** It assigns
 `this.value = this.initialValue`, a plain reactive-property write that goes through the same

@@ -405,12 +405,23 @@ copied from the squad's report.
      to make alongside it, not something this mission's narrower fix should quietly fold in.
 - **Decision (final, as shipped)**: option 1. In `validate()`, after the probe has been synced to
   the current `type`/`value`/pattern/min/max/step (the same probe R2 already established), the
-  divergence test is `this.value !== '' && this.#probe.value === ''` — the probe already carries
-  what the UA would make of the CURRENT property value under the CURRENT type, so an empty probe
-  against a non-empty property means the UA sanitized the value away entirely. Merged as
-  `flags.badInput = true`, sharing the SAME fallback message table entry (`badInput`: "Value
+  divergence test is `this.value.trim() !== '' && this.#probe.value === ''` — the probe already
+  carries what the UA would make of the CURRENT property value under the CURRENT type, so an
+  empty probe against a non-blank property means the UA sanitized the value away entirely. Merged
+  as `flags.badInput = true`, sharing the SAME fallback message table entry (`badInput`: "Value
   could not be interpreted.") the real-control `badInput` merge (R2) already uses — no new
   fallback text needed, since it is the same flag.
+- **`.trim()`, not a bare non-empty check — corrected post-#187-review-pass-2**: the first
+  shipped version used `this.value !== ''`, on the (measured-sounding but false) premise that
+  `type="text"` "never sanitizes." Measured across 22 type/value pairs by a later review pass:
+  `text`/`search`/`password` strip `\r`/`\n` from the sanitized value, so a value that is
+  ENTIRELY newline (and, for `tel`, `\r\n`; for `email`/`url`, all-whitespace) sanitizes to `''`
+  too — a false positive the bare check would have merged as `badInput` for content that is not
+  meaningfully "unrepresentable," just whitespace the UA discarded. `.trim() !== ''` excludes
+  exactly those pure-whitespace cases while leaving every genuine divergence (`"2026-13-45"`,
+  `"1,5"`, a leading-space-only numeral like `" 42"` — `.trim()` still non-empty) firing exactly
+  as before. A value with real content plus incidental whitespace (`"Acme Corp\n"`) was never
+  affected either way — the strip removes only the newline, `probe.value` stays `"Acme Corp"`.
 - **Why this does not double-report against the real-control `badInput` branch (R2)**: while a
   user is actively typing an unparseable value, `#onInput` (R2's fix 8) deliberately does NOT
   write `this.value` — so during a live edit, `this.value` stays the last GOOD value, the probe
@@ -421,9 +432,22 @@ copied from the squad's report.
 - **Why this does not over-fire on types that merely reject rather than sanitize**: `type="email"`
   with an invalid address (e.g. `notanemail`) is NOT sanitized away by the UA — the raw text
   stays on the control and `typeMismatch` is reported instead, so the probe's `.value` stays
-  non-empty and this branch's condition is false. `type="text"` never sanitizes at all. Proven by
-  a dedicated negative test (`fixtures/elements-behaviour/src/sk-form-input.test.ts`), not merely
-  asserted in prose.
+  non-empty and this branch's condition is false. Proven by a dedicated negative test
+  (`fixtures/elements-behaviour/src/sk-form-input.test.ts`), not merely asserted in prose.
+- **A second regression, found by the same review pass, isolated to `#onInput`'s badInput
+  guard**: skipping the `this.value` write while `badInput` holds (the buffer-preservation fix
+  above) means that write can become a NO-OP once the user undoes a bad keystroke back to the
+  IDENTICAL prior value — Lit's own dirty-check sees `this.value` unchanged, schedules no update,
+  and `willUpdate` (the only other path to `validate()`) never runs, so the invalid state computed
+  while `badInput` was momentarily true is left standing FOREVER: an untouched-looking field the
+  user merely mistyped into and corrected stays permanently invalid, blocking its whole form,
+  recoverable only by assigning a genuinely DIFFERENT value. Fix: `#onInput` calls `validate()`
+  UNCONDITIONALLY at the end, regardless of whether the `this.value` write above it did anything —
+  idempotent and cheap, so paying for it every keystroke is the correct trade against a field that
+  can otherwise lock. Reproduced and fixed for both the general case (`"5"` -> `"5e"` -> Backspace
+  -> `"5"`) and the user-visible edge case (an EMPTY `type="number"` field: type `"e"`, Backspace
+  — pre-fix this stayed valid; the badInput buffer-preservation fix alone regressed it to
+  permanently invalid; this second fix restores it).
 - **Test arms added**: `type="date"` with `value="2026-13-45" required` and `type="number"` with
   `value="1,5"`, both asserting `validity.valid === false`, a real `form.requestSubmit()` blocked,
   and a non-empty message reaching the `role="alert"` node; plus the negative `type="email"` case

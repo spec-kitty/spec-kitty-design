@@ -126,20 +126,62 @@ const EXPECTED_NON_PROP_FIELDS = new Map([
 ]);
 
 /**
- * PROP-NAME CASE FOLDING, not a rename table (simplified #180, debugger pass 1). An earlier
- * version of this file carried a 3-entry `KNOWN_REACT_PROP_RENAMES` map (`readonly`/
- * `autocomplete`/`inputmode`) mirroring three rows of `@wc-toolkit/react-wrappers`' own,
- * NOT-EXPORTED nineteen-entry table of well-known global HTML attributes renamed to their
- * React/JSX form (`node_modules/@wc-toolkit/react-wrappers/dist/index.js`, the
- * `propName`/`fieldName` pairs near its top — `readonly` -> `readOnly`, `maxlength` ->
- * `maxLength`, and sixteen more this repo has not used yet). A hand-mirrored SUBSET of an
- * un-exported table reds this gate the next time an element declares field #4 of that
- * nineteen — a false "rename drift" for a rename this generator has always made.
+ * PROP-NAME RENAME TABLE, READ FROM THE INSTALLED GENERATOR — corrected TWICE now, both times
+ * by measurement, neither time by reading the real table first.
  *
- * Every entry in the real table is CASE-ONLY. The invariant this gate actually owns is the
- * field SET, not its casing — so fold both sides to lower-case before comparing, and keep the
- * RAW (un-folded) values in the error message below so a genuine mismatch stays readable.
+ * Pass 1 (#180) carried a 3-entry `KNOWN_REACT_PROP_RENAMES` map (`readonly`/`autocomplete`/
+ * `inputmode`) mirroring three rows of `@wc-toolkit/react-wrappers`' own, NOT-EXPORTED table of
+ * well-known global HTML attributes renamed to their React/JSX form. A hand-mirrored SUBSET
+ * reds this gate the next time an element declares a field outside that subset — a false
+ * "rename drift" for a rename this generator has always made. Pass 1's "fix" was to fold both
+ * sides to lower-case before comparing, on the claim "every entry in the real table is
+ * CASE-ONLY." That claim was never checked against the table and is FALSE: `for -> htmlFor` and
+ * `class -> className` (`originalName: "class"`) are RENAMES, not case changes. Both survive a
+ * fold harmlessly ONLY because `class`/`for` are reserved words no Lit field can ever be named,
+ * so the folded comparison never actually exercises them — but the fold's real defect is
+ * broader than those two: folding BOTH sides means the gate no longer asserts the emitted
+ * CASING at all. If the generator ever emitted `readonly` where `readOnly` was expected,
+ * `gotFolded === wantFolded` and this gate would print green while shipping a prop React
+ * consumers cannot use as a JSX attribute override — coverage removed, not preserved.
+ *
+ * Pass 2's fix: read the real table from the installed bundle
+ * (`node_modules/@wc-toolkit/react-wrappers/dist/index.js`'s `MAPPED_PROPS` array, not
+ * exported, extracted by pattern-matching the literal below) and compare EXACT casing against
+ * it, not a fold. Reading beats mirroring (a hand-kept map goes stale the day the dependency
+ * adds a row) and beats folding (which certifies nothing about casing). If the bundle cannot be
+ * read or parsed — a future major version restructuring it, say — this falls back to the
+ * ORIGINAL 3-entry map rather than to a fold, because an exact comparison with narrower
+ * coverage is still a real assertion; a folded one is not.
  */
+function loadReactPropRenameMap() {
+  const FALLBACK = new Map([
+    ['readonly', 'readOnly'],
+    ['autocomplete', 'autoComplete'],
+    ['inputmode', 'inputMode'],
+  ]);
+  try {
+    const bundlePath = join(ROOT, 'node_modules/@wc-toolkit/react-wrappers/dist/index.js');
+    const src = readFileSync(bundlePath, 'utf8');
+    const match = src.match(/var MAPPED_PROPS = (\[[\s\S]*?\n\]);/);
+    if (!match) throw new Error('MAPPED_PROPS literal not found in the installed bundle');
+    const parsed = new Function(`"use strict"; return (${match[1]});`)();
+    const map = new Map();
+    for (const entry of parsed) {
+      if (entry && typeof entry.fieldName === 'string' && typeof entry.propName === 'string') {
+        map.set(entry.fieldName.toLowerCase(), entry.propName);
+      }
+    }
+    if (map.size === 0) throw new Error('parsed an empty MAPPED_PROPS array');
+    return map;
+  } catch (err) {
+    console.warn(
+      `⚠️  could not read @wc-toolkit/react-wrappers' MAPPED_PROPS table (${err.message}); ` +
+        'falling back to the 3-entry map. The casing assertion below still runs EXACT, not ' +
+        'folded — only its coverage is narrower than reading the real table would give.',
+    );
+    return FALLBACK;
+  }
+}
 
 const check = process.argv.includes('--check');
 // REFUSED TOGETHER. `--selftest` is tested first and exits 0 without consulting `check`, so
@@ -615,19 +657,26 @@ function audit({ outdir, manifestPath, srcDir, floor, allowFloorGrowth = false }
   }
 
   // --- PROPS, per element ----------------------------------------------------------------
+  const reactPropRenameMap = loadReactPropRenameMap();
   for (const [tag, decl] of tagged) {
     const f = join(outdir, `${decl.name}.d.ts`);
     if (!existsSync(f)) continue; // already reported by the set comparison above
     const dts = readFileSync(f, 'utf8');
     const got = emittedProps(dts);
     const want = decl.fields.slice().sort();
-    const wantFolded = want.map((field) => field.toLowerCase());
-    const gotFolded = got.values.map((field) => field.toLowerCase()).sort();
-    if (JSON.stringify(gotFolded) !== JSON.stringify(wantFolded.slice().sort())) {
+    // EXACT casing, not folded (see loadReactPropRenameMap's docstring for why a fold
+    // certifies nothing): each field's EXPECTED emitted name is the rename-table's entry for
+    // its lower-cased form, or the field itself unchanged when it has none.
+    const wantExact = want
+      .map((field) => reactPropRenameMap.get(field.toLowerCase()) ?? field)
+      .sort();
+    const gotExact = got.values.slice().sort();
+    if (JSON.stringify(gotExact) !== JSON.stringify(wantExact)) {
       problems.push(
         `${decl.name} (${tag}) props do not match the manifest's attributed and explicit ` +
           `property-only public fields.\n` +
           `   manifest: ${want.join(', ') || '(none)'}\n` +
+          `   expected (renamed): ${wantExact.join(', ') || '(none)'}\n` +
           `   emitted:  ${got.values.join(', ') || '(none)'}`,
       );
     }

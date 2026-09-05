@@ -15,7 +15,7 @@ Components in these artifacts: sk-blog-card, sk-button, sk-card, sk-check-bullet
 For a CDN load of `dist/elements.js`, pin what the browser executes:
 
 ```
-integrity="sha384-kkREAQ1QboWinsjNovYKqssEl+/D37rzoehIbS6dAMdumGo0UwKJnOSQ90u+2aDc"
+integrity="sha384-eTYkrZf2mQuuqQagA5MEA+8rr4RV4RqrtJSD7yoop514JhQitn+iYmlRzXp3ekYG"
 ```
 
 Derived from the built artifact on every run and re-derived by `--check`, so it cannot be
@@ -82,7 +82,7 @@ unit: every figure in this file is KiB (1024). The WP prompt recorded the IIFE a
 "24.0 KB" where this file would have read 23.5 KiB — **24073 bytes either way**.
 Those two numbers are pinned historical values on purpose. An earlier revision of this
 paragraph interpolated the CURRENT raw size into that comparison, so once the artifact
-grew it asserted that 119386 bytes are "24.0 KB" — false by a factor of
+grew it asserted that 119375 bytes are "24.0 KB" — false by a factor of
 five, in the one paragraph whose whole lesson is to state the basis and the unit. A lens
 caught it.
 
@@ -91,13 +91,13 @@ caught it.
 ```
 $ npx nx run elements:build && node scripts/measure-elements-sizes.mjs
 packages/elements/dist/index.js
-  raw        104779 bytes  (102.3 KiB)
-  minified    65195 bytes  (63.7 KiB)
+  raw        104770 bytes  (102.3 KiB)
+  minified    65194 bytes  (63.7 KiB)
   gzip         23 KiB
   min+gzip     14 KiB
 packages/elements/dist/elements.js
-  raw        119386 bytes  (116.6 KiB)
-  minified    74023 bytes  (72.3 KiB)
+  raw        119375 bytes  (116.6 KiB)
+  minified    74022 bytes  (72.3 KiB)
   gzip         27 KiB
   min+gzip     17 KiB
 ```

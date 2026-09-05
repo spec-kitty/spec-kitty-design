@@ -227,7 +227,7 @@ export class SkFormInput extends FormControlBase {
    *  BOTH `undefined` AND `null` mean "removed" — measured, not assumed: Lit's default `String`
    *  converter hands a REMOVED reflected attribute's `fromAttribute` result straight through,
    *  which is `null` (from `getAttribute`), not `undefined` — so a consumer's
-   *  `el.removeAttribute('pattern')` deliveres `this.pattern === null` here, a value the
+   *  `el.removeAttribute('pattern')` delivers `this.pattern === null` here, a value the
    *  ORIGINAL `string | undefined` declaration did not admit at all. Checking only `undefined`
    *  let `null` fall to the `else` branch: `target.setAttribute('pattern', null)` stringifies
    *  to the literal text `"null"`, which compiles to `^(?:null)$` — a field permanently invalid
@@ -370,7 +370,7 @@ export class SkFormInput extends FormControlBase {
     // exists to fix: a user cannot type into a control that has not rendered yet, so `control`
     // is never undefined when `badInput` could genuinely be true.
     if (control?.validity.badInput) flags.badInput = true;
-    // OPERATOR RULING (#180, fork resolved 2026-09 — see research.md R2 "value authority" for
+    // OPERATOR RULING (#180, fork resolved 2026-09 — see research.md R9 "value authority" for
     // the full three-option writeup): `setFormValue(this.value)` stays RAW and untouched — this
     // element still submits exactly what the consumer set, not a sanitized substitute. What
     // changed is DETECTION: a non-empty `this.value` that the CURRENT type cannot represent is
@@ -380,15 +380,25 @@ export class SkFormInput extends FormControlBase {
     // (measured: `type="date"`, `value="2026-13-45"` — an out-of-range/malformed date — leaves
     // `probe.value === ''`; `type="number"`, `value="1,5"` — a UA-unparseable numeral — does the
     // same). A type that does NOT sanitize on an invalid value (`type="email"` with
-    // `value="notanemail"`, `type="text"` always) leaves `probe.value` non-empty, so this branch
-    // does not fire there — `typeMismatch` from the merge loop above already covers that case.
+    // `value="notanemail"`) leaves `probe.value` non-empty, so this branch does not fire there —
+    // `typeMismatch` from the merge loop above already covers that case. `type="text"` does NOT
+    // "always" leave `probe.value` non-empty, corrected post-merge: `text`/`search`/`password`
+    // strip `\r`/`\n` from the sanitized value, so a value that is ENTIRELY newline (or, for
+    // `tel`, `\r\n`; for `email`/`url`, all-whitespace) sanitizes to `''` too — measured across
+    // 22 type/value pairs. `this.value.trim() !== ''` (below), not a bare non-empty check, is
+    // what keeps those pure-whitespace cases from firing: a value that trims to empty is not
+    // meaningfully "content the type cannot represent," it is whitespace the UA discarded the
+    // same way it would discard leading/trailing whitespace generally. A value with REAL content
+    // plus incidental whitespace (`"Acme Corp\n"`) is unaffected either way — the strip removes
+    // only the newline, `probe.value` stays `"Acme Corp"` (non-empty), and this branch never
+    // sees it.
     // Does not double-report against the REAL user-typing branch immediately above: while a
     // user is actively typing an unparseable value, `#onInput` deliberately does NOT write
     // `this.value` (see that handler), so `this.value` stays the last GOOD value during the
     // edit and `this.#probe.value` (synced from that same stale-but-valid `this.value`) is
     // non-empty — this branch is silent for the exact duration the real-control branch already
     // has it covered, and picks up only the property-assignment path that branch cannot reach.
-    if (this.value !== '' && this.#probe.value === '') flags.badInput = true;
+    if (this.value.trim() !== '' && this.#probe.value === '') flags.badInput = true;
     // The consumer's message WINS the announcement when both hold — it is the more specific
     // one — while the derived flag stays set underneath. TRIMMED, not a bare truthy check: a
     // whitespace-only `customError` (e.g. `setCustomError(' ')`) is truthy as a string, so the
@@ -505,14 +515,26 @@ export class SkFormInput extends FormControlBase {
     // a value the user never typed once editing finishes, rather than what they actually typed.
     // Skipping the `this.value` write here means the `.value=` binding never re-commits (its
     // last committed value is unchanged, so Lit's own dirty-check skips it), leaving the
-    // control's buffer untouched. `validate()` still runs directly, reading `badInput` off THIS
-    // SAME control (not the probe — see the merge loop above), so the flag merges immediately
-    // without needing `this.value` to change at all.
-    if (control.validity.badInput) {
-      this.validate();
-      return;
+    // control's buffer untouched. `badInput` still merges — see the unconditional `validate()`
+    // call below, which reads it off THIS SAME control (not the probe — see the merge loop
+    // above) regardless of whether `this.value` changes.
+    if (!control.validity.badInput) {
+      this.value = control.value;
     }
-    this.value = control.value;
+    // ALWAYS RE-RUN VALIDATE() DIRECTLY (#180 pass 2, debugger-found regression). `validate()`
+    // is otherwise reachable only from `willUpdate` on a CHANGED reactive property (plus
+    // `firstUpdated`) — but the badInput-guarded write above means `this.value = control.value`
+    // can be a NO-OP: when the user types a bad character and then undoes it back to the
+    // IDENTICAL prior value (e.g. `"5"` -> `"5e"` -> Backspace -> `"5"` again), Lit's own
+    // dirty-check sees `this.value` unchanged, schedules no update, `willUpdate` never runs, and
+    // the invalid state computed while `badInput` was momentarily true is left standing FOREVER
+    // — measured: an untouched-looking `type="number"` field the user merely mistyped into and
+    // corrected stays permanently `invalid`, blocking its whole form, with no property change to
+    // recover from (only assigning a genuinely DIFFERENT value did). Calling `validate()`
+    // unconditionally here closes that gap regardless of whether the assignment above actually
+    // changed anything — it is idempotent and cheap (see the probe-based merge above), so paying
+    // for it on every keystroke is the correct trade against a field that can otherwise lock.
+    this.validate();
   };
 }
 
