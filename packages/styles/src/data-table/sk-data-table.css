@@ -77,25 +77,59 @@
 }
 
 /*
- * Hover is a BORDER accent, not a background swap — measured, not asserted.
- * A background-based hover interacts badly with zebra striping: hovering an
- * odd row (ambient background) against `--sk-surface-pill` measured a
- * 1.297:1 lightening, but hovering an even row (`--sk-surface-muted`, which
- * is LIGHTER than `--sk-surface-pill`) against that same `--sk-surface-pill`
- * measured a 1.060:1 DARKENING in dark mode (1.047:1 in light) — a user
- * running down a five-row table sees rows 1/3/5 respond and 2/4 not, and the
- * ones that do respond move in opposite directions depending on parity. An
- * accent that never depends on the row's own background sidesteps the
- * arithmetic entirely: `border-left` is reserved (transparent) on every row
- * so hovering never shifts layout, and this is the same real property finder
- * used for both cases the forced-colors block below already relies on.
+ * Hover, pass 2 rewrite — measured, not asserted, and this time verified against
+ * BOTH border-collapse models together, not one at a time.
+ *
+ * Pass 1 used a `border-left` reserved on `tbody tr`. Two independent defects,
+ * neither caught until the fixes were run against each other:
+ *
+ *  1. `border-collapse: separate` (the sticky-header modifier, below) makes the
+ *     browser IGNORE border properties set on `<tr>` entirely — CSS 2.1 §17.6.1:
+ *     in the separated borders model, border-* applies to table CELLS only, never
+ *     rows/row-groups/columns/column-groups. Pixel-measured (not computed-style,
+ *     which echoes the declaration regardless of whether it paints): a red
+ *     `border-left` on a `<tr>` paints under `border-collapse: collapse` and does
+ *     NOT paint at all under `separate` — 0 problems in the collapsed (Default)
+ *     table, silently inert on the sticky-header table, the one exemplar the
+ *     modifier exists for.
+ *  2. Chromium does not preserve a `transparent` `border-*-color` under
+ *     `forced-colors: active` — it force-recolours it to `CanvasText`, same as
+ *     any other border color. Pixel/computed-style-measured: the "invisible"
+ *     reserved band on every row read `CanvasText` (not `transparent`) under
+ *     forced colors in both schemes, destroying the zebra alternation this
+ *     mission ships forced-colors for in the first place.
+ *
+ * The fix has three parts:
+ *
+ *  a. NORMAL-mode hover uses `filter: brightness()` on the ROW, not a border at
+ *     all. This sidesteps both border-collapse-model defects above (filter is
+ *     not a border property) and ALSO fixes the pass-1 zebra-hover finding
+ *     properly: brightness is a MULTIPLICATIVE scale, so it lightens the
+ *     ambient ground and `--sk-surface-muted` by the SAME relative amount —
+ *     measured (13,14,17)->(18,19,23) and (38,44,54)->(51,59,73), both ~1.35x
+ *     per channel — where pass 1's background-swap moved in opposite
+ *     directions depending on row parity. It also "spans the row" rather than
+ *     sitting at a fixed x-offset, so it does not scroll out of view inside
+ *     `.sk-data-table__scroller` the way a left-edge accent would.
+ *  b. The forced-colors substitute (below) moves from `tbody tr` to
+ *     `tbody tr > *:first-child` — measured to paint correctly in BOTH border
+ *     models (screenshot pixel sampling: red on `<tr>` painted under collapse
+ *     and did NOT paint under separate; blue on the first CELL painted under
+ *     BOTH). `filter: brightness()` has no visible effect under forced-colors
+ *     (backgrounds are forced to `Canvas` regardless of author CSS, and
+ *     brightening `Canvas` stays `Canvas`), so the border-based substitute is
+ *     still required there — it is simply relocated to where it actually
+ *     renders.
+ *  c. The reserved band's forced-colors baseline is explicit `Canvas` (matching
+ *     the page background, so it reads as absent) rather than left as
+ *     `transparent` — see the forced-colors block below for why.
  */
-.sk-data-table tbody tr {
+.sk-data-table tbody tr > *:first-child {
   border-left: 3px solid transparent;
 }
 
 .sk-data-table tbody tr:hover {
-  border-left-color: var(--sk-border-focus);
+  filter: brightness(1.35);
 }
 
 .sk-data-table__cell--numeric {
@@ -115,6 +149,10 @@
  * `scrollTop: 117` (page background, i.e. no border at all). `border-spacing: 0`
  * keeps the visual layout identical to the collapsed model for this primitive's
  * horizontal-only border usage.
+ *
+ * This is also why the hover/forced-colors row accent above and below is on the
+ * first CELL, never the `<tr>` — this modifier is the reason a `<tr>`-level
+ * border cannot be relied on anywhere in this file.
  *
  * `box-shadow` is NOT an acceptable substitute separator here: this file's own
  * forced-colors section (below) already documents that `box-shadow` computes away
@@ -155,26 +193,51 @@
  * every row looks identical under forced-colors even though the borders
  * between them are still visible.
  *
- * The substitute reuses the same `border-left` accent-band property the
- * normal-mode hover treatment above already establishes (reserved
- * transparent on every row), overriding only the LONGHAND `border-left-color`
- * — not the `border-left` shorthand. This is deliberate: the shorthand form
- * is invisible to stylelint's `declaration-strict-value` (`border`/`outline`
- * shorthands are not in its policed-property list at all, so a shorthand
- * with a hardcoded value would pass identically to one with a token — the
- * gate would be blind, not satisfied). The LONGHAND `-color` properties DO
- * match the policed `/color/` pattern, and `Canvas`/`CanvasText`/`Highlight`/
+ * The substitute is the SAME `border-left` accent-band property the
+ * normal-mode reservation above already establishes — on `tbody tr >
+ * *:first-child`, never `tbody tr` (see the pass-2 rewrite note above for why
+ * that distinction is load-bearing, not stylistic). The baseline override to
+ * `Canvas` (not left as `transparent`) is equally load-bearing: measured,
+ * Chromium force-recolours a `transparent` border-color under forced-colors
+ * instead of preserving invisibility, so every row would otherwise show the
+ * SAME accent color and the alternation would vanish. `Canvas` matches the
+ * page background, so an unaccented row reads as "no band" exactly like
+ * `transparent` did in normal mode; `nth-child(even)` and `:hover` then
+ * override only the LONGHAND `border-left-color` — not the `border-left`
+ * shorthand. This is deliberate: the shorthand form is invisible to
+ * stylelint's `declaration-strict-value` (`border`/`outline` shorthands are
+ * not in its policed-property list at all, so a shorthand with a hardcoded
+ * value would pass identically to one with a token — the gate would be
+ * blind, not satisfied). The LONGHAND `-color` properties DO match the
+ * policed `/color/` pattern, and `Canvas`/`CanvasText`/`Highlight`/
  * `HighlightText`/`ButtonText`/`LinkText` are explicit, deliberate entries in
  * `stylelint.config.mjs`'s `ignoreValues` for exactly this reason — the gate
  * POSITIVELY certifies these six system-color keywords rather than simply
  * never looking at the declaration.
+ *
+ * Known residual limitation, documented rather than silently absent: like any
+ * left-edge accent, this band is part of the table's scrolling content, so it
+ * scrolls out of view along with the rest of the row inside
+ * `.sk-data-table__scroller` on a horizontally scrolled narrow table. The
+ * normal-mode `filter: brightness()` hover above does not have this problem
+ * (it "spans the row" rather than sitting at a fixed offset), but `filter` has
+ * no visible effect under forced-colors (see above), so the forced-colors
+ * substitute is a border accent regardless, and inherits this limitation.
+ * `box-shadow` was considered and rejected for the same reason it was
+ * rejected for the sticky separator above — it does not survive forced-colors
+ * at all, which would be a strictly worse defect than "temporarily out of the
+ * scrolled viewport".
  */
 @media (forced-colors: active) {
-  .sk-data-table tbody tr:nth-child(even) {
+  .sk-data-table tbody tr > *:first-child {
+    border-left-color: Canvas;
+  }
+
+  .sk-data-table tbody tr:nth-child(even) > *:first-child {
     border-left-color: CanvasText;
   }
 
-  .sk-data-table tbody tr:hover {
+  .sk-data-table tbody tr:hover > *:first-child {
     border-left-color: Highlight;
   }
 }

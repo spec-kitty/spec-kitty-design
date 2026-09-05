@@ -32,14 +32,23 @@ export default {
             'none',
             'currentColor',
             '0',
-            // CSS system-color keywords, valid ONLY inside `@media (forced-colors: active)`
-            // (#176). These are the six the forced-colors baseline actually uses on the
-            // LONGHAND `-color` properties (`border-left-color`, `outline-color`, etc.) —
-            // deliberately NOT on the shorthand forms (`border`, `outline`), which this
-            // plugin does not police at all regardless of value, so a hardcoded shorthand
-            // color would have passed identically to a token and the gate would be blind
-            // rather than satisfied. Adding these here makes the gate positively certify
-            // the six explicit exceptions instead of silently never seeing them.
+            // CSS system-color keywords (#176). These are the six the forced-colors
+            // baseline actually uses on the LONGHAND `-color` properties
+            // (`border-left-color`, `outline-color`, etc.) — deliberately NOT on the
+            // shorthand forms (`border`, `outline`), which this plugin does not police at
+            // all regardless of value, so a hardcoded shorthand color would have passed
+            // identically to a token and the gate would be blind rather than satisfied.
+            // Adding these here makes the gate positively certify the six explicit
+            // exceptions instead of silently never seeing them.
+            //
+            // LIMITATION, stated rather than enforced: `ignoreValues` has no media-query
+            // scoping mechanism, so `border-left-color: CanvasText` passes everywhere this
+            // rule applies, not only inside `@media (forced-colors: active)`. Enforcing
+            // that scoping would need a custom rule or a postcss-based check; this repo
+            // does not have one. Reviewers must still confirm these six keywords appear
+            // only inside a `forced-colors` media block, the same way any other
+            // reviewable-but-unenforced convention in this repo is confirmed by reading,
+            // not tooling.
             'Canvas',
             'CanvasText',
             'Highlight',

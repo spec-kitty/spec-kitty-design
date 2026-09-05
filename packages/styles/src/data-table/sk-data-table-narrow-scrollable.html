@@ -1,13 +1,18 @@
 <!-- @spec-kitty/styles — sk-data-table (narrow-width, keyboard-scrollable region) -->
 <!-- SC-003 load-bearing exemplar: role="region" + accessible name + tabindex="0"
      wrapping an INTACT table — same <th scope> usage and cell structure as
-     sk-data-table-default.html. No hardcoded width here -- the story wraps this
-     exact markup in a max-width container purely to force the narrow condition
-     for the demo, so a consumer pasting this exemplar is not hard-capped.
+     sk-data-table-default.html. Unlike sticky-header's max-height (an arbitrary
+     demo aid a consumer should NOT inherit unasked), the max-width here is not
+     optional scaffolding -- narrowness IS this exemplar's entire subject. Measured:
+     without it, at a typical ~900px viewport this table does not actually overflow
+     (scrollWidth === clientWidth), which makes the role="region"/tabindex="0" triad
+     the exact "dead tab stop" defect this file's own header comment warns against
+     for the WIDE exemplars -- baking the width in here keeps this exemplar honestly
+     narrow regardless of where it is rendered, not just inside its own story.
      aria-label is deliberately distinct from <caption> ("narrow view", not
      "Recent builds" again) -- a duplicate name is itself a defect, copying
      the sticky-header exemplar's own distinct-name habit. -->
-<div class="sk-data-table__scroller" role="region" aria-label="Recent builds, narrow view" tabindex="0">
+<div class="sk-data-table__scroller" role="region" aria-label="Recent builds, narrow view" tabindex="0" style="max-width: 320px;">
   <table class="sk-data-table">
     <caption>Recent builds</caption>
     <thead>
