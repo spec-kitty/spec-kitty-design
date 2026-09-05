@@ -1,0 +1,30 @@
+<!-- @spec-kitty/styles — sk-data-table (sticky header modifier) -->
+<!-- No role="region"/tabindex="0"/max-height here: this exemplar's own overflow
+     is vertical, not the horizontal case that triad documents, and a hardcoded
+     max-height would hard-cap every consumer who pastes this markup. The
+     story wraps this exact markup with a max-height purely to make the
+     sticky behaviour demonstrable in Storybook -- see sk-data-table-html.stories.ts. -->
+<div class="sk-data-table__scroller">
+  <table class="sk-data-table sk-data-table--sticky-header">
+    <caption>Recent builds</caption>
+    <thead>
+      <tr>
+        <th scope="col">Build</th>
+        <th scope="col">Branch</th>
+        <th scope="col">Status</th>
+        <th scope="col">Duration</th>
+        <th scope="col">Cost</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>#1042</td><td>main</td><td>Passed</td><td>3m 12s</td><td class="sk-data-table__cell--numeric">$0.42</td></tr>
+      <tr><td>#1041</td><td>feature/skip-link</td><td>Passed</td><td>2m 58s</td><td class="sk-data-table__cell--numeric">$0.38</td></tr>
+      <tr><td>#1040</td><td>main</td><td>Failed</td><td>1m 05s</td><td class="sk-data-table__cell--numeric">$0.15</td></tr>
+      <tr><td>#1039</td><td>main</td><td>Passed</td><td>3m 30s</td><td class="sk-data-table__cell--numeric">$0.46</td></tr>
+      <tr><td>#1038</td><td>main</td><td>Passed</td><td>3m 05s</td><td class="sk-data-table__cell--numeric">$0.41</td></tr>
+      <tr><td>#1037</td><td>fix/skip-link</td><td>Passed</td><td>2m 40s</td><td class="sk-data-table__cell--numeric">$0.34</td></tr>
+      <tr><td>#1036</td><td>main</td><td>Failed</td><td>0m 48s</td><td class="sk-data-table__cell--numeric">$0.09</td></tr>
+      <tr><td>#1035</td><td>main</td><td>Passed</td><td>3m 20s</td><td class="sk-data-table__cell--numeric">$0.44</td></tr>
+    </tbody>
+  </table>
+</div>

@@ -2,7 +2,7 @@
 // Authored source: packages/styles/src/form-field/*.html
 // Regenerate: node scripts/build-styles-only-markup.mjs
 //
-// form-field is deliberately styles-only — it has no custom element. See ADR-10 and #141.
+// form-field is deliberately styles-only — it has no custom element. See ADR-10's "`form-field` is deliberately styles-only (#141)" section and #141.
 export const SkFormFieldHTML = "<div class=\"sk-form-field\">\n  <label class=\"sk-form-field__label\" for=\"field-id\">Label</label>\n  <!-- input or textarea goes here -->\n  <span class=\"sk-form-field__description\">Helper text</span>\n</div>";
 export const SkFormInputDefaultHTML = "<div class=\"sk-form-field\">\n  <label class=\"sk-form-field__label\" for=\"field-default\">Email address</label>\n  <input\n    class=\"sk-input\"\n    id=\"field-default\"\n    type=\"email\"\n    placeholder=\"you@team.com\"\n  />\n  <span class=\"sk-form-field__description\">We'll never share your email.</span>\n</div>";
 export const SkFormInputDisabledHTML = "<div class=\"sk-form-field\">\n  <label class=\"sk-form-field__label\" for=\"field-disabled\">Email address</label>\n  <input\n    class=\"sk-input\"\n    id=\"field-disabled\"\n    type=\"email\"\n    placeholder=\"you@team.com\"\n    disabled\n  />\n  <span class=\"sk-form-field__description\">This field is currently unavailable.</span>\n</div>";

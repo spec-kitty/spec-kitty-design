@@ -2,7 +2,7 @@
 
 **Date:** 2026-09-02
 **Status:** Accepted (ratified by the operator, 2026-09-02)
-**Deciders:** MOES-Media (operator session, 2026-09-02); the canonical-markup ruling in §3 was ratified by the operator on 2026-09-02
+**Deciders:** MOES-Media (operator session, 2026-09-02); the canonical-markup ruling in §3 was ratified by the operator on 2026-09-02; the styles-only class-level ruling was ratified by the operator on 2026-09-05, in #176, as an explicit override of the "ADRs are written only in #67" rule — #176's own plan raised the fork and declined to resolve it unilaterally
 **Technical Story:** ADR-8 constraints 1 and 2; SP-3, run before this record was written
 
 ---
@@ -66,10 +66,51 @@ The docsite consumes `@spec-kitty/styles` only. DSD reached Baseline *widely ava
 
 `customElements.define` is global and throws on a duplicate tag, while ADR-2 deliberately allows independent per-package versioning. Two majors of `@spec-kitty/elements` on one page is a hard runtime failure. Every definition goes through a guarded helper that warns and no-ops instead of throwing, and consumers are given a documented single-version policy. Versioned tag names remain a last resort — they would ruin the public API.
 
-### `form-field` is deliberately styles-only (#141)
+### Styles-only components are a class, not a fixed exception count
+
+**Operator override, recorded for the record.** ADRs are ordinarily written only in #67, which is
+closed; #176's own plan raised this fork and explicitly declined to resolve it ("no WP touches any
+ADR file… recorded here for the operator to decide"), rather than have the mission extend its own
+authority to amending ADR-10. The operator ruled, 2026-09-05: amend ADR-10, in #176, before merge.
+This section exists under that specific, recorded authorization — not by the mission's own
+judgment that #67-only was safe to set aside.
 
 Epic #66's completion criterion is that **no component in `packages/styles/src/` is styles-only
-except by a recorded, deliberate decision.** `form-field` is the one exception.
+except by a recorded, deliberate decision.** That rule was written admitting a *class* of
+exception; the sentence that followed it here — "`form-field` is the one exception" — was only a
+count at the time of writing, and #176 makes it false. It is replaced with the class-level ruling
+the rule always allowed for:
+
+**A component whose entire value is the semantics of a native element it styles is styles-only by
+design, not by exception.** #176 (`sk-facts`, `sk-disclosure`, `sk-data-table`, `sk-empty-state`,
+`sk-skip-link`) measured four reasons a wrapper element cannot exist here without breaking the
+semantics it would claim to provide:
+
+1. **`<dl>`/`<table>`/`<li>` need an unbroken parent/child chain.** A shadow root between a list
+   and its items, or a table and its rows, severs the relationship — #92 is this repo's own
+   recorded instance: `sk-check-bullet` nested an `<li>` inside its host and the list stopped
+   being a list.
+2. **Cross-root ID references do not resolve.** ADR-9 §4 measured it: ID lookup is scoped to
+   `getRootNode()`, so `<th id>`/`<td headers>`, `<caption>`, and `<label for>` all depend on
+   same-root lookup that a shadow boundary breaks.
+3. **A skip link needs a document-scoped `href="#main"`.** It cannot cross a shadow boundary, and
+   a wrapper element cannot guarantee same-root resolution.
+4. **`<details>` open/closed state is UA-owned.** Wrapping it re-implements bookkeeping the
+   platform already gets right — the exact hand-wiring a shipped skip-link/disclosure/table would
+   otherwise reintroduce.
+
+**The converse holds too, so this is not a loophole.** A component that *adds* behaviour, state,
+or composition beyond styling native semantics still gets an element; none of the four reasons
+above is "authoring happens to be easier this way," and none of them is satisfied by a component
+that owns interaction the native element does not already give it for free.
+
+**`form-field` remains a distinct case, recorded separately below.** It is not an instance of the
+class above — it is styles-only because its element path is `sk-form-input`/`sk-form-textarea`,
+which render the whole field themselves, not because it styles a native element with no room left
+for a wrapper. `#141` stays attached to `form-field` alone; it is not the citation for the class
+ruling above, which #176 established on its own evidence.
+
+### `form-field` is deliberately styles-only (#141)
 
 This **ratifies and supersedes** the reason already published in
 `docs/design-system/using-components.md`, which reached the same conclusion — no `<sk-form-field>`

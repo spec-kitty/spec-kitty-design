@@ -1,0 +1,20 @@
+<!-- @spec-kitty/styles — sk-disclosure (long body) -->
+<!-- Documentation only: shows padding/typography with real paragraph-length content.
+     There is no max-height/overflow/line-clamp rule on .sk-disclosure__body for this
+     to stress -- an earlier revision of this comment claimed it "proves the layout
+     doesn't break", which overclaimed a rule that does not exist. -->
+<details class="sk-disclosure" open>
+  <summary class="sk-disclosure__summary">Full changelog</summary>
+  <div class="sk-disclosure__body">
+    <p>
+      This release replaces the legacy build pipeline with a incremental,
+      content-addressed cache that skips unaffected packages entirely, cutting
+      the median CI build time from eleven minutes to under three. It also
+      fixes a race condition in the file watcher that occasionally dropped
+      change events on network filesystems, adds a new diagnostic command for
+      inspecting the dependency graph, and upgrades the underlying bundler to
+      its latest major version, which required updating every plugin
+      configuration across the monorepo.
+    </p>
+  </div>
+</details>

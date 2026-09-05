@@ -1,0 +1,30 @@
+/* @spec-kitty/styles — sk-empty-state shared styles */
+/* All values use --sk-* tokens only — no hardcoded values */
+
+.sk-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sk-space-3);
+  padding: var(--sk-space-9) var(--sk-space-6);
+  text-align: center;
+}
+
+.sk-empty-state__heading {
+  margin: 0;
+  font-family: var(--sk-font-sans);
+  font-size: var(--sk-text-lg);
+  font-weight: var(--sk-weight-semibold);
+  color: var(--sk-fg-default);
+}
+
+.sk-empty-state__body {
+  margin: 0;
+  font-family: var(--sk-font-sans);
+  font-size: var(--sk-text-sm);
+  color: var(--sk-fg-muted);
+}
+
+.sk-empty-state__action {
+  margin-block-start: var(--sk-space-2);
+}

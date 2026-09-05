@@ -7,10 +7,14 @@ so far — as **custom elements** in `@spec-kitty/elements`. Both require `@spec
 `sk-card`, `sk-check-bullet`, `sk-feature-card`, `sk-form-input`, `sk-form-textarea`, `sk-grid`,
 `sk-nav-pill`, `sk-pill-tag`, `sk-ribbon-card`, `sk-section-banner`, `sk-site-footer`, `sk-stub`,
 and `sk-transition-matrix`.
-One of the catalogue's component packages is CSS only by a recorded decision — `form-field`. See
-ADR-10, *form-field is deliberately styles-only*. Composite sections below such as Hero and Callout
-are CSS-only *patterns* rather than packages, and are not part of that count. Each section below says which it is, because the
-difference decides how you use it.
+Several of the catalogue's component packages are CSS only by a recorded decision — `form-field`,
+and (#176) `facts`, `disclosure`, `data-table`, `empty-state`, `skip-link`. See ADR-10,
+*form-field is deliberately styles-only*. These five ship classes applied to real semantic HTML
+the consumer authors — `<dl>`, `<details>`, `<table>`, a plain block, `<a>` — and no `sk-*` custom
+element wraps any of them: light-DOM native semantics (list/table/label association across a
+shadow boundary) are exactly what a wrapper element would break. Composite sections below such as
+Hero and Callout are CSS-only *patterns* rather than packages, and are not part of that count.
+Each section below says which it is, because the difference decides how you use it.
 
 Because a custom element needs no wrapper, every framework can use the migrated ones directly. A
 generated React wrapper exists for JSX typing and typed refs — see
@@ -450,6 +454,150 @@ Two-column callout block used for "why/who" benefit statements with bullet lists
 ```
 
 _No Storybook entry: this is a CSS-only pattern with no story._
+
+---
+
+## Facts
+
+Key/value pairs — status fields, metadata, run details — as a real `<dl>`, never ad-hoc `div`
+pairs whose label→value association is visual only.
+
+**CSS-only** (`@spec-kitty/styles`, no JavaScript, no `sk-*` element — #176):
+
+```html
+<dl class="sk-facts">
+  <dt class="sk-facts__term">Status</dt>
+  <dd class="sk-facts__value">Running</dd>
+  <dt class="sk-facts__term">Owner</dt>
+  <dd class="sk-facts__value">Ada Lovelace</dd>
+</dl>
+```
+
+`.sk-facts--two-col` lays term/value side by side instead of stacked; `.sk-facts--compact`
+tightens the spacing. Values render verbatim — no truncation, no formatting, no count derivation.
+
+[View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/primitives-skfacts-html--default)
+
+---
+
+## Disclosure
+
+Collapsible content — release notes, expandable detail — as a real `<details>`/`<summary>`,
+never a button plus a `hidden` div re-implementing `aria-expanded` by hand.
+
+**CSS-only** (`@spec-kitty/styles`, no JavaScript, no `sk-*` element — #176):
+
+```html
+<details class="sk-disclosure">
+  <summary class="sk-disclosure__summary">What changed in this release?</summary>
+  <div class="sk-disclosure__body">
+    <p>Three bug fixes and one performance improvement.</p>
+  </div>
+</details>
+```
+
+The `open` attribute is entirely the consumer's — the platform owns open/closed state and the
+class family only styles it. The marker is a `content`-drawn glyph with its accessible-name
+contribution suppressed (`content: '▸' / '';`), never the sole affordance for state.
+
+[View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/primitives-skdisclosure-html--closed)
+
+---
+
+## Data table
+
+Tabular data — run/job lists — as a real `<table>` with `<caption>` and `<th scope>`, with one
+documented narrow-width treatment that never reflows cells.
+
+**CSS-only** (`@spec-kitty/styles`, no JavaScript, no `sk-*` element — #176):
+
+```html
+<div class="sk-data-table__scroller">
+  <table class="sk-data-table">
+    <caption>Recent builds</caption>
+    <thead>
+      <tr><th scope="col">Build</th><th scope="col">Status</th><th scope="col">Cost</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>#1042</td><td>Passed</td><td class="sk-data-table__cell--numeric">$0.42</td></tr>
+    </tbody>
+  </table>
+</div>
+```
+
+`.sk-data-table__scroller` is part of the markup contract, not an optional narrow-width extra —
+all three authored exemplars carry it. Without it there is no `overflow-x`, and
+`.sk-data-table--sticky-header` has no scrolling ancestor to pin against, so the modifier does
+nothing.
+
+At a narrow width, add a labelled, keyboard-scrollable region to that same wrapper instead of
+reflowing cells — block-reflow drops header association and is explicitly rejected:
+
+```html
+<div class="sk-data-table__scroller" role="region" aria-label="Recent builds, narrow view" tabindex="0">
+  <table class="sk-data-table">…</table>
+</div>
+```
+
+Only give the scroller `role="region"`/`tabindex="0"` when it genuinely overflows — on a table
+that already fits, that triad is a dead tab stop and a duplicate landmark of `<caption>`; the
+accessible name must also be distinct from `<caption>`'s own text ("narrow view", not "Recent
+builds" again — a duplicate name is itself a defect). If you constrain a wide table's height or
+width yourself (e.g. `max-height` for a long list), and that constraint makes the scroller
+genuinely scrollable where it wasn't before, add the triad at that point — a scrollable region
+with no way to reach it by keyboard is a real accessibility defect, not a style choice.
+`.sk-data-table--sticky-header` pins the header row while the body scrolls
+(requires the scroller above as its scrolling ancestor). This mission is tone-free by epic ruling
+— no status/tone row colouring; that waits on a semantic status-token axis that doesn't exist yet.
+
+[View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/primitives-skdatatable-html--default)
+
+---
+
+## Empty state
+
+A shared "nothing here yet" treatment — heading, supporting copy, one optional action — replacing
+inconsistent per-page empty panels.
+
+**CSS-only** (`@spec-kitty/styles`, no JavaScript, no `sk-*` element — #176):
+
+```html
+<div class="sk-empty-state">
+  <h3 class="sk-empty-state__heading">No runs yet</h3>
+  <p class="sk-empty-state__body">Trigger a run to see its status and logs here.</p>
+  <div class="sk-empty-state__action">
+    <button type="button">Start a run</button>
+  </div>
+</div>
+```
+
+The primitive supplies no copy of its own and no icon — heading, body and the action are entirely
+the consumer's.
+
+[View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/primitives-skemptystate-html--with-action)
+
+---
+
+## Skip link
+
+A real, off-screen-until-focused skip link targeting the page's primary content, so a keyboard
+user is not forced to tab through the full navigation rail on every page.
+
+**CSS-only** (`@spec-kitty/styles`, no JavaScript, no `sk-*` element — #176):
+
+```html
+<a href="#main" class="sk-skip-link">Skip to main content</a>
+…
+<main id="main">…</main>
+```
+
+Off-screen technique is `clip-path`, never a bare `transform` — `<a>` is inline by default and
+`transform` does not apply to non-replaced inline boxes, so a transform-only skip link does not
+move at all. Give it a real, high `z-index` and never place it inside an ancestor with
+`transform`/`filter`/`will-change` (breaks its `position: fixed` containment) or one with a higher
+`z-index` in a sibling stacking context (clamps it underneath, even once focused).
+
+[View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/primitives-skskiplink-html--unfocused)
 
 ---
 

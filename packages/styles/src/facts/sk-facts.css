@@ -1,0 +1,64 @@
+/* @spec-kitty/styles — sk-facts shared styles */
+/* All values use --sk-* tokens only — no hardcoded values */
+
+/* ------------------------------------------------------------------ */
+/* Facts — stacked (default)                                           */
+/* ------------------------------------------------------------------ */
+
+.sk-facts {
+  margin: 0;
+}
+
+.sk-facts__term {
+  margin: 0;
+  margin-block-start: var(--sk-space-4);
+  font-family: var(--sk-font-sans);
+  font-size: var(--sk-text-sm);
+  font-weight: var(--sk-weight-medium);
+  color: var(--sk-fg-muted);
+}
+
+.sk-facts__term:first-of-type {
+  margin-block-start: 0;
+}
+
+.sk-facts__value {
+  margin: 0;
+  font-family: var(--sk-font-sans);
+  font-size: var(--sk-text-base);
+  color: var(--sk-fg-default);
+}
+
+/* ------------------------------------------------------------------ */
+/* Facts — two-column modifier                                         */
+/* ------------------------------------------------------------------ */
+
+.sk-facts--two-col {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  column-gap: var(--sk-space-4);
+  row-gap: var(--sk-space-2);
+  align-items: baseline;
+}
+
+.sk-facts--two-col .sk-facts__term,
+.sk-facts--two-col .sk-facts__value {
+  margin: 0;
+}
+
+/* ------------------------------------------------------------------ */
+/* Facts — compact density modifier                                    */
+/* ------------------------------------------------------------------ */
+
+.sk-facts--compact .sk-facts__term {
+  margin-block-start: var(--sk-space-1);
+}
+
+.sk-facts--compact .sk-facts__term:first-of-type {
+  margin-block-start: 0;
+}
+
+.sk-facts--compact.sk-facts--two-col {
+  row-gap: var(--sk-space-1);
+  column-gap: var(--sk-space-2);
+}

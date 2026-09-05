@@ -1,0 +1,78 @@
+/* @spec-kitty/styles — sk-skip-link shared styles */
+/* All values use --sk-* tokens only — no hardcoded values */
+/*
+ * Off-screen technique: `clip-path`, never a bare `transform`. `<a>` is
+ * inline by default and `transform` does not apply to non-replaced inline
+ * boxes — a `transform: translateY(-100%)` skip link would not move at all,
+ * leaving it a permanently visible, click-swallowing element while every
+ * static gate (stylelint/htmlhint/axe) stays green. `clip-path: inset(50%)`
+ * clips the box to nothing (paint AND hit-testing) without removing it from
+ * the accessibility tree or tab order; `clip-path: inset(0)` on focus removes
+ * the clip entirely. `position: fixed` is set unconditionally, which also
+ * blockifies this element per the CSS display spec (a positioned element's
+ * used display is never inline) — belt and suspenders with clip-path, which
+ * does not depend on display/blockification at all.
+ *
+ * Consumer constraint: do not place `.sk-skip-link` inside an ancestor with
+ * `transform`/`filter`/`will-change` set — any of those establishes a new
+ * containing block and traps this element's `position: fixed` relative to
+ * that ancestor instead of the viewport. That covers *containment*; it does
+ * NOT cover *stacking-context clamping*, a separate failure measured
+ * directly: even with a correct containing block, the link reveals, takes
+ * real focus, and paints UNDERNEATH a sibling fixed element carrying a
+ * higher `z-index` (e.g. a `z-index: 2` fixed header) once that sibling
+ * establishes its own stacking context — `z-index` only orders elements
+ * within the SAME stacking context, and `position: fixed` alone does not
+ * exempt this element from being out-ordered by one with a higher value.
+ * `z-index: 1000` is deliberately far above this repo's other usage (the
+ * only other `z-index` in `packages/styles` is `100`, in
+ * `sk-nav-pill-drawer.css`) precisely so ordinary page chrome does not
+ * accidentally clamp it — but it remains an unowned magic number: there is
+ * no `--sk-z-*` token scale in this repo to draw it from.
+ */
+
+.sk-skip-link {
+  position: fixed;
+  top: var(--sk-space-2);
+  left: var(--sk-space-2);
+  z-index: 1000;
+  padding: var(--sk-space-2) var(--sk-space-4);
+  background: var(--sk-surface-card);
+  color: var(--sk-fg-default);
+  border-radius: var(--sk-radius-sm);
+  border: 1px solid var(--sk-border-strong);
+  font-family: var(--sk-font-sans);
+  font-size: var(--sk-text-sm);
+  font-weight: var(--sk-weight-medium);
+  text-decoration: none;
+  white-space: nowrap;
+  clip-path: inset(50%);
+  transition: clip-path var(--sk-motion-duration-fast) var(--sk-motion-ease-out);
+}
+
+.sk-skip-link:focus-visible {
+  clip-path: inset(0);
+  outline: 3px solid var(--sk-border-focus);
+  outline-offset: 2px;
+}
+
+/* Reduced motion: disable exactly the one transitioning declaration this
+   component owns (the clip-path reveal) — scoped to its own selector. */
+@media (prefers-reduced-motion: reduce) {
+  .sk-skip-link {
+    transition: none;
+  }
+}
+
+/* Forced-colors: override only the LONGHAND `outline-color` (width/style are
+   already set by the base :focus-visible rule above). `Canvas`, `CanvasText`,
+   `Highlight`, `HighlightText`, `ButtonText` and `LinkText` are explicit,
+   deliberate `ignoreValues` entries in `stylelint.config.mjs` for exactly this
+   — see that file's comment and docs/contributing/adding-a-component.md's
+   forced-colors section for why the LONGHAND, not the unpoliced `outline`
+   shorthand, is what actually gets the gate to certify this value. */
+@media (forced-colors: active) {
+  .sk-skip-link:focus-visible {
+    outline-color: Highlight;
+  }
+}

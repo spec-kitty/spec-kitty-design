@@ -1,0 +1,12 @@
+<!-- @spec-kitty/styles — sk-skip-link (unfocused) -->
+<!-- Requires @spec-kitty/tokens to be loaded in the consuming page -->
+<!-- The Focused state is demonstrated via a real play()-driven .focus() call in the
+     story, not a second static exemplar or a simulated "is-focused" class -- see
+     sk-form-input.css's own recorded removal of exactly that anti-pattern.
+     Kept deliberately minimal: only the skip link and its real #main target, with
+     exactly the one inline color the axe fix needs -- no page furniture. A prior
+     revision shipped an entire <main> with an <h1> and a <p>, which is demo
+     scaffolding a consumer copying this exemplar would get for free along with a
+     colliding id="main" -- a published exemplar is not the place to author a page. -->
+<a href="#main" class="sk-skip-link">Skip to main content</a>
+<main id="main" style="color: var(--sk-fg-default);">Main content</main>
