@@ -268,10 +268,10 @@
       "criterion_id": "SC-002",
       "description": "Narrow composition has no horizontal overflow and preserves region/control order.",
       "proof_type": "automated_test",
-      "evidence": "Owner WP04: black-box Storybook checks at 390px and 414px.",
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "Verified on aggregate lane 89bbf7eb6fb12ca6aab0a780673ac93f506316e0: Storybook axe passed 177/177; Playwright Chromium+Firefox passed 70/70 including 390/414/1280/1440 shell composition, landmarks, label bytes, keyboard/focus, overflow, event, sync and zero-timer assertions.",
+      "pass_fail": "pass",
+      "verified_by": "codex/frontend-freddy/WP04",
+      "verified_at": "2026-09-05T23:34:20.866021+00:00",
       "notes": "Planned evidence mapping; populate the exact command result and immutable SHA when the owning WP or wrap-up step executes."
     },
     {
