@@ -24,6 +24,9 @@ requirement_refs:
 planning_base_branch: mission/team-overview-shell-elements
 merge_target_branch: mission/team-overview-shell-elements
 branch_strategy: Planning artifacts for this mission were generated on mission/team-overview-shell-elements. During /spec-kitty.implement this WP may branch from a dependency-specific base, but completed changes must merge back into mission/team-overview-shell-elements unless the human explicitly redirects the landing branch.
+base_branch: kitty/mission-team-overview-shell-elements-01M1S8R8
+base_commit: 76429426fc357926e275598c6dce96d9965b2eec
+created_at: '2026-09-05T19:28:21.765558+00:00'
 subtasks:
 - T001
 - T002

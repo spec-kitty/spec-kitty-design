@@ -10,5 +10,7 @@
   "purpose_tldr": "team overview shell elements",
   "slug": "team-overview-shell-elements-01M1S8R8",
   "target_branch": "mission/team-overview-shell-elements",
-  "topology": "lanes"
+  "topology": "lanes",
+  "vcs": "git",
+  "vcs_locked_at": "2026-09-05T19:28:21.533550+00:00"
 }
