@@ -1,14 +1,15 @@
 <!-- @spec-kitty/styles — sk-skip-link (unfocused) -->
 <!-- Requires @spec-kitty/tokens to be loaded in the consuming page -->
 <!-- The Focused state is demonstrated via a real play()-driven .focus() call in the
-     story, not a second static exemplar or a simulated "is-focused" class — see
-     sk-form-input.css's own recorded removal of exactly that anti-pattern. -->
+     story, not a second static exemplar or a simulated "is-focused" class -- see
+     sk-form-input.css's own recorded removal of exactly that anti-pattern.
+     Kept deliberately minimal: only the skip link and its real #main target -- no
+     unstyled surrounding page furniture (an earlier draft included a plain <nav>
+     and heading/paragraph with no token colors applied, which rendered black-on-dark
+     and blue-on-dark by browser default and failed axe's real color-contrast check;
+     this primitive's own exemplar is not the place to author an entire page). -->
 <a href="#main" class="sk-skip-link">Skip to main content</a>
-<nav aria-label="Primary">
-  <a href="#">Dashboard</a>
-  <a href="#">Settings</a>
-</nav>
-<main id="main">
-  <h1>Main content</h1>
-  <p>This is the target the skip link resolves to.</p>
+<main id="main" style="color: var(--sk-fg-default); font-family: var(--sk-font-sans);">
+  <h1 style="color: var(--sk-fg-default);">Main content</h1>
+  <p style="color: var(--sk-fg-body);">This is the target the skip link resolves to.</p>
 </main>

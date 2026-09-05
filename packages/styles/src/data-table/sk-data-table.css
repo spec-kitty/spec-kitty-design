@@ -38,6 +38,12 @@
   border-collapse: collapse;
   font-family: var(--sk-font-sans);
   font-size: var(--sk-text-sm);
+  /* Measured, not asserted: without an explicit base color here, body cells
+     inherit the browser's UA-default black text color, which axe correctly
+     flagged as a real color-contrast violation (1.08:1) against this
+     component's dark-token surfaces — this was a genuine defect, not a tool
+     limitation. */
+  color: var(--sk-fg-default);
 }
 
 .sk-data-table caption {
