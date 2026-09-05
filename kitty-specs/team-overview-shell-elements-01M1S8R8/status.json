@@ -95,7 +95,8 @@
       "last_transition_at": "2026-09-05T21:23:06.621862+00:00",
       "model": "__resolved_model_absent__",
       "notes": [
-        "Ready for review: accessible icon-size button with real-control naming, focus delegation, token geometry/focus styling, strict static validation, and 16 focused tests"
+        "Ready for review: accessible icon-size button with real-control naming, focus delegation, token geometry/focus styling, strict static validation, and 16 focused tests",
+        "Review passed: exact 5db5ec9; 16/16 browser tests, typecheck, CSS/markup parity, boundary/hygiene/lint, Storybook build and axe 177/177 green; focus-token and warning-reset reversals are load-bearing; six-file ownership and #79 behavior preserved."
       ],
       "provider": "__resolved_provider_absent__",
       "review_result": {
