@@ -218,10 +218,10 @@
       "criterion_id": "NFR-005",
       "description": "Approved shell geometry and focus visuals match CI-authoritative baselines.",
       "proof_type": "manual_review",
-      "evidence": "Pending mission wrap-up CI-authoritative baselines. WP04 local diagnostic on 89bbf7eb6fb12ca6aab0a780673ac93f506316e0 reached all 5 visible non-empty targets, produced expected missing-baseline actuals, and removed all local PNGs; no visual approval claimed.",
+      "evidence": "Pending mission wrap-up CI-authoritative baselines. WP04 diagnostic on 89bbf7eb6fb12ca6aab0a780673ac93f506316e0 reached all 5 targets and retained no PNG; correction 5581db93adc567ffa27b146698534fdf6a9867a9 changes only generated SIZES.md, so browser evidence was proportionately reused as review authorized.",
       "pass_fail": "pending",
-      "verified_by": "codex/frontend-freddy/WP04",
-      "verified_at": "2026-09-05T23:34:29.228044+00:00",
+      "verified_by": "codex/frontend-freddy/WP04-correction-1",
+      "verified_at": "2026-09-05T23:49:05.029574+00:00",
       "notes": "Planned evidence mapping; populate the exact command result and immutable SHA when the owning WP or wrap-up step executes."
     },
     {
