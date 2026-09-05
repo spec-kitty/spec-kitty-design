@@ -10,5 +10,7 @@
   "purpose_tldr": "team overview feed elements",
   "slug": "team-overview-feed-elements-01M1S8T0",
   "target_branch": "mission/team-overview-feed-elements",
-  "topology": "lanes"
+  "topology": "lanes",
+  "vcs": "git",
+  "vcs_locked_at": "2026-09-05T17:45:19.404875+00:00"
 }
