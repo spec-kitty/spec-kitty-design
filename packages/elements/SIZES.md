@@ -91,7 +91,7 @@ caught it.
 ```
 $ npx nx run elements:build && node scripts/measure-elements-sizes.mjs
 packages/elements/dist/index.js
-  raw        107909 bytes  (105.4 KiB)
+  raw        107908 bytes  (105.4 KiB)
   minified    72023 bytes  (70.3 KiB)
   gzip         22 KiB
   min+gzip     15 KiB
