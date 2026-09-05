@@ -125,7 +125,8 @@
       "last_transition_at": "2026-09-05T23:50:42.856052+00:00",
       "model": "__resolved_model_absent__",
       "notes": [
-        "Ready for review: lane 89bbf7eb6fb12ca6aab0a780673ac93f506316e0; 278/278 tests, 94/94 mutation replay, 8/8 guard selftests, 177/177 axe, Chromium+Firefox 70/70, five expected-red visual diagnostics with no PNG retention; WebKit blocked only by documented missing host libraries."
+        "Ready for review: lane 89bbf7eb6fb12ca6aab0a780673ac93f506316e0; 278/278 tests, 94/94 mutation replay, 8/8 guard selftests, 177/177 axe, Chromium+Firefox 70/70, five expected-red visual diagnostics with no PNG retention; WebKit blocked only by documented missing host libraries.",
+        "Correction ready: exact lane 5581db93adc567ffa27b146698534fdf6a9867a9; regenerated only packages/elements/SIZES.md after uncached elements build (107908-byte ESM, 121956-byte IIFE, current sha384 SRI). Repeat uncached build + size check green; CSS/markup/CEM/React/Vue/manifest/entries checks green; release graph selftest 28/28, dynamic tokens/styles/elements build, and live 4-package release graph green; commitlint/diff check green. Prior reviewer-confirmed browser-heavy evidence reused because correction is generated size evidence only."
       ],
       "provider": "__resolved_provider_absent__",
       "review": null,
