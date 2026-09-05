@@ -62,7 +62,7 @@ export class SkRibbonCard extends LitElement {
 
     // Render-time side effect, not markup — hence a statement, not an interpolation.
     checkRibbonLabel(this.ribbon);
-    return html`<article part="card" class=${ribbonCardClasses(this.variant)}>
+    return html`<article part="card" class=${ribbonCardClasses(this.variant, Boolean(this.ribbon))}>
       ${this.ribbon
         ? html`<div part="ribbon" class=${ribbonClasses(this.accent)}>${this.ribbon}</div>`
         : nothing}

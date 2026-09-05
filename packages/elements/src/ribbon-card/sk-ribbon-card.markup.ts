@@ -55,15 +55,30 @@ export const unknownRibbonMessage = (c: string): string =>
 // Two callers, two failure policies — warn-and-degrade on the render path, throw on the
 // authoring path. Collapsing them is the regression sk-card recorded and #77 reproduced once.
 
-/** The card's class list. Warns and degrades on an unknown variant. */
-export function ribbonCardClasses(variant?: string): string {
+/**
+ * The card's class list. Warns and degrades on an unknown variant.
+ *
+ * `hasRibbon` exists because THE RIBBON OVERLAPS THE CARD'S OWN TITLE. The bar is a fixed 174px
+ * whose rotated footprint is 141x141px regardless of how short the label is, so it eats a wedge
+ * of the content box that no label-length rule can shrink — measured by hit-testing every glyph
+ * of a long title with `elementFromPoint`, it covered 1-3 glyphs at every card width from 280px
+ * up, where the old drop-tab (auto-width, outside the card) covered none.
+ *
+ * Shrinking the ribbon cannot fix it: at the title's first line the band is already ~61px inboard
+ * of the content edge, so clearing it that way would leave no ribbon. The content has to reserve
+ * the corner instead, which is what real corner-ribbon designs do — hence a modifier, so a card
+ * WITHOUT a ribbon keeps its full width and is not indented for a corner nothing occupies.
+ */
+export function ribbonCardClasses(variant?: string, hasRibbon = false): string {
   if (variant !== undefined && !isRibbonCardVariant(variant)) {
     console.warn(`sk-ribbon-card: ${unknownVariantMessage(variant)} — rendering the plain card.`);
     variant = undefined;
   }
   // eslint-disable-next-line security/detect-object-injection -- narrowed by isRibbonCardVariant above
   const modifier = variant ? RIBBON_CARD_VARIANTS[variant] : '';
-  return ['sk-ribbon-card', modifier].filter(Boolean).join(' ');
+  return ['sk-ribbon-card', modifier, hasRibbon ? 'sk-ribbon-card--has-ribbon' : '']
+    .filter(Boolean)
+    .join(' ');
 }
 
 /**
@@ -144,7 +159,7 @@ export function ribbonCardStaticHtml(
   }
   const tab = ribbon ? `<div class="${ribbonClasses(accent)}">${ribbon}</div>` : '';
   return (
-    `<article class="${ribbonCardClasses(variant)}">` +
+    `<article class="${ribbonCardClasses(variant, ribbon !== undefined)}">` +
     tab +
     `<div class="sk-ribbon-card__content">${content}</div>` +
     `</article>`

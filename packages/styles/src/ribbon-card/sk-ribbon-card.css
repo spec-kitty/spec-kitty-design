@@ -164,6 +164,21 @@
    selector list serves both paths with no declaration written twice. `::slotted()` is an
    accepted owning compound in check-adopted-css-boundaries.mjs, and sk-nav-pill.css has used
    this shape since #73. */
+/* RESERVE THE CORNER. The ribbon is out of flow, so without this it paints over the title —
+   measured at 1-3 covered glyphs for every card width from 280px up. The heading is the only
+   thing that reaches the corner (the body text sits below the band's chord), so the indent is
+   on the heading rather than the whole content column, and only when a ribbon is actually
+   present — a plain card keeps its full width.
+
+   Both spellings, for the reason the rule below records: the heading is SLOTTED in the element
+   path, so a shadow-tree selector cannot match it, and `::slotted()` is inert in a document. */
+.sk-ribbon-card--has-ribbon .sk-ribbon-card__content h3,
+.sk-ribbon-card--has-ribbon .sk-ribbon-card__content h4,
+.sk-ribbon-card--has-ribbon .sk-ribbon-card__content ::slotted(h3),
+.sk-ribbon-card--has-ribbon .sk-ribbon-card__content ::slotted(h4) {
+  padding-right: 72px;
+}
+
 .sk-ribbon-card__content h3,
 .sk-ribbon-card__content h4,
 .sk-ribbon-card__content ::slotted(h3),

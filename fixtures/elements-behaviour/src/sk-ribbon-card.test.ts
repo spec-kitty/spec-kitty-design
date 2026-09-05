@@ -192,7 +192,11 @@ test('an unknown variant or ribbon colour degrades on RENDER and throws on AUTHO
   } finally {
     console.warn = realWarn;
   }
-  expect(partOf(el!, 'card')!.className.trim()).toBe('sk-ribbon-card');
+  // `--has-ribbon` is expected here and is not part of what degrades: this card IS mounted with
+  // a ribbon, and the modifier reserves the corner so the bar does not paint over the title. The
+  // degrade assertion is that no `--border-*` variant modifier survives.
+  expect(partOf(el!, 'card')!.className.trim()).toBe('sk-ribbon-card sk-ribbon-card--has-ribbon');
+  expect(partOf(el!, 'card')!.className, 'the bad variant must not survive').not.toMatch(/--border-/);
   expect(partOf(el!, 'ribbon')!.className.trim()).toBe(
     'sk-ribbon-card__ribbon sk-ribbon-card__ribbon--yellow',
   );
@@ -205,6 +209,7 @@ test('an unknown variant or ribbon colour degrades on RENDER and throws on AUTHO
     expect(() => ribbonCardStaticHtml({ variant: key })).toThrow(/unknown ribbon-card variant/);
     expect(() => ribbonCardStaticHtml({ accent: key })).toThrow(/unknown ribbon colour/);
     expect(ribbonCardClasses(key).trim()).toBe('sk-ribbon-card');
+    expect(ribbonCardClasses(key, true).trim()).toBe('sk-ribbon-card sk-ribbon-card--has-ribbon');
     expect(ribbonClasses(key).trim()).toBe('sk-ribbon-card__ribbon sk-ribbon-card__ribbon--yellow');
   }
 });

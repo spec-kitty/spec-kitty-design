@@ -36,8 +36,10 @@
      NOT because "a footer is a full-bleed band" — an earlier draft of this comment said that,
      and it is false for the only consumer in this repo: apps/demo/blog-demo.html wraps it in a
      max-width `.demo-container`. That wrapper's own horizontal padding is dropped there so the
-     gutter is not applied twice. */
-  padding: var(--sk-space-11) var(--sk-space-7) var(--sk-space-8);
+     gutter is not applied twice, and --sk-space-6 is chosen to MATCH that page's content inset —
+     measured, the footer's columns now start at the same x as the nav pill and the feature grid
+     above them, where --sk-space-7 left them 8px inboard of everything else. */
+  padding: var(--sk-space-11) var(--sk-space-6) var(--sk-space-8);
   border-top: 1px solid var(--sk-border-default);
 }
 
