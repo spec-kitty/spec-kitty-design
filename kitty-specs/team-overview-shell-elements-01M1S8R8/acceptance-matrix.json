@@ -399,6 +399,14 @@
       "verification_command": "test -z \"$(git diff --name-only 5db5ec9bf191064a6fa6471cdb43dd4d702bee19..HEAD -- apps/storybook/src/tests/visual.spec.ts-snapshots)\"",
       "result": "confirmed_absent",
       "evidence": "Command exited 0: "
+    },
+    {
+      "invariant_id": "NI-007",
+      "description": "The token catalogue equals tokens.css outside the validated generated_at timestamp.",
+      "verification_method": "custom_command",
+      "verification_command": "node --input-type=module <<'NODE'\nimport { readFileSync } from 'node:fs';\nconst sourcePath = 'packages/tokens/src/tokens.css';\nconst cataloguePath = 'packages/tokens/dist/token-catalogue.json';\nconst source = readFileSync(sourcePath, 'utf8');\nconst categories = {};\nfor (const match of source.matchAll(/\\s(--sk-([a-z][a-z0-9]*)(?:-[a-z0-9]+)+)\\s*:/g)) {\n  const [, token, category] = match;\n  categories[category] ??= { prefix: `--sk-${category}-`, tokens: [] };\n  if (!categories[category].tokens.includes(token)) categories[category].tokens.push(token);\n}\nconst catalogue = JSON.parse(readFileSync(cataloguePath, 'utf8'));\nconst { generated_at: generatedAt, ...actual } = catalogue;\nif (typeof generatedAt !== 'string' || Number.isNaN(Date.parse(generatedAt))) {\n  throw new Error('token catalogue generated_at is absent or invalid');\n}\nconst expected = { schema_version: '1.0.0', generated_from: sourcePath, categories };\nif (JSON.stringify(actual) !== JSON.stringify(expected)) {\n  throw new Error('token catalogue differs from tokens.css outside generated_at');\n}\nNODE",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: "
     }
   ],
   "legacy_negative_invariants": [
