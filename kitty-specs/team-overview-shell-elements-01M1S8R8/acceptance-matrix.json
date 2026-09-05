@@ -258,10 +258,10 @@
       "criterion_id": "SC-001",
       "description": "Desktop composition measures 56px, 240px, and a non-clipping remainder.",
       "proof_type": "automated_test",
-      "evidence": "Owner WP01, aggregate confirmation WP04: direct rendered geometry at 1280px and 1440px.",
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "Verified on aggregate lane 89bbf7eb6fb12ca6aab0a780673ac93f506316e0: Storybook axe passed 177/177; Playwright Chromium+Firefox passed 70/70 including 390/414/1280/1440 shell composition, landmarks, label bytes, keyboard/focus, overflow, event, sync and zero-timer assertions.",
+      "pass_fail": "pass",
+      "verified_by": "codex/frontend-freddy/WP04",
+      "verified_at": "2026-09-05T23:34:19.107362+00:00",
       "notes": "Planned evidence mapping; populate the exact command result and immutable SHA when the owning WP or wrap-up step executes."
     },
     {
