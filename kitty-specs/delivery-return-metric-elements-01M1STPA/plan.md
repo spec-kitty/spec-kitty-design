@@ -15,6 +15,24 @@ The implementation reuses the existing Lit, manifest, React/Vue generation, part
 
 ## Technical Context
 
+**Language/Version**: TypeScript 5.x and CSS, targeting standards-based custom elements
+
+**Primary Dependencies**: Lit 3.3.x plus the existing manifest, React/Vue generation, Vitest, Playwright, Storybook, and axe toolchain
+
+**Storage**: N/A
+
+**Testing**: Vitest browser/node projects, Playwright component/visual checks, Storybook build, axe, and repository drift/quality gates
+
+**Target Platform**: Modern browsers through ESM and classic-IIFE builds; generated React 19 and Vue type consumers
+
+**Project Type**: Nx elements-first design-system monorepo
+
+**Performance Goals**: O(stage count) rendering for 0/2/4/6-stage fixtures; enforced Storybook build below 180 seconds
+
+**Constraints**: Token-only CSS; no application state/imports; no new dependency; generated artifacts deterministic; final target only `train/elements-first`
+
+**Scale/Scope**: Two public custom elements, nine public parts, six public documentation items, and fifteen required story IDs
+
 | Concern | Decision |
 |---|---|
 | Language/runtime | TypeScript 5.x, Lit 3.3.x, standards-based custom elements, CSS |
