@@ -52,9 +52,9 @@ const compactColumns = Object.freeze([
 const compactRoutes = Object.freeze([
   Object.freeze({ id: 'queued-active', label: 'Queued → Active', tone: 'forward', values: Object.freeze({ previous: 3, current: 5 }) }),
   Object.freeze({ id: 'active-complete', label: 'Active → Complete', tone: 'completed', values: Object.freeze({ previous: 2, current: 4 }) }),
-  Object.freeze({ id: 'any-blocked', label: 'Any state → Blocked', tone: 'blocked', values: Object.freeze({ previous: 1, current: 0 }) }),
-  Object.freeze({ id: 'blocked-active', label: 'Blocked → Active', tone: 'recovery', values: Object.freeze({ previous: 0, current: 2 }) }),
-  Object.freeze({ id: 'any-previous', label: 'Any state → Previous state', tone: 'backward', values: Object.freeze({ previous: 1, current: 1 }) }),
+  Object.freeze({ id: 'any-blocked', label: 'Any state → Blocked', tone: 'blocked', group: 'Exceptions & recovery', values: Object.freeze({ previous: 1, current: 0 }) }),
+  Object.freeze({ id: 'blocked-active', label: 'Blocked → Active', tone: 'recovery', group: 'Exceptions & recovery', values: Object.freeze({ previous: 0, current: 2 }) }),
+  Object.freeze({ id: 'any-previous', label: 'Any state → Previous state', tone: 'backward', group: 'Exceptions & recovery', values: Object.freeze({ previous: 1, current: 1 }) }),
 ] satisfies ReadonlyArray<TransitionRoute>);
 
 type MatrixOptions = Partial<Pick<SkTransitionMatrix, 'selectedRouteId' | 'selectable' | 'windowLabel' | 'description' | 'selectionHint'>>;

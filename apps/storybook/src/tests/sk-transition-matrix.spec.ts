@@ -61,6 +61,21 @@ test('Default dark and LightMode preserve equivalent content and table relations
       const hostStyle = getComputedStyle(element);
       const sectionStyle = getComputedStyle(section);
       const titleStyle = getComputedStyle(title);
+      const computedHostToken = (token: string) => {
+        const probe = document.createElement('span');
+        probe.style.color = `var(${token})`;
+        root.append(probe);
+        const colour = getComputedStyle(probe).color;
+        probe.remove();
+        return colour;
+      };
+      const toneTokens = {
+        forward: computedHostToken('--sk-color-blue'),
+        completed: computedHostToken('--sk-color-green'),
+        blocked: computedHostToken('--sk-color-red'),
+        recovery: computedHostToken('--sk-color-purple'),
+        backward: computedHostToken('--sk-fg-muted'),
+      };
       const tones = [...root.querySelectorAll<HTMLElement>('[part~="legend"] [data-tone]')].map((legendItem) => {
         const tone = legendItem.dataset.tone!;
         const row = root.querySelector<HTMLElement>(`[data-route-id][data-tone="${tone}"]`)!;
@@ -91,6 +106,10 @@ test('Default dark and LightMode preserve equivalent content and table relations
           })),
           legend: [...root.querySelectorAll<HTMLElement>('[part~="legend"] [data-tone]')].map((node) => node.dataset.tone),
           groups: [...root.querySelectorAll('[part~="group"]')].map((node) => node.textContent),
+          accessibleGroups: [...root.querySelectorAll<HTMLElement>('[part~="group"]')].map((heading) => ({
+            label: heading.textContent,
+            labelsBody: heading.id !== '' && heading.closest('tbody')?.getAttribute('aria-labelledby') === heading.id,
+          })),
           selectable: element.hasAttribute('selectable'),
           tabStops: root.querySelectorAll('[tabindex]').length,
         },
@@ -102,6 +121,7 @@ test('Default dark and LightMode preserve equivalent content and table relations
           surface: sectionStyle.backgroundColor,
           foreground: titleStyle.color,
           tones,
+          toneTokens,
         },
       };
     });
@@ -116,6 +136,10 @@ test('Default dark and LightMode preserve equivalent content and table relations
   expect(light.theme.shadowForegroundToken).toBe(light.theme.hostForegroundToken);
   expect(light.theme.surface).not.toBe(dark.theme.surface);
   expect(light.theme.foreground).not.toBe(dark.theme.foreground);
+  for (const content of [dark.content, light.content]) {
+    expect(content.groups).toEqual(['Exceptions & recovery']);
+    expect(content.accessibleGroups).toEqual([{ label: 'Exceptions & recovery', labelsBody: true }]);
+  }
   const expectedToneLabels = {
     forward: 'Forward',
     completed: 'Completed',
@@ -134,6 +158,8 @@ test('Default dark and LightMode preserve equivalent content and table relations
     expect(theme.tones.map(({ tone }) => tone)).toEqual(Object.keys(expectedToneLabels));
     expect(new Set(theme.tones.map(({ colour }) => colour)).size).toBe(5);
     for (const tone of theme.tones) {
+      const expectedToken = theme.toneTokens[tone.tone as keyof typeof theme.toneTokens];
+      expect(tone.colour).toBe(expectedToken);
       expect(tone.colour).toBe(tone.legendColour);
       expect(tone.legendLabel).toBe(expectedToneLabels[tone.tone as keyof typeof expectedToneLabels]);
       expect(tone.legendHasIcon).toBe(true);
