@@ -12,6 +12,6 @@
   "include": [
     "src/Good.vue",
     "src/Bad.vue",
-    "src/vue-shim.d.ts"
+    "src/types.test-d.ts"
   ]
 }

@@ -141,9 +141,9 @@
     {
       "sha": "769baef",
       "mutations": 70,
-      "tests": 166,
+      "tests": 169,
       "seconds": 364,
-      "note": "CI, PR #170 (#81). The browser lane grew 160 -> 166 when the Vue consumer fixture landed, and this row exists because a lens noticed it was missing \u2014 verbatim the omission this file records #79 committing. 65% of the 560s ceiling, 196s spare. NOT raised: six tests cost ~-4s against the 368.1s at 35752ec, which is inside runner variance, so there is nothing to raise it from."
+      "note": "CI, PR #170 (#81). The browser lane grew 160 -> 169 as the Vue consumer fixture landed and the four-lens fold added v-model, plain-`:` and @input assertions. Recorded because a lens noticed the row was missing \u2014 verbatim the omission this file records #79 committing \u2014 and then a SECOND lens noticed the first version of this row said 166, which was the parent commit's count, not the head's. NOT raised: 364s is 65% of the 560s ceiling, and the added tests moved the time less than runner variance."
     }
   ]
 }

@@ -179,8 +179,11 @@ drifts from the manifest."* A lens caught an earlier version of this paragraph q
 and concluding the schema held — while the conformance matrix was never run for Vue. `react-wrapper`
 is a declared subject in `behaviours.json` for SC-002 (form association) and SC-006 (event
 contract), with mutations behind both; `vue` appears in neither file, and SC-401/402/403 sit outside
-the declared id range, so the mutation harness requires nothing of them. **Deleting the Vue fixture
-outright would leave every gate green.**
+the declared id range, so the mutation harness requires nothing of them. The **mutation harness** therefore requires nothing of the Vue
+fixture. (An earlier version of this paragraph said deleting the fixture outright would leave every
+gate green. That was true when written and is not now: the fold added
+`scripts/check-vue-template-types.mjs`, an ENFORCED step that reads `Good.vue`, so removing the
+fixture reds `lint-code`. Two lenses caught the sentence outliving its own commit.)
 
 What this establishes, then, is narrower than "the schema held": for a modern framework the manifest
 is sufficient to produce a working, type-checked target, and clauses one, two and four of the schema

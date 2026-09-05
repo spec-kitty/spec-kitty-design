@@ -148,7 +148,16 @@ export {};
 async function assertParses(text) {
   const ts = (await import('typescript')).default;
   const sf = ts.createSourceFile('vue.d.ts', text, ts.ScriptTarget.ESNext, false, ts.ScriptKind.TS);
-  const syntax = sf.parseDiagnostics ?? [];
+  // `parseDiagnostics` is INTERNAL — `typescript.d.ts` does not declare it. A `?? []` fallback here
+  // would turn "TypeScript renamed or hid this" into "no syntax errors" and write the file anyway:
+  // green over an empty set, in the guard that gates the write. A lens caught it. Fail closed on the
+  // API instead, so an upgrade that moves it breaks loudly rather than silently disarming this.
+  if (!Array.isArray(sf.parseDiagnostics)) {
+    console.error('❌ typescript no longer exposes parseDiagnostics — the emitter would be unguarded.');
+    console.error('   Switch to ts.createProgram + getSyntacticDiagnostics, which is public API.');
+    process.exit(1);
+  }
+  const syntax = sf.parseDiagnostics;
   if (syntax.length) {
     console.error(`❌ the generated declaration does not parse — ${syntax.length} syntax error(s):`);
     for (const d of syntax.slice(0, 5)) {
@@ -158,11 +167,58 @@ async function assertParses(text) {
     console.error('   This is manifest text reaching source unescaped. Fix the manifest or the emitter.');
     process.exit(1);
   }
+  return sf;
+}
+
+/**
+ * RECONCILED AGAINST THE PARSED AST, which is a different thing from the count this file used to
+ * carry and rightly deleted.
+ *
+ * A parse check is not enough on its own. A lens put a BALANCED fragment in an attribute's
+ * `type.text` — `string; }>;\n    'sk-injected': SkElement<{ 'p'?: string` — and the emitted file
+ * parsed cleanly, declared a FIFTEENTH component that is in no manifest, silently dropped the
+ * attribute it was attached to, and `--check` reported "14 elements".
+ *
+ * The old reconciliation counted a regex over the rendered text and could only ever agree with
+ * itself. This reads the member names TypeScript actually parsed out of `GlobalComponents` and
+ * compares that set with the manifest's tags — so anything the emitter produced that the manifest
+ * did not ask for, or dropped that it did, is a mismatch.
+ */
+function assertMembersMatch(ts, sf, expected) {
+  const found = [];
+  const visit = (node) => {
+    if (ts.isInterfaceDeclaration(node) && node.name.text === 'GlobalComponents') {
+      for (const member of node.members) {
+        const n = member.name;
+        if (n && (ts.isStringLiteral(n) || ts.isIdentifier(n))) found.push(n.text);
+      }
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(sf);
+
+  const want = [...expected].sort();
+  const got = [...new Set(found)].sort();
+  const extra = got.filter((t) => !want.includes(t));
+  const missing = want.filter((t) => !got.includes(t));
+  if (found.length !== got.length) {
+    console.error(`❌ the generated declaration has duplicate GlobalComponents members`);
+    process.exit(1);
+  }
+  if (extra.length || missing.length) {
+    console.error('❌ the generated declaration does not match the manifest:');
+    if (extra.length) console.error(`   declared but NOT in the manifest: ${extra.join(', ')}`);
+    if (missing.length) console.error(`   in the manifest but NOT declared: ${missing.join(', ')}`);
+    console.error('   Manifest text reached source as syntax. Fix the manifest or the emitter.');
+    process.exit(1);
+  }
 }
 
 const list = tags();
 const body = render(list);
-await assertParses(body);
+const ts = (await import('typescript')).default;
+const parsed = await assertParses(body);
+assertMembersMatch(ts, parsed, list.map((t) => t.tag));
 const check = process.argv.includes('--check');
 const path = join(ROOT, OUT);
 

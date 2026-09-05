@@ -3,10 +3,16 @@
 There is no `@spec-kitty/vue` package, and you do not need one. Vue 3 uses the custom elements
 directly, including `v-model`. This page is the whole integration.
 
-**Everything on this page is asserted in `fixtures/vue-consumer/` or `tests/node/vue-sfc-compile.test.ts`
-and runs on every PR.** An earlier revision documented a `v-model` limitation that does not exist and
-a `@sk-change` event that no element fires; both were written from reasoning rather than from a
-measurement, and both were wrong. Nothing here is stated that is not tested.
+**Every claim in *Binding values*, *Events* and the compile tables is asserted in
+`fixtures/vue-consumer/` or `tests/node/vue-sfc-compile.test.ts`, and runs on every PR.** An earlier
+revision documented a `v-model` limitation that does not exist and a `@sk-change` event that no
+element fires; both were written from reasoning rather than measurement, and both were wrong.
+
+The **Install** notes are *not* covered by a test — they are checked against the packages' own
+`exports` and `peerDependencies`, by hand. Two lenses caught an earlier version of this paragraph
+claiming blanket coverage, on the page whose whole subject is unverified claims. Two of the four
+rows in the warning table below are asserted in the fixture; the other two were one-off probes, and
+the table says which.
 
 ## Install
 
@@ -58,12 +64,12 @@ If you compile templates *at runtime*, Vue's full build defaults `isCustomElemen
 `tag => !!customElements.get(tag)` (since Vue 3.3), so a **registered** element resolves cleanly with
 no configuration:
 
-| tag | registered | Vue warnings |
-|---|---|---|
-| `<sk-button>` | yes | **0** |
-| `<not-registered-el>` | no | 1 |
-| `<NotAThing>` | no | 1 |
-| `<blahtag>` | no | 1 |
+| tag | registered | Vue warnings | |
+|---|---|---|---|
+| `<sk-button>` | yes | **0** | asserted in the fixture |
+| `<sk-not-a-real-element>` | no | 1 | asserted in the fixture |
+| `<NotAThing>` | no | 1 | one-off probe |
+| `<blahtag>` | no | 1 | one-off probe |
 
 The discriminator is the registry, not the hyphen — so on this path the requirement is **import
 order**: `import '@spec-kitty/elements'` must run before the template is compiled.
