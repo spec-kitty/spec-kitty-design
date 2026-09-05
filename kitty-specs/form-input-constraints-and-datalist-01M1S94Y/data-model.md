@@ -88,7 +88,7 @@ already-tested source rather than adding a second path to the same fact).
 **The reset path (`formResetCallback`) needs no separate code change.** It assigns
 `this.value = this.initialValue`, a plain reactive-property write that goes through the same
 `willUpdate()` → `validate()` path above; the sync-before-read step fixes the reset case for free.
-It DOES need its own test (see WP01 T006), because it is a different call site than a direct
+It DOES need its own test (see WP01 T002), because it is a different call site than a direct
 property assignment even though the defect and the fix are identical.
 
 ## Entity: option model item (FR-006)

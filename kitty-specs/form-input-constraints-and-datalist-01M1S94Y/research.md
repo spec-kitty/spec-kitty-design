@@ -84,7 +84,7 @@ copied from the squad's report.
      message string is not accepted when the flags object has a true entry (`updateComplete`
      rejects; `updated()` — and therefore `syncFormValue()` — never runs; the field silently
      disappears from `FormData` with no error surfaced to the caller). The ORIGINAL merge design
-     (T003 step 3, superseded) said to pass "whatever `message` happens to be," which is empty for
+     (the original merge design, superseded) said to pass "whatever `message` happens to be," which is empty for
      a UA-raised flag with no `required`/`customError` also true — a form-associated custom
      element has no UA-authored message to inherit, unlike a plain `<input>`, whose own
      `reportValidity()` bubble supplies one for free. **Fix**: a per-flag fallback message table
@@ -182,7 +182,7 @@ copied from the squad's report.
   itself confirms the required shape by direct example —
   `columns: ReadonlyArray<TransitionColumn> = Object.freeze([]);` at line 130, a plain initialized
   field, not `declare`. The originally-planned shape (this document's earlier draft, and WP01's
-  first-cut T004) used `declare options: …;` plus `this.options = Object.freeze([]);` in the
+  first-cut of the datalist subtask) used `declare options: …;` plus `this.options = Object.freeze([]);` in the
   constructor — which matches every OTHER property in this file's existing style, and is exactly
   why it is easy to get wrong: `options` needs to be the ONE exception to that convention.
   This earns the `x-spec-kitty-property-only: true` manifest marker, which routes the React
