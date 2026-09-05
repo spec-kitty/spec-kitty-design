@@ -45,6 +45,7 @@
     "@typescript-eslint/parser": "^8.59.1",
     "@vitest/browser": "4.1.11",
     "@vitest/browser-playwright": "4.1.11",
+    "@vue/compiler-dom": "3.5.42",
     "@wc-toolkit/react-wrappers": "1.2.7",
     "axe-playwright": "^2.2.2",
     "esbuild": "0.28.1",
@@ -63,7 +64,8 @@
     "stylelint-declaration-strict-value": "^1.11.1",
     "tslib": "^2.8.1",
     "vite": "7.3.6",
-    "vitest": "4.1.11"
+    "vitest": "4.1.11",
+    "vue-tsc": "^2.2.12"
   },
   "customElements": "packages/elements/custom-elements.json"
 }

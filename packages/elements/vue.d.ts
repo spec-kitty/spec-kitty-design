@@ -9,49 +9,82 @@
 //
 //     /// <reference types="@spec-kitty/elements/vue" />
 //
-// You still need one line of build configuration for SFCs. See docs/consuming-from-vue.md.
+// You still need one line of build configuration for SFCs. Full integration guide:
+// https://github.com/spec-kitty/spec-kitty-design/blob/main/docs/consuming-from-vue.md
 
-import type { HTMLAttributes, ReservedProps } from 'vue';
+import type { DefineComponent, HTMLAttributes, ReservedProps } from 'vue';
 
-type SkElement<P> = P & Partial<HTMLAttributes> & ReservedProps;
+type SkElement<P> = DefineComponent<P & Partial<HTMLAttributes> & ReservedProps>;
 
 declare module 'vue' {
   export interface GlobalComponents {
     /**
      * A blog preview card: thumbnail, eyebrow, title, excerpt, meta and a read-more link.
+     *
+     * It COMPOSES `sk-card`'s stylesheet rather than nesting the element, so the frame is authored
+     * once in `sk-card.css` and this component's own sheet adds only blog layout — the contract its
+     * CSS header has always described, now true of the element as well as the static form.
      */
     'sk-blog-card': SkElement<{
-      /** Alt text for the preview image. Set it whenever `thumbnail` is set. */
+      /**
+       * Alt text for the preview image. Set it whenever `thumbnail` is set.
+       *
+       * ONE WORD, and I walked into the reason twice. This was `thumbnailAlt`, which Lit maps to a
+       * hyphenated `thumbnail-alt` attribute — and a hyphen is not a valid JS property key, so
+       * `build-react-wrappers.mjs` refuses it: the emitted createElement props cannot carry the
+       * key, and under ssrSafe (where React delivers first-render props as ATTRIBUTES) the value
+       * would never reach the element. sk-ribbon-card hit this at #78 and its comment records it;
+       * this component hit it anyway. `alt` is also the HTML attribute it feeds.
+       */
       'alt'?: string | undefined;
       /** A short lead-in above the title, such as a category. */
       'eyebrow'?: string | undefined;
-      /** The preview image's URL. With none, no `<img>` is rendered at all — an empty one is a */
+      /**
+       * The preview image's URL. With none, no `<img>` is rendered at all — an empty one is a
+       * broken-image icon rather than a neutral placeholder.
+       */
       'thumbnail'?: string | undefined;
     }>;
     /**
      * A button, or a link styled as one.
+     *
+     * Set `href` and it renders an anchor; omit it and you get a button. That is not a
+     * convenience — every use of this primitive in the demo pages is an `<a href>` styled as a
+     * button, while the stories use `<button>`, so the catalogue already needs both and the class
+     * list is identical either way.
      */
     'sk-button': SkElement<{
-      /** Disables the button. Ignored when `href` is set — a disabled link is not a thing HTML */
+      /**
+       * Disables the button. Ignored when `href` is set — a disabled link is not a thing HTML
+       * has, and faking one with pointer-events hides it from assistive technology.
+       */
       'disabled'?: boolean;
       /** When set, the element renders an anchor to this URL instead of a button. */
       'href'?: string | undefined;
       /** Size: `sm`, or omit for the default. */
       'size'?: 'sm' | undefined;
-      /** Tone: `primary`, `secondary` or `ghost`. Omit for the unstyled base. An unknown value */
+      /**
+       * Tone: `primary`, `secondary` or `ghost`. Omit for the unstyled base. An unknown value
+       * renders the base button and warns rather than throwing.
+       */
       'variant'?: 'primary' | 'secondary' | 'ghost' | undefined;
     }>;
-    /**
-     * The card primitive — the first real component on the ADR-8 base layer.
-     */
+    /** The card primitive — the first real component on the ADR-8 base layer. */
     'sk-card': SkElement<{
       /** Swaps the surface token for the inset (input) surface, for a card nested inside another. */
       'inset'?: boolean;
-      /** Accent colour. Omit for the default surface; an unknown value renders the base card and */
+      /**
+       * Accent colour. Omit for the default surface; an unknown value renders the base card and
+       * warns rather than throwing.
+       */
       'variant'?: 'blue' | 'purple' | undefined;
     }>;
     /**
      * A checked feature bullet, for the tick-lists on marketing and reference pages.
+     *
+     * Put it inside a `<ul role="list">`. The element sets `role="listitem"` on itself, because a
+     * custom element inside a `<ul>` is NOT a list item — the static form is a real `<li>`, and
+     * this is the one place the two consumption paths differ structurally.
      */
     'sk-check-bullet': SkElement<{
       /** The tick glyph. Defaults to ✓; set it to use a different mark. */
@@ -59,71 +92,115 @@ declare module 'vue' {
     }>;
     /**
      * A feature card: an accented icon chip above a title and a short body.
+     *
+     * The icon, title and body are all slotted, because they are the consuming page's content. The
+     * component owns the frame, the chip and the two colour axes — which are independent: `accent`
+     * colours the chip, `variant` colours the card's border, and a card may have either, both or
+     * neither.
      */
     'sk-feature-card': SkElement<{
-      /** Icon-chip colour: `yellow` (the default), `green` or `purple`. An unknown value uses the */
+      /**
+       * Icon-chip colour: `yellow` (the default), `green` or `purple`. An unknown value uses the
+       * default and warns.
+       */
       'accent'?: 'yellow' | 'green' | 'purple' | undefined;
-      /** Border colour: `border-yellow`, `border-green` or `border-purple`. Omit for the default */
+      /**
+       * Border colour: `border-yellow`, `border-green` or `border-purple`. Omit for the default
+       * neutral hairline. An unknown value renders the plain card and warns rather than throwing.
+       */
       'variant'?: 'border-yellow' | 'border-green' | 'border-purple' | undefined;
     }>;
-    /**
-     * A labelled text input that participates in a native form.
-     */
+    /** A labelled text input that participates in a native form. */
     'sk-form-input': SkElement<{
       /** Optional helper text rendered under the control and linked to it for screen readers. */
       'description'?: string;
       /** Excludes the field from submission and from user interaction. */
       'disabled'?: boolean;
-      /** Whether the field is showing an error. The element sets it from its own validity. */
+      /**
+       * Whether the field is showing an error. The element sets it from its own validity.
+       * Assigning it directly paints the error state WITHOUT setting validity — the field looks
+       * wrong and still submits — so use `setCustomError()` instead.
+       */
       'invalid'?: boolean;
       /** The visible label. Also the accessible name, so it is not optional in practice. */
       'label'?: string;
-      /** The name submitted with the form value. Without it the field contributes no `FormData` */
+      /**
+       * The name submitted with the form value. Without it the field contributes no `FormData`
+       * entry — though a required empty one still blocks its form.
+       */
       'name'?: string;
-      /** Placeholder text. Not a substitute for `label`: it disappears on input and is not a */
+      /**
+       * Placeholder text. Not a substitute for `label`: it disappears on input and is not a
+       * reliable accessible name.
+       */
       'placeholder'?: string;
-      /** Marks the field required. An empty required field blocks submission and reports */
+      /**
+       * Marks the field required. An empty required field blocks submission and reports
+       * `${label} is required`, or "This field is required" when `label` is empty.
+       */
       'required'?: boolean;
       /** The native input type — `text`, `email`, `password`, and so on. */
       'type'?: string;
-      /** The current value, and what the form submits under `name` — unless `disabled`, which */
+      /**
+       * The current value, and what the form submits under `name` — unless `disabled`, which
+       * submits nothing.
+       */
       'value'?: string;
     }>;
-    /**
-     * A labelled multi-line text control that participates in a native form.
-     */
+    /** A labelled multi-line text control that participates in a native form. */
     'sk-form-textarea': SkElement<{
       /** Optional helper text rendered under the control and linked to it for screen readers. */
       'description'?: string;
       /** Excludes the field from submission and from user interaction. */
       'disabled'?: boolean;
-      /** Whether the field is showing an error. The element sets it from its own validity. */
+      /**
+       * Whether the field is showing an error. The element sets it from its own validity.
+       * Assigning it directly paints the error state WITHOUT setting validity — the field looks
+       * wrong and still submits — so use `setCustomError()` instead.
+       */
       'invalid'?: boolean;
       /** The visible label. Also the accessible name, so it is not optional in practice. */
       'label'?: string;
-      /** The name submitted with the form value. Without it the field contributes no `FormData` */
+      /**
+       * The name submitted with the form value. Without it the field contributes no `FormData`
+       * entry — though a required empty one still blocks its form.
+       */
       'name'?: string;
-      /** Placeholder text. Not a substitute for `label`: it disappears on input and is not a */
+      /**
+       * Placeholder text. Not a substitute for `label`: it disappears on input and is not a
+       * reliable accessible name.
+       */
       'placeholder'?: string;
-      /** Marks the field required. An empty required field blocks submission and reports */
+      /**
+       * Marks the field required. An empty required field blocks submission and reports
+       * `${label} is required`, or "This field is required" when `label` is empty.
+       */
       'required'?: boolean;
       /** Visible height in text rows. */
       'rows'?: number;
-      /** The current value, and what the form submits under `name` — unless `disabled`, which */
+      /**
+       * The current value, and what the form submits under `name` — unless `disabled`, which
+       * submits nothing.
+       */
       'value'?: string;
     }>;
     /**
      * A responsive grid layout primitive.
+     *
+     * Bounded on purpose: it supports 2, 3 and 4 columns because that is what the blog listing and
+     * reference pages need. It is not a general-purpose grid system. Use `::part(grid)` for layouts
+     * outside that set rather than asking for another variant.
      */
     'sk-grid': SkElement<{
       /** Gap between items, in token steps: 3, 4 or 6. Omit for the default (4). */
       'gap'?: number | undefined;
-      /** Column count, as `cols-2`, `cols-3` or `cols-4`. Omit for a single column. An unknown */
+      /**
+       * Column count, as `cols-2`, `cols-3` or `cols-4`. Omit for a single column. An unknown
+       * value renders the base grid and warns rather than throwing.
+       */
       'variant'?: 'cols-2' | 'cols-3' | 'cols-4' | undefined;
     }>;
-    /**
-     * The navigation pill — a row of links that collapses to a hamburger and a panel.
-     */
+    /** The navigation pill — a row of links that collapses to a hamburger and a panel. */
     'sk-nav-pill': SkElement<{
       /** Accessible name for the navigation landmark. */
       'label'?: string;
@@ -132,33 +209,66 @@ declare module 'vue' {
     }>;
     /**
      * A small inline label — a version tag, a status chip, or an eyebrow above a headline.
+     *
+     * `variant` sets the colour and `shape` sets the size; they are independent, so a tinted
+     * eyebrow is expressible. The label is slotted, because the text is the consuming page's.
      */
     'sk-pill-tag': SkElement<{
       /** Shape: `eyebrow` for the larger, square-cornered lead-in label. Omit for the compact pill. */
       'shape'?: 'eyebrow' | undefined;
-      /** Colour: `green`, `purple`, `breaking` or `yellow`. Omit for the neutral tag. An unknown */
+      /**
+       * Colour: `green`, `purple`, `breaking` or `yellow`. Omit for the neutral tag. An unknown
+       * value renders the base tag and warns rather than throwing.
+       */
       'variant'?: 'green' | 'purple' | 'breaking' | 'yellow' | undefined;
     }>;
     /**
      * A card with an optional diagonal ribbon tab in its corner.
+     *
+     * The title and body are slotted, because they are the consuming page's content. The ribbon's
+     * LABEL is a property rather than a slot — it is a short string the component positions and
+     * rotates, and ADR-9 §4 took the same route for the form controls' `label`.
+     *
+     * The two colour axes are independent: `variant` tints the card's border, `accent` tints
+     * the tab, and a card may use either, both or neither.
      */
     'sk-ribbon-card': SkElement<{
-      /** The ribbon's colour: `yellow` (the default), `green`, `purple`, `blue` or `red`. Ignored */
+      /**
+       * The ribbon's colour: `yellow` (the default), `green`, `purple`, `blue` or `red`. Ignored
+       * when no `ribbon` label is set.
+       */
       'accent'?: string | undefined;
-      /** The ribbon's label. The ribbon is rendered ONLY when this is set — an empty tab is a */
+      /**
+       * The ribbon's label. The ribbon is rendered ONLY when this is set — an empty tab is a
+       * coloured shape with no text, which reads as a bug rather than as a plain card.
+       */
       'ribbon'?: string | undefined;
-      /** Border colour: `border-yellow`, `-green`, `-purple`, `-blue` or `-red`. Omit for the */
+      /**
+       * Border colour: `border-yellow`, `-green`, `-purple`, `-blue` or `-red`. Omit for the
+       * default neutral hairline. An unknown value renders the plain card and warns.
+       */
       'variant'?: string | undefined;
     }>;
     /**
      * A mono-caps banner that delineates a version or section block.
+     *
+     * Non-interactive by design: it has no hover, focus or disabled state, and the colour variant
+     * IS the state. The label is slotted content, not a property — a banner's text is the
+     * consuming page's, and hardcoding it in the component is what this element replaced.
      */
     'sk-section-banner': SkElement<{
-      /** Colour variant: `neutral` (the default), `purple` or `green`. An unknown value renders */
+      /**
+       * Colour variant: `neutral` (the default), `purple` or `green`. An unknown value renders
+       * the neutral banner and warns rather than throwing.
+       */
       'variant'?: 'neutral' | 'purple' | 'green' | undefined;
     }>;
     /**
      * A site footer: a brand column, two link columns, and a legal line.
+     *
+     * The element owns the structure — the grid, the `<nav>`s, the headings, the `<ul>`s, the divider
+     * and the legal line. Text arrives as properties; only the link ITEMS are slotted, as `<li>`
+     * elements that land directly inside the element's own `<ul>`.
      */
     'sk-site-footer': SkElement<{
       /** Heading for the first link column. */
@@ -172,9 +282,7 @@ declare module 'vue' {
       /** The brand wordmark. */
       'wordmark'?: string | undefined;
     }>;
-    /**
-     * The scaffold element for the ADR-8 custom-element base layer.
-     */
+    /** The scaffold element for the ADR-8 custom-element base layer. */
     'sk-stub': SkElement<{
       // no attributes
     }>;

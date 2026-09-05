@@ -2,15 +2,25 @@
 /**
  * The generated Vue types, compiled (#81).
  *
- * A `.d.ts` that is never compiled is a claim, not a capability — the same reason #75 ships
- * type-tests for the React wrappers rather than trusting their declarations. This file is
- * type-checked by `nx run vue-consumer-fixture:typecheck`; nothing here runs.
+ * TESTED THROUGH THE COMPONENT TYPE, not by indexing a props object.
+ *
+ * The first version of this file asserted `GlobalComponents['sk-pill-tag']['variant']`. That
+ * passed — and proved nothing about a template, because the generated entries were bare props
+ * objects, which Volar cannot extract props from at all. A lens compiled a real `.vue` with
+ * `vue-tsc` and found `<sk-button variant="chartreuse">` raising no error whatsoever. The
+ * declaration was correct and the consumption path was unchecked: a verified guard at the wrong
+ * call site.
+ *
+ * Entries are now `DefineComponent<...>`, so props are reached the way Vue reaches them —
+ * `InstanceType<C>['$props']`. `Bad.vue` alongside this file is the end-to-end check under
+ * `vue-tsc`; this one keeps a fast `tsc`-only signal on the same contract.
  */
 import type { GlobalComponents } from 'vue';
 
-// Every element the manifest declares is reachable from a Vue template's type space.
-type Footer = GlobalComponents['sk-site-footer'];
-type PillTag = GlobalComponents['sk-pill-tag'];
+type PropsOf<C> = C extends abstract new (...args: never) => { $props: infer P } ? P : never;
+
+type Footer = PropsOf<GlobalComponents['sk-site-footer']>;
+type PillTag = PropsOf<GlobalComponents['sk-pill-tag']>;
 
 // Props are typed from the manifest, not `any`.
 const legal: Footer['legal'] = '© 2026 Example';

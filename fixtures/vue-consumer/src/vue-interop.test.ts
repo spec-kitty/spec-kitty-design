@@ -26,7 +26,7 @@
  * and every assertion about it would pass for the wrong reason.
  */
 import { describe, expect, it } from 'vitest';
-import { createApp, h, ref } from 'vue/dist/vue.esm-bundler.js';
+import { createApp, ref } from 'vue/dist/vue.esm-bundler.js';
 import '@spec-kitty/elements';
 
 /** Mount a Vue app on a detached host and return it, with a disposer. */
@@ -94,19 +94,117 @@ describe('[SC-401] a Vue consumer needs no wrapper package for the elements to w
     destroy();
   });
 
-  it('receives a custom event dispatched by the element', async () => {
+  /**
+   * THE REAL EVENT, not an invented one. This dispatched `sk-ping` — a name no element fires —
+   * so it proved Vue's listener plumbing against a synthetic event and nothing about the elements.
+   * `sk-nav-pill-toggle` is the one custom event the catalogue actually dispatches (it is the only
+   * `events[]` entry in custom-elements.json), it is hyphenated, and it is `composed`, so it
+   * exercises the same Vue plumbing AND the real event surface. A lens pointed out that using the
+   * real one would likely have caught the `sk-change` invention in the docs; it would have.
+   */
+  it('receives the real hyphenated custom event an element dispatches', async () => {
     const seen: string[] = [];
     const { host, destroy } = mount(
       {
-        setup: () => ({ onPing: (e: Event) => seen.push(e.type) }),
-        template: `<sk-button @sk-ping="onPing">Go</sk-button>`,
+        setup: () => ({ onToggle: (e: Event) => seen.push(e.type) }),
+        template: `<sk-nav-pill @sk-nav-pill-toggle="onToggle"></sk-nav-pill>`,
       },
       (app) => { app.config.compilerOptions.isCustomElement = (tag: string) => tag.startsWith('sk-'); },
     );
-    await customElements.whenDefined('sk-button');
-    const el = host.querySelector('sk-button')!;
-    el.dispatchEvent(new CustomEvent('sk-ping', { bubbles: true, composed: true }));
-    expect(seen, 'Vue attached a listener for a hyphenated custom event').toEqual(['sk-ping']);
+    await customElements.whenDefined('sk-nav-pill');
+    const el = host.querySelector('sk-nav-pill')! as HTMLElement & { open?: boolean };
+    const toggle = el.shadowRoot?.querySelector('button');
+    expect(toggle, 'the pill renders its toggle button').toBeTruthy();
+    (toggle as HTMLButtonElement).click();
+    expect(seen, 'Vue attached a listener for the hyphenated event the element really fires').toEqual([
+      'sk-nav-pill-toggle',
+    ]);
+    destroy();
+  });
+
+  /**
+   * THE PLAIN `:` BINDING, which the documentation described backwards until a lens checked it.
+   *
+   * Vue's `shouldSetAsProp` ends `return key in el`, so for an UPGRADED element `:legal="x"` takes
+   * the DOM-property route, not the attribute route. The attribute appears too — but that is our
+   * element reflecting (`legal: { type: String, reflect: true }`), not Vue setting it. The doc said
+   * "Vue sets it as an attribute", which credited the wrong side.
+   *
+   * This is the behaviour the fixture existed to measure and did not: it only ever tested `.prop`.
+   */
+  it('a plain : binding takes the PROPERTY route on an upgraded element', async () => {
+    const legal = ref('© plain');
+    const { host, destroy } = mount(
+      { setup: () => ({ legal }), template: `<sk-site-footer :legal="legal"></sk-site-footer>` },
+      (app) => { app.config.compilerOptions.isCustomElement = (tag: string) => tag.startsWith('sk-'); },
+    );
+    await customElements.whenDefined('sk-site-footer');
+    const el = host.querySelector('sk-site-footer')! as HTMLElement & { legal?: string };
+    expect(el.legal, 'Vue set the DOM property').toBe('© plain');
+    expect(el.getAttribute('legal'), 'and the element reflected it back to the attribute').toBe('© plain');
+    destroy();
+  });
+
+  /**
+   * THE EVENT A FORM CONSUMER ACTUALLY NEEDS. The docs recommended `@sk-change`, an event NO
+   * element dispatches — so the one copy-pasteable snippet in the page was inert and `text` would
+   * never have updated. Measured: the inner `<input>`'s native event is `composed`, so it crosses
+   * the shadow boundary, `$event.target` retargets to the host, and the host's `value` is already
+   * in sync by then.
+   */
+  it('@input reaches Vue from sk-form-input, with the host as the retargeted source', async () => {
+    const seen: Array<[string, string]> = [];
+    const { host, destroy } = mount(
+      {
+        setup: () => ({ onIn: (e: Event) => seen.push([e.type, (e.target as HTMLInputElement & { value: string }).value]) }),
+        template: `<sk-form-input name="f" label="L" @input="onIn"></sk-form-input>`,
+      },
+      (app) => { app.config.compilerOptions.isCustomElement = (tag: string) => tag.startsWith('sk-'); },
+    );
+    await customElements.whenDefined('sk-form-input');
+    const el = host.querySelector('sk-form-input')! as HTMLElement & { value?: string };
+    const inner = el.shadowRoot!.querySelector('input')!;
+    inner.value = 'typed';
+    inner.dispatchEvent(new Event('input', { bubbles: true, composed: true }));
+    expect(seen, 'Vue saw a native input event retargeted to the host, carrying the synced value').toEqual([
+      ['input', 'typed'],
+    ]);
+    expect(el.value, "and the host's own property is in sync").toBe('typed');
+    destroy();
+  });
+  /**
+   * V-MODEL WORKS, and the documentation said it did not.
+   *
+   * The page carried a "what does not work the same as React" section claiming `v-model` needs a
+   * `modelValue` prop and an `update:modelValue` event. That is true only when the compiler does
+   * NOT know the tag is a custom element — i.e. exactly the misconfiguration the same page tells
+   * you to fix. Once it does, `@vue/compiler-dom` emits `vModelText`, which drives the `value`
+   * PROPERTY and listens for `input`; our form elements satisfy both.
+   *
+   * A lens caught it, and the correction matters beyond one paragraph: a point IN FAVOUR of the
+   * mission's conclusion — that no wrapper package is needed — had been written down as a
+   * shortcoming. It is asserted here because it is load-bearing for that conclusion.
+   */
+  it('v-model binds both directions on a form element, with no wrapper', async () => {
+    const text = ref('start');
+    const { host, destroy } = mount({
+      setup: () => ({ text }),
+      template: `<sk-form-input v-model="text" name="f" label="L"></sk-form-input>`,
+    });
+    await customElements.whenDefined('sk-form-input');
+    const el = host.querySelector('sk-form-input')! as HTMLElement & { value?: string };
+    expect(el.value, 'downward on mount').toBe('start');
+
+    const inner = el.shadowRoot!.querySelector('input')!;
+    inner.value = 'typed';
+    inner.dispatchEvent(new Event('input', { bubbles: true, composed: true }));
+    await new Promise((r) => setTimeout(r, 0));
+    expect(text.value, 'upward: typing reaches the ref').toBe('typed');
+
+    text.value = 'fromParent';
+    await new Promise((r) => setTimeout(r, 0));
+    expect(el.value, 'downward: assigning the ref reaches the host').toBe('fromParent');
+    expect(inner.value, 'and the inner control').toBe('fromParent');
     destroy();
   });
 });

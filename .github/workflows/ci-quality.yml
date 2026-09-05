@@ -1,4 +1,4 @@
-# EVERY JOB CARRIES A timeout-minutes, and none did before #81.
+# EVERY JOB IN THIS WORKFLOW CARRIES A timeout-minutes, and none did before #81.
 #
 # A Vue fixture added in that mission hung the behaviour suite under webkit. GitHub's default job
 # timeout is 360 MINUTES, so the run consumed six hours of runner time before it was cancelled —
@@ -6,8 +6,17 @@
 # canceled"). A hang is not a rare event in a workflow that drives four browsers; the cost of one
 # should be minutes, not hours, and the log should end at the step that hung.
 #
-# The numbers are ceilings, not targets. `test` is the slow one at ~15 minutes (a 560s harness
-# ceiling plus setup and two browser installs), so 45 leaves room without leaving six hours.
+# SCOPE, corrected by a lens: `docs-diagrams.yml` already carried one, so "none did" was true of
+# this workflow and not of the repo. `pr-preview.yml`, `release.yml` and `storybook-deploy.yml` now
+# carry them too — pr-preview builds Storybook and deploys, the same long-running class, and runs
+# on every PR. Nothing yet ENFORCES the property, so a new job still inherits 360 minutes; that is
+# filed rather than fixed here.
+#
+# The numbers are ceilings, not targets, and generous on purpose. Measured on recent runs of this
+# workflow, `test` — the slowest job — takes 6-10 minutes, and every other job is under 2. A lens
+# checked the figure this comment originally asserted (~15 minutes) against the API and it was
+# wrong; the ceilings below leave 4x to 45x headroom on real durations, so none of them can red a
+# healthy run. What they bound is a hang.
 
 name: CI Quality
 
@@ -202,6 +211,11 @@ jobs:
       # #81. Same generated-artifact contract as the CSS, markup and React generators.
       - name: "[ENFORCED] Generated Vue types are current (#81, ADR-8 confirmation #4)"
         run: node scripts/build-vue-types.mjs --check
+      # The types are only worth anything inside a TEMPLATE, which only Volar compiles. The first
+      # version of the generator emitted bare props objects: they type-checked under tsc and gave a
+      # template nothing, and no gate here could see it.
+      - name: "[ENFORCED] Vue types reach a real SFC (#81)"
+        run: node scripts/check-vue-template-types.mjs
       - name: "[ENFORCED] Generated CSS modules are current (ADR-10 generated-artifact contract)"
         run: node scripts/build-elements-css.mjs --check
       # ADR-9 Confirmation #1, which the ADR requires by name and no mission had landed.

@@ -24,27 +24,27 @@
     "ADR-11's citation for how amendments happen does not check out - see the operator questions",
     "on #71.",
     "",
-    "adds the mutations rather than to the end of the mission — the ceiling asserts at the end of",
+    "adds the mutations rather than to the end of the mission \u2014 the ceiling asserts at the end of",
     "EVERY run and is wired into CI, so it reds at whichever commit pushes the set over, not at a",
     "tidy final measurement pass.",
     "",
-    "is CHROMIUM-ONLY — the second browser affects `ceilingSeconds`, not this one. An earlier plan",
+    "is CHROMIUM-ONLY \u2014 the second browser affects `ceilingSeconds`, not this one. An earlier plan",
     "draft conflated the two, which is precisely what the note above says the split exists to",
     "prevent. Neither ceiling is raised: 79.5s of 180s, and the CI number is the one that binds.",
     "",
-    "39 mutations — a lens caught the PR body quoting the local figure as though it were the",
+    "39 mutations \u2014 a lens caught the PR body quoting the local figure as though it were the",
     "ceiling-relevant one. Neither ceiling raised; the margin is now thinner and the next mission",
     "that adds mutations should expect to raise selftestCeilingSeconds rather than assume it fits.",
     "",
     "#74 MEASURED BOTH CEILINGS RATHER THAN ASSUMING THEM, and the numbers below are CI's, not a",
-    "workstation's — a lens caught an earlier revision of this paragraph quoting a local figure",
+    "workstation's \u2014 a lens caught an earlier revision of this paragraph quoting a local figure",
     "and a stale head as though they were the binding one.",
     "",
     "  CI @ 75a7dd7  39 mutations / 62 tests  121.7s",
     "  CI @ d34feaa  41 mutations / 80 tests  141.6s",
     "",
     "That is ~10s per added mutation, NOT the ~3s the raw mutation delta suggests, because",
-    "suite-selftest.mjs runs the WHOLE suite once per mutation — so adding tests and adding",
+    "suite-selftest.mjs runs the WHOLE suite once per mutation \u2014 so adding tests and adding",
     "MEASURED AGAIN at #126: 43 mutations / 83 browser tests -> 161.1s CI, 18.9s under the 180s ceiling. That is roughly five more mutations of headroom at the true marginal cost, NOT the \"roughly four\" this paragraph used to claim from the 41-mutation row.",
     "",
     "The harness spawns vitest with `CI: ''`, so it is chromium-only; the second browser affects",
@@ -57,16 +57,17 @@
     "next mission to touch this file should raise selftestCeilingSeconds deliberately, with the",
     "run that justifies it, rather than discover the breach.",
     "",
-    "THE SLOPE, corrected. #74 recorded \"~10s per added mutation\" and #126 planned around it. That figure bundles two variables: the harness runs one FULL SUITE per mutation, so the two committed CI points (39 mut/62 tests -> 121.7s; 41/80 -> 141.6s) fit per-run ~= 1.90s + 0.0183s x tests. A mutation with no new tests costs ~3.4s; the 10s was a mutation PLUS nine tests. #126 predicted 151s on that fit and CI measured 161.1s, so the model under-predicts by ~7% — good enough to plan with, not good enough to quote.",
-    "NOT RAISED at #126, deliberately. Two mutations were added and the run still fits with 18.9s spare, so raising the ceiling would have been raising it from an arithmetic the run does not support — the defect this file records a lens catching twice. The next mission to add mutations should expect to raise it, and now has a real slope to do that from.",
+    "THE SLOPE, corrected. #74 recorded \"~10s per added mutation\" and #126 planned around it. That figure bundles two variables: the harness runs one FULL SUITE per mutation, so the two committed CI points (39 mut/62 tests -> 121.7s; 41/80 -> 141.6s) fit per-run ~= 1.90s + 0.0183s x tests. A mutation with no new tests costs ~3.4s; the 10s was a mutation PLUS nine tests. #126 predicted 151s on that fit and CI measured 161.1s, so the model under-predicts by ~7% \u2014 good enough to plan with, not good enough to quote.",
+    "NOT RAISED at #126, deliberately. Two mutations were added and the run still fits with 18.9s spare, so raising the ceiling would have been raising it from an arithmetic the run does not support \u2014 the defect this file records a lens catching twice. The next mission to add mutations should expect to raise it, and now has a real slope to do that from.",
     "",
     "TWO POINTS AT THE SAME COUNTS, 161.1s and 155.5s, both CI, both 43 mutations / 83 tests. That spread is runner variance, and it is recorded rather than averaged away: a single quoted figure is what this file exists to argue against. Plan against the SLOWER one.",
-    "RAISED AT #77, 180 -> 240, which is the deliberate raise the paragraph above told the next mission adding mutations to expect. The justifying run is the breach itself: CI @ a1a0623, 47 mutations / 91 browser tests, harness step 23:26:15Z -> 23:29:15Z — it ran to completion, every mutation produced its named red, and the ONLY failure was this ceiling. That is recorded as a measurement row with seconds 180 and a `ceilingBreach` flag, because the exact elapsed is known only to be marginally above 180: the script prints its own figure and CI truncated the log at the failure. THE ARITHMETIC, stated so it can be checked rather than trusted: the committed fit is per-run ~= 1.90s + 0.0183s x tests, so predicted(47, 91) = 167.6s against an actual of ~180 — the ~7% under-prediction this file already records, here measured at ~7.4%. predicted(49, 98) = 181.0s; scaled by the same factor, ~194s. Runner variance is ~3.6% at identical counts (161.1 vs 155.5 above), so ~202s is the number to plan against. 240 leaves ~19% headroom, which is roughly ten mutations at the true marginal cost. NOT SET TO ~205. A ceiling with no headroom converts ordinary runner variance into a red build on a tree nobody touched, and the next mission would spend its gate pass re-raising it. NO LOCAL FIGURE IS QUOTED AS THE BASIS. This mission's workstation run was 138.9s at 49/98, which is 30% under CI and is exactly the kind of number a lens has twice caught this file citing as though it were binding.",
-    "THE 240 ARITHMETIC WAS WRONG, and the very next CI run said so. The paragraph above predicted ~194s at 49 mutations and planned 240 around it. CI @ bcef5a3 measured 49 mutations / 100 browser tests at 128.5s — 34% under the prediction, and 52s FASTER than the a1a0623 run that breached 180s with TWO FEWER mutations. So the interpretation of that breach changes: it was not the mutation count crossing a threshold, it was a slow runner. Runner variance across these two adjacent runs is at least 180 -> 128.5, roughly 40% of the mean — an order of magnitude beyond the ~3.6% recorded above from the 161.1/155.5 pair, which was evidently a lucky pair rather than the spread. The per-run fit (1.90s + 0.0183s x tests) should not be used to plan a ceiling. It predicts a central tendency and the ceiling has to survive the tail. 240 STAYS, on the corrected basis: it is ~1.9x the fastest observed run at this count and ~1.33x the slowest observed run at any count, which is headroom for the variance actually measured rather than for the slope. A ceiling derived from the fit would have been ~205 and would red on a slow runner with nothing wrong. Recorded rather than quietly corrected, because a prediction contradicted by the next run is exactly the shape this file exists to catch, and it caught mine.",
-    "RAISED AGAIN AT #78, 240 -> 360, and this time the measurement came FIRST. A lens refused the PR body's '212.8s local vs 240s' as evidence — correctly, since this file says twice that a workstation figure is not ceiling-relevant — and asked for the CI number before merge. It is 231.7s at 54 mutations / 116 tests: 8.3s of headroom, not the comfortable margin the local figure implied. AND THE VARIANCE IS LARGER THAN ANY MODEL HERE. Adjacent CI runs: 128.5s at 49/100, 231.7s at 54/116. The work grew ~28% (mutations x tests) and the time grew ~80%. Whatever the per-run fit predicts, the spread between two runs five days apart is the number a ceiling has to survive, and this file's own conclusion says so. 360 is ~1.55x the slowest observed run at the current count. It is not derived from the fit, which under-predicts and describes a central tendency. #79 adds a third batch of components and should re-measure rather than assume this holds.",
-    "RAISED AT #77 PART 3, 360 -> 560, and for once the marginal cost is measured rather than fitted. Three CI runs on ONE DAY, same runner class, backfilled below: 64 mut/144 tests -> 300.6s, 67/154 -> 319.1s, 70/160 -> 368.1s. Two of those three rows were owed by earlier missions and never written — #79 was told in this file to re-measure and did not, so the 360 ceiling stood on #78's 54-mutation figure while the standing set grew to 67 unobserved. That is the defect this file exists to catch, committed against this file's own instruction, by me.",
-    "WHY 560 AND NOT 480. 480 is 1.30x the slowest observed run and looks generous against a same-day cluster that spans only 300.6-368.1s. It is not, and this file already records why: the widest variance ever measured here is a1a0623 (>180s at 47/91) against bcef5a3 (128.5s at 49/100) — adjacent runs, MORE work in the faster one, ~40% apart. A 40%-slow runner at today's count is ~515s, which 480 would red with nothing wrong. 560 is 1.52x the slowest observed, consistent with the 1.55x basis #78 used, and survives the worst variance actually recorded. The tight same-day cluster is NOT evidence the fleet got more consistent; it is three samples, and this file has twice been wrong by treating a central tendency as a bound.",
-    "THE REAL PROBLEM IS NOT THE CEILING, and raising it is treating a symptom. suite-selftest.mjs runs the WHOLE suite once per mutation, so cost is O(mutations x tests) and BOTH factors grow every migration mission — which is why 6 mutations and 16 tests cost 67.5s here while the committed per-run fit predicts a fraction of that. The harness is now over six minutes and each mission has raised this number: 180 -> 240 -> 360 -> 560. The next raise should not happen; the harness should mutate against a filtered suite instead. Filed rather than fixed here, because changing what the harness runs changes what every red means and that is not a fold at the end of a component migration."
+    "RAISED AT #77, 180 -> 240, which is the deliberate raise the paragraph above told the next mission adding mutations to expect. The justifying run is the breach itself: CI @ a1a0623, 47 mutations / 91 browser tests, harness step 23:26:15Z -> 23:29:15Z \u2014 it ran to completion, every mutation produced its named red, and the ONLY failure was this ceiling. That is recorded as a measurement row with seconds 180 and a `ceilingBreach` flag, because the exact elapsed is known only to be marginally above 180: the script prints its own figure and CI truncated the log at the failure. THE ARITHMETIC, stated so it can be checked rather than trusted: the committed fit is per-run ~= 1.90s + 0.0183s x tests, so predicted(47, 91) = 167.6s against an actual of ~180 \u2014 the ~7% under-prediction this file already records, here measured at ~7.4%. predicted(49, 98) = 181.0s; scaled by the same factor, ~194s. Runner variance is ~3.6% at identical counts (161.1 vs 155.5 above), so ~202s is the number to plan against. 240 leaves ~19% headroom, which is roughly ten mutations at the true marginal cost. NOT SET TO ~205. A ceiling with no headroom converts ordinary runner variance into a red build on a tree nobody touched, and the next mission would spend its gate pass re-raising it. NO LOCAL FIGURE IS QUOTED AS THE BASIS. This mission's workstation run was 138.9s at 49/98, which is 30% under CI and is exactly the kind of number a lens has twice caught this file citing as though it were binding.",
+    "THE 240 ARITHMETIC WAS WRONG, and the very next CI run said so. The paragraph above predicted ~194s at 49 mutations and planned 240 around it. CI @ bcef5a3 measured 49 mutations / 100 browser tests at 128.5s \u2014 34% under the prediction, and 52s FASTER than the a1a0623 run that breached 180s with TWO FEWER mutations. So the interpretation of that breach changes: it was not the mutation count crossing a threshold, it was a slow runner. Runner variance across these two adjacent runs is at least 180 -> 128.5, roughly 40% of the mean \u2014 an order of magnitude beyond the ~3.6% recorded above from the 161.1/155.5 pair, which was evidently a lucky pair rather than the spread. The per-run fit (1.90s + 0.0183s x tests) should not be used to plan a ceiling. It predicts a central tendency and the ceiling has to survive the tail. 240 STAYS, on the corrected basis: it is ~1.9x the fastest observed run at this count and ~1.33x the slowest observed run at any count, which is headroom for the variance actually measured rather than for the slope. A ceiling derived from the fit would have been ~205 and would red on a slow runner with nothing wrong. Recorded rather than quietly corrected, because a prediction contradicted by the next run is exactly the shape this file exists to catch, and it caught mine.",
+    "RAISED AGAIN AT #78, 240 -> 360, and this time the measurement came FIRST. A lens refused the PR body's '212.8s local vs 240s' as evidence \u2014 correctly, since this file says twice that a workstation figure is not ceiling-relevant \u2014 and asked for the CI number before merge. It is 231.7s at 54 mutations / 116 tests: 8.3s of headroom, not the comfortable margin the local figure implied. AND THE VARIANCE IS LARGER THAN ANY MODEL HERE. Adjacent CI runs: 128.5s at 49/100, 231.7s at 54/116. The work grew ~28% (mutations x tests) and the time grew ~80%. Whatever the per-run fit predicts, the spread between two runs five days apart is the number a ceiling has to survive, and this file's own conclusion says so. 360 is ~1.55x the slowest observed run at the current count. It is not derived from the fit, which under-predicts and describes a central tendency. #79 adds a third batch of components and should re-measure rather than assume this holds.",
+    "RAISED AT #77 PART 3, 360 -> 560, and for once the marginal cost is measured rather than fitted. Three CI runs on ONE DAY, same runner class, backfilled below: 64 mut/144 tests -> 300.6s, 67/154 -> 319.1s, 70/160 -> 368.1s. Two of those three rows were owed by earlier missions and never written \u2014 #79 was told in this file to re-measure and did not, so the 360 ceiling stood on #78's 54-mutation figure while the standing set grew to 67 unobserved. That is the defect this file exists to catch, committed against this file's own instruction, by me.",
+    "WHY 560 AND NOT 480. 480 is 1.30x the slowest observed run and looks generous against a same-day cluster that spans only 300.6-368.1s. It is not, and this file already records why: the widest variance ever measured here is a1a0623 (>180s at 47/91) against bcef5a3 (128.5s at 49/100) \u2014 adjacent runs, MORE work in the faster one, ~40% apart. A 40%-slow runner at today's count is ~515s, which 480 would red with nothing wrong. 560 is 1.52x the slowest observed, consistent with the 1.55x basis #78 used, and survives the worst variance actually recorded. The tight same-day cluster is NOT evidence the fleet got more consistent; it is three samples, and this file has twice been wrong by treating a central tendency as a bound.",
+    "THE REAL PROBLEM IS NOT THE CEILING, and raising it is treating a symptom. suite-selftest.mjs runs the WHOLE suite once per mutation, so cost is O(mutations x tests) and BOTH factors grow every migration mission \u2014 which is why 6 mutations and 16 tests cost 67.5s here while the committed per-run fit predicts a fraction of that. The harness is now over six minutes and each mission has raised this number: 180 -> 240 -> 360 -> 560. The next raise should not happen; the harness should mutate against a filtered suite instead. Filed rather than fixed here, because changing what the harness runs changes what every red means and that is not a fold at the end of a component migration.",
+    "MEASURED AT #81 WITHOUT RAISING ANYTHING: 70 mutations / 166 tests -> 364s. The set grew by six tests and the time did not move outside variance (368.1s at 160 tests). Recorded because this file's standing instruction is to re-measure when the mutation set OR the test set grows, and a lens caught that #81 had grown the test set and written nothing down. Re-measuring and declining to raise is the outcome this instruction wants; silence is not."
   ],
   "covers": "npm run test (both lanes, chromium + webkit in CI)",
   "ceilingSeconds": 25,
@@ -106,21 +107,21 @@
       "mutations": 49,
       "tests": 100,
       "seconds": 128.5,
-      "note": "CI. Faster than the 47-mutation breach at a1a0623 despite two more mutations — the evidence that runner variance, not count, drove that breach."
+      "note": "CI. Faster than the 47-mutation breach at a1a0623 despite two more mutations \u2014 the evidence that runner variance, not count, drove that breach."
     },
     {
       "sha": "b253754",
       "mutations": 54,
       "tests": 116,
       "seconds": 231.7,
-      "note": "CI. 8.3s under the 240s ceiling — the run that showed the ceiling was already nearly breached, not merely at risk for #79."
+      "note": "CI. 8.3s under the 240s ceiling \u2014 the run that showed the ceiling was already nearly breached, not merely at risk for #79."
     },
     {
       "sha": "4b98614",
       "mutations": 64,
       "tests": 144,
       "seconds": 300.6,
-      "note": "CI, PR #140 (#79). BACKFILLED at #77 part 3 — this row should have been written by #79, which the paragraph above told to re-measure rather than assume 360 held. It did not, so the 360 ceiling stood on #78's 54-mutation measurement while the count grew to 64."
+      "note": "CI, PR #140 (#79). BACKFILLED at #77 part 3 \u2014 this row should have been written by #79, which the paragraph above told to re-measure rather than assume 360 held. It did not, so the 360 ceiling stood on #78's 54-mutation measurement while the count grew to 64."
     },
     {
       "sha": "a2fddad",
@@ -136,6 +137,13 @@
       "seconds": 368.1,
       "ceilingBreach": true,
       "note": "CI, PR #166 (#77 part 3). Harness ran to completion: all 70 mutations produced their named red with a green baseline, and the ONLY failure was the 360s ceiling. The run that justifies the raise below."
+    },
+    {
+      "sha": "769baef",
+      "mutations": 70,
+      "tests": 166,
+      "seconds": 364,
+      "note": "CI, PR #170 (#81). The browser lane grew 160 -> 166 when the Vue consumer fixture landed, and this row exists because a lens noticed it was missing \u2014 verbatim the omission this file records #79 committing. 65% of the 560s ceiling, 196s spare. NOT raised: six tests cost ~-4s against the 368.1s at 35752ec, which is inside runner variance, so there is nothing to raise it from."
     }
   ]
 }

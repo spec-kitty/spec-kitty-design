@@ -113,11 +113,28 @@ if (!selftestMode) {
 
 function runSuite(dir, project) {
   try {
+    // BOUNDED, AND A TIMEOUT SAYS SO. This spawn had no timeout at all: a hang here burned the
+    // whole job — six hours before #81 gave every job a ceiling, and still the full 45 minutes
+    // after — and the log ended with no indication of WHICH mutation hung. A lens hit exactly that
+    // and had to diff the tmpdir by hand to find it. That is the residual of the defect #81 set out
+    // to close, in the harness #81 blames the six hours on.
+    //
+    // 180s against a whole-suite wall clock of ~10s in CI: generous enough that a slow runner never
+    // trips it, short enough that a hang costs one mutation rather than the job.
     const out = execFileSync('npx', ['vitest', 'run', '--project', project, '--reporter=json'], {
-      cwd: dir, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], env: { ...process.env, CI: '' },
+      cwd: dir,
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'pipe'],
+      env: { ...process.env, CI: '' },
+      timeout: 180_000,
     });
     return JSON.parse(out.slice(out.indexOf('{')));
   } catch (err) {
+    // A timeout is not "the suite reported nothing" — it is a hang, and the caller must be able to
+    // say which mutation caused it.
+    if (err.code === 'ETIMEDOUT' || err.signal === 'SIGTERM') {
+      return { testResults: [], __noReport: true, __timedOut: true };
+    }
     const out = String(err.stdout ?? '');
     const i = out.indexOf('{');
     if (i < 0) return { testResults: [], __noReport: true, __stderr: String(err.stderr ?? '').slice(-800) };
@@ -197,6 +214,16 @@ for (const m of mutations) {
         else {
           writeFileSync(target, after);
           const res = runSuite(dir, 'browser');
+
+          // A HANG IS ITS OWN OUTCOME, and it now says which mutation caused it. `__noReport` was
+          // set in three places and read in none, so a timed-out suite fell through to "the named
+          // test is ABSENT from the report" — indistinguishable from a syntax-breaking mutation,
+          // and silent about which entry hung. A lens spent a 25-minute hang diffing a tmpdir by
+          // hand to find out.
+          if (res.__timedOut) {
+            verdict = ['timeout', `the suite HUNG (>180s) under this mutation — ${m.file}`];
+          } else {
+
           const tests = allTests(res);
           // In --selftest mode the id names a GUARD, not a behaviour, so there is no
           // "named test" to find. The entry declares which behaviour test it should red
@@ -227,6 +254,7 @@ for (const m of mutations) {
               verdict = ['collateral', `declared expectCollateral but no other behaviour test failed — the mutation is narrower than claimed`];
             else if (!m.expectCollateral && collateral.length > 0)
               verdict = ['collateral', `other behaviour test(s) also failed: ${collateral.map((t) => t.name.match(/\[SC-\d+\]/)?.[0]).join(' ')}`];
+          }
           }
         }
       }
