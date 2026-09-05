@@ -163,10 +163,25 @@ and the semantics it depends on.
 Windows High Contrast schemes: a `background`-drawn triangle with `forced-color-adjust: none`
 stays its authored color (`rgb(51,51,51)` in the probe) — near-invisible against the dark-HC
 background, which is the majority configuration — and without the property it computes to
-`Canvas`, equally invisible. Only a **`content`-drawn marker** (e.g. `content: "▸"` as text, or a
-`border`-drawn shape) survives, because forced-colors maps text and border colors to
-`CanvasText`/`Highlight` rather than stripping them. Use a content- or border-drawn marker, never
-a background-fill icon, for anything that must remain visible under `forced-colors: active`.
+`Canvas`, equally invisible. Use a content- or border-drawn marker, never a background-fill icon,
+for anything that must remain visible under `forced-colors: active`.
+
+**Corrected mechanism (pre-merge gate pass 1 found this recorded wrong here and in four other
+places, including the authoring recipe — all five are fixed).** The reason a content-drawn marker
+on `.sk-disclosure__summary` survives is **not** "forced-colors maps text/border colors to
+`CanvasText`/`Highlight` generically." Isolated measurement: `<summary>` — like `<a>` — is mapped
+by Chromium's forced-colors algorithm to the **`LinkText`** system color intrinsically, regardless
+of content technique; a bare `<details><summary>` with zero authored CSS recolors identically.
+Measured values are `rgb(255,255,0)` (dark scheme) / `rgb(0,0,159)` (light scheme) — both
+`LinkText`, not `CanvasText` (white/black). The content-vs-background distinction is still real and
+still load-bearing (a background-drawn icon gets none of this treatment), but the mechanism
+producing it is link-element-specific forced-colors mapping, not a general content-glyph rule.
+
+**A second, independent defect this gate pass found: the marker glyph was inside the summary's
+accessible name.** CDP AX tree measured `"▸ Deployment history"` — every disclosure announced the
+decorative triangle before its own label, on a control whose open/closed state is already exposed
+natively. Fix, verified in-engine: `content: '▸' / '';` (CSS Generated Content's alt-text syntax) —
+the glyph still paints, the accessible name no longer includes it.
 
 ### `.sk-data-table` — `<table>` / `<caption>` / `<th scope>`
 
@@ -233,18 +248,31 @@ a background-fill icon, for anything that must remain visible under `forced-colo
 
 ### Sanctioned forced-colors CSS pattern (record once, apply everywhere)
 
-`stylelint`'s `declaration-strict-value` polices `['/color/', 'background', 'background-color',
-'font-family', 'padding', 'margin', 'border-radius']` — `/color/` is a substring regex, so it
-matches `border-color` and `outline-color`, and system-color keywords (`Highlight`,
-`CanvasText`, `Canvas`) are not in `ignoreValues`. Writing the longhand (`border-color:
-CanvasText`, `outline-color: Highlight`) would need a new stylelint exception, which NFR-001
-forbids. **Use the unpoliced shorthand instead** — `border: 1px solid CanvasText;` and `outline:
-2px solid Highlight;` — neither `border` nor `outline` (unqualified) appears in the policed list,
-so the shorthand form satisfies NFR-001 with zero new exceptions and zero `stylelint.config.mjs`
-edits. This is the **one** sanctioned pattern for every forced-colors declaration in this
-mission (skip-link focus outline, disclosure marker border/content color, data-table row
-separators) — do not improvise a second one, and do not have WP02 and WP03 (both `parallel_group:
-0`, so effectively concurrent) invent divergent answers to the same stylelint question.
+**Corrected at pre-merge gate pass 1 — the original version of this section was wrong, and it was
+the operator's own error in the fold, not this mission's.** It recommended the unpoliced `border`/
+`outline` SHORTHAND specifically because `declaration-strict-value` does not police those property
+names at all. That reasoning is backwards: a rule that never looks at a property does not
+"satisfy" a token-only requirement over it, it makes the gate blind to it — `border-left: 3px
+solid #ff0000` (an arbitrary hardcoded color, not a system keyword) would have passed the gate
+identically to a compliant declaration, and NFR-001's claim that every color is either a
+`--sk-*` token or a deliberate, gate-visible exception would have been false.
+
+**The actual sanctioned pattern**: add the six forced-colors system-color keywords this mission
+uses (`Canvas`, `CanvasText`, `Highlight`, `HighlightText`, `ButtonText`, `LinkText`) to
+`stylelint.config.mjs`'s `ignoreValues`, and write the **LONGHAND** `-color` properties
+(`border-left-color`, `outline-color`) under `@media (forced-colors: active)` — never the
+shorthand. The longhand properties DO match the policed `/color/` pattern, so with the six
+keywords now in `ignoreValues`, the gate **positively certifies** each one is a deliberate,
+recorded exception rather than silently never seeing the declaration. `stylelint.config.mjs` is
+therefore in this mission's write scope (a single, additive change to `ignoreValues`, no new
+policed-property entries, no relaxation of anything already enforced) — see the "File and Write
+Scope" section.
+
+This is the **one** sanctioned pattern for every forced-colors declaration in this mission
+(skip-link focus outline, data-table row separators) — do not improvise a second one, and do not
+have WP02 and WP03 (both `parallel_group: 0`, so effectively concurrent) invent divergent answers
+to the same stylelint question. The disclosure marker needs **no** forced-colors declaration at
+all — see "Forced-colors marker technique (disclosure)" above for why.
 
 ## File and Write Scope
 
@@ -293,6 +321,7 @@ has a matching `packages/elements/src/<name>` directory).
 ```text
 packages/styles/src/index.ts   # + export * from './facts/index'; etc., five lines
 packages/styles/package.json   # + "./<name>/*": "./dist/<name>/*" per new directory, five entries
+stylelint.config.mjs           # + six forced-colors system-color keywords in ignoreValues (pre-merge gate pass 1)
 ```
 
 `packages/styles/package.json` was missing from this scope in the pre-squad plan — an SC-004 gap.
@@ -300,6 +329,10 @@ packages/styles/package.json   # + "./<name>/*": "./dist/<name>/*" per new direc
 iterates the component directories under `packages/styles/src` and requires a matching `./<dir>/*`
 export for each; without the five new entries, `@spec-kitty/styles/facts/sk-facts.css` (etc.) does
 not resolve as a package import even though the file exists on disk.
+
+`stylelint.config.mjs` was missing from this scope until pre-merge gate pass 1 — see "Sanctioned
+forced-colors CSS pattern" above. The edit is additive only: six system-color keyword strings
+added to an existing `ignoreValues` array, nothing removed, no policed-property relaxed.
 
 Nothing else under `packages/elements`, `packages/react`, `packages/tokens`, or
 `.github/workflows/ci-quality.yml` needs to change: no new package directory is created (all
