@@ -31,15 +31,20 @@
     "counted here either. See scripts/normalise-manifest.mjs.",
     "#77 adds <sk-site-footer> with FIVE attributes and zero methods: wordmark, tagline, legal, column-one-heading and column-two-heading. Every one is a string, which is the operator's ruling on #77 working around a constraint this ratchet's sibling gate enforces — the React wrappers' ssrSafe mode delivers first-render props as ATTRIBUTES, which carry only strings, so structured data would not survive. The link ITEMS are slotted instead. An earlier revision of this entry recorded 0/0 for a slot-only design that contradicted that ruling; the rebuild is why the numbers moved."
   ],
-  "total": 65,
+  "total": 68,
   "elements": {
+    "sk-app-shell": {
+      "attributes": 0,
+      "properties": 0,
+      "methods": 0
+    },
     "sk-blog-card": {
       "attributes": 3,
       "properties": 0,
       "methods": 0
     },
     "sk-button": {
-      "attributes": 4,
+      "attributes": 5,
       "properties": 0,
       "methods": 0
     },
@@ -49,6 +54,11 @@
       "methods": 0
     },
     "sk-check-bullet": {
+      "attributes": 1,
+      "properties": 0,
+      "methods": 0
+    },
+    "sk-context-sidebar": {
       "attributes": 1,
       "properties": 0,
       "methods": 0
@@ -77,6 +87,16 @@
       "attributes": 2,
       "properties": 0,
       "methods": 3
+    },
+    "sk-page-header": {
+      "attributes": 0,
+      "properties": 0,
+      "methods": 0
+    },
+    "sk-personal-rail": {
+      "attributes": 1,
+      "properties": 0,
+      "methods": 0
     },
     "sk-pill-tag": {
       "attributes": 2,
