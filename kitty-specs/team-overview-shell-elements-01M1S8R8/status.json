@@ -124,6 +124,9 @@
       "last_event_id": "01M1SYT49Y81BG1D4SDH955BCQ",
       "last_transition_at": "2026-09-05T23:35:11.422754+00:00",
       "model": "__resolved_model_absent__",
+      "notes": [
+        "Ready for review: lane 89bbf7eb6fb12ca6aab0a780673ac93f506316e0; 278/278 tests, 94/94 mutation replay, 8/8 guard selftests, 177/177 axe, Chromium+Firefox 70/70, five expected-red visual diagnostics with no PNG retention; WebKit blocked only by documented missing host libraries."
+      ],
       "provider": "__resolved_provider_absent__",
       "role": "implementer",
       "shell_pid": 2459900,
