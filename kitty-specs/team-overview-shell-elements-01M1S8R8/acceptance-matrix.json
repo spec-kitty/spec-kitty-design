@@ -358,10 +358,10 @@
       "criterion_id": "SC-011",
       "description": "All 15 new mutation arms fail only their named assertions and the full harness passes.",
       "proof_type": "automated_test",
-      "evidence": "Owner WP04: per-arm evidence identifies subject/test/failure, followed by complete mutation and harness self-tests.",
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "Verified on aggregate lane 89bbf7eb6fb12ca6aab0a780673ac93f506316e0: focused identity mutants each had one named red/245 collateral green; complete suite-selftest baseline 246/246 and all 94/94 named mutations isolated; 8/8 harness guard selftests passed.",
+      "pass_fail": "pass",
+      "verified_by": "codex/frontend-freddy/WP04",
+      "verified_at": "2026-09-05T23:34:27.579662+00:00",
       "notes": "Planned evidence mapping; populate the exact command result and immutable SHA when the owning WP or wrap-up step executes."
     },
     {
