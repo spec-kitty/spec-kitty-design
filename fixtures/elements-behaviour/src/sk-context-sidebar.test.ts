@@ -106,7 +106,8 @@ test('[SC-013] every declared part is present and targetable from outside', asyn
 
 test('[SC-014] the generated stylesheet is adopted by identity with no style injection', async () => {
   const el = await mount();
-  expect(el.shadowRoot!.adoptedStyleSheets).toEqual([skContextSidebarSheet]);
+  expect(el.shadowRoot!.adoptedStyleSheets).toHaveLength(1);
+  expect(el.shadowRoot!.adoptedStyleSheets[0]).toBe(skContextSidebarSheet);
   expect(el.shadowRoot!.querySelectorAll('style')).toHaveLength(0);
 });
 
