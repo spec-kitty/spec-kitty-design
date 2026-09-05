@@ -240,6 +240,25 @@
           "description": "The static form — an `<li>`, because the static path sits inside a real `<ul>`.\n\nThe ELEMENT cannot be an `<li>`: a custom element inside a `<ul>` is not a list item, so it\ncarries `role=\"listitem\"` on the host instead. That is the one place these two paths differ\nstructurally, and it is unavoidable rather than an oversight — recorded on the element."
         },
         {
+          "kind": "function",
+          "name": "checkRibbonLabel",
+          "return": {
+            "type": {
+              "text": "void"
+            }
+          },
+          "parameters": [
+            {
+              "name": "label",
+              "optional": true,
+              "type": {
+                "text": "string"
+              }
+            }
+          ],
+          "description": "Warns on BOTH paths — a clipped label is legible-but-wrong, which is what a warning is for.\nNever throws (it would take out the whole card mid-render) and never truncates (it would\ninvent an ellipsis the design does not have)."
+        },
+        {
           "kind": "variable",
           "name": "DEFAULT_ACCENT",
           "type": {
@@ -883,7 +902,7 @@
         {
           "kind": "variable",
           "name": "RIBBON_CARD_AXES",
-          "default": "{ WithRibbon: { ribbon: 'Primary Workshop' }, ...Object.fromEntries( RIBBON_CARD_COLOURS.map((c) => [ `Ribbon${c.charAt(0).toUpperCase()}${c.slice(1)}`, { ribbon: 'Primary Workshop', accent: c }, ]), ), }",
+          "default": "{ WithRibbon: { ribbon: 'Primary' }, ...Object.fromEntries( RIBBON_CARD_COLOURS.map((c) => [ `Ribbon${c.charAt(0).toUpperCase()}${c.slice(1)}`, { ribbon: 'Primary', accent: c }, ]), ), }",
           "description": "The non-variant axes, DERIVED.\n\n`WithRibbon` reproduces the export name the styles layer already published, and the per-colour\nribbon forms are derived from RIBBON_CARD_COLOURS so a sixth colour cannot appear on one axis\nand not the other."
         },
         {
@@ -922,9 +941,13 @@
               "type": {
                 "text": "string"
               }
+            },
+            {
+              "name": "hasRibbon",
+              "default": "false"
             }
           ],
-          "description": "The card's class list. Warns and degrades on an unknown variant."
+          "description": "The card's class list. Warns and degrades on an unknown variant.\n\n`hasRibbon` exists because THE RIBBON OVERLAPS THE CARD'S OWN TITLE. The bar is a fixed 174px\nwhose rotated footprint is 141x141px regardless of how short the label is, so it eats a wedge\nof the content box that no label-length rule can shrink — measured by hit-testing every glyph\nof a long title with `elementFromPoint`, it covered 1-3 glyphs at every card width from 280px\nup, where the old drop-tab (auto-width, outside the card) covered none.\n\nShrinking the ribbon cannot fix it: at the title's first line the band is already ~61px inboard\nof the content edge, so clearing it that way would leave no ribbon. The content has to reserve\nthe corner instead, which is what real corner-ribbon designs do — hence a modifier, so a card\nWITHOUT a ribbon keeps its full width and is not indented for a corner nothing occupies."
         },
         {
           "kind": "function",
@@ -3659,6 +3682,14 @@
           "name": "checkBulletStaticHtml",
           "declaration": {
             "name": "checkBulletStaticHtml",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "checkRibbonLabel",
+          "declaration": {
+            "name": "checkRibbonLabel",
             "module": "./dist/index.js"
           }
         },

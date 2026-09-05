@@ -26,7 +26,7 @@ type Story = StoryObj;
 export const Default: Story = {};
 
 export const WithRibbon: Story = {
-  render: () => card('ribbon="Primary Workshop"', 'Full-day rollout workshop', 'Get everyone aligned in your environment.'),
+  render: () => card('ribbon="Primary"', 'Full-day rollout workshop', 'Get everyone aligned in your environment.'),
 };
 
 export const RibbonColours: Story = {
@@ -55,7 +55,7 @@ export const LightMode: Story = {
   parameters: { backgrounds: { default: 'sk-light' } },
   render: () => `
     <div class="sk-light" style="background: var(--sk-surface-page); padding: var(--sk-space-6); display:grid; gap:var(--sk-space-6); grid-template-columns:repeat(2, 1fr);">
-      ${card('ribbon="Primary Workshop"', 'Full-day rollout workshop', 'Ribbon on the light surface.')}
+      ${card('ribbon="Primary"', 'Full-day rollout workshop', 'Ribbon on the light surface.')}
       ${card('variant="border-green" ribbon="Now stable" accent="green"', 'SemVer channel', 'Border and ribbon on the light surface.')}
     </div>
   `,

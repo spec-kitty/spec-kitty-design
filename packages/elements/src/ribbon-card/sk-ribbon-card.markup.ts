@@ -55,15 +55,74 @@ export const unknownRibbonMessage = (c: string): string =>
 // Two callers, two failure policies — warn-and-degrade on the render path, throw on the
 // authoring path. Collapsing them is the regression sk-card recorded and #77 reproduced once.
 
-/** The card's class list. Warns and degrades on an unknown variant. */
-export function ribbonCardClasses(variant?: string): string {
+/**
+ * The card's class list. Warns and degrades on an unknown variant.
+ *
+ * `hasRibbon` exists because THE RIBBON OVERLAPS THE CARD'S OWN TITLE. The bar is a fixed 174px
+ * whose rotated footprint is 141x141px regardless of how short the label is, so it eats a wedge
+ * of the content box that no label-length rule can shrink — measured by hit-testing every glyph
+ * of a long title with `elementFromPoint`, it covered 1-3 glyphs at every card width from 280px
+ * up, where the old drop-tab (auto-width, outside the card) covered none.
+ *
+ * Shrinking the ribbon cannot fix it: at the title's first line the band is already ~61px inboard
+ * of the content edge, so clearing it that way would leave no ribbon. The content has to reserve
+ * the corner instead, which is what real corner-ribbon designs do — hence a modifier, so a card
+ * WITHOUT a ribbon keeps its full width and is not indented for a corner nothing occupies.
+ */
+export function ribbonCardClasses(variant?: string, hasRibbon = false): string {
   if (variant !== undefined && !isRibbonCardVariant(variant)) {
     console.warn(`sk-ribbon-card: ${unknownVariantMessage(variant)} — rendering the plain card.`);
     variant = undefined;
   }
   // eslint-disable-next-line security/detect-object-injection -- narrowed by isRibbonCardVariant above
   const modifier = variant ? RIBBON_CARD_VARIANTS[variant] : '';
-  return ['sk-ribbon-card', modifier].filter(Boolean).join(' ');
+  return ['sk-ribbon-card', modifier, hasRibbon ? 'sk-ribbon-card--has-ribbon' : '']
+    .filter(Boolean)
+    .join(' ');
+}
+
+/**
+ * The most characters that fit inside the clipped corner — MEASURED BY INK, not by geometry.
+ *
+ * The bar is centred ON the card's corner and the label is centred IN the bar, so a long label
+ * runs past the card edge and is cut by the card's `overflow: hidden`.
+ *
+ * HOW THIS IS MEASURED, because the obvious way is wrong and was used here once. Taking
+ * `getBoundingClientRect()` of the text inside the already-rotated bar returns the AXIS-ALIGNED
+ * ENVELOPE of the rotated run, not the run's width; mapping that envelope through the rotation
+ * matrix a second time double-transforms it and understates the budget badly. The first version
+ * of this constant said 8 characters for exactly that reason. What is measured instead: paint
+ * the label, screenshot the card with `overflow: hidden` and again with `overflow: visible`, and
+ * count the label pixels that differ. That number IS the clipped ink.
+ *
+ *   characters:   3    8   10   12   13   14   15   16
+ *   ink lost:     0    0    0    0    0    2   26   53
+ *
+ * So 13 fits and 14 starts to lose ink. Every label this repo ships is inside that.
+ *
+ * TWO THINGS THIS NUMBER IS RELATIVE TO, both of which the previous version asserted away:
+ *  - The FONT. `--sk-font-mono` resolves to a fallback stack; tokens.css records that JetBrains
+ *    Mono is not actually loaded. The measured face here advances 8.88px/char, so width is
+ *    linear in character count and a count is a fair budget — but a narrower or wider mono on
+ *    another platform shifts it. This is a per-platform constant presented as guidance.
+ *  - The ROOT FONT SIZE. The bar's height is rem-derived while its width/top/right are px, so
+ *    the derivation in sk-ribbon-card.css holds at a 16px root. At 20px the budget falls to ~9.
+ *
+ * It warns rather than enforcing, which is the right strength for a number with those caveats.
+ */
+const RIBBON_LABEL_MAX = 13;
+
+const overlongRibbonMessage = (label: string): string =>
+  `ribbon label "${label}" is ${label.length} characters; at most ${RIBBON_LABEL_MAX} fit inside ` +
+  `the corner at this size and the rest is clipped. Use a shorter badge.`;
+
+/** Warns on BOTH paths — a clipped label is legible-but-wrong, which is what a warning is for.
+ *  Never throws (it would take out the whole card mid-render) and never truncates (it would
+ *  invent an ellipsis the design does not have). */
+export function checkRibbonLabel(label?: string): void {
+  if (label !== undefined && label.length > RIBBON_LABEL_MAX) {
+    console.warn(`sk-ribbon-card: ${overlongRibbonMessage(label)}`);
+  }
 }
 
 /** The ribbon's class list. Warns and degrades to the default colour. */
@@ -92,13 +151,15 @@ export function ribbonCardStaticHtml(
   content = PLACEHOLDER_CONTENT,
 ): string {
   const { variant, ribbon, accent } = opts;
+  // Warns here too — same CSS, same clip.
+  checkRibbonLabel(ribbon);
   if (variant !== undefined && !isRibbonCardVariant(variant)) throw new Error(unknownVariantMessage(variant));
   if (accent !== undefined && !isRibbonCardColour(accent)) {
     throw new Error(unknownRibbonMessage(accent));
   }
   const tab = ribbon ? `<div class="${ribbonClasses(accent)}">${ribbon}</div>` : '';
   return (
-    `<article class="${ribbonCardClasses(variant)}">` +
+    `<article class="${ribbonCardClasses(variant, ribbon !== undefined)}">` +
     tab +
     `<div class="sk-ribbon-card__content">${content}</div>` +
     `</article>`
@@ -113,11 +174,11 @@ export function ribbonCardStaticHtml(
  * and not the other.
  */
 export const RIBBON_CARD_AXES = {
-  WithRibbon: { ribbon: 'Primary Workshop' },
+  WithRibbon: { ribbon: 'Primary' },
   ...Object.fromEntries(
     RIBBON_CARD_COLOURS.map((c) => [
       `Ribbon${c.charAt(0).toUpperCase()}${c.slice(1)}`,
-      { ribbon: 'Primary Workshop', accent: c },
+      { ribbon: 'Primary', accent: c },
     ]),
   ),
 } as Record<string, RibbonCardStaticOptions>;

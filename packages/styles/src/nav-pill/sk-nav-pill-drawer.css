@@ -78,7 +78,20 @@
   box-shadow: 0 0 0 var(--sk-border-width-1) var(--sk-border-default);
 }
 
+/* BORDER-BOX ON THE ITEM, and without it the drawer clips its own rows.
+   `width: 100%` on a content-box element resolves to the container's CONTENT width, and the
+   item's own horizontal padding is then added OUTSIDE it — so every row overflowed the drawer's
+   right padding by 2 x --sk-space-4 and was cut off by the drawer's `overflow: hidden`. Visible
+   as a highlighted row running past the panel edge with no gutter on the right.
+   Only the form components set box-sizing in this repo; there is no global reset.
+
+   ON THE ITEM ONLY. Setting it on `.sk-nav-pill__drawer` as well fixes nothing — measured
+   overflow is 0px either way, because the drawer's width is `auto` and box-sizing does not
+   affect an auto-width box. It is not inert, though: the drawer's collapse animation runs on
+   `max-height: 0` -> `400px`, and under border-box that 400px caps the BORDER box, dropping the
+   content cap to 374px and making `overflow: hidden` bite 26px earlier. */
 .sk-nav-pill__drawer .sk-nav-pill__item {
+  box-sizing: border-box;
   width: 100%;
   border-radius: var(--sk-radius-sm);
   padding: var(--sk-space-3) var(--sk-space-4);
@@ -158,6 +171,14 @@
      slotted <button> item got no panel padding and a classless <a> got panel padding with no
      base styling. One contract for slotted items, not two. */
   :host([open]) .sk-nav-pill__items ::slotted(.sk-nav-pill__item) {
+    /* BORDER-BOX HERE TOO. This is the ELEMENT path's copy of the rule fixed above, and it is
+       the supported one — the bare descendant selector cannot match a slotted node, so fixing
+       only that rule left `<sk-nav-pill>` broken while the static arrangement was correct: the
+       exact cross-path divergence ADR-8 criterion 1 exists to prevent. Measured before the fix:
+       the item's border box overflowed the panel's content box by 16px on EACH side and ran 3px
+       past the panel's border. This panel is `overflow: visible`, so unlike the static drawer it
+       was not even clipped — the row's background painted over the panel's rounded corner. */
+    box-sizing: border-box;
     width: 100%;
     border-radius: var(--sk-radius-sm);
     padding: var(--sk-space-3) var(--sk-space-4);

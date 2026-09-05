@@ -192,7 +192,11 @@ test('an unknown variant or ribbon colour degrades on RENDER and throws on AUTHO
   } finally {
     console.warn = realWarn;
   }
-  expect(partOf(el!, 'card')!.className.trim()).toBe('sk-ribbon-card');
+  // `--has-ribbon` is expected here and is not part of what degrades: this card IS mounted with
+  // a ribbon, and the modifier reserves the corner so the bar does not paint over the title. The
+  // degrade assertion is that no `--border-*` variant modifier survives.
+  expect(partOf(el!, 'card')!.className.trim()).toBe('sk-ribbon-card sk-ribbon-card--has-ribbon');
+  expect(partOf(el!, 'card')!.className, 'the bad variant must not survive').not.toMatch(/--border-/);
   expect(partOf(el!, 'ribbon')!.className.trim()).toBe(
     'sk-ribbon-card__ribbon sk-ribbon-card__ribbon--yellow',
   );
@@ -205,6 +209,62 @@ test('an unknown variant or ribbon colour degrades on RENDER and throws on AUTHO
     expect(() => ribbonCardStaticHtml({ variant: key })).toThrow(/unknown ribbon-card variant/);
     expect(() => ribbonCardStaticHtml({ accent: key })).toThrow(/unknown ribbon colour/);
     expect(ribbonCardClasses(key).trim()).toBe('sk-ribbon-card');
+    expect(ribbonCardClasses(key, true).trim()).toBe('sk-ribbon-card sk-ribbon-card--has-ribbon');
     expect(ribbonClasses(key).trim()).toBe('sk-ribbon-card__ribbon sk-ribbon-card__ribbon--yellow');
   }
+});
+
+// THE RIBBON MUST STAY CORNER-ANCHORED. This is the guard that did not exist when the bar was
+// left with drop-tab offsets after being rotated, and nothing in the suite noticed: every other
+// assertion here is about parts, colours and warnings, none about where the bar actually sits.
+//
+// `offsetTop` is the load-bearing half. `top: 32px` is INERT on a statically positioned box, so
+// reading 32 proves the rule is positioned as well as offset — one assertion covering both. The
+// visual-regression gate would also red on this, but only via a CI-shot baseline being current,
+// and visual.spec.ts records that clipping deliberately surrendered position regressions (#103).
+test('the ribbon is anchored to the card corner (not left in the content flow)', async () => {
+  const el = await mount({ ribbon: 'Tab' });
+  const ribbon = partOf(el, 'ribbon')!;
+
+  expect(getComputedStyle(ribbon).position, 'the ribbon must be corner-anchored').toBe('absolute');
+  expect(ribbon.offsetTop, '`top` is inert unless the ribbon is positioned').toBe(32);
+});
+
+// The label guard warns on BOTH paths, so both are asserted. The static path is the one that
+// shipped a clipping label through the generator while the element path was clean.
+test('an overlong ribbon label warns on the element and static paths alike', async () => {
+  const long = 'X'.repeat(40);
+  const warnings: unknown[][] = [];
+  const realWarn = console.warn;
+  console.warn = (...args: unknown[]) => void warnings.push(args);
+  try {
+    await mount({ ribbon: long });
+    ribbonCardStaticHtml({ ribbon: long });
+  } finally {
+    console.warn = realWarn;
+  }
+
+  expect(warnings.length, 'both paths must warn').toBe(2);
+  for (const [msg] of warnings) {
+    expect(String(msg), 'the warning must name the offending label').toContain(long);
+  }
+});
+
+// The complement, and the half that actually regressed: a label the catalogue ships must NOT
+// warn. `RIBBON_LABEL_MAX` was 8 on a first pass — measured through a double-transformed
+// bounding box — which warned on every one of these.
+test('the labels this repo ships do not warn', async () => {
+  const warnings: unknown[][] = [];
+  const realWarn = console.warn;
+  console.warn = (...args: unknown[]) => void warnings.push(args);
+  try {
+    for (const label of ['Primary', 'Now stable', 'v2.x Preview', 'Deprecated']) {
+      await mount({ ribbon: label });
+      ribbonCardStaticHtml({ ribbon: label });
+    }
+  } finally {
+    console.warn = realWarn;
+  }
+
+  expect(warnings, 'a shipped label must fit the corner').toEqual([]);
 });
