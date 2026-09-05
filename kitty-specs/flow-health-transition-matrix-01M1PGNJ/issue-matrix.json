@@ -1,0 +1,89 @@
+{
+  "rows": {
+    "#125": {
+      "evidence_ref": "https://github.com/spec-kitty/spec-kitty-design/issues/125 \u2014 programme tracker; #149 supplies one child deliverable",
+      "fr": null,
+      "nfr": null,
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": null,
+      "scope": "programme tracking issue; this mission contributes the transition-matrix deliverable",
+      "source_file": "spec.md",
+      "title": "Elements-first programme tracking issue cited as parent context",
+      "verdict": "in-mission",
+      "wp": null
+    },
+    "#140": {
+      "evidence_ref": "https://github.com/spec-kitty/spec-kitty-design/pull/140 \u2014 MERGED into train/elements-first at 70742b8436ca89e09cb6e0416c0830f4bded3289 on 2026-09-04T16:24:51Z; required status checks succeeded",
+      "fr": null,
+      "nfr": null,
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": null,
+      "scope": "merged upstream dependency and generated-artifact precedent; this mission did not implement it",
+      "source_file": "plan.md",
+      "title": "Elements migration prerequisite for button, pill-tag and check-bullet",
+      "verdict": "verified-already-fixed",
+      "wp": null
+    },
+    "#143": {
+      "evidence_ref": "https://github.com/spec-kitty/spec-kitty-design/pull/143 \u2014 MERGED into train/elements-first at 910d91b3395deadde0acecfd3c5a9e502a70bcc1 on 2026-09-04T17:55:21Z; required status checks succeeded",
+      "fr": null,
+      "nfr": null,
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": null,
+      "scope": "merged upstream dependency and generated-artifact precedent; this mission did not implement it",
+      "source_file": "plan.md",
+      "title": "Blog-card elements migration prerequisite",
+      "verdict": "verified-already-fixed",
+      "wp": null
+    },
+    "#144": {
+      "evidence_ref": "https://github.com/spec-kitty/spec-kitty-design/issues/144 \u2014 binding parent ownership/design context",
+      "fr": null,
+      "nfr": null,
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": null,
+      "scope": "parent epic and binding library/application ownership boundary",
+      "source_file": "spec.md",
+      "title": "Team overview component-system epic; #149 is one child mission",
+      "verdict": "in-mission",
+      "wp": null
+    },
+    "#149": {
+      "evidence_ref": "https://github.com/spec-kitty/spec-kitty-design/issues/149 \u2014 WP01 generic prerequisite, WP02 complete component, and WP03 React/final verification closure",
+      "fr": null,
+      "nfr": null,
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": null,
+      "scope": "mission issue implemented by three serial work packages",
+      "source_file": "spec.md",
+      "title": "Flow-health transition matrix",
+      "verdict": "in-mission",
+      "wp": "WP03"
+    },
+    "#150": {
+      "evidence_ref": "https://github.com/spec-kitty/spec-kitty-design/issues/150 \u2014 composition follow-up explicitly outside #149",
+      "fr": null,
+      "nfr": null,
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": null,
+      "scope": "follow-up composition mission explicitly outside this reusable element",
+      "source_file": "spec.md",
+      "title": "Team overview Storybook composition follow-up",
+      "verdict": "deferred-with-followup",
+      "wp": null
+    },
+    "#76": {
+      "evidence_ref": "https://github.com/spec-kitty/spec-kitty-design/issues/76 \u2014 established elements-first authoring/generation contract verified in checkout",
+      "fr": null,
+      "nfr": null,
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": null,
+      "scope": "prior elements-first authoring/generation contract used as precedent",
+      "source_file": "spec.md",
+      "title": "Elements-first component authoring and generated-wrapper precedent",
+      "verdict": "verified-already-fixed",
+      "wp": null
+    }
+  },
+  "schema_version": 1
+}

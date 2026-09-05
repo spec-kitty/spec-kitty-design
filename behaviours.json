@@ -142,8 +142,16 @@
           "file": "fixtures/elements-behaviour/src/sk-nav-pill.test.ts"
         },
         {
+          "name": "sk-transition-matrix",
+          "file": "fixtures/elements-behaviour/src/sk-transition-matrix.test.ts"
+        },
+        {
           "name": "react-wrapper",
           "file": "fixtures/react-consumer/src/wrappers.test.tsx"
+        },
+        {
+          "name": "react-transition-matrix",
+          "file": "fixtures/react-consumer/src/sk-transition-matrix.test.tsx"
         }
       ]
     },
@@ -161,6 +169,10 @@
         {
           "name": "sk-nav-pill",
           "file": "fixtures/elements-behaviour/src/sk-nav-pill.test.ts"
+        },
+        {
+          "name": "sk-transition-matrix",
+          "file": "fixtures/elements-behaviour/src/sk-transition-matrix.test.ts"
         }
       ]
     },
@@ -178,6 +190,10 @@
         {
           "name": "sk-nav-pill",
           "file": "fixtures/elements-behaviour/src/sk-nav-pill.test.ts"
+        },
+        {
+          "name": "sk-transition-matrix",
+          "file": "fixtures/elements-behaviour/src/sk-transition-matrix.test.ts"
         }
       ]
     },
@@ -212,6 +228,14 @@
         {
           "name": "sk-nav-pill",
           "file": "fixtures/elements-behaviour/src/sk-nav-pill.test.ts"
+        },
+        {
+          "name": "sk-transition-matrix",
+          "file": "fixtures/elements-behaviour/src/sk-transition-matrix.test.ts"
+        },
+        {
+          "name": "react-transition-matrix",
+          "file": "fixtures/react-consumer/src/sk-transition-matrix.test.tsx"
         }
       ]
     },
@@ -308,6 +332,10 @@
         {
           "name": "sk-site-footer",
           "file": "fixtures/elements-behaviour/src/sk-site-footer.test.ts"
+        },
+        {
+          "name": "sk-transition-matrix",
+          "file": "fixtures/elements-behaviour/src/sk-transition-matrix.test.ts"
         }
       ]
     },
@@ -361,6 +389,10 @@
         {
           "name": "sk-stub",
           "file": "fixtures/elements-behaviour/src/sk-stub.test.ts"
+        },
+        {
+          "name": "sk-transition-matrix",
+          "file": "fixtures/elements-behaviour/src/sk-transition-matrix.test.ts"
         }
       ]
     },

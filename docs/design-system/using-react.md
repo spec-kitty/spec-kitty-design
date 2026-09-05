@@ -98,6 +98,46 @@ function Field() {
 }
 ```
 
+Structured component data stays on the property path. The generated transition-matrix wrapper
+preserves readonly array types and the typed selection detail:
+
+```tsx
+import { useState } from 'react';
+import { SkTransitionMatrix } from '@spec-kitty/react';
+import type { TransitionColumn, TransitionRoute } from '@spec-kitty/elements';
+
+const columns: ReadonlyArray<TransitionColumn> = Object.freeze([
+  Object.freeze({ id: 'current', label: 'Current' }),
+]);
+const routes: ReadonlyArray<TransitionRoute> = Object.freeze([
+  Object.freeze({
+    id: 'queued-active',
+    label: 'Queued to active',
+    tone: 'forward',
+    values: Object.freeze({ current: 5 }),
+  }),
+]);
+
+function Flow() {
+  const [selectedRouteId, setSelectedRouteId] = useState<string>();
+  return (
+    <SkTransitionMatrix
+      columns={columns}
+      routes={routes}
+      selectable
+      selectedRouteId={selectedRouteId}
+      windowLabel="Current reporting window"
+      description="Moves grouped by route and interval."
+      selectionHint="Select a route to inspect it."
+      onSkTransitionMatrixSelect={(event) => setSelectedRouteId(event.detail.routeId)}
+    />
+  );
+}
+```
+
+Removing a previously supplied `columns` or `routes` prop assigns a fresh frozen empty array to the
+element. It never retains stale structured data or serializes either array as an attribute.
+
 - **Everything in `packages/react/src/` is generated.** Do not hand-edit it: CI regenerates and
   fails on drift, on orphaned files, and on a shrunken output set (`.wrapper-floor` is a
   committed ratchet; the gate refuses a missing or unparseable one rather than reading it as

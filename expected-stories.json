@@ -90,7 +90,18 @@
     "sk-site-footer": [
       "elements-sksitefooter--default",
       "elements-sksitefooter--light-mode"
+    ],
+    "sk-transition-matrix": [
+      "elements-sktransitionmatrix--default",
+      "elements-sktransitionmatrix--approved-example",
+      "elements-sktransitionmatrix--fifty-active-w-ps",
+      "elements-sktransitionmatrix--sparse-data",
+      "elements-sktransitionmatrix--equal-totals-different-distribution",
+      "elements-sktransitionmatrix--empty",
+      "elements-sktransitionmatrix--controlled-selection",
+      "elements-sktransitionmatrix--selectable-states",
+      "elements-sktransitionmatrix--light-mode"
     ]
   },
-  "total": 50
+  "total": 59
 }

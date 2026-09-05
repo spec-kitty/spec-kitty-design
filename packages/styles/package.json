@@ -24,7 +24,8 @@
     "./ribbon-card/*": "./dist/ribbon-card/*",
     "./section-banner/*": "./dist/section-banner/*",
     "./site-footer/*": "./dist/site-footer/*",
-    "./stub/*": "./dist/stub/*"
+    "./stub/*": "./dist/stub/*",
+    "./transition-matrix/*": "./dist/transition-matrix/*"
   },
   "files": [
     "dist/",

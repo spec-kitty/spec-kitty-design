@@ -12,7 +12,13 @@
  * list from `nx show projects --with-target typecheck` rather than naming projects by hand.
  */
 import * as React from 'react';
-import { SkFormInput, SkNavPill, type SkFormInputElement } from '../src/index.js';
+import {
+  SkFormInput,
+  SkNavPill,
+  SkTransitionMatrix,
+  type SkFormInputElement,
+  type TransitionMatrixSelectDetail,
+} from '../src/index.js';
 
 // --- props are typed, and inherited ones are present -----------------------------------
 // value/label/required are inheritedFrom FormControlBase with privacy public. FR-004 said for
@@ -54,3 +60,54 @@ export const withHandler = <SkNavPill onSkNavPillToggle={(e) => void e.detail.op
 
 // @ts-expect-error the detail is typed now, so a wrong field on it is an error rather than `any`
 export const wrongDetail = <SkNavPill onSkNavPillToggle={(e) => void e.detail.opened} />;
+
+// --- transition matrix -------------------------------------------------------------------
+const transitionColumns = [
+  { id: 'previous', label: 'Previous' },
+  { id: 'current', label: 'Current' },
+] as const;
+const transitionRoutes = [
+  {
+    id: 'planned-progress',
+    label: 'Planned → In progress',
+    tone: 'forward',
+    group: 'Forward flow',
+    values: { previous: 3, current: 5 },
+  },
+] as const;
+
+export const transitionMatrixAllProps = (
+  <SkTransitionMatrix
+    columns={transitionColumns}
+    routes={transitionRoutes}
+    selectedRouteId="planned-progress"
+    selectable
+    windowLabel="Last 72 hours"
+    description="Moves grouped by route and day."
+    selectionHint="Select any row to inspect its WPs."
+    onSkTransitionMatrixSelect={(event) => {
+      const detail: TransitionMatrixSelectDetail = event.detail;
+      void detail.routeId.toUpperCase();
+      // @ts-expect-error the callback detail is typed rather than `any`
+      void event.detail.route;
+    }}
+  />
+);
+
+const invalidToneRoutes = [
+  { id: 'bad-tone', label: 'Bad tone', tone: 'warning', values: { previous: 1, current: 2 } },
+] as const;
+// @ts-expect-error `warning` is not one of the five transition tones
+export const transitionMatrixInvalidTone = <SkTransitionMatrix routes={invalidToneRoutes} />;
+
+const invalidCountRoutes = [
+  { id: 'bad-count', label: 'Bad count', tone: 'forward', values: { previous: '3' } },
+] as const;
+// @ts-expect-error route counts are numbers, not numeric strings
+export const transitionMatrixInvalidCount = <SkTransitionMatrix routes={invalidCountRoutes} />;
+
+// @ts-expect-error consumer-authored copy is a string
+export const transitionMatrixInvalidCopy = <SkTransitionMatrix description={42} />;
+
+// @ts-expect-error event detail route ids are strings
+export const transitionMatrixInvalidDetail: TransitionMatrixSelectDetail = { routeId: 42 };

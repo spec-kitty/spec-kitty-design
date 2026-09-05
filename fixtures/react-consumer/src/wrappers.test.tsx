@@ -53,7 +53,8 @@
  * deletable in silence: arm 1 only catches a DECLARED lane that executed zero tests, and the
  * browser lane is full of other people's tests.
  */
-import { StrictMode } from 'react';
+import * as React from 'react';
+import { StrictMode, forwardRef, useEffect, useLayoutEffect, useRef } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { act } from 'react';
 import { afterEach, beforeEach, expect, test } from 'vitest';
@@ -87,6 +88,75 @@ function render(ui: React.ReactNode) {
   act(() => root.render(<StrictMode>{ui}</StrictMode>));
 }
 
+type PropertyOnlyProbeElement = HTMLElement & {
+  structured: ReadonlyArray<Readonly<{ id: string }>>;
+};
+
+type PropertyOnlyProbeProps = Readonly<{
+  structured?: ReadonlyArray<Readonly<{ id: string }>>;
+}>;
+
+// BEGIN GENERATED PROPERTY-ONLY WRAPPER
+const propertyOnlyProbeGeneratedSource = "const useIsomorphicLayoutEffect =\n  typeof window !== \"undefined\" ? useLayoutEffect : useEffect;\n\nfunction mergeRefs(target, forwardedRef) {\n  if (!forwardedRef) {\n    return;\n  }\n\n  if (typeof forwardedRef === \"function\") {\n    forwardedRef(target);\n  } else {\n    forwardedRef.current = target;\n  }\n}\n\nfunction createForwardedRefHandler(localRef, forwardedRef) {\n  return (node) => {\n    localRef.current = node;\n    mergeRefs(node, forwardedRef);\n  };\n}\n\nfunction useProperties(targetElement, propName, value, resetValue) {\n  useEffect(() => {\n    const el = targetElement?.current;\n    const nextValue = value === undefined && resetValue ? resetValue() : value;\n    if (!el || nextValue === undefined || el[propName] === nextValue) {\n      return;\n    }\n\n    try {\n      el[propName] = nextValue;\n    } catch (e) {\n      console.warn(e);\n    }\n  }, [targetElement, propName, value]);\n}\n\nfunction useEventListener(targetElement, eventName, eventHandler) {\n  // keep a ref to the latest handler so we don't need to re-register the event listener\n  // whenever the handler changes (avoids duplicate listeners on re-renders)\n  const handlerRef = useRef(eventHandler);\n  handlerRef.current = eventHandler;\n\n  useIsomorphicLayoutEffect(() => {\n    const el = targetElement?.current;\n    if (!el || eventName === undefined) {\n      return;\n    }\n\n    // capture the handler at the time the listener is attached so we can call cancel on it\n    const eventListener = (event) => {\n      const handler = handlerRef.current;\n      if (handler) {\n        handler(event);\n      }\n    };\n\n    el.addEventListener(eventName, eventListener);\n\n    return () => {\n      const handler = handlerRef.current;\n      if (handler?.cancel) {\n        handler.cancel();\n      }\n      el.removeEventListener(eventName, eventListener);\n    };\n  }, [eventName, targetElement?.current]);\n}\n\nconst PropertyOnlyProbe = forwardRef((props, forwardedRef) => {\n  const ref = useRef(null);\n  const {\n    className,\n    exportparts,\n    htmlFor,\n    part,\n    tabIndex,\n    structured,\n    ...restProps\n  } = props;\n\n  /** Waits for the client before loading the custom element */\n  useEffect(() => {\n    loadElements();\n  }, []);\n\n  /** Properties - run whenever a property has changed */\n  useProperties(ref, \"structured\", structured, () => Object.freeze([]));\n\n  return React.createElement(\n    \"sk-property-only-probe\",\n    {\n      ref: createForwardedRefHandler(ref, forwardedRef),\n      ...restProps,\n      class: className,\n      exportparts: exportparts,\n      for: htmlFor ?? props[\"for\"],\n      part: part,\n      tabindex: tabIndex ?? props[\"tabindex\"],\n      style: { ...props.style },\n    },\n    props.children,\n  );\n});\n\nreturn PropertyOnlyProbe;\n";
+// END GENERATED PROPERTY-ONLY WRAPPER
+
+const PropertyOnlyProbe = new Function(
+  'React',
+  'forwardRef',
+  'useEffect',
+  'useLayoutEffect',
+  'useRef',
+  'loadElements',
+  propertyOnlyProbeGeneratedSource,
+)(
+  React,
+  forwardRef,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  () => import('@spec-kitty/elements'),
+) as React.ForwardRefExoticComponent<
+  PropertyOnlyProbeProps & React.RefAttributes<PropertyOnlyProbeElement>
+>;
+
+test('[property-only] a synthetic wrapper preserves identity and resets an omitted array prop', () => {
+  const first = Object.freeze([{ id: 'first' }]);
+  const second = Object.freeze([{ id: 'second' }]);
+
+  render(<PropertyOnlyProbe structured={first} />);
+  const element = host.querySelector('sk-property-only-probe') as PropertyOnlyProbeElement;
+  expect(element.structured, 'the first value was not assigned before custom-element upgrade').toBe(
+    first,
+  );
+  expect(element.hasAttribute('structured'), 'structured data must never be serialized').toBe(
+    false,
+  );
+
+  class PropertyOnlyProbeElementClass extends HTMLElement {
+    declare structured: PropertyOnlyProbeElement['structured'];
+
+    constructor() {
+      super();
+      if (!Object.prototype.hasOwnProperty.call(this, 'structured')) {
+        this.structured = Object.freeze([]);
+      }
+    }
+  }
+  customElements.define('sk-property-only-probe', PropertyOnlyProbeElementClass);
+  expect(element.structured, 'custom-element upgrade lost the original identity').toBe(first);
+  expect(element.hasAttribute('structured'), 'upgrade created a structured attribute').toBe(false);
+
+  render(<PropertyOnlyProbe structured={second} />);
+  expect(element.structured, 'a React rerender did not replace the property identity').toBe(second);
+  expect(element.hasAttribute('structured'), 'a rerender serialized structured data').toBe(false);
+
+  render(<PropertyOnlyProbe />);
+  expect(element.structured).toEqual([]);
+  expect(Object.isFrozen(element.structured), 'the removal reset must be immutable').toBe(true);
+  expect(element.structured, 'removal retained the previous consumer array').not.toBe(second);
+  expect(element.hasAttribute('structured'), 'removal created a structured attribute').toBe(false);
+});
+
 test('SC-306 guard — this file is actually executed by the browser lane', () => {
   // Guards the include glob, not the wrappers — and it is nearly tautological, which is worth
   // saying rather than leaving a reader to find out: if the include narrows, this file does not
@@ -118,7 +188,12 @@ test('[SC-006] the wrapper subscribes a React handler to the element event', asy
 
   const sentinel = { from: 'the test, not the element' };
   await act(async () => {
-    el.dispatchEvent(new CustomEvent('sk-nav-pill-toggle', { detail: sentinel, bubbles: true }));
+    el.dispatchEvent(
+      new CustomEvent('sk-nav-pill-toggle', {
+        detail: sentinel,
+        bubbles: true,
+      }),
+    );
   });
 
   expect(seen, 'the event never reached the React handler').toHaveLength(1);
@@ -164,7 +239,7 @@ test('SC-307 end-to-end — a form-associated wrapper submits inside a React <fo
     >
       <SkFormInput name="email" label="Email" value="cat@example.com" />
       <button type="submit">Go</button>
-    </form>
+    </form>,
   );
 
   await customElements.whenDefined('sk-form-input');
@@ -197,12 +272,14 @@ test('SC-307 end-to-end — a required empty wrapper blocks submission', async (
     >
       <SkFormInput name="email" label="Email" required />
       <button type="submit">Go</button>
-    </form>
+    </form>,
   );
   await customElements.whenDefined('sk-form-input');
-  await (host.querySelector('sk-form-input') as HTMLElement & {
-    updateComplete: Promise<boolean>;
-  }).updateComplete;
+  await (
+    host.querySelector('sk-form-input') as HTMLElement & {
+      updateComplete: Promise<boolean>;
+    }
+  ).updateComplete;
   await act(async () => {
     (host.querySelector('button[type=submit]') as HTMLButtonElement).click();
   });

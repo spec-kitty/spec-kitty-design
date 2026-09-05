@@ -52,8 +52,16 @@
  */
 import { execFileSync } from 'node:child_process';
 import {
-  cpSync, existsSync, globSync, mkdirSync, mkdtempSync, readdirSync, readFileSync,
-  rmSync, statSync, writeFileSync,
+  cpSync,
+  existsSync,
+  globSync,
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  statSync,
+  writeFileSync,
 } from 'node:fs';
 import { basename, dirname, join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
@@ -72,12 +80,29 @@ const SRC = 'packages/elements/src';
 const MANIFEST = 'packages/elements/custom-elements.json';
 const OUTDIR = 'packages/react/src';
 const MODULE = '@spec-kitty/elements';
+const PROPERTY_ONLY_MARKER = 'x-spec-kitty-property-only';
+const PROPERTY_RESET_MARKER = 'x-spec-kitty-property-reset';
+const EMPTY_ARRAY_RESET = 'empty-array';
+const PROPERTY_ONLY_FIXTURE = 'fixtures/react-consumer/src/wrappers.test.tsx';
+const PROPERTY_ONLY_FIXTURE_BEGIN = '// BEGIN GENERATED PROPERTY-ONLY WRAPPER';
+const PROPERTY_ONLY_FIXTURE_END = '// END GENERATED PROPERTY-ONLY WRAPPER';
+const escapeRegex = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 /** Emitted by the generator for every run; carry no tagName and are not elements. */
 const NON_ELEMENT_FILES = new Set(['index.d.ts', 'index.js', 'react-utils.js']);
 /** Supplied by the generator's reactProps, not by the manifest. Excluded from prop comparison. */
 const REACT_PROPS = new Set([
-  'className', 'exportparts', 'htmlFor', 'key', 'part', 'ref', 'tabIndex', 'style', 'slot', 'id',
-  'children', 'dangerouslySetInnerHTML',
+  'className',
+  'exportparts',
+  'htmlFor',
+  'key',
+  'part',
+  'ref',
+  'tabIndex',
+  'style',
+  'slot',
+  'id',
+  'children',
+  'dangerouslySetInnerHTML',
 ]);
 
 /**
@@ -111,6 +136,36 @@ if (check && process.argv.includes('--selftest')) {
 }
 const selftest = process.argv.includes('--selftest');
 
+/** A test-owned element manifest: never add synthetic API to a production declaration. */
+function withPropertyOnlyProbe(input = { schemaVersion: '1.0.0', modules: [] }) {
+  const manifest = JSON.parse(JSON.stringify(input));
+  manifest.modules ??= [];
+  manifest.modules.push({
+    kind: 'javascript-module',
+    path: './property-only-probe.js',
+    declarations: [
+      {
+        kind: 'class',
+        name: 'PropertyOnlyProbe',
+        tagName: 'sk-property-only-probe',
+        customElement: true,
+        members: [
+          {
+            kind: 'field',
+            name: 'structured',
+            type: { text: 'ReadonlyArray<Readonly<{ id: string }>>' },
+            description: 'Synthetic structured data used only by the generated browser fixture.',
+            [PROPERTY_ONLY_MARKER]: true,
+            [PROPERTY_RESET_MARKER]: EMPTY_ARRAY_RESET,
+          },
+        ],
+        attributes: [],
+      },
+    ],
+  });
+  return manifest;
+}
+
 /** Elements as they exist ON DISK — the third count, which the generator never consults. */
 function elementsOnDisk(src = SRC) {
   return globSync(`${src}/**/sk-*.ts`, {})
@@ -125,26 +180,43 @@ function taggedDeclarations(manifest) {
   for (const mod of manifest.modules ?? []) {
     for (const decl of mod.declarations ?? []) {
       if (!decl.tagName) continue;
-      const settable = (decl.members ?? [])
+      const settableMembers = (decl.members ?? [])
         // privacy is the discriminator. `inheritedFrom` is NOT: a public inherited field is
         // public API. See the header.
         .filter((m) => m.kind === 'field' && m.privacy !== 'protected' && m.privacy !== 'private')
         // readonly: a prop is settable, a getter is not. See manifestForGeneration().
-        .filter((m) => !m.readonly && !m.static && !m.name.startsWith('#'))
-        .map((m) => m.name);
+        .filter((m) => !m.readonly && !m.static && !m.name.startsWith('#'));
+      const settable = settableMembers.map((m) => m.name);
       // field name -> the attribute name Lit actually OBSERVES. These differ: sk-nav-pill
       // declares `isOpen: { attribute: 'open' }`, so the field is `isOpen` and the observed
       // attribute is `open`. Keeping only the field name loses exactly the thing first-render
       // delivery depends on.
       const attrNameByField = new Map(
-        (decl.attributes ?? []).map((a) => [a.fieldName ?? a.name, a.name])
+        (decl.attributes ?? []).map((a) => [a.fieldName ?? a.name, a.name]),
       );
-      const fields = [...new Set(settable)].filter((f) => attrNameByField.has(f)).sort();
-      const unattributed = [...new Set(settable)].filter((f) => !attrNameByField.has(f)).sort();
-      const events = (decl.events ?? []).map((e) => e.name).filter(Boolean).sort();
+      const propertyOnly = new Map(
+        settableMembers
+          .filter((member) => member[PROPERTY_ONLY_MARKER] === true)
+          .map((member) => [member.name, member[PROPERTY_RESET_MARKER]]),
+      );
+      const fields = [...new Set(settable)]
+        .filter((field) => attrNameByField.has(field) || propertyOnly.has(field))
+        .sort();
+      const attributedFields = [...new Set(settable)]
+        .filter((field) => attrNameByField.has(field))
+        .sort();
+      const unattributed = [...new Set(settable)]
+        .filter((field) => !attrNameByField.has(field) && !propertyOnly.has(field))
+        .sort();
+      const events = (decl.events ?? [])
+        .map((e) => e.name)
+        .filter(Boolean)
+        .sort();
       out.set(decl.tagName, {
         name: decl.name,
         fields,
+        attributedFields,
+        propertyOnly,
         unattributed,
         attrNameByField,
         events,
@@ -179,7 +251,13 @@ function emittedProps(dts) {
 
 /** `sk-nav-pill-toggle` -> `onSkNavPillToggle`, the generator's handler-prop convention. */
 function handlerName(eventName) {
-  return 'on' + eventName.split('-').map((p) => p.charAt(0).toUpperCase() + p.slice(1)).join('');
+  return (
+    'on' +
+    eventName
+      .split('-')
+      .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
+      .join('')
+  );
 }
 
 /**
@@ -214,8 +292,56 @@ function manifestForGeneration(manifest) {
         .filter((d) => d.tagName)
         .map((d) => {
           const attributed = new Set(
-            (d.attributes ?? []).map((a) => a.fieldName ?? a.name).filter(Boolean)
+            (d.attributes ?? []).map((a) => a.fieldName ?? a.name).filter(Boolean),
           );
+          for (const member of d.members ?? []) {
+            const hasPropertyOnly = Object.hasOwn(member, PROPERTY_ONLY_MARKER);
+            if (hasPropertyOnly && member[PROPERTY_ONLY_MARKER] !== true) {
+              throw new Error(
+                `${d.tagName}.${member.name} has a non-exact ${PROPERTY_ONLY_MARKER}; ` +
+                  'the only admitted value is boolean true',
+              );
+            }
+            if (member[PROPERTY_ONLY_MARKER] === true) {
+              if (
+                member.kind !== 'field' ||
+                member.readonly ||
+                member.static ||
+                member.name.startsWith('#') ||
+                member.privacy === 'protected' ||
+                member.privacy === 'private'
+              ) {
+                throw new Error(
+                  `${d.tagName}.${member.name} is marked property-only but is not a public settable field`,
+                );
+              }
+              if (attributed.has(member.name)) {
+                throw new Error(
+                  `${d.tagName}.${member.name} is both property-only and an observed attribute`,
+                );
+              }
+            }
+            if (Object.hasOwn(member, PROPERTY_RESET_MARKER)) {
+              if (member[PROPERTY_ONLY_MARKER] !== true) {
+                throw new Error(
+                  `${d.tagName}.${member.name} has ${PROPERTY_RESET_MARKER} without the property-only marker`,
+                );
+              }
+              if (member[PROPERTY_RESET_MARKER] !== EMPTY_ARRAY_RESET) {
+                throw new Error(
+                  `${d.tagName}.${member.name} has unsupported reset metadata ` +
+                    JSON.stringify(member[PROPERTY_RESET_MARKER]),
+                );
+              }
+              const type = String(member.type?.text ?? '').trim();
+              if (!/^ReadonlyArray\s*</.test(type) && !/^readonly\s+.+\[\]$/.test(type)) {
+                throw new Error(
+                  `${d.tagName}.${member.name} claims an empty-array reset but its normalized type ` +
+                    `${JSON.stringify(type)} is not readonly-array shaped`,
+                );
+              }
+            }
+          }
           return {
             ...d,
             members: (d.members ?? []).filter((m) => {
@@ -224,12 +350,81 @@ function manifestForGeneration(manifest) {
               if (m.kind !== 'field') return true;
               if (m.static || m.name.startsWith('#')) return true;
               if (m.privacy === 'protected' || m.privacy === 'private') return true;
-              return attributed.has(m.name);
+              return attributed.has(m.name) || m[PROPERTY_ONLY_MARKER] === true;
             }),
           };
         }),
     })),
   };
+}
+
+/**
+ * The upstream generator already routes unattributed fields through `useProperties`; it does not
+ * understand this repository's proven removal reset metadata. Patch only wrappers that actually
+ * carry such metadata, leaving today's production tree byte-identical until one is introduced.
+ */
+function applyPropertyOnlyResets(manifest, outdir) {
+  const resetFields = [];
+  for (const mod of manifest.modules ?? []) {
+    for (const declaration of mod.declarations ?? []) {
+      if (!declaration.tagName) continue;
+      for (const member of declaration.members ?? []) {
+        if (
+          member[PROPERTY_ONLY_MARKER] === true &&
+          member[PROPERTY_RESET_MARKER] === EMPTY_ARRAY_RESET
+        ) {
+          resetFields.push({ component: declaration.name, field: member.name });
+        }
+      }
+    }
+  }
+  if (resetFields.length === 0) return;
+
+  for (const { component, field } of resetFields) {
+    const wrapperPath = join(outdir, `${component}.js`);
+    const body = readFileSync(wrapperPath, 'utf8');
+    const escaped = escapeRegex(field);
+    const call = new RegExp(`useProperties\\(ref, (["'])${escaped}\\1, ${escaped}\\);`, 'g');
+    const matches = [...body.matchAll(call)];
+    if (matches.length !== 1) {
+      throw new Error(
+        `${component}.${field} carries ${EMPTY_ARRAY_RESET} reset metadata but the generated ` +
+          `wrapper has ${matches.length} matching useProperties call(s)`,
+      );
+    }
+    writeFileSync(
+      wrapperPath,
+      body.replace(
+        call,
+        (_match, quote) =>
+          `useProperties(ref, ${quote}${field}${quote}, ${field}, () => Object.freeze([]));`,
+      ),
+    );
+  }
+
+  const utilsPath = join(outdir, 'react-utils.js');
+  let utils = readFileSync(utilsPath, 'utf8');
+  const replacements = [
+    [
+      'export function useProperties(targetElement, propName, value) {',
+      'export function useProperties(targetElement, propName, value, resetValue) {',
+    ],
+    [
+      '    if (!el || value === undefined || el[propName] === value) {',
+      '    const nextValue = value === undefined && resetValue ? resetValue() : value;\n' +
+        '    if (!el || nextValue === undefined || el[propName] === nextValue) {',
+    ],
+    ['      el[propName] = value;', '      el[propName] = nextValue;'],
+  ];
+  for (const [before, after] of replacements) {
+    if (utils.split(before).length !== 2) {
+      throw new Error(
+        `react-utils.js no longer contains exactly one expected useProperties runtime anchor: ${before}`,
+      );
+    }
+    utils = utils.replace(before, after);
+  }
+  writeFileSync(utilsPath, utils);
 }
 
 /** Generate into `outdir`. Isolated in a child process: the generator mutates module state. */
@@ -238,7 +433,8 @@ function generate(manifestPath, outdir) {
   // two --check passes and any concurrent invocation would race on one filename.
   const scratch = mkdtempSync(join(tmpdir(), 'react-wrappers-manifest-'));
   const narrowed = join(scratch, 'manifest-for-generation.json');
-  writeFileSync(narrowed, JSON.stringify(manifestForGeneration(JSON.parse(readFileSync(manifestPath, 'utf8')))));
+  const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
+  writeFileSync(narrowed, JSON.stringify(manifestForGeneration(manifest)));
   const script = `
     const { generateReactWrappers } = require(${JSON.stringify(join(ROOT, 'node_modules/@wc-toolkit/react-wrappers'))});
     const m = require(${JSON.stringify(resolve(narrowed))});
@@ -249,9 +445,86 @@ function generate(manifestPath, outdir) {
     });
   `;
   try {
-    execFileSync(process.execPath, ['-e', script], { cwd: ROOT, stdio: 'pipe' });
+    execFileSync(process.execPath, ['-e', script], {
+      cwd: ROOT,
+      stdio: 'pipe',
+    });
+    applyPropertyOnlyResets(manifest, outdir);
   } finally {
     rmSync(scratch, { recursive: true, force: true });
+  }
+}
+
+/**
+ * Generate the browser fixture through the same production seam as committed wrappers.
+ *
+ * The browser cannot run the Node generator itself. Instead, this gate emits a wholly synthetic
+ * wrapper plus its generated property hook, removes only module wiring, and stores that executable
+ * JavaScript as a string in the existing browser test. `--check` compares the string to a fresh
+ * generation, so the browser assertion cannot drift into a test-local paraphrase of the runtime.
+ */
+function propertyOnlyBrowserFixtureSection() {
+  const scratch = mkdtempSync(join(tmpdir(), 'property-only-browser-fixture-'));
+  const manifestPath = join(scratch, 'manifest.json');
+  const out = join(scratch, 'out');
+  mkdirSync(out, { recursive: true });
+  writeFileSync(manifestPath, JSON.stringify(withPropertyOnlyProbe()));
+  try {
+    generate(manifestPath, out);
+    const utilities = readFileSync(join(out, 'react-utils.js'), 'utf8')
+      .replace(/^import .* from "react";\n\n/, '')
+      .replaceAll('export function ', 'function ');
+    const wrapper = readFileSync(join(out, 'PropertyOnlyProbe.js'), 'utf8')
+      .replace(/^"use client";\n/, '')
+      .replace(/^import .* from "react";\n\n/, '')
+      .replace(/^import .* from "\.\/react-utils\.js";\n\n/, '')
+      .replace('export const PropertyOnlyProbe =', 'const PropertyOnlyProbe =')
+      // `new Function` has no Vite module graph. The test supplies Vite's real import as a
+      // callback; this adapter does not touch the generated property assignment/reset path.
+      .replace('import("@spec-kitty/elements");', 'loadElements();');
+    if (/^import /m.test(utilities) || /^import /m.test(wrapper)) {
+      throw new Error('synthetic browser fixture still contains an unresolved generated import');
+    }
+    const executable = `${utilities}\n${wrapper}\nreturn PropertyOnlyProbe;\n`;
+    return (
+      `${PROPERTY_ONLY_FIXTURE_BEGIN}\n` +
+      `const propertyOnlyProbeGeneratedSource = ${JSON.stringify(executable)};\n` +
+      `${PROPERTY_ONLY_FIXTURE_END}`
+    );
+  } finally {
+    rmSync(scratch, { recursive: true, force: true });
+  }
+}
+
+function syncPropertyOnlyBrowserFixture(mode) {
+  const body = readFileSync(PROPERTY_ONLY_FIXTURE, 'utf8');
+  const begin = body.indexOf(PROPERTY_ONLY_FIXTURE_BEGIN);
+  const end = body.indexOf(PROPERTY_ONLY_FIXTURE_END);
+  if (
+    begin < 0 ||
+    end < begin ||
+    body.indexOf(PROPERTY_ONLY_FIXTURE_BEGIN, begin + 1) >= 0 ||
+    body.indexOf(PROPERTY_ONLY_FIXTURE_END, end + 1) >= 0
+  ) {
+    throw new Error(
+      `${PROPERTY_ONLY_FIXTURE} must contain exactly one ordered generated property-only fixture block`,
+    );
+  }
+  const expected = propertyOnlyBrowserFixtureSection();
+  const current = body.slice(begin, end + PROPERTY_ONLY_FIXTURE_END.length);
+  if (mode === 'check') {
+    if (current !== expected) {
+      throw new Error(
+        `${PROPERTY_ONLY_FIXTURE} is stale; run node scripts/build-react-wrappers.mjs`,
+      );
+    }
+    return;
+  }
+  if (current !== expected) {
+    writeFileSync(
+      PROPERTY_ONLY_FIXTURE,
+      `${body.slice(0, begin)}${expected}${body.slice(end + PROPERTY_ONLY_FIXTURE_END.length)}`,
+    );
   }
 }
 
@@ -277,7 +550,7 @@ function treeFiles(dir) {
  * Every assertion, over a generated tree. Returns a list of problems.
  * Pulled out of the CLI paths so --selftest exercises THIS, not a paraphrase of it.
  */
-function audit({ outdir, manifestPath, srcDir, floor }) {
+function audit({ outdir, manifestPath, srcDir, floor, allowFloorGrowth = false }) {
   const problems = [];
   const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
   const tagged = taggedDeclarations(manifest);
@@ -290,17 +563,17 @@ function audit({ outdir, manifestPath, srcDir, floor }) {
   // --- FLOOR. A ratchet on a committed number, not `length > 0`. -------------------------
   // `> 0` is satisfied by ONE file: emit SkCard.d.ts alone, expected one, sets equal, green,
   // four of five elements missing. check-elements-entries.mjs:107-109 is the house pattern.
-  // EXACT EQUALITY, not `>=`. After any write run the two are equal by construction, so
-  // equality costs nothing — and `>=` leaves slack: edit .wrapper-floor down to 4 while five
-  // wrappers are emitted and --check stays green, because the auto-raise only runs on a local
-  // write and CI never performs one. A later commit could then remove an element under the
-  // weakened floor with every gate green. Found at the pre-merge gate's second pass.
-  if (emittedClasses.length !== floor) {
+  // EXACT EQUALITY in check mode, not `>=`. A normal write may grow the set so it can raise the
+  // committed floor below, but it may never shrink it. After that write the two are equal by
+  // construction. This keeps CI from accepting a floor slackened below the current count while
+  // still allowing the component-authoring recipe to add a component. Found at the pre-merge
+  // gate's second pass, then extended when the tenth wrapper exercised the growth path.
+  if (emittedClasses.length < floor || (!allowFloorGrowth && emittedClasses.length !== floor)) {
     problems.push(
       `${emittedClasses.length} wrapper(s) emitted but the committed floor is ${floor}. ` +
         'Refusing to report green over a shrunken set, or over a floor that has been slackened ' +
         'below the current count. If an element was deliberately removed, edit the floor in the ' +
-        'same commit and say why.'
+        'same commit and say why.',
     );
   }
 
@@ -311,7 +584,7 @@ function audit({ outdir, manifestPath, srcDir, floor }) {
   if (JSON.stringify(tags) !== JSON.stringify(onDisk)) {
     problems.push(
       `the source glob and the manifest disagree about which elements exist.\n` +
-        `   manifest: ${tags.join(', ') || '(none)'}\n   on disk:  ${onDisk.join(', ') || '(none)'}`
+        `   manifest: ${tags.join(', ') || '(none)'}\n   on disk:  ${onDisk.join(', ') || '(none)'}`,
     );
   }
 
@@ -321,7 +594,7 @@ function audit({ outdir, manifestPath, srcDir, floor }) {
     problems.push(
       `the emitted wrappers and the manifest's tagged declarations do not match.\n` +
         `   expected: ${expectedClasses.join(', ') || '(none)'}\n` +
-        `   emitted:  ${emittedClasses.join(', ') || '(none)'}`
+        `   emitted:  ${emittedClasses.join(', ') || '(none)'}`,
     );
   }
 
@@ -334,14 +607,29 @@ function audit({ outdir, manifestPath, srcDir, floor }) {
     const want = decl.fields;
     if (JSON.stringify(got.values) !== JSON.stringify(want)) {
       problems.push(
-        `${decl.name} (${tag}) props do not match the manifest's attributed public fields.\n` +
+        `${decl.name} (${tag}) props do not match the manifest's attributed and explicit ` +
+          `property-only public fields.\n` +
           `   manifest: ${want.join(', ') || '(none)'}\n` +
-          `   emitted:  ${got.values.join(', ') || '(none)'}`
+          `   emitted:  ${got.values.join(', ') || '(none)'}`,
       );
     }
     // A per-element floor. Set equality alone is satisfied by both sides being empty.
     if (want.length > 0 && got.values.length === 0) {
       problems.push(`${decl.name} emitted ZERO props for ${want.length} public field(s).`);
+    }
+    for (const field of decl.propertyOnly.keys()) {
+      const escaped = escapeRegex(field);
+      if (
+        !new RegExp(
+          `^\\s{2}${escaped}\\?: ${escapeRegex(decl.name)}Element\\["${escaped}"\\];$`,
+          'm',
+        ).test(dts)
+      ) {
+        problems.push(
+          `${decl.name} (${tag}) property-only prop "${field}" does not preserve the element ` +
+            'field type identity.',
+        );
+      }
     }
 
     // --- EVENTS. The same argument as props, and the first draft did not apply it. ---------
@@ -354,7 +642,7 @@ function audit({ outdir, manifestPath, srcDir, floor }) {
       problems.push(
         `${decl.name} (${tag}) event handlers do not match the manifest's events.\n` +
           `   manifest: ${wantHandlers.join(', ') || '(none)'}\n` +
-          `   emitted:  ${got.handlers.join(', ') || '(none)'}`
+          `   emitted:  ${got.handlers.join(', ') || '(none)'}`,
       );
     }
 
@@ -368,15 +656,48 @@ function audit({ outdir, manifestPath, srcDir, floor }) {
     const js = join(outdir, `${decl.name}.js`);
     if (existsSync(js)) {
       const body = readFileSync(js, 'utf8');
-      for (const field of want) {
+      for (const field of decl.attributedFields) {
         const attr = decl.attrNameByField.get(field);
         if (attr === field) continue; // no rename to verify
-        const emitsAttr = new RegExp(`^\\s+${attr}:`, 'm').test(body);
+        // JavaScript object keys containing `-` are necessarily quoted. The upstream generator
+        // emits those correctly, so the audit must accept both its quoted kebab-case form and
+        // the identifier form used by names such as `open`. Escaping the manifest value keeps
+        // this check a literal-key assertion rather than a permissive regex.
+        const escapedAttr = escapeRegex(attr);
+        const emitsAttr = new RegExp(
+          `^\\s+(?:${escapedAttr}|["']${escapedAttr}["']):`,
+          'm',
+        ).test(body);
         if (!emitsAttr) {
           problems.push(
             `${decl.name} (${tag}) renames ${field} -> attribute "${attr}", but the emitted\n` +
               `   createElement props do not carry a "${attr}" key. Under ssrSafe the first\n` +
-              '   render writes an attribute, so the key must be the observed attribute name.'
+              '   render writes an attribute, so the key must be the observed attribute name.',
+          );
+        }
+      }
+
+      // Explicit property-only members must stay on the property hook and out of the attribute
+      // map. Their .d.ts presence alone cannot prove either runtime fact.
+      for (const [field, reset] of decl.propertyOnly) {
+        const escaped = escapeRegex(field);
+        const ordinaryCall = new RegExp(`useProperties\\(ref, ["']${escaped}["'], ${escaped}\\);`);
+        const resetCall = new RegExp(
+          `useProperties\\(ref, ["']${escaped}["'], ${escaped}, ` +
+            `\\(\\) => Object\\.freeze\\(\\[\\]\\)\\);`,
+        );
+        const hasExpectedCall =
+          reset === EMPTY_ARRAY_RESET ? resetCall.test(body) : ordinaryCall.test(body);
+        if (!hasExpectedCall) {
+          problems.push(
+            `${decl.name} (${tag}) does not assign property-only field "${field}" through ` +
+              `useProperties${reset === EMPTY_ARRAY_RESET ? ' with its empty-array reset' : ''}.`,
+          );
+        }
+        if (new RegExp(`^\\s+["']?${escaped}["']?:`, 'm').test(body)) {
+          problems.push(
+            `${decl.name} (${tag}) serializes property-only field "${field}" in the ` +
+              'React.createElement attribute map.',
           );
         }
       }
@@ -400,8 +721,35 @@ function audit({ outdir, manifestPath, srcDir, floor }) {
           `   actual:   ${decl.unattributed.join(', ') || '(none)'}\n` +
           '   A public field with no observed attribute cannot reach the element on first\n' +
           '   render under ssrSafe. Give it an attribute, or add it to EXPECTED_NON_PROP_FIELDS\n' +
-          '   with the reason in the same commit.'
+          '   with the reason in the same commit.',
       );
+    }
+  }
+
+  const resetCount = [...tagged.values()].reduce(
+    (count, declaration) =>
+      count +
+      [...declaration.propertyOnly.values()].filter((value) => value === EMPTY_ARRAY_RESET).length,
+    0,
+  );
+  if (resetCount > 0) {
+    const utilsPath = join(outdir, 'react-utils.js');
+    if (!existsSync(utilsPath)) {
+      problems.push('property-only reset fields exist but react-utils.js is missing');
+    } else {
+      const utils = readFileSync(utilsPath, 'utf8');
+      if (utils.includes('if (!el || value === undefined')) {
+        problems.push('useProperties retained the stale value === undefined early-return guard');
+      }
+      if (!utils.includes('value === undefined && resetValue ? resetValue() : value')) {
+        problems.push('useProperties does not derive the proven removal reset value');
+      }
+      if (!utils.includes('el[propName] = nextValue;')) {
+        problems.push('useProperties does not assign the derived reset value');
+      }
+      if (!utils.includes('}, [targetElement, propName, value]);')) {
+        problems.push('useProperties lost value from its update dependency list');
+      }
     }
   }
 
@@ -412,7 +760,9 @@ function audit({ outdir, manifestPath, srcDir, floor }) {
     .map((f) => f.replace(/\.d\.ts$/, '.js'))
     .filter((f) => !existsSync(join(outdir, f)));
   if (orphanTypes.length) {
-    problems.push(`${orphanTypes.length} wrapper type(s) have no runtime file: ${orphanTypes.join(', ')}`);
+    problems.push(
+      `${orphanTypes.length} wrapper type(s) have no runtime file: ${orphanTypes.join(', ')}`,
+    );
   }
   const missingDirective = componentFiles
     .map((f) => f.replace(/\.d\.ts$/, '.js'))
@@ -422,7 +772,7 @@ function audit({ outdir, manifestPath, srcDir, floor }) {
     problems.push(
       `${missingDirective.length} wrapper(s) carry no "use client" directive: ` +
         `${missingDirective.join(', ')}. FR-009 is decided as ssrSafe — a custom element cannot ` +
-        'run in a server render, so registration is deferred to a client effect.'
+        'run in a server render, so registration is deferred to a client effect.',
     );
   }
   return problems;
@@ -459,12 +809,166 @@ if (selftest) {
       `❌ the self-test fixture floor computed as ${JSON.stringify(FLOOR_UNDER_TEST)}, not a\n` +
         '   positive integer. Either the fixture manifest declares no tagged elements — in which\n' +
         '   case every probe runs against an empty tree and the table is vacuous — or the count\n' +
-        '   was read off the wrong shape.'
+        '   was read off the wrong shape.',
     );
     process.exit(1);
   }
   let bad = 0;
   let caught = 0;
+
+  const propertyOnlyManifest = () => withPropertyOnlyProbe(BASE_MANIFEST);
+  const PROPERTY_PROBES = [
+    ['an explicit typed property-only field with a proven removal reset', null, () => {}, () => {}],
+    [
+      'the property-only marker removed, so a structured prop silently disappears',
+      'non-deliverable public field set changed',
+      (manifest) => {
+        const member = manifest.modules
+          .flatMap((module) => module.declarations ?? [])
+          .find((declaration) => declaration.tagName === 'sk-property-only-probe')
+          .members.find((candidate) => candidate.name === 'structured');
+        delete member[PROPERTY_ONLY_MARKER];
+        delete member[PROPERTY_RESET_MARKER];
+      },
+      () => {},
+    ],
+    [
+      'internal state falsely admitted as a property-only public prop',
+      'non-deliverable public field set changed',
+      (manifest) => {
+        const input = manifest.modules
+          .flatMap((module) => module.declarations ?? [])
+          .find((declaration) => declaration.tagName === 'sk-form-input');
+        input.members.find((member) => member.name === 'errorMessage')[PROPERTY_ONLY_MARKER] = true;
+      },
+      () => {},
+    ],
+    [
+      'the generated property-only declaration dropped while the wrapper file remains',
+      'props do not match',
+      () => {},
+      ({ out }) => {
+        const file = join(out, 'PropertyOnlyProbe.d.ts');
+        writeFileSync(
+          file,
+          readFileSync(file, 'utf8').replace(/^\s{2}structured\?:.*$/m, '  // dropped'),
+        );
+      },
+    ],
+    [
+      'invalid property reset metadata accepted',
+      'unsupported reset metadata',
+      (manifest) => {
+        const member = manifest.modules
+          .flatMap((module) => module.declarations ?? [])
+          .find((declaration) => declaration.tagName === 'sk-property-only-probe')
+          .members.find((candidate) => candidate.name === 'structured');
+        member[PROPERTY_RESET_MARKER] = 'guessed-default';
+      },
+      () => {},
+    ],
+    [
+      'the generated useProperties call removed',
+      'does not assign property-only field',
+      () => {},
+      ({ out }) => {
+        const file = join(out, 'PropertyOnlyProbe.js');
+        writeFileSync(
+          file,
+          readFileSync(file, 'utf8').replace(
+            /^\s*useProperties\(ref, "structured".*$/m,
+            '  // property assignment removed',
+          ),
+        );
+      },
+    ],
+    [
+      'the old value === undefined early return retained, leaving a removed prop stale',
+      'stale value === undefined early-return guard',
+      () => {},
+      ({ out }) => {
+        const file = join(out, 'react-utils.js');
+        const body = readFileSync(file, 'utf8')
+          .replace(
+            '    const nextValue = value === undefined && resetValue ? resetValue() : value;\n' +
+              '    if (!el || nextValue === undefined || el[propName] === nextValue) {',
+            '    if (!el || value === undefined || el[propName] === value) {',
+          )
+          .replace('      el[propName] = nextValue;', '      el[propName] = value;');
+        writeFileSync(file, body);
+      },
+    ],
+    [
+      'property assignment replaced with an attribute-map entry',
+      'serializes property-only field',
+      () => {},
+      ({ out }) => {
+        const file = join(out, 'PropertyOnlyProbe.js');
+        writeFileSync(
+          file,
+          readFileSync(file, 'utf8').replace(
+            /^\s*useProperties\(ref, "structured".*$/m,
+            '      structured: structured,',
+          ),
+        );
+      },
+    ],
+    [
+      'value removed from the property hook update dependency',
+      'lost value from its update dependency list',
+      () => {},
+      ({ out }) => {
+        const file = join(out, 'react-utils.js');
+        writeFileSync(
+          file,
+          readFileSync(file, 'utf8').replace(
+            '}, [targetElement, propName, value]);',
+            '}, [targetElement, propName]);',
+          ),
+        );
+      },
+    ],
+  ];
+
+  for (const [index, [note, expect, mutateManifest, mutateOutput]] of PROPERTY_PROBES.entries()) {
+    const probeDir = join(dir, `property-probe-${index}`);
+    const out = join(probeDir, 'out');
+    const src = join(probeDir, 'src');
+    mkdirSync(out, { recursive: true });
+    cpSync(SRC, src, { recursive: true });
+    mkdirSync(join(src, 'property-only-probe'), { recursive: true });
+    writeFileSync(
+      join(src, 'property-only-probe/sk-property-only-probe.ts'),
+      'export class PropertyOnlyProbe {}\n',
+    );
+    const manifestPath = join(probeDir, 'manifest.json');
+    const manifest = propertyOnlyManifest();
+    mutateManifest(manifest);
+    writeFileSync(manifestPath, JSON.stringify(manifest));
+    let problems = [];
+    try {
+      generate(manifestPath, out);
+      mutateOutput({ out, src, probeDir });
+      problems = audit({
+        outdir: out,
+        manifestPath,
+        srcDir: src,
+        floor: FLOOR_UNDER_TEST + 1,
+      });
+    } catch (error) {
+      problems = [`generation failed: ${error.message}`];
+    }
+    const joined = problems.join('\n');
+    const hit = expect === null ? problems.length === 0 : joined.includes(expect);
+    if (!hit) {
+      console.error(
+        `  ✗ ${note}\n     expected ${expect === null ? 'no problem' : JSON.stringify(expect)}, ` +
+          `got ${problems.length ? problems.join('\n       ') : 'none'}`,
+      );
+      bad++;
+    }
+    if (expect !== null) caught++;
+  }
 
   /**
    * Each row is [note, expect, mutate]. `expect` is a substring of the problem the row is
@@ -565,7 +1069,7 @@ if (selftest) {
         const f = join(out, 'SkNavPill.d.ts');
         writeFileSync(
           f,
-          readFileSync(f, 'utf8').replace(/^ {2}onSkNavPillToggle\?:.*$/m, '  // gone')
+          readFileSync(f, 'utf8').replace(/^ {2}onSkNavPillToggle\?:.*$/m, '  // gone'),
         );
       },
     ],
@@ -576,6 +1080,21 @@ if (selftest) {
       ({ out }) => {
         const f = join(out, 'SkNavPill.js');
         writeFileSync(f, readFileSync(f, 'utf8').replace(/^(\s+)open:/m, '$1isOpen:'));
+      },
+    ],
+    [
+      'a quoted kebab-case attribute rename lost in the emitted runtime, so React would write ' +
+        'the field-name attribute and Lit would observe nothing',
+      'do not carry a "selected-route-id" key',
+      ({ out }) => {
+        const f = join(out, 'SkTransitionMatrix.js');
+        writeFileSync(
+          f,
+          readFileSync(f, 'utf8').replace(
+            /^(\s+)"selected-route-id":/m,
+            '$1selectedRouteId:',
+          ),
+        );
       },
     ],
     [
@@ -597,7 +1116,7 @@ if (selftest) {
           for (const d of mod.declarations ?? []) {
             if (d.tagName === 'sk-card') {
               d.attributes = (d.attributes ?? []).filter(
-                (a) => (a.fieldName ?? a.name) !== 'variant'
+                (a) => (a.fieldName ?? a.name) !== 'variant',
               );
             }
           }
@@ -618,7 +1137,7 @@ if (selftest) {
         const f = join(out, 'SkFormInput.d.ts');
         const body = readFileSync(f, 'utf8').replace(
           /^ {2}value\?:/m,
-          '  error?: SkFormInputElement["error"];\n  value?:'
+          '  error?: SkFormInputElement["error"];\n  value?:',
         );
         writeFileSync(f, body);
       },
@@ -652,13 +1171,14 @@ if (selftest) {
       });
       const joined = problems.join('\n');
       const didCatch = expect === null ? problems.length === 0 : joined.includes(expect);
-      const wanted = expect === null ? 'no problem' : `a problem matching ${JSON.stringify(expect)}`;
+      const wanted =
+        expect === null ? 'no problem' : `a problem matching ${JSON.stringify(expect)}`;
       if (!didCatch) {
         console.error(
           `  ✗ ${note}\n     expected ${wanted}, got ` +
             (problems.length
               ? `${problems.length} problem(s):\n       ${problems.join('\n       ')}`
-              : 'none')
+              : 'none'),
         );
         bad++;
       }
@@ -668,8 +1188,9 @@ if (selftest) {
     rmSync(dir, { recursive: true, force: true });
   }
 
+  const totalProbes = PROPERTY_PROBES.length + PROBES.length;
   if (bad) {
-    console.error(`\n❌ ${bad} of ${PROBES.length} probe(s) did not behave as recorded.`);
+    console.error(`\n❌ ${bad} of ${totalProbes} probe(s) did not behave as recorded.`);
     process.exit(1);
   }
 
@@ -682,20 +1203,20 @@ if (selftest) {
    * exists. check-adopted-css-boundaries.mjs:240-251 already argues this against its own earlier
    * shape and uses a named two-dimensional floor; this follows it.
    */
-  const FLOOR = { mustCatch: 14, mustPass: 1 };
-  const mustPass = PROBES.length - caught;
+  const FLOOR = { mustCatch: 23, mustPass: 2 };
+  const mustPass = totalProbes - caught;
   if (caught < FLOOR.mustCatch || mustPass < FLOOR.mustPass) {
     console.error(
       `\n❌ Degenerate probe table: ${caught} must-catch (floor ${FLOOR.mustCatch}), ` +
         `${mustPass} must-pass (floor ${FLOOR.mustPass}).\n` +
         '   Every form this gate has ever been defeated by must stay in the table, and at least\n' +
         '   one row must expect a clean pass — otherwise `audit` returning a constant passes.\n' +
-        '   Raise the floor when you add a row; never lower it to make a deletion fit.'
+        '   Raise the floor when you add a row; never lower it to make a deletion fit.',
     );
     process.exit(1);
   }
   console.log(
-    `\n✅ All ${PROBES.length} probes behaved as recorded (${caught} must-catch, ${mustPass} must-pass).`
+    `\n✅ All ${totalProbes} probes behaved as recorded (${caught} must-catch, ${mustPass} must-pass).`,
   );
   process.exit(0);
 }
@@ -719,13 +1240,13 @@ try {
   // ABSENCE IS A FAILURE, not a floor of zero, and a non-integer is a failure too.
   //
   // The first draft read `existsSync(p) ? Number(...) : 0`, so deleting the file set the floor
-    // to 0 and garbage in it produced NaN — and `n < NaN` is false. Both made the floor vacuous
+  // to 0 and garbage in it produced NaN — and `n < NaN` is false. Both made the floor vacuous
   // in silence, which is the certifying-absence shape this whole file argues against.
   // check-part-ratchet.mjs:34-41 refuses absence for exactly this reason and says so.
   if (!existsSync(floorPath)) {
     console.error(
       `❌ ${floorPath} is missing. It is the committed wrapper-count ratchet; treating its` +
-        ' absence as "no floor" is how a shrunken set ships. Restore it from git.'
+        ' absence as "no floor" is how a shrunken set ships. Restore it from git.',
     );
     process.exit(1);
   }
@@ -736,12 +1257,21 @@ try {
   if (!/^\d+$/.test(floorRaw) || Number(floorRaw) < 1) {
     console.error(
       `❌ ${floorPath} must be a positive integer (read ${JSON.stringify(floorRaw)}). A package\n` +
-        '   that genuinely emits zero elements should delete this gate, not zero its floor.'
+        '   that genuinely emits zero elements should delete this gate, not zero its floor.',
     );
     process.exit(1);
   }
   const floor = Number(floorRaw);
-  const problems = audit({ outdir: fresh, manifestPath: MANIFEST, srcDir: SRC, floor });
+  const problems = audit({
+    outdir: fresh,
+    manifestPath: MANIFEST,
+    srcDir: SRC,
+    floor,
+    // A normal generation is the only path allowed to raise this ratchet. `--check` remains
+    // exact, while a deliberate new component can first pass the semantic audit and then
+    // commit the raised count below. Shrinkage is refused in both modes.
+    allowFloorGrowth: !check,
+  });
   if (problems.length) {
     console.error('❌ build-react-wrappers:\n' + problems.map((p) => `   ${p}`).join('\n'));
     process.exit(1);
@@ -765,7 +1295,7 @@ try {
         `❌ ${orphans.length} file(s) in ${OUTDIR} the generator does not emit:\n` +
           orphans.map((f) => `   ${f}`).join('\n') +
           '\n   The generator does not clean its outdir, so these survive regeneration ' +
-          'and drift silently.'
+          'and drift silently.',
       );
       process.exit(1);
     }
@@ -773,7 +1303,9 @@ try {
     const missing = generated.filter((f) => !committed.includes(f));
     const drifted = generated
       .filter((f) => committed.includes(f))
-      .filter((f) => readFileSync(join(fresh, f), 'utf8') !== readFileSync(join(OUTDIR, f), 'utf8'));
+      .filter(
+        (f) => readFileSync(join(fresh, f), 'utf8') !== readFileSync(join(OUTDIR, f), 'utf8'),
+      );
 
     if (missing.length || drifted.length) {
       console.error(`❌ ${OUTDIR} is stale. Run: node scripts/build-react-wrappers.mjs`);
@@ -791,13 +1323,16 @@ try {
       generate(MANIFEST, second);
       const a = treeFiles(fresh);
       const b = treeFiles(second);
-      const differ = JSON.stringify(a) !== JSON.stringify(b)
-        ? ['the two runs emitted different file sets']
-        : a.filter((f) => readFileSync(join(fresh, f), 'utf8') !== readFileSync(join(second, f), 'utf8'));
+      const differ =
+        JSON.stringify(a) !== JSON.stringify(b)
+          ? ['the two runs emitted different file sets']
+          : a.filter(
+              (f) => readFileSync(join(fresh, f), 'utf8') !== readFileSync(join(second, f), 'utf8'),
+            );
       if (differ.length) {
         console.error(
           `❌ Two runs on an unchanged manifest are not identical (FR-003):\n` +
-            differ.map((f) => `   ${f}`).join('\n')
+            differ.map((f) => `   ${f}`).join('\n'),
         );
         process.exit(1);
       }
@@ -805,10 +1340,12 @@ try {
       rmSync(second, { recursive: true, force: true });
     }
 
+    syncPropertyOnlyBrowserFixture('check');
+
     console.log(
       `✅ ${OUTDIR} is up to date (${generated.length} file(s), ` +
         `${generated.filter((f) => f.endsWith('.d.ts') && !NON_ELEMENT_FILES.has(f)).length} element(s)), ` +
-        'and two runs are byte-identical.'
+        'and two runs are byte-identical.',
     );
   } else {
     rmSync(OUTDIR, { recursive: true, force: true });
@@ -817,6 +1354,7 @@ try {
       mkdirSync(dirname(join(OUTDIR, f)), { recursive: true });
       cpSync(join(fresh, f), join(OUTDIR, f));
     }
+    syncPropertyOnlyBrowserFixture('write');
     const count = generated.filter((f) => f.endsWith('.d.ts') && !NON_ELEMENT_FILES.has(f)).length;
     // RATCHET UP ONLY. The first draft wrote the count unconditionally, so removing an element
     // rewrote 5 -> 4 as a side effect of the regenerate you are forced to run to make --check
@@ -832,11 +1370,13 @@ try {
       console.error(
         `❌ ${count} element(s) emitted but the committed floor is ${floor}.\n` +
           `   Refusing to lower it as a side effect. If an element was deliberately removed,\n` +
-          `   edit ${floorPath} in the same commit and say why in the message.`
+          `   edit ${floorPath} in the same commit and say why in the message.`,
       );
       process.exit(1);
     }
-    console.log(`build-react-wrappers: wrote ${generated.length} file(s) to ${OUTDIR} (${count} element(s))`);
+    console.log(
+      `build-react-wrappers: wrote ${generated.length} file(s) to ${OUTDIR} (${count} element(s))`,
+    );
   }
 } finally {
   rmSync(fresh, { recursive: true, force: true });
