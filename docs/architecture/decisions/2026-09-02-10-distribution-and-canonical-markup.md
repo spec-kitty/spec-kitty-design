@@ -66,6 +66,53 @@ The docsite consumes `@spec-kitty/styles` only. DSD reached Baseline *widely ava
 
 `customElements.define` is global and throws on a duplicate tag, while ADR-2 deliberately allows independent per-package versioning. Two majors of `@spec-kitty/elements` on one page is a hard runtime failure. Every definition goes through a guarded helper that warns and no-ops instead of throwing, and consumers are given a documented single-version policy. Versioned tag names remain a last resort — they would ruin the public API.
 
+### `form-field` is deliberately styles-only (#141)
+
+Epic #66's completion criterion is that **no component in `packages/styles/src/` is styles-only
+except by a recorded, deliberate decision.** `form-field` is the one exception, and this is the
+record.
+
+**There is no `<sk-form-field>` element and there should not be.** The element path for a labelled
+field is `sk-form-input` and `sk-form-textarea`, which render the *whole* field themselves —
+measured, not assumed:
+
+```html
+<div part="field" class="sk-form-input">
+  <label part="label" class="sk-form-input__label" for="control">…</label>
+  <input part="control" …>
+  <span part="description" …>   <span part="error" role="alert" …>
+```
+
+So a wrapper element would have nothing to wrap. Slotting a control inside it produces **two
+labels** when that control is `sk-form-input`, and avoiding that would mean giving the control a
+suppression mode — making two components' contracts conditional on each other to add a surface one
+of them already owns.
+
+**An earlier ruling on #141 called `form-field` a distinct component — the field wrapper as opposed
+to the control — and that ruling predates #74**, which then built `sk-form-input` to render its own
+label, description and error. The ruling was not wrong when made; the control absorbed the wrapper's
+job afterwards. The operator has re-ruled on the current state: styles-only, deliberately.
+
+**What `form-field` still is.** The static-path field markup for the no-JavaScript consumer that
+ADR-10 §3 exists to serve: eight `.html` forms composing a label, a control and a description, in
+default, focus, error, disabled and filled states, for both `input` and `textarea`.
+
+**The two class families are correct, not duplication.** `.sk-form-field__label` and
+`.sk-form-input__label` carry identical declarations, which looks like a violation of ADR-8
+criterion #1 and is not: the element's CSS is *adopted into its shadow root*, which cannot see
+light-DOM classes. They style different trees and both derive from the same `--sk-*` tokens. A
+single class family here is not achievable and would not be desirable.
+
+**One authored source, now enforced.** The barrel was hand-written beside the `.html` files —
+exporting **eight** strings while the directory held **five** files, so `SkFormInputFocusHTML`,
+`SkFormInputDisabledHTML` and `SkFormInputFilledHTML` shipped to consumers backed by nothing on
+disk. The five that did have files happened to agree, which is how a two-source arrangement survives
+review. `scripts/build-styles-only-markup.mjs` now generates the barrel from the `.html` files with
+a `--check` in CI, matching the contract every element-backed component already has via
+`build-element-markup.mjs`. All eight exports are preserved byte-for-byte; the three missing files
+were recovered from the barrel before it was regenerated.
+
+
 ### Consequences
 
 #### Positive
