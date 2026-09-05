@@ -61,7 +61,7 @@ sole authority for subtask completion.
 
 **Prompt:** [`tasks/WP01-facts-and-empty-state-primitives.md`](./tasks/WP01-facts-and-empty-state-primitives.md)
 **Priority:** P1 — lowest-risk, no-transition primitives
-**Dependencies:** None
+**Dependencies**: None
 **Requirement refs:** FR-001, FR-005, FR-007, NFR-001, NFR-003; C-001, C-002, C-004, C-005
 **Independent review:** Render each story; confirm `<dl>`/`<dt>`/`<dd>` and the empty-state block
 render with real semantic markup, axe is clean, and `LightMode` actually changes computed colors.
@@ -99,7 +99,7 @@ render with real semantic markup, axe is clean, and `LightMode` actually changes
 
 **Prompt:** [`tasks/WP02-disclosure-and-skip-link-primitives.md`](./tasks/WP02-disclosure-and-skip-link-primitives.md)
 **Priority:** P1 — the two primitives that introduce a transition and the forced-colors/reduced-motion baseline
-**Dependencies:** None (parallel with WP01 and WP03 — disjoint files)
+**Dependencies**: None (parallel with WP01 and WP03 — disjoint files)
 **Requirement refs:** FR-002, FR-006, FR-007, FR-009, FR-010, NFR-001, NFR-002, NFR-003; C-001, C-004, C-005
 **Independent review:** Toggle the disclosure with mouse and keyboard (native, nothing to
 simulate); tab to the skip link and confirm it becomes visible at AA contrast and its `href`
@@ -151,7 +151,7 @@ resolves to a real `id="main"` in the story fixture. Emulate `forced-colors: act
 
 **Prompt:** [`tasks/WP03-data-table-primitive.md`](./tasks/WP03-data-table-primitive.md)
 **Priority:** P1 — highest-risk concern in the mission
-**Dependencies:** None (parallel with WP01 and WP02 — disjoint files)
+**Dependencies**: None (parallel with WP01 and WP02 — disjoint files)
 **Requirement refs:** FR-003, FR-004, FR-007, FR-009, NFR-001, NFR-003; C-001, C-003, C-004, C-005
 **Independent review:** At a narrow viewport, confirm the scroll region is a labelled,
 `tabindex="0"` container wrapping an **intact** `<table>` — headers, `scope`, and cell structure
@@ -193,7 +193,7 @@ unchanged. Reject any change that reflows cells to blocks at any breakpoint.
 
 **Prompt:** [`tasks/WP04-barrel-registration-and-recipe.md`](./tasks/WP04-barrel-registration-and-recipe.md)
 **Priority:** P2 — closure package
-**Dependencies:** WP01, WP02, WP03 (needs all five directories' `.html` files to exist for the
+**Dependencies**: WP01, WP02, WP03 (needs all five directories' `.html` files to exist for the
 generator, and needs no other WP writing `packages/styles/src/index.ts` concurrently)
 **Requirement refs:** FR-007, FR-008, FR-011, NFR-001; SC-001, SC-004, SC-006, SC-007
 **Independent review:** Import `@spec-kitty/styles`'s entry point and confirm every one of the
