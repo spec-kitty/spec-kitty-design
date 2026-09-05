@@ -1,7 +1,7 @@
 {
   "rows": {
     "#125": {
-      "evidence_ref": "https://github.com/spec-kitty/spec-kitty-design/issues/125 \u2014 programme tracker; #149 supplies one child deliverable",
+      "evidence_ref": "https://github.com/spec-kitty/spec-kitty-design/issues/144 \u2014 concrete remaining programme tracker; publishing and Team Kitty integration remain explicitly outside #149",
       "fr": null,
       "nfr": null,
       "repo": "spec-kitty/spec-kitty-design",
@@ -9,7 +9,7 @@
       "scope": "programme tracking issue; this mission contributes the transition-matrix deliverable",
       "source_file": "spec.md",
       "title": "Elements-first programme tracking issue cited as parent context",
-      "verdict": "in-mission",
+      "verdict": "deferred-with-followup",
       "wp": null
     },
     "#140": {
@@ -37,7 +37,7 @@
       "wp": null
     },
     "#144": {
-      "evidence_ref": "https://github.com/spec-kitty/spec-kitty-design/issues/144 \u2014 binding parent ownership/design context",
+      "evidence_ref": "Remaining child issues: https://github.com/spec-kitty/spec-kitty-design/issues/145, https://github.com/spec-kitty/spec-kitty-design/issues/146, https://github.com/spec-kitty/spec-kitty-design/issues/147, https://github.com/spec-kitty/spec-kitty-design/issues/148, and https://github.com/spec-kitty/spec-kitty-design/issues/150",
       "fr": null,
       "nfr": null,
       "repo": "spec-kitty/spec-kitty-design",
@@ -45,11 +45,11 @@
       "scope": "parent epic and binding library/application ownership boundary",
       "source_file": "spec.md",
       "title": "Team overview component-system epic; #149 is one child mission",
-      "verdict": "in-mission",
+      "verdict": "deferred-with-followup",
       "wp": null
     },
     "#149": {
-      "evidence_ref": "https://github.com/spec-kitty/spec-kitty-design/issues/149 \u2014 WP01 generic prerequisite, WP02 complete component, and WP03 React/final verification closure",
+      "evidence_ref": "https://github.com/spec-kitty/spec-kitty-design/pull/171 \u2014 merged as 8e654e858c7e09acf48ddafdd99a5349fae92d87",
       "fr": null,
       "nfr": null,
       "repo": "spec-kitty/spec-kitty-design",
@@ -57,7 +57,7 @@
       "scope": "mission issue implemented by three serial work packages",
       "source_file": "spec.md",
       "title": "Flow-health transition matrix",
-      "verdict": "in-mission",
+      "verdict": "fixed",
       "wp": "WP03"
     },
     "#150": {
