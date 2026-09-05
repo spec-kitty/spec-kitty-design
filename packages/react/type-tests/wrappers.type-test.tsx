@@ -19,6 +19,7 @@ import {
   type SkFormInputElement,
   type TransitionMatrixSelectDetail,
 } from '../src/index.js';
+import type { TransitionMatrixProperties } from '@spec-kitty/elements';
 
 // --- props are typed, and inherited ones are present -----------------------------------
 // value/label/required are inheritedFrom FormControlBase with privacy public. FR-004 said for
@@ -93,6 +94,21 @@ export const transitionMatrixAllProps = (
     }}
   />
 );
+
+const transitionMatrixPropertyContract = {
+  columns: transitionColumns,
+  routes: transitionRoutes,
+  selectedRouteId: 'planned-progress',
+  selectable: true,
+  windowLabel: 'Last 72 hours',
+  description: 'Moves grouped by route and day.',
+  selectionHint: 'Select any row to inspect its WPs.',
+} satisfies TransitionMatrixProperties;
+void transitionMatrixPropertyContract;
+
+// @ts-expect-error all seven public fields are known and arbitrary fields stay outside the contract
+const transitionMatrixUnknownProperty: TransitionMatrixProperties = { ...transitionMatrixPropertyContract, currentOpenWPs: 50 };
+void transitionMatrixUnknownProperty;
 
 const invalidToneRoutes = [
   { id: 'bad-tone', label: 'Bad tone', tone: 'warning', values: { previous: 1, current: 2 } },

@@ -12,15 +12,6 @@ export type TransitionRoute = Readonly<{
   values: Readonly<Record<string, number>>;
 }>;
 export type TransitionMatrixSelectDetail = Readonly<{ routeId: string }>;
-export type TransitionMatrixProperties = Readonly<{
-  columns: ReadonlyArray<TransitionColumn>;
-  routes: ReadonlyArray<TransitionRoute>;
-  selectedRouteId?: string;
-  selectable: boolean;
-  windowLabel?: string;
-  description?: string;
-  selectionHint?: string;
-}>;
 
 type ValidMatrix = Readonly<{
   columns: ReadonlyArray<TransitionColumn>;
@@ -182,6 +173,17 @@ export class SkTransitionMatrix extends LitElement {
     this.requestUpdate();
   }
 
+  willUpdate(): void {
+    if (
+      this.#pressedRouteId !== null &&
+      (!this.selectable ||
+        !Array.isArray(this.routes) ||
+        !this.routes.some((route) => route?.id === this.#pressedRouteId))
+    ) {
+      this.#pressedRouteId = null;
+    }
+  }
+
   #renderLegend(routes: ReadonlyArray<TransitionRoute>): TemplateResult {
     const present = new Set(routes.map((route) => route.tone));
     return html`<ul part="legend" class="sk-transition-matrix__legend" aria-label="Move tone legend">
@@ -197,7 +199,7 @@ export class SkTransitionMatrix extends LitElement {
     const routeTotalId = this.#id(`route-total-${routeIndex}`);
     const routeTotal = matrix.columns.reduce((sum, column) => sum + route.values[column.id], 0);
     const selected = route.id === this.selectedRouteId;
-    const pressed = route.id === this.#pressedRouteId;
+    const pressed = this.selectable && route.id === this.#pressedRouteId;
     const events = this.selectable;
     return html`<tr
       part="row"
@@ -292,5 +294,20 @@ export class SkTransitionMatrix extends LitElement {
     </section>`;
   }
 }
+
+type TransitionMatrixPropertyName = keyof typeof SkTransitionMatrix.properties;
+type RequiredTransitionMatrixPropertyName = Extract<
+  TransitionMatrixPropertyName,
+  'columns' | 'routes' | 'selectable'
+>;
+type OptionalTransitionMatrixPropertyName = Exclude<
+  TransitionMatrixPropertyName,
+  RequiredTransitionMatrixPropertyName
+>;
+
+export type TransitionMatrixProperties = Readonly<
+  Pick<SkTransitionMatrix, RequiredTransitionMatrixPropertyName> &
+    Partial<Pick<SkTransitionMatrix, OptionalTransitionMatrixPropertyName>>
+>;
 
 define('sk-transition-matrix', SkTransitionMatrix);

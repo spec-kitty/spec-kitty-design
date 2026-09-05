@@ -1,5 +1,5 @@
 import { beforeEach, expect, test } from 'vitest';
-import { skTransitionMatrixSheet } from '@spec-kitty/elements';
+import { SkTransitionMatrix, skTransitionMatrixSheet } from '@spec-kitty/elements';
 // eslint-disable-next-line @nx/enforce-module-boundaries -- raw authored CSS is the token-contract test subject
 import transitionMatrixCss from '../../../packages/styles/src/transition-matrix/sk-transition-matrix.css?raw';
 // eslint-disable-next-line @nx/enforce-module-boundaries -- raw authored source is the public-boundary test subject
@@ -7,8 +7,8 @@ import transitionMatrixSource from '../../../packages/elements/src/transition-ma
 // eslint-disable-next-line @nx/enforce-module-boundaries -- raw authored story is the fixture-copy test subject
 import transitionMatrixStorySource from '../../../packages/elements/src/transition-matrix/sk-transition-matrix.stories.ts?raw';
 import type {
-  SkTransitionMatrix,
   TransitionColumn,
+  TransitionMatrixProperties,
   TransitionMatrixSelectDetail,
   TransitionRoute,
   TransitionTone,
@@ -69,6 +69,8 @@ test('bar ratios use the current global maximum and recompute after replacement 
   ]);
   await element.updateComplete;
   expect(Array.from(element.shadowRoot!.querySelectorAll<HTMLElement>('[data-ratio]')).map((node) => Number(node.dataset['ratio']))).toEqual([0.125, 0.25, 0.5, 1]);
+  expect(element.shadowRoot!.querySelector('[data-route-total]')?.textContent).toBe('30');
+  expect(element.shadowRoot!.querySelector('[data-overall-total]')?.textContent).toContain('30 moves');
 });
 
 test('stable ids preserve values when routes and columns reorder without mutating inputs (FR-005 SC-002)', async () => {
@@ -95,7 +97,10 @@ test.each([
   ['no columns', Object.freeze([]), approvedRoutes],
   ['no routes', approvedColumns, Object.freeze([])],
   ['duplicate column id', Object.freeze([approvedColumns[0], approvedColumns[0]]), approvedRoutes],
+  ['empty column id', Object.freeze([{ ...approvedColumns[0], id: '' }]), approvedRoutes],
   ['empty route id', approvedColumns, Object.freeze([{ ...approvedRoutes[0], id: '' }])],
+  ['duplicate route id', approvedColumns, Object.freeze([approvedRoutes[0], approvedRoutes[0]])],
+  ['unknown runtime tone', approvedColumns, Object.freeze([{ ...approvedRoutes[0], tone: 'warning' as TransitionTone }])],
   ['missing value key', approvedColumns, Object.freeze([{ ...approvedRoutes[0], values: { 'tue-1': 1 } }])],
   ['unknown value key', approvedColumns, Object.freeze([{ ...approvedRoutes[0], values: { ...approvedRoutes[0].values, unknown: 1 } }])],
   ['negative value', approvedColumns, Object.freeze([{ ...approvedRoutes[0], values: { ...approvedRoutes[0].values, 'tue-1': -1 } }])],
@@ -104,7 +109,7 @@ test.each([
   ['infinite value', approvedColumns, Object.freeze([{ ...approvedRoutes[0], values: { ...approvedRoutes[0].values, 'tue-1': Number.POSITIVE_INFINITY } }])],
 ] as const)('invalid or empty data fails closed: %s (FR-014 FR-017)', async (_label, columns, routes) => {
   const element = await mount(columns as ReadonlyArray<TransitionColumn>, routes as ReadonlyArray<TransitionRoute>);
-  expect(element.shadowRoot!.querySelector('[part~="empty-state"]')?.textContent).toContain('No transition data');
+  expect(element.shadowRoot!.querySelector('[part~="empty-state"]')?.textContent ?? '').toContain('No transition data');
   expect(element.shadowRoot!.querySelectorAll('[data-value]')).toHaveLength(0);
   expect(element.shadowRoot!.querySelectorAll('[data-tone]')).toHaveLength(0);
   expect(element.shadowRoot!.querySelectorAll('[tabindex]')).toHaveLength(0);
@@ -195,6 +200,86 @@ test('non-selectable mode has no tab stops, prompt, event, or interaction afford
   expect(count).toBe(0);
   expect(getComputedStyle(row).cursor).not.toBe('pointer');
   expect(getComputedStyle(route).backgroundColor).toBe(rest);
+});
+
+test('pointer press is cleared across disable, release, and re-enable without residue', async () => {
+  const element = await mount();
+  element.selectable = true;
+  await element.updateComplete;
+  const row = element.shadowRoot!.querySelector<HTMLElement>('[data-route-id="planned-progress"]')!;
+
+  row.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+  await element.updateComplete;
+  expect(row.getAttribute('data-pressed')).toBe('true');
+
+  element.selectable = false;
+  await element.updateComplete;
+  expect(row.hasAttribute('data-pressed')).toBe(false);
+  row.dispatchEvent(new PointerEvent('pointerup', { bubbles: true }));
+
+  element.selectable = true;
+  await element.updateComplete;
+  expect(row.hasAttribute('data-pressed')).toBe(false);
+});
+
+test('keyboard press is cleared when its route disappears and cannot resurrect on reintroduction', async () => {
+  const element = await mount();
+  element.selectable = true;
+  await element.updateComplete;
+  const row = element.shadowRoot!.querySelector<HTMLElement>('[data-route-id="progress-review"]')!;
+
+  row.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true, cancelable: true }));
+  await element.updateComplete;
+  expect(row.getAttribute('data-pressed')).toBe('true');
+
+  element.routes = Object.freeze(approvedRoutes.filter((route) => route.id !== 'progress-review'));
+  await element.updateComplete;
+  expect(element.shadowRoot!.querySelector('[data-pressed]')).toBe(null);
+  row.dispatchEvent(new KeyboardEvent('keyup', { key: ' ', bubbles: true }));
+
+  element.routes = approvedRoutes;
+  await element.updateComplete;
+  expect(element.shadowRoot!.querySelector('[data-route-id="progress-review"]')?.hasAttribute('data-pressed')).toBe(false);
+});
+
+test('the authored element contract pins exactly five attribute mappings and keeps structured inputs property-only', async () => {
+  expect([...SkTransitionMatrix.observedAttributes].sort()).toEqual([
+    'description',
+    'selectable',
+    'selected-route-id',
+    'selection-hint',
+    'window-label',
+  ]);
+
+  const element = await mount();
+  element.setAttribute('selected-route-id', 'blocked');
+  element.setAttribute('selectable', '');
+  element.setAttribute('window-label', 'consumer window');
+  element.setAttribute('description', 'Consumer description.');
+  element.setAttribute('selection-hint', 'Consumer hint.');
+  await element.updateComplete;
+  expect({
+    selectedRouteId: element.selectedRouteId,
+    selectable: element.selectable,
+    windowLabel: element.windowLabel,
+    description: element.description,
+    selectionHint: element.selectionHint,
+  }).toEqual({
+    selectedRouteId: 'blocked',
+    selectable: true,
+    windowLabel: 'consumer window',
+    description: 'Consumer description.',
+    selectionHint: 'Consumer hint.',
+  });
+
+  element.selectable = false;
+  await element.updateComplete;
+  expect(element.hasAttribute('selectable')).toBe(false);
+  element.selectable = true;
+  await element.updateComplete;
+  expect(element.hasAttribute('selectable')).toBe(true);
+  expect(element.hasAttribute('columns')).toBe(false);
+  expect(element.hasAttribute('routes')).toBe(false);
 });
 
 test('semantic table exposes route and column headers, route totals, and generic consumer-owned copy (FR-004 FR-009 FR-015)', async () => {
@@ -348,4 +433,59 @@ test('the public TypeScript contract accepts readonly data and rejects invalid v
   // @ts-expect-error detail carries the stable route id
   const invalidDetail: TransitionMatrixSelectDetail = { id: 'route' };
   expect([invalidTone, invalidCount, invalidDetail]).toHaveLength(3);
+});
+
+type MatrixDeclaredPropertyNames = keyof typeof SkTransitionMatrix.properties;
+type MatrixContractPropertyNames = keyof TransitionMatrixProperties;
+type ExactMatrixPropertyNames =
+  Exclude<MatrixDeclaredPropertyNames, MatrixContractPropertyNames> extends never
+    ? Exclude<MatrixContractPropertyNames, MatrixDeclaredPropertyNames> extends never
+      ? true
+      : false
+    : false;
+
+test('TransitionMatrixProperties covers exactly the seven declared public properties', () => {
+  const exactPropertyNames: ExactMatrixPropertyNames = true;
+  const allProperties = {
+    columns: approvedColumns,
+    routes: approvedRoutes,
+    selectedRouteId: 'planned-progress',
+    selectable: true,
+    windowLabel: 'consumer window',
+    description: 'Consumer description.',
+    selectionHint: 'Consumer hint.',
+  } satisfies TransitionMatrixProperties;
+  const requiredPropertiesOnly = {
+    columns: approvedColumns,
+    routes: approvedRoutes,
+    selectable: false,
+  } satisfies TransitionMatrixProperties;
+
+  // @ts-expect-error columns remain structured readonly data
+  const invalidColumns: TransitionMatrixProperties = { ...allProperties, columns: 'columns' };
+  // @ts-expect-error routes remain structured readonly data
+  const invalidRoutes: TransitionMatrixProperties = { ...allProperties, routes: 'routes' };
+  // @ts-expect-error selectedRouteId remains optional consumer-authored text
+  const invalidSelectedRouteId: TransitionMatrixProperties = { ...allProperties, selectedRouteId: 1 };
+  // @ts-expect-error selectable remains boolean
+  const invalidSelectable: TransitionMatrixProperties = { ...allProperties, selectable: 'true' };
+  // @ts-expect-error windowLabel remains optional consumer-authored text
+  const invalidWindowLabel: TransitionMatrixProperties = { ...allProperties, windowLabel: 1 };
+  // @ts-expect-error description remains optional consumer-authored text
+  const invalidDescription: TransitionMatrixProperties = { ...allProperties, description: 1 };
+  // @ts-expect-error selectionHint remains optional consumer-authored text
+  const invalidSelectionHint: TransitionMatrixProperties = { ...allProperties, selectionHint: 1 };
+
+  expect({
+    exactPropertyNames,
+    allProperties,
+    requiredPropertiesOnly,
+    invalidColumns,
+    invalidRoutes,
+    invalidSelectedRouteId,
+    invalidSelectable,
+    invalidWindowLabel,
+    invalidDescription,
+    invalidSelectionHint,
+  }).toBeTruthy();
 });

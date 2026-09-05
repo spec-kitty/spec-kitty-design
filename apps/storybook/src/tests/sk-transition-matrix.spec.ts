@@ -61,6 +61,21 @@ test('Default dark and LightMode preserve equivalent content and table relations
       const hostStyle = getComputedStyle(element);
       const sectionStyle = getComputedStyle(section);
       const titleStyle = getComputedStyle(title);
+      const tones = [...root.querySelectorAll<HTMLElement>('[part~="legend"] [data-tone]')].map((legendItem) => {
+        const tone = legendItem.dataset.tone!;
+        const row = root.querySelector<HTMLElement>(`[data-route-id][data-tone="${tone}"]`)!;
+        const legendIcon = legendItem.querySelector<HTMLElement>('.sk-transition-matrix__icon')!;
+        const routeIcon = row.querySelector<HTMLElement>('.sk-transition-matrix__icon')!;
+        return {
+          tone,
+          colour: getComputedStyle(row).color,
+          legendColour: getComputedStyle(legendIcon).color,
+          legendLabel: legendItem.textContent?.trim(),
+          legendHasIcon: legendIcon.querySelector('svg') !== null,
+          routeLabel: row.querySelector('[part~="route"]')?.textContent?.trim(),
+          routeHasIcon: routeIcon.querySelector('svg') !== null,
+        };
+      });
       return {
         content: {
           heading: title.textContent,
@@ -86,6 +101,7 @@ test('Default dark and LightMode preserve equivalent content and table relations
           shadowForegroundToken: titleStyle.getPropertyValue('--sk-fg-default').trim(),
           surface: sectionStyle.backgroundColor,
           foreground: titleStyle.color,
+          tones,
         },
       };
     });
@@ -100,6 +116,31 @@ test('Default dark and LightMode preserve equivalent content and table relations
   expect(light.theme.shadowForegroundToken).toBe(light.theme.hostForegroundToken);
   expect(light.theme.surface).not.toBe(dark.theme.surface);
   expect(light.theme.foreground).not.toBe(dark.theme.foreground);
+  const expectedToneLabels = {
+    forward: 'Forward',
+    completed: 'Completed',
+    blocked: 'Blocked',
+    recovery: 'Recovery',
+    backward: 'Backward',
+  };
+  const expectedRouteLabels = {
+    forward: 'Queued → Active',
+    completed: 'Active → Complete',
+    blocked: 'Any state → Blocked',
+    recovery: 'Blocked → Active',
+    backward: 'Any state → Previous state',
+  };
+  for (const theme of [dark.theme, light.theme]) {
+    expect(theme.tones.map(({ tone }) => tone)).toEqual(Object.keys(expectedToneLabels));
+    expect(new Set(theme.tones.map(({ colour }) => colour)).size).toBe(5);
+    for (const tone of theme.tones) {
+      expect(tone.colour).toBe(tone.legendColour);
+      expect(tone.legendLabel).toBe(expectedToneLabels[tone.tone as keyof typeof expectedToneLabels]);
+      expect(tone.legendHasIcon).toBe(true);
+      expect(tone.routeLabel).toBe(expectedRouteLabels[tone.tone as keyof typeof expectedRouteLabels]);
+      expect(tone.routeHasIcon).toBe(true);
+    }
+  }
 });
 
 test('ControlledSelection and LightMode remain non-empty and axe-clean', async ({ page }) => {
@@ -243,6 +284,78 @@ test('selectable rows expose positive hover, keyboard focus-visible, and active 
   await expect(row).not.toHaveAttribute('data-pressed');
 });
 
+test('real pointer and keyboard releases cannot resurrect a press after disable or route replacement', async ({ page }) => {
+  await story(page, 'selectable-states');
+  const host = page.locator('sk-transition-matrix[data-selectable-states]').first();
+  const pointerRow = host.locator('[data-route-id="planned-progress"]');
+  const pointerBox = await pointerRow.boundingBox();
+  expect(pointerBox).not.toBe(null);
+
+  await page.mouse.move(
+    pointerBox!.x + pointerBox!.width / 2,
+    pointerBox!.y + pointerBox!.height / 2,
+  );
+  await page.mouse.down();
+  await expect(pointerRow).toHaveAttribute('data-pressed', 'true');
+  await host.evaluate(async (element) => {
+    const matrix = element as HTMLElement & { selectable: boolean; updateComplete: Promise<unknown> };
+    matrix.selectable = false;
+    await matrix.updateComplete;
+  });
+  await expect(pointerRow).not.toHaveAttribute('data-pressed');
+  await page.mouse.up();
+  await host.evaluate(async (element) => {
+    const matrix = element as HTMLElement & { selectable: boolean; updateComplete: Promise<unknown> };
+    matrix.selectable = true;
+    await matrix.updateComplete;
+  });
+  await expect(pointerRow).not.toHaveAttribute('data-pressed');
+
+  const keyboardRow = host.locator('[data-route-id="progress-review"]');
+  await keyboardRow.focus();
+  await page.keyboard.down('Space');
+  await expect(keyboardRow).toHaveAttribute('data-pressed', 'true');
+  await host.evaluate(async (element) => {
+    const matrix = element as HTMLElement & { selectable: boolean; updateComplete: Promise<unknown> };
+    matrix.selectable = false;
+    await matrix.updateComplete;
+  });
+  await expect(keyboardRow).not.toHaveAttribute('data-pressed');
+  await page.keyboard.up('Space');
+  await host.evaluate(async (element) => {
+    const matrix = element as HTMLElement & { selectable: boolean; updateComplete: Promise<unknown> };
+    matrix.selectable = true;
+    await matrix.updateComplete;
+  });
+  await expect(keyboardRow).not.toHaveAttribute('data-pressed');
+
+  const routes = await host.evaluate((element) =>
+    (element as HTMLElement & { routes: ReadonlyArray<unknown> }).routes,
+  );
+  await keyboardRow.focus();
+  await page.keyboard.down('Space');
+  await expect(keyboardRow).toHaveAttribute('data-pressed', 'true');
+  await host.evaluate(async (element) => {
+    const matrix = element as HTMLElement & {
+      routes: ReadonlyArray<{ id: string }>;
+      updateComplete: Promise<unknown>;
+    };
+    matrix.routes = matrix.routes.filter((route) => route.id !== 'progress-review');
+    await matrix.updateComplete;
+  });
+  await expect(host.locator('[data-pressed]')).toHaveCount(0);
+  await page.keyboard.up('Space');
+  await host.evaluate(async (element, originalRoutes) => {
+    const matrix = element as HTMLElement & {
+      routes: ReadonlyArray<unknown>;
+      updateComplete: Promise<unknown>;
+    };
+    matrix.routes = originalRoutes;
+    await matrix.updateComplete;
+  }, routes);
+  await expect(host.locator('[data-route-id="progress-review"]')).not.toHaveAttribute('data-pressed');
+});
+
 test('ratios are exact, zero remains zero, and a maximum-changing reassignment recomputes them', async ({ page }) => {
   const host = await story(page, 'approved-example');
   const facts = await host.evaluate(async (element) => {
@@ -251,11 +364,18 @@ test('ratios are exact, zero remains zero, and a maximum-changing reassignment r
     matrix.routes = [{ id: 'replacement', label: 'Replacement', tone: 'forward', values: { 'tue-1': 2, 'wed-2': 4, 'thu-3': 8, 'fri-4': 16 } }];
     await matrix.updateComplete;
     const replaced = [...matrix.shadowRoot!.querySelectorAll<HTMLElement>('[data-ratio]')].map((node) => Number(node.dataset.ratio));
-    return { initial, replaced };
+    return {
+      initial,
+      replaced,
+      replacementRouteTotal: Number(matrix.shadowRoot!.querySelector<HTMLElement>('[data-route-total]')?.dataset.routeTotal),
+      replacementOverallText: matrix.shadowRoot!.querySelector('[data-overall-total]')?.textContent,
+    };
   });
   for (const cell of facts.initial) expect(cell.ratio).toBe(cell.value / 7);
   expect(facts.initial.filter((cell) => cell.value === 0).every((cell) => cell.ratio === 0)).toBe(true);
   expect(facts.replaced).toEqual([0.125, 0.25, 0.5, 1]);
+  expect(facts.replacementRouteTotal).toBe(30);
+  expect(facts.replacementOverallText).toContain('30 moves');
 });
 
 test('narrow scrolling keeps the sticky route owner visible without overlap', async ({ page }) => {

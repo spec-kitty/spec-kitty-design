@@ -47,6 +47,149 @@ for (const mod of manifest.modules ?? []) {
 const stripComments = (src) =>
   src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/.*$/gm, '$1');
 
+/**
+ * Audit the consumer-facing attribute, property-only, and method documentation surface.
+ *
+ * Both the repository gate and --selftest call this function. Keep the actionable diagnostics
+ * here so a probe cannot pass against a simplified paraphrase of production behaviour.
+ */
+const auditDocumentedSurface = (candidateManifest, expectedDocs) => {
+  const problems = [];
+  let examinedDeclarations = 0;
+  let examinedDocs = 0;
+  const perElement = new Map();
+
+  for (const mod of candidateManifest.modules ?? []) {
+    for (const decl of mod.declarations ?? []) {
+      if (!decl.tagName) continue;
+      examinedDeclarations++;
+      let attrCount = 0;
+      let propertyCount = 0;
+      let methodCount = 0;
+      const attributedFields = new Set(
+        (decl.attributes ?? []).map((attr) => attr.fieldName ?? attr.name),
+      );
+
+      for (const attr of decl.attributes ?? []) {
+        examinedDocs++;
+        attrCount++;
+        if (!String(attr.description ?? '').trim()) {
+          problems.push(
+            `<${decl.tagName}> attribute "${attr.name}" has no description, so the generated ` +
+              'React prop documents itself as `undefined`. Add JSDoc to the property that ' +
+              'declares it — normalise-manifest.mjs propagates it, including from the base class.',
+          );
+        }
+      }
+
+      for (const mem of decl.members ?? []) {
+        if (Object.hasOwn(mem, 'x-spec-kitty-property-only')) {
+          if (mem['x-spec-kitty-property-only'] !== true) {
+            problems.push(
+              `<${decl.tagName}> field "${mem.name}" has a non-exact property-only marker. ` +
+                'The only admitted value is boolean true.',
+            );
+          } else {
+            examinedDocs++;
+            propertyCount++;
+            if (
+              mem.kind !== 'field' ||
+              mem.readonly ||
+              mem.static ||
+              mem.name.startsWith('#') ||
+              mem.privacy === 'protected' ||
+              mem.privacy === 'private'
+            ) {
+              problems.push(
+                `<${decl.tagName}> field "${mem.name}" is marked property-only but is not a ` +
+                  'public settable field.',
+              );
+            }
+            if (mem.state === true || mem['x-spec-kitty-internal-state'] === true) {
+              problems.push(
+                `<${decl.tagName}> field "${mem.name}" is internal state and cannot be property-only.`,
+              );
+            }
+            if (attributedFields.has(mem.name)) {
+              problems.push(
+                `<${decl.tagName}> field "${mem.name}" is both property-only and an observed ` +
+                  'attribute. Structured property inputs must never be double-published.',
+              );
+            }
+            if (!String(mem.description ?? '').trim()) {
+              problems.push(
+                `<${decl.tagName}> property-only field "${mem.name}" has no consumer-facing ` +
+                  'description, so the generated React prop would be undocumented.',
+              );
+            }
+          }
+        }
+        if (mem.kind !== 'method') continue;
+        if (mem.privacy === 'protected' || mem.privacy === 'private') continue;
+        if (mem.name.startsWith('#')) continue;
+        examinedDocs++;
+        methodCount++;
+        if (!String(mem.description ?? '').trim()) {
+          problems.push(
+            `<${decl.tagName}> public method "${mem.name}()" has no description; it reaches the ` +
+              "wrapper's class-level `## Methods` block as `: undefined`.",
+          );
+        }
+      }
+      perElement.set(decl.tagName, {
+        attributes: attrCount,
+        properties: propertyCount,
+        methods: methodCount,
+      });
+    }
+  }
+
+  for (const [tag, want] of Object.entries(expectedDocs.elements ?? {})) {
+    const got = perElement.get(tag);
+    if (!got) {
+      problems.push(
+        `expected-docs.json records <${tag}> but the manifest declares no such element. If it was ` +
+          'removed, remove its row in the same commit.',
+      );
+      continue;
+    }
+    if (
+      got.attributes !== want.attributes ||
+      got.properties !== want.properties ||
+      got.methods !== want.methods
+    ) {
+      problems.push(
+        `<${tag}> documented surface changed: expected ${want.attributes} attribute(s), ` +
+          `${want.properties} property-only field(s), and ${want.methods} method(s); found ` +
+          `${got.attributes}, ${got.properties}, and ${got.methods}. If that is ` +
+          'intended, update expected-docs.json in the same commit and say why.',
+      );
+    }
+  }
+  for (const tag of perElement.keys()) {
+    if (!(tag in (expectedDocs.elements ?? {}))) {
+      problems.push(
+        `<${tag}> is not in expected-docs.json. A new element must be added to the ratchet in the ` +
+          'same commit, or its documentation is unheld.',
+      );
+    }
+  }
+  if (examinedDocs !== expectedDocs.total) {
+    problems.push(
+      `${examinedDocs} documented item(s) examined but expected-docs.json records ` +
+        `${expectedDocs.total}.`,
+    );
+  }
+  if (examinedDocs === 0) {
+    problems.push(
+      'zero public attributes, property-only fields, or methods were examined — refusing to ' +
+        'report green over an empty set, whatever the per-element rows say.',
+    );
+  }
+
+  return { problems, examinedDeclarations, examinedDocs };
+};
+
 // What the package actually registers, read from source: `define('<tag>', X)` or Lit's
 // `@customElement('<tag>')` decorator, which the first cut missed entirely.
 const registered = new Set();
@@ -72,80 +215,6 @@ if (process.argv.includes('--selftest')) {
   const base = JSON.parse(readFileSync(MANIFEST, 'utf8'));
   const clone = () => JSON.parse(JSON.stringify(base));
   const tagged = (m) => m.modules.flatMap((x) => x.declarations ?? []).filter((d) => d.tagName);
-
-  /** Run the doc assertions over an arbitrary manifest, returning the problems. */
-  const audit = (m, expected) => {
-    const out = [];
-    let docs = 0;
-    const per = new Map();
-    for (const mod of m.modules ?? []) {
-      for (const decl of mod.declarations ?? []) {
-        if (!decl.tagName) continue;
-        let a = 0;
-        let p = 0;
-        let me = 0;
-        const attributedFields = new Set(
-          (decl.attributes ?? []).map((attr) => attr.fieldName ?? attr.name),
-        );
-        for (const attr of decl.attributes ?? []) {
-          docs++;
-          a++;
-          if (!String(attr.description ?? '').trim()) out.push(`attr ${decl.tagName}.${attr.name}`);
-        }
-        for (const mem of decl.members ?? []) {
-          if (Object.hasOwn(mem, 'x-spec-kitty-property-only')) {
-            if (mem['x-spec-kitty-property-only'] !== true) {
-              out.push(`invalid property-only marker ${decl.tagName}.${mem.name}`);
-            } else {
-              docs++;
-              p++;
-              if (mem.kind !== 'field')
-                out.push(`property-only non-field ${decl.tagName}.${mem.name}`);
-              if (
-                mem.readonly ||
-                mem.static ||
-                mem.name.startsWith('#') ||
-                mem.privacy === 'protected' ||
-                mem.privacy === 'private'
-              )
-                out.push(`property-only non-settable ${decl.tagName}.${mem.name}`);
-              if (mem.state === true || mem['x-spec-kitty-internal-state'] === true) {
-                out.push(`property-only internal state ${decl.tagName}.${mem.name}`);
-              }
-              if (attributedFields.has(mem.name)) {
-                out.push(`both property-only and observed attribute ${decl.tagName}.${mem.name}`);
-              }
-              if (!String(mem.description ?? '').trim()) {
-                out.push(`property ${decl.tagName}.${mem.name}`);
-              }
-            }
-          }
-          if (mem.kind !== 'method') continue;
-          if (mem.privacy === 'protected' || mem.privacy === 'private') continue;
-          if (mem.name.startsWith('#')) continue;
-          docs++;
-          me++;
-          if (!String(mem.description ?? '').trim()) out.push(`method ${decl.tagName}.${mem.name}`);
-        }
-        per.set(decl.tagName, { attributes: a, properties: p, methods: me });
-      }
-    }
-    for (const [tag, want] of Object.entries(expected.elements ?? {})) {
-      const got = per.get(tag);
-      if (!got) out.push(`missing element ${tag}`);
-      else if (
-        got.attributes !== want.attributes ||
-        got.properties !== want.properties ||
-        got.methods !== want.methods
-      )
-        out.push(`surface changed ${tag}`);
-    }
-    for (const tag of per.keys())
-      if (!(tag in (expected.elements ?? {}))) out.push(`unratcheted ${tag}`);
-    if (docs !== expected.total) out.push('total mismatch');
-    if (docs === 0) out.push('zero examined');
-    return out;
-  };
 
   const EXPECTED = JSON.parse(readFileSync('expected-docs.json', 'utf8'));
   const addProperty = (m, overrides = {}) => {
@@ -175,7 +244,7 @@ if (process.argv.includes('--selftest')) {
     ],
     [
       'a property-only description blanked',
-      'property ',
+      'property-only field',
       (m) => {
         addProperty(m, { description: '' });
         return m;
@@ -183,7 +252,7 @@ if (process.argv.includes('--selftest')) {
     ],
     [
       'a property-only marker weakened from exact true',
-      'invalid property-only marker',
+      'non-exact property-only marker',
       (m) => {
         addProperty(m, { 'x-spec-kitty-property-only': 'true' });
         return m;
@@ -191,7 +260,7 @@ if (process.argv.includes('--selftest')) {
     ],
     [
       'a property-only marker attached to internal state',
-      'property-only internal state',
+      'internal state and cannot be property-only',
       (m) => {
         addProperty(m, { state: true });
         return m;
@@ -199,7 +268,7 @@ if (process.argv.includes('--selftest')) {
     ],
     [
       'a property-only marker attached to a readonly field',
-      'property-only non-settable',
+      'marked property-only but is not a public settable field',
       (m) => {
         addProperty(m, { readonly: true });
         return m;
@@ -207,7 +276,7 @@ if (process.argv.includes('--selftest')) {
     ],
     [
       'a field published as both a property and an observed attribute',
-      'both property-only and observed attribute',
+      'both property-only and an observed attribute',
       (m) => {
         const declaration = addProperty(m);
         declaration.attributes ??= [];
@@ -221,7 +290,7 @@ if (process.argv.includes('--selftest')) {
     ],
     [
       'an attribute description blanked',
-      'attr ',
+      'attribute "',
       (m) => {
         tagged(m)[1].attributes[0].description = '';
         return m;
@@ -229,7 +298,7 @@ if (process.argv.includes('--selftest')) {
     ],
     [
       "an attribute description reduced to whitespace — `?? ''` alone would pass this",
-      'attr ',
+      'attribute "',
       (m) => {
         tagged(m)[1].attributes[0].description = '   \n  ';
         return m;
@@ -237,7 +306,7 @@ if (process.argv.includes('--selftest')) {
     ],
     [
       'a public method description blanked',
-      'method ',
+      'public method',
       (m) => {
         const d = tagged(m).find((x) => (x.members ?? []).some((y) => y.kind === 'method'));
         d.members.find(
@@ -248,7 +317,7 @@ if (process.argv.includes('--selftest')) {
     ],
     [
       'a method with NO privacy field — the skip must not swallow it',
-      'method ',
+      'public method',
       (m) => {
         const d = tagged(m).find((x) => (x.members ?? []).some((y) => y.kind === 'method'));
         const mem = d.members.find(
@@ -262,7 +331,7 @@ if (process.argv.includes('--selftest')) {
     [
       'THE VACUITY CASE: every element stripped of attributes, property-only fields, and methods, so the old ' +
         'declaration-only floor printed a green "all carry a description" over zero items',
-      'zero examined',
+      'zero public attributes',
       (m) => {
         for (const d of tagged(m)) {
           d.attributes = [];
@@ -275,7 +344,7 @@ if (process.argv.includes('--selftest')) {
     ],
     [
       'one documented attribute silently removed — the count ratchet, in isolation',
-      'surface changed',
+      'documented surface changed',
       (m) => {
         tagged(m)[1].attributes.pop();
         return m;
@@ -283,7 +352,7 @@ if (process.argv.includes('--selftest')) {
     ],
     [
       'a new element added without a row in expected-docs.json',
-      'unratcheted',
+      'is not in expected-docs.json',
       (m) => {
         m.modules[0].declarations.push({
           kind: 'class',
@@ -302,7 +371,7 @@ if (process.argv.includes('--selftest')) {
   let caught = 0;
   for (const [note, expect, mutate] of PROBES) {
     const expected = JSON.parse(JSON.stringify(EXPECTED));
-    const problemsFound = audit(mutate(clone(), expected), expected);
+    const problemsFound = auditDocumentedSurface(mutate(clone(), expected), expected).problems;
     const hit =
       expect === null ? problemsFound.length === 0 : problemsFound.some((p) => p.includes(expect));
     if (!hit) {
@@ -433,94 +502,6 @@ for (const mod of manifest.modules ?? []) {
  * `sk-stub` has zero attributes and zero public methods, and without the second floor a
  * regression could hide behind it.
  */
-let examinedDeclarations = 0;
-let examinedDocs = 0;
-/** tag -> { attributes, properties, methods } actually found, for the ratchet below. */
-const perElement = new Map();
-for (const mod of manifest.modules ?? []) {
-  for (const decl of mod.declarations ?? []) {
-    if (!decl.tagName) continue;
-    examinedDeclarations++;
-    let attrCount = 0;
-    let propertyCount = 0;
-    let methodCount = 0;
-    const attributedFields = new Set(
-      (decl.attributes ?? []).map((attr) => attr.fieldName ?? attr.name),
-    );
-
-    for (const attr of decl.attributes ?? []) {
-      examinedDocs++;
-      attrCount++;
-      if (!String(attr.description ?? '').trim()) {
-        problems.push(
-          `<${decl.tagName}> attribute "${attr.name}" has no description, so the generated ` +
-            'React prop documents itself as `undefined`. Add JSDoc to the property that ' +
-            'declares it — normalise-manifest.mjs propagates it, including from the base class.',
-        );
-      }
-    }
-
-    for (const mem of decl.members ?? []) {
-      if (Object.hasOwn(mem, 'x-spec-kitty-property-only')) {
-        if (mem['x-spec-kitty-property-only'] !== true) {
-          problems.push(
-            `<${decl.tagName}> field "${mem.name}" has a non-exact property-only marker. ` +
-              'The only admitted value is boolean true.',
-          );
-        } else {
-          examinedDocs++;
-          propertyCount++;
-          if (
-            mem.kind !== 'field' ||
-            mem.readonly ||
-            mem.static ||
-            mem.name.startsWith('#') ||
-            mem.privacy === 'protected' ||
-            mem.privacy === 'private'
-          ) {
-            problems.push(
-              `<${decl.tagName}> field "${mem.name}" is marked property-only but is not a ` +
-                'public settable field.',
-            );
-          }
-          if (mem.state === true || mem['x-spec-kitty-internal-state'] === true) {
-            problems.push(
-              `<${decl.tagName}> field "${mem.name}" is internal state and cannot be property-only.`,
-            );
-          }
-          if (attributedFields.has(mem.name)) {
-            problems.push(
-              `<${decl.tagName}> field "${mem.name}" is both property-only and an observed ` +
-                'attribute. Structured property inputs must never be double-published.',
-            );
-          }
-          if (!String(mem.description ?? '').trim()) {
-            problems.push(
-              `<${decl.tagName}> property-only field "${mem.name}" has no consumer-facing ` +
-                'description, so the generated React prop would be undocumented.',
-            );
-          }
-        }
-      }
-      if (mem.kind !== 'method') continue;
-      if (mem.privacy === 'protected' || mem.privacy === 'private') continue;
-      if (mem.name.startsWith('#')) continue;
-      examinedDocs++;
-      methodCount++;
-      if (!String(mem.description ?? '').trim()) {
-        problems.push(
-          `<${decl.tagName}> public method "${mem.name}()" has no description; it reaches the ` +
-            "wrapper's class-level `## Methods` block as `: undefined`.",
-        );
-      }
-    }
-    perElement.set(decl.tagName, {
-      attributes: attrCount,
-      properties: propertyCount,
-      methods: methodCount,
-    });
-  }
-}
 // THE ANTI-VACUITY HALF, against a COMMITTED count. The first version of this block floored on
 // `examinedDeclarations`, which is subsumed by the `declared.length === 0` check far above and
 // so could never fire alone — while `examinedDocs`, the number that actually measures whether
@@ -536,49 +517,9 @@ for (const mod of manifest.modules ?? []) {
 // and must be a deliberate line in expected-docs.json, not a number that quietly drops. A floor
 // would also miss a swap — one added, one removed — which per-element equality catches.
 const expectedDocs = JSON.parse(readFileSync('expected-docs.json', 'utf8'));
-for (const [tag, want] of Object.entries(expectedDocs.elements ?? {})) {
-  const got = perElement.get(tag);
-  if (!got) {
-    problems.push(
-      `expected-docs.json records <${tag}> but the manifest declares no such element. If it was ` +
-        'removed, remove its row in the same commit.',
-    );
-    continue;
-  }
-  if (
-    got.attributes !== want.attributes ||
-    got.properties !== want.properties ||
-    got.methods !== want.methods
-  ) {
-    problems.push(
-      `<${tag}> documented surface changed: expected ${want.attributes} attribute(s), ` +
-        `${want.properties} property-only field(s), and ${want.methods} method(s); found ` +
-        `${got.attributes}, ${got.properties}, and ${got.methods}. If that is ` +
-        'intended, update expected-docs.json in the same commit and say why.',
-    );
-  }
-}
-for (const tag of perElement.keys()) {
-  if (!(tag in (expectedDocs.elements ?? {}))) {
-    problems.push(
-      `<${tag}> is not in expected-docs.json. A new element must be added to the ratchet in the ` +
-        'same commit, or its documentation is unheld.',
-    );
-  }
-}
-if (examinedDocs !== expectedDocs.total) {
-  problems.push(
-    `${examinedDocs} documented item(s) examined but expected-docs.json records ` +
-      `${expectedDocs.total}.`,
-  );
-}
-if (examinedDocs === 0) {
-  problems.push(
-    'zero public attributes, property-only fields, or methods were examined — refusing to ' +
-      'report green over an empty ' +
-      'set, whatever the per-element rows say.',
-  );
-}
+const documentedSurface = auditDocumentedSurface(manifest, expectedDocs);
+problems.push(...documentedSurface.problems);
+const { examinedDeclarations, examinedDocs } = documentedSurface;
 
 if (problems.length) {
   console.error(`❌ ${MANIFEST} does not describe the package's elements (FR-006, SC-004):`);
