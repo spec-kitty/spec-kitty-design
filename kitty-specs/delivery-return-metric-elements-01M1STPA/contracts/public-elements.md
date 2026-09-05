@@ -42,7 +42,7 @@ export type EvidenceStage = Readonly<{
 |---|---|---|---|
 | `stages` | none | `ReadonlyArray<EvidenceStage>` (manifest-facing structural literal) | `Object.freeze([])` |
 
-There are no public attributes, methods, events, or slots. Input records require unique nonblank IDs, nonblank labels/display values, optional string annotations, and supported tones. Empty/invalid input renders one generic unavailable state, not a partial chain.
+There are no public attributes, methods, events, or slots. Input records require unique nonblank IDs and nonblank labels/display values; annotation and tone are optional. Omitting both remains valid, produces neutral/no-annotation presentation, and never mutates the record to add defaults. Empty/invalid input renders one generic unavailable state, not a partial chain.
 
 ### Parts
 
@@ -58,4 +58,5 @@ One same-root native ordered list contains one direct list item and one actual `
 - Public code and defaults contain no Team Kitty domain vocabulary.
 - Styling API is inherited `--sk-*` tokens and the documented parts only.
 - Both hosts are block boxes and both themes are token-driven.
+- The required approved story surrounds the chain with real existing `sk-card`/`sk-grid` and reaches real `sk-pill-tag` only through annotated `sk-metric` composition.
 - There is no `sk-team-overview`, duplicate card/grid/tag/stat-grid, or hand-authored wrapper.

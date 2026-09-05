@@ -107,7 +107,15 @@ This WP covers FR-001–FR-005, FR-013, and the metric half of FR-016. It satisf
 6. Assert missing/blank required content and unsupported tone fail closed to the generic status without partial primary values.
 7. Target all five literal selectors through external `sk-metric::part(name)` rules and verify they resolve to present shadow nodes.
 8. Compare `shadowRoot.adoptedStyleSheets[0]` with the named `skMetricSheet` module export by identity and require zero shadow `<style>` elements.
-9. Demonstrate at least one direct production-source reversal for each coherent acceptance group, capture the named failing assertion, and restore before commit. Do not add mutation-registry entries.
+9. Execute every row of this fixed reversal matrix against production source. Capture the named failing assertion and command exit nonzero, restore the exact source, rerun that assertion green, and record both outputs before commit. Do not add mutation-registry entries.
+
+| Coherent group | Temporary production-source reversal | Required named assertion that must turn red |
+|---|---|---|
+| Opaque supplied content | Replace the `displayValue` text binding with a digits-only transformation | `preserves every supplied display-value byte` |
+| Native definition semantics | Replace the `<dl>/<dt>/<dd>` relationship with generic `<div>` nodes | `exposes one native definition relationship without a heading` |
+| Annotation/pill composition | Replace the actual `sk-pill-tag` node with a plain span | `composes the existing pill tag and omits absent annotation chrome` |
+| Fail-closed validation and tone | Allow an unsupported tone through the valid render path | `fails closed for invalid required content or tone` |
+| Public parts and constructed stylesheet | Remove `part="value"` from the valid template | `targets all five public parts and adopts only skMetricSheet` |
 
 ### T002 — Element and styles
 

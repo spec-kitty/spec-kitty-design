@@ -65,13 +65,14 @@ As an HTML or React consumer, I can use documented element APIs and generated wr
 
 1. **Given** the generated React wrapper, **When** a consumer assigns a readonly evidence-stage array, **Then** TypeScript preserves the exported stage shape without `any`.
 2. **Given** default-dark and `LightMode` stories, **When** each is rendered, **Then** both meet WCAG 2.1 AA and use token-driven theming with no cross-shadow theme selector.
-3. **Given** the required Delivery return demonstration, **When** it is composed with existing `sk-card`, `sk-grid`, and `sk-pill-tag` capabilities, **Then** no duplicate card, grid, tag, or Team-overview component is introduced.
+3. **Given** the required Delivery return demonstration, **When** it renders, **Then** its story DOM contains real existing `sk-card` and `sk-grid` elements around the chain and real `sk-pill-tag` descendants supplied by annotated metrics, with no duplicate card, grid, tag, or Team-overview implementation.
 4. **Given** a fresh regeneration at the same commit, **When** all generators run again, **Then** committed public artifacts are byte-stable.
 
 ## Edge Cases
 
 - Missing optional annotation/status content produces no empty supporting chrome.
 - Empty strings, malformed stage records, duplicate/blank IDs, and unsupported tones fail to a generic non-misleading state; the element never guesses corrected domain data.
+- A valid stage may omit both `annotation` and `tone`; it remains in the chain, renders without annotation chrome, inherits the neutral metric presentation, and is not mutated to add defaults.
 - Long localized labels and large preformatted values wrap or remain readable without clipping or changing the supplied text.
 - Two stages have one connector; six stages remain legible and do not assume the reference fixture's four-stage count.
 - A stage model update that preserves an ID preserves that stage's rendered identity while updating supplied content; the component does not select or animate stages.
@@ -98,18 +99,18 @@ As an HTML or React consumer, I can use documented element APIs and generated wr
 | FR-012 | Safe invalid state | Empty or structurally invalid input MUST produce a deterministic generic empty/invalid presentation and MUST NOT render a partially trusted chain. | Medium | Open |
 | FR-013 | Generic tones | Tone names and rendering MUST remain generic (`neutral`, `info`, `success`, `attention`) and MUST NOT encode Team Kitty state names. | High | Open |
 | FR-014 | Generated consumers | The manifest-derived React wrapper and Vue declaration MUST expose the complete public contract; the React stage property MUST retain its readonly type without `any`. | High | Open |
-| FR-015 | Required demonstrations | Stories MUST cover the approved-density four-stage Delivery return example, honest supporting annotations, long labels/large values, two/four/six stages, narrow vertical reflow, default dark, and `LightMode`. | High | Open |
-| FR-016 | Public documentation | Every public property and declared `::part()` MUST be documented and recorded in the repository's exact/shrink-only ratchets with a targeting test for every part. | High | Open |
+| FR-015 | Required demonstrations | Stories MUST cover the approved-density four-stage Delivery return example, honest supporting annotations, long labels/large values, two/four/six stages, narrow vertical reflow, default dark, and `LightMode`. `ApprovedExample` MUST literally compose the existing `sk-card` and `sk-grid`; annotated stages MUST reach the existing `sk-pill-tag` through `sk-metric`. | High | Open |
+| FR-016 | Public documentation | Every public property and declared `::part()` MUST be documented. Executable evidence MUST assert the exact per-tag manifest part sets (`metric`, `label`, `value`, `annotation`, `empty-state`; `list`, `stage`, `connector`, `empty-state`), record the aggregate ratchet delta, and target every part in a rendered element. Missing, extra, duplicate, or zero-count part declarations MUST fail. | High | Open |
 
 ### Non-Functional Requirements
 
 | ID | Title | Requirement | Category | Priority | Status |
 |----|-------|-------------|----------|----------|--------|
-| NFR-001 | Accessibility | Every new/changed Storybook scenario MUST report zero WCAG 2.1 AA violations under the repository axe gate; keyboard reading order and forced-colors distinction MUST remain valid. | Accessibility | High | Open |
-| NFR-002 | Visual fidelity | Dark and `LightMode` stories MUST match the approved Team overview visual grammar, including hierarchy, density, tabular values, connectors, and narrow reflow, through the repository's visual review process. | Visual | High | Open |
-| NFR-003 | Token fidelity | All component CSS values MUST resolve through existing or explicitly reviewed `--sk-*` tokens; no raw color, spacing, typography, radius, shadow, motion, or z-index values may ship in component CSS. | Maintainability | High | Open |
+| NFR-001 | Accessibility | Every new/changed Storybook scenario MUST report zero WCAG 2.1 AA violations under the repository axe gate; keyboard reading order MUST remain valid. A real Playwright context with `forcedColors: 'active'` MUST prove connector/stage distinction, and a controlled authored-source reversal MUST make the named forced-colors assertion red before restoration. | Accessibility | High | Open |
+| NFR-002 | Visual fidelity | Dark and `LightMode` stories MUST match the approved Team overview visual grammar, including hierarchy, density, tabular values, connectors, and narrow reflow, through the repository's visual review process. For each new tag, computed-style evidence on equivalent dark/light fixtures MUST show at least one approved token-driven visual property changes while content and semantics remain equivalent. | Visual | High | Open |
+| NFR-003 | Token fidelity | All design-bearing component CSS values MUST resolve through existing or explicitly reviewed `--sk-*` tokens; no raw color, spacing/gap, typography/line, radius, border/outline, shadow, motion, or z-index values may ship. A parsed, component-scoped gate with selftests MUST enforce these property classes while allowing only documented CSS-wide/structural exceptions. | Maintainability | High | Open |
 | NFR-004 | Deterministic artifacts | CSS modules, static output where applicable, `custom-elements.json`, React wrappers, Vue declarations, and `SIZES.md` MUST regenerate byte-identically at the final commit. | Reliability | High | Open |
-| NFR-005 | Repository gates | The complete recipe-prescribed quality, type, build, manifest/wrapper drift, unit/browser, Storybook, axe, and visual-regression gates MUST pass after rebasing onto the latest `train/elements-first`. | Quality | High | Open |
+| NFR-005 | Repository gates | The complete recipe-prescribed quality, type, build, manifest/wrapper drift, unit/browser, Storybook, axe, and visual-regression gates MUST pass on the integrated latest-train head. Storybook build execution MUST fail closed on timeout or elapsed duration above 180 seconds through a deterministic wrapper whose timeout arm has a cheap selftest. | Quality | High | Open |
 | NFR-006 | Review evidence | Tier C pre-merge review MUST record three independent lens verdicts against the exact PR head, plus the required maintainer approval for component changes. | Governance | High | Open |
 
 ### Constraints
@@ -123,7 +124,7 @@ As an HTML or React consumer, I can use documented element APIs and generated wr
 | C-005 | Canonical sources | CSS has one authored source in `packages/styles`; markup has one authored source in `packages/elements` only when a genuine static form exists. Generated outputs MUST NOT be hand-edited. | Architecture | High | Open |
 | C-006 | Shadow styling API | Public styling is limited to inherited tokens, documented `::part()` surfaces, and documented per-component properties; no selector may cross a shadow boundary. | Architecture | High | Open |
 | C-007 | Mission ownership | Authored component sources are limited to `metric` and `evidence-chain`; shared generated registries may change only as derived consequences of those sources. | Scope | High | Open |
-| C-008 | Integration target | The eventual single mission PR targets only `train/elements-first`, uses `Refs #147`, and never merges or pushes `main`, publishes, or deploys. | Delivery | High | Open |
+| C-008 | Integration target | The eventual single mission PR targets only `train/elements-first`, uses `Refs #147`, and never merges or pushes `main`, publishes, or deploys. WP01/WP02 authored work may proceed after #79, but shared-artifact WP03 MUST wait until #145/#146 have landed, then run only after a latest-train refresh and supported WP01→WP02 consolidation. | Delivery | High | Open |
 
 ### Key Entities
 
@@ -139,9 +140,9 @@ As an HTML or React consumer, I can use documented element APIs and generated wr
 - **SC-001**: A frozen four-stage Delivery return fixture renders all four supplied values and annotations exactly, in order, with one composed `sk-metric` per stage and no mutation of the fixture.
 - **SC-002**: Two-, four-, and six-stage fixtures render the same item count/order in wide and narrow layouts; connector count is always `stage count - 1`.
 - **SC-003**: Currency-looking, percentage-looking, large, and nonnumeric display strings survive element and generated React-wrapper rendering byte-for-byte with no `any` in the structured stage prop.
-- **SC-004**: Every new required story reports zero axe violations in default dark and `LightMode`, and visual review approves both themes plus narrow reflow.
+- **SC-004**: Every new required story reports zero axe violations in default dark and `LightMode`; computed evidence proves token-driven theme variance for both new tags; an active forced-colors context preserves connector/stage distinction; and visual review approves both themes plus narrow reflow.
 - **SC-005**: Source and generated package code contain zero Team Kitty imports and expose zero Team Kitty-specific public tags, exported types, properties, events, defaults, or calculations.
-- **SC-006**: All repository-prescribed generation, drift, type, quality, build, test, Storybook, axe, visual, and release-graph gates pass at the exact final head after a latest-train rebase.
+- **SC-006**: All repository-prescribed generation, drift, type, quality, build, test, Storybook, axe, visual, release-graph, exact-part, parsed-token-literal, and 180-second Storybook-budget gates pass at the exact final head after the required latest-train integration sequence.
 - **SC-007**: Three Tier C pre-merge lenses and one maintainer approve the exact PR head before any authorized merge to `train/elements-first`.
 
 ## Explicit non-goals

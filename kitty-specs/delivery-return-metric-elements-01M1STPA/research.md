@@ -81,10 +81,12 @@ Metric and evidence-chain authored sources/tests/stories can be reviewed indepen
 
 - Focused element tests should use frozen stage arrays/records and retain copies of input values before/after rendering without shadow-DOM snapshot testing.
 - Type tests must prove the generated React `stages` prop accepts the exported readonly stage type and rejects malformed/`any`-masking use.
-- Part tests must target every declared part from outside each shadow root and keep `expected-parts.json` exact.
-- Story coverage must be ratcheted for two/four/six stages, approved four-stage density, long/large values, narrow layout, invalid/empty state, and `LightMode`.
+- Part tests must target every declared part from outside each shadow root; a parsed manifest check must enforce the exact per-tag sets because `expected-parts.json` is only shrink-safe in aggregate.
+- Story coverage must be ratcheted for two/four/six stages, approved four-stage density, long/large values, narrow layout, invalid/empty state, and `LightMode`. The approved story must literally compose existing card/grid/pill elements; computed evidence must distinguish equivalent dark/light fixtures for both new tags.
+- An active forced-colors browser context plus a controlled authored-CSS reversal must prove connector/stage distinction. A parsed scoped gate must cover raw design values beyond stylelint's color/spacing subset.
 - Visual tests compare the approved reference; local baselines are not authority.
-- Final integration requires a latest-train refresh before regeneration, then the full recipe gates and Tier C exact-head three-lens review.
+- Storybook's 180-second target requires a fail-closed build wrapper and cheap timeout selftest, not an elapsed-time note after a plain build.
+- After WP01/WP02 approval and #145/#146 landing, final integration requires a latest-train refresh and supported WP01→WP02 consolidation before WP03 starts; later train movement invalidates WP03 evidence. Tier C remains an exact-PR-head review.
 
 ## Open questions and risks
 
@@ -92,6 +94,6 @@ Metric and evidence-chain authored sources/tests/stories can be reviewed indepen
 - **Metric static form**: planning must make an explicit yes/no decision after checking whether an annotation can genuinely reuse `sk-pill-tag` in the no-JavaScript path. Absence is safer than duplicated authored markup.
 - **Nested definition/list semantics**: verify with the browser accessibility tree and axe that one metric per list item does not add noisy or misleading grouping.
 - **Stable-ID validation**: a repeated-render identity assertion should prove IDs are used while remaining outside behavior/mutation ownership.
-- **Shared artifact drift**: #145/#146 are landing serially on the same train. Final implementation must refresh from the then-current train and regenerate exactly once after authored lanes consolidate.
+- **Shared artifact drift**: #145/#146 are landing serially on the same train. Hold WP03 until they land, refresh to the then-current train, supported-consolidate authored WP01/WP02, and generate/review WP03 on that pinned head. If train moves, rerun/re-review WP03 rather than repairing ratchets after approval.
 
 No product decision is currently blocked. The risks above are implementation/verification obligations and do not broaden mission scope.

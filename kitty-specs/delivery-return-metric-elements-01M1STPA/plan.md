@@ -11,7 +11,7 @@ Add two generic, presentational elements: `sk-metric` renders one supplied label
 
 Both components remain element-only. The chain's structured data cannot be represented honestly as attributes, and its static form would have to duplicate the metric implementation. The metric's optional annotation deliberately composes the existing `sk-pill-tag`; a no-JavaScript copy would either leave that child unupgraded or restate its markup. ADR-10 permits no markup module where no genuine static form exists.
 
-The implementation reuses the existing Lit, manifest, React/Vue generation, part/story ratchets, `sk-card`, `sk-grid`, and `sk-pill-tag` machinery. No dependency, token, behavior-registry subject, event, application import, or Team-specific aggregate is added. Three sequential work packages isolate component authorship from the serial shared-artifact integration point.
+The implementation reuses the existing Lit, manifest, React/Vue generation, part/story ratchets, `sk-card`, `sk-grid`, and `sk-pill-tag` machinery. No dependency, token, behavior-registry subject, event, application import, or Team-specific aggregate is added. Three sequential work packages isolate component authorship from the serial shared-artifact integration point. WP01/WP02 may proceed after landed prerequisite #79; WP03 is held until #145/#146 land and the approved authored WPs have been consolidated onto a freshly refreshed train base.
 
 ## Technical Context
 
@@ -21,7 +21,7 @@ The implementation reuses the existing Lit, manifest, React/Vue generation, part
 
 **Storage**: N/A
 
-**Testing**: Vitest browser/node projects, Playwright component/visual checks, Storybook build, axe, and repository drift/quality gates
+**Testing**: Vitest browser/node projects, Playwright component/visual/forced-colors checks, Storybook build, axe, exact manifest-part and parsed token-literal gates, and repository drift/quality gates
 
 **Target Platform**: Modern browsers through ESM and classic-IIFE builds; generated React 19 and Vue type consumers
 
@@ -50,13 +50,13 @@ The implementation reuses the existing Lit, manifest, React/Vue generation, part
 |---|---|
 | Specification fidelity | APIs use generic metric/evidence language and preserve supplied strings/order; no Team Kitty state, action, calculation, or public aggregate enters library code. |
 | Token and architecture integrity | One authored CSS source per element, existing semantic tokens first, open shadow roots, declared parts, and no cross-root selectors. No new package or dependency. |
-| Accessibility | Native definition relationship per metric, a same-root ordered list for the chain, decorative connectors, forced-colors distinction, both themes, axe zero, and accessibility-tree checks are explicit gates. |
-| Test quality | Focused tests prove opaque values, fail-closed validation, readonly preservation, stable identity, composition, parts, and stylesheet adoption through deliberate red reversals. No render-only or shadow snapshot evidence. |
+| Accessibility | Native definition relationship per metric, a same-root ordered list for the chain, decorative connectors, an active forced-colors Playwright context plus source reversal, both themes, axe zero, and accessibility-tree checks are explicit gates. |
+| Test quality | Focused tests prove opaque values, fail-closed validation, readonly preservation, absent optional fields, stable identity, literal composition, exact parts, and stylesheet adoption through enumerated deliberate red reversals. No render-only or shadow snapshot evidence. |
 | Generated consumers | Manifest, React wrapper, Vue declaration, CSS modules, and size report are regenerated and checked; the structured property type is self-contained at the manifest boundary. |
-| Visual fidelity | Approved four-stage density, long/large content, two/four/six stages, narrow vertical reflow, dark, and `LightMode` are individually addressable stories/visual targets. |
-| Performance | Final evidence records the enforced Storybook build below 180 seconds; component algorithms remain O(stage count). |
+| Visual fidelity | Approved four-stage density, long/large content, two/four/six stages, narrow vertical reflow, dark, and `LightMode` are individually addressable stories/visual targets; computed-style comparisons prove token-driven theme variance for both tags. |
+| Performance | A deterministic Storybook build wrapper fails on timeout or elapsed duration above 180 seconds and has a cheap timeout-arm selftest; component algorithms remain O(stage count). |
 | Review and merge | Tier C requires three pre-merge lenses and one maintainer approval at the exact PR head. The only eventual target is `train/elements-first`; train-to-`main`, publish, and deploy remain forbidden. |
-| Shared artifact coordination | After component WPs are approved, refresh from the latest train, integrate in dependency order, regenerate once, and do not rebase after final generated evidence without rerunning it. |
+| Shared artifact coordination | After WP01/WP02 approval and #145/#146 landing, refresh from latest train and consolidate WP01→WP02 before WP03 is claimed. WP03 alone computes shared ratchets/generated evidence on that pinned integration head. Later train movement invalidates WP03 evidence and returns it through implementation/review on the new base. |
 
 No charter exception or unresolved clarification is required. A newly proven token/dependency need is a stop-and-escalate condition, not implied authority.
 
@@ -189,7 +189,7 @@ Record exactly these new IDs in `expected-stories.json`:
 ### Evidence chain — `Elements/SkEvidenceChain`
 
 - `Default` — generic four-stage sequence
-- `ApprovedExample` — required Delivery return fixture data only
+- `ApprovedExample` — required Delivery return fixture inside real existing `sk-card` and `sk-grid` composition
 - `TwoStages`
 - `SixStages`
 - `Narrow`
@@ -198,9 +198,9 @@ Record exactly these new IDs in `expected-stories.json`:
 - `InvalidInput`
 - `LightMode`
 
-The resulting IDs follow the repository convention (`elements-skmetric--...` and `elements-skevidencechain--...`). `LightMode` uses a real `.sk-light` wrapper. The approved story may contain Investment/Completed/Deployed/Verified and honest annotations because it is a representative fixture; those strings do not enter component source, defaults, types, or docs.
+The resulting IDs follow the repository convention (`elements-skmetric--...` and `elements-skevidencechain--...`). `LightMode` uses a real `.sk-light` wrapper around content equivalent to the default-dark fixture. `ApprovedExample` imports/registers and renders actual existing `sk-card` and `sk-grid` elements around `sk-evidence-chain`; annotated stages cause the nested `sk-metric` elements to render actual existing `sk-pill-tag` descendants. The story may contain Investment/Completed/Deployed/Verified and honest annotations because it is a representative fixture; those strings do not enter component source, defaults, types, or docs.
 
-Visual coverage targets approved dark, equivalent light, compact metric, long content, two/six-stage generality, and narrow vertical reflow. CI-produced baselines are authoritative; local actual PNGs are diagnostic and never committed as approved bytes.
+Visual coverage targets approved dark, equivalent light, compact metric, long content, two/six-stage generality, and narrow vertical reflow. Functional Playwright compares equivalent dark/`LightMode` content and requires at least one approved token-driven computed property to differ for `sk-metric` and for `sk-evidence-chain`. CI-produced baselines are authoritative; local actual PNGs are diagnostic and never committed as approved bytes.
 
 ## Behavior, type, and accessibility evidence
 
@@ -220,6 +220,8 @@ Do not add `sk-metric` or `sk-evidence-chain` subjects to `behaviours.json` or `
 - all five parts are externally targetable;
 - the exact named `skMetricSheet` is adopted and no `<style>` is injected.
 
+WP01's red-evidence matrix is fixed before implementation: opaque text, native definition semantics, annotation/pill composition, fail-closed validation, and part/constructed-sheet adoption are separate coherent groups. For each row the WP prompt names the temporary production-source break and the single expected failing assertion; the implementer records red output, restores the source, and records the same assertion green.
+
 `fixtures/elements-behaviour/src/sk-evidence-chain.test.ts` proves:
 
 - frozen two/four/six-stage inputs render one direct list item and one `sk-metric` per stage;
@@ -227,10 +229,11 @@ Do not add `sk-metric` or `sk-evidence-chain` subjects to `behaviours.json` or `
 - rerender with stable IDs preserves stage node identity while new references update text;
 - connector count is `n - 1` and connectors are absent from the accessibility tree;
 - malformed/duplicate/blank-ID input fails closed as a whole;
+- a stage with absent `tone` and `annotation` remains valid, renders neutral/no annotation chrome, and does not acquire caller-visible defaults;
 - all four parts are externally targetable;
 - the exact named `skEvidenceChainSheet` is adopted and no `<style>` is injected.
 
-Each WP records a direct production-source reversal that makes its named acceptance assertion red before restoration. Tests do not snapshot shadow markup or certify only that an element renders.
+WP02 likewise fixes separate red rows for immutable order/stable identity, literal metric composition/connectors, whole-input validation including absent optional fields, ordered-list/accessibility semantics, forced-colors authored CSS, and part/constructed-sheet adoption. Tests do not snapshot shadow markup or certify only that an element renders.
 
 ### Manifest and generated-consumer evidence
 
@@ -238,9 +241,13 @@ Expected documentation delta:
 
 - `sk-metric`: 5 attributes, 0 property-only fields, 0 methods.
 - `sk-evidence-chain`: 0 attributes, 1 property-only field, 0 methods.
-- `expected-docs.json` total increases by 6 from the implementation-time train baseline.
+- `expected-docs.json` total increases by 6 from the recorded latest-train + WP01/WP02 integrated baseline.
 
-Expected part delta: nine total parts (five metric, four chain), with the total increased from the implementation-time train baseline. Expected story delta: fifteen IDs.
+Expected part delta: nine total parts (five metric, four chain), with the total increased from that recorded integrated baseline. The shrink-only aggregate ratchet is necessary but insufficient: `scripts/check-component-public-contract.mjs` parses `custom-elements.json`, accepts explicit `--tag` expectations, and fails on any missing, extra, duplicate, or empty per-tag part set; its `--selftest` proves both missing and extra cases. Rendered fixture tests target every one of the nine parts. Expected story delta: fifteen IDs.
+
+`scripts/check-component-token-literals.mjs` parses the two authored component stylesheets with the repository's existing CSS parser and rejects raw design-bearing values in color, spacing/gap, typography/line, radius, border/outline, shadow, motion, and z-index declarations. Its narrowly documented CSS-wide/structural exceptions do not permit raw design values, and `--selftest` proves every property class has a red case. No dependency is added.
+
+`scripts/build-storybook-with-budget.mjs` owns the real Storybook build invocation, terminates/fails closed at 180 seconds, fails a completed build whose elapsed time exceeds the same ceiling, and reports duration. Its internal `--selftest` exercises success, nonzero exit, and timeout using short fixture children rather than a real 180-second wait.
 
 `packages/react/type-tests/wrappers.type-test.tsx` proves scalar metric props, supported literal tones, readonly `EvidenceStage[]`, rejected malformed stages/tones, and no explicit or inferred `any`. `fixtures/react-consumer/src/sk-evidence-chain.test.tsx` proves the wrapper assigns the exact frozen `stages` identity through the property path, replaces it on rerender, and resets omission to a fresh frozen empty array without a `stages` attribute. This is verification of the already-shipped property-only mechanism, not a new generator feature or behavior-registry subject.
 
@@ -292,6 +299,9 @@ packages/react/src/react-utils.js                      # generated only if bytes
 packages/react/.wrapper-floor                          # generated floor
 packages/elements/vue.d.ts                             # generated
 packages/elements/SIZES.md                             # generated after build
+scripts/check-component-public-contract.mjs
+scripts/check-component-token-literals.mjs
+scripts/build-storybook-with-budget.mjs
 packages/react/type-tests/wrappers.type-test.tsx
 fixtures/react-consumer/src/sk-evidence-chain.test.tsx
 apps/storybook/src/tests/sk-metric.spec.ts
@@ -305,7 +315,7 @@ docs/design-system/changelog.md
 CHANGELOG.md
 ```
 
-WP03 depends on WP01 and WP02. It updates `CHANGELOG.md` with exactly the two new public tags because `check-release-graph.mjs` compares every manifest tag with that file. Other generated bytes may move only as deterministic consequences of the required latest-train refresh. No sibling authored component, token, dependency, lockfile, ADR, application, or other mission record is in scope.
+WP03 depends on approved WP01/WP02, landed #145/#146, a fresh `origin/train/elements-first` refresh, and supported WP01→WP02 consolidation onto the clean mission target. It updates `CHANGELOG.md` with exactly the two new public tags because `check-release-graph.mjs` compares every manifest tag with that file. Other generated bytes may move only as deterministic consequences of that recorded integration base. No sibling authored component, token, dependency, lockfile, ADR, application, or other mission record is in scope.
 
 ## Project Structure
 
@@ -330,6 +340,11 @@ packages/elements/src/
 fixtures/
 ├── elements-behaviour/src/sk-{metric,evidence-chain}.test.ts
 └── react-consumer/src/sk-evidence-chain.test.tsx
+
+scripts/
+├── check-component-public-contract.mjs
+├── check-component-token-literals.mjs
+└── build-storybook-with-budget.mjs
 ```
 
 **Structure decision**: extend the existing four-package elements-first monorepo. No new package, app, service, storage, or application integration is needed.
@@ -365,7 +380,7 @@ fixtures/
 - **Purpose**: Prove approved density/themes/generality and leave every public surface documented and release-reachable.
 - **Relevant requirements**: FR-015–FR-016; NFR-001–NFR-006; C-008.
 - **Affected surfaces**: Storybook Playwright/visual coverage, docs, changelogs, styles export map, all final gates.
-- **Sequencing/depends-on**: IC-03 and a latest-train refresh.
+- **Sequencing/depends-on**: IC-03, landed #145/#146, a latest-train refresh, and supported WP01→WP02 consolidation before WP03 begins.
 - **Risks**: shared-artifact drift from #145/#146, local baseline substitution, stale exact-head review, or release-graph omissions.
 
 ## Gate sequence
@@ -374,13 +389,15 @@ fixtures/
 
 Each component WP runs its focused Vitest browser file, TypeScript/lint for touched sources, CSS generation/check for its local sheet, and a focused Storybook build/load check without invoking the full mutation fleet. WP03 owns all full-repository gates.
 
-### Final integration gates
+### WP03 entry and final integration gates
 
-After WP01/WP02 approval and immediately before WP03 final evidence:
+WP03 is the serial shared-artifact stage. It must not be claimed merely because WP01/WP02 are approved:
 
-1. Fetch the current `origin/train/elements-first` and rebase the mission branch before shared artifacts are regenerated.
-2. Integrate approved WPs in dependency order.
-3. Regenerate in repository order:
+1. Wait until #145 and #146 are verified on `origin/train/elements-first`.
+2. Require clean mission target and lane worktrees with no active writer. Fetch the current train and refresh the canonical mission target through the supported stale-state/git workflow.
+3. Consolidate approved WP01 then WP02 onto that refreshed target through the supported dependency-aware workflow. Record the train SHA, WP01 SHA, WP02 SHA, and resulting integrated target SHA.
+4. Claim WP03 only if its returned workspace contains exactly that integrated target. If the runtime cannot construct this base safely, stop as blocked; do not manually assemble a substitute worktree.
+5. Compute ratchets from this base and regenerate in repository order:
 
    ```sh
    node scripts/build-elements-css.mjs
@@ -392,7 +409,7 @@ After WP01/WP02 approval and immediately before WP03 final evidence:
    node scripts/measure-elements-sizes.mjs
    ```
 
-4. Run all drift/content/hygiene/type/release gates:
+6. Run all drift/content/hygiene/type/release gates, including the exact contract and parsed CSS checks:
 
    ```sh
    node scripts/build-elements-css.mjs --check
@@ -407,6 +424,10 @@ After WP01/WP02 approval and immediately before WP03 final evidence:
    node scripts/check-adopted-css-boundaries.mjs
    node scripts/check-element-css-hygiene.mjs
    node scripts/check-part-ratchet.mjs
+   node scripts/check-component-public-contract.mjs --manifest packages/elements/custom-elements.json --tag sk-metric=metric,label,value,annotation,empty-state --tag sk-evidence-chain=list,stage,connector,empty-state
+   node scripts/check-component-public-contract.mjs --selftest
+   node scripts/check-component-token-literals.mjs packages/styles/src/metric/sk-metric.css packages/styles/src/evidence-chain/sk-evidence-chain.css
+   node scripts/check-component-token-literals.mjs --selftest
    node scripts/check-story-theme-wrapper.mjs
    node scripts/check-story-theme-wrapper.mjs --selftest
    node scripts/typecheck-all.mjs
@@ -418,11 +439,12 @@ After WP01/WP02 approval and immediately before WP03 final evidence:
    npm run quality:all
    ```
 
-5. Run `npm run test`, then the full `node scripts/suite-selftest.mjs` serially with no competing browser fleet. No new mutation arm is expected, but the complete existing fleet must remain green.
-6. Build Storybook and run axe, functional Chromium/Firefox component coverage, and diagnostic local visual tests. WebKit remains required in final unqualified CI; local system-library installation is not authorized.
-7. Commit every generated output and require a clean tree. Re-run deterministic checks against the exact commit.
-8. Open one eventual PR to `train/elements-first` with `Refs #147`; use CI-produced visual bytes as the only baseline authority.
-9. At the final exact PR head require all CI, three Tier C lens verdicts with dispositions, and one maintainer approval. Any push invalidates SHA-pinned evidence and requires it to rerun.
+7. Run `npm run test`, then the full `node scripts/suite-selftest.mjs` serially with no competing browser fleet. No new mutation arm is expected, but the complete existing fleet must remain green.
+8. Run `node scripts/build-storybook-with-budget.mjs --selftest`, then `node scripts/build-storybook-with-budget.mjs`; the latter invokes the real build and fails closed at 180 seconds. Run axe, functional Chromium/Firefox coverage, the active forced-colors Chromium case, and diagnostic local visual tests. WebKit remains required in final unqualified CI; local system-library installation is not authorized.
+9. Commit every generated output and require a clean tree. Re-run deterministic checks against the exact commit and verify `origin/train/elements-first` still equals the recorded train SHA.
+10. If train moved, do not rebase an approved WP03 or edit ratchets/generated files after review. Return WP03 through supported stale-state recovery onto the new refreshed/consolidated base, then repeat implementation evidence and independent review.
+11. If train is unchanged, use the supported workflow to consolidate the approved WP03 result, open one eventual PR to `train/elements-first` with `Refs #147`, and use CI-produced visual bytes as the only baseline authority.
+12. At the final exact PR head require all CI, three Tier C lens verdicts with dispositions, and one maintainer approval. Any push invalidates SHA-pinned evidence and requires it to rerun.
 
 ## Complexity Tracking
 
@@ -432,6 +454,6 @@ No charter violation is requested. The two-element/three-WP split is the minimum
 
 - If the approved connector/value treatment cannot be achieved from existing semantic tokens, stop for a token decision and maintainer scope rather than adding a component token silently.
 - If the generated React declaration refers to a missing local type alias, correct the source declaration shape and regenerate; do not hand-edit wrapper output.
-- If another mission lands on the train after the final refresh, repeat refresh/regeneration/gates before exact-head review; do not resolve generated conflicts by editing sibling authored sources.
+- If another mission lands after the recorded WP03 integration base, invalidate WP03 evidence and return it through supported refresh/consolidation/implementation/review; do not post-rebase an approved lane or resolve generated conflicts by editing sibling authored sources.
 - If same-root ordered-list semantics or connector forced-colors visibility fails measured accessibility checks, return to the element/CSS design inside this mission.
 - Any need for events, selection, application imports, domain calculations, new dependencies, public aggregate tags, or sibling component edits exceeds issue #147 and blocks implementation pending explicit scope.
