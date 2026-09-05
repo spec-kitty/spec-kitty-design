@@ -2,7 +2,7 @@
 // Authored source: packages/styles/src/facts/*.html
 // Regenerate: node scripts/build-styles-only-markup.mjs
 //
-// facts is deliberately styles-only — it has no custom element. See ADR-10 and #141.
+// facts is deliberately styles-only — it has no custom element. See ADR-10's "Styles-only components are a class, not a fixed exception count" section.
 export const SkFactsCompactHTML = "<dl class=\"sk-facts sk-facts--compact\">\n  <dt class=\"sk-facts__term\">Status</dt>\n  <dd class=\"sk-facts__value\">Running</dd>\n  <dt class=\"sk-facts__term\">Owner</dt>\n  <dd class=\"sk-facts__value\">Ada Lovelace</dd>\n  <dt class=\"sk-facts__term\">Region</dt>\n  <dd class=\"sk-facts__value\">us-east-1</dd>\n</dl>";
 export const SkFactsEmptyValueHTML = "<dl class=\"sk-facts sk-facts--two-col\">\n  <dt class=\"sk-facts__term\">Status</dt>\n  <dd class=\"sk-facts__value\">Running</dd>\n  <dt class=\"sk-facts__term\">Notes</dt>\n  <dd class=\"sk-facts__value\"></dd>\n</dl>";
 export const SkFactsLongValueHTML = "<dl class=\"sk-facts sk-facts--two-col\">\n  <dt class=\"sk-facts__term\">Deployment strategy and rollback policy</dt>\n  <dd class=\"sk-facts__value\">Blue-green with automatic rollback if the error rate exceeds 1% within the first ten minutes after a release, or if any readiness probe fails for more than three consecutive checks.</dd>\n  <dt class=\"sk-facts__term\">Owner</dt>\n  <dd class=\"sk-facts__value\">Ada Lovelace</dd>\n</dl>";

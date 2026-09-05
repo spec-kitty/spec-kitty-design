@@ -103,14 +103,30 @@
  *
  *  a. NORMAL-mode hover uses `filter: brightness()` on the ROW, not a border at
  *     all. This sidesteps both border-collapse-model defects above (filter is
- *     not a border property) and ALSO fixes the pass-1 zebra-hover finding
- *     properly: brightness is a MULTIPLICATIVE scale, so it lightens the
- *     ambient ground and `--sk-surface-muted` by the SAME relative amount —
- *     measured (13,14,17)->(18,19,23) and (38,44,54)->(51,59,73), both ~1.35x
- *     per channel — where pass 1's background-swap moved in opposite
- *     directions depending on row parity. It also "spans the row" rather than
- *     sitting at a fixed x-offset, so it does not scroll out of view inside
- *     `.sk-data-table__scroller` the way a left-edge accent would.
+ *     not a border property), and fixes the pass-1 zebra-hover finding for any
+ *     row that has a real painted background to brighten: brightness is a
+ *     MULTIPLICATIVE scale, so an EVEN row's opaque `--sk-surface-muted` fill
+ *     is genuinely brightened uniformly across the whole row box — measured
+ *     (38,44,54)->(51,59,73), ~1.35x per channel — where pass 1's background-
+ *     swap moved in opposite directions depending on row parity. It also
+ *     "spans the row" rather than sitting at a fixed x-offset, so it does not
+ *     scroll out of view inside `.sk-data-table__scroller` the way a
+ *     left-edge accent would.
+ *
+ *     This does NOT hold for an ODD row the same way, and the difference is
+ *     worth stating rather than papering over: odd rows have no explicit
+ *     `background` (they show the ambient/page ground through, unpainted by
+ *     this element), and `filter` can only brighten what this element itself
+ *     paints — brightening a fully transparent source pixel stays fully
+ *     transparent. Measured: sampling an odd row's empty cell padding at
+ *     (13,14,17) (the page background showing through) reads IDENTICALLY
+ *     before and after hover; the effect there is confined to whatever this
+ *     row DOES paint — text glyphs and the `border-bottom` rule on its cells
+ *     — not a full-row wash the way the even-row case gets. This is a real,
+ *     weaker-than-intended affordance on odd rows, not a broken one: it never
+ *     moves in the wrong direction, it is just visually subtler than the
+ *     even-row case. Recorded here so the next reader measures both parities
+ *     rather than trusting one number for both.
  *  b. The forced-colors substitute (below) moves from `tbody tr` to
  *     `tbody tr > *:first-child` — measured to paint correctly in BOTH border
  *     models (screenshot pixel sampling: red on `<tr>` painted under collapse
