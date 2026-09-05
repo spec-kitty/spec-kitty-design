@@ -32,8 +32,13 @@ decision rather than a stylistic preference.
 2. **Cross-root ID references do not resolve.** ADR-9 §4 measured it — ID lookup is scoped to
    `getRootNode()`. `<th id>` ↔ `<td headers>`, `<caption>` and `<label for>` all depend on
    same-root lookup.
-3. **A skip link must target an ID in the document** and be its first focusable node. `href="#main"`
-   cannot cross a shadow boundary, and a wrapper element cannot guarantee first-focusable.
+3. **A skip link must target an ID in the document.** `href="#main"` cannot cross a shadow
+   boundary, and a wrapper element cannot guarantee same-root resolution. (Being the document's
+   *first* focusable node is the recommended consumer usage this mission's exemplar demonstrates —
+   it is a page-integration concern the primitive's own isolated stories cannot verify, since each
+   story renders in its own iframe with no surrounding page chrome. No FR or SC in this mission
+   claims first-focusable-node placement as tested; treat it as documented guidance, not a proven
+   property.)
 4. **`<details>` open/closed state is UA-owned.** Wrapping it re-implements the bookkeeping the
    platform already gets right — which is exactly the hand-wiring the Factory surface shows.
 
@@ -49,12 +54,21 @@ against the current base:
 - **"No `--sk-status-*` or `--sk-chart-*` semantic token category exists."** True — so the
   tone-free constraint below stands.
 - **"Grep finds no `forced-colors` block anywhere in `packages/` or `apps/`."** True.
-- **"Grep finds no `prefers-reduced-motion` block."** **No longer true.**
-  `packages/styles/src/transition-matrix/sk-transition-matrix.css:237` carries one, added by #171
-  after the issue was written. This mission therefore **generalises the existing precedent** into a
-  documented baseline rather than inventing a second convention — a mission that "establishes" a
-  reduced-motion baseline while one already ships would create exactly the divergence it is meant
-  to remove.
+- **"Grep finds no `prefers-reduced-motion` block."** Technically no longer true — a block exists
+  at `packages/styles/src/transition-matrix/sk-transition-matrix.css:237` — but **measurement
+  shows it guards nothing**: it disables `scroll-behavior`, and `scroll-behavior: smooth` is set
+  nowhere in `packages/styles`, so the guard is inert. Meanwhile ten real `transition:` declarations
+  ship unguarded across `nav-pill` (3), `card`, `button`, `site-footer`, `form-field` (2), and
+  `nav-pill-drawer` (2). There is no live convention to generalise. **This mission establishes the
+  first real reduced-motion guard** — one that actually disables an animating property on a live
+  transition — and the two primitives that introduce a transition (`.sk-disclosure`,
+  `.sk-skip-link`) are it. The existing block is, textually, `.sk-transition-matrix,
+  .sk-transition-matrix * { scroll-behavior: auto; }` — a wildcard over every descendant of the
+  component root, disabling a property that has no `smooth` value anywhere to disable. Do not copy
+  that wildcard shape or describe it as "scoped to a named property, not a blanket rule" (it is a
+  blanket rule over the component subtree that happens to target dead CSS). The new guards this
+  mission ships must each disable the exact transitioning declaration on the exact element that
+  carries it — nothing wider.
 - **Styles-only components are derived, not listed.** `scripts/build-styles-only-markup.mjs`
   selects directories under `packages/styles/src` that contain a `.css` and have **no** matching
   directory under `packages/elements/src`. Today that set is exactly `form-field`. The five new
@@ -90,11 +104,17 @@ against the current base:
 - **FR-008**: `packages/styles/src/index.ts` gains one `export *` line per new directory. Absent a
   gate (#156), this is verified by an explicit success criterion rather than assumed.
 - **FR-009**: A `@media (forced-colors: active)` treatment covers skip-link focus, the disclosure
-  marker and table borders — the three places a Windows High Contrast user otherwise loses the
-  affordance entirely.
+  marker, and **the data-table's zebra/hover row distinction** — the three places a Windows High
+  Contrast user otherwise loses the affordance entirely. (Table *borders* were the issue's original
+  candidate for the third location; measured under `forcedColors: 'active'`, an ordinary
+  `border: 1px solid #999` already computes to a visible system color with **no** author
+  forced-colors rule at all, so a border-only treatment would certify a no-op. What actually
+  flattens to `Canvas` and disappears is `background`-based zebra striping and hover-row
+  highlighting — that is the real third location.)
 - **FR-010**: Any transition this mission introduces is disabled under
-  `@media (prefers-reduced-motion: reduce)`, following the shape already shipped at
-  `sk-transition-matrix.css:237`.
+  `@media (prefers-reduced-motion: reduce)`. No live convention exists yet to follow — see "What
+  the issue says, and what is actually true" above — so this mission **establishes** the first
+  real one, scoped per-declaration rather than copied wholesale from the inert precedent.
 - **FR-011**: Both baselines are documented in the component-authoring recipe so later components
   inherit them rather than re-deciding. Per epic #183, this concern is **owned here** and must not
   be spun out into a new ticket.
@@ -135,14 +155,21 @@ against the current base:
   is intact.
 - **SC-004**: `packages/styles/src/index.ts` exports every new primitive. Verified by importing the
   package entry point and asserting each generated export name resolves — the drift #156 leaves
-  ungated, and the one that already bit `SkGridGap4HTML`.
+  ungated, and the one that already bit `SkGridGap4HTML`. **Also**: `packages/styles/package.json`
+  gains a `./<name>/*` subpath export for each of the five new directories, matching its existing
+  16 entries — `scripts/check-release-graph.mjs`'s `checkSubpathCoverage` is `[ENFORCED]` at
+  `ci-quality.yml:533` and fails one row per directory with no subpath export; without it the CSS
+  is unreachable as `@spec-kitty/styles/<name>/sk-<name>.css` even though the source exists.
 - **SC-005**: The forced-colors baseline is committed and demonstrated: with forced colors emulated,
-  the skip link on focus, the disclosure marker and the table borders all remain perceivable.
+  the skip link on focus, the disclosure marker, and the data-table's zebra/hover row distinction
+  all remain perceivable.
 - **SC-006**: No `--sk-status-*` or `--sk-chart-*` token is introduced. Verified by grep against
   `packages/tokens/src/tokens.css`.
-- **SC-007**: Normal gates pass — stylelint, htmlhint, axe, and the generated-artifact `--check`
-  scripts. Before the final gate the branch rebases on the current train and regenerates shared
-  artifacts (epic #183, and #176's own exit criteria).
+- **SC-007**: Normal gates pass — stylelint, htmlhint, axe, the generated-artifact `--check`
+  scripts, and `scripts/check-release-graph.mjs` (`[ENFORCED]` at `ci-quality.yml:533`, absent from
+  the issue's original gate list — SC-004's subpath-export requirement is what it actually checks).
+  Before the final gate the branch rebases on the current train and regenerates shared artifacts
+  (epic #183, and #176's own exit criteria).
 
 ## Out of scope
 
