@@ -221,6 +221,15 @@
   text-transform: uppercase;
 }
 
+.sk-transition-matrix__group-label {
+  position: sticky;
+  left: var(--sk-space-6);
+  right: var(--sk-space-6);
+  display: block;
+  width: max-content;
+  margin-inline: auto;
+}
+
 .sk-transition-matrix__hint,
 .sk-transition-matrix__empty { padding: var(--sk-space-4) var(--sk-space-6); }
 .sk-transition-matrix__empty { color: var(--sk-fg-muted); }

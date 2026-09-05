@@ -246,7 +246,7 @@ export class SkTransitionMatrix extends LitElement {
       const bodyRoutes = matrix.routes.slice(start, end);
       const groupHeadingId = group ? this.#id(`group-${start}`) : '';
       bodies.push(html`<tbody aria-labelledby=${groupHeadingId || nothing}>
-        ${group ? html`<tr class="sk-transition-matrix__group-row"><th part="group" class="sk-transition-matrix__group" id=${groupHeadingId} colspan=${matrix.columns.length + 2}>${group}</th></tr>` : nothing}
+        ${group ? html`<tr class="sk-transition-matrix__group-row"><th part="group" class="sk-transition-matrix__group" id=${groupHeadingId} colspan=${matrix.columns.length + 2}><span class="sk-transition-matrix__group-label">${group}</span></th></tr>` : nothing}
         ${bodyRoutes.map((route, index) => this.#renderRoute(route, start + index, matrix))}
       </tbody>`);
       start = end;

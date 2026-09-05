@@ -314,11 +314,31 @@ test('narrow scrolling keeps the sticky route owner visible without overlap', as
   await expect.poll(() => scroller.evaluate((node) => node.scrollLeft)).toBeGreaterThan(0);
   const after = await route.boundingBox();
   const cellBox = await cell.boundingBox();
+  const groupVisibility = await host.evaluate((element) => {
+    const root = element.shadowRoot!;
+    const viewport = root.querySelector<HTMLElement>('[part~="scroller"]')!.getBoundingClientRect();
+    const group = root.querySelector<HTMLElement>('[part~="group"]')!;
+    const range = document.createRange();
+    range.selectNodeContents(group);
+    const text = range.getBoundingClientRect();
+    return {
+      label: group.textContent?.trim(),
+      textTransform: getComputedStyle(group).textTransform,
+      text: { left: text.left, right: text.right, top: text.top, bottom: text.bottom },
+      viewport: { left: viewport.left, right: viewport.right, top: viewport.top, bottom: viewport.bottom },
+    };
+  });
   expect(before).not.toBe(null);
   expect(after).not.toBe(null);
   expect(cellBox).not.toBe(null);
   expect(Math.abs(after!.x - before!.x)).toBeLessThan(2);
   expect(after!.x + after!.width).toBeLessThanOrEqual(cellBox!.x + 1);
+  expect(groupVisibility.label).toBe('Exceptions & recovery');
+  expect(groupVisibility.textTransform).toBe('uppercase');
+  expect(groupVisibility.text.left).toBeGreaterThanOrEqual(groupVisibility.viewport.left);
+  expect(groupVisibility.text.right).toBeLessThanOrEqual(groupVisibility.viewport.right);
+  expect(groupVisibility.text.top).toBeGreaterThanOrEqual(groupVisibility.viewport.top);
+  expect(groupVisibility.text.bottom).toBeLessThanOrEqual(groupVisibility.viewport.bottom);
 
   const results = [await inspectPaintOwnership('rest')];
   await host.evaluate(async (element) => {
