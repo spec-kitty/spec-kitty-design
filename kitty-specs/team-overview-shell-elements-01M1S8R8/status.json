@@ -27,6 +27,9 @@
       "last_event_id": "01M1SJYN3W0C3102X7FM36VR1B",
       "last_transition_at": "2026-09-05T20:07:56.796182+00:00",
       "model": "__resolved_model_absent__",
+      "notes": [
+        "RED: 13 intended behavior failures on compile-safe inert scaffolds. GREEN: 13/13 focused Chromium; CSS generator/check, exact token comparator, ESLint, stylelint, boundary/hygiene, story-theme and typecheck-all pass. Shared entries and manifest intentionally deferred to WP04."
+      ],
       "provider": "__resolved_provider_absent__",
       "role": "implementer",
       "shell_pid": 2459900,
