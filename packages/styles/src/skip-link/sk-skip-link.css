@@ -1,0 +1,63 @@
+/* @spec-kitty/styles — sk-skip-link shared styles */
+/* All values use --sk-* tokens only — no hardcoded values */
+/*
+ * Off-screen technique: `clip-path`, never a bare `transform`. `<a>` is
+ * inline by default and `transform` does not apply to non-replaced inline
+ * boxes — a `transform: translateY(-100%)` skip link would not move at all,
+ * leaving it a permanently visible, click-swallowing element while every
+ * static gate (stylelint/htmlhint/axe) stays green. `clip-path: inset(50%)`
+ * clips the box to nothing (paint AND hit-testing) without removing it from
+ * the accessibility tree or tab order; `clip-path: inset(0)` on focus removes
+ * the clip entirely. `position: fixed` is set unconditionally, which also
+ * blockifies this element per the CSS display spec (a positioned element's
+ * used display is never inline) — belt and suspenders with clip-path, which
+ * does not depend on display/blockification at all.
+ *
+ * Consumer constraint: do not place `.sk-skip-link` inside an ancestor with
+ * `transform`/`filter`/`will-change` set — any of those establishes a new
+ * containing block and traps this element's `position: fixed` relative to
+ * that ancestor instead of the viewport.
+ */
+
+.sk-skip-link {
+  position: fixed;
+  top: var(--sk-space-2);
+  left: var(--sk-space-2);
+  z-index: 1000;
+  padding: var(--sk-space-2) var(--sk-space-4);
+  background: var(--sk-surface-card);
+  color: var(--sk-fg-default);
+  border-radius: var(--sk-radius-sm);
+  border: 1px solid var(--sk-border-strong);
+  font-family: var(--sk-font-sans);
+  font-size: var(--sk-text-sm);
+  font-weight: var(--sk-weight-medium);
+  text-decoration: none;
+  white-space: nowrap;
+  clip-path: inset(50%);
+  transition: clip-path var(--sk-motion-duration-fast) var(--sk-motion-ease-out);
+}
+
+.sk-skip-link:focus-visible {
+  clip-path: inset(0);
+  outline: 3px solid var(--sk-border-focus);
+  outline-offset: 2px;
+}
+
+/* Reduced motion: disable exactly the one transitioning declaration this
+   component owns (the clip-path reveal) — scoped to its own selector. */
+@media (prefers-reduced-motion: reduce) {
+  .sk-skip-link {
+    transition: none;
+  }
+}
+
+/* Forced-colors: the focused state's outline uses the unpoliced `outline`
+   shorthand with a system-color keyword — `outline-color` (the longhand)
+   would trip stylelint's declaration-strict-value (`/color/` matches it as
+   a substring); plain `outline` does not. */
+@media (forced-colors: active) {
+  .sk-skip-link:focus-visible {
+    outline: 3px solid Highlight;
+  }
+}

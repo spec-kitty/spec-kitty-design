@@ -1,0 +1,109 @@
+/* @spec-kitty/styles — sk-disclosure shared styles */
+/* All values use --sk-* tokens only — no hardcoded values */
+/*
+ * Marker: a CONTENT-drawn glyph, never a background-drawn icon. Under
+ * `forced-colors: active`, browsers automatically recolor text (including
+ * pseudo-element `content` glyphs) to the `CanvasText` system color, as long
+ * as `forced-color-adjust` is left at its default `auto` — a background-drawn
+ * icon does not get this automatic treatment, and forcing one to survive via
+ * `forced-color-adjust: none` freezes it at its AUTHORED color, which is
+ * frequently invisible against the forced-colors background (measured: a
+ * dark-grey icon on the dark-scheme forced-colors background). This file
+ * therefore never sets `forced-color-adjust: none` anywhere.
+ *
+ * The [open] marker rules use a CHILD combinator (`>`), not a descendant
+ * combinator — `.sk-disclosure[open] .sk-disclosure__summary` would also
+ * match an inner, still-closed disclosure's summary when nested (see the
+ * Nested story).
+ */
+
+.sk-disclosure {
+  border: 1px solid var(--sk-border-default);
+  border-radius: var(--sk-radius-md);
+  background: var(--sk-surface-card);
+}
+
+/* display: flex is used deliberately here, WITH a replacement marker
+   (the ::before glyph below) shipped in this same file — never flex/grid
+   a <summary> without also supplying the marker that replaces the native
+   one it silently removes. */
+.sk-disclosure__summary {
+  display: flex;
+  align-items: center;
+  gap: var(--sk-space-2);
+  padding: var(--sk-space-3) var(--sk-space-4);
+  cursor: pointer;
+  font-family: var(--sk-font-sans);
+  font-size: var(--sk-text-base);
+  font-weight: var(--sk-weight-medium);
+  color: var(--sk-fg-default);
+  list-style: none;
+}
+
+.sk-disclosure__summary::-webkit-details-marker {
+  display: none;
+}
+
+.sk-disclosure__summary::before {
+  content: '▸';
+  display: inline-block;
+  color: var(--sk-fg-muted);
+  transition: transform var(--sk-motion-duration-fast) var(--sk-motion-ease-out);
+}
+
+/* Child combinator — see the file header note. */
+.sk-disclosure[open] > .sk-disclosure__summary::before {
+  transform: rotate(90deg);
+}
+
+/* `outline`, not `box-shadow`: box-shadow computes away under
+   `forced-colors: active` (it is not one of the properties the forced-colors
+   algorithm preserves), so a box-shadow-only focus ring would disappear
+   entirely in forced-colors mode. `outline` is preserved/remapped to a
+   system color automatically, the same way `border` is. */
+.sk-disclosure__summary:focus-visible {
+  outline: 2px solid var(--sk-border-focus);
+  outline-offset: 2px;
+  border-radius: var(--sk-radius-sm);
+}
+
+.sk-disclosure__body {
+  padding: 0 var(--sk-space-4) var(--sk-space-4);
+  color: var(--sk-fg-body);
+  font-family: var(--sk-font-sans);
+  font-size: var(--sk-text-sm);
+}
+
+/* Reduced motion: disable exactly the one transitioning declaration this
+   component owns (the marker's rotation) — scoped to its own selector, not
+   a wildcard. There is no working precedent to copy the EFFECT of;
+   sk-transition-matrix.css:237 guards `scroll-behavior`, which nothing in
+   this repo sets to `smooth`, so it disables nothing. */
+@media (prefers-reduced-motion: reduce) {
+  .sk-disclosure__summary::before {
+    transition: none;
+  }
+}
+
+/*
+ * Forced-colors, measured (not asserted): the marker is content-drawn
+ * (`::before { content: '▸' }`), so the browser's own forced-colors
+ * algorithm already recolors its glyph to `CanvasText` with ZERO authored
+ * CSS, as long as `forced-color-adjust` is never set to `none` anywhere in
+ * this file (it never is). There is nothing to write here for the marker
+ * itself — an explicit `forced-color-adjust: auto` declaration was tried
+ * and rejected: `auto` is not in stylelint's `ignoreValues`, and
+ * `forced-color-adjust` matches the policed `/color/` pattern as a
+ * substring, so it would need a new stylelint exception for a value that
+ * is already the property's default and changes nothing.
+ *
+ * What DOES need an explicit rule is the summary's own focus ring, because
+ * this file used `box-shadow` for it originally, and `box-shadow` computes
+ * away entirely under `forced-colors: active` (measured — it is not one of
+ * the properties the forced-colors algorithm preserves). Switching the
+ * focus ring to `outline` (above) fixes this without any media query at
+ * all, since `outline` is preserved/remapped automatically the same way
+ * `border` is — measured with Playwright's `page.emulateMedia({
+ * forcedColors: 'active' })` against both `colorScheme: 'dark'` and
+ * `colorScheme: 'light'`; see this mission's verification notes.
+ */

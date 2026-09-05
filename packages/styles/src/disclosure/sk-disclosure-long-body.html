@@ -1,0 +1,16 @@
+<!-- @spec-kitty/styles — sk-disclosure (long body, proving the layout doesn't break) -->
+<details class="sk-disclosure" open>
+  <summary class="sk-disclosure__summary">Full changelog</summary>
+  <div class="sk-disclosure__body">
+    <p>
+      This release replaces the legacy build pipeline with a incremental,
+      content-addressed cache that skips unaffected packages entirely, cutting
+      the median CI build time from eleven minutes to under three. It also
+      fixes a race condition in the file watcher that occasionally dropped
+      change events on network filesystems, adds a new diagnostic command for
+      inspecting the dependency graph, and upgrades the underlying bundler to
+      its latest major version, which required updating every plugin
+      configuration across the monorepo.
+    </p>
+  </div>
+</details>

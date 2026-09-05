@@ -1,0 +1,14 @@
+<!-- @spec-kitty/styles — sk-skip-link (unfocused) -->
+<!-- Requires @spec-kitty/tokens to be loaded in the consuming page -->
+<!-- The Focused state is demonstrated via a real play()-driven .focus() call in the
+     story, not a second static exemplar or a simulated "is-focused" class — see
+     sk-form-input.css's own recorded removal of exactly that anti-pattern. -->
+<a href="#main" class="sk-skip-link">Skip to main content</a>
+<nav aria-label="Primary">
+  <a href="#">Dashboard</a>
+  <a href="#">Settings</a>
+</nav>
+<main id="main">
+  <h1>Main content</h1>
+  <p>This is the target the skip link resolves to.</p>
+</main>

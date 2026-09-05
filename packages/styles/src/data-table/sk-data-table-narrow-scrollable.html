@@ -1,0 +1,45 @@
+<!-- @spec-kitty/styles — sk-data-table (narrow-width, keyboard-scrollable region) -->
+<!-- SC-003 load-bearing exemplar: role="region" + accessible name + tabindex="0"
+     wrapping an INTACT table — same <th scope> usage and cell structure as
+     sk-data-table-default.html. Only the wrapper's width constraint differs
+     (demonstrated here via an inline max-width on the outer div so the story
+     forces the narrow condition without depending on the viewport). -->
+<div style="max-width: 320px;">
+  <div class="sk-data-table__scroller" role="region" aria-label="Recent builds" tabindex="0">
+    <table class="sk-data-table">
+      <caption>Recent builds</caption>
+      <thead>
+        <tr>
+          <th scope="col">Build</th>
+          <th scope="col">Branch</th>
+          <th scope="col">Status</th>
+          <th scope="col">Duration</th>
+          <th scope="col">Cost</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>#1042</td>
+          <td>main</td>
+          <td>Passed</td>
+          <td>3m 12s</td>
+          <td class="sk-data-table__cell--numeric">$0.42</td>
+        </tr>
+        <tr>
+          <td>#1041</td>
+          <td>feature/skip-link</td>
+          <td>Passed</td>
+          <td>2m 58s</td>
+          <td class="sk-data-table__cell--numeric">$0.38</td>
+        </tr>
+        <tr>
+          <td>#1040</td>
+          <td>main</td>
+          <td>Failed</td>
+          <td>1m 05s</td>
+          <td class="sk-data-table__cell--numeric">$0.15</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

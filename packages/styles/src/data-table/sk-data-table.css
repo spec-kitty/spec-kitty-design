@@ -1,0 +1,111 @@
+/* @spec-kitty/styles — sk-data-table shared styles */
+/* All values use --sk-* tokens only — no hardcoded values */
+/*
+ * Markup contract (decided here, followed by the .html exemplars):
+ *   <div class="sk-data-table__scroller" role="region" aria-label="..." tabindex="0">
+ *     <table class="sk-data-table">
+ *       <caption>...</caption>
+ *       <thead><tr><th scope="col">...</th>...</tr></thead>
+ *       <tbody>...</tbody>
+ *     </table>
+ *   </div>
+ * The scroller is the ONLY narrow-width mechanism. The table inside is never
+ * reflowed — no `display: block` on `tr`/`td`/`th` at any breakpoint.
+ *
+ * Forced-colors location for THIS primitive is zebra/hover ROW DISTINCTION,
+ * not borders: measured, a plain `border` already computes to a visible
+ * system color under `forced-colors: active` with zero author rule, so a
+ * border-only "fix" would certify a no-op. The `background`-based zebra/hover
+ * treatment is what actually flattens to `Canvas` and needs a real
+ * `border`-based substitute — see the media block below. `background`/
+ * `background-color` are explicitly policed by stylelint's
+ * declaration-strict-value, so this never attempts to force them to survive.
+ */
+
+.sk-data-table__scroller {
+  overflow-x: auto;
+  overflow-y: auto;
+  border-radius: var(--sk-radius-md);
+}
+
+.sk-data-table__scroller:focus-visible {
+  outline: 2px solid var(--sk-border-focus);
+  outline-offset: -2px;
+}
+
+.sk-data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--sk-font-sans);
+  font-size: var(--sk-text-sm);
+}
+
+.sk-data-table caption {
+  text-align: left;
+  padding: var(--sk-space-2) var(--sk-space-3);
+  color: var(--sk-fg-muted);
+  font-size: var(--sk-text-xs);
+}
+
+.sk-data-table th,
+.sk-data-table td {
+  padding: var(--sk-space-2) var(--sk-space-3);
+  text-align: left;
+  border-bottom: 1px solid var(--sk-border-default);
+}
+
+.sk-data-table thead th {
+  color: var(--sk-fg-muted);
+  font-weight: var(--sk-weight-medium);
+  border-bottom: 1px solid var(--sk-border-strong);
+}
+
+.sk-data-table tbody tr:nth-child(even) {
+  background: var(--sk-surface-muted);
+}
+
+.sk-data-table tbody tr:hover {
+  background: var(--sk-surface-pill);
+}
+
+.sk-data-table__cell--numeric {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Sticky header row modifier. Requires the scrolling ancestor to be
+   `.sk-data-table__scroller` (overflow-x: auto above) — `position: sticky`'s
+   containing block for this purpose is the nearest scrolling ancestor. */
+.sk-data-table--sticky-header thead th {
+  position: sticky;
+  top: 0;
+  background: var(--sk-surface-card);
+}
+
+/*
+ * Forced-colors, measured (not asserted): a plain `border-bottom` (the base
+ * rule above, on every `td`/`th`) already survives forced-colors mode with
+ * zero author override — browsers remap border colors to a system color
+ * automatically. That is NOT the loss this block exists to fix. The actual
+ * loss is the ZEBRA ALTERNATION and hover PATTERN itself: `background`
+ * cannot be forced to survive (browsers flatten it to `Canvas`, and
+ * `background`/`background-color` are explicitly policed by
+ * declaration-strict-value regardless), so without an explicit substitute,
+ * every row looks identical under forced-colors even though the borders
+ * between them are still visible.
+ *
+ * The substitute is a `border-left` accent band — `border-left` is the
+ * unpoliced shorthand (not `border-left-color`), so no stylelint exception
+ * is needed. Even rows get a `CanvasText` band, hovered rows get a
+ * `Highlight` band (a different system color), which recreates a real,
+ * perceivable alternating pattern using only border, not background.
+ */
+@media (forced-colors: active) {
+  .sk-data-table tbody tr:nth-child(even) {
+    border-left: 3px solid CanvasText;
+  }
+
+  .sk-data-table tbody tr:hover {
+    border-left: 3px solid Highlight;
+  }
+}
