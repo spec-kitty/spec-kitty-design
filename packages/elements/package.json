@@ -15,13 +15,17 @@
       "types": "./dist/elements.d.ts",
       "default": "./dist/elements.js"
     },
+    "./vue": {
+      "types": "./vue.d.ts"
+    },
     "./custom-elements.json": "./custom-elements.json",
     "./dist/*": "./dist/*"
   },
   "customElements": "custom-elements.json",
   "files": [
     "dist/",
-    "custom-elements.json"
+    "custom-elements.json",
+    "vue.d.ts"
   ],
   "peerDependencies": {
     "lit": "^3.3.3",

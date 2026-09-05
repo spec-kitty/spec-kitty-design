@@ -80,6 +80,116 @@ The framework-target schema `research/001` §163 asked for: a target package is 
 
 A second correction to ADR-8's rationale, which does not change the operator's decision that React leads: React 19 scores 16/16 on Custom Elements Everywhere for both basic and advanced interop, as does Angular. A React wrapper buys JSX-level types, typed refs and SSR attribute handling — real ergonomics, but not interop. Size the wrapper mission accordingly.
 
+### The fourth-target extension cost — MEASURED (#81, ADR-8 confirmation #4)
+
+ADR-8's confirmation criterion #4 is the claim this programme rests on: that adding a framework
+target is additive and cheap. #81 required it be measured, with the target chosen and written down
+*before* the work so the result could not be shaped by what turned out easy.
+
+**Target: Vue 3, declared on #81 at 2026-09-04T22:53:20Z**, deliberately as the harder of the two
+candidates — Solid compiles element creation directly and would have flattered the result.
+
+**Measured elapsed — two figures, because one of them alone is misleading.**
+
+| | |
+|---|---|
+| declaration → first working commit | **~8 minutes** |
+| declaration → green on CI | **~6h32m**, across three CI defects and their fixes |
+
+The first number is the cost of *writing* the target. The second is the cost of *landing* it, and a
+lens was right that reporting only the first is the shaping #81 exists to prevent. What the extra
+six hours actually bought is worth naming, because it is not generator cost and a fifth target would
+not pay it again in the same shape:
+
+1. a browser-lane test used a **dynamic** import, which Vite's scanner cannot see, so the dependency
+   was discovered mid-run and hung webkit — the job ran to GitHub's 360-minute default and was
+   cancelled. The test needed no DOM and now lives in the node lane.
+2. the fixture imported `@spec-kitty/elements/elements.js`, a subpath the vitest alias does not
+   cover, resolving to a `dist/` the `test` job never builds.
+3. the fixture asserted `adoptedStyleSheets.length`, which is SC-014's contract, so a mutation
+   reddened two tests and the harness refused the collateral.
+
+All three are **harness-integration** cost, not framework cost: the price of adding a fixture to an
+unfamiliar lane. Against the one-day timebox both figures pass, and #81's diagnostic — *"if it takes
+a week, the generator is not finished"* — is answered either way.
+
+**Result: no package.** Vue 3 uses the elements directly, including `v-model`. Measured in a real
+Vue render (`fixtures/vue-consumer/`), not read from documentation: elements upgrade, a plain `:`
+binding takes the DOM-property route, `.prop` stays reactive across updates, `v-model` binds both
+directions on a form element, the real `sk-nav-pill-toggle` event reaches a Vue handler, and
+`@input` from `sk-form-input` retargets to the host with its value already synced.
+
+None of that needed a wrapper — the same conclusion this ADR already records for React 19, that a
+wrapper buys ergonomics rather than interop, arrived at independently for a second framework.
+
+The fixture resolves `@spec-kitty/elements` through the vitest alias to **source**, not to the built
+bundle: the `test` job never builds. It does not assert `adoptedStyleSheets`, because that is
+SC-014's contract and asserting it here broke mutation attribution. Both are recorded because an
+earlier revision of this paragraph claimed the opposite of each.
+
+What the target *did* need was a generator emitting one `.d.ts` from the same
+`custom-elements.json` the React generator reads, and one documentation page. For comparison,
+`build-react-wrappers.mjs` is 843 lines and produces a published package, because React below 19
+set every prop as an attribute and non-string values never reached the element.
+
+**The prediction, correctly scoped — my first account of it over-corrected.** I predicted the cost
+would be `compilerOptions.isCustomElement` configuration, and recorded that as *wrong*. A lens
+pointed out it was substantially **right**: that configuration is required for Single File
+Components, the default and dominant Vue authoring mode, which this ADR's own documentation page
+leads with.
+
+What is actually false is a narrower sub-claim — that Vue warns on every unregistered-looking
+`<sk-*>` tag. It does not, on the runtime-compiler path, where the full build defaults
+`isCustomElement` to `tag => !!customElements.get(tag)`. That is a property of the full build's
+`compileToFunction` and has held since Vue **3.3**, not 3.5 as first recorded:
+
+| tag | registered | Vue warnings |
+|---|---|---|
+| `sk-button` | yes | **0** |
+| `not-registered-el` | no | 1 |
+| `NotAThing` | no | 1 |
+| `blahtag` | no | 1 |
+
+Vue was confirmed to be in dev mode first — a production build strips warnings entirely and would
+have produced the same silence for an unrelated reason. Two of these four rows are asserted in
+`fixtures/vue-consumer/`; the other two were probes.
+
+So the discriminator is the registry, not the hyphen, and on that path the real requirement is
+**import order** rather than configuration. But reaching that path needs an explicit
+`vue: 'vue/dist/vue.esm-bundler.js'` alias — `vue`'s own exports resolve to a runtime-only build
+with no compiler — so most consumers are not on it, and the prediction holds for the ones who
+are not.
+
+**What this does and does not establish.** It is one target, measured once, by someone who already
+knew the codebase — a floor on the cost, not an average, and an unfamiliar maintainer would take
+longer. It says nothing about a framework with poor custom-element support; Vue and React both
+score well on Custom Elements Everywhere, and a target that scored badly is where the additive
+claim would actually be tested. It says nothing about **SSR**, which is where the React generator has all its machinery
+(`ssrSafe`, `"use client"`, a deferred element import, attribute-only first render). The Vue result
+is a client-side render only. Measured afterwards with `@vue/server-renderer`: string, number and
+boolean `.prop` bindings serialise as attributes, but an **object** `.prop` is dropped entirely.
+None of today's fourteen elements takes an object prop, so nothing is broken — but `.prop` is the
+binding the documentation recommends *for non-strings*, and the first element with an object prop
+breaks Nuxt silently.
+
+And it does **not** establish the schema's third clause. `research/001` §163 reads in full: *"a
+target package is valid when it is generated from `custom-elements.json`, adds no markup, CSS or
+behaviour of its own, **passes the conformance matrix unmodified**, and fails CI when its output
+drifts from the manifest."* A lens caught an earlier version of this paragraph quoting clause one
+and concluding the schema held — while the conformance matrix was never run for Vue. `react-wrapper`
+is a declared subject in `behaviours.json` for SC-002 (form association) and SC-006 (event
+contract), with mutations behind both; `vue` appears in neither file, and SC-401/402/403 sit outside
+the declared id range, so the mutation harness requires nothing of them. The **mutation harness** therefore requires nothing of the Vue
+fixture. (An earlier version of this paragraph said deleting the fixture outright would leave every
+gate green. That was true when written and is not now: the fold added
+`scripts/check-vue-template-types.mjs`, an ENFORCED step that reads `Good.vue`, so removing the
+fixture reds `lint-code`. Two lenses caught the sentence outliving its own commit.)
+
+What this establishes, then, is narrower than "the schema held": for a modern framework the manifest
+is sufficient to produce a working, type-checked target, and clauses one, two and four of the schema
+were met. Clause three was not attempted, and a fifth target should either register conformance
+subjects or say the same thing here.
+
 ### Consequences
 
 #### Positive

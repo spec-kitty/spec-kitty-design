@@ -120,6 +120,19 @@ export default defineConfig({
         //   [vite] optimized dependencies changed. reloading
         // — arriving right after tests/browser/registered-elements.test.ts had collected,
         // which is why that file and sk-stub.test.ts were the two that died in CI.
+        // The Vue entry is BELT AND BRACES, not the fix — a lens caught the first version of this
+        // comment claiming otherwise. #81's six-hour webkit hang came from a DYNAMIC import of
+        // `@vue/compiler-dom`, which is not in this list and never will be: that test moved to the
+        // node lane, which is the actual fix. The deep `vue/dist/...` path below is a static import
+        // and was probably already discovered by the scanner; it is listed because a deep dist path
+        // is what the scanner is worst at, and this list exists for exactly that risk.
+        //
+        // BARE `vue` IS KEPT even though a static read says only `import type` uses it, and those
+        // erase. The reasoning is sound and the entry is not worth removing on it: this exact pair
+        // is what CI proved green, removing an entry from this list invalidates the optimizer's
+        // config hash and forces a re-optimization, and the cost of a redundant entry is nothing
+        // against the cost of the failure mode this list exists to prevent. A lens suggested the
+        // removal; it is declined deliberately rather than overlooked.
         optimizeDeps: {
           include: [
             'react',
@@ -127,6 +140,8 @@ export default defineConfig({
             'react-dom/client',
             'react/jsx-runtime',
             'react/jsx-dev-runtime',
+            'vue',
+            'vue/dist/vue.esm-bundler.js',
           ],
         },
         test: {

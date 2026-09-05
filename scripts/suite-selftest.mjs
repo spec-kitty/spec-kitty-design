@@ -73,6 +73,19 @@ const behaviourPairs = registry.flatMap((b) =>
  * self-check provably never exercised. Asserting the SET closes the class: adding a guard
  * without a self-check entry now fails here rather than being noticed by a reader.
  */
+// `timeout` IS EMITTABLE AND IS DELIBERATELY NOT LISTED — the exemption is written down rather
+// than left silent, which is the whole point of the paragraph above.
+//
+// #81 added the verdict when it bounded the per-mutation spawn. Two lenses caught that EMITTABLE
+// was not updated, making the newest guard the one the self-check provably never exercised. The
+// honest fix is an entry that hangs; I wrote one, could not verify it (this workstation's /tmp is a
+// near-full tmpfs and the browser lane will not run reliably), and removed it rather than ship
+// unverified machinery into the harness that guards everything else.
+//
+// So it is exempt like guards 6/7/8, for a stated reason: an entry exercising this arm must
+// actually hang, and a real 180s hang would consume a third of the harness's own ceiling. Closing
+// it properly needs a per-entry timeout override plus a mutation that reliably blocks the browser's
+// main thread — worth doing, and worth doing where it can be measured.
 const EMITTABLE = ['pattern', 'ambiguous', 'noop', 'absent', 'green', 'collateral'];
 if (selftestMode) {
   const covered = new Set(mutations.map((m) => m.expectRejectedBy));
@@ -111,13 +124,38 @@ if (!selftestMode) {
   }
 }
 
-function runSuite(dir, project) {
+const SUITE_TIMEOUT_MS = 180_000;
+
+function runSuite(dir, project, timeoutMs = SUITE_TIMEOUT_MS) {
   try {
+    // BOUNDED, AND A TIMEOUT SAYS SO. This spawn had no timeout at all: a hang here burned the
+    // whole job — six hours before #81 gave every job a ceiling, and still the full 45 minutes
+    // after — and the log ended with no indication of WHICH mutation hung. A lens hit exactly that
+    // and had to diff the tmpdir by hand to find it. That is the residual of the defect #81 set out
+    // to close, in the harness #81 blames the six hours on.
+    //
+    // 180s against a whole-suite wall clock of ~10s in CI: generous enough that a slow runner never
+    // trips it, short enough that a hang costs one mutation rather than the job.
     const out = execFileSync('npx', ['vitest', 'run', '--project', project, '--reporter=json'], {
-      cwd: dir, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], env: { ...process.env, CI: '' },
+      cwd: dir,
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'pipe'],
+      env: { ...process.env, CI: '' },
+      // Per-entry override so a self-check can exercise the timeout arm cheaply — a real 180s hang
+      // would eat a third of the harness's own ceiling.
+      timeout: timeoutMs,
     });
     return JSON.parse(out.slice(out.indexOf('{')));
   } catch (err) {
+    // A timeout is not "the suite reported nothing" — it is a hang, and the caller must be able to
+    // say which mutation caused it.
+    // `code === 'ETIMEDOUT'` ALONE. A timeout sets both code and SIGTERM, but a run killed by
+    // anything else that sends SIGTERM — job cancellation, a sibling process — is not a hang, and
+    // reporting it as one is a wrong diagnosis with a right exit code. A lens measured that the
+    // code test alone suffices.
+    if (err.code === 'ETIMEDOUT') {
+      return { testResults: [], __noReport: true, __timedOut: true };
+    }
     const out = String(err.stdout ?? '');
     const i = out.indexOf('{');
     if (i < 0) return { testResults: [], __noReport: true, __stderr: String(err.stderr ?? '').slice(-800) };
@@ -196,7 +234,23 @@ for (const m of mutations) {
         if (after === before) verdict = ['noop', 'replacement is a no-op'];
         else {
           writeFileSync(target, after);
-          const res = runSuite(dir, 'browser');
+          const res = runSuite(dir, 'browser', m.timeoutMs ?? SUITE_TIMEOUT_MS);
+
+          // A HANG IS ITS OWN OUTCOME, and it now says which mutation caused it. `__noReport` was
+          // set in three places and read in none, so a timed-out suite fell through to "the named
+          // test is ABSENT from the report" — indistinguishable from a syntax-breaking mutation,
+          // and silent about which entry hung. A lens spent a 25-minute hang diffing a tmpdir by
+          // hand to find out.
+          if (res.__timedOut) {
+            verdict = ['timeout', `the suite HUNG (>${SUITE_TIMEOUT_MS / 1000}s) under this mutation — ${m.file}`];
+          } else {
+
+          // `__noReport` was set in three places and read in none, so a spawn that crashed without
+          // emitting JSON fell through to "the named test is ABSENT" with its stderr discarded. A
+          // lens noted the fold closed only the timeout sub-case.
+          if (res.__noReport && !res.__timedOut) {
+            verdict = ['absent', `the suite produced no report — ${res.__stderr ? res.__stderr.split('\n').slice(-3).join(' ') : 'no stderr captured'}`];
+          }
           const tests = allTests(res);
           // In --selftest mode the id names a GUARD, not a behaviour, so there is no
           // "named test" to find. The entry declares which behaviour test it should red
@@ -227,6 +281,7 @@ for (const m of mutations) {
               verdict = ['collateral', `declared expectCollateral but no other behaviour test failed — the mutation is narrower than claimed`];
             else if (!m.expectCollateral && collateral.length > 0)
               verdict = ['collateral', `other behaviour test(s) also failed: ${collateral.map((t) => t.name.match(/\[SC-\d+\]/)?.[0]).join(' ')}`];
+          }
           }
         }
       }

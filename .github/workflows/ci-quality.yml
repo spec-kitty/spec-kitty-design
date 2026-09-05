@@ -1,3 +1,23 @@
+# EVERY JOB IN THIS WORKFLOW CARRIES A timeout-minutes, and none did before #81.
+#
+# A Vue fixture added in that mission hung the behaviour suite under webkit. GitHub's default job
+# timeout is 360 MINUTES, so the run consumed six hours of runner time before it was cancelled —
+# and the cancellation looked like a failure with no diagnosis in it ("The operation was
+# canceled"). A hang is not a rare event in a workflow that drives four browsers; the cost of one
+# should be minutes, not hours, and the log should end at the step that hung.
+#
+# SCOPE, corrected by a lens: `docs-diagrams.yml` already carried one, so "none did" was true of
+# this workflow and not of the repo. `pr-preview.yml`, `release.yml` and `storybook-deploy.yml` now
+# carry them too — pr-preview builds Storybook and deploys, the same long-running class, and runs
+# on every PR. Nothing yet ENFORCES the property, so a new job still inherits 360 minutes; that is
+# filed rather than fixed here.
+#
+# The numbers are ceilings, not targets, and generous on purpose. Measured on recent runs of this
+# workflow, `test` — the slowest job — takes 6-10 minutes, and every other job is under 2. A lens
+# checked the figure this comment originally asserted (~15 minutes) against the API and it was
+# wrong; the ceilings below leave 4x to 45x headroom on real durations, so none of them can red a
+# healthy run. What they bound is a hang.
+
 name: CI Quality
 
 on:
@@ -27,6 +47,7 @@ jobs:
   # ── Path filter ──────────────────────────────────────────────────────────────
   changes:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     outputs:
       tokens:     ${{ steps.filter.outputs.tokens }}
       components: ${{ steps.filter.outputs.components }}
@@ -104,6 +125,7 @@ jobs:
   # ── Security ─────────────────────────────────────────────────────────────────
   security:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     if: github.event_name != 'schedule' || github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # actions/checkout v4.3.1
@@ -118,6 +140,7 @@ jobs:
   # ── Workflow pin check ───────────────────────────────────────────────────────
   workflow-pin-check:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # actions/checkout v4.3.1
       - name: "[ENFORCED] Check all Actions are SHA-pinned (FR-043)"
@@ -126,6 +149,7 @@ jobs:
   # ── Code lint ────────────────────────────────────────────────────────────────
   lint-code:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     outputs:
       eslint_failures: ${{ steps.eslint.outputs.has_failures }}
       stylelint_failures: ${{ steps.stylelint.outputs.has_failures }}
@@ -184,6 +208,14 @@ jobs:
         run: node scripts/build-react-wrappers.mjs --check
       - name: "[ENFORCED] The wrapper gate's own probe table (SC-311, SC-312)"
         run: node scripts/build-react-wrappers.mjs --selftest
+      # #81. Same generated-artifact contract as the CSS, markup and React generators.
+      - name: "[ENFORCED] Generated Vue types are current (#81, ADR-8 confirmation #4)"
+        run: node scripts/build-vue-types.mjs --check
+      # The types are only worth anything inside a TEMPLATE, which only Volar compiles. The first
+      # version of the generator emitted bare props objects: they type-checked under tsc and gave a
+      # template nothing, and no gate here could see it.
+      - name: "[ENFORCED] Vue types reach a real SFC (#81)"
+        run: node scripts/check-vue-template-types.mjs
       - name: "[ENFORCED] Generated CSS modules are current (ADR-10 generated-artifact contract)"
         run: node scripts/build-elements-css.mjs --check
       # ADR-9 Confirmation #1, which the ADR requires by name and no mission had landed.
@@ -294,6 +326,7 @@ jobs:
   # ── Storybook build ──────────────────────────────────────────────────────────
   storybook-build:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     needs: [changes]
     if: needs.changes.outputs.tokens == 'true' || needs.changes.outputs.components == 'true'
     steps:
@@ -330,6 +363,7 @@ jobs:
   # ── Accessibility gate ────────────────────────────────────────────────────
   a11y:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     needs: [storybook-build]
     if: needs.storybook-build.result == 'success'
     steps:
@@ -354,6 +388,7 @@ jobs:
   # ── Visual regression ──────────────────────────────────────────────────────
   visual-regression:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     needs: [storybook-build]
     if: needs.storybook-build.result == 'success'
     steps:
@@ -383,6 +418,7 @@ jobs:
   # ── Cross-browser smoke ────────────────────────────────────────────────────
   playwright:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     needs: [storybook-build]
     if: needs.storybook-build.result == 'success'
     steps:
@@ -412,6 +448,7 @@ jobs:
   # 'skipped' is never legitimate for a job that always runs.
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # actions/checkout v4.3.1
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e  # actions/setup-node v6.4.0
@@ -434,6 +471,7 @@ jobs:
   # ── Lighthouse (advisory) ──────────────────────────────────────────────────
   lighthouse:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     needs: [storybook-build]
     if: needs.storybook-build.result == 'success'
     continue-on-error: true   # advisory only
@@ -470,6 +508,7 @@ jobs:
   # against real files and `dist/` is gitignored.
   release-gate:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # actions/checkout v4.3.1
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e  # actions/setup-node v6.4.0
@@ -501,6 +540,7 @@ jobs:
 
   gate:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     needs: [changes, security, workflow-pin-check, lint-code, storybook-build, a11y, visual-regression, playwright, test, release-gate]
     if: always()
     steps:
@@ -582,6 +622,7 @@ jobs:
   # ── Lint feedback ────────────────────────────────────────────────────────────
   lint-feedback:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     needs: lint-code
     if: >-
       always() && github.event_name == 'pull_request' &&
