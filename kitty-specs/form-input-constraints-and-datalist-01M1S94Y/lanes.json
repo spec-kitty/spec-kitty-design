@@ -21,6 +21,7 @@
       "predicted_surfaces": [
         "api",
         "artifact-rendering",
+        "legacy-cleanup",
         "tracker-integration"
       ],
       "depends_on_lanes": [],
@@ -32,12 +33,13 @@
         "WP02"
       ],
       "write_scope": [
+        "expected-docs.json",
         "fixtures/react-consumer/src/sk-form-input-options.test.tsx",
         "packages/elements/SIZES.md",
         "packages/elements/custom-elements.json",
+        "packages/elements/vue.d.ts",
         "packages/react/src/SkFormInput.d.ts",
-        "packages/react/src/SkFormInput.js",
-        "packages/styles/src/form-input/**"
+        "packages/react/src/SkFormInput.js"
       ],
       "predicted_surfaces": [
         "api",
@@ -50,8 +52,8 @@
       "parallel_group": 1
     }
   ],
-  "computed_at": "2026-09-05T18:43:21.383271+00:00",
+  "computed_at": "2026-09-05T19:20:44.594998+00:00",
   "computed_from": "dependency_graph+ownership",
   "planning_artifact_wps": [],
-  "planning_commit_sha": "4dbbf47edd96db8a78f8e6f3c6ed5e351e8ce0ca"
+  "planning_commit_sha": "de30ad3f043fb23a28454186ce5e3aa1829f6f3d"
 }

@@ -15,6 +15,7 @@ subtasks:
 - T012
 - T013
 - T014
+- T015
 phase: Phase 2 - Generated artifacts and cross-framework proof
 history:
 - at: '2026-09-05T18:37:18Z'
@@ -31,8 +32,9 @@ owned_files:
 - packages/react/src/SkFormInput.js
 - packages/react/src/SkFormInput.d.ts
 - fixtures/react-consumer/src/sk-form-input-options.test.tsx
-- packages/styles/src/form-input/**
 - packages/elements/SIZES.md
+- packages/elements/vue.d.ts
+- expected-docs.json
 role: implementer
 tags: []
 task_type: implement
@@ -67,25 +69,41 @@ Wrap HTML/XML tags in backticks: `<div>`, `<script>`. Use language identifiers i
 
 ## Objectives & Success Criteria
 
+> **This WP prompt was revised after a post-tasks squad returned BLOCK on the mission.** T012
+> originally named files that do not exist (repointed below); `expected-docs.json` and
+> `packages/elements/vue.d.ts` were missing from this WP entirely (new T015); T010's prop-naming
+> assumption was wrong (corrected below). If you have seen an earlier version of this file,
+> re-read T010, T012, and the new T015 — do not assume only cosmetic changes.
+
 Every build artifact that depends on `sk-form-input`'s manifest shape is current, and the mission's
-two remaining open requirements are closed with evidence, not assertion:
+remaining open requirements are closed with evidence, not assertion:
 
 - `custom-elements.json` reflects the new members and passes `check-manifest-content.mjs` (every
   new property has a doc comment that propagated correctly) — FR-001/SC-007.
 - `packages/react/src/SkFormInput.{js,d.ts}` regenerate cleanly, and `options` is confirmed
   (by reading the generated `.js`, not by assumption) to go through `useProperties(...)` rather
-  than becoming a dropped or attribute-only prop — FR-005/FR-006 delivery.
+  than becoming a dropped or attribute-only prop — FR-005/FR-006 delivery. The emitted prop NAMES
+  for `readonly`/`inputmode` are confirmed to be lowercase (matching the Lit field name), not
+  React's conventional `readOnly`/`inputMode` — an assumption an earlier version of this mission's
+  contract got backwards (T010).
 - **NFR-001/SC-006 is answered with a passing test**, not a documentation-only claim: a new
   `fixtures/react-consumer` test proves `options` reaches the element even before
   `customElements.define` runs, survives a re-render with a new array (identity-checked), and
   resets to a fresh frozen `[]` on removal — mirroring `sk-transition-matrix`'s already-shipped
   `[SC-010]` test.
-- Any true gap in the generated static/no-build form is written down as a documented limitation
-  with a stated workaround — FR-008. (Read Subtask T012 before assuming there IS a gap; there may
-  not be one, since plain HTML already supports every one of this mission's new attributes.)
-- The size report and behaviour-registry bookkeeping are current — SC-007 — and this WP records,
-  rather than silently skips, whatever `conformance-matrix.json`'s actual state turns out to be
-  on the train this mission rebases onto (see Subtask T013).
+- The generated static/no-build form's real gap is documented against the REAL file location —
+  FR-008. **`packages/styles/src/form-input/` has no `.html` at all** (only `sk-form-input.css`);
+  the real static markup for this element is `packages/styles/src/form-field/sk-form-input-*.html`,
+  which this mission does not edit (T012, repointed — read it before assuming the original target
+  was ever correct).
+- The size report is current (T013), and `packages/elements/vue.d.ts` / `expected-docs.json` are
+  regenerated/updated to match the new manifest shape — both newly identified by the squad as
+  drift-gated artifacts this mission's change touches that the original plan never mentioned
+  (T015).
+- The behaviour-registry bookkeeping WP01 did (new ARMS under existing ids) is verified present
+  and current — SC-007 — and this WP records, rather than silently skips, whatever
+  `conformance-matrix.json`'s actual state turns out to be on the train this mission rebases onto
+  (T013).
 
 ## Context & Constraints
 
@@ -118,8 +136,22 @@ Read, in this order:
 6. `kitty-specs/form-input-constraints-and-datalist-01M1S94Y/tasks.md`'s closing "Notes on
    requirements NOT separately tasked" section — it already recorded, as a FACT verified by
    direct filesystem check, that `scripts/build-conformance-matrix.mjs` and
-   `conformance-matrix.json` do not exist in this train snapshot. Re-verify this yourself at the
-   START of T013 (the train may have moved since planning) rather than trusting the note blindly.
+   `conformance-matrix.json` do not exist in this train snapshot, that the behaviour-id registry
+   is CLOSED (no new ids, WP01 added arms under existing ones), and that the real static-markup
+   location is `packages/styles/src/form-field/`, not `packages/styles/src/form-input/`.
+   Re-verify all three yourself rather than trusting the note blindly — the train may have moved.
+7. `packages/elements/vue.d.ts` — read the existing `sk-form-input` entry (around line 114) so you
+   recognize what the regenerated version should look like: one `SkElement<{...}>` block per
+   tagged element, each attribute as a typed, documented field. Read
+   `scripts/build-vue-types.mjs`'s header comment too — this file exists to answer #81's "is a
+   framework target additive and cheap" question, and is generated FROM the same manifest T009
+   regenerates; no Vue-specific decision is needed here, only a mechanical regen (T015).
+8. `expected-docs.json`'s own `$comment` block, and its current `sk-form-input` entry
+   (`{"attributes": 9, "properties": 0, "methods": 5}`, file `"total": 65`) — this file is
+   HAND-UPDATED, not generated, and is compared by EXACT count in
+   `scripts/check-manifest-content.mjs`. Recompute both numbers from what WP01 ACTUALLY added
+   (T015) rather than trusting this document's arithmetic, which could itself go stale if WP01's
+   final attribute count differs from what was planned.
 
 ## Branch Strategy
 
@@ -169,6 +201,17 @@ Read, in this order:
   3. Open the regenerated `packages/react/src/SkFormInput.d.ts` and confirm `options` is typed as
      `SkFormInputElement['options']` (or the generator's equivalent re-export pattern), matching
      how `SkTransitionMatrix.d.ts` types `columns`/`routes`.
+  3a. **Prop-naming check, post-squad**: confirm the emitted prop names for `readonly` and
+     `inputmode` in both `.js` and `.d.ts` are LOWERCASE — `readonly`, `inputmode` — NOT React's
+     conventional `readOnly`/`inputMode`. An earlier version of `contracts/sk-form-input.contract.
+     md` assumed the React-idiomatic casing and was wrong: `build-react-wrappers.mjs` names a prop
+     after the Lit class field verbatim when the field has no hyphen to convert (compare
+     `sk-transition-matrix`'s `selectedRouteId`, which DOES get camelCased, because its attribute
+     is hyphenated `selected-route-id` — `readonly`/`inputmode` have no hyphen, so nothing
+     converts them). If the generated output disagrees with this expectation, that is new
+     information — read the generator to understand why, and correct
+     `contracts/sk-form-input.contract.md` to match the ACTUAL output, whichever it is; do not
+     assume the contract document was right.
   4. `node scripts/build-react-wrappers.mjs --check` — must exit 0 (confirms the regeneration is
      idempotent and nothing manual needs re-running).
   5. `node scripts/build-react-wrappers.mjs --selftest` — must exit 0 (the generator's own
@@ -223,30 +266,44 @@ Read, in this order:
   the top of the new test file, naming it as the precedent this test replicates — a future reader
   of #179 or #147-#149 should be able to find both examples from either one.
 
-### Subtask T012 – Regenerate static styles-only markup; document any real FR-008 gap
+### Subtask T012 – Document the FR-008 gap against the REAL static-markup location — **completely repointed, post-squad**
 
-- **Purpose**: FR-008 — confirm there IS or IS NOT a genuine no-build-consumer gap, and record
-  whichever is true.
+- **Purpose**: FR-008 — record the genuine no-build-consumer gap accurately, against files that
+  actually exist.
+- **An earlier version of this subtask named files that do not exist for this element** —
+  `sk-form-input.markup.ts` and `packages/styles/src/form-input/*.html`. Verify this yourself
+  before doing anything else: `ls packages/elements/src/form-input/` has no `.markup.ts`;
+  `ls packages/styles/src/form-input/` has exactly one file, `sk-form-input.css` — no `.html` at
+  all. `scripts/build-element-markup.mjs --check` therefore verifies NOTHING about `sk-form-input`
+  specifically; do not run it as part of this subtask under the belief that it does.
 - **Steps**:
-  1. If any of WP01's new Storybook story arms (T008) render through the element-backed static
-     markup path (check whether `sk-form-input` has a `.markup.ts` module the way some other
-     elements do, or whether its static HTML in `packages/styles/src/form-input/` is generated
-     directly from the element template) — run `node scripts/build-element-markup.mjs` and
-     `node scripts/build-element-markup.mjs --check`.
-  2. Read the regenerated `.html` for the new attributes (`pattern`, `min`, `max`, `step`,
-     `inputmode`, `autocomplete`, `readonly`, `list`+`<datalist>`) — confirm they appear as plain
-     HTML attributes with no JavaScript. This is expected to WORK with zero code changes, since
-     native HTML already supports every one of these attributes; if it does not appear, the
-     element's TEMPLATE (not the generator) is missing the binding — go back to WP01, do not
-     patch the generated file.
-  3. Write ONE paragraph (in this WP's Activity Log, and cross-reference it from `plan.md`'s
-     IC-08 risk note if that note needs updating) stating explicitly: the true FR-008 gap is that
-     the static/no-build consumer gets NO custom validity-merge message text (T003's merged flags
-     are JavaScript behaviour, absent in a script-free consumer) — but this is NOT a defect,
-     because native browser validation already produces its own UA message in that consumer with
-     zero code. If you find any OTHER gap during this subtask, document it the same way instead
-     of silently working around it.
-- **Files**: `packages/styles/src/form-input/**` (generated — do not hand-edit).
+  1. Confirm where this element's REAL static/no-build markup lives:
+     `ls packages/styles/src/form-field/sk-form-input-*.html` — five hand-authored files
+     (`-default`, `-disabled`, `-error`, `-filled`, `-focus`), feeding a generated barrel
+     (`index.ts`) via `scripts/build-styles-only-markup.mjs`. These live in `form-field`'s owned
+     directory, fenced by C-004 ("`sk-form-field` stays deliberately styles-only") and by ADR-10
+     §3's history of that directory's own obligations (`#173` is the precedent for a deferred,
+     separately-filed obligation in this exact territory).
+  2. **Do NOT edit any file under `packages/styles/src/form-field/`.** This mission's
+     `owned_files` do not include that directory, and reaching into it — even for a
+     small-looking attribute addition — would be exactly the kind of unreviewed scope-creep into
+     another component's territory ADR-10 §3 already recorded a caution about. If the operator
+     wants parity in the static forms, that is a separate, explicitly-scoped follow-up (filed the
+     way `#173` was filed), not an addition to this WP.
+  3. Write the FR-008 discharge into this WP's Activity Log (and check whether `plan.md`'s IC-08
+     needs a cross-reference — it should already say this after the fold-in, confirm rather than
+     re-derive): the no-build static-markup consumer does **not** gain the new constraint
+     attributes, `readonly`, or the datalist in this mission. The stated workaround is real, not
+     hand-waved: every new attribute (`pattern`, `min`, `max`, `step`, `readonly`, `list`+
+     `<datalist>`) is plain HTML with zero framework involvement, so a maintainer of that static
+     form can add them by hand with no element code required, the same way they would add any
+     other native HTML attribute.
+  4. If you find any OTHER FR-008-relevant gap while doing this (for example, if `form-field`'s
+     own barrel generator behaves differently than described above by the time you run this),
+     document it the same way — explicitly, with the actual command output — rather than silently
+     working around it or assuming the plan's description still holds.
+- **Files**: none edited. This subtask is documentation-only; `packages/styles/src/form-field/**`
+  is explicitly OUT of scope and not in this WP's (or WP01's) `owned_files`.
 - **Parallel?**: No.
 
 ### Subtask T013 – Size report regen + registry reconciliation note (SC-007)
@@ -261,25 +318,65 @@ Read, in this order:
   3. Re-verify (do not trust the planning-time note blindly — the train may have moved):
      `ls scripts/build-conformance-matrix.mjs conformance-matrix.json 2>&1`. If BOTH are still
      absent, record in this WP's Activity Log that SC-007's conformance-matrix obligation is
-     currently discharged by `mutations.json`/`behaviours.json` alone (WP01's T008), because the
-     generator this requirement anticipates has not landed on this train yet. If EITHER now
-     exists (the train moved since planning), run whatever `--check`/regeneration that new
-     tooling defines for these new behaviour ids, and record that you did so.
+     currently discharged by `mutations.json`/`behaviours.json` alone (WP01's T008, which added
+     new ARMS under EXISTING ids — the registry itself did not grow a new id, only new arm
+     entries), because the generator this requirement anticipates has not landed on this train
+     yet. If EITHER now exists (the train moved since planning), run whatever
+     `--check`/regeneration that new tooling defines for these behaviour arms, and record that you
+     did so.
+  4. Confirm WP01's T008 registry arms are actually present and well-formed:
+     `tests/node/config-contract.test.ts`'s two `'[registry] …'` tests must still pass with the
+     SAME applicable-id list as before this mission (`SC-002`–`SC-015`) — if that list changed,
+     WP01 minted a new id by mistake, which the closed-set gate should have caught already, but
+     confirm rather than assume.
 - **Files**: `packages/elements/SIZES.md` (generated).
 - **Parallel?**: No.
 
-### Subtask T014 – Full drift-gate sweep + rebase-on-train check
+### Subtask T014 – Regenerate `vue.d.ts`; hand-update `expected-docs.json` counts — **new, post-squad; two drift-gated artifacts the original plan never mentioned**
+
+- **Purpose**: SC-007 / manifest-drift completeness. `packages/elements/vue.d.ts` and
+  `expected-docs.json` are both derived from — or gated against — the SAME `custom-elements.json`
+  this mission's manifest change modifies (T009), and neither was in the original version of this
+  WP at all. Both will red on this mission's first CI push if skipped.
+- **Steps**:
+  1. `node scripts/build-vue-types.mjs` (regenerates `packages/elements/vue.d.ts` from
+     `custom-elements.json` — no Vue-specific decision is needed; this is purely mechanical).
+  2. `node scripts/build-vue-types.mjs --check` — must exit 0.
+  3. Read the regenerated `sk-form-input` block in `vue.d.ts` and spot-check that the seven new
+     attributes appear with their doc comments, and that `options` is typed consistently with
+     however `PROPERTY_ONLY_MARKER`-marked members are handled elsewhere in this file (read the
+     script's own handling of that marker if unsure — do not assume it matches the React
+     generator's handling without checking).
+  4. Open `expected-docs.json` and locate `elements['sk-form-input']` (currently
+     `{"attributes": 9, "properties": 0, "methods": 5}`) and the top-level `"total"` (currently
+     `65`). Recompute BOTH from what WP01 actually shipped — do not copy the numbers in this
+     mission's planning documents verbatim, in case WP01's final attribute/property count differs
+     from what was planned. As planned: seven new attributes (`pattern`, `min`, `max`, `step`,
+     `inputmode`, `autocomplete`, `readonly`) and one new property-only field (`options`) would
+     move the entry to `{"attributes": 16, "properties": 1, "methods": 5}` and the file `"total"`
+     to `73`.
+  5. `node scripts/check-manifest-content.mjs` — must exit 0 with the updated `expected-docs.json`
+     (re-run from T009 if you have not already after WP01 landed).
+  6. Commit the reasoning for the count change in the same commit that changes the numbers, per
+     `expected-docs.json`'s own stated contract ("If a count changes, change it here and say why").
+- **Files**: `packages/elements/vue.d.ts` (generated, do not hand-edit), `expected-docs.json`
+  (hand-updated — this file is a ratchet, not itself generated).
+- **Parallel?**: No.
+
+### Subtask T015 – Full drift-gate sweep + rebase-on-train check
 
 - **Purpose**: Everything this mission's PR will be judged on by CI, run locally first, plus the
-  plan.md/quickstart.md-required pre-final-gate rebase.
+  plan.md/quickstart.md-required pre-final-gate rebase. Runs LAST, after T014, so nothing this
+  sweep checks can be re-dirtied by a subtask that runs after it.
 - **Steps**:
-  1. Re-run every `--check` invocation this WP has already run once (T009, T010, T013) — a LATER
-     subtask's regeneration can occasionally re-dirty an EARLIER generated file if two generators
-     read overlapping input; running all of them again catches that instead of leaving it for CI.
+  1. Re-run every `--check` invocation this WP has already run once (T009, T010, T013, T014) — a
+     LATER subtask's regeneration can occasionally re-dirty an EARLIER generated file if two
+     generators read overlapping input; running all of them again catches that instead of leaving
+     it for CI.
   2. `git fetch` and check whether `train/elements-first` has moved since this mission branched
      (`git log --oneline train/elements-first -5` compared against this mission's base commit,
      recorded in `plan.md`'s header as `dcf7af2`). If it has moved, rebase this mission branch on
-     the current tip and re-run steps 1-13's `--check` invocations again post-rebase — plan.md and
+     the current tip and re-run every `--check` invocation above again post-rebase — plan.md and
      quickstart.md both require this before the final gate, and it is cheap to do now rather than
      leave it as a surprise for the pre-merge squad.
   3. Run the full `fixtures/elements-behaviour` and `fixtures/react-consumer` suites one more time
@@ -290,12 +387,17 @@ Read, in this order:
 
 ## Test Strategy
 
-- T010's `--check`/`--selftest` and T009's `check-manifest-content.mjs`/`--selftest` are the
-  build-tooling verification layer (ADR-11 required behaviour #9, generation determinism).
+- T010's `--check`/`--selftest`, T009's `check-manifest-content.mjs`/`--selftest`, and T014's
+  `build-vue-types.mjs --check` are the build-tooling verification layer (ADR-11 required
+  behaviour #9, generation determinism).
 - T011 is the ONLY new browser-mode test file in this WP; it is also the one with the highest
   review scrutiny, since it is this mission's answer to a cross-mission open question (epic #183).
-- T014 is a verification-only subtask with no new test file — it exists to make sure nothing
-  written in T009-T013 quietly broke something else's drift gate.
+- T012 and T014's `expected-docs.json` half are documentation/ratchet subtasks with no new test
+  file — T012 because there is genuinely nothing to regenerate for this element's static markup
+  (see its corrected steps), T014's hand-edit because `expected-docs.json` is a committed ratchet
+  compared by `check-manifest-content.mjs`, not a script output.
+- T015 is a verification-only subtask with no new test file — it exists to make sure nothing
+  written in T009-T014 quietly broke something else's drift gate.
 
 ## Risks & Mitigations
 
@@ -305,11 +407,25 @@ Read, in this order:
   the difference — record it explicitly as a new finding in this WP's Activity Log and flag it for
   the pre-merge squad; it may be exactly the kind of thing epic #183 wants recorded for #147-#149's
   future readers.
+- **Assuming a naming convention instead of reading the generated output (T010)**: the original
+  version of this mission's `contracts/sk-form-input.contract.md` assumed React's own
+  `readOnly`/`inputMode` casing for the generated wrapper props, and was wrong — the generator
+  names props after the Lit field verbatim when there is no hyphen to convert. Confirm the ACTUAL
+  emitted names before writing anything that depends on them (T011's test, in particular).
+- **Reaching into `form-field`'s directory to "complete" FR-008 (T012)**: it will look like the
+  obviously helpful thing to do once you have read the five static `.html` files and see how
+  small the diff would be. It is explicitly out of scope for this mission — see T012's steps and
+  research.md R7 for why, and file it separately if the operator wants it.
+- **Getting `expected-docs.json`'s arithmetic wrong (T014)**: this is a hand-edit with no
+  generator to catch a mistake except `check-manifest-content.mjs`'s exact-equality check, which
+  WILL catch a wrong number, but only as an opaque count mismatch — recompute from what WP01
+  actually shipped, not from this document's numbers, which could themselves be stale.
 - **Working around a wrong generated shape instead of fixing the source**: every subtask above
   says this explicitly at least once because it is the most likely shortcut under time pressure —
-  hand-editing `SkFormInput.js`/`.d.ts` or `custom-elements.json` to make a `--check` pass will be
-  caught by the NEXT regeneration (CI runs the same generator), so it does not actually save time.
-- **Rebasing late**: T014 step 2's rebase is placed LAST deliberately (after all local
+  hand-editing `SkFormInput.js`/`.d.ts`, `vue.d.ts`, or `custom-elements.json` to make a `--check`
+  pass will be caught by the NEXT regeneration (CI runs the same generator), so it does not
+  actually save time.
+- **Rebasing late**: T015 step 2's rebase is placed LAST deliberately (after all local
   regeneration is already correct against the mission's own tip), but if it surfaces a real
   conflict with `train/elements-first`'s own movement (e.g. another mission changed
   `form-control-base.ts` in the interim), stop and report rather than resolving a substantive
@@ -319,10 +435,15 @@ Read, in this order:
 
 - Confirm T011's test file explicitly names `sk-transition-matrix`/#149 as the precedent, so a
   reviewer (and epic #183's future readers) can trace the lineage without re-deriving it.
-- Confirm T012's Activity Log paragraph distinguishes "no gap" from "gap, documented" rather than
-  asserting one or the other without having actually looked.
+- **Confirm T010's prop-naming check actually happened** — read the generated `SkFormInput.js`/
+  `.d.ts` yourself and check `readonly`/`inputmode` are lowercase, not `readOnly`/`inputMode`.
+- Confirm T012's Activity Log paragraph documents the gap against the REAL file location
+  (`packages/styles/src/form-field/`) and that NO file under that directory was touched.
 - Confirm T013's registry-reconciliation note reflects the REPO STATE AT THE TIME THIS WP RAN, not
-  a copy-paste of the planning-time note in `tasks.md` (the train may have moved).
+  a copy-paste of the planning-time note in `tasks.md` (the train may have moved), and that it
+  correctly describes WP01's registrations as ARMS under existing ids, not new ids.
+- **Confirm T014's `expected-docs.json` numbers were recomputed from WP01's actual diff**, not
+  copied from this planning document, and that the commit message says why the counts changed.
 
 ## Activity Log
 
