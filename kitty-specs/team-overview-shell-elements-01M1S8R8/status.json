@@ -19,7 +19,7 @@
   "work_packages": {
     "WP01": {
       "actor": "user",
-      "agent": "codex",
+      "agent": null,
       "agent_profile": "reviewer-renata",
       "agent_profile_version": "1.0",
       "force_count": 1,
@@ -31,6 +31,7 @@
         "RED: 13 intended behavior failures on compile-safe inert scaffolds. GREEN: 13/13 focused Chromium; CSS generator/check, exact token comparator, ESLint, stylelint, boundary/hygiene, story-theme and typecheck-all pass. Shared entries and manifest intentionally deferred to WP04."
       ],
       "provider": "__resolved_provider_absent__",
+      "review": null,
       "review_result": {
         "feedback_path": "/home/jeroennouws/dev/team-kitty-missions/design-145/kitty-specs/team-overview-shell-elements-01M1S8R8/tasks/WP01-shell-geometry-and-personal-rail/review-cycle-1.md",
         "reference": "review-cycle://team-overview-shell-elements-01M1S8R8/WP01-shell-geometry-and-personal-rail/review-cycle-1.md",
@@ -38,14 +39,14 @@
         "verdict": "changes_requested"
       },
       "role": "reviewer",
-      "shell_pid": 2459900,
-      "shell_pid_created_at": "1788535195.17",
+      "shell_pid": null,
+      "shell_pid_created_at": null,
       "subtasks": {
-        "T001": "done",
-        "T002": "done",
-        "T003": "done",
-        "T004": "done",
-        "T005": "done"
+        "T001": "planned",
+        "T002": "planned",
+        "T003": "planned",
+        "T004": "planned",
+        "T005": "planned"
       }
     },
     "WP02": {
