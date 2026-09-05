@@ -1,0 +1,14 @@
+{
+  "created_at": "2026-09-05T17:16:26.762590+00:00",
+  "flattened": false,
+  "friendly_name": "dashboard semantic primitives",
+  "mission_id": "01M1S94M8A23CK0X2PXD2Y9KGF",
+  "mission_number": null,
+  "mission_slug": "dashboard-semantic-primitives-01M1S94M",
+  "mission_type": "software-dev",
+  "purpose_context": "This mission advances dashboard semantic primitives on mission/dashboard-semantic-primitives so stakeholders can track the work from mission creation onward.",
+  "purpose_tldr": "dashboard semantic primitives",
+  "slug": "dashboard-semantic-primitives-01M1S94M",
+  "target_branch": "mission/dashboard-semantic-primitives",
+  "topology": "single_branch"
+}
