@@ -7,7 +7,7 @@ requirement_refs:
 - FR-008
 planning_base_branch: mission/form-input-constraints-and-datalist
 merge_target_branch: mission/form-input-constraints-and-datalist
-branch_strategy: Planning artifacts were generated on mission/form-input-constraints-and-datalist; completed changes must merge back into mission/form-input-constraints-and-datalist, which itself PRs into train/elements-first at mission close (per docs/architecture/elements-first-programme.md).
+branch_strategy: Planning artifacts for this mission were generated on mission/form-input-constraints-and-datalist. During /spec-kitty.implement this WP may branch from a dependency-specific base, but completed changes must merge back into mission/form-input-constraints-and-datalist unless the human explicitly redirects the landing branch.
 subtasks:
 - T009
 - T010
@@ -28,7 +28,6 @@ execution_mode: code_change
 model: ''
 owned_files:
 - packages/elements/custom-elements.json
-- packages/react/src/SkFormInput.tsx
 - packages/react/src/SkFormInput.js
 - packages/react/src/SkFormInput.d.ts
 - fixtures/react-consumer/src/sk-form-input-options.test.tsx
@@ -73,7 +72,7 @@ two remaining open requirements are closed with evidence, not assertion:
 
 - `custom-elements.json` reflects the new members and passes `check-manifest-content.mjs` (every
   new property has a doc comment that propagated correctly) — FR-001/SC-007.
-- `packages/react/src/SkFormInput.{tsx,js,d.ts}` regenerate cleanly, and `options` is confirmed
+- `packages/react/src/SkFormInput.{js,d.ts}` regenerate cleanly, and `options` is confirmed
   (by reading the generated `.js`, not by assumption) to go through `useProperties(...)` rather
   than becoming a dropped or attribute-only prop — FR-005/FR-006 delivery.
 - **NFR-001/SC-006 is answered with a passing test**, not a documentation-only claim: a new
@@ -181,7 +180,7 @@ Read, in this order:
      `static properties`, on a public, non-readonly, non-static, non-`#private` field, typed as a
      `ReadonlyArray<…>` for the empty-array reset marker). Do not work around a wrong shape in the
      generator or by hand-editing generated output.
-- **Files**: `packages/react/src/SkFormInput.tsx`, `.js`, `.d.ts` (all generated — do not
+- **Files**: `packages/react/src/SkFormInput.js`, `.d.ts` (all generated — do not
   hand-edit).
 - **Parallel?**: No.
 

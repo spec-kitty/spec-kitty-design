@@ -12,7 +12,7 @@ requirement_refs:
 - FR-007
 planning_base_branch: mission/form-input-constraints-and-datalist
 merge_target_branch: mission/form-input-constraints-and-datalist
-branch_strategy: Planning artifacts were generated on mission/form-input-constraints-and-datalist; completed changes must merge back into mission/form-input-constraints-and-datalist, which itself PRs into train/elements-first at mission close (per docs/architecture/elements-first-programme.md).
+branch_strategy: Planning artifacts for this mission were generated on mission/form-input-constraints-and-datalist. During /spec-kitty.implement this WP may branch from a dependency-specific base, but completed changes must merge back into mission/form-input-constraints-and-datalist unless the human explicitly redirects the landing branch.
 subtasks:
 - T001
 - T002
