@@ -407,6 +407,14 @@
       "verification_command": "node --input-type=module <<'NODE'\nimport { readFileSync } from 'node:fs';\nconst sourcePath = 'packages/tokens/src/tokens.css';\nconst cataloguePath = 'packages/tokens/dist/token-catalogue.json';\nconst source = readFileSync(sourcePath, 'utf8');\nconst categories = {};\nfor (const match of source.matchAll(/\\s(--sk-([a-z][a-z0-9]*)(?:-[a-z0-9]+)+)\\s*:/g)) {\n  const [, token, category] = match;\n  categories[category] ??= { prefix: `--sk-${category}-`, tokens: [] };\n  if (!categories[category].tokens.includes(token)) categories[category].tokens.push(token);\n}\nconst catalogue = JSON.parse(readFileSync(cataloguePath, 'utf8'));\nconst { generated_at: generatedAt, ...actual } = catalogue;\nif (typeof generatedAt !== 'string' || Number.isNaN(Date.parse(generatedAt))) {\n  throw new Error('token catalogue generated_at is absent or invalid');\n}\nconst expected = { schema_version: '1.0.0', generated_from: sourcePath, categories };\nif (JSON.stringify(actual) !== JSON.stringify(expected)) {\n  throw new Error('token catalogue differs from tokens.css outside generated_at');\n}\nNODE",
       "result": "confirmed_absent",
       "evidence": "Command exited 0: "
+    },
+    {
+      "invariant_id": "NI-004",
+      "description": "The authorized PR targets train/elements-first, references #145, and no command pushes or merges main.",
+      "verification_method": "route_check",
+      "verification_command": "test \"$(gh pr view --json baseRefName --jq .baseRefName)\" = train/elements-first && gh pr view --json body --jq .body | rg -q \"Refs #145\"",
+      "result": "pending",
+      "evidence": null
     }
   ],
   "legacy_negative_invariants": [
