@@ -1,0 +1,85 @@
+{
+  "version": 1,
+  "mission_slug": "dashboard-semantic-primitives-01M1S94M",
+  "mission_id": "01M1S94M8A23CK0X2PXD2Y9KGF",
+  "mission_branch": "kitty/mission-dashboard-semantic-primitives-01M1S94M",
+  "target_branch": "mission/dashboard-semantic-primitives",
+  "lanes": [
+    {
+      "lane_id": "lane-a",
+      "wp_ids": [
+        "WP01"
+      ],
+      "write_scope": [
+        "packages/styles/src/empty-state/**",
+        "packages/styles/src/facts/**"
+      ],
+      "predicted_surfaces": [
+        "api",
+        "app-shell",
+        "artifact-rendering",
+        "dashboard"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    },
+    {
+      "lane_id": "lane-b",
+      "wp_ids": [
+        "WP02"
+      ],
+      "write_scope": [
+        "packages/styles/src/disclosure/**",
+        "packages/styles/src/skip-link/**"
+      ],
+      "predicted_surfaces": [
+        "api",
+        "app-shell",
+        "artifact-rendering",
+        "dashboard",
+        "legacy-cleanup"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    },
+    {
+      "lane_id": "lane-c",
+      "wp_ids": [
+        "WP03"
+      ],
+      "write_scope": [
+        "packages/styles/src/data-table/**"
+      ],
+      "predicted_surfaces": [
+        "api",
+        "app-shell",
+        "artifact-rendering",
+        "dashboard"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    },
+    {
+      "lane_id": "lane-d",
+      "wp_ids": [
+        "WP04"
+      ],
+      "write_scope": [
+        "docs/contributing/adding-a-component.md",
+        "packages/styles/src/index.ts"
+      ],
+      "predicted_surfaces": [
+        "api",
+        "artifact-rendering",
+        "dashboard",
+        "legacy-cleanup"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    }
+  ],
+  "computed_at": "2026-09-05T18:40:16.218645+00:00",
+  "computed_from": "dependency_graph+ownership",
+  "planning_artifact_wps": [],
+  "planning_commit_sha": "5c630ed65a05ba30405778aaef6f59518c74cf82"
+}

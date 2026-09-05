@@ -14,6 +14,9 @@ requirement_refs:
 - NFR-001
 - NFR-002
 - NFR-003
+planning_base_branch: mission/dashboard-semantic-primitives
+merge_target_branch: mission/dashboard-semantic-primitives
+branch_strategy: Planning artifacts for this mission were generated on mission/dashboard-semantic-primitives. During /spec-kitty.implement this WP may branch from a dependency-specific base, but completed changes must merge back into mission/dashboard-semantic-primitives unless the human explicitly redirects the landing branch.
 subtasks:
 - T008
 - T009
