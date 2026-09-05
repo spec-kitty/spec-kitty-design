@@ -278,10 +278,10 @@
       "criterion_id": "SC-003",
       "description": "The approved rail contains exactly one account anchor in account and none in primary.",
       "proof_type": "automated_test",
-      "evidence": "Owner WP04: composition locator counts and ordering assertions.",
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "Verified on aggregate lane 89bbf7eb6fb12ca6aab0a780673ac93f506316e0: Storybook axe passed 177/177; Playwright Chromium+Firefox passed 70/70 including 390/414/1280/1440 shell composition, landmarks, label bytes, keyboard/focus, overflow, event, sync and zero-timer assertions.",
+      "pass_fail": "pass",
+      "verified_by": "codex/frontend-freddy/WP04",
+      "verified_at": "2026-09-05T23:34:22.450548+00:00",
       "notes": "Planned evidence mapping; populate the exact command result and immutable SHA when the owning WP or wrap-up step executes."
     },
     {
