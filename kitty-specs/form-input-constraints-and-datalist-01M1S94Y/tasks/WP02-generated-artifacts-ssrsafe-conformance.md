@@ -175,7 +175,7 @@ Read, in this order:
   2. `git diff -- packages/elements/custom-elements.json` — read the diff. Confirm every new
      property from WP01 (`pattern`, `min`, `max`, `step`, `inputmode`, `autocomplete`, `readonly`,
      `options`) appears with the doc comment WP01 wrote, and that `options` carries
-     `"attribute": false"` — if instead it shows up as a plain string attribute, WP01's T004
+     `"attribute": false"` — if instead it shows up as a plain string attribute, WP01's T003
      property declaration does not match the shape `propertyOnlyFields()` requires; go back and
      fix the SOURCE (do not hand-edit the generated manifest).
   3. `node scripts/check-manifest-content.mjs` — must exit 0. If it fails naming a missing doc
@@ -218,7 +218,7 @@ Read, in this order:
      internal consistency checks, run as a SEPARATE step per the script's own refusal to combine
      `--check` and `--selftest`).
   6. If step 2 or 3 does NOT hold — e.g. `options` was dropped entirely, or emitted as a plain
-     attribute prop — STOP and re-open WP01's T004: the property shape does not match what
+     attribute prop — STOP and re-open WP01's T003: the property shape does not match what
      `propertyOnlyFields()`'s AST walk requires (it must be a literal `{ attribute: false }` in
      `static properties`, on a public, non-readonly, non-static, non-`#private` field, typed as a
      `ReadonlyArray<…>` for the empty-array reset marker). Do not work around a wrong shape in the
@@ -318,13 +318,13 @@ Read, in this order:
   3. Re-verify (do not trust the planning-time note blindly — the train may have moved):
      `ls scripts/build-conformance-matrix.mjs conformance-matrix.json 2>&1`. If BOTH are still
      absent, record in this WP's Activity Log that SC-007's conformance-matrix obligation is
-     currently discharged by `mutations.json`/`behaviours.json` alone (WP01's T008, which added
+     currently discharged by `mutations.json`/`behaviours.json` alone (WP01's T004, which added
      new ARMS under EXISTING ids — the registry itself did not grow a new id, only new arm
      entries), because the generator this requirement anticipates has not landed on this train
      yet. If EITHER now exists (the train moved since planning), run whatever
      `--check`/regeneration that new tooling defines for these behaviour arms, and record that you
      did so.
-  4. Confirm WP01's T008 registry arms are actually present and well-formed:
+  4. Confirm WP01's T004 registry arms are actually present and well-formed:
      `tests/node/config-contract.test.ts`'s two `'[registry] …'` tests must still pass with the
      SAME applicable-id list as before this mission (`SC-002`–`SC-015`) — if that list changed,
      WP01 minted a new id by mistake, which the closed-set gate should have caught already, but
