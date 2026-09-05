@@ -310,9 +310,9 @@ declare module 'vue' {
       /** Optional consumer-authored label for the reporting window. */
       'window-label'?: string;
       /** Consumer-labelled time buckets, assigned as a JavaScript property. */
-      'columns'?: import('@spec-kitty/elements').SkTransitionMatrix["columns"];
+      'columns'?: import('@spec-kitty/elements/dist/transition-matrix/sk-transition-matrix.js').SkTransitionMatrix["columns"];
       /** Aggregate transition routes, assigned as a JavaScript property. */
-      'routes'?: import('@spec-kitty/elements').SkTransitionMatrix["routes"];
+      'routes'?: import('@spec-kitty/elements/dist/transition-matrix/sk-transition-matrix.js').SkTransitionMatrix["routes"];
     }>;
   }
 }

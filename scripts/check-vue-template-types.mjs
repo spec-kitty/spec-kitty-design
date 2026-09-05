@@ -16,12 +16,105 @@
  * this checks which file the error is in and what it says.
  */
 import { execFileSync } from 'node:child_process';
-import { existsSync } from 'node:fs';
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  rmSync,
+  symlinkSync,
+  writeFileSync,
+} from 'node:fs';
+import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const PROJECT = 'fixtures/vue-consumer/tsconfig.vue.json';
+
+/**
+ * Compile the declaration from the package a consumer actually receives.
+ *
+ * The workspace fixture extends tsconfig.base.json, whose @spec-kitty/elements path alias points
+ * at src/index.ts. That once hid a published-only failure: vue.d.ts imported the package root,
+ * the tarball's dist/index.d.ts re-exported generated CSS modules that were not packed, and the
+ * fixture stayed green because it never resolved that declaration. This probe packs and extracts
+ * @spec-kitty/elements into an isolated node_modules tree with no tsconfig and no paths.
+ */
+function assertPackedDeclarationCompiles() {
+  const scratch = mkdtempSync(join(tmpdir(), 'vue-packed-types-'));
+  try {
+    const modules = join(scratch, 'node_modules');
+    const packed = join(modules, '@spec-kitty', 'elements');
+    mkdirSync(packed, { recursive: true });
+
+    const raw = execFileSync('npm', ['pack', '--pack-destination', scratch, '--json'], {
+      cwd: join(ROOT, 'packages/elements'),
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'pipe'],
+      timeout: 120_000,
+    });
+    const tarball = join(scratch, JSON.parse(raw)[0].filename);
+    execFileSync('tar', ['-xzf', tarball, '-C', packed, '--strip-components=1'], {
+      timeout: 120_000,
+    });
+
+    // Vue is deliberately not a dependency of @spec-kitty/elements. The consuming app supplies
+    // it; these symlinks model that peer-owned installation without invoking the registry.
+    for (const dependency of [
+      'vue',
+      'lit',
+      'lit-html',
+      'lit-element',
+      '@lit/reactive-element',
+      '@lit-labs/ssr-dom-shim',
+    ]) {
+      const installed = join(ROOT, 'node_modules', ...dependency.split('/'));
+      if (!existsSync(installed)) {
+        throw new Error(`${dependency} is not installed, so the packed Vue declaration cannot be checked`);
+      }
+      const staged = join(modules, ...dependency.split('/'));
+      mkdirSync(dirname(staged), { recursive: true });
+      symlinkSync(installed, staged, 'dir');
+    }
+
+    const consumer = join(scratch, 'consumer.ts');
+    writeFileSync(
+      consumer,
+      `/// <reference types="@spec-kitty/elements/vue" />\n` +
+        `import type { GlobalComponents } from 'vue';\n` +
+        `type Matrix = InstanceType<GlobalComponents['sk-transition-matrix']>['$props'];\n` +
+        `const columns: NonNullable<Matrix['columns']> = [{ id: 'today', label: 'Today' }];\n` +
+        `export { columns };\n`,
+    );
+
+    execFileSync(
+      process.execPath,
+      [
+        join(ROOT, 'node_modules/typescript/bin/tsc'),
+        '--noEmit',
+        '--strict',
+        '--skipLibCheck',
+        'false',
+        '--moduleResolution',
+        'bundler',
+        '--module',
+        'esnext',
+        '--target',
+        'esnext',
+        consumer,
+      ],
+      { cwd: scratch, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], timeout: 120_000 },
+    );
+  } catch (error) {
+    const output = `${error.stdout ?? ''}${error.stderr ?? ''}`.trim();
+    throw new Error(
+      `the packed @spec-kitty/elements Vue declaration does not compile with paths disabled` +
+        `${output ? `:\n${output}` : `: ${error.message}`}`,
+    );
+  } finally {
+    rmSync(scratch, { recursive: true, force: true });
+  }
+}
 
 // A named refusal, not a Node stack trace — the house rule typecheck-all.mjs documents. A lens
 // deleted the fixture and got a raw ENOENT dump.
@@ -107,4 +200,15 @@ if (problems.length) {
   problems.forEach((p) => console.error(`   ${p}`));
   process.exit(1);
 }
-console.log(`✅ Vue template types reach a real SFC: Good.vue clean, Bad.vue rejects an undeclared variant.`);
+
+try {
+  assertPackedDeclarationCompiles();
+} catch (error) {
+  console.error(`❌ Vue template types:\n   ${error.message}`);
+  process.exit(1);
+}
+
+console.log(
+  `✅ Vue template types reach a real SFC and compile from the packed package with paths disabled: ` +
+    `Good.vue clean, Bad.vue rejects an undeclared variant.`,
+);

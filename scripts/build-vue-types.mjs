@@ -59,16 +59,26 @@ function tags() {
           if (typeof d.name !== 'string' || !/^[A-Za-z_$][A-Za-z0-9_$]*$/.test(d.name)) {
             throw new Error(`${d.tagName}: property-only fields require an emittable declaration name`);
           }
+          if (!/^sk-[a-z0-9]+(?:-[a-z0-9]+)*$/.test(d.tagName)) {
+            throw new Error(
+              `${d.tagName}: property-only fields require the published sk-<component> directory convention`,
+            );
+          }
           if (attributeFields.has(member.name)) {
             throw new Error(`${d.tagName}.${member.name} is both property-only and an observed attribute`);
           }
+          const component = d.tagName.slice('sk-'.length);
           return {
             name: member.name,
-            // Index the exported element class instead of re-parsing type.text. This preserves
-            // structured and future generic types without manufacturing an import list, works in
-            // this repo through tsconfig paths, and resolves through the package's own export for
-            // published consumers.
-            type: `import('@spec-kitty/elements').${d.name}[${JSON.stringify(member.name)}]`,
+            // Index the element's NARROW published declaration, not the package root. This
+            // preserves structured and future generic types without manufacturing an import list.
+            // The root barrel also exports constructed stylesheets; importing it from this .d.ts
+            // made a packed Vue consumer resolve every stylesheet declaration in the package.
+            // The component-local declaration is shipped under the public ./dist/* export and
+            // reaches exactly the field whose type the manifest classified.
+            type:
+              `import('@spec-kitty/elements/dist/${component}/${d.tagName}.js')` +
+              `.${d.name}[${JSON.stringify(member.name)}]`,
             description: (member.description ?? '').trim(),
           };
         });
