@@ -248,10 +248,10 @@
       "criterion_id": "NFR-008",
       "description": "The final PR head passes every repository and CI-equivalent gate after SK-179 consolidation without a later rebase.",
       "proof_type": "automated_test",
-      "evidence": "Pending required SK-179 consolidation, draft train/elements-first PR, CI-authoritative visual baseline commit, exact-PR-head gates, independent lenses, maintainer approval, verified train merge, and governed #145/#153 closeout. WP04 lane evidence is pinned to 89bbf7eb6fb12ca6aab0a780673ac93f506316e0.",
+      "evidence": "Pending SK-179 consolidation, train/elements-first PR, authoritative visual baseline commit, exact-PR-head gates, independent lenses, maintainer approval, verified train merge, and governed #145/#153 closeout. Replacement WP04 lane handoff is pinned to 5581db93adc567ffa27b146698534fdf6a9867a9.",
       "pass_fail": "pending",
-      "verified_by": "codex/frontend-freddy/WP04",
-      "verified_at": "2026-09-05T23:34:30.834304+00:00",
+      "verified_by": "codex/frontend-freddy/WP04-correction-1",
+      "verified_at": "2026-09-05T23:49:06.884036+00:00",
       "notes": "Planned evidence mapping; populate the exact command result and immutable SHA when the owning WP or wrap-up step executes."
     },
     {
