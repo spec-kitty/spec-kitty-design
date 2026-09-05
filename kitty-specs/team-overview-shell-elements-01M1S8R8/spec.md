@@ -1,7 +1,7 @@
 # Mission Specification: Team overview shell elements
 
 **Mission:** `team-overview-shell-elements-01M1S8R8` · **Issue:** #145 · part of epic #144 · tracks #125
-**Branch:** `mission/team-overview-shell-elements` from `train/elements-first` at `dcf7af26ff8f14d0d8b5a8e45c7eb9d64201e053`
+**Branch:** `mission/team-overview-shell-elements` from `train/elements-first` at `37662678938c0e76455760e435c5ea626aac8056`
 **Created:** 2026-09-05
 **Status:** Draft
 **Squad tier:** B — three independent lenses post-tasks and again at the pre-merge gate
@@ -17,8 +17,9 @@
 - Existing contract authority: the `sk-button` implementation landed from #79 in train commit
   `70742b8436ca89e09cb6e0416c0830f4bded3289`. This mission extends that element; it does not
   fork or replace it. Issue #153 records the existing element's missing route to an accessible
-  icon-only name and focus delegation; the narrow extension here closes the part of that defect
-  required by #145.
+  icon-only name and focus delegation; the narrow extension here implements the defect resolution
+  required by #145. After the authorized train PR is verified merged, mission/orchestrator wrap-up
+  closes both #145 and #153 with the merged PR and train-commit evidence.
 - Repository authority: tokens remain the sole design-value source; CSS, element, manifest,
   generated React wrapper and Vue declarations retain the established one-way dependency and
   generation contracts.
@@ -64,6 +65,12 @@ sk-button size="icon"
   intercept, translate, cancel or redispatch their descendants' actions.
 - **Icon-only button:** the existing `sk-button` with `size="icon"`. `label` supplies the accessible
   name of the real inner button or anchor. The consumer supplies the slotted glyph.
+- **Issue resolution:** WP workers implement and verify only; they never close GitHub issues.
+  Immediately after verifying the explicitly authorized PR merged into `train/elements-first`,
+  mission/orchestrator wrap-up closes #145 and #153 as completed with the merged PR and commit
+  evidence. It does not change #112, #125, #144, #146, #147, #148, #150, #154, or any other
+  parent/sibling/follow-up issue; if one was completed separately, it preserves and records that
+  externally changed state.
 
 ## Public contracts
 
@@ -305,7 +312,7 @@ selected state.
 | C-005 | Shadow boundary | Component CSS MUST not depend on `:root`, `html`, `body`, `:host-context()` or a consumer ancestor selector; internal classes follow the tag-name family and public styling uses tokens/parts. | Architecture | High | Open |
 | C-006 | Canonical artifacts | CSS is authored only in `packages/styles`; React/Vue/CEM/CSS modules/size output are generated, never hand-edited. Markup is authored once, and no static form is required for a purely slot-composed shell element unless implementation demonstrates a meaningful static contract. | Architecture | High | Open |
 | C-007 | Serial shared artifacts | All work packages form one dependency-ordered serial chain even when Spec Kitty materializes a lane per WP. Shared manifest, wrapper, ratchet, size and barrel artifacts have one final integration owner. | Delivery | High | Open |
-| C-008 | Train target | The only PR target is `train/elements-first`, with `Refs #145`. Never merge or push to `main`; never publish or deploy. | Delivery | High | Open |
+| C-008 | Train target and issue resolution | The only PR target is `train/elements-first`, with `Refs #145`. WP workers MUST NOT close issues. Immediately after verifying the explicitly authorized PR merged into the train, mission/orchestrator wrap-up MUST close #145 and #153 as completed with merged PR/commit evidence and MUST NOT change #112, #125, #144, #146, #147, #148, #150, #154, or another parent/sibling/follow-up issue; any separately completed state is preserved and recorded as external. Never merge or push to `main`; never publish or deploy. | Delivery | High | Open |
 | C-009 | Final rebase | Do not rewrite an execution lane after work starts. After all WPs are approved but before consolidation, refresh/rebase the clean planning target onto the latest train while lanes remain frozen, then run canonical `spec-kitty merge`. Commit any required shared regeneration and run every final gate with no further rebase. If train moves again, stop and explicitly rebaseline instead of blindly rebasing an exact-SHA candidate. | Delivery | High | Open |
 | C-010 | Review gate | Tier B requires an independent three-lens post-tasks PASS before implementation and an exact-SHA independent squad plus maintainer approval before merge. The author cannot approve their own artifacts. | Governance | High | Open |
 
@@ -339,7 +346,9 @@ selected state.
 - **SC-012:** The exact post-consolidation PR head passes repository generators/checks, build,
   typecheck, behavior tests, Storybook build, axe with zero violations, CI-authoritative visual
   review, commitlint, the Tier-B squad and maintainer review. No rebase occurs after that candidate
-  is created; later train movement triggers an explicit stop/rebaseline decision.
+  is created; later train movement triggers an explicit stop/rebaseline decision. After the
+  authorized merge is verified on `train/elements-first`, mission/orchestrator wrap-up closes #145
+  and #153 with merged PR/commit evidence while leaving all unrelated issue states unchanged.
 
 ## Explicit non-goals
 
@@ -349,4 +358,6 @@ selected state.
   action rows or the public `sk-team-overview` page component prohibited by epic #144.
 - Any wrapper-generator redesign, React `tabIndex` policy from #154, button form participation, or
   unrelated #79 follow-up beyond what the icon-size accessible-name/focus contract requires.
+- Any WP-owned issue closure, any closure before the authorized train merge is verified, or any
+  mission-owned closure other than #145 and #153.
 - Merge to `main`, package publication, release tagging, deployment or Storybook publishing.

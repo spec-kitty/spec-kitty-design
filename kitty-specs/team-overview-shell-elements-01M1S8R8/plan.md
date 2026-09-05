@@ -1,7 +1,7 @@
 # Implementation Plan: Team overview shell elements
 
 **Mission:** `team-overview-shell-elements-01M1S8R8` · Issue #145 · Epic #144
-**Branch:** `mission/team-overview-shell-elements` from `train/elements-first` at `dcf7af26ff8f14d0d8b5a8e45c7eb9d64201e053`
+**Branch:** `mission/team-overview-shell-elements` from `train/elements-first` at `37662678938c0e76455760e435c5ea626aac8056`
 **Date:** 2026-09-05
 **Spec:** [`spec.md`](./spec.md) in this same frozen planning tree. The reachable immutable planning
 identity is `lanes.json.planning_commit_sha`, captured by the final canonical task-finalization run.
@@ -57,7 +57,7 @@ A Tier-B three-lens PASS gates WP01.
 | Performance | Final exact-head CI Storybook build must complete in under the charter's 180-second limit; `SIZES.md` is regenerated after real builds. |
 | Canonical generation | CSS modules, token catalogue, CEM, React, Vue and sizes are generated; generated files are never hand-edited. Only stable outputs are byte-determinism checks because the token catalogue embeds its generation timestamp. |
 | Supply chain | No new dependency, lifecycle script or registry access. If implementation discovers one, stop. |
-| Review and merge | Post-tasks and pre-merge squads are exact-SHA gates. One maintainer approval is required. Only `train/elements-first` may receive this mission. |
+| Review, merge and resolution | Post-tasks and pre-merge squads are exact-SHA gates. One maintainer approval is required. Only `train/elements-first` may receive this mission. WP workers close no issue; after the authorized train merge is verified, mission/orchestrator wrap-up closes exactly #145 and #153 with merged PR/commit evidence. |
 
 No charter exception is requested.
 
@@ -297,6 +297,9 @@ probe.
 - `packages/styles/src/index.ts` and new shell `.markup.ts`/`.html`/`index.ts` files.
 - Sibling TKO2–TKO5 authored directories, Team Kitty application code, routers/stores/icons.
 - Wrapper generator/runtime changes, `tabIndex` policy, dependency files, release/tag/deploy files.
+- Issue closure by a WP, closure before the authorized train merge is verified, or wrap-up changing
+  #112, #125, #144, #146, #147, #148, #150, #154, or another unrelated issue state; separately
+  completed states are recorded and preserved as external changes.
 - Any merge/push to `main`, publication or deployment.
 
 ## Story and Browser Evidence
@@ -486,8 +489,14 @@ repair is required, do it before execution and run task finalization last so
    self-invalidating commit/evidence loop. Any other push invalidates SHA-pinned evidence. If train
    moves, stop and obtain an explicit rebaseline decision instead of blindly rebasing the reviewed
    candidate.
-8. Merge only to `train/elements-first` when explicitly authorized. Never merge the train to main,
-   tag, publish or deploy.
+8. Merge only to `train/elements-first` when explicitly authorized. Verify the PR is merged into
+   that base and resolve its exact merge commit. Immediately afterward, mission/orchestrator
+   wrap-up—not a WP worker—closes #145 and #153 as completed with the merged PR URL/number and train
+   commit SHA in each closure comment. Compare the pre-closure and post-closure state snapshots for
+   #112, #125, #144, #146, #147, #148, #150 and #154 and require them to be unchanged across this
+   mission's closure operation. If a separate completion races that window, stop and attribute it
+   before continuing; never claim or overwrite it. Never merge the train to main, tag, publish or
+   deploy.
 
 ## Implementation Concern Map
 
@@ -550,7 +559,8 @@ materialize a distinct lane for each package; the dependency DAG, not lane reuse
 The packages are serial because aggregate generated and registry artifacts are committed. That
 does not authorize one package to absorb another issue's authored sources. Post-WP04 mission
 wrap-up performs the pre-consolidation target refresh, canonical merge and exact-head gates above;
-those steps are not conditions of WP04 approval.
+those steps are not conditions of WP04 approval. Issue closure is also wrap-up-only: workers close
+nothing, and #145/#153 close only after the authorized train merge is verified.
 
 ## Pre-mortem and Risks
 
@@ -572,3 +582,4 @@ those steps are not conditions of WP04 approval.
 | SIZES records stale dist | measurement before build | build tokens/styles/elements immediately before measure |
 | Local PNGs become authority | snapshot generated outside Ubuntu CI | WP04 records diagnostic actuals only; wrap-up accepts only PR-artifact bytes after approved-reference review |
 | Review evidence goes stale | push after squad or train moves | a push requires rerunning affected evidence; train movement requires stop/rebaseline, not blind rebase |
+| A worker closes an issue or wrap-up closes the wrong set | issue state moves before verified train merge, or a parent/sibling changes | prohibit closure in every WP; snapshot governed states, verify the authorized train merge, close exactly #145/#153 with merge evidence, then compare all non-target states |

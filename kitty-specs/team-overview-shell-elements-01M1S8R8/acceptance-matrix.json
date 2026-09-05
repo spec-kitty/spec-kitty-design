@@ -248,7 +248,7 @@
       "criterion_id": "NFR-008",
       "description": "The final PR head passes every repository and CI-equivalent gate after SK-179 consolidation without a later rebase.",
       "proof_type": "automated_test",
-      "evidence": "Owner mission wrap-up: run every current-train [ENFORCED] command mapped in plan.md, record current train SHA, consolidated head SHA, exact commands/results, clean status, PR head equality, CI evidence, and fresh three-lens/maintainer evidence on external immutable PR/check surfaces under the SK-178 waiver.",
+      "evidence": "Owner mission wrap-up: run every current-train [ENFORCED] command mapped in plan.md, record current train SHA, consolidated head SHA, exact commands/results, clean status, PR head equality, CI evidence, and fresh three-lens/maintainer evidence on external immutable PR/check surfaces under the SK-178 waiver; after the authorized train merge is verified, close #145/#153 with merged PR/commit evidence and preserve all unrelated issue states.",
       "pass_fail": "pending",
       "verified_by": null,
       "verified_at": null,
@@ -368,7 +368,7 @@
       "criterion_id": "SC-012",
       "description": "The post-consolidation exact head passes local, CI, approved visual, squad, and maintainer gates.",
       "proof_type": "manual_review",
-      "evidence": "Owner mission wrap-up: pin all evidence to the PR head after authoritative PNG commit and record it externally on immutable PR comment/check surfaces; under the SK-178 waiver do not run a tracked acceptance writer that changes the certified head, and stop for maintainer disposition if no non-mutating verdict surface exists. Any other push invalidates evidence and train movement requires an explicit rebaseline decision.",
+      "evidence": "Owner mission wrap-up: pin all evidence to the PR head after authoritative PNG commit and record it externally on immutable PR comment/check surfaces; under the SK-178 waiver do not run a tracked acceptance writer that changes the certified head, and stop for maintainer disposition if no non-mutating verdict surface exists. Any other push invalidates evidence and train movement requires an explicit rebaseline decision. Once that authorized PR is verified merged into the train, close #145/#153 with merged PR/commit evidence and prove the governed non-target issue states did not change.",
       "pass_fail": "pending",
       "verified_by": null,
       "verified_at": null,
@@ -381,6 +381,7 @@
     "Owner WP04 — local PNGs never become authority: `test -z \"$(git diff --name-only <WP03-approved-sha>..HEAD -- apps/storybook/src/tests/visual.spec.ts-snapshots)\"` must pass at WP04 approval; only mission wrap-up may later add CI-artifact baseline bytes.",
     "Owner mission wrap-up — train-only/no-main: `test \"$(gh pr view --json baseRefName --jq .baseRefName)\" = train/elements-first` must pass, the PR body must contain `Refs #145`, and no command may push or merge `main`.",
     "Owner mission wrap-up — exact-SHA final evidence: `test \"$(gh pr view --json headRefOid --jq .headRefOid)\" = \"$(git rev-parse HEAD)\" && test -z \"$(git status --porcelain)\" && git diff --check <current-train-sha>..HEAD` must pass after the authoritative baseline commit; every gate, squad, and maintainer result must name that same head and be recorded externally under the SK-178 waiver, never by a tracked acceptance auto-commit that would invalidate the evidence it contains.",
+    "Owner mission wrap-up — exact issue-resolution set: before any issue mutation, snapshot #112/#125/#144/#146/#147/#148/#150/#154 with `for id in 112 125 144 146 147 148 150 154; do gh issue view \"$id\" --repo spec-kitty/spec-kitty-design --json number,state --jq '[.number,.state]|@tsv'; done > /tmp/sk145-nontarget-before.tsv`; only after `gh pr view <pr-number> --repo spec-kitty/spec-kitty-design --json baseRefName,mergedAt,mergeCommit` proves the authorized PR merged into `train/elements-first`, close #145 and #153 with that PR/commit evidence, repeat the loop to `/tmp/sk145-nontarget-after.tsv`, require `cmp /tmp/sk145-nontarget-before.tsv /tmp/sk145-nontarget-after.tsv`, and require both target issue states to be `CLOSED`.",
     "Owner WP01 and mission wrap-up — token catalogue source equality: the exact read-only Node comparator in plan.md must pass after each authorized catalogue generation and may ignore only the validated generated_at timestamp value."
   ]
 }

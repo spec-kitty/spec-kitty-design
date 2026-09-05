@@ -182,7 +182,7 @@ build, demo assembly, and `git diff --check` commands from the planning base. Re
 diagnostic separately; it is not a passing gate. Do not claim latest-train, post-consolidation PR,
 approved visual, or CI-authoritative exact-head readiness as WP04 evidence. Capture
 environment/timing, end with `git status --porcelain` empty and pin WP04 approval to its exact lane
-SHA.
+SHA. As a WP worker, do not close #145, #153, or any other issue.
 
 After all WPs approve, mission wrap-up—not WP04 approval—must perform SK-179 ordering: fetch and
 refresh/rebase the clean planning target onto latest `origin/train/elements-first` while execution
@@ -199,7 +199,12 @@ the SK-178 waiver, do not invoke an acceptance-verdict writer whose tracked auto
 the certified head; if no non-mutating acceptance surface is available, stop for maintainer
 disposition rather than starting an infinite evidence-invalidating commit loop. Any other push
 invalidates evidence; later train movement requires stop/rebaseline, not a blind rebase. Never
-merge/push to `main`, close an issue, publish or deploy.
+merge/push to `main`, publish or deploy. Only after the explicitly authorized PR is verified merged
+into `train/elements-first`, mission/orchestrator wrap-up closes #145 and #153 as completed with the
+merged PR URL/number and train commit SHA. It compares before/after snapshots and does not change
+#112, #125, #144, #146, #147, #148, #150, #154, or any other parent/sibling/follow-up issue. If an
+issue was separately completed outside this mission, wrap-up only records and preserves that
+external state.
 
 ## Definition of done
 
@@ -214,4 +219,6 @@ merge/push to `main`, close an issue, publish or deploy.
   deferred to post-consolidation wrap-up.
 - The aggregate-lane static/type/build/security/release/offline gate list passes at one clean SHA;
   latest-train consolidation and exact-PR gates are explicitly deferred to mission wrap-up.
+- WP04 records that it changed no issue state; the separate #145/#153 resolution obligation remains
+  outside this package's approval and belongs only to mission/orchestrator wrap-up.
 - No sibling authored source, app state/icon, `main`, publish or deployment action enters the diff.

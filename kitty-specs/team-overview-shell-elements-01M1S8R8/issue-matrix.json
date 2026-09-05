@@ -1,7 +1,7 @@
 {
   "rows": {
     "#112": {
-      "evidence_ref": "Follow-up: #112 remains the open conformance-matrix mission. Mission wrap-up owns checking its current train/gate state before consolidation and recording the result; this mission neither implements nor closes #112.",
+      "evidence_ref": "Follow-up: #112 remains the conformance-matrix mission. Mission wrap-up owns checking its current train/gate state before consolidation and preserving its then-current issue state; this mission neither implements nor mutates #112, and records any separately completed state as external.",
       "fr": "FR-011,FR-013,FR-014",
       "nfr": "NFR-001,NFR-007,NFR-008",
       "repo": "spec-kitty/spec-kitty-design",
@@ -13,7 +13,7 @@
       "wp": "mission-wrap-up"
     },
     "#125": {
-      "evidence_ref": "Follow-up: #125 remains the open programme tracker. Mission wrap-up owns recording the #145 train PR as this mission's contribution; it must not close #125.",
+      "evidence_ref": "Follow-up: #125 remains the programme tracker. Mission wrap-up owns recording the #145 train PR as this mission's contribution and preserving #125's then-current issue state; it records any separately completed state as external rather than mutating it.",
       "fr": "FR-001–FR-017",
       "nfr": "NFR-001–NFR-008",
       "repo": "spec-kitty/spec-kitty-design",
@@ -25,7 +25,7 @@
       "wp": "mission-wrap-up"
     },
     "#144": {
-      "evidence_ref": "Follow-up: #144 remains the open Team overview design-system epic with sibling #146–#150 work. Mission wrap-up owns verifying #145 stayed inside the shell boundary and recording its train PR; it must not close #144.",
+      "evidence_ref": "Follow-up: #144 remains the Team overview design-system epic with sibling #146–#150 work. Mission wrap-up owns verifying #145 stayed inside the shell boundary, recording its train PR, and preserving #144's then-current issue state; it records any separately completed state as external rather than mutating it.",
       "fr": "FR-001–FR-017",
       "nfr": "NFR-001–NFR-008",
       "repo": "spec-kitty/spec-kitty-design",
@@ -37,7 +37,7 @@
       "wp": "mission-wrap-up"
     },
     "#145": {
-      "evidence_ref": "Issue #145 is this mission. WP01–WP04 own implementation evidence; mission wrap-up owns changing this row from in-mission only after the exact train-target PR head passes all gates and is merged. The mission does not close the GitHub issue.",
+      "evidence_ref": "Issue #145 is this mission. WP01–WP04 own implementation evidence but never issue closure. Immediately after verifying the explicitly authorized PR merged into train/elements-first, mission/orchestrator wrap-up closes #145 as completed with the merged PR URL/number and train commit SHA.",
       "fr": "FR-001–FR-017",
       "nfr": "NFR-001–NFR-008",
       "repo": "spec-kitty/spec-kitty-design",
@@ -49,7 +49,7 @@
       "wp": "mission-wrap-up"
     },
     "#146": {
-      "evidence_ref": "Follow-up: #146 is the parallel feed-elements mission. WP04 and mission wrap-up own preserving any landed authored sources and reconciling only shared generated/entry/ratchet files; this mission does not close #146.",
+      "evidence_ref": "Follow-up: #146 is the parallel feed-elements mission. WP04 and mission wrap-up own preserving any landed authored sources and reconciling only shared generated/entry/ratchet files; this mission does not change #146's issue state and records any separately completed state as external.",
       "fr": null,
       "nfr": "NFR-006,NFR-008",
       "repo": "spec-kitty/spec-kitty-design",
@@ -59,6 +59,30 @@
       "title": "[TKO2] Team overview feed elements",
       "verdict": "deferred-with-followup",
       "wp": "WP04"
+    },
+    "#147": {
+      "evidence_ref": "Follow-up: #147 remains a sibling metric/evidence-chain mission. Mission wrap-up snapshots and preserves its then-current issue state; #145 does not close or otherwise mutate it and records any separately completed state as external.",
+      "fr": null,
+      "nfr": "NFR-008",
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": "SC-012",
+      "scope": "Parallel sibling outside the shell and button-extension authored scope.",
+      "source_file": "spec.md",
+      "title": "[TKO3] delivery-return-metric-elements — metric and evidence-chain",
+      "verdict": "deferred-with-followup",
+      "wp": "mission-wrap-up"
+    },
+    "#148": {
+      "evidence_ref": "Follow-up: #148 remains a sibling return-over-time visualization mission. Mission wrap-up snapshots and preserves its then-current issue state; #145 does not close or otherwise mutate it and records any separately completed state as external.",
+      "fr": null,
+      "nfr": "NFR-008",
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": "SC-012",
+      "scope": "Parallel sibling outside the shell and button-extension authored scope.",
+      "source_file": "spec.md",
+      "title": "[TKO4] return-over-time bar-chart — accessible controlled data visualization",
+      "verdict": "deferred-with-followup",
+      "wp": "mission-wrap-up"
     },
     "#149": {
       "evidence_ref": "Issue #149 is closed and its transition-matrix mission landed through PR #171 at train commit 8e654e858c7e09acf48ddafdd99a5349fae92d87. Mission wrap-up owns preserving it during refresh/regeneration; no work or issue closure is owed here.",
@@ -73,7 +97,7 @@
       "wp": "mission-wrap-up"
     },
     "#150": {
-      "evidence_ref": "Follow-up: #150 remains the open final Team overview pattern-composition mission. WP04 owns keeping its generic shell evidence below that boundary; mission wrap-up records the #145 train result without closing #150.",
+      "evidence_ref": "Follow-up: #150 remains the final Team overview pattern-composition mission. WP04 owns keeping its generic shell evidence below that boundary; mission wrap-up snapshots and preserves #150's then-current issue state and records any separately completed state as external.",
       "fr": "FR-001,FR-003",
       "nfr": "NFR-003,NFR-004,NFR-005",
       "repo": "spec-kitty/spec-kitty-design",
@@ -85,7 +109,7 @@
       "wp": "WP04"
     },
     "#153": {
-      "evidence_ref": "Issue #153 supplies the accessible-name and delegatesFocus defect contract. WP03 owns the fix and exact behavior evidence; mission wrap-up owns recording the landed train commit without closing the issue.",
+      "evidence_ref": "Issue #153 supplies the accessible-name and delegatesFocus defect contract. WP03 owns the fix and exact behavior evidence but never issue closure. Immediately after verifying the explicitly authorized PR merged into train/elements-first, mission/orchestrator wrap-up closes #153 as completed with the merged PR URL/number and train commit SHA.",
       "fr": "FR-012,FR-013,FR-014,FR-017",
       "nfr": "NFR-001,NFR-002,NFR-004",
       "repo": "spec-kitty/spec-kitty-design",
@@ -94,10 +118,10 @@
       "source_file": "plan.md",
       "title": "sk-button accessible name and delegatesFocus",
       "verdict": "in-mission",
-      "wp": "WP03"
+      "wp": "mission-wrap-up"
     },
     "#154": {
-      "evidence_ref": "Follow-up: #154 remains open and owns the generated React wrapper tabIndex policy. WP03 and mission wrap-up own proving this mission adds no host tabIndex or generator-policy change; they must not close #154.",
+      "evidence_ref": "Follow-up: #154 owns the generated React wrapper tabIndex policy. WP03 and mission wrap-up own proving this mission adds no host tabIndex or generator-policy change and preserving #154's then-current issue state; they record any separately completed state as external rather than mutating it.",
       "fr": "FR-014,FR-017",
       "nfr": "NFR-002",
       "repo": "spec-kitty/spec-kitty-design",

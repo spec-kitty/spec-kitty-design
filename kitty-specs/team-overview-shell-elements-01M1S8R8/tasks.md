@@ -8,6 +8,10 @@ This mission uses one strict serial dependency chain. Spec Kitty may materialize
 the four packages are independently reviewable, but
 their approved results are consolidated by Spec Kitty before one final PR. Do not open a partial
 WP PR, rebase or rewrite the lane after execution starts, merge to `main`, publish or deploy.
+WP workers must not close any GitHub issue. After all WPs and exact-head gates complete and the
+explicitly authorized PR is verified merged into `train/elements-first`, mission/orchestrator
+wrap-up closes #145 and #153 with merged PR/commit evidence and leaves every unrelated issue state
+unchanged unless separately completed.
 
 ## Subtask index
 
@@ -77,6 +81,8 @@ Own every shared registry, entry, generated aggregate, documentation and end-to-
 This package makes the four independently reviewed additions one aggregate lane state and is the
 only package allowed to edit collision-prone shared artifacts. Latest-train refresh, consolidation
 and exact-PR gates remain mission wrap-up work after WP04 approval.
+The authorized-train-merge verification and exact #145/#153 issue closure are likewise
+mission/orchestrator wrap-up work; WP04 must not close an issue.
 
 - **Dependencies:** WP01, WP02, WP03
 - **Requirements:** FR-001–FR-017; NFR-001–NFR-008; C-001–C-010
