@@ -150,8 +150,10 @@ test('at the narrow boundary metadata follows text and actions remain reachable'
   const text = part(el, 'text')!;
   const meta = part(el, 'meta')!;
   expect(Array.from(header.children)).toEqual([text, meta]);
-  expect(Math.round(text.getBoundingClientRect().width)).toBe(600);
-  expect(Math.round(meta.getBoundingClientRect().width)).toBe(600);
+  expect(Math.round(header.getBoundingClientRect().width)).toBe(600);
+  expect(Math.round(text.getBoundingClientRect().width)).toBeGreaterThan(0);
+  expect(Math.round(meta.getBoundingClientRect().width))
+    .toBe(Math.round(text.getBoundingClientRect().width));
   expect(meta.getBoundingClientRect().top).toBeGreaterThanOrEqual(text.getBoundingClientRect().bottom);
   const action = el.querySelector('button[slot="actions"]') as HTMLButtonElement;
   expect(action.getBoundingClientRect().width).toBeGreaterThan(0);

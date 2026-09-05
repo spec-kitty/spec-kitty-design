@@ -135,6 +135,24 @@ test('long direct labels truncate visually without changing source or accessible
   frame.remove();
 });
 
+test('at the narrow boundary the complementary landmark fills the flow without a side divider', async () => {
+  const frame = document.createElement('div');
+  frame.style.width = '600px';
+  document.body.append(frame);
+  const el = document.createElement('sk-context-sidebar') as SkContextSidebar;
+  el.innerHTML = '<p>Context content remains visible.</p>';
+  frame.append(el);
+  await el.updateComplete;
+
+  const aside = part(el, 'sidebar')!;
+  const computed = getComputedStyle(aside);
+  expect(Math.round(aside.getBoundingClientRect().width)).toBe(600);
+  expect(computed.borderInlineEndWidth).toBe('0px');
+  expect(computed.borderBlockEndWidth).not.toBe('0px');
+  expect(el.textContent).toContain('Context content remains visible.');
+  frame.remove();
+});
+
 test('native descendant events pass through once without element redispatch', async () => {
   const el = await mount();
   const button = el.querySelector('button[slot="footer"]') as HTMLButtonElement;
