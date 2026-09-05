@@ -120,6 +120,11 @@ export default defineConfig({
         //   [vite] optimized dependencies changed. reloading
         // — arriving right after tests/browser/registered-elements.test.ts had collected,
         // which is why that file and sk-stub.test.ts were the two that died in CI.
+        // VUE IS LISTED FOR THE SAME REASON REACT IS, and #81 paid for the omission. The Vue
+        // consumer fixture imports the full `vue/dist/vue.esm-bundler.js` build (the runtime
+        // compiler, which the isCustomElement measurement requires). A deep dist path is exactly
+        // what the scanner is worst at, and an un-prebundled dependency discovered mid-run is the
+        // defect this list already exists to prevent.
         optimizeDeps: {
           include: [
             'react',
@@ -127,6 +132,8 @@ export default defineConfig({
             'react-dom/client',
             'react/jsx-runtime',
             'react/jsx-dev-runtime',
+            'vue',
+            'vue/dist/vue.esm-bundler.js',
           ],
         },
         test: {

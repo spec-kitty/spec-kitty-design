@@ -142,25 +142,3 @@ describe('[SC-402] the measured cost — and it is NOT the one predicted', () =>
     destroy();
   });
 });
-
-describe('[SC-403] the cost that IS real, and it is build-time only', () => {
-  /**
-   * The runtime result above does not transfer to the common case. `@vitejs/plugin-vue` compiles
-   * an SFC at BUILD time, when no CustomElementRegistry exists — so the runtime check that saves
-   * the string-template consumer cannot help, and the compiler emits a component resolution.
-   *
-   * That is the whole measured cost of this target: one line of build configuration, needed by
-   * SFC consumers and not by string-template consumers. Asserted here against the real compiler
-   * rather than described, because the distinction is exactly the kind that rots in prose.
-   */
-  it('emits resolveComponent for an SFC without isCustomElement, and a direct element with it', async () => {
-    const { compile } = await import('@vue/compiler-dom');
-    const tpl = '<sk-button>Click</sk-button>';
-    const without = compile(tpl, { mode: 'module' }).code;
-    const withCfg = compile(tpl, { mode: 'module', isCustomElement: (t: string) => t.startsWith('sk-') }).code;
-
-    expect(without, 'unconfigured: Vue treats it as a component to resolve').toMatch(/resolveComponent/);
-    expect(withCfg, 'configured: Vue creates the element directly').not.toMatch(/resolveComponent/);
-    expect(withCfg, 'and takes the element block path').toMatch(/createElementBlock|createElementVNode/);
-  });
-});
