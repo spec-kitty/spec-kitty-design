@@ -228,10 +228,10 @@
       "criterion_id": "NFR-006",
       "description": "Stable generators are deterministic and the timestamped token catalogue exactly matches its source outside generated_at.",
       "proof_type": "automated_test",
-      "evidence": "Owners WP01/WP04/mission wrap-up: run the plan's read-only source/catalogue comparator after WP01 generation and final refresh; run --check or exact diff gates for CSS, markup, CEM, React, Vue, and SIZES.",
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "Verified on aggregate lane 89bbf7eb6fb12ca6aab0a780673ac93f506316e0: canonical generator order and repeat-generation checks were byte-stable; all generated-surface drift/ratchet gates passed; NI-002 12-path absence and NI-007 token source/catalogue comparator are confirmed_absent.",
+      "pass_fail": "pass",
+      "verified_by": "codex/frontend-freddy/WP04",
+      "verified_at": "2026-09-05T23:34:24.181977+00:00",
       "notes": "Planned evidence mapping; populate the exact command result and immutable SHA when the owning WP or wrap-up step executes."
     },
     {
