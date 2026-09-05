@@ -22,6 +22,7 @@
         "api",
         "app-shell",
         "artifact-rendering",
+        "legacy-cleanup",
         "workspace"
       ],
       "depends_on_lanes": [],
@@ -44,6 +45,7 @@
         "api",
         "app-shell",
         "artifact-rendering",
+        "legacy-cleanup",
         "workspace"
       ],
       "depends_on_lanes": [
@@ -84,7 +86,10 @@
         "packages/react/src/index.js",
         "packages/react/src/react-utils.js",
         "packages/react/type-tests/wrappers.type-test.tsx",
-        "packages/styles/package.json"
+        "packages/styles/package.json",
+        "scripts/build-storybook-with-budget.mjs",
+        "scripts/check-component-public-contract.mjs",
+        "scripts/check-component-token-literals.mjs"
       ],
       "predicted_surfaces": [
         "api",
@@ -99,8 +104,8 @@
       "parallel_group": 2
     }
   ],
-  "computed_at": "2026-09-05T22:45:40.545392+00:00",
+  "computed_at": "2026-09-05T23:59:29.385601+00:00",
   "computed_from": "dependency_graph+ownership",
   "planning_artifact_wps": [],
-  "planning_commit_sha": "4c1b21829e8a2f8ba2e1ed83877b4bf9a741a736"
+  "planning_commit_sha": "6c16c0308d9e8f4c92eee5bc66e416bcee9599b1"
 }
