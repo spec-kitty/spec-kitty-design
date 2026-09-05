@@ -53,7 +53,7 @@
     },
     "WP02": {
       "actor": "user",
-      "agent": "codex",
+      "agent": null,
       "agent_profile": "reviewer-renata",
       "agent_profile_version": "1.0",
       "force_count": 1,
@@ -65,6 +65,7 @@
         "Ready for review at 22656da: behavior RED 12/14 on inert scaffolds; GREEN 15/15 focused. CSS generation/check, boundary/hygiene/no-inline-CSS, theme selftests, typecheck-all 5 projects, owned ESLint/stylelint, Storybook build, axe 174/174, and 12-path absence twice pass. WP04 retains 7 mutation/registry/shared aggregate changes."
       ],
       "provider": "__resolved_provider_absent__",
+      "review": null,
       "review_result": {
         "feedback_path": "/home/jeroennouws/dev/team-kitty-missions/design-145/kitty-specs/team-overview-shell-elements-01M1S8R8/tasks/WP02-context-sidebar-and-page-header/review-cycle-1.md",
         "reference": "review-cycle://team-overview-shell-elements-01M1S8R8/WP02-context-sidebar-and-page-header/review-cycle-1.md",
@@ -72,13 +73,13 @@
         "verdict": "changes_requested"
       },
       "role": "reviewer",
-      "shell_pid": 2459900,
-      "shell_pid_created_at": "1788535195.17",
+      "shell_pid": null,
+      "shell_pid_created_at": null,
       "subtasks": {
-        "T006": "done",
-        "T007": "done",
-        "T008": "done",
-        "T009": "done"
+        "T006": "planned",
+        "T007": "planned",
+        "T008": "planned",
+        "T009": "planned"
       }
     },
     "WP03": {
