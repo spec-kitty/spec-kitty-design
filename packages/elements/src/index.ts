@@ -1,18 +1,22 @@
-export { define, registeredTags } from './define.js';
-export { SkStub } from './stub/sk-stub.js';
-export { SkBlogCard } from './blog-card/sk-blog-card.js';
-export { SkButton } from './button/sk-button.js';
-export { SkCard } from './card/sk-card.js';
-export { SkCheckBullet } from './check-bullet/sk-check-bullet.js';
-export { SkNavPill } from './nav-pill/sk-nav-pill.js';
-export { SkFormInput } from './form-input/sk-form-input.js';
-export { SkFormTextarea } from './form-textarea/sk-form-textarea.js';
-export { SkGrid } from './grid/sk-grid.js';
-export { SkFeatureCard } from './feature-card/sk-feature-card.js';
-export { SkRibbonCard } from './ribbon-card/sk-ribbon-card.js';
-export { SkPillTag } from './pill-tag/sk-pill-tag.js';
-export { SkSectionBanner } from './section-banner/sk-section-banner.js';
-export { SkSiteFooter } from './site-footer/sk-site-footer.js';
+export { define, registeredTags } from "./define.js";
+export { SkAppShell } from "./app-shell/sk-app-shell.js";
+export { SkStub } from "./stub/sk-stub.js";
+export { SkBlogCard } from "./blog-card/sk-blog-card.js";
+export { SkButton } from "./button/sk-button.js";
+export { SkCard } from "./card/sk-card.js";
+export { SkCheckBullet } from "./check-bullet/sk-check-bullet.js";
+export { SkContextSidebar } from "./context-sidebar/sk-context-sidebar.js";
+export { SkNavPill } from "./nav-pill/sk-nav-pill.js";
+export { SkFormInput } from "./form-input/sk-form-input.js";
+export { SkFormTextarea } from "./form-textarea/sk-form-textarea.js";
+export { SkGrid } from "./grid/sk-grid.js";
+export { SkFeatureCard } from "./feature-card/sk-feature-card.js";
+export { SkRibbonCard } from "./ribbon-card/sk-ribbon-card.js";
+export { SkPillTag } from "./pill-tag/sk-pill-tag.js";
+export { SkPageHeader } from "./page-header/sk-page-header.js";
+export { SkPersonalRail } from "./personal-rail/sk-personal-rail.js";
+export { SkSectionBanner } from "./section-banner/sk-section-banner.js";
+export { SkSiteFooter } from "./site-footer/sk-site-footer.js";
 export {
   SkTransitionMatrix,
   type TransitionColumn,
@@ -20,7 +24,7 @@ export {
   type TransitionMatrixSelectDetail,
   type TransitionRoute,
   type TransitionTone,
-} from './transition-matrix/sk-transition-matrix.js';
+} from "./transition-matrix/sk-transition-matrix.js";
 
 /**
  * The generated constructed stylesheet, exported so a test can assert PROVENANCE.
@@ -31,26 +35,26 @@ export {
  * @spec-kitty/styles, and that needs this export to be checkable from outside without
  * reaching across a project boundary.
  */
-export { default as skStubSheet } from './stub/sk-stub.css.js';
+export { default as skStubSheet } from "./stub/sk-stub.css.js";
 
 // Same reason, for sk-grid's [SC-014]: the claim is that the adopted sheet is the one
 // GENERATED from packages/styles/src/grid/sk-grid.css, and identity against the class's own
 // `static styles` would hold for any sheet at all.
-export { default as skGridSheet } from './grid/sk-grid.css.js';
-export { default as skBlogCardSheet } from './blog-card/sk-blog-card.css.js';
+export { default as skGridSheet } from "./grid/sk-grid.css.js";
+export { default as skBlogCardSheet } from "./blog-card/sk-blog-card.css.js";
 // sk-card's sheet, exported for the FIRST time at #78 and for a reason worth stating: it is
 // the only sheet in the repo adopted by a component other than its author, so blog-card's
 // [SC-014] identity assertion needs it to prove the frame is IMPORTED rather than copied.
 // Without it that test could only count sheets, not identify them.
-export { default as skCardSheet } from './card/sk-card.css.js';
-export { default as skButtonSheet } from './button/sk-button.css.js';
-export { default as skCheckBulletSheet } from './check-bullet/sk-check-bullet.css.js';
-export { default as skFeatureCardSheet } from './feature-card/sk-feature-card.css.js';
-export { default as skRibbonCardSheet } from './ribbon-card/sk-ribbon-card.css.js';
-export { default as skPillTagSheet } from './pill-tag/sk-pill-tag.css.js';
-export { default as skSectionBannerSheet } from './section-banner/sk-section-banner.css.js';
-export { default as skSiteFooterSheet } from './site-footer/sk-site-footer.css.js';
-export { default as skTransitionMatrixSheet } from './transition-matrix/sk-transition-matrix.css.js';
+export { default as skCardSheet } from "./card/sk-card.css.js";
+export { default as skButtonSheet } from "./button/sk-button.css.js";
+export { default as skCheckBulletSheet } from "./check-bullet/sk-check-bullet.css.js";
+export { default as skFeatureCardSheet } from "./feature-card/sk-feature-card.css.js";
+export { default as skRibbonCardSheet } from "./ribbon-card/sk-ribbon-card.css.js";
+export { default as skPillTagSheet } from "./pill-tag/sk-pill-tag.css.js";
+export { default as skSectionBannerSheet } from "./section-banner/sk-section-banner.css.js";
+export { default as skSiteFooterSheet } from "./site-footer/sk-site-footer.css.js";
+export { default as skTransitionMatrixSheet } from "./transition-matrix/sk-transition-matrix.css.js";
 
 // The card's authored markup module, exported so the two failure policies are reachable
 // from the behaviour fixture. `cardClasses` is TOTAL (an unknown variant warns and degrades)
@@ -66,12 +70,17 @@ export {
   cardStaticHtml,
   isCardVariant,
   type CardVariant,
-} from './card/sk-card.markup.js';
+} from "./card/sk-card.markup.js";
 
 // The grid's markup module, exported for the same reason as the card's: the two failure
 // policies are only a split if something can reach both. `gridClasses` warns and degrades,
 // `gridStaticHtml` throws.
-export { gridClasses, gridStaticHtml, type GridGap, type GridVariant } from './grid/sk-grid.markup.js';
+export {
+  gridClasses,
+  gridStaticHtml,
+  type GridGap,
+  type GridVariant,
+} from "./grid/sk-grid.markup.js";
 
 // sk-blog-card's markup module. `BLOG_CARD_AXES` and `BLOG_CARD_VARIANTS` are NOT re-exported:
 // they are declared in the markup module because the GENERATOR requires them there and cannot
@@ -81,7 +90,7 @@ export { gridClasses, gridStaticHtml, type GridGap, type GridVariant } from './g
 export {
   PLACEHOLDER_THUMBNAIL,
   blogCardStaticHtml,
-} from './blog-card/sk-blog-card.markup.js';
+} from "./blog-card/sk-blog-card.markup.js";
 
 // sk-button's markup module. The two maps because the behaviour fixture derives its loops from
 // them; both class helpers because tone and size each degrade.
@@ -97,7 +106,7 @@ export {
   BUTTON_VARIANTS,
   buttonClasses,
   buttonStaticHtml,
-} from './button/sk-button.markup.js';
+} from "./button/sk-button.markup.js";
 
 // sk-check-bullet's markup module. Only the static form, which the fixture calls.
 //
@@ -106,7 +115,7 @@ export {
 // obligation is on the module, not on this barrel, and an earlier revision of this block cited
 // it as though it were. `DEFAULT_ICON` and `checkBulletClasses` are used only by
 // sk-check-bullet.ts, which imports them straight from the markup module.
-export { checkBulletStaticHtml } from './check-bullet/sk-check-bullet.markup.js';
+export { checkBulletStaticHtml } from "./check-bullet/sk-check-bullet.markup.js";
 
 // sk-feature-card's markup module. Both class helpers are exported because the component has
 // TWO independent axes and each has its own degrade path.
@@ -122,7 +131,7 @@ export {
   featureCardStaticHtml,
   type FeatureCardAccent,
   type FeatureCardVariant,
-} from './feature-card/sk-feature-card.markup.js';
+} from "./feature-card/sk-feature-card.markup.js";
 
 // sk-site-footer's markup module. Only the static form and the legal placeholder: the class map
 // is imported by the element straight from the module, and _VARIANTS/_AXES are the generator's
@@ -130,7 +139,7 @@ export {
 export {
   PLACEHOLDER_LEGAL,
   siteFooterStaticHtml,
-} from './site-footer/sk-site-footer.markup.js';
+} from "./site-footer/sk-site-footer.markup.js";
 
 // sk-pill-tag's markup module. Both class helpers, because colour and shape each degrade; the
 // maps because the fixture derives its loops from them. The `PillTagShape`/`PillTagVariant`
@@ -140,7 +149,7 @@ export {
   PILL_TAG_VARIANTS,
   pillTagClasses,
   pillTagStaticHtml,
-} from './pill-tag/sk-pill-tag.markup.js';
+} from "./pill-tag/sk-pill-tag.markup.js";
 
 // sk-ribbon-card's markup module. Both class helpers, because the card and the ribbon each
 // have their own degrade path.
@@ -150,7 +159,7 @@ export {
   ribbonCardStaticHtml,
   ribbonClasses,
   type RibbonCardColour,
-} from './ribbon-card/sk-ribbon-card.markup.js';
+} from "./ribbon-card/sk-ribbon-card.markup.js";
 
 // sk-section-banner's markup module, same reason.
 //
@@ -176,4 +185,4 @@ export {
   sectionBannerClasses,
   sectionBannerStaticHtml,
   type SectionBannerVariant,
-} from './section-banner/sk-section-banner.markup.js';
+} from "./section-banner/sk-section-banner.markup.js";
