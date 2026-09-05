@@ -1,5 +1,8 @@
 /* @spec-kitty/styles — sk-data-table shared styles */
-/* All values use --sk-* tokens only — no hardcoded values */
+/* All values use --sk-* tokens only — no hardcoded values, except the system-color
+   keywords under forced-colors — see docs/contributing/adding-a-component.md's
+   "Forced-colors and reduced-motion baselines" section, the canonical owner of that
+   convention; it is not restated here. */
 /*
  * Markup contract (decided here, followed by the .html exemplars):
  *   <div class="sk-data-table__scroller" role="region" aria-label="..." tabindex="0">
@@ -12,14 +15,17 @@
  * The scroller is the ONLY narrow-width mechanism. The table inside is never
  * reflowed — no `display: block` on `tr`/`td`/`th` at any breakpoint.
  *
- * Forced-colors location for THIS primitive is zebra/hover ROW DISTINCTION,
- * not borders: measured, a plain `border` already computes to a visible
- * system color under `forced-colors: active` with zero author rule, so a
- * border-only "fix" would certify a no-op. The `background`-based zebra/hover
- * treatment is what actually flattens to `Canvas` and needs a real
- * `border`-based substitute — see the media block below. `background`/
- * `background-color` are explicitly policed by stylelint's
- * declaration-strict-value, so this never attempts to force them to survive.
+ * The `role="region"`/`aria-label`/`tabindex="0"` triad belongs ONLY to a scroller
+ * that genuinely overflows — measured: on a wide exemplar where `scrollWidth ===
+ * clientWidth`, that triad is a dead tab stop (arrow keys move nothing) and a
+ * duplicate landmark whose name repeats the `<caption>`. The authored `.html`
+ * exemplars therefore carry it only on the narrow one — but a CONSUMER who
+ * constrains a wide table's height/width themselves (creating real overflow that
+ * did not exist in the authored form) must add the same triad at that point:
+ * measured, axe's `scrollable-region-focusable` rule correctly flags an
+ * unlabelled, non-focusable scroller that has become genuinely scrollable. The
+ * `StickyHeader` story is exactly this case — see its own comment in
+ * `sk-data-table-html.stories.ts`.
  */
 
 .sk-data-table__scroller {
@@ -70,8 +76,26 @@
   background: var(--sk-surface-muted);
 }
 
+/*
+ * Hover is a BORDER accent, not a background swap — measured, not asserted.
+ * A background-based hover interacts badly with zebra striping: hovering an
+ * odd row (ambient background) against `--sk-surface-pill` measured a
+ * 1.297:1 lightening, but hovering an even row (`--sk-surface-muted`, which
+ * is LIGHTER than `--sk-surface-pill`) against that same `--sk-surface-pill`
+ * measured a 1.060:1 DARKENING in dark mode (1.047:1 in light) — a user
+ * running down a five-row table sees rows 1/3/5 respond and 2/4 not, and the
+ * ones that do respond move in opposite directions depending on parity. An
+ * accent that never depends on the row's own background sidesteps the
+ * arithmetic entirely: `border-left` is reserved (transparent) on every row
+ * so hovering never shifts layout, and this is the same real property finder
+ * used for both cases the forced-colors block below already relies on.
+ */
+.sk-data-table tbody tr {
+  border-left: 3px solid transparent;
+}
+
 .sk-data-table tbody tr:hover {
-  background: var(--sk-surface-pill);
+  border-left-color: var(--sk-border-focus);
 }
 
 .sk-data-table__cell--numeric {
@@ -79,12 +103,43 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* Sticky header row modifier. Requires the scrolling ancestor to be
-   `.sk-data-table__scroller` (overflow-x: auto above) — `position: sticky`'s
-   containing block for this purpose is the nearest scrolling ancestor. */
+/*
+ * Sticky header row modifier.
+ *
+ * `border-collapse: separate` here, NOT the table's default `collapse` — measured,
+ * not asserted: under `collapse`, cell borders are painted by the TABLE's border
+ * model, not by the individual `<th>` box. The sticky `th` scrolls its background
+ * with `position: sticky` correctly, but its bottom border is a property of the
+ * (non-sticky) table's collapsed border set, which does NOT travel with it —
+ * pixel-measured at the unscrolled position (`--sk-border-strong`) versus at
+ * `scrollTop: 117` (page background, i.e. no border at all). `border-spacing: 0`
+ * keeps the visual layout identical to the collapsed model for this primitive's
+ * horizontal-only border usage.
+ *
+ * `box-shadow` is NOT an acceptable substitute separator here: this file's own
+ * forced-colors section (below) already documents that `box-shadow` computes away
+ * entirely under `forced-colors: active` — using it for the sticky separator would
+ * silently lose exactly the affordance FR-009 exists to keep.
+ *
+ * `z-index: 1` is required, not decorative — measured: without it (the property's
+ * initial value is `auto`), the sticky `th` still visually paints above in-flow
+ * body rows ONLY because it establishes a stacking context via `position: sticky`
+ * (any positioned element paints above static ones by default) — but that ordering
+ * is incidental, not guaranteed. A consumer adding `tbody tr { position: relative }`
+ * to anchor a row action (the ordinary way to do that) creates ANOTHER positioned
+ * stacking context with the same default `z-index: auto`, and body rows then paint
+ * OVER the sticky header — measured. `z-index: 1` fixes the header's stacking order
+ * explicitly rather than relying on incidental DOM-order tie-breaking.
+ */
+.sk-data-table--sticky-header {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
 .sk-data-table--sticky-header thead th {
   position: sticky;
   top: 0;
+  z-index: 1;
   background: var(--sk-surface-card);
 }
 
@@ -100,18 +155,26 @@
  * every row looks identical under forced-colors even though the borders
  * between them are still visible.
  *
- * The substitute is a `border-left` accent band — `border-left` is the
- * unpoliced shorthand (not `border-left-color`), so no stylelint exception
- * is needed. Even rows get a `CanvasText` band, hovered rows get a
- * `Highlight` band (a different system color), which recreates a real,
- * perceivable alternating pattern using only border, not background.
+ * The substitute reuses the same `border-left` accent-band property the
+ * normal-mode hover treatment above already establishes (reserved
+ * transparent on every row), overriding only the LONGHAND `border-left-color`
+ * — not the `border-left` shorthand. This is deliberate: the shorthand form
+ * is invisible to stylelint's `declaration-strict-value` (`border`/`outline`
+ * shorthands are not in its policed-property list at all, so a shorthand
+ * with a hardcoded value would pass identically to one with a token — the
+ * gate would be blind, not satisfied). The LONGHAND `-color` properties DO
+ * match the policed `/color/` pattern, and `Canvas`/`CanvasText`/`Highlight`/
+ * `HighlightText`/`ButtonText`/`LinkText` are explicit, deliberate entries in
+ * `stylelint.config.mjs`'s `ignoreValues` for exactly this reason — the gate
+ * POSITIVELY certifies these six system-color keywords rather than simply
+ * never looking at the declaration.
  */
 @media (forced-colors: active) {
   .sk-data-table tbody tr:nth-child(even) {
-    border-left: 3px solid CanvasText;
+    border-left-color: CanvasText;
   }
 
   .sk-data-table tbody tr:hover {
-    border-left: 3px solid Highlight;
+    border-left-color: Highlight;
   }
 }

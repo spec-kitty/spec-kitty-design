@@ -3,4 +3,4 @@
 // Regenerate: node scripts/build-styles-only-markup.mjs
 //
 // skip-link is deliberately styles-only — it has no custom element. See ADR-10 and #141.
-export const SkSkipLinkUnfocusedHTML = "<a href=\"#main\" class=\"sk-skip-link\">Skip to main content</a>\n<main id=\"main\" style=\"color: var(--sk-fg-default); font-family: var(--sk-font-sans);\">\n  <h1 style=\"color: var(--sk-fg-default);\">Main content</h1>\n  <p style=\"color: var(--sk-fg-body);\">This is the target the skip link resolves to.</p>\n</main>";
+export const SkSkipLinkUnfocusedHTML = "<a href=\"#main\" class=\"sk-skip-link\">Skip to main content</a>\n<main id=\"main\" style=\"color: var(--sk-fg-default);\">Main content</main>";

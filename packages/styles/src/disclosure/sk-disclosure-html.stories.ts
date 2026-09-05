@@ -21,6 +21,18 @@ export const Closed: Story = {
   render: () => SkDisclosureClosedHTML,
 };
 
+/**
+ * Also the forced-colors visual baseline (SC-005). Measured, not asserted:
+ * the recolor mechanism is NOT "content-drawn glyphs get recolored
+ * automatically" -- it is that Chromium maps <summary> (like <a>) to the
+ * LinkText system color intrinsically, regardless of content technique.
+ * Measured rgb(255,255,0) (dark scheme) / rgb(0,0,159) (light scheme) --
+ * both are LinkText, not CanvasText (white/black), via
+ * page.emulateMedia({ forcedColors: 'active' }) against both
+ * colorScheme: 'dark' and colorScheme: 'light'. See sk-disclosure.css's
+ * file-header comment for the full explanation; this is a pointer to it,
+ * not a restatement.
+ */
 export const Open: Story = {
   render: () => SkDisclosureOpenHTML,
 };
@@ -32,31 +44,15 @@ export const LongBody: Story = {
 /**
  * The outer disclosure is open; the inner (nested) disclosure is closed.
  *
- * This proves the `[open]` marker rule uses a CHILD combinator
- * (`.sk-disclosure[open] > .sk-disclosure__summary::before`), not a
+ * This proves the [open] marker rule uses a CHILD combinator
+ * (.sk-disclosure[open] > .sk-disclosure__summary::before), not a
  * descendant combinator. A descendant-combinator selector would ALSO match
- * the inner, still-closed disclosure's summary — because `[open] .foo`
- * matches any `.foo` anywhere inside an open ancestor — and both markers
+ * the inner, still-closed disclosure's summary -- because [open] .foo
+ * matches any .foo anywhere inside an open ancestor -- and both markers
  * would render as "open" even though only the outer one is.
  */
 export const Nested: Story = {
   render: () => SkDisclosureNestedHTML,
-};
-
-/**
- * Forced-colors visual baseline (SC-005). The marker is a `content`-drawn
- * glyph (`::before { content: '▸' }`), never a background-drawn icon, and
- * `forced-color-adjust` is left at its default `auto` everywhere in this
- * file. Under `forced-colors: active` (Chromium devtools: "Emulate CSS
- * media feature forced-colors", or Windows High Contrast), the browser
- * automatically recolors the marker glyph to the `CanvasText` system color
- * in both the dark and light High Contrast schemes — measured with
- * Playwright's `page.emulateMedia({ forcedColors: 'active' })` against both
- * `colorScheme: 'dark'` and `colorScheme: 'light'`; see this mission's
- * verification notes for the exact computed colors observed.
- */
-export const ForcedColorsBaseline: Story = {
-  render: () => SkDisclosureOpenHTML,
 };
 
 export const LightMode: Story = {

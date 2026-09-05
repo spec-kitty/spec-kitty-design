@@ -3,13 +3,10 @@
 <!-- The Focused state is demonstrated via a real play()-driven .focus() call in the
      story, not a second static exemplar or a simulated "is-focused" class -- see
      sk-form-input.css's own recorded removal of exactly that anti-pattern.
-     Kept deliberately minimal: only the skip link and its real #main target -- no
-     unstyled surrounding page furniture (an earlier draft included a plain <nav>
-     and heading/paragraph with no token colors applied, which rendered black-on-dark
-     and blue-on-dark by browser default and failed axe's real color-contrast check;
-     this primitive's own exemplar is not the place to author an entire page). -->
+     Kept deliberately minimal: only the skip link and its real #main target, with
+     exactly the one inline color the axe fix needs -- no page furniture. A prior
+     revision shipped an entire <main> with an <h1> and a <p>, which is demo
+     scaffolding a consumer copying this exemplar would get for free along with a
+     colliding id="main" -- a published exemplar is not the place to author a page. -->
 <a href="#main" class="sk-skip-link">Skip to main content</a>
-<main id="main" style="color: var(--sk-fg-default); font-family: var(--sk-font-sans);">
-  <h1 style="color: var(--sk-fg-default);">Main content</h1>
-  <p style="color: var(--sk-fg-body);">This is the target the skip link resolves to.</p>
-</main>
+<main id="main" style="color: var(--sk-fg-default);">Main content</main>

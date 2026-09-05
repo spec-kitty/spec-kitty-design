@@ -1,5 +1,10 @@
 <!-- @spec-kitty/styles — sk-data-table (sticky header modifier) -->
-<div class="sk-data-table__scroller" role="region" aria-label="Recent builds, long list" tabindex="0" style="max-height: 240px;">
+<!-- No role="region"/tabindex="0"/max-height here: this exemplar's own overflow
+     is vertical, not the horizontal case that triad documents, and a hardcoded
+     max-height would hard-cap every consumer who pastes this markup. The
+     story wraps this exact markup with a max-height purely to make the
+     sticky behaviour demonstrable in Storybook -- see sk-data-table-html.stories.ts. -->
+<div class="sk-data-table__scroller">
   <table class="sk-data-table sk-data-table--sticky-header">
     <caption>Recent builds</caption>
     <thead>

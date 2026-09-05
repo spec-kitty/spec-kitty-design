@@ -16,7 +16,19 @@
  * Consumer constraint: do not place `.sk-skip-link` inside an ancestor with
  * `transform`/`filter`/`will-change` set — any of those establishes a new
  * containing block and traps this element's `position: fixed` relative to
- * that ancestor instead of the viewport.
+ * that ancestor instead of the viewport. That covers *containment*; it does
+ * NOT cover *stacking-context clamping*, a separate failure measured
+ * directly: even with a correct containing block, the link reveals, takes
+ * real focus, and paints UNDERNEATH a sibling fixed element carrying a
+ * higher `z-index` (e.g. a `z-index: 2` fixed header) once that sibling
+ * establishes its own stacking context — `z-index` only orders elements
+ * within the SAME stacking context, and `position: fixed` alone does not
+ * exempt this element from being out-ordered by one with a higher value.
+ * `z-index: 1000` is deliberately far above this repo's other usage (the
+ * only other `z-index` in `packages/styles` is `100`, in
+ * `sk-nav-pill-drawer.css`) precisely so ordinary page chrome does not
+ * accidentally clamp it — but it remains an unowned magic number: there is
+ * no `--sk-z-*` token scale in this repo to draw it from.
  */
 
 .sk-skip-link {
@@ -52,12 +64,15 @@
   }
 }
 
-/* Forced-colors: the focused state's outline uses the unpoliced `outline`
-   shorthand with a system-color keyword — `outline-color` (the longhand)
-   would trip stylelint's declaration-strict-value (`/color/` matches it as
-   a substring); plain `outline` does not. */
+/* Forced-colors: override only the LONGHAND `outline-color` (width/style are
+   already set by the base :focus-visible rule above). `Canvas`, `CanvasText`,
+   `Highlight`, `HighlightText`, `ButtonText` and `LinkText` are explicit,
+   deliberate `ignoreValues` entries in `stylelint.config.mjs` for exactly this
+   — see that file's comment and docs/contributing/adding-a-component.md's
+   forced-colors section for why the LONGHAND, not the unpoliced `outline`
+   shorthand, is what actually gets the gate to certify this value. */
 @media (forced-colors: active) {
   .sk-skip-link:focus-visible {
-    outline: 3px solid Highlight;
+    outline-color: Highlight;
   }
 }

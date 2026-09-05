@@ -1,15 +1,22 @@
 /* @spec-kitty/styles — sk-disclosure shared styles */
 /* All values use --sk-* tokens only — no hardcoded values */
 /*
- * Marker: a CONTENT-drawn glyph, never a background-drawn icon. Under
- * `forced-colors: active`, browsers automatically recolor text (including
- * pseudo-element `content` glyphs) to the `CanvasText` system color, as long
- * as `forced-color-adjust` is left at its default `auto` — a background-drawn
- * icon does not get this automatic treatment, and forcing one to survive via
- * `forced-color-adjust: none` freezes it at its AUTHORED color, which is
- * frequently invisible against the forced-colors background (measured: a
- * dark-grey icon on the dark-scheme forced-colors background). This file
- * therefore never sets `forced-color-adjust: none` anywhere.
+ * Marker: a CONTENT-drawn glyph, never a background-drawn icon — but the
+ * mechanism that keeps it visible under `forced-colors: active` is NOT "content
+ * glyphs get recolored automatically". Isolated measurement: `<summary>`
+ * (like `<a>`) is mapped to the `LinkText` system color by Chromium's
+ * forced-colors algorithm intrinsically — an unstyled `<details><summary>`
+ * with zero authored CSS recolors identically. Measured values are
+ * `rgb(255,255,0)` (dark scheme) / `rgb(0,0,159)` (light scheme), which are
+ * `LinkText`, not `CanvasText` (white/black) — an earlier revision of this
+ * comment, the stories file, and the mission plan all named the wrong
+ * mechanism and the wrong color. What IS still true and load-bearing: a
+ * BACKGROUND-drawn icon does not get any of this automatic treatment, and
+ * forcing one to survive via `forced-color-adjust: none` freezes it at its
+ * AUTHORED color, which is frequently invisible against the forced-colors
+ * background (measured: a dark-grey icon on the dark-scheme forced-colors
+ * background). This file therefore never sets `forced-color-adjust: none`
+ * anywhere.
  *
  * The [open] marker rules use a CHILD combinator (`>`), not a descendant
  * combinator — `.sk-disclosure[open] .sk-disclosure__summary` would also
@@ -44,8 +51,18 @@
   display: none;
 }
 
+/*
+ * The `/ ''` is CSS Generated Content's ALT TEXT syntax, not decoration — measured
+ * in-engine: without it, the accessible-name computation for `<summary>` includes
+ * `::before`'s generated content, so the CDP accessibility tree reports
+ * `"▸ Deployment history"` — every disclosure announces the decorative triangle
+ * before its own label, on a control whose open/closed state is already exposed
+ * natively via the `aria-expanded`-equivalent `details`/`summary` semantics. The
+ * empty alt text (`''`) removes the glyph from the accessible name while the glyph
+ * itself keeps painting exactly as before — verified in-engine, not asserted.
+ */
 .sk-disclosure__summary::before {
-  content: '▸';
+  content: '▸' / '';
   display: inline-block;
   color: var(--sk-fg-muted);
   transition: transform var(--sk-motion-duration-fast) var(--sk-motion-ease-out);
@@ -86,24 +103,12 @@
 }
 
 /*
- * Forced-colors, measured (not asserted): the marker is content-drawn
- * (`::before { content: '▸' }`), so the browser's own forced-colors
- * algorithm already recolors its glyph to `CanvasText` with ZERO authored
- * CSS, as long as `forced-color-adjust` is never set to `none` anywhere in
- * this file (it never is). There is nothing to write here for the marker
- * itself — an explicit `forced-color-adjust: auto` declaration was tried
- * and rejected: `auto` is not in stylelint's `ignoreValues`, and
- * `forced-color-adjust` matches the policed `/color/` pattern as a
- * substring, so it would need a new stylelint exception for a value that
- * is already the property's default and changes nothing.
- *
- * What DOES need an explicit rule is the summary's own focus ring, because
- * this file used `box-shadow` for it originally, and `box-shadow` computes
- * away entirely under `forced-colors: active` (measured — it is not one of
- * the properties the forced-colors algorithm preserves). Switching the
- * focus ring to `outline` (above) fixes this without any media query at
- * all, since `outline` is preserved/remapped automatically the same way
- * `border` is — measured with Playwright's `page.emulateMedia({
- * forcedColors: 'active' })` against both `colorScheme: 'dark'` and
- * `colorScheme: 'light'`; see this mission's verification notes.
+ * Forced-colors: nothing to declare for the marker itself (see the file header
+ * comment — `<summary>` recolors to `LinkText` intrinsically, and this file
+ * never sets `forced-color-adjust: none`). The summary's own `:focus-visible`
+ * ring uses `outline` (above), which is preserved/remapped automatically the
+ * same way `border` is, so it needs no override here either. See
+ * docs/contributing/adding-a-component.md's "Forced-colors and
+ * reduced-motion baselines" section for the canonical statement of both
+ * mechanisms — restated here only as a pointer, not re-derived.
  */

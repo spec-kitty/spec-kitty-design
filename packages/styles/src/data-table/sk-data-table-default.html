@@ -1,6 +1,11 @@
 <!-- @spec-kitty/styles — sk-data-table (default, wide) -->
 <!-- Requires @spec-kitty/tokens to be loaded in the consuming page -->
-<div class="sk-data-table__scroller" role="region" aria-label="Recent builds" tabindex="0">
+<!-- No role="region"/tabindex="0" here: measured, on a wide table where
+     scrollWidth === clientWidth, that triad is a dead tab stop (arrow keys
+     move nothing) and a duplicate landmark whose name repeats <caption>.
+     That triad belongs only on a scroller that genuinely overflows -- see
+     sk-data-table-narrow-scrollable.html. -->
+<div class="sk-data-table__scroller">
   <table class="sk-data-table">
     <caption>Recent builds</caption>
     <thead>
