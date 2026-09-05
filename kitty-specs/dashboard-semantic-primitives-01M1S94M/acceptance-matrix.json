@@ -5,115 +5,121 @@
   "overall_verdict": "pending",
   "criteria": [
     {
-      "criterion_id": "FR-001",
-      "description": "Verify FR-001 is satisfied",
+      "criterion_id": "SC-001",
+      "description": "All five primitives exist as packages/styles/src/<name>/sk-<name>.css with generated barrels. Asserted by `node scripts/build-styles-only-markup.mjs --check` passing on a clean tree, and by the generated barrels containing one export per authored .html.",
       "proof_type": "automated_test",
       "evidence": null,
       "pass_fail": "pending",
       "verified_by": null,
       "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "notes": "Real script with a real exit code: node scripts/build-styles-only-markup.mjs --check. Verified in WP04 T023/T024."
     },
     {
-      "criterion_id": "FR-002",
-      "description": "Verify FR-002 is satisfied",
-      "proof_type": "automated_test",
+      "criterion_id": "SC-002",
+      "description": "Every primitive is demonstrated over real <dl>/<details>/<table>/<a> markup in its stories -- verified by grepping the authored .html for the native tag, not by reading story titles. .sk-empty-state has no single required native tag by design (FR-005; a plain block container).",
+      "proof_type": "manual_qa",
       "evidence": null,
       "pass_fail": "pending",
       "verified_by": null,
       "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "notes": "Verified per-primitive in WP01/WP02/WP03, and mission-wide (all five, with per-tag match counts) in WP04 T025. Recorded grep output, not a committed CI script."
     },
     {
-      "criterion_id": "FR-003",
-      "description": "Verify FR-003 is satisfied",
-      "proof_type": "automated_test",
+      "criterion_id": "SC-003",
+      "description": "The narrow-width table keeps its headers and is keyboard-reachable: at a narrow viewport the scroll container (.sk-data-table__scroller) is focusable (tabindex=\"0\"), has an accessible name (aria-label or aria-labelledby), and <th scope> association is intact.",
+      "proof_type": "manual_qa",
       "evidence": null,
       "pass_fail": "pending",
       "verified_by": null,
       "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "notes": "Devtools/accessibility-tree inspection, recorded concretely (tool used, what was observed) -- see WP03 T018. Not an automated test; packages/styles has no test target."
     },
     {
-      "criterion_id": "FR-004",
-      "description": "Verify FR-004 is satisfied",
+      "criterion_id": "SC-004",
+      "description": "packages/styles/src/index.ts exports every new primitive, verified by importing the package entry point and asserting each generated export name resolves. ALSO: packages/styles/package.json gains a ./<name>/* subpath export for each of the five new directories -- scripts/check-release-graph.mjs's checkSubpathCoverage is [ENFORCED] at ci-quality.yml:533 and fails one row per directory with no subpath export.",
       "proof_type": "automated_test",
       "evidence": null,
       "pass_fail": "pending",
       "verified_by": null,
       "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "notes": "Two parts: (1) an import-and-resolve check for the five new export names, committed as a real test or recorded verbatim in the PR body (packages/styles/project.json has no test target -- see WP04 T021); (2) node scripts/check-release-graph.mjs, a real script with a real exit code, for the package.json subpath coverage half. This second half was entirely absent from the mission's original plan."
     },
     {
-      "criterion_id": "FR-005",
-      "description": "Verify FR-005 is satisfied",
-      "proof_type": "automated_test",
+      "criterion_id": "SC-005",
+      "description": "The forced-colors baseline is committed and demonstrated: with forced colors emulated, the skip link on focus, the disclosure marker, and the data-table's zebra/hover row distinction all remain perceivable. (Table borders was the issue's original -- and wrong -- guess for the third location; measured, a plain border already survives forced-colors mode with zero author rule, while background-based zebra/hover flattens to Canvas.)",
+      "proof_type": "manual_qa",
       "evidence": null,
       "pass_fail": "pending",
       "verified_by": null,
       "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "notes": "Visual/devtools forced-colors emulation (Windows High Contrast, or Chromium devtools' 'Emulate CSS media feature forced-colors'), documented per story per WP02/WP03. Not an automated test."
     },
     {
-      "criterion_id": "FR-006",
-      "description": "Verify FR-006 is satisfied",
+      "criterion_id": "SC-006",
+      "description": "No --sk-status-* or --sk-chart-* token is introduced. Verified by grep against packages/tokens/src/tokens.css.",
       "proof_type": "automated_test",
       "evidence": null,
       "pass_fail": "pending",
       "verified_by": null,
       "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "notes": "grep -n 'sk-status-|sk-chart-' packages/tokens/src/tokens.css -- a real command with a real (empty) expected result, recorded in WP04 T024. Also recorded as negative invariant C-002 below."
     },
     {
-      "criterion_id": "FR-007",
-      "description": "Verify FR-007 is satisfied",
+      "criterion_id": "SC-007",
+      "description": "Normal gates pass -- stylelint, htmlhint, axe, the generated-artifact --check scripts, and scripts/check-release-graph.mjs ([ENFORCED] at ci-quality.yml:533, absent from the issue's original gate list). Before the final gate the branch rebases on the current train and regenerates shared artifacts.",
       "proof_type": "automated_test",
       "evidence": null,
       "pass_fail": "pending",
       "verified_by": null,
       "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
-    },
-    {
-      "criterion_id": "FR-008",
-      "description": "Verify FR-008 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
-    },
-    {
-      "criterion_id": "FR-009",
-      "description": "Verify FR-009 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
-    },
-    {
-      "criterion_id": "FR-010",
-      "description": "Verify FR-010 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
-    },
-    {
-      "criterion_id": "FR-011",
-      "description": "Verify FR-011 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "notes": "The full local gate suite in plan.md's 'Local gate commands' section, run and recorded in WP04 T024. This mission has no automated behaviour-test suite (packages/styles/project.json has no test target) -- this criterion's automated_test proof_type refers to the gate SCRIPTS themselves (stylelint, htmlhint, the generators' --check forms, check-release-graph.mjs), each a real command with a real exit code, not a unit-test harness."
     }
   ],
-  "negative_invariants": []
+  "negative_invariants": [
+    {
+      "invariant_id": "C-001",
+      "description": "No sk-* custom element ships from this mission. Any impulse to wrap one of these five primitives in an element is the #92 regression.",
+      "verification_method": "grep_absence",
+      "verification_command": "ls packages/elements/src | grep -E '^(facts|disclosure|data-table|empty-state|skip-link)$'",
+      "result": "pending",
+      "evidence": null,
+      "scope": "packages/elements/src"
+    },
+    {
+      "invariant_id": "C-002",
+      "description": "Tone-free: no success/danger row or panel colouring, and no --sk-status-*/--sk-chart-* token is invented (epic #183 ruling).",
+      "verification_method": "grep_absence",
+      "verification_command": "grep -n 'sk-status-\\|sk-chart-' packages/tokens/src/tokens.css",
+      "result": "pending",
+      "evidence": null,
+      "scope": "packages/tokens/src/tokens.css"
+    },
+    {
+      "invariant_id": "C-003",
+      "description": "No sorting, filtering, pagination, virtualization, row selection, column resizing, sticky columns, or JavaScript of any kind.",
+      "verification_method": "custom_command",
+      "verification_command": "grep -rl '<script' packages/styles/src/{facts,disclosure,data-table,empty-state,skip-link}/*.html; find packages/styles/src/{facts,disclosure,data-table,empty-state,skip-link} -name '*.ts' ! -name 'index.ts' ! -name '*.stories.ts'",
+      "result": "pending",
+      "evidence": null,
+      "scope": "packages/styles/src/facts packages/styles/src/disclosure packages/styles/src/data-table packages/styles/src/empty-state packages/styles/src/skip-link"
+    },
+    {
+      "invariant_id": "C-004",
+      "description": "No Team Kitty or Factory Dashboard domain copy in any of the five new primitives.",
+      "verification_method": "grep_absence",
+      "verification_command": "grep -rli 'Team Kitty\\|Factory Dashboard' packages/styles/src/{facts,disclosure,data-table,empty-state,skip-link}",
+      "result": "pending",
+      "evidence": null,
+      "scope": "packages/styles/src/facts packages/styles/src/disclosure packages/styles/src/data-table packages/styles/src/empty-state packages/styles/src/skip-link"
+    },
+    {
+      "invariant_id": "C-005",
+      "description": "LightMode stories wrap in class=\"sk-light\", never data-theme=\"light\" -- the attribute form activates nothing (#93). form-field's own LightMode story is a known, recorded exception to this that must NOT be copied; check-bullet's is the shape to copy.",
+      "verification_method": "custom_command",
+      "verification_command": "node scripts/check-story-theme-wrapper.mjs && node scripts/check-story-theme-wrapper.mjs --selftest",
+      "result": "pending",
+      "evidence": null,
+      "scope": "packages/styles/src/facts packages/styles/src/disclosure packages/styles/src/data-table packages/styles/src/empty-state packages/styles/src/skip-link"
+    }
+  ]
 }

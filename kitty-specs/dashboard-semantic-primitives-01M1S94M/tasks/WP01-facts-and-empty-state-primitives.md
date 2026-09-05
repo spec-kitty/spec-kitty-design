@@ -123,10 +123,17 @@ Done means:
   FR-005, FR-007, NFR-001, NFR-003, C-001, C-002, C-004, C-005.
 - Mission plan: `kitty-specs/dashboard-semantic-primitives-01M1S94M/plan.md` — read IC-01, IC-04,
   and the "Public Contract" section for the exact BEM class names.
-- Precedent to copy structurally: `packages/styles/src/form-field/` (CSS header comment style,
-  `.html` header-comment convention the generator strips, `-html.stories.ts` naming, the
-  `LightMode` story shape). Read `packages/styles/src/form-field/sk-form-field.css`,
+- Precedent to copy structurally (file layout only): `packages/styles/src/form-field/` (CSS
+  header comment style, `.html` header-comment convention the generator strips,
+  `-html.stories.ts` naming). Read `packages/styles/src/form-field/sk-form-field.css`,
   `sk-form-field.html`, and `sk-form-field-html.stories.ts` before starting.
+- **`LightMode` story precedent is `check-bullet`, NOT `form-field`.** Measured: form-field's own
+  `LightMode` story has no `class="sk-light"` at all — only a Storybook `backgrounds` parameter —
+  and `expected-inert-theme-wrappers.json` records it as a known, deliberate offender. Copying it
+  would ship two more inert `LightMode` stories that `check-story-theme-wrapper.mjs` cannot catch
+  (it matches for `data-theme`, not a missing `class`). Read
+  `packages/styles/src/check-bullet/sk-check-bullet-html.stories.ts`'s `LightMode` export instead
+  — it wraps in `<div class="sk-light" style="...">` — and copy that shape.
 - Generator: `scripts/build-styles-only-markup.mjs` — read its docstring. It picks up any
   directory under `packages/styles/src/` that has a `.css` and **no** matching directory under
   `packages/elements/src`; you make **no changes to this script**.
@@ -155,7 +162,7 @@ Done means:
   compact-density arrangements over real `<dl>`/`<dt>`/`<dd>` markup.
 - **Steps**:
   1. Create `packages/styles/src/facts/sk-facts.css` with a header comment matching the
-     form-field precedent's style (`/* @spec-kitty/styles — sk-facts shared styles */` etc.).
+     form-field precedent's file-layout style (`/* @spec-kitty/styles — sk-facts shared styles */` etc.).
   2. `.sk-facts` (on `<dl>`): default stacked layout — each `.sk-facts__term`/`.sk-facts__value`
      pair on its own row, term above value (or inline, whichever reads better — pick one and be
      consistent; do not invent a second stacked shape).
@@ -208,11 +215,13 @@ Done means:
   2. Create `packages/styles/src/facts/sk-facts-html.stories.ts` mirroring
      `sk-form-field-html.stories.ts`'s shape: import `./sk-facts.css` for side effects, import the
      generated named exports from `./index`, define `meta` with
-     `title: 'Dashboard/Facts (HTML)'`, `tags: ['autodocs']`,
+     `title: 'Primitives/SkFacts (HTML)'` (existing sections are `Components/`, `Elements/`,
+     `Primitives/`, `Form/`, `Navigation/` — there is no `Dashboard/` section; inventing one is
+     both new taxonomy and in tension with C-004), `tags: ['autodocs']`,
      `parameters: { a11y: { disable: false } }`.
   3. Stories: `Default` (stacked), `TwoColumn`, `Compact`, `LongValue`, `EmptyValue`, and the
-     required `LightMode` (wrapped in `class="sk-light"`, matching the form-field precedent's
-     `LightMode` story exactly in structure).
+     required `LightMode` (wrapped in `class="sk-light"`, matching `check-bullet`'s `LightMode`
+     story shape — NOT form-field's, which is missing the class entirely).
   4. Verify `LightMode` actually renders differently from dark mode — inspect a computed style
      value (e.g. background) under both, don't just assume the class does something.
 - **Files**: `packages/styles/src/facts/index.ts` (generated — do not hand-edit),
@@ -259,7 +268,8 @@ Done means:
   1. Run `node scripts/build-styles-only-markup.mjs` again (idempotent — safe to re-run after
      T003 already ran it).
   2. Create `packages/styles/src/empty-state/sk-empty-state-html.stories.ts` — `WithAction`,
-     `WithoutAction`, and the required `LightMode` story.
+     `WithoutAction`, and the required `LightMode` story (again, `check-bullet`'s shape, not
+     form-field's). Use `title: 'Primitives/SkEmptyState (HTML)'`.
 - **Files**: `packages/styles/src/empty-state/index.ts` (generated),
   `packages/styles/src/empty-state/sk-empty-state-html.stories.ts` (new).
 - **Parallel?**: No — depends on T004/T005.
@@ -292,10 +302,9 @@ useful).
 - **Risk**: `.sk-empty-state` grows a status/tone variant under implementation pressure.
   **Mitigation**: C-002 and epic #183 forbid it outright — if a real need surfaces, stop and
   report rather than deciding.
-- **Risk**: a `LightMode` story wraps in `data-theme="light"` instead of `class="sk-light"`,
-  which passes visually in a screenshot but activates nothing. **Mitigation**: copy the
-  form-field precedent's `LightMode` story structure exactly; verify a computed value differs
-  between themes.
+- **Risk**: a `LightMode` story copies form-field's shape (no `class="sk-light"` at all) instead
+  of `check-bullet`'s (which has it). **Mitigation**: copy `check-bullet`'s `LightMode` story
+  structure exactly, not form-field's; verify a computed value differs between themes.
 
 ## Review Guidance
 

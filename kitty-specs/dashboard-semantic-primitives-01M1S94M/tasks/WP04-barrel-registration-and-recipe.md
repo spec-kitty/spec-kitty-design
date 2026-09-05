@@ -42,7 +42,6 @@ owned_files:
 - packages/styles/src/index.ts
 - packages/styles/package.json
 - docs/contributing/adding-a-component.md
-- kitty-specs/dashboard-semantic-primitives-01M1S94M/acceptance-matrix.json
 role: implementer
 tags: []
 task_type: implement
@@ -99,8 +98,9 @@ Use language identifiers in code blocks: ```python, ```bash
 Close out the mission: register all five new directories' generated barrels in the shared package
 entry point, add their subpath exports to `package.json`, document the two cross-cutting
 baselines in the authoring recipe (accurately this time), run the full local gate suite as final
-mission evidence, verify SC-002 mission-wide, and instantiate the acceptance matrix with honest
-content.
+mission evidence, verify SC-002 mission-wide, and record real evidence against the
+already-instantiated acceptance matrix (`acceptance-matrix.json`'s content was authored during
+the post-tasks squad fold, not by this WP).
 
 **Do not start this WP until WP01, WP02, and WP03 have all landed on the branch** — you need all
 five directories' `.html` files present so the generator's derived styles-only set includes all
@@ -124,8 +124,9 @@ Done means:
 - `node scripts/check-release-graph.mjs` passes — `[ENFORCED]` at `ci-quality.yml:533`, checks
   the package.json subpath coverage above.
 - SC-002 is verified mission-wide (all five primitives), not just for `.sk-data-table`.
-- `acceptance-matrix.json` has real criteria keyed to SC-001..SC-007 with honest proof types, and
-  C-001..C-005 recorded as negative invariants — not the CLI's 11 TODO placeholders.
+- `acceptance-matrix.json`'s already-instantiated SC-001..SC-007 criteria and C-001..C-005
+  negative invariants have real `pass_fail`/`result` and `evidence` filled in from this WP's own
+  gate runs (T024/T025) and the other WPs' recorded checks (T026).
 - The full local gate suite has been run and its real output recorded.
 - SC-006 is verified: no `--sk-status-*`/`--sk-chart-*` token exists in
   `packages/tokens/src/tokens.css`.
@@ -318,53 +319,33 @@ Done means:
 - **Files**: N/A (verification only; evidence recorded in Activity Log / PR body).
 - **Parallel?**: No — depends on WP01–WP03 (needs all directories' `.html` files).
 
-### Subtask T026 – Instantiate `acceptance-matrix.json` against SC-001..SC-007 with honest proof types; record C-001..C-005 as negative invariants
+### Subtask T026 – Run the acceptance-matrix's SC/C checks and record real evidence
 
-- **Purpose**: Replace the CLI's 11 TODO-placeholder rows (all claiming `proof_type:
-  automated_test` for a package with no test target) with real, honest content.
+- **Purpose**: `acceptance-matrix.json` was already instantiated during the post-tasks squad fold
+  — it holds seven real `SC-001`..`SC-007` criteria (honest `proof_type`s, no `automated_test`
+  claims this package can't back) and five `C-001`..`C-005` negative invariants, replacing the
+  CLI's original 11 TODO placeholders. **This subtask does not author that content — it runs the
+  checks the matrix already specifies and records the result.** `acceptance-matrix.json` lives
+  under `kitty-specs/` and is not in this WP's `owned_files` (WPs may not own paths under
+  `kitty-specs/`); update it through the mission's normal spec-artifact write path, not a plain
+  `git commit` from this WP's lane, if that path differs.
 - **Steps**:
-  1. Read `kitty-specs/dashboard-semantic-primitives-01M1S94M/acceptance-matrix.json`'s current
-     schema: `criteria` (array of `{criterion_id, description, proof_type, evidence, pass_fail,
-     verified_by, verified_at, notes}`) and `negative_invariants` (array of `{invariant_id,
-     description, verification_method, verification_command, result, evidence, scope}`). Valid
-     `proof_type` values: `automated_test` | `manual_qa` | `code_review` | `negative_invariant`.
-     Valid `verification_method` values: `grep_absence` | `route_check` | `custom_command`.
-  2. Replace the 11 `criteria` rows with seven rows keyed to `SC-001` through `SC-007` (copy each
-     description from `spec.md`'s "Success criteria" section verbatim or near-verbatim). Assign:
-     - `SC-001` (generated barrels, `--check` passes): `automated_test` — real script, real exit
-       code.
-     - `SC-002` (native tags present, mission-wide): `manual_qa` — a recorded grep, not a
-       committed CI script (see T025).
-     - `SC-003` (scroller focusable/named/th-scope intact): `manual_qa` — devtools/accessibility
-       tree inspection (see WP03 T018).
-     - `SC-004` (entry point + package.json exports resolve): `automated_test` if T021's check is
-       committed as a real test, otherwise `manual_qa` with the recorded output as evidence.
-     - `SC-005` (forced-colors baseline demonstrated): `manual_qa` — visual/devtools emulation.
-     - `SC-006` (no status/chart token introduced): `automated_test` — a real grep with a real
-       exit code counts, even if run manually and recorded (treat consistently with SC-004's
-       choice).
-     - `SC-007` (normal gates pass, rebased): `automated_test` — the gate suite itself.
-     Leave `pass_fail: "pending"` and `evidence: null` until the primitives are actually
-     implemented and gated — this WP instantiates the matrix's *content*, it does not claim
-     verification ahead of the work.
-  3. Add five `negative_invariants` entries for C-001 through C-005:
-     - `C-001` (no `sk-*` custom element ships): `grep_absence`, e.g.
-       `verification_command: "ls packages/elements/src | grep -E '^(facts|disclosure|data-table|empty-state|skip-link)$'"`
-       (expect empty output).
-     - `C-002` (tone-free, no status/chart token): `grep_absence`, scoped to
-       `packages/tokens/src/tokens.css`, pattern `sk-status-|sk-chart-` (same check as SC-006 —
-       recording it as a negative invariant too is intentional, per the squad's instruction).
-     - `C-003` (no JS/sort/filter/paginate/virtualize/select/resize): `custom_command` — describe
-       the check (no `<script>` tags in the five new directories' `.html`, no `.ts` files beyond
-       generated `index.ts` and authored `*.stories.ts`).
-     - `C-004` (no Team Kitty/Factory Dashboard domain copy): `grep_absence`, scoped to the five
-       new directories, pattern along the lines of `Team Kitty|Factory Dashboard`.
-     - `C-005` (`LightMode` uses `class="sk-light"`, never `data-theme`): `custom_command` —
-       point at `check-story-theme-wrapper.mjs`'s ratchet as the enforcing mechanism.
-  4. Leave `result: "pending"` for each until implementation exists to check.
-- **Files**: `kitty-specs/dashboard-semantic-primitives-01M1S94M/acceptance-matrix.json` (edit).
-- **Parallel?**: Yes, with T021–T025 (different file), but do it after the five primitives'
-  directory/class names are final so the negative-invariant commands are accurate.
+  1. Read `kitty-specs/dashboard-semantic-primitives-01M1S94M/acceptance-matrix.json` and run each
+     `negative_invariants[].verification_command` (five commands, C-001..C-005) exactly as
+     written. Record each `result` (`pending` was the seed value; update to whatever the schema's
+     real result vocabulary is for a passing/failing negative invariant — check
+     `NEGATIVE_INVARIANT_RESULTS` in `specify_cli.acceptance.matrix` if unsure) and `evidence`
+     (the actual command output).
+  2. For each `criteria[]` row (SC-001..SC-007), run the check its `notes` field describes (most
+     point at a WP's own subtask — e.g. SC-003 points at WP03 T018's accessibility-tree check,
+     SC-002 points at T025's mission-wide grep). Fill in `pass_fail`, `evidence`, `verified_by`,
+     and `verified_at` from the real gate run in T024 and the mission-wide checks in T025.
+  3. Do not add an eighth criterion or a sixth negative invariant without also updating
+     `spec.md`'s SC-*/C-* list — the matrix's rows are meant to track the spec's, not diverge
+     from it.
+- **Files**: `kitty-specs/dashboard-semantic-primitives-01M1S94M/acceptance-matrix.json` (updated
+  with real results — content already authored, not a WP04-owned file).
+- **Parallel?**: No — depends on T021–T025 (needs their real output to fill in evidence).
 
 ## Test Strategy
 

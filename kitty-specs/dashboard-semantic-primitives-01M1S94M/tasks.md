@@ -24,6 +24,24 @@ No WP may invent a `--sk-status-*`/`--sk-chart-*` token, add a custom element, a
 behaviour, or add sort/filter/pagination/virtualization/row-selection/column-resizing. If any of
 those becomes necessary, stop and report rather than widening a WP's scope.
 
+**Post-tasks squad findings folded 2026-09-05** — read `plan.md`'s "Corrected premises" and
+"Pre-mortem and Risks" sections before starting any WP; two of the spec's own premises were wrong
+(the reduced-motion precedent guards nothing; FR-009's third forced-colors location is row
+distinction, not table borders) and are corrected there and in `spec.md` directly. Three
+mission-wide rules apply to every WP below:
+
+1. **A `.css` and at least one `.html` land in the same commit, always.** The generator throws
+   (not a clean failure) on a directory with a `.css` but zero `.html`, and fails generation for
+   **every** directory when it does — see plan.md's "Delivery rule" section.
+2. **The one sanctioned forced-colors CSS pattern** (unpoliced `border:`/`outline:` shorthand with
+   a system-color keyword, never the `-color` longhand) is fixed once in plan.md's "Sanctioned
+   forced-colors CSS pattern" section. WP02 and WP03 both write forced-colors declarations and
+   must use the same pattern, not invent independent answers.
+3. **`lanes.json`'s `mission_branch` field names a branch that does not exist.** This mission's
+   real, only branch is `mission/dashboard-semantic-primitives` (topology `single_branch`, per
+   `meta.json` and every WP's own frontmatter) — use that, not whatever `lanes.json` says, if the
+   two ever disagree at dispatch time.
+
 ## Subtask index
 
 | ID | Work Package | Description | Parallel |
@@ -39,19 +57,21 @@ those becomes necessary, stop and report rather than widening a WP's scope.
 | T009 | WP02 | Author `sk-disclosure` HTML exemplars (closed, open, long body, nested) | [P] |
 | T010 | WP02 | Regenerate `disclosure/index.ts` and author `sk-disclosure-html.stories.ts` | No |
 | T011 | WP02 | Author `sk-skip-link` CSS incl. reduced-motion + forced-colors focus treatment | [P] |
-| T012 | WP02 | Author `sk-skip-link` HTML exemplars (unfocused, focused-state demo w/ real `#main`) | [P] |
+| T012 | WP02 | Author `sk-skip-link` HTML exemplar (unfocused only, real `#main` target) | [P] |
 | T013 | WP02 | Regenerate `skip-link/index.ts` and author `sk-skip-link-html.stories.ts` | No |
 | T014 | WP02 | Stylelint + htmlhint scoped to `disclosure/` and `skip-link/`; verify motion/forced-colors shape | No |
-| T015 | WP03 | Author `sk-data-table` CSS (zebra/hover/numeric/sticky-header/scroller/forced-colors borders) | No |
+| T015 | WP03 | Author `sk-data-table` CSS (zebra/hover/numeric/sticky-header/scroller/forced-colors row distinction) | No |
 | T016 | WP03 | Author `sk-data-table` HTML exemplars (default+caption, sticky header, narrow-scrollable) | No |
 | T017 | WP03 | Regenerate `data-table/index.ts` and author `sk-data-table-html.stories.ts` | No |
 | T018 | WP03 | Verify SC-003: scroller is focusable, named, and `<th scope>` association is intact | No |
 | T019 | WP03 | Verify SC-002 for this primitive: real `<table>`/`<caption>`/`<th scope>`, no cell reflow | No |
-| T020 | WP03 | Stylelint + htmlhint scoped to `data-table/`; confirm forced-colors covers borders only | No |
-| T021 | WP04 | Add 5 `export *` lines to `packages/styles/src/index.ts`; verify SC-004 | No |
+| T020 | WP03 | Stylelint + htmlhint scoped to `data-table/`; confirm forced-colors covers row distinction only | No |
+| T021 | WP04 | Add 5 `export *` lines to `packages/styles/src/index.ts` + 5 subpath exports to `package.json`; verify SC-004 | No |
 | T022 | WP04 | Document forced-colors + reduced-motion baselines in `adding-a-component.md` (FR-011) | No |
 | T023 | WP04 | Run `build-styles-only-markup.mjs` (+ `--check`) across all five directories | No |
-| T024 | WP04 | Run full mission gate suite and record evidence; grep tokens.css for SC-006 | No |
+| T024 | WP04 | Run full mission gate suite (incl. `check-release-graph.mjs`) and record evidence; grep tokens.css for SC-006 | No |
+| T025 | WP04 | Mission-wide SC-002 grep across all five primitives, with per-tag match counts | No |
+| T026 | WP04 | Run the already-instantiated acceptance-matrix's SC/C checks and record real evidence | No |
 
 Record completion with `spec-kitty agent tasks mark-status T001 T002 ... --status done`
 (single or batch). There is no `- [ ]` checkbox to tick; the reduced event-log snapshot is the
@@ -164,7 +184,7 @@ unchanged. Reject any change that reflows cells to blocks at any breakpoint.
 - T017 Regenerate `data-table/index.ts` and author its stories (WP03)
 - T018 Verify SC-003 — scroller focusable, named, header association intact (WP03)
 - T019 Verify SC-002 for this primitive — real table markup, no reflow (WP03)
-- T020 Stylelint + htmlhint scoped to `data-table/`; confirm forced-colors covers borders only (WP03)
+- T020 Stylelint + htmlhint scoped to `data-table/`; confirm forced-colors covers row distinction only (WP03)
 
 ### Implementation sketch
 
@@ -174,8 +194,12 @@ unchanged. Reject any change that reflows cells to blocks at any breakpoint.
    (`aria-label` or `aria-labelledby`), `tabindex="0"`. This is the *one documented approach*
    FR-004 requires — block-reflow of cells is explicitly rejected, it is the exact defect being
    fixed in the Factory Dashboard source.
-3. `@media (forced-colors: active)` covers the table borders — the third of the mission's three
-   required locations (skip-link focus and disclosure marker are WP02's).
+3. `@media (forced-colors: active)` covers **zebra/hover row distinction**, not borders — the
+   third of the mission's three required locations (skip-link focus and disclosure marker are
+   WP02's). Measured: a plain `border` already survives forced-colors with zero author rule; the
+   `background`-based zebra/hover treatment is what flattens to `Canvas` and needs a real block
+   (e.g. a border/outline-based row separator using the sanctioned shorthand pattern from
+   plan.md's "Sanctioned forced-colors CSS pattern" section).
 4. Exemplars: a default table with `<caption>` and `<th scope="col">`/`<th scope="row">` where
    applicable, a sticky-header variant, and a narrow-width variant demonstrating the scroller.
 5. The narrow-width story must be verifiable, not just visual: assert (in the story or a note
@@ -189,23 +213,35 @@ unchanged. Reject any change that reflows cells to blocks at any breakpoint.
 - No status/tone row or cell colouring (C-002).
 - Do not touch `packages/styles/src/index.ts` — WP04's surface.
 
-## WP04 — Barrel registration, entry point, and authoring recipe
+## WP04 — Barrel registration, package exports, docs, and mission-wide verification
 
 **Prompt:** [`tasks/WP04-barrel-registration-and-recipe.md`](./tasks/WP04-barrel-registration-and-recipe.md)
 **Priority:** P2 — closure package
 **Dependencies**: WP01, WP02, WP03 (needs all five directories' `.html` files to exist for the
-generator, and needs no other WP writing `packages/styles/src/index.ts` concurrently)
-**Requirement refs:** FR-007, FR-008, FR-011, NFR-001; SC-001, SC-004, SC-006, SC-007
+generator, and needs no other WP writing `packages/styles/src/index.ts` or `package.json`
+concurrently)
+**Requirement refs:** FR-007, FR-008, FR-011, NFR-001; SC-001, SC-002 (mission-wide), SC-004,
+SC-006, SC-007; C-001–C-005 (as negative invariants)
 **Independent review:** Import `@spec-kitty/styles`'s entry point and confirm every one of the
-five new generated export names resolves. Confirm `docs/contributing/adding-a-component.md` now
-documents both baselines. Confirm no `--sk-status-*`/`--sk-chart-*` token was introduced.
+five new generated export names resolves. Confirm `packages/styles/package.json` has a `./<name>/*`
+subpath export for each new directory and `check-release-graph.mjs` passes. Confirm
+`docs/contributing/adding-a-component.md` now documents both baselines accurately (establishing,
+not generalising; row distinction, not borders). Confirm no `--sk-status-*`/`--sk-chart-*` token
+was introduced. Confirm `acceptance-matrix.json` has real, non-placeholder content.
 
 ### Included subtasks
 
-- T021 Add five `export *` lines to `packages/styles/src/index.ts`; verify SC-004 (WP04)
+- T021 Add five `export *` lines to `packages/styles/src/index.ts` + five subpath exports to
+  `packages/styles/package.json`; verify SC-004 (WP04)
 - T022 Document both baselines in `adding-a-component.md` (WP04)
-- T023 Run the generator and its `--check` across all five directories (WP04)
-- T024 Run the full mission gate suite and record evidence (WP04)
+- T023 Run the generator's `--check` only across all five directories — never its mutating form
+  from this WP (WP04)
+- T024 Run the full mission gate suite, including `check-release-graph.mjs`, and record evidence
+  (WP04)
+- T025 Mission-wide SC-002 grep across all five primitives, with per-tag match counts (WP04)
+- T026 Run the already-instantiated acceptance-matrix's SC/C checks and record real evidence
+  (WP04) — `acceptance-matrix.json`'s SC-001..SC-007/C-001..C-005 content was authored during
+  this post-tasks fold, not by WP04
 
 ### Implementation sketch
 
@@ -213,22 +249,57 @@ documents both baselines. Confirm no `--sk-status-*`/`--sk-chart-*` token was in
    `packages/styles/src/index.ts`, matching the existing alphabetical style. This is the single
    hand-maintained per-*directory* line #156 tracks — there is no gate to catch a missed one, so
    verify by actually importing the entry point and checking all five export names resolve
-   (SC-004), not just by eyeballing the diff.
+   (SC-004); **commit that check as a real test, or record its verbatim output in the PR body** —
+   `packages/styles/project.json` has no `test` target, so recording output in the PR body is the
+   pragmatic default rather than inventing new test infrastructure. Also add one `"./<name>/*":
+   "./dist/<name>/*"` entry per new directory to `packages/styles/package.json`'s `exports` map —
+   this was missing from the original plan and is what `check-release-graph.mjs`'s
+   `checkSubpathCoverage` (`[ENFORCED]` at `ci-quality.yml:533`) actually enforces. While editing
+   `packages/styles/src/index.ts`'s header comment, **delete its stale directory/export count
+   rather than recomputing it** — it undercounted CSS-only directories before this mission (it
+   names two, `form-input`/`form-textarea`; the real count is three, including
+   `transition-matrix`) and has already been wrong twice.
 2. Add a short section to `docs/contributing/adding-a-component.md` documenting the
-   `forced-colors` and `prefers-reduced-motion` baselines this mission establishes, pointing at
-   the real shipped CSS (the three forced-colors locations, and the reduced-motion shape copied
-   from `sk-transition-matrix.css:237`) rather than re-describing them in prose (FR-011).
-3. Run `node scripts/build-styles-only-markup.mjs` then `--check` — must be clean with all five
-   new directories included in its reported set.
+   `forced-colors` and `prefers-reduced-motion` baselines this mission **establishes** (not
+   "generalises" — the prior precedent guarded nothing), pointing at the real shipped CSS: the
+   three forced-colors locations are skip-link focus, disclosure marker, and data-table
+   **zebra/hover row distinction** (not borders), and the reduced-motion shape is scoped
+   per-declaration, not copied from the inert `sk-transition-matrix.css:237` wildcard (FR-011).
+3. Run `node scripts/build-styles-only-markup.mjs --check` only — must be clean with all five new
+   directories included in its reported set. Do **not** run the mutating form from this WP: it
+   rewrites every styles-only directory's `index.ts`, including WP01–03's, outside lane-d's
+   declared write scope. If `--check` reports staleness in a directory this WP doesn't own, that
+   bounces back to the owning WP.
 4. Run the full local gate list from `plan.md`'s "Local gate commands" section and record real
    output: stylelint, htmlhint, `quality:lint`, `check-story-theme-wrapper.mjs` (+ `--selftest`),
-   a Storybook build, and `run-axe-storybook.js`. Grep `packages/tokens/src/tokens.css` to confirm
-   SC-006 (no `--sk-status-*`/`--sk-chart-*` token exists).
+   a Storybook build, `run-axe-storybook.js`, and `check-release-graph.mjs` (+ `--selftest` first).
+   Grep `packages/tokens/src/tokens.css` to confirm SC-006 (no `--sk-status-*`/`--sk-chart-*`
+   token exists).
 5. Rebase onto the current `train/elements-first` if it has moved during the mission, and
    regenerate before this final gate run (SC-007).
+6. Run one grep confirming every primitive's authored `.html` contains its real native tag
+   (`<dl>` in `facts/`, `<details>` in `disclosure/`, `<table>` in `data-table/`, `<a>` in
+   `skip-link/` — `.sk-empty-state` has no single required native tag, note it explicitly rather
+   than silently skipping it), printing per-tag match counts. This is SC-002 verified
+   mission-wide; the original plan verified it for `.sk-data-table` only.
+7. Replace `acceptance-matrix.json`'s 11 TODO placeholders (currently all claiming
+   `proof_type: automated_test`, which this mission's styles-only, no-test-target package cannot
+   honestly claim for most of them) with real criteria keyed to SC-001..SC-007, using
+   `proof_type: automated_test` only where a real script with its own exit code performs the
+   check (`build-styles-only-markup.mjs --check`, `check-release-graph.mjs`) and `manual_qa`
+   elsewhere (SC-002/SC-003/SC-005 devtools/accessibility-tree inspection, SC-004's recorded
+   output). Add C-001 through C-005 as `negative_invariants` (schema: `invariant_id`,
+   `description`, `verification_method` — `grep_absence` fits all five here, `verification_command`,
+   `result`) — e.g. C-001 verified by confirming no new directory appears under
+   `packages/elements/src/{facts,disclosure,data-table,empty-state,skip-link}`, C-002 by grep
+   against `packages/tokens/src/tokens.css` (same command as SC-006), C-004 by grep for
+   Team-Kitty/Factory-Dashboard domain strings across the five new directories, C-005 by pointing
+   at `check-story-theme-wrapper.mjs`'s ratchet as the enforcing mechanism.
 
 ### Review boundaries
 
-- This WP is the **only** writer of `packages/styles/src/index.ts` in the whole mission.
+- This WP is the **only** writer of `packages/styles/src/index.ts` and
+  `packages/styles/package.json` in the whole mission.
 - Do not re-author or restyle any of the five primitives here — fixes to authored CSS/HTML belong
   in the WP that owns that directory.
+- Do not run the generator's mutating form from this WP (see subtask T023).

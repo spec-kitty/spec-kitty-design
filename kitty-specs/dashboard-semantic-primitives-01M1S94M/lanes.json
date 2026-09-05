@@ -54,7 +54,8 @@
         "api",
         "app-shell",
         "artifact-rendering",
-        "dashboard"
+        "dashboard",
+        "legacy-cleanup"
       ],
       "depends_on_lanes": [],
       "parallel_group": 0
@@ -66,13 +67,14 @@
       ],
       "write_scope": [
         "docs/contributing/adding-a-component.md",
+        "packages/styles/package.json",
         "packages/styles/src/index.ts"
       ],
       "predicted_surfaces": [
         "api",
         "artifact-rendering",
         "dashboard",
-        "legacy-cleanup"
+        "tests"
       ],
       "depends_on_lanes": [
         "lane-a",
@@ -82,8 +84,8 @@
       "parallel_group": 1
     }
   ],
-  "computed_at": "2026-09-05T18:44:06.659038+00:00",
+  "computed_at": "2026-09-05T19:17:33.584373+00:00",
   "computed_from": "dependency_graph+ownership",
   "planning_artifact_wps": [],
-  "planning_commit_sha": "1c44f33750017a6c4f505e7a675d6cdc146bb873"
+  "planning_commit_sha": "152de98144f195f895b6f3c600e89f850ff140ff"
 }
