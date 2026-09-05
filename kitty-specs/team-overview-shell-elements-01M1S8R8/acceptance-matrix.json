@@ -248,10 +248,10 @@
       "criterion_id": "NFR-008",
       "description": "The final PR head passes every repository and CI-equivalent gate after SK-179 consolidation without a later rebase.",
       "proof_type": "automated_test",
-      "evidence": "Owner mission wrap-up: run every current-train [ENFORCED] command mapped in plan.md, record current train SHA, consolidated head SHA, exact commands/results, clean status, PR head equality, CI evidence, and fresh three-lens/maintainer evidence on external immutable PR/check surfaces under the SK-178 waiver; after the authorized train merge is verified, close #145/#153 with merged PR/commit evidence and preserve all unrelated issue states.",
+      "evidence": "Pending required SK-179 consolidation, draft train/elements-first PR, CI-authoritative visual baseline commit, exact-PR-head gates, independent lenses, maintainer approval, verified train merge, and governed #145/#153 closeout. WP04 lane evidence is pinned to 89bbf7eb6fb12ca6aab0a780673ac93f506316e0.",
       "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "verified_by": "codex/frontend-freddy/WP04",
+      "verified_at": "2026-09-05T23:34:30.834304+00:00",
       "notes": "Planned evidence mapping; populate the exact command result and immutable SHA when the owning WP or wrap-up step executes."
     },
     {
