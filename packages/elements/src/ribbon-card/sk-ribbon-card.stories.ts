@@ -26,15 +26,15 @@ type Story = StoryObj;
 export const Default: Story = {};
 
 export const WithRibbon: Story = {
-  render: () => card('ribbon="Primary Workshop"', 'Full-day rollout workshop', 'Get everyone aligned in your environment.'),
+  render: () => card('ribbon="Primary"', 'Full-day rollout workshop', 'Get everyone aligned in your environment.'),
 };
 
 export const RibbonColours: Story = {
   render: () => `
     <div style="display:grid; gap:var(--sk-space-6); grid-template-columns:repeat(3, 1fr);">
-      ${card('ribbon="Now stable" accent="green"', 'SemVer channel', 'Green ribbon.')}
-      ${card('ribbon="v2.x Preview" accent="purple"', 'Skills Pack beta', 'Purple ribbon.')}
-      ${card('ribbon="Deprecated" accent="red"', 'Legacy channel', 'Red ribbon.')}
+      ${card('ribbon="Stable" accent="green"', 'SemVer channel', 'Green ribbon.')}
+      ${card('ribbon="Preview" accent="purple"', 'Skills Pack beta', 'Purple ribbon.')}
+      ${card('ribbon="Retired" accent="red"', 'Legacy channel', 'Red ribbon.')}
     </div>
   `,
 };
@@ -44,7 +44,7 @@ export const BorderedVariants: Story = {
   render: () => `
     <div style="display:grid; gap:var(--sk-space-6); grid-template-columns:repeat(3, 1fr);">
       ${card('variant="border-yellow" ribbon="Primary" accent="yellow"', 'Primary', 'Matched.')}
-      ${card('variant="border-green" ribbon="Now stable" accent="green"', 'Stable', 'Matched.')}
+      ${card('variant="border-green" ribbon="Stable" accent="green"', 'Stable', 'Matched.')}
       ${card('variant="border-purple" ribbon="Preview" accent="blue"', 'Preview', 'Purple border, blue ribbon.')}
     </div>
   `,
@@ -55,8 +55,8 @@ export const LightMode: Story = {
   parameters: { backgrounds: { default: 'sk-light' } },
   render: () => `
     <div class="sk-light" style="background: var(--sk-surface-page); padding: var(--sk-space-6); display:grid; gap:var(--sk-space-6); grid-template-columns:repeat(2, 1fr);">
-      ${card('ribbon="Primary Workshop"', 'Full-day rollout workshop', 'Ribbon on the light surface.')}
-      ${card('variant="border-green" ribbon="Now stable" accent="green"', 'SemVer channel', 'Border and ribbon on the light surface.')}
+      ${card('ribbon="Primary"', 'Full-day rollout workshop', 'Ribbon on the light surface.')}
+      ${card('variant="border-green" ribbon="Stable" accent="green"', 'SemVer channel', 'Border and ribbon on the light surface.')}
     </div>
   `,
 };

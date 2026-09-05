@@ -1,8 +1,8 @@
 /* @spec-kitty/styles — sk-ribbon-card shared styles */
 /* All values use --sk-* tokens only — no hardcoded values */
-/* Deviation note: the ribbon top/right offset uses small fixed px values
-   (top:0, right:24px) for precise corner anchoring — accepted layout constant
-   not representable as a spacing token. */
+/* Deviation note: the ribbon's width/top/right use fixed px values for precise corner
+   anchoring — accepted layout constants not representable as spacing tokens. They are one
+   derived set, not three free numbers; see the geometry note on the rule itself. */
 
 /* A custom element defaults to `display: inline`, so without this the host cannot be sized or
    spaced and a consumer's max-width on it is inert. `block` matches the static <article>; the
@@ -34,26 +34,56 @@
   background: var(--sk-surface-card);
   border: 1px solid var(--sk-border-default);
   border-radius: var(--sk-radius-md);
-  overflow: visible;
+  /* CLIPPED, and this is what makes it a corner ribbon rather than a floating tab.
+     `overflow: visible` let the rotated banner swing clear of the card entirely — it hung above
+     and to the right of the top-right corner, attached to nothing. A corner ribbon is defined by
+     being cut off at the corner it crosses; without the clip the rotation has nothing to cut
+     against. `border-radius` on the card makes this clip follow the rounded corner. */
+  overflow: hidden;
 }
 
-/* The ribbon tab drops from the top edge of the card */
+/* The ribbon crosses the top-right corner at 45 degrees and is clipped by the card.
+   The bar is wider than the corner it covers so both ends disappear under the card's edges —
+   that is what stops it reading as a rotated label rather than a ribbon.
+
+   WHAT WAS ACTUALLY WRONG: this was a DROP TAB that had been rotated and never re-anchored.
+   `top: 0; right: var(--sk-space-6)` with `border-radius: 0 0 sm sm` positions a tab hanging
+   from the top edge; once the bar is rotated 45 degrees those offsets put it off the corner
+   attached to nothing, and the card's `overflow: visible` let it hang there. `position:
+   absolute` was always present and is not the fix — the offsets and the clip are.
+
+   THE THREE NUMBERS ARE DERIVED FROM ONE, so do not tune them independently. Let `a` be the
+   leg of the corner triangle the ribbon covers (a = 88px) and `h` the bar's own height
+   (~25px = two space-1 paddings plus a text-xs mono line). Then:
+       width = a*sqrt(2) + 2h = 174px   (the visible chord, plus a tuck under each edge)
+       top   = (a - h)/2      =  32px
+       right = (a - width)/2  = -43px   (negative: the lower end overhangs and is clipped)
+   This centres the bar on the corner's diagonal and leaves ~8px of it tucked under the top and
+   right edges, so neither end shows a cut. Changing `a` alone and recomputing keeps that true;
+   changing one number alone exposes an end or uncovers the corner.
+
+   THE LABEL IS FOR SHORT STRINGS: the visible chord is a*sqrt(2) long and the text is centred
+   in it, so a long label is cut by the clip above. RIBBON_LABEL_MAX (8) in
+   sk-ribbon-card.markup.ts is the measured budget, and it warns when exceeded. */
 .sk-ribbon-card__ribbon {
+  position: absolute;
+  top: 32px;
+  right: -43px;
+  width: 174px;
   transform: rotate(45deg);
   transform-origin: center;
-  position: absolute;
-  top: 0;
-  right: var(--sk-space-6);
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: var(--sk-space-1);
   font-family: var(--sk-font-mono);
   font-size: var(--sk-text-xs);
   font-weight: var(--sk-weight-bold);
   letter-spacing: 0.14em;
   text-transform: uppercase;
+  text-align: center;
   padding: var(--sk-space-1) var(--sk-space-3);
-  border-radius: 0 0 var(--sk-radius-sm) var(--sk-radius-sm);
+  box-sizing: border-box;
 }
 
 /* REMOVED at #78: the ribbon's label is a string property, rendered as a TEXT NODE by the
@@ -116,7 +146,7 @@
   border-color: var(--sk-color-red);
 }
 
-/* Card content — top margin creates space for the ribbon tab */
+/* Card content — pushed clear of the corner ribbon's chord. */
 .sk-ribbon-card__content {
   margin-top: var(--sk-space-5);
 }

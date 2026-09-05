@@ -1,7 +1,7 @@
 import { LitElement, html, nothing } from 'lit';
 import { define } from '../define.js';
 import sheet from './sk-ribbon-card.css.js';
-import { ribbonCardClasses, ribbonClasses } from './sk-ribbon-card.markup.js';
+import { checkRibbonLabel, ribbonCardClasses, ribbonClasses } from './sk-ribbon-card.markup.js';
 
 /**
  * A card with an optional diagonal ribbon tab in its corner.
@@ -59,6 +59,9 @@ export class SkRibbonCard extends LitElement {
     // is the word sk-feature-card uses in this same batch for the same idea — the colour of the
     // accent element inside the card — and a shared vocabulary across the catalogue is worth
     // more than a component-local noun.
+
+    // Render-time side effect, not markup — hence a statement, not an interpolation.
+    checkRibbonLabel(this.ribbon);
     return html`<article part="card" class=${ribbonCardClasses(this.variant)}>
       ${this.ribbon
         ? html`<div part="ribbon" class=${ribbonClasses(this.accent)}>${this.ribbon}</div>`

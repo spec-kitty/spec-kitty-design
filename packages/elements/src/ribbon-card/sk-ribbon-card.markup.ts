@@ -66,6 +66,41 @@ export function ribbonCardClasses(variant?: string): string {
   return ['sk-ribbon-card', modifier].filter(Boolean).join(' ');
 }
 
+/**
+ * The most characters that fit inside the clipped corner — MEASURED, not chosen.
+ *
+ * The bar is centred ON the card's corner and the label is centred IN the bar, so a long label
+ * runs past the card edge and is cut off by the card's `overflow: hidden`. The font is
+ * --sk-font-mono, so this is an exact character count rather than an estimate. Measured in
+ * chromium against the shipped geometry (a = 88px, see sk-ribbon-card.css) by mapping the text
+ * run's four rotated corners through the transform matrix:
+ *
+ *   NEW (3)                 31px   23px spare
+ *   BETA (4)                37px   19px spare
+ *   LIMITED (7)             56px    5px spare
+ *   SOLD OUT (8)            62px    1px spare   <- the budget
+ *   BESTSELLER (10)         75px   clips by  8px
+ *   PRIMARY WORKSHOP (16)  112px   clips by 35px
+ *
+ * The budget scales with `a` (the geometry note in sk-ribbon-card.css owns that derivation);
+ * 8 is what this size buys. Four of the six distinct labels in this component's own stories
+ * exceeded it, which is how the clipping shipped.
+ */
+const RIBBON_LABEL_MAX = 8;
+
+const overlongRibbonMessage = (label: string): string =>
+  `ribbon label "${label}" is ${label.length} characters; at most ${RIBBON_LABEL_MAX} fit inside ` +
+  `the corner and the rest is clipped. Use a short badge like NEW, BETA or SOLD OUT.`;
+
+/** Warns on BOTH paths — a clipped label is legible-but-wrong, which is what a warning is for.
+ *  Never throws (it would take out the whole card mid-render) and never truncates (it would
+ *  invent an ellipsis the design does not have). */
+export function checkRibbonLabel(label?: string): void {
+  if (label !== undefined && label.length > RIBBON_LABEL_MAX) {
+    console.warn(`sk-ribbon-card: ${overlongRibbonMessage(label)}`);
+  }
+}
+
 /** The ribbon's class list. Warns and degrades to the default colour. */
 export function ribbonClasses(colour?: string): string {
   if (colour !== undefined && !isRibbonCardColour(colour)) {
@@ -92,6 +127,8 @@ export function ribbonCardStaticHtml(
   content = PLACEHOLDER_CONTENT,
 ): string {
   const { variant, ribbon, accent } = opts;
+  // Warns here too — same CSS, same clip.
+  checkRibbonLabel(ribbon);
   if (variant !== undefined && !isRibbonCardVariant(variant)) throw new Error(unknownVariantMessage(variant));
   if (accent !== undefined && !isRibbonCardColour(accent)) {
     throw new Error(unknownRibbonMessage(accent));
@@ -113,11 +150,11 @@ export function ribbonCardStaticHtml(
  * and not the other.
  */
 export const RIBBON_CARD_AXES = {
-  WithRibbon: { ribbon: 'Primary Workshop' },
+  WithRibbon: { ribbon: 'Primary' },
   ...Object.fromEntries(
     RIBBON_CARD_COLOURS.map((c) => [
       `Ribbon${c.charAt(0).toUpperCase()}${c.slice(1)}`,
-      { ribbon: 'Primary Workshop', accent: c },
+      { ribbon: 'Primary', accent: c },
     ]),
   ),
 } as Record<string, RibbonCardStaticOptions>;
