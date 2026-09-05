@@ -1,0 +1,106 @@
+{
+  "version": 1,
+  "mission_slug": "delivery-return-metric-elements-01M1STPA",
+  "mission_id": "01M1STPA8ADF29D87STZ3CWZK1",
+  "mission_branch": "kitty/mission-delivery-return-metric-elements-01M1STPA",
+  "target_branch": "mission/delivery-return-metric-elements",
+  "lanes": [
+    {
+      "lane_id": "lane-a",
+      "wp_ids": [
+        "WP01"
+      ],
+      "write_scope": [
+        "fixtures/elements-behaviour/src/sk-metric.test.ts",
+        "packages/elements/src/metric/sk-metric.css.d.ts",
+        "packages/elements/src/metric/sk-metric.css.js",
+        "packages/elements/src/metric/sk-metric.stories.ts",
+        "packages/elements/src/metric/sk-metric.ts",
+        "packages/styles/src/metric/sk-metric.css"
+      ],
+      "predicted_surfaces": [
+        "api",
+        "app-shell",
+        "artifact-rendering",
+        "workspace"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    },
+    {
+      "lane_id": "lane-b",
+      "wp_ids": [
+        "WP02"
+      ],
+      "write_scope": [
+        "fixtures/elements-behaviour/src/sk-evidence-chain.test.ts",
+        "packages/elements/src/evidence-chain/sk-evidence-chain.css.d.ts",
+        "packages/elements/src/evidence-chain/sk-evidence-chain.css.js",
+        "packages/elements/src/evidence-chain/sk-evidence-chain.stories.ts",
+        "packages/elements/src/evidence-chain/sk-evidence-chain.ts",
+        "packages/styles/src/evidence-chain/sk-evidence-chain.css"
+      ],
+      "predicted_surfaces": [
+        "api",
+        "app-shell",
+        "artifact-rendering",
+        "workspace"
+      ],
+      "depends_on_lanes": [
+        "lane-a"
+      ],
+      "parallel_group": 1
+    },
+    {
+      "lane_id": "lane-c",
+      "wp_ids": [
+        "WP03"
+      ],
+      "write_scope": [
+        "CHANGELOG.md",
+        "apps/storybook/src/tests/sk-evidence-chain.spec.ts",
+        "apps/storybook/src/tests/sk-metric.spec.ts",
+        "apps/storybook/src/tests/visual.spec.ts",
+        "apps/storybook/src/tests/visual.spec.ts-snapshots/*evidence-chain*.png",
+        "apps/storybook/src/tests/visual.spec.ts-snapshots/*metric*.png",
+        "docs/design-system/changelog.md",
+        "docs/design-system/using-components.md",
+        "docs/design-system/using-react.md",
+        "expected-docs.json",
+        "expected-parts.json",
+        "expected-stories.json",
+        "fixtures/react-consumer/src/sk-evidence-chain.test.tsx",
+        "packages/elements/SIZES.md",
+        "packages/elements/custom-elements.json",
+        "packages/elements/src/elements.ts",
+        "packages/elements/src/index.ts",
+        "packages/elements/vue.d.ts",
+        "packages/react/.wrapper-floor",
+        "packages/react/src/SkEvidenceChain.d.ts",
+        "packages/react/src/SkEvidenceChain.js",
+        "packages/react/src/SkMetric.d.ts",
+        "packages/react/src/SkMetric.js",
+        "packages/react/src/index.d.ts",
+        "packages/react/src/index.js",
+        "packages/react/src/react-utils.js",
+        "packages/react/type-tests/wrappers.type-test.tsx",
+        "packages/styles/package.json"
+      ],
+      "predicted_surfaces": [
+        "api",
+        "artifact-rendering",
+        "tracker-integration",
+        "workspace"
+      ],
+      "depends_on_lanes": [
+        "lane-a",
+        "lane-b"
+      ],
+      "parallel_group": 2
+    }
+  ],
+  "computed_at": "2026-09-05T22:42:55.365886+00:00",
+  "computed_from": "dependency_graph+ownership",
+  "planning_artifact_wps": [],
+  "planning_commit_sha": "4fcd64ab9f60c9c902f7ec2ae5fe8d4af905d88e"
+}
