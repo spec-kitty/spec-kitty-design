@@ -79,9 +79,20 @@ const loadComposition = async (
 
 const axeIsClean = async (page: Page, label: string) => {
   await injectAxe(page);
-  const violations = await getViolations(page, "body", {
-    runOnly: { type: "tag", values: ["wcag2a", "wcag2aa"] },
-  });
+  let violations: Awaited<ReturnType<typeof getViolations>> = [];
+  await expect
+    .poll(async () => {
+      try {
+        violations = await getViolations(page, "body", {
+          runOnly: { type: "tag", values: ["wcag2a", "wcag2aa"] },
+        });
+        return "ready";
+      } catch (error) {
+        if (String(error).includes("Axe is already running")) return "busy";
+        throw error;
+      }
+    })
+    .toBe("ready");
   expect(violations, `${label} must have zero WCAG 2.1 AA violations`).toEqual(
     [],
   );
