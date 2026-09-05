@@ -177,8 +177,8 @@ export class SkTransitionMatrix extends LitElement {
     if (
       this.#pressedRouteId !== null &&
       (!this.selectable ||
-        !Array.isArray(this.routes) ||
-        !this.routes.some((route) => route?.id === this.#pressedRouteId))
+        validateMatrix(this.columns, this.routes) === null ||
+        !this.routes.some((route) => route.id === this.#pressedRouteId))
     ) {
       this.#pressedRouteId = null;
     }

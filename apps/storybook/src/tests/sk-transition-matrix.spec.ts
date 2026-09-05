@@ -382,6 +382,45 @@ test('real pointer and keyboard releases cannot resurrect a press after disable 
   await expect(host.locator('[data-route-id="progress-review"]')).not.toHaveAttribute('data-pressed');
 });
 
+test('an invalid matrix clears pointer press state before valid data is restored', async ({ page }) => {
+  await story(page, 'selectable-states');
+  const host = page.locator('sk-transition-matrix[data-selectable-states]').first();
+  const row = host.locator('[data-route-id="planned-progress"]');
+  const box = await row.boundingBox();
+  expect(box).not.toBe(null);
+
+  await page.mouse.move(box!.x + box!.width / 2, box!.y + box!.height / 2);
+  await page.mouse.down();
+  await expect(row).toHaveAttribute('data-pressed', 'true');
+  await host.evaluate(async (element) => {
+    const matrix = element as HTMLElement & {
+      routes: ReadonlyArray<{ id: string; label: string; tone: string; values: Record<string, number> }>;
+      updateComplete: Promise<unknown>;
+    };
+    matrix.routes = matrix.routes.map((route, index) =>
+      index === 0 ? { ...route, values: { 'tue-1': 3 } } : route,
+    );
+    await matrix.updateComplete;
+  });
+  await expect(host.locator('[part~="empty-state"]')).toBeVisible();
+  await expect(host.locator('[data-pressed]')).toHaveCount(0);
+  await page.mouse.up();
+
+  await host.evaluate(async (element) => {
+    const matrix = element as HTMLElement & {
+      routes: ReadonlyArray<{ id: string; label: string; tone: string; values: Record<string, number> }>;
+      updateComplete: Promise<unknown>;
+    };
+    matrix.routes = matrix.routes.map((route, index) =>
+      index === 0
+        ? { ...route, values: { 'tue-1': 3, 'wed-2': 6, 'thu-3': 7, 'fri-4': 5 } }
+        : route,
+    );
+    await matrix.updateComplete;
+  });
+  await expect(host.locator('[data-route-id="planned-progress"]')).not.toHaveAttribute('data-pressed');
+});
+
 test('ratios are exact, zero remains zero, and a maximum-changing reassignment recomputes them', async ({ page }) => {
   const host = await story(page, 'approved-example');
   const facts = await host.evaluate(async (element) => {

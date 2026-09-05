@@ -242,6 +242,29 @@ test('keyboard press is cleared when its route disappears and cannot resurrect o
   expect(element.shadowRoot!.querySelector('[data-route-id="progress-review"]')?.hasAttribute('data-pressed')).toBe(false);
 });
 
+test('pointer press is cleared when data becomes invalid and cannot resurrect after valid data returns', async () => {
+  const element = await mount();
+  element.selectable = true;
+  await element.updateComplete;
+  const row = element.shadowRoot!.querySelector<HTMLElement>('[data-route-id="planned-progress"]')!;
+
+  row.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+  await element.updateComplete;
+  expect(row.getAttribute('data-pressed')).toBe('true');
+
+  element.routes = Object.freeze([
+    Object.freeze({ ...approvedRoutes[0], values: Object.freeze({ 'tue-1': 3 }) }),
+    ...approvedRoutes.slice(1),
+  ]) as ReadonlyArray<TransitionRoute>;
+  await element.updateComplete;
+  expect(element.shadowRoot!.querySelector('[part~="empty-state"]')).not.toBe(null);
+  expect(element.shadowRoot!.querySelector('[data-pressed]')).toBe(null);
+
+  element.routes = approvedRoutes;
+  await element.updateComplete;
+  expect(element.shadowRoot!.querySelector('[data-route-id="planned-progress"]')?.hasAttribute('data-pressed')).toBe(false);
+});
+
 test('the authored element contract pins exactly five attribute mappings and keeps structured inputs property-only', async () => {
   expect([...SkTransitionMatrix.observedAttributes].sort()).toEqual([
     'description',
