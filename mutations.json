@@ -710,7 +710,7 @@
       "arm": "app shell adopts the sheet by identity",
       "file": "packages/elements/src/app-shell/sk-app-shell.ts",
       "from": "  static styles = [sheet];",
-      "to": "  static styles = [new CSSStyleSheet()];"
+      "to": "  static styles = (() => { const clone = new CSSStyleSheet(); clone.replaceSync(Array.from(sheet.cssRules, (rule) => rule.cssText).join('\\n')); return [clone]; })();"
     },
     {
       "id": "SC-013",
