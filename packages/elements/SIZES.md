@@ -7,15 +7,15 @@ Components in these artifacts: sk-blog-card, sk-button, sk-card, sk-check-bullet
 
 | artifact | raw | minified | min+gzip | notes |
 |---|---:|---:|---:|---|
-| `ESM  (dist/index.js)` | 94.4 KiB | 61.7 KiB | 13 KiB | `lit` external |
-| `IIFE (dist/elements.js)` | 108.5 KiB | 70.3 KiB | 17 KiB | runtime bundled |
+| `ESM  (dist/index.js)` | 101.5 KiB | 63.5 KiB | 14 KiB | `lit` external |
+| `IIFE (dist/elements.js)` | 115.8 KiB | 72.2 KiB | 17 KiB | runtime bundled |
 
 ## Subresource Integrity — the classic-script bundle (FR-005)
 
 For a CDN load of `dist/elements.js`, pin what the browser executes:
 
 ```
-integrity="sha384-fPanFos85C0FCawPJ2NQ2naVEyGuSabB6ScjUHZP2Skn2QMT67bNTSvIZfrM4DBs"
+integrity="sha384-nSDa/i23Z1QJkpSVdqorEd/t0Pu7oPzf6ODy+VcibtsaZPCdZXmOvYXq42p64Muy"
 ```
 
 Derived from the built artifact on every run and re-derived by `--check`, so it cannot be
@@ -35,9 +35,9 @@ What a consumer downloads, from a real `npm pack` of each package in the derived
 | package | files | unpacked |
 |---|---:|---:|
 | `@spec-kitty/tokens` | 37 | 5749.5 KiB |
-| `@spec-kitty/styles` | 98 | 189.6 KiB |
-| `@spec-kitty/elements` | 34 | 425.8 KiB |
-| `@spec-kitty/react` | 34 | 72.8 KiB |
+| `@spec-kitty/styles` | 68 | 134.4 KiB |
+| `@spec-kitty/elements` | 34 | 451.3 KiB |
+| `@spec-kitty/react` | 34 | 76.5 KiB |
 
 PACKED SIZE IS DELIBERATELY NOT IN THIS TABLE. It is the size of the gzipped tarball and therefore
 depends on the zlib build of the machine that runs `npm pack` — a workstation and CI measured
@@ -53,7 +53,7 @@ Those look contradictory and are not: **they are different bases, and partly a
 different component.** ADR-10's SP-3 spike measured `sk-card`, not `sk-stub`.
 
 - ADR-10 §2's two figures are **unminified raw on `sk-card` ALONE** (3.7 / 26.6 KB).
-- ADR-8's ~6 KB is **minified+gzip**, and the IIFE now measures 16.7 KiB
+- ADR-8's ~6 KB is **minified+gzip**, and the IIFE now measures 17.3 KiB
   min+gzip — which does NOT corroborate it and is not meant to. That figure was a per-component
   Lit-runtime estimate; this artifact carries the runtime plus every component in the package,
   so the two are different bases and the gap grows with each component added. An earlier
@@ -71,7 +71,7 @@ figure it replaced, not more. Comparing them needs a per-component build; #81 ow
 measurement that produces one. Stating the basis is this section's whole point.
 
 What this script *does* establish is the shape of the relationship: the runtime is a
-runtime cost MEASURED AT THIS BUILD (14.1 KiB of the IIFE is Lit, since the
+runtime cost MEASURED AT THIS BUILD (14.2 KiB of the IIFE is Lit, since the
 ESM artifact holds the same element with `lit` external) and the per-component cost
 tracks its CSS. A batch mission adding a component should expect the IIFE to grow by
 roughly that component's CSS, not by a fixed per-component overhead.
@@ -82,7 +82,7 @@ unit: every figure in this file is KiB (1024). The WP prompt recorded the IIFE a
 "24.0 KB" where this file would have read 23.5 KiB — **24073 bytes either way**.
 Those two numbers are pinned historical values on purpose. An earlier revision of this
 paragraph interpolated the CURRENT raw size into that comparison, so once the artifact
-grew it asserted that 111149 bytes are "24.0 KB" — false by a factor of
+grew it asserted that 118533 bytes are "24.0 KB" — false by a factor of
 five, in the one paragraph whose whole lesson is to state the basis and the unit. A lens
 caught it.
 
@@ -91,13 +91,13 @@ caught it.
 ```
 $ npx nx run elements:build && node scripts/measure-elements-sizes.mjs
 packages/elements/dist/index.js
-  raw         96697 bytes  (94.4 KiB)
-  minified    63189 bytes  (61.7 KiB)
-  gzip         20 KiB
-  min+gzip     13 KiB
+  raw        103947 bytes  (101.5 KiB)
+  minified    65065 bytes  (63.5 KiB)
+  gzip         23 KiB
+  min+gzip     14 KiB
 packages/elements/dist/elements.js
-  raw        111149 bytes  (108.5 KiB)
-  minified    72033 bytes  (70.3 KiB)
-  gzip         24 KiB
+  raw        118533 bytes  (115.8 KiB)
+  minified    73893 bytes  (72.2 KiB)
+  gzip         27 KiB
   min+gzip     17 KiB
 ```

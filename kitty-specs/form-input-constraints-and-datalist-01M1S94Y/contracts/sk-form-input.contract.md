@@ -106,33 +106,47 @@ the flag being set.
 
 **Read-timing contract, new**: a UA flag reflects the CURRENT update's constraint values (value,
 type, pattern, min, max, step), not a previous render's — see research.md R2 for the mechanism
-(`validate()` syncs the control's own DOM state before reading its `.validity`, since `willUpdate`
-runs before `render()` commits this update's bindings). This applies equally to `form.reset()`
-restoring a satisfying value: the field must report valid immediately, not remain stuck reporting
-the pre-reset invalid state.
+(`validate()` syncs a DETACHED validation probe — not the rendered control — to the current
+update's values before reading its `.validity`; the probe exists because the rendered control
+does not exist yet during the very first `willUpdate` pass, which the earlier "sync the real
+control" design left unhandled for a field that mounts already-invalid). This applies equally to
+`form.reset()` restoring a satisfying value: the field must report valid immediately, not remain
+stuck reporting the pre-reset invalid state. `badInput` is the one exception: it is merged from
+the REAL rendered control, not the probe, because it is only ever set by genuine user typing (a
+property assignment cannot reproduce it — measured directly on a bare native `<input>`), and a
+user cannot type into a control that has not rendered yet, so this carries none of the mount-time
+risk the probe exists to close.
 
-## React wrapper contract (delta) — **prop naming corrected post-squad**
+## React wrapper contract (delta) — **prop naming corrected twice — second correction is the measured one**
 
 ```tsx
 <SkFormInput
   pattern="[A-Za-z0-9_-]+"
   min="0" max="100" step="1"
-  inputmode="numeric"
-  autocomplete="off"
-  readonly
+  inputMode="numeric"
+  autoComplete="off"
+  readOnly
   options={[{ value: 'main' }, { value: 'release/2026.09', label: 'Release 2026.09' }]}
 />
 ```
 
-**Prop names are `readonly`/`inputmode`, lowercase — NOT React's conventional `readOnly`/
-`inputMode`.** The original draft of this contract used React's own DOM-prop casing, which is
-wrong for this generator: `build-react-wrappers.mjs` names a prop after the Lit class field
-verbatim when the field name has no hyphen to convert (only hyphenated attributes like
-`selected-route-id` get camelCased, e.g. `sk-transition-matrix`'s `selectedRouteId`). `readonly`
-and `inputmode` are the element's OWN field names (chosen to match the native HTML attribute
-spelling, like `disabled`/`required`/`pattern`), so the emitted wrapper prop is `readonly`/
-`inputmode`, not a React-idiomatic rename. Confirm this against the regenerated
-`packages/react/src/SkFormInput.d.ts` rather than assuming either convention.
+**Prop names are `readOnly`/`autoComplete`/`inputMode` — React's own camelCase convention, NOT
+the element's lowercase field names.** This contract asserted the OPPOSITE during the squad
+fold-in ("lowercase, not React's convention") — that assertion was reasoned from how
+hyphen-to-camelCase conversion works elsewhere in this generator (`selected-route-id` ->
+`selectedRouteId`) and was wrong for THESE three names specifically. Measured directly by running
+`build-react-wrappers.mjs` against the real manifest: it failed its own consistency check with
+`emitted: …autoComplete…inputMode…readOnly…` against a `want` list assuming lowercase. The
+underlying generator, `@wc-toolkit/react-wrappers`, hard-codes a table of well-known global HTML
+attributes to their real React/JSX prop names (`node_modules/@wc-toolkit/react-wrappers/dist/
+index.js`) — `readonly`/`autocomplete`/`inputmode` are three of them, matching how React itself
+names these props for native elements (`<input readOnly autoComplete="off">`), independent of
+what the Lit field or attribute is named. `sk-form-input` is the first element in this repo to
+use a field name matching one of those well-known attributes, so the mismatch was never visible
+before. `scripts/build-react-wrappers.mjs` now carries a `KNOWN_REACT_PROP_RENAMES` map so its
+own consistency check expects this rename rather than treating it as drift. Confirm against the
+regenerated `packages/react/src/SkFormInput.js`/`.d.ts` — reading the generator's actual output
+is what caught both the original wrong guess and this contract's own first "correction."
 
 `options` is delivered as a JS property via the generated `useProperties` hook (not an attribute),
 surviving delivery before the custom element is defined and resetting to a fresh frozen `[]` when

@@ -125,6 +125,33 @@ const EXPECTED_NON_PROP_FIELDS = new Map([
   ['sk-form-textarea', ['errorMessage']],
 ]);
 
+/**
+ * KNOWN HTML ATTRIBUTE RENAMES, not a denylist and not element-scoped — these are GLOBAL,
+ * because the rename comes from the platform's own naming split, not from anything an element
+ * author chooses. `@wc-toolkit/react-wrappers` hard-codes a table of well-known global HTML
+ * attributes to their real React/JSX prop names (`node_modules/@wc-toolkit/react-wrappers/dist/
+ * index.js`, the `propName`/`fieldName` pairs near its top) — `readonly` -> `readOnly`,
+ * `autocomplete` -> `autoComplete`, `inputmode` -> `inputMode`, and others this repo has not
+ * used yet — because that IS React's own convention for native elements (`<input readOnly>`,
+ * not `<input readonly>`), independent of Lit or this manifest.
+ *
+ * #180 is the first element in this repo to declare a Lit field matching one of these names
+ * verbatim (`readonly`/`autocomplete`/`inputmode` on `sk-form-input`, chosen to match the
+ * native HTML attribute spelling, same as every other property on that element) — so this is
+ * the first time the mismatch between "the Lit field name" and "the emitted React prop name"
+ * became observable. Measured directly against the installed generator: regenerating with the
+ * field name assumed to equal the prop name produced `manifest: …autocomplete…inputmode…
+ * readonly… / emitted: …autoComplete…inputMode…readOnly…` and this check (rightly) failed.
+ *
+ * Extend this map only for a rename CONFIRMED against the installed generator version when a
+ * future element hits it — do not guess ahead of what an element actually uses.
+ */
+const KNOWN_REACT_PROP_RENAMES = new Map([
+  ['readonly', 'readOnly'],
+  ['autocomplete', 'autoComplete'],
+  ['inputmode', 'inputMode'],
+]);
+
 const check = process.argv.includes('--check');
 // REFUSED TOGETHER. `--selftest` is tested first and exits 0 without consulting `check`, so
 // appending it to the drift step would turn an ENFORCED gate into a probe run that prints
@@ -604,7 +631,9 @@ function audit({ outdir, manifestPath, srcDir, floor, allowFloorGrowth = false }
     if (!existsSync(f)) continue; // already reported by the set comparison above
     const dts = readFileSync(f, 'utf8');
     const got = emittedProps(dts);
-    const want = decl.fields;
+    const want = decl.fields
+      .map((field) => KNOWN_REACT_PROP_RENAMES.get(field) ?? field)
+      .sort();
     if (JSON.stringify(got.values) !== JSON.stringify(want)) {
       problems.push(
         `${decl.name} (${tag}) props do not match the manifest's attributed and explicit ` +

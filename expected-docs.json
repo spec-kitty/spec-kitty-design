@@ -31,7 +31,7 @@
     "counted here either. See scripts/normalise-manifest.mjs.",
     "#77 adds <sk-site-footer> with FIVE attributes and zero methods: wordmark, tagline, legal, column-one-heading and column-two-heading. Every one is a string, which is the operator's ruling on #77 working around a constraint this ratchet's sibling gate enforces — the React wrappers' ssrSafe mode delivers first-render props as ATTRIBUTES, which carry only strings, so structured data would not survive. The link ITEMS are slotted instead. An earlier revision of this entry recorded 0/0 for a slot-only design that contradicted that ruling; the rebuild is why the numbers moved."
   ],
-  "total": 65,
+  "total": 73,
   "elements": {
     "sk-blog-card": {
       "attributes": 3,
@@ -59,8 +59,8 @@
       "methods": 0
     },
     "sk-form-input": {
-      "attributes": 9,
-      "properties": 0,
+      "attributes": 16,
+      "properties": 1,
       "methods": 5
     },
     "sk-form-textarea": {

@@ -1515,6 +1515,56 @@
               "privacy": "private"
             },
             {
+              "kind": "field",
+              "name": "#probe",
+              "privacy": "private",
+              "type": {
+                "text": "HTMLInputElement"
+              }
+            },
+            {
+              "kind": "method",
+              "name": "#syncOptionalAttribute",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "target",
+                  "type": {
+                    "text": "HTMLInputElement"
+                  }
+                },
+                {
+                  "name": "name",
+                  "type": {
+                    "text": "string"
+                  }
+                },
+                {
+                  "name": "value",
+                  "type": {
+                    "text": "string | undefined"
+                  }
+                }
+              ],
+              "description": "Sets `name` on `target` to `value` when defined, or REMOVES the attribute — never sets an\nempty string. See the call site in `validate()` for why: `pattern=\"\"` is not \"no pattern\",\nit is \"the empty string is the only valid value.\""
+            },
+            {
+              "kind": "field",
+              "name": "autocomplete",
+              "privacy": "public",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "Forwarded to the inner control's `autocomplete` attribute, verbatim.",
+              "attribute": "autocomplete",
+              "reflects": true
+            },
+            {
               "kind": "method",
               "name": "checkValidity",
               "return": {
@@ -1670,6 +1720,17 @@
             },
             {
               "kind": "field",
+              "name": "inputmode",
+              "privacy": "public",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "A hint to the browser about the kind of on-screen keyboard to display. Hinting only — it\ncarries no validation semantics.",
+              "attribute": "inputmode",
+              "reflects": true
+            },
+            {
+              "kind": "field",
               "name": "internals",
               "type": {
                 "text": "ElementInternals"
@@ -1713,6 +1774,28 @@
             },
             {
               "kind": "field",
+              "name": "max",
+              "privacy": "public",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "The maximum value, for numeric and date/time input types. A string, matching the native\nHTML attribute's own contract.",
+              "attribute": "max",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "min",
+              "privacy": "public",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "The minimum value, for numeric and date/time input types. A string, matching the native\nHTML attribute's own contract.",
+              "attribute": "min",
+              "reflects": true
+            },
+            {
+              "kind": "field",
               "name": "name",
               "type": {
                 "text": "string"
@@ -1729,6 +1812,28 @@
             },
             {
               "kind": "field",
+              "name": "options",
+              "privacy": "public",
+              "type": {
+                "text": "ReadonlyArray<{ value: string; label?: string }>"
+              },
+              "description": "Suggested values shown in a native datalist alongside the input. A typed value matching no\noption stays valid unless a forwarded constraint says otherwise — this is a suggestion\nlist, not a closed set.",
+              "x-spec-kitty-property-only": true,
+              "x-spec-kitty-property-reset": "empty-array"
+            },
+            {
+              "kind": "field",
+              "name": "pattern",
+              "privacy": "public",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "A regular expression the value must match. Forwarded verbatim to the inner control; the\nplatform performs the match, this element does not re-validate it.",
+              "attribute": "pattern",
+              "reflects": true
+            },
+            {
+              "kind": "field",
               "name": "placeholder",
               "privacy": "public",
               "type": {
@@ -1737,6 +1842,17 @@
               "description": "Placeholder text. Not a substitute for `label`: it disappears on input and is not a\nreliable accessible name.",
               "default": "''",
               "attribute": "placeholder"
+            },
+            {
+              "kind": "field",
+              "name": "readonly",
+              "privacy": "public",
+              "type": {
+                "text": "boolean"
+              },
+              "description": "Marks the field read-only. The value is still submitted with the form, unlike `disabled` —\nbut the field is barred from constraint validation, so a `required` read-only field never\nblocks its form.",
+              "default": "false",
+              "attribute": "readonly"
             },
             {
               "kind": "method",
@@ -1789,6 +1905,17 @@
                 "name": "FormControlBase",
                 "module": "packages/elements/src/form-control-base.ts"
               }
+            },
+            {
+              "kind": "field",
+              "name": "step",
+              "privacy": "public",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "The granularity the value must adhere to, for numeric and date/time input types. `\"any\"`\nis a legal value the platform itself interprets.",
+              "attribute": "step",
+              "reflects": true
             },
             {
               "kind": "method",
@@ -1892,6 +2019,14 @@
           ],
           "attributes": [
             {
+              "name": "autocomplete",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "Forwarded to the inner control's `autocomplete` attribute, verbatim.",
+              "fieldName": "autocomplete"
+            },
+            {
               "name": "description",
               "type": {
                 "text": "string"
@@ -1906,6 +2041,14 @@
               },
               "fieldName": "disabled",
               "description": "Excludes the field from submission and from user interaction."
+            },
+            {
+              "name": "inputmode",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "A hint to the browser about the kind of on-screen keyboard to display. Hinting only — it\ncarries no validation semantics.",
+              "fieldName": "inputmode"
             },
             {
               "name": "invalid",
@@ -1925,12 +2068,36 @@
               "description": "The visible label. Also the accessible name, so it is not optional in practice."
             },
             {
+              "name": "max",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "The maximum value, for numeric and date/time input types. A string, matching the native\nHTML attribute's own contract.",
+              "fieldName": "max"
+            },
+            {
+              "name": "min",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "The minimum value, for numeric and date/time input types. A string, matching the native\nHTML attribute's own contract.",
+              "fieldName": "min"
+            },
+            {
               "name": "name",
               "type": {
                 "text": "string"
               },
               "fieldName": "name",
               "description": "The name submitted with the form value. Without it the field contributes no `FormData`\nentry — though a required empty one still blocks its form."
+            },
+            {
+              "name": "pattern",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "A regular expression the value must match. Forwarded verbatim to the inner control; the\nplatform performs the match, this element does not re-validate it.",
+              "fieldName": "pattern"
             },
             {
               "name": "placeholder",
@@ -1942,12 +2109,29 @@
               "fieldName": "placeholder"
             },
             {
+              "name": "readonly",
+              "type": {
+                "text": "boolean"
+              },
+              "description": "Marks the field read-only. The value is still submitted with the form, unlike `disabled` —\nbut the field is barred from constraint validation, so a `required` read-only field never\nblocks its form.",
+              "default": "false",
+              "fieldName": "readonly"
+            },
+            {
               "name": "required",
               "type": {
                 "text": "boolean"
               },
               "fieldName": "required",
               "description": "Marks the field required. An empty required field blocks submission and reports\n`${label} is required`, or \"This field is required\" when `label` is empty."
+            },
+            {
+              "name": "step",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "The granularity the value must adhere to, for numeric and date/time input types. `\"any\"`\nis a legal value the platform itself interprets.",
+              "fieldName": "step"
             },
             {
               "name": "type",
