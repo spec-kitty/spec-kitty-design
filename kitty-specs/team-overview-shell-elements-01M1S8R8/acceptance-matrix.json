@@ -188,10 +188,10 @@
       "criterion_id": "NFR-002",
       "description": "Interactive controls remain keyboard reachable in DOM order with visible focus.",
       "proof_type": "automated_test",
-      "evidence": "Owner WP04: sk-team-overview-shell-layout.spec.ts tabs the desktop and 390px compositions; WP03 directly proves inner-control focus visibility.",
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "Verified on aggregate lane 89bbf7eb6fb12ca6aab0a780673ac93f506316e0: Storybook axe passed 177/177; Playwright Chromium+Firefox passed 70/70 including 390/414/1280/1440 shell composition, landmarks, label bytes, keyboard/focus, overflow, event, sync and zero-timer assertions.",
+      "pass_fail": "pass",
+      "verified_by": "codex/frontend-freddy/WP04",
+      "verified_at": "2026-09-05T23:34:14.234488+00:00",
       "notes": "Planned evidence mapping; populate the exact command result and immutable SHA when the owning WP or wrap-up step executes."
     },
     {
