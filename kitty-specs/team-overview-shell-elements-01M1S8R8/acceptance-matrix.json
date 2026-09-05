@@ -28,10 +28,10 @@
       "criterion_id": "FR-003",
       "description": "Narrow shell reflow preserves every supplied region without element-owned open or visibility state.",
       "proof_type": "automated_test",
-      "evidence": "Owner WP01, aggregate confirmation WP04: focused shell tests and sk-team-overview-shell-layout.spec.ts assert 390px/414px reachability and absence of internal open/selected behavior.",
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "Verified on aggregate lane 89bbf7eb6fb12ca6aab0a780673ac93f506316e0: npm run test passed 278/278 (32 node + 246 Chromium); focused fixtures, exact parts/label/sheet contracts, generated public surfaces, and compatibility checks all green.",
+      "pass_fail": "pass",
+      "verified_by": "codex/frontend-freddy/WP04",
+      "verified_at": "2026-09-05T23:33:38.953781+00:00",
       "notes": "Planned evidence mapping; populate the exact command result and immutable SHA when the owning WP or wrap-up step executes."
     },
     {
