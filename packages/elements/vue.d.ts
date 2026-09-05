@@ -286,6 +286,30 @@ declare module 'vue' {
     'sk-stub': SkElement<{
       // no attributes
     }>;
+    /**
+     * An aggregate route-by-time-bucket transition matrix with controlled route-selection intent.
+     *
+     * Token dependencies: --sk-border-default, --sk-border-focus, --sk-border-strong,
+     * --sk-border-width-1, --sk-border-width-2, --sk-color-blue, --sk-color-green,
+     * --sk-color-purple, --sk-color-red, --sk-fg-body, --sk-fg-default, --sk-fg-muted,
+     * --sk-fg-on-card, --sk-font-mono, --sk-font-sans, --sk-radius-lg, --sk-radius-sm,
+     * --sk-space-1, --sk-space-2, --sk-space-3, --sk-space-4, --sk-space-5,
+     * --sk-space-6, --sk-space-10, --sk-space-12, --sk-surface-card,
+     * --sk-surface-muted, --sk-surface-pill, --sk-text-lg, --sk-text-sm, --sk-text-xs,
+     * --sk-weight-medium, --sk-weight-semibold.
+     */
+    'sk-transition-matrix': SkElement<{
+      /** Optional consumer-authored explanation shown above the matrix. */
+      'description'?: string;
+      /** Enables route-selection intent without taking ownership of selection. */
+      'selectable'?: boolean;
+      /** Consumer-controlled selected route id. */
+      'selected-route-id'?: string | undefined;
+      /** Optional consumer-authored selectable-row instruction. */
+      'selection-hint'?: string;
+      /** Optional consumer-authored label for the reporting window. */
+      'window-label'?: string;
+    }>;
   }
 }
 
