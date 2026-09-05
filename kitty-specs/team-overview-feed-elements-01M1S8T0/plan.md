@@ -452,7 +452,9 @@ on the exact PR head.
    exact SHA; do not run the writer and then pretend its new SHA was reviewed.
 10. Require one maintainer approval on the same exact current head. Any push invalidates the squad,
     acceptance and approval; a train advance blocks the mission under step 5.
-11. Merge only into `train/elements-first` after explicit operator authorization. Never touch
+11. Merge only into `train/elements-first` after explicit operator authorization. Verify the train
+    contains the exact accepted head, then have orchestrator wrap-up close #146 immediately. WP
+    workers never close issues; keep #144, #125, #112 and unfinished siblings open. Never touch
     `main`, publish or deploy.
 
 ## Implementation Concern Map
