@@ -40,10 +40,18 @@ export type CardVariant = keyof typeof CARD_VARIANTS;
 // fixtures/elements-behaviour/src/sk-card.test.ts, because the generator evaluated this file from
 // a `data:` URL, which has no module base, and exited with a named error on any relative import.
 // `scripts/build-element-markup.mjs` now evaluates it from its own file URL, so the one authored
-// list is simply imported. The copy is gone, and so is the assertion that policed it: there is no
-// second list left for it to disagree with. Adding, removing, renaming or reordering a tone in
-// `status-tones.ts` now changes this map, the element, the static HTML and the generated
-// template-literal exports in one edit.
+// list is simply imported. Adding, removing, renaming or reordering a tone in `status-tones.ts`
+// now changes this map, the element, the static HTML and the generated template-literal exports in
+// one edit.
+//
+// THE ASSERTION STAYS, re-aimed. This mission first deleted it, reasoning that a derivation cannot
+// disagree with its own source. A reviewer falsified that in one edit: appending
+// `['rogue', 'sk-card--status-rogue']` INSIDE the `fromEntries` argument keeps the index-signature
+// type, so the cast below stays clean, typecheck passes, and the generator happily writes
+// `SkCardStatusRogueHTML` with a class in no stylesheet. The derivation is an EXPRESSION and
+// nothing gates the expression, so `sk-card.test.ts` still holds these keys equal to
+// `STATUS_TONES`, in order — against two lists that was a restatement of an obligation; against a
+// derivation it constrains the only authored thing left.
 /** Status tone → BEM modifier. The tone vocabulary is `sk-status-indicator`'s, not the card's. */
 export const CARD_STATUSES: Readonly<Record<StatusIndicatorTone, string>> = Object.freeze(
   Object.fromEntries(STATUS_TONES.map((tone) => [tone, `sk-card--status-${tone}`])),

@@ -36,7 +36,7 @@ What a consumer downloads, from a real `npm pack` of each package in the derived
 |---|---:|---:|
 | `@spec-kitty/tokens` | 37 | 5758.1 KiB |
 | `@spec-kitty/styles` | 120 | 249.7 KiB |
-| `@spec-kitty/elements` | 46 | 647.5 KiB |
+| `@spec-kitty/elements` | 46 | 648.0 KiB |
 | `@spec-kitty/react` | 56 | 131.6 KiB |
 
 PACKED SIZE IS DELIBERATELY NOT IN THIS TABLE. It is the size of the gzipped tarball and therefore

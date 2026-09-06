@@ -102,9 +102,10 @@ export { default as skTransitionMatrixSheet } from './transition-matrix/sk-trans
 // and shown to consumers in IDE hovers.
 //
 // CARD_STATUSES is exported for the reason FEATURE_CARD_ACCENTS and RIBBON_CARD_COLOURS are: the
-// behaviour fixture DERIVES its loops from it. It no longer asserts its keys equal STATUS_TONES —
-// since #216 the map IS `Object.fromEntries(STATUS_TONES.map(...))`, so there is no second list to
-// disagree with and that assertion could only compare a derivation with its own source.
+// behaviour fixture DERIVES its loops from it, and still asserts its keys equal STATUS_TONES in
+// order. Since #216 the map IS `Object.fromEntries(STATUS_TONES.map(...))`, so that assertion no
+// longer guards two lists drifting apart — it guards the DERIVATION EXPRESSION, which nothing else
+// gates and which a reviewer forked in one edit while every static gate stayed green.
 export {
   CARD_AXES,
   CARD_STATUSES,

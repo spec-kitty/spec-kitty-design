@@ -57,8 +57,9 @@ export class SkCard extends LitElement {
   // keeping the authored list in `STATUS_TONES`.
   //
   // What holds this honest: packages/react/type-tests/wrappers.type-test.tsx proves this union and
-  // `StatusIndicatorTone` are mutually assignable. Widening, narrowing or renaming either one reds
-  // that test.
+  // `StatusIndicatorTone` are mutually assignable, and the behaviour fixture still proves
+  // CARD_STATUSES' keys equal STATUS_TONES in order. Widening, narrowing or renaming any of them
+  // reds a test.
   //
   // #216 did NOT close this half, and it is worth saying which half it closed. `CARD_STATUSES` is
   // now derived from `STATUS_TONES` — the runtime copy and the assertion that policed it are both

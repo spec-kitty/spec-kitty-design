@@ -16,9 +16,15 @@
  * is why `sk-card.markup.ts` derives its status map instead of restating six strings and pinning
  * them with an assertion nothing forced the next component to copy.
  *
- * KEEP THIS FILE A LEAF. An import added here — even a type-only one that erases at build time —
- * is one more module the generator has to be able to evaluate, and the failure lands on whichever
- * unrelated PR touches a markup module next.
+ * KEEP THIS FILE A LEAF — and that is now ENFORCED, not requested. `build-element-markup.mjs`
+ * reads this file's import list from esbuild's metafile before it evaluates anything and exits
+ * non-zero, naming THIS file, if the list is not empty.
+ *
+ * The check exists because the request alone did not hold. Measured on the first round of this
+ * change: `import { css } from 'lit'` here left `--check` green and exit 0 — some browser-facing
+ * modules survive evaluation in Node by accident — and `import '../define.js'` did fail, but with
+ * `customElements is not defined` reported against `sk-card.markup.ts`, which is not the file that
+ * gained the import, on whichever unrelated PR touched a markup module next.
  */
 export type StatusIndicatorTone =
   | 'neutral'
