@@ -2,7 +2,7 @@
 
 **Date:** 2026-09-02
 **Status:** Proposed
-**Deciders:** MOES-Media (operator session, 2026-09-02 — lifted the charter's unit-test prohibition and selected the runner)
+**Deciders:** MOES-Media (operator session, 2026-09-02 — lifted the charter's unit-test prohibition and selected the runner); the wrapper prop-name invariant subsection was ratified by the operator, filed as issue #189 rather than decided in the #187 mission, as an explicit override of the "ADRs are written only in #67" rule — #176 set the precedent for ADR-10
 **Technical Story:** ADR-8 constraint — a screenshot and an axe scan cannot see a broken `setFormValue`; `research/001` §163 (no schema for a valid framework target); charter amendment O5
 
 ---
@@ -79,6 +79,128 @@ The framework-target schema `research/001` §163 asked for: a target package is 
 **The generator itself is deferred to SP-6.** One correction worth recording, because ADR-8 blurred it: `@lit/react` is a runtime `createComponent()` helper called once per component by hand — it is not a generator, and it cannot satisfy the drift criterion on its own. A manifest-driven generator (`@wc-toolkit/react-wrappers` or equivalent) is a separate dependency and a separate decision.
 
 A second correction to ADR-8's rationale, which does not change the operator's decision that React leads: React 19 scores 16/16 on Custom Elements Everywhere for both basic and advanced interop, as does Angular. A React wrapper buys JSX-level types, typed refs and SSR attribute handling — real ergonomics, but not interop. Size the wrapper mission accordingly.
+
+### The wrapper prop-name invariant this ADR omitted (#189)
+
+**Operator override, recorded for the record.** ADRs are ordinarily written only in #67, which is
+closed. Issue #189 was filed rather than decided — it was raised by the pre-merge gate on #187
+("Filed rather than decided, per the operator ruling") specifically because the generator-contract
+question it names is architectural and #187's own mission is not the place to rule on it. The
+operator authorized amending ADR-11 for #189 the same way it authorized amending ADR-10 for #176:
+this section exists under that specific, recorded authorization, not by this loop's own extension
+of the "#67 only" rule to a case it happened to find convenient.
+
+**The invariant this ADR should always have stated.** The generated React wrapper preserves the
+manifest's field **set** — every public, settable field becomes exactly one prop, no more, no
+fewer, and a missing, extra or misspelled field is a real defect the consistency gate must catch.
+It does **not** preserve field **casing** unconditionally: for a small, fixed set of well-known
+HTML-attribute-shaped names, the emitted prop follows React's own JSX naming convention instead of
+the Lit field's literal spelling — `readonly` emits as `readOnly`, `autocomplete` as
+`autoComplete`, `inputmode` as `inputMode`, and further entries besides — measured directly against
+the installed `@wc-toolkit/react-wrappers` bundle at authoring time: **17** total, not the
+nineteen issue #189 estimated; counts of an unversioned-in-this-repo internal table are not stable
+across dependency versions, which is exactly why the gate reads it live rather than recording a
+number here. This was true of
+`@wc-toolkit/react-wrappers` from the day this ADR chose it; ADR-11 simply never said so, because
+no element had yet declared a field whose name collided with that table until `sk-form-input` did
+(#180, then corrected by #187 — see below).
+
+**The table is a package internal, not a contract this repo controls.** The rename table
+(`MAPPED_PROPS` in `node_modules/@wc-toolkit/react-wrappers/dist/index.js`) is not exported by the
+package. `scripts/build-react-wrappers.mjs` therefore cannot `import` it and cannot assert against
+it the way it asserts against `custom-elements.json`. Two approaches were tried, in order, and the
+second is the one that ships:
+
+1. **#180 (first pass)**: a hand-copied 3-entry map (`readonly`/`autocomplete`/`inputmode`) mirroring
+   three rows of the real table, later replaced by a version that folded both the expected and
+   emitted prop-name sets to lower-case before comparing. Two defects, both found at review rather
+   than by the gate itself: a hand-mirrored subset reds the very next element that declares a field
+   outside it (`sk-form-textarea` declaring `maxlength` was the concrete example raised), and folding
+   both sides means the comparison no longer asserts casing **at all** — a generator regression that
+   emitted `readonly` where `readOnly` was required would print green.
+2. **#187 (second pass, current)**: `loadReactPropRenameMap()` reads the real `MAPPED_PROPS` array
+   out of the **installed** bundle by pattern-matching its literal source, builds a
+   lower-cased-field-name → exact-JSX-prop-name map from every entry it finds, and the per-element
+   comparison asserts **exact** casing (`JSON.stringify` equality, not folded) against that map. If
+   the read or parse fails — a future major version of the dependency restructuring the bundle, say
+   — it falls back to the original 3-entry map from #180, **with a loud `console.warn`** naming the
+   failure, rather than silently degrading to a fold. An exact comparison with narrower coverage is
+   still a real assertion; a folded one is not.
+
+This is a **deliberate, fail-closed coupling to a package internal**, not a design this ADR
+recommends casually. It is accepted here specifically because: the alternative (a hand-kept mirror)
+goes stale the day the dependency adds a row, the table itself is small and stable (a fixed list of
+well-known global HTML attributes, not something `@wc-toolkit/react-wrappers` churns), and the
+failure mode when the coupling breaks is a loud warning plus a narrower-but-still-exact fallback,
+never a silent pass. A future case that wants to assert against some other dependency's undocumented
+internal should be held to the same shape: read the installed artifact, compare exactly, and fail
+loud (not fold, not silently trust a hand-copied mirror) when the read itself fails.
+
+**The worked example — `sk-form-input`.** It is the first, and to date only, element in this
+repository to declare a field whose name matches an entry in `MAPPED_PROPS`. Its three affected
+fields:
+
+| Lit field (manifest / attribute) | Emitted React prop |
+|---|---|
+| `readonly` | `readOnly` |
+| `autocomplete` | `autoComplete` |
+| `inputmode` | `inputMode` |
+
+**What a future element author must know, before naming a field.** A lowercase, HTML-attribute-
+shaped field name that happens to appear in `MAPPED_PROPS` will emit camelCase in the generated
+React wrapper regardless of how the manifest or the Lit class spells it. This is invisible until the
+gate runs unless the element's own contract doc says so — so it must. `sk-form-input`'s contract doc
+(`kitty-specs/form-input-constraints-and-datalist-01M1S94Y/contracts/sk-form-input.contract.md`,
+"React wrapper contract (delta)") is the citable worked example for the *shape* of that disclosure:
+name the affected fields and their emitted prop names explicitly, in a fenced JSX example, rather
+than leaving a reader to infer casing from the manifest. **That contract doc's prose is stale** —
+it still describes the #180 folded-comparison gate ("the consistency check now folds both … to
+lower-case … rather than carrying any rename table of its own"), which #187 superseded with the
+exact-comparison, real-table-reading gate described above. This ADR does not correct that file —
+amending a mission's already-closed contract doc is out of this mission's scope, C-001 — but records
+the drift here so it is not silently rediscovered: a follow-up correcting
+`sk-form-input.contract.md`'s React-wrapper-contract section against the current gate is owed, the
+same way ADR-10 filed #173 rather than leave a stale instruction unowned.
+
+**Should `REACT_PROPS` and the rename table be one mechanism?** #189's third point names a real
+adjacent duplication. `REACT_PROPS` (`build-react-wrappers.mjs`, the generator-supplied prop
+exclusion set — `className`, `htmlFor`, `tabIndex`, `part`, `ref`, and others the generator adds
+itself rather than sourcing from the manifest) and the rename table above are two different
+mechanisms in the same file, both about generator-side prop naming, applied at two different points:
+`emittedProps()` filters a `.d.ts`'s declared props by `REACT_PROPS` *before* a prop is even
+classified as a value or a handler; the per-element loop applies the rename table *afterward*, when
+comparing the survivors against the manifest. The concrete collision: a manifest field whose renamed
+form matches a `REACT_PROPS` entry — `tabindex` renaming to `tabIndex`, which **is** in
+`REACT_PROPS` — would have its renamed form filtered out of `emittedProps()`'s result before the
+rename-table comparison runs, producing a "props do not match the manifest" failure that never names
+the real cause. (`for`→`htmlFor` is the table's other candidate collision, but `for` and `class` are
+reserved words no Lit field can ever be named, so that half is theoretical; `tabindex` is not.)
+
+**Verdict: not worth consolidating now, and this is a recommendation for the operator to weigh, not
+a change this mission makes.** Three reasons hold this at "recorded, not implemented":
+
+1. **No element has hit it yet.** `tabindex` is a real, plausible future field name (a focus-order
+   override is a defensible thing for an interactive element's manifest to expose), but nothing in
+   this repository declares one today. Consolidating now would be preventive maintenance on a gate
+   that has never actually produced the confusing message it is accused of — a real cost against a
+   speculative one.
+2. **Consolidating changes gate behaviour**, and this mission's brief is explicit that a
+   gate-behaviour change is not this docs mission's call to make unilaterally. The two mechanisms
+   also serve genuinely different questions — `REACT_PROPS` answers "does the generator supply this
+   prop itself, independent of the manifest," the rename table answers "does the manifest's field
+   survive with a different spelling" — and folding them risks conflating "excluded from comparison"
+   with "renamed within comparison," which is a more subtle bug surface to introduce than the
+   confusing-message problem it would fix.
+3. **The cheaper fix is a better error message, not a merged mechanism.** If and when an element
+   does declare a `REACT_PROPS`-colliding field, the more targeted repair is for the per-element
+   comparison to detect that a `want` entry's renamed form is in `REACT_PROPS` and say so directly
+   ("field X renames to Y, which the generator supplies itself and excludes from comparison") rather
+   than restructuring how exclusion and renaming interact.
+
+If a future mission or the operator judges otherwise — including simply disagreeing with reason 3's
+premise — that is a legitimate reversal of this verdict, but it is a code change to
+`scripts/build-react-wrappers.mjs` requiring its own review, not something this ADR amendment
+authorizes by having discussed it.
 
 ### The fourth-target extension cost — MEASURED (#81, ADR-8 confirmation #4)
 
@@ -233,4 +355,5 @@ subjects or say the same thing here.
 
 * Amended by O5, the charter amendment lifting the unit-test prohibition in `languages_frameworks`, `testing_requirements` and `quality_gates`. Charter changes go through `spec-kitty charter interview → generate → sync`, never by hand (CLAUDE.md §7).
 * Related: ADR-8 (base layer), ADR-9 (styling API — items 6 and 7 verify what it declares), ADR-13 (Storybook builder), SP-1 (gate repair), SP-6 (generator selection).
-* Evidence: `scripts/run-axe-storybook.js:102`, `.github/workflows/ci-quality.yml` (`components` filter; `gate` skipped-tolerance), `packages/angular/src/lib/*/**.spec.ts`, `playwright.config.ts`.
+* Amended by #189 (operator override, same precedent as ADR-10's #176): the wrapper prop-name invariant, omitted from this ADR's original "Wrapper generation" section — see that section's "The wrapper prop-name invariant this ADR omitted (#189)" subsection.
+* Evidence: `scripts/run-axe-storybook.js:102`, `.github/workflows/ci-quality.yml` (`components` filter; `gate` skipped-tolerance), `packages/angular/src/lib/*/**.spec.ts`, `playwright.config.ts`, `scripts/build-react-wrappers.mjs` (`REACT_PROPS`, `loadReactPropRenameMap`, per-element prop comparison), `kitty-specs/form-input-constraints-and-datalist-01M1S94Y/contracts/sk-form-input.contract.md` ("React wrapper contract (delta)").
