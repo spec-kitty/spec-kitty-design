@@ -1,0 +1,236 @@
+/* sk-notice — a block-level, optionally announced status surface (#178).
+ *
+ * TONE VOCABULARY AND TOKENS. This file consumes the `--sk-status-*` /
+ * `--sk-on-status-*` pairs landed by #177 and does NOT fork a `--sk-notice-*`
+ * family. #178 names that fork as the specific risk: one tone scale exists
+ * across sk-status-indicator (#146), sk-card[status] (#177) and this element,
+ * and a second family would be a divergence nothing computes.
+ *
+ * NO THEME SELECTOR ANYWHERE. `:root[data-theme="light"] .sk-notice` and
+ * `.sk-light .sk-notice` both cross the shadow boundary and are therefore INERT
+ * once this sheet is adopted — silently, with no error, producing a LightMode
+ * story that renders dark styling (ADR-9 §3; #72 repaired exactly that in
+ * sk-card.css). Light-mode variance already lives in the tokens, which inherit
+ * through the boundary where a selector does not.
+ *
+ * TONE IS NEVER THE SOLE CARRIER. Three things carry it: the surface, the
+ * inline-start EDGE, and the marker glyph — which is real slotted/fallback DOM
+ * text, not a background image and not CSS generated content. The message text
+ * itself is the fourth and is the consumer's. The Greyscale story is the
+ * assertion; under `filter: grayscale(1)` the edge weight and the marker still
+ * read.
+ */
+
+:host {
+  /* #135. A custom element's UA default is `display: inline`, and `max-width`,
+     `width`, `margin` and vertical padding do not apply to a non-replaced inline
+     box — so a consumer's `style="max-width: 60ch"` on <sk-notice> would be
+     silently inert. A notice owns a region, so `block` rather than inline-flex. */
+  display: block;
+}
+
+.sk-notice {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: start;
+  gap: var(--sk-space-3);
+  padding: var(--sk-space-4);
+  border-radius: var(--sk-radius-md);
+  border-style: solid;
+  border-width: var(--sk-border-width-1);
+  border-color: var(--sk-border-default);
+  background: var(--sk-surface-card);
+  color: var(--sk-fg-body);
+  font-family: var(--sk-font-sans);
+  font-size: var(--sk-text-base);
+
+  /* THE TONE EDGE. Widened on the inline-start side only, so the tone has a
+     geometric carrier as well as a chromatic one. This is also the property the
+     forced-colors block below steps up again — see there for why a colour-only
+     forced-colors rule would be inert. */
+  border-inline-start-width: var(--sk-border-width-4);
+  border-inline-start-color: var(--sk-border-strong);
+
+  /* ENTRANCE. A notice appears in response to an event, so it has a genuine
+     entrance to animate — unlike most of this library. It is a fade-and-rise of
+     one step, cancelled wholesale under reduced motion at the bottom of this
+     file.
+
+     IT IS NOT ON THE ANNOUNCEMENT PATH. The live region's text is written by the
+     same Lit update that paints this box; nothing waits on `animationend`. #178
+     requires that an animated entrance must not delay the announcement, and the
+     way that requirement is met is structural — there is no animation event
+     handler in the element at all — rather than by tuning a duration. */
+  animation-name: sk-notice-enter;
+  animation-duration: var(--sk-motion-duration-fast);
+  animation-timing-function: var(--sk-motion-ease-out);
+}
+
+@keyframes sk-notice-enter {
+  from {
+    opacity: 0;
+    transform: translateY(var(--sk-space-1));
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.sk-notice--neutral {
+  background: var(--sk-status-neutral);
+  color: var(--sk-on-status-neutral);
+  border-inline-start-color: var(--sk-on-status-neutral);
+}
+
+.sk-notice--info {
+  background: var(--sk-status-info);
+  color: var(--sk-on-status-info);
+  border-inline-start-color: var(--sk-on-status-info);
+}
+
+.sk-notice--success {
+  background: var(--sk-status-success);
+  color: var(--sk-on-status-success);
+  border-inline-start-color: var(--sk-on-status-success);
+}
+
+.sk-notice--attention {
+  background: var(--sk-status-attention);
+  color: var(--sk-on-status-attention);
+  border-inline-start-color: var(--sk-on-status-attention);
+}
+
+.sk-notice--danger {
+  background: var(--sk-status-danger);
+  color: var(--sk-on-status-danger);
+  border-inline-start-color: var(--sk-on-status-danger);
+}
+
+.sk-notice--recovery {
+  background: var(--sk-status-recovery);
+  color: var(--sk-on-status-recovery);
+  border-inline-start-color: var(--sk-on-status-recovery);
+}
+
+/* The marker is DECORATIVE (aria-hidden in the template) and is real text —
+   either the consumer's slotted node or this component's fallback glyph. That
+   matters for forced colors: a background-drawn icon receives none of the
+   automatic recolouring and would need `forced-color-adjust: none`, which
+   freezes it at its authored colour and is frequently invisible against the
+   forced-colors background. Text does not have that problem. */
+.sk-notice__marker {
+  display: inline-flex;
+  flex-shrink: 0;
+  font-size: var(--sk-text-lg);
+}
+
+.sk-notice__content {
+  display: grid;
+  gap: var(--sk-space-2);
+  min-width: 0;
+}
+
+/* The consumer supplies the heading element itself, so this box styles only the
+   slot's box. #178 and #146 both require the heading LEVEL to stay the
+   consumer's: an element-generated <h2> is an outline defect a consumer cannot
+   repair from outside. `::slotted()` reaches only the top-level assigned node,
+   which is exactly the consumer's heading. */
+.sk-notice__heading ::slotted(*) {
+  margin: 0;
+  font-size: var(--sk-text-lg);
+  font-weight: var(--sk-weight-semibold);
+  color: inherit;
+}
+
+.sk-notice__body {
+  min-width: 0;
+}
+
+.sk-notice__body ::slotted(p) {
+  margin-block: 0;
+}
+
+.sk-notice__body ::slotted(p + p) {
+  margin-block-start: var(--sk-space-2);
+}
+
+.sk-notice__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sk-space-2);
+}
+
+.sk-notice__dismiss {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--sk-space-1);
+  border-radius: var(--sk-radius-sm);
+  border-style: solid;
+  border-width: var(--sk-border-width-1);
+  border-color: transparent;
+  background: transparent;
+  color: inherit;
+  font-family: inherit;
+  font-size: var(--sk-text-base);
+  cursor: pointer;
+}
+
+/* `outline`, never `box-shadow`. box-shadow COMPUTES AWAY ENTIRELY under
+   `forced-colors: active`, so a focus ring built from it disappears exactly
+   where a visible ring matters most. `outline` is preserved and remapped to a
+   system colour automatically, the same way `border` is. */
+.sk-notice__dismiss:focus-visible {
+  outline-style: solid;
+  outline-width: var(--sk-border-width-2);
+  outline-offset: var(--sk-border-width-1);
+  outline-color: var(--sk-border-focus);
+}
+
+/* FORCED COLORS — and this block is LOAD-BEARING, which is not the same as
+   present. Measured facts it is built on:
+   
+   - `background` does not survive: it flattens to `Canvas`, so all six tones
+     become one ground and the chromatic carrier is gone. Everything below has
+     to come from the edge and the marker.
+   - `border-*-color` IS remapped automatically, with zero author CSS. So a
+     forced-colors block that only set a border colour would change nothing that
+     was not already going to happen — present, and inert. A sibling mission
+     shipped exactly that.
+   - `transparent` is NOT preserved on `border-*-color` either; it maps to
+     `CanvasText` like any other border colour. That is why the dismiss button's
+     transparent border above cannot be leaned on as an invisible-by-default
+     fallback here, and why the ring below is an `outline` rather than that
+     border.
+
+   What makes this block do real work is therefore the WIDTH step, which no
+   automatic remap supplies: the tone edge goes from `--sk-border-width-4` to a
+   doubled step so a notice stays distinguishable from any other bordered box on
+   a flattened ground. The colour is pinned to `CanvasText` to make it
+   deliberate rather than whatever the remap happens to pick.
+
+   `forced-color-adjust: none` is not used anywhere in this file. */
+@media (forced-colors: active) {
+  .sk-notice {
+    border-inline-start-width: calc(var(--sk-border-width-4) * 2);
+    border-inline-start-color: CanvasText;
+  }
+
+  .sk-notice__dismiss:focus-visible {
+    outline-color: Highlight;
+  }
+}
+
+/* REDUCED MOTION. Scoped to the exact selector and the exact property this
+   component owns — never a wildcard over the component's subtree, per the
+   recipe. This component sets exactly one animation and this cancels that one.
+   The notice is fully readable with it cancelled, because the entrance is the
+   only motion here and nothing about the content depends on it. */
+@media (prefers-reduced-motion: reduce) {
+  .sk-notice {
+    animation-name: none;
+  }
+}

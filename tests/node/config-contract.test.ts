@@ -447,3 +447,23 @@ test('[config] React is not a dependency of @spec-kitty/elements (NFR-003)', () 
     ).toEqual([]);
   }
 });
+
+test('[config] sk-notice holds no timer, no positioning and no self-removal', () => {
+  // #178's hard boundaries, asserted rather than promised: a notice that sets a timeout has
+  // become a toast, and the audit's whole complaint is that the dashboard's strips were
+  // everything at once. Asserting an ABSENCE like this needs a source read — a rendered
+  // snapshot cannot see a `setTimeout` that has not fired yet, and no behaviour test can
+  // observe a queue that is empty by construction.
+  //
+  // IT LIVES IN THE NODE LANE, and that is not a preference. The browser fixture is its own nx
+  // project, so reading `packages/elements/src/...` from there is a relative cross-project
+  // import and `@nx/enforce-module-boundaries` refuses it — measured, as an ESLint error, not
+  // guessed. The node lane already reads repository files as its subject matter, which is what
+  // this assertion is.
+  const source = readFileSync('packages/elements/src/notice/sk-notice.ts', 'utf8');
+  for (const banned of ['setTimeout', 'setInterval', 'requestAnimationFrame', 'this.remove(']) {
+    expect(source, `sk-notice.ts references ${banned}`).not.toContain(banned);
+  }
+  // ...and the guard is only worth having if the file it names exists.
+  expect(source).toContain("define('sk-notice', SkNotice);");
+});

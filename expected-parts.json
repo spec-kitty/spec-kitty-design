@@ -32,9 +32,10 @@
     "#77 adds FOUR for <sk-site-footer>: footer, grid, divider, legal. Total 30 -> 34. Each is a SHADOW node — the component's own surface — which is exactly why they are the parts: everything a reader sees is slotted and therefore already the consumer's to style. `grid` is the escape hatch for a layout outside the provided `1.5fr 1fr 1fr`, the same argument sk-grid's `grid` part carries. Naming all four here rather than one, because three separate gates have now caught a note claiming a different number than its own data.",
     "#146 WP01 adds ELEVEN parts across section-header (six), status-indicator (three) and entity-marker (two), each with a literal external selector and computed-style assertion. On the consolidated train-based mission target, total moves 69 -> 80.",
     "#146 WP02 adds EIGHT sk-action-row parts: row, trigger, marker, title, reference, tags, metadata and controls. Total moves 80 -> 88.",
-    "#147 adds FIVE sk-metric parts (metric, label, value, annotation, empty-state) and FOUR sk-evidence-chain parts (list, stage, connector, empty-state). Total moves 88 -> 97."
+    "#147 adds FIVE sk-metric parts (metric, label, value, annotation, empty-state) and FOUR sk-evidence-chain parts (list, stage, connector, empty-state). Total moves 88 -> 97.",
+    "#178 adds sk-notice with SEVEN parts — the largest single entry here, and deliberately so: a notice is a composition (marker, heading, body, actions, dismiss) rather than a single box, and under-exposing parts is the support burden ADR-9 §2 names. Every one is targeted from outside by the [SC-013] test in fixtures/elements-behaviour/src/sk-notice.test.ts, which is what the ratchet scans for. `body` is also the live region, so a rename there is an ANNOUNCEMENT regression as well as a styling one."
   ],
-  "total": 97,
+  "total": 104,
   "byElement": {
     "sk-action-row": [
       "controls",
@@ -117,6 +118,15 @@
       "hamburger",
       "items",
       "nav"
+    ],
+    "sk-notice": [
+      "actions",
+      "body",
+      "content",
+      "dismiss",
+      "heading",
+      "marker",
+      "notice"
     ],
     "sk-page-header": [
       "actions",

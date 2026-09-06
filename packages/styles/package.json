@@ -30,6 +30,7 @@
     "./grid/*": "./dist/grid/*",
     "./metric/*": "./dist/metric/*",
     "./nav-pill/*": "./dist/nav-pill/*",
+    "./notice/*": "./dist/notice/*",
     "./page-header/*": "./dist/page-header/*",
     "./personal-rail/*": "./dist/personal-rail/*",
     "./pill-tag/*": "./dist/pill-tag/*",

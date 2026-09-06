@@ -38,3 +38,4 @@ import './status-indicator/sk-status-indicator.js';
 import './entity-marker/sk-entity-marker.js';
 import './metric/sk-metric.js';
 import './evidence-chain/sk-evidence-chain.js';
+import './notice/sk-notice.js';

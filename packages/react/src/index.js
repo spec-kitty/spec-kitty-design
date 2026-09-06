@@ -13,6 +13,7 @@ export * from "./SkFormTextarea.js";
 export * from "./SkGrid.js";
 export * from "./SkMetric.js";
 export * from "./SkNavPill.js";
+export * from "./SkNotice.js";
 export * from "./SkPageHeader.js";
 export * from "./SkPersonalRail.js";
 export * from "./SkPillTag.js";

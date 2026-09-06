@@ -13,14 +13,14 @@ compatibility window to honour and no deprecation cycle to run.
 
 ### `@spec-kitty/elements`
 
-The custom-element base layer (ADR-8): twenty-five components as standard custom elements, built on
+The custom-element base layer (ADR-8): twenty-six components as standard custom elements, built on
 Lit, with styling delivered through constructed stylesheets and a closed styling API (ADR-9).
 
 - `sk-action-row`, `sk-app-shell`, `sk-blog-card`, `sk-button`, `sk-card`, `sk-check-bullet`,
   `sk-context-sidebar`, `sk-entity-marker`, `sk-evidence-chain`, `sk-feature-card`, `sk-form-input`,
-  `sk-form-textarea`, `sk-grid`, `sk-metric`, `sk-nav-pill`, `sk-page-header`, `sk-personal-rail`, `sk-pill-tag`, `sk-ribbon-card`,
-  `sk-section-banner`, `sk-section-header`, `sk-site-footer`, `sk-status-indicator`, `sk-stub`,
-  `sk-transition-matrix`
+  `sk-form-textarea`, `sk-grid`, `sk-metric`, `sk-nav-pill`, `sk-notice`, `sk-page-header`,
+  `sk-personal-rail`, `sk-pill-tag`, `sk-ribbon-card`, `sk-section-banner`, `sk-section-header`,
+  `sk-site-footer`, `sk-status-indicator`, `sk-stub`, `sk-transition-matrix`
 - Two distribution entries (ADR-10 §2): an ESM build with `lit` external, and a self-contained
   classic-script IIFE that loads from `file://` with no network
 - `custom-elements.json` manifest, generated and drift-checked
@@ -34,7 +34,10 @@ directly, so `src/` is the artifact, and CI fails on drift.
 ### `@spec-kitty/styles`
 
 The stylesheets, as both authored CSS and generated static HTML forms (ADR-10 §3), for consumers
-rendering without JavaScript. Subpath exports for all thirty-one component directories.
+rendering without JavaScript. Subpath exports for all thirty-three component directories. (The
+count has been wrong twice: it said twenty-nine while there were thirty, and #178 additionally found
+`notice` was the only `src/` directory with no `exports` entry at all. Measured, not counted by
+hand — `packages/styles/src` has 33 directories and `package.json` has 33 subpath exports.)
 
 ### `@spec-kitty/tokens`
 

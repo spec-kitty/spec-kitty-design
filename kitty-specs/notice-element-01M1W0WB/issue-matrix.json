@@ -1,0 +1,65 @@
+{
+  "rows": {
+    "#135": {
+      "evidence_ref": "packages/styles/src/notice/sk-notice.css declares `:host { display: block }`; a notice owns a region, so block rather than the inline default a custom element would otherwise take.",
+      "fr": "FR-012",
+      "nfr": null,
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": null,
+      "scope": "rule-applied",
+      "source_file": "spec.md",
+      "title": ":host { display: … } must be declared — CITED as a standing rule, not a defect",
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
+    "#146": {
+      "evidence_ref": "STATUS_TONES verified exported at packages/elements/src/status-indicator/sk-status-indicator.ts:24, frozen, six values in presentation order; imported by sk-notice rather than restated. sk-status-indicator itself is unchanged by this mission.",
+      "fr": "FR-002",
+      "nfr": null,
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": "SC-C",
+      "scope": "dependency",
+      "source_file": "spec.md",
+      "title": "sk-status-indicator — CITED as the tone-vocabulary owner, not a defect this mission repairs",
+      "verdict": "verified-already-fixed",
+      "wp": "WP02"
+    },
+    "#177": {
+      "evidence_ref": "--sk-status-* / --sk-on-status-* verified present in BOTH theme blocks of packages/tokens/src/tokens.css (:109-121 default, :404-416 .sk-light), 12 declarations each; consumed by packages/styles/src/notice/sk-notice.css with no --sk-notice-* family created.",
+      "fr": "FR-017",
+      "nfr": "NFR-002",
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": "SC-C",
+      "scope": "dependency",
+      "source_file": "spec.md",
+      "title": "sk-card status tone axis and the --sk-status-* token category — CITED as the token dependency",
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
+    "#178": {
+      "evidence_ref": "packages/elements/src/notice/sk-notice.ts; fixtures/elements-behaviour/src/sk-notice.test.ts",
+      "fr": "FR-001..FR-022",
+      "nfr": "NFR-001..NFR-005",
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": "SC-A..SC-G",
+      "scope": "in-scope",
+      "source_file": "spec.md",
+      "title": "[elements] sk-notice — accessible block-level live status and alert element",
+      "verdict": "in-mission",
+      "wp": "WP01,WP02,WP03,WP04,WP05"
+    },
+    "#216": {
+      "evidence_ref": "#216 stays OPEN and this mission does not close it — closing it changes a generator contract and an ADR confirmation criterion, which is not this mission's to decide. It does not bite here: a *.markup.ts exists only for a component with a server-rendered static form, and sk-notice has none, so it imports STATUS_TONES directly and adds no third copy of the vocabulary. The separate build-vue-types.mjs copy #216 also records DOES apply, and is pinned by mutual assignability in packages/react/type-tests/wrappers.type-test.tsx.",
+      "fr": "FR-002",
+      "nfr": null,
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": "SC-C",
+      "scope": "out-of-scope",
+      "source_file": "spec.md",
+      "title": "a *.markup.ts cannot import a shared vocabulary — CITED; the constraint does not reach this element",
+      "verdict": "deferred-with-followup",
+      "wp": "WP02"
+    }
+  },
+  "schema_version": 1
+}
