@@ -81,15 +81,26 @@
     },
     "WP03": {
       "actor": "user",
+      "agent": null,
       "force_count": 1,
       "lane": "planned",
       "last_event_id": "01M1VJHFFDB2K3X9WBWNMQ6G60",
       "last_transition_at": "2026-09-06T14:39:13.901390+00:00",
+      "review": null,
       "review_result": {
         "feedback_path": "/home/jeroennouws/dev/team-kitty-missions/design-147/kitty-specs/delivery-return-metric-elements-01M1STPA/tasks/WP03-public-surfaces-and-verification-closure/review-cycle-1.md",
         "reference": "review-cycle://delivery-return-metric-elements-01M1STPA/WP03-public-surfaces-and-verification-closure/review-cycle-1.md",
         "reviewer": "user",
         "verdict": "changes_requested"
+      },
+      "shell_pid": null,
+      "shell_pid_created_at": null,
+      "subtasks": {
+        "T009": "planned",
+        "T010": "planned",
+        "T011": "planned",
+        "T012": "planned",
+        "T013": "planned"
       }
     }
   }
