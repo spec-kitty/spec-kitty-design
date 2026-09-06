@@ -1,5 +1,13 @@
 {
   "created_at": "2026-09-06T02:56:06.643295+00:00",
+  "documentation_state": {
+    "coverage_percentage": 0.0,
+    "divio_types_selected": [],
+    "generators_configured": [],
+    "iteration_mode": "initial",
+    "last_audit_date": null,
+    "target_audience": "developers"
+  },
   "flattened": false,
   "friendly_name": "adr index reconciliation and gate",
   "mission_id": "01M1TAA0ZJM65QE87PV4DE50Q2",
