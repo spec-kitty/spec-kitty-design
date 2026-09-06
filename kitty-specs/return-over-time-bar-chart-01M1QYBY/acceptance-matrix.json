@@ -262,10 +262,10 @@
       "criterion_id": "FR-019",
       "description": "Document exact token dependencies and a minimal structural part surface; every declared part is rendered and externally targetable.",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "docs/design-system/using-components.md and changelog document exact tokens and seven parts; check-parts and manifest gates prove all are rendered/targetable",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T21:30:36.507918+00:00",
       "notes": "CSS-to-doc token equality and seven-part conformance evidence.",
       "lane_owners": [
         "WP01"
