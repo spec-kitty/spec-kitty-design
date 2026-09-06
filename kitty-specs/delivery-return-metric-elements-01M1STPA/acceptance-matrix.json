@@ -188,10 +188,10 @@
       "criterion_id": "NFR-003",
       "description": "All design-bearing component CSS values resolve through approved --sk-* tokens, enforced by the parsed component-scoped gate and its selftests.",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "node scripts/check-component-token-literals.mjs and its selftest pass for all 13 governed property classes; stylelint and adopted-CSS hygiene pass with only documented structural percentage exceptions.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T19:06:25.326270+00:00",
       "notes": "WP03 parsed token-literal gate plus stylelint and CSS hygiene checks."
     },
     {
