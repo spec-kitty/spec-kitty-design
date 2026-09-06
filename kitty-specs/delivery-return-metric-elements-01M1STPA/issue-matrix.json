@@ -1,7 +1,7 @@
 {
   "rows": {
     "#144": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "Parent Team overview epic; #147 implements only metric/evidence-chain elements and preserves the epic state until all sibling missions land.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -9,8 +9,8 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "verdict": "deferred-with-followup",
+      "wp": "mission-wrap-up"
     },
     "#145": {
       "evidence_ref": "<link or commit>",
