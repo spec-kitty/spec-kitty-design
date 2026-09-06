@@ -98,6 +98,14 @@ ratios are recorded beside the declarations in `packages/tokens/src/tokens.css`.
 say too — a surface that is the sole carrier of "this failed" disappears in greyscale, in
 `forced-colors: active`, and for a reader with a colour-vision deficiency.
 
+That is not a hypothetical for these tokens, and the light theme is the case to hold in mind.
+Measured against `--sk-surface-page` (#F8F5EC), **every** light status surface sits between
+**1.01:1** and **1.19:1** — attention (#FFF6D9) is the lowest at 1.01, success 1.04, info and
+recovery 1.08, danger 1.11, neutral 1.19. These are high-key tints by design and they are doing
+almost no work on their own: in light mode the 4px edge and the consumer's own text carry the
+axis, and the surface is close to decoration. Dark is only a little stronger (1.25:1 for
+attention). Build accordingly.
+
 ## Token catalogue reference
 
 The full list of tokens across all 13 categories (colour, surface, foreground, border, spacing, radius, typography, shadow, and more) is available in two places:

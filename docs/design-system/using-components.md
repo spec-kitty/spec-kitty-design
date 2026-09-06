@@ -576,10 +576,16 @@ token for a card nested inside another.
 
 ### The operational status axis
 
-`status` is a **second, independent** axis: `variant` is the brand/decorative one, `status` is the
-operational one, and a card may carry both. It accepts the same six tones `sk-status-indicator`
-does — `neutral`, `info`, `success`, `attention`, `danger`, `recovery` — because there is one tone
+`status` is a **second** axis: `variant` is the brand/decorative one, `status` is the operational
+one, and a card may carry both. It accepts the same six tones `sk-status-indicator` does —
+`neutral`, `info`, `success`, `attention`, `danger`, `recovery` — because there is one tone
 vocabulary in this library, not one per component.
+
+**The two axes are orthogonal as inputs and precedence in rendering.** Both may be set, both
+reflect, neither errors — but while a `status` is present the operational tone **supersedes** the
+brand variant's surface and edge entirely, so `variant="blue" status="danger"` and
+`status="danger"` render identically. Set `variant` for how the card looks when it has no
+operational state to report; do not expect it to tint one that does.
 
 **You supply the tone.** The card holds no domain mapping: it will not decide that a string
 containing "failed" means `danger`, and an unrecognised value renders the base card and warns

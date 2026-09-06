@@ -20,8 +20,13 @@
      wrapper, see the tokens README). --sk-fg-body is defined in both. #101 */
   color: var(--sk-fg-body);
   padding: var(--sk-space-7);
-  /* Border is always 2px — only colour changes on hover/accent states.
-     This prevents layout shift from border-width changes. */
+  /* The base border is 2px on all four sides, and every INTERACTIVE state changes
+     only its colour — which is what prevents layout shift on hover.
+     #177 widened the inline-start edge to 4px for a status tone, so "always 2px"
+     is no longer true of the box; the property that matters still is. A status is
+     a STATIC axis: it is set once in markup, not entered and left under the
+     pointer, so the widened edge cannot produce the reflow this note exists to
+     prevent. Do not reintroduce a width change on :hover, :focus or :active. */
   transition: border-color var(--sk-motion-duration-fast) var(--sk-motion-ease-out);
 }
 
@@ -64,12 +69,30 @@
    reason for the token pair. See #72 and SK-D01. */
 
 /* ── Operational status tones (#177) ──────────────────────────────────────────
-   ONE axis, orthogonal to `variant`. `variant` stays the brand/decorative axis;
-   `status` is the operational one, and a card may carry both — which is why the
-   status blocks are AUTHORED AFTER the variant and inset blocks. Equal
-   specificity, so source order decides: on a card carrying both, the operational
-   tone wins the surface and the brand variant keeps its own hover accent. Both
-   modifiers are present on the node either way; nothing is silently dropped.
+   ONE axis. `variant` stays the brand/decorative axis; `status` is the
+   operational one, and a card may carry both.
+
+   THE TWO AXES ARE ORTHOGONAL AS INPUTS AND PRECEDENCE IN RENDERING. Both may be
+   set, both reflect, neither errors, and both modifiers stay on the node — but
+   while a status is present the operational tone SUPERSEDES the brand variant's
+   surface and edge ENTIRELY. `.sk-card--blue` sets exactly `background` and
+   `border-color`; the status rules below set both, at equal specificity, authored
+   after. So the variant loses every property it declares, and nothing about it
+   reaches the pixel.
+
+   MEASURED, because an earlier revision of this comment claimed the opposite —
+   that "the brand variant keeps its own hover accent" and "nothing is silently
+   dropped". Computed styles for `variant="blue" status="attention"`,
+   `variant="purple" status="attention"` and `status="attention"` alone are
+   IDENTICAL in background, all four border colours and border width. The two
+   variants render pixel-identical under any status.
+
+   That is deliberate and it is the right default — an operational tone that a
+   decorative one could tint is not an operational tone — but it is PRECEDENCE,
+   not co-existence, and the difference is what the comment above got wrong.
+   Giving `variant` a surviving visual contribution under a status is a DESIGN
+   decision and belongs to whoever owns the palette, not to a stylesheet comment.
+   Pinned by the precedence test in fixtures/elements-behaviour/src/sk-card.test.ts.
 
    TONE IS NEVER THE ONLY CARRIER OF MEANING. These rules paint a surface and an
    edge. The meaning is carried by the slotted <sk-status-indicator>'s TEXT — see
@@ -122,8 +145,12 @@
    `.sk-card--blue:hover` and `.sk-card--purple:hover` set `border-color` at
    (0,2,0), which outranks the (0,1,0) status rules above — so without these six,
    hovering a card carrying BOTH axes swapped the operational tone for the brand
-   one and the status hue disappeared under the pointer. Measured on the
-   StatusWithVariant story, which is exactly that combination.
+   one and the status hue disappeared under the pointer.
+
+   These six complete the precedence stated above rather than being an exception
+   to it: without them the variant's ONE surviving declaration was its hover
+   colour, which made the rendering inconsistent — variant inert at rest, variant
+   winning on hover. It is now inert in both.
 
    Equal specificity to the variant hover rules, authored after them, so source
    order decides — the same mechanism the block above relies on. Six rules rather

@@ -294,39 +294,76 @@ test('an unknown status THROWS on the authoring path — it never reaches genera
 });
 
 /**
- * ORTHOGONALITY. #177 makes the separation binding, so it is asserted rather than described:
- * `variant` is the brand axis, `status` the operational one, and a card carries both.
+ * ORTHOGONAL AS INPUTS, PRECEDENCE IN RENDERING.
+ *
+ * Both axes may be set, both reflect, neither errors, and both modifiers stay on the node —
+ * that is the orthogonality #177 makes binding, and the first three assertions pin it.
+ *
+ * The RENDERING is precedence, and the last two assertions are the ones that pin THAT. An
+ * earlier revision of this test asserted only `both-axes !== variant-only`, which passes for
+ * a card whose `variant` is ignored outright — so it certified the relationship it was meant
+ * to measure without ever testing it. `.sk-card--blue` declares exactly `background` and
+ * `border-color`, the status rules declare both at equal specificity authored after, and the
+ * variant therefore loses every property it sets.
+ *
+ * `toBe`, not `not.toBe`, is the honest assertion here and the direction matters: the
+ * relationship is that the brand variant contributes NOTHING while a status is present.
+ * Asserting a difference would require giving `variant` a surviving visual contribution,
+ * which is a design decision and not this test's to make.
  */
-test('status and variant are independent axes on one card', async () => {
-  const both = document.createElement('sk-card');
-  both.setAttribute('variant', 'purple');
-  both.setAttribute('status', 'attention');
-  document.body.append(both);
-
-  const purpleOnly = document.createElement('sk-card');
-  purpleOnly.setAttribute('variant', 'purple');
-  document.body.append(purpleOnly);
-
-  await (both as unknown as { updateComplete: Promise<unknown> }).updateComplete;
-  await (purpleOnly as unknown as { updateComplete: Promise<unknown> }).updateComplete;
-
+test('status supersedes variant in rendering, while both axes stay live as inputs', async () => {
+  const mount = async (attrs: Record<string, string>) => {
+    const el = document.createElement('sk-card');
+    for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
+    document.body.append(el);
+    await (el as unknown as { updateComplete: Promise<unknown> }).updateComplete;
+    return el;
+  };
   const inner = (el: Element) => el.shadowRoot!.querySelector('[part="card"]') as HTMLElement;
-  expect(inner(both).classList.contains('sk-card--purple')).toBe(true);
-  expect(inner(both).classList.contains('sk-card--status-attention')).toBe(true);
+  // `.sk-card` TRANSITIONS `border-color`, so a computed border colour read straight after an
+  // attribute change is the value mid-flight, not the value that settles. Measured here rather
+  // than assumed: with the status attribute removed, `backgroundColor` had already snapped to
+  // the purple tint while `borderTopColor` still read rgb(255, 216, 77) — the attention yellow.
+  // Finishing the element's animations is deterministic where a timeout is a flake. The earlier
+  // revision of this test never saw it because it compared only `backgroundColor`, which this
+  // component does not transition.
+  const paint = (el: Element) => {
+    const node = inner(el);
+    for (const animation of node.getAnimations()) animation.finish();
+    const cs = getComputedStyle(node);
+    return [cs.backgroundColor, cs.borderTopColor, cs.borderLeftColor, cs.borderLeftWidth].join('|');
+  };
 
-  // Not merely both classes present: the status surface must actually win, and the brand
-  // variant must still be the thing that changes when only IT is removed.
+  const blueAttention = await mount({ variant: 'blue', status: 'attention' });
+  const purpleAttention = await mount({ variant: 'purple', status: 'attention' });
+  const attentionOnly = await mount({ status: 'attention' });
+  const purpleOnly = await mount({ variant: 'purple' });
+
+  // Inputs: both axes survive as attributes and as classes. Neither erases the other.
+  expect(inner(purpleAttention).classList.contains('sk-card--purple')).toBe(true);
+  expect(inner(purpleAttention).classList.contains('sk-card--status-attention')).toBe(true);
+  expect(purpleAttention.getAttribute('variant')).toBe('purple');
+
+  // Rendering: the status supersedes the variant completely. THIS is the assertion the
+  // earlier revision was missing — `both-axes` against `status-only`, not against
+  // `variant-only`. It is what makes the precedence claim in sk-card.css falsifiable.
   expect(
-    getComputedStyle(inner(both)).backgroundColor,
-    'a card carrying both axes must not render as if it carried only the variant',
-  ).not.toBe(getComputedStyle(inner(purpleOnly)).backgroundColor);
+    paint(purpleAttention),
+    'a status card must render identically whether or not a brand variant is also set — ' +
+      'if this differs, `variant` has gained a surviving visual contribution and the ' +
+      'precedence documented in sk-card.css is no longer what ships',
+  ).toBe(paint(attentionOnly));
+  expect(
+    paint(blueAttention),
+    'two different brand variants under one status must render identically',
+  ).toBe(paint(purpleAttention));
 
-  both.removeAttribute('status');
-  await (both as unknown as { updateComplete: Promise<unknown> }).updateComplete;
-  expect(inner(both).classList.contains('sk-card--purple')).toBe(true);
-  expect(getComputedStyle(inner(both)).backgroundColor).toBe(
-    getComputedStyle(inner(purpleOnly)).backgroundColor,
-  );
+  // And the variant is not inert in general — removing the status restores it, which is what
+  // makes the two axes independent inputs rather than one enum.
+  purpleAttention.removeAttribute('status');
+  await (purpleAttention as unknown as { updateComplete: Promise<unknown> }).updateComplete;
+  expect(paint(purpleAttention)).toBe(paint(purpleOnly));
+  expect(paint(purpleOnly)).not.toBe(paint(attentionOnly));
 });
 
 /**

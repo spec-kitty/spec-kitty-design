@@ -116,10 +116,63 @@ brand accent and the status hue disappeared under the pointer. Exactly the combi
 variant ones, keep the operational tone stable. No gate would have caught this: axe does not
 hover, and the orthogonality test asserts at rest.
 
+**And the base case was the same bug, caught at review, not by me.** `.sk-card--blue` declares
+exactly `background` and `border-color`; the status rules declare both, later, at equal
+specificity. So `variant` never reached the pixel while a `status` was set, at rest as well as on
+hover — I fixed the hover collision and did not check the case it was a special case of.
+
+Measured in-engine: `variant="blue" status="attention"`, `variant="purple" status="attention"` and
+`status="attention"` alone all compute
+`rgb(42, 36, 16) | rgb(255, 216, 77) | rgb(255, 216, 77) | 4px`.
+
+The fix is documentation, not design. **The two axes are orthogonal as INPUTS — both settable,
+both reflected, neither erroring, both modifiers on the node — and PRECEDENCE in rendering: the
+operational tone supersedes the brand variant's surface and edge entirely.** Deciding that a brand
+accent should survive under an operational tone is a design decision and belongs to whoever owns
+the palette; it is filed rather than taken.
+
+Three artefacts said otherwise and are corrected: `sk-card.css`'s comment ("the brand variant keeps
+its own hover accent … nothing is silently dropped"), the `StatusWithVariant` story (whose two
+cells rendered pixel-identically while its docstring claimed it varied the brand variant), and the
+behaviour test, which asserted only `both-axes !== variant-only` — an assertion that passes for a
+card whose `variant` is ignored outright. It now asserts `both-axes === status-only`, which is the
+direction that can actually fail; `!==` is unassertable without first making the design change.
+
+**A defect the review did not have, found while writing that assertion.** `.sk-card` transitions
+`border-color`, so a computed border colour read straight after an attribute change is the value
+mid-flight. With the status attribute removed, `backgroundColor` had snapped to the purple tint
+while `borderTopColor` still read `rgb(255, 216, 77)`. The old test never saw it because it
+compared only `backgroundColor`, which this component does not transition. The test now finishes
+the element's animations before reading, which is deterministic where a timeout is a flake.
+
 A fourth was caught before it reached CI: the `[SC-013]` arm's `from` string still quoted
 `cardClasses(this.variant, this.inset)`, which the widened render call had replaced. The harness
 reported `PATTERN NOT FOUND` rather than a false green. A mutation anchor is the one test input a
 source edit silently invalidates.
+
+## The story ratchet paid for itself, in this mission, on this fold
+
+Worth recording because #219 asks whether the ratchet should be widened, and this is the evidence.
+
+While applying the review fold I truncated `packages/elements/src/card/sk-card.stories.ts` **to
+zero bytes** — a `open(p,'w').write(open(p).read()...)` in a rewrite script, where the `'w'` empties
+the file before the read runs. All seventeen `sk-card` element stories disappeared.
+
+What did **not** notice:
+
+- `nx run elements:lint` — passed. An empty file has nothing to lint.
+- `scripts/typecheck-all.mjs` — passed. An empty module is valid TypeScript.
+- `npm test` — **361 tests, all green.** Stories are not imported by the behaviour fixture.
+- every drift check, every hygiene gate, the manifest, the React wrappers, the Vue types.
+
+What did: `expected-stories.json`, via `run-axe-storybook.js`, which named all seventeen missing
+ids. Without #177 opting `sk-card` into that ratchet — which was optional, and which the recipe
+explicitly says a component may decline — a commit deleting every story of the component the
+mission exists to change would have reached CI with sixteen gates green.
+
+That is the certifying-absence class this programme keeps finding, and it is the direct argument
+for #219: the styles-layer greyscale story cited in this very document as acceptance evidence is
+**not** ratcheted, so the same deletion there would still be silent today.
 
 ## Not done, deliberately
 

@@ -8,9 +8,11 @@ import '../status-indicator/sk-status-indicator.js';
  * Variants are ATTRIBUTES here (`variant="blue"`), not the classes the static layer uses.
  * The adopted stylesheet is byte-identical to packages/styles/src/card/sk-card.css.
  *
- * TWO INDEPENDENT AXES since #177. `variant` is the brand/decorative axis; `status` is the
- * operational one, carrying the same six tones `sk-status-indicator` owns. A card may set
- * either, both, or neither.
+ * TWO AXES since #177. `variant` is the brand/decorative axis; `status` is the operational one,
+ * carrying the same six tones `sk-status-indicator` owns. A card may set either, both, or
+ * neither — but where both are set the RENDERING is precedence, not co-existence: the
+ * operational tone supersedes the brand variant's surface and edge entirely. See
+ * StatusWithVariant.
  */
 const meta: Meta = {
   title: 'Elements/SkCard',
@@ -80,27 +82,49 @@ export const StatusRecovery: Story = { render: () => toneCard('recovery') };
 export const AllStatuses: Story = { render: () => allTones() };
 
 /**
- * ORTHOGONALITY. `variant` and `status` are separate axes and a card may carry both — which is
- * why `status` is not more entries in the variant enum. The left column varies the brand
- * variant at a fixed status; the right varies the status at a fixed brand variant.
+ * ORTHOGONAL AS INPUTS, PRECEDENCE IN RENDERING — and the first row is the proof.
  *
- * Asserted, not eyeballed: fixtures/elements-behaviour/src/sk-card.test.ts puts both modifiers
- * on one node and requires the rendered surface to differ from the variant-only card.
+ * An earlier revision of this story set `variant="blue" status="attention"` beside
+ * `variant="purple" status="attention"` and claimed it "varies the brand variant at a fixed
+ * status". Those two render PIXEL-IDENTICAL, so it varied nothing observable and demonstrated
+ * the opposite of what it said. The first row now shows that on purpose, with the third cell
+ * naming what it means: while a status is present the operational tone supersedes the brand
+ * variant's surface and edge entirely, because `.sk-card--blue` declares only `background` and
+ * `border-color` and the status rules declare both, later, at equal specificity.
+ *
+ * The axes stay orthogonal as INPUTS — both can be set, both reflect, neither errors, both
+ * modifiers stay on the node — and the second row shows the variant is not inert in general:
+ * remove the status and it paints again.
+ *
+ * Whether a brand accent SHOULD survive under an operational tone is a design decision and is
+ * not this story's to make. Pinned by the precedence test in
+ * fixtures/elements-behaviour/src/sk-card.test.ts, which asserts identity rather than
+ * difference — deliberately, since difference is exactly what would need deciding first.
  */
 export const StatusWithVariant: Story = {
   render: () => `
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--sk-space-4);background:var(--sk-surface-page);padding:var(--sk-space-6);">
+    <div style="display:grid;grid-template-columns:repeat(3, 1fr);gap:var(--sk-space-4);background:var(--sk-surface-page);padding:var(--sk-space-6);">
       <sk-card variant="blue" status="attention">
         <sk-status-indicator tone="attention"><span slot="marker">●</span>Review needed</sk-status-indicator>
+        <p style="margin:var(--sk-space-3) 0 0">variant="blue" status="attention"</p>
       </sk-card>
       <sk-card variant="purple" status="attention">
         <sk-status-indicator tone="attention"><span slot="marker">●</span>Review needed</sk-status-indicator>
+        <p style="margin:var(--sk-space-3) 0 0">variant="purple" status="attention"</p>
+      </sk-card>
+      <sk-card status="attention">
+        <sk-status-indicator tone="attention"><span slot="marker">●</span>Review needed</sk-status-indicator>
+        <p style="margin:var(--sk-space-3) 0 0">status="attention", no variant — all three of these render identically</p>
       </sk-card>
       <sk-card variant="purple" status="success">
         <sk-status-indicator tone="success"><span slot="marker">●</span>Verification complete</sk-status-indicator>
+        <p style="margin:var(--sk-space-3) 0 0">the status is what varies</p>
       </sk-card>
       <sk-card variant="purple">
-        <p>Architecture card, no operational status</p>
+        <p>variant="purple", no status — the brand variant paints again</p>
+      </sk-card>
+      <sk-card>
+        <p>neither axis</p>
       </sk-card>
     </div>
   `,
