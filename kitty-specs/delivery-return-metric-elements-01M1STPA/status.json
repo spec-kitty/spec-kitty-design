@@ -98,7 +98,8 @@
       "last_transition_at": "2026-09-06T16:11:05.081856+00:00",
       "model": "__resolved_model_absent__",
       "notes": [
-        "Exact-head closeout at 275f14ff: train stable 32fa495; 371/371 tests; 132/132 mutations; Storybook 7.28s/180s; axe 244/244 zero; Chromium 12/12; Firefox 11 pass/1 intentional forced-colors skip; local visual qualified 2/30 with 28 host/missing-baseline diagnostics and no retained bytes."
+        "Exact-head closeout at 275f14ff: train stable 32fa495; 371/371 tests; 132/132 mutations; Storybook 7.28s/180s; axe 244/244 zero; Chromium 12/12; Firefox 11 pass/1 intentional forced-colors skip; local visual qualified 2/30 with 28 host/missing-baseline diagnostics and no retained bytes.",
+        "APPROVED: all five prior findings closed; independent Codex review found no blockers. Exact-head: 371/371 tests, 132/132 mutations, Storybook 7.28s/180s, axe 244/244 zero, Chromium 12/12, Firefox 11 applicable pass; local visuals honestly qualified pending CI authority."
       ],
       "provider": "__resolved_provider_absent__",
       "review": null,
