@@ -17,6 +17,13 @@
   color: var(--sk-fg-body);
   background: var(--sk-surface-page);
   font-family: var(--sk-font-sans);
+  /* The ONE transitioning declaration this component owns (#182): the density change, so a
+     consumer that flips `density` on scroll gets a settle rather than a jump. It lives in this
+     rule rather than in a second `.sk-page-header { … }` block further down deliberately — two
+     rules with one selector make a sheet-reading test ambiguous, and a later duplicate silently
+     wins in a browser. The reduced-motion block at the end of this file suppresses exactly this
+     declaration and nothing else. */
+  transition: padding var(--sk-motion-duration-fast) var(--sk-motion-ease-out);
 }
 
 .sk-page-header__text,
@@ -57,5 +64,211 @@
   .sk-page-header__meta {
     width: 100%;
     justify-content: flex-start;
+  }
+
+  /* #182 — the compact form reflows too, and reflows by STACKING rather than by
+     dropping anything. The text row is allowed to wrap so a long title takes a
+     line of its own instead of competing with the supporting copy for one, and
+     the metadata group re-wraps so the trailing action stays on-screen. Every
+     region is still rendered; the only thing that changes is how many lines
+     they occupy. */
+  .sk-page-header--compact {
+    align-items: start;
+  }
+
+  .sk-page-header--compact .sk-page-header__text {
+    flex-wrap: wrap;
+  }
+
+  .sk-page-header--compact .sk-page-header__meta {
+    flex-wrap: wrap;
+  }
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   #182 — the compact density axis and the sticky axis.
+
+   TWO AXES, ORTHOGONAL, AND DELIBERATELY EXPRESSED TWO DIFFERENT WAYS.
+
+   Density is a BEM modifier on the inner header box, this repo's convention, and
+   the spelling that gives the element's warn-and-degrade on an unknown value a
+   natural home.
+
+   Sticky is `:host([sticky])`, and it HAS to be the host. Measured in chromium
+   against a 300px scroller: an inner `position: sticky` box inside a
+   `display: block` host scrolled from top 0 to top -500 after a 500px scroll —
+   it did not stick at all, because its containing block is the host's content
+   box and it has no room to move inside it. The identical markup with
+   `position: sticky` on the HOST stayed at top 0. An inner-box spelling would
+   have been a sticky axis that silently does nothing.
+
+   NOTHING BELOW CHANGES THE DEFAULT DENSITY. Every rule is gated behind
+   `.sk-page-header--compact` or `:host([sticky])`, except the `transition`
+   immediately below, which cannot alter a static render. That is not tidiness:
+   apps/storybook/src/tests/visual.spec.ts carries a committed baseline of a
+   composition containing this header at its default density.
+   ════════════════════════════════════════════════════════════════════════════ */
+
+/* ── Compact density ─────────────────────────────────────────────────────────
+   The SAME five slots at reduced density — never a second copy of the header.
+   Font sizes are deliberately NOT touched: the title is the consumer's own
+   heading and its typography is theirs, which is why #145 sets none either. */
+.sk-page-header--compact {
+  align-items: center;
+  gap: var(--sk-space-3);
+  padding: var(--sk-space-2) var(--sk-space-4);
+  min-block-size: var(--sk-layout-page-header-compact-height);
+}
+
+/* Eyebrow, title and supporting copy move onto one row. `nowrap` here is what
+   makes `--sk-layout-page-header-compact-height` an honest single-row figure,
+   and therefore what makes the derived scroll-margin token honest. */
+.sk-page-header--compact .sk-page-header__text {
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: baseline;
+  gap: var(--sk-space-3);
+}
+
+/* TRUNCATION IS VISUAL ONLY. `text-overflow` paints an ellipsis; it does not
+   alter the DOM text, so the whole string stays in the accessibility tree.
+   Applied to the SLOTTED node rather than the wrapper because the wrapper's
+   `overflow: hidden` would clip a block child without ever drawing an ellipsis;
+   `display: block` is required for the same reason — `text-overflow` does not
+   apply to a non-replaced inline box. `margin: 0` retires the UA margins on a
+   slotted `<h2>`/`<p>`, which is what lets the row be one line high. */
+.sk-page-header--compact .sk-page-header__eyebrow slot::slotted(*),
+.sk-page-header--compact .sk-page-header__title slot::slotted(*),
+.sk-page-header--compact .sk-page-header__supporting slot::slotted(*),
+.sk-page-header--compact .sk-page-header__sync slot::slotted(*) {
+  display: block;
+  overflow: hidden;
+  margin: 0;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.sk-page-header--compact .sk-page-header__eyebrow,
+.sk-page-header--compact .sk-page-header__title,
+.sk-page-header--compact .sk-page-header__supporting,
+.sk-page-header--compact .sk-page-header__sync {
+  overflow: hidden;
+}
+
+.sk-page-header--compact .sk-page-header__meta {
+  flex-wrap: nowrap;
+}
+
+/* THE TRAILING ACTION NEVER SHRINKS. Under horizontal pressure the sync text
+   truncates and the action keeps its full box — "nothing is dropped to make
+   room" is a flex-basis decision, not a hope. */
+.sk-page-header--compact .sk-page-header__actions {
+  flex: 0 0 auto;
+}
+
+.sk-page-header--compact .sk-page-header__sync {
+  flex: 0 1 auto;
+}
+
+/* ── Sticky ──────────────────────────────────────────────────────────────────
+   On the HOST — see the measurement in the block comment above. */
+:host([sticky]) {
+  position: sticky;
+  inset-block-start: var(--sk-layout-page-header-sticky-offset);
+  z-index: var(--sk-layout-page-header-sticky-layer);
+}
+
+/* The elevation, plus a border band RESERVED at `transparent` so that turning it
+   on under forced colors costs no layout shift. The band is not decoration: a
+   sticky header separated from the content beneath it only by a `box-shadow`
+   becomes indistinguishable under `forced-colors: active`, because box-shadow
+   computes away entirely there — measured and recorded in
+   packages/styles/src/disclosure/sk-disclosure.css and
+   packages/styles/src/data-table/sk-data-table.css, and not re-derived here. */
+:host([sticky]) .sk-page-header {
+  box-shadow: var(--sk-shadow-elev);
+  /* LONGHANDS, not the `border-block-end` shorthand, for two independent reasons.
+     (1) stylelint's declaration-strict-value does not inspect the `border`/`outline`
+     shorthands at all, so a value written there passes because the gate never looks;
+     `border-block-end-color` matches its policed `/color/` pattern, so `transparent`
+     — and `CanvasText` in the forced-colors block below — are values it positively
+     certifies. Reason (1) is independently sufficient and is why these declarations
+     stay longhand.
+     (2) A shorthand carrying a `var()` also reads back EMPTY from the CSSOM, so a
+     sheet-reading test asking for `border-block-end-style` could not tell a reserved
+     band from an absent one. An earlier revision of this comment blamed that on the
+     shorthand being LOGICAL. That was wrong, and a reviewer falsified it; re-measured
+     in chromium, reading `style.getPropertyValue` off the rule:
+
+         border-block-end: 1px solid red        -> border-block-end-style "solid"
+         border-block-end: var(--w) solid red   -> border-block-end-style ""
+         border-bottom:    1px solid red        -> border-bottom-style    "solid"
+         border-bottom:    var(--w) solid red   -> border-bottom-style    ""
+
+     The logical shorthand expands exactly like the physical one. The empty read is
+     pending-substitution: a declaration containing `var()` has no expanded longhands
+     until the value is substituted. These declarations do carry `var()`, so the
+     consequence stands — only the stated cause was wrong. */
+  border-block-end-width: var(--sk-border-width-1);
+  border-block-end-style: solid;
+  border-block-end-color: transparent;
+}
+
+/* ── Dropping stickiness ─────────────────────────────────────────────────────
+   TWO SEPARATE BLOCKS, not one comma-joined condition. Joined, the height arm
+   would be unfalsifiable on its own — a test reading the sheet could not tell a
+   sheet that handles both thresholds from one that handles only the width.
+
+   @media, not @container, and that is forced rather than chosen: this sheet
+   declares `container-type: inline-size` on `:host`, and a container query can
+   style only that container's DESCENDANTS. The element being made non-sticky is
+   the host itself, so a container query cannot reach it. */
+@media (max-width: 720px) {
+  :host([sticky]) {
+    position: static;
+  }
+
+  :host([sticky]) .sk-page-header {
+    box-shadow: none;
+  }
+}
+
+@media (max-height: 480px) {
+  :host([sticky]) {
+    position: static;
+  }
+
+  :host([sticky]) .sk-page-header {
+    box-shadow: none;
+  }
+}
+
+/* ── Reduced motion ──────────────────────────────────────────────────────────
+   Exactly the one transitioning declaration this component owns, scoped to its
+   own selector — never a wildcard over the component's subtree. Same shape as
+   packages/styles/src/skip-link/sk-skip-link.css and
+   packages/styles/src/disclosure/sk-disclosure.css. The compact form is fully
+   readable with the transition suppressed: the transition only smooths the
+   padding change, it never carries information. */
+@media (prefers-reduced-motion: reduce) {
+  .sk-page-header {
+    transition: none;
+  }
+}
+
+/* ── Forced colors ───────────────────────────────────────────────────────────
+   Overriding only the LONGHAND `border-block-end-color`. The `border-block-end`
+   shorthand above is invisible to stylelint's `declaration-strict-value` — that
+   plugin polices `/color/`, `background`, `background-color`, `font-family`,
+   `padding`, `margin` and `border-radius`, and no `border`/`outline` shorthand
+   — so a system color written in shorthand would pass because the gate never
+   looks, not because it approved. The longhand DOES match `/color/`, and
+   `CanvasText` is one of six system-color keywords listed explicitly in
+   stylelint.config.mjs's `ignoreValues` for exactly this. See
+   docs/contributing/adding-a-component.md, the canonical owner of the
+   convention. */
+@media (forced-colors: active) {
+  :host([sticky]) .sk-page-header {
+    border-block-end-color: CanvasText;
   }
 }

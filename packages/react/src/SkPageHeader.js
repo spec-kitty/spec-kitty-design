@@ -5,8 +5,16 @@ import { createForwardedRefHandler } from "./react-utils.js";
 
 export const SkPageHeader = forwardRef((props, forwardedRef) => {
   const ref = useRef(null);
-  const { className, exportparts, htmlFor, part, tabIndex, ...restProps } =
-    props;
+  const {
+    sticky,
+    density,
+    className,
+    exportparts,
+    htmlFor,
+    part,
+    tabIndex,
+    ...restProps
+  } = props;
 
   /** Waits for the client before loading the custom element */
   useEffect(() => {
@@ -18,11 +26,13 @@ export const SkPageHeader = forwardRef((props, forwardedRef) => {
     {
       ref: createForwardedRefHandler(ref, forwardedRef),
       ...restProps,
+      density: density,
       class: className,
       exportparts: exportparts,
       for: htmlFor ?? props["for"],
       part: part,
       tabindex: tabIndex ?? props["tabindex"],
+      sticky: sticky ? true : undefined,
       style: { ...props.style },
     },
     props.children,

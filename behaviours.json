@@ -242,6 +242,10 @@
           "file": "fixtures/elements-behaviour/src/sk-personal-rail.test.ts"
         },
         {
+          "name": "sk-page-header",
+          "file": "fixtures/elements-behaviour/src/sk-page-header.test.ts"
+        },
+        {
           "name": "sk-transition-matrix",
           "file": "fixtures/elements-behaviour/src/sk-transition-matrix.test.ts"
         },

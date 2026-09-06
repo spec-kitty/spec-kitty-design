@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "generated_at": "2026-09-05T19:59:53.994Z",
+  "generated_at": "2026-09-06T13:08:52.551Z",
   "generated_from": "packages/tokens/src/tokens.css",
   "categories": {
     "color": {
@@ -141,7 +141,11 @@
       "prefix": "--sk-layout-",
       "tokens": [
         "--sk-layout-personal-rail-width",
-        "--sk-layout-context-sidebar-width"
+        "--sk-layout-context-sidebar-width",
+        "--sk-layout-page-header-sticky-offset",
+        "--sk-layout-page-header-compact-height",
+        "--sk-layout-page-header-sticky-layer",
+        "--sk-layout-page-header-sticky-scroll-margin"
       ]
     },
     "radius": {

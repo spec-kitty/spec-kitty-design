@@ -3072,7 +3072,7 @@
         },
         {
           "kind": "class",
-          "description": "A stateless layout for consumer-owned page orientation, metadata, and actions.",
+          "description": "A stateless layout for consumer-owned page orientation, metadata, and actions.\n\nTwo orthogonal axes. `density` changes how much room the header takes; `sticky` changes\nwhether it stays put while its scroll region scrolls. Neither implies the other, and the same\nfive slots resolve at either density — there is no second header to author and no second\nmarkup path to drift.\n\nWhen `sticky` is set the HOST is the sticky box, so the header pins itself inside whatever\nscroll container its surroundings provide. Two viewport thresholds return it to normal flow —\n720px of width and 480px of height — because a sticky header that eats a short viewport, or\nthat overlaps a focused control below it, is worse than no sticky header at all. Nothing is\ndropped in that reflow.\n\nConsumers styling their own content under a sticky header should set\n`scroll-margin-block-start: var(--sk-layout-page-header-sticky-scroll-margin)` on the\nfocusable elements in it, so a focused element scrolled into view is not obscured by the\nheader (WCAG 2.4.11).\n\nThat token's DEFAULT VALUE covers ONE configuration: `density=\"compact\"` laid out on a single\nrow, which is the header wider than 720px. It is derived from the header's own sticky offset\nand compact block size rather than restated, so within that configuration it cannot drift.\nOutside it the header is taller than the default and the consumer overrides the token — the\nname stays the single place the value lives, which is the part of the contract that matters.\nTwo cases need the override, and the orthogonality above is why the first exists:\n\n- **Default density.** `sticky` without `density=\"compact\"` is supported, and its height is\n  entirely the consumer's slotted content — measured between 227px and 533px for one\n  composition across two widths and two title lengths, against an 80px default. There is no\n  honest derived number for it, so there is no second token: the consumer sets the value from\n  their own header.\n- **A stacked compact header.** Stacking is a CONTAINER query on the header's own width and the\n  sticky drop is a MEDIA query on the viewport's, so they are not the same threshold: a 400px\n  header column inside a 1400px viewport is sticky AND stacked at once — measured 96px against\n  the same 80px default.\n\nThe element does not measure its own live box to close that gap, because observing layout is\nthe class of behaviour it is deliberately barred from owning.\n\nThe `sync` slot's contents are rendered verbatim. This element never starts a timer, reads a\nclock, polls, observes scrolling, or computes a relative age: freshness belongs to the\nconsumer, which owns the timer and supplies the resulting string.",
           "name": "SkPageHeader",
           "cssParts": [
             {
@@ -3130,7 +3130,50 @@
               "name": "title"
             }
           ],
-          "members": [],
+          "members": [
+            {
+              "kind": "field",
+              "name": "density",
+              "privacy": "public",
+              "type": {
+                "text": "'compact' | undefined"
+              },
+              "description": "Layout density, as `compact`. Omit for the default density. The compact form carries the\nsame five slots on a single row, with the actions region pinned and the text truncating\nvisually — the full text stays in the accessibility tree. An unknown value renders the\ndefault density and warns rather than throwing.",
+              "attribute": "density",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "sticky",
+              "privacy": "public",
+              "type": {
+                "text": "boolean"
+              },
+              "description": "Whether the header pins itself to the top of its scroll region. Independent of `density`:\na compact header need not stick and a sticky header need not be compact. Below 720px of\nviewport width or 480px of viewport height the header returns to normal flow and stacks,\nkeeping the title, the metadata and the actions all present.",
+              "default": "false",
+              "attribute": "sticky",
+              "reflects": true
+            }
+          ],
+          "attributes": [
+            {
+              "name": "density",
+              "type": {
+                "text": "'compact' | undefined"
+              },
+              "description": "Layout density, as `compact`. Omit for the default density. The compact form carries the\nsame five slots on a single row, with the actions region pinned and the text truncating\nvisually — the full text stays in the accessibility tree. An unknown value renders the\ndefault density and warns rather than throwing.",
+              "fieldName": "density"
+            },
+            {
+              "name": "sticky",
+              "type": {
+                "text": "boolean"
+              },
+              "description": "Whether the header pins itself to the top of its scroll region. Independent of `density`:\na compact header need not stick and a sticky header need not be compact. Below 720px of\nviewport width or 480px of viewport height the header returns to normal flow and stacks,\nkeeping the title, the metadata and the actions all present.",
+              "default": "false",
+              "fieldName": "sticky"
+            }
+          ],
           "superclass": {
             "name": "LitElement",
             "package": "lit"

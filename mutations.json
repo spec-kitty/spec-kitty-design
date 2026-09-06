@@ -29,7 +29,8 @@
     "#78 adds three for <sk-blog-card>, and two are specific to the composition ruling: dropping sk-card's sheet reds the two-sheet identity assertion (and is the realistic regression — someone 'tidying' an import), and SWAPPING THE ORDER reds it too. That arm guards a CONVENTION rather than a current behaviour: the two sheets contest zero declarations, so a swap changes no computed style and the arm reds the structural identity-at-index assertion. An earlier revision of this note said order 'decides whose rules win where the two sheets touch', which was not true when written — two lenses caught it. The arm is kept because the moment either sheet grows a declaration the other sets, the order is what decides it. Neither is expressible for any other component in the repo.",
     "#78's gate asked for a fourth blog-card arm dropping one `::slotted(` branch, and it is deliberately NOT added, for the reason #140 recorded above: guard 7 keys on a declared (id, subject) pair and guard 4 requires the red test to carry a [SC-NNN] marker. The arm that asserts slotted reach is a regression test, not an ADR-11 required behaviour, so binding it to SC-013 or SC-014 would mislabel it and minting an id would extend ADR-11, which #67 owns. The coverage is real either way and is doubled: the fixture asserts a computed style off a slotted node AND that the hover rule survives parsing, and check-adopted-css-boundaries now rejects `::slotted(x):hover` outright with three committed probes.",
     "#77 adds THREE for <sk-site-footer>. The SC-013 arm drops the DIVIDER's part rather than the footer's, because the footer part is also the node other tests query to prove the element rendered at all — the same reasoning check-bullet's arm records. Both SC-014 spellings are carried, per #77's own earlier finding: emptying the array reds the adoptedStyleSheets.length assertion FIRST and vitest aborts there, so the identity assertion on the next line is never shown to be load-bearing in the behaviour whose id is literally about identity. Swapping in a fresh CSSStyleSheet keeps length at 1 and can only red the identity arm.",
-    "#77's pass-2 gate asked for a FOURTH site-footer arm covering the conditional divider, and it was written, bound to SC-013, and then REMOVED — the harness correctly reported it 'semantically inert'. Forcing the divider to always render does not break SC-013, which is 'every declared part is targetable': the part is still present and still targetable. The conditionality is a regression guard, not an ADR-11 required behaviour, so it has no (id, subject) pair to bind to and guard 4 has no [SC-NNN]-marked test to red. Third time this programme has reached that boundary (#140, #143, here), and the answer is the same each time: the coverage is real — `the divider is drawn only when there is a legal line to divide` asserts absence, whitespace-only, and the property arriving later — it is simply held by a test rather than by the harness. Minting an id would extend ADR-11's behaviour set, which #67 owns."
+    "#77's pass-2 gate asked for a FOURTH site-footer arm covering the conditional divider, and it was written, bound to SC-013, and then REMOVED — the harness correctly reported it 'semantically inert'. Forcing the divider to always render does not break SC-013, which is 'every declared part is targetable': the part is still present and still targetable. The conditionality is a regression guard, not an ADR-11 required behaviour, so it has no (id, subject) pair to bind to and guard 4 has no [SC-NNN]-marked test to red. Third time this programme has reached that boundary (#140, #143, here), and the answer is the same each time: the coverage is real — `the divider is drawn only when there is a legal line to divide` asserts absence, whitespace-only, and the property arriving later — it is simply held by a test rather than by the harness. Minting an id would extend ADR-11's behaviour set, which #67 owns.",
+    "#182 adds two for <sk-page-header>, one per axis, and both mutate the ELEMENT rather than the test. Each flips `reflect: true` to `reflect: false` on one of the two new reactive properties; the named [SC-010] test asserts the pre-upgrade value reaches the ATTRIBUTE, so each arm reds it on its own. The sticky arm is not merely a reflection check: the sticky geometry is expressed as `:host([sticky])` — it HAS to be on the host, because an inner box's containing block is the host and it cannot move inside it (measured) — so an unreflected `sticky` is a sticky axis that silently does nothing. NO THIRD ARM FOR THE REFLOW THRESHOLD, and that is a stated gap rather than an omission: guard 7 requires every mutation's (id, subject) pair to be declared in behaviours.json, and tests/node/config-contract.test.ts asserts that file's applicable id set equals ADR-11's list exactly. ADR-11 has no id for a responsive/threshold behaviour, so the drop blocks are covered by ordinary tests here and by apps/storybook/src/tests/sk-page-header-sticky.spec.ts, and the registry gap is filed as an issue rather than closed by mis-filing a layout assertion under a reflection id."
   ],
   "mutations": [
     {
@@ -903,6 +904,22 @@
       "file": "packages/elements/src/form-input/sk-form-input.ts",
       "from": "if (this.value.trim() !== '' && this.#probe.value === '') flags.badInput = true;",
       "to": "if (this.value !== '' && this.#probe.value === '') flags.badInput = true;"
+    },
+    {
+      "id": "SC-010",
+      "subject": "fixtures/elements-behaviour/src/sk-page-header.test.ts",
+      "arm": "the density axis reaches the reflected attribute",
+      "file": "packages/elements/src/page-header/sk-page-header.ts",
+      "from": "    density: { type: String, reflect: true },",
+      "to": "    density: { type: String, reflect: false },"
+    },
+    {
+      "id": "SC-010",
+      "subject": "fixtures/elements-behaviour/src/sk-page-header.test.ts",
+      "arm": "the sticky axis reaches the reflected attribute the sheet reads",
+      "file": "packages/elements/src/page-header/sk-page-header.ts",
+      "from": "    sticky: { type: Boolean, reflect: true },",
+      "to": "    sticky: { type: Boolean, reflect: false },"
     }
   ]
 }
