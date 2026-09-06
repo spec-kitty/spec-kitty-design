@@ -448,10 +448,10 @@
       "criterion_id": "NFR-008",
       "description": "Every declared behavior-and-subject mutation turns its named assertion red and 100 percent of registered mutations are killed within the repository budget.",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "CI run 34065216159 job 101572668819 at 7a56e7e: green 382-assertion baseline, 109 registry pairs, 35 affected sources, zero full-suite fallbacks, 155/155 named mutations killed in 1286s under 1405.5s, and 10/10 guards in 60.3s. Measurement recorded in suite-budget.json.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T23:17:01.967788+00:00",
       "notes": "WP03 runs the local fleet; wrap-up records exact-head CI count and time.",
       "lane_owners": [
         "WP03"
