@@ -49,10 +49,17 @@ const SPEC_KITTY_AUTO_COMMIT_PATTERNS = [
   // exact message ("Update generator config for feature <slug>"), which the pattern above does
   // not reach — its second group is a fixed noun list. The commit lands mid-branch, BEFORE the
   // one lanes.json records as `planning_commit_sha`, so rewording it renumbers a hash the
-  // mission state machine reads back. Anchored to end-of-LINE and to the slug shape, like its
+  // mission state machine reads back. Anchored to end-of-LINE and to the SLUG SHAPE, like its
   // siblings: an unanchored /^Update / would exempt any commit starting with that word from
-  // EVERY rule. Found by #193, the first `documentation`-type mission on this train.
-  (msg) => /^Update generator config for feature \S+\s*(\n|$)/.test(msg),
+  // EVERY rule, and a `\S+` tail is barely narrower — it matches `X`, `NOT-A-SLUG!!!` and
+  // `../../etc/passwd`. The slug shape is the one the `chore(acceptance)` entries above already
+  // bound: lowercase hyphenated words, then the Spec Kitty `-01` + ≥6 uppercase-alphanumeric
+  // suffix. Found by #193, the first `documentation`-type mission on this train; probed in
+  // scripts/check-commitlint-config.mjs.
+  (msg) =>
+    /^Update generator config for feature [a-z0-9]+(?:-[a-z0-9]+)*-01[A-Z0-9]{6,}\s*(\n|$)/.test(
+      msg,
+    ),
   // spec: Initial mission spec (Spec Kitty creation step)
   (msg) => /^spec: /.test(msg),
   // op(<profile-id>): <action> [<invocation-id>] — the Op record `spec-kitty dispatch` commits

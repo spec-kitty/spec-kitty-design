@@ -22,6 +22,7 @@ const generatedMessages = [
   'chore(acceptance): record FR-001=pass for team-overview-shell-elements-01M1S8R8',
   'chore(acceptance): record NFR-008=pending for team-overview-shell-elements-01M1S8R8',
   'chore(acceptance): register negative invariant NI-001 for team-overview-shell-elements-01M1S8R8',
+  'Update generator config for feature adr-index-reconciliation-and-gate-01M1TAA0',
 ];
 
 for (const message of generatedMessages) {
@@ -37,6 +38,12 @@ const nearMisses = [
   'chore(acceptance): record FR-001=blocked for team-overview-shell-elements-01M1S8R8',
   'chore(acceptance): record FR-1=pass for team-overview-shell-elements-01M1S8R8',
   'chore(acceptance): register negative invariant NI-1 for team-overview-shell-elements-01M1S8R8',
+  // The generator-config exemption is bounded by the slug shape, not by `\\S+`. Each of these
+  // is what an unbounded tail would have let through.
+  'Update generator config for feature X',
+  'Update generator config for feature NOT-A-SLUG!!!',
+  'Update generator config for feature ../../etc/passwd',
+  'Update generator config for feature adr-index-reconciliation-and-gate',
 ];
 
 for (const message of nearMisses) {
