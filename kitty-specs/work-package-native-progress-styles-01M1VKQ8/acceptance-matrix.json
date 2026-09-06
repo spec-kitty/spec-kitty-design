@@ -108,10 +108,10 @@
       "criterion_id": "FR-011",
       "description": "The component's default (dark) presentation and a LightMode story (class=\"sk-light\") both exist and are driven by tokens, with LightMode rendering genuinely different computed styling.",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "primitives-skprogress-html--default and --light-mode: 252-story axe gate green; computed track/label styling differs; 3/3 visuals green",
+      "pass_fail": "pass",
+      "verified_by": "codex-orry-wp208-210-0906a",
+      "verified_at": "2026-09-06T17:32:36.738286+00:00",
       "notes": "Verified by WP01 T005's computed-style-difference assertion between Default and LightMode, plus T009's axe gate over both themes and check-story-theme-wrapper.mjs's class=\"sk-light\" check."
     },
     {
