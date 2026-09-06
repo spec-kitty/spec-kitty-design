@@ -73,7 +73,7 @@
       "wp": "mission-wrap-up"
     },
     "#150": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "Final pattern composition remains blocked on #145-#149 landing and is not implemented by #147.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -81,8 +81,8 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "verdict": "deferred-with-followup",
+      "wp": "mission-wrap-up"
     }
   },
   "schema_version": 1
