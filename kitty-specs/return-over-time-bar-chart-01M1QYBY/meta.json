@@ -4,7 +4,7 @@
   "flattened": false,
   "friendly_name": "return over time bar chart",
   "mission_id": "01M1QYBY415AKWVH4HX2MT762Q",
-  "mission_number": 8,
+  "mission_number": null,
   "mission_slug": "return-over-time-bar-chart-01M1QYBY",
   "mission_type": "software-dev",
   "purpose_context": "This mission advances return over time bar chart on mission/return-over-time-bar-chart so stakeholders can track the work from mission creation onward.",
