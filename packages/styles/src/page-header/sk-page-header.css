@@ -192,10 +192,23 @@
      shorthands at all, so a value written there passes because the gate never looks;
      `border-block-end-color` matches its policed `/color/` pattern, so `transparent`
      — and `CanvasText` in the forced-colors block below — are values it positively
-     certifies. (2) Measured: Chromium's CSSOM does not expand this LOGICAL shorthand
-     into its longhands on a rule's style declaration, so a sheet-reading test asking
-     for `border-block-end-style` reads back an empty string and cannot tell a
-     reserved band from an absent one. */
+     certifies. Reason (1) is independently sufficient and is why these declarations
+     stay longhand.
+     (2) A shorthand carrying a `var()` also reads back EMPTY from the CSSOM, so a
+     sheet-reading test asking for `border-block-end-style` could not tell a reserved
+     band from an absent one. An earlier revision of this comment blamed that on the
+     shorthand being LOGICAL. That was wrong, and a reviewer falsified it; re-measured
+     in chromium, reading `style.getPropertyValue` off the rule:
+
+         border-block-end: 1px solid red        -> border-block-end-style "solid"
+         border-block-end: var(--w) solid red   -> border-block-end-style ""
+         border-bottom:    1px solid red        -> border-bottom-style    "solid"
+         border-bottom:    var(--w) solid red   -> border-bottom-style    ""
+
+     The logical shorthand expands exactly like the physical one. The empty read is
+     pending-substitution: a declaration containing `var()` has no expanded longhands
+     until the value is substituted. These declarations do carry `var()`, so the
+     consequence stands — only the stated cause was wrong. */
   border-block-end-width: var(--sk-border-width-1);
   border-block-end-style: solid;
   border-block-end-color: transparent;
