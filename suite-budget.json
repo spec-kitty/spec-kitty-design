@@ -198,6 +198,13 @@
       "seconds": 923.9,
       "ceilingBreach": true,
       "note": "CI, PR #206 (#146), run 34031816773 / job 101482679926. Green 307-assertion baseline with all 88 registry pairs present; 29 mutated sources resolved with zero full-suite fallbacks; all 128 mutations produced their named red with no collateral. The ONLY failure was the 881.9s ceiling. The ordinary behavior gate independently passed 647/647 in 22.5s under its 25s ceiling. Independent debugger-debbie Codex diagnosis found no hang or isolated slow arm and recommended the operator-authorized 1405.5s calibration."
+    },
+    {
+      "sha": "7a56e7e",
+      "mutations": 155,
+      "tests": 382,
+      "seconds": 1286,
+      "note": "CI, PR #231 (#148), run 34065216159 / job 101572668819. Exact candidate after the ordinary-suite recalibration: green 382-assertion Chromium baseline with all 109 registry pairs present; the impact graph resolved 35 mutated sources with zero full-suite fallbacks; all 155 mutations produced their named red with no collateral. The separate guard step passed 10/10 in 60.3s, and the ordinary node/Chromium/WebKit suite passed 798/798 with zero skips in 26.2s under its 40s ceiling. The 1,405.5s mutation ceiling is unchanged; this 1,286s result leaves 119.5s of measured headroom."
     }
   ]
 }
