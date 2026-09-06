@@ -382,8 +382,8 @@ test('SK-evidence-chain approved composition and light — visual baselines', as
   await evidenceChainStory(page, 'approved-example');
   let target = page.locator('sk-grid').first();
   await expect(target).toHaveScreenshot('sk-evidence-chain-approved-dark.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
-  const host = await evidenceChainStory(page, 'light-mode');
-  target = host;
+  await evidenceChainStory(page, 'light-mode');
+  target = page.locator('sk-grid').first();
   await expect(target).toHaveScreenshot('sk-evidence-chain-light.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
 });
 

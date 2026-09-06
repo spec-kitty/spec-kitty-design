@@ -54,7 +54,7 @@ test('annotation composes the real pill tag and all five public parts are reacha
   await expect(host.locator('[part="empty-state"]')).toHaveText('Metric unavailable.');
 });
 
-test('tone and compact stories render upgraded, nonblank metric states', async ({ page }) => {
+test('tone values and pills use their exact theme-safe mappings without default rails', async ({ page }) => {
   let host = await story(page, 'tones');
   const tones = page.locator('sk-metric');
   await expect(tones).toHaveCount(4);
@@ -62,9 +62,91 @@ test('tone and compact stories render upgraded, nonblank metric states', async (
     .toEqual(['neutral', 'info', 'success', 'attention']);
   await expect(tones.locator('[part="metric"]')).toHaveCount(4);
 
-  host = await story(page, 'compact');
+  const facts = () => tones.evaluateAll((elements) => {
+    const tokens = [
+      '--sk-fg-default',
+      '--sk-on-tint-sky',
+      '--sk-on-tint-mint',
+      '--sk-on-tint-butter',
+    ];
+    return elements.map((element, index) => {
+      const root = element.shadowRoot!;
+      const metric = root.querySelector<HTMLElement>('[part="metric"]')!;
+      const value = root.querySelector<HTMLElement>('[part="value"]')!;
+      const annotation = root.querySelector<HTMLElement>('[part="annotation"]')!;
+      const pill = annotation.querySelector('sk-pill-tag');
+      const probe = document.createElement('span');
+      probe.style.color = `var(${tokens[index]})`;
+      element.before(probe);
+      const tokenColor = getComputedStyle(probe).color;
+      probe.remove();
+      return {
+        valueColor: getComputedStyle(value).color,
+        tokenColor,
+        pillVariant: pill?.getAttribute('variant') ?? null,
+        railWidth: Number.parseFloat(getComputedStyle(metric).borderInlineStartWidth),
+        valueBottom: value.getBoundingClientRect().bottom,
+        annotationTop: annotation.getBoundingClientRect().top,
+      };
+    });
+  });
+
+  const dark = await facts();
+  expect(dark.map(({ valueColor }) => valueColor)).toEqual(dark.map(({ tokenColor }) => tokenColor));
+  expect(dark.map(({ pillVariant }) => pillVariant)).toEqual([null, 'purple', 'green', 'yellow']);
+  expect(dark.every(({ railWidth }) => railWidth === 0)).toBe(true);
+  expect(dark.every(({ valueBottom, annotationTop }) => annotationTop >= valueBottom)).toBe(true);
+
+  await page.locator('#storybook-root').evaluate((root) => root.classList.add('sk-light'));
+  const light = await facts();
+  expect(light.map(({ valueColor }) => valueColor)).toEqual(light.map(({ tokenColor }) => tokenColor));
+  expect(light.map(({ pillVariant }) => pillVariant)).toEqual([null, 'purple', 'green', 'yellow']);
+  expect(light.some(({ valueColor }, index) => valueColor !== dark[index]!.valueColor)).toBe(true);
+});
+
+test('compact centers its three tiers and long annotation content stays bounded', async ({ page }) => {
+  let host = await story(page, 'compact');
   await expect(host).toHaveAttribute('compact', '');
   await expect(host.locator('[part="metric"]')).toBeVisible();
+  const compact = await host.evaluate((element) => {
+    const root = element.shadowRoot!;
+    const metric = root.querySelector<HTMLElement>('[part="metric"]')!;
+    const label = root.querySelector<HTMLElement>('[part="label"]')!;
+    const value = root.querySelector<HTMLElement>('[part="value"]')!;
+    const annotation = root.querySelector<HTMLElement>('[part="annotation"]')!;
+    const center = (node: HTMLElement) => {
+      const rect = node.getBoundingClientRect();
+      return rect.left + rect.width / 2;
+    };
+    return {
+      metric: center(metric),
+      label: center(label),
+      value: center(value),
+      annotation: center(annotation),
+      annotationTop: annotation.getBoundingClientRect().top,
+      valueBottom: value.getBoundingClientRect().bottom,
+    };
+  });
+  expect(Math.abs(compact.metric - compact.label)).toBeLessThanOrEqual(1);
+  expect(Math.abs(compact.metric - compact.value)).toBeLessThanOrEqual(1);
+  expect(Math.abs(compact.metric - compact.annotation)).toBeLessThanOrEqual(1);
+  expect(compact.annotationTop).toBeGreaterThanOrEqual(compact.valueBottom);
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  host = await story(page, 'long-content');
+  const bounds = await host.evaluate((element) => {
+    const root = element.shadowRoot!;
+    const metric = root.querySelector<HTMLElement>('[part="metric"]')!.getBoundingClientRect();
+    const annotation = root.querySelector<HTMLElement>('[part="annotation"]')!.getBoundingClientRect();
+    const pill = root.querySelector('sk-pill-tag')!.shadowRoot!
+      .querySelector<HTMLElement>('[part="tag"]')!.getBoundingClientRect();
+    return { metricLeft: metric.left, metricRight: metric.right, annotationLeft: annotation.left,
+      annotationRight: annotation.right, pillLeft: pill.left, pillRight: pill.right };
+  });
+  expect(bounds.annotationLeft).toBeGreaterThanOrEqual(bounds.metricLeft);
+  expect(bounds.annotationRight).toBeLessThanOrEqual(bounds.metricRight);
+  expect(bounds.pillLeft).toBeGreaterThanOrEqual(bounds.metricLeft);
+  expect(bounds.pillRight).toBeLessThanOrEqual(bounds.metricRight);
 });
 
 test('Default dark and LightMode keep content and semantics while a named token-driven color changes', async ({ page }) => {

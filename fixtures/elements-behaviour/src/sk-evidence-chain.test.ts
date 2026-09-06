@@ -236,13 +236,21 @@ test('ships a scoped forced-colors connector distinction without forced-color-ad
   expect(forcedMedia).toHaveLength(1);
   const connectorRules = Array.from(forcedMedia[0]!.cssRules).filter(
     (rule): rule is CSSStyleRule =>
-      rule instanceof CSSStyleRule && rule.selectorText === '.sk-evidence-chain__connector',
+      rule instanceof CSSStyleRule && rule.selectorText === '.sk-evidence-chain__connector::before',
   );
   expect(connectorRules).toHaveLength(1);
   expect(connectorRules[0]!.style.getPropertyValue('border-block-start-color').toLowerCase()).toBe(
     'canvastext',
   );
   expect(connectorRules[0]!.style.getPropertyValue('border-inline-start-color').toLowerCase()).toBe(
+    'canvastext',
+  );
+  const stageRules = Array.from(forcedMedia[0]!.cssRules).filter(
+    (rule): rule is CSSStyleRule =>
+      rule instanceof CSSStyleRule && rule.selectorText === '.sk-evidence-chain__stage',
+  );
+  expect(stageRules).toHaveLength(1);
+  expect(stageRules[0]!.style.getPropertyValue('border-inline-start-color').toLowerCase()).toBe(
     'canvastext',
   );
   expect(evidenceChainCss).not.toMatch(/forced-color-adjust\s*:\s*none/i);
@@ -278,7 +286,7 @@ test('declares wide flow and preserves DOM order in the live narrow flow', async
 test('uses token-driven connector contrast in equivalent dark and light chains', async () => {
   const dark = await mount(fourStages);
   const darkConnector = dark.shadowRoot!.querySelector<HTMLElement>('[part="connector"]')!;
-  const darkColor = getComputedStyle(darkConnector).borderBlockStartColor;
+  const darkColor = getComputedStyle(darkConnector, '::before').borderBlockStartColor;
 
   const lightWrapper = document.createElement('div');
   lightWrapper.className = 'sk-light';
@@ -288,7 +296,7 @@ test('uses token-driven connector contrast in equivalent dark and light chains',
   document.body.append(lightWrapper);
   await light.updateComplete;
   const lightConnector = light.shadowRoot!.querySelector<HTMLElement>('[part="connector"]')!;
-  const lightColor = getComputedStyle(lightConnector).borderBlockStartColor;
+  const lightColor = getComputedStyle(lightConnector, '::before').borderBlockStartColor;
 
   expect(darkColor).not.toBe('');
   expect(lightColor).not.toBe('');

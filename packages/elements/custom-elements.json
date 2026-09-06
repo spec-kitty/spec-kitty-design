@@ -1826,7 +1826,7 @@
         },
         {
           "kind": "class",
-          "description": "An ordered chain of generic evidence stages composed from real `sk-metric` elements.\n\nThe consumer owns stage order, identity, display formatting, and domain meaning. Valid supplied\nstrings and object references are preserved; invalid whole inputs fail closed.\n\nToken dependencies: --sk-border-strong, --sk-border-width-2, --sk-fg-muted,\n--sk-font-sans, --sk-space-2, --sk-space-3, --sk-space-4, --sk-space-6,\n--sk-text-sm.",
+          "description": "An ordered chain of generic evidence stages composed from real `sk-metric` elements.\n\nThe consumer owns stage order, identity, display formatting, and domain meaning. Valid supplied\nstrings and object references are preserved; invalid whole inputs fail closed.\n\nToken dependencies: --sk-border-strong, --sk-border-width-1, --sk-border-width-2,\n--sk-fg-muted, --sk-fg-subtle, --sk-font-mono, --sk-font-sans, --sk-space-1,\n--sk-space-2, --sk-space-3, --sk-space-4, --sk-space-10, --sk-text-sm,\n--sk-text-xs.",
           "name": "SkEvidenceChain",
           "cssParts": [
             {
@@ -3174,7 +3174,7 @@
         },
         {
           "kind": "class",
-          "description": "A generic supplied label and opaque display value with optional supporting annotation.\n\nThe consumer owns all formatting and domain meaning. This element preserves valid strings\nexactly and contributes a native definition relationship, not a section heading.\n\nToken dependencies: --sk-border-default, --sk-border-width-2, --sk-color-blue,\n--sk-color-green, --sk-color-yellow, --sk-fg-default, --sk-fg-muted, --sk-font-mono,\n--sk-font-sans, --sk-space-1, --sk-space-2, --sk-space-3, --sk-space-4,\n--sk-text-2xl, --sk-text-sm, --sk-text-xl, --sk-weight-bold, --sk-weight-semibold.",
+          "description": "A generic supplied label and opaque display value with optional supporting annotation.\n\nThe consumer owns all formatting and domain meaning. This element preserves valid strings\nexactly and contributes a native definition relationship, not a section heading.\n\nToken dependencies: --sk-fg-default, --sk-fg-muted, --sk-font-mono, --sk-font-sans,\n--sk-on-tint-butter, --sk-on-tint-mint, --sk-on-tint-sky, --sk-space-1,\n--sk-space-2, --sk-space-3, --sk-space-4, --sk-text-2xl, --sk-text-sm,\n--sk-text-xs, --sk-text-xl, --sk-weight-bold, --sk-weight-medium.",
           "name": "SkMetric",
           "cssParts": [
             {

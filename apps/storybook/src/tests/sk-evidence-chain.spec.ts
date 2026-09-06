@@ -69,15 +69,39 @@ test('Narrow changes CSS direction without changing ordered DOM content', async 
   const host = await story(page, 'narrow');
   const facts = await host.evaluate((element) => {
     const list = element.shadowRoot!.querySelector<HTMLOListElement>('[part="list"]')!;
+    const stages = [...list.children] as HTMLElement[];
+    const connectors = [...list.querySelectorAll<HTMLElement>('[part="connector"]')];
     return {
       direction: getComputedStyle(list).flexDirection,
-      labels: [...list.children].map((stage) =>
+      labels: stages.map((stage) =>
         (stage.querySelector('sk-metric') as HTMLElement & { label?: string } | null)?.label,
       ),
+      connectors: connectors.map((connector, index) => {
+        const before = getComputedStyle(connector, '::before');
+        const after = getComputedStyle(connector, '::after');
+        const connectorRect = connector.getBoundingClientRect();
+        const currentMetric = stages[index]!.querySelector('sk-metric')!.getBoundingClientRect();
+        const nextMetric = stages[index + 1]!.querySelector('sk-metric')!.getBoundingClientRect();
+        return {
+          glyph: after.content,
+          topBorder: Number.parseFloat(before.borderBlockStartWidth),
+          inlineBorder: Number.parseFloat(before.borderInlineStartWidth),
+          afterCurrent: connectorRect.top >= currentMetric.bottom,
+          beforeNext: connectorRect.bottom <= nextMetric.top,
+        };
+      }),
     };
   });
   expect(facts.direction).toBe('column');
   expect(facts.labels).toEqual(['Items received', 'Items reviewed', 'Items accepted', 'Items remaining']);
+  expect(facts.connectors).toHaveLength(3);
+  for (const connector of facts.connectors) {
+    expect(connector.glyph).toContain('↓');
+    expect(connector.topBorder).toBe(0);
+    expect(connector.inlineBorder).toBe(1);
+    expect(connector.afterCurrent).toBe(true);
+    expect(connector.beforeNext).toBe(true);
+  }
 });
 
 test('ApprovedExample uses actual grid/card wrappers and nested metric pill tags', async ({ page }) => {
@@ -98,6 +122,14 @@ test('ApprovedExample uses actual grid/card wrappers and nested metric pill tags
     'Production evidence',
     '4 awaiting evidence',
   ]);
+  const grid = await page.locator('sk-grid').first().evaluate((element) => ({
+    maxInlineSize: element.style.maxInlineSize,
+    renderedWidth: element.getBoundingClientRect().width,
+    computedMaximum: Number.parseFloat(getComputedStyle(element).maxInlineSize),
+  }));
+  expect(grid.maxInlineSize).toBe('calc(var(--sk-space-12) * 6 + var(--sk-space-8))');
+  expect(grid.renderedWidth).toBeGreaterThan(0);
+  expect(grid.renderedWidth).toBeLessThanOrEqual(grid.computedMaximum);
 });
 
 test('empty and invalid whole inputs fail closed to one status and no list', async ({ page }) => {
@@ -108,31 +140,91 @@ test('empty and invalid whole inputs fail closed to one status and no list', asy
   }
 });
 
-test('Default dark and LightMode preserve semantics while connector token paint changes', async ({ page }) => {
+test('Approved dark and LightMode preserve the exact composition while connector token paint changes', async ({ page }) => {
   const facts = async (id: string) => {
     const host = await story(page, id);
     return host.evaluate((element) => {
       const root = element.shadowRoot!;
       const connector = root.querySelector<HTMLElement>('[part="connector"]')!;
+      const grid = element.parentElement!.parentElement!;
+      const probe = document.createElement('span');
+      probe.style.borderBlockStart = 'var(--sk-border-width-1) solid var(--sk-border-strong)';
+      element.before(probe);
+      const token = getComputedStyle(probe).borderBlockStartColor;
+      probe.remove();
       return {
         content: {
-          labels: [...root.querySelectorAll<HTMLElement & { label?: string }>('sk-metric')]
-            .map((metric) => metric.label),
+          labels: [...root.querySelectorAll<HTMLElement & { label?: string }>('sk-metric')].map((metric) => metric.label),
+          values: [...root.querySelectorAll<HTMLElement & { displayValue?: string }>('sk-metric')].map((metric) => metric.displayValue),
+          annotations: [...root.querySelectorAll<HTMLElement & { annotation?: string }>('sk-metric')].map((metric) => metric.annotation),
+          tones: [...root.querySelectorAll<HTMLElement & { tone?: string }>('sk-metric')].map((metric) => metric.tone),
           stages: root.querySelectorAll('ol > li').length,
           connectors: root.querySelectorAll('[part="connector"]').length,
+          pills: [...root.querySelectorAll('sk-metric')].filter((metric) => metric.shadowRoot?.querySelector('sk-pill-tag')).length,
+          parent: element.parentElement?.tagName,
+          grandparent: grid.tagName,
+          maxInlineSize: grid.style.maxInlineSize,
         },
         paint: {
-          token: getComputedStyle(element).getPropertyValue('--sk-border-strong').trim(),
-          connector: getComputedStyle(connector).borderBlockStartColor,
+          token,
+          connector: getComputedStyle(connector, '::before').borderBlockStartColor,
         },
       };
     });
   };
-  const dark = await facts('default');
+  const dark = await facts('approved-example');
   const light = await facts('light-mode');
   expect(light.content).toEqual(dark.content);
+  expect(dark.content).toMatchObject({
+    tones: ['neutral', 'info', 'success', 'success'],
+    stages: 4,
+    connectors: 3,
+    pills: 4,
+    parent: 'SK-CARD',
+    grandparent: 'SK-GRID',
+    maxInlineSize: 'calc(var(--sk-space-12) * 6 + var(--sk-space-8))',
+  });
+  expect(dark.paint.connector).toBe(dark.paint.token);
+  expect(light.paint.connector).toBe(light.paint.token);
   expect(light.paint.token).not.toBe(dark.paint.token);
   expect(light.paint.connector).not.toBe(dark.paint.connector);
+});
+
+test('wide connectors are directional one-pixel paths aligned with the label band', async ({ page }) => {
+  const host = await story(page, 'approved-example');
+  const facts = await host.evaluate((element) => {
+    const root = element.shadowRoot!;
+    const stages = [...root.querySelectorAll<HTMLElement>('ol > li')];
+    return [...root.querySelectorAll<HTMLElement>('[part="connector"]')].map((connector, index) => {
+      const before = getComputedStyle(connector, '::before');
+      const after = getComputedStyle(connector, '::after');
+      const connectorRect = connector.getBoundingClientRect();
+      const metric = stages[index]!.querySelector('sk-metric')!;
+      const label = metric.shadowRoot!.querySelector<HTMLElement>('[part="label"]')!.getBoundingClientRect();
+      const value = metric.shadowRoot!.querySelector<HTMLElement>('[part="value"]')!.getBoundingClientRect();
+      const lineCenter = connectorRect.top + connectorRect.height / 2;
+      return {
+        glyph: after.content,
+        borderStyle: before.borderBlockStartStyle,
+        borderWidth: Number.parseFloat(before.borderBlockStartWidth),
+        borderColor: before.borderBlockStartColor,
+        inLabelBand: lineCenter >= label.top && lineCenter <= label.bottom,
+        beforeValue: connectorRect.top < value.top,
+        stageRailWidth: Number.parseFloat(getComputedStyle(stages[index]!).borderInlineStartWidth),
+      };
+    });
+  });
+  expect(facts).toHaveLength(3);
+  for (const connector of facts) {
+    expect(connector.glyph).toContain('→');
+    expect(connector.borderStyle).not.toBe('none');
+    expect(connector.borderWidth).toBe(1);
+    expect(connector.borderColor).not.toBe('rgba(0, 0, 0, 0)');
+    expect(connector.borderColor).not.toBe('transparent');
+    expect(connector.inLabelBand).toBe(true);
+    expect(connector.beforeValue).toBe(true);
+    expect(connector.stageRailWidth).toBe(0);
+  }
 });
 
 test('active forced colors preserves ordered semantics and visible decorative boundaries', async ({ browser, browserName }, testInfo) => {
@@ -152,18 +244,24 @@ test('active forced colors preserves ordered semantics and visible decorative bo
     const facts = await host.evaluate((element) => {
       const root = element.shadowRoot!;
       const connectors = [...root.querySelectorAll<HTMLElement>('[part="connector"]')];
-      const metrics = [...root.querySelectorAll<HTMLElement>('sk-metric')];
+      const stages = [...root.querySelectorAll<HTMLElement>('ol > li')];
       return {
-        stages: root.querySelectorAll('ol > li').length,
+        stages: stages.length,
         connectorCount: connectors.length,
         decorative: connectors.every((connector) => connector.getAttribute('aria-hidden') === 'true'),
         boundaries: connectors.map((connector) => {
-          const style = getComputedStyle(connector);
-          return { style: style.borderBlockStartStyle, width: Number.parseFloat(style.borderBlockStartWidth), color: style.borderBlockStartColor };
+          const style = getComputedStyle(connector, '::before');
+          const glyph = getComputedStyle(connector, '::after');
+          return {
+            style: style.borderBlockStartStyle,
+            width: Number.parseFloat(style.borderBlockStartWidth),
+            color: style.borderBlockStartColor,
+            glyph: glyph.content,
+            glyphColor: glyph.color,
+          };
         }),
-        metricBoundaries: metrics.map((metric) => {
-          const surface = metric.shadowRoot!.querySelector<HTMLElement>('[part="metric"]')!;
-          const style = getComputedStyle(surface);
+        stageBoundaries: stages.map((stage) => {
+          const style = getComputedStyle(stage);
           return {
             style: style.borderInlineStartStyle,
             width: Number.parseFloat(style.borderInlineStartWidth),
@@ -180,9 +278,12 @@ test('active forced colors preserves ordered semantics and visible decorative bo
       expect(boundary.width).toBeGreaterThan(0);
       expect(boundary.color).not.toBe('rgba(0, 0, 0, 0)');
       expect(boundary.color).not.toBe('transparent');
+      expect(boundary.glyph).toContain('→');
+      expect(boundary.glyphColor).not.toBe('rgba(0, 0, 0, 0)');
+      expect(boundary.glyphColor).not.toBe('transparent');
     }
-    expect(facts.metricBoundaries).toHaveLength(4);
-    for (const boundary of facts.metricBoundaries) {
+    expect(facts.stageBoundaries).toHaveLength(4);
+    for (const boundary of facts.stageBoundaries) {
       expect(boundary.style).not.toBe('none');
       expect(boundary.width).toBeGreaterThan(0);
       expect(boundary.color).not.toBe('rgba(0, 0, 0, 0)');

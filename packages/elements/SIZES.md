@@ -7,15 +7,15 @@ Components in these artifacts: sk-action-row, sk-app-shell, sk-blog-card, sk-but
 
 | artifact | raw | minified | min+gzip | notes |
 |---|---:|---:|---:|---|
-| `ESM  (dist/index.js)` | 142.3 KiB | 94.8 KiB | 19 KiB | `lit` external |
-| `IIFE (dist/elements.js)` | 158.8 KiB | 104.6 KiB | 23 KiB | runtime bundled |
+| `ESM  (dist/index.js)` | 143.5 KiB | 95.9 KiB | 20 KiB | `lit` external |
+| `IIFE (dist/elements.js)` | 160.0 KiB | 105.7 KiB | 24 KiB | runtime bundled |
 
 ## Subresource Integrity — the classic-script bundle (FR-005)
 
 For a CDN load of `dist/elements.js`, pin what the browser executes:
 
 ```
-integrity="sha384-TBW7N+/h/frvwqkH1pU0Ym1puHEOmLtA7GJqrkMpS+iX8g4oqS4ofWfyRUZx30xJ"
+integrity="sha384-rL9uP0iRIb6mjM89qLkw+TFJnI2P3UWKFmNyJsgVWGlDdwbqySeH4OTF+6nSC2fN"
 ```
 
 Derived from the built artifact on every run and re-derived by `--check`, so it cannot be
@@ -53,7 +53,7 @@ Those look contradictory and are not: **they are different bases, and partly a
 different component.** ADR-10's SP-3 spike measured `sk-card`, not `sk-stub`.
 
 - ADR-10 §2's two figures are **unminified raw on `sk-card` ALONE** (3.7 / 26.6 KB).
-- ADR-8's ~6 KB is **minified+gzip**, and the IIFE now measures 23.5 KiB
+- ADR-8's ~6 KB is **minified+gzip**, and the IIFE now measures 23.6 KiB
   min+gzip — which does NOT corroborate it and is not meant to. That figure was a per-component
   Lit-runtime estimate; this artifact carries the runtime plus every component in the package,
   so the two are different bases and the gap grows with each component added. An earlier
@@ -82,7 +82,7 @@ unit: every figure in this file is KiB (1024). The WP prompt recorded the IIFE a
 "24.0 KB" where this file would have read 23.5 KiB — **24073 bytes either way**.
 Those two numbers are pinned historical values on purpose. An earlier revision of this
 paragraph interpolated the CURRENT raw size into that comparison, so once the artifact
-grew it asserted that 162660 bytes are "24.0 KB" — false by a factor of
+grew it asserted that 163810 bytes are "24.0 KB" — false by a factor of
 five, in the one paragraph whose whole lesson is to state the basis and the unit. A lens
 caught it.
 
@@ -91,13 +91,13 @@ caught it.
 ```
 $ npx nx run elements:build && node scripts/measure-elements-sizes.mjs
 packages/elements/dist/index.js
-  raw        145748 bytes  (142.3 KiB)
-  minified    97066 bytes  (94.8 KiB)
+  raw        146898 bytes  (143.5 KiB)
+  minified    98164 bytes  (95.9 KiB)
   gzip         30 KiB
-  min+gzip     19 KiB
+  min+gzip     20 KiB
 packages/elements/dist/elements.js
-  raw        162660 bytes  (158.8 KiB)
-  minified   107112 bytes  (104.6 KiB)
+  raw        163810 bytes  (160.0 KiB)
+  minified   108210 bytes  (105.7 KiB)
   gzip         35 KiB
-  min+gzip     23 KiB
+  min+gzip     24 KiB
 ```

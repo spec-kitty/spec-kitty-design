@@ -59,7 +59,7 @@ const isInActiveForcedColours = (declaration) => {
 
 const isAllowed = (value, declaration) => {
   const importantFree = value.replace(/\s*!important\s*$/i, '').trim();
-  if (CSS_WIDE.test(importantFree) || STRUCTURAL.test(importantFree)) return true;
+  if (CSS_WIDE.test(importantFree) || isStructuralRemainder(importantFree)) return true;
   if (SYSTEM_COLOUR.test(importantFree)) {
     return /^(?:currentColor|transparent)$/i.test(importantFree) || isInActiveForcedColours(declaration);
   }
@@ -115,6 +115,7 @@ const selftest = () => {
     .probe {
       color: var(--sk-fg-default);
       gap: var(--sk-space-2);
+      width: 100%;
       font-size: var(--sk-text-sm);
       word-spacing: var(--sk-space-1);
       border-radius: var(--sk-radius-sm);

@@ -141,9 +141,10 @@ declare module 'vue' {
      * The consumer owns stage order, identity, display formatting, and domain meaning. Valid supplied
      * strings and object references are preserved; invalid whole inputs fail closed.
      *
-     * Token dependencies: --sk-border-strong, --sk-border-width-2, --sk-fg-muted,
-     * --sk-font-sans, --sk-space-2, --sk-space-3, --sk-space-4, --sk-space-6,
-     * --sk-text-sm.
+     * Token dependencies: --sk-border-strong, --sk-border-width-1, --sk-border-width-2,
+     * --sk-fg-muted, --sk-fg-subtle, --sk-font-mono, --sk-font-sans, --sk-space-1,
+     * --sk-space-2, --sk-space-3, --sk-space-4, --sk-space-10, --sk-text-sm,
+     * --sk-text-xs.
      */
     'sk-evidence-chain': SkElement<{
       /**
@@ -307,10 +308,10 @@ declare module 'vue' {
      * The consumer owns all formatting and domain meaning. This element preserves valid strings
      * exactly and contributes a native definition relationship, not a section heading.
      *
-     * Token dependencies: --sk-border-default, --sk-border-width-2, --sk-color-blue,
-     * --sk-color-green, --sk-color-yellow, --sk-fg-default, --sk-fg-muted, --sk-font-mono,
-     * --sk-font-sans, --sk-space-1, --sk-space-2, --sk-space-3, --sk-space-4,
-     * --sk-text-2xl, --sk-text-sm, --sk-text-xl, --sk-weight-bold, --sk-weight-semibold.
+     * Token dependencies: --sk-fg-default, --sk-fg-muted, --sk-font-mono, --sk-font-sans,
+     * --sk-on-tint-butter, --sk-on-tint-mint, --sk-on-tint-sky, --sk-space-1,
+     * --sk-space-2, --sk-space-3, --sk-space-4, --sk-text-2xl, --sk-text-sm,
+     * --sk-text-xs, --sk-text-xl, --sk-weight-bold, --sk-weight-medium.
      */
     'sk-metric': SkElement<{
       /**

@@ -78,7 +78,7 @@ test('composes the existing pill tag and omits absent annotation chrome', async 
     expect(pill?.textContent).toBe('Within range');
     expect(pill?.getAttribute('variant')).toBe(variant);
     expect(element.getAttribute('tone')).toBe(tone);
-    painted.add(getComputedStyle(element.shadowRoot!.querySelector('[part="metric"]')!).borderInlineStartColor);
+    painted.add(getComputedStyle(element.shadowRoot!.querySelector('[part="value"]')!).color);
   }
   expect(painted.size, 'each tone needs its own generic accent treatment').toBe(4);
 

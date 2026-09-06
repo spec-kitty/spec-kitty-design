@@ -50,9 +50,10 @@ reference after changing the collection. Defaults to a frozen empty array. */
  * The consumer owns stage order, identity, display formatting, and domain meaning. Valid supplied
  * strings and object references are preserved; invalid whole inputs fail closed.
  *
- * Token dependencies: --sk-border-strong, --sk-border-width-2, --sk-fg-muted,
- * --sk-font-sans, --sk-space-2, --sk-space-3, --sk-space-4, --sk-space-6,
- * --sk-text-sm.
+ * Token dependencies: --sk-border-strong, --sk-border-width-1, --sk-border-width-2,
+ * --sk-fg-muted, --sk-fg-subtle, --sk-font-mono, --sk-font-sans, --sk-space-1,
+ * --sk-space-2, --sk-space-3, --sk-space-4, --sk-space-10, --sk-text-sm,
+ * --sk-text-xs.
  *
  * ## Attributes & Properties
  *

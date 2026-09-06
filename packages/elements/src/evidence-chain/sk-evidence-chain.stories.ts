@@ -25,6 +25,37 @@ const genericStages = Object.freeze([
   }),
 ] satisfies ReadonlyArray<EvidenceStage>);
 
+const approvedStages = Object.freeze([
+  Object.freeze({
+    id: 'investment',
+    label: 'Investment',
+    displayValue: '€1,840',
+    annotation: '€166 unattributed',
+    tone: 'neutral',
+  }),
+  Object.freeze({
+    id: 'completed',
+    label: 'Completed',
+    displayValue: '42 WPs',
+    annotation: '34 first pass',
+    tone: 'info',
+  }),
+  Object.freeze({
+    id: 'deployed',
+    label: 'Deployed',
+    displayValue: '6 missions',
+    annotation: 'Production evidence',
+    tone: 'success',
+  }),
+  Object.freeze({
+    id: 'verified',
+    label: 'Verified',
+    displayValue: '2 outcomes',
+    annotation: '4 awaiting evidence',
+    tone: 'success',
+  }),
+] satisfies ReadonlyArray<EvidenceStage>);
+
 const twoStages = Object.freeze(genericStages.slice(0, 2));
 const sixStages = Object.freeze([
   ...genericStages,
@@ -36,6 +67,23 @@ const createChain = (stages: unknown): SkEvidenceChain => {
   const element = document.createElement('sk-evidence-chain') as SkEvidenceChain;
   element.stages = stages as ReadonlyArray<EvidenceStage>;
   return element;
+};
+
+const createApprovedComposition = (light = false): HTMLElement => {
+  const grid = document.createElement('sk-grid');
+  grid.setAttribute('gap', '4');
+  grid.style.inlineSize = '100%';
+  grid.style.maxInlineSize = 'calc(var(--sk-space-12) * 6 + var(--sk-space-8))';
+  const card = document.createElement('sk-card');
+  card.append(createChain(approvedStages));
+  grid.append(card);
+
+  if (!light) return grid;
+  const wrapper = document.createElement('div');
+  wrapper.className = 'sk-light';
+  wrapper.style.cssText = 'background: var(--sk-surface-page); padding: var(--sk-space-6);';
+  wrapper.append(grid);
+  return wrapper;
 };
 
 const meta: Meta = {
@@ -51,44 +99,7 @@ type Story = StoryObj;
 export const Default: Story = {};
 
 export const ApprovedExample: Story = {
-  render: () => {
-    const stages = Object.freeze([
-      Object.freeze({
-        id: 'investment',
-        label: 'Investment',
-        displayValue: '€1,840',
-        annotation: '€166 unattributed',
-        tone: 'info',
-      }),
-      Object.freeze({
-        id: 'completed',
-        label: 'Completed',
-        displayValue: '42 WPs',
-        annotation: '34 first pass',
-        tone: 'success',
-      }),
-      Object.freeze({
-        id: 'deployed',
-        label: 'Deployed',
-        displayValue: '6 missions',
-        annotation: 'Production evidence',
-        tone: 'success',
-      }),
-      Object.freeze({
-        id: 'verified',
-        label: 'Verified',
-        displayValue: '2 outcomes',
-        annotation: '4 awaiting evidence',
-        tone: 'neutral',
-      }),
-    ] satisfies ReadonlyArray<EvidenceStage>);
-    const grid = document.createElement('sk-grid');
-    grid.setAttribute('gap', '4');
-    const card = document.createElement('sk-card');
-    card.append(createChain(stages));
-    grid.append(card);
-    return grid;
-  },
+  render: () => createApprovedComposition(),
 };
 
 export const TwoStages: Story = {
@@ -139,11 +150,5 @@ export const InvalidInput: Story = {
 
 export const LightMode: Story = {
   parameters: { backgrounds: { default: 'sk-light' } },
-  render: () => {
-    const wrapper = document.createElement('div');
-    wrapper.className = 'sk-light';
-    wrapper.style.cssText = 'background: var(--sk-surface-page); padding: var(--sk-space-6);';
-    wrapper.append(createChain(genericStages));
-    return wrapper;
-  },
+  render: () => createApprovedComposition(true),
 };
