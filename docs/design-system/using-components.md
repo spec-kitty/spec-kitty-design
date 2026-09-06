@@ -3,11 +3,12 @@
 The Spec Kitty components ship as CSS in `@spec-kitty/styles`, and — for the components migrated
 so far — as **custom elements** in `@spec-kitty/elements`. Both require `@spec-kitty/tokens`.
 
-**Migration is in progress.** Twenty-five elements exist today: `sk-action-row`, `sk-app-shell`,
+**Migration is in progress.** Twenty-six elements exist today: `sk-action-row`, `sk-app-shell`,
 `sk-blog-card`, `sk-button`, `sk-card`, `sk-check-bullet`, `sk-context-sidebar`, `sk-entity-marker`,
-`sk-evidence-chain`, `sk-feature-card`, `sk-form-input`, `sk-form-textarea`, `sk-grid`, `sk-metric`, `sk-nav-pill`, `sk-page-header`,
-`sk-personal-rail`, `sk-pill-tag`, `sk-ribbon-card`, `sk-section-banner`, `sk-section-header`,
-`sk-site-footer`, `sk-status-indicator`, `sk-stub`, and `sk-transition-matrix`.
+`sk-evidence-chain`, `sk-feature-card`, `sk-form-input`, `sk-form-textarea`, `sk-grid`, `sk-metric`,
+`sk-nav-pill`, `sk-notice`, `sk-page-header`, `sk-personal-rail`, `sk-pill-tag`, `sk-ribbon-card`,
+`sk-section-banner`, `sk-section-header`, `sk-site-footer`, `sk-status-indicator`, `sk-stub`, and
+`sk-transition-matrix`.
 Several of the catalogue's component packages are CSS only by a recorded decision — `form-field`,
 (#176) `facts`, `disclosure`, `data-table`, `empty-state`, `skip-link`, and (#210) `progress`. See
 ADR-10, *form-field is deliberately styles-only* and *Styles-only components are a class, not a
@@ -562,6 +563,81 @@ domain words to colors. An unknown tone renders as neutral while preserving the 
 `sk-entity-marker` never fetches identity or generates initials. Supply the exact icon, initials,
 or short mark to render. A non-empty `label` makes the mark meaningful and names it; an absent or
 whitespace-only label makes it decorative and hides it from assistive technology.
+
+---
+
+## Notices
+
+`sk-notice` is a block-level status message about a page or a region of it — the surface a build
+failure, a degraded queue or a "connection lost, retrying" strip belongs on. It is **not** a toast:
+it has no positioning, no stacking, no queueing, no auto-dismiss timer and no portal. The consumer
+decides where it appears and whether it exists at all.
+
+```html
+<sk-notice tone="danger" announce="assertive" dismissible
+           dismiss-label="Dismiss the deploy failure notice">
+  <h3 slot="heading">Deploy failed</h3>
+  <p>Three of twelve targets rejected the release bundle.</p>
+  <sk-button slot="actions">Retry the deploy</sk-button>
+</sk-notice>
+
+<script type="module">
+  const notice = document.querySelector('sk-notice');
+
+  // A message that CHANGES is announced again. Set the property; do not rebuild the element.
+  notice.message = 'Retrying in 2 seconds';
+
+  notice.addEventListener('sk-notice-dismiss', (event) => {
+    // The element did NOT remove itself. This is yours to decide.
+    notice.remove();
+  });
+</script>
+```
+
+**Announcement is an explicit property, not a side effect of tone.** `announce` takes `off` (the
+default), `polite` or `assertive`. A `danger` notice with `announce="off"` is silent; a `neutral`
+one with `announce="assertive"` interrupts. Nothing about the tone decides it, and a notice that is
+never announced is still perfectly usable as a static message — that is what `off` is for.
+
+**A changed message is announced again.** `message` is a reactive property, so assigning a new
+value re-renders the live region's text and the change is announced. This is the one thing to get
+right: the repository's own `sk-form-input` records the opposite failure twice, where the announced
+text changed and nothing re-rendered, leaving `role="alert"` silent and `aria-describedby` pointing
+at text that was no longer true.
+
+**One caveat, and it is the consumer's to handle.** The live region is created with its role at the
+element's first render, ahead of any message you assign afterwards. If you build a notice with
+`message` already set and insert it in one step, the region and its content enter the DOM together,
+which assistive technology does not reliably announce. **Insert the notice first, then assign
+`message`.** The element cannot close this itself without deferring its own first paint behind a
+timer, which is exactly the toast behaviour it is defined not to have.
+
+**The heading level is yours.** Slot a native heading; the element generates none, the same rule
+`sk-section-header` follows. Slot the body as `message` or as real markup — the default slot renders
+inside the live region, so multi-paragraph content is announced too.
+
+**Dismissal is controlled.** `dismissible` renders a real `<button>` with a required accessible name
+(`dismiss-label`, defaulting to "Dismiss notice"). Activating it emits one `sk-notice-dismiss` with
+`{ tone }`, `bubbles: true`, `composed: true` and `cancelable: true`. **The element never removes
+itself** in either branch. What `preventDefault()` cancels is the element's own focus move — nothing
+else, because nothing else is the element's to do.
+
+**Focus lands on the notice host** after a dismissal that is not cancelled; the element gives itself
+`tabindex="-1"` for that purpose unless you supplied your own `tabindex`. The reason is that the
+dismiss button is inside the shadow root and is the node most likely to stop existing the moment
+your handler runs — leaving focus there drops it to `<body>` as soon as you remove the notice. The
+host is still in the document while your handler runs, so you have a defined place to redirect from.
+If you remove the notice, move focus somewhere deliberate yourself.
+
+**Tone is never the only carrier of meaning.** Each tone brings a marker glyph and a widened
+inline-start edge as well as a surface colour, and the message text is yours and carries the meaning
+for assistive technology. The six tones are the same vocabulary `sk-status-indicator` and
+`sk-card[status]` use, over the same `--sk-status-*` / `--sk-on-status-*` tokens — there is one
+scale, not three. An unknown tone renders as `neutral` and warns, keeping the message visible.
+
+A notice **may slot an `sk-status-indicator`**; an indicator never becomes a notice. They differ in
+every axis but the tone vocabulary: an indicator is inline, passive and lives inside a row, while a
+notice is block, optionally announced, and owns a region.
 
 ---
 
