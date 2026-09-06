@@ -1,7 +1,7 @@
 {
   "rows": {
     "#125": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "https://github.com/spec-kitty/spec-kitty-design/issues/125 \u2014 broader conversion tracker, not closed by TKW2",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -9,7 +9,7 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
+      "verdict": "deferred-with-followup",
       "wp": null
     },
     "#208": {
