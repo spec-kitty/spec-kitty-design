@@ -22,15 +22,23 @@
  * asserted — a stale row pointing at a deleted record is as bad as a record with no row.
  *
  * IT ALSO ASSERTS STATUS, and that is deliberate. A row is a transcription of a record, not a
- * ruling about it. An index that says `Accepted` where the record says `Proposed` has promoted a
- * decision the operator never ratified, which under the charter turns a descriptive record into a
- * binding constraint on every later mission spec. That is the one field whose drift changes what
- * the repo is allowed to do, so the gate refuses it. Titles and identifier styles are NOT
- * asserted: they are editorial, and a gate that reds on a harmless edit is a gate someone deletes.
+ * ruling about it. An index that says `Accepted` where the record says `Proposed` reports a
+ * ratification that did not happen, and the recorded status of a decision is the thing a reader
+ * consults this table for. What a given status obliges is settled elsewhere — by the charter, the
+ * workflow, and the records themselves — and this gate takes no position on it; it only holds the
+ * table to what the records say. Titles and identifier styles are NOT asserted: they are
+ * editorial, and a gate that reds on a harmless edit is a gate someone deletes.
  *
  * THE CHECKS ARE PURE FUNCTIONS over parsed inputs, so `--selftest` can feed them synthetic
  * defects. A gate observed green on a healthy tree has demonstrated nothing about what it can
  * see; the probes are the evidence, the way check-release-graph.mjs's are.
+ *
+ * EACH PROBE NAMES THE PROBLEM IT EXPECTS, and that is not decoration. The first version asserted
+ * only `problems.length > 0`, and a mutation sweep found four guards whose deletion left the
+ * selftest GREEN because a different problem in the same probe tripped instead — the floors for
+ * zero files, zero rows and a missing section, and the missing-Status-field branch. A probe table
+ * that cannot tell which check fired is a smoke test wearing a probe table's clothes, which is
+ * this file's own defect class one level up.
  *
  * EVERY CHECK HAS AN EMPTY-SET FLOOR. Zero record files, zero parsed rows, a missing
  * `## Decisions (ADRs)` section, zero records to compare statuses against — each is a FAILURE,
@@ -42,13 +50,24 @@
  * WIRING is asserted by scripts/check-gate-wiring.mjs, which carries this gate's two CI lines in
  * its REQUIRED_LINT registry — the repo's single place for "this gate must still be running".
  */
-import { readFileSync, readdirSync, existsSync } from 'node:fs';
+import { readFileSync, readdirSync, existsSync, statSync } from 'node:fs';
 import { join, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 
-/** The source of truth. Everything in here is a record and must be indexed. */
+/**
+ * The source of truth. Every `.md` FILE directly in here is a record and must be indexed —
+ * including one reached through a symlink, which `Dirent.isFile()` alone reports as false.
+ *
+ * The old comment read "Everything in here is a record", and the filter under it saw strictly
+ * less than that: no symlinks, and nothing under a subdirectory. `decisions/superseded/` is a
+ * common ADR convention, so that gap would have hidden a whole class of record from a gate whose
+ * entire subject is unindexed records. Rather than recurse — which would need a rule about how a
+ * nested record is named in the table, and this mission is not the place to invent one — a
+ * non-empty subdirectory is REFUSED, so the next mission that wants one has to decide
+ * deliberately instead of silently getting no coverage. See `classifyEntries`.
+ */
 export const DECISIONS_DIR = 'docs/architecture/decisions';
 /** The derived view. */
 export const INDEX_FILE = 'docs/architecture/README.md';
@@ -56,6 +75,54 @@ export const INDEX_FILE = 'docs/architecture/README.md';
 export const SECTION = '## Decisions (ADRs)';
 
 /* ─────────────────────────────────── parsers ─────────────────────────────────── */
+
+/**
+ * Blank out every HTML comment span, preserving newlines so line structure survives.
+ *
+ * A commented-out row RENDERS NOTHING. Read literally, it satisfied coverage: the gate printed
+ * `15/15` over a table that showed fourteen rows to a reader — a record with no visible row,
+ * which is exactly the #193 defect this gate exists to prevent, smuggled past the gate in the
+ * gate's own syntax. Unterminated comments are swallowed to end-of-file here for the same reason
+ * a renderer swallows them.
+ */
+function stripHtmlComments(text) {
+  return text.replace(/<!--[\s\S]*?(?:-->|$)/g, (m) => m.replace(/[^\n]/g, ''));
+}
+
+/**
+ * Which lines are inside a fenced code block, computed from the TOP of the document.
+ *
+ * Same defect as the comment case: a row inside ``` fences renders as literal text and indexes
+ * nothing, but parsed naively it counted as coverage. Computed from line 0 rather than from the
+ * section heading because a heading inside a fence is not a heading either.
+ */
+function fenceMask(lines) {
+  const mask = new Array(lines.length).fill(false);
+  let open = null;
+  for (let i = 0; i < lines.length; i++) {
+    const m = lines[i].match(/^\s*(`{3,}|~{3,})/);
+    if (open === null) {
+      if (m) open = m[1][0];
+    } else {
+      mask[i] = true;
+      if (m && m[1][0] === open) open = null;
+    }
+  }
+  return mask;
+}
+
+/**
+ * Split a table row into cells on UNESCAPED pipes.
+ *
+ * GFM writes a literal pipe inside a cell as `\|`. Splitting on every `|` shifted every cell
+ * after it by one, so a title containing one reported a STATUS violation naming a field the
+ * author never touched — a true failure with a message pointing at the wrong place, which is
+ * worse than no message.
+ */
+export function splitRow(line) {
+  const inner = line.replace(/^\|/, '').replace(/(?<!\\)\|$/, '');
+  return inner.split(/(?<!\\)\|/).map((c) => c.replace(/\\\|/g, '|').trim());
+}
 
 /**
  * Parse the ADR table out of the index.
@@ -67,19 +134,24 @@ export const SECTION = '## Decisions (ADRs)';
  * A data row whose first cell is not a markdown link goes to `malformed`, not silently to the
  * floor: a row typed by hand with no link is a row pointing at no record, which is precisely one
  * of the two drift directions.
+ *
+ * ONLY RENDERED ROWS COUNT. Comment spans are blanked and fenced blocks are skipped before
+ * anything is matched — see the two helpers above for what each one cost.
  */
 export function parseAdrTable(readmeText) {
-  const lines = String(readmeText ?? '').split('\n');
-  const start = lines.findIndex((l) => l.trim() === SECTION);
+  const lines = stripHtmlComments(String(readmeText ?? '')).split('\n');
+  const fenced = fenceMask(lines);
+  const start = lines.findIndex((l, i) => !fenced[i] && l.trim() === SECTION);
   if (start === -1) return { sectionFound: false, rows: [], malformed: [] };
 
   const rows = [];
   const malformed = [];
   for (let i = start + 1; i < lines.length; i++) {
+    if (fenced[i]) continue;
     if (/^##\s/.test(lines[i])) break;
     const t = lines[i].trim();
     if (!t.startsWith('|')) continue;
-    const cells = t.replace(/^\|/, '').replace(/\|$/, '').split('|').map((c) => c.trim());
+    const cells = splitRow(t);
     if (cells.every((c) => /^:?-{3,}:?$/.test(c))) continue; // separator
     if (cells[0] === 'ADR') continue; // header
     const link = cells[0].match(/^\[([^\]]+)\]\(([^)]+)\)$/);
@@ -128,6 +200,42 @@ export function statusToken(raw) {
   // file's header names for titles applies to formatting too.
   const m = raw.replace(/[*_`]/g, '').trim().match(/^[A-Za-z][A-Za-z-]*/);
   return m ? m[0] : null;
+}
+
+/**
+ * Which directory entries are records, and which are refusals.
+ *
+ * `entries` are `{ name, isFile, isDirectory, childCount }`, with symlinks already resolved by
+ * the caller — keeping this a pure function over plain descriptors is what lets `--selftest`
+ * feed it a subdirectory without creating one on disk.
+ */
+export function classifyEntries(entries) {
+  const files = [];
+  const problems = [];
+  for (const e of entries ?? []) {
+    if (e.isDirectory) {
+      if ((e.childCount ?? 0) > 0) {
+        problems.push(
+          `${DECISIONS_DIR}/${e.name}/ is a non-empty subdirectory holding ${e.childCount} ` +
+            `entr${e.childCount === 1 ? 'y' : 'ies'}. This gate indexes the top level only, so ` +
+            `anything in there is invisible to it — an unindexed record that reports as coverage. ` +
+            `Flatten it, or teach this gate and the table how a nested record is addressed.`,
+        );
+      }
+      continue;
+    }
+    if (!e.isFile) {
+      problems.push(
+        `${DECISIONS_DIR}/${e.name} is neither a file nor a directory — refusing to guess whether ` +
+          `it is a record`,
+      );
+      continue;
+    }
+    // Non-markdown files are assets (diagrams, exports), not records.
+    if (!e.name.endsWith('.md')) continue;
+    files.push(e.name);
+  }
+  return { files: files.sort(), problems };
 }
 
 /* ─────────────────────────── the checks, as pure functions ─────────────────────────── */
@@ -257,60 +365,133 @@ export function checkStatusAgreement(rows, records) {
 
 /* ──────────────────────────────────── selftest ──────────────────────────────────── */
 
-const TABLE = (...rows) => parseAdrTable([SECTION, '', '| ADR | Title | Status |', '|---|---|---|', ...rows].join('\n'));
+const SECTION_DOC = (...lines) =>
+  [SECTION, '', '| ADR | Title | Status |', '|---|---|---|', ...lines].join('\n');
+const TABLE = (...rows) => parseAdrTable(SECTION_DOC(...rows));
 const REC = (status) => new Map([['a.md', { title: 'A', status }]]);
 
+/**
+ * Every probe declares `expect`: a substring of the problem it is supposed to provoke.
+ *
+ * Without it a probe passes when ANY check fires, and a mutation sweep proved that is not a
+ * theoretical gap here — deleting the zero-files floor, the zero-rows floor, the missing-section
+ * floor or the missing-Status branch each left this selftest green, because a neighbouring check
+ * tripped on the same input. The inputs below are also narrowed so each probe provokes its own
+ * check as directly as it can; `expect` is what makes that provable rather than intended.
+ */
 const PROBES = [
   {
     what: 'a record on disk with no row in the table',
+    expect: 'has no row in the',
     run: () => checkIndexCoverage(['a.md', 'b.md'], TABLE('| [ADR-1](decisions/a.md) | A | Accepted |')),
   },
   {
     what: 'a row pointing at a record that does not exist',
+    expect: 'which does not exist',
     run: () => checkIndexCoverage(['a.md'], TABLE('| [ADR-1](decisions/a.md) | A | Accepted |', '| [ADR-2](decisions/gone.md) | B | Accepted |')),
   },
   {
+    // ZERO files AND an empty table, so the only thing this input can be about is the files
+    // floor. The old version passed a populated table, whose row then tripped the stale-row
+    // check — which is why deleting this floor was green.
     what: 'coverage asserted over ZERO record files',
-    run: () => checkIndexCoverage([], TABLE('| [ADR-1](decisions/a.md) | A | Accepted |')),
+    expect: 'yielded no decision records',
+    run: () => checkIndexCoverage([], TABLE()),
   },
   {
     what: 'coverage asserted over a table with ZERO rows',
+    expect: 'parsed to ZERO rows',
     run: () => checkIndexCoverage(['a.md'], TABLE()),
   },
   {
+    // ZERO files as well, so the zero-rows floor a missing section also implies is not what
+    // carries this probe. Deleting the section floor used to fall through to that one.
     what: 'an index file with no Decisions section at all',
-    run: () => checkIndexCoverage(['a.md'], parseAdrTable('# Architecture\n\n## Research\n')),
+    expect: `has no "${SECTION}" section`,
+    run: () => checkIndexCoverage([], parseAdrTable('# Architecture\n\n## Research\n')),
   },
   {
     what: 'a hand-typed row that links to nothing',
+    expect: 'index row links to no record',
     run: () => checkIndexCoverage(['a.md'], TABLE('| [ADR-1](decisions/a.md) | A | Accepted |', '| ADR-2 | B | Accepted |')),
   },
   {
     what: 'a row linking outside the decisions directory',
+    expect: 'which is not a record under',
     run: () => checkIndexCoverage(['a.md'], TABLE('| [ADR-1](decisions/a.md) | A | Accepted |', '| [ADR-2](research/002.md) | B | Accepted |')),
   },
   {
     what: 'two rows for the same record',
+    expect: 'has two rows',
     run: () => checkIndexCoverage(['a.md'], TABLE('| [ADR-1](decisions/a.md) | A | Accepted |', '| [ADR-1 bis](decisions/a.md) | A | Accepted |')),
   },
   {
+    // A COMMENTED-OUT ROW RENDERS NOTHING. Before `stripHtmlComments`, this input reported full
+    // coverage — the gate certifying an index a reader cannot see, which is #193 exactly.
+    what: 'a row hidden inside an HTML comment',
+    expect: 'decisions/b.md has no row in the',
+    run: () =>
+      checkIndexCoverage(
+        ['a.md', 'b.md'],
+        parseAdrTable(
+          // The MULTI-LINE form, which is the one that got through: the row's own line still
+          // starts with `|`, so a line-at-a-time parser sees a perfectly good row. A one-line
+          // `<!-- | … | -->` never did, because it does not start with a pipe.
+          SECTION_DOC('| [ADR-1](decisions/a.md) | A | Accepted |', '<!--', '| [ADR-2](decisions/b.md) | B | Accepted |', '-->'),
+        ),
+      ),
+  },
+  {
+    // Same defect, the other syntax that renders a row as text instead of as a row.
+    what: 'a row hidden inside a fenced code block',
+    expect: 'decisions/b.md has no row in the',
+    run: () =>
+      checkIndexCoverage(
+        ['a.md', 'b.md'],
+        parseAdrTable(
+          SECTION_DOC('| [ADR-1](decisions/a.md) | A | Accepted |', '', '```markdown', '| [ADR-2](decisions/b.md) | B | Accepted |', '```'),
+        ),
+      ),
+  },
+  {
+    what: 'a non-empty subdirectory under the decisions directory',
+    expect: 'is a non-empty subdirectory',
+    run: () =>
+      classifyEntries([
+        { name: 'a.md', isFile: true, isDirectory: false },
+        { name: 'superseded', isFile: false, isDirectory: true, childCount: 2 },
+      ]).problems,
+  },
+  {
+    what: 'a decisions entry that resolves to neither a file nor a directory',
+    expect: 'neither a file nor a directory',
+    run: () => classifyEntries([{ name: 'dangling.md', isFile: false, isDirectory: false }]).problems,
+  },
+  {
     what: 'a row promoting a Proposed record to Accepted',
+    expect: 'says Status "Accepted"',
     run: () => checkStatusAgreement(TABLE('| [ADR-1](decisions/a.md) | A | Accepted |').rows, REC('Proposed')),
   },
   {
     what: 'a row still saying Proposed after the record was ratified',
+    expect: 'says Status "Proposed"',
     run: () => checkStatusAgreement(TABLE('| [ADR-1](decisions/a.md) | A | Proposed |').rows, REC('Accepted (ratified by the operator, 2026-09-02)')),
   },
   {
+    // The ROW has no status either, so the `got === null` branch cannot be what carries this
+    // probe. With a populated cell it was, which is why deleting the record-side branch was green.
     what: 'a record with no Status field at all',
-    run: () => checkStatusAgreement(TABLE('| [ADR-1](decisions/a.md) | A | Accepted |').rows, REC(null)),
+    expect: 'states no **Status:** field',
+    run: () => checkStatusAgreement(TABLE('| [ADR-1](decisions/a.md) | A |  |').rows, REC(null)),
   },
   {
     what: 'a row with an empty Status cell',
+    expect: 'has no Status value',
     run: () => checkStatusAgreement(TABLE('| [ADR-1](decisions/a.md) | A |  |').rows, REC('Accepted')),
   },
   {
     what: 'status agreement asserted over ZERO records',
+    expect: 'refusing to certify status agreement over nothing',
     run: () => checkStatusAgreement(TABLE('| [ADR-1](decisions/a.md) | A | Accepted |').rows, new Map()),
   },
   {
@@ -318,6 +499,7 @@ const PROBES = [
     // leading token is unreadable. Without this, `statusToken` returning null on both sides
     // would compare null to null and pass.
     what: 'a record whose Status field starts with no comparable word',
+    expect: 'begins with no word this gate',
     run: () => checkStatusAgreement(TABLE('| [ADR-1](decisions/a.md) | A | Accepted |').rows, REC('— see below')),
   },
 ];
@@ -333,6 +515,32 @@ const NEGATIVE_PROBES = [
     run: () => checkIndexCoverage(['a.md'], TABLE('| [ADR-1](decisions/a.md#context) | A | Accepted |')),
   },
   {
+    // THE SECTION BOUNDARY. The `break` on the next `##` heading survived mutation against the
+    // real tree — the README's Research table happens to sit further down than anything the old
+    // probes fed the parser. Delete the break and this input reds: the Research header and its
+    // row are parsed as ADR rows, one malformed and one pointing outside decisions/.
+    what: 'a Research table after the section is not part of the index',
+    run: () =>
+      checkIndexCoverage(
+        ['a.md'],
+        parseAdrTable(
+          [
+            SECTION,
+            '',
+            '| ADR | Title | Status |',
+            '|---|---|---|',
+            '| [ADR-1](decisions/a.md) | A | Accepted |',
+            '',
+            '## Research',
+            '',
+            '| Document | Topic |',
+            '|---|---|',
+            '| [001-eval.md](research/001-eval.md) | Distribution |',
+          ].join('\n'),
+        ),
+      ),
+  },
+  {
     what: 'a status qualified with prose after the token',
     run: () => checkStatusAgreement(TABLE('| [ADR-1](decisions/a.md) | A | Accepted |').rows, REC('Accepted (ratified by the operator, 2026-09-02)')),
   },
@@ -344,14 +552,43 @@ const NEGATIVE_PROBES = [
     what: 'the addendum punctuation, `**Status**: Complete`',
     run: () => checkStatusAgreement(TABLE('| [ADR-1](decisions/a.md) | A | Complete |').rows, new Map([['a.md', parseRecord('# A\n\n**Status**: Complete (WP01 delivered)\n')]])),
   },
+  {
+    // A GFM-escaped pipe in a title used to shift every cell right, so the STATUS check reported
+    // a violation of a field the author never edited — a true failure naming the wrong place.
+    what: 'a title containing a GFM-escaped pipe',
+    run: () => checkStatusAgreement(TABLE('| [ADR-1](decisions/a.md) | Tokens \\| Type | Accepted |').rows, REC('Accepted')),
+  },
+  {
+    what: 'an empty subdirectory and a non-markdown asset are not refused',
+    run: () =>
+      classifyEntries([
+        { name: 'a.md', isFile: true, isDirectory: false },
+        { name: 'diagram.png', isFile: true, isDirectory: false },
+        { name: 'drafts', isFile: false, isDirectory: true, childCount: 0 },
+      ]).problems,
+  },
 ];
 
 function selftest() {
   let failed = 0;
   for (const probe of PROBES) {
+    if (typeof probe.expect !== 'string' || probe.expect.length === 0) {
+      console.log(`❌ probe declares no expected problem: ${probe.what}`);
+      failed++;
+      continue;
+    }
     const problems = probe.run();
     if (problems.length === 0) {
       console.log(`❌ probe did NOT trip: ${probe.what}`);
+      failed++;
+    } else if (!problems.some((p) => p.includes(probe.expect))) {
+      // The mutation-sweep finding, made structural: a probe satisfied by ANY problem is
+      // satisfied by the WRONG check firing, and four guards in this file were deletable
+      // for exactly that reason while the line below printed a tick.
+      console.log(
+        `❌ probe tripped the WRONG check: ${probe.what} — expected a problem containing ` +
+          `"${probe.expect}", got: ${problems.join(' | ')}`,
+      );
       failed++;
     } else {
       console.log(`✅ ${probe.what} — rejected (${problems.length})`);
@@ -373,14 +610,14 @@ function selftest() {
   // The floor is asserted, not implied: a probe list that silently emptied would print nothing
   // and exit 0, which is the defect class this whole script is about — one level up, in the
   // harness that is supposed to be the evidence.
-  if (PROBES.length < 14 || NEGATIVE_PROBES.length < 5) {
+  if (PROBES.length < 18 || NEGATIVE_PROBES.length < 8) {
     console.error(
       `❌ only ${PROBES.length} defect probe(s) and ${NEGATIVE_PROBES.length} healthy probe(s) — ` +
-        `the selftest floor is 14 and 5`,
+        `the selftest floor is 18 and 8`,
     );
     process.exit(1);
   }
-  console.log(`\n✅ all ${PROBES.length} defect probes tripped and all ${NEGATIVE_PROBES.length} healthy shapes passed.`);
+  console.log(`\n✅ all ${PROBES.length} defect probes tripped their own check and all ${NEGATIVE_PROBES.length} healthy shapes passed.`);
 }
 
 /* ──────────────────────────────────── main ──────────────────────────────────── */
@@ -391,10 +628,30 @@ function main() {
     console.error(`❌ ${DECISIONS_DIR} does not exist — refusing to certify an index over a missing directory.`);
     process.exit(1);
   }
-  const files = readdirSync(dir, { withFileTypes: true })
-    .filter((d) => d.isFile() && d.name.endsWith('.md'))
-    .map((d) => d.name)
-    .sort();
+  // Symlinks are resolved here rather than filtered out: `Dirent.isFile()` is false for one, and
+  // a symlinked record is still a record. A broken link resolves to neither, which
+  // `classifyEntries` refuses rather than skips.
+  const entries = readdirSync(dir, { withFileTypes: true }).map((d) => {
+    let isFile = d.isFile();
+    let isDirectory = d.isDirectory();
+    if (d.isSymbolicLink()) {
+      try {
+        const st = statSync(join(dir, d.name));
+        isFile = st.isFile();
+        isDirectory = st.isDirectory();
+      } catch {
+        isFile = false;
+        isDirectory = false;
+      }
+    }
+    return {
+      name: d.name,
+      isFile,
+      isDirectory,
+      childCount: isDirectory ? readdirSync(join(dir, d.name)).length : 0,
+    };
+  });
+  const { files, problems: discoveryProblems } = classifyEntries(entries);
 
   const indexPath = join(ROOT, INDEX_FILE);
   if (!existsSync(indexPath)) {
@@ -408,7 +665,7 @@ function main() {
   console.log(`records:  ${files.length} in ${DECISIONS_DIR}`);
   console.log(`rows:     ${table.rows.length} under "${SECTION}" in ${INDEX_FILE}`);
 
-  const problems = [...checkIndexCoverage(files, table), ...checkStatusAgreement(table.rows, records)];
+  const problems = [...discoveryProblems, ...checkIndexCoverage(files, table), ...checkStatusAgreement(table.rows, records)];
 
   if (problems.length) {
     console.error(`\n❌ ${problems.length} ADR index problem(s):\n`);
