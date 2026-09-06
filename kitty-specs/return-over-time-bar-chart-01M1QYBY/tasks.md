@@ -82,7 +82,7 @@ WP01 complete authored/browser contract ──▶ WP03 registries/generated/clos
 | FR-001–FR-024 and lane-verifiable NFR/C evidence | Active WP01 and WP03 according to their exact frontmatter refs | WP03 records only evidence that exists on approved dependent `lane-b` |
 | NFR-009 build-budget enforcement | WP03 creates/self-tests the 180-second wrapper and changes CI to call it | Mission wrap-up records the green wrapper-backed CI result at the final PR head |
 | NFR-006 WebKit behavior | WP01 authors the shared three-project assertions and proves Chromium/Firefox locally; WP03 preserves the CI lane | Mission wrap-up requires exact-head PR CI WebKit; no named local container seam exists at planning head |
-| NFR-008 mutation fleet and `suite-budget.json` | WP03 runs the nine-arm fleet locally but cannot change the 560-second ceiling from local evidence | Mission wrap-up records final-head CI counts/time, disposes the measurement row, reruns CI after any row commit, and stops for filtered-suite remediation on breach |
+| NFR-008 mutation fleet and `suite-budget.json` | WP03 runs the nine-arm fleet locally but cannot change the authoritative 1,405.5-second ceiling from local evidence | Mission wrap-up records final-head CI counts/time, disposes the measurement row, reruns CI after any row commit, and stops for filtered-suite remediation on breach |
 | NFR-010 visual fidelity | WP01 owns executable crop scenarios only | Mission wrap-up reviews CI-authoritative bytes, records disposition, commits approved bytes, and obtains fresh green CI |
 | C-008 final latest-train integration and #112 decision | WP03 proves frozen lane provenance only | Mission wrap-up refreshes before consolidation, records the final target/baseline, and decides #112 from latest train |
 | C-009 one `Refs #148` PR into `train/elements-first` | none of the WPs | Mission wrap-up opens the draft PR before CI and finalizes it only after all terminal gates |
@@ -174,10 +174,10 @@ prose ledger is not a substitute for the materialized matrices.
    The exact-head PR CI Playwright/behavior jobs also own the WebKit result; Chromium/Firefox lane
    evidence cannot substitute for it.
 6. From the exact-head CI mutation job, record the SHA/run URL, mutation count, browser-test count,
-   and elapsed seconds. Never raise the 560-second `selftestCeilingSeconds` from local evidence. If
+   and elapsed seconds. Never raise the 1,405.5-second `selftestCeilingSeconds` from local evidence. If
    CI is within budget, append the candidate-head measurement row to `suite-budget.json`, push that
    changed head, and require a fresh complete CI run whose final-head measurement is recorded in PR
-   evidence. If CI exceeds 560 seconds, stop readiness for separately authorized filtered,
+   evidence. If CI exceeds 1,405.5 seconds, stop readiness for separately authorized filtered,
    subject-scoped harness remediation; do not raise the ceiling.
 7. Run the three-lens pre-merge Codex squad and obtain current-head maintainer approval. Any head
    change stales both. Finalize the already-open draft PR only after both match the final head.

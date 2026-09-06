@@ -195,10 +195,10 @@ empty-set guard, or check may be omitted, substituted with a narrative claim, or
 optional. Do not require a local visual comparison to pass before CI-authoritative baselines exist;
 mission wrap-up after WP03 approval is the sole owner of visual baseline acceptance.
 `suite-selftest.mjs` must kill all nine registered bar-chart mutations—seven element arms across
-six pairs plus two React arms—inside its 560-second ceiling; do not raise the ceiling from a local
+six pairs plus two React arms—inside its authoritative 1,405.5-second ceiling; do not raise the ceiling from a local
 estimate or change `suite-budget.json` in WP03. The terminal mission-wrap-up owner records the
 exact-head CI fleet counts/time and disposes the measurement row; an over-budget CI result stops
-readiness for filtered subject-scoped harness remediation rather than raising 560. The final
+readiness for filtered subject-scoped harness remediation rather than raising 1,405.5 seconds. The final
 generated commit must leave `git status --porcelain` empty.
 
 ### T018 — Update durable lane evidence

@@ -337,7 +337,9 @@ standing element assertion and records direct source-break proof without writing
 registries. WP03 is the sole `behaviours.json`/`mutations.json` writer: after the authored component
 is frozen, it registers one SC-010 arm, one SC-013 arm, two independent SC-014 arms that break
 adopted-sheet length and generated-sheet identity, and one arm for each of SC-006/007/008. Run the
-slow suite. The checked-in 560-second ceiling is immutable from local evidence: only the final
+slow suite. The checked-in 1,405.5-second ceiling is authoritative and immutable from local
+evidence; it supersedes the historical 560-second calibration retained in `suite-budget.json`.
+Only the final
 exact-head CI mutation fleet may supply the measurement/disposition described below, and an
 over-budget run stops readiness for filtered subject-scoped harness remediation rather than a
 ceiling increase.
@@ -589,10 +591,11 @@ before execution, a cited local WebKit run is optional additive evidence and nev
 
 The final-head CI mutation job also owns the authoritative fleet measurement. Mission wrap-up must
 record the PR-head SHA, run URL, mutation count, browser-test count, and elapsed seconds, then give
-`suite-budget.json` an explicit disposition. A green measurement at or below the existing 560-second
+`suite-budget.json` an explicit disposition. A green measurement at or below the existing
+1,405.5-second
 ceiling may be appended as a measurement row by the terminal wrap-up owner; because that commit
 changes the head, push it and require a fresh complete CI run. Neither WP03 nor mission wrap-up may
-raise 560 seconds from local evidence. If exact-head CI exceeds 560 seconds, stop readiness and
+raise 1,405.5 seconds from local evidence. If exact-head CI exceeds 1,405.5 seconds, stop readiness and
 perform separately authorized filtered, subject-scoped suite remediation; do not increase the
 ceiling or mark the budget complete.
 
@@ -715,7 +718,7 @@ is canceled without implementation because its complete scope is absorbed into W
 | New semantic tokens fail light mode | Alias themed semantic targets in both blocks; assert computed dark/light difference and contrast before visual review. |
 | Native buttons distort chart geometry | Keep one ownership item per datum and style the button as the full item only in selectable mode; geometry tests cover both modes. |
 | Invalid replacement leaks stale UI | Recompute discriminant every render and assert valid→invalid→valid replacement with zero intermediate targets. |
-| Mutation suite breaches 560 seconds | Keep nine truthful mutations: seven element arms across six pairs (SC-014 needs separate length and identity arms) plus two dedicated React arms; use direct probes for other invariants. Local evidence cannot raise 560. A final-head CI breach blocks readiness and requires separately authorized filtered, subject-scoped harness remediation. |
+| Mutation suite breaches 1,405.5 seconds | Keep nine truthful mutations: seven element arms across six pairs (SC-014 needs separate length and identity arms) plus two dedicated React arms; use direct probes for other invariants. Local evidence cannot raise 1,405.5 seconds. A final-head CI breach blocks readiness and requires separately authorized filtered, subject-scoped harness remediation. |
 | Screenshot encourages extra deployment series | Crop only the four blue bars and exclude deployment dots/counts/legend per RD-005 and C-002. |
 | Public part surface becomes accidental API | Freeze only the seven structural parts above; leave decorative/internal nodes private. |
 | Generated source conflicts after serial work | Keep CEM/React/Vue/expected-docs/SIZES ownership in WP03, regenerate from final authored sources once, and rerun drift checks and exact-head reviews. |
