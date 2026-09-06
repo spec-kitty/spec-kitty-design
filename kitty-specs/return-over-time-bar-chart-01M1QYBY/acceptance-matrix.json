@@ -319,10 +319,10 @@
       "criterion_id": "FR-023",
       "description": "Prove series, selectedId, selectable, and event detail reach the generated React wrapper without any, including replacement and removal through the production hook.",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "fixtures/react-consumer/src/sk-bar-chart.test.tsx proves real pre-definition production upgrade, exact readonly series identity/replacement/removal, props, and typed event without any",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T21:30:41.978016+00:00",
       "notes": "Dedicated React runtime and type evidence.",
       "lane_owners": [
         "WP03"
