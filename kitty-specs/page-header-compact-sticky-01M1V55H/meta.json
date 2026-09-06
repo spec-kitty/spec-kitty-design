@@ -1,0 +1,14 @@
+{
+  "created_at": "2026-09-06T10:45:31.258447+00:00",
+  "flattened": false,
+  "friendly_name": "page header compact sticky",
+  "mission_id": "01M1V55HFTD3C8WPN65E20QG9T",
+  "mission_number": null,
+  "mission_slug": "page-header-compact-sticky-01M1V55H",
+  "mission_type": "software-dev",
+  "purpose_context": "This mission advances page header compact sticky on mission/page-header-compact-sticky so stakeholders can track the work from mission creation onward.",
+  "purpose_tldr": "page header compact sticky",
+  "slug": "page-header-compact-sticky-01M1V55H",
+  "target_branch": "mission/page-header-compact-sticky",
+  "topology": "single_branch"
+}
