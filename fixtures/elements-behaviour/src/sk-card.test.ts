@@ -1,6 +1,6 @@
 import { beforeEach, expect, test } from 'vitest';
 import '@spec-kitty/elements';
-import { CARD_STATUSES, STATUS_TONES, cardClasses, cardStaticHtml } from '@spec-kitty/elements';
+import { CARD_STATUSES, cardClasses, cardStaticHtml } from '@spec-kitty/elements';
 import { installTokenSheet } from './token-sheet.js';
 
 /**
@@ -202,22 +202,31 @@ test('an unknown variant THROWS on the authoring path — a bad variant never re
 });
 
 /**
- * ONE VOCABULARY, held by assertion rather than by an import.
+ * THE PARITY ASSERTION IS GONE, and its absence is the point (#216).
  *
- * `sk-card.markup.ts` is a leaf: `scripts/build-element-markup.mjs` evaluates it from a `data:`
- * URL, which has no module base, and exits with a named error on any relative import. So
- * `CARD_STATUSES` cannot import `STATUS_TONES` even though `STATUS_TONES` is the one authored
- * list. This test is what makes the map a derivation instead of a fork: a tone added to #146,
- * removed from it, renamed on either side, or reordered, reds here.
+ * #177 held `CARD_STATUSES` equal to `STATUS_TONES` here — membership and order — because
+ * `sk-card.markup.ts` could not import the one authored list: `scripts/build-element-markup.mjs`
+ * evaluated it from a `data:` URL, which has no module base, and exited with a named error on any
+ * relative import. The assertion worked and did not generalise; the next component to want the
+ * vocabulary would have had to remember to write its own copy of it, and nothing detected that it
+ * did not.
  *
- * ORDER, not just membership. The tones are a presentation scale — neutral through recovery —
- * and stories, the token block and the docs all iterate them. A set-equality assertion would
- * pass over a reordering that silently reorders every one of those surfaces.
+ * The generator now evaluates each markup module from its own file URL, so `CARD_STATUSES` is
+ * `Object.fromEntries(STATUS_TONES.map(...))`. There is no second list, so there is nothing left
+ * for an equality assertion to disagree with: it could only ever compare a derivation with the
+ * thing it was derived from. Deleting it removes a test that had stopped being able to fail for
+ * the reason it was written — not coverage.
+ *
+ * WHAT THE DERIVATION DOES NOT CONSTRAIN is the template literal, so that half stays, standing on
+ * its own below. A map that derived its KEYS from `STATUS_TONES` and its VALUES from another
+ * component's BEM block would satisfy every derivation and still be wrong.
  */
-test('the card\'s status keys are sk-status-indicator\'s tone vocabulary, in order', () => {
-  expect(Object.keys(CARD_STATUSES)).toEqual([...STATUS_TONES]);
-  // And the modifiers are the BEM family for THIS block — a status key that mapped to another
-  // component's class would satisfy the line above and still be wrong.
+test('every card status modifier is the BEM family for this block', () => {
+  // Non-empty, first: `Object.entries` over an empty map makes the loop below a green line over
+  // zero inputs, which is the defect class this repository names most often. A floor, not a count
+  // against `STATUS_TONES.length` — the map is derived from that array, so comparing the two is
+  // the tautology this test was rewritten to stop pretending was coverage.
+  expect(Object.keys(CARD_STATUSES).length).toBeGreaterThan(0);
   for (const [tone, cls] of Object.entries(CARD_STATUSES)) {
     expect(cls).toBe(`sk-card--status-${tone}`);
   }

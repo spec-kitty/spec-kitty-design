@@ -1,6 +1,9 @@
 // The AUTHORED markup source for sk-blog-card (ADR-10 §3).
 //
-// LEAF MODULE, no relative imports: the generator evaluates it from a `data:` URL.
+// EVALUATED IN A BARE NODE PROCESS by scripts/build-element-markup.mjs. It may import a LEAF —
+// a module with no imports of its own, like status-indicator/status-tones.ts — and may NOT reach
+// anything that needs a browser. It was a strict leaf until #216: the generator evaluated it from
+// a `data:` URL, which has no module base, so no import resolved at all.
 //
 // THIS COMPONENT COMPOSES sk-card, and the operator ruling on #78 is that it composes the
 // STYLESHEETS rather than nesting the elements.
@@ -45,11 +48,12 @@ export interface BlogCardStaticOptions {
 // sk-button records for its own `content`, and it means "this module escapes caller input" is
 // never wholly true. A consumer passing untrusted text should escape it themselves.
 //
-// Local rather than shared because the generator evaluates this module from a `data:` URL, which
-// has no module base, so a relative import fails. Note that is a property of the CURRENT
-// generator, not of the architecture — a lens showed `esbuild.build({ bundle: true })` would
-// inline a shared helper, which is how the runtime bundle already ships this function. Both the
-// bundling fix and a gate for the class are filed as #163; this is the second copy until then.
+// Local rather than shared, and the REASON changed at #216. It used to be forced: the generator
+// evaluated this module from a `data:` URL, which has no module base, so a relative import failed.
+// It now evaluates from a real module URL, so a shared leaf escaper is possible — the previous
+// note here already said the constraint was a property of the generator rather than of the
+// architecture, and that is now settled. #163 owns the shared helper and the gate for the class;
+// this is the second copy until it lands, and it is no longer blocked on the generator.
 // ONE canonical list. `attr` is `text` plus the two quote characters — derived rather than
 // respelled, because an earlier revision wrote the `& < >` chain twice inside eleven lines and
 // a lens pointed out that two copies of one escaping rule is exactly what drifts.

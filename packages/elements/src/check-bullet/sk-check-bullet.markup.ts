@@ -1,6 +1,9 @@
 // The AUTHORED markup source for sk-check-bullet (ADR-10 §3).
 //
-// LEAF MODULE, no relative imports: the generator evaluates it from a `data:` URL.
+// EVALUATED IN A BARE NODE PROCESS by scripts/build-element-markup.mjs. It may import a LEAF —
+// a module with no imports of its own, like status-indicator/status-tones.ts — and may NOT reach
+// anything that needs a browser. It was a strict leaf until #216: the generator evaluated it from
+// a `data:` URL, which has no module base, so no import resolved at all.
 //
 // NO RENAME HERE. `.sk-check-bullet*` already matches the component's own name, so the #139
 // ownership problem that forced the button and pill-tag renames does not apply.

@@ -2,33 +2,21 @@ import { LitElement, html } from 'lit';
 import { define } from '../define.js';
 import sheet from './sk-status-indicator.css.js';
 
-export type StatusIndicatorTone =
-  | 'neutral'
-  | 'info'
-  | 'success'
-  | 'attention'
-  | 'danger'
-  | 'recovery';
+// THE VOCABULARY MOVED, and the re-export is why nothing else had to (#216).
+//
+// `STATUS_TONES` and its union are now authored in `./status-tones.js`, a leaf module with no
+// imports of its own, because `scripts/build-element-markup.mjs` evaluates a `*.markup.ts` in a
+// bare Node process and cannot reach this file: it imports `lit`, and `define.js` patches
+// `customElements.define` at module scope. `sk-card.markup.ts` consumes the vocabulary from the
+// leaf; every existing consumer — the package barrel, the behaviour fixtures, the stories,
+// `sk-notice` — still reads it from here, unchanged.
+//
+// Exported at #177 and still the library's ONE authored tone list. What changed at #216 is that a
+// second component no longer has to restate it: the copy `sk-card` carried, and the
+// order-sensitive assertion that held the copy honest, are both gone.
+import { STATUS_TONES, type StatusIndicatorTone } from './status-tones.js';
 
-// EXPORTED at #177, and the export is the point rather than a convenience.
-//
-// This array was module-private, so a second component needing the same tone set had no way to
-// consume it and would have spelled the six values again — a fork nothing could detect. It is now
-// the library's ONE authored tone list. `sk-card`'s status axis is held to it by an assertion
-// (fixtures/elements-behaviour/src/sk-card.test.ts) rather than by an import, because
-// `sk-card.markup.ts` is evaluated by scripts/build-element-markup.mjs from a `data:` URL and a
-// relative import there is a named generator error.
-//
-// `//`, not `/** */`: a doc comment above an export is lifted verbatim into custom-elements.json.
-/** The tone vocabulary, in presentation order. */
-export const STATUS_TONES: ReadonlyArray<StatusIndicatorTone> = Object.freeze([
-  'neutral',
-  'info',
-  'success',
-  'attention',
-  'danger',
-  'recovery',
-]);
+export { STATUS_TONES, type StatusIndicatorTone };
 
 const statusTone = (value: unknown): StatusIndicatorTone => {
   if (typeof value === 'string' && STATUS_TONES.includes(value as StatusIndicatorTone)) {

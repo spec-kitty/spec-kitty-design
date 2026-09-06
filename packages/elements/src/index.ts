@@ -19,9 +19,11 @@ export { SkPersonalRail } from './personal-rail/sk-personal-rail.js';
 export { SkContextSidebar } from './context-sidebar/sk-context-sidebar.js';
 export { SkPageHeader } from './page-header/sk-page-header.js';
 export { SkSectionHeader } from './section-header/sk-section-header.js';
-// STATUS_TONES is the library's ONE authored tone list (#146, exported at #177). It is here
-// because a second consumer now exists — sk-card's status axis — and because the assertion that
-// keeps the two from forking has to be able to reach it from outside this package.
+// STATUS_TONES is the library's ONE authored tone list (#146, exported at #177). Since #216 it is
+// authored in `status-indicator/status-tones.ts`, a LEAF with no imports, and re-exported by the
+// element — so `sk-card.markup.ts`, which the markup generator evaluates in a bare Node process,
+// can consume it directly. This line is unchanged by that move on purpose: consumers outside the
+// package see the same two names in the same place they always did.
 export {
   SkStatusIndicator,
   STATUS_TONES,
@@ -34,9 +36,10 @@ export {
   type EvidenceStage,
 } from './evidence-chain/sk-evidence-chain.js';
 // sk-notice (#178) CONSUMES the tone vocabulary above rather than restating it — it imports
-// STATUS_TONES directly, which it can because it authors no `*.markup.ts` (there is no static
-// form for an announcement-bearing element to have) and so never meets the data:-URL constraint
-// #216 records. `NOTICE_ANNOUNCEMENTS` is its own, separate axis: politeness, not tone.
+// STATUS_TONES directly, which it could even before #216 because it authors no `*.markup.ts`
+// (there is no static form for an announcement-bearing element to have) and so never met the
+// data:-URL constraint #216 closed. It needed no conversion when that landed; `sk-card` did.
+// `NOTICE_ANNOUNCEMENTS` is its own, separate axis: politeness, not tone.
 export {
   SkNotice,
   NOTICE_ANNOUNCEMENTS,
@@ -99,8 +102,9 @@ export { default as skTransitionMatrixSheet } from './transition-matrix/sk-trans
 // and shown to consumers in IDE hovers.
 //
 // CARD_STATUSES is exported for the reason FEATURE_CARD_ACCENTS and RIBBON_CARD_COLOURS are: the
-// behaviour fixture DERIVES its loops from it, and asserts its keys equal STATUS_TONES. A tone
-// added on either side without the other reds that test instead of passing unobserved.
+// behaviour fixture DERIVES its loops from it. It no longer asserts its keys equal STATUS_TONES —
+// since #216 the map IS `Object.fromEntries(STATUS_TONES.map(...))`, so there is no second list to
+// disagree with and that assertion could only compare a derivation with its own source.
 export {
   CARD_AXES,
   CARD_STATUSES,
@@ -199,8 +203,8 @@ export {
 //
 // ONLY WHAT IS CONSUMED. An earlier revision re-exported the *_VARIANTS, *_AXES and is* names
 // for both components — eight symbols with no caller anywhere in the repo. They are not needed
-// by the generator, which evaluates the markup module directly from a data: URL and never goes
-// through this barrel, nor by the analyzer, which globs source.
+// by the generator, which imports the markup module by its own file URL and never goes through
+// this barrel, nor by the analyzer, which globs source.
 //
 // APPLIED TO TWO COMPONENTS SO FAR, and the rest is a KNOWN, SCOPED gap rather than an
 // oversight — a lens enumerated it and it is worth stating plainly instead of leaving the rule

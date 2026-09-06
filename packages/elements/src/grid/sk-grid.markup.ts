@@ -2,8 +2,10 @@
 // module are GENERATED from this file by scripts/build-element-markup.mjs, and CI fails on
 // drift — so this is the only place the class list is written.
 //
-// LEAF MODULE, no relative imports: the generator evaluates it from a `data:` URL, which has
-// no module base.
+// EVALUATED IN A BARE NODE PROCESS by scripts/build-element-markup.mjs. It may import a LEAF —
+// a module with no imports of its own, like status-indicator/status-tones.ts — and may NOT reach
+// anything that needs a browser. It was a strict leaf until #216: the generator evaluated it from
+// a `data:` URL, which has no module base, so no import resolved at all.
 
 /** The column-count modifiers this primitive supports, as variant name → BEM modifier. */
 export const GRID_VARIANTS = {

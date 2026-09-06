@@ -16,10 +16,71 @@
  * Usage: node scripts/build-element-markup.mjs [--check]
  */
 import { readFileSync, writeFileSync, existsSync, globSync, statSync, mkdirSync } from 'node:fs';
-import { basename, dirname } from 'node:path';
+import { basename, dirname, resolve } from 'node:path';
+import { registerHooks } from 'node:module';
+import { pathToFileURL, fileURLToPath } from 'node:url';
 import * as esbuild from 'esbuild';
 
 const check = process.argv.includes('--check');
+
+// A REAL MODULE URL, so a markup module can consume a value another module owns (#216).
+//
+// This file used to transform each `*.markup.ts` with esbuild and `import()` the result from a
+// `data:` URL. A `data:` URL has no hierarchical base, so ANY import from a markup module — bare
+// or relative — died there, and the generator said so in a named error. The constraint was real
+// and correctly reported, and its consequence was the defect: a markup module could not import a
+// shared VOCABULARY, so `sk-card` restated `sk-status-indicator`'s six tones and pinned the copy
+// with an order-sensitive assertion that nothing forced the next component to write. The operator
+// ruled on 2026-09-06: fix the generator, so no component ever restates the vocabulary again.
+//
+// Each module is now imported from `pathToFileURL(src)` — its own path — which gives every import
+// inside it a base to resolve against. Two hooks make that work against the source tree as this
+// repository actually authors it:
+//
+//   resolve — every relative import in this repo carries a `.js` extension over a `.ts` source
+//             (NodeNext style, and required: `allowImportingTsExtensions` conflicts with the
+//             emit `packages/elements` performs). Node does NOT map `.js` back to `.ts` — it
+//             reports ERR_MODULE_NOT_FOUND for a file that type-checks perfectly. So a relative
+//             `.js` specifier with nothing behind it and a `.ts` sibling is retargeted, and
+//             NOTHING else is: a specifier that resolves normally never reaches this branch.
+//
+//   load    — esbuild stays the transformer. Node 22.18+ strips types natively and would also
+//             work here, but it is erasable-syntax-only and gated on the runner's Node MINOR
+//             (`node-version: '22'` resolves to whatever 22.x is current). esbuild is pinned in
+//             package.json, is already what this file used, and the reasoning below about not
+//             hand-stripping types is unchanged. Evaluating from a different URL is the change;
+//             what understands the language is not.
+//
+// Both hooks are installed once, in this process, and both fall through to the default for
+// anything they do not recognise. `registerHooks` is the synchronous in-thread API (Node 22.15+),
+// so there is no worker thread and no loader package to add.
+registerHooks({
+  resolve(specifier, context, nextResolve) {
+    if (specifier.startsWith('.') && specifier.endsWith('.js') && context.parentURL?.startsWith('file:')) {
+      const asWritten = new URL(specifier, context.parentURL);
+      if (!existsSync(fileURLToPath(asWritten))) {
+        const source = new URL(`${specifier.slice(0, -'.js'.length)}.ts`, context.parentURL);
+        if (existsSync(fileURLToPath(source))) {
+          return { url: source.href, format: 'module', shortCircuit: true };
+        }
+      }
+    }
+    return nextResolve(specifier, context);
+  },
+  load(url, context, nextLoad) {
+    if (url.startsWith('file:') && url.endsWith('.ts')) {
+      // Transformed by esbuild, not by regex. Hand-stripping types is a regex over a grammar
+      // and it broke on the first optional parameter — the same class of mistake this repo has
+      // already paid for once. esbuild is pinned here and understands the language.
+      const { code } = esbuild.transformSync(readFileSync(fileURLToPath(url), 'utf8'), {
+        loader: 'ts',
+        format: 'esm',
+      });
+      return { format: 'module', source: code, shortCircuit: true };
+    }
+    return nextLoad(url, context);
+  },
+});
 
 // Derived from the ELEMENTS that have an authored markup module — the same derivation the
 // CSS pipeline uses, and for the same reason: a hand-maintained list does not survive
@@ -36,27 +97,29 @@ let drifted = [];
 
 for (const src of sources) {
   const name = basename(src).replace(/^sk-/, '').replace(/\.markup\.ts$/, '');
-  // Transformed by esbuild, not by regex. Hand-stripping types is a regex over a grammar
-  // and it broke on the first optional parameter — the same class of mistake this repo has
-  // already paid for once. esbuild is pinned here and understands the language.
-  const { code: js } = esbuild.transformSync(readFileSync(src, 'utf8'), {
-    loader: 'ts',
-    format: 'esm',
-  });
-  // A data: URL has no hierarchical base, so a markup module with a RELATIVE import dies
-  // here. That fails closed, which is safe — but with a raw `ERR_UNSUPPORTED_RESOLVE_REQUEST`
-  // stack on someone else's PR, which is the same unnamed-failure class the two errors below
-  // exist to close. The constraint is real and worth stating: a *.markup.ts is a leaf.
+  // STILL NAMED, and the constraint it names is now the true one. The old message said a
+  // *.markup.ts "must be a leaf module with no relative imports", which was accurate about the
+  // data: URL it no longer runs from. What remains is narrower and worth stating exactly,
+  // because it is what a reader will hit: this runs in a bare Node process, so a markup module
+  // may import a LEAF — a module with no imports of its own, like
+  // status-indicator/status-tones.ts — and may not reach a module that needs a browser. Every
+  // element file does: they import `lit`, and `define.js` patches `customElements.define` at
+  // module scope, which throws before any export is read.
+  //
+  // Without this the failure is a raw ERR_MODULE_NOT_FOUND or a `customElements is not defined`
+  // stack on someone else's PR — the unnamed-failure class the errors below exist to close.
   let mod;
   try {
-    mod = await import(`data:text/javascript,${encodeURIComponent(js)}`);
+    mod = await import(pathToFileURL(resolve(src)).href);
   } catch (err) {
     console.error(`❌ ${src} could not be loaded by the generator:`);
     console.error(`   ${String(err?.message ?? err).split('\n')[0]}`);
     console.error(
-      `   A *.markup.ts is evaluated from a data: URL and therefore has NO module base — it\n` +
-        `   must be a leaf module with no relative imports. Inline what it needs, or move the\n` +
-        `   shared part into the markup module itself.`
+      `   The generator evaluates a *.markup.ts in a bare Node process. It may import a LEAF\n` +
+        `   module — one with no imports of its own, e.g. status-indicator/status-tones.ts — and\n` +
+        `   it may NOT import anything that needs a browser: every sk-*.ts element reaches \`lit\`\n` +
+        `   and registers a custom element at module scope. Point the import at a leaf, or move\n` +
+        `   the shared part into one.`
     );
     process.exit(1);
   }
