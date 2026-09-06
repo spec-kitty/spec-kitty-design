@@ -58,10 +58,10 @@
       "criterion_id": "FR-006",
       "description": "Authored fixtures exist for every required determinate state: zero, T10 5-of-8, complete, a large total, and a long label.",
       "proof_type": "code_review",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "packages/styles/src/progress/ and generated packages/styles/src/progress/index.ts \u2014 zero, 5-of-8, complete, large-total, and long-label fixtures reviewed",
+      "pass_fail": "pass",
+      "verified_by": "codex-orry-wp208-210-0906a",
+      "verified_at": "2026-09-06T17:32:31.571264+00:00",
       "notes": "Confirmed by WP01 T001's five state fixtures existing on disk and appearing in the generated barrel (build-styles-only-markup.mjs --check, WP01 T002/T009)."
     },
     {
