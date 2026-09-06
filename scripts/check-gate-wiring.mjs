@@ -317,6 +317,13 @@ else {
     // silently omits seven of fifteen records again.
     [/node\s+scripts\/check-adr-index\.mjs(?!\s*--selftest)(\s|$)/, 'the ADR index gate', 'scripts/check-adr-index.mjs'],
     [/node\s+scripts\/check-adr-index\.mjs\s+--selftest(\s|$)/, "the ADR index gate's own probe table", 'scripts/check-adr-index.mjs --selftest'],
+    // #197, both entries with the gate itself, per the three comments above. `llms.txt` and
+    // `llms-full.txt` were a third and fourth hand-maintained ADR index — 3 of 15 records and
+    // 14 of 15 respectively, plus three range expressions and two set-wide status claims — and
+    // nothing in `.github/` or `scripts/` referenced either file. This gate is what keeps the
+    // hand list from coming back; without an entry here its two CI lines are deletable free.
+    [/node\s+scripts\/check-llms-adr-surface\.mjs(?!\s*--selftest)(\s|$)/, 'the LLM ADR-surface gate', 'scripts/check-llms-adr-surface.mjs'],
+    [/node\s+scripts\/check-llms-adr-surface\.mjs\s+--selftest(\s|$)/, "the LLM ADR-surface gate's own probe table", 'scripts/check-llms-adr-surface.mjs --selftest'],
     // THIS FILE, registered against itself. Every comment above records the same episode — a
     // gate shipped with no entry here, and a lens then deleting its CI line with this checker
     // still green (#74's css-hygiene gate, #129's manifest gate) — and this file was the one
