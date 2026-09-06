@@ -1,6 +1,6 @@
 {
   "mission_slug": "delivery-return-metric-elements-01M1STPA",
-  "mission_number": "",
+  "mission_number": "8",
   "mission_type": "software-dev",
   "overall_verdict": "pending",
   "criteria": [
@@ -8,10 +8,10 @@
       "criterion_id": "FR-001",
       "description": "sk-metric renders the supplied label and displayValue verbatim, including currency-looking, percentage-looking, large and nonnumeric strings.",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "fixtures/elements-behaviour/src/sk-metric.test.ts:27-47; exact opaque display strings passed in npm test",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T16:48:25.139033+00:00",
       "notes": "WP01: focused browser behavior assertions plus named production-source red reversal."
     },
     {
