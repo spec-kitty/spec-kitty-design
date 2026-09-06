@@ -12,6 +12,18 @@
       "verdict": "deferred-with-followup",
       "wp": null
     },
+    "#178": {
+      "evidence_ref": "Follow-up: #178 \u2014 external notice prerequisite for downstream #214; not part of TKW2",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "deferred-with-followup",
+      "wp": null
+    },
     "#208": {
       "evidence_ref": "https://github.com/spec-kitty/spec-kitty-design/issues/208 \u2014 #210 is one child; epic remains open for #209 and #211-#214",
       "fr": null,
