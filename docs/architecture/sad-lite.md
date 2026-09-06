@@ -214,9 +214,22 @@ the #200 ruling.
 > index rather than for one: an ungated table is right or wrong by coincidence.
 >
 > Correcting the two cells and leaving the table ungated is what produced #226, and #193 before
-> it. So the table is gone rather than fixed, which is the answer this repository has now reached
-> four times: `elements-first-programme.md:5`, `llms.txt`/`llms-full.txt` (#197), this file's
-> **Related ADRs** row (#201), and now this section. One index, one gate.
+> it. So the table is gone rather than fixed, which is the answer this repository has reached at
+> `elements-first-programme.md:5`, at `llms.txt`/`llms-full.txt` (#197), at this file's
+> **Related ADRs** row (#201), here, and at `CLAUDE.md`'s own "ADR index" line — that last one
+> found while writing this note, still reading "eight ADRs" against fifteen records, and
+> repointed in the same commit. Five is the number of instances **found**, not a proof that none
+> remain: every one of them was found by someone looking for something else.
+>
+> **The Decision column.** The removed table was `ADR | Decision | Status`; the gated one is
+> `ADR | Title | Status`, and a Title is a transcribed H1, not a decision — ADR-9's row read
+> "Open shadow roots; consumers restyle through `::part()`" where the gated table reads "Shadow
+> DOM, the Styling API, and Label Ownership". Those one-line glosses live in `llms-full.txt` §2,
+> which carries a `**Decision:**` line for 13 of the 15 records. **Two have none:** ADR-10, whose
+> section states its rulings as numbered clauses instead, and the ADR-003 addendum. So for ADR-10
+> the single-sentence "what did this decide" gloss this table used to carry now exists on no
+> surface this section points at. Recorded rather than reconstructed here: writing one would be
+> authoring a summary, which is what an index is not for.
 >
 > **The two `Superseded by ADR-013` cells.** ADR-006 and ADR-007 carried that phrase here, and
 > the gated table does not use it — it transcribes each record's own Status, and neither record

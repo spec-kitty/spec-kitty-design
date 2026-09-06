@@ -128,7 +128,7 @@ This repo uses Spec Kitty for structured spec-driven development.
 - [`./llms-full.txt`](./llms-full.txt) — comprehensive context bundle (~40 KB) with token catalogue, component manifest, ADR summaries, install snippets.
 - Storybook `index.json` (auto-emitted at build): `https://stijn-dejongh.github.io/spec-kitty-design/index.json`.
 - Token catalogue JSON: `https://stijn-dejongh.github.io/spec-kitty-design/token-catalogue.json` (also at `packages/tokens/dist/token-catalogue.json` locally).
-- ADR index: [`./docs/architecture/decisions/`](./docs/architecture/decisions/) (eight ADRs covering token format, monorepo topology, naming, doctrine distribution, supply chain, Storybook 10.x, multi-framework rendering).
+- ADR index: [the architecture README's ADR table](./docs/architecture/README.md#decisions-adrs), which `scripts/check-adr-index.mjs` holds to [`./docs/architecture/decisions/`](./docs/architecture/decisions/) in both directions, each record's own Status transcribed. No count or topic list is written here: this line read "eight ADRs" against fifteen records and named none of the elements-first set, ADR-8 through ADR-14 (#226).
 - Component-usage doc: [`./docs/design-system/using-components.md`](./docs/design-system/using-components.md). Token-usage doc: [`./docs/design-system/using-tokens.md`](./docs/design-system/using-tokens.md).
 - Project-local Claude Code skill: [`./skills/spec-kitty-design/SKILL.md`](./skills/spec-kitty-design/SKILL.md) — copy into your `~/.claude/skills/spec-kitty-design/` (or symlink) if you want a slash command for component scaffolding.
 
