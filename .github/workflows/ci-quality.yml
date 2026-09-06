@@ -310,6 +310,14 @@ jobs:
       # a later PR adding `test_ok=...` to the skipped-tolerance block.
       - name: "[ENFORCED] The gate actually gates the test job (FR-014)"
         run: node scripts/check-gate-wiring.mjs
+      # The wiring checker's own probe table (#202, #205). Same rationale as the CSS, entry,
+      # manifest, wrapper, release and ADR-index gates' `--selftest` steps one level up: the
+      # checker above was defeated twice by edits that still read as correct, and both defeats
+      # were recorded only as prose in an issue. This re-runs all eight against a copy of this
+      # file, plus a control that requires the unmodified workflow to pass, so a checker that
+      # reds on everything cannot satisfy a table of red expectations.
+      - name: "[ENFORCED] The wiring checker's defeat table (#202, #205)"
+        run: node scripts/check-gate-wiring-defeats.mjs
       # The ADR index, held to the directory it indexes (#193). Seven of fifteen records
       # were unindexed when this landed, including the three the elements-first programme
       # cites most. It lives in `lint-code` rather than behind the `changes` filter on
