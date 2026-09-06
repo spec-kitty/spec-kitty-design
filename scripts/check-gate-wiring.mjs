@@ -59,12 +59,16 @@ const JOBS = ['test', 'release-gate'];
 
 /** GitHub expressions masked to one keyword-free token, so `${{ … }}` can neither move the
  *  block depth nor look like a shell word. */
-const masked = (text) => String(text).replace(/\$\{\{[\s\S]*?\}\}/g, 'GHEXPR');
+const masked = (text) =>
+  String(text)
+    .replace(/\$\{\{[\s\S]*?\}\}/g, 'GHEXPR')
+    // Shell parameter expansion too, or `${VAR}`'s brace moves the block depth counted below.
+    .replace(/\$\{[^{}]*\}/g, 'SHVAR');
 
 /** Whole-line `#` comments dropped, `\` continuations joined, blanks removed. A continued
  *  disjunction is ONE line here, which is what lets it be read as one condition. */
-const logicalLines = (body) =>
-  String(body ?? '')
+const logicalLines = (body) => {
+  const lines = String(body ?? '')
     .split('\n')
     .filter((l) => !/^\s*#/.test(l))
     .join('\n')
@@ -72,17 +76,56 @@ const logicalLines = (body) =>
     .split('\n')
     .map((l) => l.trim())
     .filter(Boolean);
+  // `then` ON ITS OWN LINE is folded back onto its `if`. Requiring `; then` on one logical line
+  // was a FALSE POSITIVE against ordinary POSIX style (F7): a perfectly intact gate written
+  //     if [ ... ] || \
+  //        [ ... ]
+  //     then
+  // was reported as having no top-level conditional that exits non-zero, while the shell still
+  // blocked the merge. A checker that reds a correct gate gets the checker deleted, so this is
+  // as load-bearing as any of the defeats below.
+  const folded = [];
+  for (const line of lines) {
+    if (/^(then|do)$/.test(line) && folded.length) folded[folded.length - 1] += `; ${line}`;
+    else folded.push(line);
+  }
+  return folded;
+};
+
+/** `;`-separated simple commands of one logical line. */
+const fragments = (line) => line.split(';').map((f) => f.trim()).filter(Boolean);
+
+/**
+ * An `exit` whose status is PROVABLY non-zero.
+ *
+ * Stated over the argument rather than as a literal `exit 0` pattern (F3). The old rule was
+ * `/exit\s+0\s*$/`, and three one-character neighbours walked past it — `exit 0;`, `exit 00`,
+ * and `SKIP=0` … `exit $SKIP` — each an unconditional early exit that left the gate green.
+ * Bare `exit` inherits the previous command's status and is not provable either. Anything the
+ * rule cannot prove non-zero is refused, so the next spelling fails closed rather than being
+ * added to a list.
+ */
+const RAISING_EXIT = /^exit\s+([1-9][0-9]*)$/;
+const isExit = (fragment) => /^exit\b/.test(fragment);
+const raisesFor = (fragment) => RAISING_EXIT.test(fragment.trim());
 
 const OPENERS = new Set(['if', 'case', 'for', 'while', 'until']);
 const CLOSERS = new Set(['fi', 'esac', 'done']);
 /** Block depth, counted at WORD level over the masked line, so a one-liner `if … ; then … ; fi`
  *  is correctly net zero and a nested block is correctly not top level. */
 const depthDelta = (line) => {
+  const shape = masked(line);
   let delta = 0;
-  for (const word of masked(line).split(/[\s;()]+/)) {
+  for (const word of shape.split(/[\s;()]+/)) {
     if (OPENERS.has(word)) delta += 1;
     else if (CLOSERS.has(word)) delta -= 1;
   }
+  // BRACES COUNT TOO (F1). Without this, `{` and `}` moved no depth and a function header was
+  // just another word, so wrapping the entire failure disjunction in `gate_check() { ... }` and
+  // never calling it read as TOP LEVEL: this file printed green, the probe table printed green,
+  // and the shell printed "All hard gates passed." over a failed `test` job. A brace group is a
+  // block whether or not it has a name, and a gating conditional inside one is not top level.
+  delta += (shape.match(/\{/g) ?? []).length - (shape.match(/\}/g) ?? []).length;
   return delta;
 };
 
@@ -140,15 +183,21 @@ const gatingConditionals = (body) => {
         branch.push(lines[j]);
         inner += depthDelta(lines[j]);
       }
-      const exitsNonZero = branch
-        .flatMap((l) => l.split(';'))
-        .some((fragment) => /^\s*exit\s+[1-9]\d*\s*$/.test(fragment));
+      const exitsNonZero = branch.flatMap(fragments).some(raisesFor);
       if (exitsNonZero) {
         count += 1;
         const parsed = disjunctsOf(opener[1].trim());
         if (parsed === null) malformed.push(opener[1].trim());
         else for (const d of parsed) disjuncts.add(d);
       }
+    }
+    // UNREACHABLE CODE DOES NOT GATE (F1). An unconditional `exit` at top level ends the step,
+    // so every conditional after it is dead — and the checker must not count a dead conditional
+    // as the thing blocking a merge. Scanning stops here rather than reporting, because the
+    // swallow rules below already name the exit itself; what this prevents is the gate LOOKING
+    // gated because an unreachable disjunction is still present in the file.
+    if (depth === 0 && !/^(if|elif|else|while|until|for|case)\b/.test(line) && fragments(line).some(isExit)) {
+      break;
     }
     depth += depthDelta(line);
   }
@@ -167,19 +216,61 @@ const gatingConditionals = (body) => {
  * manifest step is `git diff --exit-code … || { echo "::error::…"; exit 1; }`. Every other
  * right-hand side is refused, whatever it spells, so an unrecognised swallow fails closed.
  */
-const RAISES = /^(?:\{[\s\S]*;\s*exit\s+[1-9]\d*\s*;?\s*\}|exit\s+[1-9]\d*)$/;
+/**
+ * A `||` right-hand side that provably raises.
+ *
+ * Either a bare non-zero `exit`, or a brace group whose FIRST exit is non-zero. "First", not
+ * "last" (F5): the previous rule accepted any group ending in `exit 1`, so
+ * `|| { echo "::warning::drift"; exit 0; exit 1; }` passed while the shell returned 0 at the
+ * first `exit`. The tree's one legitimate fallback — `|| { echo "::error::…"; exit 1; }` —
+ * still qualifies, because its first exit is the raising one; a leading `echo` is not an exit.
+ */
+const raisingRhs = (rhs) => {
+  const group = rhs.match(/^\{([\s\S]*)\}$/);
+  if (group) {
+    const exits = fragments(group[1]).filter(isExit);
+    return exits.length > 0 && raisesFor(exits[0]);
+  }
+  return raisesFor(rhs);
+};
+
 const swallows = (body) => {
   const text = String(body ?? '');
   const why = [];
   if (/(^|\n)\s*set\s+\+e\b/.test(text)) why.push('`set +e`');
-  if (/(^|\n)\s*exit\s+0\s*(#.*)?$/m.test(text)) why.push('a trailing `exit 0`');
+  // A TRAP ON EXIT/ERR REWRITES THE STEP'S STATUS (F2). `trap 'exit 0' EXIT` at the top of the
+  // gate step let it log "Merge blocked." and report success — every clause intact, every
+  // assertion satisfied, the job green over a failed dependency. Nothing in this workflow has a
+  // legitimate reason to trap either signal in an audited step, so the construct is refused
+  // outright rather than having its handler inspected.
+  if (/(^|\n)\s*trap\b[^\n]*\b(EXIT|ERR)\b/.test(text)) why.push('a `trap … EXIT/ERR`');
   for (const line of logicalLines(text)) {
     const shape = masked(line);
+    const isCondition = /^(?:if|elif|while|until)\s/.test(shape);
+
+    // EVERY exit in the body, by ARGUMENT (F3) — not a literal `exit 0` pattern. Conditional
+    // exits inside the line's own `if … ; then` are excluded: the gate's `exit 1` is one.
+    if (!isCondition) {
+      for (const fragment of fragments(shape)) {
+        if (isExit(fragment) && !raisesFor(fragment)) {
+          why.push(`an \`exit\` that is not provably non-zero (\`${fragment.slice(0, 40)}\`)`);
+        }
+      }
+    }
+
     if (!shape.includes('||')) continue;
-    if (/^(?:if|elif|while|until)\s/.test(shape)) continue; // a condition, not a fallback
-    const rhs = shape.slice(shape.lastIndexOf('||') + 2).trim();
-    if (RAISES.test(rhs)) continue;
-    why.push(`a \`||\` fallback (${line.slice(0, 60)})`);
+    if (isCondition) continue; // a condition, not a fallback
+    // EVERY right-hand side in the chain, not just the last (F4). `lastIndexOf('||')` examined
+    // only the final one, so `cmd || echo "::warning::…" || exit 1` and `cmd || true || exit 1`
+    // both passed — and both return 0 under `bash -e`, because the FIRST fallback succeeds and
+    // the `exit 1` is never reached. That reopened #205 on all of REQUIRED_LINT at once.
+    const [, ...rhss] = shape.split('||').map((s) => s.trim());
+    for (const rhs of rhss) {
+      if (!raisingRhs(rhs)) {
+        why.push(`a \`||\` fallback (${line.slice(0, 60)})`);
+        break;
+      }
+    }
   }
   return why;
 };
