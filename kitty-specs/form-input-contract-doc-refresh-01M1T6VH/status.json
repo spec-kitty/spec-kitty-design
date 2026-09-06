@@ -1,0 +1,28 @@
+{
+  "event_count": 1,
+  "last_event_id": "01M1T78DP583A161FD5G1H7K8N",
+  "materialized_at": "2026-09-06T02:02:48.389877+00:00",
+  "mission_number": "",
+  "mission_slug": "form-input-contract-doc-refresh-01M1T6VH",
+  "mission_type": "software-dev",
+  "summary": {
+    "approved": 0,
+    "blocked": 0,
+    "canceled": 0,
+    "claimed": 0,
+    "done": 0,
+    "for_review": 0,
+    "in_progress": 0,
+    "in_review": 0,
+    "planned": 1
+  },
+  "work_packages": {
+    "WP01": {
+      "actor": "finalize-tasks",
+      "force_count": 0,
+      "lane": "planned",
+      "last_event_id": "01M1T78DP583A161FD5G1H7K8N",
+      "last_transition_at": "2026-09-06T02:02:48.389877+00:00"
+    }
+  }
+}
