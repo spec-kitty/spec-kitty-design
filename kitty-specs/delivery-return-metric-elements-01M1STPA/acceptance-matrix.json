@@ -48,10 +48,10 @@
       "criterion_id": "FR-005",
       "description": "A metric exposes one native definition relationship without claiming a surrounding heading or description.",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "sk-metric.ts:84-92 and sk-metric.test.ts:49-58; native dl dt dd relation and no heading passed",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T16:48:31.992890+00:00",
       "notes": "WP01: native dl/dt/dd relationship and absence-of-heading assertions."
     },
     {
