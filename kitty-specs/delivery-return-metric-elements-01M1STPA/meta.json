@@ -10,5 +10,7 @@
   "purpose_tldr": "delivery return metric elements",
   "slug": "delivery-return-metric-elements-01M1STPA",
   "target_branch": "mission/delivery-return-metric-elements",
-  "topology": "lanes"
+  "topology": "lanes",
+  "vcs": "git",
+  "vcs_locked_at": "2026-09-06T00:16:42.180205+00:00"
 }

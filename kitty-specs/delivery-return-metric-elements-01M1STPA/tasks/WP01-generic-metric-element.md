@@ -24,6 +24,9 @@ requirement_refs:
 planning_base_branch: mission/delivery-return-metric-elements
 merge_target_branch: mission/delivery-return-metric-elements
 branch_strategy: Planning artifacts for this mission were generated on mission/delivery-return-metric-elements. During /spec-kitty.implement this WP may branch from a dependency-specific base, but completed changes must merge back into mission/delivery-return-metric-elements unless the human explicitly redirects the landing branch.
+base_branch: kitty/mission-delivery-return-metric-elements-01M1STPA
+base_commit: b9edb4cf657b5ce07c803523ec2e04e64ec5dc36
+created_at: '2026-09-06T00:16:42.336706+00:00'
 subtasks:
 - T001
 - T002
