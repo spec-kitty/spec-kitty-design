@@ -14,9 +14,11 @@ This directory contains the architectural record for the Spec Kitty Design Syste
 
 ## Decisions (ADRs)
 
-The decision records are in [`decisions/`](decisions/), and the table below is that directory — `scripts/check-adr-index.mjs` fails CI when a record has no row, when a row points at no record, or when a row's **Status** disagrees with the record's own. The status is the record's, not the table's: only **Accepted** records bind. Any mission spec that would contradict an Accepted ADR must include an ADR amendment as a tracked work item before implementation — see charter `architectural_review_requirement`. A **Proposed** record describes a decision that has been written down but not ratified by the operator; it informs a mission and does not constrain it.
+The decision records are in [`decisions/`](decisions/), and the table below is that directory — `scripts/check-adr-index.mjs` fails CI when a record has no row, when a row points at no record, or when a row's **Status** disagrees with the record's own. The Status column transcribes each record's own Status field; the index reports statuses, it does not confer them. Any mission spec that would contradict an Accepted ADR must include an ADR amendment as a tracked work item before implementation — see charter `architectural_review_requirement`.
 
-Identifiers below are the ones each record uses in its own H1, unpadded — `ADR-8`, not `ADR-008`.
+**Complete** appears on the ADR-003 addendum alone. That record uses it to say the reconciliation work it describes has been carried out ("pre-implementation gate FR-034 satisfied — WP01 delivered"); it is a description of finished work, not a decision state.
+
+Identifiers below are the ones each record uses in its own H1. Every ADR record's own H1 is unpadded — `ADR-8`, not `ADR-008` — with one exception: the ADR-003 addendum, whose H1 writes the identifier padded, and whose row transcribes that.
 
 | ADR | Title | Status |
 |---|---|---|
