@@ -586,11 +586,11 @@
     {
       "criterion_id": "C-008",
       "description": "Preserve the serial integration protocol: refresh the clean planning target before first claim and before consolidation, use Spec Kitty-owned lane dependency propagation, and never rewrite a captured baseline.",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "proof_type": "inspection",
+      "evidence": "rebased onto train 079fd967 with safety ref c926884; generators refreshed; Codex range/union audit preserved 85-commit range, all lifecycle/ops and 27-element shared surfaces; rebase defects repaired by e9f7c3f and f69fd25",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T22:13:11.356024+00:00",
       "notes": "Final owner records current train, finalized planning SHA, supported propagation, and baseline provenance.",
       "lane_owners": [
         "WP03"
@@ -612,11 +612,11 @@
     {
       "criterion_id": "C-010",
       "description": "Do not merge train to main, publish packages, deploy Team Kitty, or broaden component scope.",
-      "proof_type": "code_review",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "proof_type": "inspection",
+      "evidence": "origin/main remains ccb055c5; no main merge, publish, package release, SaaS change, or deploy; train-only mission scope and sibling-owned sources preserved",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T22:13:13.345698+00:00",
       "notes": "Lane review and wrap-up verify authorization and scope boundaries.",
       "lane_owners": [
         "WP03"
