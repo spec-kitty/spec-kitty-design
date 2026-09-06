@@ -108,10 +108,10 @@
       "criterion_id": "FR-011",
       "description": "Two-, four- and six-stage inputs retain item count and order while CSS alone changes wide horizontal flow to narrow vertical flow.",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "sk-evidence-chain.css:7-23,49-70 plus focused DOM-order and Playwright assertions; CSS-only reflow passed",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T16:48:43.544898+00:00",
       "notes": "WP02 behavior/stories and WP03 narrow computed-layout/DOM-order Playwright proof."
     },
     {
