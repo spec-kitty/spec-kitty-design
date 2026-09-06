@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "generated_at": "2026-09-06T15:01:41.668Z",
+  "generated_at": "2026-09-06T19:09:56.922Z",
   "generated_from": "packages/tokens/src/tokens.css",
   "categories": {
     "color": {
@@ -28,7 +28,10 @@
         "--sk-color-sage-deep",
         "--sk-color-sage-soft",
         "--sk-color-accent",
-        "--sk-color-accent-fg"
+        "--sk-color-accent-fg",
+        "--sk-color-data-series-primary",
+        "--sk-color-data-grid",
+        "--sk-color-data-baseline"
       ]
     },
     "surface": {

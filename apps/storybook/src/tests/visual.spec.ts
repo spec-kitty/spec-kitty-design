@@ -155,6 +155,14 @@ const actionRowStory = async (page: Page, id: string): Promise<Locator> => {
   return host;
 };
 
+const barChartStory = async (page: Page, id: string): Promise<Locator> => {
+  await page.goto(`/iframe.html?id=elements-skbarchart--${id}&viewMode=story`);
+  const host = page.locator('sk-bar-chart').first();
+  await host.waitFor({ state: 'visible', timeout: 20000 });
+  await expect(host.locator('[part="chart"]')).toBeVisible();
+  return host;
+};
+
 test('SK-team-overview shell desktop dark — visual baseline', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   const host = await teamOverviewShellStory(page);
@@ -398,4 +406,33 @@ test('SK-evidence-chain narrow — visual baseline', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   const host = await evidenceChainStory(page, 'narrow');
   await expect(host).toHaveScreenshot('sk-evidence-chain-narrow.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+test('SK-bar-chart approved dark — visual baseline', async ({ page }) => {
+  const host = await barChartStory(page, 'default');
+  await expect(host).toHaveScreenshot('sk-bar-chart-approved-dark.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+});
+
+test('SK-bar-chart approved light — visual baseline', async ({ page }) => {
+  const host = await barChartStory(page, 'light-mode');
+  await expect(host).toHaveScreenshot('sk-bar-chart-approved-light.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+});
+
+test('SK-bar-chart narrow scrolled ownership — visual baseline', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const host = await barChartStory(page, 'long-labels');
+  const plot = host.locator('[part="plot"]');
+  await plot.evaluate((node) => { node.scrollLeft = node.scrollWidth; });
+  await expect.poll(() => plot.evaluate((node) => node.scrollLeft)).toBeGreaterThan(0);
+  await expect(host).toHaveScreenshot('sk-bar-chart-narrow-scrolled.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+});
+
+test('SK-bar-chart zero and empty states — visual baselines', async ({ page }) => {
+  let host = await barChartStory(page, 'zero-values');
+  await expect(host).toHaveScreenshot('sk-bar-chart-zero-values.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  host = await barChartStory(page, 'empty');
+  await expect(host).toHaveScreenshot('sk-bar-chart-empty.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+});
+
+test('SK-bar-chart selectable states — visual baseline', async ({ page }) => {
+  const host = await barChartStory(page, 'selectable-states');
+  await expect(host).toHaveScreenshot('sk-bar-chart-selectable-states.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
 });

@@ -82,6 +82,11 @@
   --sk-on-tint-sky:         var(--sk-color-blue);
   --sk-on-tint-rose:        var(--sk-color-red);
 
+  /* ── Data visualisation ──────────── */
+  --sk-color-data-series-primary: var(--sk-on-tint-sky);
+  --sk-color-data-grid: var(--sk-border-default);
+  --sk-color-data-baseline: var(--sk-fg-subtle);
+
   /* ── Operational Status — semantic pairs (#177) ───────────────────────────
      ONE tone vocabulary, owned by sk-status-indicator (#146) and consumed here:
      neutral | info | success | attention | danger | recovery.
@@ -386,6 +391,11 @@
   --sk-on-tint-sky:         #2E4A6B;
   /* L 0.28, inside the family's 0.237-0.355 ink band. 9.11:1 on --sk-surface-tint-rose. */
   --sk-on-tint-rose:        #6B2424;
+
+  /* ── Data visualisation ──────────── */
+  --sk-color-data-series-primary: var(--sk-on-tint-sky);
+  --sk-color-data-grid: var(--sk-border-default);
+  --sk-color-data-baseline: var(--sk-fg-subtle);
 
   /* ── Operational Status — semantic pairs (#177) ───────────────────────────
      The light half. Rationale, pairing rule and the dark measurements are in the
