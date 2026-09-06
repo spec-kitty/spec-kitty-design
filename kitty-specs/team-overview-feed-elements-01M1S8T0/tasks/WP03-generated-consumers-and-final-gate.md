@@ -55,6 +55,7 @@ owned_files:
 - scripts/check-manifest-content.mjs
 - scripts/check-element-css-hygiene.mjs
 - scripts/suite-selftest.mjs
+- scripts/suite-selftest-reporter.mjs
 - vitest.config.mts
 - tests/node/config-contract.test.ts
 - suite-budget.json

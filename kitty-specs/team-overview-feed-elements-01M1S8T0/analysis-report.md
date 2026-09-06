@@ -57,7 +57,8 @@ coupling, captures each report through Vitest's supported per-run `--outputFile`
 unhandled runner errors, requires report/exit consistency, isolates runtime profiles and transform
 caches, and uses a unique inherited token plus `/proc` start-time validation to contain detached
 Linux descendants without signalling a reused PID. Two independent Codex follow-up reviews found
-no blocker for the authoritative Linux gate.
+no blocker for the authoritative Linux gate. The authorized remediation's custom reporter is
+explicitly listed in the plan structure and WP03 ownership metadata.
 
 The implementation remains within the approved serial lane and preserves the approved WP01/WP02
 sources. WP03 adds a React consumer runtime fixture sourced only from `@spec-kitty/react`, generated
