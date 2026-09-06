@@ -268,10 +268,10 @@
       "criterion_id": "C-005",
       "description": "CSS has one authored source in packages/styles, markup has one authored source only where a genuine static form exists, and generated outputs are not hand-edited.",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "CSS source/adoption checks, generated CSS/markup checks, and range-diff provenance confirm canonical authored sources and no hand-edited derived output.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T19:06:34.441282+00:00",
       "notes": "CSS source/adoption, markup drift, and generated-artifact checks."
     },
     {
