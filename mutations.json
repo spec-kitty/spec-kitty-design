@@ -224,8 +224,8 @@
       "subject": "fixtures/elements-behaviour/src/sk-card.test.ts",
       "arm": "card part present",
       "file": "packages/elements/src/card/sk-card.ts",
-      "from": "<div part=\"card\" class=${cardClasses(this.variant, this.inset)}>",
-      "to": "<div class=${cardClasses(this.variant, this.inset)}>"
+      "from": "<div part=\"card\" class=${cardClasses(this.variant, this.inset, this.status)}>",
+      "to": "<div class=${cardClasses(this.variant, this.inset, this.status)}>"
     },
     {
       "id": "SC-006",
