@@ -98,6 +98,12 @@ declare module 'vue' {
       /** Swaps the surface token for the inset (input) surface, for a card nested inside another. */
       'inset'?: boolean;
       /**
+       * Operational status tone, orthogonal to `variant` — a card may carry both. The vocabulary is
+       * `sk-status-indicator`'s; the card holds no domain mapping and never infers a tone. An unknown
+       * value renders the base card and warns rather than throwing.
+       */
+      'status'?: 'neutral' | 'info' | 'success' | 'attention' | 'danger' | 'recovery' | undefined;
+      /**
        * Accent colour. Omit for the default surface; an unknown value renders the base card and
        * warns rather than throwing.
        */

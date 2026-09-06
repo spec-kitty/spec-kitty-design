@@ -62,3 +62,105 @@
    LightMode story rendering dark styling.
    A custom property inherits through the boundary; a selector does not. That is the whole
    reason for the token pair. See #72 and SK-D01. */
+
+/* ── Operational status tones (#177) ──────────────────────────────────────────
+   ONE axis, orthogonal to `variant`. `variant` stays the brand/decorative axis;
+   `status` is the operational one, and a card may carry both — which is why the
+   status blocks are AUTHORED AFTER the variant and inset blocks. Equal
+   specificity, so source order decides: on a card carrying both, the operational
+   tone wins the surface and the brand variant keeps its own hover accent. Both
+   modifiers are present on the node either way; nothing is silently dropped.
+
+   TONE IS NEVER THE ONLY CARRIER OF MEANING. These rules paint a surface and an
+   edge. The meaning is carried by the slotted <sk-status-indicator>'s TEXT — see
+   the Greyscale story, which renders the whole set desaturated and stays
+   readable. A card whose only signal is its hue is the defect this axis exists
+   to remove, not a use of it.
+
+   NO THEME SELECTOR here, deliberately, for the reason the block above already
+   records at length: `:root[data-theme="light"] .sk-x` and `.sk-light .sk-x`
+   both cross a shadow boundary and are inert once this sheet is adopted. Light
+   variance lives entirely in --sk-status-* / --sk-on-status-*, which inherit
+   through the boundary as values. */
+.sk-card--status-neutral {
+  background: var(--sk-status-neutral);
+  border-color: var(--sk-on-status-neutral);
+  border-inline-start-width: var(--sk-border-width-4);
+}
+
+.sk-card--status-info {
+  background: var(--sk-status-info);
+  border-color: var(--sk-on-status-info);
+  border-inline-start-width: var(--sk-border-width-4);
+}
+
+.sk-card--status-success {
+  background: var(--sk-status-success);
+  border-color: var(--sk-on-status-success);
+  border-inline-start-width: var(--sk-border-width-4);
+}
+
+.sk-card--status-attention {
+  background: var(--sk-status-attention);
+  border-color: var(--sk-on-status-attention);
+  border-inline-start-width: var(--sk-border-width-4);
+}
+
+.sk-card--status-danger {
+  background: var(--sk-status-danger);
+  border-color: var(--sk-on-status-danger);
+  border-inline-start-width: var(--sk-border-width-4);
+}
+
+.sk-card--status-recovery {
+  background: var(--sk-status-recovery);
+  border-color: var(--sk-on-status-recovery);
+  border-inline-start-width: var(--sk-border-width-4);
+}
+
+/* Forced-colors. Under `forced-colors: active` every tone collapses to the
+   system surface: `background` flattens to Canvas and the six tints become one
+   ground, so the tone is gone. The card must therefore not depend on
+   `background-color` to stay distinguishable — the EDGE is what survives.
+
+   `border` is remapped to a system color automatically with zero author CSS, so
+   the rule below is not what makes the edge visible; it makes the edge
+   DELIBERATE — CanvasText rather than whatever the automatic remap happens to
+   pick — and it keeps the widened inline-start step, which is the only thing
+   left distinguishing a status card from a plain one in this mode.
+
+   LONGHAND `-color`, not the `border` shorthand: stylelint's
+   declaration-strict-value polices `/color/` as a substring match and does not
+   inspect the shorthand at all, so a shorthand here would pass by being
+   invisible to the gate rather than by satisfying it. `CanvasText` is an
+   explicit `ignoreValues` entry for exactly this. Same shape as
+   sk-skip-link.css, sk-data-table.css and sk-action-row.css.
+
+   `forced-color-adjust: none` is NOT used anywhere here: it freezes a value at
+   its authored color, which is frequently invisible against the forced-colors
+   background. */
+@media (forced-colors: active) {
+  .sk-card--status-neutral,
+  .sk-card--status-info,
+  .sk-card--status-success,
+  .sk-card--status-attention,
+  .sk-card--status-danger,
+  .sk-card--status-recovery {
+    border-inline-start-color: CanvasText;
+    border-inline-start-width: var(--sk-border-width-4);
+  }
+}
+
+/* Reduced motion. The card already transitions `border-color` (the rule at the
+   top of this file), and the status axis is now one of the things that
+   transition can express — a status changing under the reader is exactly the
+   motion `prefers-reduced-motion` exists to suppress.
+
+   Scoped to the exact selector and the exact property this component owns, per
+   the recipe: never a wildcard over the component's subtree. The card sets one
+   transition and this cancels that one. */
+@media (prefers-reduced-motion: reduce) {
+  .sk-card {
+    transition: none;
+  }
+}

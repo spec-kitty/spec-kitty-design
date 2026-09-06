@@ -19,8 +19,12 @@ export { SkPersonalRail } from './personal-rail/sk-personal-rail.js';
 export { SkContextSidebar } from './context-sidebar/sk-context-sidebar.js';
 export { SkPageHeader } from './page-header/sk-page-header.js';
 export { SkSectionHeader } from './section-header/sk-section-header.js';
+// STATUS_TONES is the library's ONE authored tone list (#146, exported at #177). It is here
+// because a second consumer now exists — sk-card's status axis — and because the assertion that
+// keeps the two from forking has to be able to reach it from outside this package.
 export {
   SkStatusIndicator,
+  STATUS_TONES,
   type StatusIndicatorTone,
 } from './status-indicator/sk-status-indicator.js';
 export { SkEntityMarker } from './entity-marker/sk-entity-marker.js';
@@ -74,8 +78,13 @@ export { default as skTransitionMatrixSheet } from './transition-matrix/sk-trans
 //
 // `//`, not `/** */`: a doc comment here would be lifted verbatim into custom-elements.json
 // and shown to consumers in IDE hovers.
+//
+// CARD_STATUSES is exported for the reason FEATURE_CARD_ACCENTS and RIBBON_CARD_COLOURS are: the
+// behaviour fixture DERIVES its loops from it, and asserts its keys equal STATUS_TONES. A tone
+// added on either side without the other reds that test instead of passing unobserved.
 export {
   CARD_AXES,
+  CARD_STATUSES,
   CARD_VARIANTS,
   cardClasses,
   cardStaticHtml,

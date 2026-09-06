@@ -10,7 +10,18 @@ export type StatusIndicatorTone =
   | 'danger'
   | 'recovery';
 
-const TONES: ReadonlyArray<StatusIndicatorTone> = Object.freeze([
+// EXPORTED at #177, and the export is the point rather than a convenience.
+//
+// This array was module-private, so a second component needing the same tone set had no way to
+// consume it and would have spelled the six values again — a fork nothing could detect. It is now
+// the library's ONE authored tone list. `sk-card`'s status axis is held to it by an assertion
+// (fixtures/elements-behaviour/src/sk-card.test.ts) rather than by an import, because
+// `sk-card.markup.ts` is evaluated by scripts/build-element-markup.mjs from a `data:` URL and a
+// relative import there is a named generator error.
+//
+// `//`, not `/** */`: a doc comment above an export is lifted verbatim into custom-elements.json.
+/** The tone vocabulary, in presentation order. */
+export const STATUS_TONES: ReadonlyArray<StatusIndicatorTone> = Object.freeze([
   'neutral',
   'info',
   'success',
@@ -20,7 +31,7 @@ const TONES: ReadonlyArray<StatusIndicatorTone> = Object.freeze([
 ]);
 
 const statusTone = (value: unknown): StatusIndicatorTone => {
-  if (typeof value === 'string' && TONES.includes(value as StatusIndicatorTone)) {
+  if (typeof value === 'string' && STATUS_TONES.includes(value as StatusIndicatorTone)) {
     return value as StatusIndicatorTone;
   }
   if (value !== undefined && value !== '') {

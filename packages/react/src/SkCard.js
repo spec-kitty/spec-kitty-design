@@ -7,6 +7,7 @@ export const SkCard = forwardRef((props, forwardedRef) => {
   const ref = useRef(null);
   const {
     inset,
+    status,
     variant,
     className,
     exportparts,
@@ -26,6 +27,7 @@ export const SkCard = forwardRef((props, forwardedRef) => {
     {
       ref: createForwardedRefHandler(ref, forwardedRef),
       ...restProps,
+      status: status,
       variant: variant,
       class: className,
       exportparts: exportparts,
