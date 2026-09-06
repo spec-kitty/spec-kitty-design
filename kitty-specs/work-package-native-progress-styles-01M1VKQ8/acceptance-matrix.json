@@ -98,10 +98,10 @@
       "criterion_id": "FR-010",
       "description": "Any transition authored on the fill is disabled under prefers-reduced-motion: reduce, scoped to exactly that selector and property; if no transition is authored, this is satisfied vacuously.",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "apps/storybook/src/tests/sk-progress.spec.ts \u2014 reduced-motion/static transition-scope contract passed across three engines",
+      "pass_fail": "pass",
+      "verified_by": "codex-orry-wp208-210-0906a",
+      "verified_at": "2026-09-06T17:32:35.722758+00:00",
       "notes": "Verified by WP01 T008's conditional static-source assertion over sk-progress.css (scoped guard present, or no transition exists to guard)."
     },
     {
