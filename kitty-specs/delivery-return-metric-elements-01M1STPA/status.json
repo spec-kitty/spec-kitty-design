@@ -1,7 +1,7 @@
 {
-  "event_count": 10,
-  "last_event_id": "01M1T2DMBWWBNGBBCH4D63SC7B",
-  "materialized_at": "2026-09-06T00:38:16.188648+00:00",
+  "event_count": 11,
+  "last_event_id": "01M1T3A56V3EK272X34DBNRT78",
+  "materialized_at": "2026-09-06T00:53:50.939566+00:00",
   "mission_number": "",
   "mission_slug": "delivery-return-metric-elements-01M1STPA",
   "mission_type": "software-dev",
@@ -11,8 +11,8 @@
     "canceled": 0,
     "claimed": 0,
     "done": 0,
-    "for_review": 0,
-    "in_progress": 1,
+    "for_review": 1,
+    "in_progress": 0,
     "in_review": 0,
     "planned": 1
   },
@@ -54,14 +54,20 @@
       "agent_profile": "__resolved_profile_absent__",
       "agent_profile_version": "__resolved_profile_version_absent__",
       "force_count": 0,
-      "lane": "in_progress",
-      "last_event_id": "01M1T2DMBWWBNGBBCH4D63SC7B",
-      "last_transition_at": "2026-09-06T00:38:16.188648+00:00",
+      "lane": "for_review",
+      "last_event_id": "01M1T3A56V3EK272X34DBNRT78",
+      "last_transition_at": "2026-09-06T00:53:50.939566+00:00",
       "model": "__resolved_model_absent__",
       "provider": "__resolved_provider_absent__",
       "role": "implementer",
       "shell_pid": 2459900,
-      "shell_pid_created_at": "1788535195.17"
+      "shell_pid_created_at": "1788535195.17",
+      "subtasks": {
+        "T005": "done",
+        "T006": "done",
+        "T007": "done",
+        "T008": "done"
+      }
     },
     "WP03": {
       "actor": "finalize-tasks",
