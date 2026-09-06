@@ -2,7 +2,7 @@
   "mission_slug": "work-package-native-progress-styles-01M1VKQ8",
   "mission_number": "",
   "mission_type": "software-dev",
-  "overall_verdict": "pending",
+  "overall_verdict": "fail",
   "criteria": [
     {
       "criterion_id": "FR-001",
@@ -150,17 +150,17 @@
       "invariant_id": "C-001",
       "description": "No sk-progress custom element, no packages/elements/src/progress/ directory, no ::part(), and no behaviour or mutation registry entry for this component.",
       "verification_method": "custom_command",
-      "verification_command": "test ! -d packages/elements/src/progress && git diff --exit-code -- expected-parts.json expected-docs.json behaviours.json mutations.json",
-      "result": "pending",
-      "evidence": null
+      "verification_command": "test ! -d packages/elements/src/progress && git diff --exit-code origin/train/elements-first...HEAD -- expected-parts.json expected-docs.json behaviours.json mutations.json",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: "
     },
     {
       "invariant_id": "C-002",
       "description": "No CSS content/counter()-based arithmetic, no JavaScript of any kind, no application state, and no timer updates a value anywhere in this component's source.",
       "verification_method": "grep_absence",
       "verification_command": "grep -RE 'content\\s*:.*(counter\\(|var\\(--sk-progress-value)|<script' packages/styles/src/progress",
-      "result": "pending",
-      "evidence": null,
+      "result": "verification_error",
+      "evidence": "grep verification failed (exit 2): grep: Unmatched ( or \\(",
       "scope": "packages/styles/src/progress"
     },
     {
@@ -169,39 +169,39 @@
       "verification_method": "code_review",
       "verification_command": null,
       "result": "pending",
-      "evidence": null
+      "evidence": "Unknown verification method: code_review"
     },
     {
       "invariant_id": "C-004",
       "description": "No new --sk-* token category is introduced absent a demonstrated gap and recorded maintainer sign-off.",
       "verification_method": "custom_command",
       "verification_command": "git diff --exit-code -- packages/tokens/src/tokens.css",
-      "result": "pending",
-      "evidence": null
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: "
     },
     {
       "invariant_id": "C-005",
       "description": "apps/demo/dashboard-demo.html's existing .dash-progress-* rules and markup are not modified by this mission.",
       "verification_method": "custom_command",
       "verification_command": "git diff --exit-code -- apps/demo/dashboard-demo.html",
-      "result": "pending",
-      "evidence": null
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: "
     },
     {
       "invariant_id": "C-006",
       "description": "The required LightMode story wraps its fixture in class=\"sk-light\", never data-theme=\"light\".",
       "verification_method": "custom_command",
       "verification_command": "node scripts/check-story-theme-wrapper.mjs",
-      "result": "pending",
-      "evidence": null
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: \u2705 42 story file(s) scanned; 2 known inert theme wrapper(s), none new."
     },
     {
       "invariant_id": "C-007",
       "description": "This mission's markup and CSS are self-contained and do not compose with or reference any other #208 child component.",
       "verification_method": "grep_absence",
       "verification_command": "grep -RE 'sk-(nav-pill|form-input|form-textarea|badge|status)' packages/styles/src/progress",
-      "result": "pending",
-      "evidence": null,
+      "result": "confirmed_absent",
+      "evidence": "grep found zero matches",
       "scope": "packages/styles/src/progress"
     }
   ]
