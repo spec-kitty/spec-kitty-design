@@ -8,10 +8,10 @@
       "criterion_id": "FR-001",
       "description": "Every fixture renders the fixed div.sk-progress > label.sk-progress__label[for] + progress.sk-progress__bar[id][value][max] + span.sk-progress__meta structure, with no element added, removed, or reordered.",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "apps/storybook/src/tests/sk-progress.spec.ts \u2014 ordered native label/progress/meta structure passed in 24 Chromium+Firefox focused tests and 12 WebKit focused tests",
+      "pass_fail": "pass",
+      "verified_by": "codex-orry-wp208-210-0906a",
+      "verified_at": "2026-09-06T17:32:26.386690+00:00",
       "notes": "Verified by WP01 T007's DOM-structure assertion over every generated fixture (host direct children in order, per-child tag/attribute check)."
     },
     {
