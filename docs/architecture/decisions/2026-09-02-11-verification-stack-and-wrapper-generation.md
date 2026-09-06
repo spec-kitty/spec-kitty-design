@@ -1,7 +1,7 @@
 # ADR 11 (2026-09-02): Verification Stack for Elements, and Generated Wrappers
 
 **Date:** 2026-09-02
-**Status:** Proposed. The ADR as a whole remains Proposed; the wrapper prop-name invariant subsection added 2026-09-06 is ratified under its own operator override (below) independent of that overall status.
+**Status:** Accepted (ratified by the operator, 2026-09-06 — the #200 ruling). This replaces a split status that held the ADR as a whole Proposed while the wrapper prop-name invariant subsection added 2026-09-06 stood ratified under its own #189 operator override, independent of that overall status. With the whole record Accepted there is nothing for that subsection's ratification to be independent of, so it is subsumed and the split is retired rather than left layered under the new status. #189 is undisturbed below as the authorization for *writing* that amendment outside #67 — a different act from ratifying it, and the one that is still doing work.
 **Deciders:** MOES-Media (operator session, 2026-09-02 — lifted the charter's unit-test prohibition and selected the runner); the wrapper prop-name invariant subsection was ratified by the operator on 2026-09-06, in the session that dispatched the #189 mission, filed as issue #189 rather than decided in the #187 mission, as an explicit override of the "ADRs are written only in #67" rule — #176 set the precedent for ADR-10
 **Technical Story:** ADR-8 constraint — a screenshot and an axe scan cannot see a broken `setFormValue`; `research/001` §163 (no schema for a valid framework target); charter amendment O5
 

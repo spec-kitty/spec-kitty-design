@@ -1,7 +1,7 @@
 # ADR 9 (2026-09-02): Shadow DOM, the Styling API, and Label Ownership
 
 **Date:** 2026-09-02
-**Status:** Proposed
+**Status:** Accepted (ratified by the operator, 2026-09-06 — the #200 ruling)
 **Deciders:** MOES-Media (operator session, 2026-09-02)
 **Technical Story:** ADR-8 negative consequence — "shadow DOM ends class-based overriding … a styling API must be designed deliberately"; SP-3 and SP-5, both run before this record was written
 
