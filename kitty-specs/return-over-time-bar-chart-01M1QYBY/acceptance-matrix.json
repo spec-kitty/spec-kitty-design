@@ -206,10 +206,10 @@
       "criterion_id": "FR-015",
       "description": "Expose focus and selected states with shape or border plus valid programmatic state, never color alone; under forced colors keyboard focus retains an outline and remains distinguishable from controlled selection.",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "dark/light focus and selection browser assertions plus forced-colors checks prove canonical focus outline and non-color-only distinct state",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T21:30:28.240504+00:00",
       "notes": "Real focus/selection state and forced-colors source-break evidence.",
       "lane_owners": [
         "WP01"
