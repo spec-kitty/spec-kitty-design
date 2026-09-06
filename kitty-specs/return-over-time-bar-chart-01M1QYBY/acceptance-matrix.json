@@ -121,10 +121,10 @@
       "criterion_id": "FR-009",
       "description": "Render a labelled empty state for absent or empty series with zero bars and activation targets.",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "empty/default/removal tests and empty Storybook story prove labelled empty state with zero bars and activation targets",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T21:30:17.666412+00:00",
       "notes": "Empty/default/property-removal behavior and Storybook evidence.",
       "lane_owners": [
         "WP01"
