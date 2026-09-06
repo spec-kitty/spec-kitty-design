@@ -155,3 +155,35 @@ test.describe('sk-progress overflow, forced-colors, and reduced-motion observabl
     expect(colours.borderColor).not.toBe(colours.backgroundColor);
   });
 });
+
+test.describe('sk-progress theming', () => {
+  /**
+   * FR-011: LightMode (class="sk-light") must render genuinely different computed
+   * styling from Default (dark), not merely exist as a story. Sampled from the
+   * track (`--sk-surface-input`/`--sk-border-default`) and the label
+   * (`--sk-fg-default`) — the fill's `--sk-color-yellow` is intentionally the same
+   * token in both themes (tokens.css has no `.sk-light` override for it), so it
+   * would not prove anything here. This must fail if the `sk-light` wrapper in
+   * the LightMode story is ever removed, since both themes would then resolve to
+   * the same `:root` token values.
+   */
+  test('LightMode resolves genuinely different computed track and label styling than Default', async ({ page }) => {
+    const themedStyles = async (id: string) => {
+      const host = await story(page, id);
+      const bar = host.locator('progress');
+      const label = host.locator('label');
+      return {
+        trackBackground: await bar.evaluate((node) => getComputedStyle(node).backgroundColor),
+        trackBorderColor: await bar.evaluate((node) => getComputedStyle(node).borderColor),
+        labelColor: await label.evaluate((node) => getComputedStyle(node).color),
+      };
+    };
+
+    const dark = await themedStyles('default');
+    const light = await themedStyles('light-mode');
+
+    expect(light.trackBackground).not.toBe(dark.trackBackground);
+    expect(light.trackBorderColor).not.toBe(dark.trackBorderColor);
+    expect(light.labelColor).not.toBe(dark.labelColor);
+  });
+});
