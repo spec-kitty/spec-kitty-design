@@ -1,6 +1,9 @@
 // The AUTHORED markup source for sk-button (ADR-10 §3).
 //
-// LEAF MODULE, no relative imports: the generator evaluates it from a `data:` URL.
+// EVALUATED IN A BARE NODE PROCESS by scripts/build-element-markup.mjs. It may import a LEAF —
+// a module with no imports of its own, like status-indicator/status-tones.ts — and may NOT reach
+// anything that needs a browser. It was a strict leaf until #216: the generator evaluated it from
+// a `data:` URL, which has no module base, so no import resolved at all.
 //
 // THE CLASS PREFIX CHANGED IN THIS MISSION. `.sk-btn*` became `.sk-button*` under the operator
 // ruling on #139: `check-adopted-css-boundaries.mjs` derives ownership from the component's own
@@ -90,8 +93,10 @@ export interface ButtonStaticOptions {
 //     script execution without ever breaking out of the attribute. Escaping is not a URL
 //     allowlist. Filed as #159.
 //
-// Local rather than shared because a markup module must be a LEAF: the generator evaluates it
-// from a `data:` URL, which has no module base, so it cannot import a helper.
+// Local rather than shared — but no longer BECAUSE it must be. The generator evaluated this
+// module from a `data:` URL until #216, so it could import nothing; it now evaluates from a real
+// module URL and a markup module may import a leaf. #163 owns the shared escaper; this copy stays
+// until that lands.
 //
 // `'` is escaped too. It is not strictly needed while the template below uses double quotes,
 // but this helper carries a generic name and sits one edit away from a single-quoted attribute.

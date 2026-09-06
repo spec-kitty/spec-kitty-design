@@ -139,9 +139,9 @@
           "kind": "variable",
           "name": "CARD_STATUSES",
           "type": {
-            "text": "{\n  neutral: 'sk-card--status-neutral',\n  info: 'sk-card--status-info',\n  success: 'sk-card--status-success',\n  attention: 'sk-card--status-attention',\n  danger: 'sk-card--status-danger',\n  recovery: 'sk-card--status-recovery',\n}"
+            "text": "Readonly<Record<StatusIndicatorTone, string>>"
           },
-          "default": "{ neutral: 'sk-card--status-neutral', info: 'sk-card--status-info', success: 'sk-card--status-success', attention: 'sk-card--status-attention', danger: 'sk-card--status-danger', recovery: 'sk-card--status-recovery', }",
+          "default": "Object.freeze( Object.fromEntries(STATUS_TONES.map((tone) => [tone, `sk-card--status-${tone}`])), )",
           "description": "Status tone → BEM modifier. The tone vocabulary is `sk-status-indicator`'s, not the card's."
         },
         {

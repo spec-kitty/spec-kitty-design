@@ -57,8 +57,16 @@ export class SkCard extends LitElement {
   // keeping the authored list in `STATUS_TONES`.
   //
   // What holds this honest: packages/react/type-tests/wrappers.type-test.tsx proves this union and
-  // `StatusIndicatorTone` are mutually assignable, and the behaviour fixture proves CARD_STATUSES'
-  // keys equal STATUS_TONES. Widening, narrowing or renaming either one reds a test.
+  // `StatusIndicatorTone` are mutually assignable, and the behaviour fixture still proves
+  // CARD_STATUSES' keys equal STATUS_TONES in order. Widening, narrowing or renaming any of them
+  // reds a test.
+  //
+  // #216 did NOT close this half, and it is worth saying which half it closed. `CARD_STATUSES` is
+  // now derived from `STATUS_TONES` — the runtime copy and the assertion that policed it are both
+  // gone. This `declare` line is a different pipeline: `build-vue-types.mjs` copies the MANIFEST's
+  // type text, and only a property-only field's type is emitted as an `import(...)` reference, so
+  // an attribute annotated with an alias would still emit an unresolved identifier into a
+  // declaration file that imports nothing. Measured after the #216 fix landed, not assumed.
   /** Operational status tone, orthogonal to `variant` — a card may carry both. The vocabulary is
    *  `sk-status-indicator`'s; the card holds no domain mapping and never infers a tone. An unknown
    *  value renders the base card and warns rather than throwing. */

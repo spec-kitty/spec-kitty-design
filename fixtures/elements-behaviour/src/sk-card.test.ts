@@ -202,22 +202,48 @@ test('an unknown variant THROWS on the authoring path — a bad variant never re
 });
 
 /**
- * ONE VOCABULARY, held by assertion rather than by an import.
+ * THE SAME ASSERTION, CONSTRAINING SOMETHING DIFFERENT (#177 wrote it, #216 re-aimed it).
  *
- * `sk-card.markup.ts` is a leaf: `scripts/build-element-markup.mjs` evaluates it from a `data:`
- * URL, which has no module base, and exits with a named error on any relative import. So
- * `CARD_STATUSES` cannot import `STATUS_TONES` even though `STATUS_TONES` is the one authored
- * list. This test is what makes the map a derivation instead of a fork: a tone added to #146,
- * removed from it, renamed on either side, or reordered, reds here.
+ * #177 held `CARD_STATUSES` equal to `STATUS_TONES` because the two were separate authored lists
+ * that could drift: `sk-card.markup.ts` could not import the one authored list, since
+ * `scripts/build-element-markup.mjs` evaluated it from a `data:` URL and exited with a named error
+ * on any relative import. Against two lists this assertion was the only thing holding them
+ * together, and it was close to a tautology only in the sense that it restated the obligation.
  *
- * ORDER, not just membership. The tones are a presentation scale — neutral through recovery —
- * and stories, the token block and the docs all iterate them. A set-equality assertion would
- * pass over a reordering that silently reorders every one of those surfaces.
+ * #216 removed the second list — `CARD_STATUSES` is now
+ * `Object.fromEntries(STATUS_TONES.map(...))` — and this mission first DELETED this assertion on
+ * the reasoning that a derivation cannot disagree with its own source. A reviewer falsified that
+ * in one edit. The derivation is an EXPRESSION, and nothing gates the expression:
+ *
+ *     Object.fromEntries([...STATUS_TONES.map(t => [t, `sk-card--status-${t}`]),
+ *                         ['rogue', 'sk-card--status-rogue']])
+ *
+ * keeps the index-signature type, so the `as` cast stays clean, `typecheck-all` passes for five
+ * projects, the markup generator regenerates and WRITES `SkCardStatusRogueHTML` with a class in no
+ * stylesheet, and every CSS, manifest, entry, part and hygiene gate stays green. So the assertion
+ * is restored, and against a derivation it is not a tautology at all: it constrains the expression
+ * that produces the map, which is the only authored thing left to get wrong.
+ *
+ * ORDER, not just membership. The tones are a presentation scale — neutral through recovery — and
+ * stories, the token block and the docs all iterate them. A set-equality assertion would pass over
+ * a reordering that silently reorders every one of those surfaces.
  */
 test('the card\'s status keys are sk-status-indicator\'s tone vocabulary, in order', () => {
   expect(Object.keys(CARD_STATUSES)).toEqual([...STATUS_TONES]);
-  // And the modifiers are the BEM family for THIS block — a status key that mapped to another
-  // component's class would satisfy the line above and still be wrong.
+});
+
+/**
+ * THE VALUES, separately — and this test CANNOT stand in for the one above.
+ *
+ * It derives its expectation from the key under test, so it is self-fulfilling for any key,
+ * `rogue` included. That is exactly why deleting the equality assertion and keeping only this one
+ * left the fork above undetected. What it does catch is a value pointing at another component's
+ * BEM block, which the key-level assertion cannot see.
+ */
+test('every card status modifier is the BEM family for this block', () => {
+  // Non-empty, first: `Object.entries` over an empty map makes the loop below a green line over
+  // zero inputs, which is the defect class this repository names most often.
+  expect(Object.keys(CARD_STATUSES).length).toBeGreaterThan(0);
   for (const [tone, cls] of Object.entries(CARD_STATUSES)) {
     expect(cls).toBe(`sk-card--status-${tone}`);
   }

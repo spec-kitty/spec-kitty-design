@@ -138,8 +138,30 @@ The count moves every batch, so it is deliberately not stated here —
 #79's batch landed. (This paragraph used to end "`sk-card` is the only one today", which had
 gone stale three batches before a lens caught it — on the one page a new implementer opens.)
 
-It **must be a leaf module with no relative imports**: the generator evaluates it from a `data:`
-URL, which has no module base, and says so in a named error if you give it one.
+It is evaluated **in a bare Node process** by the generator, from its own file URL. So it may
+import a **leaf** — a module with no imports of its own, like
+`packages/elements/src/status-indicator/status-tones.ts` — and nothing else. A bare specifier and a
+non-leaf target are both refused **before** the module is evaluated, by name and naming the file
+that holds the import: `build-element-markup.mjs` reads each import list from esbuild's metafile.
+
+That is a gate rather than a convention on purpose. `import { css } from 'lit'` added to a leaf
+leaves the generator *green* — some browser-facing modules survive evaluation in Node by accident —
+and `import './define.js'` fails with `customElements is not defined` blamed on the markup module
+rather than on the file that gained the import. Both were measured while #216 landed.
+
+Import a leaf when the value is a **shared vocabulary** — a list a second component must agree
+with. Before #216 this module was a strict leaf (it was evaluated from a `data:` URL, which has no
+module base, so nothing resolved), and the only way to consume a vocabulary was to restate it and
+pin the copy with an equality test. `sk-card`'s status axis was that copy;
+`CARD_STATUSES = Object.fromEntries(STATUS_TONES.map(...))` is what replaced it. A restatement is
+no longer the pattern to follow: nothing forces the *next* component to write its assertion, and
+nothing detects that it did not.
+
+**Keep the equality assertion anyway, and re-aim it.** Assert that the derived map's keys equal the
+vocabulary, in order. Against two lists that assertion held them together; against a derivation it
+constrains the *expression*, which is now the only authored thing that can be wrong — a rogue entry
+appended inside the `Object.fromEntries` argument type-checks, regenerates, and passes every static
+gate in this repo.
 
 **Composing another component's stylesheet.** A component may adopt a sheet it does not author:
 `sk-blog-card` does `static styles = [cardSheet, sheet]` so one box is styled by both `sk-card`

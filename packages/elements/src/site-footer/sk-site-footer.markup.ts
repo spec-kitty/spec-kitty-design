@@ -1,8 +1,10 @@
 // The AUTHORED markup source for sk-site-footer (ADR-10 §3). The static HTML and the styles-layer
 // module are GENERATED from this file by scripts/build-element-markup.mjs, and CI fails on drift.
 //
-// LEAF MODULE, no relative imports: the generator evaluates it from a `data:` URL, which has no
-// module base.
+// EVALUATED IN A BARE NODE PROCESS by scripts/build-element-markup.mjs. It may import a LEAF —
+// a module with no imports of its own, like status-indicator/status-tones.ts — and may NOT reach
+// anything that needs a browser. It was a strict leaf until #216: the generator evaluated it from
+// a `data:` URL, which has no module base, so no import resolved at all.
 //
 // THE SHAPE HERE IS THE OPERATOR'S RULING ON #77 (2026-09-04), not a choice made in this file:
 // the element owns the whole structure — the <nav>s, the headings, the <ul>s, the divider and the
@@ -62,9 +64,10 @@ const DEFAULTS = {
   legal: '© YYYY Your Company. All rights reserved.',
 } as const;
 
-// Escaping, leaf-local: the generator evaluates this module from a `data:` URL with no module
-// base, so it cannot import a helper. `attr` is `text` plus the quote characters — derived, so
-// the canonical list exists once. #163 tracks making the generator bundle so this can be shared.
+// Escaping, still local, and no longer because it has to be: the generator evaluated this module
+// from a `data:` URL with no module base until #216, and now evaluates from a real module URL, so
+// a shared leaf escaper would resolve. `attr` is `text` plus the quote characters — derived, so
+// the canonical list exists once. #163 tracks the shared helper and is now unblocked.
 const text = (v: string): string =>
   v.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 const attr = (v: string): string => text(v).replace(/"/g, '&quot;').replace(/'/g, '&#39;');

@@ -17,6 +17,12 @@
  * artifacts are exempt and are required to be regenerable.
  */
 
+// The ONE authored tone list, imported rather than restated (#216, #146). `status-tones.ts` is a
+// leaf — it imports nothing and needs no DOM — which is exactly what the generator can evaluate;
+// `sk-status-indicator.ts` re-exports it for everyone else. Importing the ELEMENT here would not
+// work: it reaches `lit` and registers a custom element at module scope.
+import { STATUS_TONES, type StatusIndicatorTone } from '../status-indicator/status-tones.js';
+
 /** Variant → BEM modifier. The static layer's classes are the contract; the element's
  *  `variant="blue"` attribute is sugar over them. */
 export const CARD_VARIANTS = { blue: 'sk-card--blue', purple: 'sk-card--purple' } as const;
@@ -29,24 +35,33 @@ export type CardVariant = keyof typeof CARD_VARIANTS;
 // separation binding. Folding the six tones into CARD_VARIANTS would make every brand x status
 // combination unreachable and would fork the tone vocabulary into the variant enum.
 //
-// THE KEYS ARE NOT AUTHORED HERE — they are #146's, and this file is not allowed to import them.
-// `scripts/build-element-markup.mjs` evaluates every *.markup.ts from a `data:` URL, which has no
-// module base, and exits with a named error on any relative import. So the one authored list is
-// `STATUS_TONES` in packages/elements/src/status-indicator/sk-status-indicator.ts, and this map is
-// held equal to it — membership AND order — by an assertion in
-// fixtures/elements-behaviour/src/sk-card.test.ts. Adding a tone to #146 reds that test until this
-// map is extended, which is the intended failure. Do not "fix" it by narrowing either side.
+// DERIVED, NOT RESTATED — and #216 is what made that possible. #177 spelled the six tones out
+// here and held them equal to `STATUS_TONES` with an order-sensitive assertion in
+// fixtures/elements-behaviour/src/sk-card.test.ts, because the generator evaluated this file from
+// a `data:` URL, which has no module base, and exited with a named error on any relative import.
+// `scripts/build-element-markup.mjs` now evaluates it from its own file URL, so the one authored
+// list is simply imported. Adding, removing, renaming or reordering a tone in `status-tones.ts`
+// now changes this map, the element, the static HTML and the generated template-literal exports in
+// one edit.
+//
+// THE ASSERTION STAYS, re-aimed. This mission first deleted it, reasoning that a derivation cannot
+// disagree with its own source. A reviewer falsified that in one edit: appending
+// `['rogue', 'sk-card--status-rogue']` INSIDE the `fromEntries` argument keeps the index-signature
+// type, so the cast below stays clean, typecheck passes, and the generator happily writes
+// `SkCardStatusRogueHTML` with a class in no stylesheet. The derivation is an EXPRESSION and
+// nothing gates the expression, so `sk-card.test.ts` still holds these keys equal to
+// `STATUS_TONES`, in order — against two lists that was a restatement of an obligation; against a
+// derivation it constrains the only authored thing left.
 /** Status tone → BEM modifier. The tone vocabulary is `sk-status-indicator`'s, not the card's. */
-export const CARD_STATUSES = {
-  neutral: 'sk-card--status-neutral',
-  info: 'sk-card--status-info',
-  success: 'sk-card--status-success',
-  attention: 'sk-card--status-attention',
-  danger: 'sk-card--status-danger',
-  recovery: 'sk-card--status-recovery',
-} as const;
+export const CARD_STATUSES: Readonly<Record<StatusIndicatorTone, string>> = Object.freeze(
+  Object.fromEntries(STATUS_TONES.map((tone) => [tone, `sk-card--status-${tone}`])),
+) as Readonly<Record<StatusIndicatorTone, string>>;
 
-export type CardStatus = keyof typeof CARD_STATUSES;
+// THE VOCABULARY'S TYPE, not a second one derived from the map above. `Object.fromEntries` widens
+// its key type to `string`, so `keyof typeof CARD_STATUSES` — what this alias used to be — would
+// now BE `string`, and `isCardStatus` would narrow nothing. Aliasing the imported union keeps
+// every consumer's narrowing exactly as it was while removing the second authored list.
+export type CardStatus = StatusIndicatorTone;
 
 // PUBLISHED PROSE IS SHORT, DELIBERATELY. Everything in a `/** */` above an export is
 // lifted verbatim into custom-elements.json and rendered in IDE hovers and on docs sites —

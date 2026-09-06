@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "mission_slug": "markup-vocabulary-import-and-ratchet-corrections-01M1WBVC",
+  "mission_id": "01M1WBVCCFVBG8Q7N3035B7PQG",
+  "mission_branch": "kitty/mission-markup-vocabulary-import-and-ratchet-corrections-01M1WBVC",
+  "target_branch": "mission/markup-vocabulary-import-and-ratchet-corrections",
+  "lanes": [
+    {
+      "lane_id": "lane-planning",
+      "wp_ids": [
+        "WP01",
+        "WP02",
+        "WP03"
+      ],
+      "write_scope": [
+        "docs/contributing/adding-a-token.md",
+        "expected-stories.json",
+        "fixtures/elements-behaviour/src/sk-card.test.ts",
+        "packages/elements/src/card/sk-card.markup.ts",
+        "packages/elements/src/card/sk-card.ts",
+        "packages/elements/src/status-indicator/sk-status-indicator.ts",
+        "packages/elements/src/status-indicator/status-tones.ts",
+        "scripts/build-element-markup.mjs"
+      ],
+      "predicted_surfaces": [
+        "planning"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    }
+  ],
+  "computed_at": "2026-09-06T22:05:32.204138+00:00",
+  "computed_from": "dependency_graph+ownership",
+  "planning_artifact_wps": [
+    "WP01",
+    "WP02",
+    "WP03"
+  ],
+  "planning_commit_sha": "aa3c4f3f8b4d41353a244da10fe9ed1dcb4e7615"
+}
