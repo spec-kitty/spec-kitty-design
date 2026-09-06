@@ -1,14 +1,14 @@
 import type { Meta, StoryObj } from '@storybook/web-components';
 import { expect, fn, userEvent, within } from 'storybook/test';
 import './sk-bar-chart.js';
-import type { BarChartSelectDetail, BarDatum, SkBarChart } from './sk-bar-chart.js';
+import type { BarChartSelectDetail, BarSeries, SkBarChart } from './sk-bar-chart.js';
 
 const approvedSeries = Object.freeze([
   Object.freeze({ id: 'aug-11', label: 'Aug 11', value: 320, displayValue: '€320' }),
   Object.freeze({ id: 'aug-18', label: 'Aug 18', value: 510, displayValue: '€510' }),
   Object.freeze({ id: 'aug-25', label: 'Aug 25', value: 440, displayValue: '€440' }),
   Object.freeze({ id: 'sep-1', label: 'Sep 1', value: 604, displayValue: '€604' }),
-] satisfies ReadonlyArray<BarDatum>);
+] satisfies BarSeries);
 
 type StoryArgs = {
   onSelect: (detail: BarChartSelectDetail) => void;
@@ -20,7 +20,7 @@ type ChartOptions = Partial<Pick<
 >>;
 
 const chart = (
-  series: ReadonlyArray<BarDatum>,
+  series: BarSeries,
   options: ChartOptions = {},
 ): SkBarChart => {
   const element = document.createElement('sk-bar-chart') as SkBarChart;
@@ -130,7 +130,9 @@ export const SelectableStates: Story = {
     const nonSelectable = chart(approvedSeries, { selectedId: 'aug-18' });
     nonSelectable.dataset['nonSelectableState'] = 'true';
     stack.append(selectable, selected, nonSelectable);
-    return frame(stack);
+    const rendered = frame(stack);
+    rendered.dataset['barChartSelectableStates'] = 'true';
+    return rendered;
   },
 };
 

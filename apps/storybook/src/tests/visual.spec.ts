@@ -435,6 +435,15 @@ test('SK-bar-chart zero and empty states — visual baselines', async ({ page })
 });
 
 test('SK-bar-chart selectable states — visual baseline', async ({ page }) => {
-  const host = await barChartStory(page, 'selectable-states');
-  await expect(host).toHaveScreenshot('sk-bar-chart-selectable-states.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  await barChartStory(page, 'selectable-states');
+  const states = page.locator('[data-bar-chart-selectable-states]');
+  await expect(states.locator('sk-bar-chart')).toHaveCount(3);
+  const rest = states.locator('sk-bar-chart[data-selectable-states]');
+  const selected = states.locator('sk-bar-chart[data-selected-state]');
+  const nonSelectable = states.locator('sk-bar-chart[data-non-selectable-state]');
+  await expect(rest.getByRole('button')).toHaveCount(4);
+  await expect(rest.locator('[aria-pressed="true"]')).toHaveCount(0);
+  await expect(selected.locator('[aria-pressed="true"]')).toHaveCount(1);
+  await expect(nonSelectable.getByRole('button')).toHaveCount(0);
+  await expect(states).toHaveScreenshot('sk-bar-chart-selectable-states.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
 });

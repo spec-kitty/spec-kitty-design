@@ -5089,6 +5089,14 @@
         },
         {
           "kind": "js",
+          "name": "BarSeries",
+          "declaration": {
+            "name": "BarSeries",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
           "name": "BLOG_CARD_AXES",
           "declaration": {
             "name": "BLOG_CARD_AXES",

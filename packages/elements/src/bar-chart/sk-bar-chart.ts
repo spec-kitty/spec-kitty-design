@@ -9,10 +9,12 @@ export type BarDatum = Readonly<{
   displayValue: string;
 }>;
 
+export type BarSeries = ReadonlyArray<BarDatum>;
+
 export type BarChartSelectDetail = Readonly<{ id: string }>;
 
 type ValidSeries = Readonly<{
-  data: ReadonlyArray<BarDatum>;
+  data: BarSeries;
   maximum: number;
 }>;
 
@@ -21,7 +23,7 @@ let nextBarChartInstanceId = 0;
 const validText = (value: unknown): value is string =>
   typeof value === 'string' && value.trim().length > 0;
 
-const validateSeries = (series: ReadonlyArray<BarDatum>): ValidSeries | null => {
+const validateSeries = (series: BarSeries): ValidSeries | null => {
   if (!Array.isArray(series) || series.length === 0) return null;
 
   const ids = series.map((datum) => datum?.id);

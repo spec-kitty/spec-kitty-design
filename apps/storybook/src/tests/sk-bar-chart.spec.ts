@@ -383,24 +383,75 @@ test('390px long-label ownership survives horizontal scrolling without page over
 
   const ownership = () => host.evaluate((element) => {
     const root = element.shadowRoot!;
-    return [...root.querySelectorAll<HTMLElement>('[part="item"]')].map((item) => {
+    const plot = root.querySelector<HTMLElement>('[part="plot"]')!;
+    const plotRect = plot.getBoundingClientRect();
+    const viewport = { left: 0, top: 0, right: window.innerWidth, bottom: window.innerHeight };
+    const items = [...root.querySelectorAll<HTMLElement>('[part="item"]')];
+    const facts = items.map((item) => {
       const itemRect = item.getBoundingClientRect();
-      const owned = [
+      const targets = [
         item.querySelector('[part="value"]')!,
-        item.querySelector('svg')!,
+        item.querySelector('[part="bar"]')!,
         item.querySelector('[part="label"]')!,
-      ].map((node) => {
+      ];
+      const owned = targets.map((node) => {
         const rect = node.getBoundingClientRect();
         return rect.left >= itemRect.left - 0.5 && rect.right <= itemRect.right + 0.5;
       });
-      return { id: item.dataset.datumId, owned };
+      const hitTargets = targets.flatMap((node) => {
+        const rect = node.getBoundingClientRect();
+        const visible = {
+          left: Math.max(rect.left, plotRect.left, viewport.left),
+          right: Math.min(rect.right, plotRect.right, viewport.right),
+          top: Math.max(rect.top, plotRect.top, viewport.top),
+          bottom: Math.min(rect.bottom, plotRect.bottom, viewport.bottom),
+        };
+        if (visible.right - visible.left <= 1 || visible.bottom - visible.top <= 1) return [];
+        const hit = root.elementFromPoint(
+          (visible.left + visible.right) / 2,
+          (visible.top + visible.bottom) / 2,
+        );
+        return [{
+          kind: node.getAttribute('part'),
+          expected: item.dataset.datumId,
+          actual: hit?.closest<HTMLElement>('[part~="item"]')?.dataset.datumId,
+        }];
+      });
+      return { id: item.dataset.datumId, itemRect, owned, hitTargets };
     });
+    const overlaps = facts.flatMap((left, index) => facts.slice(index + 1).flatMap((right) => {
+      const horizontal = Math.min(left.itemRect.right, right.itemRect.right) -
+        Math.max(left.itemRect.left, right.itemRect.left);
+      const vertical = Math.min(left.itemRect.bottom, right.itemRect.bottom) -
+        Math.max(left.itemRect.top, right.itemRect.top);
+      return horizontal > 0.5 && vertical > 0.5 ? [[left.id, right.id]] : [];
+    }));
+    return { facts, overlaps };
   });
-  expect((await ownership()).every(({ owned }) => owned.every(Boolean))).toBe(true);
+
+  const assertOwnership = async () => {
+    const result = await ownership();
+    expect(result.facts.map(({ id }) => id)).toEqual(['long-a', 'long-b', 'long-c', 'long-d']);
+    expect(result.facts.every(({ owned }) => owned.every(Boolean))).toBe(true);
+    expect(result.overlaps).toEqual([]);
+    for (const fact of result.facts) {
+      expect(fact.hitTargets).toHaveLength(3);
+      expect([...new Set(fact.hitTargets.map(({ kind }) => kind))].sort()).toEqual([
+        'bar',
+        'label',
+        'value',
+      ]);
+      expect(fact.hitTargets.every(({ expected, actual }) =>
+        expected === fact.id && actual === fact.id
+      )).toBe(true);
+    }
+  };
+
+  await assertOwnership();
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
   await plot.evaluate((node) => { node.scrollLeft = node.scrollWidth; });
   await expect.poll(() => plot.evaluate((node) => node.scrollLeft)).toBeGreaterThan(0);
-  expect((await ownership()).every(({ owned }) => owned.every(Boolean))).toBe(true);
+  await assertOwnership();
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
 });
 

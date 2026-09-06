@@ -4,6 +4,7 @@ export {
   SkBarChart,
   type BarChartSelectDetail,
   type BarDatum,
+  type BarSeries,
 } from './bar-chart/sk-bar-chart.js';
 export { SkStub } from './stub/sk-stub.js';
 export { SkBlogCard } from './blog-card/sk-blog-card.js';

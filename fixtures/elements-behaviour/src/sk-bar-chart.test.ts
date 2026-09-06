@@ -5,7 +5,7 @@ import {
   SkBarChart,
   skBarChartSheet,
   type BarChartSelectDetail,
-  type BarDatum,
+  type BarSeries,
 } from '@spec-kitty/elements';
 // eslint-disable-next-line @nx/enforce-module-boundaries -- raw authored CSS is the accessibility-contract test subject
 import barChartCss from '../../../packages/styles/src/bar-chart/sk-bar-chart.css?raw';
@@ -15,7 +15,7 @@ import { installTokenSheet } from './token-sheet.js';
 
 type BarChart = SkBarChart & { updateComplete: Promise<unknown> };
 
-const approvedSeries: ReadonlyArray<BarDatum> = Object.freeze([
+const approvedSeries: BarSeries = Object.freeze([
   Object.freeze({ id: 'aug-11', label: 'Aug 11', value: 320, displayValue: '€320' }),
   Object.freeze({ id: 'aug-18', label: 'Aug 18', value: 510, displayValue: '€510' }),
   Object.freeze({ id: 'aug-25', label: 'Aug 25', value: 440, displayValue: '€440' }),
@@ -38,7 +38,7 @@ const mount = async ({
   selectedId?: string;
 } = {}): Promise<BarChart> => {
   const element = document.createElement('sk-bar-chart') as BarChart;
-  element.series = series as ReadonlyArray<BarDatum>;
+  element.series = series as BarSeries;
   element.label = label;
   element.description = description;
   element.selectable = selectable;
@@ -134,7 +134,7 @@ test('empty and malformed series fail closed without partial or stale targets', 
 
   const element = await mount({ selectable: true });
   expect(itemsOf(element)).toHaveLength(4);
-  element.series = invalidSeries[6] as ReadonlyArray<BarDatum>;
+  element.series = invalidSeries[6] as BarSeries;
   await element.updateComplete;
   expect(itemsOf(element)).toHaveLength(0);
   expect(element.shadowRoot!.querySelectorAll('button')).toHaveLength(0);

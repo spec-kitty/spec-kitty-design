@@ -31,6 +31,7 @@ import {
   type TransitionMatrixSelectDetail,
 } from '../src/index.js';
 import type {
+  BarSeries,
   EvidenceStage,
   NoticeAnnounce,
   SkNoticeDismissDetail,
@@ -80,9 +81,13 @@ export const withHandler = <SkNavPill onSkNavPillToggle={(e) => void e.detail.op
 export const wrongDetail = <SkNavPill onSkNavPillToggle={(e) => void e.detail.opened} />;
 
 // --- bar chart ---------------------------------------------------------------------------
-const barSeries = Object.freeze([
+const barSeries: BarSeries = Object.freeze([
   Object.freeze({ id: 'aug-11', label: 'Aug 11', value: 320, displayValue: '€320' }),
 ]) satisfies SkBarChartElement['series'];
+// @ts-expect-error the exported BarSeries contract is readonly
+barSeries.push({ id: 'aug-18', label: 'Aug 18', value: 510, displayValue: '€510' });
+// @ts-expect-error each datum exposed through BarSeries is readonly
+barSeries[0]!.value = 510;
 
 export const barChartAllProps = (
   <SkBarChart
