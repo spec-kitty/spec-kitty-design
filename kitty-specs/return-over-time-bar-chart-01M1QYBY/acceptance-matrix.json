@@ -149,10 +149,10 @@
       "criterion_id": "FR-011",
       "description": "Default selectable to false; only true creates activation surfaces, tab stops, interaction states, and events.",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "nonselectable and selectable unit/browser assertions prove activation surfaces, tab stops, states, and events exist only when selectable is true",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T21:30:21.114438+00:00",
       "notes": "Positive and negative behavior and Playwright assertions.",
       "lane_owners": [
         "WP01"
