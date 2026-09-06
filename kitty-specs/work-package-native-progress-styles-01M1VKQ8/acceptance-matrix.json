@@ -128,10 +128,10 @@
       "criterion_id": "FR-013",
       "description": "packages/styles/src/index.ts exports the new component's barrel and packages/styles/package.json carries a ./progress/* subpath export.",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "node scripts/check-release-graph.mjs \u2014 4 publishable packages packed and all exports resolved; styles progress subpath present",
+      "pass_fail": "pass",
+      "verified_by": "codex-orry-wp208-210-0906a",
+      "verified_at": "2026-09-06T17:32:38.868734+00:00",
       "notes": "Verified by WP01 T002's edits plus T009's node scripts/check-release-graph.mjs gate run."
     },
     {
