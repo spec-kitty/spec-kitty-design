@@ -291,10 +291,10 @@
       "criterion_id": "FR-021",
       "description": "Provide approved four-bucket, close unequal, zero, empty, long/date-stamped, controlled selectable, interaction-state, and LightMode stories.",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "eight sk-bar-chart stories are index-ratcheted and non-empty; all rendered in the 260-story zero-violation axe traversal",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T21:30:40.273947+00:00",
       "notes": "Eight-story index ratchet, non-empty load, and axe traversal.",
       "lane_owners": [
         "WP01"
