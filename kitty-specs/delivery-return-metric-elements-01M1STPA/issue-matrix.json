@@ -13,7 +13,7 @@
       "wp": "mission-wrap-up"
     },
     "#145": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "#145 shell elements must be verified on train/elements-first before WP03 consolidation; #147 does not modify or close it.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -21,8 +21,8 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "verdict": "deferred-with-followup",
+      "wp": "WP03"
     },
     "#146": {
       "evidence_ref": "<link or commit>",
