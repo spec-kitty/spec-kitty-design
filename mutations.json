@@ -783,6 +783,126 @@
       "file": "packages/elements/src/page-header/sk-page-header.ts",
       "from": "  static styles = [sheet];",
       "to": "  static styles = [new CSSStyleSheet()];"
+    },
+    {
+      "id": "SC-003",
+      "subject": "fixtures/elements-behaviour/src/sk-form-input.test.ts",
+      "arm": "readonly barred but still submits (#180)",
+      "file": "packages/elements/src/form-input/sk-form-input.ts",
+      "from": "    if (this.readonly) {\n      this.internals.setValidity({});\n      this.invalid = false;\n      this.errorMessage = '';\n      return;\n    }",
+      "to": "    void this.readonly;"
+    },
+    {
+      "id": "SC-003",
+      "subject": "fixtures/elements-behaviour/src/sk-form-input.test.ts",
+      "arm": "merged UA flag blocks a real submit (#180)",
+      "file": "packages/elements/src/form-input/sk-form-input.ts",
+      "from": "    for (const key of [\n      'patternMismatch',\n      'rangeUnderflow',\n      'rangeOverflow',\n      'stepMismatch',\n      'typeMismatch',\n    ] as const) {\n      if (this.#probe.validity[key]) flags[key] = true;\n    }",
+      "to": "    void 0;"
+    },
+    {
+      "id": "SC-003",
+      "subject": "fixtures/elements-behaviour/src/sk-form-input.test.ts",
+      "arm": "post-reset validity reports valid immediately (#180, re-sited from SC-004 — see research.md R6)",
+      "file": "packages/elements/src/form-input/sk-form-input.ts",
+      "from": "    this.#probe.value = this.value;",
+      "to": "    void 0;"
+    },
+    {
+      "id": "SC-013",
+      "subject": "fixtures/elements-behaviour/src/sk-form-input.test.ts",
+      "arm": "datalist reachable by node identity (#180 — judgement call, see research.md R6)",
+      "file": "packages/elements/src/form-input/sk-form-input.ts",
+      "from": "        list=${hasOptions ? 'options' : nothing}",
+      "to": "        list=${nothing}"
+    },
+    {
+      "id": "SC-013",
+      "subject": "fixtures/elements-behaviour/src/sk-form-input.test.ts",
+      "arm": "constraint attribute reaches the inner control (#180 — judgement call, see research.md R6)",
+      "file": "packages/elements/src/form-input/sk-form-input.ts",
+      "from": "        pattern=${this.pattern ?? nothing}",
+      "to": "        pattern=${nothing}"
+    },
+    {
+      "id": "SC-003",
+      "subject": "fixtures/elements-behaviour/src/sk-form-input.test.ts",
+      "arm": "probe type assigned before value, matching render() (#180, debugger pass 1)",
+      "file": "packages/elements/src/form-input/sk-form-input.ts",
+      "from": "    this.#probe.type = this.type;\n    this.#probe.value = this.value;",
+      "to": "    this.#probe.value = this.value;\n    this.#probe.type = this.type;"
+    },
+    {
+      "id": "SC-003",
+      "subject": "fixtures/elements-behaviour/src/sk-form-input.test.ts",
+      "arm": "null (not just undefined) removes a probe attribute rather than forwarding \"null\" (#180, debugger pass 1)",
+      "file": "packages/elements/src/form-input/sk-form-input.ts",
+      "from": "    if (value === undefined || value === null) {",
+      "to": "    if (value === undefined) {"
+    },
+    {
+      "id": "SC-003",
+      "subject": "fixtures/elements-behaviour/src/sk-form-input.test.ts",
+      "arm": "label change alone re-runs validate() (#180, debugger pass 1)",
+      "file": "packages/elements/src/form-input/sk-form-input.ts",
+      "from": "      changed.has('type') ||\n      // `label` feeds the required-empty MESSAGE text (`${this.label || 'This field'} is\n      // required`, below) but was missing here — changing `label` on an already-invalid field\n      // left the `role=\"alert\"` node and `internals.validationMessage` showing the OLD label\n      // until some UNRELATED trigger happened to re-run validate() next.\n      changed.has('label')\n",
+      "to": "      changed.has('type')\n"
+    },
+    {
+      "id": "SC-013",
+      "subject": "fixtures/elements-behaviour/src/sk-form-input.test.ts",
+      "arm": "aria-describedby omitted, not an empty string, when nothing references it (#180, debugger pass 1)",
+      "file": "packages/elements/src/form-input/sk-form-input.ts",
+      "from": "        aria-describedby=${describedBy || nothing}",
+      "to": "        aria-describedby=${describedBy || undefined}"
+    },
+    {
+      "id": "SC-003",
+      "subject": "fixtures/elements-behaviour/src/sk-form-input.test.ts",
+      "arm": "a whitespace-only customError is treated as empty (#180, debugger pass 1)",
+      "file": "packages/elements/src/form-input/sk-form-input.ts",
+      "from": "    if (this.customError.trim() !== '') {",
+      "to": "    if (this.customError) {"
+    },
+    {
+      "id": "SC-003",
+      "subject": "fixtures/elements-behaviour/src/sk-form-input.test.ts",
+      "arm": "bad-input control keeps the user's buffer instead of being overwritten mid-edit (#180, debugger pass 1)",
+      "file": "packages/elements/src/form-input/sk-form-input.ts",
+      "from": "    if (!control.validity.badInput) {\n      this.value = control.value;\n    }\n",
+      "to": "    this.value = control.value;\n"
+    },
+    {
+      "id": "SC-010",
+      "subject": "fixtures/react-consumer/src/sk-form-input-options.test.tsx",
+      "arm": "form-input wrapper delivers and resets structured options",
+      "file": "packages/react/src/SkFormInput.js",
+      "from": "  useProperties(ref, \"options\", options, () => Object.freeze([]));",
+      "to": "  void options;"
+    },
+    {
+      "id": "SC-003",
+      "subject": "fixtures/elements-behaviour/src/sk-form-input.test.ts",
+      "arm": "the programmatic badInput divergence detects a value the type cannot represent (#180, operator ruling)",
+      "file": "packages/elements/src/form-input/sk-form-input.ts",
+      "from": "    if (this.value.trim() !== '' && this.#probe.value === '') flags.badInput = true;\n",
+      "to": "    if (false) flags.badInput = true;\n"
+    },
+    {
+      "id": "SC-003",
+      "subject": "fixtures/elements-behaviour/src/sk-form-input.test.ts",
+      "arm": "#onInput calls validate() unconditionally, not only inside the badInput branch (#180, pre-merge review pass 2)",
+      "file": "packages/elements/src/form-input/sk-form-input.ts",
+      "from": "    this.validate();\n  };\n}\n",
+      "to": "  };\n}\n"
+    },
+    {
+      "id": "SC-003",
+      "subject": "fixtures/elements-behaviour/src/sk-form-input.test.ts",
+      "arm": "the divergence branch is gated on trim(), not a bare non-empty check, so pure-whitespace sanitization is not a false positive (#180, pre-merge review pass 2)",
+      "file": "packages/elements/src/form-input/sk-form-input.ts",
+      "from": "if (this.value.trim() !== '' && this.#probe.value === '') flags.badInput = true;",
+      "to": "if (this.value !== '' && this.#probe.value === '') flags.badInput = true;"
     }
   ]
 }

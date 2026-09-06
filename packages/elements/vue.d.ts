@@ -123,10 +123,17 @@ declare module 'vue' {
     }>;
     /** A labelled text input that participates in a native form. */
     'sk-form-input': SkElement<{
+      /** Forwarded to the inner control's `autocomplete` attribute, verbatim. */
+      'autocomplete'?: string | null | undefined;
       /** Optional helper text rendered under the control and linked to it for screen readers. */
       'description'?: string;
       /** Excludes the field from submission and from user interaction. */
       'disabled'?: boolean;
+      /**
+       * A hint to the browser about the kind of on-screen keyboard to display. Hinting only — it
+       * carries no validation semantics.
+       */
+      'inputmode'?: string | null | undefined;
       /**
        * Whether the field is showing an error. The element sets it from its own validity.
        * Assigning it directly paints the error state WITHOUT setting validity — the field looks
@@ -136,20 +143,46 @@ declare module 'vue' {
       /** The visible label. Also the accessible name, so it is not optional in practice. */
       'label'?: string;
       /**
+       * The maximum value, for numeric and date/time input types. A string, matching the native
+       * HTML attribute's own contract.
+       */
+      'max'?: string | null | undefined;
+      /**
+       * The minimum value, for numeric and date/time input types. A string, matching the native
+       * HTML attribute's own contract.
+       */
+      'min'?: string | null | undefined;
+      /**
        * The name submitted with the form value. Without it the field contributes no `FormData`
        * entry — though a required empty one still blocks its form.
        */
       'name'?: string;
+      /**
+       * A regular expression the value must match. Forwarded verbatim to the inner control; the
+       * platform performs the match, this element does not re-validate it.
+       */
+      'pattern'?: string | null | undefined;
       /**
        * Placeholder text. Not a substitute for `label`: it disappears on input and is not a
        * reliable accessible name.
        */
       'placeholder'?: string;
       /**
+       * Marks the field read-only. The value is still submitted with the form, unlike `disabled` —
+       * but the field is barred from constraint validation, so a `required` read-only field never
+       * blocks its form.
+       */
+      'readonly'?: boolean;
+      /**
        * Marks the field required. An empty required field blocks submission and reports
        * `${label} is required`, or "This field is required" when `label` is empty.
        */
       'required'?: boolean;
+      /**
+       * The granularity the value must adhere to, for numeric and date/time input types. `"any"`
+       * is a legal value the platform itself interprets.
+       */
+      'step'?: string | null | undefined;
       /** The native input type — `text`, `email`, `password`, and so on. */
       'type'?: string;
       /**
@@ -157,6 +190,12 @@ declare module 'vue' {
        * submits nothing.
        */
       'value'?: string;
+      /**
+       * Suggested values shown in a native datalist alongside the input. A typed value matching no
+       * option stays valid unless a forwarded constraint says otherwise — this is a suggestion
+       * list, not a closed set.
+       */
+      'options'?: import('@spec-kitty/elements/dist/form-input/sk-form-input.js').SkFormInput["options"];
     }>;
     /** A labelled multi-line text control that participates in a native form. */
     'sk-form-textarea': SkElement<{

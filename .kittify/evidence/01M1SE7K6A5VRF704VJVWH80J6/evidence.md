@@ -1,0 +1,1 @@
+13 findings (3 BLOCKER, 5 MAJOR, 5 MINOR/NIT) on plan+tasks at post-tasks point-cut for #180; verified against sk-form-input.ts, behaviours.json/mutations.json, tests/node/config-contract.test.ts, scripts/suite-selftest.mjs, scripts/normalise-manifest.mjs, vitest.config.mts, ci-quality.yml

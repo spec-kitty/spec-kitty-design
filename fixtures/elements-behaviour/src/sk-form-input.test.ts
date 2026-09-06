@@ -1,4 +1,5 @@
 import { beforeEach, expect, test } from 'vitest';
+import { userEvent } from '@vitest/browser/context';
 import '@spec-kitty/elements';
 
 /**
@@ -29,6 +30,16 @@ type Input = HTMLElement & {
   checkValidity(): boolean;
   formDisabledCallback(disabled: boolean): void;
   updateComplete: Promise<unknown>;
+  // #180 additions
+  type: string;
+  pattern: string | undefined;
+  min: string | undefined;
+  max: string | undefined;
+  step: string | undefined;
+  inputmode: string | undefined;
+  autocomplete: string | undefined;
+  readonly: boolean;
+  options: ReadonlyArray<{ value: string; label?: string }>;
 };
 
 const mount = async (attrs: Record<string, string> = {}, seed = ''): Promise<[HTMLFormElement, Input]> => {
@@ -399,6 +410,475 @@ test('clearing a server error does NOT wipe a live required violation', async ()
   expect(el.validity.valueMissing, 'the required violation is re-derived, not erased').toBe(true);
   expect(el.hasAttribute('invalid')).toBe(true);
   await expect.element(control(el)).toHaveAccessibleDescription(/is required/);
+});
+
+/**
+ * #180 — native constraint forwarding, merged UA validity, corrected readonly semantics, and a
+ * shadow-root datalist. WP01 T001 (forwarding), T002 (readonly + merged validity), T003
+ * (datalist) — merged with their tests per the coordinator's DIRECTIVE_034 fold-in: each test
+ * below sits in the same subtask as the code it covers, not a later one.
+ */
+
+test('[SC-013] pattern/min/max/step/inputmode/autocomplete reach the inner control', async () => {
+  // SIX ATTRIBUTES, ONE TEST — a dropped forwarding for any one of them is a distinguishable
+  // mutation target (the render() binding line for that attribute), so a single parameterized
+  // assertion set still gives per-attribute mutation coverage.
+  const cases: Array<[keyof Input, string]> = [
+    ['pattern', '[a-z]+'],
+    ['min', '3'],
+    ['max', '9'],
+    ['step', '2'],
+    ['inputmode', 'numeric'],
+    ['autocomplete', 'off'],
+  ];
+  const [, el] = await mount({ name: 'signal' });
+  for (const [prop, value] of cases) {
+    (el as unknown as Record<string, unknown>)[prop] = value;
+  }
+  await el.updateComplete;
+  const inner = control(el);
+  for (const [prop, value] of cases) {
+    expect(
+      inner.getAttribute(prop as string),
+      `${String(prop)} must reach the inner control as a real attribute`,
+    ).toBe(value);
+    // PROPERTY -> ATTRIBUTE on the HOST, not the inner control — the other half of `reflect:
+    // true`, and previously unasserted: this test's other checks all read the INNER control, so
+    // deleting `reflect: true` from all six properties reds nothing here. `reflect: true` is
+    // also what the forwarding assertion above depends on transitively (Lit re-runs the render
+    // binding on the property write either way), but the HOST attribute itself is a separate,
+    // directly observable fact this loop was not checking.
+    expect(el.hasAttribute(prop as string), `${String(prop)} must reflect onto the HOST`).toBe(true);
+  }
+  // Attribute -> property also works, for every one of them (Lit's own `type: String` handles
+  // this; asserted once as a precondition the rest of the test relies on).
+  const [, el2] = await mount({ pattern: '[0-9]+', min: '1', max: '5', step: '1', inputmode: 'tel', autocomplete: 'on' });
+  expect(el2.pattern).toBe('[0-9]+');
+  expect(el2.min).toBe('1');
+  expect(el2.max).toBe('5');
+  expect(el2.step).toBe('1');
+  expect(el2.inputmode).toBe('tel');
+  expect(el2.autocomplete).toBe('on');
+
+  // UNSET must OMIT the attribute entirely on the rendered control, not forward an empty
+  // string. This is not merely cosmetic: an empty `pattern=""` is not "no pattern" — it compiles
+  // to a regex that matches ONLY the empty string, so a plain input like "x" would fail it.
+  // Measured directly while building the merge (below): the same trap exists internally for the
+  // detached validation probe, and is guarded there for the same reason.
+  const [, el3] = await mount({ name: 'plain' });
+  const inner3 = control(el3);
+  for (const attr of ['pattern', 'min', 'max', 'step']) {
+    expect(inner3.hasAttribute(attr), `unset ${attr} must be ABSENT, not empty`).toBe(false);
+  }
+});
+
+test('[SC-003] readonly reaches the inner control but is NOT reflected on the host', async () => {
+  // ATTRIBUTE -> PROPERTY works (markup authoring); PROPERTY -> ATTRIBUTE is DELIBERATELY absent
+  // — reflecting `readonly` would let the UA bar constraint validation on the host attribute
+  // alone, making the element's own barring branch an unobservable mutation anchor (research.md
+  // R1). This test's second half is the one that would silently pass for the wrong reason if
+  // `reflect: true` were mistakenly restored.
+  const [, el] = await mount({ readonly: '' });
+  expect(el.readonly, 'attribute -> property must still work').toBe(true);
+  expect(control(el).readOnly, 'the inner control must be driven from the property').toBe(true);
+
+  const [, el2] = await mount({});
+  el2.readonly = true;
+  await el2.updateComplete;
+  expect(
+    el2.hasAttribute('readonly'),
+    'readonly is deliberately NOT reflected — this must stay false',
+  ).toBe(false);
+});
+
+test('[SC-003] a merged UA validity flag blocks a real submit and carries a message — mount-time', async () => {
+  const [form, el] = await mount({ name: 'branch', pattern: '[a-z]+' }, '123');
+  await el.updateComplete;
+
+  expect(el.validity.patternMismatch, 'the UA flag must be merged onto the host').toBe(true);
+  expect(el.checkValidity()).toBe(false);
+
+  let fired = 0;
+  form.addEventListener('submit', (e) => {
+    e.preventDefault(); // never let a genuinely-firing submit actually navigate the test iframe
+    fired += 1;
+  });
+  form.requestSubmit();
+  expect(fired, 'a patternMismatch value must never reach a submit handler').toBe(0);
+
+  // The message reaches the a11y tree, not merely the flag.
+  const err = el.shadowRoot!.querySelector('[part~="error"]') as HTMLElement;
+  expect(err.textContent!.trim().length, 'a UA-raised flag must carry a non-empty message').toBeGreaterThan(0);
+
+  // And the valid path still works.
+  el.value = 'abc';
+  await el.updateComplete;
+  form.requestSubmit();
+  expect(fired, 'a valid value must still submit').toBe(1);
+});
+
+test('[SC-003] a constraint attribute changed AFTER mount reaches the host validity — the read-before-write ordering fix', async () => {
+  // THE ARM THAT CATCHES THE CRITICAL DEFECT. Mount with a VALID value, THEN mutate — this is
+  // what programmatic assignment (and the React wrapper) actually does, and it is the case
+  // `willUpdate` running before `render()` commits bindings would otherwise miss: without the
+  // sync-before-read step in validate(), `control.validity` here would still reflect the
+  // PREVIOUS render's (valid) state.
+  const [form, el] = await mount({ name: 'branch', pattern: '[a-z]+' }, 'abc');
+  await el.updateComplete;
+  expect(el.validity.valid, 'precondition: valid at mount').toBe(true);
+
+  el.value = '123';
+  await el.updateComplete;
+
+  expect(el.validity.patternMismatch, 'the flag must be current after a post-mount mutation').toBe(true);
+  expect(el.checkValidity()).toBe(false);
+
+  let fired = 0;
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    fired += 1;
+  });
+  form.requestSubmit();
+  expect(fired, 'a post-mount-mutated invalid value must still block submission').toBe(0);
+});
+
+test('[SC-003] a `type` change and a `value` change in the SAME update validate against the NEW type — the probe-ordering fix', async () => {
+  // THE ARM THAT CATCHES THE PROBE-ORDERING DEFECT. `pattern="\d+"` (digits only). Mount as a
+  // number field with a satisfying value, then change BOTH `type` (number -> text) and `value`
+  // ('123' -> 'abc') in one update, unawaited between the two assignments — exactly what a
+  // consumer switching a field's kind and seeding a new value at once would do. Without probe
+  // assigning `type` before `value`, the probe validated 'abc' against the STALE 'number' type
+  // (silently sanitizing to '' with no flag at all), then flipped type — leaving the merge with
+  // an empty, unmatched-by-\d+-because-empty value and a host that wrongly reported valid.
+  const [form, el] = await mount({ name: 'branch', type: 'number', pattern: '\\d+' }, '123');
+  await el.updateComplete;
+  expect(el.validity.valid, 'precondition: valid as a number field').toBe(true);
+
+  el.type = 'text';
+  el.value = 'abc';
+  await el.updateComplete;
+
+  expect(el.validity.patternMismatch, 'text "abc" against \\d+ must mismatch').toBe(true);
+  expect(el.checkValidity()).toBe(false);
+  let fired = 0;
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    fired += 1;
+  });
+  form.requestSubmit();
+  expect(fired, 'a same-update type+value change must not slip through as valid').toBe(0);
+});
+
+test('[SC-003] a UA flag with no required/customError still gets a non-empty message — the setValidity throw fix', async () => {
+  // THE ARM THAT CATCHES THE OTHER CRITICAL DEFECT. `required` is NOT set here, so the only
+  // source of a true flag is the merged UA flag — `setValidity(flags, '')` throws in that case
+  // unless a fallback message is authored. The test simply completing (updateComplete resolving,
+  // not rejecting) is part of the assertion.
+  const [, el] = await mount({ name: 'branch', pattern: '[a-z]+' }, '123');
+  // Reaching this line at all is part of the assertion: `setValidity(flags, '')` throwing would
+  // reject `updateComplete` (awaited inside `mount`), failing the test before this line runs.
+  const err = el.shadowRoot!.querySelector('[part~="error"]') as HTMLElement;
+  expect(err.textContent!.trim().length, 'a bare UA flag must still get a message').toBeGreaterThan(0);
+});
+
+test('[SC-003] badInput reaches the host — REAL typing only, never a property assignment', async () => {
+  // MEASURED, NOT ASSUMED: `el.value = '12e'` (property assignment) on a bare native
+  // `<input type="number">` sanitizes silently to `''` with `badInput` staying `false` — even
+  // with a dispatched `input` event. `badInput` is set ONLY by the UA's own response to genuine
+  // user keystrokes into the widget. That is why this merge is read from the REAL rendered
+  // control (not the detached validation probe every other flag in this file is merged from —
+  // a probe driven by property assignment could never observe this flag at all) and why this
+  // test uses `userEvent.type`, not `el.value = …`.
+  const [, el] = await mount({ name: 'qty', type: 'number' });
+  const inner = control(el);
+  await userEvent.type(inner, '12');
+  await userEvent.type(inner, 'e');
+  await el.updateComplete;
+
+  expect(el.validity.badInput, 'real typing of an unparseable number must merge badInput').toBe(true);
+  expect(el.validity.valid).toBe(false);
+});
+
+test('[SC-003] a bad-input control keeps the user\'s buffer, rather than being overwritten mid-edit', async () => {
+  // "12e4" IS a valid HTML number (exponential notation) — but IS badInput for the MIDDLE
+  // keystroke, "12e", before the trailing "4" arrives. Measured on a bare native input: typing
+  // the whole thing keystroke-by-keystroke ends at `value === '12e4'`, `badInput === false`.
+  // The regression this guards: an EARLIER version of `#onInput` copied the sanitized `''` the
+  // UA reports mid-typing into `this.value`, and the NEXT render's `.value=` binding committed
+  // that `''` back onto the SAME control the user was still typing into — resetting its buffer,
+  // so the trailing "4" landed in an EMPTIED field and the end result was just "4", not "12e4".
+  const [, el] = await mount({ name: 'qty', type: 'number' });
+  const inner = control(el);
+  await userEvent.type(inner, '12e'); // badInput mid-sequence
+  await el.updateComplete; // let a render happen WHILE badInput is true
+  await userEvent.type(inner, '4'); // completes it to a valid exponential number
+
+  expect(el.value, 'the control must keep every keystroke, not just the last one').toBe('12e4');
+  expect(el.validity.badInput).toBe(false);
+  expect(el.validity.valid).toBe(true);
+});
+
+test('[SC-003] undoing a bad keystroke back to the IDENTICAL prior value still re-validates — the unconditional validate() fix', async () => {
+  // THE REGRESSION #187's pre-merge review pass 2 caught: the buffer-preservation fix above
+  // skips `this.value = control.value` while `badInput` is true, which is correct for the
+  // MIDDLE of a keystroke sequence — but if the user backs out to the EXACT prior value,
+  // `this.value = control.value` becomes a NO-OP once badInput clears (Lit's dirty-check sees no
+  // change and never reschedules `willUpdate`), so the invalid state computed while badInput was
+  // momentarily true was left standing FOREVER — a field the user LEFT VALID reported invalid
+  // with no property change able to recover it. `#onInput` calling `validate()`
+  // unconditionally, not only inside the badInput branch, is the fix under test here.
+  const [form, el] = await mount({ name: 'qty', type: 'number' }, '5');
+  await el.updateComplete;
+  expect(el.validity.valid, 'precondition: valid at mount').toBe(true);
+
+  const inner = control(el);
+  await userEvent.type(inner, '{End}e'); // "5e" — badInput mid-sequence
+  await el.updateComplete;
+  expect(el.validity.badInput, 'precondition: badInput while "5e" is on the control').toBe(true);
+
+  await userEvent.keyboard('{Backspace}'); // undo back to "5" — IDENTICAL to this.value already
+  await el.updateComplete;
+
+  expect(el.value, 'the property must reflect the undone control value').toBe('5');
+  expect(el.validity.badInput, 'badInput must clear once the control is valid again').toBe(false);
+  expect(el.validity.valid, 'the host must recover — this is the regression').toBe(true);
+
+  let fired = 0;
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    fired += 1;
+  });
+  form.requestSubmit();
+  expect(fired, 'a recovered value must submit, not stay silently blocked').toBe(1);
+});
+
+test('[SC-003] an untouched-looking empty number field survives a mistype-and-undo — the user-visible shape of the same regression', async () => {
+  // The narrower, more alarming shape of the same bug: an OPTIONAL, EMPTY field a user merely
+  // brushes against (types a stray character, then corrects it) must not end up vetoing its
+  // whole form. Pre-fix-3 this was already valid; the buffer-preservation fix alone regressed
+  // it to permanently invalid; this test proves the unconditional validate() fix restores it.
+  const [form, el] = await mount({ name: 'qty', type: 'number' });
+  await el.updateComplete;
+  expect(el.validity.valid, 'precondition: an empty, non-required number field is valid').toBe(
+    true,
+  );
+
+  const inner = control(el);
+  await userEvent.type(inner, 'e');
+  await el.updateComplete;
+  await userEvent.keyboard('{Backspace}');
+  await el.updateComplete;
+
+  expect(el.value).toBe('');
+  expect(el.validity.valid, 'an untouched-looking empty field must not lock invalid').toBe(true);
+
+  let fired = 0;
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    fired += 1;
+  });
+  form.requestSubmit();
+  expect(fired).toBe(1);
+});
+
+test('[SC-003] a value the current type cannot represent blocks a real submit — the programmatic badInput divergence (operator ruling)', async () => {
+  // #180's value-authority fork, resolved by the operator: `this.value` stays RAW (still what
+  // gets submitted on a valid path), but a non-empty value the UA sanitizes AWAY ENTIRELY for
+  // the current type is now DETECTED and blocks the form, exactly like real-typing badInput
+  // does. `2026-13-45` is not a real date (month 13); a bare native `<input type="date">`
+  // sanitizes an unparseable value straight to `''`, which is what makes this the programmatic
+  // analogue of badInput rather than a `typeMismatch`/`rangeOverflow` case.
+  const [form, el] = await mount({ name: 'when', type: 'date', required: '' }, '2026-13-45');
+  await el.updateComplete;
+
+  expect(el.validity.valid, 'an unrepresentable date must not report valid').toBe(false);
+  expect(el.value, 'the raw, unsanitized value must be preserved on the property').toBe(
+    '2026-13-45',
+  );
+
+  let fired = 0;
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    fired += 1;
+  });
+  form.requestSubmit();
+  expect(fired, 'an unrepresentable date must never reach a submit handler').toBe(0);
+
+  const err = el.shadowRoot!.querySelector('[part~="error"]') as HTMLElement;
+  expect(
+    err.textContent!.trim().length,
+    'the divergence must carry a non-empty message, not merely set a flag',
+  ).toBeGreaterThan(0);
+});
+
+test('[SC-003] a comma-formatted number blocks a real submit — the programmatic badInput divergence (operator ruling)', async () => {
+  // Same divergence, a different type: "1,5" is not a UA-parseable number (no thousands
+  // separator, no locale comma-decimal support in the number input's own parser), so a bare
+  // native `<input type="number">` sanitizes it to `''` on property assignment.
+  const [form, el] = await mount({ name: 'qty', type: 'number' }, '1,5');
+  await el.updateComplete;
+
+  expect(el.validity.valid).toBe(false);
+  expect(el.value, 'the raw value must be preserved, not silently cleared').toBe('1,5');
+
+  let fired = 0;
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    fired += 1;
+  });
+  form.requestSubmit();
+  expect(fired).toBe(0);
+});
+
+test('[SC-003] an unparseable-looking but non-sanitizing value reports typeMismatch, NOT the new divergence — proves the branch does not over-fire', async () => {
+  // The negative case the operator ruling explicitly asked to be proven: `type="email"` does
+  // NOT sanitize an invalid value away — the UA keeps the raw text on the control and reports
+  // `typeMismatch` instead. If the new divergence branch fired here too, it would be
+  // indistinguishable from `typeMismatch` and this test would still pass for the wrong reason —
+  // so it asserts `badInput` is specifically FALSE, not merely that the field is invalid.
+  const [, el] = await mount({ name: 'contact', type: 'email' }, 'notanemail');
+  await el.updateComplete;
+
+  expect(el.validity.typeMismatch, 'an invalid email is a typeMismatch, not badInput').toBe(true);
+  expect(
+    el.validity.badInput,
+    'the programmatic divergence must not fire for a type that keeps the raw text',
+  ).toBe(false);
+  expect(el.validity.valid).toBe(false);
+});
+
+test('[SC-003] a value that sanitizes to empty ONLY because it is pure whitespace does not trigger the divergence — the `.trim()` fix', async () => {
+  // #187's pre-merge review pass 2 measured that `text`/`search`/`password` inputs strip `\r`/
+  // `\n` from their sanitized value, so a value that is ENTIRELY newline sanitizes to `''` too —
+  // the same shape as `2026-13-45`/`1,5`, but not a genuine "unrepresentable content" case, just
+  // whitespace the UA discarded. A bare `this.value !== ''` check would have merged this as
+  // `badInput` and blocked the field; `.trim() !== ''` correctly stays silent for it.
+  const [, el] = await mount({ name: 'notes', type: 'text' }, '\n');
+  await el.updateComplete;
+
+  expect(
+    el.validity.badInput,
+    'a pure-whitespace value must not read as an unrepresentable divergence',
+  ).toBe(false);
+  expect(el.validity.valid).toBe(true);
+});
+
+test('[SC-002][SC-003] a readonly control still submits but is barred from constraint validation', async () => {
+  const [form, el] = await mount({ name: 'region', label: 'Region', required: '', readonly: '' });
+  await el.updateComplete;
+
+  expect(el.validity.valid, 'barred, not merely passing').toBe(true);
+  expect(el.checkValidity()).toBe(true);
+  // PRESENCE, not absence — the exact line that distinguishes readonly from disabled.
+  expect(new FormData(form).has('region'), 'a readonly control still submits its (empty) value').toBe(true);
+
+  // The subtlest arm: a pattern mismatch ALSO present must not leak through — proves the
+  // readonly early return precedes the merge code, not merely that empty+required is barred.
+  const [, el2] = await mount({ name: 'region2', required: '', readonly: '', pattern: '[a-z]+' }, '123');
+  await el2.updateComplete;
+  expect(el2.validity.valid, 'a failing pattern must also be barred when readonly').toBe(true);
+});
+
+test('[SC-003] a form reset that restores a satisfying value reports valid immediately', async () => {
+  // RE-SITED FROM SC-004 — this is a merged-validity claim, not the value-restoration SC-004
+  // already owns (see the existing SC-004 test above); full story in research.md R6.
+  const [form, el] = await mount({ name: 'branch', pattern: '[a-z]+' }, 'abc');
+  await el.updateComplete;
+  el.value = '123';
+  await el.updateComplete;
+  expect(el.validity.valid, 'precondition: invalid before reset').toBe(false);
+
+  form.reset();
+  await el.updateComplete;
+
+  expect(el.validity.valid, 'a reset that restores a satisfying value must report valid').toBe(true);
+  const err = el.shadowRoot!.querySelector('[part~="error"]') as HTMLElement;
+  expect(err.textContent!.trim()).toBe('');
+});
+
+test('[SC-013] the datalist is reachable from the inner input by node identity', async () => {
+  const [, el] = await mount({ name: 'branch' });
+  el.options = Object.freeze([
+    { value: 'main' },
+    { value: 'release/2026.09', label: 'Release 2026.09' },
+  ]);
+  await el.updateComplete;
+
+  const inner = control(el);
+  const datalist = el.shadowRoot!.querySelector('datalist');
+  // NODE IDENTITY, not attribute-string equality — a string match would pass even if `list`
+  // pointed at a same-id node in the WRONG root, or at nothing.
+  expect(inner.list, 'the input must resolve `list` to THIS datalist, by identity').toBe(datalist);
+  expect(datalist!.children.length).toBe(2);
+  expect((datalist!.children[1] as HTMLOptionElement).label).toBe('Release 2026.09');
+});
+
+test('[SC-013] no options means no list attribute and no datalist element', async () => {
+  const [, el] = await mount({ name: 'branch' });
+  await el.updateComplete;
+  expect(control(el).list, 'absent, not pointing at nothing').toBe(null);
+  expect(el.shadowRoot!.querySelector('datalist')).toBe(null);
+});
+
+test('[FR-006] a value matching no option stays valid', async () => {
+  const [, el] = await mount({ name: 'branch' });
+  el.options = Object.freeze([{ value: 'main' }]);
+  el.value = 'not-in-the-list';
+  await el.updateComplete;
+  expect(el.validity.valid, 'the datalist is a suggestion, not a closed enum').toBe(true);
+});
+
+test('[SC-003] removing a constraint attribute clears it, rather than forwarding literal "null"', async () => {
+  // Lit's default String converter hands a REMOVED reflected attribute's `fromAttribute` result
+  // straight through as `null` (from `getAttribute`), not `undefined` — a value the original
+  // `string | undefined` declaration did not admit. Checking only `undefined` for "removed"
+  // let `null` fall to `setAttribute(name, null)`, which stringifies to the literal text
+  // "null" — `pattern="null"` compiles to `^(?:null)$`, permanently invalid for anything else,
+  // with NO visible `pattern` attribute in the shadow DOM to explain why.
+  const [, el] = await mount({ name: 'branch', pattern: '[a-z]+' }, 'anything-with-digits-1');
+  await el.updateComplete;
+  expect(el.validity.valid, 'precondition: the pattern legitimately fails first').toBe(false);
+
+  el.removeAttribute('pattern');
+  await el.updateComplete;
+
+  expect(el.pattern, 'Lit hands this property null on attribute removal, not undefined').toBe(null);
+  expect(control(el).hasAttribute('pattern'), 'no attribute must reach the rendered control').toBe(false);
+  expect(el.validity.valid, 'removing the constraint must clear the mismatch, not fossilize "null"').toBe(true);
+});
+
+test('[SC-003] changing `label` alone updates the required-field message', async () => {
+  const [, el] = await mount({ name: 'email', label: 'Email', required: '' });
+  await el.updateComplete;
+  const err = () => (el.shadowRoot!.querySelector('[part~="error"]') as HTMLElement).textContent!.trim();
+  expect(err()).toMatch(/Email is required/);
+
+  el.label = 'Work email';
+  await el.updateComplete;
+  expect(err(), 'changing label alone must re-run validate(), not wait for value to also change').toMatch(
+    /Work email is required/,
+  );
+});
+
+test('[SC-013] no description and no error means aria-describedby is ABSENT, not empty', async () => {
+  // `undefined` is not a removal sentinel in a Lit ATTRIBUTE binding (only `nothing` is) — the
+  // original `aria-describedby=${describedBy || undefined}` rendered a literal
+  // `aria-describedby=""` rather than omitting the attribute.
+  const [, el] = await mount({ name: 'email', label: 'Email' });
+  await el.updateComplete;
+  expect(control(el).hasAttribute('aria-describedby'), 'must be absent, not an empty string').toBe(false);
+});
+
+test('[SC-003] a whitespace-only customError is treated as empty, not a blank visible error', async () => {
+  const [, el] = await mount({ name: 'email', label: 'Email' });
+  await el.updateComplete;
+  expect(el.validity.valid, 'precondition: nothing else makes this invalid').toBe(true);
+
+  el.setCustomError('   ');
+  await el.updateComplete;
+
+  expect(el.validity.valid, 'a whitespace-only error must not silently invalidate the field').toBe(true);
+  expect(el.hasAttribute('invalid'), 'no visible error paint for a message with nothing to show').toBe(false);
 });
 
 test('a disabled required field does not veto its form', async () => {
