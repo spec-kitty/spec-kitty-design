@@ -71,6 +71,18 @@
       "title": "[doctrine] issue-matrix.json ships unfilled and scrapes a referenced-only issue into a row",
       "verdict": "fixed",
       "wp": "WP03"
+    },
+    "#225": {
+      "evidence_ref": "Referenced, not delivered: #225 carries the operator ruling that funds the filtered-suite redesign. C-003 holds the suite-time ceiling at 881.9s and this mission does not raise it.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
     }
   },
   "schema_version": 1
