@@ -10,6 +10,7 @@
       "types": "./dist/src/index.d.ts",
       "default": "./dist/src/index.js"
     },
+    "./action-row/*": "./dist/action-row/*",
     "./app-shell/*": "./dist/app-shell/*",
     "./blog-card/*": "./dist/blog-card/*",
     "./button/*": "./dist/button/*",
@@ -19,6 +20,7 @@
     "./data-table/*": "./dist/data-table/*",
     "./disclosure/*": "./dist/disclosure/*",
     "./empty-state/*": "./dist/empty-state/*",
+    "./entity-marker/*": "./dist/entity-marker/*",
     "./facts/*": "./dist/facts/*",
     "./feature-card/*": "./dist/feature-card/*",
     "./form-field/*": "./dist/form-field/*",
@@ -31,8 +33,10 @@
     "./pill-tag/*": "./dist/pill-tag/*",
     "./ribbon-card/*": "./dist/ribbon-card/*",
     "./section-banner/*": "./dist/section-banner/*",
+    "./section-header/*": "./dist/section-header/*",
     "./site-footer/*": "./dist/site-footer/*",
     "./skip-link/*": "./dist/skip-link/*",
+    "./status-indicator/*": "./dist/status-indicator/*",
     "./stub/*": "./dist/stub/*",
     "./transition-matrix/*": "./dist/transition-matrix/*"
   },

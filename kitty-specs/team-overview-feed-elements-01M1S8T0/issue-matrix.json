@@ -37,15 +37,15 @@
       "wp": "WP03"
     },
     "#145": {
-      "evidence_ref": "Issue #145 remains open as the parallel shell-elements sibling. Its shared generated outputs are reconciled only through the held train; this mission neither implements nor closes it.",
+      "evidence_ref": "PR #195 merged the accepted #145 head into the held train as ff380ec7157ec59800e9e7a76cce8952f3567a95; issues #145 and #153 were closed only after that train merge was verified. The shell elements and their shared generated outputs are present in this mission's consolidation base.",
       "fr": "FR-019",
       "nfr": "NFR-007\u2013NFR-008",
       "repo": "spec-kitty/spec-kitty-design",
       "sc": "SC-002, SC-010",
-      "scope": "Deferred parallel sibling: shell elements are owned by #145; only generated-output collision handling affects #146 planning.",
+      "scope": "Verified parallel sibling prerequisite: shell elements remain owned by #145; #146 only reconciles their landed shared generated outputs with its disjoint feed elements.",
       "source_file": "plan.md",
       "title": "[TKO1] team-overview-shell-elements \u2014 app-shell, personal-rail, context-sidebar, page-header",
-      "verdict": "deferred-with-followup",
+      "verdict": "verified-already-fixed",
       "wp": "WP03"
     },
     "#146": {

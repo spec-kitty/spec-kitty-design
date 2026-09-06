@@ -1,0 +1,59 @@
+:host {
+  display: block;
+}
+
+.sk-section-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "eyebrow metadata"
+    "title action"
+    "description action";
+  align-items: center;
+  column-gap: var(--sk-space-6);
+  row-gap: var(--sk-space-2);
+  color: var(--sk-fg-default);
+  font-family: var(--sk-font-sans);
+}
+
+.sk-section-header__eyebrow {
+  grid-area: eyebrow;
+  color: var(--sk-fg-muted);
+  font-family: var(--sk-font-mono);
+  font-size: var(--sk-text-xs);
+  font-weight: var(--sk-weight-medium);
+  text-transform: uppercase;
+}
+
+.sk-section-header__title {
+  grid-area: title;
+  min-width: 0;
+}
+
+.sk-section-header__title slot::slotted(*) {
+  margin: 0;
+  color: var(--sk-fg-default);
+  font-family: var(--sk-font-display);
+  font-size: var(--sk-text-xl);
+  font-weight: var(--sk-weight-semibold);
+}
+
+.sk-section-header__description {
+  grid-area: description;
+  min-width: 0;
+  color: var(--sk-fg-muted);
+  font-size: var(--sk-text-sm);
+}
+
+.sk-section-header__metadata {
+  grid-area: metadata;
+  justify-self: end;
+  color: var(--sk-fg-muted);
+  font-size: var(--sk-text-xs);
+}
+
+.sk-section-header__action {
+  grid-area: action;
+  align-self: end;
+  justify-self: end;
+}

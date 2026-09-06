@@ -292,3 +292,128 @@ test.describe('distribution artifacts', () => {
     expect(result.styleTags, "shadowRoot <style> count").toBe(0);
   });
 });
+
+const actionRowStory = async (page: Page, id: string) => {
+  await page.goto(`/iframe.html?id=elements-skactionrow--${id}&viewMode=story`);
+  const host = page.locator('sk-action-row').first();
+  await expect(host.locator('[part="row"]')).toBeVisible({ timeout: 20000 });
+  return host;
+};
+
+test.describe('sk-action-row browser contract', () => {
+  test('keeps native list ownership and trailing controls outside row activation', async ({ page }) => {
+    await actionRowStory(page, 'native-list');
+    await expect(page.locator('ul > li > sk-action-row')).toHaveCount(2);
+    expect(await page.locator('sk-action-row').evaluateAll((hosts) =>
+      hosts.map((host) => host.shadowRoot?.querySelectorAll('ul,li,[role="list"],[role="listitem"]').length),
+    )).toEqual([0, 0]);
+
+    const host = await actionRowStory(page, 'with-controls');
+    await host.evaluate((element) => {
+      const state = { controls: 0, rows: 0 };
+      (window as typeof window & { __actionRowControls?: typeof state }).__actionRowControls = state;
+      element.addEventListener('sk-action-row-activate', () => { state.rows += 1; });
+      element.querySelector('[data-native-link]')!.addEventListener('click', (event) => {
+        event.preventDefault();
+        state.controls += 1;
+      });
+      element.querySelector('[data-native-button]')!.addEventListener('click', () => { state.controls += 1; });
+      element.querySelector('[data-sk-button]')!.addEventListener('click', () => { state.controls += 1; });
+    });
+    await host.locator('[data-native-link]').click();
+    await host.locator('[data-native-button]').click();
+    await host.locator('[data-sk-button]').locator('button').click();
+    expect(await page.evaluate(() =>
+      (window as typeof window & { __actionRowControls: unknown }).__actionRowControls,
+    )).toEqual({ controls: 3, rows: 0 });
+  });
+
+  test('emits the exact non-cancelable event once and suppresses repeat key activation', async ({ page }) => {
+    const host = await actionRowStory(page, 'default');
+    const trigger = host.locator('button[part="trigger"]');
+    await host.evaluate((element) => {
+      const trace = {
+        events: [] as Array<{ detail: unknown; keys: string[]; bubbles: boolean; composed: boolean; cancelable: boolean }>,
+        dispatches: [] as Array<{ result: boolean; defaultPrevented: boolean }>,
+        keys: [] as Array<{ key: string; repeat: boolean; defaultPrevented: boolean }>,
+      };
+      (window as typeof window & { __actionRowTrace?: typeof trace }).__actionRowTrace = trace;
+      const originalDispatch = element.dispatchEvent.bind(element);
+      element.dispatchEvent = ((event: Event) => {
+        const result = originalDispatch(event);
+        trace.dispatches.push({ result, defaultPrevented: event.defaultPrevented });
+        return result;
+      }) as typeof element.dispatchEvent;
+      element.addEventListener('sk-action-row-activate', (event) => {
+        const custom = event as CustomEvent<unknown>;
+        trace.events.push({
+          detail: custom.detail,
+          keys: Object.keys((custom.detail ?? {}) as object),
+          bubbles: custom.bubbles,
+          composed: custom.composed,
+          cancelable: custom.cancelable,
+        });
+      });
+      document.addEventListener('sk-action-row-activate', (event) => event.preventDefault());
+      element.shadowRoot!.querySelector('button')!.addEventListener('keydown', (event) => {
+        trace.keys.push({ key: event.key, repeat: event.repeat, defaultPrevented: event.defaultPrevented });
+      });
+    });
+
+    await trigger.click();
+    expect(await page.evaluate(() =>
+      (window as typeof window & { __actionRowTrace: unknown }).__actionRowTrace,
+    )).toMatchObject({
+      events: [{ detail: { id: 'activity-17' }, keys: ['id'], bubbles: true, composed: true, cancelable: false }],
+      dispatches: [{ result: true, defaultPrevented: false }],
+    });
+
+    await page.evaluate(() => {
+      const trace = (window as typeof window & {
+        __actionRowTrace: { events: unknown[]; dispatches: unknown[]; keys: unknown[] };
+      }).__actionRowTrace;
+      trace.events.length = 0;
+      trace.dispatches.length = 0;
+      trace.keys.length = 0;
+    });
+    await trigger.focus();
+    await page.keyboard.down('Enter');
+    await page.keyboard.down('Enter');
+    await page.keyboard.up('Enter');
+    expect(await page.evaluate(() =>
+      (window as typeof window & { __actionRowTrace: unknown }).__actionRowTrace,
+    )).toMatchObject({
+      events: [{ detail: { id: 'activity-17' } }],
+      keys: expect.arrayContaining([{ key: 'Enter', repeat: true, defaultPrevented: true }]),
+    });
+    expect(await host.evaluate((element) => (element as HTMLElement & { selected: boolean }).selected)).toBe(false);
+  });
+
+  test('keeps controlled selection valid in both branches and fits the 320px story', async ({ page }) => {
+    let host = await actionRowStory(page, 'selected');
+    await expect(host.locator('[part="row"]')).toHaveAttribute('aria-current', 'true');
+    await expect(host.locator('button[part="trigger"]')).toHaveCount(1);
+
+    host = await actionRowStory(page, 'non-selectable');
+    await expect(host.locator('[part="row"]')).toHaveAttribute('aria-current', 'true');
+    await expect(host.locator('button[part="trigger"]')).toHaveCount(0);
+    await expect(host.locator('[aria-selected],[aria-pressed],[role="checkbox"],[role="switch"]')).toHaveCount(0);
+
+    host = await actionRowStory(page, 'long-content');
+    expect(await host.evaluate((element) => {
+      const row = element.shadowRoot!.querySelector<HTMLElement>('[part="row"]')!;
+      const trigger = element.shadowRoot!.querySelector<HTMLElement>('[part="trigger"]')!;
+      const controls = element.shadowRoot!.querySelector<HTMLElement>('[part="controls"]')!;
+      const rowRect = row.getBoundingClientRect();
+      const triggerRect = trigger.getBoundingClientRect();
+      const controlsRect = controls.getBoundingClientRect();
+      return {
+        width: element.getBoundingClientRect().width,
+        rowOverflow: row.scrollWidth - row.clientWidth,
+        triggerOverflow: trigger.scrollWidth - trigger.clientWidth,
+        controlsInside: controlsRect.left >= rowRect.left && controlsRect.right <= rowRect.right + 0.5,
+        noOverlap: triggerRect.bottom <= controlsRect.top + 0.5,
+      };
+    })).toEqual({ width: 320, rowOverflow: 0, triggerOverflow: 0, controlsInside: true, noOverlap: true });
+  });
+});

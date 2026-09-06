@@ -7,22 +7,17 @@
     "the emitted prop docs and the",
     "class-level `## Methods` block, so one with none ships `/** undefined */` into a consumer's",
     "editor. check-manifest-content.mjs asserts the descriptions are non-empty.",
-    "",
     "THIS FILE IS THE ANTI-VACUITY HALF, and it exists because the first version of that gate",
     "did not have one. It counted DECLARATIONS, not items, so a manifest with five tagged",
     "elements and zero attributes, property-only fields, and methods printed",
-    "",
     "    ✅ 0 public attribute(s), property-only field(s), and method(s) across 5 element(s).",
-    "",
     "— a green line over an empty set, in the gate whose own docstring names that defect class.",
     "Both pre-merge lenses found it independently. Same shape as expected-parts.json, and the",
     "same reason.",
-    "",
     "EXACT EQUALITY, not shrink-only. Removing a documented property or method is an API change",
     "and should be a deliberate line in the same commit; adding one likewise. Either direction",
     "silently moving is what this refuses. If a count changes, change it here and say why in the",
     "commit message.",
-    "",
     "Counts are of the PUBLISHED surface as the wrapper generator sees it: attributes[] entries,",
     "members[] explicitly marked x-spec-kitty-property-only, and members[] of kind `method` that",
     "are not private/protected and do not start with `#`. `total` is the sum of all three.",
@@ -30,10 +25,17 @@
     "no attribute and cannot be delivered on a first render under ssrSafe — so they are not",
     "counted here either. See scripts/normalise-manifest.mjs.",
     "#77 adds <sk-site-footer> with FIVE attributes and zero methods: wordmark, tagline, legal, column-one-heading and column-two-heading. Every one is a string, which is the operator's ruling on #77 working around a constraint this ratchet's sibling gate enforces — the React wrappers' ssrSafe mode delivers first-render props as ATTRIBUTES, which carry only strings, so structured data would not survive. The link ITEMS are slotted instead. An earlier revision of this entry recorded 0/0 for a slot-only design that contradicted that ruling; the rebuild is why the numbers moved.",
-    "#182: 76 -> 78. <sk-page-header> goes from zero documented attributes to two — `density` (string, reflected; `compact` is the only non-default value) and `sticky` (boolean, reflected). Both are published API the React generator copies into a consumer's prop docs, and this file is exact-equality in both directions, so the pair cannot arrive or leave silently. No other element's counts move."
+    "#182: 76 -> 78. <sk-page-header> goes from zero documented attributes to two — `density` (string, reflected; `compact` is the only non-default value) and `sticky` (boolean, reflected). Both are published API the React generator copies into a consumer's prop docs, and this file is exact-equality in both directions, so the pair cannot arrive or leave silently. No other element's counts move.",
+    "#146 WP01 adds three projection primitives. Section-header is slot-only; status-indicator publishes one tone attribute; entity-marker publishes one accessible label attribute. Total moves 65 -> 67.",
+    "#146 WP02 adds sk-action-row with three controlled attributes: row-id, selectable and selected. Total moves 67 -> 70."
   ],
-  "total": 78,
+  "total": 83,
   "elements": {
+    "sk-action-row": {
+      "attributes": 3,
+      "properties": 0,
+      "methods": 0
+    },
     "sk-app-shell": {
       "attributes": 0,
       "properties": 0,
@@ -60,6 +62,11 @@
       "methods": 0
     },
     "sk-context-sidebar": {
+      "attributes": 1,
+      "properties": 0,
+      "methods": 0
+    },
+    "sk-entity-marker": {
       "attributes": 1,
       "properties": 0,
       "methods": 0
@@ -114,13 +121,23 @@
       "properties": 0,
       "methods": 0
     },
-    "sk-stub": {
+    "sk-section-header": {
       "attributes": 0,
       "properties": 0,
       "methods": 0
     },
     "sk-site-footer": {
       "attributes": 5,
+      "properties": 0,
+      "methods": 0
+    },
+    "sk-status-indicator": {
+      "attributes": 1,
+      "properties": 0,
+      "methods": 0
+    },
+    "sk-stub": {
+      "attributes": 0,
       "properties": 0,
       "methods": 0
     },

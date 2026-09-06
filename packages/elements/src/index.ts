@@ -1,4 +1,5 @@
 export { define, registeredTags } from './define.js';
+export { SkActionRow, type ActionRowActivateDetail } from './action-row/sk-action-row.js';
 export { SkStub } from './stub/sk-stub.js';
 export { SkBlogCard } from './blog-card/sk-blog-card.js';
 export { SkButton } from './button/sk-button.js';
@@ -17,6 +18,12 @@ export { SkAppShell } from './app-shell/sk-app-shell.js';
 export { SkPersonalRail } from './personal-rail/sk-personal-rail.js';
 export { SkContextSidebar } from './context-sidebar/sk-context-sidebar.js';
 export { SkPageHeader } from './page-header/sk-page-header.js';
+export { SkSectionHeader } from './section-header/sk-section-header.js';
+export {
+  SkStatusIndicator,
+  type StatusIndicatorTone,
+} from './status-indicator/sk-status-indicator.js';
+export { SkEntityMarker } from './entity-marker/sk-entity-marker.js';
 export {
   SkTransitionMatrix,
   type TransitionColumn,
@@ -36,6 +43,7 @@ export {
  * reaching across a project boundary.
  */
 export { default as skStubSheet } from './stub/sk-stub.css.js';
+export { default as skActionRowSheet } from './action-row/sk-action-row.css.js';
 
 // Same reason, for sk-grid's [SC-014]: the claim is that the adopted sheet is the one
 // GENERATED from packages/styles/src/grid/sk-grid.css, and identity against the class's own
@@ -54,6 +62,9 @@ export { default as skRibbonCardSheet } from './ribbon-card/sk-ribbon-card.css.j
 export { default as skPillTagSheet } from './pill-tag/sk-pill-tag.css.js';
 export { default as skSectionBannerSheet } from './section-banner/sk-section-banner.css.js';
 export { default as skSiteFooterSheet } from './site-footer/sk-site-footer.css.js';
+export { default as skSectionHeaderSheet } from './section-header/sk-section-header.css.js';
+export { default as skStatusIndicatorSheet } from './status-indicator/sk-status-indicator.css.js';
+export { default as skEntityMarkerSheet } from './entity-marker/sk-entity-marker.css.js';
 export { default as skTransitionMatrixSheet } from './transition-matrix/sk-transition-matrix.css.js';
 
 // The card's authored markup module, exported so the two failure policies are reachable

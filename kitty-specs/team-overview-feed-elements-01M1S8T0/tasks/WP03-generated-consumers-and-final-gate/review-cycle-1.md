@@ -73,4 +73,3 @@ for this metadata-only correction if the lane remains exactly at the reviewed SH
 7. Shared-file ownership — **FAIL**: the required handoff coordination note is absent, as described
    above.
 8. Production fragility — **N/A**: WP03 adds no production `raise`/throw path.
-

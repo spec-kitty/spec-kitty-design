@@ -73,6 +73,14 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) conve
 - Added `size="icon"` and the reflected `label` accessibility seam to `sk-button`. Icon buttons
   and links render as 40px square native controls, forward the supplied label to the real inner
   control, and retain a token-driven focus-visible treatment in both themes.
+- Added `sk-section-header`, `sk-status-indicator`, and `sk-entity-marker` as controlled,
+  presentational feed primitives (#146). Consumers retain heading level, native list markup,
+  status copy, and identity lookup; the elements only project supplied content. Status tone and
+  entity accessible naming both survive property assignment before custom-element upgrade.
+- Added `sk-action-row` as a controlled feed projection (#146). A valid selectable row uses one
+  native primary button, keeps trailing controls as siblings, and emits one bubbling, composed,
+  non-cancelable `sk-action-row-activate` request with exact `{ id }`. Consumers retain native
+  `ul > li`, selection, routing, data, and time ownership.
 - Added the controlled `sk-transition-matrix` element for accessible aggregate route-by-time-bucket
   moves, including typed intent events, responsive table semantics, and generated React delivery.
 - Added two orthogonal reflected axes to `sk-page-header` (#182): `density="compact"` and `sticky`.

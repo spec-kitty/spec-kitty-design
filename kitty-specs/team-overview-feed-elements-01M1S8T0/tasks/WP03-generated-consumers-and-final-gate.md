@@ -51,6 +51,7 @@ owned_files:
 - packages/react/src/**
 - packages/react/.wrapper-floor
 - CHANGELOG.md
+- scripts/check-manifest-content.mjs
 priority: P1
 role: implementer
 tags: []

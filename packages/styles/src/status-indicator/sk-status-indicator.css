@@ -1,0 +1,43 @@
+:host {
+  display: inline-flex;
+}
+
+.sk-status-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sk-space-2);
+  color: var(--sk-fg-body);
+  font-family: var(--sk-font-sans);
+  font-size: var(--sk-text-sm);
+  line-height: 1.5;
+}
+
+.sk-status-indicator__marker {
+  display: inline-flex;
+  flex-shrink: 0;
+  color: var(--sk-fg-muted);
+}
+
+.sk-status-indicator--info .sk-status-indicator__marker {
+  color: var(--sk-on-tint-sky);
+}
+
+.sk-status-indicator--success .sk-status-indicator__marker {
+  color: var(--sk-on-tint-mint);
+}
+
+.sk-status-indicator--attention .sk-status-indicator__marker {
+  color: var(--sk-on-tint-butter);
+}
+
+.sk-status-indicator--danger .sk-status-indicator__marker {
+  color: var(--sk-color-red);
+}
+
+.sk-status-indicator--recovery .sk-status-indicator__marker {
+  color: var(--sk-on-tint-lilac);
+}
+
+.sk-status-indicator__text {
+  min-width: 0;
+}

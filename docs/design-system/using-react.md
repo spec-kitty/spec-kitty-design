@@ -138,6 +138,32 @@ function Flow() {
 Removing a previously supplied `columns` or `routes` prop assigns a fresh frozen empty array to the
 element. It never retains stale structured data or serializes either array as an attribute.
 
+The generated action-row callback carries the exact consumer-owned ID. Selection stays controlled;
+the wrapper forwards the request but does not update `selected` itself:
+
+```tsx
+import { useState } from 'react';
+import { SkActionRow } from '@spec-kitty/react';
+
+function ActivityRow() {
+  const [selected, setSelected] = useState(false);
+  return (
+    <SkActionRow
+      rowId="activity-17"
+      selectable
+      selected={selected}
+      onSkActionRowActivate={(event) => setSelected(event.detail.id === 'activity-17')}
+    >
+      <strong slot="title">Activity</strong>
+      <code slot="reference">consumer/reference</code>
+    </SkActionRow>
+  );
+}
+```
+
+The underlying event bubbles across shadow roots, is composed, and is deliberately non-cancelable:
+the row requests consumer action but owns no navigation or other preventable default.
+
 - **Everything in `packages/react/src/` is generated.** Do not hand-edit it: CI regenerates and
   fails on drift, on orphaned files, and on a shrunken output set (`.wrapper-floor` is a
   committed ratchet; the gate refuses a missing or unparseable one rather than reading it as
