@@ -228,10 +228,10 @@
       "criterion_id": "C-001",
       "description": "Elements own rendering and local accessibility only and own no fetching, stores, routing, timers, selection, application actions, or Team Kitty domain calculations.",
       "proof_type": "manual_review",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "Independent source review of sk-metric and sk-evidence-chain found rendering and local accessibility only: no fetching, stores, routing, timers, selection, actions, event dispatch, or domain calculations.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T19:06:28.400950+00:00",
       "notes": "WP reviews and Tier C source-boundary audit."
     },
     {
