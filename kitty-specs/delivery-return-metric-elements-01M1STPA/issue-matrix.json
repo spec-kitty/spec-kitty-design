@@ -37,7 +37,7 @@
       "wp": "WP03"
     },
     "#147": {
-      "evidence_ref": "Current mission; WP01-WP03 are done and approved with 16/16 functional requirements accepted. Rewritten product/test tip is 1613e309846a15c8dd5479e1bf20250f6661da73; aggregate PR and issue closure remain post-train-merge.",
+      "evidence_ref": "Current mission; WP01-WP03 are done and approved with 16/16 functional requirements accepted. Rebased product/test tip is a7147f9373a831fadb63b71177d17a6511689d68; aggregate PR and issue closure remain post-train-merge.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -85,7 +85,7 @@
       "wp": "mission-wrap-up"
     },
     "#79": {
-      "evidence_ref": "#79 landed all three component migrations through PR #140 at train commit 70742b81435f2c7889370b867f502b45e32e0ab6; #147 reuses those primitives without modifying their contracts.",
+      "evidence_ref": "#79 landed all three component migrations through PR #140 at train commit 70742b8436ca89e09cb6e0416c0830f4bded3289; #147 reuses those primitives without modifying their contracts.",
       "fr": null,
       "nfr": null,
       "repo": null,
