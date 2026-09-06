@@ -1,0 +1,99 @@
+{
+  "version": 1,
+  "mission_slug": "notice-element-01M1W0WB",
+  "mission_id": "01M1W0WB2TA0RPMME1ZNJZ943P",
+  "mission_branch": "kitty/mission-notice-element-01M1W0WB",
+  "target_branch": "mission/notice-element",
+  "lanes": [
+    {
+      "lane_id": "lane-a",
+      "wp_ids": [
+        "WP01"
+      ],
+      "write_scope": [
+        "packages/styles/src/notice/sk-notice.css",
+        "stylelint.config.mjs"
+      ],
+      "predicted_surfaces": [],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    },
+    {
+      "lane_id": "lane-b",
+      "wp_ids": [
+        "WP02"
+      ],
+      "write_scope": [
+        "packages/elements/src/elements.ts",
+        "packages/elements/src/index.ts",
+        "packages/elements/src/notice/sk-notice.css.d.ts",
+        "packages/elements/src/notice/sk-notice.css.js",
+        "packages/elements/src/notice/sk-notice.ts"
+      ],
+      "predicted_surfaces": [
+        "artifact-rendering",
+        "legacy-cleanup"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    },
+    {
+      "lane_id": "lane-c",
+      "wp_ids": [
+        "WP03"
+      ],
+      "write_scope": [
+        "packages/elements/src/notice/sk-notice.stories.ts"
+      ],
+      "predicted_surfaces": [
+        "artifact-rendering"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    },
+    {
+      "lane_id": "lane-d",
+      "wp_ids": [
+        "WP04"
+      ],
+      "write_scope": [
+        "apps/storybook/src/tests/sk-notice-forced-colors.spec.ts",
+        "fixtures/elements-behaviour/src/sk-notice.test.ts",
+        "packages/react/type-tests/wrappers.type-test.tsx"
+      ],
+      "predicted_surfaces": [
+        "artifact-rendering"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    },
+    {
+      "lane_id": "lane-e",
+      "wp_ids": [
+        "WP05"
+      ],
+      "write_scope": [
+        "behaviours.json",
+        "docs/design-system/using-components.md",
+        "expected-docs.json",
+        "expected-parts.json",
+        "expected-stories.json",
+        "mutations.json",
+        "packages/elements/SIZES.md",
+        "packages/elements/custom-elements.json",
+        "packages/elements/vue.d.ts",
+        "packages/react/.wrapper-floor",
+        "packages/react/src"
+      ],
+      "predicted_surfaces": [
+        "artifact-rendering"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    }
+  ],
+  "computed_at": "2026-09-06T18:59:38.414595+00:00",
+  "computed_from": "dependency_graph+ownership",
+  "planning_artifact_wps": [],
+  "planning_commit_sha": "fe4b920237af16433e819026d5e414a780fdc7cd"
+}
