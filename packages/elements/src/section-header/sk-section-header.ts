@@ -5,6 +5,10 @@ import sheet from './sk-section-header.css.js';
 /**
  * A presentational section heading whose outline level and supporting content are consumer-owned.
  *
+ * Token dependencies: --sk-fg-default, --sk-fg-muted, --sk-font-display, --sk-font-mono,
+ * --sk-font-sans, --sk-space-2, --sk-space-6, --sk-text-sm, --sk-text-xl, --sk-text-xs,
+ * --sk-weight-medium, --sk-weight-semibold.
+ *
  * @element sk-section-header
  * @slot eyebrow - Optional lead-in content.
  * @slot title - A consumer-authored native heading.

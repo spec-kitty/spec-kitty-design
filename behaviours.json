@@ -326,7 +326,7 @@
       "summary": "every declared ::part() is present and targetable from outside",
       "owner": "fixture",
       "applicable": true,
-      "note": "FIXTURE-owned. packages/elements/src contains no part= and no @csspart, and the manifest declares 0 cssParts — so an elements-owned mutation would have no pattern and the harness's guard 1 would fire by construction. The manifest-derived arm is WP04's ratchet.",
+      "note": "Subject-owned. Shipped elements declare styling hooks with @csspart and render matching part= surfaces; expected-parts.json rejects manifest drift, while every registered subject fixture proves its declared parts are present and externally targetable. The synthetic fixture remains as harness self-coverage.",
       "subjects": [
         {
           "name": "sk-behaviour-fixture",

@@ -355,6 +355,7 @@ node scripts/typecheck-all.mjs
 node scripts/check-no-css-in-source.mjs
 node scripts/check-adopted-css-boundaries.mjs --selftest
 node scripts/check-adopted-css-boundaries.mjs
+node scripts/check-element-css-hygiene.mjs --selftest
 node scripts/check-element-css-hygiene.mjs
 node scripts/check-part-ratchet.mjs
 node scripts/check-story-theme-wrapper.mjs --selftest
@@ -393,6 +394,7 @@ node scripts/check-offline-load.mjs
 bash scripts/npm-audit-gate.sh
 npm ci --dry-run --ignore-scripts
 bash scripts/check-action-pins.sh
+node scripts/check-commitlint-config.mjs
 for commit in $(git rev-list --reverse origin/train/elements-first..HEAD); do
   npx commitlint --from="${commit}^" --to="$commit"
 done

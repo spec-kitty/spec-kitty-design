@@ -1,6 +1,7 @@
 import { beforeEach, expect, test } from 'vitest';
 import '@spec-kitty/elements';
 import { skSectionHeaderSheet } from '@spec-kitty/elements';
+import { assertThemesDiffered, contrast } from './contrast.js';
 import { installTokenSheet } from './token-sheet.js';
 
 beforeEach(installTokenSheet);
@@ -11,10 +12,10 @@ const mount = async (content = `
   <p slot="description">What needs attention now.</p>
   <span slot="metadata">12 items</span>
   <button slot="action">View all</button>
-`) => {
+`, container: HTMLElement = document.body) => {
   const element = document.createElement('sk-section-header');
   element.innerHTML = content;
-  document.body.append(element);
+  container.append(element);
   await (element as unknown as { updateComplete: Promise<unknown> }).updateComplete;
   return element;
 };
@@ -70,6 +71,39 @@ test('empty optional regions collapse and respond to consumer projection changes
   metadata.remove();
   await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
   expect(partOf(element, 'metadata')?.hidden).toBe(true);
+});
+
+test('identical consumer content resolves distinct dark/light surfaces with AA text contrast', async () => {
+  const content = `
+    <span slot="eyebrow">In flight</span>
+    <h3 slot="title">Recent activity</h3>
+    <p slot="description">What needs attention now.</p>
+    <span slot="metadata">12 items</span>
+    <span slot="action">View all</span>
+  `;
+  const surfaces = new Map<string, string>();
+  const projectedText: string[] = [];
+
+  for (const theme of ['dark', 'light'] as const) {
+    const wrapper = document.createElement('div');
+    if (theme === 'light') wrapper.className = 'sk-light';
+    wrapper.style.background = 'var(--sk-surface-page)';
+    document.body.append(wrapper);
+    const element = await mount(content, wrapper);
+    const surface = getComputedStyle(wrapper).backgroundColor;
+    surfaces.set(theme, surface);
+    projectedText.push(element.textContent!.replace(/\s+/g, ' ').trim());
+
+    for (const slot of ['eyebrow', 'title', 'description', 'metadata', 'action'] as const) {
+      const node = element.querySelector<HTMLElement>(`[slot="${slot}"]`)!;
+      const foreground = getComputedStyle(node).color;
+      const ratio = contrast(foreground, surface);
+      expect(ratio, `${slot} text in ${theme} is ${ratio.toFixed(2)}:1`).toBeGreaterThanOrEqual(4.5);
+    }
+  }
+
+  expect(projectedText).toEqual([projectedText[0], projectedText[0]]);
+  assertThemesDiffered(surfaces);
 });
 
 test('[SC-013] every declared part is present and targetable from outside', async () => {

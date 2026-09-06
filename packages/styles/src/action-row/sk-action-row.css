@@ -57,7 +57,7 @@ button.sk-action-row__trigger:hover {
 
 button.sk-action-row__trigger:focus-visible {
   z-index: 1;
-  outline: var(--sk-border-width-2) solid var(--sk-border-focus);
+  outline: var(--sk-border-width-2) solid var(--sk-color-accent);
   outline-offset: calc(var(--sk-border-width-2) * -1);
 }
 
@@ -144,5 +144,49 @@ button.sk-action-row__trigger:active {
   .sk-action-row__controls {
     width: 100%;
     padding: 0 var(--sk-space-4) var(--sk-space-3);
+  }
+}
+
+/* Disable exactly the two transitions this component owns. Keeping the
+   selectors scoped avoids changing motion in consumer-provided slots. */
+@media (prefers-reduced-motion: reduce) {
+  .sk-action-row {
+    transition: none;
+  }
+
+  .sk-action-row__trigger {
+    transition: none;
+  }
+}
+
+/* Background state changes flatten to Canvas in forced-colors mode. Preserve
+   the selected edge and give hover/pressed states an inset outline without
+   opting out of the user's palette. System colours live on policed longhands;
+   focus keeps the base rule's width/style and overrides its colour only. */
+@media (forced-colors: active) {
+  .sk-action-row[aria-current="true"] {
+    border-inline-start-color: Highlight;
+    border-inline-start-width: var(--sk-border-width-2);
+  }
+
+  button.sk-action-row__trigger:hover {
+    outline-style: solid;
+    outline-width: var(--sk-border-width-1);
+    outline-offset: calc(var(--sk-border-width-1) * -1);
+    outline-color: CanvasText;
+  }
+
+  button.sk-action-row__trigger:active {
+    outline-style: dashed;
+    outline-width: var(--sk-border-width-2);
+    outline-offset: calc(var(--sk-border-width-2) * -1);
+    outline-color: ButtonText;
+  }
+
+  button.sk-action-row__trigger:focus-visible {
+    outline-style: solid;
+    outline-width: var(--sk-border-width-2);
+    outline-offset: calc(var(--sk-border-width-2) * -1);
+    outline-color: Highlight;
   }
 }

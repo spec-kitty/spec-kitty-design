@@ -1099,7 +1099,7 @@
         },
         {
           "kind": "class",
-          "description": "A controlled, consumer-composed action row.\n\nToken dependencies: --sk-border-default, --sk-border-focus, --sk-border-strong,\n--sk-border-width-1, --sk-border-width-2, --sk-fg-body, --sk-fg-default, --sk-fg-muted,\n--sk-font-display, --sk-font-mono, --sk-font-sans, --sk-motion-duration-fast,\n--sk-motion-ease-out, --sk-radius-md, --sk-space-1, --sk-space-2, --sk-space-3,\n--sk-space-4, --sk-space-5, --sk-surface-card, --sk-surface-muted, --sk-surface-pill,\n--sk-text-base, --sk-text-sm, --sk-text-xs, --sk-weight-medium, --sk-weight-semibold.",
+          "description": "A controlled, consumer-composed action row.\n\nToken dependencies: --sk-border-default, --sk-border-strong, --sk-border-width-1,\n--sk-border-width-2, --sk-color-accent, --sk-fg-body, --sk-fg-default, --sk-fg-muted,\n--sk-font-display, --sk-font-mono, --sk-font-sans, --sk-motion-duration-fast,\n--sk-motion-ease-out, --sk-radius-md, --sk-space-1, --sk-space-2, --sk-space-3,\n--sk-space-4, --sk-space-5, --sk-surface-card, --sk-surface-muted, --sk-surface-pill,\n--sk-text-base, --sk-text-sm, --sk-text-xs, --sk-weight-medium, --sk-weight-semibold.",
           "name": "SkActionRow",
           "cssParts": [
             {
@@ -1723,7 +1723,7 @@
         },
         {
           "kind": "class",
-          "description": "A compact consumer-supplied icon, initials, or short mark with explicit accessible naming.",
+          "description": "A compact consumer-supplied icon, initials, or short mark with explicit accessible naming.\n\nToken dependencies: --sk-font-sans, --sk-on-tint-butter, --sk-radius-sm, --sk-space-1,\n--sk-space-7, --sk-surface-tint-butter, --sk-text-xs, --sk-weight-bold.",
           "name": "SkEntityMarker",
           "cssParts": [
             {
@@ -3671,7 +3671,7 @@
         },
         {
           "kind": "class",
-          "description": "A presentational section heading whose outline level and supporting content are consumer-owned.",
+          "description": "A presentational section heading whose outline level and supporting content are consumer-owned.\n\nToken dependencies: --sk-fg-default, --sk-fg-muted, --sk-font-display, --sk-font-mono,\n--sk-font-sans, --sk-space-2, --sk-space-6, --sk-text-sm, --sk-text-xl, --sk-text-xs,\n--sk-weight-medium, --sk-weight-semibold.",
           "name": "SkSectionHeader",
           "cssParts": [
             {
@@ -3907,7 +3907,7 @@
         },
         {
           "kind": "class",
-          "description": "A consumer-labelled status with a presentation-only tone and decorative marker.",
+          "description": "A consumer-labelled status with a presentation-only tone and decorative marker.\n\nToken dependencies: --sk-color-red, --sk-fg-body, --sk-fg-muted, --sk-font-sans,\n--sk-on-tint-butter, --sk-on-tint-lilac, --sk-on-tint-mint, --sk-on-tint-sky,\n--sk-space-2, --sk-text-sm.",
           "name": "SkStatusIndicator",
           "cssParts": [
             {

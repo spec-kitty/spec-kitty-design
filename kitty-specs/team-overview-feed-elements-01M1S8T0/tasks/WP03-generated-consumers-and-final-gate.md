@@ -52,6 +52,7 @@ owned_files:
 - packages/react/.wrapper-floor
 - CHANGELOG.md
 - scripts/check-manifest-content.mjs
+- scripts/check-element-css-hygiene.mjs
 priority: P1
 role: implementer
 tags: []

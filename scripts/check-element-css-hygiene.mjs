@@ -1,11 +1,14 @@
 #!/usr/bin/env node
 /**
- * Two assertions over ADOPTED stylesheets, made over PARSED CSS rather than raw text.
+ * Three assertions over ADOPTED stylesheets, made over PARSED CSS rather than raw text.
  *
  *   1. No `is-focused`-style class that simulates a state the browser owns. The static sheets
  *      needed one to show focus in a screenshot; an element that can have real focus has no
  *      business shipping a simulation, and it tells the accessibility tree something untrue.
  *   2. No `var()` reference to a custom property that @spec-kitty/tokens does not define.
+ *   3. No new raw `line-height`. Six pre-existing declarations are pinned by exact file, value,
+ *      and occurrence count; deleting one requires shrinking the allowlist, while changing,
+ *      moving, duplicating, or adding one fails the gate.
  *
  * SCOPE: the sheets under an element's OWN directory — deliberately NOT the same set as
  * check-adopted-css-boundaries.mjs, which since #78 derives its set from the element's imports
@@ -36,7 +39,7 @@
  * That is this repo's `::part()`-mention-in-a-comment looseness, arriving as a false positive
  * instead of a false negative. postcss sees declarations and selectors; comments are not either.
  *
- * Usage: node scripts/check-element-css-hygiene.mjs
+ * Usage: node scripts/check-element-css-hygiene.mjs [--selftest]
  */
 import { readFileSync, globSync } from 'node:fs';
 import { basename } from 'node:path';
@@ -77,6 +80,129 @@ const PLATFORM_ATTRS = new Set([
   'disabled', 'required', 'checked', 'readonly', 'open', 'hidden', 'selected', 'multiple',
   'inert', 'contenteditable',
 ]);
+
+/**
+ * Historical typography debt outside the Team overview feed components. This is deliberately a
+ * multiset rather than a file-only allowlist: an author cannot duplicate an allowed declaration
+ * in the same sheet and remain green. Once a listed declaration is tokenised or removed, the
+ * stale-entry check below turns red until this list is explicitly shrunk.
+ */
+const RAW_LINE_HEIGHT_ALLOWLIST = new Map([
+  ['packages/styles/src/button/sk-button.css', ['1']],
+  ['packages/styles/src/check-bullet/sk-check-bullet.css', ['1.55']],
+  ['packages/styles/src/feature-card/sk-feature-card.css', ['1.55']],
+  ['packages/styles/src/pill-tag/sk-pill-tag.css', ['1.5']],
+  ['packages/styles/src/ribbon-card/sk-ribbon-card.css', ['1.55']],
+  ['packages/styles/src/site-footer/sk-site-footer.css', ['1.55']],
+]);
+
+const TOKEN_LINE_HEIGHT = /^var\(\s*--sk-[a-z0-9-]+\s*\)$/;
+
+function createRawLineHeightAudit(allowlist = RAW_LINE_HEIGHT_ALLOWLIST) {
+  const remaining = new Map(
+    [...allowlist].map(([file, values]) => [file, [...values]]),
+  );
+  const findings = [];
+
+  return {
+    observe(file, line, rawValue) {
+      const value = rawValue.trim();
+      if (TOKEN_LINE_HEIGHT.test(value)) return;
+
+      const allowedValues = remaining.get(file) ?? [];
+      const allowedIndex = allowedValues.indexOf(value);
+      if (allowedIndex >= 0) {
+        allowedValues.splice(allowedIndex, 1);
+        return;
+      }
+
+      findings.push(
+        `${file}:${line} — line-height: ${value} — use a defined --sk-* typography token; ` +
+          `new raw line-height values are not allowed`,
+      );
+    },
+    finish() {
+      for (const [file, values] of remaining) {
+        for (const value of values) {
+          findings.push(
+            `${file} — allowlisted line-height: ${value} was not found; shrink ` +
+              `RAW_LINE_HEIGHT_ALLOWLIST instead of leaving a stale exception`,
+          );
+        }
+      }
+      return findings;
+    },
+  };
+}
+
+if (process.argv.includes('--selftest')) {
+  const probes = [
+    {
+      label: 'accepts one exact historical declaration',
+      allowlist: new Map([['legacy.css', ['1.5']]]),
+      declarations: [['legacy.css', 3, '1.5']],
+      expected: [],
+    },
+    {
+      label: 'rejects a duplicate of an allowed declaration',
+      allowlist: new Map([['legacy.css', ['1.5']]]),
+      declarations: [
+        ['legacy.css', 3, '1.5'],
+        ['legacy.css', 4, '1.5'],
+      ],
+      expected: ['new raw line-height values are not allowed'],
+    },
+    {
+      label: 'rejects raw line-height in a new file',
+      allowlist: new Map(),
+      declarations: [['new.css', 7, '1.4']],
+      expected: ['new raw line-height values are not allowed'],
+    },
+    {
+      label: 'rejects a changed historical value',
+      allowlist: new Map([['legacy.css', ['1.5']]]),
+      declarations: [['legacy.css', 3, '1.6']],
+      expected: ['new raw line-height values are not allowed', 'stale exception'],
+    },
+    {
+      label: 'accepts one direct token reference',
+      allowlist: new Map(),
+      declarations: [['new.css', 7, 'var(--sk-leading-body)']],
+      expected: [],
+    },
+    {
+      label: 'rejects a stale historical exception',
+      allowlist: new Map([['legacy.css', ['1.5']]]),
+      declarations: [],
+      expected: ['stale exception'],
+    },
+  ];
+  const failures = [];
+  for (const probe of probes) {
+    const audit = createRawLineHeightAudit(probe.allowlist);
+    for (const declaration of probe.declarations) audit.observe(...declaration);
+    const result = audit.finish();
+    if (
+      result.length !== probe.expected.length ||
+      !probe.expected.every((fragment) =>
+        result.some((finding) => finding.includes(fragment)),
+      )
+    ) {
+      failures.push(
+        `${probe.label}: expected ${JSON.stringify(probe.expected)}, got ${JSON.stringify(result)}`,
+      );
+    }
+  }
+  if (failures.length) {
+    console.error('❌ Raw line-height hygiene selftest:');
+    for (const failure of failures) console.error(`   ${failure}`);
+    process.exit(1);
+  }
+  console.log(
+    `✅ Raw line-height hygiene selftest: ${probes.length}/${probes.length} probes passed.`,
+  );
+  process.exit(0);
+}
 
 /** A state token, bounded by a separator or the ends — so `interactive` does not match `active`
  *  and `sk-form-input__disabled` does. */
@@ -139,6 +265,7 @@ if (defined.size === 0) {
 }
 
 const problems = [];
+const rawLineHeightAudit = createRawLineHeightAudit();
 let sheetCount = 0;
 let ruleCount = 0;
 
@@ -171,6 +298,9 @@ for (const name of elements) {
     });
     root.walkDecls((decl) => {
       const line = decl.source?.start?.line ?? 0;
+      if (decl.prop.toLowerCase() === 'line-height') {
+        rawLineHeightAudit.observe(file, line, decl.value);
+      }
       // EVERY `--sk-*` reference, not only those followed by a comma. The first version matched
       // `var(--sk-x, fallback)` alone, so `var(--sk-space-99)` with NO fallback passed — and
       // that is the worse defect the docstring describes, because the declaration silently
@@ -189,6 +319,8 @@ for (const name of elements) {
   }
 }
 
+problems.push(...rawLineHeightAudit.finish());
+
 if (ruleCount === 0) {
   console.error(`❌ Parsed ${sheetCount} stylesheet(s) and found zero rules.`);
   process.exit(1);
@@ -202,5 +334,5 @@ if (problems.length) {
 
 console.log(
   `✅ Adopted CSS hygiene: ${elements.length} element(s), ${sheetCount} sheet(s), ${ruleCount} ` +
-    `rule(s) — no simulated states, no undefined-token fallbacks.`
+    `rule(s) — no simulated states, no undefined-token fallbacks, no new raw line-height.`
 );

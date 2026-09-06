@@ -5,6 +5,9 @@ import sheet from './sk-entity-marker.css.js';
 /**
  * A compact consumer-supplied icon, initials, or short mark with explicit accessible naming.
  *
+ * Token dependencies: --sk-font-sans, --sk-on-tint-butter, --sk-radius-sm, --sk-space-1,
+ * --sk-space-7, --sk-surface-tint-butter, --sk-text-xs, --sk-weight-bold.
+ *
  * @element sk-entity-marker
  * @slot - Consumer-supplied icon, initials, or short mark.
  * @csspart marker - The marker layout root.

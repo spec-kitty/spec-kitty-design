@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/web-components';
+import '../button/sk-button.js';
 import './sk-section-header.js';
 
 const header = (content: string, light = false) => `

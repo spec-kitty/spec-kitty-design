@@ -1,4 +1,4 @@
-import { test, expect, type Page } from '@playwright/test';
+import { test, expect, type Locator, type Page } from '@playwright/test';
 import { createHash } from 'node:crypto';
 import { readFileSync, writeFileSync, mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -301,12 +301,36 @@ const actionRowStory = async (page: Page, id: string) => {
 };
 
 test.describe('sk-action-row browser contract', () => {
-  test('keeps native list ownership and trailing controls outside row activation', async ({ page }) => {
+  test('keeps real browser list roles, equal projections and trailing controls outside row activation', async ({ page }) => {
     await actionRowStory(page, 'native-list');
-    await expect(page.locator('ul > li > sk-action-row')).toHaveCount(2);
-    expect(await page.locator('sk-action-row').evaluateAll((hosts) =>
+    const list = page.getByRole('list');
+    await expect(list).toHaveCount(1);
+    const items = list.getByRole('listitem');
+    await expect(items).toHaveCount(2);
+    for (const item of await items.all()) {
+      await expect(item.locator(':scope > sk-action-row')).toHaveCount(1);
+    }
+
+    const rows = page.locator('ul > li > sk-action-row');
+    await expect(rows).toHaveCount(2);
+    expect(await rows.evaluateAll((hosts) =>
       hosts.map((host) => host.shadowRoot?.querySelectorAll('ul,li,[role="list"],[role="listitem"]').length),
     )).toEqual([0, 0]);
+    const projections = await rows.evaluateAll((hosts) => hosts.map((host) => ({
+      lightMarkup: host.innerHTML.replace(/\s+/g, ' ').trim(),
+      shadowMarkup: host.shadowRoot?.innerHTML.replace(/<!---->/g, '').replace(/\s+/g, ' ').trim(),
+      slots: Object.fromEntries(
+        Array.from(host.shadowRoot?.querySelectorAll<HTMLSlotElement>('slot[name]') ?? []).map((slot) => [
+          slot.name,
+          slot.assignedNodes({ flatten: true }).map((node) => node.textContent).join('').replace(/\s+/g, ' ').trim(),
+        ]),
+      ),
+    })));
+    expect(projections).toHaveLength(2);
+    expect(projections[1], 'equal supplied event content must produce an equal row projection').toEqual(projections[0]);
+    await expect(page.locator('sk-section-header')).toHaveCount(1);
+    await expect(page.locator('sk-status-indicator')).toHaveCount(2);
+    await expect(page.locator('sk-entity-marker')).toHaveCount(2);
 
     const host = await actionRowStory(page, 'with-controls');
     await host.evaluate((element) => {
@@ -399,21 +423,138 @@ test.describe('sk-action-row browser contract', () => {
     await expect(host.locator('button[part="trigger"]')).toHaveCount(0);
     await expect(host.locator('[aria-selected],[aria-pressed],[role="checkbox"],[role="switch"]')).toHaveCount(0);
 
+    await page.setViewportSize({ width: 320, height: 844 });
     host = await actionRowStory(page, 'long-content');
-    expect(await host.evaluate((element) => {
+    const trigger = host.locator('button[part="trigger"]');
+    const metadata = host.locator('time[slot="metadata"]');
+    await expect(host.locator('sk-pill-tag[slot="tags"]')).toHaveCount(3);
+    await expect(metadata).toBeVisible();
+    await expect(metadata).toHaveText('2 hours ago');
+    await trigger.focus();
+    await expect(trigger).toBeFocused();
+
+    const metrics = await host.evaluate((element) => {
       const row = element.shadowRoot!.querySelector<HTMLElement>('[part="row"]')!;
       const trigger = element.shadowRoot!.querySelector<HTMLElement>('[part="trigger"]')!;
       const controls = element.shadowRoot!.querySelector<HTMLElement>('[part="controls"]')!;
+      const metadata = element.querySelector<HTMLElement>('time[slot="metadata"]')!;
       const rowRect = row.getBoundingClientRect();
       const triggerRect = trigger.getBoundingClientRect();
       const controlsRect = controls.getBoundingClientRect();
+      const metadataRect = metadata.getBoundingClientRect();
+      const focus = getComputedStyle(trigger);
+      const metadataStyle = getComputedStyle(metadata);
+      const focusOutset = Math.max(0, Number.parseFloat(focus.outlineWidth) + Number.parseFloat(focus.outlineOffset));
+      const overlaps = !(
+        metadataRect.right <= controlsRect.left || controlsRect.right <= metadataRect.left ||
+        metadataRect.bottom <= controlsRect.top || controlsRect.bottom <= metadataRect.top
+      );
       return {
         width: element.getBoundingClientRect().width,
+        documentOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
         rowOverflow: row.scrollWidth - row.clientWidth,
         triggerOverflow: trigger.scrollWidth - trigger.clientWidth,
         controlsInside: controlsRect.left >= rowRect.left && controlsRect.right <= rowRect.right + 0.5,
-        noOverlap: triggerRect.bottom <= controlsRect.top + 0.5,
+        metadataControlOverlap: overlaps,
+        metadataReadable: metadataRect.width > 0 && metadataRect.height > 0 &&
+          metadataStyle.display !== 'none' && metadataStyle.visibility === 'visible',
+        focusVisible: focus.outlineStyle !== 'none' && Number.parseFloat(focus.outlineWidth) > 0,
+        focusInsideViewport: triggerRect.left - focusOutset >= 0 &&
+          triggerRect.right + focusOutset <= window.innerWidth &&
+          triggerRect.top - focusOutset >= 0 && triggerRect.bottom + focusOutset <= window.innerHeight,
+        focusInsideRow: triggerRect.left - focusOutset >= rowRect.left - 0.5 &&
+          triggerRect.right + focusOutset <= rowRect.right + 0.5 &&
+          triggerRect.top - focusOutset >= rowRect.top - 0.5 &&
+          triggerRect.bottom + focusOutset <= rowRect.bottom + 0.5,
       };
-    })).toEqual({ width: 320, rowOverflow: 0, triggerOverflow: 0, controlsInside: true, noOverlap: true });
+    });
+    expect(metrics.width).toBe(320);
+    expect(metrics.documentOverflow, 'the 320px browser viewport must not scroll horizontally').toBeLessThanOrEqual(0);
+    expect(metrics.rowOverflow).toBeLessThanOrEqual(0);
+    expect(metrics.triggerOverflow).toBeLessThanOrEqual(0);
+    expect(metrics.controlsInside).toBe(true);
+    expect(metrics.metadataControlOverlap).toBe(false);
+    expect(metrics.metadataReadable).toBe(true);
+    expect(metrics.focusVisible).toBe(true);
+    expect(metrics.focusInsideViewport).toBe(true);
+    expect(metrics.focusInsideRow).toBe(true);
   });
+
+  test('keeps selected, hover, pressed and focus affordances visible in dark and light forced colors', async ({ page }) => {
+    const paint = (locator: Locator) => locator.evaluate((node) => {
+      const style = getComputedStyle(node);
+      return {
+        outlineStyle: style.outlineStyle,
+        outlineWidth: Number.parseFloat(style.outlineWidth),
+        borderInlineStartStyle: style.borderInlineStartStyle,
+        borderInlineStartWidth: Number.parseFloat(style.borderInlineStartWidth),
+      };
+    });
+    const hasVisibleOutline = (value: Awaited<ReturnType<typeof paint>>) =>
+      value.outlineStyle !== 'none' && value.outlineWidth > 0;
+    const outlineSignature = (value: Awaited<ReturnType<typeof paint>>) =>
+      [value.outlineStyle, value.outlineWidth].join('|');
+    const selectedEdgeSignature = (value: Awaited<ReturnType<typeof paint>>) =>
+      [value.borderInlineStartStyle, value.borderInlineStartWidth].join('|');
+
+    for (const colorScheme of ['dark', 'light'] as const) {
+      await page.emulateMedia({ forcedColors: 'active', colorScheme });
+      await actionRowStory(page, 'selectable-states');
+      const restHost = page.locator('sk-action-row[data-state-rest]');
+      const selectedHost = page.locator('sk-action-row[data-state-selected]');
+      const restRow = restHost.locator('[part="row"]');
+      const selectedRow = selectedHost.locator('[part="row"]');
+      const trigger = restHost.locator('button[part="trigger"]');
+      const [restRowPaint, selectedRowPaint, restTriggerPaint] = await Promise.all([
+        paint(restRow), paint(selectedRow), paint(trigger),
+      ]);
+
+      expect(selectedRowPaint.borderInlineStartStyle, `${colorScheme} selected edge`).not.toBe('none');
+      expect(selectedRowPaint.borderInlineStartWidth, `${colorScheme} selected edge`).toBeGreaterThan(0);
+      expect(selectedEdgeSignature(selectedRowPaint), `${colorScheme} selected must differ from rest`)
+        .not.toBe(selectedEdgeSignature(restRowPaint));
+
+      await trigger.hover();
+      const hoverPaint = await paint(trigger);
+      expect(hasVisibleOutline(restTriggerPaint), `${colorScheme} rest has no state outline`).toBe(false);
+      expect(hasVisibleOutline(hoverPaint), `${colorScheme} hover outline`).toBe(true);
+      expect(outlineSignature(hoverPaint), `${colorScheme} hover must differ from rest`)
+        .not.toBe(outlineSignature(restTriggerPaint));
+
+      await page.mouse.down();
+      const pressedPaint = await paint(trigger);
+      expect(hasVisibleOutline(pressedPaint), `${colorScheme} pressed outline`).toBe(true);
+      expect(outlineSignature(pressedPaint), `${colorScheme} pressed must differ from hover`)
+        .not.toBe(outlineSignature(hoverPaint));
+      await page.mouse.up();
+      await page.mouse.move(0, 0);
+
+      await trigger.evaluate((node) => (node as HTMLElement).blur());
+      await page.keyboard.press('Tab');
+      await trigger.focus();
+      await expect(trigger).toBeFocused();
+      const focusPaint = await paint(trigger);
+      expect(hasVisibleOutline(focusPaint), `${colorScheme} focus outline`).toBe(true);
+      expect(outlineSignature(focusPaint), `${colorScheme} focus must differ from hover`)
+        .not.toBe(outlineSignature(hoverPaint));
+    }
+  });
+
+  test('removes both component-owned transitions under reduced motion', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    const host = await actionRowStory(page, 'default');
+    const transitions = await host.evaluate((element) => {
+      const row = element.shadowRoot!.querySelector<HTMLElement>('[part="row"]')!;
+      const trigger = element.shadowRoot!.querySelector<HTMLElement>('[part="trigger"]')!;
+      return [getComputedStyle(row).transitionProperty, getComputedStyle(trigger).transitionProperty];
+    });
+    expect(transitions).toEqual(['none', 'none']);
+  });
+});
+
+test('the section-header action story upgrades the reused sk-button to a native control', async ({ page }) => {
+  await page.goto('/iframe.html?id=elements-sksectionheader--with-metadata-and-action&viewMode=story');
+  const action = page.locator('sk-section-header sk-button[slot="action"]');
+  await expect(action.locator('button')).toBeVisible();
+  await expect(action).toHaveText('View all');
 });

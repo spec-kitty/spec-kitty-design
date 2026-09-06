@@ -46,6 +46,9 @@ export interface SkEntityMarkerProps extends Pick<
 /**
  * A compact consumer-supplied icon, initials, or short mark with explicit accessible naming.
  *
+ * Token dependencies: --sk-font-sans, --sk-on-tint-butter, --sk-radius-sm, --sk-space-1,
+ * --sk-space-7, --sk-surface-tint-butter, --sk-text-xs, --sk-weight-bold.
+ *
  * ## Attributes & Properties
  *
  * Component attributes and properties that can be applied to the element or by using JavaScript.

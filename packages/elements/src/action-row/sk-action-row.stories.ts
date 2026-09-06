@@ -3,6 +3,7 @@ import './sk-action-row.js';
 import '../button/sk-button.js';
 import '../entity-marker/sk-entity-marker.js';
 import '../pill-tag/sk-pill-tag.js';
+import '../section-header/sk-section-header.js';
 import '../status-indicator/sk-status-indicator.js';
 
 const row = ({
@@ -13,6 +14,10 @@ const row = ({
   title = 'team-landing-pivots',
   reference = 'spec-kitty/e2e-team-landing',
   metadata = '2 hours ago',
+  tags = `
+    <sk-pill-tag slot="tags">WP status changed</sk-pill-tag>
+    <sk-status-indicator slot="tags" tone="success">Fresh</sk-status-indicator>
+  `,
   extra = '',
 }: {
   id?: string;
@@ -22,6 +27,7 @@ const row = ({
   title?: string;
   reference?: string;
   metadata?: string;
+  tags?: string;
   extra?: string;
 } = {}) => `
   <sk-action-row
@@ -33,8 +39,7 @@ const row = ({
     <sk-entity-marker slot="marker" label="Spec Kitty repository">SP</sk-entity-marker>
     <span slot="title">${title}</span>
     <code slot="reference">${reference}</code>
-    <sk-pill-tag slot="tags">WP status changed</sk-pill-tag>
-    <sk-status-indicator slot="tags" tone="success">Fresh</sk-status-indicator>
+    ${tags}
     <time slot="metadata">${metadata}</time>
     ${controls}
   </sk-action-row>
@@ -74,12 +79,17 @@ export const Default: Story = {};
 
 export const NativeList: Story = {
   render: () =>
-    frame(
-      list(`
-    <li>${row({ id: 'native-one', title: 'First consumer-owned item' })}</li>
-    <li>${row({ id: 'native-two', title: 'Second consumer-owned item', metadata: '1 day ago' })}</li>
-  `),
-    ),
+    frame(`
+      <sk-section-header>
+        <span slot="eyebrow">Recent activity</span>
+        <h2 slot="title">Consumer-owned feed</h2>
+        <p slot="description">Two equal event projections remain two native list items.</p>
+      </sk-section-header>
+      ${list(`
+        <li>${row({ id: 'native-one', title: 'Consumer-owned event' })}</li>
+        <li>${row({ id: 'native-two', title: 'Consumer-owned event' })}</li>
+      `)}
+    `),
 };
 
 export const Selected: Story = {
@@ -112,19 +122,25 @@ export const WithControls: Story = {
 };
 
 export const LongContent: Story = {
-  render: () =>
-    frame(`
-    <div style="width:320px;max-width:100%;">
+  parameters: { layout: 'fullscreen' },
+  render: () => `
+    <div style="box-sizing:border-box;width:min(320px,100vw);background:var(--sk-surface-page);">
       ${row({
         id: 'long-content',
         title: 'A deliberately long consumer-owned activity title remains readable',
         reference: 'spec-kitty/a-very-long-unbroken-reference-without-a-natural-break-point',
         metadata: '2 hours ago',
+        tags: `
+          <sk-pill-tag slot="tags">WP status changed</sk-pill-tag>
+          <sk-pill-tag slot="tags" variant="purple">Presence unverified</sk-pill-tag>
+          <sk-pill-tag slot="tags" variant="green">Fresh</sk-pill-tag>
+          <sk-status-indicator slot="tags" tone="success">Available</sk-status-indicator>
+        `,
         extra: 'data-long-content="true"',
         controls: '<button slot="controls" type="button">Inspect evidence</button>',
       })}
     </div>
-  `),
+  `,
 };
 
 export const SelectableStates: Story = {

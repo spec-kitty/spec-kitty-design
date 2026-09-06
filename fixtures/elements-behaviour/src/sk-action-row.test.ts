@@ -2,6 +2,9 @@ import { beforeEach, expect, test } from 'vitest';
 import { userEvent } from 'vitest/browser';
 import '@spec-kitty/elements';
 import { SkActionRow, skActionRowSheet, type ActionRowActivateDetail } from '@spec-kitty/elements';
+// eslint-disable-next-line @nx/enforce-module-boundaries -- raw authored CSS is the accessibility-contract test subject
+import actionRowCss from '../../../packages/styles/src/action-row/sk-action-row.css?raw';
+import { assertThemesDiffered, contrast } from './contrast.js';
 import { installTokenSheet } from './token-sheet.js';
 
 type ActionRow = SkActionRow & { updateComplete: Promise<unknown> };
@@ -44,6 +47,24 @@ const partOf = (element: Element, name: string) =>
   element.shadowRoot!.querySelector(`[part="${name}"]`) as HTMLElement | null;
 
 const triggerOf = (element: Element) => partOf(element, 'trigger') as HTMLButtonElement;
+
+const authoredActionRowSheet = new CSSStyleSheet();
+authoredActionRowSheet.replaceSync(actionRowCss);
+
+const mediaRuleFor = (query: string): CSSMediaRule | undefined =>
+  Array.from(authoredActionRowSheet.cssRules).find(
+    (rule): rule is CSSMediaRule => rule instanceof CSSMediaRule && rule.media.mediaText === query,
+  );
+
+const styleRuleFor = (media: CSSMediaRule, selector: string): CSSStyleRule | undefined =>
+  Array.from(media.cssRules).find(
+    (rule): rule is CSSStyleRule => rule instanceof CSSStyleRule && rule.selectorText === selector,
+  );
+
+const rootStyleRuleFor = (selector: string): CSSStyleRule | undefined =>
+  Array.from(authoredActionRowSheet.cssRules).find(
+    (rule): rule is CSSStyleRule => rule instanceof CSSStyleRule && rule.selectorText === selector,
+  );
 
 test('the six consumer channels preserve the approved scan order and keep controls outside the trigger', async () => {
   const element = await mount();
@@ -317,6 +338,100 @@ test('[SC-014] the element adopts the generated sheet by identity and injects no
   expect(root.adoptedStyleSheets).toHaveLength(1);
   expect(root.adoptedStyleSheets[0]).toBe(skActionRowSheet);
   expect(root.querySelectorAll('style')).toHaveLength(0);
+});
+
+test('the focus ring resolves to the theme accent and clears 3:1 on every action-state surface', async () => {
+  const palettes = new Map<string, string>();
+  for (const theme of ['dark', 'light'] as const) {
+    const wrapper = document.createElement('div');
+    if (theme === 'light') wrapper.className = 'sk-light';
+    document.body.append(wrapper);
+    const element = await mount();
+    wrapper.append(element);
+    element.shadowRoot!.adoptedStyleSheets = [authoredActionRowSheet];
+
+    await userEvent.tab();
+    const trigger = triggerOf(element);
+    const row = partOf(element, 'row')!;
+    expect(element.shadowRoot!.activeElement).toBe(trigger);
+    const focus = getComputedStyle(trigger);
+
+    const probe = document.createElement('span');
+    wrapper.append(probe);
+    probe.style.color = 'var(--sk-color-accent)';
+    const accent = getComputedStyle(probe).color;
+    expect(focus.outlineColor, `${theme} focus ring uses the theme accent`).toBe(accent);
+    expect(focus.outlineStyle, `${theme} focus ring remains visible`).toBe('solid');
+
+    const surfaces = new Map<string, string>([['rest', getComputedStyle(row).backgroundColor]]);
+    element.selected = true;
+    await element.updateComplete;
+    surfaces.set('selected', getComputedStyle(row).backgroundColor);
+    element.selected = false;
+    await element.updateComplete;
+    for (const [state, selector] of [
+      ['hover', 'button.sk-action-row__trigger:hover'],
+      ['pressed', 'button.sk-action-row__trigger:active'],
+    ] as const) {
+      const stateRule = rootStyleRuleFor(selector);
+      expect(stateRule, `the ${state}-state rule was not parsed`).not.toBeUndefined();
+      probe.style.background = stateRule!.style.background;
+      surfaces.set(state, getComputedStyle(probe).backgroundColor);
+    }
+
+    for (const [state, surface] of surfaces) {
+      expect(surface, `${theme} ${state} surface is painted`).not.toBe('rgba(0, 0, 0, 0)');
+      expect(contrast(accent, surface), `${theme} ${state} focus contrast`).toBeGreaterThanOrEqual(3);
+    }
+    palettes.set(theme, `${accent}|${[...surfaces.values()].join('|')}`);
+    wrapper.remove();
+  }
+  assertThemesDiffered(palettes);
+});
+
+test('the authored sheet scopes reduced motion and preserves every forced-colors action affordance', () => {
+  const reducedMotion = mediaRuleFor('(prefers-reduced-motion: reduce)');
+  expect(reducedMotion, 'the reduced-motion media rule was not parsed').not.toBeUndefined();
+  expect(styleRuleFor(reducedMotion!, '.sk-action-row')?.style.transition).toBe('none');
+  expect(styleRuleFor(reducedMotion!, '.sk-action-row__trigger')?.style.transition).toBe('none');
+  expect(Array.from(reducedMotion!.cssRules, (rule) => (rule as CSSStyleRule).selectorText).sort()).toEqual([
+    '.sk-action-row',
+    '.sk-action-row__trigger',
+  ]);
+
+  const forcedColors = mediaRuleFor('(forced-colors: active)');
+  expect(forcedColors, 'the forced-colors media rule was not parsed').not.toBeUndefined();
+  const selected = styleRuleFor(forcedColors!, '.sk-action-row[aria-current="true"]')!;
+  const hover = styleRuleFor(forcedColors!, 'button.sk-action-row__trigger:hover')!;
+  const pressed = styleRuleFor(forcedColors!, 'button.sk-action-row__trigger:active')!;
+  const focus = styleRuleFor(forcedColors!, 'button.sk-action-row__trigger:focus-visible')!;
+  for (const [state, rule] of [
+    ['selected', selected],
+    ['hover', hover],
+    ['pressed', pressed],
+    ['focus', focus],
+  ] as const) {
+    expect(rule, `${state} forced-colors rule was not parsed`).not.toBeUndefined();
+  }
+  expect(selected.style.borderInlineStartColor.toLowerCase()).toBe('highlight');
+  expect(selected.style.borderInlineStartWidth).toBe('var(--sk-border-width-2)');
+  expect(hover.style.outlineColor.toLowerCase()).toBe('canvastext');
+  expect(hover.style.outlineStyle).toBe('solid');
+  expect(hover.style.outlineWidth).toBe('var(--sk-border-width-1)');
+  expect(pressed.style.outlineColor.toLowerCase()).toBe('buttontext');
+  expect(pressed.style.outlineStyle).toBe('dashed');
+  expect(pressed.style.outlineWidth).toBe('var(--sk-border-width-2)');
+  expect(focus.style.outlineColor.toLowerCase()).toBe('highlight');
+  expect(focus.style.outlineStyle).toBe('solid');
+  expect(focus.style.outlineWidth).toBe('var(--sk-border-width-2)');
+  expect(hover.style.outlineWidth).not.toBe(focus.style.outlineWidth);
+  expect(pressed.style.outlineStyle).not.toBe(focus.style.outlineStyle);
+  expect(
+    Array.from(forcedColors!.cssRules).some(
+      (rule) => rule instanceof CSSStyleRule && rule.style.forcedColorAdjust === 'none',
+    ),
+    'an affordance must not freeze authored colours in forced-colors mode',
+  ).toBe(false);
 });
 
 test('long content wraps at 320px without overflow or controls/metadata collision in both themes', async () => {

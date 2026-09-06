@@ -26,8 +26,8 @@
     "counted here either. See scripts/normalise-manifest.mjs.",
     "#77 adds <sk-site-footer> with FIVE attributes and zero methods: wordmark, tagline, legal, column-one-heading and column-two-heading. Every one is a string, which is the operator's ruling on #77 working around a constraint this ratchet's sibling gate enforces — the React wrappers' ssrSafe mode delivers first-render props as ATTRIBUTES, which carry only strings, so structured data would not survive. The link ITEMS are slotted instead. An earlier revision of this entry recorded 0/0 for a slot-only design that contradicted that ruling; the rebuild is why the numbers moved.",
     "#182: 76 -> 78. <sk-page-header> goes from zero documented attributes to two — `density` (string, reflected; `compact` is the only non-default value) and `sticky` (boolean, reflected). Both are published API the React generator copies into a consumer's prop docs, and this file is exact-equality in both directions, so the pair cannot arrive or leave silently. No other element's counts move.",
-    "#146 WP01 adds three projection primitives. Section-header is slot-only; status-indicator publishes one tone attribute; entity-marker publishes one accessible label attribute. Total moves 65 -> 67.",
-    "#146 WP02 adds sk-action-row with three controlled attributes: row-id, selectable and selected. Total moves 67 -> 70."
+    "#146 WP01 adds three projection primitives. Section-header is slot-only; status-indicator publishes one tone attribute; entity-marker publishes one accessible label attribute. On the consolidated train-based mission target, total moves 78 -> 80.",
+    "#146 WP02 adds sk-action-row with three controlled attributes: row-id, selectable and selected. Total moves 80 -> 83."
   ],
   "total": 83,
   "elements": {

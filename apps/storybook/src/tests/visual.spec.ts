@@ -239,6 +239,9 @@ test('SK-section-header long content — visual baseline', async ({ page }) => {
   const host = page.locator('sk-section-header').first();
   await host.waitFor({ state: 'visible', timeout: 20000 });
   await expect(host.locator('[part="title"]')).toBeVisible();
+  const action = host.locator('sk-button[slot="action"]');
+  await expect(action.locator('button')).toBeVisible();
+  await expect(action).toHaveText('Open activity');
   await expect(host).toHaveScreenshot('sk-section-header-long-content.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
 });
 
@@ -286,6 +289,7 @@ test('SK-action-row default and light — visual baselines', async ({ page }) =>
 });
 
 test('SK-action-row long content at 320px — visual baseline', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 844 });
   const host = await actionRowStory(page, 'long-content');
   await expect(host).toHaveScreenshot('sk-action-row-long-content-320.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
 });

@@ -15,7 +15,6 @@
   font-family: var(--sk-font-sans);
   font-size: var(--sk-text-xs);
   font-weight: var(--sk-weight-bold);
-  line-height: 1;
 }
 
 .sk-entity-marker__content {

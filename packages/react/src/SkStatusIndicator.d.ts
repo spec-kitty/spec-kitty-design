@@ -46,6 +46,10 @@ export interface SkStatusIndicatorProps extends Pick<
 /**
  * A consumer-labelled status with a presentation-only tone and decorative marker.
  *
+ * Token dependencies: --sk-color-red, --sk-fg-body, --sk-fg-muted, --sk-font-sans,
+ * --sk-on-tint-butter, --sk-on-tint-lilac, --sk-on-tint-mint, --sk-on-tint-sky,
+ * --sk-space-2, --sk-text-sm.
+ *
  * ## Attributes & Properties
  *
  * Component attributes and properties that can be applied to the element or by using JavaScript.

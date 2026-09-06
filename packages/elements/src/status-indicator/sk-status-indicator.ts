@@ -32,6 +32,10 @@ const statusTone = (value: unknown): StatusIndicatorTone => {
 /**
  * A consumer-labelled status with a presentation-only tone and decorative marker.
  *
+ * Token dependencies: --sk-color-red, --sk-fg-body, --sk-fg-muted, --sk-font-sans,
+ * --sk-on-tint-butter, --sk-on-tint-lilac, --sk-on-tint-mint, --sk-on-tint-sky,
+ * --sk-space-2, --sk-text-sm.
+ *
  * @element sk-status-indicator
  * @slot marker - A decorative consumer-supplied marker or icon.
  * @slot - Visible consumer-supplied status text.

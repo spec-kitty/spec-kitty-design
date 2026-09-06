@@ -39,8 +39,8 @@ const scanContent = () => html`
 /**
  * A controlled, consumer-composed action row.
  *
- * Token dependencies: --sk-border-default, --sk-border-focus, --sk-border-strong,
- * --sk-border-width-1, --sk-border-width-2, --sk-fg-body, --sk-fg-default, --sk-fg-muted,
+ * Token dependencies: --sk-border-default, --sk-border-strong, --sk-border-width-1,
+ * --sk-border-width-2, --sk-color-accent, --sk-fg-body, --sk-fg-default, --sk-fg-muted,
  * --sk-font-display, --sk-font-mono, --sk-font-sans, --sk-motion-duration-fast,
  * --sk-motion-ease-out, --sk-radius-md, --sk-space-1, --sk-space-2, --sk-space-3,
  * --sk-space-4, --sk-space-5, --sk-surface-card, --sk-surface-muted, --sk-surface-pill,

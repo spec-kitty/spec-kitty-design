@@ -23,8 +23,8 @@
     "#145 opts in sk-app-shell, sk-context-sidebar, sk-page-header, sk-personal-rail, and three additive sk-button icon stories: 20 ids, total 80 -> 100. This preserves the #149 transition-matrix and #176 styles-only story sets already present on the refreshed train.",
     "#182 adds seven for sk-page-header: 100 -> 107. Compact; Compact beside Default from identical slot content; a compact sticky header over a long scrolling fixture whose rows carry the documented scroll margin; the narrow reflow; the short-viewport drop; long title and long metadata truncating at compact density; and a compact sticky LightMode wrapped in `class=\"sk-light\"`, never `data-theme`. The four ids #145 declared are unchanged.",
     "#182, reviewer round: +1 for sk-page-header, 107 -> 108. DefaultSticky is a sticky header at the DEFAULT density — a supported combination the first pass shipped no story for, which is why apps/storybook/src/tests/sk-page-header-sticky.spec.ts's WCAG 2.4.11 assertion only ever ran against compact and the 64px published scroll margin went unchallenged against a measured 227-533px header. The story carries the documented remedy (the consumer overriding the token) so the assertion covers the configuration that previously failed.",
-    "#146 WP01 opts in the exact four stories for each of section-header, status-indicator and entity-marker. Total moves 59 -> 71.",
-    "#146 WP02 opts in the exact eight sk-action-row stories. Total moves 71 -> 79."
+    "#146 WP01 opts in the exact four stories for each of section-header, status-indicator and entity-marker. On the consolidated train-based mission target, total moves 108 -> 120.",
+    "#146 WP02 opts in the exact eight sk-action-row stories. Total moves 120 -> 128."
   ],
   "byElement": {
     "sk-action-row": [

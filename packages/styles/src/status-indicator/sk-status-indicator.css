@@ -9,7 +9,6 @@
   color: var(--sk-fg-body);
   font-family: var(--sk-font-sans);
   font-size: var(--sk-text-sm);
-  line-height: 1.5;
 }
 
 .sk-status-indicator__marker {
