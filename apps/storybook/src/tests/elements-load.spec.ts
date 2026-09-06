@@ -624,38 +624,64 @@ test.describe('sk-card forced colors', () => {
     });
 
     for (const colorScheme of ['dark', 'light'] as const) {
-      await page.emulateMedia({ forcedColors: 'active', colorScheme });
-      await cardStory(page, 'forced-colors');
+      // MEASURED TWICE, with the media feature OFF and then ON, and the two halves of the claim
+      // are held to different evidence.
+      //
+      // `matchMedia('(forced-colors: active)').matches` is NOT evidence that an engine performs
+      // the remap. WebKit answers `true` to it under Playwright's emulation and then leaves author
+      // backgrounds exactly as authored — this case was first written to trust that answer and
+      // WebKit failed it, six distinct tints under a media query claiming forced colors. So the
+      // guard below asks the observable question instead: did the BASE card's own background move
+      // when the feature came on? That is the same element, the same adopted stylesheet and the
+      // same shadow root as the tone cards, so an engine that moved it must move them too.
+      // The story is LOADED ONCE PER MEDIA STATE, not measured twice on one load: switching
+      // `emulateMedia` under a live page does move some computed values and not others, which read
+      // as a partial remap and made this case fail on engines that in fact remap correctly.
+      const measure = async (forcedColors: 'none' | 'active') => {
+        await page.emulateMedia({ forcedColors, colorScheme });
+        await cardStory(page, 'forced-colors');
+        const toneHosts = await page.locator('sk-card[status]').all();
+        expect(toneHosts.length, 'the story must render every tone beside the base card').toBe(6);
+        return {
+          base: await paint(page.locator('sk-card[data-forced-colors-base]')),
+          tones: await Promise.all(toneHosts.map((host) => paint(host))),
+        };
+      };
 
-      // A FLOOR, not a skip. `emulateMedia({ forcedColors })` is not implemented uniformly across
-      // the three engines this suite runs, so the COLLAPSE half of the claim is only meaningful
-      // where the feature actually engaged. Asserting it unconditionally would red on an engine
-      // that ignores the emulation; skipping the whole case where it does not engage would make
-      // the assertion a green line over zero inputs, which is the defect this spec exists to
-      // refuse. So: the mechanism is asserted everywhere, the collapse only where it applies, and
-      // chromium is REQUIRED to engage — if it ever stops, this case reds rather than going quiet.
-      const engaged = await page.evaluate(() => matchMedia('(forced-colors: active)').matches);
+      const normal = await measure('none');
+      // THE FLOOR under the collapse claim: the six tones must be genuinely distinct BEFORE
+      // forced colors, or "they collapse to one ground" is a green line over nothing.
+      expect(new Set(normal.tones.map((t) => t.background)).size,
+        `${colorScheme}: the six tones must be distinct before forced colors, or the collapse asserts nothing`)
+        .toBe(6);
+
+      const forced = await measure('active');
+      const baseForced = forced.base;
+      const tones = forced.tones;
+      const remaps = baseForced.background !== normal.base.background;
+      // Chromium MUST remap. Without this the guard could go quiet everywhere and the case would
+      // still pass, which is the shape this spec exists to refuse.
       if (browserName === 'chromium') {
-        expect(engaged, 'chromium must actually engage forced-colors emulation').toBe(true);
+        expect(remaps, 'chromium must actually apply the forced-colors remap, not just report the media feature').toBe(true);
       }
 
-      const base = await paint(page.locator('sk-card[data-forced-colors-base]'));
-      const toneHosts = await page.locator('sk-card[status]').all();
-      expect(toneHosts.length, 'the story must render every tone beside the base card').toBe(6);
-      const tones = await Promise.all(toneHosts.map((host) => paint(host)));
-
+      // THE MECHANISM, asserted in every engine and in both schemes, remap or no remap: forced
+      // colors never touches width, so the widened inline-start step is what distinguishes a
+      // status card from a plain one here.
       for (const tone of tones) {
         expect(tone.edgeStyle, `${colorScheme}: the status edge must be drawn`).not.toBe('none');
         expect(tone.edge, `${colorScheme}: the widened inline-start edge is the mechanism, and it must survive`)
-          .toBeGreaterThan(base.edge);
+          .toBeGreaterThan(baseForced.edge);
       }
 
-      if (engaged) {
+      // THE COLLAPSE, only where the engine demonstrably remapped — otherwise the assertion is
+      // about the engine, not about sk-card.
+      if (remaps) {
         expect(new Set(tones.map((t) => t.background)).size,
           `${colorScheme}: the six tints must collapse to one system ground`).toBe(1);
         expect(tones[0]!.background,
           `${colorScheme}: a status card's ground must be indistinguishable from the base card's`)
-          .toBe(base.background);
+          .toBe(baseForced.background);
       }
     }
   });
