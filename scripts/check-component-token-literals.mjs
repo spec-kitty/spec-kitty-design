@@ -11,6 +11,7 @@
 
 import { readFileSync } from 'node:fs';
 import postcss from 'postcss';
+import valueParser from 'postcss-value-parser';
 
 const CSS_WIDE = /^(?:inherit|initial|revert|revert-layer|unset)$/i;
 const SYSTEM_COLOUR = /^(?:Canvas|CanvasText|LinkText|VisitedText|ActiveText|ButtonFace|ButtonText|Field|FieldText|Highlight|HighlightText|GrayText|Mark|MarkText|AccentColor|AccentColorText|currentColor|transparent)$/i;
@@ -41,6 +42,20 @@ const withoutFunctions = (value) => value
   .replace(/[(),+*/-]/g, ' ')
   .trim();
 
+const hasNonemptyVarFallback = (value) => {
+  let found = false;
+  valueParser(value).walk((node) => {
+    if (node.type !== 'function' || node.value.toLowerCase() !== 'var') return undefined;
+    const comma = node.nodes.findIndex((child) => child.type === 'div' && child.value === ',');
+    if (comma >= 0 && node.nodes.length > comma + 1) {
+      found = true;
+      return false;
+    }
+    return undefined;
+  });
+  return found;
+};
+
 const isStructuralRemainder = (value, property) =>
   value === '' ||
   value
@@ -49,7 +64,7 @@ const isStructuralRemainder = (value, property) =>
       (token) =>
         STRUCTURAL.test(token) ||
         /^-?(?:\d+(?:\.\d+)?|\.\d+)%$/.test(token) ||
-        (GRID_TRACK_PROPERTY.test(property) && /^(?:\d+(?:\.\d+)?|\.\d+)fr$/i.test(token)),
+        (GRID_TRACK_PROPERTY.test(property) && /^1fr$/i.test(token)),
     );
 
 const isInActiveForcedColours = (declaration) => {
@@ -67,6 +82,7 @@ const isInActiveForcedColours = (declaration) => {
 
 const isAllowed = (value, declaration) => {
   const importantFree = value.replace(/\s*!important\s*$/i, '').trim();
+  if (hasNonemptyVarFallback(importantFree)) return false;
   if (CSS_WIDE.test(importantFree) || isStructuralRemainder(importantFree, declaration.prop)) return true;
   if (SYSTEM_COLOUR.test(importantFree)) {
     return /^(?:currentColor|transparent)$/i.test(importantFree) || isInActiveForcedColours(declaration);
@@ -109,6 +125,10 @@ const selftest = () => {
     ['spacing/gap', 'max-block-size: 80rem'],
     ['spacing/gap', 'grid-auto-columns: minmax(222px, 1fr)'],
     ['spacing/gap', 'grid-auto-rows: minmax(222px, 1fr)'],
+    ['spacing/gap', 'grid-auto-columns: 2fr'],
+    ['spacing/gap', 'grid-auto-rows: 222fr'],
+    ['spacing/gap', 'width: var(--sk-layout-content-max, 220px)'],
+    ['color', 'color: var(--sk-fg-default, #fff)'],
     ['typography/line', 'font-size: 16px'],
     ['typography/line', 'word-spacing: 0.1em'],
     ['radius', 'border-radius: 8px'],

@@ -1,6 +1,8 @@
 import { expect, test, type Locator, type Page } from "@playwright/test";
 import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
+import postcss from "postcss";
+import selectorParser from "postcss-selector-parser";
 
 const BOARD_CSS = "packages/styles/src/workflow-board/sk-workflow-board.css";
 const LANE_CSS = "packages/styles/src/workflow-lane/sk-workflow-lane.css";
@@ -120,6 +122,17 @@ function stripComments(source: string): string {
     .replace(/<!--[\s\S]*?-->/g, "");
 }
 
+function classSelectorInventory(source: string, from: string): string[] {
+  const classes = new Set<string>();
+  const root = postcss.parse(source, { from });
+  root.walkRules((rule) => {
+    selectorParser((selectors) => {
+      selectors.walkClasses((className) => classes.add(className.value));
+    }).processSync(rule.selector);
+  });
+  return [...classes].sort();
+}
+
 async function pageGeometry(page: Page) {
   return page.evaluate(() => {
     const documentScroller =
@@ -160,9 +173,16 @@ async function assertNativeLaneContract(root: Locator): Promise<void> {
     expect(await roleItems.allInnerTexts()).toEqual(
       await directItems.allInnerTexts(),
     );
-    const suppliedCount = (
-      await lane.locator(".sk-workflow-lane__count").innerText()
-    ).trim();
+    const count = lane.locator(
+      ":scope > .sk-workflow-lane__header > .sk-workflow-lane__count",
+    );
+    await expect(count).toHaveCount(1);
+    await expect(count).toBeVisible();
+    expect(await count.getAttribute("aria-hidden")).toBeNull();
+    const suppliedCount = (await count.innerText()).trim();
+    const accessibleCountWording = await count.ariaSnapshot();
+    expect(accessibleCountWording.trim()).not.toBe("");
+    expect(accessibleCountWording).toContain(suppliedCount);
     expect(suppliedCount).toBe(String(await directItems.count()));
   }
 }
@@ -218,14 +238,25 @@ test.describe("workflow board source and distribution contract", () => {
   test("the public CSS inventory is exactly the seven approved classes and contains no adjacent behavior", () => {
     const source = `${readFileSync(BOARD_CSS, "utf8")}\n${readFileSync(LANE_CSS, "utf8")}`;
     const code = stripComments(source);
-    const classes = [
-      ...new Set(
-        [
-          ...code.matchAll(/\.((?:sk-workflow-(?:board|lane))[a-z0-9_-]*)/g),
-        ].map((match) => match[1]),
-      ),
-    ].sort();
+    const classes = classSelectorInventory(source, "<workflow stylesheets>");
     expect(classes).toEqual([...ALLOWED_CLASSES].sort());
+    expect(
+      classSelectorInventory(
+        `
+          /* .comment-only */
+          .real-selector, [data-example=".attribute-value"] {
+            --example: ".declaration-value";
+          }
+        `,
+        "<selector-parser-control>",
+      ),
+    ).toEqual(["real-selector"]);
+    expect(
+      classSelectorInventory(
+        ".sk-workflow-board, .unapproved-public-class {}",
+        "<selector-parser-red-probe>",
+      ),
+    ).toEqual(["sk-workflow-board", "unapproved-public-class"]);
     expect(code).not.toMatch(
       /(?:^|[;{])\s*(?:content|order|transition|animation|scroll-behavior)\s*:/m,
     );
@@ -354,6 +385,7 @@ test.describe("workflow board stories are non-vacuous and console-clean", () => 
       const loaded = await openBoard(page, id);
       expect(loaded.consoleErrors).toEqual([]);
       expect(loaded.pageErrors).toEqual([]);
+      await assertNativeLaneContract(loaded.root);
       const geometry = await pageGeometry(page);
       expect(geometry.scrollWidth).toBeLessThanOrEqual(geometry.clientWidth);
     });
