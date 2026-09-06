@@ -305,10 +305,10 @@
       "criterion_id": "FR-022",
       "description": "Regenerate CSS module, token catalogue, CEM, React wrapper, wrapper floor, Vue declaration, and SIZES; update all component ratchets and extend the packed-consumer gate while preserving #149; at wrap-up recheck #112 and add the formal row if available or record verified deferral.",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "train 079fd967; CEM 27/100 docs, React 57 files/27 elements byte-current, Vue 27 plus SFC and packed-tarball checks, CSS/markup/entries/SIZES drift green; #112 open and its conformance artifact/generator absent, explicitly deferred in issue-matrix",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T22:13:09.286246+00:00",
       "notes": "Generated drift, packed-consumer, refreshed-train #112 disposition, and exact-head evidence.",
       "lane_owners": [
         "WP03"
