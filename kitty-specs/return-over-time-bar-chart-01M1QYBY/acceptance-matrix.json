@@ -220,10 +220,10 @@
       "criterion_id": "FR-016",
       "description": "Use bounded items and horizontal scrolling or a compact treatment that keeps every label, value, and bar owned without overlap or meaning-changing truncation.",
       "proof_type": "automated_test",
-      "evidence": "390x844 selectable and presentational browser assertions prove owned horizontal overflow, baseline/label containment, no overlap, full text, and hit-test ownership",
+      "evidence": "apps/storybook/src/tests/sk-bar-chart.spec.ts exact 390x844 long-label test requires four datum IDs, per-item value/bar/label containment, zero pairwise item overlap, and three correctly owned elementFromPoint hits per datum before and after scroll; Chromium/Firefox 2/2 at 375c187",
       "pass_fail": "pass",
       "verified_by": "codex",
-      "verified_at": "2026-09-06T21:30:30.128021+00:00",
+      "verified_at": "2026-09-06T22:37:12.928548+00:00",
       "notes": "390 by 844 geometry, scrolling, hit-test, and full-text assertions.",
       "lane_owners": [
         "WP01"
