@@ -109,7 +109,7 @@
       "wp": "WP04"
     },
     "#153": {
-      "evidence_ref": "Issue #153 supplies the accessible-name and delegatesFocus defect contract. WP03 owns the fix and exact behavior evidence but never issue closure. Immediately after verifying the explicitly authorized PR merged into train/elements-first, mission/orchestrator wrap-up closes #153 as completed with the merged PR URL/number and train commit SHA.",
+      "evidence_ref": "Accessible-name/delegatesFocus fix complete on refreshed target 21b24ffc50ec601acd91195c3dfcda879efed018 with button/link focus and naming tests; tracker closure remains strictly after verified train merge.",
       "fr": "FR-012,FR-013,FR-014,FR-017",
       "nfr": "NFR-001,NFR-002,NFR-004",
       "repo": "spec-kitty/spec-kitty-design",
@@ -117,8 +117,8 @@
       "scope": "In-mission sk-button label and focus-delegation defect.",
       "source_file": "plan.md",
       "title": "sk-button accessible name and delegatesFocus",
-      "verdict": "in-mission",
-      "wp": "mission-wrap-up"
+      "verdict": "fixed",
+      "wp": "WP03"
     },
     "#154": {
       "evidence_ref": "Follow-up: #154 owns the generated React wrapper tabIndex policy. WP03 and mission wrap-up own proving this mission adds no host tabIndex or generator-policy change and preserving #154's then-current issue state; they record any separately completed state as external rather than mutating it.",
