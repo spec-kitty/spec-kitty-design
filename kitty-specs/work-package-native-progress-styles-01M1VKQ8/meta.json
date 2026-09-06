@@ -1,0 +1,14 @@
+{
+  "created_at": "2026-09-06T14:59:51.577146+00:00",
+  "flattened": false,
+  "friendly_name": "work package native progress styles",
+  "mission_id": "01M1VKQ84R99FPW8FH5Z1FF82M",
+  "mission_number": null,
+  "mission_slug": "work-package-native-progress-styles-01M1VKQ8",
+  "mission_type": "software-dev",
+  "purpose_context": "This mission advances work package native progress styles on mission/work-package-native-progress-styles so stakeholders can track the work from mission creation onward.",
+  "purpose_tldr": "work package native progress styles",
+  "slug": "work-package-native-progress-styles-01M1VKQ8",
+  "target_branch": "mission/work-package-native-progress-styles",
+  "topology": "single_branch"
+}
