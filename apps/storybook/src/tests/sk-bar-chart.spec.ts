@@ -138,6 +138,63 @@ test('accessible list text owns meaning while supplementary SVG remains silent',
   await expect(host.locator('svg:not([aria-hidden="true"])')).toHaveCount(0);
 });
 
+for (const id of ['default', 'zero-values', 'long-labels'] as const) {
+  test(`${id} keeps values, SVG geometry, grid, baseline, and labels vertically contained without overlap`, async ({ page }) => {
+    const host = await story(page, id);
+    const facts = await host.locator('[part="item"]').evaluateAll((items) => items.map((item) => {
+      const surface = item.querySelector<HTMLElement>('.sk-bar-chart__surface')!;
+      const value = item.querySelector<HTMLElement>('[part="value"]')!;
+      const graphic = item.querySelector<SVGSVGElement>('svg')!;
+      const bar = item.querySelector<SVGRectElement>('[part="bar"]')!;
+      const grid = item.querySelector<SVGLineElement>('.sk-bar-chart__grid')!;
+      const baseline = item.querySelector<SVGLineElement>('.sk-bar-chart__baseline')!;
+      const label = item.querySelector<HTMLElement>('[part="label"]')!;
+      const itemRect = item.getBoundingClientRect();
+      const surfaceRect = surface.getBoundingClientRect();
+      const valueRect = value.getBoundingClientRect();
+      const graphicRect = graphic.getBoundingClientRect();
+      const barRect = bar.getBoundingClientRect();
+      const labelRect = label.getBoundingClientRect();
+      const screenY = (line: SVGLineElement) => {
+        const point = graphic.createSVGPoint();
+        point.y = Number(line.getAttribute('y1'));
+        return point.matrixTransform(line.getScreenCTM()!).y;
+      };
+      return {
+        item: { top: itemRect.top, bottom: itemRect.bottom },
+        surface: { top: surfaceRect.top, bottom: surfaceRect.bottom },
+        value: { top: valueRect.top, bottom: valueRect.bottom },
+        graphic: { top: graphicRect.top, bottom: graphicRect.bottom },
+        bar: { top: barRect.top, bottom: barRect.bottom },
+        label: { top: labelRect.top, bottom: labelRect.bottom },
+        gridY: screenY(grid),
+        baselineY: screenY(baseline),
+        baselineStroke: getComputedStyle(baseline).stroke,
+        baselineOpacity: Number(getComputedStyle(baseline).strokeOpacity),
+      };
+    }));
+
+    expect(facts).not.toHaveLength(0);
+    for (const fact of facts) {
+      expect(fact.surface.top).toBeGreaterThanOrEqual(fact.item.top - 0.5);
+      expect(fact.surface.bottom).toBeLessThanOrEqual(fact.item.bottom + 0.5);
+      expect(fact.value.top).toBeGreaterThanOrEqual(fact.surface.top - 0.5);
+      expect(fact.value.bottom).toBeLessThanOrEqual(fact.graphic.top + 0.5);
+      expect(fact.graphic.top).toBeGreaterThanOrEqual(fact.surface.top - 0.5);
+      expect(fact.graphic.bottom).toBeLessThanOrEqual(fact.label.top + 0.5);
+      expect(fact.label.bottom).toBeLessThanOrEqual(fact.surface.bottom + 0.5);
+      expect(fact.bar.top).toBeGreaterThanOrEqual(fact.graphic.top - 0.5);
+      expect(fact.bar.bottom).toBeLessThanOrEqual(fact.graphic.bottom + 0.5);
+      expect(fact.gridY).toBeGreaterThan(fact.graphic.top);
+      expect(fact.gridY).toBeLessThan(fact.graphic.bottom);
+      expect(fact.baselineY).toBeGreaterThan(fact.graphic.top);
+      expect(fact.baselineY).toBeLessThan(fact.graphic.bottom - 0.5);
+      expect(fact.baselineStroke).not.toBe('none');
+      expect(fact.baselineOpacity).toBeGreaterThan(0);
+    }
+  });
+}
+
 test('pointer, Enter, Space, and held keys emit byte-equivalent single controlled intents', async ({ page }) => {
   const host = await story(page, 'selectable-states');
   const trigger = host.getByRole('button').first();
@@ -223,6 +280,33 @@ test('real rest, hover, focus, active, selected and nonselectable states stay di
   expect(await selected.getAttribute('aria-pressed')).toBe('true');
   await expect(page.locator('sk-bar-chart[data-non-selectable-state]').getByRole('button')).toHaveCount(0);
 });
+
+for (const id of ['default', 'light-mode'] as const) {
+  test(`${id} keyboard focus resolves the canonical focus-border token`, async ({ page }) => {
+    const host = await story(page, id);
+    await host.evaluate(async (element) => {
+      const chart = element as HTMLElement & { selectable: boolean; updateComplete: Promise<unknown> };
+      chart.selectable = true;
+      await chart.updateComplete;
+    });
+    const trigger = host.getByRole('button').first();
+    await trigger.focus();
+    const colors = await host.evaluate((element) => {
+      const root = element.shadowRoot!;
+      const probe = document.createElement('span');
+      probe.style.color = 'var(--sk-border-focus)';
+      root.append(probe);
+      const expected = getComputedStyle(probe).color;
+      probe.remove();
+      return {
+        expected,
+        actual: getComputedStyle(root.querySelector(':focus-visible')!).outlineColor,
+      };
+    });
+    expect(colors.expected).not.toBe('');
+    expect(colors.actual).toBe(colors.expected);
+  });
+}
 
 for (const id of ['default', 'light-mode'] as const) {
   test(`${id} preserves focus, selection, bars and baseline in forced colors`, async ({ page }) => {
@@ -317,5 +401,50 @@ test('390px long-label ownership survives horizontal scrolling without page over
   await plot.evaluate((node) => { node.scrollLeft = node.scrollWidth; });
   await expect.poll(() => plot.evaluate((node) => node.scrollLeft)).toBeGreaterThan(0);
   expect((await ownership()).every(({ owned }) => owned.every(Boolean))).toBe(true);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+});
+
+test('390px presentational long-label chart remains an owned horizontal scroll container', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const host = await story(page, 'long-labels');
+  await host.evaluate(async (element) => {
+    const chart = element as HTMLElement & { selectable: boolean; updateComplete: Promise<unknown> };
+    chart.selectable = false;
+    await chart.updateComplete;
+  });
+  await expect(host.getByRole('button')).toHaveCount(0);
+  const plot = host.locator('[part="plot"]');
+  await expect(plot).toHaveCSS('overflow-x', 'auto');
+  await expect.poll(() => plot.evaluate((node) => node.scrollWidth)).toBeGreaterThan(
+    await plot.evaluate((node) => node.clientWidth),
+  );
+
+  const ownership = () => host.evaluate((element) => {
+    const root = element.shadowRoot!;
+    return [...root.querySelectorAll<HTMLElement>('[part="item"]')].map((item) => {
+      const itemRect = item.getBoundingClientRect();
+      const owned = [
+        item.querySelector('[part="value"]')!,
+        item.querySelector('svg')!,
+        item.querySelector('[part="label"]')!,
+      ].map((node) => {
+        const rect = node.getBoundingClientRect();
+        return {
+          horizontal: rect.left >= itemRect.left - 0.5 && rect.right <= itemRect.right + 0.5,
+          vertical: rect.top >= itemRect.top - 0.5 && rect.bottom <= itemRect.bottom + 0.5,
+        };
+      });
+      return { id: item.dataset.datumId, owned };
+    });
+  });
+  expect((await ownership()).every(({ owned }) =>
+    owned.every(({ horizontal, vertical }) => horizontal && vertical)
+  )).toBe(true);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+  await plot.evaluate((node) => { node.scrollLeft = node.scrollWidth; });
+  await expect.poll(() => plot.evaluate((node) => node.scrollLeft)).toBeGreaterThan(0);
+  expect((await ownership()).every(({ owned }) =>
+    owned.every(({ horizontal, vertical }) => horizontal && vertical)
+  )).toBe(true);
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
 });

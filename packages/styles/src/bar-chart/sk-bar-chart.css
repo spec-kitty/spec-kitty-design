@@ -26,15 +26,12 @@
   margin: 0;
   padding: 0;
   list-style: none;
-}
-
-:host([selectable]) .sk-bar-chart__plot {
   overflow-x: auto;
 }
 
 .sk-bar-chart__item {
   display: grid;
-  grid-template-rows: auto var(--sk-space-6) auto;
+  grid-template-rows: auto calc(var(--sk-space-10) * 4) auto;
   align-items: end;
   min-inline-size: 0;
   color: var(--sk-fg-body);
@@ -73,7 +70,7 @@ button.sk-bar-chart__surface:active {
 }
 
 button.sk-bar-chart__surface:focus-visible {
-  outline: var(--sk-border-width-2) solid var(--sk-color-accent);
+  outline: var(--sk-border-width-2) solid var(--sk-border-focus);
   outline-offset: calc(var(--sk-border-width-2) * -1);
 }
 
@@ -97,7 +94,7 @@ button.sk-bar-chart__surface[aria-pressed="true"] {
   inline-size: 100%;
   min-inline-size: 0;
   block-size: calc(var(--sk-space-10) * 4);
-  overflow: visible;
+  overflow: hidden;
 }
 
 .sk-bar-chart__grid {

@@ -51,7 +51,7 @@ const suppressRepeatedActivation = (event: KeyboardEvent): void => {
  * A controlled, property-fed bar chart for compact numeric comparisons.
  *
  * Token dependencies: --sk-border-default, --sk-border-strong, --sk-border-width-1,
- * --sk-border-width-2, --sk-color-accent, --sk-color-data-baseline,
+ * --sk-border-focus, --sk-border-width-2, --sk-color-data-baseline,
  * --sk-color-data-grid, --sk-color-data-series-primary, --sk-fg-body, --sk-fg-default,
  * --sk-fg-muted, --sk-font-mono, --sk-font-sans,
  * --sk-motion-duration-fast, --sk-motion-ease-out, --sk-radius-md, --sk-radius-sm,
@@ -118,7 +118,7 @@ export class SkBarChart extends LitElement {
       <svg class="sk-bar-chart__graphic" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
         <line class="sk-bar-chart__grid" x1="0" y1="50" x2="100" y2="50"></line>
         <rect part="bar" class="sk-bar-chart__bar" x="15" y=${y} width="70" height=${height}></rect>
-        <line class="sk-bar-chart__baseline" x1="0" y1="100" x2="100" y2="100"></line>
+        <line class="sk-bar-chart__baseline" x1="0" y1="99" x2="100" y2="99"></line>
       </svg>
       <span part="label" class="sk-bar-chart__label">${datum.label}</span>
     `;
