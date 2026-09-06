@@ -1,0 +1,28 @@
+{
+  "event_count": 1,
+  "last_event_id": "01M1WHR2PZ3E91CJTY9JVZS7MD",
+  "materialized_at": "2026-09-06T23:44:36.063834+00:00",
+  "mission_number": "",
+  "mission_slug": "notice-heading-in-region-and-tint-doctrine-01M1WHG4",
+  "mission_type": "software-dev",
+  "summary": {
+    "approved": 0,
+    "blocked": 0,
+    "canceled": 0,
+    "claimed": 0,
+    "done": 0,
+    "for_review": 0,
+    "in_progress": 0,
+    "in_review": 0,
+    "planned": 1
+  },
+  "work_packages": {
+    "WP01": {
+      "actor": "finalize-tasks",
+      "force_count": 0,
+      "lane": "planned",
+      "last_event_id": "01M1WHR2PZ3E91CJTY9JVZS7MD",
+      "last_transition_at": "2026-09-06T23:44:36.063834+00:00"
+    }
+  }
+}
