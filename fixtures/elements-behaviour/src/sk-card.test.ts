@@ -134,8 +134,12 @@ test('[SC-010] a status property assigned before definition survives upgrade and
   // Reflection is what a static consumer and a CSS author both read. An unreflected status is
   // an axis that silently does nothing outside the shadow root.
   expect(el.getAttribute('status'), 'status must reflect to the attribute').toBe('danger');
+  // `firstElementChild`, NOT `[part="card"]`. The [SC-013] arm that drops the part attribute
+  // would otherwise red this test too, and the harness rejected exactly that as collateral —
+  // correctly: SC-010 is a claim about property upgrade, and binding it to another behaviour's
+  // anchor makes one mutation red two ids and hides which one was actually broken.
   expect(
-    el.shadowRoot!.querySelector('[part="card"]')!.classList.contains('sk-card--status-danger'),
+    (el.shadowRoot!.firstElementChild as HTMLElement).classList.contains('sk-card--status-danger'),
   ).toBe(true);
 
   el.status = 'recovery';
