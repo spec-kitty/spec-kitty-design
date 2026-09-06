@@ -2,7 +2,7 @@
   "mission_slug": "delivery-return-metric-elements-01M1STPA",
   "mission_number": "8",
   "mission_type": "software-dev",
-  "overall_verdict": "pass",
+  "overall_verdict": "pending",
   "criteria": [
     {
       "criterion_id": "FR-001",
@@ -163,6 +163,146 @@
       "verified_by": "codex",
       "verified_at": "2026-09-06T16:48:52.749264+00:00",
       "notes": "WP03: normalized manifest/docs/parts ratchets with exact +6/+9 deltas and literal selector coverage."
+    },
+    {
+      "criterion_id": "NFR-001",
+      "description": "Every new or changed Storybook scenario reports zero WCAG 2.1 AA violations; reading order remains valid; active forced colors preserves connector and stage distinction with a recorded source-break red before restoration.",
+      "proof_type": "automated_test",
+      "evidence": "Focused behavior and Storybook Playwright prove ordered semantics and active forced-colors distinction; a controlled authored-source reversal made the named forced-colors assertion red before restoration; CI run 34053013613 attempt 1 reported 267/267 rendered stories with zero WCAG 2.1 AA violations.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T19:05:57.817960+00:00",
+      "notes": "WP03 automated accessibility, reading-order, forced-colors, and controlled reversal evidence."
+    },
+    {
+      "criterion_id": "NFR-002",
+      "description": "Dark and LightMode stories match the approved Team overview hierarchy, density, tabular values, connectors, and narrow reflow, with computed token-driven theme variance for both tags.",
+      "proof_type": "manual_review",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "CI-authoritative baseline provenance, exact-head visual regression, and independent visual review."
+    },
+    {
+      "criterion_id": "NFR-003",
+      "description": "All design-bearing component CSS values resolve through approved --sk-* tokens, enforced by the parsed component-scoped gate and its selftests.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "WP03 parsed token-literal gate plus stylelint and CSS hygiene checks."
+    },
+    {
+      "criterion_id": "NFR-004",
+      "description": "CSS modules, static output where applicable, custom-elements.json, React wrappers, Vue declarations, and SIZES.md regenerate byte-identically at the final commit.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "WP03 generator and drift checks across all committed public artifacts."
+    },
+    {
+      "criterion_id": "NFR-005",
+      "description": "The complete recipe-prescribed quality, type, build, drift, unit/browser, Storybook, axe, visual-regression, and fail-closed 180-second Storybook budget gates pass on the integrated latest-train exact head.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "External exact-head CI evidence; the committed matrix remains pending to avoid recursively invalidating that SHA."
+    },
+    {
+      "criterion_id": "NFR-006",
+      "description": "Tier C pre-merge review records three independent lens verdicts against the exact PR head plus required maintainer approval.",
+      "proof_type": "manual_review",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "External exact-head review seam; verdicts and maintainer approval are recorded immutably on the PR without changing the attested head."
+    },
+    {
+      "criterion_id": "C-001",
+      "description": "Elements own rendering and local accessibility only and own no fetching, stores, routing, timers, selection, application actions, or Team Kitty domain calculations.",
+      "proof_type": "manual_review",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "WP reviews and Tier C source-boundary audit."
+    },
+    {
+      "criterion_id": "C-002",
+      "description": "Authored and generated package code imports no Team Kitty code and exposes no Team Kitty-specific public names or defaults.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Base-diff, dependency, and forbidden-name scans."
+    },
+    {
+      "criterion_id": "C-003",
+      "description": "The mission introduces no public sk-team-overview element.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Manifest, entry, source-tree, and generated-surface scans."
+    },
+    {
+      "criterion_id": "C-004",
+      "description": "The mission reuses sk-metric within the chain and existing sk-card, sk-grid, and sk-pill-tag capabilities without creating substitutes.",
+      "proof_type": "manual_review",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Composition tests, story inspection, and authored-source audit."
+    },
+    {
+      "criterion_id": "C-005",
+      "description": "CSS has one authored source in packages/styles, markup has one authored source only where a genuine static form exists, and generated outputs are not hand-edited.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "CSS source/adoption, markup drift, and generated-artifact checks."
+    },
+    {
+      "criterion_id": "C-006",
+      "description": "Public styling is limited to inherited tokens, documented ::part() surfaces, and documented component properties, with no selector crossing a shadow boundary.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Adopted CSS boundary, exact-part ratchet, external targeting, and token-literal gates."
+    },
+    {
+      "criterion_id": "C-007",
+      "description": "Authored component sources are limited to metric and evidence-chain; shared registries and generated artifacts change only as derived consequences.",
+      "proof_type": "manual_review",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Exact base-diff ownership and generated-provenance audit."
+    },
+    {
+      "criterion_id": "C-008",
+      "description": "The single mission PR targets only train/elements-first, uses Refs #147, never touches main/publish/deploy, and closes #147 only after verified train merge.",
+      "proof_type": "manual_review",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "External PR and post-merge closure guard; remains pending in the committed matrix."
     }
   ],
   "negative_invariants": []
