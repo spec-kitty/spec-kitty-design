@@ -59,6 +59,8 @@ for (const [id, labels] of [
     expect(facts.connectors).toBe(count - 1);
     expect(facts.connectorText).toEqual(Array(count - 1).fill(''));
     expect(facts.connectorHidden).toEqual(Array(count - 1).fill('true'));
+    await expect(host.getByRole('list')).toHaveCount(1);
+    await expect(host.getByRole('listitem')).toHaveCount(count);
   });
 }
 
