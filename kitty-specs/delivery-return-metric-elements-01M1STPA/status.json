@@ -89,7 +89,7 @@
     },
     "WP03": {
       "actor": "codex",
-      "agent": null,
+      "agent": "codex",
       "agent_profile": "frontend-freddy",
       "agent_profile_version": "1.0",
       "force_count": 3,
@@ -97,6 +97,9 @@
       "last_event_id": "01M1VQHCZGVFYSX3314DE3PZEM",
       "last_transition_at": "2026-09-06T16:06:34.224899+00:00",
       "model": "__resolved_model_absent__",
+      "notes": [
+        "Exact-head closeout at 275f14ff: train stable 32fa495; 371/371 tests; 132/132 mutations; Storybook 7.28s/180s; axe 244/244 zero; Chromium 12/12; Firefox 11 pass/1 intentional forced-colors skip; local visual qualified 2/30 with 28 host/missing-baseline diagnostics and no retained bytes."
+      ],
       "provider": "__resolved_provider_absent__",
       "review": null,
       "review_result": {
