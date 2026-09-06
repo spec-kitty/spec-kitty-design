@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "mission_slug": "page-header-compact-sticky-01M1V55H",
+  "mission_id": "01M1V55HFTD3C8WPN65E20QG9T",
+  "mission_branch": "kitty/mission-page-header-compact-sticky-01M1V55H",
+  "target_branch": "mission/page-header-compact-sticky",
+  "lanes": [
+    {
+      "lane_id": "lane-planning",
+      "wp_ids": [
+        "WP01",
+        "WP02"
+      ],
+      "write_scope": [
+        "behaviours.json",
+        "docs/design-system/using-components.md",
+        "expected-docs.json",
+        "expected-stories.json",
+        "fixtures/elements-behaviour/src/sk-page-header.test.ts",
+        "mutations.json",
+        "packages/elements/SIZES.md",
+        "packages/elements/custom-elements.json",
+        "packages/elements/src/page-header/sk-page-header.css.d.ts",
+        "packages/elements/src/page-header/sk-page-header.css.js",
+        "packages/elements/src/page-header/sk-page-header.stories.ts",
+        "packages/elements/src/page-header/sk-page-header.ts",
+        "packages/elements/vue.d.ts",
+        "packages/react/src/SkPageHeader.d.ts",
+        "packages/react/src/SkPageHeader.js",
+        "packages/styles/src/page-header/sk-page-header.css",
+        "packages/tokens/dist/token-catalogue.json",
+        "packages/tokens/src/tokens.css"
+      ],
+      "predicted_surfaces": [
+        "planning"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    }
+  ],
+  "computed_at": "2026-09-06T10:53:49.976035+00:00",
+  "computed_from": "dependency_graph+ownership",
+  "planning_artifact_wps": [
+    "WP01",
+    "WP02"
+  ],
+  "planning_commit_sha": "0ea3289076e5e6e02cb6e8ffe7d913f441062597"
+}
