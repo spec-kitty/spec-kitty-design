@@ -366,13 +366,13 @@ can synchronize that all-or-none state after relevant content or layout changes:
 ```js
 function syncWorkflowScroller(scroller, labelledBy) {
   const overflowing = scroller.scrollWidth > scroller.clientWidth;
-  scroller.toggleAttribute('tabindex', overflowing);
   if (overflowing) {
     scroller.setAttribute('tabindex', '0');
     scroller.setAttribute('role', 'region');
     scroller.removeAttribute('aria-label');
     scroller.setAttribute('aria-labelledby', labelledBy);
   } else {
+    scroller.removeAttribute('tabindex');
     scroller.removeAttribute('role');
     scroller.removeAttribute('aria-label');
     scroller.removeAttribute('aria-labelledby');

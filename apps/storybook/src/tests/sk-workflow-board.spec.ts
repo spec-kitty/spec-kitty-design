@@ -234,6 +234,38 @@ async function assertConditionalScrollerContract(root: Locator): Promise<void> {
   }
 }
 
+async function assertScrollerSkippedBySequentialFocus(
+  page: Page,
+  root: Locator,
+): Promise<void> {
+  const scroller = root.locator(".sk-workflow-board__scroller");
+  await scroller.evaluate((node) => {
+    const preceding = document.createElement("button");
+    preceding.type = "button";
+    preceding.dataset.workflowBoardFocusSentinel = "preceding";
+    const following = document.createElement("button");
+    following.type = "button";
+    following.dataset.workflowBoardFocusSentinel = "following";
+    node.before(preceding);
+    node.after(following);
+  });
+  const preceding = root.locator(
+    '[data-workflow-board-focus-sentinel="preceding"]',
+  );
+  const following = root.locator(
+    '[data-workflow-board-focus-sentinel="following"]',
+  );
+
+  await preceding.focus();
+  await expect(preceding).toBeFocused();
+  await page.keyboard.press("Tab");
+  await expect(following).toBeFocused();
+  await expect(scroller).not.toBeFocused();
+  expect(
+    await scroller.evaluate((node) => document.activeElement === node),
+  ).toBe(false);
+}
+
 test.describe("workflow board source and distribution contract", () => {
   test("the public CSS inventory is exactly the seven approved classes and contains no adjacent behavior", () => {
     const source = `${readFileSync(BOARD_CSS, "utf8")}\n${readFileSync(LANE_CSS, "utf8")}`;
@@ -351,6 +383,7 @@ test.describe("workflow board source and distribution contract", () => {
     expect(section).toMatch(
       /scroller\.setAttribute\(["']tabindex["'], ["']0["']\)/,
     );
+    expect(section).toMatch(/scroller\.removeAttribute\(["']tabindex["']\)/);
   });
 
   test("generated fixtures, root exports, and package subpaths expose both styles-only families", () => {
@@ -502,6 +535,22 @@ test.describe("conditional overflow semantics and keyboard operation", () => {
     }) => {
       const { root } = await openBoard(page, id);
       await assertConditionalScrollerContract(root);
+    });
+  }
+
+  for (const id of ["fitting", "single-lane-narrow"] as const) {
+    test(`${id} omits the non-overflow scroller from sequential keyboard focus`, async ({
+      page,
+    }) => {
+      const { root } = await openBoard(page, id);
+      const scroller = root.locator(".sk-workflow-board__scroller");
+      const geometry = await scroller.evaluate((node) => ({
+        clientWidth: node.clientWidth,
+        scrollWidth: node.scrollWidth,
+      }));
+      expect(geometry.scrollWidth).toBeLessThanOrEqual(geometry.clientWidth);
+      await assertConditionalScrollerContract(root);
+      await assertScrollerSkippedBySequentialFocus(page, root);
     });
   }
 
