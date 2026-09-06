@@ -1,7 +1,7 @@
 {
-  "event_count": 5,
-  "last_event_id": "01M1W462223BJVGY557WQ6VGR9",
-  "materialized_at": "2026-09-06T19:47:34.082695+00:00",
+  "event_count": 6,
+  "last_event_id": "01M1W4BGB6GV8WE8ASFBP2RR9P",
+  "materialized_at": "2026-09-06T19:50:32.551003+00:00",
   "mission_number": "",
   "mission_slug": "gate-wiring-shell-shape-01M1W3QH",
   "mission_type": "software-dev",
@@ -9,12 +9,12 @@
     "approved": 0,
     "blocked": 0,
     "canceled": 0,
-    "claimed": 0,
+    "claimed": 1,
     "done": 0,
     "for_review": 0,
     "in_progress": 1,
     "in_review": 0,
-    "planned": 2
+    "planned": 1
   },
   "work_packages": {
     "WP01": {
@@ -30,11 +30,16 @@
       "role": "implementer"
     },
     "WP02": {
-      "actor": "finalize-tasks",
+      "actor": "user",
+      "agent_profile": "__resolved_profile_absent__",
+      "agent_profile_version": "__resolved_profile_version_absent__",
       "force_count": 0,
-      "lane": "planned",
-      "last_event_id": "01M1W42J4QZJN5JC8BH1V229VB",
-      "last_transition_at": "2026-09-06T19:45:39.479618+00:00"
+      "lane": "claimed",
+      "last_event_id": "01M1W4BGB6GV8WE8ASFBP2RR9P",
+      "last_transition_at": "2026-09-06T19:50:32.551003+00:00",
+      "model": "__resolved_model_absent__",
+      "provider": "__resolved_provider_absent__",
+      "role": "implementer"
     },
     "WP03": {
       "actor": "finalize-tasks",
