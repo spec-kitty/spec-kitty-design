@@ -68,10 +68,10 @@
       "criterion_id": "FR-007",
       "description": "The chain rejects blank or duplicate IDs, preserves supplied order and caller data, and uses valid stable IDs only for rendered node identity.",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "sk-evidence-chain.ts:27-59,102-123 and sk-evidence-chain.test.ts:86-125; validation order identity and immutability passed",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T16:48:35.785215+00:00",
       "notes": "WP02: deeply frozen fixtures, replacement ordering and same-ID DOM identity assertions."
     },
     {
