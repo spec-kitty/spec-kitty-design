@@ -3,23 +3,15 @@
   "mission_number": "",
   "mission_type": "software-dev",
   "overall_verdict": "pending",
-  "governed_extension": {
-    "schema_version": 1,
-    "authorized_by": "operator",
-    "authorized_at": "2026-09-06",
-    "authorization": "I authorize a governed out-of-band schema migration/write for issue #148 to materialize the complete acceptance and issue matrices, including missing NFR/C criteria, issue metadata, and terminal-owner metadata, followed by Spec Kitty task re-finalization.",
-    "lane_owner_field": "lane_owners",
-    "terminal_owner_field": "terminal_owner"
-  },
   "criteria": [
     {
       "criterion_id": "FR-001",
       "description": "Publish one sk-bar-chart element for one ordered numeric series.",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "packages/elements/src/elements/sk-bar-chart.ts; packages/elements/src/elements/sk-bar-chart.test.ts; scripts/check-elements-entry.mjs; full node/browser gates: 33 unit + 346 browser assertions green",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T21:29:28.411898+00:00",
       "notes": "Element registration/export and exact public member-set evidence.",
       "lane_owners": [
         "WP01"
@@ -644,5 +636,13 @@
       "terminal_owner": "mission-wrap-up"
     }
   ],
-  "negative_invariants": []
+  "negative_invariants": [],
+  "governed_extension": {
+    "schema_version": 1,
+    "authorized_by": "operator",
+    "authorized_at": "2026-09-06",
+    "authorization": "I authorize a governed out-of-band schema migration/write for issue #148 to materialize the complete acceptance and issue matrices, including missing NFR/C criteria, issue metadata, and terminal-owner metadata, followed by Spec Kitty task re-finalization.",
+    "lane_owner_field": "lane_owners",
+    "terminal_owner_field": "terminal_owner"
+  }
 }
