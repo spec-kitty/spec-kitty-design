@@ -13,7 +13,7 @@
       "wp": "mission-wrap-up"
     },
     "#145": {
-      "evidence_ref": "#145 shell elements must be verified on train/elements-first before WP03 consolidation; #147 does not modify or close it.",
+      "evidence_ref": "#145 landed through PR #195 at train commit ff380ec7157ec59800e9e7a76cce8952f3567a95; #147 consumed it without modifying or closing it.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -21,11 +21,11 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "deferred-with-followup",
+      "verdict": "verified-already-fixed",
       "wp": "WP03"
     },
     "#146": {
-      "evidence_ref": "#146 feed elements must be verified on train/elements-first before WP03 consolidation; #147 does not modify or close it.",
+      "evidence_ref": "#146 landed through PR #206 at train commit 32fa4950b88941f9a78759e3e911dfa510d10a13; #147 consumed it without modifying or closing it.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -33,11 +33,11 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "deferred-with-followup",
+      "verdict": "verified-already-fixed",
       "wp": "WP03"
     },
     "#147": {
-      "evidence_ref": "Current mission; WP01 metric implementation reviewed at lane 60a72eb8b97d69159ea3b67b18e506be9ecc9992. Completion and closure remain post-train-merge.",
+      "evidence_ref": "Current mission; WP01-WP03 are done and approved with 16/16 functional requirements accepted. Rewritten product/test tip is 1613e309846a15c8dd5479e1bf20250f6661da73; aggregate PR and issue closure remain post-train-merge.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -46,7 +46,7 @@
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
       "verdict": "in-mission",
-      "wp": "WP01"
+      "wp": "mission-wrap-up"
     },
     "#148": {
       "evidence_ref": "Sibling bar-chart mission proceeds independently and is outside #147 authored scope.",
@@ -73,7 +73,7 @@
       "wp": "mission-wrap-up"
     },
     "#150": {
-      "evidence_ref": "Final pattern composition remains blocked on #145-#149 landing and is not implemented by #147.",
+      "evidence_ref": "Final pattern composition remains blocked on #147 and #148 landing; #145, #146, and #149 are already on train. #150 is not implemented by #147.",
       "fr": null,
       "nfr": null,
       "repo": null,
