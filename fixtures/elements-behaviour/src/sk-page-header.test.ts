@@ -3,7 +3,6 @@ import { afterEach, beforeEach, expect, test, vi } from 'vitest';
 import '../../../packages/elements/src/page-header/sk-page-header.js';
 import skPageHeaderSheet from '../../../packages/elements/src/page-header/sk-page-header.css.js';
 import type { SkPageHeader } from '../../../packages/elements/src/page-header/sk-page-header.js';
-import elementSource from '../../../packages/elements/src/page-header/sk-page-header.ts?raw';
 import { installTokenSheet } from './token-sheet.js';
 
 beforeEach(installTokenSheet);
@@ -562,6 +561,12 @@ test('under forced colors the sticky header keeps a system-coloured separator', 
   // inspect the `border`/`outline` SHORTHANDS at all, so a system color written in shorthand
   // passes because the gate never looks. `CanvasText` on the longhand is a value the gate
   // positively certifies against stylelint.config.mjs's `ignoreValues`.
+  //
+  // A second reason applies to the reads ABOVE rather than to the gate: a shorthand carrying a
+  // `var()` reads back empty from the CSSOM (pending-substitution), so those assertions could
+  // not distinguish a reserved band from an absent one. That is NOT a property of the LOGICAL
+  // shorthand — `border-bottom: var(--w) solid red` behaves identically, and both expand
+  // normally with a literal value. See the measurement table in the stylesheet.
   const forced = Array.from(skPageHeaderSheet.cssRules).find(
     (rule): rule is CSSMediaRule =>
       rule instanceof CSSMediaRule &&
@@ -583,7 +588,7 @@ test('the documented scroll margin is derived from the sticky offset and the com
   probe.style.scrollMarginBlockStart = 'var(--sk-layout-page-header-sticky-scroll-margin)';
   document.body.append(probe);
   expect(getComputedStyle(probe).scrollMarginBlockStart, 'the token does not resolve')
-    .toBe('64px'); // 0rem offset + 3rem compact height + 1rem (--sk-space-4)
+    .toBe('80px'); // 0rem offset + 3rem compact min-height + 2rem (--sk-space-7)
 
   // THE OVERRIDES GO ON `:root`, NOT ON THE PROBE, and the distinction is the mechanism rather
   // than a detail: a custom property's `var()` references are substituted where the property is
@@ -594,15 +599,15 @@ test('the documented scroll margin is derived from the sticky offset and the com
   const root = document.documentElement;
   try {
     root.style.setProperty('--sk-layout-page-header-compact-height', '5rem');
-    expect(getComputedStyle(probe).scrollMarginBlockStart).toBe('96px');
-    root.style.setProperty('--sk-layout-page-header-sticky-offset', '1rem');
     expect(getComputedStyle(probe).scrollMarginBlockStart).toBe('112px');
+    root.style.setProperty('--sk-layout-page-header-sticky-offset', '1rem');
+    expect(getComputedStyle(probe).scrollMarginBlockStart).toBe('128px');
   } finally {
     root.style.removeProperty('--sk-layout-page-header-compact-height');
     root.style.removeProperty('--sk-layout-page-header-sticky-offset');
   }
   expect(getComputedStyle(probe).scrollMarginBlockStart, 'the override leaked out of the test')
-    .toBe('64px');
+    .toBe('80px');
 
   // And the header's own minimum block size reads the SAME compact-height token, which is what
   // makes the derivation honest rather than a coincidence of two numbers that happen to agree.
@@ -620,7 +625,34 @@ test('the documented scroll margin is derived from the sticky offset and the com
  *
  * A comment cannot red a build. These two can, and they fail differently on purpose: the static
  * half catches an API that is present but not yet reached on any path the suite exercises, and
- * the dynamic half catches one reached through an indirection the static scan cannot see.
+ * the dynamic half catches one reached through an indirection the static scan cannot resolve.
+ *
+ * SCOPE, STATED EXACTLY, BECAUSE THE FIRST VERSION OVERCLAIMED IT AND WAS DEFEATED.
+ *
+ * The static half originally read ONE file — `sk-page-header.ts?raw` — while its own failure
+ * message talked about the element's boundary. A reviewer walked straight through the gap with
+ * three sibling modules imported by the element and reached by it on every render: an
+ * `IntersectionObserver` toggling a `stuck` attribute from `connectedCallback`, a
+ * `window.addEventListener('scroll', …)`, and a `${Math.round((new Date().getTime() - since) /
+ * 1000)}s ago` relative-age helper. Reproduced here before the repair: all three in place, all
+ * 316 tests green, and `IntersectionObserver`, `ResizeObserver` and `addEventListener('scroll'`
+ * were ALREADY in the pattern list below. The scan named them and could not see them one file
+ * over. On a sticky header an IntersectionObserver is the single most likely thing a real
+ * implementer adds — the "am I pinned? add the shadow" reflex.
+ *
+ * So the static half now walks the element's own IMPORT GRAPH: every first-party module
+ * reachable from `sk-page-header.ts` by a RELATIVE specifier, transitively. What it still does
+ * not cover, said plainly rather than left to be discovered again:
+ *
+ *   - bare specifiers (`lit`, and anything else from node_modules) are not followed;
+ *   - a dynamic `import(expr)` with a computed specifier is not resolvable and is not followed;
+ *   - the STORIES file is deliberately outside the graph. It is not shipped element code, the
+ *     behaviour lane never loads it, and a timer in a story is a consumer writing a demo.
+ *
+ * The dynamic half is what covers the first two, and it was widened in the same pass: it
+ * previously spied only `Date.now`, `setTimeout`, `setInterval` and `requestAnimationFrame`, so
+ * `new Date().getTime()` and `performance.now()` reached it unseen and rested on the static half
+ * alone — which is the half that had just been shown to be file-scoped.
  */
 const FORBIDDEN_APIS: readonly [string, RegExp][] = [
   ['setInterval', /\bsetInterval\b/],
@@ -647,14 +679,101 @@ const stripComments = (source: string): string =>
 const offendersIn = (source: string): string[] =>
   FORBIDDEN_APIS.filter(([, pattern]) => pattern.test(source)).map(([name]) => name);
 
-test('the element source owns no timer, clock, observer or scroll API', () => {
-  const stripped = stripComments(elementSource);
+/**
+ * Every first-party element module, keyed by repository-relative path.
+ *
+ * `import.meta.glob` rather than a directory read: the browser lane has no filesystem, and the
+ * graph walk below has to be able to follow a relative import OUT of page-header/ — a sibling
+ * helper under `src/shared/` would otherwise be exactly as invisible as the one-file scan was.
+ */
+const ELEMENT_MODULES: Record<string, string> = Object.fromEntries(
+  Object.entries(
+    import.meta.glob('../../../packages/elements/src/**/*.{ts,js}', {
+      query: '?raw',
+      import: 'default',
+      eager: true,
+    }) as Record<string, string>,
+  ).map(([key, source]) => [key.slice(key.indexOf('packages/')), source]),
+);
 
-  // ANTI-VACUITY FIRST, because a scan over an over-stripped string passes for the wrong reason
-  // — and "green over nothing" is the defect class this repository's ratchets exist for.
-  expect(stripped.length, 'nothing was stripped — the comment remover is inert').toBeLessThan(
-    elementSource.length,
-  );
+const ELEMENT_ROOT = 'packages/elements/src/page-header/sk-page-header.ts';
+
+/** Resolves a relative specifier against the importing module's directory. */
+const resolveFrom = (fromPath: string, specifier: string): string => {
+  const parts = fromPath.split('/').slice(0, -1);
+  for (const segment of specifier.split('/')) {
+    if (segment === '' || segment === '.') continue;
+    if (segment === '..') parts.pop();
+    else parts.push(segment);
+  }
+  return parts.join('/');
+};
+
+/**
+ * The element's transitive first-party import graph, plus every relative specifier the resolver
+ * could NOT account for.
+ *
+ * The unresolved list is returned rather than skipped. A resolver that silently drops what it
+ * cannot see is the certifying-absence shape this whole gate exists to close — it would have
+ * turned the reviewer's sibling module into "no offenders found" instead of a failure.
+ */
+const importGraph = (root: string): { files: string[]; unresolved: string[] } => {
+  const files = new Set<string>();
+  const unresolved: string[] = [];
+  const queue = [root];
+  while (queue.length > 0) {
+    const current = queue.shift()!;
+    if (files.has(current)) continue;
+    const source = ELEMENT_MODULES[current];
+    if (source === undefined) {
+      unresolved.push(current);
+      continue;
+    }
+    files.add(current);
+    // Static `import`/`export … from`, and a dynamic `import()` with a literal specifier.
+    for (const match of stripComments(source).matchAll(
+      /(?:\bfrom\s*|\bimport\s*\(\s*)['"](\.[^'"]*)['"]/g,
+    )) {
+      const target = resolveFrom(current, match[1]!);
+      // Source files import with a `.js` extension under NodeNext; the module on disk is `.ts`.
+      const candidate = target.endsWith('.js') && ELEMENT_MODULES[`${target.slice(0, -3)}.ts`] !== undefined
+        ? `${target.slice(0, -3)}.ts`
+        : target;
+      queue.push(candidate);
+    }
+  }
+  return { files: [...files].sort(), unresolved };
+};
+
+/**
+ * The graph the element is EXPECTED to have, as a ratchet rather than as a count.
+ *
+ * A count would be satisfied by any three modules. Naming them means that adding a module to
+ * this element — the exact event that let the reviewer's attack in — fails this test until a
+ * human writes the new name down, which is the same shape as expected-parts.json and
+ * expected-docs.json. `lit` is absent because bare specifiers are not followed; that limit is
+ * stated in the docblock above rather than hidden here.
+ */
+const EXPECTED_GRAPH = [
+  'packages/elements/src/define.ts',
+  'packages/elements/src/page-header/sk-page-header.css.js',
+  'packages/elements/src/page-header/sk-page-header.ts',
+];
+
+test("the element's whole import graph owns no timer, clock, observer or scroll API", () => {
+  const { files, unresolved } = importGraph(ELEMENT_ROOT);
+
+  // ANTI-VACUITY FIRST, because a scan over an over-stripped string, or over a graph that
+  // collapsed to its root, passes for the wrong reason.
+  expect(unresolved, 'a relative import could not be resolved — the scan would silently skip it')
+    .toEqual([]);
+  expect(files, 'the import graph is not what this element is known to have').toEqual(EXPECTED_GRAPH);
+
+  const stripped = stripComments(ELEMENT_MODULES[ELEMENT_ROOT]!);
+  expect(
+    stripped.length,
+    'nothing was stripped — the comment remover is inert',
+  ).toBeLessThan(ELEMENT_MODULES[ELEMENT_ROOT]!.length);
   expect(stripped, 'the stripper ate the class — the scan below would be vacuous')
     .toContain('class SkPageHeader');
   expect(stripped).toContain('static properties');
@@ -663,37 +782,125 @@ test('the element source owns no timer, clock, observer or scroll API', () => {
   // The scan's own red, so "it finds nothing" is distinguishable from "it can find nothing".
   expect(offendersIn(stripComments('class SkPageHeader { }\nsetInterval(() => {}, 1000);')))
     .toEqual(['setInterval']);
+  // And the WALK's own red: a synthetic root whose relative import names nothing must be
+  // REPORTED, never skipped.
+  expect(importGraph('packages/elements/src/page-header/does-not-exist.ts').unresolved)
+    .toEqual(['packages/elements/src/page-header/does-not-exist.ts']);
 
+  const offenders = files
+    .flatMap((file) => offendersIn(stripComments(ELEMENT_MODULES[file]!)).map((api) => `${file}: ${api}`));
   expect(
-    offendersIn(stripped),
-    'sk-page-header must never own time or liveness: the consumer owns the timer and passes the ' +
-      'resulting string into the sync slot',
+    offenders,
+    'sk-page-header must never own time or liveness — anywhere in its own import graph, not ' +
+      'merely in its own file. The consumer owns the timer and passes the resulting string into ' +
+      'the sync slot.',
   ).toEqual([]);
 });
 
+/**
+ * Wraps the three observer constructors and the scroll-listener registration for the duration of
+ * one mount, recording what was reached rather than what was written.
+ *
+ * `Date.now` alone is not the clock. `new Date().getTime()`, `+new Date()` and
+ * `performance.now()` are all clock reads that the previous spy set never saw — and one of them
+ * is exactly what the reviewer's relative-age helper used.
+ */
+const clockAndObserverProbe = () => {
+  const reached: string[] = [];
+  const nativeAdd = EventTarget.prototype.addEventListener;
+  const nativeObservers = ['IntersectionObserver', 'ResizeObserver', 'MutationObserver'] as const;
+  const originals = new Map<string, unknown>();
+
+  for (const name of nativeObservers) {
+    const Native = (globalThis as Record<string, unknown>)[name] as
+      | (new (...args: unknown[]) => object)
+      | undefined;
+    if (Native === undefined) continue;
+    originals.set(name, Native);
+    (globalThis as Record<string, unknown>)[name] = class {
+      constructor(...args: unknown[]) {
+        reached.push(name);
+        return new Native(...args);
+      }
+    };
+  }
+  // BOTH THE PROTOTYPE AND `window`'s OWN PROPERTY, and that is measured rather than belt-and-
+  // braces. In this lane `window.addEventListener` is an OWN property of `window` and is NOT
+  // `EventTarget.prototype.addEventListener` — the browser runner has already wrapped it
+  // (measured: hasOwnProperty true, identity false, while an element's own listener still goes
+  // through the prototype). So a prototype-only patch silently misses
+  // `window.addEventListener('scroll', …)`, which is precisely the shape a sticky header
+  // attracts. The first version of this probe was prototype-only and did not see the reviewer's
+  // scroll listener at all, while catching its IntersectionObserver — a half-armed guard reading
+  // as an armed one.
+  const nativeWindowAdd = window.addEventListener;
+  const record = (type: string) => {
+    if (type === 'scroll') reached.push("addEventListener('scroll')");
+  };
+  EventTarget.prototype.addEventListener = function patched(
+    this: EventTarget,
+    type: string,
+    ...rest: unknown[]
+  ) {
+    record(type);
+    return (nativeAdd as (...a: unknown[]) => void).call(this, type, ...rest);
+  } as typeof EventTarget.prototype.addEventListener;
+  window.addEventListener = function patchedWindow(type: string, ...rest: unknown[]) {
+    record(type);
+    return (nativeWindowAdd as (...a: unknown[]) => void).call(window, type, ...rest);
+  } as typeof window.addEventListener;
+
+  const spies = {
+    'Date.now': vi.spyOn(Date, 'now'),
+    'Date.prototype.getTime': vi.spyOn(Date.prototype, 'getTime'),
+    'Date.prototype.valueOf': vi.spyOn(Date.prototype, 'valueOf'),
+    'performance.now': vi.spyOn(performance, 'now'),
+    setTimeout: vi.spyOn(globalThis, 'setTimeout'),
+    setInterval: vi.spyOn(globalThis, 'setInterval'),
+    requestAnimationFrame: vi.spyOn(globalThis, 'requestAnimationFrame'),
+  };
+
+  return {
+    spies,
+    /** Everything reached during the window, in one list, so the failure names the API. */
+    reached: () => [
+      ...reached,
+      ...Object.entries(spies).filter(([, spy]) => spy.mock.calls.length > 0).map(([name]) => name),
+    ],
+    restore: () => {
+      EventTarget.prototype.addEventListener = nativeAdd;
+      window.addEventListener = nativeWindowAdd;
+      for (const [name, Native] of originals) (globalThis as Record<string, unknown>)[name] = Native;
+    },
+  };
+};
+
 test('a compact sticky header still treats sync bytes as opaque and schedules no clock work', async () => {
-  const now = vi.spyOn(Date, 'now').mockReturnValue(0);
-  const timeout = vi.spyOn(globalThis, 'setTimeout');
-  const interval = vi.spyOn(globalThis, 'setInterval');
-  const raf = vi.spyOn(globalThis, 'requestAnimationFrame');
-
-  const el = await mountAxes('compact', true);
-  const sync = el.querySelector('[slot="sync"]') as HTMLElement;
+  const probe = clockAndObserverProbe();
+  probe.spies['Date.now'].mockReturnValue(0);
   const exact = 'Updated 12 seconds ago';
-  expect(sync.textContent).toBe(exact);
 
-  now.mockReturnValue(86_400_000);
-  el.sticky = false;
-  el.density = undefined;
-  await el.updateComplete;
-  el.density = 'compact';
-  el.sticky = true;
-  await el.updateComplete;
+  try {
+    const el = await mountAxes('compact', true);
+    const sync = el.querySelector('[slot="sync"]') as HTMLElement;
+    expect(sync.textContent).toBe(exact);
 
-  expect(sync.textContent, 'the sync string changed across a density and stickiness change')
-    .toBe(exact);
-  expect(now, 'the element read the clock').not.toHaveBeenCalled();
-  expect(timeout, 'the element scheduled a timeout').not.toHaveBeenCalled();
-  expect(interval, 'the element started an interval').not.toHaveBeenCalled();
-  expect(raf, 'the element scheduled a frame').not.toHaveBeenCalled();
+    probe.spies['Date.now'].mockReturnValue(86_400_000);
+    el.sticky = false;
+    el.density = undefined;
+    await el.updateComplete;
+    el.density = 'compact';
+    el.sticky = true;
+    await el.updateComplete;
+
+    expect(sync.textContent, 'the sync string changed across a density and stickiness change')
+      .toBe(exact);
+    expect(
+      probe.reached(),
+      'sk-page-header reached a clock, a scheduler, an observer or a scroll listener — the ' +
+        'consumer owns the timer and passes the resulting string into the sync slot',
+    ).toEqual([]);
+  } finally {
+    probe.restore();
+  }
 });

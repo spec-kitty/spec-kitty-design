@@ -15,3 +15,23 @@ declare module '*?raw' {
   const content: string;
   export default content;
 }
+
+/**
+ * `import.meta.glob` — Vite's build-time directory read.
+ *
+ * Hand-declared here rather than pulled in by adding `vite/client` to a project's `types`
+ * array, for the same reason the `*?raw` declaration above is hand-written: the fixture
+ * projects list their `types` explicitly, and widening that list changes what every file in
+ * them can reach. This declares exactly the one member used.
+ *
+ * `fixtures/elements-behaviour/src/sk-page-header.test.ts` uses it to walk an element's own
+ * import graph. Without this declaration `tsc` reports TS2339 and the fixture project's
+ * typecheck target fails — which `scripts/typecheck-all.mjs` catches, because it enumerates
+ * every project declaring the target rather than naming one.
+ */
+interface ImportMeta {
+  glob(
+    pattern: string,
+    options?: { query?: string; import?: string; eager?: boolean },
+  ): Record<string, unknown>;
+}
