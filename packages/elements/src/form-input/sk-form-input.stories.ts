@@ -59,3 +59,50 @@ export const LightMode: Story = {
   <sk-form-input name="email" label="Email address" description="We'll never share your email."></sk-form-input>
 </div>`,
 };
+
+/**
+ * #180 — a native constraint (`pattern`) violated on mount, so the merged UA validity flag is
+ * visible without interaction, same reasoning as `Error` above.
+ */
+export const Constraints: Story = {
+  render: () => {
+    const el = document.createElement('sk-form-input');
+    el.setAttribute('name', 'branch');
+    el.setAttribute('label', 'Branch name');
+    el.setAttribute('pattern', '[a-z0-9/_-]+');
+    el.setAttribute('description', 'Lowercase letters, numbers, "/", "_" and "-" only.');
+    (el as HTMLElement & { value: string }).value = 'Not Valid!';
+    return el;
+  },
+};
+
+/**
+ * #180 — `readonly`: submitted but barred from constraint validation. Rendered `required` AND
+ * empty to make the point visually — no error shown, unlike `Error` above, even though the
+ * value is missing.
+ */
+export const ReadOnly: Story = {
+  render: () =>
+    `<sk-form-input name="region" label="Region" required readonly description="Set by your organization; contact an admin to change it."></sk-form-input>`,
+};
+
+/**
+ * #180 — a shadow-root `<datalist>` driven by the `options` property. Free text is still
+ * accepted (FR-006): the suggestions are a hint, not a closed set.
+ */
+export const Datalist: Story = {
+  render: () => {
+    const el = document.createElement('sk-form-input') as HTMLElement & {
+      options: ReadonlyArray<{ value: string; label?: string }>;
+    };
+    el.setAttribute('name', 'branch');
+    el.setAttribute('label', 'Branch');
+    el.setAttribute('description', 'Pick a suggestion or type your own.');
+    el.options = Object.freeze([
+      Object.freeze({ value: 'main' }),
+      Object.freeze({ value: 'develop' }),
+      Object.freeze({ value: 'release/2026.09', label: 'Release 2026.09' }),
+    ]);
+    return el;
+  },
+};

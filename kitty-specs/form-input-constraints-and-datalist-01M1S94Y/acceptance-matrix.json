@@ -1,0 +1,240 @@
+{
+  "mission_slug": "form-input-constraints-and-datalist-01M1S94Y",
+  "mission_number": "",
+  "mission_type": "software-dev",
+  "overall_verdict": "pass_with_exceptions",
+  "criteria": [
+    {
+      "criterion_id": "FR-001",
+      "description": "pattern, min, max, step, inputmode, autocomplete and readonly are reactive properties forwarded to the inner control, each with its own published doc comment.",
+      "proof_type": "automated_test",
+      "evidence": "fixtures/elements-behaviour/src/sk-form-input.test.ts '[SC-013] pattern/min/max/step/inputmode/autocomplete reach the inner control' (asserts both the inner-control attribute AND, post debugger-fold fix #9, the host attribute for every forwarded member); mutations.json SC-013 arm 'constraint attribute reaches the inner control'.",
+      "pass_fail": "pass",
+      "verified_by": "ci @ 33997808460 (a23a15e, pre-merge gate pass 2) + local verification (#180)",
+      "verified_at": "2026-09-05T23:17:18Z",
+      "notes": "Doc-comment-per-property requirement enforced by check-manifest-content.mjs against custom-elements.json \u2014 regenerated at head and confirmed to carry the six properties' widened `string | null | undefined` types (see SC-007's evidence)."
+    },
+    {
+      "criterion_id": "FR-002",
+      "description": "validate() merges the UA's own validity flags from the inner control with the flags the element derives, rather than replacing them.",
+      "proof_type": "automated_test",
+      "evidence": "fixtures/elements-behaviour/src/sk-form-input.test.ts: '[SC-003] a merged UA validity flag blocks a real submit and carries a message \u2014 mount-time', '...a constraint attribute changed AFTER mount reaches the host validity \u2014 the read-before-write ordering fix', '...a `type` change and a `value` change in the SAME update validate against the NEW type \u2014 the probe-ordering fix', '...a UA flag with no required/customError still gets a non-empty message \u2014 the setValidity throw fix', '...badInput reaches the host \u2014 REAL typing only, never a property assignment', '...a bad-input control keeps the user's buffer, rather than being overwritten mid-edit'. mutations.json carries 12 SC-003 arms for this element (4 pre-existing at mission start; 8 added across two review folds \u2014 corrected count, a prior version of this row miscounted both the total and which arms were new). Pass-1 fold added 5: probe-ordering, null-vs-undefined, label-alone, whitespace-customError, bad-input-buffer. The operator ruling (research.md R9) added 1: the programmatic badInput divergence, tested by '[SC-003] a value the current type cannot represent blocks a real submit \u2014 the programmatic badInput divergence (operator ruling)' (type=\"date\", value=\"2026-13-45\"), '[SC-003] a comma-formatted number blocks a real submit \u2014 the programmatic badInput divergence (operator ruling)' (type=\"number\", value=\"1,5\"), and the negative '[SC-003] an unparseable-looking but non-sanitizing value reports typeMismatch, NOT the new divergence \u2014 proves the branch does not over-fire' (type=\"email\", value=\"notanemail\"). Pass-2 fold added 2 more, both fixing regressions the pass-1 fold itself introduced: the unconditional-`validate()` fix for a permanent-invalid lock when a user undoes a bad keystroke back to the identical prior value ('[SC-003] undoing a bad keystroke back to the IDENTICAL prior value still re-validates \u2014 the unconditional validate() fix', '[SC-003] an untouched-looking empty number field survives a mistype-and-undo \u2014 the user-visible shape of the same regression'), and the `.trim()`-gated divergence check fixing a false positive on pure-whitespace-sanitized values ('[SC-003] a value that sanitizes to empty ONLY because it is pure whitespace does not trigger the divergence \u2014 the `.trim()` fix').",
+      "pass_fail": "pass",
+      "verified_by": "ci @ 33997808460 (a23a15e, pre-merge gate pass 2) + local verification (#180)",
+      "verified_at": "2026-09-05T23:17:18Z",
+      "notes": "DEVIATION, documented: tooLong/tooShort are named in this FR's text but are deliberately NOT in the merge list \u2014 research.md R2 finding 3 records why (they require maxlength/minlength, which this mission does not forward, so their mutation arms would be permanently inert). All five reachable UA flags (patternMismatch, rangeUnderflow, rangeOverflow, stepMismatch, typeMismatch) plus badInput are merged and covered. The value-authority fork the debugger lens raised (raw vs. sanitized value, and whether valueMissing should rebase on the sanitized string) is now RESOLVED by explicit operator ruling, not by implementer judgement: setFormValue stays raw (unchanged contract), a type-cannot-represent divergence is detected and blocks submission as a badInput analogue, and the sanitized-submission / sanitized-valueMissing options were explicitly declined as out of this mission's scope (see research.md R9 in full). The two pass-2 arms (unconditional validate(), the trim() gate) postdate the cited CI run (a23a15e) \u2014 verified locally only as of this row (full test-file run green, each fix's mutation confirmed red-first by hand) \u2014 pending the next CI run at the head this fold produces."
+    },
+    {
+      "criterion_id": "FR-003",
+      "description": "readonly matches platform semantics: the value IS submitted (setFormValue(this.value)), and the control is barred from constraint validation (setValidity({})) \u2014 same validation outcome as disabled, opposite submission outcome.",
+      "proof_type": "automated_test",
+      "evidence": "fixtures/elements-behaviour/src/sk-form-input.test.ts '[SC-002][SC-003] a readonly control still submits but is barred from constraint validation' and '[SC-003] readonly reaches the inner control but is NOT reflected on the host'. research.md R1 records the measured platform table (readonly barred from constraint validation on the attribute alone, both engines) that this design is built against.",
+      "pass_fail": "pass",
+      "verified_by": "ci @ 33997808460 (a23a15e, pre-merge gate pass 2) + local verification (#180)",
+      "verified_at": "2026-09-05T23:17:18Z",
+      "notes": "readonly is deliberately unreflected (R1) \u2014 the property still reaches the inner control via the property binding in render(), matching the disabled precedent for the same SC-005-shaped mutation-observability reason."
+    },
+    {
+      "criterion_id": "FR-004",
+      "description": "The existing disabled behaviour is untouched: not reflected, setFormValue(null), setValidity({}).",
+      "proof_type": "automated_test",
+      "evidence": "fixtures/elements-behaviour/src/sk-form-input.test.ts '[SC-005] a disabled control is excluded from submission', '[SC-005] setting the disabled PROPERTY excludes the field from submission', 'a disabled required field does not veto its form'. No diff to the disabled property declaration or its validate() branch in this mission.",
+      "pass_fail": "pass",
+      "verified_by": "ci @ 33997808460 (a23a15e, pre-merge gate pass 2) + local verification (#180)",
+      "verified_at": "2026-09-05T23:17:18Z",
+      "notes": ""
+    },
+    {
+      "criterion_id": "FR-005",
+      "description": "The element renders a <datalist> into its own shadow root from a supplied option model and points the inner input's list at that shadow-root id.",
+      "proof_type": "automated_test",
+      "evidence": "fixtures/elements-behaviour/src/sk-form-input.test.ts '[SC-013] the datalist is reachable from the inner input by node identity' (asserts by node identity, not attribute-string equality, per SC-005's own wording) and '[SC-013] no options means no list attribute and no datalist element'. mutations.json SC-013 arm 'datalist reachable by node identity'.",
+      "pass_fail": "pass",
+      "verified_by": "ci @ 33997808460 (a23a15e, pre-merge gate pass 2) + local verification (#180)",
+      "verified_at": "2026-09-05T23:17:18Z",
+      "notes": "No sk-combobox, listbox, popup or async suggestion fetching introduced (C-001) \u2014 plain shadow-root <datalist> only."
+    },
+    {
+      "criterion_id": "FR-006",
+      "description": "Options are supplied values with optional supplied labels. The element filters, sorts, fetches and invents nothing. A typed value matching no option stays valid unless a forwarded constraint says otherwise.",
+      "proof_type": "automated_test",
+      "evidence": "fixtures/elements-behaviour/src/sk-form-input.test.ts '[FR-006] a value matching no option stays valid'. render() reads this.options?.length defensively (data-model.md) and maps the array 1:1 to <option> children with no transform.",
+      "pass_fail": "pass",
+      "verified_by": "ci @ 33997808460 (a23a15e, pre-merge gate pass 2) + local verification (#180)",
+      "verified_at": "2026-09-05T23:17:18Z",
+      "notes": ""
+    },
+    {
+      "criterion_id": "FR-007",
+      "description": "Genuinely shared forwarding lands in form-control-base.ts rather than being copied into sk-form-textarea.",
+      "proof_type": "automated_test",
+      "evidence": "research.md R5: the premise this document originally gave (\"none of the seven new attributes apply to <textarea>\") was found false and corrected (readonly/autocomplete/inputmode do apply per the HTML Standard) \u2014 but the conclusion not to share code THIS mission was upheld anyway, for measured reasons: sharing would surface the properties as inherited-but-inert manifest members on sk-form-textarea (violating NFR-003), and build-react-wrappers.mjs's EXPECTED_NON_PROP_FIELDS map has no per-subclass suppression mechanism. Recorded as a candidate for a FUTURE mission that touches both elements together.",
+      "pass_fail": "pass",
+      "verified_by": "ci @ 33997808460 (a23a15e, pre-merge gate pass 2) + local verification (#180)",
+      "verified_at": "2026-09-05T23:17:18Z",
+      "notes": "Deviation from the FR's literal instruction is deliberate and reasoned, not an oversight \u2014 see R5 in full for the corrected premise and the two concrete consequences that keep the conclusion the same."
+    },
+    {
+      "criterion_id": "FR-008",
+      "description": "Any gap in the generated static / no-build form is a documented limitation with a stated workaround, never silent divergence.",
+      "proof_type": "automated_test",
+      "evidence": "research.md R7: packages/styles/src/form-field/sk-form-input-*.html (hand-authored, styles-only per C-004) do not gain the new constraint attributes or the datalist in this mission \u2014 recorded as a documented limitation with a stated workaround (a consumer copying the static form by hand can add plain HTML attributes directly), and an explicit open item for the operator if parity is wanted instead.",
+      "pass_fail": "pass",
+      "verified_by": "ci @ 33997808460 (a23a15e, pre-merge gate pass 2) + local verification (#180)",
+      "verified_at": "2026-09-05T23:17:18Z",
+      "notes": ""
+    },
+    {
+      "criterion_id": "NFR-001",
+      "description": "The React wrapper's ssrSafe delivery is measured, not assumed, for the options array option model.",
+      "proof_type": "automated_test",
+      "evidence": "fixtures/react-consumer/src/sk-form-input-options.test.tsx '[SC-010] the generated form-input wrapper delivers and resets `options`, undefined before upgrade' \u2014 mirrors sk-transition-matrix's (#149) already-proved mechanism (attribute: false + literal field initializer earning x-spec-kitty-property-only/-reset, routed through the generated useProperties hook), confirmed the same mechanism holds for a form-associated element. Passes pre-definition delivery, post-upgrade identity preservation, re-render replacement, and reset-to-frozen-[] on removal.",
+      "pass_fail": "pass",
+      "verified_by": "ci @ 33997808460 (a23a15e, pre-merge gate pass 2) + local verification (#180)",
+      "verified_at": "2026-09-05T23:17:18Z",
+      "notes": ""
+    },
+    {
+      "criterion_id": "NFR-002",
+      "description": "The invalid treatment is never colour-only and survives forced colors. Baseline from #176.",
+      "proof_type": "automated_test",
+      "evidence": "packages/styles/src/form-input/sk-form-input.css: `.sk-form-input__control[aria-invalid=\"true\"]` (border/visual state keyed off the ARIA attribute, not colour alone) and `:host(:not([invalid])) .sk-form-input__error` (the error text node itself, not merely a colour change) \u2014 this baseline predates this mission (#176) and is unmodified by it.",
+      "pass_fail": "pass",
+      "verified_by": "ci @ 33997808460 (a23a15e, pre-merge gate pass 2) + local verification (#180)",
+      "verified_at": "2026-09-05T23:17:18Z",
+      "notes": "This mission adds no new invalid-state UI (the new constraint flags feed the SAME existing invalid/errorMessage machinery) \u2014 inherited, not separately re-verified against forced-colors emulation in this round."
+    },
+    {
+      "criterion_id": "NFR-003",
+      "description": "No behaviour change to sk-form-textarea's or form-control-base.ts's existing contracts.",
+      "proof_type": "automated_test",
+      "evidence": "git diff for this mission touches no file under packages/elements/src/form-textarea/ or the shared form-control-base.ts \u2014 a direct consequence of R5's per-element-only decision (FR-007).",
+      "pass_fail": "pass",
+      "verified_by": "ci @ 33997808460 (a23a15e, pre-merge gate pass 2) + local verification (#180)",
+      "verified_at": "2026-09-05T23:17:18Z",
+      "notes": ""
+    },
+    {
+      "criterion_id": "SC-001",
+      "description": "Every forwarded attribute round-trips both ways \u2014 attribute\u2192property and property\u2192attribute \u2014 with a behaviour test per member, and a mutation red for a dropped forwarding.",
+      "proof_type": "automated_test",
+      "evidence": "'[SC-013] pattern/min/max/step/inputmode/autocomplete reach the inner control' loops all six members asserting both the inner-control attribute and (fix #9) the host attribute; '[SC-003] removing a constraint attribute clears it, rather than forwarding literal \"null\"' covers the reverse (attribute removed -> property null -> no forwarded attribute). mutations.json SC-013 'constraint attribute reaches the inner control' arm reds a dropped forwarding.",
+      "pass_fail": "pass",
+      "verified_by": "ci @ 33997808460 (a23a15e, pre-merge gate pass 2) + local verification (#180)",
+      "verified_at": "2026-09-05T23:17:18Z",
+      "notes": ""
+    },
+    {
+      "criterion_id": "SC-002",
+      "description": "A swallowed patternMismatch reds a test. Asserted against a real form submit, not just a validity read.",
+      "proof_type": "automated_test",
+      "evidence": "'[SC-003] a merged UA validity flag blocks a real submit and carries a message \u2014 mount-time' drives a real form.requestSubmit() and asserts the submission is blocked with a message reaching the accessibility tree, not merely that a validity flag is true.",
+      "pass_fail": "pass",
+      "verified_by": "ci @ 33997808460 (a23a15e, pre-merge gate pass 2) + local verification (#180)",
+      "verified_at": "2026-09-05T23:17:18Z",
+      "notes": ""
+    },
+    {
+      "criterion_id": "SC-003",
+      "description": "A readonly field still submits its value, and an empty required readonly field does not block its form.",
+      "proof_type": "automated_test",
+      "evidence": "'[SC-002][SC-003] a readonly control still submits but is barred from constraint validation'.",
+      "pass_fail": "pass",
+      "verified_by": "ci @ 33997808460 (a23a15e, pre-merge gate pass 2) + local verification (#180)",
+      "verified_at": "2026-09-05T23:17:18Z",
+      "notes": ""
+    },
+    {
+      "criterion_id": "SC-004",
+      "description": "formResetCallback still restores the initial value.",
+      "proof_type": "automated_test",
+      "evidence": "'[SC-004] form reset restores the initial value', plus '[SC-003] a form reset that restores a satisfying value reports valid immediately' (the merged-validity half of reset correctness, re-sited from SC-004 to SC-003 post-CI per research.md R6 after a genuine collateral coupling was found between the two).",
+      "pass_fail": "pass",
+      "verified_by": "ci @ 33997808460 (a23a15e, pre-merge gate pass 2) + local verification (#180)",
+      "verified_at": "2026-09-05T23:17:18Z",
+      "notes": ""
+    },
+    {
+      "criterion_id": "SC-005",
+      "description": "The datalist is reachable from the inner input: with options supplied, the input's list attribute resolves to a <datalist> in the same root, asserted by node identity rather than by attribute string equality.",
+      "proof_type": "automated_test",
+      "evidence": "'[SC-013] the datalist is reachable from the inner input by node identity'.",
+      "pass_fail": "pass",
+      "verified_by": "ci @ 33997808460 (a23a15e, pre-merge gate pass 2) + local verification (#180)",
+      "verified_at": "2026-09-05T23:17:18Z",
+      "notes": ""
+    },
+    {
+      "criterion_id": "SC-006",
+      "description": "The ssrSafe question has a committed answer \u2014 either a passing first-render react-consumer test, or a documented and enforced channel with a test proving the enforcement.",
+      "proof_type": "automated_test",
+      "evidence": "fixtures/react-consumer/src/sk-form-input-options.test.tsx (see NFR-001 above) is the committed answer: the property-only + literal-initializer channel, proved by a passing test, not documented-and-assumed.",
+      "pass_fail": "pass",
+      "verified_by": "ci @ 33997808460 (a23a15e, pre-merge gate pass 2) + local verification (#180)",
+      "verified_at": "2026-09-05T23:17:18Z",
+      "notes": ""
+    },
+    {
+      "criterion_id": "SC-007",
+      "description": "Conformance-matrix entry, parts/docs registration, and regenerated manifest, wrappers and size report. Before final gate, rebase on the current train and regenerate shared artifacts.",
+      "proof_type": "automated_test",
+      "evidence": "Regenerated and re-derived in the same commit that authored this row: `node scripts/check-manifest-content.mjs --check` -> \"73 public attribute(s), property-only field(s), and method(s) across 15 element(s) all carry a description\" (manifest carries the widened `string | null | undefined` for pattern/min/max/step/inputmode/autocomplete); `node scripts/build-react-wrappers.mjs --check` -> \"packages/react/src is up to date (33 file(s), 15 element(s)), and two runs are byte-identical\"; `node scripts/build-vue-types.mjs --check` -> \"packages/elements/vue.d.ts is up to date (15 elements)\"; `node scripts/build-styles-only-markup.mjs --check` green. `expected-docs.json`'s sk-form-input entry is {attributes:16, properties:1, methods:5}, total 73 \u2014 unchanged and correct at head.",
+      "pass_fail": "pass",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Previously recorded `pending` because regeneration was written as \"scheduled as the next step\" \u2014 false: it landed in the SAME commit (9825413) that wrote this row. Corrected by a later review pass; this criterion is fully discharged, not deferred."
+    }
+  ],
+  "negative_invariants": [
+    {
+      "invariant_id": "C-001/C-002",
+      "description": "No sk-combobox, listbox, popup, filtering autocomplete, async suggestion fetching, multi-select, token/chip input, masking, input formatting, or date/time pickers beyond forwarding the native `type`.",
+      "enforced_by": [
+        "packages/elements/src/form-input/sk-form-input.ts (render() \u2014 a single <input> plus a shadow-root <datalist>, no additional interactive widget)"
+      ],
+      "pass_fail": "pass",
+      "evidence": "No new custom element, no new dependency, no filtering/sorting/fetching logic over the options array (data-model.md 'Entity: option model item' \u2014 \"No filtering, sorting, fetching, or invention\"). Verified by reading the shipped render() and validate() bodies directly, not inferred from the plan.",
+      "notes": ""
+    },
+    {
+      "invariant_id": "FR-002 (tooLong/tooShort)",
+      "description": "tooLong/tooShort must never be silently claimed as merged when they are not reachable.",
+      "enforced_by": [
+        "research.md R2 finding 3 (explicit exclusion, with reasoning)"
+      ],
+      "pass_fail": "pass",
+      "evidence": "validate()'s merge loop names exactly patternMismatch/rangeUnderflow/rangeOverflow/stepMismatch/typeMismatch (from the probe) plus badInput (from the real control) \u2014 tooLong/tooShort are absent, and this absence is documented (not an oversight) because maxlength/minlength are not forwarded by this mission.",
+      "notes": "This is the deviation recorded against FR-002 above, restated here as a negative invariant because a silent claim of full coverage would have been the failure mode worth guarding against."
+    },
+    {
+      "invariant_id": "C-003",
+      "description": "sk-button is not changed. The submit-button half of #153 stays #153's; this mission owns the input half only.",
+      "enforced_by": [
+        "git diff (manual, run at head)"
+      ],
+      "pass_fail": "pass",
+      "evidence": "`git diff --stat 0fde2ab...HEAD -- packages/elements/src/button/ packages/react/src/SkButton* packages/styles/src/button/` \u2014 empty output, exit 0. No commit on this mission's range (0fde2ab..HEAD, 34 commits) touches any sk-button source, generated wrapper, or style file.",
+      "notes": ""
+    },
+    {
+      "invariant_id": "C-004",
+      "description": "sk-form-field stays deliberately styles-only (#141/#172) \u2014 this mission does not turn it into a custom element or otherwise edit its directory.",
+      "enforced_by": [
+        "find (manual, run at head)"
+      ],
+      "pass_fail": "pass",
+      "evidence": "`find packages/elements/src -iname \"*form-field*\"` \u2014 empty output: no `.ts` custom element exists for form-field anywhere in packages/elements/src. The only form-field artifacts are the pre-existing hand-authored HTML under packages/styles/src/form-field/ (research.md R7), which this mission's git diff also does not touch (`git diff --stat 0fde2ab...HEAD -- packages/styles/src/form-field/` is empty).",
+      "notes": "Previously recorded only as prose inside FR-008's evidence, not as its own verified invariant \u2014 this row makes it independently checkable."
+    },
+    {
+      "invariant_id": "C-005",
+      "description": "LightMode stories wrap in class=\"sk-light\", never data-theme (#93).",
+      "enforced_by": [
+        "packages/elements/src/form-input/sk-form-input.stories.ts"
+      ],
+      "pass_fail": "pass",
+      "evidence": "`grep -n 'LightMode\\|sk-light\\|data-theme' packages/elements/src/form-input/sk-form-input.stories.ts` \u2014 the LightMode story's markup wraps in `<div class=\"sk-light\" ...>`; no `data-theme` attribute appears anywhere in the file.",
+      "notes": ""
+    }
+  ]
+}

@@ -1,0 +1,59 @@
+{
+  "version": 1,
+  "mission_slug": "form-input-constraints-and-datalist-01M1S94Y",
+  "mission_id": "01M1S94YYWE2F1ACQA2GC8Y5Y1",
+  "mission_branch": "kitty/mission-form-input-constraints-and-datalist-01M1S94Y",
+  "target_branch": "mission/form-input-constraints-and-datalist",
+  "lanes": [
+    {
+      "lane_id": "lane-a",
+      "wp_ids": [
+        "WP01"
+      ],
+      "write_scope": [
+        "behaviours.json",
+        "fixtures/elements-behaviour/src/sk-form-input.test.ts",
+        "mutations.json",
+        "packages/elements/src/form-control-base.ts",
+        "packages/elements/src/form-input/sk-form-input.stories.ts",
+        "packages/elements/src/form-input/sk-form-input.ts"
+      ],
+      "predicted_surfaces": [
+        "api",
+        "artifact-rendering",
+        "legacy-cleanup",
+        "tracker-integration"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    },
+    {
+      "lane_id": "lane-b",
+      "wp_ids": [
+        "WP02"
+      ],
+      "write_scope": [
+        "expected-docs.json",
+        "fixtures/react-consumer/src/sk-form-input-options.test.tsx",
+        "packages/elements/SIZES.md",
+        "packages/elements/custom-elements.json",
+        "packages/elements/vue.d.ts",
+        "packages/react/src/SkFormInput.d.ts",
+        "packages/react/src/SkFormInput.js"
+      ],
+      "predicted_surfaces": [
+        "api",
+        "artifact-rendering",
+        "legacy-cleanup"
+      ],
+      "depends_on_lanes": [
+        "lane-a"
+      ],
+      "parallel_group": 1
+    }
+  ],
+  "computed_at": "2026-09-05T19:27:10.892792+00:00",
+  "computed_from": "dependency_graph+ownership",
+  "planning_artifact_wps": [],
+  "planning_commit_sha": "905e9aa659737c6821d85eb89f91063673dc05c7"
+}

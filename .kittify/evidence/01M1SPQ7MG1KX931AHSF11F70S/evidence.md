@@ -1,0 +1,1 @@
+Pass-1 reducer lens over PR #187 @cde2fb8: 9 cut/simplify findings (2 superseded-doc blocks, 4 duplicated-fact sites, 1 generator rename map, 1 helper, 1 stale story docstring); merged-flag list verified minimal; report-only, no edits.

@@ -26,23 +26,51 @@ Assigning it directly paints the error state WITHOUT setting validity — the fi
 wrong and still submits — so use `setCustomError()` instead. */
   invalid?: boolean;
 
+  /** Marks the field read-only. The value is still submitted with the form, unlike `disabled` —
+but the field is barred from constraint validation, so a `required` read-only field never
+blocks its form. */
+  readOnly?: boolean;
+
   /** Marks the field required. An empty required field blocks submission and reports
 `${label} is required`, or "This field is required" when `label` is empty. */
   required?: boolean;
 
+  /** Forwarded to the inner control's `autocomplete` attribute, verbatim. */
+  autoComplete?: string | null | undefined;
+
   /** Optional helper text rendered under the control and linked to it for screen readers. */
   description?: SkFormInputElement["description"];
 
+  /** A hint to the browser about the kind of on-screen keyboard to display. Hinting only — it
+carries no validation semantics. */
+  inputMode?: string | null | undefined;
+
   /** The visible label. Also the accessible name, so it is not optional in practice. */
   label?: SkFormInputElement["label"];
+
+  /** The maximum value, for numeric and date/time input types. A string, matching the native
+HTML attribute's own contract. */
+  max?: SkFormInputElement["max"];
+
+  /** The minimum value, for numeric and date/time input types. A string, matching the native
+HTML attribute's own contract. */
+  min?: SkFormInputElement["min"];
 
   /** The name submitted with the form value. Without it the field contributes no `FormData`
 entry — though a required empty one still blocks its form. */
   name?: SkFormInputElement["name"];
 
+  /** A regular expression the value must match. Forwarded verbatim to the inner control; the
+platform performs the match, this element does not re-validate it. */
+  pattern?: SkFormInputElement["pattern"];
+
   /** Placeholder text. Not a substitute for `label`: it disappears on input and is not a
 reliable accessible name. */
   placeholder?: SkFormInputElement["placeholder"];
+
+  /** The granularity the value must adhere to, for numeric and date/time input types. `"any"`
+is a legal value the platform itself interprets. */
+  step?: SkFormInputElement["step"];
 
   /** The native input type — `text`, `email`, `password`, and so on. */
   type?: SkFormInputElement["type"];
@@ -71,6 +99,11 @@ submits nothing. */
 
   /** Allows developers to make HTML elements focusable, allow or prevent them from being sequentially focusable (usually with the `Tab` key, hence the name) and determine their relative ordering for sequential focus navigation. */
   tabIndex?: number;
+
+  /** Suggested values shown in a native datalist alongside the input. A typed value matching no
+option stays valid unless a forwarded constraint says otherwise — this is a suggestion
+list, not a closed set. */
+  options?: SkFormInputElement["options"];
 }
 
 /**
@@ -80,21 +113,44 @@ submits nothing. */
  *
  * Component attributes and properties that can be applied to the element or by using JavaScript.
  *
+ * - `autocomplete`/`autoComplete`: Forwarded to the inner control's `autocomplete` attribute, verbatim.
  * - `description`: Optional helper text rendered under the control and linked to it for screen readers.
  * - `disabled`: Excludes the field from submission and from user interaction.
+ * - `inputmode`/`inputMode`: A hint to the browser about the kind of on-screen keyboard to display. Hinting only — it
+ * carries no validation semantics.
  * - `invalid`: Whether the field is showing an error. The element sets it from its own validity.
  * Assigning it directly paints the error state WITHOUT setting validity — the field looks
  * wrong and still submits — so use `setCustomError()` instead.
  * - `label`: The visible label. Also the accessible name, so it is not optional in practice.
+ * - `max`: The maximum value, for numeric and date/time input types. A string, matching the native
+ * HTML attribute's own contract.
+ * - `min`: The minimum value, for numeric and date/time input types. A string, matching the native
+ * HTML attribute's own contract.
  * - `name`: The name submitted with the form value. Without it the field contributes no `FormData`
  * entry — though a required empty one still blocks its form.
+ * - `pattern`: A regular expression the value must match. Forwarded verbatim to the inner control; the
+ * platform performs the match, this element does not re-validate it.
  * - `placeholder`: Placeholder text. Not a substitute for `label`: it disappears on input and is not a
  * reliable accessible name.
+ * - `readonly`/`readOnly`: Marks the field read-only. The value is still submitted with the form, unlike `disabled` —
+ * but the field is barred from constraint validation, so a `required` read-only field never
+ * blocks its form.
  * - `required`: Marks the field required. An empty required field blocks submission and reports
  * `${label} is required`, or "This field is required" when `label` is empty.
+ * - `step`: The granularity the value must adhere to, for numeric and date/time input types. `"any"`
+ * is a legal value the platform itself interprets.
  * - `type`: The native input type — `text`, `email`, `password`, and so on.
  * - `value`: The current value, and what the form submits under `name` — unless `disabled`, which
  * submits nothing.
+ * - `autocomplete`: Forwarded to the inner control's `autocomplete` attribute, verbatim. (property only)
+ * - `inputmode`: A hint to the browser about the kind of on-screen keyboard to display. Hinting only — it
+ * carries no validation semantics. (property only)
+ * - `options`: Suggested values shown in a native datalist alongside the input. A typed value matching no
+ * option stays valid unless a forwarded constraint says otherwise — this is a suggestion
+ * list, not a closed set. (property only)
+ * - `readonly`: Marks the field read-only. The value is still submitted with the form, unlike `disabled` —
+ * but the field is barred from constraint validation, so a `required` read-only field never
+ * blocks its form. (property only)
  *
  * ## Methods
  *
