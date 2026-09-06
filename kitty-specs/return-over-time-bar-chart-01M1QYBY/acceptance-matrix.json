@@ -488,10 +488,10 @@
       "criterion_id": "C-001",
       "description": "No fetching, store, router, timer, time-window, currency or spend total, deployment arithmetic, selected application object, or action callback lives in the element.",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "forbidden-source/dependency boundary checks and sk-bar-chart source review prove no fetch/store/router/timer/window/currency/spend/deployment/app/action ownership",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T21:30:56.621450+00:00",
       "notes": "Forbidden-source and dependency-boundary checks on the integrated lane.",
       "lane_owners": [
         "WP01"
