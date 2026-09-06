@@ -1,7 +1,7 @@
 {
   "rows": {
     "#176": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "cited only as the ADR-10 operator-override precedent this mission's own override notice matches; ADR-10's #176 section already ratified and merged prior to this mission",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -9,8 +9,8 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
     },
     "#180": {
       "evidence_ref": "its 3-entry hand-mirrored / folded-comparison approach is superseded by #187 on this branch; build-react-wrappers.mjs's own header comment documents the supersession (Pass 1 vs Pass 2)",
