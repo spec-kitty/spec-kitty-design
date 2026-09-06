@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "generated_at": "2026-09-06T13:08:52.551Z",
+  "generated_at": "2026-09-06T14:49:28.973Z",
   "generated_from": "packages/tokens/src/tokens.css",
   "categories": {
     "color": {
@@ -43,7 +43,8 @@
         "--sk-surface-tint-mint",
         "--sk-surface-tint-butter",
         "--sk-surface-tint-lilac",
-        "--sk-surface-tint-sky"
+        "--sk-surface-tint-sky",
+        "--sk-surface-tint-rose"
       ]
     },
     "border": {
@@ -55,7 +56,8 @@
         "--sk-border-strong",
         "--sk-border-focus",
         "--sk-border-width-1",
-        "--sk-border-width-2"
+        "--sk-border-width-2",
+        "--sk-border-width-4"
       ]
     },
     "on": {
@@ -64,7 +66,25 @@
         "--sk-on-tint-mint",
         "--sk-on-tint-butter",
         "--sk-on-tint-lilac",
-        "--sk-on-tint-sky"
+        "--sk-on-tint-sky",
+        "--sk-on-tint-rose",
+        "--sk-on-status-neutral",
+        "--sk-on-status-info",
+        "--sk-on-status-success",
+        "--sk-on-status-attention",
+        "--sk-on-status-danger",
+        "--sk-on-status-recovery"
+      ]
+    },
+    "status": {
+      "prefix": "--sk-status-",
+      "tokens": [
+        "--sk-status-neutral",
+        "--sk-status-info",
+        "--sk-status-success",
+        "--sk-status-attention",
+        "--sk-status-danger",
+        "--sk-status-recovery"
       ]
     },
     "bg": {
