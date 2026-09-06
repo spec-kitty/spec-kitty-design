@@ -1,0 +1,137 @@
+{
+  "schema_version": 1,
+  "rows": {
+    "#76": {
+      "verdict": "verified-already-fixed",
+      "evidence_ref": "https://github.com/spec-kitty/spec-kitty-design/issues/76 — closed authoring-recipe mission; checkout recipe and ADR-9/10/11 govern #148.",
+      "title": "[M10] elements-first-authoring-recipe — rewrite the recipe before the batches",
+      "scope": "Established elements-first authoring, generation, ratchet, and verification procedure used by this mission.",
+      "wp": null,
+      "fr": "FR-019, FR-020, FR-022",
+      "nfr": "NFR-007",
+      "sc": null,
+      "repo": "spec-kitty/spec-kitty-design",
+      "source_file": "GitHub issue #148"
+    },
+    "#112": {
+      "verdict": "deferred-with-followup",
+      "evidence_ref": "Follow-up: #112 remains open; mission wrap-up must inspect latest train and add/test #148's formal conformance row if the artifact exists, otherwise record verified deferral.",
+      "title": "[M5b] elements-conformance-matrix — the surfaces grid, and the Svelte target",
+      "scope": "External owner of the formal conformance-matrix artifact; not implemented by #148.",
+      "wp": null,
+      "fr": "FR-022",
+      "nfr": null,
+      "sc": null,
+      "repo": "spec-kitty/spec-kitty-design",
+      "source_file": "spec.md"
+    },
+    "#125": {
+      "verdict": "deferred-with-followup",
+      "evidence_ref": "Follow-up: #125 remains the wider shared-component conversion and Team Kitty integration tracker; publishing and application integration are outside #148.",
+      "title": "Finish shared component-library conversion (est. 20–30 hrs), test, push to npm; implement into Team Kitty during UI redesign",
+      "scope": "Programme tracker cited by #148; this mission contributes only the generic bar-chart component.",
+      "wp": null,
+      "fr": null,
+      "nfr": null,
+      "sc": null,
+      "repo": "spec-kitty/spec-kitty-design",
+      "source_file": "GitHub issue #148"
+    },
+    "#144": {
+      "verdict": "deferred-with-followup",
+      "evidence_ref": "Follow-up: #144 remains open until all Team overview child missions complete; #148 contributes only its bar-chart scope and preserves the library/application boundary.",
+      "title": "Epic: Team overview — stateless dashboard elements for the approved redesign",
+      "scope": "Parent epic and binding controlled-presentational architecture boundary.",
+      "wp": null,
+      "fr": "FR-001, FR-002, FR-004, FR-005",
+      "nfr": null,
+      "sc": null,
+      "repo": "spec-kitty/spec-kitty-design",
+      "source_file": "spec.md"
+    },
+    "#145": {
+      "verdict": "verified-already-fixed",
+      "evidence_ref": "https://github.com/spec-kitty/spec-kitty-design/pull/195 — merged into train/elements-first as ff380ec; #148 must not modify its owned shell components.",
+      "title": "[TKO1] team-overview-shell-elements — app-shell, personal-rail, context-sidebar, page-header",
+      "scope": "Closed sibling mission whose owned sources are excluded by #148 C-003.",
+      "wp": null,
+      "fr": null,
+      "nfr": null,
+      "sc": null,
+      "repo": "spec-kitty/spec-kitty-design",
+      "source_file": "spec.md"
+    },
+    "#146": {
+      "verdict": "deferred-with-followup",
+      "evidence_ref": "Follow-up: #146 remains a separate sibling mission; #148 must not modify its section-header, action-row, status-indicator, or entity-marker sources.",
+      "title": "[TKO2] team-overview-feed-elements — section-header, action-row, status-indicator, entity-marker",
+      "scope": "Open sibling mission represented by the #145 through #147 ownership range in C-003.",
+      "wp": null,
+      "fr": null,
+      "nfr": null,
+      "sc": null,
+      "repo": "spec-kitty/spec-kitty-design",
+      "source_file": "spec.md"
+    },
+    "#147": {
+      "verdict": "deferred-with-followup",
+      "evidence_ref": "Follow-up: #147 remains a separate sibling mission; #148 must not modify its metric or evidence-chain sources.",
+      "title": "[TKO3] delivery-return-metric-elements — metric and evidence-chain",
+      "scope": "Open sibling mission whose owned sources are excluded by #148 C-003.",
+      "wp": null,
+      "fr": null,
+      "nfr": null,
+      "sc": null,
+      "repo": "spec-kitty/spec-kitty-design",
+      "source_file": "spec.md"
+    },
+    "#148": {
+      "verdict": "in-mission",
+      "evidence_ref": "Implementation has not started; WP01 owns the authored/browser contract, WP03 owns generated integration, and mission wrap-up owns exact-head terminal evidence.",
+      "title": "[TKO4] return-over-time bar-chart — accessible controlled data visualization",
+      "scope": "Mission issue delivered by the serial WP01 then WP03 chain and one aggregate PR into train/elements-first.",
+      "wp": "WP03",
+      "fr": "FR-001–FR-024",
+      "nfr": "NFR-001–NFR-010",
+      "sc": null,
+      "repo": "spec-kitty/spec-kitty-design",
+      "source_file": "spec.md"
+    },
+    "#149": {
+      "verdict": "verified-already-fixed",
+      "evidence_ref": "https://github.com/spec-kitty/spec-kitty-design/pull/171 — #149 landed through merged PR #171 as 8e654e858c7e09acf48ddafdd99a5349fae92d87; #148 reuses its generic property-only seam.",
+      "title": "[TKO5] flow-health transition-matrix — scalable controlled route visualization",
+      "scope": "Satisfied integration prerequisite and separate component owner; no #149 source is modified by #148.",
+      "wp": "WP01",
+      "fr": "FR-003, FR-022, FR-023",
+      "nfr": "NFR-007",
+      "sc": null,
+      "repo": "spec-kitty/spec-kitty-design",
+      "source_file": "spec.md"
+    },
+    "#150": {
+      "verdict": "deferred-with-followup",
+      "evidence_ref": "Follow-up: #150 is the downstream final Team overview Storybook composition and remains outside #148.",
+      "title": "[TKO6] team-overview pattern story — approved composition and data-integrity fixture",
+      "scope": "Downstream composition mission explicitly outside this reusable element.",
+      "wp": null,
+      "fr": null,
+      "nfr": null,
+      "sc": null,
+      "repo": "spec-kitty/spec-kitty-design",
+      "source_file": "spec.md"
+    },
+    "#171": {
+      "verdict": "verified-already-fixed",
+      "evidence_ref": "https://github.com/spec-kitty/spec-kitty-design/pull/171 — merged into train/elements-first as 8e654e858c7e09acf48ddafdd99a5349fae92d87 on 2026-09-05.",
+      "title": "feat(elements): add controlled flow health transition matrix",
+      "scope": "Merged pull request that supplies the generic manifest/React/Vue property-only projection and removal-reset seam.",
+      "wp": "WP01",
+      "fr": "FR-003, FR-022, FR-023",
+      "nfr": "NFR-007",
+      "sc": null,
+      "repo": "spec-kitty/spec-kitty-design",
+      "source_file": "spec.md"
+    }
+  }
+}

@@ -1,0 +1,648 @@
+{
+  "mission_slug": "return-over-time-bar-chart-01M1QYBY",
+  "mission_number": "",
+  "mission_type": "software-dev",
+  "overall_verdict": "pending",
+  "governed_extension": {
+    "schema_version": 1,
+    "authorized_by": "operator",
+    "authorized_at": "2026-09-06",
+    "authorization": "I authorize a governed out-of-band schema migration/write for issue #148 to materialize the complete acceptance and issue matrices, including missing NFR/C criteria, issue metadata, and terminal-owner metadata, followed by Spec Kitty task re-finalization.",
+    "lane_owner_field": "lane_owners",
+    "terminal_owner_field": "terminal_owner"
+  },
+  "criteria": [
+    {
+      "criterion_id": "FR-001",
+      "description": "Publish one sk-bar-chart element for one ordered numeric series.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Element registration/export and exact public member-set evidence.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP03"
+    },
+    {
+      "criterion_id": "FR-002",
+      "description": "Export readonly BarDatum and series types with id, label, value, and displayValue.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Element and generated-consumer type checks, including malformed negative cases.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP03"
+    },
+    {
+      "criterion_id": "FR-003",
+      "description": "Accept structured series only as a public property with a frozen empty default and removal reset, never as JSON attribute text.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Element, manifest, React, Vue, replacement, and removal-reset assertions.",
+      "lane_owners": [
+        "WP01",
+        "WP03"
+      ],
+      "terminal_owner": "WP03"
+    },
+    {
+      "criterion_id": "FR-004",
+      "description": "Render label and displayValue as exact literal text, never parse formatted text or create descendant markup from either field, and permit no input-driven side effect.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Literal-untrusted-text behavior and browser assertions.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP03"
+    },
+    {
+      "criterion_id": "FR-005",
+      "description": "Derive every height as zero-anchored value divided by the current maximum, with an all-zero guard, expressed through numeric SVG geometry rather than dynamic inline style.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Exact ratio table plus direct formula source-break evidence.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP03"
+    },
+    {
+      "criterion_id": "FR-006",
+      "description": "Render a subtle zero baseline and restrained scale and grid guidance.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "DOM, token-binding, forced-colors, and visual evidence.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP03"
+    },
+    {
+      "criterion_id": "FR-007",
+      "description": "Keep each label and display value visibly present so no meaning depends on hover.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Persistent text and interaction-state browser assertions.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP03"
+    },
+    {
+      "criterion_id": "FR-008",
+      "description": "Expose the chart name and description and every label and value pair to assistive technology in exact input order.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Accessibility-tree/source-order assertions and axe.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP03"
+    },
+    {
+      "criterion_id": "FR-009",
+      "description": "Render a labelled empty state for absent or empty series with zero bars and activation targets.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Empty/default/property-removal behavior and Storybook evidence.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP03"
+    },
+    {
+      "criterion_id": "FR-010",
+      "description": "Reject the whole runtime series for malformed records, duplicate or blank IDs, blank required text, or negative or non-finite values, and render no partial chart.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Exhaustive fail-closed validation table and source-break evidence.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP03"
+    },
+    {
+      "criterion_id": "FR-011",
+      "description": "Default selectable to false; only true creates activation surfaces, tab stops, interaction states, and events.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Positive and negative behavior and Playwright assertions.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP03"
+    },
+    {
+      "criterion_id": "FR-012",
+      "description": "Project selectedId only when it matches a current datum; activation never mutates it.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Controlled-selection replacement and non-mutation assertions.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP03"
+    },
+    {
+      "criterion_id": "FR-013",
+      "description": "Use one native click path so pointer, Enter, and Space each produce one equivalent activation without key-repeat duplication.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Real-input parity and repeat-key suppression evidence.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP03"
+    },
+    {
+      "criterion_id": "FR-014",
+      "description": "Export and document sk-bar-chart-select with exact readonly { id: string } detail, bubbles true, composed true, and cancelable false.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Element behavior, mutation, manifest, React callback, and document-boundary evidence.",
+      "lane_owners": [
+        "WP01",
+        "WP03"
+      ],
+      "terminal_owner": "WP03"
+    },
+    {
+      "criterion_id": "FR-015",
+      "description": "Expose focus and selected states with shape or border plus valid programmatic state, never color alone; under forced colors keyboard focus retains an outline and remains distinguishable from controlled selection.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Real focus/selection state and forced-colors source-break evidence.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP03"
+    },
+    {
+      "criterion_id": "FR-016",
+      "description": "Use bounded items and horizontal scrolling or a compact treatment that keeps every label, value, and bar owned without overlap or meaning-changing truncation.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "390 by 844 geometry, scrolling, hit-test, and full-text assertions.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP03"
+    },
+    {
+      "criterion_id": "FR-017",
+      "description": "Render an identical semantic signature in default dark and .sk-light themes before permitting only themed color variance.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Ordered semantics and computed-theme comparison before color assertions.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP03"
+    },
+    {
+      "criterion_id": "FR-018",
+      "description": "Add and consume reusable data-series, grid, and baseline semantic tokens, and do not use gold as the default series color.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Token source/catalogue, computed binding, and forbidden-color evidence.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP03"
+    },
+    {
+      "criterion_id": "FR-019",
+      "description": "Document exact token dependencies and a minimal structural part surface; every declared part is rendered and externally targetable.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "CSS-to-doc token equality and seven-part conformance evidence.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP03"
+    },
+    {
+      "criterion_id": "FR-020",
+      "description": "Register through guarded define(), export from both element entries, adopt the generated sheet by identity, and inject zero style elements.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Entry, distribution, SC-014, and generated-sheet assertions.",
+      "lane_owners": [
+        "WP01",
+        "WP03"
+      ],
+      "terminal_owner": "WP03"
+    },
+    {
+      "criterion_id": "FR-021",
+      "description": "Provide approved four-bucket, close unequal, zero, empty, long/date-stamped, controlled selectable, interaction-state, and LightMode stories.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Eight-story index ratchet, non-empty load, and axe traversal.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP03"
+    },
+    {
+      "criterion_id": "FR-022",
+      "description": "Regenerate CSS module, token catalogue, CEM, React wrapper, wrapper floor, Vue declaration, and SIZES; update all component ratchets and extend the packed-consumer gate while preserving #149; at wrap-up recheck #112 and add the formal row if available or record verified deferral.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Generated drift, packed-consumer, refreshed-train #112 disposition, and exact-head evidence.",
+      "lane_owners": [
+        "WP03"
+      ],
+      "terminal_owner": "mission-wrap-up"
+    },
+    {
+      "criterion_id": "FR-023",
+      "description": "Prove series, selectedId, selectable, and event detail reach the generated React wrapper without any, including replacement and removal through the production hook.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Dedicated React runtime and type evidence.",
+      "lane_owners": [
+        "WP03"
+      ],
+      "terminal_owner": "WP03"
+    },
+    {
+      "criterion_id": "FR-024",
+      "description": "Record named red-first mutations for every applicable behavior invariant and direct source-break proof for scale, validation, controlled selection, theming, forced-colors focus, and narrow ownership.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "WP red/green records and mutation-fleet evidence.",
+      "lane_owners": [
+        "WP01",
+        "WP03"
+      ],
+      "terminal_owner": "WP03"
+    },
+    {
+      "criterion_id": "NFR-001",
+      "description": "Every required rendered story reports zero WCAG 2.1 AA axe violations; a failed or empty load is a failure.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Eight non-empty stories plus axe selftest and full scan.",
+      "lane_owners": [
+        "WP01",
+        "WP03"
+      ],
+      "terminal_owner": "WP03"
+    },
+    {
+      "criterion_id": "NFR-002",
+      "description": "Pointer, Enter, and Space each emit exactly one byte-equivalent { id } record with bubbling and composed true and cancelable false for the same datum; repeat emits zero extra events.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Real-input event parity and repeat assertions.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP03"
+    },
+    {
+      "criterion_id": "NFR-003",
+      "description": "For every finite valid value, rendered ratio data equals value divided by maximum exactly; equal and zero cases are exact.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Exact geometry and recomputation assertions.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP03"
+    },
+    {
+      "criterion_id": "NFR-004",
+      "description": "At 390 by 844, zero label, value, or bar ownership overlaps or cross-item hit targets occur before or after horizontal scrolling.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Narrow viewport bounding-box and hit-test assertions.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP03"
+    },
+    {
+      "criterion_id": "NFR-005",
+      "description": "Default and LightMode have identical ordered semantics before themed color comparison; documented data surfaces differ where intended, and forced colors preserves meaning, outline focus, and selection in both themes.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Semantic-signature, computed-token, axe, and forced-colors evidence.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP03"
+    },
+    {
+      "criterion_id": "NFR-006",
+      "description": "Required real-input behavior passes locally available Chromium and Firefox for lane approval and Chromium, Firefox, and WebKit in exact-head PR CI; local WebKit is additional evidence only through a repository-defined container seam.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "WP01 authors the shared contract; exact-head PR CI owns WebKit.",
+      "lane_owners": [
+        "WP01",
+        "WP03"
+      ],
+      "terminal_owner": "mission-wrap-up"
+    },
+    {
+      "criterion_id": "NFR-007",
+      "description": "Every generated-artifact check, manifest diff, Vue source-SFC check, and post-build packed-consumer check is clean after regeneration from final integrated source.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Ordered generation, source checks, and real-tarball no-alias type gate.",
+      "lane_owners": [
+        "WP03"
+      ],
+      "terminal_owner": "WP03"
+    },
+    {
+      "criterion_id": "NFR-008",
+      "description": "Every declared behavior-and-subject mutation turns its named assertion red and 100 percent of registered mutations are killed within the repository budget.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "WP03 runs the local fleet; wrap-up records exact-head CI count and time.",
+      "lane_owners": [
+        "WP03"
+      ],
+      "terminal_owner": "mission-wrap-up"
+    },
+    {
+      "criterion_id": "NFR-009",
+      "description": "A checked-in fail-closed wrapper terminates the Storybook build and exits nonzero at 180 seconds; once the Storybook job runs its build step is unconditional and uses the wrapper; final-head duration is below 180 seconds.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "WP03 creates and self-tests the wrapper and wiring; wrap-up records exact-head CI timing.",
+      "lane_owners": [
+        "WP03"
+      ],
+      "terminal_owner": "mission-wrap-up"
+    },
+    {
+      "criterion_id": "NFR-010",
+      "description": "CI-authoritative cropped baselines for approved dark, LightMode, narrow, zero or empty, and selectable states receive explicit visual-review disposition against the approved capture.",
+      "proof_type": "manual_review",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Wrap-up owns CI actual-byte provenance, disposition, committed baselines, and fresh green CI.",
+      "lane_owners": [],
+      "terminal_owner": "mission-wrap-up"
+    },
+    {
+      "criterion_id": "C-001",
+      "description": "No fetching, store, router, timer, time-window, currency or spend total, deployment arithmetic, selected application object, or action callback lives in the element.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Forbidden-source and dependency-boundary checks on the integrated lane.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP03"
+    },
+    {
+      "criterion_id": "C-002",
+      "description": "No second series, deployment annotation, tooltip-only meaning, or public Team Kitty overview element is introduced.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Public API and forbidden-source/content checks.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP03"
+    },
+    {
+      "criterion_id": "C-003",
+      "description": "Do not modify components owned by #145 through #147 or #149, and do not create replacements for card, grid, button, pill, or navigation components.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Diff-scope and ownership verification.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP03"
+    },
+    {
+      "criterion_id": "C-004",
+      "description": "Keep one authored CSS source and one authored structured render source, with no hand-authored duplicate markup or static form.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Generated-markup and authored-source absence checks.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP03"
+    },
+    {
+      "criterion_id": "C-005",
+      "description": "All component CSS design values use --sk-* tokens; data-derived proportions use numeric SVG geometry, with no dynamic inline style, raw design values, or cross-shadow theme selectors.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Stylelint, CSS hygiene, theme boundary, and geometry checks.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP03"
+    },
+    {
+      "criterion_id": "C-006",
+      "description": "Only inherited tokens, declared parts, and documented component custom properties are public; internal BEM classes are private.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Manifest, part ratchet, and styling-boundary evidence.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP03"
+    },
+    {
+      "criterion_id": "C-007",
+      "description": "Never hand-edit generated CSS modules, static outputs, custom-elements.json, React wrappers, Vue declarations, token catalogue, or SIZES.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Ordered generators followed by drift checks and clean status.",
+      "lane_owners": [
+        "WP01",
+        "WP03"
+      ],
+      "terminal_owner": "WP03"
+    },
+    {
+      "criterion_id": "C-008",
+      "description": "Preserve the serial integration protocol: refresh the clean planning target before first claim and before consolidation, use Spec Kitty-owned lane dependency propagation, and never rewrite a captured baseline.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Final owner records current train, finalized planning SHA, supported propagation, and baseline provenance.",
+      "lane_owners": [
+        "WP03"
+      ],
+      "terminal_owner": "mission-wrap-up"
+    },
+    {
+      "criterion_id": "C-009",
+      "description": "Use one #148 design-mission branch and one pull request into train/elements-first with Refs #148, superseding the unrelated SaaS WP-per-PR convention for this checkout.",
+      "proof_type": "automated_test",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Wrap-up owns the single PR target and metadata check.",
+      "lane_owners": [],
+      "terminal_owner": "mission-wrap-up"
+    },
+    {
+      "criterion_id": "C-010",
+      "description": "Do not merge train to main, publish packages, deploy Team Kitty, or broaden component scope.",
+      "proof_type": "code_review",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Lane review and wrap-up verify authorization and scope boundaries.",
+      "lane_owners": [
+        "WP03"
+      ],
+      "terminal_owner": "mission-wrap-up"
+    },
+    {
+      "criterion_id": "C-011",
+      "description": "Run three independent profile-loaded Codex lenses after tasks and again pre-merge, at most two passes per point-cut, with exact-SHA evidence.",
+      "proof_type": "manual_review",
+      "evidence": null,
+      "pass_fail": "pending",
+      "verified_by": null,
+      "verified_at": null,
+      "notes": "Post-tasks evidence is planning-stage; wrap-up owns exact-final-head lens evidence.",
+      "lane_owners": [],
+      "terminal_owner": "mission-wrap-up"
+    }
+  ],
+  "negative_invariants": []
+}
