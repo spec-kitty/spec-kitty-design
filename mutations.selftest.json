@@ -59,6 +59,16 @@
       "$why": "A syntax error in the runner config fails before the browser project starts, producing no JSON test report promptly. A syntax error in a browser-loaded source can strand Vitest's browser session until the per-entry timeout, which exercises timeout instead of guard 4's absent verdict."
     },
     {
+      "id": "guard4-partial-collection",
+      "expectRejectedBy": "collection",
+      "file": "vitest.config.mts",
+      "from": "include: ['tests/browser/**/*.test.ts', 'fixtures/**/src/**/*.test.{ts,tsx}'],",
+      "to": "include: ['tests/browser/**/*.test.ts', 'fixtures/**/src/**/*.test.{ts,tsx}'], exclude: ['fixtures/elements-behaviour/src/sk-nav-pill.test.ts'],",
+      "redTest": "SC-002",
+      "subject": "fixtures/elements-behaviour/src/behaviours.test.ts",
+      "$why": "Removes one otherwise-green subject while leaving the named subject present. Only exact comparison with the full baseline assertion multiset can reject this partial report."
+    },
+    {
       "id": "guard4-inert",
       "expectRejectedBy": "green",
       "file": "fixtures/elements-behaviour/src/sk-behaviour-fixture.ts",
@@ -71,9 +81,9 @@
       "id": "guard5-collateral",
       "expectRejectedBy": "collateral",
       "file": "fixtures/elements-behaviour/src/sk-behaviour-fixture.ts",
-      "from": "customElements.define('sk-behaviour-fixture', SkBehaviourFixture);",
-      "to": "void SkBehaviourFixture;",
-      "redTest": "SC-002",
+      "from": "const proceed = this.dispatchEvent(event);",
+      "to": "const proceed = this.dispatchEvent(event); this.dispatchEvent(new CustomEvent('sk-toggle'));",
+      "redTest": "SC-006",
       "subject": "fixtures/elements-behaviour/src/behaviours.test.ts"
     },
     {

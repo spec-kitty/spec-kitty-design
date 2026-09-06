@@ -6,9 +6,11 @@
  * evidence" is satisfied by a commit message containing a paste — which is exactly how
  * #70's NFR-003 degraded. This re-derives the red on every CI run.
  *
- * For each entry in mutations.json: copy the repo to a temp dir (node_modules SYMLINKED —
- * it is 1.2 GB and this runs once per mutation), apply one string replacement, run the suite,
- * and assert the NAMED test failed while every other behaviour test survived.
+ * For each entry in mutations.json: restore an invocation-frozen temp repo (third-party
+ * node_modules entries are SYMLINKED — copying 1.2 GB per mutation is not viable), apply one
+ * string replacement, run every browser test Vitest's unmutated dependency graph says the source
+ * can affect, and assert the NAMED test failed while every other behaviour test survived. Graph
+ * errors and zero-file selections fall back to the complete suite rather than narrowing evidence.
  *
  * EIGHT numbered guards plus a not-green-baseline check, each of which exists because it
  * was demonstrated failing during the post-plan spike. Guard 4 is the one that will
@@ -34,17 +36,29 @@
  *   exit 1, so there is no green-over-empty path — recorded so the next reader need not
  *   re-derive it.
  */
-import { execFileSync } from 'node:child_process';
-import { cpSync, mkdtempSync, readFileSync, writeFileSync, rmSync, symlinkSync, existsSync } from 'node:fs';
+import { spawn } from 'node:child_process';
+import { createHash } from 'node:crypto';
+import {
+  cpSync, existsSync, lstatSync, mkdirSync, mkdtempSync, readFileSync, readlinkSync,
+  readdirSync, realpathSync, rmSync, statSync, symlinkSync, writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join, resolve } from 'node:path';
+import { dirname, isAbsolute, join, relative, sep } from 'node:path';
+import { createVitest } from 'vitest/node';
 
 const selftestMode = process.argv.includes('--selftest');
 const LIST = selftestMode ? 'mutations.selftest.json' : 'mutations.json';
 const repo = process.cwd();
 
-const list = JSON.parse(readFileSync(LIST, 'utf8'));
+const controlBytes = new Map([
+  [LIST, readFileSync(LIST)],
+  ['behaviours.json', readFileSync('behaviours.json')],
+  ['scripts/suite-selftest.mjs', readFileSync('scripts/suite-selftest.mjs')],
+  ['suite-budget.json', readFileSync('suite-budget.json')],
+]);
+const list = JSON.parse(controlBytes.get(LIST).toString('utf8'));
 const mutations = list.mutations ?? [];
+const budget = JSON.parse(controlBytes.get('suite-budget.json').toString('utf8'));
 // APPLICABLE behaviours only, matching floor-reporter.mjs:121.
 //
 // The two consumers of behaviours.json disagreed about what `applicable` means: the floor
@@ -57,13 +71,14 @@ const mutations = list.mutations ?? [];
 // `applicable: false` is not an escape hatch: config-contract.test.ts asserts the applicable set
 // equals ADR-11's list exactly, so an entry cannot be quietly demoted to dodge a mutation, and
 // the same test asserts SC-016 is present and carries a reason.
-const registry = JSON.parse(readFileSync('behaviours.json', 'utf8')).behaviours.filter(
+const registry = JSON.parse(controlBytes.get('behaviours.json').toString('utf8')).behaviours.filter(
   (b) => b.applicable !== false
 );
 /** Every (behaviour, subject) pair the registry declares. Guard 7 compares against these. */
-const behaviourPairs = registry.flatMap((b) =>
-  (b.subjects ?? [{ file: null }]).map((s) => `${b.id}@${s.file ?? '*'}`)
+const behaviourSubjects = registry.flatMap((b) =>
+  (b.subjects ?? [{ file: null }]).map((s) => ({ id: b.id, file: s.file ?? null }))
 );
+const behaviourPairs = behaviourSubjects.map(({ id, file }) => `${id}@${file ?? '*'}`);
 
 /**
  * Every verdict this script can emit must have a self-check entry.
@@ -86,7 +101,7 @@ const behaviourPairs = registry.flatMap((b) =>
 // actually hang, and a real 180s hang would consume a third of the harness's own ceiling. Closing
 // it properly needs a per-entry timeout override plus a mutation that reliably blocks the browser's
 // main thread — worth doing, and worth doing where it can be measured.
-const EMITTABLE = ['pattern', 'ambiguous', 'noop', 'absent', 'green', 'collateral'];
+const EMITTABLE = ['pattern', 'ambiguous', 'noop', 'absent', 'collection', 'green', 'collateral'];
 if (selftestMode) {
   const covered = new Set(mutations.map((m) => m.expectRejectedBy));
   const missing = EMITTABLE.filter((v) => !covered.has(v));
@@ -125,41 +140,124 @@ if (!selftestMode) {
 }
 
 const SUITE_TIMEOUT_MS = 180_000;
+const activeChildren = new Set();
 
-function runSuite(dir, project, timeoutMs = SUITE_TIMEOUT_MS) {
+const killChildTree = (child, signal) => {
+  if (!child?.pid) return;
   try {
-    // BOUNDED, AND A TIMEOUT SAYS SO. This spawn had no timeout at all: a hang here burned the
-    // whole job — six hours before #81 gave every job a ceiling, and still the full 45 minutes
-    // after — and the log ended with no indication of WHICH mutation hung. A lens hit exactly that
-    // and had to diff the tmpdir by hand to find it. That is the residual of the defect #81 set out
-    // to close, in the harness #81 blames the six hours on.
-    //
-    // 180s against a whole-suite wall clock of ~10s in CI: generous enough that a slow runner never
-    // trips it, short enough that a hang costs one mutation rather than the job.
-    const out = execFileSync('npx', ['vitest', 'run', '--project', project, '--reporter=json'], {
-      cwd: dir,
-      encoding: 'utf8',
+    // Each child owns a process group on POSIX, so Vitest's browser descendants cannot outlive a
+    // timeout or cancellation. Windows has no negative-pid process-group signal.
+    if (process.platform === 'win32') child.kill(signal);
+    else process.kill(-child.pid, signal);
+  } catch {
+    // The process may already have exited between the check and the signal.
+  }
+};
+
+let cleanupSandbox = () => {};
+process.on('exit', () => cleanupSandbox());
+for (const [signal, code] of [['SIGHUP', 129], ['SIGINT', 130], ['SIGTERM', 143]]) {
+  process.once(signal, () => {
+    // The parent exits synchronously, so there is no safe grace window to await here. Kill the
+    // detached groups before deleting their working tree; timeout paths below retain TERM→KILL.
+    for (const child of activeChildren) killChildTree(child, 'SIGKILL');
+    cleanupSandbox();
+    process.exit(code);
+  });
+}
+
+function spawnCaptured(command, args, options = {}) {
+  return new Promise((resolveSpawn) => {
+    const { timeoutMs, ...spawnOptions } = options;
+    const child = spawn(command, args, {
+      ...spawnOptions,
+      detached: process.platform !== 'win32',
       stdio: ['ignore', 'pipe', 'pipe'],
-      env: { ...process.env, CI: '' },
-      // Per-entry override so a self-check can exercise the timeout arm cheaply — a real 180s hang
-      // would eat a third of the harness's own ceiling.
-      timeout: timeoutMs,
     });
-    return JSON.parse(out.slice(out.indexOf('{')));
-  } catch (err) {
-    // A timeout is not "the suite reported nothing" — it is a hang, and the caller must be able to
-    // say which mutation caused it.
-    // `code === 'ETIMEDOUT'` ALONE. A timeout sets both code and SIGTERM, but a run killed by
-    // anything else that sends SIGTERM — job cancellation, a sibling process — is not a hang, and
-    // reporting it as one is a wrong diagnosis with a right exit code. A lens measured that the
-    // code test alone suffices.
-    if (err.code === 'ETIMEDOUT') {
-      return { testResults: [], __noReport: true, __timedOut: true };
-    }
-    const out = String(err.stdout ?? '');
-    const i = out.indexOf('{');
-    if (i < 0) return { testResults: [], __noReport: true, __stderr: String(err.stderr ?? '').slice(-800) };
-    try { return JSON.parse(out.slice(i)); } catch { return { testResults: [], __noReport: true }; }
+    activeChildren.add(child);
+    let stdout = '';
+    let stderr = '';
+    let timedOut = false;
+    let settled = false;
+    let forceKilled = false;
+    let escalationTimer = null;
+    const forceKill = () => {
+      if (forceKilled) return;
+      forceKilled = true;
+      killChildTree(child, 'SIGKILL');
+    };
+    child.stdout.on('data', (chunk) => { stdout += chunk; });
+    child.stderr.on('data', (chunk) => { stderr += chunk; });
+    const timer = timeoutMs
+      ? setTimeout(() => {
+          timedOut = true;
+          killChildTree(child, 'SIGTERM');
+          escalationTimer = setTimeout(() => {
+            escalationTimer = null;
+            forceKill();
+          }, 5_000);
+          escalationTimer.unref();
+        }, timeoutMs)
+      : null;
+    child.on('error', (error) => {
+      if (settled) return;
+      settled = true;
+      if (timer) clearTimeout(timer);
+      if (escalationTimer) clearTimeout(escalationTimer);
+      if (timedOut) forceKill();
+      activeChildren.delete(child);
+      resolveSpawn({ code: null, error, stderr, stdout, timedOut });
+    });
+    child.on('close', (code, signal) => {
+      if (settled) return;
+      settled = true;
+      if (timer) clearTimeout(timer);
+      if (escalationTimer) clearTimeout(escalationTimer);
+      activeChildren.delete(child);
+      if (timedOut) forceKill();
+      resolveSpawn({ code, signal, stderr, stdout, timedOut });
+    });
+  });
+}
+
+async function runSuite(dir, project, timeoutMs = SUITE_TIMEOUT_MS, subjects = []) {
+  // Serialize browser files inside every sandbox. Cold- and warm-cache probes showed parallel
+  // collection could silently lose modules. Source-impact filtering controls cost without
+  // allowing test files within the dependency-derived set to execute concurrently.
+  const result = await spawnCaptured(
+    process.execPath,
+    [
+      join(dir, 'node_modules/vitest/vitest.mjs'), 'run', ...subjects, '--project', project,
+      '--browser.fileParallelism=false', '--browser.api.port=0', '--browser.api.strictPort',
+      '--reporter=json',
+    ],
+    { cwd: dir, env: { ...process.env, CI: '' }, timeoutMs }
+  );
+  if (result.timedOut) {
+    return { testResults: [], __noReport: true, __timedOut: true };
+  }
+  const i = result.stdout.indexOf('{');
+  if (i < 0) {
+    return {
+      testResults: [],
+      __noReport: true,
+      __stderr: (result.stderr || String(result.error ?? '')).slice(-800),
+      __exitCode: result.code,
+    };
+  }
+  try {
+    const report = JSON.parse(result.stdout.slice(i));
+    report.__stderr = result.stderr.slice(-800);
+    report.__stdoutPrefix = result.stdout.slice(0, i).slice(-1_600);
+    report.__exitCode = result.code;
+    return report;
+  } catch {
+    return {
+      testResults: [],
+      __noReport: true,
+      __stderr: result.stderr.slice(-800),
+      __exitCode: result.code,
+    };
   }
 }
 
@@ -171,19 +269,161 @@ const allTests = (report) =>
   (report.testResults ?? []).flatMap((f) => (f.assertionResults ?? []).map((a) => ({
     name: a.fullName ?? a.title ?? '', status: a.status, file: f.name ?? '',
   })));
+const isBehaviourTest = (test) => /\[SC-\d+\]/.test(test.name);
 
-function prepare() {
-  const dir = mkdtempSync(join(tmpdir(), 'suite-selftest-'));
-  for (const entry of ['fixtures', 'packages', 'scripts', 'tests', 'vitest.config.mts',
-                       'behaviours.json', 'package.json', 'tsconfig.base.json', 'tsconfig.json']) {
-    if (existsSync(join(repo, entry))) cpSync(join(repo, entry), join(dir, entry), { recursive: true });
+/** Assertion multiset, normalized away from the stable sandbox's absolute path. */
+const assertionCounts = (tests, dir) => {
+  const counts = new Map();
+  for (const test of tests) {
+    const key = `${relative(dir, test.file)}\0${test.name}`;
+    counts.set(key, (counts.get(key) ?? 0) + 1);
   }
-  // SYMLINKED, never copied: node_modules is 1.2 GB and this runs once per mutation.
-  symlinkSync(join(repo, 'node_modules'), join(dir, 'node_modules'), 'dir');
-  return dir;
+  return counts;
+};
+
+const sameAssertionCounts = (left, right) =>
+  left.size === right.size && [...left].every(([key, count]) => right.get(key) === count);
+
+const SANDBOX_INPUTS = [
+  'fixtures', 'packages', 'scripts', 'tests', 'vitest.config.mts',
+  'behaviours.json', 'package.json', 'tsconfig.base.json', 'tsconfig.json',
+];
+const sandboxRoot = mkdtempSync(join(tmpdir(), 'suite-selftest-'));
+const pristine = join(sandboxRoot, 'pristine');
+const sandbox = join(sandboxRoot, 'repo');
+mkdirSync(pristine);
+mkdirSync(sandbox);
+
+const cleanup = (() => {
+  let complete = false;
+  return () => {
+    if (complete) return;
+    complete = true;
+    rmSync(sandboxRoot, { recursive: true, force: true });
+  };
+})();
+cleanupSandbox = cleanup;
+
+// Freeze authored inputs once. Every arm resets from these bytes, never from a live checkout that
+// another editor could change halfway through the 128-mutation run.
+for (const entry of SANDBOX_INPUTS) {
+  if (existsSync(join(repo, entry))) {
+    cpSync(join(repo, entry), join(pristine, entry), { recursive: true });
+  }
 }
 
-const budget = JSON.parse(readFileSync('suite-budget.json', 'utf8'));
+function prepare() {
+  for (const entry of readdirSync(sandbox)) {
+    if (entry !== 'node_modules') rmSync(join(sandbox, entry), { recursive: true, force: true });
+  }
+  for (const entry of SANDBOX_INPUTS) {
+    if (existsSync(join(pristine, entry))) {
+      cpSync(join(pristine, entry), join(sandbox, entry), { recursive: true });
+    }
+  }
+  for (const cache of ['.vite', '.vite-temp', '.cache']) {
+    rmSync(join(sandbox, 'node_modules', cache), { recursive: true, force: true });
+    mkdirSync(join(sandbox, 'node_modules', cache));
+  }
+  rmSync(join(sandbox, '.vitest-attachments'), { recursive: true, force: true });
+  return sandbox;
+}
+
+// Keep third-party dependencies symlinked, but never node_modules or its mutable tool caches as a
+// whole. Repository workspaces are rebound to the frozen sandbox copies; an uncopied workspace is
+// omitted rather than silently resolving back into the live checkout.
+const sourceModules = join(repo, 'node_modules');
+const targetModules = join(sandbox, 'node_modules');
+mkdirSync(targetModules);
+prepare();
+const within = (parent, candidate) => {
+  const path = relative(parent, candidate);
+  return path === '' || (path !== '..' && !path.startsWith(`..${sep}`) && !isAbsolute(path));
+};
+const CACHE_NAMES = new Set(['.vite', '.vite-temp', '.cache']);
+
+function linkModuleEntry(source, target) {
+  const sourceStat = lstatSync(source);
+  if (!sourceStat.isSymbolicLink()) {
+    symlinkSync(source, target, sourceStat.isDirectory() ? 'dir' : 'file');
+    return;
+  }
+  const real = realpathSync(source);
+  if (within(repo, real) && !within(sourceModules, real)) {
+    const sandboxTarget = join(sandbox, relative(repo, real));
+    if (!existsSync(sandboxTarget)) return;
+    symlinkSync(relative(dirname(target), sandboxTarget), target);
+    return;
+  }
+  // Dependency-internal links (notably node_modules/.bin) keep their package-relative target.
+  symlinkSync(readlinkSync(source), target);
+}
+
+for (const name of readdirSync(sourceModules)) {
+  if (CACHE_NAMES.has(name) || name.startsWith('.vite-')) continue;
+  const source = join(sourceModules, name);
+  const target = join(targetModules, name);
+  const sourceStat = lstatSync(source);
+  if (name.startsWith('@') && sourceStat.isDirectory() && !sourceStat.isSymbolicLink()) {
+    mkdirSync(target);
+    for (const child of readdirSync(source)) {
+      linkModuleEntry(join(source, child), join(target, child));
+    }
+  } else {
+    linkModuleEntry(source, target);
+  }
+}
+for (const cache of CACHE_NAMES) mkdirSync(join(targetModules, cache), { recursive: true });
+
+const expectedSandboxWorkspaces = [
+  '@spec-kitty/elements', '@spec-kitty/react', '@spec-kitty/styles', '@spec-kitty/tokens',
+  '@spec-kitty/react-consumer-fixture', '@spec-kitty/vue-consumer-fixture',
+  'elements-behaviour-fixture', 'vite-consumer-fixture',
+];
+for (const workspace of expectedSandboxWorkspaces) {
+  const workspacePath = join(targetModules, workspace);
+  if (!existsSync(workspacePath) || !within(sandbox, realpathSync(workspacePath))) {
+    throw new Error(`sandbox workspace ${workspace} does not resolve inside the frozen copy`);
+  }
+}
+if (existsSync(join(targetModules, '@spec-kitty/storybook'))) {
+  throw new Error('uncopied @spec-kitty/storybook must not resolve into the live checkout');
+}
+for (const cache of CACHE_NAMES) {
+  if (lstatSync(join(targetModules, cache)).isSymbolicLink()) {
+    throw new Error(`sandbox cache node_modules/${cache} must not be a symlink`);
+  }
+}
+const fingerprintPaths = (root, inputs) => {
+  const hash = createHash('sha256');
+  const visit = (path, label) => {
+    const info = lstatSync(path);
+    hash.update(`${label}\0${info.mode}\0`);
+    if (info.isSymbolicLink()) {
+      hash.update(readlinkSync(path));
+    } else if (info.isDirectory()) {
+      for (const child of readdirSync(path).sort()) visit(join(path, child), `${label}/${child}`);
+    } else {
+      hash.update(readFileSync(path));
+    }
+  };
+  for (const entry of inputs) {
+    const path = join(root, entry);
+    if (existsSync(path)) visit(path, entry);
+  }
+  return hash.digest('hex');
+};
+if (fingerprintPaths(repo, SANDBOX_INPUTS) !== fingerprintPaths(pristine, SANDBOX_INPUTS)) {
+  throw new Error('authored sandbox inputs changed while the invocation snapshot was created');
+}
+for (const [path, bytes] of controlBytes) {
+  if (!readFileSync(path).equals(bytes)) {
+    throw new Error(`${path} changed while mutation controls were being frozen`);
+  }
+}
+const fingerprintInputs = [...SANDBOX_INPUTS, LIST, 'suite-budget.json'];
+const inputFingerprint = () => fingerprintPaths(repo, fingerprintInputs);
+const startingFingerprint = inputFingerprint();
 const harnessStarted = Date.now();
 
 let failures = 0;
@@ -193,22 +433,80 @@ const report = (ok, id, msg) => {
 };
 
 // ── Baseline ────────────────────────────────────────────────────────────────────────
+// Retry zero means retry zero here too: the single, serialized baseline is authoritative and any
+// collection failure, pending assertion, or missing registry pair stops the run immediately.
 const baseDir = prepare();
-const baseline = runSuite(baseDir, 'browser');
+const baseline = await runSuite(baseDir, 'browser');
 const baseTests = allTests(baseline);
-/** Guard 6 — a zero-test run reports "passed". Executed count, not exit code. */
-if (baseTests.length === 0) {
-  console.error('❌ baseline executed 0 tests — a zero-test lane reports passed, so exit code proves nothing.');
-  rmSync(baseDir, { recursive: true, force: true });
+const baseBehaviourTests = baseTests.filter(isBehaviourTest);
+const incompleteBaselineFiles = (baseline.testResults ?? []).filter((file) =>
+  file.status === 'failed' || file.message || (file.assertionResults ?? []).length === 0
+);
+const missingBehaviourSubjects = behaviourSubjects.filter(({ id, file }) =>
+  !baseTests.some((test) =>
+    test.name.includes(`[${id}]`) && (!file || test.file.endsWith(file))
+  )
+);
+/** Guard 6 — zero/partial/skipped collection must not become a mutation authority. */
+if (baseline.__noReport || baseline.success !== true || baseTests.length === 0
+    || baseTests.some((test) => test.status !== 'passed')
+    || incompleteBaselineFiles.length > 0 || missingBehaviourSubjects.length > 0) {
+  console.error('❌ baseline is incomplete or not green; refusing mutation authority.');
+  if (baseline.__stderr) console.error(baseline.__stderr);
+  for (const { id, file } of missingBehaviourSubjects) {
+    console.error(`   missing behaviour [${id}] in ${file ?? 'the browser suite'}`);
+  }
   process.exit(1);
 }
-if (baseTests.some((t) => t.status === 'failed')) {
-  console.error('❌ baseline is not green; fix the suite before trusting any mutation.');
-  rmSync(baseDir, { recursive: true, force: true });
-  process.exit(1);
+console.log(
+  `baseline: ${baseTests.length} assertion(s), all passed; ` +
+    `${behaviourSubjects.length} registry pair(s) present\n`
+);
+
+// Resolve impact against the unmutated sandbox, before any arm can cut its own import edge. This
+// is intentionally independent of mutations.json's subject metadata: Vitest follows the same
+// aliases, transformed imports, and literal dynamic imports as the browser runner. A graph miss or
+// error falls back to the complete suite, never to zero tests.
+const baselineFiles = new Set(
+  (baseline.testResults ?? []).map((file) => relative(baseDir, file.name ?? ''))
+);
+const subjectsBySource = new Map();
+if (!selftestMode) {
+  for (const source of new Set(mutations.map((mutation) => mutation.file))) {
+    let vitest;
+    try {
+      vitest = await createVitest('test', {
+        root: sandbox,
+        config: join(sandbox, 'vitest.config.mts'),
+        project: ['browser'],
+        related: [join(sandbox, source)],
+        reporters: [],
+        run: true,
+        watch: false,
+      });
+      const relevant = (await vitest.getRelevantTestSpecifications()).map((spec) =>
+        relative(sandbox, spec.moduleId)
+      );
+      const unknown = relevant.filter((file) => !baselineFiles.has(file));
+      if (unknown.length > 0) {
+        throw new Error(`related tests absent from baseline: ${unknown.join(', ')}`);
+      }
+      subjectsBySource.set(source, relevant.length > 0 ? relevant : null);
+    } catch (error) {
+      console.warn(
+        `impact graph fallback for ${source}: ${String(error).replace(/\s+/g, ' ').slice(-300)}`
+      );
+      subjectsBySource.set(source, null);
+    } finally {
+      await vitest?.close();
+    }
+  }
+  const fullFallbacks = [...subjectsBySource.values()].filter((subjects) => subjects === null).length;
+  console.log(
+    `impact graph: ${subjectsBySource.size} source(s), ${fullFallbacks} full-suite fallback(s)\n`
+  );
+  prepare();
 }
-rmSync(baseDir, { recursive: true, force: true });
-console.log(`baseline: ${baseTests.length} test(s), all passing\n`);
 
 // ── Mutations ───────────────────────────────────────────────────────────────────────
 for (const m of mutations) {
@@ -234,7 +532,11 @@ for (const m of mutations) {
         if (after === before) verdict = ['noop', 'replacement is a no-op'];
         else {
           writeFileSync(target, after);
-          const res = runSuite(dir, 'browser', m.timeoutMs ?? SUITE_TIMEOUT_MS);
+          const relatedSubjects = selftestMode ? null : subjectsBySource.get(m.file);
+          const affectedSubjects = relatedSubjects ?? [];
+          const res = await runSuite(
+            dir, 'browser', m.timeoutMs ?? SUITE_TIMEOUT_MS, affectedSubjects
+          );
 
           // A HANG IS ITS OWN OUTCOME, and it now says which mutation caused it. `__noReport` was
           // set in three places and read in none, so a timed-out suite fell through to "the named
@@ -252,6 +554,89 @@ for (const m of mutations) {
             verdict = ['absent', `the suite produced no report — ${res.__stderr ? res.__stderr.split('\n').slice(-3).join(' ') : 'no stderr captured'}`];
           }
           const tests = allTests(res);
+          let behaviourTests = tests.filter(isBehaviourTest);
+          const expectedTests = affectedSubjects.length === 0
+            ? baseBehaviourTests
+            : baseBehaviourTests.filter((test) =>
+                affectedSubjects.some((subject) => test.file.endsWith(subject))
+              );
+          const expectedAssertions = assertionCounts(expectedTests, baseDir);
+          const expectedFiles = new Set(expectedTests.map((test) => relative(baseDir, test.file)));
+          const mismatchedFiles = [...expectedFiles].map((file) => {
+            const expected = expectedTests.filter((test) => relative(baseDir, test.file) === file);
+            const actual = behaviourTests.filter((test) => relative(dir, test.file) === file);
+            return { actual, expected, file, matches: sameAssertionCounts(
+              assertionCounts(expected, baseDir), assertionCounts(actual, dir)
+            ) };
+          }).filter(({ matches }) => !matches);
+          const partiallyCollected = mismatchedFiles.filter(({ actual }) => actual.length > 0);
+          const filesNeedingCompletion = mismatchedFiles
+            .filter(({ actual }) => actual.length === 0)
+            .map(({ file }) => file);
+          if (!verdict && partiallyCollected.length > 0) {
+            verdict = [
+              'collection',
+              `partially collected behaviour file(s) cannot be retried: ` +
+                partiallyCollected.map(({ file }) => file).join(', ')
+            ];
+          }
+
+          // Vitest browser can occasionally report a file-level import failure while every file
+          // around it executes. Do not retry an executed assertion and do not retry a red baseline:
+          // run each UNCOLLECTED behaviour file once, by itself, then replace only that file's
+          // partial report. A real mutation-induced import failure repeats and remains rejected;
+          // an orchestration miss is completed without hiding any test result.
+          const completions = [];
+          let authoritativeFileResults = res.testResults ?? [];
+          for (const file of verdict ? [] : filesNeedingCompletion) {
+            const completion = await runSuite(
+              dir, 'browser', m.timeoutMs ?? SUITE_TIMEOUT_MS, [file]
+            );
+            completions.push(completion);
+            if (!completion.__noReport && !completion.__timedOut) {
+              behaviourTests = behaviourTests
+                .filter((test) => relative(dir, test.file) !== file)
+                .concat(allTests(completion).filter(isBehaviourTest));
+              authoritativeFileResults = authoritativeFileResults
+                .filter((result) => relative(dir, result.name ?? '') !== file)
+                .concat(completion.testResults ?? []);
+            }
+          }
+
+          const mutationAssertions = assertionCounts(behaviourTests, dir);
+          const assertionSetStable = sameAssertionCounts(expectedAssertions, mutationAssertions);
+          const incompleteFiles = authoritativeFileResults.filter(
+            (file) => expectedFiles.has(relative(dir, file.name ?? ''))
+              && (file.message || (file.assertionResults ?? []).length === 0)
+          );
+          if (!verdict && (!assertionSetStable || incompleteFiles.length > 0
+              || completions.some((completion) =>
+                completion.__noReport || completion.__timedOut
+              ))) {
+            const missing = [...expectedAssertions].filter(
+              ([key, count]) => mutationAssertions.get(key) !== count
+            ).slice(0, 3).map(([key]) => key.replace('\0', ' :: '));
+            const brokenFiles = incompleteFiles.slice(0, 3).map((file) =>
+              `${relative(dir, file.name ?? '<unknown file>')}` +
+                (file.message ? ` (${String(file.message).replace(/\s+/g, ' ').slice(-240)})` : '')
+            );
+            verdict = [
+              'collection',
+              `the complete assertion set differs from the baseline ` +
+                `(${behaviourTests.length}/${expectedTests.length}) or a behaviour file failed ` +
+                `to collect` +
+                (missing.length ? `; missing: ${missing.join(', ')}` : '') +
+                (brokenFiles.length ? `; failed files: ${brokenFiles.join(', ')}` : '') +
+                (res.__stdoutPrefix
+                  ? ` — ${res.__stdoutPrefix.replace(/\s+/g, ' ').slice(-500)}`
+                  : '') +
+                (res.__stderr ? ` — ${res.__stderr.split('\n').slice(-3).join(' ')}` : '') +
+                (completions.some((completion) => completion.__stderr)
+                  ? ` — completion: ${completions.map((completion) => completion.__stderr ?? '')
+                      .join(' ').split('\n').slice(-3).join(' ')}`
+                  : '')
+            ];
+          }
           // In --selftest mode the id names a GUARD, not a behaviour, so there is no
           // "named test" to find. The entry declares which behaviour test it should red
           // via `redTest`, so guards 4 and 5 can still be exercised honestly.
@@ -260,22 +645,22 @@ for (const m of mutations) {
           // subject dimension match on the id alone, exactly as before.
           const inSubject = (t) => !m.subject || t.file.endsWith(m.subject);
           const isNamed = (t) => t.name.includes(`[${key}]`) && inSubject(t);
-          const named = tests.filter(isNamed);
-          const others = tests.filter((t) => !isNamed(t) && /\[SC-\d+\]/.test(t.name));
+          const named = behaviourTests.filter(isNamed);
+          const others = behaviourTests.filter((t) => !isNamed(t));
 
           /** Guard 4 — THE ONE THAT FIRES. A syntax-breaking mutation exits non-zero with
            *  the named test ABSENT from the report; an exit-code assertion reads that as
            *  success. Require the named test to be PRESENT and FAILED. */
           const where = m.subject ? `[${key}] in ${m.subject}` : `[${key}]`;
-          if (named.length === 0) verdict = ['absent', `named test ${where} is ABSENT from the report — red for the wrong reason`];
-          else if (!named.some((t) => t.status === 'failed')) verdict = ['green', `named test ${where} still PASSED — the mutation is semantically inert`];
+          if (!verdict && named.length === 0) verdict = ['absent', `named test ${where} is ABSENT from the report — red for the wrong reason`];
+          else if (!verdict && !named.some((t) => t.status === 'failed')) verdict = ['green', `named test ${where} still PASSED — the mutation is semantically inert`];
           /** Guard 5 — collateral bound: the mutation must be surgical.
            *
            * A mutation may DECLARE broad collateral (`expectCollateral`), for a subject
            * whose blast radius is inherently wide — a compiler flag, say. That is not an
            * exemption: the guard INVERTS, and the harness then requires other tests to
            * fail. A declared expectation that does not hold is still a failure. */
-          else {
+          else if (!verdict) {
             const collateral = others.filter((t) => t.status === 'failed');
             if (m.expectCollateral && collateral.length === 0)
               verdict = ['collateral', `declared expectCollateral but no other behaviour test failed — the mutation is narrower than claimed`];
@@ -287,7 +672,7 @@ for (const m of mutations) {
       }
     }
   } finally {
-    rmSync(dir, { recursive: true, force: true });
+    // prepare() restores frozen authored inputs and fresh local tool caches before the next arm.
   }
 
   if (selftestMode) {
@@ -295,10 +680,16 @@ for (const m of mutations) {
     const got = verdict?.[0] ?? null;
     report(got === expectGuard, m.id, got === expectGuard
       ? `rejected by guard "${expectGuard}" as expected`
-      : `expected rejection by "${expectGuard}", got ${got ? `"${got}"` : 'ACCEPTED'}`);
+      : `expected rejection by "${expectGuard}", got ${got ? `"${got}"` : 'ACCEPTED'}` +
+        (verdict?.[1] ? `: ${verdict[1]}` : ''));
   } else {
     report(!verdict, m.id, verdict ? verdict[1] : `${m.arm} — named test went red, no collateral`);
   }
+}
+
+if (inputFingerprint() !== startingFingerprint) {
+  failures++;
+  console.error('❌ authored harness inputs changed during this run; discard mixed-revision evidence.');
 }
 
 if (failures) {
@@ -310,7 +701,9 @@ console.log(
   `\n✅ All ${mutations.length} ${selftestMode ? 'guard self-checks passed' : 'mutations produced their named red, with a green baseline'}.` +
     `  (${elapsed}s, ceiling ${budget.selftestCeilingSeconds}s)`
 );
-// The harness runs one full suite per mutation and is where this job's time actually goes.
+// The harness resolves every mutated source through Vitest's dependency graph before applying any
+// arm, then checks the complete affected assertion multiset. Broad package barrels deliberately
+// remain broad; graph errors fall back to the full suite rather than reducing evidence.
 // `selftestCeilingSeconds` was described in suite-budget.json as an enforced ceiling and was
 // read by nothing — an inert key documented as a gate, which is the class this mission
 // exists to close, introduced by its own fold. Found at the second gate pass.

@@ -45,6 +45,7 @@ owned_files:
 - packages/react/type-tests/wrappers.type-test.tsx
 - behaviours.json
 - mutations.json
+- mutations.selftest.json
 - packages/elements/custom-elements.json
 - packages/elements/vue.d.ts
 - packages/elements/SIZES.md
@@ -53,6 +54,11 @@ owned_files:
 - CHANGELOG.md
 - scripts/check-manifest-content.mjs
 - scripts/check-element-css-hygiene.mjs
+- scripts/suite-selftest.mjs
+- vitest.config.mts
+- tests/node/config-contract.test.ts
+- suite-budget.json
+- docs/contributing/adding-a-component.md
 priority: P1
 role: implementer
 tags: []
@@ -97,7 +103,8 @@ approval or merge.
   target a generated wrapper only inside the harness's disposable copy.
 - Vue exposes generated tag/prop declarations. The generator does not emit typed event handlers, so
   WP03 makes no such claim.
-- No token, dependency, lockfile, budget, application, sibling component or generated hand edit.
+- No token, dependency, lockfile, budget ceiling, application, sibling component or generated hand
+  edit. Harness-budget metadata may describe the authorized final-gate remediation truthfully.
 - No rebase, push, PR, local-baseline blessing, squad, self-approval, merge, main, publish or deploy.
 - WP03 may update only pending/current evidence in the three governed mission artifacts it owns; it
   may not mark #146 fixed, record final acceptance, or claim a train/CI/squad/approval result.

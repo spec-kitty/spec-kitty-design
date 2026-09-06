@@ -323,7 +323,7 @@ git add -A && git status --porcelain   # must be empty before you open the PR
 
 # 7. the suites
 npm run test
-node scripts/suite-selftest.mjs             # slow; one full suite per mutation
+node scripts/suite-selftest.mjs             # full baseline + dependency-affected suite/mutation
 npx nx run storybook:storybook:build && node scripts/run-axe-storybook.js
 ```
 

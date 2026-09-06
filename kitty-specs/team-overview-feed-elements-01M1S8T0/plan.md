@@ -130,6 +130,12 @@ apps/storybook/src/tests/visual.spec.ts-snapshots/*entity-marker*.png
 apps/storybook/src/tests/visual.spec.ts-snapshots/*section-header*.png
 behaviours.json
 mutations.json
+mutations.selftest.json
+scripts/suite-selftest.mjs
+vitest.config.mts
+tests/node/config-contract.test.ts
+suite-budget.json
+docs/contributing/adding-a-component.md
 expected-docs.json
 expected-parts.json
 expected-stories.json
