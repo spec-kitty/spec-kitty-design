@@ -51,11 +51,12 @@
     {
       "id": "guard4-syntax-error",
       "expectRejectedBy": "absent",
-      "file": "fixtures/elements-behaviour/src/sk-behaviour-fixture.ts",
-      "from": "static formAssociated = true;",
-      "to": "static formAssociated = true; ((((",
+      "file": "vitest.config.mts",
+      "from": "import { defineConfig } from 'vitest/config';",
+      "to": "import { defineConfig } from 'vitest/config'; ((((",
       "redTest": "SC-002",
-      "subject": "fixtures/elements-behaviour/src/behaviours.test.ts"
+      "subject": "fixtures/elements-behaviour/src/behaviours.test.ts",
+      "$why": "A syntax error in the runner config fails before the browser project starts, producing no JSON test report promptly. A syntax error in a browser-loaded source can strand Vitest's browser session until the per-entry timeout, which exercises timeout instead of guard 4's absent verdict."
     },
     {
       "id": "guard4-inert",
