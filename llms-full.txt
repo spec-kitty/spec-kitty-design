@@ -45,7 +45,7 @@ spec-kitty-design/
     demo/           # Static blog-demo.html, dashboard-demo.html, index.html
   docs/
     architecture/
-      decisions/    # ADRs (ADR-1 through ADR-13 + ADR-3 addendum)
+      decisions/    # the architectural decision records; indexed by docs/architecture/README.md
       research/
       validation/
       assets/
@@ -78,16 +78,23 @@ this file and `CLAUDE.md` disagree, `CLAUDE.md` wins.
 
 ## 2. Architecture (ADR summary)
 
-> **Reading order.** ADR-1 through ADR-7 are the original design and are
-> summarised as written, so they name Angular where the decision named it.
-> ADR-8 through ADR-13 are the elements-first architecture and are what the repo
-> does today. Where they disagree, the later ADR wins, and the summaries below
-> say so at the point of disagreement. **Nothing in this repo targets Angular:**
-> `packages/angular` was deleted in #102 and there is no Angular dependency in
-> any `package.json`.
+> **Reading order.** The records dated 2026-05-01 are the original design, and
+> are summarised as written, so they name Angular where the decision named it.
+> The records dated 2026-09-02 and later are the elements-first architecture and
+> are what the repo does today. Where an earlier record and a later one disagree,
+> the later one wins, and the summaries below say so at the point of
+> disagreement. **Nothing in this repo targets Angular:** `packages/angular` was
+> deleted in #102 and there is no Angular dependency in any `package.json`.
 
-ADRs live under `docs/architecture/decisions/`. Status of every ADR below is
-**Accepted**. Each summary captures the canonical decision and its rationale.
+The records live under `docs/architecture/decisions/`.
+
+**The authoritative ADR index is the table in `docs/architecture/README.md`.**
+
+It lists one row per record and transcribes each record's own `Status:` field,
+and `scripts/check-adr-index.mjs` fails CI when that table and the directory
+disagree. This file is not that index and reports no statuses: the summaries
+below capture each record's canonical decision and its rationale, and a record's
+ratification state is read from the record itself, or from that table.
 
 ### ADR-1 — Token Distribution Format: CSS Custom Properties
 
@@ -264,6 +271,35 @@ and has no test to mutate here.
 `docs/architecture/decisions/2026-09-02-13-storybook-web-components-builder.md`.
 **Decision:** the catalogue renders through `@storybook/web-components`,
 replacing the Angular renderer ADR-6 and ADR-7 reason about.
+
+### ADR-14 — The Detached-Probe Validation Seam
+
+`docs/architecture/decisions/2026-09-06-14-detached-probe-validation-seam.md`.
+**Decision:** an element that forwards `pattern`/`min`/`max`/`step`/`type` to a
+rendered `<input>` merges the user agent's own constraint-validity flags through
+a **detached probe** — a private `<input>`, created once, never rendered and
+never connected to any document, synced from the element's current reactive
+properties on every `validate()` call. **Why:** `ElementInternals.setValidity()`
+replaces the flags it is given rather than layering onto them, so every
+UA-computed flag must be read and merged explicitly; and `validate()` runs from
+Lit's `willUpdate()`, which fires *before* `render()` commits the current
+update — so the rendered control's `.validity` is one cycle stale, and on the
+first pass there is no rendered control at all. Constraint validation is a pure
+attribute-plus-value computation needing neither layout nor a document
+connection, so an unconnected input computes the same flags at every point in
+the lifecycle, mount included. **The rule that bites:** the probe is long-lived,
+so `probe.type` is assigned **before** `probe.value` — the other order validates
+a new value against a stale type for one pass — and `pattern`/`min`/`max`/`step`
+are set-or-removed rather than coerced with `?? ''`, because an empty `pattern`
+attribute compiles to `^(?:)$` and reports every non-empty value as a mismatch.
+`badInput` is the one flag with two writers, the real rendered control and the
+probe, disjoint by a runtime invariant rather than by construction. Shipped in
+`sk-form-input`; `sk-form-textarea` forwards no such constraints and has no
+probe. The record is descriptive and leaves three questions to the operator —
+whether the probe is the sanctioned pattern for future elements, what invariant
+ties the probe, the rendered control and `setFormValue()` together, and where
+the mechanism lives once a shared form-control base exists. This summary takes
+no position on any of the three.
 
 ---
 

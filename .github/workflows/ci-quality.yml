@@ -320,6 +320,16 @@ jobs:
         run: node scripts/check-adr-index.mjs --selftest
       - name: "[ENFORCED] Every ADR has an index row, and every row an ADR (#193)"
         run: node scripts/check-adr-index.mjs
+      # The two LLM context surfaces, held to carrying NO hand-maintained ADR index (#197).
+      # `llms.txt` linked 3 of 15 records and called them "All Accepted" while five were
+      # Proposed and one Complete; `llms-full.txt` carried three ADR range expressions and a
+      # set-wide status claim, and referenced 14 of 15. Neither was gated by anything. Same
+      # placement rationale as the #193 pair above: `lint-code` carries no `if:` and no path
+      # guard, so a docs-only PR is certain to run it.
+      - name: "[ENFORCED] LLM ADR-surface gate self-test (#197)"
+        run: node scripts/check-llms-adr-surface.mjs --selftest
+      - name: "[ENFORCED] llms.txt and llms-full.txt carry no hand-maintained ADR index (#197)"
+        run: node scripts/check-llms-adr-surface.mjs
       - name: "[ENFORCED] commitlint (FR-020)"
         if: github.event_name == 'pull_request'
         run: |

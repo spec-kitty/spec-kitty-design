@@ -317,6 +317,13 @@ else {
     // silently omits seven of fifteen records again.
     [/node\s+scripts\/check-adr-index\.mjs(?!\s*--selftest)(\s|$)/, 'the ADR index gate', 'scripts/check-adr-index.mjs'],
     [/node\s+scripts\/check-adr-index\.mjs\s+--selftest(\s|$)/, "the ADR index gate's own probe table", 'scripts/check-adr-index.mjs --selftest'],
+    // #197, both entries with the gate itself, per the three comments above. `llms.txt` and
+    // `llms-full.txt` were a third and fourth hand-maintained ADR index — 3 of 15 records and
+    // 14 of 15 respectively, plus three range expressions and two set-wide status claims — and
+    // nothing in `.github/` or `scripts/` referenced either file. This gate is what keeps the
+    // hand list from coming back; without an entry here its two CI lines are deletable free.
+    [/node\s+scripts\/check-llms-adr-surface\.mjs(?!\s*--selftest)(\s|$)/, 'the LLM ADR-surface gate', 'scripts/check-llms-adr-surface.mjs'],
+    [/node\s+scripts\/check-llms-adr-surface\.mjs\s+--selftest(\s|$)/, "the LLM ADR-surface gate's own probe table", 'scripts/check-llms-adr-surface.mjs --selftest'],
     // THIS FILE, registered against itself. Every comment above records the same episode — a
     // gate shipped with no entry here, and a lens then deleting its CI line with this checker
     // still green (#74's css-hygiene gate, #129's manifest gate) — and this file was the one
@@ -330,7 +337,18 @@ else {
     [/node\s+scripts\/check-gate-wiring\.mjs(\s|$)/, 'this wiring checker itself', 'scripts/check-gate-wiring.mjs'],
   ];
 
-  /** A step that cannot fail the job is a step that is not running (B, C, D, E). */
+  /**
+   * A step that cannot fail the job is a step that is not running (B, C, D, E).
+   *
+   * KNOWN LIMITATION — see #205, and note it is NOT #202. The `||` clause below is an ENUMERATED
+   * list of swallow spellings, and the run body is examined for nothing else, so `|| /bin/true`
+   * and a `set +e` … `exit 0` body both return `[]` here and the gate they neuter is reported as
+   * enforced. Both were reproduced against #193's own step, so this is the audit's shape rather
+   * than any one gate's defect. #202 is one level up — the `gate` job's strict clause matched as
+   * shell TEXT; this is one level down, the per-step neutering test — and fixing either leaves
+   * the other open. Every entry in REQUIRED_LINT rests on this, including the self-check steps
+   * and this file's own registration.
+   */
   const neutered = (st) => {
     const why = [];
     if ('if' in st) why.push('carries an `if:`');
