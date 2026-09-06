@@ -312,7 +312,9 @@ jobs:
         run: node scripts/check-gate-wiring.mjs
       - name: "[ENFORCED] commitlint (FR-020)"
         if: github.event_name == 'pull_request'
-        run: npx commitlint --from=${{ github.event.pull_request.base.sha }} --to=${{ github.sha }}
+        run: |
+          node scripts/check-commitlint-config.mjs
+          npx commitlint --from=${{ github.event.pull_request.base.sha }} --to=${{ github.sha }}
       - name: "[ENFORCED] Fail if lint errors"
         if: always()
         run: |

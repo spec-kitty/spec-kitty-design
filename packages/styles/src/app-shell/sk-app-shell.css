@@ -1,0 +1,30 @@
+:host {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  container-type: inline-size;
+}
+
+.sk-app-shell {
+  display: grid;
+  width: 100%;
+  min-width: 0;
+  grid-template-columns:
+    var(--sk-layout-personal-rail-width)
+    var(--sk-layout-context-sidebar-width)
+    minmax(0, 1fr);
+}
+
+.sk-app-shell__personal,
+.sk-app-shell__context,
+.sk-app-shell__content,
+.sk-app-shell__header,
+.sk-app-shell__main {
+  min-width: 0;
+}
+
+@container (max-width: 720px) {
+  .sk-app-shell {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

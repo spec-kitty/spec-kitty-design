@@ -28,3 +28,7 @@ import './section-banner/sk-section-banner.js';
 import './blog-card/sk-blog-card.js';
 import './site-footer/sk-site-footer.js';
 import './transition-matrix/sk-transition-matrix.js';
+import './app-shell/sk-app-shell.js';
+import './personal-rail/sk-personal-rail.js';
+import './context-sidebar/sk-context-sidebar.js';
+import './page-header/sk-page-header.js';

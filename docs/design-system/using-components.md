@@ -3,10 +3,10 @@
 The Spec Kitty components ship as CSS in `@spec-kitty/styles`, and — for the components migrated
 so far — as **custom elements** in `@spec-kitty/elements`. Both require `@spec-kitty/tokens`.
 
-**Migration is in progress.** Fifteen elements exist today: `sk-blog-card`, `sk-button`,
-`sk-card`, `sk-check-bullet`, `sk-feature-card`, `sk-form-input`, `sk-form-textarea`, `sk-grid`,
-`sk-nav-pill`, `sk-pill-tag`, `sk-ribbon-card`, `sk-section-banner`, `sk-site-footer`, `sk-stub`,
-and `sk-transition-matrix`.
+**Migration is in progress.** Nineteen elements exist today: `sk-app-shell`, `sk-blog-card`,
+`sk-button`, `sk-card`, `sk-check-bullet`, `sk-context-sidebar`, `sk-feature-card`, `sk-form-input`,
+`sk-form-textarea`, `sk-grid`, `sk-nav-pill`, `sk-page-header`, `sk-personal-rail`, `sk-pill-tag`,
+`sk-ribbon-card`, `sk-section-banner`, `sk-site-footer`, `sk-stub`, and `sk-transition-matrix`.
 Several of the catalogue's component packages are CSS only by a recorded decision — `form-field`,
 and (#176) `facts`, `disclosure`, `data-table`, `empty-state`, `skip-link`. See ADR-10,
 *form-field is deliberately styles-only*. These five ship classes applied to real semantic HTML
@@ -19,6 +19,54 @@ Each section below says which it is, because the difference decides how you use 
 Because a custom element needs no wrapper, every framework can use the migrated ones directly. A
 generated React wrapper exists for JSX typing and typed refs — see
 [Using the elements from React](./using-react.md) for what it does and does not buy, measured.
+
+## Application shell composition
+
+The shell elements supply layout and landmarks while the consumer supplies destinations, state,
+identity, headings, status copy, and actions. They do not know which route is active or whether a
+navigation surface is open.
+
+```html
+<sk-app-shell>
+  <sk-personal-rail slot="personal-rail" label="Product areas">
+    <a slot="primary" href="/work">Work</a>
+    <button slot="utilities" type="button">Notifications</button>
+    <a slot="account" href="/account">Account</a>
+    <button slot="logout" type="button">Log out</button>
+  </sk-personal-rail>
+
+  <sk-context-sidebar slot="context-sidebar" label="Project context">
+    <strong slot="header">Reference project</strong>
+    <nav aria-label="Project sections"><a href="/summary">Summary</a></nav>
+    <button slot="footer" type="button">Project settings</button>
+  </sk-context-sidebar>
+
+  <sk-page-header slot="page-header">
+    <span slot="eyebrow">Overview</span>
+    <h1 slot="title">Delivery summary</h1>
+    <p slot="supporting">Current evidence and recent activity.</p>
+    <span slot="sync">Last synchronized by the consumer</span>
+    <sk-button slot="actions" size="icon" label="Refresh evidence">↻</sk-button>
+  </sk-page-header>
+
+  <section aria-label="Delivery content">Consumer-owned page content.</section>
+</sk-app-shell>
+```
+
+`sk-app-shell` exposes the `personal-rail`, `context-sidebar`, and `page-header` named slots plus
+the default content slot. At desktop widths its columns are 56px, 240px, and the remaining space;
+at narrow widths it keeps all regions in document order. Consumers may control visibility on the
+slotted hosts, but the shell itself has no open state or navigation events.
+
+Use the reflected `label` attribute to name the `sk-personal-rail` navigation landmark and the
+`sk-context-sidebar` complementary landmark. A nonblank label is forwarded verbatim; a blank or
+missing one uses the generic fallback. The context sidebar does not create a navigation landmark,
+so supply a native labelled `<nav>` when its content is navigation. Keep account content in the
+personal rail's `account` slot, above `logout`; do not duplicate it in `primary`.
+
+`sk-page-header` preserves the consumer's heading level and treats `sync` copy as opaque text. It
+does not calculate relative time or schedule refreshes. Links and buttons slotted into any shell
+element remain the original native controls and keep their native events.
 
 ## Transition matrix
 
@@ -77,6 +125,7 @@ Primary and secondary call-to-action buttons used to drive user actions.
 <sk-button variant="primary">Get started</sk-button>
 <sk-button variant="secondary">Learn more</sk-button>
 <sk-button variant="primary" size="sm">Book demo</sk-button>
+<sk-button variant="ghost" size="icon" label="Refresh evidence">↻</sk-button>
 ```
 
 Set `href` and it renders an anchor instead of a button, with the same class list — which is
@@ -86,13 +135,14 @@ what the demo pages actually need, since every button-styled thing there is a li
 <sk-button variant="primary" href="/docs">Read the docs</sk-button>
 ```
 
-The label is slotted content. `disabled` reaches the real `<button>` and is deliberately
-ignored on the anchor form, because a disabled link is not a thing HTML has. Use
-`sk-button::part(button)` to reach the rendered `<button>` or `<a>`.
+The visible label or glyph is slotted content. `size="icon"` creates a 40px square control and
+requires a nonblank `label`, which is forwarded to the real inner button or anchor as its
+accessible name. The glyph and its meaning remain consumer-owned. `disabled` reaches the real
+`<button>` and is deliberately ignored on the anchor form, because a disabled link is not a thing
+HTML has. Use `sk-button::part(button)` to reach the rendered `<button>` or `<a>`.
 
-Two limitations, both tracked in #153: the control lives in a shadow root, so it cannot submit
-an enclosing form, and `aria-label` on the host is ignored — an icon-only button needs the
-CSS-only form below for now.
+The control lives in a shadow root, so it cannot submit an enclosing form. Use this element for
+actions and links rather than as an implicit form-submit button.
 
 **HTML:**
 

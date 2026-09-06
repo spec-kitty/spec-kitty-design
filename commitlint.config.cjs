@@ -21,8 +21,27 @@ const SPEC_KITTY_AUTO_COMMIT_PATTERNS = [
   // would exempt any commit with that scope from EVERY rule. Anchored to end-of-LINE,
   // not end-of-string: commitlint passes ignores the FULL message, body included.
   (msg) => /^chore\(spec-kitty\): status transition WP\d+\s*(\n|$)/.test(msg),
+  // Newer transactional status writers use these additional exact operations.
+  // Keep the first line closed over a WP id and a known operation: accepting the
+  // whole `spec-kitty` scope would let arbitrary human chores bypass every rule.
+  (msg) =>
+    /^chore\(spec-kitty\): (?:status transition batch|inner-state annotation) WP\d+\s*(\n|$)/.test(
+      msg,
+    ),
+  (msg) => /^chore\(spec-kitty\): record WP\d+ remediation state\s*(\n|$)/.test(msg),
   (msg) => /^chore: Record review-cycle-\d+ \([a-z-]+\) for WP\d+ on \S+\s*(\n|$)/.test(msg),
   (msg) => /^chore: update issue-matrix for \S+\s*(\n|$)/.test(msg),
+  // `acceptance-verdict` owns these messages. Criterion/result vocabulary and
+  // the Spec Kitty slug suffix are bounded so a normal `chore(acceptance)` does
+  // not become a blanket exemption.
+  (msg) =>
+    /^chore\(acceptance\): record (?:FR|NFR|SC)-\d{3}=(?:pass|fail|pending) for [a-z0-9]+(?:-[a-z0-9]+)*-01[A-Z0-9]{6,}\s*(\n|$)/.test(
+      msg,
+    ),
+  (msg) =>
+    /^chore\(acceptance\): register negative invariant NI-\d{3} for [a-z0-9]+(?:-[a-z0-9]+)*-01[A-Z0-9]{6,}\s*(\n|$)/.test(
+      msg,
+    ),
   // Bootstrap commits emitted by older Spec Kitty CLI versions (no conv-commit format)
   (msg) => /^(Add|Map|Update) (tasks|plan|meta|charter|requirements?) /i.test(msg),
   // spec: Initial mission spec (Spec Kitty creation step)
@@ -47,6 +66,10 @@ module.exports = {
     'scope-enum': [2, 'always', [
       'tokens', 'storybook',
       'doctrine', 'ci', 'docs', 'release', 'deps', 'security',
+      // Human-authored governance and integration commits use normal conventional-commit
+      // validation. These are scopes, not ignores: type, subject and header
+      // rules still apply to acceptance repairs, mission refreshes and explicit merges.
+      'acceptance', 'merge', 'team-overview',
       // Elements-first programme (ADR-8). `styles` is html-js re-scoped, `elements`
       // is the custom-element base layer, `react` is its generated wrapper. Added
       // ahead of the packages themselves because a scope-enum miss blocks the first

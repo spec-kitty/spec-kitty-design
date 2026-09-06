@@ -230,6 +230,18 @@
           "file": "fixtures/elements-behaviour/src/sk-nav-pill.test.ts"
         },
         {
+          "name": "sk-button",
+          "file": "fixtures/elements-behaviour/src/sk-button.test.ts"
+        },
+        {
+          "name": "sk-context-sidebar",
+          "file": "fixtures/elements-behaviour/src/sk-context-sidebar.test.ts"
+        },
+        {
+          "name": "sk-personal-rail",
+          "file": "fixtures/elements-behaviour/src/sk-personal-rail.test.ts"
+        },
+        {
           "name": "sk-transition-matrix",
           "file": "fixtures/elements-behaviour/src/sk-transition-matrix.test.ts"
         },
@@ -290,6 +302,10 @@
           "file": "fixtures/elements-behaviour/src/sk-blog-card.test.ts"
         },
         {
+          "name": "sk-app-shell",
+          "file": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+        },
+        {
           "name": "sk-button",
           "file": "fixtures/elements-behaviour/src/sk-button.test.ts"
         },
@@ -300,6 +316,10 @@
         {
           "name": "sk-check-bullet",
           "file": "fixtures/elements-behaviour/src/sk-check-bullet.test.ts"
+        },
+        {
+          "name": "sk-context-sidebar",
+          "file": "fixtures/elements-behaviour/src/sk-context-sidebar.test.ts"
         },
         {
           "name": "sk-feature-card",
@@ -320,6 +340,14 @@
         {
           "name": "sk-nav-pill",
           "file": "fixtures/elements-behaviour/src/sk-nav-pill.test.ts"
+        },
+        {
+          "name": "sk-page-header",
+          "file": "fixtures/elements-behaviour/src/sk-page-header.test.ts"
+        },
+        {
+          "name": "sk-personal-rail",
+          "file": "fixtures/elements-behaviour/src/sk-personal-rail.test.ts"
         },
         {
           "name": "sk-pill-tag",
@@ -355,12 +383,20 @@
           "file": "fixtures/elements-behaviour/src/sk-blog-card.test.ts"
         },
         {
+          "name": "sk-app-shell",
+          "file": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+        },
+        {
           "name": "sk-button",
           "file": "fixtures/elements-behaviour/src/sk-button.test.ts"
         },
         {
           "name": "sk-check-bullet",
           "file": "fixtures/elements-behaviour/src/sk-check-bullet.test.ts"
+        },
+        {
+          "name": "sk-context-sidebar",
+          "file": "fixtures/elements-behaviour/src/sk-context-sidebar.test.ts"
         },
         {
           "name": "sk-feature-card",
@@ -373,6 +409,14 @@
         {
           "name": "sk-nav-pill",
           "file": "fixtures/elements-behaviour/src/sk-nav-pill.test.ts"
+        },
+        {
+          "name": "sk-page-header",
+          "file": "fixtures/elements-behaviour/src/sk-page-header.test.ts"
+        },
+        {
+          "name": "sk-personal-rail",
+          "file": "fixtures/elements-behaviour/src/sk-personal-rail.test.ts"
         },
         {
           "name": "sk-pill-tag",

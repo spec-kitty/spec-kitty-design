@@ -135,6 +135,10 @@
   --sk-space-11:  6rem;      /* 96px */
   --sk-space-12:  8rem;      /* 128px */
 
+  /* ── Layout ──────────────────────── */
+  --sk-layout-personal-rail-width: 3.5rem;  /* 56px */
+  --sk-layout-context-sidebar-width: 15rem; /* 240px */
+
   /* ── Radius ──────────────────────── */
   --sk-radius-sm:   0.5rem;    /*  8px — chips, eyebrow pills */
   --sk-radius-md:   0.75rem;   /* 12px — form inputs */
@@ -224,6 +228,10 @@
 /* Anchored on warm cream (page) → pure white (cards). */
 :root[data-theme="light"],
 .sk-light {
+  /* Layout geometry is theme-invariant. */
+  --sk-layout-personal-rail-width: 3.5rem;
+  --sk-layout-context-sidebar-width: 15rem;
+
   /* Surface scale — cream page, white cards */
   --sk-surface-page:        #F8F5EC;   /* warm cream — page background */
   --sk-surface-hero:        #FCFAF4;   /* hero / banded section background */

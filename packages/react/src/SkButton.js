@@ -8,6 +8,7 @@ export const SkButton = forwardRef((props, forwardedRef) => {
   const {
     disabled,
     href,
+    label,
     size,
     variant,
     className,
@@ -29,6 +30,7 @@ export const SkButton = forwardRef((props, forwardedRef) => {
       ref: createForwardedRefHandler(ref, forwardedRef),
       ...restProps,
       href: href,
+      label: label,
       size: size,
       variant: variant,
       class: className,

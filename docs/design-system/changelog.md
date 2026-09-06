@@ -66,6 +66,13 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) conve
 
 ### Added
 
+- Added the slot-driven `sk-app-shell`, `sk-personal-rail`, `sk-context-sidebar`, and
+  `sk-page-header` elements for generic application-shell geometry, labelled navigation and
+  complementary landmarks, and consumer-owned page orientation. The elements expose no route,
+  open-state, identity, icon, timer, or application-data policy.
+- Added `size="icon"` and the reflected `label` accessibility seam to `sk-button`. Icon buttons
+  and links render as 40px square native controls, forward the supplied label to the real inner
+  control, and retain a token-driven focus-visible treatment in both themes.
 - Added the controlled `sk-transition-matrix` element for accessible aggregate route-by-time-bucket
   moves, including typed intent events, responsive table semantics, and generated React delivery.
 
