@@ -37,7 +37,7 @@
       "wp": "WP03"
     },
     "#147": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "Current mission; WP01 metric implementation reviewed at lane 60a72eb8b97d69159ea3b67b18e506be9ecc9992. Completion and closure remain post-train-merge.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -45,8 +45,8 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "verdict": "in-mission",
+      "wp": "WP01"
     },
     "#148": {
       "evidence_ref": "<link or commit>",
