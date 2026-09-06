@@ -3,97 +3,97 @@ work_package_id: WP01
 title: Native workflow board and lane styles
 dependencies: []
 requirement_refs:
-  - FR-001
-  - FR-002
-  - FR-003
-  - FR-004
-  - FR-005
-  - FR-006
-  - FR-007
-  - FR-008
-  - FR-009
-  - FR-010
-  - FR-011
-  - FR-012
-  - FR-013
-  - FR-014
-  - FR-015
-  - FR-016
-  - NFR-001
-  - NFR-002
-  - NFR-003
-  - NFR-004
-  - NFR-005
-  - NFR-006
-  - NFR-007
-  - NFR-008
-  - C-001
-  - C-002
-  - C-003
-  - C-004
-  - C-005
-  - C-006
-  - C-007
-  - C-008
-  - C-009
+- FR-001
+- FR-002
+- FR-003
+- FR-004
+- FR-005
+- FR-006
+- FR-007
+- FR-008
+- FR-009
+- FR-010
+- FR-011
+- FR-012
+- FR-013
+- FR-014
+- FR-015
+- FR-016
+- NFR-001
+- NFR-002
+- NFR-003
+- NFR-004
+- NFR-005
+- NFR-006
+- NFR-007
+- NFR-008
+- C-001
+- C-002
+- C-003
+- C-004
+- C-005
+- C-006
+- C-007
+- C-008
+- C-009
 planning_base_branch: mission/work-package-workflow-board-styles
 merge_target_branch: mission/work-package-workflow-board-styles
-branch_strategy: Planning artifacts were generated on mission/work-package-workflow-board-styles; completed changes stay on that single mission branch until the programme orchestrator opens its PR into train/elements-first.
+branch_strategy: Planning artifacts for this mission were generated on mission/work-package-workflow-board-styles. During /spec-kitty.implement this WP may branch from a dependency-specific base, but completed changes must merge back into mission/work-package-workflow-board-styles unless the human explicitly redirects the landing branch.
 subtasks:
-  - T001
-  - T002
-  - T003
-  - T004
-  - T005
-  - T006
-  - T007
+- T001
+- T002
+- T003
+- T004
+- T005
+- T006
+- T007
 phase: Phase 1 - native workflow board and lane styles
 history:
-  - at: "2026-09-06T19:50:09Z"
-    actor: codex
-    action: Prompt authored during mission planning for issue #209
+- at: '2026-09-06T19:50:09Z'
+  actor: codex
+  action: Prompt authored during mission planning for issue
 agent_profile: frontend-freddy
 authoritative_surface: packages/styles/src/workflow-board/
 create_intent:
-  - packages/styles/src/workflow-board/sk-workflow-board.css
-  - packages/styles/src/workflow-board/sk-workflow-board-populated.html
-  - packages/styles/src/workflow-board/sk-workflow-board-fitting.html
-  - packages/styles/src/workflow-board/sk-workflow-board-all-empty.html
-  - packages/styles/src/workflow-board/sk-workflow-board-one-empty-lane.html
-  - packages/styles/src/workflow-board/sk-workflow-board-fifty-items.html
-  - packages/styles/src/workflow-board/sk-workflow-board-long-labels-and-items.html
-  - packages/styles/src/workflow-board/sk-workflow-board-single-lane-narrow.html
-  - packages/styles/src/workflow-board/sk-workflow-board-html.stories.ts
-  - packages/styles/src/workflow-board/index.ts
-  - packages/styles/src/workflow-lane/sk-workflow-lane.css
-  - packages/styles/src/workflow-lane/sk-workflow-lane-default.html
-  - packages/styles/src/workflow-lane/sk-workflow-lane-empty.html
-  - packages/styles/src/workflow-lane/sk-workflow-lane-html.stories.ts
-  - packages/styles/src/workflow-lane/index.ts
-  - apps/storybook/src/tests/sk-workflow-board.spec.ts
+- packages/styles/src/workflow-board/sk-workflow-board.css
+- packages/styles/src/workflow-board/sk-workflow-board-populated.html
+- packages/styles/src/workflow-board/sk-workflow-board-fitting.html
+- packages/styles/src/workflow-board/sk-workflow-board-all-empty.html
+- packages/styles/src/workflow-board/sk-workflow-board-one-empty-lane.html
+- packages/styles/src/workflow-board/sk-workflow-board-fifty-items.html
+- packages/styles/src/workflow-board/sk-workflow-board-long-labels-and-items.html
+- packages/styles/src/workflow-board/sk-workflow-board-single-lane-narrow.html
+- packages/styles/src/workflow-board/sk-workflow-board-html.stories.ts
+- packages/styles/src/workflow-board/index.ts
+- packages/styles/src/workflow-lane/sk-workflow-lane.css
+- packages/styles/src/workflow-lane/sk-workflow-lane-default.html
+- packages/styles/src/workflow-lane/sk-workflow-lane-empty.html
+- packages/styles/src/workflow-lane/sk-workflow-lane-html.stories.ts
+- packages/styles/src/workflow-lane/index.ts
+- apps/storybook/src/tests/sk-workflow-board.spec.ts
 execution_mode: code_change
-model: ""
+model: ''
 owned_files:
-  - packages/tokens/src/tokens.css
-  - packages/tokens/dist/token-catalogue.json
-  - packages/styles/src/workflow-board/**
-  - packages/styles/src/workflow-lane/**
-  - packages/styles/src/index.ts
-  - packages/styles/package.json
-  - expected-stories.json
-  - docs/design-system/using-components.md
-  - apps/storybook/src/tests/sk-workflow-board.spec.ts
-  - apps/storybook/src/tests/visual.spec.ts
-  - apps/storybook/src/tests/visual.spec.ts-snapshots/sk-workflow-board-*.png
+- packages/tokens/src/tokens.css
+- packages/tokens/dist/token-catalogue.json
+- packages/styles/src/workflow-board/**
+- packages/styles/src/workflow-lane/**
+- packages/styles/src/index.ts
+- packages/styles/package.json
+- expected-stories.json
+- docs/design-system/using-components.md
+- apps/storybook/src/tests/sk-workflow-board.spec.ts
+- apps/storybook/src/tests/visual.spec.ts
+- apps/storybook/src/tests/visual.spec.ts-snapshots/sk-workflow-board-*.png
 role: implementer
 tags:
-  - styles-only
-  - accessibility
-  - workflow-board
+- styles-only
+- accessibility
+- workflow-board
 task_type: implement
 tracker_refs:
-  - "#209"
-  - "#208"
+- '#209'
+- '#208'
 ---
 
 # Work Package Prompt: WP01 – Native workflow board and lane styles
