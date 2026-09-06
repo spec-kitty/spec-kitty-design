@@ -81,6 +81,9 @@ const teamOverviewShellStory = async (page: Page, light = false): Promise<Locato
     root.style.background = 'var(--sk-surface-page)';
     root.style.fontFamily = 'var(--sk-font-sans)';
     root.innerHTML = `
+      <style>
+        sk-app-shell[data-visual-shell]::part(shell) { min-height: 100vh; }
+      </style>
       <sk-app-shell data-visual-shell>
         <sk-personal-rail slot="personal-rail" label="Product areas">
           <a slot="primary" href="#work" style="color: var(--sk-fg-default)">Work</a>
@@ -112,6 +115,14 @@ const teamOverviewShellStory = async (page: Page, light = false): Promise<Locato
   const host = page.locator('sk-app-shell[data-visual-shell]').first();
   await host.waitFor({ state: 'visible', timeout: 20000 });
   await expect(host).not.toBeEmpty();
+  const viewportHeight = await page.evaluate(() => document.documentElement.clientHeight);
+  await expect
+    .poll(() =>
+      host.evaluate((element) =>
+        Math.round(element.getBoundingClientRect().height)
+      )
+    )
+    .toBeGreaterThanOrEqual(viewportHeight);
   return host;
 };
 

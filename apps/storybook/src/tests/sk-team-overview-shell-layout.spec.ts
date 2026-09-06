@@ -58,7 +58,9 @@ const loadComposition = async (
       root.style.color = "var(--sk-fg-body)";
       root.style.background = "var(--sk-surface-page)";
       root.style.fontFamily = "var(--sk-font-sans)";
-      root.innerHTML = html;
+      root.innerHTML = `<style>
+        sk-app-shell[data-testid="overview-shell"]::part(shell) { min-height: 100vh; }
+      </style>${html}`;
       const elements = root.querySelectorAll<HTMLElement>(
         "sk-app-shell, sk-personal-rail, sk-context-sidebar, sk-page-header, sk-button",
       );
@@ -114,6 +116,7 @@ for (const width of [1280, 1440]) {
           right: box.right,
           top: box.top,
           width: box.width,
+          height: box.height,
         };
       };
       return {
@@ -122,11 +125,24 @@ for (const width of [1280, 1440]) {
         context: rect("context"),
         content: rect("content"),
         viewportWidth: document.documentElement.clientWidth,
+        viewportHeight: document.documentElement.clientHeight,
         scrollWidth: document.documentElement.scrollWidth,
       };
     });
 
     expect(Math.round(geometry.shell.width)).toBe(width);
+    expect(Math.round(geometry.shell.height)).toBeGreaterThanOrEqual(
+      geometry.viewportHeight,
+    );
+    expect(Math.round(geometry.personal.height)).toBe(
+      Math.round(geometry.shell.height),
+    );
+    expect(Math.round(geometry.context.height)).toBe(
+      Math.round(geometry.shell.height),
+    );
+    expect(Math.round(geometry.content.height)).toBe(
+      Math.round(geometry.shell.height),
+    );
     expect(Math.round(geometry.personal.width)).toBe(56);
     expect(Math.round(geometry.context.width)).toBe(240);
     expect(Math.round(geometry.context.left)).toBe(
@@ -180,6 +196,109 @@ for (const width of [390, 414]) {
     ).toBe(width);
   });
 }
+
+test("390px composition preserves ordered keyboard access and visible focus for every control", async ({
+  page,
+}) => {
+  await loadComposition(page, 390);
+  await page.evaluate(() => {
+    const body = document.body;
+    body.tabIndex = -1;
+    body.focus();
+    body.removeAttribute("tabindex");
+  });
+
+  const controls = [
+    page.getByRole("link", { name: "Work queue" }),
+    page.getByRole("button", { name: "Notifications" }),
+    page.getByRole("link", { name: "Account" }),
+    page.getByRole("button", { name: "Log out" }),
+    page.getByRole("link", { name: LONG_CONTEXT_LABEL }),
+    page.getByRole("button", { name: "Project settings" }),
+    page.getByRole("button", { name: "Refresh evidence" }),
+  ];
+
+  for (const control of controls) {
+    await page.keyboard.press("Tab");
+    await expect(control).toBeVisible();
+    await expect(control).toBeFocused();
+    const focus = await control.evaluate((element) => {
+      const style = getComputedStyle(element);
+      return {
+        focusVisible: element.matches(":focus-visible"),
+        outlineStyle: style.outlineStyle,
+        outlineWidth: Number.parseFloat(style.outlineWidth),
+      };
+    });
+    expect(focus.focusVisible).toBe(true);
+    expect(focus.outlineStyle).not.toBe("none");
+    expect(focus.outlineWidth).toBeGreaterThan(0);
+  }
+});
+
+test("390px page header reflows a long title and multiple actions without overlap or overflow", async ({
+  page,
+}) => {
+  const host = await loadComposition(page, 390);
+  const evidence = await host.evaluate(async (element) => {
+    const header = element.querySelector<HTMLElement>("sk-page-header")!;
+    header.querySelector<HTMLElement>('[slot="title"]')!.textContent =
+      "A deliberately long consumer-owned page heading that must wrap without hiding the available actions";
+    header
+      .querySelector<HTMLElement>('[slot="actions"]')!
+      .insertAdjacentHTML(
+        "afterend",
+        '<button slot="actions" type="button">View details</button><button slot="actions" type="button">Open menu</button>',
+      );
+    await (header as HTMLElement & { updateComplete: Promise<unknown> })
+      .updateComplete;
+
+    const shadow = header.shadowRoot!;
+    const bounds = (node: Element) => {
+      const box = node.getBoundingClientRect();
+      return {
+        left: box.left,
+        right: box.right,
+        top: box.top,
+        bottom: box.bottom,
+        width: box.width,
+        height: box.height,
+      };
+    };
+    return {
+      header: bounds(shadow.querySelector('[part="header"]')!),
+      text: bounds(shadow.querySelector('[part="text"]')!),
+      meta: bounds(shadow.querySelector('[part="meta"]')!),
+      actions: [...header.querySelectorAll('[slot="actions"]')].map(bounds),
+      viewportWidth: document.documentElement.clientWidth,
+      scrollWidth: document.documentElement.scrollWidth,
+    };
+  });
+
+  expect(evidence.scrollWidth).toBe(evidence.viewportWidth);
+  expect(Math.round(evidence.header.width)).toBe(390);
+  expect(evidence.meta.top).toBeGreaterThanOrEqual(evidence.text.bottom);
+  expect(evidence.actions).toHaveLength(3);
+  for (const action of evidence.actions) {
+    expect(action.width).toBeGreaterThan(0);
+    expect(action.height).toBeGreaterThan(0);
+    expect(action.left).toBeGreaterThanOrEqual(evidence.header.left);
+    expect(action.right).toBeLessThanOrEqual(evidence.header.right);
+    expect(action.top).toBeGreaterThanOrEqual(evidence.meta.top);
+    expect(action.bottom).toBeLessThanOrEqual(evidence.meta.bottom);
+  }
+  for (const [left, a] of evidence.actions.entries()) {
+    for (const [offset, b] of evidence.actions.slice(left + 1).entries()) {
+      const right = left + offset + 1;
+      const overlaps =
+        a.left < b.right &&
+        a.right > b.left &&
+        a.top < b.bottom &&
+        a.bottom > b.top;
+      expect(overlaps, `actions ${left} and ${right} overlap`).toBe(false);
+    }
+  }
+});
 
 test("composition preserves landmarks, label bytes, grouping, opaque sync copy, and native actions", async ({
   page,

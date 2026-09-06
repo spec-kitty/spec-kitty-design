@@ -10,6 +10,10 @@ const storyFrameStyle = [
 ].join('; ');
 
 const linkStyle = 'color: var(--sk-fg-default); font: inherit;';
+const shellFixtureStyle = `
+  <style>
+    sk-app-shell::part(shell) { min-height: 100vh; }
+  </style>`;
 
 const composition = () => `
   <sk-app-shell>
@@ -29,7 +33,7 @@ const composition = () => `
   </sk-app-shell>`;
 
 const storyFrame = (content: string, className = '') =>
-  `<div${className ? ` class="${className}"` : ''} style="${storyFrameStyle}">${content}</div>`;
+  `<div${className ? ` class="${className}"` : ''} style="${storyFrameStyle}">${shellFixtureStyle}${content}</div>`;
 
 const meta: Meta = {
   title: 'Elements/SkAppShell',
