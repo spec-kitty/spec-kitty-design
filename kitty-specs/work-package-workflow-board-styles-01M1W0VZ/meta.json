@@ -1,0 +1,14 @@
+{
+  "created_at": "2026-09-06T18:49:37.692608+00:00",
+  "flattened": false,
+  "friendly_name": "work package workflow board styles",
+  "mission_id": "01M1W0VZ4WFQ55GNJYBA6GP5EN",
+  "mission_number": null,
+  "mission_slug": "work-package-workflow-board-styles-01M1W0VZ",
+  "mission_type": "software-dev",
+  "purpose_context": "This mission advances work package workflow board styles on mission/work-package-workflow-board-styles so stakeholders can track the work from mission creation onward.",
+  "purpose_tldr": "work package workflow board styles",
+  "slug": "work-package-workflow-board-styles-01M1W0VZ",
+  "target_branch": "mission/work-package-workflow-board-styles",
+  "topology": "single_branch"
+}
