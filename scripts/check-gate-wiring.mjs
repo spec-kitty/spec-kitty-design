@@ -26,7 +26,10 @@ const WORKFLOW = '.github/workflows/ci-quality.yml';
 // entire purpose is noticing a job that cannot block a merge. #80 added `release-gate`, which the
 // single-name version could not have seen: the gate could have gone red while the merge stayed
 // green, the exact condition this file exists to refuse. Every job that runs unconditionally and
-// must be strictly required belongs here.
+// must be strictly required belongs here. NOT `lint-code`: it is strictly required by the gate, but
+// its steps deliberately use continue-on-error (ESLint and Stylelint report into a summary and are
+// failed by a final step), so the whole-job payload audit below does not describe it. REQUIRED_LINT
+// is how a step in that job is held to running — see #193's two entries there.
 const JOBS = ['test', 'release-gate'];
 
 const raw = readFileSync(WORKFLOW, 'utf8');
@@ -144,6 +147,11 @@ else {
     // check-element-css-hygiene, in the gate that had just gained the description ratchet.
     [/node\s+scripts\/check-manifest-content\.mjs(?!\s*--selftest)(\s|$)/, 'the manifest content gate', 'scripts/check-manifest-content.mjs'],
     [/node\s+scripts\/check-manifest-content\.mjs\s+--selftest(\s|$)/, "the manifest gate's own probe table", 'scripts/check-manifest-content.mjs --selftest'],
+    // #193, both entries with the gate itself, per the two comments above. The ADR index gate
+    // is the only thing standing between `docs/architecture/decisions/` and an index that
+    // silently omits seven of fifteen records again.
+    [/node\s+scripts\/check-adr-index\.mjs(?!\s*--selftest)(\s|$)/, 'the ADR index gate', 'scripts/check-adr-index.mjs'],
+    [/node\s+scripts\/check-adr-index\.mjs\s+--selftest(\s|$)/, "the ADR index gate's own probe table", 'scripts/check-adr-index.mjs --selftest'],
   ];
 
   /** A step that cannot fail the job is a step that is not running (B, C, D, E). */

@@ -310,6 +310,16 @@ jobs:
       # a later PR adding `test_ok=...` to the skipped-tolerance block.
       - name: "[ENFORCED] The gate actually gates the test job (FR-014)"
         run: node scripts/check-gate-wiring.mjs
+      # The ADR index, held to the directory it indexes (#193). Seven of fifteen records
+      # were unindexed when this landed, including the three the elements-first programme
+      # cites most. It lives in `lint-code` rather than behind the `changes` filter on
+      # purpose: this job carries no `if:` and no path guard, so it is the one place a
+      # docs-only PR is certain to run — and a gate that never triggers is the same
+      # empty-set defect the script itself refuses, wearing a different hat.
+      - name: "[ENFORCED] ADR index gate self-test (#193)"
+        run: node scripts/check-adr-index.mjs --selftest
+      - name: "[ENFORCED] Every ADR has an index row, and every row an ADR (#193)"
+        run: node scripts/check-adr-index.mjs
       - name: "[ENFORCED] commitlint (FR-020)"
         if: github.event_name == 'pull_request'
         run: |
