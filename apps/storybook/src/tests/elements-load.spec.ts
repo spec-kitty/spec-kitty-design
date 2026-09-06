@@ -415,13 +415,50 @@ test.describe('sk-action-row browser contract', () => {
 
   test('keeps controlled selection valid in both branches and fits the 320px story', async ({ page }) => {
     let host = await actionRowStory(page, 'selected');
-    await expect(host.locator('[part="row"]')).toHaveAttribute('aria-current', 'true');
-    await expect(host.locator('button[part="trigger"]')).toHaveCount(1);
+    let row = host.locator('[part="row"]');
+    let rowHandle = await row.elementHandle();
+    expect(rowHandle).not.toBe(null);
+    await expect(row).toHaveAttribute('aria-current', 'true');
+    const selectableSnapshot = await host.ariaSnapshot();
+    expect(selectableSnapshot).toMatch(/^- button /m);
+    expect(selectableSnapshot).not.toMatch(/^- (checkbox|option|switch)\b/m);
+    expect(await row.evaluate((node) => (node as HTMLElement).tabIndex)).toBe(-1);
+
+    await host.locator('button[part="trigger"]').click();
+    expect(await host.evaluate((element) => (element as HTMLElement & { selected: boolean }).selected)).toBe(true);
+    await expect(row).toHaveAttribute('aria-current', 'true');
+
+    await host.evaluate(async (element) => {
+      const controlled = element as HTMLElement & { selected: boolean; updateComplete: Promise<unknown> };
+      controlled.selected = false;
+      await controlled.updateComplete;
+    });
+    expect(await row.evaluate((node, original) => node === original, rowHandle)).toBe(true);
+    expect(await row.getAttribute('aria-current')).toBe(null);
+    // Playwright 1.62 and Chromium's AX protocol omit aria-current even for native links.
+    // The stable accessibility structure plus the DOM carrier transition are asserted separately.
+    expect(await host.ariaSnapshot()).toBe(selectableSnapshot);
 
     host = await actionRowStory(page, 'non-selectable');
-    await expect(host.locator('[part="row"]')).toHaveAttribute('aria-current', 'true');
+    row = host.locator('[part="row"]');
+    rowHandle = await row.elementHandle();
+    expect(rowHandle).not.toBe(null);
+    await expect(row).toHaveAttribute('aria-current', 'true');
     await expect(host.locator('button[part="trigger"]')).toHaveCount(0);
     await expect(host.locator('[aria-selected],[aria-pressed],[role="checkbox"],[role="switch"]')).toHaveCount(0);
+    const nonSelectableSnapshot = await host.ariaSnapshot();
+    expect(nonSelectableSnapshot).not.toMatch(/^- (button|checkbox|option|switch)\b/m);
+    expect(nonSelectableSnapshot).toContain('- img "Spec Kitty repository"');
+    expect(await row.evaluate((node) => (node as HTMLElement).tabIndex)).toBe(-1);
+
+    await host.evaluate(async (element) => {
+      const controlled = element as HTMLElement & { selected: boolean; updateComplete: Promise<unknown> };
+      controlled.selected = false;
+      await controlled.updateComplete;
+    });
+    expect(await row.evaluate((node, original) => node === original, rowHandle)).toBe(true);
+    expect(await row.getAttribute('aria-current')).toBe(null);
+    expect(await host.ariaSnapshot()).toBe(nonSelectableSnapshot);
 
     await page.setViewportSize({ width: 320, height: 844 });
     host = await actionRowStory(page, 'long-content');
@@ -557,4 +594,10 @@ test('the section-header action story upgrades the reused sk-button to a native 
   const action = page.locator('sk-section-header sk-button[slot="action"]');
   await expect(action.locator('button')).toBeVisible();
   await expect(action).toHaveText('View all');
+});
+
+test('section-header preserves the consumer heading without adding a banner landmark', async ({ page }) => {
+  await page.goto('/iframe.html?id=elements-sksectionheader--with-metadata-and-action&viewMode=story');
+  await expect(page.getByRole('heading', { name: 'Repository activity', level: 3 })).toBeVisible();
+  await expect(page.getByRole('banner')).toHaveCount(0);
 });

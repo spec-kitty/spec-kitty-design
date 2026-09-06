@@ -42,7 +42,7 @@ test('the five consumer channels reach their named slots without inventing conte
   expect(element.shadowRoot!.textContent!.trim(), 'the component must not invent copy').toBe('');
 });
 
-test('the consumer heading owns its level and the shadow root creates no heading semantics', async () => {
+test('the consumer heading owns its level and the component creates no heading or banner semantics', async () => {
   const element = await mount('<h4 slot="title">Delivery return</h4>');
   const heading = element.querySelector('h4');
   const titleSlot = element.shadowRoot!.querySelector('slot[name="title"]') as HTMLSlotElement;
@@ -51,6 +51,7 @@ test('the consumer heading owns its level and the shadow root creates no heading
   expect(titleSlot.assignedElements()).toEqual([heading]);
   expect(element.shadowRoot!.querySelector('h1,h2,h3,h4,h5,h6')).toBe(null);
   expect(element.shadowRoot!.querySelector('[role="heading"]')).toBe(null);
+  expect(element.shadowRoot!.querySelector('header,[role="banner"]')).toBe(null);
   expect(partOf(element, 'title')?.getAttribute('role')).toBe(null);
 });
 

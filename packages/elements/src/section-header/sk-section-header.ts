@@ -39,13 +39,13 @@ export class SkSectionHeader extends LitElement {
   }
 
   render() {
-    return html`<header part="header" class="sk-section-header">
+    return html`<div part="header" class="sk-section-header">
       <div part="eyebrow" class="sk-section-header__eyebrow" hidden><slot name="eyebrow" @slotchange=${(event: Event) => this.#syncSlot(event.currentTarget as HTMLSlotElement)}></slot></div>
       <div part="title" class="sk-section-header__title" hidden><slot name="title" @slotchange=${(event: Event) => this.#syncSlot(event.currentTarget as HTMLSlotElement)}></slot></div>
       <div part="description" class="sk-section-header__description" hidden><slot name="description" @slotchange=${(event: Event) => this.#syncSlot(event.currentTarget as HTMLSlotElement)}></slot></div>
       <div part="metadata" class="sk-section-header__metadata" hidden><slot name="metadata" @slotchange=${(event: Event) => this.#syncSlot(event.currentTarget as HTMLSlotElement)}></slot></div>
       <div part="action" class="sk-section-header__action" hidden><slot name="action" @slotchange=${(event: Event) => this.#syncSlot(event.currentTarget as HTMLSlotElement)}></slot></div>
-    </header>`;
+    </div>`;
   }
 }
 
