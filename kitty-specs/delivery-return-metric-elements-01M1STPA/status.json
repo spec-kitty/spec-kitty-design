@@ -1,20 +1,20 @@
 {
-  "event_count": 14,
-  "last_event_id": "01M1VJDDENTZJZZT0EBANZVJCC",
-  "materialized_at": "2026-09-06T14:37:00.757356+00:00",
+  "event_count": 15,
+  "last_event_id": "01M1VJHFFDB2K3X9WBWNMQ6G60",
+  "materialized_at": "2026-09-06T14:39:13.901390+00:00",
   "mission_number": "",
   "mission_slug": "delivery-return-metric-elements-01M1STPA",
   "mission_type": "software-dev",
   "summary": {
     "approved": 2,
-    "blocked": 1,
+    "blocked": 0,
     "canceled": 0,
     "claimed": 0,
     "done": 0,
     "for_review": 0,
     "in_progress": 0,
     "in_review": 0,
-    "planned": 0
+    "planned": 1
   },
   "work_packages": {
     "WP01": {
@@ -80,11 +80,17 @@
       }
     },
     "WP03": {
-      "actor": "codex",
-      "force_count": 0,
-      "lane": "blocked",
-      "last_event_id": "01M1VJDDENTZJZZT0EBANZVJCC",
-      "last_transition_at": "2026-09-06T14:37:00.757356+00:00"
+      "actor": "user",
+      "force_count": 1,
+      "lane": "planned",
+      "last_event_id": "01M1VJHFFDB2K3X9WBWNMQ6G60",
+      "last_transition_at": "2026-09-06T14:39:13.901390+00:00",
+      "review_result": {
+        "feedback_path": "/home/jeroennouws/dev/team-kitty-missions/design-147/kitty-specs/delivery-return-metric-elements-01M1STPA/tasks/WP03-public-surfaces-and-verification-closure/review-cycle-1.md",
+        "reference": "review-cycle://delivery-return-metric-elements-01M1STPA/WP03-public-surfaces-and-verification-closure/review-cycle-1.md",
+        "reviewer": "user",
+        "verdict": "changes_requested"
+      }
     }
   }
 }
