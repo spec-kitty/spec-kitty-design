@@ -128,10 +128,10 @@
       "criterion_id": "FR-013",
       "description": "Public tones are limited to neutral, info, success and attention and do not encode Team Kitty workflow states.",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "sk-metric.ts:6-22,65-67 and React negative type tests; exact generic four-tone union passed",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T16:48:47.291959+00:00",
       "notes": "WP01/WP02 type and rendering assertions; WP03 manifest and forbidden-name scan."
     },
     {
