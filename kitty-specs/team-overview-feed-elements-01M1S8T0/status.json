@@ -1,0 +1,116 @@
+{
+  "event_count": 33,
+  "last_event_id": "01M1T0A99T70XH0FJDJ1C96AM5",
+  "materialized_at": "2026-09-06T00:01:29.402067+00:00",
+  "mission_number": "",
+  "mission_slug": "team-overview-feed-elements-01M1S8T0",
+  "mission_type": "software-dev",
+  "summary": {
+    "approved": 3,
+    "blocked": 0,
+    "canceled": 0,
+    "claimed": 0,
+    "done": 0,
+    "for_review": 0,
+    "in_progress": 0,
+    "in_review": 0,
+    "planned": 0
+  },
+  "work_packages": {
+    "WP01": {
+      "actor": "user",
+      "agent": "codex",
+      "agent_profile": "__resolved_profile_absent__",
+      "agent_profile_version": "__resolved_profile_version_absent__",
+      "force_count": 1,
+      "lane": "approved",
+      "last_event_id": "01M1SMRE2KWQ5H2K33R97HB3PK",
+      "last_transition_at": "2026-09-05T20:39:30.131432+00:00",
+      "model": "__resolved_model_absent__",
+      "notes": [
+        "Review passed: authoritative inline tone union regenerates self-contained CEM and Vue declarations; public alias retained; real-SFC and packed Vue consumer compiles pass at 35412ee"
+      ],
+      "provider": "__resolved_provider_absent__",
+      "review": null,
+      "review_result": {
+        "feedback_path": "/home/jeroennouws/dev/team-kitty-missions/design-146/kitty-specs/team-overview-feed-elements-01M1S8T0/tasks/WP01-presentational-feed-primitives/review-cycle-2.md",
+        "reference": "review-cycle://team-overview-feed-elements-01M1S8T0/WP01-presentational-feed-primitives/review-cycle-2.md",
+        "reviewer": "user",
+        "verdict": "approved"
+      },
+      "role": "reviewer",
+      "shell_pid": 2459900,
+      "shell_pid_created_at": "1788535195.17",
+      "subtasks": {
+        "T001": "done",
+        "T002": "done",
+        "T003": "done",
+        "T004": "done"
+      }
+    },
+    "WP02": {
+      "actor": "user",
+      "agent": "codex",
+      "agent_profile": "__resolved_profile_absent__",
+      "agent_profile_version": "__resolved_profile_version_absent__",
+      "force_count": 0,
+      "lane": "approved",
+      "last_event_id": "01M1SS13AA8DT5N243WCNT8DGZ",
+      "last_transition_at": "2026-09-05T21:54:08.331020+00:00",
+      "model": "__resolved_model_absent__",
+      "notes": [
+        "Ready for review: controlled action row, native activation and generated surfaces verified",
+        "Review passed at 421c4ca: exact controlled action-row contract; 13/13 focused and 277/277 full Vitest; seven named mutation arms; generated CSS/markup/CEM/React/Vue, manifest/entry selftests, type/style/part/story gates green; 177/177 axe; Chromium/Firefox action-row Playwright 6/6 plus composed prior final evidence."
+      ],
+      "provider": "__resolved_provider_absent__",
+      "review_result": {
+        "feedback_path": "/home/jeroennouws/dev/team-kitty-missions/design-146/kitty-specs/team-overview-feed-elements-01M1S8T0/tasks/WP02-controlled-action-row/review-cycle-1.md",
+        "reference": "review-cycle://team-overview-feed-elements-01M1S8T0/WP02-controlled-action-row/review-cycle-1.md",
+        "reviewer": "user",
+        "verdict": "approved"
+      },
+      "role": "reviewer",
+      "shell_pid": 2459900,
+      "shell_pid_created_at": "1788535195.17",
+      "subtasks": {
+        "T005": "done",
+        "T006": "done",
+        "T007": "done",
+        "T008": "done",
+        "T009": "done"
+      }
+    },
+    "WP03": {
+      "actor": "user",
+      "agent": "codex",
+      "agent_profile": "__resolved_profile_absent__",
+      "agent_profile_version": "__resolved_profile_version_absent__",
+      "force_count": 2,
+      "lane": "approved",
+      "last_event_id": "01M1T0A99T70XH0FJDJ1C96AM5",
+      "last_transition_at": "2026-09-06T00:01:29.402067+00:00",
+      "model": "__resolved_model_absent__",
+      "notes": [
+        "Ready for re-review after an evidence-only correction. Serial lane lane-a preserves approved WP01/WP02 co-ownership of shared behaviours.json, mutations.json, and packages/elements/SIZES.md; WP03 appended its generated React SC-006 evidence and regenerated aggregate size evidence at pinned lane SHA 276b696d4574358ae621aa7e7ec62b844032e4ca without changing approved product code. All 33 affected acceptance rows now cite that real SHA; the seven external rows remain pending.",
+        "Ready for re-review after scope-metadata remediation. Mission-target commit 03f281618b67a73e8da2cc298707b41af5aabb74 adds root CHANGELOG.md to WP03 owned_files, so the #146 changelog entry in pinned clean lane SHA 276b696d4574358ae621aa7e7ec62b844032e4ca is explicitly in scope. Product code and prior heavy evidence are unchanged; the corrected 36-pass/seven-external-pending acceptance matrix and all NI owner/results are preserved. Serial lane-a coordination for approved WP01/WP02 shared behaviours.json, mutations.json, and packages/elements/SIZES.md remains recorded.",
+        "Review passed at lane 276b696d4574358ae621aa7e7ec62b844032e4ca against target 13bd676794c0152879117a75ea68fc37bd1e7845. Cycle-1 evidence blockers remain closed: 36 passing criteria cite resolvable exact SHAs, seven external criteria remain pending, and the handoff explicitly coordinates serial lane-a ownership of behaviours.json, mutations.json, and packages/elements/SIZES.md. Cycle-2 scope blocker is closed: target commit 03f281618b67a73e8da2cc298707b41af5aabb74 adds CHANGELOG.md to WP03 owned_files, and every path changed after approved WP02 is now owned: CHANGELOG.md, behaviours.json, the React action-row fixture/type test, mutations.json, and SIZES.md. Target/lane were clean and diff checks pass. Prior exact-lane 278/278 test, 98/98 mutation, 8/8 guard, 177/177 axe, Chromium/Firefox 62/62, Storybook, generation and consumer evidence remains applicable because the lane and product code are unchanged. Anti-patterns: dead code PASS; synthetic fixture PASS; silent empty return N/A; FR coverage PASS with external visual pending; frozen surfaces PASS; locked decisions PASS; shared ownership PASS; production fragility N/A."
+      ],
+      "provider": "__resolved_provider_absent__",
+      "review": null,
+      "review_result": {
+        "feedback_path": "/home/jeroennouws/dev/team-kitty-missions/design-146/kitty-specs/team-overview-feed-elements-01M1S8T0/tasks/WP03-generated-consumers-and-final-gate/review-cycle-3.md",
+        "reference": "review-cycle://team-overview-feed-elements-01M1S8T0/WP03-generated-consumers-and-final-gate/review-cycle-3.md",
+        "reviewer": "user",
+        "verdict": "approved"
+      },
+      "role": "reviewer",
+      "shell_pid": 2459900,
+      "shell_pid_created_at": "1788535195.17",
+      "subtasks": {
+        "T010": "done",
+        "T011": "done",
+        "T012": "done"
+      }
+    }
+  }
+}
