@@ -46,7 +46,7 @@ phase: Phase 1 - sk-progress styles-only component
 history:
 - at: '2026-09-06T15:22:48Z'
   actor: system
-  action: Prompt authored during mission planning for
+  action: 'Prompt authored during mission planning for #210'
 agent_profile: frontend-freddy
 authoritative_surface: packages/styles/src/progress/
 create_intent:
