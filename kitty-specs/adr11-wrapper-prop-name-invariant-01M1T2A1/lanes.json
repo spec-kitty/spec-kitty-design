@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "mission_slug": "adr11-wrapper-prop-name-invariant-01M1T2A1",
+  "mission_id": "01M1T2A1A6E1C9FQQX4ZKVK0R8",
+  "mission_branch": "kitty/mission-adr11-wrapper-prop-name-invariant-01M1T2A1",
+  "target_branch": "mission/adr11-wrapper-prop-name-invariant",
+  "lanes": [
+    {
+      "lane_id": "lane-planning",
+      "wp_ids": [
+        "WP01"
+      ],
+      "write_scope": [
+        "docs/architecture/decisions/2026-09-02-11-verification-stack-and-wrapper-generation.md"
+      ],
+      "predicted_surfaces": [
+        "planning"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    }
+  ],
+  "computed_at": "2026-09-06T00:41:07.134517+00:00",
+  "computed_from": "dependency_graph+ownership",
+  "planning_artifact_wps": [
+    "WP01"
+  ],
+  "planning_commit_sha": "4b8fd14a171f649a56634e4293ff4cefd5f3ba55"
+}

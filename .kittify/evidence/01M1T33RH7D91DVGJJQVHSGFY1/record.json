@@ -1,0 +1,8 @@
+{
+  "event": "completed",
+  "invocation_id": "01M1T33RH7D91DVGJJQVHSGFY1",
+  "completed_at": "2026-09-06T00:56:35.118472+00:00",
+  "outcome": "done",
+  "closed_by": "agent",
+  "evidence_ref": "Pre-merge review of PR #190 (head a4d69c3) complete: 2 HIGH, 4 MEDIUM, 3 LOW findings; verdict REQUEST CHANGES. Report-only, no writes to the workspace."
+}
