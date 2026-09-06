@@ -138,10 +138,10 @@
       "criterion_id": "FR-014",
       "description": "Generated manifest, React wrappers and Vue declarations expose the complete contract; stages stays property-only and readonly with no any or unimported alias.",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "custom-elements.json React Vue outputs and react-consumer sk-evidence-chain.test.tsx:38-81; property identity reset and no attribute passed",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T16:48:49.019987+00:00",
       "notes": "WP03: ordered generation, exact generated-output inspection, type negatives and React runtime identity/reset fixture."
     },
     {
