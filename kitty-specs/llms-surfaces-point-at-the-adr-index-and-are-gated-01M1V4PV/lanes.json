@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "mission_slug": "llms-surfaces-point-at-the-adr-index-and-are-gated-01M1V4PV",
+  "mission_id": "01M1V4PVNE7RSM6KMZV3MC873Y",
+  "mission_branch": "kitty/mission-llms-surfaces-point-at-the-adr-index-and-are-gated-01M1V4PV",
+  "target_branch": "mission/llms-adr-index-pointer-and-gate",
+  "lanes": [
+    {
+      "lane_id": "lane-planning",
+      "wp_ids": [
+        "WP01"
+      ],
+      "write_scope": [
+        "kitty-specs/llms-surfaces-point-at-the-adr-index-and-are-gated/**"
+      ],
+      "predicted_surfaces": [
+        "planning"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    }
+  ],
+  "computed_at": "2026-09-06T10:43:13.625259+00:00",
+  "computed_from": "dependency_graph+ownership",
+  "planning_artifact_wps": [
+    "WP01"
+  ],
+  "planning_commit_sha": "5f35e23524bd2c89fd12439b7277bffbfb3752b9"
+}
