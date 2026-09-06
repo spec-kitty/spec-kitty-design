@@ -19,7 +19,7 @@
   "work_packages": {
     "WP01": {
       "actor": "user",
-      "agent": "codex",
+      "agent": null,
       "agent_profile": "__resolved_profile_absent__",
       "agent_profile_version": "__resolved_profile_version_absent__",
       "force_count": 1,
@@ -32,6 +32,7 @@
         "Review passed at lane head 60a72eb8b97d69159ea3b67b18e506be9ecc9992. Contract PASS: opaque scalar values, native dl/dt/dd semantics without heading, real sk-pill-tag tone mapping, fail-closed invalid state, compact presentation-only behavior, five exact parts, named constructed stylesheet, token-only CSS, exact six stories. Isolation PASS: one focused commit and exactly six owned files. Reversal evidence PASS: all five named production-source red/green pairs and nonzero/zero exits are recorded in the implementation handoff and final tests are mutation-sensitive by direct source-path inspection. Gates PASS: CSS generate/check, Chromium Vitest 7/7, elements typecheck, uncached elements lint with 0 errors/7 pre-existing warnings, stylelint, diff checks. WP anti-pattern checklist: dead code PASS; synthetic-fixture test PASS; silent empty return PASS; FR coverage PASS; frozen surface PASS; locked decision PASS; shared-file ownership PASS; production fragility PASS. No PR, merge, push, publish, deploy, or WP02/WP03 authority granted."
       ],
       "provider": "__resolved_provider_absent__",
+      "review": null,
       "review_result": {
         "feedback_path": "/home/jeroennouws/dev/team-kitty-missions/design-147/kitty-specs/delivery-return-metric-elements-01M1STPA/tasks/WP01-generic-metric-element/review-cycle-2.md",
         "reference": "review-cycle://delivery-return-metric-elements-01M1STPA/WP01-generic-metric-element/review-cycle-2.md",
@@ -39,13 +40,13 @@
         "verdict": "changes_requested"
       },
       "role": "reviewer",
-      "shell_pid": 2459900,
-      "shell_pid_created_at": "1788535195.17",
+      "shell_pid": null,
+      "shell_pid_created_at": null,
       "subtasks": {
-        "T001": "done",
-        "T002": "done",
-        "T003": "done",
-        "T004": "done"
+        "T001": "planned",
+        "T002": "planned",
+        "T003": "planned",
+        "T004": "planned"
       }
     },
     "WP02": {
