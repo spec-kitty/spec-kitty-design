@@ -1,4 +1,5 @@
 {
+  "baseline_merge_commit": "6c1b7ec59b325161ea46443c056a21649c4027a3",
   "created_at": "2026-09-05T22:23:12.138750+00:00",
   "flattened": false,
   "friendly_name": "delivery return metric elements",
@@ -9,6 +10,7 @@
   "purpose_context": "This mission advances delivery return metric elements on mission/delivery-return-metric-elements so stakeholders can track the work from mission creation onward.",
   "purpose_tldr": "delivery return metric elements",
   "slug": "delivery-return-metric-elements-01M1STPA",
+  "status_phase": "1",
   "target_branch": "mission/delivery-return-metric-elements",
   "topology": "lanes",
   "vcs": "git",
