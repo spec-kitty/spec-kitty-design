@@ -78,10 +78,10 @@
       "criterion_id": "FR-008",
       "description": "Completion is legible without relying on hue alone: the track/fill are distinguishable by boundary/shape, and the meta text is a second, non-colour channel.",
       "proof_type": "manual_qa",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-progress-html-default-dark-chromium-linux.png; apps/storybook/src/tests/visual.spec.ts-snapshots/sk-progress-html-light-chromium-linux.png; apps/storybook/src/tests/visual.spec.ts-snapshots/sk-progress-html-forced-colors-chromium-linux.png \u2014 track boundary/shape and visible meta text reviewed",
+      "pass_fail": "pass",
+      "verified_by": "codex-orry-wp208-210-0906a",
+      "verified_at": "2026-09-06T17:32:33.656471+00:00",
       "notes": "No colour-blindness simulation exists in this repo's harness. Visually reviewed against the rendered story (track border independent of fill colour, sk-progress__meta text present). Partial automated coverage: WP01 T008's forced-colors distinguishability assertion is the closest mechanical check, since it forces the same failure mode (colour-only signalling) to be visible under an achromatic rendering."
     },
     {
