@@ -587,7 +587,7 @@
       "criterion_id": "C-008",
       "description": "Preserve the serial integration protocol: refresh the clean planning target before first claim and before consolidation, use Spec Kitty-owned lane dependency propagation, and never rewrite a captured baseline.",
       "proof_type": "inspection",
-      "evidence": "second user-authorized rebase onto train 1f95a35 with safety/issue-148-pre-second-train-rebase-20260907-4d001b1; old/new ranges 90 commits; pre-consolidation baseline maps to current ancestor 21db869 and is recorded in meta.json; frozen planning pointer fdfc3dcc remains on preserved execution-lane refs as historical provenance; shared artifacts regenerated; 18 train anti-bypass plus 13 Storybook wiring probes green; main ccb055c5 unchanged",
+      "evidence": "third user-authorized rebase onto train 9b6b321 with safety/issue-148-pre-third-train-rebase-20260907-d52721d; range-diff preserves 108/108 patch-bearing commits as exact equivalents with zero additions, drops, or changes while the previous merge node is flattened; pre-consolidation baseline maps to current ancestor b002359 and is recorded in meta.json; frozen planning pointer fdfc3dcc remains on preserved execution-lane refs as historical provenance; shared artifacts regenerated; main ccb055c5 unchanged",
       "pass_fail": "pass",
       "verified_by": "codex",
       "verified_at": "2026-09-06T22:17:32.555520+00:00",
