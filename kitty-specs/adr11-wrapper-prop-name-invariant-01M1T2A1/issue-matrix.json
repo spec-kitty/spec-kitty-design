@@ -37,7 +37,7 @@
       "wp": null
     },
     "#189": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "commit edb3a41 amends ADR-11 with the wrapper prop-name invariant this issue raised",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -45,8 +45,8 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "verdict": "in-mission",
+      "wp": "WP01"
     },
     "#67": {
       "evidence_ref": "<link or commit>",
