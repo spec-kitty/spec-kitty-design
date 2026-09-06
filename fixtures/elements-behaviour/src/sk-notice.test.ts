@@ -169,7 +169,11 @@ test('an unknown tone and an unknown politeness both warn and degrade without lo
 test('[SC-006] activating the dismiss control fires sk-notice-dismiss exactly once', async () => {
   const element = await mount({ dismissible: true, tone: 'danger' });
   const seen: Event[] = [];
-  document.addEventListener('sk-notice-dismiss', (e) => seen.push(e));
+  // Listening on the HOST rather than on `document`, deliberately. The event is dispatched on the
+  // host (`this.dispatchEvent`), so a document listener would additionally depend on `bubbles` —
+  // and a mutation flipping that flag would then red this test as well as the [SC-008] one it
+  // belongs to. Counting at the target keeps "fires exactly once" measuring only the count.
+  element.addEventListener('sk-notice-dismiss', (e) => seen.push(e));
   dismissButton(element)!.click();
   expect(seen).toHaveLength(1);
 });
@@ -200,15 +204,27 @@ test('[SC-007] the dismiss detail is the documented shape', async () => {
 });
 
 test('[SC-008] the dismiss event bubbles and is composed as documented', async () => {
-  const element = await mount({ dismissible: true });
+  // THE NOTICE IS MOUNTED INSIDE A SHADOW ROOT, which is what makes `composed` observable rather
+  // than merely readable off the event object. The element dispatches on its own host, so with the
+  // notice in the light DOM a `document` listener would be reached by `bubbles` alone and a
+  // `composed: false` regression would print green — the flag would be asserted as a value while
+  // the behaviour it names went untested. A consumer whose notice lives in their own shadow root
+  // is the real case, and this is it.
+  const carrier = document.createElement('div');
+  document.body.append(carrier);
+  const root = carrier.attachShadow({ mode: 'open' });
+  const element = document.createElement('sk-notice') as Notice;
+  element.dismissible = true;
+  root.append(element);
+  await element.updateComplete;
+
   let evt: Event | undefined;
-  // Listening on `document` is what proves BOTH flags at once: the event has to cross the shadow
-  // boundary (composed) and then climb the light tree (bubbles) to arrive here at all.
   document.addEventListener('sk-notice-dismiss', (e) => {
     evt = e;
   });
   dismissButton(element)!.click();
-  expect(evt, 'the event never left the shadow root').toBeDefined();
+
+  expect(evt, 'the event never reached the document — it did not cross the boundary, or it did not bubble').toBeDefined();
   expect(evt!.bubbles).toBe(true);
   expect(evt!.composed).toBe(true);
   expect(evt!.cancelable).toBe(true);
@@ -256,7 +272,9 @@ test('[SC-012] the dismiss control is keyboard-operable and lands focus on the h
     // The platform synthesises the click from the key press on a real <button>; a synthetic
     // KeyboardEvent does not, so activation is asserted through the control's own click path.
     button.click();
-    expect(seen, `${key} did not activate the control`).toHaveLength(1);
+    // Activation, not arity: the count is [SC-006]'s claim, and asserting it here too would make
+    // the duplicate-dispatch mutation red two tests instead of the one it is about.
+    expect(seen.length, `${key} did not activate the control`).toBeGreaterThan(0);
     expect(element.isConnected).toBe(true);
     expect(document.activeElement, `${key}: focus was not left on the host`).toBe(element);
   }
@@ -383,10 +401,22 @@ test('every tone paints a distinct surface, and every tone differs between the t
 
 test('[SC-013] every declared part is present and targetable from outside', async () => {
   const element = await mount({ dismissible: true, tone: 'info', message: 'targetable' });
-  const parts = ['notice', 'marker', 'content', 'heading', 'body', 'actions', 'dismiss'];
-  for (const name of parts) {
+  // The rules are written out in FULL rather than built from a template literal, because
+  // scripts/check-part-ratchet.mjs scans test sources for the literal text `::part(<name>)` — a
+  // constructed selector records the part in expected-parts.json while leaving the ratchet unable
+  // to see the test that justifies the entry, which is exactly the drift that file exists to stop.
+  const parts: readonly (readonly [string, string])[] = [
+    ['notice', 'sk-notice::part(notice) { outline-style: dashed; }'],
+    ['marker', 'sk-notice::part(marker) { outline-style: dashed; }'],
+    ['content', 'sk-notice::part(content) { outline-style: dashed; }'],
+    ['heading', 'sk-notice::part(heading) { outline-style: dashed; }'],
+    ['body', 'sk-notice::part(body) { outline-style: dashed; }'],
+    ['actions', 'sk-notice::part(actions) { outline-style: dashed; }'],
+    ['dismiss', 'sk-notice::part(dismiss) { outline-style: dashed; }'],
+  ];
+  for (const [name, rule] of parts) {
     const style = document.createElement('style');
-    style.textContent = `sk-notice::part(${name}) { outline-style: dashed; }`;
+    style.textContent = rule;
     document.head.append(style);
     try {
       const part = partOf(element, name);

@@ -29,9 +29,10 @@
     "#146 WP01 adds three projection primitives. Section-header is slot-only; status-indicator publishes one tone attribute; entity-marker publishes one accessible label attribute. On the consolidated train-based mission target, total moves 78 -> 80.",
     "#146 WP02 adds sk-action-row with three controlled attributes: row-id, selectable and selected. Total moves 80 -> 83.",
     "#177 adds one documented sk-card status attribute. Total moves 83 -> 84.",
-    "#147 adds five sk-metric attributes and one property-only sk-evidence-chain field. On the refreshed train after #177, total moves 84 -> 90."
+    "#147 adds five sk-metric attributes and one property-only sk-evidence-chain field. On the refreshed train after #177, total moves 84 -> 90.",
+    "#178 adds sk-notice: five documented attributes (tone, announce, message, dismissible, dismiss-label), no property-only fields and no public methods. `#dismiss` is a PRIVATE method and is correctly absent from this count — dismissal is requested through the event, not by calling the element, because the consumer owns whether the notice exists."
   ],
-  "total": 90,
+  "total": 95,
   "elements": {
     "sk-action-row": {
       "attributes": 3,
@@ -107,6 +108,11 @@
       "attributes": 2,
       "properties": 0,
       "methods": 3
+    },
+    "sk-notice": {
+      "attributes": 5,
+      "properties": 0,
+      "methods": 0
     },
     "sk-page-header": {
       "attributes": 2,
