@@ -13,7 +13,7 @@
       "wp": null
     },
     "#180": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "its 3-entry hand-mirrored / folded-comparison approach is superseded by #187 on this branch; build-react-wrappers.mjs's own header comment documents the supersession (Pass 1 vs Pass 2)",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -21,8 +21,8 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
     },
     "#187": {
       "evidence_ref": "commit adf85d6 (branch point) already ships loadReactPropRenameMap() reading the real MAPPED_PROPS table with exact-casing comparison; re-verified against the shipped script before this mission's spec/ADR text was written",
