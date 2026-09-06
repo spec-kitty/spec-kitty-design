@@ -78,10 +78,10 @@
       "criterion_id": "FR-008",
       "description": "Every valid evidence stage renders through one actual sk-metric rather than duplicated label/value markup.",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "sk-evidence-chain.ts:4,107-114 and sk-evidence-chain.test.ts:127-150; one real sk-metric per stage passed",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T16:48:37.636754+00:00",
       "notes": "WP02: custom-element composition and exact stage-to-metric count assertions."
     },
     {
