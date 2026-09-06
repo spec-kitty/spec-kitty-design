@@ -2,7 +2,7 @@
   "mission_slug": "return-over-time-bar-chart-01M1QYBY",
   "mission_number": "",
   "mission_type": "software-dev",
-  "overall_verdict": "pending",
+  "overall_verdict": "pass",
   "criteria": [
     {
       "criterion_id": "FR-001",
@@ -627,10 +627,10 @@
       "criterion_id": "C-011",
       "description": "Run three independent profile-loaded Codex lenses after tasks and again pre-merge, at most two passes per point-cut, with exact-SHA evidence.",
       "proof_type": "manual_review",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "Three independent Codex final lenses PASS at exact d05274ca3ca43c64e54c68003828567100112523: lens 1 acceptance/schema/generated/architecture audit; lens 2 rebase/range/baseline/lane provenance audit; lens 3 product/API/accessibility/visual/framework audit. All report zero content findings and separate the still-pending exact-head CI release gate.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T23:31:00.543252+00:00",
       "notes": "Post-tasks evidence is planning-stage; wrap-up owns exact-final-head lens evidence.",
       "lane_owners": [],
       "terminal_owner": "mission-wrap-up"
