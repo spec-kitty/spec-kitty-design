@@ -13,7 +13,7 @@
       "wp": null
     },
     "#201": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "docs/architecture/sad-lite.md header row points at the gated ADR table; sixth instance filed as #226",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -21,8 +21,8 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "verdict": "fixed",
+      "wp": "WP03"
     },
     "#202": {
       "evidence_ref": "scripts/check-gate-wiring.mjs gatingConditionals/disjunctsOf; four defeats re-run by scripts/check-gate-wiring-defeats.mjs",
