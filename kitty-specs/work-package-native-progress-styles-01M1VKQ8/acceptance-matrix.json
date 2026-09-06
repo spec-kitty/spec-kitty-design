@@ -174,7 +174,7 @@
       "invariant_id": "C-004",
       "description": "No new --sk-* token category is introduced absent a demonstrated gap and recorded maintainer sign-off.",
       "verification_method": "custom_command",
-      "verification_command": "git diff --exit-code -- packages/tokens/src/tokens.css",
+      "verification_command": "git diff --exit-code origin/train/elements-first...HEAD -- packages/tokens/src/tokens.css",
       "result": "confirmed_absent",
       "evidence": "Command exited 0: "
     },
