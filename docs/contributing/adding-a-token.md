@@ -83,10 +83,59 @@ published artifact. Add the row to the table above in the same commit, and say i
 consumer the token exists and nothing about when to reach for it. `--sk-status-*` (#177) is the
 most recent example.
 
-**Aliases are the cheap way to add a category.** `--sk-status-<tone>` resolves entirely to tokens
-that already existed; the category adds meaning, not colour. If a new category needs new colour
-values, that is a palette decision and belongs to whoever owns the palette, not to the mission
-that happened to need it first.
+**Aliases are the cheap way to add a category.** `--sk-status-<tone>` is one `var()` deep: every
+one of the twelve resolves to a `--sk-surface-tint-*`, a `--sk-on-tint-*`, `--sk-surface-muted` or
+`--sk-fg-muted`, so the category adds meaning, not colour. Reach for that shape first.
+
+This paragraph used to end: *"If a new category needs new colour values, that is a palette decision
+and belongs to whoever owns the palette, not to the mission that happened to need it first."* That
+sentence forbade what the palette actually does, and #177 violated it in the same commit that made
+the alias claim above true one level up. Two of the twelve — `--sk-status-danger` and
+`--sk-on-status-danger` — bottom out in three literals that mission added
+(`--sk-surface-tint-rose` in both themes, `--sk-on-tint-rose` in light). The operator ratified all
+three under #217 with the wording, not the values, named as the thing that had to change.
+
+### Completing a family is not the same as introducing a hue
+
+**Completing an existing family from an existing hue is yours.** **Introducing a hue is not.** The
+line between them is a test you can run on your own case:
+
+1. **Does the family already exist, with a derivation rule its members visibly follow?** You are
+   filling a missing slot in a set like `--sk-surface-tint-*` / `--sk-on-tint-*` — not creating the
+   set. If you are creating it, stop; a new family is a palette decision.
+2. **Does the hue already exist in `--sk-color-*`?** Some brand-colour token already names it. If
+   your hue has no `--sk-color-*` entry, you are introducing a hue, and that is not yours whatever
+   the family looks like.
+3. **Can you derive the value and show the arithmetic?** The new value has to sit inside the band
+   the existing members occupy on every axis the family varies — measured, in a stated colour
+   space, not eyeballed — and the pair you add with it has to pass AA in both themes.
+
+**Three yeses and it is yours to add**, on these conditions: record the derivation and the measured
+bands *beside the declaration* rather than in the commit message, add the paired `--sk-on-*` in the
+same commit (the *Semantic pairing rule* below), and declare it in **both** theme blocks. Any no and
+the decision is not the mission's — file it and say what you measured.
+
+**Worked, in both directions:**
+
+- `--sk-surface-tint-rose` (#177, ratified #217) — **yes.** The family existed with four members;
+  the hue existed as `--sk-color-red`; the value was derived in HLS at the hue's own angle (0°) with
+  L and S inside the siblings' bands, and the arithmetic is in `tokens.css` beside the declaration.
+  What forced a literal rather than an alias is worth recording, because it is the shape of the
+  case: **no red or danger *surface* token existed to alias.** `--sk-color-blue-bg`,
+  `--sk-color-purple-bg` and `--sk-color-green-bg` exist and are byte-identical to
+  `--sk-surface-tint-sky`, `-lilac` and `-mint`; there is no `--sk-color-red-bg`, and
+  `--sk-color-red` is a **foreground** (#E97373, "validation errors", and the value of
+  `--sk-on-tint-rose`). `--sk-status-danger` therefore had nothing to point at.
+- **A teal status surface** — **no.** `--sk-surface-tint-*` exists and a derivation rule exists, so
+  question 1 passes; but there is no `--sk-color-teal`, so question 2 fails. That is a new hue in
+  the brand palette, and it stays out of the mission's hands however badly the mission needs it.
+
+**One thing this test is not, measured rather than assumed:** the tint family was never
+all-aliases, so rose is not the first literal in it. There is no `--sk-color-yellow-bg` —
+`--sk-surface-tint-butter: #2A2410` is a literal in the dark block too — and in the **light** block
+all five tint surfaces and all five on-tint inks are literals, because the `--sk-color-*-bg` tokens
+are dark-mode surfaces and have no light counterparts. A mission reading "the siblings are aliases,
+so mine must be too" would be reading something the file does not say.
 
 ## Semantic pairing rule
 

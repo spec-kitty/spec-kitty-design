@@ -86,9 +86,23 @@ Mixing an unpaired surface and foreground token is a visual identity violation �
 ### Operational status tones
 
 `--sk-status-neutral|info|success|attention|danger|recovery` and their `--sk-on-status-*`
-foregrounds are **semantic aliases** over the tint family — they add meaning, not colour, and
-every one resolves to a token above. The vocabulary is `sk-status-indicator`'s, one tone set for
-the whole library; `sk-card`'s `status` attribute is its first other consumer.
+foregrounds are **semantic aliases** over the tint family — they add meaning, not colour. Every one
+of the twelve is a single `var()` onto a token listed above: the five non-neutral surfaces onto
+`--sk-surface-tint-*`, their five inks onto `--sk-on-tint-*`, and the neutral pair onto
+`--sk-surface-muted` / `--sk-fg-muted`. The vocabulary is `sk-status-indicator`'s, one tone set for the whole library;
+`sk-card`'s `status` attribute is its first other consumer.
+
+**"Resolves to a token above" is true of this layer and not of the one beneath it.** This paragraph
+used to say every status token "resolves to a token above", full stop, which reads as though the
+chain ends in the brand palette. It does not. Three of the tint values a status token points at are
+literals rather than further aliases — `--sk-surface-tint-rose` in both themes and
+`--sk-on-tint-rose` in light (#177, ratified under #217) — so `--sk-status-danger` and
+`--sk-on-status-danger` bottom out in hex, and in the **light** theme every tint surface and every
+on-tint ink is a literal, because the `--sk-color-*-bg` tokens are dark-mode surfaces with no light
+counterparts. Nothing about consuming these tokens changes: you still use `--sk-status-<tone>` and
+never the value it resolves to. What changes is what you can assume when reading the file — if you
+are adding to the family rather than consuming it, the rule is in
+[`docs/contributing/adding-a-token.md`](../contributing/adding-a-token.md#completing-a-family-is-not-the-same-as-introducing-a-hue).
 
 Use `--sk-status-<tone>` as a surface and `--sk-on-status-<tone>` as the foreground or edge on
 it. Both pass AA in both themes against their own pair and against `--sk-fg-body`; the measured
