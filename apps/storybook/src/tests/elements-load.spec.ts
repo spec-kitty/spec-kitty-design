@@ -659,6 +659,13 @@ test.describe('sk-card forced colors', () => {
       const baseForced = forced.base;
       const tones = forced.tones;
       const remaps = baseForced.background !== normal.base.background;
+      // THE FLOOR'S OWN FLOOR. The next assertion is keyed on a hard-coded project name, and
+      // nothing made that name real: rename or drop `chromium` in playwright.config.ts and the
+      // branch below never runs, the collapse half goes quiet on all three engines, and the suite
+      // still reports green. Assert the project exists rather than trusting the string.
+      expect(test.info().config.projects.map((project) => project.name),
+        'the chromium floor below is keyed on this project name')
+        .toContain('chromium');
       // Chromium MUST remap. Without this the guard could go quiet everywhere and the case would
       // still pass, which is the shape this spec exists to refuse.
       if (browserName === 'chromium') {

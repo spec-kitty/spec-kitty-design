@@ -189,6 +189,16 @@
    colors remaps COLOR and leaves width alone, so that step survives untouched
    while the tint does not.
 
+   SAY THE CONSEQUENCE OUT LOUD: in forced colors the six tones are MUTUALLY
+   INDISTINGUISHABLE. All six grounds flatten to Canvas and all six borders remap
+   to CanvasText, so `success` and `danger` render identically; the only surviving
+   distinction is between a status card and a plain one, and it is carried
+   entirely by the 4px inline-start width. That is acceptable only because the
+   tone was never the carrier of meaning here — the slotted
+   <sk-status-indicator>'s TEXT is (see the Greyscale story, and #177). A future
+   author who wants the tones to differ in this mode is choosing a system color
+   per tone, which is a design decision and a different change from this one.
+
    There is deliberately NO `@media (forced-colors: active)` block here. One used
    to sit at this line, setting `border-inline-start-color: CanvasText` and
    restating `border-inline-start-width`, described as making the edge
