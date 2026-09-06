@@ -248,10 +248,10 @@
       "criterion_id": "C-003",
       "description": "The mission introduces no public sk-team-overview element.",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "Source-tree, package-entry, custom-elements manifest, React, and Vue scans find no sk-team-overview element or export.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T19:06:31.435313+00:00",
       "notes": "Manifest, entry, source-tree, and generated-surface scans."
     },
     {
