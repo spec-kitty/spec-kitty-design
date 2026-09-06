@@ -51,10 +51,10 @@
       "criterion_id": "FR-004",
       "description": "Render label and displayValue as exact literal text, never parse formatted text or create descendant markup from either field, and permit no input-driven side effect.",
       "proof_type": "automated_test",
-      "evidence": "packages/elements/src/elements/sk-bar-chart.test.ts literal-untrusted-text assertions prove exact text and zero descendants/side effects; unit and browser suites green",
+      "evidence": "fixtures/elements-behaviour/src/sk-bar-chart.test.ts literal-untrusted-text assertions prove exact label/displayValue text, zero descendants, and zero input-driven side effects; local unit/browser gates green at 375c187",
       "pass_fail": "pass",
       "verified_by": "codex",
-      "verified_at": "2026-09-06T21:30:08.728476+00:00",
+      "verified_at": "2026-09-06T22:37:11.354200+00:00",
       "notes": "Literal-untrusted-text behavior and browser assertions.",
       "lane_owners": [
         "WP01"
