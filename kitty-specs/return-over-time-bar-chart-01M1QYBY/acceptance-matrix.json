@@ -405,10 +405,10 @@
       "criterion_id": "NFR-005",
       "description": "Default and LightMode have identical ordered semantics before themed color comparison; documented data surfaces differ where intended, and forced colors preserves meaning, outline focus, and selection in both themes.",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "dark/light ordered semantics match before themed computed-color checks; forced-colors focus/selection and axe evidence green in both themes",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T21:30:52.594373+00:00",
       "notes": "Semantic-signature, computed-token, axe, and forced-colors evidence.",
       "lane_owners": [
         "WP01"
