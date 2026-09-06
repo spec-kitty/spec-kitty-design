@@ -257,9 +257,45 @@ declare module 'vue' {
       /** Whether the navigation panel is open. Reflected as the `open` attribute. */
       'open'?: boolean;
     }>;
-    /** A stateless layout for consumer-owned page orientation, metadata, and actions. */
+    /**
+     * A stateless layout for consumer-owned page orientation, metadata, and actions.
+     *
+     * Two orthogonal axes. `density` changes how much room the header takes; `sticky` changes
+     * whether it stays put while its scroll region scrolls. Neither implies the other, and the same
+     * five slots resolve at either density — there is no second header to author and no second
+     * markup path to drift.
+     *
+     * When `sticky` is set the HOST is the sticky box, so the header pins itself inside whatever
+     * scroll container its surroundings provide. Two viewport thresholds return it to normal flow —
+     * 720px of width and 480px of height — because a sticky header that eats a short viewport, or
+     * that overlaps a focused control below it, is worse than no sticky header at all. Nothing is
+     * dropped in that reflow.
+     *
+     * Consumers styling their own content under a sticky header should set
+     * `scroll-margin-block-start: var(--sk-layout-page-header-sticky-scroll-margin)` on the
+     * focusable elements in it, so a focused element scrolled into view is not obscured by the
+     * header (WCAG 2.4.11). That token is derived from the header's own sticky offset and compact
+     * block size rather than restated, so it cannot drift from the header's footprint.
+     *
+     * The `sync` slot's contents are rendered verbatim. This element never starts a timer, reads a
+     * clock, polls, observes scrolling, or computes a relative age: freshness belongs to the
+     * consumer, which owns the timer and supplies the resulting string.
+     */
     'sk-page-header': SkElement<{
-      // no declared props
+      /**
+       * Layout density, as `compact`. Omit for the default density. The compact form carries the
+       * same five slots on a single row, with the actions region pinned and the text truncating
+       * visually — the full text stays in the accessibility tree. An unknown value renders the
+       * default density and warns rather than throwing.
+       */
+      'density'?: 'compact' | undefined;
+      /**
+       * Whether the header pins itself to the top of its scroll region. Independent of `density`:
+       * a compact header need not stick and a sticky header need not be compact. Below 720px of
+       * viewport width or 480px of viewport height the header returns to normal flow and stacks,
+       * keeping the title, the metadata and the actions all present.
+       */
+      'sticky'?: boolean;
     }>;
     /** A labelled personal-navigation rail with consumer-owned controls in stable groups. */
     'sk-personal-rail': SkElement<{
