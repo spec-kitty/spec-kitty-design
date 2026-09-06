@@ -14,10 +14,10 @@
     },
     "#125": {
       "evidence_ref": "Follow-up: #125 remains the programme tracker. Mission wrap-up owns recording the #145 train PR as this mission's contribution and preserving #125's then-current issue state; it records any separately completed state as external rather than mutating it.",
-      "fr": "FR-001–FR-017",
-      "nfr": "NFR-001–NFR-008",
+      "fr": "FR-001\u2013FR-017",
+      "nfr": "NFR-001\u2013NFR-008",
       "repo": "spec-kitty/spec-kitty-design",
-      "sc": "SC-001–SC-012",
+      "sc": "SC-001\u2013SC-012",
       "scope": "Parent component-library conversion tracker; this mission contributes only the shell and button-extension slice.",
       "source_file": "spec.md",
       "title": "Finish shared component-library conversion and later Team Kitty adoption",
@@ -25,11 +25,11 @@
       "wp": "mission-wrap-up"
     },
     "#144": {
-      "evidence_ref": "Follow-up: #144 remains the Team overview design-system epic with sibling #146–#150 work. Mission wrap-up owns verifying #145 stayed inside the shell boundary, recording its train PR, and preserving #144's then-current issue state; it records any separately completed state as external rather than mutating it.",
-      "fr": "FR-001–FR-017",
-      "nfr": "NFR-001–NFR-008",
+      "evidence_ref": "Follow-up: #144 remains the Team overview design-system epic with sibling #146\u2013#150 work. Mission wrap-up owns verifying #145 stayed inside the shell boundary, recording its train PR, and preserving #144's then-current issue state; it records any separately completed state as external rather than mutating it.",
+      "fr": "FR-001\u2013FR-017",
+      "nfr": "NFR-001\u2013NFR-008",
       "repo": "spec-kitty/spec-kitty-design",
-      "sc": "SC-001–SC-012",
+      "sc": "SC-001\u2013SC-012",
       "scope": "Parent epic and binding library/application ownership boundary.",
       "source_file": "spec.md",
       "title": "Epic: stateless Team overview design-system elements",
@@ -37,15 +37,15 @@
       "wp": "mission-wrap-up"
     },
     "#145": {
-      "evidence_ref": "Issue #145 is this mission. WP01–WP04 own implementation evidence but never issue closure. Immediately after verifying the explicitly authorized PR merged into train/elements-first, mission/orchestrator wrap-up closes #145 as completed with the merged PR URL/number and train commit SHA.",
-      "fr": "FR-001–FR-017",
-      "nfr": "NFR-001–NFR-008",
+      "evidence_ref": "Implementation complete on refreshed target 21b24ffc50ec601acd91195c3dfcda879efed018: 302/302 tests, 109/109 mutations, 201/201 axe stories, 70/70 Chromium+Firefox; tracker closure remains strictly after verified train merge.",
+      "fr": "FR-001\u2013FR-017",
+      "nfr": "NFR-001\u2013NFR-008",
       "repo": "spec-kitty/spec-kitty-design",
-      "sc": "SC-001–SC-012",
+      "sc": "SC-001\u2013SC-012",
       "scope": "Mission issue for app-shell, personal-rail, context-sidebar, page-header, and the narrow sk-button extension.",
       "source_file": "spec.md",
       "title": "[TKO1] Team overview shell elements",
-      "verdict": "in-mission",
+      "verdict": "fixed",
       "wp": "mission-wrap-up"
     },
     "#146": {
@@ -68,7 +68,7 @@
       "sc": "SC-012",
       "scope": "Parallel sibling outside the shell and button-extension authored scope.",
       "source_file": "spec.md",
-      "title": "[TKO3] delivery-return-metric-elements — metric and evidence-chain",
+      "title": "[TKO3] delivery-return-metric-elements \u2014 metric and evidence-chain",
       "verdict": "deferred-with-followup",
       "wp": "mission-wrap-up"
     },
@@ -80,7 +80,7 @@
       "sc": "SC-012",
       "scope": "Parallel sibling outside the shell and button-extension authored scope.",
       "source_file": "spec.md",
-      "title": "[TKO4] return-over-time bar-chart — accessible controlled data visualization",
+      "title": "[TKO4] return-over-time bar-chart \u2014 accessible controlled data visualization",
       "verdict": "deferred-with-followup",
       "wp": "mission-wrap-up"
     },
