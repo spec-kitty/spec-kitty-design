@@ -14,16 +14,41 @@ it records.
 | WP03 | The amendment, its authorization, and the records that pointed at the gap | FR-005, C-002, C-003 | WP01, WP02 |
 | WP04 | `ceilingSeconds`, raised on measured growth | FR-006, NFR-003, C-001 | — |
 
-## Phase 1 — the two entries
+### Phase 1 — the two entries
 
-- **WP01** — mint SC-016 from ADR-14's three measured bugs; register, pin, test, mutate.
-- **WP02** — mint SC-017 from #182's two drop blocks; register, pin, test, mutate twice.
+## WP01 — SC-016, delegate/rendered-control correspondence
 
-## Phase 2 — the record
+Mint SC-016 from ADR-14's three measured bugs; register it, pin it in `config-contract`, test it
+against the rendered control, and prove it with a re-keyed red-first arm. No existing arm gains
+`expectCollateral`.
 
-- **WP03** — ADR-11's amendment section and item list; ADR-14's stale Negative consequence.
+- T001 — the correspondence test, four intended states, `badInput` excluded with the reason stated
+- T002 — dual-mark the existing probe-ordering test `[SC-003][SC-016]`
+- T003 — `behaviours.json` + `tests/node/config-contract.test.ts`
+- T004 — re-key the type-before-value arm to SC-016; re-site the SC-013 arm onto `inputmode`
 
-## Phase 3 — the budget
+## WP02 — SC-017, the responsive threshold
 
-- **WP04** — raise `ceilingSeconds`, record the three measurements, the arithmetic, the headroom
-  and the test count. `selftestCeilingSeconds` untouched.
+Mint SC-017 from #182's two drop blocks; mark the sheet-reading test, add a live arm at the lane
+viewport driven by the attribute rather than the property, and prove it with one mutation per
+threshold against the generated stylesheet.
+
+- T001 — mark and extend `sticky is declared on the host and dropped at both documented thresholds`
+- T002 — `behaviours.json` + `tests/node/config-contract.test.ts`
+- T003 — two arms, width and height, against `sk-page-header.css.js`
+
+### Phase 2 — the record
+
+## WP03 — the amendment, its authorization, and the records that pointed at the gap
+
+- T001 — ADR-11 items 10 and 11
+- T002 — the authorization subsection, citing the #196/#204 ruling by name
+- T003 — ADR-14's now-stale Negative consequence, corrected and named as a correction
+
+### Phase 3 — the budget
+
+## WP04 — `ceilingSeconds`, raised on measured growth
+
+- T001 — the raise and its arithmetic
+- T002 — the three measurements, the straddle, the test count, the headroom.
+  `selftestCeilingSeconds` untouched.
