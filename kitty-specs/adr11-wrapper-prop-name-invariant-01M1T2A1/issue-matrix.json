@@ -37,7 +37,7 @@
       "wp": "WP01"
     },
     "#189": {
-      "evidence_ref": "commit edb3a41 amends ADR-11 with the wrapper prop-name invariant this issue raised",
+      "evidence_ref": "commit edb3a41 amends ADR-11 with the wrapper prop-name invariant, worked example, contract-doc obligation, REACT_PROPS/rename-table consolidation assessment, and operator-override notice this issue asked for",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -45,7 +45,7 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "in-mission",
+      "verdict": "fixed",
       "wp": "WP01"
     },
     "#67": {
