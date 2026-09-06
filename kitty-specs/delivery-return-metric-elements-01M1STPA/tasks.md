@@ -138,14 +138,14 @@ WP03 must start from the recorded latest-train + approved-WP01/WP02 integrated t
 4. Extend React type tests and a dedicated React runtime fixture. Prove exact frozen-array identity, replacement, removal reset, no `stages` attribute, scalar metric props, literal tone rejection, and no `any`; do not change the generic generator unless a distinct scoped defect is escalated.
 5. Add `scripts/check-component-public-contract.mjs` with explicit per-tag part expectations and missing/extra selftests; add parsed `scripts/check-component-token-literals.mjs` with red selftests for every governed property class; add `scripts/build-storybook-with-budget.mjs` with a 180-second real-build ceiling and cheap success/nonzero/timeout selftests. No dependency or broad unrelated gate rewrite is allowed.
 6. Add functional Storybook assertions for semantics, counts/order, narrow reflow, and nonblank renders. Prove `ApprovedExample` contains real `sk-card`/`sk-grid` and nested real pill tags, each tag has a token-driven computed dark/light difference on equivalent content, and an active `forcedColors: 'active'` Chromium context preserves connector/stage distinction. Add visual entries for planned states; local actuals are diagnostic only.
-7. Run all deterministic, content, exact-part, parsed-token, entry, package export, release-graph, type, quality, test, budgeted Storybook, axe, and serial mutation gates. Run the full existing mutation fleet after lighter gates, with no new registry arm expected.
+7. Run all deterministic, content, exact-part, parsed-token, entry, package export, release-graph, type, quality, test, budgeted Storybook, axe, and serial mutation gates. Run the full mutation fleet after lighter gates, including the governed SC-013 registry remediation: exactly one part-removal arm for `sk-metric` and one for `sk-evidence-chain`, with no new behavior id or SC-014 pair.
 8. Record exact command outputs, counts, elapsed times, generated-file identity, integration-base SHAs, and diff scope. Return one clean internal commit for review. Do not push, open/merge a PR, rebase the mission target, or claim CI/WebKit/authoritative visual/squad/maintainer gates.
 
 ### Review boundaries
 
 - Generated artifacts move only from these two elements or the explicitly recorded latest-train integration base; no sibling authored component source may change.
 - Root/design changelogs may name the public generic tags and fixture purpose, not publish Team Kitty domain behavior.
-- No behavior/mutation entries are added for presentational components. The full fleet must still pass.
+- The only behavior/mutation entries are the operator-authorized SC-013 subjects and one exact non-root part-removal arm per new element required by the repository config contract. No new behavior id, SC-014 pair, or interactive behavior is added; the full fleet must pass.
 - No token/dependency/lockfile/ADR/app change. Any such need blocks for explicit scope.
 - WP03 review is not merge authority. If train moves, WP03 must be rerun/re-reviewed on the new supported integration base. Tier C and maintainer evidence are taken only at the eventual exact PR head.
 

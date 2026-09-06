@@ -11,7 +11,7 @@ Add two generic, presentational elements: `sk-metric` renders one supplied label
 
 Both components remain element-only. The chain's structured data cannot be represented honestly as attributes, and its static form would have to duplicate the metric implementation. The metric's optional annotation deliberately composes the existing `sk-pill-tag`; a no-JavaScript copy would either leave that child unupgraded or restate its markup. ADR-10 permits no markup module where no genuine static form exists.
 
-The implementation reuses the existing Lit, manifest, React/Vue generation, part/story ratchets, `sk-card`, `sk-grid`, and `sk-pill-tag` machinery. No dependency, token, behavior-registry subject, event, application import, or Team-specific aggregate is added. Three sequential work packages isolate component authorship from the serial shared-artifact integration point. WP01/WP02 may proceed after landed prerequisite #79; WP03 is held until #145/#146 land and the approved authored WPs have been consolidated onto a freshly refreshed train base.
+The implementation reuses the existing Lit, manifest, React/Vue generation, part/story ratchets, `sk-card`, `sk-grid`, and `sk-pill-tag` machinery. No dependency, token, interactive behavior, event, application import, or Team-specific aggregate is added. The governed implementation remediation records only the two required SC-013 styling-surface subjects and matching part-removal mutations described below. Three sequential work packages isolate component authorship from the serial shared-artifact integration point. WP01/WP02 may proceed after landed prerequisite #79; WP03 is held until #145/#146 land and the approved authored WPs have been consolidated onto a freshly refreshed train base.
 
 ## Technical Context
 
@@ -206,7 +206,7 @@ Visual coverage targets approved dark, equivalent light, compact metric, long co
 
 ### Behavior registry decision
 
-Do not add `sk-metric` or `sk-evidence-chain` subjects to `behaviours.json` or `mutations.json`. These components own none of ADR-11's event, form, upgrade-order, slot, focus/keyboard, or selection behaviors. SC-013 part targeting and SC-014 style adoption are still directly tested, but no new registry pair is declared because the mission adds no mutable/interactive behavior and the existing registry is not a generic acceptance-test catalogue.
+The reviewed plan originally prohibited any `behaviours.json` or `mutations.json` entry because these components own none of ADR-11's event, form, upgrade-order, slot, focus/keyboard, or selection behaviors. During implementation, the repository's config-contract gate proved that every public element must register its externally targetable styling surface under SC-013 and that every declared `(id, subject)` pair must have one matching mutation. The operator authorized the narrow remediation on 2026-09-06: record `sk-metric` and `sk-evidence-chain` only as SC-013 subjects, with one exact non-root part-removal mutation each. This does not create a new behavior id, SC-014 claim, mutable/interactive behavior, or broader registry ownership; it reconciles the enforced repository contract with the approved focused part tests.
 
 ### Focused element evidence
 

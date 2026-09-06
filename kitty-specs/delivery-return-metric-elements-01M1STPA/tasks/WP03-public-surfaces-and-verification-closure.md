@@ -157,7 +157,7 @@ Never hand-edit generated files to meet these assertions. Correct approved autho
 
 1. Extend `packages/react/type-tests/wrappers.type-test.tsx` with accepted metric scalar/literal props and readonly stage arrays plus `@ts-expect-error` cases for unsupported tones/malformed stages. Require no explicit/inferred `any`.
 2. Add `fixtures/react-consumer/src/sk-evidence-chain.test.tsx`. In React StrictMode, assign a frozen sentinel array, verify the exact property identity after upgrade, replace with a second reference, then omit it and require a fresh frozen empty array. At every step require no `stages` attribute and no caller mutation.
-3. Do not add behavior/mutation registry pairs. This fixture verifies the generic property-only seam already shipped by #149; it does not create an event or interactive behavior.
+3. This fixture verifies the generic property-only seam already shipped by #149; it does not create an event or interactive behavior. The operator-authorized remediation records only `sk-metric` and `sk-evidence-chain` as SC-013 styling-surface subjects, with one exact non-root part-removal mutation each, because the repository config contract requires every public element and every declared pair to be covered. Do not add a new behavior id, SC-014 pair, or any broader registry entry.
 4. Add focused Playwright specs that load the real Storybook IDs and fail on blank/non-upgraded output. Assert metric definition semantics, chain ordered-list/direct-item semantics, exact two/four/six counts/order, composed metric count, connector count, invalid state, and narrow CSS direction without DOM order change.
 5. In `ApprovedExample`, assert actual existing `SK-CARD` and `SK-GRID` wrapper tags around the chain and actual nested `SK-PILL-TAG` descendants for annotated stages. Presence of lookalike classes or markup does not pass.
 6. Compare equivalent default-dark/`LightMode` stories for each new tag: content and semantic counts must agree, while at least one explicitly named approved token-driven computed property differs. A wrapper class alone is not evidence.
@@ -216,11 +216,11 @@ npx playwright test apps/storybook/src/tests/sk-evidence-chain.spec.ts --project
 PW_INCLUDE_VISUAL=1 npx playwright test apps/storybook/src/tests/visual.spec.ts --project=chromium
 ```
 
-The Storybook wrapper's success is the only accepted build-duration evidence; separately timing a plain build is insufficient. The visual command may fail only because approved baselines are absent; record the actual output paths and treat them as diagnostic, not as committed evidence. WebKit is required by final unqualified CI but local system-library installation is not authorized. The full mutation fleet must pass unchanged; no new arm/count is expected.
+The Storybook wrapper's success is the only accepted build-duration evidence; separately timing a plain build is insufficient. The visual command may fail only because approved baselines are absent; record the actual output paths and treat them as diagnostic, not as committed evidence. WebKit is required by final unqualified CI but local system-library installation is not authorized. The full mutation fleet must pass with the governed two-arm SC-013 addition and no other mission-created registry delta.
 
 ### T013 — Exact-scope closeout
 
-1. Inspect status/diff against the assigned dependency base. Ensure no sibling authored component, Team Kitty source, token, dependency/lockfile, ADR, behavior/mutation registry, static markup, or other mission dossier changed.
+1. Inspect status/diff against the assigned dependency base. Ensure no sibling authored component, Team Kitty source, token, dependency/lockfile, ADR, static markup, or other mission dossier changed. The behavior/mutation registry delta must be exactly the governed two-subject/two-arm SC-013 remediation and nothing else from this mission.
 2. Re-run generators/checks after the targeted commit so exact-head evidence is not taken only on unstaged bytes.
 3. Record command, exit status, relevant counts, exact manifest part sets, parsed token-class selftests, budget-wrapper duration/ceiling, axe story/violation count, tests, mutation count/time, active forced-colors result, per-tag dark/light computed-property deltas, and any qualified local visual/WebKit limitation without claiming unavailable gates passed.
 4. Use Spec Kitty's targeted safe-commit/review flow and require a clean tracked/staged/untracked worktree. Do not push or open/merge a PR.
@@ -238,7 +238,7 @@ The Storybook wrapper's success is the only accepted build-duration evidence; se
 - [ ] Approved composition contains real card/grid/pill tags, each tag has measured token-driven dark/light variance, and active forced colors preserves stage/connector distinction.
 - [ ] Storybook's real build passes the fail-closed 180-second wrapper and its cheap success/nonzero/timeout selftests.
 - [ ] Release graph/changelogs mention exactly the new public tags without unrelated scope.
-- [ ] Full repository tests and existing mutation fleet pass serially; no behavior/mutation subject was added.
+- [ ] Full repository tests and the 134-arm combined mutation fleet pass serially; the only mission registry additions are the governed `sk-metric`/`sk-evidence-chain` SC-013 subjects and their exact part-removal arms.
 - [ ] All deterministic/type/quality/build/content gates pass at the WP03 commit.
 - [ ] Diff contains only `owned_files`, one focused commit, no push/PR/merge/close/publish/deploy.
 - [ ] Closeout handoff explicitly leaves post-WP03 train-stability recovery, CI/WebKit, authoritative baselines, Tier C, maintainer, and merge authority unclaimed.
@@ -255,7 +255,7 @@ The Storybook wrapper's success is the only accepted build-duration evidence; se
 
 ## Reviewer guidance
 
-Reject for an unrecorded/non-current integration base; any out-of-frontmatter diff; hand-edited generated file; missing/runtime-erased entry; unexported CSS subpath; aggregate-only rather than exact per-tag part evidence; incomplete parsed token-class selftests; untyped/attributed stage prop; stale React reset; lookalike rather than literal card/grid/pill composition; wrapper-only rather than computed theme evidence; missing active forced-colors proof; measured but unenforced Storybook budget; Team-specific public API/default; behavior/mutation registration; local baseline substitution; sibling authored change; new token/dependency; incomplete gate evidence; dirty worktree; push/PR; or a claim that WP03 approval authorizes merge. Approval covers WP03 only.
+Reject for an unrecorded/non-current integration base; any out-of-frontmatter diff; hand-edited generated file; missing/runtime-erased entry; unexported CSS subpath; aggregate-only rather than exact per-tag part evidence; incomplete parsed token-class selftests; untyped/attributed stage prop; stale React reset; lookalike rather than literal card/grid/pill composition; wrapper-only rather than computed theme evidence; missing active forced-colors proof; measured but unenforced Storybook budget; Team-specific public API/default; behavior/mutation registration beyond the governed two-subject/two-arm SC-013 remediation; local baseline substitution; sibling authored change; new token/dependency; incomplete gate evidence; dirty worktree; push/PR; or a claim that WP03 approval authorizes merge. Approval covers WP03 only.
 
 ## Activity Log
 
