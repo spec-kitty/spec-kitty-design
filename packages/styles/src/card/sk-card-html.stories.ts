@@ -7,7 +7,18 @@ import '../pill-tag/sk-pill-tag.css';
 import { SkPillTagHTML, SkPillTagGreenHTML } from '../pill-tag';
 import './sk-card.css';
 import type { Meta, StoryObj } from '@storybook/web-components';
-import { SkCardHTML, SkCardBlueHTML, SkCardPurpleHTML, SkCardInsetHTML } from './index';
+import {
+  SkCardHTML,
+  SkCardBlueHTML,
+  SkCardPurpleHTML,
+  SkCardInsetHTML,
+  SkCardStatusNeutralHTML,
+  SkCardStatusInfoHTML,
+  SkCardStatusSuccessHTML,
+  SkCardStatusAttentionHTML,
+  SkCardStatusDangerHTML,
+  SkCardStatusRecoveryHTML,
+} from './index';
 
 /** Guarded, for the reason the button story states: String.replace returns its input unchanged
  *  on no match, so an unguarded swap renders "Label" silently. One of nine such helpers across
@@ -112,6 +123,45 @@ export const BlogCardExample: Story = {
   `),
 };
 
+/**
+ * The status axis on the NO-JAVASCRIPT path (#177).
+ *
+ * Same six modifiers the element reflects, from the same generated exports — which is the
+ * point: the Django/Jekyll/Hugo consumer gets the operational tone without shipping a runtime,
+ * and there is one authored source behind both forms.
+ *
+ * Each card's label is the meaning. The surface and the edge are presentation, and neither is
+ * asked to carry "this run failed" on its own. The element-layer story composes the real
+ * `<sk-status-indicator>` here; the static path leaves the label to the consumer's own markup,
+ * which is why these say what they are in plain text.
+ */
+const STATUS_FORMS: readonly (readonly [string, string])[] = [
+  [SkCardStatusNeutralHTML, 'Neutral — not started'],
+  [SkCardStatusInfoHTML, 'Info — collecting evidence'],
+  [SkCardStatusSuccessHTML, 'Success — verification complete'],
+  [SkCardStatusAttentionHTML, 'Attention — review needed'],
+  [SkCardStatusDangerHTML, 'Danger — delivery blocked'],
+  [SkCardStatusRecoveryHTML, 'Recovery — recovering'],
+];
+
+const statusRow = (light = false) => `
+  <div${light ? ' class="sk-light"' : ''} style="background: var(--sk-surface-page); padding: var(--sk-space-6); display: flex; gap: var(--sk-space-4); flex-wrap: wrap;">
+    ${STATUS_FORMS.map(([markup, body]) => wrap(markup, body)).join('')}
+  </div>
+`;
+
+export const Statuses: Story = {
+  render: () => statusRow(),
+};
+
+/**
+ * Meaning without colour. The same six static cards, desaturated in the browser: each one
+ * still says what it is, because the text does the work and the tone only tints the box.
+ */
+export const StatusesGreyscale: Story = {
+  render: () => `<div style="filter:grayscale(1) contrast(1.05);">${statusRow()}</div>`,
+};
+
 export const LightMode: Story = {
   parameters: { backgrounds: { default: 'sk-light' } },
   render: () => `
@@ -121,5 +171,6 @@ export const LightMode: Story = {
       ${wrap(SkCardPurpleHTML, 'Purple')}
       ${wrap(SkCardInsetHTML, 'Inset')}
     </div>
+    ${statusRow(true)}
   `,
 };
