@@ -1,7 +1,7 @@
 {
   "rows": {
     "#112": {
-      "evidence_ref": "Follow-up: #112 remains open; mission wrap-up must inspect latest train and add/test #148's formal conformance row if the artifact exists, otherwise record verified deferral.",
+      "evidence_ref": "Verified at train/elements-first 079fd96782a9e512b6fb803d532a56fb6da7f131 on 2026-09-07: #112 remains open and neither conformance-matrix.json nor scripts/build-conformance-matrix.mjs exists. #148 therefore records the required explicit deferral and relies on the current behaviour, mutation, manifest, React, Vue, packed-consumer, axe, and cross-browser gates; it does not manufacture #112's separately owned artifact.",
       "fr": "FR-022",
       "nfr": null,
       "repo": "spec-kitty/spec-kitty-design",
@@ -49,31 +49,31 @@
       "wp": null
     },
     "#146": {
-      "evidence_ref": "Follow-up: #146 remains a separate sibling mission; #148 must not modify its section-header, action-row, status-indicator, or entity-marker sources.",
+      "evidence_ref": "https://github.com/spec-kitty/spec-kitty-design/pull/206 — merged into train/elements-first as 32fa4950b88941f9a78759e3e911dfa510d10a13 and issue #146 closed on 2026-09-06; #148 preserves its section-header, action-row, status-indicator, and entity-marker sources.",
       "fr": null,
       "nfr": null,
       "repo": "spec-kitty/spec-kitty-design",
       "sc": null,
-      "scope": "Open sibling mission represented by the #145 through #147 ownership range in C-003.",
+      "scope": "Closed sibling mission represented by the #145 through #147 ownership range in C-003.",
       "source_file": "spec.md",
       "title": "[TKO2] team-overview-feed-elements \u2014 section-header, action-row, status-indicator, entity-marker",
-      "verdict": "deferred-with-followup",
+      "verdict": "verified-already-fixed",
       "wp": null
     },
     "#147": {
-      "evidence_ref": "Follow-up: #147 remains a separate sibling mission; #148 must not modify its metric or evidence-chain sources.",
+      "evidence_ref": "https://github.com/spec-kitty/spec-kitty-design/pull/223 — merged into train/elements-first as 495d210cbd625cec57eca98802ded186a3669dbc and issue #147 closed on 2026-09-06; #148 preserves its metric and evidence-chain sources, with the post-rebase visual boundary repaired in e9f7c3f7cee4974cc396d45b94018160a555f832.",
       "fr": null,
       "nfr": null,
       "repo": "spec-kitty/spec-kitty-design",
       "sc": null,
-      "scope": "Open sibling mission whose owned sources are excluded by #148 C-003.",
+      "scope": "Closed sibling mission whose owned sources are excluded by #148 C-003.",
       "source_file": "spec.md",
       "title": "[TKO3] delivery-return-metric-elements \u2014 metric and evidence-chain",
-      "verdict": "deferred-with-followup",
+      "verdict": "verified-already-fixed",
       "wp": null
     },
     "#148": {
-      "evidence_ref": "WP01 authored implementation is independently approved; WP03 generated integration and lane gates are implemented at f4b45f698b7618877a776ed63b84a3c11cfcbe56 with 36 lane-owned acceptance rows passed. Independent WP03 review and mission-wrap-up exact-head/CI/PR criteria remain pending.",
+      "evidence_ref": "WP01 and WP03 are independently approved and consolidated. The aggregate was rebased onto train/elements-first 079fd96782a9e512b6fb803d532a56fb6da7f131, all shared artifacts regenerated, and the cross-mission visual-test boundary repaired in e9f7c3f7cee4974cc396d45b94018160a555f832. Local post-rebase unit/browser, type, lint, style, and static gates pass; exact-head PR CI, visual-baseline provenance, and final three-lens evidence remain mission-wrap-up work.",
       "fr": "FR-001\u2013FR-024",
       "nfr": "NFR-001\u2013NFR-010",
       "repo": "spec-kitty/spec-kitty-design",
@@ -97,7 +97,7 @@
       "wp": "WP01"
     },
     "#150": {
-      "evidence_ref": "Follow-up: #150 is the downstream final Team overview Storybook composition and remains outside #148.",
+      "evidence_ref": "Verified open on 2026-09-07: #150 is the downstream final Team overview Storybook composition. With #79 and #145–#147/#149 landed, #148 is its sole remaining backlog dependency; #150 remains outside this reusable element mission.",
       "fr": null,
       "nfr": null,
       "repo": "spec-kitty/spec-kitty-design",
