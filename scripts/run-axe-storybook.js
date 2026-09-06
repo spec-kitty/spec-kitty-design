@@ -368,8 +368,39 @@ async function assertStoryRendered(page, selectors) {
   }
 }
 
+// ── Story URL construction ───────────────────────────────────────────────────
+//
+// @storybook/addon-a11y 10.6.0 registers its OWN automatic afterEach axe.run() on
+// every direct story iframe render — the addon's preview runtime treats
+// `globals.a11y.manual !== true` as "scan automatically". This gate ALSO drives
+// axe-playwright's getViolations against the same axe-core singleton below, and the
+// two runs raced on it: one fatal "Axe is already running" among 252 stories,
+// non-deterministic and story-independent, reproduced live as
+//   ❌ elements-skstub--default: did not render (Axe is already running.)
+// on a tree byte-identical to a green run. A read-only debugger confirmed the
+// mechanism on a fresh page (autonomous scan false→true→false across runs) and
+// confirmed the fix: with `globals=a11y.manual:!true` on the navigation, 15/15
+// fresh-page trials ran no autonomous scan.
+//
+// `globals=a11y.manual:!true` is Storybook's own supported URL syntax for
+// overriding a global on ONE navigation — `:` separates key from value, `!` marks a
+// literal boolean, matching the addon's own `a11yGlobals?.manual !== !0` check. It
+// is scoped to the URLs THIS gate builds; it does not touch
+// apps/storybook/.storybook/preview.ts, so the addon's automatic scan stays on for
+// every other consumer (a developer using Storybook's UI, the manual a11y panel).
+// Setting it as a shared preview parameter/global would silence the addon
+// everywhere, which is a different (and wrong) fix for a race that is specific to
+// this gate's own external scan.
+//
+// The story id is percent-encoded because it is not a fixed literal like the
+// override above — it comes from the built index.json — and an unescaped `&` or
+// `=` in it would corrupt the query string it shares with `globals`.
+function buildStoryIframeUrl(baseUrl, storyId) {
+  return `${baseUrl}/iframe.html?id=${encodeURIComponent(storyId)}&viewMode=story&globals=a11y.manual:!true`;
+}
+
 async function checkStory(page, storyId) {
-  const url = `${BASE_URL}/iframe.html?id=${storyId}&viewMode=story`;
+  const url = buildStoryIframeUrl(BASE_URL, storyId);
 
   const scriptErrors = [];
   const onPageError = (err) => scriptErrors.push(err.message);
@@ -446,6 +477,10 @@ module.exports.computeRenderVerdict = computeRenderVerdict;
 module.exports.assertStoryRendered = assertStoryRendered;
 module.exports.CONTENT_MEDIA_SELECTOR = CONTENT_MEDIA_SELECTOR;
 module.exports.RENDER_ROOT_SELECTORS = RENDER_ROOT_SELECTORS;
+// Exported for scripts/gate-selftest.mjs's URL regression probe (#210), which drives
+// this exact function — the same seam checkStory() calls above — rather than a
+// re-implementation that could drift from what the real gate run does.
+module.exports.buildStoryIframeUrl = buildStoryIframeUrl;
 
 // ── Main ──────────────────────────────────────────────────────────────────────
 //

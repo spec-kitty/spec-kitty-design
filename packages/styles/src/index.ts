@@ -48,6 +48,7 @@ export * from './form-field/index';
 export * from './grid/index';
 export * from './nav-pill/index';
 export * from './pill-tag/index';
+export * from './progress/index';
 export * from './ribbon-card/index';
 export * from './section-banner/index';
 export * from './site-footer/index';

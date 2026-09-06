@@ -1,0 +1,114 @@
+/* @spec-kitty/styles — sk-progress shared styles */
+/* All values use --sk-* tokens only — no hardcoded values, except the system-color
+   keyword under forced-colors — see docs/contributing/adding-a-component.md's
+   "Forced-colors and reduced-motion baselines" section, the canonical owner of that
+   convention; it is not restated here. */
+/*
+ * No shadow root: this component has no custom element (styles-only, ADR-10's
+ * "Styles-only components are a class, not a fixed exception count" section), so
+ * no `:host` rule applies here.
+ *
+ * Markup contract (data-model.md is authoritative; not restated in full here):
+ *   <div class="sk-progress[ sk-progress--<modifier>]">
+ *     <label class="sk-progress__label" for="<id>">...</label>
+ *     <progress class="sk-progress__bar" id="<id>" value="<n>" max="<n>">...</progress>
+ *     <span class="sk-progress__meta">...</span>
+ *   </div>
+ * Three flat children, always in this order — no wrapper div between them, so every
+ * layout arrangement below is expressed as a flex direction/sizing rule on the root
+ * and its direct children, never a restructure.
+ */
+
+.sk-progress {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sk-space-1);
+}
+
+.sk-progress__label {
+  font-family: var(--sk-font-sans);
+  font-size: var(--sk-text-sm);
+  color: var(--sk-fg-default);
+}
+
+/*
+ * `appearance: none` is required before any of the three vendor pseudo-elements
+ * below can paint a custom fill — the only standardised styling surface
+ * `<progress>` exposes. The track is drawn with a plain `border`, which survives
+ * `forced-colors: active` automatically (zero override needed, see the
+ * `@media (forced-colors: active)` block below for the fill, which does need one).
+ */
+.sk-progress__bar {
+  appearance: none;
+  display: block;
+  width: 120px;
+  height: 4px;
+  background: var(--sk-surface-input);
+  border: 1px solid var(--sk-border-default);
+  border-radius: var(--sk-radius-pill);
+}
+
+/* Blink/WebKit paints its own track pseudo-element over the reset host by
+   default; reset it to transparent so the host's own background/border (above)
+   show through instead of a second, competing track. */
+.sk-progress__bar::-webkit-progress-bar {
+  background: transparent;
+  border-radius: var(--sk-radius-pill);
+}
+
+.sk-progress__bar::-webkit-progress-value {
+  background-color: var(--sk-color-yellow);
+  border-radius: var(--sk-radius-pill);
+}
+
+.sk-progress__bar::-moz-progress-bar {
+  background-color: var(--sk-color-yellow);
+  border-radius: var(--sk-radius-pill);
+}
+
+.sk-progress__meta {
+  font-family: var(--sk-font-mono);
+  font-size: var(--sk-text-xs);
+  color: var(--sk-fg-muted);
+}
+
+/*
+ * Layout modifiers (FR-007): same three children, same order, in every case —
+ * only the root's flex direction and the bar's own width change.
+ */
+.sk-progress--compact {
+  flex-direction: row;
+  align-items: center;
+  gap: var(--sk-space-2);
+}
+
+/* Narrow keeps the default's stacked direction but lets the bar fill the
+   available width instead of sitting at the fixed 120px default — the fixed
+   width is sized for an inline/stacked context with room to spare, not for a
+   genuinely narrow column. */
+.sk-progress--narrow .sk-progress__bar {
+  width: 100%;
+}
+
+/*
+ * Forced-colors: the track's plain `border` above survives automatically — no
+ * override needed (adding-a-component.md's forced-colors section, and this
+ * repo's own sk-skip-link/sk-data-table measurements). The fill is
+ * background-drawn and does NOT survive (it flattens to `Canvas`), so it gets
+ * an explicit override to the `Highlight` system color here, matching
+ * sk-skip-link.css / sk-data-table.css's established pattern. `Highlight` is
+ * already in stylelint.config.mjs's `ignoreValues` — no config change needed.
+ *
+ * No reduced-motion block: no transition is authored on the fill. This
+ * mission's fixtures are static snapshots (no live `value` mutation), and
+ * FR-010/AC-2 explicitly allows the reduced-motion requirement to be
+ * "satisfied vacuously" when no transition exists — adding one here with
+ * nothing to guard would be exactly the dead-guard shape
+ * adding-a-component.md warns against (sk-transition-matrix.css:237).
+ */
+@media (forced-colors: active) {
+  .sk-progress__bar::-webkit-progress-value,
+  .sk-progress__bar::-moz-progress-bar {
+    background-color: Highlight;
+  }
+}

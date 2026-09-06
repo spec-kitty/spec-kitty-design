@@ -1,0 +1,206 @@
+{
+  "mission_slug": "work-package-native-progress-styles-01M1VKQ8",
+  "mission_number": "",
+  "mission_type": "software-dev",
+  "overall_verdict": "pass",
+  "criteria": [
+    {
+      "criterion_id": "FR-001",
+      "description": "Every fixture renders the fixed div.sk-progress > label.sk-progress__label[for] + progress.sk-progress__bar[id][value][max] + span.sk-progress__meta structure, with no element added, removed, or reordered.",
+      "proof_type": "automated_test",
+      "evidence": "apps/storybook/src/tests/sk-progress.spec.ts \u2014 ordered native label/progress/meta structure passed in 24 Chromium+Firefox focused tests and 12 WebKit focused tests",
+      "pass_fail": "pass",
+      "verified_by": "codex-orry-wp208-210-0906a",
+      "verified_at": "2026-09-06T17:32:26.386690+00:00",
+      "notes": "Verified by WP01 T007's DOM-structure assertion over every generated fixture (host direct children in order, per-child tag/attribute check)."
+    },
+    {
+      "criterion_id": "FR-002",
+      "description": "No CSS content/counter() expression or JavaScript derives value, max, label, or meta text from anything other than the consumer's own authored attributes/text.",
+      "proof_type": "automated_test",
+      "evidence": "apps/storybook/src/tests/sk-progress.spec.ts \u2014 source arithmetic/content absence assertion passed across Chromium, Firefox, and WebKit",
+      "pass_fail": "pass",
+      "verified_by": "codex-orry-wp208-210-0906a",
+      "verified_at": "2026-09-06T17:32:27.461193+00:00",
+      "notes": "Verified by WP01 T007's static-source assertion reading sk-progress.css for a content declaration referencing value/max/counter( (negative-property pattern, mirroring sk-transition-matrix.spec.ts:495)."
+    },
+    {
+      "criterion_id": "FR-003",
+      "description": "The label is associated to the control by a plain light-DOM for/id pair, with zero aria-label, aria-labelledby, or role attributes anywhere in the fixture set.",
+      "proof_type": "automated_test",
+      "evidence": "apps/storybook/src/tests/sk-progress.spec.ts \u2014 native for/id association and zero authored aria/role attributes passed across three engines",
+      "pass_fail": "pass",
+      "verified_by": "codex-orry-wp208-210-0906a",
+      "verified_at": "2026-09-06T17:32:28.495458+00:00",
+      "notes": "Verified by WP01 T007's accessible-name assertion plus a zero-match grep for aria-/role= across every fixture."
+    },
+    {
+      "criterion_id": "FR-004",
+      "description": "The control's accessible role, and its aria-valuenow/aria-valuemin/aria-valuemax, derive entirely from the browser's native <progress> semantics and the element's own value/max attributes.",
+      "proof_type": "automated_test",
+      "evidence": "apps/storybook/src/tests/sk-progress.spec.ts \u2014 native progressbar role/name/value/min/max accessibility-tree assertion passed across three engines",
+      "pass_fail": "pass",
+      "verified_by": "codex-orry-wp208-210-0906a",
+      "verified_at": "2026-09-06T17:32:29.519828+00:00",
+      "notes": "Verified by WP01 T007's accessibility-tree snapshot assertion on the T10 fixture (role/name/value/min/max against label text and progress attributes)."
+    },
+    {
+      "criterion_id": "FR-005",
+      "description": "The <progress> fallback text and the sk-progress__meta span are two separately authored strings in every fixture; neither is generated from the other.",
+      "proof_type": "code_review",
+      "evidence": "packages/styles/src/progress/*.html and kitty-specs/work-package-native-progress-styles-01M1VKQ8/reviews/wp-WP01-cycle2.yaml \u2014 fallback and meta strings independently authored",
+      "pass_fail": "pass",
+      "verified_by": "codex-orry-wp208-210-0906a",
+      "verified_at": "2026-09-06T17:32:30.547772+00:00",
+      "notes": "Authoring discipline confirmed by reading WP01 T001's fixtures (both strings present, hand-authored). The numeric-consistency dimension between them is separately, automatically verified under NFR-004 by T007."
+    },
+    {
+      "criterion_id": "FR-006",
+      "description": "Authored fixtures exist for every required determinate state: zero, T10 5-of-8, complete, a large total, and a long label.",
+      "proof_type": "code_review",
+      "evidence": "packages/styles/src/progress/ and generated packages/styles/src/progress/index.ts \u2014 zero, 5-of-8, complete, large-total, and long-label fixtures reviewed",
+      "pass_fail": "pass",
+      "verified_by": "codex-orry-wp208-210-0906a",
+      "verified_at": "2026-09-06T17:32:31.571264+00:00",
+      "notes": "Confirmed by WP01 T001's five state fixtures existing on disk and appearing in the generated barrel (build-styles-only-markup.mjs --check, WP01 T002/T009)."
+    },
+    {
+      "criterion_id": "FR-007",
+      "description": "sk-progress--compact and sk-progress--narrow change only CSS layout; the label/progress/span triad, their attributes, and their document order are unchanged from the unmodified fixture.",
+      "proof_type": "automated_test",
+      "evidence": "apps/storybook/src/tests/sk-progress.spec.ts \u2014 compact/narrow attribute and three-child-order equivalence passed across three engines",
+      "pass_fail": "pass",
+      "verified_by": "codex-orry-wp208-210-0906a",
+      "verified_at": "2026-09-06T17:32:32.615562+00:00",
+      "notes": "Verified by WP01 T007's layout-modifier structural-preservation assertion comparing Compact/Narrow against the unmodified Default (T10) fixture."
+    },
+    {
+      "criterion_id": "FR-008",
+      "description": "Completion is legible without relying on hue alone: the track/fill are distinguishable by boundary/shape, and the meta text is a second, non-colour channel.",
+      "proof_type": "manual_qa",
+      "evidence": "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-progress-html-default-dark-chromium-linux.png; apps/storybook/src/tests/visual.spec.ts-snapshots/sk-progress-html-light-chromium-linux.png; apps/storybook/src/tests/visual.spec.ts-snapshots/sk-progress-html-forced-colors-chromium-linux.png \u2014 track boundary/shape and visible meta text reviewed",
+      "pass_fail": "pass",
+      "verified_by": "codex-orry-wp208-210-0906a",
+      "verified_at": "2026-09-06T17:32:33.656471+00:00",
+      "notes": "No colour-blindness simulation exists in this repo's harness. Visually reviewed against the rendered story (track border independent of fill colour, sk-progress__meta text present). Partial automated coverage: WP01 T008's forced-colors distinguishability assertion is the closest mechanical check, since it forces the same failure mode (colour-only signalling) to be visible under an achromatic rendering."
+    },
+    {
+      "criterion_id": "FR-009",
+      "description": "Under forced-colors: active, the track's boundary and the fill are each still distinguishable from the page background and from each other.",
+      "proof_type": "automated_test",
+      "evidence": "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-progress-html-forced-colors-chromium-linux.png plus apps/storybook/src/tests/sk-progress.spec.ts forced-colors computed-style check \u2014 green",
+      "pass_fail": "pass",
+      "verified_by": "codex-orry-wp208-210-0906a",
+      "verified_at": "2026-09-06T17:32:34.701125+00:00",
+      "notes": "Verified by WP01 T008's forced-colors emulation assertion (computed border/fill colour comparison) plus the CI-authoritative visual baseline (T008/T010)."
+    },
+    {
+      "criterion_id": "FR-010",
+      "description": "Any transition authored on the fill is disabled under prefers-reduced-motion: reduce, scoped to exactly that selector and property; if no transition is authored, this is satisfied vacuously.",
+      "proof_type": "automated_test",
+      "evidence": "apps/storybook/src/tests/sk-progress.spec.ts \u2014 reduced-motion/static transition-scope contract passed across three engines",
+      "pass_fail": "pass",
+      "verified_by": "codex-orry-wp208-210-0906a",
+      "verified_at": "2026-09-06T17:32:35.722758+00:00",
+      "notes": "Verified by WP01 T008's conditional static-source assertion over sk-progress.css (scoped guard present, or no transition exists to guard)."
+    },
+    {
+      "criterion_id": "FR-011",
+      "description": "The component's default (dark) presentation and a LightMode story (class=\"sk-light\") both exist and are driven by tokens, with LightMode rendering genuinely different computed styling.",
+      "proof_type": "automated_test",
+      "evidence": "primitives-skprogress-html--default and --light-mode: 252-story axe gate green; computed track/label styling differs; 3/3 visuals green",
+      "pass_fail": "pass",
+      "verified_by": "codex-orry-wp208-210-0906a",
+      "verified_at": "2026-09-06T17:32:36.738286+00:00",
+      "notes": "Verified by WP01 T005's computed-style-difference assertion between Default and LightMode, plus T009's axe gate over both themes and check-story-theme-wrapper.mjs's class=\"sk-light\" check."
+    },
+    {
+      "criterion_id": "FR-012",
+      "description": "sk-progress ships only as packages/styles/src/progress/sk-progress.css plus authored .html fixtures with a generated barrel; no packages/elements/src/progress/, no custom element, no ::part(), and no manifest/React/Vue wrapper entry exists.",
+      "proof_type": "automated_test",
+      "evidence": "build-styles-only-markup --check; build-elements-css/markup/react/vue checks; no packages/elements/src/progress; ratchets unchanged",
+      "pass_fail": "pass",
+      "verified_by": "codex-orry-wp208-210-0906a",
+      "verified_at": "2026-09-06T17:32:37.795397+00:00",
+      "notes": "Verified by WP01 T002's git ls-files packages/elements/src check and T009's ratchet-file diff checks (expected-parts.json, expected-docs.json, behaviours.json, mutations.json all unchanged)."
+    },
+    {
+      "criterion_id": "FR-013",
+      "description": "packages/styles/src/index.ts exports the new component's barrel and packages/styles/package.json carries a ./progress/* subpath export.",
+      "proof_type": "automated_test",
+      "evidence": "node scripts/check-release-graph.mjs \u2014 4 publishable packages packed and all exports resolved; styles progress subpath present",
+      "pass_fail": "pass",
+      "verified_by": "codex-orry-wp208-210-0906a",
+      "verified_at": "2026-09-06T17:32:38.868734+00:00",
+      "notes": "Verified by WP01 T002's edits plus T009's node scripts/check-release-graph.mjs gate run."
+    },
+    {
+      "criterion_id": "FR-014",
+      "description": "Documentation states the native three-part structure, that the consumer owns all arithmetic and text, and the exact set of supported determinate states and arrangements.",
+      "proof_type": "code_review",
+      "evidence": "docs/design-system/using-components.md and kitty-specs/work-package-native-progress-styles-01M1VKQ8/reviews/wp-WP01-cycle2.yaml \u2014 consumer ownership, native structure, states, and arrangements reviewed",
+      "pass_fail": "pass",
+      "verified_by": "codex-orry-wp208-210-0906a",
+      "verified_at": "2026-09-06T17:32:39.912203+00:00",
+      "notes": "Confirmed by reading WP01 T006's addition to docs/design-system/using-components.md against FR-014's required content list."
+    }
+  ],
+  "negative_invariants": [
+    {
+      "invariant_id": "C-001",
+      "description": "No sk-progress custom element, no packages/elements/src/progress/ directory, no ::part(), and no behaviour or mutation registry entry for this component.",
+      "verification_method": "custom_command",
+      "verification_command": "test ! -d packages/elements/src/progress && git diff --exit-code origin/train/elements-first...HEAD -- expected-parts.json expected-docs.json behaviours.json mutations.json",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: "
+    },
+    {
+      "invariant_id": "C-002",
+      "description": "No CSS content/counter()-based arithmetic, no JavaScript of any kind, no application state, and no timer updates a value anywhere in this component's source.",
+      "verification_method": "custom_command",
+      "verification_command": "! grep -RE 'content\\\\s*:.*(counter\\\\(|var\\\\(--sk-progress-value)|<script' packages/styles/src/progress",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: "
+    },
+    {
+      "invariant_id": "C-003",
+      "description": "No indeterminate/loading state, stepper, task data, completion animation, or status-tone colour coding.",
+      "verification_method": "custom_command",
+      "verification_command": "! grep -REi 'indeterminate|loading|stepper|task data|completion animation|status[-_ ]?tone' packages/styles/src/progress",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: "
+    },
+    {
+      "invariant_id": "C-004",
+      "description": "No new --sk-* token category is introduced absent a demonstrated gap and recorded maintainer sign-off.",
+      "verification_method": "custom_command",
+      "verification_command": "git diff --exit-code origin/train/elements-first...HEAD -- packages/tokens/src/tokens.css",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: "
+    },
+    {
+      "invariant_id": "C-005",
+      "description": "apps/demo/dashboard-demo.html's existing .dash-progress-* rules and markup are not modified by this mission.",
+      "verification_method": "custom_command",
+      "verification_command": "git diff --exit-code origin/train/elements-first...HEAD -- apps/demo/dashboard-demo.html",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: "
+    },
+    {
+      "invariant_id": "C-006",
+      "description": "The required LightMode story wraps its fixture in class=\"sk-light\", never data-theme=\"light\".",
+      "verification_method": "custom_command",
+      "verification_command": "node scripts/check-story-theme-wrapper.mjs",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: \u2705 42 story file(s) scanned; 2 known inert theme wrapper(s), none new."
+    },
+    {
+      "invariant_id": "C-007",
+      "description": "This mission's markup and CSS are self-contained and do not compose with or reference any other #208 child component.",
+      "verification_method": "custom_command",
+      "verification_command": "! grep -RE 'sk-(nav-pill|form-input|form-textarea|badge|status)' packages/styles/src/progress",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: "
+    }
+  ]
+}
