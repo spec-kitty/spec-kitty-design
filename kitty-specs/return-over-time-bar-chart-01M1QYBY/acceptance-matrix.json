@@ -391,10 +391,10 @@
       "criterion_id": "NFR-004",
       "description": "At 390 by 844, zero label, value, or bar ownership overlaps or cross-item hit targets occur before or after horizontal scrolling.",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "390x844 selectable and presentational tests prove zero label/value/bar ownership overlap or cross-item hit targets before/after horizontal scroll",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T21:30:50.783351+00:00",
       "notes": "Narrow viewport bounding-box and hit-test assertions.",
       "lane_owners": [
         "WP01"
