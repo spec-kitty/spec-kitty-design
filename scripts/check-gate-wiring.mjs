@@ -337,7 +337,18 @@ else {
     [/node\s+scripts\/check-gate-wiring\.mjs(\s|$)/, 'this wiring checker itself', 'scripts/check-gate-wiring.mjs'],
   ];
 
-  /** A step that cannot fail the job is a step that is not running (B, C, D, E). */
+  /**
+   * A step that cannot fail the job is a step that is not running (B, C, D, E).
+   *
+   * KNOWN LIMITATION — see #205, and note it is NOT #202. The `||` clause below is an ENUMERATED
+   * list of swallow spellings, and the run body is examined for nothing else, so `|| /bin/true`
+   * and a `set +e` … `exit 0` body both return `[]` here and the gate they neuter is reported as
+   * enforced. Both were reproduced against #193's own step, so this is the audit's shape rather
+   * than any one gate's defect. #202 is one level up — the `gate` job's strict clause matched as
+   * shell TEXT; this is one level down, the per-step neutering test — and fixing either leaves
+   * the other open. Every entry in REQUIRED_LINT rests on this, including the self-check steps
+   * and this file's own registration.
+   */
   const neutered = (st) => {
     const why = [];
     if ('if' in st) why.push('carries an `if:`');

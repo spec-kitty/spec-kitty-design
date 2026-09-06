@@ -232,24 +232,88 @@ CI step reds `scripts/check-gate-wiring.mjs`.
 - **FR-006**: Both surfaces MUST carry a pointer line that names `docs/architecture/README.md`,
   names ADRs, and marks that table as **authoritative**.
 - **FR-007**: A gate script MUST assert FR-001 and FR-003 as one rule: for each surface, the set of
-  referenced records is either empty or exactly equal to the directory listing.
+  referenced records is either empty or exactly equal to the directory listing. Each surface MUST
+  **declare** which of the two branches it took, and the gate MUST hold it to that declaration
+  rather than accepting either. A plain disjunction is not enough: zero references is legitimate
+  under it, so a broken reference extractor is indistinguishable from a file that took the pointer
+  branch — a pre-merge lens collapsed the extractor with one `sed` and watched `llms-full.txt` go
+  from fifteen references to zero and stay green with fifteen record paths still in the file.
 - **FR-008**: The gate MUST assert FR-004 — no ADR range expression in either surface — with a
   named pattern set, and MUST NOT trip on a title dash or on substantive prose naming records.
 - **FR-009**: The gate MUST assert FR-002 and FR-005 — no set-wide cardinality or status claim
   about ADRs in either surface.
 - **FR-010**: The gate MUST assert FR-006 — the pointer is present in both surfaces.
 - **FR-011**: The gate MUST fail closed on every empty set: zero records discovered, a surface file
-  missing, an empty surface list, or an empty pattern set.
+  missing, an empty surface manifest, or an empty pattern set. The **surface manifest floor MUST be
+  the SET, not its size** — flooring `length === 0` leaves one deleted entry silently disabling half
+  the gate, which a pre-merge lens demonstrated by shrinking the list to `llms-full.txt` alone and
+  walking a planted one-of-fifteen list plus a range expression through `llms.txt` green.
+- **FR-011a**: A surface that declared the **complete** branch and references **zero** records MUST
+  fail with its own message. This is the anti-vacuity floor on the *references* side, matching the
+  one already required on the *records* side by FR-011.
 - **FR-012**: The gate MUST refuse a reference to a `decisions/` file that does not exist.
 - **FR-013**: The gate's checks MUST be exported pure functions over parsed inputs, and it MUST
   carry a `--selftest` probe table in which **each probe declares the message it expects**, so a
   probe satisfied by a neighbouring check is a failure.
+- **FR-013a**: The gate's **composition** MUST be probed, not only its parts. Every check being
+  individually probed left `main()` free to stop calling one: a pre-merge lens deleted
+  `...checkPointer(name, lines)` from the spread and both `--selftest` and the real gate stayed
+  green on a `llms.txt` with no pointer, and three other spread deletions red-ed only by collateral
+  from a sibling check. The whole run MUST therefore be a pure function that `--selftest` can drive,
+  with one probe per element of the per-surface spread.
+- **FR-017**: The gate MUST refuse a **per-record anchor link** into the index
+  (`docs/architecture/README.md#adr-<n>`). That is the one prose-list shape with a structural
+  signature, and it is how a hand list walks past FR-007: row anchors carry no record path, so the
+  reference set stays empty and the file passes.
+- **FR-018**: The gate MUST NOT red on statements about record **format** or about a **named
+  subset**. `one decision record per file.`, `all decision records live under …`, `each ADR carries
+  its own Status field.`, `every ADR lives in its own file.` and `two decision records were
+  superseded in 2026.` MUST pass, and MUST be healthy-shape probes so they stay passing. A gate that
+  reds on a harmless edit is a gate someone deletes — and `llms-full.txt` today opens the section
+  with "The records live under …", so prefixing "All" must not fail CI on a sentence that is true
+  and is exactly what the ruling asks the file to say.
+- **FR-019**: The range and set-claim vocabularies MUST cover the forms a writer actually reaches
+  for: `ADR-1 up to ADR-13`, `everything between ADR-1 and ADR-13`, `see ADR 1-13`,
+  `decisions 1 through 13`; `the full set of ADRs is Accepted`, `every record below is Accepted`,
+  `the complete list of ADRs follows`, `an exhaustive ADR list follows`, `the entire ADR set is
+  Accepted`. Widening MUST NOT be traded against FR-018, and any form left uncaught MUST be stated
+  rather than left silent.
 - **FR-014**: The gate MUST be an `[ENFORCED]` step of `ci-quality.yml`'s `lint-code` job — the one
   job with no `if:` and no path filter, so a docs-only PR is certain to run it.
 - **FR-015**: The gate and its `--selftest` MUST both be registered in `check-gate-wiring.mjs`'s
   `REQUIRED_LINT`, matching the two-entry shape #193 and #129 used.
 - **FR-016**: No ADR record's content or Status MAY be modified. No line of
   `docs/architecture/README.md` or `scripts/check-adr-index.mjs` MAY be modified.
+
+### What the gate deliberately does not cover
+
+**The empty-or-complete rule binds only PATH-BEARING lists.** A hand list is caught when its items
+are written as `docs/architecture/decisions/<file>.md` — a markdown link, a bare path, a backticked
+path or a GitHub blob URL. A prose list that names records without ever writing a record path
+("ADR-1 Token Distribution Format — CSS custom properties", three bullets, no links) carries zero
+references, takes the empty branch, and passes.
+
+A pre-merge lens demonstrated this with three bullets linking `README.md#adr-1`, `#adr-2`, `#adr-3`
+plus "Every record below is Accepted; the complete list of ADRs follows." — green.
+
+**The choice made here, and why.** Two options were on the table: (a) a narrow heuristic, e.g. a run
+of ≥3 consecutive lines each matching `ADR-\d+` that is not the complete set, or (b) state
+explicitly that the rule binds only path-bearing lists. **Option (b) was taken**, measured rather
+than assumed: `llms-full.txt` already contains three 2-line runs of consecutive `ADR-\d+` lines
+(`:73-74`, `:200-201`, `:992-993`), so a ≥3 threshold sits one prose re-wrap away from red-ing on
+`CLAUDE.md`'s "points at the ADRs (ADR-001 …, ADR-002 …, ADR-003 …)" paragraph. That is FR-018's
+failure mode exactly, and a gate that reds on a re-wrap is a gate someone deletes — taking the real
+check with it.
+
+**One variant of the hole is closed anyway**, because it has a structural signature and no
+legitimate use: links into the index's own per-record anchors, refused by FR-017. Nobody writes
+`#adr-<n>` for any reason other than pointing at one row. The linkless variant is left open
+deliberately, and what still catches it in practice is that such a list almost always carries a
+range or a set-wide claim, both of which FR-008 and FR-009 refuse — the lens's own reproduction
+carried two of them.
+
+This is stated in the script header as well as here, so a reader does not believe more than the gate
+does.
 
 ### Non-Functional Requirements
 
@@ -293,10 +357,12 @@ CI step reds `scripts/check-gate-wiring.mjs`.
 - **SC-004**: `node scripts/check-llms-adr-surface.mjs` exits 0 on the edited tree and prints the
   per-surface reference counts it examined.
 - **SC-005**: `node scripts/check-llms-adr-surface.mjs --selftest` trips every probe against **its
-  own** expected message and asserts the probe-count floor.
+  own** expected message and asserts three floors: total probe counts, one probe naming each
+  declared pattern, and a separate floor on the composition probes.
 - **SC-006**: Each of the deliberate defects — a range expression, a partial link list, a missing
-  pointer, a cardinality claim, an empty record set — is reintroduced in turn and the gate's
-  verbatim output is recorded.
+  pointer, a cardinality claim, an empty record set, a **collapsed reference extractor**, a
+  **shrunk surface manifest**, a **deleted element of the per-surface spread**, and a
+  **per-record anchor list** — is reintroduced in turn and the gate's verbatim output is recorded.
 - **SC-007**: With the gate's CI step deleted, `node scripts/check-gate-wiring.mjs` exits non-zero
   naming it; output recorded verbatim.
 - **SC-008**: The `[ENFORCED]` step is confirmed to have run on this PR **from the job API**.
@@ -323,6 +389,17 @@ CI step reds `scripts/check-gate-wiring.mjs`.
   ruling's "point at the README table instead of restating it" permits, because the gate it asks
   for is specified as *empty or complete*. If the operator meant §2 deleted outright, that is a
   smaller diff on top of this one and the gate already accepts it (the empty branch).
+
+## Filed, not fixed
+
+- **#205** — `check-gate-wiring.mjs`'s `neutered()` tests for swallowed failure with an enumerated
+  list of spellings, so `|| /bin/true` and a `set +e` … `exit 0` body both report the step as
+  enforced. Reproduced against **#193's own step**, so it is pre-existing and is the audit's shape
+  rather than any one gate's defect; distinct from #202, which is the `gate` job's strict clause one
+  level up. This mission puts two more `[ENFORCED]` steps behind it, which is why it is filed now
+  and referenced in a comment at the `neutered()` call site. Not fixed here: widening a docs
+  mission into the wiring checker's shell semantics is the scope drift #197 itself was filed to
+  avoid.
 
 ## Out of Scope
 
