@@ -31,9 +31,26 @@
     "#182 adds two for <sk-page-header>, one per axis, and both mutate the ELEMENT rather than the test. Each flips `reflect: true` to `reflect: false` on one of the two new reactive properties; the named [SC-010] test asserts the pre-upgrade value reaches the ATTRIBUTE, so each arm reds it on its own. The sticky arm is not merely a reflection check: the sticky geometry is expressed as `:host([sticky])` — it HAS to be on the host, because an inner box's containing block is the host and it cannot move inside it (measured) — so an unreflected `sticky` is a sticky axis that silently does nothing. NO THIRD ARM FOR THE REFLOW THRESHOLD, and that is a stated gap rather than an omission: guard 7 requires every mutation's (id, subject) pair to be declared in behaviours.json, and tests/node/config-contract.test.ts asserts that file's applicable id set equals ADR-11's list exactly. ADR-11 has no id for a responsive/threshold behaviour, so the drop blocks are covered by ordinary tests here and by apps/storybook/src/tests/sk-page-header-sticky.spec.ts, and the registry gap is filed as an issue rather than closed by mis-filing a layout assertion under a reflection id.",
     "#146 WP01 adds ELEVEN arms: one part removal and two independent style-adoption arms for each of three primitives, plus one late-upgrade property-registration removal each for status tone and entity label. Section-header is slot-only and does not claim SC-010.",
     "#146 WP02 adds SEVEN sk-action-row arms: duplicate dispatch, wrong detail, false bubbling/composed flags, pre-upgrade rowId registration loss, one non-root part removal, empty styles, and fresh-sheet identity. There is no cancellation arm because SC-009 is inapplicable.",
-    "#146 WP03 adds ONE generated react-action-row arm that removes the wrapper listener inside the harness copy. The four element subjects contribute 18 mission arms and this wrapper contributes the nineteenth."
+    "#146 WP03 adds ONE generated react-action-row arm that removes the wrapper listener inside the harness copy. The four element subjects contribute 18 mission arms and this wrapper contributes the nineteenth.",
+    "#177 adds TWO for <sk-card>, one per id it now claims, and both mutate the ELEMENT rather than the test. The SC-013 arm replaces the status fail-open branch with a THROW — the exact regression sk-card.markup.ts records at length, and the only mutation in this file whose red is the ABSENCE of a part rather than a wrong value: Lit rejects updateComplete, render() returns no tree, and `[part=\"card\"]` is not in the shadow root to target. That is why the [SC-013] test mounts BOTH a plain and an unknown-status card; with only the plain one it would have stayed green through the throw, which is the certifying-absence class this harness exists to catch. The SC-010 arm flips reflect on `status`: the named test asserts the pre-upgrade value reaches the ATTRIBUTE, so an unreflected status is an axis that does nothing outside the shadow root, and no static consumer or CSS author can see it. NO ARM FOR THE VOCABULARY ASSERTION, deliberately: guard 7 keys on a declared (id, subject) pair and guard 4 requires the red test to carry an [SC-NNN] marker, and there is no ADR-11 id for 'two components share one enum'. Binding it to SC-013 or SC-010 would mislabel it and minting an id would extend ADR-11's behaviour set, which #67 owns. The coverage is real either way \u2014 the test compares Object.keys(CARD_STATUSES) to STATUS_TONES by value and order \u2014 it is simply held by a test rather than by the harness. Fourth time this programme has reached that boundary (#140, #143, #77, here); the answer has been the same each time."
   ],
   "mutations": [
+    {
+      "id": "SC-013",
+      "arm": "status fail-open keeps the card part targetable",
+      "file": "packages/elements/src/card/sk-card.markup.ts",
+      "from": "    console.warn(`sk-card: ${unknownStatusMessage(status)} \u2014 rendering the base card.`);\n    status = undefined;",
+      "to": "    throw new Error(unknownStatusMessage(status));",
+      "subject": "fixtures/elements-behaviour/src/sk-card.test.ts"
+    },
+    {
+      "id": "SC-010",
+      "arm": "status reflection",
+      "file": "packages/elements/src/card/sk-card.ts",
+      "from": "    status: { type: String, reflect: true },",
+      "to": "    status: { type: String, reflect: false },",
+      "subject": "fixtures/elements-behaviour/src/sk-card.test.ts"
+    },
     {
       "id": "SC-002",
       "arm": "FormData entry",
@@ -207,8 +224,8 @@
       "subject": "fixtures/elements-behaviour/src/sk-card.test.ts",
       "arm": "card part present",
       "file": "packages/elements/src/card/sk-card.ts",
-      "from": "<div part=\"card\" class=${cardClasses(this.variant, this.inset)}>",
-      "to": "<div class=${cardClasses(this.variant, this.inset)}>"
+      "from": "<div part=\"card\" class=${cardClasses(this.variant, this.inset, this.status)}>",
+      "to": "<div class=${cardClasses(this.variant, this.inset, this.status)}>"
     },
     {
       "id": "SC-006",

@@ -78,8 +78,33 @@ Every surface token has a paired foreground token. Always use them together to e
 | `--sk-surface-tint-butter` | `--sk-on-tint-butter` |
 | `--sk-surface-tint-lilac` | `--sk-on-tint-lilac` |
 | `--sk-surface-tint-sky` | `--sk-on-tint-sky` |
+| `--sk-surface-tint-rose` | `--sk-on-tint-rose` |
+| `--sk-status-<tone>` | `--sk-on-status-<tone>` |
 
 Mixing an unpaired surface and foreground token is a visual identity violation — it will fail the design review quality gate.
+
+### Operational status tones
+
+`--sk-status-neutral|info|success|attention|danger|recovery` and their `--sk-on-status-*`
+foregrounds are **semantic aliases** over the tint family — they add meaning, not colour, and
+every one resolves to a token above. The vocabulary is `sk-status-indicator`'s, one tone set for
+the whole library; `sk-card`'s `status` attribute is its first other consumer.
+
+Use `--sk-status-<tone>` as a surface and `--sk-on-status-<tone>` as the foreground or edge on
+it. Both pass AA in both themes against their own pair and against `--sk-fg-body`; the measured
+ratios are recorded beside the declarations in `packages/tokens/src/tokens.css`.
+
+**A tone is presentation, never the message.** Whatever the tone says, the visible text has to
+say too — a surface that is the sole carrier of "this failed" disappears in greyscale, in
+`forced-colors: active`, and for a reader with a colour-vision deficiency.
+
+That is not a hypothetical for these tokens, and the light theme is the case to hold in mind.
+Measured against `--sk-surface-page` (#F8F5EC), **every** light status surface sits between
+**1.01:1** and **1.19:1** — attention (#FFF6D9) is the lowest at 1.01, success 1.04, info and
+recovery 1.08, danger 1.11, neutral 1.19. These are high-key tints by design and they are doing
+almost no work on their own: in light mode the 4px edge and the consumer's own text carry the
+axis, and the surface is close to decoration. Dark is only a little stronger (1.25:1 for
+attention). Build accordingly.
 
 ## Token catalogue reference
 

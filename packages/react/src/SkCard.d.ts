@@ -21,6 +21,11 @@ export interface SkCardProps extends Pick<
   /** Swaps the surface token for the inset (input) surface, for a card nested inside another. */
   inset?: boolean;
 
+  /** Operational status tone, orthogonal to `variant` — a card may carry both. The vocabulary is
+`sk-status-indicator`'s; the card holds no domain mapping and never infers a tone. An unknown
+value renders the base card and warns rather than throwing. */
+  status?: SkCardElement["status"];
+
   /** Accent colour. Omit for the default surface; an unknown value renders the base card and
 warns rather than throwing. */
   variant?: SkCardElement["variant"];
@@ -55,6 +60,9 @@ warns rather than throwing. */
  * Component attributes and properties that can be applied to the element or by using JavaScript.
  *
  * - `inset`: Swaps the surface token for the inset (input) surface, for a card nested inside another.
+ * - `status`: Operational status tone, orthogonal to `variant` — a card may carry both. The vocabulary is
+ * `sk-status-indicator`'s; the card holds no domain mapping and never infers a tone. An unknown
+ * value renders the base card and warns rather than throwing.
  * - `variant`: Accent colour. Omit for the default surface; an unknown value renders the base card and
  * warns rather than throwing.
  *

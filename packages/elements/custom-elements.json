@@ -132,8 +132,17 @@
         {
           "kind": "variable",
           "name": "CARD_AXES",
-          "default": "{ Inset: { inset: true }, } as const satisfies Record<string, CardStaticOptions>",
+          "default": "{ Inset: { inset: true }, ...STATUS_AXES, } satisfies Record<string, CardStaticOptions>",
           "description": "The static forms this component publishes, BEYOND the base and one per variant.\n\nThe generator derives base + variants on its own; this names everything else. It exists\nbecause the generator used to emit `Sk<Comp>InsetHTML` unconditionally — `inset` is a CARD\naxis, and for `sk-nav-pill` or `sk-grid` that would have committed\n`class=\"sk-grid sk-grid--inset\"`, a class in no stylesheet, as generated output with\n`--check` green. A component with no extra axes exports an empty object; omitting it is an\nerror, because `?? {}` cannot distinguish \"none\" from \"I looked for the wrong name\"."
+        },
+        {
+          "kind": "variable",
+          "name": "CARD_STATUSES",
+          "type": {
+            "text": "{\n  neutral: 'sk-card--status-neutral',\n  info: 'sk-card--status-info',\n  success: 'sk-card--status-success',\n  attention: 'sk-card--status-attention',\n  danger: 'sk-card--status-danger',\n  recovery: 'sk-card--status-recovery',\n}"
+          },
+          "default": "{ neutral: 'sk-card--status-neutral', info: 'sk-card--status-info', success: 'sk-card--status-success', attention: 'sk-card--status-attention', danger: 'sk-card--status-danger', recovery: 'sk-card--status-recovery', }",
+          "description": "Status tone → BEM modifier. The tone vocabulary is `sk-status-indicator`'s, not the card's."
         },
         {
           "kind": "variable",
@@ -163,9 +172,16 @@
             {
               "name": "inset",
               "default": "false"
+            },
+            {
+              "name": "status",
+              "optional": true,
+              "type": {
+                "text": "string"
+              }
             }
           ],
-          "description": "The card's class list. An unknown `variant` warns and degrades to the base card."
+          "description": "The card's class list. An unknown `variant` or `status` warns and degrades to the base card."
         },
         {
           "kind": "function",
@@ -674,6 +690,24 @@
             }
           ],
           "description": "The static form, for a consumer with no JavaScript. Throws on an unknown variant."
+        },
+        {
+          "kind": "function",
+          "name": "isCardStatus",
+          "return": {
+            "type": {
+              "text": "status is CardStatus"
+            }
+          },
+          "parameters": [
+            {
+              "name": "status",
+              "type": {
+                "text": "string"
+              }
+            }
+          ],
+          "description": "Whether `status` names a real card status modifier."
         },
         {
           "kind": "function",
@@ -1569,6 +1603,17 @@
             },
             {
               "kind": "field",
+              "name": "status",
+              "privacy": "public",
+              "type": {
+                "text": "'neutral' | 'info' | 'success' | 'attention' | 'danger' | 'recovery' | undefined"
+              },
+              "description": "Operational status tone, orthogonal to `variant` — a card may carry both. The vocabulary is\n`sk-status-indicator`'s; the card holds no domain mapping and never infers a tone. An unknown\nvalue renders the base card and warns rather than throwing.",
+              "attribute": "status",
+              "reflects": true
+            },
+            {
+              "kind": "field",
               "name": "variant",
               "privacy": "public",
               "type": {
@@ -1588,6 +1633,14 @@
               "description": "Swaps the surface token for the inset (input) surface, for a card nested inside another.",
               "default": "false",
               "fieldName": "inset"
+            },
+            {
+              "name": "status",
+              "type": {
+                "text": "'neutral' | 'info' | 'success' | 'attention' | 'danger' | 'recovery' | undefined"
+              },
+              "description": "Operational status tone, orthogonal to `variant` — a card may carry both. The vocabulary is\n`sk-status-indicator`'s; the card holds no domain mapping and never infers a tone. An unknown\nvalue renders the base card and warns rather than throwing.",
+              "fieldName": "status"
             },
             {
               "name": "variant",
@@ -4347,6 +4400,14 @@
           "customElement": true
         },
         {
+          "kind": "variable",
+          "name": "STATUS_TONES",
+          "type": {
+            "text": "ReadonlyArray<StatusIndicatorTone>"
+          },
+          "description": "The tone vocabulary, in presentation order."
+        },
+        {
           "kind": "function",
           "name": "unknownAccentMessage",
           "return": {
@@ -4396,6 +4457,24 @@
               }
             }
           ]
+        },
+        {
+          "kind": "function",
+          "name": "unknownStatusMessage",
+          "return": {
+            "type": {
+              "text": "string"
+            }
+          },
+          "parameters": [
+            {
+              "name": "status",
+              "type": {
+                "text": "string"
+              }
+            }
+          ],
+          "description": "The shared diagnostic for an unrecognised status."
         },
         {
           "kind": "function",
@@ -4502,6 +4581,14 @@
           "name": "CARD_AXES",
           "declaration": {
             "name": "CARD_AXES",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "CARD_STATUSES",
+          "declaration": {
+            "name": "CARD_STATUSES",
             "module": "./dist/index.js"
           }
         },
@@ -4742,6 +4829,14 @@
           "name": "GridVariant",
           "declaration": {
             "name": "GridVariant",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "isCardStatus",
+          "declaration": {
+            "name": "isCardStatus",
             "module": "./dist/index.js"
           }
         },
@@ -5323,6 +5418,14 @@
         },
         {
           "kind": "js",
+          "name": "STATUS_TONES",
+          "declaration": {
+            "name": "STATUS_TONES",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
           "name": "StatusIndicatorTone",
           "declaration": {
             "name": "StatusIndicatorTone",
@@ -5390,6 +5493,14 @@
           "name": "unknownRibbonMessage",
           "declaration": {
             "name": "unknownRibbonMessage",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "unknownStatusMessage",
+          "declaration": {
+            "name": "unknownStatusMessage",
             "module": "./dist/index.js"
           }
         },

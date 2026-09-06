@@ -48,6 +48,14 @@
   --sk-surface-tint-butter: #2A2410;   /* dark: warm-yellow card */
   --sk-surface-tint-lilac:  #1E1A2E;   /* dark: v2.x banner / purple */
   --sk-surface-tint-sky:    #14202E;   /* dark: muted info / blue */
+  /* ROSE completes the family at #177, and it is a DERIVATION, not a new brand hue.
+     --sk-color-red already exists (#E97373) and is already the danger marker in
+     sk-status-indicator; what the family lacked was its SURFACE, so `--sk-status-danger`
+     had nothing to alias and would have had to carry a literal of its own.
+     Derived by the rule the four siblings already follow, measured in HLS: the hue's own
+     angle (0deg), dark tints at L 0.11-0.14 (mint 0.112, butter 0.114, sky 0.129,
+     lilac 0.141 -> rose 0.125), saturation in the family's 0.26-0.45 band (0.35). */
+  --sk-surface-tint-rose:   #2B1515;   /* dark: danger / red */
 
   /* ── Tint borders — the third slot of the tint family ─────────────────────
      Named for the TINT (sky/lilac), not the component. --sk-surface-tint-sky is
@@ -72,6 +80,45 @@
   --sk-on-tint-butter:      var(--sk-color-yellow-soft);
   --sk-on-tint-lilac:       var(--sk-color-purple);
   --sk-on-tint-sky:         var(--sk-color-blue);
+  --sk-on-tint-rose:        var(--sk-color-red);
+
+  /* ── Operational Status — semantic pairs (#177) ───────────────────────────
+     ONE tone vocabulary, owned by sk-status-indicator (#146) and consumed here:
+     neutral | info | success | attention | danger | recovery.
+
+     ALIASES, not a palette. Every value below resolves to a token that already
+     exists; this category adds meaning, not colour. It is declared in BOTH theme
+     blocks even though the aliases are identical, because a status token defined
+     in one block only is exactly the half-populated theme #93 records — and a
+     reader checking "does light have status?" must be able to answer from the
+     light block.
+
+     PAIRING (hard rule 3): --sk-status-<tone> is the SURFACE, --sk-on-status-<tone>
+     is its foreground and the card's edge colour. Two contrast contracts hold, and
+     both were measured in sRGB rather than assumed:
+       (a) the card's own foreground, --sk-fg-body, on the status surface;
+       (b) the pair itself, --sk-on-status-<tone> on --sk-status-<tone>.
+     DARK       (a) --sk-fg-body #D6D6DA      (b) pair        edge vs page
+       neutral        9.69                       6.01            8.26
+       info          11.36                       9.42           11.05
+       success       11.15                       8.55           10.21
+       attention     10.67                      11.18           13.95
+       danger        11.87                       5.87            6.58
+       recovery      11.66                       7.88            9.00
+     AA needs 4.5 for (a) and (b); WCAG 1.4.11 needs 3 for the edge. */
+  --sk-status-neutral:      var(--sk-surface-muted);
+  --sk-status-info:         var(--sk-surface-tint-sky);
+  --sk-status-success:      var(--sk-surface-tint-mint);
+  --sk-status-attention:    var(--sk-surface-tint-butter);
+  --sk-status-danger:       var(--sk-surface-tint-rose);
+  --sk-status-recovery:     var(--sk-surface-tint-lilac);
+
+  --sk-on-status-neutral:   var(--sk-fg-muted);
+  --sk-on-status-info:      var(--sk-on-tint-sky);
+  --sk-on-status-success:   var(--sk-on-tint-mint);
+  --sk-on-status-attention: var(--sk-on-tint-butter);
+  --sk-on-status-danger:    var(--sk-on-tint-rose);
+  --sk-on-status-recovery:  var(--sk-on-tint-lilac);
 
   /* ── Pill/Chip Background ────────── */
   --sk-bg-pill:             #212830;   /* nav pill rail, chips, hover row */
@@ -94,6 +141,11 @@
   --sk-border-focus:        #F5C518;   /* focus ring (= yellow) */
   --sk-border-width-1:      1px;
   --sk-border-width-2:      2px;
+  /* The accent-edge step. Theme-invariant, like -1 and -2, so it is defined once here and
+     is NOT restated in the light block. Added at #177 for sk-card's status edge: the card's
+     border is already 2px on all four sides, so an edge treatment that reads as an edge
+     needs a step above it. */
+  --sk-border-width-4:      4px;
 
   /* ── Typography — Families ───────── */
   --sk-font-sans:           ui-sans-serif, system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
@@ -319,6 +371,9 @@
   --sk-surface-tint-butter: #FFF6D9;
   --sk-surface-tint-lilac:  #F0EAF8;
   --sk-surface-tint-sky:    #E4EDF8;
+  /* Rose, derived by the same rule as its dark sibling: hue 0deg, L 0.935 against the
+     family's 0.925-0.945 (mint 0.933, butter 0.925, sky 0.933, lilac 0.945). */
+  --sk-surface-tint-rose:   #F8E5E5;
 
   /* Tint borders — darker channel extractions for a light ground */
   --sk-border-tint-sky:    rgba(46, 74, 107, 0.15);
@@ -329,6 +384,36 @@
   --sk-on-tint-butter:      #6B5A0E;
   --sk-on-tint-lilac:       #4A3D78;
   --sk-on-tint-sky:         #2E4A6B;
+  /* L 0.28, inside the family's 0.237-0.355 ink band. 9.11:1 on --sk-surface-tint-rose. */
+  --sk-on-tint-rose:        #6B2424;
+
+  /* ── Operational Status — semantic pairs (#177) ───────────────────────────
+     The light half. Rationale, pairing rule and the dark measurements are in the
+     matching block in :root; this is deliberately declared rather than inherited,
+     because a status category present in one theme only is the half-populated
+     theme #93 records, and a reader must be able to answer "does light have
+     status?" from the light block.
+     LIGHT      (a) --sk-fg-body #2A2A22      (b) pair        edge vs page
+       neutral       11.17                       5.22            6.20
+       info          12.23                       7.70            8.35
+       success       12.76                       7.10            7.38
+       attention     13.38                       6.28            6.23
+       danger        11.93                       9.11           10.12
+       recovery      12.27                       8.00            8.64
+     AA needs 4.5 for (a) and (b); WCAG 1.4.11 needs 3 for the edge. */
+  --sk-status-neutral:      var(--sk-surface-muted);
+  --sk-status-info:         var(--sk-surface-tint-sky);
+  --sk-status-success:      var(--sk-surface-tint-mint);
+  --sk-status-attention:    var(--sk-surface-tint-butter);
+  --sk-status-danger:       var(--sk-surface-tint-rose);
+  --sk-status-recovery:     var(--sk-surface-tint-lilac);
+
+  --sk-on-status-neutral:   var(--sk-fg-muted);
+  --sk-on-status-info:      var(--sk-on-tint-sky);
+  --sk-on-status-success:   var(--sk-on-tint-mint);
+  --sk-on-status-attention: var(--sk-on-tint-butter);
+  --sk-on-status-danger:    var(--sk-on-tint-rose);
+  --sk-on-status-recovery:  var(--sk-on-tint-lilac);
 
   /* Pill background */
   --sk-bg-pill:             #ECE7D8;

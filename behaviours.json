@@ -38,7 +38,8 @@
     "#77 adds sk-site-footer to SC-013 and SC-014. Declaring the subject is what CREATES the obligation — nothing detects that a new element should have behaviour tests, and the suite's own floor proved it: with the tests written and passing but no subject declared, the run failed with '<sk-site-footer> exists but is not a subject of any behaviour ... it would ship with zero behaviour tests and every gate green'. That is the gate working.",
     "#146 WP01 adds section-header to SC-013/SC-014 and adds status-indicator and entity-marker to SC-010/SC-013/SC-014. Slot projection and accessible naming remain direct assertions rather than mislabeled behavior ids.",
     "#146 WP02 adds sk-action-row to SC-006/SC-007/SC-008/SC-010/SC-013/SC-014. SC-009 is intentionally absent because its activation request is non-cancelable and the component owns no preventable default action.",
-    "#146 WP03 adds react-action-row only to SC-006: its generated wrapper must deliver the action request once without changing the exact event or frozen detail identity."
+    "#146 WP03 adds react-action-row only to SC-006: its generated wrapper must deliver the action request once without changing the exact event or frozen detail identity.",
+    "#177 adds sk-card to SC-010. It was already an SC-013 subject and stays one; SC-010 is NEW to it because `status` is its first reflected STRING property — `variant` predates the id's adoption here and `inset` is boolean. Declaring the subject is what creates the obligation, per sk-site-footer's note above. sk-card is deliberately NOT added to SC-014: it adopts a generated sheet, but the claim there is asserted for it indirectly by sk-blog-card, whose two-sheet identity case imports sk-card's sheet by name, and adding a duplicate subject would grow the registry without adding an assertion. #177 also does not mint an id for fail-open: that behaviour is carried by SC-013, honestly rather than by relabelling, because a throw inside render() blanks the shadow root and the declared ::part() literally stops being targetable."
   ],
   "behaviours": [
     {
@@ -251,6 +252,10 @@
         {
           "name": "sk-button",
           "file": "fixtures/elements-behaviour/src/sk-button.test.ts"
+        },
+        {
+          "name": "sk-card",
+          "file": "fixtures/elements-behaviour/src/sk-card.test.ts"
         },
         {
           "name": "sk-context-sidebar",

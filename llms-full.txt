@@ -394,6 +394,7 @@ amendment.
 | `--sk-surface-tint-butter` | `#2A2410` | warm-yellow card |
 | `--sk-surface-tint-lilac` | `#1E1A2E` | v2.x banner / purple section |
 | `--sk-surface-tint-sky` | `#14202E` | muted info / blue section |
+| `--sk-surface-tint-rose` | `#2B1515` | danger / red status surface (#177) |
 
 ### On-tint foregrounds (paired with tint surfaces)
 
@@ -403,6 +404,25 @@ amendment.
 | `--sk-on-tint-butter` | `var(--sk-color-yellow-soft)` |
 | `--sk-on-tint-lilac` | `var(--sk-color-purple)` |
 | `--sk-on-tint-sky` | `var(--sk-color-blue)` |
+| `--sk-on-tint-rose` | `var(--sk-color-red)` |
+
+### Operational status pairs (#177)
+
+Semantic ALIASES over the tint family — meaning, not colour. One tone vocabulary for the whole
+library, owned by `sk-status-indicator` (#146) and consumed by `sk-card`'s `status` axis.
+
+| Surface | Foreground | Aliases |
+|---|---|---|
+| `--sk-status-neutral` | `--sk-on-status-neutral` | `--sk-surface-muted` / `--sk-fg-muted` |
+| `--sk-status-info` | `--sk-on-status-info` | the sky tint pair |
+| `--sk-status-success` | `--sk-on-status-success` | the mint tint pair |
+| `--sk-status-attention` | `--sk-on-status-attention` | the butter tint pair |
+| `--sk-status-danger` | `--sk-on-status-danger` | the rose tint pair |
+| `--sk-status-recovery` | `--sk-on-status-recovery` | the lilac tint pair |
+
+Declared in both theme blocks. All twelve pass AA in both themes against their own pair and
+against `--sk-fg-body`; the measured ratios sit beside the declarations in `tokens.css`. A tone
+is presentation and never the message — the visible text has to carry the meaning too.
 
 ### Pill / chip background
 
@@ -567,7 +587,7 @@ markup module (ADR-10 §3).
 
 | element | owns behaviour | notes |
 |---|---|---|
-| `sk-card` | no | `variant` (blue/purple), `inset`; default slot |
+| `sk-card` | no | two ORTHOGONAL axes — `variant` (blue/purple, brand) and `status` (neutral/info/success/attention/danger/recovery, operational, #177) — plus `inset`; default slot. Unknown `variant` or `status` warns and degrades to the base card; the static helper throws instead. There is deliberately no `sk-status-card`: a status card is `sk-card[status]` + `sk-status-indicator` + `.sk-facts` + `.sk-disclosure` composed, with the `<dl>`/`<details>` in light DOM |
 | `sk-nav-pill` | yes | fires `sk-nav-pill-toggle` with `detail: { open: boolean }`, cancelable; `isOpen` reflects as the `open` attribute |
 | `sk-form-input` | yes | form-associated via `ElementInternals`; `errorMessage` is `state: true` and deliberately not a React prop |
 | `sk-form-textarea` | yes | as `sk-form-input`, plus `rows` |
@@ -619,8 +639,8 @@ carry the detail generic from the element's `@fires {Type}`.
 #### sk-card (styles)
 - Path: `packages/styles/src/card/sk-card.css` + `sk-card.html` + `sk-card-html.stories.ts`
 - Story title: `Components/Card`
-- Variants: `Default`, `Blue`, `Purple`, `Inset`, `BlogCardExample`, `LightMode`
-- Notes: surface-tinted card; `BlogCardExample` is the composition used on `blog-demo.html`.
+- Variants: `Default`, `Blue`, `Purple`, `Inset`, `BlogCardExample`, `Statuses`, `StatusesGreyscale`, `LightMode`
+- Notes: surface-tinted card; `BlogCardExample` is the composition used on `blog-demo.html`. `.sk-card--status-<tone>` is the operational axis (#177), generated as `SkCardStatus<Tone>HTML`; `StatusesGreyscale` is the evidence that the tone is not the sole carrier of meaning.
 
 #### sk-check-bullet (styles)
 - Path: `packages/styles/src/check-bullet/sk-check-bullet.css` + `sk-check-bullet.html` + `sk-check-bullet-html.stories.ts`

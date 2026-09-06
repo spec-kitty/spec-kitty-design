@@ -23,6 +23,31 @@ export const CARD_VARIANTS = { blue: 'sk-card--blue', purple: 'sk-card--purple' 
 
 export type CardVariant = keyof typeof CARD_VARIANTS;
 
+// THE SIBLING MAP, and the reason it is a sibling rather than more entries in CARD_VARIANTS.
+//
+// `variant` is the brand/decorative axis; `status` is the operational one, and #177 makes the
+// separation binding. Folding the six tones into CARD_VARIANTS would make every brand x status
+// combination unreachable and would fork the tone vocabulary into the variant enum.
+//
+// THE KEYS ARE NOT AUTHORED HERE — they are #146's, and this file is not allowed to import them.
+// `scripts/build-element-markup.mjs` evaluates every *.markup.ts from a `data:` URL, which has no
+// module base, and exits with a named error on any relative import. So the one authored list is
+// `STATUS_TONES` in packages/elements/src/status-indicator/sk-status-indicator.ts, and this map is
+// held equal to it — membership AND order — by an assertion in
+// fixtures/elements-behaviour/src/sk-card.test.ts. Adding a tone to #146 reds that test until this
+// map is extended, which is the intended failure. Do not "fix" it by narrowing either side.
+/** Status tone → BEM modifier. The tone vocabulary is `sk-status-indicator`'s, not the card's. */
+export const CARD_STATUSES = {
+  neutral: 'sk-card--status-neutral',
+  info: 'sk-card--status-info',
+  success: 'sk-card--status-success',
+  attention: 'sk-card--status-attention',
+  danger: 'sk-card--status-danger',
+  recovery: 'sk-card--status-recovery',
+} as const;
+
+export type CardStatus = keyof typeof CARD_STATUSES;
+
 // PUBLISHED PROSE IS SHORT, DELIBERATELY. Everything in a `/** */` above an export is
 // lifted verbatim into custom-elements.json and rendered in IDE hovers and on docs sites —
 // #72 already shipped a 1144-character `@csspart` blob that way. Rationale for maintainers
@@ -40,6 +65,18 @@ export function isCardVariant(variant: string): variant is CardVariant {
 export const unknownVariantMessage = (variant: string): string =>
   `unknown card variant "${variant}" — expected one of ${Object.keys(CARD_VARIANTS).join(', ')}`;
 
+// `Object.hasOwn` here for the SAME measured reason as `isCardVariant` above, restated only as a
+// pointer: `in` reaches the prototype chain, so `status="constructor"` would pass and this module
+// also generates server-rendered HTML.
+/** Whether `status` names a real card status modifier. */
+export function isCardStatus(status: string): status is CardStatus {
+  return Object.hasOwn(CARD_STATUSES, status);
+}
+
+/** The shared diagnostic for an unrecognised status. */
+export const unknownStatusMessage = (status: string): string =>
+  `unknown card status "${status}" — expected one of ${Object.keys(CARD_STATUSES).join(', ')}`;
+
 // WHY THIS IS TOTAL AND `cardStaticHtml` IS NOT — the load-bearing decision in this file.
 //
 // The previous fold made this THROW, and pass 2 measured the consequence: Lit rejects
@@ -56,16 +93,27 @@ export const unknownVariantMessage = (variant: string): string =>
 // `Object.keys(CARD_VARIANTS)` and cannot pass an unknown one. One module, two callers, two
 // failure policies; collapsing them into one function is what went wrong. Both halves are
 // asserted in fixtures/elements-behaviour/src/sk-card.test.ts.
-/** The card's class list. An unknown `variant` warns and degrades to the base card. */
-export function cardClasses(variant?: string, inset = false): string {
+//
+// `status` (#177) takes the SAME policy, deliberately and not by copy-paste convenience: it is the
+// same untrusted-markup-input class as `variant` — a CMS field, a server template, a typo — and
+// the empty-shadow-root failure above is identical whichever axis triggers it. `status=""` is
+// treated as absent and does NOT warn, matching `statusTone()` in sk-status-indicator.ts, because
+// an attribute present-but-empty is how a template writes "no status".
+/** The card's class list. An unknown `variant` or `status` warns and degrades to the base card. */
+export function cardClasses(variant?: string, inset = false, status?: string): string {
   if (variant && !isCardVariant(variant)) {
     console.warn(`sk-card: ${unknownVariantMessage(variant)} — rendering the base card.`);
     variant = undefined;
+  }
+  if (status && !isCardStatus(status)) {
+    console.warn(`sk-card: ${unknownStatusMessage(status)} — rendering the base card.`);
+    status = undefined;
   }
   return [
     'sk-card',
     variant ? CARD_VARIANTS[variant as CardVariant] : '',
     inset ? 'sk-card--inset' : '',
+    status ? CARD_STATUSES[status as CardStatus] : '',
   ]
     .filter(Boolean)
     .join(' ');
@@ -82,7 +130,20 @@ export function cardClasses(variant?: string, inset = false): string {
 export interface CardStaticOptions {
   variant?: string;
   inset?: boolean;
+  status?: string;
 }
+
+// The status forms are DERIVED from CARD_STATUSES rather than typed out. Typing them out would
+// put the tone list in this file a second time, and the second copy is the one that goes stale.
+// `Object.fromEntries` widens away the literal key types, which is why this object is only
+// `satisfies`-checked and not `as const` — the generator reads the keys at runtime and the type
+// only has to prove every value is a legal option bag.
+const STATUS_AXES: Record<string, CardStaticOptions> = Object.fromEntries(
+  Object.keys(CARD_STATUSES).map((status) => [
+    `Status${status.charAt(0).toUpperCase()}${status.slice(1)}`,
+    { status },
+  ]),
+);
 
 /**
  * The static forms this component publishes, BEYOND the base and one per variant.
@@ -96,15 +157,19 @@ export interface CardStaticOptions {
  */
 export const CARD_AXES = {
   Inset: { inset: true },
-} as const satisfies Record<string, CardStaticOptions>;
+  ...STATUS_AXES,
+} satisfies Record<string, CardStaticOptions>;
 
 export function cardStaticHtml(opts: CardStaticOptions = {}, content = 'Card content'): string {
   // THROWS, where `cardClasses` warns. This is the authoring/build path — the generator and
   // server-side templates call it, nothing is painted yet, and committing a card with a
   // silently-dropped variant into generated output is the failure worth stopping.
-  const { variant, inset = false } = opts;
+  const { variant, inset = false, status } = opts;
   if (variant !== undefined && !isCardVariant(variant)) {
     throw new Error(unknownVariantMessage(variant));
   }
-  return `<article class="${cardClasses(variant, inset)}">${content}</article>`;
+  if (status !== undefined && !isCardStatus(status)) {
+    throw new Error(unknownStatusMessage(status));
+  }
+  return `<article class="${cardClasses(variant, inset, status)}">${content}</article>`;
 }

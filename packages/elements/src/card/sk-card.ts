@@ -18,7 +18,9 @@ import { cardClasses } from './sk-card.markup.js';
 //     is how the blob above happened; keep tag descriptions to one short line.
 //
 // The variant contract is not repeated in prose: the manifest already carries
-// `variant: 'blue' | 'purple' | undefined` from the field declaration below.
+// `variant: 'blue' | 'purple' | undefined` from the field declaration below. Same for `status`
+// (#177), whose six tones the manifest carries the same way — the class description says what the
+// axis IS, not what its members are.
 //
 // SINCE #129 THAT INCLUDES EVERY REACTIVE PROPERTY'S OWN `/** */`, and every public
 // method's: normalise-manifest.mjs propagates a field's description onto its attribute,
@@ -37,6 +39,7 @@ export class SkCard extends LitElement {
   static properties = {
     variant: { type: String, reflect: true },
     inset: { type: Boolean, reflect: true },
+    status: { type: String, reflect: true },
   };
 
   /** Accent colour. Omit for the default surface; an unknown value renders the base card and
@@ -46,6 +49,21 @@ export class SkCard extends LitElement {
   /** Swaps the surface token for the inset (input) surface, for a card nested inside another. */
   declare inset: boolean;
 
+  // THE UNION IS SPELLED OUT HERE BECAUSE THE PIPELINE REQUIRES IT, not because the card owns a
+  // second vocabulary. `scripts/build-vue-types.mjs` emits `'<attr>'?: <the manifest's type text>`
+  // verbatim into packages/elements/vue.d.ts, and that file imports nothing from this package — so
+  // a `StatusIndicatorTone` alias here would emit an unresolved identifier and fail typecheck-all.
+  // #146 wrote `tone`'s union out inline at sk-status-indicator.ts for exactly this reason while
+  // keeping the authored list in `STATUS_TONES`.
+  //
+  // What holds this honest: packages/react/type-tests/wrappers.type-test.tsx proves this union and
+  // `StatusIndicatorTone` are mutually assignable, and the behaviour fixture proves CARD_STATUSES'
+  // keys equal STATUS_TONES. Widening, narrowing or renaming either one reds a test.
+  /** Operational status tone, orthogonal to `variant` — a card may carry both. The vocabulary is
+   *  `sk-status-indicator`'s; the card holds no domain mapping and never infers a tone. An unknown
+   *  value renders the base card and warns rather than throwing. */
+  declare status: 'neutral' | 'info' | 'success' | 'attention' | 'danger' | 'recovery' | undefined;
+
   constructor() {
     super();
     this.inset = false;
@@ -54,7 +72,7 @@ export class SkCard extends LitElement {
   render() {
     // The class list comes from sk-card.markup.ts, which is also what generates the static
     // HTML and the template-literal exports — ADR-10 §3's "authored once".
-    return html`<div part="card" class=${cardClasses(this.variant, this.inset)}><slot></slot></div>`;
+    return html`<div part="card" class=${cardClasses(this.variant, this.inset, this.status)}><slot></slot></div>`;
   }
 }
 

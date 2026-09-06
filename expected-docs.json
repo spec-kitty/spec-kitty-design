@@ -29,7 +29,7 @@
     "#146 WP01 adds three projection primitives. Section-header is slot-only; status-indicator publishes one tone attribute; entity-marker publishes one accessible label attribute. On the consolidated train-based mission target, total moves 78 -> 80.",
     "#146 WP02 adds sk-action-row with three controlled attributes: row-id, selectable and selected. Total moves 80 -> 83."
   ],
-  "total": 83,
+  "total": 84,
   "elements": {
     "sk-action-row": {
       "attributes": 3,
@@ -52,7 +52,7 @@
       "methods": 0
     },
     "sk-card": {
-      "attributes": 2,
+      "attributes": 3,
       "properties": 0,
       "methods": 0
     },
