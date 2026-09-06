@@ -79,10 +79,10 @@
       "criterion_id": "FR-006",
       "description": "Render a subtle zero baseline and restrained scale and grid guidance.",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "packages/storybook/src/tests/sk-bar-chart.spec.ts proves visible grid and zero baseline plus contained vertical geometry in dark/light/forced-colors",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T21:30:12.296126+00:00",
       "notes": "DOM, token-binding, forced-colors, and visual evidence.",
       "lane_owners": [
         "WP01"
