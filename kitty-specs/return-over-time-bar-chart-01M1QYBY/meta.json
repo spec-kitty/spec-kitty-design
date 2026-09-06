@@ -1,4 +1,5 @@
 {
+  "baseline_merge_commit": "a842ef4b6a8d237d1ad90beafd9f55bc03582e63",
   "created_at": "2026-09-05T04:48:57.473860+00:00",
   "flattened": false,
   "friendly_name": "return over time bar chart",
@@ -9,6 +10,7 @@
   "purpose_context": "This mission advances return over time bar chart on mission/return-over-time-bar-chart so stakeholders can track the work from mission creation onward.",
   "purpose_tldr": "return over time bar chart",
   "slug": "return-over-time-bar-chart-01M1QYBY",
+  "status_phase": "1",
   "target_branch": "mission/return-over-time-bar-chart",
   "topology": "single_branch",
   "vcs": "git",
