@@ -75,6 +75,16 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) conve
   control, and retain a token-driven focus-visible treatment in both themes.
 - Added the controlled `sk-transition-matrix` element for accessible aggregate route-by-time-bucket
   moves, including typed intent events, responsive table semantics, and generated React delivery.
+- Added two orthogonal reflected axes to `sk-page-header` (#182): `density="compact"` and `sticky`.
+  One header, two densities — the compact form resolves from the same five slots, so there is no
+  second header to author. When `sticky` is set the host is the sticky box, so the header pins
+  inside whatever scroll region its surroundings provide; below 720px of viewport width or 480px
+  of viewport height it returns to normal flow and stacks, with the title, the metadata and the
+  trailing action all still present. Four `--sk-layout-page-header-*` tokens carry the geometry,
+  one of them a `calc()` over the other two — `--sk-layout-page-header-sticky-scroll-margin`, the
+  value consumers apply to their own focusable content so a focused element is not obscured by the
+  sticky header (WCAG 2.4.11). The element still owns no timer, clock read or liveness state; a
+  test enforces that rather than a comment.
 
 - Initial token layer (`@spec-kitty/tokens`) with 93 design tokens across 13 categories
 - Brand fonts bundled: Falling Sky family (30 files), Swansea family

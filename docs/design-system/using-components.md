@@ -68,6 +68,87 @@ personal rail's `account` slot, above `logout`; do not duplicate it in `primary`
 does not calculate relative time or schedule refreshes. Links and buttons slotted into any shell
 element remain the original native controls and keep their native events.
 
+### Page header density and stickiness
+
+`sk-page-header` has two reflected axes, and they are independent: a compact header need not
+stick, and a sticky header need not be compact.
+
+| attribute | values | what it changes |
+|---|---|---|
+| `density` | `compact`, or omitted | Padding, gaps and row direction. The same five slots resolve at either density — there is no second header to author. Any other value renders the default density and warns. |
+| `sticky` | present / absent | The header pins itself to the top of its scroll region. |
+
+```html
+<sk-page-header density="compact" sticky>
+  <span slot="eyebrow">Runs</span>
+  <h1 slot="title">Pipeline runs</h1>
+  <p slot="supporting">Latest evidence for this project.</p>
+  <span slot="sync">Updated 12 seconds ago</span>
+  <sk-button slot="actions" size="icon" label="Refresh runs">↻</sk-button>
+</sk-page-header>
+```
+
+At compact density the eyebrow, title, supporting copy and sync text share one row and truncate
+visually if they do not fit. Truncation is visual only — the DOM text is untouched, so assistive
+technology still reads the whole string. The actions region never shrinks: under horizontal
+pressure the metadata gives way first and the trailing control keeps its full box.
+
+**Stickiness is dropped below 720px of viewport width or 480px of viewport height.** The header
+returns to normal flow and stacks, and nothing is removed to make room — the title, the metadata
+and the actions are all still rendered and still reachable. A sticky header that consumes a third
+of a short viewport is worse than no sticky header.
+
+#### Keeping focused content out from behind the header
+
+A sticky header will otherwise cover a control the browser has just scrolled into view, which is a
+WCAG 2.4.11 failure. The header cannot reach your content to fix that, so it publishes the value
+for you to apply — you never compute an offset yourself:
+
+```css
+.page-content :is(a, button, input, select, textarea, [tabindex]) {
+  scroll-margin-block-start: var(--sk-layout-page-header-sticky-scroll-margin);
+}
+```
+
+That token is **derived**, not restated:
+
+```
+--sk-layout-page-header-sticky-scroll-margin =
+    --sk-layout-page-header-sticky-offset      (where the header pins, default 0)
+  + --sk-layout-page-header-compact-height     (the compact header's minimum block size, 3rem)
+  + --sk-space-4
+```
+
+The header's own `min-block-size` at compact density reads the same
+`--sk-layout-page-header-compact-height`, so retuning either input moves both the header and the
+scroll margin together. **The stated residual**: the derivation describes a single-row compact
+header. If your slotted title wraps to two lines the header is taller than the token says, and you
+raise `--sk-layout-page-header-compact-height` — which raises the header's own minimum block size
+in the same move. The element does not measure its own live box, because measuring layout is the
+class of behaviour it is deliberately barred from owning.
+
+Set `--sk-layout-page-header-sticky-offset` when something else already occupies the top of the
+scroll region, and `--sk-layout-page-header-sticky-layer` if the header must stack differently
+against your own positioned content.
+
+#### The scroll-container contract, stated once
+
+`sk-app-shell` owns page geometry; `sk-page-header` owns stickiness **within the region the shell
+gives it**. `position: sticky` resolves against the nearest scrolling ancestor, so the two have to
+agree on one thing and only one: **the element that scrolls must be an ancestor of the header, and
+the header must not be inside a separate scroll container from the content it sits above.** In the
+shell composition at the top of this page that is satisfied by the page scrolling; if you make the
+shell's main region its own scroll container, put the header inside that region rather than beside
+it. This paragraph is the only place that contract is written down, and it is written on the
+header because the header is what breaks when it is violated.
+
+#### What the header still does not do
+
+Everything #145 ruled out stays ruled out, and stickiness does not soften it. The header starts no
+timer, reads no clock, computes no relative age, polls nothing, observes no scrolling, and owns no
+"live" state. The freshness string and any live/paused indicator are slotted content, rendered
+verbatim; the consumer owns the timer that produces them.
+
 ## Transition matrix
 
 `sk-transition-matrix` presents aggregate moves by route and consumer-labelled time bucket. Assign
