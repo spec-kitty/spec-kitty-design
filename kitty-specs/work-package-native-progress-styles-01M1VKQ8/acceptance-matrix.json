@@ -88,10 +88,10 @@
       "criterion_id": "FR-009",
       "description": "Under forced-colors: active, the track's boundary and the fill are each still distinguishable from the page background and from each other.",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-progress-html-forced-colors-chromium-linux.png plus apps/storybook/src/tests/sk-progress.spec.ts forced-colors computed-style check \u2014 green",
+      "pass_fail": "pass",
+      "verified_by": "codex-orry-wp208-210-0906a",
+      "verified_at": "2026-09-06T17:32:34.701125+00:00",
       "notes": "Verified by WP01 T008's forced-colors emulation assertion (computed border/fill colour comparison) plus the CI-authoritative visual baseline (T008/T010)."
     },
     {
