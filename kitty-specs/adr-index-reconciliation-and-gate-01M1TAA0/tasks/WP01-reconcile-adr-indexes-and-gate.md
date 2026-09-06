@@ -16,7 +16,7 @@ requirement_refs:
 - FR-011
 planning_base_branch: mission/adr-index-reconciliation-and-gate
 merge_target_branch: mission/adr-index-reconciliation-and-gate
-branch_strategy: Planning artifacts for this mission were generated on mission/adr-index-reconciliation-and-gate. Completed changes merge back into mission/adr-index-reconciliation-and-gate, which opens a PR onto train/elements-first.
+branch_strategy: Planning artifacts for this mission were generated on mission/adr-index-reconciliation-and-gate. During /spec-kitty.implement this WP may branch from a dependency-specific base, but completed changes must merge back into mission/adr-index-reconciliation-and-gate unless the human explicitly redirects the landing branch.
 subtasks:
 - T001
 - T002
