@@ -530,10 +530,10 @@
       "criterion_id": "C-004",
       "description": "Keep one authored CSS source and one authored structured render source, with no hand-authored duplicate markup or static form.",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "generated-markup and source checks prove one authored sk-bar-chart.ts render source and one authored sk-bar-chart.css source with no duplicate static form",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T21:31:02.227373+00:00",
       "notes": "Generated-markup and authored-source absence checks.",
       "lane_owners": [
         "WP01"
