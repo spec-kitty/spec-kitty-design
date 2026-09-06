@@ -107,10 +107,10 @@
       "criterion_id": "FR-008",
       "description": "Expose the chart name and description and every label and value pair to assistive technology in exact input order.",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "ordered accessible-list semantics and exact chart name/description/label/value browser assertions green; axe rendered all 260 stories with zero violations",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T21:30:15.925432+00:00",
       "notes": "Accessibility-tree/source-order assertions and axe.",
       "lane_owners": [
         "WP01"
