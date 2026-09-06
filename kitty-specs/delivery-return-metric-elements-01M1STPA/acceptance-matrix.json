@@ -148,10 +148,10 @@
       "criterion_id": "FR-015",
       "description": "Exactly six metric and nine evidence-chain stories cover generic defaults, the approved Delivery-return fixture, long content, two/four/six stages, narrow reflow and real .sk-light wrappers.",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "six metric and nine evidence-chain stories plus real card grid pill composition; Storybook ID ratchet passed",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T16:48:50.800727+00:00",
       "notes": "WP01/WP02 authored story sets; WP03 built index ratchet, nonblank loads, axe and visual coverage."
     },
     {
