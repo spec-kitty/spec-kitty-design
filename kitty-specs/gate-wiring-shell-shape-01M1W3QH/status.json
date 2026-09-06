@@ -1,7 +1,7 @@
 {
-  "event_count": 10,
-  "last_event_id": "01M1W4RWDG01W563ZXTS81711M",
-  "materialized_at": "2026-09-06T19:57:50.896915+00:00",
+  "event_count": 11,
+  "last_event_id": "01M1W4RXG3QCR48N680HVMPN94",
+  "materialized_at": "2026-09-06T19:57:52.003597+00:00",
   "mission_number": "",
   "mission_slug": "gate-wiring-shell-shape-01M1W3QH",
   "mission_type": "software-dev",
@@ -11,9 +11,9 @@
     "canceled": 0,
     "claimed": 0,
     "done": 0,
-    "for_review": 1,
+    "for_review": 0,
     "in_progress": 1,
-    "in_review": 0,
+    "in_review": 1,
     "planned": 1
   },
   "work_packages": {
@@ -22,9 +22,9 @@
       "agent_profile": "__resolved_profile_absent__",
       "agent_profile_version": "__resolved_profile_version_absent__",
       "force_count": 1,
-      "lane": "for_review",
-      "last_event_id": "01M1W4RWDG01W563ZXTS81711M",
-      "last_transition_at": "2026-09-06T19:57:50.896915+00:00",
+      "lane": "in_review",
+      "last_event_id": "01M1W4RXG3QCR48N680HVMPN94",
+      "last_transition_at": "2026-09-06T19:57:52.003597+00:00",
       "model": "__resolved_model_absent__",
       "provider": "__resolved_provider_absent__",
       "review_result": {
