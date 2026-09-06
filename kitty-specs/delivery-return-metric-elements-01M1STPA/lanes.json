@@ -107,5 +107,5 @@
   "computed_at": "2026-09-05T23:59:29.385601+00:00",
   "computed_from": "dependency_graph+ownership",
   "planning_artifact_wps": [],
-  "planning_commit_sha": "6be7062ca1adc164f592f9ac5fcfc58ff03f36be"
+  "planning_commit_sha": "90925bf6e30cf9fe6ea98ee6b03361b09706e637"
 }
