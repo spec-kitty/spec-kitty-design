@@ -406,6 +406,8 @@ test('SK-evidence-chain narrow — visual baseline', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   const host = await evidenceChainStory(page, 'narrow');
   await expect(host).toHaveScreenshot('sk-evidence-chain-narrow.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+});
+
 test('SK-bar-chart approved dark — visual baseline', async ({ page }) => {
   const host = await barChartStory(page, 'default');
   await expect(host).toHaveScreenshot('sk-bar-chart-approved-dark.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
