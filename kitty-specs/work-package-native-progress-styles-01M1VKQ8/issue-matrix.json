@@ -37,7 +37,7 @@
       "wp": "WP01"
     },
     "#214": {
-      "evidence_ref": "https://github.com/spec-kitty/spec-kitty-design/issues/214 \u2014 downstream pattern composition after prerequisites close",
+      "evidence_ref": "Follow-up: #214 \u2014 downstream pattern composition after #209-#213 and #178 close",
       "fr": null,
       "nfr": null,
       "repo": null,
