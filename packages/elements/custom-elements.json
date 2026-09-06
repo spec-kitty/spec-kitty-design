@@ -848,6 +848,14 @@
         },
         {
           "kind": "variable",
+          "name": "NOTICE_ANNOUNCEMENTS",
+          "type": {
+            "text": "ReadonlyArray<NoticeAnnounce>"
+          },
+          "description": "The politeness levels, in escalating order."
+        },
+        {
+          "kind": "variable",
           "name": "PILL_TAG_AXES",
           "default": "Object.fromEntries( Object.keys(PILL_TAG_SHAPES).map((s) => [`${s.charAt(0).toUpperCase()}${s.slice(1)}`, { shape: s }]), )",
           "description": "The non-variant axes: one per shape."
@@ -3501,6 +3509,189 @@
         },
         {
           "kind": "class",
+          "description": "A block-level status message about a page or a region of it, announced at a politeness the\nconsumer chooses.\n\nAnnouncement is an explicit property, never a side effect of tone: a `danger` notice with\n`announce=\"off\"` is silent, and a `neutral` one with `announce=\"assertive\"` interrupts. The\nelement owns no application state — the consumer decides whether a notice exists — and it has\nno timer, no positioning and no stacking. It is not a toast.\n\nToken dependencies: --sk-border-default, --sk-border-focus, --sk-border-strong,\n--sk-border-width-1, --sk-border-width-2, --sk-border-width-4, --sk-fg-body, --sk-font-sans,\n--sk-motion-duration-fast, --sk-motion-ease-out, --sk-on-status-attention,\n--sk-on-status-danger, --sk-on-status-info, --sk-on-status-neutral, --sk-on-status-recovery,\n--sk-on-status-success, --sk-radius-md, --sk-radius-sm, --sk-space-1, --sk-space-2,\n--sk-space-3, --sk-space-4, --sk-status-attention, --sk-status-danger, --sk-status-info,\n--sk-status-neutral, --sk-status-recovery, --sk-status-success, --sk-surface-card,\n--sk-text-base, --sk-text-lg, --sk-weight-semibold.",
+          "name": "SkNotice",
+          "cssParts": [
+            {
+              "description": "The trailing actions wrapper.",
+              "name": "actions"
+            },
+            {
+              "description": "The message body, and the live region when announcement is on.",
+              "name": "body"
+            },
+            {
+              "description": "The heading, body and actions column.",
+              "name": "content"
+            },
+            {
+              "description": "The dismiss control.",
+              "name": "dismiss"
+            },
+            {
+              "description": "The consumer heading's wrapper.",
+              "name": "heading"
+            },
+            {
+              "description": "The decorative marker wrapper.",
+              "name": "marker"
+            },
+            {
+              "description": "The notice layout root.",
+              "name": "notice"
+            }
+          ],
+          "slots": [
+            {
+              "description": "The message body. Rendered inside the live region, so slotted content is announced with `message`.",
+              "name": ""
+            },
+            {
+              "description": "Trailing consumer-owned controls, such as `sk-button`s.",
+              "name": "actions"
+            },
+            {
+              "description": "A consumer-supplied native heading. The element generates none, so the level stays the consumer's.",
+              "name": "heading"
+            },
+            {
+              "description": "A decorative consumer-supplied marker. Falls back to a per-tone glyph.",
+              "name": "marker"
+            }
+          ],
+          "members": [
+            {
+              "kind": "method",
+              "name": "#dismiss",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              }
+            },
+            {
+              "kind": "field",
+              "name": "announce",
+              "privacy": "public",
+              "type": {
+                "text": "'off' | 'polite' | 'assertive'"
+              },
+              "description": "Announcement politeness. `off` (the default) renders no live region; `polite` renders\n`role=\"status\"`; `assertive` renders `role=\"alert\"`. Independent of `tone`.",
+              "default": "'off'",
+              "attribute": "announce",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "dismissible",
+              "privacy": "public",
+              "type": {
+                "text": "boolean"
+              },
+              "description": "Whether to render the dismiss control. The element never removes itself when it is used.",
+              "default": "false",
+              "attribute": "dismissible",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "dismissLabel",
+              "privacy": "public",
+              "type": {
+                "text": "string"
+              },
+              "description": "Accessible name for the dismiss control. Defaults to `Dismiss notice`.",
+              "default": "'Dismiss notice'",
+              "attribute": "dismiss-label"
+            },
+            {
+              "kind": "field",
+              "name": "message",
+              "privacy": "public",
+              "type": {
+                "text": "string"
+              },
+              "description": "The message text. Changing it re-announces, when announcement is on. A consumer that must\nannounce a message which already exists when the notice is inserted should insert the notice\nfirst and then assign this — a live region that enters the DOM together with its content is\nnot reliably announced, and the element cannot defer its own first paint without a timer.",
+              "default": "''",
+              "attribute": "message"
+            },
+            {
+              "kind": "field",
+              "name": "tone",
+              "privacy": "public",
+              "type": {
+                "text": "'neutral' | 'info' | 'success' | 'attention' | 'danger' | 'recovery' | undefined"
+              },
+              "description": "Presentation tone, from the library's one tone vocabulary. Unknown values render as\n`neutral` without changing the visible message.",
+              "attribute": "tone",
+              "reflects": true
+            }
+          ],
+          "events": [
+            {
+              "type": {
+                "text": "CustomEvent<SkNoticeDismissDetail>"
+              },
+              "description": "Requests dismissal; `detail: { tone }`. Bubbles, is composed, and is cancelable. The element never removes itself — `preventDefault()` abandons only the element's own focus move.",
+              "name": "sk-notice-dismiss"
+            }
+          ],
+          "attributes": [
+            {
+              "name": "announce",
+              "type": {
+                "text": "'off' | 'polite' | 'assertive'"
+              },
+              "description": "Announcement politeness. `off` (the default) renders no live region; `polite` renders\n`role=\"status\"`; `assertive` renders `role=\"alert\"`. Independent of `tone`.",
+              "default": "'off'",
+              "fieldName": "announce"
+            },
+            {
+              "name": "dismiss-label",
+              "type": {
+                "text": "string"
+              },
+              "description": "Accessible name for the dismiss control. Defaults to `Dismiss notice`.",
+              "default": "'Dismiss notice'",
+              "fieldName": "dismissLabel"
+            },
+            {
+              "name": "dismissible",
+              "type": {
+                "text": "boolean"
+              },
+              "description": "Whether to render the dismiss control. The element never removes itself when it is used.",
+              "default": "false",
+              "fieldName": "dismissible"
+            },
+            {
+              "name": "message",
+              "type": {
+                "text": "string"
+              },
+              "description": "The message text. Changing it re-announces, when announcement is on. A consumer that must\nannounce a message which already exists when the notice is inserted should insert the notice\nfirst and then assign this — a live region that enters the DOM together with its content is\nnot reliably announced, and the element cannot defer its own first paint without a timer.",
+              "default": "''",
+              "fieldName": "message"
+            },
+            {
+              "name": "tone",
+              "type": {
+                "text": "'neutral' | 'info' | 'success' | 'attention' | 'danger' | 'recovery' | undefined"
+              },
+              "description": "Presentation tone, from the library's one tone vocabulary. Unknown values render as\n`neutral` without changing the visible message.",
+              "fieldName": "tone"
+            }
+          ],
+          "superclass": {
+            "name": "LitElement",
+            "package": "lit"
+          },
+          "tagName": "sk-notice",
+          "customElement": true
+        },
+        {
+          "kind": "class",
           "description": "A stateless layout for consumer-owned page orientation, metadata, and actions.\n\nTwo orthogonal axes. `density` changes how much room the header takes; `sticky` changes\nwhether it stays put while its scroll region scrolls. Neither implies the other, and the same\nfive slots resolve at either density — there is no second header to author and no second\nmarkup path to drift.\n\nWhen `sticky` is set the HOST is the sticky box, so the header pins itself inside whatever\nscroll container its surroundings provide. Two viewport thresholds return it to normal flow —\n720px of width and 480px of height — because a sticky header that eats a short viewport, or\nthat overlaps a focused control below it, is worse than no sticky header at all. Nothing is\ndropped in that reflow.\n\nConsumers styling their own content under a sticky header should set\n`scroll-margin-block-start: var(--sk-layout-page-header-sticky-scroll-margin)` on the\nfocusable elements in it, so a focused element scrolled into view is not obscured by the\nheader (WCAG 2.4.11).\n\nThat token's DEFAULT VALUE covers ONE configuration: `density=\"compact\"` laid out on a single\nrow, which is the header wider than 720px. It is derived from the header's own sticky offset\nand compact block size rather than restated, so within that configuration it cannot drift.\nOutside it the header is taller than the default and the consumer overrides the token — the\nname stays the single place the value lives, which is the part of the contract that matters.\nTwo cases need the override, and the orthogonality above is why the first exists:\n\n- **Default density.** `sticky` without `density=\"compact\"` is supported, and its height is\n  entirely the consumer's slotted content — measured between 227px and 533px for one\n  composition across two widths and two title lengths, against an 80px default. There is no\n  honest derived number for it, so there is no second token: the consumer sets the value from\n  their own header.\n- **A stacked compact header.** Stacking is a CONTAINER query on the header's own width and the\n  sticky drop is a MEDIA query on the viewport's, so they are not the same threshold: a 400px\n  header column inside a 1400px viewport is sticky AND stacked at once — measured 96px against\n  the same 80px default.\n\nThe element does not measure its own live box to close that gap, because observing layout is\nthe class of behaviour it is deliberately barred from owning.\n\nThe `sync` slot's contents are rendered verbatim. This element never starts a timer, reads a\nclock, polls, observes scrolling, or computes a relative age: freshness belongs to the\nconsumer, which owns the timer and supplies the resulting string.",
           "name": "SkPageHeader",
           "cssParts": [
@@ -5095,6 +5286,22 @@
         },
         {
           "kind": "js",
+          "name": "NOTICE_ANNOUNCEMENTS",
+          "declaration": {
+            "name": "NOTICE_ANNOUNCEMENTS",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "NoticeAnnounce",
+          "declaration": {
+            "name": "NoticeAnnounce",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
           "name": "PILL_TAG_AXES",
           "declaration": {
             "name": "PILL_TAG_AXES",
@@ -5490,6 +5697,30 @@
           "name": "SkNavPill",
           "declaration": {
             "name": "SkNavPill",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "SkNotice",
+          "declaration": {
+            "name": "SkNotice",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "SkNoticeDismissDetail",
+          "declaration": {
+            "name": "SkNoticeDismissDetail",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "skNoticeSheet",
+          "declaration": {
+            "name": "default",
             "module": "./dist/index.js"
           }
         },

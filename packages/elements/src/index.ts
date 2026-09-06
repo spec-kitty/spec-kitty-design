@@ -33,6 +33,17 @@ export {
   SkEvidenceChain,
   type EvidenceStage,
 } from './evidence-chain/sk-evidence-chain.js';
+// sk-notice (#178) CONSUMES the tone vocabulary above rather than restating it — it imports
+// STATUS_TONES directly, which it can because it authors no `*.markup.ts` (there is no static
+// form for an announcement-bearing element to have) and so never meets the data:-URL constraint
+// #216 records. `NOTICE_ANNOUNCEMENTS` is its own, separate axis: politeness, not tone.
+export {
+  SkNotice,
+  NOTICE_ANNOUNCEMENTS,
+  type NoticeAnnounce,
+  type SkNoticeDismissDetail,
+} from './notice/sk-notice.js';
+
 export {
   SkTransitionMatrix,
   type TransitionColumn,
@@ -76,6 +87,7 @@ export { default as skStatusIndicatorSheet } from './status-indicator/sk-status-
 export { default as skEntityMarkerSheet } from './entity-marker/sk-entity-marker.css.js';
 export { default as skMetricSheet } from './metric/sk-metric.css.js';
 export { default as skEvidenceChainSheet } from './evidence-chain/sk-evidence-chain.css.js';
+export { default as skNoticeSheet } from './notice/sk-notice.css.js';
 export { default as skTransitionMatrixSheet } from './transition-matrix/sk-transition-matrix.css.js';
 
 // The card's authored markup module, exported so the two failure policies are reachable
