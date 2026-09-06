@@ -159,12 +159,32 @@ names these props for native elements (`<input readOnly autoComplete="off">`), i
 what the Lit field or attribute is named. `sk-form-input` is the first element in this repo to
 use a field name matching one of those well-known attributes, so the mismatch was never visible
 before. A hand-mirrored rename table would only ever cover the entries this repo happens to have
-used so far — the pre-merge debugger lens found this fragile and simplified it: every rename in
-the generator's own (un-exported) table is CASE-ONLY, so `scripts/build-react-wrappers.mjs`'s own
-consistency check now folds both the expected and emitted prop-NAME SETS to lower-case before
-comparing, rather than carrying any rename table of its own. Confirm against the regenerated
+used so far — the pre-merge debugger lens found this fragile. Its fix, described here until #187
+replaced it, folded both the expected and emitted prop-NAME SETS to lower-case before comparing,
+on the claim that every rename in the generator's own (un-exported) table is CASE-ONLY. **Both the
+gate description and that claim are now stale — corrected in #191, not restated in full here (one
+owner per fact); see ADR-11's "wrapper prop-name invariant" section,
+`docs/architecture/decisions/2026-09-02-11-verification-stack-and-wrapper-generation.md`, for the
+canonical statement.** In short: `scripts/build-react-wrappers.mjs` no longer folds anything —
+`loadReactPropRenameMap()` reads the real `MAPPED_PROPS` table out of the installed
+`@wc-toolkit/react-wrappers` bundle and the per-element check asserts EXACT casing against it
+(verified at this head: `node scripts/build-react-wrappers.mjs --check` passes against that exact
+comparison, and a fold would no longer catch a generator regression that emitted `readonly` where
+`readOnly` was expected). And the CASE-ONLY claim is false: `for`→`htmlFor` and `class`→
+`className` are word substitutions, not case changes — this element's own three renames
+(`readonly`/`autocomplete`/`inputmode`) remain case-only. Which of the table's columns you key it
+by decides where those two substitutions surface, and all three answers differ (measured against
+`@wc-toolkit/react-wrappers@1.2.7`, the version pinned exactly at `package.json:49`; a later
+release may add rows or move them): keyed by `fieldName.toLowerCase()` — the column
+`loadReactPropRenameMap()` actually builds its map from — all 17 rows are case-only and there is no
+word substitution at all; `for`→`htmlFor` shows up on the `name` column, which is the column
+ADR-11 measures by; and `class`→`className` shows up on `originalName`, a column no code in this
+repo reads. ADR-11 traces the `for` row in full and records where its own trace of the `class`
+row's `originalName` path stops. Confirm the prop names themselves against the regenerated
 `packages/react/src/SkFormInput.js`/`.d.ts` — reading the generator's actual output is what caught
-both the original wrong guess and this contract's own first "correction."
+both the original wrong guess and this contract's own first "correction"; the gate-description and
+CASE-ONLY corrections above rest on reading the gate's source and ADR-11's own measurement, not on
+regenerating output that was never wrong.
 
 `options` is delivered as a JS property via the generated `useProperties` hook (not an attribute),
 surviving delivery before the custom element is defined and resetting to a fresh frozen `[]` when

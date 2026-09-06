@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "mission_slug": "form-input-contract-doc-refresh-01M1T6VH",
+  "mission_id": "01M1T6VHA875JBW2BCR474W3GA",
+  "mission_branch": "kitty/mission-form-input-contract-doc-refresh-01M1T6VH",
+  "target_branch": "mission/form-input-contract-doc-refresh",
+  "lanes": [
+    {
+      "lane_id": "lane-planning",
+      "wp_ids": [
+        "WP01"
+      ],
+      "write_scope": [
+        "kitty-specs/form-input-constraints-and-datalist-01M1S94Y/contracts/sk-form-input.contract.md"
+      ],
+      "predicted_surfaces": [
+        "planning"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    }
+  ],
+  "computed_at": "2026-09-06T02:02:48.436304+00:00",
+  "computed_from": "dependency_graph+ownership",
+  "planning_artifact_wps": [
+    "WP01"
+  ],
+  "planning_commit_sha": "489d3c3d4f7d69d7d817951971b60396626825ba"
+}
