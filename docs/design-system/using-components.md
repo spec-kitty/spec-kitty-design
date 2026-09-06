@@ -12,12 +12,12 @@ so far — as **custom elements** in `@spec-kitty/elements`. Both require `@spec
 Several of the catalogue's component packages are CSS only by a recorded decision — `form-field`,
 (#176) `facts`, `disclosure`, `data-table`, `empty-state`, `skip-link`, (#210) `progress`, and
 (#209) `workflow-board` and `workflow-lane`. See
-ADR-10, _form-field is deliberately styles-only_ and _Styles-only components are a class, not a
-fixed exception count_. These nine ship classes applied to real semantic HTML the consumer authors
+ADR-10, *form-field is deliberately styles-only* and *Styles-only components are a class, not a
+fixed exception count*. These nine ship classes applied to real semantic HTML the consumer authors
 — `<dl>`, `<details>`, `<table>`, a plain block, `<a>`, `<progress>`, `<section>`, and `<ol>` — and no `sk-*` custom element
 wraps any of them: light-DOM native semantics (list/table/label association across a shadow
 boundary) are exactly what a wrapper element would break. Composite sections below such as Hero
-and Callout are CSS-only _patterns_ rather than packages, and are not part of that count. Each
+and Callout are CSS-only *patterns* rather than packages, and are not part of that count. Each
 section below says which it is, because the difference decides how you use it.
 
 Because a custom element needs no wrapper, every framework can use the migrated ones directly. A
@@ -77,10 +77,10 @@ element remain the original native controls and keep their native events.
 `sk-page-header` has two reflected axes, and they are independent: a compact header need not
 stick, and a sticky header need not be compact.
 
-| attribute | values                | what it changes                                                                                                                                                              |
-| --------- | --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| attribute | values | what it changes |
+|---|---|---|
 | `density` | `compact`, or omitted | Padding, gaps and row direction. The same five slots resolve at either density — there is no second header to author. Any other value renders the default density and warns. |
-| `sticky`  | present / absent      | The header pins itself to the top of its scroll region.                                                                                                                      |
+| `sticky` | present / absent | The header pins itself to the top of its scroll region. |
 
 ```html
 <sk-page-header density="compact" sticky>
@@ -136,15 +136,15 @@ the one place the value lives; only its default is compact-specific.
 Measured in chromium against the shipped token sheet, one composition (eyebrow, title, supporting
 copy, sync text, one action), as the host's own height:
 
-| configuration              | header width | short title | long title |
-| -------------------------- | -----------: | ----------: | ---------: |
-| `density="compact" sticky` |        900px |    **60px** |       60px |
-| `density="compact" sticky` |        400px |        96px |       96px |
-| `sticky` (default density) |        900px |       227px |      356px |
-| `sticky` (default density) |        400px |       275px |      533px |
+| configuration | header width | short title | long title |
+|---|---:|---:|---:|
+| `density="compact" sticky` | 900px | **60px** | 60px |
+| `density="compact" sticky` | 400px | 96px | 96px |
+| `sticky` (default density) | 900px | 227px | 356px |
+| `sticky` (default density) | 400px | 275px | 533px |
 
 Against a published default of **80px**. Note that the compact figure is not the 3rem (48px)
-minimum: `--sk-layout-page-header-compact-height` is a _floor_, and the real height is whatever the
+minimum: `--sk-layout-page-header-compact-height` is a *floor*, and the real height is whatever the
 slotted content needs above it — this catalogue's own sticky story measures 71px, because its sync
 slot also carries a status pill. That is what the `--sk-space-7` term absorbs, and it is why the
 term is 2rem rather than the 1rem it shipped with for one round.
@@ -157,7 +157,7 @@ Two things follow, and the second is easy to miss:
   would be a guess wearing a token's name. Set
   `--sk-layout-page-header-sticky-scroll-margin` yourself, from your own header.
 - **A compact header can be stacked and sticky at the same time.** Stacking is a `@container`
-  query on the _header's own width_; dropping stickiness is a `@media` query on the _viewport's_.
+  query on the *header's own width*; dropping stickiness is a `@media` query on the *viewport's*.
   They are deliberately different mechanisms — the header must reflow inside whatever column the
   page gives it, while scrolling is a viewport concern — but it means a 400px header column inside
   a 1400px viewport is **sticky and stacked at once**, at 96px against the 64px default. Note the
@@ -178,7 +178,7 @@ real height keeps the two consistent by construction — which is the whole reas
 derived rather than restated.
 
 The mechanism, so you can reason about it rather than trust it: focus scrolls an element into view
-only when it needs to. A row that is _already_ inside the scroll port but sitting under the sticky
+only when it needs to. A row that is *already* inside the scroll port but sitting under the sticky
 header gives the browser no reason to scroll — so it stays hidden. An unsatisfied
 `scroll-margin-block-start` is what forces the scroll that lifts it clear. Measured on the
 default-density story, against a 214px header: at `0px` and at `64px` the focused row stayed at
@@ -255,22 +255,22 @@ scoped consumer adjustments; internal class names are not API.
 the structured inputs as JavaScript properties; arrays are not serialized to attributes.
 
 ```js
-const matrix = document.querySelector("sk-transition-matrix");
+const matrix = document.querySelector('sk-transition-matrix');
 matrix.columns = Object.freeze([
-  Object.freeze({ id: "previous", label: "Previous" }),
-  Object.freeze({ id: "current", label: "Current" }),
+  Object.freeze({ id: 'previous', label: 'Previous' }),
+  Object.freeze({ id: 'current', label: 'Current' }),
 ]);
 matrix.routes = Object.freeze([
   Object.freeze({
-    id: "queued-active",
-    label: "Queued to active",
-    tone: "forward",
+    id: 'queued-active',
+    label: 'Queued to active',
+    tone: 'forward',
     values: Object.freeze({ previous: 3, current: 5 }),
   }),
 ]);
 matrix.selectable = true;
-matrix.selectedRouteId = "queued-active";
-matrix.addEventListener("sk-transition-matrix-select", (event) => {
+matrix.selectedRouteId = 'queued-active';
+matrix.addEventListener('sk-transition-matrix-select', (event) => {
   // The event requests a change. The consumer remains the owner of selectedRouteId.
   matrix.selectedRouteId = event.detail.routeId;
 });
@@ -294,19 +294,15 @@ one of `neutral`, `info`, `success`, or `attention`. Its public parts are `metri
 list. Supply its only public field, `stages`, as a readonly JavaScript property:
 
 ```js
-const chain = document.querySelector("sk-evidence-chain");
+const chain = document.querySelector('sk-evidence-chain');
 chain.stages = Object.freeze([
+  Object.freeze({ id: 'received', label: 'Items received', displayValue: '128' }),
   Object.freeze({
-    id: "received",
-    label: "Items received",
-    displayValue: "128",
-  }),
-  Object.freeze({
-    id: "verified",
-    label: "Items verified",
-    displayValue: "91%",
-    annotation: "Sampled",
-    tone: "success",
+    id: 'verified',
+    label: 'Items verified',
+    displayValue: '91%',
+    annotation: 'Sampled',
+    tone: 'success',
   }),
 ]);
 ```
@@ -328,14 +324,8 @@ directly instead.
 there is deliberately no `<sk-workflow-board>` or `<sk-workflow-lane>` custom element.
 
 ```html
-<link
-  rel="stylesheet"
-  href="/node_modules/@spec-kitty/styles/dist/workflow-board/sk-workflow-board.css"
-/>
-<link
-  rel="stylesheet"
-  href="/node_modules/@spec-kitty/styles/dist/workflow-lane/sk-workflow-lane.css"
-/>
+<link rel="stylesheet" href="/node_modules/@spec-kitty/styles/dist/workflow-board/sk-workflow-board.css" />
+<link rel="stylesheet" href="/node_modules/@spec-kitty/styles/dist/workflow-lane/sk-workflow-lane.css" />
 
 <div class="sk-workflow-board">
   <h2 id="work-package-board-title">Work Packages</h2>
@@ -348,9 +338,7 @@ there is deliberately no `<sk-workflow-board>` or `<sk-workflow-lane>` custom el
     <section class="sk-workflow-lane" aria-labelledby="planned-title">
       <header class="sk-workflow-lane__header">
         <h3 class="sk-workflow-lane__title" id="planned-title">Planned</h3>
-        <span class="sk-workflow-lane__count" aria-label="2 work packages"
-          >2</span
-        >
+        <span class="sk-workflow-lane__count" aria-label="2 work packages">2</span>
       </header>
       <ol class="sk-workflow-lane__list">
         <li>Consumer-owned work package content</li>
@@ -380,16 +368,16 @@ can synchronize that all-or-none state after relevant content or layout changes:
 ```js
 function syncWorkflowScroller(scroller, labelledBy) {
   const overflowing = scroller.scrollWidth > scroller.clientWidth;
-  scroller.toggleAttribute("tabindex", overflowing);
+  scroller.toggleAttribute('tabindex', overflowing);
   if (overflowing) {
-    scroller.setAttribute("tabindex", "0");
-    scroller.setAttribute("role", "region");
-    scroller.removeAttribute("aria-label");
-    scroller.setAttribute("aria-labelledby", labelledBy);
+    scroller.setAttribute('tabindex', '0');
+    scroller.setAttribute('role', 'region');
+    scroller.removeAttribute('aria-label');
+    scroller.setAttribute('aria-labelledby', labelledBy);
   } else {
-    scroller.removeAttribute("role");
-    scroller.removeAttribute("aria-label");
-    scroller.removeAttribute("aria-labelledby");
+    scroller.removeAttribute('role');
+    scroller.removeAttribute('aria-label');
+    scroller.removeAttribute('aria-labelledby');
   }
 }
 ```
@@ -420,10 +408,7 @@ Primary and secondary call-to-action buttons used to drive user actions.
 **As a custom element** — `sk-button` is migrated, so it needs no wrapper:
 
 ```html
-<script
-  type="module"
-  src="/node_modules/@spec-kitty/elements/dist/elements.js"
-></script>
+<script type="module" src="/node_modules/@spec-kitty/elements/dist/elements.js"></script>
 
 <sk-button variant="primary">Get started</sk-button>
 <sk-button variant="secondary">Learn more</sk-button>
@@ -478,9 +463,7 @@ It fires `sk-nav-pill-toggle` before the open state changes, with
 
 ```html
 <nav class="sk-nav">
-  <a class="sk-nav__logo" href="/"
-    ><img src="/assets/logo.png" alt="Spec Kitty"
-  /></a>
+  <a class="sk-nav__logo" href="/"><img src="/assets/logo.png" alt="Spec Kitty"></a>
   <ul class="sk-nav__links">
     <li><a class="sk-nav__pill" href="/platform">Platform</a></li>
     <li><a class="sk-nav__pill" href="/docs">Docs</a></li>
@@ -499,10 +482,7 @@ Pill-shaped tags used to label and categorise content inline.
 **As a custom element** — `sk-pill-tag` is migrated, so it needs no wrapper:
 
 ```html
-<script
-  type="module"
-  src="/node_modules/@spec-kitty/elements/dist/elements.js"
-></script>
+<script type="module" src="/node_modules/@spec-kitty/elements/dist/elements.js"></script>
 
 <sk-pill-tag>Design system</sk-pill-tag>
 <sk-pill-tag variant="green">Shipped</sk-pill-tag>
@@ -530,10 +510,7 @@ Ticked list items, for feature and requirement lists.
 **As a custom element** — `sk-check-bullet` is migrated, so it needs no wrapper:
 
 ```html
-<script
-  type="module"
-  src="/node_modules/@spec-kitty/elements/dist/elements.js"
-></script>
+<script type="module" src="/node_modules/@spec-kitty/elements/dist/elements.js"></script>
 
 <ul role="list">
   <sk-check-bullet>Requirements captured up front</sk-check-bullet>
@@ -570,14 +547,8 @@ A brand column, link columns and a legal line, in a grid that collapses to one c
 **As a custom element** — `sk-site-footer` is migrated, so it needs no wrapper:
 
 ```html
-<script
-  type="module"
-  src="/node_modules/@spec-kitty/elements/dist/elements.js"
-></script>
-<link
-  rel="stylesheet"
-  href="/node_modules/@spec-kitty/styles/dist/site-footer/sk-site-footer.css"
-/>
+<script type="module" src="/node_modules/@spec-kitty/elements/dist/elements.js"></script>
+<link rel="stylesheet" href="/node_modules/@spec-kitty/styles/dist/site-footer/sk-site-footer.css" />
 
 <sk-site-footer
   wordmark="Your Brand"
@@ -586,12 +557,8 @@ A brand column, link columns and a legal line, in a grid that collapses to one c
   headingtwo="Connect"
   legal="© 2026 Your Company."
 >
-  <li slot="column-one">
-    <a href="#" class="sk-site-footer__link">Platform</a>
-  </li>
-  <li slot="column-two">
-    <a href="#" class="sk-site-footer__link">Contact</a>
-  </li>
+  <li slot="column-one"><a href="#" class="sk-site-footer__link">Platform</a></li>
+  <li slot="column-two"><a href="#" class="sk-site-footer__link">Contact</a></li>
 </sk-site-footer>
 ```
 
@@ -626,14 +593,9 @@ Eyebrow labels and section banners used to introduce sections and add visual hie
 **As a custom element** — `sk-section-banner` is migrated, so it needs no wrapper:
 
 ```html
-<script
-  type="module"
-  src="/node_modules/@spec-kitty/elements/dist/elements.js"
-></script>
+<script type="module" src="/node_modules/@spec-kitty/elements/dist/elements.js"></script>
 
-<sk-section-banner variant="purple"
-  >Version 2.x — event architecture</sk-section-banner
->
+<sk-section-banner variant="purple">Version 2.x — event architecture</sk-section-banner>
 ```
 
 The label is slotted content, not a property: a banner's text belongs to your page. Omit
@@ -680,9 +642,7 @@ projection vocabulary.
       <sk-entity-marker slot="marker" label="Spec Kitty">SK</sk-entity-marker>
       <strong slot="title">team-landing-pivots</strong>
       <code slot="reference">spec-kitty/e2e-team-landing</code>
-      <sk-status-indicator slot="tags" tone="success"
-        >Fresh</sk-status-indicator
-      >
+      <sk-status-indicator slot="tags" tone="success">Fresh</sk-status-indicator>
       <time slot="metadata">2 hours ago</time>
       <sk-button slot="controls" size="sm">Inspect</sk-button>
     </sk-action-row>
@@ -690,11 +650,9 @@ projection vocabulary.
 </ul>
 
 <script type="module">
-  document
-    .querySelector("sk-action-row")
-    .addEventListener("sk-action-row-activate", (event) => {
-      console.log(event.detail.id);
-    });
+  document.querySelector('sk-action-row').addEventListener('sk-action-row-activate', (event) => {
+    console.log(event.detail.id);
+  });
 </script>
 ```
 
@@ -727,24 +685,20 @@ it has no positioning, no stacking, no queueing, no auto-dismiss timer and no po
 decides where it appears and whether it exists at all.
 
 ```html
-<sk-notice
-  tone="danger"
-  announce="assertive"
-  dismissible
-  dismiss-label="Dismiss the deploy failure notice"
->
+<sk-notice tone="danger" announce="assertive" dismissible
+           dismiss-label="Dismiss the deploy failure notice">
   <h3 slot="heading">Deploy failed</h3>
   <p>Three of twelve targets rejected the release bundle.</p>
   <sk-button slot="actions">Retry the deploy</sk-button>
 </sk-notice>
 
 <script type="module">
-  const notice = document.querySelector("sk-notice");
+  const notice = document.querySelector('sk-notice');
 
   // A message that CHANGES is announced again. Set the property; do not rebuild the element.
-  notice.message = "Retrying in 2 seconds";
+  notice.message = 'Retrying in 2 seconds';
 
-  notice.addEventListener("sk-notice-dismiss", (event) => {
+  notice.addEventListener('sk-notice-dismiss', (event) => {
     // The element did NOT remove itself. This is yours to decide.
     notice.remove();
   });
@@ -853,16 +807,11 @@ Surface containers for grouping related content, used in feature grids, blog lis
 **As a custom element** — migrated, so it needs no wrapper:
 
 ```html
-<script
-  type="module"
-  src="/node_modules/@spec-kitty/elements/dist/elements.js"
-></script>
+<script type="module" src="/node_modules/@spec-kitty/elements/dist/elements.js"></script>
 
 <sk-card variant="blue">
   <h3>Structured requirements</h3>
-  <p>
-    Developers spend time building, not being blocked on finalized requirements.
-  </p>
+  <p>Developers spend time building, not being blocked on finalized requirements.</p>
 </sk-card>
 ```
 
@@ -893,15 +842,11 @@ would break (see ADR-10's styles-only ruling and #92):
 
 ```html
 <sk-card status="danger">
-  <sk-status-indicator tone="danger"
-    ><span slot="marker">●</span>Delivery blocked</sk-status-indicator
-  >
+  <sk-status-indicator tone="danger"><span slot="marker">●</span>Delivery blocked</sk-status-indicator>
 
   <dl class="sk-facts sk-facts--two-col">
-    <dt class="sk-facts__term">Owner</dt>
-    <dd class="sk-facts__value">Ada Lovelace</dd>
-    <dt class="sk-facts__term">Region</dt>
-    <dd class="sk-facts__value">us-east-1</dd>
+    <dt class="sk-facts__term">Owner</dt><dd class="sk-facts__value">Ada Lovelace</dd>
+    <dt class="sk-facts__term">Region</dt><dd class="sk-facts__value">us-east-1</dd>
   </dl>
 
   <details class="sk-disclosure">
@@ -920,9 +865,7 @@ The static path carries the same axis as `.sk-card--status-<tone>`, generated in
 <div class="sk-card">
   <span class="sk-eyebrow">Feature</span>
   <h3>Structured requirements</h3>
-  <p>
-    Developers spend time building, not being blocked on finalized requirements.
-  </p>
+  <p>Developers spend time building, not being blocked on finalized requirements.</p>
 </div>
 ```
 
@@ -948,11 +891,7 @@ Labelled text inputs, selects, and validation states for data-entry surfaces.
   description="As it should appear on your invoice."
 ></sk-form-input>
 
-<sk-form-textarea
-  name="goal"
-  label="What are you trying to ship?"
-  rows="4"
-></sk-form-textarea>
+<sk-form-textarea name="goal" label="What are you trying to ship?" rows="4"></sk-form-textarea>
 ```
 
 The element owns its own label, description and validation message, and participates in a
@@ -962,7 +901,7 @@ native `<form>`: put it inside one, give it a `name`, and its value arrives in `
 as real elements and ran axe over each. A consumer-supplied `<label>` pointing at a control
 inside the element's shadow root **fails** — axe resolves `aria-labelledby` from the attribute
 and scopes ID lookups to `getRootNode()`, so no cross-root reference resolves, and labelling the
-_host_ does not label the inner control. The same applies to `description`, which reaches the
+*host* does not label the inner control. The same applies to `description`, which reaches the
 control through `aria-describedby`. Both are therefore properties. There is no `for`/`id` pair
 to get wrong, because there is none.
 
@@ -982,7 +921,7 @@ would have contributed is `display: flex; flex-direction: column; gap`, which th
 ```html
 <div class="sk-form-field">
   <label class="sk-form-field__label" for="name">Your name</label>
-  <input class="sk-input" id="name" type="text" placeholder="Jane Smith" />
+  <input class="sk-input" id="name" type="text" placeholder="Jane Smith">
 </div>
 ```
 
@@ -1002,9 +941,7 @@ Full-width hero block with eyebrow, headline, lead copy, checkmark bullet list, 
 <section class="sk-hero">
   <span class="sk-eyebrow">Open-source</span>
   <h1 class="sk-hero__headline">Bring structure to AI-assisted delivery</h1>
-  <p class="sk-hero__lead">
-    Developers spend time building, not being blocked on finalized requirements.
-  </p>
+  <p class="sk-hero__lead">Developers spend time building, not being blocked on finalized requirements.</p>
   <ul class="sk-hero__bullets">
     <li>Spec -> Plan -> Implement</li>
     <li>No requirement drift</li>
@@ -1083,9 +1020,7 @@ never a button plus a `hidden` div re-implementing `aria-expanded` by hand.
 
 ```html
 <details class="sk-disclosure">
-  <summary class="sk-disclosure__summary">
-    What changed in this release?
-  </summary>
+  <summary class="sk-disclosure__summary">What changed in this release?</summary>
   <div class="sk-disclosure__body">
     <p>Three bug fixes and one performance improvement.</p>
   </div>
@@ -1110,22 +1045,12 @@ documented narrow-width treatment that never reflows cells.
 ```html
 <div class="sk-data-table__scroller">
   <table class="sk-data-table">
-    <caption>
-      Recent builds
-    </caption>
+    <caption>Recent builds</caption>
     <thead>
-      <tr>
-        <th scope="col">Build</th>
-        <th scope="col">Status</th>
-        <th scope="col">Cost</th>
-      </tr>
+      <tr><th scope="col">Build</th><th scope="col">Status</th><th scope="col">Cost</th></tr>
     </thead>
     <tbody>
-      <tr>
-        <td>#1042</td>
-        <td>Passed</td>
-        <td class="sk-data-table__cell--numeric">$0.42</td>
-      </tr>
+      <tr><td>#1042</td><td>Passed</td><td class="sk-data-table__cell--numeric">$0.42</td></tr>
     </tbody>
   </table>
 </div>
@@ -1140,15 +1065,8 @@ At a narrow width, add a labelled, keyboard-scrollable region to that same wrapp
 reflowing cells — block-reflow drops header association and is explicitly rejected:
 
 ```html
-<div
-  class="sk-data-table__scroller"
-  role="region"
-  aria-label="Recent builds, narrow view"
-  tabindex="0"
->
-  <table class="sk-data-table">
-    …
-  </table>
+<div class="sk-data-table__scroller" role="region" aria-label="Recent builds, narrow view" tabindex="0">
+  <table class="sk-data-table">…</table>
 </div>
 ```
 
@@ -1177,12 +1095,8 @@ whose fraction is expressed only as an inline `width` style.
 
 ```html
 <div class="sk-progress">
-  <label class="sk-progress__label" for="mission-progress"
-    >5 of 8 Work Packages done</label
-  >
-  <progress class="sk-progress__bar" id="mission-progress" value="5" max="8">
-    63%
-  </progress>
+  <label class="sk-progress__label" for="mission-progress">5 of 8 Work Packages done</label>
+  <progress class="sk-progress__bar" id="mission-progress" value="5" max="8">63%</progress>
   <span class="sk-progress__meta">63%</span>
 </div>
 ```
@@ -1222,9 +1136,7 @@ inconsistent per-page empty panels.
 ```html
 <div class="sk-empty-state">
   <h3 class="sk-empty-state__heading">No runs yet</h3>
-  <p class="sk-empty-state__body">
-    Trigger a run to see its status and logs here.
-  </p>
+  <p class="sk-empty-state__body">Trigger a run to see its status and logs here.</p>
   <div class="sk-empty-state__action">
     <button type="button">Start a run</button>
   </div>
