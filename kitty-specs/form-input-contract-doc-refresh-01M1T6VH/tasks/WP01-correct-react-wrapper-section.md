@@ -1,30 +1,32 @@
 ---
-work_package_id: "WP01"
-title: "Correct the React wrapper contract (delta) section"
+work_package_id: WP01
+title: Correct the React wrapper contract (delta) section
 dependencies: []
 requirement_refs:
-  - "FR-001"
-  - "FR-002"
-  - "FR-003"
-  - "FR-004"
-planning_base_branch: "mission/form-input-contract-doc-refresh"
-merge_target_branch: "mission/form-input-contract-doc-refresh"
-branch_strategy: "Planning artifacts were generated on mission/form-input-contract-doc-refresh; completed changes must merge back into mission/form-input-contract-doc-refresh."
-owned_files:
-  - "kitty-specs/form-input-constraints-and-datalist-01M1S94Y/contracts/sk-form-input.contract.md"
+- FR-001
+- FR-002
+- FR-003
+- FR-004
+planning_base_branch: mission/form-input-contract-doc-refresh
+merge_target_branch: mission/form-input-contract-doc-refresh
+branch_strategy: Planning artifacts for this mission were generated on mission/form-input-contract-doc-refresh. During /spec-kitty.implement this WP may branch from a dependency-specific base, but completed changes must merge back into mission/form-input-contract-doc-refresh unless the human explicitly redirects the landing branch.
 subtasks:
-  - "T001"
-  - "T002"
-  - "T003"
-  - "T004"
-phase: "Phase 1 - Correction"
-assignee: ""
-agent: ""
-shell_pid: ""
+- T001
+- T002
+- T003
+- T004
+phase: Phase 1 - Correction
 history:
-  - timestamp: "2026-09-06T00:00:00Z"
-    agent: "system"
-    action: "Prompt generated via /spec-kitty.tasks"
+- timestamp: '2026-09-06T00:00:00Z'
+  agent: system
+  action: Prompt generated via /spec-kitty.tasks
+authoritative_surface: kitty-specs/form-input-constraints-and-datalist-01M1S94Y/contracts/
+create_intent: []
+execution_mode: planning_artifact
+owned_files:
+- kitty-specs/form-input-constraints-and-datalist-01M1S94Y/contracts/sk-form-input.contract.md
+tags: []
+tracker_refs: []
 ---
 
 # Work Package Prompt: WP01 – Correct the React wrapper contract (delta) section
