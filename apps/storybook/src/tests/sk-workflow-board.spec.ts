@@ -270,8 +270,17 @@ test.describe("workflow board source and distribution contract", () => {
   test("the surface remains styles-only and does not enter element, wrapper, manifest, or behavior ownership", () => {
     expect(existsSync("packages/elements/src/workflow-board")).toBe(false);
     expect(existsSync("packages/elements/src/workflow-lane")).toBe(false);
-    expect(existsSync("packages/react/src/SkWorkflowBoard.tsx")).toBe(false);
-    expect(existsSync("packages/react/src/SkWorkflowLane.tsx")).toBe(false);
+    for (const path of [
+      "packages/react/src/SkWorkflowBoard.js",
+      "packages/react/src/SkWorkflowBoard.d.ts",
+      "packages/react/src/SkWorkflowLane.js",
+      "packages/react/src/SkWorkflowLane.d.ts",
+    ]) {
+      expect(existsSync(path)).toBe(false);
+    }
+    expect(readFileSync("packages/elements/vue.d.ts", "utf8")).not.toMatch(
+      /(?:sk-workflow-(?:board|lane)|SkWorkflow(?:Board|Lane))/i,
+    );
     for (const path of [
       "packages/elements/custom-elements.json",
       "expected-parts.json",
