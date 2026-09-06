@@ -58,10 +58,10 @@
       "criterion_id": "FR-006",
       "description": "sk-evidence-chain accepts exactly one property-only readonly array of immutable stage records with an analyzer-safe structural type.",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "sk-evidence-chain.ts:7-13,80-94 plus manifest React Vue type gates; readonly property-only stages passed",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T16:48:33.823550+00:00",
       "notes": "WP02 behavior/type proof; WP03 normalized manifest and generated React/Vue inspection."
     },
     {
