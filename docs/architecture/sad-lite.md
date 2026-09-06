@@ -197,21 +197,38 @@ Full risk register in [`risk-register.md`](risk-register.md). Top-5 prioritised 
 
 ## 7. Architectural Decision Index
 
-| ADR | Decision | Status |
-|---|---|---|
-| [ADR-001](decisions/2026-05-01-1-token-distribution-format.md) | CSS custom properties over Tailwind/shadcn | Accepted |
-| [ADR-002](decisions/2026-05-01-2-monorepo-package-topology.md) | Separate publishable packages per framework target | Accepted |
-| [ADR-003](decisions/2026-05-01-3-token-schema-naming-convention.md) | `--sk-<category>-<name>` schema; value reconciliation is a pre-implementation gate | Accepted |
-| [ADR-004](decisions/2026-05-01-4-org-layer-doctrine-distribution.md) | `doctrine/` as org-layer source for #832 | Accepted |
-| [ADR-005](decisions/2026-05-01-5-npm-supply-chain-security-posture.md) | npm security posture; residual risk explicitly accepted | Accepted |
-| [ADR-006](decisions/2026-05-01-6-storybook-multi-framework-rendering.md) | Storybook multi-framework rendering | Superseded by ADR-013 |
-| [ADR-007](decisions/2026-05-01-7-storybook-version-10x-adoption.md) | Storybook 10.x adoption | Superseded on the framework question by ADR-013 |
-| [ADR-8](decisions/2026-09-02-8-custom-elements-base-layer.md) | **Custom elements as the base layer; framework wrappers GENERATED from the manifest** | Accepted |
-| [ADR-9](decisions/2026-09-02-9-shadow-dom-and-styling-api.md) | Open shadow roots; consumers restyle through `::part()` | Accepted |
-| [ADR-10](decisions/2026-09-02-10-distribution-and-canonical-markup.md) | Constructed stylesheets, both distribution entries, markup authored once, guarded `define()` | Accepted |
-| [ADR-11](decisions/2026-09-02-11-verification-stack-and-wrapper-generation.md) | Required behaviours, each with a red-first mutation | Accepted |
-| [ADR-12](decisions/2026-09-02-12-consumer-audit-of-record.md) | The consumer set is recorded, not assumed | Accepted |
-| [ADR-13](decisions/2026-09-02-13-storybook-web-components-builder.md) | Storybook renders through `@storybook/web-components` | Accepted |
+The index is [the architecture README's ADR table](README.md#decisions-adrs). It carries one row
+per record in [`decisions/`](decisions/), transcribes each record's own **Status** field, and
+`scripts/check-adr-index.mjs` fails CI when a record has no row, a row points at no record, or a
+row's Status disagrees with the record's own. Read the Status column with the records: the
+README's *"What a Status obliges"* note states what `Accepted` and `Proposed` each require, under
+the #200 ruling.
+
+> **On this section (#226).** It held a second ADR index — a 13-row `ADR | Decision | Status`
+> table, hand-maintained and held by no gate, in the document the architecture README calls
+> *"Start here."* Measured at removal, against the fifteen records on disk: **two rows were
+> missing entirely** (ADR-14, and the ADR-003 addendum), and **two Status cells asserted
+> `Accepted` over a record whose own header reads `Proposed`** (ADR-12 and ADR-13). Two further
+> cells had been wrong for ADR-9 and ADR-11, and stopped being wrong in the commit before this
+> one, when the operator's ruling on #200 ratified both — which is the argument against a second
+> index rather than for one: an ungated table is right or wrong by coincidence.
+>
+> Correcting the two cells and leaving the table ungated is what produced #226, and #193 before
+> it. So the table is gone rather than fixed, which is the answer this repository has now reached
+> four times: `elements-first-programme.md:5`, `llms.txt`/`llms-full.txt` (#197), this file's
+> **Related ADRs** row (#201), and now this section. One index, one gate.
+>
+> **The two `Superseded by ADR-013` cells.** ADR-006 and ADR-007 carried that phrase here, and
+> the gated table does not use it — it transcribes each record's own Status, and neither record
+> says `Superseded`. That is editorial content, not a transcription, so it was checked before
+> being removed rather than after. It survives in three places: `llms-full.txt` states **both**
+> halves in prose ("ADR-6 and ADR-7 are superseded on the framework question … summarised as the
+> record of why the catalogue looks as it does, not as current guidance"), on a surface
+> `scripts/check-llms-adr-surface.mjs` holds; ADR-13's own record states the ADR-6 half in its
+> **Technical Story** and **More Information**; and `system-context-canvas.md` records it as a
+> discharged assumption. Nothing was written into ADR-006's or ADR-007's Status field to replace
+> it — ADR-13 supersedes ADR-6 by its own text and never names ADR-7, so a `Superseded` status in
+> either record would be a ruling nobody made, which the gate would then faithfully transcribe.
 
 ---
 
