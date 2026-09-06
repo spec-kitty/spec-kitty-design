@@ -138,6 +138,38 @@ function Flow() {
 Removing a previously supplied `columns` or `routes` prop assigns a fresh frozen empty array to the
 element. It never retains stale structured data or serializes either array as an attribute.
 
+Metric scalar props and evidence-chain structured stages are typed by the generated wrappers.
+The stage alias remains owned by the elements package:
+
+```tsx
+import { SkEvidenceChain, SkMetric } from '@spec-kitty/react';
+import type { EvidenceStage } from '@spec-kitty/elements';
+
+const stages = Object.freeze([
+  Object.freeze({ id: 'received', label: 'Items received', displayValue: '128' }),
+  Object.freeze({
+    id: 'verified',
+    label: 'Items verified',
+    displayValue: '91%',
+    annotation: 'Sampled',
+    tone: 'success',
+  }),
+]) satisfies ReadonlyArray<EvidenceStage>;
+
+export function EvidenceSummary() {
+  return (
+    <>
+      <SkMetric label="Items received" displayValue="128" tone="info" compact />
+      <SkEvidenceChain stages={stages} />
+    </>
+  );
+}
+```
+
+Removing a previously supplied `stages` prop assigns a fresh frozen empty array. The wrapper
+preserves each supplied array's identity, never mutates it, and never serializes `stages` as an
+attribute.
+
 The generated action-row callback carries the exact consumer-owned ID. Selection stays controlled;
 the wrapper forwards the request but does not update `selected` itself:
 

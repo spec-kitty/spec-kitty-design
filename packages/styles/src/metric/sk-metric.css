@@ -1,0 +1,83 @@
+/* @spec-kitty/styles — one generic supplied metric */
+
+:host {
+  display: block;
+}
+
+.sk-metric {
+  display: grid;
+  gap: var(--sk-space-2);
+  min-width: 0;
+  margin: 0;
+  padding: var(--sk-space-4);
+  border-inline-start: var(--sk-border-width-2) solid var(--sk-border-default);
+  color: var(--sk-fg-default);
+  font-family: var(--sk-font-sans);
+}
+
+.sk-metric--info {
+  border-inline-start-color: var(--sk-color-blue);
+}
+
+.sk-metric--success {
+  border-inline-start-color: var(--sk-color-green);
+}
+
+.sk-metric--attention {
+  border-inline-start-color: var(--sk-color-yellow);
+}
+
+.sk-metric__label {
+  min-width: 0;
+  color: var(--sk-fg-muted);
+  font-family: var(--sk-font-mono);
+  font-size: var(--sk-text-sm);
+  font-weight: var(--sk-weight-semibold);
+  overflow-wrap: anywhere;
+  text-transform: uppercase;
+}
+
+.sk-metric__content {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--sk-space-3);
+  min-width: 0;
+  margin: 0;
+}
+
+.sk-metric__value {
+  min-width: 0;
+  color: var(--sk-fg-default);
+  font-family: var(--sk-font-mono);
+  font-size: var(--sk-text-2xl);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--sk-weight-bold);
+  overflow-wrap: anywhere;
+}
+
+.sk-metric__annotation {
+  display: inline-flex;
+  min-width: 0;
+}
+
+:host([compact]) .sk-metric {
+  gap: var(--sk-space-1);
+  padding: var(--sk-space-2);
+}
+
+:host([compact]) .sk-metric__content {
+  gap: var(--sk-space-2);
+}
+
+:host([compact]) .sk-metric__value {
+  font-size: var(--sk-text-xl);
+}
+
+.sk-metric__empty {
+  margin: 0;
+  padding: var(--sk-space-3) var(--sk-space-4);
+  color: var(--sk-fg-muted);
+  font-family: var(--sk-font-sans);
+  font-size: var(--sk-text-sm);
+}

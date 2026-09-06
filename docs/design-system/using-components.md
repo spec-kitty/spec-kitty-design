@@ -3,9 +3,9 @@
 The Spec Kitty components ship as CSS in `@spec-kitty/styles`, and — for the components migrated
 so far — as **custom elements** in `@spec-kitty/elements`. Both require `@spec-kitty/tokens`.
 
-**Migration is in progress.** Twenty-three elements exist today: `sk-action-row`, `sk-app-shell`,
+**Migration is in progress.** Twenty-five elements exist today: `sk-action-row`, `sk-app-shell`,
 `sk-blog-card`, `sk-button`, `sk-card`, `sk-check-bullet`, `sk-context-sidebar`, `sk-entity-marker`,
-`sk-feature-card`, `sk-form-input`, `sk-form-textarea`, `sk-grid`, `sk-nav-pill`, `sk-page-header`,
+`sk-evidence-chain`, `sk-feature-card`, `sk-form-input`, `sk-form-textarea`, `sk-grid`, `sk-metric`, `sk-nav-pill`, `sk-page-header`,
 `sk-personal-rail`, `sk-pill-tag`, `sk-ribbon-card`, `sk-section-banner`, `sk-section-header`,
 `sk-site-footer`, `sk-status-indicator`, `sk-stub`, and `sk-transition-matrix`.
 Several of the catalogue's component packages are CSS only by a recorded decision — `form-field`,
@@ -240,6 +240,42 @@ The seven public properties are `columns`, `routes`, `selectedRouteId`, `selecta
 boundaries and is non-cancelable because the element has no default selection action to prevent.
 The element derives move totals and bar ratios from supplied cells. It does not accept or calculate
 current inventory, fetch data, format dates, navigate, or update application state.
+
+## Metric and evidence chain
+
+`sk-metric` presents one consumer-supplied label and opaque display value as a native `<dl>`
+definition relationship. Its five attributes are `label`, `display-value`, `annotation`, `tone`,
+and `compact`; the element does not parse or calculate the displayed text. The optional tone is
+one of `neutral`, `info`, `success`, or `attention`. Its public parts are `metric`, `label`,
+`value`, `annotation`, and `empty-state`.
+
+`sk-evidence-chain` composes real `sk-metric` descendants as direct items of a native ordered
+list. Supply its only public field, `stages`, as a readonly JavaScript property:
+
+```js
+const chain = document.querySelector('sk-evidence-chain');
+chain.stages = Object.freeze([
+  Object.freeze({ id: 'received', label: 'Items received', displayValue: '128' }),
+  Object.freeze({
+    id: 'verified',
+    label: 'Items verified',
+    displayValue: '91%',
+    annotation: 'Sampled',
+    tone: 'success',
+  }),
+]);
+```
+
+The consumer owns identifiers, order, formatting, calculations, and domain meaning. The chain
+only projects the supplied values, adds decorative connectors, and fails invalid whole inputs
+closed. Its parts are `list`, `stage`, `connector`, and `empty-state`; a composed approved layout
+may wrap it in the existing `sk-grid` and `sk-card` elements, while annotated stages contain the
+real `sk-pill-tag` used by `sk-metric`.
+
+Neither component has a styles-layer static form. The chain's readonly structured data must use
+property assignment, which static HTML cannot preserve without inventing a serialization and
+parsing policy. Consumers needing no JavaScript should author the native `<dl>`/`<ol>` structures
+directly instead.
 
 ## Installation
 

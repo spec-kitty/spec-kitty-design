@@ -346,3 +346,56 @@ test('SK-action-row selected and non-selectable analogues — visual baselines',
   host = await actionRowStory(page, 'non-selectable');
   await expect(host).toHaveScreenshot('sk-action-row-non-selectable.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
 });
+
+const metricStory = async (page: Page, id: string): Promise<Locator> => {
+  await page.goto(`/iframe.html?id=elements-skmetric--${id}&viewMode=story`);
+  const host = page.locator('sk-metric').first();
+  await host.waitFor({ state: 'visible', timeout: 20000 });
+  await expect(host.locator('[part="metric"]')).toBeVisible();
+  return host;
+};
+
+const evidenceChainStory = async (page: Page, id: string): Promise<Locator> => {
+  await page.goto(`/iframe.html?id=elements-skevidencechain--${id}&viewMode=story`);
+  const host = page.locator('sk-evidence-chain').first();
+  await host.waitFor({ state: 'visible', timeout: 20000 });
+  await expect(host.locator('[part="list"]')).toBeVisible();
+  return host;
+};
+
+test('SK-metric default dark and light — visual baselines', async ({ page }) => {
+  let host = await metricStory(page, 'default');
+  await expect(host).toHaveScreenshot('sk-metric-default-dark.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  host = await metricStory(page, 'light-mode');
+  await expect(host).toHaveScreenshot('sk-metric-light.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+});
+
+test('SK-metric compact and long content — visual baselines', async ({ page }) => {
+  let host = await metricStory(page, 'compact');
+  await expect(host).toHaveScreenshot('sk-metric-compact.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  await page.setViewportSize({ width: 390, height: 844 });
+  host = await metricStory(page, 'long-content');
+  await expect(host).toHaveScreenshot('sk-metric-long-content.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+});
+
+test('SK-evidence-chain approved composition and light — visual baselines', async ({ page }) => {
+  await evidenceChainStory(page, 'approved-example');
+  let target = page.locator('sk-grid').first();
+  await expect(target).toHaveScreenshot('sk-evidence-chain-approved-dark.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  const host = await evidenceChainStory(page, 'light-mode');
+  target = host;
+  await expect(target).toHaveScreenshot('sk-evidence-chain-light.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+});
+
+test('SK-evidence-chain two and six stages — visual baselines', async ({ page }) => {
+  let host = await evidenceChainStory(page, 'two-stages');
+  await expect(host).toHaveScreenshot('sk-evidence-chain-two-stages.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  host = await evidenceChainStory(page, 'six-stages');
+  await expect(host).toHaveScreenshot('sk-evidence-chain-six-stages.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+});
+
+test('SK-evidence-chain narrow — visual baseline', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const host = await evidenceChainStory(page, 'narrow');
+  await expect(host).toHaveScreenshot('sk-evidence-chain-narrow.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+});
