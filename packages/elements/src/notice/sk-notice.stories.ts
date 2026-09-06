@@ -1,6 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/web-components';
 import { html, type TemplateResult } from 'lit';
 import './sk-notice.js';
+// Composed by the TrailingActions and WithStatusIndicator stories. Imported explicitly rather
+// than relying on another story file having already defined them: Storybook bundles every story
+// together, so a missing import here is invisible until someone runs this file's stories alone.
+import '../button/sk-button.js';
 import '../status-indicator/sk-status-indicator.js';
 
 // TONES ARE DERIVED, NOT RETYPED. Importing the vocabulary here means a tone added, removed or
@@ -174,12 +178,12 @@ export const Dismissible: Story = {
       const root = (event.currentTarget as HTMLElement).closest('div');
       const log = root?.querySelector('#dismiss-log');
       count += 1;
-      const notice = event.target as HTMLElement;
+      const dismissed = event.target as HTMLElement;
       if (log) {
         log.textContent =
           `sk-notice-dismiss #${count} — detail: ${JSON.stringify(detail)}\n` +
           `bubbles: ${event.bubbles}, composed: ${event.composed}, cancelable: ${event.cancelable}\n` +
-          `still in the document after the event: ${notice.isConnected}`;
+          `still in the document after the event: ${dismissed.isConnected}`;
       }
     };
     const onDismissCancelled = (event: Event) => {
