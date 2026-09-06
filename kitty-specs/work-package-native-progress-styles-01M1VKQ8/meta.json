@@ -1,6 +1,8 @@
 {
+  "accept_commit": "cef992b4579bcf7a24e1b1e13a9355c832b60882",
   "acceptance_history": [
     {
+      "accept_commit": "cef992b4579bcf7a24e1b1e13a9355c832b60882",
       "acceptance_mode": "pr",
       "accepted_at": "2026-09-06T17:35:37.909070+00:00",
       "accepted_by": "codex-orry-wp208-210-0906a",
