@@ -172,13 +172,19 @@ canonical statement.** In short: `scripts/build-react-wrappers.mjs` no longer fo
 comparison, and a fold would no longer catch a generator regression that emitted `readonly` where
 `readOnly` was expected). And the CASE-ONLY claim is false: `for`→`htmlFor` and `class`→
 `className` are word substitutions, not case changes — this element's own three renames
-(`readonly`/`autocomplete`/`inputmode`) remain case-only, and the axis on which `for`/`class`
-diverge is not the one this element's renames sit on (ADR-11 traces both rows in full, including
-where its own trace of the `class` row's `originalName` path stops). Confirm the prop names
-themselves against the regenerated `packages/react/src/SkFormInput.js`/`.d.ts` — reading the
-generator's actual output is what caught both the original wrong guess and this contract's own
-first "correction"; the gate-description and CASE-ONLY corrections above rest on reading the gate's
-source and ADR-11's own measurement, not on regenerating output that was never wrong.
+(`readonly`/`autocomplete`/`inputmode`) remain case-only. Which of the table's columns you key it
+by decides where those two substitutions surface, and all three answers differ (measured against
+`@wc-toolkit/react-wrappers@1.2.7`, the version pinned exactly at `package.json:49`; a later
+release may add rows or move them): keyed by `fieldName.toLowerCase()` — the column
+`loadReactPropRenameMap()` actually builds its map from — all 17 rows are case-only and there is no
+word substitution at all; `for`→`htmlFor` shows up on the `name` column, which is the column
+ADR-11 measures by; and `class`→`className` shows up on `originalName`, a column no code in this
+repo reads. ADR-11 traces the `for` row in full and records where its own trace of the `class`
+row's `originalName` path stops. Confirm the prop names themselves against the regenerated
+`packages/react/src/SkFormInput.js`/`.d.ts` — reading the generator's actual output is what caught
+both the original wrong guess and this contract's own first "correction"; the gate-description and
+CASE-ONLY corrections above rest on reading the gate's source and ADR-11's own measurement, not on
+regenerating output that was never wrong.
 
 `options` is delivered as a JS property via the generated `useProperties` hook (not an attribute),
 surviving delivery before the custom element is defined and resetting to a fresh frozen `[]` when
