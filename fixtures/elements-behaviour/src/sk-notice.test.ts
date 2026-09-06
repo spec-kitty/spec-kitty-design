@@ -276,7 +276,20 @@ test('[SC-012] the dismiss control is keyboard-operable and lands focus on the h
     // the duplicate-dispatch mutation red two tests instead of the one it is about.
     expect(seen.length, `${key} did not activate the control`).toBeGreaterThan(0);
     expect(element.isConnected).toBe(true);
-    expect(document.activeElement, `${key}: focus was not left on the host`).toBe(element);
+
+    // ASSERT INSIDE THE SHADOW ROOT, not on `document.activeElement`.
+    //
+    // This assertion was `expect(document.activeElement).toBe(element)` and the mutation harness
+    // correctly called the arm that deletes `this.focus()` SEMANTICALLY INERT — measured in CI,
+    // not reasoned about here. The reason is that focus on a node INSIDE a shadow root already
+    // reports the HOST to `document.activeElement`, so the old line held whether the element moved
+    // focus or not: it certified an absence. `shadowRoot.activeElement` is what discriminates —
+    // it is the dismiss button before the move and `null` after it.
+    expect(
+      element.shadowRoot!.activeElement,
+      `${key}: focus stayed on the dismiss control instead of moving to the host`,
+    ).toBe(null);
+    expect(document.activeElement, `${key}: focus left the notice entirely`).toBe(element);
   }
 });
 
