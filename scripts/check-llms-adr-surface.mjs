@@ -157,6 +157,18 @@ const SET_SUBJECT = '(?:ADRs?|decision\\s+records?|records?)';
 const STATUS_VALUE = '(?:Accepted|Proposed|Complete|Completed|Superseded|Deprecated|Rejected|Withdrawn|ratified)';
 /** Words that quantify over the WHOLE set. "two" is not one of them, on purpose. */
 const TOTALITY = '(?:all|every|each|the\\s+(?:entire|whole|complete|full))';
+/**
+ * The gap a set claim may span — anything but a SENTENCE OR CLAUSE BOUNDARY.
+ *
+ * `[^\n]` was too greedy in exactly the way F-6 warns about, and it was caught by putting F-6's
+ * own five healthy sentences into the real file rather than only into probes: "Every ADR lives in
+ * its own file. Two decision records were superseded in 2026." red-ed as one claim, because the
+ * quantifier of the first sentence reached the status value of the second across the full stop.
+ * Each sentence passes alone; only their adjacency on one wrapped line failed. Excluding `.;!?`
+ * costs nothing real — every claim this gate must catch is a single clause — and the two-sentence
+ * line is now a healthy probe.
+ */
+const GAP = '[^\\n.;!?]';
 
 /**
  * ADR RANGE expressions. A range is the most durable form of the defect: it survives every new
@@ -220,18 +232,18 @@ export const RANGE_PATTERNS = [
 export const CARDINALITY_PATTERNS = [
   {
     name: 'set-status-claim',
-    re: new RegExp(`\\b${TOTALITY}\\b[^\\n]{0,60}?\\b${SET_SUBJECT}\\b[^\\n]{0,60}?\\b${STATUS_VALUE}\\b`, 'i'),
+    re: new RegExp(`\\b${TOTALITY}\\b${GAP}{0,60}?\\b${SET_SUBJECT}\\b${GAP}{0,60}?\\b${STATUS_VALUE}\\b`, 'i'),
   },
   {
     // The same claim with the status ahead of the noun: "All Accepted architectural decision records".
     name: 'set-status-claim-inverted',
-    re: new RegExp(`\\b${TOTALITY}\\b[^\\n]{0,40}?\\b${STATUS_VALUE}\\b[^\\n]{0,40}?\\b${SET_SUBJECT}\\b`, 'i'),
+    re: new RegExp(`\\b${TOTALITY}\\b${GAP}{0,40}?\\b${STATUS_VALUE}\\b${GAP}{0,40}?\\b${SET_SUBJECT}\\b`, 'i'),
   },
   {
     // "the status of the records below is Accepted" — scoped by position rather than by quantifier.
     name: 'below-set-status',
     re: new RegExp(
-      `\\b${SET_SUBJECT}\\s+(?:below|above|that\\s+follow|listed\\s+here|in\\s+this\\s+(?:file|section))\\b[^\\n]{0,60}?\\b${STATUS_VALUE}\\b`,
+      `\\b${SET_SUBJECT}\\s+(?:below|above|that\\s+follow|listed\\s+here|in\\s+this\\s+(?:file|section))\\b${GAP}{0,60}?\\b${STATUS_VALUE}\\b`,
       'i',
     ),
   },
@@ -747,6 +759,19 @@ const NEGATIVE_PROBES = [
   { what: 'F-6: "every ADR lives in its own file."', run: () => checkNoCardinality('x', ['every ADR lives in its own file.'], CARDINALITY_PATTERNS) },
   { what: 'F-6: "two decision records were superseded in 2026."', run: () => checkNoCardinality('x', ['two decision records were superseded in 2026.'], CARDINALITY_PATTERNS) },
   { what: 'F-6: "All records live under `docs/architecture/decisions/`."', run: () => checkNoCardinality('x', ['All records live under `docs/architecture/decisions/`.'], CARDINALITY_PATTERNS) },
+  {
+    what: 'F-6: two healthy sentences adjacent on one wrapped line do not combine into one claim',
+    run: () =>
+      checkNoCardinality(
+        'x',
+        [
+          'Every ADR lives in its own file. Two decision records were superseded in 2026.',
+          'All decision records live under `docs/architecture/decisions/`. One decision record per file.',
+          'Each ADR carries its own Status field. Every ADR lives in its own file.',
+        ],
+        CARDINALITY_PATTERNS,
+      ),
+  },
   { what: 'the section anchor this repo uses (#decisions-adrs) is not a per-record anchor', run: () => checkNoAnchorList('x', [`- [ADR index](${POINTER_PATH}#decisions-adrs): the authoritative ADR index.`]) },
   { what: 'an empty reference set under the empty contract (the pointer landing)', run: () => checkRefSet('llms.txt', [], REC, 'empty') },
   { what: 'a complete reference set under the complete contract (the prose landing)', run: () => checkRefSet('llms-full.txt', [ref('a.md'), ref('b.md'), ref('b.md')], REC, 'complete') },
@@ -827,8 +852,8 @@ function selftest() {
   // The floors are asserted, not implied: a probe list that silently emptied would print nothing
   // and exit 0 — the defect class this whole script is about, one level up in the harness that is
   // supposed to be the evidence.
-  if (PROBES.length < 45 || NEGATIVE_PROBES.length < 23) {
-    console.error(`❌ only ${PROBES.length} defect probe(s) and ${NEGATIVE_PROBES.length} healthy probe(s) — the selftest floor is 45 and 23`);
+  if (PROBES.length < 45 || NEGATIVE_PROBES.length < 24) {
+    console.error(`❌ only ${PROBES.length} defect probe(s) and ${NEGATIVE_PROBES.length} healthy probe(s) — the selftest floor is 45 and 24`);
     process.exit(1);
   }
   const named = PROBES.filter((p) => p.expect.startsWith('(')).length;

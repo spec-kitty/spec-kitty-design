@@ -271,7 +271,11 @@ CI step reds `scripts/check-gate-wiring.mjs`.
   superseded in 2026.` MUST pass, and MUST be healthy-shape probes so they stay passing. A gate that
   reds on a harmless edit is a gate someone deletes — and `llms-full.txt` today opens the section
   with "The records live under …", so prefixing "All" must not fail CI on a sentence that is true
-  and is exactly what the ruling asks the file to say.
+  and is exactly what the ruling asks the file to say. A set claim's internal gap MUST NOT cross a
+  sentence or clause boundary: putting the five sentences into the real file rather than only into
+  probes showed "Every ADR lives in its own file. Two decision records were superseded in 2026."
+  red-ing as one claim, because the first sentence's quantifier reached the second's status value
+  across the full stop. Each sentence passed alone; only their adjacency on one wrapped line failed.
 - **FR-019**: The range and set-claim vocabularies MUST cover the forms a writer actually reaches
   for: `ADR-1 up to ADR-13`, `everything between ADR-1 and ADR-13`, `see ADR 1-13`,
   `decisions 1 through 13`; `the full set of ADRs is Accepted`, `every record below is Accepted`,
