@@ -38,9 +38,23 @@ export type EvidenceStage = Readonly<{
 
 ### Property
 
+`EvidenceStage` is the exported convenience alias. The actual element source must declare the field
+with this inline structural type so the manifest and generated wrappers never need to resolve an
+imported alias:
+
+```ts
+stages: ReadonlyArray<Readonly<{
+  id: string;
+  label: string;
+  displayValue: string;
+  annotation?: string;
+  tone?: 'neutral' | 'info' | 'success' | 'attention';
+}>> = Object.freeze([]);
+```
+
 | JavaScript property | HTML attribute | Type | Default |
 |---|---|---|---|
-| `stages` | none | `ReadonlyArray<EvidenceStage>` (manifest-facing structural literal) | `Object.freeze([])` |
+| `stages` | none | the inline structural readonly array above | `Object.freeze([])` |
 
 There are no public attributes, methods, events, or slots. Input records require unique nonblank IDs and nonblank labels/display values; annotation and tone are optional. Omitting both remains valid, produces neutral/no-annotation presentation, and never mutates the record to add defaults. Empty/invalid input renders one generic unavailable state, not a partial chain.
 

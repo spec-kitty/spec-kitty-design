@@ -53,14 +53,23 @@ export type EvidenceStage = Readonly<{
 
 ## Entity: EvidenceChainInput
 
+The exported alias is a convenience for consumers and tests:
+
 ```ts
 export type EvidenceChainInput = ReadonlyArray<EvidenceStage>;
 ```
 
-Public element property:
+The actual public source declaration is intentionally inline and structural so CEM and generated
+wrappers do not depend on resolving either exported alias:
 
 ```ts
-stages: ReadonlyArray<EvidenceStage> = Object.freeze([]);
+stages: ReadonlyArray<Readonly<{
+  id: string;
+  label: string;
+  displayValue: string;
+  annotation?: string;
+  tone?: 'neutral' | 'info' | 'success' | 'attention';
+}>> = Object.freeze([]);
 ```
 
 ### Invariants

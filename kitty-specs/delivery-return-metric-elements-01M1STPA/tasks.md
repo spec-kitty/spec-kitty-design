@@ -125,7 +125,7 @@ WP03 must start from the recorded latest-train + approved-WP01/WP02 integrated t
 ### Included subtasks
 
 - [ ] T009 On the pinned integrated base, register entries/exports/docs/ratchets/changelogs and add exact-part/token/budget gate scripts (WP03)
-- [ ] T010 Regenerate manifest, React/Vue surfaces, CSS modules, and sizes without hand edits (WP03)
+- [ ] T010 Regenerate manifest, React/Vue surfaces, and sizes without hand edits; verify the WP01/WP02-owned CSS modules remain byte-identical (WP03)
 - [ ] T011 Prove typed React delivery/reset, literal approved composition, computed theme variance, and active forced-colors behavior (WP03)
 - [ ] T012 Run deterministic quality, release, exact-contract/token, 180-second Storybook, test, and serial mutation gates (WP03)
 - [ ] T013 Record exact-scope closeout on the pinned base and hand off train-SHA verification/PR gates (WP03)

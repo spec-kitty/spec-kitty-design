@@ -62,9 +62,16 @@ There is no event, form association, focus transfer, keyboard action, selection,
 
 Implementation should reuse current semantic foreground/surface/border, spacing, radius, weight, size, and mono/tabular typography tokens. A new token is allowed only if a measured visual requirement cannot be expressed by an existing semantic token; that would trigger token-package ownership and maintainer sign-off and must be folded explicitly before implementation.
 
-### D10 — Generated artifacts are isolated to the final integration package
+### D10 — Shared generated artifacts are isolated to the final integration package
 
-Metric and evidence-chain authored sources/tests/stories can be reviewed independently. Shared barrels, ratchets, manifest, React/Vue outputs, CSS modules, `SIZES.md`, documentation, and final cross-component fixtures are integrated serially after their prerequisites. This avoids write-scope overlap and preserves one regeneration point after the required latest-train rebase.
+Metric and evidence-chain authored sources/tests/stories can be reviewed independently. Each
+component WP owns and commits its component-local generated stylesheet pair after its final authored
+CSS change. Shared barrels, ratchets, manifest, React/Vue outputs, `SIZES.md`, documentation, and
+final cross-component fixtures are integrated serially after their prerequisites. WP03 may invoke
+the repository generator as a deterministic check, but the already-approved component-local
+stylesheet bytes must remain unchanged and WP03 does not take ownership of them. This avoids
+write-scope overlap and preserves one shared-artifact
+regeneration point after the required latest-train refresh and consolidation.
 
 ## Alternatives rejected
 
