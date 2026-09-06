@@ -20,10 +20,28 @@ Pattern: `--sk-<category>-<name>`
 | Foreground | `--sk-fg-` | `--sk-fg-on-sidebar` |
 | Spacing | `--sk-space-` | `--sk-space-13` |
 | Radius | `--sk-radius-` | `--sk-radius-xs` |
-| Operational status | `--sk-status-` / `--sk-on-status-` | `--sk-status-danger`, `--sk-on-status-danger` |
+| Operational status | `--sk-status-` | `--sk-status-danger` |
+| On-surface foreground | `--sk-on-` | `--sk-on-status-danger`, `--sk-on-tint-mint` |
 
 See [ADR-003](../architecture/decisions/2026-05-01-3-token-schema-naming-convention.md) for the
 complete category table and naming rationale.
+
+### A semantic pair spans two categories, and that is not a mistake
+
+`scripts/generate-token-catalogue.js` bins a token by its **prefix** — the first segment after
+`--sk-` — and nothing else. So `--sk-status-danger` is catalogued under `status` and its paired
+foreground `--sk-on-status-danger` under `on`, beside every other `--sk-on-*` token.
+
+This row used to read `--sk-status-` / `--sk-on-status-` as one category, which is how the pair
+*reads* and not how the published artifact is *shaped* (#220). The catalogue is consumed by
+Stylelint and by the docs site, so the binning is what a consumer actually sees, and the doc is
+the half that moved.
+
+The convention is older than `--sk-status-*`: **`on` is the union of every `--sk-on-*` token,
+whatever it pairs with.** `--sk-on-tint-mint` sits there too, away from its own pair
+`--sk-surface-tint-mint`, for the same reason. Pairing is a rule about which tokens you must add
+together (see *Semantic pairing rule* below); it is not what the `categories` map groups by. When
+you add a pair, expect two catalogue entries in two categories — and add both anyway.
 
 ## Steps
 
