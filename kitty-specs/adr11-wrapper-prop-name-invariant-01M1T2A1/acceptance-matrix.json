@@ -47,11 +47,11 @@
     {
       "criterion_id": "FR-005",
       "description": "Verify FR-005 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "proof_type": "code_review",
+      "evidence": "ADR \u00a7'What a future element author must know, before naming a field': states the disclosure obligation, that it is unenforced guidance (not a gate mechanism), and that it already failed once on sk-form-input's own contract doc; stale contract-doc drift filed as spec-kitty-design#191 rather than silently left.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-06T01:09:05.665057+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
