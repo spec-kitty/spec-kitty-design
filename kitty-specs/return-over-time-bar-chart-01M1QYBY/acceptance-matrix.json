@@ -248,10 +248,10 @@
       "criterion_id": "FR-018",
       "description": "Add and consume reusable data-series, grid, and baseline semantic tokens, and do not use gold as the default series color.",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "token source/catalogue exact comparison and computed bindings prove reusable data-series/grid/baseline tokens; default series is not gold",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T21:30:34.760033+00:00",
       "notes": "Token source/catalogue, computed binding, and forbidden-color evidence.",
       "lane_owners": [
         "WP01"
