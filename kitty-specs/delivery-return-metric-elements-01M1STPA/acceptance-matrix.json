@@ -18,10 +18,10 @@
       "criterion_id": "FR-002",
       "description": "sk-metric renders an optional annotation through a real sk-pill-tag and emits no annotation container when the value is absent.",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "packages/elements/src/metric/sk-metric.ts:83-90 and sk-metric.test.ts:60-92; real pill-tag and omission passed",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T16:48:26.960105+00:00",
       "notes": "WP01: DOM/composition assertions cover present and omitted annotation states."
     },
     {
