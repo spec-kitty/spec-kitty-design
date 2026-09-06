@@ -558,10 +558,10 @@
       "criterion_id": "C-006",
       "description": "Only inherited tokens, declared parts, and documented component custom properties are public; internal BEM classes are private.",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "CEM/parts/documentation gates prove only inherited tokens, seven declared parts, and documented custom properties are public; BEM classes remain private",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T21:31:05.864456+00:00",
       "notes": "Manifest, part ratchet, and styling-boundary evidence.",
       "lane_owners": [
         "WP01"
