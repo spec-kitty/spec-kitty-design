@@ -49,7 +49,7 @@
       "wp": "WP01"
     },
     "#67": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "cited only as the closed epic elements-first-run-prompt.md \u00a74's 'ADRs are written only in #67' rule refers to; not acted on by this mission beyond the #189/#176-precedent override",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -57,8 +57,8 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
     }
   },
   "schema_version": 1
