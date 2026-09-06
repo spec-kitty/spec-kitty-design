@@ -12,11 +12,9 @@
  * can affect, and assert the NAMED test failed while every other behaviour test survived. Graph
  * errors and zero-file selections fall back to the complete suite rather than narrowing evidence.
  *
- * EIGHT numbered guards plus a not-green-baseline check, each of which exists because it
- * was demonstrated failing during the post-plan spike. Guard 4 is the one that will
- * actually fire. (An earlier docstring said TEN, and said the self-check file held ten
- * entries when it held seven — stale numbers in prose, in the harness whose thesis is that
- * exactly that goes unnoticed. A pre-merge lens counted them.)
+ * The guards plus a not-green-baseline check each exist because their failure mode was
+ * demonstrated during review. Guard 4 is the one that will actually fire for product mutations.
+ * The self-check count is derived from its JSON list at the end rather than duplicated in prose.
  *
  * Usage: node scripts/suite-selftest.mjs [--selftest]
  *   --selftest runs mutations.selftest.json: deliberately-bad entries, each of which must be
@@ -141,21 +139,132 @@ if (!selftestMode) {
 
 const SUITE_TIMEOUT_MS = 180_000;
 const activeChildren = new Set();
+const childProcessTrees = new WeakMap();
+const childContainmentTokens = new WeakMap();
+
+const readLinuxProcessTable = () => {
+  const processes = new Map();
+  if (process.platform !== 'linux') return processes;
+  try {
+    for (const entry of readdirSync('/proc', { withFileTypes: true })) {
+      if (!entry.isDirectory() || !/^\d+$/.test(entry.name)) continue;
+      try {
+        const raw = readFileSync(join('/proc', entry.name, 'stat'), 'utf8');
+        const commandEnd = raw.lastIndexOf(')');
+        if (commandEnd < 0) continue;
+        // Fields after the command begin at stat field 3: state, ppid, pgrp, session, ...
+        const fields = raw.slice(commandEnd + 2).trim().split(/\s+/);
+        const pid = Number(entry.name);
+        const ppid = Number(fields[1]);
+        const pgid = Number(fields[2]);
+        const startTime = fields[19]; // /proc stat field 22, stable for the process lifetime.
+        if (Number.isInteger(pid) && Number.isInteger(ppid) && Number.isInteger(pgid)) {
+          processes.set(pid, { pgid, ppid, startTime });
+        }
+      } catch {
+        // Processes can disappear while /proc is being read.
+      }
+    }
+  } catch {
+    // /proc can be absent or restricted even on Linux containers. The child group remains usable.
+  }
+  return processes;
+};
+
+// Playwright launches browsers as detached processes on POSIX. That gives Chromium a process
+// group of its own: killing only Vitest's negative pid does not contain the browser on the forced
+// timeout path. Snapshot Linux's descendant tree before signalling so the escalation can reach
+// every process group even after Vitest exits and its children are reparented.
+const snapshotChildProcessTree = (child) => {
+  const tree = childProcessTrees.get(child) ?? {
+    identities: new Map(),
+  };
+  if (process.platform !== 'linux' || !child?.pid) {
+    childProcessTrees.set(child, tree);
+    return tree;
+  }
+
+  const processes = readLinuxProcessTable();
+  const containmentToken = childContainmentTokens.get(child);
+  if (containmentToken) {
+    const marker = `SUITE_SELFTEST_RUN_TOKEN=${containmentToken}`;
+    for (const [pid, info] of processes) {
+      try {
+        const environment = readFileSync(join('/proc', String(pid), 'environ'), 'utf8');
+        if (environment.split('\0').includes(marker)) {
+          tree.identities.set(pid, info.startTime);
+        }
+      } catch {
+        // Other users' environments can be unreadable; our child processes remain readable.
+      }
+    }
+  }
+  const childrenByParent = new Map();
+  for (const [pid, info] of processes) {
+    const children = childrenByParent.get(info.ppid) ?? [];
+    children.push(pid);
+    childrenByParent.set(info.ppid, children);
+  }
+  const pending = [child.pid];
+  const visited = new Set();
+  while (pending.length > 0) {
+    const parent = pending.pop();
+    if (visited.has(parent)) continue;
+    visited.add(parent);
+    const parentInfo = processes.get(parent);
+    if (parentInfo) tree.identities.set(parent, parentInfo.startTime);
+    for (const pid of childrenByParent.get(parent) ?? []) {
+      const info = processes.get(pid);
+      if (info) tree.identities.set(pid, info.startTime);
+      pending.push(pid);
+    }
+  }
+  childProcessTrees.set(child, tree);
+  return tree;
+};
 
 const killChildTree = (child, signal) => {
-  if (!child?.pid) return;
-  try {
-    // Each child owns a process group on POSIX, so Vitest's browser descendants cannot outlive a
-    // timeout or cancellation. Windows has no negative-pid process-group signal.
-    if (process.platform === 'win32') child.kill(signal);
-    else process.kill(-child.pid, signal);
-  } catch {
-    // The process may already have exited between the check and the signal.
+  if (!child?.pid) return 0;
+  if (process.platform === 'win32') {
+    try { child.kill(signal); } catch { /* The child may already have exited. */ }
+    return 1;
   }
+  const tree = snapshotChildProcessTree(child);
+  if (process.platform !== 'linux') {
+    try { process.kill(-child.pid, signal); } catch { /* The group may already have exited. */ }
+    return 1;
+  }
+  const live = readLinuxProcessTable();
+  const ownGroup = live.get(process.pid)?.pgid;
+  const groups = new Set();
+  for (const [pid, startTime] of tree.identities) {
+    const current = live.get(pid);
+    // Revalidate /proc start time before every signal so a reused pid cannot redirect escalation.
+    if (current?.startTime === startTime && current.pgid > 1 && current.pgid !== ownGroup) {
+      groups.add(current.pgid);
+    }
+  }
+  for (const pgid of groups) {
+    try { process.kill(-pgid, signal); } catch { /* The group may already have exited. */ }
+  }
+  // If /proc is restricted, retain the original detached-group containment while the child is
+  // demonstrably still alive. Never use this fallback after close, when a reused pgid is possible.
+  if (groups.size === 0 && child.exitCode === null && child.signalCode === null) {
+    try {
+      process.kill(-child.pid, signal);
+      return 1;
+    } catch {
+      // The child may have exited between the state check and the signal.
+    }
+  }
+  return groups.size;
 };
 
 let cleanupSandbox = () => {};
-process.on('exit', () => cleanupSandbox());
+process.on('exit', () => {
+  for (const child of activeChildren) killChildTree(child, 'SIGKILL');
+  cleanupSandbox();
+});
 for (const [signal, code] of [['SIGHUP', 129], ['SIGINT', 130], ['SIGTERM', 143]]) {
   process.once(signal, () => {
     // The parent exits synchronously, so there is no safe grace window to await here. Kill the
@@ -168,23 +277,25 @@ for (const [signal, code] of [['SIGHUP', 129], ['SIGINT', 130], ['SIGTERM', 143]
 
 function spawnCaptured(command, args, options = {}) {
   return new Promise((resolveSpawn) => {
-    const { timeoutMs, ...spawnOptions } = options;
+    const { containmentToken, timeoutMs, ...spawnOptions } = options;
     const child = spawn(command, args, {
       ...spawnOptions,
       detached: process.platform !== 'win32',
       stdio: ['ignore', 'pipe', 'pipe'],
     });
     activeChildren.add(child);
+    if (containmentToken) childContainmentTokens.set(child, containmentToken);
     let stdout = '';
     let stderr = '';
     let timedOut = false;
     let settled = false;
     let forceKilled = false;
+    let containedGroups = 0;
     let escalationTimer = null;
     const forceKill = () => {
       if (forceKilled) return;
       forceKilled = true;
-      killChildTree(child, 'SIGKILL');
+      containedGroups += killChildTree(child, 'SIGKILL');
     };
     child.stdout.on('data', (chunk) => { stdout += chunk; });
     child.stderr.on('data', (chunk) => { stderr += chunk; });
@@ -204,9 +315,18 @@ function spawnCaptured(command, args, options = {}) {
       settled = true;
       if (timer) clearTimeout(timer);
       if (escalationTimer) clearTimeout(escalationTimer);
-      if (timedOut) forceKill();
+      forceKill();
       activeChildren.delete(child);
-      resolveSpawn({ code: null, error, stderr, stdout, timedOut });
+      childProcessTrees.delete(child);
+      childContainmentTokens.delete(child);
+      resolveSpawn({
+        cleanupForced: containedGroups > 0,
+        code: null,
+        error,
+        stderr,
+        stdout,
+        timedOut,
+      });
     });
     child.on('close', (code, signal) => {
       if (settled) return;
@@ -215,51 +335,111 @@ function spawnCaptured(command, args, options = {}) {
       if (escalationTimer) clearTimeout(escalationTimer);
       activeChildren.delete(child);
       if (timedOut) forceKill();
-      resolveSpawn({ code, signal, stderr, stdout, timedOut });
+      else containedGroups += killChildTree(child, 'SIGKILL');
+      childProcessTrees.delete(child);
+      childContainmentTokens.delete(child);
+      resolveSpawn({
+        cleanupForced: containedGroups > 0,
+        code,
+        signal,
+        stderr,
+        stdout,
+        timedOut,
+      });
     });
   });
 }
 
+let suiteRunOrdinal = 0;
 async function runSuite(dir, project, timeoutMs = SUITE_TIMEOUT_MS, subjects = []) {
   // Serialize browser files inside every sandbox. Cold- and warm-cache probes showed parallel
   // collection could silently lose modules. Source-impact filtering controls cost without
   // allowing test files within the dependency-derived set to execute concurrently.
+  const ordinal = ++suiteRunOrdinal;
+  const reportPath = join(dir, `.vitest-report-${process.pid}-${ordinal}.json`);
+  const runTmp = join(runtimeTmp, `run-${ordinal}`);
+  const playwrightCache = join(runTmp, 'playwright-cache');
+  const containmentToken = `${process.pid}-${ordinal}-${Date.now()}`;
+  mkdirSync(playwrightCache, { recursive: true });
+  rmSync(reportPath, { force: true });
   const result = await spawnCaptured(
     process.execPath,
     [
       join(dir, 'node_modules/vitest/vitest.mjs'), 'run', ...subjects, '--project', project,
-      '--browser.fileParallelism=false', '--browser.api.port=0', '--browser.api.strictPort',
-      '--reporter=json',
+      '--browser.fileParallelism=false',
+      '--reporter=./scripts/suite-selftest-reporter.mjs',
+      `--outputFile=${reportPath}`,
     ],
-    { cwd: dir, env: { ...process.env, CI: '' }, timeoutMs }
+    {
+      cwd: dir,
+      env: {
+        ...process.env,
+        CI: '',
+        PWTEST_CACHE_DIR: playwrightCache,
+        SUITE_SELFTEST_RUN_TOKEN: containmentToken,
+        TEMP: runTmp,
+        TMP: runTmp,
+        TMPDIR: runTmp,
+      },
+      containmentToken,
+      timeoutMs,
+    }
   );
-  if (result.timedOut) {
-    return { testResults: [], __noReport: true, __timedOut: true };
-  }
-  const i = result.stdout.indexOf('{');
-  if (i < 0) {
-    return {
-      testResults: [],
-      __noReport: true,
-      __stderr: (result.stderr || String(result.error ?? '')).slice(-800),
-      __exitCode: result.code,
-    };
-  }
+  const diagnostics = {
+    __exitCode: result.code,
+    __signal: result.signal,
+    __spawnError: result.error ? String(result.error) : '',
+    __stderr: (result.stderr || String(result.error ?? '')).slice(-1_600),
+    __stdoutPrefix: result.stdout.slice(-1_600),
+    __timedOut: result.timedOut,
+  };
   try {
-    const report = JSON.parse(result.stdout.slice(i));
-    report.__stderr = result.stderr.slice(-800);
-    report.__stdoutPrefix = result.stdout.slice(0, i).slice(-1_600);
-    report.__exitCode = result.code;
-    return report;
-  } catch {
+    if (!existsSync(reportPath)) {
+      return {
+        testResults: [],
+        __noReport: true,
+        ...diagnostics,
+      };
+    }
+    return { ...JSON.parse(readFileSync(reportPath, 'utf8')), ...diagnostics };
+  } catch (error) {
     return {
       testResults: [],
       __noReport: true,
-      __stderr: result.stderr.slice(-800),
-      __exitCode: result.code,
+      __reportError: String(error),
+      ...diagnostics,
     };
+  } finally {
+    rmSync(reportPath, { force: true });
+    // A timeout retains its private directory until invocation cleanup so forced browser exit
+    // never races profile deletion. Successful/ordinary-red runs release theirs immediately.
+    if (!result.timedOut && !result.cleanupForced) {
+      rmSync(runTmp, { recursive: true, force: true });
+    }
   }
 }
+
+const runnerFailure = (result) => {
+  if (result.__spawnError) return `spawn failed: ${result.__spawnError}`;
+  if (result.__signal) return `runner exited from signal ${result.__signal}`;
+  if (!Array.isArray(result.unhandledErrors)) {
+    return 'report omitted the structured unhandledErrors channel';
+  }
+  if (result.unhandledErrors.length > 0) {
+    const first = result.unhandledErrors[0];
+    return `runner reported ${result.unhandledErrors.length} unhandled error(s): ` +
+      `${first?.message ?? first?.name ?? 'unknown error'}`;
+  }
+  if (typeof result.success !== 'boolean') return 'report omitted its boolean success verdict';
+  const expectedExit = result.success ? 0 : 1;
+  if (result.__exitCode !== expectedExit) {
+    return `report success=${result.success} requires exit ${expectedExit}, got ${result.__exitCode}`;
+  }
+  if (/error during close|Unhandled (?:Error|Rejection)|uncaughtException/i.test(result.__stderr)) {
+    return `runner emitted an out-of-band error: ${result.__stderr.split('\n').slice(-3).join(' ')}`;
+  }
+  return null;
+};
 
 /** Every assertion in the report, flattened. */
 // The module FILE travels with each test. Behaviour ids are no longer unique across the
@@ -291,8 +471,10 @@ const SANDBOX_INPUTS = [
 const sandboxRoot = mkdtempSync(join(tmpdir(), 'suite-selftest-'));
 const pristine = join(sandboxRoot, 'pristine');
 const sandbox = join(sandboxRoot, 'repo');
+const runtimeTmp = join(sandboxRoot, 'runtime-tmp');
 mkdirSync(pristine);
 mkdirSync(sandbox);
+mkdirSync(runtimeTmp);
 
 const cleanup = (() => {
   let complete = false;
@@ -448,7 +630,26 @@ const missingBehaviourSubjects = behaviourSubjects.filter(({ id, file }) =>
   )
 );
 /** Guard 6 — zero/partial/skipped collection must not become a mutation authority. */
-if (baseline.__noReport || baseline.success !== true || baseTests.length === 0
+if (baseline.__timedOut) {
+  console.error(
+    `❌ baseline HUNG (>${SUITE_TIMEOUT_MS / 1000}s) ` +
+      `${baseline.__noReport ? 'before producing a JSON report' : 'after tests produced a JSON report; teardown did not finish'}.`
+  );
+  if (baseline.__stderr) console.error(baseline.__stderr);
+  process.exit(1);
+}
+if (baseline.__noReport) {
+  console.error('❌ baseline produced no valid JSON report; refusing mutation authority.');
+  if (baseline.__reportError) console.error(baseline.__reportError);
+  if (baseline.__stderr) console.error(baseline.__stderr);
+  process.exit(1);
+}
+const baselineRunnerFailure = runnerFailure(baseline);
+if (baselineRunnerFailure) {
+  console.error(`❌ baseline runner failed: ${baselineRunnerFailure}`);
+  process.exit(1);
+}
+if (baseline.success !== true || baseTests.length === 0
     || baseTests.some((test) => test.status !== 'passed')
     || incompleteBaselineFiles.length > 0 || missingBehaviourSubjects.length > 0) {
   console.error('❌ baseline is incomplete or not green; refusing mutation authority.');
@@ -544,7 +745,12 @@ for (const m of mutations) {
           // and silent about which entry hung. A lens spent a 25-minute hang diffing a tmpdir by
           // hand to find out.
           if (res.__timedOut) {
-            verdict = ['timeout', `the suite HUNG (>${SUITE_TIMEOUT_MS / 1000}s) under this mutation — ${m.file}`];
+            const mutationTimeoutMs = m.timeoutMs ?? SUITE_TIMEOUT_MS;
+            verdict = [
+              'timeout',
+              `the suite HUNG (>${mutationTimeoutMs / 1000}s) under this mutation ` +
+                `${res.__noReport ? 'before producing a JSON report' : 'after producing its JSON report during teardown'} — ${m.file}`,
+            ];
           } else {
 
           // `__noReport` was set in three places and read in none, so a spawn that crashed without
@@ -552,6 +758,10 @@ for (const m of mutations) {
           // lens noted the fold closed only the timeout sub-case.
           if (res.__noReport && !res.__timedOut) {
             verdict = ['absent', `the suite produced no report — ${res.__stderr ? res.__stderr.split('\n').slice(-3).join(' ') : 'no stderr captured'}`];
+          }
+          const mutationRunnerFailure = res.__noReport ? null : runnerFailure(res);
+          if (!verdict && mutationRunnerFailure) {
+            verdict = ['collection', `runner/report failure: ${mutationRunnerFailure}`];
           }
           const tests = allTests(res);
           let behaviourTests = tests.filter(isBehaviourTest);
@@ -593,7 +803,7 @@ for (const m of mutations) {
               dir, 'browser', m.timeoutMs ?? SUITE_TIMEOUT_MS, [file]
             );
             completions.push(completion);
-            if (!completion.__noReport && !completion.__timedOut) {
+            if (!completion.__noReport && !completion.__timedOut && !runnerFailure(completion)) {
               behaviourTests = behaviourTests
                 .filter((test) => relative(dir, test.file) !== file)
                 .concat(allTests(completion).filter(isBehaviourTest));
@@ -611,7 +821,7 @@ for (const m of mutations) {
           );
           if (!verdict && (!assertionSetStable || incompleteFiles.length > 0
               || completions.some((completion) =>
-                completion.__noReport || completion.__timedOut
+                completion.__noReport || completion.__timedOut || runnerFailure(completion)
               ))) {
             const missing = [...expectedAssertions].filter(
               ([key, count]) => mutationAssertions.get(key) !== count

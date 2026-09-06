@@ -69,6 +69,14 @@
       "$why": "Removes one otherwise-green subject while leaving the named subject present. Only exact comparison with the full baseline assertion multiset can reject this partial report."
     },
     {
+      "id": "guard-runner-unhandled",
+      "expectRejectedBy": "collection",
+      "file": "fixtures/elements-behaviour/src/behaviours.test.ts",
+      "from": "import './sk-behaviour-fixture.js';",
+      "to": "import './sk-behaviour-fixture.js'; setTimeout(() => { throw new Error('deliberate self-check runner failure'); }, 0);",
+      "$why": "A red mutation normally exits Vitest with code 1, so the exit code cannot distinguish an intentional assertion failure from an unhandled runner error. This proves the structured reporter channel rejects the latter before named-red analysis."
+    },
+    {
       "id": "guard4-inert",
       "expectRejectedBy": "green",
       "file": "fixtures/elements-behaviour/src/sk-behaviour-fixture.ts",
