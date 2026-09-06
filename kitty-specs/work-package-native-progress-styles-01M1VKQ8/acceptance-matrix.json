@@ -28,10 +28,10 @@
       "criterion_id": "FR-003",
       "description": "The label is associated to the control by a plain light-DOM for/id pair, with zero aria-label, aria-labelledby, or role attributes anywhere in the fixture set.",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "apps/storybook/src/tests/sk-progress.spec.ts \u2014 native for/id association and zero authored aria/role attributes passed across three engines",
+      "pass_fail": "pass",
+      "verified_by": "codex-orry-wp208-210-0906a",
+      "verified_at": "2026-09-06T17:32:28.495458+00:00",
       "notes": "Verified by WP01 T007's accessible-name assertion plus a zero-match grep for aria-/role= across every fixture."
     },
     {
