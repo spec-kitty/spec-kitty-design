@@ -21,13 +21,20 @@
       "actor": "user",
       "agent_profile": "__resolved_profile_absent__",
       "agent_profile_version": "__resolved_profile_version_absent__",
+      "assignee": "claude",
       "force_count": 0,
       "lane": "in_progress",
       "last_event_id": "01M1T2KEMQYVSGRH8SQC3Y9M5A",
       "last_transition_at": "2026-09-06T00:41:26.935214+00:00",
       "model": "__resolved_model_absent__",
       "provider": "__resolved_provider_absent__",
-      "role": "implementer"
+      "role": "implementer",
+      "subtasks": {
+        "T001": "done",
+        "T002": "done",
+        "T003": "done",
+        "T004": "done"
+      }
     }
   }
 }
