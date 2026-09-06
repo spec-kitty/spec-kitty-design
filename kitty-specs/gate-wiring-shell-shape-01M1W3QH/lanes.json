@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "mission_slug": "gate-wiring-shell-shape-01M1W3QH",
+  "mission_id": "01M1W3QHACZ9JH9AK1G0XG3MG0",
+  "mission_branch": "kitty/mission-gate-wiring-shell-shape-01M1W3QH",
+  "target_branch": "mission/gate-wiring-shell-shape",
+  "lanes": [
+    {
+      "lane_id": "lane-planning",
+      "wp_ids": [
+        "WP01",
+        "WP02",
+        "WP03"
+      ],
+      "write_scope": [
+        ".github/workflows/ci-quality.yml",
+        "apps/storybook/src/tests/elements-load.spec.ts",
+        "docs/architecture/sad-lite.md",
+        "kitty-specs/card-status-tone-axis-01M1VJNY/issue-matrix.json",
+        "packages/elements/src/card/sk-card.css.js",
+        "packages/elements/src/card/sk-card.stories.ts",
+        "packages/styles/src/card/sk-card.css",
+        "scripts/check-gate-wiring-defeats.mjs",
+        "scripts/check-gate-wiring.mjs"
+      ],
+      "predicted_surfaces": [
+        "planning"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    }
+  ],
+  "computed_at": "2026-09-06T19:46:13.906457+00:00",
+  "computed_from": "dependency_graph+ownership",
+  "planning_artifact_wps": [
+    "WP01",
+    "WP02",
+    "WP03"
+  ],
+  "planning_commit_sha": "d4040a4375bb924d79cd53c8845333300e871565"
+}
