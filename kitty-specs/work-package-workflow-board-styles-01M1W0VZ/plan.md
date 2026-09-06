@@ -340,7 +340,7 @@ must fail if any is missing or renders no component root.
 
 ## Generation, Gate, and Delivery Sequence
 
-1. Rebase the mission branch on current `main` before implementation so #210 and any intervening
+1. Rebase the mission branch on current `origin/train/elements-first` before implementation so #210 and any intervening
    generator/export changes are current.
 2. Add the measured layout token, two authored CSS families, and all authored fixtures/stories.
 3. Run the token catalogue and styles-only markup generators. Never edit their outputs manually.
@@ -352,7 +352,7 @@ must fail if any is missing or renders no component root.
    browser, visual, package/manifest/ratchet, docs, and generated-artifact gates. CI path filters
    already classify `packages/**`, `apps/storybook/**`, `expected-stories.json`, and docs; verify
    the final PR actually schedules the component/Storybook/axe/Playwright/visual jobs.
-7. Immediately before review, rebase again if `main` moved, rerun both generators and their check
+7. Immediately before review, rebase again if `origin/train/elements-first` moved, rerun both generators and their check
    modes, rerun the full gate set, and regenerate baselines only in the CI-authoritative Linux
    Chromium environment if the rendering legitimately changed.
 8. Run the required adversarial review against the final SHA and address findings without widening
@@ -435,7 +435,7 @@ and theme, forced-colors, browser, axe, and visual proof.
 | Generated barrels/root export/package subpath drift    | Regenerate, run `--check`, resolve public imports/subpaths, and inspect pack output after premerge rebase.                                                                                  |
 | Selector or behavior creep implements adjacent work    | Exact selector/source inventory and NI matrix fail on modifiers, app state, tone maps, observers, routing, #211/#212/#214 APIs, or element surfaces.                                        |
 | Local screenshots differ from CI Linux rendering       | Use local output only for diagnosis; update committed snapshots through the CI-authoritative environment and review diffs.                                                                  |
-| `main` changes the generator/token/story ratchets      | Rebase before implementation and premerge, regenerate from authored sources, rerun full repository gates, then review the final SHA.                                                        |
+| `origin/train/elements-first` changes the generator/token/story ratchets | Rebase before implementation and premerge, regenerate from authored sources, rerun full repository gates, then review the final SHA.                                                       |
 
 ## Implementation Concern Map
 
