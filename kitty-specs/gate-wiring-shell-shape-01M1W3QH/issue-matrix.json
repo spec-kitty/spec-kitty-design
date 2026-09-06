@@ -61,7 +61,7 @@
       "wp": "WP02"
     },
     "#221": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "kitty-specs/card-status-tone-axis-01M1VJNY/issue-matrix.json filled and pruned; scraping behaviour reproduced on this mission's own matrix",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -69,8 +69,8 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "verdict": "fixed",
+      "wp": "WP03"
     },
     "#225": {
       "evidence_ref": "<link or commit>",
