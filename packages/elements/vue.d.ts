@@ -41,6 +41,30 @@ declare module 'vue' {
       // no declared props
     }>;
     /**
+     * A controlled, property-fed bar chart for compact numeric comparisons.
+     *
+     * Token dependencies: --sk-border-default, --sk-border-strong, --sk-border-width-1,
+     * --sk-border-focus, --sk-border-width-2, --sk-color-data-baseline,
+     * --sk-color-data-grid, --sk-color-data-series-primary, --sk-fg-body, --sk-fg-default,
+     * --sk-fg-muted, --sk-font-mono, --sk-font-sans,
+     * --sk-motion-duration-fast, --sk-motion-ease-out, --sk-radius-md, --sk-radius-sm,
+     * --sk-space-2, --sk-space-3, --sk-space-4, --sk-space-5, --sk-space-6,
+     * --sk-space-10, --sk-surface-card, --sk-surface-muted, --sk-surface-pill,
+     * --sk-text-sm, --sk-text-xs, --sk-weight-semibold.
+     */
+    'sk-bar-chart': SkElement<{
+      /** Optional visible description associated with the chart figure. */
+      'description'?: string;
+      /** Accessible name for the chart figure. */
+      'label'?: string;
+      /** Enables native button surfaces that request datum selection. */
+      'selectable'?: boolean;
+      /** Controlled selected datum identifier. The component never mutates it. */
+      'selected-id'?: string;
+      /** Complete consumer-owned data series. Invalid series fail closed. */
+      'series'?: import('@spec-kitty/elements/dist/bar-chart/sk-bar-chart.js').SkBarChart["series"];
+    }>;
+    /**
      * A blog preview card: thumbnail, eyebrow, title, excerpt, meta and a read-more link.
      *
      * It COMPOSES `sk-card`'s stylesheet rather than nesting the element, so the frame is authored

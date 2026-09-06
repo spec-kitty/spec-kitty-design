@@ -1,5 +1,6 @@
 export * from "./SkActionRow.js";
 export * from "./SkAppShell.js";
+export * from "./SkBarChart.js";
 export * from "./SkBlogCard.js";
 export * from "./SkButton.js";
 export * from "./SkCard.js";

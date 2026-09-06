@@ -1342,6 +1342,201 @@
         },
         {
           "kind": "class",
+          "description": "A controlled, property-fed bar chart for compact numeric comparisons.\n\nToken dependencies: --sk-border-default, --sk-border-strong, --sk-border-width-1,\n--sk-border-focus, --sk-border-width-2, --sk-color-data-baseline,\n--sk-color-data-grid, --sk-color-data-series-primary, --sk-fg-body, --sk-fg-default,\n--sk-fg-muted, --sk-font-mono, --sk-font-sans,\n--sk-motion-duration-fast, --sk-motion-ease-out, --sk-radius-md, --sk-radius-sm,\n--sk-space-2, --sk-space-3, --sk-space-4, --sk-space-5, --sk-space-6,\n--sk-space-10, --sk-surface-card, --sk-surface-muted, --sk-surface-pill,\n--sk-text-sm, --sk-text-xs, --sk-weight-semibold.",
+          "name": "SkBarChart",
+          "cssParts": [
+            {
+              "description": "The numeric SVG bar geometry.",
+              "name": "bar"
+            },
+            {
+              "description": "Accessible figure root.",
+              "name": "chart"
+            },
+            {
+              "description": "Stable empty or unavailable state.",
+              "name": "empty-state"
+            },
+            {
+              "description": "A single datum container.",
+              "name": "item"
+            },
+            {
+              "description": "Consumer-authored category label.",
+              "name": "label"
+            },
+            {
+              "description": "Ordered collection of chart items.",
+              "name": "plot"
+            },
+            {
+              "description": "Consumer-authored display value.",
+              "name": "value"
+            }
+          ],
+          "members": [
+            {
+              "kind": "field",
+              "name": "#descriptionId",
+              "privacy": "private",
+              "readonly": true,
+              "default": "`sk-bar-chart-description-${++nextBarChartInstanceId}`"
+            },
+            {
+              "kind": "method",
+              "name": "#requestSelection",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "id",
+                  "type": {
+                    "text": "string"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "#surface",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "TemplateResult"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "datum",
+                  "type": {
+                    "text": "BarDatum"
+                  }
+                },
+                {
+                  "name": "chart",
+                  "type": {
+                    "text": "ValidSeries"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "field",
+              "name": "description",
+              "privacy": "public",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "description": "Optional visible description associated with the chart figure.",
+              "attribute": "description"
+            },
+            {
+              "kind": "field",
+              "name": "label",
+              "privacy": "public",
+              "type": {
+                "text": "string"
+              },
+              "default": "'Bar chart'",
+              "description": "Accessible name for the chart figure.",
+              "attribute": "label"
+            },
+            {
+              "kind": "field",
+              "name": "selectable",
+              "privacy": "public",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "description": "Enables native button surfaces that request datum selection.",
+              "attribute": "selectable",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "selectedId",
+              "privacy": "public",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "description": "Controlled selected datum identifier. The component never mutates it.",
+              "attribute": "selected-id"
+            },
+            {
+              "kind": "field",
+              "name": "series",
+              "privacy": "public",
+              "type": {
+                "text": "ReadonlyArray<BarDatum>"
+              },
+              "description": "Complete consumer-owned data series. Invalid series fail closed.",
+              "x-spec-kitty-property-only": true,
+              "x-spec-kitty-property-reset": "empty-array"
+            }
+          ],
+          "events": [
+            {
+              "name": "sk-bar-chart-select",
+              "type": {
+                "text": "CustomEvent<BarChartSelectDetail>"
+              },
+              "description": "Requests selection for the exact consumer datum ID. The event bubbles, is composed, and is not cancelable."
+            }
+          ],
+          "attributes": [
+            {
+              "name": "description",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "description": "Optional visible description associated with the chart figure.",
+              "fieldName": "description"
+            },
+            {
+              "name": "label",
+              "type": {
+                "text": "string"
+              },
+              "default": "'Bar chart'",
+              "description": "Accessible name for the chart figure.",
+              "fieldName": "label"
+            },
+            {
+              "name": "selectable",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "description": "Enables native button surfaces that request datum selection.",
+              "fieldName": "selectable"
+            },
+            {
+              "name": "selected-id",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "description": "Controlled selected datum identifier. The component never mutates it.",
+              "fieldName": "selectedId"
+            }
+          ],
+          "superclass": {
+            "name": "LitElement",
+            "package": "lit"
+          },
+          "tagName": "sk-bar-chart",
+          "customElement": true
+        },
+        {
+          "kind": "class",
           "description": "A blog preview card: thumbnail, eyebrow, title, excerpt, meta and a read-more link.\n\nIt COMPOSES `sk-card`'s stylesheet rather than nesting the element, so the frame is authored\nonce in `sk-card.css` and this component's own sheet adds only blog layout — the contract its\nCSS header has always described, now true of the element as well as the static form.",
           "name": "SkBlogCard",
           "cssParts": [
@@ -4878,6 +5073,22 @@
         },
         {
           "kind": "js",
+          "name": "BarChartSelectDetail",
+          "declaration": {
+            "name": "BarChartSelectDetail",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "BarDatum",
+          "declaration": {
+            "name": "BarDatum",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
           "name": "BLOG_CARD_AXES",
           "declaration": {
             "name": "BLOG_CARD_AXES",
@@ -5521,6 +5732,22 @@
           "name": "SkAppShell",
           "declaration": {
             "name": "SkAppShell",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "SkBarChart",
+          "declaration": {
+            "name": "SkBarChart",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "skBarChartSheet",
+          "declaration": {
+            "name": "default",
             "module": "./dist/index.js"
           }
         },
