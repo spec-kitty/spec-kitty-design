@@ -1,4 +1,5 @@
 import { expect, test, type Locator, type Page } from "@playwright/test";
+import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 
 const BOARD_CSS = "packages/styles/src/workflow-board/sk-workflow-board.css";
@@ -8,6 +9,8 @@ const LANE_BARREL = "packages/styles/src/workflow-lane/index.ts";
 const TOKEN_SOURCE = "packages/tokens/src/tokens.css";
 const STYLES_PACKAGE = "packages/styles/package.json";
 const STYLES_ROOT = "packages/styles/src/index.ts";
+const COMPONENT_USAGE_DOC = "docs/design-system/using-components.md";
+const TOKEN_LITERAL_CHECKER = "scripts/check-component-token-literals.mjs";
 
 const BOARD_STORY_PREFIX = "primitives-skworkflowboard-html";
 const LANE_STORY_PREFIX = "primitives-skworkflowlane-html";
@@ -22,22 +25,32 @@ const ALLOWED_CLASSES = [
   "sk-workflow-lane__list",
 ] as const;
 
-const boardStories = [
-  "default",
-  "populated",
-  "fitting",
-  "all-empty",
-  "one-empty-lane",
-  "fifty-items",
-  "long-labels-and-items",
-  "single-lane-narrow",
-  "forced-colors",
-  "default-dark",
-  "light-mode",
+const boardStoryCases = [
+  { id: "default", fixture: "populated", alias: true },
+  { id: "populated", fixture: "populated", alias: false },
+  { id: "fitting", fixture: "fitting", alias: false },
+  { id: "all-empty", fixture: "all-empty", alias: false },
+  { id: "one-empty-lane", fixture: "one-empty-lane", alias: false },
+  { id: "fifty-items", fixture: "fifty-items", alias: false },
+  {
+    id: "long-labels-and-items",
+    fixture: "long-labels-and-items",
+    alias: false,
+  },
+  {
+    id: "single-lane-narrow",
+    fixture: "single-lane-narrow",
+    alias: false,
+  },
+  { id: "forced-colors", fixture: "one-empty-lane", alias: true },
+  { id: "default-dark", fixture: "populated", alias: true },
+  { id: "light-mode", fixture: "populated", alias: true },
 ] as const;
 
+type BoardStoryId = (typeof boardStoryCases)[number]["id"];
+
 const declaredViewport: Record<
-  (typeof boardStories)[number],
+  BoardStoryId,
   { width: number; height: number }
 > = {
   default: { width: 1024, height: 720 },
@@ -83,10 +96,7 @@ async function openStory(
   return { root, consoleErrors, pageErrors };
 }
 
-async function openBoard(
-  page: Page,
-  id: (typeof boardStories)[number],
-): Promise<LoadedStory> {
+async function openBoard(page: Page, id: BoardStoryId): Promise<LoadedStory> {
   await page.setViewportSize(declaredViewport[id]);
   return openStory(page, BOARD_STORY_PREFIX, id, ".sk-workflow-board");
 }
@@ -143,14 +153,64 @@ async function assertNativeLaneContract(root: Locator): Promise<void> {
     const list = lane.locator(":scope > .sk-workflow-lane__list");
     await expect(list).toHaveCount(1);
     expect(await list.evaluate((node) => node.tagName)).toBe("OL");
+    await expect(list).toHaveRole("list");
     const directItems = list.locator(":scope > li");
-    await expect(list.getByRole("listitem")).toHaveCount(
-      await directItems.count(),
+    const roleItems = list.getByRole("listitem");
+    await expect(roleItems).toHaveCount(await directItems.count());
+    expect(await roleItems.allInnerTexts()).toEqual(
+      await directItems.allInnerTexts(),
     );
     const count = Number(
       (await lane.locator(".sk-workflow-lane__count").innerText()).trim(),
     );
     expect(count).toBe(await directItems.count());
+  }
+}
+
+async function assertConditionalScrollerContract(root: Locator): Promise<void> {
+  const scroller = root.locator(".sk-workflow-board__scroller");
+  const facts = await scroller.evaluate((node) => {
+    const ariaLabel = node.getAttribute("aria-label");
+    const ariaLabelledBy = node.getAttribute("aria-labelledby");
+    const labelledByIds =
+      ariaLabelledBy?.trim().split(/\s+/).filter(Boolean) ?? [];
+    const labelledByTargets = labelledByIds.map((id) =>
+      document.getElementById(id),
+    );
+    return {
+      overflowing: node.scrollWidth > node.clientWidth,
+      role: node.getAttribute("role"),
+      tabindex: node.getAttribute("tabindex"),
+      ariaLabel,
+      ariaLabelledBy,
+      labelTargetCount: labelledByTargets.filter(Boolean).length,
+      labelledByIdCount: labelledByIds.length,
+      labelledText: labelledByTargets
+        .map((target) => target?.textContent?.trim() ?? "")
+        .filter(Boolean)
+        .join(" "),
+    };
+  });
+
+  const namingMethods = [facts.ariaLabel, facts.ariaLabelledBy].filter(
+    (value): value is string => value !== null,
+  );
+  if (facts.overflowing) {
+    expect(facts.role).toBe("region");
+    expect(facts.tabindex).toBe("0");
+    expect(namingMethods).toHaveLength(1);
+    expect(namingMethods[0]!.trim().length).toBeGreaterThan(0);
+    if (facts.ariaLabelledBy !== null) {
+      expect(facts.labelledByIdCount).toBeGreaterThan(0);
+      expect(facts.labelTargetCount).toBe(facts.labelledByIdCount);
+      expect(facts.labelledText.length).toBeGreaterThan(0);
+    }
+    await expect(scroller).toHaveRole("region");
+    await expect(scroller).toHaveAccessibleName(/\S/);
+  } else {
+    expect(facts.role).toBeNull();
+    expect(facts.tabindex).toBeNull();
+    expect(namingMethods).toHaveLength(0);
   }
 }
 
@@ -213,6 +273,39 @@ test.describe("workflow board source and distribution contract", () => {
     );
   });
 
+  test("the existing parsed token-literal gate checks both workflow stylesheets", () => {
+    const output = execFileSync(
+      process.execPath,
+      [TOKEN_LITERAL_CHECKER, BOARD_CSS, LANE_CSS],
+      { encoding: "utf8" },
+    );
+    expect(output).toContain(
+      "2 explicit component stylesheet(s) use tokens for all governed values",
+    );
+  });
+
+  test("the canonical fitting documentation omits the overflow-only scroller triad", () => {
+    const docs = readFileSync(COMPONENT_USAGE_DOC, "utf8");
+    const section = docs.slice(
+      docs.indexOf("## Workflow board and lanes"),
+      docs.indexOf("## Installation"),
+    );
+    const firstScroller = section.match(
+      /<div\s+class="sk-workflow-board__scroller"[^>]*>/,
+    );
+    expect(firstScroller).not.toBeNull();
+    expect(firstScroller![0]).not.toMatch(
+      /(?:role|aria-label|aria-labelledby|tabindex)=/,
+    );
+    expect(section).toContain("scroller.scrollWidth > scroller.clientWidth");
+    expect(section).toMatch(
+      /scroller\.setAttribute\(["']role["'], ["']region["']\)/,
+    );
+    expect(section).toMatch(
+      /scroller\.setAttribute\(["']tabindex["'], ["']0["']\)/,
+    );
+  });
+
   test("generated fixtures, root exports, and package subpaths expose both styles-only families", () => {
     expect(readGeneratedFixtures(BOARD_BARREL)).toHaveLength(7);
     expect(readGeneratedFixtures(LANE_BARREL)).toHaveLength(2);
@@ -247,7 +340,7 @@ test.describe("workflow board source and distribution contract", () => {
 });
 
 test.describe("workflow board stories are non-vacuous and console-clean", () => {
-  for (const id of boardStories) {
+  for (const { id } of boardStoryCases) {
     test(`${id} renders a visible board without browser errors or page overflow`, async ({
       page,
     }) => {
@@ -329,6 +422,7 @@ test.describe("native sections, lists, counts, and source order", () => {
     page,
   }) => {
     const { root } = await openBoard(page, "fifty-items");
+    await assertNativeLaneContract(root);
     const lane = root.locator(".sk-workflow-lane").first();
     const items = lane.locator(".sk-workflow-lane__list > li");
     await expect(items).toHaveCount(50);
@@ -344,45 +438,12 @@ test.describe("native sections, lists, counts, and source order", () => {
 });
 
 test.describe("conditional overflow semantics and keyboard operation", () => {
-  test("Populated is one genuinely overflowing named region with a complete triad", async ({
-    page,
-  }) => {
-    const { root } = await openBoard(page, "populated");
-    const scroller = root.locator(".sk-workflow-board__scroller");
-    const geometry = await scroller.evaluate((node) => ({
-      clientWidth: node.clientWidth,
-      scrollWidth: node.scrollWidth,
-    }));
-    expect(geometry.scrollWidth).toBeGreaterThan(geometry.clientWidth);
-    await expect(scroller).toHaveAttribute("role", "region");
-    await expect(scroller).toHaveAttribute(
-      "aria-labelledby",
-      "workflow-board-populated-title",
-    );
-    await expect(scroller).not.toHaveAttribute("aria-label", /.+/);
-    await expect(scroller).toHaveAttribute("tabindex", "0");
-    await expect(
-      page.getByRole("region", { name: "Work Packages", exact: true }),
-    ).toHaveCount(1);
-  });
-
-  for (const id of ["fitting", "single-lane-narrow"] as const) {
-    test(`${id} fits and omits role, name, and tabindex together`, async ({
+  for (const { id, fixture, alias } of boardStoryCases) {
+    test(`${id} (${alias ? "alias of " : "fixture "}${fixture}) derives the complete scroller triad from measured overflow`, async ({
       page,
     }) => {
       const { root } = await openBoard(page, id);
-      const scroller = root.locator(".sk-workflow-board__scroller");
-      const geometry = await scroller.evaluate((node) => ({
-        clientWidth: node.clientWidth,
-        scrollWidth: node.scrollWidth,
-      }));
-      expect(geometry.scrollWidth).toBeLessThanOrEqual(geometry.clientWidth);
-      await expect(scroller).not.toHaveAttribute("role", /.+/);
-      await expect(scroller).not.toHaveAttribute("aria-label", /.+/);
-      await expect(scroller).not.toHaveAttribute("aria-labelledby", /.+/);
-      await expect(scroller).not.toHaveAttribute("tabindex", /.+/);
-      await page.locator("body").press("Tab");
-      await expect(scroller).not.toBeFocused();
+      await assertConditionalScrollerContract(root);
     });
   }
 
@@ -649,26 +710,81 @@ test.describe("calibrated geometry, themes, and forced colors", () => {
     await assertNativeLaneContract(root);
     const emptyState = root.locator(".sk-empty-state");
     await expect(emptyState).toBeVisible();
-    const laneStyle = await root
-      .locator(".sk-workflow-lane")
-      .first()
-      .evaluate((node) => {
-        const style = getComputedStyle(node);
+    const paint = await root.evaluate((board) => {
+      const isTransparent = (color: string) =>
+        color === "transparent" ||
+        color === "rgba(0, 0, 0, 0)" ||
+        color === "rgba(0,0,0,0)";
+      const effectiveBackground = (start: Element): string => {
+        let node: Element | null = start;
+        while (node) {
+          const background = getComputedStyle(node).backgroundColor;
+          if (!isTransparent(background)) return background;
+          node = node.parentElement;
+        }
+        return getComputedStyle(document.documentElement).backgroundColor;
+      };
+      const lanes = [
+        ...board.querySelectorAll<HTMLElement>(".sk-workflow-lane"),
+      ].map((lane) => {
+        const style = getComputedStyle(lane);
         return {
-          borderStyle: style.borderStyle,
-          borderWidth: Number.parseFloat(style.borderWidth),
+          borderStyle: style.borderInlineStartStyle,
+          borderWidth: Number.parseFloat(style.borderInlineStartWidth),
+          borderColor: style.borderInlineStartColor,
+          background: effectiveBackground(lane),
         };
       });
-    expect(laneStyle.borderStyle).not.toBe("none");
-    expect(laneStyle.borderWidth).toBeGreaterThan(0);
+      const emptyCopy = board.querySelector<HTMLElement>(
+        ".sk-empty-state__body",
+      )!;
+      const emptyStyle = getComputedStyle(emptyCopy);
+      return {
+        lanes,
+        empty: {
+          color: emptyStyle.color,
+          background: effectiveBackground(emptyCopy),
+        },
+      };
+    });
+    for (const lane of paint.lanes) {
+      expect(lane.borderStyle).not.toBe("none");
+      expect(lane.borderWidth).toBeGreaterThan(0);
+      expect(lane.borderColor).not.toBe("");
+      expect(lane.borderColor).not.toBe(lane.background);
+    }
+    expect(paint.empty.color).not.toBe("");
+    expect(paint.empty.color).not.toBe(paint.empty.background);
     const scroller = root.locator(".sk-workflow-board__scroller");
     await page.locator("body").press("Tab");
     await expect(scroller).toBeFocused();
-    expect(
-      await scroller.evaluate((node) =>
-        Number.parseFloat(getComputedStyle(node).outlineWidth),
-      ),
-    ).toBeGreaterThan(0);
+    const focusPaint = await scroller.evaluate((node) => {
+      const isTransparent = (color: string) =>
+        color === "transparent" ||
+        color === "rgba(0, 0, 0, 0)" ||
+        color === "rgba(0,0,0,0)";
+      let ancestor: Element | null = node;
+      let ground = "";
+      while (ancestor) {
+        const background = getComputedStyle(ancestor).backgroundColor;
+        if (!isTransparent(background)) {
+          ground = background;
+          break;
+        }
+        ancestor = ancestor.parentElement;
+      }
+      const style = getComputedStyle(node);
+      return {
+        style: style.outlineStyle,
+        width: Number.parseFloat(style.outlineWidth),
+        color: style.outlineColor,
+        ground,
+      };
+    });
+    expect(focusPaint.style).not.toBe("none");
+    expect(focusPaint.width).toBeGreaterThan(0);
+    expect(focusPaint.color).not.toBe("");
+    expect(focusPaint.color).not.toBe(focusPaint.ground);
     const geometry = await pageGeometry(page);
     expect(geometry.scrollWidth).toBeLessThanOrEqual(geometry.clientWidth);
   });

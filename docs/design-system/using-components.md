@@ -329,12 +329,7 @@ there is deliberately no `<sk-workflow-board>` or `<sk-workflow-lane>` custom el
 
 <div class="sk-workflow-board">
   <h2 id="work-package-board-title">Work Packages</h2>
-  <div
-    class="sk-workflow-board__scroller"
-    role="region"
-    aria-labelledby="work-package-board-title"
-    tabindex="0"
-  >
+  <div class="sk-workflow-board__scroller">
     <section class="sk-workflow-lane" aria-labelledby="planned-title">
       <header class="sk-workflow-lane__header">
         <h3 class="sk-workflow-lane__title" id="planned-title">Planned</h3>
@@ -348,6 +343,9 @@ there is deliberately no `<sk-workflow-board>` or `<sk-workflow-lane>` custom el
   </div>
 </div>
 ```
+
+This one-lane example fits its scroller, so the overflow-only region, accessible name, and
+tab stop are all absent.
 
 The selector vocabulary is exactly `.sk-workflow-board`, `.sk-workflow-board__scroller`,
 `.sk-workflow-lane`, `.sk-workflow-lane__header`, `.sk-workflow-lane__title`,
