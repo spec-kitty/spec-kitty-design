@@ -38,10 +38,10 @@
       "criterion_id": "FR-004",
       "description": "Neither component parses, normalizes, calculates or infers domain meaning from supplied display strings.",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "sk-metric.test.ts:27-39; currency percentage large and nonnumeric values remain opaque",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T16:48:30.303362+00:00",
       "notes": "WP01/WP02: opaque-byte assertions and negative source/public-surface review."
     },
     {
