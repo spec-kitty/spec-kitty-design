@@ -29,7 +29,8 @@
       "model": "__resolved_model_absent__",
       "notes": [
         "Ready for independent review",
-        "Cycle 1 remediation complete; ready for independent review"
+        "Cycle 1 remediation complete; ready for independent review",
+        "Independent Codex re-review PASS at exact remediation SHA b72e9a90: all four cycle-1 blockers resolved; 343/343 browser, focused 12/12 cross-browser, 260/260 axe, typecheck 5/5, static gates green."
       ],
       "provider": "__resolved_provider_absent__",
       "review": null,
