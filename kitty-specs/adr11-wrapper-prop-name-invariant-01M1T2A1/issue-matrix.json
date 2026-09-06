@@ -1,0 +1,65 @@
+{
+  "rows": {
+    "#176": {
+      "evidence_ref": "cited only as the ADR-10 operator-override precedent this mission's own override notice matches; ADR-10's #176 section already ratified and merged prior to this mission",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
+    "#180": {
+      "evidence_ref": "its 3-entry hand-mirrored / folded-comparison approach is superseded by #187 on this branch; build-react-wrappers.mjs's own header comment documents the supersession (Pass 1 vs Pass 2)",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
+    "#187": {
+      "evidence_ref": "commit adf85d6 (branch point) already ships loadReactPropRenameMap() reading the real MAPPED_PROPS table with exact-casing comparison; re-verified against the shipped script before this mission's spec/ADR text was written",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
+    "#189": {
+      "evidence_ref": "commit edb3a41 amends ADR-11 with the wrapper prop-name invariant, worked example, contract-doc obligation, REACT_PROPS/rename-table consolidation assessment, and operator-override notice this issue asked for",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "fixed",
+      "wp": "WP01"
+    },
+    "#67": {
+      "evidence_ref": "cited only as the closed epic elements-first-run-prompt.md \u00a74's 'ADRs are written only in #67' rule refers to; not acted on by this mission beyond the #189/#176-precedent override",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    }
+  },
+  "schema_version": 1
+}
