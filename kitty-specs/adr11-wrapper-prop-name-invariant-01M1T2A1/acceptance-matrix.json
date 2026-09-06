@@ -2,7 +2,7 @@
   "mission_slug": "adr11-wrapper-prop-name-invariant-01M1T2A1",
   "mission_number": "",
   "mission_type": "software-dev",
-  "overall_verdict": "pending",
+  "overall_verdict": "pass",
   "criteria": [
     {
       "criterion_id": "FR-001",
@@ -57,11 +57,11 @@
     {
       "criterion_id": "FR-006",
       "description": "Verify FR-006 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "proof_type": "code_review",
+      "evidence": "ADR header Deciders line and \u00a7'Operator override, recorded for the record': names issue #189, the #176/ADR-10 precedent, dates the ratification to 2026-09-06, and notes ADR status remains Proposed overall; satisfies spec.md SC-004.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-06T01:09:06.644258+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     }
   ],
