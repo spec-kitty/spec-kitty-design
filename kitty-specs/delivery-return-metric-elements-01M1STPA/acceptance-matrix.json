@@ -238,10 +238,10 @@
       "criterion_id": "C-002",
       "description": "Authored and generated package code imports no Team Kitty code and exposes no Team Kitty-specific public names or defaults.",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "Dependency and forbidden-name scans plus generated-surface review find zero Team Kitty imports and zero Team Kitty-specific public tags, types, properties, events, defaults, or calculations.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T19:06:29.914515+00:00",
       "notes": "Base-diff, dependency, and forbidden-name scans."
     },
     {
