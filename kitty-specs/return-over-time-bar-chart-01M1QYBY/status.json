@@ -1,7 +1,7 @@
 {
-  "event_count": 21,
-  "last_event_id": "01M1W5S8P7YQ4E3KWT8NHPW4TK",
-  "materialized_at": "2026-09-06T20:15:32.039121+00:00",
+  "event_count": 22,
+  "last_event_id": "01M1W6BVPYXAJ50XBN17ESND65",
+  "materialized_at": "2026-09-06T20:25:41.342520+00:00",
   "mission_number": "",
   "mission_slug": "return-over-time-bar-chart-01M1QYBY",
   "mission_type": "software-dev",
@@ -11,24 +11,25 @@
     "canceled": 1,
     "claimed": 0,
     "done": 0,
-    "for_review": 1,
+    "for_review": 0,
     "in_progress": 0,
-    "in_review": 0,
+    "in_review": 1,
     "planned": 1
   },
   "work_packages": {
     "WP01": {
-      "actor": "codex",
+      "actor": "user",
       "agent": "codex",
-      "agent_profile": "frontend-freddy",
-      "agent_profile_version": "1.0",
+      "agent_profile": "__resolved_profile_absent__",
+      "agent_profile_version": "__resolved_profile_version_absent__",
       "force_count": 1,
-      "lane": "for_review",
-      "last_event_id": "01M1W5S8P7YQ4E3KWT8NHPW4TK",
-      "last_transition_at": "2026-09-06T20:15:32.039121+00:00",
+      "lane": "in_review",
+      "last_event_id": "01M1W6BVPYXAJ50XBN17ESND65",
+      "last_transition_at": "2026-09-06T20:25:41.342520+00:00",
       "model": "__resolved_model_absent__",
       "notes": [
-        "Ready for independent review"
+        "Ready for independent review",
+        "Cycle 1 remediation complete; ready for independent review"
       ],
       "provider": "__resolved_provider_absent__",
       "review": null,
@@ -38,7 +39,7 @@
         "reviewer": "codex",
         "verdict": "changes_requested"
       },
-      "role": "implementer",
+      "role": "reviewer",
       "shell_pid": null,
       "shell_pid_created_at": null,
       "subtasks": {
