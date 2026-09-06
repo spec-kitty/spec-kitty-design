@@ -22,10 +22,10 @@
       "criterion_id": "FR-002",
       "description": "Export readonly BarDatum and series types with id, label, value, and displayValue.",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "packages/elements/src/elements/sk-bar-chart.ts exported readonly BarDatum/BarSeries; packages/react/type-tests/wrappers.type-test.tsx and Vue source/packed malformed-datum negatives green",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T21:30:04.997267+00:00",
       "notes": "Element and generated-consumer type checks, including malformed negative cases.",
       "lane_owners": [
         "WP01"
