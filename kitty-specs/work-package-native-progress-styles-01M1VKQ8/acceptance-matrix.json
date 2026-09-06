@@ -197,11 +197,10 @@
     {
       "invariant_id": "C-007",
       "description": "This mission's markup and CSS are self-contained and do not compose with or reference any other #208 child component.",
-      "verification_method": "grep_absence",
-      "verification_command": "grep -RE 'sk-(nav-pill|form-input|form-textarea|badge|status)' packages/styles/src/progress",
+      "verification_method": "custom_command",
+      "verification_command": "! grep -RE 'sk-(nav-pill|form-input|form-textarea|badge|status)' packages/styles/src/progress",
       "result": "confirmed_absent",
-      "evidence": "grep found zero matches",
-      "scope": "packages/styles/src/progress"
+      "evidence": "Command exited 0: "
     }
   ]
 }
