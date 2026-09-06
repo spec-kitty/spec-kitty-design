@@ -377,10 +377,10 @@
       "criterion_id": "NFR-003",
       "description": "For every finite valid value, rendered ratio data equals value divided by maximum exactly; equal and zero cases are exact.",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "unit and browser ratio tables prove exact value/current-maximum geometry including equal, zero, all-zero, and reassignment recomputation",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T21:30:49.001029+00:00",
       "notes": "Exact geometry and recomputation assertions.",
       "lane_owners": [
         "WP01"
