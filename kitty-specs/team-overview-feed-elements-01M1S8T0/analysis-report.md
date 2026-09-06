@@ -4,7 +4,7 @@ artifact_type: spec-kitty.analysis-report
 command: /spec-kitty.analyze
 mission_slug: team-overview-feed-elements-01M1S8T0
 mission_id: 01M1S8T08J13XWH659CHPBA20G
-generated_at: '2026-09-06T13:19:08+02:00'
+generated_at: '2026-09-06T14:43:07+02:00'
 analyzer_agent: codex
 input_artifacts:
   spec.md:
@@ -31,9 +31,9 @@ findings: []
 
 ## WP03 implementation consistency analysis
 
-Analyzed implementation lane SHA: `7affad014be51c26c7e758055d656f38a8bd91d6`.
+Analyzed implementation lane SHA: `3141e919e4bc176b6d59b2f62d13ae4651547313`.
 
-Final-gate harness remediation SHA: `3de47f774f1d809f918e07a850f19ec4c3fd69e4`.
+Final-gate harness remediation SHA: `38455b932349fc0e71173e9fa0802d13253bce4b`.
 
 Verdict hint: **READY FOR INDEPENDENT WP03 REVIEW; EXTERNAL MISSION WRAP-UP REMAINS PENDING**.
 
@@ -44,21 +44,44 @@ SK-179 recovery on 2026-09-06. The orchestrator preserved safety ref
 `safety/issue146-pre-sk179-rebase-19f4bea`, rebased the seven-commit aggregate branch onto the new
 train, and resolved the sole conflict by retaining both sides of the append-only
 `kitty-ops/ops-index.jsonl`; all 62 invocation IDs remain unique. Shared artifacts then regenerated
-without a tracked diff. This exception is exhausted: a further train advance again blocks the
-mission and does not inherit authorization.
+without a tracked diff. That one-time exception was exhausted when the recovery completed.
+
+While exact-head CI was running, train advanced again through PR #203 to
+`6a39dd3268b175d4f62c82c43daa22ac0c927b97`. The operator first authorized this second recovery and
+then established standing authorization for parallel component missions: an issue branch may be
+rebased onto the latest `train/elements-first` without pausing for another approval. The authorization
+does not permit rewriting the train branch itself, and every refresh still invalidates affected
+exact-head evidence and requires complete regeneration, CI and review on the refreshed head. For
+this recovery the orchestrator preserved
+`safety/issue146-pre-sk179-second-rebase-28917cc` at
+`28917cc48b3d0016cc211e72c170a69716517805`, rebased all 13 commits, and resolved the sole conflict
+as a lossless append-only union in `kitty-ops/ops-index.jsonl`. All 63 invocation IDs remain unique;
+all 128 non-overlapping mission paths are byte-identical to the pre-rebase candidate, and the
+mission-owned index payload is identical on both ranges.
 
 The first post-rebase mutation rerun exposed a harness-lifecycle defect rather than a product
 failure: `--browser.api.port=0` is normalized by Vitest 4.1.11 to its fixed default port 63315, and
 the accompanying strict-port flag made serialized subprocesses contend with another browser gate or
 an incompletely closed predecessor. The old stdout parser also discarded a valid JSON report when
 teardown hung or stdout contained other braces, and its process-group assertion did not cover
-Playwright's separately detached Chromium group. Remediation `3de47f7` removes that fixed-port
+Playwright's separately detached Chromium group. Remediation `38455b9` removes that fixed-port
 coupling, captures each report through Vitest's supported per-run `--outputFile`, records structured
 unhandled runner errors, requires report/exit consistency, isolates runtime profiles and transform
 caches, and uses a unique inherited token plus `/proc` start-time validation to contain detached
 Linux descendants without signalling a reused PID. Two independent Codex follow-up reviews found
 no blocker for the authoritative Linux gate. The authorized remediation's custom reporter is
 explicitly listed in the plan structure and WP03 ownership metadata.
+
+Pre-refresh exact-head CI run `34031816773` independently passed the ordinary 647/647 behavior gate
+in 22.5 seconds, resolved 29 mutation sources with zero full-suite fallbacks, and reproduced every
+one of 128/128 named-red mutations against its complete green 307-assertion/88-pair baseline. Its
+only failure was runtime: 923.9 seconds exceeded the committed 881.9-second mutation ceiling.
+Independent profile-loaded Codex diagnosis found no hang, collateral failure or isolated slow arm;
+CI was 62.5% slower than the 568.6-second workstation run. Under the operator-authorized
+remediation, `suite-budget.json` records that authoritative breach and applies the existing 1.5213x
+worst-CI policy multiplier: `923.9 × (881.9 / 579.7) = 1405.5` seconds, retaining 52.1% headroom.
+The refreshed head must rerun the complete gate; a further breach triggers investigation, not an
+automatic raise.
 
 The implementation remains within the approved serial lane and preserves the approved WP01/WP02
 sources. WP03 adds a React consumer runtime fixture sourced only from `@spec-kitty/react`, generated
@@ -93,9 +116,13 @@ axe rendered 221/221 cases with zero WCAG 2.1 AA violations. Chromium and Firefo
 passed 86/86 cases. The unqualified 129-case Playwright invocation passed those 86 cases but could not
 launch any of the 43 WebKit cases because this host lacks WebKit runtime libraries (`libgtk-4-1`,
 `libicu74`, `libjpeg-turbo8`, `gstreamer1.0-libav`); this is reported as an environment limitation,
-not green evidence. The explicit Chromium visual diagnostic was expected-red 20/20 against missing
-or stale approved Linux baselines. All 16 generated local PNGs were removed and none is accepted or
-committed.
+not green evidence. The pre-baseline Chromium visual diagnostic was expected-red against missing
+approved Linux baselines, and all locally generated PNGs were removed. CI run `34031409485` then
+produced the 16 authoritative Ubuntu Chromium artifacts at pre-baseline head `c22d82c`; every
+capture was visually inspected against the approved Team overview v4 reference and copied
+byte-for-byte into the snapshot set. Their original baseline commit `28917cc` rebased to `62fb8b3`.
+Exact-head run `34031816773` accepted every visual case; its unrelated mutation-duration failure is
+disclosed above. The refreshed post-calibration head must accept the same committed baselines again.
 
 The acceptance matrix has 43 criteria: 36 are supported by current evidence and seven remain
 truthfully pending (`FR-020`, `NFR-009`, `C-007`, `C-010`, `C-011`, `C-012`, `C-013`). Negative
@@ -108,5 +135,6 @@ No implementation finding blocks independent WP03 review. Approval authorizes on
 ordered wrap-up: hold and reconcile current train, regenerate and rerun exact-head gates, obtain
 CI-authoritative Linux baselines, run the three Codex lenses, record same-head acceptance or an
 explicit SK-178 waiver plus maintainer approval, and merge only to `train/elements-first` after
-operator authorization. Any post-consolidation train advance is BLOCKED under SK-179. This worker
-must not open a PR, merge, touch `main`, publish, deploy or close an issue.
+operator authorization. Under the standing operator decision, a later train advance requires a new
+safety ref and another issue-branch rebase followed by complete evidence refresh, but no additional
+pause for authorization. This worker must not merge, touch `main`, publish, deploy or close an issue.
