@@ -1,0 +1,14 @@
+{
+  "created_at": "2026-09-06T18:49:49.915324+00:00",
+  "flattened": false,
+  "friendly_name": "notice element",
+  "mission_id": "01M1W0WB2TA0RPMME1ZNJZ943P",
+  "mission_number": null,
+  "mission_slug": "notice-element-01M1W0WB",
+  "mission_type": "software-dev",
+  "purpose_context": "This mission advances notice element on mission/notice-element so stakeholders can track the work from mission creation onward.",
+  "purpose_tldr": "notice element",
+  "slug": "notice-element-01M1W0WB",
+  "target_branch": "mission/notice-element",
+  "topology": "single_branch"
+}
