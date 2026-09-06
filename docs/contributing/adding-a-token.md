@@ -20,6 +20,7 @@ Pattern: `--sk-<category>-<name>`
 | Foreground | `--sk-fg-` | `--sk-fg-on-sidebar` |
 | Spacing | `--sk-space-` | `--sk-space-13` |
 | Radius | `--sk-radius-` | `--sk-radius-xs` |
+| Operational status | `--sk-status-` / `--sk-on-status-` | `--sk-status-danger`, `--sk-on-status-danger` |
 
 See [ADR-003](../architecture/decisions/2026-05-01-3-token-schema-naming-convention.md) for the
 complete category table and naming rationale.
@@ -47,10 +48,27 @@ complete category table and naming rationale.
    git commit -m "feat(tokens): add --sk-color-teal"
    ```
 
-5. **Check file size** stays under 20 KB:
-   ```bash
-   wc -c packages/tokens/src/tokens.css  # < 20480
-   ```
+5. **Keep the file's own weight in mind.** This step used to read "check file size stays under
+   20 KB" with a `wc -c … # < 20480` command beside it. No gate has ever enforced that number,
+   and the file passed it long before anyone noticed: it measured 23,857 bytes at
+   `train/elements-first@32fa495`, so the instruction had been silently false for some time and
+   is corrected here rather than left to be discovered by the next person who runs it. Most of
+   the growth is comments — measured rationale beside the values — which is deliberate and is
+   not what a consumer downloads once the sheet is minified. Prefer putting a long derivation in
+   the block it explains once, not in both theme blocks.
+
+## A new CATEGORY is more than a new token
+
+A new prefix creates a new category in `packages/tokens/dist/token-catalogue.json`, which is a
+published artifact. Add the row to the table above in the same commit, and say in
+`docs/design-system/using-tokens.md` what the category *means* — a catalogue entry tells a
+consumer the token exists and nothing about when to reach for it. `--sk-status-*` (#177) is the
+most recent example.
+
+**Aliases are the cheap way to add a category.** `--sk-status-<tone>` resolves entirely to tokens
+that already existed; the category adds meaning, not colour. If a new category needs new colour
+values, that is a palette decision and belongs to whoever owns the palette, not to the mission
+that happened to need it first.
 
 ## Semantic pairing rule
 

@@ -388,21 +388,11 @@
   --sk-on-tint-rose:        #6B2424;
 
   /* ── Operational Status — semantic pairs (#177) ───────────────────────────
-     ONE tone vocabulary, owned by sk-status-indicator (#146) and consumed here:
-     neutral | info | success | attention | danger | recovery.
-
-     ALIASES, not a palette. Every value below resolves to a token that already
-     exists; this category adds meaning, not colour. It is declared in BOTH theme
-     blocks even though the aliases are identical, because a status token defined
-     in one block only is exactly the half-populated theme #93 records — and a
-     reader checking "does light have status?" must be able to answer from the
-     light block.
-
-     PAIRING (hard rule 3): --sk-status-<tone> is the SURFACE, --sk-on-status-<tone>
-     is its foreground and the card's edge colour. Two contrast contracts hold, and
-     both were measured in sRGB rather than assumed:
-       (a) the card's own foreground, --sk-fg-body, on the status surface;
-       (b) the pair itself, --sk-on-status-<tone> on --sk-status-<tone>.
+     The light half. Rationale, pairing rule and the dark measurements are in the
+     matching block in :root; this is deliberately declared rather than inherited,
+     because a status category present in one theme only is the half-populated
+     theme #93 records, and a reader must be able to answer "does light have
+     status?" from the light block.
      LIGHT      (a) --sk-fg-body #2A2A22      (b) pair        edge vs page
        neutral       11.17                       5.22            6.20
        info          12.23                       7.70            8.35
