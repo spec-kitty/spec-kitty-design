@@ -1,7 +1,7 @@
 {
-  "event_count": 1,
-  "last_event_id": "01M1V5MRE8ERYB03YK262H6R4E",
-  "materialized_at": "2026-09-06T10:53:49.896077+00:00",
+  "event_count": 2,
+  "last_event_id": "01M1V5MRFPCZVFZNXPATFYS659",
+  "materialized_at": "2026-09-06T10:53:49.942429+00:00",
   "mission_number": "",
   "mission_slug": "page-header-compact-sticky-01M1V55H",
   "mission_type": "software-dev",
@@ -14,7 +14,7 @@
     "for_review": 0,
     "in_progress": 0,
     "in_review": 0,
-    "planned": 1
+    "planned": 2
   },
   "work_packages": {
     "WP01": {
@@ -23,6 +23,13 @@
       "lane": "planned",
       "last_event_id": "01M1V5MRE8ERYB03YK262H6R4E",
       "last_transition_at": "2026-09-06T10:53:49.896077+00:00"
+    },
+    "WP02": {
+      "actor": "finalize-tasks",
+      "force_count": 0,
+      "lane": "planned",
+      "last_event_id": "01M1V5MRFPCZVFZNXPATFYS659",
+      "last_transition_at": "2026-09-06T10:53:49.942429+00:00"
     }
   }
 }
