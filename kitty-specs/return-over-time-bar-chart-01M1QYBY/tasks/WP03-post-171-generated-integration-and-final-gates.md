@@ -21,6 +21,9 @@ requirement_refs:
 planning_base_branch: mission/return-over-time-bar-chart
 merge_target_branch: mission/return-over-time-bar-chart
 branch_strategy: Planning artifacts for this mission were generated on mission/return-over-time-bar-chart. During /spec-kitty.implement this WP may branch from a dependency-specific base, but completed changes must merge back into mission/return-over-time-bar-chart unless the human explicitly redirects the landing branch.
+base_branch: kitty/mission-return-over-time-bar-chart-01M1QYBY
+base_commit: e008ce13b9bc6ca2ba72d348b3ebfabba07b4a0f
+created_at: '2026-09-06T20:27:08.920344+00:00'
 subtasks:
 - T014
 - T015
