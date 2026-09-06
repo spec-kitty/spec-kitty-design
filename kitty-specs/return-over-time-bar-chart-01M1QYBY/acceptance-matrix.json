@@ -234,10 +234,10 @@
       "criterion_id": "FR-017",
       "description": "Render an identical semantic signature in default dark and .sk-light themes before permitting only themed color variance.",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "dark/light ordered semantic signatures are byte-equivalent before computed token color variance assertions; theme mutation killed",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T21:30:32.079567+00:00",
       "notes": "Ordered semantics and computed-theme comparison before color assertions.",
       "lane_owners": [
         "WP01"
