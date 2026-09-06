@@ -88,10 +88,10 @@
       "criterion_id": "FR-009",
       "description": "A valid N-stage chain renders exactly N-1 visible decorative connectors, only between adjacent stages.",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "sk-evidence-chain.ts:115-121 and sk-evidence-chain.test.ts:127-150; exact N-1 connectors passed",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T16:48:39.545576+00:00",
       "notes": "WP02 behavior tests and WP03 focused Storybook Playwright assertions."
     },
     {
