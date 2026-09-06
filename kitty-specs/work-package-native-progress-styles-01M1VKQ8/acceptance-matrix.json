@@ -182,7 +182,7 @@
       "invariant_id": "C-005",
       "description": "apps/demo/dashboard-demo.html's existing .dash-progress-* rules and markup are not modified by this mission.",
       "verification_method": "custom_command",
-      "verification_command": "git diff --exit-code -- apps/demo/dashboard-demo.html",
+      "verification_command": "git diff --exit-code origin/train/elements-first...HEAD -- apps/demo/dashboard-demo.html",
       "result": "confirmed_absent",
       "evidence": "Command exited 0: "
     },
