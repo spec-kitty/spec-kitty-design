@@ -160,10 +160,10 @@ async function assertNativeLaneContract(root: Locator): Promise<void> {
     expect(await roleItems.allInnerTexts()).toEqual(
       await directItems.allInnerTexts(),
     );
-    const count = Number(
-      (await lane.locator(".sk-workflow-lane__count").innerText()).trim(),
-    );
-    expect(count).toBe(await directItems.count());
+    const suppliedCount = (
+      await lane.locator(".sk-workflow-lane__count").innerText()
+    ).trim();
+    expect(suppliedCount).toBe(String(await directItems.count()));
   }
 }
 
@@ -273,7 +273,14 @@ test.describe("workflow board source and distribution contract", () => {
     );
   });
 
-  test("the existing parsed token-literal gate checks both workflow stylesheets", () => {
+  test("the parsed token-literal gate proves its red probes and checks both workflow stylesheets", () => {
+    const selftestOutput = execFileSync(
+      process.execPath,
+      [TOKEN_LITERAL_CHECKER, "--selftest"],
+      { encoding: "utf8" },
+    );
+    expect(selftestOutput).toContain("governed token classes fail red");
+
     const output = execFileSync(
       process.execPath,
       [TOKEN_LITERAL_CHECKER, BOARD_CSS, LANE_CSS],
@@ -409,12 +416,22 @@ test.describe("native sections, lists, counts, and source order", () => {
   }) => {
     const { root } = await openBoard(page, "one-empty-lane");
     await assertNativeLaneContract(root);
-    const lengths = await root
-      .locator(".sk-workflow-lane__list")
-      .evaluateAll((lists) =>
-        lists.map((list) => list.querySelectorAll(":scope > li").length),
-      );
-    expect(lengths.filter((count) => count === 0)).toHaveLength(1);
+    const lists = root.locator(
+      ".sk-workflow-lane > .sk-workflow-lane__list",
+    );
+    const lengths = await lists.evaluateAll((laneLists) =>
+      laneLists.map((list) => list.querySelectorAll(":scope > li").length),
+    );
+    const emptyListIndexes = lengths.flatMap((count, index) =>
+      count === 0 ? [index] : [],
+    );
+    expect(emptyListIndexes).toHaveLength(1);
+
+    const emptyLane = lists.nth(emptyListIndexes[0]!).locator("..");
+    await expect(emptyLane).toHaveClass(/\bsk-workflow-lane\b/);
+    const laneEmptyState = emptyLane.locator(":scope > .sk-empty-state");
+    await expect(laneEmptyState).toHaveCount(1);
+    await expect(laneEmptyState).toBeVisible();
     await expect(root.locator(".sk-empty-state")).toHaveCount(1);
   });
 
