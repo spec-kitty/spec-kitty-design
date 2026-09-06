@@ -93,10 +93,10 @@
       "criterion_id": "FR-007",
       "description": "Keep each label and display value visibly present so no meaning depends on hover.",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "sk-bar-chart unit and browser assertions prove every label/displayValue is persistent across interaction states without hover dependency",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T21:30:14.138978+00:00",
       "notes": "Persistent text and interaction-state browser assertions.",
       "lane_owners": [
         "WP01"
