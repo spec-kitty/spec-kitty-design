@@ -600,11 +600,11 @@
     {
       "criterion_id": "C-009",
       "description": "Use one #148 design-mission branch and one pull request into train/elements-first with Refs #148, superseding the unrelated SaaS WP-per-PR convention for this checkout.",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "proof_type": "inspection",
+      "evidence": "single aggregate draft PR https://github.com/spec-kitty/spec-kitty-design/pull/231 targets train/elements-first from mission/return-over-time-bar-chart and uses Refs #148, not Closes",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T22:18:46.501006+00:00",
       "notes": "Wrap-up owns the single PR target and metadata check.",
       "lane_owners": [],
       "terminal_owner": "mission-wrap-up"
