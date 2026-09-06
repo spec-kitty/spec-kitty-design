@@ -258,10 +258,10 @@
       "criterion_id": "C-004",
       "description": "The mission reuses sk-metric within the chain and existing sk-card, sk-grid, and sk-pill-tag capabilities without creating substitutes.",
       "proof_type": "manual_review",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "Rendered composition and source inspection prove one real sk-metric per evidence stage, ApprovedExample uses real sk-card and sk-grid, and annotations reach real sk-pill-tag; no substitutes were added.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T19:06:32.933948+00:00",
       "notes": "Composition tests, story inspection, and authored-source audit."
     },
     {
