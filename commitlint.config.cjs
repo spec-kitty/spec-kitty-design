@@ -44,6 +44,15 @@ const SPEC_KITTY_AUTO_COMMIT_PATTERNS = [
     ),
   // Bootstrap commits emitted by older Spec Kitty CLI versions (no conv-commit format)
   (msg) => /^(Add|Map|Update) (tasks|plan|meta|charter|requirements?) /i.test(msg),
+  // Same class, a message shape later CLI versions added. `spec-kitty plan` on a
+  // `documentation` mission detects a docs generator and records it in meta.json under this
+  // exact message ("Update generator config for feature <slug>"), which the pattern above does
+  // not reach — its second group is a fixed noun list. The commit lands mid-branch, BEFORE the
+  // one lanes.json records as `planning_commit_sha`, so rewording it renumbers a hash the
+  // mission state machine reads back. Anchored to end-of-LINE and to the slug shape, like its
+  // siblings: an unanchored /^Update / would exempt any commit starting with that word from
+  // EVERY rule. Found by #193, the first `documentation`-type mission on this train.
+  (msg) => /^Update generator config for feature \S+\s*(\n|$)/.test(msg),
   // spec: Initial mission spec (Spec Kitty creation step)
   (msg) => /^spec: /.test(msg),
   // op(<profile-id>): <action> [<invocation-id>] — the Op record `spec-kitty dispatch` commits
