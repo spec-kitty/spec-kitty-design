@@ -7,11 +7,11 @@
     {
       "criterion_id": "FR-001",
       "description": "Verify FR-001 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "proof_type": "code_review",
+      "evidence": "ADR \u00a7'The wrapper prop-name invariant this ADR omitted (#189)', paragraph 'The invariant this ADR should always have stated': states field-SET preservation over deliverable fields and the React/JSX casing exception via MAPPED_PROPS; satisfies spec.md SC-001 (grep for MAPPED_PROPS/readOnly/autoComplete/inputMode).",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-06T01:09:01.690580+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
