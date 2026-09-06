@@ -13,7 +13,7 @@
       "wp": null
     },
     "#208": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "https://github.com/spec-kitty/spec-kitty-design/issues/208 \u2014 #210 is one child; epic remains open for #209 and #211-#214",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -21,8 +21,8 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "verdict": "in-mission",
+      "wp": "WP01"
     },
     "#210": {
       "evidence_ref": "e4bae44 + 200d6a9; WP01 cycle-2 approval",
