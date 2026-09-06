@@ -108,7 +108,15 @@ Recorded because "the gate caught it" is only useful if what it caught is writte
    the harness rejected it as collateral. Correctly: one mutation reddening two ids hides which one
    broke. It reads `firstElementChild` now.
 
-A third was caught before it reached CI: the `[SC-013]` arm's `from` string still quoted
+A third, found by reading the cascade rather than by a gate: `.sk-card--blue:hover` and
+`.sk-card--purple:hover` set `border-color` at specificity (0,2,0), which outranks the (0,1,0)
+status rules — so on a card carrying **both** axes, hovering swapped the operational edge for the
+brand accent and the status hue disappeared under the pointer. Exactly the combination the
+`StatusWithVariant` story renders. Six `:hover` rules at equal specificity, authored after the
+variant ones, keep the operational tone stable. No gate would have caught this: axe does not
+hover, and the orthogonality test asserts at rest.
+
+A fourth was caught before it reached CI: the `[SC-013]` arm's `from` string still quoted
 `cardClasses(this.variant, this.inset)`, which the widened render call had replaced. The harness
 reported `PATTERN NOT FOUND` rather than a false green. A mutation anchor is the one test input a
 source edit silently invalidates.

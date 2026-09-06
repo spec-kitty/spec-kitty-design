@@ -118,6 +118,41 @@
   border-inline-start-width: var(--sk-border-width-4);
 }
 
+/* THE OPERATIONAL EDGE DOES NOT YIELD TO THE BRAND VARIANT'S HOVER ACCENT.
+   `.sk-card--blue:hover` and `.sk-card--purple:hover` set `border-color` at
+   (0,2,0), which outranks the (0,1,0) status rules above — so without these six,
+   hovering a card carrying BOTH axes swapped the operational tone for the brand
+   one and the status hue disappeared under the pointer. Measured on the
+   StatusWithVariant story, which is exactly that combination.
+
+   Equal specificity to the variant hover rules, authored after them, so source
+   order decides — the same mechanism the block above relies on. Six rules rather
+   than one grouped selector with a custom property, because the indirection buys
+   nothing here and a per-tone rule is what a reader greps for. */
+.sk-card--status-neutral:hover {
+  border-color: var(--sk-on-status-neutral);
+}
+
+.sk-card--status-info:hover {
+  border-color: var(--sk-on-status-info);
+}
+
+.sk-card--status-success:hover {
+  border-color: var(--sk-on-status-success);
+}
+
+.sk-card--status-attention:hover {
+  border-color: var(--sk-on-status-attention);
+}
+
+.sk-card--status-danger:hover {
+  border-color: var(--sk-on-status-danger);
+}
+
+.sk-card--status-recovery:hover {
+  border-color: var(--sk-on-status-recovery);
+}
+
 /* Forced-colors. Under `forced-colors: active` every tone collapses to the
    system surface: `background` flattens to Canvas and the six tints become one
    ground, so the tone is gone. The card must therefore not depend on
