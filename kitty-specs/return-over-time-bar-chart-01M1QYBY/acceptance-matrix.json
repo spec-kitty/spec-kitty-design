@@ -434,10 +434,10 @@
       "criterion_id": "NFR-007",
       "description": "Every generated-artifact check, manifest diff, Vue source-SFC check, and post-build packed-consumer check is clean after regeneration from final integrated source.",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "styles/CSS/CEM/React/Vue/SIZES drift checks green; uncached analyze diff clean; Vue source, SFC, runtime, and real packed-tarball checks green with #149 preserved",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T21:30:54.396924+00:00",
       "notes": "Ordered generation, source checks, and real-tarball no-alias type gate.",
       "lane_owners": [
         "WP03"
