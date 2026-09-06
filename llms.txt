@@ -24,10 +24,8 @@
 
 - [Architecture index](https://github.com/stijn-dejongh/spec-kitty-design/blob/main/docs/architecture/README.md): Reading order for the architectural record (SAD-lite, system context, quality attributes, risks, ADRs).
 - [SAD-lite](https://github.com/stijn-dejongh/spec-kitty-design/blob/main/docs/architecture/sad-lite.md): System context, package topology, bounded contexts, quality attributes, risk landscape.
-- [ADR directory](https://github.com/stijn-dejongh/spec-kitty-design/blob/main/docs/architecture/decisions/): All Accepted architectural decision records.
-- [ADR-001 Token Distribution Format](https://github.com/stijn-dejongh/spec-kitty-design/blob/main/docs/architecture/decisions/2026-05-01-1-token-distribution-format.md): CSS Custom Properties as the token distribution mechanism.
-- [ADR-002 Monorepo Package Topology](https://github.com/stijn-dejongh/spec-kitty-design/blob/main/docs/architecture/decisions/2026-05-01-2-monorepo-package-topology.md): Separate publishable packages for tokens and component frameworks.
-- [ADR-003 Token Schema and Naming Convention](https://github.com/stijn-dejongh/spec-kitty-design/blob/main/docs/architecture/decisions/2026-05-01-3-token-schema-naming-convention.md): Naming rules and semantic pairing for design tokens.
+- [ADR index](https://github.com/stijn-dejongh/spec-kitty-design/blob/main/docs/architecture/README.md#decisions-adrs): The authoritative index of the architectural decision records — one row per record, each row's Status transcribed from the record itself, held to the record directory by `scripts/check-adr-index.mjs`. Individual records are deliberately not listed in this file: a partial list here would rot, and `scripts/check-llms-adr-surface.mjs` fails CI if one reappears.
+- [ADR record directory](https://github.com/stijn-dejongh/spec-kitty-design/tree/main/docs/architecture/decisions): The records themselves, one file each, indexed by the table above.
 - [Quality attribute assessment](https://github.com/stijn-dejongh/spec-kitty-design/blob/main/docs/architecture/quality-attribute-assessment.md): AMMERSE impact analysis of the core architectural choices.
 - [Risk register](https://github.com/stijn-dejongh/spec-kitty-design/blob/main/docs/architecture/risk-register.md): Full risk inventory with mitigations and owners.
 - [Charter](https://github.com/stijn-dejongh/spec-kitty-design/blob/main/.kittify/charter/charter.md): Project mission, scope, governance.
