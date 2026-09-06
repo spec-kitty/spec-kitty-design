@@ -18,7 +18,7 @@ Measured in this clone before any edit:
 | `module.registerHooks` | present (`function`) — the synchronous, in-thread hook API, Node ≥22.15 |
 | markup sources | 21 `packages/elements/src/*/sk-*.markup.ts` |
 | `sk-notice` | imports `STATUS_TONES` **already** (`sk-notice.ts:4`); authors no `*.markup.ts`; carries no restated tone list and no parity test |
-| `expected-stories.json` | 160 ids, prefixes `elements` and `primitives` only; `components-card--statuses-greyscale` absent |
+| `expected-stories.json` | **181** ids after this mission; **180** before it, prefixes `elements` and `primitives` only, `components-card--statuses-greyscale` absent. (An earlier revision of this row said 160 — that is the figure the file's own last `$comment` note leaves a reader with, and it is three missions stale. Counted, not read.) |
 | `components-card--statuses-greyscale` | `packages/styles/src/card/sk-card-html.stories.ts`, `title: 'Components/Card'`, `export const StatusesGreyscale` |
 | implementation-evidence files in `kitty-specs/` | exactly one (`card-status-tone-axis-01M1VJNY`), and it is the only one citing a styles-layer story as acceptance evidence |
 
@@ -114,8 +114,8 @@ strategy, which is nobody's ruling yet.
 
 ## 3. `#219` — one id, and the principle written down
 
-Add `components-card--statuses-greyscale` to `expected-stories.json` under a `card (static)` key in
-`byElement`, bump `total` 160 → 161, and extend `$comment` with: what the scope is now (the elements
+Add `components-card--statuses-greyscale` to `expected-stories.json` under a `sk-card (static path)`
+key in `byElement`, bump `total` 180 → 181, and extend `$comment` with: what the scope is now (the elements
 plus any styles-layer story a mission has named as acceptance evidence), why this id (it is the
 static half of #177's own stated proof that a tone is never the sole carrier of meaning, and the
 static path is the no-JavaScript consumer ADR-10 §3 exists to serve), and the standing principle —

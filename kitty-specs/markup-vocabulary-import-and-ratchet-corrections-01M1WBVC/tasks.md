@@ -19,7 +19,7 @@ proves it; #219 and #220 are record corrections on disjoint files.
 | T005 | The order-sensitive parity test is removed; the BEM-family assertion is kept standing alone (FR-006) | WP01 | |
 | T006 | `sk-notice` verified against the same standard and the result recorded (FR-007) | WP01 | |
 | T007 | Regenerate every markup artifact cache-free; prove byte-identity and `--check` green; confirm whether the `build-vue-types.mjs` half remains (FR-008, NFR-001, NFR-002) | WP01 | |
-| T008 | `expected-stories.json` opts in `components-card--statuses-greyscale`, `total` 160 → 161 (FR-009, NFR-004) | WP02 | [P] |
+| T008 | `expected-stories.json` opts in `components-card--statuses-greyscale`, `total` 180 → 181 (FR-009, NFR-004) | WP02 | [P] |
 | T009 | The `$comment` states the ratchet's scope now, and the principle that a cited story is ratcheted in the commit that cites it (FR-010) | WP02 | [P] |
 | T010 | `docs/contributing/adding-a-token.md`'s category table matches the catalogue's prefix binning, and the pairing convention is explained (FR-011, NFR-003) | WP03 | [P] |
 
