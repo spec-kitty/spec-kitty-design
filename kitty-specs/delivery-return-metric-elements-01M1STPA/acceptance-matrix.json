@@ -118,10 +118,10 @@
       "criterion_id": "FR-012",
       "description": "Empty, non-array or structurally invalid stage input fails closed to one generic empty state with no partial list, metric or connector.",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "sk-evidence-chain.ts:27-59,96-100 and sk-evidence-chain.test.ts:152-201; invalid-input matrix fails closed",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T16:48:45.492790+00:00",
       "notes": "WP02 invalid-input matrix and named validator source-break red."
     },
     {
