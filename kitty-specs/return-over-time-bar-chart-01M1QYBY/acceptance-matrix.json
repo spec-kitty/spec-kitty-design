@@ -135,10 +135,10 @@
       "criterion_id": "FR-010",
       "description": "Reject the whole runtime series for malformed records, duplicate or blank IDs, blank required text, or negative or non-finite values, and render no partial chart.",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "exhaustive malformed/duplicate/blank/negative/non-finite fail-closed unit table green; validation source-break mutation killed",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T21:30:19.371954+00:00",
       "notes": "Exhaustive fail-closed validation table and source-break evidence.",
       "lane_owners": [
         "WP01"
