@@ -38,6 +38,86 @@ const wf = parse(raw);
 const gate = wf.jobs?.gate;
 const problems = [];
 
+// ── THE TRIGGER ITSELF ────────────────────────────────────────────────────────────────
+//
+// Every question below asks whether the `gate` job can block a merge. All of them are vacuous
+// if the workflow never runs on the pull request, and NOTHING here referenced `wf.on` — the
+// one-line neutering this file's own header claims to prevent. Reproduced with this script
+// printing green (#193 final pass), three ways: deleting the `pull_request:` trigger outright,
+// adding `paths: ['never/matches/**']` to it, and retargeting its `branches:` at a branch that
+// does not exist.
+//
+// THIS REPO HAS ALREADY BEEN BITTEN BY THE CLASS. A PR based on a mission branch rather than
+// `train/**` matched no branch filter here, ran zero quality jobs, and still showed a green
+// preview check — so "CI is green" read as satisfied while nothing had run.
+const on = wf.on ?? wf[true]; // YAML 1.1 parsers fold the `on` key to boolean true; this one does not.
+// PRESENCE, not truthiness, and every shorthand `on:` admits. A bare `pull_request:` (null
+// value), `on: pull_request` and `on: [pull_request, push]` all mean "every pull request, no
+// filters" — WIDER than what this workflow declares, so they normalise to an empty filter set
+// and are accepted. `on?.pull_request` alone treated the first of those as an absent trigger.
+const onKeys =
+  typeof on === 'string' ? [on] : Array.isArray(on) ? on.map(String) : on && typeof on === 'object' ? Object.keys(on) : [];
+const hasPr = onKeys.includes('pull_request');
+const pr = hasPr && on && typeof on === 'object' && !Array.isArray(on) ? (on.pull_request ?? {}) : {};
+if (!hasPr) {
+  problems.push(
+    'the workflow has no `on.pull_request` trigger — it never runs on a pull request, so every ' +
+      'assertion in this file is about a job that does not execute'
+  );
+} else {
+  // A PATH FILTER is the quietest of the three. `paths:` narrows the trigger to a file set, and
+  // a PR touching nothing in it gets NO run at all — not a failing one. There is no legitimate
+  // path filter on a whole-repo quality workflow whose own jobs already fan out through the
+  // `changes` job; that is where path scoping belongs, and it scopes JOBS, not the trigger.
+  for (const key of ['paths', 'paths-ignore']) {
+    if (key in pr) {
+      problems.push(
+        `\`on.pull_request\` carries \`${key}:\` — the workflow is skipped entirely for a PR that ` +
+          `does not match it, and a skipped workflow reports nothing. Scope with the \`changes\` ` +
+          `job, which gates jobs inside a run that actually happened.`
+      );
+    }
+  }
+  // BRANCH COVERAGE, tested by matching representative refs rather than by comparing strings, so
+  // a rewrite to `'train/*'` or `'**'` is accepted and a narrowing is not. An ABSENT `branches:`
+  // is a WIDER filter (every PR runs), so it is accepted deliberately; what is refused is a list
+  // that does not cover the two lines this repo merges into.
+  if ('branches' in pr) {
+    const globToRe = (g) =>
+      new RegExp(
+        '^' +
+          String(g)
+            .replace(/[.+^${}()[\]\\]/g, '\\$&')
+            .replace(/\*\*/g, '\u0000')
+            .replace(/\*/g, '[^/]*')
+            .replace(/\u0000/g, '.*')
+            .replace(/\?/g, '[^/]') +
+          '$'
+      );
+    const entries = Array.isArray(pr.branches) ? pr.branches.map(String) : [String(pr.branches)];
+    const covers = (ref) => {
+      let hit = false;
+      for (const e of entries) {
+        if (e.startsWith('!')) {
+          if (globToRe(e.slice(1)).test(ref)) hit = false;
+        } else if (globToRe(e).test(ref)) hit = true;
+      }
+      return hit;
+    };
+    // `main` is where the train lands; `train/elements-first` stands for the integration line
+    // every mission branch PRs into (ADR-8). A filter that misses either one is a filter under
+    // which those PRs merge unchecked.
+    for (const ref of ['main', 'train/elements-first']) {
+      if (!covers(ref)) {
+        problems.push(
+          `\`on.pull_request.branches\` (${entries.join(', ')}) does not match \`${ref}\` — a PR ` +
+            `targeting it runs no job in this workflow and merges unchecked`
+        );
+      }
+    }
+  }
+}
+
 // The job's ABSENCE is a failure, not a pass. `wf.jobs?.[JOB] && 'if' in ...` evaluated to
 // false when the job was deleted, so the script printed green over a workflow with no test
 // job at all — the certifying-absence shape check-part-ratchet.mjs goes out of its way to
@@ -47,6 +127,29 @@ for (const JOB of JOBS) {
 }
 if (!gate) problems.push('there is no `gate` job');
 else {
+  // THE GATE'S OWN `if:`. The header of this file names `always()` as a MUST and nothing
+  // asserted it — deleting the line left this script green (#193 final pass). Without it the
+  // `gate` job is SKIPPED the moment any of its ten needs fails, rather than running and
+  // reporting the failure, and a skipped required check does not block a merge. The disjunction
+  // below is the gating; this is what lets the gating run at all.
+  //
+  // EXACTLY `always()`, unwrapped from an optional `${{ }}`. A conjunct — `always() && ...` —
+  // reintroduces a condition under which the gate does not report, so widening this is a
+  // deliberate edit here rather than something a copied idiom does by accident.
+  const gateIf = String(gate.if ?? '')
+    .trim()
+    .replace(/^\$\{\{\s*([\s\S]*?)\s*\}\}$/, '$1')
+    .trim();
+  if (gateIf !== 'always()') {
+    problems.push(
+      gate.if === undefined
+        ? 'the `gate` job carries no `if:` — it is skipped as soon as any need fails, so a failed ' +
+            'dependency produces a SKIPPED required check instead of a red one. It must be `always()`.'
+        : `the \`gate\` job's \`if:\` is \`${String(gate.if)}\`, not \`always()\` — under any other ` +
+            `condition the gate can decline to report, and a check that does not report does not block`
+    );
+  }
+
   const step = (gate.steps ?? []).find((s) => String(s.name ?? '').includes('[ENFORCED]'));
   const script = String(step?.run ?? '');
 
@@ -124,6 +227,14 @@ else {
 
   // ii. a STRICT clause in the failure disjunction. No skipped-tolerance entry is legitimate for
   // it: `lint-code` has no `if:` and is not behind the `changes` filter.
+  //
+  // KNOWN LIMITATION — see #202. This, and the identical `strict` regex above for `test` and
+  // `release-gate`, match the clause as SHELL TEXT, not as shell. Appending a conjunct
+  // (`... != "success" ] && [ 1 = 2 ] || \`) or wrapping the disjunction in `if false && [ ... ]`
+  // defeats the real gate while this assertion still matches and a diff reader still sees the
+  // clause they expect. Verified green against this file. A robust fix means parsing shell, which
+  // is out of scope here; the limitation is recorded rather than papered over with a regex
+  // arms-race, and it is now load-bearing for every gate `lint-code` carries.
   const lintStrict = new RegExp(String.raw`\[\s*"\$\{\{\s*needs\.${LINT_JOB}\.result\s*\}\}"\s*!=\s*"success"\s*\]`);
   if (!lintStrict.test(script)) {
     problems.push(

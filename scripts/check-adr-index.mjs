@@ -112,6 +112,67 @@ function fenceMask(lines) {
 }
 
 /**
+ * The block-level tag names that open a CommonMark "HTML block, type 6".
+ *
+ * Copied from the spec's list rather than narrowed to the two tags the probes use: a narrowed
+ * list is a list the next `<section>` or `<aside>` walks past, which is this file's own defect
+ * class. `<div>` and `<details>` are only the two that occur in practice.
+ */
+const HTML_BLOCK_TAGS = new Set(
+  ('address article aside base basefont blockquote body caption center col colgroup dd details ' +
+    'dialog dir div dl dt fieldset figcaption figure footer form frame frameset h1 h2 h3 h4 h5 ' +
+    'h6 head header hr html iframe legend li link main menu menuitem nav noframes ol optgroup ' +
+    'option p param search section summary table tbody td tfoot th thead title tr track ul')
+    .split(' '),
+);
+
+/**
+ * Which lines are inside a raw HTML block.
+ *
+ * THE THIRD FORM of the defect the two helpers above close. A table row inside `<div>` or
+ * `<details>` still starts with `|`, so a line-at-a-time parser counted it as coverage — the
+ * gate reporting 15/15 over a table whose fifteenth row is not a row, which is #193 exactly.
+ *
+ * The rule modelled is CommonMark's HTML block type 6: a line whose first non-space content is
+ * `<tag` or `</tag` for a name in HTML_BLOCK_TAGS opens a block, and the block runs to the next
+ * BLANK LINE. That blank line CLOSES it, so a row after the block is a row again — see the
+ * negative probe.
+ *
+ * WHAT IS ASSERTED HERE is the parser's behaviour, and that is what the probes execute: such a
+ * row does not count as coverage. How a given renderer displays it is read off the CommonMark
+ * spec, not measured by this file, so nothing downstream should be built on the rendering half.
+ *
+ * Fenced lines are passed in and skipped, so a `<div>` shown inside a ``` example cannot open a
+ * block. HTML comments are already blanked before this runs, so they cannot either.
+ */
+function htmlBlockMask(lines, fenced) {
+  const mask = new Array(lines.length).fill(false);
+  let open = false;
+  for (let i = 0; i < lines.length; i++) {
+    if (fenced[i]) {
+      open = false;
+      continue;
+    }
+    if (open) {
+      if (lines[i].trim() === '') {
+        open = false;
+        continue;
+      }
+      mask[i] = true;
+      continue;
+    }
+    // Up to three spaces of indentation, per the spec; four makes it an indented code block,
+    // which the row-level check below refuses on its own.
+    const m = lines[i].match(/^ {0,3}<\/?([A-Za-z][A-Za-z0-9-]*)(?:[ \t>]|\/>|$)/);
+    if (m && HTML_BLOCK_TAGS.has(m[1].toLowerCase())) {
+      open = true;
+      mask[i] = true;
+    }
+  }
+  return mask;
+}
+
+/**
  * Split a table row into cells on UNESCAPED pipes.
  *
  * GFM writes a literal pipe inside a cell as `\|`. Splitting on every `|` shifted every cell
@@ -135,19 +196,33 @@ export function splitRow(line) {
  * floor: a row typed by hand with no link is a row pointing at no record, which is precisely one
  * of the two drift directions.
  *
- * ONLY RENDERED ROWS COUNT. Comment spans are blanked and fenced blocks are skipped before
- * anything is matched — see the two helpers above for what each one cost.
+ * ONLY RENDERED ROWS COUNT. Comment spans are blanked, and fenced blocks, raw HTML blocks and
+ * indented-code-block lines are all skipped before anything is matched — see the helpers above
+ * for what each one cost. All four are the same defect: a line that begins with `|` but is not
+ * a table row, counted as coverage for a record no reader can find in the table.
  */
 export function parseAdrTable(readmeText) {
   const lines = stripHtmlComments(String(readmeText ?? '')).split('\n');
   const fenced = fenceMask(lines);
-  const start = lines.findIndex((l, i) => !fenced[i] && l.trim() === SECTION);
+  const html = htmlBlockMask(lines, fenced);
+  /**
+   * Four spaces or a tab of leading whitespace makes the line an INDENTED CODE BLOCK, which
+   * renders as literal text with its link unrendered — the same non-row the fence and comment
+   * cases produce, in the one syntax that leaves no marker on the line itself.
+   *
+   * The old test was `lines[i].trim().startsWith('|')`, which threw the indentation away before
+   * looking. Reading the RAW line is what closes it, and it fails CLOSED: a row skipped here is
+   * a record with no row, which is the message this gate exists to produce. Up to THREE spaces
+   * is ordinary markdown indentation and stays a row — see the negative probe.
+   */
+  const unrendered = (i) => fenced[i] || html[i] || /^(?: {4,}|\t)/.test(lines[i]);
+  const start = lines.findIndex((l, i) => !unrendered(i) && l.trim() === SECTION);
   if (start === -1) return { sectionFound: false, rows: [], malformed: [] };
 
   const rows = [];
   const malformed = [];
   for (let i = start + 1; i < lines.length; i++) {
-    if (fenced[i]) continue;
+    if (unrendered(i)) continue;
     if (/^##\s/.test(lines[i])) break;
     const t = lines[i].trim();
     if (!t.startsWith('|')) continue;
@@ -454,6 +529,66 @@ const PROBES = [
       ),
   },
   {
+    // THIRD SYNTAX, and the one with no marker on the line itself: four leading spaces after a
+    // blank line is a CommonMark indented code block. The old parser trimmed the line before
+    // testing it for a leading `|`, so the indentation — the whole of the defect — was discarded.
+    what: 'a row indented four spaces (an indented code block)',
+    expect: 'decisions/b.md has no row in the',
+    run: () =>
+      checkIndexCoverage(
+        ['a.md', 'b.md'],
+        parseAdrTable(
+          SECTION_DOC('| [ADR-1](decisions/a.md) | A | Accepted |', '', '    | [ADR-2](decisions/b.md) | B | Accepted |'),
+        ),
+      ),
+  },
+  {
+    // Same block, the other way to open one. A tab is worth four columns, so this is the same
+    // defect in a whitespace a reviewer cannot see in a diff at all.
+    what: 'a row indented with a tab',
+    expect: 'decisions/b.md has no row in the',
+    run: () =>
+      checkIndexCoverage(
+        ['a.md', 'b.md'],
+        parseAdrTable(
+          SECTION_DOC('| [ADR-1](decisions/a.md) | A | Accepted |', '', '\t| [ADR-2](decisions/b.md) | B | Accepted |'),
+        ),
+      ),
+  },
+  {
+    // FOURTH SYNTAX: a raw HTML block. Markdown is not parsed inside one, so the row is literal
+    // text and its link is not a link — while the line still starts with `|`.
+    what: 'a row inside a raw <div> HTML block',
+    expect: 'decisions/b.md has no row in the',
+    run: () =>
+      checkIndexCoverage(
+        ['a.md', 'b.md'],
+        parseAdrTable(
+          SECTION_DOC('| [ADR-1](decisions/a.md) | A | Accepted |', '', '<div>', '| [ADR-2](decisions/b.md) | B | Accepted |', '</div>'),
+        ),
+      ),
+  },
+  {
+    // The shape this would actually take in a real README: a collapsed disclosure holding rows
+    // someone "kept for reference". Collapsed or not, they index nothing.
+    what: 'a row inside a <details> disclosure block',
+    expect: 'decisions/b.md has no row in the',
+    run: () =>
+      checkIndexCoverage(
+        ['a.md', 'b.md'],
+        parseAdrTable(
+          SECTION_DOC(
+            '| [ADR-1](decisions/a.md) | A | Accepted |',
+            '',
+            '<details>',
+            '<summary>superseded rows</summary>',
+            '| [ADR-2](decisions/b.md) | B | Accepted |',
+            '</details>',
+          ),
+        ),
+      ),
+  },
+  {
     what: 'a non-empty subdirectory under the decisions directory',
     expect: 'is a non-empty subdirectory',
     run: () =>
@@ -559,13 +694,53 @@ const NEGATIVE_PROBES = [
     run: () => checkStatusAgreement(TABLE('| [ADR-1](decisions/a.md) | Tokens \\| Type | Accepted |').rows, REC('Accepted')),
   },
   {
-    what: 'an empty subdirectory and a non-markdown asset are not refused',
+    // THE SKIPS MUST NOT BE OVER-BROAD. Up to three spaces is ordinary markdown indentation and
+    // the row still renders; only four begins a code block. Without this, "skip indented lines"
+    // could be widened to any leading space and the defect probes above would not notice — a
+    // gate that reds on a correct tree is a gate someone deletes.
+    what: 'a row indented up to three spaces is still a row',
     run: () =>
-      classifyEntries([
+      checkIndexCoverage(
+        ['a.md', 'b.md'],
+        parseAdrTable(
+          SECTION_DOC('| [ADR-1](decisions/a.md) | A | Accepted |', '   | [ADR-2](decisions/b.md) | B | Accepted |'),
+        ),
+      ),
+  },
+  {
+    // An HTML block CLOSES at the next blank line. A row after that blank line is a row again,
+    // and a mask that ran to end-of-section instead would swallow the rest of the table — the
+    // failure mode that turns this fix into a gate that reds on a healthy README.
+    what: 'a row after a raw HTML block has closed at a blank line',
+    run: () =>
+      checkIndexCoverage(
+        ['a.md', 'b.md'],
+        parseAdrTable(
+          SECTION_DOC('| [ADR-1](decisions/a.md) | A | Accepted |', '<div>note</div>', '', '| [ADR-2](decisions/b.md) | B | Accepted |'),
+        ),
+      ),
+  },
+  {
+    // THE `files` SIDE IS ASSERTED, not just `problems`. This probe was the only evidence for the
+    // `.md` discovery filter and it asserted nothing about it: mutating that filter to
+    // `if (false) continue;` — so every asset in the directory becomes a "record" that then needs
+    // a row — left `--selftest` GREEN, because refusing nothing is exactly what this probe asked
+    // for. A probe table that cannot see a deleted filter is not evidence for the filter (M03).
+    what: 'an empty subdirectory and a non-markdown asset are not refused, and the asset is not a record',
+    run: () => {
+      const { files, problems } = classifyEntries([
         { name: 'a.md', isFile: true, isDirectory: false },
         { name: 'diagram.png', isFile: true, isDirectory: false },
         { name: 'drafts', isFile: false, isDirectory: true, childCount: 0 },
-      ]).problems,
+      ]);
+      return [
+        ...problems,
+        ...(files.includes('diagram.png')
+          ? ['diagram.png was classified as a record — the `.md` discovery filter is not filtering']
+          : []),
+        ...(files.includes('a.md') ? [] : ['a.md was NOT classified as a record — the filter is too narrow']),
+      ];
+    },
   },
 ];
 
@@ -610,10 +785,10 @@ function selftest() {
   // The floor is asserted, not implied: a probe list that silently emptied would print nothing
   // and exit 0, which is the defect class this whole script is about — one level up, in the
   // harness that is supposed to be the evidence.
-  if (PROBES.length < 18 || NEGATIVE_PROBES.length < 8) {
+  if (PROBES.length < 22 || NEGATIVE_PROBES.length < 10) {
     console.error(
       `❌ only ${PROBES.length} defect probe(s) and ${NEGATIVE_PROBES.length} healthy probe(s) — ` +
-        `the selftest floor is 18 and 8`,
+        `the selftest floor is 22 and 10`,
     );
     process.exit(1);
   }
