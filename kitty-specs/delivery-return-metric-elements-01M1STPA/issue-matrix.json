@@ -83,6 +83,18 @@
       "title": "<fill at WP-implementation time>",
       "verdict": "deferred-with-followup",
       "wp": "mission-wrap-up"
+    },
+    "#79": {
+      "evidence_ref": "#79 landed all three component migrations through PR #140 at train commit 70742b81435f2c7889370b867f502b45e32e0ab6; #147 reuses those primitives without modifying their contracts.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "verified-already-fixed",
+      "wp": "mission-wrap-up"
     }
   },
   "schema_version": 1
