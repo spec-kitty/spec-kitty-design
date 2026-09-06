@@ -2,7 +2,7 @@
 
 **Status:** ready to drive
 **Branch model:** all work happens on `train/elements-first`, a long-lived integration branch cut from `main`. Mission branches are cut from the train and merge back into it; the train lands on `main` once, at the end.
-**Governing decisions:** ADR-8 (base layer), ADR-9 (styling API, label ownership), ADR-10 (distribution, canonical markup), ADR-11 (verification stack), ADR-12 (consumer audit), ADR-13 (Storybook builder). Read the ones each brief names before writing a spec.
+**Governing decisions:** ADR-8 (base layer), ADR-9 (styling API, label ownership), ADR-10 (distribution, canonical markup), ADR-11 (verification stack), ADR-12 (consumer audit), ADR-13 (Storybook builder), ADR-14 (detached-probe validation seam — **Proposed and descriptive only**: it records how `sk-form-input` derives UA validity flags, and deliberately settles nothing about whether #179 or #122 should reuse that mechanism, so it does not yet constrain an implementer the way the others do; only *Accepted* ADRs bind a mission spec, per `docs/architecture/README.md`). Read the ones each brief names before writing a spec.
 
 Every mission below has an intent, a scope boundary in both directions, dependencies, an expected work-package shape, and exit criteria that can be checked rather than asserted. Where a mission carries a residual unknown, it is named in the brief; none of them block starting.
 

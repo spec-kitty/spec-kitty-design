@@ -160,7 +160,7 @@ Comment on the issue at each point-cut with a one-line status. That is what make
 
 ### The rule that keeps this autonomous
 
-**Do not make architectural decisions.** ADRs 8–13 pin every decision these missions need, and ADRs are written only in #67. If you hit a fork that no ADR covers:
+**Do not make architectural decisions.** ADRs 8–14 are the decisions this programme has committed, and ADRs are written only in #67. They do not pin every decision these missions need — ADR-14 was added in #188 precisely because ADRs 8–13 covered nothing about how an element derives UA validity flags, and ADR-14 itself leaves three forks open for the operator rather than answering them. If you hit a fork that no ADR covers:
 
 1. Stop work on that thread.
 2. Comment on the issue with the fork, the options, and what you would recommend and why.
