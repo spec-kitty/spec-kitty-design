@@ -163,10 +163,10 @@
       "criterion_id": "FR-012",
       "description": "Project selectedId only when it matches a current datum; activation never mutates it.",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "controlled-selection replacement and event assertions prove selectedId projects only a current id and activation never mutates it",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T21:30:22.752097+00:00",
       "notes": "Controlled-selection replacement and non-mutation assertions.",
       "lane_owners": [
         "WP01"
