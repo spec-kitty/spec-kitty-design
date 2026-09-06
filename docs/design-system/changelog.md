@@ -21,8 +21,9 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) conve
   `:host-context()`"*, which is checkable whatever the class prefix, and ADR-9 §2 requires only
   that internal classes keep the `sk-` prefix — not that the family match the tag name. The
   rule is the gate's own generalisation beyond ADR-9's text, and it is now prescriptive for
-  future missions, so **it needs to be written into an ADR**: filed as #152. ADR-9 is also
-  still `Status: Proposed` while this BREAKING rename rests on it.
+  future missions, so **it needs to be written into an ADR**: filed as #152. ADR-9 was still
+  `Status: Proposed` when this BREAKING rename landed on it; the operator ratified it to
+  `Accepted` on 2026-09-06 under the #200 ruling.
   **Consumers copying markup must update these class names.** Nothing was installed from a
   registry at the time of the change (ADR-8, and the programme's semver position), so the
   break is to copied snippets rather than to installs.

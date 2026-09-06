@@ -16,6 +16,8 @@ This directory contains the architectural record for the Spec Kitty Design Syste
 
 The decision records are in [`decisions/`](decisions/), and the table below is that directory — `scripts/check-adr-index.mjs` fails CI when a record has no row, when a row points at no record, or when a row's **Status** disagrees with the record's own. The Status column transcribes each record's own Status field; the index reports statuses, it does not confer them. Any mission spec that would contradict an Accepted ADR must include an ADR amendment as a tracked work item before implementation — see charter `architectural_review_requirement`.
 
+**What a Status obliges (#200).** An **Accepted** record binds: a mission spec that would contradict one must carry an ADR amendment as a tracked work item before implementation, per the charter's `architectural_review_requirement` above. A **Proposed** record is *not yet enforced* — on its own it does not constrain a spec, and no amendment is owed to depart from one. It is still read: the review requirement is not conditional on status, and a Proposed record is this repository's recorded reasoning on its subject, not a draft nobody consults. The way to make one binding is to have the operator ratify it. That distinction is settled by the operator's ruling on #200, which ratified ADR-9 and ADR-11 rather than redefining what `Proposed` means — and ratified them **by observation rather than by review**: three `[ENFORCED]` CI steps across two jobs — two in `lint-code` naming ADR-9, one in `test` naming ADR-11 — and two charter done-conditions, which name ADR-11's required-behaviours list and not ADR-9, already treated both as binding, so the ruling aligned the records with what CI enforces rather than re-examining their contents.
+
 **Complete** appears on the ADR-003 addendum alone. That record uses it to say the reconciliation work it describes has been carried out ("pre-implementation gate FR-034 satisfied — WP01 delivered"); it is a description of finished work, not a decision state.
 
 Identifiers below are the ones each record uses in its own H1. Every ADR record's own H1 is unpadded — `ADR-8`, not `ADR-008` — with one exception: the ADR-003 addendum, whose H1 writes the identifier padded, and whose row transcribes that.
@@ -31,9 +33,9 @@ Identifiers below are the ones each record uses in its own H1. Every ADR record'
 | [ADR-6](decisions/2026-05-01-6-storybook-multi-framework-rendering.md) | Storybook Multi-Framework Rendering Strategy | Accepted |
 | [ADR-7](decisions/2026-05-01-7-storybook-version-10x-adoption.md) | Storybook 10.x Adoption — Angular 21 Compatibility | Accepted |
 | [ADR-8](decisions/2026-09-02-8-custom-elements-base-layer.md) | Custom Elements as the Shared Component Base Layer | Accepted |
-| [ADR-9](decisions/2026-09-02-9-shadow-dom-and-styling-api.md) | Shadow DOM, the Styling API, and Label Ownership | Proposed |
+| [ADR-9](decisions/2026-09-02-9-shadow-dom-and-styling-api.md) | Shadow DOM, the Styling API, and Label Ownership | Accepted |
 | [ADR-10](decisions/2026-09-02-10-distribution-and-canonical-markup.md) | Distribution, Build Artifacts, and Canonical Markup | Accepted |
-| [ADR-11](decisions/2026-09-02-11-verification-stack-and-wrapper-generation.md) | Verification Stack for Elements, and Generated Wrappers | Proposed |
+| [ADR-11](decisions/2026-09-02-11-verification-stack-and-wrapper-generation.md) | Verification Stack for Elements, and Generated Wrappers | Accepted |
 | [ADR-12](decisions/2026-09-02-12-consumer-audit-of-record.md) | Consumer Audit of Record, and Diagram Corrections | Proposed |
 | [ADR-13](decisions/2026-09-02-13-storybook-web-components-builder.md) | Storybook Moves to the Web-Components Renderer on Vite | Proposed |
 | [ADR-14](decisions/2026-09-06-14-detached-probe-validation-seam.md) | The Detached-Probe Validation Seam | Proposed |

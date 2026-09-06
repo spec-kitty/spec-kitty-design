@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "mission_slug": "adr-9-and-11-ratification-and-sad-lite-index-01M1WBNC",
+  "mission_id": "01M1WBNCYHK6V8Q62C5THG4GV7",
+  "mission_branch": "kitty/mission-adr-9-and-11-ratification-and-sad-lite-index-01M1WBNC",
+  "target_branch": "mission/adr-9-11-ratification",
+  "lanes": [
+    {
+      "lane_id": "lane-planning",
+      "wp_ids": [
+        "WP01",
+        "WP02"
+      ],
+      "write_scope": [
+        "docs/architecture/README.md",
+        "docs/architecture/decisions/2026-09-02-11-verification-stack-and-wrapper-generation.md",
+        "docs/architecture/decisions/2026-09-02-9-shadow-dom-and-styling-api.md",
+        "docs/architecture/elements-first-programme.md",
+        "docs/architecture/sad-lite.md",
+        "docs/design-system/changelog.md"
+      ],
+      "predicted_surfaces": [
+        "planning"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    }
+  ],
+  "computed_at": "2026-09-06T22:08:06.850298+00:00",
+  "computed_from": "dependency_graph+ownership",
+  "planning_artifact_wps": [
+    "WP01",
+    "WP02"
+  ],
+  "planning_commit_sha": "754ea0334821281c41547615d197240bb314288d"
+}
