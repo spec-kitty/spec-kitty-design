@@ -1,7 +1,7 @@
 {
-  "event_count": 4,
-  "last_event_id": "01M1WC85VQCTK6F2TY9TB9WQXR",
-  "materialized_at": "2026-09-06T22:08:32.119881+00:00",
+  "event_count": 5,
+  "last_event_id": "01M1WC87WJSNNJ4H54VBD9V6DR",
+  "materialized_at": "2026-09-06T22:08:34.194362+00:00",
   "mission_number": "",
   "mission_slug": "adr-9-and-11-ratification-and-sad-lite-index-01M1WBNC",
   "mission_type": "documentation",
@@ -9,12 +9,12 @@
     "approved": 0,
     "blocked": 0,
     "canceled": 0,
-    "claimed": 0,
+    "claimed": 1,
     "done": 0,
     "for_review": 0,
     "in_progress": 1,
     "in_review": 0,
-    "planned": 1
+    "planned": 0
   },
   "work_packages": {
     "WP01": {
@@ -25,11 +25,11 @@
       "last_transition_at": "2026-09-06T22:08:32.119881+00:00"
     },
     "WP02": {
-      "actor": "finalize-tasks",
+      "actor": "claude",
       "force_count": 0,
-      "lane": "planned",
-      "last_event_id": "01M1WC1GZD3JCRQGDQE3AXH07W",
-      "last_transition_at": "2026-09-06T22:04:54.125661+00:00"
+      "lane": "claimed",
+      "last_event_id": "01M1WC87WJSNNJ4H54VBD9V6DR",
+      "last_transition_at": "2026-09-06T22:08:34.194362+00:00"
     }
   }
 }
