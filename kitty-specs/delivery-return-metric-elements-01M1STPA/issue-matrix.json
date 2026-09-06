@@ -61,7 +61,7 @@
       "wp": "mission-wrap-up"
     },
     "#149": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "#149 landed through PR #171 at train commit 8e654e858c7e09acf48ddafdd99a5349fae92d87.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -69,8 +69,8 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "verdict": "verified-already-fixed",
+      "wp": "mission-wrap-up"
     },
     "#150": {
       "evidence_ref": "<link or commit>",
