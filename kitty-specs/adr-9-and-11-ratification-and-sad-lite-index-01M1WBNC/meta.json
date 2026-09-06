@@ -3,7 +3,13 @@
   "documentation_state": {
     "coverage_percentage": 0.0,
     "divio_types_selected": [],
-    "generators_configured": [],
+    "generators_configured": [
+      {
+        "config_path": "",
+        "language": "javascript",
+        "name": "jsdoc"
+      }
+    ],
     "iteration_mode": "initial",
     "last_audit_date": null,
     "target_audience": "developers"
