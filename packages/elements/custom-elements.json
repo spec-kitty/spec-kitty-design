@@ -3712,11 +3712,11 @@
               "name": "actions"
             },
             {
-              "description": "The message body, and the live region when announcement is on.",
+              "description": "The heading, the message and the default slot, and the live region when announcement is on.",
               "name": "body"
             },
             {
-              "description": "The heading, body and actions column.",
+              "description": "The body and actions column.",
               "name": "content"
             },
             {
@@ -3724,7 +3724,7 @@
               "name": "dismiss"
             },
             {
-              "description": "The consumer heading's wrapper.",
+              "description": "The consumer heading's wrapper. Nested inside `body`, and therefore inside the live region when announcement is on.",
               "name": "heading"
             },
             {
@@ -3746,7 +3746,7 @@
               "name": "actions"
             },
             {
-              "description": "A consumer-supplied native heading. The element generates none, so the level stays the consumer's. NOT inside the live region: a heading slotted here is *not* announced, while `message` and the default slot are, so a headline here with the detail in `message` announces the detail only. Put anything that must be heard into `message` or the default slot. Whether the heading should instead sit inside the region is filed as #228 — it changes what every consumer hears, so it is a design decision rather than this element's to take.",
+              "description": "A consumer-supplied native heading. The element generates none, so the level stays the consumer's. Rendered INSIDE the live region and first within it, so a headline here is announced ahead of `message` and the default slot (#228). Both live-region roles this element renders are implicitly atomic, so every later re-announcement repeats the heading too; if you want a headline that is seen and never heard, put it outside the notice.",
               "name": "heading"
             },
             {

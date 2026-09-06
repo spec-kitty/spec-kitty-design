@@ -132,6 +132,28 @@
   min-width: 0;
 }
 
+/* THE HEADING'S BOTTOM MARGIN IS A REPLACED GRID GAP, not new spacing.
+
+   Until #228 the heading box was a direct item of `.sk-notice__content`, so the
+   space between it and the body was one `gap: var(--sk-space-2)` — including
+   when NO heading was slotted, where the box is a zero-height grid item that
+   still contributes its gap. #228 moved the box inside `.sk-notice__body` so the
+   live region announces the headline, and that gap went with it. This margin is
+   the same distance on the same box, so the render is unchanged in both cases:
+
+   - no heading slotted: a zero-height box whose bottom margin supplies exactly
+     what the vanished gap did;
+   - heading, empty message, no default slot, actions present: the margin
+     collapses out of the border-free, padding-free body box, and the body is a
+     grid ITEM, whose margins do not collapse with the grid container — so the
+     heading-to-actions distance is still space-2 + space-2.
+
+   `margin-block-end`, not `margin-bottom`: the notice is a logical-property
+   component throughout (see the tone edge's `border-inline-start`). */
+.sk-notice__heading {
+  margin-block-end: var(--sk-space-2);
+}
+
 /* The consumer supplies the heading element itself, so this box styles only the
    slot's box. #178 and #146 both require the heading LEVEL to stay the
    consumer's: an element-generated <h2> is an outline defect a consumer cannot

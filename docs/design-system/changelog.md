@@ -9,6 +9,37 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) conve
 
 ### Changed
 
+- **BEHAVIOUR — `sk-notice`'s `heading` slot is now announced** (#228, operator ruling
+  2026-09-07). The heading box moved from a sibling *before* the live region to the **first child
+  inside it**, so a screen reader reads the whole notice, headline first.
+
+  **What every existing consumer now hears.** This notice —
+
+  ```html
+  <sk-notice tone="danger" announce="assertive" message="Retrying in 5s">
+    <h3 slot="heading">Deploy failed</h3>
+  </sk-notice>
+  ```
+
+  — announced "Retrying in 5s" before this change and announces "Deploy failed. Retrying in 5s"
+  after it. Nothing about the markup, the attributes or the rendered layout changes; only what is
+  inside the region does. It is listed as a behaviour change rather than a break because no
+  consumer's code stops working — but a consumer who deliberately kept a headline out of the
+  announcement no longer gets that, which is why it is here rather than in a template edit.
+
+  **Migration.** If you slotted a heading you wanted seen and not heard, move it **outside** the
+  notice — the element offers no per-notice opt-out, and a property to re-suppress it was
+  considered and rejected with the ruling. If you had duplicated the headline into `message` to get
+  it announced, delete the duplicate: it is now read twice.
+
+  **One consequence to plan for.** `role="status"` and `role="alert"` are both implicitly
+  `aria-atomic="true"`, so the *whole* region is re-read on every change. A notice whose `message`
+  updates on a timer now repeats its headline on every tick. If that is too chatty, either drop the
+  heading or slow the message updates; the atomicity is the platform's, not this element's.
+
+  `::part(heading)` still exists and is still targetable — it is now nested inside `::part(body)`.
+  Vertical spacing is unchanged: the grid gap the heading used to contribute is replaced by an equal
+  `margin-block-end` on the same box.
 - **BREAKING — CSS class families renamed** in `@spec-kitty/styles` (#79, operator ruling
   #139). `.sk-btn*` → `.sk-button*`, and `.sk-tag*` → `.sk-pill-tag*`.
   `check-adopted-css-boundaries.mjs` derives a component's ownership from its own name, so a
