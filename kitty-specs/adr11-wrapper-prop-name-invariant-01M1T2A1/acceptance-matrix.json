@@ -17,11 +17,11 @@
     {
       "criterion_id": "FR-002",
       "description": "Verify FR-002 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "proof_type": "code_review",
+      "evidence": "ADR \u00a7'The worked example \u2014 sk-form-input': table naming all three renamed fields (readonly/autocomplete/inputmode); satisfies spec.md SC-002.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-06T01:09:02.710643+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
