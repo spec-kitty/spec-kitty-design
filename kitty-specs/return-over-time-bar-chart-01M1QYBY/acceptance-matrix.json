@@ -305,10 +305,10 @@
       "criterion_id": "FR-022",
       "description": "Regenerate CSS module, token catalogue, CEM, React wrapper, wrapper floor, Vue declaration, and SIZES; update all component ratchets and extend the packed-consumer gate while preserving #149; at wrap-up recheck #112 and add the formal row if available or record verified deferral.",
       "proof_type": "automated_test",
-      "evidence": "train 9b6b321; combined regeneration current and byte-stable after the third authorized rebase: CEM 27/100 docs, React 57 files/27 elements, Vue 27 plus SFC and packed tarball, CSS/markup/entries/SIZES; #112 remains open with conformance artifact/generator absent and explicitly deferred",
+      "evidence": "train 7e181a9; combined regeneration current after the fourth authorized rebase: CEM 27/100 docs, React 57 files/27 elements, Vue 27 plus SFC and packed tarball, CSS/markup/entries/SIZES; #112 remains open with conformance artifact/generator absent and explicitly deferred",
       "pass_fail": "pass",
       "verified_by": "codex",
-      "verified_at": "2026-09-06T23:27:30.885151+00:00",
+      "verified_at": "2026-09-06T23:36:17.330158+00:00",
       "notes": "Generated drift, packed-consumer, refreshed-train #112 disposition, and exact-head evidence.",
       "lane_owners": [
         "WP03"
