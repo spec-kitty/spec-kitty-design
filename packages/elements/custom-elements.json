@@ -1826,6 +1826,48 @@
         },
         {
           "kind": "class",
+          "description": "An ordered chain of generic evidence stages composed from real `sk-metric` elements.\n\nThe consumer owns stage order, identity, display formatting, and domain meaning. Valid supplied\nstrings and object references are preserved; invalid whole inputs fail closed.\n\nToken dependencies: --sk-border-strong, --sk-border-width-1, --sk-border-width-2,\n--sk-fg-muted, --sk-fg-subtle, --sk-font-mono, --sk-font-sans, --sk-space-1,\n--sk-space-2, --sk-space-3, --sk-space-4, --sk-space-10, --sk-text-sm,\n--sk-text-xs.",
+          "name": "SkEvidenceChain",
+          "cssParts": [
+            {
+              "description": "A decorative connector between adjacent stages.",
+              "name": "connector"
+            },
+            {
+              "description": "The status shown for empty or invalid whole input.",
+              "name": "empty-state"
+            },
+            {
+              "description": "The native ordered list containing the evidence stages.",
+              "name": "list"
+            },
+            {
+              "description": "An individual evidence stage list item.",
+              "name": "stage"
+            }
+          ],
+          "members": [
+            {
+              "kind": "field",
+              "name": "stages",
+              "privacy": "public",
+              "type": {
+                "text": "ReadonlyArray<\n    Readonly<{\n      id: string;\n      label: string;\n      displayValue: string;\n      annotation?: string;\n      tone?: 'neutral' | 'info' | 'success' | 'attention';\n    }>\n  >"
+              },
+              "description": "Ordered consumer-supplied stages, assigned as a JavaScript property. Assign a new array\nreference after changing the collection. Defaults to a frozen empty array.",
+              "x-spec-kitty-property-only": true,
+              "x-spec-kitty-property-reset": "empty-array"
+            }
+          ],
+          "superclass": {
+            "name": "LitElement",
+            "package": "lit"
+          },
+          "tagName": "sk-evidence-chain",
+          "customElement": true
+        },
+        {
+          "kind": "class",
           "description": "A feature card: an accented icon chip above a title and a short body.\n\nThe icon, title and body are all slotted, because they are the consuming page's content. The\ncomponent owns the frame, the chip and the two colour axes — which are independent: `accent`\ncolours the chip, `variant` colours the card's border, and a card may have either, both or\nneither.",
           "name": "SkFeatureCard",
           "cssParts": [
@@ -3128,6 +3170,145 @@
             "package": "lit"
           },
           "tagName": "sk-grid",
+          "customElement": true
+        },
+        {
+          "kind": "class",
+          "description": "A generic supplied label and opaque display value with optional supporting annotation.\n\nThe consumer owns all formatting and domain meaning. This element preserves valid strings\nexactly and contributes a native definition relationship, not a section heading.\n\nToken dependencies: --sk-fg-default, --sk-fg-muted, --sk-font-mono, --sk-font-sans,\n--sk-on-tint-butter, --sk-on-tint-mint, --sk-on-tint-sky, --sk-space-1,\n--sk-space-2, --sk-space-3, --sk-space-4, --sk-text-2xl, --sk-text-sm,\n--sk-text-xs, --sk-text-xl, --sk-weight-bold, --sk-weight-medium.",
+          "name": "SkMetric",
+          "cssParts": [
+            {
+              "description": "The optional supporting annotation container.",
+              "name": "annotation"
+            },
+            {
+              "description": "The status shown when required content or tone is invalid.",
+              "name": "empty-state"
+            },
+            {
+              "description": "The supplied metric label.",
+              "name": "label"
+            },
+            {
+              "description": "The native definition-list metric container.",
+              "name": "metric"
+            },
+            {
+              "description": "The supplied opaque display value.",
+              "name": "value"
+            }
+          ],
+          "members": [
+            {
+              "kind": "field",
+              "name": "annotation",
+              "privacy": "public",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "description": "Optional supporting text, preserved exactly. Defaults to `''`; the annotation container is\nomitted when this is empty.",
+              "attribute": "annotation"
+            },
+            {
+              "kind": "field",
+              "name": "compact",
+              "privacy": "public",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "description": "Uses compact visual density when true, without changing content or semantics. Defaults to\n`false`.",
+              "attribute": "compact",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "displayValue",
+              "privacy": "public",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "description": "Required opaque, preformatted display text, preserved exactly. Defaults to `''`; the\nelement never parses or rewrites it.",
+              "attribute": "display-value"
+            },
+            {
+              "kind": "field",
+              "name": "label",
+              "privacy": "public",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "description": "Required consumer-supplied label, preserved exactly. Defaults to `''`; blank values render\nthe unavailable state.",
+              "attribute": "label"
+            },
+            {
+              "kind": "field",
+              "name": "tone",
+              "privacy": "public",
+              "type": {
+                "text": "'neutral' | 'info' | 'success' | 'attention'"
+              },
+              "default": "'neutral'",
+              "description": "Generic presentation tone: `neutral` (the default), `info`, `success`, or `attention`.\nUnsupported runtime values render the unavailable state.",
+              "attribute": "tone",
+              "reflects": true
+            }
+          ],
+          "attributes": [
+            {
+              "name": "annotation",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "description": "Optional supporting text, preserved exactly. Defaults to `''`; the annotation container is\nomitted when this is empty.",
+              "fieldName": "annotation"
+            },
+            {
+              "name": "compact",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "description": "Uses compact visual density when true, without changing content or semantics. Defaults to\n`false`.",
+              "fieldName": "compact"
+            },
+            {
+              "name": "display-value",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "description": "Required opaque, preformatted display text, preserved exactly. Defaults to `''`; the\nelement never parses or rewrites it.",
+              "fieldName": "displayValue"
+            },
+            {
+              "name": "label",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "description": "Required consumer-supplied label, preserved exactly. Defaults to `''`; blank values render\nthe unavailable state.",
+              "fieldName": "label"
+            },
+            {
+              "name": "tone",
+              "type": {
+                "text": "'neutral' | 'info' | 'success' | 'attention'"
+              },
+              "default": "'neutral'",
+              "description": "Generic presentation tone: `neutral` (the default), `info`, `success`, or `attention`.\nUnsupported runtime values render the unavailable state.",
+              "fieldName": "tone"
+            }
+          ],
+          "superclass": {
+            "name": "LitElement",
+            "package": "lit"
+          },
+          "tagName": "sk-metric",
           "customElement": true
         },
         {
@@ -4706,6 +4887,14 @@
         },
         {
           "kind": "js",
+          "name": "EvidenceStage",
+          "declaration": {
+            "name": "EvidenceStage",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
           "name": "FEATURE_CARD_ACCENTS",
           "declaration": {
             "name": "FEATURE_CARD_ACCENTS",
@@ -5218,6 +5407,22 @@
         },
         {
           "kind": "js",
+          "name": "SkEvidenceChain",
+          "declaration": {
+            "name": "SkEvidenceChain",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "skEvidenceChainSheet",
+          "declaration": {
+            "name": "default",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
           "name": "SkFeatureCard",
           "declaration": {
             "name": "SkFeatureCard",
@@ -5259,6 +5464,22 @@
         {
           "kind": "js",
           "name": "skGridSheet",
+          "declaration": {
+            "name": "default",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "SkMetric",
+          "declaration": {
+            "name": "SkMetric",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "skMetricSheet",
           "declaration": {
             "name": "default",
             "module": "./dist/index.js"

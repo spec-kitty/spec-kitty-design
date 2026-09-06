@@ -28,6 +28,11 @@ export {
   type StatusIndicatorTone,
 } from './status-indicator/sk-status-indicator.js';
 export { SkEntityMarker } from './entity-marker/sk-entity-marker.js';
+export { SkMetric } from './metric/sk-metric.js';
+export {
+  SkEvidenceChain,
+  type EvidenceStage,
+} from './evidence-chain/sk-evidence-chain.js';
 export {
   SkTransitionMatrix,
   type TransitionColumn,
@@ -69,6 +74,8 @@ export { default as skSiteFooterSheet } from './site-footer/sk-site-footer.css.j
 export { default as skSectionHeaderSheet } from './section-header/sk-section-header.css.js';
 export { default as skStatusIndicatorSheet } from './status-indicator/sk-status-indicator.css.js';
 export { default as skEntityMarkerSheet } from './entity-marker/sk-entity-marker.css.js';
+export { default as skMetricSheet } from './metric/sk-metric.css.js';
+export { default as skEvidenceChainSheet } from './evidence-chain/sk-evidence-chain.css.js';
 export { default as skTransitionMatrixSheet } from './transition-matrix/sk-transition-matrix.css.js';
 
 // The card's authored markup module, exported so the two failure policies are reachable

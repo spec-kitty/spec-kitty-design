@@ -1,0 +1,124 @@
+{
+  "event_count": 47,
+  "last_event_id": "01M1VQTMNAK5EP1D2DECF3DTN2",
+  "materialized_at": "2026-09-06T16:11:37.002473+00:00",
+  "mission_number": "8",
+  "mission_slug": "delivery-return-metric-elements-01M1STPA",
+  "mission_type": "software-dev",
+  "summary": {
+    "approved": 0,
+    "blocked": 0,
+    "canceled": 0,
+    "claimed": 0,
+    "done": 3,
+    "for_review": 0,
+    "in_progress": 0,
+    "in_review": 0,
+    "planned": 0
+  },
+  "work_packages": {
+    "WP01": {
+      "actor": "merge",
+      "agent": "codex",
+      "agent_profile": "reviewer-renata",
+      "agent_profile_version": "1.0",
+      "force_count": 3,
+      "lane": "done",
+      "last_event_id": "01M1VQTKDPX2J93HAJGQVS9NBM",
+      "last_transition_at": "2026-09-06T16:11:35.734438+00:00",
+      "model": "__resolved_model_absent__",
+      "notes": [
+        "Ready for review at 60a72eb8b97d69159ea3b67b18e506be9ecc9992. Scope: exactly six WP01-owned files. Red reversals: digits-only display binding made preserves every supplied display-value byte fail, exit 1, then restored green exit 0; generic div structure made exposes one native definition relationship without a heading fail, exit 1, then restored green exit 0; plain-span annotation made composes the existing pill tag and omits absent annotation chrome fail, exit 1, then restored green exit 0; unsupported-tone pass-through made fails closed for invalid required content or tone fail, exit 1, then restored green exit 0; removed value part made targets all five public parts and adopts only skMetricSheet fail, exit 1, then restored green exit 0. Final gates: CSS generation exit 0; generated CSS check 16 components exit 0; focused Chromium Vitest 7/7 pass; elements typecheck pass; elements lint pass with seven pre-existing warnings only in form-control-base and transition-matrix; stylelint pass; git diff and cached diff checks pass; 18 authored CSS token references exactly match class documentation. Lane clean after commit; no heavy/browser-fleet, axe, visual, mutation, remote, PR, merge, publish, or deploy action run.",
+        "Review passed at lane head 60a72eb8b97d69159ea3b67b18e506be9ecc9992. Contract PASS: opaque scalar values, native dl/dt/dd semantics without heading, real sk-pill-tag tone mapping, fail-closed invalid state, compact presentation-only behavior, five exact parts, named constructed stylesheet, token-only CSS, exact six stories. Isolation PASS: one focused commit and exactly six owned files. Reversal evidence PASS: all five named production-source red/green pairs and nonzero/zero exits are recorded in the implementation handoff and final tests are mutation-sensitive by direct source-path inspection. Gates PASS: CSS generate/check, Chromium Vitest 7/7, elements typecheck, uncached elements lint with 0 errors/7 pre-existing warnings, stylelint, diff checks. WP anti-pattern checklist: dead code PASS; synthetic-fixture test PASS; silent empty return PASS; FR coverage PASS; frozen surface PASS; locked decision PASS; shared-file ownership PASS; production fragility PASS. No PR, merge, push, publish, deploy, or WP02/WP03 authority granted.",
+        "Force is limited to the reopened-upstream topology: the internal integrated target now contains downstream WP02, which must not be rebased into independent WP01. Exact reviewed content delta remains one WP01-owned fixture file at 5cbbf962; 93ef67a adds provenance only.",
+        "APPROVED. Force is limited to reopened-upstream topology: integrated target contains downstream WP02 and must not be rebased into independent WP01. Independent Codex review found no blockers; one owned fixture, unchanged 7 tests/34 assertions, focused lint/type/browser/style/commit/diff gates green."
+      ],
+      "provider": "__resolved_provider_absent__",
+      "review": null,
+      "review_result": {
+        "feedback_path": "/home/jeroennouws/dev/team-kitty-missions/design-147/kitty-specs/delivery-return-metric-elements-01M1STPA/tasks/WP01-generic-metric-element/review-cycle-3.md",
+        "reference": "review-cycle://delivery-return-metric-elements-01M1STPA/WP01-generic-metric-element/review-cycle-3.md",
+        "reviewer": "codex",
+        "verdict": "approved"
+      },
+      "role": "reviewer",
+      "shell_pid": 2459900,
+      "shell_pid_created_at": "1788535195.17",
+      "subtasks": {
+        "T001": "done",
+        "T002": "done",
+        "T003": "done",
+        "T004": "done"
+      }
+    },
+    "WP02": {
+      "actor": "merge",
+      "agent": "codex",
+      "agent_profile": "reviewer-renata",
+      "agent_profile_version": "1.0",
+      "force_count": 2,
+      "lane": "done",
+      "last_event_id": "01M1VQTM2CDRT6GYDZDQWQNSG0",
+      "last_transition_at": "2026-09-06T16:11:36.396175+00:00",
+      "model": "__resolved_model_absent__",
+      "notes": [
+        "Ready for review at 9ff19a006a5324da2fd1e68e6b6636f39ef8eb71, based on WP01 60a72eb8b97d69159ea3b67b18e506be9ecc9992. Scope is exactly the six WP02-owned files. Initial red: focused evidence-chain browser target exited 1 on missing local module before production existed. Required reversal matrix: repeat key to index, sk-metric to div, absent optionals invalid, ol/li to divs, forced-colors connector rule removed, and connector part removed each made its named target exit 1; each exact restoration reran the same target exit 0. Final focused browser gate: sk-metric 7 plus sk-evidence-chain 9, 16/16 passed. CSS generation and --check, elements:typecheck, elements:lint, quality:stylelint, git diff --check, and cached diff check passed. Lint emitted only 7 pre-existing warnings in form-control-base.ts and transition-matrix/sk-transition-matrix.ts, none in owned files. Code-review checklist context was queried; charter reports no authored checklist. No axe, visual, full-repository, mutation, push, or PR action was run. Lane clean after focused commit.",
+        "Review passed at exact WP02 lane head 9ff19a006a5324da2fd1e68e6b6636f39ef8eb71 on approved WP01 parent 60a72eb8b97d69159ea3b67b18e506be9ecc9992. Isolation PASS: WP02 is one focused commit changing exactly its six owned evidence-chain files; WP01 sources are unchanged. Contract PASS: stages is the sole property-only field with frozen empty default and inline readonly structural type; validation is whole-input/fail-closed; consumer array, records, bytes, order, and stable ID-keyed node identity are preserved; one real sk-metric is composed per direct native ol/li stage; connector count is n-1 and connectors are empty/aria-hidden; exact four parts and named constructed sheet are verified; CSS is token-driven, BEM, responsive at the established breakpoint, theme-varying, and has scoped CanvasText forced-colors treatment without forced-color-adjust:none. Stories PASS: exact 9/9 exports, bounded Narrow, equivalent sk-light, and ApprovedExample uses real sk-card/sk-grid plus the exact approved literals; nested pill composition follows the reviewed real metric. Reversal evidence PASS: all six named production-source red/green reversals and exit 1/0 restorations are recorded and mutation-sensitive by inspection. Gates PASS: CSS generation/check 17 components; Chromium Vitest 16/16; elements typecheck; uncached elements lint 0 errors with 7 pre-existing out-of-scope warnings; stylelint; working/cached diff checks. WP anti-pattern checklist: dead code PASS; synthetic-fixture test PASS; silent empty return PASS (intentional caught validation returns the specified fail-closed state); FR coverage PASS; frozen surface PASS; locked decision PASS; shared-file ownership PASS; production fragility PASS. Approval is WP02-only and grants no PR, push, merge, close, publish, deploy, or WP03 authority.",
+        "Focused fixture remediation at 9eeb830b, provenance recorded at ee311a0, and updated approved WP01 dependency propagated by Spec Kitty at b266506.",
+        "APPROVED: independent Codex review found no blockers; one owned fixture, unchanged 9 tests/66 assertions and production bytes, supported WP01 dependency merge, focused lint/type/browser/CSS/commit/diff gates green.",
+        "ApprovedExample annotation correction ready for independent review at 60700a14; prior approved dependency/remediation history preserved.",
+        "APPROVED: exact one-file/four-annotation delta; approved literals exact, labels/values/tones/order and real grid/card/chain nesting unchanged; lint/type/Storybook/commit/diff checks green."
+      ],
+      "provider": "__resolved_provider_absent__",
+      "review": null,
+      "review_result": {
+        "feedback_path": "/home/jeroennouws/dev/team-kitty-missions/design-147/kitty-specs/delivery-return-metric-elements-01M1STPA/tasks/WP02-ordered-evidence-chain-composition/review-cycle-5.md",
+        "reference": "review-cycle://delivery-return-metric-elements-01M1STPA/WP02-ordered-evidence-chain-composition/review-cycle-5.md",
+        "reviewer": "codex",
+        "verdict": "approved"
+      },
+      "role": "reviewer",
+      "shell_pid": 2459900,
+      "shell_pid_created_at": "1788535195.17",
+      "subtasks": {
+        "T005": "done",
+        "T006": "done",
+        "T007": "done",
+        "T008": "done"
+      }
+    },
+    "WP03": {
+      "actor": "merge",
+      "agent": "codex",
+      "agent_profile": "reviewer-renata",
+      "agent_profile_version": "1.0",
+      "force_count": 3,
+      "lane": "done",
+      "last_event_id": "01M1VQTMNAK5EP1D2DECF3DTN2",
+      "last_transition_at": "2026-09-06T16:11:37.002473+00:00",
+      "model": "__resolved_model_absent__",
+      "notes": [
+        "Exact-head closeout at 275f14ff: train stable 32fa495; 371/371 tests; 132/132 mutations; Storybook 7.28s/180s; axe 244/244 zero; Chromium 12/12; Firefox 11 pass/1 intentional forced-colors skip; local visual qualified 2/30 with 28 host/missing-baseline diagnostics and no retained bytes.",
+        "APPROVED: all five prior findings closed; independent Codex review found no blockers. Exact-head: 371/371 tests, 132/132 mutations, Storybook 7.28s/180s, axe 244/244 zero, Chromium 12/12, Firefox 11 applicable pass; local visuals honestly qualified pending CI authority."
+      ],
+      "provider": "__resolved_provider_absent__",
+      "review": null,
+      "review_result": {
+        "feedback_path": "/home/jeroennouws/dev/team-kitty-missions/design-147/kitty-specs/delivery-return-metric-elements-01M1STPA/tasks/WP03-public-surfaces-and-verification-closure/review-cycle-4.md",
+        "reference": "review-cycle://delivery-return-metric-elements-01M1STPA/WP03-public-surfaces-and-verification-closure/review-cycle-4.md",
+        "reviewer": "codex",
+        "verdict": "approved"
+      },
+      "role": "reviewer",
+      "shell_pid": 2459900,
+      "shell_pid_created_at": "1788535195.17",
+      "subtasks": {
+        "T009": "done",
+        "T010": "done",
+        "T011": "done",
+        "T012": "done",
+        "T013": "done"
+      }
+    }
+  }
+}

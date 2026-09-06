@@ -15,7 +15,9 @@ import * as React from 'react';
 import {
   SkActionRow,
   SkCard,
+  SkEvidenceChain,
   SkFormInput,
+  SkMetric,
   SkNavPill,
   SkTransitionMatrix,
   type ActionRowActivateDetail,
@@ -23,7 +25,11 @@ import {
   type SkFormInputElement,
   type TransitionMatrixSelectDetail,
 } from '../src/index.js';
-import type { StatusIndicatorTone, TransitionMatrixProperties } from '@spec-kitty/elements';
+import type {
+  EvidenceStage,
+  StatusIndicatorTone,
+  TransitionMatrixProperties,
+} from '@spec-kitty/elements';
 
 // --- props are typed, and inherited ones are present -----------------------------------
 // value/label/required are inheritedFrom FormControlBase with privacy public. FR-004 said for
@@ -196,3 +202,39 @@ const everyTone: readonly NonNullable<SkCardProps['status']>[] = [
   'recovery',
 ] satisfies readonly StatusIndicatorTone[];
 void everyTone;
+
+// --- metric and evidence chain -----------------------------------------------------------
+export const metricAllProps = (
+  <SkMetric
+    label="Items processed"
+    displayValue="128"
+    annotation="Within range"
+    tone="success"
+    compact
+  />
+);
+
+// @ts-expect-error metric tones are the generic four-value presentation union
+export const metricInvalidTone = <SkMetric label="Items processed" displayValue="128" tone="warning" />;
+
+// @ts-expect-error displayValue is opaque display text, never a number
+export const metricInvalidValue = <SkMetric label="Items processed" displayValue={128} />;
+
+const evidenceStages = Object.freeze([
+  Object.freeze({ id: 'received', label: 'Items received', displayValue: '128', tone: 'info' as const }),
+  Object.freeze({ id: 'reviewed', label: 'Items reviewed', displayValue: '91%' }),
+]) satisfies ReadonlyArray<EvidenceStage>;
+
+export const evidenceChainStages = <SkEvidenceChain stages={evidenceStages} />;
+
+const invalidEvidenceTone = Object.freeze([
+  Object.freeze({ id: 'bad-tone', label: 'Bad tone', displayValue: '1', tone: 'warning' as const }),
+]);
+// @ts-expect-error evidence tones use the same generic four-value presentation union
+export const evidenceChainInvalidTone = <SkEvidenceChain stages={invalidEvidenceTone} />;
+
+const malformedEvidenceStages = Object.freeze([
+  Object.freeze({ id: 'missing-value', label: 'Missing value' }),
+]);
+// @ts-expect-error every stage requires opaque displayValue text
+export const evidenceChainMalformedStage = <SkEvidenceChain stages={malformedEvidenceStages} />;

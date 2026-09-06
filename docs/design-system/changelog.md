@@ -66,6 +66,11 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) conve
 
 ### Added
 
+- Added `sk-metric` and `sk-evidence-chain` as generic presentation primitives (#147). A metric
+  preserves consumer-supplied labels and opaque display values in a native definition relationship;
+  an evidence chain preserves consumer-owned stage order in a native ordered list and composes real
+  metrics. Neither tag imports consumer application data, computes business values, or owns
+  application state.
 - Added the slot-driven `sk-app-shell`, `sk-personal-rail`, `sk-context-sidebar`, and
   `sk-page-header` elements for generic application-shell geometry, labelled navigation and
   complementary landmarks, and consumer-owned page orientation. The elements expose no route,

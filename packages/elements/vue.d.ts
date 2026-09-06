@@ -136,6 +136,24 @@ declare module 'vue' {
       'label'?: string | undefined;
     }>;
     /**
+     * An ordered chain of generic evidence stages composed from real `sk-metric` elements.
+     *
+     * The consumer owns stage order, identity, display formatting, and domain meaning. Valid supplied
+     * strings and object references are preserved; invalid whole inputs fail closed.
+     *
+     * Token dependencies: --sk-border-strong, --sk-border-width-1, --sk-border-width-2,
+     * --sk-fg-muted, --sk-fg-subtle, --sk-font-mono, --sk-font-sans, --sk-space-1,
+     * --sk-space-2, --sk-space-3, --sk-space-4, --sk-space-10, --sk-text-sm,
+     * --sk-text-xs.
+     */
+    'sk-evidence-chain': SkElement<{
+      /**
+       * Ordered consumer-supplied stages, assigned as a JavaScript property. Assign a new array
+       * reference after changing the collection. Defaults to a frozen empty array.
+       */
+      'stages'?: import('@spec-kitty/elements/dist/evidence-chain/sk-evidence-chain.js').SkEvidenceChain["stages"];
+    }>;
+    /**
      * A feature card: an accented icon chip above a title and a short body.
      *
      * The icon, title and body are all slotted, because they are the consuming page's content. The
@@ -283,6 +301,44 @@ declare module 'vue' {
        * value renders the base grid and warns rather than throwing.
        */
       'variant'?: 'cols-2' | 'cols-3' | 'cols-4' | undefined;
+    }>;
+    /**
+     * A generic supplied label and opaque display value with optional supporting annotation.
+     *
+     * The consumer owns all formatting and domain meaning. This element preserves valid strings
+     * exactly and contributes a native definition relationship, not a section heading.
+     *
+     * Token dependencies: --sk-fg-default, --sk-fg-muted, --sk-font-mono, --sk-font-sans,
+     * --sk-on-tint-butter, --sk-on-tint-mint, --sk-on-tint-sky, --sk-space-1,
+     * --sk-space-2, --sk-space-3, --sk-space-4, --sk-text-2xl, --sk-text-sm,
+     * --sk-text-xs, --sk-text-xl, --sk-weight-bold, --sk-weight-medium.
+     */
+    'sk-metric': SkElement<{
+      /**
+       * Optional supporting text, preserved exactly. Defaults to `''`; the annotation container is
+       * omitted when this is empty.
+       */
+      'annotation'?: string;
+      /**
+       * Uses compact visual density when true, without changing content or semantics. Defaults to
+       * `false`.
+       */
+      'compact'?: boolean;
+      /**
+       * Required opaque, preformatted display text, preserved exactly. Defaults to `''`; the
+       * element never parses or rewrites it.
+       */
+      'display-value'?: string;
+      /**
+       * Required consumer-supplied label, preserved exactly. Defaults to `''`; blank values render
+       * the unavailable state.
+       */
+      'label'?: string;
+      /**
+       * Generic presentation tone: `neutral` (the default), `info`, `success`, or `attention`.
+       * Unsupported runtime values render the unavailable state.
+       */
+      'tone'?: 'neutral' | 'info' | 'success' | 'attention';
     }>;
     /** The navigation pill — a row of links that collapses to a hamburger and a panel. */
     'sk-nav-pill': SkElement<{

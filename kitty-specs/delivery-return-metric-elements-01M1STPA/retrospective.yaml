@@ -1,0 +1,175 @@
+schema_version: 1
+mission_id: 01M1STPA8ADF29D87STZ3CWZK1
+mission_slug: delivery-return-metric-elements-01M1STPA
+mission_number: 8
+friendly_name: delivery return metric elements
+mission_type: software-dev
+target_branch: mission/delivery-return-metric-elements
+created_at: '2026-09-06T16:11:38.355779+00:00'
+created_by:
+  kind: runtime
+  id: spec-kitty-generator
+  display: Spec Kitty Generator
+provenance:
+  kind: runtime_post_completion
+  invoked_at: '2026-09-06T16:11:38.355779+00:00'
+  policy_resolved_from:
+    enabled: <default>
+    timing: <default>
+    failure_policy: <default>
+    write_record: <default>
+    generate_proposals: <default>
+    apply_proposals: <default>
+    permissions.write_record: <default>
+    permissions.inspect_mission_artifacts: <default>
+    permissions.propose_glossary_changes: <default>
+    permissions.propose_drg_changes: <default>
+    permissions.propose_doctrine_changes: <default>
+    permissions.apply_low_risk_changes: <default>
+    permissions.apply_structural_changes: <default>
+    precedence: <default>
+    generator: <default>
+policy_source:
+  enabled: <default>
+  timing: <default>
+  failure_policy: <default>
+  write_record: <default>
+  generate_proposals: <default>
+  apply_proposals: <default>
+  permissions.write_record: <default>
+  permissions.inspect_mission_artifacts: <default>
+  permissions.propose_glossary_changes: <default>
+  permissions.propose_drg_changes: <default>
+  permissions.propose_doctrine_changes: <default>
+  permissions.apply_low_risk_changes: <default>
+  permissions.apply_structural_changes: <default>
+  precedence: <default>
+  generator: <default>
+findings_status: has_findings
+helped:
+- id: h-001
+  category: implementation
+  summary: WP01 completed without rejection cycles
+  evidence_refs:
+  - e-008
+- id: h-002
+  category: implementation
+  summary: WP02 completed without rejection cycles
+  evidence_refs:
+  - e-008
+not_helpful:
+- id: n-008
+  category: doc
+  summary: analysis-report.md present with findings
+  evidence_refs:
+  - e-016
+  details: An analysis-report.md artifact is present for this mission. Review its findings to understand documented
+    issues and decisions.
+- id: n-005
+  category: implementation
+  summary: WP01 needed 2 implementation cycles
+  evidence_refs:
+  - e-013
+  details: WP WP01 entered in_progress 2 times. Multiple implementation cycles suggest rework not captured as a
+    documented review rejection; the WP scope or contract may need refinement.
+- id: n-006
+  category: implementation
+  summary: WP02 needed 3 implementation cycles
+  evidence_refs:
+  - e-014
+  details: WP WP02 entered in_progress 3 times. Multiple implementation cycles suggest rework not captured as a
+    documented review rejection; the WP scope or contract may need refinement.
+- id: n-007
+  category: implementation
+  summary: WP03 needed 3 implementation cycles
+  evidence_refs:
+  - e-015
+  details: WP WP03 entered in_progress 3 times. Multiple implementation cycles suggest rework not captured as a
+    documented review rejection; the WP scope or contract may need refinement.
+- id: n-002
+  category: process
+  summary: WP01 required 3 --force override(s) during workflow
+  evidence_refs:
+  - e-010
+  details: WP WP01 required 3 operator-driven --force lane transition(s). Force overrides typically indicate the runtime
+    guard failed or the operator routed around it; investigate the underlying cause.
+- id: n-003
+  category: process
+  summary: WP02 required 2 --force override(s) during workflow
+  evidence_refs:
+  - e-011
+  details: WP WP02 required 2 operator-driven --force lane transition(s). Force overrides typically indicate the runtime
+    guard failed or the operator routed around it; investigate the underlying cause.
+- id: n-001
+  category: process
+  summary: WP03 had 2 lane bounce(s) before approval
+  evidence_refs:
+  - e-009
+  details: WP WP03 moved backward across workflow lanes 2 time(s) outside the documented reviewer-feedback flow.
+- id: n-004
+  category: process
+  summary: WP03 required 3 --force override(s) during workflow
+  evidence_refs:
+  - e-012
+  details: WP WP03 required 3 operator-driven --force lane transition(s). Force overrides typically indicate the runtime
+    guard failed or the operator routed around it; investigate the underlying cause.
+gaps: []
+proposals: []
+evidence_refs:
+- id: e-001
+  kind: file
+  path: kitty-specs/delivery-return-metric-elements-01M1STPA/meta.json
+- id: e-002
+  kind: file
+  path: kitty-specs/delivery-return-metric-elements-01M1STPA/spec.md
+- id: e-003
+  kind: file
+  path: kitty-specs/delivery-return-metric-elements-01M1STPA/plan.md
+- id: e-004
+  kind: file
+  path: kitty-specs/delivery-return-metric-elements-01M1STPA/tasks.md
+- id: e-005
+  kind: file
+  path: kitty-specs/delivery-return-metric-elements-01M1STPA/tasks/WP01-generic-metric-element.md
+- id: e-006
+  kind: file
+  path: kitty-specs/delivery-return-metric-elements-01M1STPA/tasks/WP02-ordered-evidence-chain-composition.md
+- id: e-007
+  kind: file
+  path: kitty-specs/delivery-return-metric-elements-01M1STPA/tasks/WP03-public-surfaces-and-verification-closure.md
+- id: e-008
+  kind: file
+  path: kitty-specs/delivery-return-metric-elements-01M1STPA/status.events.jsonl
+- id: e-009
+  kind: event_range
+  path: kitty-specs/delivery-return-metric-elements-01M1STPA/status.events.jsonl
+  range: 01M1VM5JG1G5MMWD9CF999Y9VV..01M1VP57P1EABEGF0WEM9X13V0
+- id: e-010
+  kind: event_range
+  path: kitty-specs/delivery-return-metric-elements-01M1STPA/status.events.jsonl
+  range: 01M1VM6BD4RSSX6T6J26HTAKBY..01M1VMKHVN6STS7ECDBRVXE6YF
+- id: e-011
+  kind: event_range
+  path: kitty-specs/delivery-return-metric-elements-01M1STPA/status.events.jsonl
+  range: 01M1VMM2WXKNRY51VRF86HANYP..01M1VP5X5QD5HCR87P0A2JBAVD
+- id: e-012
+  kind: event_range
+  path: kitty-specs/delivery-return-metric-elements-01M1STPA/status.events.jsonl
+  range: 01M1VJHFFDB2K3X9WBWNMQ6G60..01M1VP57P1EABEGF0WEM9X13V0
+- id: e-013
+  kind: event_range
+  path: kitty-specs/delivery-return-metric-elements-01M1STPA/status.events.jsonl
+  range: implementation_cycles
+- id: e-014
+  kind: event_range
+  path: kitty-specs/delivery-return-metric-elements-01M1STPA/status.events.jsonl
+  range: implementation_cycles
+- id: e-015
+  kind: event_range
+  path: kitty-specs/delivery-return-metric-elements-01M1STPA/status.events.jsonl
+  range: implementation_cycles
+- id: e-016
+  kind: file
+  path: kitty-specs/delivery-return-metric-elements-01M1STPA/analysis-report.md
+generator_version: '1.0'
+provenance_history: []

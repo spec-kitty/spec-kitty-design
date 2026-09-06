@@ -1,0 +1,101 @@
+{
+  "rows": {
+    "#144": {
+      "evidence_ref": "Parent Team overview epic; #147 implements only metric/evidence-chain elements and preserves the epic state until all sibling missions land.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "deferred-with-followup",
+      "wp": "mission-wrap-up"
+    },
+    "#145": {
+      "evidence_ref": "#145 landed through PR #195 at train commit ff380ec7157ec59800e9e7a76cce8952f3567a95; #147 consumed it without modifying or closing it.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "verified-already-fixed",
+      "wp": "WP03"
+    },
+    "#146": {
+      "evidence_ref": "#146 landed through PR #206 at train commit 32fa4950b88941f9a78759e3e911dfa510d10a13; #147 consumed it without modifying or closing it.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "verified-already-fixed",
+      "wp": "WP03"
+    },
+    "#147": {
+      "evidence_ref": "Current mission; WP01-WP03 are done and approved. The acceptance matrix materializes all 30 criteria: 27 pass, while NFR-005, NFR-006, and C-008 remain deliberately pending for exact-head CI/review/maintainer and post-train-merge closure through the out-of-band evidence seam. Authored product and executable test source tip is a7147f9373a831fadb63b71177d17a6511689d68; later commits add nine CI-derived visual baselines, refresh generated SIZES.md, and update governance metadata.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "in-mission",
+      "wp": "mission-wrap-up"
+    },
+    "#148": {
+      "evidence_ref": "Sibling bar-chart mission proceeds independently and is outside #147 authored scope.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "deferred-with-followup",
+      "wp": "mission-wrap-up"
+    },
+    "#149": {
+      "evidence_ref": "#149 landed through PR #171 at train commit 8e654e858c7e09acf48ddafdd99a5349fae92d87.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "verified-already-fixed",
+      "wp": "mission-wrap-up"
+    },
+    "#150": {
+      "evidence_ref": "Final pattern composition remains blocked on #147 and #148 landing; #145, #146, and #149 are already on train. #150 is not implemented by #147.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "deferred-with-followup",
+      "wp": "mission-wrap-up"
+    },
+    "#79": {
+      "evidence_ref": "#79 landed all three component migrations through PR #140 at train commit 70742b8436ca89e09cb6e0416c0830f4bded3289; #147 reuses those primitives without modifying their contracts.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "verified-already-fixed",
+      "wp": "mission-wrap-up"
+    }
+  },
+  "schema_version": 1
+}

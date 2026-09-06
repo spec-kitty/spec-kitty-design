@@ -33,6 +33,8 @@
     "#146 WP02 adds SEVEN sk-action-row arms: duplicate dispatch, wrong detail, false bubbling/composed flags, pre-upgrade rowId registration loss, one non-root part removal, empty styles, and fresh-sheet identity. There is no cancellation arm because SC-009 is inapplicable.",
     "#146 WP03 adds ONE generated react-action-row arm that removes the wrapper listener inside the harness copy. The four element subjects contribute 18 mission arms and this wrapper contributes the nineteenth.",
     "#177 adds TWO for <sk-card>, one per id it now claims, and both mutate the ELEMENT rather than the test. The SC-013 arm replaces the status fail-open branch with a THROW — the exact regression sk-card.markup.ts records at length, and the only mutation in this file whose red is the ABSENCE of a part rather than a wrong value: Lit rejects updateComplete, render() returns no tree, and `[part=\"card\"]` is not in the shadow root to target. That is why the [SC-013] test mounts BOTH a plain and an unknown-status card; with only the plain one it would have stayed green through the throw, which is the certifying-absence class this harness exists to catch. The SC-010 arm flips reflect on `status`: the named test asserts the pre-upgrade value reaches the ATTRIBUTE, so an unreflected status is an axis that does nothing outside the shadow root, and no static consumer or CSS author can see it. NO ARM FOR THE VOCABULARY ASSERTION, deliberately: guard 7 keys on a declared (id, subject) pair and guard 4 requires the red test to carry an [SC-NNN] marker, and there is no ADR-11 id for 'two components share one enum'. Binding it to SC-013 or SC-010 would mislabel it and minting an id would extend ADR-11's behaviour set, which #67 owns. The coverage is real either way \u2014 the test compares Object.keys(CARD_STATUSES) to STATUS_TONES by value and order \u2014 it is simply held by a test rather than by the harness. Fourth time this programme has reached that boundary (#140, #143, #77, here); the answer has been the same each time."
+    ,
+    "#147 WP03 adds exactly two SC-013 arms, one per newly recorded subject. Each removes a non-root part from the authored element inside the harness copy and must red the existing all-parts fixture assertion without creating a new behaviour id or SC-014 pair. On the refreshed train after #177, total mutations move 132 -> 134."
   ],
   "mutations": [
     {
@@ -1090,6 +1092,22 @@
       "file": "packages/react/src/SkActionRow.js",
       "from": "  useEventListener(ref, \"sk-action-row-activate\", props.onSkActionRowActivate);",
       "to": "  void props.onSkActionRowActivate;"
+    },
+    {
+      "id": "SC-013",
+      "subject": "fixtures/elements-behaviour/src/sk-metric.test.ts",
+      "arm": "metric annotation part remains targetable",
+      "file": "packages/elements/src/metric/sk-metric.ts",
+      "from": "<span part=\"annotation\" class=\"sk-metric__annotation\">",
+      "to": "<span class=\"sk-metric__annotation\">"
+    },
+    {
+      "id": "SC-013",
+      "subject": "fixtures/elements-behaviour/src/sk-evidence-chain.test.ts",
+      "arm": "evidence-chain connector part remains targetable",
+      "file": "packages/elements/src/evidence-chain/sk-evidence-chain.ts",
+      "from": "                part=\"connector\"",
+      "to": "                data-part=\"connector\""
     }
   ]
 }
