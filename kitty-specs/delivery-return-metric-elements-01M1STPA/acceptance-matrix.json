@@ -178,10 +178,10 @@
       "criterion_id": "NFR-002",
       "description": "Dark and LightMode stories match the approved Team overview hierarchy, density, tabular values, connectors, and narrow reflow, with computed token-driven theme variance for both tags.",
       "proof_type": "manual_review",
-      "evidence": "Nine approved Chromium baselines are byte-identical to CI artifact 9994495985 from run 34050764362; exact-head visual regression at b92d8cc passed, and independent review approved dark, light, narrow, two-, four-, and six-stage fidelity with computed theme variance.",
+      "evidence": "Nine approved Chromium baselines are byte-identical to CI artifact 9994495985 from run 34050764362; pre-remediation product-equivalent head b92d8cc passed visual regression, and subsequent commits change only governed mission metadata. Independent review approved dark, light, narrow, two-, four-, and six-stage fidelity with computed theme variance; final exact-head CI is recorded through NFR-005's external seam.",
       "pass_fail": "pass",
       "verified_by": "codex",
-      "verified_at": "2026-09-06T19:06:23.818919+00:00",
+      "verified_at": "2026-09-06T19:08:04.663135+00:00",
       "notes": "CI-authoritative baseline provenance, exact-head visual regression, and independent visual review."
     },
     {
