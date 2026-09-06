@@ -31,9 +31,9 @@ findings: []
 
 ## WP03 implementation consistency analysis
 
-Analyzed implementation lane SHA: `3dd920dd33f3759a71748d7730cedf47fcb728c8`.
+Analyzed implementation lane SHA: `7affad014be51c26c7e758055d656f38a8bd91d6`.
 
-Final-gate harness remediation SHA: `f9c766ccca2a1a3fe5a29352d7f2fc8a79749057`.
+Final-gate harness remediation SHA: `3de47f774f1d809f918e07a850f19ec4c3fd69e4`.
 
 Verdict hint: **READY FOR INDEPENDENT WP03 REVIEW; EXTERNAL MISSION WRAP-UP REMAINS PENDING**.
 
@@ -52,7 +52,7 @@ failure: `--browser.api.port=0` is normalized by Vitest 4.1.11 to its fixed defa
 the accompanying strict-port flag made serialized subprocesses contend with another browser gate or
 an incompletely closed predecessor. The old stdout parser also discarded a valid JSON report when
 teardown hung or stdout contained other braces, and its process-group assertion did not cover
-Playwright's separately detached Chromium group. Remediation `f9c766c` removes that fixed-port
+Playwright's separately detached Chromium group. Remediation `3de47f7` removes that fixed-port
 coupling, captures each report through Vitest's supported per-run `--outputFile`, records structured
 unhandled runner errors, requires report/exit consistency, isolates runtime profiles and transform
 caches, and uses a unique inherited token plus `/proc` start-time validation to contain detached
