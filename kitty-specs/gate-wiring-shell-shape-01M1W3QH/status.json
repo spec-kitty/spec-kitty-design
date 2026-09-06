@@ -1,7 +1,7 @@
 {
-  "event_count": 2,
-  "last_event_id": "01M1W42J4QZJN5JC8BH1V229VB",
-  "materialized_at": "2026-09-06T19:45:39.479618+00:00",
+  "event_count": 3,
+  "last_event_id": "01M1W42J6ARPZ4M9KYTA5NSAV1",
+  "materialized_at": "2026-09-06T19:45:39.530378+00:00",
   "mission_number": "",
   "mission_slug": "gate-wiring-shell-shape-01M1W3QH",
   "mission_type": "software-dev",
@@ -14,7 +14,7 @@
     "for_review": 0,
     "in_progress": 0,
     "in_review": 0,
-    "planned": 2
+    "planned": 3
   },
   "work_packages": {
     "WP01": {
@@ -30,6 +30,13 @@
       "lane": "planned",
       "last_event_id": "01M1W42J4QZJN5JC8BH1V229VB",
       "last_transition_at": "2026-09-06T19:45:39.479618+00:00"
+    },
+    "WP03": {
+      "actor": "finalize-tasks",
+      "force_count": 0,
+      "lane": "planned",
+      "last_event_id": "01M1W42J6ARPZ4M9KYTA5NSAV1",
+      "last_transition_at": "2026-09-06T19:45:39.530378+00:00"
     }
   }
 }
