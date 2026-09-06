@@ -363,10 +363,10 @@
       "criterion_id": "NFR-002",
       "description": "Pointer, Enter, and Space each emit exactly one byte-equivalent { id } record with bubbling and composed true and cancelable false for the same datum; repeat emits zero extra events.",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "Chromium and Firefox real-input tests prove pointer/Enter/Space byte-equivalent { id }, bubbles/composed true, cancelable false, and zero held-key repeats",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T21:30:47.212649+00:00",
       "notes": "Real-input event parity and repeat assertions.",
       "lane_owners": [
         "WP01"
