@@ -139,6 +139,21 @@
   --sk-layout-personal-rail-width: 3.5rem;  /* 56px */
   --sk-layout-context-sidebar-width: 15rem; /* 240px */
 
+  /* sk-page-header sticky geometry (#182). The offset is what the header pins itself
+     at inside whatever scroll region the shell gives it; a consumer whose shell has its
+     own fixed chrome above the header raises it. The compact height is the header's
+     declared minimum block size at density="compact", which is a single-row form.
+     The scroll-margin token is DERIVED from those two rather than restated, so the
+     value a consumer puts on their own focusable content cannot drift from the
+     header's footprint when either input is retuned (WCAG 2.4.11). */
+  --sk-layout-page-header-sticky-offset: 0rem;
+  --sk-layout-page-header-compact-height: 3rem;   /* 48px */
+  --sk-layout-page-header-sticky-layer: 10;
+  --sk-layout-page-header-sticky-scroll-margin:
+    calc(var(--sk-layout-page-header-sticky-offset) +
+         var(--sk-layout-page-header-compact-height) +
+         var(--sk-space-4));
+
   /* ── Radius ──────────────────────── */
   --sk-radius-sm:   0.5rem;    /*  8px — chips, eyebrow pills */
   --sk-radius-md:   0.75rem;   /* 12px — form inputs */
@@ -231,6 +246,13 @@
   /* Layout geometry is theme-invariant. */
   --sk-layout-personal-rail-width: 3.5rem;
   --sk-layout-context-sidebar-width: 15rem;
+  --sk-layout-page-header-sticky-offset: 0rem;
+  --sk-layout-page-header-compact-height: 3rem;
+  --sk-layout-page-header-sticky-layer: 10;
+  --sk-layout-page-header-sticky-scroll-margin:
+    calc(var(--sk-layout-page-header-sticky-offset) +
+         var(--sk-layout-page-header-compact-height) +
+         var(--sk-space-4));
 
   /* Surface scale — cream page, white cards */
   --sk-surface-page:        #F8F5EC;   /* warm cream — page background */
