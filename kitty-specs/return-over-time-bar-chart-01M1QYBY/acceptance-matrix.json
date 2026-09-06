@@ -502,10 +502,10 @@
       "criterion_id": "C-002",
       "description": "No second series, deployment annotation, tooltip-only meaning, or public Team Kitty overview element is introduced.",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "public API, story, and forbidden-content checks prove one numeric series only and no deployment annotation, tooltip-only meaning, or Team Kitty overview element",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T21:30:58.498823+00:00",
       "notes": "Public API and forbidden-source/content checks.",
       "lane_owners": [
         "WP01"
