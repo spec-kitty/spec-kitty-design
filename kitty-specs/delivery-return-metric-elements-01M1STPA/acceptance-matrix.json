@@ -98,10 +98,10 @@
       "criterion_id": "FR-010",
       "description": "Stages form one native ordered list with direct list items while connectors add no accessible item or spoken content.",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "sk-evidence-chain.ts:102-124 and sk-evidence-chain.test.ts:203-226; native ol direct li and decorative connectors passed",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T16:48:41.600967+00:00",
       "notes": "WP02 same-root semantics assertions plus WP03 axe and functional browser proof."
     },
     {
