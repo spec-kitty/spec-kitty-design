@@ -122,7 +122,7 @@ Remaining, all short: enable 2FA on the org; issue a granular publish token scop
 
 ADRs 8, 9, 10, 11, 12 and 13 are written and committed on the train. What remains: execute ADR-12's diagram corrections (which need O7 first).
 
-**Residual:** the canonical-markup ruling in ADR-10 §3 is recommended, not ratified. Downstream missions may proceed on it; it is ratified when ADR-10 moves to Accepted.
+**Ratified:** ADR-10's Status is `Accepted (ratified by the operator, 2026-09-02)`, and its Deciders line records that the canonical-markup ruling in §3 was ratified by the operator on 2026-09-02. Downstream missions build on it as a settled ruling.
 
 ---
 
