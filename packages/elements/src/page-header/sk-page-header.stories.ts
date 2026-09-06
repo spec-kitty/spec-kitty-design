@@ -111,8 +111,8 @@ const longBody = (rows = 40) => `
       </p>`).join('')}
   </div>`;
 
-const scroller = (content: string, height = '100vh', className = '') => `
-  <div data-scroller${className ? ` class="${className}"` : ''} style="${storyFrameStyle}; min-height: 0; height: ${height}; overflow: auto">
+const scroller = (content: string, height = '100vh', className = '', extraStyle = '') => `
+  <div data-scroller${className ? ` class="${className}"` : ''} style="${storyFrameStyle}; min-height: 0; height: ${height}; overflow: auto${extraStyle ? `; ${extraStyle}` : ''}">
     ${content}
   </div>`;
 
@@ -157,6 +157,33 @@ export const CompactSticky: Story = {
     },
   },
   render: () => scroller(`${header('density="compact" sticky')}${longBody()}`),
+};
+
+export const DefaultSticky: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'A sticky header at the DEFAULT density — supported, because the two axes are ' +
+          'orthogonal. Its height is entirely the consumer\'s slotted content, so the derived ' +
+          'default of `--sk-layout-page-header-sticky-scroll-margin` (64px, sized for the ' +
+          'compact single row) does not cover it. The scroll container below therefore sets the ' +
+          'token to this consumer\'s own measured figure, which is the documented remedy — the ' +
+          'token name stays the one place the value lives. Remove that override and a focused ' +
+          'row lands behind the header.',
+      },
+    },
+  },
+  render: () =>
+    scroller(
+      `${header('sticky')}${longBody()}`,
+      '100vh',
+      '',
+      // The consumer's own figure for THIS composition, rounded up from a measured ~227px.
+      // There is no derived token for default density: the height is the consumer's content,
+      // so publishing a number would be a guess wearing a token's name.
+      '--sk-layout-page-header-sticky-scroll-margin: 18rem',
+    ),
 };
 
 export const NarrowReflow: Story = {

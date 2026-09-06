@@ -41,8 +41,27 @@ function pageHeaderClasses(density?: string): string {
  * Consumers styling their own content under a sticky header should set
  * `scroll-margin-block-start: var(--sk-layout-page-header-sticky-scroll-margin)` on the
  * focusable elements in it, so a focused element scrolled into view is not obscured by the
- * header (WCAG 2.4.11). That token is derived from the header's own sticky offset and compact
- * block size rather than restated, so it cannot drift from the header's footprint.
+ * header (WCAG 2.4.11).
+ *
+ * That token's DEFAULT VALUE covers ONE configuration: `density="compact"` laid out on a single
+ * row, which is the header wider than 720px. It is derived from the header's own sticky offset
+ * and compact block size rather than restated, so within that configuration it cannot drift.
+ * Outside it the header is taller than the default and the consumer overrides the token — the
+ * name stays the single place the value lives, which is the part of the contract that matters.
+ * Two cases need the override, and the orthogonality above is why the first exists:
+ *
+ * - **Default density.** `sticky` without `density="compact"` is supported, and its height is
+ *   entirely the consumer's slotted content — measured between 227px and 533px for one
+ *   composition across two widths and two title lengths, against an 80px default. There is no
+ *   honest derived number for it, so there is no second token: the consumer sets the value from
+ *   their own header.
+ * - **A stacked compact header.** Stacking is a CONTAINER query on the header's own width and the
+ *   sticky drop is a MEDIA query on the viewport's, so they are not the same threshold: a 400px
+ *   header column inside a 1400px viewport is sticky AND stacked at once — measured 96px against
+ *   the same 80px default.
+ *
+ * The element does not measure its own live box to close that gap, because observing layout is
+ * the class of behaviour it is deliberately barred from owning.
  *
  * The `sync` slot's contents are rendered verbatim. This element never starts a timer, reads a
  * clock, polls, observes scrolling, or computes a relative age: freshness belongs to the

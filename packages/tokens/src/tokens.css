@@ -145,14 +145,28 @@
      declared minimum block size at density="compact", which is a single-row form.
      The scroll-margin token is DERIVED from those two rather than restated, so the
      value a consumer puts on their own focusable content cannot drift from the
-     header's footprint when either input is retuned (WCAG 2.4.11). */
+     header's footprint when either input is retuned (WCAG 2.4.11).
+
+     THE THIRD TERM IS --sk-space-7 (32px) AND THAT IS MEASURED, NOT PADDING FOR
+     LUCK. --sk-layout-page-header-compact-height is a MIN-block-size, so the
+     header's real height is whatever its slotted content needs above that floor:
+     measured 60px for a plain compact row at 900px, and 71px for this repo's own
+     story, whose sync slot also carries a status pill. The term has to absorb that
+     difference or the published margin is short for the element's own catalogue —
+     it was --sk-space-4 (16px) for exactly one round, which made the default 64px
+     against a 71px header. 32px clears the taller measurement by 9px.
+
+     ITS DEFAULT COVERS THE COMPACT, SINGLE-ROW HEADER ONLY — a default-density header's height
+     is the consumer's own slotted content, and a compact header narrower than
+     720px stacks. Both cases override this token; see
+     docs/design-system/using-components.md, which states the measurements. */
   --sk-layout-page-header-sticky-offset: 0rem;
   --sk-layout-page-header-compact-height: 3rem;   /* 48px */
   --sk-layout-page-header-sticky-layer: 10;
   --sk-layout-page-header-sticky-scroll-margin:
     calc(var(--sk-layout-page-header-sticky-offset) +
          var(--sk-layout-page-header-compact-height) +
-         var(--sk-space-4));
+         var(--sk-space-7));
 
   /* ── Radius ──────────────────────── */
   --sk-radius-sm:   0.5rem;    /*  8px — chips, eyebrow pills */
@@ -252,7 +266,7 @@
   --sk-layout-page-header-sticky-scroll-margin:
     calc(var(--sk-layout-page-header-sticky-offset) +
          var(--sk-layout-page-header-compact-height) +
-         var(--sk-space-4));
+         var(--sk-space-7));
 
   /* Surface scale — cream page, white cards */
   --sk-surface-page:        #F8F5EC;   /* warm cream — page background */
