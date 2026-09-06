@@ -207,20 +207,32 @@ export const Greyscale: Story = {
 };
 
 /**
- * FORCED COLORS, as a documented baseline.
+ * FORCED COLORS — the comparison, not a second copy of AllStatuses.
  *
- * Under `forced-colors: active` every tone collapses to the system surface — `background`
- * flattens to `Canvas`, so the six tints become one ground and the tone is gone. The card
- * therefore does not depend on `background-color`: the EDGE survives, drawn on the longhand
- * `border-inline-start-color` with `CanvasText`, and the widened inline-start step is what is
- * left distinguishing a status card from a plain one.
+ * Under `forced-colors: active` every tone collapses to the system surface: `background`
+ * flattens to `Canvas`, the six tints become one ground, and the tone is gone. What survives is
+ * the 4px `border-inline-start-width` each `.sk-card--status-*` rule sets OUTSIDE any media
+ * query — forced colors remaps colour and leaves width alone.
  *
- * To see it: emulate forced colors (DevTools → Rendering → Emulate CSS media feature
- * forced-colors, or `page.emulateMedia({ forcedColors: 'active' })`). Nothing here sets
- * `forced-color-adjust: none`, which would freeze a value at its authored colour and is
+ * That claim is a COMPARISON, so the story renders the thing it is a comparison against. This
+ * story used to be `render: () => allTones()` — byte-identical to `AllStatuses`, with the base
+ * card nowhere in it — which meant a reader could not see the difference the docstring
+ * described, and no test drove it either (#218). The base card is now first, labelled.
+ *
+ * Asserted, not eyeballed: `apps/storybook/src/tests/elements-load.spec.ts` loads this story
+ * under `page.emulateMedia({ forcedColors: 'active' })` in both colour schemes and requires
+ * every status card's inline-start edge to be strictly wider than the base card's. Nothing here
+ * sets `forced-color-adjust: none`, which would freeze a value at its authored colour and is
  * frequently invisible against the forced-colors background.
  */
-export const ForcedColors: Story = { render: () => allTones() };
+export const ForcedColors: Story = {
+  render: () => grid(`
+    <sk-card data-forced-colors-base>
+      <p>No status. This is the width the six below are measured against.</p>
+    </sk-card>
+    ${TONES.map(toneCard).join('')}
+  `),
+};
 
 /**
  * LightMode is required of every story by CLAUDE.md §3 — and this mission's exit criteria

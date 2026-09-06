@@ -589,6 +589,78 @@ test.describe('sk-action-row browser contract', () => {
   });
 });
 
+/**
+ * #218. `sk-card`'s ForcedColors story emulated nothing, asserted nothing, and rendered bytes
+ * identical to `AllStatuses`. The obligation it was discharging — "a forced-colors story or a
+ * documented baseline" — was met by a docstring, which is exactly the shape this repo keeps
+ * finding and removing.
+ *
+ * The claim worth pinning is the one the tone axis actually rests on: under
+ * `forced-colors: active` the six tints collapse to one system ground and the tone is GONE, so
+ * what still says "this card carries an operational status" has to be something forced colors
+ * does not touch. That is the 4px `border-inline-start-width`, set outside any media query.
+ * `sk-card.css` carried an `@media (forced-colors: active)` block that restated it, plus the
+ * `CanvasText` the UA remap already computes — both no-ops, now removed, with this case standing
+ * in their place.
+ *
+ * Same emulation as the `sk-action-row` case above, and the same both-schemes discipline.
+ */
+const cardStory = async (page: Page, id: string) => {
+  await page.goto(`/iframe.html?id=elements-skcard--${id}&viewMode=story`);
+  const host = page.locator('sk-card').first();
+  await expect(host.locator('[part="card"]')).toBeVisible({ timeout: 20000 });
+};
+
+test.describe('sk-card forced colors', () => {
+  test('keeps the widened status edge when every tone collapses to one ground', async ({ page, browserName }) => {
+    const paint = (locator: Locator) => locator.evaluate((node) => {
+      const card = node.shadowRoot!.querySelector('[part="card"]')!;
+      const style = getComputedStyle(card);
+      return {
+        edge: Number.parseFloat(style.borderInlineStartWidth),
+        edgeStyle: style.borderInlineStartStyle,
+        background: style.backgroundColor,
+      };
+    });
+
+    for (const colorScheme of ['dark', 'light'] as const) {
+      await page.emulateMedia({ forcedColors: 'active', colorScheme });
+      await cardStory(page, 'forced-colors');
+
+      // A FLOOR, not a skip. `emulateMedia({ forcedColors })` is not implemented uniformly across
+      // the three engines this suite runs, so the COLLAPSE half of the claim is only meaningful
+      // where the feature actually engaged. Asserting it unconditionally would red on an engine
+      // that ignores the emulation; skipping the whole case where it does not engage would make
+      // the assertion a green line over zero inputs, which is the defect this spec exists to
+      // refuse. So: the mechanism is asserted everywhere, the collapse only where it applies, and
+      // chromium is REQUIRED to engage — if it ever stops, this case reds rather than going quiet.
+      const engaged = await page.evaluate(() => matchMedia('(forced-colors: active)').matches);
+      if (browserName === 'chromium') {
+        expect(engaged, 'chromium must actually engage forced-colors emulation').toBe(true);
+      }
+
+      const base = await paint(page.locator('sk-card[data-forced-colors-base]'));
+      const toneHosts = await page.locator('sk-card[status]').all();
+      expect(toneHosts.length, 'the story must render every tone beside the base card').toBe(6);
+      const tones = await Promise.all(toneHosts.map((host) => paint(host)));
+
+      for (const tone of tones) {
+        expect(tone.edgeStyle, `${colorScheme}: the status edge must be drawn`).not.toBe('none');
+        expect(tone.edge, `${colorScheme}: the widened inline-start edge is the mechanism, and it must survive`)
+          .toBeGreaterThan(base.edge);
+      }
+
+      if (engaged) {
+        expect(new Set(tones.map((t) => t.background)).size,
+          `${colorScheme}: the six tints must collapse to one system ground`).toBe(1);
+        expect(tones[0]!.background,
+          `${colorScheme}: a status card's ground must be indistinguishable from the base card's`)
+          .toBe(base.background);
+      }
+    }
+  });
+});
+
 test('the section-header action story upgrades the reused sk-button to a native control', async ({ page }) => {
   await page.goto('/iframe.html?id=elements-sksectionheader--with-metadata-and-action&viewMode=story');
   const action = page.locator('sk-section-header sk-button[slot="action"]');

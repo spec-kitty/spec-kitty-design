@@ -180,38 +180,41 @@
   border-color: var(--sk-on-status-recovery);
 }
 
-/* Forced-colors. Under `forced-colors: active` every tone collapses to the
-   system surface: `background` flattens to Canvas and the six tints become one
-   ground, so the tone is gone. The card must therefore not depend on
-   `background-color` to stay distinguishable — the EDGE is what survives.
+/* FORCED COLORS: the WIDTH is the mechanism, and it is set above, unconditionally.
 
-   `border` is remapped to a system color automatically with zero author CSS, so
-   the rule below is not what makes the edge visible; it makes the edge
-   DELIBERATE — CanvasText rather than whatever the automatic remap happens to
-   pick — and it keeps the widened inline-start step, which is the only thing
-   left distinguishing a status card from a plain one in this mode.
+   Under `forced-colors: active` every tone collapses to the system surface —
+   `background` flattens to Canvas and the six tints become one ground, so the
+   tone is gone. What still says "this card carries an operational status" is the
+   4px `border-inline-start-width` in each `.sk-card--status-*` rule above: forced
+   colors remaps COLOR and leaves width alone, so that step survives untouched
+   while the tint does not.
 
-   LONGHAND `-color`, not the `border` shorthand: stylelint's
-   declaration-strict-value polices `/color/` as a substring match and does not
-   inspect the shorthand at all, so a shorthand here would pass by being
-   invisible to the gate rather than by satisfying it. `CanvasText` is an
-   explicit `ignoreValues` entry for exactly this. Same shape as
-   sk-skip-link.css, sk-data-table.css and sk-action-row.css.
+   There is deliberately NO `@media (forced-colors: active)` block here. One used
+   to sit at this line, setting `border-inline-start-color: CanvasText` and
+   restating `border-inline-start-width`, described as making the edge
+   "deliberate". Both declarations were no-ops (#218): the forced-colors
+   algorithm already remaps border colors to `CanvasText` with zero author CSS,
+   and the width was already set outside the query for a property the algorithm
+   never touches. A block that restates what the UA computes anyway reads as the
+   mechanism while doing none of the work, which is worse than no block — the
+   next author to widen the axis would have maintained it believing the edge
+   depended on it.
 
-   `forced-color-adjust: none` is NOT used anywhere here: it freezes a value at
-   its authored color, which is frequently invisible against the forced-colors
-   background. */
-@media (forced-colors: active) {
-  .sk-card--status-neutral,
-  .sk-card--status-info,
-  .sk-card--status-success,
-  .sk-card--status-attention,
-  .sk-card--status-danger,
-  .sk-card--status-recovery {
-    border-inline-start-color: CanvasText;
-    border-inline-start-width: var(--sk-border-width-4);
-  }
-}
+   Contrast the blocks in this repo that ARE load-bearing, and note what they have
+   in common: each swaps to a system color DIFFERENT from the automatic remap.
+   `sk-action-row.css` uses `Highlight` for selection; `sk-data-table.css` swaps
+   `transparent` → `Canvas`/`CanvasText` to restore a zebra alternation the remap
+   destroys; `sk-skip-link.css` uses `Highlight`. Giving the status edge a
+   distinct system color would be that kind of change — and a design decision
+   about what a status card claims in this mode, not a correction — so it is not
+   made here.
+
+   The claim is asserted rather than documented: see the forced-colors case in
+   `apps/storybook/src/tests/elements-load.spec.ts`, which emulates the media
+   feature in both color schemes and requires the status card's inline-start edge
+   to stay strictly wider than the base card's. `forced-color-adjust: none` is NOT
+   used anywhere here: it freezes a value at its authored color, which is
+   frequently invisible against the forced-colors background. */
 
 /* Reduced motion. The card already transitions `border-color` (the rule at the
    top of this file), and the status axis is now one of the things that
