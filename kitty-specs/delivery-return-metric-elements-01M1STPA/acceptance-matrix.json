@@ -198,10 +198,10 @@
       "criterion_id": "NFR-004",
       "description": "CSS modules, static output where applicable, custom-elements.json, React wrappers, Vue declarations, and SIZES.md regenerate byte-identically at the final commit.",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "Generated CSS modules, markup, custom-elements.json, React wrappers, Vue declarations, and SIZES.md all pass byte-identical drift checks after the latest-train refresh.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T19:06:26.882229+00:00",
       "notes": "WP03 generator and drift checks across all committed public artifacts."
     },
     {
