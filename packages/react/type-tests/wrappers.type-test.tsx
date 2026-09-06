@@ -14,6 +14,7 @@
 import * as React from 'react';
 import {
   SkActionRow,
+  SkBarChart,
   SkCard,
   SkEvidenceChain,
   SkFormInput,
@@ -22,6 +23,8 @@ import {
   SkNotice,
   SkTransitionMatrix,
   type ActionRowActivateDetail,
+  type BarChartSelectDetail,
+  type SkBarChartElement,
   type SkCardProps,
   type SkFormInputElement,
   type SkNoticeProps,
@@ -75,6 +78,40 @@ export const withHandler = <SkNavPill onSkNavPillToggle={(e) => void e.detail.op
 
 // @ts-expect-error the detail is typed now, so a wrong field on it is an error rather than `any`
 export const wrongDetail = <SkNavPill onSkNavPillToggle={(e) => void e.detail.opened} />;
+
+// --- bar chart ---------------------------------------------------------------------------
+const barSeries = Object.freeze([
+  Object.freeze({ id: 'aug-11', label: 'Aug 11', value: 320, displayValue: '€320' }),
+]) satisfies SkBarChartElement['series'];
+
+export const barChartAllProps = (
+  <SkBarChart
+    series={barSeries}
+    label="Return over time"
+    description="Attributed value by observation date"
+    selectable
+    selectedId="aug-11"
+    onSkBarChartSelect={(event) => {
+      const detail: BarChartSelectDetail = event.detail;
+      void detail.id.toUpperCase();
+      // @ts-expect-error the callback detail is exactly `{ id }`, not `any`
+      void event.detail.datumId;
+    }}
+  />
+);
+
+const barSeriesMissingDisplayValue = [{ id: 'aug-11', label: 'Aug 11', value: 320 }] as const;
+// @ts-expect-error every datum requires consumer-authored display text
+export const barChartMissingDisplayValue = <SkBarChart series={barSeriesMissingDisplayValue} />;
+
+const barSeriesWithStringValue = [
+  { id: 'aug-11', label: 'Aug 11', value: '320', displayValue: '€320' },
+] as const;
+// @ts-expect-error numeric geometry is derived only from a numeric value
+export const barChartStringValue = <SkBarChart series={barSeriesWithStringValue} />;
+
+// @ts-expect-error event detail IDs are consumer-owned strings
+export const barChartInvalidDetail: BarChartSelectDetail = { id: 148 };
 
 // --- transition matrix -------------------------------------------------------------------
 const transitionColumns = [

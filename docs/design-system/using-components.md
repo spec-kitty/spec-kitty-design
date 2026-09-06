@@ -3,8 +3,8 @@
 The Spec Kitty components ship as CSS in `@spec-kitty/styles`, and — for the components migrated
 so far — as **custom elements** in `@spec-kitty/elements`. Both require `@spec-kitty/tokens`.
 
-**Migration is in progress.** Twenty-six elements exist today: `sk-action-row`, `sk-app-shell`,
-`sk-blog-card`, `sk-button`, `sk-card`, `sk-check-bullet`, `sk-context-sidebar`, `sk-entity-marker`,
+**Migration is in progress.** Twenty-seven elements exist today: `sk-action-row`, `sk-app-shell`,
+`sk-bar-chart`, `sk-blog-card`, `sk-button`, `sk-card`, `sk-check-bullet`, `sk-context-sidebar`, `sk-entity-marker`,
 `sk-evidence-chain`, `sk-feature-card`, `sk-form-input`, `sk-form-textarea`, `sk-grid`, `sk-metric`,
 `sk-nav-pill`, `sk-notice`, `sk-page-header`, `sk-personal-rail`, `sk-pill-tag`, `sk-ribbon-card`,
 `sk-section-banner`, `sk-section-header`, `sk-site-footer`, `sk-status-indicator`, `sk-stub`, and
@@ -208,6 +208,45 @@ Everything #145 ruled out stays ruled out, and stickiness does not soften it. Th
 timer, reads no clock, computes no relative age, polls nothing, observes no scrolling, and owns no
 "live" state. The freshness string and any live/paused indicator are slotted content, rendered
 verbatim; the consumer owns the timer that produces them.
+
+## Bar chart
+
+`sk-bar-chart` projects a consumer-owned numeric series. Assign `series` as a JavaScript property;
+it is deliberately not an attribute and is never serialized. Every datum must have a unique,
+nonblank `id`, a nonblank `label`, a finite nonnegative numeric `value`, and a nonblank authored
+`displayValue`. An empty array renders “No data to display”; malformed data fails closed as “Chart
+unavailable”. The component does not fetch, aggregate, sort, localize, or format values.
+
+```js
+const chart = document.querySelector('sk-bar-chart');
+chart.label = 'Attributed return over time';
+chart.description = 'Last 30 days';
+chart.series = Object.freeze([
+  Object.freeze({ id: 'aug-11', label: 'Aug 11', value: 320, displayValue: '€320' }),
+  Object.freeze({ id: 'aug-18', label: 'Aug 18', value: 510, displayValue: '€510' }),
+]);
+chart.selectable = true;
+chart.selectedId = 'aug-18';
+chart.addEventListener('sk-bar-chart-select', (event) => {
+  // A request, not an internal state change: selection stays consumer-controlled.
+  chart.selectedId = event.detail.id;
+});
+```
+
+The four attributes are `label`, `description`, `selectable`, and `selected-id`; `series` is the
+single property-only input. `sk-bar-chart-select` carries readonly `{ id: string }` detail with
+`bubbles: true`, `composed: true`, and `cancelable: false`. It fires only from a valid selectable
+datum. The public parts are `chart`, `plot`, `item`, `bar`, `value`, `label`, and `empty-state`.
+
+The chart's closed token contract is `--sk-border-default`, `--sk-border-strong`,
+`--sk-border-focus`, `--sk-border-width-1`, `--sk-border-width-2`,
+`--sk-color-data-baseline`, `--sk-color-data-grid`, `--sk-color-data-series-primary`,
+`--sk-fg-body`, `--sk-fg-default`, `--sk-fg-muted`, `--sk-font-mono`, `--sk-font-sans`,
+`--sk-motion-duration-fast`, `--sk-motion-ease-out`, `--sk-radius-md`, `--sk-radius-sm`,
+`--sk-space-2`, `--sk-space-3`, `--sk-space-4`, `--sk-space-5`, `--sk-space-6`,
+`--sk-space-10`, `--sk-surface-card`, `--sk-surface-muted`, `--sk-surface-pill`,
+`--sk-text-sm`, `--sk-text-xs`, and `--sk-weight-semibold`. Use the named parts for narrowly
+scoped consumer adjustments; internal class names are not API.
 
 ## Transition matrix
 

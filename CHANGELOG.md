@@ -13,10 +13,10 @@ compatibility window to honour and no deprecation cycle to run.
 
 ### `@spec-kitty/elements`
 
-The custom-element base layer (ADR-8): twenty-six components as standard custom elements, built on
+The custom-element base layer (ADR-8): twenty-seven components as standard custom elements, built on
 Lit, with styling delivered through constructed stylesheets and a closed styling API (ADR-9).
 
-- `sk-action-row`, `sk-app-shell`, `sk-blog-card`, `sk-button`, `sk-card`, `sk-check-bullet`,
+- `sk-action-row`, `sk-app-shell`, `sk-bar-chart`, `sk-blog-card`, `sk-button`, `sk-card`, `sk-check-bullet`,
   `sk-context-sidebar`, `sk-entity-marker`, `sk-evidence-chain`, `sk-feature-card`, `sk-form-input`,
   `sk-form-textarea`, `sk-grid`, `sk-metric`, `sk-nav-pill`, `sk-notice`, `sk-page-header`,
   `sk-personal-rail`, `sk-pill-tag`, `sk-ribbon-card`, `sk-section-banner`, `sk-section-header`,

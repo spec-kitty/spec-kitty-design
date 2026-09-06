@@ -21,11 +21,15 @@ type PropsOf<C> = C extends abstract new (...args: never) => { $props: infer P }
 
 type Footer = PropsOf<GlobalComponents['sk-site-footer']>;
 type PillTag = PropsOf<GlobalComponents['sk-pill-tag']>;
+type BarChart = PropsOf<GlobalComponents['sk-bar-chart']>;
 type TransitionMatrix = PropsOf<GlobalComponents['sk-transition-matrix']>;
 
 // Props are typed from the manifest, not `any`.
 const legal: Footer['legal'] = '© 2026 Example';
 const variant: PillTag['variant'] = 'green';
+const barSeries: NonNullable<BarChart['series']> = Object.freeze([
+  Object.freeze({ id: 'aug-11', label: 'Aug 11', value: 320, displayValue: '€320' }),
+]);
 const columns: NonNullable<TransitionMatrix['columns']> = Object.freeze([
   Object.freeze({ id: 'fri-4', label: 'Today · Fri 4' }),
 ]);
@@ -41,6 +45,21 @@ const routes: NonNullable<TransitionMatrix['routes']> = Object.freeze([
 // @ts-expect-error 'chartreuse' is not one of the declared variants
 const bad: PillTag['variant'] = 'chartreuse';
 
+// @ts-expect-error every bar datum requires consumer-authored display text
+const badBarDatum: NonNullable<BarChart['series']>[number] = {
+  id: 'aug-11',
+  label: 'Aug 11',
+  value: 320,
+};
+
+const badBarValue: NonNullable<BarChart['series']>[number] = {
+  id: 'aug-11',
+  label: 'Aug 11',
+  // @ts-expect-error numeric geometry cannot be derived from a numeric string
+  value: '320',
+  displayValue: '€320',
+};
+
 // @ts-expect-error a transition column requires consumer-owned visible label text
 const badColumn: NonNullable<TransitionMatrix['columns']>[number] = { id: 'fri-4' };
 
@@ -52,5 +71,5 @@ const badRoute: NonNullable<TransitionMatrix['routes']>[number] = {
   values: { 'fri-4': 5 },
 };
 
-export type { Footer, PillTag, TransitionMatrix };
-export { legal, variant, columns, routes, bad, badColumn, badRoute };
+export type { Footer, PillTag, BarChart, TransitionMatrix };
+export { legal, variant, barSeries, columns, routes, bad, badBarDatum, badBarValue, badColumn, badRoute };

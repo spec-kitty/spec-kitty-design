@@ -308,7 +308,9 @@ jobs:
       # workflow would produce a CI-run URL in a commit message — the transcript NFR-002
       # rejects — and would not protect against the regression that will actually happen:
       # a later PR adding `test_ok=...` to the skipped-tolerance block.
-      - name: "[ENFORCED] The gate actually gates the test job (FR-014)"
+      - name: "[ENFORCED] Gate wiring checker self-test (FR-014, NFR-009)"
+        run: node scripts/check-gate-wiring.mjs --selftest
+      - name: "[ENFORCED] The gate actually gates the test and Storybook jobs (FR-014, NFR-009)"
         run: node scripts/check-gate-wiring.mjs
       # The wiring checker's own probe table (#202, #205). Same rationale as the CSS, entry,
       # manifest, wrapper, release and ADR-index gates' `--selftest` steps one level up: the
@@ -369,8 +371,8 @@ jobs:
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e  # actions/setup-node v6.4.0
         with: { node-version: '22', cache: 'npm' }
       - run: npm ci --ignore-scripts
-      - name: "[ENFORCED] Storybook build (NFR-003 < 3 min)"
-        run: npx nx run storybook:storybook:build
+      - name: "[ENFORCED] Storybook build (NFR-009 <= 180 s)"
+        run: node scripts/build-storybook-with-budget.mjs
       # Runs before the upload so the artifact the downstream jobs consume matches
       # what the deploy actually publishes — the demo pages included. That is what
       # lets nav-pill-behaviour.spec.ts drive the package's runtime JS through the

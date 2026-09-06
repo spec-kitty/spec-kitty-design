@@ -89,6 +89,13 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) conve
   `ul > li`, selection, routing, data, and time ownership.
 - Added the controlled `sk-transition-matrix` element for accessible aggregate route-by-time-bucket
   moves, including typed intent events, responsive table semantics, and generated React delivery.
+- Added the controlled `sk-bar-chart` element (#148) for compact numeric comparisons. Consumers
+  assign a readonly `series` property containing exact `id`, `label`, numeric `value`, and authored
+  `displayValue` fields; the element validates and projects that data but never fetches, aggregates,
+  sorts, formats, or owns selection. Optional selection emits one bubbling, composed,
+  non-cancelable `sk-bar-chart-select` request with exact `{ id }`; the consumer decides whether to
+  update `selectedId`. Seven named parts and the data/grid/baseline token family form its closed
+  styling contract, with generated React and Vue property delivery from the CEM.
 - Added two orthogonal reflected axes to `sk-page-header` (#182): `density="compact"` and `sticky`.
   One header, two densities — the compact form resolves from the same five slots, so there is no
   second header to author. When `sticky` is set the host is the sticky box, so the header pins
