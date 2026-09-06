@@ -31,10 +31,19 @@ export interface SkNoticeProps extends Pick<
   /** Accessible name for the dismiss control. Defaults to `Dismiss notice`. */
   dismissLabel?: SkNoticeElement["dismissLabel"];
 
-  /** The message text. Changing it re-announces, when announcement is on. A consumer that must
-announce a message which already exists when the notice is inserted should insert the notice
-first and then assign this — a live region that enters the DOM together with its content is
-not reliably announced, and the element cannot defer its own first paint without a timer. */
+  /** The message text. Changing it to a DIFFERENT value re-announces, when announcement is on.
+
+Re-setting it to the value it already holds announces nothing: Lit's default `hasChanged` is
+`!==`, so an identical assignment produces no update and no DOM mutation for a screen reader
+to notice. A dashboard that reports "Connection lost" twice in a row therefore announces it
+once. If a repeat genuinely needs to be heard, the consumer must make the text differ — a
+count or a timestamp — because an element that re-announced identical text on every
+assignment would be unusable for the polling callers this is built for.
+
+A consumer that must announce a message which already exists when the notice is inserted
+should insert the notice first and then assign this — a live region that enters the DOM
+together with its content is not reliably announced, and the element cannot defer its own
+first paint without a timer. */
   message?: SkNoticeElement["message"];
 
   /** Presentation tone, from the library's one tone vocabulary. Unknown values render as
@@ -62,7 +71,7 @@ not reliably announced, and the element cannot defer its own first paint without
   /** Allows developers to make HTML elements focusable, allow or prevent them from being sequentially focusable (usually with the `Tab` key, hence the name) and determine their relative ordering for sequential focus navigation. */
   tabIndex?: number;
 
-  /** Requests dismissal; `detail: { tone }`. Bubbles, is composed, and is cancelable. The element never removes itself — `preventDefault()` abandons only the element's own focus move. */
+  /** Requests dismissal; `detail: { tone }`. Bubbles, is composed, and is cancelable. The element never removes itself. After the event, focus moves to the notice host; `preventDefault()` abandons that move and leaves focus on the dismiss control. If you remove the notice in your handler you MUST move focus yourself — the host is gone by then and focus falls to `<body>`. */
   onSkNoticeDismiss?: (event: CustomEvent<SkNoticeDismissDetail>) => void;
 }
 
@@ -92,10 +101,19 @@ not reliably announced, and the element cannot defer its own first paint without
  * `role="status"`; `assertive` renders `role="alert"`. Independent of `tone`.
  * - `dismiss-label`/`dismissLabel`: Accessible name for the dismiss control. Defaults to `Dismiss notice`.
  * - `dismissible`: Whether to render the dismiss control. The element never removes itself when it is used.
- * - `message`: The message text. Changing it re-announces, when announcement is on. A consumer that must
- * announce a message which already exists when the notice is inserted should insert the notice
- * first and then assign this — a live region that enters the DOM together with its content is
- * not reliably announced, and the element cannot defer its own first paint without a timer.
+ * - `message`: The message text. Changing it to a DIFFERENT value re-announces, when announcement is on.
+ *
+ * Re-setting it to the value it already holds announces nothing: Lit's default `hasChanged` is
+ * `!==`, so an identical assignment produces no update and no DOM mutation for a screen reader
+ * to notice. A dashboard that reports "Connection lost" twice in a row therefore announces it
+ * once. If a repeat genuinely needs to be heard, the consumer must make the text differ — a
+ * count or a timestamp — because an element that re-announced identical text on every
+ * assignment would be unusable for the polling callers this is built for.
+ *
+ * A consumer that must announce a message which already exists when the notice is inserted
+ * should insert the notice first and then assign this — a live region that enters the DOM
+ * together with its content is not reliably announced, and the element cannot defer its own
+ * first paint without a timer.
  * - `tone`: Presentation tone, from the library's one tone vocabulary. Unknown values render as
  * `neutral` without changing the visible message.
  *
@@ -103,7 +121,7 @@ not reliably announced, and the element cannot defer its own first paint without
  *
  * Events that will be emitted by the component.
  *
- * - `sk-notice-dismiss`: Requests dismissal; `detail: { tone }`. Bubbles, is composed, and is cancelable. The element never removes itself — `preventDefault()` abandons only the element's own focus move.
+ * - `sk-notice-dismiss`: Requests dismissal; `detail: { tone }`. Bubbles, is composed, and is cancelable. The element never removes itself. After the event, focus moves to the notice host; `preventDefault()` abandons that move and leaves focus on the dismiss control. If you remove the notice in your handler you MUST move focus yourself — the host is gone by then and focus falls to `<body>`.
  *
  * ## Slots
  *
@@ -111,7 +129,7 @@ not reliably announced, and the element cannot defer its own first paint without
  *
  * - `(default)`: The message body. Rendered inside the live region, so slotted content is announced with `message`.
  * - `actions`: Trailing consumer-owned controls, such as `sk-button`s.
- * - `heading`: A consumer-supplied native heading. The element generates none, so the level stays the consumer's.
+ * - `heading`: A consumer-supplied native heading. The element generates none, so the level stays the consumer's. NOT inside the live region: a heading slotted here is *not* announced, while `message` and the default slot are, so a headline here with the detail in `message` announces the detail only. Put anything that must be heard into `message` or the default slot. Whether the heading should instead sit inside the region is filed as #228 — it changes what every consumer hears, so it is a design decision rather than this element's to take.
  * - `marker`: A decorative consumer-supplied marker. Falls back to a per-tone glyph.
  *
  * ## CSS Parts

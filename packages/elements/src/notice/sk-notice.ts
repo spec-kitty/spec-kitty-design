@@ -95,7 +95,7 @@ const MARKER: Record<StatusIndicatorTone, string> = {
  * --sk-text-base, --sk-text-lg, --sk-weight-semibold.
  *
  * @element sk-notice
- * @slot heading - A consumer-supplied native heading. The element generates none, so the level stays the consumer's.
+ * @slot heading - A consumer-supplied native heading. The element generates none, so the level stays the consumer's. NOT inside the live region: a heading slotted here is *not* announced, while `message` and the default slot are, so a headline here with the detail in `message` announces the detail only. Put anything that must be heard into `message` or the default slot. Whether the heading should instead sit inside the region is filed as #228 — it changes what every consumer hears, so it is a design decision rather than this element's to take.
  * @slot marker - A decorative consumer-supplied marker. Falls back to a per-tone glyph.
  * @slot - The message body. Rendered inside the live region, so slotted content is announced with `message`.
  * @slot actions - Trailing consumer-owned controls, such as `sk-button`s.
@@ -106,7 +106,7 @@ const MARKER: Record<StatusIndicatorTone, string> = {
  * @csspart body - The message body, and the live region when announcement is on.
  * @csspart actions - The trailing actions wrapper.
  * @csspart dismiss - The dismiss control.
- * @fires {CustomEvent<SkNoticeDismissDetail>} sk-notice-dismiss - Requests dismissal; `detail: { tone }`. Bubbles, is composed, and is cancelable. The element never removes itself — `preventDefault()` abandons only the element's own focus move.
+ * @fires {CustomEvent<SkNoticeDismissDetail>} sk-notice-dismiss - Requests dismissal; `detail: { tone }`. Bubbles, is composed, and is cancelable. The element never removes itself. After the event, focus moves to the notice host; `preventDefault()` abandons that move and leaves focus on the dismiss control. If you remove the notice in your handler you MUST move focus yourself — the host is gone by then and focus falls to `<body>`.
  */
 export class SkNotice extends LitElement {
   static styles = [sheet];
@@ -147,10 +147,19 @@ export class SkNotice extends LitElement {
   declare announce: 'off' | 'polite' | 'assertive';
 
   /**
-   * The message text. Changing it re-announces, when announcement is on. A consumer that must
-   * announce a message which already exists when the notice is inserted should insert the notice
-   * first and then assign this — a live region that enters the DOM together with its content is
-   * not reliably announced, and the element cannot defer its own first paint without a timer.
+   * The message text. Changing it to a DIFFERENT value re-announces, when announcement is on.
+   *
+   * Re-setting it to the value it already holds announces nothing: Lit's default `hasChanged` is
+   * `!==`, so an identical assignment produces no update and no DOM mutation for a screen reader
+   * to notice. A dashboard that reports "Connection lost" twice in a row therefore announces it
+   * once. If a repeat genuinely needs to be heard, the consumer must make the text differ — a
+   * count or a timestamp — because an element that re-announced identical text on every
+   * assignment would be unusable for the polling callers this is built for.
+   *
+   * A consumer that must announce a message which already exists when the notice is inserted
+   * should insert the notice first and then assign this — a live region that enters the DOM
+   * together with its content is not reliably announced, and the element cannot defer its own
+   * first paint without a timer.
    */
   declare message: string;
 
@@ -195,13 +204,29 @@ export class SkNotice extends LitElement {
     // which is the only honest meaning available here.
     if (!this.dispatchEvent(evt)) return;
 
-    // FOCUS LANDS ON THE HOST. The dismiss button lives in the shadow root and is the node most
-    // likely to stop existing the instant the consumer acts on this event; leaving focus there
-    // means focus falls to <body> the moment they remove the notice — the classic post-dismissal
-    // focus-loss defect. The host is still in the document while the consumer's handler runs, so
-    // they get a defined, synchronous place to redirect from instead of discovering focus has
-    // already been lost. The element cannot know what should receive focus next; it can only
-    // guarantee focus is somewhere deliberate when it hands control back.
+    // FOCUS LANDS ON THE HOST — AFTER the dispatch above, and that ordering is the whole of what
+    // this move can and cannot do.
+    //
+    // WHAT IT DELIVERS: when the consumer's handler returns without removing the notice, focus is
+    // left on the host rather than on a dismiss button that may now be hidden or re-rendered.
+    //
+    // WHAT IT DOES NOT DELIVER, measured rather than assumed: during the handler focus is still on
+    // the dismiss BUTTON, because this line has not run yet. A consumer who removes the notice in
+    // that handler — which is exactly what the docs tell them to do, since the element never
+    // removes itself — leaves this call running on a detached host, where `focus()` is a no-op,
+    // and focus falls to <body>. `sk-notice.test.ts` asserts that <body> outcome so it stays
+    // visible.
+    //
+    // SO THE OBLIGATION IS THE CONSUMER'S: if you remove the notice, move focus somewhere
+    // deliberate yourself. The element gives you a synchronous window in which focus is still
+    // inside the notice; it cannot hold focus inside a subtree you have deleted.
+    //
+    // NEITHER ORDERING FIXES THIS, and the shape of the non-fix is recorded so it is not retried:
+    // focusing the host BEFORE the dispatch would move focus even when the consumer cancels, which
+    // is precisely the default action `preventDefault()` exists to abandon; and a removed, focused
+    // host drops to <body> whatever the order. An earlier revision of this comment claimed the
+    // host-focus move PREVENTS the focus-loss defect. It does not — it narrows it to the case the
+    // consumer controls.
     this.focus();
   }
 
@@ -221,6 +246,14 @@ export class SkNotice extends LitElement {
     // node-identity guarantee the behaviour fixture asserts. Change the politeness and the key
     // changes, so Lit discards the node and builds a new one that carries its role from birth,
     // rather than mutating a role onto a node that is already holding text.
+    //
+    // IT PICKS THE BETTER OF TWO UNRELIABLE OPTIONS RATHER THAN REMOVING THE HAZARD, which is
+    // worth stating because the paragraph above reads as absolute. Switching `announce` from `off`
+    // to `polite` while a message is already set births a node whose text is present at birth —
+    // the very "created at the same moment as its content" condition this keying is invoked to
+    // avoid. Both spellings are unreliable there; a role mutated onto a node already holding text
+    // is the worse of the two, so that is the one this avoids. The reliable path remains the one
+    // the docs give consumers: set the politeness first, then assign the message.
     const body = keyed(
       announce,
       html`<div

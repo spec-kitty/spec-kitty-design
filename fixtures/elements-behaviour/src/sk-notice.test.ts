@@ -451,3 +451,39 @@ test('[SC-014] the element adopts the generated sheet by identity and injects no
   expect(root.adoptedStyleSheets[0]).toBe(skNoticeSheet);
   expect(root.querySelectorAll('style')).toHaveLength(0);
 });
+
+test('a consumer who removes the notice in their handler loses focus to <body>', async () => {
+  // THE LIMIT OF THE FOCUS CONTRACT, asserted so it stays visible.
+  //
+  // `#dismiss()` dispatches the event and only THEN calls `this.focus()`. So during the
+  // consumer's synchronous handler focus is still on the dismiss BUTTON, not on the host — and a
+  // consumer who removes the notice there (which the docs say is their job) leaves `this.focus()`
+  // running on a detached host, where it is a no-op. Focus lands on <body>.
+  //
+  // This is not fixable in the element and the shape of the fix is worth recording so it is not
+  // retried: focusing the host BEFORE dispatch would move focus even when the consumer cancels,
+  // which breaks `preventDefault()`; and a removed, focused host drops to <body> regardless of
+  // ordering. The element cannot hold focus inside a subtree the consumer has deleted.
+  //
+  // An earlier revision of the comment at the `this.focus()` call site claimed this case was the
+  // defect the host-focus move PREVENTS. It is the opposite: this is the case it does not reach,
+  // and the consumer has to move focus themselves. The test exists so that claim cannot drift
+  // back in unnoticed.
+  const element = await mount({ dismissible: true, tone: 'danger' });
+  const button = dismissButton(element)!;
+  button.focus();
+
+  let activeDuringHandler: Element | null = null;
+  element.addEventListener('sk-notice-dismiss', () => {
+    // What the consumer actually sees when their handler runs.
+    activeDuringHandler = element.shadowRoot!.activeElement;
+    element.remove();
+  });
+  button.click();
+
+  expect(activeDuringHandler, 'focus was NOT on the host during the handler').toBe(button);
+  expect(element.isConnected, 'the consumer removed it, as the docs tell them to').toBe(false);
+  expect(document.activeElement, 'focus fell to <body>, which the element cannot prevent').toBe(
+    document.body,
+  );
+});

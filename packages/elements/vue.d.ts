@@ -376,10 +376,19 @@ declare module 'vue' {
       /** Whether to render the dismiss control. The element never removes itself when it is used. */
       'dismissible'?: boolean;
       /**
-       * The message text. Changing it re-announces, when announcement is on. A consumer that must
-       * announce a message which already exists when the notice is inserted should insert the notice
-       * first and then assign this — a live region that enters the DOM together with its content is
-       * not reliably announced, and the element cannot defer its own first paint without a timer.
+       * The message text. Changing it to a DIFFERENT value re-announces, when announcement is on.
+       *
+       * Re-setting it to the value it already holds announces nothing: Lit's default `hasChanged` is
+       * `!==`, so an identical assignment produces no update and no DOM mutation for a screen reader
+       * to notice. A dashboard that reports "Connection lost" twice in a row therefore announces it
+       * once. If a repeat genuinely needs to be heard, the consumer must make the text differ — a
+       * count or a timestamp — because an element that re-announced identical text on every
+       * assignment would be unusable for the polling callers this is built for.
+       *
+       * A consumer that must announce a message which already exists when the notice is inserted
+       * should insert the notice first and then assign this — a live region that enters the DOM
+       * together with its content is not reliably announced, and the element cannot defer its own
+       * first paint without a timer.
        */
       'message'?: string;
       /**

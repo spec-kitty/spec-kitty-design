@@ -95,3 +95,50 @@ test.describe('sk-notice forced colors', () => {
     expect(ring!.boxShadow).toBe('none');
   });
 });
+
+test.describe('sk-notice reduced motion', () => {
+  /**
+   * THE SUPPRESSION IS MEASURED, NOT READ OFF THE SOURCE.
+   *
+   * The only prior coverage was `expect(shadowRoot.innerHTML).not.toContain('animationend')` in the
+   * behaviour fixture — a test for the ABSENCE OF A STRING, which proves the announcement is not
+   * gated on an animation event but says nothing about whether the entrance is actually suppressed.
+   * Nothing in the repo noticed if the `@media (prefers-reduced-motion: reduce)` block in
+   * sk-notice.css were deleted. This closes that: `animation-name` is compared across the two media
+   * states and must genuinely differ.
+   *
+   * Asserting the computed value rather than grepping the stylesheet is the point — a source read
+   * passes for a block that is present but scoped to a selector the element never renders.
+   */
+  const animationOf = (page: Page, storyId: string) =>
+    noticeIn(page, storyId).then((host) =>
+      host.evaluate((node) => {
+        const part = node.shadowRoot!.querySelector('[part="notice"]')!;
+        return getComputedStyle(part).animationName;
+      }),
+    );
+
+  test('the entrance animation is suppressed under prefers-reduced-motion, and the message survives', async ({
+    page,
+  }) => {
+    const normal = await animationOf(page, 'announce-assertive');
+    expect(normal, 'the component should author an entrance to suppress').toBe('sk-notice-enter');
+
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    const reduced = await animationOf(page, 'announce-assertive');
+    expect(
+      reduced,
+      'the reduced-motion block is inert: the entrance animation still runs',
+    ).toBe('none');
+
+    // AND THE NOTICE IS STILL READABLE. #178 requires that a notice never depend on animation to be
+    // readable; suppressing the entrance must not suppress the content or the live region with it.
+    const host = await noticeIn(page, 'announce-assertive');
+    const region = await host.evaluate((node) => {
+      const live = node.shadowRoot!.querySelector('[role="alert"], [role="status"]');
+      return { role: live?.getAttribute('role') ?? null, text: (live?.textContent ?? '').trim() };
+    });
+    expect(region.role).toBe('alert');
+    expect(region.text.length).toBeGreaterThan(0);
+  });
+});
