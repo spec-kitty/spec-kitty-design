@@ -65,10 +65,10 @@
       "criterion_id": "FR-005",
       "description": "Derive every height as zero-anchored value divided by the current maximum, with an all-zero guard, expressed through numeric SVG geometry rather than dynamic inline style.",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "sk-bar-chart ratio/all-zero/recompute assertions and SC-014 numeric-geometry source-break arms green in 141/141 mutation run",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T21:30:10.576842+00:00",
       "notes": "Exact ratio table plus direct formula source-break evidence.",
       "lane_owners": [
         "WP01"
