@@ -317,6 +317,17 @@ else {
     // silently omits seven of fifteen records again.
     [/node\s+scripts\/check-adr-index\.mjs(?!\s*--selftest)(\s|$)/, 'the ADR index gate', 'scripts/check-adr-index.mjs'],
     [/node\s+scripts\/check-adr-index\.mjs\s+--selftest(\s|$)/, "the ADR index gate's own probe table", 'scripts/check-adr-index.mjs --selftest'],
+    // THIS FILE, registered against itself. Every comment above records the same episode — a
+    // gate shipped with no entry here, and a lens then deleting its CI line with this checker
+    // still green (#74's css-hygiene gate, #129's manifest gate) — and this file was the one
+    // instance of it nobody had checked. Reproduced during #193's final fold: deleting the
+    // `[ENFORCED] The gate actually gates the test job (FR-014)` step from ci-quality.yml left
+    // BOTH this script and check-adr-index.mjs printing green, so the checker that catches
+    // every other gate's deletion could not catch its own — and the three assertions #193 adds
+    // above (the `on:` trigger, the gate's `if: always()`, the ADR index registry) all rest on
+    // it running. Self-registration is not circular: the assertion is about the WORKFLOW
+    // carrying the line, not about this process having been started.
+    [/node\s+scripts\/check-gate-wiring\.mjs(\s|$)/, 'this wiring checker itself', 'scripts/check-gate-wiring.mjs'],
   ];
 
   /** A step that cannot fail the job is a step that is not running (B, C, D, E). */
