@@ -38,10 +38,10 @@
       "criterion_id": "FR-004",
       "description": "The control's accessible role, and its aria-valuenow/aria-valuemin/aria-valuemax, derive entirely from the browser's native <progress> semantics and the element's own value/max attributes.",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "apps/storybook/src/tests/sk-progress.spec.ts \u2014 native progressbar role/name/value/min/max accessibility-tree assertion passed across three engines",
+      "pass_fail": "pass",
+      "verified_by": "codex-orry-wp208-210-0906a",
+      "verified_at": "2026-09-06T17:32:29.519828+00:00",
       "notes": "Verified by WP01 T007's accessibility-tree snapshot assertion on the T10 fixture (role/name/value/min/max against label text and progress attributes)."
     },
     {
