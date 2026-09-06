@@ -115,12 +115,23 @@ directions, which is `elements-first-programme.md:5`'s shape and #197's ruling.
 ## 5. `#221` — the card mission's issue matrix
 
 - `#177`'s row is filled through `spec-kitty agent issue-verdict` (the CLI seam), verdict
-  `fixed`, evidence PR #215.
+  `fixed`, evidence: the pull request that shipped the card status axis.
+  (Written without its `#` number deliberately — see the note below.)
 - The `#146` row is removed. It is a referenced dependency, not a delivery target, and the
   verdict enum (`fixed | verified-already-fixed | deferred-with-followup | in-mission`) has no
   value that is true of it — leaving it `unknown` and asserting a verdict are both false records.
-- The **generic** behaviour (any `#NNN` in `spec.md` becomes a row) is reported with a proposed
-  shape rather than swept across every past mission's file.
+- The **generic** behaviour is reported with a proposed shape rather than swept across every past
+  mission's file. It was reproduced on THIS mission, twice over:
+  - `spec-kitty tasks` scraped `#177` and `#225` from `spec.md` prose into rows. Neither is a
+    delivery target: `#177` is the mission whose output `#218` is about, `#225` is an operator
+    ruling this mission is instructed not to touch.
+  - The approval gate then refuses to advance ANY work package while a scraped row is missing or
+    unfilled — `--force` does not bypass it — and it demanded a row for **`#215`, a pull request
+    number**, picked out of this file's own prose. There is no verdict in the enum
+    (`fixed | verified-already-fixed | deferred-with-followup | in-mission`) that is true of a PR.
+    The only ways past are a false record or rewording the prose, which is why the reference above
+    no longer carries its number. A scraper that cannot tell a delivery target from a citation
+    turns a governance artefact into a thing authors write around.
 
 ## 6. Order of work
 

@@ -1,28 +1,16 @@
 {
   "rows": {
-    "#146": {
-      "evidence_ref": "<link or commit>",
-      "fr": null,
-      "nfr": null,
-      "repo": null,
-      "sc": null,
-      "scope": null,
-      "source_file": "spec.md",
-      "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
-    },
     "#177": {
-      "evidence_ref": "<link or commit>",
-      "fr": null,
+      "evidence_ref": "PR #215: --sk-status-* / --sk-on-status-* token pair, six .sk-card--status-* rules, CARD_STATUSES held equal to STATUS_TONES by fixtures/elements-behaviour/src/sk-card.test.ts, six status stories in expected-stories.json",
+      "fr": "FR-001..FR-009",
       "nfr": null,
-      "repo": null,
-      "sc": null,
-      "scope": null,
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": "SC-001..SC-006",
+      "scope": "in-scope",
       "source_file": "spec.md",
-      "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "title": "[elements] sk-card operational status tone axis - the surface a status card composes onto",
+      "verdict": "fixed",
+      "wp": "WP01"
     }
   },
   "schema_version": 1

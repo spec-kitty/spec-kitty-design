@@ -82,6 +82,7 @@
       "last_transition_at": "2026-09-06T19:59:53.227535+00:00",
       "model": "__resolved_model_absent__",
       "notes": [
+        "Implemented and self-reviewed by the mission implementer; evidence in the PR body.",
         "Implemented and self-reviewed by the mission implementer; evidence in the PR body."
       ],
       "provider": "__resolved_provider_absent__",
