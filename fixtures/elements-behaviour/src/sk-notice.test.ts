@@ -55,7 +55,7 @@ const announcedText = (element: Element) => {
       seen.push(node.textContent ?? '');
       return;
     }
-    for (const child of node.childNodes) walk(child);
+    for (const child of Array.from(node.childNodes)) walk(child);
   };
   walk(region);
   return seen.join(' ').replace(/\s+/g, ' ').trim();
@@ -116,11 +116,11 @@ test('announce="off" renders NO live region at all, whatever the tone', async ()
     expect(liveRegion(element), `tone=${tone} announced without being asked`).toBe(null);
     expect(partOf(element, 'body')!.hasAttribute('role')).toBe(false);
     expect(
-      [...element.shadowRoot!.querySelectorAll('[role]')],
+      Array.from(element.shadowRoot!.querySelectorAll('[role]')),
       `tone=${tone}: announce="off" rendered a role somewhere in the shadow root`,
     ).toEqual([]);
     expect(
-      [...element.shadowRoot!.querySelectorAll('[aria-live]')],
+      Array.from(element.shadowRoot!.querySelectorAll('[aria-live]')),
       `tone=${tone}: announce="off" rendered an aria-live somewhere in the shadow root`,
     ).toEqual([]);
     // ...and the message is still VISIBLE. Silent is not invisible.
@@ -537,6 +537,35 @@ test('every tone paints a distinct surface, and every tone differs between the t
     );
   }
   assertThemesDiffered(surfaces);
+});
+
+test('moving the heading inside the region did not move it on screen', async () => {
+  // THE GEOMETRY HALF OF #228, asserted as an INVARIANT rather than as a pinned pixel figure.
+  //
+  // Until #228 the heading box was a direct item of the `.sk-notice__content` grid, so the space
+  // below it was one `row-gap` — and it was there even with nothing slotted, because a zero-height
+  // grid item still contributes its gap. Moving the box inside `.sk-notice__body` took that gap
+  // with it, and `sk-notice.css` replaces it with an equal `margin-block-end` on the same box.
+  //
+  // Measured before and after the move on this fixture, every externally observable dimension was
+  // byte-identical — notice height, content height, the heading's offset within the content box,
+  // and the actions row's offset — in all four of {heading, no heading} x {message, no message}.
+  // Only the body box's own height changed, which is the point: it now encloses the heading.
+  //
+  // What is asserted here is the relationship those numbers followed from, not the numbers. A
+  // pinned height would be an engine-and-font measurement and would red on webkit for reasons
+  // that have nothing to do with this component; the equality below is what actually has to hold,
+  // and it reds the moment someone changes one of the two values without the other.
+  const element = await mount({ announce: 'polite', message: 'Retrying in 5s' });
+  const gap = getComputedStyle(partOf(element, 'content')!).rowGap;
+  const margin = getComputedStyle(partOf(element, 'heading')!).marginBlockEnd;
+  expect(gap, 'the content grid lost its row gap; the heading margin no longer replaces it').not.toBe(
+    '0px',
+  );
+  expect(
+    margin,
+    'the heading no longer carries the space the content grid used to supply for it',
+  ).toBe(gap);
 });
 
 test('[SC-013] every declared part is present and targetable from outside', async () => {

@@ -139,14 +139,32 @@
    when NO heading was slotted, where the box is a zero-height grid item that
    still contributes its gap. #228 moved the box inside `.sk-notice__body` so the
    live region announces the headline, and that gap went with it. This margin is
-   the same distance on the same box, so the render is unchanged in both cases:
+   the same distance on the same box, and that is MEASURED rather than reasoned
+   about. Rendered at 600px in the behaviour fixture with the real token sheet,
+   before the move and after it, in px:
 
-   - no heading slotted: a zero-height box whose bottom margin supplies exactly
-     what the vanished gap did;
-   - heading, empty message, no default slot, actions present: the margin
-     collapses out of the border-free, padding-free body box, and the body is a
-     grid ITEM, whose margins do not collapse with the grid container — so the
-     heading-to-actions distance is still space-2 + space-2.
+     case                        noticeH  contentH  headingH  actionsTop
+     heading + message + actions   120       86        24        62
+     message only                   72       38         0        38
+     heading + actions, no message  98       64        24        40
+     heading + message              96       62        24        62
+
+   Both columns of that table are the same table: every externally observable
+   dimension is identical before and after. The only figure that moved is the
+   BODY box's own height (22 -> 54 in the first row), which is the point — it now
+   encloses the heading.
+
+   The two cases that look like they should break are the two that motivate the
+   spelling. With NO heading slotted the box is zero-height, and its bottom
+   margin supplies exactly the 8px the vanished gap did (`message only`: the body
+   still starts 8px down). With a heading and no message the margin escapes the
+   border-free, padding-free body box, and the body is a grid ITEM, whose margins
+   are honoured by grid rather than collapsed away — so the heading-to-actions
+   distance is unchanged.
+
+   `fixtures/elements-behaviour/src/sk-notice.test.ts` asserts the invariant those
+   numbers follow from — this margin equals the content grid's row gap — rather
+   than the numbers, which are font and engine measurements.
 
    `margin-block-end`, not `margin-bottom`: the notice is a logical-property
    component throughout (see the tone edge's `border-inline-start`). */

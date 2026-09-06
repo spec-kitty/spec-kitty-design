@@ -6,103 +6,103 @@
   "criteria": [
     {
       "criterion_id": "FR-001",
-      "description": "Verify FR-001 is satisfied",
+      "description": "Test 'a slotted heading is INSIDE the live region\u2026' asserts [part=heading] is a descendant of the role-carrying node",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "evidence": "fixtures/elements-behaviour/src/sk-notice.test.ts, 401-test suite green",
+      "pass_fail": "pass",
+      "verified_by": "claude-opus-5",
+      "verified_at": "2026-09-06T23:56:48.919186Z",
+      "notes": "Test 'a slotted heading is INSIDE the live region\u2026' asserts [part=heading] is a descendant of the role-carrying node."
     },
     {
       "criterion_id": "FR-002",
-      "description": "Verify FR-002 is satisfied",
+      "description": "The four pre-existing announcement-contract assertions pass unchanged, each now with a slotted heading in scope",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "evidence": "fixtures/elements-behaviour/src/sk-notice.test.ts, 401-test suite green",
+      "pass_fail": "pass",
+      "verified_by": "claude-opus-5",
+      "verified_at": "2026-09-06T23:56:48.919186Z",
+      "notes": "The four pre-existing announcement-contract assertions pass unchanged, each now with a slotted heading in scope."
     },
     {
       "criterion_id": "FR-003",
-      "description": "Verify FR-003 is satisfied",
+      "description": "Verbatim red: expected 'Retrying in 5s' to be 'Deploy failed Retrying in 5s'; and the containment arm's message names the heading as outside the region",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "evidence": "red captured at 7e181a9",
+      "pass_fail": "pass",
+      "verified_by": "claude-opus-5",
+      "verified_at": "2026-09-06T23:56:48.919186Z",
+      "notes": "Verbatim red: expected 'Retrying in 5s' to be 'Deploy failed Retrying in 5s'; and the containment arm's message names the heading as outside the region."
     },
     {
       "criterion_id": "FR-004",
-      "description": "Verify FR-004 is satisfied",
+      "description": "announce=\"off\" sweep widened to zero [role] and zero [aria-live] anywhere in the shadow root, for all six tones",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "evidence": "fixtures/elements-behaviour/src/sk-notice.test.ts, 401-test suite green",
+      "pass_fail": "pass",
+      "verified_by": "claude-opus-5",
+      "verified_at": "2026-09-06T23:56:48.919186Z",
+      "notes": "announce=\"off\" sweep widened to zero [role] and zero [aria-live] anywhere in the shadow root, for all six tones."
     },
     {
       "criterion_id": "FR-005",
-      "description": "Verify FR-005 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "description": "@slot heading, @csspart heading/body/content and three story docblocks rewritten; manifest and wrappers regenerated cache-free and --check green",
+      "proof_type": "code_review",
+      "evidence": "packages/elements/custom-elements.json, packages/react/src/SkNotice.d.ts",
+      "pass_fail": "pass",
+      "verified_by": "claude-opus-5",
+      "verified_at": "2026-09-06T23:56:48.919186Z",
+      "notes": "@slot heading, @csspart heading/body/content and three story docblocks rewritten; manifest and wrappers regenerated cache-free and --check green."
     },
     {
       "criterion_id": "FR-006",
-      "description": "Verify FR-006 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "description": "Entry under [Unreleased] with the before/after announcement, a migration paragraph, and the aria-atomic consequence",
+      "proof_type": "code_review",
+      "evidence": "docs/design-system/changelog.md",
+      "pass_fail": "pass",
+      "verified_by": "claude-opus-5",
+      "verified_at": "2026-09-06T23:56:48.919186Z",
+      "notes": "Entry under [Unreleased] with the before/after announcement, a migration paragraph, and the aria-atomic consequence."
     },
     {
       "criterion_id": "FR-007",
-      "description": "Verify FR-007 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "description": "Caveat widened on two measured grounds: the documented reliable path no longer reaches an empty region with a heading slotted, and both roles are implicitly aria-atomic",
+      "proof_type": "code_review",
+      "evidence": "packages/elements/src/notice/sk-notice.ts",
+      "pass_fail": "pass",
+      "verified_by": "claude-opus-5",
+      "verified_at": "2026-09-06T23:56:48.919186Z",
+      "notes": "Caveat widened on two measured grounds: the documented reliable path no longer reaches an empty region with a heading slotted, and both roles are implicitly aria-atomic."
     },
     {
       "criterion_id": "FR-008",
-      "description": "Verify FR-008 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "description": "The forbidding sentence is replaced by a section separating completing a family from an existing hue from introducing a hue",
+      "proof_type": "code_review",
+      "evidence": "docs/contributing/adding-a-token.md",
+      "pass_fail": "pass",
+      "verified_by": "claude-opus-5",
+      "verified_at": "2026-09-06T23:56:48.919186Z",
+      "notes": "The forbidding sentence is replaced by a section separating completing a family from an existing hue from introducing a hue."
     },
     {
       "criterion_id": "FR-009",
-      "description": "Verify FR-009 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "description": "Three-question test with the conditions on a yes, plus a worked yes (rose) and a worked no (a teal status surface)",
+      "proof_type": "code_review",
+      "evidence": "docs/contributing/adding-a-token.md",
+      "pass_fail": "pass",
+      "verified_by": "claude-opus-5",
+      "verified_at": "2026-09-06T23:56:48.919186Z",
+      "notes": "Three-question test with the conditions on a yes, plus a worked yes (rose) and a worked no (a teal status surface)."
     },
     {
       "criterion_id": "FR-010",
-      "description": "Verify FR-010 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "description": "The \"resolves to a token above\" claim is scoped to the --sk-status-* layer and the three rose literals are named",
+      "proof_type": "code_review",
+      "evidence": "docs/design-system/using-tokens.md",
+      "pass_fail": "pass",
+      "verified_by": "claude-opus-5",
+      "verified_at": "2026-09-06T23:56:48.919186Z",
+      "notes": "The \"resolves to a token above\" claim is scoped to the --sk-status-* layer and the three rose literals are named."
     }
   ],
   "negative_invariants": []
