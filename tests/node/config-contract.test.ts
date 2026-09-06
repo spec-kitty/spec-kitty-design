@@ -30,6 +30,30 @@ test('[config] retry is 0 for every project, on the RESOLVED config', async () =
   }
 });
 
+test('[config] browser files are collected serially on the RESOLVED config', async () => {
+  // A shared optimizer cache was first blamed for randomly absent mutation subjects. Independent
+  // caches removed cross-root interference but did not fix normal parallel browser collection:
+  // cold and warm runs still lost modules, closed the browser RPC connection, or hung. This is a
+  // resolved-config assertion so deleting the operational setting cannot leave only its comment.
+  const vitest = await createVitest('test', { watch: false });
+  try {
+    const browsers = vitest.projects.filter((project) => project.config.browser.enabled);
+    expect(browsers.length, 'at least one browser project must be configured').toBeGreaterThan(0);
+    for (const browser of browsers) {
+      expect(
+        browser.config.fileParallelism,
+        `${browser.name}: top-level file parallelism must be disabled`,
+      ).toBe(false);
+      expect(
+        browser.config.browser.fileParallelism,
+        `${browser.name}: effective browser file parallelism must be disabled`,
+      ).toBe(false);
+    }
+  } finally {
+    await vitest.close();
+  }
+});
+
 test('[config] the floor reporter is in the RESOLVED config', async () => {
   // The arm that was missing. Asserting the npm script's text would be weaker — this reads
   // what Vitest actually resolved, so moving the flag, renaming the file or dropping it

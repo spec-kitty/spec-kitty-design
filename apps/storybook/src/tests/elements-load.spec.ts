@@ -1,4 +1,4 @@
-import { test, expect, type Page } from '@playwright/test';
+import { test, expect, type Locator, type Page } from '@playwright/test';
 import { createHash } from 'node:crypto';
 import { readFileSync, writeFileSync, mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -291,4 +291,313 @@ test.describe('distribution artifacts', () => {
     expect(result.adopted, 'adoptedStyleSheets.length').toBe(1);
     expect(result.styleTags, "shadowRoot <style> count").toBe(0);
   });
+});
+
+const actionRowStory = async (page: Page, id: string) => {
+  await page.goto(`/iframe.html?id=elements-skactionrow--${id}&viewMode=story`);
+  const host = page.locator('sk-action-row').first();
+  await expect(host.locator('[part="row"]')).toBeVisible({ timeout: 20000 });
+  return host;
+};
+
+test.describe('sk-action-row browser contract', () => {
+  test('keeps real browser list roles, equal projections and trailing controls outside row activation', async ({ page }) => {
+    await actionRowStory(page, 'native-list');
+    const list = page.getByRole('list');
+    await expect(list).toHaveCount(1);
+    const items = list.getByRole('listitem');
+    await expect(items).toHaveCount(2);
+    for (const item of await items.all()) {
+      await expect(item.locator(':scope > sk-action-row')).toHaveCount(1);
+    }
+
+    const rows = page.locator('ul > li > sk-action-row');
+    await expect(rows).toHaveCount(2);
+    expect(await rows.evaluateAll((hosts) =>
+      hosts.map((host) => host.shadowRoot?.querySelectorAll('ul,li,[role="list"],[role="listitem"]').length),
+    )).toEqual([0, 0]);
+    const projections = await rows.evaluateAll((hosts) => hosts.map((host) => ({
+      lightMarkup: host.innerHTML.replace(/\s+/g, ' ').trim(),
+      shadowMarkup: host.shadowRoot?.innerHTML.replace(/<!---->/g, '').replace(/\s+/g, ' ').trim(),
+      slots: Object.fromEntries(
+        Array.from(host.shadowRoot?.querySelectorAll<HTMLSlotElement>('slot[name]') ?? []).map((slot) => [
+          slot.name,
+          slot.assignedNodes({ flatten: true }).map((node) => node.textContent).join('').replace(/\s+/g, ' ').trim(),
+        ]),
+      ),
+    })));
+    expect(projections).toHaveLength(2);
+    expect(projections[1], 'equal supplied event content must produce an equal row projection').toEqual(projections[0]);
+    await expect(page.locator('sk-section-header')).toHaveCount(1);
+    await expect(page.locator('sk-status-indicator')).toHaveCount(2);
+    await expect(page.locator('sk-entity-marker')).toHaveCount(2);
+
+    const host = await actionRowStory(page, 'with-controls');
+    await host.evaluate((element) => {
+      const state = { controls: 0, rows: 0 };
+      (window as typeof window & { __actionRowControls?: typeof state }).__actionRowControls = state;
+      element.addEventListener('sk-action-row-activate', () => { state.rows += 1; });
+      element.querySelector('[data-native-link]')!.addEventListener('click', (event) => {
+        event.preventDefault();
+        state.controls += 1;
+      });
+      element.querySelector('[data-native-button]')!.addEventListener('click', () => { state.controls += 1; });
+      element.querySelector('[data-sk-button]')!.addEventListener('click', () => { state.controls += 1; });
+    });
+    await host.locator('[data-native-link]').click();
+    await host.locator('[data-native-button]').click();
+    await host.locator('[data-sk-button]').locator('button').click();
+    expect(await page.evaluate(() =>
+      (window as typeof window & { __actionRowControls: unknown }).__actionRowControls,
+    )).toEqual({ controls: 3, rows: 0 });
+  });
+
+  test('emits the exact non-cancelable event once and suppresses repeat key activation', async ({ page }) => {
+    const host = await actionRowStory(page, 'default');
+    const trigger = host.locator('button[part="trigger"]');
+    await host.evaluate((element) => {
+      const trace = {
+        events: [] as Array<{ detail: unknown; keys: string[]; bubbles: boolean; composed: boolean; cancelable: boolean }>,
+        dispatches: [] as Array<{ result: boolean; defaultPrevented: boolean }>,
+        keys: [] as Array<{ key: string; repeat: boolean; defaultPrevented: boolean }>,
+      };
+      (window as typeof window & { __actionRowTrace?: typeof trace }).__actionRowTrace = trace;
+      const originalDispatch = element.dispatchEvent.bind(element);
+      element.dispatchEvent = ((event: Event) => {
+        const result = originalDispatch(event);
+        trace.dispatches.push({ result, defaultPrevented: event.defaultPrevented });
+        return result;
+      }) as typeof element.dispatchEvent;
+      element.addEventListener('sk-action-row-activate', (event) => {
+        const custom = event as CustomEvent<unknown>;
+        trace.events.push({
+          detail: custom.detail,
+          keys: Object.keys((custom.detail ?? {}) as object),
+          bubbles: custom.bubbles,
+          composed: custom.composed,
+          cancelable: custom.cancelable,
+        });
+      });
+      document.addEventListener('sk-action-row-activate', (event) => event.preventDefault());
+      element.shadowRoot!.querySelector('button')!.addEventListener('keydown', (event) => {
+        trace.keys.push({ key: event.key, repeat: event.repeat, defaultPrevented: event.defaultPrevented });
+      });
+    });
+
+    await trigger.click();
+    expect(await page.evaluate(() =>
+      (window as typeof window & { __actionRowTrace: unknown }).__actionRowTrace,
+    )).toMatchObject({
+      events: [{ detail: { id: 'activity-17' }, keys: ['id'], bubbles: true, composed: true, cancelable: false }],
+      dispatches: [{ result: true, defaultPrevented: false }],
+    });
+
+    await page.evaluate(() => {
+      const trace = (window as typeof window & {
+        __actionRowTrace: { events: unknown[]; dispatches: unknown[]; keys: unknown[] };
+      }).__actionRowTrace;
+      trace.events.length = 0;
+      trace.dispatches.length = 0;
+      trace.keys.length = 0;
+    });
+    await trigger.focus();
+    await page.keyboard.down('Enter');
+    await page.keyboard.down('Enter');
+    await page.keyboard.up('Enter');
+    expect(await page.evaluate(() =>
+      (window as typeof window & { __actionRowTrace: unknown }).__actionRowTrace,
+    )).toMatchObject({
+      events: [{ detail: { id: 'activity-17' } }],
+      keys: expect.arrayContaining([{ key: 'Enter', repeat: true, defaultPrevented: true }]),
+    });
+    expect(await host.evaluate((element) => (element as HTMLElement & { selected: boolean }).selected)).toBe(false);
+  });
+
+  test('keeps controlled selection valid in both branches and fits the 320px story', async ({ page }) => {
+    let host = await actionRowStory(page, 'selected');
+    let row = host.locator('[part="row"]');
+    let rowHandle = await row.elementHandle();
+    expect(rowHandle).not.toBe(null);
+    await expect(row).toHaveAttribute('aria-current', 'true');
+    const selectableSnapshot = await host.ariaSnapshot();
+    expect(selectableSnapshot).toMatch(/^- button /m);
+    expect(selectableSnapshot).not.toMatch(/^- (checkbox|option|switch)\b/m);
+    expect(await row.evaluate((node) => (node as HTMLElement).tabIndex)).toBe(-1);
+
+    await host.locator('button[part="trigger"]').click();
+    expect(await host.evaluate((element) => (element as HTMLElement & { selected: boolean }).selected)).toBe(true);
+    await expect(row).toHaveAttribute('aria-current', 'true');
+
+    await host.evaluate(async (element) => {
+      const controlled = element as HTMLElement & { selected: boolean; updateComplete: Promise<unknown> };
+      controlled.selected = false;
+      await controlled.updateComplete;
+    });
+    expect(await row.evaluate((node, original) => node === original, rowHandle)).toBe(true);
+    expect(await row.getAttribute('aria-current')).toBe(null);
+    // Playwright 1.62 and Chromium's AX protocol omit aria-current even for native links.
+    // The stable accessibility structure plus the DOM carrier transition are asserted separately.
+    expect(await host.ariaSnapshot()).toBe(selectableSnapshot);
+
+    host = await actionRowStory(page, 'non-selectable');
+    row = host.locator('[part="row"]');
+    rowHandle = await row.elementHandle();
+    expect(rowHandle).not.toBe(null);
+    await expect(row).toHaveAttribute('aria-current', 'true');
+    await expect(host.locator('button[part="trigger"]')).toHaveCount(0);
+    await expect(host.locator('[aria-selected],[aria-pressed],[role="checkbox"],[role="switch"]')).toHaveCount(0);
+    const nonSelectableSnapshot = await host.ariaSnapshot();
+    expect(nonSelectableSnapshot).not.toMatch(/^- (button|checkbox|option|switch)\b/m);
+    expect(nonSelectableSnapshot).toContain('- img "Spec Kitty repository"');
+    expect(await row.evaluate((node) => (node as HTMLElement).tabIndex)).toBe(-1);
+
+    await host.evaluate(async (element) => {
+      const controlled = element as HTMLElement & { selected: boolean; updateComplete: Promise<unknown> };
+      controlled.selected = false;
+      await controlled.updateComplete;
+    });
+    expect(await row.evaluate((node, original) => node === original, rowHandle)).toBe(true);
+    expect(await row.getAttribute('aria-current')).toBe(null);
+    expect(await host.ariaSnapshot()).toBe(nonSelectableSnapshot);
+
+    await page.setViewportSize({ width: 320, height: 844 });
+    host = await actionRowStory(page, 'long-content');
+    const trigger = host.locator('button[part="trigger"]');
+    const metadata = host.locator('time[slot="metadata"]');
+    await expect(host.locator('sk-pill-tag[slot="tags"]')).toHaveCount(3);
+    await expect(metadata).toBeVisible();
+    await expect(metadata).toHaveText('2 hours ago');
+    await trigger.focus();
+    await expect(trigger).toBeFocused();
+
+    const metrics = await host.evaluate((element) => {
+      const row = element.shadowRoot!.querySelector<HTMLElement>('[part="row"]')!;
+      const trigger = element.shadowRoot!.querySelector<HTMLElement>('[part="trigger"]')!;
+      const controls = element.shadowRoot!.querySelector<HTMLElement>('[part="controls"]')!;
+      const metadata = element.querySelector<HTMLElement>('time[slot="metadata"]')!;
+      const rowRect = row.getBoundingClientRect();
+      const triggerRect = trigger.getBoundingClientRect();
+      const controlsRect = controls.getBoundingClientRect();
+      const metadataRect = metadata.getBoundingClientRect();
+      const focus = getComputedStyle(trigger);
+      const metadataStyle = getComputedStyle(metadata);
+      const focusOutset = Math.max(0, Number.parseFloat(focus.outlineWidth) + Number.parseFloat(focus.outlineOffset));
+      const overlaps = !(
+        metadataRect.right <= controlsRect.left || controlsRect.right <= metadataRect.left ||
+        metadataRect.bottom <= controlsRect.top || controlsRect.bottom <= metadataRect.top
+      );
+      return {
+        width: element.getBoundingClientRect().width,
+        documentOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+        rowOverflow: row.scrollWidth - row.clientWidth,
+        triggerOverflow: trigger.scrollWidth - trigger.clientWidth,
+        controlsInside: controlsRect.left >= rowRect.left && controlsRect.right <= rowRect.right + 0.5,
+        metadataControlOverlap: overlaps,
+        metadataReadable: metadataRect.width > 0 && metadataRect.height > 0 &&
+          metadataStyle.display !== 'none' && metadataStyle.visibility === 'visible',
+        focusVisible: focus.outlineStyle !== 'none' && Number.parseFloat(focus.outlineWidth) > 0,
+        focusInsideViewport: triggerRect.left - focusOutset >= 0 &&
+          triggerRect.right + focusOutset <= window.innerWidth &&
+          triggerRect.top - focusOutset >= 0 && triggerRect.bottom + focusOutset <= window.innerHeight,
+        focusInsideRow: triggerRect.left - focusOutset >= rowRect.left - 0.5 &&
+          triggerRect.right + focusOutset <= rowRect.right + 0.5 &&
+          triggerRect.top - focusOutset >= rowRect.top - 0.5 &&
+          triggerRect.bottom + focusOutset <= rowRect.bottom + 0.5,
+      };
+    });
+    expect(metrics.width).toBe(320);
+    expect(metrics.documentOverflow, 'the 320px browser viewport must not scroll horizontally').toBeLessThanOrEqual(0);
+    expect(metrics.rowOverflow).toBeLessThanOrEqual(0);
+    expect(metrics.triggerOverflow).toBeLessThanOrEqual(0);
+    expect(metrics.controlsInside).toBe(true);
+    expect(metrics.metadataControlOverlap).toBe(false);
+    expect(metrics.metadataReadable).toBe(true);
+    expect(metrics.focusVisible).toBe(true);
+    expect(metrics.focusInsideViewport).toBe(true);
+    expect(metrics.focusInsideRow).toBe(true);
+  });
+
+  test('keeps selected, hover, pressed and focus affordances visible in dark and light forced colors', async ({ page }) => {
+    const paint = (locator: Locator) => locator.evaluate((node) => {
+      const style = getComputedStyle(node);
+      return {
+        outlineStyle: style.outlineStyle,
+        outlineWidth: Number.parseFloat(style.outlineWidth),
+        borderInlineStartStyle: style.borderInlineStartStyle,
+        borderInlineStartWidth: Number.parseFloat(style.borderInlineStartWidth),
+      };
+    });
+    const hasVisibleOutline = (value: Awaited<ReturnType<typeof paint>>) =>
+      value.outlineStyle !== 'none' && value.outlineWidth > 0;
+    const outlineSignature = (value: Awaited<ReturnType<typeof paint>>) =>
+      [value.outlineStyle, value.outlineWidth].join('|');
+    const selectedEdgeSignature = (value: Awaited<ReturnType<typeof paint>>) =>
+      [value.borderInlineStartStyle, value.borderInlineStartWidth].join('|');
+
+    for (const colorScheme of ['dark', 'light'] as const) {
+      await page.emulateMedia({ forcedColors: 'active', colorScheme });
+      await actionRowStory(page, 'selectable-states');
+      const restHost = page.locator('sk-action-row[data-state-rest]');
+      const selectedHost = page.locator('sk-action-row[data-state-selected]');
+      const restRow = restHost.locator('[part="row"]');
+      const selectedRow = selectedHost.locator('[part="row"]');
+      const trigger = restHost.locator('button[part="trigger"]');
+      const [restRowPaint, selectedRowPaint, restTriggerPaint] = await Promise.all([
+        paint(restRow), paint(selectedRow), paint(trigger),
+      ]);
+
+      expect(selectedRowPaint.borderInlineStartStyle, `${colorScheme} selected edge`).not.toBe('none');
+      expect(selectedRowPaint.borderInlineStartWidth, `${colorScheme} selected edge`).toBeGreaterThan(0);
+      expect(selectedEdgeSignature(selectedRowPaint), `${colorScheme} selected must differ from rest`)
+        .not.toBe(selectedEdgeSignature(restRowPaint));
+
+      await trigger.hover();
+      const hoverPaint = await paint(trigger);
+      expect(hasVisibleOutline(restTriggerPaint), `${colorScheme} rest has no state outline`).toBe(false);
+      expect(hasVisibleOutline(hoverPaint), `${colorScheme} hover outline`).toBe(true);
+      expect(outlineSignature(hoverPaint), `${colorScheme} hover must differ from rest`)
+        .not.toBe(outlineSignature(restTriggerPaint));
+
+      await page.mouse.down();
+      const pressedPaint = await paint(trigger);
+      expect(hasVisibleOutline(pressedPaint), `${colorScheme} pressed outline`).toBe(true);
+      expect(outlineSignature(pressedPaint), `${colorScheme} pressed must differ from hover`)
+        .not.toBe(outlineSignature(hoverPaint));
+      await page.mouse.up();
+      await page.mouse.move(0, 0);
+
+      await trigger.evaluate((node) => (node as HTMLElement).blur());
+      await page.keyboard.press('Tab');
+      await trigger.focus();
+      await expect(trigger).toBeFocused();
+      const focusPaint = await paint(trigger);
+      expect(hasVisibleOutline(focusPaint), `${colorScheme} focus outline`).toBe(true);
+      expect(outlineSignature(focusPaint), `${colorScheme} focus must differ from hover`)
+        .not.toBe(outlineSignature(hoverPaint));
+    }
+  });
+
+  test('removes both component-owned transitions under reduced motion', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    const host = await actionRowStory(page, 'default');
+    const transitions = await host.evaluate((element) => {
+      const row = element.shadowRoot!.querySelector<HTMLElement>('[part="row"]')!;
+      const trigger = element.shadowRoot!.querySelector<HTMLElement>('[part="trigger"]')!;
+      return [getComputedStyle(row).transitionProperty, getComputedStyle(trigger).transitionProperty];
+    });
+    expect(transitions).toEqual(['none', 'none']);
+  });
+});
+
+test('the section-header action story upgrades the reused sk-button to a native control', async ({ page }) => {
+  await page.goto('/iframe.html?id=elements-sksectionheader--with-metadata-and-action&viewMode=story');
+  const action = page.locator('sk-section-header sk-button[slot="action"]');
+  await expect(action.locator('button')).toBeVisible();
+  await expect(action).toHaveText('View all');
+});
+
+test('section-header preserves the consumer heading without adding a banner landmark', async ({ page }) => {
+  await page.goto('/iframe.html?id=elements-sksectionheader--with-metadata-and-action&viewMode=story');
+  await expect(page.getByRole('heading', { name: 'Repository activity', level: 3 })).toBeVisible();
+  await expect(page.getByRole('banner')).toHaveCount(0);
 });

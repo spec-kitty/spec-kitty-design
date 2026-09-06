@@ -153,6 +153,11 @@ export default defineConfig({
           // corresponding assertion that it actually matched is in that fixture's own test.
           include: ['tests/browser/**/*.test.ts', 'fixtures/**/src/**/*.test.{ts,tsx}'],
           retry: 0,
+          // Vitest browser file collection is not safe in parallel for this suite. Repeated cold
+          // and warm runs lost random modules, closed the browser connection, or hung even after
+          // every discovered dependency was cached. Serial collection remained 307/307 and stays
+          // below the committed 25-second full-suite ceiling.
+          fileParallelism: false,
           browser: {
             enabled: true,
             headless: true,

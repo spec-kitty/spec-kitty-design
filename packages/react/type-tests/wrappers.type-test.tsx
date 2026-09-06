@@ -13,9 +13,11 @@
  */
 import * as React from 'react';
 import {
+  SkActionRow,
   SkFormInput,
   SkNavPill,
   SkTransitionMatrix,
+  type ActionRowActivateDetail,
   type SkFormInputElement,
   type TransitionMatrixSelectDetail,
 } from '../src/index.js';
@@ -127,3 +129,29 @@ export const transitionMatrixInvalidCopy = <SkTransitionMatrix description={42} 
 
 // @ts-expect-error event detail route ids are strings
 export const transitionMatrixInvalidDetail: TransitionMatrixSelectDetail = { routeId: 42 };
+
+// --- action row --------------------------------------------------------------------------
+export const actionRowAllProps = (
+  <SkActionRow
+    rowId="sentinel-row"
+    selectable
+    selected={false}
+    onSkActionRowActivate={(event) => {
+      const detail: ActionRowActivateDetail = event.detail;
+      void detail.id.toUpperCase();
+      // @ts-expect-error action-row detail is exactly `{ id }`, not the element prop name
+      void event.detail.rowId;
+      // @ts-expect-error a second unknown key ensures the detail is not `any`
+      void event.detail.routeId;
+    }}
+  />
+);
+
+// @ts-expect-error rowId is a consumer-owned string
+export const actionRowInvalidRowId = <SkActionRow rowId={146} />;
+
+// @ts-expect-error selectable is boolean, not a string attribute
+export const actionRowInvalidSelectable = <SkActionRow selectable="true" />;
+
+// @ts-expect-error selected is boolean, not a string attribute
+export const actionRowInvalidSelected = <SkActionRow selected="false" />;

@@ -14,10 +14,22 @@
     "",
     "TWO ceilings, because they measure different things and mixing them could not tell you",
     "which had regressed. `ceilingSeconds` covers `npm run test` - both lanes, chromium and",
-    "webkit in CI. `selftestCeilingSeconds` covers scripts/suite-selftest.mjs, which runs one",
-    "full suite per mutation and is where this job's time actually goes. That second key was",
+    "webkit in CI. `selftestCeilingSeconds` covers scripts/suite-selftest.mjs, which proves a",
+    "complete full-suite baseline and runs every dependency-affected browser test per mutation.",
+    "That second key was",
     "read by NOTHING until the second gate pass caught it: an inert key documented as an",
     "enforced ceiling, in the file whose thesis is that stale prose goes unnoticed.",
+    "At #146 Vitest's unmutated dependency graph replaced the mutation-registry-derived filter.",
+    "Package barrels remain broad; graph errors and empty selections fail closed to the full suite,",
+    "and every run matches its affected SC assertion set. Exact-head CI run 34031816773 then proved",
+    "that filtering was active (29 sources, zero full-suite fallbacks) and every one of 128 mutations",
+    "produced its named red against a green 307-assertion baseline, but 923.9s exceeded 881.9s.",
+    "The operator authorized remediation on 2026-09-06. The ceiling is therefore recalibrated to",
+    "1405.5s using the repository's existing 1.5213x worst-observed-CI multiplier:",
+    "923.9 x (881.9 / 579.7) = 1405.5s. This retains 52.1% headroom over the new worst run.",
+    "The 568.6s workstation result is recorded only as a 62.5% CI/local variance observation; CI",
+    "remains authoritative. One CI observation does not prove the runner tail, so a future breach",
+    "must trigger investigation rather than another automatic raise.",
     "",
     "WHERE THIS BUDGET LIVES IS AN OPEN OPERATOR QUESTION. Amending the charter's Performance",
     "Benchmarks may be the right home, but charter.md and charter.yaml contradict each other and",
@@ -78,7 +90,7 @@
   "measuredOn": "ubuntu-latest, chromium + webkit, cold npm ci",
   "runUrl": "https://github.com/spec-kitty/spec-kitty-design/actions/runs/33713144837",
   "sha": "0f1df74",
-  "selftestCeilingSeconds": 881.9,
+  "selftestCeilingSeconds": 1405.5,
   "selftestMeasurements": [
     {
       "sha": "d34feaa",
@@ -177,6 +189,14 @@
       "tests": 284,
       "seconds": 575.6,
       "note": "CI, PR #207 (#182), run 34032506923 — the same head as ddbfcc7 rebased onto #203, with no test or mutation change. 32% faster than that run at an identical set; the pair is the file's first same-day, same-count variance measurement. Recorded as a PAIR with ddbfcc7 rather than replacing it: a single quoted figure is what this file argues against."
+    },
+    {
+      "sha": "28917cc",
+      "mutations": 128,
+      "tests": 307,
+      "seconds": 923.9,
+      "ceilingBreach": true,
+      "note": "CI, PR #206 (#146), run 34031816773 / job 101482679926. Green 307-assertion baseline with all 88 registry pairs present; 29 mutated sources resolved with zero full-suite fallbacks; all 128 mutations produced their named red with no collateral. The ONLY failure was the 881.9s ceiling. The ordinary behavior gate independently passed 647/647 in 22.5s under its 25s ceiling. Independent debugger-debbie Codex diagnosis found no hang or isolated slow arm and recommended the operator-authorized 1405.5s calibration."
     }
   ]
 }

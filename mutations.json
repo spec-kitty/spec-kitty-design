@@ -7,14 +7,12 @@
     "SC-014 is identity AND zero-<style>; SC-015 is three arms. One mutation cannot red them",
     "all while staying collateral-clean, which is why guard 7 is a superset relation and not",
     "set equality.",
-    "",
     "TWO ENTRIES ARE DELIBERATELY NOT THE OBVIOUS FORM, and the spec pins both:",
     "  SC-015 is NOT 'replace define with an empty function' — that unregisters sk-stub and",
     "  reds every other elements-owned test, failing the collateral bound on the mission's own",
     "  canonical mutation.",
     "  SC-014 is NOT 'hand-author a new CSSStyleSheet()' — the generated module already exports",
     "  exactly that and Lit adopts it by reference, so identity survives and the test stays",
-    "",
     "`subject` (#73) names the test FILE whose [id] must go red. Behaviour ids are no longer",
     "unique across the suite — sk-nav-pill and the synthetic fixture both carry SC-006 — so an",
     "id-only match would let a mutation red the fixture's test and be credited for the",
@@ -30,7 +28,10 @@
     "#78's gate asked for a fourth blog-card arm dropping one `::slotted(` branch, and it is deliberately NOT added, for the reason #140 recorded above: guard 7 keys on a declared (id, subject) pair and guard 4 requires the red test to carry a [SC-NNN] marker. The arm that asserts slotted reach is a regression test, not an ADR-11 required behaviour, so binding it to SC-013 or SC-014 would mislabel it and minting an id would extend ADR-11, which #67 owns. The coverage is real either way and is doubled: the fixture asserts a computed style off a slotted node AND that the hover rule survives parsing, and check-adopted-css-boundaries now rejects `::slotted(x):hover` outright with three committed probes.",
     "#77 adds THREE for <sk-site-footer>. The SC-013 arm drops the DIVIDER's part rather than the footer's, because the footer part is also the node other tests query to prove the element rendered at all — the same reasoning check-bullet's arm records. Both SC-014 spellings are carried, per #77's own earlier finding: emptying the array reds the adoptedStyleSheets.length assertion FIRST and vitest aborts there, so the identity assertion on the next line is never shown to be load-bearing in the behaviour whose id is literally about identity. Swapping in a fresh CSSStyleSheet keeps length at 1 and can only red the identity arm.",
     "#77's pass-2 gate asked for a FOURTH site-footer arm covering the conditional divider, and it was written, bound to SC-013, and then REMOVED — the harness correctly reported it 'semantically inert'. Forcing the divider to always render does not break SC-013, which is 'every declared part is targetable': the part is still present and still targetable. The conditionality is a regression guard, not an ADR-11 required behaviour, so it has no (id, subject) pair to bind to and guard 4 has no [SC-NNN]-marked test to red. Third time this programme has reached that boundary (#140, #143, here), and the answer is the same each time: the coverage is real — `the divider is drawn only when there is a legal line to divide` asserts absence, whitespace-only, and the property arriving later — it is simply held by a test rather than by the harness. Minting an id would extend ADR-11's behaviour set, which #67 owns.",
-    "#182 adds two for <sk-page-header>, one per axis, and both mutate the ELEMENT rather than the test. Each flips `reflect: true` to `reflect: false` on one of the two new reactive properties; the named [SC-010] test asserts the pre-upgrade value reaches the ATTRIBUTE, so each arm reds it on its own. The sticky arm is not merely a reflection check: the sticky geometry is expressed as `:host([sticky])` — it HAS to be on the host, because an inner box's containing block is the host and it cannot move inside it (measured) — so an unreflected `sticky` is a sticky axis that silently does nothing. NO THIRD ARM FOR THE REFLOW THRESHOLD, and that is a stated gap rather than an omission: guard 7 requires every mutation's (id, subject) pair to be declared in behaviours.json, and tests/node/config-contract.test.ts asserts that file's applicable id set equals ADR-11's list exactly. ADR-11 has no id for a responsive/threshold behaviour, so the drop blocks are covered by ordinary tests here and by apps/storybook/src/tests/sk-page-header-sticky.spec.ts, and the registry gap is filed as an issue rather than closed by mis-filing a layout assertion under a reflection id."
+    "#182 adds two for <sk-page-header>, one per axis, and both mutate the ELEMENT rather than the test. Each flips `reflect: true` to `reflect: false` on one of the two new reactive properties; the named [SC-010] test asserts the pre-upgrade value reaches the ATTRIBUTE, so each arm reds it on its own. The sticky arm is not merely a reflection check: the sticky geometry is expressed as `:host([sticky])` — it HAS to be on the host, because an inner box's containing block is the host and it cannot move inside it (measured) — so an unreflected `sticky` is a sticky axis that silently does nothing. NO THIRD ARM FOR THE REFLOW THRESHOLD, and that is a stated gap rather than an omission: guard 7 requires every mutation's (id, subject) pair to be declared in behaviours.json, and tests/node/config-contract.test.ts asserts that file's applicable id set equals ADR-11's list exactly. ADR-11 has no id for a responsive/threshold behaviour, so the drop blocks are covered by ordinary tests here and by apps/storybook/src/tests/sk-page-header-sticky.spec.ts, and the registry gap is filed as an issue rather than closed by mis-filing a layout assertion under a reflection id.",
+    "#146 WP01 adds ELEVEN arms: one part removal and two independent style-adoption arms for each of three primitives, plus one late-upgrade property-registration removal each for status tone and entity label. Section-header is slot-only and does not claim SC-010.",
+    "#146 WP02 adds SEVEN sk-action-row arms: duplicate dispatch, wrong detail, false bubbling/composed flags, pre-upgrade rowId registration loss, one non-root part removal, empty styles, and fresh-sheet identity. There is no cancellation arm because SC-009 is inapplicable.",
+    "#146 WP03 adds ONE generated react-action-row arm that removes the wrapper listener inside the harness copy. The four element subjects contribute 18 mission arms and this wrapper contributes the nineteenth."
   ],
   "mutations": [
     {
@@ -920,6 +921,158 @@
       "file": "packages/elements/src/page-header/sk-page-header.ts",
       "from": "    sticky: { type: Boolean, reflect: true },",
       "to": "    sticky: { type: Boolean, reflect: false },"
+    },
+    {
+      "id": "SC-013",
+      "subject": "fixtures/elements-behaviour/src/sk-section-header.test.ts",
+      "arm": "section-header eyebrow part remains targetable",
+      "file": "packages/elements/src/section-header/sk-section-header.ts",
+      "from": "<div part=\"eyebrow\" class=\"sk-section-header__eyebrow\" hidden>",
+      "to": "<div class=\"sk-section-header__eyebrow\" hidden>"
+    },
+    {
+      "id": "SC-014",
+      "subject": "fixtures/elements-behaviour/src/sk-section-header.test.ts",
+      "arm": "section-header adopts one generated sheet",
+      "file": "packages/elements/src/section-header/sk-section-header.ts",
+      "from": "  static styles = [sheet];",
+      "to": "  static styles = [];"
+    },
+    {
+      "id": "SC-014",
+      "subject": "fixtures/elements-behaviour/src/sk-section-header.test.ts",
+      "arm": "section-header adopts the named sheet by identity",
+      "file": "packages/elements/src/section-header/sk-section-header.ts",
+      "from": "  static styles = [sheet];",
+      "to": "  static styles = [new CSSStyleSheet()];"
+    },
+    {
+      "id": "SC-010",
+      "subject": "fixtures/elements-behaviour/src/sk-status-indicator.test.ts",
+      "arm": "pre-upgrade status tone property remains reactive",
+      "file": "packages/elements/src/status-indicator/sk-status-indicator.ts",
+      "from": "    tone: { type: String, reflect: true },",
+      "to": ""
+    },
+    {
+      "id": "SC-013",
+      "subject": "fixtures/elements-behaviour/src/sk-status-indicator.test.ts",
+      "arm": "status-indicator marker part remains targetable",
+      "file": "packages/elements/src/status-indicator/sk-status-indicator.ts",
+      "from": "<span part=\"marker\" class=\"sk-status-indicator__marker\" aria-hidden=\"true\">",
+      "to": "<span class=\"sk-status-indicator__marker\" aria-hidden=\"true\">"
+    },
+    {
+      "id": "SC-014",
+      "subject": "fixtures/elements-behaviour/src/sk-status-indicator.test.ts",
+      "arm": "status-indicator adopts one generated sheet",
+      "file": "packages/elements/src/status-indicator/sk-status-indicator.ts",
+      "from": "  static styles = [sheet];",
+      "to": "  static styles = [];"
+    },
+    {
+      "id": "SC-014",
+      "subject": "fixtures/elements-behaviour/src/sk-status-indicator.test.ts",
+      "arm": "status-indicator adopts the named sheet by identity",
+      "file": "packages/elements/src/status-indicator/sk-status-indicator.ts",
+      "from": "  static styles = [sheet];",
+      "to": "  static styles = [new CSSStyleSheet()];"
+    },
+    {
+      "id": "SC-010",
+      "subject": "fixtures/elements-behaviour/src/sk-entity-marker.test.ts",
+      "arm": "pre-upgrade entity label property remains reactive",
+      "file": "packages/elements/src/entity-marker/sk-entity-marker.ts",
+      "from": "    label: { type: String, reflect: true },",
+      "to": ""
+    },
+    {
+      "id": "SC-013",
+      "subject": "fixtures/elements-behaviour/src/sk-entity-marker.test.ts",
+      "arm": "entity-marker content part remains targetable",
+      "file": "packages/elements/src/entity-marker/sk-entity-marker.ts",
+      "from": "<span part=\"content\" class=\"sk-entity-marker__content\">",
+      "to": "<span class=\"sk-entity-marker__content\">"
+    },
+    {
+      "id": "SC-014",
+      "subject": "fixtures/elements-behaviour/src/sk-entity-marker.test.ts",
+      "arm": "entity-marker adopts one generated sheet",
+      "file": "packages/elements/src/entity-marker/sk-entity-marker.ts",
+      "from": "  static styles = [sheet];",
+      "to": "  static styles = [];"
+    },
+    {
+      "id": "SC-014",
+      "subject": "fixtures/elements-behaviour/src/sk-entity-marker.test.ts",
+      "arm": "entity-marker adopts the named sheet by identity",
+      "file": "packages/elements/src/entity-marker/sk-entity-marker.ts",
+      "from": "  static styles = [sheet];",
+      "to": "  static styles = [new CSSStyleSheet()];"
+    },
+    {
+      "id": "SC-006",
+      "subject": "fixtures/elements-behaviour/src/sk-action-row.test.ts",
+      "arm": "one request per native primary activation",
+      "file": "packages/elements/src/action-row/sk-action-row.ts",
+      "from": "  row.dispatchEvent(event);",
+      "to": "  row.dispatchEvent(event); row.dispatchEvent(event);"
+    },
+    {
+      "id": "SC-007",
+      "subject": "fixtures/elements-behaviour/src/sk-action-row.test.ts",
+      "arm": "exact consumer row id detail",
+      "file": "packages/elements/src/action-row/sk-action-row.ts",
+      "from": "    detail: { id: row.rowId! },",
+      "to": "      detail: { id: '' },"
+    },
+    {
+      "id": "SC-008",
+      "subject": "fixtures/elements-behaviour/src/sk-action-row.test.ts",
+      "arm": "bubbling and composed event flags",
+      "file": "packages/elements/src/action-row/sk-action-row.ts",
+      "from": "    bubbles: true,\n    composed: true,",
+      "to": "    bubbles: false,\n    composed: false,"
+    },
+    {
+      "id": "SC-010",
+      "subject": "fixtures/elements-behaviour/src/sk-action-row.test.ts",
+      "arm": "pre-upgrade row id remains reactive",
+      "file": "packages/elements/src/action-row/sk-action-row.ts",
+      "from": "    rowId: { type: String, attribute: 'row-id', reflect: true },",
+      "to": ""
+    },
+    {
+      "id": "SC-013",
+      "subject": "fixtures/elements-behaviour/src/sk-action-row.test.ts",
+      "arm": "action-row reference part remains targetable",
+      "file": "packages/elements/src/action-row/sk-action-row.ts",
+      "from": "<span part=\"reference\" class=\"sk-action-row__reference\">",
+      "to": "<span class=\"sk-action-row__reference\">"
+    },
+    {
+      "id": "SC-014",
+      "subject": "fixtures/elements-behaviour/src/sk-action-row.test.ts",
+      "arm": "action-row adopts one generated sheet",
+      "file": "packages/elements/src/action-row/sk-action-row.ts",
+      "from": "  static styles = [sheet];",
+      "to": "  static styles = [];"
+    },
+    {
+      "id": "SC-014",
+      "subject": "fixtures/elements-behaviour/src/sk-action-row.test.ts",
+      "arm": "action-row adopts the named sheet by identity",
+      "file": "packages/elements/src/action-row/sk-action-row.ts",
+      "from": "  static styles = [sheet];",
+      "to": "  static styles = [new CSSStyleSheet()];"
+    },
+    {
+      "id": "SC-006",
+      "subject": "fixtures/react-consumer/src/sk-action-row.test.tsx",
+      "arm": "generated action-row wrapper subscribes the React callback",
+      "file": "packages/react/src/SkActionRow.js",
+      "from": "  useEventListener(ref, \"sk-action-row-activate\", props.onSkActionRowActivate);",
+      "to": "  void props.onSkActionRowActivate;"
     }
   ]
 }

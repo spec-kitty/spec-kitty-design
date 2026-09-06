@@ -1099,6 +1099,151 @@
         },
         {
           "kind": "class",
+          "description": "A controlled, consumer-composed action row.\n\nToken dependencies: --sk-border-default, --sk-border-strong, --sk-border-width-1,\n--sk-border-width-2, --sk-color-accent, --sk-fg-body, --sk-fg-default, --sk-fg-muted,\n--sk-font-display, --sk-font-mono, --sk-font-sans, --sk-motion-duration-fast,\n--sk-motion-ease-out, --sk-radius-md, --sk-space-1, --sk-space-2, --sk-space-3,\n--sk-space-4, --sk-space-5, --sk-surface-card, --sk-surface-muted, --sk-surface-pill,\n--sk-text-base, --sk-text-sm, --sk-text-xs, --sk-weight-medium, --sk-weight-semibold.",
+          "name": "SkActionRow",
+          "cssParts": [
+            {
+              "description": "Independent controls wrapper.",
+              "name": "controls"
+            },
+            {
+              "description": "Marker projection wrapper.",
+              "name": "marker"
+            },
+            {
+              "description": "Metadata projection wrapper.",
+              "name": "metadata"
+            },
+            {
+              "description": "Reference projection wrapper.",
+              "name": "reference"
+            },
+            {
+              "description": "Stable row root.",
+              "name": "row"
+            },
+            {
+              "description": "Tags projection wrapper.",
+              "name": "tags"
+            },
+            {
+              "description": "Title projection wrapper.",
+              "name": "title"
+            },
+            {
+              "description": "Primary scan-content surface.",
+              "name": "trigger"
+            }
+          ],
+          "slots": [
+            {
+              "description": "Independent trailing controls.",
+              "name": "controls"
+            },
+            {
+              "description": "Consumer-supplied visual marker.",
+              "name": "marker"
+            },
+            {
+              "description": "Consumer-authored trailing metadata.",
+              "name": "metadata"
+            },
+            {
+              "description": "Consumer-authored reference or path.",
+              "name": "reference"
+            },
+            {
+              "description": "Consumer-authored semantic tags.",
+              "name": "tags"
+            },
+            {
+              "description": "Primary consumer-authored title.",
+              "name": "title"
+            }
+          ],
+          "members": [
+            {
+              "kind": "field",
+              "name": "rowId",
+              "privacy": "public",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "Stable consumer-owned identifier included in activation requests.",
+              "attribute": "row-id",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "selectable",
+              "privacy": "public",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "description": "Enables the native primary trigger when `rowId` is non-empty.",
+              "attribute": "selectable",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "selected",
+              "privacy": "public",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "description": "Consumer-controlled current-row presentation. Activation never changes this value.",
+              "attribute": "selected",
+              "reflects": true
+            }
+          ],
+          "events": [
+            {
+              "type": {
+                "text": "CustomEvent<ActionRowActivateDetail>"
+              },
+              "description": "Requests activation for the exact consumer row ID. The event bubbles, is composed, and is not cancelable.",
+              "name": "sk-action-row-activate"
+            }
+          ],
+          "attributes": [
+            {
+              "name": "row-id",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "Stable consumer-owned identifier included in activation requests.",
+              "fieldName": "rowId"
+            },
+            {
+              "name": "selectable",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "description": "Enables the native primary trigger when `rowId` is non-empty.",
+              "fieldName": "selectable"
+            },
+            {
+              "name": "selected",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "description": "Consumer-controlled current-row presentation. Activation never changes this value.",
+              "fieldName": "selected"
+            }
+          ],
+          "superclass": {
+            "name": "LitElement",
+            "package": "lit"
+          },
+          "tagName": "sk-action-row",
+          "customElement": true
+        },
+        {
+          "kind": "class",
           "description": "A stateless page frame for personal navigation, contextual navigation, page heading, and content.",
           "name": "SkAppShell",
           "cssParts": [
@@ -1574,6 +1719,56 @@
             "package": "lit"
           },
           "tagName": "sk-context-sidebar",
+          "customElement": true
+        },
+        {
+          "kind": "class",
+          "description": "A compact consumer-supplied icon, initials, or short mark with explicit accessible naming.\n\nToken dependencies: --sk-font-sans, --sk-on-tint-butter, --sk-radius-sm, --sk-space-1,\n--sk-space-7, --sk-surface-tint-butter, --sk-text-xs, --sk-weight-bold.",
+          "name": "SkEntityMarker",
+          "cssParts": [
+            {
+              "description": "The supplied-mark wrapper.",
+              "name": "content"
+            },
+            {
+              "description": "The marker layout root.",
+              "name": "marker"
+            }
+          ],
+          "slots": [
+            {
+              "description": "Consumer-supplied icon, initials, or short mark.",
+              "name": ""
+            }
+          ],
+          "members": [
+            {
+              "kind": "field",
+              "name": "label",
+              "privacy": "public",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "Accessible name for a meaningful mark. Empty or whitespace-only values make it decorative.",
+              "attribute": "label",
+              "reflects": true
+            }
+          ],
+          "attributes": [
+            {
+              "name": "label",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "Accessible name for a meaningful mark. Empty or whitespace-only values make it decorative.",
+              "fieldName": "label"
+            }
+          ],
+          "superclass": {
+            "name": "LitElement",
+            "package": "lit"
+          },
+          "tagName": "sk-entity-marker",
           "customElement": true
         },
         {
@@ -3476,6 +3671,85 @@
         },
         {
           "kind": "class",
+          "description": "A presentational section heading whose outline level and supporting content are consumer-owned.\n\nToken dependencies: --sk-fg-default, --sk-fg-muted, --sk-font-display, --sk-font-mono,\n--sk-font-sans, --sk-space-2, --sk-space-6, --sk-text-sm, --sk-text-xl, --sk-text-xs,\n--sk-weight-medium, --sk-weight-semibold.",
+          "name": "SkSectionHeader",
+          "cssParts": [
+            {
+              "description": "The action slot wrapper.",
+              "name": "action"
+            },
+            {
+              "description": "The description slot wrapper.",
+              "name": "description"
+            },
+            {
+              "description": "The eyebrow slot wrapper.",
+              "name": "eyebrow"
+            },
+            {
+              "description": "The section-header layout root.",
+              "name": "header"
+            },
+            {
+              "description": "The metadata slot wrapper.",
+              "name": "metadata"
+            },
+            {
+              "description": "The native-heading slot wrapper.",
+              "name": "title"
+            }
+          ],
+          "slots": [
+            {
+              "description": "Optional trailing action.",
+              "name": "action"
+            },
+            {
+              "description": "Optional supporting description.",
+              "name": "description"
+            },
+            {
+              "description": "Optional lead-in content.",
+              "name": "eyebrow"
+            },
+            {
+              "description": "Optional count or metadata.",
+              "name": "metadata"
+            },
+            {
+              "description": "A consumer-authored native heading.",
+              "name": "title"
+            }
+          ],
+          "members": [
+            {
+              "kind": "method",
+              "name": "#syncSlot",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "slot",
+                  "type": {
+                    "text": "HTMLSlotElement"
+                  }
+                }
+              ]
+            }
+          ],
+          "superclass": {
+            "name": "LitElement",
+            "package": "lit"
+          },
+          "tagName": "sk-section-header",
+          "customElement": true
+        },
+        {
+          "kind": "class",
           "description": "A site footer: a brand column, two link columns, and a legal line.\n\nThe element owns the structure — the grid, the `<nav>`s, the headings, the `<ul>`s, the divider\nand the legal line. Text arrives as properties; only the link ITEMS are slotted, as `<li>`\nelements that land directly inside the element's own `<ul>`.",
           "name": "SkSiteFooter",
           "cssParts": [
@@ -3629,6 +3903,64 @@
             "package": "lit"
           },
           "tagName": "sk-site-footer",
+          "customElement": true
+        },
+        {
+          "kind": "class",
+          "description": "A consumer-labelled status with a presentation-only tone and decorative marker.\n\nToken dependencies: --sk-color-red, --sk-fg-body, --sk-fg-muted, --sk-font-sans,\n--sk-on-tint-butter, --sk-on-tint-lilac, --sk-on-tint-mint, --sk-on-tint-sky,\n--sk-space-2, --sk-text-sm.",
+          "name": "SkStatusIndicator",
+          "cssParts": [
+            {
+              "description": "The decorative marker wrapper.",
+              "name": "marker"
+            },
+            {
+              "description": "The indicator layout root.",
+              "name": "status"
+            },
+            {
+              "description": "The visible-text wrapper.",
+              "name": "text"
+            }
+          ],
+          "slots": [
+            {
+              "description": "Visible consumer-supplied status text.",
+              "name": ""
+            },
+            {
+              "description": "A decorative consumer-supplied marker or icon.",
+              "name": "marker"
+            }
+          ],
+          "members": [
+            {
+              "kind": "field",
+              "name": "tone",
+              "privacy": "public",
+              "type": {
+                "text": "'neutral' | 'info' | 'success' | 'attention' | 'danger' | 'recovery' | undefined"
+              },
+              "description": "Presentation tone. Unknown values render as `neutral` without changing the visible text.",
+              "attribute": "tone",
+              "reflects": true
+            }
+          ],
+          "attributes": [
+            {
+              "name": "tone",
+              "type": {
+                "text": "'neutral' | 'info' | 'success' | 'attention' | 'danger' | 'recovery' | undefined"
+              },
+              "description": "Presentation tone. Unknown values render as `neutral` without changing the visible text.",
+              "fieldName": "tone"
+            }
+          ],
+          "superclass": {
+            "name": "LitElement",
+            "package": "lit"
+          },
+          "tagName": "sk-status-indicator",
           "customElement": true
         },
         {
@@ -4085,6 +4417,14 @@
         }
       ],
       "exports": [
+        {
+          "kind": "js",
+          "name": "ActionRowActivateDetail",
+          "declaration": {
+            "name": "ActionRowActivateDetail",
+            "module": "./dist/index.js"
+          }
+        },
         {
           "kind": "js",
           "name": "BLOG_CARD_AXES",
@@ -4671,6 +5011,22 @@
         },
         {
           "kind": "js",
+          "name": "SkActionRow",
+          "declaration": {
+            "name": "SkActionRow",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "skActionRowSheet",
+          "declaration": {
+            "name": "default",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
           "name": "SkAppShell",
           "declaration": {
             "name": "SkAppShell",
@@ -4746,6 +5102,22 @@
           "name": "SkContextSidebar",
           "declaration": {
             "name": "SkContextSidebar",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "SkEntityMarker",
+          "declaration": {
+            "name": "SkEntityMarker",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "skEntityMarkerSheet",
+          "declaration": {
+            "name": "default",
             "module": "./dist/index.js"
           }
         },
@@ -4871,6 +5243,22 @@
         },
         {
           "kind": "js",
+          "name": "SkSectionHeader",
+          "declaration": {
+            "name": "SkSectionHeader",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "skSectionHeaderSheet",
+          "declaration": {
+            "name": "default",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
           "name": "SkSiteFooter",
           "declaration": {
             "name": "SkSiteFooter",
@@ -4880,6 +5268,22 @@
         {
           "kind": "js",
           "name": "skSiteFooterSheet",
+          "declaration": {
+            "name": "default",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "SkStatusIndicator",
+          "declaration": {
+            "name": "SkStatusIndicator",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "skStatusIndicatorSheet",
           "declaration": {
             "name": "default",
             "module": "./dist/index.js"
@@ -4914,6 +5318,14 @@
           "name": "skTransitionMatrixSheet",
           "declaration": {
             "name": "default",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "StatusIndicatorTone",
+          "declaration": {
+            "name": "StatusIndicatorTone",
             "module": "./dist/index.js"
           }
         },

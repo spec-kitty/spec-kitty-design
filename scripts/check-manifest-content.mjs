@@ -215,6 +215,12 @@ if (process.argv.includes('--selftest')) {
   const base = JSON.parse(readFileSync(MANIFEST, 'utf8'));
   const clone = () => JSON.parse(JSON.stringify(base));
   const tagged = (m) => m.modules.flatMap((x) => x.declarations ?? []).filter((d) => d.tagName);
+  const firstAttributedDeclaration = (m) => {
+    const declaration = tagged(m).find((candidate) => (candidate.attributes ?? []).length > 0);
+    if (!declaration) throw new Error('manifest self-test requires one attributed custom element');
+    return declaration;
+  };
+  const firstAttribute = (m) => firstAttributedDeclaration(m).attributes[0];
 
   const EXPECTED = JSON.parse(readFileSync('expected-docs.json', 'utf8'));
   const addProperty = (m, overrides = {}) => {
@@ -292,7 +298,7 @@ if (process.argv.includes('--selftest')) {
       'an attribute description blanked',
       'attribute "',
       (m) => {
-        tagged(m)[1].attributes[0].description = '';
+        firstAttribute(m).description = '';
         return m;
       },
     ],
@@ -300,7 +306,7 @@ if (process.argv.includes('--selftest')) {
       "an attribute description reduced to whitespace — `?? ''` alone would pass this",
       'attribute "',
       (m) => {
-        tagged(m)[1].attributes[0].description = '   \n  ';
+        firstAttribute(m).description = '   \n  ';
         return m;
       },
     ],
@@ -346,7 +352,7 @@ if (process.argv.includes('--selftest')) {
       'one documented attribute silently removed — the count ratchet, in isolation',
       'documented surface changed',
       (m) => {
-        tagged(m)[1].attributes.pop();
+        firstAttributedDeclaration(m).attributes.pop();
         return m;
       },
     ],

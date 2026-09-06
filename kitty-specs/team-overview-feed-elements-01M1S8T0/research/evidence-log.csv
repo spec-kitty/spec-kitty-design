@@ -1,0 +1,13 @@
+evidence_id,source_id,finding,decision_refs,confidence
+E-001,S-003,"A custom-element host between ul and li breaks native list and listitem relationships; display:contents is not an accessibility repair.",D-001,high
+E-002,S-004,"The current train already publishes real button/link sk-button behavior and composable sk-pill-tag tone/shape axes.",D-003;D-008,high
+E-003,S-012,"The only public action event carries typed detail {id}, bubbles and composes, but is non-cancelable because the controlled row owns no default action; selection stays controlled and ADR-11 SC-009 is not claimed.",D-002;D-003,high
+E-004,S-001,"Section heading level, status tone, feed ordering, freshness, navigation and time text belong to the consumer.",D-002;D-004;D-006,high
+E-005,S-005,"Tokens, declared parts and documented custom properties are the supported styling surface; ancestor selectors cannot cross the root.",D-008,high
+E-006,S-006,"Committed CSS/manifest/wrapper outputs are generated and canonical markup must not be authored twice.",D-007;D-009,high
+E-007,S-007,"Events, pre-upgrade properties, slots, parts and adopted sheets need applicable non-vacuous behavior tests rather than render-only checks.",D-003;D-009,high
+E-008,S-008,"A new component must regenerate CSS modules, CEM, React, Vue and SIZES and pass type, hygiene, mutation, Storybook and axe gates.",D-009;D-010,high
+E-009,S-009,"The approved feed repeats section bars and marker/title/reference/pills/right-aligned metadata across different consumer data.",D-002;D-004,high
+E-010,S-001,"Issue #146 is Tier C: three independent lenses are required pre-merge, not at post-tasks.",D-011,high
+E-011,S-002,"Shared generated artifacts require serialized landing and a latest-train rebase/regeneration before the final gate.",D-009;D-010,high
+E-012,S-013,"Issue #112 remains open at planning time, so wrap-up must rerun the conformance surfaces that actually exist on the rebased train and adopt #112's canonical matrix only if it has landed there.",D-010,high

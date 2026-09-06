@@ -126,6 +126,13 @@ const teamOverviewShellStory = async (page: Page, light = false): Promise<Locato
   return host;
 };
 
+const actionRowStory = async (page: Page, id: string): Promise<Locator> => {
+  await page.goto(`/iframe.html?id=elements-skactionrow--${id}&viewMode=story`);
+  const host = page.locator('sk-action-row').first();
+  await expect(host.locator('[part="row"]')).toBeVisible({ timeout: 20000 });
+  return host;
+};
+
 test('SK-team-overview shell desktop dark — visual baseline', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   const host = await teamOverviewShellStory(page);
@@ -225,4 +232,95 @@ test('SK-transition-matrix narrow scrolled ownership — visual baseline', async
   await scroller.evaluate((node) => { node.scrollLeft = node.scrollWidth; });
   await expect.poll(() => scroller.evaluate((node) => node.scrollLeft)).toBeGreaterThan(0);
   await expect(host).toHaveScreenshot('sk-transition-matrix-narrow-scrolled.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+});
+
+test('SK-section-header long content — visual baseline', async ({ page }) => {
+  await page.goto('/iframe.html?id=elements-sksectionheader--long-content&viewMode=story');
+  const host = page.locator('sk-section-header').first();
+  await host.waitFor({ state: 'visible', timeout: 20000 });
+  await expect(host.locator('[part="title"]')).toBeVisible();
+  const action = host.locator('sk-button[slot="action"]');
+  await expect(action.locator('button')).toBeVisible();
+  await expect(action).toHaveText('Open activity');
+  await expect(host).toHaveScreenshot('sk-section-header-long-content.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+});
+
+test('SK-section-header light mode — visual baseline', async ({ page }) => {
+  await page.goto('/iframe.html?id=elements-sksectionheader--light-mode&viewMode=story');
+  const host = page.locator('sk-section-header').first();
+  await host.waitFor({ state: 'visible', timeout: 20000 });
+  await expect(host.locator('[part="title"]')).toBeVisible();
+  await expect(host).toHaveScreenshot('sk-section-header-light.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+});
+
+test('SK-status-indicator all tones — visual baseline', async ({ page }) => {
+  await page.goto('/iframe.html?id=elements-skstatusindicator--all-tones&viewMode=story');
+  const indicators = page.locator('sk-status-indicator');
+  await expect(indicators).toHaveCount(6);
+  await indicators.first().waitFor({ state: 'visible', timeout: 20000 });
+  await expect(indicators.first().locator('..')).toHaveScreenshot('sk-status-indicator-all-tones.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+});
+
+test('SK-status-indicator light mode — visual baseline', async ({ page }) => {
+  await page.goto('/iframe.html?id=elements-skstatusindicator--light-mode&viewMode=story');
+  const indicators = page.locator('sk-status-indicator');
+  await expect(indicators).toHaveCount(6);
+  await indicators.first().waitFor({ state: 'visible', timeout: 20000 });
+  await expect(indicators.first().locator('..')).toHaveScreenshot('sk-status-indicator-light.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+});
+
+test('SK-entity-marker meaningful and decorative modes — visual baselines', async ({ page }) => {
+  await page.goto('/iframe.html?id=elements-skentitymarker--meaningful-icon&viewMode=story');
+  let host = page.locator('sk-entity-marker').first();
+  await host.waitFor({ state: 'visible', timeout: 20000 });
+  await expect(host).toHaveScreenshot('sk-entity-marker-meaningful.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+
+  await page.goto('/iframe.html?id=elements-skentitymarker--decorative&viewMode=story');
+  host = page.locator('sk-entity-marker').first();
+  await host.waitFor({ state: 'visible', timeout: 20000 });
+  await expect(host).toHaveScreenshot('sk-entity-marker-decorative.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+});
+
+test('SK-action-row default and light — visual baselines', async ({ page }) => {
+  let host = await actionRowStory(page, 'default');
+  await expect(host).toHaveScreenshot('sk-action-row-default-dark.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  host = await actionRowStory(page, 'light-mode');
+  await expect(host).toHaveScreenshot('sk-action-row-light.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+});
+
+test('SK-action-row long content at 320px — visual baseline', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 844 });
+  const host = await actionRowStory(page, 'long-content');
+  await expect(host).toHaveScreenshot('sk-action-row-long-content-320.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+});
+
+test('SK-action-row selectable rest, hover, focus and pressed — visual baselines', async ({ page }) => {
+  const host = await actionRowStory(page, 'selectable-states');
+  const trigger = host.locator('button[part="trigger"]');
+  await expect(host).toHaveScreenshot('sk-action-row-selectable-rest.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  await trigger.hover();
+  await expect(host).toHaveScreenshot('sk-action-row-selectable-hover.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  await trigger.focus();
+  await expect(host).toHaveScreenshot('sk-action-row-selectable-focus-visible.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  await page.keyboard.down('Space');
+  await expect(host).toHaveScreenshot('sk-action-row-selectable-keyboard-pressed.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  await page.keyboard.up('Space');
+});
+
+test('SK-action-row pointer active — visual baseline', async ({ page }) => {
+  const host = await actionRowStory(page, 'selectable-states');
+  const trigger = host.locator('button[part="trigger"]');
+  const box = await trigger.boundingBox();
+  expect(box).not.toBe(null);
+  await page.mouse.move(box!.x + box!.width / 2, box!.y + box!.height / 2);
+  await page.mouse.down();
+  await expect(host).toHaveScreenshot('sk-action-row-selectable-pointer-active.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  await page.mouse.up();
+});
+
+test('SK-action-row selected and non-selectable analogues — visual baselines', async ({ page }) => {
+  let host = await actionRowStory(page, 'selected');
+  await expect(host).toHaveScreenshot('sk-action-row-selected.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  host = await actionRowStory(page, 'non-selectable');
+  await expect(host).toHaveScreenshot('sk-action-row-non-selectable.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
 });

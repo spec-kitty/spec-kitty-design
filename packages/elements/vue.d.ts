@@ -18,6 +18,24 @@ type SkElement<P> = DefineComponent<P & Partial<HTMLAttributes> & ReservedProps>
 
 declare module 'vue' {
   export interface GlobalComponents {
+    /**
+     * A controlled, consumer-composed action row.
+     *
+     * Token dependencies: --sk-border-default, --sk-border-strong, --sk-border-width-1,
+     * --sk-border-width-2, --sk-color-accent, --sk-fg-body, --sk-fg-default, --sk-fg-muted,
+     * --sk-font-display, --sk-font-mono, --sk-font-sans, --sk-motion-duration-fast,
+     * --sk-motion-ease-out, --sk-radius-md, --sk-space-1, --sk-space-2, --sk-space-3,
+     * --sk-space-4, --sk-space-5, --sk-surface-card, --sk-surface-muted, --sk-surface-pill,
+     * --sk-text-base, --sk-text-sm, --sk-text-xs, --sk-weight-medium, --sk-weight-semibold.
+     */
+    'sk-action-row': SkElement<{
+      /** Stable consumer-owned identifier included in activation requests. */
+      'row-id'?: string | undefined;
+      /** Enables the native primary trigger when `rowId` is non-empty. */
+      'selectable'?: boolean;
+      /** Consumer-controlled current-row presentation. Activation never changes this value. */
+      'selected'?: boolean;
+    }>;
     /** A stateless page frame for personal navigation, contextual navigation, page heading, and content. */
     'sk-app-shell': SkElement<{
       // no declared props
@@ -99,6 +117,16 @@ declare module 'vue' {
     /** A labelled complementary landmark for consumer-owned selected-context content. */
     'sk-context-sidebar': SkElement<{
       /** Accessible name forwarded unchanged to the complementary landmark when nonblank. */
+      'label'?: string | undefined;
+    }>;
+    /**
+     * A compact consumer-supplied icon, initials, or short mark with explicit accessible naming.
+     *
+     * Token dependencies: --sk-font-sans, --sk-on-tint-butter, --sk-radius-sm, --sk-space-1,
+     * --sk-space-7, --sk-surface-tint-butter, --sk-text-xs, --sk-weight-bold.
+     */
+    'sk-entity-marker': SkElement<{
+      /** Accessible name for a meaningful mark. Empty or whitespace-only values make it decorative. */
       'label'?: string | undefined;
     }>;
     /**
@@ -378,6 +406,16 @@ declare module 'vue' {
       'variant'?: 'neutral' | 'purple' | 'green' | undefined;
     }>;
     /**
+     * A presentational section heading whose outline level and supporting content are consumer-owned.
+     *
+     * Token dependencies: --sk-fg-default, --sk-fg-muted, --sk-font-display, --sk-font-mono,
+     * --sk-font-sans, --sk-space-2, --sk-space-6, --sk-text-sm, --sk-text-xl, --sk-text-xs,
+     * --sk-weight-medium, --sk-weight-semibold.
+     */
+    'sk-section-header': SkElement<{
+      // no declared props
+    }>;
+    /**
      * A site footer: a brand column, two link columns, and a legal line.
      *
      * The element owns the structure — the grid, the `<nav>`s, the headings, the `<ul>`s, the divider
@@ -395,6 +433,17 @@ declare module 'vue' {
       'tagline'?: string | undefined;
       /** The brand wordmark. */
       'wordmark'?: string | undefined;
+    }>;
+    /**
+     * A consumer-labelled status with a presentation-only tone and decorative marker.
+     *
+     * Token dependencies: --sk-color-red, --sk-fg-body, --sk-fg-muted, --sk-font-sans,
+     * --sk-on-tint-butter, --sk-on-tint-lilac, --sk-on-tint-mint, --sk-on-tint-sky,
+     * --sk-space-2, --sk-text-sm.
+     */
+    'sk-status-indicator': SkElement<{
+      /** Presentation tone. Unknown values render as `neutral` without changing the visible text. */
+      'tone'?: 'neutral' | 'info' | 'success' | 'attention' | 'danger' | 'recovery' | undefined;
     }>;
     /** The scaffold element for the ADR-8 custom-element base layer. */
     'sk-stub': SkElement<{

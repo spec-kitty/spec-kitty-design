@@ -3,10 +3,11 @@
 The Spec Kitty components ship as CSS in `@spec-kitty/styles`, and — for the components migrated
 so far — as **custom elements** in `@spec-kitty/elements`. Both require `@spec-kitty/tokens`.
 
-**Migration is in progress.** Nineteen elements exist today: `sk-app-shell`, `sk-blog-card`,
-`sk-button`, `sk-card`, `sk-check-bullet`, `sk-context-sidebar`, `sk-feature-card`, `sk-form-input`,
-`sk-form-textarea`, `sk-grid`, `sk-nav-pill`, `sk-page-header`, `sk-personal-rail`, `sk-pill-tag`,
-`sk-ribbon-card`, `sk-section-banner`, `sk-site-footer`, `sk-stub`, and `sk-transition-matrix`.
+**Migration is in progress.** Twenty-three elements exist today: `sk-action-row`, `sk-app-shell`,
+`sk-blog-card`, `sk-button`, `sk-card`, `sk-check-bullet`, `sk-context-sidebar`, `sk-entity-marker`,
+`sk-feature-card`, `sk-form-input`, `sk-form-textarea`, `sk-grid`, `sk-nav-pill`, `sk-page-header`,
+`sk-personal-rail`, `sk-pill-tag`, `sk-ribbon-card`, `sk-section-banner`, `sk-section-header`,
+`sk-site-footer`, `sk-status-indicator`, `sk-stub`, and `sk-transition-matrix`.
 Several of the catalogue's component packages are CSS only by a recorded decision — `form-field`,
 and (#176) `facts`, `disclosure`, `data-table`, `empty-state`, `skip-link`. See ADR-10,
 *form-field is deliberately styles-only*. These five ship classes applied to real semantic HTML
@@ -467,6 +468,63 @@ generated; copy it from `packages/styles/src/section-banner/sk-section-banner.ht
 retyping it.
 
 [View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/primitives-sksectionbanner-html--default)
+
+---
+
+## Operational feed primitives
+
+Four controlled/presentational elements provide the reusable heading, row, status, and visual-marker
+pieces of an operational feed. They have no static HTML form: their contracts are defined by
+consumer slot composition and a live row-intent event, so a string builder would create a second
+projection vocabulary.
+
+```html
+<sk-section-header>
+  <span slot="eyebrow">Recent activity</span>
+  <h2 slot="title">Repository activity</h2>
+  <p slot="description">What needs attention now.</p>
+  <span slot="metadata">3 repositories</span>
+  <sk-button slot="action" variant="ghost" size="sm">View all</sk-button>
+</sk-section-header>
+
+<ul>
+  <li>
+    <sk-action-row row-id="activity-17" selectable selected>
+      <sk-entity-marker slot="marker" label="Spec Kitty">SK</sk-entity-marker>
+      <strong slot="title">team-landing-pivots</strong>
+      <code slot="reference">spec-kitty/e2e-team-landing</code>
+      <sk-status-indicator slot="tags" tone="success">Fresh</sk-status-indicator>
+      <time slot="metadata">2 hours ago</time>
+      <sk-button slot="controls" size="sm">Inspect</sk-button>
+    </sk-action-row>
+  </li>
+</ul>
+
+<script type="module">
+  document.querySelector('sk-action-row').addEventListener('sk-action-row-activate', (event) => {
+    console.log(event.detail.id);
+  });
+</script>
+```
+
+The consumer owns the native heading and chooses its level; `sk-section-header` never generates a
+heading. The consumer also owns all `ul > li` markup. None of these elements creates a list or
+assigns list roles.
+
+`sk-action-row` is activatable only when `selectable` is present and `row-id` contains non-whitespace
+content. Its internal primary trigger is a real `button`; projected `controls` remain siblings, so
+native links, buttons, and `sk-button` keep their own behavior. Pointer, Enter, and Space activation
+emit one `sk-action-row-activate` with exact `{ id }`, `bubbles: true`, `composed: true`, and
+`cancelable: false`. The element owns no navigation or other default action. `selected` remains a
+consumer-controlled input and is exposed only as `aria-current="true"` on the stable row surface.
+
+`sk-status-indicator` accepts `neutral`, `info`, `success`, `attention`, `danger`, or `recovery` as
+presentation tones. Visible status copy is always consumer-authored, and the component does not map
+domain words to colors. An unknown tone renders as neutral while preserving the supplied text.
+
+`sk-entity-marker` never fetches identity or generates initials. Supply the exact icon, initials,
+or short mark to render. A non-empty `label` makes the mark meaningful and names it; an absent or
+whitespace-only label makes it decorative and hides it from assistive technology.
 
 ---
 
