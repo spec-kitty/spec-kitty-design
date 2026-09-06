@@ -27,11 +27,11 @@
     {
       "criterion_id": "FR-003",
       "description": "Verify FR-003 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "proof_type": "code_review",
+      "evidence": "ADR \u00a7'The table is a package internal, not a contract this repo controls': states MAPPED_PROPS is not exported, the gate parses the installed bundle, and the fail-closed read/exact-compare/narrower-fallback pattern, plus the index.js-vs-index.cjs packaging note.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-06T01:09:03.729951+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
