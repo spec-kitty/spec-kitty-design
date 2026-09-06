@@ -1,12 +1,13 @@
 # ADR 14 (2026-09-06): The Detached-Probe Validation Seam
 
 **Date:** 2026-09-06
-**Status:** Proposed. Descriptive record only — see "Open Questions" below for the two forks this
+**Status:** Proposed. Descriptive record only — see "Open Questions" below for the three forks this
 ADR deliberately does not settle.
-**Deciders:** MOES-Media (operator session, 2026-09-06 — authorized writing this ADR outside #67,
-the same precedent recorded for #176 in ADR-10 and for #189 in ADR-11); the mechanism recorded here
-was itself decided during the #180 mission and corrected during the #187 mission, neither of which
-wrote an ADR for it at the time — that gap is what issue #188 raised and this ADR closes.
+**Deciders:** None recorded for this ADR itself. The mechanism it describes was decided during the
+#180 mission and corrected during the #187 mission, neither of which wrote an ADR for it at the
+time — that gap is what issue #188 raised and this ADR closes. Writing an ADR outside #67 follows
+the #176/#189 precedent and this mission's `[adr]` dispatch, not an operator ruling quoted for
+#188; see "Why this is a new ADR, and how it came to be written outside #67" below.
 **Technical Story:** Raised by the pre-merge gate on #187 (architect-alphonso, debugger-debbie),
 filed as issue #188 rather than decided in-mission, "per the operator ruling that forks go to
 issues while the ADR route is closed."
@@ -31,8 +32,9 @@ survivor). But `willUpdate()` runs **before** `render()` commits the current upd
 attribute/property bindings to the DOM. On every pass — including the very first, at mount — the
 rendered `<input>`'s `.validity`, read at that point, still reflects the *previous* render's
 committed state, not the one about to commit. On the first pass specifically, there is no rendered
-control to read at all: `this.shadowRoot?.querySelector('input')` returns `undefined` until after
-`firstUpdated()`.
+control to read at all: `this.shadowRoot?.querySelector('input')` returns `null` until after
+`firstUpdated()` — `validate()` coalesces that to `undefined` (`sk-form-input.ts:286`,
+`?? undefined`), so the local `control` binding is `undefined` on that pass.
 
 **Measured consequence of getting this wrong** (`research.md` R2, the pre-fix behaviour): mount a
 field with `pattern="[a-z]+"`, then assign `el.value = '123'`. The host reports valid, and a real
@@ -90,7 +92,8 @@ second source — see "The R2 rejection, restated against what shipped."
 **Chosen option: the detached validation probe (option 3 above), with one deliberate exception.**
 
 `#probe: HTMLInputElement` (`sk-form-input.ts:157`) is a private field, created once in its
-initializer, never appended to any document. On every `validate()` call (`sk-form-input.ts:262`):
+initializer, never appended to any document. On every `validate()` call that is not barred early
+(`sk-form-input.ts:262`; see "The two barring arms" below):
 
 1. `probe.type = this.type` is assigned **before** `probe.value = this.value`. Order is load-
    bearing: the probe is long-lived, reused across every call, so assigning `value` before `type`
@@ -106,20 +109,55 @@ initializer, never appended to any document. On every `validate()` call (`sk-for
    "attribute removed").
 3. `patternMismatch`, `rangeUnderflow`, `rangeOverflow`, `stepMismatch`, `typeMismatch` are merged
    from the **probe's** `.validity`.
-4. `badInput` is merged from the **real, rendered control** — never the probe. This is measured,
-   not a stylistic choice: `badInput` reflects the UA's own record of a genuine, unparseable
-   keystroke sequence (e.g. typing `12e` into a `type="number"` field). A bare native
+4. `badInput` is the one flag with **two writers** — it is the only flag both sources reach.
+
+   The first writer reads the **real, rendered control** (`sk-form-input.ts:372`,
+   `if (control?.validity.badInput) flags.badInput = true;`). That read is measured, not a
+   stylistic choice: `badInput` reflects the UA's own record of a genuine, unparseable keystroke
+   sequence (e.g. typing `12e` into a `type="number"` field). A bare native
    `<input type="number">`, assigned `.value` directly — even with a dispatched `input` event —
    never sets `badInput` (measured on a real `<input>`, not assumed). The probe receives only
-   property assignments, so it structurally cannot ever observe `badInput`; only a control the
-   user has actually typed into can. This is safe from the exact mount-time race the probe exists
-   to close: a user cannot type into a control that has not rendered yet, so the real control is
-   never `undefined` at a point where `badInput` could genuinely be true.
+   property assignments, so it can never observe *that* `badInput`; only a control the user has
+   actually typed into can. This read is safe from the exact mount-time race the probe exists to
+   close: a user cannot type into a control that has not rendered yet, so the real control is
+   never `undefined` at a point where the UA's `badInput` could genuinely be true.
+
+   The second writer is the **probe's** (`sk-form-input.ts:401`,
+   `if (this.value.trim() !== '' && this.#probe.value === '') flags.badInput = true;`) — the
+   detect-and-flag half of the R9 ruling described below, merged as the programmatic analogue of
+   `badInput` when the UA sanitizes a non-blank property value away entirely. So the flag is not
+   "the real control's alone."
+
+   **The two writers are disjoint by timing, not by construction.** The element's own comment
+   (`sk-form-input.ts:395-400`) states the mechanism precisely: while a user is actively typing an
+   unparseable value, `#onInput` deliberately does not write `this.value`, so `this.value` — and
+   the probe synced from it — holds the last *good*, non-empty value, and the probe branch stays
+   silent for exactly the duration the real-control branch already covers. Nothing in the shape of
+   `validate()` prevents both branches from firing on one pass; what prevents it is a runtime
+   invariant maintained in a different method. And if both did fire, no conflict would surface:
+   both write `flags.badInput = true` and nothing ever writes it `false`, so the merge is an OR —
+   a disagreement between the two sources on this flag resolves to `true` rather than being
+   detected.
 5. `firstUpdated()` (`sk-form-input.ts:447`) re-runs `validate()` once the shadow root exists. This
    is a separate fix from the probe and solves a different problem: `setValidity()`'s third
    argument is the focus anchor for `reportValidity()`, and `willUpdate()` runs before the anchor
    element exists. Without this, a field that mounts already-invalid would report validity with no
    real element to anchor the browser's own validation UI to.
+
+### The two barring arms: `disabled` and `readonly` never reach the probe
+
+`validate()` does not always reach any of the above. Its first two statements return early
+(`sk-form-input.ts:271-285`): a `disabled` element and a `readonly` element each clear validity
+outright (`internals.setValidity({})`, `invalid = false`, `errorMessage = ''`) and return before
+the probe is synced or a single flag is derived. This is architectural, not defensive
+housekeeping. A user agent normally bars a disabled form-associated element from constraint
+validation itself — but this element deliberately does **not** reflect `disabled` (or `readonly`)
+to an attribute, because that unreflectedness is what keeps the SC-005 and SC-003 mutations
+observable, so the UA cannot see either state and the element has to bar itself. Without the
+`disabled` arm a disabled, required, empty field vetoes its whole form permanently, and the user
+cannot clear it because the field is disabled. The `readonly` arm is the matching case with one
+deliberate asymmetry recorded in the code: barred from constraint validation, but the value is
+still submitted — `syncFormValue` has no `readonly` branch, on purpose.
 
 ### The `#onInput` regression, and its fix
 
@@ -170,10 +208,18 @@ hand-reimplementation. It recurred, in a different form, during #180's own devel
   rendered control, or a detached probe) in exact correspondence with intended state is
   failure-prone, and this mission needed three measured passes to get right.
 
-**This risk is scoped, not eliminated, by the shipped design.** No flag is ever decided by both
-sources at once — the five constraint flags are the probe's alone, `badInput` is the real
-control's alone — so the design cannot produce a direct, simultaneous vote-conflict between the
-two sources on a single flag. But it does not follow that the two sources are guaranteed to agree
+**This risk is scoped, not eliminated, by the shipped design.** The five constraint flags
+(`patternMismatch`, `rangeUnderflow`, `rangeOverflow`, `stepMismatch`, `typeMismatch`) are the
+probe's alone, so on those no second source can contradict it. `badInput` is the exception, and it
+is worth stating exactly rather than rounding off: it has **two writers** — the real control at
+`sk-form-input.ts:372` and the probe at `:401` (see Decision Outcome item 4) — which are disjoint
+**by timing, not by construction**. `#onInput` withholds `this.value` for precisely the window in
+which the real control's `badInput` is true, which is what keeps the probe branch silent there;
+that is an invariant held in another method, not a property of `validate()`'s structure. The merge
+is also an OR in both cases: each branch only ever writes `true`, so if the two sources ever did
+disagree on `badInput`, the disagreement would resolve to `true` rather than surface as a
+detectable conflict. That is a materially weaker guarantee than "the design cannot produce a
+vote-conflict." Nor does it follow that the two sources are guaranteed to agree
 on the flags each is exclusively responsible for; the assignment-order bug demonstrates a case
 where the probe's answer and the real control's answer, for the same intended state, differed. The
 mitigation that shipped is narrow and empirical — three specific, tested synchronization rules
@@ -212,8 +258,9 @@ derivation has already occurred.
 
 ## Open Questions
 
-This ADR is explicitly a descriptive record of what shipped and why. It does **not** answer either
-of the following, both raised by issue #188 and both owed to the operator:
+This ADR is explicitly a descriptive record of what shipped and why. It does **not** answer any of
+the following three questions, all of them raised by issue #188 ("What an ADR should settle") and
+all of them owed to the operator:
 
 1. **Is the detached probe the sanctioned pattern for #179 (`sk-time-series-chart`) and #122
    (shared `form-control-base`), or is post-render revalidation the preferred general shape?**
@@ -229,11 +276,23 @@ of the following, both raised by issue #188 and both owed to the operator:
    representations of "the field's current state" must relate to each other across the whole
    validation and submission surface. A future shared base (#122) that centralizes any part of
    this needs that invariant stated explicitly first, not inferred from one element's comments.
+3. **Where does the pattern live once #122 lands a shared base?** Issue #188 poses this as its own
+   fork, and it is not subsumed by question 1: question 1 asks *whether* the probe is the
+   sanctioned mechanism, question 3 asks *where the mechanism lives* — implemented once on the
+   shared base, or derived per element — and it survives either answer to question 1 (a
+   post-render approach would face the same placement question). Nothing centralizes it today:
+   `FormControlBase.validate()` is deliberately **abstract** (`form-control-base.ts:176`, "the
+   base cannot know a subclass's derived rules"), so #122 would be deciding where this belongs for
+   the first time rather than relocating an existing arrangement.
 
-Neither question is answered here. This section exists so the operator can rule on both without
-re-deriving the mechanism from `sk-form-input.ts`'s own comments first.
+None of the three is answered here. This section exists so the operator can rule on all of them
+without re-deriving the mechanism from `sk-form-input.ts`'s own comments first.
 
 ## Verification notes
+
+This section stands in for the `Confirmation` section ADR-8 through ADR-13 each carry: a
+descriptive record ratifies nothing that a later test could confirm, so what would be confirmation
+criteria is instead a trace of what was read to write it.
 
 Traced directly against `packages/elements/src/form-input/sk-form-input.ts`, `packages/elements/
 src/form-textarea/sk-form-textarea.ts`, `packages/elements/src/form-control-base.ts`, and the
@@ -246,47 +305,66 @@ unnecessary to state facts already covered by the tests' own passing status on `
 No claim is made here about `sk-time-series-chart` (#179) or any future `form-control-base`
 consolidation beyond what is directly observable in the current, unmerged state of those issues.
 
-### Operator override — writing this ADR outside #67
+## Why this is a new ADR, and how it came to be written outside #67
 
-**Recorded for the record.** ADRs are ordinarily written only in #67, which is closed.
-`docs/architecture/elements-first-run-prompt.md` §4 states: "ADRs 8–13 pin every decision these
-missions need, and ADRs are written only in #67," and separately lists "Write an ADR outside #67"
-under "What this loop must never do." Issue #188 was filed, rather than decided, by the pre-merge
-gate on #187 — "Filed rather than decided, per the operator ruling that forks go to issues while
-the ADR route is closed" — the same shape issue #176 was filed and authorized in (recorded in
-ADR-10's "Styles-only components are a class, not a fixed exception count" section) and issue #189
-was filed and authorized in (recorded in ADR-11's "The wrapper prop-name invariant this ADR
-omitted" section). This ADR is written under that same, specific, operator-recorded authorization
-for issue #188 — not by this loop's own extension of the "#67 only" rule to a case it happened to
-find convenient.
+**A new record rather than an amendment.** #176 amended ADR-10 and #189 amended ADR-11 because
+each of those ADRs owns the surface being corrected. No existing ADR owns validity *computation*:
+ADR-9 §4 owns the form-association arrangement this element sits inside (label ownership, the
+control living in the shadow root, why an ID reference cannot cross the boundary) but says nothing
+about how the UA's own flags are obtained; ADR-11 owns how element behaviour is *verified*, not
+how it is derived. There is no section of either that this mechanism could be added to without
+widening that ADR's subject, so it is recorded here instead.
 
-### Consequences
+**Written outside #67 — stated at its real strength.** ADRs are ordinarily written only in #67,
+which is closed. `docs/architecture/elements-first-run-prompt.md` §4 says "ADRs are written only
+in #67," and separately lists "Write an ADR outside #67" under "What this loop must never do."
+**No operator ruling authorizing this particular ADR is on record, and this section does not claim
+one.** What is on record is the route: issue #188 was filed rather than decided by the pre-merge
+gate on #187 ("Filed rather than decided, per the operator ruling that forks go to issues while
+the ADR route is closed"), titled `[adr]`, and dispatched to this loop as an `[adr]` mission. That
+is the same route #176 and #189 took — but both of those ADR sections quote an affirmative ruling
+of their own that this one has no counterpart to (ADR-10: "The operator ruled, 2026-09-05: amend
+ADR-10, in #176, before merge"; ADR-11: "The operator authorized amending ADR-11 for #189 the same
+way it authorized amending ADR-10 for #176"). This record therefore rests on that precedent and on
+the dispatch, not on a ruling of its own — which is one of the reasons its Status is `Proposed`
+rather than `Accepted`.
 
-#### Positive
+## Consequences
+
+### Positive
 
 * The mechanism, its rationale, the measured pre-fix failure, and the `#onInput` regression/fix
   now have one durable, citable record — instead of living only in one element's `//` comments and
   one mission's `research.md`.
-* The R2 rejection is no longer left standing unexamined against a design that is, in fact, a
-  second UA-computed source — a future reader will not mistake the probe design for having closed
-  that question.
-* Both of issue #188's genuinely architectural forks are now stated precisely enough for the
+* R2's rejection and R2's own rationale are reconciled for the first time. `research.md` was not
+  silent about the two-source design: it carries a "Rationale for reading TWO sources (probe for
+  five flags, the real control for `badInput`)" bullet
+  (`kitty-specs/form-input-constraints-and-datalist-01M1S94Y/research.md:132-137`). What it never
+  did was hold that bullet against its own rejection of "a second source of truth that could
+  disagree with the UA's own judgement," recorded twelve lines later in the same section — the two
+  sit in one file without ever meeting. This ADR is where they meet.
+* All three of issue #188's genuinely architectural forks are now stated precisely enough for the
   operator to rule on without re-deriving them from source.
 
-#### Negative
+### Negative
 
 * This ADR settles nothing about reuse. #179 and #122 still need an explicit decision before
   either can proceed with confidence, and this record does not shorten that wait — it only makes
   the decision cheaper to make correctly when it happens.
 * The synchronization-risk profile described above is real and unresolved: nothing here proves a
-  fourth desynchronization bug of this shape cannot exist in the shipped mechanism.
+  fourth desynchronization bug of this shape cannot exist in the shipped mechanism, and no gate
+  would catch one if it did. ADR-11's required-behaviours list (ADR-11:52-62 — "This list is the
+  gate") has no entry for delegate/rendered-control correspondence, and its nine items reach only
+  what `setValidity` does with the flags, never how the flags were derived. Filed as **#196** so
+  the admitted risk has an owner; that issue asks whether a required behaviour belongs there and
+  deliberately leaves its wording to the mission that takes it.
 
-#### Neutral
+### Neutral
 
 * No code changed to produce this record. `packages/elements/src/form-input/sk-form-input.ts` and
   `fixtures/elements-behaviour/src/sk-form-input.test.ts` are unchanged by this ADR.
 
-### More Information
+## More Information
 
 * Related: ADR-9 (shadow DOM / styling API — the same containment reasoning this element's label
   and description properties rely on), ADR-10 (`#176` override precedent), ADR-11 (`#189` override
@@ -296,4 +374,8 @@ find convenient.
   form-textarea/sk-form-textarea.ts` (`validate()` at 136 — no probe); `packages/elements/src/
   form-control-base.ts` (`validate()` declared abstract at line 176); `fixtures/elements-behaviour/
   src/sk-form-input.test.ts` (the badInput and undo-to-identical-value tests, `[SC-003]`);
-  `kitty-specs/form-input-constraints-and-datalist-01M1S94Y/research.md` (R2, R9); issue #188.
+  `kitty-specs/form-input-constraints-and-datalist-01M1S94Y/research.md` (R2 — both the
+  "Rationale for reading TWO sources" bullet at :132-137 and the rejection at :141-145 — and R9);
+  issue #188.
+* Raises: #196 — the desync class this ADR admits it cannot rule out has no entry in ADR-11's
+  required-behaviours list (ADR-11:52-62), and this ADR does not add one.
