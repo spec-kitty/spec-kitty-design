@@ -63,6 +63,99 @@ const transitionMatrixStory = async (page: Page, id: string): Promise<Locator> =
   return host;
 };
 
+const teamOverviewShellStory = async (page: Page, light = false): Promise<Locator> => {
+  await page.goto('/iframe.html?id=elements-skappshell--desktop-composition&viewMode=story');
+  await page.addScriptTag({ url: '/elements-dist/elements.js' });
+  await page.evaluate(async (isLight) => {
+    await Promise.all([
+      'sk-app-shell',
+      'sk-personal-rail',
+      'sk-context-sidebar',
+      'sk-page-header',
+      'sk-button',
+    ].map((tag) => customElements.whenDefined(tag)));
+    const root = document.querySelector<HTMLElement>('#storybook-root')!;
+    root.classList.toggle('sk-light', isLight);
+    root.style.minHeight = '100vh';
+    root.style.color = 'var(--sk-fg-body)';
+    root.style.background = 'var(--sk-surface-page)';
+    root.style.fontFamily = 'var(--sk-font-sans)';
+    root.innerHTML = `
+      <sk-app-shell data-visual-shell>
+        <sk-personal-rail slot="personal-rail" label="Product areas">
+          <a slot="primary" href="#work" style="color: var(--sk-fg-default)">Work</a>
+          <button slot="utilities" type="button">Alerts</button>
+          <a slot="account" href="#account" style="color: var(--sk-fg-default)">Account</a>
+          <button slot="logout" type="button">Log out</button>
+        </sk-personal-rail>
+        <sk-context-sidebar slot="context-sidebar" label="Project context">
+          <strong slot="header">Reference project</strong>
+          <nav aria-label="Project sections"><a href="#summary" style="color: var(--sk-fg-default)">Summary</a></nav>
+          <button slot="footer" type="button">Project settings</button>
+        </sk-context-sidebar>
+        <sk-page-header slot="page-header">
+          <span slot="eyebrow">Overview</span>
+          <h1 slot="title">Delivery summary</h1>
+          <p slot="supporting">Current evidence and recent activity.</p>
+          <span slot="sync">Last synchronized by the consumer</span>
+          <sk-button slot="actions" variant="ghost" size="icon" label="Refresh evidence">↻</sk-button>
+        </sk-page-header>
+        <section aria-label="Delivery content"><p>Consumer-owned page content.</p></section>
+      </sk-app-shell>`;
+    const elements = root.querySelectorAll<HTMLElement>(
+      'sk-app-shell, sk-personal-rail, sk-context-sidebar, sk-page-header, sk-button'
+    );
+    await Promise.all([...elements].map((element) =>
+      (element as HTMLElement & { updateComplete?: Promise<unknown> }).updateComplete
+    ));
+  }, light);
+  const host = page.locator('sk-app-shell[data-visual-shell]').first();
+  await host.waitFor({ state: 'visible', timeout: 20000 });
+  await expect(host).not.toBeEmpty();
+  return host;
+};
+
+test('SK-team-overview shell desktop dark — visual baseline', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  const host = await teamOverviewShellStory(page);
+  await expect(host).toHaveScreenshot('sk-team-overview-shell-desktop-dark.png', {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+  });
+});
+
+test('SK-team-overview shell desktop light — visual baseline', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  const host = await teamOverviewShellStory(page, true);
+  await expect(host).toHaveScreenshot('sk-team-overview-shell-desktop-light.png', {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+  });
+});
+
+test('SK-team-overview shell narrow — visual baseline', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 900 });
+  const host = await teamOverviewShellStory(page);
+  await expect(host).toHaveScreenshot('sk-team-overview-shell-narrow.png', {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+  });
+});
+
+for (const light of [false, true]) {
+  test(`SK-icon button focus ${light ? 'light' : 'dark'} — visual baseline`, async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await teamOverviewShellStory(page, light);
+    const control = page.getByRole('button', { name: 'Refresh evidence' });
+    await control.focus();
+    await expect(control).toBeFocused();
+    await expect(control).toHaveScreenshot(`sk-icon-button-focus-${light ? 'light' : 'dark'}.png`, {
+      threshold: 0.02,
+      maxDiffPixelRatio: 0.02,
+    });
+  });
+}
+
 test('SK-transition-matrix approved dark — visual baseline', async ({ page }) => {
   const host = await transitionMatrixStory(page, 'approved-example');
   await expect(host).toHaveScreenshot('sk-transition-matrix-approved-dark.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });

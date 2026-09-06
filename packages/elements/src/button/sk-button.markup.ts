@@ -23,7 +23,10 @@ export const BUTTON_VARIANTS = {
 export type ButtonVariant = keyof typeof BUTTON_VARIANTS;
 
 /** Size modifiers. A separate axis from tone: a button has a tone AND a size. */
-export const BUTTON_SIZES = { sm: 'sk-button--sm' } as const;
+export const BUTTON_SIZES = {
+  sm: 'sk-button--sm',
+  icon: 'sk-button--icon',
+} as const;
 
 export type ButtonSize = keyof typeof BUTTON_SIZES;
 
@@ -66,6 +69,8 @@ export function buttonClasses(variant?: string, size?: string): string {
 export interface ButtonStaticOptions {
   variant?: string;
   size?: string;
+  /** Accessible name forwarded to the real control. Required for the `icon` size. */
+  label?: string;
   /** When set, the static form emits an ANCHOR rather than a button — see the note below. */
   href?: string;
 }
@@ -109,13 +114,18 @@ const attr = (value: string): string =>
  * to choose between a working link and a styled one.
  */
 export function buttonStaticHtml(opts: ButtonStaticOptions = {}, content = 'Label'): string {
-  const { variant, size, href } = opts;
+  const { variant, size, label, href } = opts;
   if (variant !== undefined && !isButtonVariant(variant)) throw new Error(unknownVariantMessage(variant));
   if (size !== undefined && !isButtonSize(size)) throw new Error(unknownSizeMessage(size));
+  const validLabel = typeof label === 'string' && label.trim() ? label : undefined;
+  if (size === 'icon' && validLabel === undefined) {
+    throw new Error('sk-button: size="icon" requires a non-empty label');
+  }
   const cls = buttonClasses(variant, size);
+  const labelAttribute = validLabel === undefined ? '' : ` aria-label="${attr(validLabel)}"`;
   return href == null
-    ? `<button class="${cls}" type="button">${content}</button>`
-    : `<a class="${cls}" href="${attr(href)}">${content}</a>`;
+    ? `<button class="${cls}" type="button"${labelAttribute}>${content}</button>`
+    : `<a class="${cls}" href="${attr(href)}"${labelAttribute}>${content}</a>`;
 }
 
 // DECLARED, NOT DERIVED — and the previous revision's "DERIVED so the two tables cannot

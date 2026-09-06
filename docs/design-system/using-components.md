@@ -3,10 +3,10 @@
 The Spec Kitty components ship as CSS in `@spec-kitty/styles`, and — for the components migrated
 so far — as **custom elements** in `@spec-kitty/elements`. Both require `@spec-kitty/tokens`.
 
-**Migration is in progress.** Fifteen elements exist today: `sk-blog-card`, `sk-button`,
-`sk-card`, `sk-check-bullet`, `sk-feature-card`, `sk-form-input`, `sk-form-textarea`, `sk-grid`,
-`sk-nav-pill`, `sk-pill-tag`, `sk-ribbon-card`, `sk-section-banner`, `sk-site-footer`, `sk-stub`,
-and `sk-transition-matrix`.
+**Migration is in progress.** Nineteen elements exist today: `sk-app-shell`, `sk-blog-card`,
+`sk-button`, `sk-card`, `sk-check-bullet`, `sk-context-sidebar`, `sk-feature-card`, `sk-form-input`,
+`sk-form-textarea`, `sk-grid`, `sk-nav-pill`, `sk-page-header`, `sk-personal-rail`, `sk-pill-tag`,
+`sk-ribbon-card`, `sk-section-banner`, `sk-site-footer`, `sk-stub`, and `sk-transition-matrix`.
 Several of the catalogue's component packages are CSS only by a recorded decision — `form-field`,
 and (#176) `facts`, `disclosure`, `data-table`, `empty-state`, `skip-link`. See ADR-10,
 *form-field is deliberately styles-only*. These five ship classes applied to real semantic HTML

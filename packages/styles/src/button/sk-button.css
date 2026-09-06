@@ -71,6 +71,20 @@
   font-size: var(--sk-text-sm);
 }
 
+/* Icon size — the glyph remains consumer-owned. */
+.sk-button--icon {
+  box-sizing: border-box;
+  width: var(--sk-space-8);
+  height: var(--sk-space-8);
+  padding: 0;
+  flex: none;
+}
+
+.sk-button:focus-visible {
+  outline: var(--sk-border-width-2) solid var(--sk-border-focus);
+  outline-offset: var(--sk-border-width-2);
+}
+
 /* Disabled state */
 .sk-button:disabled,
 .sk-button[disabled] {

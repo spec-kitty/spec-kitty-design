@@ -18,6 +18,10 @@ type SkElement<P> = DefineComponent<P & Partial<HTMLAttributes> & ReservedProps>
 
 declare module 'vue' {
   export interface GlobalComponents {
+    /** A stateless page frame for personal navigation, contextual navigation, page heading, and content. */
+    'sk-app-shell': SkElement<{
+      // no declared props
+    }>;
     /**
      * A blog preview card: thumbnail, eyebrow, title, excerpt, meta and a read-more link.
      *
@@ -61,8 +65,10 @@ declare module 'vue' {
       'disabled'?: boolean;
       /** When set, the element renders an anchor to this URL instead of a button. */
       'href'?: string | undefined;
-      /** Size: `sm`, or omit for the default. */
-      'size'?: 'sm' | undefined;
+      /** Accessible name forwarded unchanged to the real control. Required for the `icon` size. */
+      'label'?: string | undefined;
+      /** Size: `sm`, `icon`, or omit for the default. */
+      'size'?: 'sm' | 'icon' | undefined;
       /**
        * Tone: `primary`, `secondary` or `ghost`. Omit for the unstyled base. An unknown value
        * renders the base button and warns rather than throwing.
@@ -89,6 +95,11 @@ declare module 'vue' {
     'sk-check-bullet': SkElement<{
       /** The tick glyph. Defaults to ✓; set it to use a different mark. */
       'icon'?: string | undefined;
+    }>;
+    /** A labelled complementary landmark for consumer-owned selected-context content. */
+    'sk-context-sidebar': SkElement<{
+      /** Accessible name forwarded unchanged to the complementary landmark when nonblank. */
+      'label'?: string | undefined;
     }>;
     /**
      * A feature card: an accented icon chip above a title and a short body.
@@ -206,6 +217,15 @@ declare module 'vue' {
       'label'?: string;
       /** Whether the navigation panel is open. Reflected as the `open` attribute. */
       'open'?: boolean;
+    }>;
+    /** A stateless layout for consumer-owned page orientation, metadata, and actions. */
+    'sk-page-header': SkElement<{
+      // no declared props
+    }>;
+    /** A labelled personal-navigation rail with consumer-owned controls in stable groups. */
+    'sk-personal-rail': SkElement<{
+      /** Accessible name forwarded unchanged to the navigation landmark when nonblank. */
+      'label'?: string | undefined;
     }>;
     /**
      * A small inline label — a version tag, a status chip, or an eyebrow above a headline.

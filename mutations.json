@@ -477,8 +477,8 @@
       "subject": "fixtures/elements-behaviour/src/sk-button.test.ts",
       "arm": "button part present",
       "file": "packages/elements/src/button/sk-button.ts",
-      "from": "<a part=\"button\" class=${cls} href=${this.href}>",
-      "to": "<a class=${cls} href=${this.href}>"
+      "from": "<a part=\"button\" class=${cls} href=${this.href} aria-label=${ifDefined(validLabel)}",
+      "to": "<a class=${cls} href=${this.href} aria-label=${ifDefined(validLabel)}"
     },
     {
       "id": "SC-014",
@@ -663,6 +663,126 @@
       "file": "packages/react/src/SkTransitionMatrix.js",
       "from": "  useProperties(ref, \"columns\", columns, () => Object.freeze([]));",
       "to": "  void columns;"
+    },
+    {
+      "id": "SC-010",
+      "subject": "fixtures/elements-behaviour/src/sk-personal-rail.test.ts",
+      "arm": "personal rail reflects a pre-upgrade label",
+      "file": "packages/elements/src/personal-rail/sk-personal-rail.ts",
+      "from": "    label: { type: String, reflect: true },",
+      "to": "    label: { type: String, reflect: false },"
+    },
+    {
+      "id": "SC-010",
+      "subject": "fixtures/elements-behaviour/src/sk-context-sidebar.test.ts",
+      "arm": "context sidebar reflects a pre-upgrade label",
+      "file": "packages/elements/src/context-sidebar/sk-context-sidebar.ts",
+      "from": "    label: { type: String, reflect: true },",
+      "to": "    label: { type: String, reflect: false },"
+    },
+    {
+      "id": "SC-010",
+      "subject": "fixtures/elements-behaviour/src/sk-button.test.ts",
+      "arm": "icon button reflects a pre-upgrade label",
+      "file": "packages/elements/src/button/sk-button.ts",
+      "from": "    label: { type: String, reflect: true },",
+      "to": "    label: { type: String, reflect: false },"
+    },
+    {
+      "id": "SC-013",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts",
+      "arm": "app shell header part remains targetable",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "        <div part=\"header\" class=\"sk-app-shell__header\">",
+      "to": "        <div class=\"sk-app-shell__header\">"
+    },
+    {
+      "id": "SC-014",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts",
+      "arm": "app shell adopts its generated sheet",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "  static styles = [sheet];",
+      "to": "  static styles = [];"
+    },
+    {
+      "id": "SC-014",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts",
+      "arm": "app shell adopts the sheet by identity",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "  static styles = [sheet];",
+      "to": "  static styles = (() => { const clone = new CSSStyleSheet(); clone.replaceSync(Array.from(sheet.cssRules, (rule) => rule.cssText).join('\\n')); return [clone]; })();"
+    },
+    {
+      "id": "SC-013",
+      "subject": "fixtures/elements-behaviour/src/sk-personal-rail.test.ts",
+      "arm": "personal rail primary part remains targetable",
+      "file": "packages/elements/src/personal-rail/sk-personal-rail.ts",
+      "from": "      <div part=\"primary\" class=\"sk-personal-rail__primary\">",
+      "to": "      <div class=\"sk-personal-rail__primary\">"
+    },
+    {
+      "id": "SC-014",
+      "subject": "fixtures/elements-behaviour/src/sk-personal-rail.test.ts",
+      "arm": "personal rail adopts its generated sheet",
+      "file": "packages/elements/src/personal-rail/sk-personal-rail.ts",
+      "from": "  static styles = [sheet];",
+      "to": "  static styles = [];"
+    },
+    {
+      "id": "SC-014",
+      "subject": "fixtures/elements-behaviour/src/sk-personal-rail.test.ts",
+      "arm": "personal rail adopts the sheet by identity",
+      "file": "packages/elements/src/personal-rail/sk-personal-rail.ts",
+      "from": "  static styles = [sheet];",
+      "to": "  static styles = [new CSSStyleSheet()];"
+    },
+    {
+      "id": "SC-013",
+      "subject": "fixtures/elements-behaviour/src/sk-context-sidebar.test.ts",
+      "arm": "context sidebar footer part remains targetable",
+      "file": "packages/elements/src/context-sidebar/sk-context-sidebar.ts",
+      "from": "      <div part=\"footer\" class=\"sk-context-sidebar__footer\">",
+      "to": "      <div class=\"sk-context-sidebar__footer\">"
+    },
+    {
+      "id": "SC-014",
+      "subject": "fixtures/elements-behaviour/src/sk-context-sidebar.test.ts",
+      "arm": "context sidebar adopts its generated sheet",
+      "file": "packages/elements/src/context-sidebar/sk-context-sidebar.ts",
+      "from": "  static styles = [sheet];",
+      "to": "  static styles = [];"
+    },
+    {
+      "id": "SC-014",
+      "subject": "fixtures/elements-behaviour/src/sk-context-sidebar.test.ts",
+      "arm": "context sidebar adopts the sheet by identity",
+      "file": "packages/elements/src/context-sidebar/sk-context-sidebar.ts",
+      "from": "  static styles = [sheet];",
+      "to": "  static styles = [new CSSStyleSheet()];"
+    },
+    {
+      "id": "SC-013",
+      "subject": "fixtures/elements-behaviour/src/sk-page-header.test.ts",
+      "arm": "page header supporting part remains targetable",
+      "file": "packages/elements/src/page-header/sk-page-header.ts",
+      "from": "        <div part=\"supporting\" class=\"sk-page-header__supporting\">",
+      "to": "        <div class=\"sk-page-header__supporting\">"
+    },
+    {
+      "id": "SC-014",
+      "subject": "fixtures/elements-behaviour/src/sk-page-header.test.ts",
+      "arm": "page header adopts its generated sheet",
+      "file": "packages/elements/src/page-header/sk-page-header.ts",
+      "from": "  static styles = [sheet];",
+      "to": "  static styles = [];"
+    },
+    {
+      "id": "SC-014",
+      "subject": "fixtures/elements-behaviour/src/sk-page-header.test.ts",
+      "arm": "page header adopts the sheet by identity",
+      "file": "packages/elements/src/page-header/sk-page-header.ts",
+      "from": "  static styles = [sheet];",
+      "to": "  static styles = [new CSSStyleSheet()];"
     }
   ]
 }

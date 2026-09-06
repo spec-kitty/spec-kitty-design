@@ -25,7 +25,10 @@ has, and faking one with pointer-events hides it from assistive technology. */
   /** When set, the element renders an anchor to this URL instead of a button. */
   href?: SkButtonElement["href"];
 
-  /** Size: `sm`, or omit for the default. */
+  /** Accessible name forwarded unchanged to the real control. Required for the `icon` size. */
+  label?: SkButtonElement["label"];
+
+  /** Size: `sm`, `icon`, or omit for the default. */
   size?: SkButtonElement["size"];
 
   /** Tone: `primary`, `secondary` or `ghost`. Omit for the unstyled base. An unknown value
@@ -69,7 +72,8 @@ renders the base button and warns rather than throwing. */
  * - `disabled`: Disables the button. Ignored when `href` is set — a disabled link is not a thing HTML
  * has, and faking one with pointer-events hides it from assistive technology.
  * - `href`: When set, the element renders an anchor to this URL instead of a button.
- * - `size`: Size: `sm`, or omit for the default.
+ * - `label`: Accessible name forwarded unchanged to the real control. Required for the `icon` size.
+ * - `size`: Size: `sm`, `icon`, or omit for the default.
  * - `variant`: Tone: `primary`, `secondary` or `ghost`. Omit for the unstyled base. An unknown value
  * renders the base button and warns rather than throwing.
  *
@@ -77,7 +81,7 @@ renders the base button and warns rather than throwing. */
  *
  * Areas where markup can be added to the component.
  *
- * - `(default)`: the button's label
+ * - `(default)`: the visible label or consumer-supplied glyph
  *
  * ## CSS Parts
  *

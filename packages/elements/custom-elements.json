@@ -66,9 +66,9 @@
           "kind": "variable",
           "name": "BUTTON_SIZES",
           "type": {
-            "text": "{ sm: 'sk-button--sm' }"
+            "text": "{\n  sm: 'sk-button--sm',\n  icon: 'sk-button--icon',\n}"
           },
-          "default": "{ sm: 'sk-button--sm' }",
+          "default": "{ sm: 'sk-button--sm', icon: 'sk-button--icon', }",
           "description": "Size modifiers. A separate axis from tone: a button has a tone AND a size."
         },
         {
@@ -1099,6 +1099,62 @@
         },
         {
           "kind": "class",
+          "description": "A stateless page frame for personal navigation, contextual navigation, page heading, and content.",
+          "name": "SkAppShell",
+          "cssParts": [
+            {
+              "description": "The page header and main-content column.",
+              "name": "content"
+            },
+            {
+              "description": "The contextual-navigation column.",
+              "name": "context"
+            },
+            {
+              "description": "The page-header region.",
+              "name": "header"
+            },
+            {
+              "description": "The main-content landmark.",
+              "name": "main"
+            },
+            {
+              "description": "The personal-navigation column.",
+              "name": "personal"
+            },
+            {
+              "description": "The complete responsive shell grid.",
+              "name": "shell"
+            }
+          ],
+          "slots": [
+            {
+              "description": "Consumer-owned main page content.",
+              "name": ""
+            },
+            {
+              "description": "Consumer-owned navigation or content for the selected context.",
+              "name": "context-sidebar"
+            },
+            {
+              "description": "Consumer-owned page title, supporting text, metadata, and actions.",
+              "name": "page-header"
+            },
+            {
+              "description": "Consumer-owned personal or application navigation.",
+              "name": "personal-rail"
+            }
+          ],
+          "members": [],
+          "superclass": {
+            "name": "LitElement",
+            "package": "lit"
+          },
+          "tagName": "sk-app-shell",
+          "customElement": true
+        },
+        {
+          "kind": "class",
           "description": "A blog preview card: thumbnail, eyebrow, title, excerpt, meta and a read-more link.\n\nIt COMPOSES `sk-card`'s stylesheet rather than nesting the element, so the frame is authored\nonce in `sk-card.css` and this component's own sheet adds only blog layout — the contract its\nCSS header has always described, now true of the element as well as the static form.",
           "name": "SkBlogCard",
           "cssParts": [
@@ -1201,11 +1257,28 @@
           ],
           "slots": [
             {
-              "description": "the button's label",
+              "description": "the visible label or consumer-supplied glyph",
               "name": ""
             }
           ],
           "members": [
+            {
+              "kind": "field",
+              "name": "#hasWarnedInvalidIconLabel",
+              "privacy": "private",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false"
+            },
+            {
+              "kind": "field",
+              "name": "#lastInvalidIconLabel",
+              "privacy": "private",
+              "type": {
+                "text": "string | undefined"
+              }
+            },
             {
               "kind": "field",
               "name": "disabled",
@@ -1230,12 +1303,32 @@
             },
             {
               "kind": "field",
+              "name": "label",
+              "privacy": "public",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "Accessible name forwarded unchanged to the real control. Required for the `icon` size.",
+              "attribute": "label",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "shadowRootOptions",
+              "type": {
+                "text": "object"
+              },
+              "static": true,
+              "default": "{ ...LitElement.shadowRootOptions, delegatesFocus: true }"
+            },
+            {
+              "kind": "field",
               "name": "size",
               "privacy": "public",
               "type": {
-                "text": "'sm' | undefined"
+                "text": "'sm' | 'icon' | undefined"
               },
-              "description": "Size: `sm`, or omit for the default.",
+              "description": "Size: `sm`, `icon`, or omit for the default.",
               "attribute": "size",
               "reflects": true
             },
@@ -1269,11 +1362,19 @@
               "fieldName": "href"
             },
             {
+              "name": "label",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "Accessible name forwarded unchanged to the real control. Required for the `icon` size.",
+              "fieldName": "label"
+            },
+            {
               "name": "size",
               "type": {
-                "text": "'sm' | undefined"
+                "text": "'sm' | 'icon' | undefined"
               },
-              "description": "Size: `sm`, or omit for the default.",
+              "description": "Size: `sm`, `icon`, or omit for the default.",
               "fieldName": "size"
             },
             {
@@ -1407,6 +1508,72 @@
             "package": "lit"
           },
           "tagName": "sk-check-bullet",
+          "customElement": true
+        },
+        {
+          "kind": "class",
+          "description": "A labelled complementary landmark for consumer-owned selected-context content.",
+          "name": "SkContextSidebar",
+          "cssParts": [
+            {
+              "description": "The default context-content region.",
+              "name": "content"
+            },
+            {
+              "description": "The context-footer region.",
+              "name": "footer"
+            },
+            {
+              "description": "The context-header region.",
+              "name": "header"
+            },
+            {
+              "description": "The complementary landmark and responsive container.",
+              "name": "sidebar"
+            }
+          ],
+          "slots": [
+            {
+              "description": "Consumer-owned context content or navigation.",
+              "name": ""
+            },
+            {
+              "description": "Consumer-owned contextual actions.",
+              "name": "footer"
+            },
+            {
+              "description": "Consumer-owned context heading or summary.",
+              "name": "header"
+            }
+          ],
+          "members": [
+            {
+              "kind": "field",
+              "name": "label",
+              "privacy": "public",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "Accessible name forwarded unchanged to the complementary landmark when nonblank.",
+              "attribute": "label",
+              "reflects": true
+            }
+          ],
+          "attributes": [
+            {
+              "name": "label",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "Accessible name forwarded unchanged to the complementary landmark when nonblank.",
+              "fieldName": "label"
+            }
+          ],
+          "superclass": {
+            "name": "LitElement",
+            "package": "lit"
+          },
+          "tagName": "sk-context-sidebar",
           "customElement": true
         },
         {
@@ -2717,6 +2884,156 @@
             "package": "lit"
           },
           "tagName": "sk-nav-pill",
+          "customElement": true
+        },
+        {
+          "kind": "class",
+          "description": "A stateless layout for consumer-owned page orientation, metadata, and actions.",
+          "name": "SkPageHeader",
+          "cssParts": [
+            {
+              "description": "The actions region.",
+              "name": "actions"
+            },
+            {
+              "description": "The eyebrow region.",
+              "name": "eyebrow"
+            },
+            {
+              "description": "The complete responsive page-header container.",
+              "name": "header"
+            },
+            {
+              "description": "The synchronization and actions group.",
+              "name": "meta"
+            },
+            {
+              "description": "The supporting-copy region.",
+              "name": "supporting"
+            },
+            {
+              "description": "The synchronization-copy region.",
+              "name": "sync"
+            },
+            {
+              "description": "The eyebrow, title, and supporting-copy group.",
+              "name": "text"
+            },
+            {
+              "description": "The title region.",
+              "name": "title"
+            }
+          ],
+          "slots": [
+            {
+              "description": "Consumer-owned page actions.",
+              "name": "actions"
+            },
+            {
+              "description": "Consumer-owned orientation text above the title.",
+              "name": "eyebrow"
+            },
+            {
+              "description": "Consumer-owned supporting copy.",
+              "name": "supporting"
+            },
+            {
+              "description": "Consumer-owned synchronization or status copy.",
+              "name": "sync"
+            },
+            {
+              "description": "Consumer-owned page heading; the consumer chooses its heading level.",
+              "name": "title"
+            }
+          ],
+          "members": [],
+          "superclass": {
+            "name": "LitElement",
+            "package": "lit"
+          },
+          "tagName": "sk-page-header",
+          "customElement": true
+        },
+        {
+          "kind": "class",
+          "description": "A labelled personal-navigation rail with consumer-owned controls in stable groups.",
+          "name": "SkPersonalRail",
+          "cssParts": [
+            {
+              "description": "The account control group.",
+              "name": "account"
+            },
+            {
+              "description": "The bottom utility, account, and logout group.",
+              "name": "bottom"
+            },
+            {
+              "description": "The visual divider before account controls.",
+              "name": "divider"
+            },
+            {
+              "description": "The logout control group.",
+              "name": "logout"
+            },
+            {
+              "description": "The primary navigation group.",
+              "name": "primary"
+            },
+            {
+              "description": "The navigation landmark and responsive rail container.",
+              "name": "rail"
+            },
+            {
+              "description": "The utility controls group.",
+              "name": "utilities"
+            }
+          ],
+          "slots": [
+            {
+              "description": "The consumer-supplied account or identity control.",
+              "name": "account"
+            },
+            {
+              "description": "The consumer-supplied logout control.",
+              "name": "logout"
+            },
+            {
+              "description": "Primary application navigation controls.",
+              "name": "primary"
+            },
+            {
+              "description": "Utility controls displayed above the account group.",
+              "name": "utilities"
+            }
+          ],
+          "members": [
+            {
+              "kind": "field",
+              "name": "label",
+              "privacy": "public",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "Accessible name forwarded unchanged to the navigation landmark when nonblank.",
+              "attribute": "label",
+              "reflects": true
+            }
+          ],
+          "attributes": [
+            {
+              "name": "label",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "Accessible name forwarded unchanged to the navigation landmark when nonblank.",
+              "fieldName": "label"
+            }
+          ],
+          "superclass": {
+            "name": "LitElement",
+            "package": "lit"
+          },
+          "tagName": "sk-personal-rail",
           "customElement": true
         },
         {
@@ -4127,6 +4444,14 @@
         },
         {
           "kind": "js",
+          "name": "SkAppShell",
+          "declaration": {
+            "name": "SkAppShell",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
           "name": "SkBlogCard",
           "declaration": {
             "name": "SkBlogCard",
@@ -4191,6 +4516,14 @@
         },
         {
           "kind": "js",
+          "name": "SkContextSidebar",
+          "declaration": {
+            "name": "SkContextSidebar",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
           "name": "SkFeatureCard",
           "declaration": {
             "name": "SkFeatureCard",
@@ -4242,6 +4575,22 @@
           "name": "SkNavPill",
           "declaration": {
             "name": "SkNavPill",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "SkPageHeader",
+          "declaration": {
+            "name": "SkPageHeader",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "SkPersonalRail",
+          "declaration": {
+            "name": "SkPersonalRail",
             "module": "./dist/index.js"
           }
         },
