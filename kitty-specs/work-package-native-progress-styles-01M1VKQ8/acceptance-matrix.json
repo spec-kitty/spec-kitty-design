@@ -138,10 +138,10 @@
       "criterion_id": "FR-014",
       "description": "Documentation states the native three-part structure, that the consumer owns all arithmetic and text, and the exact set of supported determinate states and arrangements.",
       "proof_type": "code_review",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "docs/design-system/using-components.md and kitty-specs/work-package-native-progress-styles-01M1VKQ8/reviews/wp-WP01-cycle2.yaml \u2014 consumer ownership, native structure, states, and arrangements reviewed",
+      "pass_fail": "pass",
+      "verified_by": "codex-orry-wp208-210-0906a",
+      "verified_at": "2026-09-06T17:32:39.912203+00:00",
       "notes": "Confirmed by reading WP01 T006's addition to docs/design-system/using-components.md against FR-014's required content list."
     }
   ],
