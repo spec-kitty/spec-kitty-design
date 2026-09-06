@@ -27,9 +27,11 @@ every `validate()` call, read for constraint-validity flags, because `validate()
 control — so the rendered control's `.validity` at read time still reflects the *previous*
 render, not the one about to commit. This includes: the measured pre-fix failure
 (`pattern="[a-z]+"`, `el.value = '123'` → host reports valid, a real submit succeeds with
-`123`); the `badInput` exception (merged from the REAL rendered control, never the probe, because
-`badInput` is set only by the UA's own response to genuine keystrokes — measured directly, a
-property assignment never raises it); the `#onInput` regression and its fix (the badInput-guarded
+`123`); the `badInput` exception (the UA's own `badInput` is read from the REAL rendered control, not the
+probe, because it is set only by the UA's response to genuine keystrokes — measured directly, a
+property assignment never raises it — while a second, probe-derived branch merges the
+*programmatic analogue* of `badInput` under the R9 ruling, so the flag has two writers that are
+disjoint by timing rather than by construction); the `#onInput` regression and its fix (the badInput-guarded
 `this.value = control.value` write becomes a no-op when a user undoes a bad keystroke back to the
 identical prior value, so Lit's dirty-check schedules no update, `willUpdate()` never re-runs, and
 the field is left invalid forever — fixed by calling `validate()` unconditionally from
@@ -51,17 +53,23 @@ ruling on one narrow slice of that question (value authority: detect-and-flag, k
 raw), and this ADR restates that ruling as context, but the broader three-way invariant question
 stays open, exactly as #188 poses it.
 
-## Operator authorization for writing this ADR
+## The vehicle: writing this ADR outside #67
 
-Per `docs/architecture/elements-first-run-prompt.md` §4 ("ADRs 8–13 pin every decision these
-missions need, and ADRs are written only in #67") and its "What this loop must never do" list
-("Write an ADR outside #67"), writing an ADR here is normally forbidden. Issue #188 is filed as
-`[adr]`, raised by the pre-merge gate on #187 rather than decided there ("Filed rather than
-decided, per the operator ruling that forks go to issues while the ADR route is closed") — the
-same shape #176 (amending ADR-10) and #189 (amending ADR-11) were filed and authorized in. The new
-ADR must record this override inline, dated, in the shape ADR-10's and ADR-11's override notices
-use: naming the issue, the fact that it was filed rather than decided, and that the write is under
-that specific authorization rather than this loop's own extension of the "#67 only" rule.
+Per `docs/architecture/elements-first-run-prompt.md` §4 ("ADRs are written only in #67") and its
+"What this loop must never do" list ("Write an ADR outside #67"), writing an ADR here is normally
+forbidden. Issue #188 is filed as `[adr]`, raised by the pre-merge gate on #187 rather than decided
+there ("Filed rather than decided, per the operator ruling that forks go to issues while the ADR
+route is closed"), and dispatched to this loop as an `[adr]` mission — the same route #176
+(amending ADR-10) and #189 (amending ADR-11) took.
+
+**That route is a precedent, not an authorization, and the ADR must not overstate it.** ADR-10 and
+ADR-11 each quote an affirmative operator ruling of their own ("The operator ruled, 2026-09-05:
+amend ADR-10, in #176, before merge"; "The operator authorized amending ADR-11 for #189"). **No
+comparable ruling exists for #188**, and none is to be invented. The new ADR records the honest
+framing: the issue was filed rather than decided, it was dispatched as an `[adr]` mission on the
+#176/#189 precedent, no operator ruling for this ADR is on record, and the record's Status is
+therefore `Proposed`. It must not describe itself as written under a specific, operator-recorded
+authorization.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -136,8 +144,9 @@ explicitly forbidden from making.
 them." Silently deciding either question, or silently omitting them, both defeat the purpose of
 filing this as an ADR fork.
 
-**Independent Test**: The ADR contains a clearly labeled "Open questions" section naming both
-forks verbatim (sanctioned-pattern-or-not; the three-way invariant), stating for each what is
+**Independent Test**: The ADR contains a clearly labeled "Open questions" section naming all three
+forks verbatim (sanctioned-pattern-or-not; the three-way invariant; where the pattern lives once
+#122 lands a shared base), stating for each what is
 already known (this mission's descriptive findings) and what remains undecided, with no
 recommendation phrased as a settled conclusion.
 
@@ -148,7 +157,7 @@ recommendation phrased as a settled conclusion.
    defers, it does not lean.
 2. **Given** the ADR's "Open questions" section, **When** the operator reads it, **Then** they
    have enough of the measured record (mechanism, exception, regression, restated rejection) to
-   rule on both forks without re-deriving them from `sk-form-input.ts` themselves.
+   rule on all three forks without re-deriving them from `sk-form-input.ts` themselves.
 
 ### Edge Cases
 
@@ -169,12 +178,12 @@ recommendation phrased as a settled conclusion.
 |----|-------|------------|----------|--------|
 | FR-001 | Record the timing constraint and the mechanism | As a future #179/#122 implementer, I want the ADR to state why `willUpdate` cannot read the rendered control's validity, and the detached-probe mechanism that solves it (created once, synced by property assignment, never rendered or connected), so I understand the constraint before reusing or replacing the pattern. | High | Open |
 | FR-002 | Record the measured pre-fix failure | As a reviewer, I want the ADR to state the concrete pre-fix failure `pattern="[a-z]+"` + `el.value = '123'` → host reports valid, real submit succeeds with `123` — as the demonstrated cost of getting the timing wrong. | High | Open |
-| FR-003 | Record the `badInput` exception | As a future implementer, I want the ADR to state that `badInput` is merged from the REAL rendered control, never the probe, because it is set only by the UA's response to genuine keystrokes and a property assignment can never raise it — measured, not assumed. | High | Open |
+| FR-003 | Record the `badInput` exception, including its second writer | As a future implementer, I want the ADR to state that the UA's own `badInput` is read from the REAL rendered control rather than the probe, because it is set only by the UA's response to genuine keystrokes and a property assignment can never raise it — measured, not assumed — **and** that a second branch merges the probe-derived programmatic analogue of `badInput` under the R9 ruling, so the flag has two writers, disjoint by timing (via `#onInput`'s badInput guard) rather than by construction, whose OR-merge resolves any disagreement to `true`. | High | Open |
 | FR-004 | Record the `#onInput` regression and its fix | As a reviewer, I want the ADR to state the specific regression (the badInput-guarded value write becomes a no-op on an undo-to-identical-value, leaving `willUpdate` unscheduled and the field permanently invalid) and its fix (`validate()` called unconditionally from `#onInput`), so a future clone of this pattern does not drop the fix along with the mechanism. | High | Open |
 | FR-005 | Restate the R2 rejected alternative against what shipped | As a reviewer, I want the ADR to state that the probe is itself a second UA-computed source, that R2's original two-sources concern did not evaporate, and that it recurred as three measured synchronization bugs during #180's own development, so the historical rejection is not left implying a guarantee the shipped design does not provide. | High | Open |
 | FR-006 | State R9 as settled context, not settled invariant | As a reader, I want the ADR to state R9's value-authority ruling (submission stays raw; a type-unrepresentable non-empty value is detected as the programmatic analogue of `badInput`) as already-decided context, while explicitly not extending that ruling into an answer for the broader three-way invariant question #188 raises. | Medium | Open |
-| FR-007 | State the two open questions, unresolved, for the operator | As the operator, I want the ADR's "Open questions" section to name both forks from #188 verbatim (sanctioned pattern or not; the three-way invariant) without recommending an answer to either, so the decision authority stays with me. | High | Open |
-| FR-008 | Record the operator override for writing this ADR | As a future reader, I want the ADR to record, in the shape ADR-10 and ADR-11 used, that this write is authorized by the operator's ruling on issue #188 (filed as an ADR fork, not decided in-mission) and is not this loop extending its own authority under the "#67 only" rule. | High | Open |
+| FR-007 | State the three open questions, unresolved, for the operator | As the operator, I want the ADR's "Open questions" section to name all three forks #188 raises under "What an ADR should settle" verbatim (sanctioned pattern or not; the three-way invariant; where the pattern lives once #122 lands a shared base) without recommending an answer to any of them, so the decision authority stays with me. The third is not subsumed by the first: whether the probe is sanctioned and where it lives are separable, and the second survives either answer to the first. | High | Open |
+| FR-008 | Record the vehicle for writing this ADR, at its real strength | As a future reader, I want the ADR to record how it came to be written outside #67 — #188 filed as an ADR fork rather than decided in-mission, dispatched as an `[adr]` mission on the #176/#189 precedent — and to state plainly that **no operator ruling for this ADR is on record**, unlike ADR-10's and ADR-11's override notices, which each quote one. It must not describe itself as written under a specific, operator-recorded authorization. | High | Open |
 
 ### Non-Functional Requirements
 
@@ -218,13 +227,15 @@ recommendation phrased as a settled conclusion.
 - **SC-002**: The ADR contains an explicit restatement of R2's rejected alternative against the
   shipped design, naming the three measured synchronization bugs from #180's development history
   as evidence that the two-sources risk moved rather than closed.
-- **SC-003**: The ADR contains an "Open questions" section naming both #188 forks (sanctioned
-  pattern for #179/#122; the three-way probe/control/`setFormValue` invariant) with no
-  recommended answer to either, and a citable, quotable form the operator can act on directly.
-- **SC-004**: The ADR contains an override notice for this write, referencing issue #188 and the
-  operator ruling, in the same subsection shape as ADR-10's `#176` and ADR-11's `#189` override
-  notices (named deciders/authorization line plus an inline "operator override, recorded for the
-  record" paragraph).
+- **SC-003**: The ADR contains an "Open questions" section naming all three #188 forks (sanctioned
+  pattern for #179/#122; the three-way probe/control/`setFormValue` invariant; where the pattern
+  lives once #122 lands a shared base) with no recommended answer to any of them, and a citable,
+  quotable form the operator can act on directly.
+- **SC-004**: The ADR contains a section recording how it came to be written outside #67 —
+  referencing issue #188, the fact that it was filed rather than decided, and the #176/#189
+  precedent — and states explicitly that no operator ruling for this ADR is on record, in contrast
+  to ADR-10's `#176` and ADR-11's `#189` notices, which each quote one. The Deciders line claims
+  no operator session for this record.
 - **SC-005**: `packages/elements/src/form-input/sk-form-input.ts` and
   `fixtures/elements-behaviour/src/sk-form-input.test.ts` are byte-identical to their state at
   branch point (`1405e75`) — i.e., `git diff 1405e75 -- packages/elements/src/form-input/sk-form-input.ts fixtures/elements-behaviour/src/sk-form-input.test.ts` is empty at mission close.

@@ -50,11 +50,12 @@ is amended.
 No charter file conflict identified. This mission documents an existing, already-shipped code
 behaviour and creates no new testable surface, so `languages_frameworks`/`testing_requirements`/
 `quality_gates` are untouched. The one governance rule directly in play is
-`elements-first-run-prompt.md` §4 ("ADRs 8–13 pin every decision these missions need, and ADRs are
-written only in #67"; "Write an ADR outside #67" under "what this loop must never do") — issue
-#188 and this mission's brief satisfy it via the same operator-override precedent ADR-10 recorded
-for #176 and ADR-11 recorded for #189 (see spec.md "Operator authorization for writing this ADR"
-and FR-008). No violation requiring Complexity Tracking.
+`elements-first-run-prompt.md` §4 ("ADRs are written only in #67"; "Write an ADR outside #67"
+under "what this loop must never do") — issue #188, filed as an `[adr]` fork rather than decided
+in-mission and dispatched here as an `[adr]` mission, follows the same route #176 (ADR-10) and
+#189 (ADR-11) took. That is a precedent, not an operator ruling for this ADR: none is on record,
+and the ADR says so rather than claiming one (see spec.md "The vehicle: writing this ADR outside
+#67" and FR-008). No violation requiring Complexity Tracking.
 
 ## Project Structure
 
