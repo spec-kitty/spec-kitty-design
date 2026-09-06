@@ -118,10 +118,10 @@
       "criterion_id": "FR-012",
       "description": "sk-progress ships only as packages/styles/src/progress/sk-progress.css plus authored .html fixtures with a generated barrel; no packages/elements/src/progress/, no custom element, no ::part(), and no manifest/React/Vue wrapper entry exists.",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "build-styles-only-markup --check; build-elements-css/markup/react/vue checks; no packages/elements/src/progress; ratchets unchanged",
+      "pass_fail": "pass",
+      "verified_by": "codex-orry-wp208-210-0906a",
+      "verified_at": "2026-09-06T17:32:37.795397+00:00",
       "notes": "Verified by WP01 T002's git ls-files packages/elements/src check and T009's ratchet-file diff checks (expected-parts.json, expected-docs.json, behaviours.json, mutations.json all unchanged)."
     },
     {
