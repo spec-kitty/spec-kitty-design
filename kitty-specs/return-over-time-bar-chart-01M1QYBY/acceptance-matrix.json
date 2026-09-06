@@ -220,10 +220,10 @@
       "criterion_id": "FR-016",
       "description": "Use bounded items and horizontal scrolling or a compact treatment that keeps every label, value, and bar owned without overlap or meaning-changing truncation.",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "390x844 selectable and presentational browser assertions prove owned horizontal overflow, baseline/label containment, no overlap, full text, and hit-test ownership",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T21:30:30.128021+00:00",
       "notes": "390 by 844 geometry, scrolling, hit-test, and full-text assertions.",
       "lane_owners": [
         "WP01"
