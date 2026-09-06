@@ -19,14 +19,18 @@ import {
   SkFormInput,
   SkMetric,
   SkNavPill,
+  SkNotice,
   SkTransitionMatrix,
   type ActionRowActivateDetail,
   type SkCardProps,
   type SkFormInputElement,
+  type SkNoticeProps,
   type TransitionMatrixSelectDetail,
 } from '../src/index.js';
 import type {
   EvidenceStage,
+  NoticeAnnounce,
+  SkNoticeDismissDetail,
   StatusIndicatorTone,
   TransitionMatrixProperties,
 } from '@spec-kitty/elements';
@@ -238,3 +242,69 @@ const malformedEvidenceStages = Object.freeze([
 ]);
 // @ts-expect-error every stage requires opaque displayValue text
 export const evidenceChainMalformedStage = <SkEvidenceChain stages={malformedEvidenceStages} />;
+
+// --- sk-notice: the tone union AND the dismiss detail reach the wrapper, neither as `any` (#178)
+
+export const noticeTone = <SkNotice tone="danger" announce="assertive" message="The deploy failed" />;
+
+// @ts-expect-error "failed" is a domain word, not a tone — sk-notice holds no domain mapping
+export const noticeToneDomainWord = <SkNotice tone="failed" />;
+
+// @ts-expect-error `tone` is the six-tone union, not an arbitrary string
+export const noticeToneArbitrary = <SkNotice tone={'anything' as string} />;
+
+// @ts-expect-error `announce` is off | polite | assertive — `loud` is not a politeness
+export const noticeAnnounceWrong = <SkNotice announce="loud" />;
+
+// THE ONE VOCABULARY, again at COMPILE TIME — and this is what makes "sk-notice consumes
+// STATUS_TONES rather than restating it" checkable rather than a claim in a comment.
+//
+// sk-notice.ts imports STATUS_TONES for its RUNTIME validation, so there is no second runtime
+// copy at all. What it still has to spell out inline is the `tone` FIELD ANNOTATION, because
+// build-vue-types.mjs copies the manifest's type text verbatim into a vue.d.ts that imports
+// nothing, so a type alias there emits an unresolved identifier (#216 records this as the second,
+// independent copy — distinct from the markup-module one, which sk-notice does not have because
+// it authors no *.markup.ts). These two assignments are what stop that spelling from drifting:
+// they hold in BOTH directions, so the notice's union can neither gain a tone #146 does not have
+// nor lose one it does.
+//
+// `any` would satisfy both lines — but then the three `@ts-expect-error` directives above would
+// go UNUSED, which tsc reports as an error in its own right. Neither half proves it alone.
+const toneToNotice: NonNullable<SkNoticeProps['tone']> = 'recovery' satisfies StatusIndicatorTone;
+const noticeToTone: StatusIndicatorTone = toneToNotice;
+void noticeToTone;
+
+const everyNoticeTone: readonly NonNullable<SkNoticeProps['tone']>[] = [
+  'neutral',
+  'info',
+  'success',
+  'attention',
+  'danger',
+  'recovery',
+] satisfies readonly StatusIndicatorTone[];
+void everyNoticeTone;
+
+// The politeness axis is its OWN vocabulary, not a slice of the tone one, and it is pinned the
+// same way so the three levels cannot drift from the element's declared union either.
+const everyAnnounce: readonly NonNullable<SkNoticeProps['announce']>[] = [
+  'off',
+  'polite',
+  'assertive',
+] satisfies readonly NoticeAnnounce[];
+void everyAnnounce;
+
+// --- the dismiss event detail survives generation as a TYPE, not as a bare CustomEvent --------
+//
+// Without the `{Type}` in the element's `@fires` JSDoc the manifest records `type: None` and the
+// generated React handler receives a bare `CustomEvent` whose `detail` is `any` — a degradation
+// no runtime gate in this repo can see, because packages/react/src is generated and committed and
+// every one of them would stay green.
+export const noticeHandler = (
+  <SkNotice onSkNoticeDismiss={(event) => void (event.detail satisfies SkNoticeDismissDetail)} />
+);
+
+// @ts-expect-error the detail is typed, so a field that is not on it is an error rather than `any`
+export const noticeHandlerWrongDetail = <SkNotice onSkNoticeDismiss={(event) => void event.detail.status} />;
+
+// @ts-expect-error the detail's `tone` is the six-tone union, so a domain word is not assignable
+export const noticeDetailDomainWord: SkNoticeDismissDetail = { tone: 'failed' };

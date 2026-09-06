@@ -348,6 +348,47 @@ declare module 'vue' {
       'open'?: boolean;
     }>;
     /**
+     * A block-level status message about a page or a region of it, announced at a politeness the
+     * consumer chooses.
+     *
+     * Announcement is an explicit property, never a side effect of tone: a `danger` notice with
+     * `announce="off"` is silent, and a `neutral` one with `announce="assertive"` interrupts. The
+     * element owns no application state — the consumer decides whether a notice exists — and it has
+     * no timer, no positioning and no stacking. It is not a toast.
+     *
+     * Token dependencies: --sk-border-default, --sk-border-focus, --sk-border-strong,
+     * --sk-border-width-1, --sk-border-width-2, --sk-border-width-4, --sk-fg-body, --sk-font-sans,
+     * --sk-motion-duration-fast, --sk-motion-ease-out, --sk-on-status-attention,
+     * --sk-on-status-danger, --sk-on-status-info, --sk-on-status-neutral, --sk-on-status-recovery,
+     * --sk-on-status-success, --sk-radius-md, --sk-radius-sm, --sk-space-1, --sk-space-2,
+     * --sk-space-3, --sk-space-4, --sk-status-attention, --sk-status-danger, --sk-status-info,
+     * --sk-status-neutral, --sk-status-recovery, --sk-status-success, --sk-surface-card,
+     * --sk-text-base, --sk-text-lg, --sk-weight-semibold.
+     */
+    'sk-notice': SkElement<{
+      /**
+       * Announcement politeness. `off` (the default) renders no live region; `polite` renders
+       * `role="status"`; `assertive` renders `role="alert"`. Independent of `tone`.
+       */
+      'announce'?: 'off' | 'polite' | 'assertive';
+      /** Accessible name for the dismiss control. Defaults to `Dismiss notice`. */
+      'dismiss-label'?: string;
+      /** Whether to render the dismiss control. The element never removes itself when it is used. */
+      'dismissible'?: boolean;
+      /**
+       * The message text. Changing it re-announces, when announcement is on. A consumer that must
+       * announce a message which already exists when the notice is inserted should insert the notice
+       * first and then assign this — a live region that enters the DOM together with its content is
+       * not reliably announced, and the element cannot defer its own first paint without a timer.
+       */
+      'message'?: string;
+      /**
+       * Presentation tone, from the library's one tone vocabulary. Unknown values render as
+       * `neutral` without changing the visible message.
+       */
+      'tone'?: 'neutral' | 'info' | 'success' | 'attention' | 'danger' | 'recovery' | undefined;
+    }>;
+    /**
      * A stateless layout for consumer-owned page orientation, metadata, and actions.
      *
      * Two orthogonal axes. `density` changes how much room the header takes; `sticky` changes
