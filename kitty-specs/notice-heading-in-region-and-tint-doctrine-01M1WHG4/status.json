@@ -1,7 +1,7 @@
 {
-  "event_count": 4,
-  "last_event_id": "01M1WHRCPHGVN095JAHN83MGEN",
-  "materialized_at": "2026-09-06T23:44:46.289220+00:00",
+  "event_count": 5,
+  "last_event_id": "01M1WJFKWC47MX0K23G44RMCHW",
+  "materialized_at": "2026-09-06T23:57:27.308802+00:00",
   "mission_number": "",
   "mission_slug": "notice-heading-in-region-and-tint-doctrine-01M1WHG4",
   "mission_type": "software-dev",
@@ -9,12 +9,12 @@
     "approved": 0,
     "blocked": 0,
     "canceled": 0,
-    "claimed": 0,
+    "claimed": 1,
     "done": 0,
     "for_review": 0,
     "in_progress": 1,
     "in_review": 0,
-    "planned": 1
+    "planned": 0
   },
   "work_packages": {
     "WP01": {
@@ -30,11 +30,16 @@
       "role": "implementer"
     },
     "WP02": {
-      "actor": "finalize-tasks",
+      "actor": "user",
+      "agent_profile": "__resolved_profile_absent__",
+      "agent_profile_version": "__resolved_profile_version_absent__",
       "force_count": 0,
-      "lane": "planned",
-      "last_event_id": "01M1WHR2RVZNPJ43785RP0XYWM",
-      "last_transition_at": "2026-09-06T23:44:36.123591+00:00"
+      "lane": "claimed",
+      "last_event_id": "01M1WJFKWC47MX0K23G44RMCHW",
+      "last_transition_at": "2026-09-06T23:57:27.308802+00:00",
+      "model": "__resolved_model_absent__",
+      "provider": "__resolved_provider_absent__",
+      "role": "implementer"
     }
   }
 }
