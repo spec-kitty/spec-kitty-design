@@ -29,7 +29,8 @@ const WORKFLOW = '.github/workflows/ci-quality.yml';
 // must be strictly required belongs here. NOT `lint-code`: it is strictly required by the gate, but
 // its steps deliberately use continue-on-error (ESLint and Stylelint report into a summary and are
 // failed by a final step), so the whole-job payload audit below does not describe it. REQUIRED_LINT
-// is how a step in that job is held to running — see #193's two entries there.
+// is how a step in that job is held to running — see #193's two entries there, and the
+// `lint-code` EDGE assertions below, which hold the job itself to being able to block a merge.
 const JOBS = ['test', 'release-gate'];
 
 const raw = readFileSync(WORKFLOW, 'utf8');
@@ -98,6 +99,59 @@ else {
     if (wf.jobs?.[JOB] && 'if' in wf.jobs[JOB]) {
       problems.push(`the \`${JOB}\` job carries an \`if:\` — FR-003 requires it to run unconditionally`);
     }
+  }
+
+  // 4b. THE `lint-code` EDGE. `lint-code` is strictly required by the gate but is deliberately
+  // absent from JOBS, because the whole-job payload audit below would red on ESLint's and
+  // Stylelint's intentional continue-on-error. That exclusion cost the edge itself: every
+  // REQUIRED_LINT assertion proves a STEP runs INSIDE `lint-code`, and none of them proved
+  // `lint-code` can block a merge. Reproduced with this file printing green (#193 pre-merge
+  // lens): deleting the strict clause from the gate's [ENFORCED] step, deleting `lint-code` from
+  // `gate.needs`, and putting `if: false` or `continue-on-error: true` on the job were ALL
+  // accepted — which made fourteen gates, including this file's own, unenforceable in one line.
+  // Stated here rather than by adding `lint-code` to JOBS so the continue-on-error idiom stays
+  // legal where it is deliberate (a step) and illegal where it is not (the job).
+  const LINT_JOB = 'lint-code';
+  const lintJob = wf.jobs?.[LINT_JOB];
+
+  // i. the job is a dependency at all
+  if (!(gate.needs ?? []).includes(LINT_JOB)) {
+    problems.push(
+      `\`${LINT_JOB}\` is not in gate.needs — its result is not even visible to the gate, so ` +
+        `every gate in REQUIRED_LINT runs for information only`
+    );
+  }
+
+  // ii. a STRICT clause in the failure disjunction. No skipped-tolerance entry is legitimate for
+  // it: `lint-code` has no `if:` and is not behind the `changes` filter.
+  const lintStrict = new RegExp(String.raw`\[\s*"\$\{\{\s*needs\.${LINT_JOB}\.result\s*\}\}"\s*!=\s*"success"\s*\]`);
+  if (!lintStrict.test(script)) {
+    problems.push(
+      `the gate's [ENFORCED] step has no strict \`needs.${LINT_JOB}.result != success\` clause — ` +
+        `the job can fail without blocking the merge`
+    );
+  }
+  if (tolerance.includes(LINT_JOB)) {
+    problems.push(
+      `\`${LINT_JOB}\` appears in the skipped-tolerance block. It runs UNCONDITIONALLY, so ` +
+        `'skipped' is never legitimate for it.`
+    );
+  }
+
+  // iii. the job itself can fail. Step-level continue-on-error inside `lint-code` is deliberate;
+  // JOB-level continue-on-error, or a job-level `if:`, is not — either one makes `result` unable
+  // to carry a failure to the gate at all.
+  if (lintJob && 'if' in lintJob) {
+    problems.push(
+      `the \`${LINT_JOB}\` job carries an \`if:\` — it can report 'skipped', which the gate's ` +
+        `strict clause treats as a failure only if the clause is there at all; run it unconditionally`
+    );
+  }
+  if (lintJob && lintJob['continue-on-error']) {
+    problems.push(
+      `the \`${LINT_JOB}\` job carries continue-on-error — its failure cannot reach the gate, ` +
+        `and every gate in REQUIRED_LINT becomes advisory`
+    );
   }
 
   // 5. THE PAYLOAD, not just the edge.
@@ -273,8 +327,8 @@ else {
 }
 
 if (problems.length) {
-  console.error(`❌ ${WORKFLOW}: the gate does not gate \`${JOBS.join('`, `')}\` (FR-014):`);
+  console.error(`❌ ${WORKFLOW}: the gate does not gate \`${JOBS.join('`, `')}\`, \`lint-code\` (FR-014):`);
   for (const p of problems) console.error(`   ${p}`);
   process.exit(1);
 }
-console.log(`✅ gate wiring: \`${JOBS.join('`, `')}\` are in needs, tested strictly, absent from the skip tolerance, and unconditional.`);
+console.log(`✅ gate wiring: \`${JOBS.join('`, `')}\` and \`lint-code\` are in needs, tested strictly, absent from the skip tolerance, and unconditional.`);
