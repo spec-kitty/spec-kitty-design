@@ -288,10 +288,10 @@
       "criterion_id": "C-007",
       "description": "Authored component sources are limited to metric and evidence-chain; shared registries and generated artifacts change only as derived consequences.",
       "proof_type": "manual_review",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "Exact base diff and range-diff audit limit authored component changes to metric and evidence-chain; shared registry and generated changes are derived consequences only, with no product loss or duplication.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T19:06:37.527003+00:00",
       "notes": "Exact base-diff ownership and generated-provenance audit."
     },
     {
