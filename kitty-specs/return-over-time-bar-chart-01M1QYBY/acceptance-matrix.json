@@ -177,10 +177,10 @@
       "criterion_id": "FR-013",
       "description": "Use one native click path so pointer, Enter, and Space each produce one equivalent activation without key-repeat duplication.",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "Chromium/Firefox real pointer Enter Space and held-key assertions prove one equivalent native click-path activation and no repeat duplication",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T21:30:24.632928+00:00",
       "notes": "Real-input parity and repeat-key suppression evidence.",
       "lane_owners": [
         "WP01"
