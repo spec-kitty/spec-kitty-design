@@ -1,12 +1,12 @@
 {
-  "event_count": 18,
-  "last_event_id": "01M1VM5JG1G5MMWD9CF999Y9VV",
-  "materialized_at": "2026-09-06T15:07:40.929714+00:00",
+  "event_count": 19,
+  "last_event_id": "01M1VM6BD4RSSX6T6J26HTAKBY",
+  "materialized_at": "2026-09-06T15:08:06.436572+00:00",
   "mission_number": "",
   "mission_slug": "delivery-return-metric-elements-01M1STPA",
   "mission_type": "software-dev",
   "summary": {
-    "approved": 2,
+    "approved": 1,
     "blocked": 0,
     "canceled": 0,
     "claimed": 0,
@@ -14,7 +14,7 @@
     "for_review": 0,
     "in_progress": 0,
     "in_review": 0,
-    "planned": 1
+    "planned": 2
   },
   "work_packages": {
     "WP01": {
@@ -22,10 +22,10 @@
       "agent": "codex",
       "agent_profile": "__resolved_profile_absent__",
       "agent_profile_version": "__resolved_profile_version_absent__",
-      "force_count": 0,
-      "lane": "approved",
-      "last_event_id": "01M1T2CPNK3TGFDC2EMAYAMBF8",
-      "last_transition_at": "2026-09-06T00:37:45.779057+00:00",
+      "force_count": 1,
+      "lane": "planned",
+      "last_event_id": "01M1VM6BD4RSSX6T6J26HTAKBY",
+      "last_transition_at": "2026-09-06T15:08:06.436572+00:00",
       "model": "__resolved_model_absent__",
       "notes": [
         "Ready for review at 60a72eb8b97d69159ea3b67b18e506be9ecc9992. Scope: exactly six WP01-owned files. Red reversals: digits-only display binding made preserves every supplied display-value byte fail, exit 1, then restored green exit 0; generic div structure made exposes one native definition relationship without a heading fail, exit 1, then restored green exit 0; plain-span annotation made composes the existing pill tag and omits absent annotation chrome fail, exit 1, then restored green exit 0; unsupported-tone pass-through made fails closed for invalid required content or tone fail, exit 1, then restored green exit 0; removed value part made targets all five public parts and adopts only skMetricSheet fail, exit 1, then restored green exit 0. Final gates: CSS generation exit 0; generated CSS check 16 components exit 0; focused Chromium Vitest 7/7 pass; elements typecheck pass; elements lint pass with seven pre-existing warnings only in form-control-base and transition-matrix; stylelint pass; git diff and cached diff checks pass; 18 authored CSS token references exactly match class documentation. Lane clean after commit; no heavy/browser-fleet, axe, visual, mutation, remote, PR, merge, publish, or deploy action run.",
@@ -33,10 +33,10 @@
       ],
       "provider": "__resolved_provider_absent__",
       "review_result": {
-        "feedback_path": "/home/jeroennouws/dev/team-kitty-missions/design-147/kitty-specs/delivery-return-metric-elements-01M1STPA/tasks/WP01-generic-metric-element/review-cycle-1.md",
-        "reference": "review-cycle://delivery-return-metric-elements-01M1STPA/WP01-generic-metric-element/review-cycle-1.md",
+        "feedback_path": "/home/jeroennouws/dev/team-kitty-missions/design-147/kitty-specs/delivery-return-metric-elements-01M1STPA/tasks/WP01-generic-metric-element/review-cycle-2.md",
+        "reference": "review-cycle://delivery-return-metric-elements-01M1STPA/WP01-generic-metric-element/review-cycle-2.md",
         "reviewer": "user",
-        "verdict": "approved"
+        "verdict": "changes_requested"
       },
       "role": "reviewer",
       "shell_pid": 2459900,
