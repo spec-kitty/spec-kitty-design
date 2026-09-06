@@ -544,10 +544,10 @@
       "criterion_id": "C-005",
       "description": "All component CSS design values use --sk-* tokens; data-derived proportions use numeric SVG geometry, with no dynamic inline style, raw design values, or cross-shadow theme selectors.",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "stylelint/CSS-hygiene/theme-boundary checks prove --sk-* design tokens, numeric SVG ratios, no dynamic inline style/raw design values/cross-shadow selectors",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T21:31:04.014137+00:00",
       "notes": "Stylelint, CSS hygiene, theme boundary, and geometry checks.",
       "lane_owners": [
         "WP01"
