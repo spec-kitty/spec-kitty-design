@@ -589,6 +589,111 @@ test.describe('sk-action-row browser contract', () => {
   });
 });
 
+/**
+ * #218. `sk-card`'s ForcedColors story emulated nothing, asserted nothing, and rendered bytes
+ * identical to `AllStatuses`. The obligation it was discharging — "a forced-colors story or a
+ * documented baseline" — was met by a docstring, which is exactly the shape this repo keeps
+ * finding and removing.
+ *
+ * The claim worth pinning is the one the tone axis actually rests on: under
+ * `forced-colors: active` the six tints collapse to one system ground and the tone is GONE, so
+ * what still says "this card carries an operational status" has to be something forced colors
+ * does not touch. That is the 4px `border-inline-start-width`, set outside any media query.
+ * `sk-card.css` carried an `@media (forced-colors: active)` block that restated it, plus the
+ * `CanvasText` the UA remap already computes — both no-ops, now removed, with this case standing
+ * in their place.
+ *
+ * Same emulation as the `sk-action-row` case above, and the same both-schemes discipline.
+ */
+const cardStory = async (page: Page, id: string) => {
+  await page.goto(`/iframe.html?id=elements-skcard--${id}&viewMode=story`);
+  const host = page.locator('sk-card').first();
+  await expect(host.locator('[part="card"]')).toBeVisible({ timeout: 20000 });
+};
+
+test.describe('sk-card forced colors', () => {
+  test('keeps the widened status edge when every tone collapses to one ground', async ({ page, browserName }) => {
+    const paint = (locator: Locator) => locator.evaluate((node) => {
+      const card = node.shadowRoot!.querySelector('[part="card"]')!;
+      const style = getComputedStyle(card);
+      return {
+        edge: Number.parseFloat(style.borderInlineStartWidth),
+        edgeStyle: style.borderInlineStartStyle,
+        background: style.backgroundColor,
+      };
+    });
+
+    for (const colorScheme of ['dark', 'light'] as const) {
+      // MEASURED TWICE, with the media feature OFF and then ON, and the two halves of the claim
+      // are held to different evidence.
+      //
+      // `matchMedia('(forced-colors: active)').matches` is NOT evidence that an engine performs
+      // the remap. WebKit answers `true` to it under Playwright's emulation and then leaves author
+      // backgrounds exactly as authored — this case was first written to trust that answer and
+      // WebKit failed it, six distinct tints under a media query claiming forced colors. So the
+      // guard below asks the observable question instead: did the BASE card's own background move
+      // when the feature came on? That is the same element, the same adopted stylesheet and the
+      // same shadow root as the tone cards, so an engine that moved it must move them too.
+      // The story is LOADED ONCE PER MEDIA STATE, not measured twice on one load: switching
+      // `emulateMedia` under a live page does move some computed values and not others, which read
+      // as a partial remap and made this case fail on engines that in fact remap correctly.
+      const measure = async (forcedColors: 'none' | 'active') => {
+        await page.emulateMedia({ forcedColors, colorScheme });
+        await cardStory(page, 'forced-colors');
+        const toneHosts = await page.locator('sk-card[status]').all();
+        expect(toneHosts.length, 'the story must render every tone beside the base card').toBe(6);
+        return {
+          base: await paint(page.locator('sk-card[data-forced-colors-base]')),
+          tones: await Promise.all(toneHosts.map((host) => paint(host))),
+        };
+      };
+
+      const normal = await measure('none');
+      // THE FLOOR under the collapse claim: the six tones must be genuinely distinct BEFORE
+      // forced colors, or "they collapse to one ground" is a green line over nothing.
+      expect(new Set(normal.tones.map((t) => t.background)).size,
+        `${colorScheme}: the six tones must be distinct before forced colors, or the collapse asserts nothing`)
+        .toBe(6);
+
+      const forced = await measure('active');
+      const baseForced = forced.base;
+      const tones = forced.tones;
+      const remaps = baseForced.background !== normal.base.background;
+      // THE FLOOR'S OWN FLOOR. The next assertion is keyed on a hard-coded project name, and
+      // nothing made that name real: rename or drop `chromium` in playwright.config.ts and the
+      // branch below never runs, the collapse half goes quiet on all three engines, and the suite
+      // still reports green. Assert the project exists rather than trusting the string.
+      expect(test.info().config.projects.map((project) => project.name),
+        'the chromium floor below is keyed on this project name')
+        .toContain('chromium');
+      // Chromium MUST remap. Without this the guard could go quiet everywhere and the case would
+      // still pass, which is the shape this spec exists to refuse.
+      if (browserName === 'chromium') {
+        expect(remaps, 'chromium must actually apply the forced-colors remap, not just report the media feature').toBe(true);
+      }
+
+      // THE MECHANISM, asserted in every engine and in both schemes, remap or no remap: forced
+      // colors never touches width, so the widened inline-start step is what distinguishes a
+      // status card from a plain one here.
+      for (const tone of tones) {
+        expect(tone.edgeStyle, `${colorScheme}: the status edge must be drawn`).not.toBe('none');
+        expect(tone.edge, `${colorScheme}: the widened inline-start edge is the mechanism, and it must survive`)
+          .toBeGreaterThan(baseForced.edge);
+      }
+
+      // THE COLLAPSE, only where the engine demonstrably remapped — otherwise the assertion is
+      // about the engine, not about sk-card.
+      if (remaps) {
+        expect(new Set(tones.map((t) => t.background)).size,
+          `${colorScheme}: the six tints must collapse to one system ground`).toBe(1);
+        expect(tones[0]!.background,
+          `${colorScheme}: a status card's ground must be indistinguishable from the base card's`)
+          .toBe(baseForced.background);
+      }
+    }
+  });
+});
+
 test('the section-header action story upgrades the reused sk-button to a native control', async ({ page }) => {
   await page.goto('/iframe.html?id=elements-sksectionheader--with-metadata-and-action&viewMode=story');
   const action = page.locator('sk-section-header sk-button[slot="action"]');

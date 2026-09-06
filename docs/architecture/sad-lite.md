@@ -7,8 +7,23 @@
 | **Owner** | Stijn Dejongh |
 | **Version** | 1.0 |
 | **Scope** | Repository-level architecture for `spec-kitty-design` |
-| **Related ADRs** | ADR-001 through ADR-005 |
+| **Related ADRs** | The whole of [`decisions/`](decisions/), indexed with each record's current status in [the architecture README's ADR table](README.md#decisions-adrs). No range is written out here — see the note below |
 | **Related spec** | `kitty-specs/design-system-monorepo-infra-ci-scaffold-01KQHEEJ/spec.md` |
+
+> **On the Related ADRs row (#201).** This row read `ADR-001 through ADR-005` — a hand-written
+> range, in the document the architecture README calls *"Start here"*, against a directory that
+> now holds fifteen records. It was not a scoped statement about what informed v1.0: this
+> document's own body cites eight records outside that range, added by commits well after the
+> 2026-05-01 date in the header, so the range had already been outgrown by the text beneath it. It is the fifth instance of the shape #193 measured and #199 removed elsewhere, and the
+> last one anybody had found. The row now points at the table `scripts/check-adr-index.mjs`
+> holds to `decisions/` in both directions — a row for every record, a record for every row, and
+> the Status column transcribed from each record's own — which is the same move
+> `elements-first-programme.md` made for the identical reason, and #197's ruling.
+>
+> Identifiers: this document writes the older padded `ADR-001` form in several places. No record's
+> own H1 uses it except the ADR-003 addendum's, but it is not a dead identifier — it appears
+> across a dozen files, including ADRs citing their siblings — so it is left alone here. That is a
+> style question, not a rename, and not this note's subject.
 
 ---
 

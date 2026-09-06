@@ -33,6 +33,261 @@ const WORKFLOW = '.github/workflows/ci-quality.yml';
 // `lint-code` EDGE assertions below, which hold the job itself to being able to block a merge.
 const JOBS = ['test', 'release-gate'];
 
+// ── READING A `run:` BODY AS SHAPE RATHER THAN AS TEXT (#202, #205) ───────────────────
+//
+// Every assertion below used to inspect the workflow's shell by matching SUBSTRINGS, at two
+// independent levels, and both were defeated by an edit that still reads as correct:
+//
+//   * #202, one level up — the `gate` job's failure disjunction. Appending a conjunct
+//     (`[ "${{ needs.lint-code.result }}" != "success" ] && [ 1 = 2 ] || \`) or wrapping the
+//     whole disjunction in `if false && [ … ]` kills the disjunct while the substring the
+//     assertion looked for is still there, verbatim, for a diff reader to nod at.
+//   * #205, one level down — `neutered()`'s ENUMERATED list of swallow spellings, which
+//     `|| /bin/true`, `|| cmp /dev/null /dev/null` and a `set +e` … `exit 0` body all walk past.
+//
+// NOT A SHELL PARSER, deliberately: vendoring a POSIX grammar to audit one workflow is the
+// disproportionate machinery that got #202 declined once already. What these helpers do is
+// read the body as LOGICAL LINES and assert STRUCTURE over them, with every unrecognised
+// construct reported rather than accepted. The rules below are stated positively for the same
+// reason the `[ENFORCED]` rule further down already is: enumerating the ways to defeat a check
+// is a game the enumerator loses, one spelling at a time.
+//
+// `scripts/check-gate-wiring-defeats.mjs` is the probe table for all of it. Both issues arrived
+// as PROSE reproductions, which cannot be re-run — so nothing stopped the next refactor of this
+// file from silently reopening either hole. It is registered in REQUIRED_LINT below, beside
+// this file's own self-registration.
+
+/** GitHub expressions masked to one keyword-free token, so `${{ … }}` can neither move the
+ *  block depth nor look like a shell word. */
+const masked = (text) =>
+  String(text)
+    .replace(/\$\{\{[\s\S]*?\}\}/g, 'GHEXPR')
+    // Shell parameter expansion too, or `${VAR}`'s brace moves the block depth counted below.
+    .replace(/\$\{[^{}]*\}/g, 'SHVAR');
+
+/** Whole-line `#` comments dropped, `\` continuations joined, blanks removed. A continued
+ *  disjunction is ONE line here, which is what lets it be read as one condition. */
+const logicalLines = (body) => {
+  const lines = String(body ?? '')
+    .split('\n')
+    .filter((l) => !/^\s*#/.test(l))
+    .join('\n')
+    .replace(/\\\n\s*/g, ' ')
+    .split('\n')
+    .map((l) => l.trim())
+    .filter(Boolean);
+  // `then` ON ITS OWN LINE is folded back onto its `if`. Requiring `; then` on one logical line
+  // was a FALSE POSITIVE against ordinary POSIX style (F7): a perfectly intact gate written
+  //     if [ ... ] || \
+  //        [ ... ]
+  //     then
+  // was reported as having no top-level conditional that exits non-zero, while the shell still
+  // blocked the merge. A checker that reds a correct gate gets the checker deleted, so this is
+  // as load-bearing as any of the defeats below.
+  const folded = [];
+  for (const line of lines) {
+    if (/^(then|do)$/.test(line) && folded.length) folded[folded.length - 1] += `; ${line}`;
+    else folded.push(line);
+  }
+  return folded;
+};
+
+/** `;`-separated simple commands of one logical line. */
+const fragments = (line) => line.split(';').map((f) => f.trim()).filter(Boolean);
+
+/**
+ * An `exit` whose status is PROVABLY non-zero.
+ *
+ * Stated over the argument rather than as a literal `exit 0` pattern (F3). The old rule was
+ * `/exit\s+0\s*$/`, and three one-character neighbours walked past it — `exit 0;`, `exit 00`,
+ * and `SKIP=0` … `exit $SKIP` — each an unconditional early exit that left the gate green.
+ * Bare `exit` inherits the previous command's status and is not provable either. Anything the
+ * rule cannot prove non-zero is refused, so the next spelling fails closed rather than being
+ * added to a list.
+ */
+const RAISING_EXIT = /^exit\s+([1-9][0-9]*)$/;
+const isExit = (fragment) => /^exit\b/.test(fragment);
+const raisesFor = (fragment) => RAISING_EXIT.test(fragment.trim());
+
+const OPENERS = new Set(['if', 'case', 'for', 'while', 'until']);
+const CLOSERS = new Set(['fi', 'esac', 'done']);
+/** Block depth, counted at WORD level over the masked line, so a one-liner `if … ; then … ; fi`
+ *  is correctly net zero and a nested block is correctly not top level. */
+const depthDelta = (line) => {
+  const shape = masked(line);
+  let delta = 0;
+  for (const word of shape.split(/[\s;()]+/)) {
+    if (OPENERS.has(word)) delta += 1;
+    else if (CLOSERS.has(word)) delta -= 1;
+  }
+  // BRACES COUNT TOO (F1). Without this, `{` and `}` moved no depth and a function header was
+  // just another word, so wrapping the entire failure disjunction in `gate_check() { ... }` and
+  // never calling it read as TOP LEVEL: this file printed green, the probe table printed green,
+  // and the shell printed "All hard gates passed." over a failed `test` job. A brace group is a
+  // block whether or not it has a name, and a gating conditional inside one is not top level.
+  delta += (shape.match(/\{/g) ?? []).length - (shape.match(/\}/g) ?? []).length;
+  return delta;
+};
+
+/** Whitespace collapsed, INCLUDING inside `${{ … }}`, so realignment and reflow are free and
+ *  a smuggled `-a 1 = 2` inside the brackets is not. */
+const norm = (s) =>
+  String(s)
+    .replace(/\s+/g, ' ')
+    .replace(/\$\{\{\s*([\s\S]*?)\s*\}\}/g, (_, inner) => `\${{ ${inner.trim()} }}`)
+    .trim();
+
+/**
+ * A condition, accepted ONLY as a pure `||` chain of single bracket tests.
+ *
+ * Returns the normalised disjuncts, or `null` for anything else — a `&&`, a negation, a
+ * subshell, a `[[ ]]`, a bare command. `null` is a PROBLEM at the call site, never a pass:
+ * that one rule is what refuses both of #202's defeats at once, because an appended conjunct
+ * and an `if false && …` wrapper are the same construct in different places.
+ */
+const disjunctsOf = (condition) => {
+  const shape = masked(condition);
+  if (shape.includes('&&') || /(^|\s)!(\s|$)/.test(shape) || /[()]/.test(shape)) return null;
+  const parts = condition.split('||').map((p) => p.trim());
+  for (const part of parts) {
+    if (!/^\[\s[\s\S]*\s\]$/.test(part)) return null;
+    if ((masked(part).match(/\[/g) ?? []).length !== 1) return null;
+    if ((masked(part).match(/\]/g) ?? []).length !== 1) return null;
+  }
+  return parts.map(norm);
+};
+
+/**
+ * The step's GATING conditionals: top-level `if … ; then` whose then-branch exits non-zero.
+ *
+ * That definition is the whole point. The gate's step also contains four top-level `if`s that
+ * normalise `sb_ok`/`a11y_ok` and are not gating anything, so a rule over every `if` would be
+ * wrong; and it makes two further defeats fail closed for free — weakening the branch to
+ * `exit 0`, and nesting the disjunction inside `if false; then … fi`, both leave NO gating
+ * conditional at all, which the caller treats as the gate not gating.
+ */
+const gatingConditionals = (body) => {
+  const lines = logicalLines(body);
+  const disjuncts = new Set();
+  const malformed = [];
+  let count = 0;
+  let depth = 0;
+  for (let i = 0; i < lines.length; i += 1) {
+    const line = lines[i];
+    const opener = depth === 0 ? line.match(/^if\s+([\s\S]*?);\s*then\b([\s\S]*)$/) : null;
+    if (opener) {
+      const branch = [opener[2]];
+      let inner = depthDelta(line);
+      for (let j = i + 1; inner > 0 && j < lines.length; j += 1) {
+        if (inner === 1 && /^(else|elif)\b/.test(lines[j])) break;
+        branch.push(lines[j]);
+        inner += depthDelta(lines[j]);
+      }
+      const exitsNonZero = branch.flatMap(fragments).some(raisesFor);
+      if (exitsNonZero) {
+        count += 1;
+        const parsed = disjunctsOf(opener[1].trim());
+        if (parsed === null) malformed.push(opener[1].trim());
+        else for (const d of parsed) disjuncts.add(d);
+      }
+    }
+    // UNREACHABLE CODE DOES NOT GATE (F1). An unconditional `exit` at top level ends the step,
+    // so every conditional after it is dead — and the checker must not count a dead conditional
+    // as the thing blocking a merge. Scanning stops here rather than reporting, because the
+    // swallow rules below already name the exit itself; what this prevents is the gate LOOKING
+    // gated because an unreachable disjunction is still present in the file.
+    if (depth === 0 && !/^(if|elif|else|while|until|for|case)\b/.test(line) && fragments(line).some(isExit)) {
+      break;
+    }
+    depth += depthDelta(line);
+  }
+  return { disjuncts, malformed, count };
+};
+
+/**
+ * Ways a step body can pass over a failure. ONE rule, shared by `neutered()` (which audits the
+ * registered gates in `lint-code`, `test` and `release-gate`) and by the `[ENFORCED]` sweep at
+ * the bottom of this file. They used to be two rules — an enumeration and an inversion — and
+ * #205 is exactly what that divergence cost: the enumeration reported a gate as enforced while
+ * `|| /bin/true` held its exit status open.
+ *
+ * The `||` clause is an ALLOW-LIST OF ONE. A `||` whose right-hand side provably raises is a
+ * fallback that STRENGTHENS the step, and the tree legitimately contains one — `lint-code`'s
+ * manifest step is `git diff --exit-code … || { echo "::error::…"; exit 1; }`. Every other
+ * right-hand side is refused, whatever it spells, so an unrecognised swallow fails closed.
+ */
+/**
+ * A `||` right-hand side that provably raises.
+ *
+ * Either a bare non-zero `exit`, or a brace group whose FIRST exit is non-zero. "First", not
+ * "last" (F5): the previous rule accepted any group ending in `exit 1`, so
+ * `|| { echo "::warning::drift"; exit 0; exit 1; }` passed while the shell returned 0 at the
+ * first `exit`. The tree's one legitimate fallback — `|| { echo "::error::…"; exit 1; }` —
+ * still qualifies, because its first exit is the raising one; a leading `echo` is not an exit.
+ */
+const raisingRhs = (rhs) => {
+  const group = rhs.match(/^\{([\s\S]*)\}$/);
+  if (group) {
+    const exits = fragments(group[1]).filter(isExit);
+    return exits.length > 0 && raisesFor(exits[0]);
+  }
+  return raisesFor(rhs);
+};
+
+const swallows = (body) => {
+  const text = String(body ?? '');
+  const why = [];
+  if (/(^|\n)\s*set\s+\+e\b/.test(text)) why.push('`set +e`');
+  // A TRAP ON EXIT/ERR REWRITES THE STEP'S STATUS (F2). `trap 'exit 0' EXIT` at the top of the
+  // gate step let it log "Merge blocked." and report success — every clause intact, every
+  // assertion satisfied, the job green over a failed dependency. Nothing in this workflow has a
+  // legitimate reason to trap either signal in an audited step, so the construct is refused
+  // outright rather than having its handler inspected.
+  if (/(^|\n)\s*trap\b[^\n]*\b(EXIT|ERR)\b/.test(text)) why.push('a `trap … EXIT/ERR`');
+  for (const line of logicalLines(text)) {
+    const shape = masked(line);
+    const isCondition = /^(?:if|elif|while|until)\s/.test(shape);
+
+    // A BACKGROUNDED COMMAND'S STATUS NEVER REACHES THE STEP. `node scripts/check-adr-index.mjs &`
+    // returns immediately with 0 — `bash -e -c 'false &'` exits 0 — so the gate still RUNS, still
+    // prints, and can no longer fail. Same family as the `||` rule below: the audited command's
+    // exit status is severed from the job. Found by probing beyond the reported findings; the one
+    // trailing `&` in this workflow serves Storybook for the advisory lighthouse job, which is
+    // neither [ENFORCED] nor registered, so nothing legitimate is caught here.
+    if (/(^|[^&])&\s*$/.test(shape)) why.push(`a backgrounded command (\`${line.slice(0, 50)}\`)`);
+
+    // EVERY exit in the body, by ARGUMENT (F3) — not a literal `exit 0` pattern. Conditional
+    // exits inside the line's own `if … ; then` are excluded: the gate's `exit 1` is one.
+    if (!isCondition) {
+      for (const fragment of fragments(shape)) {
+        if (isExit(fragment) && !raisesFor(fragment)) {
+          why.push(`an \`exit\` that is not provably non-zero (\`${fragment.slice(0, 40)}\`)`);
+        }
+      }
+    }
+
+    if (!shape.includes('||')) continue;
+    if (isCondition) continue; // a condition, not a fallback
+    // EVERY right-hand side in the chain, not just the last (F4). `lastIndexOf('||')` examined
+    // only the final one, so `cmd || echo "::warning::…" || exit 1` and `cmd || true || exit 1`
+    // both passed — and both return 0 under `bash -e`, because the FIRST fallback succeeds and
+    // the `exit 1` is never reached. That reopened #205 on all of REQUIRED_LINT at once.
+    //
+    // KNOWN AND DELIBERATE: this splits on `||` as text, so a `||` inside a quoted string would
+    // split wrongly. It fails CLOSED when it does — the fragment stops looking like a raise and
+    // the step is reported — which is the safe direction and the reason this is a recorded
+    // limitation rather than a quoting parser. Do not "fix" it by loosening the rule.
+    const [, ...rhss] = shape.split('||').map((s) => s.trim());
+    for (const rhs of rhss) {
+      if (!raisingRhs(rhs)) {
+        why.push(`a \`||\` fallback (${line.slice(0, 60)})`);
+        break;
+      }
+    }
+  }
+  return why;
+};
+
 const raw = readFileSync(WORKFLOW, 'utf8');
 const wf = parse(raw);
 const gate = wf.jobs?.gate;
@@ -169,6 +424,36 @@ else {
   }
   const tolerance = toleranceMatch?.[0] ?? '';
 
+  // THE FAILURE DISJUNCTION, read as shape (#202). Every `needs.<job>.result != "success"`
+  // assertion below is now membership in this set — the disjuncts of the step's top-level
+  // conditionals that actually exit non-zero — rather than a substring search over the whole
+  // body. See the helpers at the top of this file for what is and is not accepted.
+  const gating = gatingConditionals(script);
+  if (gating.count === 0) {
+    problems.push(
+      "the gate's [ENFORCED] step has no top-level conditional that exits non-zero — whatever " +
+        'clauses it contains, nothing in it can fail the job. This is what a weakened `exit 0`, ' +
+        'or the disjunction nested inside another block, looks like from here.'
+    );
+  }
+  for (const condition of gating.malformed) {
+    problems.push(
+      `the gate's failure condition is not a plain \`||\` chain of bracket tests: \`${condition}\`. ` +
+        'A conjunct, a negation or a subshell can make a clause that is present unable to fire, so ' +
+        'the shape is refused rather than searched for substrings. Widening this is a deliberate ' +
+        'edit in scripts/check-gate-wiring.mjs, not something an idiom does by accident.'
+    );
+  }
+  /** The clause a strictly-required job must contribute, as a WHOLE disjunct. */
+  const strictlyRequired = (job) => {
+    if (gating.disjuncts.has(norm(`[ "\${{ needs.${job}.result }}" != "success" ]`))) return;
+    problems.push(
+      `the gate's [ENFORCED] step has no strict \`needs.${job}.result != success\` clause standing ` +
+        `as its own disjunct in a conditional that exits non-zero — the job can fail without ` +
+        `blocking the merge`
+    );
+  };
+
   // Checks 1-4 hold for EVERY strictly-required job, not for one hard-coded name.
   for (const JOB of JOBS) {
     // 1. the job is a dependency at all
@@ -176,14 +461,8 @@ else {
       problems.push(`\`${JOB}\` is not in gate.needs — its result is not even visible to the gate`);
     }
 
-    // 2. a STRICT clause in the failure disjunction
-    const strict = new RegExp(String.raw`\[\s*"\$\{\{\s*needs\.${JOB}\.result\s*\}\}"\s*!=\s*"success"\s*\]`);
-    if (!strict.test(script)) {
-      problems.push(
-        `the gate's [ENFORCED] step has no strict \`needs.${JOB}.result != success\` clause — ` +
-          `the job can fail without blocking the merge`
-      );
-    }
+    // 2. a STRICT clause in the failure disjunction, by SHAPE (#202)
+    strictlyRequired(JOB);
 
     // 3 (continued)
     if (tolerance.includes(JOB)) {
@@ -228,20 +507,15 @@ else {
   // ii. a STRICT clause in the failure disjunction. No skipped-tolerance entry is legitimate for
   // it: `lint-code` has no `if:` and is not behind the `changes` filter.
   //
-  // KNOWN LIMITATION — see #202. This, and the identical `strict` regex above for `test` and
-  // `release-gate`, match the clause as SHELL TEXT, not as shell. Appending a conjunct
+  // #202 IS CLOSED HERE. This assertion, and the identical one for `test` and `release-gate`
+  // above, used to match the clause as SHELL TEXT. Appending a conjunct
   // (`... != "success" ] && [ 1 = 2 ] || \`) or wrapping the disjunction in `if false && [ ... ]`
-  // defeats the real gate while this assertion still matches and a diff reader still sees the
-  // clause they expect. Verified green against this file. A robust fix means parsing shell, which
-  // is out of scope here; the limitation is recorded rather than papered over with a regex
-  // arms-race, and it is now load-bearing for every gate `lint-code` carries.
-  const lintStrict = new RegExp(String.raw`\[\s*"\$\{\{\s*needs\.${LINT_JOB}\.result\s*\}\}"\s*!=\s*"success"\s*\]`);
-  if (!lintStrict.test(script)) {
-    problems.push(
-      `the gate's [ENFORCED] step has no strict \`needs.${LINT_JOB}.result != success\` clause — ` +
-        `the job can fail without blocking the merge`
-    );
-  }
+  // then defeated the real gate while the assertion still matched and a diff reader still saw
+  // the clause they expected — both verified green against this file. `strictlyRequired` now
+  // asks whether the clause stands as a WHOLE DISJUNCT of a top-level conditional that exits
+  // non-zero, which is a question about the shell's shape rather than its spelling. The defeats
+  // are re-run by scripts/check-gate-wiring-defeats.mjs rather than described in an issue.
+  strictlyRequired(LINT_JOB);
   if (tolerance.includes(LINT_JOB)) {
     problems.push(
       `\`${LINT_JOB}\` appears in the skipped-tolerance block. It runs UNCONDITIONALLY, so ` +
@@ -335,25 +609,38 @@ else {
     // it running. Self-registration is not circular: the assertion is about the WORKFLOW
     // carrying the line, not about this process having been started.
     [/node\s+scripts\/check-gate-wiring\.mjs(\s|$)/, 'this wiring checker itself', 'scripts/check-gate-wiring.mjs'],
+    // THIS FILE'S PROBE TABLE (#202, #205), registered with the table itself rather than a
+    // mission later — the omission every comment above records. Both holes it re-runs arrived as
+    // PROSE reproductions in an issue, which is why they survived: a reproduction nobody can run
+    // does not stop the next refactor of this file from reopening the hole it describes. The
+    // table is required SEPARATELY from the checker, for the reason #75's pair states — a probe
+    // table that stops running is a gate whose defeated forms quietly reopen — and the two
+    // command patterns cannot satisfy each other, because `check-gate-wiring-defeats.mjs` is not
+    // `check-gate-wiring.mjs` followed by a space or an end of line.
+    [/node\s+scripts\/check-gate-wiring-defeats\.mjs(\s|$)/, "the wiring checker's own defeat table", 'scripts/check-gate-wiring-defeats.mjs'],
   ];
 
   /**
    * A step that cannot fail the job is a step that is not running (B, C, D, E).
    *
-   * KNOWN LIMITATION — see #205, and note it is NOT #202. The `||` clause below is an ENUMERATED
-   * list of swallow spellings, and the run body is examined for nothing else, so `|| /bin/true`
-   * and a `set +e` … `exit 0` body both return `[]` here and the gate they neuter is reported as
-   * enforced. Both were reproduced against #193's own step, so this is the audit's shape rather
-   * than any one gate's defect. #202 is one level up — the `gate` job's strict clause matched as
-   * shell TEXT; this is one level down, the per-step neutering test — and fixing either leaves
-   * the other open. Every entry in REQUIRED_LINT rests on this, including the self-check steps
-   * and this file's own registration.
+   * #205 IS CLOSED HERE. The third clause used to be an ENUMERATED list of swallow spellings —
+   * `|| true`, `|| :`, `|| echo`, `|| cat`, `|| printf`, `|| exit 0` — and the run body was
+   * examined for nothing else, so `|| /bin/true`, `|| cmp /dev/null /dev/null` and a
+   * `set +e` … `exit 0` body all returned `[]` here while the gate they neuter was reported as
+   * enforced. All three were reproduced against #193's own step: this was the audit's shape, not
+   * any one gate's defect. It now delegates to `swallows()`, the same inverted rule the
+   * `[ENFORCED]` sweep at the bottom of this file already used — ONE rule, so the two cannot
+   * drift apart again, which is how the weaker of them survived seventeen registered gates.
+   *
+   * #202 was one level up (the `gate` job's strict clause matched as shell TEXT) and is closed
+   * by `gatingConditionals`; the two were independent and both had to be fixed.
    */
   const neutered = (st) => {
     const why = [];
     if ('if' in st) why.push('carries an `if:`');
     if (st['continue-on-error']) why.push('carries continue-on-error');
-    if (/\|\|\s*(:|true\b|echo\b|cat\b|printf\b|exit\s+0)/.test(String(st.run ?? ''))) why.push('swallows failure with `|| true`');
+    if ('shell' in st) why.push(`carries \`shell: ${st.shell}\``);
+    for (const swallow of swallows(st.run)) why.push(`contains ${swallow}`);
     return why;
   };
 
@@ -437,28 +724,31 @@ else {
       if (enforced && 'if' in st) {
         problems.push(`[ENFORCED] step "${st.name}" in \`${jobName}\` carries an \`if:\` — it can be skipped`);
       }
-      // INVERTED, not enumerated. This was a list of swallows — `|| true`, then `|| :`, then
-      // `|| echo` — and a lens walked past every version of it three ways: `set +e`, a trailing
-      // bare `exit 0`, and `|| /bin/true`. Enumerating the ways to ignore a failure is a losing
-      // game; an [ENFORCED] step has no legitimate reason to contain any of these constructs, so
-      // the rule is stated positively and the exception, if one is ever needed, is a deliberate
-      // edit here rather than a spelling the list happens not to cover.
-      const body = String(st.run ?? '');
+      // A `shell:` OVERRIDE REPLACES THE COMMAND. `shell: bash -c "true" #` runs the step's body
+      // as an argument to a shell that ignores it, so the registered gate never executes and the
+      // step reports success — the `run:` line stays in the diff, matched by every assertion
+      // above. NO step in this workflow carries `shell:`; they all use the job default, so
+      // requiring its absence costs nothing and a deliberate future need is a deliberate edit
+      // here. Same reasoning as the continue-on-error rule two lines up.
+      if (enforced && 'shell' in st) {
+        problems.push(
+          `[ENFORCED] step "${st.name}" in \`${jobName}\` carries \`shell: ${st.shell}\` — the ` +
+            `override decides what actually runs, so the command in \`run:\` is no longer evidence`
+        );
+      }
+      // INVERTED, not enumerated — and now the SAME `swallows()` the registered-gate audit uses.
+      // This was a list of swallows — `|| true`, then `|| :`, then `|| echo` — and a lens walked
+      // past every version of it three ways: `set +e`, a trailing bare `exit 0`, and
+      // `|| /bin/true`. Enforcing the inverted rule only here left `neutered()` on the old
+      // enumeration, which is precisely what #205 measured; both call one helper now.
+      //
+      // The `||` half was previously excluded by "the line contains `[`", which reads the gate's
+      // legitimate `[ ... ] || [ ... ]` disjunction as a condition — but also excuses
+      // `[ -f x ] || rm -rf /`. `swallows()` joins continuations first and asks whether the
+      // LOGICAL line opens a condition, so the disjunction still passes and a fallback dressed
+      // up with a bracket does not.
       if (enforced) {
-        const swallows = [];
-        if (/(^|\n)\s*set\s+\+e\b/.test(body)) swallows.push('`set +e`');
-        if (/(^|\n)\s*exit\s+0\s*(#.*)?$/m.test(body)) swallows.push('a trailing `exit 0`');
-        // A `||` whose line is NOT part of a test condition. The gate's own [ENFORCED] step is a
-        // legitimate multi-line `[ ... ] || [ ... ]` disjunction, so a blanket ban is wrong — but
-        // `cmd || anything` outside a test is a fallback, whatever the fallback happens to be.
-        // That is what makes this robust where the previous enumeration was not: a lens walked
-        // past `|| true`, `|| :` and `|| echo` in turn, and then past the widened list with
-        // `|| /bin/true` and `|| test 1`.
-        const fallbackLines = body
-          .split('\n')
-          .filter((l) => l.includes('||') && !/[[]|(^|\s)if\s|(^|\s)while\s/.test(l));
-        if (fallbackLines.length) swallows.push(`a \`||\` fallback (${fallbackLines[0].trim().slice(0, 60)})`);
-        for (const why of swallows) {
+        for (const why of swallows(st.run)) {
           problems.push(`[ENFORCED] step "${st.name}" in \`${jobName}\` contains ${why} — it can pass over a failure`);
         }
       }
