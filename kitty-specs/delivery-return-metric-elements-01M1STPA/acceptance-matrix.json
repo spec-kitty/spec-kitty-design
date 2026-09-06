@@ -28,10 +28,10 @@
       "criterion_id": "FR-003",
       "description": "sk-metric provides the approved eyebrow and strong tabular-value hierarchy plus a presentation-only compact mode.",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "packages/styles/src/metric/sk-metric.css:30-75 and sk-metric.test.ts:94-118; hierarchy and compact mode passed",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T16:48:28.638177+00:00",
       "notes": "WP01: focused behavior/style proof and the Default, Compact and LongContent stories."
     },
     {
