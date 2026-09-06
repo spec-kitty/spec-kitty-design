@@ -9,13 +9,14 @@ so far — as **custom elements** in `@spec-kitty/elements`. Both require `@spec
 `sk-personal-rail`, `sk-pill-tag`, `sk-ribbon-card`, `sk-section-banner`, `sk-section-header`,
 `sk-site-footer`, `sk-status-indicator`, `sk-stub`, and `sk-transition-matrix`.
 Several of the catalogue's component packages are CSS only by a recorded decision — `form-field`,
-and (#176) `facts`, `disclosure`, `data-table`, `empty-state`, `skip-link`. See ADR-10,
-*form-field is deliberately styles-only*. These five ship classes applied to real semantic HTML
-the consumer authors — `<dl>`, `<details>`, `<table>`, a plain block, `<a>` — and no `sk-*` custom
-element wraps any of them: light-DOM native semantics (list/table/label association across a
-shadow boundary) are exactly what a wrapper element would break. Composite sections below such as
-Hero and Callout are CSS-only *patterns* rather than packages, and are not part of that count.
-Each section below says which it is, because the difference decides how you use it.
+(#176) `facts`, `disclosure`, `data-table`, `empty-state`, `skip-link`, and (#210) `progress`. See
+ADR-10, *form-field is deliberately styles-only* and *Styles-only components are a class, not a
+fixed exception count*. These seven ship classes applied to real semantic HTML the consumer authors
+— `<dl>`, `<details>`, `<table>`, a plain block, `<a>`, `<progress>` — and no `sk-*` custom element
+wraps any of them: light-DOM native semantics (list/table/label association across a shadow
+boundary) are exactly what a wrapper element would break. Composite sections below such as Hero
+and Callout are CSS-only *patterns* rather than packages, and are not part of that count. Each
+section below says which it is, because the difference decides how you use it.
 
 Because a custom element needs no wrapper, every framework can use the migrated ones directly. A
 generated React wrapper exists for JSX typing and typed refs — see
@@ -838,6 +839,47 @@ with no way to reach it by keyboard is a real accessibility defect, not a style 
 — no status/tone row colouring; that waits on a semantic status-token axis that doesn't exist yet.
 
 [View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/primitives-skdatatable-html--default)
+
+---
+
+## Progress
+
+Determinate completion — a mission's work-package count, a build's percent complete — as a real
+`<progress>` with a plain light-DOM `label[for]`/`progress[id]` pair, never a hand-rolled `div`
+whose fraction is expressed only as an inline `width` style.
+
+**CSS-only** (`@spec-kitty/styles`, no JavaScript, no `sk-*` element — #210):
+
+```html
+<div class="sk-progress">
+  <label class="sk-progress__label" for="mission-progress">5 of 8 Work Packages done</label>
+  <progress class="sk-progress__bar" id="mission-progress" value="5" max="8">63%</progress>
+  <span class="sk-progress__meta">63%</span>
+</div>
+```
+
+The consumer supplies `value`, `max`, the label text, and the visible `sk-progress__meta` text —
+all four are consumer-authored and the library performs no arithmetic on any of them. The native
+`for`/`id` pair is the sole label association mechanism; no fixture carries `aria-label`,
+`aria-labelledby`, or `role`. The role (`progressbar`) and the exposed value/min/max are derived by
+the browser from the `<progress>` element's own `value`/`max` attributes (min is implicitly `0`),
+the same way any other native `<progress>` element's accessibility is computed — restyling it for
+this design's visual language does not change that.
+
+Two layout modifiers change CSS only — the same three children, in the same order, in both:
+
+- `sk-progress--compact` — an inline arrangement for placing the indicator beside other compact
+  metadata.
+- `sk-progress--narrow` — a stacked arrangement whose bar fills the available width, for narrow
+  columns.
+
+The maintained fixture set covers five determinate states (zero, a worked 5-of-8 example, complete,
+a large total, and a long label) plus both modifiers — see
+[ADR-10](../architecture/decisions/2026-09-02-10-distribution-and-canonical-markup.md)'s
+styles-only class ruling for why no `sk-progress` element exists. Negative values or a `value`
+exceeding `max` are consumer validation, not a concern this component's CSS or markup enforces.
+
+[View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/primitives-skprogress-html--default)
 
 ---
 

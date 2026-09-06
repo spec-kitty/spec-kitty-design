@@ -31,6 +31,7 @@
     "./page-header/*": "./dist/page-header/*",
     "./personal-rail/*": "./dist/personal-rail/*",
     "./pill-tag/*": "./dist/pill-tag/*",
+    "./progress/*": "./dist/progress/*",
     "./ribbon-card/*": "./dist/ribbon-card/*",
     "./section-banner/*": "./dist/section-banner/*",
     "./section-header/*": "./dist/section-header/*",

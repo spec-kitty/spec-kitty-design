@@ -48,6 +48,28 @@ test('SK-feature-card HTML default — visual baseline', async ({ page }) => {
   await expect(target).toHaveScreenshot('sk-feature-card-html-default.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
 });
 
+test('SK-progress HTML default dark — visual baseline', async ({ page }) => {
+  await page.goto('/iframe.html?id=primitives-skprogress-html--default&viewMode=story');
+  const target = page.locator('.sk-progress').first();
+  await target.waitFor({ state: 'visible', timeout: 20000 });
+  await expect(target).toHaveScreenshot('sk-progress-html-default-dark.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+});
+
+test('SK-progress HTML light mode — visual baseline', async ({ page }) => {
+  await page.goto('/iframe.html?id=primitives-skprogress-html--light-mode&viewMode=story');
+  const target = page.locator('.sk-progress').first();
+  await target.waitFor({ state: 'visible', timeout: 20000 });
+  await expect(target).toHaveScreenshot('sk-progress-html-light.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+});
+
+test('SK-progress HTML forced colors — visual baseline', async ({ page }) => {
+  await page.emulateMedia({ forcedColors: 'active' });
+  await page.goto('/iframe.html?id=primitives-skprogress-html--forced-colors&viewMode=story');
+  const target = page.locator('.sk-progress').first();
+  await target.waitFor({ state: 'visible', timeout: 20000 });
+  await expect(target).toHaveScreenshot('sk-progress-html-forced-colors.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+});
+
 test('SK-ribbon-card HTML with ribbon — visual baseline', async ({ page }) => {
   await page.goto('/iframe.html?id=components-skribboncard-html--with-ribbon&viewMode=story');
   const target = page.locator('.sk-ribbon-card').first();
