@@ -19,15 +19,26 @@
   "work_packages": {
     "WP01": {
       "actor": "codex",
+      "agent": "codex",
       "agent_profile": "frontend-freddy",
       "agent_profile_version": "1.0",
+      "assignee": "codex",
       "force_count": 0,
       "lane": "in_progress",
       "last_event_id": "01M1W4TWDSBH5GCQKMEA66WZMM",
       "last_transition_at": "2026-09-06T19:58:56.441804+00:00",
       "model": "__resolved_model_absent__",
+      "notes": [
+        "Codex implementation seat started in authorized primary clone; runtime worktree path intentionally unused per programme contract"
+      ],
       "provider": "__resolved_provider_absent__",
-      "role": "implementer"
+      "role": "implementer",
+      "subtasks": {
+        "T001": "done",
+        "T002": "done",
+        "T003": "done",
+        "T004": "done"
+      }
     }
   }
 }
