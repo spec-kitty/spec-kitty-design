@@ -248,6 +248,14 @@ const swallows = (body) => {
     const shape = masked(line);
     const isCondition = /^(?:if|elif|while|until)\s/.test(shape);
 
+    // A BACKGROUNDED COMMAND'S STATUS NEVER REACHES THE STEP. `node scripts/check-adr-index.mjs &`
+    // returns immediately with 0 — `bash -e -c 'false &'` exits 0 — so the gate still RUNS, still
+    // prints, and can no longer fail. Same family as the `||` rule below: the audited command's
+    // exit status is severed from the job. Found by probing beyond the reported findings; the one
+    // trailing `&` in this workflow serves Storybook for the advisory lighthouse job, which is
+    // neither [ENFORCED] nor registered, so nothing legitimate is caught here.
+    if (/(^|[^&])&\s*$/.test(shape)) why.push(`a backgrounded command (\`${line.slice(0, 50)}\`)`);
+
     // EVERY exit in the body, by ARGUMENT (F3) — not a literal `exit 0` pattern. Conditional
     // exits inside the line's own `if … ; then` are excluded: the gate's `exit 1` is one.
     if (!isCondition) {
@@ -264,6 +272,11 @@ const swallows = (body) => {
     // only the final one, so `cmd || echo "::warning::…" || exit 1` and `cmd || true || exit 1`
     // both passed — and both return 0 under `bash -e`, because the FIRST fallback succeeds and
     // the `exit 1` is never reached. That reopened #205 on all of REQUIRED_LINT at once.
+    //
+    // KNOWN AND DELIBERATE: this splits on `||` as text, so a `||` inside a quoted string would
+    // split wrongly. It fails CLOSED when it does — the fragment stops looking like a raise and
+    // the step is reported — which is the safe direction and the reason this is a recorded
+    // limitation rather than a quoting parser. Do not "fix" it by loosening the rule.
     const [, ...rhss] = shape.split('||').map((s) => s.trim());
     for (const rhs of rhss) {
       if (!raisingRhs(rhs)) {
@@ -626,6 +639,7 @@ else {
     const why = [];
     if ('if' in st) why.push('carries an `if:`');
     if (st['continue-on-error']) why.push('carries continue-on-error');
+    if ('shell' in st) why.push(`carries \`shell: ${st.shell}\``);
     for (const swallow of swallows(st.run)) why.push(`contains ${swallow}`);
     return why;
   };
@@ -709,6 +723,18 @@ else {
       }
       if (enforced && 'if' in st) {
         problems.push(`[ENFORCED] step "${st.name}" in \`${jobName}\` carries an \`if:\` — it can be skipped`);
+      }
+      // A `shell:` OVERRIDE REPLACES THE COMMAND. `shell: bash -c "true" #` runs the step's body
+      // as an argument to a shell that ignores it, so the registered gate never executes and the
+      // step reports success — the `run:` line stays in the diff, matched by every assertion
+      // above. NO step in this workflow carries `shell:`; they all use the job default, so
+      // requiring its absence costs nothing and a deliberate future need is a deliberate edit
+      // here. Same reasoning as the continue-on-error rule two lines up.
+      if (enforced && 'shell' in st) {
+        problems.push(
+          `[ENFORCED] step "${st.name}" in \`${jobName}\` carries \`shell: ${st.shell}\` — the ` +
+            `override decides what actually runs, so the command in \`run:\` is no longer evidence`
+        );
       }
       // INVERTED, not enumerated — and now the SAME `swallows()` the registered-gate audit uses.
       // This was a list of swallows — `|| true`, then `|| :`, then `|| echo` — and a lens walked

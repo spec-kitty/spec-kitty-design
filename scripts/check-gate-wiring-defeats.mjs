@@ -151,6 +151,14 @@ const CASES = [
     fallback('typecheck-all.mjs', '|| true || exit 1')],
   ['F5 `|| { echo …; exit 0; exit 1; }` — the group exits 0 first',
     fallback('check-adr-index.mjs', '|| { echo "::warning::drift"; exit 0; exit 1; }')],
+
+  // ── Two more of the same class, found by probing past the reported findings ──────────
+  ['F9  a registered gate backgrounded with `&`',
+    fallback('check-adr-index.mjs', '&')],
+  ['F10 a registered gate with a `shell:` override that replaces the command', (wf) => {
+    const step = lintStep(wf, 'check-adr-index.mjs');
+    step.shell = 'bash -c "true" #';
+  }],
 ];
 
 /**
@@ -158,7 +166,7 @@ const CASES = [
  * REMOVED by lowering it in the same commit, which is a reviewable edit rather than a deletion
  * that hides in a digit.
  */
-const MIN_CASES = 16;
+const MIN_CASES = 18;
 
 const dir = mkdtempSync(join(tmpdir(), 'gate-wiring-defeats-'));
 mkdirSync(join(dir, '.github/workflows'), { recursive: true });
