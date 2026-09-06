@@ -26,13 +26,97 @@ const WORKFLOW = '.github/workflows/ci-quality.yml';
 // entire purpose is noticing a job that cannot block a merge. #80 added `release-gate`, which the
 // single-name version could not have seen: the gate could have gone red while the merge stayed
 // green, the exact condition this file exists to refuse. Every job that runs unconditionally and
-// must be strictly required belongs here.
+// must be strictly required belongs here. NOT `lint-code`: it is strictly required by the gate, but
+// its steps deliberately use continue-on-error (ESLint and Stylelint report into a summary and are
+// failed by a final step), so the whole-job payload audit below does not describe it. REQUIRED_LINT
+// is how a step in that job is held to running — see #193's two entries there, and the
+// `lint-code` EDGE assertions below, which hold the job itself to being able to block a merge.
 const JOBS = ['test', 'release-gate'];
 
 const raw = readFileSync(WORKFLOW, 'utf8');
 const wf = parse(raw);
 const gate = wf.jobs?.gate;
 const problems = [];
+
+// ── THE TRIGGER ITSELF ────────────────────────────────────────────────────────────────
+//
+// Every question below asks whether the `gate` job can block a merge. All of them are vacuous
+// if the workflow never runs on the pull request, and NOTHING here referenced `wf.on` — the
+// one-line neutering this file's own header claims to prevent. Reproduced with this script
+// printing green (#193 final pass), three ways: deleting the `pull_request:` trigger outright,
+// adding `paths: ['never/matches/**']` to it, and retargeting its `branches:` at a branch that
+// does not exist.
+//
+// THIS REPO HAS ALREADY BEEN BITTEN BY THE CLASS. A PR based on a mission branch rather than
+// `train/**` matched no branch filter here, ran zero quality jobs, and still showed a green
+// preview check — so "CI is green" read as satisfied while nothing had run.
+const on = wf.on ?? wf[true]; // YAML 1.1 parsers fold the `on` key to boolean true; this one does not.
+// PRESENCE, not truthiness, and every shorthand `on:` admits. A bare `pull_request:` (null
+// value), `on: pull_request` and `on: [pull_request, push]` all mean "every pull request, no
+// filters" — WIDER than what this workflow declares, so they normalise to an empty filter set
+// and are accepted. `on?.pull_request` alone treated the first of those as an absent trigger.
+const onKeys =
+  typeof on === 'string' ? [on] : Array.isArray(on) ? on.map(String) : on && typeof on === 'object' ? Object.keys(on) : [];
+const hasPr = onKeys.includes('pull_request');
+const pr = hasPr && on && typeof on === 'object' && !Array.isArray(on) ? (on.pull_request ?? {}) : {};
+if (!hasPr) {
+  problems.push(
+    'the workflow has no `on.pull_request` trigger — it never runs on a pull request, so every ' +
+      'assertion in this file is about a job that does not execute'
+  );
+} else {
+  // A PATH FILTER is the quietest of the three. `paths:` narrows the trigger to a file set, and
+  // a PR touching nothing in it gets NO run at all — not a failing one. There is no legitimate
+  // path filter on a whole-repo quality workflow whose own jobs already fan out through the
+  // `changes` job; that is where path scoping belongs, and it scopes JOBS, not the trigger.
+  for (const key of ['paths', 'paths-ignore']) {
+    if (key in pr) {
+      problems.push(
+        `\`on.pull_request\` carries \`${key}:\` — the workflow is skipped entirely for a PR that ` +
+          `does not match it, and a skipped workflow reports nothing. Scope with the \`changes\` ` +
+          `job, which gates jobs inside a run that actually happened.`
+      );
+    }
+  }
+  // BRANCH COVERAGE, tested by matching representative refs rather than by comparing strings, so
+  // a rewrite to `'train/*'` or `'**'` is accepted and a narrowing is not. An ABSENT `branches:`
+  // is a WIDER filter (every PR runs), so it is accepted deliberately; what is refused is a list
+  // that does not cover the two lines this repo merges into.
+  if ('branches' in pr) {
+    const globToRe = (g) =>
+      new RegExp(
+        '^' +
+          String(g)
+            .replace(/[.+^${}()[\]\\]/g, '\\$&')
+            .replace(/\*\*/g, '\u0000')
+            .replace(/\*/g, '[^/]*')
+            .replace(/\u0000/g, '.*')
+            .replace(/\?/g, '[^/]') +
+          '$'
+      );
+    const entries = Array.isArray(pr.branches) ? pr.branches.map(String) : [String(pr.branches)];
+    const covers = (ref) => {
+      let hit = false;
+      for (const e of entries) {
+        if (e.startsWith('!')) {
+          if (globToRe(e.slice(1)).test(ref)) hit = false;
+        } else if (globToRe(e).test(ref)) hit = true;
+      }
+      return hit;
+    };
+    // `main` is where the train lands; `train/elements-first` stands for the integration line
+    // every mission branch PRs into (ADR-8). A filter that misses either one is a filter under
+    // which those PRs merge unchecked.
+    for (const ref of ['main', 'train/elements-first']) {
+      if (!covers(ref)) {
+        problems.push(
+          `\`on.pull_request.branches\` (${entries.join(', ')}) does not match \`${ref}\` — a PR ` +
+            `targeting it runs no job in this workflow and merges unchecked`
+        );
+      }
+    }
+  }
+}
 
 // The job's ABSENCE is a failure, not a pass. `wf.jobs?.[JOB] && 'if' in ...` evaluated to
 // false when the job was deleted, so the script printed green over a workflow with no test
@@ -43,6 +127,29 @@ for (const JOB of JOBS) {
 }
 if (!gate) problems.push('there is no `gate` job');
 else {
+  // THE GATE'S OWN `if:`. The header of this file names `always()` as a MUST and nothing
+  // asserted it — deleting the line left this script green (#193 final pass). Without it the
+  // `gate` job is SKIPPED the moment any of its ten needs fails, rather than running and
+  // reporting the failure, and a skipped required check does not block a merge. The disjunction
+  // below is the gating; this is what lets the gating run at all.
+  //
+  // EXACTLY `always()`, unwrapped from an optional `${{ }}`. A conjunct — `always() && ...` —
+  // reintroduces a condition under which the gate does not report, so widening this is a
+  // deliberate edit here rather than something a copied idiom does by accident.
+  const gateIf = String(gate.if ?? '')
+    .trim()
+    .replace(/^\$\{\{\s*([\s\S]*?)\s*\}\}$/, '$1')
+    .trim();
+  if (gateIf !== 'always()') {
+    problems.push(
+      gate.if === undefined
+        ? 'the `gate` job carries no `if:` — it is skipped as soon as any need fails, so a failed ' +
+            'dependency produces a SKIPPED required check instead of a red one. It must be `always()`.'
+        : `the \`gate\` job's \`if:\` is \`${String(gate.if)}\`, not \`always()\` — under any other ` +
+            `condition the gate can decline to report, and a check that does not report does not block`
+    );
+  }
+
   const step = (gate.steps ?? []).find((s) => String(s.name ?? '').includes('[ENFORCED]'));
   const script = String(step?.run ?? '');
 
@@ -97,6 +204,67 @@ else {
     }
   }
 
+  // 4b. THE `lint-code` EDGE. `lint-code` is strictly required by the gate but is deliberately
+  // absent from JOBS, because the whole-job payload audit below would red on ESLint's and
+  // Stylelint's intentional continue-on-error. That exclusion cost the edge itself: every
+  // REQUIRED_LINT assertion proves a STEP runs INSIDE `lint-code`, and none of them proved
+  // `lint-code` can block a merge. Reproduced with this file printing green (#193 pre-merge
+  // lens): deleting the strict clause from the gate's [ENFORCED] step, deleting `lint-code` from
+  // `gate.needs`, and putting `if: false` or `continue-on-error: true` on the job were ALL
+  // accepted — which made fourteen gates, including this file's own, unenforceable in one line.
+  // Stated here rather than by adding `lint-code` to JOBS so the continue-on-error idiom stays
+  // legal where it is deliberate (a step) and illegal where it is not (the job).
+  const LINT_JOB = 'lint-code';
+  const lintJob = wf.jobs?.[LINT_JOB];
+
+  // i. the job is a dependency at all
+  if (!(gate.needs ?? []).includes(LINT_JOB)) {
+    problems.push(
+      `\`${LINT_JOB}\` is not in gate.needs — its result is not even visible to the gate, so ` +
+        `every gate in REQUIRED_LINT runs for information only`
+    );
+  }
+
+  // ii. a STRICT clause in the failure disjunction. No skipped-tolerance entry is legitimate for
+  // it: `lint-code` has no `if:` and is not behind the `changes` filter.
+  //
+  // KNOWN LIMITATION — see #202. This, and the identical `strict` regex above for `test` and
+  // `release-gate`, match the clause as SHELL TEXT, not as shell. Appending a conjunct
+  // (`... != "success" ] && [ 1 = 2 ] || \`) or wrapping the disjunction in `if false && [ ... ]`
+  // defeats the real gate while this assertion still matches and a diff reader still sees the
+  // clause they expect. Verified green against this file. A robust fix means parsing shell, which
+  // is out of scope here; the limitation is recorded rather than papered over with a regex
+  // arms-race, and it is now load-bearing for every gate `lint-code` carries.
+  const lintStrict = new RegExp(String.raw`\[\s*"\$\{\{\s*needs\.${LINT_JOB}\.result\s*\}\}"\s*!=\s*"success"\s*\]`);
+  if (!lintStrict.test(script)) {
+    problems.push(
+      `the gate's [ENFORCED] step has no strict \`needs.${LINT_JOB}.result != success\` clause — ` +
+        `the job can fail without blocking the merge`
+    );
+  }
+  if (tolerance.includes(LINT_JOB)) {
+    problems.push(
+      `\`${LINT_JOB}\` appears in the skipped-tolerance block. It runs UNCONDITIONALLY, so ` +
+        `'skipped' is never legitimate for it.`
+    );
+  }
+
+  // iii. the job itself can fail. Step-level continue-on-error inside `lint-code` is deliberate;
+  // JOB-level continue-on-error, or a job-level `if:`, is not — either one makes `result` unable
+  // to carry a failure to the gate at all.
+  if (lintJob && 'if' in lintJob) {
+    problems.push(
+      `the \`${LINT_JOB}\` job carries an \`if:\` — it can report 'skipped', which the gate's ` +
+        `strict clause treats as a failure only if the clause is there at all; run it unconditionally`
+    );
+  }
+  if (lintJob && lintJob['continue-on-error']) {
+    problems.push(
+      `the \`${LINT_JOB}\` job carries continue-on-error — its failure cannot reach the gate, ` +
+        `and every gate in REQUIRED_LINT becomes advisory`
+    );
+  }
+
   // 5. THE PAYLOAD, not just the edge.
   //
   // Checks 1-4 all ask whether the gate LOOKS AT `needs.test.result`. None asked whether the
@@ -144,6 +312,22 @@ else {
     // check-element-css-hygiene, in the gate that had just gained the description ratchet.
     [/node\s+scripts\/check-manifest-content\.mjs(?!\s*--selftest)(\s|$)/, 'the manifest content gate', 'scripts/check-manifest-content.mjs'],
     [/node\s+scripts\/check-manifest-content\.mjs\s+--selftest(\s|$)/, "the manifest gate's own probe table", 'scripts/check-manifest-content.mjs --selftest'],
+    // #193, both entries with the gate itself, per the two comments above. The ADR index gate
+    // is the only thing standing between `docs/architecture/decisions/` and an index that
+    // silently omits seven of fifteen records again.
+    [/node\s+scripts\/check-adr-index\.mjs(?!\s*--selftest)(\s|$)/, 'the ADR index gate', 'scripts/check-adr-index.mjs'],
+    [/node\s+scripts\/check-adr-index\.mjs\s+--selftest(\s|$)/, "the ADR index gate's own probe table", 'scripts/check-adr-index.mjs --selftest'],
+    // THIS FILE, registered against itself. Every comment above records the same episode — a
+    // gate shipped with no entry here, and a lens then deleting its CI line with this checker
+    // still green (#74's css-hygiene gate, #129's manifest gate) — and this file was the one
+    // instance of it nobody had checked. Reproduced during #193's final fold: deleting the
+    // `[ENFORCED] The gate actually gates the test job (FR-014)` step from ci-quality.yml left
+    // BOTH this script and check-adr-index.mjs printing green, so the checker that catches
+    // every other gate's deletion could not catch its own — and the three assertions #193 adds
+    // above (the `on:` trigger, the gate's `if: always()`, the ADR index registry) all rest on
+    // it running. Self-registration is not circular: the assertion is about the WORKFLOW
+    // carrying the line, not about this process having been started.
+    [/node\s+scripts\/check-gate-wiring\.mjs(\s|$)/, 'this wiring checker itself', 'scripts/check-gate-wiring.mjs'],
   ];
 
   /** A step that cannot fail the job is a step that is not running (B, C, D, E). */
@@ -265,8 +449,8 @@ else {
 }
 
 if (problems.length) {
-  console.error(`❌ ${WORKFLOW}: the gate does not gate \`${JOBS.join('`, `')}\` (FR-014):`);
+  console.error(`❌ ${WORKFLOW}: the gate does not gate \`${JOBS.join('`, `')}\`, \`lint-code\` (FR-014):`);
   for (const p of problems) console.error(`   ${p}`);
   process.exit(1);
 }
-console.log(`✅ gate wiring: \`${JOBS.join('`, `')}\` are in needs, tested strictly, absent from the skip tolerance, and unconditional.`);
+console.log(`✅ gate wiring: \`${JOBS.join('`, `')}\` and \`lint-code\` are in needs, tested strictly, absent from the skip tolerance, and unconditional.`);

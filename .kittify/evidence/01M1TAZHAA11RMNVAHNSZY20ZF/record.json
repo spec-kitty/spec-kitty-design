@@ -1,0 +1,8 @@
+{
+  "event": "completed",
+  "invocation_id": "01M1TAZHAA11RMNVAHNSZY20ZF",
+  "completed_at": "2026-09-06T03:11:21.982863+00:00",
+  "outcome": "done",
+  "closed_by": "agent",
+  "evidence_ref": "/tmp/claude-1000/-home-jeroennouws-dev-team-kitty-missions/7796c1f2-1f99-489a-82bb-a5f1839b720d/scratchpad/evidence.md"
+}

@@ -2,7 +2,7 @@
 
 **Status:** ready to drive
 **Branch model:** all work happens on `train/elements-first`, a long-lived integration branch cut from `main`. Mission branches are cut from the train and merge back into it; the train lands on `main` once, at the end.
-**Governing decisions:** ADR-8 (base layer), ADR-9 (styling API, label ownership), ADR-10 (distribution, canonical markup), ADR-11 (verification stack), ADR-12 (consumer audit), ADR-13 (Storybook builder), ADR-14 (detached-probe validation seam — **Proposed and descriptive only**: it records how `sk-form-input` derives UA validity flags, and deliberately settles nothing about whether #179 or #122 should reuse that mechanism, so it does not yet constrain an implementer the way the others do; only *Accepted* ADRs bind a mission spec, per `docs/architecture/README.md`). Read the ones each brief names before writing a spec.
+**Governing decisions:** the whole of [`decisions/`](decisions/), indexed with each record's current status in [the architecture README's ADR table](README.md#decisions-adrs). No range is written out here: `scripts/check-adr-index.mjs` holds that table to the directory in both directions, so the index cannot fall behind the record the way an enumeration in this line did (#193). Read the ones each brief names before writing a spec, and read the Status column with them: a spec that would contradict an *Accepted* ADR must carry an ADR amendment as a tracked work item (charter `architectural_review_requirement`).
 
 Every mission below has an intent, a scope boundary in both directions, dependencies, an expected work-package shape, and exit criteria that can be checked rather than asserted. Where a mission carries a residual unknown, it is named in the brief; none of them block starting.
 
@@ -120,9 +120,9 @@ Remaining, all short: enable 2FA on the org; issue a granular publish token scop
 
 ### M1 · `elements-first-decision-record` — ✅ substantially complete
 
-ADRs 8, 9, 10, 11, 12 and 13 are written and committed on the train. What remains: flip ADR-8 to Accepted at review, and execute ADR-12's diagram corrections (which need O7 first).
+ADRs 8, 9, 10, 11, 12 and 13 are written and committed on the train. What remains: execute ADR-12's diagram corrections (which need O7 first).
 
-**Residual:** the canonical-markup ruling in ADR-10 §3 is recommended, not ratified. Downstream missions may proceed on it; it is ratified when ADR-10 moves to Accepted.
+**Ratified:** ADR-10's Status is `Accepted (ratified by the operator, 2026-09-02)`, and its Deciders line records that the canonical-markup ruling in §3 was ratified by the operator on 2026-09-02. Downstream missions build on it as a settled ruling.
 
 ---
 

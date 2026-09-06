@@ -20,6 +20,7 @@ npm run quality:all    # ESLint + Stylelint + HTMLHint
 | Lockfile | `npm ci --dry-run --ignore-scripts` | Lockfile drift detection | After any `package.json` change |
 | Action SHA pins | `bash scripts/check-action-pins.sh` | Mutable `@v*` tags in workflows | After editing `.github/workflows/` |
 | Token breaking changes | `bash scripts/check-token-breaking-changes.sh` | Removed or renamed `--sk-*` tokens | Before bumping package version |
+| ADR index | `node scripts/check-adr-index.mjs` | A record in `docs/architecture/decisions/` with no row in the architecture README's ADR table, a row pointing at no record, or a row whose Status disagrees with the record's own | After adding, renaming or ratifying an ADR |
 
 ## Storybook-specific
 

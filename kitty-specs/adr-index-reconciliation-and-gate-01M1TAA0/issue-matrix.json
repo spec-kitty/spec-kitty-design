@@ -1,0 +1,41 @@
+{
+  "rows": {
+    "#188": {
+      "evidence_ref": "Cited by #193 as the mission that surfaced the drift. ADR-14 shipped in #194; this mission only indexes it. No ADR content or status touched — git diff over docs/architecture/decisions/ is empty.",
+      "fr": null,
+      "nfr": null,
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": null,
+      "scope": "referenced-not-in-scope",
+      "source_file": "spec.md",
+      "title": "[adr] The detached-probe validation seam has no ADR",
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
+    "#193": {
+      "evidence_ref": "f90a968 — README table 8 rows → 15, one per file in docs/architecture/decisions/; programme doc governing-decisions line de-enumerated; scripts/check-adr-index.mjs wired into ci-quality.yml lint-code and registered in check-gate-wiring.mjs REQUIRED_LINT; both drift directions and a status promotion watched fail.",
+      "fr": "FR-001..FR-011",
+      "nfr": "NFR-001, NFR-002",
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": "SC-001..SC-007",
+      "scope": "in-scope",
+      "source_file": "spec.md",
+      "title": "[docs] The ADR indexes are stale — README’s table and the programme doc’s ADR-8–13 list omit later ADRs",
+      "verdict": "fixed",
+      "wp": "WP01"
+    },
+    "#194": {
+      "evidence_ref": "#193’s premise that grep -c ‘ADR-14’ returns 0 in both indexes is stale: #194 added the README row (15c4abf) and the programme-doc mention, and fixed elements-first-run-prompt.md:163. Verified against the tree, not the issue text; not redone here.",
+      "fr": null,
+      "nfr": null,
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": null,
+      "scope": "referenced-not-in-scope",
+      "source_file": "spec.md",
+      "title": "PR: ADR-14, the detached-probe validation seam",
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    }
+  },
+  "schema_version": 1
+}

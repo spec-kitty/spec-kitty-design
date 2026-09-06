@@ -1,0 +1,28 @@
+{
+  "created_at": "2026-09-06T02:56:06.643295+00:00",
+  "documentation_state": {
+    "coverage_percentage": 0.0,
+    "divio_types_selected": [],
+    "generators_configured": [
+      {
+        "config_path": "",
+        "language": "javascript",
+        "name": "jsdoc"
+      }
+    ],
+    "iteration_mode": "initial",
+    "last_audit_date": null,
+    "target_audience": "developers"
+  },
+  "flattened": false,
+  "friendly_name": "adr index reconciliation and gate",
+  "mission_id": "01M1TAA0ZJM65QE87PV4DE50Q2",
+  "mission_number": null,
+  "mission_slug": "adr-index-reconciliation-and-gate-01M1TAA0",
+  "mission_type": "documentation",
+  "purpose_context": "This mission advances adr index reconciliation and gate on mission/adr-index-reconciliation-and-gate so stakeholders can track the work from mission creation onward.",
+  "purpose_tldr": "adr index reconciliation and gate",
+  "slug": "adr-index-reconciliation-and-gate-01M1TAA0",
+  "target_branch": "mission/adr-index-reconciliation-and-gate",
+  "topology": "single_branch"
+}
