@@ -48,10 +48,10 @@
       "criterion_id": "FR-005",
       "description": "The <progress> fallback text and the sk-progress__meta span are two separately authored strings in every fixture; neither is generated from the other.",
       "proof_type": "code_review",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "packages/styles/src/progress/*.html and kitty-specs/work-package-native-progress-styles-01M1VKQ8/reviews/wp-WP01-cycle2.yaml \u2014 fallback and meta strings independently authored",
+      "pass_fail": "pass",
+      "verified_by": "codex-orry-wp208-210-0906a",
+      "verified_at": "2026-09-06T17:32:30.547772+00:00",
       "notes": "Authoring discipline confirmed by reading WP01 T001's fixtures (both strings present, hand-authored). The numeric-consistency dimension between them is separately, automatically verified under NFR-004 by T007."
     },
     {
