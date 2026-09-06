@@ -2,7 +2,7 @@
 
 **Mission Branch**: `mission/delivery-return-metric-elements`
 **Created**: 2026-09-06
-**Status**: Draft  
+**Status**: Draft
 **Input**: `spec-kitty/spec-kitty-design` issue #147, governed by epic #144 and ADR-9/10/11.
 
 ## Intent and terminology

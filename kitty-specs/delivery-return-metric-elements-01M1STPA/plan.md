@@ -1,8 +1,8 @@
 # Implementation Plan: Delivery-return metric elements
 
-**Mission**: `delivery-return-metric-elements-01M1STPA` · Issue #147 · Epic #144  
-**Branch**: `mission/delivery-return-metric-elements` from `train/elements-first` at `0fde2abffd26c53caeb40ced44bef8c79846b47b`  
-**Date**: 2026-09-06  
+**Mission**: `delivery-return-metric-elements-01M1STPA` · Issue #147 · Epic #144
+**Branch**: `mission/delivery-return-metric-elements` from `train/elements-first` at `0fde2abffd26c53caeb40ced44bef8c79846b47b`
+**Date**: 2026-09-06
 **Spec**: [`spec.md`](./spec.md)
 
 ## Summary

@@ -37,7 +37,7 @@
       "wp": "WP03"
     },
     "#147": {
-      "evidence_ref": "Current mission; WP01-WP03 are done and approved. The acceptance matrix materializes all 30 criteria: 27 pass, while NFR-005, NFR-006, and C-008 remain deliberately pending for exact-head CI/review/maintainer and post-train-merge closure through the out-of-band evidence seam. Rebased product/test tip is a7147f9373a831fadb63b71177d17a6511689d68.",
+      "evidence_ref": "Current mission; WP01-WP03 are done and approved. The acceptance matrix materializes all 30 criteria: 27 pass, while NFR-005, NFR-006, and C-008 remain deliberately pending for exact-head CI/review/maintainer and post-train-merge closure through the out-of-band evidence seam. Authored product and executable test source tip is a7147f9373a831fadb63b71177d17a6511689d68; later commits add nine CI-derived visual baselines, refresh generated SIZES.md, and update governance metadata.",
       "fr": null,
       "nfr": null,
       "repo": null,
