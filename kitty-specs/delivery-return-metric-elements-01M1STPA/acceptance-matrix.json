@@ -278,10 +278,10 @@
       "criterion_id": "C-006",
       "description": "Public styling is limited to inherited tokens, documented ::part() surfaces, and documented component properties, with no selector crossing a shadow boundary.",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "Adopted-CSS boundary and hygiene checks, parsed token gate, exact nine-part ratchet, and rendered external part targeting all pass with no shadow-crossing selectors.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T19:06:35.954072+00:00",
       "notes": "Adopted CSS boundary, exact-part ratchet, external targeting, and token-literal gates."
     },
     {
