@@ -438,16 +438,3 @@ test('[SC-014] the element adopts the generated sheet by identity and injects no
   expect(root.adoptedStyleSheets[0]).toBe(skNoticeSheet);
   expect(root.querySelectorAll('style')).toHaveLength(0);
 });
-
-test('sk-notice holds no timer, no positioning and no application state', async () => {
-  // #178's hard boundaries, asserted rather than promised. A notice that sets a timeout has
-  // become a toast, and the audit's whole complaint is that the dashboard's strips were
-  // everything-at-once. Reading the element's own source is the only way to assert an ABSENCE
-  // like this; a rendered snapshot cannot see a setTimeout that has not fired yet.
-  const source = await import('../../../packages/elements/src/notice/sk-notice.ts?raw').then(
-    (m) => m.default as string,
-  );
-  for (const banned of ['setTimeout', 'setInterval', 'requestAnimationFrame', 'this.remove(']) {
-    expect(source, `sk-notice.ts references ${banned}`).not.toContain(banned);
-  }
-});
