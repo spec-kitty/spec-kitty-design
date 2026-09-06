@@ -444,3 +444,4 @@ an unclean tree, or a failure that was skipped instead of diagnosed.
 > task-history surface for implementation and review updates.
 
 - 2026-09-06T19:50:09Z – codex – Prompt created and finalized for issue #209.
+- 2026-09-06T20:55:54Z – codex – Implemented exact seven-selector native workflow board/lane surface in d0a92b0, 49a1e46, and 86970fa. T001-T004 evidence complete: expected red captured; 220px/13.75rem calibrated in Chromium and Firefox; authored fixtures/stories/CSS plus generated catalogue/barrels, exports/docs and size ratchet complete. Focused and full available-engine Playwright, axe, build, quality, package, security and offline gates green. T005-T007 remain pending CI-authoritative baselines, WebKit/CI, rebase and four-lens review; one full mutation run had four host-contention runner timeouts/errors and must be rerun cleanly.
