@@ -43,7 +43,9 @@
     "./skip-link/*": "./dist/skip-link/*",
     "./status-indicator/*": "./dist/status-indicator/*",
     "./stub/*": "./dist/stub/*",
-    "./transition-matrix/*": "./dist/transition-matrix/*"
+    "./transition-matrix/*": "./dist/transition-matrix/*",
+    "./workflow-board/*": "./dist/workflow-board/*",
+    "./workflow-lane/*": "./dist/workflow-lane/*"
   },
   "files": [
     "dist/",

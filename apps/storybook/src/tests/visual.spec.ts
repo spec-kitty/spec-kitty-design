@@ -70,6 +70,42 @@ test('SK-progress HTML forced colors — visual baseline', async ({ page }) => {
   await expect(target).toHaveScreenshot('sk-progress-html-forced-colors.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
 });
 
+const workflowBoardStory = async (page: Page, id: string, viewport: { width: number; height: number }): Promise<Locator> => {
+  await page.setViewportSize(viewport);
+  await page.goto(`/iframe.html?id=primitives-skworkflowboard-html--${id}&viewMode=story`);
+  const target = page.locator('.sk-workflow-board').first();
+  await target.waitFor({ state: 'visible', timeout: 20000 });
+  await expect(target).not.toBeEmpty();
+  return target;
+};
+
+const workflowBoardVisuals = [
+  ['populated', 'sk-workflow-board-populated-dark.png', { width: 1024, height: 720 }],
+  ['fitting', 'sk-workflow-board-fitting.png', { width: 1600, height: 720 }],
+  ['all-empty', 'sk-workflow-board-all-empty.png', { width: 1024, height: 720 }],
+  ['one-empty-lane', 'sk-workflow-board-one-empty-lane.png', { width: 1024, height: 720 }],
+  ['fifty-items', 'sk-workflow-board-fifty-items.png', { width: 1024, height: 1200 }],
+  ['long-labels-and-items', 'sk-workflow-board-long-labels-and-items.png', { width: 360, height: 720 }],
+  ['single-lane-narrow', 'sk-workflow-board-single-lane-narrow.png', { width: 320, height: 720 }],
+  ['light-mode', 'sk-workflow-board-light.png', { width: 1024, height: 720 }],
+] as const;
+
+for (const [id, snapshot, viewport] of workflowBoardVisuals) {
+  test(`SK-workflow-board ${id} — visual baseline`, async ({ page }) => {
+    const target = await workflowBoardStory(page, id, viewport);
+    await expect(target).toHaveScreenshot(snapshot, { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  });
+}
+
+test('SK-workflow-board forced colors — visual baseline', async ({ page }) => {
+  await page.emulateMedia({ forcedColors: 'active' });
+  const target = await workflowBoardStory(page, 'forced-colors', { width: 1024, height: 720 });
+  const scroller = target.locator('.sk-workflow-board__scroller');
+  await page.locator('body').press('Tab');
+  await expect(scroller).toBeFocused();
+  await expect(target).toHaveScreenshot('sk-workflow-board-forced-colors.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+});
+
 test('SK-ribbon-card HTML with ribbon — visual baseline', async ({ page }) => {
   await page.goto('/iframe.html?id=components-skribboncard-html--with-ribbon&viewMode=story');
   const target = page.locator('.sk-ribbon-card').first();

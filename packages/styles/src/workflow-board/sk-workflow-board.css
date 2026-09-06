@@ -1,0 +1,40 @@
+/* @spec-kitty/styles — native workflow-board presentation (#209) */
+/*
+ * This styles-only family preserves consumer-authored light-DOM semantics.
+ * The consumer adds role="region", exactly one accessible name, and
+ * tabindex="0" to the scroller only after measuring real horizontal overflow.
+ * CSS owns presentation and containment; it does not measure or mutate state.
+ */
+
+.sk-workflow-board {
+  display: grid;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  gap: var(--sk-space-3);
+  font-family: var(--sk-font-sans);
+  color: var(--sk-fg-body);
+}
+
+.sk-workflow-board__scroller {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(
+    var(--sk-layout-workflow-lane-min-inline-size),
+    1fr
+  );
+  align-items: start;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  gap: var(--sk-space-4);
+  padding: var(--sk-space-1);
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  border-radius: var(--sk-radius-md);
+}
+
+.sk-workflow-board__scroller:focus-visible {
+  outline-width: var(--sk-border-width-2);
+  outline-style: solid;
+  outline-color: var(--sk-border-focus);
+  outline-offset: calc(var(--sk-border-width-2) * -1);
+}
