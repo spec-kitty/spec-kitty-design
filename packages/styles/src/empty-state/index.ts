@@ -3,5 +3,6 @@
 // Regenerate: node scripts/build-styles-only-markup.mjs
 //
 // empty-state is deliberately styles-only — it has no custom element. See ADR-10's "Styles-only components are a class, not a fixed exception count" section.
+export const SkEmptyStateInlineHTML = "<p class=\"sk-empty-state sk-empty-state--inline\">Nothing here</p>";
 export const SkEmptyStateWithActionHTML = "<div class=\"sk-empty-state\">\n  <h3 class=\"sk-empty-state__heading\">No runs yet</h3>\n  <p class=\"sk-empty-state__body\">Trigger a run to see its status and logs here.</p>\n  <div class=\"sk-empty-state__action\">\n    <button type=\"button\">Start a run</button>\n  </div>\n</div>";
 export const SkEmptyStateWithoutActionHTML = "<div class=\"sk-empty-state\">\n  <h3 class=\"sk-empty-state__heading\">No runs yet</h3>\n  <p class=\"sk-empty-state__body\">Trigger a run to see its status and logs here.</p>\n</div>";

@@ -261,8 +261,95 @@ const computeRenderVerdict = ([rootSelectors, mediaSelector, booleanOnly]) => {
         visit(node);
         return acc;
       };
-      const hasOwnContent = (el) =>
-        flatText(el).trim().length > 0 || flatMatch(el, mediaSelector);
+      // One deliberately narrow empty-alt composition has meaningful rendered evidence even
+      // though the image itself is decorative: the upgraded entity marker owns the accessible
+      // name. Keep this as a conjunction over observed browser state. A bare label/role, an open
+      // shadow root, an image-shaped descendant, or a loaded-but-unpaintable image proves nothing
+      // alone.
+      const hasValidEntityMarkerImage = (candidate) => {
+        // The per-host scan sees both the custom-element host and its authored BEM root. Resolve
+        // only that exact shadow-root marker back to its host, then run the same strict evidence
+        // conjunction below. No arbitrary descendant or lookalike class receives this path.
+        const candidateRoot = candidate.getRootNode?.();
+        const host =
+          candidate.localName === 'sk-entity-marker'
+            ? candidate
+            : candidateRoot?.host?.localName === 'sk-entity-marker' &&
+                candidateRoot.host.shadowRoot === candidateRoot &&
+                candidateRoot.querySelector('[part~="marker"]') === candidate
+              ? candidateRoot.host
+              : null;
+        if (!host) return false;
+        const ctor = customElements.get('sk-entity-marker');
+        if (typeof ctor !== 'function') return false;
+        if (!host.matches(':defined') || !(host instanceof ctor)) return false;
+
+        const shadow = host.shadowRoot;
+        if (!shadow) return false;
+        const marker = shadow.querySelector('[part~="marker"]');
+        const content = shadow.querySelector('[part~="content"]');
+        const slot = shadow.querySelector('slot:not([name])');
+        if (!marker || !content || !slot || !marker.contains(content) || !content.contains(slot)) {
+          return false;
+        }
+
+        const label = host.getAttribute('label')?.trim() ?? '';
+        if (!label) return false;
+        if (
+          marker.getAttribute('role') !== 'img' ||
+          marker.getAttribute('aria-label') !== label ||
+          marker.hasAttribute('aria-hidden')
+        ) {
+          return false;
+        }
+
+        const directlyAssigned = new Set(slot.assignedElements({ flatten: false }));
+        return Array.from(host.querySelectorAll('img')).some((image) => {
+          if (
+            image.parentElement !== host ||
+            image.getRootNode() !== host.getRootNode() ||
+            image.assignedSlot !== slot ||
+            !directlyAssigned.has(image) ||
+            image.getAttribute('alt') !== '' ||
+            !image.complete ||
+            image.naturalWidth <= 0 ||
+            image.naturalHeight <= 0
+          ) {
+            return false;
+          }
+          const rect = image.getBoundingClientRect();
+          if (rect.width <= 0 || rect.height <= 0) return false;
+          const style = getComputedStyle(image);
+          return (
+            style.display !== 'none' &&
+            style.display !== 'contents' &&
+            style.visibility !== 'hidden' &&
+            style.visibility !== 'collapse' &&
+            style.contentVisibility !== 'hidden' &&
+            Number.parseFloat(style.opacity || '1') > 0
+          );
+        });
+      };
+      const hasOwnContent = (el) => {
+        const text = flatText(el).trim();
+        const descendants = flatElements(el);
+        // An image-only entity marker must satisfy the bounded composition above. In particular,
+        // a nonempty image alt is duplicate-name misuse and may not sneak through the generic
+        // global `img[alt]:not([alt=""])` media arm.
+        if (
+          el.localName === 'sk-entity-marker' &&
+          text.length === 0 &&
+          descendants.some((candidate) => candidate.localName === 'img')
+        ) {
+          return hasValidEntityMarkerImage(el);
+        }
+        return (
+          text.length > 0 ||
+          flatMatch(el, mediaSelector) ||
+          hasValidEntityMarkerImage(el) ||
+          descendants.some((candidate) => hasValidEntityMarkerImage(candidate))
+        );
+      };
 
       if (!hasOwnContent(root)) {
         return {

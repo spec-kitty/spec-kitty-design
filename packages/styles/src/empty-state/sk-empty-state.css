@@ -28,3 +28,16 @@
 .sk-empty-state__action {
   margin-block-start: var(--sk-space-2);
 }
+
+.sk-empty-state--inline {
+  display: block;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  margin: 0;
+  padding: var(--sk-space-3) var(--sk-space-4);
+  color: var(--sk-fg-muted);
+  font-family: var(--sk-font-sans);
+  font-size: var(--sk-text-sm);
+  text-align: start;
+  overflow-wrap: anywhere;
+}

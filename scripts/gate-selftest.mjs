@@ -27,7 +27,10 @@
  */
 import { chromium } from 'playwright';
 import { createRequire } from 'node:module';
-import { SHAPES } from '../packages/elements/src/__fixtures__/shapes.mjs';
+import {
+  SHAPES,
+  setupEntityMarkerFixture,
+} from '../packages/elements/src/__fixtures__/shapes.mjs';
 
 const require = createRequire(import.meta.url);
 const {
@@ -141,6 +144,9 @@ async function buildFixture(page, shape) {
       }
     }, Object.entries(shape.shadow));
   }
+  if (shape.entityMarker) {
+    await page.evaluate(setupEntityMarkerFixture, shape.entityMarker);
+  }
 }
 
 // The floor. Without it, `export const SHAPES = []` prints "✅ All 0 shapes
@@ -162,10 +168,13 @@ if (passShapes.length === 0 || failShapes.length === 0) {
 }
 
 const browser = await chromium.launch();
-const page = await browser.newPage();
 
 let failed = 0;
 for (const shape of SHAPES) {
+  // A fresh page also means a fresh CustomElementRegistry. The marker matrix needs one case with
+  // no definition and several with an exact `sk-entity-marker` definition; sharing a page would
+  // make those states impossible to isolate after the first registration.
+  const page = await browser.newPage();
   await buildFixture(page, shape);
 
   let got, reason = '';
@@ -211,6 +220,7 @@ for (const shape of SHAPES) {
       `assert=${verdict.padEnd(8)} wait=${waited ? 'satisfied' : 'timed out'}` +
       (ok ? '' : `\n     ${why}`),
   );
+  await page.close();
 }
 
 await browser.close();

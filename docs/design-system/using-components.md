@@ -709,12 +709,18 @@ projection vocabulary.
 
 <ul>
   <li>
-    <sk-action-row row-id="activity-17" selectable selected>
-      <sk-entity-marker slot="marker" label="Spec Kitty">SK</sk-entity-marker>
+    <sk-action-row row-id="activity-17" selectable selected layout="card">
+      <sk-entity-marker slot="marker" label="Mia" size="sm" shape="circle">
+        <img src="/people/mia.webp" alt="">
+      </sk-entity-marker>
       <strong slot="title">team-landing-pivots</strong>
       <code slot="reference">spec-kitty/e2e-team-landing</code>
-      <sk-status-indicator slot="tags" tone="success">Fresh</sk-status-indicator>
+      <sk-status-indicator slot="tags" tone="success" pulsing>
+        <span slot="marker">●</span>
+        Live claim
+      </sk-status-indicator>
       <time slot="metadata">2 hours ago</time>
+      <span slot="supporting">Claimed by Mia · supplied by the application</span>
       <sk-button slot="controls" size="sm">Inspect</sk-button>
     </sk-action-row>
   </li>
@@ -737,14 +743,34 @@ native links, buttons, and `sk-button` keep their own behavior. Pointer, Enter, 
 emit one `sk-action-row-activate` with exact `{ id }`, `bubbles: true`, `composed: true`, and
 `cancelable: false`. The element owns no navigation or other default action. `selected` remains a
 consumer-controlled input and is exposed only as `aria-current="true"` on the stable row surface.
+`layout="card"` reflows that same trigger, content and controls into a compact vertical
+presentation; it does not create a semantic card or a status axis. The optional `supporting` slot is
+a passive, full-width secondary line in either layout and is externally targetable through
+`::part(supporting)`. Controls still belong in `controls`, not in `supporting`.
 
 `sk-status-indicator` accepts `neutral`, `info`, `success`, `attention`, `danger`, or `recovery` as
 presentation tones. Visible status copy is always consumer-authored, and the component does not map
 domain words to colors. An unknown tone renders as neutral while preserving the supplied text.
+`pulsing` is an optional supplied presentation flag on the marker only: it adds no timer, heartbeat,
+claim-expiry rule, liveness inference or announcement. Keep visible consumer-authored text such as
+“Live claim”; motion is never the meaning carrier.
 
 `sk-entity-marker` never fetches identity or generates initials. Supply the exact icon, initials,
 or short mark to render. A non-empty `label` makes the mark meaningful and names it; an absent or
-whitespace-only label makes it decorative and hides it from assistive technology.
+whitespace-only label makes it decorative and hides it from assistive technology. `size="sm"` and
+`shape="circle"` are independent: either may be omitted or used alone. A directly slotted image is
+contained and cover-cropped inside every size/shape combination. For a meaningful image, put the
+single name on the host and keep the consumer-owned image decorative:
+
+```html
+<sk-entity-marker label="Mia" size="sm" shape="circle">
+  <img src="/people/mia.webp" alt="">
+</sk-entity-marker>
+```
+
+The component never rewrites `alt`. A nonempty image `alt` beside a nonempty host `label` is a
+consumer error because it introduces a duplicate name. Consumers own image bytes, alternate-text
+choice, initials, identity lookup and any trust or liveness interpretation.
 
 ---
 
@@ -1248,6 +1274,20 @@ inconsistent per-page empty panels.
 
 The primitive supplies no copy of its own and no icon — heading, body and the action are entirely
 the consumer's.
+
+For an already-labelled lane that needs one compact structural message rather than the full
+heading/body/action stack, use the passive inline modifier on native light DOM:
+
+```html
+<p class="sk-empty-state sk-empty-state--inline">Nothing here</p>
+```
+
+“Inline” does not mean forced onto one physical line: complete consumer-supplied copy wraps at
+narrow widths. The modifier adds no fallback, heading, action, `role`, live region or status
+semantics. Use `sk-notice` for an announced block-level message; do not turn an empty lane into a
+notice merely to reuse its visuals. The inline modifier's exact token dependencies are
+`--sk-fg-muted`, `--sk-font-sans`, `--sk-space-3`, `--sk-space-4`, and `--sk-text-sm`.
+Consumers retain ownership of the copy and application data.
 
 [View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/primitives-skemptystate-html--with-action)
 
