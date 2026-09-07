@@ -58,10 +58,10 @@
       "criterion_id": "FR-006",
       "description": "Verify FR-006 is satisfied",
       "proof_type": "automated_test",
-      "evidence": "3ca42f9; native valueMissing/:invalid and same-root accessible description assertions green",
+      "evidence": "7cbf6ce5ae27f1d995552deec32f0b463e8dac7f (product tree cf9d5045c0968add9056abc038401a17a7f24e9c); native valueMissing/:invalid and same-root accessible description assertions green",
       "pass_fail": "pass",
       "verified_by": "codex",
-      "verified_at": "2026-09-07T03:30:12.283330+00:00",
+      "verified_at": "2026-09-07T04:35:53.232087+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
