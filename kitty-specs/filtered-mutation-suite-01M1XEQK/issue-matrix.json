@@ -1,100 +1,117 @@
 {
   "rows": {
     "#179": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "Referenced only as the blocked consumer of the ceiling. No code of #179 is touched.",
       "fr": null,
       "nfr": null,
-      "repo": null,
+      "repo": "spec-kitty/spec-kitty-design",
       "sc": null,
-      "scope": null,
+      "scope": "referenced-only",
       "source_file": "spec.md",
-      "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "title": "sk-time-series-chart (parent of PR #241)",
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
     },
     "#193": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "Cited in spec.md only, as the record that motivated rejecting a coverage- or declaration-derived observer set in favour of making the import graph honest. No code of these issues is touched.",
       "fr": null,
       "nfr": null,
-      "repo": null,
+      "repo": "spec-kitty/spec-kitty-design",
       "sc": null,
-      "scope": null,
+      "scope": "referenced-only",
       "source_file": "spec.md",
-      "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "title": "cited as prior art: #193's probe table — a green over an empty or stale derivation",
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
     },
     "#197": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "Cited in spec.md only, as the record that motivated rejecting a coverage- or declaration-derived observer set in favour of making the import graph honest. No code of these issues is touched.",
       "fr": null,
       "nfr": null,
-      "repo": null,
+      "repo": "spec-kitty/spec-kitty-design",
       "sc": null,
-      "scope": null,
+      "scope": "referenced-only",
       "source_file": "spec.md",
-      "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "title": "cited as prior art: #197's collapsed extractor — a green over an empty or stale derivation",
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
     },
     "#225": {
-      "evidence_ref": "<link or commit>",
-      "fr": null,
-      "nfr": null,
-      "repo": null,
-      "sc": null,
-      "scope": null,
+      "evidence_ref": "PR #249; CI run 34101668195 jobs 101677273183 (844.3s) and 101685458981 (839.8s), 157/157 arms green, 10/10 guards",
+      "fr": [
+        "FR-001",
+        "FR-002",
+        "FR-003",
+        "FR-004"
+      ],
+      "nfr": [
+        "NFR-001",
+        "NFR-002",
+        "NFR-003",
+        "NFR-004"
+      ],
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": [
+        "SC-001",
+        "SC-002",
+        "SC-003",
+        "SC-004",
+        "SC-005",
+        "SC-007"
+      ],
+      "scope": "in-scope",
       "source_file": "spec.md",
-      "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "title": "[ci] fund the filtered-suite redesign so the mutation budget stops needing raises",
+      "verdict": "fixed",
+      "wp": "WP01"
     },
     "#232": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "Cited in spec.md only, as the record that motivated rejecting a coverage- or declaration-derived observer set in favour of making the import graph honest. No code of these issues is touched.",
       "fr": null,
       "nfr": null,
-      "repo": null,
+      "repo": "spec-kitty/spec-kitty-design",
       "sc": null,
-      "scope": null,
+      "scope": "referenced-only",
       "source_file": "spec.md",
-      "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "title": "cited as prior art: #232's derivation — a green over an empty or stale derivation",
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
     },
     "#234": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "Cited in spec.md only, as the record that motivated rejecting a coverage- or declaration-derived observer set in favour of making the import graph honest. No code of these issues is touched.",
       "fr": null,
       "nfr": null,
-      "repo": null,
+      "repo": "spec-kitty/spec-kitty-design",
       "sc": null,
-      "scope": null,
+      "scope": "referenced-only",
       "source_file": "spec.md",
-      "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "title": "cited as prior art: #234's hidden heading — a green over an empty or stale derivation",
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
     },
     "#238": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "Investigated and answered at https://github.com/spec-kitty/spec-kitty-design/issues/238#issuecomment-5568502201: it is NOT a contributor to the mutation harness wall-clock spread (harness is chromium-only; the spread is a uniform 1.56x runner multiplier with no outlier arm), but it reproduced on this PR losing 9 of 79 files, and the same class was reproduced on chromium inside the harness. Left open, not fixed here.",
       "fr": null,
       "nfr": null,
-      "repo": null,
+      "repo": "spec-kitty/spec-kitty-design",
       "sc": null,
-      "scope": null,
+      "scope": "referenced-only",
       "source_file": "spec.md",
-      "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "title": "[ci] the behaviour suite's webkit lane intermittently stops mid-queue",
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
     },
     "#241": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "Its 165-arm set projects to ~889s on the slow runner class against the new 1100s ceiling; it must be rebased onto this train and re-run to be measured rather than projected. Not touched by this mission.",
       "fr": null,
       "nfr": null,
-      "repo": null,
+      "repo": "spec-kitty/spec-kitty-design",
       "sc": null,
-      "scope": null,
+      "scope": "referenced-only",
       "source_file": "spec.md",
-      "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "title": "sk-time-series-chart: a missing interval is a visible gap (#179)",
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
     }
   },
   "schema_version": 1

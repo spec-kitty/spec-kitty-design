@@ -938,7 +938,10 @@ for (const m of mutations) {
       : `expected rejection by "${expectGuard}", got ${got ? `"${got}"` : 'ACCEPTED'}` +
         (verdict?.[1] ? `: ${verdict[1]}` : ''));
   } else {
-    report(!verdict, m.id, verdict ? verdict[1] : `${m.arm} — named test went red, no collateral`);
+    // An arm that DECLARED collateral and got it was reported as "no collateral", which is
+    // the opposite of what guard 5's inverted arm just proved.
+    report(!verdict, m.id, verdict ? verdict[1] : `${m.arm} — named test went red, `
+      + (m.expectCollateral ? 'with the declared collateral' : 'no collateral'));
   }
 }
 
