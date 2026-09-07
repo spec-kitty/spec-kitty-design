@@ -135,7 +135,7 @@ export function stripComments(source, file = 'source.ts') {
  */
 export const styleBlocks = (rendition) => {
   const out = [];
-  const re = /<style>([\s\S]*?)<\/style>/g;
+  const re = /<style\b[^>]*>([\s\S]*?)<\/style>/g;
   let m;
   while ((m = re.exec(rendition)) !== null) {
     out.push(m[1].replace(/\$\{[\s\S]*?\}/g, 'SK-INTERPOLATED-SELECTOR'));
@@ -143,9 +143,22 @@ export const styleBlocks = (rendition) => {
   return out;
 };
 
-/** Every class name a selector names, functional pseudo-class argument lists included. */
-export const classesIn = (selector) =>
-  (selector.match(/\.(-?[_a-zA-Z][\w-]*)/g) ?? []).map((c) => c.slice(1));
+/**
+ * Every class name a selector names — through a class selector OR through a `[class]` attribute
+ * selector, and inside functional pseudo-class argument lists either way.
+ *
+ * THE ATTRIBUTE FORM IS NOT PEDANTRY. `[class~="sk-card"] { border: 0 }` selects exactly what
+ * `.sk-card { border: 0 }` selects and is the first thing a `.`-only rule teaches an author to
+ * write. Adding it costs one alternation; leaving it out would have made R3 a naming convention
+ * rather than a rule.
+ */
+export const classesIn = (selector) => {
+  const out = (selector.match(/\.(-?[_a-zA-Z][\w-]*)/g) ?? []).map((c) => c.slice(1));
+  for (const m of selector.matchAll(/\[\s*class\s*[~|^$*]?=\s*(['"]?)([^'"\]]*)\1\s*\]/g)) {
+    for (const name of m[2].trim().split(/\s+/).filter(Boolean)) out.push(name);
+  }
+  return out;
+};
 
 /**
  * Every `::part()` in a selector, paired with the element tag it is written against.
@@ -448,6 +461,14 @@ const PROBES = [
   ['a part declared for another element, reached through a bound class', (s) => s.replace('.sk-probe__header::part(text)', '.sk-probe__header::part(card)'), true],
   ['an unbound class reaching a part no element records', (s) => s.replace('.sk-probe__header::part(text)', '.sk-unbound::part(not-a-real-part)'), true],
   ['an unbound class reaching a part SOME element records — the weakened arm, accepted by design', (s) => s.replace('.sk-probe__header::part(text)', '.sk-unbound::part(card)'), false],
+  ['a library-owned class named through a [class~=] attribute selector', (s) =>
+    s.replace('.sk-probe { display: grid;', '[class~="sk-card"] { border: 0; }\n  .sk-probe { display: grid;'), true],
+  ['a library-owned class named through an exact [class=] attribute selector', (s) =>
+    s.replace('.sk-probe { display: grid;', '[class="sk-facts__term"] { margin: 0; }\n  .sk-probe { display: grid;'), true],
+  ['a fixture-owned class named through a [class~=] attribute selector, which is fine', (s) =>
+    s.replace('.sk-probe { display: grid;', '[class~="sk-probe__own"] { margin: 0; }\n  .sk-probe { display: grid;'), false],
+  ['a <style> carrying attributes, whose CSS must still be read', (s) =>
+    s.replace('<style>', '<style type="text/css">').replace('.sk-probe { display: grid;', '.sk-card { border: 0; }\n  .sk-probe { display: grid;'), true],
   ['an interpolated selector, which cannot be decided', (s) => s.replace('.sk-probe {', '${sel} {'), true],
   ['an empty style block', (s) => s.replace(/<style>[\s\S]*?<\/style>/, '<style></style>'), true],
   ['a fixture composing too few tags', (s) =>
@@ -590,9 +611,9 @@ function selftest() {
     }
   }
 
-  if (PROBES.length < 20) {
+  if (PROBES.length < 24) {
     failures += 1;
-    console.error(`❌ the probe table shrank to ${PROBES.length}, below its floor of 20.`);
+    console.error(`❌ the probe table shrank to ${PROBES.length}, below its floor of 24.`);
   }
 
   if (failures > 0) process.exit(1);
