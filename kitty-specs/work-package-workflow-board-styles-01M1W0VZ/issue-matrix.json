@@ -37,7 +37,7 @@
       "wp": "WP01"
     },
     "#210": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "Issue #210 closed by PR #222, merge 1f587b78f95601d140210802a46ef6b00286cccf.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -45,8 +45,8 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
     },
     "#211": {
       "evidence_ref": "<link or commit>",
