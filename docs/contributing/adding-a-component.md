@@ -285,11 +285,28 @@ in `mutations.json`, or `scripts/suite-selftest.mjs` fails the build.
 
 A purely presentational component owns none of them and adds nothing there.
 
-The registry holds **fifteen** ids, fourteen of them applicable. The fifteenth (SC-023,
-generation determinism) is declared `applicable: false` because ADR-11 states it as a CI-gate
+The registry's applicable id set is pinned by `tests/node/config-contract.test.ts`, which asserts
+it equals ADR-11's required-behaviours list exactly — read the list there rather than trusting a
+count here. This sentence used to carry one ("fifteen ids, fourteen applicable") and went stale the
+moment #196/#204 added two. One entry is declared inapplicable (SC-023,
+generation determinism), because ADR-11 states it as a CI-gate
 obligation — `build-react-wrappers.mjs --check` discharges it — and it is in the file so the
 registry mirrors the ADR's list rather than being silently short of it. You will not add a
 subject for it.
+
+Two of the sixteen are newer than the rest and are easy to miss when they apply to you (#196,
+#204, added 2026-09-07):
+
+- **SC-016, delegate/rendered-control correspondence.** If your element derives any part of its
+  reported validity from an object other than the control the user interacts with — a detached
+  probe, a hidden mirror, a re-derived `ValidityState` — you own this id, and the test asserts the
+  two agree for the same intended state rather than merely that the host reports the right flag.
+  `sk-form-input` is the only element with such a delegate today; ADR-14 records why it has one.
+- **SC-017, responsive threshold.** If your component's behaviour changes below a documented
+  viewport width or height, you own this id. The test asserts the shipped stylesheet declares the
+  threshold at its documented figure **and** that the behaviour changes at it live, and the
+  mutation goes against the **generated** `sk-<name>.css.js` — the `test` job never builds, so an
+  arm against the authored `.css` is semantically inert.
 
 ### 7. Run the gates
 

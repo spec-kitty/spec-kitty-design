@@ -90,9 +90,12 @@ test('[registry] behaviours.json declares exactly ADR-11\'s applicable behaviour
     'SC-013',                               // styling API
     'SC-014',                               // style adoption
     'SC-015',                               // registry guard
-    // The fifteenth, generation determinism, is DECLARED and inapplicable — asserted
+    'SC-016',                               // delegate/rendered-control correspondence (#196)
+    'SC-017',                               // responsive threshold (#204)
+    // The seventeenth, generation determinism, is DECLARED and inapplicable — asserted
     // separately below, because a list that only counts applicable ids would let it be
-    // deleted silently.
+    // deleted silently. SC-016 and SC-017 are ADR-11 items 10 and 11, added by the #196/#204
+    // amendment; this list is the second copy that keeps the registry mirroring the ADR.
   ];
   const registry = JSON.parse(readFileSync('behaviours.json', 'utf8')) as {
     behaviours: { id: string; applicable?: boolean }[];
@@ -102,13 +105,18 @@ test('[registry] behaviours.json declares exactly ADR-11\'s applicable behaviour
 });
 
 test('[registry] the inapplicable behaviour is declared, and says what discharges it', () => {
-  // WITHOUT THIS, SC-016 IS DECORATIVE. The test above filters on `applicable !== false`, so an
+  // WITHOUT THIS, SC-023 IS DECORATIVE. The test above filters on `applicable !== false`, so an
   // inapplicable entry is invisible to it and could be deleted with every gate green — the
-  // registry would quietly return to fourteen ids and nothing would say ADR-11 has fifteen.
+  // registry would quietly return to sixteen ids and nothing would say ADR-11 has seventeen.
   //
   // Asserting the REASON too, not just the id: `applicable: false` with no explanation is an
-  // escape hatch, and the whole argument for declaring SC-016 this way is that the discharge
+  // escape hatch, and the whole argument for declaring SC-023 this way is that the discharge
   // (build-react-wrappers.mjs --check) is recorded where a reader will look for it.
+  //
+  // BOTH COMMENTS SAID `SC-016` UNTIL #196. That was the id generation determinism carried when
+  // #75 WP04 declared it, before it was renumbered to SC-023; the prose kept the old name and
+  // nothing noticed, because a comment is not asserted. It became actively wrong the moment #196
+  // minted a REAL, applicable SC-016 — two ids, one name, in the file that pins the id set.
   const registry = JSON.parse(readFileSync('behaviours.json', 'utf8')) as {
     behaviours: { id: string; applicable?: boolean; inapplicableReason?: string }[];
   };

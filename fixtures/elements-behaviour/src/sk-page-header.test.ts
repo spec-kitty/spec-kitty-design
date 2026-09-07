@@ -413,7 +413,11 @@ test('an unknown density warns, degrades to the default, and never throws', asyn
   expect(el.querySelector('[slot="actions"]')).not.toBe(null);
 });
 
-test('sticky is declared on the host and dropped at both documented thresholds', async () => {
+test('[SC-017] sticky is declared on the host and dropped at both documented thresholds', async () => {
+  // ADR-11 ITEM 11 (#204). The SHEET half of the threshold behaviour: both drop blocks must be
+  // declared at their DOCUMENTED figures, which is what a live assertion at one viewport cannot
+  // see — a block whose condition drifted from 720px to 500px still fires at the lane's 414px.
+  // The live half is the [SC-017] test below.
   const HOST = ':host([sticky])';
   const BOX = ':host([sticky]) .sk-page-header';
 
@@ -432,6 +436,28 @@ test('sticky is declared on the host and dropped at both documented thresholds',
   // sticky axis that silently does nothing.
   expect(declarationIn(skPageHeaderSheet, '.sk-page-header', 'position')).toBeUndefined();
 
+  // EXACTLY THESE TWO CONDITIONS, AND NO OTHERS. Asserting the two documented blocks exist leaves
+  // a third one invisible: a spurious `@media (max-width: 1200px)` dropping stickiness far too
+  // early satisfies every assertion below, and the live check further down cannot see it either —
+  // the lane sits at 414px, which is under 720 and under 1200 alike, so the bogus rule and the real
+  // one agree exactly where the only live measurement is taken. A pre-merge lens found that.
+  const stickyDropConditions = Array.from(skPageHeaderSheet.cssRules)
+    .filter((rule): rule is CSSMediaRule => rule instanceof CSSMediaRule)
+    .filter((rule) =>
+      Array.from(rule.cssRules).some(
+        (inner) =>
+          inner instanceof CSSStyleRule &&
+          inner.selectorText.split(',').map((x) => x.trim()).includes(HOST) &&
+          inner.style.getPropertyValue('position').trim() !== '',
+      ),
+    )
+    .map((rule) => rule.conditionText.replace(/\s+/g, ' '))
+    .sort();
+  expect(
+    stickyDropConditions,
+    'the set of viewport conditions that unstick the host must be exactly the two documented ones',
+  ).toEqual(['(max-height: 480px)', '(max-width: 720px)']);
+
   for (const condition of ['(max-width: 720px)', '(max-height: 480px)']) {
     expect(
       declarationIn(skPageHeaderSheet, HOST, 'position', condition),
@@ -445,9 +471,16 @@ test('sticky is declared on the host and dropped at both documented thresholds',
   }
 });
 
-test('the width drop is real, measured at the lane viewport', async () => {
-  // The live half of the test above. The lane runs at 414px — asserted, not assumed, because a
-  // config change that widened it would turn this into a silent pass.
+test('[SC-017] the width drop is real, measured at the lane viewport', async () => {
+  // The LIVE half of the threshold behaviour (#204). Sticky is driven by the ATTRIBUTE here
+  // (`mountAxes` sets it directly), not by the property, and that matters now the test carries an
+  // id: the SC-010 sticky arm flips `reflect` on that property, so a property-driven spelling
+  // would fail this test's own `hasAttribute` precondition and become collateral for a mutation
+  // about something else entirely. Verified against every sk-page-header arm: with the attribute
+  // spelling, neither SC-010 arm reds this test.
+  //
+  // The lane runs at 414px — asserted, not assumed, because a config change that widened it would
+  // turn this into a silent pass.
   expect(window.matchMedia('(max-width: 720px)').matches, 'the lane is not below the width threshold')
     .toBe(true);
   const el = await mountAxes('compact', true);
@@ -457,6 +490,15 @@ test('the width drop is real, measured at the lane viewport', async () => {
     getComputedStyle(el).position,
     'below the documented width a sticky header must return to normal flow',
   ).toBe('static');
+  // AND THE ELEVATION GOES WITH IT, MEASURED rather than read off the sheet. `declarationIn` above
+  // matches a rule by its exact selector TEXT, so a later, differently-worded but equally specific
+  // rule restoring the shadow inside the same block would leave that assertion reporting the
+  // original value while a browser rendered the override — the declared-versus-computed divergence
+  // this whole file's SC-016 sibling is about, in CSS. A second pre-merge lens found it.
+  expect(
+    getComputedStyle(part(el, 'header')!).boxShadow,
+    'a header that no longer sticks must not keep floating a shadow over the content',
+  ).toBe('none');
 });
 
 test('the narrow reflow keeps the title, the metadata and the trailing action reachable', async () => {

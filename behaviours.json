@@ -4,7 +4,9 @@
     "mutations.json and the conformance matrix all read. Tests are keyed by ID, never by title,",
     "so renaming a test does not silently drop coverage or break the mutation harness.",
     "",
-    "FIFTEEN entries, fourteen of them APPLICABLE. The fifteenth is generation determinism (SC-023), declared with applicable:false and the gate that discharges it named on the entry. It was deferred while the wrapper generator did not exist; #126 built the generator and its --check gate, and #75 WP04 settled it.",
+    "SEVENTEEN entries, sixteen of them APPLICABLE. The one that is not is generation determinism (SC-023), declared with applicable:false and the gate that discharges it named on the entry. It was deferred while the wrapper generator did not exist; #126 built the generator and its --check gate, and #75 WP04 settled it.",
+    "",
+    "",
     "A behaviour with no applicable subject is either ABSENT from this file, or DECLARED with applicable:false and an inapplicableReason naming the gate that discharges it. It is never expressed as a skip and never deferred to a matrix cell — that was FR-010's earlier shape and it made the mission incoherent if the conformance matrix were dropped.",
     "The second form is for a behaviour ADR-11 states as a CI-gate obligation rather than a runtime one: it has no test to mutate, but omitting it would leave the registry silently short of the ADR's list. #75 WP04 added the first, SC-023. Declaring one is not an escape hatch — config-contract asserts the applicable set equals ADR-11's list exactly, so nothing can be demoted to dodge a mutation, and it asserts the inapplicable set exactly too.",
     "SUBJECTS (#73, FR-010). A behaviour id is no longer unique across the suite: sk-nav-pill",
@@ -35,7 +37,9 @@
     "#177 adds sk-card to SC-010. It was already an SC-013 subject and stays one; SC-010 is NEW to it because `status` is its first reflected STRING property — `variant` predates the id's adoption here and `inset` is boolean. Declaring the subject is what creates the obligation, per sk-site-footer's note above. sk-card is deliberately NOT added to SC-014: it adopts a generated sheet, but the claim there is asserted for it indirectly by sk-blog-card, whose two-sheet identity case imports sk-card's sheet by name, and adding a duplicate subject would grow the registry without adding an assertion. #177 also does not mint an id for fail-open: that behaviour is carried by SC-013, honestly rather than by relabelling, because a throw inside render() blanks the shadow root and the declared ::part() literally stops being targetable.",
     "#147 WP03 records sk-metric and sk-evidence-chain as SC-013 subjects. Their approved WP01/WP02 fixture files already target every declared part; the shared registry is recorded here because config-contract derives every element and refuses an unregistered subject. No new behaviour id or SC-014 claim is added.",
     "#178 adds sk-notice to NINE ids — SC-006..SC-010 and SC-011..SC-014 — which is the widest claim a single element has made here, and each one is owned rather than borrowed. SC-009 is the one worth stating: the element does NOT remove itself, so removal cannot be the default action a cancelable event prevents. What it prevents is the element's own FOCUS MOVE, which is the only post-dismissal effect the element owns; that is what keeps `cancelable` load-bearing instead of the inert flag sk-action-row correctly declined to claim. SC-011 is the FIRST shipped-element subject — until now only the synthetic fixture carried it — and sk-notice earns it with a marker slot that has real fallback content plus three named slots.\nNO ID IS MINTED for the announcement contract, and that is the point of this note. ADR-11 has no id for 'a live region re-announces a changed message', and tests/node/config-contract.test.ts asserts the applicable set equals ADR-11's list exactly. The re-announcement and node-stability tests in sk-notice.test.ts therefore carry no [SC-NNN] marker. Fifth time this boundary has been reached (#140, #143, #77, #177); the answer is the same, and here it costs less than usual because the SC-010 arm that de-registers `message` reds the unmarked re-announcement test as well as the marked one — measured, not assumed.",
-    "#148 WP03 registers sk-bar-chart for SC-006/007/008/010/013/014 and react-bar-chart for SC-006/010. The element contributes seven mutation arms because SC-014 needs independent stylesheet-length and identity kills; the generated React wrapper contributes listener and property-reset arms."
+    "#148 WP03 registers sk-bar-chart for SC-006/007/008/010/013/014 and react-bar-chart for SC-006/010. The element contributes seven mutation arms because SC-014 needs independent stylesheet-length and identity kills; the generated React wrapper contributes listener and property-reset arms.",
+    "#196 AND #204 CLOSE THAT BOUNDARY, and this note is where the count stops. The paragraph immediately above records the FIFTH mission to reach it (#140, #143, #77, #177, #178) and to answer it the same way: the coverage is real, it is simply held by an ordinary test rather than by the harness, because minting an id extends ADR-11 and #67 owns that. The operator ruled on 2026-09-07 that both pending cases be minted in ONE amendment — SC-016 for probe/rendered-control correspondence (#196) and SC-017 for a responsive threshold (#204) — each with a red-first mutation rather than a prose obligation. Neither of the two claims this docstring names as unowned is retro-fitted here: sk-notice's re-announcement contract and sk-card's vocabulary derivation are still unowned, still held by ordinary tests, and are NOT what these two ids cover. What changed is only that the route now exists.",
+    "SC-016 IS THE ONE ID IN THIS FILE THAT IS NOT INDEPENDENTLY BREAKABLE, and that is a property of the behaviour rather than of its tests. A correspondence claim is violated by any defect that breaks EITHER source, so with the assertion in place FOUR existing sk-form-input arms red it, measured before the entry was written rather than discovered afterwards: the merged-flag loop, the probe value sync, the pattern forwarding, and the type-before-value ordering. The last of those became SC-016's own arm; the pattern one was re-sited onto inputmode; the other two stay SC-003 and reach the correspondence test through the shared marker. The two ways to express that were `expectCollateral` on each of those arms, which would have removed guard 5's blast-radius bound from surgical arms to make room for one new id, and naming both ids on the shared test, which guard 4 and guard 5 both read. The second shipped: the correspondence test is marked `[SC-003][SC-016]`, the precedent being the `[SC-002][SC-003]` readonly test that has been in that file since #180."
   ],
   "behaviours": [
     {
@@ -602,12 +606,40 @@
       ]
     },
     {
+      "id": "SC-016",
+      "charter": "delegate/rendered-control correspondence",
+      "summary": "an element that derives a validity flag from an object other than the rendered control agrees with that control for the same intended state",
+      "owner": "elements",
+      "applicable": true,
+      "note": "ADR-11 item 10 (#196, operator ruling 2026-09-07). Element-owned, not fixture-owned: the synthetic fixture has no UA delegate to desynchronize, and a fixture-owned id would carry the same defect behaviours.json's own docstring records for SC-002..SC-005 — a green that cannot tell 'the fixture covers it' from 'a shipped element does'. sk-form-input is the only element in this repository with a delegate today; sk-form-textarea deliberately has none (ADR-14, 'Corrected premise'), so it is NOT a subject and declaring it one would assert nothing.",
+      "subjects": [
+        {
+          "name": "sk-form-input",
+          "file": "fixtures/elements-behaviour/src/sk-form-input.test.ts"
+        }
+      ]
+    },
+    {
+      "id": "SC-017",
+      "charter": "responsive threshold",
+      "summary": "a documented viewport threshold is declared at the documented figure and the behaviour it gates actually changes at it",
+      "owner": "elements",
+      "applicable": true,
+      "note": "ADR-11 item 11 (#204, operator ruling 2026-09-07). THE HEIGHT THRESHOLD IS DECLARATION-ONLY, recorded here rather than left to be reconstructed from ADR prose: the lane runs at 414x, so `(max-width: 720px)` is reachable live and `(max-height: 480px)` is not. The width arm reds both the sheet-reading and the live assertion; the height arm reds the sheet-reading one alone, which is the whole red available for it in this lane. Item 11's live clause is scoped to thresholds the lane can reach, and a future lane that can shrink the viewport should add the live half rather than assume it exists. The id #182 could not use: guard 7 keys on a declared (id, subject) pair and tests/node/config-contract.test.ts pins the applicable set to ADR-11's list, so sk-page-header's two reflow blocks shipped with real tests and no re-derived red. Element-owned because the threshold lives in the element's own generated stylesheet, which is what the arms mutate.",
+      "subjects": [
+        {
+          "name": "sk-page-header",
+          "file": "fixtures/elements-behaviour/src/sk-page-header.test.ts"
+        }
+      ]
+    },
+    {
       "id": "SC-023",
       "charter": "generation determinism",
       "summary": "regenerating wrappers from an unchanged manifest is a no-op, and drift fails CI",
       "owner": "gate",
       "applicable": false,
-      "inapplicableReason": "ADR-11 item 9 assigns this to the NODE lane and states it as two clauses: regeneration is a no-op, AND drift fails CI. Both are enforced by scripts/build-react-wrappers.mjs --check, which generates twice and compares byte-for-byte before comparing against the committed tree, as an ENFORCED lint-code step with two REQUIRED_LINT entries. It is not a mutation-harness behaviour: suite-selftest.mjs runs the browser project only, and extending it to the node lane would add ~1.8s to each of 44 runs (~240s against a 180s ceiling) to re-prove what a --check gate already proves. Declared here rather than omitted so the registry mirrors ADR-11's fifteen and the discharge is recorded where a reader looks.",
+      "inapplicableReason": "ADR-11 item 9 assigns this to the NODE lane and states it as two clauses: regeneration is a no-op, AND drift fails CI. Both are enforced by scripts/build-react-wrappers.mjs --check, which generates twice and compares byte-for-byte before comparing against the committed tree, as an ENFORCED lint-code step with two REQUIRED_LINT entries. It is not a mutation-harness behaviour: suite-selftest.mjs runs the browser project only, and extending it to the node lane would add ~1.8s to each of 44 runs (~240s against a 180s ceiling) to re-prove what a --check gate already proves. Declared here rather than omitted so the registry mirrors ADR-11's list entry for entry and the discharge is recorded where a reader looks. A COUNT OF ANOTHER FILE'S LIST IS DELIBERATELY NOT WRITTEN HERE: this sentence said 'ADR-11's fifteen' and went stale the moment #196/#204 made it seventeen. The docstring at the top of THIS file does still carry a count, and that is a different thing — it counts the entries immediately below it, which a reader can check in the same file and tests/node/config-contract.test.ts asserts the applicable half of. A count of a list that lives somewhere else is the one nothing re-derives.",
       "subjects": []
     }
   ]

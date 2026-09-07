@@ -351,13 +351,18 @@ rather than `Accepted`.
 * This ADR settles nothing about reuse. #179 and #122 still need an explicit decision before
   either can proceed with confidence, and this record does not shorten that wait — it only makes
   the decision cheaper to make correctly when it happens.
-* The synchronization-risk profile described above is real and unresolved: nothing here proves a
-  fourth desynchronization bug of this shape cannot exist in the shipped mechanism, and no gate
-  would catch one if it did. ADR-11's required-behaviours list (ADR-11:52-62 — "This list is the
-  gate") has no entry for delegate/rendered-control correspondence, and its nine items reach only
-  what `setValidity` does with the flags, never how the flags were derived. Filed as **#196** so
-  the admitted risk has an owner; that issue asks whether a required behaviour belongs there and
-  deliberately leaves its wording to the mission that takes it.
+* The synchronization-risk profile described above is real, and it is now **observed** rather than
+  merely unresolved. Nothing here proves a fourth desynchronization bug of this shape cannot exist
+  in the shipped mechanism — that claim is unchanged and this ADR does not strengthen it. What has
+  changed is the second half of the original sentence, which said "no gate would catch one if it
+  did": ADR-11's required-behaviours list carried nine items, none of them about how the flags were
+  derived, and #196 was filed so the admitted risk had an owner. **Corrected 2026-09-07:** the
+  operator ruled #196 and #204 together, ADR-11 gained item 10
+  (delegate/rendered-control correspondence), and the three bugs recorded in this section are now
+  asserted as one test — `[SC-003][SC-016] the probe and the rendered control agree for the same
+  intended state` — with a red-first mutation behind it. This paragraph is corrected rather than
+  deleted because the risk it names is still real: an entry is a gate against the shape of these
+  three, not a proof about a fourth.
 
 ### Neutral
 
@@ -377,5 +382,7 @@ rather than `Accepted`.
   `kitty-specs/form-input-constraints-and-datalist-01M1S94Y/research.md` (R2 — both the
   "Rationale for reading TWO sources" bullet at :132-137 and the rejection at :141-145 — and R9);
   issue #188.
-* Raises: #196 — the desync class this ADR admits it cannot rule out has no entry in ADR-11's
-  required-behaviours list (ADR-11:52-62), and this ADR does not add one.
+* Raises: #196 — the desync class this ADR admits it cannot rule out had no entry in ADR-11's
+  required-behaviours list (ADR-11:52-62), and this ADR did not add one. **Closed 2026-09-07** by
+  the #196/#204 amendment; see ADR-11's "The two entries this list was missing", which derives its
+  item 10 from the three bugs recorded above.
