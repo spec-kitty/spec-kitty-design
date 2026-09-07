@@ -150,7 +150,7 @@
       "invariant_id": "NI-001-no-later-layer-form-select",
       "description": "No form-select element, wrapper, manifest, behaviour, mutation, parts or element-doc surface exists",
       "verification_method": "custom_command",
-      "verification_command": "test ! -e packages/elements/src/form-select && test ! -e packages/react/src/SkFormSelect.tsx && test ! -e packages/vue/src/components/SkFormSelect.vue && ! rg -n 'form-select' behaviours.json mutations.json mutations.selftest.json expected-parts.json expected-docs.json",
+      "verification_command": "test ! -e packages/elements/src/form-select && ! rg -n 'SkFormSelect|sk-form-select|form-select' packages/elements/custom-elements.json packages/elements/vue.d.ts packages/react/src behaviours.json mutations.json mutations.selftest.json expected-parts.json expected-docs.json",
       "result": "pending",
       "evidence": null
     },
