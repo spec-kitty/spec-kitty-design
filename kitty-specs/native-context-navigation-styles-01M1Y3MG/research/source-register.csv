@@ -1,0 +1,14 @@
+source_id,source_type,title,location,status,accessed_at
+SRC-001,github-issue,Native context-navigation styles,https://github.com/spec-kitty/spec-kitty-design/issues/256,authoritative,2026-09-07
+SRC-002,github-issue,Issue 92 native parent-child semantics,https://github.com/spec-kitty/spec-kitty-design/issues/92,closed-precedent,2026-09-07
+SRC-003,github-issue,Issue 145 context-sidebar boundary,https://github.com/spec-kitty/spec-kitty-design/issues/145,closed-precedent,2026-09-07
+SRC-004,github-issue,Issue 176 styles-only native semantics,https://github.com/spec-kitty/spec-kitty-design/issues/176,closed-precedent,2026-09-07
+SRC-005,repository-doc,ADR-9,docs/architecture/adr-009-component-architecture.md,authoritative,2026-09-07
+SRC-006,repository-doc,ADR-10,docs/architecture/adr-010-token-system.md,authoritative,2026-09-07
+SRC-007,repository-doc,ADR-11,docs/architecture/adr-011-testing-strategy.md,authoritative,2026-09-07
+SRC-008,repository-doc,Adding a component,docs/contributing/adding-a-component.md,authoritative,2026-09-07
+SRC-009,repository-skill,Spec Kitty Design skill,skills/spec-kitty-design/SKILL.md,authoritative,2026-09-07
+SRC-010,ux-evidence,Repository Dossier README,/home/jeroennouws/dev/team-kitty-missions/ux_redesign/repository-dossier/README.md,approved-evidence,2026-09-07
+SRC-011,ux-evidence,Repository Dossier DESIGN,/home/jeroennouws/dev/team-kitty-missions/ux_redesign/repository-dossier/DESIGN.md,approved-evidence,2026-09-07
+SRC-012,ux-evidence,Repository Dossier capability and screen reports,/home/jeroennouws/dev/team-kitty-missions/ux_redesign/repository-dossier/,approved-evidence,2026-09-07
+SRC-013,ux-evidence,Approved dark screens D1 D2 D4-D8,/home/jeroennouws/dev/team-kitty-missions/ux_redesign/repository-dossier/,approved-evidence,2026-09-07

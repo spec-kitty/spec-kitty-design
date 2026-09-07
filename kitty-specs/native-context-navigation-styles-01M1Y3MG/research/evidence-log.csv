@@ -1,0 +1,13 @@
+evidence_id,source_id,finding,decision_or_requirement
+EV-001,SRC-001,"Binding scope is a styles-only native BEM family with no element or behavior",R-001;FR-001;C-001
+EV-002,SRC-003,"Context sidebar owns landmark/layout while consumers own selection and content",R-001;C-002;C-004
+EV-003,SRC-002,"Interposed custom-element hosts can damage native parent-child semantics",R-001;R-003;C-003
+EV-004,SRC-004,"Repository supports generated styles-only exemplars and barrels over native markup",R-001;FR-011
+EV-005,SRC-001,"Current state is native aria-current and not inferred from routes",R-002;FR-003
+EV-006,SRC-001,"Primary rows require a token-composed 44 by 44 CSS-pixel minimum",R-005;FR-005
+EV-007,SRC-010,"Approved Dossier repeatedly composes grouped current and nested sidebar links",SC-006
+EV-008,SRC-013,"Approved states include empty overflow long content scale and narrow layouts",FR-006;FR-008;FR-009
+EV-009,SRC-005,"Native semantics and consumer composition define the public boundary",C-001;C-003
+EV-010,SRC-006,"Public style values must use semantic design tokens",NFR-004
+EV-011,SRC-007,"Tests and stories must cover accessibility themes responsive and browser behavior",NFR-001;NFR-002;NFR-003;NFR-005
+EV-012,SRC-001,"No custom manifest React wrapper or Vue declaration changes are allowed",NFR-007
