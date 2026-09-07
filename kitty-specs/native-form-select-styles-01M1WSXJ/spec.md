@@ -144,16 +144,18 @@ and exercise forced-colors and narrow-viewport browser checks.
 
 ### User Story 5 — Import and discover the styles-only primitive (Priority: P2)
 
-A consumer can import the form-select stylesheet from its documented subpath or the aggregate
-styles entry and can find complete authoring guidance and Storybook examples.
+A consumer can import the form-select stylesheet from its documented CSS subpath, import generated
+canonical markup from the aggregate TypeScript barrel, and find complete authoring guidance and
+Storybook examples. The TypeScript barrel does not load CSS as a side effect.
 
 **Independent Test**: regenerate the styles package, verify its release graph and generated
 artifacts, build Storybook and inspect the expected story inventory.
 
 **Acceptance Scenarios**:
 
-1. **Given** a package consumer, **When** it imports the documented form-select style subpath,
-   **Then** the package exports resolve without importing a custom element or behaviour module.
+1. **Given** a package consumer, **When** it imports the documented form-select CSS subpath and the
+   generated markup from the root TypeScript entry, **Then** both exports resolve without a custom
+   element, behaviour module or side-effect stylesheet import in the TypeScript barrel.
 2. **Given** the generated styles barrel and documentation, **When** the repository generators
    run, **Then** they reproduce committed generated output with no drift.
 3. **Given** Storybook, **When** the form-select story module is enumerated, **Then** it includes
