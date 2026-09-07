@@ -55,6 +55,31 @@ const mount = async (attrs: Record<string, string> = {}, seed = ''): Promise<[HT
 
 const control = (el: Input) => el.shadowRoot!.querySelector('input') as HTMLInputElement;
 
+/**
+ * THE FIVE FLAGS THIS ELEMENT DOES NOT COMPUTE ITSELF (SC-016, #196).
+ *
+ * Each is read off the permanently detached probe `<input>` ADR-14 describes, never off the
+ * control the user actually interacts with — so each is a claim about a SECOND object that this
+ * element is responsible for keeping in correspondence with the first.
+ *
+ * `badInput` is deliberately NOT in this list, and the exclusion is the point rather than an
+ * oversight: ADR-14 records it as the one flag with TWO writers, and the second of them (the
+ * programmatic-divergence branch, `sk-form-input.ts:401`) sets it on the host in exactly the
+ * states where the rendered control legitimately does not — a property-assigned value the UA
+ * sanitizes away raises no `badInput` on any real control. Asserting correspondence on it would
+ * assert the opposite of the shipped design.
+ */
+const DELEGATED = [
+  'patternMismatch',
+  'rangeUnderflow',
+  'rangeOverflow',
+  'stepMismatch',
+  'typeMismatch',
+] as const;
+
+const delegated = (v: ValidityState): Record<string, boolean> =>
+  Object.fromEntries(DELEGATED.map((k) => [k, v[k]]));
+
 beforeEach(() => {
   document.body.innerHTML = '';
 });
@@ -542,7 +567,7 @@ test('[SC-003] a constraint attribute changed AFTER mount reaches the host valid
   expect(fired, 'a post-mount-mutated invalid value must still block submission').toBe(0);
 });
 
-test('[SC-003] a `type` change and a `value` change in the SAME update validate against the NEW type — the probe-ordering fix', async () => {
+test('[SC-003][SC-016] a `type` change and a `value` change in the SAME update validate against the NEW type — the probe-ordering fix', async () => {
   // THE ARM THAT CATCHES THE PROBE-ORDERING DEFECT. `pattern="\d+"` (digits only). Mount as a
   // number field with a satisfying value, then change BOTH `type` (number -> text) and `value`
   // ('123' -> 'abc') in one update, unawaited between the two assignments — exactly what a
@@ -567,6 +592,76 @@ test('[SC-003] a `type` change and a `value` change in the SAME update validate 
   });
   form.requestSubmit();
   expect(fired, 'a same-update type+value change must not slip through as valid').toBe(0);
+});
+
+test('[SC-003][SC-016] the probe and the rendered control agree for the same intended state', async () => {
+  // ADR-11 ITEM 10, WRITTEN FROM ADR-14'S THREE MEASURED BUGS RATHER THAN FROM THE ABSTRACTION.
+  //
+  // Every test above asserts what the HOST reports. None of them asserts that the object the host
+  // merged from still agrees with the control the user can see — which is the thing that was
+  // wrong all three times:
+  //
+  //   1. reading the rendered control's `.validity` from `willUpdate` read the PREVIOUS render,
+  //      so `pattern="[a-z]+"` then `el.value = '123'` submitted `123`;
+  //   2. `control.pattern = this.pattern ?? ''` compiled an UNSET pattern to `^(?:)$`, which
+  //      matches only the empty string, so a plain unconstrained "x" reported patternMismatch;
+  //   3. assigning the probe's `value` before its `type` validated the new value against the
+  //      stale type, and the merge reported NO flags while the rendered control genuinely
+  //      mismatched `\d+`.
+  //
+  // Bug 3 is two live sources disagreeing outright; bugs 1 and 2 are one source disagreeing with
+  // the intended state. All three are visible as the SAME assertion — the host's delegated flags
+  // against the rendered control's own — so that is what this test makes. Each case also pins the
+  // shared answer: correspondence alone is satisfied by both sources being wrong together.
+  //
+  // THE MARKER CARRIES BOTH IDS on purpose (`[SC-002][SC-003]` above is the precedent). The merge
+  // loop is how the probe's answer reaches `setValidity` at all, so an arm that deletes it breaks
+  // this correspondence and SC-003's submission-blocking claim with one edit — measured, not
+  // assumed: three existing arms red this test. Naming both ids keeps those arms surgical instead
+  // of buying room for a new id by switching off guard 5's collateral bound on them.
+
+  // Bug 1's shape, at mount: a field that mounts ALREADY violating a forwarded constraint.
+  {
+    const [, el] = await mount({ name: 'a', pattern: '[a-z]+' }, '123');
+    expect(delegated(el.validity), 'at mount').toEqual(delegated(control(el).validity));
+    expect(el.validity.patternMismatch, 'and both must say it mismatches').toBe(true);
+  }
+
+  // Bug 1's shape, after mount: the read-before-write case the probe exists to close.
+  {
+    const [, el] = await mount({ name: 'b', pattern: '[a-z]+' }, 'abc');
+    el.value = '123';
+    await el.updateComplete;
+    expect(delegated(el.validity), 'after a post-mount change').toEqual(
+      delegated(control(el).validity),
+    );
+    expect(el.validity.patternMismatch, 'and both must say it mismatches').toBe(true);
+  }
+
+  // Bug 3: `type` and `value` changed in ONE update. This is the case where the two sources
+  // disagreed outright — the probe saw a silently sanitized '' and reported nothing while the
+  // rendered control held 'abc' against `\d+`.
+  {
+    const [, el] = await mount({ name: 'c', type: 'number', pattern: '\\d+' }, '123');
+    el.type = 'text';
+    el.value = 'abc';
+    await el.updateComplete;
+    expect(delegated(el.validity), 'after a same-update type and value change').toEqual(
+      delegated(control(el).validity),
+    );
+    expect(el.validity.patternMismatch, 'and both must say it mismatches').toBe(true);
+  }
+
+  // Bug 2: NEITHER source may invent a constraint the element never declared. The positive cases
+  // above cannot see this one — a delegate that reports a flag nobody asked for is a
+  // correspondence failure in the other direction.
+  {
+    const [, el] = await mount({ name: 'd' }, 'x');
+    const none = { patternMismatch: false, rangeUnderflow: false, rangeOverflow: false,
+      stepMismatch: false, typeMismatch: false };
+    expect(delegated(el.validity), 'an unconstrained field, on the host').toEqual(none);
+    expect(delegated(control(el).validity), 'an unconstrained field, on the control').toEqual(none);
+  }
 });
 
 test('[SC-003] a UA flag with no required/customError still gets a non-empty message — the setValidity throw fix', async () => {

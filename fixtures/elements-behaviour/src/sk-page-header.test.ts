@@ -413,7 +413,11 @@ test('an unknown density warns, degrades to the default, and never throws', asyn
   expect(el.querySelector('[slot="actions"]')).not.toBe(null);
 });
 
-test('sticky is declared on the host and dropped at both documented thresholds', async () => {
+test('[SC-017] sticky is declared on the host and dropped at both documented thresholds', async () => {
+  // ADR-11 ITEM 11 (#204). The SHEET half of the threshold behaviour: both drop blocks must be
+  // declared at their DOCUMENTED figures, which is what a live assertion at one viewport cannot
+  // see — a block whose condition drifted from 720px to 500px still fires at the lane's 414px.
+  // The live half is the [SC-017] test below.
   const HOST = ':host([sticky])';
   const BOX = ':host([sticky]) .sk-page-header';
 
@@ -445,7 +449,13 @@ test('sticky is declared on the host and dropped at both documented thresholds',
   }
 });
 
-test('the width drop is real, measured at the lane viewport', async () => {
+test('[SC-017] the width drop is real, measured at the lane viewport', async () => {
+  // The LIVE half of the threshold behaviour (#204). Sticky is driven by the ATTRIBUTE here
+  // (`mountAxes` sets it directly), not by the property, and that matters now the test carries an
+  // id: the SC-010 sticky arm flips `reflect` on that property, so a property-driven spelling
+  // would fail this test's own `hasAttribute` precondition and become collateral for a mutation
+  // about something else entirely. Verified against every sk-page-header arm: with the attribute
+  // spelling, neither SC-010 arm reds this test.
   // The live half of the test above. The lane runs at 414px — asserted, not assumed, because a
   // config change that widened it would turn this into a silent pass.
   expect(window.matchMedia('(max-width: 720px)').matches, 'the lane is not below the width threshold')
