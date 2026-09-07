@@ -32,7 +32,8 @@
         "Implementation complete at b6f5aaded1135feb8443942a8358d8a7645a01cf; focused, cross-browser, axe, mutation, generation, Storybook, release, security, and CI evidence recorded.",
         "Rework review-cycle-1: add real sequential keyboard/typeahead coverage and exact-head desktop Chrome UI 200% zoom evidence; no product scope change.",
         "Review-cycle-1 findings folded at 3c4e0e21b2aed765e485f53afcd2fb12654f19cd: exact sequential Tab and native selector keyboard evidence is green in Chromium and Firefox; genuine desktop Chrome UI 100-to-200 percent zoom diagnostic is green for T10 scale and T11 long detail with fixed outer window, local overflow, focus, and zero console errors.",
-        "Pass 2 review of review-cycle-1 folds at substantive tree 61c107e140b45c845e930e6b0800995b4f8dd189"
+        "Pass 2 review of review-cycle-1 folds at substantive tree 61c107e140b45c845e930e6b0800995b4f8dd189",
+        "Pass 2 approved: review-cycle-1 keyboard/typeahead and genuine desktop Chrome UI 100-to-200 percent zoom findings are fully resolved; Chromium and Firefox focused suites green, exact-head WebKit remains a required CI gate."
       ],
       "provider": "__resolved_provider_absent__",
       "review": null,
