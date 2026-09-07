@@ -120,6 +120,15 @@ export const setupEntityMarkerFixture = async (config) => {
   if (config.visibility === 'hidden') image.style.visibility = 'hidden';
   if (config.opacity === 'zero') image.style.opacity = '0';
   if (config.zeroRect) image.style.cssText += 'width:0;height:0;';
+  if (config.ancestorOpacity === 'zero') host.style.opacity = '0';
+  if (config.ancestorHidden) {
+    host.hidden = true;
+    // Keep the image's own rectangle nonzero so this shape proves the ancestor-chain
+    // check, rather than being caught by the existing image-rectangle guard.
+    Object.defineProperty(image, 'getBoundingClientRect', {
+      value: () => new DOMRect(0, 0, 24, 24),
+    });
+  }
 
   if (config.hideConstructor) {
     const realGet = customElements.get.bind(customElements);
@@ -342,6 +351,12 @@ export const SHAPES = [
   { id: 'entity-marker-opacity-zero-image', want: false,
     html: '<div id="storybook-root"><sk-entity-marker id="entity-marker-subject" label="Ada Lovelace"></sk-entity-marker></div>',
     entityMarker: { src: ENTITY_MARKER_IMAGE_SOURCE, opacity: 'zero' } },
+  { id: 'entity-marker-opacity-zero-ancestor', want: false,
+    html: '<div id="storybook-root"><sk-entity-marker id="entity-marker-subject" label="Ada Lovelace"></sk-entity-marker></div>',
+    entityMarker: { src: ENTITY_MARKER_IMAGE_SOURCE, ancestorOpacity: 'zero' } },
+  { id: 'entity-marker-hidden-ancestor', want: false,
+    html: '<div id="storybook-root"><sk-entity-marker id="entity-marker-subject" label="Ada Lovelace"></sk-entity-marker></div>',
+    entityMarker: { src: ENTITY_MARKER_IMAGE_SOURCE, ancestorHidden: true } },
   { id: 'entity-marker-unupgraded-attributes-only', want: false,
     html: '<div id="storybook-root"><sk-entity-marker id="entity-marker-subject" label="Ada Lovelace" role="img" aria-label="Ada Lovelace"></sk-entity-marker></div>' },
 ];

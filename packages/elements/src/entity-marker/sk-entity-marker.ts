@@ -45,10 +45,10 @@ export class SkEntityMarker extends LitElement {
   declare label: string | undefined;
 
   /** Optional compact presentation. Only `sm` is supported; invalid values use the default size. */
-  declare size: EntityMarkerSize | undefined;
+  declare size: 'sm' | undefined;
 
   /** Optional circular presentation. Only `circle` is supported; invalid values use the square shape. */
-  declare shape: EntityMarkerShape | undefined;
+  declare shape: 'circle' | undefined;
 
   render() {
     const label = this.label?.trim() ?? '';

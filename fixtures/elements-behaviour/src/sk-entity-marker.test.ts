@@ -218,7 +218,7 @@ test.each([
   else element.shape = 'circle';
   element.textContent = axis;
   document.body.append(element);
-  const { SkEntityMarker } = await import('@spec-kitty/elements');
+  const { SkEntityMarker } = await import('../../../packages/elements/src/entity-marker/sk-entity-marker.js');
   customElements.define(tag, class extends SkEntityMarker {});
   await customElements.whenDefined(tag);
   await element.updateComplete;
@@ -227,6 +227,18 @@ test.each([
   expect(element.getAttribute(axis)).toBe(value);
   expect(element.textContent).toBe(axis);
   expect(element.hasAttribute(axis === 'size' ? 'shape' : 'size')).toBe(false);
+  const marker = partOf(element, 'marker')!;
+  const appliedClass = axis === 'size' ? 'sk-entity-marker--sm' : 'sk-entity-marker--circle';
+  expect(marker.classList.contains(appliedClass)).toBe(true);
+  const appliedGeometry = geometryOf(element);
+
+  if (axis === 'size') element.size = undefined;
+  else element.shape = undefined;
+  await element.updateComplete;
+  expect(marker.classList.contains(appliedClass)).toBe(false);
+  const restoredGeometry = geometryOf(element);
+  if (axis === 'size') expect(restoredGeometry.width).toBeGreaterThan(appliedGeometry.width);
+  else expect(restoredGeometry.radius).not.toBe(appliedGeometry.radius);
 });
 
 test('consumer initials, icons, and images project verbatim with no derived identity content', async () => {

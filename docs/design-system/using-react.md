@@ -196,6 +196,35 @@ function ActivityRow() {
 The underlying event bubbles across shadow roots, is composed, and is deliberately non-cancelable:
 the row requests consumer action but owns no navigation or other preventable default.
 
+The compact work-item presentation properties are generated from the same custom-elements manifest
+as every other wrapper prop. Their types are intentionally closed: `layout` accepts only `card`,
+marker `size` accepts only `sm`, marker `shape` accepts only `circle`, and `pulsing` is boolean.
+They change presentation only; the consumer still supplies identity, status text and liveness.
+
+```tsx
+import { SkActionRow, SkEntityMarker, SkStatusIndicator } from '@spec-kitty/react';
+
+export function CompactWorkItem() {
+  return (
+    <SkActionRow rowId="wp-212" selectable layout="card">
+      <SkEntityMarker slot="marker" label="Mia" size="sm" shape="circle">
+        MI
+      </SkEntityMarker>
+      <strong slot="title">Review compact Work Package extensions</strong>
+      <SkStatusIndicator slot="tags" tone="success" pulsing>
+        <span slot="marker" aria-hidden="true">●</span>
+        Live claim
+      </SkStatusIndicator>
+      <span slot="supporting">Claimed by Mia</span>
+    </SkActionRow>
+  );
+}
+```
+
+Do not edit the generated declarations to add these props. Author and document the Lit properties,
+regenerate `custom-elements.json`, then regenerate React and Vue outputs; the compile-time wrapper
+tests reject unsupported strings, non-boolean pulse values and an accidental `any` widening.
+
 - **Everything in `packages/react/src/` is generated.** Do not hand-edit it: CI regenerates and
   fails on drift, on orphaned files, and on a shrunken output set (`.wrapper-floor` is a
   committed ratchet; the gate refuses a missing or unparseable one rather than reading it as

@@ -1,7 +1,7 @@
 {
-  "event_count": 20,
-  "last_event_id": "01M1XJPXB4TP0TE1R3CY71VVZ7",
-  "materialized_at": "2026-09-07T09:20:40.804917+00:00",
+  "event_count": 22,
+  "last_event_id": "01M1XJRBPCTF9SWDV7MJQTTAX4",
+  "materialized_at": "2026-09-07T09:21:28.268330+00:00",
   "mission_number": "",
   "mission_slug": "compact-work-item-extensions-01M1X6NT",
   "mission_type": "software-dev",
@@ -12,9 +12,9 @@
     "claimed": 0,
     "done": 0,
     "for_review": 0,
-    "in_progress": 0,
+    "in_progress": 1,
     "in_review": 0,
-    "planned": 1
+    "planned": 0
   },
   "work_packages": {
     "WP01": {
@@ -90,11 +90,27 @@
       }
     },
     "WP03": {
-      "actor": "finalize-tasks",
+      "actor": "user",
+      "agent_profile": "__resolved_profile_absent__",
+      "agent_profile_version": "__resolved_profile_version_absent__",
+      "assignee": "codex",
       "force_count": 0,
-      "lane": "planned",
-      "last_event_id": "01M1XB38XXBAJPT6C948BTJ82J",
-      "last_transition_at": "2026-09-07T07:07:37.277968+00:00"
+      "lane": "in_progress",
+      "last_event_id": "01M1XJRBPCTF9SWDV7MJQTTAX4",
+      "last_transition_at": "2026-09-07T09:21:28.268330+00:00",
+      "model": "__resolved_model_absent__",
+      "notes": [
+        "Codex integration in authorized isolated primary clone after approved WP01 and WP02"
+      ],
+      "provider": "__resolved_provider_absent__",
+      "role": "implementer",
+      "subtasks": {
+        "T013": "done",
+        "T014": "done",
+        "T015": "done",
+        "T016": "done",
+        "T017": "done"
+      }
     }
   }
 }

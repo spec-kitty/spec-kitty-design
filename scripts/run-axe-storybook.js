@@ -261,6 +261,29 @@ const computeRenderVerdict = ([rootSelectors, mediaSelector, booleanOnly]) => {
         visit(node);
         return acc;
       };
+      const isPaintable = (element, allowDisplayContents = false) => {
+        const style = getComputedStyle(element);
+        return (
+          style.display !== 'none' &&
+          (allowDisplayContents || style.display !== 'contents') &&
+          style.visibility !== 'hidden' &&
+          style.visibility !== 'collapse' &&
+          style.contentVisibility !== 'hidden' &&
+          Number.parseFloat(style.opacity || '1') > 0
+        );
+      };
+      const hasPaintablePathToHost = (element, host) => {
+        const visited = new Set();
+        let current = element;
+        while (current && !visited.has(current)) {
+          visited.add(current);
+          if (!isPaintable(current, current !== element)) return false;
+          if (current === host) return true;
+          const root = current.getRootNode?.();
+          current = current.assignedSlot ?? current.parentElement ?? root?.host ?? null;
+        }
+        return false;
+      };
       // One deliberately narrow empty-alt composition has meaningful rendered evidence even
       // though the image itself is decorative: the upgraded entity marker owns the accessible
       // name. Keep this as a conjunction over observed browser state. A bare label/role, an open
@@ -319,15 +342,7 @@ const computeRenderVerdict = ([rootSelectors, mediaSelector, booleanOnly]) => {
           }
           const rect = image.getBoundingClientRect();
           if (rect.width <= 0 || rect.height <= 0) return false;
-          const style = getComputedStyle(image);
-          return (
-            style.display !== 'none' &&
-            style.display !== 'contents' &&
-            style.visibility !== 'hidden' &&
-            style.visibility !== 'collapse' &&
-            style.contentVisibility !== 'hidden' &&
-            Number.parseFloat(style.opacity || '1') > 0
-          );
+          return hasPaintablePathToHost(image, host);
         });
       };
       const hasOwnContent = (el) => {

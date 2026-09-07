@@ -1146,7 +1146,7 @@
         },
         {
           "kind": "class",
-          "description": "A controlled, consumer-composed action row.\n\nToken dependencies: --sk-border-default, --sk-border-strong, --sk-border-width-1,\n--sk-border-width-2, --sk-color-accent, --sk-fg-body, --sk-fg-default, --sk-fg-muted,\n--sk-font-display, --sk-font-mono, --sk-font-sans, --sk-motion-duration-fast,\n--sk-motion-ease-out, --sk-radius-md, --sk-space-1, --sk-space-2, --sk-space-3,\n--sk-space-4, --sk-space-5, --sk-surface-card, --sk-surface-muted, --sk-surface-pill,\n--sk-text-base, --sk-text-sm, --sk-text-xs, --sk-weight-medium, --sk-weight-semibold.",
+          "description": "A controlled, consumer-composed action row.\n\nToken dependencies: --sk-border-default, --sk-border-strong, --sk-border-width-1,\n--sk-border-width-2, --sk-color-accent, --sk-fg-body, --sk-fg-default, --sk-fg-muted,\n--sk-font-display, --sk-font-mono, --sk-font-sans, --sk-motion-duration-fast,\n--sk-motion-ease-out, --sk-radius-md, --sk-space-1, --sk-space-2, --sk-space-3,\n--sk-space-4, --sk-space-5, --sk-surface-card, --sk-surface-muted, --sk-surface-pill,\n--sk-text-base, --sk-text-xs, --sk-weight-semibold.",
           "name": "SkActionRow",
           "cssParts": [
             {
@@ -1168,6 +1168,10 @@
             {
               "description": "Stable row root.",
               "name": "row"
+            },
+            {
+              "description": "Optional secondary-context wrapper.",
+              "name": "supporting"
             },
             {
               "description": "Tags projection wrapper.",
@@ -1200,6 +1204,10 @@
               "name": "reference"
             },
             {
+              "description": "Optional consumer-authored secondary context.",
+              "name": "supporting"
+            },
+            {
               "description": "Consumer-authored semantic tags.",
               "name": "tags"
             },
@@ -1209,6 +1217,35 @@
             }
           ],
           "members": [
+            {
+              "kind": "method",
+              "name": "#syncSlot",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "slot",
+                  "type": {
+                    "text": "HTMLSlotElement"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "field",
+              "name": "layout",
+              "privacy": "public",
+              "type": {
+                "text": "'card' | undefined"
+              },
+              "description": "Optional compact presentation. Only `card` is supported; invalid values use the default row layout.",
+              "attribute": "layout",
+              "reflects": true
+            },
             {
               "kind": "field",
               "name": "rowId",
@@ -1255,6 +1292,14 @@
             }
           ],
           "attributes": [
+            {
+              "name": "layout",
+              "type": {
+                "text": "'card' | undefined"
+              },
+              "description": "Optional compact presentation. Only `card` is supported; invalid values use the default row layout.",
+              "fieldName": "layout"
+            },
             {
               "name": "row-id",
               "type": {
@@ -1984,7 +2029,7 @@
         },
         {
           "kind": "class",
-          "description": "A compact consumer-supplied icon, initials, or short mark with explicit accessible naming.\n\nToken dependencies: --sk-font-sans, --sk-on-tint-butter, --sk-radius-sm, --sk-space-1,\n--sk-space-7, --sk-surface-tint-butter, --sk-text-xs, --sk-weight-bold.",
+          "description": "A compact consumer-supplied icon, initials, or short mark with explicit accessible naming.\n\nToken dependencies: --sk-font-sans, --sk-on-tint-butter, --sk-radius-pill, --sk-radius-sm,\n--sk-space-1, --sk-space-5, --sk-space-7, --sk-surface-tint-butter, --sk-text-xs,\n--sk-weight-bold.",
           "name": "SkEntityMarker",
           "cssParts": [
             {
@@ -1998,7 +2043,7 @@
           ],
           "slots": [
             {
-              "description": "Consumer-supplied icon, initials, or short mark.",
+              "description": "Consumer-supplied icon, initials, short mark, or direct image. Meaningful images use a host label and `alt=\"\"`.",
               "name": ""
             }
           ],
@@ -2013,6 +2058,28 @@
               "description": "Accessible name for a meaningful mark. Empty or whitespace-only values make it decorative.",
               "attribute": "label",
               "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "shape",
+              "privacy": "public",
+              "type": {
+                "text": "'circle' | undefined"
+              },
+              "description": "Optional circular presentation. Only `circle` is supported; invalid values use the square shape.",
+              "attribute": "shape",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "size",
+              "privacy": "public",
+              "type": {
+                "text": "'sm' | undefined"
+              },
+              "description": "Optional compact presentation. Only `sm` is supported; invalid values use the default size.",
+              "attribute": "size",
+              "reflects": true
             }
           ],
           "attributes": [
@@ -2023,6 +2090,22 @@
               },
               "description": "Accessible name for a meaningful mark. Empty or whitespace-only values make it decorative.",
               "fieldName": "label"
+            },
+            {
+              "name": "shape",
+              "type": {
+                "text": "'circle' | undefined"
+              },
+              "description": "Optional circular presentation. Only `circle` is supported; invalid values use the square shape.",
+              "fieldName": "shape"
+            },
+            {
+              "name": "size",
+              "type": {
+                "text": "'sm' | undefined"
+              },
+              "description": "Optional compact presentation. Only `sm` is supported; invalid values use the default size.",
+              "fieldName": "size"
             }
           ],
           "superclass": {
@@ -4532,7 +4615,7 @@
         },
         {
           "kind": "class",
-          "description": "A consumer-labelled status with a presentation-only tone and decorative marker.\n\nToken dependencies: --sk-color-red, --sk-fg-body, --sk-fg-muted, --sk-font-sans,\n--sk-on-tint-butter, --sk-on-tint-lilac, --sk-on-tint-mint, --sk-on-tint-sky,\n--sk-space-2, --sk-text-sm.",
+          "description": "A consumer-labelled status with a presentation-only tone and decorative marker.\n\nToken dependencies: --sk-border-width-1, --sk-border-width-2, --sk-fg-body, --sk-fg-muted,\n--sk-font-sans, --sk-motion-duration-slow, --sk-motion-ease-in-out, --sk-on-tint-butter,\n--sk-on-tint-lilac, --sk-on-tint-mint, --sk-on-tint-rose, --sk-on-tint-sky, --sk-space-1,\n--sk-space-2, --sk-text-sm.",
           "name": "SkStatusIndicator",
           "cssParts": [
             {
@@ -4560,6 +4643,36 @@
           ],
           "members": [
             {
+              "kind": "method",
+              "name": "#syncMarker",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "slot",
+                  "type": {
+                    "text": "HTMLSlotElement"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "field",
+              "name": "pulsing",
+              "privacy": "public",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "description": "Adds marker-only pulse presentation for consumer-supplied live activity.",
+              "attribute": "pulsing",
+              "reflects": true
+            },
+            {
               "kind": "field",
               "name": "tone",
               "privacy": "public",
@@ -4572,6 +4685,15 @@
             }
           ],
           "attributes": [
+            {
+              "name": "pulsing",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "description": "Adds marker-only pulse presentation for consumer-supplied live activity.",
+              "fieldName": "pulsing"
+            },
             {
               "name": "tone",
               "type": {

@@ -101,7 +101,7 @@ export class SkActionRow extends LitElement {
   selected = false;
 
   /** Optional compact presentation. Only `card` is supported; invalid values use the default row layout. */
-  declare layout: ActionRowLayout | undefined;
+  declare layout: 'card' | undefined;
 
   #syncSlot(slot: HTMLSlotElement): void {
     const hasContent = slot.assignedNodes({ flatten: true }).some(

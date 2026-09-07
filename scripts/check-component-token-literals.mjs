@@ -56,6 +56,62 @@ const hasNonemptyVarFallback = (value) => {
   return found;
 };
 
+const isSkVar = (node) =>
+  node.type === 'function' &&
+  node.value.toLowerCase() === 'var' &&
+  node.nodes.length === 1 &&
+  node.nodes[0]?.type === 'word' &&
+  /^--sk-[\w-]+$/i.test(node.nodes[0].value);
+
+const significantNodes = (nodes) => nodes.filter((node) => node.type !== 'space' && node.type !== 'comment');
+
+const isExactNegativeVarMultiplier = (value) => {
+  const outer = significantNodes(valueParser(value).nodes);
+  if (outer.length !== 1 || outer[0].type !== 'function' || outer[0].value.toLowerCase() !== 'calc') {
+    return false;
+  }
+  const inner = significantNodes(outer[0].nodes);
+  if (inner.length !== 3 || inner[1].type !== 'word' || inner[1].value !== '*') return false;
+  return (
+    (isSkVar(inner[0]) && inner[2].type === 'word' && inner[2].value === '-1') ||
+    (inner[0].type === 'word' && inner[0].value === '-1' && isSkVar(inner[2]))
+  );
+};
+
+const TRANSITION_TIMING_KEYWORDS = new Set([
+  'ease', 'ease-in', 'ease-out', 'ease-in-out', 'linear', 'step-start', 'step-end',
+]);
+const isTransitionPropertyIdentifier = (node) =>
+  node.type === 'word' &&
+  /^(?:--)?[a-z_][a-z0-9_-]*$/i.test(node.value) &&
+  !TRANSITION_TIMING_KEYWORDS.has(node.value.toLowerCase());
+const isComma = (node) => node.type === 'div' && node.value === ',';
+
+const isAllowedMotionGrammar = (value, property) => {
+  const nodes = significantNodes(valueParser(value).nodes);
+  if (nodes.length === 0) return false;
+  const prop = property.toLowerCase();
+  if (prop === 'transition' || prop === 'transition-property') {
+    return nodes.every((node) => isSkVar(node) || isComma(node) || isTransitionPropertyIdentifier(node));
+  }
+  if (prop === 'animation-name') {
+    return nodes.every((node) => isComma(node) || isTransitionPropertyIdentifier(node));
+  }
+  if (prop === 'animation-direction') {
+    return nodes.every(
+      (node) =>
+        isComma(node) ||
+        (node.type === 'word' && /^(?:normal|reverse|alternate|alternate-reverse)$/i.test(node.value)),
+    );
+  }
+  if (prop === 'animation-iteration-count') {
+    return nodes.every(
+      (node) => isComma(node) || (node.type === 'word' && node.value.toLowerCase() === 'infinite'),
+    );
+  }
+  return false;
+};
+
 const isStructuralRemainder = (value, property) =>
   value === '' ||
   value
@@ -84,6 +140,8 @@ const isAllowed = (value, declaration) => {
   const importantFree = value.replace(/\s*!important\s*$/i, '').trim();
   if (hasNonemptyVarFallback(importantFree)) return false;
   if (CSS_WIDE.test(importantFree) || isStructuralRemainder(importantFree, declaration.prop)) return true;
+  if (isExactNegativeVarMultiplier(importantFree)) return true;
+  if (isAllowedMotionGrammar(importantFree, declaration.prop)) return true;
   if (SYSTEM_COLOUR.test(importantFree)) {
     return /^(?:currentColor|transparent)$/i.test(importantFree) || isInActiveForcedColours(declaration);
   }
@@ -136,6 +194,8 @@ const selftest = () => {
     ['shadow', 'box-shadow: 0 1px 3px #000'],
     ['shadow', 'filter: drop-shadow(0 1px 3px #000)'],
     ['motion', 'transition-duration: 180ms'],
+    ['motion', 'transition-timing-function: ease'],
+    ['border/outline', 'outline-offset: calc(var(--sk-border-width-2) * -2)'],
     ['z-index', 'z-index: 10'],
     ['color', 'color: CanvasText'],
   ];
@@ -163,6 +223,14 @@ const selftest = () => {
       box-shadow: none;
       filter: drop-shadow(0 0 var(--sk-space-1) var(--sk-border-strong));
       transition: none;
+      transition-property: background-color, border-color;
+      transition: background-color var(--sk-motion-duration-fast) var(--sk-motion-ease-out), border-color var(--sk-motion-duration-fast) var(--sk-motion-ease-out);
+      animation-name: sk-status-indicator-pulse;
+      animation-duration: var(--sk-motion-duration-slow);
+      animation-timing-function: var(--sk-motion-ease-in-out);
+      animation-direction: alternate;
+      animation-iteration-count: infinite;
+      outline-offset: calc(var(--sk-border-width-2) * -1);
       z-index: var(--sk-z-overlay);
     }
     @media (forced-colors: active) { .probe { color: CanvasText; } }

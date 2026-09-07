@@ -982,8 +982,8 @@
       "subject": "fixtures/elements-behaviour/src/sk-status-indicator.test.ts",
       "arm": "status-indicator marker part remains targetable",
       "file": "packages/elements/src/status-indicator/sk-status-indicator.ts",
-      "from": "<span part=\"marker\" class=\"sk-status-indicator__marker\" aria-hidden=\"true\">",
-      "to": "<span class=\"sk-status-indicator__marker\" aria-hidden=\"true\">"
+      "from": "      <span part=\"marker\" class=\"sk-status-indicator__marker\" aria-hidden=\"true\" hidden",
+      "to": "      <span class=\"sk-status-indicator__marker\" aria-hidden=\"true\" hidden"
     },
     {
       "id": "SC-014",
@@ -1023,7 +1023,7 @@
       "arm": "entity-marker adopts one generated sheet",
       "file": "packages/elements/src/entity-marker/sk-entity-marker.ts",
       "from": "  static styles = [sheet];",
-      "to": "  static styles = [];"
+      "to": "  static styles = [sheet, new CSSStyleSheet()];"
     },
     {
       "id": "SC-014",
@@ -1031,7 +1031,7 @@
       "arm": "entity-marker adopts the named sheet by identity",
       "file": "packages/elements/src/entity-marker/sk-entity-marker.ts",
       "from": "  static styles = [sheet];",
-      "to": "  static styles = [new CSSStyleSheet()];"
+      "to": "  static styles = [(() => { const copy = new CSSStyleSheet(); copy.replaceSync([...sheet.cssRules].map((rule) => rule.cssText).join('\\n')); return copy; })()];"
     },
     {
       "id": "SC-006",
@@ -1361,6 +1361,46 @@
       "from": "  static styles = [sheet];",
       "to": "  static styles = [new CSSStyleSheet()];",
       "subject": "fixtures/elements-behaviour/src/sk-time-series-chart.test.ts"
+    },
+    {
+      "id": "SC-010",
+      "subject": "fixtures/elements-behaviour/src/sk-action-row.test.ts",
+      "arm": "pre-upgrade card layout stays registered and drives later render transitions",
+      "file": "packages/elements/src/action-row/sk-action-row.ts",
+      "from": "    layout: { type: String, reflect: true },",
+      "to": "    layoutBroken: { type: String, reflect: true },"
+    },
+    {
+      "id": "SC-010",
+      "subject": "fixtures/elements-behaviour/src/sk-status-indicator.test.ts",
+      "arm": "pre-upgrade pulsing stays registered and drives later render transitions",
+      "file": "packages/elements/src/status-indicator/sk-status-indicator.ts",
+      "from": "    pulsing: { type: Boolean, reflect: true },",
+      "to": "    pulsingBroken: { type: Boolean, reflect: true },"
+    },
+    {
+      "id": "SC-010",
+      "subject": "fixtures/elements-behaviour/src/sk-entity-marker.test.ts",
+      "arm": "pre-upgrade compact size stays registered and renders independently",
+      "file": "packages/elements/src/entity-marker/sk-entity-marker.ts",
+      "from": "    size: { type: String, reflect: true },",
+      "to": "    sizeBroken: { type: String, reflect: true },"
+    },
+    {
+      "id": "SC-010",
+      "subject": "fixtures/elements-behaviour/src/sk-entity-marker.test.ts",
+      "arm": "pre-upgrade circle shape stays registered and renders independently",
+      "file": "packages/elements/src/entity-marker/sk-entity-marker.ts",
+      "from": "    shape: { type: String, reflect: true },",
+      "to": "    shapeBroken: { type: String, reflect: true },"
+    },
+    {
+      "id": "SC-013",
+      "subject": "fixtures/elements-behaviour/src/sk-action-row.test.ts",
+      "arm": "action-row supporting part remains targetable",
+      "file": "packages/elements/src/action-row/sk-action-row.ts",
+      "from": "<span part=\"supporting\" class=\"sk-action-row__supporting\" hidden",
+      "to": "<span part=\"\" class=\"sk-action-row__supporting\" hidden"
     }
   ]
 }

@@ -295,8 +295,11 @@ test('selection remains controlled and maps only to aria-current on the stable r
   }
 });
 
-test('native and custom trailing controls remain independently operable and emit no row event', async () => {
-  const element = await mount({ layout: 'card' });
+test.each([
+  { label: 'default row', layout: undefined },
+  { label: 'card', layout: 'card' as const },
+])('native and custom trailing controls remain independently operable in $label layout', async ({ layout }) => {
+  const element = await mount({ layout });
   let rowEvents = 0;
   let controlEvents = 0;
   element.addEventListener('sk-action-row-activate', () => {
@@ -369,6 +372,16 @@ test('[SC-010] row properties assigned before definition survive upgrade and dri
   expect(element.getAttribute('layout')).toBe('card');
   expect(triggerOf(element).tagName).toBe('BUTTON');
   expect(partOf(element, 'row')?.getAttribute('aria-current')).toBe('true');
+  expect(partOf(element, 'row')?.classList.contains('sk-action-row--card')).toBe(true);
+
+  element.layout = undefined;
+  await element.updateComplete;
+  expect(element.hasAttribute('layout')).toBe(false);
+  expect(partOf(element, 'row')?.classList.contains('sk-action-row--card')).toBe(false);
+
+  element.layout = 'card';
+  await element.updateComplete;
+  expect(element.getAttribute('layout')).toBe('card');
   expect(partOf(element, 'row')?.classList.contains('sk-action-row--card')).toBe(true);
 
   element.selectable = false;

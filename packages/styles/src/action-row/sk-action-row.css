@@ -32,7 +32,7 @@
     "marker title metadata"
     "marker reference metadata"
     "marker tags metadata"
-    "marker supporting supporting";
+    "supporting supporting supporting";
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   min-width: 0;
@@ -57,7 +57,6 @@ button.sk-action-row__trigger:hover {
 }
 
 button.sk-action-row__trigger:focus-visible {
-  z-index: 1;
   outline: var(--sk-border-width-2) solid var(--sk-color-accent);
   outline-offset: calc(var(--sk-border-width-2) * -1);
 }

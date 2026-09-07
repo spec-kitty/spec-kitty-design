@@ -18,6 +18,9 @@ export interface SkStatusIndicatorProps extends Pick<
   | "onFocus"
   | "onBlur"
 > {
+  /** Adds marker-only pulse presentation for consumer-supplied live activity. */
+  pulsing?: boolean;
+
   /** Presentation tone. Unknown values render as `neutral` without changing the visible text. */
   tone?: SkStatusIndicatorElement["tone"];
 
@@ -46,14 +49,16 @@ export interface SkStatusIndicatorProps extends Pick<
 /**
  * A consumer-labelled status with a presentation-only tone and decorative marker.
  *
- * Token dependencies: --sk-color-red, --sk-fg-body, --sk-fg-muted, --sk-font-sans,
- * --sk-on-tint-butter, --sk-on-tint-lilac, --sk-on-tint-mint, --sk-on-tint-sky,
+ * Token dependencies: --sk-border-width-1, --sk-border-width-2, --sk-fg-body, --sk-fg-muted,
+ * --sk-font-sans, --sk-motion-duration-slow, --sk-motion-ease-in-out, --sk-on-tint-butter,
+ * --sk-on-tint-lilac, --sk-on-tint-mint, --sk-on-tint-rose, --sk-on-tint-sky, --sk-space-1,
  * --sk-space-2, --sk-text-sm.
  *
  * ## Attributes & Properties
  *
  * Component attributes and properties that can be applied to the element or by using JavaScript.
  *
+ * - `pulsing`: Adds marker-only pulse presentation for consumer-supplied live activity.
  * - `tone`: Presentation tone. Unknown values render as `neutral` without changing the visible text.
  *
  * ## Slots

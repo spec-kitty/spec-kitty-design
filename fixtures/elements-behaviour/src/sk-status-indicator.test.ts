@@ -224,17 +224,22 @@ test('[SC-010] tone and pulsing assigned before definition survive upgrade, refl
   expect(element.hasAttribute('pulsing')).toBe(true);
   expect(partOf(element, 'status')?.dataset['tone']).toBe('info');
   expect(partOf(element, 'status')?.classList.contains('sk-status-indicator--pulsing')).toBe(true);
-  element.tone = 'recovery';
+
   element.pulsing = false;
   await element.updateComplete;
-  expect(element.getAttribute('tone')).toBe('recovery');
   expect(element.hasAttribute('pulsing')).toBe(false);
-  expect(partOf(element, 'status')?.dataset['tone']).toBe('recovery');
   expect(partOf(element, 'status')?.classList.contains('sk-status-indicator--pulsing')).toBe(false);
 
-  element.setAttribute('pulsing', '');
+  element.pulsing = true;
   await element.updateComplete;
-  expect(element.pulsing).toBe(true);
+  expect(element.hasAttribute('pulsing')).toBe(true);
+  expect(partOf(element, 'status')?.classList.contains('sk-status-indicator--pulsing')).toBe(true);
+
+  element.tone = 'recovery';
+  await element.updateComplete;
+  expect(element.getAttribute('tone')).toBe('recovery');
+  expect(partOf(element, 'status')?.dataset['tone']).toBe('recovery');
+
   element.removeAttribute('pulsing');
   await element.updateComplete;
   expect(element.pulsing).toBe(false);

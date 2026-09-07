@@ -8,6 +8,7 @@ export const SkActionRow = forwardRef((props, forwardedRef) => {
   const {
     selectable,
     selected,
+    layout,
     rowId,
     className,
     exportparts,
@@ -30,6 +31,7 @@ export const SkActionRow = forwardRef((props, forwardedRef) => {
     {
       ref: createForwardedRefHandler(ref, forwardedRef),
       ...restProps,
+      layout: layout,
       "row-id": rowId ?? props["row-id"],
       class: className,
       exportparts: exportparts,
