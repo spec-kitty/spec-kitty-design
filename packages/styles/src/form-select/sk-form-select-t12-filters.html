@@ -1,0 +1,19 @@
+<!-- Authored native light-DOM T12 independent filters. -->
+<form style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--sk-space-12)), 1fr)); gap: var(--sk-space-4);">
+  <div class="sk-form-field">
+    <label class="sk-form-field__label" for="t12-kind">Kind</label>
+    <select class="sk-form-select sk-form-select--compact" id="t12-kind" name="kind">
+      <option value="all" selected>All kinds</option>
+      <option value="feature">Feature</option>
+      <option value="fix">Fix</option>
+    </select>
+  </div>
+  <div class="sk-form-field">
+    <label class="sk-form-field__label" for="t12-outcome">Outcome</label>
+    <select class="sk-form-select sk-form-select--compact" id="t12-outcome" name="outcome">
+      <option value="all" selected>All outcomes</option>
+      <option value="approved">Approved</option>
+      <option value="rejected">Rejected</option>
+    </select>
+  </div>
+</form>

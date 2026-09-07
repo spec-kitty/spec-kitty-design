@@ -11,10 +11,10 @@ so far — as **custom elements** in `@spec-kitty/elements`. Both require `@spec
 `sk-transition-matrix`.
 Several of the catalogue's component packages are CSS only by a recorded decision — `form-field`,
 (#176) `facts`, `disclosure`, `data-table`, `empty-state`, `skip-link`, (#210) `progress`, and
-(#209) `workflow-board` and `workflow-lane`. See
+(#209) `workflow-board` and `workflow-lane`, and (#211) `form-select`. See
 ADR-10, *form-field is deliberately styles-only* and *Styles-only components are a class, not a
-fixed exception count*. These nine ship classes applied to real semantic HTML the consumer authors
-— `<dl>`, `<details>`, `<table>`, a plain block, `<a>`, `<progress>`, `<section>`, and `<ol>` — and no `sk-*` custom element
+fixed exception count*. These ten ship classes applied to real semantic HTML the consumer authors
+— `<dl>`, `<details>`, `<table>`, a plain block, `<a>`, `<progress>`, `<section>`, `<ol>`, and `<select>` — and no `sk-*` custom element
 wraps any of them: light-DOM native semantics (list/table/label association across a shadow
 boundary) are exactly what a wrapper element would break. Composite sections below such as Hero
 and Callout are CSS-only *patterns* rather than packages, and are not part of that count. Each
@@ -924,6 +924,38 @@ would have contributed is `display: flex; flex-direction: column; gap`, which th
 ```
 
 [View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/elements-skforminput--default)
+
+---
+
+## Native form select
+
+Use the styles-only form-select primitive directly on a native light-DOM `<select>`. Compose it
+with the existing form-field label and description classes so the browser retains option,
+keyboard, validation, reset and form-submission behaviour:
+
+```html
+<div class="sk-form-field">
+  <label class="sk-form-field__label" for="lane">Lane</label>
+  <select class="sk-form-select" id="lane" name="lane" aria-describedby="lane-help">
+    <option value="planned">Planned</option>
+    <option value="review">For review</option>
+    <option value="done">Done</option>
+  </select>
+  <span class="sk-form-field__description" id="lane-help">Choose the Work Package lane.</span>
+</div>
+```
+
+Add `.sk-form-select--compact` alongside `.sk-form-select` for dense filter bars. These are the
+only public form-select classes; there is no `<sk-form-select>` custom element or JavaScript
+wrapper. Native light DOM keeps the label association and `option`/`optgroup` semantics in the
+same root, and preserves the platform indicator and interaction model.
+
+This closed selector is intentionally different from #180's datalist input: a datalist permits
+unmatched free text, while a native select can submit only its authored option set. Consumers own
+the options and selected value, listen for `change`, and own application filtering or lane state.
+
+Import the CSS independently from `@spec-kitty/styles/form-select/sk-form-select.css`; generated
+fixture markup remains available from the root `@spec-kitty/styles` TypeScript export.
 
 ---
 

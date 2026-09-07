@@ -483,3 +483,41 @@ test('SK-bar-chart selectable states — visual baseline', async ({ page }) => {
   await expect(nonSelectable.getByRole('button')).toHaveCount(0);
   await expect(states).toHaveScreenshot('sk-bar-chart-selectable-states.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
 });
+
+const formSelectStory = async (
+  page: Page,
+  id: string,
+  viewport: { width: number; height: number } = { width: 720, height: 480 },
+): Promise<Locator> => {
+  await page.setViewportSize(viewport);
+  await page.goto(`/iframe.html?id=form-skformselect-html--${id}&viewMode=story`);
+  const target = page.locator('.sk-form-field').first();
+  await target.waitFor({ state: 'visible', timeout: 20000 });
+  await expect(target.locator('select.sk-form-select')).toBeVisible();
+  return target;
+};
+
+const formSelectVisuals = [
+  ['default', 'sk-form-select-default-dark.png', { width: 720, height: 480 }],
+  ['light-mode', 'sk-form-select-light.png', { width: 720, height: 480 }],
+  ['compact', 'sk-form-select-compact.png', { width: 720, height: 480 }],
+  ['required-invalid', 'sk-form-select-invalid.png', { width: 720, height: 480 }],
+  ['narrow', 'sk-form-select-narrow.png', { width: 320, height: 720 }],
+] as const;
+
+for (const [id, snapshot, viewport] of formSelectVisuals) {
+  test(`SK-form-select ${id} — visual baseline`, async ({ page }) => {
+    const target = await formSelectStory(page, id, viewport);
+    await expect(target).toHaveScreenshot(snapshot, { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  });
+}
+
+test('SK-form-select forced colors — visual baseline', async ({ page }) => {
+  await page.emulateMedia({ forcedColors: 'active' });
+  const target = await formSelectStory(page, 'forced-colors');
+  await target.locator('.sk-form-select').focus();
+  await expect(target).toHaveScreenshot('sk-form-select-forced-colors.png', {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+  });
+});
