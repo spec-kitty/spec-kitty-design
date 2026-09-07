@@ -95,6 +95,18 @@
       "title": "<fill at WP-implementation time>",
       "verdict": "deferred-with-followup",
       "wp": "WP01"
+    },
+    "#92": {
+      "evidence_ref": "Issue #92 is closed; its direct native list/listitem parentage precedent is verified by #209 DOM and AX tests.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
     }
   },
   "schema_version": 1
