@@ -279,6 +279,8 @@ test('composition uses the required public elements and preserves shell/feed int
 test('desktop Flow exposes every date cell while keeping Current usable', async ({ page }) => {
   for (const width of [1280, 1440]) {
     const root = await loadStory(page, 'default', width, 1000);
+    const flowCard = root.locator('#flow-health > sk-card');
+    const flowLayout = root.locator('.sk-pattern-overview__flow-layout');
     const matrix = root.locator('sk-transition-matrix');
     const scroller = matrix.locator('[part~="scroller"]');
     const scrollGeometry = await scroller.evaluate((element) => ({
@@ -310,7 +312,37 @@ test('desktop Flow exposes every date cell while keeping Current usable', async 
     const current = root.locator('.sk-pattern-overview__current');
     await expect(current.getByText('50 open WPs')).toBeVisible();
     await expect(current.getByRole('button', { name: 'View 50 WPs' })).toBeVisible();
-    expect((await current.boundingBox())?.width ?? 0).toBeGreaterThanOrEqual(150);
+    const layoutBox = await flowLayout.boundingBox();
+    const matrixBox = await matrix.boundingBox();
+    const currentBox = await current.boundingBox();
+    const flowCardBox = await flowCard.boundingBox();
+    expect(layoutBox).not.toBeNull();
+    expect(matrixBox).not.toBeNull();
+    expect(currentBox).not.toBeNull();
+    expect(flowCardBox).not.toBeNull();
+    expect(matrixBox?.x ?? 0).toBeGreaterThanOrEqual((layoutBox?.x ?? 0) - 1);
+    expect((matrixBox?.x ?? 0) + (matrixBox?.width ?? 0)).toBeLessThanOrEqual((currentBox?.x ?? 0) + 1);
+    expect(currentBox?.y ?? 0).toBeLessThanOrEqual((matrixBox?.y ?? 0) + 1);
+    expect((currentBox?.x ?? 0) + (currentBox?.width ?? 0)).toBeLessThanOrEqual(
+      (layoutBox?.x ?? 0) + (layoutBox?.width ?? 0) + 1,
+    );
+    expect(flowCardBox?.height ?? Number.POSITIVE_INFINITY).toBeLessThan(650);
+
+    if (width === 1280) {
+      const metrics = current.locator('sk-metric');
+      await expect(metrics).toHaveCount(4);
+      const metricBoxes = await metrics.evaluateAll((elements) => elements.map((element) => {
+        const box = element.getBoundingClientRect();
+        return { x: Math.round(box.x), y: Math.round(box.y), width: box.width, height: box.height };
+      }));
+      expect(metricBoxes[0]?.y).toBe(metricBoxes[1]?.y);
+      expect(metricBoxes[2]?.y).toBe(metricBoxes[3]?.y);
+      expect(metricBoxes[0]?.y).toBeLessThan(metricBoxes[2]?.y ?? 0);
+      expect(metricBoxes[0]?.x).toBe(metricBoxes[2]?.x);
+      expect(metricBoxes[1]?.x).toBe(metricBoxes[3]?.x);
+      expect(metricBoxes[0]?.x).toBeLessThan(metricBoxes[1]?.x ?? 0);
+      expect(metricBoxes.every(({ width: metricWidth, height }) => metricWidth > 0 && height > 0)).toBe(true);
+    }
   }
 });
 

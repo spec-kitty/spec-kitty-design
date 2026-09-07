@@ -628,16 +628,11 @@ const patternStyles = html`<style>
   }
 
   .sk-pattern-overview__flow-layout {
-    grid-template-columns: minmax(0, 1fr) 10rem;
+    grid-template-columns: minmax(0, 1fr) calc(var(--sk-space-12) + var(--sk-space-11));
     align-items: start;
   }
 
   .sk-pattern-overview__flow-layout--scale {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .sk-pattern-overview__flow-layout:not(.sk-pattern-overview__flow-layout--scale)
-    .sk-pattern-overview__current sk-grid::part(grid) {
     grid-template-columns: minmax(0, 1fr);
   }
 
@@ -775,13 +770,25 @@ const patternStyles = html`<style>
     display: none;
   }
 
-  @media (max-width: 1320px) {
-    .sk-pattern-overview__flow-layout {
-      grid-template-columns: minmax(0, 1fr);
+  @media (min-width: 721px) and (max-width: 1280px) {
+    .sk-pattern-overview__flow-layout:not(.sk-pattern-overview__flow-layout--scale)
+      sk-transition-matrix::part(table) {
+      min-inline-size: calc((var(--sk-space-12) * 4) + var(--sk-space-11));
+      table-layout: fixed;
+    }
+
+    .sk-pattern-overview__flow-layout:not(.sk-pattern-overview__flow-layout--scale)
+      sk-transition-matrix::part(route) {
+      inline-size: var(--sk-space-11);
+      max-inline-size: var(--sk-space-11);
     }
   }
 
   @media (max-width: 720px) {
+    .sk-pattern-overview__flow-layout {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
     .sk-pattern-overview__content {
       gap: var(--sk-space-4);
       padding: var(--sk-space-4);
