@@ -186,6 +186,14 @@
       "verification_command": "node scripts/build-styles-only-markup.mjs --check",
       "result": "pending",
       "evidence": null
+    },
+    {
+      "invariant_id": "NI-006-packed-css-subpath-present",
+      "description": "The built styles tarball contains form-select/sk-form-select.css without side-effect CSS import from the TypeScript barrel",
+      "verification_method": "custom_command",
+      "verification_command": "node scripts/check-release-graph.mjs",
+      "result": "pending",
+      "evidence": null
     }
   ]
 }
