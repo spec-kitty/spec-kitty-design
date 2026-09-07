@@ -47,7 +47,7 @@ requirement_refs:
 - C-011
 planning_base_branch: mission/work-package-view-pattern-stories
 merge_target_branch: mission/work-package-view-pattern-stories
-branch_strategy: Planning artifacts were generated on mission/work-package-view-pattern-stories; completed changes must merge back into mission/work-package-view-pattern-stories.
+branch_strategy: Planning artifacts for this mission were generated on mission/work-package-view-pattern-stories. During /spec-kitty.implement this WP may branch from a dependency-specific base, but completed changes must merge back into mission/work-package-view-pattern-stories unless the human explicitly redirects the landing branch.
 base_branch: train/elements-first
 base_commit: f026d6939e0a6037b8b5ad04cc97d53e3e7eecec
 created_at: '2026-09-07T19:55:00Z'
@@ -68,18 +68,20 @@ phase: Phase 1 - complete Storybook pattern and evidence
 history:
 - at: '2026-09-07T19:55:00Z'
   actor: codex
-  action: Prompt authored for issue #214
+  action: Prompt authored for issue
 agent_profile: frontend-freddy
 authoritative_surface: packages/elements/src/patterns/work-package-views.stories.ts
-create_intent: []
+create_intent:
+- packages/elements/src/patterns/work-package-views.stories.ts
+- apps/storybook/src/tests/sk-work-package-view-patterns.spec.ts
 execution_mode: code_change
 owned_files:
 - packages/elements/src/patterns/work-package-views.stories.ts
 - apps/storybook/.storybook/preview.ts
 - apps/storybook/src/tests/sk-work-package-view-patterns.spec.ts
-- apps/storybook/src/tests/expected-stories.json
-- apps/storybook/src/tests/visual-regression.spec.ts
-- apps/storybook/src/tests/__screenshots__
+- expected-stories.json
+- apps/storybook/src/tests/visual.spec.ts
+- apps/storybook/src/tests/visual.spec.ts-snapshots/*.png
 - docs/design-system/using-components.md
 priority: P1
 role: implementer
