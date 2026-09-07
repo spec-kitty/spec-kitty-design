@@ -49,28 +49,28 @@
       "wp": null
     },
     "#212": {
-      "evidence_ref": "Follow-up: #212 is a separate active claimed mission with no implementation overlap; https://github.com/spec-kitty/spec-kitty-design/issues/212",
+      "evidence_ref": "Closed sibling merged into train/elements-first by PR #252 at 97317e294b802cfbaeeeb61867c59cad6b3e0bc9 before #213 final rebase; https://github.com/spec-kitty/spec-kitty-design/issues/212",
       "fr": null,
       "nfr": null,
       "repo": null,
       "sc": null,
       "scope": null,
       "source_file": null,
-      "title": null,
-      "verdict": "deferred-with-followup",
+      "title": "[TKW4] compact work-item extensions \u2014 card-layout action row, compact marker, activity pulse, inline empty state",
+      "verdict": "verified-already-fixed",
       "wp": null
     },
     "#213": {
-      "evidence_ref": "WP01 independently approved at 340aa67408432716fbd81449985921e770e79a10; WP02/WP03 continue issue contract",
+      "evidence_ref": "WP01, WP02, and WP03 independently approved; Spec Kitty mission accepted at final evidence head c4b435c15bc1a0d4d7703fd011a871a7a6b43d46; PR #261 targets train/elements-first.",
       "fr": null,
       "nfr": null,
       "repo": null,
       "sc": null,
       "scope": null,
       "source_file": "spec.md",
-      "title": "<fill at WP-implementation time>",
+      "title": "[TKW5] Work Package detail primitives \u2014 breadcrumbs, prose, event history, and read-only checklist state",
       "verdict": "in-mission",
-      "wp": "WP01"
+      "wp": "WP03"
     },
     "#79": {
       "evidence_ref": "https://github.com/spec-kitty/spec-kitty-design/issues/79 (closed predecessor)",
