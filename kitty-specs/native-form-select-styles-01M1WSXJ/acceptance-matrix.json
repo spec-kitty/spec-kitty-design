@@ -151,24 +151,24 @@
       "description": "No form-select element, wrapper, manifest, behaviour, mutation, parts or element-doc surface exists",
       "verification_method": "custom_command",
       "verification_command": "test ! -e packages/elements/src/form-select && ! rg -n 'SkFormSelect|sk-form-select|form-select' packages/elements/custom-elements.json packages/elements/vue.d.ts packages/react/src behaviours.json mutations.json mutations.selftest.json expected-parts.json expected-docs.json",
-      "result": "pending",
-      "evidence": null
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: "
     },
     {
       "invariant_id": "NI-002-exact-public-selector-vocabulary",
       "description": "The authored CSS exposes no public selector outside sk-form-select and sk-form-select--compact",
       "verification_method": "custom_command",
       "verification_command": "test \"$(rg -o --pcre2 \"\\\\.sk-form-select(?:--compact)?(?=[^A-Za-z0-9_-]|$)\" packages/styles/src/form-select/sk-form-select.css | sort -u | wc -l)\" -eq 2 && ! rg -n --pcre2 \"\\\\.sk-form-select(?!--compact)(?:__[A-Za-z0-9_-]+|--(?!compact)[A-Za-z0-9_-]+)\" packages/styles/src/form-select/sk-form-select.css",
-      "result": "pending",
-      "evidence": null
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: "
     },
     {
       "invariant_id": "NI-003-no-forbidden-select-css",
       "description": "The stylesheet has no appearance reset, forced-color suppression, generated content, motion or replacement-indicator mechanism",
       "verification_method": "grep_absence",
       "verification_command": "appearance\\\\s*:\\\\s*none|forced-color-adjust\\\\s*:\\\\s*none|content\\\\s*:|transition\\\\s*:|animation\\\\s*:|background-image\\\\s*:|mask(?:-image)?\\\\s*:|(?:linear|radial|conic)-gradient\\\\s*\\\\(|url\\\\s*\\\\(|::(?:before|after)",
-      "result": "pending",
-      "evidence": null,
+      "result": "confirmed_absent",
+      "evidence": "grep found zero matches",
       "scope": "packages/styles/src/form-select"
     },
     {
@@ -176,24 +176,24 @@
       "description": "The mission adds no demo, application state, element or wrapper implementation",
       "verification_method": "custom_command",
       "verification_command": "base=$(git merge-base HEAD origin/train/elements-first) && git diff --quiet \"$base\"..HEAD -- apps/demo packages/elements/src/form-select packages/react packages/vue behaviours.json mutations.json mutations.selftest.json expected-parts.json expected-docs.json",
-      "result": "pending",
-      "evidence": null
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: "
     },
     {
       "invariant_id": "NI-005-styles-only-generation-current",
       "description": "The generated styles-only markup barrel exactly matches authored HTML fixtures",
       "verification_method": "custom_command",
       "verification_command": "node scripts/build-styles-only-markup.mjs --check",
-      "result": "pending",
-      "evidence": null
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: \u2705 styles-only barrels are current (data-table, disclosure, empty-state, facts, form-field, form-select, progress, skip-link, workflow-board, workflow-lane)."
     },
     {
       "invariant_id": "NI-006-packed-css-subpath-present",
       "description": "The release graph proves the packed form-select CSS subpath and the root TypeScript barrel contains no side-effect CSS import",
       "verification_method": "custom_command",
       "verification_command": "node scripts/check-release-graph.mjs && ! rg -n --pcre2 \"(?:from\\\\s+|import\\\\s*)[\\u0027\\u0022][^\\u0027\\u0022]+\\\\.css[\\u0027\\u0022]\" packages/styles/src/index.ts",
-      "result": "pending",
-      "evidence": null
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: packages:    elements, react, styles, tokens\npublishable: @spec-kitty/tokens, @spec-kitty/styles, @spec-kitty/elements, @spec-kitty/react\nbuildable:   tokens, styles, elements\n  @spec-kitty/tokens: 37"
     }
   ]
 }
