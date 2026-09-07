@@ -543,6 +543,14 @@
       "verification_command": "! grep -ER \"@customElement\\\\(['\\\"]sk-work-package|customElements\\\\.define\\\\(['\\\"]sk-work-package|export .*sk-work-package-(card|overview|detail|kanban|checklist|panel)\" packages/elements/src packages/react/src",
       "result": "confirmed_absent",
       "evidence": "Command exited 0: "
+    },
+    {
+      "invariant_id": "NI-002",
+      "description": "The Storybook pattern owns no application network, storage, route, timer, clock, random, polling, or drag/drop state.",
+      "verification_method": "custom_command",
+      "verification_command": "! grep -ER \"(fetch\\\\(|localStorage|sessionStorage|setTimeout\\\\(|setInterval\\\\(|Date\\\\.now|new Date|Math\\\\.random|history\\\\.|location\\\\.|router|dragstart|ondrop)\" packages/elements/src/patterns/work-package-views.stories.ts",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: "
     }
   ]
 }
