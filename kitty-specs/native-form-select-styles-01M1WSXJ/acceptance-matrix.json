@@ -98,10 +98,10 @@
       "criterion_id": "FR-010",
       "description": "Verify FR-010 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "3ca42f9; source negative assertions and Chromium forced-colors native appearance green",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T03:30:22.639869+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
