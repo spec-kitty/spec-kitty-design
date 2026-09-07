@@ -131,17 +131,20 @@ ratchet/visual IDs and generated-artifact status. Preserve the named Stitch prov
 the approved T10/T11 URLs expose no authenticated screen payload, so the issue contract and
 accepted predecessor baselines govern and no unseen pixel measurement is claimed.
 
-Before implementation, add failing executable contract cases for deep immutability, duplicate and
-unknown identifiers, 5-of-8/zero/50 derivation, lane/list/progress reconciliation, subtask totals,
+Before implementation, add failing executable contract cases for deep immutability of all fifty fixture-owned records, duplicate and
+unknown identifiers, 5-of-8 from the supplied `completedLaneId`, visible empty 0/0 with valid DOM
+`value=0,max=1`, scale derivation without fabricated records, lane/list/progress reconciliation,
+direct-child checklist semantics and subtask totals,
 verbatim event order, and dark/light content parity. Then implement one exported recursively frozen
-fixture plus typed, deterministic `deriveOverview` and `deriveDetail` in the excluded story module.
+fixture containing all fifty scale records and a consumer-supplied `completedLaneId`, plus typed,
+deterministic `deriveOverview` and `deriveDetail` in the excluded story module.
 All repeated displayed totals and percentages must originate in those selectors. Read no clock,
 randomness, network, storage, route, parser, sorter, or trust classifier.
 
 ## T004–T006 — Overview composition and states
 
 At the sanctioned Storybook preview seam, import the missing predecessor CSS modules identified in
-the plan. Author only token-backed composition layout. Render a labelled native `progress`, five
+the plan. Author only token-backed composition layout. Render a labelled native `progress` (with DOM `value=0,max=1` for visible empty 0/0), five
 named native lane sections and ordered lists, compact `sk-action-row` items, public markers/pills/
 statuses, and public inline empty state. Add the overflow region/name/tabindex triad only where the
 board demonstrably overflows. The narrow story uses a labelled native select with real options and
@@ -157,7 +160,8 @@ the public `sk-notice`.
 ## T007–T008 — Detail composition and states
 
 Render breadcrumb `nav > ol` with native links and one terminal current crumb, public page header,
-a native list of passive `sk-check-bullet` items, consumer-authored Lit prompt HTML under
+a native `ul` with direct passive `sk-check-bullet[role=listitem]` children and no wrapper `li`,
+checkbox role, control, or host tabindex; consumer-authored Lit prompt HTML under
 `.sk-prose`, a base `sk-card` with native facts, and a native ordered event timeline. Keep subtask
 state, prompt, fact values, event ordering, actor/time, and trust text verbatim.
 
@@ -170,11 +174,12 @@ event at narrow widths.
 ## T009–T011 — Documentation and executable proof
 
 Update the usage guide with the public composition seam and all Team Kitty-owned responsibilities.
-Build Storybook, take exact built IDs from its index, update the story ratchet via the repository's
-supported workflow, and never hand-edit generated distribution files.
+Declare every exported helper in `meta.excludeStories`. Build Storybook, prove exactly fifteen
+story entries, take their exact built IDs from the index, and update the authored story ratchet
+from the latest train total by exactly +15, and never hand-edit generated distribution files.
 
-Add a dedicated focused Playwright suite over Chromium, Firefox, and WebKit. Prove every native
-relationship, exact counts/progress, unique IDs, notice/empty distinction, pointer/Enter/Space
+Add a dedicated focused Playwright suite over Chromium, Firefox, and WebKit. Prove direct-child checklist semantics and every other native
+relationship, exact counts/progress DOM properties, fixture-owned scale data, unique IDs, notice/empty distinction, pointer/Enter/Space
 intent and unchanged selection, native lane selection, keyboard/focus order, dark/light data
 signature equality plus a real token delta, 50-item scale, mobile/narrow/200%-zoom document
 containment, and reachable board/code overflow. Ratchet every new story into the existing non-empty
