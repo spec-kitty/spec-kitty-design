@@ -68,10 +68,10 @@
       "criterion_id": "FR-007",
       "description": "Verify FR-007 is satisfied",
       "proof_type": "automated_test",
-      "evidence": "3ca42f9; ten non-empty ratcheted Storybook routes plus narrow/full-width live geometry assertions green",
+      "evidence": "7cbf6ce5ae27f1d995552deec32f0b463e8dac7f (product tree cf9d5045c0968add9056abc038401a17a7f24e9c); ten non-empty Storybook routes plus narrow/full-width geometry assertions green",
       "pass_fail": "pass",
       "verified_by": "codex",
-      "verified_at": "2026-09-07T03:30:14.770038+00:00",
+      "verified_at": "2026-09-07T04:35:55.814009+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
