@@ -24,6 +24,18 @@
       "verdict": "verified-already-fixed",
       "wp": "WP01"
     },
+    "#146": {
+      "evidence_ref": "Issue #146 is closed; its existing primitives are consumed opaquely without scope expansion.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
     "#208": {
       "evidence_ref": "Epic #208 continues through primary children #211-#214 after this #209 mission.",
       "fr": null,
