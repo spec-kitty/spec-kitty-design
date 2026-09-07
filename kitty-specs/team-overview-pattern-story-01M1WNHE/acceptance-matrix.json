@@ -2,267 +2,679 @@
   "mission_slug": "team-overview-pattern-story-01M1WNHE",
   "mission_number": "",
   "mission_type": "software-dev",
-  "overall_verdict": "pending",
+  "overall_verdict": "pass",
   "criteria": [
     {
       "criterion_id": "FR-001",
-      "description": "Verify FR-001 is satisfied",
+      "description": "Add a Storybook Team overview pattern and fixtures without defining or exporting a `sk-team-overview` custom element. (US1)",
       "proof_type": "automated_test",
-      "evidence": "PR #242 @ 1415ae447babaf29f6363748e22fb25ce5d8b722; CI run 34078606143 green; three independent Codex approvals",
+      "evidence": "Product candidate 8c37babf596524d06c2232f11782f98ff0c4d2c7; its story, dedicated Playwright spec, and eleven visual baselines are byte-identical to CI candidate 1415ae447babaf29f6363748e22fb25ce5d8b722; full CI green at https://github.com/spec-kitty/spec-kitty-design/actions/runs/34078606143. apps/storybook/src/tests/sk-team-overview-pattern.spec.ts:70-90 proves the Storybook-only surface, public-contract wiring, no sk-team-overview registration, no shadow-root reach-through, no Team Kitty import, and no fetch/timer/runtime clock.",
       "pass_fail": "pass",
       "verified_by": "codex",
-      "verified_at": "2026-09-07T03:35:02.361703+00:00",
-      "notes": "TODO: replace with a real acceptance criterion"
+      "verified_at": "2026-09-07T08:17:26.617487+00:00",
+      "notes": "Evidence is tied to the rebased product candidate and its byte-identical CI-proven pre-rebase candidate; final delivery criteria are rechecked at mission wrap-up.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP01"
     },
     {
       "criterion_id": "FR-002",
-      "description": "Verify FR-002 is satisfied",
+      "description": "Export one deeply readonly raw fixture model for delivery, flow, shell, and operational content. (US1/US2)",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "evidence": "Product candidate 8c37babf596524d06c2232f11782f98ff0c4d2c7; its story, dedicated Playwright spec, and eleven visual baselines are byte-identical to CI candidate 1415ae447babaf29f6363748e22fb25ce5d8b722; full CI green at https://github.com/spec-kitty/spec-kitty-design/actions/runs/34078606143. Dedicated Playwright lines 93-173 prove deep freezing, deterministic selectors, \u20ac1,840\u2212\u20ac166=\u20ac1,674, 320+410+340+604=\u20ac1,674, rounded 91%, the evidence chain, 62 transition moves, 50 open WPs, fixed dates, honest legend, and route grammar.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T08:17:26.617487+00:00",
+      "notes": "Evidence is tied to the rebased product candidate and its byte-identical CI-proven pre-rebase candidate; final delivery criteria are rechecked at mission wrap-up.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP01"
     },
     {
       "criterion_id": "FR-003",
-      "description": "Verify FR-003 is satisfied",
+      "description": "Derive every repeated total, percentage, legend entry, chart series, matrix projection, and status summary through deterministic pure selectors. (US1/US2)",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "evidence": "Product candidate 8c37babf596524d06c2232f11782f98ff0c4d2c7; its story, dedicated Playwright spec, and eleven visual baselines are byte-identical to CI candidate 1415ae447babaf29f6363748e22fb25ce5d8b722; full CI green at https://github.com/spec-kitty/spec-kitty-design/actions/runs/34078606143. Dedicated Playwright lines 93-173 prove deep freezing, deterministic selectors, \u20ac1,840\u2212\u20ac166=\u20ac1,674, 320+410+340+604=\u20ac1,674, rounded 91%, the evidence chain, 62 transition moves, 50 open WPs, fixed dates, honest legend, and route grammar.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T08:17:26.617487+00:00",
+      "notes": "Evidence is tied to the rebased product candidate and its byte-identical CI-proven pre-rebase candidate; final delivery criteria are rechecked at mission wrap-up.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP01"
     },
     {
       "criterion_id": "FR-004",
-      "description": "Verify FR-004 is satisfied",
+      "description": "Derive \u20ac1,674 and rounded 91% from \u20ac1,840/\u20ac166; full-coverage bucket values sum to \u20ac1,674. (US1)",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "evidence": "Product candidate 8c37babf596524d06c2232f11782f98ff0c4d2c7; its story, dedicated Playwright spec, and eleven visual baselines are byte-identical to CI candidate 1415ae447babaf29f6363748e22fb25ce5d8b722; full CI green at https://github.com/spec-kitty/spec-kitty-design/actions/runs/34078606143. Dedicated Playwright lines 93-173 prove deep freezing, deterministic selectors, \u20ac1,840\u2212\u20ac166=\u20ac1,674, 320+410+340+604=\u20ac1,674, rounded 91%, the evidence chain, 62 transition moves, 50 open WPs, fixed dates, honest legend, and route grammar.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T08:17:26.617487+00:00",
+      "notes": "Evidence is tied to the rebased product candidate and its byte-identical CI-proven pre-rebase candidate; final delivery criteria are rechecked at mission wrap-up.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP01"
     },
     {
       "criterion_id": "FR-005",
-      "description": "Verify FR-005 is satisfied",
+      "description": "Render `\u20ac1,840 \u2192 42 WPs \u2192 6 missions \u2192 2 verified`, the `Illustrative data` tag, evidence/proof framing, and subordinate 34/4 annotations. (US1)",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "evidence": "Product candidate 8c37babf596524d06c2232f11782f98ff0c4d2c7; its story, dedicated Playwright spec, and eleven visual baselines are byte-identical to CI candidate 1415ae447babaf29f6363748e22fb25ce5d8b722; full CI green at https://github.com/spec-kitty/spec-kitty-design/actions/runs/34078606143. Dedicated Playwright lines 93-173 prove deep freezing, deterministic selectors, \u20ac1,840\u2212\u20ac166=\u20ac1,674, 320+410+340+604=\u20ac1,674, rounded 91%, the evidence chain, 62 transition moves, 50 open WPs, fixed dates, honest legend, and route grammar.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T08:17:26.617487+00:00",
+      "notes": "Evidence is tied to the rebased product candidate and its byte-identical CI-proven pre-rebase candidate; final delivery criteria are rechecked at mission wrap-up.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP01"
     },
     {
       "criterion_id": "FR-006",
-      "description": "Verify FR-006 is satisfied",
+      "description": "Compose the Delivery return card from `sk-card`, `sk-evidence-chain`, and `sk-bar-chart` through public inputs only. (US1)",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "evidence": "Product candidate 8c37babf596524d06c2232f11782f98ff0c4d2c7; its story, dedicated Playwright spec, and eleven visual baselines are byte-identical to CI candidate 1415ae447babaf29f6363748e22fb25ce5d8b722; full CI green at https://github.com/spec-kitty/spec-kitty-design/actions/runs/34078606143. Dedicated Playwright lines 93-173 prove deep freezing, deterministic selectors, \u20ac1,840\u2212\u20ac166=\u20ac1,674, 320+410+340+604=\u20ac1,674, rounded 91%, the evidence chain, 62 transition moves, 50 open WPs, fixed dates, honest legend, and route grammar.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T08:17:26.617487+00:00",
+      "notes": "Evidence is tied to the rebased product candidate and its byte-identical CI-proven pre-rebase candidate; final delivery criteria are rechecked at mission wrap-up.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP01"
     },
     {
       "criterion_id": "FR-007",
-      "description": "Verify FR-007 is satisfied",
+      "description": "Derive 62 moves only from transition cells and 50 open WPs only from status inventory. (US2)",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "evidence": "Product candidate 8c37babf596524d06c2232f11782f98ff0c4d2c7; its story, dedicated Playwright spec, and eleven visual baselines are byte-identical to CI candidate 1415ae447babaf29f6363748e22fb25ce5d8b722; full CI green at https://github.com/spec-kitty/spec-kitty-design/actions/runs/34078606143. Dedicated Playwright lines 93-173 prove deep freezing, deterministic selectors, \u20ac1,840\u2212\u20ac166=\u20ac1,674, 320+410+340+604=\u20ac1,674, rounded 91%, the evidence chain, 62 transition moves, 50 open WPs, fixed dates, honest legend, and route grammar.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T08:17:26.617487+00:00",
+      "notes": "Evidence is tied to the rebased product candidate and its byte-identical CI-proven pre-rebase candidate; final delivery criteria are rechecked at mission wrap-up.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP01"
     },
     {
       "criterion_id": "FR-008",
-      "description": "Verify FR-008 is satisfied",
+      "description": "Supply the four binding date labels as fixture data with no clock or timezone dependency. (US2)",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "evidence": "Product candidate 8c37babf596524d06c2232f11782f98ff0c4d2c7; its story, dedicated Playwright spec, and eleven visual baselines are byte-identical to CI candidate 1415ae447babaf29f6363748e22fb25ce5d8b722; full CI green at https://github.com/spec-kitty/spec-kitty-design/actions/runs/34078606143. Dedicated Playwright lines 93-173 prove deep freezing, deterministic selectors, \u20ac1,840\u2212\u20ac166=\u20ac1,674, 320+410+340+604=\u20ac1,674, rounded 91%, the evidence chain, 62 transition moves, 50 open WPs, fixed dates, honest legend, and route grammar.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T08:17:26.617487+00:00",
+      "notes": "Evidence is tied to the rebased product candidate and its byte-identical CI-proven pre-rebase candidate; final delivery criteria are rechecked at mission wrap-up.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP01"
     },
     {
       "criterion_id": "FR-009",
-      "description": "Verify FR-009 is satisfied",
+      "description": "Show only present tones; use `A \u2192 B` grammar; distinguish recovery and explicit backward routes. (US2)",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "evidence": "Product candidate 8c37babf596524d06c2232f11782f98ff0c4d2c7; its story, dedicated Playwright spec, and eleven visual baselines are byte-identical to CI candidate 1415ae447babaf29f6363748e22fb25ce5d8b722; full CI green at https://github.com/spec-kitty/spec-kitty-design/actions/runs/34078606143. Dedicated Playwright lines 93-173 prove deep freezing, deterministic selectors, \u20ac1,840\u2212\u20ac166=\u20ac1,674, 320+410+340+604=\u20ac1,674, rounded 91%, the evidence chain, 62 transition moves, 50 open WPs, fixed dates, honest legend, and route grammar.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T08:17:26.617487+00:00",
+      "notes": "Evidence is tied to the rebased product candidate and its byte-identical CI-proven pre-rebase candidate; final delivery criteria are rechecked at mission wrap-up.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP01"
     },
     {
       "criterion_id": "FR-010",
-      "description": "Verify FR-010 is satisfied",
+      "description": "Render aggregate route cells for the 50-WP scale without one edge/row per work package. (US2)",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "evidence": "Product candidate 8c37babf596524d06c2232f11782f98ff0c4d2c7; its story, dedicated Playwright spec, and eleven visual baselines are byte-identical to CI candidate 1415ae447babaf29f6363748e22fb25ce5d8b722; full CI green at https://github.com/spec-kitty/spec-kitty-design/actions/runs/34078606143. Dedicated Playwright lines 93-173 prove deep freezing, deterministic selectors, \u20ac1,840\u2212\u20ac166=\u20ac1,674, 320+410+340+604=\u20ac1,674, rounded 91%, the evidence chain, 62 transition moves, 50 open WPs, fixed dates, honest legend, and route grammar.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T08:17:26.617487+00:00",
+      "notes": "Evidence is tied to the rebased product candidate and its byte-identical CI-proven pre-rebase candidate; final delivery criteria are rechecked at mission wrap-up.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP01"
     },
     {
       "criterion_id": "FR-011",
-      "description": "Verify FR-011 is satisfied",
+      "description": "Compose 12/21/13/4 status counts and derived 50 total using `sk-metric` and `sk-grid` public surfaces. (US2)",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "evidence": "Product candidate 8c37babf596524d06c2232f11782f98ff0c4d2c7; its story, dedicated Playwright spec, and eleven visual baselines are byte-identical to CI candidate 1415ae447babaf29f6363748e22fb25ce5d8b722; full CI green at https://github.com/spec-kitty/spec-kitty-design/actions/runs/34078606143. Dedicated Playwright lines 93-173 prove deep freezing, deterministic selectors, \u20ac1,840\u2212\u20ac166=\u20ac1,674, 320+410+340+604=\u20ac1,674, rounded 91%, the evidence chain, 62 transition moves, 50 open WPs, fixed dates, honest legend, and route grammar.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T08:17:26.617487+00:00",
+      "notes": "Evidence is tied to the rebased product candidate and its byte-identical CI-proven pre-rebase candidate; final delivery criteria are rechecked at mission wrap-up.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP01"
     },
     {
       "criterion_id": "FR-012",
-      "description": "Verify FR-012 is satisfied",
+      "description": "Compose `sk-app-shell` and the public rail/sidebar/header/navigation elements with exactly one account anchor above logout. (US1/US4)",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "evidence": "Product candidate 8c37babf596524d06c2232f11782f98ff0c4d2c7; its story, dedicated Playwright spec, and eleven visual baselines are byte-identical to CI candidate 1415ae447babaf29f6363748e22fb25ce5d8b722; full CI green at https://github.com/spec-kitty/spec-kitty-design/actions/runs/34078606143. Dedicated Playwright lines 176-276 prove the required public element set, one account anchor above logout, semantic operational lists, ordered slots, lowercase references, unique feed fingerprints, bounded amber meanings, and non-link warnings.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T08:17:26.617487+00:00",
+      "notes": "Evidence is tied to the rebased product candidate and its byte-identical CI-proven pre-rebase candidate; final delivery criteria are rechecked at mission wrap-up.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP01"
     },
     {
       "criterion_id": "FR-013",
-      "description": "Verify FR-013 is satisfied",
+      "description": "Render native semantic lists whose `sk-action-row` children preserve marker \u2192 name \u2192 monospace reference \u2192 pills \u2192 right-aligned time. (US1)",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "evidence": "Product candidate 8c37babf596524d06c2232f11782f98ff0c4d2c7; its story, dedicated Playwright spec, and eleven visual baselines are byte-identical to CI candidate 1415ae447babaf29f6363748e22fb25ce5d8b722; full CI green at https://github.com/spec-kitty/spec-kitty-design/actions/runs/34078606143. Dedicated Playwright lines 176-276 prove the required public element set, one account anchor above logout, semantic operational lists, ordered slots, lowercase references, unique feed fingerprints, bounded amber meanings, and non-link warnings.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T08:17:26.617487+00:00",
+      "notes": "Evidence is tied to the rebased product candidate and its byte-identical CI-proven pre-rebase candidate; final delivery criteria are rechecked at mission wrap-up.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP01"
     },
     {
       "criterion_id": "FR-014",
-      "description": "Verify FR-014 is satisfied",
+      "description": "Prevent byte-identical accidental duplication between In flight and Recent activity; preserve shared-event metadata when intentional. (US1)",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "evidence": "Product candidate 8c37babf596524d06c2232f11782f98ff0c4d2c7; its story, dedicated Playwright spec, and eleven visual baselines are byte-identical to CI candidate 1415ae447babaf29f6363748e22fb25ce5d8b722; full CI green at https://github.com/spec-kitty/spec-kitty-design/actions/runs/34078606143. Dedicated Playwright lines 176-276 prove the required public element set, one account anchor above logout, semantic operational lists, ordered slots, lowercase references, unique feed fingerprints, bounded amber meanings, and non-link warnings.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T08:17:26.617487+00:00",
+      "notes": "Evidence is tied to the rebased product candidate and its byte-identical CI-proven pre-rebase candidate; final delivery criteria are rechecked at mission wrap-up.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP01"
     },
     {
       "criterion_id": "FR-015",
-      "description": "Verify FR-015 is satisfied",
+      "description": "Limit attention amber to at most two documented meanings and retain distinct visual/semantic treatment for other states. (US1/US4)",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "evidence": "Product candidate 8c37babf596524d06c2232f11782f98ff0c4d2c7; its story, dedicated Playwright spec, and eleven visual baselines are byte-identical to CI candidate 1415ae447babaf29f6363748e22fb25ce5d8b722; full CI green at https://github.com/spec-kitty/spec-kitty-design/actions/runs/34078606143. Dedicated Playwright lines 176-276 prove the required public element set, one account anchor above logout, semantic operational lists, ordered slots, lowercase references, unique feed fingerprints, bounded amber meanings, and non-link warnings.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T08:17:26.617487+00:00",
+      "notes": "Evidence is tied to the rebased product candidate and its byte-identical CI-proven pre-rebase candidate; final delivery criteria are rechecked at mission wrap-up.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP01"
     },
     {
       "criterion_id": "FR-016",
-      "description": "Verify FR-016 is satisfied",
+      "description": "Wire row, bar, and route events to separately named Storybook action spies and demonstrate consumer-controlled selection. (US3)",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "evidence": "Product candidate 8c37babf596524d06c2232f11782f98ff0c4d2c7; its story, dedicated Playwright spec, and eleven visual baselines are byte-identical to CI candidate 1415ae447babaf29f6363748e22fb25ce5d8b722; full CI green at https://github.com/spec-kitty/spec-kitty-design/actions/runs/34078606143. Story play assertions and dedicated Playwright lines 349-410 prove separate row/bar/route spies, one pointer and keyboard event per activation, exact typed details, bubbling/composed/non-cancelable flags, and consumer-controlled non-retention.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T08:17:26.617487+00:00",
+      "notes": "Evidence is tied to the rebased product candidate and its byte-identical CI-proven pre-rebase candidate; final delivery criteria are rechecked at mission wrap-up.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP01"
     },
     {
       "criterion_id": "FR-017",
-      "description": "Verify FR-017 is satisfied",
+      "description": "Provide `ApprovedDark`, including 1280px reference and 1440px product-width variants, plus `LightMode` with the same fixture.",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "evidence": "Product candidate 8c37babf596524d06c2232f11782f98ff0c4d2c7; its story, dedicated Playwright spec, and eleven visual baselines are byte-identical to CI candidate 1415ae447babaf29f6363748e22fb25ce5d8b722; full CI green at https://github.com/spec-kitty/spec-kitty-design/actions/runs/34078606143. Six emitted stories are ratcheted in expected-stories.json (219 unique IDs); dedicated Playwright lines 413-597 prove dark/light fixture parity, timezone stability, 390\u00d7844 reachability/overflow ownership, aggregate Scale50WPs geometry, and honest partial data.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T08:17:26.617487+00:00",
+      "notes": "Evidence is tied to the rebased product candidate and its byte-identical CI-proven pre-rebase candidate; final delivery criteria are rechecked at mission wrap-up.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP01"
     },
     {
       "criterion_id": "FR-018",
-      "description": "Verify FR-018 is satisfied",
+      "description": "Provide `Narrow` at 390px and `Scale50WPs`, proving usable shell/chart/matrix/rows and readable aggregate cells.",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "evidence": "Product candidate 8c37babf596524d06c2232f11782f98ff0c4d2c7; its story, dedicated Playwright spec, and eleven visual baselines are byte-identical to CI candidate 1415ae447babaf29f6363748e22fb25ce5d8b722; full CI green at https://github.com/spec-kitty/spec-kitty-design/actions/runs/34078606143. Six emitted stories are ratcheted in expected-stories.json (219 unique IDs); dedicated Playwright lines 413-597 prove dark/light fixture parity, timezone stability, 390\u00d7844 reachability/overflow ownership, aggregate Scale50WPs geometry, and honest partial data.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T08:17:26.617487+00:00",
+      "notes": "Evidence is tied to the rebased product candidate and its byte-identical CI-proven pre-rebase candidate; final delivery criteria are rechecked at mission wrap-up.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP01"
     },
     {
       "criterion_id": "FR-019",
-      "description": "Verify FR-019 is satisfied",
+      "description": "Provide an interaction story covering row, bar, and route intent with no child-owned selection.",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "evidence": "Product candidate 8c37babf596524d06c2232f11782f98ff0c4d2c7; its story, dedicated Playwright spec, and eleven visual baselines are byte-identical to CI candidate 1415ae447babaf29f6363748e22fb25ce5d8b722; full CI green at https://github.com/spec-kitty/spec-kitty-design/actions/runs/34078606143. Story play assertions and dedicated Playwright lines 349-410 prove separate row/bar/route spies, one pointer and keyboard event per activation, exact typed details, bubbling/composed/non-cancelable flags, and consumer-controlled non-retention.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T08:17:26.617487+00:00",
+      "notes": "Evidence is tied to the rebased product candidate and its byte-identical CI-proven pre-rebase candidate; final delivery criteria are rechecked at mission wrap-up.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP01"
     },
     {
       "criterion_id": "FR-020",
-      "description": "Verify FR-020 is satisfied",
+      "description": "Provide an empty/partial-data story that labels missing evidence and partial chart coverage honestly. (US5)",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "evidence": "Product candidate 8c37babf596524d06c2232f11782f98ff0c4d2c7; its story, dedicated Playwright spec, and eleven visual baselines are byte-identical to CI candidate 1415ae447babaf29f6363748e22fb25ce5d8b722; full CI green at https://github.com/spec-kitty/spec-kitty-design/actions/runs/34078606143. Six emitted stories are ratcheted in expected-stories.json (219 unique IDs); dedicated Playwright lines 413-597 prove dark/light fixture parity, timezone stability, 390\u00d7844 reachability/overflow ownership, aggregate Scale50WPs geometry, and honest partial data.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T08:17:26.617487+00:00",
+      "notes": "Evidence is tied to the rebased product candidate and its byte-identical CI-proven pre-rebase candidate; final delivery criteria are rechecked at mission wrap-up.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP01"
     },
     {
       "criterion_id": "FR-021",
-      "description": "Verify FR-021 is satisfied",
+      "description": "Reuse the exact raw fixture across ApprovedDark and LightMode and assert an identical semantic/data signature. (US4)",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "evidence": "Product candidate 8c37babf596524d06c2232f11782f98ff0c4d2c7; its story, dedicated Playwright spec, and eleven visual baselines are byte-identical to CI candidate 1415ae447babaf29f6363748e22fb25ce5d8b722; full CI green at https://github.com/spec-kitty/spec-kitty-design/actions/runs/34078606143. Six emitted stories are ratcheted in expected-stories.json (219 unique IDs); dedicated Playwright lines 413-597 prove dark/light fixture parity, timezone stability, 390\u00d7844 reachability/overflow ownership, aggregate Scale50WPs geometry, and honest partial data.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T08:17:26.617487+00:00",
+      "notes": "Evidence is tied to the rebased product candidate and its byte-identical CI-proven pre-rebase candidate; final delivery criteria are rechecked at mission wrap-up.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP01"
     },
     {
       "criterion_id": "FR-022",
-      "description": "Verify FR-022 is satisfied",
+      "description": "Compose through public element APIs with zero private shadow-root styling/query reach-through in story code.",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "evidence": "Product candidate 8c37babf596524d06c2232f11782f98ff0c4d2c7; its story, dedicated Playwright spec, and eleven visual baselines are byte-identical to CI candidate 1415ae447babaf29f6363748e22fb25ce5d8b722; full CI green at https://github.com/spec-kitty/spec-kitty-design/actions/runs/34078606143. apps/storybook/src/tests/sk-team-overview-pattern.spec.ts:70-90 proves the Storybook-only surface, public-contract wiring, no sk-team-overview registration, no shadow-root reach-through, no Team Kitty import, and no fetch/timer/runtime clock.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T08:17:26.617487+00:00",
+      "notes": "Evidence is tied to the rebased product candidate and its byte-identical CI-proven pre-rebase candidate; final delivery criteria are rechecked at mission wrap-up.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP01"
     },
     {
       "criterion_id": "FR-023",
-      "description": "Verify FR-023 is satisfied",
+      "description": "Add every new pattern story ID to the committed story ratchet and make missing required stories fail by name.",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "evidence": "Product candidate 8c37babf596524d06c2232f11782f98ff0c4d2c7; its story, dedicated Playwright spec, and eleven visual baselines are byte-identical to CI candidate 1415ae447babaf29f6363748e22fb25ce5d8b722; full CI green at https://github.com/spec-kitty/spec-kitty-design/actions/runs/34078606143. Six emitted stories are ratcheted in expected-stories.json (219 unique IDs); dedicated Playwright lines 413-597 prove dark/light fixture parity, timezone stability, 390\u00d7844 reachability/overflow ownership, aggregate Scale50WPs geometry, and honest partial data.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T08:17:26.617487+00:00",
+      "notes": "Evidence is tied to the rebased product candidate and its byte-identical CI-proven pre-rebase candidate; final delivery criteria are rechecked at mission wrap-up.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP01"
     },
     {
       "criterion_id": "FR-024",
-      "description": "Verify FR-024 is satisfied",
+      "description": "Add explicit arithmetic, selector-purity, content-integrity, semantic, controlled-event, 390px reflow, and Scale50WPs assertions.",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "evidence": "Product candidate 8c37babf596524d06c2232f11782f98ff0c4d2c7; its story, dedicated Playwright spec, and eleven visual baselines are byte-identical to CI candidate 1415ae447babaf29f6363748e22fb25ce5d8b722; full CI green at https://github.com/spec-kitty/spec-kitty-design/actions/runs/34078606143. Six emitted stories are ratcheted in expected-stories.json (219 unique IDs); dedicated Playwright lines 413-597 prove dark/light fixture parity, timezone stability, 390\u00d7844 reachability/overflow ownership, aggregate Scale50WPs geometry, and honest partial data.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T08:17:26.617487+00:00",
+      "notes": "Evidence is tied to the rebased product candidate and its byte-identical CI-proven pre-rebase candidate; final delivery criteria are rechecked at mission wrap-up.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP01"
     },
     {
       "criterion_id": "FR-025",
-      "description": "Verify FR-025 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "description": "Add CI-authoritative full-composition baselines and focused crops for rail identity, delivery arithmetic, bar comparison, and matrix readability.",
+      "proof_type": "manual_qa",
+      "evidence": "Product candidate 8c37babf596524d06c2232f11782f98ff0c4d2c7; its story, dedicated Playwright spec, and eleven visual baselines are byte-identical to CI candidate 1415ae447babaf29f6363748e22fb25ce5d8b722; full CI green at https://github.com/spec-kitty/spec-kitty-design/actions/runs/34078606143. visual.spec.ts contains seven full-pattern and four focused Team overview cases; all eleven CI-authoritative PNG baselines were inspected and approved by three independent Codex lenses.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T08:17:26.617487+00:00",
+      "notes": "Evidence is tied to the rebased product candidate and its byte-identical CI-proven pre-rebase candidate; final delivery criteria are rechecked at mission wrap-up.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP01"
     },
     {
       "criterion_id": "FR-026",
-      "description": "Verify FR-026 is satisfied",
+      "description": "Run axe against every ratcheted pattern story and fail on load/empty-render errors.",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
-      "notes": "TODO: replace with a real acceptance criterion"
+      "evidence": "Product candidate 8c37babf596524d06c2232f11782f98ff0c4d2c7; its story, dedicated Playwright spec, and eleven visual baselines are byte-identical to CI candidate 1415ae447babaf29f6363748e22fb25ce5d8b722; full CI green at https://github.com/spec-kitty/spec-kitty-design/actions/runs/34078606143. Dedicated Playwright lines 600-604 requires every one of the six pattern stories to render non-empty and report zero WCAG 2.1 AA axe violations; the CI axe job passed.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T08:17:26.617487+00:00",
+      "notes": "Evidence is tied to the rebased product candidate and its byte-identical CI-proven pre-rebase candidate; final delivery criteria are rechecked at mission wrap-up.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP01"
+    },
+    {
+      "criterion_id": "NFR-001",
+      "description": "All full-coverage currency sums and all transition/status totals equal their raw fixture reductions exactly; the attribution label is the rounded percentage of raw values.",
+      "proof_type": "automated_test",
+      "evidence": "Product candidate 8c37babf596524d06c2232f11782f98ff0c4d2c7; its story, dedicated Playwright spec, and eleven visual baselines are byte-identical to CI candidate 1415ae447babaf29f6363748e22fb25ce5d8b722; full CI green at https://github.com/spec-kitty/spec-kitty-design/actions/runs/34078606143. Dedicated Playwright lines 93-173 prove deep freezing, deterministic selectors, \u20ac1,840\u2212\u20ac166=\u20ac1,674, 320+410+340+604=\u20ac1,674, rounded 91%, the evidence chain, 62 transition moves, 50 open WPs, fixed dates, honest legend, and route grammar.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T08:17:26.617487+00:00",
+      "notes": "Evidence is tied to the rebased product candidate and its byte-identical CI-proven pre-rebase candidate; final delivery criteria are rechecked at mission wrap-up.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP01"
+    },
+    {
+      "criterion_id": "NFR-002",
+      "description": "Repeated rendering under different clocks/timezones produces byte-identical dates, hashes, amounts, counts, row order, and derived selectors.",
+      "proof_type": "automated_test",
+      "evidence": "Product candidate 8c37babf596524d06c2232f11782f98ff0c4d2c7; its story, dedicated Playwright spec, and eleven visual baselines are byte-identical to CI candidate 1415ae447babaf29f6363748e22fb25ce5d8b722; full CI green at https://github.com/spec-kitty/spec-kitty-design/actions/runs/34078606143. Dedicated Playwright lines 93-173 prove deep freezing, deterministic selectors, \u20ac1,840\u2212\u20ac166=\u20ac1,674, 320+410+340+604=\u20ac1,674, rounded 91%, the evidence chain, 62 transition moves, 50 open WPs, fixed dates, honest legend, and route grammar.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T08:17:26.617487+00:00",
+      "notes": "Evidence is tied to the rebased product candidate and its byte-identical CI-proven pre-rebase candidate; final delivery criteria are rechecked at mission wrap-up.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP01"
+    },
+    {
+      "criterion_id": "NFR-003",
+      "description": "Every required pattern story has a non-empty render and zero WCAG 2.1 AA axe violations.",
+      "proof_type": "automated_test",
+      "evidence": "Product candidate 8c37babf596524d06c2232f11782f98ff0c4d2c7; its story, dedicated Playwright spec, and eleven visual baselines are byte-identical to CI candidate 1415ae447babaf29f6363748e22fb25ce5d8b722; full CI green at https://github.com/spec-kitty/spec-kitty-design/actions/runs/34078606143. Dedicated Playwright lines 600-604 requires every one of the six pattern stories to render non-empty and report zero WCAG 2.1 AA axe violations; the CI axe job passed.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T08:17:26.617487+00:00",
+      "notes": "Evidence is tied to the rebased product candidate and its byte-identical CI-proven pre-rebase candidate; final delivery criteria are rechecked at mission wrap-up.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP01"
+    },
+    {
+      "criterion_id": "NFR-004",
+      "description": "Every documented interactive row/bar/route is keyboard reachable through the child contract and emits one event per activation with no story-only keyboard fork.",
+      "proof_type": "automated_test",
+      "evidence": "Product candidate 8c37babf596524d06c2232f11782f98ff0c4d2c7; its story, dedicated Playwright spec, and eleven visual baselines are byte-identical to CI candidate 1415ae447babaf29f6363748e22fb25ce5d8b722; full CI green at https://github.com/spec-kitty/spec-kitty-design/actions/runs/34078606143. Story play assertions and dedicated Playwright lines 349-410 prove separate row/bar/route spies, one pointer and keyboard event per activation, exact typed details, bubbling/composed/non-cancelable flags, and consumer-controlled non-retention.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T08:17:26.617487+00:00",
+      "notes": "Evidence is tied to the rebased product candidate and its byte-identical CI-proven pre-rebase candidate; final delivery criteria are rechecked at mission wrap-up.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP01"
+    },
+    {
+      "criterion_id": "NFR-005",
+      "description": "At 390 \u00d7 844, all primary regions and actions remain reachable in document order with zero page-level horizontal overflow; child-owned internal scroll regions remain operable.",
+      "proof_type": "automated_test",
+      "evidence": "Product candidate 8c37babf596524d06c2232f11782f98ff0c4d2c7; its story, dedicated Playwright spec, and eleven visual baselines are byte-identical to CI candidate 1415ae447babaf29f6363748e22fb25ce5d8b722; full CI green at https://github.com/spec-kitty/spec-kitty-design/actions/runs/34078606143. Six emitted stories are ratcheted in expected-stories.json (219 unique IDs); dedicated Playwright lines 413-597 prove dark/light fixture parity, timezone stability, 390\u00d7844 reachability/overflow ownership, aggregate Scale50WPs geometry, and honest partial data.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T08:17:26.617487+00:00",
+      "notes": "Evidence is tied to the rebased product candidate and its byte-identical CI-proven pre-rebase candidate; final delivery criteria are rechecked at mission wrap-up.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP01"
+    },
+    {
+      "criterion_id": "NFR-006",
+      "description": "The 50-WP matrix has zero crossing edges, zero detached/floating labels, and every non-empty cell/route label remains visually and programmatically associated.",
+      "proof_type": "automated_test",
+      "evidence": "Product candidate 8c37babf596524d06c2232f11782f98ff0c4d2c7; its story, dedicated Playwright spec, and eleven visual baselines are byte-identical to CI candidate 1415ae447babaf29f6363748e22fb25ce5d8b722; full CI green at https://github.com/spec-kitty/spec-kitty-design/actions/runs/34078606143. Six emitted stories are ratcheted in expected-stories.json (219 unique IDs); dedicated Playwright lines 413-597 prove dark/light fixture parity, timezone stability, 390\u00d7844 reachability/overflow ownership, aggregate Scale50WPs geometry, and honest partial data.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T08:17:26.617487+00:00",
+      "notes": "Evidence is tied to the rebased product candidate and its byte-identical CI-proven pre-rebase candidate; final delivery criteria are rechecked at mission wrap-up.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP01"
+    },
+    {
+      "criterion_id": "NFR-007",
+      "description": "ApprovedDark and LightMode use one fixture and expose identical ordered semantic content before theme-only computed-style differences.",
+      "proof_type": "automated_test",
+      "evidence": "Product candidate 8c37babf596524d06c2232f11782f98ff0c4d2c7; its story, dedicated Playwright spec, and eleven visual baselines are byte-identical to CI candidate 1415ae447babaf29f6363748e22fb25ce5d8b722; full CI green at https://github.com/spec-kitty/spec-kitty-design/actions/runs/34078606143. Six emitted stories are ratcheted in expected-stories.json (219 unique IDs); dedicated Playwright lines 413-597 prove dark/light fixture parity, timezone stability, 390\u00d7844 reachability/overflow ownership, aggregate Scale50WPs geometry, and honest partial data.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T08:17:26.617487+00:00",
+      "notes": "Evidence is tied to the rebased product candidate and its byte-identical CI-proven pre-rebase candidate; final delivery criteria are rechecked at mission wrap-up.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP01"
+    },
+    {
+      "criterion_id": "NFR-008",
+      "description": "CI records approved full-page dark 1280, dark 1440, light 1440, narrow 390, scale, interaction, and partial-data baselines plus four high-risk crops named in FR-025.",
+      "proof_type": "manual_qa",
+      "evidence": "Product candidate 8c37babf596524d06c2232f11782f98ff0c4d2c7; its story, dedicated Playwright spec, and eleven visual baselines are byte-identical to CI candidate 1415ae447babaf29f6363748e22fb25ce5d8b722; full CI green at https://github.com/spec-kitty/spec-kitty-design/actions/runs/34078606143. visual.spec.ts contains seven full-pattern and four focused Team overview cases; all eleven CI-authoritative PNG baselines were inspected and approved by three independent Codex lenses.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T08:17:26.617487+00:00",
+      "notes": "Evidence is tied to the rebased product candidate and its byte-identical CI-proven pre-rebase candidate; final delivery criteria are rechecked at mission wrap-up.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP01"
+    },
+    {
+      "criterion_id": "NFR-009",
+      "description": "The repository's checked Storybook build completes successfully below the enforced 180-second ceiling on the final rebased PR head.",
+      "proof_type": "automated_test",
+      "evidence": "Product candidate 8c37babf596524d06c2232f11782f98ff0c4d2c7; its story, dedicated Playwright spec, and eleven visual baselines are byte-identical to CI candidate 1415ae447babaf29f6363748e22fb25ce5d8b722; full CI green at https://github.com/spec-kitty/spec-kitty-design/actions/runs/34078606143. Post-rebase local regeneration, generated-drift, content, type/quality, Vitest, Storybook, axe, and accessibility self-tests are green; the rebase audit proves strict union with train 99a5144 and byte identity for all #150 product/test/baseline blobs.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T08:17:26.617487+00:00",
+      "notes": "Evidence is tied to the rebased product candidate and its byte-identical CI-proven pre-rebase candidate; final delivery criteria are rechecked at mission wrap-up.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP01"
+    },
+    {
+      "criterion_id": "NFR-010",
+      "description": "Semantic, controlled-event, and layout assertions pass in locally available Chromium/Firefox and in Chromium/Firefox/WebKit on exact-head CI.",
+      "proof_type": "automated_test",
+      "evidence": "Product candidate 8c37babf596524d06c2232f11782f98ff0c4d2c7; its story, dedicated Playwright spec, and eleven visual baselines are byte-identical to CI candidate 1415ae447babaf29f6363748e22fb25ce5d8b722; full CI green at https://github.com/spec-kitty/spec-kitty-design/actions/runs/34078606143. Six emitted stories are ratcheted in expected-stories.json (219 unique IDs); dedicated Playwright lines 413-597 prove dark/light fixture parity, timezone stability, 390\u00d7844 reachability/overflow ownership, aggregate Scale50WPs geometry, and honest partial data.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T08:17:26.617487+00:00",
+      "notes": "Evidence is tied to the rebased product candidate and its byte-identical CI-proven pre-rebase candidate; final delivery criteria are rechecked at mission wrap-up.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP01"
+    },
+    {
+      "criterion_id": "NFR-011",
+      "description": "Type, lint, Storybook, story-ratchet, axe, visual, Playwright, release, security, generated-drift, behavior/mutation, and aggregate gates remain green after the final train rebase.",
+      "proof_type": "automated_test",
+      "evidence": "Product candidate 8c37babf596524d06c2232f11782f98ff0c4d2c7; its story, dedicated Playwright spec, and eleven visual baselines are byte-identical to CI candidate 1415ae447babaf29f6363748e22fb25ce5d8b722; full CI green at https://github.com/spec-kitty/spec-kitty-design/actions/runs/34078606143. Post-rebase local regeneration, generated-drift, content, type/quality, Vitest, Storybook, axe, and accessibility self-tests are green; the rebase audit proves strict union with train 99a5144 and byte identity for all #150 product/test/baseline blobs.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T08:17:26.617487+00:00",
+      "notes": "Evidence is tied to the rebased product candidate and its byte-identical CI-proven pre-rebase candidate; final delivery criteria are rechecked at mission wrap-up.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "mission-wrap-up"
+    },
+    {
+      "criterion_id": "C-001",
+      "description": "No fetching, store, router, polling, timer, relative-time clock, product selector, or application action function enters the design library.",
+      "proof_type": "automated_test",
+      "evidence": "Product candidate 8c37babf596524d06c2232f11782f98ff0c4d2c7; its story, dedicated Playwright spec, and eleven visual baselines are byte-identical to CI candidate 1415ae447babaf29f6363748e22fb25ce5d8b722; full CI green at https://github.com/spec-kitty/spec-kitty-design/actions/runs/34078606143. apps/storybook/src/tests/sk-team-overview-pattern.spec.ts:70-90 proves the Storybook-only surface, public-contract wiring, no sk-team-overview registration, no shadow-root reach-through, no Team Kitty import, and no fetch/timer/runtime clock.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T08:17:26.617487+00:00",
+      "notes": "Evidence is tied to the rebased product candidate and its byte-identical CI-proven pre-rebase candidate; final delivery criteria are rechecked at mission wrap-up.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP01"
+    },
+    {
+      "criterion_id": "C-002",
+      "description": "Do not register, export, document, or generate a wrapper for `sk-team-overview`.",
+      "proof_type": "automated_test",
+      "evidence": "Product candidate 8c37babf596524d06c2232f11782f98ff0c4d2c7; its story, dedicated Playwright spec, and eleven visual baselines are byte-identical to CI candidate 1415ae447babaf29f6363748e22fb25ce5d8b722; full CI green at https://github.com/spec-kitty/spec-kitty-design/actions/runs/34078606143. apps/storybook/src/tests/sk-team-overview-pattern.spec.ts:70-90 proves the Storybook-only surface, public-contract wiring, no sk-team-overview registration, no shadow-root reach-through, no Team Kitty import, and no fetch/timer/runtime clock.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T08:17:26.617487+00:00",
+      "notes": "Evidence is tied to the rebased product candidate and its byte-identical CI-proven pre-rebase candidate; final delivery criteria are rechecked at mission wrap-up.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP01"
+    },
+    {
+      "criterion_id": "C-003",
+      "description": "Reuse `sk-card`, `sk-grid`, `sk-button`, `sk-pill-tag`, `sk-nav-pill`, and all #145\u2013#149 elements; do not create replacements or new design tokens for the composition.",
+      "proof_type": "automated_test",
+      "evidence": "Product candidate 8c37babf596524d06c2232f11782f98ff0c4d2c7; its story, dedicated Playwright spec, and eleven visual baselines are byte-identical to CI candidate 1415ae447babaf29f6363748e22fb25ce5d8b722; full CI green at https://github.com/spec-kitty/spec-kitty-design/actions/runs/34078606143. apps/storybook/src/tests/sk-team-overview-pattern.spec.ts:70-90 proves the Storybook-only surface, public-contract wiring, no sk-team-overview registration, no shadow-root reach-through, no Team Kitty import, and no fetch/timer/runtime clock.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T08:17:26.617487+00:00",
+      "notes": "Evidence is tied to the rebased product candidate and its byte-identical CI-proven pre-rebase candidate; final delivery criteria are rechecked at mission wrap-up.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP01"
+    },
+    {
+      "criterion_id": "C-004",
+      "description": "Do not modify another mission's component implementation or style through a private shadow-root seam. File a follow-up if a missing reusable contract is discovered.",
+      "proof_type": "automated_test",
+      "evidence": "Product candidate 8c37babf596524d06c2232f11782f98ff0c4d2c7; its story, dedicated Playwright spec, and eleven visual baselines are byte-identical to CI candidate 1415ae447babaf29f6363748e22fb25ce5d8b722; full CI green at https://github.com/spec-kitty/spec-kitty-design/actions/runs/34078606143. apps/storybook/src/tests/sk-team-overview-pattern.spec.ts:70-90 proves the Storybook-only surface, public-contract wiring, no sk-team-overview registration, no shadow-root reach-through, no Team Kitty import, and no fetch/timer/runtime clock.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T08:17:26.617487+00:00",
+      "notes": "Evidence is tied to the rebased product candidate and its byte-identical CI-proven pre-rebase candidate; final delivery criteria are rechecked at mission wrap-up.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP01"
+    },
+    {
+      "criterion_id": "C-005",
+      "description": "No import, type, route, store, API model, or asset from Team Kitty is added.",
+      "proof_type": "automated_test",
+      "evidence": "Product candidate 8c37babf596524d06c2232f11782f98ff0c4d2c7; its story, dedicated Playwright spec, and eleven visual baselines are byte-identical to CI candidate 1415ae447babaf29f6363748e22fb25ce5d8b722; full CI green at https://github.com/spec-kitty/spec-kitty-design/actions/runs/34078606143. apps/storybook/src/tests/sk-team-overview-pattern.spec.ts:70-90 proves the Storybook-only surface, public-contract wiring, no sk-team-overview registration, no shadow-root reach-through, no Team Kitty import, and no fetch/timer/runtime clock.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T08:17:26.617487+00:00",
+      "notes": "Evidence is tied to the rebased product candidate and its byte-identical CI-proven pre-rebase candidate; final delivery criteria are rechecked at mission wrap-up.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP01"
+    },
+    {
+      "criterion_id": "C-006",
+      "description": "Do not imply guaranteed ROI, reconcile moves with items, hide missing evidence, or leave a full-coverage arithmetic gap.",
+      "proof_type": "automated_test",
+      "evidence": "Product candidate 8c37babf596524d06c2232f11782f98ff0c4d2c7; its story, dedicated Playwright spec, and eleven visual baselines are byte-identical to CI candidate 1415ae447babaf29f6363748e22fb25ce5d8b722; full CI green at https://github.com/spec-kitty/spec-kitty-design/actions/runs/34078606143. Dedicated Playwright lines 93-173 prove deep freezing, deterministic selectors, \u20ac1,840\u2212\u20ac166=\u20ac1,674, 320+410+340+604=\u20ac1,674, rounded 91%, the evidence chain, 62 transition moves, 50 open WPs, fixed dates, honest legend, and route grammar.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T08:17:26.617487+00:00",
+      "notes": "Evidence is tied to the rebased product candidate and its byte-identical CI-proven pre-rebase candidate; final delivery criteria are rechecked at mission wrap-up.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP01"
+    },
+    {
+      "criterion_id": "C-007",
+      "description": "A warning without a navigation target must not use link styling or link semantics.",
+      "proof_type": "automated_test",
+      "evidence": "Product candidate 8c37babf596524d06c2232f11782f98ff0c4d2c7; its story, dedicated Playwright spec, and eleven visual baselines are byte-identical to CI candidate 1415ae447babaf29f6363748e22fb25ce5d8b722; full CI green at https://github.com/spec-kitty/spec-kitty-design/actions/runs/34078606143. Dedicated Playwright lines 176-276 prove the required public element set, one account anchor above logout, semantic operational lists, ordered slots, lowercase references, unique feed fingerprints, bounded amber meanings, and non-link warnings.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T08:17:26.617487+00:00",
+      "notes": "Evidence is tied to the rebased product candidate and its byte-identical CI-proven pre-rebase candidate; final delivery criteria are rechecked at mission wrap-up.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP01"
+    },
+    {
+      "criterion_id": "C-008",
+      "description": "All #150 WPs consolidate into `mission/team-overview-pattern-story` and one PR targets `train/elements-first` with `Refs #150`; never use `Closes #150` on a pre-merge WP surface.",
+      "proof_type": "code_review",
+      "evidence": "PR #242 is the sole #150 mission PR, targets train/elements-first, and uses Refs #150. The mission branch contains one WP owned by WP01 and no main/release/deploy action.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T08:17:26.617487+00:00",
+      "notes": "Evidence is tied to the rebased product candidate and its byte-identical CI-proven pre-rebase candidate; final delivery criteria are rechecked at mission wrap-up.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "mission-wrap-up"
+    },
+    {
+      "criterion_id": "C-009",
+      "description": "Before final review, rebase the clean mission branch onto latest `origin/train/elements-first`, regenerate any shared committed artifacts, and rerun the complete repository-prescribed gates on the exact head.",
+      "proof_type": "code_review",
+      "evidence": "Product candidate 8c37babf596524d06c2232f11782f98ff0c4d2c7; its story, dedicated Playwright spec, and eleven visual baselines are byte-identical to CI candidate 1415ae447babaf29f6363748e22fb25ce5d8b722; full CI green at https://github.com/spec-kitty/spec-kitty-design/actions/runs/34078606143. Post-rebase local regeneration, generated-drift, content, type/quality, Vitest, Storybook, axe, and accessibility self-tests are green; the rebase audit proves strict union with train 99a5144 and byte identity for all #150 product/test/baseline blobs.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T08:17:26.617487+00:00",
+      "notes": "Evidence is tied to the rebased product candidate and its byte-identical CI-proven pre-rebase candidate; final delivery criteria are rechecked at mission wrap-up.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "mission-wrap-up"
+    },
+    {
+      "criterion_id": "C-010",
+      "description": "Never merge to `main`, merge train into main, publish packages, or deploy Team Kitty.",
+      "proof_type": "code_review",
+      "evidence": "PR #242 is the sole #150 mission PR, targets train/elements-first, and uses Refs #150. The mission branch contains one WP owned by WP01 and no main/release/deploy action.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T08:17:26.617487+00:00",
+      "notes": "Evidence is tied to the rebased product candidate and its byte-identical CI-proven pre-rebase candidate; final delivery criteria are rechecked at mission wrap-up.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "mission-wrap-up"
+    },
+    {
+      "criterion_id": "C-011",
+      "description": "Use Codex agents only; run three independent pre-merge lenses at the exact candidate SHA and preserve actionable findings through remediation/re-review.",
+      "proof_type": "code_review",
+      "evidence": "Three independent Codex product lenses approved CI candidate 1415ae447babaf29f6363748e22fb25ce5d8b722; an additional Codex rebase audit approved product candidate 8c37babf596524d06c2232f11782f98ff0c4d2c7 on train 99a5144 with no content loss.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T08:17:26.617487+00:00",
+      "notes": "Evidence is tied to the rebased product candidate and its byte-identical CI-proven pre-rebase candidate; final delivery criteria are rechecked at mission wrap-up.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "mission-wrap-up"
     }
   ],
   "negative_invariants": []
