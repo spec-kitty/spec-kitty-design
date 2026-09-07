@@ -97,21 +97,21 @@ pass, and asserts it goes red.
 
 ## Functional Requirements
 
-- **FR-001** A composition fixture under `packages/elements/src/patterns/` composes
+- **FR-001**: A composition fixture under `packages/elements/src/patterns/` composes
   `sk-page-header`, `sk-notice`, `sk-card[status]`, `sk-status-indicator`,
   `sk-time-series-chart`, `.sk-facts` and `.sk-disclosure` through public surfaces only.
-- **FR-002** The composition's markup is an authored module, imported by BOTH the story file and
+- **FR-002**: The composition's markup is an authored module, imported by BOTH the story file and
   the behaviour test, so one artefact carries the visual, the accessibility and the behavioural
   evidence and cannot drift into three.
-- **FR-003** `scripts/check-pattern-composition.mjs` enforces both halves of the criterion over
+- **FR-003**: `scripts/check-pattern-composition.mjs` enforces both halves of the criterion over
   `packages/elements/src/patterns/**`, with `--selftest` carrying a red-first probe table and an
   end-to-end plant-and-detect arm.
-- **FR-004** Two `[ENFORCED]` steps in `lint-code`, two `REQUIRED_LINT` entries.
-- **FR-005** A behaviour test with a registered behaviour id and a red-first mutation against the
+- **FR-004**: Two `[ENFORCED]` steps in `lint-code`, two `REQUIRED_LINT` entries.
+- **FR-005**: A behaviour test with a registered behaviour id and a red-first mutation against the
   composition module itself. Story ids alone are not accepted as proof.
-- **FR-006** No Factory-specific role, failure, queue, signal, authentication or refresh
+- **FR-006**: No Factory-specific role, failure, queue, signal, authentication or refresh
   vocabulary anywhere in the fixture, its module, its stories or the gate — #183 criterion 4.
-- **FR-007** No budget ceiling is raised. `selftestCeilingSeconds` stays 1059.7, `ceilingSeconds`
+- **FR-007**: No budget ceiling is raised. `selftestCeilingSeconds` stays 1059.7, `ceilingSeconds`
   stays 40, and the harness is re-measured and recorded.
 
 ## Out of Scope
