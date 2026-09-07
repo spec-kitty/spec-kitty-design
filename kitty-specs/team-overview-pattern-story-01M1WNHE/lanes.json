@@ -1,0 +1,34 @@
+{
+  "version": 1,
+  "mission_slug": "team-overview-pattern-story-01M1WNHE",
+  "mission_id": "01M1WNHE356008K8XYM9TN2C8G",
+  "mission_branch": "kitty/mission-team-overview-pattern-story-01M1WNHE",
+  "target_branch": "mission/team-overview-pattern-story",
+  "lanes": [
+    {
+      "lane_id": "lane-a",
+      "wp_ids": [
+        "WP01"
+      ],
+      "write_scope": [
+        "CHANGELOG.md",
+        "apps/storybook/src/tests/sk-team-overview-pattern.spec.ts",
+        "apps/storybook/src/tests/visual.spec.ts",
+        "apps/storybook/src/tests/visual.spec.ts-snapshots/team-overview-*.png",
+        "expected-stories.json",
+        "packages/elements/src/patterns/team-overview.stories.ts"
+      ],
+      "predicted_surfaces": [
+        "api",
+        "app-shell",
+        "artifact-rendering"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    }
+  ],
+  "computed_at": "2026-09-07T01:04:52.632573+00:00",
+  "computed_from": "dependency_graph+ownership",
+  "planning_artifact_wps": [],
+  "planning_commit_sha": "482dfb5e40821f64965117899c9c8ee2faeae16b"
+}
