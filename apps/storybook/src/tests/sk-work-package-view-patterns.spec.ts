@@ -27,11 +27,23 @@ type ActionTrace = Array<{
   composed: boolean;
   cancelable: boolean;
 }>;
+type FocusStop = Readonly<{
+  outerTag: string;
+  outerRowId: string | null;
+  innerTag: string;
+  innerPart: string | null;
+  id: string | null;
+  href: string | null;
+  longCode: boolean;
+}>;
 
 const openStory = async (
   page: Page,
   id: StoryId,
-  viewport: Readonly<{ width: number; height: number }> = { width: 1280, height: 900 },
+  viewport: Readonly<{ width: number; height: number }> = {
+    width: 1280,
+    height: 900,
+  },
 ): Promise<void> => {
   await page.setViewportSize(viewport);
   await page.goto(`/iframe.html?id=${STORY_PREFIX}${id}&viewMode=story`);
@@ -39,7 +51,17 @@ const openStory = async (
 
 const overview = async (
   page: Page,
-  id: Extract<StoryId, 'default' | 'light-mode' | 'all-lanes-empty' | 'scale-50-work-packages' | 'live-claim' | 'stale-claim' | 'snapshot-behind-log' | 'narrow-overview'>,
+  id: Extract<
+    StoryId,
+    | 'default'
+    | 'light-mode'
+    | 'all-lanes-empty'
+    | 'scale-50-work-packages'
+    | 'live-claim'
+    | 'stale-claim'
+    | 'snapshot-behind-log'
+    | 'narrow-overview'
+  >,
   viewport?: Readonly<{ width: number; height: number }>,
 ): Promise<Locator> => {
   await openStory(page, id, viewport);
@@ -51,7 +73,16 @@ const overview = async (
 
 const detail = async (
   page: Page,
-  id: Extract<StoryId, 'detail-populated' | 'detail-light-mode' | 'detail-no-subtasks' | 'detail-absent-prompt' | 'detail-history-unavailable' | 'detail-long-content' | 'detail-narrow'>,
+  id: Extract<
+    StoryId,
+    | 'detail-populated'
+    | 'detail-light-mode'
+    | 'detail-no-subtasks'
+    | 'detail-absent-prompt'
+    | 'detail-history-unavailable'
+    | 'detail-long-content'
+    | 'detail-narrow'
+  >,
   viewport?: Readonly<{ width: number; height: number }>,
 ): Promise<Locator> => {
   await openStory(page, id, viewport);
@@ -67,11 +98,62 @@ const documentGeometry = (page: Page) =>
     scrollWidth: document.documentElement.scrollWidth,
   }));
 
+const resetKeyboardFocus = async (page: Page): Promise<void> => {
+  await page.evaluate(() => {
+    if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
+  });
+  await expect.poll(() => page.evaluate(() => document.activeElement === document.body)).toBe(true);
+};
+
+const currentFocusStop = (page: Page): Promise<FocusStop> =>
+  page.evaluate(() => {
+    const outer = document.activeElement as HTMLElement;
+    let inner = outer;
+    while (inner.shadowRoot?.activeElement instanceof HTMLElement) {
+      inner = inner.shadowRoot.activeElement;
+    }
+
+    return {
+      outerTag: outer.localName,
+      outerRowId: outer.getAttribute('row-id'),
+      innerTag: inner.localName,
+      innerPart: inner.getAttribute('part'),
+      id: inner.id || null,
+      href: inner.getAttribute('href'),
+      longCode: inner.hasAttribute('data-long-code'),
+    };
+  });
+
+const tabToVisibleStop = async (page: Page, target: Locator): Promise<FocusStop> => {
+  await page.keyboard.press('Tab');
+  await expect(target).toBeFocused();
+  await expect(target).toBeInViewport();
+  const geometry = await target.evaluate((element) => {
+    const bounds = element.getBoundingClientRect();
+    return {
+      width: bounds.width,
+      height: bounds.height,
+      left: bounds.left,
+      right: bounds.right,
+      top: bounds.top,
+      bottom: bounds.bottom,
+      viewportWidth: document.documentElement.clientWidth,
+      viewportHeight: window.innerHeight,
+      outlineStyle: getComputedStyle(element).outlineStyle,
+    };
+  });
+  expect(geometry.width).toBeGreaterThan(0);
+  expect(geometry.height).toBeGreaterThan(0);
+  expect(geometry.left).toBeGreaterThanOrEqual(0);
+  expect(geometry.right).toBeLessThanOrEqual(geometry.viewportWidth);
+  expect(geometry.bottom).toBeGreaterThan(0);
+  expect(geometry.top).toBeLessThan(geometry.viewportHeight);
+  expect(geometry.outlineStyle).not.toBe('none');
+  return currentFocusStop(page);
+};
+
 test('source keeps the patterns inside immutable Storybook-only public boundaries', () => {
-  const source = readFileSync(
-    'packages/elements/src/patterns/work-package-views.stories.ts',
-    'utf8',
-  );
+  const source = readFileSync('packages/elements/src/patterns/work-package-views.stories.ts', 'utf8');
 
   expect(source).not.toMatch(/<sk-work-package-(?:overview|detail|card)(?:\s|>)/);
   expect(source).not.toMatch(/customElements\.define\s*\(/);
@@ -92,7 +174,7 @@ test('source keeps the patterns inside immutable Storybook-only public boundarie
 test('built index discovers exactly the fifteen route states and no helper exports', async ({ request }) => {
   const response = await request.get('/index.json');
   expect(response.ok()).toBe(true);
-  const index = await response.json() as {
+  const index = (await response.json()) as {
     entries: Readonly<Record<string, Readonly<{ type: string; title: string }>>>;
   };
   const entries = Object.entries(index.entries)
@@ -109,7 +191,7 @@ test('default overview reconciles one frozen 5-of-8 fixture across lanes and pro
   await expect(root).toHaveAttribute('data-completed-count', '5');
   await expect(root).toHaveAttribute('data-total-count', '8');
   await expect(root).toHaveAttribute('data-percentage', '63');
-  expect(JSON.parse(await root.getAttribute('data-projection-guards') ?? '{}')).toEqual({
+  expect(JSON.parse((await root.getAttribute('data-projection-guards')) ?? '{}')).toEqual({
     duplicateLane: true,
     unknownCompletedLane: true,
     duplicateWorkPackage: true,
@@ -117,17 +199,21 @@ test('default overview reconciles one frozen 5-of-8 fixture across lanes and pro
     unknownVisibleLane: true,
   });
 
-  const progress = root.getByRole('progressbar', { name: '5 of 8 Work Packages done' });
+  const progress = root.getByRole('progressbar', {
+    name: '5 of 8 Work Packages done',
+  });
   await expect(progress).toHaveJSProperty('value', 5);
   await expect(progress).toHaveJSProperty('max', 8);
   await expect(root.locator('.sk-progress__meta')).toHaveText('63%');
 
   const lanes = root.locator('[data-lane-id]');
   await expect(lanes).toHaveCount(5);
-  const counts = await lanes.evaluateAll((nodes) => nodes.map((lane) => ({
-    visible: Number(lane.querySelector('.sk-workflow-lane__count')?.textContent),
-    items: lane.querySelectorAll(':scope > .sk-workflow-lane__list > li').length,
-  })));
+  const counts = await lanes.evaluateAll((nodes) =>
+    nodes.map((lane) => ({
+      visible: Number(lane.querySelector('.sk-workflow-lane__count')?.textContent),
+      items: lane.querySelectorAll(':scope > .sk-workflow-lane__list > li').length,
+    })),
+  );
   expect(counts).toEqual([
     { visible: 1, items: 1 },
     { visible: 1, items: 1 },
@@ -147,20 +233,27 @@ test('empty and scale overview states preserve valid native progress and fixture
   await expect(empty).toHaveAttribute('data-completed-count', '0');
   await expect(empty).toHaveAttribute('data-total-count', '0');
   await expect(empty).toHaveAttribute('data-percentage', '0');
-  const emptyProgress = empty.getByRole('progressbar', { name: '0 of 0 Work Packages done' });
+  const emptyProgress = empty.getByRole('progressbar', {
+    name: '0 of 0 Work Packages done',
+  });
   await expect(emptyProgress).toHaveJSProperty('value', 0);
   await expect(emptyProgress).toHaveJSProperty('max', 1);
   await expect(empty.locator('.sk-workflow-lane__list > li')).toHaveCount(0);
   await expect(empty.locator('.sk-empty-state--inline')).toHaveCount(5);
 
-  const scale = await overview(page, 'scale-50-work-packages', { width: 1024, height: 900 });
+  const scale = await overview(page, 'scale-50-work-packages', {
+    width: 1024,
+    height: 900,
+  });
   await expect(scale).toHaveAttribute('data-total-count', '50');
   await expect(scale.locator('.sk-workflow-lane__list > li')).toHaveCount(50);
-  const scaleIds = JSON.parse(await scale.getAttribute('data-work-package-ids') ?? '[]') as string[];
+  const scaleIds = JSON.parse((await scale.getAttribute('data-work-package-ids')) ?? '[]') as string[];
   expect(scaleIds).toHaveLength(50);
   expect(new Set(scaleIds).size).toBe(50);
   expect(scaleIds.every((id) => id.startsWith('scale-wp-'))).toBe(true);
-  const scaleProgress = scale.getByRole('progressbar', { name: '10 of 50 Work Packages done' });
+  const scaleProgress = scale.getByRole('progressbar', {
+    name: '10 of 50 Work Packages done',
+  });
   await expect(scaleProgress).toHaveJSProperty('value', 10);
   await expect(scaleProgress).toHaveJSProperty('max', 50);
   const scroller = scale.locator('.sk-workflow-board__scroller');
@@ -209,8 +302,8 @@ test('overview logs exact pointer, Enter, and Space intent without mutating sele
   });
 
   const assertLast = async (count: number): Promise<void> => {
-    const trace = await page.evaluate(() =>
-      (window as typeof window & { __workPackageActionTrace: ActionTrace }).__workPackageActionTrace,
+    const trace = await page.evaluate(
+      () => (window as typeof window & { __workPackageActionTrace: ActionTrace }).__workPackageActionTrace,
     );
     expect(trace).toHaveLength(count);
     expect(trace.at(-1)).toEqual({
@@ -234,24 +327,112 @@ test('overview logs exact pointer, Enter, and Space intent without mutating sele
   await expect(root.locator('[data-activation-log]')).toHaveAttribute('data-id', 'wp-02');
 });
 
+test('sequential keyboard traversal has exact overview and detail focus stops', async ({ page }) => {
+  const root = await overview(page, 'default');
+  await resetKeyboardFocus(page);
+
+  const overviewStops: FocusStop[] = [];
+  for (const rowId of ['wp-01', 'wp-02', 'wp-03', 'wp-04', 'wp-05', 'wp-06', 'wp-07', 'wp-08']) {
+    overviewStops.push(
+      await tabToVisibleStop(page, root.locator(`sk-action-row[row-id="${rowId}"] button[part="trigger"]`)),
+    );
+  }
+  expect(overviewStops).toEqual(
+    ['wp-01', 'wp-02', 'wp-03', 'wp-04', 'wp-05', 'wp-06', 'wp-07', 'wp-08'].map((rowId) => ({
+      outerTag: 'sk-action-row',
+      outerRowId: rowId,
+      innerTag: 'button',
+      innerPart: 'trigger',
+      id: null,
+      href: null,
+      longCode: false,
+    })),
+  );
+
+  const detailRoot = await detail(page, 'detail-long-content');
+  await resetKeyboardFocus(page);
+  const detailStops = [
+    await tabToVisibleStop(page, detailRoot.locator('a[href="#repository"]')),
+    await tabToVisibleStop(page, detailRoot.locator('a[href="#mission"]')),
+    await tabToVisibleStop(page, detailRoot.locator('[data-long-code]')),
+  ];
+  expect(detailStops).toEqual([
+    {
+      outerTag: 'a',
+      outerRowId: null,
+      innerTag: 'a',
+      innerPart: null,
+      id: null,
+      href: '#repository',
+      longCode: false,
+    },
+    {
+      outerTag: 'a',
+      outerRowId: null,
+      innerTag: 'a',
+      innerPart: null,
+      id: null,
+      href: '#mission',
+      longCode: false,
+    },
+    {
+      outerTag: 'pre',
+      outerRowId: null,
+      innerTag: 'pre',
+      innerPart: null,
+      id: null,
+      href: null,
+      longCode: true,
+    },
+  ]);
+});
+
 test('narrow overview uses a controlled native selector and keeps one supplied lane visible', async ({ page }) => {
-  const root = await overview(page, 'narrow-overview', { width: 390, height: 844 });
+  const root = await overview(page, 'narrow-overview', {
+    width: 390,
+    height: 844,
+  });
   const select = root.getByRole('combobox', { name: 'Lane' });
   await expect(select.locator('option')).toHaveCount(5);
   await expect(select).toHaveValue('in-progress');
   await expect(root.locator('[data-lane-id]')).toHaveCount(1);
   await expect(root.locator('[data-lane-id="in-progress"]')).toHaveCount(1);
 
-  await select.selectOption('done');
+  await resetKeyboardFocus(page);
+  expect(await tabToVisibleStop(page, select)).toEqual({
+    outerTag: 'select',
+    outerRowId: null,
+    innerTag: 'select',
+    innerPart: null,
+    id: 'work-package-overview-narrow-lane',
+    href: null,
+    longCode: false,
+  });
+  await page.keyboard.press('d');
+  await expect(select).toHaveValue('done');
   await expect(root.locator('[data-lane-intent-log]')).toHaveAttribute('data-count', '1');
   await expect(root.locator('[data-lane-intent-log]')).toHaveAttribute('data-lane-id', 'done');
   await expect(root).toHaveAttribute('data-visible-lane-id', 'in-progress');
   await expect(root.locator('[data-lane-id="in-progress"]')).toHaveCount(1);
+  await expect(root.locator('sk-action-row[row-id="wp-02"]')).toHaveAttribute('selected', '');
+  await expect(root).toHaveAttribute('data-selected-work-package-id', 'wp-02');
+  expect(await tabToVisibleStop(page, root.locator('sk-action-row[row-id="wp-02"] button[part="trigger"]'))).toEqual({
+    outerTag: 'sk-action-row',
+    outerRowId: 'wp-02',
+    innerTag: 'button',
+    innerPart: 'trigger',
+    id: null,
+    href: null,
+    longCode: false,
+  });
+  await expect(root.locator('[data-lane-intent-log]')).toHaveAttribute('data-count', '1');
   expect(await documentGeometry(page)).toEqual(expect.objectContaining({ clientWidth: 390 }));
   expect((await documentGeometry(page)).scrollWidth).toBeLessThanOrEqual(390);
 });
 
-test('detail preserves breadcrumb, direct-child passive checklist, facts, and supplied history order', async ({ page }) => {
+test('detail preserves breadcrumb, direct-child passive checklist, facts, and supplied history order', async ({
+  page,
+}) => {
   const root = await detail(page, 'detail-populated');
   const breadcrumb = root.getByRole('navigation', { name: 'Breadcrumb' });
   await expect(breadcrumb.getByRole('link')).toHaveCount(2);
@@ -261,11 +442,15 @@ test('detail preserves breadcrumb, direct-child passive checklist, facts, and su
   await expect(checklist).toHaveRole('list');
   await expect(checklist.locator(':scope > sk-check-bullet')).toHaveCount(3);
   await expect(checklist.locator(':scope > li')).toHaveCount(0);
-  expect(await checklist.locator(':scope > sk-check-bullet').evaluateAll((items) => items.map((item) => ({
-    role: item.getAttribute('role'),
-    tabindex: item.getAttribute('tabindex'),
-    state: item.getAttribute('state'),
-  })))).toEqual([
+  expect(
+    await checklist.locator(':scope > sk-check-bullet').evaluateAll((items) =>
+      items.map((item) => ({
+        role: item.getAttribute('role'),
+        tabindex: item.getAttribute('tabindex'),
+        state: item.getAttribute('state'),
+      })),
+    ),
+  ).toEqual([
     { role: 'listitem', tabindex: null, state: 'complete' },
     { role: 'listitem', tabindex: null, state: 'complete' },
     { role: 'listitem', tabindex: null, state: 'pending' },
@@ -278,7 +463,7 @@ test('detail preserves breadcrumb, direct-child passive checklist, facts, and su
   await expect(root.locator('.sk-facts')).toHaveCount(1);
   await expect(root.locator('.sk-facts > dt')).toHaveCount(4);
   await expect(root.locator('.sk-facts > dd')).toHaveCount(4);
-  expect(JSON.parse(await root.getAttribute('data-event-order') ?? '[]')).toEqual([
+  expect(JSON.parse((await root.getAttribute('data-event-order')) ?? '[]')).toEqual([
     'event-created',
     'event-started',
     'event-review',
@@ -299,7 +484,10 @@ test('detail empty, retention, and long-content states make absence and overflow
   await expect(unavailable.locator('sk-notice[data-history-unavailable]')).toHaveCount(1);
   await expect(unavailable.locator('.sk-event-timeline')).toHaveCount(0);
 
-  const long = await detail(page, 'detail-long-content', { width: 390, height: 844 });
+  const long = await detail(page, 'detail-long-content', {
+    width: 390,
+    height: 844,
+  });
   await expect(long.locator('.sk-event-timeline > li')).toHaveCount(20);
   const code = long.locator('[data-long-code]');
   await expect(code).toBeVisible();
@@ -321,11 +509,13 @@ test('dark and LightMode preserve identical semantic data with a real token delt
   const signatures: Array<Readonly<{ text: string; ids: string | null; surface: string }>> = [];
   for (const id of ['default', 'light-mode'] as const) {
     const root = await overview(page, id);
-    signatures.push(await root.evaluate((element) => ({
-      text: element.innerText.replace(/\s+/g, ' ').trim(),
-      ids: element.getAttribute('data-work-package-ids'),
-      surface: getComputedStyle(element).getPropertyValue('--sk-surface-page').trim(),
-    })));
+    signatures.push(
+      await root.evaluate((element) => ({
+        text: element.innerText.replace(/\s+/g, ' ').trim(),
+        ids: element.getAttribute('data-work-package-ids'),
+        surface: getComputedStyle(element).getPropertyValue('--sk-surface-page').trim(),
+      })),
+    );
   }
   expect(signatures[0]?.text).toBe(signatures[1]?.text);
   expect(signatures[0]?.ids).toBe(signatures[1]?.ids);
@@ -334,15 +524,17 @@ test('dark and LightMode preserve identical semantic data with a real token delt
   const detailSignatures: Array<Readonly<{ text: string; order: string | null }>> = [];
   for (const id of ['detail-populated', 'detail-light-mode'] as const) {
     const root = await detail(page, id);
-    detailSignatures.push(await root.evaluate((element) => ({
-      text: element.innerText.replace(/\s+/g, ' ').trim(),
-      order: element.getAttribute('data-event-order'),
-    })));
+    detailSignatures.push(
+      await root.evaluate((element) => ({
+        text: element.innerText.replace(/\s+/g, ' ').trim(),
+        order: element.getAttribute('data-event-order'),
+      })),
+    );
   }
   expect(detailSignatures[0]).toEqual(detailSignatures[1]);
 });
 
-test('desktop, equivalent 200%-zoom width, and narrow views contain the document and visible focus', async ({ page }) => {
+test('desktop, 640px reflow, and narrow views contain the document and visible focus', async ({ page }) => {
   for (const [id, viewport] of [
     ['default', { width: 1280, height: 900 }],
     ['narrow-overview', { width: 640, height: 900 }],
@@ -351,9 +543,10 @@ test('desktop, equivalent 200%-zoom width, and narrow views contain the document
     const root = await overview(page, id, viewport);
     const geometry = await documentGeometry(page);
     expect(geometry.scrollWidth).toBeLessThanOrEqual(geometry.clientWidth);
-    const focusTarget = id === 'default'
-      ? root.locator('sk-action-row button[part="trigger"]').first()
-      : root.getByRole('combobox', { name: 'Lane' });
+    const focusTarget =
+      id === 'default'
+        ? root.locator('sk-action-row button[part="trigger"]').first()
+        : root.getByRole('combobox', { name: 'Lane' });
     await focusTarget.focus();
     await expect(focusTarget).toBeFocused();
     const focusBox = await focusTarget.boundingBox();
@@ -362,10 +555,13 @@ test('desktop, equivalent 200%-zoom width, and narrow views contain the document
     expect(focusBox!.x + focusBox!.width).toBeLessThanOrEqual(viewport.width);
   }
 
-  const narrowDetail = await detail(page, 'detail-narrow', { width: 390, height: 844 });
-  const tracks = await narrowDetail.locator('.sk-work-package-pattern__detail-grid').evaluate((element) =>
-    getComputedStyle(element).gridTemplateColumns.trim().split(/\s+/),
-  );
+  const narrowDetail = await detail(page, 'detail-narrow', {
+    width: 390,
+    height: 844,
+  });
+  const tracks = await narrowDetail
+    .locator('.sk-work-package-pattern__detail-grid')
+    .evaluate((element) => getComputedStyle(element).gridTemplateColumns.trim().split(/\s+/));
   expect(tracks).toHaveLength(1);
   const geometry = await documentGeometry(page);
   expect(geometry.scrollWidth).toBeLessThanOrEqual(geometry.clientWidth);
