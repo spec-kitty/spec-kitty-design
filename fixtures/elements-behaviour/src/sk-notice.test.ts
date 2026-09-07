@@ -42,6 +42,15 @@ const liveRegion = (element: Element) =>
 //
 // This walks the region and follows `assignedNodes({ flatten: true })`, which is the flattened
 // subtree the accessibility tree is built from.
+//
+// AND IT SKIPS WHAT THE ACCESSIBILITY TREE SKIPS, which the first version of this helper did not.
+// A DOM walk that ignores `aria-hidden`, `display: none` and `visibility: hidden` reports text
+// that no screen reader will ever speak, so an assertion built on it is green for a notice that
+// announces the detail alone — the exact pre-#228 defect. Measured on the shipped element before
+// this guard existed: setting either `aria-hidden="true"` or `display: none` on `part="heading"`
+// left BOTH arms of the heading test green ("Deploy failed Retrying in 5s", containment `true`)
+// while the notice announced "Retrying in 5s". The containment arm cannot see it either — the node
+// is still a descendant — so this is a third direction neither arm covered.
 const announcedText = (element: Element) => {
   const region = liveRegion(element);
   if (!region) return null;
@@ -54,6 +63,11 @@ const announcedText = (element: Element) => {
     if (node.nodeType === Node.TEXT_NODE) {
       seen.push(node.textContent ?? '');
       return;
+    }
+    if (node instanceof Element) {
+      if (node.getAttribute('aria-hidden') === 'true') return;
+      const style = getComputedStyle(node);
+      if (style.display === 'none' || style.visibility === 'hidden') return;
     }
     for (const child of Array.from(node.childNodes)) walk(child);
   };
@@ -139,9 +153,20 @@ test('a slotted heading is INSIDE the live region, so the headline is announced 
   // slot="heading">Deploy failed</h3>` plus a detail in `message` — got the detail announced and
   // the headline silent. The operator ruled that the whole notice is announced, heading first.
   //
-  // Asserted twice over, structure and text, because either alone is weak: containment alone
-  // would pass for a heading rendered inside the region but after the message, and flattened
-  // text alone would pass for a template that inlined the heading's text without the slot.
+  // Asserted three ways, because each covers a direction the others cannot see:
+  //
+  //   - CONTAINMENT alone would pass for a heading rendered inside the region but AFTER the
+  //     message, announcing the detail first.
+  //   - FLATTENED TEXT alone would pass for a template that inlined the heading's text without
+  //     the slot, so the consumer's own node never reaches the region.
+  //   - Neither sees a heading REMOVED FROM THE ACCESSIBILITY TREE while staying in the DOM.
+  //     `aria-hidden="true"` or `display: none` on the heading box restores the pre-#228
+  //     behaviour exactly — the notice announces the detail alone — and the node is still a
+  //     descendant, still carrying its text. Measured: before the guard below and the one in
+  //     `announcedText`, both mutations left this test GREEN.
+  //
+  // The third is asserted twice too: `announcedText` now skips those subtrees (so the text arm
+  // reds on its own), and the two attributes are named here so the failure says which one.
   const element = await mount({ announce: 'assertive', tone: 'danger', message: 'Retrying in 5s' });
   const heading = document.createElement('h3');
   heading.slot = 'heading';
@@ -150,10 +175,27 @@ test('a slotted heading is INSIDE the live region, so the headline is announced 
   await element.updateComplete;
 
   const region = liveRegion(element)!;
+  const headingBox = partOf(element, 'heading')!;
   expect(
-    region.contains(partOf(element, 'heading')),
+    region.contains(headingBox),
     'the heading is outside the live region, so a screen reader announces the detail and never the headline',
   ).toBe(true);
+  // IN the region is not the same as IN the accessibility tree.
+  expect(
+    headingBox.getAttribute('aria-hidden'),
+    'the heading is inside the region but hidden from assistive technology, which announces the detail alone',
+  ).toBe(null);
+  const headingStyle = getComputedStyle(headingBox);
+  expect(
+    headingStyle.display,
+    'the heading is inside the region but display:none, so it is neither seen nor announced',
+  ).not.toBe('none');
+  expect(
+    headingStyle.visibility,
+    'the heading is inside the region but visibility:hidden, so it is neither seen nor announced',
+  ).not.toBe('hidden');
+
+  // ...and the consequence, which also catches any vector the three guards above do not name.
   expect(announcedText(element)).toBe('Deploy failed Retrying in 5s');
 
   // ...and the level stays the CONSUMER'S. Moving the box does not license generating one.
@@ -552,13 +594,24 @@ test('moving the heading inside the region did not move it on screen', async () 
   // and the actions row's offset — in all four of {heading, no heading} x {message, no message}.
   // Only the body box's own height changed, which is the point: it now encloses the heading.
   //
-  // What is asserted here is the relationship those numbers followed from, not the numbers. A
+  // What is asserted here is the relationships those numbers followed from, not the numbers. A
   // pinned height would be an engine-and-font measurement and would red on webkit for reasons
-  // that have nothing to do with this component; the equality below is what actually has to hold,
-  // and it reds the moment someone changes one of the two values without the other.
+  // that have nothing to do with this component.
+  //
+  // THREE relationships, not one, because `margin == row-gap` alone is not what the geometry
+  // rests on and an earlier revision of this test claimed it was. Measured: force
+  // `::part(content) { display: block }` and `getComputedStyle(content).rowGap` still reads
+  // `8px` — the computed value survives a display type that ignores it — so a lone gap-equality
+  // assertion stays green while the layout moves. It really does move: content height drops
+  // 86 -> 78 with a heading and a message, 38 -> 30 with neither.
   const element = await mount({ announce: 'polite', message: 'Retrying in 5s' });
-  const gap = getComputedStyle(partOf(element, 'content')!).rowGap;
-  const margin = getComputedStyle(partOf(element, 'heading')!).marginBlockEnd;
+  const content = partOf(element, 'content')!;
+  const headingBox = partOf(element, 'heading')!;
+  const body = partOf(element, 'body')!;
+  const gap = getComputedStyle(content).rowGap;
+  const margin = getComputedStyle(headingBox).marginBlockEnd;
+
+  // 1. The margin is the gap it replaced.
   expect(gap, 'the content grid lost its row gap; the heading margin no longer replaces it').not.toBe(
     '0px',
   );
@@ -566,6 +619,49 @@ test('moving the heading inside the region did not move it on screen', async () 
     margin,
     'the heading no longer carries the space the content grid used to supply for it',
   ).toBe(gap);
+
+  // 2. The content box is still a GRID, which is what supplies the body -> actions gap.
+  expect(
+    getComputedStyle(content).display,
+    'the content box is no longer a grid, so its row gap applies to nothing',
+  ).toBe('grid');
+
+  // 3. The margin stays INSIDE the body box, in BOTH cases where it touches a body edge. This is
+  //    what the grid ITEM buys: a grid item establishes a block formatting context, so the
+  //    margin cannot collapse through the body's edge. Measured by forcing the content box to
+  //    `display: block`, the two escapes look like this:
+  //
+  //      no heading slotted        the zero-height box self-collapses and the margin leaves
+  //                                through the body's TOP edge: top 0 -> 8, height 30 -> 22
+  //      heading, nothing after it the margin leaves through the BOTTOM edge: height 32 -> 24
+  //
+  //    Both are asserted, because a check on only one of them passes for half a regression.
+
+  // 3a. No heading slotted — the margin must still be inside, above the message.
+  const contentTop = content.getBoundingClientRect().top;
+  const bodyRect = body.getBoundingClientRect();
+  expect(
+    Math.round(bodyRect.top - contentTop),
+    "the heading's margin escaped through the body's TOP edge; the body is no longer a BFC root",
+  ).toBe(0);
+  expect(
+    bodyRect.height,
+    "the zero-height heading's self-collapsed margin is no longer inside the body box",
+  ).toBeGreaterThanOrEqual(parseFloat(margin));
+
+  // 3b. A heading with nothing after it — the margin must not leave through the bottom edge.
+  const withHeading = await mount({ announce: 'polite' });
+  const slotted = document.createElement('h3');
+  slotted.slot = 'heading';
+  slotted.textContent = 'Deploy failed';
+  withHeading.append(slotted);
+  await withHeading.updateComplete;
+  const slottedHeadingHeight = partOf(withHeading, 'heading')!.getBoundingClientRect().height;
+  expect(slottedHeadingHeight, 'the slotted heading rendered no box to measure').toBeGreaterThan(0);
+  expect(
+    partOf(withHeading, 'body')!.getBoundingClientRect().height,
+    "the heading's margin escaped through the body's BOTTOM edge; the body is no longer a BFC root",
+  ).toBeGreaterThanOrEqual(slottedHeadingHeight + parseFloat(margin));
 });
 
 test('[SC-013] every declared part is present and targetable from outside', async () => {

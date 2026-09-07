@@ -22,16 +22,29 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) conve
   ```
 
   — announced "Retrying in 5s" before this change and announces "Deploy failed. Retrying in 5s"
-  after it. Nothing about the markup, the attributes or the rendered layout changes; only what is
-  inside the region does. It is listed as a behaviour change rather than a break because no
-  consumer's code stops working — but a consumer who deliberately kept a headline out of the
-  announcement no longer gets that, which is why it is here rather than in a template edit.
+  after it. Your markup, your attributes and the notice's own rendered layout are unchanged — but
+  **`::part(body)`'s box is not**, see the migration below. It is listed as a behaviour change
+  rather than a break because no consumer's code stops working — but a consumer who deliberately
+  kept a headline out of the announcement no longer gets that, which is why it is here rather than
+  in a template edit.
 
   **Migration.** If you slotted a heading you wanted seen and not heard, move it **outside** the
   notice. There is no per-notice switch: the ruling weighed a per-consumer **opt-in** property
   against making it unconditional and chose unconditional, so no opt-out exists either. If you had
   duplicated the headline into `message` to get it announced, delete the duplicate: it is now read
   twice.
+
+  **If you style `::part(body)`, check it.** The part still exists and is still targetable, but its
+  **box now encloses the heading**. Measured on a notice with a heading, a message and actions at
+  600px, the body box goes from `top 32px, height 22px` to `top 0, height 54px` — it now starts at
+  the top of the content column. A background, padding, border or `border-radius` you put on
+  `::part(body)` used to sit around the message alone and now sits around the headline as well.
+  There is no selector that reaches back inside a part — `::part()` cannot be followed by a
+  combinator into the shadow tree — so if you need the old framing, either move the declarations
+  out to `::part(notice)` / `::part(content)`, or keep them on `::part(body)` and compensate on
+  `::part(heading)`, which is targetable in its own right. `sk-notice` has no visual-regression
+  baseline in this repository, so no gate here would have caught this for you — hence the explicit
+  numbers.
 
   **One consequence to plan for.** `role="status"` and `role="alert"` are both implicitly
   `aria-atomic="true"`, so the *whole* region is re-read on every change. A notice whose `message`

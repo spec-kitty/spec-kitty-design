@@ -149,22 +149,52 @@
      heading + actions, no message  98       64        24        40
      heading + message              96       62        24        62
 
-   Both columns of that table are the same table: every externally observable
-   dimension is identical before and after. The only figure that moved is the
-   BODY box's own height (22 -> 54 in the first row), which is the point — it now
-   encloses the heading.
+   Both columns of that table are the same table: the notice's own layout is
+   identical before and after, and so is the position of everything a reader sees.
 
-   The two cases that look like they should break are the two that motivate the
-   spelling. With NO heading slotted the box is zero-height, and its bottom
-   margin supplies exactly the 8px the vanished gap did (`message only`: the body
-   still starts 8px down). With a heading and no message the margin escapes the
-   border-free, padding-free body box, and the body is a grid ITEM, whose margins
-   are honoured by grid rather than collapsed away — so the heading-to-actions
-   distance is unchanged.
+   WHAT DID MOVE IS `part="body"`'s OWN BOX, and it is a published part, so this
+   is a consumer-visible change rather than an internal one. In the first row it
+   goes from top 32, height 22 to top 0, height 54: it now starts at the top of
+   the content column and encloses the heading. A consumer who paints
+   `::part(body)` — a background, a padding, a border-radius — now paints it
+   around the headline too. `docs/design-system/changelog.md` carries that in the
+   migration line; nothing in this repo's gates catches it, because sk-notice has
+   no visual-regression baseline.
 
-   `fixtures/elements-behaviour/src/sk-notice.test.ts` asserts the invariant those
-   numbers follow from — this margin equals the content grid's row gap — rather
-   than the numbers, which are font and engine measurements.
+   THE MECHANISM, measured rather than reasoned about — and an earlier revision of
+   this paragraph reasoned, and got it backwards. It said the margin "escapes" the
+   body box. It does not escape; keeping it in is the whole job, and three things
+   do it together:
+
+     1. `.sk-notice__content` is a GRID. That is what supplies the body -> actions
+        gap. Force it to `display: block` and content height drops 86 -> 78 with a
+        heading and a message, and 38 -> 30 with neither.
+     2. `.sk-notice__body` is therefore a grid ITEM, and a grid item establishes a
+        block formatting context, so a margin inside it cannot collapse through its
+        edge.
+     3. When there is content after the heading the margin is between siblings and
+        could not escape anyway.
+
+   (2) is load-bearing in exactly the two cases where the margin touches a body
+   edge, and both were measured by forcing the content box to `display: block`:
+
+     - NO HEADING SLOTTED. The box is zero-height, so its top and bottom margins
+       self-collapse into one 8px margin adjacent to the body's TOP edge. As a grid
+       item the body holds it: body top 0, body height 30 (8 + the 22px message).
+       As a plain block it does not: body top 8, body height 22 — the margin has
+       moved OUTSIDE the body. The rendered result is the same 8px either way,
+       which is why the earlier prose survived; the box it belongs to is not.
+     - HEADING, NO MESSAGE, NO DEFAULT SLOT. Nothing follows the heading, so its
+       margin is adjacent to the body's BOTTOM edge. Grid item: body height 32
+       (24 + 8). Plain block: 24 — escaped, and the heading-to-actions distance
+       collapses with it.
+
+   `fixtures/elements-behaviour/src/sk-notice.test.ts` asserts all three of those
+   relationships rather than the numbers, which are font and engine measurements.
+   All three, because `margin == row-gap` is NOT sufficient on its own: measured,
+   `getComputedStyle(content).rowGap` still reads `8px` after the box stops being a
+   grid, so a lone gap-equality assertion stays green while the layout moves. The
+   test therefore also pins the display type and the containment.
 
    `margin-block-end`, not `margin-bottom`: the notice is a logical-property
    component throughout (see the tone edge's `border-inline-start`). */

@@ -94,14 +94,28 @@ the whole library; `sk-card`'s `status` attribute is its first other consumer.
 
 **"Resolves to a token above" is true of this layer and not of the one beneath it.** This paragraph
 used to say every status token "resolves to a token above", full stop, which reads as though the
-chain ends in the brand palette. It does not. Three of the tint values a status token points at are
-literals rather than further aliases — `--sk-surface-tint-rose` in both themes and
-`--sk-on-tint-rose` in light (#177, ratified under #217) — so `--sk-status-danger` and
-`--sk-on-status-danger` bottom out in hex, and in the **light** theme every tint surface and every
-on-tint ink is a literal, because the `--sk-color-*-bg` tokens are dark-mode surfaces with no light
-counterparts. Nothing about consuming these tokens changes: you still use `--sk-status-<tone>` and
-never the value it resolves to. What changes is what you can assume when reading the file — if you
-are adding to the family rather than consuming it, the rule is in
+chain ends in the brand palette. It does not, and not only for rose — counted in
+`packages/tokens/src/tokens.css`:
+
+| | dark | light |
+|---|---|---|
+| the five `--sk-surface-tint-*` | all five **hex literals** | all five **hex literals** |
+| the five `--sk-on-tint-*` | all five `var(--sk-color-*)` | all five **hex literals** |
+
+So **every** `--sk-status-<tone>` surface bottoms out in hex, in both themes — `info`, `success`,
+`attention` and `recovery` exactly as much as `danger`. Only the dark inks reach the brand palette.
+What is specific to rose is not that it is a literal but that a **mission added it**:
+`--sk-surface-tint-rose` in both themes and `--sk-on-tint-rose` in light are the three values #177
+introduced and #217 ratified.
+
+The three that look like aliases are not. `--sk-surface-tint-sky`, `-lilac` and `-mint` are
+**byte-identical to** `--sk-color-blue-bg`, `--sk-color-purple-bg` and `--sk-color-green-bg` — they
+do not reference them. Do not "fix" one into a `var()`: that would make three members of a
+five-member family resolve differently from the other two for no reason a consumer can see.
+
+Nothing about consuming these tokens changes: you still use `--sk-status-<tone>` and never the
+value it resolves to. What changes is what you can assume when reading the file — if you are adding
+to the family rather than consuming it, the rule is in
 [`docs/contributing/adding-a-token.md`](../contributing/adding-a-token.md#completing-a-family-is-not-the-same-as-introducing-a-hue).
 
 Use `--sk-status-<tone>` as a surface and `--sk-on-status-<tone>` as the foreground or edge on

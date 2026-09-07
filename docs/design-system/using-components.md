@@ -667,6 +667,14 @@ Both live-region roles the element renders — `role="status"` for `polite`, `ro
 change**, heading included. A notice that updates a countdown repeats its headline on every tick.
 If you want a headline that is seen and never heard, put it outside the notice.
 
+**If you style `::part(body)`, that box grew.** Since #228 it encloses the heading rather than
+starting below it — measured at 600px with a heading, a message and actions, it moves from
+`top 32px, height 22px` to `top 0, height 54px`. The notice's own layout is unchanged, but a
+background, padding, border or `border-radius` on `::part(body)` now frames the headline too.
+`::part()` cannot be followed by a combinator into the shadow tree, so there is no way to re-exclude
+the heading from inside: move the decoration to `::part(notice)` or `::part(content)`, or compensate
+on `::part(heading)`.
+
 **Dismissal is controlled.** `dismissible` renders a real `<button>` with a required accessible name
 (`dismiss-label`, defaulting to "Dismiss notice"). Activating it emits one `sk-notice-dismiss` with
 `{ tone }`, `bubbles: true`, `composed: true` and `cancelable: true`. **The element never removes
