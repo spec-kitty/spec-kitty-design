@@ -31,10 +31,15 @@ export default {
     // that ADR-11 generates the React wrappers from. Measured before excluding: 63 added lines
     // in custom-elements.json, one of them the entire layout stylesheet on a single line.
     //
-    // NAMES THE EXTENSION, unlike the bare `**` on the line above. The bare form was tried first
-    // and is INERT here — the manifest came back with all 63 lines still in it. Recorded because
-    // the neighbouring entry is written the bare way and the next person will copy it.
-    'packages/elements/src/patterns/**/*.ts',
+    // A CORRECTION LIVES HERE, because it was one edit away from shipping as fact. An earlier
+    // revision of this block carried the claim "names the extension, unlike the bare `**` on the
+    // line above — the bare form was tried first and is INERT here". That is FALSE. The bare form
+    // was never tried: the first attempt added this comment and no entry at all, so the manifest
+    // was unchanged for the obvious reason, and `**/*.ts` was then adopted as the fix for a cause
+    // that did not exist. Both forms were afterwards measured directly — a probe module planted
+    // under `__fixtures__/` and this fixture under the bare glob, each excluded — so the entry
+    // below is written the same way as its neighbours rather than differently for a wrong reason.
+    'packages/elements/src/patterns/**',
   ],
   outdir: 'packages/elements',
   litelement: true,
