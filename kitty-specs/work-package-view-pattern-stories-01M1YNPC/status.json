@@ -19,16 +19,18 @@
   "work_packages": {
     "WP01": {
       "actor": "codex",
-      "agent": null,
+      "agent": "codex",
       "agent_profile": "frontend-freddy",
       "agent_profile_version": "1.0",
+      "assignee": "codex",
       "force_count": 1,
       "lane": "in_progress",
       "last_event_id": "01M1Z0GWXF5KV88D0P5EPK8GDV",
       "last_transition_at": "2026-09-07T22:41:18.255132+00:00",
       "model": "__resolved_model_absent__",
       "notes": [
-        "Implementation complete at b6f5aaded1135feb8443942a8358d8a7645a01cf; focused, cross-browser, axe, mutation, generation, Storybook, release, security, and CI evidence recorded."
+        "Implementation complete at b6f5aaded1135feb8443942a8358d8a7645a01cf; focused, cross-browser, axe, mutation, generation, Storybook, release, security, and CI evidence recorded.",
+        "Rework review-cycle-1: add real sequential keyboard/typeahead coverage and exact-head desktop Chrome UI 200% zoom evidence; no product scope change."
       ],
       "provider": "__resolved_provider_absent__",
       "review": null,
