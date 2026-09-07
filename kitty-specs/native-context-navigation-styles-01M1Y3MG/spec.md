@@ -1,8 +1,8 @@
 # Mission Specification: Native context-navigation styles
 
-**Mission Branch**: `train/elements-first` (planning checkout; implementation uses a Spec Kitty lane)  
-**Created**: 2026-09-07  
-**Status**: Ready for planning  
+**Mission Branch**: `train/elements-first` (planning checkout; implementation uses a Spec Kitty lane)
+**Created**: 2026-09-07
+**Status**: Ready for planning
 **Input**: GitHub issue [#256](https://github.com/spec-kitty/spec-kitty-design/issues/256), part of tracking epic #253.
 
 ## Intent and scope

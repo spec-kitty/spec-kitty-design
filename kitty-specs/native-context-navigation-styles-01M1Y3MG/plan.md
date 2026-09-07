@@ -1,10 +1,10 @@
 # Implementation Plan: Native context-navigation styles
 
-**Branch**: `train/elements-first` planning checkout; implementation lane created by Spec Kitty  
-**Date**: 2026-09-07  
-**Spec**: [spec.md](./spec.md)  
-**Input**: live issue #256, approved Repository Dossier UX evidence, and governed discovery artifacts  
-**Base**: latest observed `origin/train/elements-first` at `753bbf2436960fc6906aa7961b459aa81c7c5d70`; fetch/rebase immediately before implementation and exact-SHA review  
+**Branch**: `train/elements-first` planning checkout; implementation lane created by Spec Kitty
+**Date**: 2026-09-07
+**Spec**: [spec.md](./spec.md)
+**Input**: live issue #256, approved Repository Dossier UX evidence, and governed discovery artifacts
+**Base**: latest observed `origin/train/elements-first` at `753bbf2436960fc6906aa7961b459aa81c7c5d70`; fetch/rebase immediately before implementation and exact-SHA review
 **Squad tier**: C — independent Codex review plus all charter-required exact-head lenses before delivery
 
 ## Summary
@@ -15,13 +15,13 @@ There is no custom element, JavaScript behavior, route/data model, token additio
 
 ## Technical context
 
-**Language/version**: authored CSS and HTML; TypeScript Storybook/Playwright tests under the repository toolchain  
-**Primary dependencies**: existing `@spec-kitty/tokens`; `@spec-kitty/styles`; Storybook 10.6; Playwright 1.62; axe  
-**Storage/runtime**: none; no script, listener, asynchronous work, application state, or component instance  
-**Testing**: generated-source assertions, Playwright across Chromium/Firefox/WebKit where available, Storybook build, axe story crawl, visual baseline gate, repository lint/type/build/release checks  
-**Target platform**: evergreen browsers rendering native navigation/list/link markup in light DOM  
-**Performance goals**: zero runtime JavaScript; static CSS/HTML only; no new suite budget or mutation arm  
-**Constraints**: existing semantic `--sk-*` tokens only; no un-tokened 44px; no theme selector; no invented Team Kitty behavior/data; generated artifacts reproducible  
+**Language/version**: authored CSS and HTML; TypeScript Storybook/Playwright tests under the repository toolchain
+**Primary dependencies**: existing `@spec-kitty/tokens`; `@spec-kitty/styles`; Storybook 10.6; Playwright 1.62; axe
+**Storage/runtime**: none; no script, listener, asynchronous work, application state, or component instance
+**Testing**: generated-source assertions, Playwright across Chromium/Firefox/WebKit where available, Storybook build, axe story crawl, visual baseline gate, repository lint/type/build/release checks
+**Target platform**: evergreen browsers rendering native navigation/list/link markup in light DOM
+**Performance goals**: zero runtime JavaScript; static CSS/HTML only; no new suite budget or mutation arm
+**Constraints**: existing semantic `--sk-*` tokens only; no un-tokened 44px; no theme selector; no invented Team Kitty behavior/data; generated artifacts reproducible
 **Scale/scope**: one CSS family with ten named treatments, a compact fixture/story matrix, one focused test file, package export/docs/story ratchets
 
 ## Charter and architecture check

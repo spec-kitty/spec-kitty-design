@@ -1,0 +1,13 @@
+{
+  "wp_id": "WP01",
+  "captured_at": "2026-09-07T14:58:52Z",
+  "base_branch": "train/elements-first",
+  "base_commit": "6f731bfa2b5b091c0aa585e3068bc8b2d2ccaecf",
+  "test_runner": "pytest",
+  "total": 0,
+  "passed": 0,
+  "failed": 0,
+  "skipped": 0,
+  "failures": [],
+  "source_identity": "GateCoverageScopeSource/junit_xml"
+}

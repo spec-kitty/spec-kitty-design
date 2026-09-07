@@ -30,6 +30,9 @@ requirement_refs:
 planning_base_branch: train/elements-first
 merge_target_branch: train/elements-first
 branch_strategy: Planning artifacts for this mission were generated on train/elements-first. During /spec-kitty.implement this WP may branch from a dependency-specific base, but completed changes must merge back into train/elements-first unless the human explicitly redirects the landing branch.
+base_branch: kitty/mission-native-context-navigation-styles-01M1Y3MG
+base_commit: 367a52e43a8bacfa8ba99440643dd3a9d03da3fa
+created_at: '2026-09-07T14:58:50.265378+00:00'
 subtasks:
 - T001
 - T002

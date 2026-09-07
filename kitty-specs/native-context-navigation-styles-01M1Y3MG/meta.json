@@ -11,5 +11,7 @@
   "purpose_tldr": "Give grouped and nested Team context navigation one reusable native, token-only presentation contract.",
   "slug": "native-context-navigation-styles-01M1Y3MG",
   "target_branch": "train/elements-first",
-  "topology": "lanes"
+  "topology": "lanes",
+  "vcs": "git",
+  "vcs_locked_at": "2026-09-07T14:58:50.081962+00:00"
 }

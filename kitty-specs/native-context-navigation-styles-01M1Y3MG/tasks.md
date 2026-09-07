@@ -1,6 +1,6 @@
 # Tasks: Native context-navigation styles
 
-**Input**: `spec.md`, `research.md`, `data-model.md`, `plan.md`, `quickstart.md`, and `contracts/context-nav.md`  
+**Input**: `spec.md`, `research.md`, `data-model.md`, `plan.md`, `quickstart.md`, and `contracts/context-nav.md`
 **Planning base / merge target**: `train/elements-first`; implementation runs in the Spec Kitty lane and its single PR targets the train.
 
 ## Work-package topology
