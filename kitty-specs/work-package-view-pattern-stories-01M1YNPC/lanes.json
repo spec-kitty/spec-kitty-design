@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "mission_slug": "work-package-view-pattern-stories-01M1YNPC",
+  "mission_id": "01M1YNPCY5CJ93XYY5RDQZ4H5E",
+  "mission_branch": "kitty/mission-work-package-view-pattern-stories-01M1YNPC",
+  "target_branch": "mission/work-package-view-pattern-stories",
+  "lanes": [
+    {
+      "lane_id": "lane-a",
+      "wp_ids": [
+        "WP01"
+      ],
+      "write_scope": [
+        "apps/storybook/.storybook/preview.ts",
+        "apps/storybook/src/tests/sk-work-package-view-patterns.spec.ts",
+        "apps/storybook/src/tests/visual.spec.ts",
+        "apps/storybook/src/tests/visual.spec.ts-snapshots/*.png",
+        "docs/design-system/using-components.md",
+        "expected-stories.json",
+        "packages/elements/src/patterns/work-package-views.stories.ts"
+      ],
+      "predicted_surfaces": [
+        "api",
+        "app-shell",
+        "artifact-rendering",
+        "legacy-cleanup"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    }
+  ],
+  "computed_at": "2026-09-07T20:00:55.479634+00:00",
+  "computed_from": "dependency_graph+ownership",
+  "planning_artifact_wps": [],
+  "planning_commit_sha": "1d866aa975620b403ddf642f1a1bfbbbcd76a2d9"
+}
