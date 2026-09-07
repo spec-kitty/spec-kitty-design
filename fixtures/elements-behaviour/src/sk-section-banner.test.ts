@@ -1,3 +1,7 @@
+/* eslint-disable @nx/enforce-module-boundaries -- #225: this file imports the element modules
+   it EXERCISES, not the package barrel. The mutation harness selects each arm's tests from
+   Vitest's dependency graph, and one barrel import puts every element source in every behaviour
+   test's graph — which is what made that filter inert. */
 /**
  * <sk-section-banner> — #77's layout batch.
  *
@@ -6,12 +10,12 @@
  * variant mapping, the default-variant rule, the two failure policies, and the accessible name.
  */
 import { beforeEach, expect, test } from 'vitest';
-import '@spec-kitty/elements';
+import '../../../packages/elements/src/section-banner/sk-section-banner.js';
+import skSectionBannerSheet from '../../../packages/elements/src/section-banner/sk-section-banner.css.js';
 import {
   sectionBannerClasses,
   sectionBannerStaticHtml,
-  skSectionBannerSheet,
-} from '@spec-kitty/elements';
+} from '../../../packages/elements/src/section-banner/sk-section-banner.markup.js';
 import { installTokenSheet } from './token-sheet.js';
 
 beforeEach(installTokenSheet);

@@ -1,18 +1,20 @@
+/* eslint-disable @nx/enforce-module-boundaries -- #225: this file imports the element modules
+   it EXERCISES, not the package barrel. The mutation harness selects each arm's tests from
+   Vitest's dependency graph, and one barrel import puts every element source in every behaviour
+   test's graph — which is what made that filter inert. */
 import { beforeEach, expect, test } from 'vitest';
-import { SkTransitionMatrix, skTransitionMatrixSheet } from '@spec-kitty/elements';
-// eslint-disable-next-line @nx/enforce-module-boundaries -- raw authored CSS is the token-contract test subject
+import skTransitionMatrixSheet from '../../../packages/elements/src/transition-matrix/sk-transition-matrix.css.js';
+import {
+  SkTransitionMatrix,
+  type TransitionColumn,
+  type TransitionMatrixProperties,
+  type TransitionMatrixSelectDetail,
+  type TransitionRoute,
+  type TransitionTone,
+} from '../../../packages/elements/src/transition-matrix/sk-transition-matrix.js';
 import transitionMatrixCss from '../../../packages/styles/src/transition-matrix/sk-transition-matrix.css?raw';
-// eslint-disable-next-line @nx/enforce-module-boundaries -- raw authored source is the public-boundary test subject
 import transitionMatrixSource from '../../../packages/elements/src/transition-matrix/sk-transition-matrix.ts?raw';
-// eslint-disable-next-line @nx/enforce-module-boundaries -- raw authored story is the fixture-copy test subject
 import transitionMatrixStorySource from '../../../packages/elements/src/transition-matrix/sk-transition-matrix.stories.ts?raw';
-import type {
-  TransitionColumn,
-  TransitionMatrixProperties,
-  TransitionMatrixSelectDetail,
-  TransitionRoute,
-  TransitionTone,
-} from '@spec-kitty/elements';
 
 type Matrix = SkTransitionMatrix & { updateComplete: Promise<unknown> };
 

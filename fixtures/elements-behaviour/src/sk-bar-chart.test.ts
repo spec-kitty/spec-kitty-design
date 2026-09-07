@@ -1,13 +1,16 @@
+/* eslint-disable @nx/enforce-module-boundaries -- #225: this file imports the element modules
+   it EXERCISES, not the package barrel. The mutation harness selects each arm's tests from
+   Vitest's dependency graph, and one barrel import puts every element source in every behaviour
+   test's graph — which is what made that filter inert. */
 import { beforeEach, expect, test } from 'vitest';
-import { userEvent } from 'vitest/browser';
-import '@spec-kitty/elements';
+import '../../../packages/elements/src/bar-chart/sk-bar-chart.js';
+import skBarChartSheet from '../../../packages/elements/src/bar-chart/sk-bar-chart.css.js';
 import {
-  SkBarChart,
-  skBarChartSheet,
   type BarChartSelectDetail,
   type BarSeries,
-} from '@spec-kitty/elements';
-// eslint-disable-next-line @nx/enforce-module-boundaries -- raw authored CSS is the accessibility-contract test subject
+  SkBarChart,
+} from '../../../packages/elements/src/bar-chart/sk-bar-chart.js';
+import { userEvent } from 'vitest/browser';
 import barChartCss from '../../../packages/styles/src/bar-chart/sk-bar-chart.css?raw';
 import tokensCss from '@spec-kitty/tokens/tokens.css?raw';
 import { assertThemesDiffered, contrast } from './contrast.js';

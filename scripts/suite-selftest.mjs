@@ -25,8 +25,9 @@
  *   The list must cover every verdict this script can emit; that is asserted below. Note the
  *   honest limit: EMITTABLE is a hand-maintained literal, so a NEW verdict string added
  *   without touching it is still unexercised — the assertion catches a missing entry for a
- *   KNOWN verdict, not a new one. Guards 6, 7 and 8 exit before the loop and have no entry
- *   at all; guard 7 is disabled in selftest mode because the ids there name guards, not
+ *   KNOWN verdict, not a new one. Guards 6, 7, 8 and 9 exit before the loop and have no entry
+ *   at all — guard 9 additionally CANNOT have one, because --selftest disables the impact filter
+ *   it checks; guard 7 is disabled in selftest mode because the ids there name guards, not
  *   behaviours, which is defensible but means it is unproven here. Since #75 WP04 guard 7 also
  *   applies a registry FILTER (applicable !== false) that --selftest likewise cannot reach.
 *   Its fail-closed property rests on guard 7's own `unknown` arm: over-filter and every
@@ -81,7 +82,7 @@ const behaviourPairs = behaviourSubjects.map(({ id, file }) => `${id}@${file ?? 
 /**
  * Every verdict this script can emit must have a self-check entry.
  *
- * Guards 6, 7, 8 and guard 5's inverted arm had none, and guard 7 was additionally disabled
+ * Guards 6, 7, 8, 9 and guard 5's inverted arm had none, and guard 7 was additionally disabled
  * in selftest mode — so the guard binding the two registries was the one guard the
  * self-check provably never exercised. Asserting the SET closes the class: adding a guard
  * without a self-check entry now fails here rather than being noticed by a reader.
@@ -706,6 +707,50 @@ if (!selftestMode) {
   console.log(
     `impact graph: ${subjectsBySource.size} source(s), ${fullFallbacks} full-suite fallback(s)\n`
   );
+
+  /**
+   * Guard 9 — a narrowed selection must be able to carry the named test.
+   *
+   * The graph decides which files an arm RUNS; mutations.json decides which test must go RED.
+   * Nothing bound the two. A selection that excludes the arm's subject cannot fail the named test
+   * at all, so guard 4 reports `absent` — the SAME verdict a syntax-breaking mutation produces.
+   * A filter defect then arrives dressed as a mutation defect, which is the confusion this
+   * harness exists to refuse. #225 made the filter narrow enough for that to be reachable, so it
+   * is checked here rather than left to be read off a misleading verdict.
+   *
+   * Only sources the graph actually NARROWED are checked: a full-suite fallback runs everything
+   * by definition, and the baseline has already proved every registry pair present in it.
+   *
+   * Both arms are fail-closed. A subject outside the selection is rejected; so is a MISSING
+   * subject under a narrowed selection, because there is then nothing to check the narrowing
+   * against. `subject` is optional in the file format and 157 of 157 entries carry one, so the
+   * second arm is vacuous today and stays honest if that ever stops being true.
+   *
+   * Like guards 6, 7 and 8 this exits before the loop and has no self-check entry — and could not
+   * have one, because --selftest disables the filter outright (`relatedSubjects = selftestMode ?
+   * null : ...`), so mutations.selftest.json cannot reach this code at all. The exemption is
+   * written down rather than left silent, exactly as the header records for the other three.
+   */
+  const unreachable = mutations
+    .map((m) => ({ mutation: m, subjects: subjectsBySource.get(m.file) }))
+    .filter(({ mutation, subjects }) => Array.isArray(subjects) && (
+      !mutation.subject
+        || !subjects.some((file) => file === mutation.subject || file.endsWith(mutation.subject))
+    ));
+  if (unreachable.length) {
+    console.error('❌ the impact graph selects no file that could carry the named test:');
+    for (const { mutation, subjects } of unreachable) {
+      console.error(
+        `   [${mutation.id}] ${mutation.arm}: subject ${mutation.subject ?? '<none declared>'} ` +
+          `is absent from the ${subjects.length} file(s) resolved for ${mutation.file}`
+      );
+    }
+    console.error(
+      '   Such an arm can only ever report "absent" — a filter defect read as a mutation defect.'
+    );
+    process.exit(1);
+  }
+
   prepare();
 }
 
@@ -913,7 +958,9 @@ console.log(
 );
 // The harness resolves every mutated source through Vitest's dependency graph before applying any
 // arm, then checks the complete affected assertion multiset. Broad package barrels deliberately
-// remain broad; graph errors fall back to the full suite rather than reducing evidence.
+// remain broad; graph errors fall back to the full suite rather than reducing evidence. Since #225
+// guard 9 binds that selection to mutations.json: a narrowed set that cannot carry the arm's named
+// test is rejected before the loop instead of surfacing later as guard 4's "absent".
 // `selftestCeilingSeconds` was described in suite-budget.json as an enforced ceiling and was
 // read by nothing — an inert key documented as a gate, which is the class this mission
 // exists to close, introduced by its own fold. Found at the second gate pass.

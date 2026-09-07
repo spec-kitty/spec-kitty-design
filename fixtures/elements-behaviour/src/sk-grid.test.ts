@@ -1,3 +1,7 @@
+/* eslint-disable @nx/enforce-module-boundaries -- #225: this file imports the element modules
+   it EXERCISES, not the package barrel. The mutation harness selects each arm's tests from
+   Vitest's dependency graph, and one barrel import puts every element source in every behaviour
+   test's graph — which is what made that filter inert. */
 /**
  * <sk-grid> — #77's layout batch.
  *
@@ -8,8 +12,10 @@
  * a layout primitive can silently get wrong: blocking its children from being themed.
  */
 import { beforeEach, expect, test } from 'vitest';
-import '@spec-kitty/elements';
-import { gridClasses, gridStaticHtml, skGridSheet } from '@spec-kitty/elements';
+import '../../../packages/elements/src/card/sk-card.js';
+import '../../../packages/elements/src/grid/sk-grid.js';
+import skGridSheet from '../../../packages/elements/src/grid/sk-grid.css.js';
+import { gridClasses, gridStaticHtml } from '../../../packages/elements/src/grid/sk-grid.markup.js';
 import { installTokenSheet } from './token-sheet.js';
 
 beforeEach(installTokenSheet);

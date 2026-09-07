@@ -1,3 +1,7 @@
+/* eslint-disable @nx/enforce-module-boundaries -- #225: this file imports the element modules
+   it EXERCISES, not the package barrel. The mutation harness selects each arm's tests from
+   Vitest's dependency graph, and one barrel import puts every element source in every behaviour
+   test's graph — which is what made that filter inert. */
 /**
  * <sk-feature-card> — #78's cards batch.
  *
@@ -8,15 +12,15 @@
  * test would notice.
  */
 import { beforeEach, expect, test } from 'vitest';
-import '@spec-kitty/elements';
+import '../../../packages/elements/src/feature-card/sk-feature-card.js';
+import skFeatureCardSheet from '../../../packages/elements/src/feature-card/sk-feature-card.css.js';
 import {
   FEATURE_CARD_ACCENTS,
   FEATURE_CARD_VARIANTS,
   featureCardChipClasses,
   featureCardClasses,
   featureCardStaticHtml,
-  skFeatureCardSheet,
-} from '@spec-kitty/elements';
+} from '../../../packages/elements/src/feature-card/sk-feature-card.markup.js';
 import { installTokenSheet } from './token-sheet.js';
 
 beforeEach(installTokenSheet);

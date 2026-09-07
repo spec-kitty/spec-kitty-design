@@ -11,7 +11,7 @@
     "Same shape as packages/elements/src/__fixtures__/shapes.mjs driving gate-selftest.mjs.",
     "Run with: node scripts/suite-selftest.mjs --selftest",
     "Every verdict the harness can emit must appear here as an expectRejectedBy \u2014 the script",
-    "asserts that set, so a new guard cannot ship without a self-check entry. Guards 6, 7, 8 and",
+    "asserts that set, so a new guard cannot ship without a self-check entry. Guards 6, 7, 8, 9 and",
     "guard 5's inverted arm previously had none, and guard 7 was disabled in selftest mode.",
     "",
     "`subject` on every redTest entry (#74). Without it `inSubject()` in suite-selftest.mjs is",

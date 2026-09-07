@@ -1,3 +1,7 @@
+/* eslint-disable @nx/enforce-module-boundaries -- #225: this file imports the element modules
+   it EXERCISES, not the package barrel. The mutation harness selects each arm's tests from
+   Vitest's dependency graph, and one barrel import puts every element source in every behaviour
+   test's graph — which is what made that filter inert. */
 /**
  * <sk-ribbon-card> — #78's cards batch.
  *
@@ -5,14 +9,14 @@
  * colour axes are independent, and both degrade paths work.
  */
 import { beforeEach, expect, test } from 'vitest';
-import '@spec-kitty/elements';
+import '../../../packages/elements/src/ribbon-card/sk-ribbon-card.js';
+import skRibbonCardSheet from '../../../packages/elements/src/ribbon-card/sk-ribbon-card.css.js';
 import {
   RIBBON_CARD_COLOURS,
   ribbonCardClasses,
   ribbonCardStaticHtml,
   ribbonClasses,
-  skRibbonCardSheet,
-} from '@spec-kitty/elements';
+} from '../../../packages/elements/src/ribbon-card/sk-ribbon-card.markup.js';
 import { installTokenSheet } from './token-sheet.js';
 
 beforeEach(installTokenSheet);

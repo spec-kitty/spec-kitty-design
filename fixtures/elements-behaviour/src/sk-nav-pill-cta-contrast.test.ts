@@ -1,3 +1,7 @@
+/* eslint-disable @nx/enforce-module-boundaries -- #225: this file imports the element modules
+   it EXERCISES, not the package barrel. The mutation harness selects each arm's tests from
+   Vitest's dependency graph, and one barrel import puts every element source in every behaviour
+   test's graph — which is what made that filter inert. */
 /**
  * <sk-nav-pill>'s CTA button — the contrast verifier that #78's token change needs.
  *
@@ -18,7 +22,7 @@
  * sheet, and that fixture's opt-out is deliberate.
  */
 import { beforeEach, expect, test } from 'vitest';
-import '@spec-kitty/elements';
+import '../../../packages/elements/src/nav-pill/sk-nav-pill.js';
 import { installTokenSheet } from './token-sheet.js';
 import { contrast, assertThemesDiffered } from './contrast.js';
 
