@@ -62,6 +62,8 @@ A component is not done when it renders. It is done when every item below that a
 7. **Style adoption** — the element adopts a constructed stylesheet and injects no `<style>` element, so a consumer CSP without `style-src` cannot silently strip its styling.
 8. **Registry guard** — a second `define` of the same tag warns and no-ops rather than throwing.
 9. **Generation determinism** (Node lane) — regenerating wrappers from an unchanged manifest is a no-op, and drift fails CI.
+10. **Delegate/rendered-control correspondence** — where an element derives any part of its reported validity from an object other than the control the user interacts with, a test asserts the two agree for the same intended state: at mount, after a post-mount change, and after two constrained properties change in the *same* update — and that neither invents a constraint the element never declared. Added 2026-09-07 (#196); see "The two entries this list was missing" below for the three measured bugs it is written from.
+11. **Responsive threshold** — where a documented viewport threshold changes an element's behaviour, a test asserts that the shipped stylesheet declares that threshold at its documented figure, *and* that the behaviour it gates actually changes at it in a real viewport. Thresholds written as separate blocks are asserted separately, so each can fail alone. Added 2026-09-07 (#204); see the same section.
 
 Explicitly **not** wanted: "it renders" assertions; shadow-DOM snapshot comparisons, which are brittle and duplicate the visual baselines; tests of Lit's own reactivity; assertions on internal class names.
 
@@ -278,6 +280,123 @@ future mission or the operator judges otherwise — including simply disagreeing
 that is a legitimate reversal of this verdict, but it is that code change, requiring its own review,
 not something this ADR amendment authorizes by having discussed it.
 
+### The two entries this list was missing (#196, #204)
+
+**Operator ruling, 2026-09-07, recorded for the record.** This ADR has been `Accepted` since the
+#200 ruling, so amending it needs its authorization written down where a reader looks, the way
+#176 did for ADR-10 and #189 did for the wrapper prop-name subsection above. The ruling: *"Rule both
+now. Add both entries in a single ADR-11 amendment: a required behaviour for probe/rendered-control
+correspondence (#196), and an id that lets a responsive threshold carry a mutation (#204)."* Chosen
+over a propose-and-batch process and over keeping the list operator-only case by case, on the stated
+reasoning that the two missions that hit this boundary had already measured what their entries need
+to say — and that this was the **fifth** time a mission reached it (#140, #143, #77, #177, #178),
+each time stalling. The ruling also fixed the bar: *"Both entries must be falsifiable in the way
+ADR-11 requires — each with a red-first mutation, not a prose obligation. An entry no arm can fail
+is the defect this list exists to prevent."*
+
+#### Item 10, written from three measured bugs rather than from the abstraction
+
+ADR-14 records the mechanism: `sk-form-input` merges five UA constraint flags from a permanently
+detached probe `<input>` rather than from the rendered control, and records that its mitigation is
+*"narrow and empirical — three specific, tested synchronization rules … not a structural guarantee
+that a fourth such bug cannot exist."* The three bugs, all measured during #180's development:
+
+1. **Read before write.** Reading the rendered control's `.validity` from `willUpdate()` reads the
+   *previous* render. `pattern="[a-z]+"`, then `el.value = '123'` — the host reported valid and a
+   real `form.requestSubmit()` succeeded with `123` in `FormData`.
+2. **`?? ''` compiled an absent constraint into a present one.** `control.pattern = this.pattern ??
+   ''` compiles to the HTML pattern algorithm's `^(?:)$`, which matches only the empty string, so a
+   plain, unconstrained `"x"` reported `patternMismatch: true`.
+3. **Assignment order.** A same-update `type` `number`→`text` with `value` `'123'`→`'abc'` under
+   `pattern="\d+"`, assigned value-then-type, silently sanitized the probe's value to `''`; the
+   merge reported no flags while the rendered control genuinely mismatched `\d+`.
+
+Items 1 and 2 are one source disagreeing with the intended state; item 3 is the two live sources
+disagreeing with each other. All three are observable as **one** assertion — the flags the host
+reports against the flags the rendered control itself computes — which is what item 10 requires and
+what `[SC-003][SC-016] the probe and the rendered control agree for the same intended state` now
+asserts, across all three shapes plus the negative case item 2 needs.
+
+`badInput` is deliberately **outside** the correspondence claim. ADR-14 records it as the one flag
+with two writers, and the second of them fires precisely where the rendered control legitimately
+reports nothing — a property-assigned value the UA sanitizes away raises `badInput` on no real
+control. Asserting correspondence there would assert the opposite of the shipped design.
+
+**The red, demonstrated rather than asserted.** `mutations.json` carries the arm as SC-016 — the
+type-before-value reversal, ADR-14's own "clearest instance" — re-keyed from SC-003, where it had
+been filed for want of an id:
+
+```
+FAIL |browser (chromium)| fixtures/elements-behaviour/src/sk-form-input.test.ts >
+  [SC-003][SC-016] the probe and the rendered control agree for the same intended state
+AssertionError: after a same-update type and value change:
+  expected { patternMismatch: false, …(4) } to deeply equal { patternMismatch: true, …(4) }
+
+FAIL |browser (chromium)| fixtures/elements-behaviour/src/sk-form-input.test.ts >
+  [SC-003][SC-016] a `type` change and a `value` change in the SAME update validate against
+  the NEW type — the probe-ordering fix
+AssertionError: text "abc" against \d+ must mismatch: expected false to be true
+```
+
+Both tests carry the id, so guard 5 sees no collateral; the second is the host-side assertion that
+already existed for this defect and the first is the correspondence assertion this item adds.
+
+#### What the machinery resisted, and what was done about it
+
+Worth recording because it is a real property of this list rather than an implementation detail: a
+correspondence entry is **not independently breakable**. It is violated by any defect that breaks
+either source, so `scripts/suite-selftest.mjs`'s guard 5 — which requires a mutation to be surgical
+— sees it as collateral. Measured before the entry was written: with the assertion in place, three
+existing `sk-form-input` arms red it (the merged-flag loop, the probe's `value` sync, and the
+`pattern` forwarding).
+
+Two ways to express that were available. Marking those arms `expectCollateral: true` would have
+removed guard 5's blast-radius bound from three surgical arms in order to make room for one new id,
+and was rejected on that ground. What shipped instead names the shared claim on the **test**: a test
+name may carry more than one id — `[SC-002][SC-003] a readonly control still submits but is barred
+from constraint validation` has been in that file since #180 — and both guard 4 and guard 5 read the
+marker, so a test marked `[SC-003][SC-016]` is *named* for both and neither arm becomes collateral.
+The one arm that could not be handled that way, SC-013's constraint-forwarding arm, was re-sited
+from `pattern` to `inputmode`: with item 10 in force, dropping `pattern` from the rendered control is
+a correspondence defect as well as a forwarding one, while `inputmode` reaches no validity at all.
+That is a like-for-like exchange — the `[SC-013]` test asserts six forwarded attributes and the arm
+drops one of them either way — and the `pattern` case is not left unwatched: it is measured red by
+the item 10 test.
+
+#### Item 11, and the constraint that made it necessary
+
+`sk-page-header` (#182) returns a sticky header to normal flow below 720px of width and below 480px
+of height, in two deliberately separate `@media` blocks so either can fail alone. Both thresholds
+had real tests and **no** re-derived red, for a reason that is structural rather than an oversight:
+`scripts/suite-selftest.mjs`'s guard 7 is set equality — `uncovered` rejects a declared pair with no
+mutation and `unknown` rejects a mutation naming no declared pair — and
+`tests/node/config-contract.test.ts` pins `behaviours.json`'s applicable set to this list exactly. So
+a breakpoint could not carry a mutation until this list named one. Verified against both files on
+this branch, not taken from the issue.
+
+The arms mutate the **generated** `packages/elements/src/page-header/sk-page-header.css.js`. That is
+forced: the `test` job never builds, so an arm against the authored `.css` would be semantically
+inert; `SC-010`'s existing arm against generated `packages/react/src/SkTransitionMatrix.js` is the
+precedent. Two arms, one per threshold, and the height arm reds only the sheet-reading assertion —
+which is the measured proof that the two blocks fail independently, the property #182 wrote them
+separately to obtain.
+
+```
+# the width arm
+AssertionError: stickiness must be dropped inside (max-width: 720px):
+  expected undefined to be 'static'
+AssertionError: below the documented width a sticky header must return to normal flow:
+  expected 'sticky' to be 'static'
+
+# the height arm — one red, in the sheet-reading test alone
+AssertionError: stickiness must be dropped inside (max-height: 480px):
+  expected undefined to be 'static'
+```
+
+Its live assertion is driven by the `sticky` **attribute**, not the property, so that the existing
+SC-010 arm — which flips `reflect` on that property — does not red it for a reason that has nothing
+to do with a threshold.
+
 ### The fourth-target extension cost — MEASURED (#81, ADR-8 confirmation #4)
 
 ADR-8's confirmation criterion #4 is the claim this programme rests on: that adding a framework
@@ -432,4 +551,5 @@ subjects or say the same thing here.
 * Amended by O5, the charter amendment lifting the unit-test prohibition in `languages_frameworks`, `testing_requirements` and `quality_gates`. Charter changes go through `spec-kitty charter interview → generate → sync`, never by hand (CLAUDE.md §7).
 * Related: ADR-8 (base layer), ADR-9 (styling API — items 6 and 7 verify what it declares), ADR-13 (Storybook builder), SP-1 (gate repair), SP-6 (generator selection).
 * Amended by #189 (operator override, same precedent as ADR-10's #176): the wrapper prop-name invariant, omitted from this ADR's original "Wrapper generation" section — see that section's "The wrapper prop-name invariant this ADR omitted (#189)" subsection.
+* Amended by the #196/#204 operator ruling of 2026-09-07: required behaviours 10 (delegate/rendered-control correspondence) and 11 (responsive threshold) — see "The two entries this list was missing (#196, #204)". This is the first amendment made while the record is `Accepted` rather than `Proposed`, which is why the authorization is recorded there in full.
 * Evidence: `scripts/run-axe-storybook.js:102`, `.github/workflows/ci-quality.yml` (`components` filter; `gate` skipped-tolerance), `packages/angular/src/lib/*/**.spec.ts`, `playwright.config.ts`, `scripts/build-react-wrappers.mjs` (`REACT_PROPS`, `loadReactPropRenameMap`, per-element prop comparison), `kitty-specs/form-input-constraints-and-datalist-01M1S94Y/contracts/sk-form-input.contract.md` ("React wrapper contract (delta)").
