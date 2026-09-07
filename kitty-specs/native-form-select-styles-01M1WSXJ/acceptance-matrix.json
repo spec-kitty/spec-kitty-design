@@ -78,10 +78,10 @@
       "criterion_id": "FR-008",
       "description": "Verify FR-008 is satisfied",
       "proof_type": "automated_test",
-      "evidence": "3ca42f9; live focus-visible/invalid/disabled and Chromium forced-colors boundary assertions green",
+      "evidence": "7cbf6ce5ae27f1d995552deec32f0b463e8dac7f (product tree cf9d5045c0968add9056abc038401a17a7f24e9c); live focus-visible/invalid/disabled and forced-colors assertions green",
       "pass_fail": "pass",
       "verified_by": "codex",
-      "verified_at": "2026-09-07T03:30:17.487803+00:00",
+      "verified_at": "2026-09-07T04:35:58.319439+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
