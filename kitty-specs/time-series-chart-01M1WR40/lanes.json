@@ -1,0 +1,70 @@
+{
+  "version": 1,
+  "mission_slug": "time-series-chart-01M1WR40",
+  "mission_id": "01M1WR40K68N7PDRRGJQ7RD8GT",
+  "mission_branch": "kitty/mission-time-series-chart-01M1WR40",
+  "target_branch": "mission/time-series-chart",
+  "lanes": [
+    {
+      "lane_id": "lane-a",
+      "wp_ids": [
+        "WP01"
+      ],
+      "write_scope": [
+        "behaviours.json",
+        "docs/contributing/adding-a-token.md",
+        "expected-parts.json",
+        "expected-stories.json",
+        "fixtures/elements-behaviour/src/sk-time-series-chart.test.ts",
+        "fixtures/react-consumer/src/sk-time-series-chart.test.tsx",
+        "mutations.json",
+        "packages/elements/src/elements.ts",
+        "packages/elements/src/index.ts",
+        "packages/elements/src/time-series-chart/sk-time-series-chart.stories.ts",
+        "packages/elements/src/time-series-chart/sk-time-series-chart.ts",
+        "packages/styles/src/time-series-chart/sk-time-series-chart.css",
+        "packages/tokens/dist/token-catalogue.json",
+        "packages/tokens/src/tokens.css"
+      ],
+      "predicted_surfaces": [
+        "api",
+        "artifact-rendering",
+        "legacy-cleanup"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    },
+    {
+      "lane_id": "lane-b",
+      "wp_ids": [
+        "WP02"
+      ],
+      "write_scope": [
+        "docs/design-system/using-components.md",
+        "expected-docs.json",
+        "packages/elements/SIZES.md",
+        "packages/elements/custom-elements.json",
+        "packages/elements/src/time-series-chart/sk-time-series-chart.css.d.ts",
+        "packages/elements/src/time-series-chart/sk-time-series-chart.css.js",
+        "packages/elements/vue.d.ts",
+        "packages/react/src/SkTimeSeriesChart.d.ts",
+        "packages/react/src/SkTimeSeriesChart.js",
+        "packages/react/src/index.d.ts",
+        "packages/react/src/index.js",
+        "suite-budget.json"
+      ],
+      "predicted_surfaces": [
+        "api",
+        "artifact-rendering"
+      ],
+      "depends_on_lanes": [
+        "lane-a"
+      ],
+      "parallel_group": 1
+    }
+  ],
+  "computed_at": "2026-09-07T01:41:04.249311+00:00",
+  "computed_from": "dependency_graph+ownership",
+  "planning_artifact_wps": [],
+  "planning_commit_sha": "ff43f8c820737bd435fdb6cd31af9118462e0090"
+}
