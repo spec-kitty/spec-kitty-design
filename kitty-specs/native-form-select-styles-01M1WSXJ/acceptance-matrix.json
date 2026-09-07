@@ -118,10 +118,10 @@
       "criterion_id": "FR-012",
       "description": "Verify FR-012 is satisfied",
       "proof_type": "custom_command",
-      "evidence": "3ca42f9; styles generator check, npm-pack CSS subpath, release graph, root no-side-effect barrel green",
+      "evidence": "7cbf6ce5ae27f1d995552deec32f0b463e8dac7f (product tree cf9d5045c0968add9056abc038401a17a7f24e9c); styles generator check, packed CSS subpath, release graph and no-side-effect root barrel green",
       "pass_fail": "pass",
       "verified_by": "codex",
-      "verified_at": "2026-09-07T03:30:27.733590+00:00",
+      "verified_at": "2026-09-07T04:36:08.464650+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
