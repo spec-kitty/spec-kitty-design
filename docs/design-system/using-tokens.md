@@ -151,8 +151,9 @@ still has two channels left. Do the same in anything you build on these tokens.
 `--sk-color-data-grid` and `--sk-color-data-baseline`, which `sk-bar-chart` (#148) consumes — the
 element that landed one mission before the family existed. That equality is asserted by computed
 value in both themes rather than left as a comment, so the eventual retrofit of `sk-bar-chart` onto
-`--sk-chart-*` is a rename and not a redesign. Until it happens, both spellings are live and
-`--sk-chart-*` is the one to write in new work.
+`--sk-chart-*` is a rename and not a redesign — it is filed as #240, with the measurement of every
+surface it touches. Until it lands, both spellings are live and `--sk-chart-*` is the one to write
+in new work.
 
 Measured against `--sk-surface-card`, every series ink and the gap ink clear 3:1 in both themes
 (dark 9.97 / 9.21 / 8.11 / 12.58 and gap 7.45; light 9.10 / 8.04 / 9.42 / 6.79 and gap 6.76).

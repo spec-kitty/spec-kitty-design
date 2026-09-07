@@ -38,7 +38,9 @@
  * including sk-data-table.css's own measurement that the role/label/tabindex triad on a
  * scroller that does not genuinely overflow is a dead tab stop and a duplicate landmark, and
  * its rule that the table is NEVER reflowed — no `display: block` on tr/td/th at any
- * breakpoint. The divergence is filed as an issue rather than decided here.
+ * breakpoint. The divergence is filed as #239, with this measurement attached, rather than
+ * decided here: whether the repo wants a shareable adopted primitive sheet is an architectural
+ * question and not this element's to answer.
  */
 
 :host {

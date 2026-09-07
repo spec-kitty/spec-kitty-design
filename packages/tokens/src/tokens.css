@@ -111,7 +111,8 @@
      --sk-color-data-* declaration by exact string twice per theme block. That
      is not "small and mechanical" on an element that landed unchanged one
      mission ago, and #179 binds this mission to extend none of its API. Filed
-     rather than half-done.
+     as #240, with the surface-by-surface measurement attached, rather than
+     half-done.
 
      FOUR series inks, not one, because a line chart carries more than one
      series and the fourth channel matters: hue COLLAPSES under forced colors,

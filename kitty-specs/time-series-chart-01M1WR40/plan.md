@@ -142,8 +142,8 @@ just-landed element's published API text and rewrites one of its tests.
 **Decision**: define `--sk-chart-*` as the family, give the three roles it shares with #148 the *same
 underlying values*, and prove the equivalence by **computed value in both themes** rather than by
 comment. That discharges "one chart token family shared with #148" as far as is possible without
-touching #148, and reduces the eventual retrofit to a pure rename. The retrofit is filed as an issue
-with the measurement. Half-retrofitting is explicitly refused.
+touching #148, and reduces the eventual retrofit to a pure rename. The retrofit is filed as #240
+with the surface-by-surface measurement. Half-retrofitting is explicitly refused.
 
 ### D-3 — The gap is a drawn object with its own `::part()`, and that is what the mutation reds
 
