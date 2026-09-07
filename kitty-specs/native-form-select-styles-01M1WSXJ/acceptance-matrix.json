@@ -164,9 +164,9 @@
     },
     {
       "invariant_id": "NI-003-no-forbidden-select-css",
-      "description": "The stylesheet has no appearance reset, forced-color suppression, generated content, transition or animation",
+      "description": "The stylesheet has no appearance reset, forced-color suppression, generated content, motion or replacement-indicator mechanism",
       "verification_method": "grep_absence",
-      "verification_command": "appearance\\\\s*:\\\\s*none|forced-color-adjust\\\\s*:\\\\s*none|content\\\\s*:|transition\\\\s*:|animation\\\\s*:",
+      "verification_command": "appearance\\\\s*:\\\\s*none|forced-color-adjust\\\\s*:\\\\s*none|content\\\\s*:|transition\\\\s*:|animation\\\\s*:|background-image\\\\s*:|mask(?:-image)?\\\\s*:|(?:linear|radial|conic)-gradient\\\\s*\\\\(|url\\\\s*\\\\(|::(?:before|after)",
       "result": "pending",
       "evidence": null,
       "scope": "packages/styles/src/form-select"
