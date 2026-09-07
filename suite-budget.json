@@ -279,6 +279,13 @@
       "tests": 412,
       "seconds": 767.3,
       "note": "CI, PR #241 (#179), run 34127252576 / job 101758720190. The first post-#225 measurement from a mission other than #225's own: green 412-assertion Chromium baseline with all 118 registry pairs present, 37 mutated sources resolved with zero full-suite fallbacks, all 165 mutations producing their named red with no collateral. 72.4 percent of the 1059.7s ceiling against #249's 72.2 percent projection for this exact branch. NOT RAISED — above the worst prior observation, below the ceiling, which this file's own rule says is not a raise trigger."
+    },
+    {
+      "sha": "6ab9334",
+      "mutations": 166,
+      "tests": 417,
+      "seconds": 744.5,
+      "note": "CI, PR #260 (#259), run 34133326195 / job 101778414604. Recorded because this file's standing instruction is to re-measure whenever the mutation set OR the test set grows, and this mission grows both: 165 -> 166 arms (one SC-011 arm against the composition module) and 412 -> 417 assertions (five over the composed tree). Green 417-assertion Chromium baseline with all 119 registry pairs present, the impact graph resolving 38 mutated sources with zero full-suite fallbacks, and every arm producing its named red with no collateral. The separate guard step passed 10/10 in 56.1s and the ordinary suite in 24.7s under its 40s ceiling. NOT RAISED, and the arithmetic is worth stating because it cuts against the direction the set moved: 744.5s for 166 arms against 767.3s for 165 at 57a0af7 is FASTER with one more arm, which is the runner spread this file has measured at 2.2% within a head and 12.7% across four runs of an identical set. 744.5s is 70.3% of the 1059.7s ceiling, 315.2s of headroom. It IS above the 696.6s worst observation the ceiling was computed from, and this file's own rule for that case is explicit: a later run above the worst observation does not by itself demand a raise; a later run above the CEILING does."
     }
   ]
 }
