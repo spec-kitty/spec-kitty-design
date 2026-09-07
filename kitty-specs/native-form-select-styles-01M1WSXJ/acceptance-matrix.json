@@ -161,6 +161,15 @@
       "verification_command": "test \"$(rg -o --pcre2 \"\\\\.sk-form-select(?:--compact)?(?=[^A-Za-z0-9_-]|$)\" packages/styles/src/form-select/sk-form-select.css | sort -u | wc -l)\" -eq 2 && ! rg -n --pcre2 \"\\\\.sk-form-select(?!--compact)(?:__[A-Za-z0-9_-]+|--(?!compact)[A-Za-z0-9_-]+)\" packages/styles/src/form-select/sk-form-select.css",
       "result": "pending",
       "evidence": null
+    },
+    {
+      "invariant_id": "NI-003-no-forbidden-select-css",
+      "description": "The stylesheet has no appearance reset, forced-color suppression, generated content, transition or animation",
+      "verification_method": "grep_absence",
+      "verification_command": "appearance\\\\s*:\\\\s*none|forced-color-adjust\\\\s*:\\\\s*none|content\\\\s*:|transition\\\\s*:|animation\\\\s*:",
+      "result": "pending",
+      "evidence": null,
+      "scope": "packages/styles/src/form-select"
     }
   ]
 }
