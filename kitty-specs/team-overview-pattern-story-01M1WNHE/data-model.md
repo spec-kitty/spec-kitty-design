@@ -70,4 +70,3 @@ selected projection.
 7. Amber maps to at most two documented meanings.
 8. No warning gains link semantics without a target.
 9. No Team Kitty or runtime-time dependency exists.
-

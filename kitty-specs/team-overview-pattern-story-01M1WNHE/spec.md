@@ -1,11 +1,11 @@
 # Mission Specification: Team overview pattern story
 
-**Mission Branch**: `mission/team-overview-pattern-story`  
-**Created**: 2026-09-07  
-**Status**: Specification complete — ready for planning  
+**Mission Branch**: `mission/team-overview-pattern-story`\
+**Created**: 2026-09-07\
+**Status**: Specification complete — ready for planning\
 **Input**: GitHub issue #150 under epic #144, the complete child-mission contracts, ADR-9,
-ADR-10, ADR-11, the #76 authoring recipe, and the operator-approved Stitch references  
-**Target**: One aggregate pull request into `train/elements-first` with `Refs #150`  
+ADR-10, ADR-11, the #76 authoring recipe, and the operator-approved Stitch references\
+**Target**: One aggregate pull request into `train/elements-first` with `Refs #150`\
 **Squad tier**: C — three independent Codex lenses pre-merge
 
 ## Outcome

@@ -1,7 +1,7 @@
 # Tasks: team-overview-pattern-story
 
-**Input**: `spec.md`, `plan.md`, `research.md`, `data-model.md`, `quickstart.md`  
-**Branch**: `mission/team-overview-pattern-story` (mission target and eventual aggregate PR head)  
+**Input**: `spec.md`, `plan.md`, `research.md`, `data-model.md`, `quickstart.md`\
+**Branch**: `mission/team-overview-pattern-story` (mission target and eventual aggregate PR head)\
 **External merge target**: `train/elements-first`
 
 One cohesive work package. The immutable fixture, selectors, composition, story variants, story
@@ -68,4 +68,3 @@ the future Team Kitty seam.
   commit.
 - T010 must set #150 from `in-mission` to terminal `fixed` before the WP moves to done, preventing
   the post-merge issue-matrix defect found during #148 closeout.
-

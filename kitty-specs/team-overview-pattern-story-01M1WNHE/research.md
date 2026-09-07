@@ -73,4 +73,3 @@ This pattern owns no element behavior, so it adds no behavior/mutation registry 
 belongs in story interaction assertions, Playwright semantic/layout/event tests, the story/axe
 ratchet, and CI-authoritative visual baselines. All generated package outputs are expected to remain
 unchanged after regeneration.
-

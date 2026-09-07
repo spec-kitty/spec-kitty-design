@@ -1,9 +1,9 @@
 # Implementation Plan: Team overview pattern story
 
 **Branch**: `mission/team-overview-pattern-story` | **Date**: 2026-09-07 | **Spec**:
-`kitty-specs/team-overview-pattern-story-01M1WNHE/spec.md`  
+`kitty-specs/team-overview-pattern-story-01M1WNHE/spec.md`\
 **Input**: GitHub issue #150, epic #144, approved Stitch references, ADR-9/10/11, and the
-#76 authoring recipe  
+#76 authoring recipe\
 **Base at planning**: `origin/train/elements-first@2bbbd7b7c2287d1c664902b0d8c4f7e353205c7c`
 
 ## Summary
@@ -25,18 +25,18 @@ candidate in parallel at the Tier-C point-cut.
 ## Technical Context
 
 **Language/Version**: TypeScript 5.x, modern browser JavaScript, HTML/CSS authored through Lit's
-`html` templates and existing design-system tokens  
+`html` templates and existing design-system tokens\
 **Primary Dependencies**: Storybook 10.6 web-components/Vite, Lit 3.3, `storybook/test` spies,
-Playwright 1.62, axe-playwright, Vitest 4.1  
-**Storage**: N/A; immutable in-memory story fixture only  
+Playwright 1.62, axe-playwright, Vitest 4.1\
+**Storage**: N/A; immutable in-memory story fixture only\
 **Testing**: direct selector tests where useful, Storybook play-function assertions, Playwright
 Chromium/Firefox/WebKit semantic/layout/event checks, axe over every ratcheted story, Chromium visual
-regression, existing full repository gates  
-**Target Platform**: Storybook static build and evergreen Chromium/Firefox/WebKit consumers  
-**Project Type**: Nx monorepo design system; Storybook-only pattern composition  
-**Performance Goals**: existing fail-closed Storybook build below 180 seconds  
+regression, existing full repository gates\
+**Target Platform**: Storybook static build and evergreen Chromium/Firefox/WebKit consumers\
+**Project Type**: Nx monorepo design system; Storybook-only pattern composition\
+**Performance Goals**: existing fail-closed Storybook build below 180 seconds\
 **Constraints**: no new custom element, package API, token, child implementation change, Team Kitty
-import, runtime clock, fetching, routing, store, or private shadow-root reach-through  
+import, runtime clock, fetching, routing, store, or private shadow-root reach-through\
 **Scale/Scope**: six discoverable stories; one raw overview fixture; 62 transition moves; 50 open
 WPs; full composition at 1280/1440 and narrow at 390×844
 
