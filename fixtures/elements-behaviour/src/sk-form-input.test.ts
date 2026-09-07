@@ -1,6 +1,10 @@
+/* eslint-disable @nx/enforce-module-boundaries -- #225: this file imports the element modules
+   it EXERCISES, not the package barrel. The mutation harness selects each arm's tests from
+   Vitest's dependency graph, and one barrel import puts every element source in every behaviour
+   test's graph — which is what made that filter inert. */
 import { beforeEach, expect, test } from 'vitest';
+import '../../../packages/elements/src/form-input/sk-form-input.js';
 import { userEvent } from '@vitest/browser/context';
-import '@spec-kitty/elements';
 
 /**
  * <sk-form-input> — the first REAL subject SC-002…SC-005 have ever had.

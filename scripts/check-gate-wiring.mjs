@@ -688,6 +688,15 @@ else {
     // command patterns cannot satisfy each other, because `check-gate-wiring-defeats.mjs` is not
     // `check-gate-wiring.mjs` followed by a space or an end of line.
     [/node\s+scripts\/check-gate-wiring-defeats\.mjs(\s|$)/, "the wiring checker's own defeat table", 'scripts/check-gate-wiring-defeats.mjs'],
+    // #225, both entries with the gate itself, per every comment above. The behaviour-fixture
+    // import gate is what keeps `selftestCeilingSeconds` describing the suite it bounds: one
+    // `import '@spec-kitty/elements'` in that fixture puts its file back into EVERY element
+    // arm's selection, and enough of them return the mutation harness to O(arms x elements) —
+    // the exponent the ceiling's five raises were all about. Its own probe table is required
+    // separately because it carries an end-to-end plant-and-detect arm, and a table that stops
+    // running is a gate whose defeated forms quietly reopen.
+    [/node\s+scripts\/check-behaviour-fixture-imports\.mjs(?!\s*--selftest)(\s|$)/, 'the behaviour-fixture barrel-import gate', 'scripts/check-behaviour-fixture-imports.mjs'],
+    [/node\s+scripts\/check-behaviour-fixture-imports\.mjs\s+--selftest(\s|$)/, "the fixture-import gate's own probe table", 'scripts/check-behaviour-fixture-imports.mjs --selftest'],
   ];
 
   /**

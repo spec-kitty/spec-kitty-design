@@ -1,3 +1,7 @@
+/* eslint-disable @nx/enforce-module-boundaries -- #225: this file imports the element modules
+   it EXERCISES, not the package barrel. The mutation harness selects each arm's tests from
+   Vitest's dependency graph, and one barrel import puts every element source in every behaviour
+   test's graph — which is what made that filter inert. */
 /**
  * <sk-blog-card> — #78, the stylesheet-composition ruling.
  *
@@ -6,13 +10,14 @@
  * consumption paths cannot diverge the way they would have under element nesting.
  */
 import { beforeEach, expect, test } from 'vitest';
-import '@spec-kitty/elements';
+import '../../../packages/elements/src/blog-card/sk-blog-card.js';
+import '../../../packages/elements/src/card/sk-card.js';
+import skBlogCardSheet from '../../../packages/elements/src/blog-card/sk-blog-card.css.js';
+import skCardSheet from '../../../packages/elements/src/card/sk-card.css.js';
 import {
   PLACEHOLDER_THUMBNAIL,
   blogCardStaticHtml,
-  skBlogCardSheet,
-  skCardSheet,
-} from '@spec-kitty/elements';
+} from '../../../packages/elements/src/blog-card/sk-blog-card.markup.js';
 import { installTokenSheet } from './token-sheet.js';
 
 beforeEach(installTokenSheet);

@@ -1,5 +1,9 @@
+/* eslint-disable @nx/enforce-module-boundaries -- #225: this file imports the element modules
+   it EXERCISES, not the package barrel. The mutation harness selects each arm's tests from
+   Vitest's dependency graph, and one barrel import puts every element source in every behaviour
+   test's graph — which is what made that filter inert. */
 import { beforeEach, expect, test } from 'vitest';
-import '@spec-kitty/elements';
+import '../../../packages/elements/src/nav-pill/sk-nav-pill.js';
 
 /**
  * <sk-nav-pill> — the first BEHAVIOURAL component on the ADR-8 base layer.
@@ -113,7 +117,7 @@ test('[SC-010] a property assigned before the definition loads is applied on upg
   el.isOpen = true;
   document.body.append(el);
 
-  const { SkNavPill } = (await import('@spec-kitty/elements')) as unknown as {
+  const { SkNavPill } = (await import('../../../packages/elements/src/nav-pill/sk-nav-pill.js')) as unknown as {
     SkNavPill: CustomElementConstructor;
   };
   customElements.define('sk-nav-pill-late', class extends SkNavPill {});

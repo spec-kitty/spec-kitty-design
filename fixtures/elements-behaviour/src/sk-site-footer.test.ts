@@ -1,3 +1,7 @@
+/* eslint-disable @nx/enforce-module-boundaries -- #225: this file imports the element modules
+   it EXERCISES, not the package barrel. The mutation harness selects each arm's tests from
+   Vitest's dependency graph, and one barrel import puts every element source in every behaviour
+   test's graph — which is what made that filter inert. */
 /**
  * <sk-site-footer> — #77's remaining component, and the last in the catalogue apart from
  * form-field (#141).
@@ -9,8 +13,12 @@
  * ruling had already been recorded and contradicted.
  */
 import { beforeEach, expect, test } from 'vitest';
-import '@spec-kitty/elements';
-import { PLACEHOLDER_LEGAL, siteFooterStaticHtml, skSiteFooterSheet } from '@spec-kitty/elements';
+import '../../../packages/elements/src/site-footer/sk-site-footer.js';
+import skSiteFooterSheet from '../../../packages/elements/src/site-footer/sk-site-footer.css.js';
+import {
+  PLACEHOLDER_LEGAL,
+  siteFooterStaticHtml,
+} from '../../../packages/elements/src/site-footer/sk-site-footer.markup.js';
 import { installTokenSheet } from './token-sheet.js';
 import { contrast, assertThemesDiffered } from './contrast.js';
 

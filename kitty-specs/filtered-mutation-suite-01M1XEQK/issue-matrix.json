@@ -1,0 +1,142 @@
+{
+  "rows": {
+    "#179": {
+      "evidence_ref": "Referenced only as the blocked consumer of the ceiling. No code of #179 is touched.",
+      "fr": null,
+      "nfr": null,
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": null,
+      "scope": "referenced-only",
+      "source_file": "spec.md",
+      "title": "sk-time-series-chart (parent of PR #241)",
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
+    },
+    "#193": {
+      "evidence_ref": "Cited in spec.md only, as the record that motivated rejecting a coverage- or declaration-derived observer set in favour of making the import graph honest. No code of these issues is touched.",
+      "fr": null,
+      "nfr": null,
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": null,
+      "scope": "referenced-only",
+      "source_file": "spec.md",
+      "title": "cited as prior art: #193's probe table — a green over an empty or stale derivation",
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
+    "#197": {
+      "evidence_ref": "Cited in spec.md only, as the record that motivated rejecting a coverage- or declaration-derived observer set in favour of making the import graph honest. No code of these issues is touched.",
+      "fr": null,
+      "nfr": null,
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": null,
+      "scope": "referenced-only",
+      "source_file": "spec.md",
+      "title": "cited as prior art: #197's collapsed extractor — a green over an empty or stale derivation",
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
+    "#225": {
+      "evidence_ref": "PR #249; CI run 34119467072 jobs 101733926149 (679.4s), 101738107560 (672.7s), 101742264649 (687.4s) and job 101747235751 (696.6s), 157/157 arms green, 10/10 guards in each; ceiling 1059.7 = 696.6 x 1.5213",
+      "fr": [
+        "FR-001",
+        "FR-002",
+        "FR-003",
+        "FR-004"
+      ],
+      "nfr": [
+        "NFR-001",
+        "NFR-002",
+        "NFR-003",
+        "NFR-004"
+      ],
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": [
+        "SC-001",
+        "SC-002",
+        "SC-003",
+        "SC-004",
+        "SC-005",
+        "SC-007"
+      ],
+      "scope": "in-scope",
+      "source_file": "spec.md",
+      "title": "[ci] fund the filtered-suite redesign so the mutation budget stops needing raises",
+      "verdict": "fixed",
+      "wp": "WP01"
+    },
+    "#232": {
+      "evidence_ref": "Cited in spec.md only, as the record that motivated rejecting a coverage- or declaration-derived observer set in favour of making the import graph honest. No code of these issues is touched.",
+      "fr": null,
+      "nfr": null,
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": null,
+      "scope": "referenced-only",
+      "source_file": "spec.md",
+      "title": "cited as prior art: #232's derivation — a green over an empty or stale derivation",
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
+    "#234": {
+      "evidence_ref": "Cited in spec.md only, as the record that motivated rejecting a coverage- or declaration-derived observer set in favour of making the import graph honest. No code of these issues is touched.",
+      "fr": null,
+      "nfr": null,
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": null,
+      "scope": "referenced-only",
+      "source_file": "spec.md",
+      "title": "cited as prior art: #234's hidden heading — a green over an empty or stale derivation",
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
+    "#238": {
+      "evidence_ref": "Investigated and answered at https://github.com/spec-kitty/spec-kitty-design/issues/238#issuecomment-5568502201: it is NOT a contributor to the mutation harness wall-clock spread (harness is chromium-only; the spread is a uniform 1.56x runner multiplier with no outlier arm), but it reproduced on this PR losing 9 of 79 files, and the same class was reproduced on chromium inside the harness. Left open, not fixed here.",
+      "fr": null,
+      "nfr": null,
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": null,
+      "scope": "referenced-only",
+      "source_file": "spec.md",
+      "title": "[ci] the behaviour suite's webkit lane intermittently stops mid-queue",
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
+    },
+    "#241": {
+      "evidence_ref": "Its 165-arm set, measured on a local merge, resolves to 9.58 files per arm once its own sk-time-series-chart.test.ts is converted, projecting 745s against the 1059.7s ceiling. As merged today it FAILS the new scripts/check-behaviour-fixture-imports.mjs gate on that file; converting it is now required rather than suggested. Noted on the PR. Not touched by this mission.",
+      "fr": null,
+      "nfr": null,
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": null,
+      "scope": "referenced-only",
+      "source_file": "spec.md",
+      "title": "sk-time-series-chart: a missing interval is a visible gap (#179)",
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
+    },
+    "#250": {
+      "evidence_ref": "Filed by this mission as the measured next lever; it is now the whole of the per-arm fixed block.",
+      "fr": null,
+      "nfr": null,
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": null,
+      "scope": "filed-followup",
+      "source_file": "spec.md",
+      "title": "[ci] the generated React wrappers import the whole elements barrel",
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
+    },
+    "#251": {
+      "evidence_ref": "Filed by this mission after a review lens showed the six retained in-body barrel imports did not assert it and registered-elements.test.ts does not either.",
+      "fr": null,
+      "nfr": null,
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": null,
+      "scope": "filed-followup",
+      "source_file": "spec.md",
+      "title": "[ci] nothing asserts that the elements barrel exports the constructor the registry holds",
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
+    }
+  },
+  "schema_version": 1
+}

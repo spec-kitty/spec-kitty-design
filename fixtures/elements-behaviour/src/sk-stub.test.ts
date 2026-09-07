@@ -1,3 +1,7 @@
+/* eslint-disable @nx/enforce-module-boundaries -- #225: this file imports the element modules
+   it EXERCISES, not the package barrel. The mutation harness selects each arm's tests from
+   Vitest's dependency graph, and one barrel import puts every element source in every behaviour
+   test's graph — which is what made that filter inert. */
 /**
  * <sk-stub> — the behaviours the ELEMENTS package owns rather than the synthetic fixture.
  *
@@ -8,7 +12,9 @@
  * without special-casing, and the special case is what the rule exists to remove.
  */
 import { expect, test, vi } from 'vitest';
-import { define, SkStub, skStubSheet } from '@spec-kitty/elements';
+import skStubSheet from '../../../packages/elements/src/stub/sk-stub.css.js';
+import { define } from '../../../packages/elements/src/define.js';
+import { SkStub } from '../../../packages/elements/src/stub/sk-stub.js';
 
 /**
  * The TWO elements-owned behaviours. Their subject is `packages/elements/src`, reached
@@ -17,7 +23,7 @@ import { define, SkStub, skStubSheet } from '@spec-kitty/elements';
  * No alias redirection is needed, contrary to an earlier version of this comment: the
  * harness copies `packages/` into its temp dir and the config resolves its alias against
  * `dirname(import.meta.url)`, so the alias follows the copy. The comment also cited a
- * "guard 10" that does not exist — there are eight numbered guards.
+ * "guard 10" that does not exist — there are nine numbered guards since #225 added guard 9.
  *
  * SC-013 is NOT here: packages/elements/src contains no `part=` and no `@csspart`, and the
  * manifest declares zero cssParts, so an elements-owned part mutation would have no

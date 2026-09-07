@@ -1,3 +1,7 @@
+/* eslint-disable @nx/enforce-module-boundaries -- #225: this file imports the element modules
+   it EXERCISES, not the package barrel. The mutation harness selects each arm's tests from
+   Vitest's dependency graph, and one barrel import puts every element source in every behaviour
+   test's graph — which is what made that filter inert. */
 /**
  * <sk-button> — #79's primitives batch.
  *
@@ -6,15 +10,15 @@
  * both degrade paths work.
  */
 import { beforeEach, expect, test } from 'vitest';
-import '@spec-kitty/elements';
+import '../../../packages/elements/src/button/sk-button.js';
+import skButtonSheet from '../../../packages/elements/src/button/sk-button.css.js';
+import { SkButton } from '../../../packages/elements/src/button/sk-button.js';
 import {
   BUTTON_SIZES,
   BUTTON_VARIANTS,
-  SkButton,
   buttonClasses,
   buttonStaticHtml,
-  skButtonSheet,
-} from '@spec-kitty/elements';
+} from '../../../packages/elements/src/button/sk-button.markup.js';
 import { installTokenSheet } from './token-sheet.js';
 
 beforeEach(installTokenSheet);

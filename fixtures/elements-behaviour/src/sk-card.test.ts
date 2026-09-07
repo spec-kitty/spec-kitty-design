@@ -1,6 +1,15 @@
+/* eslint-disable @nx/enforce-module-boundaries -- #225: this file imports the element modules
+   it EXERCISES, not the package barrel. The mutation harness selects each arm's tests from
+   Vitest's dependency graph, and one barrel import puts every element source in every behaviour
+   test's graph — which is what made that filter inert. */
 import { beforeEach, expect, test } from 'vitest';
-import '@spec-kitty/elements';
-import { CARD_STATUSES, STATUS_TONES, cardClasses, cardStaticHtml } from '@spec-kitty/elements';
+import '../../../packages/elements/src/card/sk-card.js';
+import {
+  CARD_STATUSES,
+  cardClasses,
+  cardStaticHtml,
+} from '../../../packages/elements/src/card/sk-card.markup.js';
+import { STATUS_TONES } from '../../../packages/elements/src/status-indicator/status-tones.js';
 import { installTokenSheet } from './token-sheet.js';
 
 /**
@@ -125,7 +134,7 @@ test('[SC-010] a status property assigned before definition survives upgrade and
   el.status = 'danger';
   el.textContent = 'Failed';
   document.body.append(el);
-  const { SkCard } = await import('@spec-kitty/elements');
+  const { SkCard } = await import('../../../packages/elements/src/card/sk-card.js');
   customElements.define('sk-card-late', class extends SkCard {});
   await customElements.whenDefined('sk-card-late');
   await el.updateComplete;

@@ -1,3 +1,7 @@
+/* eslint-disable @nx/enforce-module-boundaries -- #225: this file imports the element modules
+   it EXERCISES, not the package barrel. The mutation harness selects each arm's tests from
+   Vitest's dependency graph, and one barrel import puts every element source in every behaviour
+   test's graph — which is what made that filter inert. */
 /**
  * <sk-pill-tag> — #79's primitives batch.
  *
@@ -5,14 +9,14 @@
  * axes of ONE component, where the shape used to be a second component sharing the directory.
  */
 import { beforeEach, expect, test } from 'vitest';
-import '@spec-kitty/elements';
+import '../../../packages/elements/src/pill-tag/sk-pill-tag.js';
+import skPillTagSheet from '../../../packages/elements/src/pill-tag/sk-pill-tag.css.js';
 import {
   PILL_TAG_SHAPES,
   PILL_TAG_VARIANTS,
   pillTagClasses,
   pillTagStaticHtml,
-  skPillTagSheet,
-} from '@spec-kitty/elements';
+} from '../../../packages/elements/src/pill-tag/sk-pill-tag.markup.js';
 import { installTokenSheet } from './token-sheet.js';
 import { contrast, assertThemesDiffered } from './contrast.js';
 

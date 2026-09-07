@@ -1,3 +1,7 @@
+/* eslint-disable @nx/enforce-module-boundaries -- #225: this file imports the element modules
+   it EXERCISES, not the package barrel. The mutation harness selects each arm's tests from
+   Vitest's dependency graph, and one barrel import puts every element source in every behaviour
+   test's graph — which is what made that filter inert. */
 /**
  * <sk-check-bullet> — #79's primitives batch.
  *
@@ -5,8 +9,11 @@
  * batch: it has to participate in a LIST, and a custom element inside a <ul> is not a list item.
  */
 import { beforeEach, expect, test } from 'vitest';
-import '@spec-kitty/elements';
-import { checkBulletStaticHtml, skCheckBulletSheet } from '@spec-kitty/elements';
+import '../../../packages/elements/src/check-bullet/sk-check-bullet.js';
+import skCheckBulletSheet from '../../../packages/elements/src/check-bullet/sk-check-bullet.css.js';
+import {
+  checkBulletStaticHtml,
+} from '../../../packages/elements/src/check-bullet/sk-check-bullet.markup.js';
 import { installTokenSheet } from './token-sheet.js';
 import { contrast, assertThemesDiffered } from './contrast.js';
 
