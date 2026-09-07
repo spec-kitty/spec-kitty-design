@@ -246,6 +246,24 @@ jobs:
       # matched the comment explaining why the thing was excluded.
       - name: "[ENFORCED] Adopted CSS hygiene (SK-D01)"
         run: node scripts/check-element-css-hygiene.mjs
+      # #259, the last open exit criterion of epic #183: "a composition fixture demonstrates that
+      # the patterns can be assembled from public surfaces WITHOUT private shadow-root
+      # reach-through or duplicated component CSS". Two falsifiable claims, and before this gate
+      # NEITHER was covered. The cross-root gate two steps up was assumed to cover the first and
+      # does not reach a pattern fixture: four cross-root selectors planted into
+      # team-overview.stories.ts left it printing the identical green line at the identical 451
+      # rules. stylelint globs packages/**/*.css, so an inline <style> inside a .ts is never
+      # parsed at all. The two also point in opposite directions — ADR-9 asks whether an
+      # element's own sheet reaches OUT, this asks whether a consumer reaches IN.
+      # TWO steps, the selftest first, for the reason every gate above states: a probe table that
+      # stops running is a gate whose defeated forms quietly reopen. This one additionally
+      # carries an end-to-end arm that plants violations into a COPY OF THE REAL patterns
+      # directory, because "the glob reaches the fixtures that exist" is precisely the assumption
+      # that turned out to be false of the gate this one supplements.
+      - name: "[ENFORCED] Pattern-composition gate self-check (#183 exit criterion, #259)"
+        run: node scripts/check-pattern-composition.mjs --selftest
+      - name: "[ENFORCED] Pattern fixtures compose from public surfaces only (#183, #259)"
+        run: node scripts/check-pattern-composition.mjs
       # The IIFE entry was a hand-maintained list of side-effect imports. #73 added an element
       # to index.ts and not to it, and everything stayed green — the test lane resolves the
       # package to index.ts, the analyzer reads source, Storybook has its own module graph.
