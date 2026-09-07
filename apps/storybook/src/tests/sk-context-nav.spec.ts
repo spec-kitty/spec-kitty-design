@@ -227,6 +227,26 @@ function nonColourCue(cue: Awaited<ReturnType<typeof linkCue>>): string {
   });
 }
 
+function parseRgb(color: string): [number, number, number] {
+  const channels = color.match(/^rgba?\(\s*([\d.]+)[, ]+\s*([\d.]+)[, ]+\s*([\d.]+)/);
+  if (channels === null) throw new Error(`expected an RGB color, received ${color}`);
+  return [Number(channels[1]), Number(channels[2]), Number(channels[3])];
+}
+
+function relativeLuminance(color: string): number {
+  const channels = parseRgb(color).map((channel) => {
+    const value = channel / 255;
+    return value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
+  });
+  return 0.2126 * channels[0]! + 0.7152 * channels[1]! + 0.0722 * channels[2]!;
+}
+
+function contrastRatio(first: string, second: string): number {
+  const lighter = Math.max(relativeLuminance(first), relativeLuminance(second));
+  const darker = Math.min(relativeLuminance(first), relativeLuminance(second));
+  return (lighter + 0.05) / (darker + 0.05);
+}
+
 test.describe('sk-context-nav source, markup, and distribution contract', () => {
   test.skip(({ browserName }) => browserName !== 'chromium', 'browser-independent contracts run once');
 
@@ -249,8 +269,8 @@ test.describe('sk-context-nav source, markup, and distribution contract', () => 
     postcss.parse(source, { from: CONTEXT_NAV_CSS }).walkRules((rule) => {
       currentSelectors.push(...selectorStrings(rule.selector).filter((selector) => selector.includes('[aria-current')));
     });
-    expect(currentSelectors.length).toBeGreaterThan(0);
-    expect(currentSelectors.every((selector) => selector === '.sk-context-nav__link[aria-current]:not([aria-current="false"])')).toBe(true);
+    const currentSelector = '.sk-context-nav__link[aria-current]:not([aria-current="false"])';
+    expect(new Set(currentSelectors)).toEqual(new Set([currentSelector, `${currentSelector}:active`]));
 
     const audit = execFileSync(process.execPath, [TOKEN_LITERAL_CHECKER, CONTEXT_NAV_CSS], { encoding: 'utf8' });
     expect(audit).toContain('1 explicit component stylesheet(s) use tokens for all governed values');
@@ -550,6 +570,55 @@ test.describe('sk-context-nav state and resilience contract', () => {
     expect(currentCue.fontWeight).not.toBe(restCue.fontWeight);
     expect(currentCue.borderInlineStartWidth).not.toBe(restCue.borderInlineStartWidth);
     expect(new Set([restCue, hoverCue, activeCue, focusCue, currentCue].map(nonColourCue))).toHaveProperty('size', 5);
+  });
+
+  test('current rest, hover, and trusted mouse-down have distinct non-colour cues', async ({ page }) => {
+    const { nav } = await openStory(page, 'current-top-level');
+    const current = nav.locator('.sk-context-nav__link[aria-current]:not([aria-current="false"])');
+    const restCue = await linkCue(current);
+    await current.hover();
+    const hoverCue = await linkCue(current);
+    const box = await current.boundingBox();
+    expect(box).not.toBeNull();
+    await page.mouse.move(box!.x + box!.width / 2, box!.y + box!.height / 2);
+    await page.mouse.down();
+    expect(await current.evaluate((node) => node.matches(':active'))).toBe(true);
+    const activeCue = await linkCue(current);
+    await page.mouse.up();
+
+    expect(new Set([restCue, hoverCue, activeCue].map(nonColourCue))).toHaveProperty('size', 3);
+  });
+
+  test('focused LightMode link outline reaches 3:1 against every adjacent light surface', async ({ page }) => {
+    const { nav } = await openStory(page, 'light-mode');
+    const link = nav.locator('.sk-context-nav__link:not([aria-current])').first();
+    await page.locator('body').click({ position: { x: 1, y: 1 } });
+    await page.keyboard.press('Tab');
+    await page.keyboard.press('Tab');
+    await expect(link).toBeFocused();
+    const colors = await link.evaluate((node) => {
+      const style = getComputedStyle(node);
+      const frame = node.closest('[data-context-nav-story-frame]');
+      if (frame === null) throw new Error('context navigation story frame is missing');
+      return {
+        frameBackground: getComputedStyle(frame).backgroundColor,
+        linkBackground: style.backgroundColor,
+        outlineColor: style.outlineColor,
+        outlineStyle: style.outlineStyle,
+        outlineWidth: style.outlineWidth,
+      };
+    });
+    expect(colors.outlineStyle).not.toBe('none');
+    expect(Number.parseFloat(colors.outlineWidth)).toBeGreaterThan(0);
+    for (const [surface, background] of [
+      ['link', colors.linkBackground],
+      ['frame', colors.frameBackground],
+    ] as const) {
+      expect(
+        contrastRatio(colors.outlineColor, background),
+        `${colors.outlineColor} focus outline against ${surface} background ${background}`,
+      ).toBeGreaterThanOrEqual(3);
+    }
   });
 
   test('primary rows meet the minimum target and visited history remains presentation-neutral', async ({ page }) => {

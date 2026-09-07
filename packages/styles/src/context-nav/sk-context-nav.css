@@ -90,7 +90,7 @@
 
 .sk-context-nav__link:focus-visible,
 .sk-context-nav__overflow-link:focus-visible {
-  outline-color: var(--sk-border-focus);
+  outline-color: var(--sk-color-accent);
   outline-style: solid;
   outline-width: var(--sk-border-width-2);
   outline-offset: var(--sk-border-width-1);
@@ -99,10 +99,15 @@
 .sk-context-nav__link[aria-current]:not([aria-current="false"]) {
   color: var(--sk-fg-default);
   background: var(--sk-surface-pill);
-  border-inline-start-color: var(--sk-border-focus);
+  border-inline-start-color: var(--sk-color-accent);
   border-inline-start-style: solid;
   border-inline-start-width: var(--sk-border-width-4);
   font-weight: var(--sk-weight-semibold);
+}
+
+.sk-context-nav__link[aria-current]:not([aria-current="false"]):active {
+  background: var(--sk-surface-muted);
+  border-inline-start-style: double;
 }
 
 .sk-context-nav__icon {
