@@ -31,7 +31,8 @@
       "notes": [
         "Codex implementation started under resolved frontend-freddy profile",
         "Implementation complete at product SHA 2a330b7a; CI-derived baselines at 1415ae44; CI run 34078606143 fully green; three independent Codex lenses approved.",
-        "Approved after exact-head local gates and CI Quality 34101924949 passed; review lane 7b44bbb is tree-identical to b2191e2 and preserves the reviewed implementation."
+        "Approved after exact-head local gates and CI Quality 34101924949 passed; review lane 7b44bbb is tree-identical to b2191e2 and preserves the reviewed implementation.",
+        "Done after verified lane integration and terminal #150 evidence. The lane was intentionally collapsed to the approved mission tip after review; --force acknowledges the resulting zero unique lane commits while real lane-to-target ancestry remains verified."
       ],
       "provider": "__resolved_provider_absent__",
       "review_result": {
