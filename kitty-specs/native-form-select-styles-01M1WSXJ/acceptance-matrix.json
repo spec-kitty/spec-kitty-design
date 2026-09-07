@@ -38,10 +38,10 @@
       "criterion_id": "FR-004",
       "description": "Verify FR-004 is satisfied",
       "proof_type": "automated_test",
-      "evidence": "3ca42f9; generated fixtures compose existing sk-form-field label/description classes",
+      "evidence": "7cbf6ce5ae27f1d995552deec32f0b463e8dac7f (product tree cf9d5045c0968add9056abc038401a17a7f24e9c); generated fixtures compose existing sk-form-field label/description classes",
       "pass_fail": "pass",
       "verified_by": "codex",
-      "verified_at": "2026-09-07T03:30:04.528453+00:00",
+      "verified_at": "2026-09-07T04:35:48.047277+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
