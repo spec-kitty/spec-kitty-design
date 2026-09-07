@@ -391,10 +391,10 @@
       "criterion_id": "NFR-004",
       "description": "At 390 by 844, zero label, value, or bar ownership overlaps or cross-item hit targets occur before or after horizontal scrolling.",
       "proof_type": "automated_test",
-      "evidence": "apps/storybook/src/tests/sk-bar-chart.spec.ts exact 390x844 test proves zero pairwise item overlap and exact per-datum value/bar/label hit ownership via ShadowRoot.elementFromPoint before/after horizontal scroll; Chromium/Firefox 2/2 at 375c187, CI WebKit pending under NFR-006",
+      "evidence": "apps/storybook/src/tests/sk-bar-chart.spec.ts proves exact 390x844 pairwise non-overlap and datum-owned value/bar/label hit testing before and after scroll; local Chromium/Firefox passed and exact-head CI run 34069071736 passed the 299-test Playwright job including WebKit.",
       "pass_fail": "pass",
       "verified_by": "codex",
-      "verified_at": "2026-09-06T22:37:14.592218+00:00",
+      "verified_at": "2026-09-07T00:58:40.910708+00:00",
       "notes": "Narrow viewport bounding-box and hit-test assertions.",
       "lane_owners": [
         "WP01"
