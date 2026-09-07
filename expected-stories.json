@@ -34,7 +34,8 @@
     "#209 opts in fourteen native styles-only workflow stories: eleven board states and three lane states. On the refreshed train after #148, total moves 189 -> 203. The duplicate-looking Default/Populated and DefaultDark entries are intentional separately addressable contract and visual evidence states; LightMode is a real .sk-light wrapper.",
     "#211 opts in all ten native light-DOM form-select stories, total 203 -> 213. Default is the T10 lane route, T12TwoFilters retains two independent native filters, and narrow/forced-colors/light are separately addressable acceptance evidence.",
     "#150 opts in the six Storybook-only Team overview pattern stories named as acceptance evidence. The fixture/selectors/render helpers are excluded from CSF story indexing; only the six user-facing variants count. On the refreshed train after #211, total moves 213 -> 219.",
-    "#179 opts sk-time-series-chart in with all FOURTEEN of its stories, total 219 -> 233 on the refreshed train after #249. Four are load-bearing beyond coverage and would be the ones a later mission could retire silently: `interior-gap` is the defect this element exists to refuse, shown as a working affordance; `annotated-gap` is the only evidence that annotation fires on a SUPPLIED threshold rather than an inferred one; `multiple-series` is the only place four dash patterns and four marker shapes are in one frame, which is the mission's claim that differentiation survives hue collapse — and it is the story apps/storybook/src/tests/sk-time-series-chart.spec.ts measures under forced colors; and `narrow-viewport` is the table doing its second job, as the narrow treatment, with the scroller region triad present because it genuinely overflows there. Docs entries are excluded, matching every other element here."
+    "#179 opts sk-time-series-chart in with all FOURTEEN of its stories, total 219 -> 233 on the refreshed train after #249. Four are load-bearing beyond coverage and would be the ones a later mission could retire silently: `interior-gap` is the defect this element exists to refuse, shown as a working affordance; `annotated-gap` is the only evidence that annotation fires on a SUPPLIED threshold rather than an inferred one; `multiple-series` is the only place four dash patterns and four marker shapes are in one frame, which is the mission's claim that differentiation survives hue collapse — and it is the story apps/storybook/src/tests/sk-time-series-chart.spec.ts measures under forced colors; and `narrow-viewport` is the table doing its second job, as the narrow treatment, with the scroller region triad present because it genuinely overflows there. Docs entries are excluded, matching every other element here.",
+    "#212 ratchets sixteen additive acceptance stories: four each for action-row card/T10 composition, entity-marker axes/images, status pulse/preferences, and inline empty-state presentations. On the refreshed train after #179, total moves 233 -> 249; every pre-existing story id remains present."
   ],
   "byElement": {
     "sk-action-row": [
@@ -45,6 +46,10 @@
       "elements-skactionrow--with-controls",
       "elements-skactionrow--long-content",
       "elements-skactionrow--selectable-states",
+      "elements-skactionrow--card-states",
+      "elements-skactionrow--card-long-content",
+      "elements-skactionrow--t-10-compact-item",
+      "elements-skactionrow--t-10-compact-item-light-mode",
       "elements-skactionrow--light-mode"
     ],
     "sk-app-shell": [
@@ -134,12 +139,20 @@
     "sk-empty-state": [
       "primitives-skemptystate-html--with-action",
       "primitives-skemptystate-html--without-action",
+      "primitives-skemptystate-html--inline",
+      "primitives-skemptystate-html--inline-long-narrow",
+      "primitives-skemptystate-html--inline-preferences",
+      "primitives-skemptystate-html--inline-light-mode",
       "primitives-skemptystate-html--light-mode"
     ],
     "sk-entity-marker": [
       "elements-skentitymarker--initials",
       "elements-skentitymarker--meaningful-icon",
       "elements-skentitymarker--decorative",
+      "elements-skentitymarker--axis-matrix",
+      "elements-skentitymarker--image-naming",
+      "elements-skentitymarker--long-label",
+      "elements-skentitymarker--compact-circle-light-mode",
       "elements-skentitymarker--light-mode"
     ],
     "sk-evidence-chain": [
@@ -283,6 +296,10 @@
       "elements-skstatusindicator--default",
       "elements-skstatusindicator--all-tones",
       "elements-skstatusindicator--long-text",
+      "elements-skstatusindicator--pulsing-states",
+      "elements-skstatusindicator--multiple-pulsing-all-tones",
+      "elements-skstatusindicator--pulsing-preferences",
+      "elements-skstatusindicator--pulsing-light-mode",
       "elements-skstatusindicator--light-mode"
     ],
     "sk-time-series-chart": [
@@ -339,5 +356,5 @@
       "patterns-team-overview--empty-partial-data"
     ]
   },
-  "total": 233
+  "total": 249
 }

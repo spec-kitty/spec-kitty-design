@@ -27,6 +27,9 @@ export interface SkActionRowProps extends Pick<
   /** Consumer-controlled current-row presentation. Activation never changes this value. */
   selected?: boolean;
 
+  /** Optional compact presentation. Only `card` is supported; invalid values use the default row layout. */
+  layout?: SkActionRowElement["layout"];
+
   /** Stable consumer-owned identifier included in activation requests. */
   rowId?: SkActionRowElement["rowId"];
 
@@ -63,12 +66,13 @@ export interface SkActionRowProps extends Pick<
  * --sk-font-display, --sk-font-mono, --sk-font-sans, --sk-motion-duration-fast,
  * --sk-motion-ease-out, --sk-radius-md, --sk-space-1, --sk-space-2, --sk-space-3,
  * --sk-space-4, --sk-space-5, --sk-surface-card, --sk-surface-muted, --sk-surface-pill,
- * --sk-text-base, --sk-text-sm, --sk-text-xs, --sk-weight-medium, --sk-weight-semibold.
+ * --sk-text-base, --sk-text-xs, --sk-weight-semibold.
  *
  * ## Attributes & Properties
  *
  * Component attributes and properties that can be applied to the element or by using JavaScript.
  *
+ * - `layout`: Optional compact presentation. Only `card` is supported; invalid values use the default row layout.
  * - `row-id`/`rowId`: Stable consumer-owned identifier included in activation requests.
  * - `selectable`: Enables the native primary trigger when `rowId` is non-empty.
  * - `selected`: Consumer-controlled current-row presentation. Activation never changes this value.
@@ -87,6 +91,7 @@ export interface SkActionRowProps extends Pick<
  * - `marker`: Consumer-supplied visual marker.
  * - `metadata`: Consumer-authored trailing metadata.
  * - `reference`: Consumer-authored reference or path.
+ * - `supporting`: Optional consumer-authored secondary context.
  * - `tags`: Consumer-authored semantic tags.
  * - `title`: Primary consumer-authored title.
  *
@@ -99,6 +104,7 @@ export interface SkActionRowProps extends Pick<
  * - `metadata`: Metadata projection wrapper.
  * - `reference`: Reference projection wrapper.
  * - `row`: Stable row root.
+ * - `supporting`: Optional secondary-context wrapper.
  * - `tags`: Tags projection wrapper.
  * - `title`: Title projection wrapper.
  * - `trigger`: Primary scan-content surface.

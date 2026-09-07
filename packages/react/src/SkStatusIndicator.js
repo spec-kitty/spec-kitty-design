@@ -6,6 +6,7 @@ import { createForwardedRefHandler } from "./react-utils.js";
 export const SkStatusIndicator = forwardRef((props, forwardedRef) => {
   const ref = useRef(null);
   const {
+    pulsing,
     tone,
     className,
     exportparts,
@@ -31,6 +32,7 @@ export const SkStatusIndicator = forwardRef((props, forwardedRef) => {
       for: htmlFor ?? props["for"],
       part: part,
       tabindex: tabIndex ?? props["tabindex"],
+      pulsing: pulsing ? true : undefined,
       style: { ...props.style },
     },
     props.children,

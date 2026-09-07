@@ -7,6 +7,8 @@ export const SkEntityMarker = forwardRef((props, forwardedRef) => {
   const ref = useRef(null);
   const {
     label,
+    shape,
+    size,
     className,
     exportparts,
     htmlFor,
@@ -26,6 +28,8 @@ export const SkEntityMarker = forwardRef((props, forwardedRef) => {
       ref: createForwardedRefHandler(ref, forwardedRef),
       ...restProps,
       label: label,
+      shape: shape,
+      size: size,
       class: className,
       exportparts: exportparts,
       for: htmlFor ?? props["for"],

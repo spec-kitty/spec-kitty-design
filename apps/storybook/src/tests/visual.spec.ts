@@ -391,6 +391,122 @@ test('SK-action-row selected and non-selectable analogues — visual baselines',
   await expect(host).toHaveScreenshot('sk-action-row-non-selectable.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
 });
 
+test('compact work-item extensions T10 dark — visual baseline', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  const host = await actionRowStory(page, 't-10-compact-item');
+  await expect(host).toHaveScreenshot('sk-compact-work-item-extensions-t10-dark.png', {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+  });
+});
+
+test('compact work-item extensions T10 light — visual baseline', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  const host = await actionRowStory(page, 't-10-compact-item-light-mode');
+  await expect(host).toHaveScreenshot('sk-compact-work-item-extensions-t10-light.png', {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+  });
+});
+
+test('compact work-item extensions narrow long card — visual baseline', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const host = await actionRowStory(page, 'card-long-content');
+  await host.evaluate((element) => {
+    const frame = element.parentElement!;
+    frame.style.width = '220px';
+    frame.style.inlineSize = '220px';
+    frame.style.maxInlineSize = '220px';
+  });
+  await expect(host).toHaveScreenshot('sk-compact-work-item-extensions-narrow-long-card.png', {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+  });
+});
+
+test('compact work-item extensions marker axis matrix — visual baseline', async ({ page }) => {
+  await page.goto('/iframe.html?id=elements-skentitymarker--axis-matrix&viewMode=story');
+  const markers = page.locator('sk-entity-marker');
+  await expect(markers).toHaveCount(4);
+  await markers.first().waitFor({ state: 'visible', timeout: 20000 });
+  await expect(markers.first().locator('..')).toHaveScreenshot(
+    'sk-compact-work-item-extensions-marker-axis-matrix.png',
+    { threshold: 0.02, maxDiffPixelRatio: 0.02 },
+  );
+});
+
+test('compact work-item extensions portrait and landscape crop — visual baseline', async ({ page }) => {
+  await page.goto('/iframe.html?id=elements-skentitymarker--image-naming&viewMode=story');
+  const first = page.locator('sk-entity-marker').first();
+  await first.waitFor({ state: 'visible', timeout: 20000 });
+  await page.evaluate(() => {
+    const marker = document.createElement('sk-entity-marker');
+    marker.setAttribute('label', 'Landscape subject');
+    marker.setAttribute('size', 'sm');
+    marker.setAttribute('shape', 'circle');
+    marker.innerHTML =
+      '<img data-landscape alt="" src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22120%22 height=%2260%22%3E%3Crect width=%22120%22 height=%2260%22 fill=%22%238fcb8f%22/%3E%3Ccircle cx=%2280%22 cy=%2230%22 r=%2218%22 fill=%22%231f2228%22/%3E%3C/svg%3E">';
+    document.querySelector('sk-entity-marker')!.parentElement!.append(marker);
+  });
+  await expect.poll(() => page.locator('img[data-landscape]').evaluate((image: HTMLImageElement) => image.complete))
+    .toBe(true);
+  await expect(first.locator('..')).toHaveScreenshot(
+    'sk-compact-work-item-extensions-marker-image-crop.png',
+    { threshold: 0.02, maxDiffPixelRatio: 0.02 },
+  );
+});
+
+test('compact work-item extensions pulse off/on reduced-motion fallback — visual baseline', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/iframe.html?id=elements-skstatusindicator--pulsing-preferences&viewMode=story');
+  const indicators = page.locator('sk-status-indicator');
+  await expect(indicators).toHaveCount(2);
+  await indicators.first().waitFor({ state: 'visible', timeout: 20000 });
+  await expect(indicators.first().locator('..')).toHaveScreenshot(
+    'sk-compact-work-item-extensions-pulse-reduced-motion.png',
+    { threshold: 0.02, maxDiffPixelRatio: 0.02 },
+  );
+});
+
+test('compact work-item extensions inline short and long dark — visual baseline', async ({ page }) => {
+  await page.goto('/iframe.html?id=primitives-skemptystate-html--inline&viewMode=story');
+  let target = page.locator('[data-inline-empty-frame]');
+  await target.waitFor({ state: 'visible', timeout: 20000 });
+  await expect(target).toHaveScreenshot('sk-compact-work-item-extensions-inline-short-dark.png', {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+  });
+
+  await page.goto('/iframe.html?id=primitives-skemptystate-html--inline-long-narrow&viewMode=story');
+  target = page.locator('[data-inline-empty-frame]');
+  await target.waitFor({ state: 'visible', timeout: 20000 });
+  await expect(target).toHaveScreenshot('sk-compact-work-item-extensions-inline-long-dark.png', {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+  });
+});
+
+test('compact work-item extensions inline light — visual baseline', async ({ page }) => {
+  await page.goto('/iframe.html?id=primitives-skemptystate-html--inline-light-mode&viewMode=story');
+  const target = page.locator('[data-inline-empty-frame]');
+  await target.waitFor({ state: 'visible', timeout: 20000 });
+  await expect(target).toHaveScreenshot('sk-compact-work-item-extensions-inline-light.png', {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+  });
+});
+
+test('compact work-item extensions inline forced colors — visual baseline', async ({ page }) => {
+  await page.emulateMedia({ forcedColors: 'active' });
+  await page.goto('/iframe.html?id=primitives-skemptystate-html--inline-preferences&viewMode=story');
+  const target = page.locator('[data-inline-empty-frame]');
+  await target.waitFor({ state: 'visible', timeout: 20000 });
+  await expect(target).toHaveScreenshot('sk-compact-work-item-extensions-inline-forced-colors.png', {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+  });
+});
+
 const metricStory = async (page: Page, id: string): Promise<Locator> => {
   await page.goto(`/iframe.html?id=elements-skmetric--${id}&viewMode=story`);
   const host = page.locator('sk-metric').first();

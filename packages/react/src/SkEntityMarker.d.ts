@@ -21,6 +21,12 @@ export interface SkEntityMarkerProps extends Pick<
   /** Accessible name for a meaningful mark. Empty or whitespace-only values make it decorative. */
   label?: SkEntityMarkerElement["label"];
 
+  /** Optional circular presentation. Only `circle` is supported; invalid values use the square shape. */
+  shape?: SkEntityMarkerElement["shape"];
+
+  /** Optional compact presentation. Only `sm` is supported; invalid values use the default size. */
+  size?: SkEntityMarkerElement["size"];
+
   /** A space-separated list of the classes of the element. Classes allows CSS and JavaScript to select and access specific elements via the class selectors or functions like the method `Document.getElementsByClassName()`. */
   className?: string;
 
@@ -46,20 +52,23 @@ export interface SkEntityMarkerProps extends Pick<
 /**
  * A compact consumer-supplied icon, initials, or short mark with explicit accessible naming.
  *
- * Token dependencies: --sk-font-sans, --sk-on-tint-butter, --sk-radius-sm, --sk-space-1,
- * --sk-space-7, --sk-surface-tint-butter, --sk-text-xs, --sk-weight-bold.
+ * Token dependencies: --sk-font-sans, --sk-on-tint-butter, --sk-radius-pill, --sk-radius-sm,
+ * --sk-space-1, --sk-space-5, --sk-space-7, --sk-surface-tint-butter, --sk-text-xs,
+ * --sk-weight-bold.
  *
  * ## Attributes & Properties
  *
  * Component attributes and properties that can be applied to the element or by using JavaScript.
  *
  * - `label`: Accessible name for a meaningful mark. Empty or whitespace-only values make it decorative.
+ * - `shape`: Optional circular presentation. Only `circle` is supported; invalid values use the square shape.
+ * - `size`: Optional compact presentation. Only `sm` is supported; invalid values use the default size.
  *
  * ## Slots
  *
  * Areas where markup can be added to the component.
  *
- * - `(default)`: Consumer-supplied icon, initials, or short mark.
+ * - `(default)`: Consumer-supplied icon, initials, short mark, or direct image. Meaningful images use a host label and `alt=""`.
  *
  * ## CSS Parts
  *

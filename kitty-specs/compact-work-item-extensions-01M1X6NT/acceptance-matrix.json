@@ -1,0 +1,800 @@
+{
+  "mission_slug": "compact-work-item-extensions-01M1X6NT",
+  "mission_number": "",
+  "mission_type": "software-dev",
+  "overall_verdict": "pass",
+  "criteria": [
+    {
+      "criterion_id": "FR-001",
+      "description": "Reflected card layout: `sk-action-row` MUST expose reflected `layout=\"card\"` presentation.",
+      "proof_type": "automated_test",
+      "evidence": "FR-001 (Reflected card layout): fixtures/elements-behaviour/src/sk-action-row.test.ts and apps/storybook/src/tests/sk-compact-work-item-extensions.spec.ts. GitHub Actions run 34136076412 at PR head 2c42e883; local final behavioral tree rerun: 466/466 tests and quality/generation drift green.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T15:15:34.275077+00:00",
+      "notes": "Binding FR criterion curated from spec.md."
+    },
+    {
+      "criterion_id": "FR-002",
+      "description": "Default row compatibility: Omitting `layout` MUST retain the current default row layout and content projection.",
+      "proof_type": "automated_test",
+      "evidence": "FR-002 (Default row compatibility): fixtures/elements-behaviour/src/sk-action-row.test.ts and apps/storybook/src/tests/sk-compact-work-item-extensions.spec.ts. GitHub Actions run 34136076412 at PR head 2c42e883; local final behavioral tree rerun: 466/466 tests and quality/generation drift green.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T15:15:36.064075+00:00",
+      "notes": "Binding FR criterion curated from spec.md."
+    },
+    {
+      "criterion_id": "FR-003",
+      "description": "Presentation-only reflow: Card layout MUST reflow the existing marker, title, reference, tags, metadata, and controls without adding a status/tone axis or a second semantic card surface.",
+      "proof_type": "automated_test",
+      "evidence": "FR-003 (Presentation-only reflow): fixtures/elements-behaviour/src/sk-action-row.test.ts and apps/storybook/src/tests/sk-compact-work-item-extensions.spec.ts. GitHub Actions run 34136076412 at PR head 2c42e883; local final behavioral tree rerun: 466/466 tests and quality/generation drift green.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T15:15:37.766807+00:00",
+      "notes": "Binding FR criterion curated from spec.md."
+    },
+    {
+      "criterion_id": "FR-004",
+      "description": "Supporting projection: `sk-action-row` MUST expose an optional named `supporting` slot for a full-width secondary line in either layout; absent content MUST remain optional.",
+      "proof_type": "automated_test",
+      "evidence": "FR-004 (Supporting projection): fixtures/elements-behaviour/src/sk-action-row.test.ts and apps/storybook/src/tests/sk-compact-work-item-extensions.spec.ts. GitHub Actions run 34136076412 at PR head 2c42e883; local final behavioral tree rerun: 466/466 tests and quality/generation drift green.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T15:15:39.497294+00:00",
+      "notes": "Binding FR criterion curated from spec.md."
+    },
+    {
+      "criterion_id": "FR-005",
+      "description": "Supporting styling API: The supporting projection wrapper MUST be documented as `::part(supporting)` and be present and externally targetable whenever the row renders.",
+      "proof_type": "automated_test",
+      "evidence": "FR-005 (Supporting styling API): fixtures/elements-behaviour/src/sk-action-row.test.ts and apps/storybook/src/tests/sk-compact-work-item-extensions.spec.ts. GitHub Actions run 34136076412 at PR head 2c42e883; local final behavioral tree rerun: 466/466 tests and quality/generation drift green.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T15:15:41.235003+00:00",
+      "notes": "Binding FR criterion curated from spec.md."
+    },
+    {
+      "criterion_id": "FR-006",
+      "description": "Reading-order integrity: In card layout, projected channels MUST occur in DOM/assistive-technology order consistent with their visible reading order; CSS reordering MUST NOT create a contradictory sequence.",
+      "proof_type": "automated_test",
+      "evidence": "FR-006 (Reading-order integrity): fixtures/elements-behaviour/src/sk-action-row.test.ts and apps/storybook/src/tests/sk-compact-work-item-extensions.spec.ts. GitHub Actions run 34136076412 at PR head 2c42e883; local final behavioral tree rerun: 466/466 tests and quality/generation drift green.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T15:15:42.974281+00:00",
+      "notes": "Binding FR criterion curated from spec.md."
+    },
+    {
+      "criterion_id": "FR-007",
+      "description": "Layout fail-open: An unsupported non-empty layout MUST warn and render as the current row layout with all supplied content preserved.",
+      "proof_type": "automated_test",
+      "evidence": "FR-007 (Layout fail-open): fixtures/elements-behaviour/src/sk-action-row.test.ts and apps/storybook/src/tests/sk-compact-work-item-extensions.spec.ts. GitHub Actions run 34136076412 at PR head 2c42e883; local final behavioral tree rerun: 466/466 tests and quality/generation drift green.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T15:15:44.822686+00:00",
+      "notes": "Binding FR criterion curated from spec.md."
+    },
+    {
+      "criterion_id": "FR-008",
+      "description": "Activation preservation: `rowId`, `selectable`, controlled `selected`, and `sk-action-row-activate` with exact `{ id }` detail, bubbling/composed flags, and non-cancelable behavior MUST remain unchanged in both layouts.",
+      "proof_type": "automated_test",
+      "evidence": "FR-008 (Activation preservation): fixtures/elements-behaviour/src/sk-action-row.test.ts and apps/storybook/src/tests/sk-compact-work-item-extensions.spec.ts. GitHub Actions run 34136076412 at PR head 2c42e883; local final behavioral tree rerun: 466/466 tests and quality/generation drift green.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T15:15:46.588838+00:00",
+      "notes": "Binding FR criterion curated from spec.md."
+    },
+    {
+      "criterion_id": "FR-009",
+      "description": "Input parity: Pointer, Enter, and Space MUST remain equivalent and emit one activation for an actionable row in both layouts; repeated keydown suppression MUST remain effective.",
+      "proof_type": "automated_test",
+      "evidence": "FR-009 (Input parity): fixtures/elements-behaviour/src/sk-action-row.test.ts and apps/storybook/src/tests/sk-compact-work-item-extensions.spec.ts. GitHub Actions run 34136076412 at PR head 2c42e883; local final behavioral tree rerun: 466/466 tests and quality/generation drift green.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T15:15:48.313727+00:00",
+      "notes": "Binding FR criterion curated from spec.md."
+    },
+    {
+      "criterion_id": "FR-010",
+      "description": "Nested-control isolation: Native and custom trailing controls MUST remain outside the primary trigger and MUST NOT activate the row.",
+      "proof_type": "automated_test",
+      "evidence": "FR-010 (Nested-control isolation): fixtures/elements-behaviour/src/sk-action-row.test.ts and apps/storybook/src/tests/sk-compact-work-item-extensions.spec.ts. GitHub Actions run 34136076412 at PR head 2c42e883; local final behavioral tree rerun: 466/466 tests and quality/generation drift green.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T15:15:50.030330+00:00",
+      "notes": "Binding FR criterion curated from spec.md."
+    },
+    {
+      "criterion_id": "FR-011",
+      "description": "Static focus behavior: A non-selectable row or a row with blank `rowId` MUST add no tab stop in either layout.",
+      "proof_type": "automated_test",
+      "evidence": "FR-011 (Static focus behavior): fixtures/elements-behaviour/src/sk-action-row.test.ts and apps/storybook/src/tests/sk-compact-work-item-extensions.spec.ts. GitHub Actions run 34136076412 at PR head 2c42e883; local final behavioral tree rerun: 466/466 tests and quality/generation drift green.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T15:15:51.753569+00:00",
+      "notes": "Binding FR criterion curated from spec.md."
+    },
+    {
+      "criterion_id": "FR-012",
+      "description": "Sparse content: Card layout MUST remain coherent when marker, tags, supporting content, or controls are independently absent.",
+      "proof_type": "automated_test",
+      "evidence": "FR-012 (Sparse content): fixtures/elements-behaviour/src/sk-action-row.test.ts and apps/storybook/src/tests/sk-compact-work-item-extensions.spec.ts. GitHub Actions run 34136076412 at PR head 2c42e883; local final behavioral tree rerun: 466/466 tests and quality/generation drift green.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T15:15:53.569303+00:00",
+      "notes": "Binding FR criterion curated from spec.md."
+    },
+    {
+      "criterion_id": "FR-013",
+      "description": "Marker size axis: `sk-entity-marker` MUST expose `size=\"sm\"` as an independent compact-size presentation; omitted `size` MUST retain the current size.",
+      "proof_type": "automated_test",
+      "evidence": "FR-013 (Marker size axis): fixtures/elements-behaviour/src/sk-entity-marker.test.ts, entity-marker stories/types, and visual baselines. GitHub Actions run 34136076412 at PR head 2c42e883; local final behavioral tree rerun: 466/466 tests and quality/generation drift green.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T15:15:55.312106+00:00",
+      "notes": "Binding FR criterion curated from spec.md."
+    },
+    {
+      "criterion_id": "FR-014",
+      "description": "Marker shape axis: `sk-entity-marker` MUST expose `shape=\"circle\"` as an independent circular presentation; omitted `shape` MUST retain the current shape.",
+      "proof_type": "automated_test",
+      "evidence": "FR-014 (Marker shape axis): fixtures/elements-behaviour/src/sk-entity-marker.test.ts, entity-marker stories/types, and visual baselines. GitHub Actions run 34136076412 at PR head 2c42e883; local final behavioral tree rerun: 466/466 tests and quality/generation drift green.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T15:15:56.987622+00:00",
+      "notes": "Binding FR criterion curated from spec.md."
+    },
+    {
+      "criterion_id": "FR-015",
+      "description": "Marker axis composition: `size=\"sm\"` and `shape=\"circle\"` MUST work separately and together without changing consumer content or accessible-name behavior.",
+      "proof_type": "automated_test",
+      "evidence": "FR-015 (Marker axis composition): fixtures/elements-behaviour/src/sk-entity-marker.test.ts, entity-marker stories/types, and visual baselines. GitHub Actions run 34136076412 at PR head 2c42e883; local final behavioral tree rerun: 466/466 tests and quality/generation drift green.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T15:15:58.667213+00:00",
+      "notes": "Binding FR criterion curated from spec.md."
+    },
+    {
+      "criterion_id": "FR-016",
+      "description": "Slotted image presentation: A consumer-slotted image MUST fill the marker predictably using cover/crop presentation for differing intrinsic aspect ratios in default, compact, square, and circle states.",
+      "proof_type": "automated_test",
+      "evidence": "FR-016 (Slotted image presentation): fixtures/elements-behaviour/src/sk-entity-marker.test.ts, entity-marker stories/types, and visual baselines. GitHub Actions run 34136076412 at PR head 2c42e883; local final behavioral tree rerun: 466/466 tests and quality/generation drift green.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T15:16:00.528011+00:00",
+      "notes": "Binding FR criterion curated from spec.md."
+    },
+    {
+      "criterion_id": "FR-017",
+      "description": "Single image name: A meaningful image marker MUST use the host `label` as its one accessible name and a consumer-supplied image with `alt=\"\"`; documentation and tests MUST state this composition rule.",
+      "proof_type": "automated_test",
+      "evidence": "FR-017 (Single image name): fixtures/elements-behaviour/src/sk-entity-marker.test.ts, entity-marker stories/types, and visual baselines. GitHub Actions run 34136076412 at PR head 2c42e883; local final behavioral tree rerun: 466/466 tests and quality/generation drift green.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T15:16:02.805994+00:00",
+      "notes": "Binding FR criterion curated from spec.md."
+    },
+    {
+      "criterion_id": "FR-018",
+      "description": "Decorative marker preservation: An absent or whitespace-only host label MUST retain the current decorative marker behavior for initials, icons, and images.",
+      "proof_type": "automated_test",
+      "evidence": "FR-018 (Decorative marker preservation): fixtures/elements-behaviour/src/sk-entity-marker.test.ts, entity-marker stories/types, and visual baselines. GitHub Actions run 34136076412 at PR head 2c42e883; local final behavioral tree rerun: 466/466 tests and quality/generation drift green.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T15:16:04.502036+00:00",
+      "notes": "Binding FR criterion curated from spec.md."
+    },
+    {
+      "criterion_id": "FR-019",
+      "description": "Marker content neutrality: The element MUST continue to render consumer-supplied initials, icons, and images verbatim and MUST NOT derive identity content.",
+      "proof_type": "automated_test",
+      "evidence": "FR-019 (Marker content neutrality): fixtures/elements-behaviour/src/sk-entity-marker.test.ts, entity-marker stories/types, and visual baselines. GitHub Actions run 34136076412 at PR head 2c42e883; local final behavioral tree rerun: 466/466 tests and quality/generation drift green.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T15:16:06.287285+00:00",
+      "notes": "Binding FR criterion curated from spec.md."
+    },
+    {
+      "criterion_id": "FR-020",
+      "description": "Reflected pulse: `sk-status-indicator` MUST expose a reflected boolean `pulsing` presentation state.",
+      "proof_type": "automated_test",
+      "evidence": "FR-020 (Reflected pulse): fixtures/elements-behaviour/src/sk-status-indicator.test.ts plus reduced-motion/forced-colors visual coverage. GitHub Actions run 34136076412 at PR head 2c42e883; local final behavioral tree rerun: 466/466 tests and quality/generation drift green.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T15:16:08.098580+00:00",
+      "notes": "Binding FR criterion curated from spec.md."
+    },
+    {
+      "criterion_id": "FR-021",
+      "description": "Marker-only pulse: Pulsing presentation MUST apply only to the marker wrapper and MUST NOT animate, replace, hide, or synthesize visible status text.",
+      "proof_type": "automated_test",
+      "evidence": "FR-021 (Marker-only pulse): fixtures/elements-behaviour/src/sk-status-indicator.test.ts plus reduced-motion/forced-colors visual coverage. GitHub Actions run 34136076412 at PR head 2c42e883; local final behavioral tree rerun: 466/466 tests and quality/generation drift green.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T15:16:10.120614+00:00",
+      "notes": "Binding FR criterion curated from spec.md."
+    },
+    {
+      "criterion_id": "FR-022",
+      "description": "Motion-independent meaning: Supplied visible text MUST remain required by the public contract; pulse MUST never be the sole carrier of \u201clive\u201d.",
+      "proof_type": "automated_test",
+      "evidence": "FR-022 (Motion-independent meaning): fixtures/elements-behaviour/src/sk-status-indicator.test.ts plus reduced-motion/forced-colors visual coverage. GitHub Actions run 34136076412 at PR head 2c42e883; local final behavioral tree rerun: 466/466 tests and quality/generation drift green.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T15:16:11.839091+00:00",
+      "notes": "Binding FR criterion curated from spec.md."
+    },
+    {
+      "criterion_id": "FR-023",
+      "description": "Pulse fallbacks: Reduced motion MUST replace animation with static perceivable marker emphasis; forced colors MUST retain marker distinction; no-marker and multiple-indicator states MUST remain coherent.",
+      "proof_type": "automated_test",
+      "evidence": "FR-023 (Pulse fallbacks): fixtures/elements-behaviour/src/sk-status-indicator.test.ts plus reduced-motion/forced-colors visual coverage. GitHub Actions run 34136076412 at PR head 2c42e883; local final behavioral tree rerun: 466/466 tests and quality/generation drift green.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T15:16:13.544262+00:00",
+      "notes": "Binding FR criterion curated from spec.md."
+    },
+    {
+      "criterion_id": "FR-024",
+      "description": "Inline empty modifier: The existing styles-only `.sk-empty-state` family MUST add `.sk-empty-state--inline` for one compact structural empty-lane message rather than a heading/body/action stack; \u201cone-line\u201d MUST NOT impose `nowrap` or truncation.",
+      "proof_type": "automated_test",
+      "evidence": "FR-024 (Inline empty modifier): apps/storybook/src/tests/sk-empty-state-inline.spec.ts plus authored/generated empty-state surfaces. GitHub Actions run 34136076412 at PR head 2c42e883; local final behavioral tree rerun: 466/466 tests and quality/generation drift green.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T15:16:15.796304+00:00",
+      "notes": "Binding FR criterion curated from spec.md."
+    },
+    {
+      "criterion_id": "FR-025",
+      "description": "Complete supplied copy: Inline empty-state copy MUST remain consumer supplied and complete; long copy MUST reflow at compact widths rather than be silently truncated or clipped.",
+      "proof_type": "automated_test",
+      "evidence": "FR-025 (Complete supplied copy): apps/storybook/src/tests/sk-empty-state-inline.spec.ts plus authored/generated empty-state surfaces. GitHub Actions run 34136076412 at PR head 2c42e883; local final behavioral tree rerun: 466/466 tests and quality/generation drift green.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T15:16:17.610600+00:00",
+      "notes": "Binding FR criterion curated from spec.md."
+    },
+    {
+      "criterion_id": "FR-026",
+      "description": "Passive empty semantics: The inline modifier MUST invent no copy, heading, announcement, live region, action, or status semantics and MUST remain distinct from `sk-notice`.",
+      "proof_type": "automated_test",
+      "evidence": "FR-026 (Passive empty semantics): apps/storybook/src/tests/sk-empty-state-inline.spec.ts plus authored/generated empty-state surfaces. GitHub Actions run 34136076412 at PR head 2c42e883; local final behavioral tree rerun: 466/466 tests and quality/generation drift green.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T15:16:20.572649+00:00",
+      "notes": "Binding FR criterion curated from spec.md."
+    },
+    {
+      "criterion_id": "FR-027",
+      "description": "Empty-state exemplar: A focused authored inline empty-state exemplar and story coverage MUST feed the existing styles-only generated barrel; generated outputs MUST NOT be hand-edited.",
+      "proof_type": "automated_test",
+      "evidence": "FR-027 (Empty-state exemplar): apps/storybook/src/tests/sk-empty-state-inline.spec.ts plus authored/generated empty-state surfaces. GitHub Actions run 34136076412 at PR head 2c42e883; local final behavioral tree rerun: 466/466 tests and quality/generation drift green.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T15:16:22.280205+00:00",
+      "notes": "Binding FR criterion curated from spec.md."
+    },
+    {
+      "criterion_id": "FR-028",
+      "description": "Story coverage: Focused stories MUST cover every new axis and the acceptance-state matrix, including one T10 compact-item composition, default dark presentation, and required `LightMode`.",
+      "proof_type": "automated_test",
+      "evidence": "FR-028 (Story coverage): Storybook build, visual regression, generated wrapper/manifest/SIZES drift, docs and ratchets. GitHub Actions run 34136076412 at PR head 2c42e883; local final behavioral tree rerun: 466/466 tests and quality/generation drift green.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T15:16:23.961806+00:00",
+      "notes": "Binding FR criterion curated from spec.md."
+    },
+    {
+      "criterion_id": "FR-029",
+      "description": "Verification and distribution: Focused behavior/mutation tests, React type tests for every new element property, documentation and ratchet updates, and regeneration of CSS modules, manifest, wrappers, styles-only output, and size report MUST ship together.",
+      "proof_type": "automated_test",
+      "evidence": "FR-029 (Verification and distribution): Storybook build, visual regression, generated wrapper/manifest/SIZES drift, docs and ratchets. GitHub Actions run 34136076412 at PR head 2c42e883; local final behavioral tree rerun: 466/466 tests and quality/generation drift green.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T15:16:25.753116+00:00",
+      "notes": "Binding FR criterion curated from spec.md."
+    },
+    {
+      "criterion_id": "FR-030",
+      "description": "Valid image render evidence: The axe anti-vacuity gate MUST accept the required upgraded `sk-entity-marker[label]` composition when a directly slotted, actually rendered `img[alt=\"\"]` supplies the visual and the host supplies the meaningful accessible name. Recognition MUST use actual meaningful accessible rendered content, or equivalently precise valid evidence, rather than treating the empty-alt image or a bare attribute promise as sufficient by itself.",
+      "proof_type": "automated_test",
+      "evidence": "FR-030 (Valid image render evidence): scripts/gate-selftest.mjs and axe run: 355/355 loaded stories, zero violations. GitHub Actions run 34136076412 at PR head 2c42e883; local final behavioral tree rerun: 466/466 tests and quality/generation drift green.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T15:16:27.487557+00:00",
+      "notes": "Binding FR criterion curated from spec.md."
+    },
+    {
+      "criterion_id": "FR-031",
+      "description": "Render-verdict self-test: A focused gate self-test MUST prove the valid meaningful-image fixture passes and MUST prove both a truly blank component host and an unupgraded `sk-*` host still fail through the same render-verdict seam used by the wait and assertion.",
+      "proof_type": "automated_test",
+      "evidence": "FR-031 (Render-verdict self-test): scripts/gate-selftest.mjs and axe run: 355/355 loaded stories, zero violations. GitHub Actions run 34136076412 at PR head 2c42e883; local final behavioral tree rerun: 466/466 tests and quality/generation drift green.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T15:16:29.431299+00:00",
+      "notes": "Binding FR criterion curated from spec.md."
+    },
+    {
+      "criterion_id": "NFR-001",
+      "description": "Accessibility gate: All affected and new Storybook stories MUST report zero axe WCAG 2.1 AA violations, with non-empty successfully loaded render roots.",
+      "proof_type": "automated_test",
+      "evidence": "NFR-001 (Accessibility gate): axe 355/355 zero-violation evidence. GitHub Actions run 34136076412 at PR head 2c42e883; local final behavioral tree rerun: 466/466 tests and quality/generation drift green.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T15:16:31.385722+00:00",
+      "notes": "Binding NFR criterion curated from spec.md."
+    },
+    {
+      "criterion_id": "NFR-002",
+      "description": "Narrow-lane resilience: At 220px, 360px, and at least one intermediate lane width, every required compact-item and inline-empty state MUST show no content collision, clipped focus ring, or page-level horizontal overflow.",
+      "proof_type": "automated_test",
+      "evidence": "NFR-002 (Narrow-lane resilience): 3-browser compact geometry suite at 220px/360px/intermediate widths. GitHub Actions run 34136076412 at PR head 2c42e883; local final behavioral tree rerun: 466/466 tests and quality/generation drift green.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T15:16:33.145326+00:00",
+      "notes": "Binding NFR criterion curated from spec.md."
+    },
+    {
+      "criterion_id": "NFR-003",
+      "description": "Keyboard equivalence: Across both action-row layouts, focused tests MUST demonstrate one event each for pointer, Enter, and Space, zero events from nested controls, and zero tab stops for non-actionable rows.",
+      "proof_type": "automated_test",
+      "evidence": "NFR-003 (Keyboard equivalence): action-row pointer/Enter/Space/nested-control/focus tests. GitHub Actions run 34136076412 at PR head 2c42e883; local final behavioral tree rerun: 466/466 tests and quality/generation drift green.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T15:16:34.907912+00:00",
+      "notes": "Binding NFR criterion curated from spec.md."
+    },
+    {
+      "criterion_id": "NFR-004",
+      "description": "Backward compatibility: Existing default visual and behavior baselines for all four public surfaces MUST remain green; intended baseline additions MUST be limited to new states.",
+      "proof_type": "automated_test",
+      "evidence": "NFR-004 (Backward compatibility): full default behavior suite and reviewed ten-baseline visual delta. GitHub Actions run 34136076412 at PR head 2c42e883; local final behavioral tree rerun: 466/466 tests and quality/generation drift green.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T15:16:36.727348+00:00",
+      "notes": "Binding NFR criterion curated from spec.md."
+    },
+    {
+      "criterion_id": "NFR-005",
+      "description": "Mutation evidence: Every changed behavior covered by the applicable ADR-11 registry MUST have a unique, non-inert red-first mutation arm, with zero unexplained collateral failures.",
+      "proof_type": "automated_test",
+      "evidence": "NFR-005 (Mutation evidence): 170/170 mutation registry arms plus guard self-tests. GitHub Actions run 34136076412 at PR head 2c42e883; local final behavioral tree rerun: 466/466 tests and quality/generation drift green.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T15:16:38.396312+00:00",
+      "notes": "Binding NFR criterion curated from spec.md."
+    },
+    {
+      "criterion_id": "NFR-006",
+      "description": "Typed wrapper fidelity: Generated React types MUST expose `layout`, `size`, `shape`, and `pulsing` with their exact public types and without `any`; this mission MUST add no host `tabindex` forwarding or duplicate focus stop beyond the known #154 baseline.",
+      "proof_type": "automated_test",
+      "evidence": "NFR-006 (Typed wrapper fidelity): React type tests and React/Vue generator drift checks. GitHub Actions run 34136076412 at PR head 2c42e883; local final behavioral tree rerun: 466/466 tests and quality/generation drift green.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T15:16:40.078593+00:00",
+      "notes": "Binding NFR criterion curated from spec.md."
+    },
+    {
+      "criterion_id": "NFR-007",
+      "description": "Token and theme compliance: Component CSS MUST use authoritative `--sk-*` tokens for 100% of design values, use no cross-shadow theme selectors, and render the required states in both default dark and `.sk-light` themes.",
+      "proof_type": "automated_test",
+      "evidence": "NFR-007 (Token and theme compliance): token literal/stylelint/theme/forced-colors checks. GitHub Actions run 34136076412 at PR head 2c42e883; local final behavioral tree rerun: 466/466 tests and quality/generation drift green.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T15:16:41.702170+00:00",
+      "notes": "Binding NFR criterion curated from spec.md."
+    },
+    {
+      "criterion_id": "NFR-008",
+      "description": "User-preference resilience: Pulse and all interactive/action affordances MUST retain their specified meaning and visibility under `prefers-reduced-motion: reduce` and `forced-colors: active`, verified by focused assertions or documented visual evidence.",
+      "proof_type": "automated_test",
+      "evidence": "NFR-008 (User-preference resilience): reduced-motion and forced-colors behavior/visual evidence. GitHub Actions run 34136076412 at PR head 2c42e883; local final behavioral tree rerun: 466/466 tests and quality/generation drift green.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T15:16:43.349829+00:00",
+      "notes": "Binding NFR criterion curated from spec.md."
+    },
+    {
+      "criterion_id": "NFR-009",
+      "description": "Zero-drift quality: Type checks, lint, generated-artifact checks, behavior suites, mutation self-test, Storybook build, axe, relevant Playwright/visual checks, and `npm run quality:all` MUST complete with zero failures on the final mission head.",
+      "proof_type": "automated_test",
+      "evidence": "NFR-009 (Zero-drift quality): full local and GitHub Actions quality gates. GitHub Actions run 34136076412 at PR head 2c42e883; local final behavioral tree rerun: 466/466 tests and quality/generation drift green.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T15:16:44.978751+00:00",
+      "notes": "Binding NFR criterion curated from spec.md."
+    },
+    {
+      "criterion_id": "C-001",
+      "description": "Four extensions only: Scope is limited to the four backward-compatible extensions named in this specification.",
+      "proof_type": "code_review",
+      "evidence": "C-001 (Four extensions only): Exact base-to-head scope diff reviewed by Architect Alphonso, Reviewer Renata, Debugger Debbie and Randy Reducer; repository ownership and dependency guards green. GitHub Actions run 34136076412 at PR head 2c42e883; local final behavioral tree rerun: 466/466 tests and quality/generation drift green.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T15:16:46.576146+00:00",
+      "notes": "Binding C criterion curated from spec.md."
+    },
+    {
+      "criterion_id": "C-002",
+      "description": "No Work Package component: Do not create `sk-work-package-card`, `sk-summary-card`, a stateful Kanban component, or a full-page Work Package element.",
+      "proof_type": "code_review",
+      "evidence": "C-002 (No Work Package component): Exact base-to-head scope diff reviewed by Architect Alphonso, Reviewer Renata, Debugger Debbie and Randy Reducer; repository ownership and dependency guards green. GitHub Actions run 34136076412 at PR head 2c42e883; local final behavioral tree rerun: 466/466 tests and quality/generation drift green.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T15:16:48.413210+00:00",
+      "notes": "Binding C criterion curated from spec.md."
+    },
+    {
+      "criterion_id": "C-003",
+      "description": "Card-tone ownership: Do not add status-toned action rows or entity markers and do not duplicate #177's `sk-card[status]` surface/tone ownership.",
+      "proof_type": "code_review",
+      "evidence": "C-003 (Card-tone ownership): Exact base-to-head scope diff reviewed by Architect Alphonso, Reviewer Renata, Debugger Debbie and Randy Reducer; repository ownership and dependency guards green. GitHub Actions run 34136076412 at PR head 2c42e883; local final behavioral tree rerun: 466/466 tests and quality/generation drift green.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T15:16:50.164631+00:00",
+      "notes": "Binding C criterion curated from spec.md."
+    },
+    {
+      "criterion_id": "C-004",
+      "description": "No nested tone imitation: Do not nest an action-row card presentation inside a toned `sk-card` merely to copy T10's border; visible tags/indicators carry lane/status meaning.",
+      "proof_type": "code_review",
+      "evidence": "C-004 (No nested tone imitation): Exact base-to-head scope diff reviewed by Architect Alphonso, Reviewer Renata, Debugger Debbie and Randy Reducer; repository ownership and dependency guards green. GitHub Actions run 34136076412 at PR head 2c42e883; local final behavioral tree rerun: 466/466 tests and quality/generation drift green.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T15:16:51.824775+00:00",
+      "notes": "Binding C criterion curated from spec.md."
+    },
+    {
+      "criterion_id": "C-005",
+      "description": "Notice boundary: Inline empty state is passive and MUST NOT duplicate #178's announced, block-level `sk-notice` ownership.",
+      "proof_type": "code_review",
+      "evidence": "C-005 (Notice boundary): Exact base-to-head scope diff reviewed by Architect Alphonso, Reviewer Renata, Debugger Debbie and Randy Reducer; repository ownership and dependency guards green. GitHub Actions run 34136076412 at PR head 2c42e883; local final behavioral tree rerun: 466/466 tests and quality/generation drift green.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T15:16:53.429598+00:00",
+      "notes": "Binding C criterion curated from spec.md."
+    },
+    {
+      "criterion_id": "C-006",
+      "description": "Application state excluded: Routing, fetching, lane movement, drag/drop, timers, claim/heartbeat expiry, liveness inference, status mapping, relative-time formatting, and other application state remain outside the library.",
+      "proof_type": "code_review",
+      "evidence": "C-006 (Application state excluded): Exact base-to-head scope diff reviewed by Architect Alphonso, Reviewer Renata, Debugger Debbie and Randy Reducer; repository ownership and dependency guards green. GitHub Actions run 34136076412 at PR head 2c42e883; local final behavioral tree rerun: 466/466 tests and quality/generation drift green.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T15:16:55.075712+00:00",
+      "notes": "Binding C criterion curated from spec.md."
+    },
+    {
+      "criterion_id": "C-007",
+      "description": "One tone vocabulary: Existing `sk-status-indicator` tones remain exactly neutral, info, success, attention, danger, and recovery; this mission adds no tone or domain mapping.",
+      "proof_type": "code_review",
+      "evidence": "C-007 (One tone vocabulary): Exact base-to-head scope diff reviewed by Architect Alphonso, Reviewer Renata, Debugger Debbie and Randy Reducer; repository ownership and dependency guards green. GitHub Actions run 34136076412 at PR head 2c42e883; local final behavioral tree rerun: 466/466 tests and quality/generation drift green.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T15:16:56.686237+00:00",
+      "notes": "Binding C criterion curated from spec.md."
+    },
+    {
+      "criterion_id": "C-008",
+      "description": "Dependency direction: Preserve `tokens \u2192 styles \u2192 elements \u2192 generated React wrappers`; no package may bypass or reverse that dependency flow.",
+      "proof_type": "code_review",
+      "evidence": "C-008 (Dependency direction): Exact base-to-head scope diff reviewed by Architect Alphonso, Reviewer Renata, Debugger Debbie and Randy Reducer; repository ownership and dependency guards green. GitHub Actions run 34136076412 at PR head 2c42e883; local final behavioral tree rerun: 466/466 tests and quality/generation drift green.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T15:16:58.306506+00:00",
+      "notes": "Binding C criterion curated from spec.md."
+    },
+    {
+      "criterion_id": "C-009",
+      "description": "Native/light-DOM semantics: `.sk-empty-state--inline` remains a styles-layer class on consumer-authored light-DOM content; no wrapper element re-hosts it.",
+      "proof_type": "code_review",
+      "evidence": "C-009 (Native/light-DOM semantics): Exact base-to-head scope diff reviewed by Architect Alphonso, Reviewer Renata, Debugger Debbie and Randy Reducer; repository ownership and dependency guards green. GitHub Actions run 34136076412 at PR head 2c42e883; local final behavioral tree rerun: 466/466 tests and quality/generation drift green.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T15:16:59.961317+00:00",
+      "notes": "Binding C criterion curated from spec.md."
+    },
+    {
+      "criterion_id": "C-010",
+      "description": "Generated-only outputs: Generated CSS modules, static barrels, manifest, React wrappers, Vue declarations, and size report are regenerated through repository tooling, never hand-edited.",
+      "proof_type": "code_review",
+      "evidence": "C-010 (Generated-only outputs): Exact base-to-head scope diff reviewed by Architect Alphonso, Reviewer Renata, Debugger Debbie and Randy Reducer; repository ownership and dependency guards green. GitHub Actions run 34136076412 at PR head 2c42e883; local final behavioral tree rerun: 466/466 tests and quality/generation drift green.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T15:17:01.650721+00:00",
+      "notes": "Binding C criterion curated from spec.md."
+    },
+    {
+      "criterion_id": "C-011",
+      "description": "Consumer-supplied image: The consumer supplies image bytes and alternate-text choice; the element performs no fetching, lookup, caching, or image generation.",
+      "proof_type": "code_review",
+      "evidence": "C-011 (Consumer-supplied image): Exact base-to-head scope diff reviewed by Architect Alphonso, Reviewer Renata, Debugger Debbie and Randy Reducer; repository ownership and dependency guards green. GitHub Actions run 34136076412 at PR head 2c42e883; local final behavioral tree rerun: 466/466 tests and quality/generation drift green.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T15:17:03.370454+00:00",
+      "notes": "Binding C criterion curated from spec.md."
+    },
+    {
+      "criterion_id": "C-012",
+      "description": "No identity derivation: The library performs no initials generation, actor lookup, or trust/liveness inference.",
+      "proof_type": "code_review",
+      "evidence": "C-012 (No identity derivation): Exact base-to-head scope diff reviewed by Architect Alphonso, Reviewer Renata, Debugger Debbie and Randy Reducer; repository ownership and dependency guards green. GitHub Actions run 34136076412 at PR head 2c42e883; local final behavioral tree rerun: 466/466 tests and quality/generation drift green.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T15:17:05.056206+00:00",
+      "notes": "Binding C criterion curated from spec.md."
+    },
+    {
+      "criterion_id": "C-013",
+      "description": "Do not worsen #154: No new property or wrapper behavior may make the custom-element host an additional focus stop; the existing real interactive control remains the only row trigger.",
+      "proof_type": "code_review",
+      "evidence": "C-013 (Do not worsen #154): Exact base-to-head scope diff reviewed by Architect Alphonso, Reviewer Renata, Debugger Debbie and Randy Reducer; repository ownership and dependency guards green. GitHub Actions run 34136076412 at PR head 2c42e883; local final behavioral tree rerun: 466/466 tests and quality/generation drift green.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T15:17:06.657859+00:00",
+      "notes": "Binding C criterion curated from spec.md."
+    },
+    {
+      "criterion_id": "C-014",
+      "description": "No pulse lifecycle: `pulsing` is a supplied presentation flag only: no timer, subscription, stale threshold, heartbeat, or domain-to-tone mapping enters the component.",
+      "proof_type": "code_review",
+      "evidence": "C-014 (No pulse lifecycle): Exact base-to-head scope diff reviewed by Architect Alphonso, Reviewer Renata, Debugger Debbie and Randy Reducer; repository ownership and dependency guards green. GitHub Actions run 34136076412 at PR head 2c42e883; local final behavioral tree rerun: 466/466 tests and quality/generation drift green.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T15:17:08.358354+00:00",
+      "notes": "Binding C criterion curated from spec.md."
+    },
+    {
+      "criterion_id": "C-015",
+      "description": "Existing contracts preserved: The existing parts, slots, properties, event shape/flags, selection model, and six tones may only receive the additive changes explicitly listed here.",
+      "proof_type": "code_review",
+      "evidence": "C-015 (Existing contracts preserved): Exact base-to-head scope diff reviewed by Architect Alphonso, Reviewer Renata, Debugger Debbie and Randy Reducer; repository ownership and dependency guards green. GitHub Actions run 34136076412 at PR head 2c42e883; local final behavioral tree rerun: 466/466 tests and quality/generation drift green.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T15:17:10.110449+00:00",
+      "notes": "Binding C criterion curated from spec.md."
+    },
+    {
+      "criterion_id": "C-016",
+      "description": "Bounded axe-gate correction: Gate work is limited to correcting render-evidence classification and its focused self-tests. It MUST NOT weaken the non-empty-root or per-host fail-closed guards, accept a bare `aria-label`/role on an otherwise empty host as content, change axe rules, or redesign the wider gate.",
+      "proof_type": "code_review",
+      "evidence": "C-016 (Bounded axe-gate correction): Exact base-to-head scope diff reviewed by Architect Alphonso, Reviewer Renata, Debugger Debbie and Randy Reducer; repository ownership and dependency guards green. GitHub Actions run 34136076412 at PR head 2c42e883; local final behavioral tree rerun: 466/466 tests and quality/generation drift green.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T15:17:11.862888+00:00",
+      "notes": "Binding C criterion curated from spec.md."
+    },
+    {
+      "criterion_id": "C-017",
+      "description": "Token-bounded visual interpretation: Exact visual values unavailable from the approved Stitch reference MUST be chosen only from existing authoritative `--sk-*` tokens. T10 supplies qualitative visual intent; this mission MUST NOT claim pixel fidelity for values the reference does not expose.",
+      "proof_type": "code_review",
+      "evidence": "C-017 (Token-bounded visual interpretation): Exact base-to-head scope diff reviewed by Architect Alphonso, Reviewer Renata, Debugger Debbie and Randy Reducer; repository ownership and dependency guards green. GitHub Actions run 34136076412 at PR head 2c42e883; local final behavioral tree rerun: 466/466 tests and quality/generation drift green.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T15:17:14.154873+00:00",
+      "notes": "Binding C criterion curated from spec.md."
+    },
+    {
+      "criterion_id": "SC-001",
+      "description": "All four additive public extensions are present, documented, and usable together without adding any new Work Package-specific element.",
+      "proof_type": "automated_test",
+      "evidence": "SC-001 (All four additive public extensions are present, documented, and usable together without adding any new Work Package-specific element.): four-surface public API/docs/distribution audit. GitHub Actions run 34136076412 at PR head 2c42e883; local final behavioral tree rerun: 466/466 tests and quality/generation drift green.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T15:17:15.850375+00:00",
+      "notes": "Binding SC criterion curated from spec.md."
+    },
+    {
+      "criterion_id": "SC-002",
+      "description": "`sk-action-row` passes the full required state matrix in default and card layouts, including exact one-event pointer/Enter/Space parity, zero nested-control row events, and zero non-actionable tab stops.",
+      "proof_type": "automated_test",
+      "evidence": "SC-002 (`sk-action-row` passes the full required state matrix in default and card layouts, including exact one-event pointer/Enter/Space parity, zero nested-control row events, and zero non-actionable tab stops.): action-row behavior and 3-browser composition suite. GitHub Actions run 34136076412 at PR head 2c42e883; local final behavioral tree rerun: 466/466 tests and quality/generation drift green.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T15:17:17.587118+00:00",
+      "notes": "Binding SC criterion curated from spec.md."
+    },
+    {
+      "criterion_id": "SC-003",
+      "description": "Compact action rows and inline empty states render at 220px, 360px, and at least one intermediate width with zero collisions, clipped focus indicators, or page-level horizontal overflow.",
+      "proof_type": "automated_test",
+      "evidence": "SC-003 (Compact action rows and inline empty states render at 220px, 360px, and at least one intermediate width with zero collisions, clipped focus indicators, or page-level horizontal overflow.): 3-browser 220px/360px/intermediate geometry suite. GitHub Actions run 34136076412 at PR head 2c42e883; local final behavioral tree rerun: 466/466 tests and quality/generation drift green.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T15:17:19.351139+00:00",
+      "notes": "Binding SC criterion curated from spec.md."
+    },
+    {
+      "criterion_id": "SC-004",
+      "description": "Marker tests cover initials, icon, and image across both sizes and both shapes, and confirm exactly one accessible name for the documented meaningful-image composition.",
+      "proof_type": "automated_test",
+      "evidence": "SC-004 (Marker tests cover initials, icon, and image across both sizes and both shapes, and confirm exactly one accessible name for the documented meaningful-image composition.): entity-marker axes/image/accessibility suite. GitHub Actions run 34136076412 at PR head 2c42e883; local final behavioral tree rerun: 466/466 tests and quality/generation drift green.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T15:17:21.059259+00:00",
+      "notes": "Binding SC criterion curated from spec.md."
+    },
+    {
+      "criterion_id": "SC-005",
+      "description": "Pulse tests prove reflected on/off state, marker-only scope, multiple-instance independence, a static reduced-motion emphasis, and retained forced-colors distinction.",
+      "proof_type": "automated_test",
+      "evidence": "SC-005 (Pulse tests prove reflected on/off state, marker-only scope, multiple-instance independence, a static reduced-motion emphasis, and retained forced-colors distinction.): status-indicator pulse/motion/forced-colors suite. GitHub Actions run 34136076412 at PR head 2c42e883; local final behavioral tree rerun: 466/466 tests and quality/generation drift green.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T15:17:22.774292+00:00",
+      "notes": "Binding SC criterion curated from spec.md."
+    },
+    {
+      "criterion_id": "SC-006",
+      "description": "The inline empty-state exemplar proves short and long consumer copy, both themes, and forced colors while exposing zero invented announcement or action semantics.",
+      "proof_type": "automated_test",
+      "evidence": "SC-006 (The inline empty-state exemplar proves short and long consumer copy, both themes, and forced colors while exposing zero invented announcement or action semantics.): inline empty-state semantic/wrapping/theme suite. GitHub Actions run 34136076412 at PR head 2c42e883; local final behavioral tree rerun: 466/466 tests and quality/generation drift green.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T15:17:24.493859+00:00",
+      "notes": "Binding SC criterion curated from spec.md."
+    },
+    {
+      "criterion_id": "SC-007",
+      "description": "Existing default behavior and visual baselines for action row, entity marker, status indicator, and non-inline empty state remain green with no unintended baseline changes.",
+      "proof_type": "automated_test",
+      "evidence": "SC-007 (Existing default behavior and visual baselines for action row, entity marker, status indicator, and non-inline empty state remain green with no unintended baseline changes.): full default behavior plus reviewed visual delta. GitHub Actions run 34136076412 at PR head 2c42e883; local final behavioral tree rerun: 466/466 tests and quality/generation drift green.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T15:17:26.229719+00:00",
+      "notes": "Binding SC criterion curated from spec.md."
+    },
+    {
+      "criterion_id": "SC-008",
+      "description": "Generated React declarations expose the four new element properties with exact types and no `any`; all generated-artifact drift checks report zero differences.",
+      "proof_type": "automated_test",
+      "evidence": "SC-008 (Generated React declarations expose the four new element properties with exact types and no `any`; all generated-artifact drift checks report zero differences.): React/Vue/CEM/CSS/SIZES drift and type tests. GitHub Actions run 34136076412 at PR head 2c42e883; local final behavioral tree rerun: 466/466 tests and quality/generation drift green.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T15:17:27.993706+00:00",
+      "notes": "Binding SC criterion curated from spec.md."
+    },
+    {
+      "criterion_id": "SC-009",
+      "description": "Storybook contains focused new-axis stories and one T10 compact-item composition in default dark and `LightMode`, with zero axe violations and green relevant visual regressions.",
+      "proof_type": "automated_test",
+      "evidence": "SC-009 (Storybook contains focused new-axis stories and one T10 compact-item composition in default dark and `LightMode`, with zero axe violations and green relevant visual regressions.): focused Storybook T10 light/dark, axe and visual gates. GitHub Actions run 34136076412 at PR head 2c42e883; local final behavioral tree rerun: 466/466 tests and quality/generation drift green.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T15:17:30.200747+00:00",
+      "notes": "Binding SC criterion curated from spec.md."
+    },
+    {
+      "criterion_id": "SC-010",
+      "description": "The final rebased mission head passes focused tests, type checks, lint, applicable mutation checks, Storybook build, axe, relevant Playwright/visual gates, and `npm run quality:all` without weakening or skipping a gate.",
+      "proof_type": "automated_test",
+      "evidence": "SC-010 (The final rebased mission head passes focused tests, type checks, lint, applicable mutation checks, Storybook build, axe, relevant Playwright/visual gates, and `npm run quality): full local and GitHub Actions gate set. GitHub Actions run 34136076412 at PR head 2c42e883; local final behavioral tree rerun: 466/466 tests and quality/generation drift green.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T15:17:32.628531+00:00",
+      "notes": "Binding SC criterion curated from spec.md."
+    },
+    {
+      "criterion_id": "SC-011",
+      "description": "The gate self-test passes one positive fixture consisting of an upgraded, meaningfully labelled entity marker with actually rendered decorative `img[alt=\"\"]`, while negative fixtures for a blank host and an unupgraded `sk-*` host are both rejected by the same render-verdict function.",
+      "proof_type": "automated_test",
+      "evidence": "SC-011 (The gate self-test passes one positive fixture consisting of an upgraded, meaningfully labelled entity marker with actually rendered decorative `img[alt=\"\"]`, while negative fixtures for a blank host and an unupgraded `sk-*` host are both rejected by the same render-verdict function.): render-verdict self-test positive and negative probes. GitHub Actions run 34136076412 at PR head 2c42e883; local final behavioral tree rerun: 466/466 tests and quality/generation drift green.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T15:17:34.355808+00:00",
+      "notes": "Binding SC criterion curated from spec.md."
+    }
+  ],
+  "negative_invariants": [
+    {
+      "invariant_id": "NI-001",
+      "description": "Omitting every new attribute or modifier preserves the pre-mission default presentation and behavior.",
+      "verification_method": "custom_command",
+      "verification_command": "npm test",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: > spec-kitty-design@0.0.0 test\n> vitest run\n\n\n RUN  v4.1.11 /home/jeroennouws/dev/team-kitty-missions/design-212-wp208-212-0907a\n\n \u2713 |node| tests/node/vue-sfc-compile.test.ts (3 tests) 24ms\n \u2713 |node| "
+    },
+    {
+      "invariant_id": "NI-002",
+      "description": "layout=card does not create a new element, status axis, domain model, or semantic card contract.",
+      "verification_method": "grep_absence",
+      "verification_command": "sk-work-package-card\\|sk-summary-card\\|statusTone\\|status-tone",
+      "result": "confirmed_absent",
+      "evidence": "grep found zero matches",
+      "scope": "packages/elements/src/action-row packages/styles/src/action-row"
+    },
+    {
+      "invariant_id": "NI-003",
+      "description": "Action-row activation does not mutate selected, navigate, fire for a non-actionable row, or fire from a nested trailing control.",
+      "verification_method": "custom_command",
+      "verification_command": "npm test",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: > spec-kitty-design@0.0.0 test\n> vitest run\n\n\n RUN  v4.1.11 /home/jeroennouws/dev/team-kitty-missions/design-212-wp208-212-0907a\n\n \u2713 |node| tests/node/vue-sfc-compile.test.ts (3 tests) 28ms\n \u2713 |node| "
+    },
+    {
+      "invariant_id": "NI-004",
+      "description": "The supporting slot does not become a claim model, live region, timer, or inferred liveness source.",
+      "verification_method": "grep_absence",
+      "verification_command": "setInterval\\|setTimeout\\|aria-live\\|role=.status\\|claimExpiry\\|heartbeat",
+      "result": "confirmed_absent",
+      "evidence": "grep found zero matches",
+      "scope": "packages/elements/src/action-row packages/styles/src/action-row"
+    },
+    {
+      "invariant_id": "NI-005",
+      "description": "Entity-marker size and shape do not fetch an image, derive initials, perform identity lookup, or change host-label ownership.",
+      "verification_method": "grep_absence",
+      "verification_command": "fetch(\\|setInterval\\|setTimeout\\|initialsFrom\\|actorLookup\\|identityLookup",
+      "result": "confirmed_absent",
+      "evidence": "grep found zero matches",
+      "scope": "packages/elements/src/entity-marker packages/styles/src/entity-marker"
+    },
+    {
+      "invariant_id": "NI-006",
+      "description": "A meaningful slotted image does not contribute a second accessible name in the documented supported composition.",
+      "verification_method": "custom_command",
+      "verification_command": "npm test",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: > spec-kitty-design@0.0.0 test\n> vitest run\n\n\n RUN  v4.1.11 /home/jeroennouws/dev/team-kitty-missions/design-212-wp208-212-0907a\n\n \u2713 |node| tests/node/vue-sfc-compile.test.ts (3 tests) 38ms\n \u2713 |node| "
+    },
+    {
+      "invariant_id": "NI-007",
+      "description": "Pulsing does not animate visible text, synthesize status text, infer tone, start a timer, subscribe to heartbeats, or expire itself.",
+      "verification_method": "grep_absence",
+      "verification_command": "setInterval\\|setTimeout\\|EventSource\\|WebSocket\\|aria-live\\|heartbeat",
+      "result": "confirmed_absent",
+      "evidence": "grep found zero matches",
+      "scope": "packages/elements/src/status-indicator packages/styles/src/status-indicator"
+    },
+    {
+      "invariant_id": "NI-008",
+      "description": "Motion is not the sole signal of live and disabling motion does not remove all perceivable marker emphasis.",
+      "verification_method": "custom_command",
+      "verification_command": "npm test",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: > spec-kitty-design@0.0.0 test\n> vitest run\n\n\n RUN  v4.1.11 /home/jeroennouws/dev/team-kitty-missions/design-212-wp208-212-0907a\n\n \u2713 |node| tests/node/vue-sfc-compile.test.ts (3 tests) 23ms\n \u2713 |node| "
+    },
+    {
+      "invariant_id": "NI-009",
+      "description": "The inline empty state does not add copy, a heading, a role, a live region, an action, or notice semantics.",
+      "verification_method": "grep_absence",
+      "verification_command": "aria-live\\|role=.status\\|<h[1-6]\\|<button",
+      "result": "confirmed_absent",
+      "evidence": "grep found zero matches",
+      "scope": "packages/styles/src/empty-state/sk-empty-state-inline.html"
+    },
+    {
+      "invariant_id": "NI-010",
+      "description": "Generated files are not authored sources and no generated file is edited to make a drift gate pass.",
+      "verification_method": "custom_command",
+      "verification_command": "node scripts/build-react-wrappers.mjs --check && node scripts/build-vue-types.mjs --check && node scripts/measure-elements-sizes.mjs --check && git diff --exit-code -- packages/react/src packages/elements/vue.d.ts packages/elements/SIZES.md",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: \u2705 packages/react/src is up to date (59 file(s), 28 element(s)), and two runs are byte-identical.\n\u2705 packages/elements/vue.d.ts is up to date (28 elements).\n\u2705 packages/elements/SIZES.md is up to date."
+    },
+    {
+      "invariant_id": "NI-011",
+      "description": "No raw design value, cross-shadow theme selector, new tone vocabulary, or reversed package dependency is introduced.",
+      "verification_method": "custom_command",
+      "verification_command": "node scripts/check-component-token-literals.mjs packages/styles/src/action-row/sk-action-row.css packages/styles/src/entity-marker/sk-entity-marker.css packages/styles/src/status-indicator/sk-status-indicator.css packages/styles/src/empty-state/sk-empty-state.css && npm run quality:stylelint && npm test",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: \u2705 4 explicit component stylesheet(s) use tokens for all governed values.\n\n> spec-kitty-design@0.0.0 quality:stylelint\n> stylelint --allow-empty-input 'packages/**/*.css' 'packages/**/*.scss'\n\n\n> spec-"
+    },
+    {
+      "invariant_id": "NI-012",
+      "description": "No Team Kitty routing, data, lane state, progress arithmetic, trust rules, claim expiry, or Markdown processing enters the mission.",
+      "verification_method": "grep_absence",
+      "verification_command": "router\\|fetch(\\|setInterval\\|setTimeout\\|heartbeat\\|claimExpiry\\|markdown\\|marked(",
+      "result": "confirmed_absent",
+      "evidence": "grep found zero matches",
+      "scope": "packages/elements/src/action-row packages/elements/src/entity-marker packages/elements/src/status-indicator packages/styles/src/empty-state"
+    },
+    {
+      "invariant_id": "NI-013",
+      "description": "The valid meaningful-image correction does not allow a blank, unupgraded, or attribute-only empty component host through the axe anti-vacuity gate.",
+      "verification_method": "custom_command",
+      "verification_command": "node scripts/gate-selftest.mjs",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: \u2705 URL probe: buildStoryIframeUrl sets globals=a11y.manual:!true and round-trips 2 story id(s) safely.\n\u2705 shadow-real                    want=true  assert=rendered wait=satisfied\n\u2705 shadow-empty         "
+    }
+  ]
+}

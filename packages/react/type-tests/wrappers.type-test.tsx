@@ -16,18 +16,23 @@ import {
   SkActionRow,
   SkBarChart,
   SkCard,
+  SkEntityMarker,
   SkEvidenceChain,
   SkFormInput,
   SkMetric,
   SkNavPill,
   SkNotice,
+  SkStatusIndicator,
   SkTransitionMatrix,
   type ActionRowActivateDetail,
   type BarChartSelectDetail,
+  type SkActionRowProps,
   type SkBarChartElement,
   type SkCardProps,
+  type SkEntityMarkerProps,
   type SkFormInputElement,
   type SkNoticeProps,
+  type SkStatusIndicatorProps,
   type TransitionMatrixSelectDetail,
 } from '../src/index.js';
 import type {
@@ -190,6 +195,7 @@ export const actionRowAllProps = (
     rowId="sentinel-row"
     selectable
     selected={false}
+    layout="card"
     onSkActionRowActivate={(event) => {
       const detail: ActionRowActivateDetail = event.detail;
       void detail.id.toUpperCase();
@@ -209,6 +215,35 @@ export const actionRowInvalidSelectable = <SkActionRow selectable="true" />;
 
 // @ts-expect-error selected is boolean, not a string attribute
 export const actionRowInvalidSelected = <SkActionRow selected="false" />;
+
+// @ts-expect-error `card` is the complete presentation union, not an arbitrary string
+export const actionRowInvalidLayout = <SkActionRow layout={'stacked' as string} />;
+
+const actionRowLayout: NonNullable<SkActionRowProps['layout']> = 'card';
+void actionRowLayout;
+
+// --- compact marker axes ---------------------------------------------------------------
+export const entityMarkerAllAxes = <SkEntityMarker label="Ada Lovelace" size="sm" shape="circle" />;
+
+// @ts-expect-error `sm` is the complete compact-size union, not an arbitrary string
+export const entityMarkerInvalidSize = <SkEntityMarker size={'large' as string} />;
+
+// @ts-expect-error `circle` is the complete shape union, not an arbitrary string
+export const entityMarkerInvalidShape = <SkEntityMarker shape={'pill' as string} />;
+
+const entityMarkerSize: NonNullable<SkEntityMarkerProps['size']> = 'sm';
+const entityMarkerShape: NonNullable<SkEntityMarkerProps['shape']> = 'circle';
+void entityMarkerSize;
+void entityMarkerShape;
+
+// --- marker-only status pulse ----------------------------------------------------------
+export const statusIndicatorPulsing = <SkStatusIndicator tone="success" pulsing />;
+
+// @ts-expect-error `pulsing` is boolean, not a string attribute
+export const statusIndicatorInvalidPulsing = <SkStatusIndicator pulsing="true" />;
+
+const statusIndicatorPulsingType: NonNullable<SkStatusIndicatorProps['pulsing']> = true;
+void statusIndicatorPulsingType;
 
 // --- sk-card: the status axis reaches the wrapper as a UNION, not as `any` (#177) ----------
 //

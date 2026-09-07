@@ -2,7 +2,7 @@
    it EXERCISES, not the package barrel. The mutation harness selects each arm's tests from
    Vitest's dependency graph, and one barrel import puts every element source in every behaviour
    test's graph — which is what made that filter inert. */
-import { beforeEach, expect, test } from 'vitest';
+import { beforeEach, expect, test, vi } from 'vitest';
 import '../../../packages/elements/src/action-row/sk-action-row.js';
 import '../../../packages/elements/src/button/sk-button.js';
 import skActionRowSheet from '../../../packages/elements/src/action-row/sk-action-row.css.js';
@@ -34,17 +34,20 @@ const mount = async ({
   rowId = 'row-17',
   selectable = true,
   selected = false,
+  layout,
   children = content,
 }: {
   rowId?: string | undefined;
   selectable?: boolean;
   selected?: boolean;
+  layout?: 'card' | undefined;
   children?: string;
 } = {}): Promise<ActionRow> => {
   const element = document.createElement('sk-action-row') as ActionRow;
   element.rowId = rowId;
   element.selectable = selectable;
   element.selected = selected;
+  element.layout = layout;
   element.innerHTML = children;
   document.body.append(element);
   await element.updateComplete;
@@ -78,7 +81,7 @@ test('the six consumer channels preserve the approved scan order and keep contro
   const element = await mount();
   const trigger = triggerOf(element);
   const projected = Array.from(trigger.querySelectorAll<HTMLSlotElement>('slot')).map((slot) => slot.name);
-  expect(projected).toEqual(['marker', 'title', 'reference', 'tags', 'metadata']);
+  expect(projected).toEqual(['marker', 'title', 'reference', 'tags', 'metadata', 'supporting']);
   expect(trigger.tagName).toBe('BUTTON');
   expect(trigger.type).toBe('button');
 
@@ -89,73 +92,126 @@ test('the six consumer channels preserve the approved scan order and keep contro
   expect(element.shadowRoot!.textContent!.trim()).toBe('');
 });
 
-test('non-selectable and blank-ID rows fail closed without false interaction affordance', async () => {
-  for (const options of [
-    { rowId: 'row-17', selectable: false },
-    { rowId: '', selectable: true },
-    { rowId: ' \t ', selectable: true },
-  ]) {
-    const element = await mount(options);
-    let count = 0;
-    element.addEventListener('sk-action-row-activate', () => {
-      count += 1;
-    });
-    const trigger = triggerOf(element);
-    expect(trigger.tagName).not.toBe('BUTTON');
-    expect(trigger.hasAttribute('tabindex')).toBe(false);
-    expect(getComputedStyle(trigger).cursor).not.toBe('pointer');
-    trigger.click();
-    trigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
-    expect(count).toBe(0);
+test('layout is additive, accepts only card, and unknown values fail open without losing projections', async () => {
+  const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+  try {
+    const element = await mount({ children: `${content}<span slot="supporting">Claimed by Mia</span>` });
+    const row = partOf(element, 'row')!;
+    expect(element.layout).toBeUndefined();
+    expect(row.classList.contains('sk-action-row--card')).toBe(false);
+
+    element.setAttribute('layout', 'card');
+    await element.updateComplete;
+    expect(element.layout).toBe('card');
+    expect(row.classList.contains('sk-action-row--card')).toBe(true);
+
+    element.setAttribute('layout', 'stacked');
+    await element.updateComplete;
+    expect(row.classList.contains('sk-action-row--card')).toBe(false);
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('unknown action-row layout'));
+    expect(triggerOf(element).querySelectorAll('slot')).toHaveLength(6);
+    expect((triggerOf(element).querySelector('slot[name="supporting"]') as HTMLSlotElement).assignedElements()).toHaveLength(1);
+
+    element.setAttribute('layout', '');
+    await element.updateComplete;
+    expect(row.classList.contains('sk-action-row--card')).toBe(false);
+  } finally {
+    warn.mockRestore();
   }
 });
 
-test('[SC-006] native pointer, Enter, Space, and held-key sequences each request activation once', async () => {
-  const element = await mount();
-  const trigger = triggerOf(element);
-  const events: CustomEvent<ActionRowActivateDetail>[] = [];
-  element.addEventListener('sk-action-row-activate', (event) => {
-    events.push(event as CustomEvent<ActionRowActivateDetail>);
-  });
+test('[SC-013] supporting keeps one targetable stable part while assignment controls visibility', async () => {
+  const element = await mount({ children: '<strong slot="title">Compact item</strong>' });
+  const supporting = element.shadowRoot!.querySelector('.sk-action-row__supporting') as HTMLElement;
+  expect(supporting.getAttribute('part')).toBe('supporting');
+  const slot = supporting.querySelector('slot[name="supporting"]') as HTMLSlotElement;
+  expect(supporting.hidden).toBe(true);
+  expect(slot.assignedNodes()).toHaveLength(0);
 
-  await userEvent.click(trigger);
-  expect(events).toHaveLength(1);
+  const style = document.createElement('style');
+  style.textContent = 'sk-action-row::part(supporting) { outline-style: dashed; }';
+  document.head.append(style);
+  expect(getComputedStyle(supporting).outlineStyle).toBe('dashed');
 
-  trigger.focus();
-  await userEvent.keyboard('{Enter}');
-  expect(events).toHaveLength(2);
+  const line = document.createElement('span');
+  line.slot = 'supporting';
+  line.textContent = 'Claimed by Mia';
+  let changed = new Promise((resolve) => slot.addEventListener('slotchange', resolve, { once: true }));
+  element.append(line);
+  await changed;
+  expect(slot.assignedElements()).toEqual([line]);
+  expect(supporting.hidden).toBe(false);
 
-  await userEvent.keyboard('{Space}');
-  expect(events).toHaveLength(3);
+  changed = new Promise((resolve) => slot.addEventListener('slotchange', resolve, { once: true }));
+  line.remove();
+  await changed;
+  expect(supporting.hidden).toBe(true);
 
-  const keydowns: Array<{
-    key: string;
-    repeat: boolean;
-    defaultPrevented: boolean;
-  }> = [];
-  trigger.addEventListener('keydown', (event) => {
-    keydowns.push({
-      key: event.key,
-      repeat: event.repeat,
-      defaultPrevented: event.defaultPrevented,
+  changed = new Promise((resolve) => slot.addEventListener('slotchange', resolve, { once: true }));
+  element.append(line);
+  await changed;
+  expect(element.shadowRoot!.querySelector('.sk-action-row__supporting')).toBe(supporting);
+  expect(supporting.hidden).toBe(false);
+  style.remove();
+});
+
+test('non-selectable and blank-ID rows fail closed without false interaction affordance', async () => {
+  for (const layout of [undefined, 'card'] as const) {
+    for (const options of [
+      { rowId: 'row-17', selectable: false },
+      { rowId: '', selectable: true },
+      { rowId: ' \t ', selectable: true },
+    ]) {
+      const element = await mount({ ...options, layout });
+      let count = 0;
+      element.addEventListener('sk-action-row-activate', () => {
+        count += 1;
+      });
+      const trigger = triggerOf(element);
+      expect(trigger.tagName).not.toBe('BUTTON');
+      expect(trigger.hasAttribute('tabindex')).toBe(false);
+      expect(getComputedStyle(trigger).cursor).not.toBe('pointer');
+      trigger.click();
+      trigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+      expect(count).toBe(0);
+      element.remove();
+    }
+  }
+});
+
+test('[SC-006] native pointer, Enter, Space, and held-key sequences each request activation once in both layouts', async () => {
+  for (const layout of [undefined, 'card'] as const) {
+    const element = await mount({ layout });
+    const trigger = triggerOf(element);
+    const events: CustomEvent<ActionRowActivateDetail>[] = [];
+    element.addEventListener('sk-action-row-activate', (event) => {
+      events.push(event as CustomEvent<ActionRowActivateDetail>);
     });
-  });
-  await userEvent.keyboard('{Enter>2/}');
-  expect(events).toHaveLength(4);
-  expect(keydowns).toContainEqual({
-    key: 'Enter',
-    repeat: true,
-    defaultPrevented: true,
-  });
 
-  keydowns.length = 0;
-  await userEvent.keyboard('{Space>2/}');
-  expect(events).toHaveLength(5);
-  expect(keydowns).toContainEqual({
-    key: ' ',
-    repeat: true,
-    defaultPrevented: true,
-  });
+    await userEvent.click(trigger);
+    expect(events).toHaveLength(1);
+
+    trigger.focus();
+    await userEvent.keyboard('{Enter}');
+    expect(events).toHaveLength(2);
+
+    await userEvent.keyboard('{Space}');
+    expect(events).toHaveLength(3);
+
+    const keydowns: Array<{ key: string; repeat: boolean; defaultPrevented: boolean }> = [];
+    trigger.addEventListener('keydown', (event) => {
+      keydowns.push({ key: event.key, repeat: event.repeat, defaultPrevented: event.defaultPrevented });
+    });
+    await userEvent.keyboard('{Enter>2/}');
+    expect(events).toHaveLength(4);
+    expect(keydowns).toContainEqual({ key: 'Enter', repeat: true, defaultPrevented: true });
+
+    keydowns.length = 0;
+    await userEvent.keyboard('{Space>2/}');
+    expect(events).toHaveLength(5);
+    expect(keydowns).toContainEqual({ key: ' ', repeat: true, defaultPrevented: true });
+    element.remove();
+  }
 });
 
 test('[SC-007] activation preserves the consumer ID verbatim and exposes no extra detail keys', async () => {
@@ -216,28 +272,34 @@ test('[SC-008] the non-cancelable event crosses shadow roots and has no componen
 });
 
 test('selection remains controlled and maps only to aria-current on the stable row root', async () => {
-  for (const selectable of [true, false]) {
-    const element = await mount({ selectable, selected: true });
-    const row = partOf(element, 'row')!;
-    expect(row.getAttribute('aria-current')).toBe('true');
-    expect(element.shadowRoot!.querySelector('[aria-selected],[aria-pressed],[role="checkbox"],[role="switch"]')).toBe(
-      null,
-    );
+  for (const layout of [undefined, 'card'] as const) {
+    for (const selectable of [true, false]) {
+      const element = await mount({ selectable, selected: true, layout });
+      const row = partOf(element, 'row')!;
+      expect(row.getAttribute('aria-current')).toBe('true');
+      expect(element.shadowRoot!.querySelector('[aria-selected],[aria-pressed],[role="checkbox"],[role="switch"]')).toBe(
+        null,
+      );
 
-    if (selectable) triggerOf(element).click();
-    await element.updateComplete;
-    expect(element.selected).toBe(true);
-    expect(partOf(element, 'row')).toBe(row);
+      if (selectable) triggerOf(element).click();
+      await element.updateComplete;
+      expect(element.selected).toBe(true);
+      expect(partOf(element, 'row')).toBe(row);
 
-    element.selected = false;
-    await element.updateComplete;
-    expect(partOf(element, 'row')).toBe(row);
-    expect(row.hasAttribute('aria-current')).toBe(false);
+      element.selected = false;
+      await element.updateComplete;
+      expect(partOf(element, 'row')).toBe(row);
+      expect(row.hasAttribute('aria-current')).toBe(false);
+      element.remove();
+    }
   }
 });
 
-test('native and custom trailing controls remain independently operable and emit no row event', async () => {
-  const element = await mount();
+test.each([
+  { label: 'default row', layout: undefined },
+  { label: 'card', layout: 'card' as const },
+])('native and custom trailing controls remain independently operable in $label layout', async ({ layout }) => {
+  const element = await mount({ layout });
   let rowEvents = 0;
   let controlEvents = 0;
   element.addEventListener('sk-action-row-activate', () => {
@@ -286,6 +348,7 @@ test('[SC-010] row properties assigned before definition survive upgrade and dri
   element.rowId = 'late-row';
   element.selectable = true;
   element.selected = true;
+  element.layout = 'card';
   element.innerHTML = '<strong slot="title">Late row</strong>';
   document.body.append(element);
   customElements.define('sk-action-row-late', class extends SkActionRow {});
@@ -296,16 +359,30 @@ test('[SC-010] row properties assigned before definition survive upgrade and dri
     rowId: element.rowId,
     selectable: element.selectable,
     selected: element.selected,
+    layout: element.layout,
   }).toEqual({
     rowId: 'late-row',
     selectable: true,
     selected: true,
+    layout: 'card',
   });
   expect(element.getAttribute('row-id')).toBe('late-row');
   expect(element.hasAttribute('selectable')).toBe(true);
   expect(element.hasAttribute('selected')).toBe(true);
+  expect(element.getAttribute('layout')).toBe('card');
   expect(triggerOf(element).tagName).toBe('BUTTON');
   expect(partOf(element, 'row')?.getAttribute('aria-current')).toBe('true');
+  expect(partOf(element, 'row')?.classList.contains('sk-action-row--card')).toBe(true);
+
+  element.layout = undefined;
+  await element.updateComplete;
+  expect(element.hasAttribute('layout')).toBe(false);
+  expect(partOf(element, 'row')?.classList.contains('sk-action-row--card')).toBe(false);
+
+  element.layout = 'card';
+  await element.updateComplete;
+  expect(element.getAttribute('layout')).toBe('card');
+  expect(partOf(element, 'row')?.classList.contains('sk-action-row--card')).toBe(true);
 
   element.selectable = false;
   await element.updateComplete;
@@ -323,6 +400,7 @@ test('[SC-013] every declared part is present and targetable from outside', asyn
     ['reference', 'sk-action-row::part(reference) { outline-style: dashed; }'],
     ['tags', 'sk-action-row::part(tags) { outline-style: dashed; }'],
     ['metadata', 'sk-action-row::part(metadata) { outline-style: dashed; }'],
+    ['supporting', 'sk-action-row::part(supporting) { outline-style: dashed; }'],
     ['controls', 'sk-action-row::part(controls) { outline-style: dashed; }'],
   ];
   for (const [name, rule] of cases) {
@@ -337,7 +415,7 @@ test('[SC-013] every declared part is present and targetable from outside', asyn
       style.remove();
     }
   }
-  expect(cases).toHaveLength(8);
+  expect(cases).toHaveLength(9);
 });
 
 test('[SC-014] the element adopts the generated sheet by identity and injects no style tag', async () => {
@@ -487,6 +565,37 @@ test('long content wraps at 320px without overflow or controls/metadata collisio
   expect(surfaces.get('dark')).not.toBe(surfaces.get('light'));
 });
 
-test('the public attributes are exactly the three controlled inputs', async () => {
-  expect([...SkActionRow.observedAttributes].sort()).toEqual(['row-id', 'selectable', 'selected']);
+test('card layout contains long and sparse content at every compact lane width without CSS reordering', async () => {
+  expect(actionRowCss).not.toMatch(/\border\s*:/);
+  for (const width of [220, 280, 360]) {
+    const wrapper = document.createElement('div');
+    wrapper.style.width = `${width}px`;
+    document.body.append(wrapper);
+    const element = await mount({
+      layout: 'card',
+      children: `
+        <strong slot="title">A long consumer-supplied title remains readable at every lane width</strong>
+        <code slot="reference">spec-kitty/a-very-long-unbroken-reference-without-a-natural-break</code>
+        <time slot="metadata">2 hours ago</time>
+        <span slot="supporting">Claimed by a consumer with complete visible text</span>
+      `,
+    });
+    wrapper.append(element);
+    await element.updateComplete;
+    const row = partOf(element, 'row')!;
+    const trigger = triggerOf(element);
+    expect(row.classList.contains('sk-action-row--card')).toBe(true);
+    expect(row.scrollWidth).toBeLessThanOrEqual(row.clientWidth);
+    expect(trigger.scrollWidth).toBeLessThanOrEqual(trigger.clientWidth);
+    expect(partOf(element, 'marker')!.hidden).toBe(true);
+    expect(partOf(element, 'tags')!.hidden).toBe(true);
+    expect(partOf(element, 'controls')!.hidden).toBe(true);
+    expect(partOf(element, 'marker')!.getBoundingClientRect().height).toBe(0);
+    expect(partOf(element, 'tags')!.getBoundingClientRect().height).toBe(0);
+    wrapper.remove();
+  }
+});
+
+test('the public attributes add only layout to the three controlled inputs', async () => {
+  expect([...SkActionRow.observedAttributes].sort()).toEqual(['layout', 'row-id', 'selectable', 'selected']);
 });

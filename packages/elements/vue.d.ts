@@ -26,9 +26,11 @@ declare module 'vue' {
      * --sk-font-display, --sk-font-mono, --sk-font-sans, --sk-motion-duration-fast,
      * --sk-motion-ease-out, --sk-radius-md, --sk-space-1, --sk-space-2, --sk-space-3,
      * --sk-space-4, --sk-space-5, --sk-surface-card, --sk-surface-muted, --sk-surface-pill,
-     * --sk-text-base, --sk-text-sm, --sk-text-xs, --sk-weight-medium, --sk-weight-semibold.
+     * --sk-text-base, --sk-text-xs, --sk-weight-semibold.
      */
     'sk-action-row': SkElement<{
+      /** Optional compact presentation. Only `card` is supported; invalid values use the default row layout. */
+      'layout'?: 'card' | undefined;
       /** Stable consumer-owned identifier included in activation requests. */
       'row-id'?: string | undefined;
       /** Enables the native primary trigger when `rowId` is non-empty. */
@@ -152,12 +154,17 @@ declare module 'vue' {
     /**
      * A compact consumer-supplied icon, initials, or short mark with explicit accessible naming.
      *
-     * Token dependencies: --sk-font-sans, --sk-on-tint-butter, --sk-radius-sm, --sk-space-1,
-     * --sk-space-7, --sk-surface-tint-butter, --sk-text-xs, --sk-weight-bold.
+     * Token dependencies: --sk-font-sans, --sk-on-tint-butter, --sk-radius-pill, --sk-radius-sm,
+     * --sk-space-1, --sk-space-5, --sk-space-7, --sk-surface-tint-butter, --sk-text-xs,
+     * --sk-weight-bold.
      */
     'sk-entity-marker': SkElement<{
       /** Accessible name for a meaningful mark. Empty or whitespace-only values make it decorative. */
       'label'?: string | undefined;
+      /** Optional circular presentation. Only `circle` is supported; invalid values use the square shape. */
+      'shape'?: 'circle' | undefined;
+      /** Optional compact presentation. Only `sm` is supported; invalid values use the default size. */
+      'size'?: 'sm' | undefined;
     }>;
     /**
      * An ordered chain of generic evidence stages composed from real `sk-metric` elements.
@@ -573,11 +580,14 @@ declare module 'vue' {
     /**
      * A consumer-labelled status with a presentation-only tone and decorative marker.
      *
-     * Token dependencies: --sk-color-red, --sk-fg-body, --sk-fg-muted, --sk-font-sans,
-     * --sk-on-tint-butter, --sk-on-tint-lilac, --sk-on-tint-mint, --sk-on-tint-sky,
+     * Token dependencies: --sk-border-width-1, --sk-border-width-2, --sk-fg-body, --sk-fg-muted,
+     * --sk-font-sans, --sk-motion-duration-slow, --sk-motion-ease-in-out, --sk-on-tint-butter,
+     * --sk-on-tint-lilac, --sk-on-tint-mint, --sk-on-tint-rose, --sk-on-tint-sky, --sk-space-1,
      * --sk-space-2, --sk-text-sm.
      */
     'sk-status-indicator': SkElement<{
+      /** Adds marker-only pulse presentation for consumer-supplied live activity. */
+      'pulsing'?: boolean;
       /** Presentation tone. Unknown values render as `neutral` without changing the visible text. */
       'tone'?: 'neutral' | 'info' | 'success' | 'attention' | 'danger' | 'recovery' | undefined;
     }>;

@@ -31,7 +31,8 @@
   grid-template-areas:
     "marker title metadata"
     "marker reference metadata"
-    "marker tags metadata";
+    "marker tags metadata"
+    "supporting supporting supporting";
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   min-width: 0;
@@ -56,7 +57,6 @@ button.sk-action-row__trigger:hover {
 }
 
 button.sk-action-row__trigger:focus-visible {
-  z-index: 1;
   outline: var(--sk-border-width-2) solid var(--sk-color-accent);
   outline-offset: calc(var(--sk-border-width-2) * -1);
 }
@@ -109,6 +109,15 @@ button.sk-action-row__trigger:active {
   white-space: nowrap;
 }
 
+.sk-action-row__supporting {
+  grid-area: supporting;
+  min-width: 0;
+  margin-block-start: var(--sk-space-2);
+  color: var(--sk-fg-muted);
+  font-size: var(--sk-text-xs);
+  overflow-wrap: anywhere;
+}
+
 .sk-action-row__controls {
   box-sizing: border-box;
   display: flex;
@@ -118,6 +127,38 @@ button.sk-action-row__trigger:active {
   flex-wrap: wrap;
   gap: var(--sk-space-2);
   padding: var(--sk-space-3) var(--sk-space-4) var(--sk-space-3) 0;
+}
+
+.sk-action-row--card {
+  flex-direction: column;
+}
+
+.sk-action-row--card .sk-action-row__trigger {
+  grid-template-areas:
+    "marker"
+    "title"
+    "reference"
+    "tags"
+    "metadata"
+    "supporting";
+  grid-template-columns: minmax(0, 1fr);
+  width: 100%;
+}
+
+.sk-action-row--card .sk-action-row__marker {
+  margin-inline-end: 0;
+}
+
+.sk-action-row--card .sk-action-row__metadata {
+  justify-self: start;
+  margin-block-start: var(--sk-space-2);
+  margin-inline-start: 0;
+  white-space: normal;
+}
+
+.sk-action-row--card .sk-action-row__controls {
+  width: 100%;
+  padding: 0 var(--sk-space-4) var(--sk-space-3);
 }
 
 @container (max-width: 400px) {
@@ -130,7 +171,8 @@ button.sk-action-row__trigger:active {
       "marker title"
       "marker reference"
       "marker tags"
-      "metadata metadata";
+      "metadata metadata"
+      "supporting supporting";
     grid-template-columns: auto minmax(0, 1fr);
     width: 100%;
   }

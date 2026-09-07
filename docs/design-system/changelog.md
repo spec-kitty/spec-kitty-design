@@ -112,6 +112,14 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) conve
 
 ### Added
 
+- Added four backward-compatible compact work-item presentations (#212): `sk-action-row` now accepts
+  `layout="card"` and an optional `supporting` slot/part; `sk-entity-marker` gains independent
+  `size="sm"` and `shape="circle"` axes with contained cover-cropped consumer images;
+  `sk-status-indicator` gains a reflected marker-only `pulsing` flag with reduced-motion and
+  forced-colors fallbacks; and `.sk-empty-state--inline` provides passive, naturally wrapping
+  lane copy. Consumers continue to own selection, identity, status/liveness, copy and application
+  state. Manifest, React, Vue, static markup and size outputs are generated from their canonical
+  authored sources.
 - Added `sk-metric` and `sk-evidence-chain` as generic presentation primitives (#147). A metric
   preserves consumer-supplied labels and opaque display values in a native definition relationship;
   an evidence chain preserves consumer-owned stage order in a native ordered list and composes real
