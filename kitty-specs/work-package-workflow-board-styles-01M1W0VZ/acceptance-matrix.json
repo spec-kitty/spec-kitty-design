@@ -58,10 +58,10 @@
       "criterion_id": "FR-006",
       "description": "Verify FR-006 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "apps/storybook/src/tests/sk-workflow-board.spec.ts: Chromium 44/44 and Firefox 44/44 locally; full cross-browser CI 34068567976; 301-story axe gate green",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T00:32:03.885534+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
