@@ -300,6 +300,15 @@ jobs:
       # already failed (sk-stub and sk-nav-pill are migrated elements whose styles-layer
       # stories still offend), and the comment outlived the rewrite because the workflow file
       # was not in that commit's diff. To retire an offender, fix it and LOWER the count.
+      # #225. `selftestCeilingSeconds` is derived from how few test files each mutation arm
+      # runs, and that number holds only while the behaviour fixture imports element modules
+      # rather than the package barrel. One barrel import puts its file back into every element
+      # arm. The rule was prose in docs/contributing/adding-a-component.md and was violated by
+      # the very next branch (PR #241) before the ink dried, which is why it is a gate.
+      - name: "[ENFORCED] Fixture-import gate self-test (#225)"
+        run: node scripts/check-behaviour-fixture-imports.mjs --selftest
+      - name: "[ENFORCED] The behaviour fixture imports elements, not the barrel (#225)"
+        run: node scripts/check-behaviour-fixture-imports.mjs
       - name: "[ENFORCED] Light-mode story gate self-test (#93)"
         run: node scripts/check-story-theme-wrapper.mjs --selftest
       - name: "[ENFORCED] Light-mode stories activate light mode (#93)"

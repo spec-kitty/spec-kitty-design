@@ -134,7 +134,7 @@ test('[SC-010] a status property assigned before definition survives upgrade and
   el.status = 'danger';
   el.textContent = 'Failed';
   document.body.append(el);
-  const { SkCard } = await import('@spec-kitty/elements');
+  const { SkCard } = await import('../../../packages/elements/src/card/sk-card.js');
   customElements.define('sk-card-late', class extends SkCard {});
   await customElements.whenDefined('sk-card-late');
   await el.updateComplete;

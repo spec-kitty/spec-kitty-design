@@ -49,7 +49,7 @@ test('[SC-010] a label property assigned before definition survives upgrade and 
   element.label = 'Mission marker';
   element.textContent = 'M';
   document.body.append(element);
-  const { SkEntityMarker } = await import('@spec-kitty/elements');
+  const { SkEntityMarker } = await import('../../../packages/elements/src/entity-marker/sk-entity-marker.js');
   customElements.define('sk-entity-marker-late', class extends SkEntityMarker {});
   await customElements.whenDefined('sk-entity-marker-late');
   await element.updateComplete;

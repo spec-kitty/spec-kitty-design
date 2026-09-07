@@ -117,7 +117,7 @@ test('[SC-010] a property assigned before the definition loads is applied on upg
   el.isOpen = true;
   document.body.append(el);
 
-  const { SkNavPill } = (await import('@spec-kitty/elements')) as unknown as {
+  const { SkNavPill } = (await import('../../../packages/elements/src/nav-pill/sk-nav-pill.js')) as unknown as {
     SkNavPill: CustomElementConstructor;
   };
   customElements.define('sk-nav-pill-late', class extends SkNavPill {});

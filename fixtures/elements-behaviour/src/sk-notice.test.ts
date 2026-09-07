@@ -540,7 +540,7 @@ test('[SC-010] tone, announce and dismissible assigned before upgrade survive an
   element.message = 'assigned before the definition loaded';
   document.body.append(element);
 
-  const { SkNotice } = await import('@spec-kitty/elements');
+  const { SkNotice } = await import('../../../packages/elements/src/notice/sk-notice.js');
   customElements.define('sk-notice-late', class extends SkNotice {});
   await customElements.whenDefined('sk-notice-late');
   await element.updateComplete;

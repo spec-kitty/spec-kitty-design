@@ -87,7 +87,7 @@ test('[SC-010] a tone property assigned before definition survives upgrade and r
   element.tone = 'info';
   element.textContent = 'Measuring';
   document.body.append(element);
-  const { SkStatusIndicator } = await import('@spec-kitty/elements');
+  const { SkStatusIndicator } = await import('../../../packages/elements/src/status-indicator/sk-status-indicator.js');
   customElements.define('sk-status-indicator-late', class extends SkStatusIndicator {});
   await customElements.whenDefined('sk-status-indicator-late');
   await element.updateComplete;

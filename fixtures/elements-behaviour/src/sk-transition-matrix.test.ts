@@ -388,7 +388,7 @@ test('[SC-010] arrays assigned before a late definition survive upgrade', async 
   element.columns = approvedColumns;
   element.routes = approvedRoutes;
   document.body.append(element);
-  const { SkTransitionMatrix } = await import('@spec-kitty/elements');
+  const { SkTransitionMatrix } = await import('../../../packages/elements/src/transition-matrix/sk-transition-matrix.js');
   customElements.define('sk-transition-matrix-late', class extends SkTransitionMatrix {});
   await customElements.whenDefined('sk-transition-matrix-late');
   await element.updateComplete;
