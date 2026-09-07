@@ -272,9 +272,12 @@ export class SkNotice extends LitElement {
     //      it no longer produces an empty-at-birth region and the old sentence claimed it did.
     //
     //   2. EVERY RE-ANNOUNCEMENT NOW CARRIES THE HEADING, permanently, not just at birth. Both
-    //      roles this element renders are implicitly ATOMIC — WAI-ARIA gives `alert` and `status`
-    //      `aria-atomic="true"` as well as their `aria-live` value — so a change anywhere in the
-    //      region is presented as the whole region. That is precisely what makes the ruling work:
+    //      roles this element renders are implicitly ATOMIC, and that is a looked-up fact rather
+    //      than an inference: `role="alert"` is equivalent to `aria-live="assertive"` AND
+    //      `aria-atomic="true"`, and `role="status"` has an implicit `aria-live` of `polite` and
+    //      an implicit `aria-atomic` of `true` (MDN, ARIA alert_role / status_role; WAI-ARIA 1.2
+    //      §5.4 "Implicit Value for Role"). An atomic region is presented WHOLE when any part of
+    //      it changes. That is precisely what makes the ruling work:
     //      changing `message` alone re-reads "Deploy failed. Retrying in 2s", not "Retrying in
     //      2s". It is also the cost: a notice that updates a countdown repeats its headline on
     //      every tick. Nothing here can trim that without taking the heading back out, so it is a

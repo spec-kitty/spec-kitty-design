@@ -89,8 +89,8 @@ Mixing an unpaired surface and foreground token is a visual identity violation â
 foregrounds are **semantic aliases** over the tint family â€” they add meaning, not colour. Every one
 of the twelve is a single `var()` onto a token listed above: the five non-neutral surfaces onto
 `--sk-surface-tint-*`, their five inks onto `--sk-on-tint-*`, and the neutral pair onto
-`--sk-surface-muted` / `--sk-fg-muted`. The vocabulary is `sk-status-indicator`'s, one tone set for the whole library;
-`sk-card`'s `status` attribute is its first other consumer.
+`--sk-surface-muted` / `--sk-fg-muted`. The vocabulary is `sk-status-indicator`'s, one tone set for
+the whole library; `sk-card`'s `status` attribute is its first other consumer.
 
 **"Resolves to a token above" is true of this layer and not of the one beneath it.** This paragraph
 used to say every status token "resolves to a token above", full stop, which reads as though the
