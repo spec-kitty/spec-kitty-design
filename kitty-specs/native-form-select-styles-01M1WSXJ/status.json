@@ -1,0 +1,57 @@
+{
+  "event_count": 6,
+  "last_event_id": "01M1X4X52JDK6HS7H1WQWFP5XX",
+  "materialized_at": "2026-09-07T05:19:25.266175+00:00",
+  "mission_number": "",
+  "mission_slug": "native-form-select-styles-01M1WSXJ",
+  "mission_type": "software-dev",
+  "summary": {
+    "approved": 1,
+    "blocked": 0,
+    "canceled": 0,
+    "claimed": 0,
+    "done": 0,
+    "for_review": 0,
+    "in_progress": 0,
+    "in_review": 0,
+    "planned": 0
+  },
+  "work_packages": {
+    "WP01": {
+      "actor": "user",
+      "agent": "codex",
+      "agent_profile": "__resolved_profile_absent__",
+      "agent_profile_version": "__resolved_profile_version_absent__",
+      "assignee": "codex",
+      "force_count": 0,
+      "lane": "approved",
+      "last_event_id": "01M1X4X52JDK6HS7H1WQWFP5XX",
+      "last_transition_at": "2026-09-07T05:19:25.266175+00:00",
+      "model": "__resolved_model_absent__",
+      "notes": [
+        "Codex frontend-freddy implementation started in the programme-authorized primary clone",
+        "Implementation complete at certified source head a3245ae7; exact-head CI 34084516931 fully green, four Codex lenses found no remaining product defect, acceptance matrix and durable 200% zoom evidence refreshed.",
+        "Independent Codex runtime review approved: exact source-head CI 34084516931 green; current branch adds only governed state, issue matrix, contract, and durable checksummed 200% zoom evidence; all requirements, non-goals and anti-pattern checks pass."
+      ],
+      "provider": "__resolved_provider_absent__",
+      "review_result": {
+        "feedback_path": "/home/jeroennouws/dev/team-kitty-missions/design-211-wp208-211-0907a/kitty-specs/native-form-select-styles-01M1WSXJ/tasks/WP01-native-light-dom-form-select-styles/review-cycle-1.md",
+        "reference": "review-cycle://native-form-select-styles-01M1WSXJ/WP01-native-light-dom-form-select-styles/review-cycle-1.md",
+        "reviewer": "codex",
+        "verdict": "approved"
+      },
+      "role": "reviewer",
+      "shell_pid": 3589512,
+      "shell_pid_created_at": "1788757977.9",
+      "subtasks": {
+        "T001": "done",
+        "T002": "done",
+        "T003": "done",
+        "T004": "done",
+        "T005": "done",
+        "T006": "done",
+        "T007": "done"
+      }
+    }
+  }
+}

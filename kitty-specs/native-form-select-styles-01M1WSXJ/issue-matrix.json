@@ -1,0 +1,113 @@
+{
+  "rows": {
+    "#141": {
+      "evidence_ref": "https://github.com/spec-kitty/spec-kitty-design/issues/141 closed; styles-only form-field decision implemented by PR #172",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
+    "#172": {
+      "evidence_ref": "https://github.com/spec-kitty/spec-kitty-design/pull/172 closed/merged; generated styles-only barrel convention present on train",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
+    "#177": {
+      "evidence_ref": "https://github.com/spec-kitty/spec-kitty-design/issues/177 closed via PR #215; card-tone ownership remains external and untouched",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
+    "#178": {
+      "evidence_ref": "https://github.com/spec-kitty/spec-kitty-design/issues/178 closed via PR #224; notice ownership remains external and untouched",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
+    "#180": {
+      "evidence_ref": "https://github.com/spec-kitty/spec-kitty-design/issues/180 closed; free-text datalist predecessor remains distinct from closed native select",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
+    "#208": {
+      "evidence_ref": "https://github.com/spec-kitty/spec-kitty-design/issues/208 active parent epic; #211 delivers only its TKW3 child scope",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "in-mission",
+      "wp": "WP01"
+    },
+    "#209": {
+      "evidence_ref": "https://github.com/spec-kitty/spec-kitty-design/issues/209 closed via PR #229; styles-only workflow board predecessor is merged into train",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
+    "#211": {
+      "evidence_ref": "https://github.com/spec-kitty/spec-kitty-design/issues/211 binding mission contract; implemented and reviewed in PR #243",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "in-mission",
+      "wp": "WP01"
+    },
+    "#214": {
+      "evidence_ref": "https://github.com/spec-kitty/spec-kitty-design/issues/214 existing downstream T10/T11 composition mission; starts after #209-#213 and #178",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
+    }
+  },
+  "schema_version": 1
+}

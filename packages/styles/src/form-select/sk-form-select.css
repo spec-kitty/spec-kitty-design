@@ -1,0 +1,46 @@
+/* @spec-kitty/styles — native light-DOM form-select presentation (#211) */
+/* The browser keeps the indicator, option UI, validity, focus, and form behaviour. */
+
+.sk-form-select {
+  box-sizing: border-box;
+  inline-size: 100%;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  contain: paint;
+  padding-block: var(--sk-space-3);
+  padding-inline: var(--sk-space-4);
+  color: var(--sk-fg-default);
+  background: var(--sk-surface-input);
+  border-color: var(--sk-border-default);
+  border-style: solid;
+  border-width: var(--sk-border-width-1);
+  border-radius: var(--sk-radius-sm);
+  font-family: var(--sk-font-sans);
+  font-size: var(--sk-text-base);
+  font-weight: var(--sk-weight-normal);
+}
+
+.sk-form-select:focus-visible {
+  border-color: var(--sk-border-focus);
+  outline-color: var(--sk-border-focus);
+  outline-style: solid;
+  outline-width: var(--sk-border-width-2);
+  outline-offset: var(--sk-border-width-1);
+}
+
+.sk-form-select:invalid {
+  border-color: var(--sk-color-red);
+  border-style: double;
+  border-width: var(--sk-border-width-2);
+}
+
+.sk-form-select:disabled {
+  border-style: dashed;
+  cursor: not-allowed;
+}
+
+.sk-form-select--compact {
+  padding-block: var(--sk-space-2);
+  padding-inline: var(--sk-space-3);
+  font-size: var(--sk-text-sm);
+}

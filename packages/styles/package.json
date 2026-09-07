@@ -27,6 +27,7 @@
     "./feature-card/*": "./dist/feature-card/*",
     "./form-field/*": "./dist/form-field/*",
     "./form-input/*": "./dist/form-input/*",
+    "./form-select/*": "./dist/form-select/*",
     "./form-textarea/*": "./dist/form-textarea/*",
     "./grid/*": "./dist/grid/*",
     "./metric/*": "./dist/metric/*",
