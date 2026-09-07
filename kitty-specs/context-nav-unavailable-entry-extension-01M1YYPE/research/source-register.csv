@@ -1,0 +1,11 @@
+source_id,source_type,title,location,authority,accessed_at,scope
+SRC-001,github-issue,"Issue #264: context navigation unavailable-entry extension",https://github.com/spec-kitty/spec-kitty-design/issues/264,binding,2026-09-08,"native unavailable anatomy; interaction absence; states; resilience; exit criteria"
+SRC-002,github-pr,"PR #262: native context-navigation styles",https://github.com/spec-kitty/spec-kitty-design/pull/262,landed-dependency,2026-09-08,"merged implementation and verification evidence for #256"
+SRC-003,git-revision,"Current design train",57e1f466afd3ead40523aa3d25d86b85eda87bce,authoritative,2026-09-08,"latest fetched train at mission start; contains public .sk-context-nav family"
+SRC-004,repository-doc,"ADR 9: Shadow DOM and styling API",docs/architecture/decisions/2026-09-02-9-shadow-dom-and-styling-api.md,binding,2026-09-08,"native composition and styling ownership"
+SRC-005,repository-doc,"ADR 10: Distribution and canonical markup",docs/architecture/decisions/2026-09-02-10-distribution-and-canonical-markup.md,binding,2026-09-08,"styles-only authored HTML and generated barrel boundary"
+SRC-006,repository-doc,"ADR 11: Verification stack",docs/architecture/decisions/2026-09-02-11-verification-stack-and-wrapper-generation.md,binding,2026-09-08,"behavior evidence; generated wrapper invariants; mutation applicability"
+SRC-007,repository-doc,"Adding a component",docs/contributing/adding-a-component.md,binding,2026-09-08,"current generator order; stories; axe; package and quality gates"
+SRC-008,repository-source,"Existing context-navigation family",packages/styles/src/context-nav/,binding,2026-09-08,"selectors; canonical fixtures; stories; generated public export"
+SRC-009,ux-evidence,"Mission Reading approved dossier",/home/jeroennouws/dev/team-kitty-missions/ux_redesign/mission-reading/,binding-product-evidence,2026-09-08,"M1-M8 design intent; capability audit; reviews; responsive and truth boundaries"
+SRC-010,repository-governance,"Project charter",.kittify/charter/charter.md,binding,2026-09-08,"tokens; native semantics; reviews; exact-head merge gates; findings practice"
