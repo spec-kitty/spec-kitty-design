@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "mission_slug": "native-form-select-styles-01M1WSXJ",
+  "mission_id": "01M1WSXJ1ZTCGCK6NBFG0K0GPM",
+  "mission_branch": "kitty/mission-native-form-select-styles-01M1WSXJ",
+  "target_branch": "mission/native-form-select-styles",
+  "lanes": [
+    {
+      "lane_id": "lane-a",
+      "wp_ids": [
+        "WP01"
+      ],
+      "write_scope": [
+        "apps/storybook/src/tests/sk-form-select.spec.ts",
+        "apps/storybook/src/tests/visual.spec.ts",
+        "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-form-select-*.png",
+        "docs/design-system/using-components.md",
+        "expected-stories.json",
+        "packages/elements/SIZES.md",
+        "packages/styles/package.json",
+        "packages/styles/src/form-select/**",
+        "packages/styles/src/index.ts"
+      ],
+      "predicted_surfaces": [
+        "api",
+        "app-shell",
+        "artifact-rendering",
+        "tracker-integration"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    }
+  ],
+  "computed_at": "2026-09-07T02:45:15.970816+00:00",
+  "computed_from": "dependency_graph+ownership",
+  "planning_artifact_wps": [],
+  "planning_commit_sha": "370291db803417aec9a3af1d9be69a239fedf9da"
+}
