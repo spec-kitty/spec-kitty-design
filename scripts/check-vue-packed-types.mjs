@@ -77,8 +77,14 @@ try {
     `/// <reference types="@spec-kitty/elements/vue" />\n` +
       `import type { GlobalComponents } from 'vue';\n` +
       `type Matrix = InstanceType<GlobalComponents['sk-transition-matrix']>['$props'];\n` +
+      `type BarSeries = InstanceType<GlobalComponents['sk-bar-chart']>['$props']['series'];\n` +
       `const columns: NonNullable<Matrix['columns']> = [{ id: 'today', label: 'Today' }];\n` +
-      `export { columns };\n`,
+      `const series: NonNullable<BarSeries> = [{ id: 'aug-11', label: 'Aug 11', value: 320, displayValue: '€320' }];\n` +
+      `// @ts-expect-error every bar datum requires displayValue\n` +
+      `const missingDisplayValue: NonNullable<BarSeries> = [{ id: 'aug-11', label: 'Aug 11', value: 320 }];\n` +
+      `// @ts-expect-error bar values are numeric geometry inputs\n` +
+      `const stringValue: NonNullable<BarSeries> = [{ id: 'aug-11', label: 'Aug 11', value: '320', displayValue: '€320' }];\n` +
+      `export { columns, series, missingDisplayValue, stringValue };\n`,
   );
 
   execFileSync(

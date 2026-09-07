@@ -5,28 +5,21 @@
     "so renaming a test does not silently drop coverage or break the mutation harness.",
     "",
     "FIFTEEN entries, fourteen of them APPLICABLE. The fifteenth is generation determinism (SC-023), declared with applicable:false and the gate that discharges it named on the entry. It was deferred while the wrapper generator did not exist; #126 built the generator and its --check gate, and #75 WP04 settled it.",
-    "",
-    "",
     "A behaviour with no applicable subject is either ABSENT from this file, or DECLARED with applicable:false and an inapplicableReason naming the gate that discharges it. It is never expressed as a skip and never deferred to a matrix cell — that was FR-010's earlier shape and it made the mission incoherent if the conformance matrix were dropped.",
     "The second form is for a behaviour ADR-11 states as a CI-gate obligation rather than a runtime one: it has no test to mutate, but omitting it would leave the registry silently short of the ADR's list. #75 WP04 added the first, SC-023. Declaring one is not an escape hatch — config-contract asserts the applicable set equals ADR-11's list exactly, so nothing can be demoted to dodge a mutation, and it asserts the inapplicable set exactly too.",
-    "",
-    "",
     "SUBJECTS (#73, FR-010). A behaviour id is no longer unique across the suite: sk-nav-pill",
     "carries SC-006..SC-010 and SC-012, and the synthetic fixture carries them too. An id-only",
     "coverage check therefore stayed GREEN with the ELEMENT's entire behaviour file deleted,",
     "because the fixture still covered every id. That is this programme's certifying-absence",
     "class, inside the reporter written to catch it.",
-    "",
     "Each subject names the FILE that must carry the id. scripts/floor-reporter.mjs checks",
     "coverage per (id, subject file); scripts/suite-selftest.mjs's guard 7 compares mutations",
     "against the same pairs, and a mutation's optional `subject` narrows which file's named",
     "test it must red.",
-    "",
     "A subject's `name` is what tests/node/config-contract.test.ts matches against the ELEMENT",
     "glob, so it names the element (sk-stub, sk-card, sk-nav-pill), not the test file's role. A",
     "lens added a real element with no entry here and every gate went green — this registry was",
     "the last hand-maintained list deciding whether an element is tested at all.",
-    "",
     "SC-002..SC-005 finally have a REAL subject (#74). They were written in #71 for this mission",
     "and until now were carried only by the synthetic fixture — which is why the id-only coverage",
     "check could not tell 'the fixture covers form association' from 'a shipped element does'.",
@@ -41,7 +34,8 @@
     "#146 WP03 adds react-action-row only to SC-006: its generated wrapper must deliver the action request once without changing the exact event or frozen detail identity.",
     "#177 adds sk-card to SC-010. It was already an SC-013 subject and stays one; SC-010 is NEW to it because `status` is its first reflected STRING property — `variant` predates the id's adoption here and `inset` is boolean. Declaring the subject is what creates the obligation, per sk-site-footer's note above. sk-card is deliberately NOT added to SC-014: it adopts a generated sheet, but the claim there is asserted for it indirectly by sk-blog-card, whose two-sheet identity case imports sk-card's sheet by name, and adding a duplicate subject would grow the registry without adding an assertion. #177 also does not mint an id for fail-open: that behaviour is carried by SC-013, honestly rather than by relabelling, because a throw inside render() blanks the shadow root and the declared ::part() literally stops being targetable.",
     "#147 WP03 records sk-metric and sk-evidence-chain as SC-013 subjects. Their approved WP01/WP02 fixture files already target every declared part; the shared registry is recorded here because config-contract derives every element and refuses an unregistered subject. No new behaviour id or SC-014 claim is added.",
-    "#178 adds sk-notice to NINE ids — SC-006..SC-010 and SC-011..SC-014 — which is the widest claim a single element has made here, and each one is owned rather than borrowed. SC-009 is the one worth stating: the element does NOT remove itself, so removal cannot be the default action a cancelable event prevents. What it prevents is the element's own FOCUS MOVE, which is the only post-dismissal effect the element owns; that is what keeps `cancelable` load-bearing instead of the inert flag sk-action-row correctly declined to claim. SC-011 is the FIRST shipped-element subject — until now only the synthetic fixture carried it — and sk-notice earns it with a marker slot that has real fallback content plus three named slots.\nNO ID IS MINTED for the announcement contract, and that is the point of this note. ADR-11 has no id for 'a live region re-announces a changed message', and tests/node/config-contract.test.ts asserts the applicable set equals ADR-11's list exactly. The re-announcement and node-stability tests in sk-notice.test.ts therefore carry no [SC-NNN] marker. Fifth time this boundary has been reached (#140, #143, #77, #177); the answer is the same, and here it costs less than usual because the SC-010 arm that de-registers `message` reds the unmarked re-announcement test as well as the marked one — measured, not assumed."
+    "#178 adds sk-notice to NINE ids — SC-006..SC-010 and SC-011..SC-014 — which is the widest claim a single element has made here, and each one is owned rather than borrowed. SC-009 is the one worth stating: the element does NOT remove itself, so removal cannot be the default action a cancelable event prevents. What it prevents is the element's own FOCUS MOVE, which is the only post-dismissal effect the element owns; that is what keeps `cancelable` load-bearing instead of the inert flag sk-action-row correctly declined to claim. SC-011 is the FIRST shipped-element subject — until now only the synthetic fixture carried it — and sk-notice earns it with a marker slot that has real fallback content plus three named slots.\nNO ID IS MINTED for the announcement contract, and that is the point of this note. ADR-11 has no id for 'a live region re-announces a changed message', and tests/node/config-contract.test.ts asserts the applicable set equals ADR-11's list exactly. The re-announcement and node-stability tests in sk-notice.test.ts therefore carry no [SC-NNN] marker. Fifth time this boundary has been reached (#140, #143, #77, #177); the answer is the same, and here it costs less than usual because the SC-010 arm that de-registers `message` reds the unmarked re-announcement test as well as the marked one — measured, not assumed.",
+    "#148 WP03 registers sk-bar-chart for SC-006/007/008/010/013/014 and react-bar-chart for SC-006/010. The element contributes seven mutation arms because SC-014 needs independent stylesheet-length and identity kills; the generated React wrapper contributes listener and property-reset arms."
   ],
   "behaviours": [
     {
@@ -170,6 +164,14 @@
         {
           "name": "sk-notice",
           "file": "fixtures/elements-behaviour/src/sk-notice.test.ts"
+        },
+        {
+          "name": "sk-bar-chart",
+          "file": "fixtures/elements-behaviour/src/sk-bar-chart.test.ts"
+        },
+        {
+          "name": "react-bar-chart",
+          "file": "fixtures/react-consumer/src/sk-bar-chart.test.tsx"
         }
       ]
     },
@@ -199,6 +201,10 @@
         {
           "name": "sk-notice",
           "file": "fixtures/elements-behaviour/src/sk-notice.test.ts"
+        },
+        {
+          "name": "sk-bar-chart",
+          "file": "fixtures/elements-behaviour/src/sk-bar-chart.test.ts"
         }
       ]
     },
@@ -228,6 +234,10 @@
         {
           "name": "sk-notice",
           "file": "fixtures/elements-behaviour/src/sk-notice.test.ts"
+        },
+        {
+          "name": "sk-bar-chart",
+          "file": "fixtures/elements-behaviour/src/sk-bar-chart.test.ts"
         }
       ]
     },
@@ -314,6 +324,14 @@
         {
           "name": "sk-notice",
           "file": "fixtures/elements-behaviour/src/sk-notice.test.ts"
+        },
+        {
+          "name": "sk-bar-chart",
+          "file": "fixtures/elements-behaviour/src/sk-bar-chart.test.ts"
+        },
+        {
+          "name": "react-bar-chart",
+          "file": "fixtures/react-consumer/src/sk-bar-chart.test.tsx"
         }
       ]
     },
@@ -466,6 +484,10 @@
         {
           "name": "sk-notice",
           "file": "fixtures/elements-behaviour/src/sk-notice.test.ts"
+        },
+        {
+          "name": "sk-bar-chart",
+          "file": "fixtures/elements-behaviour/src/sk-bar-chart.test.ts"
         }
       ]
     },
@@ -559,6 +581,10 @@
         {
           "name": "sk-notice",
           "file": "fixtures/elements-behaviour/src/sk-notice.test.ts"
+        },
+        {
+          "name": "sk-bar-chart",
+          "file": "fixtures/elements-behaviour/src/sk-bar-chart.test.ts"
         }
       ]
     },

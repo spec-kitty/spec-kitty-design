@@ -1,5 +1,11 @@
 export { define, registeredTags } from './define.js';
 export { SkActionRow, type ActionRowActivateDetail } from './action-row/sk-action-row.js';
+export {
+  SkBarChart,
+  type BarChartSelectDetail,
+  type BarDatum,
+  type BarSeries,
+} from './bar-chart/sk-bar-chart.js';
 export { SkStub } from './stub/sk-stub.js';
 export { SkBlogCard } from './blog-card/sk-blog-card.js';
 export { SkButton } from './button/sk-button.js';
@@ -67,6 +73,7 @@ export {
  */
 export { default as skStubSheet } from './stub/sk-stub.css.js';
 export { default as skActionRowSheet } from './action-row/sk-action-row.css.js';
+export { default as skBarChartSheet } from './bar-chart/sk-bar-chart.css.js';
 
 // Same reason, for sk-grid's [SC-014]: the claim is that the adopted sheet is the one
 // GENERATED from packages/styles/src/grid/sk-grid.css, and identity against the class's own

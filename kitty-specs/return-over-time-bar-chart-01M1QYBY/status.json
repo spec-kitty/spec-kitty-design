@@ -1,0 +1,103 @@
+{
+  "event_count": 30,
+  "last_event_id": "01M1WAZ6SHQ8E9JX5VVNKJHP28",
+  "materialized_at": "2026-09-06T21:46:09.585849+00:00",
+  "mission_number": "",
+  "mission_slug": "return-over-time-bar-chart-01M1QYBY",
+  "mission_type": "software-dev",
+  "summary": {
+    "approved": 0,
+    "blocked": 0,
+    "canceled": 1,
+    "claimed": 0,
+    "done": 2,
+    "for_review": 0,
+    "in_progress": 0,
+    "in_review": 0,
+    "planned": 0
+  },
+  "work_packages": {
+    "WP01": {
+      "actor": "merge",
+      "agent": "codex",
+      "agent_profile": "__resolved_profile_absent__",
+      "agent_profile_version": "__resolved_profile_version_absent__",
+      "force_count": 1,
+      "lane": "done",
+      "last_event_id": "01M1WAZ64VTGR2GPXD254X94ZT",
+      "last_transition_at": "2026-09-06T21:46:08.923914+00:00",
+      "model": "__resolved_model_absent__",
+      "notes": [
+        "Ready for independent review",
+        "Cycle 1 remediation complete; ready for independent review",
+        "Independent Codex re-review PASS at exact remediation SHA b72e9a90: all four cycle-1 blockers resolved; 343/343 browser, focused 12/12 cross-browser, 260/260 axe, typecheck 5/5, static gates green."
+      ],
+      "provider": "__resolved_provider_absent__",
+      "review": null,
+      "review_result": {
+        "reference": "review-cycle://return-over-time-bar-chart-01M1QYBY/WP01-authored-bar-chart-and-browser-contract/review-cycle-2.md",
+        "reviewer": "Codex issue148 independent reviewer",
+        "verdict": "approved"
+      },
+      "role": "reviewer",
+      "shell_pid": null,
+      "shell_pid_created_at": null,
+      "subtasks": {
+        "T001": "done",
+        "T002": "done",
+        "T003": "done",
+        "T004": "done",
+        "T005": "done",
+        "T006": "done",
+        "T007": "done",
+        "T008": "done",
+        "T009": "done",
+        "T010": "done",
+        "T011": "done",
+        "T012": "done",
+        "T013": "done"
+      }
+    },
+    "WP02": {
+      "actor": "codex",
+      "cancellation_reason": "scope absorbed into WP01 before implementation; restore governed cancellation after post-rebase task finalization",
+      "force_count": 6,
+      "lane": "canceled",
+      "last_event_id": "01M1W11NSRZW105WGKMX7M1S4M",
+      "last_transition_at": "2026-09-06T18:52:44.728535+00:00",
+      "reason_source": "operator"
+    },
+    "WP03": {
+      "actor": "merge",
+      "agent": "codex",
+      "agent_profile": "__resolved_profile_absent__",
+      "agent_profile_version": "__resolved_profile_version_absent__",
+      "force_count": 0,
+      "lane": "done",
+      "last_event_id": "01M1WAZ6SHQ8E9JX5VVNKJHP28",
+      "last_transition_at": "2026-09-06T21:46:09.585849+00:00",
+      "model": "__resolved_model_absent__",
+      "notes": [
+        "WP03 complete at lane-b f4b45f698b7618877a776ed63b84a3c11cfcbe56: generated CEM/React/Vue/SIZES current; exact framework/property/event gates green; mutation 141/141 including nine bar arms; Storybook budget/axe/cross-browser gates green; 36 WP03-owned acceptance rows passed and nine mission-wrap-up rows remain pending. Historical e008ce13 commitlint scope exception and 1405.5s versus stale 560s prose are explicitly recorded for orchestrator reconciliation.",
+        "Independent Codex WP03 review PASS at exact lane SHA f4b45f6: generated and consumer contracts, 141/141 mutation, Storybook/wiring/CEM repair, docs and evidence conform. Aggregate held for e008 commit-message normalization and stale 560s planning prose correction."
+      ],
+      "provider": "__resolved_provider_absent__",
+      "review_result": {
+        "reference": "review-cycle://return-over-time-bar-chart-01M1QYBY/WP03-post-171-generated-integration-and-final-gates/review-cycle-1.md",
+        "reviewer": "Codex issue148 independent reviewer",
+        "verdict": "approved"
+      },
+      "role": "reviewer",
+      "shell_pid": 2459900,
+      "shell_pid_created_at": "1788535195.17",
+      "subtasks": {
+        "T014": "done",
+        "T015": "done",
+        "T016": "done",
+        "T017": "done",
+        "T018": "done",
+        "T019": "done"
+      }
+    }
+  }
+}

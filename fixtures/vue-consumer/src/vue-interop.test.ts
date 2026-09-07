@@ -130,6 +130,35 @@ describe('[SC-401] a Vue consumer needs no wrapper package for the elements to w
     destroy();
   });
 
+  it('keeps a readonly bar-chart series reactive without serializing it', async () => {
+    const firstSeries = Object.freeze([
+      Object.freeze({ id: 'aug-11', label: 'Aug 11', value: 320, displayValue: '€320' }),
+    ]);
+    const secondSeries = Object.freeze([
+      Object.freeze({ id: 'sep-1', label: 'Sep 1', value: 604, displayValue: '€604' }),
+    ]);
+    const series = ref(firstSeries);
+    const { host, destroy } = mount(
+      {
+        setup: () => ({ series }),
+        template: `<sk-bar-chart :series.prop="series"></sk-bar-chart>`,
+      },
+      (app) => { app.config.compilerOptions.isCustomElement = (tag: string) => tag.startsWith('sk-'); },
+    );
+    await customElements.whenDefined('sk-bar-chart');
+    const el = host.querySelector('sk-bar-chart')! as HTMLElement & {
+      series?: ReadonlyArray<unknown>;
+    };
+    expect(el.series, 'the readonly series reaches the property by identity').toBe(firstSeries);
+    expect(el.hasAttribute('series')).toBe(false);
+
+    series.value = secondSeries;
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(el.series, 'a later readonly series assignment remains reactive').toBe(secondSeries);
+    expect(el.hasAttribute('series')).toBe(false);
+    destroy();
+  });
+
   /**
    * THE REAL EVENT, not an invented one. This dispatched `sk-ping` — a name no element fires —
    * so it proved Vue's listener plumbing against a synthetic event and nothing about the elements.

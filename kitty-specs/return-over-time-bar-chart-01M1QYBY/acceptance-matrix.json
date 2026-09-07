@@ -1,0 +1,648 @@
+{
+  "mission_slug": "return-over-time-bar-chart-01M1QYBY",
+  "mission_number": "",
+  "mission_type": "software-dev",
+  "overall_verdict": "pass",
+  "criteria": [
+    {
+      "criterion_id": "FR-001",
+      "description": "Publish one sk-bar-chart element for one ordered numeric series.",
+      "proof_type": "automated_test",
+      "evidence": "packages/elements/src/bar-chart/sk-bar-chart.ts; fixtures/elements-behaviour/src/sk-bar-chart.test.ts; scripts/check-elements-entries.mjs; local bar-chart unit 15/15 and Chromium/Firefox browser 44/44 at 375c187",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T22:37:08.126031+00:00",
+      "notes": "Element registration/export and exact public member-set evidence.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP03"
+    },
+    {
+      "criterion_id": "FR-002",
+      "description": "Export readonly BarDatum and series types with id, label, value, and displayValue.",
+      "proof_type": "automated_test",
+      "evidence": "packages/elements/src/bar-chart/sk-bar-chart.ts exports readonly BarDatum/BarSeries; packages/elements/src/index.ts exports BarSeries; Storybook/fixture consumers and packages/react/type-tests/wrappers.type-test.tsx readonly negative assertions; all five typecheck projects passed at 375c187",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T22:37:09.793460+00:00",
+      "notes": "Element and generated-consumer type checks, including malformed negative cases.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP03"
+    },
+    {
+      "criterion_id": "FR-003",
+      "description": "Accept structured series only as a public property with a frozen empty default and removal reset, never as JSON attribute text.",
+      "proof_type": "automated_test",
+      "evidence": "custom-elements.json has series as property only; sk-bar-chart unit removal reset plus real pre-definition React upgrade/identity/removal and Vue assignment/replacement gates green",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T21:30:06.865355+00:00",
+      "notes": "Element, manifest, React, Vue, replacement, and removal-reset assertions.",
+      "lane_owners": [
+        "WP01",
+        "WP03"
+      ],
+      "terminal_owner": "WP03"
+    },
+    {
+      "criterion_id": "FR-004",
+      "description": "Render label and displayValue as exact literal text, never parse formatted text or create descendant markup from either field, and permit no input-driven side effect.",
+      "proof_type": "automated_test",
+      "evidence": "fixtures/elements-behaviour/src/sk-bar-chart.test.ts literal-untrusted-text assertions prove exact label/displayValue text, zero descendants, and zero input-driven side effects; local unit/browser gates green at 375c187",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T22:37:11.354200+00:00",
+      "notes": "Literal-untrusted-text behavior and browser assertions.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP03"
+    },
+    {
+      "criterion_id": "FR-005",
+      "description": "Derive every height as zero-anchored value divided by the current maximum, with an all-zero guard, expressed through numeric SVG geometry rather than dynamic inline style.",
+      "proof_type": "automated_test",
+      "evidence": "sk-bar-chart ratio/all-zero/recompute assertions and SC-014 numeric-geometry source-break arms green in 141/141 mutation run",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T21:30:10.576842+00:00",
+      "notes": "Exact ratio table plus direct formula source-break evidence.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP03"
+    },
+    {
+      "criterion_id": "FR-006",
+      "description": "Render a subtle zero baseline and restrained scale and grid guidance.",
+      "proof_type": "automated_test",
+      "evidence": "apps/storybook/src/tests/sk-bar-chart.spec.ts proves visible grid and zero baseline plus contained vertical geometry in dark/light/forced-colors",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T21:30:12.296126+00:00",
+      "notes": "DOM, token-binding, forced-colors, and visual evidence.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP03"
+    },
+    {
+      "criterion_id": "FR-007",
+      "description": "Keep each label and display value visibly present so no meaning depends on hover.",
+      "proof_type": "automated_test",
+      "evidence": "sk-bar-chart unit and browser assertions prove every label/displayValue is persistent across interaction states without hover dependency",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T21:30:14.138978+00:00",
+      "notes": "Persistent text and interaction-state browser assertions.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP03"
+    },
+    {
+      "criterion_id": "FR-008",
+      "description": "Expose the chart name and description and every label and value pair to assistive technology in exact input order.",
+      "proof_type": "automated_test",
+      "evidence": "ordered accessible-list semantics and exact chart name/description/label/value browser assertions green; axe rendered all 260 stories with zero violations",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T21:30:15.925432+00:00",
+      "notes": "Accessibility-tree/source-order assertions and axe.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP03"
+    },
+    {
+      "criterion_id": "FR-009",
+      "description": "Render a labelled empty state for absent or empty series with zero bars and activation targets.",
+      "proof_type": "automated_test",
+      "evidence": "empty/default/removal tests and empty Storybook story prove labelled empty state with zero bars and activation targets",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T21:30:17.666412+00:00",
+      "notes": "Empty/default/property-removal behavior and Storybook evidence.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP03"
+    },
+    {
+      "criterion_id": "FR-010",
+      "description": "Reject the whole runtime series for malformed records, duplicate or blank IDs, blank required text, or negative or non-finite values, and render no partial chart.",
+      "proof_type": "automated_test",
+      "evidence": "exhaustive malformed/duplicate/blank/negative/non-finite fail-closed unit table green; validation source-break mutation killed",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T21:30:19.371954+00:00",
+      "notes": "Exhaustive fail-closed validation table and source-break evidence.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP03"
+    },
+    {
+      "criterion_id": "FR-011",
+      "description": "Default selectable to false; only true creates activation surfaces, tab stops, interaction states, and events.",
+      "proof_type": "automated_test",
+      "evidence": "nonselectable and selectable unit/browser assertions prove activation surfaces, tab stops, states, and events exist only when selectable is true",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T21:30:21.114438+00:00",
+      "notes": "Positive and negative behavior and Playwright assertions.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP03"
+    },
+    {
+      "criterion_id": "FR-012",
+      "description": "Project selectedId only when it matches a current datum; activation never mutates it.",
+      "proof_type": "automated_test",
+      "evidence": "controlled-selection replacement and event assertions prove selectedId projects only a current id and activation never mutates it",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T21:30:22.752097+00:00",
+      "notes": "Controlled-selection replacement and non-mutation assertions.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP03"
+    },
+    {
+      "criterion_id": "FR-013",
+      "description": "Use one native click path so pointer, Enter, and Space each produce one equivalent activation without key-repeat duplication.",
+      "proof_type": "automated_test",
+      "evidence": "Chromium/Firefox real pointer Enter Space and held-key assertions prove one equivalent native click-path activation and no repeat duplication",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T21:30:24.632928+00:00",
+      "notes": "Real-input parity and repeat-key suppression evidence.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP03"
+    },
+    {
+      "criterion_id": "FR-014",
+      "description": "Export and document sk-bar-chart-select with exact readonly { id: string } detail, bubbles true, composed true, and cancelable false.",
+      "proof_type": "automated_test",
+      "evidence": "element/CEM/docs/React gates prove typed readonly { id } detail and bubbles=true composed=true cancelable=false; SC-006/007/008 mutations killed",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T21:30:26.464016+00:00",
+      "notes": "Element behavior, mutation, manifest, React callback, and document-boundary evidence.",
+      "lane_owners": [
+        "WP01",
+        "WP03"
+      ],
+      "terminal_owner": "WP03"
+    },
+    {
+      "criterion_id": "FR-015",
+      "description": "Expose focus and selected states with shape or border plus valid programmatic state, never color alone; under forced colors keyboard focus retains an outline and remains distinguishable from controlled selection.",
+      "proof_type": "automated_test",
+      "evidence": "dark/light focus and selection browser assertions plus forced-colors checks prove canonical focus outline and non-color-only distinct state",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T21:30:28.240504+00:00",
+      "notes": "Real focus/selection state and forced-colors source-break evidence.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP03"
+    },
+    {
+      "criterion_id": "FR-016",
+      "description": "Use bounded items and horizontal scrolling or a compact treatment that keeps every label, value, and bar owned without overlap or meaning-changing truncation.",
+      "proof_type": "automated_test",
+      "evidence": "apps/storybook/src/tests/sk-bar-chart.spec.ts exact 390x844 long-label test requires four datum IDs, per-item value/bar/label containment, zero pairwise item overlap, and three correctly owned elementFromPoint hits per datum before and after scroll; Chromium/Firefox 2/2 at 375c187",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T22:37:12.928548+00:00",
+      "notes": "390 by 844 geometry, scrolling, hit-test, and full-text assertions.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP03"
+    },
+    {
+      "criterion_id": "FR-017",
+      "description": "Render an identical semantic signature in default dark and .sk-light themes before permitting only themed color variance.",
+      "proof_type": "automated_test",
+      "evidence": "dark/light ordered semantic signatures are byte-equivalent before computed token color variance assertions; theme mutation killed",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T21:30:32.079567+00:00",
+      "notes": "Ordered semantics and computed-theme comparison before color assertions.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP03"
+    },
+    {
+      "criterion_id": "FR-018",
+      "description": "Add and consume reusable data-series, grid, and baseline semantic tokens, and do not use gold as the default series color.",
+      "proof_type": "automated_test",
+      "evidence": "token source/catalogue exact comparison and computed bindings prove reusable data-series/grid/baseline tokens; default series is not gold",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T21:30:34.760033+00:00",
+      "notes": "Token source/catalogue, computed binding, and forbidden-color evidence.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP03"
+    },
+    {
+      "criterion_id": "FR-019",
+      "description": "Document exact token dependencies and a minimal structural part surface; every declared part is rendered and externally targetable.",
+      "proof_type": "automated_test",
+      "evidence": "docs/design-system/using-components.md and changelog document exact tokens and seven parts; check-parts and manifest gates prove all are rendered/targetable",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T21:30:36.507918+00:00",
+      "notes": "CSS-to-doc token equality and seven-part conformance evidence.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP03"
+    },
+    {
+      "criterion_id": "FR-020",
+      "description": "Register through guarded define(), export from both element entries, adopt the generated sheet by identity, and inject zero style elements.",
+      "proof_type": "automated_test",
+      "evidence": "entry/adopted-boundary selftests and checks prove guarded define, dual exports, one generated sheet by identity, and zero style elements; SC-014 mutations killed",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T21:30:38.416253+00:00",
+      "notes": "Entry, distribution, SC-014, and generated-sheet assertions.",
+      "lane_owners": [
+        "WP01",
+        "WP03"
+      ],
+      "terminal_owner": "WP03"
+    },
+    {
+      "criterion_id": "FR-021",
+      "description": "Provide approved four-bucket, close unequal, zero, empty, long/date-stamped, controlled selectable, interaction-state, and LightMode stories.",
+      "proof_type": "automated_test",
+      "evidence": "eight sk-bar-chart stories are index-ratcheted and non-empty; all rendered in the 260-story zero-violation axe traversal",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T21:30:40.273947+00:00",
+      "notes": "Eight-story index ratchet, non-empty load, and axe traversal.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP03"
+    },
+    {
+      "criterion_id": "FR-022",
+      "description": "Regenerate CSS module, token catalogue, CEM, React wrapper, wrapper floor, Vue declaration, and SIZES; update all component ratchets and extend the packed-consumer gate while preserving #149; at wrap-up recheck #112 and add the formal row if available or record verified deferral.",
+      "proof_type": "automated_test",
+      "evidence": "train 7e181a9; combined regeneration current after the fourth authorized rebase: CEM 27/100 docs, React 57 files/27 elements, Vue 27 plus SFC and packed tarball, CSS/markup/entries/SIZES; #112 remains open with conformance artifact/generator absent and explicitly deferred",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T23:36:17.330158+00:00",
+      "notes": "Generated drift, packed-consumer, refreshed-train #112 disposition, and exact-head evidence.",
+      "lane_owners": [
+        "WP03"
+      ],
+      "terminal_owner": "mission-wrap-up"
+    },
+    {
+      "criterion_id": "FR-023",
+      "description": "Prove series, selectedId, selectable, and event detail reach the generated React wrapper without any, including replacement and removal through the production hook.",
+      "proof_type": "automated_test",
+      "evidence": "fixtures/react-consumer/src/sk-bar-chart.test.tsx proves real pre-definition production upgrade, exact readonly series identity/replacement/removal, props, and typed event without any",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T21:30:41.978016+00:00",
+      "notes": "Dedicated React runtime and type evidence.",
+      "lane_owners": [
+        "WP03"
+      ],
+      "terminal_owner": "WP03"
+    },
+    {
+      "criterion_id": "FR-024",
+      "description": "Record named red-first mutations for every applicable behavior invariant and direct source-break proof for scale, validation, controlled selection, theming, forced-colors focus, and narrow ownership.",
+      "proof_type": "automated_test",
+      "evidence": "suite-selftest killed all 141 named mutations with zero collateral in 958.4s; all nine bar arms killed, covering ratio, validation, preupgrade, parts, event, theme, forced-colors, reduced-motion, narrow ownership, SC-014 length/identity",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T21:30:43.627107+00:00",
+      "notes": "WP red/green records and mutation-fleet evidence.",
+      "lane_owners": [
+        "WP01",
+        "WP03"
+      ],
+      "terminal_owner": "WP03"
+    },
+    {
+      "criterion_id": "NFR-001",
+      "description": "Every required rendered story reports zero WCAG 2.1 AA axe violations; a failed or empty load is a failure.",
+      "proof_type": "automated_test",
+      "evidence": "gate-selftest 24/24; run-axe-storybook rendered 260/260 stories with zero WCAG 2.1 AA violations, including all eight bar-chart stories",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T21:30:45.426227+00:00",
+      "notes": "Eight non-empty stories plus axe selftest and full scan.",
+      "lane_owners": [
+        "WP01",
+        "WP03"
+      ],
+      "terminal_owner": "WP03"
+    },
+    {
+      "criterion_id": "NFR-002",
+      "description": "Pointer, Enter, and Space each emit exactly one byte-equivalent { id } record with bubbling and composed true and cancelable false for the same datum; repeat emits zero extra events.",
+      "proof_type": "automated_test",
+      "evidence": "Chromium and Firefox real-input tests prove pointer/Enter/Space byte-equivalent { id }, bubbles/composed true, cancelable false, and zero held-key repeats",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T21:30:47.212649+00:00",
+      "notes": "Real-input event parity and repeat assertions.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP03"
+    },
+    {
+      "criterion_id": "NFR-003",
+      "description": "For every finite valid value, rendered ratio data equals value divided by maximum exactly; equal and zero cases are exact.",
+      "proof_type": "automated_test",
+      "evidence": "unit and browser ratio tables prove exact value/current-maximum geometry including equal, zero, all-zero, and reassignment recomputation",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T21:30:49.001029+00:00",
+      "notes": "Exact geometry and recomputation assertions.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP03"
+    },
+    {
+      "criterion_id": "NFR-004",
+      "description": "At 390 by 844, zero label, value, or bar ownership overlaps or cross-item hit targets occur before or after horizontal scrolling.",
+      "proof_type": "automated_test",
+      "evidence": "apps/storybook/src/tests/sk-bar-chart.spec.ts exact 390x844 test proves zero pairwise item overlap and exact per-datum value/bar/label hit ownership via ShadowRoot.elementFromPoint before/after horizontal scroll; Chromium/Firefox 2/2 at 375c187, CI WebKit pending under NFR-006",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T22:37:14.592218+00:00",
+      "notes": "Narrow viewport bounding-box and hit-test assertions.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP03"
+    },
+    {
+      "criterion_id": "NFR-005",
+      "description": "Default and LightMode have identical ordered semantics before themed color comparison; documented data surfaces differ where intended, and forced colors preserves meaning, outline focus, and selection in both themes.",
+      "proof_type": "automated_test",
+      "evidence": "dark/light ordered semantics match before themed computed-color checks; forced-colors focus/selection and axe evidence green in both themes",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T21:30:52.594373+00:00",
+      "notes": "Semantic-signature, computed-token, axe, and forced-colors evidence.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP03"
+    },
+    {
+      "criterion_id": "NFR-006",
+      "description": "Required real-input behavior passes locally available Chromium and Firefox for lane approval and Chromium, Firefox, and WebKit in exact-head PR CI; local WebKit is additional evidence only through a repository-defined container seam.",
+      "proof_type": "automated_test",
+      "evidence": "CI run 34065216159 at 7a56e7e: behavior floor node=34, Chromium=382, WebKit=382, zero skipped; bar-chart 15/15 in both behavior browsers; Playwright cross-browser gate green. https://github.com/spec-kitty/spec-kitty-design/actions/runs/34065216159",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T23:16:59.793396+00:00",
+      "notes": "WP01 authors the shared contract; exact-head PR CI owns WebKit.",
+      "lane_owners": [
+        "WP01",
+        "WP03"
+      ],
+      "terminal_owner": "mission-wrap-up"
+    },
+    {
+      "criterion_id": "NFR-007",
+      "description": "Every generated-artifact check, manifest diff, Vue source-SFC check, and post-build packed-consumer check is clean after regeneration from final integrated source.",
+      "proof_type": "automated_test",
+      "evidence": "styles/CSS/CEM/React/Vue/SIZES drift checks green; uncached analyze diff clean; Vue source, SFC, runtime, and real packed-tarball checks green with #149 preserved",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T21:30:54.396924+00:00",
+      "notes": "Ordered generation, source checks, and real-tarball no-alias type gate.",
+      "lane_owners": [
+        "WP03"
+      ],
+      "terminal_owner": "WP03"
+    },
+    {
+      "criterion_id": "NFR-008",
+      "description": "Every declared behavior-and-subject mutation turns its named assertion red and 100 percent of registered mutations are killed within the repository budget.",
+      "proof_type": "automated_test",
+      "evidence": "CI run 34065216159 job 101572668819 at 7a56e7e: green 382-assertion baseline, 109 registry pairs, 35 affected sources, zero full-suite fallbacks, 155/155 named mutations killed in 1286s under 1405.5s, and 10/10 guards in 60.3s. Measurement recorded in suite-budget.json.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T23:17:01.967788+00:00",
+      "notes": "WP03 runs the local fleet; wrap-up records exact-head CI count and time.",
+      "lane_owners": [
+        "WP03"
+      ],
+      "terminal_owner": "mission-wrap-up"
+    },
+    {
+      "criterion_id": "NFR-009",
+      "description": "A checked-in fail-closed wrapper terminates the Storybook build and exits nonzero at 180 seconds; once the Storybook job runs its build step is unconditional and uses the wrapper; final-head duration is below 180 seconds.",
+      "proof_type": "automated_test",
+      "evidence": "CI run 34065216159 job 101572683651 at 7a56e7e: fail-closed Storybook wrapper completed in 14.47s under its enforced 180s ceiling; wrapper selftest and wiring probes are green.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T23:17:03.772080+00:00",
+      "notes": "WP03 creates and self-tests the wrapper and wiring; wrap-up records exact-head CI timing.",
+      "lane_owners": [
+        "WP03"
+      ],
+      "terminal_owner": "mission-wrap-up"
+    },
+    {
+      "criterion_id": "NFR-010",
+      "description": "CI-authoritative cropped baselines for approved dark, LightMode, narrow, zero or empty, and selectable states receive explicit visual-review disposition against the approved capture.",
+      "proof_type": "manual_review",
+      "evidence": "All six CI-derived bar-chart PNGs were inspected against the approved Stitch reference; five are byte-identical to run 34063650759 artifact 9998297436 and selectable is byte-identical to run 34064628144 artifact 9998579352. Exact candidate run 34065216159 passed visual regression 38/38.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T23:17:05.431659+00:00",
+      "notes": "Wrap-up owns CI actual-byte provenance, disposition, committed baselines, and fresh green CI.",
+      "lane_owners": [],
+      "terminal_owner": "mission-wrap-up"
+    },
+    {
+      "criterion_id": "C-001",
+      "description": "No fetching, store, router, timer, time-window, currency or spend total, deployment arithmetic, selected application object, or action callback lives in the element.",
+      "proof_type": "automated_test",
+      "evidence": "forbidden-source/dependency boundary checks and sk-bar-chart source review prove no fetch/store/router/timer/window/currency/spend/deployment/app/action ownership",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T21:30:56.621450+00:00",
+      "notes": "Forbidden-source and dependency-boundary checks on the integrated lane.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP03"
+    },
+    {
+      "criterion_id": "C-002",
+      "description": "No second series, deployment annotation, tooltip-only meaning, or public Team Kitty overview element is introduced.",
+      "proof_type": "automated_test",
+      "evidence": "public API, story, and forbidden-content checks prove one numeric series only and no deployment annotation, tooltip-only meaning, or Team Kitty overview element",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T21:30:58.498823+00:00",
+      "notes": "Public API and forbidden-source/content checks.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP03"
+    },
+    {
+      "criterion_id": "C-003",
+      "description": "Do not modify components owned by #145 through #147 or #149, and do not create replacements for card, grid, button, pill, or navigation components.",
+      "proof_type": "automated_test",
+      "evidence": "diff-scope verification preserves #145-#147/#149 component sources and adds no card/grid/button/pill/navigation replacement; only authorized shared manifest checker repair is outside WP03 list",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T21:31:00.318902+00:00",
+      "notes": "Diff-scope and ownership verification.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP03"
+    },
+    {
+      "criterion_id": "C-004",
+      "description": "Keep one authored CSS source and one authored structured render source, with no hand-authored duplicate markup or static form.",
+      "proof_type": "automated_test",
+      "evidence": "generated-markup and source checks prove one authored sk-bar-chart.ts render source and one authored sk-bar-chart.css source with no duplicate static form",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T21:31:02.227373+00:00",
+      "notes": "Generated-markup and authored-source absence checks.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP03"
+    },
+    {
+      "criterion_id": "C-005",
+      "description": "All component CSS design values use --sk-* tokens; data-derived proportions use numeric SVG geometry, with no dynamic inline style, raw design values, or cross-shadow theme selectors.",
+      "proof_type": "automated_test",
+      "evidence": "stylelint/CSS-hygiene/theme-boundary checks prove --sk-* design tokens, numeric SVG ratios, no dynamic inline style/raw design values/cross-shadow selectors",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T21:31:04.014137+00:00",
+      "notes": "Stylelint, CSS hygiene, theme boundary, and geometry checks.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP03"
+    },
+    {
+      "criterion_id": "C-006",
+      "description": "Only inherited tokens, declared parts, and documented component custom properties are public; internal BEM classes are private.",
+      "proof_type": "automated_test",
+      "evidence": "CEM/parts/documentation gates prove only inherited tokens, seven declared parts, and documented custom properties are public; BEM classes remain private",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T21:31:05.864456+00:00",
+      "notes": "Manifest, part ratchet, and styling-boundary evidence.",
+      "lane_owners": [
+        "WP01"
+      ],
+      "terminal_owner": "WP03"
+    },
+    {
+      "criterion_id": "C-007",
+      "description": "Never hand-edit generated CSS modules, static outputs, custom-elements.json, React wrappers, Vue declarations, token catalogue, or SIZES.",
+      "proof_type": "automated_test",
+      "evidence": "canonical ordered generators produced commits 2669311 and subsequent byte-clean drift checks; no generated output was hand-edited",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T21:31:07.527587+00:00",
+      "notes": "Ordered generators followed by drift checks and clean status.",
+      "lane_owners": [
+        "WP01",
+        "WP03"
+      ],
+      "terminal_owner": "WP03"
+    },
+    {
+      "criterion_id": "C-008",
+      "description": "Preserve the serial integration protocol: refresh the clean planning target before first claim and before consolidation, use Spec Kitty-owned lane dependency propagation, and never rewrite a captured baseline.",
+      "proof_type": "inspection",
+      "evidence": "fourth user-authorized stale-state recovery rebase onto train 7e181a9 with safety/issue-148-pre-fourth-train-rebase-20260907-41874ae; range-diff preserves 111/114 prior patches exactly, with three shared-artifact patches intentionally conflict-resolved to retain both train and #148 story/mutation/generated content, zero dropped or unmatched prior patches, and a separate regenerated combined SIZES commit; pre-consolidation baseline maps to current ancestor 1ea3d7d and is recorded in meta.json; frozen planning pointer fdfc3dcc remains on preserved execution-lane refs as historical provenance; main ccb055c5 unchanged",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T23:36:18.899372+00:00",
+      "notes": "Final owner records current train, finalized planning SHA, supported propagation, and baseline provenance.",
+      "lane_owners": [
+        "WP03"
+      ],
+      "terminal_owner": "mission-wrap-up"
+    },
+    {
+      "criterion_id": "C-009",
+      "description": "Use one #148 design-mission branch and one pull request into train/elements-first with Refs #148, superseding the unrelated SaaS WP-per-PR convention for this checkout.",
+      "proof_type": "inspection",
+      "evidence": "single aggregate draft PR https://github.com/spec-kitty/spec-kitty-design/pull/231 targets train/elements-first from mission/return-over-time-bar-chart and uses Refs #148, not Closes",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T22:18:46.501006+00:00",
+      "notes": "Wrap-up owns the single PR target and metadata check.",
+      "lane_owners": [],
+      "terminal_owner": "mission-wrap-up"
+    },
+    {
+      "criterion_id": "C-010",
+      "description": "Do not merge train to main, publish packages, deploy Team Kitty, or broaden component scope.",
+      "proof_type": "inspection",
+      "evidence": "origin/main remains ccb055c5; no main merge, publish, package release, SaaS change, or deploy; train-only mission scope and sibling-owned sources preserved",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-06T22:13:13.345698+00:00",
+      "notes": "Lane review and wrap-up verify authorization and scope boundaries.",
+      "lane_owners": [
+        "WP03"
+      ],
+      "terminal_owner": "mission-wrap-up"
+    },
+    {
+      "criterion_id": "C-011",
+      "description": "Run three independent profile-loaded Codex lenses after tasks and again pre-merge, at most two passes per point-cut, with exact-SHA evidence.",
+      "proof_type": "manual_review",
+      "evidence": "Three independent final Codex lenses PASS at exact 71801a66c61e240d5606c8a78b083ce3a136c0c9 after the fourth authorized train rebase: lens 1 acceptance/schema/generated/story-union audit; lens 2 rebase/range/conflict/baseline provenance audit; lens 3 product/API/accessibility/visual/framework audit. All report zero content findings. A clean uncontended local mutation retry and fresh exact-head PR CI remain separate release gates.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T00:11:01.922146+00:00",
+      "notes": "Post-tasks evidence is planning-stage; wrap-up owns exact-final-head lens evidence.",
+      "lane_owners": [],
+      "terminal_owner": "mission-wrap-up"
+    }
+  ],
+  "negative_invariants": [],
+  "governed_extension": {
+    "schema_version": 1,
+    "authorized_by": "operator",
+    "authorized_at": "2026-09-06",
+    "authorization": "I authorize a governed out-of-band schema migration/write for issue #148 to materialize the complete acceptance and issue matrices, including missing NFR/C criteria, issue metadata, and terminal-owner metadata, followed by Spec Kitty task re-finalization.",
+    "lane_owner_field": "lane_owners",
+    "terminal_owner_field": "terminal_owner"
+  }
+}

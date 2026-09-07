@@ -22,13 +22,21 @@
   <sk-button variant="primary">Save</sk-button>
   <sk-pill-tag variant="green">Ready</sk-pill-tag>
   <sk-site-footer :legal="legal" />
+  <sk-bar-chart
+    :series.prop="barSeries"
+    label="Return over time"
+    description="Attributed value by observation date"
+  />
   <sk-transition-matrix :columns.prop="columns" :routes.prop="routes" />
 </template>
 
 <script setup lang="ts">
-import type { TransitionColumn, TransitionRoute } from '@spec-kitty/elements';
+import type { BarDatum, TransitionColumn, TransitionRoute } from '@spec-kitty/elements';
 
 const legal = '© 2026 Example';
+const barSeries = Object.freeze([
+  Object.freeze({ id: 'aug-11', label: 'Aug 11', value: 320, displayValue: '€320' }),
+] satisfies ReadonlyArray<BarDatum>);
 const columns = Object.freeze([
   Object.freeze({ id: 'fri-4', label: 'Today · Fri 4' }),
 ] satisfies ReadonlyArray<TransitionColumn>);

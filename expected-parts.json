@@ -33,9 +33,10 @@
     "#146 WP01 adds ELEVEN parts across section-header (six), status-indicator (three) and entity-marker (two), each with a literal external selector and computed-style assertion. On the consolidated train-based mission target, total moves 69 -> 80.",
     "#146 WP02 adds EIGHT sk-action-row parts: row, trigger, marker, title, reference, tags, metadata and controls. Total moves 80 -> 88.",
     "#147 adds FIVE sk-metric parts (metric, label, value, annotation, empty-state) and FOUR sk-evidence-chain parts (list, stage, connector, empty-state). Total moves 88 -> 97.",
-    "#178 adds sk-notice with SEVEN parts — the largest single entry here, and deliberately so: a notice is a composition (marker, heading, body, actions, dismiss) rather than a single box, and under-exposing parts is the support burden ADR-9 §2 names. Every one is targeted from outside by the [SC-013] test in fixtures/elements-behaviour/src/sk-notice.test.ts, which is what the ratchet scans for. `body` is also the live region, so a rename there is an ANNOUNCEMENT regression as well as a styling one."
+    "#178 adds sk-notice with SEVEN parts — the largest single entry here, and deliberately so: a notice is a composition (marker, heading, body, actions, dismiss) rather than a single box, and under-exposing parts is the support burden ADR-9 §2 names. Every one is targeted from outside by the [SC-013] test in fixtures/elements-behaviour/src/sk-notice.test.ts, which is what the ratchet scans for. `body` is also the live region, so a rename there is an ANNOUNCEMENT regression as well as a styling one.",
+    "#148 WP01 adds SEVEN sk-bar-chart parts: chart, plot, item, bar, value, label and empty-state. On the refreshed train after #147 and #178, total moves 104 -> 111."
   ],
-  "total": 104,
+  "total": 111,
   "byElement": {
     "sk-action-row": [
       "controls",
@@ -54,6 +55,15 @@
       "main",
       "personal",
       "shell"
+    ],
+    "sk-bar-chart": [
+      "bar",
+      "chart",
+      "empty-state",
+      "item",
+      "label",
+      "plot",
+      "value"
     ],
     "sk-blog-card": [
       "card",

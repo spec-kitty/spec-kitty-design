@@ -12,6 +12,7 @@
     },
     "./action-row/*": "./dist/action-row/*",
     "./app-shell/*": "./dist/app-shell/*",
+    "./bar-chart/*": "./dist/bar-chart/*",
     "./blog-card/*": "./dist/blog-card/*",
     "./button/*": "./dist/button/*",
     "./card/*": "./dist/card/*",

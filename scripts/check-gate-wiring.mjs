@@ -18,8 +18,10 @@
  * lets the job report on failed dependencies at all. The actual gating is the shell
  * disjunction inside its [ENFORCED] step, which is what this checks.
  */
-import { readFileSync } from 'node:fs';
-import { parse } from 'yaml';
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { parse, stringify } from 'yaml';
 
 const WORKFLOW = '.github/workflows/ci-quality.yml';
 // A LIST, not a name. This was `const JOB = 'test'` — one job, hard-coded — in the script whose
@@ -32,6 +34,8 @@ const WORKFLOW = '.github/workflows/ci-quality.yml';
 // is how a step in that job is held to running — see #193's two entries there, and the
 // `lint-code` EDGE assertions below, which hold the job itself to being able to block a merge.
 const JOBS = ['test', 'release-gate'];
+const STORYBOOK_PREDICATE = "needs.changes.outputs.tokens == 'true' || needs.changes.outputs.components == 'true'";
+const STORYBOOK_WRAPPER = 'node scripts/build-storybook-with-budget.mjs';
 
 // ── READING A `run:` BODY AS SHAPE RATHER THAN AS TEXT (#202, #205) ───────────────────
 //
@@ -288,10 +292,75 @@ const swallows = (body) => {
   return why;
 };
 
-const raw = readFileSync(WORKFLOW, 'utf8');
+function inspectWorkflow(raw) {
 const wf = parse(raw);
 const gate = wf.jobs?.gate;
 const problems = [];
+
+// ── THE FILTERED STORYBOOK BUILD ────────────────────────────────────────────────────
+//
+// storybook-build is intentionally NOT in JOBS: it legitimately skips for unrelated changes.
+// The guarantee here is narrower and source-structural. When relevant tokens/components select
+// the job, exactly one unconditional, fail-closed wrapper invocation must own the 180 s budget.
+const storybook = wf.jobs?.['storybook-build'];
+if (!storybook) {
+  problems.push('there is no `storybook-build` job at all');
+} else {
+  const jobIf = String(storybook.if ?? '').trim();
+  if (!('if' in storybook)) {
+    problems.push('the `storybook-build` job lost its deliberate relevant-change predicate');
+  } else if (jobIf !== STORYBOOK_PREDICATE) {
+    problems.push(
+      `the \`storybook-build\` job condition is \`${jobIf}\`, not the exact deliberate relevant-change predicate`
+    );
+  }
+  if (storybook['continue-on-error']) {
+    problems.push('the `storybook-build` job carries continue-on-error — wrapper failure cannot reach the gate');
+  }
+
+  const buildSteps = (storybook.steps ?? []).filter((step) =>
+    String(step.name ?? '').includes('[ENFORCED] Storybook build')
+  );
+  if (buildSteps.length !== 1) {
+    problems.push(
+      buildSteps.length === 0
+        ? `the \`storybook-build\` job is missing the exact wrapper \`${STORYBOOK_WRAPPER}\` in an [ENFORCED] Storybook build step`
+        : `the \`storybook-build\` job has ${buildSteps.length} [ENFORCED] Storybook build steps, expected exactly one`
+    );
+  }
+  for (const buildStep of buildSteps) {
+    if ('if' in buildStep) {
+      problems.push('the enforced Storybook build step carries an `if:` — it must run whenever its job is selected');
+    }
+    if (buildStep['continue-on-error']) {
+      problems.push('the enforced Storybook build step carries continue-on-error — wrapper failure is swallowed');
+    }
+    const body = String(buildStep.run ?? '');
+    if (/(^|\n)\s*set\s+\+e\b/.test(body)) {
+      problems.push('the enforced Storybook build step uses `set +e` — wrapper failure is swallowed');
+    }
+    if (/\|\|/.test(body)) {
+      problems.push('the enforced Storybook build step uses a `||` fallback — wrapper failure is swallowed');
+    }
+    if (/(^|\n)\s*exit\s+0\s*(#.*)?$/m.test(body)) {
+      problems.push('the enforced Storybook build step forces success with `exit 0` — wrapper failure is swallowed');
+    }
+    if (body.trim() !== STORYBOOK_WRAPPER) {
+      problems.push(
+        body.includes('build-storybook-with-budget.mjs')
+          ? `the enforced Storybook build step does not invoke the exact wrapper \`${STORYBOOK_WRAPPER}\``
+          : `the enforced Storybook build step is missing the exact wrapper \`${STORYBOOK_WRAPPER}\``
+      );
+    }
+  }
+
+  const rawNxSteps = (storybook.steps ?? []).filter((step) =>
+    /(?:^|\s)(?:npx\s+)?nx\s+run\s+storybook:storybook:build(?:\s|$)/.test(String(step.run ?? ''))
+  );
+  if (rawNxSteps.length) {
+    problems.push('raw `nx run storybook:storybook:build` remains in the Storybook job; only the budget wrapper may build it');
+  }
+}
 
 // ── THE TRIGGER ITSELF ────────────────────────────────────────────────────────────────
 //
@@ -608,7 +677,8 @@ else {
     // above (the `on:` trigger, the gate's `if: always()`, the ADR index registry) all rest on
     // it running. Self-registration is not circular: the assertion is about the WORKFLOW
     // carrying the line, not about this process having been started.
-    [/node\s+scripts\/check-gate-wiring\.mjs(\s|$)/, 'this wiring checker itself', 'scripts/check-gate-wiring.mjs'],
+    [/node\s+scripts\/check-gate-wiring\.mjs(?!\s*--selftest)(\s|$)/, 'this wiring checker itself', 'scripts/check-gate-wiring.mjs'],
+    [/node\s+scripts\/check-gate-wiring\.mjs\s+--selftest(\s|$)/, "this wiring checker's Storybook probe table", 'scripts/check-gate-wiring.mjs --selftest'],
     // THIS FILE'S PROBE TABLE (#202, #205), registered with the table itself rather than a
     // mission later — the omission every comment above records. Both holes it re-runs arrived as
     // PROSE reproductions in an issue, which is why they survived: a reproduction nobody can run
@@ -755,10 +825,128 @@ else {
     }
   }
 }
-
-if (problems.length) {
-  console.error(`❌ ${WORKFLOW}: the gate does not gate \`${JOBS.join('`, `')}\`, \`lint-code\` (FR-014):`);
-  for (const p of problems) console.error(`   ${p}`);
-  process.exit(1);
+return problems;
 }
-console.log(`✅ gate wiring: \`${JOBS.join('`, `')}\` and \`lint-code\` are in needs, tested strictly, absent from the skip tolerance, and unconditional.`);
+
+function storybookStep(model) {
+  return model.jobs?.['storybook-build']?.steps?.find((step) =>
+    String(step.name ?? '').includes('[ENFORCED] Storybook build')
+  );
+}
+
+function selftest() {
+  const canonical = parse(readFileSync(WORKFLOW, 'utf8'));
+  const probes = [
+    {
+      name: 'valid canonical fixture',
+      expected: null,
+      mutate: () => undefined,
+    },
+    {
+      name: 'missing Storybook job',
+      expected: 'no `storybook-build` job',
+      mutate: (model) => { delete model.jobs['storybook-build']; },
+    },
+    {
+      name: 'lost relevant-change predicate',
+      expected: 'lost its deliberate relevant-change predicate',
+      mutate: (model) => { delete model.jobs['storybook-build'].if; },
+    },
+    {
+      name: 'wrong Storybook job condition',
+      expected: 'not the exact deliberate relevant-change predicate',
+      mutate: (model) => { model.jobs['storybook-build'].if = "needs.changes.outputs.tokens == 'true'"; },
+    },
+    {
+      name: 'conditional build step',
+      expected: 'build step carries an `if:`',
+      mutate: (model) => { storybookStep(model).if = 'false'; },
+    },
+    {
+      name: 'job continue-on-error',
+      expected: 'job carries continue-on-error',
+      mutate: (model) => { model.jobs['storybook-build']['continue-on-error'] = true; },
+    },
+    {
+      name: 'step continue-on-error',
+      expected: 'build step carries continue-on-error',
+      mutate: (model) => { storybookStep(model)['continue-on-error'] = true; },
+    },
+    {
+      name: 'or-true failure swallow',
+      expected: '`||` fallback',
+      mutate: (model) => { storybookStep(model).run = `${STORYBOOK_WRAPPER} || true`; },
+    },
+    {
+      name: 'set-plus-e failure swallow',
+      expected: '`set +e`',
+      mutate: (model) => { storybookStep(model).run = `set +e\n${STORYBOOK_WRAPPER}`; },
+    },
+    {
+      name: 'forced-success failure swallow',
+      expected: 'forces success with `exit 0`',
+      mutate: (model) => { storybookStep(model).run = `${STORYBOOK_WRAPPER}\nexit 0`; },
+    },
+    {
+      name: 'missing wrapper',
+      expected: 'missing the exact wrapper',
+      mutate: (model) => { model.jobs['storybook-build'].steps = model.jobs['storybook-build'].steps.filter((step) => step !== storybookStep(model)); },
+    },
+    {
+      name: 'wrong wrapper',
+      expected: 'missing the exact wrapper',
+      mutate: (model) => { storybookStep(model).run = 'node scripts/build-storybook.mjs'; },
+    },
+    {
+      name: 'raw Nx build',
+      expected: 'raw `nx run storybook:storybook:build` remains',
+      mutate: (model) => { storybookStep(model).run = 'npx nx run storybook:storybook:build'; },
+    },
+  ];
+
+  const scratch = mkdtempSync(join(tmpdir(), 'gate-wiring-selftest-'));
+  const failures = [];
+  try {
+    for (const [index, probe] of probes.entries()) {
+      const model = structuredClone(canonical);
+      probe.mutate(model);
+      const fixture = join(scratch, `${String(index).padStart(2, '0')}.yml`);
+      writeFileSync(fixture, stringify(model));
+      // This path-taking seam is deliberately private to --selftest. Normal invocation below
+      // always reads WORKFLOW and accepts no path argument, so no production bypass exists.
+      const found = inspectWorkflow(readFileSync(fixture, 'utf8'));
+      if (probe.expected === null ? found.length !== 0 : !found.some((problem) => problem.includes(probe.expected))) {
+        failures.push(`${probe.name}: expected ${probe.expected ?? 'green'}, got ${found.join(' | ') || 'green'}`);
+      }
+    }
+  } finally {
+    rmSync(scratch, { recursive: true, force: true });
+  }
+
+  if (failures.length) {
+    console.error('❌ gate wiring selftest:');
+    for (const failure of failures) console.error(`   ${failure}`);
+    process.exit(1);
+  }
+  console.log(`✅ gate wiring selftest: ${probes.length}/${probes.length} isolated fixtures passed.`);
+}
+
+if (process.argv.includes('--selftest')) {
+  if (process.argv.length !== 3) {
+    console.error('❌ --selftest accepts no additional arguments');
+    process.exit(1);
+  }
+  selftest();
+} else {
+  if (process.argv.length !== 2) {
+    console.error('❌ usage: node scripts/check-gate-wiring.mjs [--selftest]');
+    process.exit(1);
+  }
+  const problems = inspectWorkflow(readFileSync(WORKFLOW, 'utf8'));
+  if (problems.length) {
+    console.error(`❌ ${WORKFLOW}: the gate does not gate \`${JOBS.join('`, `')}\`, \`lint-code\`, and the filtered Storybook build:`);
+    for (const problem of problems) console.error(`   ${problem}`);
+    process.exit(1);
+  }
+  console.log(`✅ gate wiring: \`${JOBS.join('`, `')}\` and \`lint-code\` gate strictly; the filtered Storybook job uses only its 180 s wrapper.`);
+}

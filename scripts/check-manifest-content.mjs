@@ -221,6 +221,18 @@ if (process.argv.includes('--selftest')) {
     return declaration;
   };
   const firstAttribute = (m) => firstAttributedDeclaration(m).attributes[0];
+  const firstPublicMethod = (m) => {
+    for (const declaration of tagged(m)) {
+      const method = (declaration.members ?? []).find(
+        (member) =>
+          member.kind === 'method' &&
+          member.privacy !== 'protected' &&
+          member.privacy !== 'private',
+      );
+      if (method) return method;
+    }
+    throw new Error('manifest self-test requires one public custom-element method');
+  };
 
   const EXPECTED = JSON.parse(readFileSync('expected-docs.json', 'utf8'));
   const addProperty = (m, overrides = {}) => {
@@ -245,6 +257,27 @@ if (process.argv.includes('--selftest')) {
         const declaration = addProperty(m);
         expected.elements[declaration.tagName].properties++;
         expected.total++;
+        return m;
+      },
+    ],
+    [
+      'a private-only method declaration before the public-method owner cannot hide the public probe target',
+      null,
+      (m, expected) => {
+        m.modules[0].declarations.unshift({
+          kind: 'class',
+          name: 'SkPrivateMethodProbe',
+          tagName: 'sk-private-method-probe',
+          customElement: true,
+          attributes: [],
+          members: [{ kind: 'method', name: 'internalOnly', privacy: 'private' }],
+        });
+        expected.elements['sk-private-method-probe'] = {
+          attributes: 0,
+          properties: 0,
+          methods: 0,
+        };
+        firstPublicMethod(m);
         return m;
       },
     ],
@@ -314,10 +347,7 @@ if (process.argv.includes('--selftest')) {
       'a public method description blanked',
       'public method',
       (m) => {
-        const d = tagged(m).find((x) => (x.members ?? []).some((y) => y.kind === 'method'));
-        d.members.find(
-          (y) => y.kind === 'method' && y.privacy !== 'protected' && y.privacy !== 'private',
-        ).description = '';
+        firstPublicMethod(m).description = '';
         return m;
       },
     ],
@@ -325,10 +355,7 @@ if (process.argv.includes('--selftest')) {
       'a method with NO privacy field — the skip must not swallow it',
       'public method',
       (m) => {
-        const d = tagged(m).find((x) => (x.members ?? []).some((y) => y.kind === 'method'));
-        const mem = d.members.find(
-          (y) => y.kind === 'method' && y.privacy !== 'protected' && y.privacy !== 'private',
-        );
+        const mem = firstPublicMethod(m);
         delete mem.privacy;
         mem.description = '';
         return m;
@@ -394,7 +421,7 @@ if (process.argv.includes('--selftest')) {
     process.exit(1);
   }
   // Shrink-only floor on the table itself, named rather than a copied literal.
-  const FLOOR = { mustCatch: 12, mustPass: 2 };
+  const FLOOR = { mustCatch: 12, mustPass: 3 };
   if (caught < FLOOR.mustCatch || PROBES.length - caught < FLOOR.mustPass) {
     console.error(
       `\n❌ Degenerate probe table: ${caught} must-catch (floor ${FLOOR.mustCatch}), ` +
