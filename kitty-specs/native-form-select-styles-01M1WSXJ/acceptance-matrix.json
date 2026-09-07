@@ -98,10 +98,10 @@
       "criterion_id": "FR-010",
       "description": "Verify FR-010 is satisfied",
       "proof_type": "automated_test",
-      "evidence": "3ca42f9; source negative assertions and Chromium forced-colors native appearance green",
+      "evidence": "7cbf6ce5ae27f1d995552deec32f0b463e8dac7f (product tree cf9d5045c0968add9056abc038401a17a7f24e9c); negative source assertions and native forced-colors appearance green",
       "pass_fail": "pass",
       "verified_by": "codex",
-      "verified_at": "2026-09-07T03:30:22.639869+00:00",
+      "verified_at": "2026-09-07T04:36:03.471961+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
