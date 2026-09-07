@@ -354,7 +354,14 @@
       "patterns-team-overview--scale-50-w-ps",
       "patterns-team-overview--controlled-interactions",
       "patterns-team-overview--empty-partial-data"
+    ],
+    "operational-status-pattern": [
+      "patterns-operational-status--default",
+      "patterns-operational-status--light-mode",
+      "patterns-operational-status--narrow",
+      "patterns-operational-status--without-banner",
+      "patterns-operational-status--complete-series"
     ]
   },
-  "total": 249
+  "total": 254
 }
