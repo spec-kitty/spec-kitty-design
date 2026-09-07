@@ -23,6 +23,7 @@
   "purpose_context": "This mission advances work package workflow board styles on mission/work-package-workflow-board-styles so stakeholders can track the work from mission creation onward.",
   "purpose_tldr": "work package workflow board styles",
   "slug": "work-package-workflow-board-styles-01M1W0VZ",
+  "status_phase": "1",
   "target_branch": "mission/work-package-workflow-board-styles",
   "topology": "single_branch"
 }
