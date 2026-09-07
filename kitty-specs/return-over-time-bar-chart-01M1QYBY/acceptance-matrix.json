@@ -601,10 +601,10 @@
       "criterion_id": "C-009",
       "description": "Use one #148 design-mission branch and one pull request into train/elements-first with Refs #148, superseding the unrelated SaaS WP-per-PR convention for this checkout.",
       "proof_type": "inspection",
-      "evidence": "single aggregate draft PR https://github.com/spec-kitty/spec-kitty-design/pull/231 targets train/elements-first from mission/return-over-time-bar-chart and uses Refs #148, not Closes",
+      "evidence": "Aggregate PR #231 targeted and merged only into train/elements-first as 2bbbd7b7 with Refs #148; issue #148 closed after verified merge. origin/main remained ccb055c and no publish or deployment occurred.",
       "pass_fail": "pass",
       "verified_by": "codex",
-      "verified_at": "2026-09-06T22:18:46.501006+00:00",
+      "verified_at": "2026-09-07T00:58:51.058729+00:00",
       "notes": "Wrap-up owns the single PR target and metadata check.",
       "lane_owners": [],
       "terminal_owner": "mission-wrap-up"
