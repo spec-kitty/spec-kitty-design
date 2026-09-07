@@ -38,10 +38,10 @@
       "criterion_id": "FR-004",
       "description": "Verify FR-004 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "3ca42f9; generated fixtures compose existing sk-form-field label/description classes",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T03:30:04.528453+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
