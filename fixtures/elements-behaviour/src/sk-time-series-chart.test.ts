@@ -1,14 +1,17 @@
+/* eslint-disable @nx/enforce-module-boundaries -- #225: this file imports the element modules
+   it EXERCISES, not the package barrel. The mutation harness selects each arm's tests from
+   Vitest's dependency graph, and one barrel import puts every element source in every behaviour
+   test's graph — which is what made that filter inert. */
 import { beforeEach, expect, test } from 'vitest';
 import { userEvent } from 'vitest/browser';
-import '@spec-kitty/elements';
+import '../../../packages/elements/src/time-series-chart/sk-time-series-chart.js';
+import skTimeSeriesChartSheet from '../../../packages/elements/src/time-series-chart/sk-time-series-chart.css.js';
 import {
   SkTimeSeriesChart,
-  skTimeSeriesChartSheet,
   type TimeSeriesChartSelectDetail,
   type TimeSeriesDatum,
   type TimeSeriesPoint,
-} from '@spec-kitty/elements';
-// eslint-disable-next-line @nx/enforce-module-boundaries -- raw authored CSS is the accessibility-contract test subject
+} from '../../../packages/elements/src/time-series-chart/sk-time-series-chart.js';
 import chartCss from '../../../packages/styles/src/time-series-chart/sk-time-series-chart.css?raw';
 import tokensCss from '@spec-kitty/tokens/tokens.css?raw';
 import { assertThemesDiffered, contrast } from './contrast.js';
@@ -768,6 +771,9 @@ test('[SC-013] all sixteen declared parts are rendered and externally targetable
 test('[SC-014] the generated sheet is the sole adopted stylesheet by identity', async () => {
   const element = await mount();
   expect(element.shadowRoot!.adoptedStyleSheets).toHaveLength(1);
+  // The sheet is imported from the GENERATED module, not re-exported through the package
+  // barrel — #225 banned that here, and it makes this identity claim stronger rather than
+  // weaker: it now names the exact artifact build-elements-css.mjs writes.
   expect(element.shadowRoot!.adoptedStyleSheets[0]).toBe(skTimeSeriesChartSheet);
   expect(element.shadowRoot!.querySelectorAll('style')).toHaveLength(0);
 });
