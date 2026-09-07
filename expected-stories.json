@@ -33,7 +33,8 @@
     "#148 WP01 opts in the exact eight sk-bar-chart stories. On the refreshed train after #219, total moves 181 -> 189.",
     "#209 opts in fourteen native styles-only workflow stories: eleven board states and three lane states. On the refreshed train after #148, total moves 189 -> 203. The duplicate-looking Default/Populated and DefaultDark entries are intentional separately addressable contract and visual evidence states; LightMode is a real .sk-light wrapper.",
     "#211 opts in all ten native light-DOM form-select stories, total 203 -> 213. Default is the T10 lane route, T12TwoFilters retains two independent native filters, and narrow/forced-colors/light are separately addressable acceptance evidence.",
-    "#150 opts in the six Storybook-only Team overview pattern stories named as acceptance evidence. The fixture/selectors/render helpers are excluded from CSF story indexing; only the six user-facing variants count. On the refreshed train after #211, total moves 213 -> 219."
+    "#150 opts in the six Storybook-only Team overview pattern stories named as acceptance evidence. The fixture/selectors/render helpers are excluded from CSF story indexing; only the six user-facing variants count. On the refreshed train after #211, total moves 213 -> 219.",
+    "#179 opts sk-time-series-chart in with all FOURTEEN of its stories, total 219 -> 233 on the refreshed train after #249. Four are load-bearing beyond coverage and would be the ones a later mission could retire silently: `interior-gap` is the defect this element exists to refuse, shown as a working affordance; `annotated-gap` is the only evidence that annotation fires on a SUPPLIED threshold rather than an inferred one; `multiple-series` is the only place four dash patterns and four marker shapes are in one frame, which is the mission's claim that differentiation survives hue collapse — and it is the story apps/storybook/src/tests/sk-time-series-chart.spec.ts measures under forced colors; and `narrow-viewport` is the table doing its second job, as the narrow treatment, with the scroller region triad present because it genuinely overflows there. Docs entries are excluded, matching every other element here."
   ],
   "byElement": {
     "sk-action-row": [
@@ -284,6 +285,22 @@
       "elements-skstatusindicator--long-text",
       "elements-skstatusindicator--light-mode"
     ],
+    "sk-time-series-chart": [
+      "elements-sktimeserieschart--default",
+      "elements-sktimeserieschart--interior-gap",
+      "elements-sktimeserieschart--annotated-gap",
+      "elements-sktimeserieschart--leading-and-trailing-gaps",
+      "elements-sktimeserieschart--entirely-unobserved",
+      "elements-sktimeserieschart--mixed-resolution",
+      "elements-sktimeserieschart--unequal-spacing",
+      "elements-sktimeserieschart--dense-series",
+      "elements-sktimeserieschart--multiple-series",
+      "elements-sktimeserieschart--single-point",
+      "elements-sktimeserieschart--empty",
+      "elements-sktimeserieschart--controlled-selection",
+      "elements-sktimeserieschart--narrow-viewport",
+      "elements-sktimeserieschart--light-mode"
+    ],
     "sk-transition-matrix": [
       "elements-sktransitionmatrix--default",
       "elements-sktransitionmatrix--approved-example",
@@ -322,5 +339,5 @@
       "patterns-team-overview--empty-partial-data"
     ]
   },
-  "total": 219
+  "total": 233
 }

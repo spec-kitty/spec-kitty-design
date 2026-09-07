@@ -168,6 +168,21 @@ const validateChart = (
 };
 
 /**
+ * The points of one series exactly as the consumer supplied them — missing intervals included.
+ *
+ * This is a named seam rather than an inline `datum.points`, and it is named because it is the
+ * ONE place a "helpful" implementation drops the nulls and draws straight through. Every part of
+ * the GRAPHIC reads the series through here: the segments, the markers, the resolution
+ * boundaries and the gaps. Filtering here is the textbook interpolation defect, and it removes
+ * the `gap` part from the shadow root, which is what the [SC-013] arm in mutations.json reds.
+ *
+ * The published table deliberately does NOT read through here. The table's own job is to report
+ * every interval including the unobserved ones, so a defect confined to the drawing has to be
+ * caught by the drawing's own contract rather than laundered through the table.
+ */
+const asSupplied = (datum: TimeSeriesDatum): ReadonlyArray<TimeSeriesPoint> => datum.points;
+
+/**
  * Maximal runs of consecutive observations, cut again wherever the SUPPLIED resolution changes.
  *
  * A null ends a run outright — that is what makes the break a break rather than an interpolation.
@@ -209,7 +224,7 @@ const gapsOf = (
   threshold: number,
 ): Gap[] => {
   const gaps: Gap[] = [];
-  const points = datum.points;
+  const points = asSupplied(datum);
   const annotates = Number.isFinite(threshold) && threshold > 0;
   let index = 0;
   while (index < points.length) {
@@ -412,17 +427,16 @@ export class SkTimeSeriesChart extends LitElement {
       })}
       ${chart.data.map((datum, index) => {
         const channel = index % MARKER_SHAPES.length;
-        const observations = datum.points.filter((point) => point.value !== null);
+        const drawn = asSupplied(datum);
+        const observations = drawn.filter((point) => point.value !== null);
         const boundaries: number[] = [];
-        for (let i = 1; i < datum.points.length; i += 1) {
-          if (datum.points[i].resolution !== datum.points[i - 1].resolution) {
-            boundaries.push(
-              round((this.#x(chart, datum.points[i - 1].at) + this.#x(chart, datum.points[i].at)) / 2),
-            );
+        for (let i = 1; i < drawn.length; i += 1) {
+          if (drawn[i].resolution !== drawn[i - 1].resolution) {
+            boundaries.push(round((this.#x(chart, drawn[i - 1].at) + this.#x(chart, drawn[i].at)) / 2));
           }
         }
         return svg`<g class="sk-time-series-chart__series" data-series-id=${datum.id} data-channel=${channel + 1}>
-          ${segmentsOf(datum.points)
+          ${segmentsOf(drawn)
             .filter((segment) => segment.points.length > 1)
             .map(
               (segment) => svg`<polyline

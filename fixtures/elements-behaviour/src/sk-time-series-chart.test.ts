@@ -646,7 +646,9 @@ test('[SC-008] selection intent bubbles and crosses a shadow boundary', async ()
   expect(seen).not.toBeNull();
   expect(seen!.bubbles).toBe(true);
   expect(seen!.composed).toBe(true);
-  expect(seen!.cancelable).toBe(true);
+  // Cancelability is asserted in [SC-009] and in the unmarked controlled-selection test, not
+  // here: an arm that flips `cancelable` must red the behaviour that DEPENDS on it, and an
+  // extra assertion in this test would make that arm collateral on a second marked behaviour.
   wrapper.remove();
 });
 
