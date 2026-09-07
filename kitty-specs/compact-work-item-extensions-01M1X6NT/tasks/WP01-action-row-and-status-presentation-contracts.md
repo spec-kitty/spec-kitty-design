@@ -43,6 +43,9 @@ requirement_refs:
 planning_base_branch: mission/compact-work-item-extensions
 merge_target_branch: mission/compact-work-item-extensions
 branch_strategy: Planning artifacts for this mission were generated on mission/compact-work-item-extensions. During /spec-kitty.implement this WP may branch from a dependency-specific base, but completed changes must merge back into mission/compact-work-item-extensions unless the human explicitly redirects the landing branch.
+base_branch: kitty/mission-compact-work-item-extensions-01M1X6NT
+base_commit: 68e12a874be5c843f66fddbec9bb82597b2e1424
+created_at: '2026-09-07T07:26:11.848185+00:00'
 subtasks:
 - T001
 - T002

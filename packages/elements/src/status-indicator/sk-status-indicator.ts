@@ -31,8 +31,9 @@ const statusTone = (value: unknown): StatusIndicatorTone => {
 /**
  * A consumer-labelled status with a presentation-only tone and decorative marker.
  *
- * Token dependencies: --sk-color-red, --sk-fg-body, --sk-fg-muted, --sk-font-sans,
- * --sk-on-tint-butter, --sk-on-tint-lilac, --sk-on-tint-mint, --sk-on-tint-sky,
+ * Token dependencies: --sk-border-width-1, --sk-border-width-2, --sk-fg-body, --sk-fg-muted,
+ * --sk-font-sans, --sk-motion-duration-slow, --sk-motion-ease-in-out, --sk-on-tint-butter,
+ * --sk-on-tint-lilac, --sk-on-tint-mint, --sk-on-tint-rose, --sk-on-tint-sky, --sk-space-1,
  * --sk-space-2, --sk-text-sm.
  *
  * @element sk-status-indicator
@@ -46,15 +47,37 @@ export class SkStatusIndicator extends LitElement {
   static styles = [sheet];
   static properties = {
     tone: { type: String, reflect: true },
+    pulsing: { type: Boolean, reflect: true },
   };
 
   /** Presentation tone. Unknown values render as `neutral` without changing the visible text. */
   declare tone: 'neutral' | 'info' | 'success' | 'attention' | 'danger' | 'recovery' | undefined;
 
+  /** Adds marker-only pulse presentation for consumer-supplied live activity. */
+  pulsing = false;
+
+  #syncMarker(slot: HTMLSlotElement): void {
+    const hasContent = slot.assignedNodes({ flatten: true }).some(
+      (node) => node.nodeType === Node.ELEMENT_NODE || (node.textContent?.trim().length ?? 0) > 0,
+    );
+    slot.parentElement?.toggleAttribute('hidden', !hasContent);
+  }
+
+  protected firstUpdated(): void {
+    const marker = this.renderRoot.querySelector<HTMLSlotElement>('slot[name="marker"]');
+    if (marker) this.#syncMarker(marker);
+  }
+
   render() {
     const tone = statusTone(this.tone);
-    return html`<span part="status" class="sk-status-indicator sk-status-indicator--${tone}" data-tone=${tone}>
-      <span part="marker" class="sk-status-indicator__marker" aria-hidden="true"><slot name="marker"></slot></span>
+    return html`<span
+      part="status"
+      class="sk-status-indicator sk-status-indicator--${tone}${this.pulsing ? ' sk-status-indicator--pulsing' : ''}"
+      data-tone=${tone}
+    >
+      <span part="marker" class="sk-status-indicator__marker" aria-hidden="true" hidden
+        ><slot name="marker" @slotchange=${(event: Event) => this.#syncMarker(event.currentTarget as HTMLSlotElement)}></slot
+      ></span>
       <span part="text" class="sk-status-indicator__text"><slot></slot></span>
     </span>`;
   }

@@ -3,6 +3,7 @@ import { define } from '../define.js';
 import sheet from './sk-action-row.css.js';
 
 export type ActionRowActivateDetail = Readonly<{ id: string }>;
+export type ActionRowLayout = 'card';
 
 type ActionRowState = HTMLElement & {
   rowId: string | undefined;
@@ -28,12 +29,27 @@ const suppressRepeatedActivation = (event: KeyboardEvent): void => {
   event.preventDefault();
 };
 
-const scanContent = () => html`
-  <span part="marker" class="sk-action-row__marker"><slot name="marker"></slot></span>
+const actionRowLayout = (value: unknown): ActionRowLayout | undefined => {
+  if (value === 'card') return value;
+  if (value !== undefined && value !== '') {
+    console.warn(`unknown action-row layout "${String(value)}"; using row`);
+  }
+  return undefined;
+};
+
+const scanContent = (syncSlot: (slot: HTMLSlotElement) => void) => html`
+  <span part="marker" class="sk-action-row__marker" hidden
+    ><slot name="marker" @slotchange=${(event: Event) => syncSlot(event.currentTarget as HTMLSlotElement)}></slot
+  ></span>
   <span part="title" class="sk-action-row__title"><slot name="title"></slot></span>
   <span part="reference" class="sk-action-row__reference"><slot name="reference"></slot></span>
-  <span part="tags" class="sk-action-row__tags"><slot name="tags"></slot></span>
+  <span part="tags" class="sk-action-row__tags" hidden
+    ><slot name="tags" @slotchange=${(event: Event) => syncSlot(event.currentTarget as HTMLSlotElement)}></slot
+  ></span>
   <span part="metadata" class="sk-action-row__metadata"><slot name="metadata"></slot></span>
+  <span part="supporting" class="sk-action-row__supporting" hidden
+    ><slot name="supporting" @slotchange=${(event: Event) => syncSlot(event.currentTarget as HTMLSlotElement)}></slot
+  ></span>
 `;
 
 /**
@@ -44,7 +60,7 @@ const scanContent = () => html`
  * --sk-font-display, --sk-font-mono, --sk-font-sans, --sk-motion-duration-fast,
  * --sk-motion-ease-out, --sk-radius-md, --sk-space-1, --sk-space-2, --sk-space-3,
  * --sk-space-4, --sk-space-5, --sk-surface-card, --sk-surface-muted, --sk-surface-pill,
- * --sk-text-base, --sk-text-sm, --sk-text-xs, --sk-weight-medium, --sk-weight-semibold.
+ * --sk-text-base, --sk-text-xs, --sk-weight-semibold.
  *
  * @element sk-action-row
  * @slot marker - Consumer-supplied visual marker.
@@ -52,6 +68,7 @@ const scanContent = () => html`
  * @slot reference - Consumer-authored reference or path.
  * @slot tags - Consumer-authored semantic tags.
  * @slot metadata - Consumer-authored trailing metadata.
+ * @slot supporting - Optional consumer-authored secondary context.
  * @slot controls - Independent trailing controls.
  * @csspart row - Stable row root.
  * @csspart trigger - Primary scan-content surface.
@@ -60,6 +77,7 @@ const scanContent = () => html`
  * @csspart reference - Reference projection wrapper.
  * @csspart tags - Tags projection wrapper.
  * @csspart metadata - Metadata projection wrapper.
+ * @csspart supporting - Optional secondary-context wrapper.
  * @csspart controls - Independent controls wrapper.
  * @fires {CustomEvent<ActionRowActivateDetail>} sk-action-row-activate - Requests activation for the exact consumer row ID. The event bubbles, is composed, and is not cancelable.
  */
@@ -70,6 +88,7 @@ export class SkActionRow extends LitElement {
     rowId: { type: String, attribute: 'row-id', reflect: true },
     selectable: { type: Boolean, reflect: true },
     selected: { type: Boolean, reflect: true },
+    layout: { type: String, reflect: true },
   };
 
   /** Stable consumer-owned identifier included in activation requests. */
@@ -81,9 +100,32 @@ export class SkActionRow extends LitElement {
   /** Consumer-controlled current-row presentation. Activation never changes this value. */
   selected = false;
 
+  /** Optional compact presentation. Only `card` is supported; invalid values use the default row layout. */
+  declare layout: ActionRowLayout | undefined;
+
+  #syncSlot(slot: HTMLSlotElement): void {
+    const hasContent = slot.assignedNodes({ flatten: true }).some(
+      (node) => node.nodeType === Node.ELEMENT_NODE || (node.textContent?.trim().length ?? 0) > 0,
+    );
+    slot.parentElement?.toggleAttribute('hidden', !hasContent);
+  }
+
+  protected firstUpdated(): void {
+    this.renderRoot
+      .querySelectorAll<HTMLSlotElement>(
+        'slot[name="marker"], slot[name="tags"], slot[name="supporting"], slot[name="controls"]',
+      )
+      .forEach((slot) => this.#syncSlot(slot));
+  }
+
   render() {
-    const content = scanContent();
-    return html`<div part="row" class="sk-action-row" aria-current=${this.selected ? 'true' : nothing}>
+    const content = scanContent((slot) => this.#syncSlot(slot));
+    const layout = actionRowLayout(this.layout);
+    return html`<div
+      part="row"
+      class="sk-action-row${layout === 'card' ? ' sk-action-row--card' : ''}"
+      aria-current=${this.selected ? 'true' : nothing}
+    >
       ${
         isActionable(this)
           ? html`<button
@@ -97,8 +139,8 @@ export class SkActionRow extends LitElement {
             </button>`
           : html`<div part="trigger" class="sk-action-row__trigger sk-action-row__trigger--static">${content}</div>`
       }
-      <div part="controls" class="sk-action-row__controls">
-        <slot name="controls"></slot>
+      <div part="controls" class="sk-action-row__controls" hidden>
+        <slot name="controls" @slotchange=${(event: Event) => this.#syncSlot(event.currentTarget as HTMLSlotElement)}></slot>
       </div>
     </div>`;
   }

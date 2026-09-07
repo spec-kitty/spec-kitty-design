@@ -1,12 +1,12 @@
 {
-  "event_count": 3,
-  "last_event_id": "01M1XB38XXBAJPT6C948BTJ82J",
-  "materialized_at": "2026-09-07T07:07:37.277968+00:00",
+  "event_count": 11,
+  "last_event_id": "01M1XEMW6TESQJG2AFQ14BCYGM",
+  "materialized_at": "2026-09-07T08:09:39.802740+00:00",
   "mission_number": "",
   "mission_slug": "compact-work-item-extensions-01M1X6NT",
   "mission_type": "software-dev",
   "summary": {
-    "approved": 0,
+    "approved": 1,
     "blocked": 0,
     "canceled": 0,
     "claimed": 0,
@@ -14,15 +14,43 @@
     "for_review": 0,
     "in_progress": 0,
     "in_review": 0,
-    "planned": 3
+    "planned": 2
   },
   "work_packages": {
     "WP01": {
-      "actor": "finalize-tasks",
-      "force_count": 0,
-      "lane": "planned",
-      "last_event_id": "01M1XB38TK9KSM8F0T6579G0QP",
-      "last_transition_at": "2026-09-07T07:07:37.171515+00:00"
+      "actor": "user",
+      "agent": null,
+      "agent_profile": "__resolved_profile_absent__",
+      "agent_profile_version": "__resolved_profile_version_absent__",
+      "assignee": "codex",
+      "force_count": 1,
+      "lane": "approved",
+      "last_event_id": "01M1XEMW6TESQJG2AFQ14BCYGM",
+      "last_transition_at": "2026-09-07T08:09:39.802740+00:00",
+      "model": "__resolved_model_absent__",
+      "notes": [
+        "Codex implementation in authorized isolated primary clone",
+        "WP01 implemented test-first; focused gates and Storybook build green",
+        "Independent Reviewer Renata approval: WP01 contract and focused gates satisfied"
+      ],
+      "provider": "__resolved_provider_absent__",
+      "review": null,
+      "review_result": {
+        "reference": "review-cycle://compact-work-item-extensions-01M1X6NT/WP01-action-row-and-status-presentation-contracts/review-cycle-2.md",
+        "reviewer": "codex-reviewer-renata",
+        "verdict": "approved"
+      },
+      "role": "reviewer",
+      "shell_pid": null,
+      "shell_pid_created_at": null,
+      "subtasks": {
+        "T001": "done",
+        "T002": "done",
+        "T003": "done",
+        "T004": "done",
+        "T005": "done",
+        "T006": "done"
+      }
     },
     "WP02": {
       "actor": "finalize-tasks",

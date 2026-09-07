@@ -14,6 +14,8 @@ const row = ({
   title = 'team-landing-pivots',
   reference = 'spec-kitty/e2e-team-landing',
   metadata = '2 hours ago',
+  marker = '<sk-entity-marker slot="marker" label="Spec Kitty repository">SP</sk-entity-marker>',
+  supporting = '',
   tags = `
     <sk-pill-tag slot="tags">WP status changed</sk-pill-tag>
     <sk-status-indicator slot="tags" tone="success">Fresh</sk-status-indicator>
@@ -27,6 +29,8 @@ const row = ({
   title?: string;
   reference?: string;
   metadata?: string;
+  marker?: string;
+  supporting?: string;
   tags?: string;
   extra?: string;
 } = {}) => `
@@ -36,11 +40,12 @@ const row = ({
     ${selected ? 'selected' : ''}
     ${extra}
   >
-    <sk-entity-marker slot="marker" label="Spec Kitty repository">SP</sk-entity-marker>
+    ${marker}
     <span slot="title">${title}</span>
     <code slot="reference">${reference}</code>
     ${tags}
     <time slot="metadata">${metadata}</time>
+    ${supporting}
     ${controls}
   </sk-action-row>
 `;
@@ -152,6 +157,54 @@ export const SelectableStates: Story = {
     <li>${row({ id: 'state-static', selectable: false, extra: 'data-state-static="true"' })}</li>
   `),
     ),
+};
+
+export const CardStates: Story = {
+  render: () =>
+    frame(
+      list(`
+        <li>${row({ extra: 'layout="card"', supporting: '<span slot="supporting">Claimed by Mia · live signal supplied by the consumer</span>' })}</li>
+        <li>${row({ id: 'card-selected', selected: true, extra: 'layout="card"', supporting: '<span slot="supporting">Claimed by Ada · stale status supplied by the consumer</span>' })}</li>
+        <li>${row({ id: 'card-static', selectable: false, marker: '', tags: '', extra: 'layout="card"' })}</li>
+        <li>${row({ id: 'card-controls', extra: 'layout="card"', controls: '<button slot="controls" type="button">Inspect</button>' })}</li>
+      `),
+    ),
+};
+
+export const CardLongContent: Story = {
+  parameters: { layout: 'fullscreen' },
+  render: () => `
+    <div style="box-sizing:border-box;width:calc(var(--sk-space-12) * 2);background:var(--sk-surface-page);">
+      ${row({
+        id: 'card-long-content',
+        title: 'A deliberately long consumer-owned compact work-item title remains readable',
+        reference: 'spec-kitty/a-very-long-unbroken-reference-without-a-natural-break-point',
+        supporting: '<span slot="supporting">Claimed by a consumer whose complete supporting line can wrap naturally</span>',
+        extra: 'layout="card" data-card-long-content="true"',
+      })}
+    </div>
+  `,
+};
+
+const t10CompactItem = () =>
+  row({
+    id: 't10-compact-item',
+    title: 'Review compact Work Package extensions',
+    reference: 'WP01 · action-row and status presentation',
+    marker: '<sk-entity-marker slot="marker" label="Mia" size="sm" shape="circle">MI</sk-entity-marker>',
+    tags: '<sk-status-indicator slot="tags" tone="success" pulsing><span slot="marker">●</span>Live claim</sk-status-indicator>',
+    supporting: '<span slot="supporting">Claimed by Mia · evidence supplied by the application</span>',
+    controls: '<button slot="controls" type="button">Review</button>',
+    extra: 'layout="card" data-t10-compact-item="true"',
+  });
+
+export const T10CompactItem: Story = {
+  render: () => frame(t10CompactItem()),
+};
+
+export const T10CompactItemLightMode: Story = {
+  parameters: { backgrounds: { default: 'sk-light' }, a11y: { disable: false } },
+  render: () => frame(t10CompactItem(), true),
 };
 
 export const LightMode: Story = {

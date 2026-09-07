@@ -10,5 +10,7 @@
   "purpose_tldr": "compact work item extensions",
   "slug": "compact-work-item-extensions-01M1X6NT",
   "target_branch": "mission/compact-work-item-extensions",
-  "topology": "single_branch"
+  "topology": "single_branch",
+  "vcs": "git",
+  "vcs_locked_at": "2026-09-07T07:26:11.656283+00:00"
 }

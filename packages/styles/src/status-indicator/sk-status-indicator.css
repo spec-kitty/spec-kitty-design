@@ -17,6 +17,30 @@
   color: var(--sk-fg-muted);
 }
 
+.sk-status-indicator--pulsing .sk-status-indicator__marker {
+  outline-style: solid;
+  outline-width: var(--sk-border-width-1);
+  outline-color: var(--sk-fg-muted);
+  outline-offset: 0;
+  animation-name: sk-status-indicator-pulse;
+  animation-duration: var(--sk-motion-duration-slow);
+  animation-timing-function: var(--sk-motion-ease-in-out);
+  animation-direction: alternate;
+  animation-iteration-count: infinite;
+}
+
+@keyframes sk-status-indicator-pulse {
+  from {
+    outline-width: var(--sk-border-width-1);
+    outline-offset: 0;
+  }
+
+  to {
+    outline-width: var(--sk-border-width-2);
+    outline-offset: var(--sk-space-1);
+  }
+}
+
 .sk-status-indicator--info .sk-status-indicator__marker {
   color: var(--sk-on-tint-sky);
 }
@@ -50,4 +74,27 @@
 
 .sk-status-indicator__text {
   min-width: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sk-status-indicator--pulsing .sk-status-indicator__marker {
+    outline-style: solid;
+    outline-width: var(--sk-border-width-2);
+    outline-offset: var(--sk-space-1);
+    animation-name: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .sk-status-indicator__marker {
+    outline-style: solid;
+    outline-width: var(--sk-border-width-1);
+    outline-color: CanvasText;
+  }
+
+  .sk-status-indicator--pulsing .sk-status-indicator__marker {
+    outline-style: double;
+    outline-width: var(--sk-border-width-2);
+    outline-color: Highlight;
+  }
 }
