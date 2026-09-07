@@ -30,7 +30,8 @@
       "model": "__resolved_model_absent__",
       "notes": [
         "Codex implementation started under resolved frontend-freddy profile",
-        "Implementation complete at product SHA 2a330b7a; CI-derived baselines at 1415ae44; CI run 34078606143 fully green; three independent Codex lenses approved."
+        "Implementation complete at product SHA 2a330b7a; CI-derived baselines at 1415ae44; CI run 34078606143 fully green; three independent Codex lenses approved.",
+        "Approved after exact-head local gates and CI Quality 34101924949 passed; review lane 7b44bbb is tree-identical to b2191e2 and preserves the reviewed implementation."
       ],
       "provider": "__resolved_provider_absent__",
       "review_result": {
