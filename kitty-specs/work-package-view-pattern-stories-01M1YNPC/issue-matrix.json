@@ -1,7 +1,7 @@
 {
   "rows": {
     "#177": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "Closed predecessor #177 remains authoritative for sk-card tone ownership; WP01 uses the base public card without duplicating tone semantics.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -9,7 +9,7 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
+      "verdict": "verified-already-fixed",
       "wp": null
     },
     "#178": {
