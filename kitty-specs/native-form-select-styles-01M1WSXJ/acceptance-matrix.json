@@ -87,11 +87,11 @@
     {
       "criterion_id": "FR-009",
       "description": "Verify FR-009 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "proof_type": "custom_command",
+      "evidence": "3ca42f9; check-component-token-literals selftest + form-select stylesheet audit green; quality:stylelint green",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T03:30:19.942138+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
