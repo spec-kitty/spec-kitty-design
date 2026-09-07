@@ -1401,6 +1401,14 @@
       "file": "packages/elements/src/action-row/sk-action-row.ts",
       "from": "<span part=\"supporting\" class=\"sk-action-row__supporting\" hidden",
       "to": "<span part=\"\" class=\"sk-action-row__supporting\" hidden"
+    },
+    {
+      "id": "SC-011",
+      "arm": "a wrapper between the dl and its dt/dd severs the definition list across the card slot boundary (ADR-11's canonical SC-011 arm is a renamed slot; this is a different failure mode under the same id, because the composition's slot belongs to sk-card and renaming it would test that element rather than the composition)",
+      "file": "packages/elements/src/patterns/operational-status.ts",
+      "from": "            <dt class=\"sk-facts__term\">${fact.term}</dt>\n            <dd class=\"sk-facts__value\">${fact.value}</dd>",
+      "to": "            <div><dt class=\"sk-facts__term\">${fact.term}</dt>\n            <dd class=\"sk-facts__value\">${fact.value}</dd></div>",
+      "subject": "fixtures/elements-behaviour/src/pattern-operational-status.test.ts"
     }
   ]
 }
