@@ -697,7 +697,11 @@ test('[SC-010] properties assigned before definition survive upgrade and first r
   expect(element.selectedId).toBe('throughput-4');
   expect(element.gapThreshold).toBe(3 * HOUR);
   expect(rowsOf(element)).toHaveLength(6);
-  expect(partsOf(element, 'gap-note')).toHaveLength(1);
+  // The gap-note DOM is deliberately NOT asserted here. It would make this test red under the
+  // SC-013 interpolation arm as well, and an arm that reds two MARKED behaviours cannot say
+  // which one it proves. `gapThreshold` reaching the upgraded element is asserted above, which
+  // is the property claim this behaviour is about; the notes themselves are covered by the
+  // supplied-threshold test.
   expect(
     element.shadowRoot!.querySelector('[aria-pressed="true"]')!.closest('[part="row"]')!
       .getAttribute('data-point-id'),
