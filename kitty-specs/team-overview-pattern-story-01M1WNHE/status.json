@@ -19,13 +19,18 @@
   "work_packages": {
     "WP01": {
       "actor": "codex",
+      "agent": "codex",
       "agent_profile": "__resolved_profile_absent__",
       "agent_profile_version": "__resolved_profile_version_absent__",
+      "assignee": "codex",
       "force_count": 0,
       "lane": "in_progress",
       "last_event_id": "01M1WPKYMHTFPN5FVJVRNBZM9S",
       "last_transition_at": "2026-09-07T01:09:43.697937+00:00",
       "model": "__resolved_model_absent__",
+      "notes": [
+        "Codex implementation started under resolved frontend-freddy profile"
+      ],
       "provider": "__resolved_provider_absent__",
       "role": "implementer"
     }

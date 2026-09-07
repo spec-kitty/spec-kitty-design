@@ -32,7 +32,8 @@
     "#219 opts in the FIRST styles-layer story: `components-card--statuses-greyscale`, one id, total 180 -> 181. The scope sentence four notes above — \"scoped to the ELEMENTS, not the whole catalogue\" because the packages/styles story files predate this and \"#77-#79 migrate them and can opt each in as it lands\" — has outlived its reason: those migrations landed and nothing was opted in. What replaces it is narrower than \"everything\" and stronger than \"nothing\": THE SCOPE IS THE ELEMENTS, PLUS ANY STORY A MISSION HAS NAMED AS ACCEPTANCE EVIDENCE. The principle, stated so the next mission does not re-derive it: a story cited as proof is ratcheted in the same commit that cites it. This id specifically, because #177's implementation-evidence.md names `Greyscale` AND `StatusesGreyscale` as its proof that a status tone is never the sole carrier of meaning. The element-layer half (elements-skcard--greyscale) was ratcheted by that mission; the STATIC half was not — and the static path is the no-JavaScript consumer ADR-10 section 3 exists to serve, so it is the half where a reader has no element to fall back on. The story your evidence names as proof was, for the static layer, the one that could be retired silently. NOT the whole packages/styles catalogue, deliberately: #219 raises that as an open question and it is a larger scope decision than a follow-up mission should take. The sweep that bounds this: kitty-specs holds exactly ONE implementation-evidence.md today (card-status-tone-axis-01M1VJNY), and it cites exactly one styles-layer story. When a second mission cites one, it adds it here, in its own commit.",
     "#148 WP01 opts in the exact eight sk-bar-chart stories. On the refreshed train after #219, total moves 181 -> 189.",
     "#209 opts in fourteen native styles-only workflow stories: eleven board states and three lane states. On the refreshed train after #148, total moves 189 -> 203. The duplicate-looking Default/Populated and DefaultDark entries are intentional separately addressable contract and visual evidence states; LightMode is a real .sk-light wrapper.",
-    "#211 opts in all ten native light-DOM form-select stories, total 203 -> 213. Default is the T10 lane route, T12TwoFilters retains two independent native filters, and narrow/forced-colors/light are separately addressable acceptance evidence."
+    "#211 opts in all ten native light-DOM form-select stories, total 203 -> 213. Default is the T10 lane route, T12TwoFilters retains two independent native filters, and narrow/forced-colors/light are separately addressable acceptance evidence.",
+    "#150 opts in the six Storybook-only Team overview pattern stories named as acceptance evidence. The fixture/selectors/render helpers are excluded from CSF story indexing; only the six user-facing variants count. On the refreshed train after #211, total moves 213 -> 219."
   ],
   "byElement": {
     "sk-action-row": [
@@ -311,7 +312,15 @@
       "primitives-skworkflowlane-html--default",
       "primitives-skworkflowlane-html--empty",
       "primitives-skworkflowlane-html--light-mode"
+    ],
+    "team-overview-pattern": [
+      "patterns-team-overview--default",
+      "patterns-team-overview--light-mode",
+      "patterns-team-overview--narrow",
+      "patterns-team-overview--scale-50-w-ps",
+      "patterns-team-overview--controlled-interactions",
+      "patterns-team-overview--empty-partial-data"
     ]
   },
-  "total": 213
+  "total": 219
 }
