@@ -120,6 +120,13 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) conve
   lane copy. Consumers continue to own selection, identity, status/liveness, copy and application
   state. Manifest, React, Vue, static markup and size outputs are generated from their canonical
   authored sources.
+- Added the styles-only `.sk-breadcrumbs`, `.sk-prose`, and `.sk-event-timeline` native recipes
+  for reusable detail views (#213), with theme, narrow-width, forced-colour, long-content, and
+  scale evidence. Consumers keep native structure and retain routing, Markdown/sanitization,
+  heading, event-order, trust, clock, and absence-announcement decisions. Also added the
+  backward-compatible `complete | pending` state axis to `sk-check-bullet`; omitted state remains
+  complete, and passive list items expose hidden state text without becoming checkboxes or task
+  controls.
 - Added `sk-metric` and `sk-evidence-chain` as generic presentation primitives (#147). A metric
   preserves consumer-supplied labels and opaque display values in a native definition relationship;
   an evidence chain preserves consumer-owned stage order in a native ordered list and composes real

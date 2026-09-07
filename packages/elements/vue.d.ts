@@ -136,15 +136,17 @@ declare module 'vue' {
       'variant'?: 'blue' | 'purple' | undefined;
     }>;
     /**
-     * A checked feature bullet, for the tick-lists on marketing and reference pages.
+     * A passive completion-state item for feature lists on marketing and reference pages.
      *
      * Put it inside a `<ul role="list">`. The element sets `role="listitem"` on itself, because a
      * custom element inside a `<ul>` is NOT a list item — the static form is a real `<li>`, and
      * this is the one place the two consumption paths differ structurally.
      */
     'sk-check-bullet': SkElement<{
-      /** The tick glyph. Defaults to ✓; set it to use a different mark. */
+      /** Decorative marker glyph. Defaults to the current state's marker; set it to override. */
       'icon'?: string | undefined;
+      /** Read-only completion state. Omit for complete; unsupported values render as complete. */
+      'state'?: 'complete' | 'pending' | undefined;
     }>;
     /** A labelled complementary landmark for consumer-owned selected-context content. */
     'sk-context-sidebar': SkElement<{

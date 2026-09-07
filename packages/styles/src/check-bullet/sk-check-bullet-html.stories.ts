@@ -1,6 +1,6 @@
 import './sk-check-bullet.css';
 import type { Meta, StoryObj } from '@storybook/web-components';
-import { SkCheckBulletHTML } from './index';
+import { SkCheckBulletHTML, SkCheckBulletPendingHTML } from './index';
 
 const meta: Meta = {
   title: 'Primitives/SkCheckBullet (HTML)',
@@ -12,7 +12,8 @@ export default meta;
 type Story = StoryObj;
 
 export const Default: Story = {
-  render: () => `<ul role="list" style="list-style:none;padding:0;margin:0">${SkCheckBulletHTML}</ul>`,
+  render: () =>
+    `<ul role="list" style="list-style:none;padding:0;margin:0">${SkCheckBulletHTML}</ul>`,
 };
 
 /**
@@ -27,26 +28,62 @@ export const Default: Story = {
  * match, so a renamed default would silently render three identical rows.
  */
 const PLACEHOLDER = 'Feature description here';
-const swap = (text: string) => {
-  if (!SkCheckBulletHTML.includes(PLACEHOLDER)) {
+const swap = (source: string, text: string) => {
+  if (!source.includes(PLACEHOLDER)) {
     throw new Error(
       'sk-check-bullet story: generated markup no longer contains ' +
         JSON.stringify(PLACEHOLDER) +
         ' — the replacement would have silently returned it unchanged. Update PLACEHOLDER ' +
-        'alongside checkBulletStaticHtml()\'s default content.',
+        "alongside checkBulletStaticHtml()'s default content.",
     );
   }
-  return SkCheckBulletHTML.replace(PLACEHOLDER, text);
+  return source.replace(PLACEHOLDER, text);
 };
 
 export const ListOfThree: Story = {
-  render: () => [
-    '<ul role="list" style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px">',
-    swap('Developers spend time building, not being blocked on finalized requirements.'),
-    swap('Works with Jira, Linear, GitHub, GitLab, and Slack.'),
-    swap('Zero-config setup — connect your repo and you are ready to go.'),
-    '</ul>',
-  ].join(''),
+  render: () =>
+    [
+      '<ul role="list" style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:var(--sk-space-2)">',
+      swap(
+        SkCheckBulletHTML,
+        'Developers spend time building, not being blocked on finalized requirements.',
+      ),
+      swap(
+        SkCheckBulletHTML,
+        'Works with Jira, Linear, GitHub, GitLab, and Slack.',
+      ),
+      swap(
+        SkCheckBulletHTML,
+        'Zero-config setup — connect your repo and you are ready to go.',
+      ),
+      '</ul>',
+    ].join(''),
+};
+
+export const Complete: Story = {
+  render: () =>
+    `<ul role="list" style="list-style:none;padding:0;margin:0">${swap(
+      SkCheckBulletHTML,
+      'Static complete state',
+    )}</ul>`,
+};
+
+export const Pending: Story = {
+  render: () =>
+    `<ul role="list" style="list-style:none;padding:0;margin:0">${swap(
+      SkCheckBulletPendingHTML,
+      'Static pending state',
+    )}</ul>`,
+};
+
+export const Mixed: Story = {
+  render: () =>
+    [
+      '<ul role="list" style="list-style:none;padding:0;margin:0;display:grid;gap:var(--sk-space-3)">',
+      swap(SkCheckBulletHTML, 'Static complete state'),
+      swap(SkCheckBulletPendingHTML, 'Static pending state'),
+      '</ul>',
+    ].join(''),
 };
 
 export const LightMode: Story = {

@@ -11,9 +11,10 @@ so far — as **custom elements** in `@spec-kitty/elements`. Both require `@spec
 `sk-time-series-chart`, and `sk-transition-matrix`.
 Several of the catalogue's component packages are CSS only by a recorded decision — `form-field`,
 (#176) `facts`, `disclosure`, `data-table`, `empty-state`, `skip-link`, (#210) `progress`, and
-(#209) `workflow-board` and `workflow-lane`, and (#211) `form-select`. See
+(#209) `workflow-board` and `workflow-lane`, (#211) `form-select`, and (#213) `breadcrumbs`,
+`prose`, and `event-timeline`. See
 ADR-10, *form-field is deliberately styles-only* and *Styles-only components are a class, not a
-fixed exception count*. These ten ship classes applied to real semantic HTML the consumer authors
+fixed exception count*. These thirteen ship classes applied to real semantic HTML the consumer authors
 — `<dl>`, `<details>`, `<table>`, a plain block, `<a>`, `<progress>`, `<section>`, `<ol>`, and `<select>` — and no `sk-*` custom element
 wraps any of them: light-DOM native semantics (list/table/label association across a shadow
 boundary) are exactly what a wrapper element would break. Composite sections below such as Hero
@@ -585,7 +586,8 @@ Ticked list items, for feature and requirement lists.
 
 <ul role="list">
   <sk-check-bullet>Requirements captured up front</sk-check-bullet>
-  <sk-check-bullet icon="★">Decisions live with the feature</sk-check-bullet>
+  <sk-check-bullet state="pending">Independent review pending</sk-check-bullet>
+  <sk-check-bullet state="complete" icon="★">Decisions live with the feature</sk-check-bullet>
 </ul>
 ```
 
@@ -598,16 +600,134 @@ survive", which is not how ARIA works — a `<ul>` already maps to `role=list`. 
 text is the accessible content — and `icon` replaces it. Two parts: `bullet` (the row) and
 `icon` (the tick).
 
+`state` is either `complete` or `pending`; omitting it keeps the backward-compatible complete
+presentation. Each row includes visually hidden “Complete” or “Pending” text, so state is not
+communicated by the decorative glyph or colour alone. This remains a passive list item, not a
+checkbox, switch, task editor, or progress calculation: the consumer owns state and any action
+that changes it.
+
 **HTML:**
 
 ```html
 <li class="sk-check-bullet">
   <span class="sk-check-bullet__icon" aria-hidden="true">✓</span>
+  <span class="sk-check-bullet__state">Complete</span>
   Requirements captured up front
+</li>
+<li class="sk-check-bullet sk-check-bullet--pending">
+  <span class="sk-check-bullet__icon" aria-hidden="true">○</span>
+  <span class="sk-check-bullet__state">Pending</span>
+  Independent review pending
 </li>
 ```
 
+Its `--sk-*` dependencies are `--sk-space-3`, `--sk-fg-default`, `--sk-fg-muted`,
+`--sk-font-sans`, `--sk-text-base`, `--sk-on-tint-mint`, `--sk-weight-bold`,
+`--sk-weight-extrabold`, and `--sk-border-width-1`. The pre-existing line height and icon
+alignment declarations remain unchanged rather than becoming new public tokens.
+
 [View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/primitives-skcheckbullet-html--default)
+
+---
+
+## Breadcrumbs
+
+Breadcrumbs are native navigation and ordered-list markup styled by `.sk-breadcrumbs`; there is
+no `sk-breadcrumbs` custom element.
+
+```html
+<nav class="sk-breadcrumbs" aria-label="Breadcrumb">
+  <ol class="sk-breadcrumbs__list">
+    <li class="sk-breadcrumbs__item">
+      <a class="sk-breadcrumbs__link" href="/repositories">Repositories</a>
+    </li>
+    <li class="sk-breadcrumbs__item">
+      <a class="sk-breadcrumbs__link" href="/repositories/example">Example</a>
+    </li>
+    <li class="sk-breadcrumbs__item">
+      <a class="sk-breadcrumbs__link" href="/repositories/example/detail" aria-current="page">Detail</a>
+    </li>
+  </ol>
+</nav>
+```
+
+The consumer owns destinations, labels, route matching, and which one link carries
+`aria-current="page"`. Keep the native `nav > ol > li > a` structure. Add
+`.sk-breadcrumbs--narrow` when composing into a narrow column; the list then contains its own
+horizontal overflow without shortening accessible link text.
+
+Its exact token dependencies are `--sk-fg-muted`, `--sk-fg-subtle`, `--sk-fg-default`,
+`--sk-font-sans`, `--sk-text-sm`, `--sk-weight-semibold`, `--sk-space-1`, `--sk-space-2`,
+`--sk-space-4`, `--sk-space-12`, `--sk-radius-sm`, `--sk-border-width-2`, and
+`--sk-border-focus`.
+
+[View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/primitives-skbreadcrumbs-html--default)
+
+---
+
+## Prose
+
+`.sk-prose` styles native consumer-authored headings, paragraphs, lists, links, code, and tables.
+It does not parse Markdown, sanitize HTML, choose heading levels, or manufacture missing content.
+
+```html
+<article class="sk-prose">
+  <h2>Implementation prompt</h2>
+  <p>Keep the supplied structure intact.</p>
+  <ul><li>Preserve native semantics.</li></ul>
+  <pre role="region" aria-label="Command" tabindex="0"><code>spec-kitty next</code></pre>
+</article>
+```
+
+Give a genuinely overflowing code region a distinct accessible name and keyboard focus as shown.
+For multi-column values, compose the existing `.sk-data-table` and its scroller inside the prose
+instead of treating the values as paragraphs. When prose is absent, render the passive
+`.sk-empty-state` recipe; use `sk-notice` only when a change must be announced. The consumer owns
+that distinction as well as parsing, sanitization, heading hierarchy, and copy.
+
+Its exact token dependencies are `--sk-fg-body`, `--sk-fg-default`, `--sk-color-accent`,
+`--sk-surface-muted`, `--sk-border-default`, `--sk-border-focus`, `--sk-border-width-1`,
+`--sk-border-width-2`, `--sk-font-sans`, `--sk-font-display`, `--sk-font-mono`,
+`--sk-text-base`, `--sk-text-sm`, `--sk-text-xl`, `--sk-text-2xl`,
+`--sk-weight-semibold`, `--sk-radius-sm`, `--sk-radius-md`, `--sk-space-1`, `--sk-space-2`,
+`--sk-space-3`, `--sk-space-4`, `--sk-space-5`, `--sk-space-7`, and `--sk-space-12`.
+
+[View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/primitives-skprose-html--prompt)
+
+---
+
+## Event timeline
+
+Use `.sk-event-timeline` on a native ordered list when entries form a chronology. The consumer
+supplies and orders every event, actor, timestamp, display string, detail, and trust marker.
+
+```html
+<ol class="sk-event-timeline">
+  <li class="sk-event-timeline__item">
+    <p class="sk-event-timeline__summary">1. Evidence recorded</p>
+    <p class="sk-event-timeline__metadata">
+      <span>Reviewer name</span><time datetime="2026-09-07T09:00:00Z">09:00 UTC</time>
+    </p>
+    <p class="sk-event-timeline__content">Optional supporting content.</p>
+    <span class="sk-event-timeline__marker">Verified by consumer</span>
+  </li>
+</ol>
+```
+
+The class family neither sorts events nor reads clocks, formats time, infers trust, or applies
+retention rules. Use `.sk-data-table` instead when values are comparable rows and columns rather
+than a sequence. If history is unavailable, render passive `.sk-empty-state` markup; an announced
+`sk-notice` is a separate consumer decision. `.sk-event-timeline--narrow` constrains the same
+native structure without detaching metadata from its owning `<li>`.
+
+Its exact token dependencies are `--sk-fg-body`, `--sk-fg-default`, `--sk-fg-muted`,
+`--sk-on-tint-sky`, `--sk-on-tint-mint`, `--sk-surface-page`, `--sk-border-strong`,
+`--sk-border-width-1`, `--sk-border-width-2`, `--sk-font-sans`, `--sk-text-base`,
+`--sk-text-sm`, `--sk-weight-medium`, `--sk-weight-semibold`, `--sk-radius-pill`,
+`--sk-space-1`, `--sk-space-2`, `--sk-space-3`, `--sk-space-4`, `--sk-space-6`,
+`--sk-space-7`, and `--sk-space-12`.
+
+[View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/primitives-skeventtimeline-html--default)
 
 ---
 

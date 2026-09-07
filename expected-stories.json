@@ -35,7 +35,8 @@
     "#211 opts in all ten native light-DOM form-select stories, total 203 -> 213. Default is the T10 lane route, T12TwoFilters retains two independent native filters, and narrow/forced-colors/light are separately addressable acceptance evidence.",
     "#150 opts in the six Storybook-only Team overview pattern stories named as acceptance evidence. The fixture/selectors/render helpers are excluded from CSF story indexing; only the six user-facing variants count. On the refreshed train after #211, total moves 213 -> 219.",
     "#179 opts sk-time-series-chart in with all FOURTEEN of its stories, total 219 -> 233 on the refreshed train after #249. Four are load-bearing beyond coverage and would be the ones a later mission could retire silently: `interior-gap` is the defect this element exists to refuse, shown as a working affordance; `annotated-gap` is the only evidence that annotation fires on a SUPPLIED threshold rather than an inferred one; `multiple-series` is the only place four dash patterns and four marker shapes are in one frame, which is the mission's claim that differentiation survives hue collapse — and it is the story apps/storybook/src/tests/sk-time-series-chart.spec.ts measures under forced colors; and `narrow-viewport` is the table doing its second job, as the narrow treatment, with the scroller region triad present because it genuinely overflows there. Docs entries are excluded, matching every other element here.",
-    "#212 ratchets sixteen additive acceptance stories: four each for action-row card/T10 composition, entity-marker axes/images, status pulse/preferences, and inline empty-state presentations. On the refreshed train after #179, total moves 233 -> 249; every pre-existing story id remains present."
+    "#212 ratchets sixteen additive acceptance stories: four each for action-row card/T10 composition, entity-marker axes/images, status pulse/preferences, and inline empty-state presentations. On the refreshed train after #179, total moves 233 -> 249; every pre-existing story id remains present.",
+    "#213 ratchets thirty-one acceptance stories: all eight native breadcrumb, seven prose and ten event-timeline states, plus the six additive element-layer check-bullet state/scale stories. Total moves 254 -> 285 on the refreshed train after #260. Generated docs entries are excluded; the existing four check-bullet stories remain unchanged."
   ],
   "byElement": {
     "sk-action-row": [
@@ -76,6 +77,16 @@
       "elements-skblogcard--long-title",
       "elements-skblogcard--light-mode"
     ],
+    "sk-breadcrumbs": [
+      "primitives-skbreadcrumbs-html--default",
+      "primitives-skbreadcrumbs-html--one-level",
+      "primitives-skbreadcrumbs-html--three-level",
+      "primitives-skbreadcrumbs-html--six-level",
+      "primitives-skbreadcrumbs-html--long-labels",
+      "primitives-skbreadcrumbs-html--narrow",
+      "primitives-skbreadcrumbs-html--forced-colors",
+      "primitives-skbreadcrumbs-html--light-mode"
+    ],
     "sk-button": [
       "elements-skbutton--primary",
       "elements-skbutton--secondary",
@@ -114,6 +125,12 @@
     "sk-check-bullet": [
       "elements-skcheckbullet--default",
       "elements-skcheckbullet--single",
+      "elements-skcheckbullet--complete",
+      "elements-skcheckbullet--pending",
+      "elements-skcheckbullet--mixed",
+      "elements-skcheckbullet--long-items",
+      "elements-skcheckbullet--no-subtasks",
+      "elements-skcheckbullet--fifty-items",
       "elements-skcheckbullet--custom-icon",
       "elements-skcheckbullet--light-mode"
     ],
@@ -154,6 +171,18 @@
       "elements-skentitymarker--long-label",
       "elements-skentitymarker--compact-circle-light-mode",
       "elements-skentitymarker--light-mode"
+    ],
+    "sk-event-timeline": [
+      "primitives-skeventtimeline-html--default",
+      "primitives-skeventtimeline-html--one-event",
+      "primitives-skeventtimeline-html--two-events",
+      "primitives-skeventtimeline-html--twenty-events",
+      "primitives-skeventtimeline-html--long-transition",
+      "primitives-skeventtimeline-html--verified-marker",
+      "primitives-skeventtimeline-html--unavailable-retention",
+      "primitives-skeventtimeline-html--narrow",
+      "primitives-skeventtimeline-html--forced-colors",
+      "primitives-skeventtimeline-html--light-mode"
     ],
     "sk-evidence-chain": [
       "elements-skevidencechain--default",
@@ -270,6 +299,15 @@
       "elements-skpilltag--all-variants",
       "elements-skpilltag--light-mode"
     ],
+    "sk-prose": [
+      "primitives-skprose-html--default",
+      "primitives-skprose-html--prompt",
+      "primitives-skprose-html--long-code",
+      "primitives-skprose-html--wide-table",
+      "primitives-skprose-html--absent-prompt",
+      "primitives-skprose-html--narrow",
+      "primitives-skprose-html--light-mode"
+    ],
     "sk-ribbon-card": [
       "elements-skribboncard--default",
       "elements-skribboncard--with-ribbon",
@@ -363,5 +401,5 @@
       "patterns-operational-status--complete-series"
     ]
   },
-  "total": 254
+  "total": 285
 }

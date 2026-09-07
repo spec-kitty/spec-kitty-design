@@ -7,6 +7,7 @@ export const SkCheckBullet = forwardRef((props, forwardedRef) => {
   const ref = useRef(null);
   const {
     icon,
+    state,
     className,
     exportparts,
     htmlFor,
@@ -26,6 +27,7 @@ export const SkCheckBullet = forwardRef((props, forwardedRef) => {
       ref: createForwardedRefHandler(ref, forwardedRef),
       ...restProps,
       icon: icon,
+      state: state,
       class: className,
       exportparts: exportparts,
       for: htmlFor ?? props["for"],

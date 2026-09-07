@@ -737,3 +737,136 @@ for (const visual of teamOverviewFocusedCases) {
     });
   });
 }
+
+const detailStory = async (
+  page: Page,
+  storyId: string,
+  selector: string,
+  viewport: { width: number; height: number } = { width: 960, height: 720 },
+): Promise<Locator> => {
+  await page.setViewportSize(viewport);
+  await page.goto(`/iframe.html?id=${storyId}&viewMode=story`);
+  const target = page.locator(selector).first();
+  await target.waitFor({ state: 'visible', timeout: 20000 });
+  await page.evaluate(() => document.fonts.ready);
+  return target;
+};
+
+test('SK-check-bullet active forced colors retains visible, distinct complete and pending state', async ({ page, browserName }) => {
+  test.skip(browserName !== 'chromium', 'Playwright forced-colors emulation is Chromium-owned');
+  await page.emulateMedia({ forcedColors: 'active' });
+  expect(await page.evaluate(() => matchMedia('(forced-colors: active)').matches)).toBe(true);
+  const root = await detailStory(page, 'elements-skcheckbullet--mixed', '#storybook-root');
+  await page.evaluate(() => customElements.whenDefined('sk-check-bullet'));
+  const bullets = root.locator('sk-check-bullet');
+  const presentations = await Promise.all(
+    [bullets.nth(0), bullets.nth(2)].map(async (bullet) => {
+      const icon = bullet.locator('[part="icon"]');
+      const box = await icon.boundingBox();
+      return {
+        glyph: await icon.textContent(),
+        label: await bullet.locator('.sk-check-bullet__state').textContent(),
+        color: await icon.evaluate((node) => getComputedStyle(node).color),
+        fontWeight: await icon.evaluate((node) => getComputedStyle(node).fontWeight),
+        width: box?.width ?? 0,
+        height: box?.height ?? 0,
+      };
+    }),
+  );
+  expect(presentations[0].glyph).toBe('✓');
+  expect(presentations[0].label).toBe('Complete');
+  expect(presentations[1].glyph).toBe('○');
+  expect(presentations[1].label).toBe('Pending');
+  expect(presentations[0].glyph).not.toBe(presentations[1].glyph);
+  for (const presentation of presentations) {
+    expect(presentation.color).not.toBe('rgba(0, 0, 0, 0)');
+    expect(Number(presentation.fontWeight)).toBeGreaterThanOrEqual(700);
+    expect(presentation.width).toBeGreaterThan(0);
+    expect(presentation.height).toBeGreaterThan(0);
+  }
+});
+
+const workPackageDetailVisuals = [
+  {
+    id: 'primitives-skbreadcrumbs-html--default',
+    selector: '.sk-breadcrumbs',
+    name: 'sk-breadcrumbs-default-dark.png',
+    viewport: { width: 960, height: 480 },
+  },
+  {
+    id: 'primitives-skbreadcrumbs-html--light-mode',
+    selector: '.sk-light',
+    name: 'sk-breadcrumbs-light.png',
+    viewport: { width: 960, height: 480 },
+  },
+  {
+    id: 'primitives-skbreadcrumbs-html--long-labels',
+    selector: '.sk-breadcrumbs',
+    name: 'sk-breadcrumbs-long-narrow.png',
+    viewport: { width: 320, height: 480 },
+  },
+  {
+    id: 'primitives-skprose-html--prompt',
+    selector: '.sk-prose',
+    name: 'sk-prose-prompt-dark.png',
+    viewport: { width: 960, height: 720 },
+  },
+  {
+    id: 'primitives-skprose-html--light-mode',
+    selector: '.sk-light',
+    name: 'sk-prose-light.png',
+    viewport: { width: 960, height: 720 },
+  },
+  {
+    id: 'primitives-skprose-html--long-code',
+    selector: '.sk-prose',
+    name: 'sk-prose-long-code-narrow.png',
+    viewport: { width: 360, height: 720 },
+  },
+  {
+    id: 'primitives-skeventtimeline-html--default',
+    selector: '.sk-event-timeline',
+    name: 'sk-event-timeline-default-dark.png',
+    viewport: { width: 960, height: 720 },
+  },
+  {
+    id: 'primitives-skeventtimeline-html--light-mode',
+    selector: '.sk-light',
+    name: 'sk-event-timeline-light.png',
+    viewport: { width: 960, height: 720 },
+  },
+  {
+    id: 'primitives-skeventtimeline-html--twenty-events',
+    selector: '.sk-event-timeline',
+    name: 'sk-event-timeline-twenty-events.png',
+    viewport: { width: 960, height: 1200 },
+  },
+  {
+    id: 'elements-skcheckbullet--mixed',
+    selector: '#storybook-root',
+    name: 'sk-check-bullet-state-mixed.png',
+    viewport: { width: 720, height: 480 },
+  },
+  {
+    id: 'elements-skcheckbullet--light-mode',
+    selector: '.sk-light',
+    name: 'sk-check-bullet-state-light.png',
+    viewport: { width: 720, height: 480 },
+  },
+  {
+    id: 'elements-skcheckbullet--long-items',
+    selector: '#storybook-root',
+    name: 'sk-check-bullet-state-long-narrow.png',
+    viewport: { width: 320, height: 720 },
+  },
+] as const;
+
+for (const visual of workPackageDetailVisuals) {
+  test(`Work package detail ${visual.name} — targeted visual baseline`, async ({ page }) => {
+    const target = await detailStory(page, visual.id, visual.selector, visual.viewport);
+    await expect(target).toHaveScreenshot(visual.name, {
+      threshold: 0.02,
+      maxDiffPixelRatio: 0.02,
+    });
+  });
+}

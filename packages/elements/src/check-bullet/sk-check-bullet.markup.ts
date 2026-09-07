@@ -25,18 +25,49 @@
 /** No colour or shape variants — a check bullet is one thing. */
 export const CHECK_BULLET_VARIANTS = {} as const;
 
-/** No non-variant axes. */
-export const CHECK_BULLET_AXES = {} as const;
+/** Complete/pending presentation derived from one closed, immutable record. */
+export const CHECK_BULLET_PRESENTATIONS = Object.freeze({
+  complete: Object.freeze({ modifier: '', icon: '✓', label: 'Complete' }),
+  pending: Object.freeze({
+    modifier: 'sk-check-bullet--pending',
+    icon: '○',
+    label: 'Pending',
+  }),
+} as const);
+
+export type CheckBulletState = keyof typeof CHECK_BULLET_PRESENTATIONS;
+
+/** The state vocabulary, derived from the canonical presentation record. */
+export const CHECK_BULLET_STATES: readonly CheckBulletState[] = Object.freeze(
+  Object.keys(CHECK_BULLET_PRESENTATIONS) as CheckBulletState[],
+);
+
+/** Pending is the only additional generated static form; base markup stays complete. */
+export const CHECK_BULLET_AXES = {
+  Pending: { state: 'pending' },
+} as const satisfies Record<string, CheckBulletStaticOptions>;
 
 export interface CheckBulletStaticOptions {
-  /** The tick glyph. A component-owned mark rather than content, so it has a default. */
+  /** Decorative completion-state marker. Defaults to the selected state's canonical marker. */
   icon?: string;
+  /** Read-only completion state. Omit for the backward-compatible complete presentation. */
+  state?: CheckBulletState;
 }
 
-export const DEFAULT_ICON = '✓';
+/** Whether a runtime value names a supported check-bullet state. */
+export function isCheckBulletState(state: string): state is CheckBulletState {
+  return Object.hasOwn(CHECK_BULLET_PRESENTATIONS, state);
+}
 
-export function checkBulletClasses(): string {
-  return 'sk-check-bullet';
+/** Normalize untrusted runtime input without mutating or throwing. */
+export function checkBulletPresentation(state?: string) {
+  const entry = Object.entries(CHECK_BULLET_PRESENTATIONS).find(([name]) => name === state);
+  return entry?.[1] ?? CHECK_BULLET_PRESENTATIONS.complete;
+}
+
+export function checkBulletClasses(state?: string): string {
+  const { modifier } = checkBulletPresentation(state);
+  return ['sk-check-bullet', modifier].filter(Boolean).join(' ');
 }
 
 /**
@@ -50,10 +81,17 @@ export function checkBulletStaticHtml(
   opts: CheckBulletStaticOptions = {},
   content = 'Feature description here',
 ): string {
-  const icon = opts.icon ?? DEFAULT_ICON;
+  if (opts.state !== undefined && !isCheckBulletState(opts.state)) {
+    throw new Error(
+      `unknown check-bullet state "${opts.state}" — expected one of ${CHECK_BULLET_STATES.join(', ')}`,
+    );
+  }
+  const presentation = checkBulletPresentation(opts.state);
+  const icon = opts.icon ?? presentation.icon;
   return (
-    `<li class="${checkBulletClasses()}">` +
+    `<li class="${checkBulletClasses(opts.state)}">` +
     `<span class="sk-check-bullet__icon" aria-hidden="true">${icon}</span>` +
+    `<span class="sk-check-bullet__state">${presentation.label}</span> ` +
     content +
     `</li>`
   );

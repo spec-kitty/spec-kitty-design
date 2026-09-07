@@ -162,13 +162,13 @@ export {
   buttonStaticHtml,
 } from './button/sk-button.markup.js';
 
-// sk-check-bullet's markup module. Only the static form, which the fixture calls.
+// sk-check-bullet's markup module. Only the static form is public here, because the fixture
+// consumes it; the element imports its class and presentation helpers directly from the module.
 //
 // `CHECK_BULLET_AXES` and `CHECK_BULLET_VARIANTS` are declared in the markup module because the
 // GENERATOR requires them there and cannot tell an absent export from an empty one — that
 // obligation is on the module, not on this barrel, and an earlier revision of this block cited
-// it as though it were. `DEFAULT_ICON` and `checkBulletClasses` are used only by
-// sk-check-bullet.ts, which imports them straight from the markup module.
+// it as though it were. The runtime-only helpers stay internal to the element package.
 export { checkBulletStaticHtml } from './check-bullet/sk-check-bullet.markup.js';
 
 // sk-feature-card's markup module. Both class helpers are exported because the component has
