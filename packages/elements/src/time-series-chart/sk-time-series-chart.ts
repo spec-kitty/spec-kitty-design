@@ -70,6 +70,17 @@ const MARKER_SHAPES = Object.freeze(['circle', 'square', 'triangle', 'diamond'] 
 /** The literal published for an interval with no observation. Never blank, never zero. */
 const NO_DATA = 'No data';
 
+/**
+ * A well-formed collection that carries no point at all.
+ *
+ * Distinguished from `null` — a MALFORMED collection — because the two say different things to
+ * a reader and the element must not report a data-shape defect as "no data yet". A first cut
+ * derived the difference in `render()` from the series array's own shape and got it backwards:
+ * a series with a blank id and an empty points array is invalid, and it reported "No data to
+ * display".
+ */
+const EMPTY = 'empty';
+
 let nextChartInstanceId = 0;
 
 const validText = (value: unknown): value is string =>
@@ -93,7 +104,9 @@ const suppressRepeatedActivation = (event: KeyboardEvent): void => {
  * NOT invalid — it is the value that means "no observation in this interval", which is the whole
  * reason this element exists.
  */
-const validateChart = (series: ReadonlyArray<TimeSeriesDatum>): Chart | null => {
+const validateChart = (
+  series: ReadonlyArray<TimeSeriesDatum>,
+): Chart | typeof EMPTY | null => {
   if (!Array.isArray(series)) return null;
 
   const seriesIds: unknown[] = [];
@@ -138,7 +151,7 @@ const validateChart = (series: ReadonlyArray<TimeSeriesDatum>): Chart | null => 
   // Point ids are unique across the WHOLE chart, not per series: `selectedId` is a point id, and
   // a controlled selection cannot be resolved from an id that names two points.
   if (new Set(pointIds).size !== pointIds.length) return null;
-  if (pointIds.length === 0) return null;
+  if (pointIds.length === 0) return EMPTY;
 
   if (valueMin === Number.POSITIVE_INFINITY) {
     // An entirely unobserved chart still has a time axis. Its value scale is degenerate and the
@@ -307,7 +320,7 @@ export class SkTimeSeriesChart extends LitElement {
 
   #requestSelection(seriesId: string, pointId: string, control: HTMLButtonElement): void {
     const chart = validateChart(this.series);
-    if (!this.selectable || !chart) return;
+    if (!this.selectable || chart === null || chart === EMPTY) return;
     const datum = chart.data.find((entry) => entry.id === seriesId);
     if (!datum?.points.some((point) => point.id === pointId)) return;
     const proceed = this.dispatchEvent(
@@ -472,7 +485,7 @@ export class SkTimeSeriesChart extends LitElement {
   /**
    * Apply the scroller's region triad only when it GENUINELY overflows.
    *
-   * `packages/styles/src/data-table/sk-data-table.css` measured both halves of this: on a
+   * The data-table primitive's own stylesheet measured both halves of this: on a
    * scroller where the content fits, `role="region"`/`aria-label`/`tabindex="0"` is a dead tab
    * stop and a duplicate landmark whose name repeats the caption; on one that genuinely
    * overflows, axe's `scrollable-region-focusable` correctly flags its absence. A row-count
@@ -550,7 +563,8 @@ export class SkTimeSeriesChart extends LitElement {
   }
 
   render() {
-    const chart = validateChart(this.series);
+    const result = validateChart(this.series);
+    const chart = result === null || result === EMPTY ? null : result;
     const describedBy = this.description ? this.#descriptionId : nothing;
     const gaps = chart
       ? chart.data.flatMap((datum) => gapsOf(datum, this.gapThreshold))
@@ -585,12 +599,7 @@ export class SkTimeSeriesChart extends LitElement {
             ${this.#table(chart)}
           `
         : html`<p part="empty-state" class="sk-time-series-chart__empty-state">
-            ${Array.isArray(this.series) &&
-            this.series.every(
-              (datum) => datum && Array.isArray(datum.points) && datum.points.length === 0,
-            )
-              ? 'No data to display'
-              : 'Chart unavailable'}
+            ${result === EMPTY ? 'No data to display' : 'Chart unavailable'}
           </p>`}
     </figure>`;
   }

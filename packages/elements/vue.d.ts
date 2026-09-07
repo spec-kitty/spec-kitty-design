@@ -586,6 +586,48 @@ declare module 'vue' {
       // no declared props
     }>;
     /**
+     * A controlled, property-fed line chart over a time axis whose missing intervals are drawn as
+     * gaps and published as "No data".
+     *
+     * Every value is published persistently in a paired native table — the element's accessible
+     * representation and its narrow-viewport treatment — so no meaning is hover-only. The graphic is
+     * aria-hidden and carries no accessible content of its own. Selection is controlled: activation
+     * requests a change and never makes one, and the only default action the element owns is moving
+     * focus to the activated point, which a listener may cancel.
+     *
+     * Series are distinguished by three redundant channels — ink, dash pattern and marker shape —
+     * because ink is the one of the three that collapses under forced-colors and in greyscale.
+     *
+     * Token dependencies: --sk-border-default, --sk-border-focus, --sk-border-strong,
+     * --sk-border-width-1, --sk-border-width-2, --sk-chart-baseline, --sk-chart-dash-1,
+     * --sk-chart-dash-2, --sk-chart-dash-3, --sk-chart-dash-4, --sk-chart-gap,
+     * --sk-chart-gap-dash, --sk-chart-gap-fill, --sk-chart-grid, --sk-chart-plot-block-size,
+     * --sk-chart-series-1, --sk-chart-series-2, --sk-chart-series-3, --sk-chart-series-4,
+     * --sk-chart-stroke-width, --sk-fg-body, --sk-fg-default, --sk-fg-muted, --sk-font-mono,
+     * --sk-font-sans, --sk-motion-duration-fast, --sk-motion-ease-out, --sk-radius-md,
+     * --sk-radius-sm, --sk-space-1, --sk-space-2, --sk-space-3, --sk-space-4, --sk-space-5,
+     * --sk-space-6, --sk-space-10, --sk-surface-card, --sk-surface-pill, --sk-text-sm,
+     * --sk-text-xs, --sk-weight-medium.
+     */
+    'sk-time-series-chart': SkElement<{
+      /** Optional visible description associated with the chart figure. */
+      'description'?: string;
+      /**
+       * Consumer-supplied gap duration, in the same unit as the point timestamps, at or beyond which
+       * a run with no observation earns a visible note. Zero, negative and non-finite values annotate
+       * nothing. The element infers no threshold of its own.
+       */
+      'gap-threshold'?: number;
+      /** Accessible name for the chart figure and the published table's caption. */
+      'label'?: string;
+      /** Enables native controls that request selection of a point. */
+      'selectable'?: boolean;
+      /** Controlled selected point identifier. The component never mutates it. */
+      'selected-id'?: string;
+      /** Complete consumer-owned series collection. An invalid collection fails closed. */
+      'series'?: import('@spec-kitty/elements/dist/time-series-chart/sk-time-series-chart.js').SkTimeSeriesChart["series"];
+    }>;
+    /**
      * An aggregate route-by-time-bucket transition matrix with controlled route-selection intent.
      *
      * Token dependencies: --sk-border-default, --sk-border-focus, --sk-border-strong,
