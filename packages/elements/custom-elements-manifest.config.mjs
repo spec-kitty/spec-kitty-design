@@ -23,6 +23,23 @@ export default {
     // public element surface.
     'packages/elements/src/**/*.stories.ts',
     'packages/elements/src/__fixtures__/**',
+    // Pattern composition fixtures (#183 exit criterion, #259). Same category as the two
+    // exclusions above and excluded for the same stated reason: a fixture is EVIDENCE that the
+    // public surfaces suffice, not part of the public element surface. Without this the analyzer
+    // records the fixture's whole inline `<style>` blob as a variable `default` and its
+    // docstrings as descriptions, in a document consumers read for the component contract and
+    // that ADR-11 generates the React wrappers from. Measured before excluding: 63 added lines
+    // in custom-elements.json, one of them the entire layout stylesheet on a single line.
+    //
+    // A CORRECTION LIVES HERE, because it was one edit away from shipping as fact. An earlier
+    // revision of this block carried the claim "names the extension, unlike the bare `**` on the
+    // line above — the bare form was tried first and is INERT here". That is FALSE. The bare form
+    // was never tried: the first attempt added this comment and no entry at all, so the manifest
+    // was unchanged for the obvious reason, and `**/*.ts` was then adopted as the fix for a cause
+    // that did not exist. Both forms were afterwards measured directly — a probe module planted
+    // under `__fixtures__/` and this fixture under the bare glob, each excluded — so the entry
+    // below is written the same way as its neighbours rather than differently for a wrong reason.
+    'packages/elements/src/patterns/**',
   ],
   outdir: 'packages/elements',
   litelement: true,

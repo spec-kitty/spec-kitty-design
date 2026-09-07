@@ -374,6 +374,10 @@
         {
           "name": "sk-notice",
           "file": "fixtures/elements-behaviour/src/sk-notice.test.ts"
+        },
+        {
+          "name": "operational-status pattern",
+          "file": "fixtures/elements-behaviour/src/pattern-operational-status.test.ts"
         }
       ]
     },

@@ -697,6 +697,14 @@ else {
     // running is a gate whose defeated forms quietly reopen.
     [/node\s+scripts\/check-behaviour-fixture-imports\.mjs(?!\s*--selftest)(\s|$)/, 'the behaviour-fixture barrel-import gate', 'scripts/check-behaviour-fixture-imports.mjs'],
     [/node\s+scripts\/check-behaviour-fixture-imports\.mjs\s+--selftest(\s|$)/, "the fixture-import gate's own probe table", 'scripts/check-behaviour-fixture-imports.mjs --selftest'],
+    // #259, both entries with the gate itself, per every comment above. This gate carries epic
+    // #183's last exit criterion, and it exists because the gate that was ASSUMED to carry half
+    // of it does not reach a pattern fixture — measured with a planted violation, not reasoned
+    // about. Its probe table is required separately because it carries an end-to-end
+    // plant-and-detect arm against a copy of the real patterns directory, which is the arm that
+    // proves scope; a table that stops running is a gate whose defeated forms quietly reopen.
+    [/node\s+scripts\/check-pattern-composition\.mjs(?!\s*--selftest)(\s|$)/, 'the pattern-composition gate', 'scripts/check-pattern-composition.mjs'],
+    [/node\s+scripts\/check-pattern-composition\.mjs\s+--selftest(\s|$)/, "the pattern-composition gate's own probe table", 'scripts/check-pattern-composition.mjs --selftest'],
   ];
 
   /**
