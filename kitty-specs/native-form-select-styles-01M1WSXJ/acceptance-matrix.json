@@ -28,10 +28,10 @@
       "criterion_id": "FR-003",
       "description": "Verify FR-003 is satisfied",
       "proof_type": "automated_test",
-      "evidence": "3ca42f9; seven fixture exports; native option/optgroup DOM assertions green Chromium and Firefox",
+      "evidence": "7cbf6ce5ae27f1d995552deec32f0b463e8dac7f (product tree cf9d5045c0968add9056abc038401a17a7f24e9c); seven fixture exports; native option/optgroup DOM assertions green across CI browsers",
       "pass_fail": "pass",
       "verified_by": "codex",
-      "verified_at": "2026-09-07T03:30:01.923270+00:00",
+      "verified_at": "2026-09-07T04:35:45.566155+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
