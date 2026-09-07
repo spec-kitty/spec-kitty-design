@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "mission_slug": "native-context-navigation-styles-01M1Y3MG",
+  "mission_id": "01M1Y3MGX4AQDR57WYED1EBR2X",
+  "mission_branch": "kitty/mission-native-context-navigation-styles-01M1Y3MG",
+  "target_branch": "train/elements-first",
+  "lanes": [
+    {
+      "lane_id": "lane-a",
+      "wp_ids": [
+        "WP01"
+      ],
+      "write_scope": [
+        "apps/storybook/src/tests/sk-context-nav.spec.ts",
+        "apps/storybook/src/tests/visual.spec.ts",
+        "apps/storybook/src/tests/visual.spec.ts-snapshots/*context-nav*",
+        "docs/design-system/using-components.md",
+        "expected-stories.json",
+        "packages/elements/SIZES.md",
+        "packages/styles/package.json",
+        "packages/styles/src/context-nav/**",
+        "packages/styles/src/index.ts"
+      ],
+      "predicted_surfaces": [
+        "api",
+        "app-shell",
+        "artifact-rendering",
+        "legacy-cleanup"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    }
+  ],
+  "computed_at": "2026-09-07T14:55:24.037496+00:00",
+  "computed_from": "dependency_graph+ownership",
+  "planning_artifact_wps": [],
+  "planning_commit_sha": "647405ef919b12e3fd0333aba908bdd184b0168f"
+}

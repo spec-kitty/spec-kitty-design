@@ -547,6 +547,67 @@ It fires `sk-nav-pill-toggle` before the open state changes, with
 
 ---
 
+## Native context navigation
+
+Use `sk-context-nav` for grouped and nested page destinations inside a context area. Import the
+tokens and the independently exported styles subpath:
+
+```css
+@import '@spec-kitty/tokens';
+@import '@spec-kitty/styles/context-nav/sk-context-nav.css';
+```
+
+Apply the classes directly to consumer-authored native light-DOM markup:
+
+```html
+<nav class="sk-context-nav" aria-label="Project context">
+  <section class="sk-context-nav__group" aria-labelledby="project-destinations">
+    <h2 class="sk-context-nav__heading" id="project-destinations">Destinations</h2>
+    <ul class="sk-context-nav__list">
+      <li class="sk-context-nav__item">
+        <a class="sk-context-nav__link" href="/overview" aria-current="page">
+          <svg class="sk-context-nav__icon" aria-hidden="true"><!-- decorative path --></svg>
+          <span class="sk-context-nav__label">Overview</span>
+        </a>
+        <ul class="sk-context-nav__children">
+          <li class="sk-context-nav__item">
+            <a class="sk-context-nav__link" href="/overview/history">
+              <span class="sk-context-nav__label">History</span>
+            </a>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </section>
+</nav>
+```
+
+The consumer owns every URL, label, group and child order, child count, and `aria-current` value.
+Only values other than `aria-current="false"` receive current presentation. Icons are also
+consumer-owned: decorative icons use `aria-hidden="true"`, while a link's accessible name comes
+from its text or another consumer-supplied accessible name.
+
+Empty copy uses `sk-context-nav__empty-copy`. If management or overflow navigation exists, author
+an ordinary native link with `sk-context-nav__overflow-link`; the styles infer neither condition.
+There is no JavaScript behavior, routing, selection logic, count limit, or generated content.
+
+The stylesheet depends on these existing semantic tokens: `--sk-fg-body`, `--sk-fg-default`,
+`--sk-fg-muted`, `--sk-surface-muted`, `--sk-surface-pill`, `--sk-color-accent`,
+`--sk-border-strong`, `--sk-border-width-1`, `--sk-border-width-2`,
+`--sk-border-width-4`, `--sk-font-sans`, `--sk-text-xs`, `--sk-text-sm`,
+`--sk-weight-normal`, `--sk-weight-medium`, `--sk-weight-semibold`, `--sk-radius-sm`, and
+`--sk-space-1`, `--sk-space-2`, `--sk-space-3`, `--sk-space-4`, `--sk-space-5`, and
+`--sk-space-9`.
+
+This remains styles-only under ADR-10 because native navigation, heading, list, list-item, and link
+relationships are already the correct public semantics. It composes in the content slot of
+`sk-context-sidebar`; consumer CSS does not reach through that element's shadow root, and the
+context-navigation family does not widen the sidebar element.
+
+[View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/navigation-skcontextnav-html--default)
+
+---
+
 ## Tags
 
 Pill-shaped tags used to label and categorise content inline.

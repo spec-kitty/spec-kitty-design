@@ -656,6 +656,44 @@ test('SK-form-select forced colors — visual baseline', async ({ page }) => {
     maxDiffPixelRatio: 0.02,
   });
 });
+
+const contextNavStory = async (
+  page: Page,
+  id: string,
+  viewport: { width: number; height: number } = { width: 720, height: 720 },
+): Promise<Locator> => {
+  await page.setViewportSize(viewport);
+  await page.goto(`/iframe.html?id=navigation-skcontextnav-html--${id}&viewMode=story`);
+  const target = page.locator('[data-context-nav-story-frame]').first();
+  await target.waitFor({ state: 'visible', timeout: 20000 });
+  await expect(target.locator('nav.sk-context-nav')).toBeVisible();
+  return target;
+};
+
+const contextNavVisuals = [
+  ['default', 'sk-context-nav-default-dark.png', { width: 720, height: 720 }],
+  ['current-nested', 'sk-context-nav-current-nested.png', { width: 720, height: 720 }],
+  ['long-labels', 'sk-context-nav-long-labels-240.png', { width: 390, height: 720 }],
+  ['light-mode', 'sk-context-nav-light.png', { width: 720, height: 720 }],
+] as const;
+
+for (const [id, snapshot, viewport] of contextNavVisuals) {
+  test(`SK-context-nav ${id} — visual baseline`, async ({ page }) => {
+    const target = await contextNavStory(page, id, viewport);
+    await expect(target).toHaveScreenshot(snapshot, { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  });
+}
+
+test('SK-context-nav forced colors — visual baseline', async ({ page }) => {
+  await page.emulateMedia({ forcedColors: 'active' });
+  const target = await contextNavStory(page, 'forced-colors');
+  await target.locator('.sk-context-nav__link[aria-current]').focus();
+  await expect(target).toHaveScreenshot('sk-context-nav-forced-colors.png', {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+  });
+});
+
 type TeamOverviewStoryId =
   | 'default'
   | 'light-mode'
