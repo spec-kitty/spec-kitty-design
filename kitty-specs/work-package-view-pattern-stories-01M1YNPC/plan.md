@@ -54,17 +54,19 @@ barrel export.
 ### PD-002 — One fixture graph, explicit projections
 
 Define one `WORK_PACKAGE_VIEW_FIXTURE` and freeze it recursively. The root owns consumer-supplied
-lane definitions/order, eight Work Packages, the selected Work Package's subtasks/prompt/facts/
-history, claim classifications/text, snapshot/retention messages, actor/time/trust strings, and
-default controlled selection. From it:
+lane definitions/order, a fixture-owned fifty-record Work Package catalog (with the T10 eight-item
+view expressed as fixture-owned membership), a consumer-supplied `completedLaneId`, the selected
+Work Package's subtasks/prompt/facts/history, claim classifications/text, snapshot/retention
+messages, actor/time/trust strings, and default controlled selection. From it:
 
-- `deriveOverview(fixture, options)` flattens lane items once, counts the `done` lane, computes
-  `total`, `completed`, and `Math.round(completed / total * 100)` with a zero-total branch, derives
+- `deriveOverview(fixture, options)` projects only fixture-owned records, flattens lane items once,
+  counts the fixture-supplied `completedLaneId` without interpreting a hard-coded lane value,
+  computes `total`, `completed`, and `Math.round(completed / total * 100)` with a zero-total branch, derives
   per-lane counts, and returns the consumer-selected visible-lane projection;
 - `deriveDetail(workPackage, options)` projects supplied subtasks/prompt/facts/events in source
   order and derives checklist complete/total without interpreting content;
-- route-state options replace arrays/availability flags from the same graph. They do not carry
-  independent visible totals.
+- route-state options select fixture-owned membership/availability flags from the same graph.
+  They neither synthesize extra domain records nor carry independent visible totals.
 
 Invalid duplicate Work Package IDs, duplicate DOM IDs, membership in more than one lane, or an
 unknown selected lane fail closed in selector/play evidence rather than silently producing a
@@ -90,9 +92,11 @@ The planned CSF exports are:
 14. `DetailLongContent`;
 15. `DetailNarrow`.
 
-The built `index.json` owns the final normalized IDs. After build, add those exact IDs beneath a
-`work-package-views` key in `expected-stories.json` and change its total from 285 to 300. Generated
-docs entries and excluded helper exports are not counted.
+The CSF `meta.excludeStories` enumerates every exported fixture, selector, and render helper so
+only the fifteen named story exports enter discovery. The built `index.json` owns the final
+normalized IDs. After rebasing the current train and building, add those exact fifteen IDs beneath
+a `work-package-views` key in the authored `expected-stories.json`, updating its total from the
+then-current train total by exactly +15. Generated docs entries and helper exports are not counted.
 
 ### PD-004 — Styles-only CSS enters at the Storybook seam
 
@@ -115,8 +119,10 @@ and narrow scenarios that demonstrably overflow add the exact conditional triad 
 `role="region"`, a distinct accessible name, and `tabindex="0"`. Live/stale claim meaning is
 supplied visible text; only live adds the public `pulsing` presentation.
 
-Progress is exactly `label[for] + progress[id][value][max] + span` and all four values come from
-the derived projection. The narrow selector is a native labelled `select` with real options and
+Progress is exactly `label[for] + progress[id][value][max] + span`; visible counts/percentage and
+non-empty DOM values come from the derived projection. For visible `0 of 0`/`0%`, set valid native
+DOM properties `value=0` and `max=1` and prove the properties, avoiding the browser's invalid zero
+maximum fallback. The narrow selector is a native labelled `select` with real options and
 renders only the selected lane supplied by args/options; its `change` intent is logged but does not
 become an application router.
 
@@ -132,8 +138,9 @@ ID.
 ### PD-007 — Native detail structure and availability states
 
 Render breadcrumb `nav > ol > li > a` with one `aria-current="page"` terminal crumb, then a public
-page header. The subtask area is a native list whose direct `li` contains passive
-`sk-check-bullet[state]`; it does not use checkbox semantics. Prompt content is consumer-authored
+page header. The subtask area is a native `ul` whose direct children are passive
+`sk-check-bullet[state][role="listitem"]`; do not add wrapper `li`, checkbox semantics, controls, or
+a host tabindex. Prompt content is consumer-authored
 Lit HTML placed under `.sk-prose`; no string-to-HTML parser exists. Facts remain a native `dl`
 inside base `sk-card`. History is a native `.sk-event-timeline` ordered list preserving input order,
 with supplied marker text.
@@ -195,8 +202,9 @@ flowchart LR
 
 ### Story/play invariants
 
-- prove root and nested fixture values are frozen;
-- prove overview 5/8 and its rounded percentage from lane items, empty 0/0, scale total 50, and
+- prove root and nested fixture values, including all fifty scale records, are frozen;
+- prove overview 5/8 and its rounded percentage from lane items and supplied `completedLaneId`,
+  empty visible 0/0 with DOM `value=0,max=1`, scale total 50 without fabricated records, and
   every visible lane count;
 - prove detail checklist totals from its subtask array and event order/string identity;
 - prove dark/light semantic signatures are byte-equivalent;
@@ -209,9 +217,11 @@ flowchart LR
 Create `apps/storybook/src/tests/sk-work-package-view-patterns.spec.ts` and exercise the real built
 stories in Chromium, Firefox, and WebKit. It asserts:
 
-- exact story-state presence and non-empty upgraded content;
-- native landmark/list/progress/select/options/checklist/timeline semantics and label associations;
-- 5/8 arithmetic, zero and 50-item derivation, per-lane/list count equality, and unique IDs;
+- exactly fifteen story-state entries, with all helper exports absent, and non-empty upgraded content;
+- native landmark/list/progress/select/options/checklist/timeline semantics and label associations,
+  including direct-child check bullets with `role=listitem` and no checkbox/tabindex;
+- 5/8 arithmetic from supplied completion semantics, valid zero-state progress DOM properties,
+  fixture-owned 50-item derivation, per-lane/list count equality, and unique IDs;
 - live/stale supplied text and animation/static distinction without a clock;
 - snapshot/history messages use real `sk-notice`, ordinary absence does not;
 - pointer/Enter/Space action-row activation and unchanged controlled selection;
@@ -223,8 +233,9 @@ stories in Chromium, Firefox, and WebKit. It asserts:
 
 ### Axe and visual
 
-All fifteen built story IDs enter `expected-stories.json`, putting every state under the existing
-non-empty, zero-WCAG-2.1-AA axe gate. Extend `apps/storybook/src/tests/visual.spec.ts` with the new
+After the final train rebase, exactly the fifteen built story IDs enter the authored
+`expected-stories.json`; the total moves from that train's current value by +15, putting every
+state under the existing non-empty, zero-WCAG-2.1-AA axe gate. Extend `apps/storybook/src/tests/visual.spec.ts` with the new
 full-route and focused captures in PD-008. Obtain snapshots from the Ubuntu CI artifact, inspect
 them, commit only the intended new files, and rerun the exact-head workflow.
 
