@@ -108,10 +108,10 @@
       "criterion_id": "FR-011",
       "description": "Verify FR-011 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "3ca42f9; Storybook build has all 10 expected routes; .sk-light computed color/border/background delta green",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T03:30:25.169856+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
