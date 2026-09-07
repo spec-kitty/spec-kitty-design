@@ -47,8 +47,8 @@ arithmetic outside the fixture selectors, and prompt parsing or sanitization.
   events, parts, and native semantics delivered by #178 and #209–#213. The pattern neither reaches
   through shadow roots nor copies component CSS.
 - **BD-003 — One immutable source model:** one deeply readonly fixture graph supplies Work
-  Packages, lanes, subtasks, claims, prompt markup inputs, actors, times, event ordering, and trust
-  labels. Pure selectors derive every repeated completion count and percentage; stories do not
+  Packages, including all fifty scale-state records, lanes and its `completedLaneId`, subtasks,
+  claims, prompt markup inputs, actors, times, event ordering, and trust labels. Pure selectors derive every repeated completion count and percentage; stories do not
   maintain parallel display totals.
 - **BD-004 — Supplied decisions remain supplied:** live/stale claim classification, stale advisory
   copy, actor/time text, trust tier, history availability, prompt HTML, and lane value are fixture
@@ -137,8 +137,9 @@ same Work Package fixture.
 1. **Given** repository, mission, and Work Package labels, **when** the detail renders, **then** a
    labelled breadcrumb navigation contains native links and exactly one terminal current crumb.
 2. **Given** mixed complete and pending fixture subtasks, **when** the checklist is read, **then** it
-   remains a native list of passive `sk-check-bullet` items whose announced states and ordering
-   match the immutable data and offer no toggle control.
+   is a native list whose direct children are passive `sk-check-bullet[role="listitem"]` elements;
+   their announced states and ordering match immutable data, with no wrapper `li`, checkbox role,
+   toggle control, or host tabindex.
 3. **Given** supplied prompt HTML containing prose and code, **when** rendered, **then** `.sk-prose`
    owns readable layout and code overflow while the story performs no Markdown parsing,
    sanitization, highlighting, or copy behavior.
@@ -211,8 +212,9 @@ content; measure document overflow at approved desktop and narrow/mobile widths.
 
 ### Edge Cases
 
-- A fixture with zero Work Packages derives zero completed, zero total, and a supported zero
-  progress presentation without dividing by zero or printing `NaN`.
+- A fixture with zero Work Packages derives zero completed, zero total, and visible `0 of 0`/`0%`
+  text without dividing by zero or printing `NaN`; the native progress uses valid DOM properties
+  `value=0` and `max=1` for that empty presentation.
 - Moving an item between fixture lanes or changing a subtask state recomputes every affected count
   and percentage; no stale display constant remains.
 - Unknown lane values are not inferred into a color or status vocabulary by the pattern.
@@ -236,8 +238,8 @@ content; measure document overflow at approved desktop and narrow/mobile widths.
 | ID | Title | Requirement | Priority | Status |
 |---|---|---|---|---|
 | FR-001 | Pattern-only exports | Add Storybook pattern render functions and stories without registering or publishing a Work Package overview/detail element. | High | Open |
-| FR-002 | Immutable fixture graph | Export one deeply readonly fixture graph containing overview lanes/items and the populated detail Work Package with subtasks, prompt, facts, claims, and history. | High | Open |
-| FR-003 | Pure derivation | Derive completed/total/percentage, per-lane counts, visible-lane projection, and checklist summaries with deterministic side-effect-free selectors. | High | Open |
+| FR-002 | Immutable fixture graph | Export one deeply readonly fixture graph containing overview lanes/items, all fifty scale-state records, a consumer-supplied completed-lane identifier, and the populated detail Work Package with subtasks, prompt, facts, claims, and history. | High | Open |
+| FR-003 | Pure derivation | Derive completed/total/percentage from fixture-owned records and the fixture-supplied completed-lane identifier, plus per-lane counts, visible-lane projection, and checklist summaries, with deterministic side-effect-free selectors. | High | Open |
 | FR-004 | Populated T10 overview | Compose page header, labelled native progress, five-lane workflow board, compact action-row items, pills, markers, statuses, and inline empty treatment from public surfaces. | High | Open |
 | FR-005 | Overview progress integrity | Render every overview count and percentage from the same Work Package arrays that populate the lanes. | High | Open |
 | FR-006 | Controlled activation | Log the documented action-row activation intent once and require selected presentation to come from explicit story input. | High | Open |
@@ -254,7 +256,7 @@ content; measure document overflow at approved desktop and narrow/mobile widths.
 | FR-017 | Public-surface guard | Verify the composition uses no private shadow selector, copied component CSS, Team Kitty import, or unregistered invented component. | High | Open |
 | FR-018 | Ownership documentation | Document fixture/selector/pattern inputs and the boundary between library presentation/intent and Team Kitty application behavior. | High | Open |
 | FR-019 | Visual evidence | Add CI-authoritative desktop and narrow visual baselines plus focused crops for board overflow, progress, claims, checklist state, and history connector. | High | Open |
-| FR-020 | Story accessibility | Ratchet every new story into the existing axe scan and require a non-empty render with zero WCAG 2.1 AA violations. | High | Open |
+| FR-020 | Story accessibility | Exclude every non-story helper export through CSF metadata, prove exactly fifteen built story entries, and add those exact built IDs to the authored axe-story ratchet; every entry must render non-empty with zero WCAG 2.1 AA violations. | High | Open |
 
 ### Non-Functional Requirements
 
@@ -283,14 +285,15 @@ content; measure document overflow at approved desktop and narrow/mobile widths.
 | C-005 | No content interpretation | No Markdown parser/sanitizer, syntax highlighter, relative-time formatter, event sorter/verifier, trust inference, or domain-to-tone mapping. | Scope | High | Open |
 | C-006 | Existing ownership | Do not duplicate #177 card-tone ownership, #178 notice ownership, or any public surface owned by #209–#213. | Architecture | High | Open |
 | C-007 | Light DOM | Preserve light-DOM relationships for lists, breadcrumbs, progress, select/options, prompt markup, facts, and history. | Accessibility | High | Open |
-| C-008 | Generated artifacts | Regenerate applicable artifacts using repository tools and never hand-edit generated CSS modules, markup/barrels, CEM, React/Vue output, ratchets, or size reports. | Delivery | High | Open |
+| C-008 | Generated and authored verification artifacts | Regenerate generated CSS modules, markup/barrels, CEM, React/Vue output, and size reports using repository tools and never hand-edit them. Update the authored `expected-stories.json` and visual-case ratchets deliberately from the built index/current train; do not misclassify those authored test manifests as generated output. | Delivery | High | Open |
 | C-009 | Visual provenance | Treat T10/T11 as qualitative visual intent; record the unavailable authenticated payload and do not claim unseen pixel fidelity. | Evidence | High | Open |
 | C-010 | Frozen records | Do not modify existing historical validation, learning, or unrelated mission records. | Governance | High | Open |
 | C-011 | Train delivery | Rebase on the latest train before final evidence; PR and merge target only `train/elements-first`; never touch `main`. | Delivery | High | Open |
 
 ### Key Entities
 
-- **WorkPackageFixture**: immutable Work Package identity, title/reference, lane value, supplied
+- **WorkPackageFixture**: immutable Work Package identity, title/reference, fixture-supplied lane value and
+  root `completedLaneId`, supplied
   status/tags, optional claim classification/text, subtasks, prompt input, facts, and event history.
 - **LaneFixture**: immutable consumer-defined lane id/label/order and its Work Package membership.
 - **ClaimFixture**: supplied `live` or `stale` classification plus stable actor/time/advisory text;
