@@ -109,6 +109,20 @@ test.describe('sk-form-select source, markup, and distribution contract', () => 
     expect(code).not.toMatch(/outline\s*:\s*none/);
     expect(code).not.toMatch(/(?:\.sk-light|data-theme|:root|:host-context)/);
 
+    const baseRule = postcss.parse(source, { from: SELECT_CSS }).nodes.find(
+      (node) => node.type === 'rule' && node.selector === '.sk-form-select',
+    );
+    expect(baseRule?.type).toBe('rule');
+    const declarations = new Map(
+      baseRule?.type === 'rule'
+        ? baseRule.nodes.filter((node) => node.type === 'decl').map((node) => [node.prop, node.value])
+        : [],
+    );
+    expect(declarations.get('width')).toBe('100%');
+    expect(declarations.get('min-width')).toBe('0');
+    expect(declarations.get('max-width')).toBe('100%');
+    expect(declarations.get('contain')).toBe('paint');
+
     const selftest = execFileSync(process.execPath, [TOKEN_LITERAL_CHECKER, '--selftest'], { encoding: 'utf8' });
     expect(selftest).toContain('governed token classes fail red');
     const audit = execFileSync(process.execPath, [TOKEN_LITERAL_CHECKER, SELECT_CSS], { encoding: 'utf8' });
@@ -305,15 +319,23 @@ test.describe('sk-form-select live native semantics', () => {
       const geometry = await root.locator('.sk-form-select').first().evaluate((node) => {
         const field = node.closest('.sk-form-field')!;
         const scroller = document.scrollingElement ?? document.documentElement;
+        const selectRect = node.getBoundingClientRect();
+        const fieldRect = field.getBoundingClientRect();
         return {
           documentClient: scroller.clientWidth,
           documentScroll: scroller.scrollWidth,
-          selectRight: node.getBoundingClientRect().right,
-          fieldRight: field.getBoundingClientRect().right,
+          selectLeft: selectRect.left,
+          selectRight: selectRect.right,
+          selectWidth: selectRect.width,
+          fieldLeft: fieldRect.left,
+          fieldRight: fieldRect.right,
+          fieldWidth: fieldRect.width,
         };
       });
       expect(geometry.documentScroll).toBe(geometry.documentClient);
+      expect(geometry.selectLeft).toBeGreaterThanOrEqual(geometry.fieldLeft - 0.5);
       expect(geometry.selectRight).toBeLessThanOrEqual(geometry.fieldRight + 0.5);
+      expect(geometry.selectWidth).toBeCloseTo(geometry.fieldWidth, 0);
     }
   });
 

@@ -507,7 +507,26 @@ const formSelectVisuals = [
 
 for (const [id, snapshot, viewport] of formSelectVisuals) {
   test(`SK-form-select ${id} — visual baseline`, async ({ page }) => {
-    const target = await formSelectStory(page, id, viewport);
+    const field = await formSelectStory(page, id, viewport);
+    const target = id === 'narrow' ? page.locator('#storybook-root') : field;
+    if (id === 'narrow') {
+      await target.evaluate((node: HTMLElement) => {
+        node.style.alignSelf = 'stretch';
+      });
+      const geometry = await target.evaluate((node) => {
+        const scroller = document.scrollingElement ?? document.documentElement;
+        return {
+          targetWidth: node.getBoundingClientRect().width,
+          viewportWidth: document.documentElement.clientWidth,
+          documentScrollWidth: scroller.scrollWidth,
+        };
+      });
+      expect(geometry).toEqual({
+        targetWidth: viewport.width,
+        viewportWidth: viewport.width,
+        documentScrollWidth: viewport.width,
+      });
+    }
     await expect(target).toHaveScreenshot(snapshot, { threshold: 0.02, maxDiffPixelRatio: 0.02 });
   });
 }

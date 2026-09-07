@@ -3,9 +3,13 @@
 
 .sk-form-select {
   box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
   inline-size: 100%;
   min-inline-size: 0;
   max-inline-size: 100%;
+  contain: paint;
   padding-block: var(--sk-space-3);
   padding-inline: var(--sk-space-4);
   color: var(--sk-fg-default);
