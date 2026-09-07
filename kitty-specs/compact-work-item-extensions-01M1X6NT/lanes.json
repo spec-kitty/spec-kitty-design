@@ -1,0 +1,106 @@
+{
+  "version": 1,
+  "mission_slug": "compact-work-item-extensions-01M1X6NT",
+  "mission_id": "01M1X6NT8GTM1RSBAF54R4DR5B",
+  "mission_branch": "kitty/mission-compact-work-item-extensions-01M1X6NT",
+  "target_branch": "mission/compact-work-item-extensions",
+  "lanes": [
+    {
+      "lane_id": "lane-a",
+      "wp_ids": [
+        "WP01"
+      ],
+      "write_scope": [
+        "fixtures/elements-behaviour/src/sk-action-row.test.ts",
+        "fixtures/elements-behaviour/src/sk-status-indicator.test.ts",
+        "packages/elements/src/action-row/sk-action-row.css.d.ts",
+        "packages/elements/src/action-row/sk-action-row.css.js",
+        "packages/elements/src/action-row/sk-action-row.stories.ts",
+        "packages/elements/src/action-row/sk-action-row.ts",
+        "packages/elements/src/status-indicator/sk-status-indicator.css.d.ts",
+        "packages/elements/src/status-indicator/sk-status-indicator.css.js",
+        "packages/elements/src/status-indicator/sk-status-indicator.stories.ts",
+        "packages/elements/src/status-indicator/sk-status-indicator.ts",
+        "packages/styles/src/action-row/sk-action-row.css",
+        "packages/styles/src/status-indicator/sk-status-indicator.css"
+      ],
+      "predicted_surfaces": [
+        "api",
+        "app-shell",
+        "artifact-rendering",
+        "legacy-cleanup"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    },
+    {
+      "lane_id": "lane-b",
+      "wp_ids": [
+        "WP02"
+      ],
+      "write_scope": [
+        "apps/storybook/src/tests/sk-empty-state-inline.spec.ts",
+        "docs/design-system/using-components.md",
+        "fixtures/elements-behaviour/src/sk-entity-marker.test.ts",
+        "packages/elements/src/__fixtures__/shapes.mjs",
+        "packages/elements/src/entity-marker/sk-entity-marker.css.d.ts",
+        "packages/elements/src/entity-marker/sk-entity-marker.css.js",
+        "packages/elements/src/entity-marker/sk-entity-marker.stories.ts",
+        "packages/elements/src/entity-marker/sk-entity-marker.ts",
+        "packages/styles/src/empty-state/index.ts",
+        "packages/styles/src/empty-state/sk-empty-state-html.stories.ts",
+        "packages/styles/src/empty-state/sk-empty-state-inline.html",
+        "packages/styles/src/empty-state/sk-empty-state.css",
+        "packages/styles/src/entity-marker/sk-entity-marker.css",
+        "scripts/gate-selftest.mjs",
+        "scripts/run-axe-storybook.js"
+      ],
+      "predicted_surfaces": [
+        "api",
+        "artifact-rendering",
+        "legacy-cleanup"
+      ],
+      "depends_on_lanes": [
+        "lane-a"
+      ],
+      "parallel_group": 1
+    },
+    {
+      "lane_id": "lane-c",
+      "wp_ids": [
+        "WP03"
+      ],
+      "write_scope": [
+        "apps/storybook/src/tests/sk-compact-work-item-extensions.spec.ts",
+        "apps/storybook/src/tests/visual.spec.ts",
+        "apps/storybook/src/tests/visual.spec.ts-snapshots/**",
+        "docs/design-system/changelog.md",
+        "docs/design-system/using-react.md",
+        "expected-docs.json",
+        "expected-parts.json",
+        "expected-stories.json",
+        "mutations.json",
+        "packages/elements/SIZES.md",
+        "packages/elements/custom-elements.json",
+        "packages/elements/vue.d.ts",
+        "packages/react/.wrapper-floor",
+        "packages/react/src/**",
+        "packages/react/type-tests/wrappers.type-test.tsx"
+      ],
+      "predicted_surfaces": [
+        "api",
+        "app-shell",
+        "artifact-rendering",
+        "legacy-cleanup"
+      ],
+      "depends_on_lanes": [
+        "lane-b"
+      ],
+      "parallel_group": 2
+    }
+  ],
+  "computed_at": "2026-09-07T07:25:33.512518+00:00",
+  "computed_from": "dependency_graph+ownership",
+  "planning_artifact_wps": [],
+  "planning_commit_sha": "11797adce2a6002cbfdc3f15656e47e18517f9cf"
+}
