@@ -197,6 +197,14 @@
       "verification_command": "npx playwright test apps/storybook/src/tests/sk-workflow-board.spec.ts --project=chromium --grep \"native sections, lists, counts, and source order\"",
       "result": "confirmed_absent",
       "evidence": "Command exited 0: Running 4 tests using 4 workers\n\n\n\n\n\n\n\n\n\n[1/4] [chromium] \u203a apps/storybook/src/tests/sk-workflow-board.spec.ts:488:7 \u203a native sections, lists, counts, and source order \u203a OneEmptyLane has exactly one e"
+    },
+    {
+      "invariant_id": "NI-005",
+      "description": "No application state, routing, filtering, observers, timers, motion, domain vocabulary, or tone ownership enters the library.",
+      "verification_method": "custom_command",
+      "verification_command": "npx playwright test apps/storybook/src/tests/sk-workflow-board.spec.ts --project=chromium --grep \"public CSS inventory\"",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: Running 1 test using 1 worker\n\n\n\n[1/1] [chromium] \u203a apps/storybook/src/tests/sk-workflow-board.spec.ts:270:7 \u203a workflow board source and distribution contract \u203a the public CSS inventory is exactly the"
     }
   ]
 }
