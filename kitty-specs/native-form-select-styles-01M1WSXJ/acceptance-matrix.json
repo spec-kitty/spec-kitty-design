@@ -108,10 +108,10 @@
       "criterion_id": "FR-011",
       "description": "Verify FR-011 is satisfied",
       "proof_type": "automated_test",
-      "evidence": "3ca42f9; Storybook build has all 10 expected routes; .sk-light computed color/border/background delta green",
+      "evidence": "7cbf6ce5ae27f1d995552deec32f0b463e8dac7f (product tree cf9d5045c0968add9056abc038401a17a7f24e9c); Storybook has all 10 routes; .sk-light computed token delta and visual baselines green",
       "pass_fail": "pass",
       "verified_by": "codex",
-      "verified_at": "2026-09-07T03:30:25.169856+00:00",
+      "verified_at": "2026-09-07T04:36:05.920819+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
