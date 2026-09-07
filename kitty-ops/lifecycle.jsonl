@@ -73,3 +73,4 @@
 {"agent": "codex", "at": "2026-09-07T02:43:15.441078+00:00", "canonical_action_id": "tasks::tasks", "mission_id": "01M1WSXJ1ZTCGCK6NBFG0K0GPM", "phase": "started", "reason": null, "wp_id": null}
 {"agent": "codex", "at": "2026-09-07T03:05:25.246729+00:00", "canonical_action_id": "tasks::tasks", "mission_id": "01M1WSXJ1ZTCGCK6NBFG0K0GPM", "phase": "completed", "reason": null, "wp_id": null}
 {"agent": "codex", "at": "2026-09-07T03:05:42.832640+00:00", "canonical_action_id": "implement::implement", "mission_id": "01M1WSXJ1ZTCGCK6NBFG0K0GPM", "phase": "started", "reason": null, "wp_id": "WP01"}
+{"agent": "codex", "at": "2026-09-07T01:08:43.570589+00:00", "canonical_action_id": "discovery::research", "mission_id": "01M1WNHE356008K8XYM9TN2C8G", "phase": "started", "reason": null, "wp_id": null}

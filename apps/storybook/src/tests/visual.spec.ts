@@ -540,3 +540,84 @@ test('SK-form-select forced colors — visual baseline', async ({ page }) => {
     maxDiffPixelRatio: 0.02,
   });
 });
+type TeamOverviewStoryId =
+  | 'default'
+  | 'light-mode'
+  | 'narrow'
+  | 'scale-50-w-ps'
+  | 'controlled-interactions'
+  | 'empty-partial-data';
+
+// #150 visual authority is the operator-supplied 1123×1600 capture at
+// /tmp/codex-clipboard-LwdjJW.png (sha256
+// ca08a0cbe1120233a1619d6b58da1bc2b84e3b9edeea41aff24a151321dbef04). It is
+// not an authenticated clean-v4 export. Flow-health comparison also uses #149's committed
+// sk-transition-matrix-approved-dark baseline (sha256
+// 870eb7c6aff160a324d2477cfcc2b00ecfa0d3e16a6f7eeb8826082df339d277). New baselines below
+// remain CI-authoritative and require explicit visual disposition before acceptance.
+
+const teamOverviewPatternStory = async (
+  page: Page,
+  id: TeamOverviewStoryId,
+  width: number,
+  height: number,
+): Promise<Locator> => {
+  await page.setViewportSize({ width, height });
+  await page.goto(`/iframe.html?id=patterns-team-overview--${id}&viewMode=story`);
+  const root = page.locator('[data-team-overview-pattern]').first();
+  await root.waitFor({ state: 'visible', timeout: 20000 });
+  await expect(root).toHaveAttribute('data-render-complete', 'true');
+  await page.evaluate(() => document.fonts.ready);
+  await expect(root.locator('sk-app-shell')).toBeVisible();
+  await expect(root.locator('sk-evidence-chain').locator('[part~="list"]')).toBeVisible();
+  await expect(root.locator('sk-bar-chart').locator('[part~="chart"]')).toBeVisible();
+  await expect(root.locator('sk-transition-matrix').locator('[part~="table"]')).toBeVisible();
+  if (id === 'controlled-interactions') {
+    await expect(root).toHaveAttribute('data-play-proof', 'passed');
+  }
+  return root;
+};
+
+const teamOverviewFullCases = [
+  { id: 'default', width: 1280, height: 1600, name: 'team-overview-approved-dark-1280.png' },
+  { id: 'default', width: 1440, height: 1600, name: 'team-overview-approved-dark-1440.png' },
+  { id: 'light-mode', width: 1440, height: 1600, name: 'team-overview-light-1440.png' },
+  { id: 'narrow', width: 390, height: 844, name: 'team-overview-narrow-390.png' },
+  { id: 'scale-50-w-ps', width: 1440, height: 1200, name: 'team-overview-scale-50-wps.png' },
+  { id: 'controlled-interactions', width: 1440, height: 1200, name: 'team-overview-controlled-interactions.png' },
+  { id: 'empty-partial-data', width: 1440, height: 1200, name: 'team-overview-empty-partial-data.png' },
+] as const satisfies ReadonlyArray<{
+  id: TeamOverviewStoryId;
+  width: number;
+  height: number;
+  name: string;
+}>;
+
+for (const visual of teamOverviewFullCases) {
+  test(`Team overview ${visual.name} — full pattern baseline`, async ({ page }) => {
+    const root = await teamOverviewPatternStory(page, visual.id, visual.width, visual.height);
+    await expect(root).toHaveScreenshot(visual.name, {
+      threshold: 0.02,
+      maxDiffPixelRatio: 0.02,
+    });
+  });
+}
+
+const teamOverviewFocusedCases = [
+  { id: 'default', region: 'rail-identity', name: 'team-overview-rail-identity.png' },
+  { id: 'default', region: 'delivery-evidence', name: 'team-overview-delivery-evidence.png' },
+  { id: 'default', region: 'return-chart', name: 'team-overview-return-chart.png' },
+  { id: 'scale-50-w-ps', region: 'flow-matrix', name: 'team-overview-flow-matrix.png' },
+] as const;
+
+for (const visual of teamOverviewFocusedCases) {
+  test(`Team overview ${visual.region} — focused baseline`, async ({ page }) => {
+    const root = await teamOverviewPatternStory(page, visual.id, 1440, 1600);
+    const region = root.locator(`[data-visual-region="${visual.region}"]`).first();
+    await region.waitFor({ state: 'visible', timeout: 20000 });
+    await expect(region).toHaveScreenshot(visual.name, {
+      threshold: 0.02,
+      maxDiffPixelRatio: 0.02,
+    });
+  });
+}

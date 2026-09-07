@@ -1,0 +1,61 @@
+{
+  "event_count": 7,
+  "last_event_id": "01M1XJ4TRX443H98SMA1BJA455",
+  "materialized_at": "2026-09-07T09:10:48.349904+00:00",
+  "mission_number": "",
+  "mission_slug": "team-overview-pattern-story-01M1WNHE",
+  "mission_type": "software-dev",
+  "summary": {
+    "approved": 0,
+    "blocked": 0,
+    "canceled": 0,
+    "claimed": 0,
+    "done": 1,
+    "for_review": 0,
+    "in_progress": 0,
+    "in_review": 0,
+    "planned": 0
+  },
+  "work_packages": {
+    "WP01": {
+      "actor": "codex",
+      "agent": "codex",
+      "agent_profile": "__resolved_profile_absent__",
+      "agent_profile_version": "__resolved_profile_version_absent__",
+      "assignee": "codex",
+      "force_count": 1,
+      "lane": "done",
+      "last_event_id": "01M1XJ4TRX443H98SMA1BJA455",
+      "last_transition_at": "2026-09-07T09:10:48.349904+00:00",
+      "model": "__resolved_model_absent__",
+      "notes": [
+        "Codex implementation started under resolved frontend-freddy profile",
+        "Implementation complete at product SHA 2a330b7a; CI-derived baselines at 1415ae44; CI run 34078606143 fully green; three independent Codex lenses approved.",
+        "Approved after exact-head local gates and CI Quality 34101924949 passed; review lane 7b44bbb is tree-identical to b2191e2 and preserves the reviewed implementation.",
+        "Done after verified lane integration and terminal #150 evidence. The lane was intentionally collapsed to the approved mission tip after review; --force acknowledges the resulting zero unique lane commits while real lane-to-target ancestry remains verified."
+      ],
+      "provider": "__resolved_provider_absent__",
+      "review_result": {
+        "feedback_path": "/home/jeroennouws/dev/team-kitty-missions/design-150/kitty-specs/team-overview-pattern-story-01M1WNHE/tasks/WP01-team-overview-pattern-and-proof/review-cycle-1.md",
+        "reference": "review-cycle://team-overview-pattern-story-01M1WNHE/WP01-team-overview-pattern-and-proof/review-cycle-1.md",
+        "reviewer": "codex",
+        "verdict": "approved"
+      },
+      "role": "reviewer",
+      "shell_pid": 2459900,
+      "shell_pid_created_at": "1788535195.17",
+      "subtasks": {
+        "T001": "done",
+        "T002": "done",
+        "T003": "done",
+        "T004": "done",
+        "T005": "done",
+        "T006": "done",
+        "T007": "done",
+        "T008": "done",
+        "T009": "done",
+        "T010": "done"
+      }
+    }
+  }
+}

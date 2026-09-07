@@ -1,0 +1,125 @@
+{
+  "rows": {
+    "#125": {
+      "evidence_ref": "Follow-up: #125 remains open; npm publication and Team Kitty application integration are outside #150.",
+      "fr": null,
+      "nfr": null,
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": null,
+      "scope": "Broader component-conversion, publication, and Team Kitty integration tracker; #150 contributes only the design-library pattern proof.",
+      "source_file": "research.md",
+      "title": "Finish shared component-library conversion (est. 20\u201330 hrs), test, push to npm; implement into Team Kitty during UI redesign",
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
+    },
+    "#144": {
+      "evidence_ref": "Follow-up: #144 remains open until #150 is merged into train/elements-first and the post-merge programme review assesses epic closure; WP01 does not pre-close the parent epic.",
+      "fr": "FR-001\u2013FR-026",
+      "nfr": "NFR-001\u2013NFR-011",
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": null,
+      "scope": "Parent epic and binding library/application ownership contract; #150 is its final design-library child.",
+      "source_file": "spec.md",
+      "title": "Epic: Team overview \u2014 stateless dashboard elements for the approved redesign",
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
+    },
+    "#145": {
+      "evidence_ref": "PR #195 merged into train/elements-first as ff380ec7157ec59800e9e7a76cce8952f3567a95; issue #145 is closed and the commit is an ancestor of the #150 candidate. WP01 reuses the shell elements without modifying their contracts.",
+      "fr": "FR-012, FR-017\u2013FR-018, FR-022, FR-024\u2013FR-026",
+      "nfr": "NFR-003, NFR-005, NFR-007\u2013NFR-008, NFR-010",
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": null,
+      "scope": "Closed shell-element dependency reused by WP01.",
+      "source_file": "GitHub issue #150",
+      "title": "[TKO1] team-overview-shell-elements \u2014 app-shell, personal-rail, context-sidebar, page-header",
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
+    "#146": {
+      "evidence_ref": "PR #206 merged into train/elements-first as 32fa4950b88941f9a78759e3e911dfa510d10a13; issue #146 is closed and the commit is an ancestor of the #150 candidate. WP01 reuses the feed elements with native list ownership.",
+      "fr": "FR-013\u2013FR-016, FR-018\u2013FR-019, FR-022, FR-024\u2013FR-026",
+      "nfr": "NFR-003\u2013NFR-005, NFR-007\u2013NFR-008, NFR-010",
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": null,
+      "scope": "Closed feed-element dependency reused by WP01.",
+      "source_file": "GitHub issue #150",
+      "title": "[TKO2] team-overview-feed-elements \u2014 section-header, action-row, status-indicator, entity-marker",
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
+    "#147": {
+      "evidence_ref": "PR #223 merged into train/elements-first as 495d210cbd625cec57eca98802ded186a3669dbc; issue #147 is closed and the commit is an ancestor of the #150 candidate. WP01 reuses metric and evidence-chain through public APIs.",
+      "fr": "FR-005\u2013FR-006, FR-011, FR-017\u2013FR-018, FR-020, FR-022, FR-024\u2013FR-026",
+      "nfr": "NFR-003, NFR-005, NFR-007\u2013NFR-008, NFR-010",
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": null,
+      "scope": "Closed delivery-return dependency reused by WP01.",
+      "source_file": "GitHub issue #150",
+      "title": "[TKO3] delivery-return-metric-elements \u2014 metric and evidence-chain",
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
+    "#148": {
+      "evidence_ref": "PR #231 merged the accepted bar-chart product into train/elements-first as 2bbbd7b7c2287d1c664902b0d8c4f7e353205c7c; governance closeout PR #237 merged as 137c40ec185b4da08b107640ef285f1178e5f72b; issue #148 is closed.",
+      "fr": "FR-006, FR-016, FR-018\u2013FR-020, FR-022, FR-024\u2013FR-026",
+      "nfr": "NFR-003\u2013NFR-005, NFR-007\u2013NFR-008, NFR-010",
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": null,
+      "scope": "Closed bar-chart dependency reused by WP01.",
+      "source_file": "research.md",
+      "title": "[TKO4] return-over-time bar-chart \u2014 accessible controlled data visualization",
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
+    "#149": {
+      "evidence_ref": "PR #171 merged the transition-matrix into train/elements-first as 8e654e858c7e09acf48ddafdd99a5349fae92d87; issue-matrix closeout PR #175 merged as 70c1d5d23aee899e117de2ceed3d626fb191e799; issue #149 is closed.",
+      "fr": "FR-007\u2013FR-010, FR-016, FR-018\u2013FR-019, FR-022, FR-024\u2013FR-026",
+      "nfr": "NFR-003\u2013NFR-008, NFR-010",
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": null,
+      "scope": "Closed transition-matrix dependency reused by WP01.",
+      "source_file": "plan.md",
+      "title": "[TKO5] flow-health transition-matrix \u2014 scalable controlled route visualization",
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
+    "#150": {
+      "evidence_ref": "PR #242 rebased product/baseline candidate 8c37babf596524d06c2232f11782f98ff0c4d2c7 is byte-identical on #150-owned product/test/baseline paths to CI-proven candidate 1415ae447babaf29f6363748e22fb25ce5d8b722; CI run 34078606143 passed and three independent Codex lenses approved. The implementation is fixed; issue #150 remains open until authorized merge into train/elements-first.",
+      "fr": "FR-001\u2013FR-026",
+      "nfr": "NFR-001\u2013NFR-011",
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": null,
+      "scope": "Current mission issue; WP01 owns the complete Storybook composition, fixture, tests, baselines, and pre-merge proof while authorized train merge and GitHub closure remain external mechanics.",
+      "source_file": "spec.md",
+      "title": "[TKO6] team-overview pattern story \u2014 approved composition and data-integrity fixture",
+      "verdict": "fixed",
+      "wp": "WP01"
+    },
+    "#76": {
+      "evidence_ref": "PR #132 merged into train/elements-first as 9b185643ac801525599c48c966002596eab4433b; issue #76 is closed and its authoring recipe governs WP01.",
+      "fr": "FR-022\u2013FR-026",
+      "nfr": "NFR-008\u2013NFR-011",
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": null,
+      "scope": "Closed authoring-recipe prerequisite governing #150 implementation and verification.",
+      "source_file": "spec.md",
+      "title": "[M10] elements-first-authoring-recipe \u2014 rewrite the recipe before the batches",
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
+    "#79": {
+      "evidence_ref": "PR #140 merged into train/elements-first as 70742b8436ca89e09cb6e0416c0830f4bded3289; issue #79 is closed and WP01 reuses sk-button and sk-pill-tag without contract changes.",
+      "fr": "FR-006, FR-012, FR-022",
+      "nfr": "NFR-007, NFR-010",
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": null,
+      "scope": "Closed primitive prerequisite reused through public APIs.",
+      "source_file": "spec.md",
+      "title": "[M13] component-migration-batch-primitives \u2014 button, pill-tag, check-bullet",
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    }
+  },
+  "schema_version": 1
+}
