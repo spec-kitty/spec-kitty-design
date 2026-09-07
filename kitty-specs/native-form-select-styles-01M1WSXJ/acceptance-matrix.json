@@ -17,11 +17,11 @@
     {
       "criterion_id": "FR-002",
       "description": "Verify FR-002 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "proof_type": "source_inspection",
+      "evidence": "3ca42f9; selector inventory test: exactly sk-form-select and sk-form-select--compact",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T03:29:59.386316+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
