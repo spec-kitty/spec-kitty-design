@@ -2,7 +2,7 @@
   "mission_slug": "native-form-select-styles-01M1WSXJ",
   "mission_number": "",
   "mission_type": "software-dev",
-  "overall_verdict": "pending",
+  "overall_verdict": "pass",
   "criteria": [
     {
       "criterion_id": "FR-001",
@@ -128,10 +128,10 @@
       "criterion_id": "FR-013",
       "description": "Verify FR-013 is satisfied",
       "proof_type": "ci_visual",
-      "evidence": "3ca42f9; behavior suite green Chromium/Firefox and axe 319/319; CI-authoritative six visual snapshots, WebKit host libraries, and exact-head 200% browser evidence remain for outer orchestrator",
-      "pass_fail": "pending",
+      "evidence": "7cbf6ce5ae27f1d995552deec32f0b463e8dac7f (product tree cf9d5045c0968add9056abc038401a17a7f24e9c); CI https://github.com/spec-kitty/spec-kitty-design/actions/runs/34081800284: Playwright 504 (Chromium/Firefox/WebKit), axe 319/319, visual 53/53 incl 6 select baselines, mutation 157/157. Real Chrome 151 UI zoom evidence: X11 Ctrl+0 then Ctrl+Plus x5; host zoom factor 2; outer 1200x800 fixed; inner 1200x657->600x328; DPR 1->2; document width 1200->600 no overflow; Default focused, RequiredInvalid, Disabled passed with native indicator/boundary/help visible and no clipping; checksummed screenshots under test-results/form-select-real-zoom/7cbf6ce5ae27f1d995552deec32f0b463e8dac7f",
+      "pass_fail": "pass",
       "verified_by": "codex",
-      "verified_at": "2026-09-07T03:30:30.355318+00:00",
+      "verified_at": "2026-09-07T04:36:10.971643+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
