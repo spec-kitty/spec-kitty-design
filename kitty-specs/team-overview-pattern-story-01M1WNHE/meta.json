@@ -1,0 +1,14 @@
+{
+  "created_at": "2026-09-07T00:50:52.645450+00:00",
+  "flattened": false,
+  "friendly_name": "team overview pattern story",
+  "mission_id": "01M1WNHE356008K8XYM9TN2C8G",
+  "mission_number": null,
+  "mission_slug": "team-overview-pattern-story-01M1WNHE",
+  "mission_type": "software-dev",
+  "purpose_context": "This mission advances team overview pattern story on mission/team-overview-pattern-story so stakeholders can track the work from mission creation onward.",
+  "purpose_tldr": "team overview pattern story",
+  "slug": "team-overview-pattern-story-01M1WNHE",
+  "target_branch": "mission/team-overview-pattern-story",
+  "topology": "single_branch"
+}
