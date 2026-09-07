@@ -8,10 +8,10 @@
       "criterion_id": "FR-001",
       "description": "Verify FR-001 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "PR #242 @ 1415ae447babaf29f6363748e22fb25ce5d8b722; CI run 34078606143 green; three independent Codex approvals",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T03:35:02.361703+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
