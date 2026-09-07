@@ -178,6 +178,14 @@
       "verification_command": "base=$(git merge-base HEAD origin/train/elements-first) && git diff --quiet \"$base\"..HEAD -- apps/demo packages/elements/src/form-select packages/react packages/vue behaviours.json mutations.json mutations.selftest.json expected-parts.json expected-docs.json",
       "result": "pending",
       "evidence": null
+    },
+    {
+      "invariant_id": "NI-005-styles-only-generation-current",
+      "description": "The generated styles-only markup barrel exactly matches authored HTML fixtures",
+      "verification_method": "custom_command",
+      "verification_command": "node scripts/build-styles-only-markup.mjs --check",
+      "result": "pending",
+      "evidence": null
     }
   ]
 }
