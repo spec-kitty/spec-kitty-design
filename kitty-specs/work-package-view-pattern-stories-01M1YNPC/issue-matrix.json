@@ -1,5 +1,17 @@
 {
   "rows": {
+    "#150": {
+      "evidence_ref": "Closed pattern precedent #150; its completion comment records the merged Storybook-only fixture/selector/controlled-intent pattern.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
     "#177": {
       "evidence_ref": "PR #215 merged into train/elements-first as 03a7b78bfe94f0370bd0fbdfde2e9eb38c6e2002; issue #177 completion comment records the predecessor contract.",
       "fr": null,
