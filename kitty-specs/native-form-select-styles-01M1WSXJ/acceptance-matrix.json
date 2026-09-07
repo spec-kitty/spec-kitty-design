@@ -153,6 +153,14 @@
       "verification_command": "test ! -e packages/elements/src/form-select && test ! -e packages/react/src/SkFormSelect.tsx && test ! -e packages/vue/src/components/SkFormSelect.vue && ! rg -n 'form-select' behaviours.json mutations.json mutations.selftest.json expected-parts.json expected-docs.json",
       "result": "pending",
       "evidence": null
+    },
+    {
+      "invariant_id": "NI-002-exact-public-selector-vocabulary",
+      "description": "The authored CSS exposes no public selector outside sk-form-select and sk-form-select--compact",
+      "verification_method": "custom_command",
+      "verification_command": "test \"$(rg -o --pcre2 \"\\\\.sk-form-select(?:--compact)?(?=[^A-Za-z0-9_-]|$)\" packages/styles/src/form-select/sk-form-select.css | sort -u | wc -l)\" -eq 2 && ! rg -n --pcre2 \"\\\\.sk-form-select(?!--compact)(?:__[A-Za-z0-9_-]+|--(?!compact)[A-Za-z0-9_-]+)\" packages/styles/src/form-select/sk-form-select.css",
+      "result": "pending",
+      "evidence": null
     }
   ]
 }
