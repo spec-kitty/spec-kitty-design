@@ -80,6 +80,12 @@ const DELEGATED = [
 const delegated = (v: ValidityState): Record<string, boolean> =>
   Object.fromEntries(DELEGATED.map((k) => [k, v[k]]));
 
+/** The full five-flag shape with only the named flags true — so a case can pin the shared ANSWER
+ *  and not merely the agreement. A correspondence assertion alone passes when both sources are
+ *  wrong in the same way, and a single-flag anchor leaves the other four pinned by nobody. */
+const onlyFlags = (...on: string[]): Record<string, boolean> =>
+  Object.fromEntries(DELEGATED.map((k) => [k, on.includes(k)]));
+
 beforeEach(() => {
   document.body.innerHTML = '';
 });
@@ -612,7 +618,9 @@ test('[SC-003][SC-016] the probe and the rendered control agree for the same int
   // Bug 3 is two live sources disagreeing outright; bugs 1 and 2 are one source disagreeing with
   // the intended state. All three are visible as the SAME assertion — the host's delegated flags
   // against the rendered control's own — so that is what this test makes. Each case also pins the
-  // shared answer: correspondence alone is satisfied by both sources being wrong together.
+  // shared answer — ALL FIVE flags, not just the one under test: correspondence alone is satisfied
+  // by both sources being wrong together, and an anchor on one flag leaves the other four pinned by
+  // nobody. A pre-merge lens caught that gap when only `patternMismatch` was anchored.
   //
   // THE MARKER CARRIES BOTH IDS on purpose (`[SC-002][SC-003]` above is the precedent). The merge
   // loop is how the probe's answer reaches `setValidity` at all, so an arm that deletes it breaks
@@ -624,7 +632,8 @@ test('[SC-003][SC-016] the probe and the rendered control agree for the same int
   {
     const [, el] = await mount({ name: 'a', pattern: '[a-z]+' }, '123');
     expect(delegated(el.validity), 'at mount').toEqual(delegated(control(el).validity));
-    expect(el.validity.patternMismatch, 'and both must say it mismatches').toBe(true);
+    expect(delegated(el.validity), 'and both must land on the RIGHT answer, all five flags')
+      .toEqual(onlyFlags('patternMismatch'));
   }
 
   // Bug 1's shape, after mount: the read-before-write case the probe exists to close.
@@ -635,7 +644,8 @@ test('[SC-003][SC-016] the probe and the rendered control agree for the same int
     expect(delegated(el.validity), 'after a post-mount change').toEqual(
       delegated(control(el).validity),
     );
-    expect(el.validity.patternMismatch, 'and both must say it mismatches').toBe(true);
+    expect(delegated(el.validity), 'and both must land on the RIGHT answer, all five flags')
+      .toEqual(onlyFlags('patternMismatch'));
   }
 
   // Bug 3: `type` and `value` changed in ONE update. This is the case where the two sources
@@ -649,7 +659,8 @@ test('[SC-003][SC-016] the probe and the rendered control agree for the same int
     expect(delegated(el.validity), 'after a same-update type and value change').toEqual(
       delegated(control(el).validity),
     );
-    expect(el.validity.patternMismatch, 'and both must say it mismatches').toBe(true);
+    expect(delegated(el.validity), 'and both must land on the RIGHT answer, all five flags')
+      .toEqual(onlyFlags('patternMismatch'));
   }
 
   // Bug 2: NEITHER source may invent a constraint the element never declared. The positive cases
@@ -657,10 +668,9 @@ test('[SC-003][SC-016] the probe and the rendered control agree for the same int
   // correspondence failure in the other direction.
   {
     const [, el] = await mount({ name: 'd' }, 'x');
-    const none = { patternMismatch: false, rangeUnderflow: false, rangeOverflow: false,
-      stepMismatch: false, typeMismatch: false };
-    expect(delegated(el.validity), 'an unconstrained field, on the host').toEqual(none);
-    expect(delegated(control(el).validity), 'an unconstrained field, on the control').toEqual(none);
+    expect(delegated(el.validity), 'an unconstrained field, on the host').toEqual(onlyFlags());
+    expect(delegated(control(el).validity), 'an unconstrained field, on the control')
+      .toEqual(onlyFlags());
   }
 });
 

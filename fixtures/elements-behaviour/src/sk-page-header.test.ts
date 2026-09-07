@@ -456,8 +456,9 @@ test('[SC-017] the width drop is real, measured at the lane viewport', async () 
   // would fail this test's own `hasAttribute` precondition and become collateral for a mutation
   // about something else entirely. Verified against every sk-page-header arm: with the attribute
   // spelling, neither SC-010 arm reds this test.
-  // The live half of the test above. The lane runs at 414px — asserted, not assumed, because a
-  // config change that widened it would turn this into a silent pass.
+  //
+  // The lane runs at 414px — asserted, not assumed, because a config change that widened it would
+  // turn this into a silent pass.
   expect(window.matchMedia('(max-width: 720px)').matches, 'the lane is not below the width threshold')
     .toBe(true);
   const el = await mountAxes('compact', true);

@@ -285,8 +285,11 @@ in `mutations.json`, or `scripts/suite-selftest.mjs` fails the build.
 
 A purely presentational component owns none of them and adds nothing there.
 
-The registry holds **seventeen** ids, sixteen of them applicable. The one that is not (SC-023,
-generation determinism) is declared `applicable: false` because ADR-11 states it as a CI-gate
+The registry's applicable id set is pinned by `tests/node/config-contract.test.ts`, which asserts
+it equals ADR-11's required-behaviours list exactly — read the list there rather than trusting a
+count here. This sentence used to carry one ("fifteen ids, fourteen applicable") and went stale the
+moment #196/#204 added two. One entry is declared inapplicable (SC-023,
+generation determinism), because ADR-11 states it as a CI-gate
 obligation — `build-react-wrappers.mjs --check` discharges it — and it is in the file so the
 registry mirrors the ADR's list rather than being silently short of it. You will not add a
 subject for it.

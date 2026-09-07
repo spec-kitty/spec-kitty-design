@@ -53,6 +53,8 @@ The deciding factor over Option B is the Node lane: `@web/test-runner` cannot te
 
 A component is not done when it renders. It is done when every item below that applies to it has a test. This list is the gate — there is **no coverage threshold**, then or now.
 
+Items 1-9 and 11 are each a standalone behaviour with a surgical mutation of its own. **Item 10 is not, and the difference is worth naming rather than leaving to be rediscovered:** it is a cross-cutting invariant over two sources, so it is violated by any defect that breaks either of them, and the mutation that proves it necessarily shares its red with the item whose mechanism it rides on. Adding it was an operator decision (#196), taken with that property measured and on the table; a future entry of the same shape should be recognised as such before it is minted, not after.
+
 1. **Form association** — a native `<form>` submit produces the expected `FormData` entry; `setValidity` blocks submission and the message reaches the accessibility tree; form reset restores the initial value; a disabled control is excluded from submission.
 2. **Event contract** — fires exactly once; the documented `detail` shape; `composed` and `bubbles` as documented; where the event is declared cancelable, `preventDefault()` demonstrably prevents.
 3. **Property before upgrade** — a property assigned before the element definition loads is still applied on upgrade. Invisible to every other gate, and load-bearing for the no-build dashboard where script order is not controlled.
@@ -63,7 +65,7 @@ A component is not done when it renders. It is done when every item below that a
 8. **Registry guard** — a second `define` of the same tag warns and no-ops rather than throwing.
 9. **Generation determinism** (Node lane) — regenerating wrappers from an unchanged manifest is a no-op, and drift fails CI.
 10. **Delegate/rendered-control correspondence** — where an element derives any part of its reported validity from an object other than the control the user interacts with, a test asserts the two agree for the same intended state: at mount, after a post-mount change, and after two constrained properties change in the *same* update — and that neither invents a constraint the element never declared. Added 2026-09-07 (#196); see "The two entries this list was missing" below for the three measured bugs it is written from.
-11. **Responsive threshold** — where a documented viewport threshold changes an element's behaviour, a test asserts that the shipped stylesheet declares that threshold at its documented figure, *and* that the behaviour it gates actually changes at it in a real viewport. Thresholds written as separate blocks are asserted separately, so each can fail alone. Added 2026-09-07 (#204); see the same section.
+11. **Responsive threshold** — where a documented viewport threshold changes an element's behaviour, a test asserts that the shipped stylesheet declares that threshold at its documented figure; and, for every threshold the test lane's own viewport can cross, that the behaviour it gates actually changes at it live. Thresholds written as separate blocks are asserted separately, so each can fail alone. The live clause is scoped to what the lane can reach on purpose, and a threshold covered by declaration alone says so where it is declared — `sk-page-header`'s height threshold is the current instance. Added 2026-09-07 (#204); see the same section.
 
 Explicitly **not** wanted: "it renders" assertions; shadow-DOM snapshot comparisons, which are brittle and duplicate the visual baselines; tests of Lit's own reactivity; assertions on internal class names.
 
@@ -346,9 +348,11 @@ already existed for this defect and the first is the correspondence assertion th
 Worth recording because it is a real property of this list rather than an implementation detail: a
 correspondence entry is **not independently breakable**. It is violated by any defect that breaks
 either source, so `scripts/suite-selftest.mjs`'s guard 5 — which requires a mutation to be surgical
-— sees it as collateral. Measured before the entry was written: with the assertion in place, three
-existing `sk-form-input` arms red it (the merged-flag loop, the probe's `value` sync, and the
-`pattern` forwarding).
+— sees it as collateral. Measured before the entry was written: with the assertion in place, **four**
+existing `sk-form-input` arms red it — the merged-flag loop, the probe's `value` sync, the
+`pattern` forwarding, and the type-before-value ordering. The last became this item's own arm and
+the third was re-sited (below), which leaves two reaching the correspondence test as arms of
+another id.
 
 Two ways to express that were available. Marking those arms `expectCollateral: true` would have
 removed guard 5's blast-radius bound from three surgical arms in order to make room for one new id,
@@ -361,7 +365,11 @@ from `pattern` to `inputmode`: with item 10 in force, dropping `pattern` from th
 a correspondence defect as well as a forwarding one, while `inputmode` reaches no validity at all.
 That is a like-for-like exchange — the `[SC-013]` test asserts six forwarded attributes and the arm
 drops one of them either way — and the `pattern` case is not left unwatched: it is measured red by
-the item 10 test.
+the item 10 test. Measured once, by hand, and **not** mechanized: no committed arm applies "drop
+`pattern` forwarding" and asserts it reds `[SC-016]`, because such an arm would red the `[SC-013]`
+test too. A pre-merge lens named that, and it is filed as **#236** rather than fixed
+here — an arm for it needs guard 5 to be able to read a declared entanglement, which is a
+gate-behaviour change this amendment's ruling does not authorize.
 
 #### Item 11, and the constraint that made it necessary
 
@@ -551,5 +559,6 @@ subjects or say the same thing here.
 * Amended by O5, the charter amendment lifting the unit-test prohibition in `languages_frameworks`, `testing_requirements` and `quality_gates`. Charter changes go through `spec-kitty charter interview → generate → sync`, never by hand (CLAUDE.md §7).
 * Related: ADR-8 (base layer), ADR-9 (styling API — items 6 and 7 verify what it declares), ADR-13 (Storybook builder), SP-1 (gate repair), SP-6 (generator selection).
 * Amended by #189 (operator override, same precedent as ADR-10's #176): the wrapper prop-name invariant, omitted from this ADR's original "Wrapper generation" section — see that section's "The wrapper prop-name invariant this ADR omitted (#189)" subsection.
+* Raises: #236 — item 10's entanglement with item 1 is expressed by naming both ids on one test, which no script can read back; and the `pattern`-forwarding case it now covers rests on a one-time manual measurement rather than on a committed arm.
 * Amended by the #196/#204 operator ruling of 2026-09-07: required behaviours 10 (delegate/rendered-control correspondence) and 11 (responsive threshold) — see "The two entries this list was missing (#196, #204)". This is the first amendment made while the record is `Accepted` rather than `Proposed`, which is why the authorization is recorded there in full.
 * Evidence: `scripts/run-axe-storybook.js:102`, `.github/workflows/ci-quality.yml` (`components` filter; `gate` skipped-tolerance), `packages/angular/src/lib/*/**.spec.ts`, `playwright.config.ts`, `scripts/build-react-wrappers.mjs` (`REACT_PROPS`, `loadReactPropRenameMap`, per-element prop comparison), `kitty-specs/form-input-constraints-and-datalist-01M1S94Y/contracts/sk-form-input.contract.md` ("React wrapper contract (delta)").
