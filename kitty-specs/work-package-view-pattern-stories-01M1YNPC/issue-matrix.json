@@ -13,7 +13,7 @@
       "wp": "WP01"
     },
     "#178": {
-      "evidence_ref": "Closed prerequisite #178 supplies the public sk-notice announcement surface composed by WP01.",
+      "evidence_ref": "PR #224 merged into train/elements-first as 079fd96782a9e512b6fb803d532a56fb6da7f131; issue #178 completion comment records the sk-notice contract.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -22,7 +22,7 @@
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
       "verdict": "verified-already-fixed",
-      "wp": null
+      "wp": "WP01"
     },
     "#208": {
       "evidence_ref": "Epic #208 programme composition is completed by final child #214 after #209-#213 and #178 closed.",
