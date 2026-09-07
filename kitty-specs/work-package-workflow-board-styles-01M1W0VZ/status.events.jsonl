@@ -19,3 +19,4 @@
 {"actor": "user", "at": "2026-09-06T20:55:05.100235+00:00", "delta": {"subtasks": {"T001": "done", "T002": "done", "T003": "done", "T004": "done"}}, "event_id": "01M1W81P4CMBE9SWWFWWTJM51Y", "kind": "annotation", "wp_id": "WP01"}
 {"actor": "user", "at": "2026-09-06T20:55:40.829782+00:00", "delta": {"subtasks": {"T001": "done"}}, "event_id": "01M1W82S0XEHFW4V08YJACXC42", "kind": "annotation", "wp_id": "WP01"}
 {"actor": "user", "at": "2026-09-06T21:55:15.437518+00:00", "delta": {"subtasks": {"T005": "done", "T006": "done"}}, "event_id": "01M1WBFVVD3714RZ031PPAYD1H", "kind": "annotation", "wp_id": "WP01"}
+{"actor": "user", "at": "2026-09-07T00:21:18.809893+00:00", "delta": {"subtasks": {"T007": "done"}}, "event_id": "01M1WKV9TS9PZZSP7NPSD0C09S", "kind": "annotation", "wp_id": "WP01"}
