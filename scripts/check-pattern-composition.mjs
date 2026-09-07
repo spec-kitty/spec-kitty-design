@@ -37,38 +37,92 @@
  *
  * ── WHAT IS CHECKED ────────────────────────────────────────────────────────────────────────
  *
- * Over every file under `packages/elements/src/patterns/`:
+ * Over every `.ts`, `.tsx`, `.js`, `.mjs`, `.cjs` and `.css` file under
+ * `packages/elements/src/patterns/`:
  *
- *   R1  No `.shadowRoot`, no `attachShadow(`, no `::shadow`, no `/deep/`, no `>>>`. A fixture
- *       that reaches a component's internals is not evidence that the public surface suffices —
- *       it is evidence that it does not.
+ *   R1  No reach into a private root: `.shadowRoot`, `attachShadow(`, `::shadow`, `/deep/`,
+ *       `>>>`, and two spellings that are not evasions at all but the NATURAL ones —
+ *       `.renderRoot`, Lit's own public alias for the shadow root on every element in this repo,
+ *       and `getRootNode()`, the standard un-deprecated way to obtain one. Also the property
+ *       NAMED AS A STRING, which closes bracket access, `Reflect.get` and
+ *       `getOwnPropertyDescriptor(...).get.call` with one pattern instead of an enumeration.
+ *       And no runtime CSS injection, whose text no static rule below could read.
  *
- *   R2  Every `::part(name)` names an ELEMENT TAG and that element records that part in
+ *   R2  Every `::part(name)` resolves to an ELEMENT and that element records that part in
  *       `expected-parts.json`. `::part()` is the sanctioned seam, but only for parts the
  *       shrink-only public ratchet actually carries: a part the manifest does not declare is as
- *       private as a shadow child. A `::part()` with no resolvable element tag in front of it is
- *       rejected too, rather than skipped — an unresolvable selector is the shape #197 shipped.
+ *       private as a shadow child. The element is resolved from a type selector, or from the
+ *       class this fixture's own markup binds to exactly one `sk-` tag.
  *
- *   R3  No selector in an inline `<style>` writes rules for a class a `packages/styles` sheet
- *       OWNS. That is "duplicated component CSS" stated so a machine can decide it: the library
- *       owns the appearance of `.sk-card`, `.sk-facts__term`, `.sk-disclosure__summary`; a
- *       fixture that declares rules for them has either copied them or is overriding them from
- *       outside, and both are the thing the criterion forbids. USING such a class in MARKUP is
- *       composition and stays legal — this rule is about writing CSS *for* it, never about
- *       naming it.
+ *   R3  No duplicated component CSS, in FOUR spellings, because the first three of them name no
+ *       library class and a class-only rule is therefore a naming convention rather than a rule:
+ *         * a selector naming a class a `packages/styles` sheet OWNS — through a class selector
+ *           or any `[class]` attribute operator, with CSS and JS escapes decoded first;
+ *         * a bare UNSCOPED `sk-*` type selector, which restyles every instance in the document;
+ *         * a bare type selector for a native tag this fixture's own markup gives a library-owned
+ *           class to — the `.x dt { … }` that restates `.sk-facts__term` with the class left out,
+ *           which is the most realistic spelling of this defect because #176's primitives are
+ *           light-DOM classes on native tags;
+ *         * `@import`, which pulls in CSS `walkRules()` never visits.
+ *       USING an owned class in MARKUP is composition and stays legal — every rule here is about
+ *       writing CSS *for* it. A type selector SCOPED by a fixture class also stays legal: that
+ *       places the host in the page rather than reaching into the component, and both fixtures in
+ *       this directory rely on it.
  *
  *   R4  Floors, because every rule above passes vacuously over an empty set. No fixtures, no
- *       owned classes, no recorded parts, a `<style>` block that parsed to no rules, or a
- *       patterns directory composing fewer than MIN_COMPOSED_TAGS distinct `sk-` element tags,
- *       are each a refusal rather than a green line.
+ *       owned classes, no recorded parts, an unreadable `expected-parts.json`, a file that does
+ *       not parse, a `<style>` block that parsed to no rules, or a patterns directory composing
+ *       fewer than MIN_COMPOSED_TAGS distinct `sk-` element tags, are each a refusal rather than
+ *       a green line.
  *
- * ── WHAT IS DELIBERATELY NOT CHECKED ───────────────────────────────────────────────────────
+ * ── WHAT IS DELIBERATELY NOT CHECKED, AND WHY ──────────────────────────────────────────────
  *
- * `fixtures/elements-behaviour/` and `tests/browser/` are OUT OF SCOPE and must stay so. Those
- * suites reach `element.shadowRoot` on purpose — that is how a test VERIFIES that a public
- * surface produced the right private structure, and 30 existing files do it. Scoping R1 to them
- * would red the suite that proves the criterion holds. The criterion is about the COMPOSITION
- * FIXTURE, and so is this gate.
+ * A gate that states its boundaries is honest; one that reads as total and is not is the defect
+ * this file exists to refuse. Each limit below was MEASURED, not assumed.
+ *
+ * THE BEHAVIOUR AND BROWSER SUITES. `fixtures/elements-behaviour/` and `tests/browser/` are out
+ * of scope and must stay so. Those suites reach `element.shadowRoot` on purpose — that is how a
+ * test VERIFIES that a public surface produced the right private structure, and 30 existing files
+ * do it. Scoping R1 to them would red the suite that proves the criterion holds.
+ *
+ * ONE DIRECTORY, BY CONVENTION. The criterion is enforced for `packages/elements/src/patterns/`
+ * and nowhere else. A composition fixture placed at, say, `apps/storybook/patterns/` is entirely
+ * outside this gate. That is a CONVENTION, stated as one: this gate cannot make "wherever someone
+ * puts a pattern fixture" decidable, and the honest form of that is to name the directory rather
+ * than to imply a reach it does not have.
+ *
+ * `style="…"` ATTRIBUTES. Not read. #177's own composition story sets
+ * `style="margin-block-start:var(--sk-space-4)"` on a slotted `<dl>`, and that is ordinary
+ * consumer layout; deciding whether an arbitrary inline declaration "restates component CSS"
+ * is not decidable from the attribute, and a rule that reds the legitimate case gets deleted.
+ *
+ * OVERRIDING A `--sk-*` TOKEN IS NOT A VIOLATION — it is the DOCUMENTED PUBLIC API, and this was
+ * checked against doctrine before being declined rather than after. ADR-9: "Consumers lose
+ * arbitrary class-based overrides and gain only what `::part()` and the documented custom
+ * properties expose", and "custom properties are the one thing that crosses a shadow boundary
+ * unimpeded". `docs/design-system/using-components.md` says in as many words: "you override the
+ * token." A fixture setting `--sk-surface-card` is therefore USING the styling API, not
+ * duplicating component CSS, and R3 leaves it alone on purpose.
+ *
+ * SK-D01, THE TOKENS-ONLY RULE, IS NOT ENFORCED HERE. `quality:stylelint` globs
+ * `packages/**\/*.css`, so a raw `#fff` or a bare `12px` inside an inline `<style>` in a `.ts` is
+ * linted by nothing — including this gate. Reproducing `stylelint-declaration-strict-value`'s
+ * property list against the generated token catalogue is disproportionate machinery for one
+ * directory, so it is named as an open limit instead. An earlier revision of the fixture's own
+ * docstring claimed this gate covered it; that claim was false and has been withdrawn.
+ *
+ * `new CSSStyleSheet(` AND `unsafeCSS(` ARE A NEIGHBOUR'S JOB, not an omission.
+ * `check-no-css-in-source.mjs` rejects both anywhere under `packages/elements` — verified by
+ * planting `new CSSStyleSheet()` + `replaceSync('.sk-card { border: 0 }')` into this directory's
+ * fixture and watching that gate name the file and the line. Restating them here would be a
+ * second copy of an enforced rule, which this repo has removed four times. The same gate also
+ * rejects any `.css` file under `packages/elements`, so R3's `.css` arm is defence in depth.
+ *
+ * R1'S RESIDUAL, NAMED. The string-literal rule closes every spelling that writes the property
+ * name out, and esbuild's constant folding extends that further than it looks: `"shadow" +
+ * "Root"` is folded to `"shadowRoot"` in the rendition and IS caught — measured, not assumed.
+ * What escapes is a key assembled at RUNTIME, `['shadow','Root'].join('')`, which no static check
+ * can decide. An AST walk would not close that either, so the limit is stated rather than chased.
  *
  * PARSED, NOT GREPPED. esbuild strips comments before the source rules run, for the reason
  * `check-no-css-in-source.mjs` states at length: a regex "comment stripper" also blanks
@@ -88,7 +142,7 @@ import { fileURLToPath } from 'node:url';
 import esbuild from 'esbuild';
 import postcss from 'postcss';
 
-const SCAN = 'packages/elements/src/patterns/**/*.{ts,tsx}';
+const SCAN = 'packages/elements/src/patterns/**/*.{ts,tsx,js,mjs,cjs,css}';
 const OWNED_SHEETS = 'packages/styles/src/**/sk-*.css';
 const PARTS_FILE = 'expected-parts.json';
 
@@ -106,8 +160,40 @@ const REACH_THROUGH = [
   [/\.shadowRoot\b/, '`.shadowRoot` — reads a private root the consumer does not own'],
   [/\bshadowRoot\s*\?\./, '`shadowRoot?.` — same reach, optional-chained'],
   [/\battachShadow\s*\(/, '`attachShadow(` — a fixture composes elements, it does not build roots'],
-  [/::shadow\b/, '`::shadow` — a removed piercing combinator'],
-  [/\/deep\//, '`/deep/` — a removed piercing combinator'],
+  // LIT'S OWN PUBLIC ALIAS FOR THE SHADOW ROOT, and in this repo the NATURAL spelling rather than
+  // an evasion — `ReactiveElement.renderRoot` is documented API and every element here is a
+  // LitElement. An implementer reaching for a component's internals from a fixture writes this
+  // one innocently, which makes it the single most important string in this list.
+  [/\.renderRoot\b/, "`.renderRoot` — Lit's public alias for the shadow root; same reach"],
+  // The standard, un-deprecated way to obtain a root. `el.getRootNode()` from inside a component's
+  // subtree returns its ShadowRoot, so this is `.shadowRoot` spelled through the DOM API.
+  [/\bgetRootNode\s*\(/, '`getRootNode(` — returns the ShadowRoot; same reach through the DOM API'],
+  // THE BRACKET AND REFLECTION SPELLINGS, closed by ONE rule rather than an enumeration.
+  // `e['shadowRoot']`, `Reflect.get(e, 'shadowRoot')`,
+  // `Object.getOwnPropertyDescriptor(Element.prototype, 'shadowRoot').get.call(e)` and a computed
+  // key all share one property: every one of them must NAME the property as a string literal
+  // somewhere in the source. Matching the quoted name catches the whole family at the cost of a
+  // single pattern, and there is no legitimate reason for a composition fixture to contain that
+  // string at all.
+  [/['"`](?:shadowRoot|renderRoot)['"`]/, 'the shadow root named as a string — bracket access, `Reflect.get`, or a computed key'],
+];
+
+/**
+ * Runtime CSS injection, which no composition fixture has a reason to do.
+ *
+ * A fixture that builds a stylesheet at runtime puts its CSS outside every static rule below —
+ * R2 and R3 read `<style>` bodies, and a string handed to `insertRule()` is not one.
+ *
+ * `new CSSStyleSheet(` and `unsafeCSS(` are DELIBERATELY ABSENT: `check-no-css-in-source.mjs`
+ * already rejects both anywhere under `packages/elements`, verified by planting
+ * `new CSSStyleSheet()` + `replaceSync('.sk-card { border: 0 }')` into this directory's fixture
+ * and watching that gate name the file and the line. Restating them here would be a second copy
+ * of a rule that is already enforced, which this repo has removed four times.
+ */
+const RUNTIME_CSS = [
+  [/createElement\s*\(\s*['"`]style['"`]/i, "`createElement('style')` — injects CSS no static rule here can read"],
+  [/\.insertRule\s*\(/, '`insertRule(` — injects a rule no static rule here can read'],
+  [/\.replaceSync\s*\(|\.replace\s*\(\s*[`'"][^`'"]*\{/, '`replaceSync(`/`replace(` on a stylesheet — same'],
 ];
 const CSS_PIERCING = [
   [/::shadow\b/, '`::shadow` — a removed piercing combinator'],
@@ -132,13 +218,29 @@ export function stripComments(source, file = 'source.ts') {
  * The mask is a CLASS-SHAPED token rather than a blank, so an interpolated selector still parses
  * and is then REJECTED by name below — a computed selector cannot be checked, and silently
  * dropping it is the certifying-absence shape this file exists to refuse.
+ *
+ * THE `i` FLAG IS LOAD-BEARING AND WAS MISSING. HTML tag names are case-insensitive, so `<STYLE>`
+ * renders identically and a case-only edit disabled the ENTIRE CSS half of this gate — R2, R3 and
+ * the piercing-combinator arm together, the last of which has no source-side counterpart. The
+ * gate's own rule counter is what makes it visible: 54 rules with `<style>`, 44 with `<STYLE>`,
+ * green either way. One character, and the file read clean without being read.
  */
 export const styleBlocks = (rendition) => {
   const out = [];
-  const re = /<style\b[^>]*>([\s\S]*?)<\/style>/g;
+  const re = /<style\b[^>]*>([\s\S]*?)<\/style>/gi;
   let m;
   while ((m = re.exec(rendition)) !== null) {
-    out.push(m[1].replace(/\$\{[\s\S]*?\}/g, 'SK-INTERPOLATED-SELECTOR'));
+    out.push(
+      m[1]
+        .replace(/\$\{[\s\S]*?\}/g, 'SK-INTERPOLATED-SELECTOR')
+        // THE JS ESCAPE LAYER, and there are TWO of them here. This block is the SOURCE TEXT of a
+        // template literal, not the string it evaluates to, so a literal backslash in the CSS is
+        // written `\\` and reaches postcss as two characters. `.sk\\-card` therefore decoded to
+        // `.sk\-card`, whose class name the CSS decoder then read as `sk` — a name no sheet owns,
+        // so an escaped-hyphen spelling of `.sk-card` walked through R3 while the single-backslash
+        // spelling was caught. Collapsing the JS layer first puts both on the same footing.
+        .replace(/\\\\/g, '\\'),
+    );
   }
   return out;
 };
@@ -152,12 +254,64 @@ export const styleBlocks = (rendition) => {
  * write. Adding it costs one alternation; leaving it out would have made R3 a naming convention
  * rather than a rule.
  */
-export const classesIn = (selector) => {
-  const out = (selector.match(/\.(-?[_a-zA-Z][\w-]*)/g) ?? []).map((c) => c.slice(1));
-  for (const m of selector.matchAll(/\[\s*class\s*[~|^$*]?=\s*(['"]?)([^'"\]]*)\1\s*\]/g)) {
-    for (const name of m[2].trim().split(/\s+/).filter(Boolean)) out.push(name);
+export const decodeCssEscapes = (text) =>
+  String(text)
+    // `\64 ` and `\0064` — a hex code point, optionally closed by one whitespace character.
+    .replace(/\\([0-9a-fA-F]{1,6})[ \t\n]?/g, (_, hex) => String.fromCodePoint(parseInt(hex, 16)))
+    // `\-` — any other escaped character stands for itself.
+    .replace(/\\(.)/g, '$1');
+
+/**
+ * Every class name a selector names — through a class selector, or through a `[class]` attribute
+ * selector in any of its operator and flag spellings.
+ *
+ * ESCAPES ARE DECODED FIRST, and that is not theoretical tidiness. `.sk\-card` and `.sk-car\64`
+ * are the SAME SELECTOR as `.sk-card` to every browser, and against the raw text the class regex
+ * stopped at the backslash and yielded `sk` and `sk-car` — two names no sheet owns, so both walked
+ * straight through R3. One backslash defeated the whole rule.
+ *
+ * THE ATTRIBUTE FORMS, all of them. `[class~="sk-card"]` selects exactly what `.sk-card` selects.
+ * `[class^="sk-"]` selects EVERY library class at once, which is the broadest possible override and
+ * was the quietest hole here. And `[class~="sk-card" i]` — the case-insensitivity flag — walked
+ * past the earlier pattern because its `\s*\]` tail could not cross the ` i`, so the very form
+ * this file cites as a review self-catch was bypassable by two characters.
+ *
+ * SUBSTRING OPERATORS ARE RESOLVED AGAINST THE OWNED SET, not treated as literal names: `^=`, `$=`
+ * and `*=` name every owned class stand in the stated relation to the value. That is what makes
+ * `[class^="sk-"]` report the classes it actually reaches instead of a name nobody owns.
+ */
+export const classesIn = (selector, ownedNames = []) => {
+  const decoded = decodeCssEscapes(selector);
+  const out = (decoded.match(/\.(-?[_a-zA-Z][\w-]*)/g) ?? []).map((c) => c.slice(1));
+  const attr = /\[\s*class\s*([~|^$*]?)=\s*(['"]?)([^'"\]]*)\2\s*(?:[isIS]\s*)?\]/g;
+  for (const m of decoded.matchAll(attr)) {
+    const op = m[1];
+    const value = m[3].trim();
+    if (!value) continue;
+    if (op === '^' || op === '$' || op === '*') {
+      for (const name of ownedNames) {
+        const hit =
+          op === '^' ? name.startsWith(value) : op === '$' ? name.endsWith(value) : name.includes(value);
+        if (hit) out.push(name);
+      }
+      continue;
+    }
+    for (const name of value.split(/\s+/).filter(Boolean)) out.push(name);
   }
   return out;
+};
+
+/** The leftmost compound's type selector, if it has one. `sk-card > .x` -> `sk-card`. */
+export const leadingTag = (selector) => {
+  const m = decodeCssEscapes(selector).trim().match(/^([a-zA-Z][\w-]*)/);
+  return m ? m[1].toLowerCase() : null;
+};
+
+/** The rightmost compound's bare type selector, if the compound is ONLY a type selector. */
+export const trailingBareTag = (selector) => {
+  const parts = decodeCssEscapes(selector).trim().split(/[\s>+~]+/).filter(Boolean);
+  const last = parts[parts.length - 1] ?? '';
+  return /^[a-zA-Z][\w-]*$/.test(last) && parts.length > 1 ? last.toLowerCase() : null;
 };
 
 /**
@@ -202,8 +356,8 @@ export const partsIn = (selector) => {
  */
 export const classTagBindings = (rendition) => {
   const bindings = new Map();
-  for (const m of rendition.matchAll(/<\s*(sk-[a-z0-9-]+)([^>]*)>/g)) {
-    const tag = m[1];
+  for (const m of rendition.matchAll(/<\s*([a-zA-Z][\w-]*)([^>]*)>/g)) {
+    const tag = m[1].toLowerCase();
     for (const attr of m[2].matchAll(/class\s*=\s*"([^"]*)"/g)) {
       for (const name of attr[1].split(/\s+/).filter(Boolean)) {
         if (!bindings.has(name)) bindings.set(name, new Set());
@@ -265,6 +419,8 @@ export function run(root = '.') {
     violations.push(`${PARTS_FILE} records no parts — R2 would accept anything.`);
   }
 
+  const ownedNames = [...owned.keys()];
+
   const files = globSync(join(root, SCAN), {}).sort();
   notes.files = files.length;
   if (files.length === 0) {
@@ -273,28 +429,47 @@ export function run(root = '.') {
 
   for (const file of files) {
     const raw = readFileSync(file, 'utf8');
+    // A `.css` file IS one style block, and postcss handles its comments — esbuild would reject
+    // it outright. Note such a file is ALSO a hard red in `check-no-css-in-source.mjs`, whose
+    // stray-stylesheet glob covers all of `packages/elements`; it is scanned here so that this
+    // gate's own counts describe everything in the directory rather than resting on a neighbour.
+    const isCss = file.endsWith('.css');
     let rendition;
-    try {
-      rendition = stripComments(raw, file);
-    } catch (err) {
-      violations.push(`${file} does not parse — it cannot be checked: ${err?.message ?? err}`);
-      continue;
+    if (isCss) {
+      rendition = '';
+    } else {
+      try {
+        rendition = stripComments(raw, file);
+      } catch (err) {
+        violations.push(`${file} does not parse — it cannot be checked: ${err?.message ?? err}`);
+        continue;
+      }
     }
 
     // R1 over source.
     for (const [re, why] of REACH_THROUGH) {
-      const m = rendition.match(re);
-      if (m) violations.push(`${file} — ${why}`);
+      if (re.test(rendition)) violations.push(`${file} — ${why}`);
+    }
+    for (const [re, why] of RUNTIME_CSS) {
+      if (re.test(rendition)) violations.push(`${file} — ${why}`);
     }
 
     // Which elements this fixture composes, for R4's floor.
     for (const m of rendition.matchAll(/<\s*(sk-[a-z0-9-]+)/g)) notes.tags.add(m[1]);
 
-    // Which element each of this fixture's classes sits on, for R2's class spelling.
-    const bindings = classTagBindings(rendition);
+    // Which element each of this fixture's classes sits on, for R2's class spelling, and the
+    // reverse index — which classes each TAG carries — for R3's light-DOM primitive rule.
+    const classToTags = classTagBindings(rendition);
+    const bindings = new Map();
+    for (const [cls, tags] of classToTags) {
+      for (const tag of tags) {
+        if (!bindings.has(tag)) bindings.set(tag, new Set());
+        bindings.get(tag).add(cls);
+      }
+    }
 
     // R1 (piercing), R2 and R3 over the inline CSS.
-    for (const block of styleBlocks(rendition)) {
+    for (const block of isCss ? [raw] : styleBlocks(rendition)) {
       for (const [re, why] of CSS_PIERCING) {
         if (re.test(block)) violations.push(`${file} (inline <style>) — ${why}`);
       }
@@ -306,6 +481,19 @@ export function run(root = '.') {
         violations.push(`${file} — its inline <style> does not parse as CSS: ${err?.message ?? err}`);
         continue;
       }
+
+      // ── AT-RULES, WHICH `walkRules()` DOES NOT VISIT ────────────────────────────────
+      // `@import url('./duplicated-card.css')` reaches the parser as an AtRule whose `params`
+      // no rule below ever reads, so every selector it pulls in is unexamined and the pass
+      // still printed green. An input this gate cannot read must not be reported as clean —
+      // the same principle as the interpolated-selector refusal.
+      sheet.walkAtRules((at) => {
+        if (!/^(import|use|charset)$/i.test(at.name)) return;
+        violations.push(
+          `${file} — \`@${at.name} ${at.params}\` pulls in CSS this gate never reads, so nothing ` +
+            `here can decide whether it duplicates component CSS. Inline the rules instead.`,
+        );
+      });
 
       let ruleCount = 0;
       sheet.walkRules((rule) => {
@@ -326,7 +514,7 @@ export function run(root = '.') {
             if (subject === null) {
               const candidates = new Set();
               for (const name of classes) {
-                for (const bound of bindings.get(name) ?? []) candidates.add(bound);
+                for (const bound of classToTags.get(name) ?? []) candidates.add(bound);
               }
               if (candidates.size === 1) [subject] = [...candidates];
             }
@@ -363,7 +551,7 @@ export function run(root = '.') {
             }
           }
 
-          for (const name of classesIn(selector)) {
+          for (const name of classesIn(selector, ownedNames)) {
             const sheetFile = owned.get(name);
             if (sheetFile === undefined) continue;
             violations.push(
@@ -371,6 +559,48 @@ export function run(root = '.') {
                 `That is duplicated component CSS. Use the class in MARKUP and let the library's ` +
                 `own sheet style it; restyle through the element's documented ::part() or tokens.`,
             );
+          }
+
+          // ── A BARE, UNSCOPED ELEMENT TYPE SELECTOR ──────────────────────────────────────
+          // `sk-card { border: 0 }` restyles EVERY instance in the document from outside the
+          // component, without going through a part or a token. R3's class rule never saw it
+          // because there is no class in it. A selector carrying `::part()` is exempt — that is
+          // the sanctioned seam and R2 checks it — and so is a type selector SCOPED by an
+          // ancestor (`.sk-pattern-operations sk-card { min-inline-size: 0 }`), which sets the
+          // host's own layout in the page rather than reaching into the component. Both fixtures
+          // in this directory use the scoped form.
+          const lead = leadingTag(selector);
+          if (lead?.startsWith('sk-') && !selector.includes('::part(')) {
+            violations.push(
+              `${file} — \`${selector}\` is an unscoped type selector for <${lead}>, so it ` +
+                `restyles every instance in the document from outside the component. Reach the ` +
+                `element through its documented ::part() or tokens, or scope the rule to this ` +
+                `fixture's own ancestor class if you only mean to place the host in the page.`,
+            );
+          }
+
+          // ── THE LIGHT-DOM PRIMITIVE, RESTYLED THROUGH ITS TAG ───────────────────────────
+          // `.sk-op-status dt { font-weight: 400; margin: 0 }` restates what `.sk-facts__term`
+          // already declares, for the LIBRARY'S OWN markup, and names no library class at all —
+          // so it is duplicated component CSS that the class rule structurally cannot see. It is
+          // also the most realistic spelling of this defect, because #176's primitives are
+          // light-DOM classes on native tags.
+          //
+          // Decided from the fixture's OWN MARKUP rather than from a list of tag names: a bare
+          // trailing type selector is rejected only when this file's markup puts a library-owned
+          // class on that tag. A fixture with no `.sk-facts` in it may style `dt` freely, which is
+          // what keeps this from reddening ordinary page CSS.
+          const trailing = trailingBareTag(selector);
+          if (trailing && !trailing.startsWith('sk-')) {
+            const ownedOnTag = [...(bindings.get(trailing) ?? [])].filter((c) => owned.has(c));
+            if (ownedOnTag.length > 0) {
+              violations.push(
+                `${file} — \`${selector}\` styles <${trailing}> directly, and this fixture's own ` +
+                  `markup puts the library-owned class(es) ${ownedOnTag.map((c) => `.${c}`).join(', ')} ` +
+                  `on that tag. Restating a light-DOM primitive's declarations through its tag is ` +
+                  `duplicated component CSS with the class name left out.`,
+              );
+            }
           }
         }
       });
@@ -473,20 +703,97 @@ const PROBES = [
   ['an empty style block', (s) => s.replace(/<style>[\s\S]*?<\/style>/, '<style></style>'), true],
   ['a fixture composing too few tags', (s) =>
     s.replace('<sk-page-header><h1 slot="title">Probe</h1></sk-page-header>', '').replace('<sk-status-indicator tone="info">Fine</sk-status-indicator>', ''), true],
+
+  // ── F2. AN UPPERCASE TAG, which renders identically and disabled the whole CSS half.
+  ['<STYLE> uppercase, carrying a piercing combinator', (s) =>
+    s.replace('<style>', '<STYLE>').replace('</style>', '</STYLE>').replace('.sk-probe sk-card {', 'sk-card >>> .x { color: red; }\n  .sk-probe sk-card {'), true],
+  ['<STYLE> uppercase, carrying a duplicated class', (s) =>
+    s.replace('<style>', '<STYLE>').replace('</style>', '</STYLE>').replace('.sk-probe { display: grid;', '.sk-card { border: 0; }\n  .sk-probe { display: grid;'), true],
+
+  // ── F4. The two spellings an implementer writes INNOCENTLY.
+  ['renderRoot, Lit\'s own public alias for the shadow root', (s) =>
+    s.replace('export const view', 'const inner = (e) => e.renderRoot.querySelector(".internal");\nexport const view'), true],
+  ['getRootNode(), the standard way to obtain a root', (s) =>
+    s.replace('export const view', 'const inner = (e) => e.firstElementChild.getRootNode();\nexport const view'), true],
+
+  // ── F1. Duplication that names no class at all.
+  ['a bare unscoped sk- type selector', (s) =>
+    s.replace('.sk-probe { display: grid;', 'sk-card { border: 0; padding: 0; }\n  .sk-probe { display: grid;'), true],
+  ['a type selector SCOPED by the fixture\'s own class, which places the host and must pass', (s) => s, false],
+  ['a light-DOM primitive restyled through its tag', (s) =>
+    s.replace('<sk-card status="info">', '<sk-card status="info"><dl class="sk-facts"><dt class="sk-facts__term">A</dt><dd class="sk-facts__value">B</dd></dl>')
+      .replace('.sk-probe { display: grid;', '.sk-probe dt { font-weight: 400; margin: 0; }\n  .sk-probe { display: grid;'), true],
+  ['the same tag styled where the markup gives it NO owned class, which must pass', (s) =>
+    s.replace('.sk-probe { display: grid;', '.sk-probe dt { font-weight: 400; margin: 0; }\n  .sk-probe { display: grid;'), false],
+  ['@import, an at-rule walkRules() never visits', (s) =>
+    s.replace('.sk-probe { display: grid;', "@import url('./duplicated-card.css');\n  .sk-probe { display: grid;"), true],
+
+  // ── F3. Escapes and attribute-operator variation.
+  ['an escaped hyphen, .sk\\-card', (s) => s.replace('.sk-probe { display: grid;', '.sk\\-card { border: 0; }\n  .sk-probe { display: grid;'), true],
+  ['a hex escape, .sk-car\\64', (s) => s.replace('.sk-probe { display: grid;', '.sk-car\\64  { border: 0; }\n  .sk-probe { display: grid;'), true],
+  ['[class^="sk-"], which reaches every library class at once', (s) =>
+    s.replace('.sk-probe { display: grid;', '[class^="sk-"] { border: 0; }\n  .sk-probe { display: grid;'), true],
+  ['[class~="sk-card" i], the case-insensitivity flag', (s) =>
+    s.replace('.sk-probe { display: grid;', '[class~="sk-card" i] { border: 0; }\n  .sk-probe { display: grid;'), true],
+  ['[class*="facts__"], substring containment', (s) =>
+    s.replace('.sk-probe { display: grid;', '[class*="facts__"] { margin: 0; }\n  .sk-probe { display: grid;'), true],
+  ['[class^="sk-probe"], which reaches only fixture-owned classes and must pass', (s) =>
+    s.replace('.sk-probe { display: grid;', '[class^="sk-probe"] { margin: 0; }\n  .sk-probe { display: grid;'), false],
+
+  // ── F5. Runtime CSS injection, which no static rule above can read.
+  ['createElement("style") at runtime', (s) =>
+    s.replace('export const view', 'const inject = () => document.createElement("style");\nexport const view'), true],
+  ['insertRule at runtime', (s) =>
+    s.replace('export const view', 'const inject = (sh) => sh.insertRule(".sk-card { border: 0 }");\nexport const view'), true],
 ];
 
-/** A sandbox carrying only what the repository pass reads, so a probe cannot see the real tree. */
-function sandbox(fixtureSource, { patterns = true } = {}) {
+/**
+ * A sandbox carrying only what the repository pass reads, so a probe cannot see the real tree.
+ *
+ * `parts` and `filename` exist for the INPUT_PROBES below, which vary the gate's INPUTS rather
+ * than a fixture's source — the class of arm that had no coverage at all until it was pointed out
+ * that five problem-emitting branches survived a green `--selftest`.
+ */
+function sandbox(fixtureSource, { patterns = true, parts = null, filename = 'probe.ts' } = {}) {
   const dir = mkdtempSync(join(tmpdir(), 'sk-pattern-composition-'));
   mkdirSync(join(dir, 'packages/styles/src'), { recursive: true });
   cpSync('packages/styles/src', join(dir, 'packages/styles/src'), { recursive: true });
-  cpSync(PARTS_FILE, join(dir, PARTS_FILE));
+  if (parts === null) cpSync(PARTS_FILE, join(dir, PARTS_FILE));
+  else if (parts !== false) writeFileSync(join(dir, PARTS_FILE), parts);
   if (patterns) {
     mkdirSync(join(dir, 'packages/elements/src/patterns'), { recursive: true });
-    writeFileSync(join(dir, 'packages/elements/src/patterns/probe.ts'), fixtureSource);
+    writeFileSync(join(dir, `packages/elements/src/patterns/${filename}`), fixtureSource);
   }
   return dir;
 }
+
+/**
+ * PROBLEM-EMITTING BRANCHES THAT NO SOURCE MUTATION REACHES.
+ *
+ * Every one of these was live code with no arm over it while `--selftest` printed green. Two of
+ * them had WRITTEN PROMISES against them in this very file — the four-floor claim in the header
+ * listed "no recorded parts" when only three floors had arms, and `stripComments`' docstring
+ * promises that a file esbuild cannot parse FAILS rather than being skipped, with nothing testing
+ * it. A gate whose subject is unfalsifiable greens had two of its own, one level up.
+ *
+ * Each entry names a sandbox and the substring the resulting refusal must contain.
+ */
+const INPUT_PROBES = [
+  ['expected-parts.json is unreadable', () => sandbox(CLEAN_FIXTURE, { parts: 'not json {' }), 'could not be read'],
+  ['expected-parts.json is absent entirely', () => sandbox(CLEAN_FIXTURE, { parts: false }), 'could not be read'],
+  ['expected-parts.json records no parts at all', () => sandbox(CLEAN_FIXTURE, { parts: '{"byElement":{}}' }), 'records no parts'],
+  ['a fixture esbuild cannot parse', () => sandbox('export const broken = (;'), 'does not parse'],
+  ['an inline <style> postcss cannot parse', () =>
+    sandbox(CLEAN_FIXTURE.replace('<style>', '<style>@media (min-width: 1px) { .a { color: red; }')), 'does not parse as CSS'],
+  ['::part() on an element the contract does not record at all', () =>
+    sandbox(CLEAN_FIXTURE.replace('sk-page-header::part(header)', 'sk-not-an-element::part(header)')), 'does not record'],
+  // ── F8. The criterion is scoped to ONE DIRECTORY by convention; these hold the file TYPES
+  // inside it, which the scan missed until it named only `.ts`/`.tsx`.
+  ['a .js fixture in the same directory', () =>
+    sandbox(CLEAN_FIXTURE.replace('.sk-probe { display: grid;', '.sk-card { border: 0; }\n  .sk-probe { display: grid;'), { filename: 'legacy.js' }), 'duplicated component CSS'],
+  ['a .mjs fixture in the same directory', () =>
+    sandbox(CLEAN_FIXTURE.replace('.sk-probe { display: grid;', '.sk-card { border: 0; }\n  .sk-probe { display: grid;'), { filename: 'legacy.mjs' }), 'duplicated component CSS'],
+];
 
 function selftest() {
   let failures = 0;
@@ -511,6 +818,27 @@ function selftest() {
     }
     if (mustReject) rejects += 1;
     else accepts += 1;
+  }
+
+  // ── The input probes: branches no source mutation reaches. ──
+  let inputs = 0;
+  for (const [name, make, expect] of INPUT_PROBES) {
+    const dir = make();
+    let result;
+    try {
+      result = run(dir);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+    inputs += 1;
+    const hit = result.violations.some((v) => v.includes(expect));
+    if (!hit) {
+      failures += 1;
+      console.error(
+        `❌ input probe "${name}": expected a refusal containing "${expect}", got ` +
+          `${result.violations.length === 0 ? 'GREEN' : `\n   ${result.violations.join('\n   ')}`}`,
+      );
+    }
   }
 
   // ── The floor arms, which no source mutation can express. ──
@@ -611,16 +939,40 @@ function selftest() {
     }
   }
 
-  if (PROBES.length < 24) {
-    failures += 1;
-    console.error(`❌ the probe table shrank to ${PROBES.length}, below its floor of 24.`);
+  // ── THE TABLE'S OWN RATCHET, EXACT RATHER THAN A FLOOR (#249's defect class) ──────────────
+  //
+  // `PROBES.length < N` counts ROWS, not coverage: the table could shed the two forms this file
+  // cites as review self-catches and still announce green, because a row floor cannot tell which
+  // rows left. Deleting arms is exactly what a later refactor does under time pressure.
+  //
+  // So the counts are EXACT and the reject/accept split is asserted SEPARATELY. Dropping a reject
+  // arm and adding an accept arm keeps the total and is caught by the split; adding a genuine
+  // probe is a one-line update here, made deliberately rather than absorbed silently. Same shape
+  // as `expected-parts.json`, which is exact for the same reason.
+  const EXPECTED_PROBES = 47;
+  const EXPECTED_REJECTS = 34;
+  const EXPECTED_ACCEPTS = 13;
+  const EXPECTED_INPUT_PROBES = 8;
+  for (const [what, actual, expected] of [
+    ['probe rows', PROBES.length, EXPECTED_PROBES],
+    ['reject arms', rejects, EXPECTED_REJECTS],
+    ['accept arms', accepts, EXPECTED_ACCEPTS],
+    ['input probes', inputs, EXPECTED_INPUT_PROBES],
+  ]) {
+    if (actual !== expected) {
+      failures += 1;
+      console.error(
+        `❌ ${what}: ${actual}, recorded ${expected}. A table that can shrink is a gate whose ` +
+          `defeated forms quietly reopen — update this number deliberately or restore the arm.`,
+      );
+    }
   }
 
   if (failures > 0) process.exit(1);
   console.log(
     `\n✅ All ${PROBES.length} probes behaved as recorded (${rejects} reject, ${accepts} accept), ` +
-      `both floor arms refused, and ${plantVerdicts.length} planted violation(s) went red in a ` +
-      `copy of the real patterns directory.`,
+      `all ${inputs} input probes refused their own branch, both floor arms refused, and ` +
+      `${plantVerdicts.length} planted violation(s) went red in a copy of the real patterns directory.`,
   );
   process.exit(0);
 }

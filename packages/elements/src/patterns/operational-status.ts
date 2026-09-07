@@ -211,9 +211,13 @@ export const OPERATIONAL_MODEL: OperationalModel = Object.freeze({
  * the rule `scripts/check-pattern-composition.mjs` enforces, and it is what lets the fixture
  * claim "no duplicated component CSS" as a checked property rather than as a promise.
  *
- * Every value is a `--sk-*` token. Note that an inline `<style>` inside a `.ts` is NOT reached by
- * `quality:stylelint` (it globs `packages/**\/*.css`), so the token rule is not enforced here by
- * stylelint — the pattern-composition gate checks it instead, for this directory.
+ * Every value here is a `--sk-*` token, and that is CONVENTION RATHER THAN ENFORCEMENT — a
+ * correction to what this comment used to claim. An inline `<style>` inside a `.ts` is not reached
+ * by `quality:stylelint` (it globs `packages/**\/*.css`), and the earlier revision went on to say
+ * "the pattern-composition gate checks it instead, for this directory". It does not. That gate
+ * checks reach-through, part visibility and duplicated component CSS; SK-D01's tokens-only rule is
+ * enforced over this directory by nothing, which the gate's own docstring now records as an open
+ * limit rather than leaving a false reassurance sitting beside the CSS it was about.
  */
 export const operationalStatusStyles = html`<style>
   .sk-pattern-operations {

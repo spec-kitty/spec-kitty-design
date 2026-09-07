@@ -27,6 +27,13 @@
  * "content is assigned to the intended slot" — asserted here across a card and a notice rather
  * than on one element, so this file joins SC-011's subjects.
  *
+ * THE ARM IS NOT ADR-11'S CANONICAL ONE, and that is worth a line where it is declared. SC-011's
+ * canonical mutation is a RENAMED SLOT. This composition's slot belongs to `<sk-card>`, so
+ * renaming it would test sk-card's contract rather than the composition's; the registered arm
+ * inserts a wrapper between the `<dl>` and its `<dt>`/`<dd>` instead — a different failure mode
+ * under the same id, and the one that is actually about assembling from public surfaces.
+ * `mutations.json` carries the same note beside the arm.
+ *
  * The two UNMARKED assertions below (native disclosure state, the published gap literal) carry no
  * registry id because neither is an ADR-11 behaviour class. They are supporting evidence for the
  * composition and are NOT protected by the mutation harness; the SC-011 arm is.
