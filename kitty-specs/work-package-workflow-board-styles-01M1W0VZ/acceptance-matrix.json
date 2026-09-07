@@ -205,6 +205,14 @@
       "verification_command": "npx playwright test apps/storybook/src/tests/sk-workflow-board.spec.ts --project=chromium --grep \"public CSS inventory\"",
       "result": "confirmed_absent",
       "evidence": "Command exited 0: Running 1 test using 1 worker\n\n\n\n[1/1] [chromium] \u203a apps/storybook/src/tests/sk-workflow-board.spec.ts:270:7 \u203a workflow board source and distribution contract \u203a the public CSS inventory is exactly the"
+    },
+    {
+      "invariant_id": "NI-006",
+      "description": "The role/name/tabindex triad is complete only for actual overflow, and fitting boards are absent from sequential tab order.",
+      "verification_method": "custom_command",
+      "verification_command": "npx playwright test apps/storybook/src/tests/sk-workflow-board.spec.ts --project=chromium --grep \"conditional overflow semantics and keyboard operation\"",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: Running 14 tests using 12 workers\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n[1/14] [chromium] \u203a apps/storybook/src/tests/sk-workflow-board.spec.ts:533:9 \u203a conditional overflow semantics and keyboard operation \u203a populated (fixtu"
     }
   ]
 }
