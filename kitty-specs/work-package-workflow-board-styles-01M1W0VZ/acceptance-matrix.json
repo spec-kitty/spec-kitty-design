@@ -213,6 +213,14 @@
       "verification_command": "npx playwright test apps/storybook/src/tests/sk-workflow-board.spec.ts --project=chromium --grep \"conditional overflow semantics and keyboard operation\"",
       "result": "confirmed_absent",
       "evidence": "Command exited 0: Running 14 tests using 12 workers\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n[1/14] [chromium] \u203a apps/storybook/src/tests/sk-workflow-board.spec.ts:533:9 \u203a conditional overflow semantics and keyboard operation \u203a populated (fixtu"
+    },
+    {
+      "invariant_id": "NI-007",
+      "description": "Every required board state remains contained without page-level overflow.",
+      "verification_method": "custom_command",
+      "verification_command": "npx playwright test apps/storybook/src/tests/sk-workflow-board.spec.ts --project=chromium --grep \"renders a visible board without browser errors or page overflow\"",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: Running 11 tests using 11 workers\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n[1/11] [chromium] \u203a apps/storybook/src/tests/sk-workflow-board.spec.ts:424:9 \u203a workflow board stories are non-vacuous and console-clean \u203a default ren"
     }
   ]
 }
