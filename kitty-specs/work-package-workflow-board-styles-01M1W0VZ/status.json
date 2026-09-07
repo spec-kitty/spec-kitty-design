@@ -30,7 +30,8 @@
       "model": "__resolved_model_absent__",
       "notes": [
         "Codex implementation seat started in authorized primary clone; runtime worktree path intentionally unused per programme contract",
-        "Implementation and T007 exact-head evidence complete; ready for independent Codex runtime review."
+        "Implementation and T007 exact-head evidence complete; ready for independent Codex runtime review.",
+        "Independent Codex runtime review approved all FR/NFR/SC/NI contracts with no findings; source-certified head and exact-head CI are green."
       ],
       "provider": "__resolved_provider_absent__",
       "review_result": {
