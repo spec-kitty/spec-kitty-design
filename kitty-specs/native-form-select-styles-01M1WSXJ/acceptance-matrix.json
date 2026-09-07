@@ -189,9 +189,9 @@
     },
     {
       "invariant_id": "NI-006-packed-css-subpath-present",
-      "description": "The built styles tarball contains form-select/sk-form-select.css without side-effect CSS import from the TypeScript barrel",
+      "description": "The release graph proves the packed form-select CSS subpath and the root TypeScript barrel contains no side-effect CSS import",
       "verification_method": "custom_command",
-      "verification_command": "node scripts/check-release-graph.mjs",
+      "verification_command": "node scripts/check-release-graph.mjs && ! rg -n --pcre2 \"(?:from\\\\s+|import\\\\s*)[\\u0027\\u0022][^\\u0027\\u0022]+\\\\.css[\\u0027\\u0022]\" packages/styles/src/index.ts",
       "result": "pending",
       "evidence": null
     }
