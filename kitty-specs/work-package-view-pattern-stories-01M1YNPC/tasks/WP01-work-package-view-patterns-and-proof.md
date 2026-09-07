@@ -48,9 +48,9 @@ requirement_refs:
 planning_base_branch: mission/work-package-view-pattern-stories
 merge_target_branch: mission/work-package-view-pattern-stories
 branch_strategy: Planning artifacts for this mission were generated on mission/work-package-view-pattern-stories. During /spec-kitty.implement this WP may branch from a dependency-specific base, but completed changes must merge back into mission/work-package-view-pattern-stories unless the human explicitly redirects the landing branch.
-base_branch: train/elements-first
-base_commit: f026d6939e0a6037b8b5ad04cc97d53e3e7eecec
-created_at: '2026-09-07T19:55:00Z'
+base_branch: kitty/mission-work-package-view-pattern-stories-01M1YNPC
+base_commit: d75afdddde2f12193f18121a4cea1a67eee9b5a9
+created_at: '2026-09-07T20:11:06.316333+00:00'
 subtasks:
 - T001
 - T002
