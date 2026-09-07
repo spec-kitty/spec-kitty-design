@@ -25,10 +25,8 @@
   padding-block: var(--sk-space-2);
   padding-inline: var(--sk-space-3);
   color: var(--sk-fg-muted);
-  font-family: var(--sk-font-sans);
   font-size: var(--sk-text-xs);
   font-weight: var(--sk-weight-semibold);
-  overflow-wrap: anywhere;
 }
 
 .sk-context-nav__list,
@@ -54,23 +52,20 @@
   gap: var(--sk-space-3);
   padding-block: var(--sk-space-2);
   padding-inline: var(--sk-space-3);
-  color: var(--sk-fg-body);
-  background: var(--sk-surface-card);
-  border-inline-start-color: var(--sk-surface-card);
+  color: inherit;
+  background: transparent;
+  border-inline-start-color: transparent;
   border-inline-start-style: solid;
   border-inline-start-width: var(--sk-border-width-1);
   border-radius: var(--sk-radius-sm);
-  font-family: var(--sk-font-sans);
-  font-size: var(--sk-text-sm);
   font-weight: var(--sk-weight-normal);
   line-height: normal;
   text-decoration: none;
-  overflow-wrap: anywhere;
 }
 
 .sk-context-nav__link:link,
 .sk-context-nav__link:visited {
-  color: var(--sk-fg-body);
+  color: inherit;
 }
 
 .sk-context-nav__link:hover {
@@ -119,7 +114,6 @@
 .sk-context-nav__label {
   flex: 1 1 auto;
   min-inline-size: 0;
-  overflow-wrap: anywhere;
 }
 
 .sk-context-nav__children {
@@ -139,9 +133,6 @@
   padding-block: var(--sk-space-2);
   padding-inline: var(--sk-space-3);
   color: var(--sk-fg-muted);
-  font-family: var(--sk-font-sans);
-  font-size: var(--sk-text-sm);
-  overflow-wrap: anywhere;
 }
 
 .sk-context-nav__overflow-link {
@@ -149,19 +140,16 @@
   align-items: center;
   min-block-size: var(--sk-space-9);
   margin-inline: var(--sk-space-3);
-  color: var(--sk-fg-body);
-  font-family: var(--sk-font-sans);
-  font-size: var(--sk-text-sm);
+  color: inherit;
   font-weight: var(--sk-weight-medium);
   text-decoration-line: underline;
   text-decoration-thickness: var(--sk-border-width-1);
   text-underline-offset: var(--sk-space-1);
-  overflow-wrap: anywhere;
 }
 
 .sk-context-nav__overflow-link:link,
 .sk-context-nav__overflow-link:visited {
-  color: var(--sk-fg-body);
+  color: inherit;
 }
 
 .sk-context-nav__overflow-link:hover {

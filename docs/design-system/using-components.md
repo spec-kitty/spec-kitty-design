@@ -592,8 +592,8 @@ an ordinary native link with `sk-context-nav__overflow-link`; the styles infer n
 There is no JavaScript behavior, routing, selection logic, count limit, or generated content.
 
 The stylesheet depends on these existing semantic tokens: `--sk-fg-body`, `--sk-fg-default`,
-`--sk-fg-muted`, `--sk-surface-card`, `--sk-surface-muted`, `--sk-surface-pill`,
-`--sk-border-focus`, `--sk-border-strong`, `--sk-border-width-1`, `--sk-border-width-2`,
+`--sk-fg-muted`, `--sk-surface-muted`, `--sk-surface-pill`, `--sk-color-accent`,
+`--sk-border-strong`, `--sk-border-width-1`, `--sk-border-width-2`,
 `--sk-border-width-4`, `--sk-font-sans`, `--sk-text-xs`, `--sk-text-sm`,
 `--sk-weight-normal`, `--sk-weight-medium`, `--sk-weight-semibold`, `--sk-radius-sm`, and
 `--sk-space-1`, `--sk-space-2`, `--sk-space-3`, `--sk-space-4`, `--sk-space-5`, and

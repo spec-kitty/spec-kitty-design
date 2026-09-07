@@ -265,6 +265,14 @@ test.describe('sk-context-nav source, markup, and distribution contract', () => 
     expect(unpairedVisitedSelectors(source)).toEqual([]);
     expect((code.match(/:visited/g) ?? []).length).toBe(2);
 
+    const ordinaryLinkDeclarations = new Map<string, string>();
+    postcss.parse(source, { from: CONTEXT_NAV_CSS }).walkRules('.sk-context-nav__link', (rule) => {
+      rule.walkDecls((declaration) => ordinaryLinkDeclarations.set(declaration.prop, declaration.value));
+    });
+    expect(ordinaryLinkDeclarations.get('color')).toBe('inherit');
+    expect(ordinaryLinkDeclarations.get('background')).toBe('transparent');
+    expect(ordinaryLinkDeclarations.get('border-inline-start-color')).toBe('transparent');
+
     const currentSelectors: string[] = [];
     postcss.parse(source, { from: CONTEXT_NAV_CSS }).walkRules((rule) => {
       currentSelectors.push(...selectorStrings(rule.selector).filter((selector) => selector.includes('[aria-current')));
@@ -350,6 +358,12 @@ test.describe('sk-context-nav source, markup, and distribution contract', () => 
     expect(section).toMatch(/ADR-10/);
     expect(section).toMatch(/sk-context-sidebar/);
     expect(section).toMatch(/no (?:JavaScript )?behavio(?:u)?r/i);
+
+    const dependencyClaim = section.match(/The stylesheet depends on these existing semantic tokens:([\s\S]*?)\n\n/);
+    expect(dependencyClaim).not.toBeNull();
+    const documentedTokens = new Set(dependencyClaim![1]!.match(/--sk-[a-z0-9-]+/g) ?? []);
+    const stylesheetTokens = new Set(readFileSync(CONTEXT_NAV_CSS, 'utf8').match(/var\((--sk-[a-z0-9-]+)/g)?.map((value) => value.slice(4)) ?? []);
+    expect([...documentedTokens].sort()).toEqual([...stylesheetTokens].sort());
   });
 });
 
@@ -610,15 +624,11 @@ test.describe('sk-context-nav state and resilience contract', () => {
     });
     expect(colors.outlineStyle).not.toBe('none');
     expect(Number.parseFloat(colors.outlineWidth)).toBeGreaterThan(0);
-    for (const [surface, background] of [
-      ['link', colors.linkBackground],
-      ['frame', colors.frameBackground],
-    ] as const) {
-      expect(
-        contrastRatio(colors.outlineColor, background),
-        `${colors.outlineColor} focus outline against ${surface} background ${background}`,
-      ).toBeGreaterThanOrEqual(3);
-    }
+    expect(colors.linkBackground).toBe('rgba(0, 0, 0, 0)');
+    expect(
+      contrastRatio(colors.outlineColor, colors.frameBackground),
+      `${colors.outlineColor} focus outline against frame background ${colors.frameBackground}`,
+    ).toBeGreaterThanOrEqual(3);
   });
 
   test('primary rows meet the minimum target and visited history remains presentation-neutral', async ({ page }) => {
@@ -716,15 +726,19 @@ test.describe('sk-context-nav state and resilience contract', () => {
     const darkNav = (await openStory(page, 'default')).nav;
     const dark = await darkNav.evaluate((node) => ({
       color: getComputedStyle(node).color,
+      frameBackground: getComputedStyle(node.closest('[data-context-nav-story-frame]')!).backgroundColor,
       linkBackground: getComputedStyle(node.querySelector('.sk-context-nav__link')!).backgroundColor,
     }));
     const lightNav = (await openStory(page, 'light-mode')).nav;
     expect(await lightNav.locator('xpath=ancestor::*[contains(concat(" ", normalize-space(@class), " "), " sk-light ")]').count()).toBeGreaterThan(0);
     const light = await lightNav.evaluate((node) => ({
       color: getComputedStyle(node).color,
+      frameBackground: getComputedStyle(node.closest('[data-context-nav-story-frame]')!).backgroundColor,
       linkBackground: getComputedStyle(node.querySelector('.sk-context-nav__link')!).backgroundColor,
     }));
     expect(light.color).not.toBe(dark.color);
-    expect(light.linkBackground).not.toBe(dark.linkBackground);
+    expect(light.frameBackground).not.toBe(dark.frameBackground);
+    expect(light.linkBackground).toBe('rgba(0, 0, 0, 0)');
+    expect(dark.linkBackground).toBe('rgba(0, 0, 0, 0)');
   });
 });
