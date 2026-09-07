@@ -37,7 +37,7 @@
       "wp": "WP01"
     },
     "#225": {
-      "evidence_ref": "PR #249; CI run 34101668195 jobs 101677273183 (844.3s) and 101685458981 (839.8s), 157/157 arms green, 10/10 guards",
+      "evidence_ref": "PR #249; CI run 34119467072 jobs 101733926149 (679.4s), 101738107560 (672.7s), 101742264649 (687.4s), 157/157 arms green, 10/10 guards; ceiling 1045.7 = 687.4 x 1.5213",
       "fr": [
         "FR-001",
         "FR-002",
@@ -102,7 +102,7 @@
       "wp": "WP01"
     },
     "#241": {
-      "evidence_ref": "Its 165-arm set projects to ~889s on the slow runner class against the new 1100s ceiling; it must be rebased onto this train and re-run to be measured rather than projected. Not touched by this mission.",
+      "evidence_ref": "Its 165-arm set, measured on a local merge, resolves to 9.58 files per arm once its own sk-time-series-chart.test.ts is converted, projecting 745s against the 1045.7s ceiling. As merged today it FAILS the new scripts/check-behaviour-fixture-imports.mjs gate on that file; converting it is now required rather than suggested. Noted on the PR. Not touched by this mission.",
       "fr": null,
       "nfr": null,
       "repo": "spec-kitty/spec-kitty-design",
@@ -110,6 +110,30 @@
       "scope": "referenced-only",
       "source_file": "spec.md",
       "title": "sk-time-series-chart: a missing interval is a visible gap (#179)",
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
+    },
+    "#250": {
+      "evidence_ref": "Filed by this mission as the measured next lever; it is now the whole of the per-arm fixed block.",
+      "fr": null,
+      "nfr": null,
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": null,
+      "scope": "filed-followup",
+      "source_file": "spec.md",
+      "title": "[ci] the generated React wrappers import the whole elements barrel",
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
+    },
+    "#251": {
+      "evidence_ref": "Filed by this mission after a review lens showed the six retained in-body barrel imports did not assert it and registered-elements.test.ts does not either.",
+      "fr": null,
+      "nfr": null,
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": null,
+      "scope": "filed-followup",
+      "source_file": "spec.md",
+      "title": "[ci] nothing asserts that the elements barrel exports the constructor the registry holds",
       "verdict": "deferred-with-followup",
       "wp": "WP01"
     }

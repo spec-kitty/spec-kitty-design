@@ -285,16 +285,19 @@ in `mutations.json`, or `scripts/suite-selftest.mjs` fails the build.
 
 A purely presentational component owns none of them and adds nothing there.
 
-**Import the element modules the test exercises, not `@spec-kitty/elements`.** Since #225 the
+**Import the element modules the test exercises, never `@spec-kitty/elements`.** Since #225 the
 mutation harness runs each arm against the test files Vitest's dependency graph says the mutated
-source can reach, and one side-effect import of the package barrel puts every element module in
-that test's graph — which is what made the filter inert for the whole of its first day. Take
-named symbols from the module that authors them (`buttonStaticHtml` from
+source can reach, and one import of the package barrel — static or dynamic — puts every element
+module in that test's graph, which is what made the filter inert for the whole of its first day.
+Take named symbols from the module that authors them (`buttonStaticHtml` from
 `button/sk-button.markup.js`, `STATUS_TONES` from `status-indicator/status-tones.js`), and add a
-side-effect import for each element whose tag the file instantiates. Six tests deliberately keep
-an in-body `await import('@spec-kitty/elements')`, because asserting the class the barrel exports
-IS the registered constructor is a claim about the barrel; those files stay in every element
-arm's selection, and that is correct.
+side-effect import for each element whose tag the file instantiates.
+
+This is **enforced**, not requested: `scripts/check-behaviour-fixture-imports.mjs` fails on any
+quoted `@spec-kitty/elements` specifier under `fixtures/elements-behaviour/src/`. `suite-budget.json`'s
+`selftestCeilingSeconds` is derived from how few files each arm runs, so one such import makes the
+committed ceiling stop describing the suite it bounds. A claim *about* the barrel belongs in
+`tests/browser/`, which already imports it and which the gate does not scan.
 
 `suite-selftest.mjs` guard 9 rejects, before any arm runs, a mutation whose `subject` is absent
 from the selection its source resolved to — the case where the filter and `mutations.json`

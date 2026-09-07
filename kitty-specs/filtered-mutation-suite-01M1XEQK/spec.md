@@ -50,7 +50,7 @@ re-exports every element. `sk-button.test.ts` therefore genuinely depends on `sk
 `sk-grid.ts` and every other element module, so a `sk-notice` mutation genuinely could break it.
 The dependency-derived filter cannot narrow what the imports have made wide.
 
-The six behaviour tests that already deep-import their element instead of the barrel —
+The six behaviour tests that already deep-imported their element instead of the barrel —
 `sk-app-shell`, `sk-context-sidebar`, `sk-evidence-chain`, `sk-metric`, `sk-page-header`,
 `sk-personal-rail` — are exactly the six files a `sk-button` mutation does **not** select. The
 pattern that fixes this is already in the repository; it was simply never applied to the rest.
