@@ -37,7 +37,7 @@
       "wp": "WP01"
     },
     "#214": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "WP01 implements #214 at substantive fold commit 3c4e0e21b2aed765e485f53afcd2fb12654f19cd in PR #266.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -45,8 +45,8 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "verdict": "in-mission",
+      "wp": "WP01"
     }
   },
   "schema_version": 1
