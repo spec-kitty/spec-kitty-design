@@ -1,0 +1,407 @@
+/* @spec-kitty/styles — sk-time-series-chart (#179) */
+/* All values use --sk-* tokens only — no hardcoded values, except the system-color
+   keywords under forced-colors — see docs/contributing/adding-a-component.md's
+   "Forced-colors and reduced-motion baselines" section, the canonical owner of that
+   convention; it is not restated here. */
+/*
+ * WHY THE TABLE IS STYLED HERE AND NOT BY `.sk-data-table`, measured rather than assumed.
+ *
+ * #179 asks for "a real table view of the same series styled with the .sk-data-table
+ * primitive", and its overlap section says "the tabular equivalent uses the light-DOM
+ * primitive". That is not constructible under this repo's own gates:
+ *
+ *   - scripts/build-elements-css.mjs derives its work set from the ELEMENTS
+ *     (packages/elements/src/**\/sk-<name>.ts) and generates each module from
+ *     packages/styles/src/<name>/sk-*.css — the component's OWN directory only. There is no
+ *     sk-data-table element (packages/styles/src/data-table/index.ts says so, deliberately,
+ *     citing ADR-10), so there is no sk-data-table.css.js to adopt, and the same script
+ *     sweeps an orphan generated module.
+ *   - scripts/check-adopted-css-boundaries.mjs requires the LEFTMOST COMPOUND of every
+ *     selector in an adopted sheet to be owned by the element, matched against
+ *     ^sk-<name>($|__|--). A rule whose leftmost compound is `.sk-data-table` is rejected
+ *     in this file by name.
+ *   - A light-DOM class cannot reach into a shadow root at all. That is ADR-9's subject.
+ *
+ * sk-transition-matrix is the standing precedent and resolves it the same way: a native
+ * <table> in its own root with its own `__scroller`/`__table` rules. What is copied here is
+ * that primitive's MARKUP CONTRACT, verbatim, because that is the part that is actually
+ * load-bearing for accessibility:
+ *
+ *     <div class="…__scroller" [role="region" aria-label="…" tabindex="0" when it OVERFLOWS]>
+ *       <table class="…__table">
+ *         <caption>…</caption>
+ *         <thead><tr><th scope="col">…</th>…</tr></thead>
+ *         <tbody>…</tbody>
+ *       </table>
+ *     </div>
+ *
+ * including sk-data-table.css's own measurement that the role/label/tabindex triad on a
+ * scroller that does not genuinely overflow is a dead tab stop and a duplicate landmark, and
+ * its rule that the table is NEVER reflowed — no `display: block` on tr/td/th at any
+ * breakpoint. The divergence is filed as an issue rather than decided here.
+ */
+
+:host {
+  display: block;
+  min-inline-size: 0;
+}
+
+.sk-time-series-chart {
+  min-inline-size: 0;
+  margin: 0;
+  color: var(--sk-fg-body);
+  font-family: var(--sk-font-sans);
+}
+
+.sk-time-series-chart__description {
+  margin: 0 0 var(--sk-space-4);
+  color: var(--sk-fg-muted);
+  font-size: var(--sk-text-sm);
+}
+
+/* ── Legend ─────────────────────────────────────────────────────────────────
+   The legend carries the same three channels the plot does — ink, dash pattern
+   and marker shape — because ink is the one of the three that disappears under
+   forced-colors and in greyscale. */
+.sk-time-series-chart__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sk-space-2) var(--sk-space-5);
+  margin: 0 0 var(--sk-space-3);
+  padding: 0;
+  list-style: none;
+}
+
+.sk-time-series-chart__legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sk-space-2);
+  color: var(--sk-fg-muted);
+  font-size: var(--sk-text-xs);
+}
+
+.sk-time-series-chart__legend-mark {
+  display: block;
+  inline-size: var(--sk-space-10);
+  block-size: var(--sk-space-4);
+  flex: none;
+}
+
+/* ── Plot ───────────────────────────────────────────────────────────────── */
+.sk-time-series-chart__plot {
+  min-inline-size: 0;
+  margin: 0 0 var(--sk-space-4);
+  padding: var(--sk-space-2);
+  background: var(--sk-surface-card);
+  border: var(--sk-border-width-1) solid var(--sk-border-default);
+  border-radius: var(--sk-radius-md);
+}
+
+/* preserveAspectRatio is "xMidYMid meet", not "none". `none` distorts every marker
+   shape and every dash pattern with the viewport, and marker shape and dash pattern
+   are two of this component's three differentiation channels — the two that have to
+   survive when ink collapses. A fixed 1000x320 ratio costs a little vertical space
+   and keeps them honest. */
+.sk-time-series-chart__graphic {
+  display: block;
+  inline-size: 100%;
+  min-inline-size: 0;
+  block-size: auto;
+  max-block-size: var(--sk-chart-plot-block-size);
+}
+
+.sk-time-series-chart__grid {
+  stroke: var(--sk-chart-grid);
+  stroke-width: var(--sk-border-width-1);
+}
+
+.sk-time-series-chart__baseline {
+  stroke: var(--sk-chart-baseline);
+  stroke-width: var(--sk-border-width-2);
+}
+
+/* ── Gaps ───────────────────────────────────────────────────────────────────
+   A gap is a DRAWN OBJECT, not the absence of one. The band is the low-emphasis
+   carrier; the two dashed edges are what make it discoverable without colour,
+   which is why they are stroked rather than filled — `fill` flattens to Canvas
+   under forced-colors and a stroke does not. */
+.sk-time-series-chart__gap-band {
+  fill: var(--sk-chart-gap-fill);
+}
+
+.sk-time-series-chart__gap-edge {
+  fill: none;
+  stroke: var(--sk-chart-gap);
+  stroke-width: var(--sk-border-width-2);
+  stroke-dasharray: var(--sk-chart-gap-dash);
+}
+
+/* An ANNOTATED gap is one whose duration met a threshold the CONSUMER supplied.
+   It is outlined as well as filled, and it is the only gap that also emits a
+   visible note below the plot. Nothing here is inferred from the data. */
+.sk-time-series-chart__gap--annotated .sk-time-series-chart__gap-band {
+  stroke: var(--sk-chart-gap);
+  stroke-width: var(--sk-border-width-1);
+  stroke-dasharray: var(--sk-chart-gap-dash);
+}
+
+.sk-time-series-chart__gap-notes {
+  margin: 0 0 var(--sk-space-4);
+  padding: 0;
+  list-style: none;
+  color: var(--sk-fg-muted);
+  font-size: var(--sk-text-xs);
+}
+
+.sk-time-series-chart__gap-note {
+  margin: 0;
+  padding: var(--sk-space-1) 0;
+}
+
+/* ── Series lines and markers ───────────────────────────────────────────────
+   THREE channels, deliberately redundant: ink (--sk-chart-series-N), dash
+   pattern (--sk-chart-dash-N) and marker shape (chosen in the element's own
+   geometry). Ink is the only one of the three that collapses under
+   forced-colors and in greyscale, so the other two carry the differentiation
+   there. */
+.sk-time-series-chart__line {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: var(--sk-chart-stroke-width);
+}
+
+.sk-time-series-chart__line--channel-1 {
+  stroke: var(--sk-chart-series-1);
+  stroke-dasharray: var(--sk-chart-dash-1);
+}
+
+.sk-time-series-chart__line--channel-2 {
+  stroke: var(--sk-chart-series-2);
+  stroke-dasharray: var(--sk-chart-dash-2);
+}
+
+.sk-time-series-chart__line--channel-3 {
+  stroke: var(--sk-chart-series-3);
+  stroke-dasharray: var(--sk-chart-dash-3);
+}
+
+.sk-time-series-chart__line--channel-4 {
+  stroke: var(--sk-chart-series-4);
+  stroke-dasharray: var(--sk-chart-dash-4);
+}
+
+/* An hourly SEGMENT is an aggregate, not an observation. It is drawn heavier and
+   its markers are hollow, so the difference survives greyscale and forced-colors
+   without spending the dash channel, which already carries series identity. */
+.sk-time-series-chart__line--hour {
+  stroke-width: calc(var(--sk-chart-stroke-width) * 2);
+}
+
+.sk-time-series-chart__marker {
+  stroke-width: var(--sk-border-width-2);
+}
+
+.sk-time-series-chart__marker--channel-1 {
+  fill: var(--sk-chart-series-1);
+  stroke: var(--sk-chart-series-1);
+}
+
+.sk-time-series-chart__marker--channel-2 {
+  fill: var(--sk-chart-series-2);
+  stroke: var(--sk-chart-series-2);
+}
+
+.sk-time-series-chart__marker--channel-3 {
+  fill: var(--sk-chart-series-3);
+  stroke: var(--sk-chart-series-3);
+}
+
+.sk-time-series-chart__marker--channel-4 {
+  fill: var(--sk-chart-series-4);
+  stroke: var(--sk-chart-series-4);
+}
+
+.sk-time-series-chart__marker--hour {
+  fill: var(--sk-surface-card);
+}
+
+.sk-time-series-chart__marker--selected {
+  stroke: var(--sk-border-focus);
+  stroke-width: calc(var(--sk-border-width-2) * 2);
+}
+
+.sk-time-series-chart__resolution-boundary {
+  fill: none;
+  stroke: var(--sk-chart-baseline);
+  stroke-width: var(--sk-border-width-1);
+  stroke-dasharray: var(--sk-chart-gap-dash);
+}
+
+/* ── The paired table: the published representation ─────────────────────────
+   Every value, in source order, with no pointer and no focus. See the header
+   for why these declarations are authored here rather than borrowed. */
+.sk-time-series-chart__scroller {
+  overflow-x: auto;
+  overflow-y: auto;
+  max-block-size: calc(var(--sk-space-10) * 5);
+  border: var(--sk-border-width-1) solid var(--sk-border-default);
+  border-radius: var(--sk-radius-md);
+}
+
+.sk-time-series-chart__scroller:focus-visible {
+  outline: var(--sk-border-width-2) solid var(--sk-border-focus);
+  outline-offset: calc(var(--sk-border-width-2) * -1);
+}
+
+.sk-time-series-chart__table {
+  inline-size: 100%;
+  border-collapse: collapse;
+  color: var(--sk-fg-default);
+  font-family: var(--sk-font-sans);
+  font-size: var(--sk-text-sm);
+}
+
+.sk-time-series-chart__caption {
+  padding: var(--sk-space-2) var(--sk-space-3);
+  color: var(--sk-fg-muted);
+  font-size: var(--sk-text-xs);
+  text-align: left;
+}
+
+.sk-time-series-chart__table th,
+.sk-time-series-chart__table td {
+  padding: var(--sk-space-2) var(--sk-space-3);
+  border-bottom: var(--sk-border-width-1) solid var(--sk-border-default);
+  text-align: left;
+}
+
+.sk-time-series-chart__table thead th {
+  position: sticky;
+  inset-block-start: 0;
+  color: var(--sk-fg-muted);
+  background: var(--sk-surface-card);
+  border-bottom: var(--sk-border-width-1) solid var(--sk-border-strong);
+  font-weight: var(--sk-weight-medium);
+}
+
+.sk-time-series-chart__value {
+  color: var(--sk-fg-default);
+  font-family: var(--sk-font-mono);
+  overflow-wrap: anywhere;
+}
+
+/* "No data" is a VALUE, not an empty cell and not a zero. It is set apart from a
+   real observation by weight and by the em dash marker the element renders, so
+   the distinction does not depend on ink. */
+.sk-time-series-chart__row--no-data .sk-time-series-chart__value {
+  color: var(--sk-fg-muted);
+  font-family: var(--sk-font-sans);
+  font-style: italic;
+}
+
+.sk-time-series-chart__point {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sk-space-2);
+  margin: 0;
+  padding: var(--sk-space-1) var(--sk-space-2);
+  color: inherit;
+  background: transparent;
+  border: var(--sk-border-width-1) solid transparent;
+  border-radius: var(--sk-radius-sm);
+  font: inherit;
+  text-align: left;
+  transition:
+    background-color var(--sk-motion-duration-fast) var(--sk-motion-ease-out),
+    border-color var(--sk-motion-duration-fast) var(--sk-motion-ease-out);
+}
+
+button.sk-time-series-chart__point {
+  appearance: none;
+  cursor: pointer;
+}
+
+button.sk-time-series-chart__point:hover {
+  background: var(--sk-surface-pill);
+}
+
+button.sk-time-series-chart__point:focus-visible {
+  outline: var(--sk-border-width-2) solid var(--sk-border-focus);
+  outline-offset: calc(var(--sk-border-width-2) * -1);
+}
+
+button.sk-time-series-chart__point[aria-pressed="true"] {
+  background: var(--sk-surface-pill);
+  border-color: var(--sk-border-strong);
+}
+
+.sk-time-series-chart__empty-state {
+  margin: 0;
+  padding: var(--sk-space-6);
+  color: var(--sk-fg-muted);
+  background: var(--sk-surface-card);
+  border: var(--sk-border-width-1) solid var(--sk-border-default);
+  border-radius: var(--sk-radius-md);
+  font-size: var(--sk-text-sm);
+  text-align: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sk-time-series-chart__point {
+    transition: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .sk-time-series-chart__grid,
+  .sk-time-series-chart__baseline,
+  .sk-time-series-chart__resolution-boundary {
+    stroke: CanvasText;
+  }
+
+  /* Ink collapses here — every series line becomes CanvasText. The dash pattern
+     set above is untouched and the marker shape is geometry, so the two survive
+     and the series stay apart. The gap edges keep their own dash and the band
+     flattens to Canvas, which is exactly why the edges are stroked. */
+  .sk-time-series-chart__line {
+    stroke: CanvasText;
+  }
+
+  .sk-time-series-chart__marker {
+    fill: CanvasText;
+    stroke: CanvasText;
+  }
+
+  .sk-time-series-chart__marker--hour {
+    fill: Canvas;
+  }
+
+  .sk-time-series-chart__marker--selected {
+    stroke: Highlight;
+  }
+
+  .sk-time-series-chart__gap-band {
+    fill: Canvas;
+  }
+
+  .sk-time-series-chart__gap-edge {
+    stroke: CanvasText;
+  }
+
+  button.sk-time-series-chart__point:hover {
+    background: Canvas;
+  }
+
+  button.sk-time-series-chart__point[aria-pressed="true"] {
+    border-color: Highlight;
+    border-style: double;
+  }
+
+  button.sk-time-series-chart__point:focus-visible {
+    outline-color: Highlight;
+    outline-style: solid;
+    outline-width: var(--sk-border-width-2);
+  }
+}
