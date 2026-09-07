@@ -138,10 +138,10 @@
       "criterion_id": "FR-014",
       "description": "Verify FR-014 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "Generator drift, root/subpath exports, release graph, packed Vue types, offline load and documentation checks green; CI 34068567976",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T00:32:14.255198+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
