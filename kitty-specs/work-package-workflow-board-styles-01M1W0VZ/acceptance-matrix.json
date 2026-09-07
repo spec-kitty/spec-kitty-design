@@ -221,6 +221,14 @@
       "verification_command": "npx playwright test apps/storybook/src/tests/sk-workflow-board.spec.ts --project=chromium --grep \"renders a visible board without browser errors or page overflow\"",
       "result": "confirmed_absent",
       "evidence": "Command exited 0: Running 11 tests using 11 workers\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n[1/11] [chromium] \u203a apps/storybook/src/tests/sk-workflow-board.spec.ts:424:9 \u203a workflow board stories are non-vacuous and console-clean \u203a default ren"
+    },
+    {
+      "invariant_id": "NI-008",
+      "description": "Empty, one-empty, populated, and fifty-item states do not fake items or drift counts/cardinality.",
+      "verification_method": "custom_command",
+      "verification_command": "npx playwright test apps/storybook/src/tests/sk-workflow-board.spec.ts --project=chromium --grep \"native sections, lists, counts, and source order\"",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: Running 4 tests using 4 workers\n\n\n\n\n\n\n\n[1/4] [chromium] \u203a apps/storybook/src/tests/sk-workflow-board.spec.ts:488:7 \u203a native sections, lists, counts, and source order \u203a OneEmptyLane has exactly one emp"
     }
   ]
 }
