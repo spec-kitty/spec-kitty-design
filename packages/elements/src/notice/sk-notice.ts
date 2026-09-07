@@ -95,15 +95,15 @@ const MARKER: Record<StatusIndicatorTone, string> = {
  * --sk-text-base, --sk-text-lg, --sk-weight-semibold.
  *
  * @element sk-notice
- * @slot heading - A consumer-supplied native heading. The element generates none, so the level stays the consumer's. NOT inside the live region: a heading slotted here is *not* announced, while `message` and the default slot are, so a headline here with the detail in `message` announces the detail only. Put anything that must be heard into `message` or the default slot. Whether the heading should instead sit inside the region is filed as #228 — it changes what every consumer hears, so it is a design decision rather than this element's to take.
+ * @slot heading - A consumer-supplied native heading. The element generates none, so the level stays the consumer's. Rendered INSIDE the live region and first within it, so a headline here is announced ahead of `message` and the default slot (#228). Both live-region roles this element renders are implicitly atomic, so every later re-announcement repeats the heading too; if you want a headline that is seen and never heard, put it outside the notice.
  * @slot marker - A decorative consumer-supplied marker. Falls back to a per-tone glyph.
  * @slot - The message body. Rendered inside the live region, so slotted content is announced with `message`.
  * @slot actions - Trailing consumer-owned controls, such as `sk-button`s.
  * @csspart notice - The notice layout root.
  * @csspart marker - The decorative marker wrapper.
- * @csspart content - The heading, body and actions column.
- * @csspart heading - The consumer heading's wrapper.
- * @csspart body - The message body, and the live region when announcement is on.
+ * @csspart content - The body and actions column.
+ * @csspart heading - The consumer heading's wrapper. Nested inside `body`, and therefore inside the live region when announcement is on.
+ * @csspart body - The heading, the message and the default slot, and the live region when announcement is on.
  * @csspart actions - The trailing actions wrapper.
  * @csspart dismiss - The dismiss control.
  * @fires {CustomEvent<SkNoticeDismissDetail>} sk-notice-dismiss - Requests dismissal; `detail: { tone }`. Bubbles, is composed, and is cancelable. The element never removes itself. After the event, focus moves to the notice host; `preventDefault()` abandons that move and leaves focus on the dismiss control. If you remove the notice in your handler you MUST move focus yourself — the host is gone by then and focus falls to `<body>`.
@@ -240,6 +240,12 @@ export class SkNotice extends LitElement {
     // the accessibility tree twice, and `aria-hidden`-ing the copy to fix that would suppress the
     // very announcements it exists for.
     //
+    // THE HEADING IS INSIDE IT (#228, operator ruling 2026-09-07), and it used to be a sibling
+    // BEFORE it. A consumer following this element's own Dismissible story — `<h3
+    // slot="heading">Deploy failed</h3>` plus the detail in `message` — heard the detail and
+    // never the headline, which is not what `role="alert"` implies to anyone reading that markup.
+    // The whole notice is now announced, heading first.
+    //
     // `keyed()` on the politeness is what keeps the "never toggled onto an existing node" half of
     // #178's requirement honest. Within one politeness the key is stable, so a `message` change
     // re-renders only the text child and the container node itself is preserved — that is the
@@ -252,15 +258,43 @@ export class SkNotice extends LitElement {
     // to `polite` while a message is already set births a node whose text is present at birth —
     // the very "created at the same moment as its content" condition this keying is invoked to
     // avoid. Both spellings are unreliable there; a role mutated onto a node already holding text
-    // is the worse of the two, so that is the one this avoids. The reliable path remains the one
-    // the docs give consumers: set the politeness first, then assign the message.
+    // is the worse of the two, so that is the one this avoids.
+    //
+    // #228 WIDENED THAT HAZARD IN TWO WAYS, and this paragraph is wider than it was because the
+    // caveat it replaced was measurably too narrow once the heading moved inside:
+    //
+    //   1. THE ESCAPE IS NARROWER. The old wording closed with "the reliable path remains the one
+    //      the docs give consumers: set the politeness first, then assign the message". That path
+    //      relied on the region being EMPTY at birth. With the heading inside, a consumer who
+    //      slots one — which the stories, the docs and #228's own example all do — births a region
+    //      that already holds text no matter when `message` is assigned. The recommended ordering
+    //      still helps, because the message still arrives as a mutation to an existing node, but
+    //      it no longer produces an empty-at-birth region and the old sentence claimed it did.
+    //
+    //   2. EVERY RE-ANNOUNCEMENT NOW CARRIES THE HEADING, permanently, not just at birth. Both
+    //      roles this element renders are implicitly ATOMIC, and that is a looked-up fact rather
+    //      than an inference: `role="alert"` is equivalent to `aria-live="assertive"` AND
+    //      `aria-atomic="true"`, and `role="status"` has an implicit `aria-live` of `polite` and
+    //      an implicit `aria-atomic` of `true` (MDN, ARIA alert_role / status_role; WAI-ARIA 1.2
+    //      §5.4 "Implicit Value for Role"). An atomic region is presented WHOLE when any part of
+    //      it changes. That is precisely what makes the ruling work:
+    //      changing `message` alone re-reads "Deploy failed. Retrying in 2s", not "Retrying in
+    //      2s". It is also the cost: a notice that updates a countdown repeats its headline on
+    //      every tick. Nothing here can trim that without taking the heading back out, so it is a
+    //      documented consequence rather than a defect — see the migration line in
+    //      docs/design-system/changelog.md.
+    //
+    // What has NOT changed: within one politeness the region node is still preserved across a
+    // message change, so the heading is not re-created either, and the node-identity assertions in
+    // the behaviour fixture still hold with a heading in scope.
     const body = keyed(
       announce,
       html`<div
         part="body"
         class="sk-notice__body"
         role=${announce === 'off' ? nothing : ROLE[announce]}
-      >${this.message}<slot></slot></div>`,
+      ><div part="heading" class="sk-notice__heading"><slot name="heading"></slot></div>${this
+        .message}<slot></slot></div>`,
     );
 
     return html`<div part="notice" class="sk-notice sk-notice--${tone}" data-tone=${tone}>
@@ -268,7 +302,6 @@ export class SkNotice extends LitElement {
         ><slot name="marker">${MARKER[tone]}</slot></span
       >
       <div part="content" class="sk-notice__content">
-        <div part="heading" class="sk-notice__heading"><slot name="heading"></slot></div>
         ${body}
         <div part="actions" class="sk-notice__actions"><slot name="actions"></slot></div>
       </div>

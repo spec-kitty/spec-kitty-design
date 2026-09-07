@@ -129,7 +129,7 @@ first paint without a timer. */
  *
  * - `(default)`: The message body. Rendered inside the live region, so slotted content is announced with `message`.
  * - `actions`: Trailing consumer-owned controls, such as `sk-button`s.
- * - `heading`: A consumer-supplied native heading. The element generates none, so the level stays the consumer's. NOT inside the live region: a heading slotted here is *not* announced, while `message` and the default slot are, so a headline here with the detail in `message` announces the detail only. Put anything that must be heard into `message` or the default slot. Whether the heading should instead sit inside the region is filed as #228 — it changes what every consumer hears, so it is a design decision rather than this element's to take.
+ * - `heading`: A consumer-supplied native heading. The element generates none, so the level stays the consumer's. Rendered INSIDE the live region and first within it, so a headline here is announced ahead of `message` and the default slot (#228). Both live-region roles this element renders are implicitly atomic, so every later re-announcement repeats the heading too; if you want a headline that is seen and never heard, put it outside the notice.
  * - `marker`: A decorative consumer-supplied marker. Falls back to a per-tone glyph.
  *
  * ## CSS Parts
@@ -137,10 +137,10 @@ first paint without a timer. */
  * Custom selectors for styling elements within the component.
  *
  * - `actions`: The trailing actions wrapper.
- * - `body`: The message body, and the live region when announcement is on.
- * - `content`: The heading, body and actions column.
+ * - `body`: The heading, the message and the default slot, and the live region when announcement is on.
+ * - `content`: The body and actions column.
  * - `dismiss`: The dismiss control.
- * - `heading`: The consumer heading's wrapper.
+ * - `heading`: The consumer heading's wrapper. Nested inside `body`, and therefore inside the live region when announcement is on.
  * - `marker`: The decorative marker wrapper.
  * - `notice`: The notice layout root.
  */

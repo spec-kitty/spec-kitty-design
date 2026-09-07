@@ -32,6 +32,49 @@ const partOf = (element: Element, name: string) =>
 const liveRegion = (element: Element) =>
   element.shadowRoot!.querySelector('[role="alert"], [role="status"]') as HTMLElement | null;
 
+// WHAT AN ASSISTIVE TECHNOLOGY ACTUALLY GETS FROM THE REGION — and it is NOT `textContent`.
+//
+// `Element.textContent` does not cross a slot. `message` is a text node in the SHADOW tree, so
+// every assertion below that reads `liveRegion(el).textContent` works; a consumer's slotted
+// heading and slotted body live in the LIGHT tree and are invisible to the same call. An
+// assertion written against `textContent` for slotted content is therefore vacuous — it would
+// have been red before #228's move for the wrong reason, and unsatisfiable after it.
+//
+// This walks the region and follows `assignedNodes({ flatten: true })`, which is the flattened
+// subtree the accessibility tree is built from.
+//
+// AND IT SKIPS WHAT THE ACCESSIBILITY TREE SKIPS, which the first version of this helper did not.
+// A DOM walk that ignores `aria-hidden`, `display: none` and `visibility: hidden` reports text
+// that no screen reader will ever speak, so an assertion built on it is green for a notice that
+// announces the detail alone — the exact pre-#228 defect. Measured on the shipped element before
+// this guard existed: setting either `aria-hidden="true"` or `display: none` on `part="heading"`
+// left BOTH arms of the heading test green ("Deploy failed Retrying in 5s", containment `true`)
+// while the notice announced "Retrying in 5s". The containment arm cannot see it either — the node
+// is still a descendant — so this is a third direction neither arm covered.
+const announcedText = (element: Element) => {
+  const region = liveRegion(element);
+  if (!region) return null;
+  const seen: string[] = [];
+  const walk = (node: Node): void => {
+    if (node instanceof HTMLSlotElement) {
+      for (const assigned of node.assignedNodes({ flatten: true })) walk(assigned);
+      return;
+    }
+    if (node.nodeType === Node.TEXT_NODE) {
+      seen.push(node.textContent ?? '');
+      return;
+    }
+    if (node instanceof Element) {
+      if (node.getAttribute('aria-hidden') === 'true') return;
+      const style = getComputedStyle(node);
+      if (style.display === 'none' || style.visibility === 'hidden') return;
+    }
+    for (const child of Array.from(node.childNodes)) walk(child);
+  };
+  walk(region);
+  return seen.join(' ').replace(/\s+/g, ' ').trim();
+};
+
 const dismissButton = (element: Element) => partOf(element, 'dismiss') as HTMLButtonElement | null;
 
 // ---------------------------------------------------------------------------------------------
@@ -70,13 +113,94 @@ test('announce="off" renders NO live region at all, whatever the tone', async ()
   // Announcement is an explicit property, never a side effect of tone. A `danger` notice that
   // was not asked to announce must be silent — asserting the absence of the node, not merely
   // the absence of a role attribute on a node that is otherwise a live region.
+  //
+  // ASSERTED OVER THE WHOLE SHADOW ROOT, not just the body, since #228. The heading box moved
+  // INSIDE the body, and a move that created a live region where a consumer had asked for none
+  // would be the exact opposite of this element's contract. `[role]` and `[aria-live]` are both
+  // swept because either one alone announces: a `role="status"` carries an implicit `aria-live`
+  // and needs no attribute, and a bare `aria-live` announces with no role.
   for (const tone of STATUS_TONES) {
     const element = await mount({ tone, message: `${tone} happened` });
+    const heading = document.createElement('h3');
+    heading.slot = 'heading';
+    heading.textContent = `${tone} headline`;
+    element.append(heading);
+    await element.updateComplete;
+
     expect(liveRegion(element), `tone=${tone} announced without being asked`).toBe(null);
     expect(partOf(element, 'body')!.hasAttribute('role')).toBe(false);
+    expect(
+      Array.from(element.shadowRoot!.querySelectorAll('[role]')),
+      `tone=${tone}: announce="off" rendered a role somewhere in the shadow root`,
+    ).toEqual([]);
+    expect(
+      Array.from(element.shadowRoot!.querySelectorAll('[aria-live]')),
+      `tone=${tone}: announce="off" rendered an aria-live somewhere in the shadow root`,
+    ).toEqual([]);
     // ...and the message is still VISIBLE. Silent is not invisible.
     expect(partOf(element, 'body')!.textContent).toContain(`${tone} happened`);
+    // ...as is the heading, which still renders inside the (role-less) body box.
+    expect(partOf(element, 'body')!.contains(partOf(element, 'heading'))).toBe(true);
+    expect(heading.assignedSlot!.name).toBe('heading');
   }
+});
+
+test('a slotted heading is INSIDE the live region, so the headline is announced with the detail', async () => {
+  // THE TEST #228's RULING EXISTS FOR. Its red is a heading present and not announced.
+  //
+  // Before the move, `<div part="heading">` was a SIBLING BEFORE the keyed() body that carries
+  // the role. A consumer following this element's own Dismissible story — `<h3
+  // slot="heading">Deploy failed</h3>` plus a detail in `message` — got the detail announced and
+  // the headline silent. The operator ruled that the whole notice is announced, heading first.
+  //
+  // Asserted three ways, because each covers a direction the others cannot see:
+  //
+  //   - CONTAINMENT alone would pass for a heading rendered inside the region but AFTER the
+  //     message, announcing the detail first.
+  //   - FLATTENED TEXT alone would pass for a template that inlined the heading's text without
+  //     the slot, so the consumer's own node never reaches the region.
+  //   - Neither sees a heading REMOVED FROM THE ACCESSIBILITY TREE while staying in the DOM.
+  //     `aria-hidden="true"` or `display: none` on the heading box restores the pre-#228
+  //     behaviour exactly — the notice announces the detail alone — and the node is still a
+  //     descendant, still carrying its text. Measured: before the guard below and the one in
+  //     `announcedText`, both mutations left this test GREEN.
+  //
+  // The third is asserted twice too: `announcedText` now skips those subtrees (so the text arm
+  // reds on its own), and the two attributes are named here so the failure says which one.
+  const element = await mount({ announce: 'assertive', tone: 'danger', message: 'Retrying in 5s' });
+  const heading = document.createElement('h3');
+  heading.slot = 'heading';
+  heading.textContent = 'Deploy failed';
+  element.append(heading);
+  await element.updateComplete;
+
+  const region = liveRegion(element)!;
+  const headingBox = partOf(element, 'heading')!;
+  expect(
+    region.contains(headingBox),
+    'the heading is outside the live region, so a screen reader announces the detail and never the headline',
+  ).toBe(true);
+  // IN the region is not the same as IN the accessibility tree.
+  expect(
+    headingBox.getAttribute('aria-hidden'),
+    'the heading is inside the region but hidden from assistive technology, which announces the detail alone',
+  ).toBe(null);
+  const headingStyle = getComputedStyle(headingBox);
+  expect(
+    headingStyle.display,
+    'the heading is inside the region but display:none, so it is neither seen nor announced',
+  ).not.toBe('none');
+  expect(
+    headingStyle.visibility,
+    'the heading is inside the region but visibility:hidden, so it is neither seen nor announced',
+  ).not.toBe('hidden');
+
+  // ...and the consequence, which also catches any vector the three guards above do not name.
+  expect(announcedText(element)).toBe('Deploy failed Retrying in 5s');
+
+  // ...and the level stays the CONSUMER'S. Moving the box does not license generating one.
+  expect(element.shadowRoot!.querySelector('h1,h2,h3,h4,h5,h6')).toBe(null);
+  expect(heading.assignedSlot!.name).toBe('heading');
 });
 
 test('a CHANGED message with no tone change reaches the live region', async () => {
@@ -87,8 +211,19 @@ test('a CHANGED message with no tone change reaches the live region', async () =
   // nothing re-rendered, so `role="alert"` never fired again and `aria-describedby` pointed at
   // text that was no longer true. Deleting `message: { type: String }` from sk-notice's
   // `static properties` reproduces it exactly, and that is the SC-010 mutation arm.
+  //
+  // A HEADING IS IN SCOPE SINCE #228, because the heading now sits inside the region and this
+  // assertion has to hold with it there rather than only in the headless case. The heading must
+  // survive the message change unchanged, and — because `alert` and `status` are implicitly
+  // atomic — what is re-announced is the whole region, heading included.
   const element = await mount({ announce: 'assertive', tone: 'danger', message: 'Retrying in 5s' });
+  const heading = document.createElement('h3');
+  heading.slot = 'heading';
+  heading.textContent = 'Deploy failed';
+  element.append(heading);
+  await element.updateComplete;
   expect(liveRegion(element)!.textContent).toContain('Retrying in 5s');
+  expect(announcedText(element)).toBe('Deploy failed Retrying in 5s');
 
   element.message = 'Retrying in 2s';
   await element.updateComplete;
@@ -96,28 +231,49 @@ test('a CHANGED message with no tone change reaches the live region', async () =
   expect(element.tone, 'the tone must not have moved — that is the point').toBe('danger');
   expect(liveRegion(element)!.textContent).toContain('Retrying in 2s');
   expect(liveRegion(element)!.textContent).not.toContain('Retrying in 5s');
+  expect(announcedText(element)).toBe('Deploy failed Retrying in 2s');
 });
 
 test('the live-region node is the SAME node across message and tone changes', async () => {
   // Identity, not structure. A live region that is recreated with its content is not reliably
   // announced, so "the text updated" is not sufficient evidence on its own — the node carrying
   // the role has to be the one that was already there.
+  //
+  // AND THE HEADING IS IN SCOPE SINCE #228. It lives inside the region now, so "the node carrying
+  // the role is the one that was already there" has to be true of the heading box too — a
+  // heading re-created on every message change would drop the consumer's own node out of the
+  // accessibility tree and back in, which is the announcement hazard one level down.
   const element = await mount({ announce: 'polite', tone: 'info', message: 'first' });
+  const heading = document.createElement('h3');
+  heading.slot = 'heading';
+  heading.textContent = 'Connection';
+  element.append(heading);
+  await element.updateComplete;
   const first = liveRegion(element)!;
+  const firstHeading = partOf(element, 'heading')!;
+  expect(first.contains(firstHeading)).toBe(true);
 
   element.message = 'second';
   await element.updateComplete;
   expect(liveRegion(element), 'a message change recreated the live region').toBe(first);
+  expect(partOf(element, 'heading'), 'a message change recreated the heading box').toBe(
+    firstHeading,
+  );
 
   element.tone = 'danger';
   await element.updateComplete;
   expect(liveRegion(element), 'a tone change recreated the live region').toBe(first);
+  expect(partOf(element, 'heading'), 'a tone change recreated the heading box').toBe(firstHeading);
 
   element.message = 'third';
   element.tone = 'success';
   await element.updateComplete;
   expect(liveRegion(element), 'a combined change recreated the live region').toBe(first);
+  expect(partOf(element, 'heading'), 'a combined change recreated the heading box').toBe(
+    firstHeading,
+  );
   expect(first.textContent).toContain('third');
+  expect(announcedText(element)).toBe('Connection third');
 });
 
 test('changing the politeness builds a NEW node rather than re-roling the old one', async () => {
@@ -125,7 +281,18 @@ test('changing the politeness builds a NEW node rather than re-roling the old on
   // politeness the node is stable (above); ACROSS politeness levels it must not be, because
   // mutating `role` on a node that is already holding text is precisely the anti-pattern #178
   // names. `keyed()` on the announce level is what produces this.
+  //
+  // SINCE #228 THE NEW NODE IS BORN HOLDING MORE — the heading as well as the message — and the
+  // caveat beside `keyed()` in sk-notice.ts is widened to say so. The trade is unchanged: a role
+  // mutated onto a node already holding text is still the worse of the two spellings, so this is
+  // still the one to avoid. What is asserted here is that the new node really does carry the
+  // consumer's heading, not just the role.
   const element = await mount({ announce: 'polite', message: 'connection lost' });
+  const heading = document.createElement('h3');
+  heading.slot = 'heading';
+  heading.textContent = 'Connection';
+  element.append(heading);
+  await element.updateComplete;
   const before = liveRegion(element)!;
   expect(before.getAttribute('role')).toBe('status');
 
@@ -136,6 +303,8 @@ test('changing the politeness builds a NEW node rather than re-roling the old on
   expect(after, 'the role was toggled onto the node that already held the message').not.toBe(
     before,
   );
+  expect(after.contains(partOf(element, 'heading'))).toBe(true);
+  expect(announcedText(element)).toBe('Connection connection lost');
 });
 
 test('the announcement is not gated on the entrance animation', async () => {
@@ -410,6 +579,89 @@ test('every tone paints a distinct surface, and every tone differs between the t
     );
   }
   assertThemesDiffered(surfaces);
+});
+
+test('moving the heading inside the region did not move it on screen', async () => {
+  // THE GEOMETRY HALF OF #228, asserted as an INVARIANT rather than as a pinned pixel figure.
+  //
+  // Until #228 the heading box was a direct item of the `.sk-notice__content` grid, so the space
+  // below it was one `row-gap` — and it was there even with nothing slotted, because a zero-height
+  // grid item still contributes its gap. Moving the box inside `.sk-notice__body` took that gap
+  // with it, and `sk-notice.css` replaces it with an equal `margin-block-end` on the same box.
+  //
+  // Measured before and after the move on this fixture, every externally observable dimension was
+  // byte-identical — notice height, content height, the heading's offset within the content box,
+  // and the actions row's offset — in all four of {heading, no heading} x {message, no message}.
+  // Only the body box's own height changed, which is the point: it now encloses the heading.
+  //
+  // What is asserted here is the relationships those numbers followed from, not the numbers. A
+  // pinned height would be an engine-and-font measurement and would red on webkit for reasons
+  // that have nothing to do with this component.
+  //
+  // THREE relationships, not one, because `margin == row-gap` alone is not what the geometry
+  // rests on and an earlier revision of this test claimed it was. Measured: force
+  // `::part(content) { display: block }` and `getComputedStyle(content).rowGap` still reads
+  // `8px` — the computed value survives a display type that ignores it — so a lone gap-equality
+  // assertion stays green while the layout moves. It really does move: content height drops
+  // 86 -> 78 with a heading and a message, 38 -> 30 with neither.
+  const element = await mount({ announce: 'polite', message: 'Retrying in 5s' });
+  const content = partOf(element, 'content')!;
+  const headingBox = partOf(element, 'heading')!;
+  const body = partOf(element, 'body')!;
+  const gap = getComputedStyle(content).rowGap;
+  const margin = getComputedStyle(headingBox).marginBlockEnd;
+
+  // 1. The margin is the gap it replaced.
+  expect(gap, 'the content grid lost its row gap; the heading margin no longer replaces it').not.toBe(
+    '0px',
+  );
+  expect(
+    margin,
+    'the heading no longer carries the space the content grid used to supply for it',
+  ).toBe(gap);
+
+  // 2. The content box is still a GRID, which is what supplies the body -> actions gap.
+  expect(
+    getComputedStyle(content).display,
+    'the content box is no longer a grid, so its row gap applies to nothing',
+  ).toBe('grid');
+
+  // 3. The margin stays INSIDE the body box, in BOTH cases where it touches a body edge. This is
+  //    what the grid ITEM buys: a grid item establishes a block formatting context, so the
+  //    margin cannot collapse through the body's edge. Measured by forcing the content box to
+  //    `display: block`, the two escapes look like this:
+  //
+  //      no heading slotted        the zero-height box self-collapses and the margin leaves
+  //                                through the body's TOP edge: top 0 -> 8, height 30 -> 22
+  //      heading, nothing after it the margin leaves through the BOTTOM edge: height 32 -> 24
+  //
+  //    Both are asserted, because a check on only one of them passes for half a regression.
+
+  // 3a. No heading slotted — the margin must still be inside, above the message.
+  const contentTop = content.getBoundingClientRect().top;
+  const bodyRect = body.getBoundingClientRect();
+  expect(
+    Math.round(bodyRect.top - contentTop),
+    "the heading's margin escaped through the body's TOP edge; the body is no longer a BFC root",
+  ).toBe(0);
+  expect(
+    bodyRect.height,
+    "the zero-height heading's self-collapsed margin is no longer inside the body box",
+  ).toBeGreaterThanOrEqual(parseFloat(margin));
+
+  // 3b. A heading with nothing after it — the margin must not leave through the bottom edge.
+  const withHeading = await mount({ announce: 'polite' });
+  const slotted = document.createElement('h3');
+  slotted.slot = 'heading';
+  slotted.textContent = 'Deploy failed';
+  withHeading.append(slotted);
+  await withHeading.updateComplete;
+  const slottedHeadingHeight = partOf(withHeading, 'heading')!.getBoundingClientRect().height;
+  expect(slottedHeadingHeight, 'the slotted heading rendered no box to measure').toBeGreaterThan(0);
+  expect(
+    partOf(withHeading, 'body')!.getBoundingClientRect().height,
+    "the heading's margin escaped through the body's BOTTOM edge; the body is no longer a BFC root",
+  ).toBeGreaterThanOrEqual(slottedHeadingHeight + parseFloat(margin));
 });
 
 test('[SC-013] every declared part is present and targetable from outside', async () => {

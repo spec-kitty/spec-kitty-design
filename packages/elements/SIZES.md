@@ -7,7 +7,7 @@ Components in these artifacts: sk-action-row, sk-app-shell, sk-bar-chart, sk-blo
 
 | artifact | raw | minified | min+gzip | notes |
 |---|---:|---:|---:|---|
-| `ESM  (dist/index.js)` | 159.4 KiB | 107.4 KiB | 22 KiB | `lit` external |
+| `ESM  (dist/index.js)` | 159.5 KiB | 107.5 KiB | 22 KiB | `lit` external |
 | `IIFE (dist/elements.js)` | 176.2 KiB | 117.3 KiB | 26 KiB | runtime bundled |
 
 ## Subresource Integrity — the classic-script bundle (FR-005)
@@ -15,7 +15,7 @@ Components in these artifacts: sk-action-row, sk-app-shell, sk-bar-chart, sk-blo
 For a CDN load of `dist/elements.js`, pin what the browser executes:
 
 ```
-integrity="sha384-BTFy6LFWdjzCEtZ3b2rTCWs/pM81hBlbc38GEGGDUtr9mz6ARzeYPsIWEGTVgPgO"
+integrity="sha384-2MSJyVOGz+YW06UPxB3DxjYPo4p/BxBG1tuq8Y514UAtiSVebcMa11/TEulgvZWd"
 ```
 
 Derived from the built artifact on every run and re-derived by `--check`, so it cannot be
@@ -35,8 +35,8 @@ What a consumer downloads, from a real `npm pack` of each package in the derived
 | package | files | unpacked |
 |---|---:|---:|
 | `@spec-kitty/tokens` | 37 | 5758.7 KiB |
-| `@spec-kitty/styles` | 121 | 253.3 KiB |
-| `@spec-kitty/elements` | 47 | 676.4 KiB |
+| `@spec-kitty/styles` | 121 | 257.4 KiB |
+| `@spec-kitty/elements` | 47 | 676.5 KiB |
 | `@spec-kitty/react` | 58 | 137.2 KiB |
 
 PACKED SIZE IS DELIBERATELY NOT IN THIS TABLE. It is the size of the gzipped tarball and therefore
@@ -82,7 +82,7 @@ unit: every figure in this file is KiB (1024). The WP prompt recorded the IIFE a
 "24.0 KB" where this file would have read 23.5 KiB — **24073 bytes either way**.
 Those two numbers are pinned historical values on purpose. An earlier revision of this
 paragraph interpolated the CURRENT raw size into that comparison, so once the artifact
-grew it asserted that 180380 bytes are "24.0 KB" — false by a factor of
+grew it asserted that 180439 bytes are "24.0 KB" — false by a factor of
 five, in the one paragraph whose whole lesson is to state the basis and the unit. A lens
 caught it.
 
@@ -91,13 +91,13 @@ caught it.
 ```
 $ npx nx run elements:build && node scripts/measure-elements-sizes.mjs
 packages/elements/dist/index.js
-  raw        163249 bytes  (159.4 KiB)
-  minified   110015 bytes  (107.4 KiB)
+  raw        163308 bytes  (159.5 KiB)
+  minified   110070 bytes  (107.5 KiB)
   gzip         33 KiB
   min+gzip     22 KiB
 packages/elements/dist/elements.js
-  raw        180380 bytes  (176.2 KiB)
-  minified   120075 bytes  (117.3 KiB)
+  raw        180439 bytes  (176.2 KiB)
+  minified   120130 bytes  (117.3 KiB)
   gzip         39 KiB
   min+gzip     26 KiB
 ```

@@ -79,9 +79,14 @@ export const AllTones: Story = { render: () => allTones() };
  * point #178 makes: a `danger` notice with `announce="off"` is silent, and a `neutral` one with
  * `announce="assertive"` interrupts. Nothing about the tone decides it.
  *
- * `off` renders NO live region — not an empty one, and not one with the role removed. `polite`
- * renders `role="status"`, `assertive` renders `role="alert"`, and in both cases the node
- * carrying the role exists from that node's first render, before any message reaches it.
+ * `off` renders NO live region — not an empty one, and not one with the role removed, and no
+ * `aria-live` anywhere either. `polite` renders `role="status"`, `assertive` renders
+ * `role="alert"`, and in both cases the node carrying the role exists from that node's first
+ * render, before any message reaches it.
+ *
+ * THE HEADING IS INSIDE THE REGION (#228). Each of the three below slots one, so what an
+ * announcing notice reads is "Announced politely. The deploy failed on three of twelve targets." —
+ * headline first. Before #228 the headline was a sibling before the region and was silent.
  */
 export const AnnounceOff: Story = {
   render: () => frame(notice('danger', { announce: 'off', heading: 'Announcement off' })),
@@ -127,6 +132,12 @@ const wrap = (body: TemplateResult) => html`<div
  *
  * The proof is not this story — a story cannot fail. It is
  * `fixtures/elements-behaviour/src/sk-notice.test.ts`, whose red is a stale message.
+ *
+ * WHAT IS RE-READ IS THE WHOLE REGION, NOT THE DELTA. `role="status"` is implicitly
+ * `aria-atomic="true"`, and since #228 the heading is inside the region — so each press below
+ * announces "Connection. Reconnecting — retrying in 2 seconds", repeating the headline every time.
+ * That repetition is the cost of the headline being heard at all, and it is documented in
+ * `docs/design-system/changelog.md` rather than tuned away here.
  */
 export const MessageChange: Story = {
   render: () => {
@@ -237,7 +248,9 @@ export const LongMessage: Story = {
  *
  * The body slot is rendered INSIDE the live region, so slotted content participates in the
  * announcement exactly as `message` does — a consumer is not forced to choose between structured
- * markup and being announced.
+ * markup and being announced. Since #228 the HEADING slot is inside it too, and first, so this
+ * notice announces "The deploy failed. Three of twelve targets rejected the release bundle. The
+ * failures are all signature mismatches, so the bundle is likely stale rather than broken."
  */
 export const MultiParagraphBody: Story = {
   render: () =>

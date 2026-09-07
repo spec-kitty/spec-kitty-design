@@ -651,9 +651,29 @@ which assistive technology does not reliably announce. **Insert the notice first
 `message`.** The element cannot close this itself without deferring its own first paint behind a
 timer, which is exactly the toast behaviour it is defined not to have.
 
-**The heading level is yours.** Slot a native heading; the element generates none, the same rule
-`sk-section-header` follows. Slot the body as `message` or as real markup — the default slot renders
-inside the live region, so multi-paragraph content is announced too.
+Since #228 that ordering helps but no longer produces an *empty* region when you slot a heading:
+the heading is inside the region, so the region is born holding it. The message still arrives as a
+mutation to a node that already existed, which is the part that matters.
+
+**The heading level is yours, and the heading is announced.** Slot a native heading; the element
+generates none, the same rule `sk-section-header` follows. It renders **inside** the live region and
+first within it, so `<h3 slot="heading">Deploy failed</h3>` with `message="Retrying in 5s"` is heard
+as "Deploy failed. Retrying in 5s" rather than the detail alone. Slot the body as `message` or as
+real markup — the default slot renders inside the live region too, so multi-paragraph content is
+announced.
+
+Both live-region roles the element renders — `role="status"` for `polite`, `role="alert"` for
+`assertive` — are implicitly `aria-atomic="true"`, so **the whole region is re-read on every
+change**, heading included. A notice that updates a countdown repeats its headline on every tick.
+If you want a headline that is seen and never heard, put it outside the notice.
+
+**If you style `::part(body)`, that box grew.** Since #228 it encloses the heading rather than
+starting below it — measured at 600px with a heading, a message and actions, it moves from
+`top 32px, height 22px` to `top 0, height 54px`. The notice's own layout is unchanged, but a
+background, padding, border or `border-radius` on `::part(body)` now frames the headline too.
+`::part()` cannot be followed by a combinator into the shadow tree, so there is no way to re-exclude
+the heading from inside: move the decoration to `::part(notice)` or `::part(content)`, or compensate
+on `::part(heading)`.
 
 **Dismissal is controlled.** `dismissible` renders a real `<button>` with a required accessible name
 (`dismiss-label`, defaulting to "Dismiss notice"). Activating it emits one `sk-notice-dismiss` with

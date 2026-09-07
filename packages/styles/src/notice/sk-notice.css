@@ -132,6 +132,76 @@
   min-width: 0;
 }
 
+/* THE HEADING'S BOTTOM MARGIN IS A REPLACED GRID GAP, not new spacing.
+
+   Until #228 the heading box was a direct item of `.sk-notice__content`, so the
+   space between it and the body was one `gap: var(--sk-space-2)` — including
+   when NO heading was slotted, where the box is a zero-height grid item that
+   still contributes its gap. #228 moved the box inside `.sk-notice__body` so the
+   live region announces the headline, and that gap went with it. This margin is
+   the same distance on the same box, and that is MEASURED rather than reasoned
+   about. Rendered at 600px in the behaviour fixture with the real token sheet,
+   before the move and after it, in px:
+
+     case                        noticeH  contentH  headingH  actionsTop
+     heading + message + actions   120       86        24        62
+     message only                   72       38         0        38
+     heading + actions, no message  98       64        24        40
+     heading + message              96       62        24        62
+
+   Both columns of that table are the same table: the notice's own layout is
+   identical before and after, and so is the position of everything a reader sees.
+
+   WHAT DID MOVE IS `part="body"`'s OWN BOX, and it is a published part, so this
+   is a consumer-visible change rather than an internal one. In the first row it
+   goes from top 32, height 22 to top 0, height 54: it now starts at the top of
+   the content column and encloses the heading. A consumer who paints
+   `::part(body)` — a background, a padding, a border-radius — now paints it
+   around the headline too. `docs/design-system/changelog.md` carries that in the
+   migration line; nothing in this repo's gates catches it, because sk-notice has
+   no visual-regression baseline.
+
+   THE MECHANISM, measured rather than reasoned about — and an earlier revision of
+   this paragraph reasoned, and got it backwards. It said the margin "escapes" the
+   body box. It does not escape; keeping it in is the whole job, and three things
+   do it together:
+
+     1. `.sk-notice__content` is a GRID. That is what supplies the body -> actions
+        gap. Force it to `display: block` and content height drops 86 -> 78 with a
+        heading and a message, and 38 -> 30 with neither.
+     2. `.sk-notice__body` is therefore a grid ITEM, and a grid item establishes a
+        block formatting context, so a margin inside it cannot collapse through its
+        edge.
+     3. When there is content after the heading the margin is between siblings and
+        could not escape anyway.
+
+   (2) is load-bearing in exactly the two cases where the margin touches a body
+   edge, and both were measured by forcing the content box to `display: block`:
+
+     - NO HEADING SLOTTED. The box is zero-height, so its top and bottom margins
+       self-collapse into one 8px margin adjacent to the body's TOP edge. As a grid
+       item the body holds it: body top 0, body height 30 (8 + the 22px message).
+       As a plain block it does not: body top 8, body height 22 — the margin has
+       moved OUTSIDE the body. The rendered result is the same 8px either way,
+       which is why the earlier prose survived; the box it belongs to is not.
+     - HEADING, NO MESSAGE, NO DEFAULT SLOT. Nothing follows the heading, so its
+       margin is adjacent to the body's BOTTOM edge. Grid item: body height 32
+       (24 + 8). Plain block: 24 — escaped, and the heading-to-actions distance
+       collapses with it.
+
+   `fixtures/elements-behaviour/src/sk-notice.test.ts` asserts all three of those
+   relationships rather than the numbers, which are font and engine measurements.
+   All three, because `margin == row-gap` is NOT sufficient on its own: measured,
+   `getComputedStyle(content).rowGap` still reads `8px` after the box stops being a
+   grid, so a lone gap-equality assertion stays green while the layout moves. The
+   test therefore also pins the display type and the containment.
+
+   `margin-block-end`, not `margin-bottom`: the notice is a logical-property
+   component throughout (see the tone edge's `border-inline-start`). */
+.sk-notice__heading {
+  margin-block-end: var(--sk-space-2);
+}
+
 /* The consumer supplies the heading element itself, so this box styles only the
    slot's box. #178 and #146 both require the heading LEVEL to stay the
    consumer's: an element-generated <h2> is an outline defect a consumer cannot
