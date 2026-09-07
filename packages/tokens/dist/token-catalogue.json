@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "generated_at": "2026-09-07T01:32:21.049Z",
+  "generated_at": "2026-09-07T02:05:02.076Z",
   "generated_from": "packages/tokens/src/tokens.css",
   "categories": {
     "color": {
@@ -77,6 +77,26 @@
         "--sk-on-status-attention",
         "--sk-on-status-danger",
         "--sk-on-status-recovery"
+      ]
+    },
+    "chart": {
+      "prefix": "--sk-chart-",
+      "tokens": [
+        "--sk-chart-series-1",
+        "--sk-chart-series-2",
+        "--sk-chart-series-3",
+        "--sk-chart-series-4",
+        "--sk-chart-grid",
+        "--sk-chart-baseline",
+        "--sk-chart-gap",
+        "--sk-chart-gap-fill",
+        "--sk-chart-dash-1",
+        "--sk-chart-dash-2",
+        "--sk-chart-dash-3",
+        "--sk-chart-dash-4",
+        "--sk-chart-gap-dash",
+        "--sk-chart-stroke-width",
+        "--sk-chart-plot-block-size"
       ]
     },
     "status": {
