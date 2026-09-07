@@ -559,6 +559,14 @@
       "verification_command": "! grep -Ei \"(markdown|sanitize|syntax.?highlight|relative.?time|\\\\.sort\\\\(|trust.*infer|domain.*tone)\" packages/elements/src/patterns/work-package-views.stories.ts",
       "result": "confirmed_absent",
       "evidence": "Command exited 0: "
+    },
+    {
+      "invariant_id": "NI-004",
+      "description": "The Storybook pattern imports no Team Kitty application package.",
+      "verification_method": "custom_command",
+      "verification_command": "! grep -Ei \"(team-kitty|spec-kitty-saas)\" packages/elements/src/patterns/work-package-views.stories.ts",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: "
     }
   ]
 }
