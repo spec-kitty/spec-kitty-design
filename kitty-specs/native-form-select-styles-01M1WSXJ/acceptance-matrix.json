@@ -117,11 +117,11 @@
     {
       "criterion_id": "FR-012",
       "description": "Verify FR-012 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "proof_type": "custom_command",
+      "evidence": "3ca42f9; styles generator check, npm-pack CSS subpath, release graph, root no-side-effect barrel green",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T03:30:27.733590+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
