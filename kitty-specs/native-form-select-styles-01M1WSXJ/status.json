@@ -19,13 +19,18 @@
   "work_packages": {
     "WP01": {
       "actor": "codex",
+      "agent": "codex",
       "agent_profile": "frontend-freddy",
       "agent_profile_version": "1.0",
+      "assignee": "codex",
       "force_count": 0,
       "lane": "in_progress",
       "last_event_id": "01M1WXKRX9NCD6NQNH69TWPPFM",
       "last_transition_at": "2026-09-07T03:11:57.865981+00:00",
       "model": "__resolved_model_absent__",
+      "notes": [
+        "Codex frontend-freddy implementation started in the programme-authorized primary clone"
+      ],
       "provider": "__resolved_provider_absent__",
       "role": "implementer"
     }
