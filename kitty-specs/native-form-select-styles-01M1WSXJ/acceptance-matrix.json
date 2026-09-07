@@ -88,10 +88,10 @@
       "criterion_id": "FR-009",
       "description": "Verify FR-009 is satisfied",
       "proof_type": "custom_command",
-      "evidence": "3ca42f9; check-component-token-literals selftest + form-select stylesheet audit green; quality:stylelint green",
+      "evidence": "7cbf6ce5ae27f1d995552deec32f0b463e8dac7f (product tree cf9d5045c0968add9056abc038401a17a7f24e9c); token-literal selftest, stylesheet audit and stylelint green in CI https://github.com/spec-kitty/spec-kitty-design/actions/runs/34081800284",
       "pass_fail": "pass",
       "verified_by": "codex",
-      "verified_at": "2026-09-07T03:30:19.942138+00:00",
+      "verified_at": "2026-09-07T04:36:00.929668+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
