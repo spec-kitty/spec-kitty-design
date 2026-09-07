@@ -476,10 +476,10 @@
       "criterion_id": "NFR-010",
       "description": "CI-authoritative cropped baselines for approved dark, LightMode, narrow, zero or empty, and selectable states receive explicit visual-review disposition against the approved capture.",
       "proof_type": "manual_review",
-      "evidence": "All six CI-derived bar-chart PNGs were inspected against the approved Stitch reference; five are byte-identical to run 34063650759 artifact 9998297436 and selectable is byte-identical to run 34064628144 artifact 9998579352. Exact candidate run 34065216159 passed visual regression 38/38.",
+      "evidence": "All six CI-derived bar-chart baselines were manually inspected against the approved Stitch authority and committed; exact-head CI run 34069071736 passed visual regression 38/38 in 13.3s.",
       "pass_fail": "pass",
       "verified_by": "codex",
-      "verified_at": "2026-09-06T23:17:05.431659+00:00",
+      "verified_at": "2026-09-07T00:58:49.236620+00:00",
       "notes": "Wrap-up owns CI actual-byte provenance, disposition, committed baselines, and fresh green CI.",
       "lane_owners": [],
       "terminal_owner": "mission-wrap-up"
