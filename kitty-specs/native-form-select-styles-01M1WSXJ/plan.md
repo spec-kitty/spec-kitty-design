@@ -10,7 +10,8 @@
 Add a styles-only `form-select` component whose `.sk-form-select` base class is applied directly
 to a native light-DOM `<select>`, plus the sole `.sk-form-select--compact` modifier. Author static
 HTML fixtures as the canonical semantic source, generate their TypeScript barrel with the existing
-styles-only generator, expose the CSS package subpath and aggregate stylesheet, document the
+styles-only generator, expose its generated markup from the aggregate TypeScript barrel and its
+CSS through a package subpath, document the
 native/datalist ownership boundary, and prove the result with cross-browser Playwright semantics,
 axe, Storybook, forced-colors, theme, reflow, zoom and visual checks.
 
@@ -35,7 +36,7 @@ work; Storybook remains inside the repository's three-minute budget
 **Constraints**: authoritative `--sk-*` token values only; real native descendants and form
 semantics; no `appearance:none`, custom arrow or forced-color suppression; generated artifacts
 must reproduce exactly  
-**Scale/Scope**: two public classes, eight authored fixtures, one story module, one focused browser
+**Scale/Scope**: two public classes, seven authored fixtures, one story module, one focused browser
 test module, focused visual entries and distribution/documentation updates
 
 ## Fresh-base reconciliation
@@ -54,7 +55,7 @@ latest train and token vocabulary.
 |---|---|
 | Tokens → styles → elements → wrappers | Styles only. Reuse existing tokens; do not create later-layer artifacts. |
 | ADR-9 styling ownership | Public styling is on a light-DOM class applied to the native node. No shadow root. |
-| ADR-10 canonical markup/distribution | HTML fixtures are authored; `index.ts` is generator-owned; CSS subpath and aggregate import are published. |
+| ADR-10 canonical markup/distribution | HTML fixtures are authored; per-component `index.ts` is generator-owned and re-exported from the root TypeScript barrel; CSS ships through its package subpath. |
 | ADR-11 verification | Applicable semantics are covered in real browsers; generator determinism is checked; element behaviours do not apply. |
 | Component recipe | Lowercase hyphenated directory, BEM `sk-` class, required LightMode/axe/visual coverage and generated documentation surfaces. |
 | Charter testing | Focused red tests precede implementation; no gate is weakened or skipped. |
@@ -78,7 +79,7 @@ kitty-specs/native-form-select-styles-01M1WSXJ/
 │   ├── evidence-log.csv
 │   └── source-register.csv
 ├── tasks.md
-└── tasks/WP01-native-form-select.md
+└── tasks/WP01-native-light-dom-form-select-styles.md
 ```
 
 ### Authored source and documentation
@@ -93,8 +94,7 @@ packages/styles/src/form-select/
 ├── sk-form-select-long-options.html
 ├── sk-form-select-optgroups.html
 ├── sk-form-select-required-invalid.html
-├── sk-form-select-disabled.html
-└── sk-form-select-narrow.html
+└── sk-form-select-disabled.html
 
 apps/storybook/src/tests/
 ├── sk-form-select.spec.ts
@@ -145,7 +145,7 @@ reference.
 
 - **Purpose**: make authored markup and CSS importable through supported public paths with no drift.
 - **Relevant requirements**: FR-012; NFR-003, NFR-008; C-001, C-008.
-- **Affected surfaces**: generator-produced `form-select/index.ts`, aggregate styles entry,
+- **Affected surfaces**: generator-produced `form-select/index.ts`, aggregate TypeScript export,
   `packages/styles/package.json`, generated release/doc surfaces.
 - **Sequencing/depends-on**: IC-01 fixtures exist before generator runs.
 - **Risks**: hand-authoring generated exports, forgetting the package subpath or aggregate import,
@@ -174,22 +174,24 @@ reference.
 
 ## Test-first implementation sequence
 
-1. Rebase onto the live train and rerun the styles-only generator check as a clean baseline.
-2. Add focused failing tests and expected story ids for the absent component. Cover source-level
+1. Complete the Tier-B post-tasks four-profile Codex point-cut and fold every confirmed finding
+   before implementation begins.
+2. Rebase onto the live train and rerun the styles-only generator check as a clean baseline.
+3. Add focused failing tests and expected story ids for the absent component. Cover source-level
    prohibitions (`appearance:none`, replacement indicator, motion, raw design values) as well as
    the live semantic matrix below.
-3. Author the eight canonical HTML fixtures and minimal token-only stylesheet. Keep the UA
+4. Author the seven canonical HTML fixtures and minimal token-only stylesheet. Reuse the T10/default
+   fixture in the Narrow story because narrowness is a viewport axis, not a third class. Keep the UA
    indicator and use native `:focus-visible`, `:invalid` and `:disabled` selectors with an
    additional non-colour state cue where needed.
-4. Run `node scripts/build-styles-only-markup.mjs` to create `form-select/index.ts`; add the
-   aggregate CSS import and `./form-select/*` package export. Regenerate, never edit, shared
-   derived artifacts.
-5. Add stories that render only generated fixture constants. LightMode wraps in `.sk-light` and
+5. Run `node scripts/build-styles-only-markup.mjs` to create `form-select/index.ts`; re-export that
+   generated markup from the root TypeScript barrel and expose CSS separately through
+   `./form-select/*`. Regenerate, never edit, shared derived artifacts.
+6. Add stories that render only generated fixture constants. `Default` is the T10 lane and
+   default-dark evidence route; do not duplicate it as a second `T10Lane` route. LightMode wraps in `.sk-light` and
    proves a computed token-derived difference; forced-colors is exercised through browser media
    emulation, not simulated CSS.
-6. Complete browser/axe/visual coverage and documentation, then run focused-to-full gates.
-7. At the task-complete point-cut, run the four-profile Codex adversarial squad. Fold findings
-   before implementation if tasks expose omissions.
+7. Complete browser/axe/visual coverage and documentation, then run focused-to-full gates.
 8. At pre-merge, fetch/rebase latest train, regenerate, rerun affected and full gates, push the
    exact head, wait for exact-head CI, and rerun all four Codex adversarial lenses.
 
@@ -197,25 +199,34 @@ reference.
 
 | Contract | Fixture / action | Assertion |
 |---|---|---|
-| Native structure | all generated fixtures | root is `select`; children are native option/optgroup; no custom roles |
+| Native structure | all generated fixtures | every `.sk-form-select` is a light-DOM `HTMLSelectElement`; its recursive element descendants are only option/optgroup; form-field/form wrappers are permitted |
 | Label association | T10 lane | clicking label focuses the select; accessible name matches label |
 | Keyboard choice | T10 lane | Arrow Down changes native selected value |
 | Typeahead | option set with unique `d` | typing `d` selects the matching option without library code |
-| Submission | T10/T12 real forms | `FormData` contains selected names/values; T12 yields both independent fields |
+| Submission | T10/T12 real forms | invalid `requestSubmit()` emits zero submit events; after valid selection exactly one canceling submit handler fires and its in-handler `FormData` contains exact pair(s) |
 | Reset | changed selection | `form.reset()` restores authored default |
 | Required validity | empty placeholder | native `valueMissing`; `:invalid`; described help resolves same-root id |
 | Disabled | disabled story | native disabled property; excluded from `FormData`; still legible |
 | Option semantics | optgroup story | native tags, labels and authored order preserved |
 | Long/narrow | long + narrow at 320px | no page-level horizontal overflow or clipped essential content |
+| Full width | Default/T10 | rendered select inline size equals its form-field content-box inline size |
 | Themes | default vs LightMode | `.sk-light` exists and at least one token-derived computed style differs |
 | Forced colors | forced-colors media | focus, invalid, disabled and native indicator remain discernible |
-| Browser zoom | manual 200% evidence, recorded in PR | indicator plus focus/invalid/disabled affordances and content remain available |
+| Browser zoom | actual desktop Chromium at 200%, exact final SHA | record browser/OS/version, exact story URLs, UI zoom procedure, before/after viewport measurements and screenshots for focused Default, RequiredInvalid and Disabled; indicator/state affordances remain visible and content unclipped |
 | Accessibility | required story set | zero axe violations |
 | Visual | named closed-control states | approved stable Chromium baselines; never snapshot an open OS popup |
 
 WebKit remains required in CI even when the local Fedora environment lacks its host libraries. A
 local environment limitation is recorded as such and cannot be used to remove or weaken the CI
 project.
+
+The zoom procedure launches the exact built Storybook head in desktop Chromium, records
+`chromium --version` and OS metadata, applies browser UI zoom to 200% (for example the browser's
+Ctrl-Plus command confirmed by the reduced CSS viewport), captures Default while focused plus
+RequiredInvalid and Disabled, and stores screenshots with the PR evidence. Device-scale-factor,
+viewport resizing and CSS `zoom` are not substitutes. Evidence names the exact git SHA and records
+before/after `innerWidth`, document `scrollWidth/clientWidth`, indicator visibility and clipping
+observations.
 
 ## Verification ladder
 
@@ -250,4 +261,3 @@ deleted, reclassified or given a wider threshold to obtain green.
 No charter violation or new architectural mechanism is proposed. One cohesive work package is the
 smallest reviewable unit because CSS, canonical fixtures, generated barrel, stories and browser
 proof form one public component contract and cannot independently satisfy issue #211.
-

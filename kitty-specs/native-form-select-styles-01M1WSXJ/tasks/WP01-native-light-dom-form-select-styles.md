@@ -64,7 +64,6 @@ create_intent:
 - packages/styles/src/form-select/sk-form-select-optgroups.html
 - packages/styles/src/form-select/sk-form-select-required-invalid.html
 - packages/styles/src/form-select/sk-form-select-disabled.html
-- packages/styles/src/form-select/sk-form-select-narrow.html
 - packages/styles/src/form-select/index.ts
 - packages/styles/src/form-select/sk-form-select-html.stories.ts
 - apps/storybook/src/tests/sk-form-select.spec.ts
@@ -122,7 +121,8 @@ Done means one reviewed head satisfies all of these:
   200% browser zoom. Long labels and 320px layout stay contained. No motion is introduced.
 - All CSS design values resolve through authoritative `--sk-*` tokens. No `appearance:none`,
   replacement arrow or `forced-color-adjust:none` is present.
-- Eight authored fixtures drive the generated barrel. Public aggregate and subpath imports resolve.
+- Seven authored fixtures drive the generated barrel. The root TypeScript export and packed CSS
+  subpath resolve independently.
 - Required T10/T12/state/theme stories are non-empty and axe-clean; LightMode uses `.sk-light` and
   produces a real computed token delta.
 - Documentation states why the primitive stays native light DOM, why #180's free-text datalist is
@@ -146,14 +146,20 @@ the focused command reds only because the new story/surface is absent.
 
 The completed test must assert:
 
-- every generated fixture root is a native `<select>` and descendants are only native
-  `<option>`/`<optgroup>` in authored order; no role replacement or custom option markup;
+- every fixture contains the expected `.sk-form-select` nodes; each is a light-DOM
+  `HTMLSelectElement` whose recursive element descendants are only native `<option>`/`<optgroup>`
+  in authored order, while surrounding form/form-field markup remains permitted; no role
+  replacement or custom option markup;
 - public selector/source inventory is exactly the base and compact classes, with no raw design
   values, motion, `appearance:none`, replacement indicator or forced-colour suppression;
 - label activation/focus, accessible name, ArrowDown choice and unique-prefix typeahead;
-- real form `FormData`, two independent T12 filters, request/submit validity, reset, required
-  `valueMissing`, disabled omission and same-root described help;
+- a canceling submit listener observes zero events from invalid `requestSubmit()`, then exactly one
+  event after valid selection whose in-handler `FormData` has the exact expected pair(s); retain two
+  independent T12 filters, reset, required `valueMissing`, disabled omission and same-root
+  described error help;
 - compact preserves native semantics; long and narrow stories do not create page overflow;
+- Default/T10 is explicitly full-width and its rendered inline size equals its form-field content
+  box inline size;
 - `.sk-light` exists and yields a token-derived computed delta; forced-colors retains focus,
   invalid/disabled cues and UA indicator; all story loads are anti-vacuous.
 
@@ -161,38 +167,48 @@ Do not assert open operating-system popup pixels or engine-private accessibility
 
 ## T002 — Author the exact stylesheet and native fixtures
 
-Create the eight planned `.html` fixtures. Use unique ids within every rendered fixture and native
+Create the seven planned `.html` fixtures. Use unique ids within every rendered fixture and native
 label `for` associations. T10 is a lane-choice form. T12 contains two independently named filter
-selects. Required-invalid starts on an empty placeholder and points to same-root description text.
-Optgroups remain real labelled nodes; long-option and narrow states use ordinary native markup.
+selects. Required-invalid starts on an empty placeholder and points to visible same-root error text,
+which tests assert as the accessible description; do not hard-code `aria-invalid`, because native
+validity changes after selection. Optgroups remain real labelled nodes. Narrow reuses the T10/default
+fixture at a 320px story viewport because narrowness adds no public class or semantic state.
 
 Author minimal CSS for the two classes only. Use existing input surface/border/focus/foreground,
 spacing, radius, type and weight tokens. Keep the UA indicator by leaving `appearance` alone. Do
 not set `outline:none`; use a visible token/system-compatible outline or the existing sanctioned
-focus treatment. Add a non-colour state cue for invalid/disabled if measurement requires it. Keep
+focus treatment. Invalid MUST retain the visible associated error text as its non-colour cue, and
+the focused boundary/outline MUST remain observable. Disabled MUST remain distinguishable by its
+native disabled affordance plus a non-colour cursor/boundary cue. Keep
 `box-sizing:border-box`, `max-inline-size:100%`/`inline-size:100%` token-free structural values as
 per repository conventions. Author no transition, animation or reduced-motion block.
 
 ## T003 — Generate distribution and stories
 
-Run `node scripts/build-styles-only-markup.mjs`; never edit the produced `index.ts`. Add the CSS to
-the aggregate style entry and `./form-select/*` to the package exports. Verify generator check and
-root/subpath resolution.
+Run `node scripts/build-styles-only-markup.mjs`; never edit the produced `index.ts`. Re-export the
+generated form-select markup from `packages/styles/src/index.ts`, add `./form-select/*` to package
+exports, and verify CSS separately at `@spec-kitty/styles/form-select/sk-form-select.css` inside the
+packed tarball. Do not introduce a side-effect CSS import into the TypeScript barrel.
 
-Author the story module solely from generated fixture exports. Expose at least `Default` (T10 dark),
-`T10Lane`, `T12TwoFilters`, `Compact`, `LongOptions`, `Optgroups`, `RequiredInvalid`, `Disabled`,
+Author the story module solely from generated fixture exports. Expose `Default` as the explicitly
+documented T10 lane/default-dark route, plus `T12TwoFilters`, `Compact`, `LongOptions`, `Optgroups`, `RequiredInvalid`, `Disabled`,
 `Narrow`, `ForcedColors`, and `LightMode`. LightMode must wrap in `class="sk-light"`, not inert
-`data-theme`, and every story keeps a11y enabled. Add all ids to `expected-stories.json`.
+`data-theme`, and every story keeps a11y enabled. Add those ids once to `expected-stories.json` and
+recompute its exact `total` in the same change.
 
 ## T004 — Turn live native evidence green
 
 Run the focused spec across configured Chromium, Firefox and WebKit projects where local libraries
 permit; exact-head CI remains mandatory for WebKit. Use real keyboard input and form APIs. Keep
 typeahead deterministic with a unique initial. Assert option tags/order rather than popup AX
-internals. At 320 CSS pixels assert document containment. With forced-colors emulation inspect live
+internals. At 320 CSS pixels assert document containment. Default/T10 must also prove its select's
+rendered inline size equals the containing form field's content-box inline size. With forced-colors emulation inspect live
 focus/invalid/disabled boundaries and preserve the native arrow. Separately inspect at 200% browser
-zoom and record indicator, focus, invalid, disabled and content results in the PR evidence; a narrow
-viewport is not a substitute.
+zoom in desktop Chromium and retain exact-head evidence: OS/browser/version, exact story URLs,
+before/after `innerWidth` and document widths, a UI-level Ctrl-Plus procedure confirmed at 200%,
+and screenshots of focused Default, RequiredInvalid and Disabled. Record indicator/boundary/text
+visibility and clipping observations. CSS zoom, viewport resizing and device-scale emulation are
+not substitutes.
 
 ## T005 — Documentation, axe, visuals and generated surfaces
 
@@ -214,6 +230,12 @@ styles-only generator write+check, styles build, type checks, lint/stylelint/HTM
 full Playwright, Storybook production build, axe, visual regression, release graph/package pack,
 security/lockfile, mutation/self-test where CI invokes them, `npm test`, and `npm run quality:all`.
 
+Use `spec-kitty agent mission acceptance-verdict` to attach exact evidence and verification methods
+to every FR criterion. Execute the predeclared Spec Kitty negative invariants covering: no
+element/wrapper/manifest/behaviour/mutation addition; no forbidden CSS/third public selector; no
+application/demo logic; current generated barrel; and resolvable packed CSS subpath. The scaffolded
+criterion descriptions are runtime-owned placeholders; do not hand-edit the matrix to hide them.
+
 Audit the final diff: no token addition unless a separately governed demonstrated gap exists; no
 element/wrapper/manifest/behaviour/mutation/demo change; no third public selector; no application
 logic; all generated files reproducible; only owned files changed.
@@ -224,5 +246,10 @@ Before pre-merge review, fetch latest train, rebase, regenerate in dependency or
 affected/full gate. Push with `--force-with-lease` only if rebase requires it. Any later push stales
 CI and adversarial evidence and repeats the entire final gate. The outer orchestrator opens the
 `Refs #211`, `part of #208` PR to `train/elements-first`, runs the four exact-head Codex lenses,
-waits for exact-head CI, and owns squash merge/issue/epic closeout.
+waits for exact-head CI, and posts one aggregate adversarial-gate comment naming that SHA with every
+finding folded or deferred to a numbered issue. Any later push reruns CI and all four lenses. The
+orchestrator then owns squash merge/issue/epic closeout.
 
+## Activity Log
+
+- 2026-09-07 — Authored and finalized during the Spec Kitty tasks phase; implementation unclaimed.

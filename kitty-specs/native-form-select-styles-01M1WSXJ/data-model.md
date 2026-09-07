@@ -120,7 +120,6 @@ animation.
     id="required-lane"
     name="lane"
     required
-    aria-invalid="true"
     aria-describedby="required-lane-error"
   >
     <option value="" selected>Choose a lane</option>
@@ -132,9 +131,10 @@ animation.
 </div>
 ```
 
-The maintained exemplar supplies `aria-invalid` and visible help because it is a static reference.
-The actual native invalid condition is `select.validity.valueMissing`. The library never watches
-the value, calls validation APIs, or synchronizes ARIA state.
+The maintained exemplar supplies visible, associated error help while the native required-empty
+condition makes `select.validity.valueMissing` and `:invalid` the sole validity state. It does not
+hard-code `aria-invalid`, which would become stale after a valid selection. The library never
+watches the value, calls validation APIs, or synchronizes ARIA state.
 
 ## Relationships and cardinality
 

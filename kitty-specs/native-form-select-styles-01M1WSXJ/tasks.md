@@ -15,12 +15,12 @@ reviewable 3–7 subtask range.
 | ID | Description | WP | Parallel |
 |---|---|---|---|
 | T001 | Rebase on the latest train, author the focused Playwright/source acceptance contract first, and demonstrate the expected red because the form-select story/surface does not exist (FR-001–FR-014; NFR-001–NFR-010; C-001–C-010). | WP01 | No |
-| T002 | Author the token-only `.sk-form-select` and `.sk-form-select--compact` stylesheet plus eight native select/option/optgroup fixtures, preserving UA indicator, native focus/validity/disabled semantics, long-content containment and zero motion (FR-001–FR-010; NFR-002–NFR-007; C-001–C-004, C-008–C-010). | WP01 | No |
+| T002 | Author the token-only `.sk-form-select` and `.sk-form-select--compact` stylesheet plus seven native select/option/optgroup fixtures, preserving UA indicator, native focus/validity/disabled semantics, full-width/long-content containment and zero motion; Narrow reuses Default/T10 at 320px (FR-001–FR-010; NFR-002–NFR-007; C-001–C-004, C-008–C-010). | WP01 | No |
 | T003 | Generate the styles-only barrel, wire aggregate/subpath exports, and author the axe-enabled Storybook catalogue with T10/T12, compact, long, optgroup, invalid, disabled, narrow, forced-colors, default dark and real `.sk-light` coverage (FR-007, FR-011–FR-013; NFR-001, NFR-004–NFR-009). | WP01 | No |
 | T004 | Turn the focused contract green across native label/keyboard/typeahead/form/reset/validation/disabled/option semantics, 320px reflow, forced-colors, theme delta and available browser projects; record separate 200% zoom evidence (FR-003–FR-013; NFR-001–NFR-009; SC-001–SC-009). | WP01 | No |
 | T005 | Document the native light-DOM rationale, closed-select versus #180 datalist distinction and consumer ownership; add story/visual ratchets and regenerate shared release/documentation outputs without adding element/wrapper/behaviour/mutation surfaces (FR-012–FR-014; NFR-008–NFR-010; C-003–C-009; SC-010–SC-013). | WP01 | No |
-| T006 | Run focused-first and full repository verification: generation drift, release/package resolution, lint/style/type/HTML, Storybook/axe/all-browser Playwright, visual, security, mutation/self-test and `npm run quality:all`; audit every negative boundary (all requirements). | WP01 | No |
-| T007 | Before pre-merge review, fetch and rebase onto current `train/elements-first`, regenerate, rerun all affected/full gates, and produce CI plus four-lens Codex evidence tied to the exact final head; repeat after any later push (FR-012–FR-014; NFR-008–NFR-010; C-002, C-008–C-010; SC-011–SC-013). | WP01 | No |
+| T006 | Run focused-first and full repository verification; use supported Spec Kitty acceptance commands to bind exact evidence to every criterion and execute the predeclared negative invariants for generation drift, forbidden surfaces/selectors/CSS and application logic (all requirements). | WP01 | No |
+| T007 | Before pre-merge review, fetch and rebase onto current `train/elements-first`, regenerate, rerun all affected/full gates, and produce CI plus four-lens Codex evidence and an aggregate finding-disposition comment tied to the exact final head; repeat after any later push (FR-012–FR-014; NFR-008–NFR-010; C-002, C-008–C-010; SC-011–SC-013). | WP01 | No |
 
 No `[P]` marker is valid. T001 creates the red contract. T002 supplies the surface it targets. T003
 needs fixtures before generation and stories before live browser evidence. T004 proves the rendered
@@ -78,4 +78,3 @@ or tests without the stylesheet do not deliver the component.
 The WP stops after implementation and independent Spec Kitty review on the mission branch. The
 programme orchestrator owns the PR into `train/elements-first`, exact-head CI/adversarial comment,
 squash merge, issue closeout and epic checkbox. It must not merge the train into `main`.
-
