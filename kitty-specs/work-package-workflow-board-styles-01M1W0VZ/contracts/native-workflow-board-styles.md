@@ -9,12 +9,12 @@ contract remains issue #209; this artifact records the package-facing seam that 
 The complete public selector inventory is:
 
 - `.sk-workflow-board`
-- `.sk-workflow-board__lanes`
+- `.sk-workflow-board__scroller`
 - `.sk-workflow-lane`
 - `.sk-workflow-lane__header`
 - `.sk-workflow-lane__title`
 - `.sk-workflow-lane__count`
-- `.sk-workflow-lane__items`
+- `.sk-workflow-lane__list`
 
 No modifier, state, item, domain, or tone class is part of this contract. The authored sources are
 `packages/styles/src/workflow-board/sk-workflow-board.css` and
@@ -28,8 +28,8 @@ children are `<li>` elements. Consumers supply lane names, visible counts, item 
 empty-state siblings, and the single lane shown in a mobile route state. The library does not parse,
 derive, filter, select, navigate, fetch, observe, time, animate, or infer any of those values.
 
-The board wrapper receives `role="region"`, an accessible name, and `tabindex="0"` only when measured
-geometry proves horizontal overflow. Consumers remove the complete triad when it fits. The styles
+The `.sk-workflow-board__scroller` receives `role="region"`, an accessible name, and `tabindex="0"`
+only when measured geometry proves horizontal overflow. Consumers remove the complete triad when it fits. The styles
 provide local horizontal scrolling, visible `:focus-visible` treatment, neutral lane boundaries,
 content wrapping, and forced-colors preservation; they do not perform the measurement or mutate ARIA.
 
