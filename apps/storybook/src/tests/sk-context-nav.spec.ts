@@ -727,14 +727,14 @@ test.describe('sk-context-nav state and resilience contract', () => {
     const dark = await darkNav.evaluate((node) => ({
       color: getComputedStyle(node).color,
       frameBackground: getComputedStyle(node.closest('[data-context-nav-story-frame]')!).backgroundColor,
-      linkBackground: getComputedStyle(node.querySelector('.sk-context-nav__link')!).backgroundColor,
+      linkBackground: getComputedStyle(node.querySelector('.sk-context-nav__link:not([aria-current]:not([aria-current="false"]))')!).backgroundColor,
     }));
     const lightNav = (await openStory(page, 'light-mode')).nav;
     expect(await lightNav.locator('xpath=ancestor::*[contains(concat(" ", normalize-space(@class), " "), " sk-light ")]').count()).toBeGreaterThan(0);
     const light = await lightNav.evaluate((node) => ({
       color: getComputedStyle(node).color,
       frameBackground: getComputedStyle(node.closest('[data-context-nav-story-frame]')!).backgroundColor,
-      linkBackground: getComputedStyle(node.querySelector('.sk-context-nav__link')!).backgroundColor,
+      linkBackground: getComputedStyle(node.querySelector('.sk-context-nav__link:not([aria-current]:not([aria-current="false"]))')!).backgroundColor,
     }));
     expect(light.color).not.toBe(dark.color);
     expect(light.frameBackground).not.toBe(dark.frameBackground);
