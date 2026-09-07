@@ -61,7 +61,7 @@
       "wp": null
     },
     "#213": {
-      "evidence_ref": "WP01, WP02, and WP03 independently approved; Spec Kitty mission accepted at final evidence head c4b435c15bc1a0d4d7703fd011a871a7a6b43d46; PR #261 targets train/elements-first.",
+      "evidence_ref": "WP01, WP02, and WP03 independently approved and the Spec Kitty mission accepted; PR #261 targets train/elements-first, with immutable-head CI, zoom, and four-lens evidence recorded on the PR.",
       "fr": null,
       "nfr": null,
       "repo": null,
