@@ -569,6 +569,12 @@ const teamOverviewPatternStory = async (
   await expect(root).toHaveAttribute('data-render-complete', 'true');
   await page.evaluate(() => document.fonts.ready);
   await expect(root.locator('sk-app-shell')).toBeVisible();
+  await expect(root.locator('sk-evidence-chain').locator('[part~="list"]')).toBeVisible();
+  await expect(root.locator('sk-bar-chart').locator('[part~="chart"]')).toBeVisible();
+  await expect(root.locator('sk-transition-matrix').locator('[part~="table"]')).toBeVisible();
+  if (id === 'controlled-interactions') {
+    await expect(root).toHaveAttribute('data-play-proof', 'passed');
+  }
   return root;
 };
 
@@ -598,15 +604,15 @@ for (const visual of teamOverviewFullCases) {
 }
 
 const teamOverviewFocusedCases = [
-  { region: 'rail-identity', name: 'team-overview-rail-identity.png' },
-  { region: 'delivery-evidence', name: 'team-overview-delivery-evidence.png' },
-  { region: 'return-chart', name: 'team-overview-return-chart.png' },
-  { region: 'flow-matrix', name: 'team-overview-flow-matrix.png' },
+  { id: 'default', region: 'rail-identity', name: 'team-overview-rail-identity.png' },
+  { id: 'default', region: 'delivery-evidence', name: 'team-overview-delivery-evidence.png' },
+  { id: 'default', region: 'return-chart', name: 'team-overview-return-chart.png' },
+  { id: 'scale-50-w-ps', region: 'flow-matrix', name: 'team-overview-flow-matrix.png' },
 ] as const;
 
 for (const visual of teamOverviewFocusedCases) {
   test(`Team overview ${visual.region} — focused baseline`, async ({ page }) => {
-    const root = await teamOverviewPatternStory(page, 'default', 1440, 1600);
+    const root = await teamOverviewPatternStory(page, visual.id, 1440, 1600);
     const region = root.locator(`[data-visual-region="${visual.region}"]`).first();
     await region.waitFor({ state: 'visible', timeout: 20000 });
     await expect(region).toHaveScreenshot(visual.name, {

@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/web-components';
-import { expect, fn, within } from 'storybook/test';
+import { expect, fn } from 'storybook/test';
 import { html, nothing, type TemplateResult } from 'lit';
 import '../action-row/sk-action-row.js';
 import '../app-shell/sk-app-shell.js';
@@ -262,7 +262,7 @@ export const TEAM_OVERVIEW_FIXTURE = deepFreeze({
       { id: 'planned', label: 'Planned', count: 12, tone: 'neutral' },
       { id: 'in-progress', label: 'In progress', count: 21, tone: 'info' },
       { id: 'for-review', label: 'For review', count: 13, tone: 'success' },
-      { id: 'blocked', label: 'Blocked', count: 4, tone: 'attention' },
+      { id: 'blocked', label: 'Blocked', count: 4, tone: 'neutral' },
     ],
   },
   operational: {
@@ -328,7 +328,7 @@ export const TEAM_OVERVIEW_FIXTURE = deepFreeze({
               { label: 'Fresh', kind: 'status', tone: 'success' },
             ],
             time: '1 day ago',
-            selectable: false,
+            selectable: true,
           },
           {
             id: 'recent-docs-refresh',
@@ -574,6 +574,31 @@ const patternStyles = html`<style>
     border-inline-start: var(--sk-border-width-4) solid var(--sk-color-accent);
   }
 
+  .sk-pattern-overview__context-navigation {
+    display: block;
+    min-inline-size: 0;
+    inline-size: 100%;
+  }
+
+  .sk-pattern-overview__context-navigation::part(nav) {
+    align-items: stretch;
+    box-sizing: border-box;
+    inline-size: 100%;
+    border-radius: var(--sk-radius-md);
+  }
+
+  .sk-pattern-overview__context-navigation::part(items) {
+    align-items: stretch;
+    display: flex;
+    flex-direction: column;
+    min-inline-size: 0;
+    inline-size: 100%;
+  }
+
+  .sk-pattern-overview__context-navigation::part(hamburger) {
+    display: none;
+  }
+
   .sk-pattern-overview__content {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
@@ -592,6 +617,28 @@ const patternStyles = html`<style>
     grid-template-columns: minmax(0, 1fr);
     min-inline-size: 0;
     gap: var(--sk-space-4);
+  }
+
+  .sk-pattern-overview__delivery-summary,
+  .sk-pattern-overview__flow-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    min-inline-size: 0;
+    gap: var(--sk-space-4);
+  }
+
+  .sk-pattern-overview__flow-layout {
+    grid-template-columns: minmax(0, 1fr) 10rem;
+    align-items: start;
+  }
+
+  .sk-pattern-overview__flow-layout--scale {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .sk-pattern-overview__flow-layout:not(.sk-pattern-overview__flow-layout--scale)
+    .sk-pattern-overview__current sk-grid::part(grid) {
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .sk-pattern-overview [data-visual-region] {
@@ -699,6 +746,15 @@ const patternStyles = html`<style>
     font-weight: var(--sk-weight-bold);
   }
 
+  .sk-pattern-overview__scale-proof {
+    padding: var(--sk-space-3) var(--sk-space-4);
+    color: var(--sk-fg-body);
+    background: var(--sk-surface-muted);
+    border-inline-start: var(--sk-border-width-4) solid var(--sk-color-accent);
+    border-radius: var(--sk-radius-sm);
+    font-size: var(--sk-text-sm);
+  }
+
   .sk-pattern-overview__operational-list li {
     min-inline-size: 0;
   }
@@ -716,13 +772,13 @@ const patternStyles = html`<style>
   }
 
   .sk-pattern-overview__intent-log {
-    display: block;
-    padding: var(--sk-space-3);
-    color: var(--sk-fg-muted);
-    background: var(--sk-surface-muted);
-    border-radius: var(--sk-radius-sm);
-    font-family: var(--sk-font-mono);
-    font-size: var(--sk-text-xs);
+    display: none;
+  }
+
+  @media (max-width: 1100px) {
+    .sk-pattern-overview__flow-layout {
+      grid-template-columns: minmax(0, 1fr);
+    }
   }
 
   @media (max-width: 720px) {
@@ -794,7 +850,7 @@ const recordIntent = <Detail extends object>(
 ): void => {
   callback(event.detail);
   const root = event.currentTarget as HTMLElement;
-  const log = root.querySelector<HTMLOutputElement>('[data-intent-log]');
+  const log = root.querySelector<HTMLElement>('[data-intent-log]');
   if (!log) return;
   const attribute = `data-${kind}-event`;
   const prior = JSON.parse(log.getAttribute(attribute) ?? '{}') as { count?: number };
@@ -806,7 +862,7 @@ const recordIntent = <Detail extends object>(
     cancelable: event.cancelable,
   };
   log.setAttribute(attribute, JSON.stringify(record));
-  log.value = `${kind} intent: ${JSON.stringify(event.detail)}`;
+  log.textContent = `${kind} intent: ${JSON.stringify(event.detail)}`;
 };
 
 export const renderTeamOverview = (
@@ -899,7 +955,7 @@ export const renderTeamOverview = (
             <strong>${fixture.team.name}</strong>
             <span>${fixture.team.repository}</span>
           </div>
-          <sk-nav-pill label="Team sections">
+          <sk-nav-pill class="sk-pattern-overview__context-navigation" label="Team sections">
             ${fixture.shell.contextNavigation.map((item) => html`
               <a
                 class="sk-pattern-overview__context-link"
@@ -922,19 +978,22 @@ export const renderTeamOverview = (
           <section id="delivery-return" aria-labelledby="delivery-return-title">
             <sk-card>
               <div class="sk-pattern-overview__card-content sk-pattern-overview__delivery">
-                <header class="sk-pattern-overview__delivery-heading">
-                  <div class="sk-pattern-overview__title-line">
-                    <h2 id="delivery-return-title">${fixture.delivery.title}</h2>
-                    <span>${fixture.delivery.windowLabel}</span>
-                    <sk-pill-tag>${fixture.delivery.illustrativeLabel}</sk-pill-tag>
-                  </div>
-                  <div>
-                    <strong>${delivery.attributionPercent}% spend attributed</strong>
-                    <p class="sk-pattern-overview__muted">Observed · evidence, not guaranteed ROI</p>
-                  </div>
-                </header>
-                <p>${fixture.delivery.description}</p>
-                <div data-visual-region="delivery-evidence">
+                <div
+                  class="sk-pattern-overview__delivery-summary"
+                  data-visual-region="delivery-evidence"
+                >
+                  <header class="sk-pattern-overview__delivery-heading">
+                    <div class="sk-pattern-overview__title-line">
+                      <h2 id="delivery-return-title">${fixture.delivery.title}</h2>
+                      <span>${fixture.delivery.windowLabel}</span>
+                      <sk-pill-tag>${fixture.delivery.illustrativeLabel}</sk-pill-tag>
+                    </div>
+                    <div>
+                      <strong>${delivery.attributionPercent}% spend attributed</strong>
+                      <p class="sk-pattern-overview__muted">Observed · evidence, not guaranteed ROI</p>
+                    </div>
+                  </header>
+                  <p>${fixture.delivery.description}</p>
                   <sk-evidence-chain .stages=${delivery.evidenceStages}></sk-evidence-chain>
                 </div>
                 <sk-grid variant="cols-2" gap="6">
@@ -996,7 +1055,16 @@ export const renderTeamOverview = (
           <section id="flow-health" aria-label="Flow health and current inventory">
             <sk-card>
               <div class="sk-pattern-overview__card-content sk-pattern-overview__flow">
-                <sk-grid variant="cols-2" gap="6">
+                ${options.scale
+                  ? html`<p class="sk-pattern-overview__scale-proof" data-scale-proof>
+                      <strong>50-WP scale proof.</strong>
+                      Fifty current work packages remain a compact inventory beside six aggregate
+                      routes and 24 time cells; the matrix never expands to one row per WP.
+                    </p>`
+                  : nothing}
+                <div class=${`sk-pattern-overview__flow-layout${options.scale
+                  ? ' sk-pattern-overview__flow-layout--scale'
+                  : ''}`}>
                   <div data-visual-region="flow-matrix">
                     <sk-transition-matrix
                       .columns=${flow.columns}
@@ -1024,10 +1092,10 @@ export const renderTeamOverview = (
                           .tone=${status.tone}
                         ></sk-metric>`)}
                     </sk-grid>
-                    <sk-button variant="ghost" size="sm">View 50 WPs</sk-button>
+                    <sk-button variant="ghost" size="sm">View ${flow.openTotal} WPs</sk-button>
                     <p class="sk-pattern-overview__muted">Observer · up to 60 s behind</p>
                   </aside>
-                </sk-grid>
+                </div>
               </div>
             </sk-card>
           </section>
@@ -1036,14 +1104,13 @@ export const renderTeamOverview = (
             ${operational.map((section) => renderOperationalSection(section, args.selectedRowId))}
           </div>
 
-          <output
+          <span
             class="sk-pattern-overview__intent-log"
             data-intent-log
             data-row-event='{"count":0}'
             data-bar-event='{"count":0}'
             data-route-event='{"count":0}'
-            aria-live="polite"
-          >No selection intent yet.</output>
+          >No selection intent yet.</span>
         </div>
       </sk-app-shell>
     </div>`;
@@ -1103,70 +1170,29 @@ export const Scale50WPs: Story = {
 
 export const ControlledInteractions: Story = {
   args: {
-    selectedRowId: 'recent-dashboard-polish',
+    selectedRowId: 'flight-team-landing',
     selectedBarId: 'aug-11',
     selectedRouteId: 'planned-progress',
   },
   play: async ({ canvasElement, args }) => {
-    const canvas = within(canvasElement);
-    // Emit at the public hosts here so the story never queries child shadow roots. The Playwright
-    // contract below activates each real rendered control with pointer and keyboard input.
-    const row = canvasElement.querySelector<HTMLElement & { selected: boolean }>(
-      'sk-action-row[row-id="flight-team-landing"]',
+    const row = canvasElement.querySelector<HTMLElement & { selectable: boolean; selected: boolean }>(
+      `sk-action-row[row-id="${CSS.escape(args.selectedRowId)}"]`,
     );
     const chart = canvasElement.querySelector<HTMLElement & { selectedId: string }>('sk-bar-chart');
     const matrix = canvasElement.querySelector<HTMLElement & { selectedRouteId?: string }>(
       'sk-transition-matrix',
     );
-    row?.dispatchEvent(new CustomEvent<ActionRowActivateDetail>('sk-action-row-activate', {
-      detail: { id: 'flight-team-landing' },
-      bubbles: true,
-      composed: true,
-    }));
-    chart?.dispatchEvent(new CustomEvent<BarChartSelectDetail>('sk-bar-chart-select', {
-      detail: { id: 'aug-18' },
-      bubbles: true,
-      composed: true,
-    }));
-    matrix?.dispatchEvent(new CustomEvent<TransitionMatrixSelectDetail>('sk-transition-matrix-select', {
-      detail: { routeId: 'progress-review' },
-      bubbles: true,
-      composed: true,
-    }));
-
-    await expect(args.onRowActivate).toHaveBeenCalledTimes(1);
-    await expect(args.onRowActivate).toHaveBeenCalledWith({ id: 'flight-team-landing' });
-    await expect(args.onBarSelect).toHaveBeenCalledTimes(1);
-    await expect(args.onBarSelect).toHaveBeenCalledWith({ id: 'aug-18' });
-    await expect(args.onRouteSelect).toHaveBeenCalledTimes(1);
-    await expect(args.onRouteSelect).toHaveBeenCalledWith({ routeId: 'progress-review' });
-
     const root = canvasElement.querySelector<HTMLElement>('[data-team-overview-pattern]');
-    const log = canvas.getByText(/route intent:/);
-    await expect(JSON.parse(log.getAttribute('data-row-event') ?? '{}')).toEqual({
-      count: 1,
-      detail: { id: 'flight-team-landing' },
-      bubbles: true,
-      composed: true,
-      cancelable: false,
-    });
-    await expect(JSON.parse(log.getAttribute('data-bar-event') ?? '{}')).toEqual({
-      count: 1,
-      detail: { id: 'aug-18' },
-      bubbles: true,
-      composed: true,
-      cancelable: false,
-    });
-    await expect(JSON.parse(log.getAttribute('data-route-event') ?? '{}')).toEqual({
-      count: 1,
-      detail: { routeId: 'progress-review' },
-      bubbles: true,
-      composed: true,
-      cancelable: false,
-    });
-    await expect(row?.selected).toBe(false);
-    await expect(chart?.selectedId).toBe('aug-11');
-    await expect(matrix?.selectedRouteId).toBe('planned-progress');
+    await expect(args.onRowActivate).not.toBe(args.onBarSelect);
+    await expect(args.onRowActivate).not.toBe(args.onRouteSelect);
+    await expect(args.onBarSelect).not.toBe(args.onRouteSelect);
+    await expect(args.onRowActivate).not.toHaveBeenCalled();
+    await expect(args.onBarSelect).not.toHaveBeenCalled();
+    await expect(args.onRouteSelect).not.toHaveBeenCalled();
+    await expect(row?.selectable).toBe(true);
+    await expect(row?.selected).toBe(true);
+    await expect(chart?.selectedId).toBe(args.selectedBarId);
+    await expect(matrix?.selectedRouteId).toBe(args.selectedRouteId);
     root?.setAttribute('data-play-proof', 'passed');
   },
 };

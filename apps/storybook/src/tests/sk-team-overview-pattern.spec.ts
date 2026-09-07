@@ -16,15 +16,37 @@ const loadStory = async (
   id: (typeof STORY_IDS)[number],
   width = 1440,
   height = 1000,
+  args = '',
 ): Promise<Locator> => {
   await page.setViewportSize({ width, height });
-  await page.goto(`/iframe.html?id=patterns-team-overview--${id}&viewMode=story`);
+  await page.goto(`/iframe.html?id=patterns-team-overview--${id}&viewMode=story${args ? `&args=${args}` : ''}`);
   const root = page.locator('[data-team-overview-pattern]').first();
   await root.waitFor({ state: 'visible', timeout: 20000 });
   await expect(root.locator('sk-app-shell')).toBeVisible();
   await expect(root).toHaveAttribute('data-render-complete', 'true');
   return root;
 };
+
+type IntentRecord = Readonly<{
+  count: number;
+  detail: Readonly<Record<string, string>>;
+  bubbles: boolean;
+  composed: boolean;
+  cancelable: boolean;
+}>;
+
+const readIntentRecords = async (root: Locator): Promise<Readonly<Record<string, IntentRecord>>> =>
+  root.locator('[data-intent-log]').evaluate((element) => ({
+    row: JSON.parse(element.getAttribute('data-row-event') ?? '{}') as IntentRecord,
+    bar: JSON.parse(element.getAttribute('data-bar-event') ?? '{}') as IntentRecord,
+    route: JSON.parse(element.getAttribute('data-route-event') ?? '{}') as IntentRecord,
+  }));
+
+const expectedIntentRecords = (): Readonly<Record<string, IntentRecord>> => ({
+  row: { count: 1, detail: { id: 'recent-dashboard-polish' }, bubbles: true, composed: true, cancelable: false },
+  bar: { count: 1, detail: { id: 'aug-18' }, bubbles: true, composed: true, cancelable: false },
+  route: { count: 1, detail: { routeId: 'progress-review' }, bubbles: true, composed: true, cancelable: false },
+});
 
 const axeIsClean = async (page: Page, storyId: string): Promise<void> => {
   await injectAxe(page);
@@ -53,6 +75,7 @@ test('source keeps the pattern outside the public element and application bounda
 
   expect(source).not.toMatch(/<sk-team-overview(?:\s|>)/);
   expect(source).not.toMatch(/customElements\.define\s*\(/);
+  expect(source).not.toMatch(/new\s+CustomEvent/);
   expect(source).not.toMatch(/shadowRoot/);
   expect(source).not.toMatch(/from\s+['"][^'"]*team-kitty/i);
   expect(source).not.toMatch(/\b(?:fetch|setTimeout|setInterval)\s*\(/);
@@ -132,6 +155,8 @@ test('approved story derives exact delivery and independent flow totals from one
   await expect(root.getByText('91% spend attributed')).toHaveCount(1);
   await expect(root.getByText('62 moves · last 72 hours')).toHaveCount(1);
   await expect(root.getByText('50 open WPs')).toHaveCount(1);
+  await expect(root.getByRole('button', { name: 'View 50 WPs' })).toHaveCount(1);
+  await expect(root.locator('[data-visual-region="delivery-evidence"]')).toContainText('91% spend attributed');
 
   const outcomes = root.locator('.sk-pattern-overview__outcome-list > li');
   await expect(outcomes).toHaveCount(3);
@@ -141,6 +166,7 @@ test('approved story derives exact delivery and independent flow totals from one
     'Blocked work visible',
   ]);
   await expect(root.getByText('View evidence →', { exact: true })).toHaveCount(1);
+  await expect(root.locator('[data-intent-log]')).toBeHidden();
 });
 
 test('composition uses the required public elements and preserves shell/feed integrity', async ({ page }) => {
@@ -198,119 +224,147 @@ test('composition uses the required public elements and preserves shell/feed int
   })));
   expect(new Set(fingerprints.map(({ text }) => text)).size).toBe(fingerprints.length);
 
+  const context = root.locator('sk-context-sidebar');
+  await expect(context.getByRole('navigation', { name: 'Team sections' })).toBeVisible();
+  const contextLinks = context.locator('a.sk-pattern-overview__context-link');
+  await expect(contextLinks).toHaveCount(4);
+  const navigationLayout = await contextLinks.evaluateAll((links) => links.map((link) => {
+    const box = link.getBoundingClientRect();
+    return {
+      top: box.top,
+      bottom: box.bottom,
+      left: box.left,
+      right: box.right,
+      clipped: link.scrollWidth > link.clientWidth,
+    };
+  }));
+  let priorBottom = Number.NEGATIVE_INFINITY;
+  for (const item of navigationLayout) {
+    expect(item.clipped).toBe(false);
+    expect(item.top).toBeGreaterThanOrEqual(priorBottom);
+    priorBottom = item.bottom;
+  }
+  const contextBounds = await context.locator('[part~="sidebar"]').boundingBox();
+  expect(contextBounds).not.toBeNull();
+  for (const item of navigationLayout) {
+    expect(item.left).toBeGreaterThanOrEqual(contextBounds?.x ?? 0);
+    expect(item.right).toBeLessThanOrEqual((contextBounds?.x ?? 0) + (contextBounds?.width ?? 0));
+  }
+
   const warning = root.locator('[data-non-link-warning]');
   await expect(warning).toHaveCount(1);
   await expect(warning).not.toHaveAttribute('href');
   await expect(warning).not.toHaveAttribute('role', 'link');
   expect(await warning.evaluate((element) => getComputedStyle(element).textDecorationLine)).toBe('none');
-  await expect(root.locator('[data-attention-meaning]')).toHaveCount(2);
+  const attentionStatuses = await root.locator('sk-status-indicator[tone="attention"]').allTextContents();
+  const attentionPills = await root.locator('sk-pill-tag[variant="yellow"]').allTextContents();
+  const attentionMetrics = await root.locator('sk-metric[tone="attention"]').allTextContents();
+  const attentionStages = await root.locator('sk-evidence-chain').evaluate((element) =>
+    (element as HTMLElement & { stages: ReadonlyArray<{ label: string; tone: string }> })
+      .stages.filter(({ tone }) => tone === 'attention').map(({ label }) => label),
+  );
+  expect({ attentionStatuses, attentionPills, attentionMetrics, attentionStages }).toEqual({
+    attentionStatuses: ['Pending'],
+    attentionPills: ['1 mission off default branch'],
+    attentionMetrics: [],
+    attentionStages: [],
+  });
+  await expect(root.locator('sk-metric').filter({ hasText: 'Blocked' })).toHaveAttribute('tone', 'neutral');
 });
 
-test('controlled story emits exact row, bar, and route intent without retaining requested state', async ({
-  page,
-}) => {
-  const root = await loadStory(page, 'controlled-interactions');
+test('desktop Flow exposes every date cell while keeping Current usable', async ({ page }) => {
+  const root = await loadStory(page, 'default', 1440, 1000);
+  const matrix = root.locator('sk-transition-matrix');
+  const scroller = matrix.locator('[part~="scroller"]');
+  const scrollGeometry = await scroller.evaluate((element) => ({
+    clientWidth: element.clientWidth,
+    scrollWidth: element.scrollWidth,
+  }));
+  expect(scrollGeometry.scrollWidth).toBeLessThanOrEqual(scrollGeometry.clientWidth + 1);
+
+  const dateHeaders = matrix.locator('thead th:nth-child(n+2):nth-child(-n+5)');
+  await expect(dateHeaders).toHaveText(['Tue 1', 'Wed 2', 'Thu 3', 'Today · Fri 4']);
+  const cells = matrix.locator('tbody tr[data-route-id] td:not([part~="total"])');
+  await expect(cells).toHaveCount(24);
+  const scrollerBox = await scroller.boundingBox();
+  expect(scrollerBox).not.toBeNull();
+  const exposedItems = matrix.locator(
+    'thead th:nth-child(n+2):nth-child(-n+5), tbody tr[data-route-id] td:not([part~="total"])',
+  );
+  for (const item of await exposedItems.all()) {
+    const box = await item.boundingBox();
+    expect(box).not.toBeNull();
+    expect(box?.x ?? 0).toBeGreaterThanOrEqual((scrollerBox?.x ?? 0) - 1);
+    expect((box?.x ?? 0) + (box?.width ?? 0)).toBeLessThanOrEqual(
+      (scrollerBox?.x ?? 0) + (scrollerBox?.width ?? 0) + 1,
+    );
+  }
+
+  const current = root.locator('.sk-pattern-overview__current');
+  await expect(current.getByText('50 open WPs')).toBeVisible();
+  await expect(current.getByRole('button', { name: 'View 50 WPs' })).toBeVisible();
+  expect((await current.boundingBox())?.width ?? 0).toBeGreaterThanOrEqual(150);
+});
+
+test('real pointer intent stays controlled until Storybook args rerender each child', async ({ page }) => {
+  let root = await loadStory(page, 'controlled-interactions');
   await expect(root).toHaveAttribute('data-play-proof', 'passed');
 
-  const log = root.locator('[data-intent-log]');
-  const records = await log.evaluate((element) => ({
-    row: JSON.parse(element.getAttribute('data-row-event') ?? '{}'),
-    bar: JSON.parse(element.getAttribute('data-bar-event') ?? '{}'),
-    route: JSON.parse(element.getAttribute('data-route-event') ?? '{}'),
-  }));
-  expect(records).toEqual({
-    row: {
-      count: 1,
-      detail: { id: 'flight-team-landing' },
-      bubbles: true,
-      composed: true,
-      cancelable: false,
-    },
-    bar: {
-      count: 1,
-      detail: { id: 'aug-18' },
-      bubbles: true,
-      composed: true,
-      cancelable: false,
-    },
-    route: {
-      count: 1,
-      detail: { routeId: 'progress-review' },
-      bubbles: true,
-      composed: true,
-      cancelable: false,
-    },
-  });
+  let selectedRow = root.locator('sk-action-row[row-id="flight-team-landing"]');
+  let requestedRow = root.locator('sk-action-row[row-id="recent-dashboard-polish"]');
+  let chart = root.locator('sk-bar-chart');
+  let matrix = root.locator('sk-transition-matrix');
+  await expect(selectedRow.locator('[part~="row"]')).toHaveAttribute('aria-current', 'true');
+  await expect(requestedRow.locator('[part~="row"]')).not.toHaveAttribute('aria-current', 'true');
 
-  const row = root.locator('sk-action-row[row-id="flight-team-landing"]');
-  const chart = root.locator('sk-bar-chart');
-  const matrix = root.locator('sk-transition-matrix');
-  expect(await row.evaluate((element) => (element as HTMLElement & { selected: boolean }).selected)).toBe(false);
-  expect(await chart.evaluate((element) => (element as HTMLElement & { selectedId: string }).selectedId)).toBe('aug-11');
-  expect(await matrix.evaluate(
-    (element) => (element as HTMLElement & { selectedRouteId?: string }).selectedRouteId,
-  )).toBe('planned-progress');
-
-  await row.getByRole('button').click();
+  await requestedRow.getByRole('button').click();
   await chart.getByRole('button', { name: '€410 Aug 18' }).click();
   await matrix.getByRole('row', { name: /In progress → For review/ }).click();
-  expect(await log.evaluate((element) => ({
-    row: JSON.parse(element.getAttribute('data-row-event') ?? '{}').count,
-    bar: JSON.parse(element.getAttribute('data-bar-event') ?? '{}').count,
-    route: JSON.parse(element.getAttribute('data-route-event') ?? '{}').count,
-  }))).toEqual({ row: 2, bar: 2, route: 2 });
-  expect(await row.evaluate((element) => (element as HTMLElement & { selected: boolean }).selected)).toBe(false);
-  expect(await chart.evaluate((element) => (element as HTMLElement & { selectedId: string }).selectedId)).toBe('aug-11');
-  expect(await matrix.evaluate(
-    (element) => (element as HTMLElement & { selectedRouteId?: string }).selectedRouteId,
-  )).toBe('planned-progress');
+  expect(await readIntentRecords(root)).toEqual(expectedIntentRecords());
 
-  await row.evaluate(async (element) => {
-    const typed = element as HTMLElement & { selected: boolean; updateComplete: Promise<unknown> };
-    typed.selected = true;
-    await typed.updateComplete;
-  });
-  await chart.evaluate(async (element) => {
-    const typed = element as HTMLElement & { selectedId: string; updateComplete: Promise<unknown> };
-    typed.selectedId = 'aug-18';
-    await typed.updateComplete;
-  });
-  await matrix.evaluate(async (element) => {
-    const typed = element as HTMLElement & { selectedRouteId?: string; updateComplete: Promise<unknown> };
-    typed.selectedRouteId = 'progress-review';
-    await typed.updateComplete;
-  });
+  await expect(selectedRow.locator('[part~="row"]')).toHaveAttribute('aria-current', 'true');
+  await expect(requestedRow.locator('[part~="row"]')).not.toHaveAttribute('aria-current', 'true');
+  await expect(chart.getByRole('button', { name: '€320 Aug 11' })).toHaveAttribute('aria-pressed', 'true');
+  await expect(chart.getByRole('button', { name: '€410 Aug 18' })).toHaveAttribute('aria-pressed', 'false');
+  await expect(matrix.getByRole('row', { name: /Planned → In progress/ })).toHaveAttribute(
+    'aria-selected', 'true',
+  );
+  await expect(matrix.getByRole('row', { name: /In progress → For review/ })).toHaveAttribute(
+    'aria-selected', 'false',
+  );
 
-  await expect(row.locator('[part~="row"]')).toHaveAttribute('aria-current', 'true');
+  root = await loadStory(
+    page,
+    'controlled-interactions',
+    1440,
+    1000,
+    'selectedRowId:recent-dashboard-polish;selectedBarId:aug-18;selectedRouteId:progress-review',
+  );
+  await expect(root).toHaveAttribute('data-play-proof', 'passed');
+  selectedRow = root.locator('sk-action-row[row-id="flight-team-landing"]');
+  requestedRow = root.locator('sk-action-row[row-id="recent-dashboard-polish"]');
+  chart = root.locator('sk-bar-chart');
+  matrix = root.locator('sk-transition-matrix');
+  await expect(selectedRow.locator('[part~="row"]')).not.toHaveAttribute('aria-current', 'true');
+  await expect(requestedRow.locator('[part~="row"]')).toHaveAttribute('aria-current', 'true');
   await expect(chart.getByRole('button', { name: '€410 Aug 18' })).toHaveAttribute('aria-pressed', 'true');
   await expect(matrix.getByRole('row', { name: /In progress → For review/ })).toHaveAttribute(
-    'aria-selected',
-    'true',
+    'aria-selected', 'true',
   );
 });
 
-test('keyboard activation emits once through each child contract', async ({ page }) => {
+test('real keyboard intent carries exact non-cancelable child event contracts', async ({ page }) => {
   const root = await loadStory(page, 'controlled-interactions');
-  const log = root.locator('[data-intent-log]');
-
-  const exercise = async (target: Locator, attribute: string): Promise<void> => {
-    const before = Number(JSON.parse(await log.getAttribute(attribute) ?? '{}').count ?? 0);
+  const targets = [
+    root.locator('sk-action-row[row-id="recent-dashboard-polish"]').getByRole('button'),
+    root.locator('sk-bar-chart').getByRole('button', { name: '€410 Aug 18' }),
+    root.locator('sk-transition-matrix').getByRole('row', { name: /In progress → For review/ }),
+  ];
+  for (const target of targets) {
     await target.focus();
     await page.keyboard.press('Enter');
-    await expect.poll(async () =>
-      Number(JSON.parse(await log.getAttribute(attribute) ?? '{}').count ?? 0),
-    ).toBe(before + 1);
-  };
-
-  await exercise(
-    root.locator('sk-action-row[row-id="flight-team-landing"]').getByRole('button'),
-    'data-row-event',
-  );
-  await exercise(root.locator('sk-bar-chart').getByRole('button', { name: '€410 Aug 18' }), 'data-bar-event');
-  await exercise(
-    root.locator('sk-transition-matrix').getByRole('row', { name: /In progress → For review/ }),
-    'data-route-event',
-  );
+  }
+  expect(await readIntentRecords(root)).toEqual(expectedIntentRecords());
 });
 
 test('dark and light stories expose identical content and selector signatures', async ({ page }) => {
@@ -374,10 +428,33 @@ test('390 by 844 story preserves region order, reachability, and page overflow o
   }
 
   for (const control of await root.getByRole('link').all()) {
-    await expect(control).toBeAttached();
+    await expect(control).toBeVisible();
   }
   for (const control of await root.getByRole('button').all()) {
-    await expect(control).toBeAttached();
+    await expect(control).toBeVisible();
+  }
+
+  const rail = root.locator('sk-personal-rail');
+  const context = root.locator('sk-context-sidebar');
+  const contextLinks = context.locator('a.sk-pattern-overview__context-link');
+  const expectedTabOrder = [
+    rail.getByRole('link', { name: 'Overview' }),
+    rail.getByRole('link', { name: 'Work' }),
+    rail.getByRole('link', { name: 'Connectors' }),
+    rail.getByRole('button', { name: 'Notifications' }),
+    rail.getByRole('link', { name: 'Collaborative Demo account' }),
+    rail.getByRole('button', { name: 'Log out' }),
+    contextLinks.nth(0),
+    contextLinks.nth(1),
+    contextLinks.nth(2),
+    contextLinks.nth(3),
+    context.locator('sk-button').getByRole('button', { name: 'Manage team' }),
+    root.getByRole('button', { name: 'Refresh evidence' }),
+  ];
+  await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+  for (const expectedControl of expectedTabOrder) {
+    await page.keyboard.press('Tab');
+    await expect(expectedControl).toBeFocused();
   }
 
   const childScrollers = [
@@ -406,10 +483,18 @@ test('390 by 844 story preserves region order, reachability, and page overflow o
 });
 
 test('Scale50WPs keeps 50 items separate from a six-route aggregate matrix', async ({ page }) => {
-  const root = await loadStory(page, 'scale-50-w-ps');
+  let root = await loadStory(page, 'default');
+  const defaultMatrixWidth = await root.locator('sk-transition-matrix').evaluate(
+    (element) => element.getBoundingClientRect().width,
+  );
+  root = await loadStory(page, 'scale-50-w-ps');
   const matrix = root.locator('sk-transition-matrix');
   await expect(root.getByText('50 open WPs')).toHaveCount(1);
   await expect(root.getByText('62 moves · last 72 hours')).toHaveCount(1);
+  await expect(root.locator('[data-scale-proof]')).toContainText('six aggregate routes and 24 time cells');
+  expect(await matrix.evaluate((element) => element.getBoundingClientRect().width)).toBeGreaterThan(
+    defaultMatrixWidth,
+  );
 
   const shape = await matrix.evaluate((element) => {
     const typed = element as HTMLElement & {
