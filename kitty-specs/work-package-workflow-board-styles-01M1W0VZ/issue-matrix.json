@@ -1,7 +1,7 @@
 {
   "rows": {
     "#125": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "Tracked umbrella remains open; this mission delivers only #209 and does not widen into #125.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -9,8 +9,8 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
     },
     "#208": {
       "evidence_ref": "<link or commit>",
