@@ -1,7 +1,7 @@
 {
-  "event_count": 1,
-  "last_event_id": "01M1WPB29QJYS11S24TRY1E1WW",
-  "materialized_at": "2026-09-07T01:04:52.535184+00:00",
+  "event_count": 2,
+  "last_event_id": "01M1WPKYJY1YR937GYB59R2FNF",
+  "materialized_at": "2026-09-07T01:09:43.646665+00:00",
   "mission_number": "",
   "mission_slug": "team-overview-pattern-story-01M1WNHE",
   "mission_type": "software-dev",
@@ -9,20 +9,25 @@
     "approved": 0,
     "blocked": 0,
     "canceled": 0,
-    "claimed": 0,
+    "claimed": 1,
     "done": 0,
     "for_review": 0,
     "in_progress": 0,
     "in_review": 0,
-    "planned": 1
+    "planned": 0
   },
   "work_packages": {
     "WP01": {
-      "actor": "finalize-tasks",
+      "actor": "codex",
+      "agent_profile": "__resolved_profile_absent__",
+      "agent_profile_version": "__resolved_profile_version_absent__",
       "force_count": 0,
-      "lane": "planned",
-      "last_event_id": "01M1WPB29QJYS11S24TRY1E1WW",
-      "last_transition_at": "2026-09-07T01:04:52.535184+00:00"
+      "lane": "claimed",
+      "last_event_id": "01M1WPKYJY1YR937GYB59R2FNF",
+      "last_transition_at": "2026-09-07T01:09:43.646665+00:00",
+      "model": "__resolved_model_absent__",
+      "provider": "__resolved_provider_absent__",
+      "role": "implementer"
     }
   }
 }
