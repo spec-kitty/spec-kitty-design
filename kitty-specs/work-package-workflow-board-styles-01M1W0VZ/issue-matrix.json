@@ -73,7 +73,7 @@
       "wp": "WP01"
     },
     "#213": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "Issue #213 is an explicit independent programme child and remains outside #209 scope.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -81,8 +81,8 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
     },
     "#214": {
       "evidence_ref": "<link or commit>",
