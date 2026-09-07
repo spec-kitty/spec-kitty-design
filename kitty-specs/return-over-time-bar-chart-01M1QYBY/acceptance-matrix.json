@@ -419,10 +419,10 @@
       "criterion_id": "NFR-006",
       "description": "Required real-input behavior passes locally available Chromium and Firefox for lane approval and Chromium, Firefox, and WebKit in exact-head PR CI; local WebKit is additional evidence only through a repository-defined container seam.",
       "proof_type": "automated_test",
-      "evidence": "CI run 34065216159 at 7a56e7e: behavior floor node=34, Chromium=382, WebKit=382, zero skipped; bar-chart 15/15 in both behavior browsers; Playwright cross-browser gate green. https://github.com/spec-kitty/spec-kitty-design/actions/runs/34065216159",
+      "evidence": "Exact-head CI run 34069071736 at bf31114c: behavior floor Node 34 + Chromium 383 + WebKit 383 = 800 assertions with zero skipped; cross-browser Playwright completed with 299 passed, 2 intentional skips, and 2 successful sibling-owned WebKit retries.",
       "pass_fail": "pass",
       "verified_by": "codex",
-      "verified_at": "2026-09-06T23:16:59.793396+00:00",
+      "verified_at": "2026-09-07T00:58:43.984569+00:00",
       "notes": "WP01 authors the shared contract; exact-head PR CI owns WebKit.",
       "lane_owners": [
         "WP01",
