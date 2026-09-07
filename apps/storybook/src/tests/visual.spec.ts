@@ -908,3 +908,91 @@ for (const visual of workPackageDetailVisuals) {
     });
   });
 }
+
+type WorkPackagePatternStoryId =
+  | 'default'
+  | 'light-mode'
+  | 'all-lanes-empty'
+  | 'scale-50-work-packages'
+  | 'live-claim'
+  | 'stale-claim'
+  | 'snapshot-behind-log'
+  | 'narrow-overview'
+  | 'detail-populated'
+  | 'detail-light-mode'
+  | 'detail-no-subtasks'
+  | 'detail-absent-prompt'
+  | 'detail-history-unavailable'
+  | 'detail-long-content'
+  | 'detail-narrow';
+
+const workPackagePatternStory = async (
+  page: Page,
+  id: WorkPackagePatternStoryId,
+  width: number,
+  height: number,
+): Promise<Locator> => {
+  await page.setViewportSize({ width, height });
+  await page.goto(`/iframe.html?id=patterns-work-package-views--${id}&viewMode=story`);
+  const root = page.locator('[data-work-package-overview], [data-work-package-detail]').first();
+  await root.waitFor({ state: 'visible', timeout: 20000 });
+  await expect(root).toHaveAttribute('data-render-complete', 'true');
+  await page.evaluate(() => document.fonts.ready);
+  return root;
+};
+
+const workPackagePatternFullCases = [
+  { id: 'default', width: 1280, height: 1000, name: 'work-package-overview-dark-1280.png' },
+  { id: 'light-mode', width: 1280, height: 1000, name: 'work-package-overview-light-1280.png' },
+  { id: 'narrow-overview', width: 390, height: 844, name: 'work-package-overview-narrow-390.png' },
+  { id: 'all-lanes-empty', width: 1280, height: 900, name: 'work-package-overview-empty-lanes.png' },
+  { id: 'scale-50-work-packages', width: 1440, height: 1000, name: 'work-package-overview-scale-50.png' },
+  { id: 'detail-populated', width: 1280, height: 1100, name: 'work-package-detail-dark-1280.png' },
+  { id: 'detail-light-mode', width: 1280, height: 1100, name: 'work-package-detail-light-1280.png' },
+  { id: 'detail-narrow', width: 390, height: 1000, name: 'work-package-detail-narrow-390.png' },
+] as const satisfies ReadonlyArray<{
+  id: WorkPackagePatternStoryId;
+  width: number;
+  height: number;
+  name: string;
+}>;
+
+for (const visual of workPackagePatternFullCases) {
+  test(`Work Package pattern ${visual.name} — full route baseline`, async ({ page }) => {
+    const root = await workPackagePatternStory(page, visual.id, visual.width, visual.height);
+    await expect(root).toHaveScreenshot(visual.name, {
+      threshold: 0.02,
+      maxDiffPixelRatio: 0.02,
+    });
+  });
+}
+
+const workPackagePatternFocusedCases = [
+  { id: 'default', selector: '[data-work-package-progress]', name: 'work-package-overview-progress.png' },
+  { id: 'scale-50-work-packages', selector: '.sk-workflow-board', name: 'work-package-overview-board-overflow.png' },
+  { id: 'live-claim', selector: '[data-claim-state="live"]', name: 'work-package-overview-live-claim.png' },
+  { id: 'stale-claim', selector: '[data-claim-state="stale"]', name: 'work-package-overview-stale-claim.png' },
+  { id: 'snapshot-behind-log', selector: '[data-snapshot-notice]', name: 'work-package-overview-snapshot-notice.png' },
+  { id: 'detail-populated', selector: '.sk-work-package-pattern__checklist', name: 'work-package-detail-checklist-states.png' },
+  { id: 'detail-populated', selector: '.sk-event-timeline', name: 'work-package-detail-history-connector.png' },
+  { id: 'detail-no-subtasks', selector: '[data-no-subtasks]', name: 'work-package-detail-no-subtasks.png' },
+  { id: 'detail-absent-prompt', selector: '[data-absent-prompt]', name: 'work-package-detail-absent-prompt.png' },
+  { id: 'detail-history-unavailable', selector: '[data-history-unavailable]', name: 'work-package-detail-history-unavailable.png' },
+  { id: 'detail-long-content', selector: '[data-long-code]', name: 'work-package-detail-long-code.png' },
+] as const satisfies ReadonlyArray<{
+  id: WorkPackagePatternStoryId;
+  selector: string;
+  name: string;
+}>;
+
+for (const visual of workPackagePatternFocusedCases) {
+  test(`Work Package pattern ${visual.name} — focused route state`, async ({ page }) => {
+    const root = await workPackagePatternStory(page, visual.id, 1280, 1100);
+    const region = root.locator(visual.selector).first();
+    await region.waitFor({ state: 'visible', timeout: 20000 });
+    await expect(region).toHaveScreenshot(visual.name, {
+      threshold: 0.02,
+      maxDiffPixelRatio: 0.02,
+    });
+  });
+}

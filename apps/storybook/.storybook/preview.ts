@@ -16,6 +16,14 @@ import '../../../packages/tokens/src/tokens.css';
 import '../../../packages/styles/src/facts/sk-facts.css';
 import '../../../packages/styles/src/disclosure/sk-disclosure.css';
 import '../../../packages/styles/src/empty-state/sk-empty-state.css';
+import '../../../packages/styles/src/breadcrumbs/sk-breadcrumbs.css';
+import '../../../packages/styles/src/event-timeline/sk-event-timeline.css';
+import '../../../packages/styles/src/form-field/sk-form-field.css';
+import '../../../packages/styles/src/form-select/sk-form-select.css';
+import '../../../packages/styles/src/progress/sk-progress.css';
+import '../../../packages/styles/src/prose/sk-prose.css';
+import '../../../packages/styles/src/workflow-board/sk-workflow-board.css';
+import '../../../packages/styles/src/workflow-lane/sk-workflow-lane.css';
 import type { Preview } from '@storybook/web-components';
 
 const preview: Preview = {

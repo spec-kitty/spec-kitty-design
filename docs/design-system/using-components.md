@@ -25,6 +25,28 @@ Because a custom element needs no wrapper, every framework can use the migrated 
 generated React wrapper exists for JSX typing and typed refs — see
 [Using the elements from React](./using-react.md) for what it does and does not buy, measured.
 
+## Work Package view patterns
+
+The Storybook `Patterns/Work Package Views` stories demonstrate the T10 overview and T11 detail
+routes without publishing a page component. Compose the overview from `sk-page-header`, native
+`.sk-progress`, native `.sk-form-select`, `.sk-workflow-board`/`.sk-workflow-lane`, and compact
+`sk-action-row` items. Compose detail from native `.sk-breadcrumbs`, `sk-page-header`, a direct
+native list of passive `sk-check-bullet` hosts, `.sk-prose`, a base `sk-card` containing
+`.sk-facts`, and a native `.sk-event-timeline`.
+
+Keep one immutable application fixture and derive repeated totals from it. The lane identifier
+that means complete is application data, not design-system vocabulary. Likewise claims, stale
+advisories, actor/time strings, prompt HTML, event order, trust labels, lane selection, and notice
+announcement policy arrive already decided. Activation and select events are intent seams: the
+consumer updates routing or controlled selection if it chooses.
+
+The application still owns fetching, storage, mutable state, routing, lane changes, timers and
+claim expiry, relative-time formatting, prompt parsing or sanitization, event sorting or
+verification, trust inference, and integration with Team Kitty. Use `sk-notice` for a supplied
+snapshot/retention message that needs announcement semantics; do not create a local banner. There
+is intentionally no `sk-work-package-card`, Work Package page element, stateful Kanban component,
+checklist control, or execution panel.
+
 ## Application shell composition
 
 The shell elements supply layout and landmarks while the consumer supplies destinations, state,
