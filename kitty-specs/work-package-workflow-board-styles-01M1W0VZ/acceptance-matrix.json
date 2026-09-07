@@ -165,5 +165,14 @@
       "notes": "TODO: replace with a real acceptance criterion"
     }
   ],
-  "negative_invariants": []
+  "negative_invariants": [
+    {
+      "invariant_id": "NI-001",
+      "description": "No custom element, wrapper, manifest, parts, behavior, or mutation surface is introduced.",
+      "verification_method": "custom_command",
+      "verification_command": "npx playwright test apps/storybook/src/tests/sk-workflow-board.spec.ts --project=chromium --grep \"surface remains styles-only\"",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: Running 1 test using 1 worker\n\n\n\n[1/1] [chromium] \u203a apps/storybook/src/tests/sk-workflow-board.spec.ts:302:7 \u203a workflow board source and distribution contract \u203a the surface remains styles-only and doe"
+    }
+  ]
 }
