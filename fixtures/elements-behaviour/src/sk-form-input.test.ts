@@ -663,6 +663,32 @@ test('[SC-003][SC-016] the probe and the rendered control agree for the same int
       .toEqual(onlyFlags('patternMismatch'));
   }
 
+  // THE FOURTH SHAPE — the one ADR-14 says it cannot rule out, and the one a pre-merge lens showed
+  // the four blocks above could not see. Every case so far drives `patternMismatch` and asserts the
+  // other four delegated flags FALSE on both sides, which they would be anyway. A sync defect
+  // landing on `min`/`max`/`step` or on `type` — the same shape as bug 2, one attribute over —
+  // would leave every block above vacuously green. So the other four flags are driven TRUE here.
+  {
+    const [, el] = await mount({ name: 'e', type: 'number', min: '5', step: '2' }, '4');
+    expect(delegated(el.validity), 'a range and step violation').toEqual(
+      delegated(control(el).validity),
+    );
+    expect(delegated(el.validity), 'and both must land on the RIGHT answer, all five flags')
+      .toEqual(onlyFlags('rangeUnderflow', 'stepMismatch'));
+  }
+  {
+    const [, el] = await mount({ name: 'f', type: 'number', max: '3' }, '9');
+    expect(delegated(el.validity), 'a range overflow').toEqual(delegated(control(el).validity));
+    expect(delegated(el.validity), 'and both must land on the RIGHT answer, all five flags')
+      .toEqual(onlyFlags('rangeOverflow'));
+  }
+  {
+    const [, el] = await mount({ name: 'g', type: 'email' }, 'notanemail');
+    expect(delegated(el.validity), 'a type mismatch').toEqual(delegated(control(el).validity));
+    expect(delegated(el.validity), 'and both must land on the RIGHT answer, all five flags')
+      .toEqual(onlyFlags('typeMismatch'));
+  }
+
   // Bug 2: NEITHER source may invent a constraint the element never declared. The positive cases
   // above cannot see this one — a delegate that reports a flag nobody asked for is a
   // correspondence failure in the other direction.

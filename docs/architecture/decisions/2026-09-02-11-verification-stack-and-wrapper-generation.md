@@ -319,6 +319,14 @@ reports against the flags the rendered control itself computes — which is what
 what `[SC-003][SC-016] the probe and the rendered control agree for the same intended state` now
 asserts, across all three shapes plus the negative case item 2 needs.
 
+**The three bugs are the floor, not the ceiling.** Written from them, the entry would have tested
+only `pattern`, and a pre-merge lens showed what that leaves open: the other four delegated flags —
+`rangeUnderflow`, `rangeOverflow`, `stepMismatch`, `typeMismatch` — were asserted *false* in every
+case, which they would have been anyway, so a sync defect landing on `min`/`max`/`step`/`type`
+instead of `pattern` (bug 2's shape, one attribute over) would have passed every assertion. That is
+exactly the fourth-of-the-same-shape ADR-14 says it cannot rule out, and it was reachable through
+the entry as first drafted. The test now drives all five flags true in some case.
+
 `badInput` is deliberately **outside** the correspondence claim. ADR-14 records it as the one flag
 with two writers, and the second of them fires precisely where the rendered control legitimately
 reports nothing — a property-assigned value the UA sanitizes away raises `badInput` on no real
@@ -404,6 +412,17 @@ AssertionError: stickiness must be dropped inside (max-height: 480px):
 Its live assertion is driven by the `sticky` **attribute**, not the property, so that the existing
 SC-010 arm — which flips `reflect` on that property — does not red it for a reason that has nothing
 to do with a threshold.
+
+Two blind spots a pre-merge lens found in the first draft, both closed, both the same shape as item
+10's own subject — a *declared* state diverging from the *computed* one. Reading the two documented
+blocks says nothing about a **third**: a spurious `@media (max-width: 1200px)` unsticking the header
+far too early satisfies every declaration assertion, and the live check cannot see it either,
+because the lane sits at 414px where the bogus rule and the real one agree. The test now asserts the
+set of conditions that unstick the host is *exactly* the two documented ones. And `declarationIn`
+matches a rule by its exact selector text, so a later, differently-worded rule restoring the
+elevation inside the same block would leave it reporting the original value; the live half now
+measures the computed `box-shadow` rather than reading it. The height threshold keeps only its
+declaration arm, because no live measurement of it is available in this lane.
 
 ### The fourth-target extension cost — MEASURED (#81, ADR-8 confirmation #4)
 
