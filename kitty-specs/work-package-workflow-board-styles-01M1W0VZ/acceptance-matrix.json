@@ -181,6 +181,14 @@
       "verification_command": "npx playwright test apps/storybook/src/tests/sk-workflow-board.spec.ts --project=chromium --grep \"public CSS inventory\"",
       "result": "confirmed_absent",
       "evidence": "Command exited 0: Running 1 test using 1 worker\n\n\n\n[1/1] [chromium] \u203a apps/storybook/src/tests/sk-workflow-board.spec.ts:270:7 \u203a workflow board source and distribution contract \u203a the public CSS inventory is exactly the"
+    },
+    {
+      "invariant_id": "NI-003",
+      "description": "Styles and fixtures generate no labels, counts, separators, punctuation, or other accessible content.",
+      "verification_method": "custom_command",
+      "verification_command": "npx playwright test apps/storybook/src/tests/sk-workflow-board.spec.ts --project=chromium --grep \"authored fixtures forge no list/grid semantics\"",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: Running 1 test using 1 worker\n\n\n\n[1/1] [chromium] \u203a apps/storybook/src/tests/sk-workflow-board.spec.ts:407:7 \u203a workflow board source and distribution contract \u203a authored fixtures forge no list/grid se"
     }
   ]
 }
