@@ -37,7 +37,7 @@
       "wp": "WP01"
     },
     "#225": {
-      "evidence_ref": "PR #249; CI run 34119467072 jobs 101733926149 (679.4s), 101738107560 (672.7s), 101742264649 (687.4s), 157/157 arms green, 10/10 guards; ceiling 1045.7 = 687.4 x 1.5213",
+      "evidence_ref": "PR #249; CI run 34119467072 jobs 101733926149 (679.4s), 101738107560 (672.7s), 101742264649 (687.4s) and job 101747235751 (696.6s), 157/157 arms green, 10/10 guards in each; ceiling 1059.7 = 696.6 x 1.5213",
       "fr": [
         "FR-001",
         "FR-002",
@@ -102,7 +102,7 @@
       "wp": "WP01"
     },
     "#241": {
-      "evidence_ref": "Its 165-arm set, measured on a local merge, resolves to 9.58 files per arm once its own sk-time-series-chart.test.ts is converted, projecting 745s against the 1045.7s ceiling. As merged today it FAILS the new scripts/check-behaviour-fixture-imports.mjs gate on that file; converting it is now required rather than suggested. Noted on the PR. Not touched by this mission.",
+      "evidence_ref": "Its 165-arm set, measured on a local merge, resolves to 9.58 files per arm once its own sk-time-series-chart.test.ts is converted, projecting 745s against the 1059.7s ceiling. As merged today it FAILS the new scripts/check-behaviour-fixture-imports.mjs gate on that file; converting it is now required rather than suggested. Noted on the PR. Not touched by this mission.",
       "fr": null,
       "nfr": null,
       "repo": "spec-kitty/spec-kitty-design",
