@@ -229,6 +229,14 @@
       "verification_command": "npx playwright test apps/storybook/src/tests/sk-workflow-board.spec.ts --project=chromium --grep \"native sections, lists, counts, and source order\"",
       "result": "confirmed_absent",
       "evidence": "Command exited 0: Running 4 tests using 4 workers\n\n\n\n\n\n\n\n[1/4] [chromium] \u203a apps/storybook/src/tests/sk-workflow-board.spec.ts:488:7 \u203a native sections, lists, counts, and source order \u203a OneEmptyLane has exactly one emp"
+    },
+    {
+      "invariant_id": "NI-009",
+      "description": "No raw design values, token fallbacks, inert light wrapper, or forced-colors opt-out is introduced.",
+      "verification_method": "custom_command",
+      "verification_command": "npx playwright test apps/storybook/src/tests/sk-workflow-board.spec.ts --project=chromium --grep \"one measured, theme-invariant|parsed token-literal|LightMode changes|forced colors preserves\"",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: Running 4 tests using 4 workers\n\n\n\n\n\n\n\n\n\n[1/4] [chromium] \u203a apps/storybook/src/tests/sk-workflow-board.spec.ts:348:7 \u203a workflow board source and distribution contract \u203a the parsed token-literal gate p"
     }
   ]
 }
