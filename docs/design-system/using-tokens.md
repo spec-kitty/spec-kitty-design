@@ -134,6 +134,31 @@ almost no work on their own: in light mode the 4px edge and the consumer's own t
 axis, and the surface is close to decoration. Dark is only a little stronger (1.25:1 for
 attention). Build accordingly.
 
+### Chart inks and dash patterns
+
+`--sk-chart-*` (#179) is the data-visualisation category. Four series inks, a grid, a baseline, a
+gap ink and its translucent band, four `stroke-dasharray` patterns, a gap dash, a stroke width and
+a shared plot height.
+
+**Reach for it when you are drawing data, and use more than one channel.** Ink alone is not
+differentiation: under `forced-colors: active` every series stroke collapses to `CanvasText`, and
+in greyscale the four inks converge. `sk-time-series-chart` therefore pairs each series ink with
+`--sk-chart-dash-<n>` and with a marker shape it draws itself, so a reader who has lost the ink
+still has two channels left. Do the same in anything you build on these tokens.
+
+**The three roles shared with `--sk-color-data-*` resolve to the same values.** `--sk-chart-series-1`,
+`--sk-chart-grid` and `--sk-chart-baseline` are the same inks as `--sk-color-data-series-primary`,
+`--sk-color-data-grid` and `--sk-color-data-baseline`, which `sk-bar-chart` (#148) consumes — the
+element that landed one mission before the family existed. That equality is asserted by computed
+value in both themes rather than left as a comment, so the eventual retrofit of `sk-bar-chart` onto
+`--sk-chart-*` is a rename and not a redesign. Until it happens, both spellings are live and
+`--sk-chart-*` is the one to write in new work.
+
+Measured against `--sk-surface-card`, every series ink and the gap ink clear 3:1 in both themes
+(dark 9.97 / 9.21 / 8.11 / 12.58 and gap 7.45; light 9.10 / 8.04 / 9.42 / 6.79 and gap 6.76).
+`--sk-chart-grid` deliberately does not — it is 1.33 dark and 1.27 light, because a grid is a rule
+and not content, and a grid that competes with the data is a worse chart.
+
 ## Token catalogue reference
 
 The full list of tokens across all 13 categories (colour, surface, foreground, border, spacing, radius, typography, shadow, and more) is available in two places:

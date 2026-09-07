@@ -22,6 +22,7 @@ Pattern: `--sk-<category>-<name>`
 | Radius | `--sk-radius-` | `--sk-radius-xs` |
 | Operational status | `--sk-status-` | `--sk-status-danger` |
 | On-surface foreground | `--sk-on-` | `--sk-on-status-danger`, `--sk-on-tint-mint` |
+| Chart | `--sk-chart-` | `--sk-chart-series-1`, `--sk-chart-dash-2`, `--sk-chart-gap` |
 
 See [ADR-003](../architecture/decisions/2026-05-01-3-token-schema-naming-convention.md) for the
 complete category table and naming rationale.
@@ -86,6 +87,16 @@ most recent example.
 **Aliases are the cheap way to add a category.** `--sk-status-<tone>` is one `var()` deep: every
 one of the twelve resolves to a `--sk-surface-tint-*`, a `--sk-on-tint-*`, `--sk-surface-muted` or
 `--sk-fg-muted`, so the category adds meaning, not colour. Reach for that shape first.
+
+`--sk-chart-*` (#179) is the most recent category and it follows that shape: every one of its
+seven colour roles is one `var()` deep onto an `--sk-on-tint-*`, `--sk-border-default` or
+`--sk-fg-*`, so it adds meaning and no hue. Its one literal is `--sk-chart-gap-fill`, an rgba
+channelled from `--sk-fg-muted` in each theme, on the same footing as the `--sk-border-tint-*`
+pair that predates it. The category is not colour-only: `--sk-chart-dash-1..4` and
+`--sk-chart-gap-dash` are `stroke-dasharray` patterns, and they are the point — a chart
+differentiated only by hue collapses under `forced-colors: active` and in greyscale, so the
+dash channel is what survives. See
+[`docs/design-system/using-tokens.md`](../design-system/using-tokens.md#chart-inks-and-dash-patterns).
 
 This paragraph used to end: *"If a new category needs new colour values, that is a palette decision
 and belongs to whoever owns the palette, not to the mission that happened to need it first."* That
