@@ -462,10 +462,10 @@
       "criterion_id": "NFR-009",
       "description": "A checked-in fail-closed wrapper terminates the Storybook build and exits nonzero at 180 seconds; once the Storybook job runs its build step is unconditional and uses the wrapper; final-head duration is below 180 seconds.",
       "proof_type": "automated_test",
-      "evidence": "CI run 34065216159 job 101572683651 at 7a56e7e: fail-closed Storybook wrapper completed in 14.47s under its enforced 180s ceiling; wrapper selftest and wiring probes are green.",
+      "evidence": "Exact-head CI run 34069071736: fail-closed Storybook wrapper completed successfully in 15.25s under the enforced 180s ceiling; demo assembled from 2 pages with all 42 references resolved.",
       "pass_fail": "pass",
       "verified_by": "codex",
-      "verified_at": "2026-09-06T23:17:03.772080+00:00",
+      "verified_at": "2026-09-07T00:58:47.407004+00:00",
       "notes": "WP03 creates and self-tests the wrapper and wiring; wrap-up records exact-head CI timing.",
       "lane_owners": [
         "WP03"
