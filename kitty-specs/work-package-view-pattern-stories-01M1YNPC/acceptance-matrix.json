@@ -535,5 +535,14 @@
       "notes": "Issue #214 binding requirement; exact-head CI and zoom evidence are revalidated after every push."
     }
   ],
-  "negative_invariants": []
+  "negative_invariants": [
+    {
+      "invariant_id": "NI-001",
+      "description": "No Work Package page, card, Kanban, detail, overview, checklist, or panel custom element is registered or exported.",
+      "verification_method": "custom_command",
+      "verification_command": "! grep -ER \"@customElement\\\\(['\\\"]sk-work-package|customElements\\\\.define\\\\(['\\\"]sk-work-package|export .*sk-work-package-(card|overview|detail|kanban|checklist|panel)\" packages/elements/src packages/react/src",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: "
+    }
+  ]
 }
