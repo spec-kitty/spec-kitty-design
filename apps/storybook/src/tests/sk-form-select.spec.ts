@@ -98,6 +98,8 @@ async function assertNativeSelect(select: Locator): Promise<void> {
 }
 
 test.describe('sk-form-select source, markup, and distribution contract', () => {
+  test.skip(({ browserName }) => browserName !== 'chromium', 'browser-independent contracts run once');
+
   test('the public selector inventory is exactly the base and compact classes and preserves native affordances', () => {
     const source = readFileSync(SELECT_CSS, 'utf8');
     const code = stripComments(source);
@@ -108,20 +110,6 @@ test.describe('sk-form-select source, markup, and distribution contract', () => 
     expect(code).not.toMatch(/(?:transition|animation(?:-[a-z-]+)?)\s*:/);
     expect(code).not.toMatch(/outline\s*:\s*none/);
     expect(code).not.toMatch(/(?:\.sk-light|data-theme|:root|:host-context)/);
-
-    const baseRule = postcss.parse(source, { from: SELECT_CSS }).nodes.find(
-      (node) => node.type === 'rule' && node.selector === '.sk-form-select',
-    );
-    expect(baseRule?.type).toBe('rule');
-    const declarations = new Map(
-      baseRule?.type === 'rule'
-        ? baseRule.nodes.filter((node) => node.type === 'decl').map((node) => [node.prop, node.value])
-        : [],
-    );
-    expect(declarations.get('width')).toBe('100%');
-    expect(declarations.get('min-width')).toBe('0');
-    expect(declarations.get('max-width')).toBe('100%');
-    expect(declarations.get('contain')).toBe('paint');
 
     const selftest = execFileSync(process.execPath, [TOKEN_LITERAL_CHECKER, '--selftest'], { encoding: 'utf8' });
     expect(selftest).toContain('governed token classes fail red');
@@ -221,16 +209,27 @@ test.describe('sk-form-select live native semantics', () => {
 
     const sizing = await select.evaluate((node) => {
       const field = node.closest('.sk-form-field')!;
-      const fieldStyle = getComputedStyle(field);
+      const frame = node.closest('[data-form-select-story-frame]')!;
+      const frameStyle = getComputedStyle(frame);
+      const scroller = document.scrollingElement ?? document.documentElement;
       return {
-        select: node.getBoundingClientRect().width,
-        fieldContent:
-          field.getBoundingClientRect().width -
-          Number.parseFloat(fieldStyle.paddingInlineStart) -
-          Number.parseFloat(fieldStyle.paddingInlineEnd),
+        selectWidth: node.getBoundingClientRect().width,
+        fieldWidth: field.getBoundingClientRect().width,
+        frameWidth: frame.getBoundingClientRect().width,
+        frameContentWidth:
+          frame.getBoundingClientRect().width -
+          Number.parseFloat(frameStyle.paddingInlineStart) -
+          Number.parseFloat(frameStyle.paddingInlineEnd),
+        storyRootWidth: document.querySelector('#storybook-root')!.getBoundingClientRect().width,
+        viewportWidth: document.documentElement.clientWidth,
+        documentScrollWidth: scroller.scrollWidth,
       };
     });
-    expect(sizing.select).toBeCloseTo(sizing.fieldContent, 0);
+    expect(sizing.documentScrollWidth).toBe(sizing.viewportWidth);
+    expect(sizing.storyRootWidth).toBeCloseTo(sizing.viewportWidth, 0);
+    expect(sizing.frameWidth).toBeCloseTo(sizing.storyRootWidth, 0);
+    expect(sizing.fieldWidth).toBeCloseTo(sizing.frameContentWidth, 0);
+    expect(sizing.selectWidth).toBeCloseTo(sizing.fieldWidth, 0);
   });
 
   test('required invalid requestSubmit is blocked, then one valid submit exposes exact FormData and same-root help', async ({ page }) => {

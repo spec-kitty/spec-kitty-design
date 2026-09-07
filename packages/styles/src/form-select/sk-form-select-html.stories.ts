@@ -21,13 +21,14 @@ export default meta;
 type Story = StoryObj;
 
 const storyFrame = (html: string, light = false): string => `
-  <div${light ? ' class="sk-light"' : ''} style="box-sizing: border-box; inline-size: 100%; padding: var(--sk-space-4); color: var(--sk-fg-body); background: var(--sk-surface-page);">
+  <div data-form-select-story-frame${light ? ' class="sk-light"' : ''} style="box-sizing: border-box; inline-size: 100%; padding: var(--sk-space-4); color: var(--sk-fg-body); background: var(--sk-surface-page);">
     ${html}
   </div>
 `;
 
 /** T10 lane choice and the canonical default-dark, full-width route. */
 export const Default: Story = {
+  parameters: { layout: 'fullscreen' },
   render: () => storyFrame(SkFormSelectT10LaneHTML),
 };
 
