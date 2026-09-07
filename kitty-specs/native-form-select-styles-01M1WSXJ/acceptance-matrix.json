@@ -48,10 +48,10 @@
       "criterion_id": "FR-005",
       "description": "Verify FR-005 is satisfied",
       "proof_type": "automated_test",
-      "evidence": "3ca42f9; ArrowDown/typeahead/reset/requestSubmit/FormData/disabled omission green Chromium and Firefox",
+      "evidence": "7cbf6ce5ae27f1d995552deec32f0b463e8dac7f (product tree cf9d5045c0968add9056abc038401a17a7f24e9c); keyboard/typeahead/requestSubmit/FormData/reset/disabled omission green in CI",
       "pass_fail": "pass",
       "verified_by": "codex",
-      "verified_at": "2026-09-07T03:30:09.592792+00:00",
+      "verified_at": "2026-09-07T04:35:50.720516+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
