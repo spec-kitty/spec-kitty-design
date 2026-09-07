@@ -138,10 +138,10 @@
       "criterion_id": "FR-014",
       "description": "Verify FR-014 is satisfied",
       "proof_type": "source_inspection",
-      "evidence": "3ca42f9; docs/design-system/using-components.md Native form select section covers light DOM, datalist, and consumer ownership",
+      "evidence": "7cbf6ce5ae27f1d995552deec32f0b463e8dac7f (product tree cf9d5045c0968add9056abc038401a17a7f24e9c); using-components native form select docs cover light DOM, datalist distinction and consumer ownership",
       "pass_fail": "pass",
       "verified_by": "codex",
-      "verified_at": "2026-09-07T03:30:32.906502+00:00",
+      "verified_at": "2026-09-07T04:36:13.671328+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     }
   ],
