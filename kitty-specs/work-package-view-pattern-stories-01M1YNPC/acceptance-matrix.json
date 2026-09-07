@@ -575,6 +575,14 @@
       "verification_command": "git diff --quiet origin/train/elements-first...HEAD -- packages/tokens/dist packages/styles/dist packages/elements/dist packages/react/dist packages/vue/dist",
       "result": "confirmed_absent",
       "evidence": "Command exited 0: "
+    },
+    {
+      "invariant_id": "NI-006",
+      "description": "No pre-existing architecture validation or learning record was modified by issue 214.",
+      "verification_method": "custom_command",
+      "verification_command": "git diff --quiet origin/train/elements-first...HEAD -- docs/architecture/validation docs/learning",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: "
     }
   ]
 }
