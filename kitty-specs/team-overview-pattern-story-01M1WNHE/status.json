@@ -1,7 +1,7 @@
 {
-  "event_count": 4,
-  "last_event_id": "01M1WZ155VF9YQ0YST11TG6ANY",
-  "materialized_at": "2026-09-07T03:36:44.987535+00:00",
+  "event_count": 5,
+  "last_event_id": "01M1WZ49TDQJ21Q339RCJ5AG03",
+  "materialized_at": "2026-09-07T03:38:28.045056+00:00",
   "mission_number": "",
   "mission_slug": "team-overview-pattern-story-01M1WNHE",
   "mission_type": "software-dev",
@@ -11,9 +11,9 @@
     "canceled": 0,
     "claimed": 0,
     "done": 0,
-    "for_review": 1,
+    "for_review": 0,
     "in_progress": 0,
-    "in_review": 0,
+    "in_review": 1,
     "planned": 0
   },
   "work_packages": {
@@ -24,18 +24,18 @@
       "agent_profile_version": "__resolved_profile_version_absent__",
       "assignee": "codex",
       "force_count": 0,
-      "lane": "for_review",
-      "last_event_id": "01M1WZ155VF9YQ0YST11TG6ANY",
-      "last_transition_at": "2026-09-07T03:36:44.987535+00:00",
+      "lane": "in_review",
+      "last_event_id": "01M1WZ49TDQJ21Q339RCJ5AG03",
+      "last_transition_at": "2026-09-07T03:38:28.045056+00:00",
       "model": "__resolved_model_absent__",
       "notes": [
         "Codex implementation started under resolved frontend-freddy profile",
         "Implementation complete at product SHA 2a330b7a; CI-derived baselines at 1415ae44; CI run 34078606143 fully green; three independent Codex lenses approved."
       ],
       "provider": "__resolved_provider_absent__",
-      "role": "implementer",
-      "shell_pid": 3006381,
-      "shell_pid_created_at": "1788752202.5",
+      "role": "reviewer",
+      "shell_pid": 2459900,
+      "shell_pid_created_at": "1788535195.17",
       "subtasks": {
         "T001": "done",
         "T002": "done",
