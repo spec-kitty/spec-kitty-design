@@ -511,7 +511,7 @@ for (const [id, snapshot, viewport] of formSelectVisuals) {
     const target = id === 'narrow' ? page.locator('#storybook-root') : field;
     if (id === 'narrow') {
       await target.evaluate((node: HTMLElement) => {
-        node.style.alignSelf = 'stretch';
+        node.style.inlineSize = '100vw';
       });
       const geometry = await target.evaluate((node) => {
         const scroller = document.scrollingElement ?? document.documentElement;
