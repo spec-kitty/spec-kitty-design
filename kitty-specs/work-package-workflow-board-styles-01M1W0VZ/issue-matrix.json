@@ -36,6 +36,18 @@
       "verdict": "verified-already-fixed",
       "wp": "WP01"
     },
+    "#172": {
+      "evidence_ref": "PR #172 is merged; the styles-only generated-barrel pipeline is present and drift-checked.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
     "#208": {
       "evidence_ref": "Epic #208 continues through primary children #211-#214 after this #209 mission.",
       "fr": null,
