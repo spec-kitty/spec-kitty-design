@@ -3,47 +3,49 @@ work_package_id: WP01
 title: Make the dependency-derived filter bite, and guard what it selects
 dependencies: []
 requirement_refs:
-  - FR-001
-  - FR-002
-  - FR-003
-  - FR-004
-  - NFR-001
-  - NFR-002
-  - NFR-003
-  - NFR-004
-  - C-001
-  - C-002
-  - C-003
-  - C-004
+- FR-001
+- FR-002
+- FR-003
+- FR-004
+- NFR-001
+- NFR-002
+- NFR-003
+- NFR-004
+- C-001
+- C-002
+- C-003
+- C-004
 planning_base_branch: mission/filtered-mutation-suite
 merge_target_branch: mission/filtered-mutation-suite
-branch_strategy: Planning artifacts were generated on mission/filtered-mutation-suite under the single_branch topology; the mission PR targets train/elements-first.
+branch_strategy: Planning artifacts for this mission were generated on mission/filtered-mutation-suite. During /spec-kitty.implement this WP may branch from a dependency-specific base, but completed changes must merge back into mission/filtered-mutation-suite unless the human explicitly redirects the landing branch.
 subtasks:
-  - T001
-  - T002
-  - T003
-  - T004
-  - T005
-  - T006
-  - T007
+- T001
+- T002
+- T003
+- T004
+- T005
+- T006
+- T007
 phase: Phase 1 - filtered mutation suite
+history: []
 agent_profile: backend-benny
 authoritative_surface: scripts/suite-selftest.mjs
+create_intent: []
 execution_mode: code_change
-model: ""
+model: ''
 owned_files:
-  - fixtures/elements-behaviour/src/*.test.ts
-  - scripts/suite-selftest.mjs
-  - suite-budget.json
+- fixtures/elements-behaviour/src/*.test.ts
+- scripts/suite-selftest.mjs
+- suite-budget.json
 role: implementer
 tags:
-  - ci
-  - mutation-harness
-  - performance
+- ci
+- mutation-harness
+- performance
 task_type: implement
 tracker_refs:
-  - "#225"
-  - "#241"
+- '#225'
+- '#241'
 ---
 
 # Work Package Prompt: WP01 — Make the dependency-derived filter bite
