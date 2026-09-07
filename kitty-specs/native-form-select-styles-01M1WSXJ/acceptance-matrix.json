@@ -8,10 +8,10 @@
       "criterion_id": "FR-001",
       "description": "Verify FR-001 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "3ca42f9; apps/storybook/src/tests/sk-form-select.spec.ts; Chromium 23/23",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T03:29:43.502988+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
