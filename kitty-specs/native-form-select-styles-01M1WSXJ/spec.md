@@ -26,7 +26,7 @@ Canonical markup:
 ```html
 <div class="sk-form-field">
   <label class="sk-form-field__label" for="status">Status</label>
-  <select class="sk-form-select" id="status" name="status">
+  <select class="sk-form-select" id="status" name="status" aria-describedby="status-help">
     <option value="ready">Ready</option>
   </select>
   <p class="sk-form-field__description" id="status-help">Choose a status.</p>
@@ -125,14 +125,19 @@ and exercise forced-colors and narrow-viewport browser checks.
 **Acceptance Scenarios**:
 
 1. **Given** default dark and explicit LightMode surfaces, **When** the same select renders in
-   each, **Then** its text, surface, border and focus treatment adapt using authoritative tokens.
+   each and LightMode wraps its fixture in the repository-required `.sk-light` class, **Then** its
+   text, surface, border and focus treatment adapt using authoritative tokens and expose a
+   token-derived computed-style delta.
 2. **Given** a required invalid select, **When** it renders in either theme, **Then** invalid state
    is visible without replacing native validity semantics.
 3. **Given** forced-colors mode, **When** the select is focused, invalid or disabled, **Then** the
    native control and its state indicator remain discernible.
-4. **Given** browser zoom or a 320 CSS-pixel viewport, **When** the fixture is viewed, **Then** its
-   label, select and description remain available without clipped essential content.
-5. **Given** a reduced-motion preference, **When** state changes, **Then** no component animation
+4. **Given** browser zoom at 200%, **When** the fixture is viewed and the select is focused,
+   invalid or disabled, **Then** its native indicator and each required state affordance remain
+   visible and essential content is not clipped.
+5. **Given** a 320 CSS-pixel viewport, **When** the fixture is viewed, **Then** its label, select
+   and description remain available without page-level horizontal overflow.
+6. **Given** a reduced-motion preference, **When** state changes, **Then** no component animation
    or transition is introduced.
 
 ---
@@ -154,6 +159,10 @@ artifacts, build Storybook and inspect the expected story inventory.
 3. **Given** Storybook, **When** the form-select story module is enumerated, **Then** it includes
    T10 lane, T12 two-filter, compact, long-option, optgroup, invalid, disabled, narrow,
    forced-colors, default-dark and LightMode coverage.
+4. **Given** the component documentation, **When** a consumer chooses between the form-input
+   datalist and form-select, **Then** it states that form-select stays native light DOM, that #180's
+   datalist accepts unmatched free text and is therefore not a closed-choice substitute, and that
+   the consumer owns options, value/change handling and application filter or lane state.
 
 ## Edge Cases
 
@@ -183,9 +192,10 @@ artifacts, build Storybook and inspect the expected story inventory.
 | **FR-008** | The control MUST provide a visible native-compatible focus indicator and distinguish disabled and invalid state. |
 | **FR-009** | All design values in authored CSS MUST come from authoritative `--sk-*` tokens. |
 | **FR-010** | The implementation MUST preserve browser affordances; it MUST NOT use `appearance: none`, draw a replacement arrow or disable forced-colors adjustment. |
-| **FR-011** | Storybook MUST expose T10 lane, T12 two-filter, compact, long-option, optgroup, invalid, disabled, narrow, forced-colors, default-dark and LightMode examples. |
+| **FR-011** | Storybook MUST expose T10 lane, T12 two-filter, compact, long-option, optgroup, invalid, disabled, narrow, forced-colors, default-dark and LightMode examples; LightMode MUST use a `.sk-light` wrapper and exhibit a token-derived computed-style delta. |
 | **FR-012** | The published styles barrel, package subpath, generated reference and story inventory MUST include the new styles-only primitive through repository-supported generation. |
 | **FR-013** | Browser tests MUST cover native semantics, form behaviour, keyboard/typeahead, state accessibility, axe, themes, forced colours, narrow layout and visual regression. |
+| **FR-014** | Public documentation MUST explain why form-select remains native light DOM, why #180's datalist is not a closed-choice substitute, and that consumers own options, selected value, change handling and application state. |
 
 ## Non-Functional Requirements
 
@@ -196,7 +206,7 @@ artifacts, build Storybook and inspect the expected story inventory.
 | **NFR-003** | Token compliance | Zero raw design values in the new shipped CSS; values resolve through `var(--sk-*)`. |
 | **NFR-004** | Theme support | Required states are legible in default dark and explicit LightMode. |
 | **NFR-005** | Forced-colors resilience | Focus, invalid and disabled controls remain discernible with forced colors active. |
-| **NFR-006** | Reflow | No page-level horizontal overflow at a 320 CSS-pixel viewport. |
+| **NFR-006** | Reflow and zoom | No page-level horizontal overflow at a 320 CSS-pixel viewport; separate 200% browser-zoom evidence preserves the native indicator and focused, invalid and disabled affordances without clipping essential content. |
 | **NFR-007** | Motion | Zero new animations or transitions. |
 | **NFR-008** | Distribution integrity | Generated-artifact and release-graph drift checks pass. |
 | **NFR-009** | Cross-browser behaviour | Relevant Playwright assertions pass in Chromium, Firefox and WebKit CI projects. |
@@ -253,12 +263,13 @@ artifacts, build Storybook and inspect the expected story inventory.
 | **SC-004** | Browser-owned form behaviour remains intact. | `FormData`, required validity, disabled omission and reset tests. |
 | **SC-005** | Native options and groups remain exposed in their authored order. | DOM/type/order assertions across engines. |
 | **SC-006** | Required-invalid support is perceivable and described. | Native validity, same-root description relationship and axe checks. |
-| **SC-007** | Focus, invalid and disabled states survive resilient display modes. | Forced-colors and theme browser assertions plus visual baselines. |
+| **SC-007** | Focus, invalid and disabled states survive resilient display modes. | Forced-colors and theme browser assertions plus separate 200% browser-zoom evidence and visual baselines. |
 | **SC-008** | Long content and narrow layouts do not escape their container. | Long-option and 320-pixel reflow tests. |
 | **SC-009** | All required issue states are discoverable. | Expected-story inventory and Storybook build. |
 | **SC-010** | The stylesheet uses only authoritative design tokens. | Stylelint and targeted authored-CSS inspection. |
 | **SC-011** | Published style exports and docs are reproducible. | Generator and generated-drift gates. |
 | **SC-012** | The repository remains releasable on the train. | `npm run quality:all`, relevant browser/visual gates and CI. |
+| **SC-013** | Consumers can choose the correct native control and ownership boundary. | Documentation explicitly contrasts the closed select with #180's free-text datalist and states the light-DOM and application-state boundaries. |
 
 ## Dependencies and governance
 
@@ -273,4 +284,3 @@ artifacts, build Storybook and inspect the expected story inventory.
 
 No new architectural decision is required at specification time. Existing ADRs and the issue
 contract fully determine the public primitive, native-semantic boundary and distribution layer.
-
