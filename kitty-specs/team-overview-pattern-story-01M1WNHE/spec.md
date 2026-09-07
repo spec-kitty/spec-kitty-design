@@ -266,7 +266,7 @@ explicit labels, full-coverage arithmetic is not claimed, and non-link warnings 
 |---|---|---|---|---|---|
 | C-001 | Presentational boundary | No fetching, store, router, polling, timer, relative-time clock, product selector, or application action function enters the design library. | Architecture | High | Binding |
 | C-002 | No public page element | Do not register, export, document, or generate a wrapper for `sk-team-overview`. | Scope | High | Binding |
-| C-003 | Existing children | Reuse `sk-card`, `sk-grid`, `sk-button`, `sk-pill-tag`, `sk-nav-pill`, and all #145–#149 elements; do not create replacements. | Scope | High | Binding |
+| C-003 | Existing children | Reuse `sk-card`, `sk-grid`, `sk-button`, `sk-pill-tag`, `sk-nav-pill`, and all #145–#149 elements; do not create replacements or new design tokens for the composition. | Scope | High | Binding |
 | C-004 | Child ownership | Do not modify another mission's component implementation or style through a private shadow-root seam. File a follow-up if a missing reusable contract is discovered. | Scope | High | Binding |
 | C-005 | No Team Kitty coupling | No import, type, route, store, API model, or asset from Team Kitty is added. | Architecture | High | Binding |
 | C-006 | Honest evidence | Do not imply guaranteed ROI, reconcile moves with items, hide missing evidence, or leave a full-coverage arithmetic gap. | Product integrity | High | Binding |
