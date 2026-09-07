@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "generated_at": "2026-09-06T19:09:56.922Z",
+  "generated_at": "2026-09-07T01:32:21.049Z",
   "generated_from": "packages/tokens/src/tokens.css",
   "categories": {
     "color": {
@@ -165,6 +165,7 @@
       "tokens": [
         "--sk-layout-personal-rail-width",
         "--sk-layout-context-sidebar-width",
+        "--sk-layout-workflow-lane-min-inline-size",
         "--sk-layout-page-header-sticky-offset",
         "--sk-layout-page-header-compact-height",
         "--sk-layout-page-header-sticky-layer",

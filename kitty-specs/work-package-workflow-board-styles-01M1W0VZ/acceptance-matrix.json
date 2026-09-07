@@ -1,0 +1,250 @@
+{
+  "mission_slug": "work-package-workflow-board-styles-01M1W0VZ",
+  "mission_number": "",
+  "mission_type": "software-dev",
+  "overall_verdict": "pass",
+  "criteria": [
+    {
+      "criterion_id": "FR-001",
+      "description": "Verify FR-001 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "apps/storybook/src/tests/sk-workflow-board.spec.ts; CI 34068567976; exact CSS selector inventory",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T00:31:57.055723+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-002",
+      "description": "Verify FR-002 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "apps/storybook/src/tests/sk-workflow-board.spec.ts; CI 34068567976; exact CSS selector inventory",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T00:31:58.473344+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-003",
+      "description": "Verify FR-003 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "apps/storybook/src/tests/sk-workflow-board.spec.ts: Chromium 44/44 and Firefox 44/44 locally; full cross-browser CI 34068567976; 301-story axe gate green",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T00:31:59.804327+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-004",
+      "description": "Verify FR-004 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "apps/storybook/src/tests/sk-workflow-board.spec.ts: Chromium 44/44 and Firefox 44/44 locally; full cross-browser CI 34068567976; 301-story axe gate green",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T00:32:01.135967+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-005",
+      "description": "Verify FR-005 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "apps/storybook/src/tests/sk-workflow-board.spec.ts: Chromium 44/44 and Firefox 44/44 locally; full cross-browser CI 34068567976; 301-story axe gate green",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T00:32:02.467957+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-006",
+      "description": "Verify FR-006 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "apps/storybook/src/tests/sk-workflow-board.spec.ts: Chromium 44/44 and Firefox 44/44 locally; full cross-browser CI 34068567976; 301-story axe gate green",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T00:32:03.885534+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-007",
+      "description": "Verify FR-007 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "apps/storybook/src/tests/sk-workflow-board.spec.ts: Chromium 44/44 and Firefox 44/44 locally; full cross-browser CI 34068567976; 301-story axe gate green",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T00:32:05.230291+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-008",
+      "description": "Verify FR-008 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "apps/storybook/src/tests/sk-workflow-board.spec.ts: Chromium 44/44 and Firefox 44/44 locally; full cross-browser CI 34068567976; 301-story axe gate green",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T00:32:06.660463+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-009",
+      "description": "Verify FR-009 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "apps/storybook/src/tests/sk-workflow-board.spec.ts: Chromium 44/44 and Firefox 44/44 locally; full cross-browser CI 34068567976; 301-story axe gate green",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T00:32:08.024522+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-010",
+      "description": "Verify FR-010 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "apps/storybook/src/tests/sk-workflow-board.spec.ts: Chromium 44/44 and Firefox 44/44 locally; full cross-browser CI 34068567976; 301-story axe gate green",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T00:32:09.349835+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-011",
+      "description": "Verify FR-011 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "apps/storybook/src/tests/sk-workflow-board.spec.ts: Chromium 44/44 and Firefox 44/44 locally; full cross-browser CI 34068567976; 301-story axe gate green",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T00:32:10.506147+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-012",
+      "description": "Verify FR-012 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "apps/storybook/src/tests/sk-workflow-board.spec.ts: Chromium 44/44 and Firefox 44/44 locally; full cross-browser CI 34068567976; 301-story axe gate green",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T00:32:11.744116+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-013",
+      "description": "Verify FR-013 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "apps/storybook/src/tests/sk-workflow-board.spec.ts: Chromium 44/44 and Firefox 44/44 locally; full cross-browser CI 34068567976; 301-story axe gate green",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T00:32:13.035570+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-014",
+      "description": "Verify FR-014 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "Generator drift, root/subpath exports, release graph, packed Vue types, offline load and documentation checks green; CI 34068567976",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T00:32:14.255198+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-015",
+      "description": "Verify FR-015 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "Generator drift, root/subpath exports, release graph, packed Vue types, offline load and documentation checks green; CI 34068567976",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T00:32:15.525401+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-016",
+      "description": "Verify FR-016 is satisfied",
+      "proof_type": "visual_regression",
+      "evidence": "CI-authoritative visual-regression job 101581750816 in run 34068567976 passed exact source head 0d70dc7ccb7e2844f753f0c658c37262b667e934",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T00:32:16.962608+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    }
+  ],
+  "negative_invariants": [
+    {
+      "invariant_id": "NI-001",
+      "description": "No custom element, wrapper, manifest, parts, behavior, or mutation surface is introduced.",
+      "verification_method": "custom_command",
+      "verification_command": "npx playwright test apps/storybook/src/tests/sk-workflow-board.spec.ts --project=chromium --grep \"surface remains styles-only\"",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: Running 1 test using 1 worker\n\n\n\n[1/1] [chromium] \u203a apps/storybook/src/tests/sk-workflow-board.spec.ts:302:7 \u203a workflow board source and distribution contract \u203a the surface remains styles-only and doe"
+    },
+    {
+      "invariant_id": "NI-002",
+      "description": "Public CSS inventory contains exactly the seven approved selectors and no extra modifier/domain class.",
+      "verification_method": "custom_command",
+      "verification_command": "npx playwright test apps/storybook/src/tests/sk-workflow-board.spec.ts --project=chromium --grep \"public CSS inventory\"",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: Running 1 test using 1 worker\n\n\n\n[1/1] [chromium] \u203a apps/storybook/src/tests/sk-workflow-board.spec.ts:270:7 \u203a workflow board source and distribution contract \u203a the public CSS inventory is exactly the"
+    },
+    {
+      "invariant_id": "NI-003",
+      "description": "Styles and fixtures generate no labels, counts, separators, punctuation, or other accessible content.",
+      "verification_method": "custom_command",
+      "verification_command": "npx playwright test apps/storybook/src/tests/sk-workflow-board.spec.ts --project=chromium --grep \"authored fixtures forge no list/grid semantics\"",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: Running 1 test using 1 worker\n\n\n\n[1/1] [chromium] \u203a apps/storybook/src/tests/sk-workflow-board.spec.ts:407:7 \u203a workflow board source and distribution contract \u203a authored fixtures forge no list/grid se"
+    },
+    {
+      "invariant_id": "NI-004",
+      "description": "Native section, heading, ordered-list, and direct list-item semantics are never forged or wrapped.",
+      "verification_method": "custom_command",
+      "verification_command": "npx playwright test apps/storybook/src/tests/sk-workflow-board.spec.ts --project=chromium --grep \"native sections, lists, counts, and source order\"",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: Running 4 tests using 4 workers\n\n\n\n\n\n\n\n\n\n[1/4] [chromium] \u203a apps/storybook/src/tests/sk-workflow-board.spec.ts:488:7 \u203a native sections, lists, counts, and source order \u203a OneEmptyLane has exactly one e"
+    },
+    {
+      "invariant_id": "NI-005",
+      "description": "No application state, routing, filtering, observers, timers, motion, domain vocabulary, or tone ownership enters the library.",
+      "verification_method": "custom_command",
+      "verification_command": "npx playwright test apps/storybook/src/tests/sk-workflow-board.spec.ts --project=chromium --grep \"public CSS inventory\"",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: Running 1 test using 1 worker\n\n\n\n[1/1] [chromium] \u203a apps/storybook/src/tests/sk-workflow-board.spec.ts:270:7 \u203a workflow board source and distribution contract \u203a the public CSS inventory is exactly the"
+    },
+    {
+      "invariant_id": "NI-006",
+      "description": "The role/name/tabindex triad is complete only for actual overflow, and fitting boards are absent from sequential tab order.",
+      "verification_method": "custom_command",
+      "verification_command": "npx playwright test apps/storybook/src/tests/sk-workflow-board.spec.ts --project=chromium --grep \"conditional overflow semantics and keyboard operation\"",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: Running 14 tests using 12 workers\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n[1/14] [chromium] \u203a apps/storybook/src/tests/sk-workflow-board.spec.ts:533:9 \u203a conditional overflow semantics and keyboard operation \u203a populated (fixtu"
+    },
+    {
+      "invariant_id": "NI-007",
+      "description": "Every required board state remains contained without page-level overflow.",
+      "verification_method": "custom_command",
+      "verification_command": "npx playwright test apps/storybook/src/tests/sk-workflow-board.spec.ts --project=chromium --grep \"renders a visible board without browser errors or page overflow\"",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: Running 11 tests using 11 workers\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n[1/11] [chromium] \u203a apps/storybook/src/tests/sk-workflow-board.spec.ts:424:9 \u203a workflow board stories are non-vacuous and console-clean \u203a default ren"
+    },
+    {
+      "invariant_id": "NI-008",
+      "description": "Empty, one-empty, populated, and fifty-item states do not fake items or drift counts/cardinality.",
+      "verification_method": "custom_command",
+      "verification_command": "npx playwright test apps/storybook/src/tests/sk-workflow-board.spec.ts --project=chromium --grep \"native sections, lists, counts, and source order\"",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: Running 4 tests using 4 workers\n\n\n\n\n\n\n\n[1/4] [chromium] \u203a apps/storybook/src/tests/sk-workflow-board.spec.ts:488:7 \u203a native sections, lists, counts, and source order \u203a OneEmptyLane has exactly one emp"
+    },
+    {
+      "invariant_id": "NI-009",
+      "description": "No raw design values, token fallbacks, inert light wrapper, or forced-colors opt-out is introduced.",
+      "verification_method": "custom_command",
+      "verification_command": "npx playwright test apps/storybook/src/tests/sk-workflow-board.spec.ts --project=chromium --grep \"one measured, theme-invariant|parsed token-literal|LightMode changes|forced colors preserves\"",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: Running 4 tests using 4 workers\n\n\n\n\n\n\n\n\n\n[1/4] [chromium] \u203a apps/storybook/src/tests/sk-workflow-board.spec.ts:348:7 \u203a workflow board source and distribution contract \u203a the parsed token-literal gate p"
+    },
+    {
+      "invariant_id": "NI-010",
+      "description": "No #211, #212, or #214 implementation is hidden in examples, docs, elements, or public selectors.",
+      "verification_method": "custom_command",
+      "verification_command": "npx playwright test apps/storybook/src/tests/sk-workflow-board.spec.ts --project=chromium --grep \"surface remains styles-only|public CSS inventory\"",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: Running 2 tests using 2 workers\n\n\n\n\n\n[1/2] [chromium] \u203a apps/storybook/src/tests/sk-workflow-board.spec.ts:270:7 \u203a workflow board source and distribution contract \u203a the public CSS inventory is exactly"
+    }
+  ]
+}

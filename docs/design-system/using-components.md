@@ -10,10 +10,11 @@ so far — as **custom elements** in `@spec-kitty/elements`. Both require `@spec
 `sk-section-banner`, `sk-section-header`, `sk-site-footer`, `sk-status-indicator`, `sk-stub`, and
 `sk-transition-matrix`.
 Several of the catalogue's component packages are CSS only by a recorded decision — `form-field`,
-(#176) `facts`, `disclosure`, `data-table`, `empty-state`, `skip-link`, and (#210) `progress`. See
+(#176) `facts`, `disclosure`, `data-table`, `empty-state`, `skip-link`, (#210) `progress`, and
+(#209) `workflow-board` and `workflow-lane`. See
 ADR-10, *form-field is deliberately styles-only* and *Styles-only components are a class, not a
-fixed exception count*. These seven ship classes applied to real semantic HTML the consumer authors
-— `<dl>`, `<details>`, `<table>`, a plain block, `<a>`, `<progress>` — and no `sk-*` custom element
+fixed exception count*. These nine ship classes applied to real semantic HTML the consumer authors
+— `<dl>`, `<details>`, `<table>`, a plain block, `<a>`, `<progress>`, `<section>`, and `<ol>` — and no `sk-*` custom element
 wraps any of them: light-DOM native semantics (list/table/label association across a shadow
 boundary) are exactly what a wrapper element would break. Composite sections below such as Hero
 and Callout are CSS-only *patterns* rather than packages, and are not part of that count. Each
@@ -316,6 +317,75 @@ Neither component has a styles-layer static form. The chain's readonly structure
 property assignment, which static HTML cannot preserve without inventing a serialization and
 parsing policy. Consumers needing no JavaScript should author the native `<dl>`/`<ol>` structures
 directly instead.
+
+## Workflow board and lanes
+
+`workflow-board` and `workflow-lane` are styles-only native-HTML families. Load both CSS files;
+there is deliberately no `<sk-workflow-board>` or `<sk-workflow-lane>` custom element.
+
+```html
+<link rel="stylesheet" href="/node_modules/@spec-kitty/styles/dist/workflow-board/sk-workflow-board.css" />
+<link rel="stylesheet" href="/node_modules/@spec-kitty/styles/dist/workflow-lane/sk-workflow-lane.css" />
+
+<div class="sk-workflow-board">
+  <h2 id="work-package-board-title">Work Packages</h2>
+  <div class="sk-workflow-board__scroller">
+    <section class="sk-workflow-lane" aria-labelledby="planned-title">
+      <header class="sk-workflow-lane__header">
+        <h3 class="sk-workflow-lane__title" id="planned-title">Planned</h3>
+        <span class="sk-workflow-lane__count" aria-label="2 work packages">2</span>
+      </header>
+      <ol class="sk-workflow-lane__list">
+        <li>Consumer-owned work package content</li>
+        <li>Another consumer-owned work package</li>
+      </ol>
+    </section>
+  </div>
+</div>
+```
+
+This one-lane example fits its scroller, so the overflow-only region, accessible name, and
+tab stop are all absent.
+
+The selector vocabulary is exactly `.sk-workflow-board`, `.sk-workflow-board__scroller`,
+`.sk-workflow-lane`, `.sk-workflow-lane__header`, `.sk-workflow-lane__title`,
+`.sk-workflow-lane__count`, and `.sk-workflow-lane__list`. Apply each lane block directly to a
+native `<section>` named by its own native `h2`–`h6`. Apply the list class to an `<ol>` and keep
+each work package as a direct `<li>` in source order; do not insert a wrapper or forge list roles.
+
+The count, wording, IDs, heading levels, lane/item order, item markup, tone, empty copy, and mobile
+selection are consumer-owned. Keep maintained counts equal to direct list-item cardinality. An
+empty lane still has an empty `<ol>`; place supplied empty treatment after it as a sibling, never
+as a fake list item. On a narrow route, render the one consumer-selected lane through the same
+seven selectors; the library stores no active lane and hides no peers.
+
+The scroller gets `role="region"`, exactly one accessible naming method, and `tabindex="0"`
+together only while it genuinely overflows. A fitting scroller omits all three. Dynamic consumers
+can synchronize that all-or-none state after relevant content or layout changes:
+
+```js
+function syncWorkflowScroller(scroller, labelledBy) {
+  const overflowing = scroller.scrollWidth > scroller.clientWidth;
+  if (overflowing) {
+    scroller.setAttribute('tabindex', '0');
+    scroller.setAttribute('role', 'region');
+    scroller.removeAttribute('aria-label');
+    scroller.setAttribute('aria-labelledby', labelledBy);
+  } else {
+    scroller.removeAttribute('tabindex');
+    scroller.removeAttribute('role');
+    scroller.removeAttribute('aria-label');
+    scroller.removeAttribute('aria-labelledby');
+  }
+}
+```
+
+That example is consumer code, not a package helper: choose when to re-run it from your own render
+and layout lifecycle. Do not add a library observer or resize handler. Presentation uses neutral
+tokens only: `--sk-layout-workflow-lane-min-inline-size`, `--sk-space-*`, `--sk-font-*`,
+`--sk-text-*`, `--sk-weight-*`, `--sk-surface-card`, `--sk-surface-pill`, `--sk-fg-body`,
+`--sk-fg-default`, `--sk-border-default`, `--sk-border-focus`, `--sk-border-width-*`, and
+`--sk-radius-*`. Lane names never choose a status tone.
 
 ## Installation
 

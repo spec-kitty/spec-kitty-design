@@ -1,0 +1,58 @@
+{
+  "event_count": 6,
+  "last_event_id": "01M1WMC6TZF9KAAT61G8MTBBMX",
+  "materialized_at": "2026-09-07T00:30:32.799717+00:00",
+  "mission_number": "",
+  "mission_slug": "work-package-workflow-board-styles-01M1W0VZ",
+  "mission_type": "software-dev",
+  "summary": {
+    "approved": 1,
+    "blocked": 0,
+    "canceled": 0,
+    "claimed": 0,
+    "done": 0,
+    "for_review": 0,
+    "in_progress": 0,
+    "in_review": 0,
+    "planned": 0
+  },
+  "work_packages": {
+    "WP01": {
+      "actor": "codex",
+      "agent": "codex",
+      "agent_profile": "reviewer-renata",
+      "agent_profile_version": "1.0",
+      "assignee": "codex",
+      "force_count": 0,
+      "lane": "approved",
+      "last_event_id": "01M1WMC6TZF9KAAT61G8MTBBMX",
+      "last_transition_at": "2026-09-07T00:30:32.799717+00:00",
+      "model": "__resolved_model_absent__",
+      "notes": [
+        "Codex implementation seat started in authorized primary clone; runtime worktree path intentionally unused per programme contract",
+        "Implementation and T007 exact-head evidence complete; ready for independent Codex runtime review.",
+        "Independent Codex runtime review approved all FR/NFR/SC/NI contracts with no findings; source-certified head and exact-head CI are green."
+      ],
+      "provider": "__resolved_provider_absent__",
+      "review_result": {
+        "reference": "review-cycle://work-package-workflow-board-styles-01M1W0VZ/WP01-native-workflow-board-and-lane-styles/review-cycle-1.md",
+        "reviewer": "reviewer-renata",
+        "verdict": "approved"
+      },
+      "role": "reviewer",
+      "subtasks": {
+        "T001": "done",
+        "T002": "done",
+        "T003": "done",
+        "T004": "done",
+        "T005": "done",
+        "T006": "done",
+        "T007": "done"
+      },
+      "tracker_refs": [
+        "#209",
+        "#208"
+      ]
+    }
+  }
+}

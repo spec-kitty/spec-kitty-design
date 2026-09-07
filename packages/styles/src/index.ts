@@ -54,3 +54,5 @@ export * from './section-banner/index';
 export * from './site-footer/index';
 export * from './skip-link/index';
 export * from './stub/index';
+export * from './workflow-board/index';
+export * from './workflow-lane/index';

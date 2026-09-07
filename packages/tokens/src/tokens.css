@@ -195,6 +195,11 @@
   /* ── Layout ──────────────────────── */
   --sk-layout-personal-rail-width: 3.5rem;  /* 56px */
   --sk-layout-context-sidebar-width: 15rem; /* 240px */
+  /* Browser-calibrated lower bound for a workflow lane (#209). 13.75rem is
+     220px at the repository's 16px root: the smallest tested candidate in the
+     220–360px sweep that keeps long opaque content contained, fits one lane at
+     320/360px, and makes five lanes overflow locally without widening the page. */
+  --sk-layout-workflow-lane-min-inline-size: 13.75rem;
 
   /* sk-page-header sticky geometry (#182). The offset is what the header pins itself
      at inside whatever scroll region the shell gives it; a consumer whose shell has its
@@ -317,6 +322,7 @@
   /* Layout geometry is theme-invariant. */
   --sk-layout-personal-rail-width: 3.5rem;
   --sk-layout-context-sidebar-width: 15rem;
+  --sk-layout-workflow-lane-min-inline-size: 13.75rem;
   --sk-layout-page-header-sticky-offset: 0rem;
   --sk-layout-page-header-compact-height: 3rem;
   --sk-layout-page-header-sticky-layer: 10;
