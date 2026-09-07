@@ -2,7 +2,7 @@
   "mission_slug": "return-over-time-bar-chart-01M1QYBY",
   "mission_number": "",
   "mission_type": "software-dev",
-  "overall_verdict": "pending",
+  "overall_verdict": "pass",
   "criteria": [
     {
       "criterion_id": "FR-001",
@@ -627,10 +627,10 @@
       "criterion_id": "C-011",
       "description": "Run three independent profile-loaded Codex lenses after tasks and again pre-merge, at most two passes per point-cut, with exact-SHA evidence.",
       "proof_type": "manual_review",
-      "evidence": "Fourth authorized train rebase and combined-artifact regeneration occurred after the prior exact-head lenses; final Codex lens evidence must be refreshed on the new immutable head.",
-      "pass_fail": "pending",
+      "evidence": "Three independent final Codex lenses PASS at exact 71801a66c61e240d5606c8a78b083ce3a136c0c9 after the fourth authorized train rebase: lens 1 acceptance/schema/generated/story-union audit; lens 2 rebase/range/conflict/baseline provenance audit; lens 3 product/API/accessibility/visual/framework audit. All report zero content findings. A clean uncontended local mutation retry and fresh exact-head PR CI remain separate release gates.",
+      "pass_fail": "pass",
       "verified_by": "codex",
-      "verified_at": "2026-09-06T23:36:15.730500+00:00",
+      "verified_at": "2026-09-07T00:11:01.922146+00:00",
       "notes": "Post-tasks evidence is planning-stage; wrap-up owns exact-final-head lens evidence.",
       "lane_owners": [],
       "terminal_owner": "mission-wrap-up"
