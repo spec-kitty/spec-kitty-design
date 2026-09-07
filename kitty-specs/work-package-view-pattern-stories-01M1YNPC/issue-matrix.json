@@ -60,6 +60,18 @@
       "verdict": "verified-already-fixed",
       "wp": "WP01"
     },
+    "#210": {
+      "evidence_ref": "Closed programme predecessor #210; its completion comment records the merged native progress public surface composed by WP01.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
     "#214": {
       "evidence_ref": "WP01 implementation/review evidence at substantive commit 3c4e0e21b2aed765e485f53afcd2fb12654f19cd plus review-cycle-1 folds.",
       "fr": null,
