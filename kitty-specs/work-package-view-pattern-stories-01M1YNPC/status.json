@@ -19,7 +19,7 @@
   "work_packages": {
     "WP01": {
       "actor": "user",
-      "agent": "codex-reviewer",
+      "agent": null,
       "agent_profile": "reviewer-renata",
       "agent_profile_version": "1.0",
       "force_count": 1,
@@ -31,6 +31,7 @@
         "Implementation complete at b6f5aaded1135feb8443942a8358d8a7645a01cf; focused, cross-browser, axe, mutation, generation, Storybook, release, security, and CI evidence recorded."
       ],
       "provider": "__resolved_provider_absent__",
+      "review": null,
       "review_result": {
         "feedback_path": "/home/jeroennouws/dev/team-kitty-missions/design-214-wp208-214-0907a/kitty-specs/work-package-view-pattern-stories-01M1YNPC/tasks/WP01-work-package-view-patterns-and-proof/review-cycle-1.md",
         "reference": "review-cycle://work-package-view-pattern-stories-01M1YNPC/WP01-work-package-view-patterns-and-proof/review-cycle-1.md",
@@ -38,21 +39,21 @@
         "verdict": "changes_requested"
       },
       "role": "reviewer",
-      "shell_pid": 373380,
-      "shell_pid_created_at": "1788706501.11",
+      "shell_pid": null,
+      "shell_pid_created_at": null,
       "subtasks": {
-        "T001": "done",
-        "T002": "done",
-        "T003": "done",
-        "T004": "done",
-        "T005": "done",
-        "T006": "done",
-        "T007": "done",
-        "T008": "done",
-        "T009": "done",
-        "T010": "done",
-        "T011": "done",
-        "T012": "done"
+        "T001": "planned",
+        "T002": "planned",
+        "T003": "planned",
+        "T004": "planned",
+        "T005": "planned",
+        "T006": "planned",
+        "T007": "planned",
+        "T008": "planned",
+        "T009": "planned",
+        "T010": "planned",
+        "T011": "planned",
+        "T012": "planned"
       }
     }
   }
