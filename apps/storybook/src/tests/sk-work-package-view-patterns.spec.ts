@@ -156,6 +156,7 @@ test('source keeps the patterns inside immutable Storybook-only public boundarie
   const source = readFileSync('packages/elements/src/patterns/work-package-views.stories.ts', 'utf8');
 
   expect(source).not.toMatch(/<sk-work-package-(?:overview|detail|card)(?:\s|>)/);
+  expect(source).not.toMatch(/<sk-(?:workflow-board|workflow-lane)(?:\s|>)/);
   expect(source).not.toMatch(/customElements\.define\s*\(/);
   expect(source).not.toMatch(/shadowRoot/);
   expect(source).not.toMatch(/from\s+['"][^'"]*team-kitty/i);
@@ -187,6 +188,7 @@ test('built index discovers exactly the fifteen route states and no helper expor
 
 test('default overview reconciles one frozen 5-of-8 fixture across lanes and progress', async ({ page }) => {
   const root = await overview(page, 'default');
+  await expect(root).toHaveAttribute('data-play-proof', 'passed');
   await expect(root).toHaveAttribute('data-fixture-deeply-frozen', 'true');
   await expect(root).toHaveAttribute('data-completed-count', '5');
   await expect(root).toHaveAttribute('data-total-count', '8');
@@ -208,6 +210,21 @@ test('default overview reconciles one frozen 5-of-8 fixture across lanes and pro
 
   const lanes = root.locator('[data-lane-id]');
   await expect(lanes).toHaveCount(5);
+  expect(
+    await lanes.evaluateAll((nodes) =>
+      nodes.map((lane) => ({
+        tag: lane.localName,
+        directLists: lane.querySelectorAll(':scope > ol.sk-workflow-lane__list').length,
+        headingTag: document.getElementById(lane.getAttribute('aria-labelledby') ?? '')?.localName,
+      })),
+    ),
+  ).toEqual(
+    Array.from({ length: 5 }, () => ({
+      tag: 'section',
+      directLists: 1,
+      headingTag: 'h3',
+    })),
+  );
   const counts = await lanes.evaluateAll((nodes) =>
     nodes.map((lane) => ({
       visible: Number(lane.querySelector('.sk-workflow-lane__count')?.textContent),
@@ -224,7 +241,13 @@ test('default overview reconciles one frozen 5-of-8 fixture across lanes and pro
   expect(counts.reduce((sum, lane) => sum + lane.items, 0)).toBe(8);
 
   const scroller = root.locator('.sk-workflow-board__scroller');
+  const scrollerGeometry = await scroller.evaluate((node) => ({
+    clientWidth: node.clientWidth,
+    scrollWidth: node.scrollWidth,
+  }));
+  expect(scrollerGeometry.scrollWidth).toBeLessThanOrEqual(scrollerGeometry.clientWidth);
   await expect(scroller).not.toHaveAttribute('role');
+  await expect(scroller).not.toHaveAttribute('aria-labelledby');
   await expect(scroller).not.toHaveAttribute('tabindex');
 });
 
@@ -242,8 +265,8 @@ test('empty and scale overview states preserve valid native progress and fixture
   await expect(empty.locator('.sk-empty-state--inline')).toHaveCount(5);
 
   const scale = await overview(page, 'scale-50-work-packages', {
-    width: 1024,
-    height: 900,
+    width: 1440,
+    height: 1000,
   });
   await expect(scale).toHaveAttribute('data-total-count', '50');
   await expect(scale.locator('.sk-workflow-lane__list > li')).toHaveCount(50);
@@ -257,9 +280,27 @@ test('empty and scale overview states preserve valid native progress and fixture
   await expect(scaleProgress).toHaveJSProperty('value', 10);
   await expect(scaleProgress).toHaveJSProperty('max', 50);
   const scroller = scale.locator('.sk-workflow-board__scroller');
+  const scrollerGeometry = await scroller.evaluate((node) => ({
+    clientWidth: node.clientWidth,
+    scrollWidth: node.scrollWidth,
+  }));
+  expect(scrollerGeometry.scrollWidth).toBeGreaterThan(scrollerGeometry.clientWidth);
   await expect(scroller).toHaveRole('region');
   await expect(scroller).toHaveAccessibleName('Work Package workflow');
   await expect(scroller).toHaveAttribute('tabindex', '0');
+  await resetKeyboardFocus(page);
+  expect(await tabToVisibleStop(page, scroller)).toEqual({
+    outerTag: 'div',
+    outerRowId: null,
+    innerTag: 'div',
+    innerPart: null,
+    id: null,
+    href: null,
+    longCode: false,
+  });
+  const initialScrollLeft = await scroller.evaluate((node) => node.scrollLeft);
+  await page.keyboard.press('ArrowRight');
+  await expect.poll(() => scroller.evaluate((node) => node.scrollLeft)).toBeGreaterThan(initialScrollLeft);
 });
 
 test('claim and announcement states use supplied public presentations', async ({ page }) => {

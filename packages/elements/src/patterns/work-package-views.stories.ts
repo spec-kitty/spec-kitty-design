@@ -304,6 +304,15 @@ const patternStyles = html`<style>
   .sk-work-package-pattern__summary { display: grid; min-inline-size: 0; gap: var(--sk-space-4); }
   .sk-work-package-pattern__selector { max-inline-size: var(--sk-layout-workflow-lane-min-inline-size); }
   .sk-work-package-pattern__lane-list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--sk-space-3); }
+  .sk-work-package-pattern__board-frame { min-inline-size: 0; max-inline-size: 100%; }
+  .sk-work-package-pattern__board-frame--overflow-proof {
+    max-inline-size: calc(
+      var(--sk-layout-workflow-lane-min-inline-size) +
+      var(--sk-layout-workflow-lane-min-inline-size) +
+      var(--sk-layout-workflow-lane-min-inline-size) +
+      var(--sk-layout-workflow-lane-min-inline-size)
+    );
+  }
   .sk-work-package-pattern__empty { margin-block-start: var(--sk-space-3); }
   .sk-work-package-pattern__detail-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--sk-space-6); min-inline-size: 0; }
   .sk-work-package-pattern__detail-column { display: grid; align-content: start; min-inline-size: 0; gap: var(--sk-space-5); }
@@ -377,7 +386,7 @@ export const renderWorkPackageOverview = (args: OverviewArgs, options: OverviewO
         : overview.workPackages;
   const projection = deriveOverview(overview, source, options.narrow ? args.selectedLaneId : undefined);
   const rootId = `work-package-overview-${options.narrow ? 'narrow' : options.scale ? 'scale' : options.claimState ?? 'default'}`;
-  const overflows = options.scale === true;
+  const demonstratesBoardOverflow = options.scale === true;
 
   return html`
     <main
@@ -438,33 +447,35 @@ export const renderWorkPackageOverview = (args: OverviewArgs, options: OverviewO
           </div>
         ` : nothing}
 
-        <section class="sk-workflow-board" aria-labelledby="${rootId}-board-title">
-          <h2 id="${rootId}-board-title">Work Package workflow</h2>
-          <div
-            class="sk-workflow-board__scroller"
-            role=${overflows ? 'region' : nothing}
-            aria-labelledby=${overflows ? `${rootId}-board-title` : nothing}
-            tabindex=${overflows ? '0' : nothing}
-          >
-            ${projection.lanes.map((lane) => html`
-              <section class="sk-workflow-lane" aria-labelledby="${rootId}-${lane.id}-title" data-lane-id=${lane.id}>
-                <header class="sk-workflow-lane__header">
-                  <h3 class="sk-workflow-lane__title" id="${rootId}-${lane.id}-title">${lane.label}</h3>
-                  <span class="sk-workflow-lane__count" aria-label="${lane.workPackages.length} Work Packages">${lane.workPackages.length}</span>
-                </header>
-                <ol class="sk-workflow-lane__list">
-                  ${lane.workPackages.map((workPackage) => renderWorkPackage(workPackage, args, rootId))}
-                </ol>
-                ${lane.workPackages.length === 0 ? html`
-                  <div class="sk-empty-state sk-empty-state--inline sk-work-package-pattern__empty">
-                    <p class="sk-empty-state__heading">No Work Packages in ${lane.label}</p>
-                    <p class="sk-empty-state__body">This supplied lane is empty.</p>
-                  </div>
-                ` : nothing}
-              </section>
-            `)}
-          </div>
-        </section>
+        <div class="sk-work-package-pattern__board-frame${demonstratesBoardOverflow ? ' sk-work-package-pattern__board-frame--overflow-proof' : ''}">
+          <section class="sk-workflow-board" aria-labelledby="${rootId}-board-title">
+            <h2 id="${rootId}-board-title">Work Package workflow</h2>
+            <div
+              class="sk-workflow-board__scroller"
+              role=${demonstratesBoardOverflow ? 'region' : nothing}
+              aria-labelledby=${demonstratesBoardOverflow ? `${rootId}-board-title` : nothing}
+              tabindex=${demonstratesBoardOverflow ? '0' : nothing}
+            >
+              ${projection.lanes.map((lane) => html`
+                <section class="sk-workflow-lane" aria-labelledby="${rootId}-${lane.id}-title" data-lane-id=${lane.id}>
+                  <header class="sk-workflow-lane__header">
+                    <h3 class="sk-workflow-lane__title" id="${rootId}-${lane.id}-title">${lane.label}</h3>
+                    <span class="sk-workflow-lane__count" aria-label="${lane.workPackages.length} Work Packages">${lane.workPackages.length}</span>
+                  </header>
+                  <ol class="sk-workflow-lane__list">
+                    ${lane.workPackages.map((workPackage) => renderWorkPackage(workPackage, args, rootId))}
+                  </ol>
+                  ${lane.workPackages.length === 0 ? html`
+                    <div class="sk-empty-state sk-empty-state--inline sk-work-package-pattern__empty">
+                      <p class="sk-empty-state__heading">No Work Packages in ${lane.label}</p>
+                      <p class="sk-empty-state__body">This supplied lane is empty.</p>
+                    </div>
+                  ` : nothing}
+                </section>
+              `)}
+            </div>
+          </section>
+        </div>
       </div>
       <output data-activation-log data-count="0" hidden></output>
       <output data-lane-intent-log data-count="0" hidden></output>
@@ -618,7 +629,14 @@ export const Default: Story = {
     await expect(root).not.toBeNull();
     await expect(root?.dataset.fixtureDeeplyFrozen).toBe('true');
     await expect(root?.dataset.workPackageIds).toBe(JSON.stringify(BASE_WORK_PACKAGES.map(({ id }) => id)));
-    await expect(root?.querySelectorAll(':scope sk-workflow-lane')).toHaveLength(LANES.length);
+    const lanes = root?.querySelectorAll<HTMLElement>(':scope section.sk-workflow-lane[data-lane-id]');
+    await expect(lanes).toHaveLength(LANES.length);
+    for (const lane of lanes ?? []) {
+      const labelledBy = lane.getAttribute('aria-labelledby');
+      await expect(labelledBy).toBeTruthy();
+      await expect(lane.querySelector(`:scope > header > h3#${CSS.escape(labelledBy ?? '')}`)).not.toBeNull();
+      await expect(lane.querySelectorAll(':scope > ol.sk-workflow-lane__list')).toHaveLength(1);
+    }
     await expect(root?.querySelectorAll(':scope sk-action-row')).toHaveLength(BASE_WORK_PACKAGES.length);
     root?.setAttribute('data-play-proof', 'passed');
   },
