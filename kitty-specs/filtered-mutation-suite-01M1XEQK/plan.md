@@ -3,6 +3,34 @@
 **Mission**: `filtered-mutation-suite-01M1XEQK` · **Branch**: `mission/filtered-mutation-suite`
 **Base**: `train/elements-first@99a5144` · **Issue**: #225 · **Blocks**: PR #241
 
+## Technical Context
+
+**Language/Version**: TypeScript 5.x on Node 22 (CI: `actions/setup-node` v6.4.0, `node-version: '22'`)
+
+**Primary Dependencies**: Vitest (browser mode, `vitest/node`'s `createVitest` +
+`getRelevantTestSpecifications`), `@vitest/browser-playwright`, Playwright chromium (the mutation
+harness spawns Vitest with `CI: ''`, so `vitest.config.mts` gives it chromium only; the ordinary
+behaviour suite runs chromium + webkit), Lit for the elements.
+
+**Storage**: none. `mutations.json`, `behaviours.json` and `suite-budget.json` are the committed
+inputs; the harness works in a `mkdtemp` sandbox with `node_modules` symlinked.
+
+**Testing**: `scripts/measure-suite-time.mjs` (ordinary behaviour suite, 40s ceiling),
+`scripts/suite-selftest.mjs` (157 mutation arms), `scripts/suite-selftest.mjs --selftest`
+(10 deliberately-bad entries, each rejected by the guard it names).
+
+**Target Platform**: GitHub Actions `ubuntu-latest`, job `test` in `.github/workflows/ci-quality.yml`.
+
+**Project Type**: monorepo — `packages/{tokens,styles,elements,react}`, `fixtures/*`, `tests/*`.
+
+**Performance Goals**: mean selected test files per element arm below 15 (NFR-003); the harness
+completes PR #241's 165-arm set inside the re-derived ceiling on a slow runner (SC-006).
+
+**Constraints**: no selection logic edited (C-001); guards 1–8 unedited (C-002); `behaviours.json`
+and the ADR-11 id set untouched (C-003); the ceiling is set from CI figures only (C-004).
+
+**Scale/Scope**: 21 fixture test files rewritten, 1 additive guard, 1 budget file re-derived.
+
 ## Architecture of the change
 
 Nothing in the harness's selection logic is edited. The filter already exists and is already
