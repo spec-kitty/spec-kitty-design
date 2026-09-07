@@ -627,10 +627,10 @@
       "criterion_id": "C-011",
       "description": "Run three independent profile-loaded Codex lenses after tasks and again pre-merge, at most two passes per point-cut, with exact-SHA evidence.",
       "proof_type": "manual_review",
-      "evidence": "Three independent final Codex lenses PASS at exact 71801a66c61e240d5606c8a78b083ce3a136c0c9 after the fourth authorized train rebase: lens 1 acceptance/schema/generated/story-union audit; lens 2 rebase/range/conflict/baseline provenance audit; lens 3 product/API/accessibility/visual/framework audit. All report zero content findings. A clean uncontended local mutation retry and fresh exact-head PR CI remain separate release gates.",
+      "evidence": "Three independent Codex lenses passed the product candidate at 71801a6 and revalidated the evidence-only final head bf31114c; post-merge audit confirmed merge tree identity, 45/45 acceptance coverage, architecture fidelity, exact-head CI, and unchanged main. Governance closeout terminalized #148 separately.",
       "pass_fail": "pass",
       "verified_by": "codex",
-      "verified_at": "2026-09-07T00:11:01.922146+00:00",
+      "verified_at": "2026-09-07T00:58:52.899824+00:00",
       "notes": "Post-tasks evidence is planning-stage; wrap-up owns exact-final-head lens evidence.",
       "lane_owners": [],
       "terminal_owner": "mission-wrap-up"
