@@ -28,9 +28,10 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) conve
   announcement no longer gets that, which is why it is here rather than in a template edit.
 
   **Migration.** If you slotted a heading you wanted seen and not heard, move it **outside** the
-  notice — the element offers no per-notice opt-out, and a property to re-suppress it was
-  considered and rejected with the ruling. If you had duplicated the headline into `message` to get
-  it announced, delete the duplicate: it is now read twice.
+  notice. There is no per-notice switch: the ruling weighed a per-consumer **opt-in** property
+  against making it unconditional and chose unconditional, so no opt-out exists either. If you had
+  duplicated the headline into `message` to get it announced, delete the duplicate: it is now read
+  twice.
 
   **One consequence to plan for.** `role="status"` and `role="alert"` are both implicitly
   `aria-atomic="true"`, so the *whole* region is re-read on every change. A notice whose `message`
