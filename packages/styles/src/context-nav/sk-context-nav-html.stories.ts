@@ -7,6 +7,10 @@ import {
   SkContextNavEmptyOverflowHTML,
   SkContextNavLongLabelsHTML,
   SkContextNavScaleHTML,
+  SkContextNavUnavailableAllHTML,
+  SkContextNavUnavailableLongHTML,
+  SkContextNavUnavailableMixedHTML,
+  SkContextNavUnavailableParentHTML,
 } from './index';
 
 const meta: Meta = {
@@ -31,6 +35,12 @@ const withChildCount = (html: string, count: number): string =>
       return child === null || Number(child[1]) <= count;
     })
     .join('\n');
+
+const withoutUnavailableAnnotations = (html: string): string =>
+  html.replace(
+    /\s*<span class="sk-context-nav__annotation">[\s\S]*?<\/span>/g,
+    '',
+  );
 
 const storyFrame = (
   html: string,
@@ -104,4 +114,46 @@ export const Rtl: Story = {
 export const LightMode: Story = {
   parameters: { backgrounds: { default: 'sk-light' } },
   render: () => storyFrame(SkContextNavDefaultHTML, { light: true }),
+};
+
+/** Mixed native links and static unavailable destinations in the default dark theme. */
+export const UnavailableMixed: Story = {
+  render: () => storyFrame(SkContextNavUnavailableMixedHTML),
+};
+
+/** Unavailable destinations remain explicit when the consumer omits annotation text. */
+export const UnavailableAnnotationFree: Story = {
+  render: () =>
+    storyFrame(withoutUnavailableAnnotations(SkContextNavUnavailableMixedHTML)),
+};
+
+/** A catalogue may truthfully contain no available or current destination. */
+export const UnavailableAll: Story = {
+  render: () => storyFrame(SkContextNavUnavailableAllHTML),
+};
+
+/** An unavailable parent has no implied child list beside a real available parent. */
+export const UnavailableParent: Story = {
+  render: () => storyFrame(SkContextNavUnavailableParentHTML),
+};
+
+/** Long labels and annotations in the 240 CSS-pixel composition. */
+export const UnavailableLong: Story = {
+  parameters: { viewport: { defaultViewport: "mobile1" } },
+  render: () => storyFrame(SkContextNavUnavailableLongHTML, { narrow: true }),
+};
+
+/** Browser tests activate forced-colours emulation for this unavailable-entry route. */
+export const UnavailableForcedColors: Story = {
+  render: () => storyFrame(SkContextNavUnavailableMixedHTML, { narrow: true }),
+};
+
+export const UnavailableRtl: Story = {
+  render: () =>
+    storyFrame(SkContextNavUnavailableLongHTML, { narrow: true, rtl: true }),
+};
+
+export const UnavailableLightMode: Story = {
+  parameters: { backgrounds: { default: "sk-light" } },
+  render: () => storyFrame(SkContextNavUnavailableMixedHTML, { light: true }),
 };

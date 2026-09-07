@@ -8,7 +8,7 @@ Components in these artifacts: sk-action-row, sk-app-shell, sk-bar-chart, sk-blo
 | artifact | raw | minified | min+gzip | notes |
 |---|---:|---:|---:|---|
 | `ESM  (dist/index.js)` | 192.4 KiB | 131.2 KiB | 27 KiB | `lit` external |
-| `IIFE (dist/elements.js)` | 209.1 KiB | 140.6 KiB | 30 KiB | runtime bundled |
+| `IIFE (dist/elements.js)` | 209.1 KiB | 140.6 KiB | 31 KiB | runtime bundled |
 
 ## Subresource Integrity — the classic-script bundle (FR-005)
 
@@ -35,7 +35,7 @@ What a consumer downloads, from a real `npm pack` of each package in the derived
 | package | files | unpacked |
 |---|---:|---:|
 | `@spec-kitty/tokens` | 37 | 5764.3 KiB |
-| `@spec-kitty/styles` | 185 | 438.1 KiB |
+| `@spec-kitty/styles` | 189 | 456.3 KiB |
 | `@spec-kitty/elements` | 49 | 783.0 KiB |
 | `@spec-kitty/react` | 60 | 147.1 KiB |
 
@@ -99,5 +99,5 @@ packages/elements/dist/elements.js
   raw        214101 bytes  (209.1 KiB)
   minified   144003 bytes  (140.6 KiB)
   gzip         45 KiB
-  min+gzip     30 KiB
+  min+gzip     31 KiB
 ```

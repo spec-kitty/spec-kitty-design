@@ -1,4 +1,4 @@
-/* @spec-kitty/styles — native light-DOM context navigation presentation (#256) */
+/* @spec-kitty/styles — native light-DOM context navigation presentation (#256, #264) */
 /* Consumers own navigation semantics, links, order, current state, icons, and copy. */
 
 .sk-context-nav {
@@ -116,6 +116,42 @@
   min-inline-size: 0;
 }
 
+.sk-context-nav__unavailable {
+  box-sizing: border-box;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  inline-size: 100%;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  min-block-size: var(--sk-space-9);
+  gap: var(--sk-space-2) var(--sk-space-3);
+  padding-block: var(--sk-space-2);
+  padding-inline: var(--sk-space-3);
+  color: var(--sk-fg-muted);
+  background: transparent;
+  border-inline-start-color: var(--sk-border-strong);
+  border-inline-start-style: dashed;
+  border-inline-start-width: var(--sk-border-width-1);
+  border-radius: var(--sk-radius-sm);
+  font-weight: var(--sk-weight-normal);
+  line-height: normal;
+}
+
+.sk-context-nav__unavailable .sk-context-nav__label {
+  flex-basis: var(--sk-space-9);
+}
+
+.sk-context-nav__annotation {
+  flex: 0 1 auto;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  margin-inline-start: auto;
+  font-size: var(--sk-text-xs);
+  font-weight: var(--sk-weight-medium);
+  overflow-wrap: anywhere;
+}
+
 .sk-context-nav__children {
   margin-inline-start: var(--sk-space-3);
   padding-inline-start: var(--sk-space-4);
@@ -158,6 +194,11 @@
 }
 
 @media (forced-colors: active) {
+  .sk-context-nav__unavailable {
+    color: GrayText;
+    border-inline-start-color: GrayText;
+  }
+
   .sk-context-nav__children {
     border-inline-start-color: ButtonText;
   }

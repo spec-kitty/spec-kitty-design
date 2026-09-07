@@ -599,6 +599,12 @@ Apply the classes directly to consumer-authored native light-DOM markup:
           </li>
         </ul>
       </li>
+      <li class="sk-context-nav__item">
+        <span class="sk-context-nav__unavailable" aria-disabled="true">
+          <span class="sk-context-nav__label">Reports</span>
+          <span class="sk-context-nav__annotation">Unavailable</span>
+        </span>
+      </li>
     </ul>
   </section>
 </nav>
@@ -612,6 +618,22 @@ from its text or another consumer-supplied accessible name.
 Empty copy uses `sk-context-nav__empty-copy`. If management or overflow navigation exists, author
 an ordinary native link with `sk-context-nav__overflow-link`; the styles infer neither condition.
 There is no JavaScript behavior, routing, selection logic, count limit, or generated content.
+
+For a known destination that cannot currently be reached, keep its native list item and replace the
+anchor with `span.sk-context-nav__unavailable[aria-disabled="true"]`. Never render a disabled anchor,
+remove an `href`, intercept a click, or add `role="button"` or `tabindex`. The unavailable span has no
+hover, active, pointer, focus, or activation contract. Only real available links may carry
+`aria-current`.
+
+An optional `sk-context-nav__annotation` contains visible wording supplied verbatim by the consumer,
+such as “Unavailable”; the stylesheet does not generate a reason or fallback. The dashed static row
+shape and native non-link semantics keep colour from being the only indication. If every destination
+is unavailable, author no current item. If a parent destination is unavailable, omit its child list;
+the styles never imply hidden or pending descendants.
+
+The consumer continues to own availability, annotations, URLs, order, count, current selection, and
+whether an available parent has a native child list. Long labels and annotations wrap in both LTR and
+RTL rather than being clipped.
 
 The stylesheet depends on these existing semantic tokens: `--sk-fg-body`, `--sk-fg-default`,
 `--sk-fg-muted`, `--sk-surface-muted`, `--sk-surface-pill`, `--sk-color-accent`,
