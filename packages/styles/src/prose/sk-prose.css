@@ -1,0 +1,114 @@
+/* @spec-kitty/styles — consumer-authored prose and prompt content */
+/* The primitive styles native nodes; it never parses or rewrites content. */
+
+.sk-prose {
+  box-sizing: border-box;
+  inline-size: 100%;
+  max-inline-size: calc(
+    var(--sk-space-12) + var(--sk-space-12) + var(--sk-space-12) +
+      var(--sk-space-12) + var(--sk-space-12)
+  );
+  color: var(--sk-fg-body);
+  font-family: var(--sk-font-sans);
+  font-size: var(--sk-text-base);
+}
+
+.sk-prose > :first-child {
+  margin-block-start: 0;
+}
+
+.sk-prose > :last-child {
+  margin-block-end: 0;
+}
+
+.sk-prose h1,
+.sk-prose h2,
+.sk-prose h3,
+.sk-prose h4,
+.sk-prose h5,
+.sk-prose h6 {
+  margin-block: var(--sk-space-7) var(--sk-space-3);
+  color: var(--sk-fg-default);
+  font-family: var(--sk-font-display);
+  font-weight: var(--sk-weight-semibold);
+}
+
+.sk-prose h2 {
+  font-size: var(--sk-text-2xl);
+}
+
+.sk-prose h3 {
+  font-size: var(--sk-text-xl);
+}
+
+.sk-prose p,
+.sk-prose ul,
+.sk-prose ol {
+  margin-block: 0 var(--sk-space-4);
+}
+
+.sk-prose ul,
+.sk-prose ol {
+  padding-inline-start: var(--sk-space-7);
+}
+
+.sk-prose li + li {
+  margin-block-start: var(--sk-space-1);
+}
+
+.sk-prose a {
+  color: var(--sk-color-accent);
+  text-decoration-thickness: var(--sk-border-width-1);
+  text-underline-offset: var(--sk-space-1);
+}
+
+.sk-prose a:focus-visible,
+.sk-prose pre:focus-visible {
+  border-radius: var(--sk-radius-sm);
+  outline: var(--sk-border-width-2) solid var(--sk-border-focus);
+  outline-offset: var(--sk-border-width-2);
+}
+
+.sk-prose code {
+  border-radius: var(--sk-radius-sm);
+  background: var(--sk-surface-muted);
+  color: var(--sk-fg-default);
+  font-family: var(--sk-font-mono);
+  font-size: var(--sk-text-sm);
+}
+
+.sk-prose :not(pre) > code {
+  padding: var(--sk-space-1) var(--sk-space-2);
+}
+
+.sk-prose pre {
+  box-sizing: border-box;
+  max-inline-size: 100%;
+  margin-block: var(--sk-space-5);
+  padding: var(--sk-space-4);
+  overflow-x: auto;
+  border: var(--sk-border-width-1) solid var(--sk-border-default);
+  border-radius: var(--sk-radius-md);
+  background: var(--sk-surface-muted);
+}
+
+.sk-prose pre code {
+  padding: 0;
+  background: transparent;
+  white-space: pre;
+}
+
+.sk-prose .sk-data-table__scroller {
+  max-inline-size: 100%;
+}
+
+@media (forced-colors: active) {
+  .sk-prose pre {
+    border-color: CanvasText;
+  }
+
+  .sk-prose a:focus-visible,
+  .sk-prose pre:focus-visible {
+    outline-color: Highlight;
+  }
+}

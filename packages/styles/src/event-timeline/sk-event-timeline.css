@@ -1,0 +1,94 @@
+/* @spec-kitty/styles — native ordered transition chronology */
+/* Ordering, wording, time, and marker meaning remain consumer-owned. */
+
+.sk-event-timeline {
+  box-sizing: border-box;
+  display: grid;
+  inline-size: 100%;
+  max-inline-size: calc(
+    var(--sk-space-12) + var(--sk-space-12) + var(--sk-space-12) +
+      var(--sk-space-12) + var(--sk-space-12)
+  );
+  margin: 0;
+  padding: 0;
+  color: var(--sk-fg-body);
+  font-family: var(--sk-font-sans);
+  font-size: var(--sk-text-base);
+  list-style: none;
+}
+
+.sk-event-timeline__item {
+  position: relative;
+  display: grid;
+  min-inline-size: 0;
+  padding-block-end: var(--sk-space-6);
+  padding-inline-start: var(--sk-space-7);
+  overflow-wrap: anywhere;
+}
+
+.sk-event-timeline__item::before {
+  position: absolute;
+  inset-block-start: var(--sk-space-1);
+  inset-inline-start: var(--sk-space-1);
+  box-sizing: border-box;
+  inline-size: var(--sk-space-3);
+  block-size: var(--sk-space-3);
+  border: var(--sk-border-width-2) solid var(--sk-on-tint-sky);
+  border-radius: var(--sk-radius-pill);
+  background: var(--sk-surface-page);
+  content: "";
+}
+
+.sk-event-timeline__item:not(:last-child)::after {
+  position: absolute;
+  inset-block: var(--sk-space-4) 0;
+  inset-inline-start: calc(var(--sk-space-1) + var(--sk-space-2));
+  inline-size: var(--sk-border-width-1);
+  background: var(--sk-border-strong);
+  content: "";
+}
+
+.sk-event-timeline__summary {
+  margin: 0;
+  color: var(--sk-fg-default);
+  font-weight: var(--sk-weight-semibold);
+}
+
+.sk-event-timeline__metadata {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sk-space-1) var(--sk-space-3);
+  min-inline-size: 0;
+  margin-block-start: var(--sk-space-1);
+  color: var(--sk-fg-muted);
+  font-size: var(--sk-text-sm);
+}
+
+.sk-event-timeline__content {
+  min-inline-size: 0;
+  margin-block: var(--sk-space-2) 0;
+  color: var(--sk-fg-body);
+}
+
+.sk-event-timeline__marker {
+  justify-self: start;
+  margin-block-start: var(--sk-space-2);
+  color: var(--sk-on-tint-mint);
+  font-size: var(--sk-text-sm);
+  font-weight: var(--sk-weight-medium);
+}
+
+.sk-event-timeline--narrow {
+  max-inline-size: calc(var(--sk-space-12) + var(--sk-space-12));
+}
+
+@media (forced-colors: active) {
+  .sk-event-timeline__item::before {
+    border-color: CanvasText;
+    background: Canvas;
+  }
+
+  .sk-event-timeline__item:not(:last-child)::after {
+    background: CanvasText;
+  }
+}

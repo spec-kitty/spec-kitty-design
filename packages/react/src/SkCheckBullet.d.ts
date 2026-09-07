@@ -18,8 +18,11 @@ export interface SkCheckBulletProps extends Pick<
   | "onFocus"
   | "onBlur"
 > {
-  /** The tick glyph. Defaults to ✓; set it to use a different mark. */
+  /** Decorative marker glyph. Defaults to the current state's marker; set it to override. */
   icon?: SkCheckBulletElement["icon"];
+
+  /** Read-only completion state. Omit for complete; unsupported values render as complete. */
+  state?: SkCheckBulletElement["state"];
 
   /** A space-separated list of the classes of the element. Classes allows CSS and JavaScript to select and access specific elements via the class selectors or functions like the method `Document.getElementsByClassName()`. */
   className?: string;
@@ -44,7 +47,7 @@ export interface SkCheckBulletProps extends Pick<
 }
 
 /**
- * A checked feature bullet, for the tick-lists on marketing and reference pages.
+ * A passive completion-state item for feature lists on marketing and reference pages.
  *
  * Put it inside a `<ul role="list">`. The element sets `role="listitem"` on itself, because a
  * custom element inside a `<ul>` is NOT a list item — the static form is a real `<li>`, and
@@ -54,7 +57,8 @@ export interface SkCheckBulletProps extends Pick<
  *
  * Component attributes and properties that can be applied to the element or by using JavaScript.
  *
- * - `icon`: The tick glyph. Defaults to ✓; set it to use a different mark.
+ * - `icon`: Decorative marker glyph. Defaults to the current state's marker; set it to override.
+ * - `state`: Read-only completion state. Omit for complete; unsupported values render as complete.
  *
  * ## Slots
  *
@@ -67,6 +71,6 @@ export interface SkCheckBulletProps extends Pick<
  * Custom selectors for styling elements within the component.
  *
  * - `bullet`: the bullet row
- * - `icon`: the tick, which is decorative and hidden from assistive technology
+ * - `icon`: the completion-state marker, decorative and hidden from assistive technology
  */
 export const SkCheckBullet: React.ForwardRefExoticComponent<SkCheckBulletProps>;

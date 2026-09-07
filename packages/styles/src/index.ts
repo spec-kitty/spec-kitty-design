@@ -36,12 +36,14 @@
 // Safe because every per-component barrel exports only `Sk*HTML` consts, verified collision-free
 // across all of them.
 export * from './blog-card/index';
+export * from './breadcrumbs/index';
 export * from './button/index';
 export * from './card/index';
 export * from './check-bullet/index';
 export * from './data-table/index';
 export * from './disclosure/index';
 export * from './empty-state/index';
+export * from './event-timeline/index';
 export * from './facts/index';
 export * from './feature-card/index';
 export * from './form-field/index';
@@ -50,6 +52,7 @@ export * from './grid/index';
 export * from './nav-pill/index';
 export * from './pill-tag/index';
 export * from './progress/index';
+export * from './prose/index';
 export * from './ribbon-card/index';
 export * from './section-banner/index';
 export * from './site-footer/index';

@@ -39,3 +39,24 @@
   flex-shrink: 0;
   margin-top: 0.1em;
 }
+
+.sk-check-bullet--pending .sk-check-bullet__icon {
+  color: var(--sk-fg-muted);
+}
+
+.sk-check-bullet__state {
+  position: absolute;
+  inline-size: var(--sk-border-width-1);
+  block-size: var(--sk-border-width-1);
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (forced-colors: active) {
+  .sk-check-bullet__icon,
+  .sk-check-bullet--pending .sk-check-bullet__icon {
+    color: CanvasText;
+    font-weight: var(--sk-weight-extrabold);
+  }
+}

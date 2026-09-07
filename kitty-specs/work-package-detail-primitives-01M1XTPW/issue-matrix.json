@@ -1,0 +1,101 @@
+{
+  "rows": {
+    "#177": {
+      "evidence_ref": "https://github.com/spec-kitty/spec-kitty-design/issues/177 (closed prerequisite on train/elements-first)",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "verified-already-fixed",
+      "wp": null
+    },
+    "#178": {
+      "evidence_ref": "https://github.com/spec-kitty/spec-kitty-design/issues/178 (closed prerequisite on train/elements-first)",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "verified-already-fixed",
+      "wp": null
+    },
+    "#208": {
+      "evidence_ref": "Epic composition evidence and closeout owned by WP03; part of https://github.com/spec-kitty/spec-kitty-design/issues/208",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "in-mission",
+      "wp": "WP03"
+    },
+    "#211": {
+      "evidence_ref": "https://github.com/spec-kitty/spec-kitty-design/issues/211 (closed sibling supplies established zoom evidence pattern)",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "verified-already-fixed",
+      "wp": null
+    },
+    "#212": {
+      "evidence_ref": "Follow-up: #212 is a separate active claimed mission with no implementation overlap; https://github.com/spec-kitty/spec-kitty-design/issues/212",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "deferred-with-followup",
+      "wp": null
+    },
+    "#213": {
+      "evidence_ref": "WP01 independently approved at 340aa67408432716fbd81449985921e770e79a10; WP02/WP03 continue issue contract",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "in-mission",
+      "wp": "WP01"
+    },
+    "#79": {
+      "evidence_ref": "https://github.com/spec-kitty/spec-kitty-design/issues/79 (closed predecessor)",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "verified-already-fixed",
+      "wp": null
+    },
+    "#92": {
+      "evidence_ref": "https://github.com/spec-kitty/spec-kitty-design/issues/92 (closed predecessor)",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "verified-already-fixed",
+      "wp": null
+    }
+  },
+  "schema_version": 1
+}

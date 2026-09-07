@@ -1,0 +1,96 @@
+{
+  "version": 1,
+  "mission_slug": "work-package-detail-primitives-01M1XTPW",
+  "mission_id": "01M1XTPW5BCZ3KCKMSYT99TK74",
+  "mission_branch": "kitty/mission-work-package-detail-primitives-01M1XTPW",
+  "target_branch": "mission/work-package-detail-primitives",
+  "lanes": [
+    {
+      "lane_id": "lane-a",
+      "wp_ids": [
+        "WP01"
+      ],
+      "write_scope": [
+        "apps/storybook/src/tests/sk-work-package-detail-primitives.spec.ts",
+        "packages/styles/package.json",
+        "packages/styles/src/breadcrumbs/**",
+        "packages/styles/src/event-timeline/**",
+        "packages/styles/src/index.ts",
+        "packages/styles/src/prose/**"
+      ],
+      "predicted_surfaces": [
+        "api",
+        "app-shell",
+        "artifact-rendering",
+        "tracker-integration"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    },
+    {
+      "lane_id": "lane-b",
+      "wp_ids": [
+        "WP02"
+      ],
+      "write_scope": [
+        "behaviours.json",
+        "expected-docs.json",
+        "fixtures/elements-behaviour/src/sk-check-bullet.test.ts",
+        "mutations.json",
+        "packages/elements/src/check-bullet/**",
+        "packages/styles/src/check-bullet/index.ts",
+        "packages/styles/src/check-bullet/sk-check-bullet-html.stories.ts",
+        "packages/styles/src/check-bullet/sk-check-bullet.css",
+        "packages/styles/src/check-bullet/sk-check-bullet.html"
+      ],
+      "predicted_surfaces": [
+        "api",
+        "app-shell",
+        "artifact-rendering",
+        "legacy-cleanup",
+        "tracker-integration"
+      ],
+      "depends_on_lanes": [
+        "lane-a"
+      ],
+      "parallel_group": 1
+    },
+    {
+      "lane_id": "lane-c",
+      "wp_ids": [
+        "WP03"
+      ],
+      "write_scope": [
+        "apps/storybook/src/tests/visual.spec.ts",
+        "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-breadcrumbs-*",
+        "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-check-bullet-state-*",
+        "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-event-timeline-*",
+        "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-prose-*",
+        "docs/architecture/validation/issue-213-work-package-detail-zoom/**",
+        "docs/design-system/changelog.md",
+        "docs/design-system/using-components.md",
+        "expected-stories.json",
+        "fixtures/react-consumer/src/wrappers.test.tsx",
+        "packages/elements/SIZES.md",
+        "packages/elements/custom-elements.json",
+        "packages/elements/vue.d.ts",
+        "packages/react/src/**"
+      ],
+      "predicted_surfaces": [
+        "api",
+        "artifact-rendering",
+        "legacy-cleanup",
+        "tracker-integration"
+      ],
+      "depends_on_lanes": [
+        "lane-a",
+        "lane-b"
+      ],
+      "parallel_group": 2
+    }
+  ],
+  "computed_at": "2026-09-07T12:24:49.994572+00:00",
+  "computed_from": "dependency_graph+ownership",
+  "planning_artifact_wps": [],
+  "planning_commit_sha": "b3e69fba5a50af7c679defc917bc595f517697a5"
+}

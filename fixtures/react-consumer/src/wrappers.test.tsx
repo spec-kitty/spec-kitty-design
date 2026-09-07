@@ -58,7 +58,24 @@ import { StrictMode, forwardRef, useEffect, useLayoutEffect, useRef } from 'reac
 import { createRoot, type Root } from 'react-dom/client';
 import { act } from 'react';
 import { afterEach, beforeEach, expect, test } from 'vitest';
-import { SkNavPill, SkFormInput } from '@spec-kitty/react';
+import { SkCheckBullet, SkFormInput, SkNavPill } from '@spec-kitty/react';
+
+/**
+ * Compile-only coverage for #213's generated discriminated state prop. Keeping the unsupported
+ * value beside both supported values makes a widened generated declaration fail with an unused
+ * `@ts-expect-error`, while a narrowed declaration fails one of the positive cases.
+ */
+function checkBulletStateTypeSurface() {
+  return (
+    <>
+      <SkCheckBullet state="complete">Complete</SkCheckBullet>
+      <SkCheckBullet state="pending">Pending</SkCheckBullet>
+      {/* @ts-expect-error — unsupported states must remain outside the generated wrapper union */}
+      <SkCheckBullet state="blocked">Blocked</SkCheckBullet>
+    </>
+  );
+}
+void checkBulletStateTypeSurface;
 
 /**
  * REQUIRED BY REACT, and its absence is not silent — it prints
