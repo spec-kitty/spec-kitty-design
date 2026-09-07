@@ -48,10 +48,10 @@
       "criterion_id": "FR-005",
       "description": "Verify FR-005 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "3ca42f9; ArrowDown/typeahead/reset/requestSubmit/FormData/disabled omission green Chromium and Firefox",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-07T03:30:09.592792+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
