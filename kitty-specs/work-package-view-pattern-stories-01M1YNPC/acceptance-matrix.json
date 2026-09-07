@@ -567,6 +567,14 @@
       "verification_command": "! grep -Ei \"(team-kitty|spec-kitty-saas)\" packages/elements/src/patterns/work-package-views.stories.ts",
       "result": "confirmed_absent",
       "evidence": "Command exited 0: "
+    },
+    {
+      "invariant_id": "NI-005",
+      "description": "No generated token, style, element distribution, React wrapper, or Vue wrapper artifact differs from the authoritative train.",
+      "verification_method": "custom_command",
+      "verification_command": "git diff --quiet origin/train/elements-first...HEAD -- packages/tokens/dist packages/styles/dist packages/elements/dist packages/react/dist packages/vue/dist",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: "
     }
   ]
 }
