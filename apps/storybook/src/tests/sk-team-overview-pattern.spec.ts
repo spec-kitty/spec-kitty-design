@@ -75,7 +75,6 @@ test('source keeps the pattern outside the public element and application bounda
 
   expect(source).not.toMatch(/<sk-team-overview(?:\s|>)/);
   expect(source).not.toMatch(/customElements\.define\s*\(/);
-  expect(source).not.toMatch(/new\s+CustomEvent/);
   expect(source).not.toMatch(/shadowRoot/);
   expect(source).not.toMatch(/from\s+['"][^'"]*team-kitty/i);
   expect(source).not.toMatch(/\b(?:fetch|setTimeout|setInterval)\s*\(/);
@@ -84,6 +83,11 @@ test('source keeps the pattern outside the public element and application bounda
   expect(source).toContain('deriveDelivery');
   expect(source).toContain('deriveFlow');
   expect(source).toContain('deriveOperationalSections');
+  expect(source).toContain('PUBLIC_CONTRACT_WIRING_PROOF');
+  expect(source).toContain('dedicated Playwright tests prove real pointer/keyboard origin');
+  expect(source).toMatch(/new CustomEvent<ActionRowActivateDetail>\('sk-action-row-activate'/);
+  expect(source).toMatch(/new CustomEvent<BarChartSelectDetail>\('sk-bar-chart-select'/);
+  expect(source).toMatch(/new CustomEvent<TransitionMatrixSelectDetail>\('sk-transition-matrix-select'/);
 });
 
 test('approved story derives exact delivery and independent flow totals from one frozen fixture', async ({
@@ -273,42 +277,48 @@ test('composition uses the required public elements and preserves shell/feed int
 });
 
 test('desktop Flow exposes every date cell while keeping Current usable', async ({ page }) => {
-  const root = await loadStory(page, 'default', 1440, 1000);
-  const matrix = root.locator('sk-transition-matrix');
-  const scroller = matrix.locator('[part~="scroller"]');
-  const scrollGeometry = await scroller.evaluate((element) => ({
-    clientWidth: element.clientWidth,
-    scrollWidth: element.scrollWidth,
-  }));
-  expect(scrollGeometry.scrollWidth).toBeLessThanOrEqual(scrollGeometry.clientWidth + 1);
-
-  const dateHeaders = matrix.locator('thead th:nth-child(n+2):nth-child(-n+5)');
-  await expect(dateHeaders).toHaveText(['Tue 1', 'Wed 2', 'Thu 3', 'Today · Fri 4']);
-  const cells = matrix.locator('tbody tr[data-route-id] td:not([part~="total"])');
-  await expect(cells).toHaveCount(24);
-  const scrollerBox = await scroller.boundingBox();
-  expect(scrollerBox).not.toBeNull();
-  const exposedItems = matrix.locator(
-    'thead th:nth-child(n+2):nth-child(-n+5), tbody tr[data-route-id] td:not([part~="total"])',
-  );
-  for (const item of await exposedItems.all()) {
-    const box = await item.boundingBox();
-    expect(box).not.toBeNull();
-    expect(box?.x ?? 0).toBeGreaterThanOrEqual((scrollerBox?.x ?? 0) - 1);
-    expect((box?.x ?? 0) + (box?.width ?? 0)).toBeLessThanOrEqual(
-      (scrollerBox?.x ?? 0) + (scrollerBox?.width ?? 0) + 1,
+  for (const width of [1280, 1440]) {
+    const root = await loadStory(page, 'default', width, 1000);
+    const matrix = root.locator('sk-transition-matrix');
+    const scroller = matrix.locator('[part~="scroller"]');
+    const scrollGeometry = await scroller.evaluate((element) => ({
+      clientWidth: element.clientWidth,
+      scrollWidth: element.scrollWidth,
+    }));
+    expect(scrollGeometry.scrollWidth, `${width}px must expose the complete matrix`).toBeLessThanOrEqual(
+      scrollGeometry.clientWidth + 1,
     );
-  }
 
-  const current = root.locator('.sk-pattern-overview__current');
-  await expect(current.getByText('50 open WPs')).toBeVisible();
-  await expect(current.getByRole('button', { name: 'View 50 WPs' })).toBeVisible();
-  expect((await current.boundingBox())?.width ?? 0).toBeGreaterThanOrEqual(150);
+    const dateHeaders = matrix.locator('thead th:nth-child(n+2):nth-child(-n+5)');
+    await expect(dateHeaders).toHaveText(['Tue 1', 'Wed 2', 'Thu 3', 'Today · Fri 4']);
+    const cells = matrix.locator('tbody tr[data-route-id] td:not([part~="total"])');
+    await expect(cells).toHaveCount(24);
+    const scrollerBox = await scroller.boundingBox();
+    expect(scrollerBox).not.toBeNull();
+    const exposedItems = matrix.locator(
+      'thead th:nth-child(n+2):nth-child(-n+5), tbody tr[data-route-id] td:not([part~="total"])',
+    );
+    for (const item of await exposedItems.all()) {
+      const box = await item.boundingBox();
+      expect(box).not.toBeNull();
+      expect(box?.x ?? 0).toBeGreaterThanOrEqual((scrollerBox?.x ?? 0) - 1);
+      expect((box?.x ?? 0) + (box?.width ?? 0)).toBeLessThanOrEqual(
+        (scrollerBox?.x ?? 0) + (scrollerBox?.width ?? 0) + 1,
+      );
+    }
+
+    const current = root.locator('.sk-pattern-overview__current');
+    await expect(current.getByText('50 open WPs')).toBeVisible();
+    await expect(current.getByRole('button', { name: 'View 50 WPs' })).toBeVisible();
+    expect((await current.boundingBox())?.width ?? 0).toBeGreaterThanOrEqual(150);
+  }
 });
 
 test('real pointer intent stays controlled until Storybook args rerender each child', async ({ page }) => {
   let root = await loadStory(page, 'controlled-interactions');
   await expect(root).toHaveAttribute('data-play-proof', 'passed');
+  await expect(root).toHaveAttribute('data-play-proof-layer', 'public-contract-wiring');
+  expect(Object.values(await readIntentRecords(root)).map(({ count }) => count)).toEqual([0, 0, 0]);
 
   let selectedRow = root.locator('sk-action-row[row-id="flight-team-landing"]');
   let requestedRow = root.locator('sk-action-row[row-id="recent-dashboard-polish"]');
@@ -355,6 +365,7 @@ test('real pointer intent stays controlled until Storybook args rerender each ch
 
 test('real keyboard intent carries exact non-cancelable child event contracts', async ({ page }) => {
   const root = await loadStory(page, 'controlled-interactions');
+  expect(Object.values(await readIntentRecords(root)).map(({ count }) => count)).toEqual([0, 0, 0]);
   const targets = [
     root.locator('sk-action-row[row-id="recent-dashboard-polish"]').getByRole('button'),
     root.locator('sk-bar-chart').getByRole('button', { name: '€410 Aug 18' }),

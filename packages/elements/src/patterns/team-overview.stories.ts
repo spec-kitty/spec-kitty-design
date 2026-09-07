@@ -775,7 +775,7 @@ const patternStyles = html`<style>
     display: none;
   }
 
-  @media (max-width: 1100px) {
+  @media (max-width: 1320px) {
     .sk-pattern-overview__flow-layout {
       grid-template-columns: minmax(0, 1fr);
     }
@@ -1175,24 +1175,90 @@ export const ControlledInteractions: Story = {
     selectedRouteId: 'planned-progress',
   },
   play: async ({ canvasElement, args }) => {
-    const row = canvasElement.querySelector<HTMLElement & { selectable: boolean; selected: boolean }>(
+    const selectedRow = canvasElement.querySelector<HTMLElement & { selectable: boolean; selected: boolean }>(
       `sk-action-row[row-id="${CSS.escape(args.selectedRowId)}"]`,
+    );
+    const requestedRowId = args.selectedRowId === 'flight-team-landing'
+      ? 'recent-dashboard-polish'
+      : 'flight-team-landing';
+    const requestedBarId = args.selectedBarId === 'aug-11' ? 'aug-18' : 'aug-11';
+    const requestedRouteId = args.selectedRouteId === 'planned-progress'
+      ? 'progress-review'
+      : 'planned-progress';
+    const requestedRow = canvasElement.querySelector<HTMLElement & { selected: boolean }>(
+      `sk-action-row[row-id="${requestedRowId}"]`,
     );
     const chart = canvasElement.querySelector<HTMLElement & { selectedId: string }>('sk-bar-chart');
     const matrix = canvasElement.querySelector<HTMLElement & { selectedRouteId?: string }>(
       'sk-transition-matrix',
     );
     const root = canvasElement.querySelector<HTMLElement>('[data-team-overview-pattern]');
+    const log = root?.querySelector<HTMLElement>('[data-intent-log]');
     await expect(args.onRowActivate).not.toBe(args.onBarSelect);
     await expect(args.onRowActivate).not.toBe(args.onRouteSelect);
     await expect(args.onBarSelect).not.toBe(args.onRouteSelect);
-    await expect(args.onRowActivate).not.toHaveBeenCalled();
-    await expect(args.onBarSelect).not.toHaveBeenCalled();
-    await expect(args.onRouteSelect).not.toHaveBeenCalled();
-    await expect(row?.selectable).toBe(true);
-    await expect(row?.selected).toBe(true);
+    await expect(requestedRow).not.toBeNull();
+    await expect(chart).not.toBeNull();
+    await expect(matrix).not.toBeNull();
+
+    // PUBLIC_CONTRACT_WIRING_PROOF: Storybook's DOM locators do not cross child
+    // shadow roots. These typed host events prove only the composition's public
+    // listener/spies; dedicated Playwright tests prove real pointer/keyboard origin.
+    requestedRow?.dispatchEvent(new CustomEvent<ActionRowActivateDetail>('sk-action-row-activate', {
+      detail: { id: requestedRowId },
+      bubbles: true,
+      composed: true,
+      cancelable: false,
+    }));
+    chart?.dispatchEvent(new CustomEvent<BarChartSelectDetail>('sk-bar-chart-select', {
+      detail: { id: requestedBarId },
+      bubbles: true,
+      composed: true,
+      cancelable: false,
+    }));
+    matrix?.dispatchEvent(new CustomEvent<TransitionMatrixSelectDetail>('sk-transition-matrix-select', {
+      detail: { routeId: requestedRouteId },
+      bubbles: true,
+      composed: true,
+      cancelable: false,
+    }));
+    await expect(args.onRowActivate).toHaveBeenCalledTimes(1);
+    await expect(args.onRowActivate).toHaveBeenCalledWith({ id: requestedRowId });
+    await expect(args.onBarSelect).toHaveBeenCalledTimes(1);
+    await expect(args.onBarSelect).toHaveBeenCalledWith({ id: requestedBarId });
+    await expect(args.onRouteSelect).toHaveBeenCalledTimes(1);
+    await expect(args.onRouteSelect).toHaveBeenCalledWith({ routeId: requestedRouteId });
+    await expect(JSON.parse(log?.getAttribute('data-row-event') ?? '{}')).toEqual({
+      count: 1,
+      detail: { id: requestedRowId },
+      bubbles: true,
+      composed: true,
+      cancelable: false,
+    });
+    await expect(JSON.parse(log?.getAttribute('data-bar-event') ?? '{}')).toEqual({
+      count: 1,
+      detail: { id: requestedBarId },
+      bubbles: true,
+      composed: true,
+      cancelable: false,
+    });
+    await expect(JSON.parse(log?.getAttribute('data-route-event') ?? '{}')).toEqual({
+      count: 1,
+      detail: { routeId: requestedRouteId },
+      bubbles: true,
+      composed: true,
+      cancelable: false,
+    });
+    await expect(selectedRow?.selectable).toBe(true);
+    await expect(selectedRow?.selected).toBe(true);
+    await expect(requestedRow?.selected).toBe(false);
     await expect(chart?.selectedId).toBe(args.selectedBarId);
     await expect(matrix?.selectedRouteId).toBe(args.selectedRouteId);
+    log?.setAttribute('data-row-event', '{"count":0}');
+    log?.setAttribute('data-bar-event', '{"count":0}');
+    log?.setAttribute('data-route-event', '{"count":0}');
+    if (log) log.textContent = 'Play proof complete; awaiting consumer intent.';
+    root?.setAttribute('data-play-proof-layer', 'public-contract-wiring');
     root?.setAttribute('data-play-proof', 'passed');
   },
 };
