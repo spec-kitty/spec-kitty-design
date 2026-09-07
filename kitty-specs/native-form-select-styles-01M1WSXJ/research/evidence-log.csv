@@ -1,0 +1,21 @@
+evidence_id,source_ids,finding,decision_or_requirement_supported,confidence,status
+E-001,"S-001;S-002","#211 requires a closed native lane/filter choice while consumers retain values handlers and application state.","Scope; R-02; R-10",High,Accepted
+E-002,"S-001;S-004","ADR-10 classifies styling a native semantic element as deliberately styles-only; a custom wrapper would sever or replace the semantics it claims to provide.","R-01; styles-only constraint",High,Accepted
+E-003,"S-004;S-008;S-011","PR #172 established generated styles-only barrels and ADR-10 supplies the class-level native-semantics rationale for new styles-only components.","R-01; R-08",High,Accepted
+E-004,"S-001;S-007;S-020","The only new public classes warranted by the issue and BEM contract are .sk-form-select and .sk-form-select--compact; all other states are native/container conditions.","R-03; exact API",High,Accepted
+E-005,"S-001;S-004","Real option and optgroup descendants preserve selection keyboard typeahead validation form and reset semantics; custom option roles or wrappers are forbidden.","R-02",High,Accepted
+E-006,"S-003;S-010","Label and aria-describedby ID references must resolve in the same root; current form-field invalid exemplars demonstrate the sibling help shape.","R-04",High,Accepted
+E-007,"S-001;S-017;S-018","The approved T10 project exposed only an unauthenticated shell; issue #211 transcribes the binding visual/state intent, so unseen pixel details are not claimed.","Authority limitation",High,Accepted
+E-008,"S-007;S-011;S-012","A new component directory is the local repository convention; the generator creates only its component barrel, leaving root export and package subpath manual.","R-01; R-08",High,Accepted
+E-009,"S-001;S-004;S-009","A native select is a closed set and is not #180's free-text datalist, a custom combobox, listbox, or async search widget.","R-02; R-10",High,Accepted
+E-010,"S-001;S-003;S-010","Required invalidity stays native while static reference help is visible and same-root described; CSS does not synthesize validity or ARIA state.","R-04",High,Accepted
+E-011,"S-006;S-010","Legacy input outline:none plus box-shadow focus would disappear under forced colors and is not a valid select precedent.","R-05; accessibility risk",High,Accepted
+E-012,"S-001;S-006","appearance:none custom indicators and forced-color-adjust:none contradict the requirement that native indicator focus and disabled affordances survive forced colors.","R-05",High,Accepted
+E-013,"S-006;S-016","Existing authoritative tokens cover the select box and compact density; logical min/max/full inline sizing addresses long/narrow containment without a new token.","R-06",High,Accepted
+E-014,"S-005;S-006;S-020","The recipe registers behavior only for a component that owns behavior; #211 has no JavaScript subject and must not invent a mutation entry.","R-07; negative invariant",High,Accepted
+E-015,"S-001;S-005;S-014","Real outer-browser tests are still required for native label keyboard typeahead form reset validity disabled and option semantics across configured engines.","R-07; browser acceptance",High,Accepted
+E-016,"S-006;S-011;S-012;S-019","Generated barrel release graph complete regeneration and build-before-size measurement together cover deterministic public distribution.","R-08",High,Accepted
+E-017,"S-001;S-013;S-015","All twelve named stories are acceptance evidence and must be ratcheted so a missing story cannot produce a false axe-zero pass.","R-09",High,Accepted
+E-018,"S-001;S-002;S-009","Filter/lane value handlers fetching routing and responsive route state remain consumer-owned; documentation must distinguish select from datalist.","R-10; scope boundary",High,Accepted
+E-019,"S-014;S-020","Arrow/typeahead work in measured Chromium and Firefox; native popup behavior and AX internals differ by platform, so outcomes—not popup pixels—are the portable contract and CI WebKit remains required.","Browser test design",High,Accepted
+E-020,"S-005;S-006;S-014;S-015;S-019","The complete gate spans type lint build generated drift Storybook axe Playwright visual release size behavior/mutation baseline and quality:all; CI visual evidence is authoritative.","Verification plan",High,Accepted
