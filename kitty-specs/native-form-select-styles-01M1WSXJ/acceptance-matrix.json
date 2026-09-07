@@ -8,10 +8,10 @@
       "criterion_id": "FR-001",
       "description": "Verify FR-001 is satisfied",
       "proof_type": "automated_test",
-      "evidence": "3ca42f9; apps/storybook/src/tests/sk-form-select.spec.ts; Chromium 23/23",
+      "evidence": "7cbf6ce5ae27f1d995552deec32f0b463e8dac7f (product tree cf9d5045c0968add9056abc038401a17a7f24e9c); CI https://github.com/spec-kitty/spec-kitty-design/actions/runs/34081800284; form-select focused/native behavior suite and full Playwright green",
       "pass_fail": "pass",
       "verified_by": "codex",
-      "verified_at": "2026-09-07T03:29:43.502988+00:00",
+      "verified_at": "2026-09-07T04:35:40.155993+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
