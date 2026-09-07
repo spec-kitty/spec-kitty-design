@@ -173,6 +173,14 @@
       "verification_command": "npx playwright test apps/storybook/src/tests/sk-workflow-board.spec.ts --project=chromium --grep \"surface remains styles-only\"",
       "result": "confirmed_absent",
       "evidence": "Command exited 0: Running 1 test using 1 worker\n\n\n\n[1/1] [chromium] \u203a apps/storybook/src/tests/sk-workflow-board.spec.ts:302:7 \u203a workflow board source and distribution contract \u203a the surface remains styles-only and doe"
+    },
+    {
+      "invariant_id": "NI-002",
+      "description": "Public CSS inventory contains exactly the seven approved selectors and no extra modifier/domain class.",
+      "verification_method": "custom_command",
+      "verification_command": "npx playwright test apps/storybook/src/tests/sk-workflow-board.spec.ts --project=chromium --grep \"public CSS inventory\"",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: Running 1 test using 1 worker\n\n\n\n[1/1] [chromium] \u203a apps/storybook/src/tests/sk-workflow-board.spec.ts:270:7 \u203a workflow board source and distribution contract \u203a the public CSS inventory is exactly the"
     }
   ]
 }
