@@ -1095,6 +1095,11 @@
         },
         {
           "kind": "variable",
+          "name": "shape",
+          "default": "MARKER_SHAPES[channel]"
+        },
+        {
+          "kind": "variable",
           "name": "SITE_FOOTER_AXES",
           "type": {
             "text": "{}"
@@ -4597,6 +4602,389 @@
         },
         {
           "kind": "class",
+          "description": "A controlled, property-fed line chart over a time axis whose missing intervals are drawn as\ngaps and published as \"No data\".\n\nEvery value is published persistently in a paired native table — the element's accessible\nrepresentation and its narrow-viewport treatment — so no meaning is hover-only. The graphic is\naria-hidden and carries no accessible content of its own. Selection is controlled: activation\nrequests a change and never makes one, and the only default action the element owns is moving\nfocus to the activated point, which a listener may cancel.\n\nSeries are distinguished by three redundant channels — ink, dash pattern and marker shape —\nbecause ink is the one of the three that collapses under forced-colors and in greyscale.\n\nToken dependencies: --sk-border-default, --sk-border-focus, --sk-border-strong,\n--sk-border-width-1, --sk-border-width-2, --sk-chart-baseline, --sk-chart-dash-1,\n--sk-chart-dash-2, --sk-chart-dash-3, --sk-chart-dash-4, --sk-chart-gap,\n--sk-chart-gap-dash, --sk-chart-gap-fill, --sk-chart-grid, --sk-chart-plot-block-size,\n--sk-chart-series-1, --sk-chart-series-2, --sk-chart-series-3, --sk-chart-series-4,\n--sk-chart-stroke-width, --sk-fg-body, --sk-fg-default, --sk-fg-muted, --sk-font-mono,\n--sk-font-sans, --sk-motion-duration-fast, --sk-motion-ease-out, --sk-radius-md,\n--sk-radius-sm, --sk-space-1, --sk-space-2, --sk-space-3, --sk-space-4, --sk-space-5,\n--sk-space-6, --sk-space-10, --sk-surface-card, --sk-surface-pill, --sk-text-sm,\n--sk-text-xs, --sk-weight-medium.",
+          "name": "SkTimeSeriesChart",
+          "cssParts": [
+            {
+              "description": "Accessible figure root.",
+              "name": "chart"
+            },
+            {
+              "description": "Stable empty or unavailable state.",
+              "name": "empty-state"
+            },
+            {
+              "description": "A drawn interval with no observation.",
+              "name": "gap"
+            },
+            {
+              "description": "One such note.",
+              "name": "gap-note"
+            },
+            {
+              "description": "Visible notes for gaps beyond the supplied threshold.",
+              "name": "gap-notes"
+            },
+            {
+              "description": "Series key carrying ink, dash pattern and marker shape.",
+              "name": "legend"
+            },
+            {
+              "description": "One drawn segment of one series at one resolution.",
+              "name": "line"
+            },
+            {
+              "description": "One observation's marker, shaped by series.",
+              "name": "marker"
+            },
+            {
+              "description": "Framed viewport holding the graphic.",
+              "name": "plot"
+            },
+            {
+              "description": "Native selection control, present only when selectable.",
+              "name": "point"
+            },
+            {
+              "description": "The rule where a supplied resolution changes.",
+              "name": "resolution-boundary"
+            },
+            {
+              "description": "One point's row.",
+              "name": "row"
+            },
+            {
+              "description": "Scrollable viewport for the published table.",
+              "name": "scroller"
+            },
+            {
+              "description": "Consumer-authored series name in the legend.",
+              "name": "series-name"
+            },
+            {
+              "description": "The paired tabular equivalent of the same series.",
+              "name": "table"
+            },
+            {
+              "description": "One point's display string, or the no-observation literal.",
+              "name": "value"
+            }
+          ],
+          "members": [
+            {
+              "kind": "field",
+              "name": "#descriptionId",
+              "privacy": "private",
+              "readonly": true,
+              "default": "`sk-time-series-chart-description-${++nextChartInstanceId}`"
+            },
+            {
+              "kind": "method",
+              "name": "#graphic",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "TemplateResult"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "chart",
+                  "type": {
+                    "text": "Chart"
+                  }
+                },
+                {
+                  "name": "gaps",
+                  "type": {
+                    "text": "ReadonlyArray<Gap>"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "#legend",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "TemplateResult"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "chart",
+                  "type": {
+                    "text": "Chart"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "#marker",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "SVGTemplateResult"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "chart",
+                  "type": {
+                    "text": "Chart"
+                  }
+                },
+                {
+                  "name": "point",
+                  "type": {
+                    "text": "TimeSeriesPoint"
+                  }
+                },
+                {
+                  "name": "channel",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "seriesId",
+                  "type": {
+                    "text": "string"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "#requestSelection",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "seriesId",
+                  "type": {
+                    "text": "string"
+                  }
+                },
+                {
+                  "name": "pointId",
+                  "type": {
+                    "text": "string"
+                  }
+                },
+                {
+                  "name": "control",
+                  "type": {
+                    "text": "HTMLButtonElement"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "#table",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "TemplateResult"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "chart",
+                  "type": {
+                    "text": "Chart"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "#x",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "number"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "chart",
+                  "type": {
+                    "text": "Chart"
+                  }
+                },
+                {
+                  "name": "at",
+                  "type": {
+                    "text": "number"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "#y",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "number"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "chart",
+                  "type": {
+                    "text": "Chart"
+                  }
+                },
+                {
+                  "name": "value",
+                  "type": {
+                    "text": "number"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "field",
+              "name": "description",
+              "privacy": "public",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "description": "Optional visible description associated with the chart figure.",
+              "attribute": "description"
+            },
+            {
+              "kind": "field",
+              "name": "gapThreshold",
+              "privacy": "public",
+              "type": {
+                "text": "number"
+              },
+              "default": "0",
+              "description": "Consumer-supplied gap duration, in the same unit as the point timestamps, at or beyond which\na run with no observation earns a visible note. Zero, negative and non-finite values annotate\nnothing. The element infers no threshold of its own.",
+              "attribute": "gap-threshold"
+            },
+            {
+              "kind": "field",
+              "name": "label",
+              "privacy": "public",
+              "type": {
+                "text": "string"
+              },
+              "default": "'Time series chart'",
+              "description": "Accessible name for the chart figure and the published table's caption.",
+              "attribute": "label"
+            },
+            {
+              "kind": "field",
+              "name": "selectable",
+              "privacy": "public",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "description": "Enables native controls that request selection of a point.",
+              "attribute": "selectable",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "selectedId",
+              "privacy": "public",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "description": "Controlled selected point identifier. The component never mutates it.",
+              "attribute": "selected-id"
+            },
+            {
+              "kind": "field",
+              "name": "series",
+              "privacy": "public",
+              "type": {
+                "text": "ReadonlyArray<TimeSeriesDatum>"
+              },
+              "description": "Complete consumer-owned series collection. An invalid collection fails closed.",
+              "x-spec-kitty-property-only": true,
+              "x-spec-kitty-property-reset": "empty-array"
+            }
+          ],
+          "events": [
+            {
+              "name": "sk-time-series-chart-select",
+              "type": {
+                "text": "CustomEvent<TimeSeriesChartSelectDetail>"
+              },
+              "description": "Requests selection of the exact consumer point. The event bubbles, is composed, and is cancelable; cancelling it suppresses the element's own focus move and nothing else."
+            }
+          ],
+          "attributes": [
+            {
+              "name": "description",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "description": "Optional visible description associated with the chart figure.",
+              "fieldName": "description"
+            },
+            {
+              "name": "gap-threshold",
+              "type": {
+                "text": "number"
+              },
+              "default": "0",
+              "description": "Consumer-supplied gap duration, in the same unit as the point timestamps, at or beyond which\na run with no observation earns a visible note. Zero, negative and non-finite values annotate\nnothing. The element infers no threshold of its own.",
+              "fieldName": "gapThreshold"
+            },
+            {
+              "name": "label",
+              "type": {
+                "text": "string"
+              },
+              "default": "'Time series chart'",
+              "description": "Accessible name for the chart figure and the published table's caption.",
+              "fieldName": "label"
+            },
+            {
+              "name": "selectable",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "description": "Enables native controls that request selection of a point.",
+              "fieldName": "selectable"
+            },
+            {
+              "name": "selected-id",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "description": "Controlled selected point identifier. The component never mutates it.",
+              "fieldName": "selectedId"
+            }
+          ],
+          "superclass": {
+            "name": "LitElement",
+            "package": "lit"
+          },
+          "tagName": "sk-time-series-chart",
+          "customElement": true
+        },
+        {
+          "kind": "class",
           "description": "An aggregate route-by-time-bucket transition matrix with controlled route-selection intent.\n\nToken dependencies: --sk-border-default, --sk-border-focus, --sk-border-strong,\n--sk-border-width-1, --sk-border-width-2, --sk-color-blue, --sk-color-green,\n--sk-color-purple, --sk-color-red, --sk-fg-body, --sk-fg-default, --sk-fg-muted,\n--sk-fg-on-card, --sk-font-mono, --sk-font-sans, --sk-radius-lg, --sk-radius-sm,\n--sk-space-1, --sk-space-2, --sk-space-3, --sk-space-4, --sk-space-5,\n--sk-space-6, --sk-space-10, --sk-space-12, --sk-surface-card,\n--sk-surface-muted, --sk-surface-pill, --sk-text-lg, --sk-text-sm, --sk-text-xs,\n--sk-weight-medium, --sk-weight-semibold.",
           "name": "SkTransitionMatrix",
           "cssParts": [
@@ -6089,6 +6477,22 @@
         },
         {
           "kind": "js",
+          "name": "SkTimeSeriesChart",
+          "declaration": {
+            "name": "SkTimeSeriesChart",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "skTimeSeriesChartSheet",
+          "declaration": {
+            "name": "default",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
           "name": "SkTransitionMatrix",
           "declaration": {
             "name": "SkTransitionMatrix",
@@ -6116,6 +6520,38 @@
           "name": "StatusIndicatorTone",
           "declaration": {
             "name": "StatusIndicatorTone",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "TimeSeriesChartSelectDetail",
+          "declaration": {
+            "name": "TimeSeriesChartSelectDetail",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "TimeSeriesDatum",
+          "declaration": {
+            "name": "TimeSeriesDatum",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "TimeSeriesPoint",
+          "declaration": {
+            "name": "TimeSeriesPoint",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "TimeSeriesResolution",
+          "declaration": {
+            "name": "TimeSeriesResolution",
             "module": "./dist/index.js"
           }
         },

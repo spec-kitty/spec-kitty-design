@@ -3,12 +3,12 @@
 The Spec Kitty components ship as CSS in `@spec-kitty/styles`, and — for the components migrated
 so far — as **custom elements** in `@spec-kitty/elements`. Both require `@spec-kitty/tokens`.
 
-**Migration is in progress.** Twenty-seven elements exist today: `sk-action-row`, `sk-app-shell`,
+**Migration is in progress.** Twenty-eight elements exist today: `sk-action-row`, `sk-app-shell`,
 `sk-bar-chart`, `sk-blog-card`, `sk-button`, `sk-card`, `sk-check-bullet`, `sk-context-sidebar`, `sk-entity-marker`,
 `sk-evidence-chain`, `sk-feature-card`, `sk-form-input`, `sk-form-textarea`, `sk-grid`, `sk-metric`,
 `sk-nav-pill`, `sk-notice`, `sk-page-header`, `sk-personal-rail`, `sk-pill-tag`, `sk-ribbon-card`,
-`sk-section-banner`, `sk-section-header`, `sk-site-footer`, `sk-status-indicator`, `sk-stub`, and
-`sk-transition-matrix`.
+`sk-section-banner`, `sk-section-header`, `sk-site-footer`, `sk-status-indicator`, `sk-stub`,
+`sk-time-series-chart`, and `sk-transition-matrix`.
 Several of the catalogue's component packages are CSS only by a recorded decision — `form-field`,
 (#176) `facts`, `disclosure`, `data-table`, `empty-state`, `skip-link`, (#210) `progress`, and
 (#209) `workflow-board` and `workflow-lane`, and (#211) `form-select`. See
@@ -209,6 +209,79 @@ Everything #145 ruled out stays ruled out, and stickiness does not soften it. Th
 timer, reads no clock, computes no relative age, polls nothing, observes no scrolling, and owns no
 "live" state. The freshness string and any live/paused indicator are slotted content, rendered
 verbatim; the consumer owns the timer that produces them.
+
+## Time series chart
+
+`sk-time-series-chart` draws a consumer-owned line chart over a **time** axis. It is not a widened
+bar chart and shares no source with one: it exists because a bar chart's model has no way to say
+"this interval has no observation", so an absent bar and a zero bar are the same picture.
+
+**A missing interval is a value.** A point's `value` may be `null`, which means *no observation in
+this interval*. The line **breaks** there, the interval is drawn as a gap, and the paired table
+reports it as `No data`. It is never interpolated across and never drawn to the baseline. Leading
+and trailing nulls keep their place, so the window you supplied is the window that renders.
+
+```js
+const chart = document.querySelector('sk-time-series-chart');
+chart.label = 'Throughput over time';
+chart.description = 'Requests per second, by hour, as collected';
+chart.gapThreshold = 3 * 60 * 60 * 1000;   // supplied, never inferred
+chart.series = Object.freeze([
+  Object.freeze({
+    id: 'throughput',
+    name: 'Throughput',
+    points: Object.freeze([
+      Object.freeze({ id: 'h0', at: 1767225600000, value: 40, displayValue: '40 req/s', label: '00:00', resolution: 'raw' }),
+      Object.freeze({ id: 'h1', at: 1767229200000, value: null, displayValue: 'unused', label: '01:00', resolution: 'raw' }),
+      Object.freeze({ id: 'h2', at: 1767232800000, value: 62, displayValue: '62 req/s', label: '02:00', resolution: 'hour' }),
+    ]),
+  }),
+]);
+chart.selectable = true;
+chart.selectedId = 'h0';
+chart.addEventListener('sk-time-series-chart-select', (event) => {
+  // A request, not an internal state change: selection stays consumer-controlled.
+  chart.selectedId = event.detail.pointId;
+});
+```
+
+`at` is used for **position only** — unequal spacing is therefore meaningful and visible.
+`displayValue` and `label` render verbatim; the element parses no formatted text, chooses no
+window, reads no clock, sets no timer, fetches nothing, and never downsamples, smooths or fits a
+trend. `resolution` is supplied per point; a maximal run of one resolution is a segment, an `hour`
+segment is drawn heavier with hollow markers, a rule marks the change, and the axis does not
+rescale across it.
+
+**Every value is published, always.** The paired table is in the DOM at all times, in source order,
+one row per point, carrying the series name, the label, the display string (or `No data`) and the
+row's resolution. Nothing is hover-only, and the table is also the narrow-viewport treatment: it
+scrolls rather than reflowing, and it takes the `role="region"`/`aria-label`/`tabindex="0"` triad
+only when it genuinely overflows. The SVG is `aria-hidden` and carries no accessible content.
+
+**Differentiation uses three channels, not one.** Series are told apart by ink
+(`--sk-chart-series-1..4`), by dash pattern (`--sk-chart-dash-1..4`) and by marker shape — circle,
+square, triangle, diamond, cycling after four. Ink is the channel that collapses under
+`forced-colors: active` and in greyscale; the other two are why the chart is still readable there,
+and why the gap is drawn with a dashed **stroke** rather than only a fill.
+
+A `gapThreshold` you supply, in the same unit as your timestamps, annotates any run at or beyond
+it with a visible note. Zero, negative and non-finite thresholds annotate nothing, and the element
+never infers one.
+
+The five attributes are `label`, `description`, `selectable`, `selected-id` and `gap-threshold`;
+`series` is the single property-only input, delivered as a property and never serialized.
+`sk-time-series-chart-select` carries a frozen `{ seriesId: string; pointId: string }` detail with
+`bubbles: true`, `composed: true`, and **`cancelable: true`**. Cancelling it suppresses the one
+default action the element owns — moving focus to the activated point — and nothing else; selection
+was never the element's to change. Point ids must be unique across the whole chart, because
+`selectedId` is a point id. An empty collection renders "No data to display"; malformed data fails
+closed as "Chart unavailable".
+
+The public parts are `chart`, `legend`, `series-name`, `plot`, `line`, `marker`, `gap`,
+`resolution-boundary`, `gap-notes`, `gap-note`, `scroller`, `table`, `row`, `value`, `point` and
+`empty-state`. `point` exists only when `selectable`; `gap-notes` and `gap-note` only when a
+threshold is supplied and met.
+
 
 ## Bar chart
 

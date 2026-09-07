@@ -37,7 +37,8 @@
     "#178 adds TWELVE arms for <sk-notice>, all mutating the ELEMENT. Three need their reason recorded.\nTWO SC-010 ARMS. The first flips `reflect` on `tone` — the ordinary property-before-upgrade arm. The SECOND deletes `message` from `static properties` and is the arm this mission exists for: it reproduces the defect sk-form-input.ts records twice. Measured red: `expected 'Retrying in 5s' to contain 'Retrying in 2s'` — a STALE MESSAGE. It also reds the UNMARKED re-announcement test, which costs nothing because isBehaviourTest keys on the [SC-NNN] marker, so an unmarked test is invisible to the collateral bound. That is how the announcement contract gets harness coverage without minting an id ADR-11 does not have.\nTHE FIRST expectCollateral IN THIS FILE, on the SC-012 arm. Deleting `this.focus()` reds [SC-012] AND the uncancelled contrast branch of [SC-009] — a property of the DESIGN, not of test hygiene: the element does not remove itself, so the only default action a cancelable dismiss can prevent is the focus move, which makes focus the one behaviour those two ids share. Guard 5 inverts on the flag and requires the collateral to occur, so it asserts rather than exempts. The [SC-012] assertion had to be moved INSIDE the shadow root first: CI measured the arm 'semantically inert' against the original `document.activeElement === element`, which holds whether or not focus moves, because focus on a node inside a shadow root already reports the host.\nSC-013 drops the CONTENT part, not the root `notice` part (the node other tests query to prove the element rendered) and not `marker` (which [SC-011] reads aria-hidden from). Both SC-014 spellings are carried, per #77's finding.",
     "#216 KEEPS the vocabulary assertion this file's #177 note describes, and adds NO arm. The first revision of this entry said the assertion had been removed because a fork was \"no longer REPRESENTABLE\"; that was measurably false and a pre-merge reviewer falsified it in one edit. What #216 removed is one SHAPE of fork — two authored lists that can drift apart. CARD_STATUSES is now Object.fromEntries(STATUS_TONES.map(...)), so there is no second list. But the derivation is an EXPRESSION and nothing gates the expression: appending ['rogue','sk-card--status-rogue'] inside the fromEntries argument keeps the index-signature type, so the cast stays clean, typecheck-all passes for five projects, build-element-markup regenerates and WRITES SkCardStatusRogueHTML with a class in no stylesheet, and check-adopted-css-boundaries, check-element-css-hygiene, check-no-css-in-source, check-elements-entries, check-manifest-content, check-part-ratchet and htmlhint all stay green. The order-sensitive equality in fixtures/elements-behaviour/src/sk-card.test.ts is the only thing that reds, and it is verified to red on exactly that edit. Note the sibling BEM-family test CANNOT stand in for it: it derives its expectation from the key under test, so it is self-fulfilling for any key, 'rogue' included. So the boundary the #177 note named — a real claim with no ADR-11 id, the fourth time (#140, #143, #77, #177) — is UNCHANGED and still held by an ordinary test rather than by this harness. The count is unchanged for the same reason it was then: guard 7 keys on a declared (id, subject) pair and guard 4 requires an [SC-NNN] marker, and there is still no id for 'the expression that derives one component's map from another's vocabulary'.",
     "#148 WP03 adds NINE bar-chart arms: seven element arms cover duplicate dispatch, exact detail, bubbling/composed flags, property-only series registration, label part exposure, and the independent stylesheet length and identity contracts; two React arms cover the generated listener and property bridge.",
-    "#196 AND #204 ADD TWO IDS AND THIS FILE IS WHERE THE COST SHOWS. THREE CHANGES, none of them additive-only.\n(1) SC-016 (delegate/rendered-control correspondence) is carried by the arm that was already here as SC-003 'probe type assigned before value' — RE-KEYED, not duplicated. ADR-14 calls that defect 'the clearest instance' of the two sources disagreeing, so it was always a correspondence arm; it was filed under SC-003 because no other id existed. SC-003 keeps eleven arms and its own tests, so nothing is left uncovered by the move.\n(2) The SC-013 arm 'constraint attribute reaches the inner control' is RE-SITED from `pattern=${nothing}` to `inputmode=${nothing}`. Measured, not assumed: dropping `pattern` from the rendered control reds the [SC-013] forwarding test AND the [SC-016] correspondence test, because with item 10 in force it IS a correspondence defect — the probe still holds the constraint the control lost. `inputmode` reaches no validity at all, so the arm reds the forwarding test alone. The [SC-013] test asserts six forwarded attributes and the arm drops one of them either way, and the `pattern` case is not left unwatched: it is measured red by the [SC-016] test.\nWHY NOT expectCollateral: it would have removed guard 5's blast-radius bound from three surgical arms (the merged-flag loop, the probe value sync, and this one) to make room for one new id. Naming both ids on the shared test does the same work without weakening anything, and `[SC-002][SC-003] a readonly control still submits` is the precedent for a dual-marked test in this very file.\n(3) SC-017 (responsive threshold) gets TWO arms, one per documented threshold, and both mutate the GENERATED packages/elements/src/page-header/sk-page-header.css.js. That is forced rather than chosen: the test job never builds, so an arm against the authored packages/styles/src/page-header/sk-page-header.css would be semantically inert — SC-010's arm against generated packages/react/src/SkTransitionMatrix.js is the precedent for mutating a generated artefact. The HEIGHT arm reds ONE test where the WIDTH arm reds two, and that asymmetry is the measurement #182 wrote two separate @media blocks to obtain: only the width threshold is reachable live at the lane's 414px viewport, so the height block is falsifiable only through the sheet-reading assertion, and joining the two conditions would make it unfalsifiable altogether."
+    "#196 AND #204 ADD TWO IDS AND THIS FILE IS WHERE THE COST SHOWS. THREE CHANGES, none of them additive-only.\n(1) SC-016 (delegate/rendered-control correspondence) is carried by the arm that was already here as SC-003 'probe type assigned before value' — RE-KEYED, not duplicated. ADR-14 calls that defect 'the clearest instance' of the two sources disagreeing, so it was always a correspondence arm; it was filed under SC-003 because no other id existed. SC-003 keeps eleven arms and its own tests, so nothing is left uncovered by the move.\n(2) The SC-013 arm 'constraint attribute reaches the inner control' is RE-SITED from `pattern=${nothing}` to `inputmode=${nothing}`. Measured, not assumed: dropping `pattern` from the rendered control reds the [SC-013] forwarding test AND the [SC-016] correspondence test, because with item 10 in force it IS a correspondence defect — the probe still holds the constraint the control lost. `inputmode` reaches no validity at all, so the arm reds the forwarding test alone. The [SC-013] test asserts six forwarded attributes and the arm drops one of them either way, and the `pattern` case is not left unwatched: it is measured red by the [SC-016] test.\nWHY NOT expectCollateral: it would have removed guard 5's blast-radius bound from three surgical arms (the merged-flag loop, the probe value sync, and this one) to make room for one new id. Naming both ids on the shared test does the same work without weakening anything, and `[SC-002][SC-003] a readonly control still submits` is the precedent for a dual-marked test in this very file.\n(3) SC-017 (responsive threshold) gets TWO arms, one per documented threshold, and both mutate the GENERATED packages/elements/src/page-header/sk-page-header.css.js. That is forced rather than chosen: the test job never builds, so an arm against the authored packages/styles/src/page-header/sk-page-header.css would be semantically inert — SC-010's arm against generated packages/react/src/SkTransitionMatrix.js is the precedent for mutating a generated artefact. The HEIGHT arm reds ONE test where the WIDTH arm reds two, and that asymmetry is the measurement #182 wrote two separate @media blocks to obtain: only the width threshold is reachable live at the lane's 414px viewport, so the height block is falsifiable only through the sheet-reading assertion, and joining the two conditions would make it unfalsifiable altogether.",
+    "#179 adds EIGHT sk-time-series-chart arms, all mutating the ELEMENT; total 157 -> 165 on the refreshed train after #235. Three need their reason recorded.\nTHE SC-013 ARM IS THE MISSION'S REQUIRED RED-FIRST GAP MUTATION. It rewrites `asSupplied`, the single named seam every part of the GRAPHIC reads the series through, to drop the null points — the textbook interpolation defect, and the exact change a maintainer makes when a broken line looks like a bug. The line then joins straight through and the `gap` part stops existing, so the named [SC-013] test reds on a part's ABSENCE. The published TABLE deliberately does not read through that seam, so the arm is confined to the drawing and cannot be laundered by the table still saying 'No data'. sk-card's #177 arm is the precedent for an absent-part red, and its note explains why the fixture must MOUNT the part: with a dense-only mount this test would stay green through the defect. Measured red-first before the PR opened, with zero MARKED collateral — the first draft also reddened [SC-010], and the [SC-010] assertion was moved rather than the arm weakened, because an arm that reds two marked behaviours cannot say which one it proves.\nTHE SC-009 ARM flips `cancelable` to false. The [SC-008] test deliberately does NOT assert cancelability — it asserts bubbles and composed — so this arm reds the behaviour that depends on the flag and nothing else marked. The unmarked controlled-selection test also reds, which costs nothing: isBehaviourTest keys on the [SC-NNN] marker.\nTHE SC-010 ARM comments out `series: { attribute: false }`. That is the property-only registration the React wrapper's first-render delivery depends on; without it the class field initializer wins over a value assigned before upgrade, and the named [SC-010] test reds on the series identity. NO NINTH ARM FOR THE PUBLISHED TABLE, and that is a stated gap: 'every value is present without hover or focus' is a real claim with no ADR-11 id, so it is held by an ordinary test rather than by this harness — the same boundary #140, #143, #77, #177 and #216 reached, with the same answer."
   ],
   "mutations": [
     {
@@ -1296,6 +1297,70 @@
       "file": "packages/elements/src/page-header/sk-page-header.css.js",
       "from": "@media (max-height: 480px) {\\n  :host([sticky]) {\\n    position: static;",
       "to": "@media (max-height: 240px) {\\n  :host([sticky]) {\\n    position: static;"
+    },
+    {
+      "id": "SC-006",
+      "arm": "one selection request per activation",
+      "file": "packages/elements/src/time-series-chart/sk-time-series-chart.ts",
+      "from": "    const proceed = this.dispatchEvent(\n      new CustomEvent<TimeSeriesChartSelectDetail>('sk-time-series-chart-select', {",
+      "to": "    this.dispatchEvent(\n      new CustomEvent<TimeSeriesChartSelectDetail>('sk-time-series-chart-select', {\n        detail: Object.freeze({ seriesId, pointId }),\n        bubbles: true,\n        composed: true,\n        cancelable: true,\n      }),\n    );\n    const proceed = this.dispatchEvent(\n      new CustomEvent<TimeSeriesChartSelectDetail>('sk-time-series-chart-select', {",
+      "subject": "fixtures/elements-behaviour/src/sk-time-series-chart.test.ts"
+    },
+    {
+      "id": "SC-007",
+      "arm": "the exact consumer point identity",
+      "file": "packages/elements/src/time-series-chart/sk-time-series-chart.ts",
+      "from": "        detail: Object.freeze({ seriesId, pointId }),",
+      "to": "        detail: Object.freeze({ seriesId, pointId: pointId.trim() }),",
+      "subject": "fixtures/elements-behaviour/src/sk-time-series-chart.test.ts"
+    },
+    {
+      "id": "SC-008",
+      "arm": "the request crosses the shadow boundary",
+      "file": "packages/elements/src/time-series-chart/sk-time-series-chart.ts",
+      "from": "        bubbles: true,",
+      "to": "        bubbles: false,",
+      "subject": "fixtures/elements-behaviour/src/sk-time-series-chart.test.ts"
+    },
+    {
+      "id": "SC-009",
+      "arm": "preventDefault suppresses the element's own focus move",
+      "file": "packages/elements/src/time-series-chart/sk-time-series-chart.ts",
+      "from": "        cancelable: true,",
+      "to": "        cancelable: false,",
+      "subject": "fixtures/elements-behaviour/src/sk-time-series-chart.test.ts"
+    },
+    {
+      "id": "SC-010",
+      "arm": "property-only series registration",
+      "file": "packages/elements/src/time-series-chart/sk-time-series-chart.ts",
+      "from": "    series: { attribute: false },",
+      "to": "    // series is deliberately unregistered by this mutation arm",
+      "subject": "fixtures/elements-behaviour/src/sk-time-series-chart.test.ts"
+    },
+    {
+      "id": "SC-013",
+      "arm": "interpolating across nulls removes the gap part",
+      "file": "packages/elements/src/time-series-chart/sk-time-series-chart.ts",
+      "from": "const asSupplied = (datum: TimeSeriesDatum): ReadonlyArray<TimeSeriesPoint> => datum.points;",
+      "to": "const asSupplied = (datum: TimeSeriesDatum): ReadonlyArray<TimeSeriesPoint> =>\n  datum.points.filter((point) => point.value !== null);",
+      "subject": "fixtures/elements-behaviour/src/sk-time-series-chart.test.ts"
+    },
+    {
+      "id": "SC-014",
+      "arm": "adopted stylesheet count",
+      "file": "packages/elements/src/time-series-chart/sk-time-series-chart.ts",
+      "from": "  static styles = [sheet];",
+      "to": "  static styles = [];",
+      "subject": "fixtures/elements-behaviour/src/sk-time-series-chart.test.ts"
+    },
+    {
+      "id": "SC-014",
+      "arm": "adopted stylesheet identity",
+      "file": "packages/elements/src/time-series-chart/sk-time-series-chart.ts",
+      "from": "  static styles = [sheet];",
+      "to": "  static styles = [new CSSStyleSheet()];",
+      "subject": "fixtures/elements-behaviour/src/sk-time-series-chart.test.ts"
     }
   ]
 }

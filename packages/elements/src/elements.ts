@@ -40,3 +40,4 @@ import './metric/sk-metric.js';
 import './evidence-chain/sk-evidence-chain.js';
 import './notice/sk-notice.js';
 import './bar-chart/sk-bar-chart.js';
+import './time-series-chart/sk-time-series-chart.js';

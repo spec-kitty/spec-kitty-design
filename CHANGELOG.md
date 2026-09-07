@@ -13,14 +13,20 @@ compatibility window to honour and no deprecation cycle to run.
 
 ### `@spec-kitty/elements`
 
-The custom-element base layer (ADR-8): twenty-seven components as standard custom elements, built on
+The custom-element base layer (ADR-8): twenty-eight components as standard custom elements, built on
 Lit, with styling delivered through constructed stylesheets and a closed styling API (ADR-9).
 
 - `sk-action-row`, `sk-app-shell`, `sk-bar-chart`, `sk-blog-card`, `sk-button`, `sk-card`, `sk-check-bullet`,
   `sk-context-sidebar`, `sk-entity-marker`, `sk-evidence-chain`, `sk-feature-card`, `sk-form-input`,
   `sk-form-textarea`, `sk-grid`, `sk-metric`, `sk-nav-pill`, `sk-notice`, `sk-page-header`,
   `sk-personal-rail`, `sk-pill-tag`, `sk-ribbon-card`, `sk-section-banner`, `sk-section-header`,
-  `sk-site-footer`, `sk-status-indicator`, `sk-stub`, `sk-transition-matrix`
+  `sk-site-footer`, `sk-status-indicator`, `sk-stub`, `sk-time-series-chart`, `sk-transition-matrix`
+- `sk-time-series-chart` (#179) is the first element whose data model can say *no observation*: a
+  point's `value` may be `null`, the line breaks there rather than interpolating or falling to the
+  baseline, the interval is drawn as a `::part(gap)`, and the paired table reports it as `No data`.
+  Every value is published persistently in that table, so nothing is hover-only, and series are
+  distinguished by dash pattern and marker shape as well as ink — the two channels that survive
+  `forced-colors: active` and greyscale
 - Two distribution entries (ADR-10 §2): an ESM build with `lit` external, and a self-contained
   classic-script IIFE that loads from `file://` with no network
 - `custom-elements.json` manifest, generated and drift-checked
@@ -34,10 +40,12 @@ directly, so `src/` is the artifact, and CI fails on drift.
 ### `@spec-kitty/styles`
 
 The stylesheets, as both authored CSS and generated static HTML forms (ADR-10 §3), for consumers
-rendering without JavaScript. Subpath exports for all thirty-three component directories. (The
-count has been wrong twice: it said twenty-nine while there were thirty, and #178 additionally found
-`notice` was the only `src/` directory with no `exports` entry at all. Measured, not counted by
-hand — `packages/styles/src` has 33 directories and `package.json` has 33 subpath exports.)
+rendering without JavaScript. Subpath exports for every component directory. (The count has been
+wrong twice — it said twenty-nine while there were thirty, and #178 additionally found `notice` was
+the only `src/` directory with no `exports` entry at all — so it is deliberately no longer written
+here: `ls -d packages/styles/src/*/ | wc -l` against the `exports` keys is the answer, and
+`scripts/check-release-graph.mjs` enforces the equality. It caught #179's own missing
+`time-series-chart` entry, which is what a gate is for.)
 
 ### `@spec-kitty/tokens`
 

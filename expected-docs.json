@@ -31,9 +31,10 @@
     "#177 adds one documented sk-card status attribute. Total moves 83 -> 84.",
     "#147 adds five sk-metric attributes and one property-only sk-evidence-chain field. On the refreshed train after #177, total moves 84 -> 90.",
     "#178 adds sk-notice: five documented attributes (tone, announce, message, dismissible, dismiss-label), no property-only fields and no public methods. `#dismiss` is a PRIVATE method and is correctly absent from this count — dismissal is requested through the event, not by calling the element, because the consumer owns whether the notice exists.",
-    "#148 WP03 reconciles the generated <sk-bar-chart> surface: four documented scalar attributes (label, description, selectable, selected-id), one documented property-only series field, and zero public methods. On the refreshed train after #178, total moves 95 -> 100."
+    "#148 WP03 reconciles the generated <sk-bar-chart> surface: four documented scalar attributes (label, description, selectable, selected-id), one documented property-only series field, and zero public methods. On the refreshed train after #178, total moves 95 -> 100.",
+    "#179 adds sk-time-series-chart: five attributes (description, gap-threshold, label, selectable, selected-id) and ONE property-only field (series), total 100 -> 106. There are no methods. `series` is property-only by construction — `attribute: false` — which is what makes the React wrapper deliver an array of objects on first render instead of dropping it; normalise-manifest stamps x-spec-kitty-property-only and build-react-wrappers reads it. The overflow triad on the table scroller is applied imperatively in `updated()` and is DELIBERATELY not a reactive field: an internal layout fact should not become published API, and this ratchet is exact, so a state field would have had to be counted here forever."
   ],
-  "total": 100,
+  "total": 106,
   "elements": {
     "sk-action-row": {
       "attributes": 3,
@@ -163,6 +164,11 @@
     "sk-stub": {
       "attributes": 0,
       "properties": 0,
+      "methods": 0
+    },
+    "sk-time-series-chart": {
+      "attributes": 5,
+      "properties": 1,
       "methods": 0
     },
     "sk-transition-matrix": {

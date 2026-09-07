@@ -34,9 +34,10 @@
     "#146 WP02 adds EIGHT sk-action-row parts: row, trigger, marker, title, reference, tags, metadata and controls. Total moves 80 -> 88.",
     "#147 adds FIVE sk-metric parts (metric, label, value, annotation, empty-state) and FOUR sk-evidence-chain parts (list, stage, connector, empty-state). Total moves 88 -> 97.",
     "#178 adds sk-notice with SEVEN parts — the largest single entry here, and deliberately so: a notice is a composition (marker, heading, body, actions, dismiss) rather than a single box, and under-exposing parts is the support burden ADR-9 §2 names. Every one is targeted from outside by the [SC-013] test in fixtures/elements-behaviour/src/sk-notice.test.ts, which is what the ratchet scans for. `body` is also the live region, so a rename there is an ANNOUNCEMENT regression as well as a styling one.",
-    "#148 WP01 adds SEVEN sk-bar-chart parts: chart, plot, item, bar, value, label and empty-state. On the refreshed train after #147 and #178, total moves 104 -> 111."
+    "#148 WP01 adds SEVEN sk-bar-chart parts: chart, plot, item, bar, value, label and empty-state. On the refreshed train after #147 and #178, total moves 104 -> 111.",
+    "#179 adds sk-time-series-chart's SIXTEEN parts, total 111 -> 127. Three of them are the mission's own subject rather than ordinary styling surface. `gap` is a DRAWN OBJECT — the mutation that interpolates across nulls removes it, so the [SC-013] test's red is a part's ABSENCE, the shape sk-card's #177 arm records; that is why the [SC-013] fixture mounts a series WITH an interior null run rather than only a dense one. `point` exists only when the chart is selectable, so its fixture is the selectable mount. `gap-note` and `gap-notes` exist only when a SUPPLIED gapThreshold is met, so their fixture supplies one — an element that inferred a threshold would render them unconditionally and the ratchet would never notice."
   ],
-  "total": 111,
+  "total": 127,
   "byElement": {
     "sk-action-row": [
       "controls",
@@ -188,6 +189,24 @@
       "marker",
       "status",
       "text"
+    ],
+    "sk-time-series-chart": [
+      "chart",
+      "empty-state",
+      "gap",
+      "gap-note",
+      "gap-notes",
+      "legend",
+      "line",
+      "marker",
+      "plot",
+      "point",
+      "resolution-boundary",
+      "row",
+      "scroller",
+      "series-name",
+      "table",
+      "value"
     ],
     "sk-transition-matrix": [
       "bar",
