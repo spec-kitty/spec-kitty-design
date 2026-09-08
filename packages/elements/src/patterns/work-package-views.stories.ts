@@ -303,7 +303,6 @@ const patternStyles = html`<style>
   .sk-work-package-pattern__page { display: grid; min-inline-size: 0; gap: var(--sk-space-6); padding: var(--sk-space-6); }
   .sk-work-package-pattern__summary { display: grid; min-inline-size: 0; gap: var(--sk-space-4); }
   .sk-work-package-pattern__selector { max-inline-size: var(--sk-layout-workflow-lane-min-inline-size); }
-  .sk-work-package-pattern__lane-list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--sk-space-3); }
   .sk-work-package-pattern__board-frame { min-inline-size: 0; max-inline-size: 100%; }
   .sk-work-package-pattern__board-frame--overflow-proof {
     max-inline-size: calc(
@@ -399,7 +398,6 @@ export const renderWorkPackageOverview = (args: OverviewArgs, options: OverviewO
       data-total-count=${projection.total}
       data-percentage=${projection.percentage}
       data-work-package-ids=${JSON.stringify(source.map((workPackage) => workPackage.id))}
-      data-scale-record-count=${overview.scaleWorkPackages.length}
       data-projection-guards=${JSON.stringify(projectionGuardProof())}
       data-selected-work-package-id=${args.selectedWorkPackageId}
       data-visible-lane-id=${options.narrow ? args.selectedLaneId : ''}
