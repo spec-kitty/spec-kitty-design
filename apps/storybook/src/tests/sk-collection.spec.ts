@@ -31,6 +31,7 @@ type FixtureExpectation = {
   id: StoryId;
   heading: string;
   items: string[];
+  listTag?: 'UL' | 'OL';
   count?: string;
   action?: { name: string; href: string };
 };
@@ -54,6 +55,7 @@ const FIXTURES: FixtureExpectation[] = [
     id: 'fifty-items',
     heading: 'Large collection',
     items: FIFTY_ITEMS,
+    listTag: 'OL',
     count: '50 items',
     action: { name: 'View more', href: '#more-items' },
   },
@@ -102,22 +104,34 @@ export function assertNoForbiddenBlockedSurface(cssText: string): void {
   }
 
   const forbiddenNames: string[] = [];
+  const forbiddenDeclarations: string[] = [];
   const root = postcss.parse(cssText);
   root.walkRules((rule) => {
     selectorParser((selectors) => {
       selectors.walkClasses((className) => {
         if (/blocked/i.test(className.value)) forbiddenNames.push(`.${className.value}`);
       });
+      selectors.walkIds((id) => {
+        if (/blocked/i.test(id.value)) forbiddenNames.push(`#${id.value}`);
+      });
       selectors.walkAttributes((attribute) => {
-        if (/blocked/i.test(attribute.attribute)) {
-          forbiddenNames.push(`[${attribute.attribute}]`);
+        if (/blocked/i.test(attribute.attribute) || /blocked/i.test(attribute.value ?? '')) {
+          forbiddenNames.push(attribute.toString());
         }
       });
     }).processSync(rule.selector);
   });
+  root.walkDecls((declaration) => {
+    if (/blocked/i.test(declaration.prop)) forbiddenDeclarations.push(declaration.prop);
+  });
   if (forbiddenNames.length > 0) {
     throw new Error(
       `sk-collection must not expose blocked-named selector surfaces: ${forbiddenNames.join(', ')}`,
+    );
+  }
+  if (forbiddenDeclarations.length > 0) {
+    throw new Error(
+      `sk-collection must not expose a blocked-named declaration surface: ${forbiddenDeclarations.join(', ')}`,
     );
   }
 }
@@ -287,6 +301,24 @@ test.describe('sk-collection neutral source boundary', () => {
     );
   });
 
+  test('matcher catches a Blocked-named ID selector', () => {
+    expect(() => assertNoForbiddenBlockedSurface('.sk-collection #Blocked { display: block; }')).toThrow(
+      /blocked-named selector/,
+    );
+  });
+
+  test('matcher catches a Blocked attribute value selector', () => {
+    expect(() => assertNoForbiddenBlockedSurface(".sk-collection[data-state='Blocked'] { display: block; }")).toThrow(
+      /blocked-named selector/,
+    );
+  });
+
+  test('matcher catches a Blocked-named declaration surface', () => {
+    expect(() => assertNoForbiddenBlockedSurface('.sk-collection { --sk-collection-Blocked: 1; }')).toThrow(
+      /blocked-named declaration/,
+    );
+  });
+
   test('matcher accepts ordinary collection CSS with an unrelated token', () => {
     expect(() => assertNoForbiddenBlockedSurface('.sk-collection { color: var(--sk-fg-body); }')).not.toThrow();
   });
@@ -336,6 +368,10 @@ test('native fixture scale, naming, order, counts, and optional regions are exac
     const collection = await openStory(page, fixture.id);
     const heading = collection.locator('.sk-collection__heading');
     await expect(heading).toHaveText(fixture.heading);
+    await expect(collection.getByRole('heading', { name: fixture.heading, level: 3 })).toHaveCount(1);
+    expect(
+      await heading.evaluate((node) => node.parentElement?.classList.contains('sk-collection__header')),
+    ).toBe(true);
     const headingId = await heading.getAttribute('id');
     expect(headingId).toBeTruthy();
     await expect(collection).toHaveAttribute('aria-labelledby', headingId!);
@@ -351,6 +387,7 @@ test('native fixture scale, naming, order, counts, and optional regions are exac
 
     const list = body.getByRole('list');
     await expect(list).toHaveCount(1);
+    expect(await list.evaluate((node) => node.tagName)).toBe(fixture.listTag ?? 'UL');
     const items = body.getByRole('listitem');
     await expect(items).toHaveCount(fixture.items.length);
     expect(await items.allInnerTexts()).toEqual(fixture.items);
