@@ -1,0 +1,1 @@
+Implementation dispatch blocked before allocation: analysis_report_required; no code/worktree created.

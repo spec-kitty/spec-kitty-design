@@ -1,0 +1,93 @@
+# review-findings/v1 — confirmed subset of tasks.merged.yaml after adversarial refutation pass
+# (batch 1). All 4 findings in this batch were confirmed against the live artifact; none refuted.
+schema: review-findings/v1
+complete: true
+phase: tasks
+lens_group: merged
+mission: work-explorer-segmented-choice-styles-01M20C9F
+source_files:
+  - reviews/tasks-decomp.findings.yaml
+  - reviews/tasks-order.findings.yaml
+  - reviews/tasks-cover.findings.yaml
+findings:
+  - id: TASKS-DECOMP-001
+    lens: Decomposition / PR-sizing
+    severity: 3
+    title: T020 names the Tier-C pre-merge squad as its actor while the WP frontmatter assigns all subtasks to role:implementer, blurring which actor's work is inside this WP's one-PR boundary
+    evidence:
+      - artifact: "tasks/WP01-segmented-choice-styles.md frontmatter, line 95 (`role: implementer`) and lines 41-61 (`subtasks:` list includes T020)"
+      - artifact: "tasks/WP01-segmented-choice-styles.md § T020, lines 435-436: \"a human operator (the Tier-C pre-merge squad, run after T019's final push) opens the built Storybook in an actual Chrome window...\""
+      - artifact: "tasks/WP01-segmented-choice-styles.md § Definition of done, lines 463-464, which correctly keeps the squad's own evidence-post OUT of the T001-T020 subtask numbering"
+      - artifact: "kitty-specs/native-form-select-styles-01M1WSXJ/tasks/WP01-native-light-dom-form-select-styles.md § T004 (lines 199-211), the cited precedent's own 200%-zoom task, written as ordinary implementer work with no separate 'squad' actor named"
+    claim: >
+      T020 breaks the pattern the rest of T001-T019 follow (implicit `role: implementer` actor):
+      its own procedure text names the actor as "the Tier-C pre-merge squad," sequenced "after
+      T019's final push" — i.e. during pre-merge review, not WP implementation — yet it is listed
+      as one of the WP's twenty numbered `subtasks`, unlike the squad's separate evidence-post
+      bullet which is correctly excluded from that numbering. This blurs whether "this WP's ~20
+      subtasks" is genuinely one reviewable PR's worth of implementer work.
+    remediation: >
+      Either (a) reassign T020 to the implementer to match the form-select precedent, or (b) if
+      genuinely squad-owned, remove T020 from `subtasks:`/the T001-T020 numbering and fold its
+      requirement into the Definition of done as a squad-gate bullet alongside the evidence-post.
+
+  - id: TASKS-DECOMP-002
+    lens: No padding, no vacuous tasks
+    severity: 2
+    title: T013 re-verifies exactly what T012 already re-ran and confirmed, adding no new checkable content
+    evidence:
+      - artifact: "tasks/WP01-segmented-choice-styles.md § T012, lines 318-325"
+      - artifact: "tasks/WP01-segmented-choice-styles.md § T013, lines 327-330"
+    claim: >
+      T012 explicitly re-runs "both test.describe blocks" and confirms "every assertion from
+      T001" is GREEN — T001 is exactly the block T013 asks to re-run. T013's own heading admits
+      it is "folded into T012." It performs zero verification T012 didn't already produce,
+      padding the subtask count with a step that does no independent work.
+    remediation: >
+      Delete T013 as a separate numbered subtask, folding its one sentence into T012's body, or
+      renumber T014-T020 down by one; if kept for progress-tracking, say so explicitly.
+
+  - id: TASKS-ORDER-001
+    lens: Internal task order / Storybook-rebuild dependency correctness
+    severity: 3
+    title: "The binding \"Execution order\" overview misattributes which task performs the second Storybook rebuild, contradicting T010-T013's own headers and bodies"
+    evidence:
+      - artifact: "tasks/WP01-segmented-choice-styles.md § Execution order, item 6 (line 141)"
+      - artifact: "tasks/WP01-segmented-choice-styles.md § Execution order, item 7 (line 143)"
+      - artifact: "tasks/WP01-segmented-choice-styles.md § T010 (line 293), § T011 (line 304)"
+      - artifact: "tasks/WP01-segmented-choice-styles.md § T012 (line 318): the actual second-rebuild task"
+      - artifact: "tasks/WP01-segmented-choice-styles.md § T013 (line 327): body only re-runs the narrower source-contract block, no rebuild command"
+    claim: >
+      The "binding — do not reorder" Execution-order overview's item 6 groups T010-T012 as "land
+      the remaining CSS", but T012 performs no CSS authoring — it is exclusively the second
+      Storybook rebuild + live-block re-run (its own header says "IC-04's second rebuild"). Item 7
+      then attributes the rebuild to T013, whose real body only re-confirms the narrower
+      Chromium-only block and issues no rebuild command. An implementer trusting the overview over
+      each task's own body could misattribute which numbered task performs the mandatory second
+      rebuild — reproducing, at the overview level, the shape PLAN-SEQ-001 was raised against at
+      the plan layer. Per-task bodies are individually correct; risk is bounded by T018's later
+      full gate sweep.
+    remediation: >
+      Correct Execution-order items 6-7: "T010-T011 — land the remaining CSS ... (T010),
+      forced-colors block (T011)" and "T012 — rebuild Storybook again ... and re-run the live
+      Playwright block until green; T013 is a narrower, folded-in re-check of only the
+      source-contract block."
+
+  - id: TASKS-COVER-001
+    lens: Every FR and AC traceable to at least one task
+    severity: 3
+    title: FR-001 (and, more weakly, FR-002/FR-004) are declared requirement_refs but never cited against a concrete subtask in the WP body
+    evidence:
+      - artifact: "tasks/WP01-segmented-choice-styles.md frontmatter, requirement_refs (lines 6-7, 9)"
+      - artifact: "tasks/WP01-segmented-choice-styles.md line 118"
+      - code: "grep 'FR-001' kitty-specs/.../tasks/WP01-segmented-choice-styles.md returns only the frontmatter entry and the generic line-118 range statement"
+      - artifact: "spec.md FR-001, FR-002, FR-004"
+    claim: >
+      Every other FR/NFR/C id in requirement_refs is cited in at least one T00x heading or body
+      sentence. FR-001 never appears anywhere in T001-T020's body text. The same weaker pattern
+      applies to FR-002 (carried only under C-001's tags) and FR-004 (carried only under T007's
+      FR-008 tag). The substance is plausibly covered elsewhere (T002, T016, T007) but the mapping
+      is never stated, so traceability fails by inspection.
+    remediation: >
+      Add explicit "FR-001" tag to T002 and/or T016's headings; add "FR-002" to T001/T013/T017's
+      headings alongside C-001; add "FR-004" to T007's heading alongside FR-008.

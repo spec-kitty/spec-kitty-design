@@ -1,0 +1,74 @@
+schema: review-findings/v1
+complete: true
+phase: analysis
+lens_group: runtime-readiness
+mission: work-explorer-segmented-choice-styles-01M20C9F
+findings:
+  - id: ANALYSIS-RUNTIME-001
+    lens: Persisted analysis-report.md frontmatter (machine-readable evidence trail) agrees with the report body's own conclusion
+    severity: 4
+    title: "verdict: unknown / findings: [] persisted in analysis-report.md's frontmatter, even though the report body concludes READY with two named advisory findings"
+    evidence:
+      - artifact: "kitty-specs/work-explorer-segmented-choice-styles-01M20C9F/analysis-report.md:22-29 (frontmatter: verdict: unknown, issue_counts all null, findings: [])"
+      - artifact: "kitty-specs/work-explorer-segmented-choice-styles-01M20C9F/analysis-report.md:40-42, 147-149 (body prose: \"## Verdict: READY\" / \"Verdict (restated) — READY.\")"
+      - artifact: "kitty-specs/work-explorer-segmented-choice-styles-01M20C9F/analysis-report.md:138-142 (Findings table: A-001, A-002, both severity 'advisory')"
+      - code: "/home/jeroennouws/.local/share/uv/tools/spec-kitty-cli/lib64/python3.14/site-packages/specify_cli/analysis_report.py:320-348 (_split_carrier: returns (None, body) whenever body does not start with '---'), and :430-463 (parse_structured_findings: carrier is None -> function returns None), and :490-499 (write_analysis_report: structured is None -> verdict = VERDICT_UNKNOWN, findings = [], issue_counts = dict.fromkeys(_COUNT_KEYS) i.e. all None)"
+    claim: >
+      The report body that was handed to `record-analysis` (visible in analysis-report.md after
+      the second `---`) begins directly with a blank line then "# Cross-Artifact Analysis
+      Report..." — it is plain prose, not prefixed with a valid `analysis-findings/v1` YAML
+      carrier block. Per `analysis_report.py`'s write path, `_split_carrier` requires the body to
+      start with a literal `---` to even attempt carrier parsing; since it doesn't, `parse_structured_findings`
+      returns `None`, and `write_analysis_report` (analysis_report.py:494-499) falls back to
+      `verdict = VERDICT_UNKNOWN`, `findings = []`, `issue_counts = dict.fromkeys(_COUNT_KEYS)`
+      (i.e. every count key, including the advisory-adjacent ones, persisted as `null`). This is
+      exactly the documented "legacy/pre-v1 report" fallback (C-FIND-3 in the module's own
+      comments) — not a bug in the recorder, but a case of the analyst-authored body not
+      conforming to the structured-carrier contract the recorder expects. The result is a real,
+      mechanically-verifiable discrepancy in the mission's canonical evidence trail: the frontmatter
+      that any downstream tooling or human would read as "the" structured verdict says
+      `verdict: unknown` with zero recorded findings, while the analyst's own prose — two lines
+      below the closing `---` — says READY and lists two concrete advisory findings (A-001, A-002)
+      in a table. Anything that later trusts the frontmatter over the prose (a future
+      `check-prerequisites`-style summary, an accept-gate rollup, a Codex/human audit skimming only
+      the machine-readable header, or simple git-blame/diff tooling) would see "unknown" and either
+      have to re-read the full prose to learn the actual verdict, or — worse — treat "unknown" as
+      "not yet analyzed" and second-guess a mission that has, in fact, been thoroughly analyzed and
+      cleared.
+    remediation: >
+      Regenerate analysis-report.md via `record-analysis`, this time prefixing the report body
+      with a valid `analysis-findings/v1` YAML carrier (opening and closing `---` lines) that
+      encodes A-001 and A-002 as `severity: low` (or whatever the lowest non-blocking rung in
+      SEVERITY_ORDER is called) findings with matching `counts`, so `compute_verdict_from_findings`
+      derives `verdict: ready` and the recorder persists `verdict: ready` / `findings: [A-001, A-002]`
+      instead of `unknown` / `[]`. This does not require re-doing any analysis — only re-wrapping
+      the already-correct conclusion in the format the recorder's write path expects.
+  - id: ANALYSIS-RUNTIME-002
+    lens: Does the persisted unknown-verdict frontmatter actually block /spec-kitty.implement dispatch for WP01
+    severity: 5
+    title: "verdict: unknown does not gate /spec-kitty.implement — confirmed non-blocking by direct read of the gate function"
+    evidence:
+      - code: "/home/jeroennouws/.local/share/uv/tools/spec-kitty-cli/lib64/python3.14/site-packages/specify_cli/cli/commands/agent/workflow.py:950-990 (_require_current_analysis_report calls only check_analysis_report_current(...); branches only on .ok / .reason == ANALYSIS_REPORT_REASON_CARRIER_FORMAT / .missing / .mismatches — 'verdict' is never read)"
+      - code: "/home/jeroennouws/.local/share/uv/tools/spec-kitty-cli/lib64/python3.14/site-packages/specify_cli/analysis_report.py:534-637 (check_analysis_report_current checks only: file existence, top-level frontmatter.get('schema') != FINDINGS_SCHEMA_V1 [i.e. NOT itself a bare carrier], artifact_type == spec-kitty.analysis-report, input_artifacts is a dict, and sha256 hash equality per artifact against collect_input_artifact_hashes — no reference to 'verdict' or 'findings' anywhere in this function)"
+    claim: >
+      Read closely, `_require_current_analysis_report` (the actual function gating `implement`
+      dispatch) delegates entirely to `check_analysis_report_current`, whose `AnalysisFreshness`
+      result carries `ok`/`stale`/`missing`/`reason`/`mismatches` — no verdict field at all. The
+      function's only checks are: (1) the outer frontmatter is not itself accidentally a bare
+      `analysis-findings/v1` carrier (this file's frontmatter has `artifact_type:
+      spec-kitty.analysis-report`, so this check passes), (2) `artifact_type` matches, (3)
+      `input_artifacts` is present, and (4) every recorded sha256 (spec.md/plan.md/tasks.md/
+      charter) matches the current file content. `verdict: unknown` therefore mechanically has NO
+      effect on the implement gate for this mission today — a mission can be `verdict: unknown`
+      (even `verdict: blocked`, in principle) and still pass `_require_current_analysis_report` as
+      long as the hashes match. This is a "does not block" finding, not a defect in the gate itself
+      — but it means ANALYSIS-RUNTIME-001's discrepancy is purely an evidence-trail/audit-quality
+      issue, not a live blocker, and should not be escalated to blocking severity on that basis.
+    remediation: >
+      No code change needed for implement dispatch to proceed safely; this finding exists only to
+      make explicit, for whoever consumes ANALYSIS-RUNTIME-001, that the unknown-verdict defect is
+      advisory/audit-quality, not a live gate failure. If future work wants the gate to also assert
+      `verdict != unknown` before allowing implement (stronger guarantee than freshness alone),
+      that would be a deliberate, separate hardening change to `_require_current_analysis_report`,
+      not something to infer from the current gate's silence on verdict.
+# End of findings.

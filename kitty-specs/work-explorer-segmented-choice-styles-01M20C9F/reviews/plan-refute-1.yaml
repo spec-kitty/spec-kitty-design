@@ -1,0 +1,55 @@
+# review-refute/v1 — canonical format for refuter-batch verdicts.
+schema: review-refute/v1
+complete: true
+phase: plan
+batch: 1
+verdicts:
+  - id: PLAN-SEQ-001
+    verdict: confirmed
+    reason: >
+      Verified playwright.config.ts serves a prebuilt static Storybook (http-server, no dev server)
+      and sk-form-select.spec.ts's openStory navigates to /iframe.html?id=<prefix>--<id>, which only
+      resolves once the stories file (IC-05) is authored and Storybook is rebuilt; plan.md's IC-01
+      (lines 195-209), IC-03 (lines 245-249), and IC-04's own Sequencing/depends-on (lines 267-276)
+      each name only IC-02 as the live block's prerequisite and never IC-05, and IC-05's own
+      Sequencing line (line 295) names only IC-02, not IC-04, so the gap is real as quoted.
+
+  - id: PLAN-SEQ-002
+    verdict: confirmed
+    reason: >
+      plan.md line 219-222 literally reads "Feeds IC-01 ... and IC-03/IC-05 (Storybook stories and
+      the Playwright spec both consume the generated barrel's named exports)" while IC-03 (lines
+      228-249) is the forced-colors CSS block with its own separately stated IC-01-only dependency
+      and never imports the barrel, and IC-04 (lines 256-263) is the actual Playwright spec — the
+      parenthetical names the wrong concern, exactly as the finding quotes.
+
+  - id: PLAN-VERIFY-001
+    verdict: confirmed
+    reason: >
+      Confirmed apps/storybook/src/tests/visual.spec.ts is entirely hand-authored per-component
+      test() blocks with no loop over all Storybook stories, docs/contributing/adding-a-component.md
+      §8 (the only citation plan.md gives for the Visual-regression gate) says only that baselines
+      are CI-authoritative and never instructs adding visual.spec.ts entries, and plan.md's IC-01
+      through IC-06 contain zero mention of visual.spec.ts, so as written the gate would pass without
+      ever screenshotting sk-segmented-choice.
+
+  - id: PLAN-VERIFY-002
+    verdict: confirmed
+    reason: >
+      spec.md FR-003 (line 231) and Acceptance Scenario 1 (lines 89-94) require the pressed/selected
+      state itself to be non-colour-distinguishable from its siblings, but plan.md's IC-04 "Relevant
+      requirements" line (lines 264-265) omits FR-003, its Purpose bullet (lines 260-263) names only
+      hover/active/focus-visible/axe/zoom-overflow under FR-009, and IC-01's red-first paragraph
+      (lines 198-201) enumerates only hover/active/focus/disabled — no named assertion covers the
+      resting pressed-vs-unpressed border/weight/shape delta, and axe-core does not check that.
+
+  - id: PLAN-VERIFY-003
+    verdict: confirmed
+    reason: >
+      Read apps/storybook/src/tests/sk-transition-matrix.spec.ts directly: line 285 (`await
+      row.hover()`) sits inside the test starting at line 265, "non-selectable selected data has
+      zero interaction residue," which asserts hovered/pointerDown/focused/afterKeyboard all
+      expect(...).toEqual(before) — an invariance/no-delta assertion for a disabled row — while the
+      genuine positive computed-style-delta precedent (`expect(hover.background).not.toBe(rest.background)`)
+      is in the next test starting at line 312, confirming the citation in plan.md's IC-04 and
+      spec.md's FR-009 points at the wrong polarity of test.

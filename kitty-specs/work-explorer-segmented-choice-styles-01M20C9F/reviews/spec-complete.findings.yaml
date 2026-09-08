@@ -1,0 +1,96 @@
+schema: review-findings/v1
+complete: true
+phase: spec
+lens_group: complete
+mission: work-explorer-segmented-choice-styles-01M20C9F
+findings:
+  - id: SPEC-COMPLETE-001
+    lens: testability
+    severity: 4
+    title: Hover and active states named by FR-003 have no story, browser assertion, or visual baseline anywhere in the spec's own verification apparatus
+    evidence:
+      - artifact: "spec.md § FR-003 (line 205): \"selected, hover, active, focus-visible and disabled states to each be distinguishable by more than colour\""
+      - artifact: "spec.md § User Story 1, Acceptance Scenario 2 (lines 71-73): hover AC, but the story's own \"Independent Test\" block (lines 62-65) names only the selected-state/axe assertion and does not mention hover or focus"
+      - artifact: "spec.md § FR-006 (lines 208-209): 13 required stories — none is a hover or active-state story"
+      - artifact: "spec.md § FR-007/FR-008/FR-009 (lines 209-211): the Playwright-assertion FRs that operationalize SC-003 — roles/names/order, activation/aria-pressed/disabled, focus-visibility/axe/zoom. Neither hover nor active is named in any of the three."
+      - artifact: "spec.md § SC-003 (assertion list) and § FR-012/SC-007 (visual-baseline state list: \"selected/unselected/disabled/focus, long content, dark/light and forced-colors\") — hover and active are absent from both lists"
+    claim: >
+      FR-003 and issue #270's public/library contract line ("Selected, hover, active, focus-visible
+      and disabled states are distinct without depending on color alone") name five states that must
+      be non-colour-only distinguishable. Three of the five (selected, focus-visible, disabled) are
+      backed by a named Storybook story (FR-006), a Playwright assertion (FR-007/008/009), and a
+      visual-regression baseline (FR-012). The other two — hover and active — appear only once, in
+      User Story 1's prose Acceptance Scenario 2, and are never named again in any FR that commits to
+      an actual test, story, or baseline. Nothing in the spec's own acceptance apparatus (FR-006
+      through FR-012, SC-001 through SC-011) would catch an implementation that ships with a
+      colour-only hover or active state, or with no hover/active differentiation at all — even though
+      FR-003 claims it as a requirement. This is exactly the DIRECTIVE_041 failure mode: an
+      acceptance criterion that reads as testable in isolation but is not wired to any of the
+      concrete verification mechanisms (test/story/baseline) the rest of the spec relies on, so
+      nothing operationalizes it.
+    remediation: >
+      Either (a) add hover and active to the FR-009/SC-003 Playwright assertion (Playwright's
+      `.hover()` + a computed-style diff is the established pattern in this repo — see
+      apps/storybook/src/tests/sk-context-nav.spec.ts:813, sk-transition-matrix.spec.ts:285, and
+      sk-bar-chart.spec.ts:257 — so no new story is required, only an assertion against an existing
+      required story), and add hover/active to FR-012/SC-007's visual-baseline state list; or (b) if
+      the plan phase judges hover/active verification out of this mission's bar, say so explicitly in
+      the spec (e.g. a Constraints entry or an Edge Case) rather than leaving FR-003's claim silently
+      unbacked.
+  - id: SPEC-COMPLETE-002
+    lens: ratchet-count-testability
+    severity: 3
+    title: FR-013 does not carry forward expected-stories.json's own documented pitfall — the autodocs-generated `--docs` entry must be excluded from the count and from byElement, and nothing in the spec says so
+    evidence:
+      - artifact: "spec.md § FR-013 (line 215): \"a new sk-segmented-choice (…) entry added to expected-stories.json naming every FR-006 story id, with total bumped by exactly the number of stories added\""
+      - artifact: "spec.md § SC-008: \"total is bumped by exactly the number of new story ids added (13, unless the plan phase determines a different exact split)\""
+      - code: "expected-stories.json:22 — \"The `--docs` entry Storybook generates from the autodocs tag is not listed: it is a generated page, not a story, and no other element records one.\""
+      - code: "expected-stories.json:36-42 — every prior entry's commit note states an exact bump (e.g. \"#211 opts in all ten native light-DOM form-select stories, total 203 -> 213\") with no docs entry counted, confirming the exclusion is load-bearing precedent, not an aside"
+    claim: >
+      Every existing styles-only component's stories file in this repo uses `tags: ['autodocs']`
+      (see packages/styles/src/disclosure/sk-disclosure-html.stories.ts:12,
+      packages/styles/src/form-select/sk-form-select-html.stories.ts), which makes Storybook's
+      built index.json emit an additional "docs" entry per component beyond its named stories.
+      expected-stories.json's own $comment explicitly flags this as a trap it had to correct for:
+      the docs entry is a generated page, not a story, and must not be counted toward `total` or
+      listed in `byElement`. FR-013 and SC-008 both describe the required bump ("exactly the number
+      of stories added", "13") without repeating this exclusion, so a WP author deriving the ratchet
+      entry mechanically from Storybook's own built index (rather than from the FR-006 prose list)
+      has a concrete, previously-real failure mode available: counting 14 (13 stories + 1 docs page)
+      or including a `...--docs` id in `byElement.sk-segmented-choice`. This is the exact ambiguity
+      the mission-derived lens asks about — the ratchet file does track story IDs with an exact-count
+      `total`, but the ratchet's own preconditions (docs-entry exclusion) are not restated in FR-013,
+      so a WP can mechanically produce a wrong entry without re-deriving the convention themselves.
+    remediation: >
+      Add one clause to FR-013 (or a new Constraint) stating explicitly: "the Storybook-generated
+      `--docs` page entry (from the `autodocs` tag) is excluded from both `total` and
+      `byElement.sk-segmented-choice`, matching every existing entry in expected-stories.json" — so
+      the WP does not have to rediscover this from the ratchet file's comment history.
+  - id: SPEC-COMPLETE-003
+    lens: ratchet-count-testability
+    severity: 2
+    title: Spec never commits sk-segmented-choice to a Storybook title-taxonomy root, which determines the literal prefix of all 13 ratchet story ids
+    evidence:
+      - artifact: "spec.md § FR-013: \"a new sk-segmented-choice (or equivalent story-prefix) entry\" — the parenthetical concedes the prefix is not fixed"
+      - artifact: "spec.md § Terminology (lines 23-29): cites sk-form-select, sk-disclosure, sk-facts, sk-data-table, sk-empty-state, sk-skip-link as styles-only precedent, all of which are `Primitives/` or `Form/` titled, none `Components/`"
+      - code: "expected-stories.json:250-261 (sk-form-select, title 'Form/SkFormSelect (HTML)') and :177-183 (sk-disclosure, title 'Primitives/SkDisclosure (HTML)') — the ratchet's story ids are literally derived from the Storybook title (e.g. `form-skformselect-html--default`, `primitives-skdisclosure-html--default`)"
+      - artifact: "CLAUDE.md § 6: \"Title taxonomy — pick the closest existing root: Components/, Form/, Navigation/, Primitives/, Tags/, Tokens/. Don't invent new top-level groups without a reason.\""
+    claim: >
+      An interactive button-group control (segmented-choice) is at least as plausible a fit for
+      `Components/` (where Button, Card, BlogCard, RibbonCard, FeatureCard, SiteFooter live) as for
+      `Primitives/` (where passive display elements — disclosure, facts, data-table, empty-state,
+      skip-link — live), but the spec's own cited precedent list names only `Primitives/`- and
+      `Form/`-titled components and never states which root this component belongs under. Since the
+      ratchet's story ids are mechanically derived from the Storybook `title` string, this choice
+      directly determines every one of the 13 ids FR-013 requires (e.g.
+      `primitives-sksegmentedchoice-html--default` vs `components-sksegmentedchoice-html--default`).
+      FR-013's own "(or equivalent story-prefix)" hedge acknowledges the prefix is undetermined but
+      does not resolve it, leaving a WP to pick one; if a reviewer disagrees during the pre-merge
+      squad, the fix is a rename across the stories file's `title`, the generated ids, and the
+      ratchet entry — small, but avoidable rework inside the one WP this mission budgets (C-007).
+    remediation: >
+      State the intended Storybook title root explicitly in the spec (e.g. add a sentence to FR-010
+      or FR-013: "titled `Components/SkSegmentedChoice (HTML)`, matching the interactive-control
+      precedent set by Button/Card rather than the passive-primitive set") — or, if genuinely
+      deferred to the plan phase, say so explicitly rather than leaving it implicit in a
+      parenthetical hedge.

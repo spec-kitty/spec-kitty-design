@@ -1,0 +1,18 @@
+schema: review-verify/v1
+complete: true
+phase: analysis
+reviewer: codex
+profile: reviewer-renata
+reviewed_commit: 54ed4f671e717d8146e9492e4e041587370e0080
+reviewed_artifact_sha256: d6459e1f12ee364463fc25f73d7a327d0b7deefbdb213332db74a063b3faa911
+directives_applied: [DIRECTIVE_001, DIRECTIVE_024, DIRECTIVE_030, DIRECTIVE_032, DIRECTIVE_041]
+results:
+  - id: ANALYSIS-COVERAGE-001
+    status: resolved
+    reason: The current report has one explicit row for each of all 43 spec IDs, separates FR/NFR/C requirement_refs from SC outcomes, and the report/spec ID-set diff is empty.
+  - id: ANALYSIS-COVERAGE-002
+    status: resolved
+    reason: The current report names both TASKS-DECOMP findings and directly verifies the contiguous T001–T018 range, absent T019/T020, and the distinct current purposes of T012 and T013.
+  - id: ANALYSIS-RUNTIME-001
+    status: resolved
+    reason: The recorder-generated header now says analyzer_agent codex, verdict ready, two low findings, and zero medium/high/critical findings; its input hashes are current.

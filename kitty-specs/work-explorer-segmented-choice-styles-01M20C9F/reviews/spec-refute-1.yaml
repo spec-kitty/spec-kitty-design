@@ -1,0 +1,44 @@
+schema: review-refute/v1
+complete: true
+phase: spec
+batch: 1
+verdicts:
+  - id: SPEC-GOV-001
+    verdict: confirmed
+    reason: >-
+      spec.md's C-005 never mentions "1024" anywhere and cites only the issue's
+      "approved W4 narrow layout" phrasing, while `gh issue view 270` confirms the issue's own
+      Evidence section states a concrete number ("wraps at 1024px") that spec.md neither
+      adopts nor acknowledges exists.
+  - id: SPEC-GOV-002
+    verdict: confirmed
+    reason: >-
+      The charter's Review Policy ties earlier-point-cut tiering to
+      docs/architecture/elements-first-programme.md, whose Tier table only lists M1-M16
+      (epic #66) with zero matches for "269", "270", "Work Explorer", or "TKX", so the Tier-C
+      classification for this mission traces solely to the issue's self-declared tier line,
+      not to an independent charter/programme confirmation as C-009 implies.
+  - id: SPEC-GOV-003
+    verdict: confirmed
+    reason: >-
+      spec.md's C-009 text contains no clause distinguishing a tier-mandated point-cut from an
+      optional/report-only enrichment pass (grep for "optional"/"enrichment" in spec.md only
+      matches unrelated text), so the finding's narrow claim that this omission exists is
+      accurate even though the finding itself concedes it is not a real contradiction.
+  - id: SPEC-GOV-004
+    verdict: confirmed
+    reason: >-
+      ADR-10's styles-only class-level ruling lists exactly four narrow semantic-breaking
+      reasons (dl/table/li parent-child chains, cross-root ID refs, skip-link href, <details>
+      UA-owned state) tied to sk-facts/sk-disclosure/sk-data-table/sk-empty-state/sk-skip-link,
+      none of which addresses a button group, and grep confirms "form-select" appears zero
+      times in the ADR-10 file, so spec.md's Terminology section overstates verified precedent
+      by including sk-form-select and by implying the four reasons generalize to this component.
+  - id: SPEC-ARCH-003
+    verdict: confirmed
+    reason: >-
+      tokens.css defines both --sk-surface-pill and --sk-bg-pill at the identical value
+      (#212830 dark / #ECE7D8 light) under different names, and the cited precedent
+      sk-nav-pill.css uses only --sk-bg-pill, confirming C-004/FR-015's generic "pill/surface"
+      phrasing does not disambiguate which of the two same-valued tokens a WP author should
+      reuse.

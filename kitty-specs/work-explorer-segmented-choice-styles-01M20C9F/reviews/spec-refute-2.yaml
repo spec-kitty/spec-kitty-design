@@ -1,0 +1,43 @@
+schema: review-refute/v1
+complete: true
+phase: spec
+batch: 2
+verdicts:
+  - id: SPEC-ARCH-001
+    verdict: confirmed
+    reason: >
+      Verified sk-nav-pill.css uses shorthand border/outline throughout and sk-form-select.css
+      uses longhand border-color/outline-color, but grep confirms neither file contains any
+      forced-colors media block, and spec.md never mentions "longhand"/"shorthand" anywhere,
+      so C-004's cited precedent does not demonstrate the third documented trap's fix and no
+      FR/NFR/Constraint makes it testable.
+  - id: SPEC-ARCH-002
+    verdict: confirmed
+    reason: >
+      docs/contributing/adding-a-component.md's forced-colors section documents exactly three
+      traps (background/box-shadow flattening, forced-color-adjust:none freezing an authored
+      color, and stylelint's shorthand blind spot); grep confirms spec.md never mentions
+      "forced-color-adjust" and NFR-004/scenario 4 restate only the first trap, while FR-003's
+      "more than colour" wording does not exclude a background-drawn icon/glyph cue.
+  - id: SPEC-COMPLETE-001
+    verdict: confirmed
+    reason: >
+      Grep of spec.md confirms "hover" and "active" as states appear only in FR-003's prose and
+      US1 Acceptance Scenario 2, while FR-006's 13 stories, FR-007/008/009's browser assertions,
+      SC-003, FR-012 and SC-007's baseline lists all omit both, leaving two of FR-003's five named
+      states with no story/assertion/baseline wiring.
+  - id: SPEC-COMPLETE-002
+    verdict: confirmed
+    reason: >
+      expected-stories.json line 22 and multiple other $comment entries explicitly and repeatedly
+      state the autodocs-generated --docs entry is excluded from count and byElement, and grep
+      confirms spec.md never mentions "autodocs" or "docs entry," so FR-013/SC-008 do not carry
+      forward this documented, recurring convention.
+  - id: SPEC-COMPLETE-003
+    verdict: confirmed
+    reason: >
+      expected-stories.json byElement ids confirm story ids are literally prefixed from the
+      Storybook title (e.g. "form-skformselect-html--...", "primitives-skdisclosure-html--..."),
+      five of the six cited precedents use Primitives/ and one uses Form/, none uses Components/,
+      and spec.md never states an intended title root for sk-segmented-choice, only FR-013's
+      hedging "(or equivalent story-prefix)".

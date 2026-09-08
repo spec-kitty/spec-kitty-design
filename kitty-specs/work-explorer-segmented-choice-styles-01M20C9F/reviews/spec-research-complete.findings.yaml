@@ -1,0 +1,85 @@
+schema: review-findings/v1
+complete: true
+phase: spec-research
+mission: work-explorer-segmented-choice-styles-01M20C9F
+lens: completeness
+findings:
+  - id: SPEC-RESEARCH-COMPLETE-001
+    lens: completeness
+    severity: 3
+    title: research.md cites packages/tokens/src/tokens.css as evidence with no corresponding evidence-log or source-register row
+    evidence:
+      - artifact: "research.md:104-107 (Q3 rationale: \"No --sk-surface-pill token was found in packages/tokens/src/tokens.css during this check\")"
+      - artifact: "research/evidence-log.csv (28 rows, EV-001..EV-028 — none references tokens.css or --sk-surface-pill)"
+      - artifact: "research/source-register.csv (23 rows, SRC-001..SRC-023 — none registers packages/tokens/src/tokens.css)"
+    claim: >
+      Q3's decision ("Confirmed — --sk-bg-pill is exactly the token sk-nav-pill.css uses") rests on
+      two sub-claims: the positive one (sk-nav-pill.css uses --sk-bg-pill, backed by EV-001/SRC-006)
+      and a negative one — that --sk-surface-pill, the wrong name FR-015/C-004 warn against, does
+      not exist anywhere in packages/tokens/src/tokens.css. That negative sub-claim is load-bearing
+      (it is the entire reason Q3 concludes the FR-015 warning "appears to guard against a token
+      that either never existed or was already rejected"), but neither evidence-log.csv nor
+      source-register.csv records tokens.css as a source or logs the grep/read that produced this
+      claim. A reviewer re-verifying Q3's evidence trail mechanically (rather than trusting the
+      prose) cannot find the row that backs this specific sub-claim. Grep against the live tree
+      confirms tokens.css indeed contains no "surface-pill" string, so the underlying fact holds —
+      the gap is in the audit trail, not the conclusion.
+    remediation: >
+      Add a source-register.csv row (e.g. SRC-024) for packages/tokens/src/tokens.css, and an
+      evidence-log.csv row (e.g. EV-029) recording the grep/read that found zero occurrences of
+      "surface-pill" in that file, cross-referenced from Q3.
+
+  - id: SPEC-RESEARCH-COMPLETE-002
+    lens: completeness
+    severity: 2
+    title: Three evidence-log rows (EV-006, EV-007, EV-028) have no corresponding discussion anywhere in research.md's Researched Questions
+    evidence:
+      - artifact: "research/evidence-log.csv:7 (EV-006, sk-form-select.spec.ts two-describe-block shape)"
+      - artifact: "research/evidence-log.csv:8 (EV-007, sk-notice-forced-colors.spec.ts border-width measurement pattern)"
+      - artifact: "research/evidence-log.csv:29 (EV-028, meta.json topology/target_branch confirmation)"
+      - artifact: "research.md (full file — grep for \"sk-form-select.spec.ts\", \"sk-notice-forced-colors.spec.ts\", and \"meta.json\" returns zero matches)"
+    claim: >
+      research.md's ten Researched Questions (Q1-Q10) are the document's stated unit of analysis —
+      each has its own Decision/Rationale/Alternatives/Evidence structure. EV-006 (the
+      sk-form-select.spec.ts two-test.describe-block Playwright structural pattern, cited by
+      plan.md's IC-04 as the precedent this mission's own spec file must follow), EV-007 (the
+      sk-notice-forced-colors.spec.ts "measure a non-color property, not just presence" pattern,
+      cited by NFR-004/plan.md as the forced-colors verification technique), and EV-028 (meta.json's
+      topology/target_branch confirmation, backing C-007's one-WP/one-PR/train/elements-first
+      delivery contract) are all load-bearing precedent claims with their own evidence-log rows, but
+      none is walked through by any Q section's Decision/Rationale prose — they exist only as
+      evidence-log entries with no narrative home. This is the reverse of finding 001: here the
+      evidence trail is more complete than the narrative it should support, so a reader following
+      research.md's own Q-by-Q structure would not learn these three precedents were checked at
+      all.
+    remediation: >
+      Either fold EV-006/EV-007 into Q5 (which already covers the FR-009 Playwright-pattern
+      citations and is the natural home for the spec-file-shape and forced-colors-measurement
+      precedents) and EV-028 into a new or existing question addressing C-007's delivery contract,
+      or add a short "Additional precedent checks" subsection to research.md that references these
+      three rows explicitly.
+
+  - id: SPEC-RESEARCH-COMPLETE-003
+    lens: completeness
+    severity: 2
+    title: C-004's claim that sk-nav-pill.css and sk-form-select.css "carry no forced-colors block" is unverified by research.md/evidence-log
+    evidence:
+      - artifact: "spec.md:264 (C-004: \"Base-state colours use --sk-bg-pill ... matching the base-state precedent in sk-nav-pill.css and sk-form-select.css — base-state token reuse only, not a forced-colors precedent, since neither file carries a forced-colors block.\")"
+      - artifact: "research.md Q3 (lines 95-114 — verifies only the positive --sk-bg-pill usage in sk-nav-pill.css, not the negative \"no forced-colors block\" claim about either file)"
+      - artifact: "research/evidence-log.csv (no row mentions the absence of a forced-colors block in sk-nav-pill.css or sk-form-select.css)"
+    claim: >
+      C-004 makes a specific negative claim — that neither sk-nav-pill.css nor sk-form-select.css
+      contains a forced-colors block — as the reason those files are cited only for base-state token
+      reuse and not for the forced-colors technique (which Q4/EV-002/EV-003 instead source from
+      sk-skip-link.css and sk-data-table.css). Q3 verifies the positive claim (--sk-bg-pill usage in
+      sk-nav-pill.css) but never checks the negative claim about either file, and no evidence-log row
+      records it. A grep of both files during this review confirms the underlying claim is true (no
+      "forced-colors" string in either file), so the gap is again in the research document's coverage,
+      not a wrong conclusion in spec.md — but as written, research.md's completeness claim ("Every
+      precedent, token, tooling behaviour, and line-number citation this mission's spec.md and
+      plan.md build on was independently re-verified") is not quite accurate for this specific
+      sub-claim.
+    remediation: >
+      Add a sentence to Q3 (or Q4) noting the grep-confirmed absence of a forced-colors block in
+      sk-nav-pill.css and sk-form-select.css, with a corresponding evidence-log row, so C-004's full
+      claim — not just its positive half — is covered.

@@ -657,6 +657,113 @@ test('SK-form-select forced colors — visual baseline', async ({ page }) => {
   });
 });
 
+const segmentedChoiceStory = async (
+  page: Page,
+  id: string,
+  viewport: { width: number; height: number } = { width: 720, height: 320 },
+): Promise<Locator> => {
+  await page.setViewportSize(viewport);
+  await page.goto(`/iframe.html?id=components-sksegmentedchoice-html--${id}&viewMode=story`);
+  const target = page.locator('[data-segmented-choice-story-frame]').first();
+  await target.waitFor({ state: 'visible', timeout: 20000 });
+  await expect(target.getByRole('group')).toBeVisible();
+  return target;
+};
+
+test('SK-segmented-choice selected — visual baseline', async ({ page }) => {
+  const target = await segmentedChoiceStory(page, 'default');
+  await expect(target).toHaveScreenshot('sk-segmented-choice-selected.png', {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+  });
+});
+
+test('SK-segmented-choice unselected — visual baseline', async ({ page }) => {
+  const target = await segmentedChoiceStory(page, 'no-selection');
+  await expect(target).toHaveScreenshot('sk-segmented-choice-unselected.png', {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+  });
+});
+
+test('SK-segmented-choice hover — visual baseline', async ({ page }) => {
+  const target = await segmentedChoiceStory(page, 'default');
+  await target.locator('.sk-segmented-choice__item').nth(1).hover();
+  await expect(target).toHaveScreenshot('sk-segmented-choice-hover.png', {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+  });
+});
+
+test('SK-segmented-choice active — visual baseline', async ({ page }) => {
+  const target = await segmentedChoiceStory(page, 'default');
+  const item = target.locator('.sk-segmented-choice__item').nth(1);
+  const box = await item.boundingBox();
+  expect(box).not.toBeNull();
+  await page.mouse.move(box!.x + box!.width / 2, box!.y + box!.height / 2);
+  await page.mouse.down();
+  try {
+    await expect(target).toHaveScreenshot('sk-segmented-choice-active.png', {
+      threshold: 0.02,
+      maxDiffPixelRatio: 0.02,
+    });
+  } finally {
+    await page.mouse.up();
+  }
+});
+
+test('SK-segmented-choice disabled — visual baseline', async ({ page }) => {
+  const target = await segmentedChoiceStory(page, 'one-disabled');
+  await expect(target).toHaveScreenshot('sk-segmented-choice-disabled.png', {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+  });
+});
+
+test('SK-segmented-choice focus — visual baseline', async ({ page }) => {
+  const target = await segmentedChoiceStory(page, 'default');
+  await page.keyboard.press('Tab');
+  await expect(target.locator('.sk-segmented-choice__item').first()).toBeFocused();
+  await expect(target).toHaveScreenshot('sk-segmented-choice-focus.png', {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+  });
+});
+
+test('SK-segmented-choice long content — visual baseline', async ({ page }) => {
+  const target = await segmentedChoiceStory(page, 'long-labels', { width: 390, height: 420 });
+  await expect(target).toHaveScreenshot('sk-segmented-choice-long-content.png', {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+  });
+});
+
+test('SK-segmented-choice dark — visual baseline', async ({ page }) => {
+  const target = await segmentedChoiceStory(page, 'default-dark');
+  await expect(target).toHaveScreenshot('sk-segmented-choice-dark.png', {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+  });
+});
+
+test('SK-segmented-choice light — visual baseline', async ({ page }) => {
+  const target = await segmentedChoiceStory(page, 'light-mode');
+  await expect(target).toHaveScreenshot('sk-segmented-choice-light.png', {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+  });
+});
+
+test('SK-segmented-choice forced colors — visual baseline', async ({ page }) => {
+  await page.emulateMedia({ forcedColors: 'active' });
+  const target = await segmentedChoiceStory(page, 'forced-colors');
+  await target.locator('.sk-segmented-choice__item').nth(2).focus();
+  await expect(target).toHaveScreenshot('sk-segmented-choice-forced-colors.png', {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+  });
+});
+
 const contextNavStory = async (
   page: Page,
   id: string,

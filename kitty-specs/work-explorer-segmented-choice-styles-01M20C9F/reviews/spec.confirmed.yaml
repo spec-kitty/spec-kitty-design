@@ -1,0 +1,74 @@
+schema: review-findings/v1
+complete: true
+phase: spec
+mission: work-explorer-segmented-choice-styles-01M20C9F
+note: >
+  All 10 merged findings were confirmed by R3 refutation (batches 1 and 2, 0 refuted). This file
+  is the confirmed subset of spec.merged.yaml, unchanged, passed to R4 for fixing.
+findings:
+  - id: SPEC-GOV-001
+    severity: 4
+    title: "C-005 claims the issue gives no breakpoint number for the W4 narrow/wrapping story, but the issue's own Evidence section states one (1024px)"
+    remediation: >
+      Correct C-005 to either (a) fix the narrow/wrapping story's viewport at 1024px, citing the
+      issue's Evidence section as the source, or (b) if deliberately left open, say so explicitly
+      and drop the false claim that the issue supplies no number.
+  - id: SPEC-GOV-002
+    severity: 3
+    title: "C-009 cites 'the charter's Review Policy' for the Tier-C classification, but docs/architecture/elements-first-programme.md — the document that policy names as the tiering record — does not classify this mission at all"
+    remediation: >
+      Reword C-009 to name the issue's tier line as the sole binding source, and note explicitly
+      that docs/architecture/elements-first-programme.md does not classify this mission.
+  - id: SPEC-GOV-003
+    severity: 1
+    title: "C-009 does not clarify that the spec-phase adversarial review this file is part of is an optional, non-gating enrichment pass rather than a tier-mandated earlier point-cut"
+    remediation: >
+      Add one clause to C-009 noting a spec-phase pass may run as optional, report-only enrichment
+      without contradicting the Tier-C conclusion.
+  - id: SPEC-GOV-004
+    severity: 3
+    title: "Terminology section's ADR-10 precedent list overclaims: the cited components' styles-only rationale does not obviously extend to a segmented-choice button group, and sk-form-select is not even part of ADR-10's own documented class list"
+    remediation: >
+      Separate the two justifications: issue #270's instruction as the binding source for C-001;
+      if ADR-10 precedent is cited at all, note it doesn't fit the structural-semantics rationale,
+      and drop sk-form-select from the list unless a separate rationale is cited.
+  - id: SPEC-ARCH-001
+    severity: 4
+    title: "Third forced-colors trap (stylelint blind to border/outline shorthand) is named but not closed by any testable requirement, and C-004's cited precedent doesn't demonstrate the fix"
+    remediation: >
+      Add a new Constraint requiring longhand -color properties in any forced-colors override,
+      matching sk-skip-link.css and sk-data-table.css. Repoint C-004's precedent citation: keep
+      sk-nav-pill.css/sk-form-select.css for base-state token reuse only, add
+      sk-skip-link.css/sk-data-table.css for the forced-colors technique.
+  - id: SPEC-ARCH-002
+    severity: 3
+    title: "Recipe's second forced-colors trap (forced-color-adjust:none freezing an authored color) is never restated, despite the spec citing 'the documented traps' as full authority"
+    remediation: >
+      Add a sentence to NFR-004 stating a background-drawn icon/glyph cue must not use
+      forced-color-adjust: none; prefer border/outline- or content-drawn cue, citing
+      sk-disclosure.css/sk-data-table.css.
+  - id: SPEC-ARCH-003
+    severity: 2
+    title: "C-004/FR-015's generic 'pill/surface' token-family language is ambiguous between two same-valued, differently-named tokens"
+    remediation: >
+      Name the specific token in C-004/FR-015 — --sk-bg-pill, matching the sk-nav-pill.css precedent
+      already cited — rather than the generic "pill/surface" phrasing.
+  - id: SPEC-COMPLETE-001
+    severity: 4
+    title: "Hover and active states named by FR-003 have no story, browser assertion, or visual baseline anywhere in the spec's own verification apparatus"
+    remediation: >
+      Add hover and active to the FR-009/SC-003 Playwright assertion (pattern:
+      apps/storybook/src/tests/sk-context-nav.spec.ts:813, sk-transition-matrix.spec.ts:285,
+      sk-bar-chart.spec.ts:257) and to FR-012/SC-007's baseline list.
+  - id: SPEC-COMPLETE-002
+    severity: 3
+    title: "FR-013 does not carry forward expected-stories.json's own documented pitfall — the autodocs-generated --docs entry must be excluded from the count and from byElement, and nothing in the spec says so"
+    remediation: >
+      Add one clause to FR-013 stating the --docs page entry is excluded from both total and
+      byElement.sk-segmented-choice, matching every existing entry in expected-stories.json.
+  - id: SPEC-COMPLETE-003
+    severity: 2
+    title: "Spec never commits sk-segmented-choice to a Storybook title-taxonomy root, which determines the literal prefix of all 13 ratchet story ids"
+    remediation: >
+      State the intended Storybook title root explicitly in the spec (e.g. "titled
+      Components/SkSegmentedChoice (HTML)"), or say explicitly it's deferred to the plan phase.

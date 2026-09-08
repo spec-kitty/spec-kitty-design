@@ -1,0 +1,93 @@
+schema: review-findings/v1
+complete: true
+phase: analysis
+lens_group: coverage
+mission: work-explorer-segmented-choice-styles-01M20C9F
+findings:
+  - id: ANALYSIS-COVERAGE-001
+    lens: Does the report's Coverage section (§4) actually walk every FR/NFR/C/SC id, or spot-check and generalize?
+    severity: 3
+    title: "§4 Coverage frames requirement_refs as \"a complete 1:1 mapping to spec.md's full requirement set\" while silently excluding spec.md's entire Success-Criteria table (SC-001..SC-011) from both that claim and its own verification prose, and names only 4 of 32 FR/NFR/C ids by number anywhere in the report"
+    evidence:
+      - artifact: "analysis-report.md §4 (line 76): \"WP01 requirement_refs (frontmatter) lists all of FR-001–FR-016, NFR-001–NFR-006, C-001–C-010 — a complete 1:1 mapping to spec.md's full requirement set\""
+      - artifact: "tasks/WP01-segmented-choice-styles.md frontmatter requirement_refs (lines 6-37): enumerates FR-001..FR-016, NFR-001..NFR-006, C-001..C-010 — zero SC-* entries anywhere in the list"
+      - artifact: "spec.md lines 314-351, \"## Success Criteria *(mandatory)*\": SC-001 through SC-011, a distinct mandatory spec.md section, not a subset of the Functional/Non-Functional Requirements or Constraints tables §4 is checking"
+      - artifact: "grep of analysis-report.md for 'SC-[0-9]{3}' returns only SC-008 (line ~53/62, in §1's ratchet-count discussion) and SC-004 (§3) — no SC id appears anywhere inside §4 itself, and SC-001/002/003/005/006/007/009/010/011 never appear anywhere in the whole report"
+      - artifact: "grep of analysis-report.md for FR-[0-9]{3} and NFR-[0-9]{3} shows FR-003, FR-005, FR-007, FR-012, NFR-003, NFR-004, NFR-005 never appear anywhere in the report by id, out of spec.md's 16 FRs and 6 NFRs"
+    claim: >
+      Task point 1 asks whether §4 actually verifies every FR/NFR/C id or just spot-checks a few
+      and generalizes. On inspection it does the latter: §4's prose names only FR-001, FR-002,
+      FR-004 (via TASKS-COVER-001) and FR-013 (ratchet) by id, then leans on tasks.md's own
+      "every FR/NFR/C is discharged" self-report and WP01's requirement_refs list-membership as
+      the evidence for the rest, rather than independently walking each id itself. I independently
+      spot-checked WP01/tasks.md for FR-003 (covered by T008, named explicitly), FR-005 (covered
+      by T004's overflow-containment note), FR-007 (covered by T006, named explicitly in tasks.md's
+      Subtask Index), FR-012 (covered by T013, named explicitly), NFR-003 (covered by T009's
+      automated half plus the Tier-C squad's manual half, named explicitly), NFR-004 (covered by
+      T011/T009, named explicitly in WP01 frontmatter and body) and NFR-005 (covered by T017's
+      stylelint gate) — all seven are substantively discharged in the live WP01/tasks.md text, so
+      this is not a live mission defect. But the report's own §4 never demonstrates this: it
+      neither names these seven ids nor shows the same "confirmed by direct comparison" work it
+      performed for FR-001/002/004/013. More significantly, §4's framing claim ("a complete 1:1
+      mapping to spec.md's full requirement set") is imprecise on its face — spec.md's actual full
+      requirement set includes the mandatory Success Criteria table, which requirement_refs does
+      not reference at all (by design — SC ids are outcome-level criteria, tracked in WP01's body
+      text and in acceptance-matrix.json, not in requirement_refs) — yet §4 never states or
+      acknowledges this scope boundary the way it carefully flags other asymmetries elsewhere (e.g.
+      §6's lanes.json/owned_files write_scope asymmetry). A reader taking §4's "complete... full
+      requirement set" claim at face value would reasonably expect SC-001..SC-011 to be included
+      or their exclusion explained; neither happens. Separately verified: WP01's own body text
+      (not requirement_refs) does substantively cite all 11 SC ids (SC-001 through SC-011 all
+      appear at least once in tasks/WP01-segmented-choice-styles.md), so — as with the FR/NFR spot
+      check — the underlying mission artifact is not actually missing SC traceability; only the
+      report's own coverage-verification prose and its "full requirement set" framing are
+      imprecise/incomplete about it.
+    remediation: >
+      Either walk every FR/NFR/C id in §4 the same way FR-001/002/004/013 are walked (or explicitly
+      state the verification method was "list-membership check against tasks.md's own coverage
+      claim, spot-checked against N ids" rather than implying an id-by-id independent walk), and
+      add a explicit sentence to §4 addressing spec.md's Success-Criteria table separately from the
+      FR/NFR/C requirement_refs — e.g. "SC-001..SC-011 are not carried in requirement_refs (which
+      tracks FR/NFR/C only); they are instead traceable via WP01's own body text, where all 11 SC
+      ids appear at least once" — so the "complete... full requirement set" claim in §4 is accurate
+      rather than silently scoped to a subset of spec.md's mandatory requirement tables.
+  - id: ANALYSIS-COVERAGE-002
+    lens: Does the report's review-trail cross-check actually match what it claims to have re-verified?
+    severity: 3
+    title: "Verdict-restated section claims the tasks-phase \"decomp\" review round's findings were \"confirmed resolved... by direct re-inspection here\", but TASKS-DECOMP-001/TASKS-DECOMP-002 are never named, quoted, or independently re-verified anywhere in the report body — \"decomp\" appears exactly once in the whole document, inside that one blanket claim"
+    evidence:
+      - artifact: "analysis-report.md line 149 (Verdict restated): \"The mission's own review trail (spec-phase R1-R6, plan-phase and post-research rounds, tasks-phase decomp/order/cover/fresh rounds) surfaced real findings at each phase, and every one of them is confirmed resolved in the current spec.md/plan.md/tasks.md/WP01 content by direct re-inspection here, not by re-trusting the trail's own verdict labels.\""
+      - artifact: "grep -in \"decomp\" kitty-specs/work-explorer-segmented-choice-styles-01M20C9F/analysis-report.md — exactly one hit, the sentence above; no other occurrence of \"decomp\", \"DECOMP-001\", or \"DECOMP-002\" anywhere in the report"
+      - artifact: "reviews/tasks-decomp.findings.yaml: TASKS-DECOMP-001 (severity 3, T020's squad-actor-inside-implementer-subtask-list conflation) and TASKS-DECOMP-002 (severity 2, T013 re-verifying exactly what T012 already reconfirmed) — the two findings from the named round"
+      - artifact: "reviews/tasks-verify.yaml: both findings recorded status: resolved with reasons tied to the current T001-T018 renumbering and T013's redefinition as the visual-regression baseline task (not the old redundant re-check step)"
+    claim: >
+      By contrast, the report does explicitly name, quote, and independently re-verify
+      TASKS-COVER-001 (§4), TASKS-ORDER-001 (§5), PLAN-POST-RESEARCH-SEQ-001 (§5), and — under
+      different framing — TASKS-FRESH-001/TASKS-FRESH2-001 (§2's zoom-validation-drift discussion,
+      which cites tasks-verify-2.yaml/tasks-verify-3.yaml by name). Those five spot-checks were
+      independently verified against their reviews/*.yaml sources during this review and all match
+      accurately — the report's specific claims about them hold. TASKS-DECOMP-001 and
+      TASKS-DECOMP-002 receive no equivalent treatment: they are not named, their claims are not
+      restated, and no artifact evidence is cited to show they were re-checked against the live
+      WP01/tasks.md content the way the other five findings were. Yet the Verdict-restated
+      paragraph explicitly lists "decomp" as one of the rounds whose findings were "confirmed
+      resolved... by direct re-inspection here, not by re-trusting the trail's own verdict labels"
+      — a direct claim of independent verification work that the report's visible body never
+      performs for this specific round. I independently checked: both findings are legitimately
+      resolved in the current file (T020 no longer exists as a numbered subtask — the manual
+      zoom validation was fully reassigned to the Tier-C squad outside the T001-T018 range per the
+      TASKS-FRESH-001 fix the report does discuss; and the current T013 is the visual-regression
+      baseline task, not the old redundant post-T012 re-check T013 that TASKS-DECOMP-002 flagged)
+      — so the underlying resolution is real and the verdict is not put at risk. But the report's
+      own claim to have directly re-inspected the decomp round specifically is not backed by any
+      visible work, which is exactly the kind of "trusting a resolved label without re-verifying"
+      the same sentence explicitly disclaims doing.
+    remediation: >
+      Either add a §4/§9-style paragraph that names TASKS-DECOMP-001 and TASKS-DECOMP-002 and shows
+      the same kind of direct re-inspection given to TASKS-COVER-001/TASKS-ORDER-001 (e.g. "T020 no
+      longer exists in the current T001-T018 subtask range — confirmed by direct read — so
+      TASKS-DECOMP-001's actor-conflation concern no longer applies; T013 is now the visual-
+      regression baseline task, not the old redundant re-check T013 TASKS-DECOMP-002 flagged"), or
+      soften the Verdict-restated sentence to not claim direct re-inspection of the decomp round
+      specifically if no such re-inspection is going to be shown in the report body.
+# End of findings.

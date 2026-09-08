@@ -1,0 +1,99 @@
+schema: review-findings/v1
+complete: true
+phase: plan
+lens_group: verify
+mission: work-explorer-segmented-choice-styles-01M20C9F
+findings:
+  - id: PLAN-VERIFY-001
+    lens: Test strategy concreteness
+    severity: 4
+    title: FR-012/SC-007 visual-regression baselines have no IC task to author the required apps/storybook/src/tests/visual.spec.ts entries
+    evidence:
+      - artifact: "plan.md § Gate enumeration (STEP 4), 'Applicable' table, row 'Visual-regression baselines'"
+      - artifact: "plan.md § Implementation Concern Map (IC-01..IC-06) — no IC mentions apps/storybook/src/tests/visual.spec.ts"
+      - code: "apps/storybook/src/tests/visual.spec.ts:1-1030 (entirely hand-authored, per-component test() blocks, each calling expect(...).toHaveScreenshot('<name>.png', ...) against a named selector/story — confirmed by grep across every existing component in the file; there is no loop that iterates all Storybook stories automatically)"
+      - artifact: "docs/contributing/adding-a-component.md § 8 'Visual baseline' — only says baselines are CI-authoritative; does not itself instruct adding entries to visual.spec.ts, and plan.md cites only this section"
+    claim: >
+      FR-012 requires "CI-authoritative visual baselines covering selected/unselected/hover/active/
+      disabled/focus, long content, dark/light and forced-colors renders" and SC-007 requires those
+      baselines to "exist and pass." The plan's Gate enumeration lists "Visual-regression baselines"
+      as an applicable gate citing the CI `visual-regression-diffs` artifact, but every existing
+      component's coverage in this repo's visual-regression suite is a hand-authored test() block in
+      apps/storybook/src/tests/visual.spec.ts naming a specific story/selector and a specific PNG
+      filename — there is no mechanism that automatically snapshots a newly added component's stories.
+      No IC in the Implementation Concern Map (IC-01 through IC-06) tasks authoring any
+      visual.spec.ts entries for sk-segmented-choice. As written, the CI visual-regression job would
+      run and pass trivially for this WP, without ever screenshotting the new component — a "check
+      that passes on absence," the exact shape of defect ADR-11 was written to close for behaviour,
+      and one FR-012 explicitly asks this mission to avoid for appearance.
+    remediation: >
+      Add a new IC (or a bullet inside IC-04/IC-06) that tasks authoring one or more test() blocks in
+      apps/storybook/src/tests/visual.spec.ts for sk-segmented-choice, naming the specific states
+      FR-012 requires (selected/unselected/hover/active/disabled/focus, long content, dark/light,
+      forced-colors) and their toHaveScreenshot() baseline filenames, following the existing
+      per-component pattern in that file (e.g. the SK-form-select or SK-context-nav blocks). List
+      "Author visual.spec.ts baseline tests" explicitly as a Gate-enumeration dependency, not only the
+      CI artifact that reads them.
+
+  - id: PLAN-VERIFY-002
+    lens: Test strategy concreteness
+    severity: 4
+    title: FR-003's pressed/selected-state non-colour-only distinction has no named Playwright assertion in IC-04
+    evidence:
+      - artifact: "plan.md § IC-04 — Playwright spec, 'Relevant requirements' list: FR-007, FR-008, FR-009, NFR-001, NFR-002, NFR-003, NFR-004, SC-002, SC-003, SC-004, SC-005, SC-006, SC-009 (FR-003 absent)"
+      - artifact: "plan.md § IC-04 — Purpose bullet: 'hover/active/focus-visible/axe/zoom-overflow assertions (FR-009)' — pressed/selected is not named"
+      - artifact: "plan.md § IC-01 — Sequencing/depends-on: 'write the Playwright spec's hover/active/focus/disabled assertions (IC-04) against that pass and watch them fail ... THEN add the distinguishing CSS declarations (border/weight/shape per FR-003) until the same assertions pass' — enumerates hover/active/focus/disabled only, omitting the pressed/selected state itself"
+      - artifact: "spec.md § User Story 1, Acceptance Scenario 1: 'the pressed button is visually distinguishable from its two unpressed siblings by more than colour alone ... and axe-core reports zero WCAG 2.1 AA violations' — axe does not check shape/border-vs-colour distinctions, so this scenario's load-bearing claim needs its own computed-style assertion"
+    claim: >
+      FR-003 requires five distinct, non-colour-only states: selected, hover, active, focus-visible
+      and disabled. IC-04 (the WP's only test-authoring concern) names concrete assertions for hover,
+      active, focus-visible and disabled (and cites real precedent lines for the hover/active
+      computed-style-delta pattern), but the SELECTED/pressed state's own non-colour-only
+      distinctness — the central claim of User Story 1 Acceptance Scenario 1, and the first item in
+      FR-003's own list — is never named as an IC-04 assertion, is excluded from IC-04's own
+      "Relevant requirements" line, and is excluded from IC-01's red-first sequencing paragraph
+      (which explicitly enumerates only "hover/active/focus/disabled"). Axe-core does not assert
+      shape/border/weight differences between elements, so nothing else in the plan's named gates
+      would catch a regression that made the pressed item differ from its siblings by colour alone.
+      (This compounds with PLAN-VERIFY-001: if the visual-regression channel that could otherwise
+      catch this is also unauthored for this component, the claim has zero enforcement.)
+    remediation: >
+      Add FR-003 (and the pressed/selected state specifically) to IC-04's "Relevant requirements" and
+      Purpose bullet, naming a concrete computed-style-delta assertion comparing a pressed item's
+      border/font-weight/shape properties against an unpressed sibling's — mirroring the existing
+      `sk-nav-pill.css` `.sk-nav-pill__item--active` precedent (border + font-weight, not colour
+      alone) and the `page.hover()`/computed-style comparison pattern already cited for hover/active.
+      Update IC-01's red-first sequencing paragraph to include this assertion alongside
+      hover/active/focus/disabled.
+
+  - id: PLAN-VERIFY-003
+    lens: Revert discipline
+    severity: 3
+    title: The sk-transition-matrix.spec.ts:285 citation for the hover/active computed-style-delta pattern points at an invariance test, not a distinctness test
+    evidence:
+      - artifact: "plan.md § IC-04 Purpose: 'using the page.hover()/page.mouse.down()/computed-style-delta pattern at sk-context-nav.spec.ts:813, sk-transition-matrix.spec.ts:285, sk-bar-chart.spec.ts:257'"
+      - artifact: "spec.md FR-009: 'pattern: sk-context-nav.spec.ts:813's ... sk-transition-matrix.spec.ts:285's await row.hover() / style-delta comparison, sk-bar-chart.spec.ts:257's ...'"
+      - code: "apps/storybook/src/tests/sk-transition-matrix.spec.ts:265-309 — test('non-selectable selected data has zero interaction residue', ...) asserts hovered/pointerDown/focused/afterKeyboard styles all EQUAL the resting state (expect(hovered).toEqual(before); expect(pointerDown).toEqual(before); ...) — i.e. it proves NO visual delta on hover/active for a disabled row, the opposite polarity from what FR-009/IC-04 need to model"
+      - code: "apps/storybook/src/tests/sk-transition-matrix.spec.ts:312, test('selectable rows expose positive hover, keyboard focus-visible, and active or pressed deltas', ...) — this is the actual positive-delta precedent in the same file (hover.background differs from rest.background, etc.), a few lines below the cited one"
+    claim: >
+      Lens 3 requires that a cited precedent actually demonstrate a computed-style DELTA (before vs.
+      after) rather than a single-state or invariance assertion, since the whole point of citing it is
+      to justify that IC-04's new hover/active tests would fail if the distinguishing CSS were
+      reverted. sk-context-nav.spec.ts:813 and sk-bar-chart.spec.ts:257 both check out — genuine
+      before/after computed-style-delta assertions. sk-transition-matrix.spec.ts:285, however, is the
+      start of a test that asserts the OPPOSITE: that hover/mousedown/focus/keyboard activity produces
+      NO style change for a non-selectable row (`expect(hovered).toEqual(before)` etc.) — it is a
+      revert-INSENSITIVE-by-design test for a disabled/inert state, not a template for asserting a
+      real, distinguishable hover/active cue on an enabled, unpressed segmented-choice item. The
+      correct precedent for the polarity IC-04 actually needs sits a few lines later in the same file,
+      at line 312 ("selectable rows expose positive hover, keyboard focus-visible, and active or
+      pressed deltas"), which does assert genuine deltas (e.g. `expect(hover.background).not.toBe(rest.background)`).
+      An implementer who opens the cited line 285 rather than reading further risks modelling the new
+      component's hover/active test on the wrong (invariance) shape.
+    remediation: >
+      Retarget the citation in plan.md's IC-04 (and, since spec.md's FR-009 is the binding source of
+      the same citation, flag it there too for a future spec amendment) from
+      sk-transition-matrix.spec.ts:285 to sk-transition-matrix.spec.ts:312 ("selectable rows expose
+      positive hover, keyboard focus-visible, and active or pressed deltas") — the test that actually
+      demonstrates the positive computed-style-delta pattern IC-04 needs for an enabled, unpressed
+      segmented-choice item.

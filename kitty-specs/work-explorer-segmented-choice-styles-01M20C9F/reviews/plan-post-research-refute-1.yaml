@@ -1,0 +1,221 @@
+schema: review-findings/v1
+phase: plan-post-research
+round: refute-1
+mission: work-explorer-segmented-choice-styles-01M20C9F
+verdicts:
+  - id: PLAN-POST-RESEARCH-FIT-001
+    verdict: CONFIRMED
+    severity: 3
+    rationale: >
+      Independently re-read spec.md lines 189-196 (User Story 4 AC4) and line 253 (NFR-004).
+      AC4 literally lists "the selected, disabled and focus-visible states" and says "the full
+      set of traps this bar draws on is enumerated in NFR-004 and C-010" — but NFR-004's own text
+      names only "the selected-state indicator and the focus-visible indicator," never disabled.
+      plan.md IC-03 (lines 279-287) inherits that narrower framing verbatim ("for the
+      selected-state indicator and the focus-visible indicator"), and plan.md's Documentation
+      section (lines 112-115) explicitly frames the GrayText precedent as "available precedent if
+      a disabled-state forced-colors cue is needed, not a new requirement this plan is adding."
+      Independently confirmed research.md Q4 and stylelint.config.mjs: GrayText is present in
+      `ignoreValues` (stylelint.config.mjs lines 52-56) and is already used by
+      `sk-context-nav.css` lines 197-198 for exactly a disabled/unavailable forced-colors cue —
+      matching research.md's EV-032 claim precisely. IC-04's Risks/Relevant-requirements text
+      (plan.md lines 332-333, 379-383) names hover/active/focus-visible/axe/zoom assertions and a
+      pressed-item delta assertion but no distinct disabled-plus-forced-colors assertion. This is
+      a real, narrow spec-internal inconsistency (AC4 defers to NFR-004 for "the full set," but
+      NFR-004 doesn't cover what AC4 names) that plan.md faithfully propagates rather than resolves.
+      The finding itself is well-calibrated — it does not claim the base disabled treatment (border/
+      weight/opacity/cursor, IC-01) actually fails under forced-colors, only that plan.md never
+      states or verifies that assumption. That calibration holds up under independent review.
+    remediation: >
+      As the original finding proposes: either (a) add an explicit IC-03 sub-bullet stating the
+      design decision for `:disabled` under forced-colors (that the base border/weight/opacity/
+      cursor treatment survives unaided because none of those properties are colour-remapped) plus
+      a corresponding IC-04 assertion measuring that claim, or (b) if a dedicated override is
+      needed, name the `GrayText`/`CanvasText` longhand `-color` technique explicitly in IC-03 and
+      widen C-010's keyword list to include it.
+
+  - id: PLAN-POST-RESEARCH-FIT-002
+    verdict: CONFIRMED
+    severity: 2
+    rationale: >
+      Independently re-read plan.md's Documentation section (lines 100-127) end to end: it names
+      research.md's "Discrepancies-found section" only structurally (line 100, "plus a
+      Discrepancies-found section") and never recounts any of its three items. Independently
+      re-read research.md's Discrepancies found section (lines 394-457): item 2 (C-006's
+      unqualified "all commits in this mission" wording contradicted by this mission's own
+      design-phase commits) and item 3 (C-004's sk-form-select.css mis-citation for
+      `--sk-bg-pill`) are both real, both backed by evidence I independently re-verified (git log
+      shows the 9 most recent commits all use `docs(kitty-specs)`/`fix(kitty-specs)` scope, not
+      `styles`; `sk-form-select.css`'s actual base tokens per research.md's own grep are
+      `--sk-surface-input`/`--sk-border-*`/`--sk-radius-sm`/`--sk-color-red`, none of them
+      `--sk-bg-pill`). plan.md's Delivery contract (lines 469-472) restates C-006's "all commits in
+      this mission" wording without the caveat research.md's own Discrepancy #2 supplies. plan.md's
+      IC-01 (lines 251-255) does cite only `sk-nav-pill.css` for `--sk-bg-pill`, correctly
+      sidestepping the C-004 mis-citation in practice, exactly as the finding states — so the claim
+      that "no incorrect claim is repeated" is accurate; the gap is purely that the known
+      spec-accuracy discrepancies go unacknowledged in the one document that claims to summarize
+      research.md's findings.
+    remediation: >
+      As proposed: add a short subsection to plan.md's Documentation section explicitly
+      summarizing research.md's three Discrepancies-found items, including the C-006
+      scope-wording clarification and the C-004 sk-form-select.css mis-citation note.
+
+  - id: PLAN-POST-RESEARCH-FIT-003
+    verdict: CONFIRMED
+    severity: 1
+    rationale: >
+      Independently re-read plan.md IC-03's heading (line 279: "### IC-03 — Forced-colors and
+      accessible-name-boundary CSS") against its full body (lines 279-307: Purpose, Relevant
+      requirements, Affected surfaces, Sequencing/depends-on, Risks). None of it mentions
+      accessible name, `role="group"`, or `aria-label` — it is entirely about the
+      `@media (forced-colors: active)` block. Independently confirmed data-model.md lines 38-43
+      state the accessible-name attributes are consumer-owned and CSS-invisible ("the library
+      never reads role, aria-label, or aria-labelledby"). This is exactly what the finding
+      describes: a stale/leftover heading fragment naming a concern the section's body never
+      addresses, genuinely handled elsewhere (IC-04's live-block assertions, IC-06's
+      documentation). Low severity is correct — no coverage gap exists, only a labelling
+      inconsistency that could momentarily mislead a reviewer skimming headings.
+    remediation: >
+      As proposed: rename IC-03's heading to drop the "accessible-name-boundary" fragment (e.g.
+      "IC-03 — Forced-colors CSS").
+
+  - id: PLAN-POST-RESEARCH-SEQ-001
+    verdict: PARTIALLY-CONFIRMED
+    severity: 3
+    rationale: >
+      Independently re-read IC-01 (lines 240-260), IC-03 (lines 296-304), and IC-04
+      (lines 336-378) Sequencing/depends-on prose in full, and confirmed `playwright.config.ts`:
+      `webServer.command` is `npx http-server apps/storybook/storybook-static --port 6006
+      --silent` — a static-directory server with no watch/rebuild mechanism, exactly as the
+      finding states. The textual gap is real: all three ICs describe "rebuild THEN write/run RED
+      assertions THEN add the distinguishing CSS until they turn GREEN," and none of the three
+      inserts an explicit second `storybook:storybook:build` between "add the CSS" and "until they
+      turn GREEN." I confirmed via grep that every one of the plan's 6 in-body
+      `storybook:storybook:build`/`rebuild` mentions precedes only the RED run, matching the
+      finding's own grep claim.
+      However, the "cannot actually turn green as written" framing overstates the operational
+      risk: the plan already states the static-serving rationale explicitly and repeatedly (IC-04's
+      own sentence, "this repo's playwright.config.ts serves a prebuilt STATIC Storybook with no
+      dev server"), so an implementer who has just been told why the first rebuild is necessary is
+      very likely to infer the same constraint applies to any subsequent CSS edit, without needing
+      it restated a third time. This is a real completeness gap in a document that is otherwise
+      unusually explicit (DIRECTIVE_041), not a plan that objectively cannot be executed to a
+      green state — the underlying static-serving fact that makes the rebuild necessary is already
+      on the page. Severity is narrowed from 4 to 3 for that reason; the fact pattern itself is
+      fully confirmed.
+    remediation: >
+      As proposed: insert an explicit second `npx nx run storybook:storybook:build` step in each
+      of IC-01's, IC-03's, and IC-04's "in practice" sequencing narratives, between "add the
+      distinguishing CSS/forced-colors declarations" and "until they turn GREEN/pass," so the
+      document's own stated standard of explicitness (already applied to the RED-side rebuild)
+      is applied symmetrically to the GREEN-side transition.
+
+  - id: PLAN-POST-RESEARCH-SEQ-002
+    verdict: CONFIRMED
+    severity: 3
+    rationale: >
+      Independently re-read plan.md IC-04's 5-step baseline procedure (lines 366-378), the Gate
+      enumeration's "Visual-regression baselines" row (line 436), and the Delivery contract's
+      "Squad tier" bullet (lines 473-477). Confirmed exactly as the finding states: only IC-04's
+      own dense prose ties the baseline-PNG commit to a re-verification obligation ("because the
+      commit changes at the new head, rerun the applicable checks/review at that exact new head");
+      neither the Gate enumeration row nor the Delivery contract's squad-tier bullet restates this
+      or notes that a second head is required. Independently confirmed `ci-quality.yml` lines
+      452-480: the `visual-regression` job is marked `[ENFORCED]` (line 472, a required/blocking
+      check), and the `visual-regression-diffs` artifact uploads only `if: failure()` (line 477).
+      Since `sk-segmented-choice` ships with no committed baseline PNGs at initial push, this
+      ENFORCED job is expected to fail on that first push by construction of the very procedure
+      IC-04 describes — and nothing in the two "what does mergeable mean" sections (Gate
+      enumeration, Delivery contract) flags that this specific gate's first-run red is by design
+      rather than a defect, or that SC-011's exact-commit-SHA-bound squad evidence must target the
+      post-baseline head. The failure mode described (posting squad evidence against the
+      pre-baseline SHA, or treating the expected first-push red as a regression to investigate) is
+      plausible for a reader who consults only the authoritative summary sections.
+    remediation: >
+      As proposed: add one sentence to the Delivery contract's "Squad tier" bullet and to the Gate
+      enumeration's "Visual-regression baselines" row, cross-referencing IC-04's 5-step procedure:
+      state that this WP's PR requires at least two heads, that the visual-regression ENFORCED job
+      is expected to fail on the first push by design, and that the Tier-C squad's evidence-post
+      must target the head after the baseline-PNG commit.
+
+  - id: PLAN-POST-RESEARCH-VERIFY-001
+    verdict: CONFIRMED
+    severity: 4
+    rationale: >
+      Thoroughly re-verified every factual thread. (1) `sk-form-select.spec.ts`: grepped for
+      scrollWidth/clientWidth and confirmed the exact cited lines — 224-225 (`viewportWidth:
+      document.documentElement.clientWidth`, `documentScrollWidth: scroller.scrollWidth`) and
+      324-325 (`documentClient: scroller.clientWidth`, `documentScroll: scroller.scrollWidth`) —
+      both inside tests that call `page.setViewportSize({ width: 320, ... })` or measure a fixed
+      story frame, not a zoomed page. (2) Grepped `zoom` (case-insensitive) across every
+      `*.spec.ts` file in `apps/storybook/src/tests/`: zero matches, confirming no automated
+      Playwright zoom mechanism exists anywhere in this repo today. (3) Read both cited validation
+      READMEs (`docs/architecture/validation/issue-211-form-select-zoom/README.md` and
+      `issue-213-work-package-detail-zoom/README.md`) in full: both independently confirm the
+      X11/XTEST manual procedure ("X11/XTEST sent Ctrl+0, then Ctrl+Shift+= five times through
+      Chrome's real desktop UI," "No CSS zoom, viewport resize, device-scale override, CDP
+      emulation, or pinch/page-scale emulation was used"), recorded as SHA-256 screenshot digests,
+      run "after the final push" as part of the pre-merge gate. (4) Grepped
+      `docs/contributing/adding-a-component.md`, `docs/architecture/adversarial-squad-gate.md`,
+      `docs/architecture/quality-attribute-assessment.md`, `docs/architecture/sad-lite.md` for
+      "zoom": zero matches, confirming the manual procedure is not codified as doctrine plan.md
+      could cite as a binding alternative.
+      Beyond the finding's own evidence, a broader repo-wide grep for "zoom" turned up strong
+      independent corroboration: at least one other mission's review cycle
+      (`kitty-specs/work-package-view-pattern-stories-01M1YNPC/tasks/WP01-.../review-cycle-1.md`)
+      explicitly rejected a viewport-substitution technique for exactly this reason ("substitutes a
+      640px viewport for a 1280px route at 200% browser zoom. It never changes browser zoom...
+      equivalent viewport emulation alone does not establish that gate"), and another mission's
+      own docs state "browser zoom cannot truthfully be replaced by a narrow viewport"
+      (`kitty-specs/native-form-select-styles-01M1WSXJ/tasks.md:53`). This is a recurring, known
+      defect class in this repo, not a one-off — which strengthens rather than weakens the
+      finding: plan.md's IC-04 Risks section is about to repeat a mistake this repo's own history
+      has already flagged and rejected multiple times. One minor overstatement in the finding's
+      remediation text: it characterizes the READMEs as "explicitly warn[ing]" that CSS
+      zoom/viewport-resize/device-scale were "tried-and-rejected substitutes" — the READMEs
+      themselves only state what was NOT used, without narrating a reject history; the
+      "tried-and-rejected" framing is more precisely supported by the cross-mission review-cycle
+      evidence found independently above than by the two READMEs the finding cites for it. This is
+      a citation-precision nit in the remediation, not a defect in the core claim, which is fully
+      confirmed at severity 4.
+    remediation: >
+      As proposed: either (a) name a concrete, verified-equivalent automated zoom technique (e.g.
+      a Playwright browser context with `deviceScaleFactor: 2` and a halved CSS viewport,
+      geometry-matched to the issue-211/213 READMEs' `1200x657`→`600x328` real-zoom transition) and
+      confirm — before committing the plan to it — that it reproduces the same
+      `scrollWidth`/`clientWidth` behaviour real X11 zoom produces (cross-referencing this repo's
+      own prior rejections of viewport/device-scale substitution as non-equivalent, e.g.
+      work-package-view-pattern-stories-01M1YNPC's review-cycle-1 finding), and add it to IC-04 as
+      a named assertion; or (b) add an explicit IC task producing a
+      `docs/architecture/validation/issue-270-segmented-choice-zoom/README.md` evidence file via
+      the same manual X11-desktop procedure used for #211/#213, name it in the Gate enumeration
+      table as the mechanism that discharges NFR-003/SC-005, and state who/when runs it
+      (pre-merge, after the final push, per the #211/#213 precedent).
+
+  - id: PLAN-POST-RESEARCH-VERIFY-002
+    verdict: CONFIRMED
+    severity: 2
+    rationale: >
+      Independently re-read plan.md's Gate enumeration Applicable table (lines 428-439) end to
+      end: every other row names an exact command (`npm run quality:stylelint`, `npx nx run
+      storybook:storybook:build && node scripts/run-axe-storybook.js`, `npx playwright test
+      apps/storybook/src/tests/sk-segmented-choice.spec.ts`, etc.); the "Visual-regression
+      baselines" row (line 436) names only the artifact and a doc-section pointer, with no
+      command/job identified — confirmed exactly as the finding states. Independently confirmed
+      `.github/workflows/ci-quality.yml` lines 453-480: the `visual-regression` job runs `npx
+      playwright test apps/storybook/src/tests/visual.spec.ts --project=chromium` under `env:
+      PW_INCLUDE_VISUAL: '1'` (line 474-475), separate from the `playwright` cross-browser smoke
+      job (lines 483-506) which runs plain `npx playwright test` over the whole `testDir`.
+      Independently confirmed `playwright.config.ts` line 11: `testIgnore:
+      process.env['PW_INCLUDE_VISUAL'] ? [] : ['**/visual.spec.ts']` — `visual.spec.ts` is
+      excluded from every Playwright invocation unless that env var is set, exactly as the finding
+      states. This is a genuine, if minor, completeness gap: a reader checking "which CI job
+      actually exercises my new visual test() blocks, and under what invocation" cannot confirm it
+      from plan.md's Gate enumeration row alone.
+    remediation: >
+      As proposed: add the exact command/job identification to the row, e.g. "CI
+      `visual-regression` job — `PW_INCLUDE_VISUAL=1 npx playwright test
+      apps/storybook/src/tests/visual.spec.ts --project=chromium` (excluded from the default `npx
+      playwright test` run via `playwright.config.ts`'s `testIgnore` unless this env var is set);
+      artifact `visual-regression-diffs` uploaded only on job failure, expected on the first push
+      before a baseline exists."
