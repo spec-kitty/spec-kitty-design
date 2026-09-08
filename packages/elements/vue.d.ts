@@ -19,7 +19,7 @@ type SkElement<P> = DefineComponent<P & Partial<HTMLAttributes> & ReservedProps>
 declare module 'vue' {
   export interface GlobalComponents {
     /**
-     * A controlled, consumer-composed action row.
+     * A controlled, consumer-composed action row with optional native-route and flush presentation modes.
      *
      * Token dependencies: --sk-border-default, --sk-border-strong, --sk-border-width-1,
      * --sk-border-width-2, --sk-color-accent, --sk-fg-body, --sk-fg-default, --sk-fg-muted,
@@ -29,8 +29,12 @@ declare module 'vue' {
      * --sk-text-base, --sk-text-xs, --sk-weight-semibold.
      */
     'sk-action-row': SkElement<{
+      /** Opaque native route destination. A non-blank value takes precedence over selectable-button mode. */
+      'href'?: string | undefined;
       /** Optional compact presentation. Only `card` is supported; invalid values use the default row layout. */
       'layout'?: 'card' | undefined;
+      /** Optional container-owned presentation. Only `flush` is supported; invalid values use the bordered row. */
+      'presentation'?: 'flush' | undefined;
       /** Stable consumer-owned identifier included in activation requests. */
       'row-id'?: string | undefined;
       /** Enables the native primary trigger when `rowId` is non-empty. */

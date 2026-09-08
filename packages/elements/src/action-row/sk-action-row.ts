@@ -6,9 +6,13 @@ export type ActionRowActivateDetail = Readonly<{ id: string }>;
 export type ActionRowLayout = 'card';
 
 type ActionRowState = HTMLElement & {
+  href: string | undefined;
   rowId: string | undefined;
   selectable: boolean;
 };
+
+const isRoute = (row: ActionRowState): boolean =>
+  typeof row.href === 'string' && row.href.trim() !== '';
 
 const isActionable = (row: ActionRowState): boolean =>
   row.selectable && typeof row.rowId === 'string' && row.rowId.trim() !== '';
@@ -37,11 +41,13 @@ const actionRowLayout = (value: unknown): ActionRowLayout | undefined => {
   return undefined;
 };
 
+const ACTION_ROW_TITLE_ID = 'sk-action-row-title';
+
 const scanContent = (syncSlot: (slot: HTMLSlotElement) => void) => html`
   <span part="marker" class="sk-action-row__marker" hidden
     ><slot name="marker" @slotchange=${(event: Event) => syncSlot(event.currentTarget as HTMLSlotElement)}></slot
   ></span>
-  <span part="title" class="sk-action-row__title"><slot name="title"></slot></span>
+  <span id=${ACTION_ROW_TITLE_ID} part="title" class="sk-action-row__title"><slot name="title"></slot></span>
   <span part="reference" class="sk-action-row__reference"><slot name="reference"></slot></span>
   <span part="tags" class="sk-action-row__tags" hidden
     ><slot name="tags" @slotchange=${(event: Event) => syncSlot(event.currentTarget as HTMLSlotElement)}></slot
@@ -53,7 +59,7 @@ const scanContent = (syncSlot: (slot: HTMLSlotElement) => void) => html`
 `;
 
 /**
- * A controlled, consumer-composed action row.
+ * A controlled, consumer-composed action row with optional native-route and flush presentation modes.
  *
  * Token dependencies: --sk-border-default, --sk-border-strong, --sk-border-width-1,
  * --sk-border-width-2, --sk-color-accent, --sk-fg-body, --sk-fg-default, --sk-fg-muted,
@@ -79,7 +85,7 @@ const scanContent = (syncSlot: (slot: HTMLSlotElement) => void) => html`
  * @csspart metadata - Metadata projection wrapper.
  * @csspart supporting - Optional secondary-context wrapper.
  * @csspart controls - Independent controls wrapper.
- * @fires {CustomEvent<ActionRowActivateDetail>} sk-action-row-activate - Requests activation for the exact consumer row ID. The event bubbles, is composed, and is not cancelable.
+ * @fires {CustomEvent<ActionRowActivateDetail>} sk-action-row-activate - Requests activation for the exact consumer row ID in selectable-button mode. Native-route mode does not emit this event. The event bubbles, is composed, and is not cancelable.
  */
 export class SkActionRow extends LitElement {
   static styles = [sheet];
@@ -89,6 +95,8 @@ export class SkActionRow extends LitElement {
     selectable: { type: Boolean, reflect: true },
     selected: { type: Boolean, reflect: true },
     layout: { type: String, reflect: true },
+    href: { type: String, reflect: true },
+    presentation: { type: String, reflect: true },
   };
 
   /** Stable consumer-owned identifier included in activation requests. */
@@ -102,6 +110,39 @@ export class SkActionRow extends LitElement {
 
   /** Optional compact presentation. Only `card` is supported; invalid values use the default row layout. */
   declare layout: 'card' | undefined;
+
+  /** Opaque native route destination. A non-blank value takes precedence over selectable-button mode. */
+  declare href: string | undefined;
+
+  /** Optional container-owned presentation. Only `flush` is supported; invalid values use the bordered row. */
+  declare presentation: 'flush' | undefined;
+
+  #lastWarnedPresentation: string | undefined;
+  #warnedMixed: string | undefined;
+
+  #actionRowPresentation(value: unknown): 'flush' | undefined {
+    if (value === 'flush') {
+      this.#lastWarnedPresentation = undefined;
+      return value;
+    }
+    if (typeof value === 'string' && value.trim() !== '') {
+      if (this.#lastWarnedPresentation !== value) {
+        console.warn(`unknown action-row presentation "${String(value)}"; using bordered row`);
+        this.#lastWarnedPresentation = value;
+      }
+    } else {
+      this.#lastWarnedPresentation = undefined;
+    }
+    return undefined;
+  }
+
+  protected willUpdate(): void {
+    const mixed = isRoute(this) && this.selectable ? this.href : undefined;
+    if (mixed !== undefined && this.#warnedMixed !== mixed) {
+      console.warn('action-row href and selectable are both set; using native route mode');
+    }
+    this.#warnedMixed = mixed;
+  }
 
   #syncSlot(slot: HTMLSlotElement): void {
     const hasContent = slot.assignedNodes({ flatten: true }).some(
@@ -121,13 +162,27 @@ export class SkActionRow extends LitElement {
   render() {
     const content = scanContent((slot) => this.#syncSlot(slot));
     const layout = actionRowLayout(this.layout);
+    const presentation = this.#actionRowPresentation(this.presentation);
+    const route = isRoute(this);
     return html`<div
       part="row"
-      class="sk-action-row${layout === 'card' ? ' sk-action-row--card' : ''}"
-      aria-current=${this.selected ? 'true' : nothing}
+      class="sk-action-row${layout === 'card' ? ' sk-action-row--card' : ''}${
+        presentation === 'flush' ? ' sk-action-row--flush' : ''
+      }"
+      aria-current=${this.selected && !route ? 'true' : nothing}
     >
       ${
-        isActionable(this)
+        route
+          ? html`<a
+              part="trigger"
+              class="sk-action-row__trigger"
+              href=${this.href!}
+              aria-labelledby=${ACTION_ROW_TITLE_ID}
+              aria-current=${this.selected ? 'page' : nothing}
+            >
+              ${content}
+            </a>`
+          : isActionable(this)
           ? html`<button
               part="trigger"
               class="sk-action-row__trigger"

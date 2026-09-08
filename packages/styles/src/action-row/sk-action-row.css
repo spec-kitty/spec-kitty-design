@@ -24,6 +24,19 @@
   border-color: var(--sk-border-strong);
 }
 
+.sk-action-row--flush {
+  background: none;
+  border-color: transparent;
+  border-width: 0;
+  border-radius: 0;
+}
+
+.sk-action-row--flush[aria-current="true"] {
+  background: var(--sk-surface-pill);
+  border-color: transparent;
+  border-width: 0;
+}
+
 .sk-action-row__trigger {
   box-sizing: border-box;
   display: grid;
@@ -47,21 +60,30 @@
     var(--sk-motion-ease-out);
 }
 
-button.sk-action-row__trigger {
+button.sk-action-row__trigger,
+a.sk-action-row__trigger {
   appearance: none;
   cursor: pointer;
 }
 
-button.sk-action-row__trigger:hover {
+a.sk-action-row__trigger {
+  color: inherit;
+  text-decoration: none;
+}
+
+button.sk-action-row__trigger:hover,
+a.sk-action-row__trigger:hover {
   background: var(--sk-surface-pill);
 }
 
-button.sk-action-row__trigger:focus-visible {
+button.sk-action-row__trigger:focus-visible,
+a.sk-action-row__trigger:focus-visible {
   outline: var(--sk-border-width-2) solid var(--sk-color-accent);
   outline-offset: calc(var(--sk-border-width-2) * -1);
 }
 
-button.sk-action-row__trigger:active {
+button.sk-action-row__trigger:active,
+a.sk-action-row__trigger:active {
   background: var(--sk-surface-muted);
 }
 
@@ -211,21 +233,28 @@ button.sk-action-row__trigger:active {
     border-inline-start-width: var(--sk-border-width-2);
   }
 
-  button.sk-action-row__trigger:hover {
+  .sk-action-row--flush[aria-current="true"] {
+    border-inline-start-width: 0;
+  }
+
+  button.sk-action-row__trigger:hover,
+  a.sk-action-row__trigger:hover {
     outline-style: solid;
     outline-width: var(--sk-border-width-1);
     outline-offset: calc(var(--sk-border-width-1) * -1);
     outline-color: CanvasText;
   }
 
-  button.sk-action-row__trigger:active {
+  button.sk-action-row__trigger:active,
+  a.sk-action-row__trigger:active {
     outline-style: dashed;
     outline-width: var(--sk-border-width-2);
     outline-offset: calc(var(--sk-border-width-2) * -1);
     outline-color: ButtonText;
   }
 
-  button.sk-action-row__trigger:focus-visible {
+  button.sk-action-row__trigger:focus-visible,
+  a.sk-action-row__trigger:focus-visible {
     outline-style: solid;
     outline-width: var(--sk-border-width-2);
     outline-offset: calc(var(--sk-border-width-2) * -1);

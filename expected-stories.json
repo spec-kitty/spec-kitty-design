@@ -40,7 +40,8 @@
     "#256 opts in all fifteen native styles-only context-navigation stories, total 285 -> 300 on the refreshed train after #213. The routes separately preserve grouped, current top-level, current nested, current parent, no-current, empty, empty-plus-overflow, long-label, one/three/twenty-child, 240px narrow, forced-colours, RTL, and real `.sk-light` acceptance evidence.",
     "#214 ratchets the exact fifteen Storybook-only Work Package overview/detail route-state stories named as acceptance evidence. On the refreshed train after #256, total moves 300 -> 315; exported fixture, selector, and render helpers are excluded from CSF indexing.",
     "#264 adds eight unavailable-entry acceptance stories, total 315 -> 323 on the refreshed train after #214. Mixed dark, annotation-free, all-unavailable/no-current, unavailable-parent/no-children, long 240px, forced-colours, RTL, and real `.sk-light` routes keep the additive styles-only contract reviewable without inventing application state.",
-    "#254 ratchets eleven additive sk-app-shell compact-presentation stories: closed/open, 390/768/860/861, long labels, short/tall viewports, reduced motion, and forced colors. On the refreshed train after #264, total moves 323 -> 334; the existing desktop, narrow, empty, and LightMode stories remain."
+    "#254 ratchets eleven additive sk-app-shell compact-presentation stories: closed/open, 390/768/860/861, long labels, short/tall viewports, reduced motion, and forced colors. On the refreshed train after #264, total moves 323 -> 334; the existing desktop, narrow, empty, and LightMode stories remain.",
+    "#272 ratchets seven additive sk-action-row stories for native route, route+flush, button+flush, selected+flush, selected route, unknown-presentation fail-open, and forced-colors comparison. On the refreshed train after #271, total moves 361 -> 368; existing stories remain."
   ],
   "byElement": {
     "sk-action-row": [
@@ -55,7 +56,14 @@
       "elements-skactionrow--card-long-content",
       "elements-skactionrow--t-10-compact-item",
       "elements-skactionrow--t-10-compact-item-light-mode",
-      "elements-skactionrow--light-mode"
+      "elements-skactionrow--light-mode",
+      "elements-skactionrow--route",
+      "elements-skactionrow--route-flush",
+      "elements-skactionrow--button-flush",
+      "elements-skactionrow--selected-flush",
+      "elements-skactionrow--route-selected",
+      "elements-skactionrow--unknown-presentation",
+      "elements-skactionrow--forced-colors"
     ],
     "sk-app-shell": [
       "elements-skappshell--default",
@@ -489,5 +497,5 @@
       "components-sksegmentedchoice-html--light-mode"
     ]
   },
-  "total": 361
+  "total": 368
 }

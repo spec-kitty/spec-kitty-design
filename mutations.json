@@ -46,7 +46,8 @@
     "#254 POST-CI WEBKIT FIX adds THIRTEEN SC-012 app-shell arms, moving the refreshed standing set from 188 to 201. They cover synchronous reconnect, disconnect restoration, exact raw absent and present attribute restoration, all four effective-exposure decisions, the disconnected slot-event guard, and all four slotchange bindings. The implementation deliberately snapshots exposure attributes when a directly assigned root becomes inactive rather than observing consumer mutations: the named [SC-012] test proves a write made while suppressed cannot replace the saved pre-suppression values, and the consumer documentation states that ownership boundary.",
     "#254 REVIEW-CYCLE 5 adds FIVE app-shell arms, moving the standing set from 201 to 206. Three SC-012 arms independently break original-snapshot inheritance, current-owner restoration, and active-destination release during cross-shell handoff. One SC-006 arm removes nearest-shell Escape claiming without stopping the original key event. One SC-017 arm changes only the compact logical container feature back to physical width; the pre-existing 860-to-859 CSS arm remains separate so logical-axis parity and inclusive-threshold semantics are independently falsifiable.",
     "#254 REVIEW-CYCLE 6 adds FOUR arms, moving the standing set from 206 to 210: generated compactTrigger omission resets null; component acceptance waits one microtask for the current React commit; omitted React false is accepted as closed; and an ordinary omitted-false route close releases hidden focus. Each new arm is exact and omits expectCollateral.",
-    "#254 REVIEW-CYCLE 6 COLLATERAL ADJUDICATION records the reproduced exact-7aa outcomes without changing product behavior. The presentation-reflection, native controlled-close release, and compact-header exposure mutations all red the integrated React SC-012 fixture, so each declares required collateral. The old native subject stays green when the closed-render await is removed, while the React SC-012 fixture alone reds; that arm is therefore retargeted to react-app-shell without collateral."
+    "#254 REVIEW-CYCLE 6 COLLATERAL ADJUDICATION records the reproduced exact-7aa outcomes without changing product behavior. The presentation-reflection, native controlled-close release, and compact-header exposure mutations all red the integrated React SC-012 fixture, so each declares required collateral. The old native subject stays green when the closed-render await is removed, while the React SC-012 fixture alone reds; that arm is therefore retargeted to react-app-shell without collateral.",
+    "#272 adds exactly THREE sk-action-row arms, moving the refreshed standing set from 210 to 213. Two SC-010 arms remove the new href and presentation registrations independently so the extended pre-upgrade test proves each public axis remains reactive and reflected. One SC-006 arm attaches the existing selectable request path to the route anchor; the mixed-state negative case then proves native route mode emits zero custom activation events. No SC-007/SC-008 route arms exist because an event with no dispatch has no independently falsifiable detail or propagation flags."
   ],
   "mutations": [
     {
@@ -1736,6 +1737,30 @@
       "from": "    if (changed.get('open') === true && this.open !== true) {",
       "to": "    if (changed.get('open') === true && this.open === false) {",
       "subject": "fixtures/react-consumer/src/sk-app-shell.test.tsx"
+    },
+    {
+      "id": "SC-010",
+      "arm": "pre-upgrade native route destination stays registered and reflected",
+      "file": "packages/elements/src/action-row/sk-action-row.ts",
+      "from": "    href: { type: String, reflect: true },",
+      "to": "    hrefBroken: { type: String, reflect: true },",
+      "subject": "fixtures/elements-behaviour/src/sk-action-row.test.ts"
+    },
+    {
+      "id": "SC-010",
+      "arm": "pre-upgrade flush presentation stays registered and reflected",
+      "file": "packages/elements/src/action-row/sk-action-row.ts",
+      "from": "    presentation: { type: String, reflect: true },",
+      "to": "    presentationBroken: { type: String, reflect: true },",
+      "subject": "fixtures/elements-behaviour/src/sk-action-row.test.ts"
+    },
+    {
+      "id": "SC-006",
+      "arm": "native route mode emits no selectable activation request",
+      "file": "packages/elements/src/action-row/sk-action-row.ts",
+      "from": "          ? html`<a\n              part=\"trigger\"",
+      "to": "          ? html`<a\n              @click=${() => requestActivation(this)}\n              part=\"trigger\"",
+      "subject": "fixtures/elements-behaviour/src/sk-action-row.test.ts"
     }
   ]
 }

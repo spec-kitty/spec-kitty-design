@@ -27,8 +27,14 @@ export interface SkActionRowProps extends Pick<
   /** Consumer-controlled current-row presentation. Activation never changes this value. */
   selected?: boolean;
 
+  /** Opaque native route destination. A non-blank value takes precedence over selectable-button mode. */
+  href?: SkActionRowElement["href"];
+
   /** Optional compact presentation. Only `card` is supported; invalid values use the default row layout. */
   layout?: SkActionRowElement["layout"];
+
+  /** Optional container-owned presentation. Only `flush` is supported; invalid values use the bordered row. */
+  presentation?: SkActionRowElement["presentation"];
 
   /** Stable consumer-owned identifier included in activation requests. */
   rowId?: SkActionRowElement["rowId"];
@@ -54,12 +60,12 @@ export interface SkActionRowProps extends Pick<
   /** Allows developers to make HTML elements focusable, allow or prevent them from being sequentially focusable (usually with the `Tab` key, hence the name) and determine their relative ordering for sequential focus navigation. */
   tabIndex?: number;
 
-  /** Requests activation for the exact consumer row ID. The event bubbles, is composed, and is not cancelable. */
+  /** Requests activation for the exact consumer row ID in selectable-button mode. Native-route mode does not emit this event. The event bubbles, is composed, and is not cancelable. */
   onSkActionRowActivate?: (event: CustomEvent<ActionRowActivateDetail>) => void;
 }
 
 /**
- * A controlled, consumer-composed action row.
+ * A controlled, consumer-composed action row with optional native-route and flush presentation modes.
  *
  * Token dependencies: --sk-border-default, --sk-border-strong, --sk-border-width-1,
  * --sk-border-width-2, --sk-color-accent, --sk-fg-body, --sk-fg-default, --sk-fg-muted,
@@ -72,7 +78,9 @@ export interface SkActionRowProps extends Pick<
  *
  * Component attributes and properties that can be applied to the element or by using JavaScript.
  *
+ * - `href`: Opaque native route destination. A non-blank value takes precedence over selectable-button mode.
  * - `layout`: Optional compact presentation. Only `card` is supported; invalid values use the default row layout.
+ * - `presentation`: Optional container-owned presentation. Only `flush` is supported; invalid values use the bordered row.
  * - `row-id`/`rowId`: Stable consumer-owned identifier included in activation requests.
  * - `selectable`: Enables the native primary trigger when `rowId` is non-empty.
  * - `selected`: Consumer-controlled current-row presentation. Activation never changes this value.
@@ -81,7 +89,7 @@ export interface SkActionRowProps extends Pick<
  *
  * Events that will be emitted by the component.
  *
- * - `sk-action-row-activate`: Requests activation for the exact consumer row ID. The event bubbles, is composed, and is not cancelable.
+ * - `sk-action-row-activate`: Requests activation for the exact consumer row ID in selectable-button mode. Native-route mode does not emit this event. The event bubbles, is composed, and is not cancelable.
  *
  * ## Slots
  *

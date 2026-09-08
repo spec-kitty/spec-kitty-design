@@ -354,6 +354,29 @@ test('SK-action-row default and light — visual baselines', async ({ page }) =>
   await expect(host).toHaveScreenshot('sk-action-row-light.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
 });
 
+test('SK-action-row route and flush states — visual baselines', async ({ page }) => {
+  for (const [storyId, snapshot] of [
+    ['route', 'sk-action-row-route.png'],
+    ['route-flush', 'sk-action-row-route-flush.png'],
+    ['button-flush', 'sk-action-row-button-flush.png'],
+    ['selected-flush', 'sk-action-row-selected-flush.png'],
+    ['route-selected', 'sk-action-row-route-selected.png'],
+    ['unknown-presentation', 'sk-action-row-unknown-presentation.png'],
+  ] as const) {
+    const host = await actionRowStory(page, storyId);
+    await expect(host).toHaveScreenshot(snapshot, { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  }
+});
+
+test('SK-action-row forced-colors selected comparison — visual baseline', async ({ page }) => {
+  await page.emulateMedia({ forcedColors: 'active' });
+  const host = await actionRowStory(page, 'forced-colors');
+  await expect(host.locator('..')).toHaveScreenshot('sk-action-row-forced-colors.png', {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+  });
+});
+
 test('SK-action-row long content at 320px — visual baseline', async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 844 });
   const host = await actionRowStory(page, 'long-content');

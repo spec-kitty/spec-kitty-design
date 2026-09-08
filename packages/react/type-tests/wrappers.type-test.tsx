@@ -222,6 +222,8 @@ export const actionRowAllProps = (
     selectable
     selected={false}
     layout="card"
+    href="/missions/272"
+    presentation="flush"
     onSkActionRowActivate={(event) => {
       const detail: ActionRowActivateDetail = event.detail;
       void detail.id.toUpperCase();
@@ -245,8 +247,16 @@ export const actionRowInvalidSelected = <SkActionRow selected="false" />;
 // @ts-expect-error `card` is the complete presentation union, not an arbitrary string
 export const actionRowInvalidLayout = <SkActionRow layout={'stacked' as string} />;
 
+// @ts-expect-error href is a consumer-owned string
+export const actionRowInvalidHref = <SkActionRow href={272} />;
+
+// @ts-expect-error `flush` is the complete presentation union, not an arbitrary string
+export const actionRowInvalidPresentation = <SkActionRow presentation={'borderless' as string} />;
+
 const actionRowLayout: NonNullable<SkActionRowProps['layout']> = 'card';
+const actionRowPresentation: NonNullable<SkActionRowProps['presentation']> = 'flush';
 void actionRowLayout;
+void actionRowPresentation;
 
 // --- compact marker axes ---------------------------------------------------------------
 export const entityMarkerAllAxes = <SkEntityMarker label="Ada Lovelace" size="sm" shape="circle" />;
