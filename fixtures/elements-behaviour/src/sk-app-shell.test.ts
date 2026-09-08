@@ -891,3 +891,233 @@ test('Escape emits nothing for absent, unknown, desktop, or controlled-closed co
   expect(count).toBe(0);
   expect(el.open).toBe(true);
 });
+
+const mountRailPreserving = async (width = 1024) => {
+  const frame = document.createElement('div');
+  frame.style.width = `${width}px`;
+  document.body.append(frame);
+  const el = document.createElement('sk-app-shell') as SkAppShell;
+  el.presentation = 'rail-preserving';
+  el.open = true;
+  el.innerHTML = `
+    <nav slot="personal-rail" aria-label="Product areas"><a href="#work">Work</a></nav>
+    <aside slot="context-sidebar" aria-label="Current workspace"><a href="#overview">Overview</a></aside>
+    <div slot="compact-header"><button aria-expanded="true" aria-controls="rail-navigation">Menu</button></div>
+    <nav slot="compact-navigation" id="rail-navigation" aria-label="Repository navigation">
+      <a href="#missions">Missions</a>
+    </nav>
+    <header slot="page-header">Header</header>
+    <article>Main</article>
+  `;
+  frame.append(el);
+  el.compactTrigger = el.querySelector('button');
+  await el.updateComplete;
+  await settleResize(el);
+  return {
+    el,
+    frame,
+    personal: el.querySelector<HTMLElement>('[slot="personal-rail"]')!,
+    context: el.querySelector<HTMLElement>('[slot="context-sidebar"]')!,
+    trigger: el.querySelector<HTMLButtonElement>('button')!,
+    navigation: el.querySelector<HTMLElement>('[slot="compact-navigation"]')!,
+    link: el.querySelector<HTMLAnchorElement>('[slot="compact-navigation"] a')!,
+  };
+};
+
+test('[SC-010] rail-preserving survives pre-upgrade assignment, reflects, and removes to undefined', async () => {
+  const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+  const tag = `sk-app-shell-rail-preupgrade-${Math.random().toString(36).slice(2)}`;
+  const pending = document.createElement(tag) as SkAppShell;
+  pending.presentation = 'rail-preserving';
+  pending.open = true;
+  document.body.append(pending);
+
+  customElements.define(tag, class extends (customElements.get('sk-app-shell') as typeof SkAppShell) {});
+  await customElements.whenDefined(tag);
+  await pending.updateComplete;
+
+  expect(pending.presentation).toBe('rail-preserving');
+  expect(pending.getAttribute('presentation')).toBe('rail-preserving');
+  expect(pending.open).toBe(true);
+  pending.removeAttribute('presentation');
+  await pending.updateComplete;
+  expect(pending.presentation).toBe(undefined);
+  expect(pending.hasAttribute('presentation')).toBe(false);
+  expect(warn).not.toHaveBeenCalled();
+  pending.remove();
+});
+
+test.each([1100, 1024, 768, 390])(
+  '[SC-012] [SC-017] rail-preserving is effective at %ipx, retains personal, and suppresses context',
+  async (width) => {
+    const { el, frame, personal, context, trigger, navigation } = await mountRailPreserving(width);
+    expect(getComputedStyle(part(el, 'personal')!).display).not.toBe('none');
+    expect(Math.round(part(el, 'personal')!.getBoundingClientRect().width)).toBe(56);
+    expect(getComputedStyle(part(el, 'context')!).display).toBe('none');
+    expect(getComputedStyle(part(el, 'compact-header')!).display).not.toBe('none');
+    expect(part(el, 'compact-navigation')?.hidden).toBe(false);
+    expect([personal.getAttribute('inert'), personal.getAttribute('aria-hidden')]).toEqual([null, null]);
+    expect([context.getAttribute('inert'), context.getAttribute('aria-hidden')]).toEqual(['', 'true']);
+    expect([trigger.parentElement!.getAttribute('inert'), trigger.parentElement!.getAttribute('aria-hidden')])
+      .toEqual([null, null]);
+    expect([navigation.getAttribute('inert'), navigation.getAttribute('aria-hidden')]).toEqual([null, null]);
+    frame.remove();
+  },
+);
+
+test('[SC-012] [SC-017] rail-preserving ends at 1101px and restores exact consumer exposure', async () => {
+  const { el, frame, personal, context, trigger, navigation } = await mountRailPreserving(1100);
+  context.setAttribute('aria-hidden', 'consumer-context');
+  navigation.setAttribute('aria-hidden', 'consumer-navigation');
+  await el.updateComplete;
+  expect(getComputedStyle(part(el, 'context')!).display).toBe('none');
+
+  frame.style.width = '1101px';
+  await settleResize(el);
+  expect(el.open).toBe(true);
+  expect(getComputedStyle(part(el, 'personal')!).display).not.toBe('none');
+  expect(getComputedStyle(part(el, 'context')!).display).not.toBe('none');
+  expect(getComputedStyle(part(el, 'compact-header')!).display).toBe('none');
+  expect(part(el, 'compact-navigation')?.hidden).toBe(true);
+  expect([personal.getAttribute('inert'), personal.getAttribute('aria-hidden')]).toEqual([null, null]);
+  expect([context.getAttribute('inert'), context.getAttribute('aria-hidden')]).toEqual([null, null]);
+  expect([trigger.parentElement!.getAttribute('inert'), trigger.parentElement!.getAttribute('aria-hidden')])
+    .toEqual(['', 'true']);
+  expect([navigation.getAttribute('inert'), navigation.getAttribute('aria-hidden')]).toEqual(['', 'true']);
+  frame.remove();
+});
+
+test('[SC-006] [SC-012] rail-preserving reuses accepted Escape dismissal and focus return', async () => {
+  const { el, frame, trigger, link } = await mountRailPreserving();
+  await acceptEscape(el, link);
+  expect(el.open).toBe(false);
+  expect(part(el, 'compact-navigation')?.hidden).toBe(true);
+  expect(document.activeElement).toBe(trigger);
+  frame.remove();
+});
+
+test('[SC-012] presentation transitions release focus only when the destination becomes hidden', async () => {
+  const retained = await mountRailPreserving(768);
+  retained.link.focus();
+  retained.el.presentation = 'compact';
+  await retained.el.updateComplete;
+  expect(part(retained.el, 'compact-navigation')?.hidden).toBe(false);
+  expect(document.activeElement).toBe(retained.link);
+  retained.frame.remove();
+
+  const released = await mountRailPreserving(1024);
+  released.link.focus();
+  released.el.presentation = 'compact';
+  await released.el.updateComplete;
+  expect(part(released.el, 'compact-navigation')?.hidden).toBe(true);
+  expect(document.activeElement).not.toBe(released.link);
+  expect(released.el.open).toBe(true);
+  released.frame.remove();
+});
+
+test('[SC-012] [SC-017] rail-preserving uses logical content-box size in vertical writing mode', async () => {
+  const { el, frame, personal, context } = await mountRailPreserving();
+  el.style.writingMode = 'vertical-rl';
+  el.style.blockSize = '390px';
+  el.style.inlineSize = '1100px';
+  await settleResize(el);
+  expect(getComputedStyle(part(el, 'personal')!).display).not.toBe('none');
+  expect(getComputedStyle(part(el, 'context')!).display).toBe('none');
+  expect([personal.getAttribute('inert'), personal.getAttribute('aria-hidden')]).toEqual([null, null]);
+  expect([context.getAttribute('inert'), context.getAttribute('aria-hidden')]).toEqual(['', 'true']);
+
+  el.style.inlineSize = '1101px';
+  await settleResize(el);
+  expect(getComputedStyle(part(el, 'context')!).display).not.toBe('none');
+  expect([context.getAttribute('inert'), context.getAttribute('aria-hidden')]).toEqual([null, null]);
+  frame.remove();
+});
+
+test('[SC-012] [SC-017] rail-preserving uses the CSS content-box boundary with border-box padding', async () => {
+  const { el, frame, link } = await mountRailPreserving();
+  el.style.boxSizing = 'border-box';
+  el.style.paddingInline = '1px';
+  el.style.width = '1102px';
+  await settleResize(el);
+  const contentInlineSize = () =>
+    el.clientWidth - Number.parseFloat(getComputedStyle(el).paddingLeft)
+      - Number.parseFloat(getComputedStyle(el).paddingRight);
+  expect(contentInlineSize()).toBe(1100);
+  expect(part(el, 'compact-navigation')?.hidden).toBe(false);
+
+  el.style.width = '1103px';
+  link.focus();
+  await settleResize(el);
+  expect(contentInlineSize()).toBe(1101);
+  expect(part(el, 'compact-navigation')?.hidden).toBe(true);
+  expect(document.activeElement).not.toBe(link);
+  expect(el.open).toBe(true);
+  frame.remove();
+});
+
+test('[SC-012] rail-preserving restores dynamic and disconnected context roots exactly', async () => {
+  const { el, frame, context } = await mountRailPreserving();
+  el.presentation = undefined;
+  await el.updateComplete;
+  context.setAttribute('inert', 'consumer-context');
+  context.setAttribute('aria-hidden', 'consumer-context');
+  el.presentation = 'rail-preserving';
+  await el.updateComplete;
+  expect([context.getAttribute('inert'), context.getAttribute('aria-hidden')]).toEqual(['', 'true']);
+
+  el.remove();
+  expect([context.getAttribute('inert'), context.getAttribute('aria-hidden')])
+    .toEqual(['consumer-context', 'consumer-context']);
+  frame.append(el);
+  await el.updateComplete;
+  expect([context.getAttribute('inert'), context.getAttribute('aria-hidden')]).toEqual(['', 'true']);
+
+  context.slot = '';
+  await Promise.resolve();
+  await settleResize(el);
+  expect([context.getAttribute('inert'), context.getAttribute('aria-hidden')])
+    .toEqual(['consumer-context', 'consumer-context']);
+
+  const replacement = document.createElement('aside');
+  replacement.slot = 'context-sidebar';
+  replacement.setAttribute('aria-hidden', 'replacement-context');
+  el.append(replacement);
+  await Promise.resolve();
+  await settleResize(el);
+  expect([replacement.getAttribute('inert'), replacement.getAttribute('aria-hidden')])
+    .toEqual(['', 'true']);
+  frame.remove();
+  expect([replacement.getAttribute('inert'), replacement.getAttribute('aria-hidden')])
+    .toEqual([null, 'replacement-context']);
+});
+
+test('[SC-006] nested rail-preserving shells assign Escape to the nearest effective shell', async () => {
+  const outer = await mountRailPreserving();
+  const inner = document.createElement('sk-app-shell') as SkAppShell;
+  inner.presentation = 'rail-preserving';
+  inner.open = true;
+  inner.innerHTML = `
+    <div slot="compact-header"><button aria-controls="inner-navigation">Inner menu</button></div>
+    <nav slot="compact-navigation" id="inner-navigation"><a href="#inner">Inner</a></nav>
+  `;
+  outer.el.querySelector('article')!.append(inner);
+  await inner.updateComplete;
+  await settleResize(inner);
+  const emissions: Element[] = [];
+  outer.el.addEventListener('sk-app-shell-dismiss', (event) => emissions.push(event.target as Element));
+  inner.querySelector('a')!.dispatchEvent(
+    new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, composed: true }),
+  );
+  expect(emissions).toEqual([inner]);
+  outer.frame.remove();
+});
+
+test('[SC-017] generated rail-preserving CSS pins logical threshold, token geometry, and forced colors', () => {
+  const cssText = Array.from(skAppShellSheet.cssRules, (rule) => rule.cssText).join('\n');
+  expect(cssText).toContain('@container (max-inline-size: 1100px)');
+  expect(cssText).toMatch(
+    /grid-template-columns:\s*var\(--sk-layout-personal-rail-width\)\s*minmax\(0, 1fr\)/,
+  );
+  expect(cssText).toContain('@media (forced-colors: active)');
+  expect(cssText).toContain(':host([presentation="rail-preserving"])');
+});

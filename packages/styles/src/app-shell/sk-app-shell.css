@@ -31,9 +31,73 @@
   overflow-wrap: anywhere;
 }
 
+.sk-app-shell__compact-header {
+  padding: var(--sk-space-3) var(--sk-space-4);
+  border-bottom-style: solid;
+  border-bottom-width: var(--sk-border-width-1);
+  border-bottom-color: var(--sk-border-default);
+  background: var(--sk-surface-card);
+}
+
+.sk-app-shell__compact-header:focus-within {
+  outline-style: solid;
+  outline-width: var(--sk-border-width-2);
+  outline-color: var(--sk-border-focus);
+  outline-offset: calc(var(--sk-border-width-2) * -1);
+}
+
+.sk-app-shell__compact-navigation {
+  max-block-size: calc(100dvh - var(--sk-space-12));
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: var(--sk-space-4);
+  border-bottom-style: solid;
+  border-bottom-width: var(--sk-border-width-1);
+  border-bottom-color: var(--sk-border-strong);
+  background: var(--sk-surface-card);
+}
+
 @container (max-width: 720px) {
   .sk-app-shell {
     grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@container (max-inline-size: 1100px) {
+  :host([presentation="rail-preserving"]) .sk-app-shell {
+    grid-template-columns:
+      var(--sk-layout-personal-rail-width)
+      minmax(0, 1fr);
+  }
+
+  :host([presentation="rail-preserving"]) .sk-app-shell__personal {
+    grid-column: 1;
+    grid-row: 1 / span 3;
+  }
+
+  :host([presentation="rail-preserving"]) .sk-app-shell__context {
+    display: none;
+  }
+
+  :host([presentation="rail-preserving"]) .sk-app-shell__compact-header,
+  :host([presentation="rail-preserving"]) .sk-app-shell__compact-navigation,
+  :host([presentation="rail-preserving"]) .sk-app-shell__content {
+    grid-column: 2;
+  }
+
+  :host([presentation="rail-preserving"]) .sk-app-shell__compact-header {
+    display: block;
+    grid-row: 1;
+  }
+
+  :host([presentation="rail-preserving"]) .sk-app-shell__compact-navigation {
+    display: block;
+    grid-row: 2;
+  }
+
+  :host([presentation="rail-preserving"]) .sk-app-shell__content {
+    grid-row: 3;
   }
 }
 
@@ -49,41 +113,23 @@
 
   :host([presentation="compact"]) .sk-app-shell__compact-header {
     display: block;
-    padding: var(--sk-space-3) var(--sk-space-4);
-    border-bottom-style: solid;
-    border-bottom-width: var(--sk-border-width-1);
-    border-bottom-color: var(--sk-border-default);
-    background: var(--sk-surface-card);
-  }
-
-  :host([presentation="compact"]) .sk-app-shell__compact-header:focus-within {
-    outline-style: solid;
-    outline-width: var(--sk-border-width-2);
-    outline-color: var(--sk-border-focus);
-    outline-offset: calc(var(--sk-border-width-2) * -1);
   }
 
   :host([presentation="compact"]) .sk-app-shell__compact-navigation {
     display: block;
-    max-block-size: calc(100dvh - var(--sk-space-12));
-    overflow-x: hidden;
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    padding: var(--sk-space-4);
-    border-bottom-style: solid;
-    border-bottom-width: var(--sk-border-width-1);
-    border-bottom-color: var(--sk-border-strong);
-    background: var(--sk-surface-card);
   }
+}
 
-  :host([presentation="compact"]) .sk-app-shell__compact-navigation[hidden] {
-    display: none;
-  }
+:host(:is([presentation="compact"], [presentation="rail-preserving"]))
+  .sk-app-shell__compact-navigation[hidden] {
+  display: none;
 }
 
 @media (forced-colors: active) {
   :host([presentation="compact"]) .sk-app-shell__compact-header:focus-within,
-  :host([presentation="compact"]) .sk-app-shell__compact-navigation {
+  :host([presentation="compact"]) .sk-app-shell__compact-navigation,
+  :host([presentation="rail-preserving"]) .sk-app-shell__compact-header:focus-within,
+  :host([presentation="rail-preserving"]) .sk-app-shell__compact-navigation {
     outline-style: solid;
     outline-width: var(--sk-border-width-2);
     outline-color: CanvasText;

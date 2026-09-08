@@ -618,3 +618,178 @@ test('compact composition has one consumer navigation landmark, one main, and no
   }).toBe('ready');
   expect(violations).toEqual([]);
 });
+
+for (const { width, effective } of [
+  { width: 1280, effective: false },
+  { width: 1101, effective: false },
+  { width: 1100, effective: true },
+  { width: 1024, effective: true },
+  { width: 768, effective: true },
+  { width: 390, effective: true },
+] as const) {
+  test(`rail-preserving has the required region geometry at ${width}px`, async ({ page }) => {
+    const shell = await load(
+      page,
+      `rail-preserving-${width === 1280 ? 'wide' : width}`,
+      { width: Math.max(width, 1280), height: 720 },
+    );
+    const personal = shadowPart(shell, 'personal');
+    const context = shadowPart(shell, 'context');
+    const compactHeader = shadowPart(shell, 'compact-header');
+    const navigation = shadowPart(shell, 'compact-navigation');
+    const content = shadowPart(shell, 'content');
+
+    await expect(personal).toBeVisible();
+    if (effective) {
+      await expect(context).toBeHidden();
+      await expect(compactHeader).toBeVisible();
+      await expect(navigation).toBeVisible();
+      expect(Math.round((await personal.boundingBox())!.width)).toBe(56);
+      const personalBox = (await personal.boundingBox())!;
+      const contentBox = (await content.boundingBox())!;
+      expect(Math.round(contentBox.x)).toBe(Math.round(personalBox.x + personalBox.width));
+      await expect(shell.locator('[slot="personal-rail"]')).not.toHaveAttribute('inert', '');
+      await expect(shell.locator('[slot="context-sidebar"]')).toHaveAttribute('inert', '');
+    } else {
+      await expect(context).toBeVisible();
+      await expect(compactHeader).toBeHidden();
+      await expect(navigation).toBeHidden();
+      await expect(shell.locator('[slot="personal-rail"]')).not.toHaveAttribute('inert', '');
+      await expect(shell.locator('[slot="context-sidebar"]')).not.toHaveAttribute('inert', '');
+      await expect(shell.locator('[slot="compact-header"]')).toHaveAttribute('inert', '');
+    }
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
+      await page.evaluate(() => document.documentElement.clientWidth),
+    );
+  });
+}
+
+test('rail-preserving is shell-relative inside a wider viewport and respects content-box padding', async ({ page }) => {
+  const shell = await load(page, 'rail-preserving-open', { width: 1440, height: 900 });
+  const result = await shell.evaluate(async (element) => {
+    const appShell = element as HTMLElement & { updateComplete: Promise<unknown> };
+    const header = appShell.shadowRoot!.querySelector<HTMLElement>('[part="compact-header"]')!;
+    appShell.style.boxSizing = 'border-box';
+    appShell.style.paddingInline = '1px';
+    const settle = async () => {
+      await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+      await appShell.updateComplete;
+    };
+    appShell.style.width = '1102px';
+    await settle();
+    const at1100 = getComputedStyle(header).display;
+    appShell.style.width = '1103px';
+    await settle();
+    return { at1100, at1101: getComputedStyle(header).display };
+  });
+  expect(result).toEqual({ at1100: 'block', at1101: 'none' });
+});
+
+test('rail-preserving uses logical inline size in vertical writing mode', async ({ page }) => {
+  const shell = await load(page, 'rail-preserving-open', { width: 900, height: 1200 });
+  const result = await shell.evaluate(async (element) => {
+    const appShell = element as HTMLElement & { updateComplete: Promise<unknown> };
+    const header = appShell.shadowRoot!.querySelector<HTMLElement>('[part="compact-header"]')!;
+    appShell.style.writingMode = 'vertical-rl';
+    appShell.style.blockSize = '390px';
+    const settle = async () => {
+      await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+      await appShell.updateComplete;
+    };
+    appShell.style.inlineSize = '1100px';
+    await settle();
+    const at1100 = getComputedStyle(header).display;
+    appShell.style.inlineSize = '1101px';
+    await settle();
+    return { at1100, at1101: getComputedStyle(header).display };
+  });
+  expect(result).toEqual({ at1100: 'block', at1101: 'none' });
+});
+
+test('rail-preserving closed/open navigation reuses the controlled dismissal seam', async ({ page }) => {
+  const closed = await load(page, 'rail-preserving-closed', { width: 1024, height: 720 });
+  await expect(shadowPart(closed, 'compact-header')).toBeVisible();
+  await expect(shadowPart(closed, 'compact-navigation')).toBeHidden();
+  await expect(closed.locator('[slot="compact-navigation"]')).toHaveAttribute('inert', '');
+
+  const open = await load(page, 'rail-preserving-open', { width: 1024, height: 720 });
+  const trigger = open.locator('[slot="compact-header"] button');
+  const link = open.locator('[slot="compact-navigation"] a[href="#missions"]');
+  await link.focus();
+  await link.press('Escape');
+  await expect(open).not.toHaveAttribute('open', '');
+  await expect(shadowPart(open, 'compact-navigation')).toBeHidden();
+  await expect(trigger).toBeFocused();
+});
+
+for (const { name, viewport, shouldScroll } of [
+  { name: 'rail-preserving-short-viewport', viewport: { width: 1024, height: 320 }, shouldScroll: true },
+  { name: 'rail-preserving-tall-viewport', viewport: { width: 1024, height: 900 }, shouldScroll: false },
+] as const) {
+  test(`${name} bounds long navigation inside the shell`, async ({ page }) => {
+    const shell = await load(page, name, viewport);
+    const drawer = shadowPart(shell, 'compact-navigation');
+    const geometry = await drawer.evaluate((element) => ({
+      clientHeight: element.clientHeight,
+      scrollHeight: element.scrollHeight,
+      overflowY: getComputedStyle(element).overflowY,
+    }));
+    expect(geometry.overflowY).toBe('auto');
+    if (shouldScroll) expect(geometry.scrollHeight).toBeGreaterThan(geometry.clientHeight);
+    else expect(geometry.scrollHeight).toBeLessThanOrEqual(geometry.clientHeight);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
+      await page.evaluate(() => document.documentElement.clientWidth),
+    );
+  });
+}
+
+test('rail-preserving theme, forced-colors, reduced-motion, and axe contracts hold', async ({ page }) => {
+  const surface = async (storyName: string) => {
+    const shell = await load(page, storyName, { width: 1024, height: 720 });
+    return shadowPart(shell, 'compact-navigation').evaluate((element) => {
+      const reference = document.createElement('div');
+      reference.style.background = 'var(--sk-surface-card)';
+      element.getRootNode().appendChild(reference);
+      const values = {
+        drawer: getComputedStyle(element).backgroundColor,
+        reference: getComputedStyle(reference).backgroundColor,
+      };
+      reference.remove();
+      return values;
+    });
+  };
+  const dark = await surface('rail-preserving-open');
+  const light = await surface('rail-preserving-light-mode');
+  expect(dark.drawer).toBe(dark.reference);
+  expect(light.drawer).toBe(light.reference);
+  expect(light.drawer).not.toBe(dark.drawer);
+
+  await page.emulateMedia({ forcedColors: 'active' });
+  const forced = await load(page, 'rail-preserving-forced-colors', { width: 1024, height: 720 });
+  const forcedStyle = await shadowPart(forced, 'compact-navigation').evaluate((element) => ({
+    outlineStyle: getComputedStyle(element).outlineStyle,
+    outlineWidth: Number.parseFloat(getComputedStyle(element).outlineWidth),
+  }));
+  expect(forcedStyle.outlineStyle).toBe('solid');
+  expect(forcedStyle.outlineWidth).toBeGreaterThan(0);
+
+  await page.emulateMedia({ forcedColors: 'none', reducedMotion: 'reduce' });
+  const reduced = await load(page, 'rail-preserving-reduced-motion', { width: 1024, height: 720 });
+  expect(await shadowPart(reduced, 'compact-navigation').evaluate((element) => ({
+    animationName: getComputedStyle(element).animationName,
+    transitionDuration: getComputedStyle(element).transitionDuration,
+  }))).toEqual({ animationName: 'none', transitionDuration: '0s' });
+
+  await injectAxe(page);
+  let violations: Awaited<ReturnType<typeof getViolations>> = [];
+  await expect.poll(async () => {
+    try {
+      violations = await getViolations(page, 'body', { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa'] } });
+      return 'ready';
+    } catch (error) {
+      if (String(error).includes('Axe is already running')) return 'busy';
+      throw error;
+    }
+  }).toBe('ready');
+  expect(violations).toEqual([]);
+});

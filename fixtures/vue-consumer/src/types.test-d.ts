@@ -43,9 +43,10 @@ const routes: NonNullable<TransitionMatrix['routes']> = Object.freeze([
   }),
 ]);
 const appShellPresentation: AppShell['presentation'] = 'compact';
+const appShellRailPreservingPresentation: AppShell['presentation'] = 'rail-preserving';
 const appShellOpen: AppShell['open'] = true;
 const appShellTrigger: NonNullable<AppShell['compactTrigger']> = document.createElement('button');
-// @ts-expect-error compact is the only non-default presentation
+// @ts-expect-error wide is not a public presentation
 const badAppShellPresentation: AppShell['presentation'] = 'wide';
 
 // @ts-expect-error 'chartreuse' is not one of the declared variants
@@ -78,4 +79,4 @@ const badRoute: NonNullable<TransitionMatrix['routes']>[number] = {
 };
 
 export type { Footer, PillTag, BarChart, AppShell, TransitionMatrix };
-export { legal, variant, barSeries, columns, routes, appShellPresentation, appShellOpen, appShellTrigger, badAppShellPresentation, bad, badBarDatum, badBarValue, badColumn, badRoute };
+export { legal, variant, barSeries, columns, routes, appShellPresentation, appShellRailPreservingPresentation, appShellOpen, appShellTrigger, badAppShellPresentation, bad, badBarDatum, badBarValue, badColumn, badRoute };

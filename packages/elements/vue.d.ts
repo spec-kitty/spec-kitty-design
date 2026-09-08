@@ -51,10 +51,10 @@ declare module 'vue' {
      * --sk-surface-card.
      */
     'sk-app-shell': SkElement<{
-      /** Consumer-controlled compact drawer state. The shell never changes this value. */
+      /** Consumer-controlled responsive navigation state. The shell never changes this value. */
       'open'?: boolean;
-      /** Enables the opt-in compact layout. Omit it for the legacy responsive shell. */
-      'presentation'?: 'compact' | undefined;
+      /** Enables an opt-in responsive layout. Omit it for the legacy responsive shell. */
+      'presentation'?: 'compact' | 'rail-preserving' | undefined;
       /** Consumer trigger used only for accepted-Escape focus return. It must be actually assigned within this shell's compact-header slot and control a same-root target actually assigned within this shell's compact-navigation slot. */
       'compactTrigger'?: import('@spec-kitty/elements/dist/app-shell/sk-app-shell.js').SkAppShell["compactTrigger"];
     }>;

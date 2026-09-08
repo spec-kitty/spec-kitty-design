@@ -56,6 +56,7 @@ export const ok = <SkFormInput value="hello" label="Name" required disabled={fal
 
 const compactTrigger = document.createElement('button');
 const compactPresentation: SkAppShellPresentation = 'compact';
+const railPreservingPresentation: SkAppShellPresentation = 'rail-preserving';
 const omittedPresentation: SkAppShellPresentation = undefined;
 void omittedPresentation;
 export const appShellAllProps = (
@@ -71,9 +72,10 @@ export const appShellAllProps = (
     }}
   />
 );
+export const appShellRailPreserving = <SkAppShell presentation={railPreservingPresentation} />;
 const appShellElement: SkAppShellElement | null = null;
 void appShellElement;
-// @ts-expect-error compact is the only non-default presentation
+// @ts-expect-error wide is not a public presentation
 export const appShellUnknownPresentation = <SkAppShell presentation="wide" />;
 
 // @ts-expect-error `required` is boolean, not string

@@ -18,10 +18,10 @@ export interface SkAppShellProps extends Pick<
   | "onFocus"
   | "onBlur"
 > {
-  /** Consumer-controlled compact drawer state. The shell never changes this value. */
+  /** Consumer-controlled responsive navigation state. The shell never changes this value. */
   open?: boolean;
 
-  /** Enables the opt-in compact layout. Omit it for the legacy responsive shell. */
+  /** Enables an opt-in responsive layout. Omit it for the legacy responsive shell. */
   presentation?: SkAppShellElement["presentation"];
 
   /** A space-separated list of the classes of the element. Classes allows CSS and JavaScript to select and access specific elements via the class selectors or functions like the method `Document.getElementsByClassName()`. */
@@ -48,7 +48,7 @@ export interface SkAppShellProps extends Pick<
   /** Consumer trigger used only for accepted-Escape focus return. It must be actually assigned within this shell's compact-header slot and control a same-root target actually assigned within this shell's compact-navigation slot. */
   compactTrigger?: SkAppShellElement["compactTrigger"];
 
-  /** Requests dismissal after Escape while the controlled compact drawer is effectively open. Detail is `{ reason: 'escape' }`; the event bubbles, is composed, and is not cancelable. */
+  /** Requests dismissal after Escape while controlled responsive navigation is effectively open. Detail is `{ reason: 'escape' }`; the event bubbles, is composed, and is not cancelable. */
   onSkAppShellDismiss?: (
     event: CustomEvent<{ readonly reason: "escape" }>,
   ) => void;
@@ -66,15 +66,15 @@ export interface SkAppShellProps extends Pick<
  *
  * Component attributes and properties that can be applied to the element or by using JavaScript.
  *
- * - `open`: Consumer-controlled compact drawer state. The shell never changes this value.
- * - `presentation`: Enables the opt-in compact layout. Omit it for the legacy responsive shell.
+ * - `open`: Consumer-controlled responsive navigation state. The shell never changes this value.
+ * - `presentation`: Enables an opt-in responsive layout. Omit it for the legacy responsive shell.
  * - `compactTrigger`: Consumer trigger used only for accepted-Escape focus return. It must be actually assigned within this shell's compact-header slot and control a same-root target actually assigned within this shell's compact-navigation slot. (property only)
  *
  * ## Events
  *
  * Events that will be emitted by the component.
  *
- * - `sk-app-shell-dismiss`: Requests dismissal after Escape while the controlled compact drawer is effectively open. Detail is `{ reason: 'escape' }`; the event bubbles, is composed, and is not cancelable.
+ * - `sk-app-shell-dismiss`: Requests dismissal after Escape while controlled responsive navigation is effectively open. Detail is `{ reason: 'escape' }`; the event bubbles, is composed, and is not cancelable.
  *
  * ## Slots
  *
