@@ -1,0 +1,249 @@
+{
+  "reviewedHead": "b9724983c721ba8e876fb07cac724904285b3d98",
+  "browserVersion": "151.0.7922.34",
+  "executablePath": "/home/jeroennouws/.cache/ms-playwright/chromium-1234/chrome-linux64/chrome",
+  "os": "Fedora Linux 44; Linux 7.1.5-201.fc44.x86_64; x86_64",
+  "display": ":99 1200x800x24",
+  "pageUrl": "http://127.0.0.1:6172/iframe.html?id=components-sksegmentedchoice-html--narrow&viewMode=story",
+  "x11FocusedWindowReset": "[1024x768]",
+  "x11FocusedWindowZoom": "[1024x768]",
+  "zoomMechanism": "X11 XTEST native Ctrl+0, then five Ctrl+Shift+= browser UI chords",
+  "at100": {
+    "expectedZoom": 100,
+    "window": {
+      "innerWidth": 1024,
+      "innerHeight": 681,
+      "outerWidth": 1024,
+      "outerHeight": 768,
+      "devicePixelRatio": 1,
+      "visualViewportWidth": 1024,
+      "visualViewportHeight": 681,
+      "visualViewportScale": 1
+    },
+    "document": {
+      "clientWidth": 1024,
+      "clientHeight": 681,
+      "scrollWidth": 1024,
+      "scrollHeight": 681
+    },
+    "frame": {
+      "text": "Overview\n  Activity\n  Details",
+      "left": 448,
+      "top": 250.5,
+      "right": 576,
+      "bottom": 430.5,
+      "width": 128,
+      "height": 180,
+      "clientWidth": 128,
+      "clientHeight": 180,
+      "scrollWidth": 128,
+      "scrollHeight": 180
+    },
+    "group": {
+      "text": "Overview\n  Activity\n  Details",
+      "left": 464,
+      "top": 266.5,
+      "right": 560,
+      "bottom": 414.5,
+      "width": 96,
+      "height": 148,
+      "clientWidth": 96,
+      "clientHeight": 148,
+      "scrollWidth": 96,
+      "scrollHeight": 148
+    },
+    "buttons": [
+      {
+        "text": "Overview",
+        "left": 464,
+        "top": 266.5,
+        "right": 560,
+        "bottom": 324.5,
+        "width": 96,
+        "height": 58,
+        "clientWidth": 92,
+        "clientHeight": 54,
+        "scrollWidth": 92,
+        "scrollHeight": 54
+      },
+      {
+        "text": "Activity",
+        "left": 464,
+        "top": 325.5,
+        "right": 560,
+        "bottom": 369.5,
+        "width": 96,
+        "height": 44,
+        "clientWidth": 94,
+        "clientHeight": 42,
+        "scrollWidth": 94,
+        "scrollHeight": 42
+      },
+      {
+        "text": "Details",
+        "left": 464,
+        "top": 370.5,
+        "right": 560,
+        "bottom": 414.5,
+        "width": 96,
+        "height": 44,
+        "clientWidth": 94,
+        "clientHeight": 42,
+        "scrollWidth": 94,
+        "scrollHeight": 42
+      }
+    ],
+    "rows": [
+      267,
+      326,
+      371
+    ],
+    "overlaps": [],
+    "focus": {
+      "tag": "button",
+      "text": "Overview",
+      "outlineStyle": "solid",
+      "outlineWidth": "2px",
+      "outlineOffset": "4px",
+      "outlineColor": "rgb(245, 197, 24)",
+      "rect": {
+        "left": 464,
+        "top": 266.5,
+        "right": 560,
+        "bottom": 324.5,
+        "width": 96,
+        "height": 58
+      }
+    },
+    "checks": {
+      "forcedWrap": true,
+      "minimumTargets": true,
+      "noButtonClipping": true,
+      "noOverlap": true,
+      "noPageHorizontalOverflow": true,
+      "groupContainedByFrame": true,
+      "visibleKeyboardFocus": true,
+      "focusNotClippedByDocument": true
+    },
+    "passed": true
+  },
+  "at200": {
+    "expectedZoom": 200,
+    "window": {
+      "innerWidth": 512,
+      "innerHeight": 340,
+      "outerWidth": 1024,
+      "outerHeight": 768,
+      "devicePixelRatio": 2,
+      "visualViewportWidth": 512,
+      "visualViewportHeight": 340.5,
+      "visualViewportScale": 1
+    },
+    "document": {
+      "clientWidth": 512,
+      "clientHeight": 340,
+      "scrollWidth": 512,
+      "scrollHeight": 340
+    },
+    "frame": {
+      "text": "Overview\n  Activity\n  Details",
+      "left": 192,
+      "top": 80.25,
+      "right": 320,
+      "bottom": 260.25,
+      "width": 128,
+      "height": 180,
+      "clientWidth": 128,
+      "clientHeight": 180,
+      "scrollWidth": 128,
+      "scrollHeight": 180
+    },
+    "group": {
+      "text": "Overview\n  Activity\n  Details",
+      "left": 208,
+      "top": 96.25,
+      "right": 304,
+      "bottom": 244.25,
+      "width": 96,
+      "height": 148,
+      "clientWidth": 96,
+      "clientHeight": 148,
+      "scrollWidth": 96,
+      "scrollHeight": 148
+    },
+    "buttons": [
+      {
+        "text": "Overview",
+        "left": 208,
+        "top": 96.25,
+        "right": 304,
+        "bottom": 154.25,
+        "width": 96,
+        "height": 58,
+        "clientWidth": 92,
+        "clientHeight": 54,
+        "scrollWidth": 92,
+        "scrollHeight": 54
+      },
+      {
+        "text": "Activity",
+        "left": 208,
+        "top": 155.25,
+        "right": 304,
+        "bottom": 199.25,
+        "width": 96,
+        "height": 44,
+        "clientWidth": 94,
+        "clientHeight": 42,
+        "scrollWidth": 94,
+        "scrollHeight": 42
+      },
+      {
+        "text": "Details",
+        "left": 208,
+        "top": 200.25,
+        "right": 304,
+        "bottom": 244.25,
+        "width": 96,
+        "height": 44,
+        "clientWidth": 94,
+        "clientHeight": 42,
+        "scrollWidth": 94,
+        "scrollHeight": 42
+      }
+    ],
+    "rows": [
+      96,
+      155,
+      200
+    ],
+    "overlaps": [],
+    "focus": {
+      "tag": "button",
+      "text": "Overview",
+      "outlineStyle": "solid",
+      "outlineWidth": "2px",
+      "outlineOffset": "4px",
+      "outlineColor": "rgb(245, 197, 24)",
+      "rect": {
+        "left": 208,
+        "top": 96.25,
+        "right": 304,
+        "bottom": 154.25,
+        "width": 96,
+        "height": 58
+      }
+    },
+    "checks": {
+      "forcedWrap": true,
+      "minimumTargets": true,
+      "noButtonClipping": true,
+      "noOverlap": true,
+      "noPageHorizontalOverflow": true,
+      "groupContainedByFrame": true,
+      "visibleKeyboardFocus": true,
+      "focusNotClippedByDocument": true
+    },
+    "passed": true
+  }
+}

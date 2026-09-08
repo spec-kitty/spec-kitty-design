@@ -1,16 +1,18 @@
 # Issue #270 segmented-choice browser zoom evidence
 
 This evidence records actual Chrome page zoom for all thirteen required native
-segmented-choice stories. It was captured from commit
+segmented-choice stories. Twelve unchanged stories were captured from commit
 `2152c7544ac2435d39d82d57bf3dbfe4eee2e67a` (tree
 `62ebd799389d3f54e0283d705dd4521f770bad26`) after the CI-authored visual baselines
-were committed.
+were committed. The `narrow` story was refreshed after the wrap review fix from product
+commit `b9724983c721ba8e876fb07cac724904285b3d98` (tree
+`0e17137e763001fdb3739203caac70bcaeb5358f`).
 
 ## Environment and method
 
 - Fedora Linux 44, kernel `7.1.5-201.fc44.x86_64`, x86_64
 - Chrome for Testing `151.0.7922.34`, Playwright `1.62.1`, Storybook `10.6.0`
-- Production Storybook build served at `127.0.0.1` in a `1200 x 800` Xvfb screen
+- Production Storybook builds served at `127.0.0.1` in a `1200 x 800` Xvfb screen
 - X11/XTEST focused the real headed Chrome window and sent `Ctrl+0`, followed by five
   native `Ctrl+Shift+=` chords
 - FFmpeg captured the complete X11 screen, including browser chrome and its visible zoom
@@ -18,9 +20,11 @@ were committed.
 - No CSS zoom/transform, Playwright viewport or device-scale override, CDP emulation, or
   pinch/page-scale emulation was used
 
-The physical Chrome window stayed `1200 x 800`. Its CSS viewport changed from
-`1200 x 657` at 100% to `600 x 328` at 200%; `devicePixelRatio` changed from `1` to
-`2`, while `visualViewport.scale` remained `1`.
+For the original twelve-story capture, the physical Chrome window stayed `1200 x 800`.
+Its CSS viewport changed from `1200 x 657` at 100% to `600 x 328` at 200%. For the
+post-review `narrow` refresh, the real headed Chrome window stayed `1024 x 768`; its CSS
+viewport changed from `1024 x 681` to `512 x 340`. In both runs,
+`devicePixelRatio` changed from `1` to `2`, while `visualViewport.scale` remained `1`.
 
 At each zoom level the harness opened each built story directly, focused the first native
 enabled button by keyboard, measured the document, group, every button's content box, and
@@ -38,8 +42,8 @@ checks; this evidence isolates genuine browser zoom.
 
 ## 100% measurements and captures
 
-All rows used CSS viewport `1200 x 657`, DPR `1`, and visual viewport scale `1`.
-Client/scroll values are CSS pixels.
+Unless noted for `narrow`, rows used CSS viewport `1200 x 657`, DPR `1`, and visual
+viewport scale `1`. Client/scroll values are CSS pixels.
 
 | Story             | Capture SHA-256                                                    | Document client/scroll | Group client/scroll | Keyboard focus observation                       |
 | ----------------- | ------------------------------------------------------------------ | ---------------------: | ------------------: | ------------------------------------------------ |
@@ -52,15 +56,15 @@ Client/scroll values are CSS pixels.
 | `no-selection`    | `2d663bc0ccfb9c7e8eb6c5ed680236d0c7ffffbe8f940aa0024ca6ce5236868b` |              1200/1200 |             257/257 | Overview; 2px solid; contained                   |
 | `all-disabled`    | `1a72b14462e8ee92bb352290ba9706d9ad68dcc961495743f48a34771c4e1107` |              1200/1200 |             262/262 | N/A; every native button is disabled             |
 | `one-disabled`    | `152e2eef173d6bcf1592a25b671b1897c4f1599df4f0b68a5e08bf00047ac7d2` |              1200/1200 |             262/262 | Overview; 2px solid; contained                   |
-| `narrow`          | `d4f83e469975c8889f0ae90670a9a8864591dffff74fbd36eeefe0a37c927a8b` |              1200/1200 |             262/262 | Overview; 2px solid; contained                   |
+| `narrow`          | `7ce5941288255fec6e6c06455113428a6685a41fc790c54f26335d1d33d7d225` |              1024/1024 |               96/96 | Overview; 2px solid; contained                   |
 | `forced-colors`   | `235f440de8767203c77befba217af35f7b705fb74bb95e3fdfd9fcdb40d54a4b` |              1200/1200 |             262/262 | Overview; 2px solid; contained                   |
 | `default-dark`    | `657f12e6eb984a127db250140ce543968083563a6dc107749f5614dcead91bb6` |              1200/1200 |             262/262 | Overview; 2px solid; contained                   |
 | `light-mode`      | `d71212db0b4b19c588e38a27b5dfec9ee972d08a1dae2d25c0b8e29fa313277c` |              1200/1200 |             262/262 | Overview; 2px solid; contained                   |
 
 ## 200% measurements and captures
 
-All rows used CSS viewport `600 x 328`, DPR `2`, and visual viewport scale `1`.
-Client/scroll values are CSS pixels.
+Unless noted for `narrow`, rows used CSS viewport `600 x 328`, DPR `2`, and visual
+viewport scale `1`. Client/scroll values are CSS pixels.
 
 | Story             | Capture SHA-256                                                    | Document client/scroll | Group client/scroll | Keyboard focus observation                       |
 | ----------------- | ------------------------------------------------------------------ | ---------------------: | ------------------: | ------------------------------------------------ |
@@ -73,10 +77,24 @@ Client/scroll values are CSS pixels.
 | `no-selection`    | `05cef8d4072e0450f5fa95c21895a68d90eeabf411b7469e3042ee41fc9a4ae4` |                600/600 |             257/257 | Overview; 2px solid; contained                   |
 | `all-disabled`    | `7d8efd680bbd4088da4069036b40804c3f63f506b6eda6676cf3bbde0896237f` |                600/600 |             262/262 | N/A; every native button is disabled             |
 | `one-disabled`    | `f4707c7450a767110c26395706d591734cbb6b35c9afaf56e9f3aca62f4172d1` |                600/600 |             262/262 | Overview; 2px solid; contained                   |
-| `narrow`          | `03786be8904c3514db9a2351013d75e53e1d98e9c00708a98f575ad87ded9101` |                600/600 |             262/262 | Overview; 2px solid; contained                   |
+| `narrow`          | `948bd700605a8c34c3e74f843c286e8558a98a7e40f6bcde54bf4ff5884e69c4` |                512/512 |               96/96 | Overview; 2px solid; contained                   |
 | `forced-colors`   | `fbc694feb4f45f0e396ce9e002672e810cc53645e213c7f64d55b0c5e5cf870f` |                600/600 |             262/262 | Overview; 2px solid; contained                   |
 | `default-dark`    | `0073c565e74c56708faf0c261963436e1aa789a97bac06b0e3776c36fb3a7505` |                600/600 |             262/262 | Overview; 2px solid; contained                   |
 | `light-mode`      | `c2ba4abbf03d219ee02fae027b2c1bc191f24d22b797483379447b71e2570df9` |                600/600 |             262/262 | Overview; 2px solid; contained                   |
+
+## Post-review `narrow` refresh
+
+The refreshed story deliberately constrains the presentation frame so the three native
+buttons wrap onto separate rows. At 100%, their top coordinates were `266.5`, `325.5`,
+and `370.5` CSS pixels; at 200%, they were `96.25`, `155.25`, and `200.25`. At both zoom
+levels, button border-boxes measured `96 x 58`, `96 x 44`, and `96 x 44` CSS pixels. The
+document had no horizontal overflow, the group remained contained by its frame, no
+buttons overlapped or clipped, and the first button's 2px keyboard-focus outline with a
+4px offset remained visible and inside the document.
+
+The reviewer-owned measurement record is
+`narrow-metrics.json`, SHA-256
+`9e5093014697a59df8db0885bb2fbda25ecfa1d05b7eed04b668dfada18a4c01`.
 
 The tracked files are named `<story>-100-desktop.png` and
 `<story>-200-desktop.png`. The PR evidence comment pins the post-evidence exact delivery
