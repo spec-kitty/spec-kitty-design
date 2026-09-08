@@ -46,6 +46,16 @@
   overflow-wrap: anywhere;
 }
 
+@media (max-width: 20rem) {
+  .sk-copy-field {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .sk-copy-field .sk-button {
+    justify-self: end;
+  }
+}
+
 @media (forced-colors: active) {
   .sk-copy-field {
     border-color: CanvasText;
@@ -54,15 +64,5 @@
 
   .sk-copy-field__status {
     color: CanvasText;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .sk-copy-field,
-  .sk-copy-field .sk-button,
-  .sk-copy-field__value,
-  .sk-copy-field__status {
-    animation: none;
-    transition: none;
   }
 }

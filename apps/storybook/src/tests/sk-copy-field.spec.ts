@@ -93,6 +93,26 @@ test('long values wrap without horizontal clipping at narrow responsive widths',
   expect(dimensions.valueWidth).toBeLessThan(dimensions.hostWidth);
 });
 
+test('long values remain contained when fixed-window 400% zoom yields a 195px CSS viewport', async ({ page }) => {
+  await page.setViewportSize({ width: 195, height: 253 });
+  const host = await story(page, 'long-wrapping-command');
+  const dimensions = await host.evaluate((element) => {
+    const value = element.shadowRoot!.querySelector<HTMLElement>('[part="value"]')!;
+    return {
+      hostRight: element.getBoundingClientRect().right,
+      pageWidth: document.documentElement.scrollWidth,
+      viewportWidth: document.documentElement.clientWidth,
+      valueWidth: value.getBoundingClientRect().width,
+      valueClientWidth: value.clientWidth,
+      valueScrollWidth: value.scrollWidth,
+    };
+  });
+  expect(dimensions.hostRight).toBeLessThanOrEqual(dimensions.viewportWidth);
+  expect(dimensions.pageWidth).toBe(dimensions.viewportWidth);
+  expect(dimensions.valueWidth).toBeGreaterThan(0);
+  expect(dimensions.valueScrollWidth).toBeLessThanOrEqual(dimensions.valueClientWidth + 1);
+});
+
 test('value mutation clears stale feedback and old completion cannot restore it', async ({ page }) => {
   const host = await story(page);
   await host.evaluate((element) => {

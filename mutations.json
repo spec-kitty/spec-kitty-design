@@ -1837,6 +1837,14 @@
       "subject": "fixtures/elements-behaviour/src/sk-copy-field.test.ts"
     },
     {
+      "id": "SC-017",
+      "arm": "the 20rem high-zoom reflow threshold remains declared at its documented figure",
+      "file": "packages/elements/src/copy-field/sk-copy-field.css.js",
+      "from": "@media (max-width: 20rem)",
+      "to": "@media (max-width: 10rem)",
+      "subject": "fixtures/elements-behaviour/src/sk-copy-field.test.ts"
+    },
+    {
       "id": "SC-006",
       "arm": "generated copy-field wrapper subscribes the React callback once",
       "file": "packages/react/src/SkCopyField.js",

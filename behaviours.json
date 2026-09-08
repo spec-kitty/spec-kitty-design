@@ -742,6 +742,10 @@
         {
           "name": "sk-app-shell",
           "file": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+        },
+        {
+          "name": "sk-copy-field",
+          "file": "fixtures/elements-behaviour/src/sk-copy-field.test.ts"
         }
       ]
     },

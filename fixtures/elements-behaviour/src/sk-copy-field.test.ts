@@ -97,6 +97,7 @@ test('missing, rejected, throwing, and insecure clipboard paths select the visib
   const clipboardCases: Array<unknown> = [
     undefined,
     {},
+    { writeText: 'not callable' },
     { writeText: vi.fn(() => Promise.reject(new Error('denied'))) },
     { writeText: vi.fn(() => { throw new Error('blocked'); }) },
   ];
@@ -152,6 +153,59 @@ test('selection failure emits failed and never makes an untruthful success claim
   control(element).click();
   await vi.waitFor(() => expect(outcomes).toEqual(['failed']));
   expect(status(element).textContent).toBe('Unable to copy or select the value.');
+});
+
+test('every selection-fallback failure is contained and emits one failed result', async () => {
+  const failures = [
+    'focus verification',
+    'selected text mismatch',
+    'range creation throws',
+    'selection removal throws',
+    'selection replacement throws',
+  ] as const;
+
+  for (const failure of failures) {
+    const escaped: Event[] = [];
+    const recordEscaped = (event: Event) => escaped.push(event);
+    globalThis.addEventListener('error', recordEscaped);
+    globalThis.addEventListener('unhandledrejection', recordEscaped);
+    const element = await mount(`unselectable: ${failure}`);
+    const node = valueNode(element);
+    control(element).focus();
+    const selection = {
+      removeAllRanges: vi.fn(() => {
+        if (failure === 'selection removal throws') throw new Error('remove denied');
+      }),
+      addRange: vi.fn(() => {
+        if (failure === 'selection replacement throws') throw new Error('add denied');
+      }),
+      toString: () => failure === 'selected text mismatch' ? 'different text' : node.textContent,
+    } as unknown as Selection;
+    vi.spyOn(globalThis, 'getSelection').mockReturnValue(selection);
+    if (failure === 'focus verification') {
+      vi.spyOn(node, 'focus').mockImplementation(() => undefined);
+    }
+    if (failure === 'range creation throws') {
+      vi.spyOn(document, 'createRange').mockImplementation(() => {
+        throw new Error('range denied');
+      });
+    }
+    const outcomes: string[] = [];
+    element.addEventListener('sk-copy-field-result', (event) => {
+      outcomes.push((event as CustomEvent<{ outcome: string }>).detail.outcome);
+    });
+
+    control(element).click();
+    await vi.waitFor(() => expect(outcomes).toEqual(['failed']));
+    await Promise.resolve();
+    expect(status(element).textContent).toBe('Unable to copy or select the value.');
+    expect(escaped).toEqual([]);
+
+    globalThis.removeEventListener('error', recordEscaped);
+    globalThis.removeEventListener('unhandledrejection', recordEscaped);
+    element.remove();
+    vi.restoreAllMocks();
+  }
 });
 
 test('missing and blank labels each warn once and fail open without hiding the control or value', async () => {
@@ -373,6 +427,23 @@ test('[SC-014] shared button CSS precedes the generated local sheet and no style
   expect(sheets[0]).toBe(buttonSheet);
   expect(sheets[1]).toBe(skCopyFieldSheet);
   expect(element.shadowRoot!.querySelectorAll('style')).toHaveLength(0);
+});
+
+test('[SC-017] the 20rem viewport threshold declares the one-column high-zoom reflow', () => {
+  const responsiveRules = Array.from(skCopyFieldSheet.cssRules)
+    .filter((rule): rule is CSSMediaRule => rule instanceof CSSMediaRule)
+    .filter((rule) => rule.conditionText.replace(/\s+/g, ' ') === '(max-width: 20rem)');
+  expect(responsiveRules).toHaveLength(1);
+  const declarations = Array.from(responsiveRules[0]!.cssRules)
+    .filter((rule): rule is CSSStyleRule => rule instanceof CSSStyleRule);
+  const field = declarations.find((rule) => rule.selectorText === '.sk-copy-field');
+  const button = declarations.find((rule) => rule.selectorText === '.sk-copy-field .sk-button');
+  expect(field?.style.getPropertyValue('grid-template-columns').trim()).toBe('minmax(0px, 1fr)');
+  expect(button?.style.getPropertyValue('justify-self').trim()).toBe('end');
+  expect(
+    window.matchMedia('(max-width: 20rem)').matches,
+    'the behavior-fixture lane must stay above the threshold; the 195px Playwright case owns the live below-threshold proof',
+  ).toBe(false);
 });
 
 test('[SC-015] guarded module registration warns only for a different constructor', () => {
