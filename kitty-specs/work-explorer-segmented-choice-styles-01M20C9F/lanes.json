@@ -20,8 +20,9 @@
         "packages/elements/SIZES.md",
         "packages/styles/package.json",
         "packages/styles/src/index.ts",
-        "packages/styles/src/segmented-choice/**",
-        "suite-budget.json"
+    "packages/styles/src/segmented-choice/**",
+    "scripts/build-styles-only-markup.mjs",
+    "suite-budget.json"
       ],
       "predicted_surfaces": [
         "api",

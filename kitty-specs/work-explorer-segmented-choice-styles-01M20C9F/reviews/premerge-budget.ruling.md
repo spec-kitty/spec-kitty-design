@@ -20,6 +20,15 @@ the file's established `1.5213 × worst observed` floor: `1084.5 × 1.5213 =
 process-only deviation is required to make the repository-mandated gate
 deterministic; it does not alter the styles-only segmented-choice contract.
 
+The same review found that the generated segmented-choice barrel falsely
+attributed #270's component-specific ownership rationale to ADR-10. Because the
+barrel is generated and generated output must never be hand-edited,
+`scripts/build-styles-only-markup.mjs` is also added to WP01 and lane ownership
+solely to encode the #270 citation at the canonical source. The generator keeps
+the existing form-field exception and every other ADR-10 citation unchanged.
+This narrow correction creates no new generator, export, component, or public
+API surface.
+
 The correction must be committed to the same one-WP/one-PR branch, rerun through
 all PR checks, and independently reviewed at the new exact head. A rerun of the
 old ceiling is not accepted as remediation.
