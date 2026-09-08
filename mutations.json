@@ -47,7 +47,8 @@
     "#254 REVIEW-CYCLE 5 adds FIVE app-shell arms, moving the standing set from 201 to 206. Three SC-012 arms independently break original-snapshot inheritance, current-owner restoration, and active-destination release during cross-shell handoff. One SC-006 arm removes nearest-shell Escape claiming without stopping the original key event. One SC-017 arm changes only the compact logical container feature back to physical width; the pre-existing 860-to-859 CSS arm remains separate so logical-axis parity and inclusive-threshold semantics are independently falsifiable.",
     "#254 REVIEW-CYCLE 6 adds FOUR arms, moving the standing set from 206 to 210: generated compactTrigger omission resets null; component acceptance waits one microtask for the current React commit; omitted React false is accepted as closed; and an ordinary omitted-false route close releases hidden focus. Each new arm is exact and omits expectCollateral.",
     "#254 REVIEW-CYCLE 6 COLLATERAL ADJUDICATION records the reproduced exact-7aa outcomes without changing product behavior. The presentation-reflection, native controlled-close release, and compact-header exposure mutations all red the integrated React SC-012 fixture, so each declares required collateral. The old native subject stays green when the closed-render await is removed, while the React SC-012 fixture alone reds; that arm is therefore retargeted to react-app-shell without collateral.",
-    "#272 adds exactly THREE sk-action-row arms, moving the refreshed standing set from 210 to 213. Two SC-010 arms remove the new href and presentation registrations independently so the extended pre-upgrade test proves each public axis remains reactive and reflected. One SC-006 arm attaches the existing selectable request path to the route anchor; the mixed-state negative case then proves native route mode emits zero custom activation events. No SC-007/SC-008 route arms exist because an event with no dispatch has no independently falsifiable detail or propagation flags."
+    "#272 adds exactly THREE sk-action-row arms, moving the refreshed standing set from 210 to 213. Two SC-010 arms remove the new href and presentation registrations independently so the extended pre-upgrade test proves each public axis remains reactive and reflected. One SC-006 arm attaches the existing selectable request path to the route anchor; the mixed-state negative case then proves native route mode emits zero custom activation events. No SC-007/SC-008 route arms exist because an event with no dispatch has no independently falsifiable detail or propagation flags.",
+    "#257 CYCLE-2 COLLATERAL ADJUDICATION records the exact-e5202f4 outcome after the container-responsive SC-017 test was added. Both SC-014 stylesheet-adoption mutations necessarily remove or replace the local sheet that owns the @container rule, so the named SC-014 identity/length assertion and the SC-017 live-layout assertion red together. Each declares required collateral; guard 5 still inverts and will fail if the layout test ever stops proving that stylesheet dependency."
   ],
   "mutations": [
     {
@@ -1826,7 +1827,8 @@
       "file": "packages/elements/src/copy-field/sk-copy-field.ts",
       "from": "  static styles = [buttonSheet, sheet];",
       "to": "  static styles = [];",
-      "subject": "fixtures/elements-behaviour/src/sk-copy-field.test.ts"
+      "subject": "fixtures/elements-behaviour/src/sk-copy-field.test.ts",
+      "expectCollateral": true
     },
     {
       "id": "SC-014",
@@ -1834,14 +1836,15 @@
       "file": "packages/elements/src/copy-field/sk-copy-field.ts",
       "from": "  static styles = [buttonSheet, sheet];",
       "to": "  static styles = [buttonSheet, new CSSStyleSheet()];",
-      "subject": "fixtures/elements-behaviour/src/sk-copy-field.test.ts"
+      "subject": "fixtures/elements-behaviour/src/sk-copy-field.test.ts",
+      "expectCollateral": true
     },
     {
       "id": "SC-017",
-      "arm": "the 20rem high-zoom reflow threshold remains declared at its documented figure",
+      "arm": "the 20rem available-inline-size reflow threshold remains declared at its documented figure",
       "file": "packages/elements/src/copy-field/sk-copy-field.css.js",
-      "from": "@media (max-width: 20rem)",
-      "to": "@media (max-width: 10rem)",
+      "from": "@container (max-width: 20rem)",
+      "to": "@container (max-width: 10rem)",
       "subject": "fixtures/elements-behaviour/src/sk-copy-field.test.ts"
     },
     {

@@ -7,13 +7,36 @@ const story = async (page: Page, id = 'default'): Promise<Locator> => {
   return host;
 };
 
-test('the empty polite atomic status is exposed from first render and keeps its identity', async ({ page }) => {
+const installFocusSentinels = async (host: Locator): Promise<void> => {
+  await host.evaluate((element) => {
+    const before = document.createElement('button');
+    before.type = 'button';
+    before.textContent = 'Before copy field';
+    before.dataset['copyFieldSentinel'] = 'before';
+    const after = document.createElement('button');
+    after.type = 'button';
+    after.textContent = 'After copy field';
+    after.dataset['copyFieldSentinel'] = 'after';
+    element.before(before);
+    element.after(after);
+  });
+};
+
+test('the accessibility tree exposes the exact value, named control, and stable announced outcome', async ({ page }) => {
   const host = await story(page);
+  const button = host.getByRole('button', { name: 'Copy value', exact: true });
   const liveStatus = host.getByRole('status');
+  await expect(button).toBeVisible();
   await expect(liveStatus).toBeAttached();
   await expect(liveStatus).toHaveAttribute('aria-live', 'polite');
   await expect(liveStatus).toHaveAttribute('aria-atomic', 'true');
-  expect(await liveStatus.ariaSnapshot()).toContain('status');
+  const exactValue = await host.locator('[part="value"]').textContent();
+  expect(exactValue).toBe('npm run quality:all');
+  const before = await host.ariaSnapshot();
+  expect(before).toContain(exactValue!);
+  expect(before).toContain('button "Copy value"');
+  expect(before).not.toContain('Value copied.');
+  expect(await liveStatus.ariaSnapshot()).toMatch(/^- status\s*$/m);
   await liveStatus.evaluate((node) => {
     (node as HTMLElement & { __copyFieldIdentity?: boolean }).__copyFieldIdentity = true;
   });
@@ -25,9 +48,33 @@ test('the empty polite atomic status is exposed from first render and keeps its 
     (element.shadowRoot!.querySelector('button') as HTMLButtonElement).click();
   });
   await expect(liveStatus).toHaveText('Value copied.');
+  expect(await liveStatus.ariaSnapshot()).toContain('status: Value copied.');
   expect(await liveStatus.evaluate(
     (node) => (node as HTMLElement & { __copyFieldIdentity?: boolean }).__copyFieldIdentity,
   )).toBe(true);
+});
+
+test('real Tab traversal has one native component stop when non-empty and zero when empty', async ({ page }) => {
+  let host = await story(page);
+  await installFocusSentinels(host);
+  const before = page.getByRole('button', { name: 'Before copy field', exact: true });
+  const after = page.getByRole('button', { name: 'After copy field', exact: true });
+  const copy = host.getByRole('button', { name: 'Copy value', exact: true });
+
+  await before.focus();
+  await page.keyboard.press('Tab');
+  await expect(copy).toBeFocused();
+  await page.keyboard.press('Tab');
+  await expect(after).toBeFocused();
+
+  host = await story(page, 'disabled-empty');
+  await installFocusSentinels(host);
+  const emptyBefore = page.getByRole('button', { name: 'Before copy field', exact: true });
+  const emptyAfter = page.getByRole('button', { name: 'After copy field', exact: true });
+  await expect(host.getByRole('button', { name: 'Copy value', exact: true })).toBeDisabled();
+  await emptyBefore.focus();
+  await page.keyboard.press('Tab');
+  await expect(emptyAfter).toBeFocused();
 });
 
 test('pointer, Enter, and Space copy exact visible bytes once and keep focus', async ({ page }) => {
@@ -111,6 +158,53 @@ test('long values remain contained when fixed-window 400% zoom yields a 195px CS
   expect(dimensions.pageWidth).toBe(dimensions.viewportWidth);
   expect(dimensions.valueWidth).toBeGreaterThan(0);
   expect(dimensions.valueScrollWidth).toBeLessThanOrEqual(dimensions.valueClientWidth + 1);
+});
+
+test('a roughly 115px host reflows safely inside a wide page viewport', async ({ page }) => {
+  await page.setViewportSize({ width: 1000, height: 700 });
+  const host = await story(page, 'long-wrapping-command');
+  const dimensions = await host.evaluate((element) => {
+    element.style.inlineSize = '115px';
+    const field = element.shadowRoot!.querySelector<HTMLElement>('[part="field"]')!;
+    const value = element.shadowRoot!.querySelector<HTMLElement>('[part="value"]')!;
+    const button = element.shadowRoot!.querySelector<HTMLButtonElement>('button')!;
+    const fieldRect = field.getBoundingClientRect();
+    const valueRect = value.getBoundingClientRect();
+    const buttonRect = button.getBoundingClientRect();
+    return {
+      viewportWidth: document.documentElement.clientWidth,
+      pageClientWidth: document.documentElement.clientWidth,
+      pageScrollWidth: document.documentElement.scrollWidth,
+      hostClientWidth: element.clientWidth,
+      hostScrollWidth: element.scrollWidth,
+      fieldClientWidth: field.clientWidth,
+      fieldScrollWidth: field.scrollWidth,
+      valueClientWidth: value.clientWidth,
+      valueScrollWidth: value.scrollWidth,
+      valueText: value.textContent,
+      valueOverflow: getComputedStyle(value).overflow,
+      gridTemplateColumns: getComputedStyle(field).gridTemplateColumns,
+      buttonJustifySelf: getComputedStyle(button).justifySelf,
+      valueWidth: valueRect.width,
+      valueBottom: valueRect.bottom,
+      buttonTop: buttonRect.top,
+      buttonRight: buttonRect.right,
+      fieldRight: fieldRect.right,
+    };
+  });
+  expect(dimensions.viewportWidth).toBe(1000);
+  expect(dimensions.hostClientWidth).toBe(115);
+  expect(dimensions.valueWidth).toBeGreaterThan(0);
+  expect(dimensions.valueText).toContain('spec-kitty implement copy-field-element');
+  expect(dimensions.valueOverflow).toBe('visible');
+  expect(dimensions.hostScrollWidth).toBeLessThanOrEqual(dimensions.hostClientWidth);
+  expect(dimensions.fieldScrollWidth).toBeLessThanOrEqual(dimensions.fieldClientWidth);
+  expect(dimensions.valueScrollWidth).toBeLessThanOrEqual(dimensions.valueClientWidth + 1);
+  expect(dimensions.pageScrollWidth).toBe(dimensions.pageClientWidth);
+  expect(dimensions.gridTemplateColumns).not.toContain(' ');
+  expect(dimensions.buttonJustifySelf).toBe('end');
+  expect(dimensions.buttonTop).toBeGreaterThanOrEqual(dimensions.valueBottom);
+  expect(dimensions.buttonRight).toBeLessThanOrEqual(dimensions.fieldRight);
 });
 
 test('value mutation clears stale feedback and old completion cannot restore it', async ({ page }) => {

@@ -39,8 +39,9 @@ truthfully for its attempt but cannot relabel the changed field, even after an A
   it is disabled and absent from sequential navigation for the empty value.
 - `status`: one stable `role="status"`, polite and atomic from first render.
 
-The field uses its value/action columns above `20rem`. At viewport widths of `20rem` or less, it
-reflows to one column and end-aligns the same native button so enlarged text keeps both the exact
+The field uses its value/action columns above `20rem` of available host inline size. When its host
+container is `20rem` wide or less, it reflows to one column and end-aligns the same native button,
+independently of the page viewport, so enlarged text and narrow compositions keep both the exact
 value and action reachable without horizontal clipping.
 
 There are no slots, public methods, form association, static markup form, timers, retries, command

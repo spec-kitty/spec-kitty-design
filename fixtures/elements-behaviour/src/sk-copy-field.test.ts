@@ -429,9 +429,13 @@ test('[SC-014] shared button CSS precedes the generated local sheet and no style
   expect(element.shadowRoot!.querySelectorAll('style')).toHaveLength(0);
 });
 
-test('[SC-017] the 20rem viewport threshold declares the one-column high-zoom reflow', () => {
+test('[SC-017] the 20rem available-inline-size threshold declares and applies the one-column reflow', async () => {
+  const hostRule = Array.from(skCopyFieldSheet.cssRules)
+    .filter((rule): rule is CSSStyleRule => rule instanceof CSSStyleRule)
+    .find((rule) => rule.selectorText === ':host');
+  expect(hostRule?.style.getPropertyValue('container-type').trim()).toBe('inline-size');
   const responsiveRules = Array.from(skCopyFieldSheet.cssRules)
-    .filter((rule): rule is CSSMediaRule => rule instanceof CSSMediaRule)
+    .filter((rule): rule is CSSContainerRule => rule instanceof CSSContainerRule)
     .filter((rule) => rule.conditionText.replace(/\s+/g, ' ') === '(max-width: 20rem)');
   expect(responsiveRules).toHaveLength(1);
   const declarations = Array.from(responsiveRules[0]!.cssRules)
@@ -440,10 +444,11 @@ test('[SC-017] the 20rem viewport threshold declares the one-column high-zoom re
   const button = declarations.find((rule) => rule.selectorText === '.sk-copy-field .sk-button');
   expect(field?.style.getPropertyValue('grid-template-columns').trim()).toBe('minmax(0px, 1fr)');
   expect(button?.style.getPropertyValue('justify-self').trim()).toBe('end');
-  expect(
-    window.matchMedia('(max-width: 20rem)').matches,
-    'the behavior-fixture lane must stay above the threshold; the 195px Playwright case owns the live below-threshold proof',
-  ).toBe(false);
+  const element = await mount('container-safe');
+  element.style.inlineSize = '115px';
+  expect(getComputedStyle(element.shadowRoot!.querySelector('[part="field"]')!).gridTemplateColumns)
+    .not.toContain(' ');
+  expect(getComputedStyle(control(element)).justifySelf).toBe('end');
 });
 
 test('[SC-015] guarded module registration warns only for a different constructor', () => {

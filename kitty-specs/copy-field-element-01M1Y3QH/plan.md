@@ -237,12 +237,16 @@ claim to an independently meaningful mutation arm in `mutations.json`:
 - native focus/keyboard path and empty disabled state;
 - every public part present and targetable;
 - generated constructable-sheet adoption by named identity with no injected `<style>`;
-- duplicate registration safety.
+- duplicate registration safety;
+- the documented `20rem` available-inline-size threshold, including container-safe one-column
+  reflow and end alignment, under SC-017.
 
 Ordinary focused tests cover stable-node re-announcement, clipboard capability/rejection arms,
-selection verification, value-revision reset, message overrides, multiple instances, and layout
-where ADR-11 has no exact behavior ID. Mutation self-tests prove each configured source transform is
-effective and the intended behavior test goes red; no unrelated ID is minted or mislabeled.
+selection verification, value-revision reset, message overrides, and multiple instances. The
+SC-017 ordinary assertion reads the generated container rule and applies it to a constrained host;
+Chromium/Firefox browser coverage proves a roughly 115px host reflows inside a wide page without
+component or page overflow. Mutation self-tests prove each configured source transform is effective
+and the intended behavior test goes red; no unrelated ID is minted or mislabeled.
 
 ## Verification Strategy
 

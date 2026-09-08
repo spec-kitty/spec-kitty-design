@@ -15,11 +15,11 @@ test-first/generator ordering.
 
 | ID | Description | WP | Parallel |
 |---|---|---|---|
-| T001 | Author focused behavior, React-type, Storybook/browser/accessibility/geometry tests first; record the expected red caused by the absent element and cover every exact-string, clipboard, fallback, message-default, event/privacy, focus, synchronous A→B→A reset, completion-order, multi-instance, theme, real-zoom, forced-color, and reduced-motion branch (FR-001–FR-017, FR-019–FR-021; NFR-001–NFR-005, NFR-007; C-008). | WP01 | No |
+| T001 | Author focused behavior, React-type, Storybook/browser/accessibility/geometry tests first; record the expected red caused by the absent element and cover every exact-string, clipboard, fallback, message-default, event/privacy, real Tab/accessibility-tree, focus, synchronous A→B→A reset, completion-order, multi-instance, wide-page/narrow-host, theme, real-zoom, forced-color, and reduced-motion branch (FR-001–FR-017, FR-019–FR-021; NFR-001–NFR-005, NFR-007; C-008). | WP01 | No |
 | T002 | Implement `SkCopyField` with one custom-accessor reactive value, one native button using the existing button stylesheet/classes, secure Clipboard API truthfulness, verified visible-value focus/selection fallback, stable live status, synchronous value-revision reset, completion-order semantics, typed privacy-safe event, parts/JSDoc, and `define()` registration (FR-001–FR-016, FR-018; C-003–C-006). | WP01 | No |
-| T003 | Author token-only `sk-copy-field.css` with explicit block host, wrapping/containment, focus/status/empty treatment, existing button/surface vocabulary, a local `transition: none` override, forced-colors safety, and no component-owned motion; wire only applicable authored package exports (FR-002, FR-015–FR-018; NFR-003–NFR-006). | WP01 | No |
+| T003 | Author token-only `sk-copy-field.css` with an explicit block host that establishes inline-size containment, a `20rem` container-query reflow, wrapping/containment, focus/status/empty treatment, existing button/surface vocabulary, a local `transition: none` override, forced-colors safety, and no component-owned motion; wire only applicable authored package exports (FR-002, FR-015–FR-018; NFR-003–NFR-006). | WP01 | No |
 | T004 | Add default/hover/focus/active/disabled and every other required Storybook state plus consumer usage, exact token-dependency, and JavaScript-boundary documentation, keeping fixtures deterministic and application-neutral (FR-003, FR-008–FR-011, FR-020, FR-022; NFR-002–NFR-006; C-003–C-005). | WP01 | No |
-| T005 | Register applicable ADR-11 behavior subjects, meaningful mutation/selftest arms, public parts/docs/stories ratchets, and React/Vue contract tests; do not claim inapplicable form, slot, responsive-threshold, or cancelation responsibilities (FR-012–FR-021; NFR-007; C-007). | WP01 | No |
+| T005 | Register applicable ADR-11 behavior subjects, including SC-017 for the documented `20rem` available-inline-size threshold, meaningful mutation/selftest arms, public parts/docs/stories ratchets, and React/Vue contract tests; do not claim inapplicable form, slot, or cancelation responsibilities (FR-012–FR-021; NFR-007; C-007). | WP01 | No |
 | T006 | Run the fixed repository command matrix from authored inputs, inspect and commit manifest/React/Vue/CSS/index/ratchet/size outputs, then execute focused and full build/lint/type/test/Storybook/axe/browser/visual/quality gates with exact-SHA results (FR-018–FR-022; NFR-001–NFR-008; C-007). | WP01 | No |
 
 No `[P]` markers are valid. T001 establishes the red contract. T002 and T003 converge on one
@@ -40,9 +40,11 @@ invalidate the reviewed lane SHA.
   support, and generated framework distribution—without command execution or application state.
 - **Priority**: P1. This is the complete independently usable outcome of #257 and a public input to
   #255.
-- **Independent test**: Focused behavior and React consumer tests pass; the dedicated Storybook
-  Playwright specs pass in Chromium and Firefox with zero axe violations and page containment at
-  390px/200%/400%; all generators/checks and full repository gates are clean; required visual
+- **Independent test**: Focused behavior and React consumer tests pass, including the SC-017
+  generated-rule/live constrained-host assertion; the dedicated Storybook Playwright specs pass in
+  Chromium and Firefox with zero axe violations, real accessibility-tree/Tab-path evidence, a
+  roughly 115px host safely reflowed inside a wide page, and page containment at 390px/200%/400%;
+  all generators/checks and full repository gates are clean; required visual
   baselines pass in the authoritative environment; and independent Codex runtime review evidence
   names the exact approved lane SHA.
 - **Included subtasks**: T001–T006.

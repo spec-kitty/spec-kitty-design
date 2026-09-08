@@ -10,7 +10,7 @@ const LONG =
 
 const frame = (content: unknown, light = false, width = '42rem') => html`<div
   class=${light ? 'sk-light' : ''}
-  style=${`box-sizing:border-box;width:min(${width},100%);padding:var(--sk-space-6);background:var(--sk-surface-page);color:var(--sk-fg-body);`}
+  style=${`box-sizing:border-box;width:min(${width},calc(100vw - 2rem));padding:var(--sk-space-6);background:var(--sk-surface-page);color:var(--sk-fg-body);`}
 >${content}</div>`;
 
 const field = (value = COMMAND) => html`<sk-copy-field .value=${value}></sk-copy-field>`;
