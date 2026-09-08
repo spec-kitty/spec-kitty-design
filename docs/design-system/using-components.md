@@ -1491,6 +1491,28 @@ contribution suppressed (`content: '▸' / '';`), never the sole affordance for 
 
 ---
 
+## Collection
+
+The CSS-only collection surface styles consumer-authored native markup: a `<section>` named by a
+real heading, a real `<button aria-expanded aria-controls>`, its controlled body, a native
+`<ul>` or `<ol>` with `<li>` children, and an optional bounded footer/action region. There is no
+`sk-collection` custom element or shadow root. Use the generated collection exemplars and
+`sk-collection.css` from `@spec-kitty/styles` as the shipped contract.
+
+The consumer owns the controlled state. It keeps `aria-expanded` and `aria-controls` accurate,
+applies or removes native `hidden` on the controlled body, supplies counts and contents, and
+decides how expansion changes. The library provides styles only; it never changes DOM,
+attributes, focus, content, or selection.
+
+This differs deliberately from `.sk-disclosure`: a disclosure's `<details open>` state is native
+and user-agent-owned, while a collection's `aria-expanded`/`hidden` pair is entirely
+consumer-owned. Do not extend `.sk-disclosure` or substitute its `<details>/<summary>` contract
+for a controlled collection.
+
+[View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/primitives-skcollection-html--default)
+
+---
+
 ## Data table
 
 Tabular data — run/job lists — as a real `<table>` with `<caption>` and `<th scope>`, with one

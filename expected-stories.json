@@ -149,6 +149,22 @@
       "elements-skcheckbullet--custom-icon",
       "elements-skcheckbullet--light-mode"
     ],
+    "sk-collection": [
+      "primitives-skcollection-html--default",
+      "primitives-skcollection-html--closed",
+      "primitives-skcollection-html--one-item",
+      "primitives-skcollection-html--fifty-items",
+      "primitives-skcollection-html--empty",
+      "primitives-skcollection-html--no-count",
+      "primitives-skcollection-html--no-footer",
+      "primitives-skcollection-html--long-text",
+      "primitives-skcollection-html--narrow",
+      "primitives-skcollection-html--forced-colors",
+      "primitives-skcollection-html--blocked",
+      "primitives-skcollection-html--blocked-light-mode",
+      "primitives-skcollection-html--blocked-forced-colors",
+      "primitives-skcollection-html--light-mode"
+    ],
     "sk-context-sidebar": [
       "elements-skcontextsidebar--default",
       "elements-skcontextsidebar--long-labels",
@@ -473,5 +489,5 @@
       "components-sksegmentedchoice-html--light-mode"
     ]
   },
-  "total": 347
+  "total": 361
 }
