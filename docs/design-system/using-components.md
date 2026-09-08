@@ -12,14 +12,16 @@ so far — as **custom elements** in `@spec-kitty/elements`. Both require `@spec
 Several of the catalogue's component packages are CSS only by a recorded decision — `form-field`,
 (#176) `facts`, `disclosure`, `data-table`, `empty-state`, `skip-link`, (#210) `progress`, and
 (#209) `workflow-board` and `workflow-lane`, (#211) `form-select`, and (#213) `breadcrumbs`,
-`prose`, and `event-timeline`, plus (#270) `segmented-choice`. See
+`prose`, and `event-timeline`. See
 ADR-10, *form-field is deliberately styles-only* and *Styles-only components are a class, not a
-fixed exception count*. These fourteen ship classes applied to real semantic HTML the consumer authors
-— `<dl>`, `<details>`, `<table>`, a plain block, `<a>`, `<progress>`, `<section>`, `<ol>`, `<select>`,
-and a named group of `<button>` elements — and no `sk-*` custom element
-wraps any of them: light-DOM native semantics (list/table/label association across a shadow
-boundary) are exactly what a wrapper element would break. Composite sections below such as Hero
-and Callout are CSS-only *patterns* rather than packages, and are not part of that count. Each
+fixed exception count*. These families ship classes applied to real semantic HTML the consumer authors
+— `<dl>`, `<details>`, `<table>`, a plain block, `<a>`, `<progress>`, `<section>`, `<ol>`, and `<select>`
+— and no `sk-*` custom element wraps any of them: light-DOM native semantics such as list, table, and
+label associations are exactly what a wrapper element would break.
+Segmented choice is separately styles-only by #270: its accessibly named native button group,
+supplied `aria-pressed` values, selection, exclusivity, and activation all remain consumer-owned.
+Composite sections below such as Hero
+and Callout are CSS-only *patterns* rather than packages, and are not part of that package list. Each
 section below says which it is, because the difference decides how you use it.
 
 Because a custom element needs no wrapper, every framework can use the migrated ones directly. A

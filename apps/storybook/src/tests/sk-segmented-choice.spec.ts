@@ -8,6 +8,8 @@ import selectorParser from "postcss-selector-parser";
 const SEGMENTED_CHOICE_CSS =
   "packages/styles/src/segmented-choice/sk-segmented-choice.css";
 const SEGMENTED_CHOICE_BARREL = "packages/styles/src/segmented-choice/index.ts";
+const STYLES_ROOT_BARREL = "packages/styles/src/index.ts";
+const STYLES_PACKAGE = "packages/styles/package.json";
 const SEGMENTED_CHOICE_STORIES =
   "packages/styles/src/segmented-choice/sk-segmented-choice-html.stories.ts";
 const COMPONENT_USAGE_DOC = "docs/design-system/using-components.md";
@@ -197,12 +199,30 @@ test.describe("sk-segmented-choice source and distribution contract", () => {
     expect(
       classSelectorInventory(readFileSync(SEGMENTED_CHOICE_CSS, "utf8")),
     ).toEqual(["sk-segmented-choice", "sk-segmented-choice__item"]);
+
+    const generatedBarrel = readFileSync(SEGMENTED_CHOICE_BARREL, "utf8");
+    expect(generatedBarrel).toContain("export const SkSegmentedChoiceDefaultHTML");
+    expect(generatedBarrel).toContain("export const SkSegmentedChoiceOneDisabledHTML");
+    expect(generatedBarrel).toContain("See #270.");
+    expect(generatedBarrel).not.toContain("See ADR-10");
+
+    expect(readFileSync(STYLES_ROOT_BARREL, "utf8")).toContain(
+      "export * from './segmented-choice/index';",
+    );
+    const packageExports = JSON.parse(readFileSync(STYLES_PACKAGE, "utf8"))
+      .exports as Record<string, unknown>;
+    expect(packageExports["./segmented-choice/*"]).toBe(
+      "./dist/segmented-choice/*",
+    );
   });
 
   test("consumer documentation includes the segmented-choice ownership contract", () => {
-    expect(readFileSync(COMPONENT_USAGE_DOC, "utf8")).toMatch(
-      /^## Segmented choice$/m,
-    );
+    const docs = readFileSync(COMPONENT_USAGE_DOC, "utf8");
+    expect(docs).toMatch(/^## Segmented choice$/m);
+    expect(docs).toContain("Segmented choice is separately styles-only by #270");
+    expect(docs).toContain("The CSS does not set or toggle `aria-pressed`");
+    expect(docs).toContain("Consumers own the group and item labels");
+    expect(docs).toContain("These classes do not create tabs, radios,\nor a custom element");
   });
 
   test("the Narrow story declares an exact 1024px viewport rather than a named preset", () => {
