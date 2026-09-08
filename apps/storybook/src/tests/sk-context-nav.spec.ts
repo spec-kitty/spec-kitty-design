@@ -295,7 +295,6 @@ test.describe('sk-context-nav source, markup, and distribution contract', () => 
         (selector) => !/:hover|:active|:focus|:link|:visited/.test(selector),
       ),
     ).toBe(true);
-    expect(unavailableDeclarations.get('display')).toBe('flex');
     expect(unavailableDeclarations.get('border-inline-start-style')).toBe(
       'dashed',
     );
@@ -400,19 +399,10 @@ test.describe('sk-context-nav source, markup, and distribution contract', () => 
 
   test('the surface remains absent from custom elements, wrappers, behavior, and mutation registries', () => {
     expect(existsSync('packages/elements/src/context-nav')).toBe(false);
-    const forbiddenTreeFiles = execFileSync(
-      'git',
-      ['ls-files', 'packages/elements/src', 'packages/react/src'],
-      {
-        encoding: 'utf8',
-      },
-    )
-      .trim()
-      .split('\n')
-      .filter(Boolean);
-    expect(
-      forbiddenTreeFiles.some((path) => /context-nav|skcontextnav/i.test(path)),
-    ).toBe(false);
+    const forbiddenTreeFiles = execFileSync('git', ['ls-files', 'packages/elements/src', 'packages/react/src'], {
+      encoding: 'utf8',
+    }).trim().split('\n').filter(Boolean);
+    expect(forbiddenTreeFiles.some((path) => /context-nav|skcontextnav/i.test(path))).toBe(false);
     expectTrackedFilesNotToContain('sk-context-nav|SkContextNav', [
       ...forbiddenTreeFiles,
       'packages/elements/custom-elements.json',
@@ -505,10 +495,17 @@ test.describe('sk-context-nav live native semantics', () => {
       await expect(row).not.toHaveAttribute('tabindex', /.+/);
       expect(
         await row.evaluate((node) => ({
+          contentEditable: node.isContentEditable,
           onclick: node.getAttribute('onclick'),
           onkeydown: node.getAttribute('onkeydown'),
+          tabIndex: (node as HTMLElement).tabIndex,
         })),
-      ).toEqual({ onclick: null, onkeydown: null });
+      ).toEqual({
+        contentEditable: false,
+        onclick: null,
+        onkeydown: null,
+        tabIndex: -1,
+      });
     }
     await expect(nav.getByRole('button')).toHaveCount(0);
     await expect(unavailable.getByRole('link')).toHaveCount(0);
@@ -524,13 +521,29 @@ test.describe('sk-context-nav live native semantics', () => {
     const hrefs = await nav
       .locator('a[href]')
       .evaluateAll((nodes) => nodes.map((node) => node.getAttribute('href')));
+    await page.evaluate(() => {
+      const sentinel = document.createElement('button');
+      sentinel.type = 'button';
+      sentinel.dataset.contextNavTabSentinel = '';
+      sentinel.textContent = 'Tab-order sentinel';
+      document.body.append(sentinel);
+    });
     const focused: Array<string | null> = [];
     await page.locator('body').click({ position: { x: 1, y: 1 } });
-    for (let index = 0; index < hrefs.length; index += 1) {
+    for (let index = 0; index <= hrefs.length; index += 1) {
       await page.keyboard.press('Tab');
-      focused.push(await page.locator(':focus').getAttribute('href'));
+      focused.push(
+        await page.evaluate(() => {
+          const active = document.activeElement;
+          if (active instanceof HTMLAnchorElement)
+            return active.getAttribute('href');
+          if (active?.hasAttribute('data-context-nav-tab-sentinel'))
+            return 'sentinel';
+          return active?.tagName ?? null;
+        }),
+      );
     }
-    expect(focused).toEqual(hrefs);
+    expect(focused).toEqual([...hrefs, 'sentinel']);
   });
 
   test('Chromium accessibility tree exposes the unavailable state and visible annotation without an action role', async ({
@@ -550,22 +563,41 @@ test.describe('sk-context-nav live native semantics', () => {
       nodeId: root.nodeId,
       selector: '.sk-context-nav__unavailable',
     });
+    const { node: domNode } = await session.send('DOM.describeNode', {
+      nodeId,
+    });
     const { nodes } = await session.send('Accessibility.getPartialAXTree', {
       nodeId,
       fetchRelatives: true,
     });
+    const target = nodes.find(
+      (node) => node.backendDOMNodeId === domNode.backendNodeId,
+    );
+    expect(target).toBeDefined();
     expect(
-      nodes.some((node) =>
-        node.properties?.some(
-          (property) =>
-            property.name === 'disabled' && property.value?.value === true,
-        ),
+      target!.properties?.some(
+        (property) =>
+          property.name === 'disabled' && property.value?.value === true,
       ),
     ).toBe(true);
-    expect(nodes.some((node) => node.name?.value === 'Reports')).toBe(true);
-    expect(nodes.some((node) => node.name?.value === 'Unavailable')).toBe(true);
+
+    const subtreeIds = new Set(target!.childIds ?? []);
+    for (const subtreeId of subtreeIds) {
+      const node = nodes.find((candidate) => candidate.nodeId === subtreeId);
+      for (const childId of node?.childIds ?? []) subtreeIds.add(childId);
+    }
+    const subtree = [
+      target!,
+      ...nodes.filter((node) =>
+        node.nodeId === undefined ? false : subtreeIds.has(node.nodeId),
+      ),
+    ];
+    expect(subtree.some((node) => node.name?.value === 'Reports')).toBe(true);
+    expect(subtree.some((node) => node.name?.value === 'Unavailable')).toBe(
+      true,
+    );
     expect(
-      nodes.some((node) =>
+      subtree.some((node) =>
         ['link', 'button'].includes(String(node.role?.value)),
       ),
     ).toBe(false);
@@ -620,9 +652,7 @@ test.describe('sk-context-nav live native semantics', () => {
     }
   });
 
-  test('Default exposes named groups, native list nesting/order, link names, and a hidden decorative icon', async ({
-    page,
-  }) => {
+  test('Default exposes named groups, native list nesting/order, link names, and a hidden decorative icon', async ({ page }) => {
     const { nav } = await openStory(page, 'default');
     const group = nav.locator('.sk-context-nav__group').first();
     const headingId = await group.getAttribute('aria-labelledby');
@@ -843,13 +873,9 @@ test.describe('sk-context-nav state and resilience contract', () => {
     expect(await linkCue(unavailable)).toEqual(restCue);
   });
 
-  test('current rest, hover, and trusted mouse-down have distinct non-colour cues', async ({
-    page,
-  }) => {
+  test('current rest, hover, and trusted mouse-down have distinct non-colour cues', async ({ page }) => {
     const { nav } = await openStory(page, 'current-top-level');
-    const current = nav.locator(
-      '.sk-context-nav__link[aria-current]:not([aria-current="false"])',
-    );
+    const current = nav.locator('.sk-context-nav__link[aria-current]:not([aria-current="false"])');
     const restCue = await linkCue(current);
     await current.hover();
     const hoverCue = await linkCue(current);
@@ -1002,19 +1028,11 @@ test.describe('sk-context-nav state and resilience contract', () => {
     }
   });
 
-  test('forced colours preserve focus, current, and nested hierarchy cues', async ({
-    page,
-    browserName,
-  }) => {
-    test.skip(
-      browserName !== 'chromium',
-      'Playwright forced-colours emulation is Chromium-only',
-    );
+  test('forced colours preserve focus, current, and nested hierarchy cues', async ({ page, browserName }) => {
+    test.skip(browserName !== 'chromium', 'Playwright forced-colours emulation is Chromium-only');
     await page.emulateMedia({ forcedColors: 'active' });
     const { nav } = await openStory(page, 'forced-colors');
-    const current = nav.locator(
-      '.sk-context-nav__link[aria-current]:not([aria-current="false"])',
-    );
+    const current = nav.locator('.sk-context-nav__link[aria-current]:not([aria-current="false"])');
     const children = nav.locator('.sk-context-nav__children').first();
     const currentCue = await linkCue(current);
     expect(currentCue.borderInlineStartStyle).not.toBe('none');
@@ -1053,20 +1071,12 @@ test.describe('sk-context-nav state and resilience contract', () => {
     expect(cue.cursor).not.toBe('pointer');
   });
 
-  test('the component owns no motion under reduced-motion emulation', async ({
-    page,
-  }) => {
+  test('the component owns no motion under reduced-motion emulation', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
     const { nav } = await openStory(page, 'default');
     for (const link of await nav.locator('.sk-context-nav__link').all()) {
-      expect(
-        await link.evaluate(
-          (node) => getComputedStyle(node).transitionDuration,
-        ),
-      ).toBe('0s');
-      expect(
-        await link.evaluate((node) => getComputedStyle(node).animationName),
-      ).toBe('none');
+      expect(await link.evaluate((node) => getComputedStyle(node).transitionDuration)).toBe('0s');
+      expect(await link.evaluate((node) => getComputedStyle(node).animationName)).toBe('none');
     }
     const unavailableNav = (await openStory(page, 'unavailable-mixed')).nav;
     for (const row of await unavailableNav

@@ -149,7 +149,6 @@
   margin-inline-start: auto;
   font-size: var(--sk-text-xs);
   font-weight: var(--sk-weight-medium);
-  overflow-wrap: anywhere;
 }
 
 .sk-context-nav__children {
