@@ -176,7 +176,8 @@
       "file": "packages/elements/src/define.ts",
       "from": "if (existing !== ctor) {",
       "to": "if (false) {",
-      "subject": "fixtures/elements-behaviour/src/sk-stub.test.ts"
+      "subject": "fixtures/elements-behaviour/src/sk-stub.test.ts",
+      "expectCollateral": true
     },
     {
       "id": "SC-006",
@@ -1761,6 +1762,95 @@
       "from": "          ? html`<a\n              part=\"trigger\"",
       "to": "          ? html`<a\n              @click=${() => requestActivation(this)}\n              part=\"trigger\"",
       "subject": "fixtures/elements-behaviour/src/sk-action-row.test.ts"
+    },
+    {
+      "id": "SC-015",
+      "arm": "copy-field module registration preserves constructor identity for duplicate guards",
+      "file": "packages/elements/src/copy-field/sk-copy-field.ts",
+      "from": "define('sk-copy-field', SkCopyField);",
+      "to": "define('sk-copy-field', class extends SkCopyField {});",
+      "subject": "fixtures/elements-behaviour/src/sk-copy-field.test.ts"
+    },
+    {
+      "id": "SC-006",
+      "arm": "one result event per completed activation",
+      "file": "packages/elements/src/copy-field/sk-copy-field.ts",
+      "from": "    this.dispatchEvent(event);",
+      "to": "    this.dispatchEvent(event);\n    this.dispatchEvent(event);",
+      "subject": "fixtures/elements-behaviour/src/sk-copy-field.test.ts"
+    },
+    {
+      "id": "SC-007",
+      "arm": "frozen outcome-only detail does not expose copied bytes",
+      "file": "packages/elements/src/copy-field/sk-copy-field.ts",
+      "from": "    const detail = Object.freeze({ outcome }) satisfies SkCopyFieldResultDetail;",
+      "to": "    const detail = Object.freeze({ outcome, value: snapshot }) satisfies SkCopyFieldResultDetail;",
+      "subject": "fixtures/elements-behaviour/src/sk-copy-field.test.ts"
+    },
+    {
+      "id": "SC-008",
+      "arm": "result crosses the shadow boundary",
+      "file": "packages/elements/src/copy-field/sk-copy-field.ts",
+      "from": "      bubbles: true,\n      composed: true,",
+      "to": "      bubbles: false,\n      composed: false,",
+      "subject": "fixtures/elements-behaviour/src/sk-copy-field.test.ts"
+    },
+    {
+      "id": "SC-010",
+      "arm": "value is reactive, reflected, and survives pre-upgrade assignment",
+      "file": "packages/elements/src/copy-field/sk-copy-field.ts",
+      "from": "    value: { type: String, converter: stringWithDefault(''), reflect: true, noAccessor: true },",
+      "to": "    // value is deliberately unregistered by this mutation arm",
+      "subject": "fixtures/elements-behaviour/src/sk-copy-field.test.ts",
+      "expectCollateral": true
+    },
+    {
+      "id": "SC-012",
+      "arm": "the sole control keeps native non-submitting button semantics",
+      "file": "packages/elements/src/copy-field/sk-copy-field.ts",
+      "from": "        type=\"button\"",
+      "to": "        type=\"reset\"",
+      "subject": "fixtures/elements-behaviour/src/sk-copy-field.test.ts"
+    },
+    {
+      "id": "SC-013",
+      "arm": "stable status part remains targetable",
+      "file": "packages/elements/src/copy-field/sk-copy-field.ts",
+      "from": "        part=\"status\"",
+      "to": "        part=\"result\"",
+      "subject": "fixtures/elements-behaviour/src/sk-copy-field.test.ts"
+    },
+    {
+      "id": "SC-014",
+      "arm": "both generated and shared constructed sheets are adopted",
+      "file": "packages/elements/src/copy-field/sk-copy-field.ts",
+      "from": "  static styles = [buttonSheet, sheet];",
+      "to": "  static styles = [];",
+      "subject": "fixtures/elements-behaviour/src/sk-copy-field.test.ts"
+    },
+    {
+      "id": "SC-014",
+      "arm": "generated local sheet identity and order",
+      "file": "packages/elements/src/copy-field/sk-copy-field.ts",
+      "from": "  static styles = [buttonSheet, sheet];",
+      "to": "  static styles = [buttonSheet, new CSSStyleSheet()];",
+      "subject": "fixtures/elements-behaviour/src/sk-copy-field.test.ts"
+    },
+    {
+      "id": "SC-006",
+      "arm": "generated copy-field wrapper subscribes the React callback once",
+      "file": "packages/react/src/SkCopyField.js",
+      "from": "  useEventListener(ref, \"sk-copy-field-result\", props.onSkCopyFieldResult);",
+      "to": "  void props.onSkCopyFieldResult;",
+      "subject": "fixtures/react-consumer/src/sk-copy-field.test.tsx"
+    },
+    {
+      "id": "SC-010",
+      "arm": "generated copy-field wrapper bridges and resets exact string props",
+      "file": "packages/react/src/SkCopyField.js",
+      "from": "      value: value,",
+      "to": "      value: undefined,",
+      "subject": "fixtures/react-consumer/src/sk-copy-field.test.tsx"
     }
   ]
 }

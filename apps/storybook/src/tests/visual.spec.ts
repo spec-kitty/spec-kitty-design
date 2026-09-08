@@ -121,6 +121,64 @@ test('SK-event-timeline compact forced colors — visual baseline', async ({ pag
   });
 });
 
+const copyFieldStory = async (page: Page, id: string, requireValue = true): Promise<Locator> => {
+  await page.goto(`/iframe.html?id=elements-skcopyfield--${id}&viewMode=story`);
+  const target = page.locator('sk-copy-field').first();
+  await target.waitFor({ state: 'visible', timeout: 20000 });
+  if (requireValue) await expect(target.locator('[part="value"]')).not.toBeEmpty();
+  return target;
+};
+
+test('SK-copy-field default dark — visual baseline', async ({ page }) => {
+  const target = await copyFieldStory(page, 'default-dark');
+  await expect(target).toHaveScreenshot('sk-copy-field-default-dark.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+});
+
+test('SK-copy-field light mode — visual baseline', async ({ page }) => {
+  const target = await copyFieldStory(page, 'light-mode');
+  await expect(target).toHaveScreenshot('sk-copy-field-light.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+});
+
+test('SK-copy-field long wrapping — visual baseline', async ({ page }) => {
+  const target = await copyFieldStory(page, 'long-wrapping-command');
+  await expect(target).toHaveScreenshot('sk-copy-field-long.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+});
+
+test('SK-copy-field narrow — visual baseline', async ({ page }) => {
+  const target = await copyFieldStory(page, 'narrow');
+  await expect(target).toHaveScreenshot('sk-copy-field-narrow.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+});
+
+test('SK-copy-field focus — visual baseline', async ({ page }) => {
+  const target = await copyFieldStory(page, 'focused');
+  await expect(target.locator('button')).toBeFocused();
+  await expect(target).toHaveScreenshot('sk-copy-field-focus.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+});
+
+test('SK-copy-field disabled empty — visual baseline', async ({ page }) => {
+  const target = await copyFieldStory(page, 'disabled-empty', false);
+  await expect(target.locator('button')).toBeDisabled();
+  await expect(target).toHaveScreenshot('sk-copy-field-disabled-empty.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+});
+
+test('SK-copy-field manual fallback — visual baseline', async ({ page }) => {
+  const target = await copyFieldStory(page, 'manual-fallback');
+  await expect(target.locator('[part="status"]')).toContainText('system copy shortcut');
+  await expect(target).toHaveScreenshot('sk-copy-field-manual.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+});
+
+test('SK-copy-field failure — visual baseline', async ({ page }) => {
+  const target = await copyFieldStory(page, 'failure');
+  await expect(target.locator('[part="status"]')).toContainText('Unable to copy');
+  await expect(target).toHaveScreenshot('sk-copy-field-failure.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+});
+
+test('SK-copy-field forced colors — visual baseline', async ({ page }) => {
+  await page.emulateMedia({ forcedColors: 'active' });
+  const target = await copyFieldStory(page, 'forced-colors');
+  await expect(target).toHaveScreenshot('sk-copy-field-forced-colors.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+});
+
 const workflowBoardStory = async (page: Page, id: string, viewport: { width: number; height: number }): Promise<Locator> => {
   await page.setViewportSize(viewport);
   await page.goto(`/iframe.html?id=primitives-skworkflowboard-html--${id}&viewMode=story`);

@@ -1,0 +1,229 @@
+{
+  "mission_slug": "copy-field-element-01M1Y3QH",
+  "mission_number": "",
+  "mission_type": "software-dev",
+  "overall_verdict": "pass",
+  "criteria": [
+    {
+      "criterion_id": "FR-001",
+      "description": "Visible text and attempted clipboard text come from the exact same reactive value without normalization.",
+      "proof_type": "automated_test",
+      "evidence": "fixtures/elements-behaviour/src/sk-copy-field.test.ts; cycle-2 Codex APPROVE at 26a73d5; exact final matrix pending",
+      "pass_fail": "pass",
+      "verified_by": "codex-acceptance",
+      "verified_at": "2026-09-07T18:34:52.329445+00:00",
+      "notes": "Verified against the exact-value authored tests and approved implementation review."
+    },
+    {
+      "criterion_id": "FR-002",
+      "description": "One native type=button control provides the action and the host adds no sequential tab stop.",
+      "proof_type": "automated_test",
+      "evidence": "fixtures/elements-behaviour/src/sk-copy-field.test.ts; apps/storybook/src/tests/sk-copy-field.spec.ts",
+      "pass_fail": "pass",
+      "verified_by": "codex-acceptance",
+      "verified_at": "2026-09-07T18:35:38.712561+00:00",
+      "notes": "Verified by authored DOM and keyboard-navigation assertions."
+    },
+    {
+      "criterion_id": "FR-003",
+      "description": "The label names the control and missing or blank labels warn and fail open to Copy value.",
+      "proof_type": "automated_test",
+      "evidence": "fixtures/elements-behaviour/src/sk-copy-field.test.ts label fail-open cases",
+      "pass_fail": "pass",
+      "verified_by": "codex-acceptance",
+      "verified_at": "2026-09-07T18:35:43.160252+00:00",
+      "notes": "Verified by missing, blank, and explicit-label tests."
+    },
+    {
+      "criterion_id": "FR-004",
+      "description": "A supported secure Clipboard API receives exactly one writeText call with the exact non-empty snapshot.",
+      "proof_type": "automated_test",
+      "evidence": "fixtures/elements-behaviour/src/sk-copy-field.test.ts exact secure Clipboard API cases",
+      "pass_fail": "pass",
+      "verified_by": "codex-acceptance",
+      "verified_at": "2026-09-07T18:35:45.285787+00:00",
+      "notes": "Verified by secure-context exact-argument tests."
+    },
+    {
+      "criterion_id": "FR-005",
+      "description": "Copied is reported only after the attempted write fulfills.",
+      "proof_type": "automated_test",
+      "evidence": "fixtures/elements-behaviour/src/sk-copy-field.test.ts fulfilled-write outcome assertions",
+      "pass_fail": "pass",
+      "verified_by": "codex-acceptance",
+      "verified_at": "2026-09-07T18:35:47.335442+00:00",
+      "notes": "Verified by controlled promise settlement tests."
+    },
+    {
+      "criterion_id": "FR-006",
+      "description": "Clipboard absence, insecure context, synchronous throw, and rejection fall back to focus and full selection.",
+      "proof_type": "automated_test",
+      "evidence": "fixtures/elements-behaviour/src/sk-copy-field.test.ts missing/insecure/throw/reject fallback cases",
+      "pass_fail": "pass",
+      "verified_by": "codex-acceptance",
+      "verified_at": "2026-09-07T18:35:49.383776+00:00",
+      "notes": "Verified by all four clipboard-negative branches."
+    },
+    {
+      "criterion_id": "FR-007",
+      "description": "A fallback that cannot focus and fully select reports failed and never copied.",
+      "proof_type": "automated_test",
+      "evidence": "fixtures/elements-behaviour/src/sk-copy-field.test.ts impossible-selection failure case",
+      "pass_fail": "pass",
+      "verified_by": "codex-acceptance",
+      "verified_at": "2026-09-07T18:35:51.647795+00:00",
+      "notes": "Verified by deterministic impossible-selection coverage."
+    },
+    {
+      "criterion_id": "FR-008",
+      "description": "An exactly empty value disables the control and invokes no result path.",
+      "proof_type": "automated_test",
+      "evidence": "fixtures/elements-behaviour/src/sk-copy-field.test.ts empty-value no-op; Storybook empty state",
+      "pass_fail": "pass",
+      "verified_by": "codex-acceptance",
+      "verified_at": "2026-09-07T18:35:53.771932+00:00",
+      "notes": "Verified by DOM, event, and clipboard no-op assertions."
+    },
+    {
+      "criterion_id": "FR-009",
+      "description": "Every actual value change advances the revision, clears status, and suppresses stale settlements.",
+      "proof_type": "automated_test",
+      "evidence": "fixtures/elements-behaviour/src/sk-copy-field.test.ts revision and stale-settlement cases",
+      "pass_fail": "pass",
+      "verified_by": "codex-acceptance",
+      "verified_at": "2026-09-07T18:35:55.760978+00:00",
+      "notes": "Verified for ordinary, batched A-B-A, and stale async cases."
+    },
+    {
+      "criterion_id": "FR-010",
+      "description": "One stable polite atomic status node exists from first render and is updated in place.",
+      "proof_type": "automated_test",
+      "evidence": "fixtures/elements-behaviour/src/sk-copy-field.test.ts stable live-region identity; browser AX checks",
+      "pass_fail": "pass",
+      "verified_by": "codex-acceptance",
+      "verified_at": "2026-09-07T18:35:58.107802+00:00",
+      "notes": "Verified by node-identity and accessibility-tree assertions."
+    },
+    {
+      "criterion_id": "FR-011",
+      "description": "All three outcome messages have defaults, consumer overrides, and blank-override fail-open behavior.",
+      "proof_type": "automated_test",
+      "evidence": "fixtures/elements-behaviour/src/sk-copy-field.test.ts default/override/blank message cases",
+      "pass_fail": "pass",
+      "verified_by": "codex-acceptance",
+      "verified_at": "2026-09-07T18:36:01.286549+00:00",
+      "notes": "Verified by default, custom, and whitespace-only message tests."
+    },
+    {
+      "criterion_id": "FR-012",
+      "description": "Each completed non-empty attempt emits one bubbling, composed, non-cancelable typed result event.",
+      "proof_type": "automated_test",
+      "evidence": "fixtures/elements-behaviour/src/sk-copy-field.test.ts one typed terminal event and flags",
+      "pass_fail": "pass",
+      "verified_by": "codex-acceptance",
+      "verified_at": "2026-09-07T18:36:04.397683+00:00",
+      "notes": "Verified for all outcomes and event flags."
+    },
+    {
+      "criterion_id": "FR-013",
+      "description": "Result detail is frozen, contains only outcome, and cannot expose the copied value.",
+      "proof_type": "automated_test",
+      "evidence": "fixtures/elements-behaviour/src/sk-copy-field.test.ts frozen one-key privacy-safe detail",
+      "pass_fail": "pass",
+      "verified_by": "codex-acceptance",
+      "verified_at": "2026-09-07T18:36:06.719225+00:00",
+      "notes": "Verified by exact-key and privacy assertions."
+    },
+    {
+      "criterion_id": "FR-014",
+      "description": "Pointer click and native Enter and Space activation share one copy path without duplicate results.",
+      "proof_type": "automated_test",
+      "evidence": "apps/storybook/src/tests/sk-copy-field.spec.ts pointer/Enter/Space activation",
+      "pass_fail": "pass",
+      "verified_by": "codex-acceptance",
+      "verified_at": "2026-09-07T18:36:09.191175+00:00",
+      "notes": "Verified in real-browser pointer and keyboard tests."
+    },
+    {
+      "criterion_id": "FR-015",
+      "description": "Success retains button focus while manual fallback focuses the non-sequential visible value.",
+      "proof_type": "automated_test",
+      "evidence": "fixtures/elements-behaviour/src/sk-copy-field.test.ts success and fallback focus assertions",
+      "pass_fail": "pass",
+      "verified_by": "codex-acceptance",
+      "verified_at": "2026-09-07T18:36:11.282286+00:00",
+      "notes": "Verified by success and manual focus assertions."
+    },
+    {
+      "criterion_id": "FR-016",
+      "description": "The field, value, copy-control, and status parts are public and documented.",
+      "proof_type": "generated_contract",
+      "evidence": "custom-elements.json; expected-parts.json and manifest gates",
+      "pass_fail": "pass",
+      "verified_by": "codex-acceptance",
+      "verified_at": "2026-09-07T18:36:13.271342+00:00",
+      "notes": "Verified through manifest and part-ratchet gates."
+    },
+    {
+      "criterion_id": "FR-017",
+      "description": "The host is block-level and long values wrap without clipping the action or page overflow.",
+      "proof_type": "browser_test",
+      "evidence": "sk-copy-field.css plus Chromium/Firefox 390px overflow tests",
+      "pass_fail": "pass",
+      "verified_by": "codex-acceptance",
+      "verified_at": "2026-09-07T18:36:15.759091+00:00",
+      "notes": "Verified by authored CSS and responsive browser assertions."
+    },
+    {
+      "criterion_id": "FR-018",
+      "description": "The class registers through define and is exported from every applicable element entry point.",
+      "proof_type": "automated_test",
+      "evidence": "registration-identity authored test; packages/elements/src/index.ts and elements.ts",
+      "pass_fail": "pass",
+      "verified_by": "codex-acceptance",
+      "verified_at": "2026-09-07T18:36:18.052053+00:00",
+      "notes": "Verified by registration-identity and entry-point gates."
+    },
+    {
+      "criterion_id": "FR-019",
+      "description": "Generated React and Vue surfaces preserve all inputs and the narrowed result-event union.",
+      "proof_type": "generated_contract",
+      "evidence": "fixtures/react-consumer/src/sk-copy-field.test.tsx; generated React/Vue freshness gates",
+      "pass_fail": "pass",
+      "verified_by": "codex-acceptance",
+      "verified_at": "2026-09-07T18:36:20.086591+00:00",
+      "notes": "Verified by generated-contract freshness and consumer tests."
+    },
+    {
+      "criterion_id": "FR-020",
+      "description": "Storybook publishes every required deterministic state across themes and interaction modes.",
+      "proof_type": "storybook_review",
+      "evidence": "sk-copy-field.stories.ts; expected-stories.json; 15 deterministic states",
+      "pass_fail": "pass",
+      "verified_by": "codex-acceptance",
+      "verified_at": "2026-09-07T18:36:22.521600+00:00",
+      "notes": "Verified through the 15-story authored module and story ratchet."
+    },
+    {
+      "criterion_id": "FR-021",
+      "description": "Authored behavior, browser, framework, registration, style, and mutation coverage exercises the public contract.",
+      "proof_type": "automated_test",
+      "evidence": "authored element/React/browser tests; 11 registered mutation arms; cycle-2 Codex approval",
+      "pass_fail": "pass",
+      "verified_by": "codex-acceptance",
+      "verified_at": "2026-09-07T18:36:24.969669+00:00",
+      "notes": "Verified by focused suites, registered mutation arms, and independent Codex review."
+    },
+    {
+      "criterion_id": "FR-022",
+      "description": "No static markup form is generated or exported and the JavaScript-required boundary is documented.",
+      "proof_type": "static_analysis",
+      "evidence": "styles package exposes CSS only; markup generators/checks omit sk-copy-field; documented JS boundary",
+      "pass_fail": "pass",
+      "verified_by": "codex-acceptance",
+      "verified_at": "2026-09-07T18:36:27.195977+00:00",
+      "notes": "Verified by markup generation checks, package exports, and public documentation."
+    }
+  ],
+  "negative_invariants": []
+}

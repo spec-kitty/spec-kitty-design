@@ -1,0 +1,33 @@
+{
+  "accept_commit": "f72d833f1f5703dded3b200f43f3577989d2ebae",
+  "acceptance_history": [
+    {
+      "accept_commit": "f72d833f1f5703dded3b200f43f3577989d2ebae",
+      "acceptance_mode": "local",
+      "accepted_at": "2026-09-07T18:38:28.742951+00:00",
+      "accepted_by": "codex-acceptance",
+      "accepted_from_commit": "8ee9785c65963ac6be650aeab33843ede29be932"
+    }
+  ],
+  "acceptance_mode": "local",
+  "accepted_at": "2026-09-07T18:38:28.742951+00:00",
+  "accepted_by": "codex-acceptance",
+  "accepted_from_commit": "8ee9785c65963ac6be650aeab33843ede29be932",
+  "baseline_merge_commit": "f8d838b7066d6aeeecc1f864d857d63d7816518f",
+  "created_at": "2026-09-07T14:18:07.639074+00:00",
+  "flattened": false,
+  "friendly_name": "sk-copy-field accessible copy control",
+  "mission_id": "01M1Y3QHWPPS0Y5791D1EMHWW7",
+  "mission_number": null,
+  "mission_slug": "copy-field-element-01M1Y3QH",
+  "mission_type": "software-dev",
+  "pr_bound": true,
+  "purpose_context": "Design-library consumers need one reusable JavaScript-dependent control for visible, non-editable, non-sensitive values. The element owns exact copying, deterministic manual fallback, stable polite feedback, and a privacy-preserving typed result event; consumers retain all application and command behavior.",
+  "purpose_tldr": "Ship one accessible sk-copy-field element that copies the exact visible value and reports only proven outcomes.",
+  "slug": "copy-field-element-01M1Y3QH",
+  "status_phase": "1",
+  "target_branch": "mission/copy-field-element",
+  "topology": "single_branch",
+  "vcs": "git",
+  "vcs_locked_at": "2026-09-07T15:32:36.764941+00:00"
+}

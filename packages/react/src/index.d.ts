@@ -6,6 +6,7 @@ export * from "./SkButton.js";
 export * from "./SkCard.js";
 export * from "./SkCheckBullet.js";
 export * from "./SkContextSidebar.js";
+export * from "./SkCopyField.js";
 export * from "./SkEntityMarker.js";
 export * from "./SkEvidenceChain.js";
 export * from "./SkFeatureCard.js";

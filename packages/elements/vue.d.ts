@@ -170,6 +170,29 @@ declare module 'vue' {
       'label'?: string | undefined;
     }>;
     /**
+     * A non-editable exact-value field with a single native copy control and truthful inline results.
+     *
+     * The displayed string is the string sent to the Clipboard API. When clipboard access is not
+     * available, the visible code is focused and selected for a manual system copy shortcut. The
+     * component never executes, parses, validates, logs, or includes the value in its result event.
+     *
+     * Token dependencies: --sk-border-default, --sk-border-focus, --sk-border-width-1,
+     * --sk-border-width-2, --sk-fg-body, --sk-fg-muted, --sk-font-mono, --sk-font-sans,
+     * --sk-radius-md, --sk-space-2, --sk-space-3, --sk-surface-input, --sk-text-sm.
+     */
+    'sk-copy-field': SkElement<{
+      /** Message shown when neither copying nor exact selection succeeded. */
+      'failure-message'?: string;
+      /** Accessible name for the native copy control. Blank values warn and use `Copy value`. */
+      'label'?: string;
+      /** Message shown when the visible value was selected for manual copying. */
+      'manual-message'?: string;
+      /** Message shown after the Clipboard API fulfills. Blank values use the default. */
+      'success-message'?: string;
+      /** Exact text displayed and offered for copying. The empty string disables the control. */
+      'value'?: string;
+    }>;
+    /**
      * A compact consumer-supplied icon, initials, or short mark with explicit accessible naming.
      *
      * Token dependencies: --sk-font-sans, --sk-on-tint-butter, --sk-radius-pill, --sk-radius-sm,

@@ -13,14 +13,17 @@ compatibility window to honour and no deprecation cycle to run.
 
 ### `@spec-kitty/elements`
 
-The custom-element base layer (ADR-8): twenty-eight components as standard custom elements, built on
+The custom-element base layer (ADR-8): twenty-nine components as standard custom elements, built on
 Lit, with styling delivered through constructed stylesheets and a closed styling API (ADR-9).
 
 - `sk-action-row`, `sk-app-shell`, `sk-bar-chart`, `sk-blog-card`, `sk-button`, `sk-card`, `sk-check-bullet`,
-  `sk-context-sidebar`, `sk-entity-marker`, `sk-evidence-chain`, `sk-feature-card`, `sk-form-input`,
+  `sk-context-sidebar`, `sk-copy-field`, `sk-entity-marker`, `sk-evidence-chain`, `sk-feature-card`, `sk-form-input`,
   `sk-form-textarea`, `sk-grid`, `sk-metric`, `sk-nav-pill`, `sk-notice`, `sk-page-header`,
   `sk-personal-rail`, `sk-pill-tag`, `sk-ribbon-card`, `sk-section-banner`, `sk-section-header`,
   `sk-site-footer`, `sk-status-indicator`, `sk-stub`, `sk-time-series-chart`, `sk-transition-matrix`
+- `sk-copy-field` (#257) displays and copies one exact consumer-provided string, reports only
+  truthful `copied`, manual-selection, or failure outcomes through an accessible live region and
+  privacy-safe event, and wraps long values without owning command execution or application state
 - `sk-time-series-chart` (#179) is the first element whose data model can say *no observation*: a
   point's `value` may be `null`, the line breaks there rather than interpolating or falling to the
   baseline, the interval is drawn as a `::part(gap)`, and the paired table reports it as `No data`.
