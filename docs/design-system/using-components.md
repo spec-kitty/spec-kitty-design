@@ -897,17 +897,40 @@ supplies and orders every event, actor, timestamp, display string, detail, and t
 </ol>
 ```
 
+Add `.sk-event-timeline--compact` to the same `<ol>` for a denser presentation. The modifier
+reduces only the timeline's measure, spacing, and typography; it does not change the native list,
+its supplied values, or its source order. A compact item may begin with the optional decorative
+leading-marker element:
+
+```html
+<ol class="sk-event-timeline sk-event-timeline--compact">
+  <li class="sk-event-timeline__item">
+    <span class="sk-event-timeline__leading-marker" aria-hidden="true">
+      <!-- Consumer-supplied decorative icon or glyph. -->
+    </span>
+    <p class="sk-event-timeline__summary">1. Evidence recorded</p>
+    <p class="sk-event-timeline__metadata">
+      <span>Reviewer name</span><time datetime="2026-09-07T09:00:00Z">09:00 UTC</time>
+    </p>
+  </li>
+</ol>
+```
+
+Keep `aria-hidden="true"` on every leading marker, and never make that marker the sole carrier of
+event meaning. The visible summary remains the required meaning-bearing content.
+
 The class family neither sorts events nor reads clocks, formats time, infers trust, or applies
 retention rules. Use `.sk-data-table` instead when values are comparable rows and columns rather
 than a sequence. If history is unavailable, render passive `.sk-empty-state` markup; an announced
-`sk-notice` is a separate consumer decision. `.sk-event-timeline--narrow` constrains the same
-native structure without detaching metadata from its owning `<li>`.
+`sk-notice` is a separate consumer decision. The compact form, like the default form, never
+announces updates or creates a live region. `.sk-event-timeline--narrow` constrains the same native
+structure without detaching metadata from its owning `<li>`.
 
 Its exact token dependencies are `--sk-fg-body`, `--sk-fg-default`, `--sk-fg-muted`,
 `--sk-on-tint-sky`, `--sk-on-tint-mint`, `--sk-surface-page`, `--sk-border-strong`,
 `--sk-border-width-1`, `--sk-border-width-2`, `--sk-font-sans`, `--sk-text-base`,
 `--sk-text-sm`, `--sk-weight-medium`, `--sk-weight-semibold`, `--sk-radius-pill`,
-`--sk-space-1`, `--sk-space-2`, `--sk-space-3`, `--sk-space-4`, `--sk-space-6`,
+`--sk-space-1`, `--sk-space-2`, `--sk-space-3`, `--sk-space-4`, `--sk-space-5`, `--sk-space-6`,
 `--sk-space-7`, and `--sk-space-12`.
 
 [View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/primitives-skeventtimeline-html--default)

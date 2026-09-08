@@ -70,6 +70,54 @@ test('SK-progress HTML forced colors — visual baseline', async ({ page }) => {
   await expect(target).toHaveScreenshot('sk-progress-html-forced-colors.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
 });
 
+const eventTimelineStory = async (page: Page, id: string): Promise<Locator> => {
+  await page.goto(`/iframe.html?id=primitives-skeventtimeline-html--${id}&viewMode=story`);
+  const target = page.locator('.sk-event-timeline').first();
+  await target.waitFor({ state: 'visible', timeout: 20000 });
+  await expect(target).not.toBeEmpty();
+  return target;
+};
+
+test('SK-event-timeline same fixture default and compact — visual baselines', async ({ page }) => {
+  const target = await eventTimelineStory(page, 'compact-default');
+  await target.evaluate((node) => node.classList.remove('sk-event-timeline--compact'));
+  await expect(target).toHaveScreenshot('sk-event-timeline-compact-fixture-default.png', {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+  });
+  await target.evaluate((node) => node.classList.add('sk-event-timeline--compact'));
+  await expect(target).toHaveScreenshot('sk-event-timeline-compact-dark.png', {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+  });
+});
+
+test('SK-event-timeline compact narrow — visual baseline', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 720 });
+  const target = await eventTimelineStory(page, 'compact-narrow');
+  await expect(target).toHaveScreenshot('sk-event-timeline-compact-narrow.png', {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+  });
+});
+
+test('SK-event-timeline compact light — visual baseline', async ({ page }) => {
+  const target = await eventTimelineStory(page, 'compact-light-mode');
+  await expect(target).toHaveScreenshot('sk-event-timeline-compact-light.png', {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+  });
+});
+
+test('SK-event-timeline compact forced colors — visual baseline', async ({ page }) => {
+  await page.emulateMedia({ forcedColors: 'active' });
+  const target = await eventTimelineStory(page, 'compact-forced-colors');
+  await expect(target).toHaveScreenshot('sk-event-timeline-compact-forced-colors.png', {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+  });
+});
+
 const workflowBoardStory = async (page: Page, id: string, viewport: { width: number; height: number }): Promise<Locator> => {
   await page.setViewportSize(viewport);
   await page.goto(`/iframe.html?id=primitives-skworkflowboard-html--${id}&viewMode=story`);

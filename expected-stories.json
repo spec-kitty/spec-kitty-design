@@ -262,7 +262,17 @@
       "primitives-skeventtimeline-html--unavailable-retention",
       "primitives-skeventtimeline-html--narrow",
       "primitives-skeventtimeline-html--forced-colors",
-      "primitives-skeventtimeline-html--light-mode"
+      "primitives-skeventtimeline-html--light-mode",
+      "primitives-skeventtimeline-html--compact-one-event",
+      "primitives-skeventtimeline-html--compact-default",
+      "primitives-skeventtimeline-html--compact-twenty-events",
+      "primitives-skeventtimeline-html--compact-leading-marker",
+      "primitives-skeventtimeline-html--compact-long-content",
+      "primitives-skeventtimeline-html--compact-linked",
+      "primitives-skeventtimeline-html--compact-narrow",
+      "primitives-skeventtimeline-html--compact-degraded",
+      "primitives-skeventtimeline-html--compact-forced-colors",
+      "primitives-skeventtimeline-html--compact-light-mode"
     ],
     "sk-evidence-chain": [
       "elements-skevidencechain--default",
@@ -513,5 +523,5 @@
       "components-sksegmentedchoice-html--light-mode"
     ]
   },
-  "total": 381
+  "total": 391
 }
