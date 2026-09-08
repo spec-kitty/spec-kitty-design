@@ -356,6 +356,20 @@ test.describe("sk-segmented-choice live native semantics", () => {
     const active = await cueOf(item);
     expect(nonColourCue(active)).not.toBe(nonColourCue(hover));
     expect(nonColourCue(active)).not.toBe(nonColourCue(rest));
+    const selected = group.locator('[aria-pressed="true"]');
+    const selectedRest = await cueOf(selected);
+    expect(nonColourCue(active)).not.toBe(nonColourCue(selectedRest));
+    await page.mouse.up();
+
+    const selectedBox = await selected.boundingBox();
+    expect(selectedBox).not.toBeNull();
+    await page.mouse.move(
+      selectedBox!.x + selectedBox!.width / 2,
+      selectedBox!.y + selectedBox!.height / 2,
+    );
+    await page.mouse.down();
+    const selectedActive = await cueOf(selected);
+    expect(nonColourCue(selectedActive)).not.toBe(nonColourCue(selectedRest));
     await page.mouse.up();
     await page.mouse.move(0, 0);
 

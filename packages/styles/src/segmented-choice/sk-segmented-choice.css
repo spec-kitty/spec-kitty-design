@@ -41,7 +41,7 @@
 
 .sk-segmented-choice__item:active:not(:disabled) {
   background: var(--sk-surface-muted);
-  border-style: double;
+  border-style: inset;
   border-width: var(--sk-border-width-2);
   font-weight: var(--sk-weight-semibold);
 }
