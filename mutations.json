@@ -39,7 +39,14 @@
     "#148 WP03 adds NINE bar-chart arms: seven element arms cover duplicate dispatch, exact detail, bubbling/composed flags, property-only series registration, label part exposure, and the independent stylesheet length and identity contracts; two React arms cover the generated listener and property bridge.",
     "#196 AND #204 ADD TWO IDS AND THIS FILE IS WHERE THE COST SHOWS. THREE CHANGES, none of them additive-only.\n(1) SC-016 (delegate/rendered-control correspondence) is carried by the arm that was already here as SC-003 'probe type assigned before value' — RE-KEYED, not duplicated. ADR-14 calls that defect 'the clearest instance' of the two sources disagreeing, so it was always a correspondence arm; it was filed under SC-003 because no other id existed. SC-003 keeps eleven arms and its own tests, so nothing is left uncovered by the move.\n(2) The SC-013 arm 'constraint attribute reaches the inner control' is RE-SITED from `pattern=${nothing}` to `inputmode=${nothing}`. Measured, not assumed: dropping `pattern` from the rendered control reds the [SC-013] forwarding test AND the [SC-016] correspondence test, because with item 10 in force it IS a correspondence defect — the probe still holds the constraint the control lost. `inputmode` reaches no validity at all, so the arm reds the forwarding test alone. The [SC-013] test asserts six forwarded attributes and the arm drops one of them either way, and the `pattern` case is not left unwatched: it is measured red by the [SC-016] test.\nWHY NOT expectCollateral: it would have removed guard 5's blast-radius bound from three surgical arms (the merged-flag loop, the probe value sync, and this one) to make room for one new id. Naming both ids on the shared test does the same work without weakening anything, and `[SC-002][SC-003] a readonly control still submits` is the precedent for a dual-marked test in this very file.\n(3) SC-017 (responsive threshold) gets TWO arms, one per documented threshold, and both mutate the GENERATED packages/elements/src/page-header/sk-page-header.css.js. That is forced rather than chosen: the test job never builds, so an arm against the authored packages/styles/src/page-header/sk-page-header.css would be semantically inert — SC-010's arm against generated packages/react/src/SkTransitionMatrix.js is the precedent for mutating a generated artefact. The HEIGHT arm reds ONE test where the WIDTH arm reds two, and that asymmetry is the measurement #182 wrote two separate @media blocks to obtain: only the width threshold is reachable live at the lane's 414px viewport, so the height block is falsifiable only through the sheet-reading assertion, and joining the two conditions would make it unfalsifiable altogether.",
     "#179 adds EIGHT sk-time-series-chart arms, all mutating the ELEMENT; total 157 -> 165 on the refreshed train after #235. Three need their reason recorded.\nTHE SC-013 ARM IS THE MISSION'S REQUIRED RED-FIRST GAP MUTATION. It rewrites `asSupplied`, the single named seam every part of the GRAPHIC reads the series through, to drop the null points — the textbook interpolation defect, and the exact change a maintainer makes when a broken line looks like a bug. The line then joins straight through and the `gap` part stops existing, so the named [SC-013] test reds on a part's ABSENCE. The published TABLE deliberately does not read through that seam, so the arm is confined to the drawing and cannot be laundered by the table still saying 'No data'. sk-card's #177 arm is the precedent for an absent-part red, and its note explains why the fixture must MOUNT the part: with a dense-only mount this test would stay green through the defect. Measured red-first before the PR opened, with zero MARKED collateral — the first draft also reddened [SC-010], and the [SC-010] assertion was moved rather than the arm weakened, because an arm that reds two marked behaviours cannot say which one it proves.\nTHE SC-009 ARM flips `cancelable` to false. The [SC-008] test deliberately does NOT assert cancelability — it asserts bubbles and composed — so this arm reds the behaviour that depends on the flag and nothing else marked. The unmarked controlled-selection test also reds, which costs nothing: isBehaviourTest keys on the [SC-NNN] marker.\nTHE SC-010 ARM comments out `series: { attribute: false }`. That is the property-only registration the React wrapper's first-render delivery depends on; without it the class field initializer wins over a value assigned before upgrade, and the named [SC-010] test reds on the series identity. NO NINTH ARM FOR THE PUBLISHED TABLE, and that is a stated gap: 'every value is present without hover or focus' is a real claim with no ADR-11 id, so it is held by an ordinary test rather than by this harness — the same boundary #140, #143, #77, #177 and #216 reached, with the same answer.",
-    "#213 adds TWO sk-check-bullet SC-010 arms. The reflected-property arm proves pending assigned before definition reaches the host attribute. The canonical-presentation arm forces every runtime state back to complete; the late-upgrade test then reds class, default glyph and accessible state text from one mutation without inventing a new behaviour id. Unmarked state tests may also red, but guard 5 remains bounded because they claim no unrelated ADR-11 id."
+    "#213 adds TWO sk-check-bullet SC-010 arms. The reflected-property arm proves pending assigned before definition reaches the host attribute. The canonical-presentation arm forces every runtime state back to complete; the late-upgrade test then reds class, default glyph and accessible state text from one mutation without inventing a new behaviour id. Unmarked state tests may also red, but guard 5 remains bounded because they claim no unrelated ADR-11 id.",
+    "#254 makes sk-app-shell's three inherited arms explicit alongside THIRTEEN new compact-presentation arms, for SIXTEEN app-shell arms in total. Four declare measured collateral because the product contracts share the same effective-open and accepted-dismissal paths; guard 5 still inverts and requires that collateral. Removing the generated sheet (SC-014) also removes the compact visibility rule asserted by SC-012. Forcing the controlled open value false (SC-010) necessarily enters the accepted-close focus behavior asserted by SC-012. Dispatching a second dismissal (SC-006) invokes the consumer's close handler twice and disturbs the SC-012 accepted-focus sequence. Removing composed propagation (SC-008) also prevents the nearest-shell SC-006 ownership assertion from observing the dismissal outside the inner shadow root. These are source-level couplings, not broad exemptions; later review-cycle isolation below records three further shared-path arms.",
+    "#254 FINAL-REVIEW FIX adds one seventeenth app-shell arm, moving the refreshed standing set from 186 to 187. It removes only the new true-to-false controlled-close focus release. The named [SC-012] test covers both an ordinary close and rejected-Escape-then-route-close in one behavior test, so this arm reds that test without marked collateral while accepted Escape still restores its trigger through the separate pending-dismissal path.",
+    "#254 FINAL REVIEW-FIX CYCLE adds an eighteenth app-shell arm, moving the refreshed standing set from 187 to 188. It weakens only the removal half of the presentation converter back to Lit's default null result. The named [SC-010] test starts through attribute authoring and proves the public omitted property state, warning behavior, legacy visibility, compact hiding, and focus release; existing pre-upgrade property authoring still proves reflection in the other direction.",
+    "#254 POST-CI WEBKIT FIX adds THIRTEEN SC-012 app-shell arms, moving the refreshed standing set from 188 to 201. They cover synchronous reconnect, disconnect restoration, exact raw absent and present attribute restoration, all four effective-exposure decisions, the disconnected slot-event guard, and all four slotchange bindings. The implementation deliberately snapshots exposure attributes when a directly assigned root becomes inactive rather than observing consumer mutations: the named [SC-012] test proves a write made while suppressed cannot replace the saved pre-suppression values, and the consumer documentation states that ownership boundary.",
+    "#254 REVIEW-CYCLE 5 adds FIVE app-shell arms, moving the standing set from 201 to 206. Three SC-012 arms independently break original-snapshot inheritance, current-owner restoration, and active-destination release during cross-shell handoff. One SC-006 arm removes nearest-shell Escape claiming without stopping the original key event. One SC-017 arm changes only the compact logical container feature back to physical width; the pre-existing 860-to-859 CSS arm remains separate so logical-axis parity and inclusive-threshold semantics are independently falsifiable.",
+    "#254 REVIEW-CYCLE 6 adds FOUR arms, moving the standing set from 206 to 210: generated compactTrigger omission resets null; component acceptance waits one microtask for the current React commit; omitted React false is accepted as closed; and an ordinary omitted-false route close releases hidden focus. Each new arm is exact and omits expectCollateral.",
+    "#254 REVIEW-CYCLE 6 COLLATERAL ADJUDICATION records the reproduced exact-7aa outcomes without changing product behavior. The presentation-reflection, native controlled-close release, and compact-header exposure mutations all red the integrated React SC-012 fixture, so each declares required collateral. The old native subject stays green when the closed-render await is removed, while the React SC-012 fixture alone reds; that arm is therefore retargeted to react-app-shell without collateral."
   ],
   "mutations": [
     {
@@ -744,7 +751,8 @@
       "arm": "app shell adopts its generated sheet",
       "file": "packages/elements/src/app-shell/sk-app-shell.ts",
       "from": "  static styles = [sheet];",
-      "to": "  static styles = [];"
+      "to": "  static styles = [];",
+      "expectCollateral": true
     },
     {
       "id": "SC-014",
@@ -1426,6 +1434,308 @@
       "from": "            <dt class=\"sk-facts__term\">${fact.term}</dt>\n            <dd class=\"sk-facts__value\">${fact.value}</dd>",
       "to": "            <div><dt class=\"sk-facts__term\">${fact.term}</dt>\n            <dd class=\"sk-facts__value\">${fact.value}</dd></div>",
       "subject": "fixtures/elements-behaviour/src/pattern-operational-status.test.ts"
+    },
+    {
+      "id": "SC-010",
+      "arm": "presentation assigned before upgrade remains reflected",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "    presentation: { type: String, reflect: true, converter: presentationConverter },",
+      "to": "    presentation: { type: String, reflect: false, converter: presentationConverter },",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts",
+      "expectCollateral": true
+    },
+    {
+      "id": "SC-010",
+      "arm": "removing the presentation attribute restores the public omitted state",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "    return value ?? undefined;",
+      "to": "    return value;",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+    },
+    {
+      "id": "SC-010",
+      "arm": "dismissal intent never mutates controlled open",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "      pending.accepted = this.open !== true;",
+      "to": "      this.open = false; pending.accepted = true;",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts",
+      "expectCollateral": true
+    },
+    {
+      "id": "SC-006",
+      "arm": "one dismissal event per effectively-open Escape",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "    const pending = this.#pendingDismissal;",
+      "to": "    this.dispatchEvent(new CustomEvent('sk-app-shell-dismiss'));\n    const pending = this.#pendingDismissal;",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts",
+      "expectCollateral": true
+    },
+    {
+      "id": "SC-007",
+      "arm": "exact escape dismissal detail",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "        detail: Object.freeze({ reason: 'escape' }),",
+      "to": "        detail: Object.freeze({ reason: 'escape', source: 'shell' }),",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+    },
+    {
+      "id": "SC-008",
+      "arm": "dismissal crosses the shadow boundary with documented flags",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "        bubbles: true,\n        composed: true,",
+      "to": "        bubbles: false,\n        composed: false,",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts",
+      "expectCollateral": true
+    },
+    {
+      "id": "SC-012",
+      "arm": "accepted focus waits for the first closed render",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "    await this.updateComplete;",
+      "to": "    // mutation: focus before the closed update",
+      "subject": "fixtures/react-consumer/src/sk-app-shell.test.tsx"
+    },
+    {
+      "id": "SC-012",
+      "arm": "closed compact navigation remains inert",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "        ?inert=${!effectivelyOpen}",
+      "to": "        ?inert=${false}",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "focus return requires the same-root light-DOM navigation target",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "      this.#assignedWithin(target, 'compact-navigation'),",
+      "to": "      this.contains(target),",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "focus return requires actual compact-header assignment",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "    if (!trigger?.isConnected || !this.#assignedWithin(trigger, 'compact-header')) return false;",
+      "to": "    if (!trigger?.isConnected || !this.contains(trigger)) return false;",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "leaving compact presentation releases focus from hidden navigation",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "    if (changed.get('presentation') === 'compact' && this.presentation !== 'compact') {\n      this.#releaseHiddenFocus();\n    }",
+      "to": "    // mutation: compact presentation changes leave hidden navigation focused",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "ordinary controlled close releases focus from hidden compact navigation",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "    if (changed.get('open') === true && this.open !== true) {\n      this.#releaseHiddenFocus();\n    }",
+      "to": "    // mutation: ordinary controlled close leaves hidden navigation focused",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts",
+      "expectCollateral": true
+    },
+    {
+      "id": "SC-017",
+      "arm": "the compact inline-size threshold remains inclusive through 860px",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "const COMPACT_MAX_INLINE_SIZE = 860;",
+      "to": "const COMPACT_MAX_INLINE_SIZE = 859;",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+    },
+    {
+      "id": "SC-017",
+      "arm": "effective open observes the CSS content-box coordinate",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "      this.#inlineSize = this.#contentInlineSize(entry);",
+      "to": "      this.#inlineSize = entry.borderBoxSize[0]?.inlineSize ?? entry.contentRect.width;",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+    },
+    {
+      "id": "SC-017",
+      "arm": "the compact container rule remains declared at 860px",
+      "file": "packages/elements/src/app-shell/sk-app-shell.css.js",
+      "from": "@container (max-inline-size: 860px)",
+      "to": "@container (max-inline-size: 859px)",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "reconnect reapplies inactive assigned-root exposure synchronously",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "    if (this.hasUpdated) this.#reconcileAssignedRootExposure();",
+      "to": "    // mutation: reconnect leaves assigned roots exposed",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "disconnect restores every suppressed consumer root",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "    this.#pendingDismissal = null;\n    this.#restoreSuppressedRoots();\n    super.disconnectedCallback();",
+      "to": "    this.#pendingDismissal = null;\n    super.disconnectedCallback();",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "restoration removes shell-owned attributes that consumers omitted",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "    if (value === null) root.removeAttribute(name);\n    else root.setAttribute(name, value);",
+      "to": "    if (value === null) root.setAttribute(name, '');\n    else root.setAttribute(name, value);",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "restoration preserves consumer-authored raw attribute values",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "    else root.setAttribute(name, value);",
+      "to": "    else root.removeAttribute(name);",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "compact presentation suppresses the assigned personal-rail root",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "      ['personal-rail', !compact],",
+      "to": "      ['personal-rail', true],",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "compact presentation suppresses the assigned context-sidebar root",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "      ['context-sidebar', !compact],",
+      "to": "      ['context-sidebar', true],",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "compact-header remains exposed while compact navigation is closed",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "      ['compact-header', compact],",
+      "to": "      ['compact-header', this.#effectivelyOpen],",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts",
+      "expectCollateral": true
+    },
+    {
+      "id": "SC-012",
+      "arm": "compact-navigation exposure follows consumer-controlled open",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "      ['compact-navigation', this.#effectivelyOpen],",
+      "to": "      ['compact-navigation', compact],",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "disconnected slot events cannot resuppress restored roots",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "    if (!this.isConnected) return;",
+      "to": "    void this.isConnected;",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "personal-rail slot changes reconcile direct-root exposure",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "        <slot name=\"personal-rail\" @slotchange=${this.#onExposureSlotChange}></slot>",
+      "to": "        <slot name=\"personal-rail\"></slot>",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "context-sidebar slot changes reconcile direct-root exposure",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "        <slot name=\"context-sidebar\" @slotchange=${this.#onExposureSlotChange}></slot>",
+      "to": "        <slot name=\"context-sidebar\"></slot>",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "compact-header slot changes reconcile direct-root exposure",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "        <slot name=\"compact-header\" @slotchange=${this.#onExposureSlotChange}></slot>",
+      "to": "        <slot name=\"compact-header\"></slot>",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "compact-navigation slot changes reconcile direct-root exposure",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "        <slot name=\"compact-navigation\" @slotchange=${this.#onExposureSlotChange}></slot>",
+      "to": "        <slot name=\"compact-navigation\"></slot>",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "cross-shell suppression inherits the consumer snapshot held by the previous owner",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "      const exposure = lease?.exposure ?? {\n        inert: root.getAttribute('inert'),\n        ariaHidden: root.getAttribute('aria-hidden'),\n      };",
+      "to": "      const exposure = {\n        inert: root.getAttribute('inert'),\n        ariaHidden: root.getAttribute('aria-hidden'),\n      };",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "an old shell owner cannot restore a root after its lease transfers",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "      if (lease?.owner !== this) continue;",
+      "to": "      if (!lease) continue;",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "an active destination releases a stale cross-shell exposure lease",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "      if (active) this.#releaseAssignedRoots(slotName);",
+      "to": "      if (active) void slotName;",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+    },
+    {
+      "id": "SC-006",
+      "arm": "the nearest effectively-open shell claims a composed Escape",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "    if (claimedEscapeInteractions.has(event)) return;",
+      "to": "    void claimedEscapeInteractions.has(event);",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+    },
+    {
+      "id": "SC-017",
+      "arm": "compact CSS queries logical inline-size rather than physical width",
+      "file": "packages/elements/src/app-shell/sk-app-shell.css.js",
+      "from": "@container (max-inline-size: 860px)",
+      "to": "@container (max-width: 860px)",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+    },
+    {
+      "id": "SC-010",
+      "arm": "generated compactTrigger omission resets stale trigger authority",
+      "file": "packages/react/src/SkAppShell.js",
+      "from": "  useProperties(ref, \"compactTrigger\", compactTrigger, () => null);",
+      "to": "  useProperties(ref, \"compactTrigger\", compactTrigger);",
+      "subject": "fixtures/react-consumer/src/sk-app-shell.test.tsx"
+    },
+    {
+      "id": "SC-012",
+      "arm": "dismissal acceptance waits for the current React commit",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "    queueMicrotask(() => {\n      pending.accepted = this.open !== true;\n      void this.#finishDismissal(pending);\n    });",
+      "to": "    pending.accepted = this.open !== true;\n    void this.#finishDismissal(pending);",
+      "subject": "fixtures/react-consumer/src/sk-app-shell.test.tsx"
+    },
+    {
+      "id": "SC-012",
+      "arm": "omitted React false is accepted as effectively closed",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "      pending.accepted = this.open !== true;",
+      "to": "      pending.accepted = this.open === false;",
+      "subject": "fixtures/react-consumer/src/sk-app-shell.test.tsx"
+    },
+    {
+      "id": "SC-012",
+      "arm": "an ordinary omitted-false route close releases hidden focus",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "    if (changed.get('open') === true && this.open !== true) {",
+      "to": "    if (changed.get('open') === true && this.open === false) {",
+      "subject": "fixtures/react-consumer/src/sk-app-shell.test.tsx"
     }
   ]
 }

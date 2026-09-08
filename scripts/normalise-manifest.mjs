@@ -111,6 +111,11 @@ const isReadonlyArrayTypeNode = (type) => {
   );
 };
 
+const isNullableTypeNode = (type) =>
+  Boolean(type && ts.isUnionTypeNode(type) && type.types.some(
+    (member) => ts.isLiteralTypeNode(member) && member.literal.kind === ts.SyntaxKind.NullKeyword,
+  ));
+
 const hasFrozenEmptyArrayInitializer = (member) => {
   const initializer = unwrap(member.initializer);
   if (!initializer || !ts.isCallExpression(initializer) || initializer.arguments.length !== 1) {
@@ -121,10 +126,16 @@ const hasFrozenEmptyArrayInitializer = (member) => {
   return ts.isArrayLiteralExpression(argument) && argument.elements.length === 0;
 };
 
+const hasNullInitializer = (member) =>
+  unwrap(member.initializer)?.kind === ts.SyntaxKind.NullKeyword;
+
 const normalizedTypeIsReadonlyArray = (member) => {
   const text = String(member?.type?.text ?? '').trim();
   return /^ReadonlyArray\s*</.test(text) || /^readonly\s+.+\[\]$/.test(text);
 };
+
+const normalizedTypeIncludesNull = (member) =>
+  String(member?.type?.text ?? '').split('|').some((type) => type.trim() === 'null');
 
 /**
  * Field names declared `state: true` in a module's `static properties` initialiser.
@@ -363,6 +374,7 @@ function propertyOnlyFields(modulePath, className) {
     result.set(name, {
       resetToEmptyArray:
         isReadonlyArrayTypeNode(field.type) && hasFrozenEmptyArrayInitializer(field),
+      resetToNull: isNullableTypeNode(field.type) && hasNullInitializer(field),
     });
   }
   return result;
@@ -384,6 +396,7 @@ let corrected = 0;
 let tagged = 0;
 let propertyOnly = 0;
 let emptyArrayResets = 0;
+let nullResets = 0;
 for (const mod of manifest.modules) {
   for (const decl of mod.declarations ?? []) {
     if (!decl.tagName) continue;
@@ -448,6 +461,9 @@ for (const mod of manifest.modules) {
       if (facts.resetToEmptyArray && normalizedTypeIsReadonlyArray(member)) {
         member['x-spec-kitty-property-reset'] = 'empty-array';
         emptyArrayResets++;
+      } else if (facts.resetToNull && normalizedTypeIncludesNull(member)) {
+        member['x-spec-kitty-property-reset'] = 'null';
+        nullResets++;
       }
       if (Array.isArray(decl.attributes)) {
         const before = decl.attributes.length;
@@ -539,5 +555,6 @@ writeFileSync(path, `${JSON.stringify(manifest, null, 2)}\n`);
 console.log(
   `normalise-manifest: ${path} sorted (${manifest.modules.length} module(s), ` +
     `${corrected} false attribute(s) removed, ${propagated} description(s) propagated, ` +
-    `${propertyOnly} property-only field(s), ${emptyArrayResets} empty-array reset(s))`,
+    `${propertyOnly} property-only field(s), ${emptyArrayResets} empty-array reset(s), ` +
+    `${nullResets} null reset(s))`,
 );

@@ -38,9 +38,21 @@ declare module 'vue' {
       /** Consumer-controlled current-row presentation. Activation never changes this value. */
       'selected'?: boolean;
     }>;
-    /** A stateless page frame for personal navigation, contextual navigation, page heading, and content. */
+    /**
+     * A stateless page frame for personal navigation, contextual navigation, page heading, and content.
+     *
+     * Token dependencies: --sk-border-default, --sk-border-focus, --sk-border-strong,
+     * --sk-border-width-1, --sk-border-width-2, --sk-layout-context-sidebar-width,
+     * --sk-layout-personal-rail-width, --sk-space-3, --sk-space-4, --sk-space-12,
+     * --sk-surface-card.
+     */
     'sk-app-shell': SkElement<{
-      // no declared props
+      /** Consumer-controlled compact drawer state. The shell never changes this value. */
+      'open'?: boolean;
+      /** Enables the opt-in compact layout. Omit it for the legacy responsive shell. */
+      'presentation'?: 'compact' | undefined;
+      /** Consumer trigger used only for accepted-Escape focus return. It must be actually assigned within this shell's compact-header slot and control a same-root target actually assigned within this shell's compact-navigation slot. */
+      'compactTrigger'?: import('@spec-kitty/elements/dist/app-shell/sk-app-shell.js').SkAppShell["compactTrigger"];
     }>;
     /**
      * A controlled, property-fed bar chart for compact numeric comparisons.

@@ -80,10 +80,84 @@ navigation surface is open.
 </sk-app-shell>
 ```
 
-`sk-app-shell` exposes the `personal-rail`, `context-sidebar`, and `page-header` named slots plus
-the default content slot. At desktop widths its columns are 56px, 240px, and the remaining space;
-at narrow widths it keeps all regions in document order. Consumers may control visibility on the
-slotted hosts, but the shell itself has no open state or navigation events.
+`sk-app-shell` exposes the `personal-rail`, `context-sidebar`, `compact-header`,
+`compact-navigation`, and `page-header` named slots plus the default content slot. With
+`presentation` omitted, its legacy contract is unchanged: at desktop widths the columns are 56px,
+240px, and the remaining space, and the existing 720px container rule keeps every legacy region in
+document order. An unknown `presentation` warns and uses that legacy layout.
+
+The reflected `presentation="compact"` axis activates against the shell's own inline size through
+860 CSS px; 861px is noncompact, including when the viewport is wider than a constrained shell.
+The reflected `open` boolean is controlled: it projects consumer state but the shell never changes
+it on Escape, activation, resize, or a route change. The `compactTrigger` field is property-only
+(`HTMLElement | null`) and is never serialized. Its only purpose is accepted-Escape focus return.
+
+```html
+<sk-app-shell presentation="compact">
+  <div slot="compact-header">
+    <button type="button" aria-expanded="false" aria-controls="repo-navigation">Menu</button>
+    <strong>Repository</strong>
+  </div>
+  <nav slot="compact-navigation" id="repo-navigation" aria-label="Repository navigation">
+    <a href="/missions">Missions</a>
+  </nav>
+  <h1 slot="page-header">Missions</h1>
+  <section>Consumer-owned page content.</section>
+</sk-app-shell>
+<script type="module">
+  const shell = document.querySelector('sk-app-shell');
+  const trigger = shell.querySelector('button');
+  shell.compactTrigger = trigger;
+  const setOpen = (open) => {
+    shell.open = open;
+    trigger.setAttribute('aria-expanded', String(open));
+  };
+  trigger.addEventListener('click', () => setOpen(!shell.open));
+  shell.addEventListener('sk-app-shell-dismiss', () => setOpen(false));
+  shell.querySelector('#repo-navigation').addEventListener('click', (event) => {
+    if (event.target.closest('a')) setOpen(false); // route ownership stays here
+  });
+</script>
+```
+
+The trigger must be consumer-authored and actually assigned within this shell's `compact-header`
+slot. It may be the directly slotted control or a descendant of a directly slotted wrapper, as in
+the example; a `slot="compact-header"` attribute on a nested, unassigned control is not sufficient.
+The labelled navigation target follows the same rule for `compact-navigation`. Trigger and target
+must remain in the same light-DOM root; the consumer owns the target id, `aria-controls`,
+`aria-expanded`, accessible names, links, routes, destination, and whether dismissal is accepted.
+Do not point the IDREF at the shell's shadow wrapper or at content assigned to another shell. The
+shell adds neither a navigation landmark nor another `main`.
+
+The shell mirrors each inactive region onto its directly assigned light-DOM roots with `inert` and
+`aria-hidden="true"`, so engines cannot expose content through a CSS-hidden shadow wrapper. Personal
+and context roots are active in legacy or noncompact presentation, compact-header roots are active
+only in compact presentation through 860px, and compact-navigation roots are active only while the
+drawer is effectively open. When a root becomes inactive, the shell snapshots its exact raw
+`inert` and `aria-hidden` attributes, including absence, an empty value, or `"false"`. It restores
+that snapshot when the root becomes active, moves out of an inactive slot, or the shell disconnects;
+it does not manufacture `aria-hidden="false"` or alter nested descendants. Consumers must author
+exposure attributes while the root is active. Writes made while the shell suppresses the root are
+unsupported and do not replace or persist over the saved snapshot. While open, compact navigation
+keeps native order inside a viewport-bounded internal scroller. Effectively open means all three
+conditions hold: `presentation === 'compact'`, shell inline size at most 860px, and controlled
+`open === true`.
+
+An effectively-open Escape emits exactly one `sk-app-shell-dismiss` with
+`detail: { reason: 'escape' }`, `bubbles: true`, `composed: true`, and `cancelable: false`; it never
+changes `open`. The shell samples acceptance once in the next microtask, after a consumer's
+current-dispatch state update has had its bounded opportunity to commit. A synchronously assigned
+native `false` and a framework-controlled false represented by omission are both effectively
+closed. The shell first renders the drawer closed and only then focuses a still-connected, valid
+`compactTrigger`. A missing, disconnected, falsely slotted, cross-root, or cross-shell trigger or
+controlled target grants no focus-return authority. Rejected dismissal expires at that sample,
+before a later task, so an unrelated route close never steals focus. Consumers should still author
+`open` as a boolean; the shell never mutates it. Route activation and destination remain entirely
+consumer-owned. Changing away from compact presentation releases focus from navigation that the
+transition hides without changing `open` or moving focus to the compact trigger.
+
+The eight styling parts are `shell`, `personal`, `context`, `compact-header`,
+`compact-navigation`, `content`, `header`, and `main`.
 
 Use the reflected `label` attribute to name the `sk-personal-rail` navigation landmark and the
 `sk-context-sidebar` complementary landmark. A nonblank label is forwarded verbatim; a blank or

@@ -27,7 +27,11 @@ export { SkRibbonCard } from './ribbon-card/sk-ribbon-card.js';
 export { SkPillTag } from './pill-tag/sk-pill-tag.js';
 export { SkSectionBanner } from './section-banner/sk-section-banner.js';
 export { SkSiteFooter } from './site-footer/sk-site-footer.js';
-export { SkAppShell } from './app-shell/sk-app-shell.js';
+export {
+  SkAppShell,
+  type SkAppShellDismissDetail,
+  type SkAppShellPresentation,
+} from './app-shell/sk-app-shell.js';
 export { SkPersonalRail } from './personal-rail/sk-personal-rail.js';
 export { SkContextSidebar } from './context-sidebar/sk-context-sidebar.js';
 export { SkPageHeader } from './page-header/sk-page-header.js';
