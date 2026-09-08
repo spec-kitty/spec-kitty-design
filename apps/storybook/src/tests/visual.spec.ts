@@ -675,6 +675,21 @@ const contextNavVisuals = [
   ['current-nested', 'sk-context-nav-current-nested.png', { width: 720, height: 720 }],
   ['long-labels', 'sk-context-nav-long-labels-240.png', { width: 390, height: 720 }],
   ['light-mode', 'sk-context-nav-light.png', { width: 720, height: 720 }],
+  [
+    'unavailable-mixed',
+    'sk-context-nav-unavailable-mixed-dark.png',
+    { width: 720, height: 720 },
+  ],
+  [
+    'unavailable-long',
+    'sk-context-nav-unavailable-long-240.png',
+    { width: 390, height: 720 },
+  ],
+  [
+    'unavailable-light-mode',
+    'sk-context-nav-unavailable-light.png',
+    { width: 720, height: 720 },
+  ],
 ] as const;
 
 for (const [id, snapshot, viewport] of contextNavVisuals) {
@@ -692,6 +707,23 @@ test('SK-context-nav forced colors — visual baseline', async ({ page }) => {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
   });
+});
+
+test('SK-context-nav unavailable forced colors — visual baseline', async ({
+  page,
+}) => {
+  await page.emulateMedia({ forcedColors: 'active' });
+  const target = await contextNavStory(page, 'unavailable-forced-colors', {
+    width: 390,
+    height: 720,
+  });
+  await expect(target).toHaveScreenshot(
+    'sk-context-nav-unavailable-forced-colors.png',
+    {
+      threshold: 0.02,
+      maxDiffPixelRatio: 0.02,
+    },
+  );
 });
 
 type TeamOverviewStoryId =

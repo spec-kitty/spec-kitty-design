@@ -263,7 +263,7 @@
    `padding`, `margin` and `border-radius`, and no `border`/`outline` shorthand
    — so a system color written in shorthand would pass because the gate never
    looks, not because it approved. The longhand DOES match `/color/`, and
-   `CanvasText` is one of six system-color keywords listed explicitly in
+   `CanvasText` is one of the system-color keywords listed explicitly in
    stylelint.config.mjs's `ignoreValues` for exactly this. See
    docs/contributing/adding-a-component.md, the canonical owner of the
    convention. */

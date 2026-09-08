@@ -38,7 +38,8 @@
     "#212 ratchets sixteen additive acceptance stories: four each for action-row card/T10 composition, entity-marker axes/images, status pulse/preferences, and inline empty-state presentations. On the refreshed train after #179, total moves 233 -> 249; every pre-existing story id remains present.",
     "#213 ratchets thirty-one acceptance stories: all eight native breadcrumb, seven prose and ten event-timeline states, plus the six additive element-layer check-bullet state/scale stories. Total moves 254 -> 285 on the refreshed train after #260. Generated docs entries are excluded; the existing four check-bullet stories remain unchanged.",
     "#256 opts in all fifteen native styles-only context-navigation stories, total 285 -> 300 on the refreshed train after #213. The routes separately preserve grouped, current top-level, current nested, current parent, no-current, empty, empty-plus-overflow, long-label, one/three/twenty-child, 240px narrow, forced-colours, RTL, and real `.sk-light` acceptance evidence.",
-    "#214 ratchets the exact fifteen Storybook-only Work Package overview/detail route-state stories named as acceptance evidence. On the refreshed train after #256, total moves 300 -> 315; exported fixture, selector, and render helpers are excluded from CSF indexing."
+    "#214 ratchets the exact fifteen Storybook-only Work Package overview/detail route-state stories named as acceptance evidence. On the refreshed train after #256, total moves 300 -> 315; exported fixture, selector, and render helpers are excluded from CSF indexing.",
+    "#264 adds eight unavailable-entry acceptance stories, total 315 -> 323 on the refreshed train after #214. Mixed dark, annotation-free, all-unavailable/no-current, unavailable-parent/no-children, long 240px, forced-colours, RTL, and real `.sk-light` routes keep the additive styles-only contract reviewable without inventing application state."
   ],
   "byElement": {
     "sk-action-row": [
@@ -157,7 +158,15 @@
       "navigation-skcontextnav-html--narrow",
       "navigation-skcontextnav-html--forced-colors",
       "navigation-skcontextnav-html--rtl",
-      "navigation-skcontextnav-html--light-mode"
+      "navigation-skcontextnav-html--light-mode",
+      "navigation-skcontextnav-html--unavailable-mixed",
+      "navigation-skcontextnav-html--unavailable-annotation-free",
+      "navigation-skcontextnav-html--unavailable-all",
+      "navigation-skcontextnav-html--unavailable-parent",
+      "navigation-skcontextnav-html--unavailable-long",
+      "navigation-skcontextnav-html--unavailable-forced-colors",
+      "navigation-skcontextnav-html--unavailable-rtl",
+      "navigation-skcontextnav-html--unavailable-light-mode"
     ],
     "sk-data-table": [
       "primitives-skdatatable-html--default",
@@ -437,5 +446,5 @@
       "patterns-work-package-views--detail-narrow"
     ]
   },
-  "total": 315
+  "total": 323
 }
