@@ -1379,9 +1379,17 @@
         },
         {
           "kind": "class",
-          "description": "A stateless page frame for personal navigation, contextual navigation, page heading, and content.",
+          "description": "A stateless page frame for personal navigation, contextual navigation, page heading, and content.\n\nToken dependencies: --sk-border-default, --sk-border-focus, --sk-border-strong,\n--sk-border-width-1, --sk-border-width-2, --sk-layout-context-sidebar-width,\n--sk-layout-personal-rail-width, --sk-space-3, --sk-space-4, --sk-space-12,\n--sk-surface-card.",
           "name": "SkAppShell",
           "cssParts": [
+            {
+              "description": "The compact identity and trigger row.",
+              "name": "compact-header"
+            },
+            {
+              "description": "The bounded compact navigation drawer.",
+              "name": "compact-navigation"
+            },
             {
               "description": "The page header and main-content column.",
               "name": "content"
@@ -1413,6 +1421,14 @@
               "name": ""
             },
             {
+              "description": "Consumer-owned compact identity and trigger, directly assigned or wrapped by a directly assigned light-DOM element.",
+              "name": "compact-header"
+            },
+            {
+              "description": "Consumer-owned navigation target, directly assigned or wrapped by a directly assigned light-DOM element; its id and accessible label stay consumer-owned.",
+              "name": "compact-navigation"
+            },
+            {
               "description": "Consumer-owned navigation or content for the selected context.",
               "name": "context-sidebar"
             },
@@ -1425,7 +1441,303 @@
               "name": "personal-rail"
             }
           ],
-          "members": [],
+          "members": [
+            {
+              "kind": "method",
+              "name": "#assignedWithin",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "boolean"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "node",
+                  "type": {
+                    "text": "Element"
+                  }
+                },
+                {
+                  "name": "slotName",
+                  "type": {
+                    "text": "'compact-header' | 'compact-navigation'"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "field",
+              "name": "#compact",
+              "privacy": "private",
+              "type": {
+                "text": "boolean"
+              },
+              "readonly": true
+            },
+            {
+              "kind": "method",
+              "name": "#contentInlineSize",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "number"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "entry",
+                  "optional": true,
+                  "type": {
+                    "text": "ResizeObserverEntry"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "field",
+              "name": "#effectivelyOpen",
+              "privacy": "private",
+              "type": {
+                "text": "boolean"
+              },
+              "readonly": true
+            },
+            {
+              "kind": "method",
+              "name": "#finishDismissal",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "Promise<void>"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "pending",
+                  "type": {
+                    "text": "{ accepted: boolean; trigger: HTMLElement | null }"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "field",
+              "name": "#inlineSize",
+              "privacy": "private"
+            },
+            {
+              "kind": "field",
+              "name": "#onExposureSlotChange",
+              "privacy": "private"
+            },
+            {
+              "kind": "field",
+              "name": "#onKeydown",
+              "privacy": "private"
+            },
+            {
+              "kind": "field",
+              "name": "#pendingDismissal",
+              "privacy": "private",
+              "type": {
+                "text": "{ accepted: boolean; trigger: HTMLElement | null } | null"
+              },
+              "default": "null"
+            },
+            {
+              "kind": "method",
+              "name": "#reconcileAssignedRootExposure",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              }
+            },
+            {
+              "kind": "method",
+              "name": "#releaseAssignedRoots",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "slotName",
+                  "type": {
+                    "text": "ExposureRegion"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "#releaseHiddenFocus",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              }
+            },
+            {
+              "kind": "field",
+              "name": "#resizeObserver",
+              "privacy": "private",
+              "type": {
+                "text": "ResizeObserver | null"
+              },
+              "default": "null"
+            },
+            {
+              "kind": "method",
+              "name": "#restoreAttribute",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "root",
+                  "type": {
+                    "text": "Element"
+                  }
+                },
+                {
+                  "name": "name",
+                  "type": {
+                    "text": "string"
+                  }
+                },
+                {
+                  "name": "value",
+                  "type": {
+                    "text": "string | null"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "#restoreSuppressedRoots",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              }
+            },
+            {
+              "kind": "method",
+              "name": "#suppressAssignedRoots",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "slotName",
+                  "type": {
+                    "text": "ExposureRegion"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "field",
+              "name": "#suppressedRoots",
+              "privacy": "private",
+              "default": "new Set<Element>()"
+            },
+            {
+              "kind": "method",
+              "name": "#validFocusTrigger",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "trigger is HTMLElement"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "trigger",
+                  "type": {
+                    "text": "HTMLElement | null"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "field",
+              "name": "compactTrigger",
+              "privacy": "public",
+              "type": {
+                "text": "HTMLElement | null"
+              },
+              "default": "null",
+              "description": "Consumer trigger used only for accepted-Escape focus return. It must be actually assigned within this shell's compact-header slot and control a same-root target actually assigned within this shell's compact-navigation slot.",
+              "x-spec-kitty-property-only": true,
+              "x-spec-kitty-property-reset": "null"
+            },
+            {
+              "kind": "field",
+              "name": "open",
+              "privacy": "public",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "description": "Consumer-controlled compact drawer state. The shell never changes this value.",
+              "attribute": "open",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "presentation",
+              "privacy": "public",
+              "type": {
+                "text": "'compact' | undefined"
+              },
+              "description": "Enables the opt-in compact layout. Omit it for the legacy responsive shell.",
+              "attribute": "presentation",
+              "reflects": true
+            }
+          ],
+          "events": [
+            {
+              "type": {
+                "text": "CustomEvent<{ readonly reason: 'escape' }>"
+              },
+              "description": "Requests dismissal after Escape while the controlled compact drawer is effectively open. Detail is `{ reason: 'escape' }`; the event bubbles, is composed, and is not cancelable.",
+              "name": "sk-app-shell-dismiss"
+            }
+          ],
+          "attributes": [
+            {
+              "name": "open",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "description": "Consumer-controlled compact drawer state. The shell never changes this value.",
+              "fieldName": "open"
+            },
+            {
+              "name": "presentation",
+              "type": {
+                "text": "'compact' | undefined"
+              },
+              "description": "Enables the opt-in compact layout. Omit it for the legacy responsive shell.",
+              "fieldName": "presentation"
+            }
+          ],
           "superclass": {
             "name": "LitElement",
             "package": "lit"
@@ -6336,6 +6648,22 @@
           "name": "SkAppShell",
           "declaration": {
             "name": "SkAppShell",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "SkAppShellDismissDetail",
+          "declaration": {
+            "name": "SkAppShellDismissDetail",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "SkAppShellPresentation",
+          "declaration": {
+            "name": "SkAppShellPresentation",
             "module": "./dist/index.js"
           }
         },

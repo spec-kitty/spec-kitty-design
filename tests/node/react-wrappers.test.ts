@@ -65,6 +65,7 @@ test('[property-only] the normalizer marks only explicit public attribute:false 
         export class SkProbe {
           static properties = {
             structured: { attribute: false },
+            nullable: { attribute: false },
             scalar: { attribute: false },
             stateFalseStructured: { attribute: false, state: false },
             stateOnly: { state: true },
@@ -81,6 +82,7 @@ test('[property-only] the normalizer marks only explicit public attribute:false 
           };
 
           structured: ReadonlyArray<string> = Object.freeze([]);
+          nullable: HTMLElement | null = null;
           scalar = 0;
           stateFalseStructured: ReadonlyArray<string> = Object.freeze([]);
           stateOnly = '';
@@ -130,6 +132,7 @@ test('[property-only] the normalizer marks only explicit public attribute:false 
 
     const fields = [
       ['structured', 'ReadonlyArray<string>'],
+      ['nullable', 'HTMLElement | null'],
       ['scalar', 'number'],
       ['stateFalseStructured', 'ReadonlyArray<string>'],
       ['stateOnly', 'string'],
@@ -231,6 +234,8 @@ test('[property-only] the normalizer marks only explicit public attribute:false 
 
     expect(member('structured')['x-spec-kitty-property-only']).toBe(true);
     expect(member('structured')['x-spec-kitty-property-reset']).toBe('empty-array');
+    expect(member('nullable')['x-spec-kitty-property-only']).toBe(true);
+    expect(member('nullable')['x-spec-kitty-property-reset']).toBe('null');
     expect(member('scalar')['x-spec-kitty-property-only']).toBe(true);
     expect(member('scalar')).not.toHaveProperty('x-spec-kitty-property-reset');
     expect(member('stateFalseStructured')['x-spec-kitty-property-only']).toBe(true);

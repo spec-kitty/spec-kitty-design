@@ -1,0 +1,60 @@
+{
+  "event_count": 11,
+  "last_event_id": "01M1YHG78Z738N4J4BWBJCC3J5",
+  "materialized_at": "2026-09-07T18:18:47.455700+00:00",
+  "mission_number": "",
+  "mission_slug": "repository-dossier-compact-navigation-shell-01M1Y3FY",
+  "mission_type": "software-dev",
+  "summary": {
+    "approved": 1,
+    "blocked": 0,
+    "canceled": 0,
+    "claimed": 0,
+    "done": 0,
+    "for_review": 0,
+    "in_progress": 0,
+    "in_review": 0,
+    "planned": 0
+  },
+  "work_packages": {
+    "WP01": {
+      "actor": "codex",
+      "agent": "codex",
+      "agent_profile": "__resolved_profile_absent__",
+      "agent_profile_version": "__resolved_profile_version_absent__",
+      "assignee": "codex",
+      "force_count": 4,
+      "lane": "approved",
+      "last_event_id": "01M1YHG78Z738N4J4BWBJCC3J5",
+      "last_transition_at": "2026-09-07T18:18:47.455700+00:00",
+      "model": "__resolved_model_absent__",
+      "notes": [
+        "Safe delivery compression rebuilt an exact tree snapshot directly on origin/train/elements-first; ancestry-only guard cannot recognize the squash. Backup ref backup/issue-254-pre-delivery-squash-5bd4df2 preserves pre-compression history; normalized lane head 5117e73 contains all mission and implementation artifacts.",
+        "Independent Codex review rejected exact SHA 5117e73afae3324895051b0117c1dc02487377a6; two reproduced contract defects plus incomplete final evidence.",
+        "Cycle 2 Codex remediation for review-cycle-1 findings.",
+        "Cycle 2 fixes committed through e870d0309d905c264ea963c2132e46a40575889f; all three cycle-1 blockers addressed and exact-head Chromium/Firefox regression passes.",
+        "Independent Codex approved implementation at exact SHA e870d0309d905c264ea963c2132e46a40575889f; cycle-1 slot/content-box defects fixed. Final acceptance remains on hold pending exact-SHA evidence and complete gate matrix; see review-feedback-2.md."
+      ],
+      "provider": "__resolved_provider_absent__",
+      "review": null,
+      "review_result": {
+        "feedback_path": "/home/jeroennouws/dev/spec-kitty-design-missions/254/kitty-specs/repository-dossier-compact-navigation-shell-01M1Y3FY/tasks/WP01-compact-navigation-shell-seam/review-cycle-2.md",
+        "reference": "review-cycle://repository-dossier-compact-navigation-shell-01M1Y3FY/WP01-compact-navigation-shell-seam/review-cycle-2.md",
+        "reviewer": "codex",
+        "verdict": "approved"
+      },
+      "role": "reviewer",
+      "shell_pid": 2951287,
+      "shell_pid_created_at": "1788789745.06",
+      "subtasks": {
+        "T001": "done",
+        "T002": "done",
+        "T003": "done",
+        "T004": "done",
+        "T005": "done",
+        "T006": "done",
+        "T007": "done"
+      }
+    }
+  }
+}

@@ -1,0 +1,26 @@
+source_id,source,role,accessed_or_scope
+S-001,GitHub issue #254,Binding requirement and acceptance record,Live issue body
+S-002,#125,Tracked compact-navigation requirement,Issue lineage cited by #254
+S-003,#135,Supporting shell history,Issue lineage cited by #254
+S-004,#145 / PR195,Dependency and shell context,Issue lineage cited by #254
+S-005,#204 / PR235,ADR-11 verification context,Issue lineage cited by #254
+S-006,#253,Parent mission coordination,Issue lineage cited by #254
+S-007,packages/elements/src/app-shell/sk-app-shell.ts,Current element surface and stateless render,Current checkout
+S-008,packages/styles/src/app-shell/sk-app-shell.css,Current grid and responsive rule,Current checkout
+S-009,docs/architecture/decisions/2026-09-02-9-shadow-dom-and-styling-api.md,Shadow/styling/part boundary,ADR-9
+S-010,docs/architecture/decisions/2026-09-02-10-distribution-and-canonical-markup.md,Canonical authored markup and generation,ADR-10
+S-011,docs/architecture/decisions/2026-09-02-11-verification-stack-and-wrapper-generation.md,Conformance and generated outputs,ADR-11
+S-012,docs/contributing/adding-a-component.md,Authoring recipe and required gates,Current recipe
+S-013,/home/jeroennouws/dev/team-kitty-missions/ux_redesign/repository-dossier/README.md,Product composition and scope,Read-only approved UX markdown
+S-014,/home/jeroennouws/dev/team-kitty-missions/ux_redesign/repository-dossier/DESIGN.md,Visual/design intent,Read-only approved UX markdown
+S-015,/home/jeroennouws/dev/team-kitty-missions/ux_redesign/repository-dossier/BACKEND-CAPABILITY-MAP.md,Capability boundary and non-goals,Read-only approved UX markdown
+S-016,/home/jeroennouws/dev/team-kitty-missions/ux_redesign/repository-dossier/SCREEN-MATRIX.md,Responsive state matrix,Read-only approved UX markdown
+S-017,/home/jeroennouws/dev/team-kitty-missions/ux_redesign/repository-dossier/UX-DECISION-REPORT.md,Resolved UX decisions,Read-only approved UX markdown
+S-018-D1,/home/jeroennouws/dev/team-kitty-missions/ux_redesign/repository-dossier/screens/D1-populated-desktop-dark.png,Desktop visual intent,SHA-256 14b45c8dae0d33679f1bfd37fabadf40df8689faeddead291d1e5a68d47ce7ff
+S-018-D2,/home/jeroennouws/dev/team-kitty-missions/ux_redesign/repository-dossier/screens/D2-populated-narrow-dark.png,Compact visual intent,SHA-256 2dd54eeab0893523ce7eca4a54e39627cda14a7d4ebcbc9804b2310947a09633
+S-018-D4,/home/jeroennouws/dev/team-kitty-missions/ux_redesign/repository-dossier/screens/D4-cross-branch-merged-dark.png,Desktop family visual intent,SHA-256 97827410ac3808f1096b52f583ba28e9a1b839de623ec82f5b95258e02e153ac
+S-018-D5,/home/jeroennouws/dev/team-kitty-missions/ux_redesign/repository-dossier/screens/D5-not-spec-kitty-dark.png,Desktop family visual intent,SHA-256 38655391fe4960babaa6bdbab003e4d0904788115473cb382bc567f038603925
+S-018-D6,/home/jeroennouws/dev/team-kitty-missions/ux_redesign/repository-dossier/screens/D6-snapshot-behind-log-dark.png,Desktop family visual intent,SHA-256 fee0e65ceef59c6fc792c0e7ea187a576a80690f7d029b53c956196d0fa9689c
+S-018-D7,/home/jeroennouws/dev/team-kitty-missions/ux_redesign/repository-dossier/screens/D7-indexing-dark.png,Desktop family visual intent,SHA-256 15ff84bb068f10817c04f0ed003b18a58369a84b4af5edd7b3bd41dd8eef386c
+S-018-D8,/home/jeroennouws/dev/team-kitty-missions/ux_redesign/repository-dossier/screens/D8-no-missions-dark.png,Desktop family visual intent,SHA-256 f6741701ec08c34567503be42cfdda7e815b659357d317394bb3105ace19356b
+S-019,WAI disclosure behavior reference,Supporting accessibility behavior only,Reference cited by audit

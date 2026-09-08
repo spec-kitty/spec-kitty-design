@@ -14,6 +14,7 @@
 import * as React from 'react';
 import {
   SkActionRow,
+  SkAppShell,
   SkBarChart,
   SkCard,
   SkEntityMarker,
@@ -25,6 +26,7 @@ import {
   SkStatusIndicator,
   SkTransitionMatrix,
   type ActionRowActivateDetail,
+  type SkAppShellElement,
   type BarChartSelectDetail,
   type SkActionRowProps,
   type SkBarChartElement,
@@ -39,6 +41,8 @@ import type {
   BarSeries,
   EvidenceStage,
   NoticeAnnounce,
+  SkAppShellDismissDetail,
+  SkAppShellPresentation,
   SkNoticeDismissDetail,
   StatusIndicatorTone,
   TransitionMatrixProperties,
@@ -49,6 +53,28 @@ import type {
 // every draft that inherited members must NOT become props; implemented literally this line
 // would not compile.
 export const ok = <SkFormInput value="hello" label="Name" required disabled={false} />;
+
+const compactTrigger = document.createElement('button');
+const compactPresentation: SkAppShellPresentation = 'compact';
+const omittedPresentation: SkAppShellPresentation = undefined;
+void omittedPresentation;
+export const appShellAllProps = (
+  <SkAppShell
+    presentation={compactPresentation}
+    open
+    compactTrigger={compactTrigger}
+    onSkAppShellDismiss={(event) => {
+      const detail: SkAppShellDismissDetail = event.detail;
+      void detail.reason;
+      // @ts-expect-error dismissal detail is exact rather than any
+      void event.detail.open;
+    }}
+  />
+);
+const appShellElement: SkAppShellElement | null = null;
+void appShellElement;
+// @ts-expect-error compact is the only non-default presentation
+export const appShellUnknownPresentation = <SkAppShell presentation="wide" />;
 
 // @ts-expect-error `required` is boolean, not string
 export const wrongType = <SkFormInput required="yes" />;

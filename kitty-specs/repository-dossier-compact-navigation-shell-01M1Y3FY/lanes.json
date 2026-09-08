@@ -1,0 +1,69 @@
+{
+  "version": 1,
+  "mission_slug": "repository-dossier-compact-navigation-shell-01M1Y3FY",
+  "mission_id": "01M1Y3FYW7J7N68YBKKYVR079X",
+  "mission_branch": "kitty/mission-repository-dossier-compact-navigation-shell-01M1Y3FY",
+  "target_branch": "train/elements-first",
+  "lanes": [
+    {
+      "lane_id": "lane-a",
+      "wp_ids": [
+        "WP01"
+      ],
+      "write_scope": [
+        "apps/storybook/src/tests/sk-app-shell-compact-navigation.spec.ts",
+        "apps/storybook/src/tests/sk-team-overview-shell-layout.spec.ts",
+        "apps/storybook/src/tests/visual.spec.ts",
+        "apps/storybook/src/tests/visual.spec.ts-snapshots/**",
+        "behaviours.json",
+        "docs/architecture/validation/issue-254-compact-navigation/chromium-200-percent.png",
+        "docs/architecture/validation/issue-254-compact-navigation/chromium-400-percent.png",
+        "docs/architecture/validation/issue-254-compact-navigation/evidence.md",
+        "docs/architecture/validation/issue-254-compact-navigation/firefox-200-percent.png",
+        "docs/architecture/validation/issue-254-compact-navigation/firefox-400-percent.png",
+        "docs/design-system/using-components.md",
+        "expected-docs.json",
+        "expected-parts.json",
+        "expected-stories.json",
+        "fixtures/elements-behaviour/src/sk-app-shell.test.ts",
+        "fixtures/react-consumer/src/sk-app-shell.test.tsx",
+        "fixtures/react-consumer/src/wrappers.test.tsx",
+        "fixtures/vue-consumer/src/types.test-d.ts",
+        "mutations.json",
+        "mutations.selftest.json",
+        "packages/elements/SIZES.md",
+        "packages/elements/custom-elements-manifest.config.mjs",
+        "packages/elements/custom-elements.json",
+        "packages/elements/src/app-shell/sk-app-shell.css.d.ts",
+        "packages/elements/src/app-shell/sk-app-shell.css.js",
+        "packages/elements/src/app-shell/sk-app-shell.stories.ts",
+        "packages/elements/src/app-shell/sk-app-shell.ts",
+        "packages/elements/src/index.ts",
+        "packages/elements/vue.d.ts",
+        "packages/react/src/SkAppShell.d.ts",
+        "packages/react/src/SkAppShell.js",
+        "packages/react/src/index.d.ts",
+        "packages/react/src/index.js",
+        "packages/react/type-tests/wrappers.type-test.tsx",
+        "packages/styles/**/app-shell*/**",
+        "packages/styles/src/app-shell/sk-app-shell.css",
+        "scripts/build-react-wrappers.mjs",
+        "scripts/normalise-manifest.mjs",
+        "suite-budget.json",
+        "tests/node/react-wrappers.test.ts"
+      ],
+      "predicted_surfaces": [
+        "api",
+        "app-shell",
+        "artifact-rendering",
+        "legacy-cleanup"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    }
+  ],
+  "computed_at": "2026-09-07T15:24:33.705977+00:00",
+  "computed_from": "dependency_graph+ownership",
+  "planning_artifact_wps": [],
+  "planning_commit_sha": "130a9a97f793fbbf7b904a71c4d0bd3b3e5ca07a"
+}

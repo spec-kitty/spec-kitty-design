@@ -22,6 +22,7 @@ type PropsOf<C> = C extends abstract new (...args: never) => { $props: infer P }
 type Footer = PropsOf<GlobalComponents['sk-site-footer']>;
 type PillTag = PropsOf<GlobalComponents['sk-pill-tag']>;
 type BarChart = PropsOf<GlobalComponents['sk-bar-chart']>;
+type AppShell = PropsOf<GlobalComponents['sk-app-shell']>;
 type TransitionMatrix = PropsOf<GlobalComponents['sk-transition-matrix']>;
 
 // Props are typed from the manifest, not `any`.
@@ -41,6 +42,11 @@ const routes: NonNullable<TransitionMatrix['routes']> = Object.freeze([
     values: Object.freeze({ 'fri-4': 5 }),
   }),
 ]);
+const appShellPresentation: AppShell['presentation'] = 'compact';
+const appShellOpen: AppShell['open'] = true;
+const appShellTrigger: NonNullable<AppShell['compactTrigger']> = document.createElement('button');
+// @ts-expect-error compact is the only non-default presentation
+const badAppShellPresentation: AppShell['presentation'] = 'wide';
 
 // @ts-expect-error 'chartreuse' is not one of the declared variants
 const bad: PillTag['variant'] = 'chartreuse';
@@ -71,5 +77,5 @@ const badRoute: NonNullable<TransitionMatrix['routes']>[number] = {
   values: { 'fri-4': 5 },
 };
 
-export type { Footer, PillTag, BarChart, TransitionMatrix };
-export { legal, variant, barSeries, columns, routes, bad, badBarDatum, badBarValue, badColumn, badRoute };
+export type { Footer, PillTag, BarChart, AppShell, TransitionMatrix };
+export { legal, variant, barSeries, columns, routes, appShellPresentation, appShellOpen, appShellTrigger, badAppShellPresentation, bad, badBarDatum, badBarValue, badColumn, badRoute };

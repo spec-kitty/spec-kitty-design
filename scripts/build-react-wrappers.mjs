@@ -83,6 +83,11 @@ const MODULE = '@spec-kitty/elements';
 const PROPERTY_ONLY_MARKER = 'x-spec-kitty-property-only';
 const PROPERTY_RESET_MARKER = 'x-spec-kitty-property-reset';
 const EMPTY_ARRAY_RESET = 'empty-array';
+const NULL_RESET = 'null';
+const RESET_EXPRESSIONS = new Map([
+  [EMPTY_ARRAY_RESET, 'Object.freeze([])'],
+  [NULL_RESET, 'null'],
+]);
 const PROPERTY_ONLY_FIXTURE = 'fixtures/react-consumer/src/wrappers.test.tsx';
 const PROPERTY_ONLY_FIXTURE_BEGIN = '// BEGIN GENERATED PROPERTY-ONLY WRAPPER';
 const PROPERTY_ONLY_FIXTURE_END = '// END GENERATED PROPERTY-ONLY WRAPPER';
@@ -215,6 +220,14 @@ function withPropertyOnlyProbe(input = { schemaVersion: '1.0.0', modules: [] }) 
             description: 'Synthetic structured data used only by the generated browser fixture.',
             [PROPERTY_ONLY_MARKER]: true,
             [PROPERTY_RESET_MARKER]: EMPTY_ARRAY_RESET,
+          },
+          {
+            kind: 'field',
+            name: 'nullable',
+            type: { text: 'HTMLElement | null' },
+            description: 'Synthetic nullable data used only by the generated browser fixture.',
+            [PROPERTY_ONLY_MARKER]: true,
+            [PROPERTY_RESET_MARKER]: NULL_RESET,
           },
         ],
         attributes: [],
@@ -385,17 +398,30 @@ function manifestForGeneration(manifest) {
                   `${d.tagName}.${member.name} has ${PROPERTY_RESET_MARKER} without the property-only marker`,
                 );
               }
-              if (member[PROPERTY_RESET_MARKER] !== EMPTY_ARRAY_RESET) {
+              if (!RESET_EXPRESSIONS.has(member[PROPERTY_RESET_MARKER])) {
                 throw new Error(
                   `${d.tagName}.${member.name} has unsupported reset metadata ` +
                     JSON.stringify(member[PROPERTY_RESET_MARKER]),
                 );
               }
               const type = String(member.type?.text ?? '').trim();
-              if (!/^ReadonlyArray\s*</.test(type) && !/^readonly\s+.+\[\]$/.test(type)) {
+              if (
+                member[PROPERTY_RESET_MARKER] === EMPTY_ARRAY_RESET &&
+                !/^ReadonlyArray\s*</.test(type) &&
+                !/^readonly\s+.+\[\]$/.test(type)
+              ) {
                 throw new Error(
                   `${d.tagName}.${member.name} claims an empty-array reset but its normalized type ` +
-                    `${JSON.stringify(type)} is not readonly-array shaped`,
+                  `${JSON.stringify(type)} is not readonly-array shaped`,
+                );
+              }
+              if (
+                member[PROPERTY_RESET_MARKER] === NULL_RESET &&
+                !type.split('|').some((memberType) => memberType.trim() === 'null')
+              ) {
+                throw new Error(
+                  `${d.tagName}.${member.name} claims a null reset but its normalized type ` +
+                    `${JSON.stringify(type)} does not include null`,
                 );
               }
             }
@@ -429,16 +455,20 @@ function applyPropertyOnlyResets(manifest, outdir) {
       for (const member of declaration.members ?? []) {
         if (
           member[PROPERTY_ONLY_MARKER] === true &&
-          member[PROPERTY_RESET_MARKER] === EMPTY_ARRAY_RESET
+          RESET_EXPRESSIONS.has(member[PROPERTY_RESET_MARKER])
         ) {
-          resetFields.push({ component: declaration.name, field: member.name });
+          resetFields.push({
+            component: declaration.name,
+            field: member.name,
+            reset: member[PROPERTY_RESET_MARKER],
+          });
         }
       }
     }
   }
   if (resetFields.length === 0) return;
 
-  for (const { component, field } of resetFields) {
+  for (const { component, field, reset } of resetFields) {
     const wrapperPath = join(outdir, `${component}.js`);
     const body = readFileSync(wrapperPath, 'utf8');
     const escaped = escapeRegex(field);
@@ -446,7 +476,7 @@ function applyPropertyOnlyResets(manifest, outdir) {
     const matches = [...body.matchAll(call)];
     if (matches.length !== 1) {
       throw new Error(
-        `${component}.${field} carries ${EMPTY_ARRAY_RESET} reset metadata but the generated ` +
+        `${component}.${field} carries ${reset} reset metadata but the generated ` +
           `wrapper has ${matches.length} matching useProperties call(s)`,
       );
     }
@@ -455,7 +485,7 @@ function applyPropertyOnlyResets(manifest, outdir) {
       body.replace(
         call,
         (_match, quote) =>
-          `useProperties(ref, ${quote}${field}${quote}, ${field}, () => Object.freeze([]));`,
+          `useProperties(ref, ${quote}${field}${quote}, ${field}, () => ${RESET_EXPRESSIONS.get(reset)});`,
       ),
     );
   }
@@ -749,16 +779,16 @@ function audit({ outdir, manifestPath, srcDir, floor, allowFloorGrowth = false }
       for (const [field, reset] of decl.propertyOnly) {
         const escaped = escapeRegex(field);
         const ordinaryCall = new RegExp(`useProperties\\(ref, ["']${escaped}["'], ${escaped}\\);`);
-        const resetCall = new RegExp(
+        const resetExpression = RESET_EXPRESSIONS.get(reset);
+        const resetCall = resetExpression && new RegExp(
           `useProperties\\(ref, ["']${escaped}["'], ${escaped}, ` +
-            `\\(\\) => Object\\.freeze\\(\\[\\]\\)\\);`,
+            `\\(\\) => ${escapeRegex(resetExpression)}\\);`,
         );
-        const hasExpectedCall =
-          reset === EMPTY_ARRAY_RESET ? resetCall.test(body) : ordinaryCall.test(body);
+        const hasExpectedCall = resetCall ? resetCall.test(body) : ordinaryCall.test(body);
         if (!hasExpectedCall) {
           problems.push(
             `${decl.name} (${tag}) does not assign property-only field "${field}" through ` +
-              `useProperties${reset === EMPTY_ARRAY_RESET ? ' with its empty-array reset' : ''}.`,
+              `useProperties${reset ? ` with its ${reset} reset` : ''}.`,
           );
         }
         if (new RegExp(`^\\s+["']?${escaped}["']?:`, 'm').test(body)) {
@@ -796,7 +826,7 @@ function audit({ outdir, manifestPath, srcDir, floor, allowFloorGrowth = false }
   const resetCount = [...tagged.values()].reduce(
     (count, declaration) =>
       count +
-      [...declaration.propertyOnly.values()].filter((value) => value === EMPTY_ARRAY_RESET).length,
+      [...declaration.propertyOnly.values()].filter((value) => RESET_EXPRESSIONS.has(value)).length,
     0,
   );
   if (resetCount > 0) {
@@ -931,6 +961,18 @@ if (selftest) {
           .find((declaration) => declaration.tagName === 'sk-property-only-probe')
           .members.find((candidate) => candidate.name === 'structured');
         member[PROPERTY_RESET_MARKER] = 'guessed-default';
+      },
+      () => {},
+    ],
+    [
+      'a null reset admitted for a property whose type cannot hold null',
+      'does not include null',
+      (manifest) => {
+        const member = manifest.modules
+          .flatMap((module) => module.declarations ?? [])
+          .find((declaration) => declaration.tagName === 'sk-property-only-probe')
+          .members.find((candidate) => candidate.name === 'structured');
+        member[PROPERTY_RESET_MARKER] = NULL_RESET;
       },
       () => {},
     ],

@@ -17,14 +17,75 @@
 
 .sk-app-shell__personal,
 .sk-app-shell__context,
+.sk-app-shell__compact-header,
+.sk-app-shell__compact-navigation,
 .sk-app-shell__content,
 .sk-app-shell__header,
 .sk-app-shell__main {
   min-width: 0;
 }
 
+.sk-app-shell__compact-header,
+.sk-app-shell__compact-navigation {
+  display: none;
+  overflow-wrap: anywhere;
+}
+
 @container (max-width: 720px) {
   .sk-app-shell {
     grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@container (max-inline-size: 860px) {
+  :host([presentation="compact"]) .sk-app-shell {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  :host([presentation="compact"]) .sk-app-shell__personal,
+  :host([presentation="compact"]) .sk-app-shell__context {
+    display: none;
+  }
+
+  :host([presentation="compact"]) .sk-app-shell__compact-header {
+    display: block;
+    padding: var(--sk-space-3) var(--sk-space-4);
+    border-bottom-style: solid;
+    border-bottom-width: var(--sk-border-width-1);
+    border-bottom-color: var(--sk-border-default);
+    background: var(--sk-surface-card);
+  }
+
+  :host([presentation="compact"]) .sk-app-shell__compact-header:focus-within {
+    outline-style: solid;
+    outline-width: var(--sk-border-width-2);
+    outline-color: var(--sk-border-focus);
+    outline-offset: calc(var(--sk-border-width-2) * -1);
+  }
+
+  :host([presentation="compact"]) .sk-app-shell__compact-navigation {
+    display: block;
+    max-block-size: calc(100dvh - var(--sk-space-12));
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: var(--sk-space-4);
+    border-bottom-style: solid;
+    border-bottom-width: var(--sk-border-width-1);
+    border-bottom-color: var(--sk-border-strong);
+    background: var(--sk-surface-card);
+  }
+
+  :host([presentation="compact"]) .sk-app-shell__compact-navigation[hidden] {
+    display: none;
+  }
+}
+
+@media (forced-colors: active) {
+  :host([presentation="compact"]) .sk-app-shell__compact-header:focus-within,
+  :host([presentation="compact"]) .sk-app-shell__compact-navigation {
+    outline-style: solid;
+    outline-width: var(--sk-border-width-2);
+    outline-color: CanvasText;
   }
 }

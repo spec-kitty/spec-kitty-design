@@ -39,7 +39,8 @@
     "#213 ratchets thirty-one acceptance stories: all eight native breadcrumb, seven prose and ten event-timeline states, plus the six additive element-layer check-bullet state/scale stories. Total moves 254 -> 285 on the refreshed train after #260. Generated docs entries are excluded; the existing four check-bullet stories remain unchanged.",
     "#256 opts in all fifteen native styles-only context-navigation stories, total 285 -> 300 on the refreshed train after #213. The routes separately preserve grouped, current top-level, current nested, current parent, no-current, empty, empty-plus-overflow, long-label, one/three/twenty-child, 240px narrow, forced-colours, RTL, and real `.sk-light` acceptance evidence.",
     "#214 ratchets the exact fifteen Storybook-only Work Package overview/detail route-state stories named as acceptance evidence. On the refreshed train after #256, total moves 300 -> 315; exported fixture, selector, and render helpers are excluded from CSF indexing.",
-    "#264 adds eight unavailable-entry acceptance stories, total 315 -> 323 on the refreshed train after #214. Mixed dark, annotation-free, all-unavailable/no-current, unavailable-parent/no-children, long 240px, forced-colours, RTL, and real `.sk-light` routes keep the additive styles-only contract reviewable without inventing application state."
+    "#264 adds eight unavailable-entry acceptance stories, total 315 -> 323 on the refreshed train after #214. Mixed dark, annotation-free, all-unavailable/no-current, unavailable-parent/no-children, long 240px, forced-colours, RTL, and real `.sk-light` routes keep the additive styles-only contract reviewable without inventing application state.",
+    "#254 ratchets eleven additive sk-app-shell compact-presentation stories: closed/open, 390/768/860/861, long labels, short/tall viewports, reduced motion, and forced colors. On the refreshed train after #264, total moves 323 -> 334; the existing desktop, narrow, empty, and LightMode stories remain."
   ],
   "byElement": {
     "sk-action-row": [
@@ -61,7 +62,18 @@
       "elements-skappshell--desktop-composition",
       "elements-skappshell--narrow",
       "elements-skappshell--empty-regions",
-      "elements-skappshell--light-mode"
+      "elements-skappshell--light-mode",
+      "elements-skappshell--compact-closed",
+      "elements-skappshell--compact-open",
+      "elements-skappshell--compact-390",
+      "elements-skappshell--compact-768",
+      "elements-skappshell--compact-860",
+      "elements-skappshell--compact-861",
+      "elements-skappshell--compact-long-labels",
+      "elements-skappshell--compact-short-viewport",
+      "elements-skappshell--compact-tall-viewport",
+      "elements-skappshell--reduced-motion",
+      "elements-skappshell--forced-colors"
     ],
     "sk-bar-chart": [
       "elements-skbarchart--default",
@@ -446,5 +458,5 @@
       "patterns-work-package-views--detail-narrow"
     ]
   },
-  "total": 323
+  "total": 334
 }
