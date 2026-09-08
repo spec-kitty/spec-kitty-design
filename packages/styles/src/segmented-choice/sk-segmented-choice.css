@@ -70,6 +70,7 @@
 @media (width <= 1024px) {
   .sk-segmented-choice__item {
     min-block-size: calc(var(--sk-space-10) - var(--sk-space-5));
+    min-inline-size: calc(var(--sk-space-10) - var(--sk-space-5));
   }
 }
 

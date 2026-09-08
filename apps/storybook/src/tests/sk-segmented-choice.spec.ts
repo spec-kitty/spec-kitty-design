@@ -500,12 +500,53 @@ test.describe("sk-segmented-choice live native semantics", () => {
   }) => {
     await page.setViewportSize({ width: 1024, height: 768 });
     const narrow = await openStory(page, "narrow");
-    const narrowHeights = await narrow.group
+    const narrowMetrics = await narrow.group
       .locator(".sk-segmented-choice__item")
       .evaluateAll((nodes) =>
-        nodes.map((node) => node.getBoundingClientRect().height),
+        nodes.map((node) => {
+          const rect = node.getBoundingClientRect();
+          return { width: rect.width, height: rect.height, top: rect.top };
+        }),
       );
-    expect(narrowHeights.every((height) => height >= 44)).toBe(true);
+    expect(
+      narrowMetrics.every(({ width, height }) => width >= 44 && height >= 44),
+    ).toBe(true);
+    expect(new Set(narrowMetrics.map(({ top }) => Math.round(top))).size).toBeGreaterThan(1);
+
+    const narrowContainment = await narrow.group.evaluate((group) => {
+      const groupRect = group.getBoundingClientRect();
+      const frameRect = group.parentElement?.getBoundingClientRect();
+      return {
+        groupLeft: groupRect.left,
+        groupRight: groupRect.right,
+        frameLeft: frameRect?.left ?? Number.NaN,
+        frameRight: frameRect?.right ?? Number.NaN,
+        documentScrollWidth: document.documentElement.scrollWidth,
+        documentClientWidth: document.documentElement.clientWidth,
+      };
+    });
+    expect(narrowContainment.groupLeft).toBeGreaterThanOrEqual(
+      narrowContainment.frameLeft,
+    );
+    expect(narrowContainment.groupRight).toBeLessThanOrEqual(
+      narrowContainment.frameRight,
+    );
+    expect(narrowContainment.documentScrollWidth).toBeLessThanOrEqual(
+      narrowContainment.documentClientWidth,
+    );
+
+    const shortLabelButton = narrow.group
+      .locator(".sk-segmented-choice__item")
+      .first();
+    await shortLabelButton.evaluate((button) => {
+      button.textContent = "I";
+    });
+    const shortLabelBox = await shortLabelButton.evaluate((button) => {
+      const rect = button.getBoundingClientRect();
+      return { width: rect.width, height: rect.height };
+    });
+    expect(shortLabelBox.width).toBeGreaterThanOrEqual(44);
+    expect(shortLabelBox.height).toBeGreaterThanOrEqual(44);
 
     await page.setViewportSize({ width: 1280, height: 720 });
     const dense = await openStory(page, "default");

@@ -21,8 +21,12 @@ const meta: Meta = {
 export default meta;
 type Story = StoryObj;
 
-const storyFrame = (html: string, light = false): string => `
-  <div data-segmented-choice-story-frame${light ? ' class="sk-light"' : ""} style="box-sizing: border-box; inline-size: 100%; padding: var(--sk-space-4); color: var(--sk-fg-body); background: var(--sk-surface-page);">
+const storyFrame = (
+  html: string,
+  light = false,
+  constrainForWrap = false,
+): string => `
+  <div data-segmented-choice-story-frame${light ? ' class="sk-light"' : ""} style="box-sizing: border-box; inline-size: 100%;${constrainForWrap ? " max-inline-size: calc(var(--sk-space-10) * 2);" : ""} padding: var(--sk-space-4); color: var(--sk-fg-body); background: var(--sk-surface-page);">
     ${html}
   </div>
 `;
@@ -75,7 +79,7 @@ export const Narrow: Story = {
       },
     },
   },
-  render: () => storyFrame(SkSegmentedChoiceDefaultHTML),
+  render: () => storyFrame(SkSegmentedChoiceDefaultHTML, false, true),
 };
 
 export const ForcedColors: Story = {
