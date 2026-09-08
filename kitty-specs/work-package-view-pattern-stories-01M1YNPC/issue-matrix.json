@@ -1,0 +1,125 @@
+{
+  "rows": {
+    "#150": {
+      "evidence_ref": "Closed pattern precedent #150; its completion comment records the merged Storybook-only fixture/selector/controlled-intent pattern.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
+    "#177": {
+      "evidence_ref": "PR #215 merged into train/elements-first as 03a7b78bfe94f0370bd0fbdfde2e9eb38c6e2002; issue #177 completion comment records the predecessor contract.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
+    "#178": {
+      "evidence_ref": "PR #224 merged into train/elements-first as 079fd96782a9e512b6fb803d532a56fb6da7f131; issue #178 completion comment records the sk-notice contract.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
+    "#208": {
+      "evidence_ref": "Epic #208; #214 is its final composition child and this mission implements only #214.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "in-mission",
+      "wp": "WP01"
+    },
+    "#209": {
+      "evidence_ref": "Closed programme predecessor #209; its completion comment records the merged native workflow-board/lane public surfaces composed by WP01.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
+    "#210": {
+      "evidence_ref": "Closed programme predecessor #210; its completion comment records the merged native progress public surface composed by WP01.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
+    "#211": {
+      "evidence_ref": "Closed programme predecessor #211; its completion comment records the merged native light-DOM form-select surface composed by WP01.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
+    "#212": {
+      "evidence_ref": "Closed programme predecessor #212; its completion comment records the merged compact work-item public surfaces composed by WP01.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
+    "#213": {
+      "evidence_ref": "Closed programme predecessor #213; its completion comment records the merged breadcrumb/prose/timeline/check-bullet public surfaces composed by WP01.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
+    "#214": {
+      "evidence_ref": "WP01 implementation/review evidence at substantive commit 3c4e0e21b2aed765e485f53afcd2fb12654f19cd plus review-cycle-1 folds.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "in-mission",
+      "wp": "WP01"
+    }
+  },
+  "schema_version": 1
+}
