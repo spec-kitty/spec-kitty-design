@@ -1,0 +1,82 @@
+schema: review-findings/v1
+complete: true
+phase: plan-post-research
+lens_group: seq
+mission: work-explorer-segmented-choice-styles-01M20C9F
+findings:
+  - id: PLAN-POST-RESEARCH-SEQ-001
+    lens: red-first sequencing operational correctness
+    severity: 4
+    title: "IC-01/IC-03/IC-04's red-first CSS cycle names a Storybook rebuild before the RED run but never a second rebuild before the GREEN verification, so the described local 'add CSS until it turns GREEN' step cannot actually turn green as written"
+    evidence:
+      - artifact: "plan.md IC-01 § Sequencing/depends-on (lines ~244-251): \"...together, run `npx nx run storybook:storybook:build` so the story ids IC-04's live block opens via `page.goto` actually exist, THEN write and run the Playwright spec's live-block ... assertions ... against that minimal/undifferentiated pass and watch them fail ... THEN add the distinguishing CSS declarations ... until the same assertions pass.\""
+      - artifact: "plan.md IC-03 § Sequencing/depends-on (lines ~298-304): \"once IC-01 (minimal CSS) + IC-02 (exemplars/barrel) + a first-pass IC-05 + `storybook:storybook:build` have landed, write ... assertions in IC-04 against the IC-01-only CSS and confirm they fail ... THEN add the block until they pass.\""
+      - artifact: "plan.md IC-04 § Sequencing/depends-on (lines ~344-353): \"...land IC-01 (minimal/undifferentiated CSS) + IC-02 (exemplars/barrel) + a first-pass IC-05 ... + a Storybook rebuild FIRST, THEN write and run the live block's ... assertions RED against that minimal pass, THEN add the distinguishing CSS (IC-01's remaining declarations, IC-03's forced-colors block) until they turn GREEN\" — no second build/rebuild step is named between \"add the distinguishing CSS\" and \"until they turn GREEN.\""
+      - code: "playwright.config.ts:20-25 (webServer.command: `npx http-server apps/storybook/storybook-static --port 6006 --silent`) — Playwright serves a static, pre-built directory; it is never told to watch or re-bundle source, so any CSS edit made after the one cited rebuild is invisible to a subsequent local Playwright run against the same `storybook-static` output until that directory is rebuilt again."
+      - code: "grep -n \"storybook:storybook:build|rebuild\" plan.md — every one of the 6 in-body occurrences (lines 246, 298, 301, 345, 349, 398) describes the single rebuild that must precede the RED run; none describes a rebuild preceding the GREEN verification. The 7th occurrence (line 434, Gate enumeration's \"Storybook build + axe gate\" row) is the final, definitive CI/merge-time build, run once at the end — it does not stand in for the local iteration loop IC-01/IC-03/IC-04 walk through as \"in practice\" steps."
+    claim: >
+      IC-01, IC-03 and IC-04 each describe the same two-phase local cycle: (1) build a minimal/
+      undifferentiated CSS pass, generate the barrel and a first-pass stories file, run
+      `npx nx run storybook:storybook:build` once, then write and run the Playwright live-block
+      assertions and confirm they fail (RED); (2) "add the distinguishing CSS declarations" (IC-01's
+      remaining border/weight/shape rules, IC-03's forced-colors block) "until they turn GREEN"/"until
+      they pass." Step (2) as written has no rebuild in it. But `playwright.config.ts`'s `webServer`
+      serves the static `apps/storybook/storybook-static` directory via `http-server` — the exact
+      "no dev server, no hot reload" constraint this plan's own IC-04 cites to justify why IC-05 and a
+      rebuild must land before the RED run can even open a story. That same constraint applies with
+      identical force to the GREEN transition: once the distinguishing CSS/forced-colors block is
+      added to the authored `.css` source, `storybook-static/` still contains the OLD bundled CSS
+      until `storybook:storybook:build` runs again, so a Playwright run against the un-rebuilt static
+      output would keep failing the pressed/hover/active/focus-visible/forced-colors computed-style
+      assertions even after the correct CSS has been authored — not because the CSS is wrong, but
+      because the static artifact under test is stale. Followed literally, the plan's own "in practice"
+      procedure cannot demonstrate the GREEN state it prescribes, which is precisely the operational
+      failure mode DIRECTIVE_041 and the prior review round's PLAN-SEQ-001 finding (already fixed for
+      the RED side) exist to prevent. This is the same class of gap surviving on the GREEN side after
+      the RED side was repaired in an earlier fold.
+    remediation: >
+      In each of IC-01's, IC-03's, and IC-04's "in practice"/Sequencing narratives, insert an explicit
+      second `npx nx run storybook:storybook:build` (or "rebuild Storybook again") step between "add
+      the distinguishing CSS/forced-colors declarations" and "until they turn GREEN/pass," so the
+      local verify-red-then-green loop names both rebuilds it actually requires, not only the first.
+
+  - id: PLAN-POST-RESEARCH-SEQ-002
+    lens: red-first sequencing operational correctness
+    severity: 3
+    title: "The visual-regression round-trip's mandatory re-verification step (push → CI-fails-by-design → pull artifact → commit → rerun) is stated only inside IC-04's own prose, not surfaced in the Gate enumeration or Delivery contract sections that actually own C-009/SC-011's squad-evidence-at-commit-SHA requirement, and the plan never notes that the visual-regression CI job is expected to fail on the WP's first push by design"
+    evidence:
+      - artifact: "plan.md IC-04 § Sequencing/depends-on, step 5 (lines ~374-378): \"(5) because the commit changes at the new head, rerun the applicable checks/review at that exact new head rather than treating the earlier review as still covering it.\" — this is the only place in the document that ties the baseline-PNG commit to a re-verification obligation."
+      - artifact: "plan.md § Gate enumeration (STEP 4), \"Visual-regression baselines\" row (lines ~436): names the CI-authoritative artifact and the IC-04 dependency, but does not restate that a passing merge state requires a SECOND commit/head beyond the PR's initial push, nor that the first CI run against this WP's own visual-regression job is expected to fail by design."
+      - artifact: "plan.md § Delivery contract (lines ~463-478): \"One Work Package, one PR, one target branch\" and \"Squad tier: Tier C, pre-merge-only (C-009). The mandatory gate is the full pre-merge adversarial squad (all four lenses, evidence posted on the PR before merge...)\" — no mention anywhere in this section of the visual-baseline round-trip, or that the squad's evidence-post (SC-011: \"carrying ... evidence comment (commit SHA...) before merge\") must target the head AFTER the baseline-PNG commit, not the WP's initial push."
+      - artifact: "spec.md SC-011 (line ~349-351): \"One PR merges onto `train/elements-first`, carrying the Tier-C pre-merge adversarial squad's evidence comment (commit SHA, per-lens verdicts, findings and dispositions) before merge\" — binds the squad evidence to a specific, exact commit SHA."
+      - code: "ci-quality.yml:452-480 (`visual-regression` job) is marked `[ENFORCED]` (line 472) — a required, blocking CI check — and only uploads the `visual-regression-diffs` artifact `if: failure()` (line 477). Because `sk-segmented-choice` has no committed baseline PNGs at the WP's initial push, this ENFORCED job is expected to fail on that first push by construction of the very procedure IC-04 describes (push, let it fail, pull the artifact it produces on failure, commit, rerun) — but nothing in the Gate enumeration or Delivery contract sections states that this specific gate's first-run failure is expected/by-design rather than a defect to investigate."
+    claim: >
+      IC-04's own text is internally correct: it prescribes push → CI produces the diffs artifact
+      (which, per `ci-quality.yml`, only happens because the ENFORCED visual-regression job is
+      expected to fail on the WP's initial push, since no baseline exists yet) → pull the PNGs → commit
+      → "rerun the applicable checks/review at that exact new head." But this critical procedural
+      detail — that getting to a mergeable PR necessarily takes at least two pushes/heads for this WP,
+      and that the squad's mandatory evidence-post (C-009, SC-011's exact-commit-SHA binding) must
+      target the SECOND (post-baseline) head, not the first — lives only inside IC-04's dense,
+      already-long visual-regression sub-narrative. The two sections that actually define what "done"
+      and "mergeable" mean for this WP (Gate enumeration STEP 4, and Delivery contract's Squad tier
+      bullet) read, on their own, as though a single push produces a mergeable, reviewable head: the
+      Delivery contract says only "one PR... evidence posted on the PR before merge" with no note that
+      the evidence-post must be re-triggered after the baseline-PNG commit, and the Gate enumeration's
+      "Visual-regression baselines" row does not flag that this specific ENFORCED gate is expected to
+      show red on the WP's first CI run. An implementer or reviewer who reads only those two
+      authoritative sections (rather than working through IC-04's full prose) could reasonably: (a)
+      treat the first push's red visual-regression check as a defect needing investigation rather than
+      the intended baseline-generation trigger, or (b) post the mandatory Tier-C squad evidence against
+      the pre-baseline commit SHA, which SC-011 would then bind to a head that does not yet carry the
+      shipped visual baselines — exactly the failure mode IC-04's own step 5 was written to forbid, but
+      that step 5's instruction is not visible from the sections an operator would naturally consult for
+      "what must be true before I request/post the squad review."
+    remediation: >
+      Add one sentence to the Delivery contract's "Squad tier" bullet and to the Gate enumeration's
+      "Visual-regression baselines" row cross-referencing IC-04's 5-step procedure explicitly: state
+      that this WP's PR requires at least two heads (an initial push, and a follow-up commit carrying
+      the CI-pulled baseline PNGs), that the visual-regression ENFORCED job is expected to fail on the
+      first push by design (not a defect), and that the Tier-C pre-merge squad's mandatory
+      evidence-post (SC-011's commit-SHA binding) must target the head AFTER the baseline-PNG commit,
+      not the WP's initial push.

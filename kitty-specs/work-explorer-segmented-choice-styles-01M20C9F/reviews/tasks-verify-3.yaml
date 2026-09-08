@@ -1,0 +1,13 @@
+schema: review-verify/v1
+complete: true
+phase: tasks
+round: 3
+results:
+  - id: TASKS-FRESH2-001
+    status: resolved
+    reason: >
+      Commit d48589f removes the zoom README from both create_intent and owned_files
+      (not just one of the two) and adds a Definition-of-done sentence stating the
+      squad commits it directly onto the WP's own PR branch alongside T018's baseline
+      commit, while explicitly not inventing a git mechanism beyond what plan.md's
+      Delivery contract actually specifies.

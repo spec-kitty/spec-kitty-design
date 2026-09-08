@@ -1,0 +1,116 @@
+schema: review-findings/v1
+phase: spec-research
+round: verify
+mission: work-explorer-segmented-choice-styles-01M20C9F
+head: b6ce70a16b242b56f54187e0ac38e574babedf14
+results:
+  - id: SPEC-RESEARCH-GOV-002
+    status: RESOLVED
+    notes: >
+      Independently re-read spec.md: Acceptance Scenario 1 (line 91) reads
+      "...the group carrying an accessible name (e.g. `role="group" aria-label="View by"`)..." and
+      Key Entities (line 276) reads "...an accessible group name — e.g. `role="group"
+      aria-label="View by"` — and lays out its children responsively." Both are genuinely
+      "e.g."-qualified, no standalone mandate. data-model.md's Entity 1 table row (line 35) now
+      reads "No — illustrative; spec.md's Acceptance Scenario 1 and Key Entities section both offer
+      `role="group" aria-label="…"` only as an "e.g." example. The binding requirement is that the
+      group carries an accessible group name by some valid mechanism, not specifically this literal
+      attribute." This is factually correct and matches spec.md's actual wording exactly. Grepped
+      both files for `role="group"` — no other row or sentence in data-model.md or research.md
+      still asserts it as a hard requirement, so no dangling contradiction was introduced. The
+      Traceability section's "adds no requirement beyond spec.md ... already state as binding"
+      claim is now accurate for this row too.
+
+  - id: SPEC-RESEARCH-ARCH-001
+    status: RESOLVED
+    notes: >
+      Re-grepped packages/tokens/src/tokens.css directly: `--sk-surface-pill` at line 42
+      (`#212830`) and line 391 (`#ECE7D8`); `--sk-bg-pill` at line 181 (`#212830`) and line 513
+      (`#ECE7D8`) — identical values in each theme, exactly as the fix states. Usage counts
+      independently re-grepped: `--sk-surface-pill` used in 6 files (action-row, time-series-chart,
+      transition-matrix, workflow-lane, bar-chart, context-nav); `--sk-bg-pill` used in 2
+      (pill-tag, nav-pill) — matches research.md Q3's corrected numbers exactly.
+      research.md Q3 (lines 95-148) now states both tokens exist, gives the correct line numbers,
+      and reframes the decision as semantic-pairing/precedent (sk-nav-pill.css's
+      `.sk-nav-pill__item--active { background: var(--sk-bg-pill); }`) rather than
+      existence-vs-nonexistence, and explicitly narrates the correction ("This corrects an earlier
+      version of this question..."). The Alternatives-considered section for `--sk-surface-pill`
+      was also updated to no longer claim nonexistence. No dangling reference to the old false
+      claim remains outside the explicit self-correcting narration.
+
+  - id: SPEC-RESEARCH-ARCH-002
+    status: RESOLVED
+    notes: >
+      Re-read stylelint.config.mjs directly (lines 1-60). Line 22 is
+      `'scale-unlimited/declaration-strict-value': [`; line 23 is the literal array
+      `['/color/', 'background', 'background-color', 'font-family', 'padding', 'margin',
+      'border-radius'],`. The rationale comment about the unpoliced shorthand spans lines 35-51
+      exactly (from "CSS system-color keywords (#176, #264)..." through "...not tooling."), matching
+      the fix precisely. evidence-log.csv's EV-017 (row 18) now reads "line 23 (policed-property
+      array: ['/color/', 'background', 'background-color', 'font-family', 'padding', 'margin',
+      'border-radius']); lines 35-51 (rationale comment on the unpoliced shorthand)" — verified
+      verbatim-correct against the live file, and its `notes` column explicitly documents the
+      correction from the prior wrong citation. research.md's own broader Q4 citation
+      ("stylelint.config.mjs lines 17-59") was left unchanged per the remediation instruction and
+      is still a defensible (if loose) superset range.
+
+  - id: SPEC-RESEARCH-COMPLETE-001
+    status: RESOLVED
+    notes: >
+      source-register.csv gained SRC-024 (packages/tokens/src/tokens.css, row 25) and
+      evidence-log.csv gained EV-029 (row 30, the corrected grep result: both tokens found live,
+      with line numbers and usage counts). research.md Q3's Evidence section cites
+      "packages/tokens/src/tokens.css lines 42, 181, 391, 513 (both tokens, both themes — see
+      evidence-log EV-029)" — the cross-reference resolves correctly. Both CSVs parse as
+      well-formed CSV (verified programmatically with Python's csv module): evidence-log.csv has 6
+      columns throughout across 32 rows (EV-001..EV-031, header + 31 data rows, no misalignment);
+      source-register.csv has 6 columns throughout across 25 rows (SRC-001..SRC-024, header + 24
+      data rows, no misalignment). The audit-trail gap identified by the finding is closed.
+
+  - id: SPEC-RESEARCH-COMPLETE-002
+    status: RESOLVED
+    notes: >
+      research.md gained an "Additional precedent checks" section (lines 344-360) explicitly
+      referencing EV-006 (sk-form-select.spec.ts two-describe-block shape), EV-007
+      (sk-notice-forced-colors.spec.ts border-width measurement pattern), and EV-028 (meta.json
+      topology/target_branch). This is the alternative option the remediation text itself offered
+      ("or add a short 'Additional precedent checks' subsection referencing these three rows
+      explicitly") rather than folding into Q5, and it fully closes the narrative-vs-evidence-trail
+      gap the finding described — each row is now named and explained in research.md's prose, not
+      just logged in the CSV. No new contradiction introduced; the three rows' content in the new
+      section is consistent with their evidence-log.csv descriptions.
+
+  - id: SPEC-RESEARCH-COMPLETE-003
+    status: RESOLVED
+    notes: >
+      Re-grepped both packages/styles/src/nav-pill/sk-nav-pill.css and
+      packages/styles/src/form-select/sk-form-select.css for "forced-colors" directly — zero
+      matches in either file (exit code 1), confirming the underlying claim. research.md Q3 (lines
+      131-135) now states: "grepping packages/styles/src/nav-pill/sk-nav-pill.css and
+      packages/styles/src/form-select/sk-form-select.css for `forced-colors` returns zero matches in
+      both files, confirming C-004's claim that these two files are cited only for base-state token
+      reuse, not for the forced-colors technique (sourced instead from sk-skip-link.css/
+      sk-data-table.css, Q4)." evidence-log.csv gained EV-031 (row 32) with matching content. The
+      coverage gap the finding described is closed; C-004's full claim (positive and negative
+      halves) is now covered by both prose and an evidence row.
+
+  - id: SPEC-RESEARCH-GOV-003
+    status: RESOLVED
+    notes: >
+      Re-read commitlint.config.cjs directly: `scope-enum` (lines 82-95) lists tokens, storybook,
+      doctrine, ci, docs, release, deps, security, acceptance, merge, team-overview, styles,
+      elements, react — `kitty-specs` is genuinely absent, confirming the underlying claim.
+      The remediation text suggested narrowing C-006's wording in spec.md, but research.md's own
+      declared scope boundary (header: "correcting spec.md/plan.md is a later phase's job, not this
+      backfill's") — the same boundary GOV-001's CONFIRMED-PROCEDURAL verdict relied on — makes
+      editing spec.md inconsistent with this document's stated methodology. The fix instead closes
+      the finding's actual substance (research.md's Q1-Q10 previously did not check C-006 at all)
+      by adding evidence-log.csv row EV-030 (row 31, commitlint.config.cjs scope-enum/exemption-
+      pattern check against the real commit history) and Discrepancy #2 in research.md's
+      "Discrepancies found" section, which now cites the correct commit hashes and explicitly notes
+      C-006's wording gap without silently rewriting spec.md. This is a defensible reading of the
+      remediation given the document's own scope boundary, and it genuinely closes the "research.md
+      does not check it" gap the CONFIRMED verdict identified. spec.md itself is unchanged (C-006
+      and FR-009's stale :285 citation both remain, as expected — out of scope for this backfill).
+
+new_findings: []

@@ -44,6 +44,7 @@
     "./ribbon-card/*": "./dist/ribbon-card/*",
     "./section-banner/*": "./dist/section-banner/*",
     "./section-header/*": "./dist/section-header/*",
+    "./segmented-choice/*": "./dist/segmented-choice/*",
     "./site-footer/*": "./dist/site-footer/*",
     "./skip-link/*": "./dist/skip-link/*",
     "./status-indicator/*": "./dist/status-indicator/*",

@@ -456,7 +456,22 @@
       "patterns-work-package-views--detail-history-unavailable",
       "patterns-work-package-views--detail-long-content",
       "patterns-work-package-views--detail-narrow"
+    ],
+    "sk-segmented-choice": [
+      "components-sksegmentedchoice-html--default",
+      "components-sksegmentedchoice-html--second-selected",
+      "components-sksegmentedchoice-html--third-selected",
+      "components-sksegmentedchoice-html--two-items",
+      "components-sksegmentedchoice-html--five-items",
+      "components-sksegmentedchoice-html--long-labels",
+      "components-sksegmentedchoice-html--no-selection",
+      "components-sksegmentedchoice-html--all-disabled",
+      "components-sksegmentedchoice-html--one-disabled",
+      "components-sksegmentedchoice-html--narrow",
+      "components-sksegmentedchoice-html--forced-colors",
+      "components-sksegmentedchoice-html--default-dark",
+      "components-sksegmentedchoice-html--light-mode"
     ]
   },
-  "total": 334
+  "total": 347
 }

@@ -1,0 +1,56 @@
+schema: review-findings/v1
+complete: true
+phase: spec
+lens_group: fresh
+mission: work-explorer-segmented-choice-styles-01M20C9F
+findings:
+  - id: SPEC-FRESH-001
+    lens: cross-reference correctness (Edge Cases vs. FR-006 story numbering)
+    severity: 2
+    title: "Edge Cases section cites \"FR-006 story 8\" for the narrow/wrapping story; FR-006's own numbering makes it story 10"
+    evidence:
+      - artifact: "spec.md § Edge Cases, third bullet: \"The narrow/wrapping story (FR-006 story 8) is the one instrumented acceptance point for this ... (see Constraints, C-005).\""
+      - artifact: "spec.md § FR-006 story list: \"...(8) all items disabled, (9) one item disabled, (10) narrow/wrapping layout at 1024px (per C-005), (11) forced colors...\" — narrow/wrapping is item 10, not 8"
+    claim: >
+      The Edge Cases bullet about the residual sub-44px-at-wrap case points readers to "FR-006
+      story 8" as the narrow/wrapping story's id, but FR-006's own numbered list assigns "narrow/
+      wrapping layout at 1024px" to position 10; position 8 is "all items disabled". This is a
+      pre-existing mismatch (present before this revision too), but it is now directly entangled
+      with C-005, which this revision rewrote to pin the narrow/wrapping story at 1024px and to
+      explicitly cross-reference this same Edge Cases bullet ("see Edge Cases" / "(see Constraints,
+      C-005)"). A reader following either cross-reference to pin down "the narrow/wrapping story"
+      by its FR-006 story number lands on the wrong story (disabled-state, not layout). The prose
+      wording still makes the intent recoverable, which keeps this from producing a wrong
+      implementation, but it is a live, checkable numbering error inside a spec that otherwise
+      numbers everything else (FR-006 items 1-13, C-005, NFR-002/003, SC-004) with exact
+      cross-reference precision.
+    remediation: >
+      Change "FR-006 story 8" to "FR-006 story 10" in the Edge Cases bullet so the id matches
+      FR-006's own numbered list of the 13 required stories.
+
+  - id: SPEC-FRESH-002
+    lens: citation precision (Terminology § Storybook title root)
+    severity: 1
+    title: "\"per CLAUDE.md §6's taxonomy guidance\" overstates what CLAUDE.md §6 actually specifies"
+    evidence:
+      - artifact: "spec.md § Terminology, \"Storybook title root\" bullet: \"...so it follows the closest precedent set for interactive, consumer-composed HTML components: `Components/Button (HTML)`, `Components/SkFeatureCard (HTML)`, `Components/SkRibbonCard (HTML)`, per CLAUDE.md §6's taxonomy guidance.\""
+      - artifact: "/home/jeroennouws/dev/team-kitty-missions/design-270/CLAUDE.md §6: \"Title taxonomy — pick the closest existing root: `Components/`, `Form/`, `Navigation/`, `Primitives/`, `Tags/`, `Tokens/`. Don't invent new top-level groups without a reason.\""
+      - code: "packages/styles/src/button/sk-button-html.stories.ts:52 title: 'Components/Button (HTML)' — precedent confirmed accurate"
+      - code: "packages/styles/src/feature-card/sk-feature-card-html.stories.ts:81, packages/styles/src/ribbon-card/sk-ribbon-card-html.stories.ts:43 — precedent confirmed accurate"
+    claim: >
+      The cited precedent titles are all real and verified (Components/Button (HTML),
+      Components/SkFeatureCard (HTML), Components/SkRibbonCard (HTML), and the contrasting
+      Primitives/SkFacts (HTML), Primitives/SkDisclosure (HTML), Form/SkFormSelect (HTML) all
+      exist exactly as quoted), so the underlying title choice is well-supported by actual repo
+      precedent. But CLAUDE.md §6 itself only lists the six root names and says "pick the closest
+      existing root" — it does not state a rule that `Components/` is reserved for "interactive,
+      consumer-composed" controls versus `Primitives/` for "passive-display" ones. That semantic
+      split is this spec's own inference from observed usage, not something CLAUDE.md §6
+      literally says, so attributing it to "CLAUDE.md §6's taxonomy guidance" slightly overstates
+      the citation's authority. Purely a citation-precision nit; the conclusion (title root =
+      `Components/`) is independently correct on the cited precedent alone.
+    remediation: >
+      Reword to something like "...per the observed precedent for interactive, consumer-composed
+      HTML components (`Components/Button (HTML)`, ...), consistent with CLAUDE.md §6's
+      instruction to pick the closest existing root" — separating the (verified) precedent
+      observation from the (more general) CLAUDE.md rule it's read alongside.

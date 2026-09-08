@@ -1,0 +1,183 @@
+schema: review-findings/v1
+phase: spec-research
+round: refute-1
+mission: work-explorer-segmented-choice-styles-01M20C9F
+verdicts:
+  - id: SPEC-RESEARCH-GOV-001
+    verdict: CONFIRMED-PROCEDURAL
+    severity: 4
+    rationale: >
+      Independently re-verified against mission-events.jsonl and git log. mission-events.jsonl
+      line 1 records action="research", result_input="success" at 11:58:18.168394+00:00, one
+      minute before action="specify" at 11:59:18.457450+00:00 (line 2) and action="plan" at
+      11:59:51.497066+00:00 (line 3) — the "research" step reported success with no research.md/
+      data-model.md artifact on disk at that time. git log confirms spec.md was authored/fixed at
+      9892785 (13:29:13) and d6ac1f5 (13:46:36); plan.md was authored and folded through two
+      review rounds at d9a231d (14:07:07), d78c0d3 (14:23:24), b91cc43 (14:29:16); research.md/
+      data-model.md were not created until 1cc92d0 (14:43:51) — the current HEAD, ~14 minutes
+      after plan.md's fold-in was already complete and its own "PASSED down to 3 open low/medium"
+      verdict already recorded. research.md's own header (lines 3-13) states this explicitly:
+      "the runtime's research phase was marked complete without ever running. This backfills it."
+      The facts underlying this finding are true and are a known, already self-disclosed deviation
+      that the mission's own research.md documents as the reason it exists — this is the
+      corrective mechanism operating as intended, not a newly-discovered defect to relitigate
+      against spec.md/plan.md's prior PASSED verdicts.
+    remediation: >
+      Record this ordering defect explicitly wherever mission process learnings are captured
+      (e.g. docs/learnings/ per repo convention) so a future mission's research step is verified
+      to have actually produced an artifact before "specify" is allowed to proceed. Documented as
+      a deviation in the mission report; corrected by this review round + the pending
+      plan-post-research review round, not by editing spec.md/plan.md's prior PASSED verdicts
+      retroactively.
+
+  - id: SPEC-RESEARCH-GOV-002
+    verdict: CONFIRMED
+    severity: 3
+    rationale: >
+      Re-read spec.md lines 90-91 (Acceptance Scenario 1): "...the group carrying an accessible
+      name (e.g. `role=\"group\" aria-label=\"View by\"`)..." — confirmed "e.g."-qualified, no
+      standalone mandate. spec.md Key Entities (line 275): "Carries (consumer-authored) an
+      accessible group name — e.g. `role=\"group\" aria-label=\"View by\"`" — same "e.g."
+      qualifier. FR-007 (line 235) is framed around the outcome ("the group itself carries an
+      accessible group name"), naming no specific ARIA role. data-model.md's Entity 1 table (line
+      35) reads: `role="group"` | ARIA role | **Yes (per spec.md Acceptance Scenario 1, FR-007)**
+      — converting the illustrative example into a "Required: Yes" row with no "e.g." qualifier
+      carried over, while data-model.md's own Traceability section (lines 131-133) asserts it
+      "adds no requirement beyond what spec.md's Key Entities section ... already state[s] as
+      binding." That assertion is inaccurate for this specific row: spec.md never states
+      `role="group"` as binding, only as one example of satisfying a more general accessible-name
+      requirement. The finding's core claim holds exactly as stated.
+    remediation: >
+      Change the Entity 1 table's `role="group"` row from "Required: Yes" to "Required: No —
+      illustrative; the binding requirement is an accessible group name by any valid mechanism,
+      per spec.md's `e.g.` framing at Acceptance Scenario 1 and Key Entities" — unless the mission
+      wants to actually commit to `role="group"` as a hard requirement, in which case that must be
+      recorded as an explicit new decision in research.md's Decisions section (with rationale) and
+      spec.md's "e.g." wording updated to match, not left as a silent data-model table hardening.
+
+  - id: SPEC-RESEARCH-ARCH-001
+    verdict: CONFIRMED
+    severity: 5
+    rationale: >
+      Re-grepped packages/tokens/src/tokens.css directly: `--sk-surface-pill` is declared at line
+      42 (`#212830` — Dark Surfaces block) and line 391 (`#ECE7D8` — light-theme override),
+      identical values to `--sk-bg-pill` at lines 181/513 in each theme. Both are present in
+      packages/tokens/dist/token-catalogue.json (lines 44 and 116 respectively). Usage count:
+      `--sk-surface-pill` appears in 6 component CSS files (bar-chart, workflow-lane, action-row,
+      transition-matrix, context-nav, time-series-chart) versus `--sk-bg-pill` in 2
+      (pill-tag, nav-pill) — surface-pill is the more, not less, precedented name. research.md
+      Q3 (lines 104-107) states verbatim: "No `--sk-surface-pill` token was found in
+      `packages/tokens/src/tokens.css` during this check" and its Alternatives (lines 109-111)
+      calls it "rejected — not found in the token catalogue." Both statements are factually false
+      as independently verified. This is a genuine, severe factual error in the research document,
+      on the exact question (token-name choice for FR-015/C-004) the question exists to settle.
+    remediation: >
+      Correct research.md Q3: `--sk-surface-pill` exists (tokens.css:42,391; catalogue lines
+      44,116) with identical values to `--sk-bg-pill` in both themes, and is used by more shipping
+      components (6) than `--sk-bg-pill` is (2). Reframe Q3's decision as a genuine choice between
+      two live, same-valued, differently-named tokens rather than a live-vs-nonexistent choice.
+      Cross-reference reviews/spec-arch.findings.yaml's SPEC-ARCH-003 if present, which already
+      flagged this ambiguity at the spec phase. Add a source-register/evidence-log row for the
+      corrected tokens.css check (see SPEC-RESEARCH-COMPLETE-001) so the corrected claim is
+      traceable.
+
+  - id: SPEC-RESEARCH-ARCH-002
+    verdict: CONFIRMED
+    severity: 2
+    rationale: >
+      Re-read stylelint.config.mjs directly. Line 20 is the comment
+      "// Enforce usage of --sk-* CSS custom property tokens instead of hardcoded values." — not
+      the policed-property array. The array itself (`'scale-unlimited/declaration-strict-value':
+      [['/color/', 'background', ...`) starts at line 22-23. Lines 26-34 are the literal
+      `ignoreValues` string entries (`'/^var\(--sk-/'`, `'transparent'`, `'inherit'`, `'initial'`,
+      `'unset'`, `'none'`, `'currentColor'`, `'0'`), not prose. The actual rationale comment about
+      the unpoliced border/outline shorthand spans lines 35-51 ("CSS system-color keywords ...
+      forced-colors baseline actually uses ... deliberately NOT on the shorthand forms ... this
+      plugin does not police at all ... LIMITATION, stated rather than enforced ..."). evidence-
+      log.csv row EV-017 (line 18) is verified verbatim to read exactly "line 20 (policed
+      property array: ...); lines 26-33 (file's own rationale comment)" — both citations are off
+      by the amounts the finding describes, and it is marked `verified: yes` despite the drift.
+      The underlying substantive claim (shorthand unpoliced by declaration-strict-value) is true.
+    remediation: >
+      Correct EV-017's source_line_or_section to "line 23 (policed-property array); lines 35-51
+      (rationale comment on the unpoliced shorthand)". research.md's own Q4 prose (broader range
+      "stylelint.config.mjs lines 17-59") needs no change — only this evidence-log row.
+
+  - id: SPEC-RESEARCH-COMPLETE-001
+    verdict: CONFIRMED
+    severity: 3
+    rationale: >
+      Grepped research/evidence-log.csv (29 lines incl. header, EV-001..EV-028) and research/
+      source-register.csv (24 lines incl. header, SRC-001..SRC-023) for "tokens.css" and
+      "surface-pill" — zero matches in either file. research.md Q3's load-bearing negative claim
+      (no `--sk-surface-pill` in tokens.css — itself now independently shown false by
+      ARCH-001) has no source-register or evidence-log row backing the check that produced it.
+      The audit-trail gap is real and independent of whether the underlying conclusion is
+      correct.
+    remediation: >
+      Add a source-register.csv row (e.g. SRC-024) for packages/tokens/src/tokens.css, and an
+      evidence-log.csv row (e.g. EV-029) recording the corrected grep result from ARCH-001's
+      remediation (both `--sk-surface-pill` and `--sk-bg-pill` found live, with line numbers),
+      cross-referenced from the corrected Q3.
+
+  - id: SPEC-RESEARCH-COMPLETE-002
+    verdict: CONFIRMED
+    severity: 2
+    rationale: >
+      Confirmed EV-006 (evidence-log.csv line 7, sk-form-select.spec.ts two-describe-block shape),
+      EV-007 (line 8, sk-notice-forced-colors.spec.ts border-width measurement pattern), and
+      EV-028 (line 29, meta.json topology/target_branch confirmation) all exist as evidence-log
+      rows. Grepped research.md in full for "sk-form-select.spec.ts", "sk-notice-forced-
+      colors.spec.ts", and "meta.json" — zero matches for all three. None of the ten Researched
+      Questions (Q1-Q10) discusses these three precedents despite each having its own logged,
+      "verified: yes" evidence row. The narrative-vs-evidence-trail gap is exactly as described.
+    remediation: >
+      Fold EV-006/EV-007 into Q5 (the FR-009 Playwright-pattern question, already the natural
+      home for spec-file-shape and forced-colors-measurement precedents) and EV-028 into a new or
+      existing question addressing C-007's delivery contract, or add a short "Additional
+      precedent checks" subsection referencing these three rows explicitly.
+
+  - id: SPEC-RESEARCH-COMPLETE-003
+    verdict: CONFIRMED
+    severity: 2
+    rationale: >
+      Re-read spec.md C-004 (line 264): "...matching the base-state precedent in `sk-nav-
+      pill.css` and `sk-form-select.css` — base-state token reuse only, not a forced-colors
+      precedent, since neither file carries a `forced-colors` block." Grepped both
+      packages/styles/src/nav-pill/sk-nav-pill.css and packages/styles/src/form-select/sk-form-
+      select.css for "forced-colors" — zero matches in either (confirms the underlying claim is
+      true). research.md Q3 (lines 95-114, already read in full) verifies only the positive claim
+      (nav-pill.css uses --sk-bg-pill) and never mentions the negative "no forced-colors block"
+      claim about either file. Grepped evidence-log.csv for "forced-colors" — three matches
+      (EV-002, EV-003, EV-007), none of which concerns nav-pill.css or form-select.css's absence
+      of such a block. The coverage gap is real; the underlying spec.md claim is correct.
+    remediation: >
+      Add a sentence to Q3 (or Q4) noting the grep-confirmed absence of a forced-colors block in
+      sk-nav-pill.css and sk-form-select.css, with a corresponding evidence-log row, so C-004's
+      full claim — not just its positive half — is covered.
+
+  - id: SPEC-RESEARCH-GOV-003
+    verdict: CONFIRMED
+    severity: 2
+    rationale: >
+      Re-read commitlint.config.cjs's scope-enum (lines 82-95): valid scopes are tokens,
+      storybook, doctrine, ci, docs, release, deps, security, acceptance, merge, team-overview,
+      styles, elements, react — `kitty-specs` is absent. Confirmed with node that the closest
+      exemption pattern (`/^(chore|feat|docs)\([^)]*-01[A-Z0-9]{6,}[^)]*\):/i`) returns `false`
+      against all four cited commit messages ("docs(kitty-specs): author plan for
+      work-explorer-segmented-choice-styles (#270)", etc.) — the scope is the bare string
+      "kitty-specs" with no mission-ULID suffix inside the parens, so the pattern's requirement
+      is genuinely unmet. `git show -s` confirms all four commits (d9a231d 14:07:07, d78c0d3
+      14:23:24, b91cc43 14:29:16, 1cc92d0 14:43:51 — the current HEAD) are real, already on this
+      mission's branch, and use `docs(kitty-specs)`/`fix(kitty-specs)`, not `styles`. C-006
+      states unqualified "All commits in this mission use the `styles` conventional-commit
+      scope," and research.md's Q1-Q10 do not check it. The finding's own materiality caveat (this
+      likely targets WP-implementation commits, and whether design-phase commits are ever run
+      through commitlint depends on the train/elements-first merge topology) is itself accurate
+      and appropriately hedged — it does not undermine CONFIRMED status, since the gap in
+      research.md's coverage is real regardless of eventual materiality.
+    remediation: >
+      Narrow C-006's wording to "All commits touching `packages/styles` in this mission's Work
+      Package use the `styles` scope" (matching its own stated rationale and excluding design-
+      phase bookkeeping commits from its claim), rather than leaving the literal-but-false
+      "all commits in this mission" phrasing unaddressed in research.md's evidence coverage.

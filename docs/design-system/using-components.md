@@ -12,10 +12,11 @@ so far — as **custom elements** in `@spec-kitty/elements`. Both require `@spec
 Several of the catalogue's component packages are CSS only by a recorded decision — `form-field`,
 (#176) `facts`, `disclosure`, `data-table`, `empty-state`, `skip-link`, (#210) `progress`, and
 (#209) `workflow-board` and `workflow-lane`, (#211) `form-select`, and (#213) `breadcrumbs`,
-`prose`, and `event-timeline`. See
+`prose`, and `event-timeline`, plus (#270) `segmented-choice`. See
 ADR-10, *form-field is deliberately styles-only* and *Styles-only components are a class, not a
-fixed exception count*. These thirteen ship classes applied to real semantic HTML the consumer authors
-— `<dl>`, `<details>`, `<table>`, a plain block, `<a>`, `<progress>`, `<section>`, `<ol>`, and `<select>` — and no `sk-*` custom element
+fixed exception count*. These fourteen ship classes applied to real semantic HTML the consumer authors
+— `<dl>`, `<details>`, `<table>`, a plain block, `<a>`, `<progress>`, `<section>`, `<ol>`, `<select>`,
+and a named group of `<button>` elements — and no `sk-*` custom element
 wraps any of them: light-DOM native semantics (list/table/label association across a shadow
 boundary) are exactly what a wrapper element would break. Composite sections below such as Hero
 and Callout are CSS-only *patterns* rather than packages, and are not part of that count. Each
@@ -1354,6 +1355,31 @@ the options and selected value, listen for `change`, and own application filteri
 
 Import the CSS independently from `@spec-kitty/styles/form-select/sk-form-select.css`; generated
 fixture markup remains available from the root `@spec-kitty/styles` TypeScript export.
+
+---
+
+## Segmented choice
+
+Apply `sk-segmented-choice` to an accessibly named native group and
+`sk-segmented-choice__item` to each direct native button. The supplied `aria-pressed` value is the
+source of truth for the selected presentation:
+
+```html
+<div class="sk-segmented-choice" role="group" aria-label="View options">
+  <button class="sk-segmented-choice__item" type="button" aria-pressed="true">Overview</button>
+  <button class="sk-segmented-choice__item" type="button" aria-pressed="false">Activity</button>
+  <button class="sk-segmented-choice__item" type="button" aria-pressed="false">Details</button>
+</div>
+```
+
+The CSS does not set or toggle `aria-pressed`, manage focus, validate that selection is exclusive,
+or attach activation handlers. Consumers own the group and item labels, item order, pressed and
+disabled values, event handlers, and any selection rules. These classes do not create tabs, radios,
+or a custom element; native button keyboard and disabled behavior remain browser-owned.
+
+Import the CSS from
+`@spec-kitty/styles/segmented-choice/sk-segmented-choice.css`; generated fixture markup is available
+from the component barrel.
 
 ---
 

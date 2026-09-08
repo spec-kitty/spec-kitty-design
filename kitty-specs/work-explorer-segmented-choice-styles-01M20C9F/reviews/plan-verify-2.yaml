@@ -1,0 +1,51 @@
+schema: review-verify/v1
+complete: true
+phase: plan
+results:
+  - id: PLAN-FRESH-001
+    status: resolved
+    reason: >
+      IC-04's Sequencing/depends-on now states "Three blocks, three dependency sets" and adds an
+      explicit third dependency set for the visual.spec.ts baseline blocks, requiring them to be
+      authored/first-run LAST, only after IC-01's distinguishing declarations and IC-03's
+      forced-colors block have landed and the live block's assertions are GREEN (plan.md lines
+      296-322) — a real, substantive sequencing statement, not a restatement of the finding.
+  - id: PLAN-FRESH-002
+    status: resolved
+    reason: >
+      The Project Structure file tree now lists visual.spec.ts under apps/storybook/src/tests/ as
+      an EXISTING file with new test() blocks appended (plan.md lines 114-116), and the Technical
+      Context Scale/Scope sentence now mentions "new test() blocks in the existing
+      apps/storybook/src/tests/visual.spec.ts" alongside the new Playwright spec file (lines 53-56).
+  - id: PLAN-SEQ-001
+    status: resolved
+    reason: >
+      IC-01 (lines 200-211), IC-03 (lines 256-264), and IC-04 (lines 304-309) all still explicitly
+      name IC-05 plus a Storybook rebuild as prerequisites before the live Playwright block can be
+      written/run red; round 2's edits did not regress this fix.
+  - id: PLAN-SEQ-002
+    status: resolved
+    reason: >
+      IC-02's Sequencing/depends-on line (lines 230-233) still correctly reads "Feeds IC-01 ... and
+      IC-04/IC-05 (Storybook stories and the Playwright spec both consume the generated barrel's
+      named exports)" — the IC-03 mislabel has not reappeared.
+  - id: PLAN-VERIFY-001
+    status: resolved
+    reason: >
+      IC-04 still carries the explicit "Visual-regression baseline authoring (FR-012/SC-007)"
+      bullet (lines 285-291) naming the required test() blocks and states, and the Gate enumeration
+      table's "Visual-regression baselines" row still depends on it (line 380).
+  - id: PLAN-VERIFY-003
+    status: resolved
+    reason: >
+      IC-04's Purpose bullet and the Testing context line both still cite
+      sk-transition-matrix.spec.ts:312 (the positive computed-style-delta test) with an explicit
+      "not the invariance test at line 265" caveat, and note spec.md's stale :285 citation is
+      out of this WP's scope — the mislabel has not reappeared.
+  - id: PLAN-VERIFY-002
+    status: resolved
+    reason: >
+      IC-04's Purpose bullet still names the pressed/selected-item computed-style-delta assertion
+      for FR-003, FR-003 is still present in IC-04's "Relevant requirements" list (line 292), and
+      IC-01's red-first sequencing paragraph still includes the pressed-item assertion alongside
+      hover/active/focus/disabled (lines 206-211).

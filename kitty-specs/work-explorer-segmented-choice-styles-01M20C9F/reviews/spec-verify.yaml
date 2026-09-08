@@ -1,0 +1,81 @@
+schema: review-verify/v1
+complete: true
+phase: spec
+results:
+  - id: SPEC-GOV-001
+    status: resolved
+    reason: >
+      C-005 now quotes the issue's Evidence section verbatim ("W4 requires the group to remain
+      operable when the toolbar wraps at 1024px" — confirmed against `gh issue view 270`), fixes
+      the narrow/wrapping story at 1024px, and FR-006 story 10 cites "(per C-005)"; the false
+      "issue gives no number" claim is gone.
+  - id: SPEC-GOV-002
+    status: resolved
+    reason: >
+      C-009 now names the issue's own "Squad tier: C — pre-merge" line (verified verbatim in the
+      issue) as the sole binding source and states explicitly that
+      docs/architecture/elements-first-programme.md's tier table (verified: lists M2 through M16,
+      never this mission) does not classify this mission, citing it only for what Tier C/pre-merge
+      mean operationally.
+  - id: SPEC-GOV-003
+    status: resolved
+    reason: >
+      C-009's final sentence explicitly permits an earlier point-cut (naming the spec-phase review
+      that produced this file's findings) to run as optional, report-only enrichment that is not
+      tier-required and does not gate advancement — matching the remediation clause exactly.
+  - id: SPEC-GOV-004
+    status: resolved
+    reason: >
+      Terminology now separates issue #270's "Do not register a custom element" as the sole
+      binding source from ADR-10 precedent, notes the five-component structural-semantics rationale
+      (verified in ADR-10: sk-facts/sk-disclosure/sk-data-table/sk-empty-state/sk-skip-link) doesn't
+      obviously extend here, and drops sk-form-select from that list — verified ADR-10 never
+      mentions sk-form-select at all, so the fix's claim is accurate; sk-form-select is retained
+      only for the separate, legitimate generation-tooling citation in C-002.
+  - id: SPEC-ARCH-001
+    status: resolved
+    reason: >
+      New Constraint C-010 requires longhand -color properties (never border/outline shorthand) in
+      any forced-colors override, and C-004 is repointed to cite sk-skip-link.css/sk-data-table.css
+      for the forced-colors technique vs. sk-nav-pill.css/sk-form-select.css for base-state token
+      reuse only — verified both citation pairs are accurate (skip-link/data-table use longhand
+      outline-color/border-left-color with system keywords; nav-pill/form-select carry no
+      forced-colors block at all).
+  - id: SPEC-ARCH-002
+    status: resolved
+    reason: >
+      NFR-004 now states a background-drawn icon/glyph cue must not rely on
+      forced-color-adjust:none and must use a border-/outline-/content-drawn cue instead, citing
+      sk-disclosure.css — verified that file's header comment documents exactly this measured trap
+      ("dark-grey icon on the dark-scheme forced-colors background") and states it never sets
+      forced-color-adjust:none anywhere.
+  - id: SPEC-ARCH-003
+    status: resolved
+    reason: >
+      FR-015 and C-004 now name --sk-bg-pill explicitly as the token to use, matching the
+      sk-nav-pill.css precedent (verified: `.sk-nav-pill__item--active { background:
+      var(--sk-bg-pill); }`), and explicitly flag --sk-surface-pill as the differently-named,
+      same-valued token to avoid — verified both tokens exist with identical values per theme in
+      tokens.css.
+  - id: SPEC-COMPLETE-001
+    status: resolved
+    reason: >
+      FR-009/SC-003 now assert distinct hover and active (mouse-down) style deltas with a cited
+      pattern, and FR-012/SC-007 add hover/active to the visual-baseline list — verified the three
+      cited Playwright files/lines (sk-context-nav.spec.ts:813, sk-transition-matrix.spec.ts:285,
+      sk-bar-chart.spec.ts:257) exist at those exact lines and contain the hover/mouse.down
+      style-delta pattern claimed.
+  - id: SPEC-COMPLETE-002
+    status: resolved
+    reason: >
+      FR-013 adds a clause excluding the autodocs `--docs` entry from both `total` and
+      `byElement.sk-segmented-choice`, quoting expected-stories.json's own comment "Docs entries
+      are excluded, matching every other element here" — verified this exact phrase exists
+      verbatim in expected-stories.json (lines 19 and 37).
+  - id: SPEC-COMPLETE-003
+    status: resolved
+    reason: >
+      Terminology now states a concrete Storybook title root, `Components/SkSegmentedChoice
+      (HTML)`, with a stated rationale (interactive consumer-composed control vs. passive
+      primitive/form control precedents) and applies it consistently through FR-006's story ids
+      and FR-013's ratchet entry — not left as a hedge or deferred to the plan phase.

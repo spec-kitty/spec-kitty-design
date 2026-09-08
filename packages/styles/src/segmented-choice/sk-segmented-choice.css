@@ -1,0 +1,97 @@
+/* @spec-kitty/styles — consumer-controlled native segmented-choice presentation (#270) */
+
+.sk-segmented-choice {
+  box-sizing: border-box;
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--sk-border-width-1);
+  min-inline-size: 0;
+  max-inline-size: 100%;
+}
+
+.sk-segmented-choice__item {
+  box-sizing: border-box;
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  padding-block: var(--sk-space-2);
+  padding-inline: var(--sk-space-4);
+  overflow-wrap: anywhere;
+  color: var(--sk-fg-body);
+  background: var(--sk-surface-input);
+  border-color: var(--sk-border-default);
+  border-style: solid;
+  border-width: var(--sk-border-width-1);
+  border-radius: var(--sk-radius-sm);
+  font-family: var(--sk-font-sans);
+  font-size: var(--sk-text-sm);
+  font-weight: var(--sk-weight-normal);
+  text-align: center;
+}
+
+.sk-segmented-choice__item:not(:disabled) {
+  cursor: pointer;
+}
+
+.sk-segmented-choice__item:hover:not(:disabled) {
+  background: var(--sk-bg-pill);
+  border-style: dashed;
+  font-weight: var(--sk-weight-medium);
+}
+
+.sk-segmented-choice__item:active:not(:disabled) {
+  background: var(--sk-surface-muted);
+  border-style: double;
+  border-width: var(--sk-border-width-2);
+  font-weight: var(--sk-weight-semibold);
+}
+
+.sk-segmented-choice__item[aria-pressed="true"] {
+  background: var(--sk-bg-pill);
+  border-color: var(--sk-border-strong);
+  border-style: double;
+  border-width: var(--sk-border-width-2);
+  font-weight: var(--sk-weight-semibold);
+}
+
+.sk-segmented-choice__item:focus-visible {
+  outline-color: var(--sk-border-focus);
+  outline-style: solid;
+  outline-width: var(--sk-border-width-2);
+  outline-offset: var(--sk-space-1);
+}
+
+.sk-segmented-choice__item:disabled {
+  color: var(--sk-fg-muted);
+  border-style: dotted;
+  cursor: not-allowed;
+}
+
+@media (width <= 1024px) {
+  .sk-segmented-choice__item {
+    min-block-size: calc(var(--sk-space-10) - var(--sk-space-5));
+  }
+}
+
+/* Forced-colors remaps background fills, so the selected and disabled states
+   gain a wider physical edge and keyboard focus gains a wider outline. Keep
+   system colours on the policed longhand colour properties and let the user
+   agent choose the rest of the high-contrast palette. */
+@media (forced-colors: active) {
+  .sk-segmented-choice__item[aria-pressed="true"] {
+    border-block-end-color: Highlight;
+    border-block-end-style: double;
+    border-block-end-width: var(--sk-border-width-4);
+  }
+
+  .sk-segmented-choice__item:focus-visible {
+    outline-color: Highlight;
+    outline-width: var(--sk-border-width-4);
+  }
+
+  .sk-segmented-choice__item:disabled {
+    border-block-end-color: GrayText;
+    border-block-end-style: dotted;
+    border-block-end-width: var(--sk-border-width-4);
+  }
+}

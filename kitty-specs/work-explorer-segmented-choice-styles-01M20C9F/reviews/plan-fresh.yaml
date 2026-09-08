@@ -1,0 +1,58 @@
+schema: review-findings/v1
+complete: true
+phase: plan
+lens_group: fresh
+mission: work-explorer-segmented-choice-styles-01M20C9F
+findings:
+  - id: PLAN-FRESH-001
+    lens: sequencing
+    severity: 3
+    title: New visual-regression baseline bullet in IC-04 has no red-first/sequencing slot
+    evidence:
+      - artifact: "plan.md § IC-04 — Playwright spec (red-first, drives IC-01/IC-03's remaining CSS)"
+      - artifact: "plan.md line ~283-289 (\"Visual-regression baseline authoring (FR-012/SC-007)\" bullet)"
+      - artifact: "plan.md line ~294 (\"Sequencing/depends-on: Two blocks, two dependency sets.\")"
+    claim: >
+      This revision adds an entirely new IC-04 deliverable — `test()` blocks in
+      `apps/storybook/src/tests/visual.spec.ts` for `sk-segmented-choice`, one per FR-012 state
+      (selected/unselected/hover/active/disabled/focus/long-content/dark/light/forced-colors) —
+      but the IC-04 "Sequencing/depends-on" paragraph immediately below it still opens with
+      "Two blocks, two dependency sets" and only walks through the source-contract block and the
+      live cross-browser block inside `sk-segmented-choice.spec.ts`. It never says when, relative
+      to IC-01's minimal-CSS-first / distinguishing-CSS-later sequence, the new visual.spec.ts
+      blocks should be authored and first run. Every other concern in this plan (IC-01/IC-03/IC-04's
+      own two existing blocks) is given an explicit red-first position in the CSS-maturation
+      timeline; this new one is not. Since a `toHaveScreenshot()` call bakes in whatever DOM/CSS
+      state exists the first time it runs (there is no prior baseline to diff against), authoring
+      these blocks against the "minimal/undifferentiated first CSS pass" the rest of IC-01/IC-04
+      explicitly prescribes would capture the wrong (non-distinguishing) visual state as the
+      committed baseline, needing a full re-capture once IC-01's remaining declarations and IC-03's
+      forced-colors block land.
+    remediation: >
+      Add one sentence to IC-04's Sequencing/depends-on (or a new short bullet) stating explicitly
+      that the visual.spec.ts `test()` blocks must be authored/first-run only after IC-01's
+      distinguishing CSS declarations and IC-03's forced-colors block have both landed and turned
+      the live Playwright block green — i.e., last in the IC-04 sequence, not alongside the
+      red-first live-block assertions — so the captured baselines reflect the finished component,
+      not the scaffold pass.
+  - id: PLAN-FRESH-002
+    lens: cross-reference
+    severity: 2
+    title: Project Structure file tree omits the visual.spec.ts edit this revision adds to IC-04
+    evidence:
+      - artifact: "plan.md § Project Structure ▸ Source Code (repository root), lines ~113-118"
+      - artifact: "plan.md § IC-04 ▸ Affected surfaces, line ~292-293"
+    claim: >
+      This revision's new "Visual-regression baseline authoring" bullet adds
+      `apps/storybook/src/tests/visual.spec.ts` (new `test()` blocks appended) to IC-04's own
+      "Affected surfaces" list. The Project Structure section's file tree — the document's other,
+      more prominent enumeration of every file this WP touches — was not updated to match: under
+      `apps/storybook/src/tests/` it still lists only `sk-segmented-choice.spec.ts`. A reader who
+      treats Project Structure as the authoritative touched-file list (as the plan's own "Scale/Scope"
+      line in Technical Context does, still saying only "one new Playwright spec file") would not
+      learn that an existing file, `visual.spec.ts`, also gets edited.
+    remediation: >
+      Add a line under `apps/storybook/src/tests/` in the Project Structure tree noting
+      `visual.spec.ts` (existing file, new test() blocks appended for sk-segmented-choice, FR-012),
+      and adjust the Technical Context "Scale/Scope" bullet to mention it alongside "one new
+      Playwright spec file" so the two summaries agree with IC-04's detail.

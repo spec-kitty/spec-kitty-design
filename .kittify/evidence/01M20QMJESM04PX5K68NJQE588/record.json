@@ -1,0 +1,8 @@
+{
+  "event": "completed",
+  "invocation_id": "01M20QMJESM04PX5K68NJQE588",
+  "completed_at": "2026-09-08T14:45:19.582031+00:00",
+  "outcome": "failed",
+  "closed_by": "agent",
+  "evidence_ref": "Implementation dispatch blocked before allocation: analysis_report_required; no code/worktree created."
+}

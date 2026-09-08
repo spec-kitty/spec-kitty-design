@@ -1,0 +1,119 @@
+schema: review-findings/v1
+complete: true
+phase: spec-research
+mission: work-explorer-segmented-choice-styles-01M20C9F
+lens: governance
+findings:
+  - id: SPEC-RESEARCH-GOV-001
+    lens: governance
+    severity: 4
+    title: "Research phase was executed out of canonical order: research.md/data-model.md were backfilled after spec.md and plan.md had already been authored AND had already passed their own adversarial review gates"
+    evidence:
+      - artifact: "kitty-specs/work-explorer-segmented-choice-styles-01M20C9F/research.md lines 8-13: \"the runtime's research phase was marked complete without ever running. This backfills it: every factual claim spec.md's and plan.md's prose rely on was independently re-verified against the live repository tree on 2026-09-08 (not copied from plan.md's own text).\""
+      - artifact: "kitty-specs/work-explorer-segmented-choice-styles-01M20C9F/mission-events.jsonl line 1: MissionNextInvoked action=\"research\", mission_state=\"discovery\", result_input=\"success\", timestamp 2026-09-08T11:58:18 — reported success roughly one minute BEFORE action=\"specify\" (11:59:18) and action=\"plan\" (11:59:51) on lines 2-3 of the same file"
+      - artifact: "git log: spec.md authored/fixed at 9892785/d6ac1f5/614e2d0 (13:59-ish); plan.md authored and both review-fold passes completed at d9a231d (14:07:07), d78c0d3 (14:23:24), b91cc43 (14:29:16); research.md/data-model.md not created until 1cc92d0 (14:43:51) — the current HEAD, roughly 14 minutes after plan.md's findings were already folded and both spec.confirmed.yaml and the plan review trail already existed"
+    claim: >
+      The runtime's own event log records a "research" step reporting success at 11:58:18, before
+      "specify" (11:59:18) and "plan" (11:59:51) even began — i.e., the step contract's declared
+      order (research informs specify, which informs plan) was nominally satisfied on paper. But no
+      research.md or data-model.md file existed until commit 1cc92d0, created 14:43:51 — nearly
+      three hours later, and, more importantly, only after spec.md had already been authored,
+      revised twice, and (per research.md's own header) "PASSED R1-R6", and after plan.md had
+      already been authored and folded through two rounds of review findings ("PASSED down to 3
+      open low/medium consistency findings"). This is precisely the failure shape ADR-11 names as
+      fatal for a verification gate: "a check that passes on absence" (ADR-11,
+      docs/architecture/decisions/2026-09-02-11-verification-stack-and-wrapper-generation.md,
+      Context and Problem Statement) — here, the mission runtime's own research-phase gate reported
+      "success" for a step that produced no artifact, and both downstream design artifacts were
+      reviewed and approved without the grounding that phase is supposed to supply. The backfill
+      exercise was executed with genuine diligence (it did catch one real defect — spec.md's stale
+      `sk-transition-matrix.spec.ts:285` FR-009 citation, per research.md's Discrepancies section —
+      that neither the spec review nor the plan review caught), which mitigates but does not
+      eliminate the concern: spec.md's "PASSED R1-R6" and plan.md's "PASSED down to 3 findings"
+      verdicts are both based on prose that, at the time those reviews ran, had never actually been
+      checked against the live repository tree. A future reader trusting those PASSED verdicts at
+      face value would not know the ground truth underneath them was verified only after the fact.
+    remediation: >
+      Record this ordering defect explicitly wherever mission process learnings are captured (e.g.
+      docs/learnings/ per repo convention) so a future mission's research step is verified to have
+      actually produced an artifact before "specify" is allowed to proceed — the runtime should fail
+      or block, not report success, when a step's declared artifact_path was never written. Until
+      that gate is repaired, a mission using this recovery pattern should say so explicitly in the
+      spec/plan review records themselves (not only in research.md, discovered later) so a reader of
+      the PASSED verdicts knows they predate any actual research grounding.
+
+  - id: SPEC-RESEARCH-GOV-002
+    lens: governance
+    severity: 3
+    title: "data-model.md hardens spec.md's illustrative role=\"group\" example into a binding \"Required: Yes\" attribute, contradicting its own claim to add no requirement beyond what spec.md already states"
+    evidence:
+      - artifact: "kitty-specs/work-explorer-segmented-choice-styles-01M20C9F/data-model.md lines 33-36 (Entity 1 attributes table): row `role=\"group\"` | ARIA role | **Required: Yes** (per spec.md Acceptance Scenario 1, FR-007) | ..."
+      - artifact: "kitty-specs/work-explorer-segmented-choice-styles-01M20C9F/data-model.md lines 131-135 (Traceability section): \"This document adds no requirement beyond what spec.md's Key Entities section (lines 272-285) and Application ownership section (lines 287-295) already state as binding. Every attribute, ownership claim, and relationship above is a direct formalization of that existing prose...\""
+      - artifact: "kitty-specs/work-explorer-segmented-choice-styles-01M20C9F/spec.md line 90-91 (Acceptance Scenario 1): \"the group carrying an accessible name (e.g. `role=\"group\" aria-label=\"View by\"`)\" — role=\"group\" appears only as an e.g. example of one way to satisfy \"an accessible name\", never as its own requirement"
+      - artifact: "kitty-specs/work-explorer-segmented-choice-styles-01M20C9F/spec.md line 275-276 (Key Entities, Segmented-choice group): \"Carries (consumer-authored) an accessible group name — e.g. `role=\"group\" aria-label=\"View by\"`\" — same e.g.-qualified phrasing"
+      - artifact: "kitty-specs/work-explorer-segmented-choice-styles-01M20C9F/spec.md FR-007: \"a Playwright spec asserting ... that the group itself carries an accessible group name\" — names the outcome (an accessible group name), not the mechanism (role=\"group\")"
+    claim: >
+      Every place spec.md mentions `role="group"` (Acceptance Scenario 1, Key Entities) qualifies it
+      with "e.g." — it is offered as one worked example of how a consumer might satisfy the actual,
+      more general binding requirement, "the group carrying an accessible name." FR-007's Playwright
+      assertion is likewise framed around the outcome ("carries an accessible group name"), not a
+      specific ARIA role. data-model.md's Entity 1 attributes table converts that illustrative
+      example into a structured, binding-looking table row — `role="group"` | Required: Yes — with
+      no "e.g." qualifier and no acknowledgment that spec.md never actually mandates this specific
+      mechanism. This is exactly the kind of silent re-decision the research/data-model phase should
+      not make: it narrows spec.md's binding contract (any valid accessible-naming mechanism) down
+      to one specific, unstated-as-mandatory ARIA role, while data-model.md's own Traceability
+      section explicitly (and, given this row, inaccurately) asserts it "adds no requirement beyond
+      what spec.md ... already states as binding." A WP implementer or a later reviewer reading
+      data-model.md's table in isolation, without cross-checking spec.md's actual "e.g."-qualified
+      wording, could reasonably treat `role="group"` as spec-mandated when it is not.
+    remediation: >
+      Either (a) change the Entity 1 table's `role="group"` row from "Required: Yes" to something
+      like "Required: No — illustrative; the binding requirement is an accessible group name by any
+      valid mechanism, per spec.md's `e.g.` framing," or (b) if the mission wants to actually commit
+      to `role="group"` as a hard requirement (a defensible design choice, since a labelled group of
+      buttons needs `role="group"` for the label to be announced as a group by most assistive
+      technology), do so explicitly as a new decision recorded in research.md's own Decisions
+      section with rationale — not silently via a data-model table cell — and then also update
+      spec.md's Acceptance Scenario 1 / Key Entities wording to drop the "e.g." qualifier so the two
+      documents agree.
+
+  - id: SPEC-RESEARCH-GOV-003
+    lens: governance
+    severity: 2
+    title: "research.md claims exhaustive re-verification of spec.md's factual claims but never checks C-006's own commit-scope claim against the mission's actual git history, which the mission's own design-phase commits (including the one carrying these research artifacts) already contradict"
+    evidence:
+      - artifact: "kitty-specs/work-explorer-segmented-choice-styles-01M20C9F/research.md lines 9-13: \"every factual claim spec.md's and plan.md's prose rely on was independently re-verified against the live repository tree on 2026-09-08 ... Where a claim did not hold, it is flagged explicitly.\" — Q1-Q10 cover C-001 through C-005 and C-008/C-009/C-010; C-006 and C-007 are not among them (C-007 is only incidentally covered via EV-028's meta.json check)."
+      - artifact: "kitty-specs/work-explorer-segmented-choice-styles-01M20C9F/spec.md C-006: \"All commits in this mission use the `styles` conventional-commit scope, matching the package actually changed (`packages/styles`).\""
+      - artifact: "commitlint.config.cjs lines 82-95 (`scope-enum`): valid scopes are tokens, storybook, doctrine, ci, docs, release, deps, security, acceptance, merge, team-overview, styles, elements, react — `kitty-specs` is not among them"
+      - artifact: "commitlint.config.cjs lines 6-78 (SPEC_KITTY_AUTO_COMMIT_PATTERNS): none of the anchored exemption patterns match a bare `docs(kitty-specs):` or `fix(kitty-specs):` header (the closest, `/^(chore|feat|docs)\\([^)]*-01[A-Z0-9]{6,}[^)]*\\):/i`, requires the mission's ULID suffix inside the parens, which `kitty-specs` does not contain)"
+      - artifact: "git log: d9a231d \"docs(kitty-specs): author plan for work-explorer-segmented-choice-styles (#270)\"; d78c0d3 \"fix(kitty-specs): fold plan review findings for work-explorer-segmented-choice-styles (#270)\"; b91cc43 \"fix(kitty-specs): fold plan fresh-sweep findings for work-explorer-segmented-choice-styles (#270)\"; 1cc92d0 \"docs(kitty-specs): backfill research for work-explorer-segmented-choice-styles (#270)\" (this mission's own HEAD commit, carrying research.md/data-model.md) — four commits, all already on this mission's branch at the time research.md was written, none of which use the `styles` scope C-006 claims is used by \"all commits in this mission\""
+    claim: >
+      C-006 is a binding Constraint stating "All commits in this mission use the `styles`
+      conventional-commit scope." That claim is unqualified, and it is already false at the moment
+      research.md was written: the mission's own design-phase commits (spec authoring/fixes, plan
+      authoring/fold-ins, and the research backfill commit itself) use `docs(kitty-specs)` /
+      `fix(kitty-specs)`, a scope that is neither `styles` nor present in
+      `commitlint.config.cjs`'s `scope-enum` list, nor covered by any of that file's documented
+      Spec-Kitty-CLI-bookkeeping exemption patterns (which are anchored to a `-01<ULID>` mission-slug
+      suffix inside the parens, absent here). research.md explicitly frames itself as having
+      independently re-verified "every factual claim spec.md's ... prose relies on," and its ten
+      researched questions (Q1-Q10) systematically check C-001 through C-005 and C-008/C-009/C-010 —
+      but C-006's own claim, trivially checkable with `git log` against the mission's own branch, is
+      never checked. In practice C-006's rationale ("matching the package actually changed") clearly
+      targets the later WP implementation commits rather than these design-phase bookkeeping commits,
+      so this is likely a wording-precision gap rather than a substantive scope violation risk — and
+      whether these specific commits are ever evaluated by `commitlint` depends on the mission's
+      "lands directly on `train/elements-first`" lane topology and on how (or whether) a later
+      `train/elements-first` → `main` merge triggers a PR-scoped `commitlint --from --to` run
+      (`.github/workflows/ci-quality.yml:371` gates it on `github.event_name == 'pull_request'`
+      only). That materiality uncertainty is exactly the kind of thing a genuinely exhaustive
+      research pass should have surfaced rather than silently passed over.
+    remediation: >
+      Either narrow C-006's wording to "All commits touching `packages/styles` in this mission's
+      Work Package use the `styles` scope" (matching its own stated rationale and leaving
+      design-phase bookkeeping commits out of its claim), or, if C-006 is meant literally to cover
+      every commit in the mission, flag the existing non-conforming design-phase commits as a defect
+      and file whatever follow-up is appropriate (e.g. widening `commitlint.config.cjs`'s exemption
+      patterns to also match a bare `kitty-specs` scope, if that is the CLI's now-current bookkeeping
+      shape) rather than leaving the contradiction undetected in research.md's evidence log.

@@ -1,0 +1,21 @@
+schema: review-refute/v1
+complete: true
+phase: analysis
+batch: 1
+reviewer: codex
+profile: debugger-debbie
+reviewed_commit: 54ed4f671e717d8146e9492e4e041587370e0080
+directives_applied: [DIRECTIVE_003, DIRECTIVE_030, DIRECTIVE_032]
+verdicts:
+  - id: ANALYSIS-COVERAGE-001
+    verdict: confirmed
+    reason: The old report's own visible table omitted full ID-by-ID and separate SC coverage, exactly as cited.
+  - id: ANALYSIS-COVERAGE-002
+    verdict: confirmed
+    reason: The old report made a blanket decomp-resolution claim but never named or demonstrated either original finding.
+  - id: ANALYSIS-RUNTIME-001
+    verdict: confirmed
+    reason: The old header/prose mismatch and the missing-carrier cause are directly established by the artifact and recorder code.
+  - id: ANALYSIS-RUNTIME-002
+    verdict: refuted
+    reason: The entry identifies no defect, requests no mission remediation, and its critical severity contradicts the rubric; it is context for RUNTIME-001, not a finding.

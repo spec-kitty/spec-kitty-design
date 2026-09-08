@@ -1,0 +1,79 @@
+schema: review-findings/v1
+complete: true
+phase: spec-research
+lens_group: fresh
+mission: work-explorer-segmented-choice-styles-01M20C9F
+findings:
+  - id: SPEC-RESEARCH-FRESH-001
+    lens: fresh
+    severity: 3
+    title: "research.md Q4 misstates C-010's system-color keyword list as matching stylelint's seven; C-010 names only six and omits GrayText, which is this repo's own precedent for exactly the disabled/unavailable forced-colors state this mission needs"
+    evidence:
+      - artifact: "kitty-specs/work-explorer-segmented-choice-styles-01M20C9F/research.md:165-167"
+      - artifact: "kitty-specs/work-explorer-segmented-choice-styles-01M20C9F/spec.md (C-010 row, Constraints table): \"a system-color keyword (`Highlight`, `CanvasText`, `ButtonText`, `LinkText`, `Canvas`, `HighlightText`)\""
+      - artifact: "stylelint.config.mjs:52-58 (ignoreValues: Canvas, CanvasText, Highlight, HighlightText, ButtonText, LinkText, GrayText — seven entries)"
+      - artifact: "packages/styles/src/context-nav/sk-context-nav.css:195-199 (@media (forced-colors: active) { .sk-context-nav__unavailable { color: GrayText; border-inline-start-color: GrayText; } })"
+    claim: >
+      research.md's Q4 section states: "`stylelint.config.mjs`'s `ignoreValues` array (lines
+      52-58) already lists `Canvas`, `CanvasText`, `Highlight`, `HighlightText`, `ButtonText`,
+      `LinkText`, `GrayText` — exactly the seven keywords C-010/NFR-004 name." This is false as
+      written: spec.md's C-010 enumerates exactly six system-color keywords in its own
+      parenthetical (`Highlight`, `CanvasText`, `ButtonText`, `LinkText`, `Canvas`,
+      `HighlightText`) and does not mention `GrayText` anywhere. NFR-004 does not independently
+      enumerate any keywords either — it defers to C-010 for the list. So "C-010/NFR-004 name"
+      seven keywords is incorrect; they name six, and stylelint's ignoreValues array has an extra
+      one (`GrayText`) that neither C-010 nor NFR-004 mentions. This is not merely a miscount:
+      `GrayText` is precisely the keyword this repository already uses, in
+      `sk-context-nav.css`'s own forced-colors block, to render an "unavailable" item's text and
+      border under `forced-colors: active` — the exact same state category
+      (disabled/unavailable, per FR-004/User Story 3/NFR-004) this mission's own
+      `sk-segmented-choice__item:disabled` forced-colors treatment will need to render distinctly.
+      Because research.md asserts the seven-way match already holds, a plan or WP author reading
+      research.md (rather than re-deriving from spec.md directly) could reasonably believe C-010
+      already authorizes `GrayText` for the disabled-state forced-colors cue, when spec.md's own
+      binding constraint text does not name it — an avoidable ambiguity this "independently
+      re-verified" research document was specifically written to prevent.
+    remediation: >
+      Correct research.md's Q4 conclusion to state accurately that stylelint's ignoreValues
+      contains seven system-color keywords while C-010 names six, and that `GrayText` — used
+      elsewhere in the tree (`sk-context-nav.css`) for a disabled/unavailable forced-colors cue —
+      is present in stylelint's allowlist but not in C-010's enumerated list. Either amend C-010 to
+      add `GrayText` (if the plan intends to use it for the disabled-state forced-colors treatment,
+      which is a plausible and precedented choice for this mission's disabled items), or explicitly
+      note in research.md/plan.md that the disabled-state forced-colors cue must be drawn using one
+      of C-010's six named keywords (most likely `CanvasText` or `GrayText` added explicitly) so the
+      WP implementer does not have to resolve the ambiguity mid-implementation.
+
+  - id: SPEC-RESEARCH-FRESH-002
+    lens: fresh
+    severity: 2
+    title: "C-004 cites sk-form-select.css as a base-state precedent for the --sk-bg-pill token alongside sk-nav-pill.css, but sk-form-select.css contains zero references to --sk-bg-pill (or --sk-surface-pill) anywhere in the file"
+    evidence:
+      - artifact: "kitty-specs/work-explorer-segmented-choice-styles-01M20C9F/spec.md (C-004 row, Constraints table): \"Base-state colours use `--sk-bg-pill` (the pressed/selected fill) plus the existing border/focus token families, matching the base-state precedent in `sk-nav-pill.css` and `sk-form-select.css`\""
+      - artifact: "packages/styles/src/form-select/sk-form-select.css (grep for sk-bg-pill / sk-surface-pill: zero matches; actual base-state tokens used are --sk-surface-input, --sk-border-default, --sk-border-focus, --sk-border-width-1/2, --sk-radius-sm, --sk-color-red)"
+      - artifact: "packages/styles/src/nav-pill/sk-nav-pill.css:39-50,128-143 (the only file that actually uses --sk-bg-pill for an active/pressed fill)"
+      - artifact: "kitty-specs/work-explorer-segmented-choice-styles-01M20C9F/research.md Q3 section, and FR-015 in spec.md — both correctly cite sk-nav-pill.css alone as the --sk-bg-pill precedent, never sk-form-select.css"
+    claim: >
+      spec.md's C-004 reads: "Base-state colours use `--sk-bg-pill` (the pressed/selected fill)
+      plus the existing border/focus token families, matching the base-state precedent in
+      `sk-nav-pill.css` and `sk-form-select.css`." Read as a single "matching...in A and B" clause,
+      this implies both files back the `--sk-bg-pill` base-state usage, but `sk-form-select.css`
+      does not use `--sk-bg-pill` (or the sibling `--sk-surface-pill`) at all — it uses an entirely
+      different token set (`--sk-surface-input`, `--sk-border-default`, `--sk-border-focus`, etc.).
+      Only `sk-nav-pill.css` demonstrates the `--sk-bg-pill` active-fill pattern, and both FR-015 and
+      research.md's own Q3 section correctly attribute the `--sk-bg-pill` precedent to
+      `sk-nav-pill.css` alone. research.md's Q3/EV-031 only verify the second half of C-004's claim
+      (neither file has a `forced-colors` block) and never check whether `sk-form-select.css`
+      actually contains `--sk-bg-pill`, so this ambiguous/incorrect attribution passed unflagged
+      through the "independently re-verified" research pass. The more charitable reading — that
+      `sk-form-select.css` is cited only for the separate "border/focus token families" half of the
+      same sentence, not for `--sk-bg-pill` itself — is plausible but the sentence's grammar does
+      not make that split clear, and a WP implementer skimming C-004 could go looking for a
+      `--sk-bg-pill` usage in `sk-form-select.css` that does not exist.
+    remediation: >
+      Reword C-004 to separate the two precedents explicitly, e.g.: "Base-state colours use
+      `--sk-bg-pill` (the pressed/selected fill, precedent: `sk-nav-pill.css`) plus the existing
+      border/focus token families (precedent: `sk-form-select.css`'s `--sk-border-default`/
+      `--sk-border-focus` usage) — base-state token reuse only, not a forced-colors precedent,
+      since neither file carries a `forced-colors` block." This removes the implication that
+      `sk-form-select.css` demonstrates `--sk-bg-pill` usage, which grep confirms it does not.

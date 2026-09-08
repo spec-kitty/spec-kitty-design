@@ -1,0 +1,67 @@
+# review-findings/v1 — canonical format for lens-session and fresh-sweep output.
+schema: review-findings/v1
+complete: true
+phase: tasks
+lens_group: decomp
+mission: work-explorer-segmented-choice-styles-01M20C9F
+findings:
+  - id: TASKS-DECOMP-001
+    lens: Decomposition / PR-sizing
+    severity: 3
+    title: T020 names the Tier-C pre-merge squad as its actor while the WP frontmatter assigns all subtasks to role:implementer, blurring which actor's work is inside this WP's one-PR boundary
+    evidence:
+      - artifact: "tasks/WP01-segmented-choice-styles.md frontmatter, line 95 (`role: implementer`) and lines 41-61 (`subtasks:` list includes T020)"
+      - artifact: "tasks/WP01-segmented-choice-styles.md § T020, lines 435-436: \"a human operator (the Tier-C pre-merge squad, run after T019's final push) opens the built Storybook in an actual Chrome window...\""
+      - artifact: "tasks/WP01-segmented-choice-styles.md § Definition of done, lines 463-464, which correctly keeps the squad's own evidence-post OUT of the T001-T020 subtask numbering (\"The PR's final head ... carries the Tier-C pre-merge adversarial squad's evidence comment ... before merge\"), showing the WP file elsewhere distinguishes squad-owned work from implementer subtasks"
+      - artifact: "kitty-specs/native-form-select-styles-01M1WSXJ/tasks/WP01-native-light-dom-form-select-styles.md § T004 (lines 199-211), the cited precedent's own 200%-zoom task, which is written as ordinary implementer work (\"Separately inspect at 200% browser zoom in desktop Chromium and retain exact-head evidence\") with no separate 'squad' actor named"
+    claim: >
+      Every other subtask in this WP (T001-T019) is implicitly executed by the WP's own
+      `role: implementer` seat, consistent with the charter's distinction between the
+      implementer that does the work and the separate adversarial review squad that gates the
+      PR before merge. T020 breaks this pattern: its own procedure text names the actor as "the
+      Tier-C pre-merge squad," a different role than `implementer`, and sequences it "after
+      T019's final push" — i.e. during pre-merge review, not during WP implementation. Yet T020
+      is listed as one of the WP's twenty numbered `subtasks` (frontmatter, alongside T001-T019),
+      and the Definition of done requires its artifact
+      (`docs/architecture/validation/issue-270-segmented-choice-zoom/README.md`) to exist for the
+      WP to count as done. This conflates two different actors' work inside one WP's subtask
+      list: unlike the squad's separate evidence-post bullet (correctly excluded from the T001-T020
+      numbering), the zoom-validation deliverable is folded in as if it were implementer output,
+      which blurs whether "this WP's ~20 subtasks" is genuinely one reviewable PR's worth of
+      implementer work or partly downstream squad-review work miscounted as implementer scope.
+      The precedent WP for the structurally identical form-select zoom validation (T004 above)
+      does not have this ambiguity — it is plain implementer work with no named squad actor.
+    remediation: >
+      Either (a) reassign T020 to the implementer to match the form-select precedent — drop "the
+      Tier-C pre-merge squad" framing and have the implementer perform and record the manual
+      200%-zoom validation themselves before opening the PR, consistent with `role: implementer`
+      governing all of T001-T020; or (b) if the manual zoom check is genuinely meant to be a
+      squad-owned pre-merge action, remove T020 from the `subtasks:` list and from the T001-T020
+      numbering entirely, and fold its requirement into the Definition of done as a squad-gate
+      bullet alongside the existing evidence-post bullet (the way the evidence-post itself is
+      already handled) — so the WP's own subtask count and "one PR's worth of implementer
+      work" claim don't silently include a different actor's task.
+  - id: TASKS-DECOMP-002
+    lens: No padding, no vacuous tasks
+    severity: 2
+    title: T013 re-verifies exactly what T012 already re-ran and confirmed, adding no new checkable content
+    evidence:
+      - artifact: "tasks/WP01-segmented-choice-styles.md § T012, lines 318-325: \"...re-run npx playwright test apps/storybook/src/tests/sk-segmented-choice.spec.ts (both test.describe blocks) and confirm every assertion from T001 and T006-T009 is GREEN...\""
+      - artifact: "tasks/WP01-segmented-choice-styles.md § T013, lines 327-330: \"(folded into T012; kept as a distinct checkpoint) Confirm T001's source-contract block is still green ... Re-run just the Chromium-only source-contract block and confirm the SC-009 no-op grep assertions and the C-001 no-packages/elements/src/segmented-choice/ assertion both still pass after T002-T011.\""
+    claim: >
+      T012 explicitly re-runs "both test.describe blocks" of sk-segmented-choice.spec.ts and
+      confirms "every assertion from T001" is GREEN — T001 is exactly the Chromium-only
+      source-contract block (SC-009 grep assertions plus the C-001 no-elements-directory
+      assertion) that T013 asks to re-run. T013's own heading admits this ("folded into T012"),
+      and its body describes a re-run that T012's own instructions already perform. It is not
+      vague or unimplementable — the action is concrete — but it produces zero verification
+      T012 didn't already produce, which pads the subtask count (T001-T020) with a step that
+      does no independent work, contrary to the WP's own claim that its ~20 subtasks are a
+      reviewable single PR's worth of distinct, checkable work.
+    remediation: >
+      Delete T013 as a separate numbered subtask and fold its one sentence ("confirm the
+      SC-009/C-001 assertions still pass") into T012's own body as a clarifying note, or
+      renumber T014-T020 down by one. If the intent was to make the checkpoint independently
+      trackable in the WP's subtask list for progress-reporting purposes, say so explicitly in
+      T013's own text rather than leaving "kept as a distinct checkpoint" as the only
+      justification for a task that performs no new verification.

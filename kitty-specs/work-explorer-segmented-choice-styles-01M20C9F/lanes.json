@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "mission_slug": "work-explorer-segmented-choice-styles-01M20C9F",
+  "mission_id": "01M20C9FMYP0N5HMEBT0WCXRSD",
+  "mission_branch": "kitty/mission-work-explorer-segmented-choice-styles-01M20C9F",
+  "target_branch": "train/elements-first",
+  "lanes": [
+    {
+      "lane_id": "lane-a",
+      "wp_ids": [
+        "WP01"
+      ],
+      "write_scope": [
+        "apps/storybook/src/tests/sk-segmented-choice.spec.ts",
+        "apps/storybook/src/tests/visual.spec.ts",
+        "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-segmented-choice-*.png",
+        "docs/architecture/validation/issue-270-segmented-choice-zoom/**",
+        "docs/design-system/using-components.md",
+        "expected-stories.json",
+        "packages/elements/SIZES.md",
+        "packages/styles/package.json",
+        "packages/styles/src/index.ts",
+        "packages/styles/src/segmented-choice/**"
+      ],
+      "predicted_surfaces": [
+        "api",
+        "app-shell",
+        "artifact-rendering",
+        "dashboard"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    }
+  ],
+  "computed_at": "2026-09-08T13:53:09.160585+00:00",
+  "computed_from": "dependency_graph+ownership",
+  "planning_artifact_wps": [],
+  "planning_commit_sha": "fa20a9b25e2abee27dec28b30125ea1352f154c2"
+}

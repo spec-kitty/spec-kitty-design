@@ -56,6 +56,7 @@ export * from './progress/index';
 export * from './prose/index';
 export * from './ribbon-card/index';
 export * from './section-banner/index';
+export * from './segmented-choice/index';
 export * from './site-footer/index';
 export * from './skip-link/index';
 export * from './stub/index';

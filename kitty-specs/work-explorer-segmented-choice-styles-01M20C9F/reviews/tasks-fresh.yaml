@@ -1,0 +1,43 @@
+schema: review-findings/v1
+complete: true
+phase: tasks
+lens_group: fresh
+mission: work-explorer-segmented-choice-styles-01M20C9F
+findings:
+  - id: TASKS-FRESH-001
+    lens: fresh sweep
+    severity: 4
+    title: T019's fix-round reassignment of the manual 200%-zoom validation to "the implementer" contradicts plan.md's explicit, twice-stated assignment of that action to the Tier-C pre-merge squad
+    evidence:
+      - artifact: "tasks/WP01-segmented-choice-styles.md § T019 (line 433): \"the implementer, after T018's final push, opens the built Storybook in an actual Chrome window, sends real Ctrl+Shift+= zoom keystrokes...\""
+      - artifact: "tasks/WP01-segmented-choice-styles.md § Definition of done (lines 462-465): \"...this squad gate, including re-checking T019's manual 200%-zoom evidence, is the squad's own separate responsibility and runs after this WP's subtasks are complete.\""
+      - artifact: "tasks/WP01-segmented-choice-styles.md § Execution order item 13 (line 151): \"T019 — manual 200%-zoom validation, performed by the implementer after T018's final push.\""
+      - artifact: "plan.md line 422 (IC-04 Risks bullet): \"...SHA-256 screenshot digests in a new docs/architecture/validation/issue-270-segmented-choice-zoom/README.md, run by the Tier-C pre-merge squad after the final push (see the Gate enumeration's 'Manual 200%-zoom validation' row).\""
+      - artifact: "plan.md line 477 (Gate Enumeration table, 'Manual 200%-zoom validation' row): \"...recorded as SHA-256 screenshot evidence in a new docs/architecture/validation/issue-270-segmented-choice-zoom/README.md, run by the Tier-C pre-merge squad after the final push, per the issue-211-form-select-zoom/README.md / issue-213-work-package-detail-zoom/README.md precedent\""
+      - artifact: "tasks/WP01-segmented-choice-styles.md lines 119-120 (Goal section): \"where this file and plan.md disagree on a procedural detail, plan.md's IC map is authoritative.\""
+    claim: >
+      The fix round changed the manual 200%-zoom validation's actor from "the Tier-C pre-merge
+      squad" to "the implementer" (and folded it into the ordinary T001-T019 implementer-role
+      subtask sequence), evidently to resolve an internal inconsistency between the WP's
+      frontmatter role:implementer / subtasks: list and the previous T020 body naming a
+      squad actor. But plan.md — which this same WP file's own Goal section names as
+      authoritative on any procedural disagreement — states twice, in near-identical language,
+      that this validation is "run by the Tier-C pre-merge squad after the final push" (IC-04's
+      Risks narrative and the Gate Enumeration table's dedicated row). The current WP text now
+      contradicts plan.md on exactly this procedural point, and per the WP's own tie-break rule,
+      plan.md wins, which means the reassignment to "the implementer" is the wrong resolution.
+      This also weakens NFR-003/SC-005 (both "High" priority): a High-NFR real-browser
+      verification specifically design to be independently discharged by the pre-merge review
+      tier (C-009) is now self-attested implementer evidence that the squad merely
+      "re-check[s]" (i.e., audits the write-up) rather than independently reproduces — the
+      independent-verification value the squad-run precedent (issue #211/#213) was chosen for is
+      lost.
+    remediation: >
+      Either (a) update plan.md's IC-04 narrative and Gate Enumeration table to reassign this
+      validation to the implementer (if that is genuinely the intended, updated procedure), so
+      the WP file and plan.md agree, or (b) revert T019's actor back to "the Tier-C pre-merge
+      squad" and move it out of the ordinary T001-T019 implementer-role subtask numbering (e.g.
+      into its own clearly-labeled non-implementer step, or into the Definition of done /
+      Commit-scope-note style section reserved for non-implementer actors), matching plan.md's
+      explicit, twice-stated assignment. Whichever direction is chosen, make plan.md and the WP
+      file say the same thing about who performs the 200%-zoom action.

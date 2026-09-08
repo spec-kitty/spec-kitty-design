@@ -1,0 +1,117 @@
+schema: review-findings/v1
+complete: true             # flip to true ONLY at the very end, after the yaml self-check passes
+phase: spec
+lens_group: gov
+mission: work-explorer-segmented-choice-styles-01M20C9F
+findings:
+  - id: SPEC-GOV-001
+    lens: Directive (DIRECTIVE_010 — spec fidelity to the issue)
+    severity: 4
+    title: "C-005 claims the issue gives no breakpoint number for the W4 narrow/wrapping story, but the issue's own Evidence section states one (1024px)"
+    evidence:
+      - artifact: "spec.md § C-005: \"The exact pixel value of the 'narrow/wrapping' story's viewport is an implementation decision for the plan/WP, not fixed here ... consistent with the issue's own framing of 'the approved W4 narrow layout' as an evidence artifact rather than a number handed to the CSS.\""
+      - artifact: "GitHub issue #270 body, Evidence section: \"W4 requires the group to remain operable when the toolbar wraps at 1024px; W9 and W10 retain it in a truthful disabled state.\" (verified via `gh issue view 270 --repo spec-kitty/spec-kitty-design`)"
+    claim: >
+      C-005 asserts, as its stated rationale for leaving the narrow/wrapping viewport width
+      unspecified, that the issue frames "the approved W4 narrow layout" only as "an evidence
+      artifact rather than a number handed to the CSS." That is factually wrong: the issue's own
+      Evidence section names a concrete number, "wraps at 1024px." Neither this number, nor any
+      acknowledgment that the issue supplies one, appears anywhere in spec.md (grepped for "1024"
+      and "breakpoint" — zero matches outside C-005 itself). If the plan/WP takes C-005 at face
+      value and picks an arbitrary narrow-story width instead of 1024px, the resulting story will
+      not represent "the approved W4 narrow layout" the issue actually describes, and TKX6
+      (#275), which composes this component into the real Work Explorer page at W4's real width,
+      would then need rework to reconcile a mismatched breakpoint.
+    remediation: >
+      Correct C-005 to either (a) fix the narrow/wrapping story's viewport at 1024px, citing the
+      issue's Evidence section as the source, since the issue already supplies the number and this
+      is not new scope invention, or (b) if 1024px is deliberately being left open pending a plan-
+      phase decision, say so explicitly and drop the false claim that the issue supplies no number
+      — state instead that the spec is choosing not to bind the plan to the issue's evidence figure,
+      and why.
+
+  - id: SPEC-GOV-002
+    lens: Mission-derived (one-WP/one-PR/Tier-C squad-cadence fidelity)
+    severity: 3
+    title: "C-009 cites 'the charter's Review Policy' for the Tier-C classification, but docs/architecture/elements-first-programme.md — the document that policy names as the tiering record — does not classify this mission at all"
+    evidence:
+      - artifact: "spec.md § C-009: \"Per the issue's stated 'Squad tier: C — pre-merge' and the charter's Review Policy, an adversarial review squad closes the PR with evidence posted on the PR before merge; no earlier point-cut (post-spec/post-plan/post-tasks) is required by this mission's declared tier.\""
+      - code: ".kittify/charter/charter.md, Review Policy section: \"Earlier point-cuts are tiered by mission risk and recorded in docs/architecture/elements-first-programme.md: mechanism-setting missions get the squad post-spec, post-plan and post-tasks; high-blast-radius missions post-tasks; routine missions rely on the merge gate alone.\""
+      - code: "docs/architecture/elements-first-programme.md — the Tier table (lines ~near 'Tier | Missions | Earlier point-cuts') lists only M1-M16 (the epic #66 programme); `grep -n \"269\\|270\\|Work Explorer\\|TKX\"` over the whole file returns zero matches"
+    claim: >
+      C-009 attributes the "no earlier point-cut required" conclusion to two sources jointly: the
+      issue's own tier line, and "the charter's Review Policy." The charter's Review Policy text is
+      explicit that tiering is *recorded in* `docs/architecture/elements-first-programme.md`, but
+      that document only classifies the sixteen M1-M16 missions of the epic #66 elements-first
+      migration programme — it never mentions epic #269, issue #270, "Work Explorer," or "TKX"
+      anywhere. This mission's "Tier C" designation therefore has exactly one actual source (the
+      issue's self-declared "Squad tier: C — pre-merge" line) rather than the two the spec implies.
+      That is not fatal — the issue is binding and sufficient on its own per this spec's own
+      framing — but citing "the charter's Review Policy" as a second, independent confirmation
+      overstates the traceability: a future reader who checks the tiering document expecting to
+      find this mission classified there, per the charter's own recording mechanism, will find
+      nothing, and may reasonably wonder whether the tier was ever actually reviewed against
+      programme-wide risk criteria or just asserted in the issue.
+    remediation: >
+      Reword C-009 to name the issue's "Squad tier: C — pre-merge" line as the sole binding source,
+      and note explicitly that `docs/architecture/elements-first-programme.md` does not classify
+      this mission (it covers only the epic #66 M1-M16 programme) — so the tier is asserted by the
+      issue author, not cross-verified against the charter's named tiering record. This keeps
+      DIRECTIVE_003 traceability honest without blocking the mission, since the issue alone is
+      sufficient binding authority per the spec's own "binding, quoted verbatim" framing of issue
+      #270.
+
+  - id: SPEC-GOV-003
+    lens: Mission-derived (one-WP/one-PR/Tier-C squad-cadence fidelity)
+    severity: 1
+    title: "C-009 does not clarify that the spec-phase adversarial review this file is part of is an optional, non-gating enrichment pass rather than a tier-mandated earlier point-cut"
+    evidence:
+      - artifact: "spec.md § C-009: \"no earlier point-cut (post-spec/post-plan/post-tasks) is required by this mission's declared tier.\""
+      - artifact: "This review itself: kitty-specs/work-explorer-segmented-choice-styles-01M20C9F/reviews/spec-gov.findings.yaml (this file) is a post-spec squad pass currently running against a mission C-009 says needs no post-spec squad."
+    claim: >
+      Read in isolation, C-009's "no earlier point-cut is required" sits next to the fact that a
+      post-spec squad review (this one) is actively running against the spec it describes. This is
+      not a real contradiction once the adversarial-squad skill's own framing is applied — earlier
+      point-cuts are "report-only" and "never gate a mission" per the charter and the skill
+      description, so an operator- or orchestrator-initiated spec-phase pass does not conflict with
+      a Tier-C mission needing none *by the charter's tiering mechanism*. But the spec does not say
+      this anywhere, leaving a reader of C-009 alone to reconcile the apparent tension unaided.
+    remediation: >
+      Add one clause to C-009 noting that a spec-phase (or plan/tasks-phase) adversarial pass may
+      still run as an optional, report-only enrichment at the mission owner's or operator's
+      discretion without contradicting the Tier-C "no earlier point-cut required" conclusion, since
+      the charter's tiering mechanism governs what is *mandatory*, not what is *permitted*.
+
+  - id: SPEC-GOV-004
+    lens: Terminology (styles-only per ADR-10)
+    severity: 3
+    title: "Terminology section's ADR-10 precedent list overclaims: the cited components' styles-only rationale (native structural semantics a shadow root would break) does not obviously extend to a segmented-choice button group, and sk-form-select is not even part of ADR-10's own documented class list"
+    evidence:
+      - artifact: "spec.md Terminology section: \"'Styles-only' means ... Verified against the repo's own precedent (`sk-form-select`, `sk-disclosure`, `sk-facts`, `sk-data-table`, `sk-empty-state`, `sk-skip-link`) rather than assumed — see FR-010 and the Constraints section.\""
+      - code: "docs/architecture/decisions/2026-09-02-10-distribution-and-canonical-markup.md:84-105 — the class-level ruling: \"A component whose entire value is the semantics of a native element it styles is styles-only by design ... #176 (`sk-facts`, `sk-disclosure`, `sk-data-table`, `sk-empty-state`, `sk-skip-link`) measured four reasons a wrapper element cannot exist here\" — the four reasons are: broken `<dl>`/`<table>`/`<li>` parent/child DOM chains, cross-shadow-root ID reference failure (`<label for>`, `<th id>`/`<td headers>`), a skip-link's document-scoped `href=\"#main\"`, and `<details>`'s UA-owned open/closed state"
+      - code: "docs/architecture/decisions/2026-09-02-10-distribution-and-canonical-markup.md — `grep -n \"form-select\"` returns zero matches; `sk-form-select` is not part of the #176-established five-component class list or otherwise addressed by ADR-10's text"
+    claim: >
+      ADR-10's actual "styles-only class" ruling is narrow: it applies to components whose native
+      element has structural semantics (list/table parent-child relationships, cross-root ID
+      lookups, a document-scoped skip-link href, or UA-owned disclosure state) that a shadow-DOM
+      wrapper would concretely break. None of those four reasons describes a segmented-choice
+      button group — plain `<button>` elements have no equivalent structural relationship that a
+      wrapper custom element with a `<slot>` would sever (buttons would stay in light DOM as
+      slotted content, exactly as `sk-nav-pill` already does for its own buttons). The spec's
+      Terminology section nonetheless presents six components, including `sk-form-select` (which
+      ADR-10's text never mentions at all), as verified precedent for the "styles-only" decision,
+      when the actual binding reason for this component is simpler and stronger: issue #270 itself
+      instructs "Do not register a custom element." Presenting an ADR-10 structural-semantics
+      argument that doesn't fit, alongside the correct issue-level instruction that does, risks a
+      future reader (or a later Wave-1 sibling mission, e.g. TKX2's "controlled native collection
+      styles") citing this spec as an extended precedent for stretching ADR-10's narrow class
+      ruling to cover components that merely prefer not to own behaviour, rather than components
+      that structurally cannot be wrapped.
+    remediation: >
+      In the Terminology section, separate the two distinct justifications: (1) issue #270's
+      explicit "Do not register a custom element" instruction is the actual binding source for
+      C-001, full stop; (2) if ADR-10 precedent is cited at all, note honestly that
+      segmented-choice does not fit the ADR-10 §"class" structural-semantics rationale the way
+      `sk-facts`/`sk-disclosure`/`sk-data-table`/`sk-empty-state`/`sk-skip-link` do, and drop
+      `sk-form-select` from the list unless a separate, documented rationale for its styles-only
+      status is cited (ADR-10's text does not currently supply one).
