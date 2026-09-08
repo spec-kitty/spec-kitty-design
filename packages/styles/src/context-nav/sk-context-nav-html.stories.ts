@@ -139,7 +139,7 @@ export const UnavailableParent: Story = {
 
 /** Long labels and annotations in the 240 CSS-pixel composition. */
 export const UnavailableLong: Story = {
-  parameters: { viewport: { defaultViewport: "mobile1" } },
+  parameters: { viewport: { defaultViewport: 'mobile1' } },
   render: () => storyFrame(SkContextNavUnavailableLongHTML, { narrow: true }),
 };
 
@@ -154,6 +154,6 @@ export const UnavailableRtl: Story = {
 };
 
 export const UnavailableLightMode: Story = {
-  parameters: { backgrounds: { default: "sk-light" } },
+  parameters: { backgrounds: { default: 'sk-light' } },
   render: () => storyFrame(SkContextNavUnavailableMixedHTML, { light: true }),
 };

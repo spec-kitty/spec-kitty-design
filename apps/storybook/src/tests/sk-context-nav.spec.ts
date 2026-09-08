@@ -280,10 +280,10 @@ test.describe('sk-context-nav source, markup, and distribution contract', () => 
     const unavailableDeclarations = new Map<string, string>();
     postcss.parse(source, { from: CONTEXT_NAV_CSS }).walkRules((rule) => {
       const selectors = selectorStrings(rule.selector).filter((selector) =>
-        selector.includes(".sk-context-nav__unavailable"),
+        selector.includes('.sk-context-nav__unavailable'),
       );
       unavailableSelectors.push(...selectors);
-      if (selectors.includes(".sk-context-nav__unavailable")) {
+      if (selectors.includes('.sk-context-nav__unavailable')) {
         rule.walkDecls((declaration) =>
           unavailableDeclarations.set(declaration.prop, declaration.value),
         );
@@ -295,13 +295,13 @@ test.describe('sk-context-nav source, markup, and distribution contract', () => 
         (selector) => !/:hover|:active|:focus|:link|:visited/.test(selector),
       ),
     ).toBe(true);
-    expect(unavailableDeclarations.get("display")).toBe("flex");
-    expect(unavailableDeclarations.get("border-inline-start-style")).toBe(
-      "dashed",
+    expect(unavailableDeclarations.get('display')).toBe('flex');
+    expect(unavailableDeclarations.get('border-inline-start-style')).toBe(
+      'dashed',
     );
-    expect(unavailableDeclarations.get("cursor")).not.toBe("pointer");
-    expect(unavailableDeclarations.has("pointer-events")).toBe(false);
-    expect(unavailableDeclarations.has("content")).toBe(false);
+    expect(unavailableDeclarations.get('cursor')).not.toBe('pointer');
+    expect(unavailableDeclarations.has('pointer-events')).toBe(false);
+    expect(unavailableDeclarations.has('content')).toBe(false);
 
     const ordinaryLinkDeclarations = new Map<string, string>();
     postcss.parse(source, { from: CONTEXT_NAV_CSS }).walkRules('.sk-context-nav__link', (rule) => {
@@ -360,13 +360,13 @@ test.describe('sk-context-nav source, markup, and distribution contract', () => 
     expect(combined).not.toMatch(/aria-expanded|aria-selected|role="(?:tree|treeitem|menu|menuitem)"/);
   });
 
-  test("unavailable fixtures use static native content and never fabricate annotation, current state, or children", () => {
+  test('unavailable fixtures use static native content and never fabricate annotation, current state, or children', () => {
     const fixtures = readGeneratedFixtures();
     const unavailableFixtures = fixtures.filter(({ name }) =>
-      name.includes("Unavailable"),
+      name.includes('Unavailable'),
     );
     expect(unavailableFixtures).toHaveLength(4);
-    const combined = unavailableFixtures.map(({ html }) => html).join("\n");
+    const combined = unavailableFixtures.map(({ html }) => html).join('\n');
     expect(combined).toMatch(
       /<span class="sk-context-nav__unavailable" aria-disabled="true">/,
     );
@@ -384,13 +384,13 @@ test.describe('sk-context-nav source, markup, and distribution contract', () => 
     );
 
     const allUnavailable = unavailableFixtures.find(
-      ({ name }) => name === "SkContextNavUnavailableAllHTML",
+      ({ name }) => name === 'SkContextNavUnavailableAllHTML',
     )?.html;
     expect(allUnavailable).toBeTruthy();
     expect(allUnavailable).not.toMatch(/<a\b|aria-current/);
 
     const parent = unavailableFixtures.find(
-      ({ name }) => name === "SkContextNavUnavailableParentHTML",
+      ({ name }) => name === 'SkContextNavUnavailableParentHTML',
     )?.html;
     expect(parent).toBeTruthy();
     expect(parent).toMatch(
@@ -398,22 +398,22 @@ test.describe('sk-context-nav source, markup, and distribution contract', () => 
     );
   });
 
-  test("the surface remains absent from custom elements, wrappers, behavior, and mutation registries", () => {
-    expect(existsSync("packages/elements/src/context-nav")).toBe(false);
+  test('the surface remains absent from custom elements, wrappers, behavior, and mutation registries', () => {
+    expect(existsSync('packages/elements/src/context-nav')).toBe(false);
     const forbiddenTreeFiles = execFileSync(
-      "git",
-      ["ls-files", "packages/elements/src", "packages/react/src"],
+      'git',
+      ['ls-files', 'packages/elements/src', 'packages/react/src'],
       {
-        encoding: "utf8",
+        encoding: 'utf8',
       },
     )
       .trim()
-      .split("\n")
+      .split('\n')
       .filter(Boolean);
     expect(
       forbiddenTreeFiles.some((path) => /context-nav|skcontextnav/i.test(path)),
     ).toBe(false);
-    expectTrackedFilesNotToContain("sk-context-nav|SkContextNav", [
+    expectTrackedFilesNotToContain('sk-context-nav|SkContextNav', [
       ...forbiddenTreeFiles,
       'packages/elements/custom-elements.json',
       'packages/elements/vue.d.ts',
@@ -491,66 +491,66 @@ test.describe('sk-context-nav live native semantics', () => {
     }
   });
 
-  test("mixed unavailable content preserves native order, disabled state, real-link current state, and tab order", async ({
+  test('mixed unavailable content preserves native order, disabled state, real-link current state, and tab order', async ({
     page,
   }) => {
-    const { nav } = await openStory(page, "unavailable-mixed");
-    const unavailable = nav.locator(".sk-context-nav__unavailable");
+    const { nav } = await openStory(page, 'unavailable-mixed');
+    const unavailable = nav.locator('.sk-context-nav__unavailable');
     await expect(unavailable).toHaveCount(2);
     for (const row of await unavailable.all()) {
-      expect(await row.evaluate((node) => node.tagName)).toBe("SPAN");
-      await expect(row).toHaveAttribute("aria-disabled", "true");
-      await expect(row).not.toHaveAttribute("href", /.+/);
-      await expect(row).not.toHaveAttribute("role", /.+/);
-      await expect(row).not.toHaveAttribute("tabindex", /.+/);
+      expect(await row.evaluate((node) => node.tagName)).toBe('SPAN');
+      await expect(row).toHaveAttribute('aria-disabled', 'true');
+      await expect(row).not.toHaveAttribute('href', /.+/);
+      await expect(row).not.toHaveAttribute('role', /.+/);
+      await expect(row).not.toHaveAttribute('tabindex', /.+/);
       expect(
         await row.evaluate((node) => ({
-          onclick: node.getAttribute("onclick"),
-          onkeydown: node.getAttribute("onkeydown"),
+          onclick: node.getAttribute('onclick'),
+          onkeydown: node.getAttribute('onkeydown'),
         })),
       ).toEqual({ onclick: null, onkeydown: null });
     }
-    await expect(nav.getByRole("button")).toHaveCount(0);
-    await expect(unavailable.getByRole("link")).toHaveCount(0);
-    await expect(nav.locator("[aria-current]")).toHaveCount(1);
+    await expect(nav.getByRole('button')).toHaveCount(0);
+    await expect(unavailable.getByRole('link')).toHaveCount(0);
+    await expect(nav.locator('[aria-current]')).toHaveCount(1);
     await expect(
       nav.locator('a.sk-context-nav__link[href][aria-current="page"]'),
     ).toHaveCount(1);
-    await expect(nav.locator(":not(a)[aria-current]")).toHaveCount(0);
+    await expect(nav.locator(':not(a)[aria-current]')).toHaveCount(0);
     await expect(
-      nav.locator(".sk-context-nav__children > .sk-context-nav__item"),
+      nav.locator('.sk-context-nav__children > .sk-context-nav__item'),
     ).toHaveCount(2);
 
     const hrefs = await nav
-      .locator("a[href]")
-      .evaluateAll((nodes) => nodes.map((node) => node.getAttribute("href")));
+      .locator('a[href]')
+      .evaluateAll((nodes) => nodes.map((node) => node.getAttribute('href')));
     const focused: Array<string | null> = [];
-    await page.locator("body").click({ position: { x: 1, y: 1 } });
+    await page.locator('body').click({ position: { x: 1, y: 1 } });
     for (let index = 0; index < hrefs.length; index += 1) {
-      await page.keyboard.press("Tab");
-      focused.push(await page.locator(":focus").getAttribute("href"));
+      await page.keyboard.press('Tab');
+      focused.push(await page.locator(':focus').getAttribute('href'));
     }
     expect(focused).toEqual(hrefs);
   });
 
-  test("Chromium accessibility tree exposes the unavailable state and visible annotation without an action role", async ({
+  test('Chromium accessibility tree exposes the unavailable state and visible annotation without an action role', async ({
     page,
     browserName,
   }) => {
     test.skip(
-      browserName !== "chromium",
-      "Chromium CDP supplies the inspectable platform accessibility tree",
+      browserName !== 'chromium',
+      'Chromium CDP supplies the inspectable platform accessibility tree',
     );
-    await openStory(page, "unavailable-mixed");
+    await openStory(page, 'unavailable-mixed');
     const session = await page.context().newCDPSession(page);
-    await session.send("DOM.enable");
-    await session.send("Accessibility.enable");
-    const { root } = await session.send("DOM.getDocument");
-    const { nodeId } = await session.send("DOM.querySelector", {
+    await session.send('DOM.enable');
+    await session.send('Accessibility.enable');
+    const { root } = await session.send('DOM.getDocument');
+    const { nodeId } = await session.send('DOM.querySelector', {
       nodeId: root.nodeId,
-      selector: ".sk-context-nav__unavailable",
+      selector: '.sk-context-nav__unavailable',
     });
-    const { nodes } = await session.send("Accessibility.getPartialAXTree", {
+    const { nodes } = await session.send('Accessibility.getPartialAXTree', {
       nodeId,
       fetchRelatives: true,
     });
@@ -558,74 +558,74 @@ test.describe('sk-context-nav live native semantics', () => {
       nodes.some((node) =>
         node.properties?.some(
           (property) =>
-            property.name === "disabled" && property.value?.value === true,
+            property.name === 'disabled' && property.value?.value === true,
         ),
       ),
     ).toBe(true);
-    expect(nodes.some((node) => node.name?.value === "Reports")).toBe(true);
-    expect(nodes.some((node) => node.name?.value === "Unavailable")).toBe(true);
+    expect(nodes.some((node) => node.name?.value === 'Reports')).toBe(true);
+    expect(nodes.some((node) => node.name?.value === 'Unavailable')).toBe(true);
     expect(
       nodes.some((node) =>
-        ["link", "button"].includes(String(node.role?.value)),
+        ['link', 'button'].includes(String(node.role?.value)),
       ),
     ).toBe(false);
   });
 
-  test("all-unavailable and unavailable-parent routes expose no invented current item or child list", async ({
+  test('all-unavailable and unavailable-parent routes expose no invented current item or child list', async ({
     page,
   }) => {
-    const allUnavailable = (await openStory(page, "unavailable-all")).nav;
+    const allUnavailable = (await openStory(page, 'unavailable-all')).nav;
     await expect(
-      allUnavailable.locator(".sk-context-nav__unavailable"),
+      allUnavailable.locator('.sk-context-nav__unavailable'),
     ).toHaveCount(3);
     await expect(
-      allUnavailable.locator("a, button, [aria-current], [tabindex]"),
+      allUnavailable.locator('a, button, [aria-current], [tabindex]'),
     ).toHaveCount(0);
 
-    const parent = (await openStory(page, "unavailable-parent")).nav;
+    const parent = (await openStory(page, 'unavailable-parent')).nav;
     const unavailableParent = parent.locator(
-      ".sk-context-nav__item:has(> .sk-context-nav__unavailable)",
+      '.sk-context-nav__item:has(> .sk-context-nav__unavailable)',
     );
     await expect(
-      unavailableParent.locator(":scope > .sk-context-nav__unavailable"),
+      unavailableParent.locator(':scope > .sk-context-nav__unavailable'),
     ).toHaveCount(1);
     await expect(
-      unavailableParent.locator(".sk-context-nav__children"),
+      unavailableParent.locator('.sk-context-nav__children'),
     ).toHaveCount(0);
     const availableParent = parent.locator(
-      ".sk-context-nav__item:has(> a.sk-context-nav__link):has(> .sk-context-nav__children)",
+      '.sk-context-nav__item:has(> a.sk-context-nav__link):has(> .sk-context-nav__children)',
     );
     await expect(
-      availableParent.locator(":scope > a.sk-context-nav__link[href]"),
+      availableParent.locator(':scope > a.sk-context-nav__link[href]'),
     ).toHaveCount(1);
     await expect(
       availableParent.locator(
-        ":scope > .sk-context-nav__children > .sk-context-nav__item",
+        ':scope > .sk-context-nav__children > .sk-context-nav__item',
       ),
     ).toHaveCount(2);
   });
 
-  test("annotation-free route stays explicit without generated fallback copy", async ({
+  test('annotation-free route stays explicit without generated fallback copy', async ({
     page,
   }) => {
-    const { nav } = await openStory(page, "unavailable-annotation-free");
-    const unavailable = nav.locator(".sk-context-nav__unavailable");
+    const { nav } = await openStory(page, 'unavailable-annotation-free');
+    const unavailable = nav.locator('.sk-context-nav__unavailable');
     expect(await unavailable.count()).toBeGreaterThan(0);
     await expect(
-      unavailable.locator(".sk-context-nav__annotation"),
+      unavailable.locator('.sk-context-nav__annotation'),
     ).toHaveCount(0);
     for (const row of await unavailable.all()) {
-      await expect(row).toHaveAttribute("aria-disabled", "true");
-      await expect(row.locator(".sk-context-nav__label")).not.toHaveText("");
+      await expect(row).toHaveAttribute('aria-disabled', 'true');
+      await expect(row.locator('.sk-context-nav__label')).not.toHaveText('');
     }
   });
 
-  test("Default exposes named groups, native list nesting/order, link names, and a hidden decorative icon", async ({
+  test('Default exposes named groups, native list nesting/order, link names, and a hidden decorative icon', async ({
     page,
   }) => {
-    const { nav } = await openStory(page, "default");
-    const group = nav.locator(".sk-context-nav__group").first();
-    const headingId = await group.getAttribute("aria-labelledby");
+    const { nav } = await openStory(page, 'default');
+    const group = nav.locator('.sk-context-nav__group').first();
+    const headingId = await group.getAttribute('aria-labelledby');
     expect(headingId).toBeTruthy();
     const heading = group.locator(`#${headingId}`);
     await expect(heading).toHaveCount(1);
@@ -806,20 +806,20 @@ test.describe('sk-context-nav state and resilience contract', () => {
     expect(new Set([restCue, hoverCue, activeCue, focusCue, currentCue].map(nonColourCue))).toHaveProperty('size', 5);
   });
 
-  test("unavailable content is non-colour distinct and gains no hover, active, pointer, focus, or activation affordance", async ({
+  test('unavailable content is non-colour distinct and gains no hover, active, pointer, focus, or activation affordance', async ({
     page,
   }) => {
-    const { nav } = await openStory(page, "unavailable-mixed");
-    const unavailable = nav.locator(".sk-context-nav__unavailable").first();
-    const link = nav.locator(".sk-context-nav__link").first();
+    const { nav } = await openStory(page, 'unavailable-mixed');
+    const unavailable = nav.locator('.sk-context-nav__unavailable').first();
+    const link = nav.locator('.sk-context-nav__link').first();
     const restCue = await linkCue(unavailable);
     const linkRestCue = await linkCue(link);
-    expect(restCue.borderInlineStartStyle).toBe("dashed");
+    expect(restCue.borderInlineStartStyle).toBe('dashed');
     expect(restCue.borderInlineStartStyle).not.toBe(
       linkRestCue.borderInlineStartStyle,
     );
-    expect(restCue.cursor).not.toBe("pointer");
-    await expect(unavailable.locator(".sk-context-nav__annotation")).toHaveText(
+    expect(restCue.cursor).not.toBe('pointer');
+    await expect(unavailable.locator('.sk-context-nav__annotation')).toHaveText(
       /unavailable/i,
     );
 
@@ -829,7 +829,7 @@ test.describe('sk-context-nav state and resilience contract', () => {
     expect(box).not.toBeNull();
     await page.mouse.move(box!.x + box!.width / 2, box!.y + box!.height / 2);
     await page.mouse.down();
-    expect(await unavailable.evaluate((node) => node.matches(":active"))).toBe(
+    expect(await unavailable.evaluate((node) => node.matches(':active'))).toBe(
       true,
     );
     expect(await linkCue(unavailable)).toEqual(restCue);
@@ -843,10 +843,10 @@ test.describe('sk-context-nav state and resilience contract', () => {
     expect(await linkCue(unavailable)).toEqual(restCue);
   });
 
-  test("current rest, hover, and trusted mouse-down have distinct non-colour cues", async ({
+  test('current rest, hover, and trusted mouse-down have distinct non-colour cues', async ({
     page,
   }) => {
-    const { nav } = await openStory(page, "current-top-level");
+    const { nav } = await openStory(page, 'current-top-level');
     const current = nav.locator(
       '.sk-context-nav__link[aria-current]:not([aria-current="false"])',
     );
@@ -949,14 +949,14 @@ test.describe('sk-context-nav state and resilience contract', () => {
     }
   });
 
-  test("unavailable labels and annotations remain complete at 240px and a 390px viewport in LTR and RTL", async ({
+  test('unavailable labels and annotations remain complete at 240px and a 390px viewport in LTR and RTL', async ({
     page,
   }) => {
     await page.setViewportSize({ width: 390, height: 900 });
-    for (const id of ["unavailable-long", "unavailable-rtl"] as const) {
+    for (const id of ['unavailable-long', 'unavailable-rtl'] as const) {
       const { nav } = await openStory(page, id);
       const frame = nav.locator(
-        "xpath=ancestor::*[@data-context-nav-story-frame]",
+        'xpath=ancestor::*[@data-context-nav-story-frame]',
       );
       const frameBox = await frame.boundingBox();
       expect(frameBox).not.toBeNull();
@@ -974,13 +974,13 @@ test.describe('sk-context-nav state and resilience contract', () => {
       );
       for (const content of await nav
         .locator(
-          ".sk-context-nav__unavailable .sk-context-nav__label, .sk-context-nav__annotation",
+          '.sk-context-nav__unavailable .sk-context-nav__label, .sk-context-nav__annotation',
         )
         .all()) {
         const text = (await content.innerText()).trim();
-        expect(text).not.toBe("");
+        expect(text).not.toBe('');
         const facts = await content.evaluate((node) => {
-          const row = node.closest(".sk-context-nav__unavailable")!;
+          const row = node.closest('.sk-context-nav__unavailable')!;
           return {
             contentHorizontalClip: node.scrollWidth > node.clientWidth + 1,
             contentVerticalClip: node.scrollHeight > node.clientHeight + 1,
@@ -989,33 +989,33 @@ test.describe('sk-context-nav state and resilience contract', () => {
             rowVerticalClip: row.scrollHeight > row.clientHeight + 1,
           };
         });
-        expect(facts.overflowWrap).toBe("anywhere");
+        expect(facts.overflowWrap).toBe('anywhere');
         expect(facts.contentHorizontalClip).toBe(false);
         expect(facts.contentVerticalClip).toBe(false);
         expect(facts.rowHorizontalClip).toBe(false);
         expect(facts.rowVerticalClip).toBe(false);
       }
-      if (id === "unavailable-rtl")
+      if (id === 'unavailable-rtl')
         expect(
           await nav.evaluate((node) => getComputedStyle(node).direction),
-        ).toBe("rtl");
+        ).toBe('rtl');
     }
   });
 
-  test("forced colours preserve focus, current, and nested hierarchy cues", async ({
+  test('forced colours preserve focus, current, and nested hierarchy cues', async ({
     page,
     browserName,
   }) => {
     test.skip(
-      browserName !== "chromium",
-      "Playwright forced-colours emulation is Chromium-only",
+      browserName !== 'chromium',
+      'Playwright forced-colours emulation is Chromium-only',
     );
-    await page.emulateMedia({ forcedColors: "active" });
-    const { nav } = await openStory(page, "forced-colors");
+    await page.emulateMedia({ forcedColors: 'active' });
+    const { nav } = await openStory(page, 'forced-colors');
     const current = nav.locator(
       '.sk-context-nav__link[aria-current]:not([aria-current="false"])',
     );
-    const children = nav.locator(".sk-context-nav__children").first();
+    const children = nav.locator('.sk-context-nav__children').first();
     const currentCue = await linkCue(current);
     expect(currentCue.borderInlineStartStyle).not.toBe('none');
     expect(Number.parseFloat(currentCue.borderInlineStartWidth)).toBeGreaterThan(0);
@@ -1035,49 +1035,49 @@ test.describe('sk-context-nav state and resilience contract', () => {
     expect(focusCue.outlineColor).not.toBe(focusCue.backgroundColor);
   });
 
-  test("forced colours preserve a visibly static unavailable cue", async ({
+  test('forced colours preserve a visibly static unavailable cue', async ({
     page,
     browserName,
   }) => {
     test.skip(
-      browserName !== "chromium",
-      "Playwright forced-colours emulation is Chromium-only",
+      browserName !== 'chromium',
+      'Playwright forced-colours emulation is Chromium-only',
     );
-    await page.emulateMedia({ forcedColors: "active" });
-    const { nav } = await openStory(page, "unavailable-forced-colors");
-    const unavailable = nav.locator(".sk-context-nav__unavailable").first();
+    await page.emulateMedia({ forcedColors: 'active' });
+    const { nav } = await openStory(page, 'unavailable-forced-colors');
+    const unavailable = nav.locator('.sk-context-nav__unavailable').first();
     const cue = await linkCue(unavailable);
-    expect(cue.borderInlineStartStyle).toBe("dashed");
+    expect(cue.borderInlineStartStyle).toBe('dashed');
     expect(Number.parseFloat(cue.borderInlineStartWidth)).toBeGreaterThan(0);
     expect(cue.borderInlineStartColor).not.toBe(cue.backgroundColor);
-    expect(cue.cursor).not.toBe("pointer");
+    expect(cue.cursor).not.toBe('pointer');
   });
 
-  test("the component owns no motion under reduced-motion emulation", async ({
+  test('the component owns no motion under reduced-motion emulation', async ({
     page,
   }) => {
-    await page.emulateMedia({ reducedMotion: "reduce" });
-    const { nav } = await openStory(page, "default");
-    for (const link of await nav.locator(".sk-context-nav__link").all()) {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    const { nav } = await openStory(page, 'default');
+    for (const link of await nav.locator('.sk-context-nav__link').all()) {
       expect(
         await link.evaluate(
           (node) => getComputedStyle(node).transitionDuration,
         ),
-      ).toBe("0s");
+      ).toBe('0s');
       expect(
         await link.evaluate((node) => getComputedStyle(node).animationName),
-      ).toBe("none");
+      ).toBe('none');
     }
-    const unavailableNav = (await openStory(page, "unavailable-mixed")).nav;
+    const unavailableNav = (await openStory(page, 'unavailable-mixed')).nav;
     for (const row of await unavailableNav
-      .locator(".sk-context-nav__unavailable")
+      .locator('.sk-context-nav__unavailable')
       .all()) {
       expect(
         await row.evaluate((node) => getComputedStyle(node).transitionDuration),
-      ).toBe("0s");
+      ).toBe('0s');
       expect(
         await row.evaluate((node) => getComputedStyle(node).animationName),
-      ).toBe("none");
+      ).toBe('none');
     }
   });
 
@@ -1100,14 +1100,14 @@ test.describe('sk-context-nav state and resilience contract', () => {
     expect(light.linkBackground).toBe('rgba(0, 0, 0, 0)');
     expect(dark.linkBackground).toBe('rgba(0, 0, 0, 0)');
 
-    const darkUnavailable = (await openStory(page, "unavailable-mixed")).nav
-      .locator(".sk-context-nav__unavailable")
+    const darkUnavailable = (await openStory(page, 'unavailable-mixed')).nav
+      .locator('.sk-context-nav__unavailable')
       .first();
     const darkUnavailableColor = await darkUnavailable.evaluate(
       (node) => getComputedStyle(node).color,
     );
     const lightUnavailableNav = (
-      await openStory(page, "unavailable-light-mode")
+      await openStory(page, 'unavailable-light-mode')
     ).nav;
     expect(
       await lightUnavailableNav
@@ -1117,7 +1117,7 @@ test.describe('sk-context-nav state and resilience contract', () => {
         .count(),
     ).toBeGreaterThan(0);
     const lightUnavailableColor = await lightUnavailableNav
-      .locator(".sk-context-nav__unavailable")
+      .locator('.sk-context-nav__unavailable')
       .first()
       .evaluate((node) => getComputedStyle(node).color);
     expect(lightUnavailableColor).not.toBe(darkUnavailableColor);

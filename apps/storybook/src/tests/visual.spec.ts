@@ -709,16 +709,16 @@ test('SK-context-nav forced colors — visual baseline', async ({ page }) => {
   });
 });
 
-test("SK-context-nav unavailable forced colors — visual baseline", async ({
+test('SK-context-nav unavailable forced colors — visual baseline', async ({
   page,
 }) => {
-  await page.emulateMedia({ forcedColors: "active" });
-  const target = await contextNavStory(page, "unavailable-forced-colors", {
+  await page.emulateMedia({ forcedColors: 'active' });
+  const target = await contextNavStory(page, 'unavailable-forced-colors', {
     width: 390,
     height: 720,
   });
   await expect(target).toHaveScreenshot(
-    "sk-context-nav-unavailable-forced-colors.png",
+    'sk-context-nav-unavailable-forced-colors.png',
     {
       threshold: 0.02,
       maxDiffPixelRatio: 0.02,
