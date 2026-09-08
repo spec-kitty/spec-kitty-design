@@ -122,7 +122,7 @@ the rule, or the next component will re-derive the wrong reason for the right-lo
   recommended exactly that shorthand-to-dodge-the-policed-list trick. **Use the LONGHAND
   `-color` properties instead** (`border-left-color`, `outline-color`), and add the specific
   system-color keywords you use (this repo's set so far: `Canvas`, `CanvasText`, `Highlight`,
-  `HighlightText`, `ButtonText`, `LinkText`) to `stylelint.config.mjs`'s `ignoreValues` — a single,
+  `HighlightText`, `ButtonText`, `LinkText`, `GrayText`) to `stylelint.config.mjs`'s `ignoreValues` — a single,
   additive, reviewable list the gate then positively certifies against, rather than a property
   family it never inspects. `packages/styles/src/skip-link/sk-skip-link.css` and
   `packages/styles/src/data-table/sk-data-table.css` both use this pattern — copy it rather than
