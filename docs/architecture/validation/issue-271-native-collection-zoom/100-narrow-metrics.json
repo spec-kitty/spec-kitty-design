@@ -1,0 +1,147 @@
+{
+  "reviewedHead": "08d421c81acfff108358711325d9373a7fd36a46",
+  "browserVersion": "151.0.7922.34",
+  "executablePath": "/home/jeroennouws/.cache/ms-playwright/chromium-1234/chrome-linux64/chrome",
+  "os": "Fedora Linux 44; Linux 7.1.5-201.fc44.x86_64 x86_64 GNU/Linux",
+  "display": ":101 1200x800x24",
+  "outerWindowRequested": {
+    "width": 390,
+    "height": 720
+  },
+  "zoomMechanism": "X11 XTEST native Ctrl+0, then five Ctrl+Shift+= browser UI chords",
+  "label": "100-narrow",
+  "results": [
+    {
+      "story": "narrow",
+      "window": {
+        "innerWidth": 500,
+        "innerHeight": 577,
+        "outerWidth": 500,
+        "outerHeight": 720,
+        "devicePixelRatio": 1,
+        "visualViewportWidth": 500,
+        "visualViewportHeight": 577,
+        "visualViewportScale": 1
+      },
+      "document": {
+        "clientWidth": 500,
+        "clientHeight": 577,
+        "scrollWidth": 500,
+        "scrollHeight": 577
+      },
+      "collection": {
+        "rect": {
+          "left": 16,
+          "top": 72,
+          "right": 484,
+          "bottom": 505,
+          "width": 468,
+          "height": 433
+        },
+        "clientWidth": 466,
+        "scrollWidth": 466
+      },
+      "heading": {
+        "tag": "H3",
+        "text": "An extraordinarily long consumer-authored collection heading that remains readable without introducing page-level horizontal overflow",
+        "rect": {
+          "left": 33,
+          "top": 85,
+          "right": 244,
+          "bottom": 217,
+          "width": 211,
+          "height": 132
+        }
+      },
+      "count": {
+        "text": "A deliberately long consumer-supplied count label that the library neither derives nor abbreviates",
+        "rect": {
+          "left": 256,
+          "top": 113,
+          "right": 467,
+          "bottom": 189,
+          "width": 211,
+          "height": 76
+        }
+      },
+      "toggle": {
+        "ariaExpanded": "true",
+        "ariaControls": "collection-long-text-body",
+        "rect": {
+          "left": 302.046875,
+          "top": 225,
+          "right": 467,
+          "bottom": 260,
+          "width": 164.953125,
+          "height": 35
+        }
+      },
+      "body": {
+        "hidden": false,
+        "rect": {
+          "left": 17,
+          "top": 273,
+          "right": 483,
+          "bottom": 504,
+          "width": 466,
+          "height": 231
+        }
+      },
+      "list": {
+        "tag": "UL",
+        "itemCount": 2,
+        "rect": {
+          "left": 33,
+          "top": 285,
+          "right": 467,
+          "bottom": 428,
+          "width": 434,
+          "height": 143
+        }
+      },
+      "footer": {
+        "present": true,
+        "rect": {
+          "left": 33,
+          "top": 440,
+          "right": 467,
+          "bottom": 492,
+          "width": 434,
+          "height": 52
+        }
+      },
+      "overlaps": {
+        "headingCount": false,
+        "headingToggle": false,
+        "countToggle": false
+      },
+      "focus": {
+        "tag": "BUTTON",
+        "text": "▸\n      Collapse collection",
+        "outlineStyle": "solid",
+        "outlineWidth": 1,
+        "outlineOffset": 1,
+        "rect": {
+          "left": 302.046875,
+          "top": 225,
+          "right": 467,
+          "bottom": 260,
+          "width": 164.953125,
+          "height": 35
+        }
+      },
+      "checks": {
+        "nativeHeading": true,
+        "nativeList": true,
+        "noPageHorizontalOverflow": true,
+        "noCollectionHorizontalOverflow": true,
+        "noHeaderOverlap": true,
+        "visibleKeyboardFocus": true,
+        "focusNotClippedByViewport": true,
+        "collectionContainedByViewport": true
+      },
+      "passed": true
+    }
+  ],
+  "passed": true
+}
