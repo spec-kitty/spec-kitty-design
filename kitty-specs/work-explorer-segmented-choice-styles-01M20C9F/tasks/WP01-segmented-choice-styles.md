@@ -93,6 +93,7 @@ owned_files:
 - apps/storybook/src/tests/visual.spec.ts-snapshots/sk-segmented-choice-*.png
 - docs/design-system/using-components.md
 - expected-stories.json
+- suite-budget.json
 role: implementer
 tags:
 - styles-only
