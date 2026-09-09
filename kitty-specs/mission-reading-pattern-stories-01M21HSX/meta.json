@@ -1,5 +1,4 @@
 {
-  "accept_commit": "5bf570735fd80ed58de0cf2023956a4445edd4c4",
   "acceptance_history": [
     {
       "accept_commit": "4f662f1d9c7f2c742ab98dfc8211598821d7e89d",
@@ -27,12 +26,18 @@
       "accepted_at": "2026-09-09T08:45:31.593642+00:00",
       "accepted_by": "codex",
       "accepted_from_commit": "62bb4b4cd356e625b0003a535cd2f8a0d1157bfb"
+    },
+    {
+      "acceptance_mode": "pr",
+      "accepted_at": "2026-09-09T08:55:40.702718+00:00",
+      "accepted_by": "codex",
+      "accepted_from_commit": "57231f877efb78485f17ddb76bb9016ffdfad666"
     }
   ],
   "acceptance_mode": "pr",
-  "accepted_at": "2026-09-09T08:45:31.593642+00:00",
+  "accepted_at": "2026-09-09T08:55:40.702718+00:00",
   "accepted_by": "codex",
-  "accepted_from_commit": "62bb4b4cd356e625b0003a535cd2f8a0d1157bfb",
+  "accepted_from_commit": "57231f877efb78485f17ddb76bb9016ffdfad666",
   "created_at": "2026-09-08T22:21:48.138656+00:00",
   "flattened": false,
   "friendly_name": "mission reading pattern stories",
