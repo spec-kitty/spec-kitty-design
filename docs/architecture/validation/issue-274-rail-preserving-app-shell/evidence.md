@@ -12,8 +12,11 @@
 - The clean product-delivery branch was subsequently rebased and regenerated after #271 on exact
   train `a679d8374087e2d81198ce00398f4862c839f293`; no mission or Op metadata was transferred.
 - The immutable-head correction cycle was rebased and regenerated again after #272 on exact train
-  `c3cc2dedeb092a0b517e763847e6f1a498ed6323`. This is an intermediate delivery base: #273 must
-  still integrate before #274's mandatory final refresh and review.
+  `c3cc2dedeb092a0b517e763847e6f1a498ed6323`.
+- After #273 landed, the complete delivery was rebased and regenerated on exact train
+  `674ebe23bea974eb8bef2dbd64f4481e5f94d212` (tree
+  `c72f050bfad130fa1c486856201b782afcdb55d8`). The product-plus-generated tree exercised by the
+  final browser-UI zoom check is commit `56688d5956ad7ebc8d1f2eedb8b939225a7936de`.
 - The final handoff SHA is the commit containing this ledger and is therefore recorded by the
   Spec Kitty transition and Git history rather than circularly embedded here.
 - Delivery remains one WP and one future PR to `train/elements-first`. No push or PR is part of
@@ -81,8 +84,9 @@ declaration, story inventory, and size report changed. The React runtime wrapper
 declaration, markup barrels, part/docs ratchets, token catalogue, and unrelated generated files
 remained no-ops.
 
-After #270, #271 and #272 landed, the train-owned segmented-choice, collection and action-row
-stories plus WP01's 14 rail-preserving stories were reconciled to 383 unique ratcheted story IDs.
+After #270, #271, #272, #273, and the independently integrated checkbox-choice-group work landed,
+the train-owned stories plus WP01's 14 rail-preserving stories were reconciled to 405 unique
+ratcheted story IDs.
 `packages/elements/SIZES.md` was regenerated from that merged source rather than conflict-edited
 as final output.
 
@@ -140,36 +144,37 @@ leaves closing consumer-owned, and does not synthesize trigger focus.
 
 | Command or evidence | Result |
 |---|---|
-| `npm ci --ignore-scripts` | Pass; 1534 packages installed. The later audit gate found no high/critical vulnerability. |
+| `npm ci --ignore-scripts` | Pass; 1534 packages installed. The audit gate found no high/critical vulnerability. Final post-#273 install/security log SHA-256 `65440b4c7f7d6857ff98963978dfc6122a698808ffc24e01fb417b497635e976`. |
 | `bash scripts/npm-audit-gate.sh`; `npm run security:lockfile-check`; `bash scripts/check-action-pins.sh` | Pass. |
-| CSS, element-markup, styles-only-markup, React and Vue generation checks/selftests | Pass after source-derived regeneration. |
+| CSS, element-markup, styles-only-markup, CEM, React and Vue generation/checks/selftests | Pass after source-derived post-#273 regeneration. Build log SHA-256 `712dbb264a54a7be13ec7edc5f4f4293133d9620af03ac69f34e75d30cd6c098`; drift/build-check log SHA-256 `81d81e3c37f6df1c1de21b20070d07a4a6d28fbb45a87a4fcd6fcf9532aaaae6`. |
 | `npx nx run elements:analyze`; manifest content check/selftest | Pass; 28 registered elements, 116 documented public members. |
-| builds plus `node scripts/measure-elements-sizes.mjs --check` | Pass after each required rebuild. |
+| official Node 22.23.2 `scripts/measure-elements-sizes.mjs` generation/check | Pass after the rebuilt release graph; SIZES is current. |
 | entries, no-CSS-in-source, adopted-CSS boundary/selftest, CSS hygiene, part ratchet | Pass. |
-| behavior-import guard/selftest | Pass for 31 fixture files and 22 probe rows after deleting only Vitest's ignored failure screenshots. No visual baseline was removed. |
-| story-theme, pattern-composition, gate-wiring/defeat, ADR index and LLM ADR surface checks/selftests | Pass. |
-| `node scripts/typecheck-all.mjs` | Pass for all five projects. |
-| `npm run quality:all`; `npm run quality:commitlint` | Pass; existing security-plugin warnings remain non-failing and none comes from the changed app-shell surface. |
-| `npm test` after the final slot-reassignment correction | Pass, 542/542 across 45 files; suite floor node 34 plus browser Chromium 508, zero skipped. Log SHA-256 `335b34027a4923228df46a862329d6ec3c14a33475f3667b811a2866c7b2c0ba`. |
-| rebuilt app-shell Playwright, Chromium + Firefox | Pass, 90/90, including exact focus order and native pointer/Enter destination paths. Log SHA-256 `ec1b8fc5affcc19d574286e74d77671d9564909fc7967e211d2ef9f56433d4a4`. |
-| official Playwright 1.62.1 Noble container, focused WebKit | Pass, 45/45. Log SHA-256 `c5e0b6e9ff1c4dfbabce755e26eeefa2a4351986c87d876ddd8b3b90e4af0e3a`. |
-| `node scripts/suite-selftest.mjs` after the final slot-reassignment correction | Pass: green 508-assertion baseline, 128 registry pairs, 41-source impact graph, zero fallbacks, all 224 mutations produced the named RED in 746.7s under the 1649.8s ceiling. Log SHA-256 `4df8e1db0879bb68d77e4e4ea917ca3926fca747e1446e0b066ab752cefede6d`. |
-| typecheck-all, quality-all, behavior-import selftest/live | Pass after the final correction: all five typecheck projects, lint/stylelint/htmlhint, 22 guard probes, and 31 fixture files. Log SHA-256 `4c4d280c57e511f3ed89addba5f9c6ccdcadfbef2b50c4d45e51ef7fcfe2fa4b`. Fresh CEM/entry/no-CSS/exact-part checks also pass at 28 elements and 116 documented public members; log SHA-256 `0eb074e8ee1acf9dbb6f551c9d3766f525a1cdabde409fcaad06b7321c75bcd3`. |
-| generation/drift checks and official Node 22 size regeneration/check | Pass; CSS/markup/React/Vue outputs current, entries/CSS/parts/story/pattern/ADR surfaces current, and SIZES regenerated after the final runtime change by Node 22.23.2. Drift log SHA-256 `164792babb913541f06210591a91b8621d904beabca2b256a62610dd30a0bdb4e`; final size log SHA-256 `1a85d46e205849f47c8cc3ee8ed07b67164632831bb2d9cbfb77695a3cd5798f`. |
-| `node scripts/measure-suite-time.mjs` | Pass, 14.7s against the 40s ceiling. |
-| `node scripts/gate-selftest.mjs` | Pass, 50/50 shapes. Log SHA-256 `cacc8faff349f6c90e09c70e3bc1e68eb42dfa2be5be8a8601a5cc131078592e`. |
-| `node scripts/build-storybook-with-budget.mjs` | Pass in 9.74s against the 180s ceiling. Log SHA-256 `c2a8ed81daca75ee81582be649348722bb357c18753a8f023e6d06391efe0942`. |
-| `node scripts/run-axe-storybook.js` with mission-local `TMPDIR` | Pass: 457/457 rendered, zero WCAG 2.1 AA violations. Log SHA-256 `78c9759433f93f52e451e1daa70fe267a68e9f68a64c8f052153cf26dde81dea`. |
-| `bash scripts/assemble-demo-dist.sh apps/storybook/storybook-static`; mission-local `TMPDIR npx playwright test --project=chromium --project=firefox --workers=2` | Pass: two demo pages / 42 references assembled; 628 passed, 18 intentional skips, zero failures. Log SHA-256 `6770e69f0476f95f64a57a9ec570300e2bd93ef7c5fdec6de3199a9b1d07a74e`. |
-| release graph/selftest, packed Vue, offline-load/selftest | Pass; four packages pack and resolve, packed Vue compiles, 28/28 packed elements upgrade with zero off-machine requests. Log SHA-256 `0fc4f0c595f0814562e52502b90ddfbdb2510d06ab891aa8f1a13cb27ce8e997`. |
+| behavior-import guard/selftest | Pass for 31 fixture files and 22 probe rows. No visual baseline was removed. |
+| story-theme, pattern-composition, gate-wiring/defeat, ADR index and LLM ADR surface checks/selftests | Pass; content/hygiene log SHA-256 `cd817ad722485236327e5e68a4e8e5ba4f440f100deaaf298a9a4bf74375609f`. |
+| `node scripts/typecheck-all.mjs`; `npm run quality:all` | Pass for all five typecheck projects and all quality gates. Existing security-plugin warnings remain non-failing and none comes from the changed app-shell surface. Log SHA-256 `ac1a5563f54913471ac64553a146c3f55f9dcabfdc02a0572ca9828b88926bf5`. |
+| `npm test` on the post-#273 tree | Pass, 542/542 across 45 files; suite floor node 34 plus browser Chromium 508, zero skipped. Log SHA-256 `c94a8835cccbc51747b7156ac0029ae7c30b98c5a323b2f44cfc2761bf92ce32`. |
+| assembled full Playwright, Chromium + Firefox | Pass, 972 with 42 intentional skips and zero failures. The initial run's only RED was the inherited checkbox story-ratchet total moving 391→405; the governed one-line reconciliation then passed its focused check and this full rerun. Final log SHA-256 `637af9057c227b40d69be5bb7a72c48c26a8fcc4ee105afedae8a13ab4811652`; initial integration RED log SHA-256 `1895797bcae33d17aca2a2126d549ada6d7fcf1d67bc49d5929224200b119618`. |
+| official Playwright 1.62.1 Noble container, full and focused WebKit | Pass: full 465 with 42 intentional skips; focused app-shell 45/45. Full log SHA-256 `ee19ea9a72b17251f96400b58ef992689b3c785fcaac1ceeea4f6eac6b62f9ee`; focused log SHA-256 `30488309e2b3b09af435cf8dd01fc1f0636889f5b3eb7ac1fe979d0487df84e9`. |
+| `node scripts/suite-selftest.mjs`; `node scripts/suite-selftest.mjs --selftest` | Pass: green 508-assertion baseline, 128 registry pairs, 41-source impact graph, zero fallbacks, all 224 mutations produced the named RED in 802.9s under the 1649.8s ceiling; all 10 guard self-checks passed. Log SHA-256 `1cf8b79ea4f5147c11d6f20a7c8d6320935be71c7b660c897869938b724e700a`. |
+| `node scripts/measure-suite-time.mjs` | Pass, 12.8s against the 40s ceiling. |
+| `node scripts/gate-selftest.mjs`; `node scripts/build-storybook-with-budget.mjs` | Pass: 50/50 gate shapes and build in 9.57s against the 180s ceiling. |
+| `node scripts/check-expected-stories.mjs`; `node scripts/run-axe-storybook.js` | Pass: all 405 declared story IDs present; 514/514 rendered, zero WCAG 2.1 AA violations. Log SHA-256 `94ef33bc6d957f7eed93687e597ca70d2e97454358bfd04612387540d1745c06`. |
+| release graph/selftest, packed Vue, official size check, offline-load/selftest | Pass; 28/28 release probes tripped, four packages pack and resolve, packed Vue compiles, SIZES is current, and 28/28 packed elements upgrade with zero off-machine requests. Log SHA-256 `9c7579bf88b37a45ab90d562a979c35fd6d84ba3c8d220935b706e1fce575550`. |
+| headed Chrome browser-UI zoom at the fixed 390 CSS-pixel story | Pass at real 100% and 200% browser zoom. Chrome for Testing 151.0.7922.34 received PID-targeted XTEST `Ctrl+0`, then five `Ctrl+Shift+=` chords for 200%; DPR changed exactly 1.203125→2.40625 while `visualViewport.scale` remained 1. Both phases measured shell 390px, rail 56px, hidden 0px context, content at x=56, Menu 70.87×44px, Work→Menu Tab order, visible/unclipped focus, and document scrollWidth=clientWidth. Metrics log SHA-256 `9ad64ece8ddaaf2b99320b84fd7497190c13d68143df261e0bf7ab45c3d6d4f8`; the 100% browser-UI screenshot remains reviewer transport at `/var/tmp/issue-274-post273/zoom-evidence/chrome-100-percent-browser-ui.png`, SHA-256 `3b7c403556e3a73d930a8c4fa855fc54855cdc204301944f5521972a6dc24e13`. The visually inspected 1204×1204 200% screenshot is tracked as `chromium-200-percent.png`, SHA-256 `054a07eb4f1c391152362e34752950d02b29746207c8f72223f88250ae05f0a3`. |
 
 ## Honest pending and environment evidence
 
 The pre-CI visual command added four genuinely new rail-preserving screenshot expectations:
-1024 dark, 1024 light, 390 dark, and forced colors. The local run failed only because those four
-baselines do not exist. Playwright wrote missing images as a side effect; they were deleted and
-were never committed. T018 remains responsible for inspecting the CI-produced Linux artifact and
-committing only approved #274 images. No legacy or compact baseline changed.
+1024 dark, 1024 light, 390 dark, and forced colors. Those four baselines still do not exist because
+this final-refresh task explicitly excludes opening/pushing a PR. The post-#273 host Chromium visual
+run was also non-diagnostic because broad inherited screenshots use different local font metrics
+(for example, the stable stub expected 336×34 but rendered 312×38). It was stopped rather than
+adopting workstation output; its four generated #274 actuals were moved outside the repository to
+`/var/tmp/issue-274-post273/local-visual-untracked/`. T018 remains responsible for inspecting the
+future CI-produced Linux artifact and committing only approved #274 images. No legacy or compact
+baseline changed. The stopped local log has SHA-256
+`f27d4e63d1b9e023e899af29e2e88020c848f4204c0da518e17bcccc1b68cbf5`.
 
 The first correction-cycle mutation sweep froze a green 498-assertion baseline and an impact graph
 of 41 sources with zero full-suite fallbacks, but finished 222/223 after an unrelated bar-chart
@@ -188,15 +193,13 @@ command, result and log digest are recorded in PR evidence because they cannot b
 embedded in the commit under test.
 
 The old host three-browser run failed because host WebKit libraries are absent; that environment
-gap is now closed by the repository-matched official Playwright container result above. The last
-pre-review assembled aggregate Chromium/Firefox run remains green at 812 passed and 36 intentional
-skips. A post-review attempt scheduled 862 cases through the isolated server but is invalid: one
-inherited Team Overview test hard-codes `localhost:6006`, retried twice against the deliberately
-unused foreign port, and the runner then ended without a summary at case 576. It is preserved as
-non-green/non-gate evidence with SHA-256
-`0831d0ceb5e51ac0e2f107c67189e3cc4fa99b39d5ea04f278664cd0ad813f16`; it does not displace the
-exact post-review focused 90/90 Chromium/Firefox and 45/45 WebKit results. The mandatory
-post-#273 refresh will rerun the full aggregate on its canonical isolated server.
+gap is now closed by the repository-matched official Playwright container result above. The first
+post-#273 ad-hoc full WebKit container transport used a read-only checkout and a noncanonical host
+port: 463 passed and 42 skipped, while the inherited Team Overview hard-coded `localhost:6006`
+and smoke fixture could not write `_token-cdn-test.html`. That invalid environment-only run remains
+recorded at SHA-256 `4ffb8b39fd64126bc679cb62ec109532f598abcc2d590c06b4f9c41968285d63`.
+The corrected isolated writable container then passed the complete full and focused WebKit lanes;
+no unrelated test was edited for the ad-hoc transport.
 
 The host `/tmp` was concurrently at 13 GiB of 16 GiB. Initial mutation, axe, and Playwright
 attempts therefore produced import timeouts, `ERR_INSUFFICIENT_RESOURCES`, and Chromium
@@ -210,7 +213,9 @@ not classify viewport units as structural. The final correction changes no CSS, 
 while 1100 is the binding container-query contract coordinate. This diagnostic is not represented
 as a passing gate or used to widen the correction into unrelated gate policy.
 
-T017 fresh exact-head Codex review, T018 PR/CI convergence, and T019 final-head reviewer-owned real
-Chrome browser-UI 200% evidence remain pending until #273 integrates and this branch is rebased and
-regenerated on the new train. No CSS zoom, browser viewport resize, Playwright device scale factor,
-or local screenshot is claimed as real browser-UI zoom in this intermediate correction head.
+T019 is complete on post-#273 product commit `56688d5956ad7ebc8d1f2eedb8b939225a7936de`
+using actual headed Chrome UI keystrokes, not CSS zoom, device scale factor, or a resized viewport
+substitute. The first attempted X11/ffmpeg capture was all black and is excluded; only the later
+Spectacle active-window images above are cited. T017 fresh independent exact-head Codex review and
+T018 future PR/CI baseline convergence remain pending and are intentionally not claimed by this
+implementer.
