@@ -41,39 +41,48 @@ The story named `forced-colors` is present in the real-zoom matrix, but Chrome w
 simulated forced-colors mode for these desktop captures. The dedicated Playwright and visual tests
 exercise forced colors independently; this record isolates genuine browser zoom.
 
-## Review-cycle 1 visual-baseline authority check
+## CI visual-baseline authority correction
 
-Cycle-one review observed different intrinsic dimensions on the Fedora host. All eight owned
-Playwright baselines were therefore regenerated from final CSS at `a97e602` inside the pinned
-`mcr.microsoft.com/playwright:v1.62.1-noble` environment, using its bundled browser and the built
-Storybook. The authoritative regeneration was byte-for-byte identical to the tracked files. The
-exact targeted reviewer command then passed 8/8 in that same environment from a clean tree:
+Cycle-one review observed different intrinsic dimensions on the Fedora host, so the eight owned
+Playwright baselines were initially replayed inside `mcr.microsoft.com/playwright:v1.62.1-noble`.
+The enforced repository gate does not run in that container: it runs Chromium on GitHub's
+`ubuntu-latest` host, whose `system-ui` metrics are the delivery authority for these Linux
+snapshots.
+
+The first delivery run, [CI Quality 34309954147](https://github.com/spec-kitty/spec-kitty-design/actions/runs/34309954147),
+passed 126 existing visual cases and produced stable failures on only these eight new cases. Every
+retry returned the same dimensions and pixels. The CI-produced actual attachments were inspected
+for dark and light contrast, native checkbox glyphs, selected and disabled differentiation,
+contained focus, forced-colors cues, narrow and long-content containment, and the complete K3
+composition. Those inspected CI attachments are now the committed baselines. No component CSS or
+story markup changed during this correction.
+
+The exact targeted command remains:
 
 ```sh
 PW_INCLUDE_VISUAL=1 npx playwright test apps/storybook/src/tests/visual.spec.ts \
   --project=chromium --grep 'SK-checkbox-choice-group'
 ```
 
-Primary Codex visual inspection covered each regenerated image. Dark and LightMode retain their
-token contrast; K3 retains disclosure, ten lanes, two selections, and static actions; narrow and
-long content remain locally contained; disabled choices remain distinct; focus remains visible;
-and forced colors retains native glyphs plus checked, disabled, and focus cues.
+Primary Codex visual inspection covered each CI image. Dark and LightMode retain their token
+contrast; K3 retains disclosure, ten lanes, two selections, and static actions; narrow and long
+content remain locally contained; disabled choices remain distinct; focus remains visible; and
+forced colors retains native glyphs plus checked, disabled, and focus cues.
 
 | Visual baseline | Dimensions | SHA-256 |
 | --- | ---: | --- |
-| `sk-checkbox-choice-group-default-dark-chromium-linux.png` | `186 x 578` | `349e884f5be8697466529a6873f34bdde800be32ca94ded73f1f209c90f269c8` |
-| `sk-checkbox-choice-group-light-chromium-linux.png` | `186 x 578` | `8f7d95f4f44ac5c5aa0472e3094b6a368f21ab13ed43a457f0d5d1529befe9a4` |
-| `sk-checkbox-choice-group-k3-chromium-linux.png` | `1024 x 376` | `142fd57818282d0c07b5cc5bf08a7507ab05fd63eaa6b2e68b5d423fcf068b62` |
-| `sk-checkbox-choice-group-narrow-chromium-linux.png` | `186 x 578` | `349e884f5be8697466529a6873f34bdde800be32ca94ded73f1f209c90f269c8` |
-| `sk-checkbox-choice-group-long-content-chromium-linux.png` | `358 x 376` | `627c35c99a9857f97a01cf954164d42475e48441386d1f4b680c20c3ccbd9eaf` |
-| `sk-checkbox-choice-group-disabled-chromium-linux.png` | `280 x 266` | `1f6c7dc2ce6acfc02f1f7b4308d19cbf6c2d1c2738f6aa0dba3dc31bdb2e426d` |
-| `sk-checkbox-choice-group-focus-chromium-linux.png` | `186 x 578` | `94d7ff6a60b93f4755013085a05ec0153da391c03626a0ba96d01da9133cc950` |
-| `sk-checkbox-choice-group-forced-colors-chromium-linux.png` | `280 x 266` | `6f42580d632bbee78b4da7434f9240bdc179f5e335959c120200d8c8e4508d92` |
+| `sk-checkbox-choice-group-default-dark-chromium-linux.png` | `200 x 576` | `e03891edc41b78823f31e05c97c4d5f1a43cbe8df60753a2a071624d0755b582` |
+| `sk-checkbox-choice-group-light-chromium-linux.png` | `200 x 576` | `7ebca6fd2f4c4f900e585daac5d53d2ce095ebe00924f047147c87c6bac51aa3` |
+| `sk-checkbox-choice-group-k3-chromium-linux.png` | `1024 x 372` | `c0c74b035a2aada68379ea883141297029c6c2b763f642e39c6597d813448890` |
+| `sk-checkbox-choice-group-narrow-chromium-linux.png` | `200 x 576` | `c0721b7ead5169728bf8ce1dc77e998e539acdb46f3403ca2fe881a233d8b1fd` |
+| `sk-checkbox-choice-group-long-content-chromium-linux.png` | `358 x 386` | `a5ec6611f4e468530f132788ec5181d3e21c95b3087791fe57f73fe106fc2a22` |
+| `sk-checkbox-choice-group-disabled-chromium-linux.png` | `322 x 264` | `cd1e120e76581bf31a3d680ea33ba35b811ec33a6837b95703b7eca9b0139ab0` |
+| `sk-checkbox-choice-group-focus-chromium-linux.png` | `200 x 576` | `bf36e781b38254d6d863615d48eb2e475f9b26d10cb33eeac968090df2e782f1` |
+| `sk-checkbox-choice-group-forced-colors-chromium-linux.png` | `322 x 264` | `b0f70753781a2dcb7dcbcf7e73be51183a52aa23314421680713485ed3a4cffd` |
 
-The Fedora-only `196`/`320`/`412`-pixel intrinsic results are local font-metric drift: adopting
-them would make the pinned Noble replay red and contradict the repository's Linux-baseline rule.
-No CSS changed during this review fix, so the genuine 100%/200% zoom evidence below remains tied
-to the same implementation tree.
+The Fedora and Noble results remain useful cross-host inspection evidence, but neither substitutes
+for the environment that enforces the repository's visual gate. The genuine 100%/200% zoom
+evidence below remains tied to the same implementation tree.
 
 ## Capture hashes
 
