@@ -58,10 +58,10 @@
       "criterion_id": "FR-006",
       "description": "M5 shows one bounded snapshot-behind explanation that refers to the same supplied SHA.",
       "proof_type": "automated_test_and_visual_evidence",
-      "evidence": "Exact rebased product head df4bf66bc72c287e6aaadf82f5fce18c766de5af: M5 snapshot-behind text reuses the supplied planning SHA and its tracked visual passes in CI 34332459374.",
+      "evidence": "Corrective product head b68f84d28715ca8ef551f40cda24f3a13e054f1e: M5 renders the fixture matching pushed marker, exact pushed time, and snapshot-behind notice using the same supplied SHA; Default proves absent pushed time; rendered browser checks and refreshed Linux Chromium visual pass in CI 34343137694.",
       "pass_fail": "pass",
       "verified_by": "codex",
-      "verified_at": "2026-09-09T09:25:32.273274+00:00",
+      "verified_at": "2026-09-09T11:25:21.303635+00:00",
       "notes": "No second version source or stronger freshness claim is introduced."
     },
     {
