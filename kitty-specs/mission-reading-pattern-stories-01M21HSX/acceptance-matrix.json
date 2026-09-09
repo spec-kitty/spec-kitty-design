@@ -138,10 +138,10 @@
       "criterion_id": "NFR-001",
       "description": "Every story has one H1, logical native semantics, zero axe violations, truthful current/unavailable state, and no unavailable tab stop.",
       "proof_type": "automated_accessibility_test",
-      "evidence": "Exact product head a36f3b72f68a00bc04ffe0cf49dbf2d362e6358e: focused Chromium and Firefox semantics pass and CI 34323100368 global axe passes; unavailable state is visible and structurally noninteractive.",
+      "evidence": "Exact rebased product head df4bf66bc72c287e6aaadf82f5fce18c766de5af: native semantics, unavailable structure, global axe, and three-engine Playwright pass in CI 34332459374 with no color-only unavailable state.",
       "pass_fail": "pass",
       "verified_by": "codex",
-      "verified_at": "2026-09-09T07:31:48.349845+00:00",
+      "verified_at": "2026-09-09T09:25:42.623977+00:00",
       "notes": "Unavailable state is expressed visibly, structurally, and without color alone."
     },
     {
