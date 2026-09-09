@@ -88,10 +88,10 @@
       "criterion_id": "FR-009",
       "description": "M8 keeps factual, observed, and reported-live truth in independently labelled regions with no inferred live actor-to-Work-Package join.",
       "proof_type": "automated_test_and_visual_evidence",
-      "evidence": "Exact product head a36f3b72f68a00bc04ffe0cf49dbf2d362e6358e: M8 tests retain separate labelled factual, observed, and reported-live regions and no live person-to-Work-Package join; its visual baseline passes.",
+      "evidence": "Exact rebased product head df4bf66bc72c287e6aaadf82f5fce18c766de5af: M8 retains separate labelled factual, observed, and reported-live regions and no live person-to-Work-Package join; CI 34332459374 passes.",
       "pass_fail": "pass",
       "verified_by": "codex",
-      "verified_at": "2026-09-09T07:31:42.479136+00:00",
+      "verified_at": "2026-09-09T09:25:36.193632+00:00",
       "notes": "Only observed activity associates Lynn with WP02."
     },
     {
