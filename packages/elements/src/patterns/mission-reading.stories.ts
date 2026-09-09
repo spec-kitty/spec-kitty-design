@@ -377,7 +377,7 @@ const routeTruth = (
 export const projectMissionReading = (
   fixture: DeepReadonly<MissionReadingFixture>,
   state: ReadingState,
-  includeMatchingPushedMarker = false,
+  pushedMarker?: DeepReadonly<MissionReadingFixture["pushedMarker"]>,
 ): DeepReadonly<MissionReadingProjection> => {
   const route = routeTruth(state);
   const long = state === "long";
@@ -414,9 +414,7 @@ export const projectMissionReading = (
       ? fixture.longValues.repository
       : fixture.repository.name,
     branch: long ? fixture.longValues.branch : fixture.git.branch,
-    pushedAt: includeMatchingPushedMarker
-      ? selectPushedTime(fixture.git, fixture.pushedMarker)
-      : selectPushedTime(fixture.git),
+    pushedAt: selectPushedTime(fixture.git, pushedMarker),
     content: route.content,
     snapshotBehind: state === "m5",
     longPath: long ? fixture.longValues.path : undefined,
@@ -575,11 +573,18 @@ const patternStyles = html`<style>
 
   .sk-mission-reading-pattern__placeholder {
     display: grid;
+    align-content: start;
     gap: var(--sk-space-3);
+    min-block-size: calc(var(--sk-space-12) * 4);
     padding: var(--sk-space-4);
     background: var(--sk-surface-card);
     border: var(--sk-border-width-1) solid var(--sk-border-default);
     border-radius: var(--sk-radius-md);
+  }
+
+  .sk-mission-reading-pattern__placeholder-lines {
+    display: grid;
+    gap: var(--sk-space-3);
   }
 
   .sk-mission-reading-pattern__placeholder-line {
@@ -964,22 +969,30 @@ const loadingDocument = (): TemplateResult =>
   html`<div
     class="sk-mission-reading-pattern__loading-region"
     data-document-frame
-    aria-busy="true"
     aria-labelledby="loading-heading"
   >
     <sk-section-header>
       <span slot="eyebrow">Selected document fragment</span>
       <h2 slot="title" id="loading-heading">Specify</h2>
     </sk-section-header>
-    <p role="status">Loading rendered content…</p>
-    <div class="sk-mission-reading-pattern__placeholder" aria-hidden="true">
-      <span class="sk-mission-reading-pattern__placeholder-line"></span>
-      <span
-        class="sk-mission-reading-pattern__placeholder-line sk-mission-reading-pattern__placeholder-line--medium"
-      ></span>
-      <span
-        class="sk-mission-reading-pattern__placeholder-line sk-mission-reading-pattern__placeholder-line--short"
-      ></span>
+    <div class="sk-mission-reading-pattern__placeholder">
+      <p role="status" aria-live="polite" aria-atomic="true">
+        Loading rendered content…
+      </p>
+      <div aria-busy="true" aria-labelledby="loading-heading">
+        <div
+          class="sk-mission-reading-pattern__placeholder-lines"
+          aria-hidden="true"
+        >
+          <span class="sk-mission-reading-pattern__placeholder-line"></span>
+          <span
+            class="sk-mission-reading-pattern__placeholder-line sk-mission-reading-pattern__placeholder-line--medium"
+          ></span>
+          <span
+            class="sk-mission-reading-pattern__placeholder-line sk-mission-reading-pattern__placeholder-line--short"
+          ></span>
+        </div>
+      </div>
     </div>
   </div>`;
 
@@ -1181,9 +1194,14 @@ export const renderMissionReading = (
     light?: boolean;
     direction?: "ltr" | "rtl";
     open?: boolean;
+    pushedMarker?: DeepReadonly<MissionReadingFixture["pushedMarker"]>;
   }> = {},
 ): TemplateResult => {
-  const projection = projectMissionReading(MISSION_READING_FIXTURE, state);
+  const projection = projectMissionReading(
+    MISSION_READING_FIXTURE,
+    state,
+    options.pushedMarker,
+  );
   const shellRef = createRef<SkAppShell>();
   const triggerRef = createRef<HTMLButtonElement>();
 
@@ -1291,7 +1309,10 @@ export const M4CanonicalPageUnavailable: Story = {
   render: () => renderMissionReading("m4"),
 };
 export const M5SnapshotBehindLog: Story = {
-  render: () => renderMissionReading("m5"),
+  render: () =>
+    renderMissionReading("m5", {
+      pushedMarker: MISSION_READING_FIXTURE.pushedMarker,
+    }),
 };
 export const M6aOtherArtifactsPresent: Story = {
   render: () => renderMissionReading("m6a"),
