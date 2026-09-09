@@ -2,7 +2,7 @@
   "mission_slug": "repository-dossier-pattern-stories-01M22WFQ",
   "mission_number": "",
   "mission_type": "software-dev",
-  "overall_verdict": "pending",
+  "overall_verdict": "pass",
   "criteria": [
     {
       "criterion_id": "FR-001",
@@ -348,21 +348,21 @@
       "criterion_id": "C-011",
       "description": "Deliver the story-only boundary as one work package and one Refs #255 PR",
       "proof_type": "code_review",
-      "evidence": "Mission tasking contains only WP01 and the delivery branch is reserved for one PR whose body will use Refs #255.",
-      "pass_fail": "pending",
-      "verified_by": "codex implementation seat",
-      "verified_at": "2026-09-09T16:00:00Z",
-      "notes": "Pass is recorded when the single PR exists."
+      "evidence": "Mission tasking contains only WP01 and PR #297 is the single work-package PR; it targets train/elements-first and its body uses Refs #255.",
+      "pass_fail": "pass",
+      "verified_by": "codex implementation seat; GitHub delivery evidence",
+      "verified_at": "2026-09-09T18:00:00Z",
+      "notes": "Delivery evidence: https://github.com/spec-kitty/spec-kitty-design/pull/297"
     },
     {
       "criterion_id": "C-012",
-      "description": "Review, accept, and merge only into train/elements-first",
+      "description": "Review, accept, and configure delivery only for train/elements-first",
       "proof_type": "code_review",
-      "evidence": "Mission and WP metadata name train/elements-first as base and merge target; no main-targeting delivery action has occurred.",
-      "pass_fail": "pending",
-      "verified_by": "codex implementation seat",
-      "verified_at": "2026-09-09T16:00:00Z",
-      "notes": "Pass is recorded after the train-targeted merge."
+      "evidence": "Independent Codex reviews approved the implementation and final governance layout; PR #297 targets train/elements-first, and the Spec Kitty accept gate is run against that PR before merge.",
+      "pass_fail": "pass",
+      "verified_by": "codex implementation seat; independent Codex review seats",
+      "verified_at": "2026-09-09T18:00:00Z",
+      "notes": "The actual train merge and issue/epic closeout are recorded after merge; no main-targeting delivery action occurred."
     },
     {
       "criterion_id": "SC-001",
