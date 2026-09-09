@@ -108,10 +108,10 @@
       "criterion_id": "FR-011",
       "description": "One planning SHA and branch are reused; pushed time requires an explicit matching marker; snapshot-behind uses the same SHA.",
       "proof_type": "automated_test",
-      "evidence": "Exact rebased product head df4bf66bc72c287e6aaadf82f5fce18c766de5af: tests prove one SHA and branch, pushed time only from a matching explicit marker, and snapshot-behind text using that same SHA; CI 34332459374 passes.",
+      "evidence": "Corrective product head b68f84d28715ca8ef551f40cda24f3a13e054f1e: rendered M5 proves matching-marker pushed time and the shared snapshot SHA, Default proves missing-marker absence, and selector coverage rejects mismatches; CI 34343137694 passes.",
       "pass_fail": "pass",
       "verified_by": "codex",
-      "verified_at": "2026-09-09T09:25:38.824322+00:00",
+      "verified_at": "2026-09-09T11:25:27.375901+00:00",
       "notes": "No derived git freshness is claimed."
     },
     {
