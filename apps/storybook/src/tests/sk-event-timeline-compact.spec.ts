@@ -377,6 +377,44 @@ test.describe("compact event timeline accessibility", () => {
       }
     }
   });
+
+  test("every native list and list item remains exposed in supplied source order", async ({
+    page,
+  }) => {
+    for (const fixture of compactFixtures) {
+      const root = await mountFixture(page, fixture);
+      const expected = truthByFixture.get(fixture)!;
+      const items = root.getByRole("listitem");
+
+      await expect(root).toHaveRole("list");
+      await expect(items).toHaveCount(expected.length);
+      expect(
+        await items.evaluateAll((nodes) =>
+          nodes.map((node) =>
+            node
+              .querySelector(":scope > .sk-event-timeline__summary")
+              ?.textContent?.replace(/\s+/g, " ")
+              .trim(),
+          ),
+        ),
+      ).toEqual(expected.map(({ summary }) => summary));
+
+      const snapshot = await root.ariaSnapshot();
+      let priorSummaryIndex = -1;
+      for (const event of expected) {
+        const summaryIndex = snapshot.indexOf(event.summary, priorSummaryIndex + 1);
+        expect(
+          summaryIndex,
+          `${fixture} accessibility tree omits or reorders ${event.summary}`,
+        ).toBeGreaterThan(priorSummaryIndex);
+        priorSummaryIndex = summaryIndex;
+
+        if (event.leadingMarkerIcon !== null) {
+          expect(snapshot).not.toContain(event.leadingMarkerIcon);
+        }
+      }
+    }
+  });
 });
 
 test.describe("compact event timeline closed fixture inventory", () => {
