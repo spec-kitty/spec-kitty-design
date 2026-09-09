@@ -1,5 +1,4 @@
 {
-  "accept_commit": "f72d833f1f5703dded3b200f43f3577989d2ebae",
   "acceptance_history": [
     {
       "accept_commit": "f72d833f1f5703dded3b200f43f3577989d2ebae",
@@ -7,12 +6,18 @@
       "accepted_at": "2026-09-07T18:38:28.742951+00:00",
       "accepted_by": "codex-acceptance",
       "accepted_from_commit": "8ee9785c65963ac6be650aeab33843ede29be932"
+    },
+    {
+      "acceptance_mode": "local",
+      "accepted_at": "2026-09-09T09:51:49.880941+00:00",
+      "accepted_by": "codex-final-acceptance",
+      "accepted_from_commit": "95f8fe465f26f01d386f19ffddc7a41c60bb6028"
     }
   ],
   "acceptance_mode": "local",
-  "accepted_at": "2026-09-07T18:38:28.742951+00:00",
-  "accepted_by": "codex-acceptance",
-  "accepted_from_commit": "8ee9785c65963ac6be650aeab33843ede29be932",
+  "accepted_at": "2026-09-09T09:51:49.880941+00:00",
+  "accepted_by": "codex-final-acceptance",
+  "accepted_from_commit": "95f8fe465f26f01d386f19ffddc7a41c60bb6028",
   "baseline_merge_commit": "f8d838b7066d6aeeecc1f864d857d63d7816518f",
   "created_at": "2026-09-07T14:18:07.639074+00:00",
   "flattened": false,
