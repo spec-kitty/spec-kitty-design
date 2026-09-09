@@ -1815,6 +1815,7 @@ test("Work Explorer controlled collection and blocked exception — visual basel
     timeout: 20000,
   });
   await planned.locator(".sk-collection__toggle").click();
+  await page.mouse.move(0, 0);
   await expect(planned).toHaveScreenshot("work-explorer-collection-open.png", {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
