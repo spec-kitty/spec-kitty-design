@@ -185,6 +185,43 @@ const pressTab = async (page: Page, count: number): Promise<void> => {
   }
 };
 
+const focusFirstBreadcrumb = async (
+  page: Page,
+  root: Locator,
+): Promise<{
+  readonly breadcrumbIndex: Locator;
+  readonly overflowListWasFocused: boolean;
+  readonly trigger: Locator;
+}> => {
+  const trigger = root.getByRole("button", { name: "Repository navigation" });
+  const breadcrumbList = root.locator(".sk-breadcrumbs__list");
+  const breadcrumbIndex = root.getByRole("link", {
+    name: "Repos",
+    exact: true,
+  });
+
+  await focusBody(page);
+  await pressTab(page, 1);
+  await expectFocusOutlineContained(trigger);
+  await pressTab(page, 1);
+
+  const overflowListWasFocused = await breadcrumbList.evaluate(
+    (element) => document.activeElement === element,
+  );
+  if (overflowListWasFocused) {
+    const geometry = await breadcrumbList.evaluate((element) => ({
+      clientWidth: element.clientWidth,
+      scrollWidth: element.scrollWidth,
+    }));
+    expect(geometry.scrollWidth).toBeGreaterThan(geometry.clientWidth);
+    await expectFocusOutlineContained(breadcrumbList);
+    await pressTab(page, 1);
+  }
+
+  await expectFocusOutlineContained(breadcrumbIndex);
+  return { breadcrumbIndex, overflowListWasFocused, trigger };
+};
+
 test("source is a Storybook-only public composition", () => {
   const storySource = readFileSync(
     "packages/elements/src/patterns/repository-dossier.stories.ts",
@@ -545,18 +582,13 @@ test("native keyboard order skips hidden regions and activates navigation and co
     width: 390,
     height: 844,
   });
-  let trigger = root.getByRole("button", { name: "Repository navigation" });
-  const breadcrumbIndex = root.getByRole("link", {
-    name: "Repos",
-    exact: true,
-  });
-
-  await focusBody(page);
-  await pressTab(page, 1);
-  await expectFocusOutlineContained(trigger);
-  await pressTab(page, 1);
-  await expectFocusOutlineContained(breadcrumbIndex);
+  let { breadcrumbIndex, overflowListWasFocused, trigger } =
+    await focusFirstBreadcrumb(page, root);
   await page.keyboard.press("Shift+Tab");
+  if (overflowListWasFocused) {
+    await expectFocusOutlineContained(root.locator(".sk-breadcrumbs__list"));
+    await page.keyboard.press("Shift+Tab");
+  }
   await expectFocusOutlineContained(trigger);
   await page.keyboard.press("Space");
   const compactOverview = root
@@ -575,8 +607,9 @@ test("native keyboard order skips hidden regions and activates navigation and co
     width: 390,
     height: 844,
   });
-  await focusBody(page);
-  await pressTab(page, 4);
+  ({ breadcrumbIndex } = await focusFirstBreadcrumb(page, root));
+  await expectFocusOutlineContained(breadcrumbIndex);
+  await pressTab(page, 2);
   const documentLink = root.getByRole("link", {
     name: "Charter",
     exact: true,
@@ -589,8 +622,9 @@ test("native keyboard order skips hidden regions and activates navigation and co
     width: 390,
     height: 844,
   });
-  await focusBody(page);
-  await pressTab(page, 7);
+  ({ breadcrumbIndex } = await focusFirstBreadcrumb(page, root));
+  await expectFocusOutlineContained(breadcrumbIndex);
+  await pressTab(page, 5);
   const missionLink = root
     .locator('[data-mission-id="#1042"]')
     .getByRole("link", { name: /Launch resilience tranche A/ });
@@ -615,8 +649,9 @@ test("native keyboard order skips hidden regions and activates navigation and co
       },
     });
   });
-  await focusBody(page);
-  await pressTab(page, 11);
+  ({ breadcrumbIndex } = await focusFirstBreadcrumb(page, root));
+  await expectFocusOutlineContained(breadcrumbIndex);
+  await pressTab(page, 9);
   const charterHost = root
     .locator("sk-copy-field")
     .filter({ hasText: "spec-kitty charter interview" });

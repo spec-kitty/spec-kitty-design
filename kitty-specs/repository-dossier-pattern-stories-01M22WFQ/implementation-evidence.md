@@ -32,13 +32,15 @@ On the corrected tree, the focused behavioral command passed 35/35 applicable Ch
 cases with one expected Firefox skip for the explicitly Chromium-owned CSS-zoom stress.
 
 The first full hosted browser run and its unchanged-head failed-job rerun each passed 1,597 cases
-with 88 intended skips but exposed the same Firefox runner boundary: after `Menu`, Firefox skipped
-the native `Repos` link. Independent Codex diagnosis found no product exposure defect and reproduced
-the boundary only by forcing Firefox's sequential-focus preference to omit links. The exact test
+with 88 intended skips but exposed the same Firefox runner boundary after `Menu`. The exact test
 passed 63/63 local Firefox repetitions; the reviewer passed the actual CI-built artifact 50/50 and
-a fresh build 30/30. The Firefox project now explicitly enables link and control focus categories,
-while retaining the real native Tab assertions, and focus failures report the deep active-element
-chain plus inert/ARIA exposure. No product focus behavior was added.
+a fresh build 30/30. A first harness correction explicitly enabled Firefox link and control focus
+categories and added deep active-element plus inert/ARIA diagnostics. The next hosted run then
+identified the actual intermediate focus target: Firefox exposes the genuinely overflowing native
+breadcrumb `<ol>` as a sequential focus stop before its links. The keyboard proof now permits that
+stop only when the list owns focus and has measurable horizontal overflow, requires its focus outline
+to remain contained, and continues through the exact `Repos`, document, Mission, and copy-control
+sequence. No product focus behavior or programmatic focus substitute was added.
 
 The 860 px baseline exposes the compact header and 16 px local content gutters while keeping the
 personal rail, desktop context sidebar, and closed compact drawer inert. The 861 px baseline
