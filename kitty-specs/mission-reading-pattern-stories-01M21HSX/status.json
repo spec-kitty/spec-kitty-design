@@ -52,7 +52,8 @@
         "Cycle 11 integration correction ready at a36f3b72f68a00bc04ffe0cf49dbf2d362e6358e.",
         "Cycle 11 independent review of #277/#265 ratchet integration.",
         "Cycle 11 APPROVED: exact-head ratchet reconciliation independently verified; 395 declared, summed, listed, and unique stories; #277 contributes 12 and #265 contributes 14; targeted exact-head Chromium 27/27; formatting and diff checks pass.",
-        "Post-merge contract lens rejected the byte-identical merged tree on M3 live/busy topology, stable loading geometry, rendered matching-marker coverage, and stale ratchet provenance."
+        "Post-merge contract lens rejected the byte-identical merged tree on M3 live/busy topology, stable loading geometry, rendered matching-marker coverage, and stale ratchet provenance.",
+        "Implementing bounded post-merge corrections from the final contract lens."
       ],
       "provider": "__resolved_provider_absent__",
       "review": null,
