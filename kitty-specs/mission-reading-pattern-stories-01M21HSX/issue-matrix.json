@@ -61,7 +61,7 @@
       "wp": null
     },
     "#265": {
-      "evidence_ref": "Product commit a36f3b72f68a00bc04ffe0cf49dbf2d362e6358e; independent review cycles 10 and 11 APPROVED; exact-head CI run 34323100368 fully green across mutation, Playwright, axe, visual, composition, generated, package, release, security, build, and quality gates.",
+      "evidence_ref": "Exact rebased product head df4bf66bc72c287e6aaadf82f5fce18c766de5af on train 674ebe23bea974eb8bef2dbd64f4481e5f94d212; independent review approved Mission behavior; CI 34332459374 fully green across mutation, Playwright, axe, visual, composition, generated, package, release, security, build, and quality gates; ratchet 405/405.",
       "fr": "FR-001\u2013FR-013",
       "nfr": "NFR-001\u2013NFR-007",
       "repo": "spec-kitty/spec-kitty-design",
