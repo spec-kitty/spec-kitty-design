@@ -98,10 +98,10 @@
       "criterion_id": "FR-010",
       "description": "The twelve canonical catalogue destinations preserve order, real links, unavailable anatomy, bounded supplied children, and terminal Ops.",
       "proof_type": "automated_test",
-      "evidence": "apps/storybook/src/tests/sk-mission-reading-pattern.spec.ts validates order, roles, hrefs, current rules, absent children, and terminal Ops across all route fixtures.",
+      "evidence": "Exact product head a36f3b72f68a00bc04ffe0cf49dbf2d362e6358e: focused tests validate catalogue order, roles, hrefs, aria-current rules, unavailable anatomy, bounded children, absent children, and terminal Ops.",
       "pass_fail": "pass",
       "verified_by": "codex",
-      "verified_at": "2026-09-09T03:41:13Z",
+      "verified_at": "2026-09-09T07:31:43.665899+00:00",
       "notes": "Available, current, nested, and unavailable entries coexist truthfully."
     },
     {
