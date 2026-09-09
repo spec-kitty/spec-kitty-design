@@ -1,0 +1,89 @@
+{
+  "rows": {
+    "#254": {
+      "evidence_ref": "PR #268 merged as 86058d912313360d78cdbcf66cbc4b034389a7b4 before #265 implementation",
+      "fr": null,
+      "nfr": null,
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": null,
+      "scope": "Required compact sk-app-shell navigation dependency",
+      "source_file": "spec.md",
+      "title": "[TKD2] sk-app-shell compact-navigation seam — mobile top bar and controlled drawer",
+      "verdict": "verified-already-fixed",
+      "wp": null
+    },
+    "#255": {
+      "evidence_ref": "Follow-up: #255; open peer mission remains independently owned and coordination is limited to landed train code",
+      "fr": null,
+      "nfr": null,
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": null,
+      "scope": "Parallel Repository Dossier mission; no temporary branch code copied into #265",
+      "source_file": "spec.md",
+      "title": "[TKD4] Repository Dossier pattern stories — approved truth and responsive state fixtures",
+      "verdict": "deferred-with-followup",
+      "wp": null
+    },
+    "#256": {
+      "evidence_ref": "PR #262 merged as 57e1f466afd3ead40523aa3d25d86b85eda87bce before #265 implementation",
+      "fr": null,
+      "nfr": null,
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": null,
+      "scope": "Required native context-navigation dependency",
+      "source_file": "spec.md",
+      "title": "[TKD1] Native context-navigation styles — grouped and nested navigation inside sk-context-sidebar",
+      "verdict": "verified-already-fixed",
+      "wp": null
+    },
+    "#263": {
+      "evidence_ref": "#264 merged and post-merge verified; #265 WP01 approved at exact publishable head 8606f01e953eebc67ce7319d6d4218b2ed751716 pending train merge",
+      "fr": "FR-001–FR-013",
+      "nfr": "NFR-001–NFR-007",
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": "SC-001–SC-006",
+      "scope": "Tracker closure after both Mission Reading children merge and pass post-merge review",
+      "source_file": "spec.md",
+      "title": "Epic: Mission Reading — honest catalogue navigation and composed document states",
+      "verdict": "in-mission",
+      "wp": "WP01"
+    },
+    "#264": {
+      "evidence_ref": "PR #267 merged as a78445552e42cb6bbde4e1d2e497137bc30c9dee and passed post-merge mission review",
+      "fr": null,
+      "nfr": null,
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": null,
+      "scope": "Required unavailable-entry context-navigation dependency",
+      "source_file": "spec.md",
+      "title": "[TKM1] sk-context-nav unavailable-entry extension — honest fixed-catalogue navigation",
+      "verdict": "verified-already-fixed",
+      "wp": null
+    },
+    "#265": {
+      "evidence_ref": "commit:8606f01e953eebc67ce7319d6d4218b2ed751716; cycle-5 independent review APPROVE",
+      "fr": "FR-001–FR-013",
+      "nfr": "NFR-001–NFR-007",
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": "SC-001–SC-006",
+      "scope": "Complete reviewed Mission Reading M1–M8 pattern-story family",
+      "source_file": "spec.md",
+      "title": "[TKM2] Mission Reading pattern stories — exact-commit document and route-state fixtures",
+      "verdict": "fixed",
+      "wp": "WP01"
+    },
+    "#285": {
+      "evidence_ref": "PR #285 merged as 7bcb8cacbf2ab7d662cfc924075ddf5005e6f7f2 before final #265 rebase; unrelated train movement only",
+      "fr": null,
+      "nfr": null,
+      "repo": "spec-kitty/spec-kitty-design",
+      "sc": null,
+      "scope": "Unrelated open train PR observed at mission start and incorporated only through the landed train",
+      "source_file": "spec.md",
+      "title": "feat(styles): add native segmented-choice presentation",
+      "verdict": "verified-already-fixed",
+      "wp": null
+    }
+  },
+  "schema_version": 1
+}

@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "mission_slug": "mission-reading-pattern-stories-01M21HSX",
+  "mission_id": "01M21HSX7AD5MVEZG4W8JWSDDE",
+  "mission_branch": "kitty/mission-mission-reading-pattern-stories-01M21HSX",
+  "target_branch": "train/elements-first",
+  "lanes": [
+    {
+      "lane_id": "lane-a",
+      "wp_ids": [
+        "WP01"
+      ],
+      "write_scope": [
+        "apps/storybook/src/tests/sk-mission-reading-pattern.spec.ts",
+        "apps/storybook/src/tests/visual.spec.ts",
+        "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-mission-reading-*.png",
+        "docs/design-system/using-components.md",
+        "expected-stories.json",
+        "packages/elements/src/patterns/mission-reading.stories.ts"
+      ],
+      "predicted_surfaces": [
+        "api",
+        "app-shell",
+        "artifact-rendering",
+        "tracker-integration"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    }
+  ],
+  "computed_at": "2026-09-08T22:47:38.204978+00:00",
+  "computed_from": "dependency_graph+ownership",
+  "planning_artifact_wps": [],
+  "planning_commit_sha": "5c680226933e1c42e888989fc7e16ee8e0253693"
+}

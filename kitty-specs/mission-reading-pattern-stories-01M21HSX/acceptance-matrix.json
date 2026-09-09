@@ -1,0 +1,320 @@
+{
+  "mission_slug": "mission-reading-pattern-stories-01M21HSX",
+  "mission_number": "",
+  "mission_type": "software-dev",
+  "overall_verdict": "pass",
+  "criteria": [
+    {
+      "criterion_id": "FR-001",
+      "description": "The Mission Reading family is a Storybook-only composition of public design-system surfaces, native HTML, and pattern-owned CSS, with no published page component.",
+      "proof_type": "code_review_and_composition_gate",
+      "evidence": "packages/elements/src/patterns/mission-reading.stories.ts; check-pattern-composition passed 47 probes plus 5 fixtures, 106 rules, and 20 tags; review-cycle-5 approved exact head 8606f01e953eebc67ce7319d6d4218b2ed751716.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-09T03:41:13Z",
+      "notes": "No custom element, framework wrapper, router, or application model was introduced."
+    },
+    {
+      "criterion_id": "FR-002",
+      "description": "One deeply immutable fixture and pure projections own repeated Mission, git, catalogue, document, artifact, Ops, observed, and live values.",
+      "proof_type": "automated_test",
+      "evidence": "apps/storybook/src/tests/sk-mission-reading-pattern.spec.ts; focused three-engine suite passed 37 tests with 2 expected skips at exact reviewed head 8606f01.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-09T03:41:13Z",
+      "notes": "Fixture immutability and selector determinism are executable assertions."
+    },
+    {
+      "criterion_id": "FR-003",
+      "description": "M1 and M2 render the same populated Specify source at desktop and 390px with a consumer-controlled compact drawer.",
+      "proof_type": "browser_test_and_visual_evidence",
+      "evidence": "Focused Chromium/Firefox/WebKit suite 37 passed and 2 expected skips; exact-head M1 desktop, M2 responsive, and M2 drawer-open visual baselines are registered and passed.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-09T03:41:13Z",
+      "notes": "Narrow layout retains 16px content gutters and native focus behavior."
+    },
+    {
+      "criterion_id": "FR-004",
+      "description": "M3 provides stable labelled busy geometry without fabricated document facts, timestamps, or actions.",
+      "proof_type": "automated_test_and_visual_evidence",
+      "evidence": "Mission Reading focused tests assert the polite busy region and absence of facts/actions; M3 full-route visual baseline passed.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-09T03:41:13Z",
+      "notes": "Placeholder geometry is assistive-hidden and pattern-owned."
+    },
+    {
+      "criterion_id": "FR-005",
+      "description": "M4 keeps unavailable Plan visible as native non-link content while Specify is the only current available link.",
+      "proof_type": "automated_test_and_visual_evidence",
+      "evidence": "Focused semantic assertions and M4 unavailable visual baseline passed; unavailable entries have no href, interactive role, or tab stop.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-09T03:41:13Z",
+      "notes": "Uses the landed public .sk-context-nav unavailable-entry contract from #264."
+    },
+    {
+      "criterion_id": "FR-006",
+      "description": "M5 shows one bounded snapshot-behind explanation that refers to the same supplied SHA.",
+      "proof_type": "automated_test_and_visual_evidence",
+      "evidence": "Focused same-SHA assertions and M5 snapshot-notice full-route baseline passed at 8606f01.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-09T03:41:13Z",
+      "notes": "No second version source or stronger freshness claim is introduced."
+    },
+    {
+      "criterion_id": "FR-007",
+      "description": "M6a renders supplied bounded Other-artifact links and M6b renders an absent state with no children, current link, or action.",
+      "proof_type": "automated_test_and_visual_evidence",
+      "evidence": "Focused present/absent count, href, current-state, and action-absence tests passed; both M6 full-route baselines passed.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-09T03:41:13Z",
+      "notes": "No recursive document tree is present."
+    },
+    {
+      "criterion_id": "FR-008",
+      "description": "M7a exposes passive Ops rows with exactly Invocation, Action, and Status; M7b is honestly action-free when absent.",
+      "proof_type": "automated_test_and_visual_evidence",
+      "evidence": "Focused Ops field/terminal-navigation assertions and both M7 full-route baselines passed.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-09T03:41:13Z",
+      "notes": "Ops has no children, execution control, retry, or recovery action."
+    },
+    {
+      "criterion_id": "FR-009",
+      "description": "M8 keeps factual, observed, and reported-live truth in independently labelled regions with no inferred live actor-to-Work-Package join.",
+      "proof_type": "automated_test_and_visual_evidence",
+      "evidence": "Focused truth-region/accessibility assertions and M8 full-route baseline passed; review-cycle-5 found no drift.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-09T03:41:13Z",
+      "notes": "Only observed activity associates Lynn with WP02."
+    },
+    {
+      "criterion_id": "FR-010",
+      "description": "The twelve canonical catalogue destinations preserve order, real links, unavailable anatomy, bounded supplied children, and terminal Ops.",
+      "proof_type": "automated_test",
+      "evidence": "apps/storybook/src/tests/sk-mission-reading-pattern.spec.ts validates order, roles, hrefs, current rules, absent children, and terminal Ops across all route fixtures.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-09T03:41:13Z",
+      "notes": "Available, current, nested, and unavailable entries coexist truthfully."
+    },
+    {
+      "criterion_id": "FR-011",
+      "description": "One planning SHA and branch are reused; pushed time requires an explicit matching marker; snapshot-behind uses the same SHA.",
+      "proof_type": "automated_test",
+      "evidence": "Fixture/projection tests validate exact git identity, matching-marker behavior, and same-SHA snapshot text.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-09T03:41:13Z",
+      "notes": "No derived git freshness is claimed."
+    },
+    {
+      "criterion_id": "FR-012",
+      "description": "The family preserves native landmarks, headings, lists, links, code, article/section markup, and intact tables inside named scrollers.",
+      "proof_type": "automated_accessibility_test",
+      "evidence": "Focused native-semantics tests passed; global axe rendered 492/492 stories with zero WCAG 2.1 AA violations; isolated WebKit all-story axe passed 1/1.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-09T03:41:13Z",
+      "notes": "Tables remain native and only their labelled container may overflow."
+    },
+    {
+      "criterion_id": "FR-013",
+      "description": "All required story IDs, focused tests, exact-head visual cases, and ownership documentation are reproducible and reviewable.",
+      "proof_type": "generated_ratchet_and_review",
+      "evidence": "Built Storybook contains all 14 Mission Reading story IDs; ratchet 383/383; 18/18 visual baselines passed with aggregate SHA-256 ed52b59680cfa88e570440bcae9d74d21b5b5ceacb75a5043b11ac696aec6ba7; docs/design-system/using-components.md updated.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-09T03:41:13Z",
+      "notes": "Review-cycle-5 approves exact publishable head 8606f01."
+    },
+    {
+      "criterion_id": "NFR-001",
+      "description": "Every story has one H1, logical native semantics, zero axe violations, truthful current/unavailable state, and no unavailable tab stop.",
+      "proof_type": "automated_accessibility_test",
+      "evidence": "Focused three-engine semantic suite 37/2, global axe 492/492 zero violations, and WebKit all-story axe 1/1 passed.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-09T03:41:13Z",
+      "notes": "Unavailable state is expressed visibly, structurally, and without color alone."
+    },
+    {
+      "criterion_id": "NFR-002",
+      "description": "Desktop, intermediate, threshold-edge, 390px, and 200% zoom presentations have no page overflow and keep narrow gutters/table containment.",
+      "proof_type": "browser_test_and_manual_qa",
+      "evidence": "Focused layout tests cover 1440, 900, 861/860/859, 390, 240, and CSS zoom stress; genuine Chrome UI zoom at 200% retained a 390 CSS-pixel viewport and contained long values.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-09T03:41:13Z",
+      "notes": "Only named local table scrollers overflow."
+    },
+    {
+      "criterion_id": "NFR-003",
+      "description": "Dark, LightMode, forced-colors, and reduced-motion presentations preserve meaning and focus without color or motion alone.",
+      "proof_type": "browser_test_and_visual_evidence",
+      "evidence": "LightMode and forced-colors baselines passed; focused forced-colors/reduced-motion assertions and repository theme gate passed.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-09T03:41:13Z",
+      "notes": "The pattern introduces no meaning-bearing animation."
+    },
+    {
+      "criterion_id": "NFR-004",
+      "description": "Composition-boundary checks pass without private-root reach-through, copied component CSS, runtime CSS injection, or undeclared parts.",
+      "proof_type": "automated_architecture_gate",
+      "evidence": "Composition gate passed 47 probes plus 5 fixtures, 106 rules, and 20 tags; adopted-style boundary passed 36 probes, 28 elements, 30 sheets, and 479 rules.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-09T03:41:13Z",
+      "notes": "Only documented public surfaces are composed."
+    },
+    {
+      "criterion_id": "NFR-005",
+      "description": "Focused and required repository quality, type, build, Storybook, axe, browser, visual, mutation, generated, package, and composition gates pass.",
+      "proof_type": "aggregate_automated_gates",
+      "evidence": "Quality/style/HTML gates green; five typechecks green; 45 Vitest files/517 tests; focused browser 37/2; visuals 18/18; mutation authority 223/223 including isolated unrelated transient rerun; all generators/checks, packs, exports, sizes, SRI, and offline checks green.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-09T03:41:13Z",
+      "notes": "Host WebKit libraries were unavailable; the official Playwright Noble container supplied the pinned WebKit evidence."
+    },
+    {
+      "criterion_id": "NFR-006",
+      "description": "Final-train regeneration, verification, visual evidence, and independent review all cite the exact publishable head.",
+      "proof_type": "git_and_review_audit",
+      "evidence": "Latest reviewed implementation head is 8606f01e953eebc67ce7319d6d4218b2ed751716; review-cycle-5 approved that head and recorded all exact-head reruns.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-09T03:41:13Z",
+      "notes": "A final remote-train check and required pre-merge exact-PR-head review remain merge-gate actions."
+    },
+    {
+      "criterion_id": "NFR-007",
+      "description": "Storybook builds within the committed three-minute budget.",
+      "proof_type": "timed_build",
+      "evidence": "Exact-head Storybook build completed in 10.23 seconds and emitted 492 stories.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-09T03:41:13Z",
+      "notes": "Comfortably inside the 180-second charter budget."
+    },
+    {
+      "criterion_id": "C-001",
+      "description": "No Mission reader, tier badge, skeleton/spinner, row, link-list, truth-band, or document-tree component is published.",
+      "proof_type": "diff_audit",
+      "evidence": "The delivery adds one Storybook pattern module, focused tests, documentation, ratchet entries, and visual baselines; no component directory, registration, manifest entry, or wrapper was added.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-09T03:41:13Z",
+      "notes": "Placeholder geometry and row arrangements remain pattern-owned."
+    },
+    {
+      "criterion_id": "C-002",
+      "description": "No routing, fetching, polling, timers, inference, persistence, search, mutation, or application action surface is added.",
+      "proof_type": "source_audit_and_review",
+      "evidence": "Prohibited-behavior source searches and review-cycle-5 passed; pattern imports only public design-system modules and Storybook/Lit authoring surfaces.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-09T03:41:13Z",
+      "notes": "Drawer state is a controlled story demonstration of the public shell contract."
+    },
+    {
+      "criterion_id": "C-003",
+      "description": "Pattern CSS uses approved tokens, semantic pairs, and sk-mission-reading-pattern BEM naming.",
+      "proof_type": "automated_style_gate",
+      "evidence": "Token, CSS hygiene, stylelint, composition, and source-boundary checks passed; CSS hygiene covered 28 elements, 29 sheets, and 464 rules.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-09T03:41:13Z",
+      "notes": "The raw 860px pattern breakpoint found in cycle 2 was removed in favor of the public inert exposure state."
+    },
+    {
+      "criterion_id": "C-004",
+      "description": "Loading is presentation-only and invents no document fact, action, published loader component, or completion state.",
+      "proof_type": "automated_test_and_diff_audit",
+      "evidence": "M3 assertions verify absent facts/actions and assistive-hidden placeholders; no component or state model was added.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-09T03:41:13Z",
+      "notes": "The polite busy region is explicitly labelled."
+    },
+    {
+      "criterion_id": "C-005",
+      "description": "Factual, observed, and reported-live values remain separate and live presence is never joined to a Work Package.",
+      "proof_type": "automated_test_and_review",
+      "evidence": "M8 focused tests assert separate regions and the absence of a live WP value; independent review-cycle-5 approved the truth boundary.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-09T03:41:13Z",
+      "notes": "Freshness claims are region-local."
+    },
+    {
+      "criterion_id": "C-006",
+      "description": "Generated artifacts are produced only through repository generators and remain deterministic.",
+      "proof_type": "generated_drift_check",
+      "evidence": "Token catalogue, element/static markup, CSS modules, CEM normalization, React, and Vue generators were rerun after the final train rebase and were byte-identical except excluded timestamp-only token-catalogue drift.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-09T03:41:13Z",
+      "notes": "No generated distribution file differs from origin/train/elements-first."
+    },
+    {
+      "criterion_id": "C-007",
+      "description": "The work is coordinated only through landed train code and targets train/elements-first, never main.",
+      "proof_type": "git_and_dependency_audit",
+      "evidence": "Dependencies #254/#256/#264 are present on the train; #255 remains independently owned; reviewed lane is linear atop the fetched train and the intended PR base is train/elements-first.",
+      "pass_fail": "pass",
+      "verified_by": "codex",
+      "verified_at": "2026-09-09T03:41:13Z",
+      "notes": "Remote train is rechecked again immediately before publication and merge."
+    }
+  ],
+  "negative_invariants": [
+    {
+      "invariant_id": "NI-001",
+      "description": "No prohibited Mission Reading component or framework wrapper exists.",
+      "verification_method": "diff_and_registration_audit",
+      "verification_command": "git diff --name-only origin/train/elements-first...HEAD; rg 'customElement|customElements.define' packages/elements/src/patterns/mission-reading.stories.ts",
+      "result": "confirmed_absent",
+      "evidence": "No component registration, component source directory, React wrapper, or Vue declaration was added."
+    },
+    {
+      "invariant_id": "NI-002",
+      "description": "No prohibited application behavior or state service is owned by the pattern.",
+      "verification_method": "source_search_and_review",
+      "verification_command": "rg 'fetch|poll|setTimeout|setInterval|localStorage|sessionStorage|router|Markdown|sanitize|highlight|search|filter|sort|pagination|retry|refresh|download|clipboard' packages/elements/src/patterns/mission-reading.stories.ts",
+      "result": "confirmed_absent",
+      "evidence": "Corrected import-specific and behavior searches passed; review-cycle-5 reported no application behavior."
+    },
+    {
+      "invariant_id": "NI-003",
+      "description": "Unavailable catalogue content never gains anchor, button, handler, or tabindex semantics.",
+      "verification_method": "browser_semantics_test",
+      "verification_command": "npx playwright test apps/storybook/src/tests/sk-mission-reading-pattern.spec.ts --project=chromium --project=firefox --project=webkit",
+      "result": "confirmed_absent",
+      "evidence": "Focused three-engine run passed 37 tests with 2 expected project skips and explicitly checks roles, hrefs, current state, and sequential focus."
+    },
+    {
+      "invariant_id": "NI-004",
+      "description": "No live person-to-Work-Package join or page-wide freshness claim is inferred.",
+      "verification_method": "fixture_projection_test_and_review",
+      "verification_command": "npx playwright test apps/storybook/src/tests/sk-mission-reading-pattern.spec.ts --project=chromium",
+      "result": "confirmed_absent",
+      "evidence": "M8 assertions keep live presence to actor, repository, branch, age, and reported-live/unverified language."
+    },
+    {
+      "invariant_id": "NI-005",
+      "description": "No generated distribution or unrelated architecture/learning artifact is part of the delivery diff.",
+      "verification_method": "git_diff_audit",
+      "verification_command": "git diff --quiet origin/train/elements-first...HEAD -- packages/tokens/dist packages/styles/dist packages/elements/dist packages/react/dist packages/vue/dist docs/architecture/validation docs/learning",
+      "result": "confirmed_absent",
+      "evidence": "Command passed after final regeneration; the delivery contains only authored pattern/test/docs/ratchet sources and reviewed PNG baselines."
+    }
+  ]
+}

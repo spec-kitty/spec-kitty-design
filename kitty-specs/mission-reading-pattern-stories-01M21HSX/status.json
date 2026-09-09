@@ -1,0 +1,73 @@
+{
+  "event_count": 28,
+  "last_event_id": "01M229B7B9SCNR3XPRSEE6EPVH",
+  "materialized_at": "2026-09-09T05:13:12.809785+00:00",
+  "mission_number": "",
+  "mission_slug": "mission-reading-pattern-stories-01M21HSX",
+  "mission_type": "software-dev",
+  "summary": {
+    "approved": 0,
+    "blocked": 0,
+    "canceled": 0,
+    "claimed": 0,
+    "done": 0,
+    "for_review": 0,
+    "in_progress": 0,
+    "in_review": 0,
+    "planned": 1
+  },
+  "work_packages": {
+    "WP01": {
+      "actor": "codex",
+      "agent": "codex",
+      "agent_profile": "__resolved_profile_absent__",
+      "agent_profile_version": "__resolved_profile_version_absent__",
+      "assignee": "codex",
+      "force_count": 5,
+      "lane": "planned",
+      "last_event_id": "01M229B7B9SCNR3XPRSEE6EPVH",
+      "last_transition_at": "2026-09-09T05:13:12.809785+00:00",
+      "model": "__resolved_model_absent__",
+      "notes": [
+        "Ready for review: implementation and mission-specific gates pass; host-only diagram and legacy CI visual baseline limitations recorded in handoff evidence.",
+        "Review cycle 1 fixed: 240px drawer, 16px narrow gutters, desktop repository link, full-route M3/M5/M6/M7 baselines, ratchet note; focused 3-engine 37/2, visual 18/18, axe 484/484, composition/type/build/quality green.",
+        "Cycle 2 locked-decision fix complete: removed raw 860px query in favor of documented public compact-root exposure state; focused 3-engine 37/2, visuals 18/18 byte-identical, composition/token/style/lint green.",
+        "Cycle 3 independent review passed at a3e3f7cbd2f6c23da6aabbbc0a793732eaa5eeb5: all prior findings fixed; public compact exposure state, token guard, composition, commitlint, build, focused browsers, and 18 registered visuals verified.",
+        "Acceptance-gate rework complete: #265 test helper disconnects prior route before viewport resize; pinned 3-engine 37/2, WebKit all-story axe 1/1, visuals 18/18 unchanged, global axe 492/492 zero violations, story ratchet 383/383, type/composition/token/theme/gates green.",
+        "Review passed: exact publishable head 8606f01e953eebc67ce7319d6d4218b2ed751716 is implementation-equivalent to the pinned-tested pre-linearization tree; the two-line helper change disconnects the prior shell before viewport resize without suppressing errors or weakening assertions; full-range commitlint, focused 37/2 plus independent WebKit axe 1/1, global axe 492/492, and all 18 unchanged visuals are verified.",
+        "Pre-merge squad rejected PR #292 at db53ca2; see review-cycle-6.md.",
+        "Implement review-cycle-6 pre-merge corrections.",
+        "Implementation corrected at f65806f; review-cycle-7 findings addressed. Quality, type, build, Storybook, axe, mutation, focused browser, and full Playwright gates passed.",
+        "Independent Codex reviewer dispatched against exact implementation head f65806f.",
+        "Exact-head review rejected only stale Mission Reading visual baselines; all product and semantic findings are resolved."
+      ],
+      "provider": "__resolved_provider_absent__",
+      "review": null,
+      "review_result": {
+        "feedback_path": "/home/jeroennouws/dev/spec-kitty-design-missions/265/kitty-specs/mission-reading-pattern-stories-01M21HSX/tasks/WP01-mission-reading-pattern-family/review-cycle-8.md",
+        "reference": "review-cycle://mission-reading-pattern-stories-01M21HSX/WP01-mission-reading-pattern-family/review-cycle-8.md",
+        "reviewer": "codex",
+        "verdict": "changes_requested"
+      },
+      "role": "implementer",
+      "shell_pid": null,
+      "shell_pid_created_at": null,
+      "subtasks": {
+        "T001": "planned",
+        "T002": "planned",
+        "T003": "planned",
+        "T004": "planned",
+        "T005": "planned",
+        "T006": "planned",
+        "T007": "planned",
+        "T008": "planned",
+        "T009": "planned",
+        "T010": "planned",
+        "T011": "planned"
+      },
+      "tracker_refs": [
+        "#265"
+      ]
+    }
+  }
+}

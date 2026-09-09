@@ -1,0 +1,17 @@
+evidence_id,source_id,finding,decision_or_requirement,confidence
+EV-001,SRC-001,"The deliverable is pattern stories and proof only; no published Mission reader or supporting row/tree/tier/loading component is allowed.","C-001;C-002;FR-001",high
+EV-002,SRC-003,"M1 and M2 are the same exact-commit Specify fixture at desktop and 390px; the narrow drawer is controlled and preserves focus semantics.","FR-002;FR-003;NFR-002",high
+EV-003,SRC-003,"M3 retains shell/document geometry and a polite busy relationship without fabricated document facts or actions.","FR-004;C-004",high
+EV-004,SRC-003,"M4 keeps an absent canonical page visible as a non-link while a real readable page remains current.","FR-005;NFR-001",high
+EV-005,SRC-003,"M5 explains snapshot-behind-log at the same SHA and must not imply a newer source.","FR-006;FR-011",high
+EV-006,SRC-003,"M6a supplies exactly four bounded artifact paths; M6b supplies none and has no children current link or action.","FR-007",high
+EV-007,SRC-003,"M7a exposes only Invocation Action and Status; M7b exposes no row current link or recovery action.","FR-008",high
+EV-008,SRC-003,"M8 requires factual observed and reported-live regions with separate labels and freshness and forbids a person-to-Work-Package live join.","FR-009;C-005",high
+EV-009,SRC-005,"Current Team Kitty still supplies bounded Research Contracts Checklists and Other children; Ops is terminal and pushed time is conditional on branch/SHA marker equality.","FR-010;FR-011",high
+EV-010,SRC-004,"The live train contains the complete controlled compact shell and available/current/nested/unavailable context navigation dependencies.","dependency gate",high
+EV-011,SRC-006,"Patterns may style their own composition but cannot access or restyle private shadow DOM; tokens and declared public contracts are the seam.","C-003;NFR-004",high
+EV-012,SRC-007,"Native navigation lists links code article section and table semantics remain in light DOM; derived artifacts are regenerated not edited.","FR-012;C-006",high
+EV-013,SRC-008,"Owned drawer behavior requires real-browser assertions; build and wrapper generation must remain deterministic.","NFR-001;NFR-005",high
+EV-014,SRC-011,"The existing pattern gate can mechanically reject private-root reach-through and duplicated component CSS in the intended pattern directory.","NFR-004",high
+EV-015,SRC-013,"#255 has no active PR at mission start, so parallel work is coordinated through final train rebase and regeneration only.","C-007;SC-006",high
+EV-016,SRC-014,"Every story requires axe and a valid sk-light variant; reviewed visual evidence must match the exact final head before train-only merge.","NFR-001;NFR-003;NFR-006",high
