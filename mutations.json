@@ -1536,6 +1536,14 @@
     },
     {
       "id": "SC-012",
+      "arm": "slot reassignment releases focus before the destination root is suppressed",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "  #onExposureSlotChange = (): void => {\n    this.#releaseHiddenFocus();\n    this.#reconcileAssignedRootExposure();\n  };",
+      "to": "  #onExposureSlotChange = (): void => {\n    this.#reconcileAssignedRootExposure();\n  };",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+    },
+    {
+      "id": "SC-012",
       "arm": "ordinary controlled close releases focus from hidden compact navigation",
       "file": "packages/elements/src/app-shell/sk-app-shell.ts",
       "from": "    if (changed.get('open') === true && this.open !== true) {\n      this.#releaseHiddenFocus();\n    }",

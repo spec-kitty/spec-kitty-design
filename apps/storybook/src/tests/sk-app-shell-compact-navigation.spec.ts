@@ -169,9 +169,10 @@ test(`${mode.label} native pointer and keyboard activation control state while r
   await expect(shell).toHaveAttribute('open', '');
   await expect(trigger).toHaveAttribute('aria-expanded', 'true');
 
-  await page.getByRole('link', { name: 'Missions' }).click();
+  await page.getByRole('link', { name: 'Overview' }).click();
   await expect(shell).not.toHaveAttribute('open', '');
   await expect(trigger).toHaveAttribute('aria-expanded', 'false');
+  expect(await page.evaluate(() => location.hash)).toBe('#overview');
   expect(await shell.evaluate((element) =>
     element.querySelector('[slot="compact-navigation"]')?.contains(document.activeElement),
   )).toBe(false);
@@ -180,6 +181,16 @@ test(`${mode.label} native pointer and keyboard activation control state while r
   await trigger.focus();
   await page.keyboard.press('Enter');
   await expect(shell).toHaveAttribute('open', '');
+  const route = page.getByRole('link', { name: 'Missions' });
+  await route.focus();
+  await page.keyboard.press('Enter');
+  expect(await page.evaluate(() => location.hash)).toBe('#missions');
+  await expect(shell).not.toHaveAttribute('open', '');
+  await expect(trigger).toHaveAttribute('aria-expanded', 'false');
+  await expect(trigger).not.toBeFocused();
+  expect(await shell.evaluate((element) =>
+    element.querySelector('[slot="compact-navigation"]')?.contains(document.activeElement),
+  )).toBe(false);
 });
 }
 
@@ -736,6 +747,75 @@ test('rail-preserving 1100↔1101 transitions preserve open and personal focus w
   await expect(shadowPart(shell, 'compact-navigation')).toBeVisible();
 });
 
+test('rail-preserving slot reassignment releases focus before exposed roots become hidden', async ({ page }) => {
+  const shell = await load(page, 'rail-preserving-open', { width: 1024, height: 720 });
+  const results = await shell.evaluate(async (element) => {
+    const appShell = element as HTMLElement & { open: boolean; updateComplete: Promise<unknown> };
+    const settle = async () => {
+      await Promise.resolve();
+      await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+      await appShell.updateComplete;
+    };
+    const moveFocusedRoot = async (
+      root: HTMLElement,
+      active: HTMLElement,
+      slot: 'context-sidebar' | 'compact-navigation',
+    ) => {
+      active.focus();
+      const focusedBefore = document.activeElement === active;
+      root.slot = slot;
+      await settle();
+      return {
+        focusedBefore,
+        focusedAfter: document.activeElement === active,
+        containsFocusAfter: root.contains(document.activeElement),
+        inert: root.getAttribute('inert'),
+        ariaHidden: root.getAttribute('aria-hidden'),
+      };
+    };
+
+    const navigation = appShell.querySelector<HTMLElement>('[slot="compact-navigation"]')!;
+    const navigationLink = navigation.querySelector<HTMLAnchorElement>('a')!;
+    const navigationToContext = await moveFocusedRoot(
+      navigation,
+      navigationLink,
+      'context-sidebar',
+    );
+
+    navigation.slot = 'compact-navigation';
+    await settle();
+    const personal = appShell.querySelector<HTMLElement>('[slot="personal-rail"]')!;
+    const personalLink = personal.querySelector<HTMLAnchorElement>('a')!;
+    const personalToContext = await moveFocusedRoot(personal, personalLink, 'context-sidebar');
+
+    const mainRoot = document.createElement('section');
+    const mainButton = document.createElement('button');
+    mainButton.textContent = 'Main action';
+    mainRoot.append(mainButton);
+    appShell.append(mainRoot);
+    await settle();
+    appShell.open = false;
+    await appShell.updateComplete;
+    const defaultToNavigation = await moveFocusedRoot(
+      mainRoot,
+      mainButton,
+      'compact-navigation',
+    );
+
+    return { navigationToContext, personalToContext, defaultToNavigation };
+  });
+
+  for (const [transition, result] of Object.entries(results)) {
+    expect(result, transition).toEqual({
+      focusedBefore: true,
+      focusedAfter: false,
+      containsFocusAfter: false,
+      inert: '',
+      ariaHidden: 'true',
+    });
+  }
+});
+
 test('rail-preserving is shell-relative inside a wider viewport and respects content-box padding', async ({ page }) => {
   const shell = await load(page, 'rail-preserving-open', { width: 1440, height: 900 });
   const result = await shell.evaluate(async (element) => {
@@ -793,15 +873,24 @@ test('rail-preserving closed/open navigation reuses the controlled dismissal sea
   expect(await closed.evaluate((element) =>
     element.shadowRoot!.querySelectorAll('nav,[role="navigation"]').length,
   )).toBe(0);
+  const personalWork = closed.locator('[slot="personal-rail"] a[href="#work"]');
+  const menu = closed.locator('[slot="compact-header"] button');
+  const hiddenContext = closed.locator('[slot="context-sidebar"]');
+  const hiddenNavigation = closed.locator('[slot="compact-navigation"]');
   await page.evaluate(() => {
     document.body.tabIndex = -1;
     document.body.focus();
   });
-  for (let tab = 0; tab < 6; tab += 1) {
+  await page.keyboard.press('Tab');
+  await expect(personalWork).toBeFocused();
+  await page.keyboard.press('Tab');
+  await expect(menu).toBeFocused();
+  for (let tab = 2; tab < 6; tab += 1) {
     await page.keyboard.press('Tab');
-    expect(await closed.evaluate((element) =>
-      !element.querySelector('[slot="compact-navigation"]')!.contains(document.activeElement),
-    )).toBe(true);
+    expect(await hiddenContext.evaluate((element) => !element.contains(document.activeElement)))
+      .toBe(true);
+    expect(await hiddenNavigation.evaluate((element) => !element.contains(document.activeElement)))
+      .toBe(true);
   }
 
   const open = await load(page, 'rail-preserving-open', { width: 1024, height: 720 });

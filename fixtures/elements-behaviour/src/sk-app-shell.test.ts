@@ -491,6 +491,54 @@ test.each(responsivePresentations)(
   },
 );
 
+test('[SC-012] rail-preserving slot changes release focus before an exposed root becomes hidden', async () => {
+  const { el, frame, personal, navigation, link } = await mountRailPreserving();
+  const settleSlotChange = async () => {
+    await Promise.resolve();
+    await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+    await el.updateComplete;
+  };
+
+  const navigationBlur = vi.spyOn(link, 'blur');
+  link.focus();
+  navigation.slot = 'context-sidebar';
+  await settleSlotChange();
+  expect(document.activeElement).not.toBe(link);
+  expect(navigationBlur).toHaveBeenCalledOnce();
+  expect([navigation.getAttribute('inert'), navigation.getAttribute('aria-hidden')])
+    .toEqual(['', 'true']);
+
+  navigation.slot = 'compact-navigation';
+  await settleSlotChange();
+  const personalLink = personal.querySelector<HTMLAnchorElement>('a')!;
+  const personalBlur = vi.spyOn(personalLink, 'blur');
+  personalLink.focus();
+  personal.slot = 'context-sidebar';
+  await settleSlotChange();
+  expect(document.activeElement).not.toBe(personalLink);
+  expect(personalBlur).toHaveBeenCalledOnce();
+  expect([personal.getAttribute('inert'), personal.getAttribute('aria-hidden')])
+    .toEqual(['', 'true']);
+
+  const mainRoot = document.createElement('section');
+  const mainButton = document.createElement('button');
+  mainButton.textContent = 'Main action';
+  mainRoot.append(mainButton);
+  el.append(mainRoot);
+  await settleSlotChange();
+  el.open = false;
+  await el.updateComplete;
+  const mainBlur = vi.spyOn(mainButton, 'blur');
+  mainButton.focus();
+  mainRoot.slot = 'compact-navigation';
+  await settleSlotChange();
+  expect(document.activeElement).not.toBe(mainButton);
+  expect(mainBlur).toHaveBeenCalledOnce();
+  expect([mainRoot.getAttribute('inert'), mainRoot.getAttribute('aria-hidden')])
+    .toEqual(['', 'true']);
+  frame.remove();
+});
+
 test.each(responsivePresentations)(
   '[SC-012] $label disconnect restores assigned roots and reconnect reapplies current inactive exposure',
   async ({ presentation, width }) => {

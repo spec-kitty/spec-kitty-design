@@ -229,6 +229,7 @@ export class SkAppShell extends LitElement {
   }
 
   #onExposureSlotChange = (): void => {
+    this.#releaseHiddenFocus();
     this.#reconcileAssignedRootExposure();
   };
 
