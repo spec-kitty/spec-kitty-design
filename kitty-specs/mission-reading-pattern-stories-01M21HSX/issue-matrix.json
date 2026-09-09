@@ -37,7 +37,7 @@
       "wp": null
     },
     "#263": {
-      "evidence_ref": "#264 merged as a78445552e42cb6bbde4e1d2e497137bc30c9dee and passed post-merge review; #265 product head a36f3b72f68a00bc04ffe0cf49dbf2d362e6358e is approved and pending final acceptance, train merge, and post-merge review.",
+      "evidence_ref": "#264 is merged and post-merge verified; #265 product head a36f3b72f68a00bc04ffe0cf49dbf2d362e6358e is independently approved and Spec Kitty acceptance is PASS; only train merge and post-merge mission review remain.",
       "fr": "FR-001\u2013FR-013",
       "nfr": "NFR-001\u2013NFR-007",
       "repo": "spec-kitty/spec-kitty-design",
