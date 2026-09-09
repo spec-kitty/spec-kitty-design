@@ -1968,7 +1968,7 @@
       "id": "SC-017",
       "arm": "rail-preserving CSS retains the personal-rail plus content grid",
       "file": "packages/elements/src/app-shell/sk-app-shell.css.js",
-      "from": "grid-template-columns:\n      var(--sk-layout-personal-rail-width)\n      minmax(0, 1fr);",
+      "from": "grid-template-columns:\\n      var(--sk-layout-personal-rail-width)\\n      minmax(0, 1fr);",
       "to": "grid-template-columns: minmax(0, 1fr);",
       "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
     },
@@ -1976,8 +1976,8 @@
       "id": "SC-017",
       "arm": "forced colors retains the rail-preserving navigation boundary selector",
       "file": "packages/elements/src/app-shell/sk-app-shell.css.js",
-      "from": ":host([presentation=\"rail-preserving\"]) .sk-app-shell__compact-header:focus-within,\n  :host([presentation=\"rail-preserving\"]) .sk-app-shell__compact-navigation {",
-      "to": ":host([presentation=\"rail-preserving\"]) .sk-app-shell__compact-header:focus-within {",
+      "from": ":host([presentation=\\\"rail-preserving\\\"]) .sk-app-shell__compact-header:focus-within,\\n  :host([presentation=\\\"rail-preserving\\\"]) .sk-app-shell__compact-navigation {",
+      "to": ":host([presentation=\\\"rail-preserving\\\"]) .sk-app-shell__compact-header:focus-within {",
       "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
     }
   ]

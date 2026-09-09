@@ -130,9 +130,14 @@ fixture collection/import failure under concurrent host load. The isolated arm l
 REDs, then correctly failed its final authored-input fingerprint because the agent-created empty
 `fixtures/elements-behaviour/src/__screenshots__/sk-app-shell.test.ts/` directory was removed after
 the harness had frozen its input directory tree. That mixed-revision log also remains invalid. The
-correction commit freezes the canonically regenerated input tree before one exclusive 223-arm
-sweep; its exact command, result and log digest are recorded in the PR evidence because they cannot
-be circularly embedded in the commit under test.
+first committed-tree sweep then kept its fingerprint stable and made all 221 inherited arms red,
+but rejected the two new generated-CSS arms as pattern misses: their JSON values decoded to real
+newlines and unescaped quotes while the generated JavaScript source contains literal `\\n` and
+`\\"` bytes inside `replaceSync(...)`. Each corrected anchor occurs exactly once. Applying either
+mutation in a temporary frozen checkout made only the named SC-017 relational assertion red. The
+follow-up commit freezes those corrected anchors before another exclusive 223-arm sweep; its exact
+command, result and log digest are recorded in PR evidence because they cannot be circularly
+embedded in the commit under test.
 
 The canonical three-browser Playwright run with a mission-local `TMPDIR` passed 640 tests and
 skipped 29, but failed 300: the host lacks the libraries Playwright requires to launch WebKit,
