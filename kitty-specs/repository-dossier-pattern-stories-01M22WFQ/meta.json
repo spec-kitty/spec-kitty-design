@@ -1,5 +1,4 @@
 {
-  "accept_commit": "075edf64356f75eac76468bba67b582a3dded629",
   "acceptance_history": [
     {
       "accept_commit": "075edf64356f75eac76468bba67b582a3dded629",
@@ -7,12 +6,18 @@
       "accepted_at": "2026-09-09T18:19:07.158367+00:00",
       "accepted_by": "codex-acceptance",
       "accepted_from_commit": "75ce408543dfc54c15c97dd69089c6cd20012a60"
+    },
+    {
+      "acceptance_mode": "pr",
+      "accepted_at": "2026-09-09T22:24:08.127711+00:00",
+      "accepted_by": "codex-acceptance",
+      "accepted_from_commit": "1a4495413497a0be23e57a2a1cfb0f5fc7d246df"
     }
   ],
   "acceptance_mode": "pr",
-  "accepted_at": "2026-09-09T18:19:07.158367+00:00",
+  "accepted_at": "2026-09-09T22:24:08.127711+00:00",
   "accepted_by": "codex-acceptance",
-  "accepted_from_commit": "75ce408543dfc54c15c97dd69089c6cd20012a60",
+  "accepted_from_commit": "1a4495413497a0be23e57a2a1cfb0f5fc7d246df",
   "created_at": "2026-09-09T10:47:43.110080+00:00",
   "flattened": false,
   "friendly_name": "repository dossier pattern stories",
