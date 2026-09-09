@@ -353,18 +353,29 @@ async function mountFixture(
 }
 
 test.describe("compact event timeline accessibility", () => {
-  test("leading markers never contribute to the supplied event name", async ({
+  test("every leading marker is hidden while its supplied summary remains exposed", async ({
     page,
   }) => {
-    const root = await mountFixture(
-      page,
-      "sk-event-timeline-compact-leading-marker.html",
-    );
-    const item = root.locator(":scope > li.sk-event-timeline__item").first();
-    const snapshot = await item.ariaSnapshot();
+    for (const fixture of compactFixtures) {
+      const root = await mountFixture(page, fixture);
+      const markers = root.locator(
+        ":scope > li.sk-event-timeline__item > .sk-event-timeline__leading-marker",
+      );
 
-    expect(snapshot).toContain("1. Evidence received");
-    expect(snapshot).not.toContain("Decorative milestone");
+      for (let index = 0; index < (await markers.count()); index += 1) {
+        const marker = markers.nth(index);
+        const item = marker.locator("..");
+        const summary = item.locator(":scope > .sk-event-timeline__summary");
+        const snapshot = await item.ariaSnapshot();
+        const markerText = (await marker.textContent())?.trim();
+
+        await expect(marker).toHaveAttribute("aria-hidden", "true");
+        expect(snapshot).toContain((await summary.textContent())!.trim());
+        if (markerText) {
+          expect(snapshot).not.toContain(markerText);
+        }
+      }
+    }
   });
 });
 
@@ -531,11 +542,16 @@ async function expectFocusInsideViewport(anchor: Locator) {
     return {
       left: box.left - outline - offset,
       right: box.right + outline + offset,
-      viewport: scroller.clientWidth,
+      top: box.top - outline - offset,
+      bottom: box.bottom + outline + offset,
+      viewportWidth: scroller.clientWidth,
+      viewportHeight: scroller.clientHeight,
     };
   });
   expect(geometry.left).toBeGreaterThanOrEqual(0);
-  expect(geometry.right).toBeLessThanOrEqual(geometry.viewport + 1);
+  expect(geometry.right).toBeLessThanOrEqual(geometry.viewportWidth + 1);
+  expect(geometry.top).toBeGreaterThanOrEqual(0);
+  expect(geometry.bottom).toBeLessThanOrEqual(geometry.viewportHeight + 1);
 }
 
 test.describe("compact event timeline density and resilience", () => {
