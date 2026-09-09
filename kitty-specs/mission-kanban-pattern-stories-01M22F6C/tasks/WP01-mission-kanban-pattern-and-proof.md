@@ -72,6 +72,7 @@ authoritative_surface: packages/elements/src/patterns/mission-kanban.stories.ts
 create_intent:
 - packages/elements/src/patterns/mission-kanban.stories.ts
 - apps/storybook/src/tests/sk-mission-kanban-pattern.spec.ts
+- docs/architecture/validation/issue-278-mission-kanban-zoom/**
 execution_mode: code_change
 owned_files:
 - packages/elements/src/patterns/mission-kanban.stories.ts
@@ -81,6 +82,7 @@ owned_files:
 - expected-stories.json
 - apps/storybook/src/tests/visual.spec.ts
 - apps/storybook/src/tests/visual.spec.ts-snapshots/mission-kanban-*.png
+- docs/architecture/validation/issue-278-mission-kanban-zoom/**
 priority: P1
 role: implementer
 tags:
@@ -128,7 +130,7 @@ vocabulary/reduction, routes, and every application claim consumer-owned. Do not
 
 ## Files and ownership
 
-Only these seven authored/product evidence surface groups may change:
+Only these eight authored/product evidence surface groups may change:
 
 ```text
 packages/elements/src/patterns/mission-kanban.stories.ts
@@ -138,6 +140,7 @@ apps/storybook/src/tests/sk-checkbox-choice-group.spec.ts
 expected-stories.json
 apps/storybook/src/tests/visual.spec.ts
 apps/storybook/src/tests/visual.spec.ts-snapshots/mission-kanban-*.png
+docs/architecture/validation/issue-278-mission-kanban-zoom/**
 ```
 
 The Storybook module owns fixture types/data, deep-freeze and guard functions, pure projections,
@@ -448,8 +451,9 @@ matches the committed/observed/empty semantics.
 ## T011 — Render, inspect, and baseline every story
 
 **Requirements**: FR-019–FR-020; NFR-003, NFR-005–NFR-007, NFR-010; C-007–C-010  
-**Files**: `apps/storybook/src/tests/visual.spec.ts` and new
-`apps/storybook/src/tests/visual.spec.ts-snapshots/mission-kanban-*.png` only  
+**Files**: `apps/storybook/src/tests/visual.spec.ts`, new
+`apps/storybook/src/tests/visual.spec.ts-snapshots/mission-kanban-*.png`, and
+`docs/architecture/validation/issue-278-mission-kanban-zoom/**` only
 **Depends on**: T010
 
 1. Add one #278 visual case for each of the ten emitted stories. Use 390×844 for K2; real media
@@ -460,6 +464,13 @@ matches the committed/observed/empty semantics.
 3. Separately inspect K2/long content at calibrated 200% zoom for page overflow and clipped focus.
 4. Use local screenshots diagnostically. Obtain Ubuntu CI candidates, inspect each, promote only
    ten intended new `mission-kanban-*` baselines, and leave every existing PNG byte unchanged.
+
+The bounded `docs/architecture/validation/issue-278-mission-kanban-zoom/**` directory is required
+for T011 to retain the real browser-UI 100%/200% captures, metrics, and inspection disposition as
+durable review evidence rather than ephemeral local diagnostics. T012 owns revalidating that exact
+evidence at the final head. This is the narrow documentation path required by issue #278's 200%-zoom
+evidence contract (NFR-003/NFR-010); no other validation directory or documentation surface is
+authorized.
 
 **Commands**:
 
@@ -555,7 +566,7 @@ git status --short --branch
 `npm run tokens:catalogue` is conditional only if an authorized token change exists. This WP
 authorizes none: stop and return to planning if a new token appears necessary.
 
-**Done when**: all commands pass on the final rebased head; only the seven owned file groups have
+**Done when**: all commands pass on the final rebased head; only the eight owned file groups have
 intentional deltas; generated/public surfaces and legacy baselines are unchanged; exactly ten
 stories are ratcheted/axe-clean/visually approved; one-WP evidence maps every requirement and SC;
 and #279–#284 remain untouched.

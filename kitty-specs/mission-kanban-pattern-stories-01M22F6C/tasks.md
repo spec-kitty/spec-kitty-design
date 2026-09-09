@@ -24,8 +24,8 @@ fixture that must reconcile every truth claim.
 | T008 | Render K6 plus real `LightMode`, long-content, forced-colors, and reduced-motion evidence without inventing data or behavior (FR-017, FR-019; NFR-001–NFR-006, NFR-010; C-002–C-007, C-010). | WP01 | T004–T007 | No |
 | T009 | Complete story/play/source invariants, exclude helper exports, build the exact ten story IDs, and update only the authored story ratchet (FR-001–FR-020; NFR-008–NFR-009; C-001–C-010). | WP01 | T002–T008 | No |
 | T010 | Complete the focused Chromium/Firefox/WebKit accessibility-tree, keyboard, route, checkbox, scroller, zoom, theme, forced-colors, and reduced-motion suite; run all-story axe (FR-007–FR-020; NFR-001–NFR-006, NFR-009; C-003–C-006). | WP01 | T009 | No |
-| T011 | Add ten #278-only visual cases/baselines, render and inspect every story and 200%-zoom state against the approved K1–K6 evidence, and preserve legacy baselines (FR-019–FR-020; NFR-003, NFR-005–NFR-007, NFR-010; C-007–C-010). | WP01 | T010 | No |
-| T012 | Refresh/rebase, regenerate/check all surfaces, prove public/generated delta zero, run the full exact-head quality/release/security suite, audit #279–#284 exclusion, and return the evidence ledger for independent review (all requirements and SC-001–SC-008). | WP01 | T001–T011 | No |
+| T011 | Add ten #278-only visual cases/baselines, render and inspect every story and real browser-UI 100%/200%-zoom state against the approved K1–K6 evidence, retain that zoom proof under the bounded issue-278 validation path, and preserve legacy baselines (FR-019–FR-020; NFR-003, NFR-005–NFR-007, NFR-010; C-007–C-010). | WP01 | T010 | No |
+| T012 | Refresh/rebase, revalidate the durable issue-278 zoom evidence at the exact head, regenerate/check all surfaces, prove public/generated delta zero, run the full quality/release/security suite, audit #279–#284 exclusion, and return the evidence ledger for independent review (all requirements and SC-001–SC-008). | WP01 | T001–T011 | No |
 
 No `[P]` marker is valid. The story module, preview seam, story ratchet, visual suite, and snapshots
 are shared write surfaces, and each later proof depends on the same completed fixture/render graph.
@@ -48,7 +48,11 @@ are shared write surfaces, and each later proof depends on the same completed fi
   `apps/storybook/.storybook/preview.ts`,
   `apps/storybook/src/tests/sk-mission-kanban-pattern.spec.ts`,
   `expected-stories.json`,
-  `apps/storybook/src/tests/visual.spec.ts`, and new `mission-kanban-*.png` baselines only.
+  `apps/storybook/src/tests/visual.spec.ts`, new `mission-kanban-*.png` baselines, and
+  `docs/architecture/validation/issue-278-mission-kanban-zoom/**` only. The bounded validation path
+  retains T011's real browser-UI 100%/200% captures and metrics as issue #278 NFR-003/NFR-010
+  evidence; T012 revalidates that durable evidence at the final exact head. No other docs path is
+  authorized.
 - **Forbidden scope**: any public `sk-mission-kanban`; package/barrel/manifest/wrapper/token change;
   application import or behavior; generated-file hand edit; and any #279–#284 artifact or contract.
 
