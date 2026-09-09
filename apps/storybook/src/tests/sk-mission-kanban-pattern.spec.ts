@@ -20,21 +20,21 @@ const STORY_IDS = [
 type StoryId = typeof STORY_IDS[number];
 
 const WORK_PACKAGES = [
-  ['WP04', 'planned', 'implementer-ivan', '1051'],
-  ['WP05', 'blocked', 'researcher-robbie', '1054'],
-  ['WP06', 'planned', 'implementer-ivan', ''],
-  ['WP03', 'in_progress', 'implementer-ivan', '1048'],
-  ['WP07', 'claimed', 'reviewer-rachel', ''],
-  ['WP08', 'in_progress', 'implementer-ivan', ''],
-  ['WP09', 'in_progress', 'implementer-ivan', ''],
-  ['WP02', 'for_review', 'reviewer-rachel', '1046'],
-  ['WP10', 'in_review', 'reviewer-rachel', ''],
-  ['WP11', 'for_review', 'reviewer-rachel', ''],
-  ['WP01', 'approved', 'reviewer-rachel', '1043'],
-  ['WP12', 'done', 'implementer-ivan', ''],
-  ['WP13', 'done', 'implementer-ivan', ''],
-  ['WP14', 'done', 'implementer-ivan', ''],
-  ['WP15', 'done', 'implementer-ivan', ''],
+  ['WP04', 'planned', 'implementer-ivan', '1051', 'neutral'],
+  ['WP05', 'blocked', 'researcher-robbie', '1054', 'danger'],
+  ['WP06', 'planned', 'implementer-ivan', '', 'neutral'],
+  ['WP03', 'in_progress', 'implementer-ivan', '1048', 'info'],
+  ['WP07', 'claimed', 'reviewer-rachel', '', 'info'],
+  ['WP08', 'in_progress', 'implementer-ivan', '', 'info'],
+  ['WP09', 'in_progress', 'implementer-ivan', '', 'info'],
+  ['WP02', 'for_review', 'reviewer-rachel', '1046', 'recovery'],
+  ['WP10', 'in_review', 'reviewer-rachel', '', 'recovery'],
+  ['WP11', 'for_review', 'reviewer-rachel', '', 'recovery'],
+  ['WP01', 'approved', 'reviewer-rachel', '1043', 'success'],
+  ['WP12', 'done', 'implementer-ivan', '', 'success'],
+  ['WP13', 'done', 'implementer-ivan', '', 'success'],
+  ['WP14', 'done', 'implementer-ivan', '', 'success'],
+  ['WP15', 'done', 'implementer-ivan', '', 'success'],
 ] as const;
 
 async function openStory(
@@ -61,46 +61,119 @@ async function documentGeometry(page: Page) {
 
 async function focusGeometry(control: Locator) {
   return control.evaluate((node) => {
+    const subpixelTolerance = 1;
     const rect = node.getBoundingClientRect();
     const style = getComputedStyle(node);
     const extent = Math.max(
       0,
       Number.parseFloat(style.outlineWidth) + Number.parseFloat(style.outlineOffset),
     );
+    const composedParent = (element: Element): Element | null => {
+      if (element.parentElement) return element.parentElement;
+      const root = element.getRootNode();
+      return root instanceof ShadowRoot ? root.host : null;
+    };
     let clipped = false;
-    for (let ancestor = node.parentElement; ancestor; ancestor = ancestor.parentElement) {
+    const clippingAncestors: Array<{
+      name: string;
+      left: number;
+      right: number;
+      clientWidth: number;
+      scrollLeft: number;
+      scrollWidth: number;
+    }> = [];
+    for (let ancestor = composedParent(node); ancestor; ancestor = composedParent(ancestor)) {
       const ancestorStyle = getComputedStyle(ancestor);
-      const clipsX = ['hidden', 'clip'].includes(ancestorStyle.overflowX);
-      const clipsY = ['hidden', 'clip'].includes(ancestorStyle.overflowY);
+      const clipsX = ['hidden', 'clip', 'auto', 'scroll'].includes(ancestorStyle.overflowX);
+      const clipsY = ['hidden', 'clip', 'auto', 'scroll'].includes(ancestorStyle.overflowY);
       if (!clipsX && !clipsY) continue;
-      const boundary = ancestor.getBoundingClientRect();
+      const ancestorRect = ancestor.getBoundingClientRect();
+      const boundary = {
+        left: ancestorRect.left,
+        right: ancestorRect.right,
+        top: ancestorRect.top,
+        bottom: ancestorRect.bottom,
+      };
+      clippingAncestors.push({
+        name: ancestor.getAttribute('data-board-scroller') !== null
+          ? 'board-scroller'
+          : ancestor.localName,
+        left: boundary.left,
+        right: boundary.right,
+        clientWidth: ancestor.clientWidth,
+        scrollLeft: ancestor.scrollLeft,
+        scrollWidth: ancestor.scrollWidth,
+      });
       if (
-        (clipsX && (rect.left - extent < boundary.left || rect.right + extent > boundary.right)) ||
-        (clipsY && (rect.top - extent < boundary.top || rect.bottom + extent > boundary.bottom))
+        (clipsX && (
+          rect.left - extent < boundary.left - subpixelTolerance ||
+          rect.right + extent > boundary.right + subpixelTolerance
+        )) ||
+        (clipsY && (
+          rect.top - extent < boundary.top - subpixelTolerance ||
+          rect.bottom + extent > boundary.bottom + subpixelTolerance
+        ))
       ) clipped = true;
     }
     return {
       clipped,
+      clippingAncestors,
       outlineStyle: style.outlineStyle,
       outlineWidth: Number.parseFloat(style.outlineWidth),
+      outlineExtent: extent,
+      rect: { left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom },
+      viewport: {
+        width: document.documentElement.clientWidth,
+        height: document.documentElement.clientHeight,
+      },
       withinViewport:
-        rect.left - extent >= 0 &&
-        rect.right + extent <= document.documentElement.clientWidth &&
-        rect.top - extent >= 0 &&
-        rect.bottom + extent <= document.documentElement.clientHeight,
+        rect.left - extent >= -subpixelTolerance &&
+        rect.right + extent <= document.documentElement.clientWidth + subpixelTolerance &&
+        rect.top - extent >= -subpixelTolerance &&
+        rect.bottom + extent <= document.documentElement.clientHeight + subpixelTolerance,
     };
   });
 }
 
 async function assertVisibleFocus(control: Locator): Promise<void> {
-  await control.scrollIntoViewIfNeeded();
-  await control.focus();
   await expect(control).toBeFocused();
   const geometry = await focusGeometry(control);
   expect(geometry.outlineStyle).not.toBe('none');
   expect(geometry.outlineWidth).toBeGreaterThan(0);
-  expect(geometry.clipped).toBe(false);
-  expect(geometry.withinViewport).toBe(true);
+  expect(geometry.clipped, JSON.stringify(geometry)).toBe(false);
+  expect(geometry.withinViewport, JSON.stringify(geometry)).toBe(true);
+}
+
+async function revealFocusedControlByKeyboard(page: Page, control: Locator): Promise<void> {
+  await expect(control).toBeFocused();
+  for (let index = 0; index < 48; index += 1) {
+    const geometry = await focusGeometry(control);
+    if (!geometry.clipped && geometry.withinViewport) {
+      await assertVisibleFocus(control);
+      return;
+    }
+    if (geometry.rect.bottom > geometry.viewport.height) {
+      await page.keyboard.press('PageDown');
+    } else if (geometry.rect.top < 0) {
+      await page.keyboard.press('PageUp');
+    }
+    if (geometry.clipped || geometry.rect.right > geometry.viewport.width) {
+      await page.keyboard.press('ArrowRight');
+    }
+    await page.evaluate(() => new Promise<void>((resolve) => {
+      requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+    }));
+  }
+  await assertVisibleFocus(control);
+}
+
+async function focusByKeyboard(page: Page, control: Locator, maximumTabs = 96): Promise<void> {
+  await page.locator('body').click({ position: { x: 1, y: 1 } });
+  for (let index = 0; index < maximumTabs; index += 1) {
+    await page.keyboard.press('Tab');
+    if (await control.evaluate((node) => node.matches(':focus'))) return;
+  }
+  throw new Error(`Keyboard traversal did not reach target after ${maximumTabs} Tab presses.`);
 }
 
 type ObserverProbeSnapshot = Readonly<{
@@ -235,13 +308,73 @@ test('[T002/T009] fixture guards, deep freeze, and source ownership invariants f
       duplicateTrackerControl: true,
       multipleStageMembership: true,
       wrongStageMembership: true,
-      nonEmptyUnmappedLane: true,
-      wrongDetailedLaneCounts: true,
-      wrongK3Selection: true,
+    nonEmptyUnmappedLane: true,
+    wrongDetailedLaneCounts: true,
+    wrongStatusTone: true,
+    wrongK3Selection: true,
       unknownSelection: true,
       unknownWorkPackage: true,
     }),
   );
+
+  const directImmutabilityProof = await root.evaluate((node) => {
+    type TestSeam = {
+      fixture: {
+        workPackages: Array<{ id: string }>;
+      };
+      projection: {
+        stages: Array<{ workPackages: Array<{ id: string }> }>;
+      };
+      derive: () => {
+        stages: Array<{ workPackages: Array<{ id: string }> }>;
+      };
+    };
+    const seam = (node as HTMLElement & { __missionKanbanTestSeam?: TestSeam })
+      .__missionKanbanTestSeam;
+    if (!seam) return { available: false };
+
+    const deeplyFrozen = (value: unknown): boolean => value === null || typeof value !== 'object' || (
+      Object.isFrozen(value) && Object.values(value as Record<string, unknown>).every(deeplyFrozen)
+    );
+    const fixtureBefore = JSON.stringify(seam.fixture);
+    const firstProjection = seam.derive();
+    const firstBefore = JSON.stringify(firstProjection);
+    let fixtureMutationBlocked = false;
+    let projectionMutationThrew = false;
+    try {
+      fixtureMutationBlocked = !Reflect.set(seam.fixture.workPackages[0]!, 'id', 'WP99');
+    } catch {
+      fixtureMutationBlocked = true;
+    }
+    try {
+      firstProjection.stages[0]!.workPackages.push({ id: 'WP99' });
+    } catch {
+      projectionMutationThrew = true;
+    }
+    const repeatedProjection = seam.derive();
+    return {
+      available: true,
+      fixtureDeeplyFrozen: deeplyFrozen(seam.fixture),
+      projectionDeeplyFrozen: deeplyFrozen(firstProjection),
+      fixtureMutationBlocked,
+      projectionMutationThrew,
+      fixtureUnchanged: JSON.stringify(seam.fixture) === fixtureBefore,
+      priorProjectionUnchanged: JSON.stringify(firstProjection) === firstBefore,
+      repeatedProjectionEqual: JSON.stringify(repeatedProjection) === firstBefore,
+      renderedProjectionIndependent: seam.projection !== firstProjection,
+    };
+  });
+  expect(directImmutabilityProof).toEqual({
+    available: true,
+    fixtureDeeplyFrozen: true,
+    projectionDeeplyFrozen: true,
+    fixtureMutationBlocked: true,
+    projectionMutationThrew: true,
+    fixtureUnchanged: true,
+    priorProjectionUnchanged: true,
+    repeatedProjectionEqual: true,
+    renderedProjectionIndependent: true,
+  });
 
   const source = readFileSync(STORY_SOURCE, 'utf8');
   for (const forbidden of [
@@ -292,10 +425,11 @@ test('[T004] K1 has the exact native stage/list reduction and all supplied facts
   expect(renderedIds).toEqual(WORK_PACKAGES.map(([id]) => id));
   expect(new Set(renderedIds).size).toBe(15);
 
-  for (const [id, lane, profile, tracker] of WORK_PACKAGES) {
+  for (const [id, lane, profile, tracker, tone] of WORK_PACKAGES) {
     const item = root.locator(`[data-work-package-id="${id}"]`);
     await expect(item).toHaveAttribute('data-committed-lane', lane);
     await expect(item.getByText(profile, { exact: true })).toBeVisible();
+    await expect(item.locator('sk-status-indicator[slot="tags"]')).toHaveAttribute('tone', tone);
     const row = item.locator('sk-action-row');
     await expect(row).toHaveAttribute('layout', 'card');
     await expect(row).toHaveAttribute(
@@ -333,6 +467,7 @@ test('[T004/T010] K1 route rows preserve native keyboard and pointer gesture sem
   const root = await openStory(page, 'default');
   const row = root.locator('[data-work-package-id="WP04"] sk-action-row');
   const route = row.locator('[part="trigger"]');
+  await focusByKeyboard(page, route);
   await assertVisibleFocus(route);
 
   await row.evaluate(async (node) => {
@@ -360,6 +495,8 @@ test('[T004/T010] K1 route rows preserve native keyboard and pointer gesture sem
   }));
   expect(gestures).toEqual({ ctrl: true, meta: true, context: true });
   const tracker = row.getByRole('link', { name: '#1051', exact: true });
+  await route.focus();
+  await page.keyboard.press('Tab');
   await assertVisibleFocus(tracker);
   await expect(route).not.toBeFocused();
 });
@@ -391,10 +528,11 @@ test('[T005] K2 owns genuine local overflow at 390px with a lane glimpse and foc
   expect(laneGeometry.firstWidth).toBeLessThanOrEqual(laneGeometry.clientWidth);
   expect(laneGeometry.secondLeft).toBeLessThan(laneGeometry.right);
 
-  await scroller.focus();
-  await expect(scroller).toBeFocused();
   const lastRoute = root.locator('[data-work-package-id="WP15"] sk-action-row [part="trigger"]');
-  await assertVisibleFocus(lastRoute);
+  const scrollLeftBeforeFocus = await scroller.evaluate((node) => node.scrollLeft);
+  await focusByKeyboard(page, lastRoute);
+  await revealFocusedControlByKeyboard(page, lastRoute);
+  expect(await scroller.evaluate((node) => node.scrollLeft)).toBeGreaterThan(scrollLeftBeforeFocus);
   const [focusedRect, scrollerRect] = await Promise.all([lastRoute.boundingBox(), scroller.boundingBox()]);
   const focusedWithinScroller = focusedRect !== null && scrollerRect !== null &&
     focusedRect.x >= scrollerRect.x - 1 &&
@@ -402,7 +540,7 @@ test('[T005] K2 owns genuine local overflow at 390px with a lane glimpse and foc
   expect(focusedWithinScroller).toBe(true);
 });
 
-test('[T005/T010] K2 calibrated 200% zoom keeps overflow local and long-path focus visible', async ({
+test('[T005/T010] K2 CSS zoom stress keeps overflow local and long-path focus visible', async ({
   page,
 }) => {
   const root = await openStory(page, 'k-2-narrow-contained', { width: 780, height: 1688 });
@@ -421,13 +559,15 @@ test('[T005/T010] K2 calibrated 200% zoom keeps overflow local and long-path foc
   expect(geometry.scrollWidth).toBeLessThanOrEqual(geometry.clientWidth + 1);
   const scroller = root.locator('[data-board-scroller]');
   expect(await scroller.evaluate((node) => node.scrollWidth > node.clientWidth + 1)).toBe(true);
-  await assertVisibleFocus(root.locator('[data-work-package-id="WP15"] sk-action-row [part="trigger"]'));
+  const lastRoute = root.locator('[data-work-package-id="WP15"] sk-action-row [part="trigger"]');
+  await focusByKeyboard(page, lastRoute);
+  await revealFocusedControlByKeyboard(page, lastRoute);
   if (process.env['PW_CAPTURE_MISSION_KANBAN']) {
     await page.screenshot({ path: '/tmp/mission-kanban-k2-zoom-200.png', fullPage: true });
   }
 });
 
-test('[T005/T010] long content at calibrated 200% zoom remains locally contained', async ({
+test('[T005/T010] long-content CSS zoom stress remains locally contained', async ({
   page,
 }) => {
   const root = await openStory(page, 'long-content', { width: 780, height: 2400 });
@@ -437,7 +577,9 @@ test('[T005/T010] long content at calibrated 200% zoom remains locally contained
   expect(geometry.scrollWidth).toBeLessThanOrEqual(geometry.clientWidth + 1);
   const scroller = root.locator('[data-board-scroller]');
   expect(await scroller.evaluate((node) => node.scrollWidth > node.clientWidth + 1)).toBe(true);
-  await assertVisibleFocus(root.locator('[data-work-package-id="WP15"] sk-action-row [part="trigger"]'));
+  const lastRoute = root.locator('[data-work-package-id="WP15"] sk-action-row [part="trigger"]');
+  await focusByKeyboard(page, lastRoute);
+  await revealFocusedControlByKeyboard(page, lastRoute);
   if (process.env['PW_CAPTURE_MISSION_KANBAN']) {
     await page.screenshot({ path: '/tmp/mission-kanban-long-zoom-200.png', fullPage: true });
   }
@@ -555,6 +697,7 @@ test('[T008/T010] genuinely overflowing K6 owns the complete scroller triad and 
   await expect(scroller).toHaveAttribute('role', 'region');
   await expect(scroller).toHaveAccessibleName('Work package Kanban');
   await expect(scroller).toHaveAttribute('tabindex', '0');
+  await focusByKeyboard(page, scroller);
   await assertVisibleFocus(scroller);
 });
 
@@ -582,6 +725,7 @@ test('[T005/T008/T010] one mounted K6 synchronizes the scroller triad across bid
   await expect(root).toHaveAttribute('data-live-resize-sentinel', 'same-root');
   geometry = await documentGeometry(page);
   expect(geometry.scrollWidth).toBeLessThanOrEqual(geometry.clientWidth + 1);
+  await focusByKeyboard(page, scroller);
   await assertVisibleFocus(scroller);
 
   await page.setViewportSize({ width: 1600, height: 1000 });
@@ -669,6 +813,7 @@ test('[T008/T010] long content remains locally contained with visible route focu
   const breadcrumbScroller = root.locator('.sk-breadcrumbs__list');
   expect(await breadcrumbScroller.evaluate((node) => node.scrollWidth > node.clientWidth + 1)).toBe(true);
   const finalBreadcrumb = breadcrumbScroller.getByRole('link', { name: 'Kanban', exact: true });
+  await focusByKeyboard(page, finalBreadcrumb);
   await assertVisibleFocus(finalBreadcrumb);
   const [breadcrumbRect, breadcrumbBoundary] = await Promise.all([
     finalBreadcrumb.boundingBox(),
@@ -679,7 +824,12 @@ test('[T008/T010] long content remains locally contained with visible route focu
     breadcrumbRect.x >= breadcrumbBoundary.x - 1 &&
     breadcrumbRect.x + breadcrumbRect.width <= breadcrumbBoundary.x + breadcrumbBoundary.width + 1,
   ).toBe(true);
-  await assertVisibleFocus(root.locator('[data-work-package-id="WP15"] sk-action-row [part="trigger"]'));
+  const lastRoute = root.locator('[data-work-package-id="WP15"] sk-action-row [part="trigger"]');
+  const scrollLeftBeforeFocus = await root.locator('[data-board-scroller]').evaluate((node) => node.scrollLeft);
+  await focusByKeyboard(page, lastRoute);
+  await revealFocusedControlByKeyboard(page, lastRoute);
+  expect(await root.locator('[data-board-scroller]').evaluate((node) => node.scrollLeft))
+    .toBeGreaterThan(scrollLeftBeforeFocus);
 });
 
 test('[T008/T010] forced colors retain boundaries, focus, and non-color truth labels', async ({
@@ -691,7 +841,43 @@ test('[T008/T010] forced colors retain boundaries, focus, and non-color truth la
   await expect(root).toContainText('Snapshot behind log');
   await expect(root).toContainText('Observed · up to 60 s behind');
   await expect(root).toContainText('Reported live · ≤90s');
+  const checkboxes = root.getByRole('checkbox');
+  await expect(checkboxes).toHaveCount(10);
+  expect(await checkboxes.evaluateAll((nodes) => nodes
+    .filter((node) => (node as HTMLInputElement).checked)
+    .map((node) => (node as HTMLInputElement).value))).toEqual(['in_review', 'blocked']);
+  const checked = root.locator('input[type="checkbox"]:checked').first();
+  const unchecked = root.locator('input[type="checkbox"]:not(:checked)').first();
+  const cue = (control: Locator) => control.evaluate((node) => {
+    const choice = node.closest('.sk-checkbox-choice-group__choice')!;
+    const style = getComputedStyle(choice);
+    return {
+      borderStyle: style.borderBlockEndStyle,
+      borderWidth: style.borderWidth,
+      borderBlockEndWidth: style.borderBlockEndWidth,
+      fontWeight: style.fontWeight,
+    };
+  });
+  expect(await cue(checked)).not.toEqual(await cue(unchecked));
+  await focusByKeyboard(page, checked);
+  await assertVisibleFocus(checked);
+  const checkedBoundary = await checked.evaluate((node) => {
+    const choice = node.closest('.sk-checkbox-choice-group__choice')!;
+    const choiceStyle = getComputedStyle(choice);
+    const controlRect = node.getBoundingClientRect();
+    return {
+      controlWidth: controlRect.width,
+      controlHeight: controlRect.height,
+      choiceBorderStyle: choiceStyle.borderBlockEndStyle,
+      choiceBorderWidth: Number.parseFloat(choiceStyle.borderBlockEndWidth),
+    };
+  });
+  expect(checkedBoundary.controlWidth).toBeGreaterThan(0);
+  expect(checkedBoundary.controlHeight).toBeGreaterThan(0);
+  expect(checkedBoundary.choiceBorderStyle).not.toBe('none');
+  expect(checkedBoundary.choiceBorderWidth).toBeGreaterThan(0);
   const route = root.locator('[data-work-package-id="WP03"] sk-action-row [part="trigger"]');
+  await focusByKeyboard(page, route);
   await assertVisibleFocus(route);
   const boundary = await root.locator('[data-reported-activity]').evaluate((node) => {
     const probe = document.createElement('span');

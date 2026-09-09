@@ -10,7 +10,10 @@ import '../notice/sk-notice.js';
 import '../page-header/sk-page-header.js';
 import '../personal-rail/sk-personal-rail.js';
 import '../pill-tag/sk-pill-tag.js';
-import '../status-indicator/sk-status-indicator.js';
+import {
+  STATUS_TONES,
+  type StatusIndicatorTone,
+} from '../status-indicator/sk-status-indicator.js';
 
 type Primitive = string | number | boolean | bigint | symbol | null | undefined;
 type DeepReadonly<T> = T extends Primitive | ((...args: never[]) => unknown)
@@ -44,6 +47,7 @@ type WorkPackageFixture = Readonly<{
   id: string;
   href: string;
   committedLaneId: Exclude<DetailedLaneId, 'genesis'>;
+  tone: StatusIndicatorTone;
   agentProfileLabel: string;
   trackerReferences: ReadonlyArray<TrackerReferenceFixture>;
   observedActivity?: ObservedActivityFixture;
@@ -111,6 +115,7 @@ type PresentationOptions = Readonly<{
   light?: boolean;
   long?: boolean;
   filters?: boolean;
+  filterApplied?: boolean;
 }>;
 
 export const deepFreezeMissionKanban = <T>(value: T): DeepReadonly<T> => {
@@ -173,13 +178,14 @@ export const MISSION_KANBAN_FIXTURE = deepFreezeMissionKanban({
     { id: 'canceled', label: 'Canceled' },
   ],
   workPackages: [
-    { id: 'WP04', href: '/a/collaborative-demo/repos/EXPERIMENTAL-spec-kitty-saas/m/launch-resilience-tranche-a/w/WP04/', committedLaneId: 'planned', agentProfileLabel: 'implementer-ivan', trackerReferences: [{ label: '#1051', href: 'https://github.com/spec-kitty/EXPERIMENTAL-spec-kitty-saas/issues/1051' }] },
-    { id: 'WP05', href: '/a/collaborative-demo/repos/EXPERIMENTAL-spec-kitty-saas/m/launch-resilience-tranche-a/w/WP05/', committedLaneId: 'blocked', agentProfileLabel: 'researcher-robbie', trackerReferences: [{ label: '#1054', href: 'https://github.com/spec-kitty/EXPERIMENTAL-spec-kitty-saas/issues/1054' }] },
-    { id: 'WP06', href: '/a/collaborative-demo/repos/EXPERIMENTAL-spec-kitty-saas/m/launch-resilience-tranche-a/w/WP06/', committedLaneId: 'planned', agentProfileLabel: 'implementer-ivan', trackerReferences: [] },
+    { id: 'WP04', href: '/a/collaborative-demo/repos/EXPERIMENTAL-spec-kitty-saas/m/launch-resilience-tranche-a/w/WP04/', committedLaneId: 'planned', tone: 'neutral', agentProfileLabel: 'implementer-ivan', trackerReferences: [{ label: '#1051', href: 'https://github.com/spec-kitty/EXPERIMENTAL-spec-kitty-saas/issues/1051' }] },
+    { id: 'WP05', href: '/a/collaborative-demo/repos/EXPERIMENTAL-spec-kitty-saas/m/launch-resilience-tranche-a/w/WP05/', committedLaneId: 'blocked', tone: 'danger', agentProfileLabel: 'researcher-robbie', trackerReferences: [{ label: '#1054', href: 'https://github.com/spec-kitty/EXPERIMENTAL-spec-kitty-saas/issues/1054' }] },
+    { id: 'WP06', href: '/a/collaborative-demo/repos/EXPERIMENTAL-spec-kitty-saas/m/launch-resilience-tranche-a/w/WP06/', committedLaneId: 'planned', tone: 'neutral', agentProfileLabel: 'implementer-ivan', trackerReferences: [] },
     {
       id: 'WP03',
       href: '/a/collaborative-demo/repos/EXPERIMENTAL-spec-kitty-saas/m/launch-resilience-tranche-a/w/WP03/',
       committedLaneId: 'in_progress',
+      tone: 'info',
       agentProfileLabel: 'implementer-ivan',
       trackerReferences: [{ label: '#1048', href: 'https://github.com/spec-kitty/EXPERIMENTAL-spec-kitty-saas/issues/1048' }],
       observedActivity: {
@@ -190,17 +196,17 @@ export const MISSION_KANBAN_FIXTURE = deepFreezeMissionKanban({
         message: 'lynn → for_review, not yet pushed',
       },
     },
-    { id: 'WP07', href: '/a/collaborative-demo/repos/EXPERIMENTAL-spec-kitty-saas/m/launch-resilience-tranche-a/w/WP07/', committedLaneId: 'claimed', agentProfileLabel: 'reviewer-rachel', trackerReferences: [] },
-    { id: 'WP08', href: '/a/collaborative-demo/repos/EXPERIMENTAL-spec-kitty-saas/m/launch-resilience-tranche-a/w/WP08/', committedLaneId: 'in_progress', agentProfileLabel: 'implementer-ivan', trackerReferences: [] },
-    { id: 'WP09', href: '/a/collaborative-demo/repos/EXPERIMENTAL-spec-kitty-saas/m/launch-resilience-tranche-a/w/WP09/', committedLaneId: 'in_progress', agentProfileLabel: 'implementer-ivan', trackerReferences: [] },
-    { id: 'WP02', href: '/a/collaborative-demo/repos/EXPERIMENTAL-spec-kitty-saas/m/launch-resilience-tranche-a/w/WP02/', committedLaneId: 'for_review', agentProfileLabel: 'reviewer-rachel', trackerReferences: [{ label: '#1046', href: 'https://github.com/spec-kitty/EXPERIMENTAL-spec-kitty-saas/issues/1046' }] },
-    { id: 'WP10', href: '/a/collaborative-demo/repos/EXPERIMENTAL-spec-kitty-saas/m/launch-resilience-tranche-a/w/WP10/', committedLaneId: 'in_review', agentProfileLabel: 'reviewer-rachel', trackerReferences: [] },
-    { id: 'WP11', href: '/a/collaborative-demo/repos/EXPERIMENTAL-spec-kitty-saas/m/launch-resilience-tranche-a/w/WP11/', committedLaneId: 'for_review', agentProfileLabel: 'reviewer-rachel', trackerReferences: [] },
-    { id: 'WP01', href: '/a/collaborative-demo/repos/EXPERIMENTAL-spec-kitty-saas/m/launch-resilience-tranche-a/w/WP01/', committedLaneId: 'approved', agentProfileLabel: 'reviewer-rachel', trackerReferences: [{ label: '#1043', href: 'https://github.com/spec-kitty/EXPERIMENTAL-spec-kitty-saas/issues/1043' }] },
-    { id: 'WP12', href: '/a/collaborative-demo/repos/EXPERIMENTAL-spec-kitty-saas/m/launch-resilience-tranche-a/w/WP12/', committedLaneId: 'done', agentProfileLabel: 'implementer-ivan', trackerReferences: [] },
-    { id: 'WP13', href: '/a/collaborative-demo/repos/EXPERIMENTAL-spec-kitty-saas/m/launch-resilience-tranche-a/w/WP13/', committedLaneId: 'done', agentProfileLabel: 'implementer-ivan', trackerReferences: [] },
-    { id: 'WP14', href: '/a/collaborative-demo/repos/EXPERIMENTAL-spec-kitty-saas/m/launch-resilience-tranche-a/w/WP14/', committedLaneId: 'done', agentProfileLabel: 'implementer-ivan', trackerReferences: [] },
-    { id: 'WP15', href: '/a/collaborative-demo/repos/EXPERIMENTAL-spec-kitty-saas/m/launch-resilience-tranche-a/w/WP15/', committedLaneId: 'done', agentProfileLabel: 'implementer-ivan', trackerReferences: [] },
+    { id: 'WP07', href: '/a/collaborative-demo/repos/EXPERIMENTAL-spec-kitty-saas/m/launch-resilience-tranche-a/w/WP07/', committedLaneId: 'claimed', tone: 'info', agentProfileLabel: 'reviewer-rachel', trackerReferences: [] },
+    { id: 'WP08', href: '/a/collaborative-demo/repos/EXPERIMENTAL-spec-kitty-saas/m/launch-resilience-tranche-a/w/WP08/', committedLaneId: 'in_progress', tone: 'info', agentProfileLabel: 'implementer-ivan', trackerReferences: [] },
+    { id: 'WP09', href: '/a/collaborative-demo/repos/EXPERIMENTAL-spec-kitty-saas/m/launch-resilience-tranche-a/w/WP09/', committedLaneId: 'in_progress', tone: 'info', agentProfileLabel: 'implementer-ivan', trackerReferences: [] },
+    { id: 'WP02', href: '/a/collaborative-demo/repos/EXPERIMENTAL-spec-kitty-saas/m/launch-resilience-tranche-a/w/WP02/', committedLaneId: 'for_review', tone: 'recovery', agentProfileLabel: 'reviewer-rachel', trackerReferences: [{ label: '#1046', href: 'https://github.com/spec-kitty/EXPERIMENTAL-spec-kitty-saas/issues/1046' }] },
+    { id: 'WP10', href: '/a/collaborative-demo/repos/EXPERIMENTAL-spec-kitty-saas/m/launch-resilience-tranche-a/w/WP10/', committedLaneId: 'in_review', tone: 'recovery', agentProfileLabel: 'reviewer-rachel', trackerReferences: [] },
+    { id: 'WP11', href: '/a/collaborative-demo/repos/EXPERIMENTAL-spec-kitty-saas/m/launch-resilience-tranche-a/w/WP11/', committedLaneId: 'for_review', tone: 'recovery', agentProfileLabel: 'reviewer-rachel', trackerReferences: [] },
+    { id: 'WP01', href: '/a/collaborative-demo/repos/EXPERIMENTAL-spec-kitty-saas/m/launch-resilience-tranche-a/w/WP01/', committedLaneId: 'approved', tone: 'success', agentProfileLabel: 'reviewer-rachel', trackerReferences: [{ label: '#1043', href: 'https://github.com/spec-kitty/EXPERIMENTAL-spec-kitty-saas/issues/1043' }] },
+    { id: 'WP12', href: '/a/collaborative-demo/repos/EXPERIMENTAL-spec-kitty-saas/m/launch-resilience-tranche-a/w/WP12/', committedLaneId: 'done', tone: 'success', agentProfileLabel: 'implementer-ivan', trackerReferences: [] },
+    { id: 'WP13', href: '/a/collaborative-demo/repos/EXPERIMENTAL-spec-kitty-saas/m/launch-resilience-tranche-a/w/WP13/', committedLaneId: 'done', tone: 'success', agentProfileLabel: 'implementer-ivan', trackerReferences: [] },
+    { id: 'WP14', href: '/a/collaborative-demo/repos/EXPERIMENTAL-spec-kitty-saas/m/launch-resilience-tranche-a/w/WP14/', committedLaneId: 'done', tone: 'success', agentProfileLabel: 'implementer-ivan', trackerReferences: [] },
+    { id: 'WP15', href: '/a/collaborative-demo/repos/EXPERIMENTAL-spec-kitty-saas/m/launch-resilience-tranche-a/w/WP15/', committedLaneId: 'done', tone: 'success', agentProfileLabel: 'implementer-ivan', trackerReferences: [] },
   ],
   k3SelectedLaneIds: ['in_review', 'blocked'],
   snapshot: {
@@ -280,6 +286,9 @@ const fixtureGuard = (fixture: DeepReadonly<MissionKanbanFixture>): true => {
     if (!workPackage.href.trim() || routeIds.has(workPackage.href)) throw new TypeError(`Invalid or duplicate Work Package route: ${workPackage.href}.`);
     if (!knownLaneIds.has(workPackage.committedLaneId) || !mappedLaneIds.includes(workPackage.committedLaneId)) {
       throw new TypeError(`Non-empty detailed lane is not mapped: ${workPackage.committedLaneId}.`);
+    }
+    if (!STATUS_TONES.includes(workPackage.tone)) {
+      throw new TypeError(`Unknown status tone for ${workPackage.id}: ${workPackage.tone}.`);
     }
     const trackerKeys = workPackage.trackerReferences.map(({ label, href }) => `${label}\u0000${href}`);
     if (trackerKeys.some((key) => !key.split('\u0000').every((part) => part.trim())) || new Set(trackerKeys).size !== trackerKeys.length) {
@@ -381,6 +390,7 @@ export const missionKanbanGuardProof = () => {
     ['wrongStageMembership', () => deriveMissionKanban({ ...fixture, stages: fixture.stages.map((stage, index) => index === 0 ? { ...stage, detailedLaneIds: ['planned'] } : index === 1 ? { ...stage, detailedLaneIds: [...stage.detailedLaneIds, 'blocked'] } : stage) })],
     ['nonEmptyUnmappedLane', () => deriveMissionKanban({ ...fixture, workPackages: [{ ...fixture.workPackages[0]!, committedLaneId: 'genesis' as Exclude<DetailedLaneId, 'genesis'> }, ...fixture.workPackages.slice(1)] })],
     ['wrongDetailedLaneCounts', () => deriveMissionKanban({ ...fixture, workPackages: [{ ...fixture.workPackages[0]!, committedLaneId: 'blocked' }, ...fixture.workPackages.slice(1)] })],
+    ['wrongStatusTone', () => deriveMissionKanban({ ...fixture, workPackages: [{ ...fixture.workPackages[0]!, tone: 'unknown' as StatusIndicatorTone }, ...fixture.workPackages.slice(1)] })],
     ['wrongK3Selection', () => deriveMissionKanban({ ...fixture, k3SelectedLaneIds: ['planned', 'blocked'] })],
     ['unknownSelection', () => deriveMissionKanban(fixture, { selectedLaneIds: ['not-supplied' as DetailedLaneId] })],
     ['unknownWorkPackage', () => deriveMissionKanban(fixture, { includedWorkPackageIds: ['WP99'] })],
@@ -574,7 +584,7 @@ const renderWorkPackage = (
     <sk-action-row layout="card" href=${workPackage.href}>
       <span slot="title">${workPackage.id}</span>
       <code slot="reference">Committed lane · ${workPackage.committedLaneId}</code>
-      <sk-status-indicator slot="tags"><span slot="marker">●</span>${workPackage.committedLaneId}</sk-status-indicator>
+      <sk-status-indicator slot="tags" tone=${workPackage.tone}><span slot="marker">●</span>${workPackage.committedLaneId}</sk-status-indicator>
       <span slot="metadata">${workPackage.agentProfileLabel}</span>
       ${workPackage.observedActivity ? html`
         <span class="sk-mission-kanban-pattern__observation" slot="supporting" data-observed-activity>
@@ -668,6 +678,18 @@ export const renderMissionKanban = (
   const long = presentation.long === true;
   const guardProof = missionKanbanGuardProof();
   const workflowScrollerRef = createWorkflowScrollerRef();
+  const testSeam = Object.freeze({
+    fixture,
+    projection,
+    derive: () => deriveMissionKanban(fixture),
+  });
+  const testSeamRef = (element?: Element): void => {
+    if (!(element instanceof HTMLElement)) return;
+    Object.defineProperty(element, '__missionKanbanTestSeam', {
+      configurable: true,
+      value: testSeam,
+    });
+  };
 
   return html`
     <div
@@ -683,6 +705,7 @@ export const renderMissionKanban = (
       data-selected-lane-ids=${JSON.stringify(projection.selectedLaneIds)}
       data-commit=${projection.commit.shaLabel}
       data-guard-proof=${JSON.stringify(guardProof)}
+      ${ref(testSeamRef)}
     >
       ${PATTERN_STYLES}
       <sk-app-shell
@@ -732,9 +755,9 @@ export const renderMissionKanban = (
           <div class="sk-mission-kanban-pattern__board-intro">
             <div>
               <p class="sk-mission-kanban-pattern__eyebrow">Committed workflow</p>
-              <h2 class="sk-mission-kanban-pattern__board-title" id="${rootId}-board-title">${presentation.filters ? 'Filtered stages' : fixture.copy.boardHeading}</h2>
+              <h2 class="sk-mission-kanban-pattern__board-title" id="${rootId}-board-title">${presentation.filterApplied ? 'Filtered stages' : fixture.copy.boardHeading}</h2>
             </div>
-            <p class="sk-mission-kanban-pattern__board-help">${presentation.filters ? 'Showing blocked and in review.' : fixture.copy.boardHelp}</p>
+            <p class="sk-mission-kanban-pattern__board-help">${presentation.filterApplied ? 'Showing blocked and in review.' : fixture.copy.boardHelp}</p>
           </div>
 
           <div class="sk-mission-kanban-pattern__board-frame">
@@ -795,6 +818,7 @@ const basePlay = async (canvasElement: HTMLElement) => {
     wrongStageMembership: true,
     nonEmptyUnmappedLane: true,
     wrongDetailedLaneCounts: true,
+    wrongStatusTone: true,
     wrongK3Selection: true,
     unknownSelection: true,
     unknownWorkPackage: true,
@@ -846,7 +870,7 @@ export const K2NarrowContained: Story = {
 };
 
 export const K3DetailedLaneFilters: Story = {
-  render: () => renderMissionKanban(k3Records(), { state: 'k3', filters: true }),
+  render: () => renderMissionKanban(k3Records(), { state: 'k3', filters: true, filterApplied: true }),
   play: async ({ canvasElement }) => {
     await basePlay(canvasElement);
     const root = canvasElement.querySelector<HTMLElement>('[data-mission-kanban-pattern]')!;
@@ -900,7 +924,7 @@ export const ForcedColors: Story = {
     includeSnapshot: true,
     includeObservedActivity: true,
     includeReportedActivity: true,
-  }), { state: 'forced' }),
+  }), { state: 'forced', filters: true }),
   play: async ({ canvasElement }) => basePlay(canvasElement),
 };
 
