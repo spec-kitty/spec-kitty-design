@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "mission_slug": "mission-kanban-checkbox-choice-group-01M21K7F",
+  "mission_id": "01M21K7FZE31HR2DSZSER0NJ7E",
+  "mission_branch": "kitty/mission-mission-kanban-checkbox-choice-group-01M21K7F",
+  "target_branch": "train/elements-first",
+  "lanes": [
+    {
+      "lane_id": "lane-a",
+      "wp_ids": [
+        "WP01"
+      ],
+      "write_scope": [
+        "apps/storybook/src/tests/sk-checkbox-choice-group.spec.ts",
+        "apps/storybook/src/tests/visual.spec.ts",
+        "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-checkbox-choice-group-*.png",
+        "docs/architecture/validation/issue-277-checkbox-choice-group-zoom/**",
+        "docs/design-system/using-components.md",
+        "expected-stories.json",
+        "packages/styles/package.json",
+        "packages/styles/src/checkbox-choice-group/**",
+        "packages/styles/src/index.ts",
+        "suite-budget.json"
+      ],
+      "predicted_surfaces": [
+        "api",
+        "app-shell",
+        "artifact-rendering",
+        "tests",
+        "tracker-integration"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    }
+  ],
+  "computed_at": "2026-09-08T23:16:07.463255+00:00",
+  "computed_from": "dependency_graph+ownership",
+  "planning_artifact_wps": [],
+  "planning_commit_sha": "d64f8a5e841e0f5df9cf9f7759a6e77e7406434e"
+}
