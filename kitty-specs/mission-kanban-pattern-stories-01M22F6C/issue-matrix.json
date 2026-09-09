@@ -25,7 +25,7 @@
       "wp": "WP01"
     },
     "#276": {
-      "evidence_ref": "Epic relationship is tracked through this final child mission: #277 is already landed and reviewed; #278 is implementation-complete at 05ba8b70afc352d0a3b94d8c7f518e37cd75f126, with epic closure intentionally performed only after this child PR merges and post-merge gates complete.",
+      "evidence_ref": "Issue 276 \u2014 Mission Kanban epic: #277 merged and closed at fb424e83; #278 independently approved with PR #295 fully green at 7b7df41. Epic checklist/comment/closure remain intentionally pending until #295 merges, #278 closes, and post-merge review/retrospective complete.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -49,7 +49,7 @@
       "wp": "WP01"
     },
     "#278": {
-      "evidence_ref": "WP01 implementation and independent cycle-4 review passed at 05ba8b70afc352d0a3b94d8c7f518e37cd75f126; exact K1-K6/browser/a11y/visual/public-drift contract is green.",
+      "evidence_ref": "Issue 278 \u2014 Mission Kanban K1-K6 pattern stories: independent Codex cycle-8 review PASS at lane 66a5c7a (tree 44bcdcbaebaf72577e2b2887c380f88765cc9298) and PR #295 head 7b7df41 (tree 5e092c7a338a9323141c820331c407157c301d85); GitHub CI 34389371446 attempt 2 final gate PASS, including visual 179/179, Playwright 1604 pass, axe, behavior 1090/1090, mutation 237/237, build/lint/release/security.",
       "fr": null,
       "nfr": null,
       "repo": null,

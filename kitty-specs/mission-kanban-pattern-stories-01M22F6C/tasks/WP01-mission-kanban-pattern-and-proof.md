@@ -589,3 +589,4 @@ and #279–#284 remain untouched.
 ## Activity Log
 
 - 2026-09-09T12:31:33Z – planner-priti – Review cycle 1 Finding 2: amended WP01 ownership to include apps/storybook/src/tests/sk-checkbox-choice-group.spec.ts solely for the integration-sensitive global story-total expectation (refreshed train total + 10), while preserving #277's accepted selector/ID and all other assertions.
+- 2026-09-09T19:14:59Z – codex-implementer – Cycle 8 remediation complete at lane 66a5c7a / delivery 7b7df41: GitHub CI 34389371446 passes visual 179/179, Playwright 1604 pass/86 skip with only two unrelated retried flakes, axe, lint, Storybook, release, security, and attempt-2 behavior/mutation/guard gates; observer remount 20/20 no-retry locally; SK-189/SK-210 document unsupported generated-matrix authoring gaps.

@@ -187,21 +187,21 @@
     {
       "criterion_id": "FR-019",
       "description": "Verify FR-019 is satisfied",
-      "proof_type": "catalogue media axe visual and zoom evidence",
-      "evidence": "Delivery 205bd989 / lane 77a69174: corrected exact-source ten PNG baselines; all ten visually inspected; pinned Playwright 1.62.1 Noble exact no-update replay 10/10 after lane-local Storybook rebuild; forced-colors includes snapshot notice, ten native filters with only in_review and blocked checked, all 15 cards, and separate observed/reported activity; K1 explicit state tones; K2 containment; K3 projection; K4-K6 truth states; LightMode/long/reduced complete; headed browser 100%/200% zoom captures remain durable under docs/architecture/validation/issue-278-mission-kanban-zoom/.",
+      "proof_type": "CI visual regression plus direct visual inspection and browser zoom evidence",
+      "evidence": "Product lane 66a5c7a (tree 44bcdcbaebaf72577e2b2887c380f88765cc9298); delivery 7b7df41 (tree 5e092c7a338a9323141c820331c407157c301d85). GitHub CI run 34389371446 visual-regression passed 179/179 in no-update mode, including all ten Mission Kanban K1-K6/dark/LightMode/long/forced-colors/reduced-motion baselines copied from and visually inspected against the prior CI artifact. Durable real-browser 100%/200% zoom captures and metrics remain under docs/architecture/validation/issue-278-mission-kanban-zoom/.",
       "pass_fail": "pass",
       "verified_by": "codex-implementer",
-      "verified_at": "2026-09-09T17:57:34.909533+00:00",
+      "verified_at": "2026-09-09T18:50:48.016254+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
       "criterion_id": "FR-020",
       "description": "Verify FR-020 is satisfied",
-      "proof_type": "CSF exclusion and public-delta test",
-      "evidence": "83b1d8d; sk-mission-kanban-pattern.spec.ts [T001/T002/T009] proves test seams work, helper exports are excluded from CSF, and package/manifest/wrapper delta is zero.",
+      "proof_type": "direct source/test seam plus no-retry lifecycle proof",
+      "evidence": "Lane 66a5c7a: helper exports remain excluded from CSF; package/manifest/wrapper delta is zero. The Storybook manager-channel remount probe observes exact forceRemount/storyFinished events, distinguishes valid iframe replacement by timeOrigin, and proves one active/zero detached observers with old targets disconnected; Playwright 1.62.1 Noble retries=0 repeat-each=20 passed 20/20 and full mission Chromium retries=0 passed 19/19. GitHub CI run 34389371446 full Playwright passed in 14m45s.",
       "pass_fail": "pass",
       "verified_by": "codex-implementer",
-      "verified_at": "2026-09-09T16:28:03.182081+00:00",
+      "verified_at": "2026-09-09T18:50:49.665712+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     }
   ],
