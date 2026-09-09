@@ -372,6 +372,16 @@ test("filtering is pure, W6 is exactly 0 of 50, and invalid values fail closed",
       personId: "unassigned",
       query: "release notes",
     });
+    const visibleSearchTotals = Object.fromEntries(
+      ["spec-kitty", "in progress"].map((query) => [
+        query,
+        module.filterWorkPackages(records, {
+          repositoryId: "all",
+          personId: "all",
+          query,
+        }).filteredTotal,
+      ]),
+    );
     const errors: string[] = [];
     const capture = (callback: () => unknown) => {
       try {
@@ -412,11 +422,16 @@ test("filtering is pure, W6 is exactly 0 of 50, and invalid values fail closed",
       before,
       after: JSON.stringify(records),
       filtered,
+      visibleSearchTotals,
       errors,
     };
   });
 
   expect(facts.filtered).toMatchObject({ sourceTotal: 50, filteredTotal: 0 });
+  expect(facts.visibleSearchTotals).toEqual({
+    "spec-kitty": 50,
+    "in progress": 21,
+  });
   expect(facts.after).toBe(facts.before);
   expect(facts.errors).toHaveLength(7);
   expect(facts.errors.every(Boolean)).toBe(true);
@@ -1181,6 +1196,16 @@ test("W7, W8, W9, and W10 preserve their distinct truth and absence contracts", 
   await expect(w7.locator("[data-no-active-work] p")).toHaveText(
     `The ${admittedRepositoryTotal} admitted repositories currently supply no active Mission work.`,
   );
+  const w7RepositoryFilter = w7.locator('[data-filter="repositoryId"]');
+  await expect(w7RepositoryFilter).toHaveAttribute("title", "All repositories");
+  await w7RepositoryFilter.selectOption("saas");
+  await expect(w7RepositoryFilter).toHaveAttribute(
+    "title",
+    "spec-kitty/EXPERIMENTAL-spec-kitty-saas",
+  );
+  await expect(w7.locator("[data-clear-filters]")).toBeVisible();
+  await expect(w7.locator("[data-filter-count]")).toHaveCount(0);
+  await expect(w7.locator("[data-no-active-work]")).toBeVisible();
   await expect(w7.locator("[data-summary-lane]")).toHaveCount(0);
   await expect(w7.locator("[data-work-package-id]")).toHaveCount(0);
   await expect(
@@ -1417,6 +1442,22 @@ test("W4 retains the personal rail, suppresses desktop context, stacks work firs
   await page.evaluate(() => {
     document.documentElement.style.zoom = "2";
   });
+  const activityHeaderGeometry = await compact
+    .locator("[data-truth-tier='activity'] sk-section-header")
+    .evaluate((header) => {
+      const eyebrow = header.querySelector<HTMLElement>('[slot="eyebrow"]')!;
+      const metadata = header.querySelector<HTMLElement>('[slot="metadata"]')!;
+      const eyebrowRect = eyebrow.getBoundingClientRect();
+      const metadataRect = metadata.getBoundingClientRect();
+      return {
+        overlaps:
+          Math.min(eyebrowRect.right, metadataRect.right) >
+            Math.max(eyebrowRect.left, metadataRect.left) &&
+          Math.min(eyebrowRect.bottom, metadataRect.bottom) >
+            Math.max(eyebrowRect.top, metadataRect.top),
+      };
+    });
+  expect(activityHeaderGeometry.overlaps).toBe(false);
   const zoomGeometry = await page.evaluate(() => ({
     clientWidth: document.documentElement.clientWidth,
     scrollWidth: document.documentElement.scrollWidth,

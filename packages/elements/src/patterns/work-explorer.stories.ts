@@ -568,6 +568,18 @@ export const groupWorkPackages = (
   return Object.freeze(groups);
 };
 
+const labelForRepository = (repositoryId: string): string =>
+  WORK_EXPLORER_FIXTURE.repositories.find(({ id }) => id === repositoryId)
+    ?.label ?? repositoryId;
+
+const labelForPerson = (person: Person | null): string => {
+  if (person === null) return "Unassigned";
+  return PERSON_GROUPS.find(({ id }) => id === person)?.label ?? person;
+};
+
+const labelForLane = (lane: Lane): string =>
+  LANE_GROUPS.find(({ id }) => id === lane)?.label ?? lane;
+
 export const filterWorkPackages = (
   records: readonly WorkPackageRecord[],
   filters: FilterState,
@@ -588,9 +600,9 @@ export const filterWorkPackages = (
       const visibleText = [
         record.missionName,
         record.workPackageId,
-        record.repositoryId,
-        record.lane,
-        personId,
+        labelForRepository(record.repositoryId),
+        labelForLane(record.lane),
+        labelForPerson(record.person),
         record.type,
         record.transitionLabel,
       ]
@@ -1224,7 +1236,10 @@ const workExplorerPatternStyles = html`<style>
   .sk-work-explorer-pattern__compact-header:not([inert])
     ~ .sk-work-explorer-pattern__content
     .sk-work-explorer-pattern__context {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(
+      auto-fit,
+      minmax(min(100%, var(--sk-layout-context-sidebar-width)), 1fr)
+    );
     align-items: start;
     gap: var(--sk-space-2);
   }
@@ -1274,18 +1289,6 @@ const workExplorerPatternStyles = html`<style>
     }
   }
 </style>`;
-
-const labelForRepository = (repositoryId: string): string =>
-  WORK_EXPLORER_FIXTURE.repositories.find(({ id }) => id === repositoryId)
-    ?.label ?? repositoryId;
-
-const labelForPerson = (person: Person | null): string => {
-  if (person === null) return "Unassigned";
-  return PERSON_GROUPS.find(({ id }) => id === person)?.label ?? person;
-};
-
-const labelForLane = (lane: Lane): string =>
-  LANE_GROUPS.find(({ id }) => id === lane)?.label ?? lane;
 
 const renderPersonalRail = (): TemplateResult => html`
   <sk-personal-rail
@@ -1614,6 +1617,14 @@ const renderFilters = (
     projection.filters.repositoryId !== "all" ||
     projection.filters.personId !== "all" ||
     projection.filters.query.trim() !== "";
+  const selectedRepositoryLabel =
+    projection.filters.repositoryId === "all"
+      ? "All repositories"
+      : (projection.repositories.find(
+          ({ id }) => id === projection.filters.repositoryId,
+        )?.label ?? projection.filters.repositoryId);
+  const filterTotalsAvailable =
+    projection.filteredTotal !== null && projection.sourceTotal !== null;
   return html`<form
     class="sk-work-explorer-pattern__filters"
     aria-label="Work filters"
@@ -1654,6 +1665,7 @@ const renderFilters = (
       <select
         class="sk-form-select"
         data-filter="repositoryId"
+        title=${selectedRepositoryLabel}
         ?disabled=${disabled}
         .value=${projection.filters.repositoryId}
         @change=${(event: Event) => onFilter("repositoryId", (event.currentTarget as HTMLSelectElement).value)}
@@ -1730,9 +1742,14 @@ const renderFilters = (
             <sk-button variant="secondary" data-clear-filters @click=${onClear}
               >Clear filters</sk-button
             >
-            <span data-filter-count
-              >${projection.filteredTotal} of ${projection.sourceTotal}</span
-            >
+            ${
+              filterTotalsAvailable
+                ? html`<span data-filter-count
+                    >${projection.filteredTotal} of
+                    ${projection.sourceTotal}</span
+                  >`
+                : nothing
+            }
           </div>`
         : nothing
     }
