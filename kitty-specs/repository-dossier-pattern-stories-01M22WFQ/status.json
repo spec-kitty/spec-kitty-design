@@ -35,7 +35,8 @@
         "Independent Codex product, visual, provenance, and acceptance-schema reviews all approved; no findings remain.",
         "Independent Codex review rejected the wrapped 390px compact trigger label.",
         "Fixing compact trigger sizing and adding a 390px no-wrap browser assertion.",
-        "Final exact-head evidence complete: hosted CI Quality run 34405101584 passed at 1f0cd94cd58dc75d61ef02cd24ae0d20177e0791 against current train ce5823ceb44377089b2ebf28cdfc55fc0faabb9d; independent Codex review found no remaining issues."
+        "Final exact-head evidence complete: hosted CI Quality run 34405101584 passed at 1f0cd94cd58dc75d61ef02cd24ae0d20177e0791 against current train ce5823ceb44377089b2ebf28cdfc55fc0faabb9d; independent Codex review found no remaining issues.",
+        "Independent Codex final review approved exact SHA 1f0cd94cd58dc75d61ef02cd24ae0d20177e0791: no findings; implementation and governance diff match reviewed 2804e853 product tree except train-owned lockfile security repair; hosted CI run 34405101584 passed all jobs against current train ce5823ceb44377089b2ebf28cdfc55fc0faabb9d."
       ],
       "provider": "__resolved_provider_absent__",
       "review": null,
