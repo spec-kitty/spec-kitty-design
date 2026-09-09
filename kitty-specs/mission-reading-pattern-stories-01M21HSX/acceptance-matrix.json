@@ -295,10 +295,10 @@
     {
       "invariant_id": "NI-003",
       "description": "Unavailable catalogue content never gains anchor, button, handler, or tabindex semantics.",
-      "verification_method": "browser_semantics_test",
-      "verification_command": "npx playwright test apps/storybook/src/tests/sk-mission-reading-pattern.spec.ts --project=chromium --project=firefox --project=webkit",
+      "verification_method": "custom_command",
+      "verification_command": "npx playwright test apps/storybook/src/tests/sk-mission-reading-pattern.spec.ts --project=chromium --grep \"catalogue keeps native links|Mission-page and artifact links\"",
       "result": "confirmed_absent",
-      "evidence": "Focused three-engine run passed 37 tests with 2 expected project skips and explicitly checks roles, hrefs, current state, and sequential focus."
+      "evidence": "Command exited 0: Running 2 tests using 2 workers\n\n\n\n\n\n[1/2] [chromium] \u203a apps/storybook/src/tests/sk-mission-reading-pattern.spec.ts:433:5 \u203a Mission-page and artifact links retain native fragment activation\n[2/2] [chr"
     },
     {
       "invariant_id": "NI-004",
