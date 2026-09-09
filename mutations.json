@@ -49,7 +49,9 @@
     "#254 REVIEW-CYCLE 6 COLLATERAL ADJUDICATION records the reproduced exact-7aa outcomes without changing product behavior. The presentation-reflection, native controlled-close release, and compact-header exposure mutations all red the integrated React SC-012 fixture, so each declares required collateral. The old native subject stays green when the closed-render await is removed, while the React SC-012 fixture alone reds; that arm is therefore retargeted to react-app-shell without collateral.",
     "#272 adds exactly THREE sk-action-row arms, moving the refreshed standing set from 210 to 213. Two SC-010 arms remove the new href and presentation registrations independently so the extended pre-upgrade test proves each public axis remains reactive and reflected. One SC-006 arm attaches the existing selectable request path to the route anchor; the mixed-state negative case then proves native route mode emits zero custom activation events. No SC-007/SC-008 route arms exist because an event with no dispatch has no independently falsifiable detail or propagation flags.",
     "#257 CYCLE-2 COLLATERAL ADJUDICATION records the exact-e5202f4 outcome after the container-responsive SC-017 test was added. Both SC-014 stylesheet-adoption mutations necessarily remove or replace the local sheet that owns the @container rule, so the named SC-014 identity/length assertion and the SC-017 live-layout assertion red together. Each declares required collateral; guard 5 still inverts and will fail if the layout test ever stops proving that stylesheet dependency.",
-    "#257 POST-CI WEBKIT FIX adds one SC-012 arm, moving the refreshed standing set from 225 to 226. The old document Range/addRange fallback could not select a node inside WebKit's closed shadow root; the shadow-inclusive Selection.setBaseAndExtent path now owns the exact visible node and full child range. The named [SC-012] fixture asserts both endpoints, so collapsing the focus offset to zero reds that behaviour without marked collateral."
+    "#257 POST-CI WEBKIT FIX adds one SC-012 arm, moving the refreshed standing set from 225 to 226. The old document Range/addRange fallback could not select a node inside WebKit's closed shadow root; the shadow-inclusive Selection.setBaseAndExtent path now owns the exact visible node and full child range. The named [SC-012] fixture asserts both endpoints, so collapsing the focus offset to zero reds that behaviour without marked collateral.",
+    "#274 adds TEN app-shell arms over the existing ADR-11 subjects and ids, moving the post-#257 standing set from 226 to 236, and retargets three #254 arms onto the expanded shared expressions they already own. Recognition, the TypeScript 1100 boundary, rail-specific personal/context/header exposure, the shared responsive-navigation derivation, the generated CSS logical/inclusive boundary, the rail-plus-content grid, and the rail-preserving forced-colors selector each have a unique source anchor. The existing presentation-focus, context-exposure, and header-exposure arms now mutate their shared responsive equivalents, so they continue guarding compact while also reaching the additive mode. The shared responsive-navigation derivation deliberately declares collateral: its red-first equivalent was the pre-implementation rail-preserving run, where the new SC-006, SC-012 and SC-017 assertions all failed together while every retained app-shell assertion stayed green. No new behavior id is minted for layout, forced colors, or the public TypeScript union; those remain assertions at their real browser/type surfaces under the existing responsive-threshold id.",
+    "#274 FINAL REVIEW CORRECTION retargets the existing #254 presentation-focus arm and adds one slot-reassignment focus-release arm, moving the integrated standing set from 236 to 237. The exposure-matrix implementation now releases focus explicitly from every assigned region that the destination hides, instead of relying on browser-specific inert/hidden behavior for non-navigation regions. Its SC-012 tests prove the navigation-retained case; personal, context, compact-header, and compact-navigation releases; and release before a reassigned destination root is suppressed. The existing compact-navigation/open arm now declares measured collateral: replacing controlled-open exposure with the compact-layout predicate made 16 tests in the same native app-shell fixture fail, and every failure carried SC-012 because slot reconciliation, lease transfer, controlled close, rail exposure, boundary transitions, and destination-hidden focus all consume that one exposure decision."
   ],
   "mutations": [
     {
@@ -1525,14 +1527,6 @@
     },
     {
       "id": "SC-012",
-      "arm": "leaving compact presentation releases focus from hidden navigation",
-      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
-      "from": "    if (changed.get('presentation') === 'compact' && this.presentation !== 'compact') {\n      this.#releaseHiddenFocus();\n    }",
-      "to": "    // mutation: compact presentation changes leave hidden navigation focused",
-      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
-    },
-    {
-      "id": "SC-012",
       "arm": "ordinary controlled close releases focus from hidden compact navigation",
       "file": "packages/elements/src/app-shell/sk-app-shell.ts",
       "from": "    if (changed.get('open') === true && this.open !== true) {\n      this.#releaseHiddenFocus();\n    }",
@@ -1606,28 +1600,12 @@
     },
     {
       "id": "SC-012",
-      "arm": "compact presentation suppresses the assigned context-sidebar root",
-      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
-      "from": "      ['context-sidebar', !compact],",
-      "to": "      ['context-sidebar', true],",
-      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
-    },
-    {
-      "id": "SC-012",
-      "arm": "compact-header remains exposed while compact navigation is closed",
-      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
-      "from": "      ['compact-header', compact],",
-      "to": "      ['compact-header', this.#effectivelyOpen],",
-      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts",
-      "expectCollateral": true
-    },
-    {
-      "id": "SC-012",
       "arm": "compact-navigation exposure follows consumer-controlled open",
       "file": "packages/elements/src/app-shell/sk-app-shell.ts",
       "from": "      ['compact-navigation', this.#effectivelyOpen],",
       "to": "      ['compact-navigation', compact],",
-      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts",
+      "expectCollateral": true
     },
     {
       "id": "SC-012",
@@ -1871,6 +1849,120 @@
       "from": "      value: value,",
       "to": "      value: undefined,",
       "subject": "fixtures/react-consumer/src/sk-copy-field.test.tsx"
+    },
+    {
+      "id": "SC-012",
+      "arm": "destination-hidden assigned-region focus release follows the exposure matrix",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "    for (const [slotName, exposed] of this.#regionExposure()) {\n      if (!exposed && this.#assignedWithin(active, slotName)) {\n        active.blur();\n        return;\n      }\n    }",
+      "to": "    if (this.#assignedWithin(active, 'compact-navigation')) active.blur();",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "slot reassignment releases focus before the destination root is suppressed",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "  #onExposureSlotChange = (): void => {\n    this.#releaseHiddenFocus();\n    this.#reconcileAssignedRootExposure();\n  };",
+      "to": "  #onExposureSlotChange = (): void => {\n    this.#reconcileAssignedRootExposure();\n  };",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "compact presentation suppresses the assigned context-sidebar root in the shared matrix",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "      ['context-sidebar', !responsiveNavigation],",
+      "to": "      ['context-sidebar', !this.#railPreserving],",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "compact-header remains exposed while responsive navigation is closed",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "      ['compact-header', responsiveNavigation],",
+      "to": "      ['compact-header', this.#effectivelyOpen],",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts",
+      "expectCollateral": true
+    },
+    {
+      "id": "SC-010",
+      "arm": "rail-preserving is recognized without an unknown-presentation warning",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "      this.presentation !== 'rail-preserving' &&",
+      "to": "      this.presentation === 'rail-preserving' &&",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+    },
+    {
+      "id": "SC-017",
+      "arm": "the rail-preserving TypeScript threshold remains inclusive through 1100px",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "const RAIL_PRESERVING_MAX_INLINE_SIZE = 1100;",
+      "to": "const RAIL_PRESERVING_MAX_INLINE_SIZE = 1099;",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "effective rail-preserving retains the assigned personal-rail root",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "      ['personal-rail', !compact],",
+      "to": "      ['personal-rail', !responsiveNavigation],",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "effective rail-preserving suppresses the assigned context-sidebar root",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "      ['context-sidebar', !responsiveNavigation],",
+      "to": "      ['context-sidebar', !compact],",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "effective rail-preserving exposes the assigned compact-header root",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "      ['compact-header', responsiveNavigation],",
+      "to": "      ['compact-header', compact],",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "the shared responsive-navigation derivation includes rail-preserving",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "    return this.#compact || this.#railPreserving;",
+      "to": "    return this.#compact;",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts",
+      "expectCollateral": true
+    },
+    {
+      "id": "SC-017",
+      "arm": "rail-preserving CSS queries logical inline-size rather than physical width",
+      "file": "packages/elements/src/app-shell/sk-app-shell.css.js",
+      "from": "@container (max-inline-size: 1100px)",
+      "to": "@container (max-width: 1100px)",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+    },
+    {
+      "id": "SC-017",
+      "arm": "the rail-preserving CSS threshold remains inclusive through 1100px",
+      "file": "packages/elements/src/app-shell/sk-app-shell.css.js",
+      "from": "@container (max-inline-size: 1100px)",
+      "to": "@container (max-inline-size: 1099px)",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+    },
+    {
+      "id": "SC-017",
+      "arm": "rail-preserving CSS retains the personal-rail plus content grid",
+      "file": "packages/elements/src/app-shell/sk-app-shell.css.js",
+      "from": "grid-template-columns:\\n      var(--sk-layout-personal-rail-width)\\n      minmax(0, 1fr);",
+      "to": "grid-template-columns: minmax(0, 1fr);",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+    },
+    {
+      "id": "SC-017",
+      "arm": "forced colors retains the rail-preserving navigation boundary selector",
+      "file": "packages/elements/src/app-shell/sk-app-shell.css.js",
+      "from": ":host([presentation=\\\"rail-preserving\\\"]) .sk-app-shell__compact-header:focus-within,\\n  :host([presentation=\\\"rail-preserving\\\"]) .sk-app-shell__compact-navigation {",
+      "to": ":host([presentation=\\\"rail-preserving\\\"]) .sk-app-shell__compact-header:focus-within {",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
     }
   ]
 }

@@ -4,7 +4,7 @@ import { define } from '../define.js';
 import sheet from './sk-app-shell.css.js';
 
 /** The app-shell layout presentation. Omit it to retain the legacy shell. */
-export type SkAppShellPresentation = 'compact' | undefined;
+export type SkAppShellPresentation = 'compact' | 'rail-preserving' | undefined;
 
 /** Detail carried by `sk-app-shell-dismiss`. */
 export interface SkAppShellDismissDetail {
@@ -13,6 +13,7 @@ export interface SkAppShellDismissDetail {
 }
 
 const COMPACT_MAX_INLINE_SIZE = 860;
+const RAIL_PRESERVING_MAX_INLINE_SIZE = 1100;
 
 type ExposureRegion =
   | 'personal-rail'
@@ -65,7 +66,7 @@ const presentationConverter = {
  * @csspart content - The page header and main-content column.
  * @csspart header - The page-header region.
  * @csspart main - The main-content landmark.
- * @fires {CustomEvent<{ readonly reason: 'escape' }>} sk-app-shell-dismiss - Requests dismissal after Escape while the controlled compact drawer is effectively open. Detail is `{ reason: 'escape' }`; the event bubbles, is composed, and is not cancelable.
+ * @fires {CustomEvent<{ readonly reason: 'escape' }>} sk-app-shell-dismiss - Requests dismissal after Escape while controlled responsive navigation is effectively open. Detail is `{ reason: 'escape' }`; the event bubbles, is composed, and is not cancelable.
  */
 export class SkAppShell extends LitElement {
   static styles = [sheet];
@@ -79,12 +80,12 @@ export class SkAppShell extends LitElement {
   // Keep the public class declaration on the exported alias while giving manifest-driven
   // consumers the self-contained union they can emit without manufacturing an import.
   /**
-   * @type {'compact' | undefined}
-   * Enables the opt-in compact layout. Omit it for the legacy responsive shell.
+   * @type {'compact' | 'rail-preserving' | undefined}
+   * Enables an opt-in responsive layout. Omit it for the legacy responsive shell.
    */
   declare presentation: SkAppShellPresentation;
 
-  /** Consumer-controlled compact drawer state. The shell never changes this value. */
+  /** Consumer-controlled responsive navigation state. The shell never changes this value. */
   open = false;
 
   /** Consumer trigger used only for accepted-Escape focus return. It must be actually assigned within this shell's compact-header slot and control a same-root target actually assigned within this shell's compact-navigation slot. */
@@ -99,21 +100,30 @@ export class SkAppShell extends LitElement {
     return this.presentation === 'compact' && this.#inlineSize <= COMPACT_MAX_INLINE_SIZE;
   }
 
+  get #railPreserving(): boolean {
+    return this.presentation === 'rail-preserving' &&
+      this.#inlineSize <= RAIL_PRESERVING_MAX_INLINE_SIZE;
+  }
+
+  get #responsiveNavigation(): boolean {
+    return this.#compact || this.#railPreserving;
+  }
+
   get #effectivelyOpen(): boolean {
-    return this.#compact && this.open;
+    return this.#responsiveNavigation && this.open;
   }
 
   override connectedCallback(): void {
     super.connectedCallback();
     this.addEventListener('keydown', this.#onKeydown);
     this.#resizeObserver = new ResizeObserver((entries) => {
-      const previousCompact = this.#compact;
+      const previousResponsiveNavigation = this.#responsiveNavigation;
       const entry = entries[entries.length - 1];
       if (!entry) return;
       this.#inlineSize = this.#contentInlineSize(entry);
-      const compact = this.#compact;
-      if (previousCompact && !compact) this.#releaseHiddenFocus();
-      if (previousCompact !== compact) this.requestUpdate();
+      const responsiveNavigation = this.#responsiveNavigation;
+      if (previousResponsiveNavigation !== responsiveNavigation) this.#releaseHiddenFocus();
+      if (previousResponsiveNavigation !== responsiveNavigation) this.requestUpdate();
     });
     this.#inlineSize = this.#contentInlineSize();
     this.#resizeObserver.observe(this, { box: 'content-box' });
@@ -133,7 +143,7 @@ export class SkAppShell extends LitElement {
     if (changed.get('open') === true && this.open !== true) {
       this.#releaseHiddenFocus();
     }
-    if (changed.get('presentation') === 'compact' && this.presentation !== 'compact') {
+    if (changed.has('presentation')) {
       this.#releaseHiddenFocus();
     }
     if (!changed.has('presentation')) return;
@@ -141,6 +151,7 @@ export class SkAppShell extends LitElement {
     if (
       this.presentation !== undefined &&
       this.presentation !== 'compact' &&
+      this.presentation !== 'rail-preserving' &&
       this.presentation !== previousPresentation
     ) {
       console.warn(
@@ -196,24 +207,29 @@ export class SkAppShell extends LitElement {
     }
   }
 
+  #regionExposure(): ReadonlyArray<readonly [ExposureRegion, boolean]> {
+    const compact = this.#compact;
+    const responsiveNavigation = this.#responsiveNavigation;
+    return [
+      ['personal-rail', !compact],
+      ['context-sidebar', !responsiveNavigation],
+      ['compact-header', responsiveNavigation],
+      ['compact-navigation', this.#effectivelyOpen],
+    ];
+  }
+
   #reconcileAssignedRootExposure(): void {
     this.#restoreSuppressedRoots();
     if (!this.isConnected) return;
 
-    const compact = this.#compact;
-    const regions: ReadonlyArray<readonly [ExposureRegion, boolean]> = [
-      ['personal-rail', !compact],
-      ['context-sidebar', !compact],
-      ['compact-header', compact],
-      ['compact-navigation', this.#effectivelyOpen],
-    ];
-    for (const [slotName, active] of regions) {
+    for (const [slotName, active] of this.#regionExposure()) {
       if (active) this.#releaseAssignedRoots(slotName);
       else this.#suppressAssignedRoots(slotName);
     }
   }
 
   #onExposureSlotChange = (): void => {
+    this.#releaseHiddenFocus();
     this.#reconcileAssignedRootExposure();
   };
 
@@ -221,8 +237,12 @@ export class SkAppShell extends LitElement {
     const active = this.getRootNode() instanceof Document
       ? this.ownerDocument.activeElement
       : (this.getRootNode() as ShadowRoot).activeElement;
-    if (active instanceof HTMLElement && this.#assignedWithin(active, 'compact-navigation')) {
-      active.blur();
+    if (!(active instanceof HTMLElement)) return;
+    for (const [slotName, exposed] of this.#regionExposure()) {
+      if (!exposed && this.#assignedWithin(active, slotName)) {
+        active.blur();
+        return;
+      }
     }
   }
 
@@ -247,7 +267,7 @@ export class SkAppShell extends LitElement {
     return Math.max(0, clientInlineSize - paddingStart - paddingEnd);
   }
 
-  #assignedWithin(node: Element, slotName: 'compact-header' | 'compact-navigation'): boolean {
+  #assignedWithin(node: Element, slotName: ExposureRegion): boolean {
     const expectedSlot = this.shadowRoot?.querySelector<HTMLSlotElement>(`slot[name="${slotName}"]`);
     if (!expectedSlot || !this.contains(node)) return false;
     for (let current: Element | null = node; current && current !== this; current = current.parentElement) {

@@ -1533,7 +1533,7 @@
                 {
                   "name": "slotName",
                   "type": {
-                    "text": "'compact-header' | 'compact-navigation'"
+                    "text": "ExposureRegion"
                   }
                 }
               ]
@@ -1618,12 +1618,31 @@
               "default": "null"
             },
             {
+              "kind": "field",
+              "name": "#railPreserving",
+              "privacy": "private",
+              "type": {
+                "text": "boolean"
+              },
+              "readonly": true
+            },
+            {
               "kind": "method",
               "name": "#reconcileAssignedRootExposure",
               "privacy": "private",
               "return": {
                 "type": {
                   "text": "void"
+                }
+              }
+            },
+            {
+              "kind": "method",
+              "name": "#regionExposure",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "ReadonlyArray<readonly [ExposureRegion, boolean]>"
                 }
               }
             },
@@ -1663,6 +1682,15 @@
                 "text": "ResizeObserver | null"
               },
               "default": "null"
+            },
+            {
+              "kind": "field",
+              "name": "#responsiveNavigation",
+              "privacy": "private",
+              "type": {
+                "text": "boolean"
+              },
+              "readonly": true
             },
             {
               "kind": "method",
@@ -1766,7 +1794,7 @@
                 "text": "boolean"
               },
               "default": "false",
-              "description": "Consumer-controlled compact drawer state. The shell never changes this value.",
+              "description": "Consumer-controlled responsive navigation state. The shell never changes this value.",
               "attribute": "open",
               "reflects": true
             },
@@ -1775,9 +1803,9 @@
               "name": "presentation",
               "privacy": "public",
               "type": {
-                "text": "'compact' | undefined"
+                "text": "'compact' | 'rail-preserving' | undefined"
               },
-              "description": "Enables the opt-in compact layout. Omit it for the legacy responsive shell.",
+              "description": "Enables an opt-in responsive layout. Omit it for the legacy responsive shell.",
               "attribute": "presentation",
               "reflects": true
             }
@@ -1787,7 +1815,7 @@
               "type": {
                 "text": "CustomEvent<{ readonly reason: 'escape' }>"
               },
-              "description": "Requests dismissal after Escape while the controlled compact drawer is effectively open. Detail is `{ reason: 'escape' }`; the event bubbles, is composed, and is not cancelable.",
+              "description": "Requests dismissal after Escape while controlled responsive navigation is effectively open. Detail is `{ reason: 'escape' }`; the event bubbles, is composed, and is not cancelable.",
               "name": "sk-app-shell-dismiss"
             }
           ],
@@ -1798,15 +1826,15 @@
                 "text": "boolean"
               },
               "default": "false",
-              "description": "Consumer-controlled compact drawer state. The shell never changes this value.",
+              "description": "Consumer-controlled responsive navigation state. The shell never changes this value.",
               "fieldName": "open"
             },
             {
               "name": "presentation",
               "type": {
-                "text": "'compact' | undefined"
+                "text": "'compact' | 'rail-preserving' | undefined"
               },
-              "description": "Enables the opt-in compact layout. Omit it for the legacy responsive shell.",
+              "description": "Enables an opt-in responsive layout. Omit it for the legacy responsive shell.",
               "fieldName": "presentation"
             }
           ],

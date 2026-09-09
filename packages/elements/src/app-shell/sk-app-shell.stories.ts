@@ -11,6 +11,11 @@ const storyFrameStyle = [
 ].join('; ');
 
 const linkStyle = 'color: var(--sk-fg-default); font: inherit;';
+const railPreservingTriggerStyle = [
+  'box-sizing: border-box',
+  'min-block-size: calc(var(--sk-space-10) - var(--sk-space-5))',
+  'min-inline-size: calc(var(--sk-space-10) - var(--sk-space-5))',
+].join('; ');
 const shellFixtureStyle = `
   <style>
     sk-app-shell::part(shell) { min-height: 100vh; }
@@ -33,12 +38,16 @@ const composition = () => `
     <section aria-label="Delivery summary"><p>Consumer-owned page content.</p></section>
   </sk-app-shell>`;
 
-const compactComposition = (open = false, longLabels = false) => `
-  <sk-app-shell presentation="compact"${open ? ' open' : ''}>
+const responsiveComposition = (
+  presentation: 'compact' | 'rail-preserving',
+  open = false,
+  longLabels = false,
+) => `
+  <sk-app-shell presentation="${presentation}"${open ? ' open' : ''}>
     <nav slot="personal-rail" aria-label="Product areas"><a href="#work" style="${linkStyle}">Work</a></nav>
     <aside slot="context-sidebar" aria-label="Current workspace"><a href="#overview" style="${linkStyle}">Overview</a></aside>
     <div slot="compact-header" style="display: flex; align-items: center; gap: var(--sk-space-3);">
-      <button type="button" aria-expanded="${String(open)}" aria-controls="repository-navigation">
+      <button type="button" aria-expanded="${String(open)}" aria-controls="repository-navigation"${presentation === 'rail-preserving' ? ` style="${railPreservingTriggerStyle}"` : ''}>
         <svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
           <line x1="2" y1="4" x2="14" y2="4"></line>
           <line x1="2" y1="8" x2="14" y2="8"></line>
@@ -69,7 +78,8 @@ const compactComposition = (open = false, longLabels = false) => `
 const storyFrame = (content: string, className = '') =>
   `<div${className ? ` class="${className}"` : ''} style="${storyFrameStyle}">${shellFixtureStyle}${content}</div>`;
 
-const interactiveCompactFrame = (
+const interactiveResponsiveFrame = (
+  presentation: 'compact' | 'rail-preserving',
   open = false,
   width?: number,
   className = '',
@@ -78,7 +88,7 @@ const interactiveCompactFrame = (
   const frame = document.createElement('div');
   frame.className = className;
   frame.style.cssText = `${storyFrameStyle};${width ? ` width: ${width}px; max-width: 100%;` : ''}`;
-  frame.innerHTML = `${shellFixtureStyle}${compactComposition(open, longLabels)}`;
+  frame.innerHTML = `${shellFixtureStyle}${responsiveComposition(presentation, open, longLabels)}`;
   const shell = frame.querySelector('sk-app-shell') as SkAppShell;
   const trigger = shell.querySelector<HTMLButtonElement>('[slot="compact-header"] button')!;
   shell.compactTrigger = trigger;
@@ -94,6 +104,20 @@ const interactiveCompactFrame = (
   return frame;
 };
 
+const interactiveCompactFrame = (
+  open = false,
+  width?: number,
+  className = '',
+  longLabels = false,
+) => interactiveResponsiveFrame('compact', open, width, className, longLabels);
+
+const interactiveRailPreservingFrame = (
+  open = false,
+  width?: number,
+  className = '',
+  longLabels = false,
+) => interactiveResponsiveFrame('rail-preserving', open, width, className, longLabels);
+
 const compactViewportOptions = {
   compactShort: {
     name: 'Compact short viewport',
@@ -102,6 +126,17 @@ const compactViewportOptions = {
   compactTall: {
     name: 'Compact tall viewport',
     styles: { width: '390px', height: '900px' },
+  },
+};
+
+const railPreservingViewportOptions = {
+  railPreservingShort: {
+    name: 'Rail-preserving short viewport',
+    styles: { width: '1024px', height: '320px' },
+  },
+  railPreservingTall: {
+    name: 'Rail-preserving tall viewport',
+    styles: { width: '1024px', height: '900px' },
   },
 };
 
@@ -149,6 +184,54 @@ export const CompactTallViewport: Story = {
 };
 export const ReducedMotion: Story = { render: () => interactiveCompactFrame(true, 390) };
 export const ForcedColors: Story = { render: () => interactiveCompactFrame(true, 390) };
+
+export const RailPreservingClosed: Story = {
+  render: () => interactiveRailPreservingFrame(false, 1024),
+};
+export const RailPreservingOpen: Story = {
+  render: () => interactiveRailPreservingFrame(true, 1024),
+};
+export const RailPreserving390: Story = {
+  render: () => interactiveRailPreservingFrame(true, 390),
+};
+export const RailPreserving768: Story = {
+  render: () => interactiveRailPreservingFrame(true, 768),
+};
+export const RailPreserving1024: Story = {
+  render: () => interactiveRailPreservingFrame(true, 1024),
+};
+export const RailPreserving1100: Story = {
+  render: () => interactiveRailPreservingFrame(true, 1100),
+};
+export const RailPreserving1101: Story = {
+  render: () => interactiveRailPreservingFrame(true, 1101),
+};
+export const RailPreservingWide: Story = {
+  render: () => interactiveRailPreservingFrame(true, 1280),
+};
+export const RailPreservingLongLabels: Story = {
+  render: () => interactiveRailPreservingFrame(true, 1024, '', true),
+};
+export const RailPreservingShortViewport: Story = {
+  globals: { viewport: { value: 'railPreservingShort', isRotated: false } },
+  parameters: { viewport: { options: railPreservingViewportOptions } },
+  render: () => interactiveRailPreservingFrame(true, undefined, '', true),
+};
+export const RailPreservingTallViewport: Story = {
+  globals: { viewport: { value: 'railPreservingTall', isRotated: false } },
+  parameters: { viewport: { options: railPreservingViewportOptions } },
+  render: () => interactiveRailPreservingFrame(true, undefined, '', true),
+};
+export const RailPreservingReducedMotion: Story = {
+  render: () => interactiveRailPreservingFrame(true, 1024),
+};
+export const RailPreservingForcedColors: Story = {
+  render: () => interactiveRailPreservingFrame(true, 1024),
+};
+export const RailPreservingLightMode: Story = {
+  parameters: { backgrounds: { default: 'sk-light' } },
+  render: () => interactiveRailPreservingFrame(true, 1024, 'sk-light'),
+};
 
 export const EmptyRegions: Story = {
   render: () => storyFrame(`

@@ -54,6 +54,17 @@ test('[SC-010] the generated wrapper delivers reflected state and the property-o
   expect(element.compactTrigger).toBe(null);
 });
 
+test('[SC-010] the generated wrapper accepts and reflects rail-preserving', async () => {
+  const trigger = document.createElement('button');
+  render(<SkAppShell presentation="rail-preserving" open compactTrigger={trigger} />);
+  const element = host.querySelector('sk-app-shell') as SkAppShellElement;
+  await settleAppShell(element);
+  expect(element.presentation).toBe('rail-preserving');
+  expect(element.getAttribute('presentation')).toBe('rail-preserving');
+  expect(element.open).toBe(true);
+  expect(element.compactTrigger).toBe(trigger);
+});
+
 test('[SC-012] a stateful React consumer accepts Escape after its scheduled close commits', async () => {
   const trace: string[] = [];
 

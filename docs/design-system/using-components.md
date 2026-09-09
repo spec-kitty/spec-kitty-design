@@ -114,8 +114,15 @@ navigation surface is open.
 240px, and the remaining space, and the existing 720px container rule keeps every legacy region in
 document order. An unknown `presentation` warns and uses that legacy layout.
 
-The reflected `presentation="compact"` axis activates against the shell's own inline size through
-860 CSS px; 861px is noncompact, including when the viewport is wider than a constrained shell.
+The reflected `presentation` axis accepts `"compact"` or `"rail-preserving"`. Compact activates
+against the shell's own content-box inline size through 860 CSS px; 861px is noncompact, including
+when the viewport is wider than a constrained shell. Rail-preserving activates through an inclusive
+1100 CSS px on that same shell-relative, logical content-box coordinate; 1101px is wide. In its
+effective state the token-defined 56px personal rail remains, the context sidebar alone is removed,
+and content starts in the adjacent column. The existing compact header and controlled navigation
+are reused rather than replaced. At 390px this deliberately remains a rail-plus-content layout;
+it does not fall through to compact or infer an application route.
+
 The reflected `open` boolean is controlled: it projects consumer state but the shell never changes
 it on Escape, activation, resize, or a route change. The `compactTrigger` field is property-only
 (`HTMLElement | null`) and is never serialized. Its only purpose is accepted-Escape focus return.
@@ -148,6 +155,10 @@ it on Escape, activation, resize, or a route change. The `compactTrigger` field 
 </script>
 ```
 
+Use the same composition with `presentation="rail-preserving"` when the personal rail must remain
+available at intermediate widths. The trigger, navigation target, `open` value, dismissal listener,
+and route-close handler are identical; rail-preserving does not add a second drawer or focus seam.
+
 The trigger must be consumer-authored and actually assigned within this shell's `compact-header`
 slot. It may be the directly slotted control or a descendant of a directly slotted wrapper, as in
 the example; a `slot="compact-header"` attribute on a nested, unassigned control is not sufficient.
@@ -155,21 +166,24 @@ The labelled navigation target follows the same rule for `compact-navigation`. T
 must remain in the same light-DOM root; the consumer owns the target id, `aria-controls`,
 `aria-expanded`, accessible names, links, routes, destination, and whether dismissal is accepted.
 Do not point the IDREF at the shell's shadow wrapper or at content assigned to another shell. The
-shell adds neither a navigation landmark nor another `main`.
+shell adds neither a navigation landmark nor another `main`. It never chooses a presentation,
+route, current destination, trigger label, or open state for the application.
 
 The shell mirrors each inactive region onto its directly assigned light-DOM roots with `inert` and
 `aria-hidden="true"`, so engines cannot expose content through a CSS-hidden shadow wrapper. Personal
-and context roots are active in legacy or noncompact presentation, compact-header roots are active
-only in compact presentation through 860px, and compact-navigation roots are active only while the
-drawer is effectively open. When a root becomes inactive, the shell snapshots its exact raw
+and context roots are active in legacy or noncompact presentation. In effective compact mode both
+personal and context roots are suppressed; in effective rail-preserving mode personal remains
+active and context is suppressed. Compact-header roots are active in either effective opt-in mode,
+and compact-navigation roots are active only while the controlled drawer is effectively open. When
+a root becomes inactive, the shell snapshots its exact raw
 `inert` and `aria-hidden` attributes, including absence, an empty value, or `"false"`. It restores
 that snapshot when the root becomes active, moves out of an inactive slot, or the shell disconnects;
 it does not manufacture `aria-hidden="false"` or alter nested descendants. Consumers must author
 exposure attributes while the root is active. Writes made while the shell suppresses the root are
 unsupported and do not replace or persist over the saved snapshot. While open, compact navigation
-keeps native order inside a viewport-bounded internal scroller. Effectively open means all three
-conditions hold: `presentation === 'compact'`, shell inline size at most 860px, and controlled
-`open === true`.
+keeps native order inside a viewport-bounded internal scroller. Effectively open means that the
+selected presentation is effective at its boundary (`compact` through 860px or `rail-preserving`
+through 1100px) and controlled `open === true`.
 
 An effectively-open Escape emits exactly one `sk-app-shell-dismiss` with
 `detail: { reason: 'escape' }`, `bubbles: true`, `composed: true`, and `cancelable: false`; it never
@@ -181,8 +195,10 @@ closed. The shell first renders the drawer closed and only then focuses a still-
 controlled target grants no focus-return authority. Rejected dismissal expires at that sample,
 before a later task, so an unrelated route close never steals focus. Consumers should still author
 `open` as a boolean; the shell never mutates it. Route activation and destination remain entirely
-consumer-owned. Changing away from compact presentation releases focus from navigation that the
-transition hides without changing `open` or moving focus to the compact trigger.
+consumer-owned. A threshold or presentation transition releases focus only when it hides the
+navigation, without changing `open` or moving focus to the compact trigger; a transition between
+effective opt-in modes leaves the still-visible destination and its focus intact. Unknown values
+warn once per meaningful change and fail open to the legacy layout.
 
 The eight styling parts are `shell`, `personal`, `context`, `compact-header`,
 `compact-navigation`, `content`, `header`, and `main`.

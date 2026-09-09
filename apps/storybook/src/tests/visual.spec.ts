@@ -294,6 +294,22 @@ const teamOverviewShellStory = async (page: Page, light = false): Promise<Locato
   return host;
 };
 
+const appShellStory = async (
+  page: Page,
+  id: string,
+  width: number,
+  height: number,
+): Promise<Locator> => {
+  await page.setViewportSize({ width, height });
+  await page.goto(`/iframe.html?id=elements-skappshell--${id}&viewMode=story`);
+  const host = page.locator('sk-app-shell').first();
+  await host.waitFor({ state: 'visible', timeout: 20000 });
+  await page.evaluate(() => document.fonts.ready);
+  await host.evaluate((element) =>
+    (element as HTMLElement & { updateComplete: Promise<unknown> }).updateComplete);
+  return host;
+};
+
 const actionRowStory = async (page: Page, id: string): Promise<Locator> => {
   await page.goto(`/iframe.html?id=elements-skactionrow--${id}&viewMode=story`);
   const host = page.locator('sk-action-row').first();
@@ -331,6 +347,29 @@ test('SK-team-overview shell narrow — visual baseline', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 900 });
   const host = await teamOverviewShellStory(page);
   await expect(host).toHaveScreenshot('sk-team-overview-shell-narrow.png', {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+  });
+});
+
+for (const visual of [
+  { id: 'rail-preserving-1024', width: 1024, height: 900, name: 'sk-app-shell-rail-preserving-1024-dark.png' },
+  { id: 'rail-preserving-light-mode', width: 1024, height: 900, name: 'sk-app-shell-rail-preserving-1024-light.png' },
+  { id: 'rail-preserving-390', width: 390, height: 900, name: 'sk-app-shell-rail-preserving-390-dark.png' },
+] as const) {
+  test(`SK-app-shell ${visual.name} — visual baseline`, async ({ page }) => {
+    const host = await appShellStory(page, visual.id, visual.width, visual.height);
+    await expect(host).toHaveScreenshot(visual.name, {
+      threshold: 0.02,
+      maxDiffPixelRatio: 0.02,
+    });
+  });
+}
+
+test('SK-app-shell rail-preserving forced colors — visual baseline', async ({ page }) => {
+  await page.emulateMedia({ forcedColors: 'active' });
+  const host = await appShellStory(page, 'rail-preserving-forced-colors', 1024, 900);
+  await expect(host).toHaveScreenshot('sk-app-shell-rail-preserving-forced-colors.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
   });
