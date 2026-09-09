@@ -2,8 +2,8 @@
 
 This evidence records actual Chrome page zoom for the narrow K2 board and the supplied
 long-content stress story. The production Storybook build and captures were produced from
-implementation commit `3abd962aae187956f32513104fa849fb7dee3933` (tree
-`dbdb285bec44f9e252907796e095c9d617744ccd`). The evidence files are committed afterward because
+implementation commit `7ffaae1033e032dafd1e42255a97392e8a80456d` (tree
+`6aac6defb52c3fcfdff47b3932cd981f8c2f5b17`). The evidence files are committed afterward because
 a Git commit cannot contain its own hash.
 
 ## Environment and method
@@ -44,9 +44,9 @@ authoritative evidence for genuine browser page zoom.
 
 | Story | 100% SHA-256 | 200% SHA-256 |
 | --- | --- | --- |
-| `k-2-narrow-contained` | `7627211d34b8e9818ab962f6f6e69cf6d0b32887f6e256b89e18e0bca9badb12` | `e8df67490d508da09023cc610def37a0404eab0dafc6ba4f689d9d46c4d14813` |
-| `long-content` | `9c40072b4b102ec8ce6aff6671a0397016b2e59bd2677dd7edf8eb17f43f328d` | `3075ded7e4f5664d5948b8e4590a1a8fdfc0b8ccb87c2f103c0519189f3b5767` |
+| `k-2-narrow-contained` | `7627211d34b8e9818ab962f6f6e69cf6d0b32887f6e256b89e18e0bca9badb12` | `fd5692a4b98be2c67f89420609e15abaca817e20b96c66b3c5af437f86ec03cc` |
+| `long-content` | `dbce78631ad5015239252e5a84a5ab17c65c790d595b3161d83e640e6dd3c3d1` | `66aee2a4df24b59ce0a8966b099937e4e4b90ed62ef432591254923ce65a6c7a` |
 
 The machine-readable `metrics.json` record has SHA-256
-`cdc6b365dc2e36ebed41c00cb298e643c6a5d4bd8b2dcf38badea28a61ec486a`.
+`5afdabe2cc49207b143990c32644d7ec2300168c5c44138de30b3c3370c08c8c`.
 Any later implementation change requires a fresh exact-source capture and inspection.

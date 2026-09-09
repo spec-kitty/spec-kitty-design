@@ -1,13 +1,13 @@
 {
-  "head": "3abd962aae187956f32513104fa849fb7dee3933",
-  "tree": "dbdb285bec44f9e252907796e095c9d617744ccd",
+  "head": "7ffaae1033e032dafd1e42255a97392e8a80456d",
+  "tree": "6aac6defb52c3fcfdff47b3932cd981f8c2f5b17",
   "method": "X11 XTEST Ctrl+0 then five Ctrl+Shift+= browser UI chords",
   "levels": {
     "k2": {
       "before-100": {
-        "head": "3abd962aae187956f32513104fa849fb7dee3933",
-        "tree": "dbdb285bec44f9e252907796e095c9d617744ccd",
-        "capturedAt": "2026-09-09T16:05:51.678Z",
+        "head": "7ffaae1033e032dafd1e42255a97392e8a80456d",
+        "tree": "6aac6defb52c3fcfdff47b3932cd981f8c2f5b17",
+        "capturedAt": "2026-09-09T16:23:20.457Z",
         "story": {
           "type": "story",
           "subtype": "story",
@@ -128,9 +128,9 @@
         }
       },
       "after-200": {
-        "head": "3abd962aae187956f32513104fa849fb7dee3933",
-        "tree": "dbdb285bec44f9e252907796e095c9d617744ccd",
-        "capturedAt": "2026-09-09T16:05:55.759Z",
+        "head": "7ffaae1033e032dafd1e42255a97392e8a80456d",
+        "tree": "6aac6defb52c3fcfdff47b3932cd981f8c2f5b17",
+        "capturedAt": "2026-09-09T16:23:24.636Z",
         "story": {
           "type": "story",
           "subtype": "story",
@@ -250,15 +250,15 @@
         "failedChecks": [],
         "desktopScreenshot": {
           "filename": "k2-after-200-desktop.png",
-          "sha256": "e8df67490d508da09023cc610def37a0404eab0dafc6ba4f689d9d46c4d14813"
+          "sha256": "fd5692a4b98be2c67f89420609e15abaca817e20b96c66b3c5af437f86ec03cc"
         }
       }
     },
     "long": {
       "before-100": {
-        "head": "3abd962aae187956f32513104fa849fb7dee3933",
-        "tree": "dbdb285bec44f9e252907796e095c9d617744ccd",
-        "capturedAt": "2026-09-09T16:05:57.933Z",
+        "head": "7ffaae1033e032dafd1e42255a97392e8a80456d",
+        "tree": "6aac6defb52c3fcfdff47b3932cd981f8c2f5b17",
+        "capturedAt": "2026-09-09T16:23:26.884Z",
         "story": {
           "type": "story",
           "subtype": "story",
@@ -375,13 +375,13 @@
         "failedChecks": [],
         "desktopScreenshot": {
           "filename": "long-before-100-desktop.png",
-          "sha256": "9c40072b4b102ec8ce6aff6671a0397016b2e59bd2677dd7edf8eb17f43f328d"
+          "sha256": "dbce78631ad5015239252e5a84a5ab17c65c790d595b3161d83e640e6dd3c3d1"
         }
       },
       "after-200": {
-        "head": "3abd962aae187956f32513104fa849fb7dee3933",
-        "tree": "dbdb285bec44f9e252907796e095c9d617744ccd",
-        "capturedAt": "2026-09-09T16:06:01.795Z",
+        "head": "7ffaae1033e032dafd1e42255a97392e8a80456d",
+        "tree": "6aac6defb52c3fcfdff47b3932cd981f8c2f5b17",
+        "capturedAt": "2026-09-09T16:23:30.748Z",
         "story": {
           "type": "story",
           "subtype": "story",
@@ -501,7 +501,7 @@
         "failedChecks": [],
         "desktopScreenshot": {
           "filename": "long-after-200-desktop.png",
-          "sha256": "3075ded7e4f5664d5948b8e4590a1a8fdfc0b8ccb87c2f103c0519189f3b5767"
+          "sha256": "66aee2a4df24b59ce0a8966b099937e4e4b90ed62ef432591254923ce65a6c7a"
         }
       }
     }
