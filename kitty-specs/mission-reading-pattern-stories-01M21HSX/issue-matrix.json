@@ -37,7 +37,7 @@
       "wp": null
     },
     "#263": {
-      "evidence_ref": "#264 is merged and post-merge verified; #265 exact rebased product head df4bf66bc72c287e6aaadf82f5fce18c766de5af passes CI 34332459374 and Spec Kitty acceptance; only train merge and post-merge mission review remain.",
+      "evidence_ref": "#264 is merged and post-merge verified; #265 corrective product head b68f84d28715ca8ef551f40cda24f3a13e054f1e passes full CI 34343137694 after closing the four late contract blockers; corrective train merge and post-merge mission review remain.",
       "fr": "FR-001\u2013FR-013",
       "nfr": "NFR-001\u2013NFR-007",
       "repo": "spec-kitty/spec-kitty-design",
