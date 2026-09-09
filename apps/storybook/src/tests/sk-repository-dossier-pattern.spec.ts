@@ -15,6 +15,9 @@ const STORY_IDS = [
   "light-mode",
   "long-data",
   "progress-thresholds",
+  "layout-threshold-860",
+  "layout-threshold-861",
+  "tracker-destinations",
   "forced-colors",
   "reduced-motion",
   "zoom-200",
@@ -68,6 +71,65 @@ const documentGeometry = (page: Page) =>
     clientWidth: document.documentElement.clientWidth,
     scrollWidth: document.documentElement.scrollWidth,
   }));
+
+const expectFocusOutlineContained = async (
+  locator: Locator,
+  bounds?: Locator,
+): Promise<void> => {
+  await expect(locator).toBeFocused();
+  const focus = await locator.evaluate((element) => {
+    const style = getComputedStyle(element);
+    const rect = element.getBoundingClientRect();
+    const width = Number.parseFloat(style.outlineWidth);
+    const offset = Number.parseFloat(style.outlineOffset);
+    const expansion = width + Math.max(Number.isFinite(offset) ? offset : 0, 0);
+    return {
+      style: style.outlineStyle,
+      width,
+      expanded: {
+        left: rect.left - expansion,
+        top: rect.top - expansion,
+        right: rect.right + expansion,
+        bottom: rect.bottom + expansion,
+      },
+    };
+  });
+  expect(focus.style).not.toBe("none");
+  expect(focus.width).toBeGreaterThan(0);
+
+  const container = bounds
+    ? await bounds.evaluate((element) => {
+        const rect = element.getBoundingClientRect();
+        return {
+          left: rect.left,
+          top: rect.top,
+          right: rect.right,
+          bottom: rect.bottom,
+        };
+      })
+    : await locator.page().evaluate(() => ({
+        left: 0,
+        top: 0,
+        right: innerWidth,
+        bottom: innerHeight,
+      }));
+  expect(focus.expanded.left).toBeGreaterThanOrEqual(container.left);
+  expect(focus.expanded.top).toBeGreaterThanOrEqual(container.top);
+  expect(focus.expanded.right).toBeLessThanOrEqual(container.right);
+  expect(focus.expanded.bottom).toBeLessThanOrEqual(container.bottom);
+};
+
+const focusBody = (page: Page) =>
+  page.evaluate(() => {
+    document.body.tabIndex = -1;
+    document.body.focus();
+  });
+
+const pressTab = async (page: Page, count: number): Promise<void> => {
+  for (let index = 0; index < count; index += 1) {
+    await page.keyboard.press("Tab");
+  }
+};
 
 test("source is a Storybook-only public composition", () => {
   const storySource = readFileSync(
@@ -181,7 +243,20 @@ test("D1 composes the approved public tags and native information families", asy
   ).toHaveCount(3);
   await expect(root.locator("progress")).toHaveCount(3);
   await expect(root.locator("time[datetime]")).toHaveCount(1);
+  await expect(root.locator("time[datetime]")).toHaveText("6 minutes ago");
   await expect(root.locator("code").first()).toBeVisible();
+  await expect(
+    root.getByRole("link", { name: "Repos", exact: true }),
+  ).toHaveAttribute("href", "#repos");
+  await expect(
+    root.getByRole("heading", { name: "Set up in this repo", exact: true }),
+  ).toBeVisible();
+  await expect(
+    root.getByText(
+      "Create Missions from your laptop with the Spec Kitty CLI. They appear here at the exact commit you push.",
+      { exact: true },
+    ),
+  ).toBeVisible();
   await expect(
     root
       .locator('[data-mission-id="#1042"] sk-action-row')
@@ -409,6 +484,119 @@ test("controlled compact navigation enters focus, dismisses with Escape, and res
   await expect(trigger).toBeFocused();
 });
 
+test("native keyboard order skips hidden regions and activates navigation and copy controls", async ({
+  page,
+}) => {
+  let root = await openStory(page, "d-2-narrow-closed", {
+    width: 390,
+    height: 844,
+  });
+  let trigger = root.getByRole("button", { name: "Repository navigation" });
+  const breadcrumbIndex = root.getByRole("link", {
+    name: "Repos",
+    exact: true,
+  });
+
+  await focusBody(page);
+  await pressTab(page, 1);
+  await expectFocusOutlineContained(trigger);
+  await pressTab(page, 1);
+  await expectFocusOutlineContained(breadcrumbIndex);
+  await page.keyboard.press("Shift+Tab");
+  await expectFocusOutlineContained(trigger);
+  await page.keyboard.press("Space");
+  const compactOverview = root
+    .locator('[slot="compact-navigation"]')
+    .getByRole("link", { name: "Overview", exact: true });
+  await expectFocusOutlineContained(
+    compactOverview,
+    root.locator('[slot="compact-navigation"]'),
+  );
+  await page.keyboard.press("Shift+Tab");
+  await expectFocusOutlineContained(trigger);
+  await page.keyboard.press("Enter");
+  await expect(root.locator("sk-app-shell")).not.toHaveAttribute("open", "");
+
+  root = await openStory(page, "d-2-narrow-closed", {
+    width: 390,
+    height: 844,
+  });
+  await focusBody(page);
+  await pressTab(page, 4);
+  const documentLink = root.getByRole("link", {
+    name: "Charter",
+    exact: true,
+  });
+  await expectFocusOutlineContained(documentLink);
+  await page.keyboard.press("Enter");
+  await expect.poll(() => new URL(page.url()).hash).toBe("#charter");
+
+  root = await openStory(page, "d-2-narrow-closed", {
+    width: 390,
+    height: 844,
+  });
+  await focusBody(page);
+  await pressTab(page, 7);
+  const missionLink = root
+    .locator('[data-mission-id="#1042"]')
+    .getByRole("link", { name: /Launch resilience tranche A/ });
+  await expectFocusOutlineContained(missionLink);
+  await page.keyboard.press("Enter");
+  await expect.poll(() => new URL(page.url()).hash).toBe("#mission-1042");
+
+  root = await openStory(page, "d-2-narrow-closed", {
+    width: 390,
+    height: 844,
+  });
+  await page.evaluate(() => {
+    const state = globalThis as typeof globalThis & {
+      __dossierKeyboardWrites: string[];
+    };
+    state.__dossierKeyboardWrites = [];
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: {
+        writeText: async (value: string) =>
+          state.__dossierKeyboardWrites.push(value),
+      },
+    });
+  });
+  await focusBody(page);
+  await pressTab(page, 11);
+  const charterHost = root
+    .locator("sk-copy-field")
+    .filter({ hasText: "spec-kitty charter interview" });
+  const charterCopy = charterHost.getByRole("button", {
+    name: "Copy Charter interview command",
+  });
+  await expectFocusOutlineContained(charterCopy);
+  await page.keyboard.press("Space");
+  await expect(charterHost.getByRole("status")).toHaveText("Value copied.");
+  await pressTab(page, 1);
+  const missionHost = root
+    .locator("sk-copy-field")
+    .filter({ hasText: "spec-kitty dispatch" });
+  const missionCopy = missionHost.getByRole("button", {
+    name: "Copy Mission dispatch command",
+  });
+  await expectFocusOutlineContained(missionCopy);
+  await page.keyboard.press("Enter");
+  await expect(missionHost.getByRole("status")).toHaveText("Value copied.");
+  expect(
+    await page.evaluate(
+      () =>
+        (
+          globalThis as typeof globalThis & {
+            __dossierKeyboardWrites: string[];
+          }
+        ).__dossierKeyboardWrites,
+    ),
+  ).toEqual([
+    "spec-kitty charter interview",
+    'spec-kitty dispatch "Add dark-mode tokens to the dossier"',
+  ]);
+});
+
 test("390px layout keeps exact gutters, reflow, drawer, and focus inside the viewport", async ({
   page,
 }) => {
@@ -555,6 +743,111 @@ test("progress threshold proof preserves supplied adjacent values and labels", a
     "100 Work Packages",
     "100 Work Packages",
   ]);
+});
+
+test("860/861px stories prove the inclusive compact-navigation seam and local gutters", async ({
+  page,
+}) => {
+  for (const item of [
+    { id: "layout-threshold-860", width: 860, compact: true, gutter: 16 },
+    { id: "layout-threshold-861", width: 861, compact: false, gutter: 24 },
+  ] as const) {
+    const root = await openStory(page, item.id, {
+      width: item.width,
+      height: 900,
+    });
+    const personal = root.locator('[slot="personal-rail"]');
+    const context = root.locator('[slot="context-sidebar"]');
+    const compactHeader = root.locator('[slot="compact-header"]');
+    const compactNavigation = root.locator('[slot="compact-navigation"]');
+
+    if (item.compact) {
+      await expect(personal).toHaveAttribute("inert", "");
+      await expect(context).toHaveAttribute("inert", "");
+      await expect(compactHeader).not.toHaveAttribute("inert", "");
+      await expect(compactHeader).toBeVisible();
+      await expect(compactNavigation).toHaveAttribute("inert", "");
+      await expect(compactNavigation).toHaveAttribute("aria-hidden", "true");
+    } else {
+      await expect(personal).not.toHaveAttribute("inert", "");
+      await expect(context).not.toHaveAttribute("inert", "");
+      await expect(compactHeader).toHaveAttribute("inert", "");
+      await expect(compactHeader).toHaveAttribute("aria-hidden", "true");
+      await expect(compactNavigation).toHaveAttribute("inert", "");
+      await expect(compactNavigation).toHaveAttribute("aria-hidden", "true");
+    }
+
+    const content = root.locator(".sk-repository-dossier-pattern__content");
+    const card = root.locator(".sk-repository-dossier-pattern__mission-card");
+    const [contentBox, cardBox] = await Promise.all([
+      content.boundingBox(),
+      card.boundingBox(),
+    ]);
+    expect(contentBox).not.toBeNull();
+    expect(cardBox).not.toBeNull();
+    expect(Math.round(cardBox!.x - contentBox!.x)).toBe(item.gutter);
+    expect(
+      Math.round(
+        contentBox!.x + contentBox!.width - (cardBox!.x + cardBox!.width),
+      ),
+    ).toBe(item.gutter);
+    const geometry = await documentGeometry(page);
+    expect(geometry.scrollWidth, item.id).toBeLessThanOrEqual(
+      geometry.clientWidth,
+    );
+  }
+});
+
+test("safe tracker destinations are native links while unsafe and absent destinations stay static", async ({
+  page,
+}) => {
+  const root = await openStory(page, "tracker-destinations");
+  const safeMission = root.locator('[data-mission-id="#1042"]');
+  const unsafeMission = root.locator('[data-mission-id="#1017"]');
+  const absentMission = root.locator('[data-mission-id="#998"]');
+  const safeTracker = safeMission.getByRole("link", {
+    name: "Tracker #1042",
+    exact: true,
+  });
+
+  await expect(safeTracker).toHaveAttribute(
+    "href",
+    "https://tracker.example.test/issues/1042",
+  );
+  await expect(
+    unsafeMission.locator("sk-pill-tag").filter({
+      hasText: "Unsafe tracker fixture",
+    }),
+  ).toBeVisible();
+  await expect(
+    unsafeMission.getByRole("link", { name: "Unsafe tracker fixture" }),
+  ).toHaveCount(0);
+  await expect(
+    absentMission.getByText(/tracker/i, { exact: false }),
+  ).toHaveCount(0);
+  await expect(root.locator("a a")).toHaveCount(0);
+
+  await safeTracker.evaluate((element) => {
+    const state = globalThis as typeof globalThis & {
+      __dossierTrackerActivation?: boolean;
+    };
+    element.addEventListener("click", (event) => {
+      event.preventDefault();
+      state.__dossierTrackerActivation = true;
+    });
+  });
+  await safeTracker.focus();
+  await page.keyboard.press("Enter");
+  expect(
+    await page.evaluate(
+      () =>
+        (
+          globalThis as typeof globalThis & {
+            __dossierTrackerActivation?: boolean;
+          }
+        ).__dossierTrackerActivation,
+    ),
+  ).toBe(true);
 });
 
 test("narrow, long-data, 200%, and 400% viewport equivalents have no page overflow", async ({

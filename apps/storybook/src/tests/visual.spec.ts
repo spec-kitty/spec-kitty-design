@@ -1571,6 +1571,9 @@ type RepositoryDossierStoryId =
   | 'light-mode'
   | 'long-data'
   | 'progress-thresholds'
+  | 'layout-threshold-860'
+  | 'layout-threshold-861'
+  | 'tracker-destinations'
   | 'forced-colors'
   | 'reduced-motion'
   | 'zoom-200'
@@ -1602,6 +1605,9 @@ const repositoryDossierFullCases = [
   { id: 'light-mode', width: 1440, height: 1024, name: 'sk-repository-dossier-light.png' },
   { id: 'long-data', width: 390, height: 1000, name: 'sk-repository-dossier-long-390.png' },
   { id: 'progress-thresholds', width: 1440, height: 1024, name: 'sk-repository-dossier-progress-thresholds.png' },
+  { id: 'layout-threshold-860', width: 860, height: 900, name: 'sk-repository-dossier-layout-threshold-860.png' },
+  { id: 'layout-threshold-861', width: 861, height: 900, name: 'sk-repository-dossier-layout-threshold-861.png' },
+  { id: 'tracker-destinations', width: 1440, height: 1024, name: 'sk-repository-dossier-tracker-destinations.png' },
 ] as const satisfies ReadonlyArray<{
   id: RepositoryDossierStoryId;
   width: number;

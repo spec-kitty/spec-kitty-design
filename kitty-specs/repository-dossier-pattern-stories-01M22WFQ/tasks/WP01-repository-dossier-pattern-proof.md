@@ -107,7 +107,7 @@ Recheck issue #255 and its comments/linked PRs, epic #253, dependencies #212/#25
 Ship one Storybook pattern family demonstrating the approved Repository Dossier composition through public surfaces only. The implementation is done when:
 
 - D1 populated desktop dark; D2 narrow closed and open drawer at 390 px; D4 cross-branch; D5 not-Spec-Kitty terminal; D6 one affected mission; D7 indexing; and D8 completed-empty are individually discoverable and non-empty.
-- A valid `LightMode` system proof exists, together with long-data, progress-threshold, forced-colors, reduced-motion, 200%/400% zoom, and 390 px resilience evidence.
+- A valid `LightMode` system proof exists, together with long-data, 860/861 px layout-threshold, tracker resilience, forced-colors, reduced-motion, 200%/400% zoom, and 390 px evidence.
 - Deeply frozen story fixtures and pure projections own every repeated repository, branch, path, SHA, mission, progress, status, notice, and action-display fact.
 - D4's merged fact is supplied, not inferred; D5 has no commit/completed action; D6 uses one identical SHA; D7 has stable busy/live meaning but no unavailable facts/timer/polling; D8 has a real commit and no fabricated zero count/row/progress.
 - The D2 drawer uses the public controlled shell seam with correct trigger state, focus entry, Escape dismissal, inert background, and focus return.
@@ -147,7 +147,7 @@ D5 is terminal not-Spec-Kitty guidance with no commit fact or completed-only act
 
 ### T006 — Add system resilience proofs
 
-Add a valid `.sk-light` `LightMode` story without claiming D3 approval. Add dedicated stories or focused test modes for long opaque values, progress threshold pairs, 390 px containment, 200%/400% zoom equivalents, forced colors, and reduced motion. Exact copy values remain intact; local code/data overflow is allowed where appropriate, but page-level horizontal overflow is not.
+Add a valid `.sk-light` `LightMode` story without claiming D3 approval. Add dedicated stories or focused test modes for long opaque values, the 860/861 px compact-navigation seam, safe/unsafe/absent tracker destinations, 390 px containment, 200%/400% zoom equivalents, forced colors, and reduced motion. Exact copy values remain intact; local code/data overflow is allowed where appropriate, but page-level horizontal overflow is not.
 
 ### T007 — Register and document
 
@@ -155,11 +155,11 @@ Add every exported story ID to `expected-stories.json` in its established format
 
 ### T008 — Complete focused executable evidence
 
-Test every state and invariant in repository-supported Chromium and Firefox configurations. Verify native semantics, one source for repeated values, drawer behavior, copy success/failure, busy/live behavior, conditional omissions, threshold labels, long-data containment, zoom, theme parity, forced-colors visibility, reduced-motion behavior, and no page-level overflow. Tests may inspect public/light DOM and accessibility state, but not use private roots to implement or restyle the pattern.
+Test every state and invariant in repository-supported Chromium and Firefox configurations. Verify native semantics, real keyboard order/activation, one source for repeated values, drawer behavior, copy success/failure, tracker destination fallbacks, busy/live behavior, conditional omissions, the 860/861 px seam, long-data containment, zoom, theme parity, forced-colors visibility, reduced-motion behavior, and no page-level overflow. Tests may inspect public/light DOM and accessibility state, but not use private roots to implement or restyle the pattern.
 
 ### T009 — Produce and review visual evidence
 
-Register a focused visual matrix for D1, D2 closed/open, D4-D8, LightMode, long/threshold conditions, forced colors, and reduced motion. Generate baselines only through Playwright. Compare D1, D2, and D4-D8 individually with their approved images, then review spacing, hierarchy, state differentiation, and responsive continuity across the complete family. Record discrepancies and fix material findings before baseline approval.
+Register a focused visual matrix for D1, D2 closed/open, D4-D8, LightMode, long data, 860/861 px layout thresholds, tracker resilience, forced colors, and reduced motion. Generate baselines only through Playwright. Compare D1, D2, and D4-D8 individually with their approved images, then review spacing, hierarchy, state differentiation, and responsive continuity across the complete family. Record discrepancies and fix material findings before baseline approval.
 
 ### T010 — Run full gates
 

@@ -15,7 +15,7 @@ One work package and one PR. The immutable fixtures, truthful projections, compl
 | T003 | Compose D1 populated desktop and D2 narrow closed/open using public shell/navigation/components and native semantics | FR-001, FR-002, FR-009, FR-010, C-001-C-005 | |
 | T004 | Compose D4 cross-branch and D6 affected-mission snapshot without truth inference or a new status wrapper | FR-003, FR-005, FR-011, FR-012 | |
 | T005 | Compose truthful D5 terminal not-Spec-Kitty, D7 indexing, and D8 completed-empty states with required omissions | FR-004, FR-006, FR-007, C-006-C-009 | |
-| T006 | Add LightMode, long-data, threshold-edge, 390 px, 200%/400% zoom, forced-colors, and reduced-motion proofs | FR-008, FR-013, FR-014, NFR-003-NFR-005, NFR-009 | |
+| T006 | Add LightMode, long-data, 860/861 px threshold-edge, tracker-resilience, 390 px, 200%/400% zoom, forced-colors, and reduced-motion proofs | FR-008, FR-013, FR-014, NFR-003-NFR-005, NFR-009 | |
 | T007 | Register every story, document pattern/application ownership, and keep all public distributions unchanged | FR-015, NFR-008, C-001-C-004 | |
 | T008 | Complete focused Chromium/Firefox, copy/drawer, native semantics, axe, and fixture-consistency evidence | FR-002-FR-014, NFR-001-NFR-005 | |
 | T009 | Register and generate visual baselines, compare D1/D2/D4-D8 individually and across the family, and record fidelity findings | NFR-006, NFR-009, SC-011 | |

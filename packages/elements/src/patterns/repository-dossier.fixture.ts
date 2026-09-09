@@ -14,6 +14,7 @@ export type DossierState =
   | "indexing"
   | "completed-empty"
   | "long-data"
+  | "tracker-destinations"
   | "thresholds";
 
 type Capability = "completed" | "not-spec-kitty" | "indexing";
@@ -87,6 +88,7 @@ export interface DossierFixture {
     readonly inspectedBranch: string | undefined;
     readonly defaultBranch: string | undefined;
   };
+  readonly breadcrumbIndex: NavigationLink;
   readonly navigation: DossierNavigation;
   readonly snapshot: RepositorySnapshot | undefined;
   readonly missions: readonly MissionRecord[];
@@ -100,6 +102,8 @@ export interface DossierFixture {
     link: Readonly<{ label: string; href: string }> | undefined;
     command: CopyDatum;
   }>[];
+  readonly setupIntroduction:
+    Readonly<{ heading: string; body: string }> | undefined;
   readonly terminalMessage: string | undefined;
   readonly busyMessage: string | undefined;
 }
@@ -131,6 +135,8 @@ const REPOSITORY = "spec-kitty/EXPERIMENTAL-spec-kitty-saas";
 const REPOSITORY_PATH = "/srv/team-kitty/EXPERIMENTAL-spec-kitty-saas";
 const SNAPSHOT_SHA = "a3f91c2";
 const DEFAULT_BRANCH = "main";
+
+const BREADCRUMB_INDEX = { label: "Repos", href: "#repos" } as const;
 
 const PERSONAL_LINKS = [
   { label: "Spec Kitty home", href: "#home", mark: "SK", placement: "primary" },
@@ -183,6 +189,11 @@ const SETUP = [
     },
   },
 ] as const;
+
+const SETUP_INTRODUCTION = {
+  heading: "Set up in this repo",
+  body: "Create Missions from your laptop with the Spec Kitty CLI. They appear here at the exact commit you push.",
+} as const;
 
 const REPOSITORY_LINKS = [
   { label: "Charter", href: "#charter" },
@@ -277,15 +288,17 @@ const completedFixture = (
     capability: "completed",
     team: TEAM,
     repository,
+    breadcrumbIndex: BREADCRUMB_INDEX,
     navigation: navigationFor(repository, missions, navigationMissionIds),
     snapshot: {
       sha: SNAPSHOT_SHA,
       branch: DEFAULT_BRANCH,
-      pushed: { iso: "2026-09-09T10:54:00Z", label: "pushed 6 minutes ago" },
+      pushed: { iso: "2026-09-09T10:54:00Z", label: "6 minutes ago" },
     },
     missions,
     repositoryLinks: REPOSITORY_LINKS,
     setup: SETUP,
+    setupIntroduction: SETUP_INTRODUCTION,
     terminalMessage: undefined,
     busyMessage: undefined,
   };
@@ -306,6 +319,29 @@ const crossBranchMissions = populatedMissions.map((mission) => {
       };
     default:
       return { ...mission, copies: [mission.planningBranch] };
+  }
+}) satisfies readonly MissionRecord[];
+
+const trackerDestinationMissions = populatedMissions.map((mission) => {
+  switch (mission.id) {
+    case "#1042":
+      return {
+        ...mission,
+        tracker: {
+          label: "Tracker #1042",
+          href: "https://tracker.example.test/issues/1042",
+        },
+      };
+    case "#1017":
+      return {
+        ...mission,
+        tracker: {
+          label: "Unsafe tracker fixture",
+          href: "javascript:alert(1)",
+        },
+      };
+    default:
+      return mission;
   }
 }) satisfies readonly MissionRecord[];
 
@@ -386,7 +422,7 @@ export const REPOSITORY_DOSSIER_FIXTURES = deepFreezeRepositoryDossierFixture<
     snapshot: {
       sha: "72c4e9a8da9015b274ef0423032e8e75cfd09d55",
       branch: longMissions[0].planningBranch,
-      pushed: { iso: "2026-09-09T10:54:00Z", label: "pushed 6 minutes ago" },
+      pushed: { iso: "2026-09-09T10:54:00Z", label: "6 minutes ago" },
     },
     setup: SETUP.map((item, index) =>
       index === 1
@@ -401,6 +437,10 @@ export const REPOSITORY_DOSSIER_FIXTURES = deepFreezeRepositoryDossierFixture<
         : item,
     ),
   },
+  "tracker-destinations": completedFixture(
+    "tracker-destinations",
+    trackerDestinationMissions,
+  ),
   thresholds: completedFixture("thresholds", thresholdMissions),
   "not-spec-kitty": {
     ...completedFixture("not-spec-kitty", []),
@@ -409,6 +449,7 @@ export const REPOSITORY_DOSSIER_FIXTURES = deepFreezeRepositoryDossierFixture<
     snapshot: undefined,
     repositoryLinks: [],
     setup: [],
+    setupIntroduction: undefined,
     terminalMessage:
       "Team Kitty checked every pushed branch and found neither kitty-specs/ nor kitty-ops/. No Dossier content will be rendered for this repository.",
   },
@@ -419,6 +460,7 @@ export const REPOSITORY_DOSSIER_FIXTURES = deepFreezeRepositoryDossierFixture<
     snapshot: undefined,
     repositoryLinks: [],
     setup: [],
+    setupIntroduction: undefined,
     busyMessage:
       "The first complete render has not been published yet. This page will fill in automatically when rendering finishes.",
   },
@@ -488,6 +530,8 @@ export const fixtureForRepositoryDossierState = (
       return REPOSITORY_DOSSIER_FIXTURES["completed-empty"];
     case "long-data":
       return REPOSITORY_DOSSIER_FIXTURES["long-data"];
+    case "tracker-destinations":
+      return REPOSITORY_DOSSIER_FIXTURES["tracker-destinations"];
     case "thresholds":
       return REPOSITORY_DOSSIER_FIXTURES.thresholds;
   }

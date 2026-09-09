@@ -80,7 +80,7 @@ flowchart TD
 
 The only mutable demonstration state is the D2 consumer-owned drawer boolean. The trigger sets `open`; the story consumes the shell dismissal event, clears `open`, and lets `sk-app-shell` restore focus. Clipboard behavior remains owned by `sk-copy-field`. Every other story render is a pure projection from a recursively frozen fixture.
 
-No projection infers backend truth. In particular, D4's merged value, D6's affected mission, D7's indexing state, and D8's emptiness are supplied facts. Progress labels and values are supplied together; no story computes percentages or status thresholds from repository data.
+No projection infers backend truth. In particular, D4's merged value, D6's affected mission, D7's indexing state, and D8's emptiness are supplied facts. Each progress record supplies a Work Package total and completion percent; the pattern formats their labels and maps the percent to native `value`/`max="100"` without repository arithmetic or tone inference.
 
 ## Implementation Concern Map
 
@@ -102,7 +102,7 @@ No projection infers backend truth. In particular, D4's merged value, D6's affec
 
 ### IC-03 — Interaction, resilience, and visual evidence
 
-- **Purpose**: prove controlled drawer and exact-copy behavior plus LightMode, long data, threshold edges, 390 px, zoom, forced-colors, reduced-motion, axe, and visual fidelity.
+- **Purpose**: prove controlled drawer and exact-copy behavior plus LightMode, long data, the 860/861 px compact-navigation threshold edge, 390 px, zoom, forced-colors, reduced-motion, axe, and visual fidelity.
 - **Relevant requirements**: FR-002, FR-008, FR-009, FR-013, FR-014; NFR-001-NFR-009.
 - **Affected surfaces**: focused Storybook Playwright spec, `visual.spec.ts`, generated visual baselines, `expected-stories.json`.
 - **Sequencing/depends-on**: IC-02.
@@ -121,7 +121,7 @@ These concerns form one work package because the stories, immutable fixtures, fo
 ## Verification Strategy
 
 1. Exercise focused Repository Dossier story tests for fixture immutability/consistency, native structure, conditional omissions, controlled drawer focus/Escape/ARIA/inert behavior, and exact copy success/failure in supported Chromium and Firefox projects.
-2. Run axe over every registered story and inspect D1, D2, and D4-D8 individually. Check the complete family in default dark, required LightMode, forced colors, reduced motion, 390 px, 200%/400% zoom equivalents, long-data, and threshold-edge conditions.
+2. Run axe over every registered story and inspect D1, D2, and D4-D8 individually. Check the complete family in default dark, required LightMode, forced colors, reduced motion, 390 px, 200%/400% zoom equivalents, long-data, and 860/861 px compact-navigation threshold-edge conditions.
 3. Run the pattern composition gate and self-test, source/style guards, expected-story checks, Storybook build, visual regression, and repository browser suite.
 4. Run authored-source tests, mutation/self-test gates, lint/type/build, package graph, manifest/wrapper/Vue/CSS-module generation checks, ratchets, sizes, security, and all required local gates from current repository instructions.
 5. Fetch and rebase onto latest `origin/train/elements-first`; regenerate derived artifacts from source and repeat applicable checks on the exact reviewed SHA.

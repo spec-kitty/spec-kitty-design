@@ -76,7 +76,7 @@ As a maintainer, I can distinguish a repository that is not a Spec Kitty reposit
 
 ### User Story 4 - Validate the family across system conditions (Priority: P2)
 
-As a design-system maintainer, I can evaluate the Repository Dossier family in light mode, forced colors, long-data stress, threshold boundaries, and zoom without treating those proofs as application behavior or a new approved product screen.
+As a design-system maintainer, I can evaluate the Repository Dossier family in light mode, forced colors, long-data stress, the compact-navigation layout threshold, and zoom without treating those proofs as application behavior or a new approved product screen.
 
 **Why this priority**: The family must prove durable public composition beyond a single ideal dark screenshot.
 
@@ -87,7 +87,7 @@ As a design-system maintainer, I can evaluate the Repository Dossier family in l
 1. **Given** the LightMode proof, **when** the family renders, **then** all content and interactive states use public tokens and remain legible; this does not claim approval of the deferred D3 product composition.
 2. **Given** unusually long repository, branch, path, command, or SHA values, **when** rendered at 390 px and 200% or 400% zoom, **then** content wraps or scrolls locally without page-level horizontal overflow or hidden controls.
 3. **Given** forced colors, **when** the family renders, **then** status, focus, selected navigation, warnings, and controls retain non-color meaning and visible boundaries.
-4. **Given** progress values immediately around public threshold boundaries, **when** rendered, **then** labels and tones agree with the consumer-supplied values and no story calculates repository progress.
+4. **Given** the same populated fixture immediately around the public compact-navigation boundary, **when** rendered at 860 px and 861 px, **then** the intended shell regions and local gutters change at the documented seam without changing repository truth.
 
 ### Edge Cases
 
@@ -98,7 +98,7 @@ As a design-system maintainer, I can evaluate the Repository Dossier family in l
 - Clipboard access rejects; feedback reports failure and never announces success.
 - Copyable text contains punctuation, slashes, whitespace, or a full SHA; the requested clipboard value is exact.
 - Long unbroken data is evaluated at 390 px and high zoom without causing page-level horizontal overflow.
-- Status/progress values sit immediately below, at, and above public documented boundaries.
+- The app-shell width sits at 860 px and 861 px around the public compact-navigation boundary.
 - Reduced-motion and forced-colors preferences are active simultaneously.
 
 ## Requirements
@@ -120,7 +120,7 @@ As a design-system maintainer, I can evaluate the Repository Dossier family in l
 | FR-011 | Immutable fixture consistency | As a reviewer, I want every repeated repository fact, status, action, and omission to derive from one immutable fixture per story.                                            | High     | Open   |
 | FR-012 | Pure display projections      | As a library consumer, I want story projections to be deterministic and free of discovery, polling, inference, arithmetic, timestamps, routing, stores, or command execution. | High     | Open   |
 | FR-013 | Long-data proof               | As a maintainer, I want stress coverage for long names, branches, paths, commands, and SHAs.                                                                                  | Medium   | Open   |
-| FR-014 | Boundary proof                | As a maintainer, I want explicit stories or tests immediately around documented progress/status thresholds.                                                                   | Medium   | Open   |
+| FR-014 | Boundary proof                | As a maintainer, I want explicit stories and browser assertions at 860 px and 861 px around the documented compact-navigation layout threshold.                               | Medium   | Open   |
 | FR-015 | Pattern documentation         | As a consumer, I want Storybook documentation that identifies this as a composition pattern and states its ownership boundaries.                                              | Medium   | Open   |
 
 ### Non-Functional Requirements
@@ -165,7 +165,7 @@ As a design-system maintainer, I can evaluate the Repository Dossier family in l
 
 ### Measurable Outcomes
 
-- **SC-001**: Storybook exports distinct, named stories covering D1, D2 closed, D2 open, D4, D5, D6, D7, and D8, plus LightMode, long-data, forced-colors/reduced-motion, and threshold proof coverage.
+- **SC-001**: Storybook exports distinct, named stories covering D1, D2 closed, D2 open, D4, D5, D6, D7, and D8, plus LightMode, long-data, forced-colors/reduced-motion, tracker resilience, and 860/861 px layout-threshold proof coverage.
 - **SC-002**: Automated fixture-consistency tests cover every repeated repository fact and every conditional omission/action in the seven approved states with no divergence.
 - **SC-003**: Chromium and Firefox behavior checks pass for controlled drawer focus/Escape semantics and copy success/failure semantics on the exact reviewed SHA.
 - **SC-004**: Axe reports zero serious or critical violations across every required story on the exact reviewed SHA.

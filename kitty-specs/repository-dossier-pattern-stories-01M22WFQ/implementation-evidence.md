@@ -1,6 +1,6 @@
 # Repository Dossier implementation evidence
 
-This ledger records the correction candidate that followed independent Codex review cycle 1. The
+This ledger records the correction candidate that followed independent Codex review cycles 1 and 2. The
 PR and child-issue closeout record the final tested commit because a commit cannot contain its own
 hash. All UI values below come from immutable story fixtures; none are observations of Team Kitty
 application state.
@@ -19,11 +19,23 @@ The generated Chromium baselines were compared side-by-side with the approved da
 | D6 snapshot disagreement | Pass — one warning remains attached only to #998 and repeats the exact supplied repository SHA.                                                                                                                                                                                                  |
 | D7 indexing              | Pass — pending copy is distinct, no completed facts appear, and the stable polite notice receives its message once after insertion.                                                                                                                                                              |
 | D8 completed empty       | Pass — the exact commit, explicit empty result, repository documents, and setup guidance remain; zero-count Mission/progress surrogates do not appear.                                                                                                                                           |
-| Cross-screen family      | Pass — repository identity, layout hierarchy, status language, current navigation ownership, native semantics, and completed/terminal/pending distinctions remain consistent. Light, forced-color, reduced-motion, long-data, threshold, and CSS-zoom stress baselines use the same composition. |
+| Cross-screen family      | Pass — repository identity, layout hierarchy, status language, current navigation ownership, native semantics, and completed/terminal/pending distinctions remain consistent. Light, forced-color, reduced-motion, long-data, 860/861 seam, tracker-resilience, progress-input, and CSS-zoom stress baselines use the same composition. |
 
-The Storybook visual command regenerated only the affected Dossier baselines and passed 15/15.
-The focused behavioral command then passed 29/29 applicable Chromium/Firefox cases with one
+The Storybook visual command regenerated only the affected Dossier baselines and passed 18/18.
+The focused behavioral command then passed 35/35 applicable Chromium/Firefox cases with one
 expected Firefox skip for the explicitly Chromium-owned CSS-zoom stress.
+
+The 860 px baseline exposes the compact header and 16 px local content gutters while keeping the
+personal rail, desktop context sidebar, and closed compact drawer inert. The 861 px baseline
+exposes the two desktop navigation regions, hides the compact regions, and restores 24 px local
+gutters. The tracker-resilience baseline renders the safe HTTPS destination as a native anchor,
+the unsafe `javascript:` destination as a static pill, and the absent destination as no tracker
+surface. These three additions were inspected individually and against the complete Dossier family.
+
+Real keyboard sequences in Chromium and Firefox begin from the document body and prove the closed
+drawer is skipped by Tab order, Shift+Tab continuity, Space/Enter compact-trigger operation, native
+document and Mission link activation, and Space/Enter operation of both copy buttons. Computed
+focus outlines and expanded outline geometry remain inside the 390 px viewport or open drawer.
 
 ## Genuine browser UI zoom
 
@@ -47,9 +59,10 @@ browser chrome visibly reported 200% and 400%; the focused trigger remained visi
 
 No new ADR-11 behavior ID was invented for a Storybook fixture. Instead, five isolated
 substitutions were applied to the extracted fixture/projection source, each against the then-current
-18-test direct fixture suite with the default reporter. Each produced exactly its named red. The
-authored source was restored before the merge-consistency invariant brought the final suite to
-19/19:
+direct fixture suite with the default reporter. Each produced exactly its named red. A sixth
+renderer mutation forced every safe tracker destination down the static branch, rebuilt Storybook,
+and made the focused native-anchor assertion red. Authored source was restored before the final
+direct fixture suite passed 20/20:
 
 | Probe                                                  | Named red                                            |
 | ------------------------------------------------------ | ---------------------------------------------------- |
@@ -58,6 +71,23 @@ authored source was restored before the merge-consistency invariant brought the 
 | Put merged #1017 back into D4 navigation               | exact unmerged navigation destinations assertion     |
 | Accept every parsed tracker protocol                   | unsafe `javascript:` destination rejection assertion |
 | Change D1 supplied progress from 62% to 5%             | exact total/percent fixture assertion                |
+| Force a safe tracker destination down the static branch | rendered safe native-anchor assertion                |
+
+## Consolidated gate result
+
+The consolidated candidate completed the repository gate surface before independent review:
+
+- `npm test`: 48 files and 582 tests passed; both required lanes were non-empty.
+- `node scripts/measure-suite-time.mjs`: 582 tests passed in 15.3 seconds against a 40-second ceiling.
+- `node scripts/build-storybook-with-budget.mjs`: production Storybook built in 9.31 seconds against a 180-second ceiling.
+- Focused Playwright: 35 applicable Chromium/Firefox cases passed with one intended Firefox skip; all 18 Dossier visual baselines passed in Chromium.
+- Full Playwright: 1,078 cases passed with 44 intended skips; the four port/demo assembly failures were rerun under the repository's native assembled surface and passed 4/4.
+- `node scripts/gate-selftest.mjs`: all 50 render-assertion shapes passed; `node scripts/run-axe-storybook.js`: all 561 rendered stories had zero WCAG 2.1 AA violations.
+- `node scripts/suite-selftest.mjs`: all 237 mutations produced their named red against a green 548-assertion baseline in 937.3 seconds; `--selftest` passed all 10 guards in 67 seconds.
+- Quality, five-project typecheck, generated React/Vue/CSS/markup/story/manifest/part gates, composition boundaries, workflow/ADR gates, security, lockfile, pinned Actions, release graph, packed Vue declarations, size report, and offline loading all passed.
+
+The PR and child-issue closeout record the immutable reviewed SHA. The final train fetch, rebase
+decision, and affected-gate rerun happen again immediately before merge.
 
 ## Known environment boundary
 

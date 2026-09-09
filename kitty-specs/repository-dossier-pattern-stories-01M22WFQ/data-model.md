@@ -4,16 +4,16 @@ This mission introduces no persisted or runtime application data model. These en
 
 ## Fixture entities
 
-| Entity              | Required facts                                       | Optional facts                     | Invariants                                                                         |
-| ------------------- | ---------------------------------------------------- | ---------------------------------- | ---------------------------------------------------------------------------------- |
-| Repository identity | owner/name, local path, inspected branch             | default branch                     | Reused from one source anywhere shown; no discovery.                               |
-| Dossier snapshot    | state, commit SHA                                    | recorded time                      | A commit exists only for completed dossier states; no current-time calculation.    |
-| Branch comparison   | inspected branch, default branch, merged label/value | none                               | Every value is supplied; no comparison or merge inference establishes truth.       |
-| Mission summary     | mission ID, title, state, href                       | progress value/label, affected SHA | Absent for completed-empty; supplied progress value and label agree.               |
-| Repository action   | label, href or native button intent, availability    | supporting explanation             | Presence is supplied by the fixture; the story does not execute commands or route. |
-| Notice              | tone, heading, body, announcement mode               | dismissibility                     | Indexing uses a stable live region; warnings use existing notice semantics.        |
-| Navigation entry    | label, href, current, children                       | unavailable explanation            | Native grouped/nested list; at most one current link; no router state.             |
-| Copy datum          | accessible label, exact value                        | visual prefix                      | Clipboard result is owned and announced by `sk-copy-field`.                        |
+| Entity              | Required facts                                       | Optional facts                                       | Invariants                                                                                 |
+| ------------------- | ---------------------------------------------------- | ---------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| Repository identity | owner/name, local path, inspected branch             | default branch                                       | Reused from one source anywhere shown; no discovery.                                       |
+| Dossier snapshot    | state, commit SHA                                    | recorded time                                        | A commit exists only for completed dossier states; no current-time calculation.            |
+| Branch comparison   | inspected branch, default branch, merged label/value | none                                                 | Every value is supplied; no comparison or merge inference establishes truth.               |
+| Mission summary     | mission ID, title, state, href                       | Work Package total, completion percent, affected SHA | Absent for completed-empty; progress display is derived only from the two supplied inputs. |
+| Repository action   | label, href or native button intent, availability    | supporting explanation                               | Presence is supplied by the fixture; the story does not execute commands or route.         |
+| Notice              | tone, heading, body, announcement mode               | dismissibility                                       | Indexing uses a stable live region; warnings use existing notice semantics.                |
+| Navigation entry    | label, href, current, children                       | unavailable explanation                              | Native grouped/nested list; at most one current link; no router state.                     |
+| Copy datum          | accessible label, exact value                        | visual prefix                                        | Clipboard result is owned and announced by `sk-copy-field`.                                |
 
 ## State projections
 
@@ -28,7 +28,7 @@ This mission introduces no persisted or runtime application data model. These en
 | D8 completed empty          | completed snapshot, real commit, empty missions              | Setup guidance; no fabricated zero row/count/progress.                          |
 | LightMode                   | D1 projection plus story theme parameter                     | System proof only; identical semantic content.                                  |
 | Long data                   | completed projection with supplied stress strings            | Local wrap/overflow only; no truncation that changes exact copy value.          |
-| Threshold proof             | supplied boundary-adjacent value/label pairs                 | Render supplied public progress states; do not derive repository progress.      |
+| Layout threshold proof      | one populated fixture at 860 px and 861 px                   | Prove the inclusive compact-navigation seam without introducing new data state. |
 
 ## Validity rules enforced by pure selectors/tests
 
@@ -39,7 +39,7 @@ This mission introduces no persisted or runtime application data model. These en
 5. D6 uses one identical supplied SHA for snapshot and affected-mission context.
 6. D7 has no completed repository facts and carries stable busy/live semantics.
 7. D8 has a commit and zero missions, but no zero-valued surrogate facts.
-8. Progress values and visible labels are supplied together and remain within native `<progress>` bounds.
+8. A Work Package total and completion percent are supplied; the pattern formats their visible labels and maps percent to native `<progress value>` with `max="100"` without repository arithmetic or tone inference.
 9. Navigation current state applies only to a real anchor, with grouped/nested native list structure.
 10. Copy values are not normalized, shortened, or reconstructed before delegation to `sk-copy-field`.
 

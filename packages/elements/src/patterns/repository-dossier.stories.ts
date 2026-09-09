@@ -94,6 +94,15 @@ const patternStyles = html`<style>
     background: var(--sk-surface-muted);
   }
 
+  .sk-repository-dossier-pattern__drawer-trigger:focus-visible,
+  .sk-repository-dossier-pattern__repository-link:focus-visible,
+  .sk-repository-dossier-pattern__setup-link:focus-visible,
+  .sk-repository-dossier-pattern__tracker-link:focus-visible,
+  .sk-repository-dossier-pattern__mission-link:focus-visible {
+    outline: var(--sk-border-width-2) solid var(--sk-border-focus);
+    outline-offset: var(--sk-border-width-2);
+  }
+
   .sk-repository-dossier-pattern__compact-identity {
     min-inline-size: 0;
     color: var(--sk-fg-default);
@@ -380,15 +389,15 @@ const repositoryNavigation = (
                 : nothing
             }
             ${
-                  navigation.overflow
-                    ? html`<a
-                        class="sk-context-nav__overflow-link"
-                        href=${navigation.overflow.href}
-                      >
-                        ${navigation.overflow.label}
-                      </a>`
-                    : nothing
-                }`
+              navigation.overflow
+                ? html`<a
+                    class="sk-context-nav__overflow-link"
+                    href=${navigation.overflow.href}
+                  >
+                    ${navigation.overflow.label}
+                  </a>`
+                : nothing
+            }`
       }
     </section>
     <section
@@ -470,7 +479,11 @@ const breadcrumbs = (
   <nav class="sk-breadcrumbs" aria-label="Breadcrumb">
     <ol class="sk-breadcrumbs__list">
       <li class="sk-breadcrumbs__item">
-        <a class="sk-breadcrumbs__link" href="#repos">Repos</a>
+        <a
+          class="sk-breadcrumbs__link"
+          href=${projection.fixture.breadcrumbIndex.href}
+          >${projection.fixture.breadcrumbIndex.label}</a
+        >
       </li>
       <li class="sk-breadcrumbs__item">
         <a
@@ -600,8 +613,9 @@ const missionSupporting = (
           >
             <span>Copies</span>
             ${mission.copies.map(
-            (branch) => html`<sk-pill-tag><code>${branch}</code></sk-pill-tag>`,
-          )}
+              (branch) =>
+                html`<sk-pill-tag><code>${branch}</code></sk-pill-tag>`,
+            )}
           </div>`
         : nothing
     }
@@ -687,7 +701,8 @@ const missionCollection = (
 const setupPanel = (
   projection: DeepReadonly<DossierProjection>,
 ): TemplateResult | typeof nothing => {
-  if (!projection.showSetup) return nothing;
+  const introduction = projection.fixture.setupIntroduction;
+  if (!projection.showSetup || !introduction) return nothing;
   return html`<sk-card class="sk-repository-dossier-pattern__setup-card">
     <section aria-labelledby="dossier-setup-heading">
       <header class="sk-repository-dossier-pattern__setup-header">
@@ -696,11 +711,10 @@ const setupPanel = (
             class="sk-repository-dossier-pattern__setup-heading"
             id="dossier-setup-heading"
           >
-            Set up in this repo
+            ${introduction.heading}
           </h2>
           <p class="sk-repository-dossier-pattern__setup-body">
-            Create Missions from your laptop with the Spec Kitty CLI. They
-            appear here at the exact commit you push.
+            ${introduction.body}
           </p>
         </div>
       </header>
@@ -908,6 +922,14 @@ const dossierViewportOptions = {
     name: "Repository Dossier 390px",
     styles: { width: "390px", height: "844px" },
   },
+  dossier860: {
+    name: "Repository Dossier 860px",
+    styles: { width: "860px", height: "900px" },
+  },
+  dossier861: {
+    name: "Repository Dossier 861px",
+    styles: { width: "861px", height: "900px" },
+  },
 };
 
 const meta: Meta = {
@@ -984,6 +1006,22 @@ export const LongData: Story = {
 
 export const ProgressThresholds: Story = {
   render: () => renderRepositoryDossier("thresholds"),
+};
+
+export const LayoutThreshold860: Story = {
+  globals: { viewport: { value: "dossier860", isRotated: false } },
+  parameters: { viewport: { options: dossierViewportOptions } },
+  render: () => renderRepositoryDossier("populated"),
+};
+
+export const LayoutThreshold861: Story = {
+  globals: { viewport: { value: "dossier861", isRotated: false } },
+  parameters: { viewport: { options: dossierViewportOptions } },
+  render: () => renderRepositoryDossier("populated"),
+};
+
+export const TrackerDestinations: Story = {
+  render: () => renderRepositoryDossier("tracker-destinations"),
 };
 
 export const ForcedColors: Story = {

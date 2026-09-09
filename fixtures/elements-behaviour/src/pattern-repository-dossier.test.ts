@@ -42,6 +42,12 @@ describe("Repository Dossier immutable fixture family", () => {
 
   test("D1 supplies progress as total and percent without inventing completed work", () => {
     const fixture = fixtureForRepositoryDossierState("populated");
+    expect(fixture.breadcrumbIndex).toEqual({ label: "Repos", href: "#repos" });
+    expect(fixture.setupIntroduction).toEqual({
+      heading: "Set up in this repo",
+      body: "Create Missions from your laptop with the Spec Kitty CLI. They appear here at the exact commit you push.",
+    });
+    expect(fixture.snapshot?.pushed.label).toBe("6 minutes ago");
     expect(fixture.missions[0].progress).toEqual({ total: 8, percent: 62 });
     expect(fixture.missions[0].progress).not.toHaveProperty("completed");
     expect(
@@ -104,12 +110,14 @@ describe("Repository Dossier immutable fixture family", () => {
     expect(terminal.missions).toEqual([]);
     expect(terminal.repositoryLinks).toEqual([]);
     expect(terminal.setup).toEqual([]);
+    expect(terminal.setupIntroduction).toBeUndefined();
 
     const indexing = fixtureForRepositoryDossierState("indexing");
     expect(indexing.snapshot).toBeUndefined();
     expect(indexing.missions).toEqual([]);
     expect(indexing.repositoryLinks).toEqual([]);
     expect(indexing.setup).toEqual([]);
+    expect(indexing.setupIntroduction).toBeUndefined();
     expect(indexing.busyMessage).toMatch(/first complete render/i);
 
     const empty = fixtureForRepositoryDossierState("completed-empty");
@@ -141,6 +149,22 @@ describe("Repository Dossier immutable fixture family", () => {
 });
 
 describe("Repository Dossier tracker destinations", () => {
+  test("the resilience fixture supplies one safe, one unsafe, and one absent tracker destination", () => {
+    const fixture = fixtureForRepositoryDossierState("tracker-destinations");
+    expect(fixture.missions.map((mission) => mission.tracker)).toEqual([
+      {
+        label: "Tracker #1042",
+        href: "https://tracker.example.test/issues/1042",
+      },
+      { label: "Unsafe tracker fixture", href: "javascript:alert(1)" },
+      undefined,
+    ]);
+    expect(safeTrackerHref(fixture.missions[0].tracker?.href)).toBe(
+      "https://tracker.example.test/issues/1042",
+    );
+    expect(safeTrackerHref(fixture.missions[1].tracker?.href)).toBeUndefined();
+  });
+
   test.each([
     undefined,
     "",

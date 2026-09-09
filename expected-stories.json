@@ -47,7 +47,7 @@
     "#257 opts in all fifteen sk-copy-field stories, including distinct result, narrow, theme, forced-color, focus, and empty states. On the refreshed train after #292, total moves 405 -> 420.",
     "#274 ratchets fourteen additive sk-app-shell rail-preserving stories: closed/open, 390/768/1024/1100/1101/wide, long labels, short/tall viewports, reduced motion, forced colors, and LightMode. On the refreshed train after #257, total moves 420 -> 434; all legacy, #254, segmented-choice, collection, action-row, checkbox-choice-group, event-timeline, Mission Reading, and copy-field story ids remain unchanged.",
     "#278 ratchets the ten Storybook-only Mission Kanban routes named as acceptance evidence, total 434 -> 444 on the refreshed train after #274. K1-K6 remain separately addressable alongside LightMode, long-content, forced-colors, and reduced-motion evidence; fixture, projector, guard, and render helpers are excluded from CSF indexing.",
-    "#255 ratchets the fifteen Storybook-only Repository Dossier routes named as acceptance evidence. D1 is the populated desktop composition; D2 retains separate closed and controlled-open 390px drawer states; D4-D8 preserve cross-branch, terminal, snapshot, indexing, and completed-empty truth; LightMode, long data, supplied progress thresholds, forced colors, reduced motion, and 200%/400% zoom remain independently reviewable. On the refreshed train after #278, total moves 444 -> 459; fixture, projection, freeze, and render helpers are excluded from CSF indexing."
+    "#255 ratchets the eighteen Storybook-only Repository Dossier routes named as acceptance evidence. D1 is the populated desktop composition; D2 retains separate closed and controlled-open 390px drawer states; D4-D8 preserve cross-branch, terminal, snapshot, indexing, and completed-empty truth; LightMode, long data, supplied progress values, the 860/861 compact-navigation seam, safe/static tracker destinations, forced colors, reduced motion, and 200%/400% zoom remain independently reviewable. On the refreshed train after #278, total moves 444 -> 462; fixture, projection, freeze, and render helpers are excluded from CSF indexing."
   ],
   "byElement": {
     "sk-action-row": [
@@ -163,9 +163,7 @@
       "elements-skcard--forced-colors",
       "elements-skcard--light-mode"
     ],
-    "sk-card (static path)": [
-      "components-card--statuses-greyscale"
-    ],
+    "sk-card (static path)": ["components-card--statuses-greyscale"],
     "sk-check-bullet": [
       "elements-skcheckbullet--default",
       "elements-skcheckbullet--single",
@@ -598,11 +596,14 @@
       "patterns-repository-dossier--light-mode",
       "patterns-repository-dossier--long-data",
       "patterns-repository-dossier--progress-thresholds",
+      "patterns-repository-dossier--layout-threshold-860",
+      "patterns-repository-dossier--layout-threshold-861",
+      "patterns-repository-dossier--tracker-destinations",
       "patterns-repository-dossier--forced-colors",
       "patterns-repository-dossier--reduced-motion",
       "patterns-repository-dossier--zoom-200",
       "patterns-repository-dossier--zoom-400"
     ]
   },
-  "total": 459
+  "total": 462
 }
