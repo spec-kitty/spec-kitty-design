@@ -1,19 +1,19 @@
 {
-  "event_count": 5,
-  "last_event_id": "01M23P099432W8Y3GF99DDYDJP",
-  "materialized_at": "2026-09-09T18:13:40.260410+00:00",
+  "event_count": 6,
+  "last_event_id": "01M23P0AFB448887T9T35146TM",
+  "materialized_at": "2026-09-09T18:13:41.483972+00:00",
   "mission_number": "",
   "mission_slug": "repository-dossier-pattern-stories-01M22WFQ",
   "mission_type": "software-dev",
   "summary": {
-    "approved": 0,
+    "approved": 1,
     "blocked": 0,
     "canceled": 0,
     "claimed": 0,
     "done": 0,
     "for_review": 0,
     "in_progress": 0,
-    "in_review": 1,
+    "in_review": 0,
     "planned": 0
   },
   "work_packages": {
@@ -24,9 +24,9 @@
       "agent_profile_version": "__resolved_profile_version_absent__",
       "assignee": "codex",
       "force_count": 0,
-      "lane": "in_review",
-      "last_event_id": "01M23P099432W8Y3GF99DDYDJP",
-      "last_transition_at": "2026-09-09T18:13:40.260410+00:00",
+      "lane": "approved",
+      "last_event_id": "01M23P0AFB448887T9T35146TM",
+      "last_transition_at": "2026-09-09T18:13:41.483972+00:00",
       "model": "__resolved_model_absent__",
       "notes": [
         "Consolidating the independently reviewed WP01 lane on the proposed train integration tree for PR #297.",
@@ -34,6 +34,12 @@
         "Independent Codex review evidence is recorded in review-cycle-4.md."
       ],
       "provider": "__resolved_provider_absent__",
+      "review_result": {
+        "feedback_path": "/tmp/skd-255-accept.DQO9NL/repo/kitty-specs/repository-dossier-pattern-stories-01M22WFQ/tasks/WP01-repository-dossier-pattern-proof/review-cycle-5.md",
+        "reference": "review-cycle://repository-dossier-pattern-stories-01M22WFQ/WP01-repository-dossier-pattern-proof/review-cycle-5.md",
+        "reviewer": "codex-independent-review",
+        "verdict": "approved"
+      },
       "role": "reviewer",
       "subtasks": {
         "T001": "done",
