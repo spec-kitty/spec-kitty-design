@@ -1,32 +1,32 @@
 {
-  "event_count": 46,
-  "last_event_id": "01M22YW3DADPJKC125YZY820BH",
-  "materialized_at": "2026-09-09T11:29:25.930923+00:00",
+  "event_count": 47,
+  "last_event_id": "01M230MMV1AJH4C6QPQD0622JZ",
+  "materialized_at": "2026-09-09T12:00:18.785409+00:00",
   "mission_number": "",
   "mission_slug": "mission-reading-pattern-stories-01M21HSX",
   "mission_type": "software-dev",
   "summary": {
-    "approved": 0,
+    "approved": 1,
     "blocked": 0,
     "canceled": 0,
     "claimed": 0,
     "done": 0,
     "for_review": 0,
     "in_progress": 0,
-    "in_review": 1,
+    "in_review": 0,
     "planned": 0
   },
   "work_packages": {
     "WP01": {
-      "actor": "codex",
+      "actor": "user",
       "agent": "codex",
       "agent_profile": "__resolved_profile_absent__",
       "agent_profile_version": "__resolved_profile_version_absent__",
       "assignee": "codex",
       "force_count": 14,
-      "lane": "in_review",
-      "last_event_id": "01M22YW3DADPJKC125YZY820BH",
-      "last_transition_at": "2026-09-09T11:29:25.930923+00:00",
+      "lane": "approved",
+      "last_event_id": "01M230MMV1AJH4C6QPQD0622JZ",
+      "last_transition_at": "2026-09-09T12:00:18.785409+00:00",
       "model": "__resolved_model_absent__",
       "notes": [
         "Ready for review: implementation and mission-specific gates pass; host-only diagram and legacy CI visual baseline limitations recorded in handoff evidence.",
@@ -60,10 +60,10 @@
       "provider": "__resolved_provider_absent__",
       "review": null,
       "review_result": {
-        "feedback_path": "/home/jeroennouws/dev/spec-kitty-design-missions/265/.acceptance-final/kitty-specs/mission-reading-pattern-stories-01M21HSX/tasks/WP01-mission-reading-pattern-family/review-cycle-10.md",
-        "reference": "review-cycle://mission-reading-pattern-stories-01M21HSX/WP01-mission-reading-pattern-family/review-cycle-10.md",
+        "feedback_path": "/home/jeroennouws/dev/spec-kitty-design-missions/265/.acceptance-final/kitty-specs/mission-reading-pattern-stories-01M21HSX/tasks/WP01-mission-reading-pattern-family/review-cycle-11.md",
+        "reference": "review-cycle://mission-reading-pattern-stories-01M21HSX/WP01-mission-reading-pattern-family/review-cycle-11.md",
         "reviewer": "codex",
-        "verdict": "changes_requested"
+        "verdict": "approved"
       },
       "role": "reviewer",
       "shell_pid": null,
