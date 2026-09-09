@@ -1669,3 +1669,300 @@ for (const zoom of [
     });
   });
 }
+type WorkExplorerStoryId =
+  | "w-1-by-lane-desktop-dark"
+  | "w-2-by-person-desktop-dark"
+  | "w-3-by-type-desktop-dark"
+  | "w-4-by-lane-1024-dark"
+  | "w-5-by-lane-light-mode"
+  | "w-6-filtered-empty-dark"
+  | "w-7-no-active-work-dark"
+  | "w-8-degraded-context-dark"
+  | "w-9-loading-dark"
+  | "w-10-no-admitted-repositories-dark";
+
+const workExplorerStory = async (
+  page: Page,
+  id: WorkExplorerStoryId,
+  viewport: Readonly<{ width: number; height: number }>,
+): Promise<Locator> => {
+  await page.goto("about:blank");
+  await page.setViewportSize(viewport);
+  await page.goto(
+    `/iframe.html?id=patterns-work-explorer--${id}&viewMode=story`,
+  );
+  const root = page.locator("[data-work-explorer-pattern]").first();
+  await root.waitFor({ state: "visible", timeout: 20000 });
+  await expect(root).toHaveAttribute("data-render-complete", "true");
+  await page.evaluate(() => document.fonts.ready);
+  return root;
+};
+
+const workExplorerFullCases = [
+  {
+    id: "w-1-by-lane-desktop-dark",
+    width: 1280,
+    height: 1248,
+    name: "work-explorer-w1-lane-dark.png",
+  },
+  {
+    id: "w-2-by-person-desktop-dark",
+    width: 1280,
+    height: 1126,
+    name: "work-explorer-w2-person-dark.png",
+  },
+  {
+    id: "w-3-by-type-desktop-dark",
+    width: 1280,
+    height: 1126,
+    name: "work-explorer-w3-type-dark.png",
+  },
+  {
+    id: "w-4-by-lane-1024-dark",
+    width: 1024,
+    height: 1620,
+    name: "work-explorer-w4-rail-1024.png",
+  },
+  {
+    id: "w-5-by-lane-light-mode",
+    width: 1280,
+    height: 1248,
+    name: "work-explorer-w5-light.png",
+  },
+  {
+    id: "w-6-filtered-empty-dark",
+    width: 1280,
+    height: 1024,
+    name: "work-explorer-w6-filtered-empty.png",
+  },
+  {
+    id: "w-7-no-active-work-dark",
+    width: 1280,
+    height: 1024,
+    name: "work-explorer-w7-no-work.png",
+  },
+  {
+    id: "w-8-degraded-context-dark",
+    width: 1280,
+    height: 1024,
+    name: "work-explorer-w8-degraded.png",
+  },
+  {
+    id: "w-9-loading-dark",
+    width: 1280,
+    height: 1024,
+    name: "work-explorer-w9-loading.png",
+  },
+  {
+    id: "w-10-no-admitted-repositories-dark",
+    width: 1280,
+    height: 1024,
+    name: "work-explorer-w10-no-repositories.png",
+  },
+] as const satisfies ReadonlyArray<{
+  id: WorkExplorerStoryId;
+  width: number;
+  height: number;
+  name: string;
+}>;
+
+for (const visual of workExplorerFullCases) {
+  test(`Work Explorer ${visual.name} — full composition baseline`, async ({
+    page,
+  }) => {
+    const root = await workExplorerStory(page, visual.id, {
+      width: visual.width,
+      height: visual.height,
+    });
+    await expect(root).toHaveScreenshot(visual.name, {
+      threshold: 0.02,
+      maxDiffPixelRatio: 0.02,
+      timeout: 20000,
+    });
+  });
+}
+
+for (const width of [1099, 1100, 1101] as const) {
+  test(`Work Explorer rail-preserving ${width}px threshold — visual baseline`, async ({
+    page,
+  }) => {
+    const root = await workExplorerStory(page, "w-4-by-lane-1024-dark", {
+      width,
+      height: 1000,
+    });
+    await expect(root).toHaveScreenshot(
+      `work-explorer-threshold-${width}.png`,
+      {
+        threshold: 0.02,
+        maxDiffPixelRatio: 0.02,
+        timeout: 20000,
+      },
+    );
+  });
+}
+
+test("Work Explorer controlled collection and blocked exception — visual baseline", async ({
+  page,
+}) => {
+  const root = await workExplorerStory(page, "w-1-by-lane-desktop-dark", {
+    width: 1280,
+    height: 1000,
+  });
+  const planned = root.locator('[data-work-group="planned"]');
+  await expect(planned).toHaveScreenshot("work-explorer-collection-closed.png", {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+    timeout: 20000,
+  });
+  await planned.locator(".sk-collection__toggle").click();
+  await expect(planned).toHaveScreenshot("work-explorer-collection-open.png", {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+    timeout: 20000,
+  });
+  await page.emulateMedia({ forcedColors: "active", reducedMotion: "reduce" });
+  await expect(root.locator("[data-blocked-exception]")).toHaveScreenshot(
+    "work-explorer-blocked-forced-colors.png",
+    { threshold: 0.02, maxDiffPixelRatio: 0.02, timeout: 20000 },
+  );
+});
+
+test("Work Explorer focused native route and active filters — visual baseline", async ({
+  page,
+}) => {
+  const root = await workExplorerStory(page, "w-1-by-lane-desktop-dark", {
+    width: 1280,
+    height: 1000,
+  });
+  await root.locator('[data-filter="repositoryId"]').selectOption("saas");
+  await root.locator('[data-filter="personId"]').selectOption("noor");
+  await root
+    .locator('[data-work-group="planned"] .sk-collection__toggle')
+    .click();
+  const focusedRow = root
+    .locator('[data-work-group="planned"] sk-action-row[href]')
+    .first();
+  await focusedRow.getByRole("link").focus();
+  await expect(focusedRow).toHaveScreenshot("work-explorer-focused-route.png", {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+    timeout: 20000,
+  });
+  await expect(
+    root.locator(".sk-work-explorer-pattern__filters"),
+  ).toHaveScreenshot("work-explorer-active-filters.png", {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+    timeout: 20000,
+  });
+});
+
+test("Work Explorer W4 controlled drawer open and dismissed — visual baselines", async ({
+  page,
+}) => {
+  const root = await workExplorerStory(page, "w-4-by-lane-1024-dark", {
+    width: 1024,
+    height: 900,
+  });
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  const trigger = root.getByRole("button", { name: "Open team navigation" });
+  await trigger.click();
+  await expect(root).toHaveScreenshot("work-explorer-w4-drawer-open.png", {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+    timeout: 20000,
+  });
+  await page.keyboard.press("Escape");
+  await expect(trigger).toBeFocused();
+  await expect(root).toHaveScreenshot("work-explorer-w4-drawer-dismissed.png", {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+    timeout: 20000,
+  });
+});
+
+test("Work Explorer compact timeline and delayed context — visual baselines", async ({
+  page,
+}) => {
+  const root = await workExplorerStory(page, "w-8-degraded-context-dark", {
+    width: 1280,
+    height: 1000,
+  });
+  await expect(root.locator('[data-truth-tier="activity"]')).toHaveScreenshot(
+    "work-explorer-delayed-activity.png",
+    { threshold: 0.02, maxDiffPixelRatio: 0.02, timeout: 20000 },
+  );
+});
+
+test("Work Explorer loading stays static under reduced motion — visual baseline", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  const root = await workExplorerStory(page, "w-9-loading-dark", {
+    width: 1024,
+    height: 900,
+  });
+  await expect(
+    root.locator(".sk-work-explorer-pattern__layout"),
+  ).toHaveScreenshot("work-explorer-loading-reduced-motion.png", {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+    timeout: 20000,
+  });
+});
+
+test("Work Explorer long supplied labels remain contained — visual baseline", async ({
+  page,
+}) => {
+  const root = await workExplorerStory(page, "w-1-by-lane-desktop-dark", {
+    width: 1024,
+    height: 900,
+  });
+  await root
+    .locator('[data-work-group="in-progress"] code[slot="reference"]')
+    .first()
+    .evaluate((element) => {
+      element.textContent =
+        "spec-kitty/EXPERIMENTAL-spec-kitty-saas-with-a-supplied-extraordinarily-long-repository-name";
+    });
+  await expect(
+    root.locator(".sk-work-explorer-pattern__work"),
+  ).toHaveScreenshot("work-explorer-long-content.png", {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+    timeout: 20000,
+  });
+});
+
+test("Work Explorer effective 200 percent CSS zoom stress — visual baseline", async ({
+  page,
+}) => {
+  const root = await workExplorerStory(page, "w-4-by-lane-1024-dark", {
+    width: 1024,
+    height: 1000,
+  });
+  await page.evaluate(() => {
+    document.documentElement.style.zoom = "2";
+  });
+  await expect(root).toHaveScreenshot("work-explorer-css-zoom-200.png", {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+    timeout: 20000,
+  });
+});
+
+test("Work Explorer short viewport keeps focused work unobscured — visual baseline", async ({
+  page,
+}) => {
+  const root = await workExplorerStory(page, "w-4-by-lane-1024-dark", {
+    width: 1024,
+    height: 480,
+  });
+  const toggle = root.locator('[data-work-group="in-progress"] .sk-collection__toggle');
+  await toggle.focus();
+  await expect(root).toHaveScreenshot("work-explorer-short-viewport-focus.png", {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+    timeout: 20000,
+  });
+});

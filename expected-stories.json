@@ -47,7 +47,8 @@
     "#257 opts in all fifteen sk-copy-field stories, including distinct result, narrow, theme, forced-color, focus, and empty states. On the refreshed train after #292, total moves 405 -> 420.",
     "#274 ratchets fourteen additive sk-app-shell rail-preserving stories: closed/open, 390/768/1024/1100/1101/wide, long labels, short/tall viewports, reduced motion, forced colors, and LightMode. On the refreshed train after #257, total moves 420 -> 434; all legacy, #254, segmented-choice, collection, action-row, checkbox-choice-group, event-timeline, Mission Reading, and copy-field story ids remain unchanged.",
     "#278 ratchets the ten Storybook-only Mission Kanban routes named as acceptance evidence, total 434 -> 444 on the refreshed train after #274. K1-K6 remain separately addressable alongside LightMode, long-content, forced-colors, and reduced-motion evidence; fixture, projector, guard, and render helpers are excluded from CSF indexing.",
-    "#255 ratchets the eighteen Storybook-only Repository Dossier routes named as acceptance evidence. D1 is the populated desktop composition; D2 retains separate closed and controlled-open 390px drawer states; D4-D8 preserve cross-branch, terminal, snapshot, indexing, and completed-empty truth; LightMode, long data, supplied progress values, the 860/861 compact-navigation seam, safe/static tracker destinations, forced colors, reduced motion, and 200%/400% zoom remain independently reviewable. On the refreshed train after #278, total moves 444 -> 462; fixture, projection, freeze, and render helpers are excluded from CSF indexing."
+    "#255 ratchets the eighteen Storybook-only Repository Dossier routes named as acceptance evidence. D1 is the populated desktop composition; D2 retains separate closed and controlled-open 390px drawer states; D4-D8 preserve cross-branch, terminal, snapshot, indexing, and completed-empty truth; LightMode, long data, supplied progress values, the 860/861 compact-navigation seam, safe/static tracker destinations, forced colors, reduced motion, and 200%/400% zoom remain independently reviewable. On the refreshed train after #278, total moves 444 -> 462; fixture, projection, freeze, and render helpers are excluded from CSF indexing.",
+    "#275 ratchets the exact ten Storybook-only Work Explorer W1-W10 compositions. Lane, person, and type regroupings conserve one 50-record fixture; rail-preserving, LightMode, filtered-empty, no-work, degraded, loading, and no-repository states stay separately addressable. On the refreshed train after #255, total moves 462 -> 472; fixture, selector, projector, and renderer helpers are excluded from CSF indexing."
   ],
   "byElement": {
     "sk-action-row": [
@@ -603,7 +604,19 @@
       "patterns-repository-dossier--reduced-motion",
       "patterns-repository-dossier--zoom-200",
       "patterns-repository-dossier--zoom-400"
+    ],
+    "work-explorer-pattern": [
+      "patterns-work-explorer--w-1-by-lane-desktop-dark",
+      "patterns-work-explorer--w-2-by-person-desktop-dark",
+      "patterns-work-explorer--w-3-by-type-desktop-dark",
+      "patterns-work-explorer--w-4-by-lane-1024-dark",
+      "patterns-work-explorer--w-5-by-lane-light-mode",
+      "patterns-work-explorer--w-6-filtered-empty-dark",
+      "patterns-work-explorer--w-7-no-active-work-dark",
+      "patterns-work-explorer--w-8-degraded-context-dark",
+      "patterns-work-explorer--w-9-loading-dark",
+      "patterns-work-explorer--w-10-no-admitted-repositories-dark"
     ]
   },
-  "total": 462
+  "total": 472
 }

@@ -82,6 +82,28 @@ the design system—owns routing, fetching, persistence, truth checking, pushed-
 Markdown parsing and sanitization, document actions, live polling, and every join between activity
 and presence data.
 
+## Work Explorer pattern
+
+The Storybook `Patterns/Work Explorer` W1–W10 family is application-pattern evidence, not a
+registered or published `sk-work-explorer` component. One deeply frozen 50-record fixture flows
+through pure filtering and lane/person/type grouping selectors into shared renderers. The three
+groupings retain the same Work Package object identities and source order; counts are derived from
+that fixture rather than authored as separate views.
+
+The renderers compose the rail-preserving `sk-app-shell`, native `.sk-segmented-choice` buttons,
+native `.sk-form-select` and input controls, native controlled `.sk-collection` sections/lists,
+flush `sk-action-row[href]` routes, and the compact native `.sk-event-timeline` with existing
+headers, cards, statuses, markers, tags, notices, and empty states. Consumers own pressed,
+expanded, hidden, filter, route, and shell-open state. A route row is a real anchor and must not
+contain another control.
+
+Verified Mission work, reported-live presence, and observed activity are independent supplied
+branches; neither presence nor activity is inferred or joined to a Work Package. The application
+owns data loading, routing, stores, polling, timers, sorting, relative-time formatting, trust
+verification, and any presence join. Summary, filter-bar, 70/30-to-stacked layout, and static
+loading-skeleton geometry are page-owned story CSS, not public design-system APIs. Empty, degraded,
+loading, and no-repository states must omit facts they have not received.
+
 ## Work Package view patterns
 
 The Storybook `Patterns/Work Package Views` stories demonstrate the T10 overview and T11 detail
