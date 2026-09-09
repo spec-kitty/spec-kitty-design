@@ -1,0 +1,31 @@
+{
+  "accept_commit": "5e6b08ee9c275a180cb1b7cacc0d6c6558d246dd",
+  "acceptance_history": [
+    {
+      "accept_commit": "5e6b08ee9c275a180cb1b7cacc0d6c6558d246dd",
+      "acceptance_mode": "local",
+      "accepted_at": "2026-09-09T14:24:58.541783+00:00",
+      "accepted_by": "codex",
+      "accepted_from_commit": "f74e4325a5a8434447f43edd1bfdd4d5d817df7e"
+    }
+  ],
+  "acceptance_mode": "local",
+  "accepted_at": "2026-09-09T14:24:58.541783+00:00",
+  "accepted_by": "codex",
+  "accepted_from_commit": "f74e4325a5a8434447f43edd1bfdd4d5d817df7e",
+  "created_at": "2026-09-09T06:55:25.200791+00:00",
+  "flattened": false,
+  "friendly_name": "mission kanban pattern stories",
+  "mission_id": "01M22F6C0G85RKMPPXPCV8BNR9",
+  "mission_number": null,
+  "mission_slug": "mission-kanban-pattern-stories-01M22F6C",
+  "mission_type": "software-dev",
+  "purpose_context": "This mission advances mission kanban pattern stories on train/elements-first so stakeholders can track the work from mission creation onward.",
+  "purpose_tldr": "mission kanban pattern stories",
+  "slug": "mission-kanban-pattern-stories-01M22F6C",
+  "status_phase": "1",
+  "target_branch": "train/elements-first",
+  "topology": "lanes",
+  "vcs": "git",
+  "vcs_locked_at": "2026-09-09T08:42:31.966600+00:00"
+}

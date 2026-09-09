@@ -1,0 +1,65 @@
+{
+  "rows": {
+    "#209": {
+      "evidence_ref": "Existing workflow-board/lane contract #209 is reused through public surfaces and remains unchanged; focused K1-K6 browser and frozen public-surface checks pass at 05ba8b70.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
+    "#272": {
+      "evidence_ref": "The refreshed base contains #272 action-row href route mode. WP01 reuses it unchanged; native Enter, modified-click, context-menu, href, focus, and independent tracker-link tests pass at 05ba8b70.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
+    "#276": {
+      "evidence_ref": "Epic relationship is tracked through this final child mission: #277 is already landed and reviewed; #278 is implementation-complete at 05ba8b70afc352d0a3b94d8c7f518e37cd75f126, with epic closure intentionally performed only after this child PR merges and post-merge gates complete.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "in-mission",
+      "wp": "WP01"
+    },
+    "#277": {
+      "evidence_ref": "Merged #277 checkbox-choice styles are reused for K3 with native fieldset/legend/label/input semantics. The complete combined #277/#278 replay passes 126 tests with 12 expected browser-specific skips at 05ba8b70; #277 public surfaces are unchanged except its explicitly authorized global story total.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
+    "#278": {
+      "evidence_ref": "WP01 implementation and independent cycle-4 review passed at 05ba8b70afc352d0a3b94d8c7f518e37cd75f126; exact K1-K6/browser/a11y/visual/public-drift contract is green.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "fixed",
+      "wp": "WP01"
+    }
+  },
+  "schema_version": 1
+}
