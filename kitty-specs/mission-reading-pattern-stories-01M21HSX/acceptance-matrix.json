@@ -28,10 +28,10 @@
       "criterion_id": "FR-003",
       "description": "M1 and M2 render the same populated Specify source at desktop and 390px with a consumer-controlled compact drawer.",
       "proof_type": "browser_test_and_visual_evidence",
-      "evidence": "Focused Chromium/Firefox/WebKit suite 37 passed and 2 expected skips; exact-head M1 desktop, M2 responsive, and M2 drawer-open visual baselines are registered and passed.",
+      "evidence": "Exact product head a36f3b72f68a00bc04ffe0cf49dbf2d362e6358e: focused Chromium and Firefox tests pass for M1 desktop, M2 390px, and controlled open drawer; CI run 34323100368 visual-regression is green.",
       "pass_fail": "pass",
       "verified_by": "codex",
-      "verified_at": "2026-09-09T03:41:13Z",
+      "verified_at": "2026-09-09T07:31:35.420951+00:00",
       "notes": "Narrow layout retains 16px content gutters and native focus behavior."
     },
     {
