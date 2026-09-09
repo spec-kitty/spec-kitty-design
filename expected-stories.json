@@ -145,9 +145,7 @@
       "elements-skcard--forced-colors",
       "elements-skcard--light-mode"
     ],
-    "sk-card (static path)": [
-      "components-card--statuses-greyscale"
-    ],
+    "sk-card (static path)": ["components-card--statuses-greyscale"],
     "sk-check-bullet": [
       "elements-skcheckbullet--default",
       "elements-skcheckbullet--single",
