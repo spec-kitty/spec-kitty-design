@@ -2,6 +2,15 @@ import "./sk-event-timeline.css";
 import "../empty-state/sk-empty-state.css";
 import type { Meta, StoryObj } from "@storybook/web-components";
 import {
+  SkEventTimelineCompactDefaultHTML,
+  SkEventTimelineCompactDegradedHTML,
+  SkEventTimelineCompactForcedColorsHTML,
+  SkEventTimelineCompactLeadingMarkerHTML,
+  SkEventTimelineCompactLinkedHTML,
+  SkEventTimelineCompactLongContentHTML,
+  SkEventTimelineCompactNarrowHTML,
+  SkEventTimelineCompactOneEventHTML,
+  SkEventTimelineCompactTwentyEventsHTML,
   SkEventTimelineForcedColorsHTML,
   SkEventTimelineLongTransitionHTML,
   SkEventTimelineNarrowHTML,
@@ -54,4 +63,36 @@ export const ForcedColors: Story = {
 export const LightMode: Story = {
   parameters: { backgrounds: { default: "sk-light" } },
   render: () => frame(SkEventTimelineTwoEventsHTML, true),
+};
+
+export const CompactOneEvent: Story = {
+  render: () => frame(SkEventTimelineCompactOneEventHTML),
+};
+export const CompactDefault: Story = {
+  render: () => frame(SkEventTimelineCompactDefaultHTML),
+};
+export const CompactTwentyEvents: Story = {
+  render: () => frame(SkEventTimelineCompactTwentyEventsHTML),
+};
+export const CompactLeadingMarker: Story = {
+  render: () => frame(SkEventTimelineCompactLeadingMarkerHTML),
+};
+export const CompactLongContent: Story = {
+  render: () => frame(SkEventTimelineCompactLongContentHTML),
+};
+export const CompactLinked: Story = {
+  render: () => frame(SkEventTimelineCompactLinkedHTML),
+};
+export const CompactNarrow: Story = {
+  render: () => frame(SkEventTimelineCompactNarrowHTML),
+};
+export const CompactDegraded: Story = {
+  render: () => frame(SkEventTimelineCompactDegradedHTML),
+};
+export const CompactForcedColors: Story = {
+  render: () => frame(SkEventTimelineCompactForcedColorsHTML),
+};
+export const CompactLightMode: Story = {
+  parameters: { backgrounds: { default: "sk-light" } },
+  render: () => frame(SkEventTimelineCompactDefaultHTML, true),
 };

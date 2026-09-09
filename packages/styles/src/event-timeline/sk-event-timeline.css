@@ -78,6 +78,70 @@
   font-weight: var(--sk-weight-medium);
 }
 
+.sk-event-timeline--compact {
+  max-inline-size: calc(
+    var(--sk-space-12) + var(--sk-space-12) + var(--sk-space-12)
+  );
+  font-size: var(--sk-text-sm);
+}
+
+.sk-event-timeline--compact .sk-event-timeline__item {
+  grid-template-columns: minmax(0, 1fr);
+  padding-block-end: var(--sk-space-4);
+  padding-inline-start: var(--sk-space-5);
+}
+
+.sk-event-timeline--compact
+  .sk-event-timeline__item:has(> .sk-event-timeline__leading-marker) {
+  grid-template-columns: var(--sk-space-4) minmax(0, 1fr);
+  column-gap: var(--sk-space-2);
+}
+
+.sk-event-timeline--compact
+  .sk-event-timeline__item:has(> .sk-event-timeline__leading-marker)
+  > :not(.sk-event-timeline__leading-marker) {
+  grid-column: 2;
+}
+
+.sk-event-timeline--compact
+  .sk-event-timeline__item
+  > .sk-event-timeline__leading-marker {
+  display: grid;
+  grid-column: 1;
+  grid-row: 1;
+  place-items: center;
+  align-self: start;
+  box-sizing: border-box;
+  inline-size: var(--sk-space-4);
+  block-size: var(--sk-space-4);
+  border: var(--sk-border-width-2) solid var(--sk-on-tint-sky);
+  border-radius: var(--sk-radius-pill);
+  background: var(--sk-surface-page);
+  color: var(--sk-on-tint-sky);
+}
+
+.sk-event-timeline--compact
+  .sk-event-timeline__item
+  > .sk-event-timeline__leading-marker
+  > svg {
+  inline-size: var(--sk-space-3);
+  block-size: var(--sk-space-3);
+  fill: none;
+  stroke: currentColor;
+}
+
+.sk-event-timeline--compact
+  .sk-event-timeline__item:has(> .sk-event-timeline__leading-marker)::before {
+  display: none;
+}
+
+.sk-event-timeline--compact
+  .sk-event-timeline__item:has(> .sk-event-timeline__leading-marker):not(
+    :last-child
+  )::after {
+  inset-inline-start: calc(var(--sk-space-5) + var(--sk-space-2));
+}
+
 .sk-event-timeline--narrow {
   max-inline-size: calc(var(--sk-space-12) + var(--sk-space-12));
 }
@@ -90,5 +154,13 @@
 
   .sk-event-timeline__item:not(:last-child)::after {
     background: CanvasText;
+  }
+
+  .sk-event-timeline--compact
+    .sk-event-timeline__item
+    > .sk-event-timeline__leading-marker {
+    border-color: CanvasText;
+    background: Canvas;
+    color: CanvasText;
   }
 }
