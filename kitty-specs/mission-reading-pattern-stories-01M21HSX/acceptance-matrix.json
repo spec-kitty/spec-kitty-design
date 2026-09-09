@@ -2,7 +2,7 @@
   "mission_slug": "mission-reading-pattern-stories-01M21HSX",
   "mission_number": "",
   "mission_type": "software-dev",
-  "overall_verdict": "pass",
+  "overall_verdict": "fail",
   "criteria": [
     {
       "criterion_id": "FR-001",
@@ -288,9 +288,9 @@
       "invariant_id": "NI-002",
       "description": "No prohibited application behavior or state service is owned by the pattern.",
       "verification_method": "custom_command",
-      "verification_command": "! rg -n \"\\\\b(fetch|setTimeout|setInterval)\\\\s*\\\\(|\\\\b(localStorage|sessionStorage)\\\\b|from\\\\s+[\\\"'][^\\\"']*(router|markdown|sanit|highlight)\" packages/elements/src/patterns/mission-reading.stories.ts",
-      "result": "confirmed_absent",
-      "evidence": "Command exited 0: "
+      "verification_command": "! rg -n \"\\\\\\\\b(fetch|setTimeout|setInterval)\\\\\\\\s*\\\\\\\\(|\\\\\\\\b(localStorage|sessionStorage)\\\\\\\\b|from\\\\\\\\s+[\\\\\"'][^\\\\\"']*(router|markdown|sanit|highlight)\" packages/elements/src/patterns/mission-reading.stories.ts",
+      "result": "still_present",
+      "evidence": "Command exited 2: sh: -c: line 1: syntax error near unexpected token `('\nsh: -c: line 1: `! rg -n \"\\\\\\\\b(fetch|setTimeout|setInterval)\\\\\\\\s*\\\\\\\\(|\\\\\\\\b(localStorage|sessionStorage)\\\\\\\\b|from\\\\\\\\s+[\\\\\"'][^\\\\\"']*(router|"
     },
     {
       "invariant_id": "NI-003",
