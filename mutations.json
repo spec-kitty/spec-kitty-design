@@ -50,9 +50,8 @@
     "#272 adds exactly THREE sk-action-row arms, moving the refreshed standing set from 210 to 213. Two SC-010 arms remove the new href and presentation registrations independently so the extended pre-upgrade test proves each public axis remains reactive and reflected. One SC-006 arm attaches the existing selectable request path to the route anchor; the mixed-state negative case then proves native route mode emits zero custom activation events. No SC-007/SC-008 route arms exist because an event with no dispatch has no independently falsifiable detail or propagation flags.",
     "#257 CYCLE-2 COLLATERAL ADJUDICATION records the exact-e5202f4 outcome after the container-responsive SC-017 test was added. Both SC-014 stylesheet-adoption mutations necessarily remove or replace the local sheet that owns the @container rule, so the named SC-014 identity/length assertion and the SC-017 live-layout assertion red together. Each declares required collateral; guard 5 still inverts and will fail if the layout test ever stops proving that stylesheet dependency.",
     "#257 POST-CI WEBKIT FIX adds one SC-012 arm, moving the refreshed standing set from 225 to 226. The old document Range/addRange fallback could not select a node inside WebKit's closed shadow root; the shadow-inclusive Selection.setBaseAndExtent path now owns the exact visible node and full child range. The named [SC-012] fixture asserts both endpoints, so collapsing the focus offset to zero reds that behaviour without marked collateral.",
-    "#274 adds EIGHT app-shell arms over the existing ADR-11 subjects and ids, moving the refreshed standing set from 213 to 221, and retargets three #254 arms onto the expanded shared expressions they already own. Recognition, the TypeScript 1100 boundary, rail-specific personal/context/header exposure, the shared responsive-navigation derivation, and the generated CSS logical/inclusive boundary each have a unique source anchor. The existing presentation-focus, context-exposure, and header-exposure arms now mutate their shared responsive equivalents, so they continue guarding compact while also reaching the additive mode. The shared responsive-navigation derivation deliberately declares collateral: its red-first equivalent was the pre-implementation rail-preserving run, where the new SC-006, SC-012 and SC-017 assertions all failed together while every retained app-shell assertion stayed green. No new behavior id is minted for layout, forced colors, or the public TypeScript union; those remain ordinary browser/type assertions at their real consumption surfaces.",
-    "#274 adds TEN app-shell arms over the existing ADR-11 subjects and ids, moving the refreshed standing set from 213 to 223, and retargets three #254 arms onto the expanded shared expressions they already own. Recognition, the TypeScript 1100 boundary, rail-specific personal/context/header exposure, the shared responsive-navigation derivation, the generated CSS logical/inclusive boundary, the rail-plus-content grid, and the rail-preserving forced-colors selector each have a unique source anchor. The existing presentation-focus, context-exposure, and header-exposure arms now mutate their shared responsive equivalents, so they continue guarding compact while also reaching the additive mode. The shared responsive-navigation derivation deliberately declares collateral: its red-first equivalent was the pre-implementation rail-preserving run, where the new SC-006, SC-012 and SC-017 assertions all failed together while every retained app-shell assertion stayed green. No new behavior id is minted for layout, forced colors, or the public TypeScript union; those remain assertions at their real browser/type surfaces under the existing responsive-threshold id.",
-    "#274 FINAL REVIEW CORRECTION retargets the existing #254 presentation-focus arm and adds one slot-reassignment focus-release arm, moving the standing set from 223 to 224. The exposure-matrix implementation now releases focus explicitly from every assigned region that the destination hides, instead of relying on browser-specific inert/hidden behavior for non-navigation regions. Its SC-012 tests prove the navigation-retained case; personal, context, compact-header, and compact-navigation releases; and release before a reassigned destination root is suppressed. The existing compact-navigation/open arm now declares measured collateral: replacing controlled-open exposure with the compact-layout predicate made 16 tests in the same native app-shell fixture fail, and every failure carried SC-012 because slot reconciliation, lease transfer, controlled close, rail exposure, boundary transitions, and destination-hidden focus all consume that one exposure decision."
+    "#274 adds TEN app-shell arms over the existing ADR-11 subjects and ids, moving the post-#257 standing set from 226 to 236, and retargets three #254 arms onto the expanded shared expressions they already own. Recognition, the TypeScript 1100 boundary, rail-specific personal/context/header exposure, the shared responsive-navigation derivation, the generated CSS logical/inclusive boundary, the rail-plus-content grid, and the rail-preserving forced-colors selector each have a unique source anchor. The existing presentation-focus, context-exposure, and header-exposure arms now mutate their shared responsive equivalents, so they continue guarding compact while also reaching the additive mode. The shared responsive-navigation derivation deliberately declares collateral: its red-first equivalent was the pre-implementation rail-preserving run, where the new SC-006, SC-012 and SC-017 assertions all failed together while every retained app-shell assertion stayed green. No new behavior id is minted for layout, forced colors, or the public TypeScript union; those remain assertions at their real browser/type surfaces under the existing responsive-threshold id.",
+    "#274 FINAL REVIEW CORRECTION retargets the existing #254 presentation-focus arm and adds one slot-reassignment focus-release arm, moving the integrated standing set from 236 to 237. The exposure-matrix implementation now releases focus explicitly from every assigned region that the destination hides, instead of relying on browser-specific inert/hidden behavior for non-navigation regions. Its SC-012 tests prove the navigation-retained case; personal, context, compact-header, and compact-navigation releases; and release before a reassigned destination root is suppressed. The existing compact-navigation/open arm now declares measured collateral: replacing controlled-open exposure with the compact-layout predicate made 16 tests in the same native app-shell fixture fail, and every failure carried SC-012 because slot reconciliation, lease transfer, controlled close, rail exposure, boundary transitions, and destination-hidden focus all consume that one exposure decision."
   ],
   "mutations": [
     {
@@ -194,27 +193,27 @@
     },
     {
       "id": "SC-007",
+      "subject": "fixtures/elements-behaviour/src/sk-nav-pill.test.ts",
       "arm": "detail shape",
-      "file": "fixtures/elements-behaviour/src/sk-behaviour-fixture.ts",
-      "from": "label: this.label,",
-      "to": "title: this.label,",
-      "subject": "fixtures/elements-behaviour/src/behaviours.test.ts"
+      "file": "packages/elements/src/nav-pill/sk-nav-pill.ts",
+      "from": "      detail: { open: next },",
+      "to": "      detail: { isOpen: next },"
     },
     {
       "id": "SC-008",
+      "subject": "fixtures/elements-behaviour/src/sk-nav-pill.test.ts",
       "arm": "composed",
-      "file": "fixtures/elements-behaviour/src/sk-behaviour-fixture.ts",
-      "from": "composed: true,",
-      "to": "composed: false,",
-      "subject": "fixtures/elements-behaviour/src/behaviours.test.ts"
+      "file": "packages/elements/src/nav-pill/sk-nav-pill.ts",
+      "from": "      composed: true,",
+      "to": "      composed: false,"
     },
     {
       "id": "SC-009",
+      "subject": "fixtures/elements-behaviour/src/sk-nav-pill.test.ts",
       "arm": "preventDefault prevents",
-      "file": "fixtures/elements-behaviour/src/sk-behaviour-fixture.ts",
-      "from": "if (!proceed) this.open = !this.open;",
-      "to": "void proceed;",
-      "subject": "fixtures/elements-behaviour/src/behaviours.test.ts"
+      "file": "packages/elements/src/nav-pill/sk-nav-pill.ts",
+      "from": "    if (!this.dispatchEvent(evt)) return;",
+      "to": "    this.dispatchEvent(evt);"
     },
     {
       "id": "SC-010",
@@ -346,33 +345,33 @@
     },
     {
       "id": "SC-002",
-      "subject": "fixtures/elements-behaviour/src/sk-form-input.test.ts",
+      "subject": "fixtures/elements-behaviour/src/sk-form-textarea.test.ts",
       "arm": "FormData entry tracks the property",
-      "file": "packages/elements/src/form-input/sk-form-input.ts",
+      "file": "packages/elements/src/form-textarea/sk-form-textarea.ts",
       "from": "    if (changed.has('value') || changed.has('disabled')) this.syncFormValue();",
       "to": "    void changed;"
     },
     {
       "id": "SC-003",
-      "subject": "fixtures/elements-behaviour/src/sk-form-input.test.ts",
+      "subject": "fixtures/elements-behaviour/src/sk-form-textarea.test.ts",
       "arm": "validity message reaches the a11y tree",
-      "file": "packages/elements/src/form-input/sk-form-input.ts",
+      "file": "packages/elements/src/form-textarea/sk-form-textarea.ts",
       "from": "      flags.valueMissing = true;\n      message = `${this.label || 'This field'} is required`;",
       "to": "      void 0;"
     },
     {
       "id": "SC-004",
-      "subject": "fixtures/elements-behaviour/src/sk-form-input.test.ts",
+      "subject": "fixtures/elements-behaviour/src/sk-form-textarea.test.ts",
       "arm": "reset restores the seeded value",
-      "file": "packages/elements/src/form-input/sk-form-input.ts",
+      "file": "packages/elements/src/form-textarea/sk-form-textarea.ts",
       "from": "    this.value = this.initialValue;",
       "to": "    this.value = '';"
     },
     {
       "id": "SC-005",
-      "subject": "fixtures/elements-behaviour/src/sk-form-input.test.ts",
+      "subject": "fixtures/elements-behaviour/src/sk-form-textarea.test.ts",
       "arm": "disabled excluded by the element",
-      "file": "packages/elements/src/form-input/sk-form-input.ts",
+      "file": "packages/elements/src/form-textarea/sk-form-textarea.ts",
       "from": "    this.internals.setFormValue(this.disabled ? null : this.value);",
       "to": "    this.internals.setFormValue(this.value);"
     },
@@ -394,9 +393,9 @@
     },
     {
       "id": "SC-005",
-      "subject": "fixtures/elements-behaviour/src/sk-form-input.test.ts",
+      "subject": "fixtures/elements-behaviour/src/sk-form-textarea.test.ts",
       "arm": "the disabled PROPERTY route excludes",
-      "file": "packages/elements/src/form-input/sk-form-input.ts",
+      "file": "packages/elements/src/form-textarea/sk-form-textarea.ts",
       "from": "    if (changed.has('value') || changed.has('disabled')) this.syncFormValue();",
       "to": "    if (changed.has('value')) this.syncFormValue();"
     },
@@ -1244,11 +1243,11 @@
     },
     {
       "id": "SC-006",
-      "subject": "fixtures/elements-behaviour/src/sk-action-row.test.ts",
+      "subject": "fixtures/elements-behaviour/src/sk-bar-chart.test.ts",
       "arm": "one request per native primary activation",
-      "file": "packages/elements/src/action-row/sk-action-row.ts",
-      "from": "  row.dispatchEvent(event);",
-      "to": "  row.dispatchEvent(event); row.dispatchEvent(event);"
+      "file": "packages/elements/src/bar-chart/sk-bar-chart.ts",
+      "from": "          @click=${() => this.#requestSelection(datum.id)}",
+      "to": "          @click=${() => { this.#requestSelection(datum.id); this.#requestSelection(datum.id); }}"
     },
     {
       "id": "SC-007",
@@ -1260,11 +1259,11 @@
     },
     {
       "id": "SC-008",
-      "subject": "fixtures/elements-behaviour/src/sk-action-row.test.ts",
+      "subject": "fixtures/elements-behaviour/src/sk-bar-chart.test.ts",
       "arm": "bubbling and composed event flags",
-      "file": "packages/elements/src/action-row/sk-action-row.ts",
-      "from": "    bubbles: true,\n    composed: true,",
-      "to": "    bubbles: false,\n    composed: false,"
+      "file": "packages/elements/src/bar-chart/sk-bar-chart.ts",
+      "from": "      bubbles: true,\n      composed: true,",
+      "to": "      bubbles: false,\n      composed: false,"
     },
     {
       "id": "SC-010",
@@ -1528,22 +1527,6 @@
     },
     {
       "id": "SC-012",
-      "arm": "leaving compact presentation releases focus from hidden navigation",
-      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
-      "from": "    if (changed.get('presentation') === 'compact' && this.presentation !== 'compact') {\n      this.#releaseHiddenFocus();\n    }",
-      "to": "    // mutation: compact presentation changes leave hidden navigation focused",
-      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
-    },
-    {
-      "id": "SC-012",
-      "arm": "slot reassignment releases focus before the destination root is suppressed",
-      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
-      "from": "  #onExposureSlotChange = (): void => {\n    this.#releaseHiddenFocus();\n    this.#reconcileAssignedRootExposure();\n  };",
-      "to": "  #onExposureSlotChange = (): void => {\n    this.#reconcileAssignedRootExposure();\n  };",
-      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
-    },
-    {
-      "id": "SC-012",
       "arm": "ordinary controlled close releases focus from hidden compact navigation",
       "file": "packages/elements/src/app-shell/sk-app-shell.ts",
       "from": "    if (changed.get('open') === true && this.open !== true) {\n      this.#releaseHiddenFocus();\n    }",
@@ -1614,23 +1597,6 @@
       "from": "      ['personal-rail', !compact],",
       "to": "      ['personal-rail', true],",
       "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
-    },
-    {
-      "id": "SC-012",
-      "arm": "compact presentation suppresses the assigned context-sidebar root",
-      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
-      "from": "      ['context-sidebar', !compact],",
-      "to": "      ['context-sidebar', true],",
-      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
-    },
-    {
-      "id": "SC-012",
-      "arm": "compact-header remains exposed while compact navigation is closed",
-      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
-      "from": "      ['compact-header', compact],",
-      "to": "      ['compact-header', this.#effectivelyOpen],",
-      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts",
-      "expectCollateral": true
     },
     {
       "id": "SC-012",
@@ -1886,10 +1852,18 @@
     },
     {
       "id": "SC-012",
-      "arm": "leaving an effective responsive presentation releases focus from hidden navigation",
+      "arm": "destination-hidden assigned-region focus release follows the exposure matrix",
       "file": "packages/elements/src/app-shell/sk-app-shell.ts",
-      "from": "    if (\n      changed.has('presentation') &&\n      this.#isResponsivePresentation(changed.get('presentation')) &&\n      !this.#responsiveNavigation\n    ) {\n      this.#releaseHiddenFocus();\n    }",
-      "to": "    // mutation: presentation changes leave hidden responsive navigation focused",
+      "from": "    for (const [slotName, exposed] of this.#regionExposure()) {\n      if (!exposed && this.#assignedWithin(active, slotName)) {\n        active.blur();\n        return;\n      }\n    }",
+      "to": "    if (this.#assignedWithin(active, 'compact-navigation')) active.blur();",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "slot reassignment releases focus before the destination root is suppressed",
+      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
+      "from": "  #onExposureSlotChange = (): void => {\n    this.#releaseHiddenFocus();\n    this.#reconcileAssignedRootExposure();\n  };",
+      "to": "  #onExposureSlotChange = (): void => {\n    this.#reconcileAssignedRootExposure();\n  };",
       "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
     },
     {
@@ -1988,14 +1962,6 @@
       "file": "packages/elements/src/app-shell/sk-app-shell.css.js",
       "from": ":host([presentation=\\\"rail-preserving\\\"]) .sk-app-shell__compact-header:focus-within,\\n  :host([presentation=\\\"rail-preserving\\\"]) .sk-app-shell__compact-navigation {",
       "to": ":host([presentation=\\\"rail-preserving\\\"]) .sk-app-shell__compact-header:focus-within {",
-      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
-    },
-    {
-      "id": "SC-012",
-      "arm": "destination-hidden assigned-region focus release follows the exposure matrix",
-      "file": "packages/elements/src/app-shell/sk-app-shell.ts",
-      "from": "    for (const [slotName, exposed] of this.#regionExposure()) {\n      if (!exposed && this.#assignedWithin(active, slotName)) {\n        active.blur();\n        return;\n      }\n    }",
-      "to": "    if (this.#assignedWithin(active, 'compact-navigation')) active.blur();",
       "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
     }
   ]
