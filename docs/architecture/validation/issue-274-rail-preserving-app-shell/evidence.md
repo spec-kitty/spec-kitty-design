@@ -32,6 +32,13 @@
   (tree `da366fed1831c04d8e28f49a86455c4a143b504a`). The final revalidation section below records
   every applicable gate rerun on that post-#294 tree; no stale pre-rebase CI result is treated as
   merge authority.
+- After those gates completed, train commit `67aaa67ab8ce79e7d287dbd93354685a41c492f0`
+  finalized only the already-merged Mission Reading mission metadata. Its seven changed paths are
+  confined to `kitty-specs/mission-reading-pattern-stories-01M21HSX/`; it changes no package,
+  fixture, gate, dependency, generated artifact, Storybook source, browser input, or #274 evidence.
+  The delivery was rebased again, and every canonical generator plus the publishable build/size
+  derivation remained byte-clean. That no-op regeneration log has SHA-256
+  `5855b4e2539875ed8ba85afe8b714b1e763e0f9c21aa7c0d0eec91fe5521f7c3`.
 - The final handoff SHA is the commit containing this ledger and is therefore recorded by the
   Spec Kitty transition and Git history rather than circularly embedded here.
 - Delivery remains exactly one WP and PR #293 to `train/elements-first`.
