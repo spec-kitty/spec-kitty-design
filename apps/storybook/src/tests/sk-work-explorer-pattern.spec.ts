@@ -136,7 +136,7 @@ test("documentation and the shrink-only ratchet pin the private pattern seam and
   expect(ratchet.byElement["work-explorer-pattern"]).toEqual(
     STORY_IDS.map((id) => `${STORY_PREFIX}${id}`),
   );
-  expect(ratchet.total).toBe(444);
+  expect(ratchet.total).toBe(454);
 });
 
 test("one deeply frozen fixture reconciles all exact margins without replacing identities", async ({
