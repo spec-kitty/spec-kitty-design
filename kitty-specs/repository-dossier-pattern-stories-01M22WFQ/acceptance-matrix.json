@@ -1,0 +1,165 @@
+{
+  "mission_slug": "repository-dossier-pattern-stories-01M22WFQ",
+  "mission_number": "",
+  "mission_type": "software-dev",
+  "overall_verdict": "pending",
+  "criteria": [
+    {
+      "criterion_id": "FR-001",
+      "description": "D1 proves the approved populated desktop composition through public components and native semantics",
+      "proof_type": "automated_test",
+      "evidence": "Focused Playwright D1 assertions cover public tags, native nav/list/link/code/time/progress structure, static tracker fallback, exact progress labels, and real Mission/document destinations; the D1 visual baseline was compared with the approved artifact.",
+      "pass_fail": "pass",
+      "verified_by": "codex implementation seat; independent review pending",
+      "verified_at": "2026-09-09T14:20:00Z",
+      "notes": "Final tested SHA is recorded externally in the PR and issue evidence."
+    },
+    {
+      "criterion_id": "FR-002",
+      "description": "D2 supplies closed and open compact-navigation stories at 390px",
+      "proof_type": "automated_test",
+      "evidence": "Chromium and Firefox prove controlled open state, inert/aria-hidden ownership, focus entry, Escape dismissal and restoration, exact 16px card gutters, row reflow, drawer containment, focus containment, and no horizontal overflow.",
+      "pass_fail": "pass",
+      "verified_by": "codex implementation seat; independent review pending",
+      "verified_at": "2026-09-09T14:20:00Z",
+      "notes": "Storybook 10 globals.viewport selects the explicit 390 × 844 option."
+    },
+    {
+      "criterion_id": "FR-003",
+      "description": "D4 preserves supplied cross-branch and merged facts without inference",
+      "proof_type": "automated_test",
+      "evidence": "Direct fixture and Playwright tests assert all five exact branch copies, merged #1017, main snapshot branch, and navigation containing only unmerged #1042/#998.",
+      "pass_fail": "pass",
+      "verified_by": "codex implementation seat; independent review pending",
+      "verified_at": "2026-09-09T14:20:00Z",
+      "notes": "The prior D4 omission/stale-navigation finding is closed."
+    },
+    {
+      "criterion_id": "FR-004",
+      "description": "D5 exposes only terminal not-Spec-Kitty truth",
+      "proof_type": "automated_test",
+      "evidence": "Direct and rendered tests prove no snapshot, Missions, progress, repository documents, copy fields, or setup guidance; approved D5 comparison passes.",
+      "pass_fail": "pass",
+      "verified_by": "codex implementation seat; independent review pending",
+      "verified_at": "2026-09-09T14:20:00Z",
+      "notes": "Mission spec/data model were corrected to match the approved no-setup state."
+    },
+    {
+      "criterion_id": "FR-005",
+      "description": "D6 associates one supplied snapshot disagreement with one Mission",
+      "proof_type": "automated_test",
+      "evidence": "Direct fixture and rendered tests prove exactly one warning, scoped to #998, with affected SHA byte-equal to the repository snapshot SHA.",
+      "pass_fail": "pass",
+      "verified_by": "codex implementation seat; independent review pending",
+      "verified_at": "2026-09-09T14:20:00Z",
+      "notes": "No new status abstraction is published."
+    },
+    {
+      "criterion_id": "FR-006",
+      "description": "D7 exposes stable busy/live meaning without unavailable facts or polling",
+      "proof_type": "automated_test",
+      "evidence": "A pre-navigation MutationObserver records exactly one empty-to-assigned notice transition; the public message property equals supplied fixture copy, aria-busy/polite semantics remain, and completed surfaces are absent in Chromium and Firefox.",
+      "pass_fail": "pass",
+      "verified_by": "codex implementation seat; independent review pending",
+      "verified_at": "2026-09-09T14:20:00Z",
+      "notes": "Assignment uses updateComplete plus one microtask; no timers, animation dependency, or polling."
+    },
+    {
+      "criterion_id": "FR-007",
+      "description": "D8 proves completed-empty truth without surrogate counts",
+      "proof_type": "automated_test",
+      "evidence": "Rendered and direct tests prove a real snapshot and setup guidance, zero Mission rows/progress/counts, and the identical SHA in git context and explicit empty result.",
+      "pass_fail": "pass",
+      "verified_by": "codex implementation seat; independent review pending",
+      "verified_at": "2026-09-09T14:20:00Z",
+      "notes": "Approved D8 hierarchy and native empty-state composition were reviewed."
+    },
+    {
+      "criterion_id": "FR-008",
+      "description": "LightMode is a token-system proof and does not claim deferred D3 approval",
+      "proof_type": "automated_test",
+      "evidence": "The LightMode story retains identical semantic content, applies the public sk-light class, changes authoritative surface tokens, passes axe, and has its own visual baseline.",
+      "pass_fail": "pass",
+      "verified_by": "codex implementation seat; independent review pending",
+      "verified_at": "2026-09-09T14:20:00Z",
+      "notes": "D3 remains explicitly deferred."
+    },
+    {
+      "criterion_id": "FR-009",
+      "description": "Exact values copy through sk-copy-field with honest result feedback",
+      "proof_type": "automated_test",
+      "evidence": "Chromium and Firefox click the public accessible controls, prove exact visible bytes reach Clipboard.writeText on success, and prove the stable result region reports only failure when copy and selection are unavailable.",
+      "pass_fail": "pass",
+      "verified_by": "codex implementation seat; independent review pending",
+      "verified_at": "2026-09-09T14:20:00Z",
+      "notes": "No private shadow-root interaction remains in the Dossier suite."
+    },
+    {
+      "criterion_id": "FR-010",
+      "description": "The composition preserves native information and interaction semantics",
+      "proof_type": "automated_test",
+      "evidence": "Every story has one h1/main, native labelled navigation, lists, links, buttons, code, time, progress, headings, and landmarks; the corrected suite reruns every story in Chromium and Firefox and checks axe on each.",
+      "pass_fail": "pass",
+      "verified_by": "codex implementation seat; independent review pending",
+      "verified_at": "2026-09-09T14:20:00Z",
+      "notes": "Current-link state appears only on anchors."
+    },
+    {
+      "criterion_id": "FR-011",
+      "description": "Every story derives repeated facts and omissions from recursively frozen fixtures",
+      "proof_type": "automated_test",
+      "evidence": "Extracted direct fixture suite passes 19/19, recursively inspects every reachable object, asserts state-specific presence/absence, D4 exact sets and merged/default-copy consistency, and produced named reds under isolated freeze/navigation/progress mutations.",
+      "pass_fail": "pass",
+      "verified_by": "codex implementation seat; independent review pending",
+      "verified_at": "2026-09-09T14:20:00Z",
+      "notes": "No ADR-11 ID was invented for this story fixture."
+    },
+    {
+      "criterion_id": "FR-012",
+      "description": "Display projection is deterministic, pure, and application-behavior free",
+      "proof_type": "automated_test",
+      "evidence": "Direct tests prove repeatability and that a mutable caller remains byte-equal and unfrozen; static tests reject fetch, timers, storage, routing, execution, current-time, random, private-root, and custom-element definitions.",
+      "pass_fail": "pass",
+      "verified_by": "codex implementation seat; independent review pending",
+      "verified_at": "2026-09-09T14:20:00Z",
+      "notes": "Tracker links are emitted only for supplied parseable HTTP(S); missing/relative/malformed/unsafe inputs remain static."
+    },
+    {
+      "criterion_id": "FR-013",
+      "description": "Long opaque values remain exact and contained",
+      "proof_type": "automated_test",
+      "evidence": "LongData runs at 390px plus genuine 200%/400% Chromium and Firefox UI zoom; root, command and focus stay contained, document scrollWidth never exceeds clientWidth, and exact command bytes remain intact.",
+      "pass_fail": "pass",
+      "verified_by": "codex implementation seat; independent review pending",
+      "verified_at": "2026-09-09T14:20:00Z",
+      "notes": "See implementation-evidence.md for fixed-window DPR and geometry."
+    },
+    {
+      "criterion_id": "FR-014",
+      "description": "Boundary proof preserves supplied progress values immediately around 60%",
+      "proof_type": "automated_test",
+      "evidence": "Direct fixture and rendered native-progress tests assert 59/60/61 with max 100, visible percent metadata, and 100 Work Packages labels; no completed count or progress arithmetic exists.",
+      "pass_fail": "pass",
+      "verified_by": "codex implementation seat; independent review pending",
+      "verified_at": "2026-09-09T14:20:00Z",
+      "notes": "The rejected completed/total model was removed."
+    },
+    {
+      "criterion_id": "FR-015",
+      "description": "Storybook documents the Dossier as a composition pattern with explicit ownership boundaries",
+      "proof_type": "code_review",
+      "evidence": "Story docs and docs/design-system/using-components.md identify immutable application-supplied facts/destinations and library-owned presentation; built index discovers exactly 15 story exports and excludes helpers.",
+      "pass_fail": "pass",
+      "verified_by": "codex implementation seat; independent review pending",
+      "verified_at": "2026-09-09T14:20:00Z",
+      "notes": "No runtime Dossier component, wrapper, manifest entry, React wrapper, Vue type, or package export is created."
+    }
+  ],
+  "negative_invariants": [
+    "A Repository Dossier story must never invent Team Kitty discovery, routing, polling, timestamps, truth inference, progress arithmetic, or command execution.",
+    "A terminal or pending repository state must never expose completed snapshot facts or actions.",
+    "A tracker label without a supplied safe HTTP(S) destination must remain static text.",
+    "A merged Mission must not remain in the unmerged navigation shortcut list.",
+    "A visual baseline is not accepted until its individual approved-state comparison and cross-screen family review are recorded."
+  ]
+}

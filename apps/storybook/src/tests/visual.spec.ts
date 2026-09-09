@@ -1554,6 +1554,112 @@ for (const visual of missionKanbanVisuals) {
     await expect(root).toHaveScreenshot(visual.name, {
       threshold: 0.02,
       maxDiffPixelRatio: 0.02,
+      timeout: 20000,
+    });
+  });
+}
+
+type RepositoryDossierStoryId =
+  | 'default'
+  | 'd-2-narrow-closed'
+  | 'd-2-narrow-open'
+  | 'd-4-cross-branch'
+  | 'd-5-not-spec-kitty'
+  | 'd-6-snapshot-behind-log'
+  | 'd-7-indexing'
+  | 'd-8-no-missions'
+  | 'light-mode'
+  | 'long-data'
+  | 'progress-thresholds'
+  | 'forced-colors'
+  | 'reduced-motion'
+  | 'zoom-200'
+  | 'zoom-400';
+
+const repositoryDossierStory = async (
+  page: Page,
+  id: RepositoryDossierStoryId,
+  viewport: Readonly<{ width: number; height: number }>,
+): Promise<Locator> => {
+  await page.setViewportSize(viewport);
+  await page.goto(`/iframe.html?id=patterns-repository-dossier--${id}&viewMode=story`);
+  const root = page.locator('[data-repository-dossier-pattern]').first();
+  await root.waitFor({ state: 'visible', timeout: 20000 });
+  await expect(root).toHaveAttribute('data-render-complete', 'true');
+  await page.evaluate(() => document.fonts.ready);
+  return root;
+};
+
+const repositoryDossierFullCases = [
+  { id: 'default', width: 1440, height: 1024, name: 'sk-repository-dossier-d1-desktop-dark.png' },
+  { id: 'd-2-narrow-closed', width: 390, height: 844, name: 'sk-repository-dossier-d2-closed-390.png' },
+  { id: 'd-2-narrow-open', width: 390, height: 844, name: 'sk-repository-dossier-d2-open-390.png' },
+  { id: 'd-4-cross-branch', width: 1440, height: 1024, name: 'sk-repository-dossier-d4-cross-branch.png' },
+  { id: 'd-5-not-spec-kitty', width: 1440, height: 900, name: 'sk-repository-dossier-d5-not-spec-kitty.png' },
+  { id: 'd-6-snapshot-behind-log', width: 1440, height: 1024, name: 'sk-repository-dossier-d6-snapshot-behind-log.png' },
+  { id: 'd-7-indexing', width: 1440, height: 900, name: 'sk-repository-dossier-d7-indexing.png' },
+  { id: 'd-8-no-missions', width: 1440, height: 1024, name: 'sk-repository-dossier-d8-no-missions.png' },
+  { id: 'light-mode', width: 1440, height: 1024, name: 'sk-repository-dossier-light.png' },
+  { id: 'long-data', width: 390, height: 1000, name: 'sk-repository-dossier-long-390.png' },
+  { id: 'progress-thresholds', width: 1440, height: 1024, name: 'sk-repository-dossier-progress-thresholds.png' },
+] as const satisfies ReadonlyArray<{
+  id: RepositoryDossierStoryId;
+  width: number;
+  height: number;
+  name: string;
+}>;
+
+for (const visual of repositoryDossierFullCases) {
+  test(`Repository Dossier ${visual.name} — full route baseline`, async ({ page }) => {
+    const root = await repositoryDossierStory(page, visual.id, {
+      width: visual.width,
+      height: visual.height,
+    });
+    if (visual.id === 'd-2-narrow-open') {
+      await root.locator('[slot="compact-navigation"]')
+        .getByRole('link', { name: 'Overview', exact: true }).focus();
+    }
+    await expect(root).toHaveScreenshot(visual.name, {
+      threshold: 0.02,
+      maxDiffPixelRatio: 0.02,
+      timeout: 20000,
+    });
+  });
+}
+
+test('Repository Dossier active forced colors — visual baseline', async ({ page, browserName }) => {
+  test.skip(browserName !== 'chromium', 'Playwright forced-colors emulation is Chromium-owned');
+  await page.emulateMedia({ forcedColors: 'active', reducedMotion: 'reduce' });
+  const root = await repositoryDossierStory(page, 'forced-colors', { width: 1440, height: 1024 });
+  await root.locator('[data-context-nav="desktop"] [aria-current="page"]').focus();
+  await expect(root).toHaveScreenshot('sk-repository-dossier-forced-colors.png', {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+    timeout: 20000,
+  });
+});
+
+test('Repository Dossier reduced motion indexing — visual baseline', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  const root = await repositoryDossierStory(page, 'reduced-motion', { width: 1440, height: 900 });
+  await expect(root).toHaveScreenshot('sk-repository-dossier-reduced-motion.png', {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+    timeout: 20000,
+  });
+});
+
+for (const zoom of [
+  { id: 'zoom-200', value: '2', width: 780, name: 'sk-repository-dossier-zoom-200.png' },
+  { id: 'zoom-400', value: '4', width: 1280, name: 'sk-repository-dossier-zoom-400.png' },
+] as const) {
+  test(`Repository Dossier ${zoom.value}00% CSS zoom stress — visual baseline`, async ({ page }) => {
+    const root = await repositoryDossierStory(page, zoom.id, { width: zoom.width, height: 1000 });
+    await page.evaluate((value) => { document.documentElement.style.zoom = value; }, zoom.value);
+    await expect(root).toHaveScreenshot(zoom.name, {
+      threshold: 0.02,
+      maxDiffPixelRatio: 0.02,
+      timeout: 20000,
     });
   });
 }

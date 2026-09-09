@@ -46,7 +46,8 @@
     "#265 ratchets the fourteen Storybook-only Mission Reading routes named as acceptance evidence. Default is the M1 populated Specify desktop; M2 has separate closed-390 and controlled-open drawer stories; M3-M8 retain loading, unavailable, snapshot, optional collection, Ops and three-truth-region states; LightMode, long-content and RTL stay separately addressable. On the final pre-merge train, total moves 391 -> 405; fixture, projector and render helpers are excluded from CSF indexing.",
     "#257 opts in all fifteen sk-copy-field stories, including distinct result, narrow, theme, forced-color, focus, and empty states. On the refreshed train after #292, total moves 405 -> 420.",
     "#274 ratchets fourteen additive sk-app-shell rail-preserving stories: closed/open, 390/768/1024/1100/1101/wide, long labels, short/tall viewports, reduced motion, forced colors, and LightMode. On the refreshed train after #257, total moves 420 -> 434; all legacy, #254, segmented-choice, collection, action-row, checkbox-choice-group, event-timeline, Mission Reading, and copy-field story ids remain unchanged.",
-    "#278 ratchets the ten Storybook-only Mission Kanban routes named as acceptance evidence, total 434 -> 444 on the refreshed train after #274. K1-K6 remain separately addressable alongside LightMode, long-content, forced-colors, and reduced-motion evidence; fixture, projector, guard, and render helpers are excluded from CSF indexing."
+    "#278 ratchets the ten Storybook-only Mission Kanban routes named as acceptance evidence, total 434 -> 444 on the refreshed train after #274. K1-K6 remain separately addressable alongside LightMode, long-content, forced-colors, and reduced-motion evidence; fixture, projector, guard, and render helpers are excluded from CSF indexing.",
+    "#255 ratchets the fifteen Storybook-only Repository Dossier routes named as acceptance evidence. D1 is the populated desktop composition; D2 retains separate closed and controlled-open 390px drawer states; D4-D8 preserve cross-branch, terminal, snapshot, indexing, and completed-empty truth; LightMode, long data, supplied progress thresholds, forced colors, reduced motion, and 200%/400% zoom remain independently reviewable. On the refreshed train after #278, total moves 444 -> 459; fixture, projection, freeze, and render helpers are excluded from CSF indexing."
   ],
   "byElement": {
     "sk-action-row": [
@@ -584,7 +585,24 @@
       "patterns-mission-reading--light-mode",
       "patterns-mission-reading--long-content",
       "patterns-mission-reading--rtl"
+    ],
+    "repository-dossier-pattern": [
+      "patterns-repository-dossier--default",
+      "patterns-repository-dossier--d-2-narrow-closed",
+      "patterns-repository-dossier--d-2-narrow-open",
+      "patterns-repository-dossier--d-4-cross-branch",
+      "patterns-repository-dossier--d-5-not-spec-kitty",
+      "patterns-repository-dossier--d-6-snapshot-behind-log",
+      "patterns-repository-dossier--d-7-indexing",
+      "patterns-repository-dossier--d-8-no-missions",
+      "patterns-repository-dossier--light-mode",
+      "patterns-repository-dossier--long-data",
+      "patterns-repository-dossier--progress-thresholds",
+      "patterns-repository-dossier--forced-colors",
+      "patterns-repository-dossier--reduced-motion",
+      "patterns-repository-dossier--zoom-200",
+      "patterns-repository-dossier--zoom-400"
     ]
   },
-  "total": 444
+  "total": 459
 }

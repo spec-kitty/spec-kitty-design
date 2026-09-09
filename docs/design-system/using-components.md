@@ -29,6 +29,32 @@ Because a custom element needs no wrapper, every framework can use the migrated 
 generated React wrapper exists for JSX typing and typed refs — see
 [Using the elements from React](./using-react.md) for what it does and does not buy, measured.
 
+## Repository Dossier pattern
+
+The Storybook `Patterns/Repository Dossier` family demonstrates the approved repository route
+without publishing a page component. It composes the public shell, context, header, status, card,
+action-row, notice, pill, and copy-field elements with native `.sk-context-nav`,
+`.sk-breadcrumbs`, `.sk-facts`, `.sk-progress`, and `.sk-empty-state` families. Repositories,
+Missions, document destinations, branch copies, progress, timestamps, commands, and links remain
+native light-DOM content supplied by the consumer.
+
+Keep a repository view's repeated facts in one immutable fixture and project display presence from
+that supplied state. A completed view may have Missions or be empty; a repository that is not a
+Spec Kitty repository and a repository whose first view is still rendering are different states.
+A cross-branch Mission renders each supplied copy. A snapshot warning belongs only to the supplied
+affected Mission and repeats the exact affected commit. Progress labels, values, maxima, branch
+names, commit identifiers, pushed times, tracker destinations, and copy-field values are displayed
+as supplied; the pattern does not calculate, discover, compare, or verify them.
+
+At compact widths, use `sk-app-shell presentation="compact"` as a controlled drawer. The consumer
+supplies the trigger and native context navigation, keeps `open` and `aria-expanded` aligned,
+installs `compactTrigger`, moves focus into the open drawer, accepts `sk-app-shell-dismiss`, and
+owns routing after activation. The application also owns repository discovery, git access,
+polling, truth inference, timestamp formatting, persistence, progress arithmetic, and command
+execution. Use `sk-copy-field` only to copy an exact supplied value and report its real result.
+There is intentionally no `sk-repository-dossier`, `sk-mission-row`, truth-band, provenance-band,
+or native-list collection wrapper.
+
 ## Mission Reading pattern
 
 The Storybook `Patterns/Mission Reading` family demonstrates Mission document routes without

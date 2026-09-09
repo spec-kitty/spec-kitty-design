@@ -1,0 +1,15 @@
+source_id,source_type,location,accessed_at,scope,authority
+SRC-001,github_issue,https://github.com/spec-kitty/spec-kitty-design/issues/255,2026-09-09,"Binding scope acceptance criteria comments and linked work",binding
+SRC-002,github_issue,https://github.com/spec-kitty/spec-kitty-design/issues/253,2026-09-09,"Programme tracking and child state",binding
+SRC-003,ux_document,/home/jeroennouws/dev/team-kitty-missions/ux_redesign/repository-dossier/README.md,2026-09-09,"Artifact index and approval boundary",approved_evidence
+SRC-004,ux_document,/home/jeroennouws/dev/team-kitty-missions/ux_redesign/repository-dossier/DESIGN.md,2026-09-09,"Composition hierarchy and state intent",approved_evidence
+SRC-005,ux_document,/home/jeroennouws/dev/team-kitty-missions/ux_redesign/repository-dossier/BACKEND-CAPABILITY-MAP.md,2026-09-09,"Available facts and application ownership",approved_evidence
+SRC-006,ux_document,/home/jeroennouws/dev/team-kitty-missions/ux_redesign/repository-dossier/SCREEN-MATRIX.md,2026-09-09,"D1 D2 D4-D8 state matrix",approved_evidence
+SRC-007,ux_document,/home/jeroennouws/dev/team-kitty-missions/ux_redesign/repository-dossier/UX-DECISION-REPORT.md,2026-09-09,"Approved decisions and deferred D3",approved_evidence
+SRC-008,ux_images,/home/jeroennouws/dev/team-kitty-missions/ux_redesign/repository-dossier/,2026-09-09,"Approved dark images D1 D2 D4 D5 D6 D7 D8",approved_evidence
+SRC-009,repository,/home/jeroennouws/dev/spec-kitty-design-missions/255,2026-09-09,"Current train tokens public contracts ADRs patterns and gates",authoritative_implementation
+SRC-010,github_dependencies,https://github.com/spec-kitty/spec-kitty-design/issues/212,2026-09-09,"Action-row supporting region and PR 252",authoritative_contract
+SRC-011,github_dependencies,https://github.com/spec-kitty/spec-kitty-design/issues/213,2026-09-09,"Breadcrumb and detail primitives plus PR 261",authoritative_contract
+SRC-012,github_dependencies,https://github.com/spec-kitty/spec-kitty-design/issues/254,2026-09-09,"Compact app-shell seam and PR 268",authoritative_contract
+SRC-013,github_dependencies,https://github.com/spec-kitty/spec-kitty-design/issues/256,2026-09-09,"Native context navigation styles and PR 262",authoritative_contract
+SRC-014,github_dependencies,https://github.com/spec-kitty/spec-kitty-design/issues/257,2026-09-09,"Exact copy field and PR 290",authoritative_contract

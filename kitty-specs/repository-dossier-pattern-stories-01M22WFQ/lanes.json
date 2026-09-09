@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "mission_slug": "repository-dossier-pattern-stories-01M22WFQ",
+  "mission_id": "01M22WFQ851RJEBPR3YWAVDGTZ",
+  "mission_branch": "kitty/mission-repository-dossier-pattern-stories-01M22WFQ",
+  "target_branch": "train/elements-first",
+  "lanes": [
+    {
+      "lane_id": "lane-a",
+      "wp_ids": [
+        "WP01"
+      ],
+      "write_scope": [
+        "apps/storybook/src/tests/sk-checkbox-choice-group.spec.ts",
+        "apps/storybook/src/tests/sk-repository-dossier-pattern.spec.ts",
+        "apps/storybook/src/tests/visual.spec.ts",
+        "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-repository-dossier-*.png",
+        "docs/design-system/using-components.md",
+        "expected-stories.json",
+        "fixtures/elements-behaviour/src/pattern-repository-dossier.test.ts",
+        "packages/elements/src/patterns/repository-dossier.fixture.ts",
+        "packages/elements/tsconfig.lib.json",
+        "packages/elements/src/patterns/repository-dossier.stories.ts"
+      ],
+      "predicted_surfaces": [
+        "api",
+        "app-shell",
+        "artifact-rendering",
+        "tracker-integration"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    }
+  ],
+  "computed_at": "2026-09-09T11:02:16.906278+00:00",
+  "computed_from": "dependency_graph+ownership",
+  "planning_artifact_wps": [],
+  "planning_commit_sha": "c8cafd05121b21c661fdbf3c4628187751aee5ad"
+}

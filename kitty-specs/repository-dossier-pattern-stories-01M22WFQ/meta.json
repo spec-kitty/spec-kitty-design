@@ -1,0 +1,14 @@
+{
+  "created_at": "2026-09-09T10:47:43.110080+00:00",
+  "flattened": false,
+  "friendly_name": "repository dossier pattern stories",
+  "mission_id": "01M22WFQ851RJEBPR3YWAVDGTZ",
+  "mission_number": null,
+  "mission_slug": "repository-dossier-pattern-stories-01M22WFQ",
+  "mission_type": "software-dev",
+  "purpose_context": "This mission advances repository dossier pattern stories on train/elements-first so stakeholders can track the work from mission creation onward.",
+  "purpose_tldr": "repository dossier pattern stories",
+  "slug": "repository-dossier-pattern-stories-01M22WFQ",
+  "target_branch": "train/elements-first",
+  "topology": "lanes"
+}
