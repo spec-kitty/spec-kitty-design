@@ -158,10 +158,10 @@
       "criterion_id": "NFR-003",
       "description": "Dark, LightMode, forced-colors, and reduced-motion presentations preserve meaning and focus without color or motion alone.",
       "proof_type": "browser_test_and_visual_evidence",
-      "evidence": "Exact product head a36f3b72f68a00bc04ffe0cf49dbf2d362e6358e: LightMode and forced-colors baselines pass; focused forced-colors and reduced-motion assertions plus repository theme gates pass.",
+      "evidence": "Exact rebased product head df4bf66bc72c287e6aaadf82f5fce18c766de5af: LightMode, forced-colors, reduced-motion, theme, and visual-regression gates pass in CI 34332459374.",
       "pass_fail": "pass",
       "verified_by": "codex",
-      "verified_at": "2026-09-09T07:31:50.720441+00:00",
+      "verified_at": "2026-09-09T09:25:45.406170+00:00",
       "notes": "The pattern introduces no meaning-bearing animation."
     },
     {
