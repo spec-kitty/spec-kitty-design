@@ -84,6 +84,10 @@ test("the Work Explorer proof remains a Storybook-only public-surface compositio
   expect(source).not.toMatch(
     /<sk-(?:work-package-group|work-explorer-summary|work-explorer-filter|presence-panel|activity-panel|loading-skeleton)(?:\s|>)/,
   );
+  expect(source).not.toMatch(/\b(?:two|2) admitted repositories\b/i);
+  expect(source).toContain(
+    "data-repository-total=${currentProjection.repositories.length}",
+  );
   expect(source).toMatch(
     /excludeStories:\s*\[[\s\S]*["']WORK_EXPLORER_FIXTURE["']/,
   );
@@ -1167,8 +1171,15 @@ test("W7, W8, W9, and W10 preserve their distinct truth and absence contracts", 
   await expect(w7.locator('sk-status-indicator[slot="sync"]')).toHaveText(
     "Mission state · verified",
   );
+  await expect(w7).toHaveAttribute("data-repository-total", "2");
+  const admittedRepositoryTotal = await w7.getAttribute(
+    "data-repository-total",
+  );
   await expect(w7.locator("[data-no-work-summary]")).toHaveText(
-    "No active Work Packages across 2 admitted repositories",
+    `No active Work Packages across ${admittedRepositoryTotal} admitted repositories`,
+  );
+  await expect(w7.locator("[data-no-active-work] p")).toHaveText(
+    `The ${admittedRepositoryTotal} admitted repositories currently supply no active Mission work.`,
   );
   await expect(w7.locator("[data-summary-lane]")).toHaveCount(0);
   await expect(w7.locator("[data-work-package-id]")).toHaveCount(0);

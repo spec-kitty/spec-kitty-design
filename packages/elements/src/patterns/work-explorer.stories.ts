@@ -1930,6 +1930,9 @@ const renderLoadingRegion = (
     </div>
   </section>`;
 
+const formatAdmittedRepositories = (count: number): string =>
+  `${count} admitted ${count === 1 ? "repository" : "repositories"}`;
+
 const renderWorkBody = (
   projection: DeepReadonly<WorkExplorerProjection>,
   onClear: () => void,
@@ -1941,7 +1944,8 @@ const renderWorkBody = (
     return html`<div class="sk-empty-state" data-no-active-work>
       <h3>No active Work Packages</h3>
       <p>
-        The two admitted repositories currently supply no active Mission work.
+        The ${formatAdmittedRepositories(projection.repositories.length)}
+        currently supply no active Mission work.
       </p>
     </div>`;
   }
@@ -2144,6 +2148,7 @@ export const renderWorkExplorer = (
     data-grouping=${currentProjection.grouping}
     data-source-total=${currentProjection.sourceTotal ?? nothing}
     data-filtered-total=${currentProjection.filteredTotal ?? nothing}
+    data-repository-total=${currentProjection.repositories.length}
     data-render-complete="true"
   >
     ${workExplorerPatternStyles}
@@ -2242,7 +2247,10 @@ export const renderWorkExplorer = (
               : html` ${
                     currentProjection.pageState === "no-work"
                       ? html`<p data-no-work-summary>
-                          No active Work Packages across 2 admitted repositories
+                          No active Work Packages across
+                          ${formatAdmittedRepositories(
+                            currentProjection.repositories.length,
+                          )}
                         </p>`
                       : renderSummary()
                   }
