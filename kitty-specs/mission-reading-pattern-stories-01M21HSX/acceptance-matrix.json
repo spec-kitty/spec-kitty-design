@@ -48,10 +48,10 @@
       "criterion_id": "FR-005",
       "description": "M4 keeps unavailable Plan visible as native non-link content while Specify is the only current available link.",
       "proof_type": "automated_test_and_visual_evidence",
-      "evidence": "Exact rebased product head df4bf66bc72c287e6aaadf82f5fce18c766de5af: M4 proves unavailable Plan is static native non-link content with no href, interactive role, tabindex, or focus stop; CI 34332459374 passes.",
+      "evidence": "Exact rebased product head b68f84d28715ca8ef551f40cda24f3a13e054f1e: M4 proves unavailable Plan is static native non-link content with no href, interactive role, tabindex, or focus stop; CI 34343137694 passes.",
       "pass_fail": "pass",
       "verified_by": "codex",
-      "verified_at": "2026-09-09T09:25:30.984489+00:00",
+      "verified_at": "2026-09-09T11:25:20.076208+00:00",
       "notes": "Uses the landed public .sk-context-nav unavailable-entry contract from #264."
     },
     {
