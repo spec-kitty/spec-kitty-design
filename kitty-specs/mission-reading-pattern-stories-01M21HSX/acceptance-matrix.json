@@ -128,10 +128,10 @@
       "criterion_id": "FR-013",
       "description": "All required story IDs, focused tests, exact-head visual cases, and ownership documentation are reproducible and reviewable.",
       "proof_type": "generated_ratchet_and_review",
-      "evidence": "Built Storybook contains all 14 Mission Reading story IDs; ratchet 383/383; 18/18 visual baselines passed with aggregate SHA-256 ed52b59680cfa88e570440bcae9d74d21b5b5ceacb75a5043b11ac696aec6ba7; docs/design-system/using-components.md updated.",
+      "evidence": "Exact product head a36f3b72f68a00bc04ffe0cf49dbf2d362e6358e: all 14 Mission Reading IDs are in the 395/395 unique-story ratchet; 18 tracked baselines have aggregate SHA-256 0f1449ae202aaededcce4e238abe78de1cb01401918250cad01fe757e8cf2308; cycle 11 approved.",
       "pass_fail": "pass",
       "verified_by": "codex",
-      "verified_at": "2026-09-09T03:41:13Z",
+      "verified_at": "2026-09-09T07:31:47.173242+00:00",
       "notes": "Review-cycle-5 approves exact publishable head 8606f01."
     },
     {
