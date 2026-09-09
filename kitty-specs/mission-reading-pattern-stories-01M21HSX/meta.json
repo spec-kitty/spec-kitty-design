@@ -1,4 +1,5 @@
 {
+  "accept_commit": "846551850edbeb1e7f58346bad38c0656c07d733",
   "acceptance_history": [
     {
       "accept_commit": "4f662f1d9c7f2c742ab98dfc8211598821d7e89d",
@@ -14,6 +15,7 @@
       "accepted_from_commit": "a05d7bd3365756895995d3d633645893a67c7c1c"
     },
     {
+      "accept_commit": "846551850edbeb1e7f58346bad38c0656c07d733",
       "acceptance_mode": "pr",
       "accepted_at": "2026-09-09T08:42:34.970851+00:00",
       "accepted_by": "codex",
