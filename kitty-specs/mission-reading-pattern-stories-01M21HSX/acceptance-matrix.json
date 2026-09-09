@@ -248,10 +248,10 @@
       "criterion_id": "C-005",
       "description": "Factual, observed, and reported-live values remain separate and live presence is never joined to a Work Package.",
       "proof_type": "automated_test_and_review",
-      "evidence": "Exact rebased product head df4bf66bc72c287e6aaadf82f5fce18c766de5af: M8 and three-engine CI 34332459374 prove separate factual, observed, and reported-live labels with no inferred live Work-Package value.",
+      "evidence": "Exact rebased product head b68f84d28715ca8ef551f40cda24f3a13e054f1e: M8 and three-engine CI 34343137694 prove separate factual, observed, and reported-live labels with no inferred live Work-Package value.",
       "pass_fail": "pass",
       "verified_by": "codex",
-      "verified_at": "2026-09-09T09:25:57.065786+00:00",
+      "verified_at": "2026-09-09T11:25:44.629856+00:00",
       "notes": "Freshness claims are region-local."
     },
     {
