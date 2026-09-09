@@ -631,22 +631,30 @@ for (const { width, effective } of [
     const shell = await load(
       page,
       `rail-preserving-${width === 1280 ? 'wide' : width}`,
-      { width: Math.max(width, 1280), height: 720 },
+      { width, height: 720 },
     );
     const personal = shadowPart(shell, 'personal');
     const context = shadowPart(shell, 'context');
     const compactHeader = shadowPart(shell, 'compact-header');
     const navigation = shadowPart(shell, 'compact-navigation');
     const content = shadowPart(shell, 'content');
+    const viewport = await page.evaluate(() => ({
+      innerWidth: window.innerWidth,
+      clientWidth: document.documentElement.clientWidth,
+      scrollWidth: document.documentElement.scrollWidth,
+    }));
+    expect(viewport.innerWidth).toBe(width);
+    expect(viewport.scrollWidth).toBeLessThanOrEqual(viewport.clientWidth);
 
     await expect(personal).toBeVisible();
+    const personalBox = (await personal.boundingBox())!;
+    const contextBox = (await context.boundingBox())!;
+    const contentBox = (await content.boundingBox())!;
+    expect(Math.round(personalBox.width)).toBe(56);
     if (effective) {
       await expect(context).toBeHidden();
       await expect(compactHeader).toBeVisible();
       await expect(navigation).toBeVisible();
-      expect(Math.round((await personal.boundingBox())!.width)).toBe(56);
-      const personalBox = (await personal.boundingBox())!;
-      const contentBox = (await content.boundingBox())!;
       expect(Math.round(contentBox.x)).toBe(Math.round(personalBox.x + personalBox.width));
       await expect(shell.locator('[slot="personal-rail"]')).not.toHaveAttribute('inert', '');
       await expect(shell.locator('[slot="context-sidebar"]')).toHaveAttribute('inert', '');
@@ -657,10 +665,10 @@ for (const { width, effective } of [
       await expect(shell.locator('[slot="personal-rail"]')).not.toHaveAttribute('inert', '');
       await expect(shell.locator('[slot="context-sidebar"]')).not.toHaveAttribute('inert', '');
       await expect(shell.locator('[slot="compact-header"]')).toHaveAttribute('inert', '');
+      expect(Math.round(contextBox.width)).toBe(240);
+      expect(Math.round(contextBox.x)).toBe(Math.round(personalBox.x + personalBox.width));
+      expect(Math.round(contentBox.x)).toBe(Math.round(contextBox.x + contextBox.width));
     }
-    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
-      await page.evaluate(() => document.documentElement.clientWidth),
-    );
   });
 }
 
@@ -685,12 +693,13 @@ test('rail-preserving is shell-relative inside a wider viewport and respects con
   expect(result).toEqual({ at1100: 'block', at1101: 'none' });
 });
 
-test('rail-preserving uses logical inline size in vertical writing mode', async ({ page }) => {
+for (const writingMode of ['vertical-rl', 'sideways-rl'] as const) {
+test(`rail-preserving uses logical inline size in ${writingMode} writing mode`, async ({ page }) => {
   const shell = await load(page, 'rail-preserving-open', { width: 900, height: 1200 });
-  const result = await shell.evaluate(async (element) => {
+  const result = await shell.evaluate(async (element, mode) => {
     const appShell = element as HTMLElement & { updateComplete: Promise<unknown> };
     const header = appShell.shadowRoot!.querySelector<HTMLElement>('[part="compact-header"]')!;
-    appShell.style.writingMode = 'vertical-rl';
+    appShell.style.writingMode = mode;
     appShell.style.blockSize = '390px';
     const settle = async () => {
       await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
@@ -702,9 +711,10 @@ test('rail-preserving uses logical inline size in vertical writing mode', async 
     appShell.style.inlineSize = '1101px';
     await settle();
     return { at1100, at1101: getComputedStyle(header).display };
-  });
+  }, writingMode);
   expect(result).toEqual({ at1100: 'block', at1101: 'none' });
 });
+}
 
 test('rail-preserving closed/open navigation reuses the controlled dismissal seam', async ({ page }) => {
   const closed = await load(page, 'rail-preserving-closed', { width: 1024, height: 720 });
@@ -715,6 +725,9 @@ test('rail-preserving closed/open navigation reuses the controlled dismissal sea
   const open = await load(page, 'rail-preserving-open', { width: 1024, height: 720 });
   const trigger = open.locator('[slot="compact-header"] button');
   const link = open.locator('[slot="compact-navigation"] a[href="#missions"]');
+  const triggerBox = (await trigger.boundingBox())!;
+  expect(triggerBox.width).toBeGreaterThanOrEqual(44);
+  expect(triggerBox.height).toBeGreaterThanOrEqual(44);
   await link.focus();
   await link.press('Escape');
   await expect(open).not.toHaveAttribute('open', '');

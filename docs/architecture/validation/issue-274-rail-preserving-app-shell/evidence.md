@@ -11,6 +11,9 @@
   regenerated on that exact train at `c6dc095bd83b5d4632a8c6ef601f9783073cca12`.
 - The clean product-delivery branch was subsequently rebased and regenerated after #271 on exact
   train `a679d8374087e2d81198ce00398f4862c839f293`; no mission or Op metadata was transferred.
+- The immutable-head correction cycle was rebased and regenerated again after #272 on exact train
+  `c3cc2dedeb092a0b517e763847e6f1a498ed6323`. This is an intermediate delivery base: #273 must
+  still integrate before #274's mandatory final refresh and review.
 - The final handoff SHA is the commit containing this ledger and is therefore recorded by the
   Spec Kitty transition and Git history rather than circularly embedded here.
 - Delivery remains one WP and one future PR to `train/elements-first`. No push or PR is part of
@@ -54,6 +57,17 @@ After the source correction:
 - the final full Chromium/Firefox repository run passed 628 with 18 intentional skips and zero
   failures after the canonical demo assembler ran.
 
+The immutable-head review correction then replaced the constrained 1280px proxy with real browser
+viewports at 1280, 1101, 1100, 1024, 768 and 390 CSS px. The browser assertions now measure page
+overflow at the true viewport, pin the wide/default 56px rail + 240px context + content geometry,
+retain separate constrained-shell coverage, and exercise both `vertical-rl` and `sideways-rl`.
+The consumer-owned Menu trigger now derives a 44 by 44 CSS-pixel minimum from existing spacing
+tokens. RED on both Chromium and Firefox measured the old trigger at only 26px high (72 passed,
+2 failed); after the story correction the same focused command passed 74/74. The native/React
+focused assertions remained green at 48/48; as expected, that deliberately partial direct Vitest
+invocation exited nonzero only because the repository-wide assertion-floor reporter requires every
+lane and subject. It is not represented as a full-suite pass.
+
 Two initial commands used the obsolete Nx project names `react-consumer:typecheck` and
 `vue-consumer:typecheck`; both failed with “Cannot find project”. They were immediately corrected
 to the live `*-fixture:typecheck` targets above. The failed aliases are not represented as gate
@@ -67,16 +81,17 @@ declaration, story inventory, and size report changed. The React runtime wrapper
 declaration, markup barrels, part/docs ratchets, token catalogue, and unrelated generated files
 remained no-ops.
 
-After #270 and #271 landed, the train-owned 13 segmented-choice and 14 collection stories plus
-WP01's 14 rail-preserving stories were reconciled to 375 unique ratcheted story IDs.
+After #270, #271 and #272 landed, the train-owned segmented-choice, collection and action-row
+stories plus WP01's 14 rail-preserving stories were reconciled to 383 unique ratcheted story IDs.
 `packages/elements/SIZES.md` was regenerated from that merged source rather than conflict-edited
 as final output.
 
-Eight new surgical mutations cover valid-value recognition, inclusive TypeScript and CSS 1100
+Ten new surgical mutations cover valid-value recognition, inclusive TypeScript and CSS 1100
 thresholds, logical `max-inline-size`, personal retention, context suppression, header exposure,
-and the shared responsive-navigation derivation. Three existing #254 arms were retargeted to the
-shared expressions they now guard; measured collateral is declared only on the shared navigation
-arm.
+the shared responsive-navigation derivation, the rail-plus-content grid, and the rail-preserving
+forced-colors selector. Three existing #254 arms were retargeted to the shared expressions they now
+guard; measured collateral is declared only on the shared navigation arm. The refreshed standing
+set is 223 arms.
 
 ## Verification ledger
 
@@ -108,16 +123,16 @@ baselines do not exist. Playwright wrote missing images as a side effect; they w
 were never committed. T018 remains responsible for inspecting the CI-produced Linux artifact and
 committing only approved #274 images. No legacy or compact baseline changed.
 
-The full mutation sweep froze a green 485-assertion baseline and an impact graph of 41 sources
-with zero full-suite fallbacks. All eight new #274 arms and 209 other arms produced their named
-REDs with the expected collateral. One inherited ribbon-card SC-014 arm failed closed because
-both attempts timed out importing the unrelated React-wrapper fixture (23/25 assertions
-collected); it was not a semantic survivor, pattern miss, or collateral failure. Result: 217/218,
-not a pass. Log SHA-256:
-`981bb859becf32cda012139e4701510438e0bfc51b9d474f44959375139fad87`.
-The guard selftest separately hit the same 180-second browser-report timeout. Per programme-owner
-ruling, the exact mutation sweep and selftest remain required in CI; neither local failure is
-relabeled green.
+The first correction-cycle mutation sweep froze a green 498-assertion baseline and an impact graph
+of 41 sources with zero full-suite fallbacks, but finished 222/223 after an unrelated bar-chart
+fixture collection/import failure under concurrent host load. The isolated arm later passed; the
+222/223 log remains invalid and is not relabeled green. A clean rerun produced all 223 semantic
+REDs, then correctly failed its final authored-input fingerprint because the agent-created empty
+`fixtures/elements-behaviour/src/__screenshots__/sk-app-shell.test.ts/` directory was removed after
+the harness had frozen its input directory tree. That mixed-revision log also remains invalid. The
+correction commit freezes the canonically regenerated input tree before one exclusive 223-arm
+sweep; its exact command, result and log digest are recorded in the PR evidence because they cannot
+be circularly embedded in the commit under test.
 
 The canonical three-browser Playwright run with a mission-local `TMPDIR` passed 640 tests and
 skipped 29, but failed 300: the host lacks the libraries Playwright requires to launch WebKit,

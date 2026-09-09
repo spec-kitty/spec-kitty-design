@@ -11,6 +11,11 @@ const storyFrameStyle = [
 ].join('; ');
 
 const linkStyle = 'color: var(--sk-fg-default); font: inherit;';
+const railPreservingTriggerStyle = [
+  'box-sizing: border-box',
+  'min-block-size: calc(var(--sk-space-10) - var(--sk-space-5))',
+  'min-inline-size: calc(var(--sk-space-10) - var(--sk-space-5))',
+].join('; ');
 const shellFixtureStyle = `
   <style>
     sk-app-shell::part(shell) { min-height: 100vh; }
@@ -42,7 +47,7 @@ const responsiveComposition = (
     <nav slot="personal-rail" aria-label="Product areas"><a href="#work" style="${linkStyle}">Work</a></nav>
     <aside slot="context-sidebar" aria-label="Current workspace"><a href="#overview" style="${linkStyle}">Overview</a></aside>
     <div slot="compact-header" style="display: flex; align-items: center; gap: var(--sk-space-3);">
-      <button type="button" aria-expanded="${String(open)}" aria-controls="repository-navigation">
+      <button type="button" aria-expanded="${String(open)}" aria-controls="repository-navigation"${presentation === 'rail-preserving' ? ` style="${railPreservingTriggerStyle}"` : ''}>
         <svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
           <line x1="2" y1="4" x2="14" y2="4"></line>
           <line x1="2" y1="8" x2="14" y2="8"></line>

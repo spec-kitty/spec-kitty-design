@@ -1015,9 +1015,11 @@ test('[SC-012] presentation transitions release focus only when the destination 
   released.frame.remove();
 });
 
-test('[SC-012] [SC-017] rail-preserving uses logical content-box size in vertical writing mode', async () => {
+test.each(['vertical-rl', 'sideways-rl'] as const)(
+  '[SC-012] [SC-017] rail-preserving uses logical content-box size in %s writing mode',
+  async (writingMode) => {
   const { el, frame, personal, context } = await mountRailPreserving();
-  el.style.writingMode = 'vertical-rl';
+  el.style.writingMode = writingMode;
   el.style.blockSize = '390px';
   el.style.inlineSize = '1100px';
   await settleResize(el);
@@ -1031,7 +1033,8 @@ test('[SC-012] [SC-017] rail-preserving uses logical content-box size in vertica
   expect(getComputedStyle(part(el, 'context')!).display).not.toBe('none');
   expect([context.getAttribute('inert'), context.getAttribute('aria-hidden')]).toEqual([null, null]);
   frame.remove();
-});
+  },
+);
 
 test('[SC-012] [SC-017] rail-preserving uses the CSS content-box boundary with border-box padding', async () => {
   const { el, frame, link } = await mountRailPreserving();
@@ -1112,12 +1115,12 @@ test('[SC-006] nested rail-preserving shells assign Escape to the nearest effect
   outer.frame.remove();
 });
 
-test('[SC-017] generated rail-preserving CSS pins logical threshold, token geometry, and forced colors', () => {
+test('[SC-017] generated rail-preserving CSS relates its grid and forced-colors rules to this mode', () => {
   const cssText = Array.from(skAppShellSheet.cssRules, (rule) => rule.cssText).join('\n');
-  expect(cssText).toContain('@container (max-inline-size: 1100px)');
   expect(cssText).toMatch(
-    /grid-template-columns:\s*var\(--sk-layout-personal-rail-width\)\s*minmax\(0, 1fr\)/,
+    /@container \(max-inline-size: 1100px\)[\s\S]*:host\(\[presentation="rail-preserving"\]\) \.sk-app-shell\s*\{\s*grid-template-columns:\s*var\(--sk-layout-personal-rail-width\)\s*minmax\(0, 1fr\)/,
   );
-  expect(cssText).toContain('@media (forced-colors: active)');
-  expect(cssText).toContain(':host([presentation="rail-preserving"])');
+  expect(cssText).toMatch(
+    /@media \(forced-colors: active\)[\s\S]*:host\(\[presentation="rail-preserving"\]\) \.sk-app-shell__compact-header:focus-within,\s*:host\(\[presentation="rail-preserving"\]\) \.sk-app-shell__compact-navigation\s*\{\s*outline-style: solid;\s*outline-width: var\(--sk-border-width-2\);\s*outline-color: CanvasText;/i,
+  );
 });

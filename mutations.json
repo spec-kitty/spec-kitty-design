@@ -50,7 +50,8 @@
     "#272 adds exactly THREE sk-action-row arms, moving the refreshed standing set from 210 to 213. Two SC-010 arms remove the new href and presentation registrations independently so the extended pre-upgrade test proves each public axis remains reactive and reflected. One SC-006 arm attaches the existing selectable request path to the route anchor; the mixed-state negative case then proves native route mode emits zero custom activation events. No SC-007/SC-008 route arms exist because an event with no dispatch has no independently falsifiable detail or propagation flags.",
     "#257 CYCLE-2 COLLATERAL ADJUDICATION records the exact-e5202f4 outcome after the container-responsive SC-017 test was added. Both SC-014 stylesheet-adoption mutations necessarily remove or replace the local sheet that owns the @container rule, so the named SC-014 identity/length assertion and the SC-017 live-layout assertion red together. Each declares required collateral; guard 5 still inverts and will fail if the layout test ever stops proving that stylesheet dependency.",
     "#257 POST-CI WEBKIT FIX adds one SC-012 arm, moving the refreshed standing set from 225 to 226. The old document Range/addRange fallback could not select a node inside WebKit's closed shadow root; the shadow-inclusive Selection.setBaseAndExtent path now owns the exact visible node and full child range. The named [SC-012] fixture asserts both endpoints, so collapsing the focus offset to zero reds that behaviour without marked collateral.",
-    "#274 adds EIGHT app-shell arms over the existing ADR-11 subjects and ids, moving the refreshed standing set from 213 to 221, and retargets three #254 arms onto the expanded shared expressions they already own. Recognition, the TypeScript 1100 boundary, rail-specific personal/context/header exposure, the shared responsive-navigation derivation, and the generated CSS logical/inclusive boundary each have a unique source anchor. The existing presentation-focus, context-exposure, and header-exposure arms now mutate their shared responsive equivalents, so they continue guarding compact while also reaching the additive mode. The shared responsive-navigation derivation deliberately declares collateral: its red-first equivalent was the pre-implementation rail-preserving run, where the new SC-006, SC-012 and SC-017 assertions all failed together while every retained app-shell assertion stayed green. No new behavior id is minted for layout, forced colors, or the public TypeScript union; those remain ordinary browser/type assertions at their real consumption surfaces."
+    "#274 adds EIGHT app-shell arms over the existing ADR-11 subjects and ids, moving the refreshed standing set from 213 to 221, and retargets three #254 arms onto the expanded shared expressions they already own. Recognition, the TypeScript 1100 boundary, rail-specific personal/context/header exposure, the shared responsive-navigation derivation, and the generated CSS logical/inclusive boundary each have a unique source anchor. The existing presentation-focus, context-exposure, and header-exposure arms now mutate their shared responsive equivalents, so they continue guarding compact while also reaching the additive mode. The shared responsive-navigation derivation deliberately declares collateral: its red-first equivalent was the pre-implementation rail-preserving run, where the new SC-006, SC-012 and SC-017 assertions all failed together while every retained app-shell assertion stayed green. No new behavior id is minted for layout, forced colors, or the public TypeScript union; those remain ordinary browser/type assertions at their real consumption surfaces.",
+    "#274 adds TEN app-shell arms over the existing ADR-11 subjects and ids, moving the refreshed standing set from 213 to 223, and retargets three #254 arms onto the expanded shared expressions they already own. Recognition, the TypeScript 1100 boundary, rail-specific personal/context/header exposure, the shared responsive-navigation derivation, the generated CSS logical/inclusive boundary, the rail-plus-content grid, and the rail-preserving forced-colors selector each have a unique source anchor. The existing presentation-focus, context-exposure, and header-exposure arms now mutate their shared responsive equivalents, so they continue guarding compact while also reaching the additive mode. The shared responsive-navigation derivation deliberately declares collateral: its red-first equivalent was the pre-implementation rail-preserving run, where the new SC-006, SC-012 and SC-017 assertions all failed together while every retained app-shell assertion stayed green. No new behavior id is minted for layout, forced colors, or the public TypeScript union; those remain assertions at their real browser/type surfaces under the existing responsive-threshold id."
   ],
   "mutations": [
     {
@@ -1961,6 +1962,22 @@
       "file": "packages/elements/src/app-shell/sk-app-shell.css.js",
       "from": "@container (max-inline-size: 1100px)",
       "to": "@container (max-inline-size: 1099px)",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+    },
+    {
+      "id": "SC-017",
+      "arm": "rail-preserving CSS retains the personal-rail plus content grid",
+      "file": "packages/elements/src/app-shell/sk-app-shell.css.js",
+      "from": "grid-template-columns:\n      var(--sk-layout-personal-rail-width)\n      minmax(0, 1fr);",
+      "to": "grid-template-columns: minmax(0, 1fr);",
+      "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+    },
+    {
+      "id": "SC-017",
+      "arm": "forced colors retains the rail-preserving navigation boundary selector",
+      "file": "packages/elements/src/app-shell/sk-app-shell.css.js",
+      "from": ":host([presentation=\"rail-preserving\"]) .sk-app-shell__compact-header:focus-within,\n  :host([presentation=\"rail-preserving\"]) .sk-app-shell__compact-navigation {",
+      "to": ":host([presentation=\"rail-preserving\"]) .sk-app-shell__compact-header:focus-within {",
       "subject": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
     }
   ]
