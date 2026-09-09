@@ -38,10 +38,10 @@
       "criterion_id": "FR-004",
       "description": "M3 provides stable labelled busy geometry without fabricated document facts, timestamps, or actions.",
       "proof_type": "automated_test_and_visual_evidence",
-      "evidence": "Exact product head a36f3b72f68a00bc04ffe0cf49dbf2d362e6358e: M3 tests prove a labelled polite busy region and no fabricated facts or actions; its tracked full-route visual baseline passes in CI 34323100368.",
+      "evidence": "Exact rebased product head df4bf66bc72c287e6aaadf82f5fce18c766de5af: M3 proves a labelled polite busy region with no fabricated facts or actions; three-engine and tracked visual evidence pass in CI 34332459374.",
       "pass_fail": "pass",
       "verified_by": "codex",
-      "verified_at": "2026-09-09T07:31:36.583768+00:00",
+      "verified_at": "2026-09-09T09:25:29.694965+00:00",
       "notes": "Placeholder geometry is assistive-hidden and pattern-owned."
     },
     {
