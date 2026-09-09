@@ -1624,39 +1624,41 @@ const renderPresence = (
                 </p>
                 <ul class="sk-work-explorer-pattern__presence-list">
                   ${presence.entries.map(
-                  (entry) =>
-                    html`<li>
-                      <a
-                        class="sk-work-explorer-pattern__presence-link"
-                        data-live-focus
-                        href=${entry.href}
-                        aria-label=${`${entry.person} working on ${entry.label}`}
-                      >
-                        <span class="sk-work-explorer-pattern__presence-person">
-                          <sk-entity-marker
-                            size="sm"
-                            shape="circle"
-                            label=${entry.person}
-                            >${entry.person.slice(0, 1)}</sk-entity-marker
+                    (entry) =>
+                      html`<li>
+                        <a
+                          class="sk-work-explorer-pattern__presence-link"
+                          data-live-focus
+                          href=${entry.href}
+                          aria-label=${`${entry.person} working on ${entry.label}`}
+                        >
+                          <span
+                            class="sk-work-explorer-pattern__presence-person"
                           >
-                          <sk-status-indicator tone="success">
-                            <svg
-                              slot="marker"
-                              aria-hidden="true"
-                              viewBox="0 0 12 12"
+                            <sk-entity-marker
+                              size="sm"
+                              shape="circle"
+                              label=${entry.person}
+                              >${entry.person.slice(0, 1)}</sk-entity-marker
                             >
-                              <circle cx="6" cy="6" r="4"></circle>
-                            </svg>
-                            <span
-                              class="sk-work-explorer-pattern__visually-hidden"
-                              >${entry.freshness}</span
-                            >
-                        </sk-status-indicator>
-                        <span>${entry.person} · ${entry.label}</span>
-                      </span>
-                    </a>
-                    </li>`,
-                )}
+                            <sk-status-indicator tone="success">
+                              <svg
+                                slot="marker"
+                                aria-hidden="true"
+                                viewBox="0 0 12 12"
+                              >
+                                <circle cx="6" cy="6" r="4"></circle>
+                              </svg>
+                              <span
+                                class="sk-work-explorer-pattern__visually-hidden"
+                                >${entry.freshness}</span
+                              >
+                            </sk-status-indicator>
+                            <span>${entry.person} · ${entry.label}</span>
+                          </span>
+                        </a>
+                      </li>`,
+                  )}
                 </ul>
               </sk-card>
               <p class="sk-work-explorer-pattern__presence-note">
@@ -2024,18 +2026,18 @@ export const renderWorkExplorer = (
         ${
           currentProjection.pageState === "loading"
             ? html` <div ${ref(mountFilters)}></div>
-                <p
-                  class="sk-work-explorer-pattern__visually-hidden"
-                  role="status"
-                  aria-live="polite"
-                >
-                  Loading Work Packages
-                </p>
                 <sk-grid
                   class="sk-work-explorer-pattern__layout"
                   variant="cols-2"
                   gap="4"
                 >
+                  <p
+                    class="sk-work-explorer-pattern__visually-hidden"
+                    role="status"
+                    aria-live="polite"
+                  >
+                    Loading Work Packages
+                  </p>
                   ${renderLoadingRegion("Loading verified Mission work", "work")}
                   ${renderLoadingRegion("Loading reported and observed context", "context")}
                 </sk-grid>`
