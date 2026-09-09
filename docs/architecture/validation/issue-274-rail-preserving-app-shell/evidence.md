@@ -157,7 +157,7 @@ leaves closing consumer-owned, and does not synthesize trigger focus.
 | `npx nx run elements:analyze`; manifest content check/selftest | Pass; 29 registered elements, 121 documented public members. |
 | official Node 22.23.2 `scripts/measure-elements-sizes.mjs` generation/check | Pass after the rebuilt release graph; SIZES is current. |
 | entries, no-CSS-in-source, adopted-CSS boundary/selftest, CSS hygiene, part ratchet | Pass. |
-| behavior-import guard/selftest | Pass for 31 fixture files and 22 probe rows. No visual baseline was removed. |
+| behavior-import guard/selftest | Pass for 32 fixture files and 22 probe rows. No visual baseline was removed. |
 | story-theme, pattern-composition, gate-wiring/defeat, ADR index and LLM ADR surface checks/selftests | Pass in the complete static/quality lane above. |
 | `node scripts/typecheck-all.mjs`; `npm run quality:all` | Pass for all five typecheck projects and all quality gates. Existing security-plugin warnings remain non-failing and none comes from the changed app-shell surface. Log SHA-256 `bd39324a62afbc85af1be54a45a209aa78c89e5ee2ca72be61657e411f3d4577`. |
 | `npm test` on the post-#290 tree | Pass, 562/562 across 47 files; suite floor node 34 plus browser Chromium 528, zero skipped. Log SHA-256 `f1e2abea6cd27d86deca858bfe5df0669acae2ffced23af49e4afeb37a98f4fb`. |
@@ -230,6 +230,6 @@ T019 is complete on post-#290 product commit `62a39c4d301e2976f24dbc96f092cba583
 using actual headed Chrome UI keystrokes, not CSS zoom, device scale factor, or a resized viewport
 substitute. Black compositor captures were excluded; only the visually inspected Spectacle
 active-window images above are cited. T018's new baselines were adopted only from the inspected CI
-actuals; final exact-head CI is recorded on PR #293 rather than circularly in this commit. T017 is
+actuals; final exact-head CI will be recorded on PR #293 rather than circularly in this commit. T017 is
 recorded by the exact-head independent Codex review artifact and PR evidence rather than claimed
 by the implementer ledger itself.
