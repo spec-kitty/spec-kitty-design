@@ -68,10 +68,10 @@
       "criterion_id": "FR-007",
       "description": "M6a renders supplied bounded Other-artifact links and M6b renders an absent state with no children, current link, or action.",
       "proof_type": "automated_test_and_visual_evidence",
-      "evidence": "Focused present/absent count, href, current-state, and action-absence tests passed; both M6 full-route baselines passed.",
+      "evidence": "Exact product head a36f3b72f68a00bc04ffe0cf49dbf2d362e6358e: M6a and M6b tests prove bounded supplied Other-artifact anchors versus an action-free absent state; both visual baselines pass.",
       "pass_fail": "pass",
       "verified_by": "codex",
-      "verified_at": "2026-09-09T03:41:13Z",
+      "verified_at": "2026-09-09T07:31:40.135855+00:00",
       "notes": "No recursive document tree is present."
     },
     {
