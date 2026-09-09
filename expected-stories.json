@@ -45,7 +45,8 @@
     "#272 ratchets eight additive sk-action-row stories for native route, route+flush, button+flush, selected+flush, selected route, unknown-presentation fail-open, forced-colors comparison, and a focused route+flush LightMode state. On the refreshed train after #271, total moves 361 -> 369; existing stories remain.",
     "#265 ratchets the fourteen Storybook-only Mission Reading routes named as acceptance evidence. Default is the M1 populated Specify desktop; M2 has separate closed-390 and controlled-open drawer stories; M3-M8 retain loading, unavailable, snapshot, optional collection, Ops and three-truth-region states; LightMode, long-content and RTL stay separately addressable. On the final pre-merge train, total moves 391 -> 405; fixture, projector and render helpers are excluded from CSF indexing.",
     "#257 opts in all fifteen sk-copy-field stories, including distinct result, narrow, theme, forced-color, focus, and empty states. On the refreshed train after #292, total moves 405 -> 420.",
-    "#274 ratchets fourteen additive sk-app-shell rail-preserving stories: closed/open, 390/768/1024/1100/1101/wide, long labels, short/tall viewports, reduced motion, forced colors, and LightMode. On the refreshed train after #257, total moves 420 -> 434; all legacy, #254, segmented-choice, collection, action-row, checkbox-choice-group, event-timeline, Mission Reading, and copy-field story ids remain unchanged."
+    "#274 ratchets fourteen additive sk-app-shell rail-preserving stories: closed/open, 390/768/1024/1100/1101/wide, long labels, short/tall viewports, reduced motion, forced colors, and LightMode. On the refreshed train after #257, total moves 420 -> 434; all legacy, #254, segmented-choice, collection, action-row, checkbox-choice-group, event-timeline, Mission Reading, and copy-field story ids remain unchanged.",
+    "#278 ratchets the ten Storybook-only Mission Kanban routes named as acceptance evidence, total 434 -> 444 on the refreshed train after #274. K1-K6 remain separately addressable alongside LightMode, long-content, forced-colors, and reduced-motion evidence; fixture, projector, guard, and render helpers are excluded from CSF indexing."
   ],
   "byElement": {
     "sk-action-row": [
@@ -541,6 +542,18 @@
       "patterns-work-package-views--detail-long-content",
       "patterns-work-package-views--detail-narrow"
     ],
+    "mission-kanban-pattern": [
+      "patterns-mission-kanban--default",
+      "patterns-mission-kanban--k-2-narrow-contained",
+      "patterns-mission-kanban--k-3-detailed-lane-filters",
+      "patterns-mission-kanban--k-4-snapshot-behind-log",
+      "patterns-mission-kanban--k-5-observed-not-yet-pushed",
+      "patterns-mission-kanban--k-6-stable-empty-board",
+      "patterns-mission-kanban--light-mode",
+      "patterns-mission-kanban--long-content",
+      "patterns-mission-kanban--forced-colors",
+      "patterns-mission-kanban--reduced-motion"
+    ],
     "sk-segmented-choice": [
       "components-sksegmentedchoice-html--default",
       "components-sksegmentedchoice-html--second-selected",
@@ -573,5 +586,5 @@
       "patterns-mission-reading--rtl"
     ]
   },
-  "total": 434
+  "total": 444
 }

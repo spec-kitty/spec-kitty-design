@@ -1,0 +1,282 @@
+{
+  "mission_slug": "mission-kanban-pattern-stories-01M22F6C",
+  "mission_number": "",
+  "mission_type": "software-dev",
+  "overall_verdict": "pass",
+  "criteria": [
+    {
+      "criterion_id": "FR-001",
+      "description": "Verify FR-001 is satisfied",
+      "proof_type": "built-story ratchet plus browser test",
+      "evidence": "83b1d8d; expected-stories.json; sk-mission-kanban-pattern.spec.ts [T001/T009] proves exactly ten entries, exactly K1-K6 product states, and four evidence variants.",
+      "pass_fail": "pass",
+      "verified_by": "codex-implementer",
+      "verified_at": "2026-09-09T16:26:39.845330+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-002",
+      "description": "Verify FR-002 is satisfied",
+      "proof_type": "direct mutation and deterministic projection test",
+      "evidence": "83b1d8d; sk-mission-kanban-pattern.spec.ts [T002/T009] directly attempts root/nested mutation, proves deep freeze, prior-projection stability, and repeat equality.",
+      "pass_fail": "pass",
+      "verified_by": "codex-implementer",
+      "verified_at": "2026-09-09T16:26:41.407825+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-003",
+      "description": "Verify FR-003 is satisfied",
+      "proof_type": "fixture guard and native board test",
+      "evidence": "83b1d8d; sk-mission-kanban-pattern.spec.ts [T002/T009,T004] asserts Planned/Doing/For review/Approved/Done exact order.",
+      "pass_fail": "pass",
+      "verified_by": "codex-implementer",
+      "verified_at": "2026-09-09T16:26:42.965572+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-004",
+      "description": "Verify FR-004 is satisfied",
+      "proof_type": "fixture guard test",
+      "evidence": "83b1d8d; sk-mission-kanban-pattern.spec.ts [T002/T009] asserts all ten detailed lanes, order, and 0/2/1/3/2/1/1/4/1/0 counts.",
+      "pass_fail": "pass",
+      "verified_by": "codex-implementer",
+      "verified_at": "2026-09-09T16:26:44.505554+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-005",
+      "description": "Verify FR-005 is satisfied",
+      "proof_type": "pure-projection and card test",
+      "evidence": "83b1d8d; sk-mission-kanban-pattern.spec.ts [T002/T009,T004] asserts the supplied lane-to-stage map and card-level committed lane preservation.",
+      "pass_fail": "pass",
+      "verified_by": "codex-implementer",
+      "verified_at": "2026-09-09T16:26:46.081671+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-006",
+      "description": "Verify FR-006 is satisfied",
+      "proof_type": "browser structure/count test",
+      "evidence": "83b1d8d; sk-mission-kanban-pattern.spec.ts [T004] asserts 15 unique WPs, 3/4/3/1/4 counts, order, lane, agent, route, and optional tracker links.",
+      "pass_fail": "pass",
+      "verified_by": "codex-implementer",
+      "verified_at": "2026-09-09T16:26:47.677326+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-007",
+      "description": "Verify FR-007 is satisfied",
+      "proof_type": "native interaction browser test",
+      "evidence": "83b1d8d; sk-mission-kanban-pattern.spec.ts [T004/T010] proves real anchors, hrefs, Enter, modified click, context menu, and independent tracker controls.",
+      "pass_fail": "pass",
+      "verified_by": "codex-implementer",
+      "verified_at": "2026-09-09T16:26:49.246290+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-008",
+      "description": "Verify FR-008 is satisfied",
+      "proof_type": "accessibility-tree and DOM structure test",
+      "evidence": "83b1d8d; sk-mission-kanban-pattern.spec.ts [T004,T010] proves named sections with headings, direct ordered lists/listitems, and sibling empty copy.",
+      "pass_fail": "pass",
+      "verified_by": "codex-implementer",
+      "verified_at": "2026-09-09T16:26:50.797427+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-009",
+      "description": "Verify FR-009 is satisfied",
+      "proof_type": "responsive overflow browser test",
+      "evidence": "83b1d8d; sk-mission-kanban-pattern.spec.ts [T005,T008/T010] proves region/name/tab-stop only on actual overflow and no dead fitting-board stop.",
+      "pass_fail": "pass",
+      "verified_by": "codex-implementer",
+      "verified_at": "2026-09-09T16:26:52.422315+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-010",
+      "description": "Verify FR-010 is satisfied",
+      "proof_type": "narrow and native zoom evidence",
+      "evidence": "83b1d8d; K2 browser tests plus docs/architecture/validation/issue-278-mission-kanban-zoom/metrics.json prove compact 390px/local overflow and real 100%-200% containment.",
+      "pass_fail": "pass",
+      "verified_by": "codex-implementer",
+      "verified_at": "2026-09-09T16:26:54.016478+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-011",
+      "description": "Verify FR-011 is satisfied",
+      "proof_type": "native filter semantics browser test",
+      "evidence": "83b1d8d; sk-mission-kanban-pattern.spec.ts [T006] proves public disclosure/checkbox-choice composition and details/fieldset/legend/label/input[type=checkbox] semantics.",
+      "pass_fail": "pass",
+      "verified_by": "codex-implementer",
+      "verified_at": "2026-09-09T16:26:55.575583+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-012",
+      "description": "Verify FR-012 is satisfied",
+      "proof_type": "fixed-selection browser test",
+      "evidence": "83b1d8d; sk-mission-kanban-pattern.spec.ts [T006] proves only in_review/blocked checked and fixed WP10/WP05 two-card projection.",
+      "pass_fail": "pass",
+      "verified_by": "codex-implementer",
+      "verified_at": "2026-09-09T16:27:32.766167+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-013",
+      "description": "Verify FR-013 is satisfied",
+      "proof_type": "consumer-ownership browser/source test",
+      "evidence": "83b1d8d; sk-mission-kanban-pattern.spec.ts [T006] proves native toggling does not recalculate the board and Apply/Clear are inert observable story controls.",
+      "pass_fail": "pass",
+      "verified_by": "codex-implementer",
+      "verified_at": "2026-09-09T16:27:34.411595+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-014",
+      "description": "Verify FR-014 is satisfied",
+      "proof_type": "snapshot truth test",
+      "evidence": "83b1d8d; sk-mission-kanban-pattern.spec.ts [T007] proves exactly one supplied same-commit notice, one unchanged SHA, and K1-equivalent board.",
+      "pass_fail": "pass",
+      "verified_by": "codex-implementer",
+      "verified_at": "2026-09-09T16:27:36.048231+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-015",
+      "description": "Verify FR-015 is satisfied",
+      "proof_type": "observed-overlay truth test",
+      "evidence": "83b1d8d; sk-mission-kanban-pattern.spec.ts [T007] proves WP03 remains committed in_progress/Doing while lynn to for_review remains separately observed/not pushed.",
+      "pass_fail": "pass",
+      "verified_by": "codex-implementer",
+      "verified_at": "2026-09-09T16:27:37.660726+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-016",
+      "description": "Verify FR-016 is satisfied",
+      "proof_type": "truth-region and accessibility-tree test",
+      "evidence": "83b1d8d; sk-mission-kanban-pattern.spec.ts [T007,T010] proves separately named reported-live, observed, snapshot, and committed regions.",
+      "pass_fail": "pass",
+      "verified_by": "codex-implementer",
+      "verified_at": "2026-09-09T16:27:39.247980+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-017",
+      "description": "Verify FR-017 is satisfied",
+      "proof_type": "empty-board browser test",
+      "evidence": "83b1d8d; sk-mission-kanban-pattern.spec.ts [T008] proves five ordered zero-count sections/lists, sibling empty copy, honest live-empty message, and no CTA.",
+      "pass_fail": "pass",
+      "verified_by": "codex-implementer",
+      "verified_at": "2026-09-09T16:27:58.563895+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-018",
+      "description": "Verify FR-018 is satisfied",
+      "proof_type": "composition gate plus generated-surface delta",
+      "evidence": "83b1d8d; check-pattern-composition.mjs and zero generated/public diff prove composition from current public surfaces plus native HTML only.",
+      "pass_fail": "pass",
+      "verified_by": "codex-implementer",
+      "verified_at": "2026-09-09T16:28:00.109095+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-019",
+      "description": "Verify FR-019 is satisfied",
+      "proof_type": "CI visual regression plus direct visual inspection and browser zoom evidence",
+      "evidence": "Product lane 66a5c7a (tree 44bcdcbaebaf72577e2b2887c380f88765cc9298); delivery 7b7df41 (tree 5e092c7a338a9323141c820331c407157c301d85). GitHub CI run 34389371446 visual-regression passed 179/179 in no-update mode, including all ten Mission Kanban K1-K6/dark/LightMode/long/forced-colors/reduced-motion baselines copied from and visually inspected against the prior CI artifact. Durable real-browser 100%/200% zoom captures and metrics remain under docs/architecture/validation/issue-278-mission-kanban-zoom/.",
+      "pass_fail": "pass",
+      "verified_by": "codex-implementer",
+      "verified_at": "2026-09-09T18:50:48.016254+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-020",
+      "description": "Verify FR-020 is satisfied",
+      "proof_type": "direct source/test seam plus no-retry lifecycle proof",
+      "evidence": "Lane 66a5c7a: helper exports remain excluded from CSF; package/manifest/wrapper delta is zero. The Storybook manager-channel remount probe observes exact forceRemount/storyFinished events, distinguishes valid iframe replacement by timeOrigin, and proves one active/zero detached observers with old targets disconnected; Playwright 1.62.1 Noble retries=0 repeat-each=20 passed 20/20 and full mission Chromium retries=0 passed 19/19. GitHub CI run 34389371446 full Playwright passed in 14m45s.",
+      "pass_fail": "pass",
+      "verified_by": "codex-implementer",
+      "verified_at": "2026-09-09T18:50:49.665712+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    }
+  ],
+  "negative_invariants": [
+    {
+      "invariant_id": "NI-001",
+      "description": "A public sk-mission-kanban element, package export, wrapper, manifest entry, or application-facing API exists after this mission.",
+      "verification_method": "custom_command",
+      "verification_command": "git -C .worktrees/mission-kanban-pattern-stories-01M22F6C-lane-a diff --quiet origin/train/elements-first...HEAD -- packages/elements/src/index.ts packages/elements/src/elements.ts packages/elements/custom-elements.json packages/elements/vue.d.ts packages/react/src packages/styles/src/index.ts",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: "
+    },
+    {
+      "invariant_id": "NI-002",
+      "description": "A render, story interaction, or projection mutates the root fixture or a previously returned projection.",
+      "verification_method": "custom_command",
+      "verification_command": "cd .worktrees/mission-kanban-pattern-stories-01M22F6C-lane-a && CI=1 npx playwright test apps/storybook/src/tests/sk-mission-kanban-pattern.spec.ts --project=chromium --grep 'fixture guards'",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: Running 1 test using 1 worker\n\u00b7\n  1 passed (2.2s)"
+    },
+    {
+      "invariant_id": "NI-003",
+      "description": "A Work Package route is rendered as a button, depends on a custom activation event, or loses native link behavior.",
+      "verification_method": "custom_command",
+      "verification_command": "cd .worktrees/mission-kanban-pattern-stories-01M22F6C-lane-a && CI=1 npx playwright test apps/storybook/src/tests/sk-mission-kanban-pattern.spec.ts --project=chromium --grep 'route rows preserve native'",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: Running 1 test using 1 worker\n\u00b7\n  1 passed (2.2s)"
+    },
+    {
+      "invariant_id": "NI-004",
+      "description": "Committed state, snapshot mismatch, observed activity, and reported-live activity are merged into one status or allowed to overwrite one another.",
+      "verification_method": "custom_command",
+      "verification_command": "cd .worktrees/mission-kanban-pattern-stories-01M22F6C-lane-a && CI=1 npx playwright test apps/storybook/src/tests/sk-mission-kanban-pattern.spec.ts --project=chromium --grep 'K4 adds|K5 keeps|accessibility trees'",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: Running 3 tests using 2 workers\n\u00b7\u00b7Mission Kanban K1\u2013K6 accessibility-tree evidence {\"default\":\"- navigation \\\"Personal navigation\\\":\\n  - link \\\"Work\\\":\\n    - /url: \\\"#work\\\"\\n    - text: WK\\n  - lin"
+    },
+    {
+      "invariant_id": "NI-005",
+      "description": "The pattern invents a human title, blocked reason, owner, date, estimate, priority, percentage, route, freshness result, or backend capability.",
+      "verification_method": "custom_command",
+      "verification_command": "cd .worktrees/mission-kanban-pattern-stories-01M22F6C-lane-a && CI=1 npx playwright test apps/storybook/src/tests/sk-mission-kanban-pattern.spec.ts --project=chromium --grep 'fixture guards'",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: Running 1 test using 1 worker\n\u00b7\n  1 passed (7.0s)"
+    },
+    {
+      "invariant_id": "NI-006",
+      "description": "The document scrolls horizontally, focus is clipped, or a fitting board receives a dead overflow-region tab stop.",
+      "verification_method": "custom_command",
+      "verification_command": "cd .worktrees/mission-kanban-pattern-stories-01M22F6C-lane-a && CI=1 npx playwright test apps/storybook/src/tests/sk-mission-kanban-pattern.spec.ts --project=chromium --project=firefox --grep 'K2 owns|K2 CSS|long-content CSS|fitting K6|overflowing K6|long content remains'",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: Running 12 tests using 2 workers\n\u00b7\u00b7\u00b7\u00b7\u00b7\u00b7\u00b7\u00b7\u00b7\u00b7\u00b7\u00b7\n  12 passed (13.2s)"
+    },
+    {
+      "invariant_id": "NI-007",
+      "description": "Native section/list, details, fieldset/legend, label/checkbox, link, heading, or empty-state relationships are replaced with simulated semantics.",
+      "verification_method": "custom_command",
+      "verification_command": "cd .worktrees/mission-kanban-pattern-stories-01M22F6C-lane-a && CI=1 npx playwright test apps/storybook/src/tests/sk-mission-kanban-pattern.spec.ts --project=chromium --project=firefox --grep 'K1 has the exact native|K3 exposes native|accessibility trees'",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: Running 6 tests using 2 workers\n\u00b7\u00b7Mission Kanban K1\u2013K6 accessibility-tree evidence {\"default\":\"- navigation \\\"Personal navigation\\\":\\n  - link \\\"Work\\\":\\n    - /url: \\\"#work\\\"\\n    - text: WK\\n  - lin"
+    },
+    {
+      "invariant_id": "NI-008",
+      "description": "Pattern CSS reaches private component internals, copies owned component selectors, injects runtime CSS, or adds raw design values where authoritative tokens exist.",
+      "verification_method": "custom_command",
+      "verification_command": "cd .worktrees/mission-kanban-pattern-stories-01M22F6C-lane-a && node scripts/check-pattern-composition.mjs && node scripts/check-no-css-in-source.mjs && npm run quality:stylelint",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: \u2705 Pattern composition: 6 fixture(s), 157 inline CSS rule(s), 20 composed element tag(s), every ::part() inside the 134-part public ratchet, no reach-through, no duplicated component CSS.\n\u2705 No CSS in h"
+    },
+    {
+      "invariant_id": "NI-009",
+      "description": "Any implementation or mission artifact for #279-#284 is created or modified.",
+      "verification_method": "custom_command",
+      "verification_command": "cd .worktrees/mission-kanban-pattern-stories-01M22F6C-lane-a && test -z \"$(git diff --name-only origin/train/elements-first...HEAD | rg -i '(issue-27[9]|issue-28[0-4]|work-package-detail|repository-ops-timeline)' || true)\"",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: "
+    }
+  ]
+}

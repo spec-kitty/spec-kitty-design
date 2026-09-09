@@ -1502,3 +1502,58 @@ test('Mission Reading long content CSS zoom stress — visual baseline', async (
     timeout: 20000,
   });
 });
+
+type MissionKanbanVisualStoryId =
+  | 'default'
+  | 'k-2-narrow-contained'
+  | 'k-3-detailed-lane-filters'
+  | 'k-4-snapshot-behind-log'
+  | 'k-5-observed-not-yet-pushed'
+  | 'k-6-stable-empty-board'
+  | 'light-mode'
+  | 'long-content'
+  | 'forced-colors'
+  | 'reduced-motion';
+
+const missionKanbanVisuals = [
+  { id: 'default', width: 1600, height: 1000, name: 'mission-kanban-k1-populated-desktop.png' },
+  { id: 'k-2-narrow-contained', width: 390, height: 844, name: 'mission-kanban-k2-narrow-contained.png' },
+  { id: 'k-3-detailed-lane-filters', width: 1440, height: 1100, name: 'mission-kanban-k3-detailed-lane-filters.png' },
+  { id: 'k-4-snapshot-behind-log', width: 1600, height: 1100, name: 'mission-kanban-k4-snapshot-behind-log.png' },
+  { id: 'k-5-observed-not-yet-pushed', width: 1600, height: 1100, name: 'mission-kanban-k5-observed-not-yet-pushed.png' },
+  { id: 'k-6-stable-empty-board', width: 1600, height: 1000, name: 'mission-kanban-k6-stable-empty-board.png' },
+  { id: 'light-mode', width: 1600, height: 1000, name: 'mission-kanban-light-mode.png' },
+  { id: 'long-content', width: 780, height: 1200, name: 'mission-kanban-long-content.png' },
+  { id: 'forced-colors', width: 1600, height: 1100, name: 'mission-kanban-forced-colors.png', forcedColors: true },
+  { id: 'reduced-motion', width: 1600, height: 1000, name: 'mission-kanban-reduced-motion.png', reducedMotion: true },
+] as const satisfies ReadonlyArray<{
+  id: MissionKanbanVisualStoryId;
+  width: number;
+  height: number;
+  name: `mission-kanban-${string}.png`;
+  forcedColors?: boolean;
+  reducedMotion?: boolean;
+}>;
+
+for (const visual of missionKanbanVisuals) {
+  test(`Mission Kanban ${visual.id} — full pattern baseline`, async ({ page }) => {
+    if ('forcedColors' in visual && visual.forcedColors) {
+      await page.emulateMedia({ forcedColors: 'active' });
+    }
+    if ('reducedMotion' in visual && visual.reducedMotion) {
+      await page.emulateMedia({ reducedMotion: 'reduce' });
+    }
+    await page.setViewportSize({ width: visual.width, height: visual.height });
+    await page.goto(`/iframe.html?id=patterns-mission-kanban--${visual.id}&viewMode=story`);
+    const root = page.locator('[data-mission-kanban-pattern]');
+    await root.waitFor({ state: 'visible', timeout: 20000 });
+    await expect(root).toHaveAttribute('data-render-complete', 'true');
+    await expect(root).toHaveAttribute('data-play-proof', 'passed');
+    await page.evaluate(() => document.fonts.ready);
+    await expect(root).not.toBeEmpty();
+    await expect(root).toHaveScreenshot(visual.name, {
+      threshold: 0.02,
+      maxDiffPixelRatio: 0.02,
+    });
+  });
+}
