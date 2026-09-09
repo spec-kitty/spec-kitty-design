@@ -268,10 +268,10 @@
       "criterion_id": "C-007",
       "description": "The work is coordinated only through landed train code and targets train/elements-first, never main.",
       "proof_type": "git_and_dependency_audit",
-      "evidence": "Issues #254, #256, and #264 are landed on train; #255 remains an independently owned parallel peer; PR #292 targets train/elements-first at fb424e83c827a586038d7a2a977b946b193192fb and never main.",
+      "evidence": "Issues #254, #256, and #264 are landed; #255 remains independently owned; landed peer #273 was incorporated only through train 674ebe23bea974eb8bef2dbd64f4481e5f94d212 and the regenerated 405-story ratchet; PR #292 targets train/elements-first, never main.",
       "pass_fail": "pass",
       "verified_by": "codex",
-      "verified_at": "2026-09-09T07:32:02.622080+00:00",
+      "verified_at": "2026-09-09T09:25:59.629770+00:00",
       "notes": "Remote train is rechecked again immediately before publication and merge."
     }
   ],
