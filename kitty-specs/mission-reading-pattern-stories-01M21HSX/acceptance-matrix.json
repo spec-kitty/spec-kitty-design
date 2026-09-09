@@ -178,10 +178,10 @@
       "criterion_id": "NFR-005",
       "description": "Focused and required repository quality, type, build, Storybook, axe, browser, visual, mutation, generated, package, and composition gates pass.",
       "proof_type": "aggregate_automated_gates",
-      "evidence": "Quality/style/HTML gates green; five typechecks green; 45 Vitest files/517 tests; focused browser 37/2; visuals 18/18; mutation authority 223/223 including isolated unrelated transient rerun; all generators/checks, packs, exports, sizes, SRI, and offline checks green.",
+      "evidence": "CI run 34323100368 is fully green at exact product head a36f3b72f68a00bc04ffe0cf49dbf2d362e6358e: quality, type, generated, composition, Storybook, axe, three-engine Playwright, visual regression, security, release/package/offline, and 20m45 mutation authority all passed.",
       "pass_fail": "pass",
       "verified_by": "codex",
-      "verified_at": "2026-09-09T03:41:13Z",
+      "verified_at": "2026-09-09T07:39:54.192074+00:00",
       "notes": "Host WebKit libraries were unavailable; the official Playwright Noble container supplied the pinned WebKit evidence."
     },
     {
