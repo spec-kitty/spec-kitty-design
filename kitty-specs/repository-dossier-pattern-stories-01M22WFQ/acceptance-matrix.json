@@ -168,7 +168,7 @@
       "criterion_id": "NFR-002",
       "description": "Every required story has zero WCAG 2.1 AA violations",
       "proof_type": "automated_test",
-      "evidence": "The focused C/F suite invokes axe for every one of the 18 Dossier story IDs. The non-vacuous repository gate then rendered and scanned all 561 Storybook stories with zero WCAG 2.1 AA violations after its 50-shape self-test passed.",
+      "evidence": "The focused Chromium/Firefox suite invokes axe for every one of the 18 Dossier story IDs. The non-vacuous repository gate declared 462 expected story IDs, then rendered and scanned all 571 Storybook stories with zero WCAG 2.1 AA violations after its 50-shape self-test passed.",
       "pass_fail": "pass",
       "verified_by": "codex implementation seat; independent Codex review seats",
       "verified_at": "2026-09-09T16:54:11Z",
@@ -228,7 +228,7 @@
       "criterion_id": "NFR-008",
       "description": "Derived artifacts and distribution outputs remain generator-clean",
       "proof_type": "automated_test",
-      "evidence": "The story ratchet intentionally moves to 452 and the three added baselines are Playwright-generated. Manifest, React-wrapper, styles-only barrel, Vue type/template, CSS-module, markup, part-ratchet, package graph, packed-Vue, size, and offline-load drift gates all pass.",
+      "evidence": "The story ratchet intentionally moves from the rebased train's 444 IDs to 462 by adding exactly 18 Dossier IDs, and all 18 added baselines are Playwright-generated. Manifest, React-wrapper, styles-only barrel, Vue type/template, CSS-module, markup, part-ratchet, package graph, packed-Vue, size, and offline-load drift gates all pass.",
       "pass_fail": "pass",
       "verified_by": "codex implementation seat; independent Codex review seats",
       "verified_at": "2026-09-09T16:54:11Z",
@@ -372,7 +372,7 @@
       "pass_fail": "pass",
       "verified_by": "codex implementation seat; independent Codex review seats",
       "verified_at": "2026-09-09T16:00:00Z",
-      "notes": "The repository-wide story ratchet moves 449 to 452."
+      "notes": "The repository-wide story ratchet moves from the rebased train's 444 IDs to 462 by adding exactly 18 Dossier IDs."
     },
     {
       "criterion_id": "SC-002",
@@ -398,7 +398,7 @@
       "criterion_id": "SC-004",
       "description": "Axe reports zero WCAG 2.1 AA violations for every required story",
       "proof_type": "automated_test",
-      "evidence": "The focused suite invokes axe for all 18 story IDs in each required browser. The non-vacuous repository gate then rendered and scanned all 561 Storybook stories with zero WCAG 2.1 AA violations after its 50-shape self-test passed.",
+      "evidence": "The focused suite invokes axe for all 18 story IDs in each required browser. The non-vacuous repository gate declared 462 expected story IDs, then rendered and scanned all 571 Storybook stories with zero WCAG 2.1 AA violations after its 50-shape self-test passed.",
       "pass_fail": "pass",
       "verified_by": "codex implementation seat; independent Codex review seats",
       "verified_at": "2026-09-09T16:00:00Z",

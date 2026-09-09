@@ -99,11 +99,11 @@ this committed ledger cannot contain the hash of the commit that contains it:
 
 - `npm test`: 48 files and 582 tests passed; both required lanes were non-empty.
 - `node scripts/measure-suite-time.mjs`: 582 tests passed in 15.3 seconds against a 40-second ceiling.
-- `node scripts/build-storybook-with-budget.mjs`: production Storybook built in 9.31 seconds against a 180-second ceiling.
+- `node scripts/build-storybook-with-budget.mjs`: production Storybook built in 11.19 seconds against a 180-second ceiling.
 - Focused Playwright: 35 applicable Chromium/Firefox cases passed with one intended Firefox skip; all 18 Dossier visual baselines passed in Chromium after adopting runner-authoritative images.
-- Full Playwright: 1,078 cases passed with 44 intended skips; the four port/demo assembly failures were rerun under the repository's native assembled surface and passed 4/4.
-- `node scripts/gate-selftest.mjs`: all 50 render-assertion shapes passed; `node scripts/run-axe-storybook.js`: all 561 rendered stories had zero WCAG 2.1 AA violations.
-- `node scripts/suite-selftest.mjs`: all 237 mutations produced their named red against a green 548-assertion baseline in 937.3 seconds; `--selftest` passed all 10 guards in 67 seconds.
+- Full Playwright: 1,657 cases passed with 88 intended skips on the exact rebased product SHA.
+- `node scripts/gate-selftest.mjs`: all 50 render-assertion shapes passed; `node scripts/run-axe-storybook.js`: all 462 declared story IDs and 571 rendered stories completed with zero WCAG 2.1 AA violations.
+- `node scripts/suite-selftest.mjs`: all 237 mutations produced their named red against green 34-node, 548-Chromium, and 548-WebKit behavior lanes; `--selftest` passed all 10 guards.
 - Quality, five-project typecheck, generated React/Vue/CSS/markup/story/manifest/part gates, composition boundaries, workflow/ADR gates, security, lockfile, pinned Actions, release graph, packed Vue declarations, size report, and offline loading all passed.
 
 Independent Codex architecture and debugger reviews approved the last product/baseline head
