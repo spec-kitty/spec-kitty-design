@@ -486,10 +486,45 @@
     }
   ],
   "negative_invariants": [
-    "A Repository Dossier story must never invent Team Kitty discovery, routing, polling, timestamps, truth inference, progress arithmetic, or command execution.",
-    "A terminal or pending repository state must never expose completed snapshot facts or actions.",
-    "A tracker label without a supplied safe HTTP(S) destination must remain static text.",
-    "A merged Mission must not remain in the unmerged navigation shortcut list.",
-    "A visual baseline is not accepted until its individual approved-state comparison and cross-screen family review are recorded."
+    {
+      "invariant_id": "NI-001",
+      "description": "A Repository Dossier story must never invent Team Kitty discovery, routing, polling, timestamps, truth inference, progress arithmetic, or command execution.",
+      "verification_method": "custom_command",
+      "verification_command": "npx playwright test apps/storybook/src/tests/sk-repository-dossier-pattern.spec.ts --project=chromium --project=firefox --grep \"source is a Storybook-only public composition\"",
+      "result": "confirmed_absent",
+      "evidence": "The focused source-boundary check passed in Chromium and Firefox at 062729313eb89eb22b21c7cfa474757be864e5d4; independent Codex review found no runtime API or Team Kitty application behavior."
+    },
+    {
+      "invariant_id": "NI-002",
+      "description": "A terminal or pending repository state must never expose completed snapshot facts or actions.",
+      "verification_method": "custom_command",
+      "verification_command": "npx playwright test apps/storybook/src/tests/sk-repository-dossier-pattern.spec.ts --project=chromium --project=firefox --grep \"D5, D7, and D8 keep terminal, pending, and completed-empty truth distinct\"",
+      "result": "confirmed_absent",
+      "evidence": "The D5/D7/D8 truth-distinction check passed in Chromium and Firefox at 062729313eb89eb22b21c7cfa474757be864e5d4."
+    },
+    {
+      "invariant_id": "NI-003",
+      "description": "A tracker label without a supplied safe HTTP(S) destination must remain static text.",
+      "verification_method": "custom_command",
+      "verification_command": "npx playwright test apps/storybook/src/tests/sk-repository-dossier-pattern.spec.ts --project=chromium --project=firefox --grep \"safe tracker destinations are native links while unsafe and absent destinations stay static\"",
+      "result": "confirmed_absent",
+      "evidence": "The safe, unsafe, and absent tracker-destination check passed in Chromium and Firefox at 062729313eb89eb22b21c7cfa474757be864e5d4."
+    },
+    {
+      "invariant_id": "NI-004",
+      "description": "A merged Mission must not remain in the unmerged navigation shortcut list.",
+      "verification_method": "custom_command",
+      "verification_command": "npx playwright test apps/storybook/src/tests/sk-repository-dossier-pattern.spec.ts --project=chromium --project=firefox --grep \"D4 presents supplied branch copies and merged fact without collapsing them\"",
+      "result": "confirmed_absent",
+      "evidence": "The D4 merged-state and navigation-omission check passed in Chromium and Firefox at 062729313eb89eb22b21c7cfa474757be864e5d4."
+    },
+    {
+      "invariant_id": "NI-005",
+      "description": "A visual baseline is not accepted until its individual approved-state comparison and cross-screen family review are recorded.",
+      "verification_method": "custom_command",
+      "verification_command": "rg -q \"Cross-screen family.*Pass\" kitty-specs/repository-dossier-pattern-stories-01M22WFQ/implementation-evidence.md",
+      "result": "confirmed_absent",
+      "evidence": "implementation-evidence.md records Pass for D1, D2, D4-D8 and the cross-screen family; independent Codex visual review approved the corrected 18-baseline family at ae96c08ece00f3a7007fda17cd831bcede662d41."
+    }
   ]
 }
