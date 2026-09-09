@@ -188,10 +188,10 @@
       "criterion_id": "NFR-006",
       "description": "Final-train regeneration, verification, visual evidence, and independent review all cite the exact publishable head.",
       "proof_type": "git_and_review_audit",
-      "evidence": "Exact rebased product head df4bf66bc72c287e6aaadf82f5fce18c766de5af is linear on train 674ebe23bea974eb8bef2dbd64f4481e5f94d212; CI 34332459374 passes; independent reviews approved product behavior and final exact-head squad review remains the merge gate.",
+      "evidence": "Corrective product head b68f84d28715ca8ef551f40cda24f3a13e054f1e is linear on train 57d1b083a6799fc5ef7f2cff75493a7f64fd59a3; CI 34343137694 passes; independent contract review approved the correction and the remaining exact-head lenses are the merge gate.",
       "pass_fail": "pass",
       "verified_by": "codex",
-      "verified_at": "2026-09-09T09:25:49.295574+00:00",
+      "verified_at": "2026-09-09T11:25:37.287194+00:00",
       "notes": "A final remote-train check and required pre-merge exact-PR-head review remain merge-gate actions."
     },
     {
