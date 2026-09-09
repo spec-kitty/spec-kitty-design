@@ -238,10 +238,10 @@
       "criterion_id": "C-004",
       "description": "Loading is presentation-only and invents no document fact, action, published loader component, or completion state.",
       "proof_type": "automated_test_and_diff_audit",
-      "evidence": "Exact rebased product head df4bf66bc72c287e6aaadf82f5fce18c766de5af: M3 asserts absent facts/actions and assistive-hidden presentation geometry; no loader component, state model, or completion behavior exists.",
+      "evidence": "Corrective product head b68f84d28715ca8ef551f40cda24f3a13e054f1e: M3 asserts no facts/actions, status outside the busy subtree, and the token-derived 512px geometry floor; no loader component, state model, or completion behavior exists.",
       "pass_fail": "pass",
       "verified_by": "codex",
-      "verified_at": "2026-09-09T09:25:55.767121+00:00",
+      "verified_at": "2026-09-09T11:25:43.397348+00:00",
       "notes": "The polite busy region is explicitly labelled."
     },
     {
