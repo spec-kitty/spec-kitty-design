@@ -40,6 +40,7 @@ export * from './breadcrumbs/index';
 export * from './button/index';
 export * from './card/index';
 export * from './check-bullet/index';
+export * from './checkbox-choice-group/index';
 export * from './collection/index';
 export * from './context-nav/index';
 export * from './data-table/index';

@@ -1,0 +1,75 @@
+work_packages:
+  - id: WP01
+    title: "Native checkbox-choice-group styles and conformance evidence"
+    dependencies: []
+    owned_files:
+      - "packages/styles/src/checkbox-choice-group/**"
+      - "packages/styles/package.json"
+      - "packages/styles/src/index.ts"
+      - "apps/storybook/src/tests/sk-checkbox-choice-group.spec.ts"
+      - "apps/storybook/src/tests/visual.spec.ts"
+      - "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-checkbox-choice-group-*.png"
+      - "docs/design-system/using-components.md"
+      - "docs/architecture/validation/issue-277-checkbox-choice-group-zoom/**"
+      - "expected-stories.json"
+      - "suite-budget.json"
+    requirement_refs:
+      - FR-001
+      - FR-002
+      - FR-003
+      - FR-004
+      - FR-005
+      - FR-006
+      - FR-007
+      - FR-008
+      - FR-009
+      - FR-010
+      - FR-011
+      - FR-012
+      - FR-013
+      - FR-014
+      - FR-015
+      - FR-016
+      - NFR-001
+      - NFR-002
+      - NFR-003
+      - NFR-004
+      - NFR-005
+      - NFR-006
+      - NFR-007
+      - NFR-008
+      - C-001
+      - C-002
+      - C-003
+      - C-004
+      - C-005
+      - C-006
+      - C-007
+      - C-008
+      - C-009
+      - C-010
+    subtasks:
+      - T001
+      - T002
+      - T003
+      - T004
+      - T005
+      - T006
+      - T007
+      - T008
+    create_intent:
+      - "packages/styles/src/checkbox-choice-group/sk-checkbox-choice-group.css"
+      - "packages/styles/src/checkbox-choice-group/sk-checkbox-choice-group-default.html"
+      - "packages/styles/src/checkbox-choice-group/sk-checkbox-choice-group-none.html"
+      - "packages/styles/src/checkbox-choice-group/sk-checkbox-choice-group-zero-counts.html"
+      - "packages/styles/src/checkbox-choice-group/sk-checkbox-choice-group-disabled.html"
+      - "packages/styles/src/checkbox-choice-group/sk-checkbox-choice-group-long.html"
+      - "packages/styles/src/checkbox-choice-group/index.ts"
+      - "packages/styles/src/checkbox-choice-group/sk-checkbox-choice-group-html.stories.ts"
+      - "apps/storybook/src/tests/sk-checkbox-choice-group.spec.ts"
+      - "docs/architecture/validation/issue-277-checkbox-choice-group-zoom/README.md"
+    prompt_file: "tasks/WP01-native-checkbox-choice-group-styles-and-conformance-evidence.md"
+    agent_profile: "frontend-freddy"
+    role: "implementer"
+    agent: "codex"
+    model: ""

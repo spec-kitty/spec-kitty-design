@@ -687,6 +687,93 @@ test('SK-form-select forced colors — visual baseline', async ({ page }) => {
   });
 });
 
+const checkboxChoiceGroupStory = async (
+  page: Page,
+  id: string,
+  viewport: { width: number; height: number } = { width: 720, height: 640 },
+): Promise<Locator> => {
+  await page.setViewportSize(viewport);
+  await page.goto(`/iframe.html?id=form-skcheckboxchoicegroup-html--${id}&viewMode=story`);
+  const target = page.locator('[data-checkbox-choice-group-story-frame]').first();
+  await target.waitFor({ state: 'visible', timeout: 20000 });
+  await expect(target.locator('fieldset.sk-checkbox-choice-group')).toBeVisible();
+  return target;
+};
+
+const checkboxChoiceGroupVisuals = [
+  [
+    'default-dark',
+    'sk-checkbox-choice-group-default-dark.png',
+    { width: 1024, height: 720 },
+  ],
+  [
+    'light-mode',
+    'sk-checkbox-choice-group-light.png',
+    { width: 1024, height: 720 },
+  ],
+  [
+    'k-3-detailed-lane-filters',
+    'sk-checkbox-choice-group-k3.png',
+    { width: 1024, height: 800 },
+  ],
+  [
+    'narrow',
+    'sk-checkbox-choice-group-narrow.png',
+    { width: 390, height: 844 },
+  ],
+  [
+    'long-content',
+    'sk-checkbox-choice-group-long-content.png',
+    { width: 390, height: 844 },
+  ],
+  [
+    'disabled-choices',
+    'sk-checkbox-choice-group-disabled.png',
+    { width: 720, height: 480 },
+  ],
+] as const;
+
+for (const [id, snapshot, viewport] of checkboxChoiceGroupVisuals) {
+  test(`SK-checkbox-choice-group ${id} — visual baseline`, async ({ page }) => {
+    const target = await checkboxChoiceGroupStory(page, id, viewport);
+    const geometry = await page.evaluate(() => {
+      const scroller = document.scrollingElement ?? document.documentElement;
+      return {
+        documentScrollWidth: scroller.scrollWidth,
+        viewportWidth: document.documentElement.clientWidth,
+      };
+    });
+    expect(geometry.documentScrollWidth).toBeLessThanOrEqual(geometry.viewportWidth);
+    await expect(target).toHaveScreenshot(snapshot, {
+      threshold: 0.02,
+      maxDiffPixelRatio: 0.02,
+    });
+  });
+}
+
+test('SK-checkbox-choice-group focus — visual baseline', async ({ page }) => {
+  const target = await checkboxChoiceGroupStory(page, 'focus-states');
+  const control = target.locator('.sk-checkbox-choice-group__control:not(:checked)').first();
+  await control.focus();
+  await expect(control).toBeFocused();
+  await expect(target).toHaveScreenshot('sk-checkbox-choice-group-focus.png', {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+  });
+});
+
+test('SK-checkbox-choice-group forced colors — visual baseline', async ({ page }) => {
+  await page.emulateMedia({ forcedColors: 'active' });
+  const target = await checkboxChoiceGroupStory(page, 'forced-colors');
+  const control = target.locator('.sk-checkbox-choice-group__control:not(:disabled)').last();
+  await control.focus();
+  await expect(control).toBeFocused();
+  await expect(target).toHaveScreenshot('sk-checkbox-choice-group-forced-colors.png', {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+  });
+});
+
 const segmentedChoiceStory = async (
   page: Page,
   id: string,

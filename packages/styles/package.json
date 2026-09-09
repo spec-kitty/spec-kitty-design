@@ -18,6 +18,7 @@
     "./button/*": "./dist/button/*",
     "./card/*": "./dist/card/*",
     "./check-bullet/*": "./dist/check-bullet/*",
+    "./checkbox-choice-group/*": "./dist/checkbox-choice-group/*",
     "./collection/*": "./dist/collection/*",
     "./context-nav/*": "./dist/context-nav/*",
     "./context-sidebar/*": "./dist/context-sidebar/*",

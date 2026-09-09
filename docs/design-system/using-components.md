@@ -12,10 +12,11 @@ so far — as **custom elements** in `@spec-kitty/elements`. Both require `@spec
 Several of the catalogue's component packages are CSS only by a recorded decision — `form-field`,
 (#176) `facts`, `disclosure`, `data-table`, `empty-state`, `skip-link`, (#210) `progress`, and
 (#209) `workflow-board` and `workflow-lane`, (#211) `form-select`, and (#213) `breadcrumbs`,
-`prose`, and `event-timeline`. See
+`prose`, and `event-timeline`, plus (#277) `checkbox-choice-group`. See
 ADR-10, *form-field is deliberately styles-only* and *Styles-only components are a class, not a
 fixed exception count*. These families ship classes applied to real semantic HTML the consumer authors
-— `<dl>`, `<details>`, `<table>`, a plain block, `<a>`, `<progress>`, `<section>`, `<ol>`, and `<select>`
+— `<dl>`, `<details>`, `<table>`, a plain block, `<a>`, `<progress>`, `<section>`, `<ol>`, `<select>`,
+and native `<fieldset>`/`<legend>`/`<label>`/checkbox relationships
 — and no `sk-*` custom element wraps any of them: light-DOM native semantics such as list, table, and
 label associations are exactly what a wrapper element would break.
 Segmented choice is separately styles-only by #270: its accessibly named native button group,
@@ -1380,6 +1381,56 @@ the options and selected value, listen for `change`, and own application filteri
 
 Import the CSS independently from `@spec-kitty/styles/form-select/sk-form-select.css`; generated
 fixture markup remains available from the root `@spec-kitty/styles` TypeScript export.
+
+---
+
+## Checkbox choice group
+
+Apply the styles-only checkbox choice group family to native light-DOM form markup. A real
+`fieldset` and `legend` name the group, and every real `label` contains its visible native checkbox,
+label text, and optional metadata:
+
+```html
+<fieldset class="sk-checkbox-choice-group">
+  <legend class="sk-checkbox-choice-group__legend">Notification topics</legend>
+  <div class="sk-checkbox-choice-group__options">
+    <label class="sk-checkbox-choice-group__choice">
+      <input
+        class="sk-checkbox-choice-group__control"
+        type="checkbox"
+        name="topic"
+        value="releases"
+      />
+      <span class="sk-checkbox-choice-group__label">Releases</span>
+      <span class="sk-checkbox-choice-group__metadata">6</span>
+    </label>
+  </div>
+</fieldset>
+```
+
+The exact public selectors are `.sk-checkbox-choice-group`,
+`.sk-checkbox-choice-group__legend`, `.sk-checkbox-choice-group__options`,
+`.sk-checkbox-choice-group__choice`, `.sk-checkbox-choice-group__control`,
+`.sk-checkbox-choice-group__label`, and `.sk-checkbox-choice-group__metadata`. Metadata is optional
+ordinary text; zero has no implicit disabled or availability meaning. The intrinsic options grid
+adapts to its container and reaches one column when narrow, while long legends, labels, and metadata
+wrap inside their own boxes.
+
+The browser owns focus, Space and label activation, checkedness mechanics, native disabled
+behavior, form submission, and reset. Consumers own names, values, order, labels, checked and
+disabled state, metadata and counts, lane vocabulary, filtering, Apply/Clear behavior, persistence,
+and query parameters. This family provides no custom element, JavaScript, validation API,
+disclosure, or custom checkbox glyph.
+
+Import the CSS from
+`@spec-kitty/styles/checkbox-choice-group/sk-checkbox-choice-group.css`; generated fixture markup is
+available from the root TypeScript export. The stylesheet depends on `--sk-bg-pill`,
+`--sk-border-default`, `--sk-border-focus`, `--sk-border-strong`, `--sk-border-width-1`,
+`--sk-border-width-2`, `--sk-border-width-4`, `--sk-color-yellow`, `--sk-fg-body`,
+`--sk-fg-default`, `--sk-fg-muted`, `--sk-font-mono`, `--sk-font-sans`, `--sk-radius-sm`,
+`--sk-space-1`, `--sk-space-2`, `--sk-space-3`, `--sk-space-4`, `--sk-space-6`, `--sk-space-8`,
+`--sk-space-12`, `--sk-surface-card`, `--sk-surface-muted`, `--sk-text-base`, `--sk-text-sm`,
+`--sk-text-xs`, `--sk-weight-medium`, `--sk-weight-normal`, and `--sk-weight-semibold`.
 
 ---
 
