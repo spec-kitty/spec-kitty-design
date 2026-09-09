@@ -148,10 +148,10 @@
       "criterion_id": "NFR-002",
       "description": "Desktop, intermediate, threshold-edge, 390px, and 200% zoom presentations have no page overflow and keep narrow gutters/table containment.",
       "proof_type": "browser_test_and_manual_qa",
-      "evidence": "Exact product head a36f3b72f68a00bc04ffe0cf49dbf2d362e6358e: tests cover 1440, 900, 861/860/859, 390, 240, long values, and CSS zoom; genuine Chrome 200% zoom retained containment and 390 CSS-pixel viewport.",
+      "evidence": "Exact rebased product head df4bf66bc72c287e6aaadf82f5fce18c766de5af: coverage spans 1440, 900, 861/860/859, 390, 240, long values, CSS zoom, and genuine Chrome 200% zoom; three-engine CI 34332459374 passes.",
       "pass_fail": "pass",
       "verified_by": "codex",
-      "verified_at": "2026-09-09T07:31:49.555323+00:00",
+      "verified_at": "2026-09-09T09:25:44.009656+00:00",
       "notes": "Only named local table scrollers overflow."
     },
     {
