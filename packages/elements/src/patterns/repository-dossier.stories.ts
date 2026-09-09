@@ -78,6 +78,7 @@ const patternStyles = html`<style>
   }
 
   .sk-repository-dossier-pattern__drawer-trigger {
+    flex: 0 0 auto;
     min-block-size: var(--sk-space-9);
     padding-block: var(--sk-space-2);
     padding-inline: var(--sk-space-3);
@@ -87,6 +88,7 @@ const patternStyles = html`<style>
     border-radius: var(--sk-radius-sm);
     font: inherit;
     font-weight: var(--sk-weight-semibold);
+    white-space: nowrap;
     cursor: pointer;
   }
 

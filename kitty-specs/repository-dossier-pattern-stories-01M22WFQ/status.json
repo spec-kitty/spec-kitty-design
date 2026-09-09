@@ -33,7 +33,8 @@
         "Implementation and final governance-only deltas are complete; exact product and acceptance evidence are recorded in review-cycle-4.md.",
         "Independent Codex review evidence is recorded in review-cycle-4.md.",
         "Independent Codex product, visual, provenance, and acceptance-schema reviews all approved; no findings remain.",
-        "Independent Codex review rejected the wrapped 390px compact trigger label."
+        "Independent Codex review rejected the wrapped 390px compact trigger label.",
+        "Fixing compact trigger sizing and adding a 390px no-wrap browser assertion."
       ],
       "provider": "__resolved_provider_absent__",
       "review": null,

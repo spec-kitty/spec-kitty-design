@@ -635,6 +635,20 @@ test("390px layout keeps exact gutters, reflow, drawer, and focus inside the vie
   expect(commandBox!.x + commandBox!.width).toBeLessThanOrEqual(374);
 
   const trigger = root.getByRole("button", { name: "Repository navigation" });
+  expect(
+    await trigger.evaluate((element) => {
+      const range = document.createRange();
+      range.selectNodeContents(element);
+      const lineTops = new Set(
+        Array.from(range.getClientRects(), (rect) => Math.round(rect.top)),
+      );
+      return {
+        flexShrink: getComputedStyle(element).flexShrink,
+        lineCount: lineTops.size,
+        whiteSpace: getComputedStyle(element).whiteSpace,
+      };
+    }),
+  ).toEqual({ flexShrink: "0", lineCount: 1, whiteSpace: "nowrap" });
   await trigger.focus();
   await expect(trigger).toBeFocused();
   const focusBox = await trigger.boundingBox();
