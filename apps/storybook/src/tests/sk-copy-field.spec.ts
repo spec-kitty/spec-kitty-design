@@ -373,13 +373,24 @@ test('manual fallback makes exactly one selection attempt per activation', async
   const host = await story(page);
   await host.evaluate((element) => {
     const state = globalThis as typeof globalThis & {
-      __copyFieldSelectionCounts: { remove: number; add: number };
+      __copyFieldSelectionAttempt: { exactBounds: boolean; set: number };
     };
-    state.__copyFieldSelectionCounts = { remove: 0, add: 0 };
+    state.__copyFieldSelectionAttempt = { exactBounds: false, set: 0 };
     const value = element.shadowRoot!.querySelector('[part="value"]') as HTMLElement;
     const selection = {
-      removeAllRanges: () => { state.__copyFieldSelectionCounts.remove += 1; },
-      addRange: () => { state.__copyFieldSelectionCounts.add += 1; },
+      setBaseAndExtent: (
+        anchorNode: Node,
+        anchorOffset: number,
+        focusNode: Node,
+        focusOffset: number,
+      ) => {
+        state.__copyFieldSelectionAttempt.set += 1;
+        state.__copyFieldSelectionAttempt.exactBounds =
+          anchorNode === value &&
+          anchorOffset === 0 &&
+          focusNode === value &&
+          focusOffset === value.childNodes.length;
+      },
       toString: () => value.textContent ?? '',
     };
     Object.defineProperty(globalThis, 'getSelection', {
@@ -397,16 +408,16 @@ test('manual fallback makes exactly one selection attempt per activation', async
   );
   expect(await host.evaluate(() => (
     globalThis as typeof globalThis & {
-      __copyFieldSelectionCounts: { remove: number; add: number };
+      __copyFieldSelectionAttempt: { exactBounds: boolean; set: number };
     }
-  ).__copyFieldSelectionCounts)).toEqual({ remove: 1, add: 1 });
+  ).__copyFieldSelectionAttempt)).toEqual({ exactBounds: true, set: 1 });
 });
 
 for (const clipboardFailure of ['absent', 'non-callable', 'sync throw', 'reject'] as const) {
   test(`real pointer fallback contains ${clipboardFailure} clipboard failure`, async ({ page }) => {
     const pageErrors: string[] = [];
     page.on('pageerror', (error) => pageErrors.push(error.message));
-    const host = await story(page);
+    const host = await story(page, 'quotes-and-unicode');
     await host.evaluate((element, failure) => {
       const state = globalThis as typeof globalThis & {
         __copyFieldFallback: { outcomes: string[]; unhandled: string[] };
@@ -430,7 +441,7 @@ for (const clipboardFailure of ['absent', 'non-callable', 'sync throw', 'reject'
       });
     }, clipboardFailure);
 
-    const button = host.getByRole('button', { name: 'Copy quality command', exact: true });
+    const button = host.getByRole('button', { name: 'Copy quoted Unicode value', exact: true });
     await button.click();
     await expect(host.getByRole('status')).toHaveText(
       'Value selected. Use your system copy shortcut to copy it.',

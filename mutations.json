@@ -48,7 +48,8 @@
     "#254 REVIEW-CYCLE 6 adds FOUR arms, moving the standing set from 206 to 210: generated compactTrigger omission resets null; component acceptance waits one microtask for the current React commit; omitted React false is accepted as closed; and an ordinary omitted-false route close releases hidden focus. Each new arm is exact and omits expectCollateral.",
     "#254 REVIEW-CYCLE 6 COLLATERAL ADJUDICATION records the reproduced exact-7aa outcomes without changing product behavior. The presentation-reflection, native controlled-close release, and compact-header exposure mutations all red the integrated React SC-012 fixture, so each declares required collateral. The old native subject stays green when the closed-render await is removed, while the React SC-012 fixture alone reds; that arm is therefore retargeted to react-app-shell without collateral.",
     "#272 adds exactly THREE sk-action-row arms, moving the refreshed standing set from 210 to 213. Two SC-010 arms remove the new href and presentation registrations independently so the extended pre-upgrade test proves each public axis remains reactive and reflected. One SC-006 arm attaches the existing selectable request path to the route anchor; the mixed-state negative case then proves native route mode emits zero custom activation events. No SC-007/SC-008 route arms exist because an event with no dispatch has no independently falsifiable detail or propagation flags.",
-    "#257 CYCLE-2 COLLATERAL ADJUDICATION records the exact-e5202f4 outcome after the container-responsive SC-017 test was added. Both SC-014 stylesheet-adoption mutations necessarily remove or replace the local sheet that owns the @container rule, so the named SC-014 identity/length assertion and the SC-017 live-layout assertion red together. Each declares required collateral; guard 5 still inverts and will fail if the layout test ever stops proving that stylesheet dependency."
+    "#257 CYCLE-2 COLLATERAL ADJUDICATION records the exact-e5202f4 outcome after the container-responsive SC-017 test was added. Both SC-014 stylesheet-adoption mutations necessarily remove or replace the local sheet that owns the @container rule, so the named SC-014 identity/length assertion and the SC-017 live-layout assertion red together. Each declares required collateral; guard 5 still inverts and will fail if the layout test ever stops proving that stylesheet dependency.",
+    "#257 POST-CI WEBKIT FIX adds one SC-012 arm, moving the refreshed standing set from 225 to 226. The old document Range/addRange fallback could not select a node inside WebKit's closed shadow root; the shadow-inclusive Selection.setBaseAndExtent path now owns the exact visible node and full child range. The named [SC-012] fixture asserts both endpoints, so collapsing the focus offset to zero reds that behaviour without marked collateral."
   ],
   "mutations": [
     {
@@ -1811,6 +1812,14 @@
       "file": "packages/elements/src/copy-field/sk-copy-field.ts",
       "from": "        type=\"button\"",
       "to": "        type=\"reset\"",
+      "subject": "fixtures/elements-behaviour/src/sk-copy-field.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "manual fallback selects the full visible value across the shadow boundary",
+      "file": "packages/elements/src/copy-field/sk-copy-field.ts",
+      "from": "      selection.setBaseAndExtent(node, 0, node, node.childNodes.length);",
+      "to": "      selection.setBaseAndExtent(node, 0, node, 0);",
       "subject": "fixtures/elements-behaviour/src/sk-copy-field.test.ts"
     },
     {

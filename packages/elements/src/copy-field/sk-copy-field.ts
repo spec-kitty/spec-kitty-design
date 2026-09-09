@@ -172,10 +172,7 @@ export class SkCopyField extends LitElement {
       const selection = globalThis.getSelection?.();
       if (!node || !selection) return false;
       node.focus({ preventScroll: true });
-      const range = document.createRange();
-      range.selectNodeContents(node);
-      selection.removeAllRanges();
-      selection.addRange(range);
+      selection.setBaseAndExtent(node, 0, node, node.childNodes.length);
       return this.shadowRoot?.activeElement === node && selection.toString() === snapshot;
     } catch {
       return false;

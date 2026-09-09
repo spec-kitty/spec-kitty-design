@@ -21,8 +21,7 @@ const setSecureContext = (secure: boolean): void => {
 };
 
 const mockExactSelection = (text: string) => vi.spyOn(globalThis, 'getSelection').mockReturnValue({
-  removeAllRanges: vi.fn(),
-  addRange: vi.fn(),
+  setBaseAndExtent: vi.fn(),
   toString: () => text,
 } as unknown as Selection);
 
@@ -99,7 +98,7 @@ test('[SC-006][SC-007][SC-008] each activation emits one private, frozen, truthf
   expect(element.value).toBe('secret-token');
 });
 
-test('missing, rejected, throwing, and insecure clipboard paths select the visible value manually', async () => {
+test('[SC-012] missing, rejected, throwing, and insecure clipboard paths select the full visible value manually', async () => {
   const clipboardCases: Array<unknown> = [
     undefined,
     {},
@@ -109,11 +108,9 @@ test('missing, rejected, throwing, and insecure clipboard paths select the visib
   ];
   for (const clipboard of clipboardCases) {
     const focus = vi.spyOn(HTMLElement.prototype, 'focus');
-    const removeAllRanges = vi.fn();
-    const addRange = vi.fn();
+    const setBaseAndExtent = vi.fn();
     const selection = {
-      removeAllRanges,
-      addRange,
+      setBaseAndExtent,
       toString: () => 'manual bytes',
     } as unknown as Selection;
     const selectionSpy = vi.spyOn(globalThis, 'getSelection').mockReturnValue(selection);
@@ -131,9 +128,9 @@ test('missing, rejected, throwing, and insecure clipboard paths select the visib
     );
     expect(focus).toHaveBeenCalledOnce();
     expect(focus).toHaveBeenCalledWith({ preventScroll: true });
-    expect(removeAllRanges).toHaveBeenCalledOnce();
-    expect(addRange).toHaveBeenCalledOnce();
-    expect((addRange.mock.calls[0]?.[0] as Range).toString()).toBe('manual bytes');
+    const node = valueNode(element);
+    expect(setBaseAndExtent).toHaveBeenCalledOnce();
+    expect(setBaseAndExtent).toHaveBeenCalledWith(node, 0, node, node.childNodes.length);
     element.remove();
     selectionSpy.mockRestore();
     focus.mockRestore();
@@ -167,8 +164,8 @@ test('every selection-fallback failure is contained and emits one failed result'
   const failures = [
     'focus verification',
     'selected text mismatch',
-    'range creation throws',
-    'selection removal throws',
+    'selection replacement unavailable',
+    'selection replacement non-callable',
     'selection replacement throws',
   ] as const;
 
@@ -180,23 +177,18 @@ test('every selection-fallback failure is contained and emits one failed result'
     const element = await mount(`unselectable: ${failure}`);
     const node = valueNode(element);
     control(element).focus();
+    let setBaseAndExtent: unknown = vi.fn(() => {
+      if (failure === 'selection replacement throws') throw new Error('selection denied');
+    });
+    if (failure === 'selection replacement unavailable') setBaseAndExtent = undefined;
+    if (failure === 'selection replacement non-callable') setBaseAndExtent = 'not callable';
     const selection = {
-      removeAllRanges: vi.fn(() => {
-        if (failure === 'selection removal throws') throw new Error('remove denied');
-      }),
-      addRange: vi.fn(() => {
-        if (failure === 'selection replacement throws') throw new Error('add denied');
-      }),
+      setBaseAndExtent,
       toString: () => failure === 'selected text mismatch' ? 'different text' : node.textContent,
     } as unknown as Selection;
     vi.spyOn(globalThis, 'getSelection').mockReturnValue(selection);
     if (failure === 'focus verification') {
       vi.spyOn(node, 'focus').mockImplementation(() => undefined);
-    }
-    if (failure === 'range creation throws') {
-      vi.spyOn(document, 'createRange').mockImplementation(() => {
-        throw new Error('range denied');
-      });
     }
     const outcomes: string[] = [];
     element.addEventListener('sk-copy-field-result', (event) => {
