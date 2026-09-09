@@ -177,6 +177,7 @@ async function focusByKeyboard(page: Page, control: Locator, maximumTabs = 96): 
 }
 
 type ObserverProbeSnapshot = Readonly<{
+  documentTimeOrigin: number;
   constructed: number;
   observedTargets: number;
   disconnectedTargets: number;
@@ -251,6 +252,7 @@ async function installObserverProbe(page: Page): Promise<void> {
         snapshot: () => {
           const activeTargetIds = [...activeTargets].map(targetId).sort((left, right) => left - right);
           return {
+            documentTimeOrigin: performance.timeOrigin,
             constructed,
             observedTargets,
             disconnectedTargets,
@@ -264,6 +266,46 @@ async function installObserverProbe(page: Page): Promise<void> {
         },
       },
     });
+  });
+}
+
+type StorybookRemountSnapshot = Readonly<{
+  requested: number;
+  finished: number;
+}>;
+
+async function installStorybookRemountProbe(page: Page): Promise<void> {
+  await page.evaluate((storyId) => {
+    type StorybookChannel = {
+      on: (event: string, listener: (payload: { storyId?: string }) => void) => void;
+    };
+    const manager = window as typeof window & {
+      __STORYBOOK_ADDONS_CHANNEL__?: StorybookChannel;
+      __missionKanbanRemountProbe?: { snapshot: () => StorybookRemountSnapshot };
+    };
+    const channel = manager.__STORYBOOK_ADDONS_CHANNEL__;
+    if (!channel) throw new Error('Storybook manager channel was not available');
+    let requested = 0;
+    let finished = 0;
+    channel.on('forceRemount', (payload) => {
+      if (payload.storyId === storyId) requested += 1;
+    });
+    channel.on('storyFinished', (payload) => {
+      if (payload.storyId === storyId) finished += 1;
+    });
+    manager.__missionKanbanRemountProbe = {
+      snapshot: () => ({ requested, finished }),
+    };
+  }, `${STORY_PREFIX}k-6-stable-empty-board`);
+}
+
+async function storybookRemountSnapshot(page: Page): Promise<StorybookRemountSnapshot> {
+  return page.evaluate(() => {
+    const probe = (window as typeof window & {
+      __missionKanbanRemountProbe?: { snapshot: () => StorybookRemountSnapshot };
+    }).__missionKanbanRemountProbe;
+    if (!probe) throw new Error('Storybook remount probe was not installed');
+    return probe.snapshot();
   });
 }
 
@@ -753,28 +795,42 @@ test('[T005/T008/T010] real Storybook reloads disconnect remounted scroller obse
   const frameDocument = preview.locator('html');
   const reloadStory = page.getByRole('button', { name: 'Reload story' });
   await expect(reloadStory).toBeVisible();
+  await expect(reloadStory).toBeEnabled();
+  await installStorybookRemountProbe(page);
 
   const snapshots = [await observerProbeSnapshot(frameDocument)];
   for (let reload = 0; reload < 3; reload += 1) {
-    const previous = snapshots.at(-1)!;
+    await root.evaluate((node, cycle) => node.setAttribute('data-remount-cycle', String(cycle)), reload);
+    const eventsBefore = await storybookRemountSnapshot(page);
     await reloadStory.click();
-    await expect.poll(async () => (await observerProbeSnapshot(frameDocument)).observedTargets)
-      .toBeGreaterThan(previous.observedTargets);
+    await expect.poll(async () => (await storybookRemountSnapshot(page)).requested, { timeout: 20000 })
+      .toBeGreaterThan(eventsBefore.requested);
+    await expect.poll(async () => (await storybookRemountSnapshot(page)).finished, { timeout: 20000 })
+      .toBeGreaterThan(eventsBefore.finished);
     await expect(root).toHaveAttribute('data-render-complete', 'true');
     await expect(root).toHaveAttribute('data-play-proof', 'passed');
+    await expect(root).not.toHaveAttribute('data-remount-cycle', /.*/);
     snapshots.push(await observerProbeSnapshot(frameDocument));
   }
 
   console.info('Mission Kanban observer lifecycle evidence', JSON.stringify(snapshots));
+  let sameDocumentRemounts = 0;
   for (const [index, snapshot] of snapshots.entries()) {
     expect.soft(snapshot.activeTargetIds, `reload ${index} active target`).toHaveLength(1);
     expect.soft(snapshot.detachedActiveTargetIds, `reload ${index} detached active targets`).toEqual([]);
     expect.soft(snapshot.observedTargets - snapshot.disconnectedTargets, `reload ${index} observer balance`).toBe(1);
     if (index === 0) continue;
-    const previousTargetId = snapshots[index - 1]!.activeTargetIds.at(-1)!;
+    const previous = snapshots[index - 1]!;
+    if (snapshot.documentTimeOrigin !== previous.documentTimeOrigin) continue;
+    sameDocumentRemounts += 1;
+    expect.soft(snapshot.observedTargets, `reload ${index} observed replacement target`)
+      .toBeGreaterThan(previous.observedTargets);
+    const previousTargetId = previous.activeTargetIds.at(-1)!;
     expect.soft(snapshot.disconnectedTargetIds, `reload ${index} disconnected old target`)
       .toContain(previousTargetId);
   }
+  expect(sameDocumentRemounts, 'at least one manager reload must exercise same-document teardown')
+    .toBeGreaterThan(0);
 });
 
 test('[T008] LightMode is semantic/data-identical to K1 with a resolved theme delta', async ({
