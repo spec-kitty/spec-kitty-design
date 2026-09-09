@@ -98,10 +98,10 @@
       "criterion_id": "FR-010",
       "description": "The twelve canonical catalogue destinations preserve order, real links, unavailable anatomy, bounded supplied children, and terminal Ops.",
       "proof_type": "automated_test",
-      "evidence": "Exact rebased product head df4bf66bc72c287e6aaadf82f5fce18c766de5af: three-engine tests validate catalogue order, roles, hrefs, aria-current rules, unavailable anatomy, bounded children, absent children, and terminal Ops in CI 34332459374.",
+      "evidence": "Exact rebased product head b68f84d28715ca8ef551f40cda24f3a13e054f1e: three-engine tests validate catalogue order, roles, hrefs, aria-current rules, unavailable anatomy, bounded children, absent children, and terminal Ops in CI 34343137694.",
       "pass_fail": "pass",
       "verified_by": "codex",
-      "verified_at": "2026-09-09T09:25:37.534184+00:00",
+      "verified_at": "2026-09-09T11:25:26.183710+00:00",
       "notes": "Available, current, nested, and unavailable entries coexist truthfully."
     },
     {
