@@ -78,10 +78,10 @@
       "criterion_id": "FR-008",
       "description": "M7a exposes passive Ops rows with exactly Invocation, Action, and Status; M7b is honestly action-free when absent.",
       "proof_type": "automated_test_and_visual_evidence",
-      "evidence": "Exact product head a36f3b72f68a00bc04ffe0cf49dbf2d362e6358e: M7a exposes only Invocation, Action, and Status, Ops remains terminal, and M7b has no action; both visual baselines pass.",
+      "evidence": "Exact rebased product head df4bf66bc72c287e6aaadf82f5fce18c766de5af: M7a exposes only Invocation, Action, and Status, Ops remains terminal, and M7b has no action; CI 34332459374 passes.",
       "pass_fail": "pass",
       "verified_by": "codex",
-      "verified_at": "2026-09-09T07:31:41.314758+00:00",
+      "verified_at": "2026-09-09T09:25:34.871842+00:00",
       "notes": "Ops has no children, execution control, retry, or recovery action."
     },
     {
