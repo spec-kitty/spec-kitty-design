@@ -296,7 +296,7 @@
       "invariant_id": "NI-003",
       "description": "Unavailable catalogue content never gains anchor, button, handler, or tabindex semantics.",
       "verification_method": "custom_command",
-      "verification_command": "test \"$(gh run view 34332459374 --repo spec-kitty/spec-kitty-design --json conclusion,headSha --jq ' .conclusion + \":\" + .headSha ')\" = \"success:df4bf66bc72c287e6aaadf82f5fce18c766de5af\" && git diff --quiet df4bf66bc72c287e6aaadf82f5fce18c766de5af..HEAD -- packages/elements/src/patterns/mission-reading.stories.ts apps/storybook/src/tests/sk-mission-reading-pattern.spec.ts",
+      "verification_command": "test \"$(gh run view 34343137694 --repo spec-kitty/spec-kitty-design --json conclusion,headSha --jq ' .conclusion + \":\" + .headSha ')\" = \"success:b68f84d28715ca8ef551f40cda24f3a13e054f1e\" && git diff --quiet b68f84d28715ca8ef551f40cda24f3a13e054f1e..HEAD -- packages/elements/src/patterns/mission-reading.stories.ts apps/storybook/src/tests/sk-mission-reading-pattern.spec.ts",
       "result": "confirmed_absent",
       "evidence": "Command exited 0: "
     },
