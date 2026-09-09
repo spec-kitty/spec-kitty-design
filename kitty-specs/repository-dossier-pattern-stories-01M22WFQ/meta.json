@@ -1,4 +1,16 @@
 {
+  "acceptance_history": [
+    {
+      "acceptance_mode": "pr",
+      "accepted_at": "2026-09-09T18:19:07.158367+00:00",
+      "accepted_by": "codex-acceptance",
+      "accepted_from_commit": "75ce408543dfc54c15c97dd69089c6cd20012a60"
+    }
+  ],
+  "acceptance_mode": "pr",
+  "accepted_at": "2026-09-09T18:19:07.158367+00:00",
+  "accepted_by": "codex-acceptance",
+  "accepted_from_commit": "75ce408543dfc54c15c97dd69089c6cd20012a60",
   "created_at": "2026-09-09T10:47:43.110080+00:00",
   "flattened": false,
   "friendly_name": "repository dossier pattern stories",
