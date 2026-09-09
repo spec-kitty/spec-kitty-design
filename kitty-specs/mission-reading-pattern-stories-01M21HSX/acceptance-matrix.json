@@ -198,10 +198,10 @@
       "criterion_id": "NFR-007",
       "description": "Storybook builds within the committed three-minute budget.",
       "proof_type": "timed_build",
-      "evidence": "Exact-head Storybook build completed in 10.23 seconds and emitted 492 stories.",
+      "evidence": "CI run 34323100368 built Storybook from exact product head a36f3b72f68a00bc04ffe0cf49dbf2d362e6358e in about 15 seconds, comfortably inside the committed 180-second budget.",
       "pass_fail": "pass",
       "verified_by": "codex",
-      "verified_at": "2026-09-09T03:41:13Z",
+      "verified_at": "2026-09-09T07:31:54.272275+00:00",
       "notes": "Comfortably inside the 180-second charter budget."
     },
     {
