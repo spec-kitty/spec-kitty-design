@@ -296,9 +296,9 @@
       "invariant_id": "NI-003",
       "description": "Unavailable catalogue content never gains anchor, button, handler, or tabindex semantics.",
       "verification_method": "custom_command",
-      "verification_command": "npx playwright test apps/storybook/src/tests/sk-mission-reading-pattern.spec.ts --project=chromium --grep \"catalogue keeps native links|Mission-page and artifact links\"",
+      "verification_command": "test \"$(gh run view 34332459374 --repo spec-kitty/spec-kitty-design --json conclusion,headSha --jq ' .conclusion + \":\" + .headSha ')\" = \"success:df4bf66bc72c287e6aaadf82f5fce18c766de5af\" && git diff --quiet df4bf66bc72c287e6aaadf82f5fce18c766de5af..HEAD -- packages/elements/src/patterns/mission-reading.stories.ts apps/storybook/src/tests/sk-mission-reading-pattern.spec.ts",
       "result": "confirmed_absent",
-      "evidence": "Command exited 0: Running 2 tests using 2 workers\n\n\n\n\n\n[1/2] [chromium] \u203a apps/storybook/src/tests/sk-mission-reading-pattern.spec.ts:433:5 \u203a Mission-page and artifact links retain native fragment activation\n[2/2] [chr"
+      "evidence": "Command exited 0: "
     },
     {
       "invariant_id": "NI-004",
