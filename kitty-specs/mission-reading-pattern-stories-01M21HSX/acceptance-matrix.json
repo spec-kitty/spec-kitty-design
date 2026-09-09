@@ -168,10 +168,10 @@
       "criterion_id": "NFR-004",
       "description": "Composition-boundary checks pass without private-root reach-through, copied component CSS, runtime CSS injection, or undeclared parts.",
       "proof_type": "automated_architecture_gate",
-      "evidence": "Composition gate passed 47 probes plus 5 fixtures, 106 rules, and 20 tags; adopted-style boundary passed 36 probes, 28 elements, 30 sheets, and 479 rules.",
+      "evidence": "Exact product head a36f3b72f68a00bc04ffe0cf49dbf2d362e6358e: composition boundary passes 47 probes, 5 fixtures, 107 rules, and 20 tags; lint-code CI 34323100368 is green.",
       "pass_fail": "pass",
       "verified_by": "codex",
-      "verified_at": "2026-09-09T03:41:13Z",
+      "verified_at": "2026-09-09T07:31:51.879558+00:00",
       "notes": "Only documented public surfaces are composed."
     },
     {
