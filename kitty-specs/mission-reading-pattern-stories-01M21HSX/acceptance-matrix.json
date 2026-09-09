@@ -18,10 +18,10 @@
       "criterion_id": "FR-002",
       "description": "One deeply immutable fixture and pure projections own repeated Mission, git, catalogue, document, artifact, Ops, observed, and live values.",
       "proof_type": "automated_test",
-      "evidence": "Exact product head a36f3b72f68a00bc04ffe0cf49dbf2d362e6358e: focused Mission Reading tests pass 15/15 in Chromium and 15/15 in Firefox and prove the deeply immutable fixture plus deterministic projections.",
+      "evidence": "Exact rebased product head df4bf66bc72c287e6aaadf82f5fce18c766de5af: one deeply immutable fixture and deterministic projections remain executable; focused approval evidence plus three-engine CI 34332459374 pass.",
       "pass_fail": "pass",
       "verified_by": "codex",
-      "verified_at": "2026-09-09T07:31:34.201869+00:00",
+      "verified_at": "2026-09-09T09:25:27.025350+00:00",
       "notes": "Fixture immutability and selector determinism are executable assertions."
     },
     {
