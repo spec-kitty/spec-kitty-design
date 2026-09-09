@@ -132,7 +132,7 @@
       "pass_fail": "pass",
       "verified_by": "codex",
       "verified_at": "2026-09-09T09:25:41.348300+00:00",
-      "notes": "Independent review cycles 10 and 11 approve exact product head a36f3b72; final acceptance and exact-head squad review govern publication."
+      "notes": "Exact rebased product head df4bf66 passes CI 34332459374; final conventional acceptance and exact-head squad review govern publication."
     },
     {
       "criterion_id": "NFR-001",
