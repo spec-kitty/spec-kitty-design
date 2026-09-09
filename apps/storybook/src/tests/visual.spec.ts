@@ -176,6 +176,7 @@ test('SK-copy-field failure — visual baseline', async ({ page }) => {
 test('SK-copy-field forced colors — visual baseline', async ({ page }) => {
   await page.emulateMedia({ forcedColors: 'active' });
   const target = await copyFieldStory(page, 'forced-colors');
+  await expect(target.locator('[part="status"]')).toHaveText('Value copied.');
   await expect(target).toHaveScreenshot('sk-copy-field-forced-colors.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
 });
 

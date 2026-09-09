@@ -24,7 +24,7 @@ const installFocusSentinels = async (host: Locator): Promise<void> => {
 
 test('the accessibility tree exposes the exact value, named control, and stable announced outcome', async ({ page }) => {
   const host = await story(page);
-  const button = host.getByRole('button', { name: 'Copy value', exact: true });
+  const button = host.getByRole('button', { name: 'Copy quality command', exact: true });
   const liveStatus = host.getByRole('status');
   await expect(button).toBeVisible();
   await expect(liveStatus).toBeAttached();
@@ -34,7 +34,7 @@ test('the accessibility tree exposes the exact value, named control, and stable 
   expect(exactValue).toBe('npm run quality:all');
   const before = await host.ariaSnapshot();
   expect(before).toContain(exactValue!);
-  expect(before).toContain('button "Copy value"');
+  expect(before).toContain('button "Copy quality command"');
   expect(before).not.toContain('Value copied.');
   expect(await liveStatus.ariaSnapshot()).toMatch(/^- status\s*$/m);
   await liveStatus.evaluate((node) => {
@@ -59,7 +59,7 @@ test('real Tab traversal has one native component stop when non-empty and zero w
   await installFocusSentinels(host);
   const before = page.getByRole('button', { name: 'Before copy field', exact: true });
   const after = page.getByRole('button', { name: 'After copy field', exact: true });
-  const copy = host.getByRole('button', { name: 'Copy value', exact: true });
+  const copy = host.getByRole('button', { name: 'Copy quality command', exact: true });
 
   await before.focus();
   await page.keyboard.press('Tab');
@@ -71,10 +71,38 @@ test('real Tab traversal has one native component stop when non-empty and zero w
   await installFocusSentinels(host);
   const emptyBefore = page.getByRole('button', { name: 'Before copy field', exact: true });
   const emptyAfter = page.getByRole('button', { name: 'After copy field', exact: true });
-  await expect(host.getByRole('button', { name: 'Copy value', exact: true })).toBeDisabled();
+  await expect(host.getByRole('button', { name: 'Copy empty value', exact: true })).toBeDisabled();
   await emptyBefore.focus();
   await page.keyboard.press('Tab');
   await expect(emptyAfter).toBeFocused();
+});
+
+test('multiple story controls have distinct names and truthful copied outcomes', async ({ page }) => {
+  const pageErrors: string[] = [];
+  page.on('pageerror', (error) => pageErrors.push(error.message));
+  await story(page, 'repeated-and-multiple');
+  const hosts = page.locator('sk-copy-field');
+  await expect(hosts).toHaveCount(2);
+  await expect(page.getByRole('button', { name: 'Copy repeated value', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Copy secondary value', exact: true })).toBeVisible();
+  await expect(hosts.nth(0).getByRole('status')).toHaveText('Value copied.');
+  await expect(hosts.nth(1).getByRole('status')).toHaveText('Value copied.');
+  const snapshot = await page.locator('body').ariaSnapshot();
+  expect(snapshot).toContain('button "Copy repeated value"');
+  expect(snapshot).toContain('button "Copy secondary value"');
+  expect(pageErrors).toEqual([]);
+});
+
+test('success stories use navigator.clipboard and expose only copied feedback', async ({ page }) => {
+  const pageErrors: string[] = [];
+  page.on('pageerror', (error) => pageErrors.push(error.message));
+  for (const id of ['copied-success', 'forced-colors']) {
+    const host = await story(page, id);
+    await expect(host.getByRole('status')).toHaveText('Value copied.');
+    await expect(host.getByRole('status')).not.toContainText('selected');
+    await expect(host.getByRole('status')).not.toContainText('Unable');
+  }
+  expect(pageErrors).toEqual([]);
 });
 
 test('pointer, Enter, and Space copy exact visible bytes once and keep focus', async ({ page }) => {
@@ -213,6 +241,58 @@ test('a roughly 115px host reflows safely inside a wide page viewport', async ({
   expect(dimensions.buttonRight).toBeLessThanOrEqual(dimensions.fieldRight);
 });
 
+test('normal-flow, flex-item, and grid-item hosts retain usable inline sizing', async ({ page }) => {
+  const source = await story(page, 'long-wrapping-command');
+  const dimensions = await source.evaluate(async (element) => {
+    const results: Array<{ layout: string; hostWidth: number; fieldWidth: number }> = [];
+    for (const layout of ['normal', 'flex', 'grid']) {
+      const container = document.createElement('div');
+      container.style.inlineSize = '640px';
+      if (layout !== 'normal') container.style.display = layout;
+      const host = document.createElement('sk-copy-field') as HTMLElement & {
+        label: string;
+        updateComplete: Promise<unknown>;
+        value: string;
+      };
+      host.label = `Copy ${layout} value`;
+      host.value = element.getAttribute('value') ?? '';
+      container.append(host);
+      document.body.append(container);
+      await host.updateComplete;
+      results.push({
+        layout,
+        hostWidth: host.getBoundingClientRect().width,
+        fieldWidth: host.shadowRoot!.querySelector('[part="field"]')!.getBoundingClientRect().width,
+      });
+      container.remove();
+    }
+    return results;
+  });
+  for (const result of dimensions) {
+    expect(result.hostWidth, result.layout).toBeGreaterThan(300);
+    expect(result.fieldWidth, result.layout).toBeGreaterThan(300);
+    expect(result.fieldWidth, result.layout).toBeLessThanOrEqual(result.hostWidth);
+  }
+});
+
+test('the logical container threshold follows the host inline axis in vertical writing', async ({ page }) => {
+  const host = await story(page, 'long-wrapping-command');
+  const columns = await host.evaluate(async (element) => {
+    const field = element.shadowRoot!.querySelector<HTMLElement>('[part="field"]')!;
+    element.style.writingMode = 'vertical-rl';
+    element.style.blockSize = '22rem';
+    element.style.inlineSize = '19rem';
+    await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+    const narrow = getComputedStyle(field).gridTemplateColumns;
+    element.style.inlineSize = '21rem';
+    await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+    const wide = getComputedStyle(field).gridTemplateColumns;
+    return { narrow, wide };
+  });
+  expect(columns.narrow.trim().split(/\s+/)).toHaveLength(1);
+  expect(columns.wide.trim().split(/\s+/)).toHaveLength(2);
+});
+
 test('value mutation clears stale feedback and old completion cannot restore it', async ({ page }) => {
   const host = await story(page);
   await host.evaluate((element) => {
@@ -321,6 +401,62 @@ test('manual fallback makes exactly one selection attempt per activation', async
     }
   ).__copyFieldSelectionCounts)).toEqual({ remove: 1, add: 1 });
 });
+
+for (const clipboardFailure of ['absent', 'non-callable', 'sync throw', 'reject'] as const) {
+  test(`real pointer fallback contains ${clipboardFailure} clipboard failure`, async ({ page }) => {
+    const pageErrors: string[] = [];
+    page.on('pageerror', (error) => pageErrors.push(error.message));
+    const host = await story(page);
+    await host.evaluate((element, failure) => {
+      const state = globalThis as typeof globalThis & {
+        __copyFieldFallback: { outcomes: string[]; unhandled: string[] };
+      };
+      state.__copyFieldFallback = { outcomes: [], unhandled: [] };
+      globalThis.addEventListener('unhandledrejection', (event) => {
+        state.__copyFieldFallback.unhandled.push(String(event.reason));
+      });
+      const clipboard = failure === 'absent'
+        ? undefined
+        : failure === 'non-callable'
+          ? { writeText: 'not callable' }
+          : failure === 'sync throw'
+            ? { writeText: () => { throw new Error('blocked'); } }
+            : { writeText: () => Promise.reject(new Error('denied')) };
+      Object.defineProperty(navigator, 'clipboard', { configurable: true, value: clipboard });
+      element.addEventListener('sk-copy-field-result', (event) => {
+        state.__copyFieldFallback.outcomes.push(
+          (event as CustomEvent<{ outcome: string }>).detail.outcome,
+        );
+      });
+    }, clipboardFailure);
+
+    const button = host.getByRole('button', { name: 'Copy quality command', exact: true });
+    await button.click();
+    await expect(host.getByRole('status')).toHaveText(
+      'Value selected. Use your system copy shortcut to copy it.',
+    );
+    const result = await host.evaluate((element) => {
+      const value = element.shadowRoot!.querySelector<HTMLElement>('[part="value"]')!;
+      const state = globalThis as typeof globalThis & {
+        __copyFieldFallback: { outcomes: string[]; unhandled: string[] };
+      };
+      return {
+        activePart: element.shadowRoot!.activeElement?.getAttribute('part'),
+        outlineStyle: getComputedStyle(value).outlineStyle,
+        outcomes: state.__copyFieldFallback.outcomes,
+        selected: globalThis.getSelection()?.toString(),
+        unhandled: state.__copyFieldFallback.unhandled,
+        value: value.textContent,
+      };
+    });
+    expect(result.activePart).toBe('value');
+    expect(result.selected).toBe(result.value);
+    expect(result.outcomes).toEqual(['manual']);
+    expect(result.unhandled).toEqual([]);
+    expect(result.outlineStyle).not.toBe('none');
+    expect(pageErrors).toEqual([]);
+  });
+}
 
 test('the Active story proves native :active only while a trusted pointer is held', async ({ page }) => {
   const host = await story(page, 'active');

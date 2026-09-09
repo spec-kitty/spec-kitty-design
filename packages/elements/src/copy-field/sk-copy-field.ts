@@ -193,9 +193,7 @@ export class SkCopyField extends LitElement {
     this.dispatchEvent(event);
     if (this.#revision === revision && this.value === snapshot) {
       this.#outcome = outcome;
-      const field = this.shadowRoot?.querySelector<HTMLElement>('[part="field"]');
       const status = this.shadowRoot?.querySelector<HTMLElement>('.sk-copy-field__status');
-      if (field) field.dataset.outcome = outcome;
       if (status) status.textContent = this.#statusMessage();
     }
   }
@@ -247,7 +245,7 @@ export class SkCopyField extends LitElement {
   }
 
   render() {
-    return html`<div part="field" class="sk-copy-field" data-outcome=${this.#outcome ?? ''}>
+    return html`<div part="field" class="sk-copy-field">
       <code part="value" class="sk-copy-field__value" tabindex="-1">${this.value}</code>
       <button
         part="copy-control"

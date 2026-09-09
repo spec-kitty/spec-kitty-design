@@ -1843,8 +1843,8 @@
       "id": "SC-017",
       "arm": "the 20rem available-inline-size reflow threshold remains declared at its documented figure",
       "file": "packages/elements/src/copy-field/sk-copy-field.css.js",
-      "from": "@container (max-width: 20rem)",
-      "to": "@container (max-width: 10rem)",
+      "from": "@container (max-inline-size: 20rem)",
+      "to": "@container (max-inline-size: 10rem)",
       "subject": "fixtures/elements-behaviour/src/sk-copy-field.test.ts"
     },
     {

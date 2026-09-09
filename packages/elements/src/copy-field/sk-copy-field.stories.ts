@@ -13,7 +13,9 @@ const frame = (content: unknown, light = false, width = '42rem') => html`<div
   style=${`box-sizing:border-box;inline-size:${width};max-inline-size:100%;padding:var(--sk-space-6);background:var(--sk-surface-page);color:var(--sk-fg-body);`}
 >${content}</div>`;
 
-const field = (value = COMMAND) => html`<sk-copy-field .value=${value}></sk-copy-field>`;
+const field = (value = COMMAND, label = 'Copy quality command') => html`
+  <sk-copy-field .value=${value} .label=${label}></sk-copy-field>
+`;
 
 const hostFrom = (canvasElement: HTMLElement): HTMLElement & { updateComplete: Promise<unknown> } =>
   canvasElement.querySelector('sk-copy-field') as HTMLElement & { updateComplete: Promise<unknown> };
@@ -41,12 +43,12 @@ const withProperty = async (
 };
 
 const withClipboard = (
-  writeText: (() => Promise<void>) | undefined,
+  writeText: ((value: string) => Promise<void>) | undefined,
   action: () => Promise<void>,
 ): Promise<void> => withProperty(
-  Navigator.prototype,
+  navigator,
   'clipboard',
-  { configurable: true, get: () => (writeText ? { writeText } : undefined) },
+  { configurable: true, value: writeText ? { writeText } : undefined },
   action,
 );
 
@@ -106,23 +108,27 @@ export const Active: Story = {
 };
 
 export const DisabledEmpty: Story = {
-  render: () => frame(field('')),
+  render: () => frame(field('', 'Copy empty value')),
 };
 
 export const LongWrappingCommand: Story = {
-  render: () => frame(field(LONG), false, '20rem'),
+  render: () => frame(field(LONG, 'Copy implementation command'), false, '20rem'),
 };
 
 export const QuotesAndUnicode: Story = {
-  render: () => frame(field(EXACT)),
+  render: () => frame(field(EXACT, 'Copy quoted Unicode value')),
 };
 
 export const CopiedSuccess: Story = {
   play: async ({ canvasElement }) => {
-    await withClipboard(async () => undefined, async () => {
+    const writes: string[] = [];
+    await withClipboard(async (value) => { writes.push(value); }, async () => {
       const host = hostFrom(canvasElement);
       (host.shadowRoot!.querySelector('button') as HTMLButtonElement).click();
       await waitForStatus(host, 'Value copied.');
+      expect(writes).toEqual([
+        host.shadowRoot!.querySelector('[part="value"]')!.textContent,
+      ]);
     });
   },
 };
@@ -165,34 +171,45 @@ export const Failure: Story = {
 export const RepeatedAndMultiple: Story = {
   render: () => frame(html`
     <div style="display:grid;gap:var(--sk-space-4);">
-      <sk-copy-field value="same value"></sk-copy-field>
-      <sk-copy-field value="second value"></sk-copy-field>
+      <sk-copy-field value="same value" label="Copy repeated value"></sk-copy-field>
+      <sk-copy-field value="second value" label="Copy secondary value"></sk-copy-field>
     </div>
   `),
   play: async ({ canvasElement }) => {
-    await withClipboard(async () => undefined, async () => {
+    const writes: string[] = [];
+    await withClipboard(async (value) => { writes.push(value); }, async () => {
       const hosts = [...canvasElement.querySelectorAll('sk-copy-field')];
       for (const host of hosts) {
+        const outcomes: string[] = [];
+        host.addEventListener('sk-copy-field-result', (event) => {
+          outcomes.push((event as CustomEvent<{ outcome: string }>).detail.outcome);
+        });
         const button = host.shadowRoot!.querySelector('button') as HTMLButtonElement;
-        button.click();
-        button.click();
-        await waitForStatus(host, 'Value copied.');
+        for (let attempt = 1; attempt <= 2; attempt += 1) {
+          button.click();
+          await waitFor(() => expect(outcomes).toHaveLength(attempt));
+          await waitForStatus(host, 'Value copied.');
+        }
+        expect(outcomes).toEqual(['copied', 'copied']);
       }
+      expect(writes).toEqual(['same value', 'same value', 'second value', 'second value']);
     });
   },
 };
 
 export const Narrow: Story = {
-  render: () => frame(field(LONG), false, '18rem'),
+  render: () => frame(field(LONG, 'Copy narrow implementation command'), false, '18rem'),
 };
 
 export const ForcedColors: Story = {
-  render: () => frame(field('forced-colors copy result')),
+  render: () => frame(field('forced-colors copy result', 'Copy forced-colors result')),
   play: async ({ canvasElement }) => {
-    await withClipboard(async () => undefined, async () => {
+    const writes: string[] = [];
+    await withClipboard(async (value) => { writes.push(value); }, async () => {
       const host = hostFrom(canvasElement);
       (host.shadowRoot!.querySelector('button') as HTMLButtonElement).click();
       await waitForStatus(host, 'Value copied.');
+      expect(writes).toEqual(['forced-colors copy result']);
     });
   },
 };

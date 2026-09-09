@@ -238,12 +238,20 @@ claim to an independently meaningful mutation arm in `mutations.json`:
 - every public part present and targetable;
 - generated constructable-sheet adoption by named identity with no injected `<style>`;
 - duplicate registration safety;
-- the documented `20rem` available-inline-size threshold, including container-safe one-column
-  reflow and end alignment, under SC-017.
+- the documented logical `20rem` available-inline-size threshold, including container-safe one-column
+  reflow and end alignment under horizontal and vertical writing modes, under SC-017;
+- full available-inline-size host sizing in normal flow and as a flex/grid item, without undoing
+  explicit consumer constraints such as the 115px proof;
+- real Chromium/Firefox pointer fallback for absent, non-callable, throwing, and rejecting
+  Clipboard API routes, including exact selection, focus indication, truthful event count, and
+  contained errors;
+- meaningful story labels, including distinct names for multiple controls, while dedicated tests
+  retain missing/blank-label fail-open coverage.
 
 Ordinary focused tests cover stable-node re-announcement, clipboard capability/rejection arms,
 selection verification, value-revision reset, message overrides, and multiple instances. The
-SC-017 ordinary assertion reads the generated container rule and applies it to a constrained host;
+SC-017 ordinary assertion reads the generated logical container rule and applies it to constrained
+horizontal and vertical hosts;
 Chromium/Firefox browser coverage proves a roughly 115px host reflows inside a wide page without
 component or page overflow. Mutation self-tests prove each configured source transform is effective
 and the intended behavior test goes red; no unrelated ID is minted or mislabeled.

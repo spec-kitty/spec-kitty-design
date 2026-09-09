@@ -1,8 +1,11 @@
 /* sk-copy-field — exact non-editable value plus one copy action. */
 
 :host {
+  box-sizing: border-box;
   display: block;
   container-type: inline-size;
+  inline-size: 100%;
+  max-inline-size: 100%;
   min-inline-size: 0;
 }
 
@@ -29,7 +32,7 @@
   font-size: var(--sk-text-sm);
 }
 
-.sk-copy-field__value:focus-visible {
+.sk-copy-field__value:focus {
   outline: var(--sk-border-width-2) solid var(--sk-border-focus);
   outline-offset: var(--sk-border-width-2);
 }
@@ -46,7 +49,7 @@
   overflow-wrap: anywhere;
 }
 
-@container (max-width: 20rem) {
+@container (max-inline-size: 20rem) {
   .sk-copy-field {
     grid-template-columns: minmax(0, 1fr);
   }

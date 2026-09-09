@@ -300,6 +300,7 @@ test('the stable status node and outcome remain isolated per instance', async ()
   expect(firstStatus.getAttribute('aria-atomic')).toBe('true');
   control(first).click();
   await vi.waitFor(() => expect(firstStatus.textContent).toBe('Value copied.'));
+  expect(first.shadowRoot!.querySelector('[part="field"]')!.hasAttribute('data-outcome')).toBe(false);
   expect(status(first)).toBe(firstStatus);
   expect(status(second)).toBe(secondStatus);
   expect(secondStatus.textContent).toBe('');
@@ -444,9 +445,11 @@ test('[SC-017] the 20rem available-inline-size threshold declares and applies th
     .filter((rule): rule is CSSStyleRule => rule instanceof CSSStyleRule)
     .find((rule) => rule.selectorText === ':host');
   expect(hostRule?.style.getPropertyValue('container-type').trim()).toBe('inline-size');
+  expect(hostRule?.style.getPropertyValue('inline-size').trim()).toBe('100%');
+  expect(hostRule?.style.getPropertyValue('max-inline-size').trim()).toBe('100%');
   const responsiveRules = Array.from(skCopyFieldSheet.cssRules)
     .filter((rule): rule is CSSContainerRule => rule instanceof CSSContainerRule)
-    .filter((rule) => rule.conditionText.replace(/\s+/g, ' ') === '(max-width: 20rem)');
+    .filter((rule) => rule.conditionText.replace(/\s+/g, ' ') === '(max-inline-size: 20rem)');
   expect(responsiveRules).toHaveLength(1);
   const declarations = Array.from(responsiveRules[0]!.cssRules)
     .filter((rule): rule is CSSStyleRule => rule instanceof CSSStyleRule);
@@ -459,6 +462,15 @@ test('[SC-017] the 20rem available-inline-size threshold declares and applies th
   expect(getComputedStyle(element.shadowRoot!.querySelector('[part="field"]')!).gridTemplateColumns)
     .not.toContain(' ');
   expect(getComputedStyle(control(element)).justifySelf).toBe('end');
+
+  element.style.writingMode = 'vertical-rl';
+  element.style.blockSize = '22rem';
+  element.style.inlineSize = '19rem';
+  expect(getComputedStyle(element.shadowRoot!.querySelector('[part="field"]')!).gridTemplateColumns)
+    .not.toContain(' ');
+  element.style.inlineSize = '21rem';
+  expect(getComputedStyle(element.shadowRoot!.querySelector('[part="field"]')!).gridTemplateColumns)
+    .toContain(' ');
 });
 
 test('[SC-015] guarded module registration warns only for a different constructor', () => {

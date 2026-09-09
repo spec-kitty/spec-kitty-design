@@ -9,7 +9,7 @@ test('forced colors preserves a visible field boundary, focus, value, and textua
   await button.focus();
   await expect(button).toBeFocused();
   await expect(host.locator('[part="value"]')).not.toBeEmpty();
-  await expect(host.locator('[part="status"]')).toHaveText(/copied|selected|unable/i);
+  await expect(host.locator('[part="status"]')).toHaveText('Value copied.');
   const presentation = await host.evaluate((element) => {
     const field = element.shadowRoot!.querySelector('[part="field"]')!;
     const control = element.shadowRoot!.querySelector('button')!;
