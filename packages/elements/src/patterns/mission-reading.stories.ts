@@ -979,7 +979,7 @@ const loadingDocument = (): TemplateResult =>
       <p role="status" aria-live="polite" aria-atomic="true">
         Loading rendered content…
       </p>
-      <div aria-busy="true" aria-labelledby="loading-heading">
+      <div role="region" aria-busy="true" aria-labelledby="loading-heading">
         <div
           class="sk-mission-reading-pattern__placeholder-lines"
           aria-hidden="true"

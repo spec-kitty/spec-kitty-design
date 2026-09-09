@@ -660,6 +660,11 @@ test("loading and snapshot states never fabricate facts or a second commit", asy
   const busyFragment = loading.locator('[aria-busy="true"]');
   const loadingStatus = loading.getByRole("status");
   await expect(busyFragment).toHaveCount(1);
+  await expect(busyFragment).toHaveAttribute("role", "region");
+  await expect(busyFragment).toHaveAttribute(
+    "aria-labelledby",
+    "loading-heading",
+  );
   await expect(loadingStatus).toHaveText("Loading rendered content…");
   await expect(loadingStatus).toHaveAttribute("aria-live", "polite");
   await expect(loadingStatus).toHaveAttribute("aria-atomic", "true");
@@ -697,7 +702,9 @@ test("loading and snapshot states never fabricate facts or a second commit", asy
   const behind = await openStory(page, "m-5-snapshot-behind-log");
   await expect(behind.locator("sk-notice")).toHaveCount(1);
   await expect(behind.getByText("72c4e9a", { exact: true })).toHaveCount(1);
-  await expect(behind.locator(".sk-facts__term")).toContainText(["Pushed"]);
+  await expect(
+    behind.locator(".sk-facts__term", { hasText: /^Pushed$/ }),
+  ).toHaveCount(1);
   await expect(
     behind.getByText("2026-08-31 14:12 UTC", { exact: true }),
   ).toHaveCount(1);
