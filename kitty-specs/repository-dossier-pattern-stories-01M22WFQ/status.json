@@ -30,7 +30,8 @@
       "model": "__resolved_model_absent__",
       "notes": [
         "Consolidating the independently reviewed WP01 lane on the proposed train integration tree for PR #297.",
-        "Implementation and final governance-only deltas are complete; exact product and acceptance evidence are recorded in review-cycle-4.md."
+        "Implementation and final governance-only deltas are complete; exact product and acceptance evidence are recorded in review-cycle-4.md.",
+        "Independent Codex review evidence is recorded in review-cycle-4.md."
       ],
       "provider": "__resolved_provider_absent__",
       "role": "reviewer",
