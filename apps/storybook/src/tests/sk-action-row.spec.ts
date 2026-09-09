@@ -274,8 +274,7 @@ const requiredResponsiveStates = [
   },
   {
     name: 'route-flush light',
-    story: 'light-mode',
-    selector: 'sk-action-row[data-light-route-flush]',
+    story: 'route-flush-light-mode',
   },
 ] as const;
 

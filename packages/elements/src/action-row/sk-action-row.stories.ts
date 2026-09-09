@@ -301,8 +301,16 @@ export const LightMode: Story = {
     backgrounds: { default: 'sk-light' },
     a11y: { disable: false },
   },
-  render: () => `${frame(row({ extra: 'data-light-mode="true"' }), true)}
-    ${frame(
+  render: () => frame(row({ extra: 'data-light-mode="true"' }), true),
+};
+
+export const RouteFlushLightMode: Story = {
+  parameters: {
+    backgrounds: { default: 'sk-light' },
+    a11y: { disable: false },
+  },
+  render: () =>
+    frame(
       row({
         id: 'activity-light-route-flush',
         selectable: false,
@@ -311,5 +319,5 @@ export const LightMode: Story = {
         extra: 'data-light-route-flush="true"',
       }),
       true,
-    )}`,
+    ),
 };

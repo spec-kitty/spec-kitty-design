@@ -41,7 +41,7 @@
     "#214 ratchets the exact fifteen Storybook-only Work Package overview/detail route-state stories named as acceptance evidence. On the refreshed train after #256, total moves 300 -> 315; exported fixture, selector, and render helpers are excluded from CSF indexing.",
     "#264 adds eight unavailable-entry acceptance stories, total 315 -> 323 on the refreshed train after #214. Mixed dark, annotation-free, all-unavailable/no-current, unavailable-parent/no-children, long 240px, forced-colours, RTL, and real `.sk-light` routes keep the additive styles-only contract reviewable without inventing application state.",
     "#254 ratchets eleven additive sk-app-shell compact-presentation stories: closed/open, 390/768/860/861, long labels, short/tall viewports, reduced motion, and forced colors. On the refreshed train after #264, total moves 323 -> 334; the existing desktop, narrow, empty, and LightMode stories remain.",
-    "#272 ratchets seven additive sk-action-row stories for native route, route+flush, button+flush, selected+flush, selected route, unknown-presentation fail-open, and forced-colors comparison. On the refreshed train after #271, total moves 361 -> 368; existing stories remain."
+    "#272 ratchets eight additive sk-action-row stories for native route, route+flush, button+flush, selected+flush, selected route, unknown-presentation fail-open, forced-colors comparison, and a focused route+flush LightMode state. On the refreshed train after #271, total moves 361 -> 369; existing stories remain."
   ],
   "byElement": {
     "sk-action-row": [
@@ -63,7 +63,8 @@
       "elements-skactionrow--selected-flush",
       "elements-skactionrow--route-selected",
       "elements-skactionrow--unknown-presentation",
-      "elements-skactionrow--forced-colors"
+      "elements-skactionrow--forced-colors",
+      "elements-skactionrow--route-flush-light-mode"
     ],
     "sk-app-shell": [
       "elements-skappshell--default",
@@ -497,5 +498,5 @@
       "components-sksegmentedchoice-html--light-mode"
     ]
   },
-  "total": 368
+  "total": 369
 }

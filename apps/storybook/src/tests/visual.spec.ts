@@ -352,9 +352,8 @@ test('SK-action-row default and light — visual baselines', async ({ page }) =>
   await expect(host).toHaveScreenshot('sk-action-row-default-dark.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
   host = await actionRowStory(page, 'light-mode');
   await expect(host).toHaveScreenshot('sk-action-row-light.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
-  const routeFlushLight = page.locator('sk-action-row[data-light-route-flush]').first();
-  await routeFlushLight.waitFor({ state: 'visible', timeout: 20000 });
-  await expect(routeFlushLight).toHaveScreenshot('sk-action-row-route-flush-light.png', {
+  host = await actionRowStory(page, 'route-flush-light-mode');
+  await expect(host).toHaveScreenshot('sk-action-row-route-flush-light.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
   });
