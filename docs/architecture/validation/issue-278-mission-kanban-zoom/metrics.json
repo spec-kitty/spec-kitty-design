@@ -1,13 +1,13 @@
 {
-  "head": "e8603cbaea449bf09af9736fe8eb5189fddd4216",
-  "tree": "377d2d6f99303fcce6df93552d257e0036907c6d",
+  "head": "3abd962aae187956f32513104fa849fb7dee3933",
+  "tree": "dbdb285bec44f9e252907796e095c9d617744ccd",
   "method": "X11 XTEST Ctrl+0 then five Ctrl+Shift+= browser UI chords",
   "levels": {
     "k2": {
       "before-100": {
-        "head": "e8603cbaea449bf09af9736fe8eb5189fddd4216",
-        "tree": "377d2d6f99303fcce6df93552d257e0036907c6d",
-        "capturedAt": "2026-09-09T15:58:53.407Z",
+        "head": "3abd962aae187956f32513104fa849fb7dee3933",
+        "tree": "dbdb285bec44f9e252907796e095c9d617744ccd",
+        "capturedAt": "2026-09-09T16:05:51.678Z",
         "story": {
           "type": "story",
           "subtype": "story",
@@ -124,13 +124,13 @@
         "failedChecks": [],
         "desktopScreenshot": {
           "filename": "k2-before-100-desktop.png",
-          "sha256": "25a2d3b36532c4942ca04e1945e81d8efe68d87724fba839d93961f5a02f454b"
+          "sha256": "7627211d34b8e9818ab962f6f6e69cf6d0b32887f6e256b89e18e0bca9badb12"
         }
       },
       "after-200": {
-        "head": "e8603cbaea449bf09af9736fe8eb5189fddd4216",
-        "tree": "377d2d6f99303fcce6df93552d257e0036907c6d",
-        "capturedAt": "2026-09-09T15:58:57.340Z",
+        "head": "3abd962aae187956f32513104fa849fb7dee3933",
+        "tree": "dbdb285bec44f9e252907796e095c9d617744ccd",
+        "capturedAt": "2026-09-09T16:05:55.759Z",
         "story": {
           "type": "story",
           "subtype": "story",
@@ -250,15 +250,15 @@
         "failedChecks": [],
         "desktopScreenshot": {
           "filename": "k2-after-200-desktop.png",
-          "sha256": "cd734b67782cd4c20cf146e895f95dd4fb94e9bdcf0cbac98884532cf316b79c"
+          "sha256": "e8df67490d508da09023cc610def37a0404eab0dafc6ba4f689d9d46c4d14813"
         }
       }
     },
     "long": {
       "before-100": {
-        "head": "e8603cbaea449bf09af9736fe8eb5189fddd4216",
-        "tree": "377d2d6f99303fcce6df93552d257e0036907c6d",
-        "capturedAt": "2026-09-09T15:58:59.489Z",
+        "head": "3abd962aae187956f32513104fa849fb7dee3933",
+        "tree": "dbdb285bec44f9e252907796e095c9d617744ccd",
+        "capturedAt": "2026-09-09T16:05:57.933Z",
         "story": {
           "type": "story",
           "subtype": "story",
@@ -375,13 +375,13 @@
         "failedChecks": [],
         "desktopScreenshot": {
           "filename": "long-before-100-desktop.png",
-          "sha256": "2e7d5b686c1dfc2147442c17b09a7e5de0973d7509e82e61e9a92243688338b6"
+          "sha256": "9c40072b4b102ec8ce6aff6671a0397016b2e59bd2677dd7edf8eb17f43f328d"
         }
       },
       "after-200": {
-        "head": "e8603cbaea449bf09af9736fe8eb5189fddd4216",
-        "tree": "377d2d6f99303fcce6df93552d257e0036907c6d",
-        "capturedAt": "2026-09-09T15:59:03.397Z",
+        "head": "3abd962aae187956f32513104fa849fb7dee3933",
+        "tree": "dbdb285bec44f9e252907796e095c9d617744ccd",
+        "capturedAt": "2026-09-09T16:06:01.795Z",
         "story": {
           "type": "story",
           "subtype": "story",
@@ -501,7 +501,7 @@
         "failedChecks": [],
         "desktopScreenshot": {
           "filename": "long-after-200-desktop.png",
-          "sha256": "ba1235bf94a1ccdc27249f4096f372428c57eb8959d72f51c1c021deee6dbc3f"
+          "sha256": "3075ded7e4f5664d5948b8e4590a1a8fdfc0b8ccb87c2f103c0519189f3b5767"
         }
       }
     }
