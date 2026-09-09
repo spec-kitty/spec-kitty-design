@@ -122,7 +122,7 @@ export class SkAppShell extends LitElement {
       if (!entry) return;
       this.#inlineSize = this.#contentInlineSize(entry);
       const responsiveNavigation = this.#responsiveNavigation;
-      if (previousResponsiveNavigation && !responsiveNavigation) this.#releaseHiddenFocus();
+      if (previousResponsiveNavigation !== responsiveNavigation) this.#releaseHiddenFocus();
       if (previousResponsiveNavigation !== responsiveNavigation) this.requestUpdate();
     });
     this.#inlineSize = this.#contentInlineSize();
@@ -143,11 +143,7 @@ export class SkAppShell extends LitElement {
     if (changed.get('open') === true && this.open !== true) {
       this.#releaseHiddenFocus();
     }
-    if (
-      changed.has('presentation') &&
-      this.#isResponsivePresentation(changed.get('presentation')) &&
-      !this.#responsiveNavigation
-    ) {
+    if (changed.has('presentation')) {
       this.#releaseHiddenFocus();
     }
     if (!changed.has('presentation')) return;
@@ -162,12 +158,6 @@ export class SkAppShell extends LitElement {
         `unknown sk-app-shell presentation "${String(this.presentation)}"; using legacy layout`,
       );
     }
-  }
-
-  #isResponsivePresentation(value: unknown): boolean {
-    return value === 'compact'
-      ? this.#inlineSize <= COMPACT_MAX_INLINE_SIZE
-      : value === 'rail-preserving' && this.#inlineSize <= RAIL_PRESERVING_MAX_INLINE_SIZE;
   }
 
   protected override updated(): void {
@@ -217,19 +207,22 @@ export class SkAppShell extends LitElement {
     }
   }
 
-  #reconcileAssignedRootExposure(): void {
-    this.#restoreSuppressedRoots();
-    if (!this.isConnected) return;
-
+  #regionExposure(): ReadonlyArray<readonly [ExposureRegion, boolean]> {
     const compact = this.#compact;
     const responsiveNavigation = this.#responsiveNavigation;
-    const regions: ReadonlyArray<readonly [ExposureRegion, boolean]> = [
+    return [
       ['personal-rail', !compact],
       ['context-sidebar', !responsiveNavigation],
       ['compact-header', responsiveNavigation],
       ['compact-navigation', this.#effectivelyOpen],
     ];
-    for (const [slotName, active] of regions) {
+  }
+
+  #reconcileAssignedRootExposure(): void {
+    this.#restoreSuppressedRoots();
+    if (!this.isConnected) return;
+
+    for (const [slotName, active] of this.#regionExposure()) {
       if (active) this.#releaseAssignedRoots(slotName);
       else this.#suppressAssignedRoots(slotName);
     }
@@ -243,8 +236,12 @@ export class SkAppShell extends LitElement {
     const active = this.getRootNode() instanceof Document
       ? this.ownerDocument.activeElement
       : (this.getRootNode() as ShadowRoot).activeElement;
-    if (active instanceof HTMLElement && this.#assignedWithin(active, 'compact-navigation')) {
-      active.blur();
+    if (!(active instanceof HTMLElement)) return;
+    for (const [slotName, exposed] of this.#regionExposure()) {
+      if (!exposed && this.#assignedWithin(active, slotName)) {
+        active.blur();
+        return;
+      }
     }
   }
 
@@ -269,7 +266,7 @@ export class SkAppShell extends LitElement {
     return Math.max(0, clientInlineSize - paddingStart - paddingEnd);
   }
 
-  #assignedWithin(node: Element, slotName: 'compact-header' | 'compact-navigation'): boolean {
+  #assignedWithin(node: Element, slotName: ExposureRegion): boolean {
     const expectedSlot = this.shadowRoot?.querySelector<HTMLSlotElement>(`slot[name="${slotName}"]`);
     if (!expectedSlot || !this.contains(node)) return false;
     for (let current: Element | null = node; current && current !== this; current = current.parentElement) {

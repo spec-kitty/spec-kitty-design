@@ -164,18 +164,26 @@ const settleResize = async (el: SkAppShell) => {
   await el.updateComplete;
 };
 
-const mountCompact = async (width = 390) => {
+type ResponsivePresentation = 'compact' | 'rail-preserving';
+
+const mountResponsive = async (presentation: ResponsivePresentation, width: number) => {
   const frame = document.createElement('div');
   frame.style.width = `${width}px`;
   document.body.append(frame);
   const el = document.createElement('sk-app-shell') as SkAppShell;
   // Use the consumer's declarative route here so the dedicated reflection arm
   // remains surgical: layout behaviour must not depend on property reflection.
-  el.setAttribute('presentation', 'compact');
+  el.setAttribute('presentation', presentation);
   el.open = true;
+  const navigationId = presentation === 'compact' ? 'compact-navigation' : 'rail-navigation';
   el.innerHTML = `
-    <button slot="compact-header" aria-expanded="true" aria-controls="compact-navigation">Menu</button>
-    <nav slot="compact-navigation" id="compact-navigation" aria-label="Repository navigation">
+    ${presentation === 'rail-preserving' ? `
+      <nav slot="personal-rail" aria-label="Product areas"><a href="#work">Work</a></nav>
+      <aside slot="context-sidebar" aria-label="Current workspace"><a href="#overview">Overview</a></aside>` : ''}
+    ${presentation === 'compact'
+      ? `<button slot="compact-header" aria-expanded="true" aria-controls="${navigationId}">Menu</button>`
+      : `<div slot="compact-header"><button aria-expanded="true" aria-controls="${navigationId}">Menu</button></div>`}
+    <nav slot="compact-navigation" id="${navigationId}" aria-label="Repository navigation">
       <a href="#missions">Missions</a>
     </nav>
     <header slot="page-header">Header</header>
@@ -185,8 +193,23 @@ const mountCompact = async (width = 390) => {
   el.compactTrigger = el.querySelector('button');
   await el.updateComplete;
   await settleResize(el);
-  return { el, frame, trigger: el.querySelector('button')!, link: el.querySelector('a')! };
+  return {
+    el,
+    frame,
+    personal: el.querySelector<HTMLElement>('[slot="personal-rail"]')!,
+    context: el.querySelector<HTMLElement>('[slot="context-sidebar"]')!,
+    trigger: el.querySelector<HTMLButtonElement>('button')!,
+    navigation: el.querySelector<HTMLElement>('[slot="compact-navigation"]')!,
+    link: el.querySelector<HTMLAnchorElement>('[slot="compact-navigation"] a')!,
+  };
 };
+
+const mountCompact = async (width = 390) => mountResponsive('compact', width);
+const mountRailPreserving = async (width = 1024) => mountResponsive('rail-preserving', width);
+const responsivePresentations = [
+  { label: 'compact', presentation: 'compact', width: 390 },
+  { label: 'rail-preserving', presentation: 'rail-preserving', width: 1024 },
+] as const;
 
 const acceptEscape = async (el: SkAppShell, origin: HTMLElement) => {
   const onDismiss = () => el.open = false;
@@ -398,8 +421,10 @@ test('[SC-017] assigned compact roots cross the inclusive content-box boundary a
   frame.remove();
 });
 
-test('[SC-012] slot changes restore stale roots before suppressing newly inactive direct roots', async () => {
-  const { el, frame } = await mountCompact();
+test.each(responsivePresentations)(
+  '[SC-012] $label slot changes restore stale roots before suppressing newly inactive direct roots',
+  async ({ presentation, width }) => {
+  const { el, frame } = await mountResponsive(presentation, width);
   const settleSlotChange = async () => {
     await Promise.resolve();
     await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
@@ -433,8 +458,9 @@ test('[SC-012] slot changes restore stale roots before suppressing newly inactiv
   personal.slot = 'personal-rail';
   el.append(personal);
   await settleSlotChange();
-  expect(personal.getAttribute('inert')).toBe('');
-  expect(personal.getAttribute('aria-hidden')).toBe('true');
+  expect([personal.getAttribute('inert'), personal.getAttribute('aria-hidden')]).toEqual(
+    presentation === 'compact' ? ['', 'true'] : [null, null],
+  );
 
   const context = document.createElement('aside');
   context.slot = 'context-sidebar';
@@ -462,10 +488,13 @@ test('[SC-012] slot changes restore stale roots before suppressing newly inactiv
   expect(compactHeader.getAttribute('inert')).toBe('');
   expect(compactHeader.getAttribute('aria-hidden')).toBe('true');
   frame.remove();
-});
+  },
+);
 
-test('[SC-012] disconnect restores assigned roots and reconnect reapplies current inactive exposure', async () => {
-  const { el, frame } = await mountCompact();
+test.each(responsivePresentations)(
+  '[SC-012] $label disconnect restores assigned roots and reconnect reapplies current inactive exposure',
+  async ({ presentation, width }) => {
+  const { el, frame } = await mountResponsive(presentation, width);
   el.open = false;
   await el.updateComplete;
   const compactNavigation = el.querySelector<HTMLElement>('[slot="compact-navigation"]')!;
@@ -492,15 +521,18 @@ test('[SC-012] disconnect restores assigned roots and reconnect reapplies curren
   expect(compactNavigation.getAttribute('inert')).toBe(null);
   expect(compactNavigation.getAttribute('aria-hidden')).toBe(null);
   frame.remove();
-});
+  },
+);
 
-test('[SC-012] an inactive shell inherits the original exposure lease across move, disconnect, and reconnect', async () => {
+test.each(responsivePresentations)(
+  '[SC-012] an inactive $label shell inherits the original exposure lease across move, disconnect, and reconnect',
+  async ({ presentation, width }) => {
   const frame = document.createElement('div');
-  frame.style.width = '390px';
+  frame.style.width = `${width}px`;
   document.body.append(frame);
 
   const first = document.createElement('sk-app-shell') as SkAppShell;
-  first.presentation = 'compact';
+  first.presentation = presentation;
   first.open = false;
   const roots = [
     document.createElement('nav'),
@@ -533,7 +565,7 @@ test('[SC-012] an inactive shell inherits the original exposure lease across mov
   expect(exposure()).toEqual(roots.map(() => ['', 'true']));
 
   const second = document.createElement('sk-app-shell') as SkAppShell;
-  second.presentation = 'compact';
+  second.presentation = presentation;
   second.open = false;
   frame.append(second);
   await second.updateComplete;
@@ -555,14 +587,17 @@ test('[SC-012] an inactive shell inherits the original exposure lease across mov
   await second.updateComplete;
   expect(exposure()).toEqual(original);
   frame.remove();
-});
+  },
+);
 
-test('[SC-012] an active destination shell releases a stale exposure lease before the old owner reconciles', async () => {
+test.each(responsivePresentations)(
+  '[SC-012] an active $label destination shell releases a stale exposure lease before the old owner reconciles',
+  async ({ presentation, width }) => {
   const frame = document.createElement('div');
-  frame.style.width = '390px';
+  frame.style.width = `${width}px`;
   document.body.append(frame);
   const first = document.createElement('sk-app-shell') as SkAppShell;
-  first.presentation = 'compact';
+  first.presentation = presentation;
   first.open = false;
   const root = document.createElement('nav');
   root.slot = 'compact-navigation';
@@ -575,7 +610,7 @@ test('[SC-012] an active destination shell releases a stale exposure lease befor
   expect([root.getAttribute('inert'), root.getAttribute('aria-hidden')]).toEqual(['', 'true']);
 
   const second = document.createElement('sk-app-shell') as SkAppShell;
-  second.presentation = 'compact';
+  second.presentation = presentation;
   second.open = true;
   frame.append(second);
   await second.updateComplete;
@@ -591,7 +626,8 @@ test('[SC-012] an active destination shell releases a stale exposure lease befor
   expect([root.getAttribute('inert'), root.getAttribute('aria-hidden')])
     .toEqual(['false', 'consumer-visible']);
   frame.remove();
-});
+  },
+);
 
 test('[SC-006] [SC-007] [SC-008] [SC-012] Escape emits one exact dismissal intent and accepted close restores focus after render', async () => {
   const { el, trigger, link } = await mountCompact();
@@ -670,8 +706,10 @@ test('[SC-006] nested shells assign one composed Escape to the nearest effective
   frame.remove();
 });
 
-test('[SC-012] ordinary controlled close releases focus from hidden compact navigation without restoring the trigger', async () => {
-  const { el, trigger, link } = await mountCompact();
+test.each(responsivePresentations)(
+  '[SC-012] ordinary controlled close releases focus from hidden $label navigation without restoring the trigger',
+  async ({ presentation, width }) => {
+  const { el, trigger, link } = await mountResponsive(presentation, width);
   const navigation = el.querySelector<HTMLElement>('[slot="compact-navigation"]')!;
   link.focus();
   expect(document.activeElement).toBe(link);
@@ -695,10 +733,13 @@ test('[SC-012] ordinary controlled close releases focus from hidden compact navi
   await el.updateComplete;
   expect(navigation.contains(document.activeElement)).toBe(false);
   expect(document.activeElement).not.toBe(trigger);
-});
+  },
+);
 
-test('[SC-010] Escape never mutates open and rejected dismissal cannot steal focus on a later route close', async () => {
-  const { el, trigger, link } = await mountCompact();
+test.each(responsivePresentations)(
+  '[SC-010] $label Escape never mutates open and rejected dismissal cannot steal focus on a later route close',
+  async ({ presentation, width }) => {
+  const { el, trigger, link } = await mountResponsive(presentation, width);
   el.addEventListener('sk-app-shell-dismiss', () => undefined);
   link.focus();
   link.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, composed: true }));
@@ -717,35 +758,40 @@ test('[SC-010] Escape never mutates open and rejected dismissal cannot steal foc
   el.open = false;
   await el.updateComplete;
   expect(document.activeElement).not.toBe(trigger);
-});
+  },
+);
 
-test('[SC-012] accepted dismissal does not focus a trigger without a same-root navigation target', async () => {
-  const { el, trigger, link } = await mountCompact();
-  trigger.setAttribute('aria-controls', 'outside-this-shell');
-  el.addEventListener('sk-app-shell-dismiss', () => el.open = false);
-  link.focus();
-  link.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, composed: true }));
-  await el.updateComplete;
-  await Promise.resolve();
-  expect(document.activeElement).not.toBe(trigger);
-});
+test.each(responsivePresentations)(
+  '[SC-012] accepted $label dismissal does not focus a trigger with a missing or invalid same-root target',
+  async ({ presentation, width }) => {
+  const { el, trigger, link } = await mountResponsive(presentation, width);
+  for (const controlledId of [null, 'outside-this-shell']) {
+    if (controlledId) trigger.setAttribute('aria-controls', controlledId);
+    else trigger.removeAttribute('aria-controls');
+    el.open = true;
+    await el.updateComplete;
+    await acceptEscape(el, link);
+    expect(document.activeElement).not.toBe(trigger);
+  }
+  },
+);
 
-test('[SC-012] accepted dismissal requires real compact-header and compact-navigation assignment', async () => {
-  const { el, trigger, link } = await mountCompact();
+test.each(responsivePresentations)(
+  '[SC-012] accepted $label dismissal requires real compact-header and compact-navigation assignment',
+  async ({ presentation, width }) => {
+  const { el, trigger, link } = await mountResponsive(presentation, width);
+  const header = el.querySelector<HTMLElement>('[slot="compact-header"]')!;
   const navigation = el.querySelector<HTMLElement>('[slot="compact-navigation"]')!;
 
   const falseHeader = document.createElement('section');
-  trigger.replaceWith(falseHeader);
-  falseHeader.append(trigger);
-  expect(trigger.assignedSlot).toBe(null);
+  header.replaceWith(falseHeader);
+  falseHeader.append(header);
+  expect(header.assignedSlot).toBe(null);
   await acceptEscape(el, link);
   expect(document.activeElement).not.toBe(trigger);
 
-  const validHeader = document.createElement('section');
-  validHeader.slot = 'compact-header';
-  falseHeader.replaceWith(validHeader);
-  trigger.removeAttribute('slot');
-  validHeader.append(trigger);
+  falseHeader.replaceWith(header);
+  expect(header.assignedSlot).not.toBe(null);
   el.open = true;
   await el.updateComplete;
   await acceptEscape(el, link);
@@ -760,10 +806,13 @@ test('[SC-012] accepted dismissal requires real compact-header and compact-navig
   await el.updateComplete;
   await acceptEscape(el, link);
   expect(document.activeElement).not.toBe(trigger);
-});
+  },
+);
 
-test('[SC-012] cross-shell and cross-root controlled targets cannot receive focus-return authority', async () => {
-  const { el, trigger, link } = await mountCompact();
+test.each(responsivePresentations)(
+  '[SC-012] $label cross-shell and cross-root controlled targets cannot receive focus-return authority',
+  async ({ presentation, width }) => {
+  const { el, trigger, link } = await mountResponsive(presentation, width);
   const ownNavigation = el.querySelector<HTMLElement>('[slot="compact-navigation"]')!;
   ownNavigation.removeAttribute('id');
 
@@ -784,7 +833,8 @@ test('[SC-012] cross-shell and cross-root controlled targets cannot receive focu
   await el.updateComplete;
   await acceptEscape(el, link);
   expect(document.activeElement).not.toBe(trigger);
-});
+  },
+);
 
 test('[SC-012] [SC-017] JavaScript uses the CSS content-box boundary for effective open', async () => {
   const { el, frame, link } = await mountCompact();
@@ -892,38 +942,6 @@ test('Escape emits nothing for absent, unknown, desktop, or controlled-closed co
   expect(el.open).toBe(true);
 });
 
-const mountRailPreserving = async (width = 1024) => {
-  const frame = document.createElement('div');
-  frame.style.width = `${width}px`;
-  document.body.append(frame);
-  const el = document.createElement('sk-app-shell') as SkAppShell;
-  el.presentation = 'rail-preserving';
-  el.open = true;
-  el.innerHTML = `
-    <nav slot="personal-rail" aria-label="Product areas"><a href="#work">Work</a></nav>
-    <aside slot="context-sidebar" aria-label="Current workspace"><a href="#overview">Overview</a></aside>
-    <div slot="compact-header"><button aria-expanded="true" aria-controls="rail-navigation">Menu</button></div>
-    <nav slot="compact-navigation" id="rail-navigation" aria-label="Repository navigation">
-      <a href="#missions">Missions</a>
-    </nav>
-    <header slot="page-header">Header</header>
-    <article>Main</article>
-  `;
-  frame.append(el);
-  el.compactTrigger = el.querySelector('button');
-  await el.updateComplete;
-  await settleResize(el);
-  return {
-    el,
-    frame,
-    personal: el.querySelector<HTMLElement>('[slot="personal-rail"]')!,
-    context: el.querySelector<HTMLElement>('[slot="context-sidebar"]')!,
-    trigger: el.querySelector<HTMLButtonElement>('button')!,
-    navigation: el.querySelector<HTMLElement>('[slot="compact-navigation"]')!,
-    link: el.querySelector<HTMLAnchorElement>('[slot="compact-navigation"] a')!,
-  };
-};
-
 test('[SC-010] rail-preserving survives pre-upgrade assignment, reflects, and removes to undefined', async () => {
   const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
   const tag = `sk-app-shell-rail-preupgrade-${Math.random().toString(36).slice(2)}`;
@@ -965,12 +983,20 @@ test.each([1100, 1024, 768, 390])(
   },
 );
 
-test('[SC-012] [SC-017] rail-preserving ends at 1101px and restores exact consumer exposure', async () => {
-  const { el, frame, personal, context, trigger, navigation } = await mountRailPreserving(1100);
+test('[SC-012] [SC-017] rail-preserving crosses 1100↔1101 in both directions without mutating state or hiding focus', async () => {
+  const { el, frame, personal, context, trigger, navigation, link } = await mountRailPreserving(1100);
+  const personalLink = personal.querySelector<HTMLAnchorElement>('a')!;
+  const contextLink = context.querySelector<HTMLAnchorElement>('a')!;
+  const linkBlur = vi.spyOn(link, 'blur');
+  const contextBlur = vi.spyOn(contextLink, 'blur');
+  const personalBlur = vi.spyOn(personalLink, 'blur');
+  const triggerBlur = vi.spyOn(trigger, 'blur');
   context.setAttribute('aria-hidden', 'consumer-context');
   navigation.setAttribute('aria-hidden', 'consumer-navigation');
   await el.updateComplete;
   expect(getComputedStyle(part(el, 'context')!).display).toBe('none');
+  link.focus();
+  expect(document.activeElement).toBe(link);
 
   frame.style.width = '1101px';
   await settleResize(el);
@@ -984,6 +1010,45 @@ test('[SC-012] [SC-017] rail-preserving ends at 1101px and restores exact consum
   expect([trigger.parentElement!.getAttribute('inert'), trigger.parentElement!.getAttribute('aria-hidden')])
     .toEqual(['', 'true']);
   expect([navigation.getAttribute('inert'), navigation.getAttribute('aria-hidden')]).toEqual(['', 'true']);
+  expect(linkBlur).toHaveBeenCalledOnce();
+  expect(document.activeElement).not.toBe(link);
+
+  contextLink.focus();
+  expect(document.activeElement).toBe(contextLink);
+  frame.style.width = '1100px';
+  await settleResize(el);
+  expect(el.open).toBe(true);
+  expect(getComputedStyle(part(el, 'context')!).display).toBe('none');
+  expect(getComputedStyle(part(el, 'compact-header')!).display).not.toBe('none');
+  expect(part(el, 'compact-navigation')?.hidden).toBe(false);
+  expect([context.getAttribute('inert'), context.getAttribute('aria-hidden')]).toEqual(['', 'true']);
+  expect([trigger.parentElement!.getAttribute('inert'), trigger.parentElement!.getAttribute('aria-hidden')])
+    .toEqual([null, null]);
+  expect([navigation.getAttribute('inert'), navigation.getAttribute('aria-hidden')])
+    .toEqual([null, 'consumer-navigation']);
+  expect(contextBlur).toHaveBeenCalledOnce();
+  expect(document.activeElement).not.toBe(contextLink);
+
+  personalLink.focus();
+  frame.style.width = '1101px';
+  await settleResize(el);
+  expect(document.activeElement).toBe(personalLink);
+  expect(personalBlur).not.toHaveBeenCalled();
+  frame.style.width = '1100px';
+  await settleResize(el);
+  expect(document.activeElement).toBe(personalLink);
+
+  trigger.focus();
+  expect(document.activeElement).toBe(trigger);
+  frame.style.width = '1101px';
+  await settleResize(el);
+  expect(el.open).toBe(true);
+  expect(triggerBlur).toHaveBeenCalledOnce();
+  expect(document.activeElement).not.toBe(trigger);
+  frame.style.width = '1100px';
+  await settleResize(el);
+  expect(part(el, 'compact-navigation')?.hidden).toBe(false);
+  expect(el.open).toBe(true);
   frame.remove();
 });
 
@@ -996,23 +1061,61 @@ test('[SC-006] [SC-012] rail-preserving reuses accepted Escape dismissal and foc
   frame.remove();
 });
 
-test('[SC-012] presentation transitions release focus only when the destination becomes hidden', async () => {
+test('[SC-012] presentation transitions release focus from every destination-hidden region only', async () => {
   const retained = await mountRailPreserving(768);
+  const retainedBlur = vi.spyOn(retained.link, 'blur');
   retained.link.focus();
   retained.el.presentation = 'compact';
   await retained.el.updateComplete;
   expect(part(retained.el, 'compact-navigation')?.hidden).toBe(false);
   expect(document.activeElement).toBe(retained.link);
+  expect(retainedBlur).not.toHaveBeenCalled();
   retained.frame.remove();
 
   const released = await mountRailPreserving(1024);
+  const releasedBlur = vi.spyOn(released.link, 'blur');
   released.link.focus();
   released.el.presentation = 'compact';
   await released.el.updateComplete;
   expect(part(released.el, 'compact-navigation')?.hidden).toBe(true);
   expect(document.activeElement).not.toBe(released.link);
+  expect(releasedBlur).toHaveBeenCalledOnce();
   expect(released.el.open).toBe(true);
   released.frame.remove();
+
+  const personalHidden = await mountRailPreserving(768);
+  const personalLink = personalHidden.personal.querySelector<HTMLAnchorElement>('a')!;
+  const personalBlur = vi.spyOn(personalLink, 'blur');
+  personalLink.focus();
+  personalHidden.el.presentation = 'compact';
+  await personalHidden.el.updateComplete;
+  expect(personalHidden.personal.getAttribute('inert')).toBe('');
+  expect(document.activeElement).not.toBe(personalLink);
+  expect(personalBlur).toHaveBeenCalledOnce();
+  personalHidden.frame.remove();
+
+  const contextHidden = await mountRailPreserving(1024);
+  contextHidden.el.presentation = undefined;
+  await contextHidden.el.updateComplete;
+  const contextLink = contextHidden.context.querySelector<HTMLAnchorElement>('a')!;
+  const contextBlur = vi.spyOn(contextLink, 'blur');
+  contextLink.focus();
+  contextHidden.el.presentation = 'rail-preserving';
+  await contextHidden.el.updateComplete;
+  expect(contextHidden.context.getAttribute('inert')).toBe('');
+  expect(document.activeElement).not.toBe(contextLink);
+  expect(contextBlur).toHaveBeenCalledOnce();
+  contextHidden.frame.remove();
+
+  const headerHidden = await mountRailPreserving(1024);
+  const headerBlur = vi.spyOn(headerHidden.trigger, 'blur');
+  headerHidden.trigger.focus();
+  headerHidden.el.presentation = undefined;
+  await headerHidden.el.updateComplete;
+  expect(headerHidden.trigger.parentElement!.getAttribute('inert')).toBe('');
+  expect(document.activeElement).not.toBe(headerHidden.trigger);
+  expect(headerBlur).toHaveBeenCalledOnce();
+  headerHidden.frame.remove();
 });
 
 test.each(['vertical-rl', 'sideways-rl'] as const)(

@@ -90,8 +90,37 @@ Ten new surgical mutations cover valid-value recognition, inclusive TypeScript a
 thresholds, logical `max-inline-size`, personal retention, context suppression, header exposure,
 the shared responsive-navigation derivation, the rail-plus-content grid, and the rail-preserving
 forced-colors selector. Three existing #254 arms were retargeted to the shared expressions they now
-guard; measured collateral is declared only on the shared navigation arm. The refreshed standing
-set is 223 arms.
+guard. Final review retargeted the existing presentation-focus arm again to the shared destination
+exposure matrix, without changing the standing count. A deliberate mutation of the controlled-open
+navigation decision made 16 tests fail in the same native app-shell fixture; every failure carried
+SC-012 because slot reconciliation, lease transfer, controlled close, rail exposure, boundary
+transitions, and destination-hidden focus all consume that decision. Its measured collateral and
+rationale are declared in the registry. The refreshed standing set remains 223 arms.
+
+## Independent-review correction evidence
+
+The final correction batch remained inside the existing responsive shell seam. A deliberate
+counterfeit repository landmark and removal of the forced-colors compact-header focus outline made
+the two new browser assertions fail before correction. The app-shell browser suite now proves that
+closed rail navigation contributes zero repository landmarks, zero context landmarks and no Tab
+targets while retaining exactly one personal navigation and one main landmark; open navigation
+contributes exactly one consumer-named repository landmark. It also proves the focused Menu gives
+the compact header a system-color outline while the drawer boundary remains visible.
+
+The #254 controlled seam is replayed for both compact and rail-preserving presentations: native
+pointer/keyboard route close, accepted and rejected Escape, ordinary close, missing/invalid/
+disconnected/false-nested/cross-root/cross-shell authority, direct and wrapped assignment,
+1100↔1101 focus/state transitions in both directions, dynamic slot assignment, and exposure-lease
+move/disconnect/reconnect. The shared native fixtures expanded from 44 to 53 app-shell tests.
+
+Firefox then exposed a product defect at the rail 1100→1101 boundary: the compact-header root was
+already inert and hidden while focus remained inside it. The actual RED is
+`/tmp/issue-274-review-corrections-cf.log` (87 passed, 1 failed); the later misleadingly named
+`/tmp/issue-274-focus-release-red-firefox.log` is a one-test GREEN rerun and is not cited as RED.
+The existing focus-release seam now reads the same destination exposure matrix as root suppression
+and explicitly blurs only an assigned region that becomes hidden. Personal-rail focus remains
+untouched in rail-preserving mode. Rebuilt focused Chromium/Firefox passed 88/88 and repository-
+matched WebKit passed 44/44.
 
 ## Verification ledger
 
@@ -100,14 +129,19 @@ set is 223 arms.
 | `npm ci --ignore-scripts` | Pass; 1534 packages installed. The later audit gate found no high/critical vulnerability. |
 | `bash scripts/npm-audit-gate.sh`; `npm run security:lockfile-check`; `bash scripts/check-action-pins.sh` | Pass. |
 | CSS, element-markup, styles-only-markup, React and Vue generation checks/selftests | Pass after source-derived regeneration. |
-| `npx nx run elements:analyze`; manifest content check/selftest | Pass; 28 registered elements, 114 documented public members. |
+| `npx nx run elements:analyze`; manifest content check/selftest | Pass; 28 registered elements, 116 documented public members. |
 | builds plus `node scripts/measure-elements-sizes.mjs --check` | Pass after each required rebuild. |
 | entries, no-CSS-in-source, adopted-CSS boundary/selftest, CSS hygiene, part ratchet | Pass. |
 | behavior-import guard/selftest | Pass for 31 fixture files and 22 probe rows after deleting only Vitest's ignored failure screenshots. No visual baseline was removed. |
 | story-theme, pattern-composition, gate-wiring/defeat, ADR index and LLM ADR surface checks/selftests | Pass. |
 | `node scripts/typecheck-all.mjs` | Pass for all five projects. |
 | `npm run quality:all`; `npm run quality:commitlint` | Pass; existing security-plugin warnings remain non-failing and none comes from the changed app-shell surface. |
-| `npm run test` | Pass, 519/519 across 45 files; suite floor node 34 plus browser 485, zero skipped. Log SHA-256 `0bad35dbb57d3c5d6fad00face005e22a14509b7c2d2333937b8faf5a26c17ee`. |
+| `npm test` after final review correction | Pass, 541/541 across 45 files; suite floor node 34 plus browser Chromium 507, zero skipped. Log SHA-256 `15902c39fb4e47d95d31c09b56892b1d65830468e3e1bf78018f1a95b980034a`. |
+| focused rebuilt app-shell Playwright, Chromium + Firefox | Pass, 88/88. Log SHA-256 `44b14aae4cf8d99b97562f1153f5650ecdca85ec2cfe530114634fdc7e8d13b9`. |
+| official Playwright 1.62.1 Noble container, focused WebKit | Pass, 44/44. Log SHA-256 `37e40bccf7e689d4dd07c6f500f3c45a050e17dda565ca4258faeaeed3ead11f`. |
+| `node scripts/suite-selftest.mjs` after review correction | Pass: green 507-assertion baseline, 128 registry pairs, 41-source impact graph, zero fallbacks, all 223 mutations produced the named RED in 909.1s under the 1649.8s ceiling. Log SHA-256 `071751b2b670eeb25dad75f793a297b85891003d9d806f97ace057ddb7068484`. |
+| typecheck-all, quality-all, CEM analyze + manifest check | Pass; all five typecheck projects, lint/stylelint/htmlhint, 28 elements and 116 documented public members. Log SHA-256 `1c04e693244238ffb6d8665edb48ac748dd6fcd3db9b442ef0e0164e324b3093`. |
+| generation/drift checks and official Node 22 size regeneration/check | Pass; CSS/markup/React/Vue outputs current, entries/CSS/parts/story/pattern/ADR surfaces current, and SIZES regenerated by Node 22.23.2. Drift log SHA-256 `164792babb913541f06210591a91b8621d904beabca2b256a62610dd30a0bdb4e`; size-check log SHA-256 `74c829afa91ebabbc54aeff526c52dc98779a92fa72cbe3ade29ad69046ea01c`. |
 | `node scripts/measure-suite-time.mjs` | Pass, 14.7s against the 40s ceiling. |
 | `node scripts/gate-selftest.mjs` | Pass, 50/50 shapes. Log SHA-256 `cacc8faff349f6c90e09c70e3bc1e68eb42dfa2be5be8a8601a5cc131078592e`. |
 | `node scripts/build-storybook-with-budget.mjs` | Pass in 9.74s against the 180s ceiling. Log SHA-256 `c2a8ed81daca75ee81582be649348722bb357c18753a8f023e6d06391efe0942`. |
@@ -139,20 +173,23 @@ follow-up commit freezes those corrected anchors before another exclusive 223-ar
 command, result and log digest are recorded in PR evidence because they cannot be circularly
 embedded in the commit under test.
 
-The canonical three-browser Playwright run with a mission-local `TMPDIR` passed 640 tests and
-skipped 29, but failed 300: the host lacks the libraries Playwright requires to launch WebKit,
-and the pre-assembler/non-serialized Chromium/Firefox attempt also exposed the missing demo and
-shared-host flake. The assembled two-worker Chromium/Firefox replay above resolved every
-non-WebKit failure. Full-run log SHA-256:
-`aa668147039ad510dd484d6502711a17b2f89d2e06bd56115a123ef71825d4ae`.
-WebKit remains a real CI requirement and is not claimed as passed locally.
+The old host three-browser run failed because host WebKit libraries are absent; that environment
+gap is now closed by the repository-matched official Playwright container result above. The last
+pre-review assembled aggregate Chromium/Firefox run remains green at 812 passed and 36 intentional
+skips. A post-review attempt scheduled 862 cases through the isolated server but is invalid: one
+inherited Team Overview test hard-codes `localhost:6006`, retried twice against the deliberately
+unused foreign port, and the runner then ended without a summary at case 576. It is preserved as
+non-green/non-gate evidence with SHA-256
+`0831d0ceb5e51ac0e2f107c67189e3cc4fa99b39d5ea04f278664cd0ad813f16`; it does not displace the
+exact post-review focused 88/88 Chromium/Firefox and 44/44 WebKit results. The mandatory
+post-#273 refresh will rerun the full aggregate on its canonical isolated server.
 
 The host `/tmp` was concurrently at 13 GiB of 16 GiB. Initial mutation, axe, and Playwright
 attempts therefore produced import timeouts, `ERR_INSUFFICIENT_RESOURCES`, and Chromium
 `Disk quota exceeded`. Reruns redirected only temporary browser profiles to an ignored cache
 inside this mission lane; no foreign process or temporary file was stopped or removed.
 
-T017 independent exact-head Codex review, T018 PR/CI baseline inspection, and T019 reviewer-owned
-real Chrome browser-UI 200% evidence remain intentionally pending after implementer handoff. No
-CSS zoom, browser viewport resize, Playwright device scale factor, or local screenshot is claimed
-as real browser-UI zoom, and `chromium-200-percent.png` has not been created.
+T017 fresh exact-head Codex review, T018 PR/CI convergence, and T019 final-head reviewer-owned real
+Chrome browser-UI 200% evidence remain pending until #273 integrates and this branch is rebased and
+regenerated on the new train. No CSS zoom, browser viewport resize, Playwright device scale factor,
+or local screenshot is claimed as real browser-UI zoom in this intermediate correction head.

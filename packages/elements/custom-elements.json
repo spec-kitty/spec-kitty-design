@@ -1533,7 +1533,7 @@
                 {
                   "name": "slotName",
                   "type": {
-                    "text": "'compact-header' | 'compact-navigation'"
+                    "text": "ExposureRegion"
                   }
                 }
               ]
@@ -1599,24 +1599,6 @@
               "privacy": "private"
             },
             {
-              "kind": "method",
-              "name": "#isResponsivePresentation",
-              "privacy": "private",
-              "return": {
-                "type": {
-                  "text": "boolean"
-                }
-              },
-              "parameters": [
-                {
-                  "name": "value",
-                  "type": {
-                    "text": "unknown"
-                  }
-                }
-              ]
-            },
-            {
               "kind": "field",
               "name": "#onExposureSlotChange",
               "privacy": "private"
@@ -1651,6 +1633,16 @@
               "return": {
                 "type": {
                   "text": "void"
+                }
+              }
+            },
+            {
+              "kind": "method",
+              "name": "#regionExposure",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "ReadonlyArray<readonly [ExposureRegion, boolean]>"
                 }
               }
             },

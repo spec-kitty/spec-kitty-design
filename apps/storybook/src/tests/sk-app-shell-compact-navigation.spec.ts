@@ -30,6 +30,11 @@ const focusState = (root: Locator) => root.evaluate((element) => ({
   focusWithin: element.matches(':focus-within'),
 }));
 
+const responsiveSeamStories = [
+  { label: 'compact', closed: 'compact-closed', open: 'compact-open', width: 390, boundary: 860 },
+  { label: 'rail-preserving', closed: 'rail-preserving-closed', open: 'rail-preserving-open', width: 1024, boundary: 1100 },
+] as const;
+
 for (const width of [390, 768, 860]) {
   test(`compact drawer is effective at the inclusive ${width}px shell boundary`, async ({ page }) => {
     const shell = await load(page, `compact-${width}`);
@@ -156,8 +161,9 @@ test('native presentation attribute removal restores the omitted legacy state wi
   });
 });
 
-test('native pointer and keyboard activation control state while route close remains consumer-owned', async ({ page }) => {
-  const shell = await load(page, 'compact-closed', { width: 390, height: 720 });
+for (const mode of responsiveSeamStories) {
+test(`${mode.label} native pointer and keyboard activation control state while route close remains consumer-owned`, async ({ page }) => {
+  const shell = await load(page, mode.closed, { width: mode.width, height: 720 });
   const trigger = page.getByRole('button', { name: /menu/i });
   await trigger.click();
   await expect(shell).toHaveAttribute('open', '');
@@ -175,9 +181,11 @@ test('native pointer and keyboard activation control state while route close rem
   await page.keyboard.press('Enter');
   await expect(shell).toHaveAttribute('open', '');
 });
+}
 
-test('accepted Escape closes before restoring focus to the same-root light-DOM trigger', async ({ page }) => {
-  const shell = await load(page, 'compact-open', { width: 390, height: 720 });
+for (const mode of responsiveSeamStories) {
+test(`${mode.label} accepted Escape closes before restoring focus to the same-root light-DOM trigger`, async ({ page }) => {
+  const shell = await load(page, mode.open, { width: mode.width, height: 720 });
   const trigger = page.getByRole('button', { name: /menu/i });
   const link = shell.locator('[slot="compact-navigation"] a[href="#missions"]');
   const events = await shell.evaluateHandle((element) => {
@@ -201,9 +209,11 @@ test('accepted Escape closes before restoring focus to the same-root light-DOM t
     { detail: { reason: 'escape' }, bubbles: true, composed: true, cancelable: false },
   ]);
 });
+}
 
-test('rejected Escape followed by ordinary route close releases hidden focus without restoring the trigger', async ({ page }) => {
-  const shell = await load(page, 'compact-open', { width: 390, height: 720 });
+for (const mode of responsiveSeamStories) {
+test(`${mode.label} rejected Escape followed by ordinary route close releases hidden focus without restoring the trigger`, async ({ page }) => {
+  const shell = await load(page, mode.open, { width: mode.width, height: 720 });
   const result = await shell.evaluate(async (element) => {
     const appShell = element as HTMLElement & { open: boolean; updateComplete: Promise<unknown> };
     const trigger = appShell.querySelector<HTMLButtonElement>('[slot="compact-header"] button')!;
@@ -238,9 +248,11 @@ test('rejected Escape followed by ordinary route close releases hidden focus wit
     triggerFocused: false,
   });
 });
+}
 
-test('focus return follows actual slot assignment for direct, wrapped, and falsely slotted controls', async ({ page }) => {
-  const shell = await load(page, 'compact-open', { width: 1000, height: 720 });
+for (const mode of responsiveSeamStories) {
+test(`${mode.label} focus return follows actual slot assignment for direct, wrapped, and falsely slotted controls`, async ({ page }) => {
+  const shell = await load(page, mode.open, { width: Math.max(mode.width, 1200), height: 720 });
   const results = await shell.evaluate(async (element) => {
     const appShell = element as HTMLElement & {
       compactTrigger: HTMLElement | null;
@@ -312,6 +324,7 @@ test('focus return follows actual slot assignment for direct, wrapped, and false
     falselySlottedTarget: false,
   });
 });
+}
 
 test('border-box padding keeps CSS presentation and Escape behavior aligned at 860/861 content px', async ({ page }) => {
   const shell = await load(page, 'compact-open', { width: 1200, height: 720 });
@@ -440,20 +453,22 @@ test('vertical writing keeps CSS placement, JS visibility, exposure, and Escape 
   });
 });
 
-test('resizing both directions never mutates open or leaves focus in hidden navigation', async ({ page }) => {
-  const shell = await load(page, 'compact-open', { width: 1200, height: 720 });
+for (const mode of responsiveSeamStories) {
+test(`${mode.label} resizing both directions never mutates open or leaves focus in hidden navigation`, async ({ page }) => {
+  const shell = await load(page, mode.open, { width: 1280, height: 720 });
   const frame = shell.locator('..');
   const link = shell.locator('[slot="compact-navigation"] a[href="#missions"]');
   await link.focus();
-  await frame.evaluate((element) => element.style.width = '861px');
+  await frame.evaluate((element, width) => element.style.width = `${width}px`, mode.boundary + 1);
   await expect(shadowPart(shell, 'compact-navigation')).toBeHidden();
   await expect(shadowPart(shell, 'compact-navigation')).toHaveAttribute('aria-hidden', 'true');
   await expect(shell).toHaveAttribute('open', '');
   expect(await link.evaluate((element) => document.activeElement === element)).toBe(false);
-  await frame.evaluate((element) => element.style.width = '860px');
+  await frame.evaluate((element, width) => element.style.width = `${width}px`, mode.boundary);
   await expect(shadowPart(shell, 'compact-navigation')).toBeVisible();
   await expect(shell).toHaveAttribute('open', '');
 });
+}
 
 for (const region of [
   { name: 'personal', slot: 'personal-rail', focusable: 'a[href="#work"]' },
@@ -476,21 +491,23 @@ for (const region of [
   });
 }
 
-test('860→861 releases focus from the compact-header trigger when it becomes inert', async ({ page }) => {
-  const shell = await load(page, 'compact-open', { width: 1200, height: 720 });
-  await setFrameWidth(shell, 860);
+for (const mode of responsiveSeamStories) {
+test(`${mode.boundary}→${mode.boundary + 1} releases focus from the ${mode.label} compact-header trigger when it becomes inert`, async ({ page }) => {
+  const shell = await load(page, mode.open, { width: 1280, height: 720 });
+  await setFrameWidth(shell, mode.boundary);
   const root = shell.locator('[slot="compact-header"]');
   const trigger = root.locator('button');
   await expect(root).not.toHaveAttribute('inert', '');
   await trigger.focus();
   expect(await focusState(root)).toEqual({ containsActive: true, focusWithin: true });
 
-  await setFrameWidth(shell, 861);
+  await setFrameWidth(shell, mode.boundary + 1);
   await expect(root).toHaveAttribute('inert', '');
   await expect(root).toHaveAttribute('aria-hidden', 'true');
   expect(await focusState(root)).toEqual({ containsActive: false, focusWithin: false });
   await expect(shell).toHaveAttribute('open', '');
 });
+}
 
 for (const { storyName, viewport, drawerScrolls } of [
   { storyName: 'compact-short-viewport', viewport: { width: 390, height: 320 }, drawerScrolls: true },
@@ -647,6 +664,15 @@ for (const { width, effective } of [
     expect(viewport.scrollWidth).toBeLessThanOrEqual(viewport.clientWidth);
 
     await expect(personal).toBeVisible();
+    await expect(page.getByRole('navigation', { name: 'Product areas', exact: true })).toHaveCount(1);
+    await expect(page.getByRole('navigation', { name: 'Repository navigation', exact: true }))
+      .toHaveCount(effective ? 1 : 0);
+    await expect(page.getByRole('complementary', { name: 'Current workspace', exact: true }))
+      .toHaveCount(effective ? 0 : 1);
+    await expect(page.getByRole('navigation')).toHaveCount(effective ? 2 : 1);
+    expect(await shell.evaluate((element) =>
+      element.shadowRoot!.querySelectorAll('nav,[role="navigation"]').length,
+    )).toBe(0);
     const personalBox = (await personal.boundingBox())!;
     const contextBox = (await context.boundingBox())!;
     const contentBox = (await content.boundingBox())!;
@@ -671,6 +697,44 @@ for (const { width, effective } of [
     }
   });
 }
+
+test('rail-preserving 1100↔1101 transitions preserve open and personal focus while releasing newly hidden focus', async ({ page }) => {
+  const shell = await load(page, 'rail-preserving-open', { width: 1280, height: 720 });
+  const personal = shell.locator('[slot="personal-rail"]');
+  const context = shell.locator('[slot="context-sidebar"]');
+  const compactHeader = shell.locator('[slot="compact-header"]');
+  const navigation = shell.locator('[slot="compact-navigation"]');
+  const personalLink = personal.getByRole('link', { name: 'Work' });
+  const contextLink = context.getByRole('link', { name: 'Overview' });
+  const trigger = compactHeader.getByRole('button', { name: 'Menu' });
+
+  await setFrameWidth(shell, 1101);
+  await contextLink.focus();
+  await expect(contextLink).toBeFocused();
+  await setFrameWidth(shell, 1100);
+  await expect(shell).toHaveAttribute('open', '');
+  await expect(context).toHaveAttribute('inert', '');
+  await expect(navigation).not.toHaveAttribute('inert', '');
+  await expect(shadowPart(shell, 'compact-navigation')).toBeVisible();
+  expect(await focusState(context)).toEqual({ containsActive: false, focusWithin: false });
+
+  await personalLink.focus();
+  await setFrameWidth(shell, 1101);
+  await expect(personalLink).toBeFocused();
+  await setFrameWidth(shell, 1100);
+  await expect(personalLink).toBeFocused();
+
+  await trigger.focus();
+  await expect(trigger).toBeFocused();
+  await setFrameWidth(shell, 1101);
+  await expect(shell).toHaveAttribute('open', '');
+  await expect(compactHeader).toHaveAttribute('inert', '');
+  await expect(navigation).toHaveAttribute('inert', '');
+  expect(await focusState(compactHeader)).toEqual({ containsActive: false, focusWithin: false });
+  await setFrameWidth(shell, 1100);
+  await expect(shell).toHaveAttribute('open', '');
+  await expect(shadowPart(shell, 'compact-navigation')).toBeVisible();
+});
 
 test('rail-preserving is shell-relative inside a wider viewport and respects content-box padding', async ({ page }) => {
   const shell = await load(page, 'rail-preserving-open', { width: 1440, height: 900 });
@@ -721,10 +785,37 @@ test('rail-preserving closed/open navigation reuses the controlled dismissal sea
   await expect(shadowPart(closed, 'compact-header')).toBeVisible();
   await expect(shadowPart(closed, 'compact-navigation')).toBeHidden();
   await expect(closed.locator('[slot="compact-navigation"]')).toHaveAttribute('inert', '');
+  await expect(page.getByRole('navigation', { name: 'Repository navigation', exact: true })).toHaveCount(0);
+  await expect(page.getByRole('complementary', { name: 'Current workspace', exact: true })).toHaveCount(0);
+  await expect(page.getByRole('navigation', { name: 'Product areas', exact: true })).toHaveCount(1);
+  await expect(page.getByRole('main')).toHaveCount(1);
+  expect(await closed.ariaSnapshot()).not.toContain('Repository navigation');
+  expect(await closed.evaluate((element) =>
+    element.shadowRoot!.querySelectorAll('nav,[role="navigation"]').length,
+  )).toBe(0);
+  await page.evaluate(() => {
+    document.body.tabIndex = -1;
+    document.body.focus();
+  });
+  for (let tab = 0; tab < 6; tab += 1) {
+    await page.keyboard.press('Tab');
+    expect(await closed.evaluate((element) =>
+      !element.querySelector('[slot="compact-navigation"]')!.contains(document.activeElement),
+    )).toBe(true);
+  }
 
   const open = await load(page, 'rail-preserving-open', { width: 1024, height: 720 });
   const trigger = open.locator('[slot="compact-header"] button');
   const link = open.locator('[slot="compact-navigation"] a[href="#missions"]');
+  await expect(page.getByRole('navigation', { name: 'Repository navigation', exact: true })).toHaveCount(1);
+  await expect(page.getByRole('complementary', { name: 'Current workspace', exact: true })).toHaveCount(0);
+  await expect(page.getByRole('navigation', { name: 'Product areas', exact: true })).toHaveCount(1);
+  await expect(page.getByRole('main')).toHaveCount(1);
+  await expect(page.getByRole('navigation', { name: 'Repository navigation', exact: true }))
+    .toHaveAccessibleName('Repository navigation');
+  expect(await open.evaluate((element) =>
+    element.shadowRoot!.querySelectorAll('nav,[role="navigation"]').length,
+  )).toBe(0);
   const triggerBox = (await trigger.boundingBox())!;
   expect(triggerBox.width).toBeGreaterThanOrEqual(44);
   expect(triggerBox.height).toBeGreaterThanOrEqual(44);
@@ -779,12 +870,31 @@ test('rail-preserving theme, forced-colors, reduced-motion, and axe contracts ho
 
   await page.emulateMedia({ forcedColors: 'active' });
   const forced = await load(page, 'rail-preserving-forced-colors', { width: 1024, height: 720 });
-  const forcedStyle = await shadowPart(forced, 'compact-navigation').evaluate((element) => ({
-    outlineStyle: getComputedStyle(element).outlineStyle,
-    outlineWidth: Number.parseFloat(getComputedStyle(element).outlineWidth),
-  }));
-  expect(forcedStyle.outlineStyle).toBe('solid');
-  expect(forcedStyle.outlineWidth).toBeGreaterThan(0);
+  await forced.locator('[slot="compact-header"] button').focus();
+  const forcedStyle = await forced.evaluate((element) => {
+    const header = element.shadowRoot!.querySelector<HTMLElement>('[part="compact-header"]')!;
+    const navigation = element.shadowRoot!.querySelector<HTMLElement>('[part="compact-navigation"]')!;
+    const reference = document.createElement('span');
+    reference.style.color = 'CanvasText';
+    element.shadowRoot!.append(reference);
+    const result = {
+      headerFocusWithin: header.matches(':focus-within'),
+      headerOutlineStyle: getComputedStyle(header).outlineStyle,
+      headerOutlineWidth: Number.parseFloat(getComputedStyle(header).outlineWidth),
+      headerOutlineColor: getComputedStyle(header).outlineColor,
+      navigationOutlineStyle: getComputedStyle(navigation).outlineStyle,
+      navigationOutlineWidth: Number.parseFloat(getComputedStyle(navigation).outlineWidth),
+      systemCanvasText: getComputedStyle(reference).color,
+    };
+    reference.remove();
+    return result;
+  });
+  expect(forcedStyle.headerFocusWithin).toBe(true);
+  expect(forcedStyle.headerOutlineStyle).toBe('solid');
+  expect(forcedStyle.headerOutlineWidth).toBeGreaterThan(0);
+  expect(forcedStyle.headerOutlineColor).toBe(forcedStyle.systemCanvasText);
+  expect(forcedStyle.navigationOutlineStyle).toBe('solid');
+  expect(forcedStyle.navigationOutlineWidth).toBeGreaterThan(0);
 
   await page.emulateMedia({ forcedColors: 'none', reducedMotion: 'reduce' });
   const reduced = await load(page, 'rail-preserving-reduced-motion', { width: 1024, height: 720 });
