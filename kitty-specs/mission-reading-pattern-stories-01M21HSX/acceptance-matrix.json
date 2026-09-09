@@ -8,20 +8,20 @@
       "criterion_id": "FR-001",
       "description": "The Mission Reading family is a Storybook-only composition of public design-system surfaces, native HTML, and pattern-owned CSS, with no published page component.",
       "proof_type": "code_review_and_composition_gate",
-      "evidence": "Exact rebased product head df4bf66bc72c287e6aaadf82f5fce18c766de5af on train 674ebe23bea974eb8bef2dbd64f4481e5f94d212: Mission Reading remains Storybook-only; composition passes 47 probes, 5 fixtures, 107 rules, and 20 public tags; CI 34332459374 is green.",
+      "evidence": "Exact rebased product head b68f84d28715ca8ef551f40cda24f3a13e054f1e on train 57d1b083a6799fc5ef7f2cff75493a7f64fd59a3: Mission Reading remains Storybook-only; composition passes 47 probes, 5 fixtures, 108 rules, and 20 public tags; CI 34343137694 is green.",
       "pass_fail": "pass",
       "verified_by": "codex",
-      "verified_at": "2026-09-09T09:25:25.604965+00:00",
+      "verified_at": "2026-09-09T11:23:53.995226+00:00",
       "notes": "No custom element, framework wrapper, router, or application model was introduced."
     },
     {
       "criterion_id": "FR-002",
       "description": "One deeply immutable fixture and pure projections own repeated Mission, git, catalogue, document, artifact, Ops, observed, and live values.",
       "proof_type": "automated_test",
-      "evidence": "Exact rebased product head df4bf66bc72c287e6aaadf82f5fce18c766de5af: one deeply immutable fixture and deterministic projections remain executable; focused approval evidence plus three-engine CI 34332459374 pass.",
+      "evidence": "Corrective product head b68f84d28715ca8ef551f40cda24f3a13e054f1e: immutable fixture and deterministic projections remain executable; exact-head CI 34343137694 passes across all engines.",
       "pass_fail": "pass",
       "verified_by": "codex",
-      "verified_at": "2026-09-09T09:25:27.025350+00:00",
+      "verified_at": "2026-09-09T11:24:21.605716+00:00",
       "notes": "Fixture immutability and selector determinism are executable assertions."
     },
     {
