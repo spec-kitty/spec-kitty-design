@@ -258,10 +258,10 @@
       "criterion_id": "C-006",
       "description": "Generated artifacts are produced only through repository generators and remain deterministic.",
       "proof_type": "generated_drift_check",
-      "evidence": "After rebasing exact product head a36f3b72f68a00bc04ffe0cf49dbf2d362e6358e, CEM, React, styles-only barrels, Vue types/SFC, CSS modules, markup, and composition generators/checks were rerun and are current; no generated dist artifact is in the diff.",
+      "evidence": "After rebasing onto train 674ebe23bea974eb8bef2dbd64f4481e5f94d212, Storybook and repository generators/checks were rerun; CEM, React, styles-only barrels, Vue, CSS modules, markup, package, and composition gates are current in CI 34332459374.",
       "pass_fail": "pass",
       "verified_by": "codex",
-      "verified_at": "2026-09-09T07:32:01.441200+00:00",
+      "verified_at": "2026-09-09T09:25:58.319178+00:00",
       "notes": "No generated distribution file differs from origin/train/elements-first."
     },
     {
