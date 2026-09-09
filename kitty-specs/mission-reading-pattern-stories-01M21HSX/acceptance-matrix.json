@@ -280,7 +280,7 @@
       "invariant_id": "NI-001",
       "description": "No prohibited Mission Reading component or framework wrapper exists.",
       "verification_method": "custom_command",
-      "verification_command": "test -z \"$(git diff --name-only origin/train/elements-first...HEAD | rg 'packages/(elements/src/components|react|vue).*(mission-reader|mission-reading)' || true)\" && ! rg -n 'customElement|customElements\\.define|sk-mission-reader' packages/elements/src/patterns/mission-reading.stories.ts",
+      "verification_command": "test -z \"$(git diff --name-only origin/train/elements-first...HEAD | rg 'packages/(elements/src/components|react|vue).*(mission-reader|mission-reading)' || true)\" && ! rg -n 'customElement|customElements\\\\.define|sk-mission-reader' packages/elements/src/patterns/mission-reading.stories.ts",
       "result": "confirmed_absent",
       "evidence": "Command exited 0: "
     },
