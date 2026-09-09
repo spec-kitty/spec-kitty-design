@@ -124,6 +124,7 @@ export const WithControls: Story = {
       `<div style="display:grid;gap:var(--sk-space-4);">
         ${row({
           extra: 'data-with-controls="true"',
+          supporting: '<span slot="supporting">Consumer-supplied supporting context</span>',
           controls: `
             <a slot="controls" href="#details" data-native-link style="color:var(--sk-fg-default);">Details</a>
             <button slot="controls" type="button" data-native-button>Pin</button>
@@ -191,7 +192,7 @@ export const UnknownPresentation: Story = {
 export const ForcedColors: Story = {
   render: () =>
     frame(`
-      <div style="display:grid;gap:var(--sk-space-4);">
+      <div data-forced-colors-comparison style="display:grid;gap:var(--sk-space-4);">
         <div>
           <p style="margin:0 0 var(--sk-space-2);color:var(--sk-fg-muted);">Selected, bordered</p>
           ${row({ id: 'forced-colors-bordered', selected: true })}
@@ -199,6 +200,16 @@ export const ForcedColors: Story = {
         <div>
           <p style="margin:0 0 var(--sk-space-2);color:var(--sk-fg-muted);">Selected, flush</p>
           ${row({ id: 'forced-colors-flush', selected: true, presentation: 'flush' })}
+        </div>
+        <div>
+          <p style="margin:0 0 var(--sk-space-2);color:var(--sk-fg-muted);">Route, flush</p>
+          ${row({
+            id: 'forced-colors-route-flush',
+            selectable: false,
+            href: '#forced-colors-route-flush',
+            presentation: 'flush',
+            extra: 'data-forced-colors-route-flush="true"',
+          })}
         </div>
       </div>
     `),
@@ -292,12 +303,16 @@ export const LightMode: Story = {
   },
   render: () =>
     frame(
-      row({
-        selectable: false,
-        href: '#activity-17',
-        presentation: 'flush',
-        extra: 'data-light-mode="true"',
-      }),
+      `<div style="display:grid;gap:var(--sk-space-4);">
+        ${row({ extra: 'data-light-mode="true"' })}
+        ${row({
+          id: 'activity-light-route-flush',
+          selectable: false,
+          href: '#activity-light-route-flush',
+          presentation: 'flush',
+          extra: 'data-light-route-flush="true"',
+        })}
+      </div>`,
       true,
     ),
 };

@@ -160,7 +160,9 @@ test('[SC-006][SC-007][SC-008] route mode never emits the selectable activation 
     trigger.click();
     trigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
     trigger.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }));
-    trigger.dispatchEvent(new MouseEvent('click', { bubbles: true, ctrlKey: true }));
+    const modifiedClick = new MouseEvent('click', { bubbles: true, cancelable: true, ctrlKey: true });
+    expect(trigger.dispatchEvent(modifiedClick)).toBe(false);
+    expect(modifiedClick.defaultPrevented).toBe(true);
     expect(events).toHaveLength(0);
     expect(trigger.tagName).toBe('A');
   } finally {

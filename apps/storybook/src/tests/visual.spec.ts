@@ -352,6 +352,12 @@ test('SK-action-row default and light — visual baselines', async ({ page }) =>
   await expect(host).toHaveScreenshot('sk-action-row-default-dark.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
   host = await actionRowStory(page, 'light-mode');
   await expect(host).toHaveScreenshot('sk-action-row-light.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  const routeFlushLight = page.locator('sk-action-row[data-light-route-flush]').first();
+  await routeFlushLight.waitFor({ state: 'visible', timeout: 20000 });
+  await expect(routeFlushLight).toHaveScreenshot('sk-action-row-route-flush-light.png', {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+  });
 });
 
 test('SK-action-row route and flush states — visual baselines', async ({ page }) => {
@@ -370,8 +376,10 @@ test('SK-action-row route and flush states — visual baselines', async ({ page 
 
 test('SK-action-row forced-colors selected comparison — visual baseline', async ({ page }) => {
   await page.emulateMedia({ forcedColors: 'active' });
-  const host = await actionRowStory(page, 'forced-colors');
-  await expect(host.locator('..')).toHaveScreenshot('sk-action-row-forced-colors.png', {
+  await actionRowStory(page, 'forced-colors');
+  const comparison = page.locator('[data-forced-colors-comparison]').first();
+  await comparison.waitFor({ state: 'visible', timeout: 20000 });
+  await expect(comparison).toHaveScreenshot('sk-action-row-forced-colors.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
   });
