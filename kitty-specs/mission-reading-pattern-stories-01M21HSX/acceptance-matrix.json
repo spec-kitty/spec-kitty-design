@@ -208,10 +208,10 @@
       "criterion_id": "C-001",
       "description": "No Mission reader, tier badge, skeleton/spinner, row, link-list, truth-band, or document-tree component is published.",
       "proof_type": "diff_audit",
-      "evidence": "The delivery adds one Storybook pattern module, focused tests, documentation, ratchet entries, and visual baselines; no component directory, registration, manifest entry, or wrapper was added.",
+      "evidence": "Exact product diff adds one Storybook pattern module, focused tests, docs, ratchet entries, and reviewed PNG baselines; no page, tier-badge, loader, row, link-list, truth-band, or tree component is published.",
       "pass_fail": "pass",
       "verified_by": "codex",
-      "verified_at": "2026-09-09T03:41:13Z",
+      "verified_at": "2026-09-09T07:31:55.480764+00:00",
       "notes": "Placeholder geometry and row arrangements remain pattern-owned."
     },
     {
