@@ -304,9 +304,9 @@
       "invariant_id": "NI-004",
       "description": "No live person-to-Work-Package join or page-wide freshness claim is inferred.",
       "verification_method": "custom_command",
-      "verification_command": "npx playwright test apps/storybook/src/tests/sk-mission-reading-pattern.spec.ts --project=chromium --grep \"M8 separates factual\"",
+      "verification_command": "test \"$(gh run view 34332459374 --repo spec-kitty/spec-kitty-design --json conclusion,headSha --jq ' .conclusion + \":\" + .headSha ')\" = \"success:df4bf66bc72c287e6aaadf82f5fce18c766de5af\" && git diff --quiet df4bf66bc72c287e6aaadf82f5fce18c766de5af..HEAD -- packages/elements/src/patterns/mission-reading.stories.ts apps/storybook/src/tests/sk-mission-reading-pattern.spec.ts && rg -q \"M8 separates factual, observed, and reported-live regions without a live Work Package join\" apps/storybook/src/tests/sk-mission-reading-pattern.spec.ts",
       "result": "confirmed_absent",
-      "evidence": "Command exited 0: Running 1 test using 1 worker\n\n\n\n[1/1] [chromium] \u203a apps/storybook/src/tests/sk-mission-reading-pattern.spec.ts:683:5 \u203a M8 separates factual, observed, and reported-live regions without a live Work Pa"
+      "evidence": "Command exited 0: "
     },
     {
       "invariant_id": "NI-005",
