@@ -118,10 +118,10 @@
       "criterion_id": "FR-012",
       "description": "The family preserves native landmarks, headings, lists, links, code, article/section markup, and intact tables inside named scrollers.",
       "proof_type": "automated_accessibility_test",
-      "evidence": "Exact rebased product head df4bf66bc72c287e6aaadf82f5fce18c766de5af: native landmark, heading, list, link, code, table, and anchor-activation coverage passes; global axe and three-engine Playwright are green in CI 34332459374.",
+      "evidence": "Exact rebased product head b68f84d28715ca8ef551f40cda24f3a13e054f1e: native landmark, heading, list, link, code, table, and anchor-activation coverage passes; global axe and three-engine Playwright are green in CI 34343137694.",
       "pass_fail": "pass",
       "verified_by": "codex",
-      "verified_at": "2026-09-09T09:25:40.083816+00:00",
+      "verified_at": "2026-09-09T11:25:28.635544+00:00",
       "notes": "Tables remain native and only their labelled container may overflow."
     },
     {
