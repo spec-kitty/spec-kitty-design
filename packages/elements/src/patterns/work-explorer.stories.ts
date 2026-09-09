@@ -65,7 +65,7 @@ interface ActivityRecord {
   readonly timestamp: string;
   readonly freshness: string;
   readonly trust: string;
-  readonly tone: "info" | "success" | "attention";
+  readonly tone: "info" | "success" | "danger";
   readonly icon: ActivityIcon;
 }
 
@@ -180,7 +180,7 @@ const PERSON_EXPANDED_GROUPS = [
 const TYPE_EXPANDED_GROUPS = ["implementer", "reviewer", "researcher"] as const;
 
 const LANE_VISIBLE_ROW_LIMITS = [
-  { groupId: "in-progress", limit: 3 },
+  { groupId: "in-progress", limit: 2 },
   { groupId: "for-review", limit: 2 },
   { groupId: "blocked", limit: 2 },
 ] as const satisfies readonly VisibleRowLimit[];
@@ -380,55 +380,43 @@ const transitionForOrdinal = (
   return fallback;
 };
 
-const sourcePriority = (workPackageId: string): number => {
-  const representatives = [
-    "WP03",
-    "WP02",
-    "WP05",
-    "WP04",
-    "WP01",
-    "WP06",
-    "WP08",
-  ];
-  const representativeIndex = representatives.indexOf(workPackageId);
-  if (representativeIndex >= 0) return representativeIndex;
-  return representatives.length + Number.parseInt(workPackageId.slice(2), 10);
-};
+const SOURCE_ORDINALS = [
+  3, 2, 5, 4, 1, 6, 8, 7, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22,
+  23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41,
+  42, 43, 44, 45, 46, 47, 48, 49, 50,
+] as const;
 
-const workPackages: readonly WorkPackageRecord[] = LANE_VALUES.map(
-  (lane, index) => {
-    const ordinal = index + 1;
+const workPackages: readonly WorkPackageRecord[] = SOURCE_ORDINALS.map(
+  (ordinal) => {
+    const sourceIndex = ordinal - 1;
     const workPackageId = `WP${String(ordinal).padStart(2, "0")}`;
     const missionName = missionForOrdinal(
       ordinal,
-      MISSION_NAMES.at(index % MISSION_NAMES.length)!,
+      MISSION_NAMES.at(sourceIndex % MISSION_NAMES.length)!,
     );
     const repositoryId = repositoryForOrdinal(ordinal);
     const [transitionDateTime, transitionLabel] = transitionForOrdinal(
       ordinal,
-      TRANSITIONS.at(index)!,
+      TRANSITIONS.at(sourceIndex)!,
     );
     return {
       id: `${repositoryId}:${missionName.toLowerCase().replaceAll(" ", "-")}:${workPackageId}`,
       missionName,
       workPackageId,
       repositoryId,
-      lane: laneForOrdinal(ordinal, lane),
-      person: personForOrdinal(ordinal, PERSON_VALUES.at(index)!),
+      lane: laneForOrdinal(ordinal, LANE_VALUES.at(sourceIndex)!),
+      person: personForOrdinal(ordinal, PERSON_VALUES.at(sourceIndex)!),
       type:
         ordinal === 4
           ? "reviewer"
           : ordinal === 29
             ? "implementer"
-            : TYPE_VALUES.at(index)!,
+            : TYPE_VALUES.at(sourceIndex)!,
       transitionDateTime,
       transitionLabel,
       href: `/repositories/${repositoryId}/missions/${ordinal}/work-packages/${workPackageId}`,
     };
   },
-).sort(
-  (left, right) =>
-    sourcePriority(left.workPackageId) - sourcePriority(right.workPackageId),
 );
 
 export const WORK_EXPLORER_FIXTURE = deepFreezeWorkExplorerFixture({
@@ -509,7 +497,7 @@ export const WORK_EXPLORER_FIXTURE = deepFreezeWorkExplorerFixture({
           timestamp: "3 hr ago",
           freshness: "Observed in the last 72 hours",
           trust: "Mission history",
-          tone: "attention",
+          tone: "danger",
           icon: "blocker",
         },
       ],
@@ -563,17 +551,21 @@ export const groupWorkPackages = (
     if (!knownIds.has(key)) throw new Error(`Unknown ${axis} value: ${key}`);
   }
   const groups = definitions.map((definition) => {
-    const groupRecords = records.filter(
-      (record) => groupKey(record, axis) === definition.id,
+    const groupRecords = Object.freeze(
+      records.filter((record) => groupKey(record, axis) === definition.id),
     );
-    return { ...definition, records: groupRecords, count: groupRecords.length };
+    return Object.freeze({
+      ...definition,
+      records: groupRecords,
+      count: groupRecords.length,
+    });
   });
   if (
     groups.reduce((total, group) => total + group.count, 0) !== records.length
   ) {
     throw new Error(`Grouping by ${axis} did not conserve every work package`);
   }
-  return deepFreezeWorkExplorerFixture(groups);
+  return Object.freeze(groups);
 };
 
 export const filterWorkPackages = (
@@ -585,31 +577,33 @@ export const filterWorkPackages = (
   records: readonly WorkPackageRecord[];
 }> => {
   const query = filters.query.trim().toLocaleLowerCase();
-  const filtered = records.filter((record) => {
-    const repositoryMatches =
-      filters.repositoryId === "all" ||
-      record.repositoryId === filters.repositoryId;
-    const personId = record.person ?? "unassigned";
-    const personMatches =
-      filters.personId === "all" || personId === filters.personId;
-    const visibleText = [
-      record.missionName,
-      record.workPackageId,
-      record.repositoryId,
-      record.lane,
-      personId,
-      record.type,
-      record.transitionLabel,
-    ]
-      .join(" ")
-      .toLocaleLowerCase();
-    return (
-      repositoryMatches &&
-      personMatches &&
-      (query === "" || visibleText.includes(query))
-    );
-  });
-  return deepFreezeWorkExplorerFixture({
+  const filtered = Object.freeze(
+    records.filter((record) => {
+      const repositoryMatches =
+        filters.repositoryId === "all" ||
+        record.repositoryId === filters.repositoryId;
+      const personId = record.person ?? "unassigned";
+      const personMatches =
+        filters.personId === "all" || personId === filters.personId;
+      const visibleText = [
+        record.missionName,
+        record.workPackageId,
+        record.repositoryId,
+        record.lane,
+        personId,
+        record.type,
+        record.transitionLabel,
+      ]
+        .join(" ")
+        .toLocaleLowerCase();
+      return (
+        repositoryMatches &&
+        personMatches &&
+        (query === "" || visibleText.includes(query))
+      );
+    }),
+  );
+  return Object.freeze({
     sourceTotal: records.length,
     filteredTotal: filtered.length,
     records: filtered,
@@ -792,22 +786,44 @@ interface WorkExplorerProjection {
   readonly activity: ActivityProjection | null;
 }
 
+const copyProjectionState = (
+  state: DeepReadonly<StoryModel>,
+): Readonly<
+  Pick<
+    WorkExplorerProjection,
+    "filters" | "expandedGroupIds" | "visibleRowLimits"
+  >
+> =>
+  Object.freeze({
+    filters: Object.freeze({ ...state.filters }),
+    expandedGroupIds: Object.freeze([...state.expandedGroupIds]),
+    visibleRowLimits: Object.freeze(
+      state.visibleRowLimits.map((descriptor) =>
+        Object.freeze({ ...descriptor }),
+      ),
+    ),
+  });
+
+const freezeProjection = (
+  projection: WorkExplorerProjection,
+): DeepReadonly<WorkExplorerProjection> =>
+  Object.freeze(projection) as DeepReadonly<WorkExplorerProjection>;
+
 export const projectWorkExplorer = (
   fixture: DeepReadonly<WorkExplorerFixture>,
   state: DeepReadonly<StoryModel>,
 ): DeepReadonly<WorkExplorerProjection> => {
   validateWorkExplorerFixture(fixture);
+  const projectionState = copyProjectionState(state);
   if (state.pageState === "loading" || state.pageState === "no-repositories") {
-    return deepFreezeWorkExplorerFixture({
+    return freezeProjection({
       id: state.id,
       pageState: state.pageState,
       grouping: state.grouping,
-      filters: state.filters,
-      expandedGroupIds: state.expandedGroupIds,
-      visibleRowLimits: state.visibleRowLimits,
-      repositories: [],
-      workPackages: [],
-      groups: [],
+      ...projectionState,
+      repositories: Object.freeze([]),
+      workPackages: Object.freeze([]),
+      groups: Object.freeze([]),
       sourceTotal: null,
       filteredTotal: null,
       mission: null,
@@ -816,65 +832,61 @@ export const projectWorkExplorer = (
     });
   }
   if (state.pageState === "no-work") {
-    return deepFreezeWorkExplorerFixture({
+    return freezeProjection({
       id: state.id,
       pageState: state.pageState,
       grouping: state.grouping,
-      filters: state.filters,
-      expandedGroupIds: state.expandedGroupIds,
-      visibleRowLimits: state.visibleRowLimits,
-      repositories: fixture.repositories,
-      workPackages: [],
-      groups: [],
+      ...projectionState,
+      repositories: Object.freeze([...fixture.repositories]),
+      workPackages: Object.freeze([]),
+      groups: Object.freeze([]),
       sourceTotal: null,
       filteredTotal: null,
       mission: fixture.context.mission,
-      presence: {
+      presence: Object.freeze({
         state: "empty",
         label: "Live now",
         freshness: fixture.context.presence.freshness,
-        entries: [],
-      },
-      activity: {
+        entries: Object.freeze([]),
+      }),
+      activity: Object.freeze({
         state: "empty",
         label: "Observed activity",
         freshness: fixture.context.activity.freshness,
         observedAt: null,
-        events: [],
-      },
+        events: Object.freeze([]),
+      }),
     });
   }
   const filtered = filterWorkPackages(fixture.workPackages, state.filters);
-  return deepFreezeWorkExplorerFixture({
+  return freezeProjection({
     id: state.id,
     pageState: state.pageState,
     grouping: state.grouping,
-    filters: state.filters,
-    expandedGroupIds: state.expandedGroupIds,
-    visibleRowLimits: state.visibleRowLimits,
-    repositories: fixture.repositories,
+    ...projectionState,
+    repositories: Object.freeze([...fixture.repositories]),
     workPackages: filtered.records,
     groups: groupWorkPackages(filtered.records, state.grouping),
     sourceTotal: filtered.sourceTotal,
     filteredTotal: filtered.filteredTotal,
     mission: fixture.context.mission,
     presence: state.degradedContext
-      ? {
+      ? Object.freeze({
           state: "unavailable",
           label: "Live unavailable",
           freshness: "Mission state is unaffected",
-          entries: [],
-        }
+          entries: Object.freeze([]),
+        })
       : fixture.context.presence,
     activity: state.degradedContext
-      ? {
+      ? Object.freeze({
           state: "delayed",
           label: fixture.context.activity.label,
           freshness: "Observed · delayed",
           observedAt: fixture.context.activity.observedAt,
           delayNotice: "Last observed 18 min ago",
           events: fixture.context.activity.events,
-        }
+        })
       : fixture.context.activity,
   });
 };
@@ -901,8 +913,21 @@ const workExplorerPatternStyles = html`<style>
   }
 
   .sk-work-explorer-pattern__content {
-    gap: var(--sk-space-7);
-    padding: var(--sk-space-7);
+    gap: var(--sk-space-5);
+    padding: var(--sk-space-5);
+  }
+
+  .sk-work-explorer-pattern__page-header::part(header) {
+    padding: var(--sk-space-5);
+  }
+
+  .sk-work-explorer-pattern__page-title,
+  .sk-work-explorer-pattern__page-supporting {
+    margin: 0;
+  }
+
+  .sk-work-explorer-pattern__page-title {
+    font-size: var(--sk-text-3xl);
   }
 
   .sk-work-explorer-pattern__summary {
@@ -959,7 +984,7 @@ const workExplorerPatternStyles = html`<style>
     gap: var(--sk-space-3);
     align-items: end;
     min-inline-size: 0;
-    padding: var(--sk-space-4);
+    padding: var(--sk-space-3);
     border-color: var(--sk-border-default);
     border-style: solid;
     border-width: var(--sk-border-width-1);
@@ -999,9 +1024,41 @@ const workExplorerPatternStyles = html`<style>
     min-inline-size: 0;
   }
 
-  .sk-work-explorer-pattern__collection-frame,
-  .sk-work-explorer-pattern__blocked-frame {
-    min-inline-size: 0;
+  .sk-work-explorer-pattern__collection-header {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+  }
+
+  .sk-work-explorer-pattern__collection-toggle {
+    grid-column: auto;
+    padding: var(--sk-space-1) var(--sk-space-2);
+  }
+
+  .sk-work-explorer-pattern__collection-body {
+    padding: 0;
+  }
+
+  .sk-work-explorer-pattern__row-item {
+    padding-block: 0;
+  }
+
+  .sk-work-explorer-pattern__row::part(trigger) {
+    padding-block: var(--sk-space-2);
+  }
+
+  .sk-work-explorer-pattern__collection-footer {
+    margin-block-start: 0;
+    padding-block-start: 0;
+  }
+
+  .sk-work-explorer-pattern__blocked-collection {
+    border-inline-start-color: var(--sk-on-status-danger);
+    border-inline-start-width: var(--sk-border-width-4);
+  }
+
+  .sk-work-explorer-pattern__blocked-heading,
+  .sk-work-explorer-pattern__blocked-count,
+  .sk-work-explorer-pattern__blocked-toggle {
+    color: var(--sk-on-status-danger);
   }
 
   .sk-work-explorer-pattern__row-list {
@@ -1070,10 +1127,10 @@ const workExplorerPatternStyles = html`<style>
   }
 
   .sk-work-explorer-pattern__activity-list
-    .sk-work-explorer-pattern__activity-marker[data-activity-tone="attention"] {
-    border-color: var(--sk-on-status-attention);
-    background: var(--sk-status-attention);
-    color: var(--sk-on-status-attention);
+    .sk-work-explorer-pattern__activity-marker[data-activity-tone="danger"] {
+    border-color: var(--sk-on-status-danger);
+    background: var(--sk-status-danger);
+    color: var(--sk-on-status-danger);
   }
 
   .sk-work-explorer-pattern__collection-more {
@@ -1092,7 +1149,6 @@ const workExplorerPatternStyles = html`<style>
     outline-width: var(--sk-border-width-2);
   }
 
-  .sk-work-explorer-pattern__blocked-label,
   .sk-work-explorer-pattern__context-meta,
   .sk-work-explorer-pattern__row-time {
     color: var(--sk-fg-muted);
@@ -1111,6 +1167,18 @@ const workExplorerPatternStyles = html`<style>
   .sk-work-explorer-pattern__drawer-trigger,
   .sk-work-explorer-pattern__context-link {
     color: var(--sk-fg-default);
+  }
+
+  .sk-work-explorer-pattern__current-work {
+    --sk-color-accent: var(--sk-surface-pill);
+  }
+
+  .sk-work-explorer-pattern__current-work:focus-visible {
+    outline-color: var(--sk-border-focus);
+  }
+
+  .sk-work-explorer-pattern__presence-card::part(card) {
+    padding: var(--sk-space-4);
   }
 
   .sk-work-explorer-pattern__drawer-trigger {
@@ -1148,6 +1216,34 @@ const workExplorerPatternStyles = html`<style>
   }
 
   .sk-work-explorer-pattern__compact-header:not([inert])
+    ~ .sk-work-explorer-pattern__content {
+    gap: var(--sk-space-4);
+    padding: var(--sk-space-4);
+  }
+
+  .sk-work-explorer-pattern__compact-header:not([inert])
+    ~ .sk-work-explorer-pattern__content
+    .sk-work-explorer-pattern__context {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+    gap: var(--sk-space-2);
+  }
+
+  .sk-work-explorer-pattern__compact-header:not([inert])
+    ~ .sk-work-explorer-pattern__content
+    .sk-work-explorer-pattern__context-region {
+    gap: var(--sk-space-2);
+  }
+
+  .sk-work-explorer-pattern__compact-header:not([inert])
+    ~ .sk-work-explorer-pattern__content
+    .sk-work-explorer-pattern__presence-card::part(card) {
+    padding: 0;
+    border-width: 0;
+    background: transparent;
+  }
+
+  .sk-work-explorer-pattern__compact-header:not([inert])
     ~ .sk-work-explorer-pattern__content
     .sk-work-explorer-pattern__filters {
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1164,7 +1260,7 @@ const workExplorerPatternStyles = html`<style>
 
   @media (forced-colors: active) {
     .sk-work-explorer-pattern__filters,
-    .sk-work-explorer-pattern__blocked-frame {
+    .sk-work-explorer-pattern__blocked-collection {
       outline-color: CanvasText;
       outline-style: solid;
       outline-width: var(--sk-border-width-1);
@@ -1240,14 +1336,17 @@ const renderContextNavigation = (
       <strong>${WORK_EXPLORER_FIXTURE.team.label}</strong>
     </div>
     <nav
-      class="sk-context-nav"
+      class="sk-context-nav sk-work-explorer-pattern__context-nav"
       aria-label=${placement === "desktop" ? "Work sections" : "Compact Work sections"}
     >
       <div class="sk-context-nav__group">
         <p class="sk-context-nav__heading">Explore</p>
         <ul class="sk-context-nav__list">
           <li class="sk-context-nav__item">
-            <a class="sk-context-nav__link" href="/work" aria-current="page"
+            <a
+              class="sk-context-nav__link sk-work-explorer-pattern__current-work"
+              href="/work"
+              aria-current="page"
               ><span class="sk-context-nav__label">Work Explorer</span></a
             >
           </li>
@@ -1270,10 +1369,17 @@ const renderContextNavigation = (
 const renderPageHeader = (
   projection: DeepReadonly<WorkExplorerProjection>,
 ): TemplateResult => html`
-  <sk-page-header slot="page-header">
+  <sk-page-header
+    class="sk-work-explorer-pattern__page-header"
+    slot="page-header"
+  >
     <span slot="eyebrow">Work Explorer</span>
-    <h1 slot="title">Who is doing what, now</h1>
-    <p slot="supporting">Illustrative workload</p>
+    <h1 class="sk-work-explorer-pattern__page-title" slot="title">
+      Who is doing what, now
+    </h1>
+    <p class="sk-work-explorer-pattern__page-supporting" slot="supporting">
+      Illustrative workload
+    </p>
     ${
       projection.mission
         ? html`<sk-status-indicator slot="sync" tone="success"
@@ -1324,9 +1430,18 @@ const renderSummary = (): TemplateResult => {
 
 const renderWorkRow = (
   record: DeepReadonly<WorkPackageRecord>,
+  grouping: GroupingAxis,
 ): TemplateResult => html`
-  <li class="sk-collection__item" data-work-package-id=${record.id}>
-    <sk-action-row row-id=${record.id} href=${record.href} presentation="flush">
+  <li
+    class="sk-collection__item sk-work-explorer-pattern__row-item"
+    data-work-package-id=${record.id}
+  >
+    <sk-action-row
+      class="sk-work-explorer-pattern__row"
+      row-id=${record.id}
+      href=${record.href}
+      presentation="flush"
+    >
       <sk-entity-marker
         slot="marker"
         size="sm"
@@ -1336,9 +1451,27 @@ const renderWorkRow = (
       >
       <span slot="title">${record.missionName} · ${record.workPackageId}</span>
       <code slot="reference">${labelForRepository(record.repositoryId)}</code>
-      <sk-pill-tag slot="tags">${labelForLane(record.lane)}</sk-pill-tag>
-      <sk-pill-tag slot="tags">${labelForPerson(record.person)}</sk-pill-tag>
-      <sk-pill-tag slot="tags">${record.type}</sk-pill-tag>
+      ${
+        grouping === "lane"
+          ? nothing
+          : html`<sk-pill-tag slot="tags" data-row-tag-axis="lane"
+              >${labelForLane(record.lane)}</sk-pill-tag
+            >`
+      }
+      ${
+        grouping === "person"
+          ? nothing
+          : html`<sk-pill-tag slot="tags" data-row-tag-axis="person"
+              >${labelForPerson(record.person)}</sk-pill-tag
+            >`
+      }
+      ${
+        grouping === "type"
+          ? nothing
+          : html`<sk-pill-tag slot="tags" data-row-tag-axis="type"
+              >${record.type}</sk-pill-tag
+            >`
+      }
       <time
         class="sk-work-explorer-pattern__row-time"
         slot="metadata"
@@ -1351,6 +1484,7 @@ const renderWorkRow = (
 
 const renderCollection = (
   group: DeepReadonly<GroupProjection>,
+  grouping: GroupingAxis,
   expandedGroupIds: readonly string[],
   visibleRowLimits: readonly DeepReadonly<VisibleRowLimit>[],
   fullyVisibleGroupIds: ReadonlySet<string>,
@@ -1363,23 +1497,32 @@ const renderCollection = (
   const suppliedLimit =
     visibleRowLimits.find(({ groupId }) => groupId === group.id)?.limit ??
     group.count;
+  const fullyVisible = fullyVisibleGroupIds.has(group.id);
   const visibleRecords = expanded
-    ? group.records.slice(
-        0,
-        fullyVisibleGroupIds.has(group.id) ? group.count : suppliedLimit,
-      )
+    ? group.records.slice(0, fullyVisible ? group.count : suppliedLimit)
     : [];
   const remaining = group.count - visibleRecords.length;
-  const collection = html` <section
-    class="sk-collection"
+  return html` <section
+    class=${`sk-collection${group.tone === "danger" ? " sk-work-explorer-pattern__blocked-collection" : ""}`}
     data-work-group=${group.id}
+    data-blocked-exception=${group.tone === "danger" ? "" : nothing}
     aria-labelledby=${headingId}
   >
-    <header class="sk-collection__header">
-      <h3 class="sk-collection__heading" id=${headingId}>${group.label}</h3>
-      <span class="sk-collection__count">${group.count} Work Packages</span>
+    <header
+      class="sk-collection__header sk-work-explorer-pattern__collection-header"
+    >
+      <h3
+        class=${`sk-collection__heading${group.tone === "danger" ? " sk-work-explorer-pattern__blocked-heading" : ""}`}
+        id=${headingId}
+      >
+        ${group.label}${group.tone === "danger" ? " · exception" : nothing}
+      </h3>
+      <span
+        class=${`sk-collection__count${group.tone === "danger" ? " sk-work-explorer-pattern__blocked-count" : ""}`}
+        >${group.count} Work Packages</span
+      >
       <button
-        class="sk-collection__toggle"
+        class=${`sk-collection__toggle sk-work-explorer-pattern__collection-toggle${group.tone === "danger" ? " sk-work-explorer-pattern__blocked-toggle" : ""}`}
         type="button"
         aria-expanded=${String(expanded)}
         aria-controls=${bodyId}
@@ -1393,44 +1536,37 @@ const renderCollection = (
       </button>
     </header>
     <div
-      class="sk-collection__body"
+      class="sk-collection__body sk-work-explorer-pattern__collection-body"
       id=${bodyId}
       role="region"
       aria-labelledby=${headingId}
       ?hidden=${!expanded}
     >
       <ul class="sk-collection__list sk-work-explorer-pattern__row-list">
-        ${visibleRecords.map(renderWorkRow)}
+        ${visibleRecords.map((record) => renderWorkRow(record, grouping))}
       </ul>
       ${
-        remaining > 0
-          ? html`<footer class="sk-collection__footer">
+        suppliedLimit < group.count
+          ? html`<footer
+              class="sk-collection__footer sk-work-explorer-pattern__collection-footer"
+            >
               <button
                 class="sk-work-explorer-pattern__collection-more"
                 type="button"
+                data-view-toggle=${group.id}
                 @click=${() => onViewAll(group.id)}
               >
-                View ${remaining} more ${group.label.toLocaleLowerCase()}
+                ${
+                  fullyVisible
+                    ? `Show fewer ${group.label.toLocaleLowerCase()}`
+                    : `View ${remaining} more ${group.label.toLocaleLowerCase()}`
+                }
               </button>
             </footer>`
           : nothing
       }
     </div>
   </section>`;
-  return group.tone === "danger"
-    ? html`<sk-card
-        class="sk-work-explorer-pattern__blocked-frame"
-        status="danger"
-        data-blocked-exception
-      >
-        <strong class="sk-work-explorer-pattern__blocked-label"
-          >Blocked · exception</strong
-        >
-        ${collection}
-      </sk-card>`
-    : html`<div class="sk-work-explorer-pattern__collection-frame">
-        ${collection}
-      </div>`;
 };
 
 const renderFilteredWork = (
@@ -1457,6 +1593,7 @@ const renderFilteredWork = (
         ${projection.groups.map((group) =>
           renderCollection(
             group,
+            projection.grouping,
             projection.expandedGroupIds,
             projection.visibleRowLimits,
             fullyVisibleGroupIds,
@@ -1510,7 +1647,10 @@ const renderFilters = (
       </div>
     </div>
     <label class="sk-work-explorer-pattern__filter-field sk-form-field">
-      <span class="sk-form-field__label">Repository</span>
+      <span
+        class="sk-form-field__label sk-work-explorer-pattern__visually-hidden"
+        >Repository</span
+      >
       <select
         class="sk-form-select"
         data-filter="repositoryId"
@@ -1540,7 +1680,10 @@ const renderFilters = (
       </select>
     </label>
     <label class="sk-work-explorer-pattern__filter-field sk-form-field">
-      <span class="sk-form-field__label">Person</span>
+      <span
+        class="sk-form-field__label sk-work-explorer-pattern__visually-hidden"
+        >Person</span
+      >
       <select
         class="sk-form-select"
         data-filter="personId"
@@ -1567,11 +1710,15 @@ const renderFilters = (
       </select>
     </label>
     <label class="sk-work-explorer-pattern__search sk-form-field">
-      <span class="sk-form-field__label">Search supplied work fields</span>
+      <span
+        class="sk-form-field__label sk-work-explorer-pattern__visually-hidden"
+        >Search supplied work fields</span
+      >
       <input
         class="sk-input"
         type="search"
         data-filter="query"
+        placeholder="Search work packages"
         ?disabled=${disabled}
         .value=${projection.filters.query}
         @input=${(event: Event) => onFilter("query", (event.currentTarget as HTMLInputElement).value)}
@@ -1608,7 +1755,7 @@ const renderPresence = (
     ${
       presence.state === "unavailable"
         ? html`<sk-notice
-            tone="attention"
+            tone="info"
             announce="off"
             message="Presence is unavailable. Mission state is unaffected."
             ><h3 slot="heading">Presence unavailable</h3></sk-notice
@@ -1618,7 +1765,7 @@ const renderPresence = (
               <h3>No reported-live presence</h3>
               <p>There are no supplied presence records.</p>
             </div>`
-          : html`<sk-card>
+          : html`<sk-card class="sk-work-explorer-pattern__presence-card">
                 <p class="sk-work-explorer-pattern__presence-copy">
                   Current relay sessions only. Activity does not imply presence.
                 </p>
@@ -1902,6 +2049,9 @@ export const renderWorkExplorer = (
     currentState = { ...currentState, filters: { ...ALL_FILTERS } };
     fullyVisibleGroupIds.clear();
     refresh();
+    filtersRef.value
+      ?.querySelector<HTMLInputElement>('[data-filter="query"]')
+      ?.focus();
   }
 
   function toggleGroup(groupId: string): void {
@@ -1917,8 +2067,15 @@ export const renderWorkExplorer = (
   }
 
   function viewAllRows(groupId: string): void {
-    fullyVisibleGroupIds.add(groupId);
+    if (fullyVisibleGroupIds.has(groupId)) {
+      fullyVisibleGroupIds.delete(groupId);
+    } else {
+      fullyVisibleGroupIds.add(groupId);
+    }
     refresh();
+    workRef.value
+      ?.querySelector<HTMLButtonElement>(`[data-view-toggle="${groupId}"]`)
+      ?.focus();
   }
 
   const setOpen = (next: boolean): void => {
@@ -2100,15 +2257,12 @@ export const renderWorkExplorer = (
                       aria-labelledby="work-explorer-verified-heading"
                       data-truth-tier="mission"
                     >
-                      <sk-section-header>
-                        <span slot="eyebrow">Verified Mission state</span>
-                        <h2 slot="title" id="work-explorer-verified-heading">
-                          Active Work Packages
-                        </h2>
-                        <span slot="metadata"
-                          >${currentProjection.filteredTotal === null ? nothing : `${currentProjection.filteredTotal} of ${currentProjection.sourceTotal}`}</span
-                        >
-                      </sk-section-header>
+                      <h2
+                        class="sk-work-explorer-pattern__visually-hidden"
+                        id="work-explorer-verified-heading"
+                      >
+                        Active Work Packages
+                      </h2>
                       <div ${ref(mountWork)}></div>
                     </section>
                     ${renderContext(currentProjection)}

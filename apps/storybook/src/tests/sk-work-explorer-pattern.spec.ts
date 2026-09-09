@@ -80,6 +80,7 @@ test("the Work Explorer proof remains a Storybook-only public-surface compositio
   expect(source).not.toMatch(
     /\b(?:wpTitle|blockedReason|teamUpdatedAt|lastSyncedAt)\b/,
   );
+  expect(source).not.toMatch(/\.sort\s*\(/);
   expect(source).not.toMatch(
     /<sk-(?:work-package-group|work-explorer-summary|work-explorer-filter|presence-panel|activity-panel|loading-skeleton)(?:\s|>)/,
   );
@@ -424,6 +425,144 @@ test("filtering is pure, W6 is exactly 0 of 50, and invalid values fail closed",
   expect(facts.errors.join(" ")).toMatch(/type/i);
 });
 
+test("selectors freeze only their new result structures and leave mutable caller descriptors untouched", async ({
+  page,
+}) => {
+  await page.goto(
+    "/iframe.html?id=patterns-mission-reading--default&viewMode=story",
+  );
+  const facts = await page.evaluate(async () => {
+    const preview = (
+      window as typeof window & {
+        __STORYBOOK_PREVIEW__: {
+          importFn: (path: string) => Promise<Record<string, unknown>>;
+        };
+      }
+    ).__STORYBOOK_PREVIEW__;
+    const module = (await preview.importFn(
+      "./packages/elements/src/patterns/work-explorer.stories.ts",
+    )) as {
+      WORK_EXPLORER_FIXTURE: {
+        workPackages: Array<Record<string, unknown>>;
+      };
+      WORK_EXPLORER_STORY_MODELS: { w1: Record<string, unknown> };
+      groupWorkPackages: (
+        records: Array<Record<string, unknown>>,
+        axis: "lane",
+      ) => ReadonlyArray<{
+        records: ReadonlyArray<Record<string, unknown>>;
+      }>;
+      filterWorkPackages: (
+        records: Array<Record<string, unknown>>,
+        filters: Record<string, string>,
+      ) => {
+        records: ReadonlyArray<Record<string, unknown>>;
+      };
+      projectWorkExplorer: (
+        fixture: Record<string, unknown>,
+        state: Record<string, unknown>,
+      ) => Readonly<Record<string, unknown>>;
+    };
+
+    const fixture = structuredClone(module.WORK_EXPLORER_FIXTURE) as Record<
+      string,
+      unknown
+    > & { workPackages: Array<Record<string, unknown>> };
+    const state = structuredClone(module.WORK_EXPLORER_STORY_MODELS.w1);
+    const records = fixture.workPackages;
+    const firstRecord = records[0]!;
+    const filters = {
+      repositoryId: "all",
+      personId: "all",
+      query: "",
+    };
+    const visibleLimit = (
+      state["visibleRowLimits"] as Array<Record<string, unknown>>
+    )[0]!;
+
+    const groups = module.groupWorkPackages(records, "lane");
+    const filtered = module.filterWorkPackages(records, filters);
+    const projection = module.projectWorkExplorer(fixture, state);
+    const projectedVisibleLimits = projection[
+      "visibleRowLimits"
+    ] as ReadonlyArray<Record<string, unknown>>;
+
+    firstRecord["transitionLabel"] = "still caller-owned";
+    filters.query = "caller can still edit";
+    visibleLimit["limit"] = 99;
+
+    return {
+      callerFrozen: {
+        fixture: Object.isFrozen(fixture),
+        records: Object.isFrozen(records),
+        record: Object.isFrozen(firstRecord),
+        state: Object.isFrozen(state),
+        filters: Object.isFrozen(filters),
+        visibleLimit: Object.isFrozen(visibleLimit),
+      },
+      writesPersisted: {
+        record: firstRecord["transitionLabel"],
+        filter: filters.query,
+        limit: visibleLimit["limit"],
+      },
+      resultFrozen: {
+        groups: Object.isFrozen(groups),
+        group: Object.isFrozen(groups[0]),
+        groupRecords: Object.isFrozen(groups[0]!.records),
+        filtered: Object.isFrozen(filtered),
+        filteredRecords: Object.isFrozen(filtered.records),
+        projection: Object.isFrozen(projection),
+        projectionFilters: Object.isFrozen(projection["filters"]),
+        projectionExpandedGroupIds: Object.isFrozen(
+          projection["expandedGroupIds"],
+        ),
+        projectionVisibleLimits: Object.isFrozen(projectedVisibleLimits),
+        projectionVisibleLimit: Object.isFrozen(projectedVisibleLimits[0]),
+      },
+      projectionCopies: {
+        filters: projection["filters"] !== state["filters"],
+        expandedGroupIds:
+          projection["expandedGroupIds"] !== state["expandedGroupIds"],
+        visibleLimits:
+          projection["visibleRowLimits"] !== state["visibleRowLimits"],
+        visibleLimit: projectedVisibleLimits[0] !== visibleLimit,
+      },
+    };
+  });
+
+  expect(facts.callerFrozen).toEqual({
+    fixture: false,
+    records: false,
+    record: false,
+    state: false,
+    filters: false,
+    visibleLimit: false,
+  });
+  expect(facts.writesPersisted).toEqual({
+    record: "still caller-owned",
+    filter: "caller can still edit",
+    limit: 99,
+  });
+  expect(facts.resultFrozen).toEqual({
+    groups: true,
+    group: true,
+    groupRecords: true,
+    filtered: true,
+    filteredRecords: true,
+    projection: true,
+    projectionFilters: true,
+    projectionExpandedGroupIds: true,
+    projectionVisibleLimits: true,
+    projectionVisibleLimit: true,
+  });
+  expect(facts.projectionCopies).toEqual({
+    filters: true,
+    expandedGroupIds: true,
+    visibleLimits: true,
+    visibleLimit: true,
+  });
+});
+
 test("story projections keep truth tiers independent and enforce W7/W9/W10 absence", async ({
   page,
 }) => {
@@ -601,10 +740,10 @@ test("W1 composes exact lane counts, supplied expansion, native collections, and
   expect(new Set(desktopFilterEdges).size).toBe(1);
   await expect(root.locator(".sk-collection")).toHaveCount(5);
   await expect(root).toHaveAttribute("data-source-total", "50");
-  await expect(root.locator("[data-work-package-id]:visible")).toHaveCount(7);
+  await expect(root.locator("[data-work-package-id]:visible")).toHaveCount(6);
   await expect(
     root.locator('[data-work-group="in-progress"] [data-work-package-id]'),
-  ).toHaveCount(3);
+  ).toHaveCount(2);
   await expect(
     root.locator('[data-work-group="for-review"] [data-work-package-id]'),
   ).toHaveCount(2);
@@ -613,9 +752,9 @@ test("W1 composes exact lane counts, supplied expansion, native collections, and
   ).toHaveCount(2);
   await expect(
     root.locator("sk-action-row[href][presentation='flush']"),
-  ).toHaveCount(7);
+  ).toHaveCount(6);
   await expect(
-    root.getByRole("button", { name: "View 18 more in progress" }),
+    root.getByRole("button", { name: "View 19 more in progress" }),
   ).toBeVisible();
   await expect(
     root.getByRole("button", { name: "View 6 more for review" }),
@@ -687,16 +826,66 @@ test("W1 composes exact lane counts, supplied expansion, native collections, and
     markers.map((marker) => ({
       tone: marker.getAttribute("data-activity-tone"),
       color: getComputedStyle(marker).color,
+      background: getComputedStyle(marker).backgroundColor,
     })),
   );
   expect(markerPresentation.map(({ tone }) => tone)).toEqual([
     "info",
     "success",
-    "attention",
+    "danger",
   ]);
   expect(new Set(markerPresentation.map(({ color }) => color)).size).toBe(3);
+  const dangerPair = await root.evaluate((element) => {
+    const probe = document.createElement("span");
+    probe.style.color = "var(--sk-on-status-danger)";
+    probe.style.backgroundColor = "var(--sk-status-danger)";
+    element.append(probe);
+    const computed = getComputedStyle(probe);
+    const pair = {
+      color: computed.color,
+      background: computed.backgroundColor,
+    };
+    probe.remove();
+    return pair;
+  });
+  expect(markerPresentation.at(-1)).toMatchObject(dangerPair);
   await expect(root.locator("[data-blocked-exception]")).toContainText(
     "Blocked · exception",
+  );
+  const blockedCollection = root.locator(
+    ".sk-collection[data-blocked-exception]",
+  );
+  await expect(blockedCollection).toHaveCount(1);
+  await expect(blockedCollection.locator("sk-card")).toHaveCount(0);
+  await expect(
+    root.locator(
+      '[data-work-group="in-progress"] [data-work-package-id] [data-row-tag-axis="lane"]',
+    ),
+  ).toHaveCount(0);
+
+  const currentWork = root.locator(
+    ".sk-work-explorer-pattern__context-nav[aria-label='Work sections'] a[aria-current='page']",
+  );
+  await currentWork.focus();
+  const currentPresentation = await currentWork.evaluate((link) => {
+    const computed = getComputedStyle(link);
+    const probe = document.createElement("span");
+    probe.style.color = "var(--sk-border-focus)";
+    link.append(probe);
+    const focusToken = getComputedStyle(probe).color;
+    probe.remove();
+    return {
+      background: computed.backgroundColor,
+      border: computed.borderInlineStartColor,
+      outline: computed.outlineColor,
+      focusToken,
+    };
+  });
+  expect(currentPresentation.border).toBe(currentPresentation.background);
+  expect(currentPresentation.outline).toBe(currentPresentation.focusToken);
+
+  expect(await root.evaluate((element) => element.scrollHeight)).toBeLessThan(
+    1900,
   );
 
   const groupStates = await root
@@ -752,13 +941,19 @@ test("W1 composes exact lane counts, supplied expansion, native collections, and
   await expect(firstToggle).toHaveAttribute("aria-expanded", "false");
   await expect(controlledBody).toHaveAttribute("hidden", "");
 
-  await root.getByRole("button", { name: "View 18 more in progress" }).click();
+  const viewMore = root.getByRole("button", {
+    name: "View 19 more in progress",
+  });
+  await viewMore.focus();
+  await viewMore.press("Enter");
   await expect(
     root.locator('[data-work-group="in-progress"] [data-work-package-id]'),
   ).toHaveCount(21);
-  await expect(
-    root.getByRole("button", { name: "View 18 more in progress" }),
-  ).toHaveCount(0);
+  const showFewer = root.getByRole("button", {
+    name: "Show fewer in progress",
+  });
+  await expect(showFewer).toBeVisible();
+  await expect(showFewer).toBeFocused();
 
   const storyUrl = page.url();
   await route.click({ button: "right" });
@@ -871,6 +1066,12 @@ test("W2 and W3 expose exact DOM margins and their supplied controlled expansion
         root.locator(`[data-work-group="${groupId}"] [data-work-package-id]`),
       ).toHaveCount(1);
     }
+    const contextualAxis = fixtureCase.id.includes("person")
+      ? "person"
+      : "type";
+    await expect(
+      root.locator(`[data-row-tag-axis="${contextualAxis}"]`),
+    ).toHaveCount(0);
   }
 });
 
@@ -917,7 +1118,7 @@ test("grouping intent reprojects the same 50 identities and updates exactly one 
 }) => {
   const root = await openStory(page, "w-1-by-lane-desktop-dark");
   await expect(root).toHaveAttribute("data-source-total", "50");
-  await expect(root.locator("[data-work-package-id]:visible")).toHaveCount(7);
+  await expect(root.locator("[data-work-package-id]:visible")).toHaveCount(6);
   await root.locator("[data-grouping='person']").click();
   await expect(root).toHaveAttribute("data-grouping", "person");
   await expect(root).toHaveAttribute("data-source-total", "50");
@@ -950,9 +1151,11 @@ test("W6 derives 0 of 50 and both real clear actions restore populated work", as
       exact: true,
     });
     await expect(clearActions).toHaveCount(2);
-    await clearActions.nth(clearIndex).click();
+    await clearActions.nth(clearIndex).focus();
+    await clearActions.nth(clearIndex).press("Enter");
     await expect(root).toHaveAttribute("data-filtered-total", "50");
-    await expect(root.locator("[data-work-package-id]:visible")).toHaveCount(7);
+    await expect(root.locator("[data-work-package-id]:visible")).toHaveCount(6);
+    await expect(root.locator('[data-filter="query"]')).toBeFocused();
   }
 });
 
@@ -983,10 +1186,13 @@ test("W7, W8, W9, and W10 preserve their distinct truth and absence contracts", 
 
   const w8 = await openStory(page, "w-8-degraded-context-dark");
   await expect(w8).toHaveAttribute("data-source-total", "50");
-  await expect(w8.locator("[data-work-package-id]:visible")).toHaveCount(7);
+  await expect(w8.locator("[data-work-package-id]:visible")).toHaveCount(6);
   await expect(
     w8.getByText("Presence unavailable", { exact: true }),
   ).toBeVisible();
+  await expect(
+    w8.locator("[data-truth-tier='presence'] sk-notice"),
+  ).toHaveAttribute("tone", "info");
   await expect(
     w8.getByText("Presence is unavailable. Mission state is unaffected.", {
       exact: true,
@@ -1204,6 +1410,12 @@ test("W4 retains the personal rail, suppresses desktop context, stacks work firs
     scrollWidth: document.documentElement.scrollWidth,
   }));
   expect(zoomGeometry.scrollWidth - zoomGeometry.clientWidth).toBe(0);
+  await page.evaluate(() => {
+    document.documentElement.style.zoom = "1";
+  });
+  expect(
+    await compact.evaluate((element) => element.scrollHeight),
+  ).toBeLessThan(1900);
 });
 
 test("forced colors preserves labelled boundaries and reduced motion keeps skeletons static", async ({
