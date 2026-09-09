@@ -109,7 +109,6 @@ type PresentationOptions = Readonly<{
   compact?: boolean;
   light?: boolean;
   long?: boolean;
-  overflowing?: boolean;
   filters?: boolean;
 }>;
 
@@ -615,6 +614,20 @@ const renderReportedActivity = (
   </section>
 `;
 
+const syncWorkflowScrollerSemantics = (element?: Element): void => {
+  if (!(element instanceof HTMLElement)) return;
+  const overflowing = element.scrollWidth > element.clientWidth;
+  if (overflowing) {
+    element.setAttribute('role', 'region');
+    element.setAttribute('aria-label', 'Work package Kanban');
+    element.setAttribute('tabindex', '0');
+    return;
+  }
+  element.removeAttribute('role');
+  element.removeAttribute('aria-label');
+  element.removeAttribute('tabindex');
+};
+
 export const renderMissionKanban = (
   projection: ReturnType<typeof deriveMissionKanban>,
   presentation: PresentationOptions,
@@ -698,9 +711,6 @@ export const renderMissionKanban = (
             <section class="sk-workflow-board" aria-labelledby="${rootId}-board-title" data-committed-board>
               <div
                 class="sk-workflow-board__scroller"
-                role=${presentation.overflowing ? 'region' : nothing}
-                aria-label=${presentation.overflowing ? 'Work package Kanban' : nothing}
-                tabindex=${presentation.overflowing ? '0' : nothing}
                 data-board-scroller
               >
                 ${projection.stages.map((stage) => html`
@@ -758,6 +768,9 @@ const basePlay = async (canvasElement: HTMLElement) => {
     unknownSelection: true,
     unknownWorkPackage: true,
   }));
+  const scroller = root!.querySelector<HTMLElement>('[data-board-scroller]');
+  await expect(scroller).not.toBeNull();
+  syncWorkflowScrollerSemantics(scroller!);
   root?.setAttribute('data-play-proof', 'passed');
 };
 
@@ -799,7 +812,7 @@ export const Default: Story = {
 };
 
 export const K2NarrowContained: Story = {
-  render: () => renderMissionKanban(allRecords(), { state: 'k2', compact: true, overflowing: true }),
+  render: () => renderMissionKanban(allRecords(), { state: 'k2', compact: true }),
   parameters: { viewport: { defaultViewport: 'mobile1' } },
   play: async ({ canvasElement }) => basePlay(canvasElement),
 };
@@ -834,7 +847,7 @@ export const K5ObservedNotYetPushed: Story = {
 export const K6StableEmptyBoard: Story = {
   render: () => renderMissionKanban(deriveMissionKanban(MISSION_KANBAN_FIXTURE, {
     includedWorkPackageIds: [],
-  }), { state: 'k6', overflowing: true }),
+  }), { state: 'k6' }),
   play: async ({ canvasElement }) => {
     await basePlay(canvasElement);
     const root = canvasElement.querySelector<HTMLElement>('[data-mission-kanban-pattern]')!;
@@ -850,7 +863,7 @@ export const LightMode: Story = {
 };
 
 export const LongContent: Story = {
-  render: () => renderMissionKanban(allRecords(), { state: 'long', compact: true, long: true, overflowing: true }),
+  render: () => renderMissionKanban(allRecords(), { state: 'long', compact: true, long: true }),
   play: async ({ canvasElement }) => basePlay(canvasElement),
 };
 

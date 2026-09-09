@@ -422,7 +422,7 @@ test('[T007] K5 keeps committed, observed, and reported-live truth in separate r
   expect(await observation.evaluate((node) => node.closest('[data-reported-activity]'))).toBeNull();
 });
 
-test('[T008] K6 retains five labelled empty lists, sibling copy, and no board/activity CTA', async ({
+test('[T008] fitting K6 retains five labelled empty lists without a dead overflow tab stop', async ({
   page,
 }) => {
   const root = await openStory(page, 'k-6-stable-empty-board');
@@ -436,12 +436,25 @@ test('[T008] K6 retains five labelled empty lists, sibling copy, and no board/ac
     await expect(stage.locator(':scope > ol + .sk-empty-state')).toHaveText('No work packages in this stage.');
   }
   const scroller = root.locator('[data-board-scroller]');
-  await expect(scroller).toHaveAttribute('role', 'region');
-  await expect(scroller).toHaveAccessibleName('Work package Kanban');
-  await expect(scroller).toHaveAttribute('tabindex', '0');
+  expect(await scroller.evaluate((node) => node.scrollWidth <= node.clientWidth + 1)).toBe(true);
+  await expect(scroller).not.toHaveAttribute('role', /.*/);
+  await expect(scroller).not.toHaveAttribute('aria-label', /.*/);
+  await expect(scroller).not.toHaveAttribute('tabindex', /.*/);
   const committedAndLive = root.locator('[data-committed-board], [data-reported-activity]');
   await expect(committedAndLive.locator('a, button, sk-button, [role="button"], [role="link"]')).toHaveCount(0);
   await expect(root.locator('[data-reported-activity]')).toContainText('No live activity reported.');
+});
+
+test('[T008/T010] genuinely overflowing K6 owns the complete scroller triad and contained focus', async ({
+  page,
+}) => {
+  const root = await openStory(page, 'k-6-stable-empty-board', { width: 1280, height: 800 });
+  const scroller = root.locator('[data-board-scroller]');
+  expect(await scroller.evaluate((node) => node.scrollWidth > node.clientWidth + 1)).toBe(true);
+  await expect(scroller).toHaveAttribute('role', 'region');
+  await expect(scroller).toHaveAccessibleName('Work package Kanban');
+  await expect(scroller).toHaveAttribute('tabindex', '0');
+  await assertVisibleFocus(scroller);
 });
 
 test('[T008] LightMode is semantic/data-identical to K1 with a resolved theme delta', async ({
