@@ -36,9 +36,10 @@
     "#212 adds four documented presentation attributes across existing elements: action-row layout (3 -> 4), entity-marker size and shape (1 -> 3), and status-indicator pulsing (1 -> 2). On the refreshed train after #179, total moves 106 -> 110; no property-only field or method count changes.",
     "#213 adds exactly one documented sk-check-bullet state attribute. The existing icon attribute plus state moves that element 1 -> 2 and the exact total 110 -> 111; no property-only field, method, or part is added.",
     "#254 adds two reflected sk-app-shell attributes (presentation and open) plus one property-only compactTrigger field. On the refreshed train after #256, total moves 111 -> 114; no public method is added.",
-    "#272 adds two reflected sk-action-row attributes: href for the native-anchor route mode and presentation for the orthogonal flush surface. On the refreshed train after #254, action-row moves 4 -> 6 and total moves 114 -> 116; no property-only field or public method is added."
+    "#272 adds two reflected sk-action-row attributes: href for the native-anchor route mode and presentation for the orthogonal flush surface. On the refreshed train after #254, action-row moves 4 -> 6 and total moves 114 -> 116; no property-only field or public method is added.",
+    "#257 adds sk-copy-field's five documented string attributes and no public methods or property-only fields. On the refreshed train after #288, total moves 116 -> 121."
   ],
-  "total": 116,
+  "total": 121,
   "elements": {
     "sk-action-row": {
       "attributes": 6,
@@ -77,6 +78,11 @@
     },
     "sk-context-sidebar": {
       "attributes": 1,
+      "properties": 0,
+      "methods": 0
+    },
+    "sk-copy-field": {
+      "attributes": 5,
       "properties": 0,
       "methods": 0
     },

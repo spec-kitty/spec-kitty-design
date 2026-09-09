@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "mission_slug": "copy-field-element-01M1Y3QH",
+  "mission_id": "01M1Y3QHWPPS0Y5791D1EMHWW7",
+  "mission_branch": "kitty/mission-copy-field-element-01M1Y3QH",
+  "target_branch": "mission/copy-field-element",
+  "lanes": [
+    {
+      "lane_id": "lane-a",
+      "wp_ids": [
+        "WP01"
+      ],
+      "write_scope": [
+        "apps/storybook/src/tests/sk-copy-field*.spec.ts",
+        "apps/storybook/src/tests/visual.spec.ts",
+        "apps/storybook/src/tests/visual.spec.ts-snapshots/sk-copy-field-*.png",
+        "behaviours.json",
+        "expected-docs.json",
+        "expected-parts.json",
+        "expected-stories.json",
+        "fixtures/elements-behaviour/src/sk-copy-field.test.ts",
+        "fixtures/react-consumer/src/sk-copy-field.test.tsx",
+        "mutations.json",
+        "mutations.selftest.json",
+        "packages/elements/SIZES.md",
+        "packages/elements/custom-elements.json",
+        "packages/elements/package.json",
+        "packages/elements/src/copy-field/**",
+        "packages/elements/src/elements.ts",
+        "packages/elements/src/index.ts",
+        "packages/elements/vue.d.ts",
+        "packages/react/src/SkCopyField.*",
+        "packages/react/src/index.*",
+        "packages/styles/package.json",
+        "packages/styles/src/copy-field/**",
+        "packages/styles/src/index.ts"
+      ],
+      "predicted_surfaces": [
+        "api",
+        "app-shell",
+        "artifact-rendering",
+        "legacy-cleanup",
+        "tracker-integration"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    }
+  ],
+  "computed_at": "2026-09-07T14:43:12.980807+00:00",
+  "computed_from": "dependency_graph+ownership",
+  "planning_artifact_wps": [],
+  "planning_commit_sha": "f669f1713a6ff852c6d657d5645b7ab8b2090883"
+}

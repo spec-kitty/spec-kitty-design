@@ -43,7 +43,8 @@
     "#254 ratchets eleven additive sk-app-shell compact-presentation stories: closed/open, 390/768/860/861, long labels, short/tall viewports, reduced motion, and forced colors. On the refreshed train after #264, total moves 323 -> 334; the existing desktop, narrow, empty, and LightMode stories remain.",
     "#277 ratchets all twelve native styles-only checkbox-choice-group stories, total 347 -> 359. The set separately preserves K3 composition, selection/count/disabled states, long and narrow containment, focus, forced colors, dark, and real `.sk-light` evidence without adding a custom checkbox element.",
     "#272 ratchets eight additive sk-action-row stories for native route, route+flush, button+flush, selected+flush, selected route, unknown-presentation fail-open, forced-colors comparison, and a focused route+flush LightMode state. On the refreshed train after #271, total moves 361 -> 369; existing stories remain.",
-    "#265 ratchets the fourteen Storybook-only Mission Reading routes named as acceptance evidence. Default is the M1 populated Specify desktop; M2 has separate closed-390 and controlled-open drawer stories; M3-M8 retain loading, unavailable, snapshot, optional collection, Ops and three-truth-region states; LightMode, long-content and RTL stay separately addressable. On the refreshed train after #277, total moves 381 -> 395; fixture, projector and render helpers are excluded from CSF indexing."
+    "#265 ratchets the fourteen Storybook-only Mission Reading routes named as acceptance evidence. Default is the M1 populated Specify desktop; M2 has separate closed-390 and controlled-open drawer stories; M3-M8 retain loading, unavailable, snapshot, optional collection, Ops and three-truth-region states; LightMode, long-content and RTL stay separately addressable. On the refreshed train after #277, total moves 381 -> 395; fixture, projector and render helpers are excluded from CSF indexing.",
+    "#257 opts in all fifteen sk-copy-field stories, including distinct result, narrow, theme, forced-color, focus, and empty states. On the refreshed train after #292, total moves 405 -> 420."
   ],
   "byElement": {
     "sk-action-row": [
@@ -218,6 +219,23 @@
       "navigation-skcontextnav-html--unavailable-forced-colors",
       "navigation-skcontextnav-html--unavailable-rtl",
       "navigation-skcontextnav-html--unavailable-light-mode"
+    ],
+    "sk-copy-field": [
+      "elements-skcopyfield--default",
+      "elements-skcopyfield--hover",
+      "elements-skcopyfield--focused",
+      "elements-skcopyfield--active",
+      "elements-skcopyfield--disabled-empty",
+      "elements-skcopyfield--long-wrapping-command",
+      "elements-skcopyfield--quotes-and-unicode",
+      "elements-skcopyfield--copied-success",
+      "elements-skcopyfield--manual-fallback",
+      "elements-skcopyfield--failure",
+      "elements-skcopyfield--repeated-and-multiple",
+      "elements-skcopyfield--narrow",
+      "elements-skcopyfield--forced-colors",
+      "elements-skcopyfield--default-dark",
+      "elements-skcopyfield--light-mode"
     ],
     "sk-data-table": [
       "primitives-skdatatable-html--default",
@@ -538,5 +556,5 @@
       "patterns-mission-reading--rtl"
     ]
   },
-  "total": 405
+  "total": 420
 }

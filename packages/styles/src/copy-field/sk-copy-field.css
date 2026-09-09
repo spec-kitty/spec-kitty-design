@@ -1,0 +1,71 @@
+/* sk-copy-field — exact non-editable value plus one copy action. */
+
+:host {
+  box-sizing: border-box;
+  display: block;
+  container-type: inline-size;
+  inline-size: 100%;
+  max-inline-size: 100%;
+  min-inline-size: 0;
+}
+
+.sk-copy-field {
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: var(--sk-space-2) var(--sk-space-3);
+  min-inline-size: 0;
+  padding: var(--sk-space-3);
+  border: var(--sk-border-width-1) solid var(--sk-border-default);
+  border-radius: var(--sk-radius-md);
+  background: var(--sk-surface-input);
+  color: var(--sk-fg-body);
+  font-family: var(--sk-font-sans);
+}
+
+.sk-copy-field__value {
+  min-inline-size: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-family: var(--sk-font-mono);
+  font-size: var(--sk-text-sm);
+}
+
+.sk-copy-field__value:focus {
+  outline: var(--sk-border-width-2) solid var(--sk-border-focus);
+  outline-offset: var(--sk-border-width-2);
+}
+
+.sk-copy-field .sk-button {
+  transition: none;
+}
+
+.sk-copy-field__status {
+  grid-column: 1 / -1;
+  min-inline-size: 0;
+  color: var(--sk-fg-muted);
+  font-size: var(--sk-text-sm);
+  overflow-wrap: anywhere;
+}
+
+@container (max-inline-size: 20rem) {
+  .sk-copy-field {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .sk-copy-field .sk-button {
+    justify-self: end;
+  }
+}
+
+@media (forced-colors: active) {
+  .sk-copy-field {
+    border-color: CanvasText;
+    border-width: var(--sk-border-width-2);
+  }
+
+  .sk-copy-field__status {
+    color: CanvasText;
+  }
+}

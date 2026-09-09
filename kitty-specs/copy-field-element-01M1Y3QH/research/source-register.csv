@@ -1,0 +1,13 @@
+source_id,source_type,title,location,accessed_at,authority
+SRC-001,github_issue,"#257 sk-copy-field accessible copyable code/value control",https://github.com/spec-kitty/spec-kitty-design/issues/257,2026-09-07,binding scope and acceptance
+SRC-002,repository_doc,"ADR-9 Shadow DOM styling API and label ownership",docs/architecture/decisions/2026-09-02-9-shadow-dom-and-styling-api.md,2026-09-07,architecture
+SRC-003,repository_doc,"ADR-10 Distribution build artifacts and canonical markup",docs/architecture/decisions/2026-09-02-10-distribution-and-canonical-markup.md,2026-09-07,architecture
+SRC-004,repository_doc,"ADR-11 Verification stack and wrapper generation",docs/architecture/decisions/2026-09-02-11-verification-stack-and-wrapper-generation.md,2026-09-07,verification
+SRC-005,repository_doc,"Adding a component",docs/contributing/adding-a-component.md,2026-09-07,authoring procedure
+SRC-006,github_issue,"#79 button primitive migration",https://github.com/spec-kitty/spec-kitty-design/issues/79,2026-09-07,button contract
+SRC-007,github_issue,"#153 sk-button accessible name and focus",https://github.com/spec-kitty/spec-kitty-design/issues/153,2026-09-07,button contract
+SRC-008,github_issue,"#154 generated wrapper tabindex defect",https://github.com/spec-kitty/spec-kitty-design/issues/154,2026-09-07,known constraint
+SRC-009,github_issue,"#178 sk-notice live-region baseline",https://github.com/spec-kitty/spec-kitty-design/issues/178,2026-09-07,announcement precedent
+SRC-010,github_issue,"#213 Work Package detail primitives",https://github.com/spec-kitty/spec-kitty-design/issues/213,2026-09-07,copy-button non-goal
+SRC-011,ux_evidence,"Repository Dossier design authority",/home/jeroennouws/dev/team-kitty-missions/ux_redesign/repository-dossier/,2026-09-07,approved composition intent
+SRC-012,repository_source,"Current train/elements-first component contracts",packages/elements/src/button/;packages/elements/src/notice/;packages/styles/src/button/;packages/styles/src/notice/,2026-09-07,live implementation authority

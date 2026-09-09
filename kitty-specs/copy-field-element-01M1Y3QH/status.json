@@ -1,0 +1,61 @@
+{
+  "event_count": 12,
+  "last_event_id": "01M1YGQQK35YK3XX80E7HQN7VQ",
+  "materialized_at": "2026-09-07T18:05:24.963412+00:00",
+  "mission_number": "",
+  "mission_slug": "copy-field-element-01M1Y3QH",
+  "mission_type": "software-dev",
+  "summary": {
+    "approved": 0,
+    "blocked": 0,
+    "canceled": 0,
+    "claimed": 0,
+    "done": 1,
+    "for_review": 0,
+    "in_progress": 0,
+    "in_review": 0,
+    "planned": 0
+  },
+  "work_packages": {
+    "WP01": {
+      "actor": "merge",
+      "agent": "codex",
+      "agent_profile": "__resolved_profile_absent__",
+      "agent_profile_version": "__resolved_profile_version_absent__",
+      "force_count": 1,
+      "lane": "done",
+      "last_event_id": "01M1YGQQK35YK3XX80E7HQN7VQ",
+      "last_transition_at": "2026-09-07T18:05:24.963412+00:00",
+      "model": "__resolved_model_absent__",
+      "notes": [
+        "Ready for review: exact-value copy field implementation committed at 63f0ee23304c7a07e133ec87b6e82b8e2976430e; focused tests and freshness checks green.",
+        "Remediated all six cycle-1 findings at 26a73d5b674b6da1fa447942382125245d295254; focused component/consumer and Chromium/Firefox checks green.",
+        "Independent Codex runtime review cycle 2 APPROVE at exact 26a73d5bacaca5e2e3b0ab87f48ae67200fe80c7: all six cycle-1 findings fixed; focused 18/18, Chromium/Firefox 24/24, surgical SC-015 kill, targeted generators/type/quality green; no findings."
+      ],
+      "provider": "__resolved_provider_absent__",
+      "review": null,
+      "review_result": {
+        "feedback_path": "/home/jeroennouws/dev/spec-kitty-design-missions/257/kitty-specs/copy-field-element-01M1Y3QH/tasks/WP01-publish-copy-field-contract/review-cycle-2.md",
+        "reference": "review-cycle://copy-field-element-01M1Y3QH/WP01-publish-copy-field-contract/review-cycle-2.md",
+        "reviewer": "codex",
+        "verdict": "approved"
+      },
+      "role": "reviewer",
+      "shell_pid": 2951287,
+      "shell_pid_created_at": "1788789745.06",
+      "subtasks": {
+        "T001": "done",
+        "T002": "done",
+        "T003": "done",
+        "T004": "done",
+        "T005": "done",
+        "T006": "done"
+      },
+      "tracker_refs": [
+        "#257",
+        "#253",
+        "#255"
+      ]
+    }
+  }
+}

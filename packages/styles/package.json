@@ -22,6 +22,7 @@
     "./collection/*": "./dist/collection/*",
     "./context-nav/*": "./dist/context-nav/*",
     "./context-sidebar/*": "./dist/context-sidebar/*",
+    "./copy-field/*": "./dist/copy-field/*",
     "./data-table/*": "./dist/data-table/*",
     "./disclosure/*": "./dist/disclosure/*",
     "./empty-state/*": "./dist/empty-state/*",

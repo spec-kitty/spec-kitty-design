@@ -1,4 +1,9 @@
 export { define, registeredTags } from './define.js';
+export {
+  SkCopyField,
+  type CopyFieldOutcome,
+  type SkCopyFieldResultDetail,
+} from './copy-field/sk-copy-field.js';
 export { SkActionRow, type ActionRowActivateDetail } from './action-row/sk-action-row.js';
 export {
   SkBarChart,
@@ -111,6 +116,7 @@ export { default as skMetricSheet } from './metric/sk-metric.css.js';
 export { default as skEvidenceChainSheet } from './evidence-chain/sk-evidence-chain.css.js';
 export { default as skNoticeSheet } from './notice/sk-notice.css.js';
 export { default as skTransitionMatrixSheet } from './transition-matrix/sk-transition-matrix.css.js';
+export { default as skCopyFieldSheet } from './copy-field/sk-copy-field.css.js';
 
 // The card's authored markup module, exported so the two failure policies are reachable
 // from the behaviour fixture. `cardClasses` is TOTAL (an unknown variant warns and degrades)

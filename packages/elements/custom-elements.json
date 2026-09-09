@@ -2475,6 +2475,297 @@
         },
         {
           "kind": "class",
+          "description": "A non-editable exact-value field with a single native copy control and truthful inline results.\n\nThe displayed string is the string sent to the Clipboard API. When clipboard access is not\navailable, the visible code is focused and selected for a manual system copy shortcut. The\ncomponent never executes, parses, validates, logs, or includes the value in its result event.\n\nToken dependencies: --sk-border-default, --sk-border-focus, --sk-border-width-1,\n--sk-border-width-2, --sk-fg-body, --sk-fg-muted, --sk-font-mono, --sk-font-sans,\n--sk-radius-md, --sk-space-2, --sk-space-3, --sk-surface-input, --sk-text-sm.",
+          "name": "SkCopyField",
+          "cssParts": [
+            {
+              "description": "Native copy button.",
+              "name": "copy-control"
+            },
+            {
+              "description": "Immediate bordered value, action, and status composition.",
+              "name": "field"
+            },
+            {
+              "description": "Stable polite result region.",
+              "name": "status"
+            },
+            {
+              "description": "Exact visible non-editable value and manual-selection target.",
+              "name": "value"
+            }
+          ],
+          "members": [
+            {
+              "kind": "method",
+              "name": "#copyValue",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "Promise<void>"
+                }
+              }
+            },
+            {
+              "kind": "field",
+              "name": "#failureMessage",
+              "privacy": "private",
+              "default": "'Unable to copy or select the value.'",
+              "type": {
+                "text": "string"
+              }
+            },
+            {
+              "kind": "method",
+              "name": "#finish",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "outcome",
+                  "type": {
+                    "text": "CopyFieldOutcome"
+                  }
+                },
+                {
+                  "name": "snapshot",
+                  "type": {
+                    "text": "string"
+                  }
+                },
+                {
+                  "name": "revision",
+                  "type": {
+                    "text": "number"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "field",
+              "name": "#hasConsumerLabel",
+              "privacy": "private",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false"
+            },
+            {
+              "kind": "field",
+              "name": "#label",
+              "privacy": "private",
+              "default": "'Copy value'",
+              "type": {
+                "text": "string"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "#manualMessage",
+              "privacy": "private",
+              "default": "'Value selected. Use your system copy shortcut to copy it.'",
+              "type": {
+                "text": "string"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "#outcome",
+              "privacy": "private",
+              "type": {
+                "text": "CopyFieldOutcome | undefined"
+              }
+            },
+            {
+              "kind": "method",
+              "name": "#resolvedLabel",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "string"
+                }
+              }
+            },
+            {
+              "kind": "field",
+              "name": "#revision",
+              "privacy": "private",
+              "type": {
+                "text": "number"
+              },
+              "default": "0"
+            },
+            {
+              "kind": "method",
+              "name": "#selectVisibleValue",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "boolean"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "snapshot",
+                  "type": {
+                    "text": "string"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "#statusMessage",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "string"
+                }
+              }
+            },
+            {
+              "kind": "field",
+              "name": "#successMessage",
+              "privacy": "private",
+              "default": "'Value copied.'",
+              "type": {
+                "text": "string"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "#value",
+              "privacy": "private",
+              "type": {
+                "text": "string"
+              },
+              "default": "''"
+            },
+            {
+              "kind": "field",
+              "name": "#warnedInvalidLabel",
+              "privacy": "private",
+              "type": {
+                "text": "string | undefined"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "failureMessage",
+              "privacy": "public",
+              "type": {
+                "text": "string"
+              },
+              "description": "Message shown when neither copying nor exact selection succeeded.",
+              "attribute": "failure-message"
+            },
+            {
+              "kind": "field",
+              "name": "label",
+              "privacy": "public",
+              "type": {
+                "text": "string"
+              },
+              "description": "Accessible name for the native copy control. Blank values warn and use `Copy value`.",
+              "attribute": "label",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "manualMessage",
+              "privacy": "public",
+              "type": {
+                "text": "string"
+              },
+              "description": "Message shown when the visible value was selected for manual copying.",
+              "attribute": "manual-message"
+            },
+            {
+              "kind": "field",
+              "name": "successMessage",
+              "privacy": "public",
+              "type": {
+                "text": "string"
+              },
+              "description": "Message shown after the Clipboard API fulfills. Blank values use the default.",
+              "attribute": "success-message"
+            },
+            {
+              "kind": "field",
+              "name": "value",
+              "privacy": "public",
+              "type": {
+                "text": "string"
+              },
+              "description": "Exact text displayed and offered for copying. The empty string disables the control.",
+              "attribute": "value",
+              "reflects": true
+            }
+          ],
+          "events": [
+            {
+              "type": {
+                "text": "CustomEvent<SkCopyFieldResultDetail>"
+              },
+              "description": "Reports only copied, manual, or failed. The event bubbles, is composed, and is not cancelable.",
+              "name": "sk-copy-field-result"
+            }
+          ],
+          "attributes": [
+            {
+              "name": "failure-message",
+              "type": {
+                "text": "string"
+              },
+              "description": "Message shown when neither copying nor exact selection succeeded.",
+              "fieldName": "failureMessage"
+            },
+            {
+              "name": "label",
+              "type": {
+                "text": "string"
+              },
+              "description": "Accessible name for the native copy control. Blank values warn and use `Copy value`.",
+              "fieldName": "label"
+            },
+            {
+              "name": "manual-message",
+              "type": {
+                "text": "string"
+              },
+              "description": "Message shown when the visible value was selected for manual copying.",
+              "fieldName": "manualMessage"
+            },
+            {
+              "name": "success-message",
+              "type": {
+                "text": "string"
+              },
+              "description": "Message shown after the Clipboard API fulfills. Blank values use the default.",
+              "fieldName": "successMessage"
+            },
+            {
+              "name": "value",
+              "type": {
+                "text": "string"
+              },
+              "description": "Exact text displayed and offered for copying. The empty string disables the control.",
+              "fieldName": "value"
+            }
+          ],
+          "superclass": {
+            "name": "LitElement",
+            "package": "lit"
+          },
+          "tagName": "sk-copy-field",
+          "customElement": true
+        },
+        {
+          "kind": "class",
           "description": "A compact consumer-supplied icon, initials, or short mark with explicit accessible naming.\n\nToken dependencies: --sk-font-sans, --sk-on-tint-butter, --sk-radius-pill, --sk-radius-sm,\n--sk-space-1, --sk-space-5, --sk-space-7, --sk-surface-tint-butter, --sk-text-xs,\n--sk-weight-bold.",
           "name": "SkEntityMarker",
           "cssParts": [
@@ -6237,6 +6528,14 @@
         },
         {
           "kind": "js",
+          "name": "CopyFieldOutcome",
+          "declaration": {
+            "name": "CopyFieldOutcome",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
           "name": "DEFAULT_ACCENT",
           "declaration": {
             "name": "DEFAULT_ACCENT",
@@ -6824,6 +7123,30 @@
           "name": "SkContextSidebar",
           "declaration": {
             "name": "SkContextSidebar",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "SkCopyField",
+          "declaration": {
+            "name": "SkCopyField",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "SkCopyFieldResultDetail",
+          "declaration": {
+            "name": "SkCopyFieldResultDetail",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "skCopyFieldSheet",
+          "declaration": {
+            "name": "default",
             "module": "./dist/index.js"
           }
         },

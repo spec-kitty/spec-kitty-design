@@ -42,7 +42,8 @@
     "#196 AND #204 CLOSE THAT BOUNDARY, and this note is where the count stops. The paragraph immediately above records the FIFTH mission to reach it (#140, #143, #77, #177, #178) and to answer it the same way: the coverage is real, it is simply held by an ordinary test rather than by the harness, because minting an id extends ADR-11 and #67 owns that. The operator ruled on 2026-09-07 that both pending cases be minted in ONE amendment — SC-016 for probe/rendered-control correspondence (#196) and SC-017 for a responsive threshold (#204) — each with a red-first mutation rather than a prose obligation. Neither of the two claims this docstring names as unowned is retro-fitted here: sk-notice's re-announcement contract and sk-card's vocabulary derivation are still unowned, still held by ordinary tests, and are NOT what these two ids cover. What changed is only that the route now exists.",
     "SC-016 IS THE ONE ID IN THIS FILE THAT IS NOT INDEPENDENTLY BREAKABLE, and that is a property of the behaviour rather than of its tests. A correspondence claim is violated by any defect that breaks EITHER source, so with the assertion in place FOUR existing sk-form-input arms red it, measured before the entry was written rather than discovered afterwards: the merged-flag loop, the probe value sync, the pattern forwarding, and the type-before-value ordering. The last of those became SC-016's own arm; the pattern one was re-sited onto inputmode; the other two stay SC-003 and reach the correspondence test through the shared marker. The two ways to express that were `expectCollateral` on each of those arms, which would have removed guard 5's blast-radius bound from surgical arms to make room for one new id, and naming both ids on the shared test, which guard 4 and guard 5 both read. The second shipped: the correspondence test is marked `[SC-003][SC-016]`, the precedent being the `[SC-002][SC-003]` readonly test that has been in that file since #180.",
     "#179 registers sk-time-series-chart for SC-006/007/008/009/010/013/014 and adds EIGHT arms. It claims NEITHER of the ids #196/#204 minted: SC-016 is delegate/rendered-control validity correspondence and this element has no form association, and SC-017 is a documented VIEWPORT threshold — this element documents none. Its marker-density limit is a data threshold, and the table scroller's region triad is MEASURED in updated() rather than gated on a breakpoint, precisely so there is no figure to drift from. Declining is the point: declaring a subject creates the obligation.\nSC-009 IS CLAIMED, where sk-action-row correctly declined it. #179 requires a CANCELABLE event, and SC-009 is 'preventDefault demonstrably prevents where cancelable', so claiming it means naming a default action the ELEMENT owns. It owns exactly one: on activation it moves focus to the activated point's control. Selection is the application's and is never touched, so cancelling prevents the focus move and nothing else — the same shape sk-notice's entry records, and for the same reason its assertion is made against shadowRoot.activeElement rather than document.activeElement, which reports the host whether or not focus moved. The test activates with element.click(), not userEvent.click(): userEvent focuses the control first and the platform's own behaviour would satisfy the assertion for the wrong reason.\nSC-013 CARRIES THE MISSION'S REQUIRED GAP ARM, and no id is minted for 'a null run breaks the line'. #179 asks for a mutation whose red is an interpolated gap; guard 7 keys every mutation on a declared (id, subject) pair and tests/node/config-contract.test.ts asserts the applicable set equals ADR-11's list exactly, so there is no id to mint here and mislabelling one is what this programme has refused repeatedly (#140, #143, #77, #177, #216). The honest binding is SC-013, because a gap here IS a declared ::part(): the arm filters the nulls out of the graphic's own seam, the line joins straight through, and the `gap` part stops existing. That is a mutation whose red is a part's ABSENCE — sk-card's #177 arm is the precedent — which is why the [SC-013] fixture mounts a series WITH an interior null run and a supplied gap threshold rather than only a dense one.\nNO react-time-series-chart SUBJECT, stated rather than silent. The generated wrapper's first-render delivery of the nested structured series IS covered, by fixtures/react-consumer/src/sk-time-series-chart.test.tsx, which #148's own contract is modelled on. It is not declared as a subject because declaring it would add two more arms against the 129.1s of headroom this file's neighbour records (157 arms / 1276.4s at ee1d5be, 8.13s per arm) that this element's own eight arms already consume most of, and selftestCeilingSeconds is #225's, held by an operator ruling. Reversible by the next mission if the ceiling moves.",
-    "#254 REVIEW-CYCLE 6 registers react-app-shell for SC-010 and SC-012. The closed-render await arm is owned by the React SC-012 fixture. Isolated reproduction also records honest React SC-012 collateral for the native reflection, ordinary controlled-close release, and compact-header exposure arms; the registry mapping remains limited to SC-010 and SC-012."
+    "#254 REVIEW-CYCLE 6 registers react-app-shell for SC-010 and SC-012. The closed-render await arm is owned by the React SC-012 fixture. Isolated reproduction also records honest React SC-012 collateral for the native reflection, ordinary controlled-close release, and compact-header exposure arms; the registry mapping remains limited to SC-010 and SC-012.",
+    "#257 registers sk-copy-field for SC-015 because this mission explicitly requires the element module's guarded registration and duplicate-constructor behavior to be independently mutation-bound. Its fixture asserts the registered constructor identity, different-constructor warning/no-op, and same-constructor silence; the surgical arm changes only the constructor passed by this module."
   ],
   "behaviours": [
     {
@@ -187,6 +188,14 @@
         {
           "name": "sk-app-shell",
           "file": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+        },
+        {
+          "name": "sk-copy-field",
+          "file": "fixtures/elements-behaviour/src/sk-copy-field.test.ts"
+        },
+        {
+          "name": "react-copy-field",
+          "file": "fixtures/react-consumer/src/sk-copy-field.test.tsx"
         }
       ]
     },
@@ -228,6 +237,10 @@
         {
           "name": "sk-app-shell",
           "file": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+        },
+        {
+          "name": "sk-copy-field",
+          "file": "fixtures/elements-behaviour/src/sk-copy-field.test.ts"
         }
       ]
     },
@@ -269,6 +282,10 @@
         {
           "name": "sk-app-shell",
           "file": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+        },
+        {
+          "name": "sk-copy-field",
+          "file": "fixtures/elements-behaviour/src/sk-copy-field.test.ts"
         }
       ]
     },
@@ -383,6 +400,14 @@
         {
           "name": "react-app-shell",
           "file": "fixtures/react-consumer/src/sk-app-shell.test.tsx"
+        },
+        {
+          "name": "sk-copy-field",
+          "file": "fixtures/elements-behaviour/src/sk-copy-field.test.ts"
+        },
+        {
+          "name": "react-copy-field",
+          "file": "fixtures/react-consumer/src/sk-copy-field.test.tsx"
         }
       ]
     },
@@ -433,6 +458,10 @@
         {
           "name": "react-app-shell",
           "file": "fixtures/react-consumer/src/sk-app-shell.test.tsx"
+        },
+        {
+          "name": "sk-copy-field",
+          "file": "fixtures/elements-behaviour/src/sk-copy-field.test.ts"
         }
       ]
     },
@@ -555,6 +584,10 @@
         {
           "name": "sk-time-series-chart",
           "file": "fixtures/elements-behaviour/src/sk-time-series-chart.test.ts"
+        },
+        {
+          "name": "sk-copy-field",
+          "file": "fixtures/elements-behaviour/src/sk-copy-field.test.ts"
         }
       ]
     },
@@ -656,6 +689,10 @@
         {
           "name": "sk-time-series-chart",
           "file": "fixtures/elements-behaviour/src/sk-time-series-chart.test.ts"
+        },
+        {
+          "name": "sk-copy-field",
+          "file": "fixtures/elements-behaviour/src/sk-copy-field.test.ts"
         }
       ]
     },
@@ -669,6 +706,10 @@
         {
           "name": "sk-stub",
           "file": "fixtures/elements-behaviour/src/sk-stub.test.ts"
+        },
+        {
+          "name": "sk-copy-field",
+          "file": "fixtures/elements-behaviour/src/sk-copy-field.test.ts"
         }
       ]
     },
@@ -701,6 +742,10 @@
         {
           "name": "sk-app-shell",
           "file": "fixtures/elements-behaviour/src/sk-app-shell.test.ts"
+        },
+        {
+          "name": "sk-copy-field",
+          "file": "fixtures/elements-behaviour/src/sk-copy-field.test.ts"
         }
       ]
     },

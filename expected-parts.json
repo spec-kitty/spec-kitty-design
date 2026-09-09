@@ -37,9 +37,10 @@
     "#148 WP01 adds SEVEN sk-bar-chart parts: chart, plot, item, bar, value, label and empty-state. On the refreshed train after #147 and #178, total moves 104 -> 111.",
     "#179 adds sk-time-series-chart's SIXTEEN parts, total 111 -> 127. Three of them are the mission's own subject rather than ordinary styling surface. `gap` is a DRAWN OBJECT — the mutation that interpolates across nulls removes it, so the [SC-013] test's red is a part's ABSENCE, the shape sk-card's #177 arm records; that is why the [SC-013] fixture mounts a series WITH an interior null run rather than only a dense one. `point` exists only when the chart is selectable, so its fixture is the selectable mount. `gap-note` and `gap-notes` exist only when a SUPPLIED gapThreshold is met, so their fixture supplies one — an element that inferred a threshold would render them unconditionally and the ratchet would never notice.",
     "#212 adds only sk-action-row's supporting part, backed by its focused external-targetability test and SC-013 mutation. On the refreshed train after #179, total moves 127 -> 128; every other element part set is unchanged.",
-    "#254 adds sk-app-shell compact-header and compact-navigation as two externally targetable parts, total 128 -> 130. The six legacy parts remain unchanged."
+    "#254 adds sk-app-shell compact-header and compact-navigation as two externally targetable parts, total 128 -> 130. The six legacy parts remain unchanged.",
+    "#257 adds sk-copy-field's four stable surfaces (field, value, copy-control, status), each present in its SC-013 fixture. On the refreshed train after #254, total moves 130 -> 134."
   ],
-  "total": 130,
+  "total": 134,
   "byElement": {
     "sk-action-row": [
       "controls",
@@ -91,6 +92,12 @@
       "footer",
       "header",
       "sidebar"
+    ],
+    "sk-copy-field": [
+      "copy-control",
+      "field",
+      "status",
+      "value"
     ],
     "sk-entity-marker": [
       "content",
