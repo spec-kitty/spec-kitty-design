@@ -1,0 +1,14 @@
+{
+  "created_at": "2026-09-09T23:42:39.573146+00:00",
+  "flattened": false,
+  "friendly_name": "confirm dialog element",
+  "mission_id": "01M248TNYM7ZBRVQTSFFH7HX1A",
+  "mission_number": null,
+  "mission_slug": "confirm-dialog-element-01M248TN",
+  "mission_type": "software-dev",
+  "purpose_context": "This mission advances confirm dialog element on mission/confirm-dialog-element so stakeholders can track the work from mission creation onward.",
+  "purpose_tldr": "confirm dialog element",
+  "slug": "confirm-dialog-element-01M248TN",
+  "target_branch": "mission/confirm-dialog-element",
+  "topology": "single_branch"
+}
