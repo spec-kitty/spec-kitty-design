@@ -1303,3 +1303,104 @@ for (const visual of workPackagePatternFocusedCases) {
     });
   });
 }
+
+type MissionReadingStoryId =
+  | 'default'
+  | 'm-2-responsive-390'
+  | 'm-2-controlled-drawer-open'
+  | 'm-3-fragment-loading'
+  | 'm-4-canonical-page-unavailable'
+  | 'm-5-snapshot-behind-log'
+  | 'm-6-a-other-artifacts-present'
+  | 'm-6-b-other-artifacts-absent'
+  | 'm-7-a-ops-present'
+  | 'm-7-b-ops-absent'
+  | 'm-8-truth-regions'
+  | 'light-mode'
+  | 'long-content';
+
+const missionReadingStory = async (
+  page: Page,
+  id: MissionReadingStoryId,
+  viewport: Readonly<{ width: number; height: number }>,
+): Promise<Locator> => {
+  await page.setViewportSize(viewport);
+  await page.goto(`/iframe.html?id=patterns-mission-reading--${id}&viewMode=story`);
+  const root = page.locator('[data-mission-reading-pattern]').first();
+  await root.waitFor({ state: 'visible', timeout: 20000 });
+  await expect(root).toHaveAttribute('data-render-complete', 'true');
+  await page.evaluate(() => document.fonts.ready);
+  return root;
+};
+
+const missionReadingFullCases = [
+  { id: 'default', width: 1440, height: 1024, name: 'sk-mission-reading-m1-desktop-dark.png' },
+  { id: 'm-2-responsive-390', width: 390, height: 844, name: 'sk-mission-reading-m2-responsive-390.png' },
+  { id: 'm-2-controlled-drawer-open', width: 390, height: 844, name: 'sk-mission-reading-m2-drawer-open-390.png' },
+  { id: 'm-3-fragment-loading', width: 1280, height: 1000, name: 'sk-mission-reading-m3-loading.png' },
+  { id: 'm-4-canonical-page-unavailable', width: 1280, height: 1000, name: 'sk-mission-reading-m4-unavailable.png' },
+  { id: 'm-5-snapshot-behind-log', width: 1280, height: 1000, name: 'sk-mission-reading-m5-snapshot-notice.png' },
+  { id: 'm-6-a-other-artifacts-present', width: 1280, height: 1000, name: 'sk-mission-reading-m6a-artifacts-present.png' },
+  { id: 'm-6-b-other-artifacts-absent', width: 1280, height: 1000, name: 'sk-mission-reading-m6b-artifacts-absent.png' },
+  { id: 'm-7-a-ops-present', width: 1280, height: 1000, name: 'sk-mission-reading-m7a-ops-present.png' },
+  { id: 'm-7-b-ops-absent', width: 1280, height: 1000, name: 'sk-mission-reading-m7b-ops-absent.png' },
+  { id: 'm-8-truth-regions', width: 1440, height: 1200, name: 'sk-mission-reading-m8-truth-regions.png' },
+  { id: 'light-mode', width: 1440, height: 1024, name: 'sk-mission-reading-light.png' },
+  { id: 'long-content', width: 390, height: 1000, name: 'sk-mission-reading-long-390.png' },
+] as const satisfies ReadonlyArray<{
+  id: MissionReadingStoryId;
+  width: number;
+  height: number;
+  name: string;
+}>;
+
+for (const visual of missionReadingFullCases) {
+  test(`Mission Reading ${visual.name} — full route baseline`, async ({ page }) => {
+    const root = await missionReadingStory(page, visual.id, { width: visual.width, height: visual.height });
+    if (visual.id === 'm-2-controlled-drawer-open') {
+      await page.emulateMedia({ reducedMotion: 'reduce' });
+      await root.getByRole('link', { name: 'Back to repository' }).focus();
+    }
+    await expect(root).toHaveScreenshot(visual.name, {
+      threshold: 0.02,
+      maxDiffPixelRatio: 0.02,
+      timeout: 20000,
+    });
+  });
+}
+
+for (const width of [859, 860, 861] as const) {
+  test(`Mission Reading threshold ${width}px — visual baseline`, async ({ page }) => {
+    const root = await missionReadingStory(page, 'default', { width, height: 1000 });
+    await expect(root).toHaveScreenshot(`sk-mission-reading-threshold-${width}.png`, {
+      threshold: 0.02,
+      maxDiffPixelRatio: 0.02,
+      timeout: 20000,
+    });
+  });
+}
+
+test('Mission Reading forced colors unavailable entry — visual baseline', async ({ page }) => {
+  await page.emulateMedia({ forcedColors: 'active', reducedMotion: 'reduce' });
+  const root = await missionReadingStory(page, 'm-4-canonical-page-unavailable', { width: 1280, height: 1000 });
+  const unavailable = root.locator(
+    '[data-context-nav="desktop"] [data-catalogue-key="plan"] > .sk-context-nav__unavailable',
+  );
+  await expect(unavailable).toHaveScreenshot('sk-mission-reading-forced-colors-unavailable.png', {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+    timeout: 20000,
+  });
+});
+
+// This is an additional rendering stress baseline only. The mission's actual 200% browser-UI
+// zoom evidence is captured separately with headed Chrome UI and native Ctrl+Plus key chords.
+test('Mission Reading long content CSS zoom stress — visual baseline', async ({ page }) => {
+  const root = await missionReadingStory(page, 'long-content', { width: 780, height: 1000 });
+  await page.evaluate(() => { document.documentElement.style.zoom = '2'; });
+  await expect(root).toHaveScreenshot('sk-mission-reading-long-css-zoom-stress.png', {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+    timeout: 20000,
+  });
+});

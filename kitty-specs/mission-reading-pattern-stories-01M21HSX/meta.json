@@ -1,0 +1,72 @@
+{
+  "accept_commit": "53e827d156e02e3a17aff7b8d1456eee553a463e",
+  "acceptance_history": [
+    {
+      "accept_commit": "4f662f1d9c7f2c742ab98dfc8211598821d7e89d",
+      "acceptance_mode": "local",
+      "accepted_at": "2026-09-09T03:54:31.159199+00:00",
+      "accepted_by": "codex",
+      "accepted_from_commit": "1be31cfdd820e166314730b2d9ae1c7afb51e249"
+    },
+    {
+      "acceptance_mode": "pr",
+      "accepted_at": "2026-09-09T06:30:47.373999+00:00",
+      "accepted_by": "codex",
+      "accepted_from_commit": "a05d7bd3365756895995d3d633645893a67c7c1c"
+    },
+    {
+      "accept_commit": "846551850edbeb1e7f58346bad38c0656c07d733",
+      "acceptance_mode": "pr",
+      "accepted_at": "2026-09-09T08:42:34.970851+00:00",
+      "accepted_by": "codex",
+      "accepted_from_commit": "7ff74e5db1f5c3618178b436fe93e95f878b7a5b"
+    },
+    {
+      "accept_commit": "5bf570735fd80ed58de0cf2023956a4445edd4c4",
+      "acceptance_mode": "pr",
+      "accepted_at": "2026-09-09T08:45:31.593642+00:00",
+      "accepted_by": "codex",
+      "accepted_from_commit": "62bb4b4cd356e625b0003a535cd2f8a0d1157bfb"
+    },
+    {
+      "accept_commit": "9becdac6ed25d406ebd93aba1a2d167ad2267871",
+      "acceptance_mode": "pr",
+      "accepted_at": "2026-09-09T08:55:40.702718+00:00",
+      "accepted_by": "codex",
+      "accepted_from_commit": "57231f877efb78485f17ddb76bb9016ffdfad666"
+    },
+    {
+      "accept_commit": "f802f78c071fddeb7ac26cdc5e8be139000caf9d",
+      "acceptance_mode": "pr",
+      "accepted_at": "2026-09-09T09:28:06.861640+00:00",
+      "accepted_by": "codex",
+      "accepted_from_commit": "2171dee8c193347b91d1800f14a0befc083a3e4f"
+    },
+    {
+      "accept_commit": "53e827d156e02e3a17aff7b8d1456eee553a463e",
+      "acceptance_mode": "pr",
+      "accepted_at": "2026-09-09T09:28:56.981535+00:00",
+      "accepted_by": "codex",
+      "accepted_from_commit": "fe950bb9c7085c86168ec839dc522ce89b370440"
+    }
+  ],
+  "acceptance_mode": "pr",
+  "accepted_at": "2026-09-09T09:28:56.981535+00:00",
+  "accepted_by": "codex",
+  "accepted_from_commit": "fe950bb9c7085c86168ec839dc522ce89b370440",
+  "created_at": "2026-09-08T22:21:48.138656+00:00",
+  "flattened": false,
+  "friendly_name": "mission reading pattern stories",
+  "mission_id": "01M21HSX7AD5MVEZG4W8JWSDDE",
+  "mission_number": null,
+  "mission_slug": "mission-reading-pattern-stories-01M21HSX",
+  "mission_type": "software-dev",
+  "purpose_context": "This mission advances mission reading pattern stories on train/elements-first so stakeholders can track the work from mission creation onward.",
+  "purpose_tldr": "mission reading pattern stories",
+  "slug": "mission-reading-pattern-stories-01M21HSX",
+  "status_phase": "1",
+  "target_branch": "train/elements-first",
+  "topology": "lanes",
+  "vcs": "git",
+  "vcs_locked_at": "2026-09-08T22:51:16.793639+00:00"
+}

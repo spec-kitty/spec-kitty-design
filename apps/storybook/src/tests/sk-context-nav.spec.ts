@@ -399,12 +399,15 @@ test.describe('sk-context-nav source, markup, and distribution contract', () => 
 
   test('the surface remains absent from custom elements, wrappers, behavior, and mutation registries', () => {
     expect(existsSync('packages/elements/src/context-nav')).toBe(false);
-    const forbiddenTreeFiles = execFileSync('git', ['ls-files', 'packages/elements/src', 'packages/react/src'], {
+    const trackedSourceFiles = execFileSync('git', ['ls-files', 'packages/elements/src', 'packages/react/src'], {
       encoding: 'utf8',
     }).trim().split('\n').filter(Boolean);
-    expect(forbiddenTreeFiles.some((path) => /context-nav|skcontextnav/i.test(path))).toBe(false);
+    expect(trackedSourceFiles.some((path) => /context-nav|skcontextnav/i.test(path))).toBe(false);
+    const implementationTreeFiles = trackedSourceFiles.filter(
+      (path) => !path.startsWith('packages/elements/src/patterns/'),
+    );
     expectTrackedFilesNotToContain('sk-context-nav|SkContextNav', [
-      ...forbiddenTreeFiles,
+      ...implementationTreeFiles,
       'packages/elements/custom-elements.json',
       'packages/elements/vue.d.ts',
       'expected-parts.json',

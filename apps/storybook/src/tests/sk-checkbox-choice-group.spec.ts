@@ -351,7 +351,7 @@ test.describe("sk-checkbox-choice-group source and public contract", () => {
       total: number;
     };
     expect(ratchet.byElement["sk-checkbox-choice-group"]).toEqual(STORY_IDS);
-    expect(ratchet.total).toBe(391);
+    expect(ratchet.total).toBe(405);
   });
 });
 
@@ -754,7 +754,9 @@ test.describe("sk-checkbox-choice-group live native semantics and presentation",
       return {
         controlWidth,
         columns: new Set(
-          choices.map((choice) => Math.round(choice.getBoundingClientRect().left)),
+          choices.map((choice) =>
+            Math.round(choice.getBoundingClientRect().left),
+          ),
         ).size,
         labelWidths: choices.map(
           (choice) =>
