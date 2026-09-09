@@ -29,7 +29,8 @@
       "last_transition_at": "2026-09-09T18:13:10.623463+00:00",
       "model": "__resolved_model_absent__",
       "notes": [
-        "Consolidating the independently reviewed WP01 lane on the proposed train integration tree for PR #297."
+        "Consolidating the independently reviewed WP01 lane on the proposed train integration tree for PR #297.",
+        "Implementation and final governance-only deltas are complete; exact product and acceptance evidence are recorded in review-cycle-4.md."
       ],
       "provider": "__resolved_provider_absent__",
       "role": "implementer",
