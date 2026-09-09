@@ -21,10 +21,17 @@
   product-plus-generated tree at that point was commit
   `809dd7fceb3e78c19d268742d41c094a1e21ae20`.
 - When #290 integrated before acceptance, the complete delivery was rebased and regenerated a
-  fifth time on exact train `57d1b083a6799fc5ef7f2cff75493a7f64fd59a3`. The final generated
+  fifth time on exact train `57d1b083a6799fc5ef7f2cff75493a7f64fd59a3`. The post-#290 generated
   product commit is `62a39c4d301e2976f24dbc96f092cba58316f20f` (tree
-  `06e832d3369c4c187cd1d70587992f2d9097b665`). It is the commit exercised by the final local
+  `06e832d3369c4c187cd1d70587992f2d9097b665`). It is the commit exercised by the post-#290
   behavior, browser, packaging, mutation, accessibility, and browser-UI zoom evidence below.
+- When #267 / PR #294 integrated before the final push, the complete delivery was rebased and
+  regenerated again on exact train `c3430fa05f7dffadda8090e2988b86375ef7fe01` (tree
+  `1cbafe5c87ac8b86dd4aac2d3513d81c9ba18813`). The exact source-derived product and evidence
+  input commit before this ledger refresh is `7322e5acba357241ff91247a09c1cb96160aa2a8`
+  (tree `da366fed1831c04d8e28f49a86455c4a143b504a`). The final revalidation section below records
+  every applicable gate rerun on that post-#294 tree; no stale pre-rebase CI result is treated as
+  merge authority.
 - The final handoff SHA is the commit containing this ledger and is therefore recorded by the
   Spec Kitty transition and Git history rather than circularly embedded here.
 - Delivery remains exactly one WP and PR #293 to `train/elements-first`.
@@ -169,6 +176,44 @@ leaves closing consumer-owned, and does not synthesize trigger focus.
 | Storybook build plus `node scripts/run-axe-storybook.js` | Pass: the ratchet contains all 434 declared story IDs; 543/543 rendered stories satisfied the render wait with zero WCAG 2.1 AA violations. Build log SHA-256 `eabff81e8b98236aefe36423104c43862b83c5ee5f43be44a34c5846a7da1ae2`; axe log `8ea5b4520f89487281af859a4dc183564997e1e11657cbc763c35e34d662be8c`. |
 | release graph/selftest, packed Vue, official size check, offline-load/selftest | Pass; 28/28 release probes tripped, four packages pack and resolve, packed Vue compiles, SIZES is current, and 29/29 packed elements upgrade with zero off-machine requests. Log SHA-256 `4c5f9a96ba6e565ddb89495549f5b582a2bf0bba0e284bf3a827680e60cc9c4c`. |
 | headed Chrome browser-UI zoom at the fixed 390 CSS-pixel story | Pass at real 100% and 200% browser zoom on product commit `62a39c4d301e2976f24dbc96f092cba58316f20f`. Chrome for Testing 151.0.7922.34 received PID-targeted XTEST `Ctrl+0`, then five `Ctrl+Shift+=` chords for 200%; DPR changed exactly 1.203125→2.40625 while `visualViewport.scale` remained 1. Both phases measured shell 390px, rail 56px, hidden 0px context, content at x=56, Menu approximately 70.88×44px, Work→Menu Tab order, visible/unclipped focus, and document scrollWidth=clientWidth. Metrics log SHA-256 `4d0aee074fdf2fcd23046ce25197c67a28a9360847a8df911b2421c44dfea4c5`; the visually inspected 100% transport has SHA-256 `75c879cd7123c41e707f96d6b592d04d3011f170cd49252b600c43e6443d4453`. The visually inspected 1204×1204 200% screenshot is tracked as `chromium-200-percent.png`, SHA-256 `dca942137460a52bcce10920ecbbfdafe343a15d97268362ddd60c4568fcced9`. |
+
+## Post-#294 exact-tree revalidation
+
+This section supersedes the earlier point-cut results for final review. Every command ran from
+the clean delivery worktree on product/evidence input commit
+`7322e5acba357241ff91247a09c1cb96160aa2a8`, based on exact train
+`c3430fa05f7dffadda8090e2988b86375ef7fe01`. Temporary browser and package files used
+`/var/tmp/issue-274-post294`; generated repository output was source-derived and inspected, and
+the worktree was clean before the evidence ledger and inspected zoom screenshot were refreshed.
+
+| Command or evidence | Exact post-#294 result |
+|---|---|
+| canonical CSS, markup, styles-only, CEM, React, Vue, release-graph and size generation | Pass; the source-reconciled tree remained stable after generation. Log SHA-256 `cebc67feccbf211a98d267f42fb8dd69e24ef3176be799ab2f04a2d804e70c24`. |
+| `npm ci --ignore-scripts`; `bash scripts/npm-audit-gate.sh`; `npm run security:lockfile-check`; `bash scripts/check-action-pins.sh` | Pass: 1534 packages installed, zero high/critical vulnerabilities, lockfile dry-run green, all Actions SHA-pinned. Log SHA-256 `e385746d28ed86534797d1f8c251d1b2660a37ecb56e3082760b2f38a346af2c`. |
+| complete generated-drift, manifest, wrapper, distribution, adopted-CSS, composition, fixture-import, story-theme, workflow-defeat, ADR/LLM, typecheck, lint, stylelint, HTMLHint and commitlint lane | Pass, including every associated selftest; 29 elements, 121 documented public members, 134 public parts, 32 behavior fixture files, 62 story files, five typecheck projects, and eight lint projects. Existing security-plugin warnings remain non-failing and outside the changed app-shell surface. Log SHA-256 `d658d6db390b293bfb86b4a6a7525e2b8a32cf65e906cd6b5bb79b8cd8516b39`. |
+| `npm test` | Pass: 562/562 tests across 47 files; node lane 34 and Chromium browser lane 528, zero skipped. Log SHA-256 `17cc453424cbd860344c2eec39466eee5ea98e9bc569ff4521c672d9e3222535`. |
+| `node scripts/suite-selftest.mjs`; `node scripts/suite-selftest.mjs --selftest` | Pass: all 237 mutations produced their named red against the green 528-assertion baseline in 921.8s under the 1649.8s ceiling; all 10 harness guards passed. Log SHA-256 values `aafe59b8c59d32b894f44229be49d33dac9e63885362eaffea71242e5ee31f50` and `fc3f633c1b612e0b31f2230ecbc57bf486bd6b1582bbf6b178e8505870afb09d`. |
+| `node scripts/measure-suite-time.mjs`; `node scripts/gate-selftest.mjs` | Pass: 562/562 in 14.1s under the 40s ceiling; all 50 render-gate shapes classified correctly. Log SHA-256 values `9f1a61338f857d7c81f0a0fcbbe2846b65bc3f17f50eb681191d3751cb7d75b7` and `cacc8faff349f6c90e09c70e3bc1e68eb42dfa2be5be8a8601a5cc131078592e`. |
+| `node scripts/build-storybook-with-budget.mjs`; `node scripts/run-axe-storybook.js` | Pass: Storybook built in 10.42s under the 180s ceiling; all 543 rendered stories satisfied the wait and had zero WCAG 2.1 AA violations. Log SHA-256 values `fe7d2158967d46d78602ce953147ec60277e903ee1394a5878b9de6a7053402f` and `be648ecb6084846597f725b28bd1b6471aafe422aec37b45c5a3a667da8dc2f1`. |
+| release graph/selftest, publishable builds, packed Vue types, size/SRI check, offline-load/selftest | Pass: all 28 defeat probes tripped, four packages packed and resolved, packed Vue compiled, sizes and SRI were current, and 29/29 packed elements upgraded with zero off-machine requests. Log SHA-256 `76c2fc5231fda40856f3d1854206a9e344baf0d4b8d1429b389b267f56fca4d9`. |
+| canonical Chromium + Firefox Playwright gate (`CI=1`, two workers, isolated server) | Pass: 1047 passed and 43 intentional skips in 3.1m. Log SHA-256 `c00dc964b39f482b7a0df4eca54e5f6b12404b96ceb3b422da8280b58fed7487`. |
+| official Playwright 1.62.1 Noble container, full WebKit | Pass: 502 passed and 43 intentional skips in 1.6m, without retry or failure. Log SHA-256 `16ef5b310a373cfbab3ad3dd0f2a0b51432b25ddb89204071712ccacd539472d`. |
+| local Chromium visual diagnostic | Non-authoritative host diagnostic: 5 passed and 164 inherited baselines differed under workstation font/raster metrics. No baseline was changed or removed. Final CI remains the visual-regression authority. Log SHA-256 `a0af5efd143d0bfc1d5a69c126ff8b8438b92e03e81652d3b3831b81aba528ec`. |
+| headed Chrome browser-UI zoom at the fixed 390 CSS-pixel story | Pass at real 100% and 200% browser zoom on commit `7322e5acba357241ff91247a09c1cb96160aa2a8`. PID-targeted XTEST applied `Ctrl+0` and five `Ctrl+Shift+=` chords; DPR changed 1.203125→2.40625 while `visualViewport.scale` remained 1. Both phases retained the 390px shell, 56px rail, 0px context, content at x=56, approximately 70.88×44px Menu target, Work→Menu Tab order, visible unclipped focus, and no horizontal page overflow. Metrics log SHA-256 `1edf4be0445c91cc55dde7a75b4d2dee0410336546c8a2278458acb4c9c275ca`; visually inspected 100% transport SHA-256 `897a5d58d688715721526f67285d5e08a1f0574d07531e96774874a6def185e3`; tracked visually inspected 200% screenshot SHA-256 `d50d0e1d091655bc6ed4931e200cac28dda8b9f1be77948e84c85b7f2f08d45f`. |
+
+The first post-#294 full browser attempt intentionally remains non-green evidence: 1045 tests
+passed, 43 skipped, and both engines failed only the deployed nav-pill check because the freshly
+built Storybook target had not yet received the canonical demo assembler (log SHA-256
+`c210ce260a4e4dd84a30e61909f2dc9f104ba8ccdef1361a1e9390e82370e230`). Running the canonical
+assembler produced two pages and 42 resolved references, then the affected file passed 2/2 without
+retry (log SHA-256 `73e25e3b62c13554e00213df18a52fd228992acff8fa2427f434fcb0e74ecb96`).
+A subsequent non-CI run reused another workspace's transient server on the repository's shared
+port and therefore saw an internally consistent older surface: all rail stories absent, an old
+SRI, and old action-row behavior. Its 1002 pass / 43 skip / 45 fail result is invalid environment
+evidence, not a product result (log SHA-256
+`2828d8d2dfa5b679778d755f50f7f2e1ef0ac37fdbde6dd52ca00eb6b0524ed5`). Canonical CI mode first
+refused that occupied port, then owned an isolated server from this exact worktree and produced the
+green 1047/43 result above.
 
 ## CI visual convergence and environment evidence
 
