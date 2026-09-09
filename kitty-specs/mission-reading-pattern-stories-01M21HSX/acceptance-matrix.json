@@ -303,10 +303,10 @@
     {
       "invariant_id": "NI-004",
       "description": "No live person-to-Work-Package join or page-wide freshness claim is inferred.",
-      "verification_method": "fixture_projection_test_and_review",
-      "verification_command": "npx playwright test apps/storybook/src/tests/sk-mission-reading-pattern.spec.ts --project=chromium",
+      "verification_method": "custom_command",
+      "verification_command": "npx playwright test apps/storybook/src/tests/sk-mission-reading-pattern.spec.ts --project=chromium --grep \"M8 separates factual\"",
       "result": "confirmed_absent",
-      "evidence": "M8 assertions keep live presence to actor, repository, branch, age, and reported-live/unverified language."
+      "evidence": "Command exited 0: Running 1 test using 1 worker\n\n\n\n[1/1] [chromium] \u203a apps/storybook/src/tests/sk-mission-reading-pattern.spec.ts:683:5 \u203a M8 separates factual, observed, and reported-live regions without a live Work Pa"
     },
     {
       "invariant_id": "NI-005",
