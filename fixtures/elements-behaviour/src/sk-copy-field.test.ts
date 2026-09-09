@@ -20,6 +20,12 @@ const setSecureContext = (secure: boolean): void => {
   Object.defineProperty(globalThis, 'isSecureContext', { configurable: true, value: secure });
 };
 
+const mockExactSelection = (text: string) => vi.spyOn(globalThis, 'getSelection').mockReturnValue({
+  removeAllRanges: vi.fn(),
+  addRange: vi.fn(),
+  toString: () => text,
+} as unknown as Selection);
+
 const mount = async (value = '', attrs: Record<string, string> = {}): Promise<CopyField> => {
   const element = document.createElement('sk-copy-field') as CopyField;
   element.value = value;
@@ -136,10 +142,12 @@ test('missing, rejected, throwing, and insecure clipboard paths select the visib
   setSecureContext(false);
   const writeText = vi.fn(async () => undefined);
   setClipboard({ writeText });
+  const selectionSpy = mockExactSelection('not sent');
   const insecure = await mount('not sent');
   control(insecure).click();
   await vi.waitFor(() => expect(status(insecure).textContent).toContain('system copy shortcut'));
   expect(writeText).not.toHaveBeenCalled();
+  selectionSpy.mockRestore();
 });
 
 test('selection failure emits failed and never makes an untruthful success claim', async () => {
@@ -263,11 +271,13 @@ test('blank result-message overrides fail open to each applicable default', asyn
   await vi.waitFor(() => expect(status(success).textContent).toBe('Value copied.'));
 
   setClipboard(undefined);
+  const selectionSpy = mockExactSelection('manual');
   const manual = await mount('manual', { 'manual-message': '\n' });
   control(manual).click();
   await vi.waitFor(() => expect(status(manual).textContent).toBe(
     'Value selected. Use your system copy shortcut to copy it.',
   ));
+  selectionSpy.mockRestore();
 
   vi.spyOn(globalThis, 'getSelection').mockReturnValue(null);
   const failed = await mount('failed', { 'failure-message': '' });
