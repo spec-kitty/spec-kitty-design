@@ -630,15 +630,30 @@ const syncWorkflowScrollerSemantics = (element?: Element): void => {
 };
 
 const createWorkflowScrollerRef = () => {
-  let observer: ResizeObserver | undefined;
+  let resizeObserver: ResizeObserver | undefined;
+  let mountObserver: MutationObserver | undefined;
+  const disconnect = (): void => {
+    resizeObserver?.disconnect();
+    mountObserver?.disconnect();
+    resizeObserver = undefined;
+    mountObserver = undefined;
+  };
   return (element?: Element): void => {
-    // Lit clears callback refs before replacement/removal, keeping one observer per story render.
-    observer?.disconnect();
-    observer = undefined;
+    disconnect();
     if (!(element instanceof HTMLElement)) return;
     syncWorkflowScrollerSemantics(element);
-    observer = new ResizeObserver(() => syncWorkflowScrollerSemantics(element));
-    observer.observe(element);
+    resizeObserver = new ResizeObserver(() => syncWorkflowScrollerSemantics(element));
+    resizeObserver.observe(element);
+
+    // Callback refs run while Lit is still attaching the fragment, so the story root is
+    // not an ancestor yet. The document body is stable through Storybook force-remounts;
+    // each rendered story watches only whether its own scroller remains in that document.
+    const mountBoundary = document.body;
+    mountObserver = new MutationObserver(() => {
+      if (mountBoundary.contains(element)) return;
+      disconnect();
+    });
+    mountObserver.observe(mountBoundary, { childList: true, subtree: true });
   };
 };
 

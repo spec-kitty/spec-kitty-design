@@ -103,6 +103,107 @@ async function assertVisibleFocus(control: Locator): Promise<void> {
   expect(geometry.withinViewport).toBe(true);
 }
 
+type ObserverProbeSnapshot = Readonly<{
+  constructed: number;
+  observedTargets: number;
+  disconnectedTargets: number;
+  activeTargetIds: ReadonlyArray<number>;
+  detachedActiveTargetIds: ReadonlyArray<number>;
+  disconnectedTargetIds: ReadonlyArray<number>;
+}>;
+
+async function installObserverProbe(page: Page): Promise<void> {
+  await page.addInitScript(() => {
+    const NativeResizeObserver = window.ResizeObserver;
+    const targetIds = new WeakMap<Element, number>();
+    const activeTargets = new Set<Element>();
+    const disconnectedTargetIds = new Set<number>();
+    let constructed = 0;
+    let observedTargets = 0;
+    let disconnectedTargets = 0;
+    let nextTargetId = 1;
+    const targetId = (target: Element) => {
+      const current = targetIds.get(target);
+      if (current !== undefined) return current;
+      const next = nextTargetId;
+      nextTargetId += 1;
+      targetIds.set(target, next);
+      return next;
+    };
+
+    class InstrumentedResizeObserver implements ResizeObserver {
+      readonly nativeObserver: ResizeObserver;
+      readonly scrollerTargets = new Set<Element>();
+
+      constructor(callback: ResizeObserverCallback) {
+        constructed += 1;
+        this.nativeObserver = new NativeResizeObserver(callback);
+      }
+
+      observe(target: Element, options?: ResizeObserverOptions): void {
+        this.nativeObserver.observe(target, options);
+        if (!target.classList.contains('sk-workflow-board__scroller') || this.scrollerTargets.has(target)) return;
+        this.scrollerTargets.add(target);
+        activeTargets.add(target);
+        observedTargets += 1;
+        targetId(target);
+      }
+
+      unobserve(target: Element): void {
+        this.nativeObserver.unobserve(target);
+        if (!this.scrollerTargets.delete(target) || !activeTargets.delete(target)) return;
+        disconnectedTargets += 1;
+        disconnectedTargetIds.add(targetId(target));
+      }
+
+      disconnect(): void {
+        this.nativeObserver.disconnect();
+        for (const target of this.scrollerTargets) {
+          if (!activeTargets.delete(target)) continue;
+          disconnectedTargets += 1;
+          disconnectedTargetIds.add(targetId(target));
+        }
+        this.scrollerTargets.clear();
+      }
+    }
+
+    Object.defineProperty(window, 'ResizeObserver', {
+      configurable: true,
+      writable: true,
+      value: InstrumentedResizeObserver,
+    });
+    Object.defineProperty(window, '__missionKanbanObserverProbe', {
+      configurable: true,
+      value: {
+        snapshot: () => {
+          const activeTargetIds = [...activeTargets].map(targetId).sort((left, right) => left - right);
+          return {
+            constructed,
+            observedTargets,
+            disconnectedTargets,
+            activeTargetIds,
+            detachedActiveTargetIds: [...activeTargets]
+              .filter((target) => !target.isConnected)
+              .map(targetId)
+              .sort((left, right) => left - right),
+            disconnectedTargetIds: [...disconnectedTargetIds].sort((left, right) => left - right),
+          };
+        },
+      },
+    });
+  });
+}
+
+async function observerProbeSnapshot(frameDocument: Locator): Promise<ObserverProbeSnapshot> {
+  return frameDocument.evaluate(() => {
+    const probe = (window as typeof window & {
+      __missionKanbanObserverProbe?: { snapshot: () => ObserverProbeSnapshot };
+    }).__missionKanbanObserverProbe;
+    if (!probe) throw new Error('Mission Kanban ResizeObserver probe was not installed');
+    return probe.snapshot();
+  });
+}
+
 test('[T001/T009] the built catalogue contains exactly the ten Mission Kanban stories', async ({
   request,
 }) => {
@@ -493,6 +594,43 @@ test('[T005/T008/T010] one mounted K6 synchronizes the scroller triad across bid
   await expect(root).toHaveAttribute('data-live-resize-sentinel', 'same-root');
   geometry = await documentGeometry(page);
   expect(geometry.scrollWidth).toBeLessThanOrEqual(geometry.clientWidth + 1);
+});
+
+test('[T005/T008/T010] real Storybook reloads disconnect remounted scroller observers', async ({
+  page,
+}) => {
+  await installObserverProbe(page);
+  await page.goto(`/?path=/story/${STORY_PREFIX}k-6-stable-empty-board`);
+  const preview = page.frameLocator('#storybook-preview-iframe');
+  const root = preview.locator('[data-mission-kanban-pattern]');
+  await root.waitFor({ state: 'visible', timeout: 20000 });
+  await expect(root).toHaveAttribute('data-render-complete', 'true');
+  await expect(root).toHaveAttribute('data-play-proof', 'passed');
+  const frameDocument = preview.locator('html');
+  const reloadStory = page.getByRole('button', { name: 'Reload story' });
+  await expect(reloadStory).toBeVisible();
+
+  const snapshots = [await observerProbeSnapshot(frameDocument)];
+  for (let reload = 0; reload < 3; reload += 1) {
+    const previous = snapshots.at(-1)!;
+    await reloadStory.click();
+    await expect.poll(async () => (await observerProbeSnapshot(frameDocument)).observedTargets)
+      .toBeGreaterThan(previous.observedTargets);
+    await expect(root).toHaveAttribute('data-render-complete', 'true');
+    await expect(root).toHaveAttribute('data-play-proof', 'passed');
+    snapshots.push(await observerProbeSnapshot(frameDocument));
+  }
+
+  console.info('Mission Kanban observer lifecycle evidence', JSON.stringify(snapshots));
+  for (const [index, snapshot] of snapshots.entries()) {
+    expect.soft(snapshot.activeTargetIds, `reload ${index} active target`).toHaveLength(1);
+    expect.soft(snapshot.detachedActiveTargetIds, `reload ${index} detached active targets`).toEqual([]);
+    expect.soft(snapshot.observedTargets - snapshot.disconnectedTargets, `reload ${index} observer balance`).toBe(1);
+    if (index === 0) continue;
+    const previousTargetId = snapshots[index - 1]!.activeTargetIds.at(-1)!;
+    expect.soft(snapshot.disconnectedTargetIds, `reload ${index} disconnected old target`)
+      .toContain(previousTargetId);
+  }
 });
 
 test('[T008] LightMode is semantic/data-identical to K1 with a resolved theme delta', async ({
