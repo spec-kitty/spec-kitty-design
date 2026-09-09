@@ -37,7 +37,7 @@
       "wp": null
     },
     "#263": {
-      "evidence_ref": "#264 is merged and post-merge verified; #265 corrective product head b68f84d28715ca8ef551f40cda24f3a13e054f1e passes full CI 34343137694 after closing the four late contract blockers; corrective train merge and post-merge mission review remain.",
+      "evidence_ref": "Both epic children are landed on train/elements-first: #264 via PR #267 as a78445552e42cb6bbde4e1d2e497137bc30c9dee with post-merge PASS, and #265 via PRs #292 and corrective #294 as c3430fa05f7dffadda8090e2988b86375ef7fe01 with acceptance and four-lens PASS; tracker closure follows the fresh-tree post-merge audit.",
       "fr": "FR-001\u2013FR-013",
       "nfr": "NFR-001\u2013NFR-007",
       "repo": "spec-kitty/spec-kitty-design",
@@ -45,7 +45,7 @@
       "scope": "Tracker closure after both Mission Reading children merge and pass post-merge review",
       "source_file": "spec.md",
       "title": "Epic: Mission Reading \u2014 honest catalogue navigation and composed document states",
-      "verdict": "in-mission",
+      "verdict": "fixed",
       "wp": "WP01"
     },
     "#264": {
@@ -61,7 +61,7 @@
       "wp": null
     },
     "#265": {
-      "evidence_ref": "Corrective product head b68f84d28715ca8ef551f40cda24f3a13e054f1e on train 57d1b083a6799fc5ef7f2cff75493a7f64fd59a3; CI 34343137694 fully green across mutation, Playwright, axe, visual, composition, generated, package, release, security, build, and aggregate gates; independent contract lens PASS; final review/acceptance/merge remain.",
+      "evidence_ref": "PR #292 merged the Mission Reading pattern family as 858ea6d7848923f39bc2ee0c1fd6eb82a207ad93; corrective PR #294 merged to train/elements-first as c3430fa05f7dffadda8090e2988b86375ef7fe01, whose tree exactly equals accepted head c58c8e67390baa966c8cf00240c33a06fe9c3079; exact-head CI 34348797583 and all four independent review lenses passed.",
       "fr": "FR-001\u2013FR-013",
       "nfr": "NFR-001\u2013NFR-007",
       "repo": "spec-kitty/spec-kitty-design",
@@ -69,7 +69,7 @@
       "scope": "Complete reviewed Mission Reading M1\u2013M8 pattern-story family",
       "source_file": "spec.md",
       "title": "[TKM2] Mission Reading pattern stories \u2014 exact-commit document and route-state fixtures",
-      "verdict": "in-mission",
+      "verdict": "fixed",
       "wp": "WP01"
     },
     "#285": {

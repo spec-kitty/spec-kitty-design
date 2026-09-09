@@ -1,16 +1,16 @@
 {
-  "event_count": 47,
-  "last_event_id": "01M230MMV1AJH4C6QPQD0622JZ",
-  "materialized_at": "2026-09-09T12:00:18.785409+00:00",
+  "event_count": 48,
+  "last_event_id": "01M232GW8FM1X9ESXFBS9TXHYJ",
+  "materialized_at": "2026-09-09T12:33:12.463539+00:00",
   "mission_number": "",
   "mission_slug": "mission-reading-pattern-stories-01M21HSX",
   "mission_type": "software-dev",
   "summary": {
-    "approved": 1,
+    "approved": 0,
     "blocked": 0,
     "canceled": 0,
     "claimed": 0,
-    "done": 0,
+    "done": 1,
     "for_review": 0,
     "in_progress": 0,
     "in_review": 0,
@@ -18,15 +18,15 @@
   },
   "work_packages": {
     "WP01": {
-      "actor": "user",
+      "actor": "codex",
       "agent": "codex",
       "agent_profile": "__resolved_profile_absent__",
       "agent_profile_version": "__resolved_profile_version_absent__",
       "assignee": "codex",
       "force_count": 14,
-      "lane": "approved",
-      "last_event_id": "01M230MMV1AJH4C6QPQD0622JZ",
-      "last_transition_at": "2026-09-09T12:00:18.785409+00:00",
+      "lane": "done",
+      "last_event_id": "01M232GW8FM1X9ESXFBS9TXHYJ",
+      "last_transition_at": "2026-09-09T12:33:12.463539+00:00",
       "model": "__resolved_model_absent__",
       "notes": [
         "Ready for review: implementation and mission-specific gates pass; host-only diagram and legacy CI visual baseline limitations recorded in handoff evidence.",
@@ -56,7 +56,8 @@
         "Implementing bounded post-merge corrections from the final contract lens.",
         "Corrective implementation complete; exact-head CI quality run 34343137694 is green for all completed jobs, including refreshed Linux visual baselines.",
         "Cycle 12 corrective review: four-lens Codex-only review of PR #294 after full product CI 34343137694 and governed acceptance refresh.",
-        "Cycle 12 APPROVED: architecture, contract/fakeability, debugger, and semantic-reducer lenses PASS; exact-head CI 34346346421 fully green; all four late contract blockers closed without scope expansion."
+        "Cycle 12 APPROVED: architecture, contract/fakeability, debugger, and semantic-reducer lenses PASS; exact-head CI 34346346421 fully green; all four late contract blockers closed without scope expansion.",
+        "Corrective PR #294 merged to train/elements-first; exact merge tree equals the accepted candidate and full exact-head CI 34348797583 passed. | Done override: GitHub squash-merged PR #294 to train/elements-first as c3430fa05f7dffadda8090e2988b86375ef7fe01; squash ancestry does not contain the accepted source commits, but the fresh clone merge tree exactly equals accepted head c58c8e67390baa966c8cf00240c33a06fe9c3079."
       ],
       "provider": "__resolved_provider_absent__",
       "review": null,

@@ -61,6 +61,7 @@
   "accepted_at": "2026-09-09T12:02:01.783602+00:00",
   "accepted_by": "codex",
   "accepted_from_commit": "4f20dab2155e2da742a38a30d6650c516af6afc3",
+  "baseline_merge_commit": "57d1b083a6799fc5ef7f2cff75493a7f64fd59a3",
   "created_at": "2026-09-08T22:21:48.138656+00:00",
   "flattened": false,
   "friendly_name": "mission reading pattern stories",
