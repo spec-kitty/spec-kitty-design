@@ -279,10 +279,10 @@
     {
       "invariant_id": "NI-001",
       "description": "No prohibited Mission Reading component or framework wrapper exists.",
-      "verification_method": "diff_and_registration_audit",
-      "verification_command": "git diff --name-only origin/train/elements-first...HEAD; rg 'customElement|customElements.define' packages/elements/src/patterns/mission-reading.stories.ts",
+      "verification_method": "custom_command",
+      "verification_command": "test -z \"$(git diff --name-only origin/train/elements-first...HEAD | rg 'packages/(elements/src/components|react|vue).*(mission-reader|mission-reading)' || true)\" && ! rg -n 'customElement|customElements\\.define|sk-mission-reader' packages/elements/src/patterns/mission-reading.stories.ts",
       "result": "confirmed_absent",
-      "evidence": "No component registration, component source directory, React wrapper, or Vue declaration was added."
+      "evidence": "Command exited 0: "
     },
     {
       "invariant_id": "NI-002",
