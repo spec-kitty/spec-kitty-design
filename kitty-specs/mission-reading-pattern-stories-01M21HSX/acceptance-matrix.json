@@ -38,10 +38,10 @@
       "criterion_id": "FR-004",
       "description": "M3 provides stable labelled busy geometry without fabricated document facts, timestamps, or actions.",
       "proof_type": "automated_test_and_visual_evidence",
-      "evidence": "Exact rebased product head df4bf66bc72c287e6aaadf82f5fce18c766de5af: M3 proves a labelled polite busy region with no fabricated facts or actions; three-engine and tracked visual evidence pass in CI 34332459374.",
+      "evidence": "Corrective product head b68f84d28715ca8ef551f40cda24f3a13e054f1e on train 57d1b083a6799fc5ef7f2cff75493a7f64fd59a3: M3 exposes a polite atomic status outside its named aria-busy region, retains the token-derived 512px loading floor, and fabricates no facts or actions; rendered topology/geometry tests and refreshed Linux Chromium visual pass in CI 34343137694.",
       "pass_fail": "pass",
       "verified_by": "codex",
-      "verified_at": "2026-09-09T09:25:29.694965+00:00",
+      "verified_at": "2026-09-09T11:25:18.353993+00:00",
       "notes": "Placeholder geometry is assistive-hidden and pattern-owned."
     },
     {
