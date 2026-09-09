@@ -228,10 +228,10 @@
       "criterion_id": "C-003",
       "description": "Pattern CSS uses approved tokens, semantic pairs, and sk-mission-reading-pattern BEM naming.",
       "proof_type": "automated_style_gate",
-      "evidence": "Token, CSS hygiene, stylelint, composition, and source-boundary checks passed; CSS hygiene covered 28 elements, 29 sheets, and 464 rules.",
+      "evidence": "Exact product head a36f3b72f68a00bc04ffe0cf49dbf2d362e6358e passes tokens, CSS hygiene, stylelint, composition, and source-boundary gates with sk-mission-reading-pattern BEM naming.",
       "pass_fail": "pass",
       "verified_by": "codex",
-      "verified_at": "2026-09-09T03:41:13Z",
+      "verified_at": "2026-09-09T07:31:57.887298+00:00",
       "notes": "The raw 860px pattern breakpoint found in cycle 2 was removed in favor of the public inert exposure state."
     },
     {
