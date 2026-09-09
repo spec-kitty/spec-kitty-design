@@ -1,0 +1,52 @@
+{
+  "entries": [
+    {
+      "created_at": "2026-09-09T23:46:10.153904Z",
+      "decision_id": "01M24913K9HVQR703BFYV2Y9FG",
+      "final_answer": "native close + returnValue: the element funnels every dismissal path (Escape, backdrop click, confirm click, cancel click, programmatic close()) through HTMLDialogElement.close(returnValue), so the platform's own 'close' event is the single observation point; returnValue is 'confirm' or 'cancel'. This avoids adding a second, redundant custom-event contract and keeps the published surface (manifest, ratchets) minimal, per #308's 'chosen and documented explicitly, not half-supported' requirement.",
+      "input_key": "reporting_mechanism",
+      "mission_id": "01M248TNYM7ZBRVQTSFFH7HX1A",
+      "mission_slug": "confirm-dialog-element-01M248TN",
+      "opened_by": "cli",
+      "options": [
+        "native close + returnValue",
+        "named custom event"
+      ],
+      "origin_flow": "specify",
+      "other_answer": false,
+      "question": "Which single mechanism should sk-confirm-dialog use to report confirm/cancel: the native <dialog> close event with returnValue, or a named custom event?",
+      "rationale": null,
+      "resolved_at": "2026-09-09T23:46:23.322563Z",
+      "resolved_by": null,
+      "slot_key": "specify.contract.reporting-mechanism",
+      "status": "resolved",
+      "step_id": null,
+      "summary_json": null
+    },
+    {
+      "created_at": "2026-09-09T23:46:25.061387Z",
+      "decision_id": "01M2491J55FKRXGT8E1KP5X2V1",
+      "final_answer": null,
+      "input_key": "static_twin_disposition",
+      "mission_id": "01M248TNYM7ZBRVQTSFFH7HX1A",
+      "mission_slug": "confirm-dialog-element-01M248TN",
+      "opened_by": "cli",
+      "options": [
+        "Yes, invent a static form now",
+        "No, defer to #301 ruling"
+      ],
+      "origin_flow": "specify",
+      "other_answer": false,
+      "question": "Should sk-confirm-dialog's stylesheet ship a generated static twin for a consumer-rendered <dialog> now, in this mission?",
+      "rationale": "Issue #308 explicitly instructs: 'if that needs a static twin, follow #301's ruling rather than inventing one here.' #301 (the static-form-of-element-backed-CSS decision) is open and unresolved as of this spec. This mission specifies the stylesheet and element fully and names the static-twin question as a named decision point deferred to #301, per operator/epic #300 instruction. No static form is invented in this mission.",
+      "resolved_at": "2026-09-09T23:46:30.038845Z",
+      "resolved_by": null,
+      "slot_key": "specify.styles.static-twin",
+      "status": "deferred",
+      "step_id": null,
+      "summary_json": null
+    }
+  ],
+  "mission_id": "01M248TNYM7ZBRVQTSFFH7HX1A",
+  "version": 1
+}
