@@ -29,6 +29,30 @@ Because a custom element needs no wrapper, every framework can use the migrated 
 generated React wrapper exists for JSX typing and typed refs — see
 [Using the elements from React](./using-react.md) for what it does and does not buy, measured.
 
+## Mission Reading pattern
+
+The Storybook `Patterns/Mission Reading` family demonstrates Mission document routes without
+publishing a page component. It composes `sk-app-shell`, `sk-personal-rail`,
+`sk-context-sidebar`, `sk-page-header`, `sk-status-indicator`, `sk-pill-tag`,
+`sk-section-header`, `sk-card`, `sk-notice`, and `sk-grid` with the native light-DOM
+`.sk-context-nav`, `.sk-breadcrumbs`, `.sk-facts`, `.sk-prose`, `.sk-data-table`, and
+`.sk-empty-state` families. Native navigation, lists, links, `article`, `section`, code, and tables
+retain their own semantics.
+
+One deeply frozen Storybook fixture owns the repeated Mission, revision, catalogue, artifact,
+operation, observed-activity, and reported-presence values. Pure projectors select the reviewed
+route states; they perform no I/O or mutation. An available catalogue destination is a real anchor.
+An unavailable destination is visible static native content with an explicit text annotation—no
+`href`, role, handler, or tab stop—and receives no child list. Only supplied bounded collections
+render nested entries; Ops remains terminal.
+
+The compact shell is controlled composition. The consumer supplies the trigger and labelled drawer,
+keeps `open` and `aria-expanded` aligned, installs `compactTrigger`, accepts
+`sk-app-shell-dismiss`, and decides what route activation does. The application—not this pattern or
+the design system—owns routing, fetching, persistence, truth checking, pushed-time markers,
+Markdown parsing and sanitization, document actions, live polling, and every join between activity
+and presence data.
+
 ## Work Package view patterns
 
 The Storybook `Patterns/Work Package Views` stories demonstrate the T10 overview and T11 detail
