@@ -1,7 +1,7 @@
 {
-  "event_count": 1,
-  "last_event_id": "01M22XACGY6S11RBCFQ4N4CYAP",
-  "materialized_at": "2026-09-09T11:02:16.862659+00:00",
+  "event_count": 2,
+  "last_event_id": "01M23NYHV8A00NSAJ24463J6N6",
+  "materialized_at": "2026-09-09T18:12:43.496261+00:00",
   "mission_number": "",
   "mission_slug": "repository-dossier-pattern-stories-01M22WFQ",
   "mission_type": "software-dev",
@@ -9,20 +9,25 @@
     "approved": 0,
     "blocked": 0,
     "canceled": 0,
-    "claimed": 0,
+    "claimed": 1,
     "done": 0,
     "for_review": 0,
     "in_progress": 0,
     "in_review": 0,
-    "planned": 1
+    "planned": 0
   },
   "work_packages": {
     "WP01": {
-      "actor": "finalize-tasks",
+      "actor": "codex",
+      "agent_profile": "__resolved_profile_absent__",
+      "agent_profile_version": "__resolved_profile_version_absent__",
       "force_count": 0,
-      "lane": "planned",
-      "last_event_id": "01M22XACGY6S11RBCFQ4N4CYAP",
-      "last_transition_at": "2026-09-09T11:02:16.862659+00:00"
+      "lane": "claimed",
+      "last_event_id": "01M23NYHV8A00NSAJ24463J6N6",
+      "last_transition_at": "2026-09-09T18:12:43.496261+00:00",
+      "model": "__resolved_model_absent__",
+      "provider": "__resolved_provider_absent__",
+      "role": "implementer"
     }
   }
 }
