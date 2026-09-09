@@ -248,10 +248,10 @@
       "criterion_id": "C-005",
       "description": "Factual, observed, and reported-live values remain separate and live presence is never joined to a Work Package.",
       "proof_type": "automated_test_and_review",
-      "evidence": "M8 focused tests assert separate regions and the absence of a live WP value; independent review-cycle-5 approved the truth boundary.",
+      "evidence": "Exact product head a36f3b72f68a00bc04ffe0cf49dbf2d362e6358e: M8 assertions and cycle-10 review prove separate factual, observed, and reported-live labels with no inferred live Work-Package value.",
       "pass_fail": "pass",
       "verified_by": "codex",
-      "verified_at": "2026-09-09T03:41:13Z",
+      "verified_at": "2026-09-09T07:32:00.268181+00:00",
       "notes": "Freshness claims are region-local."
     },
     {
