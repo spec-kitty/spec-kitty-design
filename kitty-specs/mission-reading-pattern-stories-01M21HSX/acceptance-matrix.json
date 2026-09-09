@@ -132,7 +132,7 @@
       "pass_fail": "pass",
       "verified_by": "codex",
       "verified_at": "2026-09-09T07:31:47.173242+00:00",
-      "notes": "Review-cycle-5 approves exact publishable head 8606f01."
+      "notes": "Independent review cycles 10 and 11 approve exact product head a36f3b72; final acceptance and exact-head squad review govern publication."
     },
     {
       "criterion_id": "NFR-001",
