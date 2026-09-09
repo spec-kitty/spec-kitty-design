@@ -1836,13 +1836,21 @@ test("Work Explorer focused native route and active filters — visual baseline"
   });
   await root.locator('[data-filter="repositoryId"]').selectOption("saas");
   await root.locator('[data-filter="personId"]').selectOption("noor");
-  await root
-    .locator('[data-work-group="planned"] .sk-collection__toggle')
-    .click();
+  const plannedToggle = root.locator(
+    '[data-work-group="planned"] .sk-collection__toggle',
+  );
+  await plannedToggle.focus();
+  await page.keyboard.press("Enter");
   const focusedRow = root
     .locator('[data-work-group="planned"] sk-action-row[href]')
     .first();
-  await focusedRow.getByRole("link").focus();
+  const focusedLink = focusedRow.getByRole("link");
+  await page.keyboard.press("Tab");
+  await expect(focusedLink).toBeFocused();
+  expect(
+    await focusedLink.evaluate((link) => link.matches(":focus-visible")),
+  ).toBe(true);
+  await expect(focusedLink).toHaveCSS("outline-style", "solid");
   await expect(focusedRow).toHaveScreenshot("work-explorer-focused-route.png", {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,

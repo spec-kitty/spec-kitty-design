@@ -29,6 +29,7 @@ type Person =
   "mia" | "ravi" | "lynn" | "docker-dev" | "noor" | "jeroen" | "stijn";
 type WorkType = "implementer" | "reviewer" | "researcher" | "planner";
 type PageState = "populated" | "no-work" | "loading" | "no-repositories";
+type ActivityIcon = "observe" | "assignment" | "blocker";
 
 interface RepositoryRecord {
   readonly id: string;
@@ -65,7 +66,7 @@ interface ActivityRecord {
   readonly freshness: string;
   readonly trust: string;
   readonly tone: "info" | "success" | "attention";
-  readonly icon: string;
+  readonly icon: ActivityIcon;
 }
 
 interface WorkExplorerFixture {
@@ -84,6 +85,7 @@ interface WorkExplorerFixture {
       readonly state: "observed";
       readonly label: string;
       readonly freshness: string;
+      readonly observedAt: string;
       readonly events: readonly ActivityRecord[];
     };
   };
@@ -168,22 +170,14 @@ const TYPE_GROUPS = [
   { id: "planner", label: "Planner" },
 ] as const satisfies readonly GroupDefinition[];
 
-const LANE_EXPANDED_GROUPS = [
-  "in-progress",
-  "for-review",
-  "blocked",
-] as const;
+const LANE_EXPANDED_GROUPS = ["in-progress", "for-review", "blocked"] as const;
 const PERSON_EXPANDED_GROUPS = [
   "mia",
   "lynn",
   "docker-dev",
   "unassigned",
 ] as const;
-const TYPE_EXPANDED_GROUPS = [
-  "implementer",
-  "reviewer",
-  "researcher",
-] as const;
+const TYPE_EXPANDED_GROUPS = ["implementer", "reviewer", "researcher"] as const;
 
 const LANE_VISIBLE_ROW_LIMITS = [
   { groupId: "in-progress", limit: 3 },
@@ -353,12 +347,7 @@ const personForOrdinal = (
 
 const missionForOrdinal = (ordinal: number, fallback: string): string => {
   if (ordinal === 1 || ordinal === 4) return "E2E landing pivots";
-  if (
-    ordinal === 2 ||
-    ordinal === 3 ||
-    ordinal === 5 ||
-    ordinal === 6
-  )
+  if (ordinal === 2 || ordinal === 3 || ordinal === 5 || ordinal === 6)
     return "Team landing pivots";
   if (ordinal === 8) return "Repository dossier render";
   return fallback;
@@ -392,7 +381,15 @@ const transitionForOrdinal = (
 };
 
 const sourcePriority = (workPackageId: string): number => {
-  const representatives = ["WP03", "WP02", "WP05", "WP04", "WP01", "WP06", "WP08"];
+  const representatives = [
+    "WP03",
+    "WP02",
+    "WP05",
+    "WP04",
+    "WP01",
+    "WP06",
+    "WP08",
+  ];
   const representativeIndex = representatives.indexOf(workPackageId);
   if (representativeIndex >= 0) return representativeIndex;
   return representatives.length + Number.parseInt(workPackageId.slice(2), 10);
@@ -454,35 +451,36 @@ export const WORK_EXPLORER_FIXTURE = deepFreezeWorkExplorerFixture({
     presence: {
       state: "reported-live",
       label: "Live now",
-      freshness: "Reported within 90 seconds",
+      freshness: "Reported live · ≤90s",
       entries: [
         {
           id: "presence-mia",
           person: "Mia",
           label: "WP03",
           freshness: "Reported live",
-          href: "/people/mia",
+          href: "/work/spec-kitty/EXPERIMENTAL-spec-kitty-saas/WP03",
         },
         {
           id: "presence-ravi",
           person: "Ravi",
           label: "WP02",
           freshness: "Reported live",
-          href: "/people/ravi",
+          href: "/work/spec-kitty/EXPERIMENTAL-spec-kitty-saas/WP02",
         },
         {
           id: "presence-noor",
           person: "Noor",
           label: "WP05",
           freshness: "Reported live",
-          href: "/people/noor",
+          href: "/work/spec-kitty/EXPERIMENTAL-spec-kitty-saas/WP05",
         },
       ],
     },
     activity: {
       state: "observed",
       label: "Observed activity",
-      freshness: "Last 72 hours",
+      freshness: "Observed · up to 60 s behind",
+      observedAt: "Last observed 14:32",
       events: [
         {
           id: "activity-1",
@@ -492,7 +490,7 @@ export const WORK_EXPLORER_FIXTURE = deepFreezeWorkExplorerFixture({
           freshness: "Observed in the last 72 hours",
           trust: "Repository event",
           tone: "info",
-          icon: "↗",
+          icon: "observe",
         },
         {
           id: "activity-2",
@@ -502,7 +500,7 @@ export const WORK_EXPLORER_FIXTURE = deepFreezeWorkExplorerFixture({
           freshness: "Observed in the last 72 hours",
           trust: "Mission history",
           tone: "success",
-          icon: "✓",
+          icon: "assignment",
         },
         {
           id: "activity-3",
@@ -512,7 +510,7 @@ export const WORK_EXPLORER_FIXTURE = deepFreezeWorkExplorerFixture({
           freshness: "Observed in the last 72 hours",
           trust: "Mission history",
           tone: "attention",
-          icon: "!",
+          icon: "blocker",
         },
       ],
     },
@@ -768,14 +766,14 @@ type PresenceProjection =
       readonly entries: readonly PresenceRecord[];
     };
 
-type ActivityProjection =
-  | WorkExplorerFixture["context"]["activity"]
-  | {
-      readonly state: "delayed" | "empty";
-      readonly label: string;
-      readonly freshness: string;
-      readonly events: readonly ActivityRecord[];
-    };
+interface ActivityProjection {
+  readonly state: "observed" | "delayed" | "empty";
+  readonly label: string;
+  readonly freshness: string;
+  readonly observedAt: string | null;
+  readonly delayNotice?: string;
+  readonly events: readonly ActivityRecord[];
+}
 
 interface WorkExplorerProjection {
   readonly id: string;
@@ -830,17 +828,18 @@ export const projectWorkExplorer = (
       groups: [],
       sourceTotal: null,
       filteredTotal: null,
-      mission: { label: "No active Mission work", verified: true },
+      mission: fixture.context.mission,
       presence: {
         state: "empty",
         label: "Live now",
-        freshness: "No reported presence",
+        freshness: fixture.context.presence.freshness,
         entries: [],
       },
       activity: {
         state: "empty",
         label: "Observed activity",
-        freshness: "No observed activity",
+        freshness: fixture.context.activity.freshness,
+        observedAt: null,
         events: [],
       },
     });
@@ -870,8 +869,10 @@ export const projectWorkExplorer = (
     activity: state.degradedContext
       ? {
           state: "delayed",
-          label: "Observed · delayed",
-          freshness: "Last observed 18 min ago",
+          label: fixture.context.activity.label,
+          freshness: "Observed · delayed",
+          observedAt: fixture.context.activity.observedAt,
+          delayNotice: "Last observed 18 min ago",
           events: fixture.context.activity.events,
         }
       : fixture.context.activity,
@@ -1009,6 +1010,72 @@ const workExplorerPatternStyles = html`<style>
     list-style: none;
   }
 
+  .sk-work-explorer-pattern__presence-list {
+    display: grid;
+    gap: var(--sk-space-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .sk-work-explorer-pattern__presence-link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sk-space-3);
+    min-inline-size: 0;
+    padding: var(--sk-space-2);
+    border-radius: var(--sk-radius-md);
+    color: var(--sk-fg-body);
+    text-decoration: none;
+  }
+
+  .sk-work-explorer-pattern__presence-link:hover {
+    background: var(--sk-surface-pill);
+  }
+
+  .sk-work-explorer-pattern__presence-link:focus-visible {
+    outline-color: var(--sk-border-focus);
+    outline-style: solid;
+    outline-width: var(--sk-border-width-2);
+  }
+
+  .sk-work-explorer-pattern__presence-person {
+    display: flex;
+    align-items: center;
+    gap: var(--sk-space-2);
+    min-inline-size: 0;
+  }
+
+  .sk-work-explorer-pattern__presence-copy,
+  .sk-work-explorer-pattern__presence-note,
+  .sk-work-explorer-pattern__observed-at {
+    margin: 0;
+    color: var(--sk-fg-muted);
+    font-size: var(--sk-text-sm);
+  }
+
+  .sk-work-explorer-pattern__activity-list
+    .sk-work-explorer-pattern__activity-marker[data-activity-tone="info"] {
+    border-color: var(--sk-on-status-info);
+    background: var(--sk-status-info);
+    color: var(--sk-on-status-info);
+  }
+
+  .sk-work-explorer-pattern__activity-list
+    .sk-work-explorer-pattern__activity-marker[data-activity-tone="success"] {
+    border-color: var(--sk-on-status-success);
+    background: var(--sk-status-success);
+    color: var(--sk-on-status-success);
+  }
+
+  .sk-work-explorer-pattern__activity-list
+    .sk-work-explorer-pattern__activity-marker[data-activity-tone="attention"] {
+    border-color: var(--sk-on-status-attention);
+    background: var(--sk-status-attention);
+    color: var(--sk-on-status-attention);
+  }
+
   .sk-work-explorer-pattern__collection-more {
     inline-size: 100%;
     padding: var(--sk-space-3);
@@ -1102,8 +1169,14 @@ const workExplorerPatternStyles = html`<style>
       outline-style: solid;
       outline-width: var(--sk-border-width-1);
     }
-  }
 
+    .sk-work-explorer-pattern__activity-list
+      .sk-work-explorer-pattern__activity-marker[data-activity-tone] {
+      border-color: CanvasText;
+      background: Canvas;
+      color: CanvasText;
+    }
+  }
 </style>`;
 
 const labelForRepository = (repositoryId: string): string =>
@@ -1163,7 +1236,9 @@ const renderContextNavigation = (
     id=${placement === "compact" ? "work-explorer-navigation" : nothing}
     label=${placement === "desktop" ? "Work context" : "Compact Work context"}
   >
-    <div slot="header"><strong>${WORK_EXPLORER_FIXTURE.team.label}</strong></div>
+    <div slot="header">
+      <strong>${WORK_EXPLORER_FIXTURE.team.label}</strong>
+    </div>
     <nav
       class="sk-context-nav"
       aria-label=${placement === "desktop" ? "Work sections" : "Compact Work sections"}
@@ -1202,7 +1277,8 @@ const renderPageHeader = (
     ${
       projection.mission
         ? html`<sk-status-indicator slot="sync" tone="success"
-            ><span slot="marker">✓</span
+            ><svg slot="marker" aria-hidden="true" viewBox="0 0 12 12">
+              <path d="m2 6 3 3 5-6"></path></svg
             >${projection.mission.label}</sk-status-indicator
           >`
         : nothing
@@ -1219,13 +1295,16 @@ const renderSummary = (): TemplateResult => {
     class="sk-work-explorer-pattern__summary"
     aria-label="Verified work summary"
   >
-    <p
-      class="sk-work-explorer-pattern__summary-total"
-      data-active-work-summary
-    >
-      <strong>${WORK_EXPLORER_FIXTURE.workPackages.length} active Work Packages</strong>
+    <p class="sk-work-explorer-pattern__summary-total" data-active-work-summary>
+      <strong
+        >${WORK_EXPLORER_FIXTURE.workPackages.length} active Work
+        Packages</strong
+      >
       across
-      <strong>${WORK_EXPLORER_FIXTURE.repositories.length} admitted repositories</strong>
+      <strong
+        >${WORK_EXPLORER_FIXTURE.repositories.length} admitted
+        repositories</strong
+      >
     </p>
     <dl class="sk-work-explorer-pattern__summary-facts">
       ${laneGroups.map(
@@ -1373,8 +1452,8 @@ const renderFilteredWork = (
       </div>`
     : html`<div
         class="sk-work-explorer-pattern__collections"
-      data-group-axis=${projection.grouping}
-    >
+        data-group-axis=${projection.grouping}
+      >
         ${projection.groups.map((group) =>
           renderCollection(
             group,
@@ -1439,8 +1518,25 @@ const renderFilters = (
         .value=${projection.filters.repositoryId}
         @change=${(event: Event) => onFilter("repositoryId", (event.currentTarget as HTMLSelectElement).value)}
       >
-        <option value="all">All repositories</option>
-        ${disabled ? nothing : projection.repositories.map((repository) => html`<option value=${repository.id}>${repository.label}</option>`)}
+        <option
+          value="all"
+          ?selected=${projection.filters.repositoryId === "all"}
+        >
+          All repositories
+        </option>
+        ${
+          disabled
+            ? nothing
+            : projection.repositories.map(
+                (repository) =>
+                  html`<option
+                    value=${repository.id}
+                    ?selected=${projection.filters.repositoryId === repository.id}
+                  >
+                    ${repository.label}
+                  </option>`,
+              )
+        }
       </select>
     </label>
     <label class="sk-work-explorer-pattern__filter-field sk-form-field">
@@ -1452,8 +1548,22 @@ const renderFilters = (
         .value=${projection.filters.personId}
         @change=${(event: Event) => onFilter("personId", (event.currentTarget as HTMLSelectElement).value)}
       >
-        <option value="all">All people</option>
-        ${disabled ? nothing : PERSON_GROUPS.map((person) => html`<option value=${person.id}>${person.label}</option>`)}
+        <option value="all" ?selected=${projection.filters.personId === "all"}>
+          All people
+        </option>
+        ${
+          disabled
+            ? nothing
+            : PERSON_GROUPS.map(
+                (person) =>
+                  html`<option
+                    value=${person.id}
+                    ?selected=${projection.filters.personId === person.id}
+                  >
+                    ${person.label}
+                  </option>`,
+              )
+        }
       </select>
     </label>
     <label class="sk-work-explorer-pattern__search sk-form-field">
@@ -1470,15 +1580,11 @@ const renderFilters = (
     ${
       filtersActive && !disabled
         ? html`<div class="sk-work-explorer-pattern__filter-actions">
-            <sk-button
-              variant="secondary"
-              data-clear-filters
-              @click=${onClear}
+            <sk-button variant="secondary" data-clear-filters @click=${onClear}
               >Clear filters</sk-button
             >
             <span data-filter-count
-              >${projection.filteredTotal} of
-              ${projection.sourceTotal}</span
+              >${projection.filteredTotal} of ${projection.sourceTotal}</span
             >
           </div>`
         : nothing
@@ -1504,7 +1610,7 @@ const renderPresence = (
         ? html`<sk-notice
             tone="attention"
             announce="off"
-            message="Reported-live presence is unavailable. Verified Mission state is unchanged."
+            message="Presence is unavailable. Mission state is unaffected."
             ><h3 slot="heading">Presence unavailable</h3></sk-notice
           >`
         : presence.state === "empty"
@@ -1512,13 +1618,71 @@ const renderPresence = (
               <h3>No reported-live presence</h3>
               <p>There are no supplied presence records.</p>
             </div>`
-          : html`<sk-card
-              ><ul>
-                ${presence.entries.map((entry) => html`<li><a class="sk-work-explorer-pattern__context-link" href=${entry.href}>${entry.person}</a> · ${entry.label}</li>`)}
-              </ul></sk-card
-            >`
+          : html`<sk-card>
+                <p class="sk-work-explorer-pattern__presence-copy">
+                  Current relay sessions only. Activity does not imply presence.
+                </p>
+                <ul class="sk-work-explorer-pattern__presence-list">
+                  ${presence.entries.map(
+                  (entry) =>
+                    html`<li>
+                      <a
+                        class="sk-work-explorer-pattern__presence-link"
+                        data-live-focus
+                        href=${entry.href}
+                        aria-label=${`${entry.person} working on ${entry.label}`}
+                      >
+                        <span class="sk-work-explorer-pattern__presence-person">
+                          <sk-entity-marker
+                            size="sm"
+                            shape="circle"
+                            label=${entry.person}
+                            >${entry.person.slice(0, 1)}</sk-entity-marker
+                          >
+                          <sk-status-indicator tone="success">
+                            <svg
+                              slot="marker"
+                              aria-hidden="true"
+                              viewBox="0 0 12 12"
+                            >
+                              <circle cx="6" cy="6" r="4"></circle>
+                            </svg>
+                            <span
+                              class="sk-work-explorer-pattern__visually-hidden"
+                              >${entry.freshness}</span
+                            >
+                        </sk-status-indicator>
+                        <span>${entry.person} · ${entry.label}</span>
+                      </span>
+                    </a>
+                    </li>`,
+                )}
+                </ul>
+              </sk-card>
+              <p class="sk-work-explorer-pattern__presence-note">
+                Relay status affects presence only.
+              </p>`
     }
   </section>`;
+
+const renderActivityIcon = (icon: ActivityIcon): TemplateResult => {
+  if (icon === "observe") {
+    return html`<svg aria-hidden="true" viewBox="0 0 24 24">
+      <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7Z"></path>
+      <circle cx="12" cy="12" r="3"></circle>
+    </svg>`;
+  }
+  if (icon === "assignment") {
+    return html`<svg aria-hidden="true" viewBox="0 0 24 24">
+      <circle cx="12" cy="8" r="4"></circle>
+      <path d="M4 21a8 8 0 0 1 16 0"></path>
+    </svg>`;
+  }
+  return html`<svg aria-hidden="true" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="9"></circle>
+    <path d="m6 6 12 12"></path>
+  </svg>`;
+};
 
 const renderActivity = (
   activity: DeepReadonly<ActivityProjection>,
@@ -1540,34 +1704,46 @@ const renderActivity = (
         ? html`<p class="sk-empty-state sk-empty-state--inline">
             No activity in the last 72 hours.
           </p>`
-        : html`<ol
-              class="sk-event-timeline sk-event-timeline--compact"
+        : html`${
+              activity.state === "delayed"
+                ? html`<sk-notice
+                    tone="attention"
+                    announce="off"
+                    message="Activity may be delayed. Work Package state remains current."
+                  >
+                    <h3 slot="heading">${activity.delayNotice}</h3>
+                  </sk-notice>`
+                : nothing
+            }
+            <ol
+              class="sk-event-timeline sk-event-timeline--compact sk-work-explorer-pattern__activity-list"
+              data-activity-state=${activity.state}
               aria-label="Observed Work Package events"
             >
               ${activity.events.map(
-              (event) =>
-                html`<li class="sk-event-timeline__item">
+                (event) =>
+                  html`<li class="sk-event-timeline__item">
                   <span
-                    class="sk-event-timeline__leading-marker"
+                    class="sk-event-timeline__leading-marker sk-work-explorer-pattern__activity-marker"
+                    data-activity-tone=${event.tone}
                     aria-hidden="true"
-                    >${event.icon}</span
+                    >${renderActivityIcon(event.icon)}</span
                   >
                   <p class="sk-event-timeline__summary">${event.text}</p>
                   <p class="sk-event-timeline__metadata">
                     <time datetime=${event.datetime}>${event.timestamp}</time
                     ><span>${event.trust}</span><span>${event.freshness}</span
-                    ><span>Tone: ${event.tone}</span>
                   </p>
                 </li>`,
-            )}
+              )}
             </ol>
             ${
-                activity.state === "delayed"
-                  ? html`<p class="sk-work-explorer-pattern__context-meta">
-                      Cached activity
-                    </p>`
-                  : nothing
-              }`
+              activity.observedAt
+                ? html`<p class="sk-work-explorer-pattern__observed-at">
+                    ${activity.observedAt}
+                  </p>`
+                : nothing
+            }`
     }
   </section>`;
 
@@ -1753,6 +1929,9 @@ export const renderWorkExplorer = (
       "aria-label",
       next ? "Close team navigation" : "Open team navigation",
     );
+    trigger.textContent = next
+      ? "Close team navigation"
+      : "Open team navigation";
     if (next) {
       void shell.updateComplete.then(() => {
         shell
@@ -1835,7 +2014,7 @@ export const renderWorkExplorer = (
           aria-expanded="false"
           @click=${() => setOpen(!(shellRef.value?.open ?? false))}
         >
-          Menu
+          Open team navigation
         </button>
         <strong>${WORK_EXPLORER_FIXTURE.team.label}</strong>
       </div>
@@ -1845,29 +2024,62 @@ export const renderWorkExplorer = (
         ${
           currentProjection.pageState === "loading"
             ? html` <div ${ref(mountFilters)}></div>
-                <p role="status" aria-live="polite">Loading Work Packages</p>
-                <div class="sk-work-explorer-pattern__layout">
+                <p
+                  class="sk-work-explorer-pattern__visually-hidden"
+                  role="status"
+                  aria-live="polite"
+                >
+                  Loading Work Packages
+                </p>
+                <sk-grid
+                  class="sk-work-explorer-pattern__layout"
+                  variant="cols-2"
+                  gap="4"
+                >
                   ${renderLoadingRegion("Loading verified Mission work", "work")}
                   ${renderLoadingRegion("Loading reported and observed context", "context")}
-                </div>`
+                </sk-grid>`
             : currentProjection.pageState === "no-repositories"
               ? html` <div ${ref(mountFilters)}></div>
-                  <section aria-labelledby="work-explorer-setup-heading">
-                    <sk-card>
-                      <h2 id="work-explorer-setup-heading">
-                        No admitted repositories
-                      </h2>
-                      <p>
-                        Presence and activity appear after a repository is
-                        admitted.
-                      </p>
-                      <a
-                        class="sk-work-explorer-pattern__context-link"
-                        href="/connectors"
-                        >Open Connectors</a
-                      >
-                    </sk-card>
-                  </section>`
+                  <sk-grid
+                    class="sk-work-explorer-pattern__layout"
+                    variant="cols-2"
+                    gap="4"
+                  >
+                    <section
+                      class="sk-work-explorer-pattern__work"
+                      aria-labelledby="work-explorer-setup-heading"
+                    >
+                      <sk-card>
+                        <h2 id="work-explorer-setup-heading">
+                          No admitted repositories
+                        </h2>
+                        <p>
+                          Connect a repository before this team can show
+                          governed work.
+                        </p>
+                        <a
+                          class="sk-work-explorer-pattern__context-link"
+                          href="/connectors"
+                          >Open Connectors</a
+                        >
+                      </sk-card>
+                    </section>
+                    <aside
+                      class="sk-work-explorer-pattern__context"
+                      aria-labelledby="work-explorer-appears-heading"
+                    >
+                      <sk-card>
+                        <h2 id="work-explorer-appears-heading">
+                          What appears here
+                        </h2>
+                        <p>
+                          Presence and activity appear after a repository is
+                          admitted.
+                        </p>
+                      </sk-card>
+                    </aside>
+                  </sk-grid>`
               : html` ${
                     currentProjection.pageState === "no-work"
                       ? html`<p data-no-work-summary>

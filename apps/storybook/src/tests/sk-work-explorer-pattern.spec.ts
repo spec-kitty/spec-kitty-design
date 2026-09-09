@@ -123,9 +123,7 @@ test("the built index discovers exactly the W1–W10 family and no helpers", asy
 test("documentation and the shrink-only ratchet pin the private pattern seam and exact stories", () => {
   const docs = readFileSync("docs/design-system/using-components.md", "utf8");
   expect(docs).toMatch(/^## Work Explorer pattern$/m);
-  expect(docs).toMatch(
-    /not a\s+registered or published `sk-work-explorer`/,
-  );
+  expect(docs).toMatch(/not a\s+registered or published `sk-work-explorer`/);
   expect(docs).toMatch(/Consumers own[^.]*pressed[^.]*expanded[^.]*hidden/i);
   expect(docs).toMatch(/independent supplied\s+branches/i);
   expect(docs).toMatch(/page-owned story CSS/i);
@@ -555,12 +553,12 @@ test("W1 composes exact lane counts, supplied expansion, native collections, and
   await expect(
     root.getByRole("heading", { level: 1, name: "Who is doing what, now" }),
   ).toBeVisible();
-  await expect(
-    root.locator('sk-page-header [slot="eyebrow"]'),
-  ).toHaveText("Work Explorer");
-  await expect(
-    root.locator('sk-page-header [slot="supporting"]'),
-  ).toHaveText("Illustrative workload");
+  await expect(root.locator('sk-page-header [slot="eyebrow"]')).toHaveText(
+    "Work Explorer",
+  );
+  await expect(root.locator('sk-page-header [slot="supporting"]')).toHaveText(
+    "Illustrative workload",
+  );
   await expect(
     root.locator('sk-context-sidebar[slot="context-sidebar"] [slot="header"]'),
   ).toBeVisible();
@@ -596,7 +594,9 @@ test("W1 composes exact lane counts, supplied expansion, native collections, and
       ".sk-segmented-choice, [data-filter='repositoryId'], [data-filter='personId'], [data-filter='query']",
     )
     .evaluateAll((controls) =>
-      controls.map((control) => Math.round(control.getBoundingClientRect().bottom)),
+      controls.map((control) =>
+        Math.round(control.getBoundingClientRect().bottom),
+      ),
     );
   expect(new Set(desktopFilterEdges).size).toBe(1);
   await expect(root.locator(".sk-collection")).toHaveCount(5);
@@ -637,6 +637,29 @@ test("W1 composes exact lane counts, supplied expansion, native collections, and
   await expect(root.locator("[data-truth-tier='presence']")).toContainText(
     "Noor · WP05",
   );
+  await expect(root.locator("[data-truth-tier='presence']")).toContainText(
+    "Reported live · ≤90s",
+  );
+  await expect(root.locator("[data-truth-tier='presence']")).toContainText(
+    "Current relay sessions only. Activity does not imply presence.",
+  );
+  await expect(root.locator("[data-truth-tier='presence']")).toContainText(
+    "Relay status affects presence only.",
+  );
+  const liveFocusLinks = root.locator(
+    "[data-truth-tier='presence'] a[data-live-focus]",
+  );
+  await expect(liveFocusLinks).toHaveCount(3);
+  await expect(liveFocusLinks.nth(0)).toHaveAttribute(
+    "href",
+    /\/work\/.*\/WP03$/,
+  );
+  await expect(liveFocusLinks.nth(0)).toHaveAttribute(
+    "aria-label",
+    "Mia working on WP03",
+  );
+  await expect(liveFocusLinks.nth(0)).toContainText("Mia");
+  await expect(liveFocusLinks.nth(0)).toContainText("WP03");
   await expect(root.locator("[data-truth-tier='activity']")).toContainText(
     "E2E landing pivots · WP04 · Moved to review",
   );
@@ -646,6 +669,32 @@ test("W1 composes exact lane counts, supplied expansion, native collections, and
   await expect(root.locator("[data-truth-tier='activity']")).toContainText(
     "Team landing pivots · WP06 · Blocker added",
   );
+  await expect(root.locator("[data-truth-tier='activity']")).toContainText(
+    "Observed · up to 60 s behind",
+  );
+  await expect(root.locator("[data-truth-tier='activity']")).toContainText(
+    "Last observed 14:32",
+  );
+  await expect(root.locator("[data-truth-tier='activity']")).not.toContainText(
+    "Tone:",
+  );
+  const activityMarkers = root.locator(
+    "[data-truth-tier='activity'] [data-activity-tone]",
+  );
+  await expect(activityMarkers).toHaveCount(3);
+  await expect(activityMarkers.locator("svg")).toHaveCount(3);
+  const markerPresentation = await activityMarkers.evaluateAll((markers) =>
+    markers.map((marker) => ({
+      tone: marker.getAttribute("data-activity-tone"),
+      color: getComputedStyle(marker).color,
+    })),
+  );
+  expect(markerPresentation.map(({ tone }) => tone)).toEqual([
+    "info",
+    "success",
+    "attention",
+  ]);
+  expect(new Set(markerPresentation.map(({ color }) => color)).size).toBe(3);
   await expect(root.locator("[data-blocked-exception]")).toContainText(
     "Blocked · exception",
   );
@@ -703,9 +752,7 @@ test("W1 composes exact lane counts, supplied expansion, native collections, and
   await expect(firstToggle).toHaveAttribute("aria-expanded", "false");
   await expect(controlledBody).toHaveAttribute("hidden", "");
 
-  await root
-    .getByRole("button", { name: "View 18 more in progress" })
-    .click();
+  await root.getByRole("button", { name: "View 18 more in progress" }).click();
   await expect(
     root.locator('[data-work-group="in-progress"] [data-work-package-id]'),
   ).toHaveCount(21);
@@ -721,13 +768,15 @@ test("W1 composes exact lane counts, supplied expansion, native collections, and
     link.addEventListener(
       "click",
       (event) => {
-        (window as typeof window & {
-          __workExplorerModifiedClick?: Readonly<{
-            button: number;
-            ctrlKey: boolean;
-            defaultPrevented: boolean;
-          }>;
-        }).__workExplorerModifiedClick = {
+        (
+          window as typeof window & {
+            __workExplorerModifiedClick?: Readonly<{
+              button: number;
+              ctrlKey: boolean;
+              defaultPrevented: boolean;
+            }>;
+          }
+        ).__workExplorerModifiedClick = {
           button: event.button,
           ctrlKey: event.ctrlKey,
           defaultPrevented: event.defaultPrevented,
@@ -741,9 +790,11 @@ test("W1 composes exact lane counts, supplied expansion, native collections, and
   expect(
     await page.evaluate(
       () =>
-        (window as typeof window & {
-          __workExplorerModifiedClick?: unknown;
-        }).__workExplorerModifiedClick,
+        (
+          window as typeof window & {
+            __workExplorerModifiedClick?: unknown;
+          }
+        ).__workExplorerModifiedClick,
     ),
   ).toEqual({ button: 0, ctrlKey: true, defaultPrevented: false });
 
@@ -817,9 +868,7 @@ test("W2 and W3 expose exact DOM margins and their supplied controlled expansion
     );
     for (const groupId of fixtureCase.expanded) {
       await expect(
-        root.locator(
-          `[data-work-group="${groupId}"] [data-work-package-id]`,
-        ),
+        root.locator(`[data-work-group="${groupId}"] [data-work-package-id]`),
       ).toHaveCount(1);
     }
   }
@@ -833,7 +882,9 @@ test("W1 and W5 preserve semantic/data parity while real theme tokens change", a
   ) => {
     const root = await openStory(page, id);
     return {
-      text: await root.locator(".sk-work-explorer-pattern__content").innerText(),
+      text: await root
+        .locator(".sk-work-explorer-pattern__content")
+        .innerText(),
       ids: await root
         .locator("[data-work-package-id]")
         .evaluateAll((rows) =>
@@ -883,6 +934,15 @@ test("W6 derives 0 of 50 and both real clear actions restore populated work", as
 }) => {
   for (const clearIndex of [0, 1]) {
     const root = await openStory(page, "w-6-filtered-empty-dark");
+    await expect(root.locator('[data-filter="repositoryId"]')).toHaveValue(
+      "e2e",
+    );
+    await expect(root.locator('[data-filter="personId"]')).toHaveValue(
+      "unassigned",
+    );
+    await expect(root.locator('[data-filter="query"]')).toHaveValue(
+      "release notes",
+    );
     await expect(root.locator("[data-filtered-empty]")).toContainText(
       "0 of 50",
     );
@@ -900,6 +960,9 @@ test("W7, W8, W9, and W10 preserve their distinct truth and absence contracts", 
   page,
 }) => {
   const w7 = await openStory(page, "w-7-no-active-work-dark");
+  await expect(w7.locator('sk-status-indicator[slot="sync"]')).toHaveText(
+    "Mission state · verified",
+  );
   await expect(w7.locator("[data-no-work-summary]")).toHaveText(
     "No active Work Packages across 2 admitted repositories",
   );
@@ -911,12 +974,23 @@ test("W7, W8, W9, and W10 preserve their distinct truth and absence contracts", 
   await expect(
     w7.getByText("No activity in the last 72 hours.", { exact: true }),
   ).toBeVisible();
+  await expect(w7.locator("[data-truth-tier='presence']")).toContainText(
+    "Reported live · ≤90s",
+  );
+  await expect(w7.locator("[data-truth-tier='activity']")).toContainText(
+    "Observed · up to 60 s behind",
+  );
 
   const w8 = await openStory(page, "w-8-degraded-context-dark");
   await expect(w8).toHaveAttribute("data-source-total", "50");
   await expect(w8.locator("[data-work-package-id]:visible")).toHaveCount(7);
   await expect(
     w8.getByText("Presence unavailable", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    w8.getByText("Presence is unavailable. Mission state is unaffected.", {
+      exact: true,
+    }),
   ).toBeVisible();
   await expect(
     w8.getByText("Observed · delayed", { exact: true }),
@@ -927,7 +1001,16 @@ test("W7, W8, W9, and W10 preserve their distinct truth and absence contracts", 
 
   const w9 = await openStory(page, "w-9-loading-dark");
   await expect(w9.locator("[aria-busy='true']")).toHaveCount(2);
-  await expect(w9.getByRole("status")).toHaveText("Loading Work Packages");
+  const loadingStatus = w9.getByRole("status");
+  await expect(loadingStatus).toHaveText("Loading Work Packages");
+  await expect(loadingStatus).toHaveClass(
+    /sk-work-explorer-pattern__visually-hidden/,
+  );
+  const loadingLayout = w9.locator("sk-grid.sk-work-explorer-pattern__layout");
+  await expect(loadingLayout).toHaveCount(1);
+  await expect(
+    loadingLayout.locator(":scope > [aria-busy='true']"),
+  ).toHaveCount(2);
   await expect(
     w9.locator(
       "[aria-hidden='true'] .sk-work-explorer-pattern__skeleton-shape",
@@ -964,6 +1047,16 @@ test("W7, W8, W9, and W10 preserve their distinct truth and absence contracts", 
       { exact: true },
     ),
   ).toBeVisible();
+  await expect(
+    w10.getByRole("heading", { name: "What appears here", exact: true }),
+  ).toBeVisible();
+  const setupLayout = w10.locator("sk-grid.sk-work-explorer-pattern__layout");
+  await expect(setupLayout).toHaveCount(1);
+  await expect(
+    setupLayout.locator(
+      ":scope > .sk-work-explorer-pattern__work, :scope > .sk-work-explorer-pattern__context",
+    ),
+  ).toHaveCount(2);
   await expect(
     w10.locator(
       "[data-work-package-id], time, [data-summary-lane], [data-truth-tier]",
@@ -1025,9 +1118,8 @@ test("W4 retains the personal rail, suppresses desktop context, stacks work firs
     .evaluate((element) => ({
       columns: getComputedStyle(element).gridTemplateColumns.split(" ").length,
       groupingEdge: Math.round(
-        element
-          .querySelector(".sk-segmented-choice")!
-          .getBoundingClientRect().bottom,
+        element.querySelector(".sk-segmented-choice")!.getBoundingClientRect()
+          .bottom,
       ),
       repositoryEdge: Math.round(
         element
@@ -1049,9 +1141,7 @@ test("W4 retains the personal rail, suppresses desktop context, stacks work firs
   expect(compactFilterLayout.repositoryEdge).toBe(
     compactFilterLayout.groupingEdge,
   );
-  expect(compactFilterLayout.personEdge).toBe(
-    compactFilterLayout.groupingEdge,
-  );
+  expect(compactFilterLayout.personEdge).toBe(compactFilterLayout.groupingEdge);
   expect(compactFilterLayout.searchTop).toBeGreaterThan(
     compactFilterLayout.groupingEdge,
   );
@@ -1059,9 +1149,11 @@ test("W4 retains the personal rail, suppresses desktop context, stacks work firs
   const shell = compact.locator("sk-app-shell");
   const trigger = compact.locator(".sk-work-explorer-pattern__drawer-trigger");
   await expect(trigger).toHaveAttribute("aria-label", "Open team navigation");
+  await expect(trigger).toHaveText("Open team navigation");
   await trigger.click();
   await expect(trigger).toHaveAttribute("aria-expanded", "true");
   await expect(trigger).toHaveAttribute("aria-label", "Close team navigation");
+  await expect(trigger).toHaveText("Close team navigation");
   expect(
     await shell.evaluate(
       (element) => (element as HTMLElement & { open: boolean }).open,
@@ -1073,6 +1165,7 @@ test("W4 retains the personal rail, suppresses desktop context, stacks work firs
   await page.keyboard.press("Escape");
   await expect(trigger).toHaveAttribute("aria-expanded", "false");
   await expect(trigger).toHaveAttribute("aria-label", "Open team navigation");
+  await expect(trigger).toHaveText("Open team navigation");
   await expect(trigger).toBeFocused();
   expect(
     await shell.evaluate(
