@@ -225,6 +225,29 @@ test("M1 composes only the approved public surfaces and native families", async 
         };
       }),
   ).toEqual({ inlineStart: "24px", inlineEnd: "24px" });
+
+  const proseMeasure = await root.locator(".sk-prose").evaluate((element) => {
+    const probe = document.createElement("span");
+    probe.style.position = "absolute";
+    probe.style.visibility = "hidden";
+    probe.style.inlineSize = "72ch";
+    probe.style.font = "inherit";
+    element.append(probe);
+    const width = element.getBoundingClientRect().width;
+    const seventyTwoCharacters = probe.getBoundingClientRect().width;
+    const maxInlineSize = Number.parseFloat(
+      getComputedStyle(element).maxInlineSize,
+    );
+    probe.remove();
+    return { maxInlineSize, seventyTwoCharacters, width };
+  });
+  expect(proseMeasure.width).toBeGreaterThan(0);
+  expect(
+    Math.abs(proseMeasure.width - proseMeasure.maxInlineSize),
+  ).toBeLessThan(1);
+  expect(proseMeasure.width).toBeLessThanOrEqual(
+    proseMeasure.seventyTwoCharacters + 1,
+  );
 });
 
 test("fixture invariants and exact-git truth are exposed from one deeply frozen source", async ({
@@ -405,6 +428,30 @@ test("catalogue keeps native links, static unavailable entries, bounded children
     ).toHaveCount(0);
     await expect(nav.locator('[data-catalogue-key="ops"] > ul')).toHaveCount(0);
   }
+});
+
+test("Mission-page and artifact links retain native fragment activation", async ({
+  page,
+}) => {
+  const defaultRoute = await openStory(page, "default");
+  const missionPageLink = defaultRoute.locator(
+    '[data-context-nav="desktop"] [data-catalogue-key="overview"] > a',
+  );
+  await expect(missionPageLink).toHaveAttribute("href", "#overview");
+  await missionPageLink.click();
+  await expect.poll(() => new URL(page.url()).hash).toBe("#overview");
+
+  const artifactsRoute = await openStory(page, "m-6-a-other-artifacts-present");
+  const artifactLink = artifactsRoute
+    .locator("[data-other-artifact-list] a")
+    .first();
+  await expect(artifactLink).toHaveAttribute("href", "#artifact-issue-matrix");
+  await artifactLink.focus();
+  await expect(artifactLink).toBeFocused();
+  await page.keyboard.press("Enter");
+  await expect
+    .poll(() => new URL(page.url()).hash)
+    .toBe("#artifact-issue-matrix");
 });
 
 test("command table exposes a named tab stop only while it genuinely overflows", async ({
