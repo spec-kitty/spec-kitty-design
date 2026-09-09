@@ -128,10 +128,10 @@
       "criterion_id": "FR-013",
       "description": "All required story IDs, focused tests, exact-head visual cases, and ownership documentation are reproducible and reviewable.",
       "proof_type": "generated_ratchet_and_review",
-      "evidence": "Exact rebased product head df4bf66bc72c287e6aaadf82f5fce18c766de5af: all 14 Mission Reading IDs are in the 405/405 unique-story ratchet after landed #273; 18 Mission baselines retain aggregate SHA-256 0f1449ae202aaededcce4e238abe78de1cb01401918250cad01fe757e8cf2308; CI 34332459374 passes.",
+      "evidence": "Corrective product head b68f84d28715ca8ef551f40cda24f3a13e054f1e: all 14 Mission Reading IDs remain in the 420/420 declared, computed, listed, unique-story ratchet after landed #257; 18 reviewed Mission baselines have aggregate SHA-256 c87e5eb4a2d831b600eb3b95f123cab2d00484b0521a4cd580f313206d1d4a7a; CI 34343137694 passes.",
       "pass_fail": "pass",
       "verified_by": "codex",
-      "verified_at": "2026-09-09T09:25:41.348300+00:00",
+      "verified_at": "2026-09-09T11:25:29.916500+00:00",
       "notes": "Exact rebased product head df4bf66 passes CI 34332459374; final conventional acceptance and exact-head squad review govern publication."
     },
     {
