@@ -1,12 +1,12 @@
 {
-  "event_count": 41,
-  "last_event_id": "01M22H0QY5A9K0XCMF5RPPSRZA",
-  "materialized_at": "2026-09-09T07:27:17.957831+00:00",
+  "event_count": 42,
+  "last_event_id": "01M22VAJN6HN6M5S5HCYXHQ9SS",
+  "materialized_at": "2026-09-09T10:27:25.990458+00:00",
   "mission_number": "",
   "mission_slug": "mission-reading-pattern-stories-01M21HSX",
   "mission_type": "software-dev",
   "summary": {
-    "approved": 1,
+    "approved": 0,
     "blocked": 0,
     "canceled": 0,
     "claimed": 0,
@@ -14,19 +14,19 @@
     "for_review": 0,
     "in_progress": 0,
     "in_review": 0,
-    "planned": 0
+    "planned": 1
   },
   "work_packages": {
     "WP01": {
-      "actor": "user",
+      "actor": "codex",
       "agent": "codex",
       "agent_profile": "__resolved_profile_absent__",
       "agent_profile_version": "__resolved_profile_version_absent__",
       "assignee": "codex",
-      "force_count": 13,
-      "lane": "approved",
-      "last_event_id": "01M22H0QY5A9K0XCMF5RPPSRZA",
-      "last_transition_at": "2026-09-09T07:27:17.957831+00:00",
+      "force_count": 14,
+      "lane": "planned",
+      "last_event_id": "01M22VAJN6HN6M5S5HCYXHQ9SS",
+      "last_transition_at": "2026-09-09T10:27:25.990458+00:00",
       "model": "__resolved_model_absent__",
       "notes": [
         "Ready for review: implementation and mission-specific gates pass; host-only diagram and legacy CI visual baseline limitations recorded in handoff evidence.",
@@ -56,9 +56,10 @@
       "provider": "__resolved_provider_absent__",
       "review": null,
       "review_result": {
-        "reference": "PR#292@a36f3b72f68a00bc04ffe0cf49dbf2d362e6358e",
+        "feedback_path": "/home/jeroennouws/dev/spec-kitty-design-missions/265/.acceptance-final/kitty-specs/mission-reading-pattern-stories-01M21HSX/tasks/WP01-mission-reading-pattern-family/review-cycle-10.md",
+        "reference": "review-cycle://mission-reading-pattern-stories-01M21HSX/WP01-mission-reading-pattern-family/review-cycle-10.md",
         "reviewer": "codex",
-        "verdict": "approved"
+        "verdict": "changes_requested"
       },
       "role": "reviewer",
       "shell_pid": null,
