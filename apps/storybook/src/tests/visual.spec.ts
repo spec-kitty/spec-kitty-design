@@ -112,6 +112,9 @@ test('SK-event-timeline compact light — visual baseline', async ({ page }) => 
 test('SK-event-timeline compact forced colors — visual baseline', async ({ page }) => {
   await page.emulateMedia({ forcedColors: 'active' });
   const target = await eventTimelineStory(page, 'compact-forced-colors');
+  const anchor = target.locator('a[href="#forced-colors-event"]');
+  await anchor.focus();
+  await expect(anchor).toBeFocused();
   await expect(target).toHaveScreenshot('sk-event-timeline-compact-forced-colors.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
