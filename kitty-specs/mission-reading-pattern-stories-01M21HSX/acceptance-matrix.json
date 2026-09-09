@@ -8,10 +8,10 @@
       "criterion_id": "FR-001",
       "description": "The Mission Reading family is a Storybook-only composition of public design-system surfaces, native HTML, and pattern-owned CSS, with no published page component.",
       "proof_type": "code_review_and_composition_gate",
-      "evidence": "Exact product head a36f3b72f68a00bc04ffe0cf49dbf2d362e6358e: mission-reading.stories.ts remains Storybook-only; composition gate passes 47 probes, 5 fixtures, 107 rules, and 20 public tags; review cycles 10 and 11 approved.",
+      "evidence": "Exact rebased product head df4bf66bc72c287e6aaadf82f5fce18c766de5af on train 674ebe23bea974eb8bef2dbd64f4481e5f94d212: Mission Reading remains Storybook-only; composition passes 47 probes, 5 fixtures, 107 rules, and 20 public tags; CI 34332459374 is green.",
       "pass_fail": "pass",
       "verified_by": "codex",
-      "verified_at": "2026-09-09T07:29:46.979209+00:00",
+      "verified_at": "2026-09-09T09:25:25.604965+00:00",
       "notes": "No custom element, framework wrapper, router, or application model was introduced."
     },
     {
