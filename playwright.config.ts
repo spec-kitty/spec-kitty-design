@@ -25,7 +25,18 @@ export default defineConfig({
   },
   projects: [
     { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
-    { name: 'firefox',  use: { ...devices['Desktop Firefox'] } },
-    { name: 'webkit',   use: { ...devices['Desktop Safari'] } },
+    {
+      name: 'firefox',
+      use: {
+        ...devices['Desktop Firefox'],
+        // Linux Firefox runners can inherit a controls-only sequential-focus preference.
+        // Pin the browser lane to links + controls so native Tab-order assertions exercise
+        // the repository's documented keyboard contract instead of a host preference.
+        launchOptions: {
+          firefoxUserPrefs: { 'accessibility.tabfocus': 7 },
+        },
+      },
+    },
+    { name: 'webkit', use: { ...devices['Desktop Safari'] } },
   ],
 });
