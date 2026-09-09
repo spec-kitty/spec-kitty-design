@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/web-components';
 import { expect } from 'storybook/test';
 import { html, nothing, type TemplateResult } from 'lit';
+import { ref } from 'lit/directives/ref.js';
 import '../action-row/sk-action-row.js';
 import '../app-shell/sk-app-shell.js';
 import '../button/sk-button.js';
@@ -628,6 +629,19 @@ const syncWorkflowScrollerSemantics = (element?: Element): void => {
   element.removeAttribute('tabindex');
 };
 
+const createWorkflowScrollerRef = () => {
+  let observer: ResizeObserver | undefined;
+  return (element?: Element): void => {
+    // Lit clears callback refs before replacement/removal, keeping one observer per story render.
+    observer?.disconnect();
+    observer = undefined;
+    if (!(element instanceof HTMLElement)) return;
+    syncWorkflowScrollerSemantics(element);
+    observer = new ResizeObserver(() => syncWorkflowScrollerSemantics(element));
+    observer.observe(element);
+  };
+};
+
 export const renderMissionKanban = (
   projection: ReturnType<typeof deriveMissionKanban>,
   presentation: PresentationOptions,
@@ -638,6 +652,7 @@ export const renderMissionKanban = (
   const detailedCounts = fixture.detailedLanes.map(({ id }) => projection.allDetailedLaneCounts[id]);
   const long = presentation.long === true;
   const guardProof = missionKanbanGuardProof();
+  const workflowScrollerRef = createWorkflowScrollerRef();
 
   return html`
     <div
@@ -711,6 +726,7 @@ export const renderMissionKanban = (
             <section class="sk-workflow-board" aria-labelledby="${rootId}-board-title" data-committed-board>
               <div
                 class="sk-workflow-board__scroller"
+                ${ref(workflowScrollerRef)}
                 data-board-scroller
               >
                 ${projection.stages.map((stage) => html`
@@ -768,9 +784,6 @@ const basePlay = async (canvasElement: HTMLElement) => {
     unknownSelection: true,
     unknownWorkPackage: true,
   }));
-  const scroller = root!.querySelector<HTMLElement>('[data-board-scroller]');
-  await expect(scroller).not.toBeNull();
-  syncWorkflowScrollerSemantics(scroller!);
   root?.setAttribute('data-play-proof', 'passed');
 };
 

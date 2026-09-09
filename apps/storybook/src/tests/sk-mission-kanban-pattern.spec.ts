@@ -457,6 +457,44 @@ test('[T008/T010] genuinely overflowing K6 owns the complete scroller triad and 
   await assertVisibleFocus(scroller);
 });
 
+test('[T005/T008/T010] one mounted K6 synchronizes the scroller triad across bidirectional live resize', async ({
+  page,
+}) => {
+  const root = await openStory(page, 'k-6-stable-empty-board');
+  await root.evaluate((node) => node.setAttribute('data-live-resize-sentinel', 'same-root'));
+  const scroller = root.locator('[data-board-scroller]');
+
+  expect(await scroller.evaluate((node) => node.scrollWidth <= node.clientWidth + 1)).toBe(true);
+  await expect(scroller).not.toHaveAttribute('role', /.*/);
+  await expect(scroller).not.toHaveAttribute('aria-label', /.*/);
+  await expect(scroller).not.toHaveAttribute('tabindex', /.*/);
+  let geometry = await documentGeometry(page);
+  expect(geometry.scrollWidth).toBeLessThanOrEqual(geometry.clientWidth + 1);
+
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await expect.poll(() => scroller.evaluate((node) => node.scrollWidth > node.clientWidth + 1)).toBe(true);
+  await expect.poll(() => scroller.evaluate((node) => [
+    node.getAttribute('role'),
+    node.getAttribute('aria-label'),
+    node.getAttribute('tabindex'),
+  ])).toEqual(['region', 'Work package Kanban', '0']);
+  await expect(root).toHaveAttribute('data-live-resize-sentinel', 'same-root');
+  geometry = await documentGeometry(page);
+  expect(geometry.scrollWidth).toBeLessThanOrEqual(geometry.clientWidth + 1);
+  await assertVisibleFocus(scroller);
+
+  await page.setViewportSize({ width: 1600, height: 1000 });
+  await expect.poll(() => scroller.evaluate((node) => node.scrollWidth <= node.clientWidth + 1)).toBe(true);
+  await expect.poll(() => scroller.evaluate((node) => [
+    node.getAttribute('role'),
+    node.getAttribute('aria-label'),
+    node.getAttribute('tabindex'),
+  ])).toEqual([null, null, null]);
+  await expect(root).toHaveAttribute('data-live-resize-sentinel', 'same-root');
+  geometry = await documentGeometry(page);
+  expect(geometry.scrollWidth).toBeLessThanOrEqual(geometry.clientWidth + 1);
+});
+
 test('[T008] LightMode is semantic/data-identical to K1 with a resolved theme delta', async ({
   page,
 }) => {
