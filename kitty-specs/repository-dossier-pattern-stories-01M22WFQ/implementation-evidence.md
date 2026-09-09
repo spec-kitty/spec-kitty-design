@@ -91,8 +91,9 @@ direct fixture suite passed 20/20:
 ## Consolidated gate result
 
 The consolidated candidate completed the repository gate surface before independent review. The
-390 px trigger correction then repeated the affected local gates, and the final remote head repeated
-the full hosted gate surface:
+390 px trigger correction and later Firefox harness correction each repeated their affected local
+gates. Exact remote-head hosted results are recorded externally in the PR and child closeout because
+this committed ledger cannot contain the hash of the commit that contains it:
 
 - `npm test`: 48 files and 582 tests passed; both required lanes were non-empty.
 - `node scripts/measure-suite-time.mjs`: 582 tests passed in 15.3 seconds against a 40-second ceiling.
@@ -103,12 +104,15 @@ the full hosted gate surface:
 - `node scripts/suite-selftest.mjs`: all 237 mutations produced their named red against a green 548-assertion baseline in 937.3 seconds; `--selftest` passed all 10 guards in 67 seconds.
 - Quality, five-project typecheck, generated React/Vue/CSS/markup/story/manifest/part gates, composition boundaries, workflow/ADR gates, security, lockfile, pinned Actions, release graph, packed Vue declarations, size report, and offline loading all passed.
 
-Independent Codex architecture and debugger reviews approved the corrected remote head
+Independent Codex architecture and debugger reviews approved the last product/baseline head
 `673ae070c1c8d8238f4aef986e321e33e452f347` with no findings. They verified the minimal
 story-only correction, the cross-browser regression assertion, and exact byte equality for all five
-changed CI actuals. Hosted run `34391465762` is the exact-head gate run; the PR and child-issue
-closeout record its final result together with the immutable merged SHA. The train is fetched again
-immediately before merge, and any rebase requires regeneration and a fresh exact-head run.
+changed CI actuals. Hosted run `34391465762` then served as the diagnostic run for the Firefox
+sequential-focus boundary: its original attempt and unchanged-head rerun both failed the same link
+focus assertion while all other Dossier browser cases passed. The PR and child-issue closeout record
+the later immutable reviewed SHA and its final hosted result together with the merged SHA. The train
+is fetched again immediately before merge, and any rebase requires regeneration and a fresh
+exact-head run.
 
 ## Known environment boundary
 
