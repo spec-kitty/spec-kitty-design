@@ -22,7 +22,7 @@
       "pass_fail": "pass",
       "verified_by": "codex implementation seat; independent review pending",
       "verified_at": "2026-09-09T14:20:00Z",
-      "notes": "Storybook 10 globals.viewport selects the explicit 390 × 844 option."
+      "notes": "Storybook 10 globals.viewport selects the explicit 390 \u00d7 844 option."
     },
     {
       "criterion_id": "FR-003",

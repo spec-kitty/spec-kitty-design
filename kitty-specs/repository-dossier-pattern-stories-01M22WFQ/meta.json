@@ -23,6 +23,7 @@
   "purpose_context": "This mission advances repository dossier pattern stories on train/elements-first so stakeholders can track the work from mission creation onward.",
   "purpose_tldr": "repository dossier pattern stories",
   "slug": "repository-dossier-pattern-stories-01M22WFQ",
+  "status_phase": "1",
   "target_branch": "train/elements-first",
   "topology": "lanes"
 }
