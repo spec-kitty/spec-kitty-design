@@ -351,7 +351,7 @@ test.describe("sk-checkbox-choice-group source and public contract", () => {
       total: number;
     };
     expect(ratchet.byElement["sk-checkbox-choice-group"]).toEqual(STORY_IDS);
-    expect(ratchet.total).toBe(462);
+    expect(ratchet.total).toBe(472);
   });
 });
 
