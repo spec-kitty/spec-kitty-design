@@ -301,18 +301,15 @@ export const LightMode: Story = {
     backgrounds: { default: 'sk-light' },
     a11y: { disable: false },
   },
-  render: () =>
-    frame(
-      `<div style="display:grid;gap:var(--sk-space-4);">
-        ${row({ extra: 'data-light-mode="true"' })}
-        ${row({
-          id: 'activity-light-route-flush',
-          selectable: false,
-          href: '#activity-light-route-flush',
-          presentation: 'flush',
-          extra: 'data-light-route-flush="true"',
-        })}
-      </div>`,
+  render: () => `${frame(row({ extra: 'data-light-mode="true"' }), true)}
+    ${frame(
+      row({
+        id: 'activity-light-route-flush',
+        selectable: false,
+        href: '#activity-light-route-flush',
+        presentation: 'flush',
+        extra: 'data-light-route-flush="true"',
+      }),
       true,
-    ),
+    )}`,
 };
