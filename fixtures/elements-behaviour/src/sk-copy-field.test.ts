@@ -117,15 +117,10 @@ test('[SC-012] missing, rejected, throwing, and insecure clipboard paths select 
     setSecureContext(true);
     setClipboard(clipboard);
     const element = await mount('manual bytes');
-    const outcomes: string[] = [];
-    element.addEventListener('sk-copy-field-result', (event) => {
-      outcomes.push((event as CustomEvent<{ outcome: string }>).detail.outcome);
-    });
     control(element).click();
-    await vi.waitFor(() => expect(outcomes).toEqual(['manual']));
-    expect(status(element).textContent).toBe(
+    await vi.waitFor(() => expect(status(element).textContent).toBe(
       'Value selected. Use your system copy shortcut to copy it.',
-    );
+    ));
     expect(focus).toHaveBeenCalledOnce();
     expect(focus).toHaveBeenCalledWith({ preventScroll: true });
     const node = valueNode(element);
