@@ -166,17 +166,22 @@ leaves closing consumer-owned, and does not synthesize trigger focus.
 | release graph/selftest, packed Vue, official size check, offline-load/selftest | Pass; 28/28 release probes tripped, four packages pack and resolve, packed Vue compiles, SIZES is current, and 28/28 packed elements upgrade with zero off-machine requests. Log SHA-256 `d90dbf052ecd9355eb51879b19dc1c7915dea8567f7783d2f3467a98f9e40b8d`. |
 | headed Chrome browser-UI zoom at the fixed 390 CSS-pixel story | Pass at real 100% and 200% browser zoom on commit `809dd7fceb3e78c19d268742d41c094a1e21ae20`. Chrome for Testing 151.0.7922.34 received PID-targeted XTEST `Ctrl+0`, then five `Ctrl+Shift+=` chords for 200%; DPR changed exactly 1.203125→2.40625 while `visualViewport.scale` remained 1. Both phases measured shell 390px, rail 56px, hidden 0px context, content at x=56, Menu 70.87×44px, Work→Menu Tab order, visible/unclipped focus, and document scrollWidth=clientWidth. Metrics log SHA-256 `8ca52d647a2e0c39761f7de4f9213587d246abeda9b40edc5516ec61ac621ffc`; the valid 100% reviewer transport at `/var/tmp/issue-274-post292/zoom-evidence-rerun/chrome-100-percent-browser-ui.png` has SHA-256 `19c49ce41bbf3db53da39c237dc44071361a9defc0eeaacc584c3eb182236994`. The visually inspected 1204×1204 200% screenshot is tracked as `chromium-200-percent.png`, SHA-256 `a2e06fab6bf9dabfc16357a115d7c0a001673dc10a1ab0083f77e356cd2a0336`. A preceding compositor-black capture was rejected and is not cited. |
 
-## Honest pending and environment evidence
+## CI visual convergence and environment evidence
 
 The pre-CI visual command added four genuinely new rail-preserving screenshot expectations:
-1024 dark, 1024 light, 390 dark, and forced colors. Those four baselines still do not exist because
-this final-refresh task explicitly excludes opening/pushing a PR. The post-#273 host Chromium visual
-run was also non-diagnostic because broad inherited screenshots use different local font metrics
+1024 dark, 1024 light, 390 dark, and forced colors. Exact-head CI run
+`34340858837` produced only those four missing actuals. Each was visually inspected for the retained
+56px rail, suppressed context region, responsive navigation, theme, containment, and supplied
+content before being adopted. Their SHA-256 digests are, respectively,
+`7ede07fc10196c65f25afc6750d65173e1a5a0b0ead8f8522954479866baf6d8`,
+`4fc66e61dd6a161bd3d28a92d3091b1edd4131a6986946e2d22308bc5e64ecb8`,
+`6f5dd33a62bed1ed789758b4215996ffae8c927bcedb3a753905dcee34c757f0`, and
+`9f7c80dc932ededd6c3069f83d9de6ba4f4cc3438bb314e9281d7cf6b4876dab`.
+No legacy or compact baseline changed. The post-#273 host Chromium visual run was non-diagnostic
+because broad inherited screenshots use different local font metrics
 (for example, the stable stub expected 336×34 but rendered 312×38). It was stopped rather than
 adopting workstation output; its four generated #274 actuals were moved outside the repository to
-`/var/tmp/issue-274-post273/local-visual-untracked/`. T018 remains responsible for inspecting the
-future CI-produced Linux artifact and committing only approved #274 images. No legacy or compact
-baseline changed. The stopped local log has SHA-256
+`/var/tmp/issue-274-post273/local-visual-untracked/`. The stopped local log has SHA-256
 `f27d4e63d1b9e023e899af29e2e88020c848f4204c0da518e17bcccc1b68cbf5`.
 
 The first correction-cycle mutation sweep froze a green 498-assertion baseline and an impact graph
@@ -218,7 +223,7 @@ as a passing gate or used to widen the correction into unrelated gate policy.
 
 T019 is complete on post-#292 product commit `809dd7fceb3e78c19d268742d41c094a1e21ae20`
 using actual headed Chrome UI keystrokes, not CSS zoom, device scale factor, or a resized viewport
-substitute. The first attempted X11/ffmpeg capture was all black and is excluded; only the later
-Spectacle active-window images above are cited. T017 fresh independent exact-head Codex review and
-T018 future PR/CI baseline convergence remain pending and are intentionally not claimed by this
+substitute. Black compositor captures were excluded; only the visually inspected Spectacle
+active-window images above are cited. T018 CI baseline convergence is complete. T017 fresh
+independent exact-head Codex review remains pending and is intentionally not claimed by this
 implementer.
