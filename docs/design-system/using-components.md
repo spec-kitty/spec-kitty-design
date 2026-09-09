@@ -1040,11 +1040,34 @@ heading. The consumer also owns all `ul > li` markup. None of these elements cre
 assigns list roles.
 
 `sk-action-row` is activatable only when `selectable` is present and `row-id` contains non-whitespace
-content. Its internal primary trigger is a real `button`; projected `controls` remain siblings, so
-native links, buttons, and `sk-button` keep their own behavior. Pointer, Enter, and Space activation
-emit one `sk-action-row-activate` with exact `{ id }`, `bubbles: true`, `composed: true`, and
-`cancelable: false`. The element owns no navigation or other default action. `selected` remains a
-consumer-controlled input and is exposed only as `aria-current="true"` on the stable row surface.
+content. Its internal primary trigger is then a real `button`; projected `controls` remain siblings,
+so native links, buttons, and `sk-button` keep their own behavior. Pointer, Enter, and Space
+activation emit one `sk-action-row-activate` with exact `{ id }`, `bubbles: true`, `composed: true`,
+and `cancelable: false`. The element owns no navigation or other default action. `selected` remains
+a consumer-controlled input and is exposed only as `aria-current="true"` on the stable row surface.
+
+A non-whitespace `href` switches the primary trigger to a real native anchor. The supplied value is
+reflected and passed to `href` without parsing or route construction; the browser continues to own
+Enter, modified-click, context-menu, focus, and destination behavior. Route mode takes precedence
+if `selectable` is also present and emits no `sk-action-row-activate`. In route mode, `selected`
+means the anchor carries `aria-current="page"` while the row surface carries no `aria-current`.
+An absent, empty, or whitespace-only `href` falls back to the existing button/static rules.
+
+Set `presentation="flush"` independently of route/button/static mode when the surrounding container
+owns the resting surface. Flush removes the row background, border, and radius while preserving
+padding, slots, controls, responsive anatomy, and the primary trigger's focus treatment. A selected
+non-route flush row retains the selected surface and still has no border. An unknown, empty, or
+removed `presentation` value fails open to the existing bordered presentation.
+
+```html
+<sk-action-row href="/missions/272" presentation="flush" selected>
+  <strong slot="title">Native route destination</strong>
+  <code slot="reference">spec-kitty/spec-kitty-design</code>
+  <time slot="metadata">2 hours ago</time>
+  <button slot="controls" type="button">Pin</button>
+</sk-action-row>
+```
+
 `layout="card"` reflows that same trigger, content and controls into a compact vertical
 presentation; it does not create a semantic card or a status axis. The optional `supporting` slot is
 a passive, full-width secondary line in either layout and is externally targetable through

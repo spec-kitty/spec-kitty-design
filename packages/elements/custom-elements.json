@@ -1189,7 +1189,7 @@
         },
         {
           "kind": "class",
-          "description": "A controlled, consumer-composed action row.\n\nToken dependencies: --sk-border-default, --sk-border-strong, --sk-border-width-1,\n--sk-border-width-2, --sk-color-accent, --sk-fg-body, --sk-fg-default, --sk-fg-muted,\n--sk-font-display, --sk-font-mono, --sk-font-sans, --sk-motion-duration-fast,\n--sk-motion-ease-out, --sk-radius-md, --sk-space-1, --sk-space-2, --sk-space-3,\n--sk-space-4, --sk-space-5, --sk-surface-card, --sk-surface-muted, --sk-surface-pill,\n--sk-text-base, --sk-text-xs, --sk-weight-semibold.",
+          "description": "A controlled, consumer-composed action row with optional native-route and flush presentation modes.\n\nToken dependencies: --sk-border-default, --sk-border-strong, --sk-border-width-1,\n--sk-border-width-2, --sk-color-accent, --sk-fg-body, --sk-fg-default, --sk-fg-muted,\n--sk-font-display, --sk-font-mono, --sk-font-sans, --sk-motion-duration-fast,\n--sk-motion-ease-out, --sk-radius-md, --sk-space-1, --sk-space-2, --sk-space-3,\n--sk-space-4, --sk-space-5, --sk-surface-card, --sk-surface-muted, --sk-surface-pill,\n--sk-text-base, --sk-text-xs, --sk-weight-semibold.",
           "name": "SkActionRow",
           "cssParts": [
             {
@@ -1262,6 +1262,32 @@
           "members": [
             {
               "kind": "method",
+              "name": "#actionRowPresentation",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "'flush' | undefined"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "value",
+                  "type": {
+                    "text": "unknown"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "field",
+              "name": "#lastWarnedPresentation",
+              "privacy": "private",
+              "type": {
+                "text": "string | undefined"
+              }
+            },
+            {
+              "kind": "method",
               "name": "#syncSlot",
               "privacy": "private",
               "return": {
@@ -1280,6 +1306,25 @@
             },
             {
               "kind": "field",
+              "name": "#warnedMixed",
+              "privacy": "private",
+              "type": {
+                "text": "string | undefined"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "href",
+              "privacy": "public",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "Opaque native route destination. A non-blank value takes precedence over selectable-button mode.",
+              "attribute": "href",
+              "reflects": true
+            },
+            {
+              "kind": "field",
               "name": "layout",
               "privacy": "public",
               "type": {
@@ -1287,6 +1332,17 @@
               },
               "description": "Optional compact presentation. Only `card` is supported; invalid values use the default row layout.",
               "attribute": "layout",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "presentation",
+              "privacy": "public",
+              "type": {
+                "text": "'flush' | undefined"
+              },
+              "description": "Optional container-owned presentation. Only `flush` is supported; invalid values use the bordered row.",
+              "attribute": "presentation",
               "reflects": true
             },
             {
@@ -1330,11 +1386,19 @@
               "type": {
                 "text": "CustomEvent<ActionRowActivateDetail>"
               },
-              "description": "Requests activation for the exact consumer row ID. The event bubbles, is composed, and is not cancelable.",
+              "description": "Requests activation for the exact consumer row ID in selectable-button mode. Native-route mode does not emit this event. The event bubbles, is composed, and is not cancelable.",
               "name": "sk-action-row-activate"
             }
           ],
           "attributes": [
+            {
+              "name": "href",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "Opaque native route destination. A non-blank value takes precedence over selectable-button mode.",
+              "fieldName": "href"
+            },
             {
               "name": "layout",
               "type": {
@@ -1342,6 +1406,14 @@
               },
               "description": "Optional compact presentation. Only `card` is supported; invalid values use the default row layout.",
               "fieldName": "layout"
+            },
+            {
+              "name": "presentation",
+              "type": {
+                "text": "'flush' | undefined"
+              },
+              "description": "Optional container-owned presentation. Only `flush` is supported; invalid values use the bordered row.",
+              "fieldName": "presentation"
             },
             {
               "name": "row-id",

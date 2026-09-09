@@ -10,6 +10,8 @@ const row = ({
   id = 'activity-17',
   selectable = true,
   selected = false,
+  href = '',
+  presentation = '',
   controls = '',
   title = 'team-landing-pivots',
   reference = 'spec-kitty/e2e-team-landing',
@@ -25,6 +27,8 @@ const row = ({
   id?: string;
   selectable?: boolean;
   selected?: boolean;
+  href?: string;
+  presentation?: string;
   controls?: string;
   title?: string;
   reference?: string;
@@ -38,6 +42,8 @@ const row = ({
     row-id="${id}"
     ${selectable ? 'selectable' : ''}
     ${selected ? 'selected' : ''}
+    ${href ? `href="${href}"` : ''}
+    ${presentation ? `presentation="${presentation}"` : ''}
     ${extra}
   >
     ${marker}
@@ -70,7 +76,7 @@ const meta: Meta = {
     docs: {
       description: {
         component:
-          'A controlled, consumer-composed row that emits one activation request while native list and application behavior remain outside the element.',
+          'A controlled, consumer-composed row with static, selectable-button, and native-route modes; only selectable-button mode emits an activation request.',
       },
     },
   },
@@ -115,15 +121,98 @@ export const NonSelectable: Story = {
 export const WithControls: Story = {
   render: () =>
     frame(
-      row({
-        extra: 'data-with-controls="true"',
-        controls: `
-      <a slot="controls" href="#details" data-native-link style="color:var(--sk-fg-default);">Details</a>
-      <button slot="controls" type="button" data-native-button>Pin</button>
-      <sk-button slot="controls" size="sm" data-sk-button>Inspect</sk-button>
-    `,
-      }),
+      `<div style="display:grid;gap:var(--sk-space-4);">
+        ${row({
+          extra: 'data-with-controls="true"',
+          supporting: '<span slot="supporting">Consumer-supplied supporting context</span>',
+          controls: `
+            <a slot="controls" href="#details" data-native-link style="color:var(--sk-fg-default);">Details</a>
+            <button slot="controls" type="button" data-native-button>Pin</button>
+            <sk-button slot="controls" size="sm" data-sk-button>Inspect</sk-button>
+          `,
+        })}
+        ${row({
+          id: 'activity-route-controls',
+          selectable: false,
+          href: '#activity-route-controls',
+          presentation: 'flush',
+          title: 'Native route with independent controls',
+          extra: 'data-route-controls="true"',
+          controls: `
+            <button slot="controls" type="button">Pin route</button>
+          `,
+        })}
+      </div>`,
     ),
+};
+
+export const Route: Story = {
+  render: () => frame(row({ selectable: false, href: '#activity-17' })),
+};
+
+export const RouteFlush: Story = {
+  render: () => frame(row({ selectable: false, href: '#activity-17', presentation: 'flush' })),
+};
+
+export const ButtonFlush: Story = {
+  render: () => frame(row({ presentation: 'flush' })),
+};
+
+export const SelectedFlush: Story = {
+  render: () =>
+    frame(`
+      <div style="display:grid;gap:var(--sk-space-4);">
+        <div>
+          <p style="margin:0 0 var(--sk-space-2);color:var(--sk-fg-muted);">Selected, flush</p>
+          ${row({ id: 'selected-flush', selected: true, presentation: 'flush' })}
+        </div>
+        <div>
+          <p style="margin:0 0 var(--sk-space-2);color:var(--sk-fg-muted);">Not selected, flush</p>
+          ${row({ id: 'button-flush-comparison', presentation: 'flush' })}
+        </div>
+      </div>
+    `),
+};
+
+export const RouteSelected: Story = {
+  render: () => frame(row({ selectable: false, selected: true, href: '#activity-17' })),
+};
+
+export const UnknownPresentation: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story: 'An unsupported presentation value warns once and falls back to the bordered row.',
+      },
+    },
+  },
+  render: () => frame(row({ presentation: 'unknown-presentation' })),
+};
+
+export const ForcedColors: Story = {
+  render: () =>
+    frame(`
+      <div data-forced-colors-comparison style="display:grid;gap:var(--sk-space-4);">
+        <div>
+          <p style="margin:0 0 var(--sk-space-2);color:var(--sk-fg-muted);">Selected, bordered</p>
+          ${row({ id: 'forced-colors-bordered', selected: true })}
+        </div>
+        <div>
+          <p style="margin:0 0 var(--sk-space-2);color:var(--sk-fg-muted);">Selected, flush</p>
+          ${row({ id: 'forced-colors-flush', selected: true, presentation: 'flush' })}
+        </div>
+        <div>
+          <p style="margin:0 0 var(--sk-space-2);color:var(--sk-fg-muted);">Route, flush</p>
+          ${row({
+            id: 'forced-colors-route-flush',
+            selectable: false,
+            href: '#forced-colors-route-flush',
+            presentation: 'flush',
+            extra: 'data-forced-colors-route-flush="true"',
+          })}
+        </div>
+      </div>
+    `),
 };
 
 export const LongContent: Story = {
@@ -213,4 +302,22 @@ export const LightMode: Story = {
     a11y: { disable: false },
   },
   render: () => frame(row({ extra: 'data-light-mode="true"' }), true),
+};
+
+export const RouteFlushLightMode: Story = {
+  parameters: {
+    backgrounds: { default: 'sk-light' },
+    a11y: { disable: false },
+  },
+  render: () =>
+    frame(
+      row({
+        id: 'activity-light-route-flush',
+        selectable: false,
+        href: '#activity-light-route-flush',
+        presentation: 'flush',
+        extra: 'data-light-route-flush="true"',
+      }),
+      true,
+    ),
 };
