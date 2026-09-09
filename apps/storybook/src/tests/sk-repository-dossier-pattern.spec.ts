@@ -76,7 +76,61 @@ const expectFocusOutlineContained = async (
   locator: Locator,
   bounds?: Locator,
 ): Promise<void> => {
-  await expect(locator).toBeFocused();
+  try {
+    await expect(locator).toBeFocused();
+  } catch (error) {
+    const activeElementChain = await locator.page().evaluate(() => {
+      const describe = (element: Element): string => {
+        const name =
+          element.getAttribute("aria-label") ?? element.textContent?.trim();
+        return [
+          element.localName,
+          element.id ? `#${element.id}` : "",
+          element.getAttribute("role")
+            ? `[role=${element.getAttribute("role")}]`
+            : "",
+          name ? `(${name.slice(0, 80)})` : "",
+        ]
+          .filter(Boolean)
+          .join("");
+      };
+      const chain: string[] = [];
+      let active: Element | null = document.activeElement;
+      while (active) {
+        chain.push(describe(active));
+        active = active.shadowRoot?.activeElement ?? null;
+      }
+      return chain;
+    });
+    const expectedExposure = await locator.evaluate((element) => {
+      const ancestors: string[] = [];
+      for (
+        let current: Element | null = element;
+        current;
+        current = current.parentElement
+      ) {
+        if (
+          current.hasAttribute("inert") ||
+          current.getAttribute("aria-hidden") === "true"
+        ) {
+          ancestors.push(
+            `${current.localName}${current.id ? `#${current.id}` : ""}` +
+              `[inert=${current.hasAttribute("inert")}][aria-hidden=${current.getAttribute("aria-hidden")}]`,
+          );
+        }
+      }
+      return {
+        ancestors,
+        tabIndex: (element as HTMLElement).tabIndex,
+      };
+    });
+    const reason = error instanceof Error ? error.message : String(error);
+    throw new Error(
+      `${reason}\nActive element chain: ${JSON.stringify(activeElementChain)}\n` +
+        `Expected focus exposure: ${JSON.stringify(expectedExposure)}`,
+      { cause: error },
+    );
+  }
   const focus = await locator.evaluate((element) => {
     const style = getComputedStyle(element);
     const rect = element.getBoundingClientRect();

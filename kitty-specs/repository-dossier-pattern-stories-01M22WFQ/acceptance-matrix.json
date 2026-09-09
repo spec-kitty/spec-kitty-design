@@ -524,7 +524,7 @@
       "verification_method": "custom_command",
       "verification_command": "rg -q \"Cross-screen family.*Pass\" kitty-specs/repository-dossier-pattern-stories-01M22WFQ/implementation-evidence.md",
       "result": "confirmed_absent",
-      "evidence": "implementation-evidence.md records Pass for D1, D2, D4-D8 and the cross-screen family; independent Codex visual review approved the corrected 18-baseline family at ae96c08ece00f3a7007fda17cd831bcede662d41."
+      "evidence": "implementation-evidence.md records Pass for D1, D2, D4-D8 and the cross-screen family; two independent Codex reviewers approved the corrected runner-authoritative baseline family at 673ae070c1c8d8238f4aef986e321e33e452f347."
     }
   ]
 }
