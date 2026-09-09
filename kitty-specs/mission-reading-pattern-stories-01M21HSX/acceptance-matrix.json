@@ -218,10 +218,10 @@
       "criterion_id": "C-002",
       "description": "No routing, fetching, polling, timers, inference, persistence, search, mutation, or application action surface is added.",
       "proof_type": "source_audit_and_review",
-      "evidence": "Exact product head a36f3b72f68a00bc04ffe0cf49dbf2d362e6358e passes prohibited-behavior searches and independent reviews; no router, fetching, polling, timer, persistence, search, mutation, or application action surface exists.",
+      "evidence": "Exact rebased product head df4bf66bc72c287e6aaadf82f5fce18c766de5af passes prohibited-behavior searches and CI 34332459374; no router, fetching, polling, timer, persistence, search, mutation, or application action surface exists.",
       "pass_fail": "pass",
       "verified_by": "codex",
-      "verified_at": "2026-09-09T07:31:56.712087+00:00",
+      "verified_at": "2026-09-09T09:25:53.150264+00:00",
       "notes": "Drawer state is a controlled story demonstration of the public shell contract."
     },
     {
