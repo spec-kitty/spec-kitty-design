@@ -657,9 +657,43 @@ test("loading and snapshot states never fabricate facts or a second commit", asy
   page,
 }) => {
   const loading = await openStory(page, "m-3-fragment-loading");
-  await expect(loading.locator('[aria-busy="true"]')).toHaveCount(1);
-  await expect(loading.getByRole("status")).toHaveText(
-    "Loading rendered content…",
+  const busyFragment = loading.locator('[aria-busy="true"]');
+  const loadingStatus = loading.getByRole("status");
+  await expect(busyFragment).toHaveCount(1);
+  await expect(busyFragment).toHaveAttribute("role", "region");
+  await expect(busyFragment).toHaveAttribute(
+    "aria-labelledby",
+    "loading-heading",
+  );
+  await expect(loadingStatus).toHaveText("Loading rendered content…");
+  await expect(loadingStatus).toHaveAttribute("aria-live", "polite");
+  await expect(loadingStatus).toHaveAttribute("aria-atomic", "true");
+  expect(
+    await loadingStatus.evaluate(
+      (status) => status.closest('[aria-busy="true"]') === null,
+    ),
+  ).toBe(true);
+  await expect(busyFragment.getByRole("status")).toHaveCount(0);
+  const loadingGeometry = await loading
+    .locator(".sk-mission-reading-pattern__placeholder")
+    .evaluate((region) => {
+      const style = getComputedStyle(region);
+      const tokenProbe = document.createElement("span");
+      tokenProbe.style.cssText =
+        "position:fixed;visibility:hidden;inline-size:var(--sk-space-12)";
+      region.append(tokenProbe);
+      const token = tokenProbe.getBoundingClientRect().width;
+      tokenProbe.remove();
+      return {
+        expectedMinimum: token * 4,
+        renderedBlockSize: region.getBoundingClientRect().height,
+        resolvedMinimum: Number.parseFloat(style.minBlockSize),
+      };
+    });
+  expect(loadingGeometry.expectedMinimum).toBeGreaterThan(0);
+  expect(loadingGeometry.resolvedMinimum).toBe(loadingGeometry.expectedMinimum);
+  expect(loadingGeometry.renderedBlockSize).toBeGreaterThanOrEqual(
+    loadingGeometry.expectedMinimum,
   );
   await expect(
     loading.locator("[data-document-facts], [data-document-action], article"),
@@ -668,6 +702,12 @@ test("loading and snapshot states never fabricate facts or a second commit", asy
   const behind = await openStory(page, "m-5-snapshot-behind-log");
   await expect(behind.locator("sk-notice")).toHaveCount(1);
   await expect(behind.getByText("72c4e9a", { exact: true })).toHaveCount(1);
+  await expect(
+    behind.locator(".sk-facts__term", { hasText: /^Pushed$/ }),
+  ).toHaveCount(1);
+  await expect(
+    behind.getByText("2026-08-31 14:12 UTC", { exact: true }),
+  ).toHaveCount(1);
   await expect(
     behind.getByText(/behind the activity log.*72c4e9a/),
   ).toHaveCount(1);
@@ -678,6 +718,14 @@ test("loading and snapshot states never fabricate facts or a second commit", asy
         (notice as HTMLElement & { message: string }).message.match(/72c4e9a/g),
       ),
   ).toHaveLength(1);
+
+  const unsupplied = await openStory(page, "default");
+  await expect(
+    unsupplied.locator(".sk-facts__term", { hasText: /^Pushed$/ }),
+  ).toHaveCount(0);
+  await expect(
+    unsupplied.getByText("2026-08-31 14:12 UTC", { exact: true }),
+  ).toHaveCount(0);
 });
 
 test("M8 separates factual, observed, and reported-live regions without a live Work Package join", async ({

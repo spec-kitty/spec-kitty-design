@@ -37,7 +37,7 @@
       "wp": null
     },
     "#263": {
-      "evidence_ref": "#264 is merged and post-merge verified; #265 exact rebased product head df4bf66bc72c287e6aaadf82f5fce18c766de5af passes CI 34332459374 and Spec Kitty acceptance; only train merge and post-merge mission review remain.",
+      "evidence_ref": "#264 is merged and post-merge verified; #265 corrective product head b68f84d28715ca8ef551f40cda24f3a13e054f1e passes full CI 34343137694 after closing the four late contract blockers; corrective train merge and post-merge mission review remain.",
       "fr": "FR-001\u2013FR-013",
       "nfr": "NFR-001\u2013NFR-007",
       "repo": "spec-kitty/spec-kitty-design",
@@ -61,7 +61,7 @@
       "wp": null
     },
     "#265": {
-      "evidence_ref": "Exact rebased product head df4bf66bc72c287e6aaadf82f5fce18c766de5af on train 674ebe23bea974eb8bef2dbd64f4481e5f94d212; independent review approved Mission behavior; CI 34332459374 fully green across mutation, Playwright, axe, visual, composition, generated, package, release, security, build, and quality gates; ratchet 405/405.",
+      "evidence_ref": "Corrective product head b68f84d28715ca8ef551f40cda24f3a13e054f1e on train 57d1b083a6799fc5ef7f2cff75493a7f64fd59a3; CI 34343137694 fully green across mutation, Playwright, axe, visual, composition, generated, package, release, security, build, and aggregate gates; independent contract lens PASS; final review/acceptance/merge remain.",
       "fr": "FR-001\u2013FR-013",
       "nfr": "NFR-001\u2013NFR-007",
       "repo": "spec-kitty/spec-kitty-design",
@@ -69,7 +69,7 @@
       "scope": "Complete reviewed Mission Reading M1\u2013M8 pattern-story family",
       "source_file": "spec.md",
       "title": "[TKM2] Mission Reading pattern stories \u2014 exact-commit document and route-state fixtures",
-      "verdict": "fixed",
+      "verdict": "in-mission",
       "wp": "WP01"
     },
     "#285": {

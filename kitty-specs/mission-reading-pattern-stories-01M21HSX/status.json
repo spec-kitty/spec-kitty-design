@@ -1,7 +1,7 @@
 {
-  "event_count": 41,
-  "last_event_id": "01M22H0QY5A9K0XCMF5RPPSRZA",
-  "materialized_at": "2026-09-09T07:27:17.957831+00:00",
+  "event_count": 47,
+  "last_event_id": "01M230MMV1AJH4C6QPQD0622JZ",
+  "materialized_at": "2026-09-09T12:00:18.785409+00:00",
   "mission_number": "",
   "mission_slug": "mission-reading-pattern-stories-01M21HSX",
   "mission_type": "software-dev",
@@ -23,10 +23,10 @@
       "agent_profile": "__resolved_profile_absent__",
       "agent_profile_version": "__resolved_profile_version_absent__",
       "assignee": "codex",
-      "force_count": 13,
+      "force_count": 14,
       "lane": "approved",
-      "last_event_id": "01M22H0QY5A9K0XCMF5RPPSRZA",
-      "last_transition_at": "2026-09-09T07:27:17.957831+00:00",
+      "last_event_id": "01M230MMV1AJH4C6QPQD0622JZ",
+      "last_transition_at": "2026-09-09T12:00:18.785409+00:00",
       "model": "__resolved_model_absent__",
       "notes": [
         "Ready for review: implementation and mission-specific gates pass; host-only diagram and legacy CI visual baseline limitations recorded in handoff evidence.",
@@ -51,12 +51,18 @@
         "Integrate landed #277 story-ratchet assertion with #265 total: expected 381 -> 395; targeted checkbox-choice-group Chromium suite 27/27 passed at a36f3b7.",
         "Cycle 11 integration correction ready at a36f3b72f68a00bc04ffe0cf49dbf2d362e6358e.",
         "Cycle 11 independent review of #277/#265 ratchet integration.",
-        "Cycle 11 APPROVED: exact-head ratchet reconciliation independently verified; 395 declared, summed, listed, and unique stories; #277 contributes 12 and #265 contributes 14; targeted exact-head Chromium 27/27; formatting and diff checks pass."
+        "Cycle 11 APPROVED: exact-head ratchet reconciliation independently verified; 395 declared, summed, listed, and unique stories; #277 contributes 12 and #265 contributes 14; targeted exact-head Chromium 27/27; formatting and diff checks pass.",
+        "Post-merge contract lens rejected the byte-identical merged tree on M3 live/busy topology, stable loading geometry, rendered matching-marker coverage, and stale ratchet provenance.",
+        "Implementing bounded post-merge corrections from the final contract lens.",
+        "Corrective implementation complete; exact-head CI quality run 34343137694 is green for all completed jobs, including refreshed Linux visual baselines.",
+        "Cycle 12 corrective review: four-lens Codex-only review of PR #294 after full product CI 34343137694 and governed acceptance refresh.",
+        "Cycle 12 APPROVED: architecture, contract/fakeability, debugger, and semantic-reducer lenses PASS; exact-head CI 34346346421 fully green; all four late contract blockers closed without scope expansion."
       ],
       "provider": "__resolved_provider_absent__",
       "review": null,
       "review_result": {
-        "reference": "PR#292@a36f3b72f68a00bc04ffe0cf49dbf2d362e6358e",
+        "feedback_path": "/home/jeroennouws/dev/spec-kitty-design-missions/265/.acceptance-final/kitty-specs/mission-reading-pattern-stories-01M21HSX/tasks/WP01-mission-reading-pattern-family/review-cycle-11.md",
+        "reference": "review-cycle://mission-reading-pattern-stories-01M21HSX/WP01-mission-reading-pattern-family/review-cycle-11.md",
         "reviewer": "codex",
         "verdict": "approved"
       },
