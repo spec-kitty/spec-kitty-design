@@ -188,10 +188,10 @@
       "criterion_id": "NFR-006",
       "description": "Final-train regeneration, verification, visual evidence, and independent review all cite the exact publishable head.",
       "proof_type": "git_and_review_audit",
-      "evidence": "Latest reviewed implementation head is 8606f01e953eebc67ce7319d6d4218b2ed751716; review-cycle-5 approved that head and recorded all exact-head reruns.",
+      "evidence": "Exact product head a36f3b72f68a00bc04ffe0cf49dbf2d362e6358e is linear on train fb424e83c827a586038d7a2a977b946b193192fb; independent review cycles 10 and 11 APPROVED; final metadata-only head still requires exact-head squad review before merge.",
       "pass_fail": "pass",
       "verified_by": "codex",
-      "verified_at": "2026-09-09T03:41:13Z",
+      "verified_at": "2026-09-09T07:31:53.090080+00:00",
       "notes": "A final remote-train check and required pre-merge exact-PR-head review remain merge-gate actions."
     },
     {
