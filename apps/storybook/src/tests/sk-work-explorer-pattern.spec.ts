@@ -676,6 +676,7 @@ test("W1–W10 render one H1 and pass axe from their shared public composition",
         : { width: 1280, height: 960 };
     const root = await openStory(page, storyId, viewport);
     await expect(root.locator("h1")).toHaveCount(1);
+    await expect(root.getByRole("main")).toHaveCount(1);
     await expect(root.locator("sk-app-shell")).toHaveAttribute(
       "presentation",
       "rail-preserving",

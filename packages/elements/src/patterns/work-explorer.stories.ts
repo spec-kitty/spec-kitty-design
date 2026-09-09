@@ -2179,7 +2179,7 @@ export const renderWorkExplorer = (
       </div>
       ${renderContextNavigation("compact")}
       ${renderPageHeader(currentProjection)}
-      <main class="sk-work-explorer-pattern__content">
+      <div class="sk-work-explorer-pattern__content">
         ${
           currentProjection.pageState === "loading"
             ? html` <div ${ref(mountFilters)}></div>
@@ -2268,7 +2268,7 @@ export const renderWorkExplorer = (
                     ${renderContext(currentProjection)}
                   </sk-grid>`
         }
-      </main>
+      </div>
     </sk-app-shell>
   </div>`;
 };
