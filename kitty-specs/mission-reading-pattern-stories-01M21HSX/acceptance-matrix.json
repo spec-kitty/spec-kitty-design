@@ -310,11 +310,11 @@
     },
     {
       "invariant_id": "NI-005",
-      "description": "No generated distribution or unrelated architecture/learning artifact is part of the delivery diff.",
-      "verification_method": "git_diff_audit",
+      "description": "No generated distribution or unrelated architecture or learning artifact is part of the delivery diff.",
+      "verification_method": "custom_command",
       "verification_command": "git diff --quiet origin/train/elements-first...HEAD -- packages/tokens/dist packages/styles/dist packages/elements/dist packages/react/dist packages/vue/dist docs/architecture/validation docs/learning",
       "result": "confirmed_absent",
-      "evidence": "Command passed after final regeneration; the delivery contains only authored pattern/test/docs/ratchet sources and reviewed PNG baselines."
+      "evidence": "Command exited 0: "
     }
   ]
 }
