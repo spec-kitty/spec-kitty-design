@@ -1,0 +1,234 @@
+{
+  "issue": 314,
+  "ran_at": "2026-09-10T21:54:55.590Z",
+  "head": "bf3b6a89044de6ee1aa54ba9ea5041dfb1b1e44b",
+  "declared_outcome_sources": [
+    "outcomes.declared.json",
+    "outcomes.declared.cycle-2.json"
+  ],
+  "declared_outcome_count": 31,
+  "pages": [
+    "M1",
+    "M4",
+    "M2",
+    "M3",
+    "M5",
+    "M6",
+    "M7",
+    "M8",
+    "M9",
+    "M11",
+    "M10",
+    "P1",
+    "P2",
+    "P3",
+    "P4",
+    "P5",
+    "S_shadow",
+    "S_static",
+    "S7_static",
+    "S8_shadow",
+    "S8_static",
+    "S9_shadow",
+    "S9_static",
+    "S10_static",
+    "P6",
+    "H1",
+    "H2",
+    "H3",
+    "H4"
+  ],
+  "resolved_specifiers": {
+    "@spec-kitty/tokens": "/home/jeroennouws/dev/spec-kitty-design-missions/305/packages/tokens/dist/tokens.css",
+    "@spec-kitty/styles/metric/sk-metric.css": "/home/jeroennouws/dev/spec-kitty-design-missions/305/packages/styles/dist/metric/sk-metric.css",
+    "@spec-kitty/styles/pill-tag/sk-pill-tag.css": "/home/jeroennouws/dev/spec-kitty-design-missions/305/packages/styles/dist/pill-tag/sk-pill-tag.css",
+    "@spec-kitty/styles/action-row/sk-action-row.css": "/home/jeroennouws/dev/spec-kitty-design-missions/305/packages/styles/dist/action-row/sk-action-row.css"
+  },
+  "engines": {
+    "chromium": {
+      "outcomes": {
+        "M1": "normal",
+        "M4": "normal",
+        "M2": "4px",
+        "M3": "40px",
+        "M5": "nowrap",
+        "M6": "40px",
+        "M7": "40px",
+        "M8": "4px",
+        "M9": "rgb(0, 0, 255)",
+        "M11": "4px",
+        "M10": "rgb(255, 0, 0)",
+        "P1": "0px",
+        "P2": "0px",
+        "P3": "9px",
+        "P4": "rgb(33, 40, 48)",
+        "P5": "rgb(255, 0, 0)",
+        "S1": {
+          "property": "whiteSpace",
+          "shadow": "normal",
+          "static": "normal"
+        },
+        "S2": {
+          "property": "paddingBlockStart",
+          "shadow": "0px",
+          "static": "0px"
+        },
+        "S3": {
+          "property": "paddingInlineStart",
+          "shadow": "8px",
+          "static": "8px"
+        },
+        "S4": {
+          "property": "overflowWrap",
+          "shadow": "anywhere",
+          "static": "anywhere"
+        },
+        "S5": {
+          "property": "boxSizing",
+          "shadow": "border-box",
+          "static": "border-box"
+        },
+        "S6": {
+          "property": "maxWidth",
+          "shadow": "100%",
+          "static": "100%"
+        },
+        "P6": "9px",
+        "S7": {
+          "property": "whiteSpace",
+          "shadow": "normal",
+          "static": "normal"
+        },
+        "S8": {
+          "property": "whiteSpace",
+          "shadow": "normal",
+          "static": "normal"
+        },
+        "S9": {
+          "property": "whiteSpace",
+          "shadow": "normal",
+          "static": "nowrap"
+        },
+        "S10": {
+          "property": "whiteSpace",
+          "shadow": "normal",
+          "static": "nowrap"
+        },
+        "H1": {
+          "host_display": "flex",
+          "host_container_type": "inline-size",
+          "root_flex_wrap": "wrap"
+        },
+        "H2": {
+          "host_display": "block",
+          "host_container_type": "inline-size",
+          "root_flex_wrap": "wrap"
+        },
+        "H3": {
+          "host_display": "block",
+          "host_container_type": "normal",
+          "root_flex_wrap": "nowrap"
+        },
+        "H4": {
+          "host_display": "block",
+          "host_container_type": "inline-size",
+          "root_flex_wrap": "wrap"
+        }
+      }
+    },
+    "firefox": {
+      "outcomes": {
+        "M1": "normal",
+        "M4": "normal",
+        "M2": "4px",
+        "M3": "40px",
+        "M5": "nowrap",
+        "M6": "40px",
+        "M7": "40px",
+        "M8": "4px",
+        "M9": "rgb(0, 0, 255)",
+        "M11": "4px",
+        "M10": "rgb(255, 0, 0)",
+        "P1": "0px",
+        "P2": "0px",
+        "P3": "9px",
+        "P4": "rgb(33, 40, 48)",
+        "P5": "rgb(255, 0, 0)",
+        "S1": {
+          "property": "whiteSpace",
+          "shadow": "normal",
+          "static": "normal"
+        },
+        "S2": {
+          "property": "paddingBlockStart",
+          "shadow": "0px",
+          "static": "0px"
+        },
+        "S3": {
+          "property": "paddingInlineStart",
+          "shadow": "8px",
+          "static": "8px"
+        },
+        "S4": {
+          "property": "overflowWrap",
+          "shadow": "anywhere",
+          "static": "anywhere"
+        },
+        "S5": {
+          "property": "boxSizing",
+          "shadow": "border-box",
+          "static": "border-box"
+        },
+        "S6": {
+          "property": "maxWidth",
+          "shadow": "100%",
+          "static": "100%"
+        },
+        "P6": "9px",
+        "S7": {
+          "property": "whiteSpace",
+          "shadow": "normal",
+          "static": "normal"
+        },
+        "S8": {
+          "property": "whiteSpace",
+          "shadow": "normal",
+          "static": "normal"
+        },
+        "S9": {
+          "property": "whiteSpace",
+          "shadow": "normal",
+          "static": "nowrap"
+        },
+        "S10": {
+          "property": "whiteSpace",
+          "shadow": "normal",
+          "static": "nowrap"
+        },
+        "H1": {
+          "host_display": "flex",
+          "host_container_type": "inline-size",
+          "root_flex_wrap": "wrap"
+        },
+        "H2": {
+          "host_display": "block",
+          "host_container_type": "inline-size",
+          "root_flex_wrap": "wrap"
+        },
+        "H3": {
+          "host_display": "block",
+          "host_container_type": "normal",
+          "root_flex_wrap": "nowrap"
+        },
+        "H4": {
+          "host_display": "block",
+          "host_container_type": "inline-size",
+          "root_flex_wrap": "wrap"
+        }
+      }
+    },
+    "webkit": {
+      "unmeasurable": "browserType.launch: / Host system is missing dependencies to run browsers. / Please install them with the following command:"
+    }
+  }
+}
