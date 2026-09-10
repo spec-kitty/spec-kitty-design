@@ -17,11 +17,11 @@
     {
       "criterion_id": "FR-002",
       "description": "Verify FR-002 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "proof_type": "code_inspection",
+      "evidence": "git diff 4d6c5f2..HEAD -- packages/styles/src/form-field/sk-form-field.css: .sk-input's border changed from '1px solid var(--sk-border-default)' to 'var(--sk-border-width-1) solid var(--sk-border-control)' -- closes the #173-documented spelling gap and adopts the new role. .sk-textarea (same file, unrelated rule starting at line 83) is untouched -- confirmed by reading the full diff hunk, which shows no other lines changed outside .sk-input's rule block.",
+      "pass_fail": "pass",
+      "verified_by": "reviewer-renata",
+      "verified_at": "2026-09-10T15:48:40.498699+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
