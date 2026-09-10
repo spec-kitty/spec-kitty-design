@@ -38,10 +38,10 @@
       "criterion_id": "FR-004",
       "description": "Verify FR-004 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "BusyDisabled story; existing :disabled,[disabled] block untouched; reviewer verified FR-004 directly against source and live-browser rendering, review-cycle-1.md",
+      "pass_fail": "pass",
+      "verified_by": "mission-closer",
+      "verified_at": "2026-09-10T12:35:13.419335+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
