@@ -118,10 +118,10 @@
       "criterion_id": "FR-012",
       "description": "Verify FR-012 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "packages/elements/src/button/sk-button.ts uses a plain <span part=busy-cue>, not a <progress>-based element or any shared DOM primitive; independently authored per the ratified TKT5/TKT6 cross-mission decision recorded in spec.md's Cross-Mission Decision section, scoped to sk-button alone; #306 owns its own cue",
+      "pass_fail": "pass",
+      "verified_by": "mission-closer",
+      "verified_at": "2026-09-10T12:35:30.752762+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
