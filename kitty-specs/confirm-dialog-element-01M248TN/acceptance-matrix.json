@@ -88,10 +88,10 @@
       "criterion_id": "FR-009",
       "description": "Verify FR-009 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "fixtures/elements-behaviour/src/sk-confirm-dialog.test.ts \u2014 \"[SC-005] Escape closes as cancel, focus returns to the invoker, and `open` tracks real state\" and \"[SC-005] an explicit showModal(invoker) argument overrides the platform-tracked previously-focused element\" pass in the 20/20 run; #handleClose in sk-confirm-dialog.ts is the single funnel point restoring focus to the captured invoker on every close path.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T09:44:50.087687+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
