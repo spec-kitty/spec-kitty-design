@@ -12,6 +12,18 @@
       "verdict": "deferred-with-followup",
       "wp": "WP01"
     },
+    "#161": {
+      "evidence_ref": "Open, pre-existing issue #161 (the package root exports['.'] entry is broken/unreachable) is explicitly named in research.md and WP01's own task file as 'not this WP's to fix' \u2014 WP01 only adds the new ./confirm-dialog/* subpath entry, verified independent of #161's defect by check-release-graph.mjs.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
+    },
     "#178": {
       "evidence_ref": "https://github.com/spec-kitty/spec-kitty-design/issues/178 \u2014 precedent cited by FR-018 for registering sk-confirm-dialog's unmarked zero-literal test the same way sk-notice's unmarked re-announcement test is registered, without minting a new ADR-11 id. #178 itself is not touched by this WP; the precedent it established is already settled/merged and correctly reused here.",
       "fr": null,
