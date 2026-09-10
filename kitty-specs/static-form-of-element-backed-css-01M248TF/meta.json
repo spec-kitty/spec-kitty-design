@@ -23,6 +23,7 @@
   "purpose_context": "This mission advances static form of element backed css on mission/static-form-of-element-backed-css so stakeholders can track the work from mission creation onward.",
   "purpose_tldr": "static form of element backed css",
   "slug": "static-form-of-element-backed-css-01M248TF",
+  "status_phase": "1",
   "target_branch": "mission/static-form-of-element-backed-css",
   "topology": "single_branch"
 }
