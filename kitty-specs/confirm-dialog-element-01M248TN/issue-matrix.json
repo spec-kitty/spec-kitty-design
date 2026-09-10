@@ -107,6 +107,18 @@
       "title": null,
       "verdict": "verified-already-fixed",
       "wp": "WP01"
+    },
+    "#93": {
+      "evidence_ref": "Settled precedent cited in WP01's Storybook task: data-theme=\"light\" activates nothing on a wrapper (#93); sk-confirm-dialog's LightMode story correctly uses class=\"sk-light\" instead, verified by a real computed-style assertion (confirmed clean in review-cycle-1 and re-confirmed in cycle-2). Not touched by this WP.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
     }
   },
   "schema_version": 1
