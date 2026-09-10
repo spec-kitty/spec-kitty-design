@@ -101,6 +101,14 @@ class LegacyMediaQueryList {
   }
 }
 
+/** A valid static MQL result from an environment that exposes no listener API. */
+class ListenerlessMediaQueryList {
+  readonly media = '(prefers-color-scheme: dark)';
+  readonly onchange = null;
+
+  constructor(readonly matches: boolean) {}
+}
+
 let media: FakeMediaQueryList;
 
 const installMedia = (dark: boolean): FakeMediaQueryList => {
@@ -113,6 +121,29 @@ const installLegacyMedia = (dark: boolean): LegacyMediaQueryList => {
   const legacy = new LegacyMediaQueryList(dark);
   vi.stubGlobal('matchMedia', vi.fn(() => legacy as unknown as MediaQueryList));
   return legacy;
+};
+
+const installListenerlessMedia = (dark: boolean): ListenerlessMediaQueryList => {
+  const listenerless = new ListenerlessMediaQueryList(dark);
+  vi.stubGlobal('matchMedia', vi.fn(() => listenerless as unknown as MediaQueryList));
+  return listenerless;
+};
+
+const installIncompleteMedia = (
+  dark: boolean,
+  mechanism: 'modern' | 'legacy',
+): { addCalls: () => number } => {
+  let additions = 0;
+  const incomplete = {
+    media: '(prefers-color-scheme: dark)',
+    matches: dark,
+    onchange: null,
+    ...(mechanism === 'modern'
+      ? { addEventListener: () => { additions += 1; } }
+      : { addListener: () => { additions += 1; } }),
+  };
+  vi.stubGlobal('matchMedia', vi.fn(() => incomplete as unknown as MediaQueryList));
+  return { addCalls: () => additions };
 };
 
 type BootstrapScenario = {
@@ -335,6 +366,39 @@ test('legacy-only matchMedia follows System and cleans up across manual mode and
   element.remove();
   expect(legacy.listenerCount).toBe(0);
 });
+
+test('[SC-012] listenerless matchMedia remains a static System source and the control stays operable', async () => {
+  installListenerlessMedia(true);
+  const element = await mount();
+
+  expect(element.preference).toBe('system');
+  expect(document.documentElement.dataset.theme).toBe('dark');
+  expect(document.documentElement.style.colorScheme).toBe('dark');
+
+  await choose(element, 'light');
+  expect(element.preference).toBe('light');
+  expect(document.documentElement.dataset.theme).toBe('light');
+
+  element.remove();
+  document.body.append(element);
+  await (element.updateComplete ?? Promise.resolve());
+  expect(document.documentElement.dataset.theme).toBe('light');
+});
+
+test.each(['modern', 'legacy'] as const)(
+  '[SC-012] an incomplete $0 listener pair stays static and is never installed',
+  async (mechanism) => {
+    const probe = installIncompleteMedia(false, mechanism);
+    const element = await mount();
+
+    expect(element.preference).toBe('system');
+    expect(document.documentElement.dataset.theme).toBe('light');
+    expect(probe.addCalls()).toBe(0);
+
+    element.remove();
+    expect(probe.addCalls()).toBe(0);
+  },
+);
 
 test('storage exceptions preserve current-page selection and root application', async () => {
   vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {

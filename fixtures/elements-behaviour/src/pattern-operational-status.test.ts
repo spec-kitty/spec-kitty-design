@@ -50,7 +50,7 @@ import {
   OPERATIONAL_MODEL,
   renderOperationalStatus,
 } from '../../../packages/elements/src/patterns/operational-status.js';
-import { isolateThemeStory } from '../../../packages/elements/src/theme-toggle/theme-story-environment.js';
+import { isolateThemeStory } from '../../../packages/elements/src/theme-toggle/theme-story-environment.fixture.js';
 import { installTokenSheet } from './token-sheet.js';
 import { assertThemesDiffered, contrast } from './contrast.js';
 

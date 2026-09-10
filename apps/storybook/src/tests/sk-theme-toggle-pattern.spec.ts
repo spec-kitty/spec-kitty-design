@@ -195,7 +195,7 @@ test('forced colours keep the three-state control operable while root preference
   expect(await page.evaluate((key) => localStorage.getItem(key), STORAGE_KEY)).toBe('light');
 });
 
-test('narrow and 200% zoom routes keep controls and content contained', async ({
+test('narrow and supplemental HiDPI routes keep controls and content contained', async ({
   page,
   browser,
   browserName,
@@ -212,7 +212,7 @@ test('narrow and 200% zoom routes keep controls and content contained', async ({
 
   test.skip(
     browserName !== 'chromium',
-    'the 780-physical-pixel / 390-CSS-pixel effective 200% zoom lane is Chromium-owned',
+    'the 2x device-density supplement is Chromium-owned; genuine zoom has headed evidence',
   );
   const zoomContext = await browser.newContext({
     viewport: { width: 390, height: 500 },

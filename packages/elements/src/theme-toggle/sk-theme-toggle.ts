@@ -76,7 +76,7 @@ export class SkThemeToggle extends LitElement {
   declare darkLabel: string;
 
   #media: MediaQueryList | undefined;
-  #listening = false;
+  #listenerMechanism: 'modern' | 'legacy' | undefined;
 
   constructor() {
     super();
@@ -114,23 +114,41 @@ export class SkThemeToggle extends LitElement {
   }
 
   #startListening(): void {
-    if (!this.#media || this.#listening) return;
-    if (typeof this.#media.addEventListener === 'function') {
-      this.#media.addEventListener('change', this.#onSystemChange);
-    } else {
-      this.#media.addListener(this.#onSystemChange);
+    if (!this.#media || this.#listenerMechanism) return;
+    const modern =
+      typeof this.#media.addEventListener === 'function' &&
+      typeof this.#media.removeEventListener === 'function';
+    const legacy =
+      typeof this.#media.addListener === 'function' &&
+      typeof this.#media.removeListener === 'function';
+
+    try {
+      if (modern) {
+        this.#media.addEventListener('change', this.#onSystemChange);
+        this.#listenerMechanism = 'modern';
+      } else if (legacy) {
+        this.#media.addListener(this.#onSystemChange);
+        this.#listenerMechanism = 'legacy';
+      }
+    } catch {
+      // A static media-query result still provides a safe initial System resolution.
+      this.#listenerMechanism = undefined;
     }
-    this.#listening = true;
   }
 
   #stopListening(): void {
-    if (!this.#media || !this.#listening) return;
-    if (typeof this.#media.removeEventListener === 'function') {
-      this.#media.removeEventListener('change', this.#onSystemChange);
-    } else {
-      this.#media.removeListener(this.#onSystemChange);
+    const mechanism = this.#listenerMechanism;
+    this.#listenerMechanism = undefined;
+    if (!this.#media || !mechanism) return;
+    try {
+      if (mechanism === 'modern') {
+        this.#media.removeEventListener('change', this.#onSystemChange);
+      } else {
+        this.#media.removeListener(this.#onSystemChange);
+      }
+    } catch {
+      // A failed browser cleanup must not make disconnect or a manual preference throw.
     }
-    this.#listening = false;
   }
 
   #onSystemChange = (): void => {

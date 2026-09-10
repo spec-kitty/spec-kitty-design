@@ -19,7 +19,7 @@
  */
 import type { Meta, StoryObj } from '@storybook/web-components';
 import { OPERATIONAL_MODEL, renderOperationalStatus } from './operational-status.js';
-import { isolateThemeStory } from '../theme-toggle/theme-story-environment.js';
+import { isolateThemeStory } from '../theme-toggle/theme-story-environment.fixture.js';
 import type { ThemePreference } from '../theme-toggle/theme-preference.js';
 
 const themeParameters = (preference: ThemePreference, description: string) => ({
@@ -123,7 +123,7 @@ export const Narrow: Story = {
 export const Zoom200: Story = {
   parameters: themeParameters(
     'dark',
-    'An effective 200% zoom route (780 physical pixels / 390 CSS pixels); browser tests assert content containment and control operation.',
+    'A stable composition route for genuine headed-Chrome 100%/200% UI-zoom captures. The story itself applies no zoom or device-density emulation.',
   ),
   render: () => renderOperationalStatus(OPERATIONAL_MODEL, { preference: 'dark' }),
 };

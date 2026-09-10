@@ -425,15 +425,6 @@
         },
         {
           "kind": "variable",
-          "name": "controlsBeforeMount",
-          "default": "new Set( Array.from(controlScope.querySelectorAll(THEME_CONTROL_SELECTOR)), )"
-        },
-        {
-          "kind": "variable",
-          "name": "controlScope"
-        },
-        {
-          "kind": "variable",
           "name": "DEFAULT_ACCENT",
           "type": {
             "text": "FeatureCardAccent"
@@ -996,19 +987,6 @@
               }
             }
           ]
-        },
-        {
-          "kind": "function",
-          "name": "isolateThemeStory",
-          "parameters": [
-            {
-              "name": "{ parameters, canvasElement }",
-              "type": {
-                "text": "ThemeStoryContext"
-              }
-            }
-          ],
-          "description": "Isolate document-global theme state for a Storybook story.\n\nA Storybook iframe can render several stories without replacing its document. This helper\ncaptures one true baseline per document and tracks overlapping sessions in creation order.\nThe Storybook canvas scopes control ownership so cleanup cannot disconnect another story's\ncontrol. Closing the current owner reapplies the most recent remaining session; closing an\nolder session keeps the newer owner authoritative. Only the final cleanup\nrestores the pre-first-session root, storage, and color-scheme baseline."
         },
         {
           "kind": "function",
@@ -6157,12 +6135,11 @@
             },
             {
               "kind": "field",
-              "name": "#listening",
+              "name": "#listenerMechanism",
               "privacy": "private",
               "type": {
-                "text": "boolean"
-              },
-              "default": "false"
+                "text": "'modern' | 'legacy' | undefined"
+              }
             },
             {
               "kind": "field",
@@ -7790,14 +7767,6 @@
           "name": "isGridVariant",
           "declaration": {
             "name": "isGridVariant",
-            "module": "./dist/index.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "isolateThemeStory",
-          "declaration": {
-            "name": "isolateThemeStory",
             "module": "./dist/index.js"
           }
         },

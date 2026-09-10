@@ -2083,6 +2083,14 @@
       "subject": "fixtures/elements-behaviour/src/sk-theme-toggle.test.ts"
     },
     {
+      "id": "SC-012",
+      "arm": "System installs only a complete media-query listener lifecycle pair",
+      "file": "packages/elements/src/theme-toggle/sk-theme-toggle.ts",
+      "from": "    const legacy =\n      typeof this.#media.addListener === 'function' &&\n      typeof this.#media.removeListener === 'function';",
+      "to": "    const legacy =\n      typeof this.#media.addListener === 'function';",
+      "subject": "fixtures/elements-behaviour/src/sk-theme-toggle.test.ts"
+    },
+    {
       "id": "SC-013",
       "arm": "the stable theme control part remains targetable",
       "file": "packages/elements/src/theme-toggle/sk-theme-toggle.ts",

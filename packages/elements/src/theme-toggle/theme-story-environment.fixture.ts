@@ -115,7 +115,7 @@ const applySession = (environment: ThemeStoryEnvironment, session: ThemeStorySes
 };
 
 /**
- * Isolate document-global theme state for a Storybook story.
+ * Isolate document-global theme state for a Storybook story fixture.
  *
  * A Storybook iframe can render several stories without replacing its document. This helper
  * captures one true baseline per document and tracks overlapping sessions in creation order.

@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/web-components';
 import { html } from 'lit';
 import './sk-theme-toggle.js';
-import { isolateThemeStory } from './theme-story-environment.js';
+import { isolateThemeStory } from './theme-story-environment.fixture.js';
 import type { ThemePreference } from './theme-preference.js';
 
 const frame = (

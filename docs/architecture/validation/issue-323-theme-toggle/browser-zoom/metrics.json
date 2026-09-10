@@ -1,0 +1,369 @@
+{
+  "sourceHead": "c158e53cce903235b85751dc97dc5e2ea339aca2",
+  "sourceProductTree": {
+    "sha": "2b59e239254938f06cf6dffb040af4043843eb79",
+    "paths": [
+      "apps/storybook/src/tests/sk-theme-toggle-pattern.spec.ts",
+      "fixtures/elements-behaviour/src/pattern-operational-status.test.ts",
+      "fixtures/elements-behaviour/src/sk-theme-toggle.test.ts",
+      "mutations.json",
+      "packages/elements/custom-elements-manifest.config.mjs",
+      "packages/elements/custom-elements.json",
+      "packages/elements/src/patterns/operational-status.stories.ts",
+      "packages/elements/src/theme-toggle/sk-theme-toggle.stories.ts",
+      "packages/elements/src/theme-toggle/sk-theme-toggle.ts",
+      "packages/elements/src/theme-toggle/theme-story-environment.fixture.ts",
+      "packages/elements/src/theme-toggle/theme-story-environment.ts",
+      "scripts/check-manifest-content.mjs"
+    ]
+  },
+  "sourceDiffSha256": "00e73db131430ecf34b4c867840ab9b1010cbe86c8688c0015e36650d916c7ee",
+  "browserVersion": "151.0.7922.34",
+  "executablePath": "/home/jeroennouws/.cache/ms-playwright/chromium-1234/chrome-linux64/chrome",
+  "display": ":103 1200x800x24",
+  "pageUrl": "http://127.0.0.1:6323/iframe.html?id=patterns-operational-status--zoom-200&viewMode=story",
+  "zoomMechanism": "X11 XTEST native Ctrl+0, then five Ctrl+Shift+= browser UI chords",
+  "constraints": {
+    "physicalWindowFixed": true,
+    "noCssZoomOrTransform": true,
+    "noViewportDeviceScaleOrCdpZoomEmulation": true
+  },
+  "at100": {
+    "keyboard": {
+      "values": [
+        "dark",
+        "light",
+        "system",
+        "dark"
+      ],
+      "states": [
+        {
+          "preference": "dark",
+          "theme": "dark",
+          "colorScheme": "dark",
+          "systemDark": false
+        },
+        {
+          "preference": "light",
+          "theme": "light",
+          "colorScheme": "light",
+          "systemDark": false
+        },
+        {
+          "preference": "system",
+          "theme": "light",
+          "colorScheme": "light",
+          "systemDark": false
+        },
+        {
+          "preference": "dark",
+          "theme": "dark",
+          "colorScheme": "dark",
+          "systemDark": false
+        }
+      ]
+    },
+    "geometry": {
+      "window": {
+        "innerWidth": 1199,
+        "innerHeight": 712,
+        "outerWidth": 1199,
+        "outerHeight": 799,
+        "devicePixelRatio": 1,
+        "visualViewportWidth": 1184,
+        "visualViewportHeight": 712,
+        "visualViewportScale": 1
+      },
+      "document": {
+        "clientWidth": 1184,
+        "clientHeight": 712,
+        "scrollWidth": 1184,
+        "scrollHeight": 1277
+      },
+      "composition": {
+        "left": 0,
+        "top": 0,
+        "right": 1184,
+        "bottom": 1277,
+        "width": 1184,
+        "height": 1277,
+        "clientWidth": 1184,
+        "clientHeight": 1277,
+        "scrollWidth": 1184,
+        "scrollHeight": 1277
+      },
+      "toggle": {
+        "left": 713.859375,
+        "top": 8,
+        "right": 1020.453125,
+        "bottom": 88,
+        "width": 306.59375,
+        "height": 80,
+        "clientWidth": 307,
+        "clientHeight": 80,
+        "scrollWidth": 307,
+        "scrollHeight": 80
+      },
+      "fieldset": {
+        "left": 713.859375,
+        "top": 8,
+        "right": 1020.453125,
+        "bottom": 88,
+        "width": 306.59375,
+        "height": 80,
+        "clientWidth": 305,
+        "clientHeight": 78,
+        "scrollWidth": 305,
+        "scrollHeight": 60
+      },
+      "choices": [
+        {
+          "value": "system",
+          "checked": false,
+          "text": "System",
+          "box": {
+            "left": 722.859375,
+            "top": 35,
+            "right": 825.4375,
+            "bottom": 79,
+            "width": 102.578125,
+            "height": 44,
+            "clientWidth": 101,
+            "clientHeight": 42,
+            "scrollWidth": 101,
+            "scrollHeight": 42
+          }
+        },
+        {
+          "value": "light",
+          "checked": false,
+          "text": "Light",
+          "box": {
+            "left": 829.4375,
+            "top": 35,
+            "right": 917.703125,
+            "bottom": 79,
+            "width": 88.265625,
+            "height": 44,
+            "clientWidth": 86,
+            "clientHeight": 42,
+            "scrollWidth": 86,
+            "scrollHeight": 42
+          }
+        },
+        {
+          "value": "dark",
+          "checked": true,
+          "text": "Dark",
+          "box": {
+            "left": 921.703125,
+            "top": 35,
+            "right": 1011.453125,
+            "bottom": 79,
+            "width": 89.75,
+            "height": 44,
+            "clientWidth": 86,
+            "clientHeight": 40,
+            "scrollWidth": 86,
+            "scrollHeight": 40
+          }
+        }
+      ],
+      "focus": {
+        "value": "dark",
+        "visible": true,
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "outlineOffset": "4px"
+      },
+      "root": {
+        "preference": "dark",
+        "theme": "dark",
+        "colorScheme": "dark"
+      },
+      "checks": {
+        "noDocumentHorizontalOverflow": true,
+        "allChoicesVisible": true,
+        "noChoiceClipping": true,
+        "noChoiceOverlap": true,
+        "exactlyOneSelected": true,
+        "selectedMatchesRootPreference": true,
+        "focusVisible": true
+      }
+    },
+    "capture": {
+      "file": "operational-status-100-desktop.png",
+      "sha256": "60a440bbe4f57f9140db24fa587d5abc7e005939804dacb9f20988c0aec1f7cf"
+    }
+  },
+  "at200": {
+    "keyboard": {
+      "values": [
+        "dark",
+        "light",
+        "system",
+        "dark"
+      ],
+      "states": [
+        {
+          "preference": "dark",
+          "theme": "dark",
+          "colorScheme": "dark",
+          "systemDark": false
+        },
+        {
+          "preference": "light",
+          "theme": "light",
+          "colorScheme": "light",
+          "systemDark": false
+        },
+        {
+          "preference": "system",
+          "theme": "light",
+          "colorScheme": "light",
+          "systemDark": false
+        },
+        {
+          "preference": "dark",
+          "theme": "dark",
+          "colorScheme": "dark",
+          "systemDark": false
+        }
+      ]
+    },
+    "geometry": {
+      "window": {
+        "innerWidth": 599,
+        "innerHeight": 356,
+        "outerWidth": 1199,
+        "outerHeight": 799,
+        "devicePixelRatio": 2,
+        "visualViewportWidth": 592,
+        "visualViewportHeight": 356,
+        "visualViewportScale": 1
+      },
+      "document": {
+        "clientWidth": 592,
+        "clientHeight": 356,
+        "scrollWidth": 592,
+        "scrollHeight": 1734
+      },
+      "composition": {
+        "left": 0,
+        "top": 0,
+        "right": 592,
+        "bottom": 1734.4375,
+        "width": 592,
+        "height": 1734.4375,
+        "clientWidth": 592,
+        "clientHeight": 1734,
+        "scrollWidth": 592,
+        "scrollHeight": 1734
+      },
+      "toggle": {
+        "left": 121.8671875,
+        "top": 63.5,
+        "right": 428.4609375,
+        "bottom": 143.5,
+        "width": 306.59375,
+        "height": 80,
+        "clientWidth": 307,
+        "clientHeight": 80,
+        "scrollWidth": 307,
+        "scrollHeight": 80
+      },
+      "fieldset": {
+        "left": 121.8671875,
+        "top": 63.5,
+        "right": 428.4609375,
+        "bottom": 143.5,
+        "width": 306.59375,
+        "height": 80,
+        "clientWidth": 305,
+        "clientHeight": 78,
+        "scrollWidth": 305,
+        "scrollHeight": 60
+      },
+      "choices": [
+        {
+          "value": "system",
+          "checked": false,
+          "text": "System",
+          "box": {
+            "left": 130.8671875,
+            "top": 90.5,
+            "right": 233.4453125,
+            "bottom": 134.5,
+            "width": 102.578125,
+            "height": 44,
+            "clientWidth": 101,
+            "clientHeight": 42,
+            "scrollWidth": 101,
+            "scrollHeight": 42
+          }
+        },
+        {
+          "value": "light",
+          "checked": false,
+          "text": "Light",
+          "box": {
+            "left": 237.4453125,
+            "top": 90.5,
+            "right": 325.7109375,
+            "bottom": 134.5,
+            "width": 88.265625,
+            "height": 44,
+            "clientWidth": 86,
+            "clientHeight": 42,
+            "scrollWidth": 86,
+            "scrollHeight": 42
+          }
+        },
+        {
+          "value": "dark",
+          "checked": true,
+          "text": "Dark",
+          "box": {
+            "left": 329.7109375,
+            "top": 90.5,
+            "right": 419.4609375,
+            "bottom": 134.5,
+            "width": 89.75,
+            "height": 44,
+            "clientWidth": 86,
+            "clientHeight": 40,
+            "scrollWidth": 86,
+            "scrollHeight": 40
+          }
+        }
+      ],
+      "focus": {
+        "value": "dark",
+        "visible": true,
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "outlineOffset": "4px"
+      },
+      "root": {
+        "preference": "dark",
+        "theme": "dark",
+        "colorScheme": "dark"
+      },
+      "checks": {
+        "noDocumentHorizontalOverflow": true,
+        "allChoicesVisible": true,
+        "noChoiceClipping": true,
+        "noChoiceOverlap": true,
+        "exactlyOneSelected": true,
+        "selectedMatchesRootPreference": true,
+        "focusVisible": true
+      }
+    },
+    "capture": {
+      "file": "operational-status-200-desktop.png",
+      "sha256": "0a123c1866552d706e843e62302d2617d7603878cc2372ca194dd918ce772397"
+    }
+  },
+  "errors": [],
+  "ignoredWarnings": []
+}
