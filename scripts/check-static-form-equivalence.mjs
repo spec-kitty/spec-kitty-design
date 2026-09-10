@@ -377,9 +377,20 @@ if (staticOnly) {
 const { chromium, firefox, webkit } = await import('playwright');
 
 const REPO_ROOT = process.cwd();
-const MIME = { '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8', '.js': 'text/javascript; charset=utf-8' };
+const MIME = {
+  '.html': 'text/html; charset=utf-8',
+  '.css': 'text/css; charset=utf-8',
+  '.js': 'text/javascript; charset=utf-8',
+  '.otf': 'font/otf',
+  '.woff2': 'font/woff2',
+  '.woff': 'font/woff',
+  '.ttf': 'font/ttf',
+  '.svg': 'image/svg+xml',
+  '.png': 'image/png',
+};
 
 /** The bytes an INSTALLED consumer links, resolved through Node's own export map. */
+const TOKENS = '@spec-kitty/tokens';
 const resolvedSpecifiers = {};
 const resolveSpecifier = (specifier) => {
   const path = fileURLToPath(import.meta.resolve(specifier));
@@ -400,6 +411,16 @@ const server = createServer((req, res) => {
   try {
     if (url.pathname.startsWith('/probe/')) return send(pages.get(url.pathname.slice(7)), '.html');
     if (url.pathname.startsWith('/sheet/')) return send(sheets.get(url.pathname.slice(7)), '.css');
+    // `@spec-kitty/tokens` resolves to `packages/tokens/dist/tokens.css`, whose `@font-face`
+    // rules reach RELATIVE siblings (`./fonts/…`). Served from `/pkg/<specifier>` those become
+    // `/pkg/fonts/…`, which is not a package specifier — so without this arm every probe page
+    // rendered in a FALLBACK font, silently, and the font-derived track widths this table
+    // measures were the fallback's. Symmetric across both forms and therefore not a wrong
+    // comparison, but a comparison of the wrong thing.
+    if (url.pathname.startsWith('/pkg/fonts/') || url.pathname.startsWith('/pkg/assets/')) {
+      const file = join(dirname(resolveSpecifier(TOKENS)), decodeURIComponent(url.pathname.slice('/pkg/'.length)));
+      return send(readFileSync(file), file.slice(file.lastIndexOf('.')));
+    }
     if (url.pathname.startsWith('/pkg/')) {
       const specifier = decodeURIComponent(url.pathname.slice(5));
       const file = resolveSpecifier(specifier);
@@ -413,8 +434,79 @@ const server = createServer((req, res) => {
     res.end(String(error?.message ?? error));
   }
 });
+// A LONG KEEP-ALIVE, deliberately. Node's default `keepAliveTimeout` is 5 s, and this gate makes
+// several hundred navigations per engine over reused connections — so a connection the server
+// closes at the same moment the browser reuses it produces exactly one failed subresource. That
+// is not hypothetical: it is what reddened this gate's first CI run, as ONE page whose token
+// stylesheet never arrived, which turned `padding: var(--sk-space-6)` into `padding: 0` and made
+// that scenario's two token-dependent observables diverge while every other scenario passed.
+// Raising the timeout makes it rarer; `gotoChecked` below is what makes it VISIBLE, which is the
+// half that matters.
+server.keepAliveTimeout = 120_000;
+server.headersTimeout = 130_000;
 await new Promise((done) => server.listen(0, '127.0.0.1', done));
 const ORIGIN = `http://127.0.0.1:${server.address().port}`;
+
+/**
+ * Navigate, and REFUSE A PAGE THAT DID NOT FULLY LOAD.
+ *
+ * A comparison gate whose page is missing a stylesheet does not fail — it measures something else
+ * and reports the difference as a divergence in the artifact under test. That is the
+ * silent-corruption shape this repository refuses everywhere else, and it cost this gate a red CI
+ * run that read exactly like a real defect in `sk-page-header`'s static form.
+ *
+ * Three assertions, per navigation:
+ *   1. no request failed and no response came back >= 400;
+ *   2. every `<link rel="stylesheet">` in the document has a non-empty `sheet.cssRules` — a 200
+ *      that delivered nothing, or the wrong content-type, still leaves `sheet` null or empty;
+ *   3. the token sheet actually applies, checked by resolving one real custom property. Tokens
+ *      are what turn `padding: var(--sk-space-6)` into a length, and an unresolved `var()` falls
+ *      back to the property's initial value rather than to nothing — which is why losing them is
+ *      invisible except as a wrong number.
+ *
+ * Retried, because a transient connection race is environmental and re-navigating costs
+ * milliseconds — but bounded, and the failure NAMES what it saw instead of reporting a divergence.
+ */
+const gotoChecked = async (page, url, after) => {
+  let last = null;
+  for (let attempt = 1; attempt <= 3; attempt += 1) {
+    const broken = [];
+    const onFailed = (request) => broken.push(`${request.url()} — ${request.failure()?.errorText ?? 'failed'}`);
+    const onResponse = (response) => {
+      if (response.status() >= 400) broken.push(`${response.url()} — HTTP ${response.status()}`);
+    };
+    page.on('requestfailed', onFailed);
+    page.on('response', onResponse);
+    try {
+      await page.goto(url);
+      if (after) await after();
+      // `font-display: swap` means a face that arrives after first paint RESTYLES the page, and
+      // this table measures grid tracks that resolve from font metrics. Waiting for the font set
+      // is what makes a measured length a property of the sheet rather than of the moment.
+      await page.evaluate('document.fonts.ready.then(() => undefined)');
+      const unloaded = await page.evaluate(`(() => {
+        const bad = [];
+        for (const link of document.querySelectorAll('link[rel="stylesheet"]')) {
+          const rules = link.sheet && link.sheet.cssRules ? link.sheet.cssRules.length : 0;
+          if (rules === 0) bad.push('empty or unparsed stylesheet: ' + link.getAttribute('href'));
+        }
+        if (getComputedStyle(document.documentElement).getPropertyValue('--sk-space-6').trim() === '') {
+          bad.push('--sk-space-6 does not resolve: the token sheet did not apply');
+        }
+        return bad;
+      })()`);
+      if (broken.length === 0 && unloaded.length === 0) return;
+      last = [...broken, ...unloaded];
+    } finally {
+      page.off('requestfailed', onFailed);
+      page.off('response', onResponse);
+    }
+  }
+  throw new Error(
+    `the probe page ${url} did not load after 3 attempts — every measurement taken on it would be ` +
+      `a comparison against something else:\n   ${last.join('\n   ')}`,
+  );
+};
 
 const ELEMENTS_BUNDLE = 'packages/elements/dist/elements.js';
 if (!existsSync(ELEMENTS_BUNDLE)) {
@@ -475,8 +567,24 @@ const staticSpecifierFor = (dir, file) => {
 // Page construction.
 // ---------------------------------------------------------------------------
 
-const TOKENS = '@spec-kitty/tokens';
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+
+/**
+ * NO MOTION, ON BOTH PAGES, LAST IN THE CASCADE.
+ *
+ * `sk-page-header.css` declares `transition: padding …` on `.sk-page-header`, and padding is a
+ * LAYOUT property: a page measured while that transition is in flight reports an intermediate
+ * `padding`, which moves `grid-template-columns` (the tracks resolve inside the content box) and
+ * every descendant width with it. Measured here as a divergence of exactly the compact inline
+ * padding — 32px of track — appearing on one scenario at a time and moving between runs, and in
+ * CI as `672px` against `720px` on a scenario that passed locally.
+ *
+ * A gate that compares layout must not compare a frame of an animation. Suppressing motion is
+ * symmetric across the two forms, affects no property this table measures, and removes the whole
+ * class rather than the instance. It goes LAST so it wins on order at equal specificity, and it
+ * is `!important` so it wins regardless.
+ */
+const NO_MOTION = '<style>*, *::before, *::after { transition: none !important; animation: none !important }</style>';
 
 const frameFor = (scenario, inner, scope) => {
   const { context, width, outer } = scenario;
@@ -517,6 +625,7 @@ const shadowPage = (component, spec, scenario, consumerCss, consumerScope) => {
 <style>html,body{margin:0}</style>
 ${consumerCss ? `<style>${consumerCss}</style>` : ''}
 <script src="${ORIGIN}/${ELEMENTS_BUNDLE}"></script>
+${NO_MOTION}
 ${frameFor(scenario, element, consumerScope)}`);
 };
 
@@ -540,6 +649,7 @@ const staticPage = (component, spec, scenario, flattened, links, consumerCss, po
 ${position === 'before' ? consumer : ''}
 ${linkTags}
 ${position === 'before' ? '' : consumer}
+${NO_MOTION}
 ${frameFor(scenario, wrapper, consumerScope)}`);
 };
 
@@ -622,8 +732,9 @@ async function measureComponent(page, component, spec, variantSheet, consumerRow
     ? spec.scenarios.filter((s) => s.id === consumerRow.scenario)
     : spec.scenarios;
   for (const scenario of scenarios) {
-    await page.goto(shadowPage(component, spec, scenario, consumerRow?.shadowCss, consumerRow?.scope));
-    await page.waitForFunction('document.getElementById("subject")?.shadowRoot?.childElementCount > 0');
+    await gotoChecked(page, shadowPage(component, spec, scenario, consumerRow?.shadowCss, consumerRow?.scope), () =>
+      page.waitForFunction('document.getElementById("subject")?.shadowRoot?.childElementCount > 0'),
+    );
     // `(${FLATTEN})()`, never a bare `page.evaluate(FLATTEN)`. Playwright evaluates a STRING as
     // an expression, so the bare form yields the function object rather than calling it — and
     // what came back was the function's own source text, injected as the twin's markup. Every
@@ -635,7 +746,10 @@ async function measureComponent(page, component, spec, variantSheet, consumerRow
       : spec.observables;
     const shadow = await page.evaluate(`(${MEASURE})(${JSON.stringify(observables)})`);
 
-    await page.goto(staticPage(component, spec, scenario, flattened, links, consumerRow?.staticCss, consumerRow?.position, consumerRow?.scope));
+    await gotoChecked(
+      page,
+      staticPage(component, spec, scenario, flattened, links, consumerRow?.staticCss, consumerRow?.position, consumerRow?.scope),
+    );
     const statics = await page.evaluate(`(${MEASURE})(${JSON.stringify(observables)})`);
 
     for (const key of Object.keys(shadow)) {
