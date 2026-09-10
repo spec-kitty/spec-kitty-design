@@ -16,9 +16,12 @@ existing warn/degrade (render path) and throw (static-authoring path) machinery,
 one-export-per-variant behaviour, cover the new tone with almost no new code — the two genuinely new
 surfaces are (1) an explicit `:active { transform: scale(0.97) }` rule on the new tone only, resolving
 the issue's "parity with the existing tones" clause against a fact the three current tones do not
-agree on among themselves, and (2) a forced-colors-only, content-drawn, alt-texted-empty marker, since
-`.sk-button--secondary` already carries an unconditional non-transparent border and would otherwise
-remap to the identical system colour as `danger-secondary` under `forced-colors: active`.
+agree on among themselves, and (2) a forced-colors-only `border-width` step (1px → `--sk-border-
+width-2`), since `.sk-button--secondary` already carries an unconditional non-transparent border and
+would otherwise remap to the identical system colour as `danger-secondary` under `forced-colors:
+active` — the same mechanism `sk-card.css`'s status axis and `sk-confirm-dialog.css`'s open state
+already establish in this repo, chosen over a content-drawn glyph considered and rejected in an
+earlier draft (see spec.md's Assumptions).
 
 ## Technical Context
 
@@ -206,43 +209,46 @@ this.size)` generically.
    remap to the IDENTICAL system colour as plain secondary and the two would become visually
    indistinguishable. Colour and border-presence therefore cannot carry the distinction the issue
    asks for here (contrast with sk-pill-tag's forced-colors case, where the base pill has NO border
-   at all, so presence-vs-absence alone was sufficient there). A background-drawn glyph is also
-   ruled out: adding-a-component.md's own measured finding is that a background-drawn icon frozen
-   with forced-color-adjust: none is frequently invisible against the forced-colors ground. This
-   block uses a CONTENT-drawn, alt-texted-empty marker instead — the same mechanism
-   sk-disclosure__summary::before uses to keep a decorative glyph out of the accessible name — and
-   it exists ONLY inside this media query; normal light/dark rendering is unaffected. */
+   at all, so presence-vs-absence alone was sufficient there).
+
+   THE MECHANISM IS BORDER-WIDTH, not colour and not generated content — this repo has already
+   established it, in writing, twice. sk-card.css's own status-axis comment: "forced colors remaps
+   COLOR and leaves width alone, so that step survives untouched while the tint does not" — and
+   that same comment records that an EARLIER `@media (forced-colors: active)` block there, setting
+   `border-inline-start-color: CanvasText`, was a NO-OP and was deleted (#218): the colour was
+   already auto-remapped and the width was already unconditional, so restating either did nothing.
+   sk-confirm-dialog.css does the forced-colors-SCOPED version of the same move (its border is 1px
+   in normal rendering, unlike sk-card's permanently-4px status accent, so the step belongs inside
+   the media query, not outside it) — that is the shape this rule follows.
+
+   A content-drawn glyph was considered in an earlier draft of this plan and rejected: it risks
+   colliding with size="icon"'s consumer-supplied glyph inside a padding:0, fixed 40x40 box; its
+   accessible-name safety depends on alt-text-syntax support that is not universal, landing
+   undocumented content inside a #286-governed consumer-supplied label if unsupported; it is a
+   scope ADDITION where the width step is the repo's own existing pattern applied unchanged; and it
+   would have been this repo's first use of the technique for a forced-colors purpose, where the
+   width step already has two working, CI-verified precedents. See spec.md's Assumptions for the
+   full four-point comparison.
+
+   LAYOUT CONSEQUENCE, stated rather than left implicit. At size="icon", `.sk-button--icon`
+   already declares `box-sizing: border-box`, so the extra 1px is absorbed into the existing 40x40
+   box (content area shrinks by 1px per side; the box itself does not grow) — no compensation
+   needed. At the default and size="sm" sizes, this file sets no box-sizing (browser default,
+   content-box, applies), so the step grows the button's total box by 1px per side, forced-colors
+   mode only — accepted as minor and scoped, the same order of magnitude as sk-confirm-dialog's own
+   unremarked growth under the identical mechanism. */
 @media (forced-colors: active) {
-  .sk-button--danger-secondary .sk-button__forced-colors-marker {
-    /* placeholder selector — see the WP note below on where this pseudo-element/marker actually
-       attaches, since sk-button's render() has no spare internal element to hang a class on
-       inside the shadow root's single `<button>`/`<a>` node. */
+  .sk-button--danger-secondary {
+    border-width: var(--sk-border-width-2);
   }
 }
 ```
 
-**Open construction detail, flagged rather than guessed past.** `sk-button`'s shadow template
-renders exactly one interactive node (`<button part="button">` or `<a part="button">`) with a
-`<slot>` inside it — there is no secondary internal element to attach a `::before`/`::after` to
-that would not also need to survive being the LAST thing before/after slotted content in both the
-button and anchor branches. Two shapes were considered and are recorded for the WP to choose
-between rather than silently picking one:
-
-1. **`.sk-button--danger-secondary::before` / `::after` directly on the `<button>`/`<a>` part.**
-   Simplest, no markup change, but the pseudo-element becomes a flex item alongside the slotted
-   content inside `.sk-button`'s `display: inline-flex` — needs `content: '▲' / '';` (a triangle
-   or similar glyph, TBD at WP time against what reads clearly at both icon and non-icon sizes) and
-   verification that it does not visually collide with `size="icon"`'s fixed 40×40 box or shift
-   text baseline alignment in the non-icon sizes.
-2. **A dedicated `::part()` or wrapper span in the markup module.** Rejected as the default: it
-   would add a new `::part()` (a public API addition, `expected-parts.json`'s `total` would need
-   to bump) for a purely forced-colors-scoped concern, which is a disproportionate surface increase
-   for what should be a zero-effect-outside-forced-colors marker.
-
-The WP should default to option 1 and verify empirically (Playwright, `forced-colors: active`
-emulation, both colour schemes) that the glyph does not distort layout in either the default or
-`--sm`/`--icon` sizes before committing to it; if it does, escalate rather than silently widening
-`expected-parts.json`.
+No pseudo-element, no new `::part()`, no markup change: the rule targets the existing
+`.sk-button--danger-secondary` class directly on the shadow root's single `part="button"` node
+(and the equivalent static `.sk-button--danger-secondary` class on the generated markup's own
+`<button>`/`<a>`), so `expected-parts.json` needs no edit for this mechanism (contrast with the
+rejected glyph approach, which would have needed one if it required a dedicated attachment point).
 
 ### 4. Regeneration (ADR-10 §3 / adding-a-component.md §7)
 
@@ -323,10 +329,10 @@ of an existing attribute is not a new attribute.
 
 ### Ratchets confirmed unchanged (FR-018)
 
-- `expected-parts.json`: `sk-button` stays `["button"]`, `total` unchanged — **unless** the WP
-  selects Design §3's option 2 (a new `::part()` for the forced-colors marker), in which case this
-  file and its total DO need a bump and the WP must say so explicitly rather than silently drift.
-  The default (option 1, a bare pseudo-element on the existing part) needs no change here.
+- `expected-parts.json`: `sk-button` stays `["button"]`, `total` unchanged. The FR-013 mechanism is
+  a `border-width` rule on the existing `.sk-button--danger-secondary` class, targeting the same
+  `part="button"` node that already exists — no new `::part()`, no pseudo-element, no markup
+  change — so this ratchet needs no edit at all, unconditionally.
 - `expected-docs.json`: `sk-button` stays `{ "attributes": 5, "properties": 0, "methods": 0 }`.
 - `expected-inert-theme-wrappers.json`: unaffected — this mission writes only `class="sk-light"`
   wrappers in its new stories, fixing none of the remaining inert ones.
@@ -346,8 +352,10 @@ of an existing attribute is not a new attribute.
   computed colour actually differs between the default and `.sk-light` frames, per the recipe's own
   instruction to verify rather than assume.
 - A forced-colors story or an `apps/storybook/src/tests/elements-load.spec.ts` case (WP's choice of
-  location, matching whichever precedent — `sk-pill-tag`'s spec test vs. a dedicated
-  `*-forced-colors.html` demo page — best fits a single new tone rather than a whole new component).
+  location, matching whichever precedent — `sk-card`'s own forced-colors assertion vs. a dedicated
+  `*-forced-colors.html` demo page — best fits a single new tone rather than a whole new component),
+  asserting the FR-013 border-width step comparatively against plain `secondary` (see Verification
+  below — a real computed-style comparison, not a presence check).
 
 `packages/styles/src/button/sk-button-html.stories.ts` (static path): one new story,
 `DangerSecondary`, rendering `label(SkButtonDangerSecondaryHTML, 'Deny')` (an example label only —
@@ -395,18 +403,19 @@ measured contrast figures, and a one-line pointer to the #155 coordination recor
 
 ## Complexity Tracking
 
-*No Charter Check violations.* The forced-colors marker (Design §3) is the only genuinely new
-surface beyond "reuse the existing pair," and it is presentational, forced-colors-scoped only, and
-justified in spec.md's Assumptions against the alternative mechanisms the repo's own precedents
-already ruled out (colour-only distinction, background-drawn icon). No entry is required in this
-table because nothing here is a Charter-rule violation — it is a spec-level design decision, already
-argued in full in spec.md.
+*No Charter Check violations.* The forced-colors `border-width` step (Design §3) is not a new
+surface at all — it is the repo's own existing mechanism (`sk-card.css`, `sk-confirm-dialog.css`)
+applied unchanged to a fourth tone, using an already-published token (`--sk-border-width-2`) on the
+already-existing `.sk-button--danger-secondary` class. No entry is required in this table because
+nothing here is a Charter-rule violation, and — unlike the content-drawn glyph considered and
+rejected in an earlier draft (see spec.md's Assumptions) — it is not even a scope addition beyond
+"reuse the existing pair."
 
 ## Risks
 
 | Risk | Mitigation |
 |---|---|
-| The forced-colors marker distorts layout at `size="icon"`'s fixed 40×40 box or shifts baseline alignment at default/`--sm` | Verify empirically before committing to option 1 (Design §3); fall back to option 2 (a dedicated `::part()`) only if option 1 measurably breaks layout, and bump `expected-parts.json` explicitly if so |
+| The default/`--sm` sizes' 1px-per-side box growth under forced-colors (Design §3's stated layout consequence, since those sizes set no `box-sizing`) reads as an unintended regression to a reviewer who has not read the plan | State the consequence in the CSS comment and in the PR body, matching this plan's own Design §3 note, rather than leaving it to be discovered in a diff |
 | `nx` build cache serves a stale `dist/` to `measure-elements-sizes.mjs`, producing a SIZES.md delta that looks like drift | Run the real build (`npx nx run-many --target=build ...`) immediately before measuring, per the recipe's own warning; use `--skip-nx-cache` if a stale-cache symptom appears |
 | The WP mistakes "parity with the existing tones" as licence to also add `:active` to `.sk-button--secondary`/`.sk-button--ghost` | C-003 is explicit; the plan's Design §3 CSS block scopes the new `:active` rule to `.sk-button--danger-secondary` only, with the rationale inline |
 | A future session reads BORDER-ROLE-319's own dark/light figures as this mission's proof and skips independent re-measurement | Spec.md's Assumptions and this plan's Design §3 both carry the independently re-derived numbers (matching BORDER-ROLE-319's exactly, plus two additional surfaces), satisfying the mission's own obligation to measure rather than quote |
