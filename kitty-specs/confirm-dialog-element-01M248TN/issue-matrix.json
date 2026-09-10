@@ -1,7 +1,7 @@
 {
   "rows": {
     "#1432": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "Team Kitty SaaS issue #1432 (a different repo, not spec-kitty-design) blocks whole-Team deletion upstream. FR-014 only requires that no story/exemplar/test in this mission demonstrate whole-Team deletion as an available flow (verified clean by grep in review-cycle-1 and re-verified in cycle-2); #1432's own resolution is owned by the Team Kitty SaaS repo, not this WP.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -9,8 +9,8 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
     },
     "#178": {
       "evidence_ref": "https://github.com/spec-kitty/spec-kitty-design/issues/178 \u2014 precedent cited by FR-018 for registering sk-confirm-dialog's unmarked zero-literal test the same way sk-notice's unmarked re-announcement test is registered, without minting a new ADR-11 id. #178 itself is not touched by this WP; the precedent it established is already settled/merged and correctly reused here.",
