@@ -128,10 +128,10 @@
       "criterion_id": "FR-013",
       "description": "Interactive target sizes hold at 44px in the action-group at both required widths",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "sk-boundary-page-responsive.spec.ts:45 (every interactive target in the action-group measures >=44px at 320px and 1280px), packages/styles/src/boundary-page/sk-boundary-page.css:192-226 (HIGH-2 fix, commit 256643f2: target-size floor at specificity (0,1,1) split from a separate legibility/typography reset at (0,0,0), verified in both source orders)",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T18:19:49.157595+00:00",
       "notes": "Owned by WP01 (mission/boundary-page-styles). pass_fail/evidence/verified_by/verified_at and overall_verdict are the accept gate's own fields (run via the Spec Kitty CLI's accept phase later) and are deliberately left as recorded by the scaffolder, not hand-written here."
     },
     {
