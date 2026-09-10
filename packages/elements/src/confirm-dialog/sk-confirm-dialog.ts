@@ -133,7 +133,7 @@ export class SkConfirmDialog extends LitElement {
   /** Which control receives focus when the dialog opens: `'confirm'` or `'cancel'`.
    *  Defaults to `'cancel'`, the safe default for a destructive confirmation (FR-008). An
    *  unknown value warns and falls back to `'cancel'`. */
-  declare initialFocus: ConfirmDialogInitialFocus;
+  declare initialFocus: 'confirm' | 'cancel';
 
   /** Whether clicking the dialog's own backdrop closes it. Defaults to `false`: a
    *  destructive confirmation's safest default is to require an explicit control activation,

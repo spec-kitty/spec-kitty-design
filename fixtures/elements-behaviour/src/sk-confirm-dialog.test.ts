@@ -51,16 +51,7 @@ const mountWithInvoker = async (
   return { element, invoker };
 };
 
-beforeEach(async () => {
-  // AWAITED, deliberately. `installTokenSheet()` is async (a dynamic import) and its own body
-  // does `document.body.innerHTML = ''` only after that import resolves. An un-awaited call here
-  // races that wipe against this file's own showModal()/mount() calls: on a slow or first-ever
-  // resolution the wipe can land MID-TEST, tearing the open <dialog> (and its close watcher) out
-  // from under an in-flight Escape-key assertion with no error — measured directly against
-  // this file's own [SC-005] Escape test, which timed out waiting for a `close` it could no
-  // longer receive until this await was added.
-  await installTokenSheet();
-});
+beforeEach(installTokenSheet);
 
 afterEach(async () => {
   // Force-close any dialog left open by a test that didn't reach its own close path. A modal

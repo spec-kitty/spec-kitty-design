@@ -2594,7 +2594,7 @@
               "name": "initialFocus",
               "privacy": "public",
               "type": {
-                "text": "ConfirmDialogInitialFocus"
+                "text": "'confirm' | 'cancel'"
               },
               "description": "Which control receives focus when the dialog opens: `'confirm'` or `'cancel'`.\nDefaults to `'cancel'`, the safe default for a destructive confirmation (FR-008). An\nunknown value warns and falls back to `'cancel'`.",
               "default": "'cancel'",
@@ -2687,7 +2687,7 @@
             {
               "name": "initial-focus",
               "type": {
-                "text": "ConfirmDialogInitialFocus"
+                "text": "'confirm' | 'cancel'"
               },
               "description": "Which control receives focus when the dialog opens: `'confirm'` or `'cancel'`.\nDefaults to `'cancel'`, the safe default for a destructive confirmation (FR-008). An\nunknown value warns and falls back to `'cancel'`.",
               "default": "'cancel'",

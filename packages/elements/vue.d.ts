@@ -240,7 +240,7 @@ declare module 'vue' {
        * Defaults to `'cancel'`, the safe default for a destructive confirmation (FR-008). An
        * unknown value warns and falls back to `'cancel'`.
        */
-      'initial-focus'?: ConfirmDialogInitialFocus;
+      'initial-focus'?: 'confirm' | 'cancel';
       /**
        * The dialog's accessible description. Required — no default (FR-001, FR-017). Long
        * values scroll independently of the action row (FR-010).
