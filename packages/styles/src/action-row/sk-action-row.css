@@ -94,6 +94,14 @@
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   min-width: 0;
+  /* NFR-003 (action-row-static-form-01M25JSV, #331): a title-only row (no marker, reference,
+     tags or metadata) has nothing in this grid's other rows, so the trigger's block size was
+     riding on the browser's default `line-height: normal` for one line of text plus this
+     rule's own padding — a real 44px floor was not being asserted here at all, it just
+     happened to clear 44px on some engine/font-fallback combinations and not others.
+     `--sk-space-9` is 3rem/48px — the closest token at or above the 44px floor — pinned the
+     same way sk-confirm-dialog.css pins its own two NFR-001 controls. */
+  min-block-size: var(--sk-space-9);
   margin: 0;
   padding: var(--sk-space-3) var(--sk-space-4);
   color: inherit;
