@@ -2125,3 +2125,83 @@ test('SK-button busy forced colors — visual baseline', async ({ page }) => {
     timeout: 20000,
   });
 });
+
+// #303's sk-boundary-page — NFR-004/SC-007. Named ahead of implementation in research.md
+// Decision 7 and confirmed here against the exemplars actually authored (T007/T012). Every
+// PNG below is harvested from THIS PR's own CI run's visual-regression-diffs artifact, never
+// a local --update-snapshots — see this file's own header comment for why (font
+// rasterization and clipped-component dimensions differ between a workstation and the
+// ubuntu-latest runner).
+
+const boundaryPageStory = async (page: Page, id: string): Promise<Locator> => {
+  await page.goto(`/iframe.html?id=components-skboundarypage-html--${id}&viewMode=story`);
+  const target = page.locator('.sk-boundary-page__card').first();
+  await target.waitFor({ state: 'visible', timeout: 20000 });
+  return target;
+};
+
+test('SK-boundary-page HTML form-card default dark — visual baseline', async ({ page }) => {
+  const target = await boundaryPageStory(page, 'form-card');
+  await expect(target).toHaveScreenshot('sk-boundary-page-html-form-card-default-dark.png', {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+  });
+});
+
+test('SK-boundary-page HTML form-card light mode — visual baseline', async ({ page }) => {
+  const target = await boundaryPageStory(page, 'light-mode');
+  await expect(target).toHaveScreenshot('sk-boundary-page-html-form-card-light.png', {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+  });
+});
+
+test('SK-boundary-page HTML terminal-card default dark — visual baseline', async ({ page }) => {
+  const target = await boundaryPageStory(page, 'terminal-card');
+  await expect(target).toHaveScreenshot('sk-boundary-page-html-terminal-card-default-dark.png', {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+  });
+});
+
+test('SK-boundary-page HTML without mark — visual baseline', async ({ page }) => {
+  const target = await boundaryPageStory(page, 'without-mark');
+  await expect(target).toHaveScreenshot('sk-boundary-page-html-without-mark.png', {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+  });
+});
+
+test('SK-boundary-page HTML without footnote — visual baseline', async ({ page }) => {
+  const target = await boundaryPageStory(page, 'without-footnote');
+  await expect(target).toHaveScreenshot('sk-boundary-page-html-without-footnote.png', {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+  });
+});
+
+test('SK-boundary-page HTML with footnote — visual baseline', async ({ page }) => {
+  const target = await boundaryPageStory(page, 'with-footnote');
+  await expect(target).toHaveScreenshot('sk-boundary-page-html-with-footnote.png', {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+  });
+});
+
+test('SK-boundary-page HTML forced colors — visual baseline', async ({ page }) => {
+  await page.emulateMedia({ forcedColors: 'active' });
+  const target = await boundaryPageStory(page, 'forced-colors');
+  await expect(target).toHaveScreenshot('sk-boundary-page-html-forced-colors.png', {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+  });
+});
+
+test('SK-boundary-page HTML narrow 320 — visual baseline', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 720 });
+  const target = await boundaryPageStory(page, 'form-card');
+  await expect(target).toHaveScreenshot('sk-boundary-page-html-narrow-320.png', {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+  });
+});

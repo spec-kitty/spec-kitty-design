@@ -1,0 +1,250 @@
+/* @spec-kitty/styles — sk-boundary-page shared styles (#303) */
+/* All values use --sk-* tokens only — no hardcoded values, except the system-color keyword
+   under forced-colors — see docs/contributing/adding-a-component.md's "Forced-colors and
+   reduced-motion baselines" section, the canonical owner of that convention; not restated here. */
+/*
+ * NO SHADOW ROOT, NO CUSTOM ELEMENT — deliberately, and for a reason distinct from this
+ * directory's other styles-only components. ADR-10's "Styles-only components are a class, not
+ * a fixed exception count" section is the general citation (as for `progress`/`empty-state`),
+ * but the SPECIFIC reason here is document-structure, not a native-element gap: wrapping this
+ * frame's own `<main>`/`<h1>` in a shadow root would either manufacture a landmark the page
+ * already has, or sever the `<h1>` element the consuming document already owns — the same
+ * "document-scoped structure a shadow boundary would break" family as `sk-skip-link`'s
+ * document-scoped `href="#main"` and `sk-facts`'s cross-root ID resolution, generalised to the
+ * consumer's own document outline (research.md Decision 1b, this mission).
+ *
+ * ADR-15 DOES NOT REACH THIS FRAME. ADR-15 rules on four construct kinds
+ * (host-attribute-axis-inside-a-host-owned-@container, host-owned container-type,
+ * `::slotted()`, and cross-sheet `::part()`) — all four are properties of an element's OWN
+ * shadow-DOM CSS being translated to a static form. This sheet has no shadow form to
+ * translate: it is authored directly as document CSS, like every other sheet in this directory
+ * with no sibling under packages/elements/src/. Checked, not assumed (research.md Decision 1):
+ * this file introduces no `:host`, no `container-type`, no `::slotted()`, and reaches into
+ * neither `sk-entity-marker` (#304) nor `sk-pill-tag` (#302) via `::part()` — that cross-sheet
+ * question belongs to #314 and stays undecided here (spec C-005).
+ *
+ * COMPOSITION IS PLACEMENT-ONLY. `.sk-boundary-page__mark` positions and centers whatever
+ * `<sk-entity-marker>` the consumer authors (size/shape/border are entirely the consumer's
+ * choice — this file sets none of them). The status pill (`<sk-pill-tag
+ * class="sk-pill-tag--status-<tone>">`) is composed inline inside `.sk-boundary-page__title`
+ * or `.sk-boundary-page__body` with no rule here targeting `.sk-pill-tag` at all — no default
+ * tone, no background/color override, no role/name contribution.
+ *
+ * THE FOOTNOTE/MARK ABSENCE MECHANISM IS ORDINARY FLEX `gap`, NOTHING ELSE. `.sk-boundary-page__card`
+ * is a column flex container whose ONLY inter-child spacing is `gap` — no child ever carries its
+ * own margin for card-internal rhythm. That is deliberate: a flex/grid `gap` contributes zero
+ * space for an absent child, by gap semantics, so omitting `.sk-boundary-page__mark` or
+ * `.sk-boundary-page__footnote` from the DOM entirely (never `[hidden]`, never an empty element)
+ * leaves no phantom space to leak — the #308 defect pattern (`display: flex` with no `[open]`
+ * qualifier, missed by 602 tests because everything exercised the present state) this mission
+ * exists to guard against directly. `.sk-boundary-page__action-group` is the one exception: it is
+ * a REQUIRED container (spec FR-007) that may hold zero action children — it is never omitted,
+ * so it always contributes its own `gap` share even when empty, distinct from the mark/footnote's
+ * full-DOM-omission contract. apps/storybook/src/tests/sk-boundary-page-absence.spec.ts proves
+ * this with an in-run computed-geometry measurement, including a mutation-revert exercise that
+ * confirms the assertion can actually fail.
+ *
+ * FORCED COLORS. `.sk-boundary-page__card` carries NO border in its normal (non-forced-colors)
+ * state — its edge is a surface/background distinction only (`--sk-surface-card` against
+ * `--sk-surface-page`), which `forced-colors: active` flattens away entirely (`background` does
+ * not survive; it maps to `Canvas`). So — following `sk-pill-tag.css`'s own load-bearing
+ * precedent, not `sk-notice.css`'s (whose base rule already has a border, which makes a
+ * forced-colors re-statement of only the COLOUR an inert no-op; see that file's own comment) —
+ * the `@media (forced-colors: active)` block below is the FIRST and ONLY place this file
+ * declares the card's edge at all, using the LONGHAND `-color` properties (`border-color`, never
+ * the `border` shorthand, which `declaration-strict-value` does not police at all regardless of
+ * value — docs/contributing/adding-a-component.md's explicit warning).
+ *
+ * NO TRANSITION, NO ANIMATION, ANYWHERE IN THIS FILE — so no `@media (prefers-reduced-motion:
+ * reduce)` block exists either. Per this repo's own recorded lesson
+ * (`sk-transition-matrix.css:237`, `adding-a-component.md`), a reduced-motion guard over a
+ * property nothing sets is not a safety margin, it is the dead-guard defect pattern; the
+ * absence itself is what apps/storybook/src/tests/sk-boundary-page-responsive.spec.ts asserts.
+ *
+ * THE BARE `sk-boundary-page` CLASS ON `__stage` CARRIES NO RULE OF ITS OWN — it is the same
+ * component-host identification hook every multi-part styles-only family in this directory
+ * puts on its outermost element (`sk-context-nav`, `sk-data-table`, `sk-workflow-board`: the
+ * root always carries the bare block class alongside — or instead of — a BEM element class).
+ * `scripts/run-axe-storybook.js`'s render-verdict walk looks for it by name
+ * (`BLOCK_CLASS = /^sk-[a-z0-9]+(?:-[a-z0-9]+)*$/`, which a BEM `__element`/`--modifier`
+ * class never matches by construction) to find "a component actually mounted" versus "only
+ * wrapper divs mounted" — every exemplar without a composed `<sk-entity-marker>`/`<sk-pill-tag>`
+ * (which would otherwise supply that signal by accident, via their own tag name) needs this
+ * frame to supply it directly.
+ *
+ * ANATOMY (data-model.md is authoritative; not restated in full here) — direct children of
+ * `.sk-boundary-page__card`, in this fixed order:
+ *   [ .sk-boundary-page__mark   ]  OPTIONAL — omit entirely, never [hidden]
+ *   <h1 class="sk-boundary-page__title">…</h1>   consumer's own element, styled only
+ *   .sk-boundary-page__body        required
+ *   .sk-boundary-page__action-group  required container, 0..N actions
+ *   [ .sk-boundary-page__footnote ]  OPTIONAL — omit entirely, never [hidden]
+ * ONE anatomy for the form-card and the terminal-card — no `--form`/`--terminal` (or similarly
+ * named) modifier exists below. Verified, not assumed (research.md Decision 3): both card
+ * contents were rendered against this identical class structure with no property found to
+ * differ between them.
+ */
+
+.sk-boundary-page__stage {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-block-size: 100dvh;
+  padding: var(--sk-space-6);
+  background: var(--sk-surface-page);
+}
+
+.sk-boundary-page__card {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sk-space-5);
+  inline-size: 100%;
+  max-inline-size: min(92vw, 32rem);
+  min-inline-size: 0; /* the flex item of __stage's ROW main axis — without this, the card's
+    own automatic minimum size (content-based) can refuse to shrink below a long unbroken
+    token's min-content width, which is exactly the document-level horizontal scroll FR-008
+    forbids. Verified against this component's own (deeper) nesting, not merely copied from
+    sk-empty-state--inline's shallower one, per T004's explicit instruction. */
+  padding-block: var(--sk-space-8);
+  padding-inline: var(--sk-space-7);
+  border-radius: var(--sk-radius-lg);
+  background: var(--sk-surface-card);
+  color: var(--sk-fg-body); /* explicit, not inherited UA default — the same #69 defect
+    sk-card.css's own header comment records (black text measured 1.2:1 on --sk-surface-card). */
+  font-family: var(--sk-font-sans);
+  font-size: var(--sk-text-base);
+}
+
+.sk-boundary-page__mark {
+  display: flex;
+  justify-content: center;
+  /* No inline-size/block-size, no border-radius, no border rule of any kind here — the
+     consumer's own size/shape/border="true" attributes on <sk-entity-marker> are the only
+     source of those values (spec FR-004, research.md Decision 2). */
+}
+
+.sk-boundary-page__title {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  column-gap: var(--sk-space-2);
+  row-gap: var(--sk-space-1);
+  text-align: center;
+  font-family: var(--sk-font-sans);
+  font-size: var(--sk-text-2xl);
+  font-weight: var(--sk-weight-semibold);
+  color: var(--sk-fg-default);
+  /* This class is applied TO the consumer's own <h1> — it never generates one. `display: flex`
+     here is the title-ROW status-composition point (spec FR-005): it lets a composed
+     `<sk-pill-tag class="sk-pill-tag--status-<tone>">` sit beside a long heading and wrap
+     without forcing either into horizontal overflow (spec Edge Cases), with zero rule here
+     targeting `.sk-pill-tag` itself — no background/color, no role, no default tone. */
+}
+
+.sk-boundary-page__body {
+  min-inline-size: 0;
+  overflow-wrap: anywhere; /* inherited property (CSS Text) — cascades to nested paragraphs/
+    forms without a second declaration. sk-empty-state--inline's pattern, re-verified against
+    this component's own deeper nesting rather than assumed (spec FR-008, T004). */
+  color: var(--sk-fg-body);
+  font-family: var(--sk-font-sans);
+  font-size: var(--sk-text-base);
+  line-height: 1.5;
+}
+
+.sk-boundary-page__body :is(label, input, textarea, select) {
+  font: inherit;
+}
+
+.sk-boundary-page__action-group {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--sk-space-3);
+  /* Required container (spec FR-007): present even with zero children, distinct from the
+     mark/footnote's full-DOM-omission contract — see this file's header comment. */
+}
+
+.sk-boundary-page__action-group > * {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-block-size: var(--sk-space-9); /* 48px — clears the 44px target-size floor (spec
+    FR-013) regardless of what the consumer's own action markup/classes contribute; this is
+    the "explicit min-block-size" branch of research.md's open question 2, not the "padding
+    alone reaches it" branch, verified rather than assumed against sk-confirm-dialog.css's
+    own --sk-space-9 target-size precedent. */
+  padding-inline: var(--sk-space-5);
+  background: transparent;
+  color: var(--sk-fg-default);
+  text-decoration: none;
+  font: inherit;
+  /* MEASURED, not assumed (#69's own convention) — a bare, unstyled `<a>` fails axe's
+     color-contrast rule inside this card: the UA default link blue (`rgb(0, 0, 238)`) against
+     `--sk-surface-card` (`rgb(24, 26, 31)`) measures ~1.85:1, far under the 4.5:1 floor. A bare
+     `<button>` does not fail the SAME way (`color`/`background-color` both come from its own UA
+     rule, `ButtonText` on `ButtonFace`, which self-contrasts fine) but DOES clash with a
+     surrounding dark card if only the link half were fixed — `color: var(--sk-fg-default)` on
+     both element kinds, with `background: transparent` so the effective ground is the card's
+     own (already-legible) surface, is the minimum reset that makes BOTH element kinds legible
+     in place, not a `sk-button`-style visual opinion (no radius, no hover/active state, no
+     border) — that remains the consumer's own choice, per C-003. */
+}
+
+.sk-boundary-page__footnote {
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+  margin: 0;
+  text-align: center;
+  color: var(--sk-fg-muted);
+  font-family: var(--sk-font-sans);
+  font-size: var(--sk-text-xs);
+  line-height: 1.5;
+}
+
+/* RESPONSIVE — authored once, viewport-relative @media only (never a component-owned
+   @container; research.md Decision 1 — there is no host to query). Covers narrow width and
+   the action-group's wrap behaviour; 200% zoom needs no separate rule because every dimension
+   above is already relative (dvh/vw/rem/tokens), not a fixed px breakpoint artifact. */
+@media (max-width: 480px) {
+  .sk-boundary-page__stage {
+    padding: var(--sk-space-4);
+  }
+
+  .sk-boundary-page__card {
+    max-inline-size: 100%;
+    padding-block: var(--sk-space-6);
+    padding-inline: var(--sk-space-5);
+  }
+
+  .sk-boundary-page__action-group {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .sk-boundary-page__action-group > * {
+    inline-size: 100%;
+  }
+}
+
+/* FORCED COLORS — see this file's header comment for why this is the FIRST and ONLY place
+   the card's edge is declared (the base rule above has no border to auto-remap). The width
+   step matters as much as the colour: a hairline the same weight as every other bordered box
+   in this library keeps the card distinguishable from its own action-group items once
+   `background` flattens to `Canvas` on both. */
+@media (forced-colors: active) {
+  .sk-boundary-page__card {
+    border-style: solid;
+    border-width: var(--sk-border-width-1);
+    border-color: CanvasText;
+  }
+}
+
+/* No @media (prefers-reduced-motion: reduce) block: this file sets no transition or animation
+   property anywhere, on any selector — see this file's header comment. The absence is
+   asserted, not assumed (spec FR-012). */

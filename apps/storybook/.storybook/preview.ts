@@ -29,6 +29,18 @@ import "../../../packages/styles/src/progress/sk-progress.css";
 import "../../../packages/styles/src/prose/sk-prose.css";
 import "../../../packages/styles/src/workflow-board/sk-workflow-board.css";
 import "../../../packages/styles/src/workflow-lane/sk-workflow-lane.css";
+// #303's sk-boundary-page is the mirror-image case of the block above: a styles-only,
+// no-element FRAME (packages/styles, scope:styles) composing two already-shipped CUSTOM
+// ELEMENTS (sk-entity-marker #304, sk-pill-tag #302) as opaque children in its own plain
+// HTML exemplars — never the other way around. Its own CSS sets no default size/shape/
+// border/tone on either (research.md Decision 2) and reaches into neither via `::part()`
+// (spec C-005); this import only makes the two elements UPGRADE (attach their own shadow
+// root) when Storybook renders sk-boundary-page's markup, exactly the same
+// scope:styles-cannot-import-scope:elements boundary as the comment above, mirrored: a
+// styles-only component has no layer of its own to import a custom element's definition
+// from, and `scope:storybook` is again the one project allowed to reach both.
+import "../../../packages/elements/src/entity-marker/sk-entity-marker.js";
+import "../../../packages/elements/src/pill-tag/sk-pill-tag.js";
 import type { Preview } from "@storybook/web-components";
 
 const preview: Preview = {
