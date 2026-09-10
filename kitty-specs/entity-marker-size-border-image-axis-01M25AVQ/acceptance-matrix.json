@@ -98,10 +98,10 @@
       "criterion_id": "FR-010",
       "description": "Verify FR-010 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "fixtures/elements-behaviour/src/sk-entity-marker.test.ts:96 '[FR-010] the accessible-naming contract is a pure function of label, unaffected by size, shape, or border'; sk-entity-marker.ts render() derives role/aria-label/aria-hidden solely from trimmed label, independent of size/shape/border",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T11:03:29.141138+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
