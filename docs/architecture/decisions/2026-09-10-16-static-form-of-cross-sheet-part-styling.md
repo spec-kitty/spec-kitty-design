@@ -65,9 +65,12 @@ estimated:
   **148 across 30 files**, which over-counts prose mentions of the string `@csspart`. The stale
   134/28 is not repeated anywhere below.
 
-ADR-9 §2 makes `::part()` this library's one declared public styling channel: "Adding a part is an
-API addition; removing or renaming one is a breaking change." So "what does the static path get
-for `::part()`?" is a question about the whole public styling surface, and it has never been
+ADR-9 §2 declares the styling API to be exactly three things — tokens, `::part()`, and
+per-component custom properties — of which `::part()` is the only one that is a **selector** rather
+than a custom property, and the only one that is versioned as a named surface: "Every part is named
+in the component's docs and appears in `custom-elements.json`. Adding a part is an API addition;
+removing or renaming one is a breaking change." So "what does the static path get for `::part()`?"
+is a question about the whole selector half of the public styling surface, and it has never been
 asked.
 
 ## Decision Drivers
