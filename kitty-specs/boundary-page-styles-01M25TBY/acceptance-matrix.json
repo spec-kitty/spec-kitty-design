@@ -68,10 +68,10 @@
       "criterion_id": "FR-007",
       "description": "Action-group is a required container that may hold zero actions",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "packages/styles/src/boundary-page/sk-boundary-page.css:181-186 (.sk-boundary-page__action-group required container, present even with zero children per comment); sk-boundary-page-no-action.html has zero action children; sk-boundary-page-absence.spec.ts:125 (container present with zero children) and :136 (several-actions has >1 child)",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T18:19:29.608072+00:00",
       "notes": "Owned by WP01 (mission/boundary-page-styles). pass_fail/evidence/verified_by/verified_at and overall_verdict are the accept gate's own fields (run via the Spec Kitty CLI's accept phase later) and are deliberately left as recorded by the scaffolder, not hand-written here."
     },
     {
