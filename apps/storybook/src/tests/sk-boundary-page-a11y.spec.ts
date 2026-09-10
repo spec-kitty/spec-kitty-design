@@ -154,10 +154,23 @@ const focusableSignature = (page: Page) =>
   });
 
 test.describe('sk-boundary-page focus order matches visual order, with no extra tab stops (spec SC-004)', () => {
-  for (const story of ['form-card', 'several-actions', 'no-action'] as const) {
+  // MEDIUM/HIGH-B (pre-merge squad finding): 'no-action' was previously in this same loop.
+  // sk-boundary-page-no-action.html has ZERO a[href]/button/input/select/textarea, so
+  // `expected` was `[]`, the `for (let i = 0; i < expected.length; i++)` body ran zero times,
+  // and `expect([]).toEqual([])` passed green while asserting nothing — a green line over a
+  // zero-input set, in every browser project. 'no-action' has no Tab order to compare against
+  // a visual order in the first place (there is nothing to walk), so it is the wrong fixture
+  // for THIS test; it gets its own assertion below instead, of the thing that is actually true
+  // about it — zero tab stops — rather than being iterated as if it had an order.
+  for (const story of ['form-card', 'several-actions'] as const) {
     test(`the ${story} story's Tab order exactly matches its DOM/visual order`, async ({ page }) => {
       await openStory(page, story);
       const expected = await focusableSignature(page);
+      // Non-empty floor (matches sk-boundary-page-responsive.spec.ts:50's pattern): without
+      // this, a fixture that silently lost its focusable elements would make the loop below a
+      // vacuous, always-green no-op again, exactly like the 'no-action' defect this comment
+      // describes.
+      expect(expected.length).toBeGreaterThan(0);
 
       // Start from a known, unfocused state.
       await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
@@ -179,4 +192,19 @@ test.describe('sk-boundary-page focus order matches visual order, with no extra 
       expect(actual).toEqual(expected);
     });
   }
+
+  test('the no-action story has zero focusable elements and Tab does not enter the card', async ({ page }) => {
+    await openStory(page, 'no-action');
+    const expected = await focusableSignature(page);
+    // The real assertion for this fixture: it has NO tab stops at all (asserted positively,
+    // not inferred from an empty loop never running).
+    expect(expected).toEqual([]);
+
+    await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+    await page.keyboard.press('Tab');
+    const activeTag = await page.evaluate(() => document.activeElement?.tagName.toLowerCase() ?? null);
+    // With nothing focusable in the story, a real Tab press must leave focus on <body> (or
+    // nowhere) — it must NOT land on anything inside the card.
+    expect(activeTag === 'body' || activeTag === null).toBe(true);
+  });
 });

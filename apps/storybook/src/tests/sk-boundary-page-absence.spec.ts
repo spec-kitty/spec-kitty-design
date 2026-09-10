@@ -133,6 +133,30 @@ test.describe('sk-boundary-page action-group present-but-empty contract (distinc
     await expect(page.locator('.sk-boundary-page__action-group')).toHaveCount(1);
   });
 
+  // HIGH-C (pre-merge squad finding): the two assertions above are node counts — they prove the
+  // container EXISTS, not that it still occupies its own place in the layout. `.sk-boundary-page
+  // __action-group:empty { display: none }` leaves BOTH of them green (childElementCount and
+  // locator count are unaffected by `display`) while the container drops out of flex layout
+  // entirely — no longer a flex item, no gap allocated for it, and (per the CSS spec)
+  // `getBoundingClientRect()` on it collapses to an all-zero rect. `measure()` already computes
+  // `distanceActionGroupBottomToCardBottom` (line 38); this uses that SAME field, geometrically,
+  // rather than a node count: with the action-group genuinely present and participating in
+  // layout, its bottom edge sits exactly `padding-block-end` above the card's own bottom edge,
+  // the identical relationship the without-footnote/without-mark tests above assert for their
+  // own last-real-child. Verified directly (not assumed) that the `:empty { display: none }`
+  // mutation breaks this: the action-group's rect degenerates to (0,0,0,0) once it stops
+  // participating in layout, which drives this measured distance from ~0 to several hundred
+  // pixels — see this file's mutation-revert exercise (reported in the mission handoff, matching
+  // the same manual-proof convention already used for the mark's own MEDIUM-3 remediation
+  // above, not re-run automatically on every CI pass).
+  test('the no-action story: the present-but-empty action-group still sits in normal flow, exactly padding-block-end above the card bottom', async ({ page }) => {
+    await openStory(page, 'no-action');
+    const measured = await measure(page);
+    expect(measured.actionGroupChildCount).toBe(0);
+    expect(measured.cardPaddingBlockEnd).toBeGreaterThan(0);
+    expect(Math.abs(measured.distanceActionGroupBottomToCardBottom - measured.cardPaddingBlockEnd)).toBeLessThan(1.5);
+  });
+
   test('the several-actions story renders more than one direct child in the action-group', async ({ page }) => {
     await openStory(page, 'several-actions');
     const measured = await measure(page);

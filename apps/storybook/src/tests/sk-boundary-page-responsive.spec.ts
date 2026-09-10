@@ -176,3 +176,33 @@ test.describe('sk-boundary-page logical properties only (spec FR-010)', () => {
     expect(rtl.firstLeft).toBeGreaterThan(rtl.lastLeft);
   });
 });
+
+test.describe('sk-boundary-page theming (MEDIUM-H, pre-merge squad finding)', () => {
+  /**
+   * sk-boundary-page-html.stories.ts's LightMode doc comment claims this file "verifies a
+   * computed value genuinely differs between this and Default" — no such test existed before
+   * this one. Follows sk-progress.spec.ts's own LightMode pattern (FR-011): sample tokens that
+   * actually have a `.sk-light` override in packages/tokens/src/tokens.css
+   * (`--sk-surface-card`, `--sk-fg-default`) rather than assuming the wrapper does anything —
+   * the #93 inert-theme-wrapper defect class this guards against.
+   */
+  test('LightMode resolves genuinely different computed card background and title color than Default', async ({ page }) => {
+    const themedStyles = async (story: string) => {
+      await openStory(page, story);
+      return page.evaluate(() => {
+        const card = document.querySelector<HTMLElement>('.sk-boundary-page__card')!;
+        const title = document.querySelector<HTMLElement>('.sk-boundary-page__title')!;
+        return {
+          cardBackground: getComputedStyle(card).backgroundColor,
+          titleColor: getComputedStyle(title).color,
+        };
+      });
+    };
+
+    const dark = await themedStyles('default');
+    const light = await themedStyles('light-mode');
+
+    expect(light.cardBackground).not.toBe(dark.cardBackground);
+    expect(light.titleColor).not.toBe(dark.titleColor);
+  });
+});

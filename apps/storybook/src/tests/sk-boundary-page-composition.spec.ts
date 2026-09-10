@@ -60,6 +60,16 @@ const measurePillTone = (page: Page, toneClass: string) =>
     return {
       found: true as const,
       hasToneClass: pill.classList.contains(cls),
+      // MEDIUM-D (pre-merge squad finding): the historical defect
+      // (`<sk-pill-tag class="sk-pill-tag--status-*">`, modifier class alone on the custom-
+      // element host) was caught because the selector below never matched it and `found` went
+      // false. But the hybrid form a "fix" is likely to produce —
+      // `<sk-pill-tag class="sk-pill-tag sk-pill-tag--status-*">`, base class AND modifier both
+      // on the host — matches `.sk-boundary-page__title .sk-pill-tag` and passes every
+      // assertion below while the shadow `<span part="tag">` renders untoned, because a class on
+      // the host never reaches the shadow part either way. `tagName` is the only thing that
+      // distinguishes the correct styles-layer span form from that hybrid custom-element form.
+      tagName: pill.tagName,
       backgroundColor: toned.backgroundColor,
       baseColor,
       refColor,
@@ -84,6 +94,11 @@ test.describe('sk-boundary-page composed status pill actually renders its author
       expect(measured.found).toBe(true);
       if (!measured.found) return;
       expect(measured.hasToneClass).toBe(true);
+      // MEDIUM-D: assert the composed node is the plain-span styles-layer form, not the
+      // `<sk-pill-tag>` custom element — this is what catches the hybrid
+      // `<sk-pill-tag class="sk-pill-tag sk-pill-tag--status-*">` form that `hasToneClass` alone
+      // cannot: that hybrid form also carries both classes on the host, but never on a `SPAN`.
+      expect(measured.tagName).toBe('SPAN');
       // POSITIVE assertion: the pill's actual rendered background is not the neutral/untoned
       // default — this is what a `class="sk-pill-tag--status-*"` HOST-class regression (the
       // exact defect this WP fixes) would fail, because the modifier class never reaches the

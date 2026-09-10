@@ -83,8 +83,9 @@ export const ForcedColors: Story = {
 /**
  * Rendered from the GENERATED FormCard export, wrapped in `class="sk-light"` — never
  * `data-theme="light"`, which activates nothing on a wrapper (CLAUDE.md §6, #93).
- * apps/storybook/src/tests/sk-boundary-page-responsive.spec.ts verifies a computed value
- * genuinely differs between this and Default rather than assuming the class does something.
+ * apps/storybook/src/tests/sk-boundary-page-responsive.spec.ts's 'sk-boundary-page theming'
+ * describe block verifies a computed value (card background, title color) genuinely differs
+ * between this and Default rather than assuming the class does something.
  */
 export const LightMode: Story = {
   parameters: { backgrounds: { default: 'sk-light' } },
