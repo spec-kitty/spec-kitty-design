@@ -36,6 +36,18 @@
       "verdict": "in-mission",
       "wp": "WP01"
     },
+    "#177": {
+      "evidence_ref": "plan.md Structure Decision cites #177 (rose tint family) as the structural precedent this mission's shape follows (tokens.css + catalogue regen only) -- #177 is historical, already shipped, not touched or reopened by this mission",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
     "#286": {
       "evidence_ref": "C-006: no ElementInternals/validation/copy change added by this mission; #286's copy/i18n intake boundary is respected, not advanced -- verified: diff adds no copy string",
       "fr": null,
