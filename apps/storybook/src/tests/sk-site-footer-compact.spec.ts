@@ -56,6 +56,10 @@ const TARGET_SIZE_STORIES = [
   'compact-several-links',
   'compact-long-content',
   'compact-light-mode',
+  // A one-glyph label. Without it the `min-inline-size` half of the 44px floor was deletable
+  // green: every other story's shortest label ("Terms") clears 44px on padding alone, so the
+  // width assertion was satisfied by a declaration the rule does not uniquely determine.
+  'compact-short-label',
 ] as const;
 
 for (const name of TARGET_SIZE_STORIES) {

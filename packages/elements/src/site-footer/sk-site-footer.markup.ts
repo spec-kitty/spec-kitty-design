@@ -18,6 +18,19 @@
  * The class names this component renders, named once.
  *
  * The element imports these rather than re-typing them (ADR-8 criterion 3).
+ *
+ * COMPACT PRESENTATION (#354). `row`/`meta` are the compact anatomy's own layout nodes;
+ * `linkCompact` is a MODIFIER on the existing `link` class, applied only in the light DOM
+ * (element path: a consumer-authored `<a>`; static path: a generated `<a>`) — never a descendant
+ * selector from the root, because the root class lives inside the shadow root in the element path
+ * and the anchor does not descend from it there. The sheet pairs it with `::slotted()` for the
+ * same reason it pairs `__column`.
+ *
+ * Keep this rationale ABOVE the literal, where every other `*.markup.ts` keeps its own. The
+ * manifest analyzer flattens this object to a single line and publishes it as the `default`
+ * field, so a `//` comment inside the braces is shipped to consumers' IDE hovers AND comments out
+ * everything after it on that flattened line — which hid these three class names from the
+ * published value until this was moved out.
  */
 export const SITE_FOOTER_CLASSES = {
   root: 'sk-site-footer',
@@ -31,11 +44,6 @@ export const SITE_FOOTER_CLASSES = {
   link: 'sk-site-footer__link',
   divider: 'sk-site-footer__divider',
   legal: 'sk-site-footer__legal',
-  // COMPACT PRESENTATION (#354). `row`/`meta` are the compact anatomy's own layout nodes;
-  // `linkCompact` is a MODIFIER on the existing `link` class, applied only in the light DOM
-  // (element path: a consumer-authored `<a>`; static path: a generated `<a>`) — never a
-  // descendant selector from the root, because the root class lives inside the shadow root in
-  // the element path and the anchor does not descend from it there.
   row: 'sk-site-footer__row',
   meta: 'sk-site-footer__meta',
   linkCompact: 'sk-site-footer__link--compact',

@@ -418,6 +418,37 @@ test('[FR-007] the compact element and the compact static form are the same comp
   }
 });
 
+test('[FR-010] no library-authored link reaches a footer that supplied none', () => {
+  // `links` is deliberately absent from DEFAULTS so no library destination can ship. Nothing
+  // asserted that: add `links: PLACEHOLDER_COMPACT_LINKS` to DEFAULTS and every other test here
+  // stays green, because each one passes an explicit `links` key that `{...DEFAULTS, ...opts}`
+  // overrides. This is the one input shape that exposes the leak.
+  const bare = siteFooterStaticHtml({ presentation: 'compact' });
+  expect(bare, 'a compact footer given no links emits no anchor').not.toContain('<a');
+  expect(bare, 'and no href').not.toContain('href');
+});
+
+test('[FR-001] the compact root carries the modifier class in both paths', async () => {
+  // The only other mention of this class is FR-009's NEGATIVE assertion, which passes harder if
+  // the modifier is emptied — so `SITE_FOOTER_PRESENTATIONS.compact.modifier` was deletable with
+  // the whole suite green. The class carries no declarations by design; it exists to be targeted.
+  const element = await mountCompact();
+  const root = element.shadowRoot!.querySelector('[part="footer"]')!;
+  expect(root.classList.contains('sk-site-footer'), 'element path, base class').toBe(true);
+  expect(
+    root.classList.contains('sk-site-footer--compact'),
+    'element path, compact modifier',
+  ).toBe(true);
+  element.remove();
+
+  const staticForm = siteFooterStaticHtml({
+    presentation: 'compact',
+    ...COMPACT_ATTRS,
+    links: [{ label: 'Terms', href: '/terms/' }],
+  });
+  expect(staticForm, 'static path').toContain('sk-site-footer--compact');
+});
+
 test("[FR-009] the full presentation's static form is untouched by the compact branch", () => {
   const full = siteFooterStaticHtml();
   expect((full.match(/<nav/g) ?? []).length, 'exactly two <nav>').toBe(2);

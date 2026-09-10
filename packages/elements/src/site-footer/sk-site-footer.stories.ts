@@ -137,6 +137,24 @@ export const CompactSeveralLinks: Story = {
 };
 
 /** No `legal` — no divider, and the whole legal line is simply absent, not empty. */
+/**
+ * A one-glyph link. The 44px floor's `min-inline-size` half is only load-bearing when the label
+ * is narrower than the floor — every other compact story's shortest label ("Terms") already
+ * exceeds it on padding alone, so without this story that declaration was deletable green.
+ */
+export const CompactShortLabel: Story = {
+  render: () => `
+    <sk-site-footer
+      presentation="compact"
+      wordmark="Your Brand"
+      tagline="One sentence on what you do."
+      legal="© 2026 Example · Free private beta"
+    >
+      ${compactLink('?', '/help/')}
+    </sk-site-footer>
+  `,
+};
+
 export const CompactWithoutLegal: Story = {
   render: () => `
     <sk-site-footer presentation="compact" tagline="One sentence on what you do.">

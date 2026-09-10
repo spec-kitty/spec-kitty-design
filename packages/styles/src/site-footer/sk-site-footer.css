@@ -218,7 +218,17 @@
    No focus-ring CSS and no `color:`/`outline-color:` here — the compact links keep the UA's own
    `:focus-visible` ring, the same one the full presentation's `.sk-site-footer__link` already
    ships, so nothing here can reach the frozen full presentation. */
-.sk-site-footer__link--compact {
+/* PAIRED SPELLING, and it is load-bearing rather than stylistic. The compact anchors are
+   DIRECTLY ASSIGNED to `slot[name=compact-links]`, so they stay light-DOM nodes: a bare class
+   selector in this sheet reaches them in the static/document path and reaches NOTHING once the
+   sheet is adopted into the shadow root. That is the same situation as `__column` above, which
+   is why line 59 already ships this exact pairing. Without the `::slotted()` half, the 44px
+   target-size floor applied only where a consumer had separately adopted this sheet into their
+   document — the stories do, which is why the target-size test passed while the shipped element
+   did not carry the rule. `::slotted()` takes no state pseudo-class here, so the caveat in this
+   file's header does not bite. */
+.sk-site-footer__link--compact,
+::slotted(.sk-site-footer__link--compact) {
   display: inline-flex;
   align-items: center;
   min-block-size: calc(var(--sk-space-8) + var(--sk-space-1));
