@@ -23,6 +23,7 @@
   "purpose_context": "This mission advances form input contrast touch target contract on mission/form-input-contrast-touch-target-contract so stakeholders can track the work from mission creation onward.",
   "purpose_tldr": "form input contrast touch target contract",
   "slug": "form-input-contrast-touch-target-contract-01M25STR",
+  "status_phase": "1",
   "target_branch": "mission/form-input-contrast-touch-target-contract",
   "topology": "single_branch"
 }
