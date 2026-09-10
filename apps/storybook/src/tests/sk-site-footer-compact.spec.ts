@@ -19,6 +19,25 @@ const load = async (page: Page, name: string, viewport = { width: 390, height: 4
 
 const rowOf = (footer: Locator) => footer.locator('.sk-site-footer__row');
 
+/**
+ * Put the sequential-focus origin somewhere deterministic before a Tab sequence.
+ *
+ * This replaced `page.locator('body').click()`, which clicks the body's CENTRE — and in a story
+ * whose footer fills the viewport that point can land on or past the first link, so the first Tab
+ * lands on the SECOND one. Firefox reached "Privacy" where chromium and webkit reached "Terms".
+ * The narrow-viewport test above happened to pass only because its body centre missed the links,
+ * so both call sites carried the same latent defect and both now use this.
+ */
+const seedFocusOrigin = async (page: Page) => {
+  await page.evaluate(() => {
+    const origin = document.createElement('button');
+    origin.type = 'button';
+    origin.textContent = 'focus origin';
+    document.body.prepend(origin);
+    origin.focus();
+  });
+};
+
 test('[NFR-001/FR-011] CompactLongContent does not overflow at 390px under 200% zoom emulation', async ({
   page,
 }) => {
@@ -79,7 +98,7 @@ test('the compact row stacks at 639px and does not stack at 641px, with DOM/focu
   );
   expect(domOrder).toEqual(['Terms', 'Privacy', 'Status']);
 
-  await page.locator('body').click();
+  await seedFocusOrigin(page);
   for (const label of domOrder) {
     await page.keyboard.press('Tab');
     const focused = await page.evaluate(() => document.activeElement?.textContent?.trim());
@@ -118,7 +137,7 @@ test('keyboard: Tab visits every compact link in DOM order with a visible, uncli
   );
   expect(domOrder).toEqual(['Terms', 'Privacy', 'Status']);
 
-  await page.locator('body').click();
+  await seedFocusOrigin(page);
   for (const label of domOrder) {
     await page.keyboard.press('Tab');
     const state = await page.evaluate(() => {
