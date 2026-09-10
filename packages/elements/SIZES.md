@@ -7,15 +7,15 @@ Components in these artifacts: sk-action-row, sk-app-shell, sk-bar-chart, sk-blo
 
 | artifact | raw | minified | min+gzip | notes |
 |---|---:|---:|---:|---|
-| `ESM  (dist/index.js)` | 225.3 KiB | 151.5 KiB | 32 KiB | `lit` external |
-| `IIFE (dist/elements.js)` | 245.4 KiB | 162.4 KiB | 36 KiB | runtime bundled |
+| `ESM  (dist/index.js)` | 226.0 KiB | 152.0 KiB | 32 KiB | `lit` external |
+| `IIFE (dist/elements.js)` | 246.1 KiB | 162.9 KiB | 36 KiB | runtime bundled |
 
 ## Subresource Integrity — the classic-script bundle (FR-005)
 
 For a CDN load of `dist/elements.js`, pin what the browser executes:
 
 ```
-integrity="sha384-IVyo9dToUEFq6yqZ/0Rlq/m+GH+5s6TajOFP82awt5+DO7i9UfNuJHqwDtkZm9/x"
+integrity="sha384-m7nB+SWJAJMIAwQHsmZz/IuXupr3tpRIjyPP3L2R9bJw4xZXAVjaX+aoIuNjfkJQ"
 ```
 
 Derived from the built artifact on every run and re-derived by `--check`, so it cannot be
@@ -35,9 +35,9 @@ What a consumer downloads, from a real `npm pack` of each package in the derived
 | package | files | unpacked |
 |---|---:|---:|
 | `@spec-kitty/tokens` | 37 | 5764.3 KiB |
-| `@spec-kitty/styles` | 231 | 613.8 KiB |
-| `@spec-kitty/elements` | 51 | 919.3 KiB |
-| `@spec-kitty/react` | 64 | 169.2 KiB |
+| `@spec-kitty/styles` | 231 | 616.5 KiB |
+| `@spec-kitty/elements` | 51 | 922.2 KiB |
+| `@spec-kitty/react` | 64 | 169.7 KiB |
 
 PACKED SIZE IS DELIBERATELY NOT IN THIS TABLE. It is the size of the gzipped tarball and therefore
 depends on the zlib build of the machine that runs `npm pack` — a workstation and CI measured
@@ -82,7 +82,7 @@ unit: every figure in this file is KiB (1024). The WP prompt recorded the IIFE a
 "24.0 KB" where this file would have read 23.5 KiB — **24073 bytes either way**.
 Those two numbers are pinned historical values on purpose. An earlier revision of this
 paragraph interpolated the CURRENT raw size into that comparison, so once the artifact
-grew it asserted that 251303 bytes are "24.0 KB" — false by a factor of
+grew it asserted that 252026 bytes are "24.0 KB" — false by a factor of
 five, in the one paragraph whose whole lesson is to state the basis and the unit. A lens
 caught it.
 
@@ -91,13 +91,13 @@ caught it.
 ```
 $ npx nx run elements:build && node scripts/measure-elements-sizes.mjs
 packages/elements/dist/index.js
-  raw        230703 bytes  (225.3 KiB)
-  minified   155090 bytes  (151.5 KiB)
+  raw        231408 bytes  (226.0 KiB)
+  minified   155614 bytes  (152.0 KiB)
   gzip         47 KiB
   min+gzip     32 KiB
 packages/elements/dist/elements.js
-  raw        251303 bytes  (245.4 KiB)
-  minified   166317 bytes  (162.4 KiB)
+  raw        252026 bytes  (246.1 KiB)
+  minified   166841 bytes  (162.9 KiB)
   gzip         53 KiB
   min+gzip     36 KiB
 ```
