@@ -8,10 +8,10 @@
       "criterion_id": "FR-001",
       "description": "Verify FR-001 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "fixtures/elements-behaviour/src/sk-button.test.ts: 'the primary tone PAINTS, and the three tones are distinct' asserts Object.keys(BUTTON_VARIANTS).length===4 and per-tone computed-style distinctness; npm run test 617/617 green.",
+      "pass_fail": "pass",
+      "verified_by": "reviewer-renata",
+      "verified_at": "2026-09-10T15:45:45.970654+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
