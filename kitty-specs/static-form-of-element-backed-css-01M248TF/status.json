@@ -1,7 +1,7 @@
 {
-  "event_count": 7,
-  "last_event_id": "01M24DVYZMAR0G46A2J3MANGM5",
-  "materialized_at": "2026-09-10T01:10:44.468469+00:00",
+  "event_count": 8,
+  "last_event_id": "01M24DVZ1R5WET7B949TZA9Z0C",
+  "materialized_at": "2026-09-10T01:10:44.536302+00:00",
   "mission_number": "",
   "mission_slug": "static-form-of-element-backed-css-01M248TF",
   "mission_type": "software-dev",
@@ -9,10 +9,10 @@
     "approved": 0,
     "blocked": 0,
     "canceled": 0,
-    "claimed": 1,
+    "claimed": 0,
     "done": 0,
     "for_review": 0,
-    "in_progress": 0,
+    "in_progress": 1,
     "in_review": 0,
     "planned": 0
   },
@@ -23,9 +23,9 @@
       "agent_profile": "__resolved_profile_absent__",
       "agent_profile_version": "__resolved_profile_version_absent__",
       "force_count": 1,
-      "lane": "claimed",
-      "last_event_id": "01M24DVYZMAR0G46A2J3MANGM5",
-      "last_transition_at": "2026-09-10T01:10:44.468469+00:00",
+      "lane": "in_progress",
+      "last_event_id": "01M24DVZ1R5WET7B949TZA9Z0C",
+      "last_transition_at": "2026-09-10T01:10:44.536302+00:00",
       "model": "__resolved_model_absent__",
       "notes": [
         "Independent reviewer claiming WP01 for review"
