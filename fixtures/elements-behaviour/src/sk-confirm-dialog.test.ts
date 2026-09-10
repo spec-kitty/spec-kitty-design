@@ -167,9 +167,23 @@ test('every one of the four required strings independently omits with no fallbac
 });
 
 // ---------------------------------------------------------------------------------------------
-// FR-013 — a closed dialog is not displayed. UNMARKED: no ADR-11 id names "a native <dialog>'s
-// own [open] attribute gates this component's CSS", so this is this component's own subject,
-// the same shape as the FR-018 literal-text test above.
+// FR-013 — a closed dialog is not displayed. UNMARKED, DELIBERATELY, AND RECONSIDERED ONCE
+// ALREADY: none of ADR-11's sixteen applicable ids (tests/node/config-contract.test.ts pins the
+// registry to that exact set) names "author CSS must not defeat the UA stylesheet's own
+// state-based hiding for a native element". The closest candidates were checked and declined:
+// SC-012 (focus and keyboard) covers Escape/focus-return/state-attribute-tracking, not whether a
+// CSS ruleset consuming an already-correct state attribute is itself correct; SC-013 (styling
+// API) covers whether a declared ::part() is present and targetable, not whether its base
+// ruleset is scoped correctly; SC-014 (style adoption) covers how a sheet reaches the shadow
+// root, not whether the rules in it are right. Forcing this into any of them would be exactly
+// the mislabeling behaviours.json's own $comment says "this programme has refused repeatedly"
+// (see the sk-time-series-chart `gap`-part entry, which independently arrived at the same
+// refusal for the same structural reason: guard 7 keys every mutation.json entry on a declared
+// (id, subject) pair, so an id that does not fit is not a shortcut, it is a false claim). This
+// test therefore stays outside the ADR-11/mutation-harness apparatus, proven red-first by hand
+// instead (see the WP report for the exact revert-rebuild-rerun sequence) — the same treatment
+// this file already gives the FR-018 literal-text test above, for the same reason: an id-shaped
+// gap in ADR-11's list is a gap in ADR-11, not a reason to mislabel a real subject.
 //
 // THE DEFECT THIS GUARDS: native <dialog> is hidden only by the UA stylesheet's
 // `dialog:not([open]) { display: none }`, and normal-origin author CSS beats UA-origin CSS
@@ -210,11 +224,11 @@ test('a mounted-but-never-opened dialog is not displayed, and is hidden again af
 });
 
 // ---------------------------------------------------------------------------------------------
-// [SC-005] Focus and keyboard: Escape closes as cancel, focus returns to the invoker, and the
+// [SC-012] Focus and keyboard: Escape closes as cancel, focus returns to the invoker, and the
 // `open` state attribute tracks the dialog's real state.
 // ---------------------------------------------------------------------------------------------
 
-test('[SC-005] Escape closes as cancel, focus returns to the invoker, and `open` tracks real state', async () => {
+test('[SC-012] Escape closes as cancel, focus returns to the invoker, and `open` tracks real state', async () => {
   const { element, invoker } = await mountWithInvoker();
   expect(element.hasAttribute('open')).toBe(true);
   expect(dialogOf(element).hasAttribute('open')).toBe(true);
@@ -232,7 +246,7 @@ test('[SC-005] Escape closes as cancel, focus returns to the invoker, and `open`
   expect(document.activeElement).toBe(invoker);
 });
 
-test('[SC-005] an explicit showModal(invoker) argument overrides the platform-tracked previously-focused element', async () => {
+test('[SC-012] an explicit showModal(invoker) argument overrides the platform-tracked previously-focused element', async () => {
   // This is the case that actually EXERCISES this element's own invoker tracking, as opposed to
   // the platform's own built-in "restore focus to whatever had it before showModal()" behaviour.
   // A decoy element holds real focus when showModal() is called; the explicit `invoker` argument
@@ -254,7 +268,7 @@ test('[SC-005] an explicit showModal(invoker) argument overrides the platform-tr
   expect(document.activeElement).toBe(explicitInvoker);
 });
 
-test('[SC-005] initial focus lands on the documented target and is consumer-overridable', async () => {
+test('[SC-012] initial focus lands on the documented target and is consumer-overridable', async () => {
   const defaultFocus = await mount();
   defaultFocus.showModal();
   await defaultFocus.updateComplete;
@@ -268,7 +282,7 @@ test('[SC-005] initial focus lands on the documented target and is consumer-over
   expect(overridden.shadowRoot!.activeElement).toBe(confirmButton(overridden));
 });
 
-test('[SC-005] an unknown initial-focus value warns and falls back to cancel', async () => {
+test('[SC-012] an unknown initial-focus value warns and falls back to cancel', async () => {
   const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
   const element = await mount({ ...ATTRS, 'initial-focus': 'destroy-everything' });
   element.showModal();
