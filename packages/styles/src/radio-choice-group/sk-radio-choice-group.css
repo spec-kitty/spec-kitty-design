@@ -165,7 +165,8 @@
   border-block-end-color: var(--sk-color-red);
   border-block-end-style: solid;
   border-block-end-width: var(--sk-border-width-2);
-  font-weight: var(--sk-weight-semibold);
+  /* No font-weight declaration here: `.sk-radio-choice-group__legend` already sets
+     `font-weight: var(--sk-weight-semibold)` unconditionally, so repeating it here was a no-op. */
 }
 
 @media (forced-colors: active) {

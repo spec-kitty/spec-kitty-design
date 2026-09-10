@@ -425,7 +425,14 @@ test.describe("sk-radio-choice-group source and public contract", () => {
         facts.labelCounts.every((count) => count === 1),
         name,
       ).toBe(true);
+      // `facts.names.length === 1` alone would pass vacuously if every control's `name` were the
+      // empty string — a radio with no `name` at all belongs to no native group. Assert the one
+      // shared value is genuinely non-empty as well as unique.
       expect(facts.names.length, `${name} must share one name`).toBe(1);
+      expect(
+        facts.names[0],
+        `${name}'s shared name must be non-empty`,
+      ).not.toBe("");
       expect(html, name).not.toMatch(
         /<sk-radio-choice-group\b|role="(?:group|radio)"|aria-checked=/,
       );
@@ -515,6 +522,10 @@ test.describe("sk-radio-choice-group live native semantics and presentation", ()
             };
           });
         });
+        // Count floor: `.every()` over an empty array is vacuously true, and the label is
+        // already proven present above, so this must never be empty in practice — but assert it
+        // explicitly rather than trust that indirectly.
+        expect(containment.length).toBeGreaterThan(0);
         expect(
           containment.every(({ left, choiceLeft }) => left >= choiceLeft - 0.5),
         ).toBe(true);
@@ -532,6 +543,10 @@ test.describe("sk-radio-choice-group live native semantics and presentation", ()
       expect(names.size, "every control in one group shares one name").toBe(
         1,
       );
+      // A vacuous pass: if every control's `name` were the empty string, `names.size` would
+      // still be 1 while none of them belonged to a real native group. Assert the one shared
+      // value is genuinely non-empty.
+      expect(names.has(""), "the shared name must be non-empty").toBe(false);
       const overflow = await page.evaluate(() => {
         const scroller = document.scrollingElement ?? document.documentElement;
         return {
@@ -800,7 +815,7 @@ test.describe("sk-radio-choice-group live native semantics and presentation", ()
     });
   });
 
-  test("checked, hover, active, focus-visible, and disabled choices have non-colour cues", async ({
+  test("checked, hover, active, focus-visible, and disabled choices have non-colour cues, pairwise distinct", async ({
     page,
   }) => {
     const { group } = await openStory(page, "disabled-option");
@@ -836,6 +851,20 @@ test.describe("sk-radio-choice-group live native semantics and presentation", ()
 
     const disabled = await cueOf(choices.nth(2));
     expect(nonColourCue(disabled)).not.toBe(nonColourCue(rest));
+
+    // Each state above was only ever compared against `rest`, which proves six one-sided
+    // deltas, not that the states are mutually distinguishable from EACH OTHER — e.g. hover
+    // (dashed/1px/medium) and focus-visible (dashed/2px/medium) each differ from `rest` in one
+    // property but could still collide with one another undetected. "Distinct without colour
+    // alone" is a pairwise property: collect every named state's non-colour cue and require them
+    // all to be mutually unique.
+    const cues = [rest, checked, hover, active, focusedChoice, disabled].map(nonColourCue);
+    const labels = ["rest", "checked", "hover", "active", "focus-visible", "disabled"];
+    expect(
+      new Set(cues).size,
+      `expected ${labels.length} pairwise-distinct non-colour cues, got ${new Set(cues).size}: ` +
+        labels.map((label, index) => `${label}=${cues[index]}`).join(" | "),
+    ).toBe(cues.length);
   });
 
   test("a required group's invalid legend cue is distinct from an ordinary, non-required legend", async ({
@@ -855,6 +884,20 @@ test.describe("sk-radio-choice-group live native semantics and presentation", ()
     expect(Number.parseFloat(invalidCue.borderBlockEndWidth)).toBeGreaterThan(
       Number.parseFloat(ordinaryCue.borderBlockEndWidth),
     );
+    // NFR-001: the required-invalid legend colour resolves through the authoritative
+    // `--sk-color-red` token, not an arbitrary or hard-coded value. Resolve the token's real
+    // computed colour from the live page rather than hard-coding an RGB triplet, so the
+    // assertion tracks the token's actual value instead of a guess at how the browser renders it.
+    const expectedRedColor = await page.evaluate(() => {
+      const probe = document.createElement("div");
+      probe.style.color = "var(--sk-color-red)";
+      document.body.append(probe);
+      const resolved = getComputedStyle(probe).color;
+      probe.remove();
+      return resolved;
+    });
+    expect(invalidCue.color).toBe(expectedRedColor);
+    expect(invalidCue.borderBlockEndColor).toBe(expectedRedColor);
     // The instant any radio in the group is checked, the group becomes valid and the cue clears.
     const controls = invalid.getByRole("radio");
     await controls.nth(0).check();
@@ -911,6 +954,8 @@ test.describe("sk-radio-choice-group live native semantics and presentation", ()
       ].map((label) => label.getBoundingClientRect().width);
       return { controlWidth, labelWidths };
     });
+    // Count floor: `.every()` over an empty array is vacuously true.
+    expect(measurements.labelWidths.length).toBeGreaterThan(0);
     expect(
       measurements.labelWidths.every(
         (width) => width >= measurements.controlWidth * 4,
@@ -936,6 +981,7 @@ test.describe("sk-radio-choice-group live native semantics and presentation", ()
         ...node.querySelectorAll<HTMLElement>(".sk-radio-choice-group__choice"),
       ];
       return {
+        choiceCount: choices.length,
         columns: new Set(
           choices.map((choice) =>
             Math.round(choice.getBoundingClientRect().left),
@@ -943,7 +989,21 @@ test.describe("sk-radio-choice-group live native semantics and presentation", ()
         ).size,
       };
     });
+    // Count floor: a `columns` of 0 from an empty choice set would also satisfy
+    // `<= 2` vacuously.
+    expect(measurements.choiceCount).toBeGreaterThan(0);
     expect(measurements.columns).toBeLessThanOrEqual(2);
+    // NFR-004: containment at the 200%-zoom-equivalent width, not merely a column-count proxy —
+    // this is the assertion the zoom evidence README cites as proving "no overflow" at this
+    // width; it must actually run for that claim to be true.
+    const overflow = await page.evaluate(() => {
+      const scroller = document.scrollingElement ?? document.documentElement;
+      return {
+        scrollWidth: scroller.scrollWidth,
+        clientWidth: scroller.clientWidth,
+      };
+    });
+    expect(overflow.scrollWidth).toBeLessThanOrEqual(overflow.clientWidth);
   });
 
   test("focus outlines stay inside viewport and outside local clipping", async ({
@@ -1095,7 +1155,7 @@ test.describe("sk-radio-choice-group live native semantics and presentation", ()
     expect(light.color).not.toBe(dark.color);
   });
 
-  test("forced colors retains native glyph plus checked, disabled, required-invalid, and focus cues, with accessible state proven to match rendered appearance", async ({
+  test("forced colors retains native glyph plus checked, disabled, and focus cues, with accessible state proven to match rendered appearance", async ({
     page,
     browserName,
   }) => {
@@ -1183,6 +1243,38 @@ test.describe("sk-radio-choice-group live native semantics and presentation", ()
     expect(axChecked).toEqual(domChecked);
   });
 
+  test("forced colors: a required group's invalid legend cue remains distinct from an ordinary legend", async ({
+    page,
+    browserName,
+  }) => {
+    test.skip(
+      browserName !== "chromium",
+      "Playwright forced-colors emulation is Chromium-owned",
+    );
+    // The `forced-colors` story renders `disabled.html`, which has no `required` control at all,
+    // so it cannot exercise the required-invalid legend rule in the forced-colors block
+    // (`sk-radio-choice-group.css`'s `@media (forced-colors: active)` block, the
+    // `:required:invalid` legend rule). Open the `required-invalid` and `none-selected` stories
+    // directly instead and emulate forced colors on them, mirroring the light-path assertion
+    // above but under `forcedColors: 'active'` so the forced-colors-specific `LinkText` override
+    // is the thing actually proven, not merely the light-path `--sk-color-red` rule.
+    await page.emulateMedia({ forcedColors: "active" });
+    const { group: ordinary } = await openStory(page, "none-selected");
+    const ordinaryCue = await legendCueOf(
+      ordinary.locator(".sk-radio-choice-group__legend"),
+    );
+    const { group: invalid } = await openStory(page, "required-invalid");
+    const invalidCue = await legendCueOf(
+      invalid.locator(".sk-radio-choice-group__legend"),
+    );
+    expect(invalidCue.borderBlockEndStyle).not.toBe(
+      ordinaryCue.borderBlockEndStyle,
+    );
+    expect(Number.parseFloat(invalidCue.borderBlockEndWidth)).toBeGreaterThan(
+      Number.parseFloat(ordinaryCue.borderBlockEndWidth),
+    );
+  });
+
   test("forced colors: a checked control's rendered pixels visibly differ from an unchecked one (visual half of the accent-color proof)", async ({
     page,
     browserName,
@@ -1195,25 +1287,75 @@ test.describe("sk-radio-choice-group live native semantics and presentation", ()
     // accessible state tracks reality; it cannot prove forced colors actually PAINTS a
     // perceivable difference for the customized `accent-color`. Only a rendered-pixel
     // comparison can prove that, so this crops just the native control (not the whole choice,
-    // which would also pick up border/background cues already covered elsewhere) for a checked
-    // and an unchecked radio and requires their pixels to differ by more than incidental
-    // anti-aliasing noise. If forced colors suppressed or flattened the check glyph, both crops
-    // would render as the same empty ring and this test would go red — verified red-first by
-    // temporarily setting `appearance: none` on the control (see the WP01 report for the exact
-    // red-first command and result); this is the version that must stay green afterward.
+    // which would also pick up border/background cues already covered elsewhere).
+    //
+    // The `forced-colors` story renders the `disabled.html` fixture: index 0 is checked+disabled,
+    // index 1 is unchecked+enabled, index 2 is unchecked+disabled, index 3 is unchecked+enabled.
+    // An earlier version of this test compared index 0 against index 1 — that mixes the
+    // checked/unchecked delta with a DIFFERENT disabled/enabled treatment (measured: 68 of the
+    // 154 differing pixels came from disabled-vs-enabled alone, with zero contribution from
+    // checkedness), so it could pass on a mutant that suppresses the check glyph but still draws
+    // some other structural difference between the two controls it happened to compare. Comparing
+    // index 0 against index 2 instead holds disabled/enabled constant (both disabled) so
+    // checkedness is the only remaining variable — the `disabled` flags are asserted equal
+    // immediately below so a later fixture edit cannot silently reintroduce the confound.
     await page.emulateMedia({ forcedColors: "active" });
     const { group } = await openStory(page, "forced-colors");
     const controls = group.getByRole("radio");
     await expect(controls).toHaveCount(4);
     await expect(controls.nth(0)).toBeChecked();
+    await expect(controls.nth(2)).not.toBeChecked();
+    const [checkedDisabled, uncheckedDisabled] = await Promise.all([
+      controls.nth(0).isDisabled(),
+      controls.nth(2).isDisabled(),
+    ]);
+    expect(
+      checkedDisabled,
+      "the compared pair must hold disabled/enabled constant so checkedness is the only variable",
+    ).toBe(uncheckedDisabled);
+    const checkedShot = await controls.nth(0).screenshot();
+    const uncheckedShot = await controls.nth(2).screenshot();
+    const diffPixels = countDifferingPixels(checkedShot, uncheckedShot);
+    expect(
+      diffPixels,
+      `checked+disabled vs. unchecked+disabled control differed by only ${diffPixels} pixel(s) ` +
+        "under forced colors — the check indicator is not visibly rendered",
+    ).toBeGreaterThan(100);
+  });
+
+  test("normal colours: a checked control's rendered pixels visibly differ from an unchecked one (the 11 committed visual baselines cannot see this)", async ({
+    page,
+  }) => {
+    // MAJOR finding: at visual.spec.ts's `maxDiffPixelRatio: 0.02` over a ~386x336 baseline crop
+    // (budget ~2,594px), every one of the five controls in a story totals only ~1,280px — so
+    // fully hiding the check glyph (`accent-color: transparent`, a token swap to the card
+    // background, or `visibility: hidden` on every control) still measured under that ratio and
+    // would report GREEN. This is #88's "a blank render and a full render compared EQUAL" defect
+    // re-entered at smaller scale (see visual.spec.ts:10-20's own account of #88). A targeted
+    // control-only crop, independent of the story frame's total pixel budget, is what actually
+    // proves the glyph renders in NORMAL (non-forced) colours — mirroring the forced-colors probe
+    // above but without `emulateMedia`, so it also protects the un-forced-colours default/light
+    // rendering that the 11 committed baselines are supposed to, but structurally cannot, catch.
+    const { group } = await openStory(page, "default");
+    const controls = group.getByRole("radio");
+    await expect(controls).toHaveCount(5);
+    await expect(controls.nth(0)).toBeChecked();
     await expect(controls.nth(1)).not.toBeChecked();
+    const [checkedDisabled, uncheckedDisabled] = await Promise.all([
+      controls.nth(0).isDisabled(),
+      controls.nth(1).isDisabled(),
+    ]);
+    expect(
+      checkedDisabled,
+      "the compared pair must hold disabled/enabled constant so checkedness is the only variable",
+    ).toBe(uncheckedDisabled);
     const checkedShot = await controls.nth(0).screenshot();
     const uncheckedShot = await controls.nth(1).screenshot();
     const diffPixels = countDifferingPixels(checkedShot, uncheckedShot);
     expect(
       diffPixels,
-      `checked vs. unchecked control differed by only ${diffPixels} pixel(s) under forced ` +
-        "colors — the check indicator is not visibly rendered",
-    ).toBeGreaterThan(15);
+      `checked vs. unchecked control differed by only ${diffPixels} pixel(s) in normal colours — ` +
+        "the check indicator is not visibly rendered",
+    ).toBeGreaterThan(60);
   });
 });

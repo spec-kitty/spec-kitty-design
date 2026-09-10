@@ -37,7 +37,12 @@ exact commands and their results are recorded in the WP01 implementer's report:
    for every choice in every required story, at both the default and the 390px narrow viewport:
    `Math.min(box.width, box.height) >= 44`, all green.
 4. **No document-level horizontal overflow** — measured directly for every one of the 14 required
-   stories at their declared viewport, all green (see the WP01 report for the exact command/output).
+   stories. Twelve run at the Playwright project's default viewport (Desktop Chrome, 1280x720);
+   `Narrow` and `LongContent` run at the declared 390x844 narrow viewport. This is **not** the same
+   as asserting containment at each story's own `visual.spec.ts`-declared screenshot viewport (e.g.
+   `DefaultDark`/`LightMode`'s 1024x720, or `DisabledOption`'s 720x480) — those per-story sizes are
+   exercised only by the visual-regression suite's own geometry check, not by this record's browser
+   spec run. All measured combinations are green (see the WP01 report for the exact command/output).
 5. **Focus containment** — measured directly: the focused control's outline-inclusive bounding box
    stays within the viewport and outside any clipping ancestor, all green.
 
