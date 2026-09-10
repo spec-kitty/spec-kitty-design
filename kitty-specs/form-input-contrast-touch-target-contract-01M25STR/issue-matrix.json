@@ -95,6 +95,18 @@
       "title": "<fill at WP-implementation time>",
       "verdict": "deferred-with-followup",
       "wp": "WP01"
+    },
+    "#321": {
+      "evidence_ref": "#321 IS this mission's own source issue; WP01 is its complete implementation (FR-001..FR-012, all 12 requirements delivered and independently verified by this review)",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "in-mission",
+      "wp": "WP01"
     }
   },
   "schema_version": 1
