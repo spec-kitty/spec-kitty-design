@@ -570,6 +570,60 @@ test('SK-action-row selected and non-selectable analogues — visual baselines',
   await expect(host).toHaveScreenshot('sk-action-row-non-selectable.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
 });
 
+// SK-action-row STATIC FORM (#307). `.sk-action-row-host` > `.sk-action-row` light-DOM markup
+// from the styles-layer story (`packages/styles/src/action-row/sk-action-row-html.stories.ts`),
+// clipped to the wrapper element — the same "clip to the component, not the page" convention
+// this file's header comment documents, and the root the static form actually renders. A
+// computed-style parity test (`fixtures/elements-behaviour/src/sk-action-row.test.ts`) proves
+// the reflow NUMBERS match the shadow form; these baselines are what would additionally catch a
+// visual divergence the numbers do not describe (e.g. a token resolving to the wrong colour).
+const actionRowHtmlStory = async (page: Page, storyId: string) => {
+  await page.goto(`/iframe.html?id=primitives-skactionrow-html--${storyId}&viewMode=story`);
+  const host = page.locator('.sk-action-row-host').first();
+  await host.waitFor({ state: 'visible', timeout: 20000 });
+  return host;
+};
+
+test('SK-action-row HTML default and light — visual baselines', async ({ page }) => {
+  let host = await actionRowHtmlStory(page, 'default');
+  await expect(host).toHaveScreenshot('sk-action-row-html-default-dark.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  host = await actionRowHtmlStory(page, 'light-mode');
+  await expect(host).toHaveScreenshot('sk-action-row-html-light.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+});
+
+test('SK-action-row HTML card, flush, route and current states — visual baselines', async ({ page }) => {
+  for (const [storyId, snapshot] of [
+    ['card', 'sk-action-row-html-card.png'],
+    ['flush', 'sk-action-row-html-flush.png'],
+    ['route', 'sk-action-row-html-route.png'],
+    ['current', 'sk-action-row-html-current.png'],
+    ['route-current', 'sk-action-row-html-route-current.png'],
+  ] as const) {
+    const host = await actionRowHtmlStory(page, storyId);
+    await expect(host).toHaveScreenshot(snapshot, { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  }
+});
+
+test('SK-action-row HTML forced-colors comparison — visual baseline', async ({ page }) => {
+  await page.emulateMedia({ forcedColors: 'active' });
+  await page.goto('/iframe.html?id=primitives-skactionrow-html--forced-colors&viewMode=story');
+  const comparison = page.locator('[data-forced-colors-comparison]').first();
+  await comparison.waitFor({ state: 'visible', timeout: 20000 });
+  await expect(comparison).toHaveScreenshot('sk-action-row-html-forced-colors.png', {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+  });
+});
+
+test('SK-action-row HTML long content at 360px — visual baseline', async ({ page }) => {
+  await page.setViewportSize({ width: 400, height: 844 });
+  const host = await actionRowHtmlStory(page, 'long-content-narrow');
+  await expect(host).toHaveScreenshot('sk-action-row-html-long-content-narrow.png', {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+  });
+});
+
 test('compact work-item extensions T10 dark — visual baseline', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   const host = await actionRowStory(page, 't-10-compact-item');
