@@ -13,7 +13,7 @@
       "wp": null
     },
     "#177": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "Closed sk-card operational status-tone API consumed by the public Factory-pattern composition",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -21,8 +21,8 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
     },
     "#183": {
       "evidence_ref": "<link or commit>",
