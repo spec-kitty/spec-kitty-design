@@ -37,11 +37,11 @@
     {
       "criterion_id": "FR-004",
       "description": "Verify FR-004 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "proof_type": "committed_measurement",
+      "evidence": "ADR-15 'Real package consumption, and what #161 does and does not block'; every probe resolves its CSS via import.meta.resolve and records real_package_consumption.resolved_to in measurement/<construct>/result.json. Root-import defect reproduced with its corrected cause.",
+      "pass_fail": "pass",
+      "verified_by": "architect-alphonso",
+      "verified_at": "2026-09-10T01:07:24.475212+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
