@@ -49,7 +49,7 @@
       "wp": "WP01"
     },
     "#301": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "https://github.com/spec-kitty/spec-kitty-design/issues/301 (epic #300's TKT1/G0 static-form-of-element-backed-CSS decision) is open and unresolved; FR-016/SC-006 require this WP to record the static-twin question as explicitly deferred to #301's ruling rather than inventing an answer, which the component's published documentation does. #301 itself is not this WP's to resolve.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -57,8 +57,8 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
     },
     "#308": {
       "evidence_ref": "spec-kitty/spec-kitty-design#308 is this mission's own source issue; WP01 is the mission's only work package and is now independently re-reviewed and approved (cycle-2), implementing FR-001..FR-018 end to end.",
