@@ -118,10 +118,10 @@
       "criterion_id": "FR-012",
       "description": "Verify FR-012 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "node scripts/build-element-markup.mjs --check: exit 0. packages/styles/src/button/index.ts gained exactly one export, SkButtonDangerSecondaryHTML, generated from the BUTTON_VARIANTS entry; no hand-authored HTML diff.",
+      "pass_fail": "pass",
+      "verified_by": "reviewer-renata",
+      "verified_at": "2026-09-10T15:46:17.257011+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
