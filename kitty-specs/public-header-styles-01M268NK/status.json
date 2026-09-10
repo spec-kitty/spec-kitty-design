@@ -19,8 +19,10 @@
   "work_packages": {
     "WP01": {
       "actor": "codex",
+      "agent": "codex",
       "agent_profile": "__resolved_profile_absent__",
       "agent_profile_version": "__resolved_profile_version_absent__",
+      "assignee": "codex-implementer",
       "force_count": 0,
       "lane": "in_progress",
       "last_event_id": "01M26AQ1S95ADSAKA6PSR6YY75",
