@@ -73,7 +73,7 @@
       "wp": "WP01"
     },
     "#320": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "C-005: sibling mission (danger button), deliberately disjoint scope -- this mission's only packages/tokens edit is the one new Borders-block declaration; verified zero button/danger files in diff. #320 proceeds independently, not this mission's to fix",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -81,8 +81,8 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
     }
   },
   "schema_version": 1
