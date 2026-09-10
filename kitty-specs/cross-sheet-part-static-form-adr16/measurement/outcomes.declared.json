@@ -1,0 +1,43 @@
+{
+  "issue": 314,
+  "record": "docs/architecture/decisions/2026-09-10-16-static-form-of-cross-sheet-part-styling.md",
+  "declared_before_run": true,
+  "why_this_file_exists": "ADR-15's evidence standard: the bar is written and committed BEFORE the probe runs, so a result cannot be relabelled into a pass. This file is never amended; if the run reveals an outcome worth adding, it goes in a cycle-2 file that ADDS rather than rewrites, and the bar is the union.",
+  "engines": ["chromium", "firefox"],
+  "webkit": "expected to be unmeasurable on this host (ADR-10's recorded gap); the run records the launch failure verbatim rather than omitting the engine.",
+  "groups": {
+    "M": "Mechanism. A synthetic two-element pair (probe-tag) under full control of specificity, importance and stylesheet order, versus its flattened static twin. Establishes what the cross-sheet ::part() cascade actually is, independent of any shipped component.",
+    "P": "Reachability of a part nested one level deeper - the shipped sk-metric shape, where <sk-pill-tag> lives inside sk-metric's shadow root and no exportparts forwards its parts to the document.",
+    "S": "Shipped-surface value equality. Real sk-metric + sk-pill-tag elements and their real built sheets, resolved through the package export map, versus the naive static rewrite of sk-metric.css:67.",
+    "H": "ADR-15 follow-on. Whether the two-element wrapper ADR-15 rules for construct kinds 1 and 2 reproduces :host's CASCADE POSITION against a consumer's own rule, as distinct from its layout."
+  },
+  "outcomes": [
+    { "id": "M1",  "group": "M", "state": "shadow; reaching rule .wrap probe-tag::part(tag) (0,1,2); inner .tag (0,1,0); both set white-space", "measures": "white-space on the part node", "expected": "the OUTER (reaching) declaration applies" },
+    { "id": "M2",  "group": "M", "state": "shadow; reaching rule probe-tag::part(tag) at MINIMAL specificity (0,0,2); inner rule #probe.a.b.tag at (1,3,0)", "measures": "white-space on the part node", "expected": "the OUTER declaration still applies - specificity is not consulted across trees" },
+    { "id": "M3",  "group": "M", "state": "static twin of M2; reaching rewrite .wrap .tag (0,2,0); inner rewrite #probe.a.b.tag (1,3,0)", "measures": "white-space on the twin node", "expected": "the INNER declaration applies - divergence from M2 is the outcome under test" },
+    { "id": "M4",  "group": "M", "state": "shadow; reaching sheet inserted BEFORE the element's own sheet is adopted", "measures": "white-space on the part node", "expected": "same as M1 - stylesheet order is not consulted across trees" },
+    { "id": "M5",  "group": "M", "state": "static twin; reaching rewrite and inner rule at EQUAL specificity (0,1,0) each, reaching rewrite ordered FIRST", "measures": "white-space on the twin node", "expected": "the INNER (later) declaration applies - order decides where tree order used to" },
+    { "id": "M6",  "group": "M", "state": "shadow; inner declaration !important, reaching declaration normal", "measures": "white-space on the part node", "expected": "the INNER declaration applies (ordinary importance)" },
+    { "id": "M7",  "group": "M", "state": "shadow; BOTH declarations !important", "measures": "white-space on the part node", "expected": "the INNER declaration applies - importance REVERSES tree order" },
+    { "id": "M8",  "group": "M", "state": "static twin of M7; both !important, reaching rewrite at strictly higher specificity", "measures": "white-space on the twin node", "expected": "the OUTER/reaching declaration applies - divergence from M7 is the outcome under test" },
+    { "id": "M9",  "group": "M", "state": "shadow; a PAGE rule .tag { letter-spacing: 9px } in a document stylesheet", "measures": "letter-spacing on the part node", "expected": "no effect - a document class selector cannot match inside a shadow tree" },
+    { "id": "M10", "group": "M", "state": "static twin of M9; the same page rule, page sheet ordered last, tie at (0,1,0)", "measures": "letter-spacing on the twin node", "expected": "9px - divergence from M9 is the outcome under test" },
+    { "id": "P1",  "group": "P", "state": "real <sk-metric annotation>; document rule sk-pill-tag::part(tag) { letter-spacing: 9px }", "measures": "letter-spacing on the pill's tag node inside sk-metric's shadow root", "expected": "no effect - the pill is inside sk-metric's shadow root and ::part() reaches only one tree level" },
+    { "id": "P2",  "group": "P", "state": "real <sk-metric annotation>; document rule sk-metric::part(tag) { letter-spacing: 9px }", "measures": "letter-spacing on the pill's tag node", "expected": "no effect - sk-metric forwards no exportparts" },
+    { "id": "P3",  "group": "P", "state": "static twin; the same intent rewritten .sk-pill-tag { letter-spacing: 9px }, page sheet last", "measures": "letter-spacing on the twin tag node", "expected": "9px - divergence from P1/P2 is the outcome under test" },
+    { "id": "P4",  "group": "P", "state": "real <sk-metric annotation>; document rule .sk-pill-tag { background: rgb(255,0,0) }", "measures": "background-color on the pill's tag node", "expected": "no effect - the pill's root is not reachable from the document at all" },
+    { "id": "P5",  "group": "P", "state": "static twin of P4, page sheet last", "measures": "background-color on the twin tag node", "expected": "rgb(255,0,0) - divergence from P4 is the outcome under test" },
+    { "id": "S1",  "group": "S", "state": "real sk-metric with an annotation, real built sheets via the export map", "measures": "white-space on the pill's tag node", "expected": "shadow and the naive static rewrite EQUAL" },
+    { "id": "S2",  "group": "S", "state": "as S1", "measures": "padding-block-start", "expected": "shadow and the naive static rewrite EQUAL" },
+    { "id": "S3",  "group": "S", "state": "as S1", "measures": "padding-inline-start", "expected": "shadow and the naive static rewrite EQUAL" },
+    { "id": "S4",  "group": "S", "state": "as S1", "measures": "overflow-wrap", "expected": "shadow and the naive static rewrite EQUAL" },
+    { "id": "S5",  "group": "S", "state": "as S1", "measures": "box-sizing", "expected": "shadow and the naive static rewrite EQUAL" },
+    { "id": "S6",  "group": "S", "state": "as S1", "measures": "max-width", "expected": "shadow and the naive static rewrite EQUAL" },
+    { "id": "S7",  "group": "S", "state": "as S1 but sk-pill-tag.css ordered AFTER sk-metric.css in the document", "measures": "white-space on the twin tag node", "expected": "still equal - the rewrite outbids .sk-pill-tag on specificity, so this pair does not depend on order" },
+    { "id": "S8",  "group": "S", "state": "as S1 but with one additional inner-sheet rule at (0,2,0) setting white-space: nowrap, standing in for a variant compound the component owner may add at any time", "measures": "white-space, shadow vs static twin", "expected": "shadow unchanged (normal); static twin flips to nowrap - divergence, and the component owner never touched sk-metric.css" },
+    { "id": "H1",  "group": "H", "state": "real <sk-action-row>; document rule sk-action-row { display: flex } at (0,0,1) against :host { display: block }", "measures": "display on the host", "expected": "flex - a document rule beats :host regardless of specificity" },
+    { "id": "H2",  "group": "H", "state": "ADR-15's static wrapper .sk-action-row-host carrying the complete :host set; document rule div { display: flex } at (0,0,1)", "measures": "display on the wrapper", "expected": "block - the wrapper CLASS outbids the consumer's type selector; divergence from H1 is the outcome under test" },
+    { "id": "H3",  "group": "H", "state": "real <sk-action-row>; document rule sk-action-row { container-type: normal }", "measures": "container-type on the host, and flex-wrap on .sk-action-row at a 360px width", "expected": "the container is destroyed and @container (max-width:400px) stops firing - a consumer can switch the container off from the document" },
+    { "id": "H4",  "group": "H", "state": "ADR-15's static wrapper; document rule .sk-action-row-host { container-type: normal } at EQUAL specificity, page sheet ordered FIRST", "measures": "container-type on the wrapper, and flex-wrap at 360px", "expected": "the container SURVIVES - the library's rule is later, so the same consumer intent fails; divergence from H3 is the outcome under test" }
+  ]
+}
