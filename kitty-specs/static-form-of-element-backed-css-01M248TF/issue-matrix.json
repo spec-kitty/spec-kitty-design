@@ -107,6 +107,18 @@
       "title": "<fill at WP-implementation time>",
       "verdict": "deferred-with-followup",
       "wp": "WP01"
+    },
+    "#309": {
+      "evidence_ref": "Filed by this mission as the named generator work ADR-15 owes; deliberately not built here (#301 bounds the mission to one WP). Reviewer verified at cycle-2: #309 names both probe tables including the cycle-2 additions (O15/O16 flex-item, O17/O18 grid control, O19 unconditional @container, O22, and action-row's 400/401 inclusive boundary), forbids the collapsed form AND the abbreviated wrapper, names sk-copy-field and sk-page-header with the :host([sticky]) host-styling sub-case, and excludes ::slotted() (owned by #311).",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
     }
   },
   "schema_version": 1
