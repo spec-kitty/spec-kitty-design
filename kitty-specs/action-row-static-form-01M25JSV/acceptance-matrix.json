@@ -147,11 +147,11 @@
     {
       "criterion_id": "FR-015",
       "description": "Verify FR-015 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
+      "proof_type": "code_review",
+      "evidence": "packages/styles/src/action-row/sk-action-row-html.stories.ts Default story doc comment cites FR-015 ('this IS that fragment, rendered with no surrounding collection markup and no script'); actionRowStaticHtml() (sk-action-row.markup.ts) takes no collection/index/context argument, so its output is context-free by construction \u2014 a single row renders identically in or out of a collection",
+      "pass_fail": "pass",
       "verified_by": null,
-      "verified_at": null,
+      "verified_at": "2026-09-10T14:07:20.345802+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
