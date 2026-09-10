@@ -138,10 +138,10 @@
       "criterion_id": "FR-014",
       "description": "Verify FR-014 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "reduced motion and forced colors: fixtures/elements-behaviour/src/sk-button.test.ts:644,672; RTL/logical-layout and narrow-width/zoom: apps/storybook/src/tests/sk-button.spec.ts (dir=rtl physical-side test; 390px/195px viewport overflow test); reviewer ran sk-button.spec.ts on chromium+firefox, 4/4 pass, review-cycle-1.md",
+      "pass_fail": "pass",
+      "verified_by": "mission-closer",
+      "verified_at": "2026-09-10T12:35:42.445773+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
