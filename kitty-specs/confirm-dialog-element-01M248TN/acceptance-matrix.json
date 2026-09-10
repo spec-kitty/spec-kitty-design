@@ -97,11 +97,11 @@
     {
       "criterion_id": "FR-010",
       "description": "Verify FR-010 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "proof_type": "document_inspection",
+      "evidence": "packages/styles/src/confirm-dialog/sk-confirm-dialog.css \u2014 `.sk-confirm-dialog__body` is the sole flexible flex-column item (`flex: 1 1 auto; min-block-size: 0; overflow-y: auto`) while `.sk-confirm-dialog__actions` is a fixed, non-shrinking sibling (`flex: 0 0 auto`) that the body's scroll can never cover; demonstrated visually by the OpenLongScrollingBody/NarrowWidth/Zoom200 stories in sk-confirm-dialog.stories.ts (CI-authoritative visual baselines per this repo's convention, not re-derived locally).",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T09:44:51.037399+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
