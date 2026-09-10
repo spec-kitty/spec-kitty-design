@@ -1,0 +1,21 @@
+{
+  "issue": 314,
+  "adds_to": "outcomes.declared.json",
+  "never_rewrites": "This file ADDS outcomes. It amends no cycle-1 outcome's id, state or measured value. The bar is the UNION of the two files. Convention taken from ADR-15's measurement, for the same reason: a declaration that can be edited after the run is not a declaration.",
+  "why_a_cycle_2_exists": "Cycle 1 measured 27 outcomes and one of them, S8, came back EQUAL where the declaration expected a divergence. The declaration was wrong, not the measurement (see errata below), and the correct probes for the claim S8 was reaching for are added here rather than by editing S8. Two further gaps were visible only once cycle 1 had run: M2 established that specificity is not consulted ACROSS trees but said nothing about within one tree, and P1/P2 established that the shipped part is unreachable from the document without distinguishing '::part() cannot reach two levels' from 'nothing forwards it'.",
+  "errata": [
+    {
+      "outcome": "S8",
+      "declared_expectation": "shadow unchanged (normal); static twin flips to nowrap",
+      "measured": "equal - both normal, both engines",
+      "why_the_declaration_was_wrong": "S8's simulated inner rule is (0,2,0) and the naive rewrite is also (0,2,0). That is a TIE, not a win, and the probe page authored the rewrite last, so the rewrite won on order. The declaration reasoned as though a rule inside the component's own sheet would outbid the reaching rewrite; at equal specificity it only outbids it when it is also later. The measured value stands; S9 and S10 below probe the two cases the declaration conflated.",
+      "outcome_stands": "S8's measured value is recorded unchanged and is NOT relabelled a pass. It is evidence in its own right: it shows the shipped-shaped two-party comparison surviving on an ordering accident."
+    }
+  ],
+  "outcomes": [
+    { "id": "M11", "group": "M", "state": "shadow; TWO outer-tree reaching rules competing - .wrap probe-tag::part(tag) at (0,1,2) authored FIRST against probe-tag::part(tag) at (0,0,2) authored LAST", "measures": "padding-block-start on the part node", "expected": "the (0,1,2) rule applies - specificity decides normally BETWEEN rules of the same tree; M2's 'specificity is not consulted' is a statement about CROSS-tree comparisons only" },
+    { "id": "P6",  "group": "P", "state": "real <sk-metric annotation>; exportparts=\"tag\" set on the nested <sk-pill-tag> at run time; document rule sk-metric::part(tag) { margin-block-start: 9px }", "measures": "margin-block-start on the pill's tag node", "expected": "9px - so P1/P2's null result is the ABSENCE of forwarding, not an incapacity of ::part(); a component that forwards its children's parts hands the document the same unconditional win sk-metric has" },
+    { "id": "S9",  "group": "S", "state": "as S8 but the simulated sk-pill-tag.css rule is (0,3,0), STRICTLY above the (0,2,0) naive rewrite, and still authored before it", "measures": "white-space, shadow vs static twin", "expected": "shadow normal, static nowrap - DIVERGE. The component owner changed only their own sheet; sk-metric.css is untouched and the shadow form does not move." },
+    { "id": "S10", "group": "S", "state": "the S8 tie at (0,2,0), with the simulated sk-pill-tag.css rule authored AFTER the naive rewrite in the document", "measures": "white-space, shadow vs static twin", "expected": "shadow normal, static nowrap - DIVERGE. Same two rules as S8, same specificities, opposite document order: S8's equality was an ordering accident, and document order is a consumer's bundler's decision." }
+  ]
+}
