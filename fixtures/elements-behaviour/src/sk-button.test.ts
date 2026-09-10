@@ -12,7 +12,6 @@
 import { beforeEach, expect, test } from 'vitest';
 import '../../../packages/elements/src/button/sk-button.js';
 import skButtonSheet from '../../../packages/elements/src/button/sk-button.css.js';
-import skButtonCssRaw from '../../../packages/styles/src/button/sk-button.css?raw';
 import { SkButton } from '../../../packages/elements/src/button/sk-button.js';
 import {
   BUTTON_SIZES,
@@ -29,13 +28,26 @@ beforeEach(installTokenSheet);
 
 // AUTHORED sheet, parsed directly — the same technique sk-action-row.test.ts uses for a
 // pseudo-class rule (`:hover`/`:active`) that `getComputedStyle` cannot answer without actually
-// simulating the state. `sk-button--danger-secondary`'s hover fill and active transform are
-// both asserted this way below.
+// simulating the state, and sk-status-indicator.test.ts's `authoredStatusSheet`/`mediaRuleFor`
+// pair also uses: asserting the AUTHORED sheet itself carries the guard, independent of any one
+// browser's runtime media-query interpretation. ONE shared instance — `danger-secondary`'s
+// hover/active rules (rootStyleRuleFor, below) and the busy axis's media/style rules
+// (mediaRuleFor/styleRuleFor, below) both read off it.
 const authoredButtonSheet = new CSSStyleSheet();
 authoredButtonSheet.replaceSync(skButtonCss);
 
 const rootStyleRuleFor = (selector: string): CSSStyleRule | undefined =>
   Array.from(authoredButtonSheet.cssRules).find(
+    (rule): rule is CSSStyleRule => rule instanceof CSSStyleRule && rule.selectorText === selector,
+  );
+
+const mediaRuleFor = (query: string): CSSMediaRule | undefined =>
+  Array.from(authoredButtonSheet.cssRules).find(
+    (rule): rule is CSSMediaRule => rule instanceof CSSMediaRule && rule.media.mediaText === query,
+  );
+
+const styleRuleFor = (rules: CSSRuleList | readonly CSSRule[], selector: string): CSSStyleRule | undefined =>
+  Array.from(rules).find(
     (rule): rule is CSSStyleRule => rule instanceof CSSStyleRule && rule.selectorText === selector,
   );
 
@@ -51,22 +63,6 @@ const mount = async (attrs: Record<string, string> = {}, label = 'Label') => {
 const partOf = (el: Element) => el.shadowRoot!.querySelector('[part="button"]') as HTMLElement;
 const busyCueOf = (el: Element) =>
   el.shadowRoot!.querySelector('[part="busy-cue"]') as HTMLElement;
-
-// The busy-axis (#305) authored CSS, parsed the way sk-status-indicator.test.ts's
-// `authoredStatusSheet`/`mediaRuleFor` pair already does: asserting the AUTHORED sheet itself
-// carries the guard, independent of any one browser's runtime media-query interpretation.
-const authoredButtonSheet = new CSSStyleSheet();
-authoredButtonSheet.replaceSync(skButtonCssRaw);
-
-const mediaRuleFor = (query: string): CSSMediaRule | undefined =>
-  Array.from(authoredButtonSheet.cssRules).find(
-    (rule): rule is CSSMediaRule => rule instanceof CSSMediaRule && rule.media.mediaText === query,
-  );
-
-const styleRuleFor = (rules: CSSRuleList | readonly CSSRule[], selector: string): CSSStyleRule | undefined =>
-  Array.from(rules).find(
-    (rule): rule is CSSStyleRule => rule instanceof CSSStyleRule && rule.selectorText === selector,
-  );
 
 test('icon button and link branches expose the supplied label as their accessible name', async () => {
   const button = await mount({ variant: 'primary', size: 'icon', label: 'Notifications' }, '●');
@@ -800,11 +796,30 @@ test('[FR-009/FR-010] reduced motion stops the animation while the cue stays vis
   expect(idleCue.style.opacity).toBe('0');
   expect(idleCue.style.borderStyle, 'the resting ring must be solid-bordered').toBe('solid');
 
-  // No forced-colors override exists for the cue (T001 Activity Log: checked, not assumed
-  // absent) — a plain `border` survives forced-colors automatically with zero author CSS
-  // (docs/contributing/adding-a-component.md), and this cue is entirely border-drawn. The base
-  // rule's solid border-style, asserted above, is the only thing FR-010 needs from this file.
-  expect(mediaRuleFor('(forced-colors: active)'), 'no forced-colors override should exist for the cue').toBeUndefined();
+  // No forced-colors override exists for the CUE specifically (T001 Activity Log: checked, not
+  // assumed absent) — a plain `border` survives forced-colors automatically with zero author
+  // CSS (docs/contributing/adding-a-component.md), and this cue is entirely border-drawn. The
+  // base rule's solid border-style, asserted above, is the only thing FR-010 needs from this
+  // file.
+  //
+  // SCOPED TO THE CUE'S OWN SELECTORS, not "no forced-colors block exists anywhere in the
+  // file" — #320's danger-secondary tone adds its own `@media (forced-colors: active)` block
+  // for an UNRELATED selector (`.sk-button--danger-secondary`, stepping its border-width — see
+  // sk-button.css). Asserting block-ABSENCE would have made this claim false the moment that
+  // landed on the train, for a reason that has nothing to do with the busy cue. The real claim
+  // was always "the cue has no override", and it stays checkable — and this arm stays a real
+  // assertion rather than a silently-skipped one — regardless of how many other tones gain
+  // their own forced-colors rules later.
+  const forcedColorsBlock = mediaRuleFor('(forced-colors: active)')!;
+  expect(forcedColorsBlock, 'a forced-colors block is expected (danger-secondary\'s), just not for the cue').not.toBeUndefined();
+  expect(
+    styleRuleFor(forcedColorsBlock.cssRules, '.sk-button__busy-cue'),
+    'no forced-colors override should exist for the idle cue rule',
+  ).toBeUndefined();
+  expect(
+    styleRuleFor(forcedColorsBlock.cssRules, busySelector),
+    'no forced-colors override should exist for the busy-visible cue rule',
+  ).toBeUndefined();
 });
 
 test('[FR-002] the static markup module threads busy through to the shared class list', () => {
