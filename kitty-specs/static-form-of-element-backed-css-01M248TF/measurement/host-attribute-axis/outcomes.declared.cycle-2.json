@@ -1,0 +1,26 @@
+{
+  "construct_kind": "host-attribute-axis",
+  "component": "sk-app-shell",
+  "supplements": "outcomes.declared.json",
+  "declared_before_running": true,
+  "declaration_note": "Cycle-1 review found two gaps in the cycle-1 outcome set. This file declares the additional outcomes that close them, and is committed in its own commit before the probe was extended or re-run. outcomes.declared.json is left byte-identical — the cycle-1 bar is not rewritten after the fact; it is added to, in a separately dated record.",
+  "why_these_outcomes_exist": {
+    "HIGH-1": "The cycle-1 prose prescribed a wrapper carrying only `container-type: inline-size`, while the exemplar actually MEASURED the complete :host declaration set. Those are different rules and they do not behave the same. A third static variant, B-abbrev, is added so the difference is pinned by the outcome table #309/#310 inherit, rather than by prose. The discriminating layout is a flex parent, where size containment on a wrapper with no width makes the component's content contribute zero to intrinsic sizing.",
+    "MEDIUM-2": "The cycle-1 states were 800/900/1000/1200 only, so the sheet's UNCONDITIONAL `@container (max-width: 720px)` rule was never exercised on either side. A generator that mishandled a sheet's non-host-dependent container rules would have passed the cycle-1 table."
+  },
+  "static_exemplar_variants_added": {
+    "B-abbrev": "The wrapper as the cycle-1 PROSE prescribed it: `.sk-app-shell-host { container-type: inline-size }` and nothing else. Measured alongside B-wrapper (the complete :host set) to record which one the 14/14 result actually belongs to."
+  },
+  "pass_bar": "Unchanged from cycle 1 and now applied to the combined set: a construct kind earns generated-static-form only if SOME static exemplar variant reproduces EVERY declared outcome in BOTH files, in both engines.",
+  "declared_outcomes": [
+    { "id": "O15", "description": ".sk-app-shell width (HIGH-1: component as an item of a 300px flex row)", "viewport_or_state": "flex parent 300px, presentation=compact" },
+    { "id": "O16", "description": ".sk-app-shell grid-template-columns (HIGH-1: component as an item of a 300px flex row)", "viewport_or_state": "flex parent 300px, presentation=compact" },
+    { "id": "O17", "description": ".sk-app-shell width (HIGH-1 control: component as an item of a 300px grid track — the layout the cycle-1 table already resembled)", "viewport_or_state": "grid parent, single 300px track, presentation=compact" },
+    { "id": "O18", "description": ".sk-app-shell grid-template-columns (HIGH-1 control: 300px grid track)", "viewport_or_state": "grid parent, single 300px track, presentation=compact" },
+    { "id": "O19", "description": ".sk-app-shell grid-template-columns (MEDIUM-2: the sheet's UNCONDITIONAL @container (max-width: 720px) rule, with NO presentation attribute so no host-attribute rule can also fire)", "viewport_or_state": "shell 600px, no presentation attribute" },
+    { "id": "O20", "description": ".sk-app-shell grid-template-columns (MEDIUM-2: just above the unconditional 720px breakpoint, no presentation attribute)", "viewport_or_state": "shell 760px, no presentation attribute" },
+    { "id": "O21", "description": ".sk-app-shell__compact-header display (MEDIUM-2: confirms the unconditional 720px rule does not reach the compact regions)", "viewport_or_state": "shell 600px, no presentation attribute" },
+    { "id": "O22", "description": ".sk-app-shell grid-template-columns (MEDIUM-2: sub-720 WITH the rail-preserving axis also active, so the unconditional and host-attribute rules compose)", "viewport_or_state": "shell 700px, presentation=rail-preserving" }
+  ],
+  "engines": ["chromium", "firefox"]
+}
