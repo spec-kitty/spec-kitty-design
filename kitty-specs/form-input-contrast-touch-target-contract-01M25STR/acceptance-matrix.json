@@ -78,10 +78,10 @@
       "criterion_id": "FR-008",
       "description": "Verify FR-008 is satisfied",
       "proof_type": "automated_test",
-      "evidence": "apps/storybook/src/tests/sk-form-input-contrast-touch-target.spec.ts, forced-colors sub-suite: PASS on chromium+firefox for both paths (webkit env-limitation, see FR-007 note). Test measures the ACTUAL resolved border-top-style/border-top-color via getComputedStyle inside forced-colors: active emulation for both the control and a plain non-interactive reference element in the same document, logs both via console.info, and asserts style is not 'none' and both colors are non-empty -- measured, not assumed from memory, per adding-a-component.md's own corrected-guidance precedent that this test file's own header comment cites.",
+      "evidence": "apps/storybook/src/tests/sk-form-input-contrast-touch-target.spec.ts, forced-colors sub-suite, re-verified at head 51c3ee60/373d4aeb after the assertion was strengthened and scoped: PASS on chromium (2/2), control and reference both resolve to rgb(0,0,0) for both consumption paths -- the equality-with-reference assertion this test now makes, not the superseded 'style is not none and colors non-empty' check the prior verdict cited. Skips cleanly (not fails) on firefox/webkit via 'Playwright forced-colours emulation is Chromium-only' (test.skip(browserName !== 'chromium')), reproduced with a bare <input> outside this repo's CSS on Firefox (rgb(143,143,157), neither the true system colour nor the raw authored hex) -- a tooling limitation, not a control defect. CI job 'playwright' (all three browsers) green at head.",
       "pass_fail": "pass",
       "verified_by": "reviewer-renata",
-      "verified_at": "2026-09-10T15:49:13.944815+00:00",
+      "verified_at": "2026-09-10T20:56:59.839204+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
