@@ -1,0 +1,464 @@
+{
+  "construct_kind": "slotted-child-rule",
+  "component": "sk-entity-marker",
+  "generated_at": "2026-09-10T01:01:03.619Z",
+  "train_ref_note": "Run on mission/static-form-of-element-backed-css, branched from train/elements-first@2b59c8c.",
+  "shadow_form_source": "packages/elements/src/entity-marker/sk-entity-marker.ts, rendered from the Storybook build via shadow.html, cross-checked against Storybook story elements-skentitymarker--image-naming",
+  "static_exemplar_source": "kitty-specs/static-form-of-element-backed-css-01M248TF/measurement/slotted-child-rule/exemplar.html (throwaway; links the export-map-resolved built CSS)",
+  "real_package_consumption": {
+    "specifier": "@spec-kitty/styles/entity-marker/sk-entity-marker.css",
+    "resolved_to": "/home/jeroennouws/dev/spec-kitty-design-missions/301/packages/styles/dist/entity-marker/sk-entity-marker.css",
+    "how": "Node's own export-map resolution via import.meta.resolve, served to the browser by harness.mjs on /pkg/<specifier>"
+  },
+  "declared_outcome_sources": [
+    "outcomes.declared.json",
+    "outcomes.declared.cycle-2.json"
+  ],
+  "declared_outcome_count": 10,
+  "engines": [
+    "chromium",
+    "firefox"
+  ],
+  "per_engine": {
+    "chromium": {
+      "paired_list_validity_in_shadow_tree": {
+        "paired_list_rule_count": 1,
+        "paired_list_selector_text": ".sk-entity-marker__content > img, ::slotted(img)",
+        "slotted_node_picks_it_up": true
+      },
+      "fidelity_crosscheck": {
+        "story_id": "elements-skentitymarker--image-naming",
+        "story": {
+          "display": "block",
+          "inline_size": "32px",
+          "block_size": "32px",
+          "object_fit": "cover"
+        },
+        "controlled_shadow_page": {
+          "display": "block",
+          "inline_size": "32px",
+          "block_size": "32px",
+          "object_fit": "cover"
+        },
+        "faithful": true
+      },
+      "observed_outcomes": [
+        {
+          "id": "O1",
+          "description": "assigned/descendant img display",
+          "viewport_or_state": "default marker, 64px viewport-independent box",
+          "shadow_form_value": "block",
+          "static_exemplar_value": {
+            "A-descendant": "block",
+            "B-paired-spelling": "block"
+          },
+          "equal": {
+            "A-descendant": true,
+            "B-paired-spelling": true
+          }
+        },
+        {
+          "id": "O2",
+          "description": "assigned/descendant img inline-size (width)",
+          "viewport_or_state": "default marker",
+          "shadow_form_value": "32px",
+          "static_exemplar_value": {
+            "A-descendant": "32px",
+            "B-paired-spelling": "32px"
+          },
+          "equal": {
+            "A-descendant": true,
+            "B-paired-spelling": true
+          }
+        },
+        {
+          "id": "O3",
+          "description": "assigned/descendant img block-size (height)",
+          "viewport_or_state": "default marker",
+          "shadow_form_value": "32px",
+          "static_exemplar_value": {
+            "A-descendant": "32px",
+            "B-paired-spelling": "32px"
+          },
+          "equal": {
+            "A-descendant": true,
+            "B-paired-spelling": true
+          }
+        },
+        {
+          "id": "O4",
+          "description": "assigned/descendant img object-fit",
+          "viewport_or_state": "default marker",
+          "shadow_form_value": "cover",
+          "static_exemplar_value": {
+            "A-descendant": "cover",
+            "B-paired-spelling": "cover"
+          },
+          "equal": {
+            "A-descendant": true,
+            "B-paired-spelling": true
+          }
+        },
+        {
+          "id": "O5",
+          "description": "assigned/descendant img object-fit WITH a competing page-level document rule `img { object-fit: contain }` of equal specificity present (cascade/origin probe)",
+          "viewport_or_state": "default marker + competing document rule",
+          "shadow_form_value": "contain",
+          "static_exemplar_value": {
+            "A-descendant": "cover",
+            "B-paired-spelling": "cover"
+          },
+          "equal": {
+            "A-descendant": false,
+            "B-paired-spelling": false
+          }
+        },
+        {
+          "id": "O6",
+          "description": "assigned/descendant img object-fit with the same competing rule at HIGHER specificity `.page-scope img { object-fit: contain }`",
+          "viewport_or_state": "default marker + competing higher-specificity document rule",
+          "shadow_form_value": "contain",
+          "static_exemplar_value": {
+            "A-descendant": "contain",
+            "B-paired-spelling": "contain"
+          },
+          "equal": {
+            "A-descendant": true,
+            "B-paired-spelling": true
+          }
+        },
+        {
+          "id": "O7",
+          "description": "img object-fit — consumer rule LOSES on specificity (weak), consumer sheet FIRST in document order",
+          "viewport_or_state": "default marker + weak competing rule, order=first",
+          "shadow_form_value": "contain",
+          "static_exemplar_value": {
+            "A-descendant": "cover",
+            "B-paired-spelling": "cover"
+          },
+          "equal": {
+            "A-descendant": false,
+            "B-paired-spelling": false
+          }
+        },
+        {
+          "id": "O8",
+          "description": "img object-fit — consumer rule TIES (tie), consumer sheet FIRST in document order",
+          "viewport_or_state": "default marker + tie competing rule, order=first",
+          "shadow_form_value": "contain",
+          "static_exemplar_value": {
+            "A-descendant": "cover",
+            "B-paired-spelling": "cover"
+          },
+          "equal": {
+            "A-descendant": false,
+            "B-paired-spelling": false
+          }
+        },
+        {
+          "id": "O9",
+          "description": "img object-fit — consumer rule genuinely OUTBIDS (strong), consumer sheet LAST",
+          "viewport_or_state": "default marker + strong competing rule, order=last",
+          "shadow_form_value": "contain",
+          "static_exemplar_value": {
+            "A-descendant": "contain",
+            "B-paired-spelling": "contain"
+          },
+          "equal": {
+            "A-descendant": true,
+            "B-paired-spelling": true
+          }
+        },
+        {
+          "id": "O10",
+          "description": "img object-fit — consumer rule genuinely OUTBIDS (strong), consumer sheet FIRST",
+          "viewport_or_state": "default marker + strong competing rule, order=first",
+          "shadow_form_value": "contain",
+          "static_exemplar_value": {
+            "A-descendant": "contain",
+            "B-paired-spelling": "contain"
+          },
+          "equal": {
+            "A-descendant": true,
+            "B-paired-spelling": true
+          }
+        }
+      ]
+    },
+    "firefox": {
+      "paired_list_validity_in_shadow_tree": {
+        "paired_list_rule_count": 1,
+        "paired_list_selector_text": ".sk-entity-marker__content > img, ::slotted(img)",
+        "slotted_node_picks_it_up": true
+      },
+      "fidelity_crosscheck": {
+        "story_id": "elements-skentitymarker--image-naming",
+        "story": {
+          "display": "block",
+          "inline_size": "32px",
+          "block_size": "32px",
+          "object_fit": "cover"
+        },
+        "controlled_shadow_page": {
+          "display": "block",
+          "inline_size": "32px",
+          "block_size": "32px",
+          "object_fit": "cover"
+        },
+        "faithful": true
+      },
+      "observed_outcomes": [
+        {
+          "id": "O1",
+          "description": "assigned/descendant img display",
+          "viewport_or_state": "default marker, 64px viewport-independent box",
+          "shadow_form_value": "block",
+          "static_exemplar_value": {
+            "A-descendant": "block",
+            "B-paired-spelling": "block"
+          },
+          "equal": {
+            "A-descendant": true,
+            "B-paired-spelling": true
+          }
+        },
+        {
+          "id": "O2",
+          "description": "assigned/descendant img inline-size (width)",
+          "viewport_or_state": "default marker",
+          "shadow_form_value": "32px",
+          "static_exemplar_value": {
+            "A-descendant": "32px",
+            "B-paired-spelling": "32px"
+          },
+          "equal": {
+            "A-descendant": true,
+            "B-paired-spelling": true
+          }
+        },
+        {
+          "id": "O3",
+          "description": "assigned/descendant img block-size (height)",
+          "viewport_or_state": "default marker",
+          "shadow_form_value": "32px",
+          "static_exemplar_value": {
+            "A-descendant": "32px",
+            "B-paired-spelling": "32px"
+          },
+          "equal": {
+            "A-descendant": true,
+            "B-paired-spelling": true
+          }
+        },
+        {
+          "id": "O4",
+          "description": "assigned/descendant img object-fit",
+          "viewport_or_state": "default marker",
+          "shadow_form_value": "cover",
+          "static_exemplar_value": {
+            "A-descendant": "cover",
+            "B-paired-spelling": "cover"
+          },
+          "equal": {
+            "A-descendant": true,
+            "B-paired-spelling": true
+          }
+        },
+        {
+          "id": "O5",
+          "description": "assigned/descendant img object-fit WITH a competing page-level document rule `img { object-fit: contain }` of equal specificity present (cascade/origin probe)",
+          "viewport_or_state": "default marker + competing document rule",
+          "shadow_form_value": "contain",
+          "static_exemplar_value": {
+            "A-descendant": "cover",
+            "B-paired-spelling": "cover"
+          },
+          "equal": {
+            "A-descendant": false,
+            "B-paired-spelling": false
+          }
+        },
+        {
+          "id": "O6",
+          "description": "assigned/descendant img object-fit with the same competing rule at HIGHER specificity `.page-scope img { object-fit: contain }`",
+          "viewport_or_state": "default marker + competing higher-specificity document rule",
+          "shadow_form_value": "contain",
+          "static_exemplar_value": {
+            "A-descendant": "contain",
+            "B-paired-spelling": "contain"
+          },
+          "equal": {
+            "A-descendant": true,
+            "B-paired-spelling": true
+          }
+        },
+        {
+          "id": "O7",
+          "description": "img object-fit — consumer rule LOSES on specificity (weak), consumer sheet FIRST in document order",
+          "viewport_or_state": "default marker + weak competing rule, order=first",
+          "shadow_form_value": "contain",
+          "static_exemplar_value": {
+            "A-descendant": "cover",
+            "B-paired-spelling": "cover"
+          },
+          "equal": {
+            "A-descendant": false,
+            "B-paired-spelling": false
+          }
+        },
+        {
+          "id": "O8",
+          "description": "img object-fit — consumer rule TIES (tie), consumer sheet FIRST in document order",
+          "viewport_or_state": "default marker + tie competing rule, order=first",
+          "shadow_form_value": "contain",
+          "static_exemplar_value": {
+            "A-descendant": "cover",
+            "B-paired-spelling": "cover"
+          },
+          "equal": {
+            "A-descendant": false,
+            "B-paired-spelling": false
+          }
+        },
+        {
+          "id": "O9",
+          "description": "img object-fit — consumer rule genuinely OUTBIDS (strong), consumer sheet LAST",
+          "viewport_or_state": "default marker + strong competing rule, order=last",
+          "shadow_form_value": "contain",
+          "static_exemplar_value": {
+            "A-descendant": "contain",
+            "B-paired-spelling": "contain"
+          },
+          "equal": {
+            "A-descendant": true,
+            "B-paired-spelling": true
+          }
+        },
+        {
+          "id": "O10",
+          "description": "img object-fit — consumer rule genuinely OUTBIDS (strong), consumer sheet FIRST",
+          "viewport_or_state": "default marker + strong competing rule, order=first",
+          "shadow_form_value": "contain",
+          "static_exemplar_value": {
+            "A-descendant": "contain",
+            "B-paired-spelling": "contain"
+          },
+          "equal": {
+            "A-descendant": true,
+            "B-paired-spelling": true
+          }
+        }
+      ]
+    }
+  },
+  "variant_passes_every_declared_outcome": {
+    "A-descendant": false,
+    "B-paired-spelling": false
+  },
+  "declared_outcome_failures": {
+    "A-descendant": [
+      {
+        "engine": "chromium",
+        "id": "O5",
+        "description": "assigned/descendant img object-fit WITH a competing page-level document rule `img { object-fit: contain }` of equal specificity present (cascade/origin probe)",
+        "viewport_or_state": "default marker + competing document rule",
+        "shadow_form_value": "contain",
+        "static_exemplar_value": "cover"
+      },
+      {
+        "engine": "chromium",
+        "id": "O7",
+        "description": "img object-fit — consumer rule LOSES on specificity (weak), consumer sheet FIRST in document order",
+        "viewport_or_state": "default marker + weak competing rule, order=first",
+        "shadow_form_value": "contain",
+        "static_exemplar_value": "cover"
+      },
+      {
+        "engine": "chromium",
+        "id": "O8",
+        "description": "img object-fit — consumer rule TIES (tie), consumer sheet FIRST in document order",
+        "viewport_or_state": "default marker + tie competing rule, order=first",
+        "shadow_form_value": "contain",
+        "static_exemplar_value": "cover"
+      },
+      {
+        "engine": "firefox",
+        "id": "O5",
+        "description": "assigned/descendant img object-fit WITH a competing page-level document rule `img { object-fit: contain }` of equal specificity present (cascade/origin probe)",
+        "viewport_or_state": "default marker + competing document rule",
+        "shadow_form_value": "contain",
+        "static_exemplar_value": "cover"
+      },
+      {
+        "engine": "firefox",
+        "id": "O7",
+        "description": "img object-fit — consumer rule LOSES on specificity (weak), consumer sheet FIRST in document order",
+        "viewport_or_state": "default marker + weak competing rule, order=first",
+        "shadow_form_value": "contain",
+        "static_exemplar_value": "cover"
+      },
+      {
+        "engine": "firefox",
+        "id": "O8",
+        "description": "img object-fit — consumer rule TIES (tie), consumer sheet FIRST in document order",
+        "viewport_or_state": "default marker + tie competing rule, order=first",
+        "shadow_form_value": "contain",
+        "static_exemplar_value": "cover"
+      }
+    ],
+    "B-paired-spelling": [
+      {
+        "engine": "chromium",
+        "id": "O5",
+        "description": "assigned/descendant img object-fit WITH a competing page-level document rule `img { object-fit: contain }` of equal specificity present (cascade/origin probe)",
+        "viewport_or_state": "default marker + competing document rule",
+        "shadow_form_value": "contain",
+        "static_exemplar_value": "cover"
+      },
+      {
+        "engine": "chromium",
+        "id": "O7",
+        "description": "img object-fit — consumer rule LOSES on specificity (weak), consumer sheet FIRST in document order",
+        "viewport_or_state": "default marker + weak competing rule, order=first",
+        "shadow_form_value": "contain",
+        "static_exemplar_value": "cover"
+      },
+      {
+        "engine": "chromium",
+        "id": "O8",
+        "description": "img object-fit — consumer rule TIES (tie), consumer sheet FIRST in document order",
+        "viewport_or_state": "default marker + tie competing rule, order=first",
+        "shadow_form_value": "contain",
+        "static_exemplar_value": "cover"
+      },
+      {
+        "engine": "firefox",
+        "id": "O5",
+        "description": "assigned/descendant img object-fit WITH a competing page-level document rule `img { object-fit: contain }` of equal specificity present (cascade/origin probe)",
+        "viewport_or_state": "default marker + competing document rule",
+        "shadow_form_value": "contain",
+        "static_exemplar_value": "cover"
+      },
+      {
+        "engine": "firefox",
+        "id": "O7",
+        "description": "img object-fit — consumer rule LOSES on specificity (weak), consumer sheet FIRST in document order",
+        "viewport_or_state": "default marker + weak competing rule, order=first",
+        "shadow_form_value": "contain",
+        "static_exemplar_value": "cover"
+      },
+      {
+        "engine": "firefox",
+        "id": "O8",
+        "description": "img object-fit — consumer rule TIES (tie), consumer sheet FIRST in document order",
+        "viewport_or_state": "default marker + tie competing rule, order=first",
+        "shadow_form_value": "contain",
+        "static_exemplar_value": "cover"
+      }
+    ]
+  },
+  "composed_case_tested": false,
+  "composed_case_note": "No composed/nested-container case applies: this sheet declares no container-type. The contract asks instead for the cascade/specificity observation, captured as declared outcomes O5 and O6.",
+  "verdict_for_this_construct_kind": "shadow-only",
+  "passing_static_exemplar_variant": null
+}

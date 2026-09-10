@@ -1,3 +1,45 @@
+/* WHAT A STATIC CONSUMER MUST AUTHOR INSTEAD (ADR-15).
+
+   The compact / rail-preserving axis below is a HOST-ATTRIBUTE VARIANT AXIS inside a
+   @container block whose container is `:host`. There is no light-DOM form of it in this
+   package yet — #309 files the generator, #310 the equivalence gate — so a server-rendered
+   consumer authors it themselves, and there is exactly one shape that works:
+
+       <div class="sk-app-shell-host sk-app-shell-host--compact">
+         <div class="sk-app-shell"> ... </div>
+       </div>
+
+   THE WRAPPER CARRIES THIS SHEET'S WHOLE `:host` DECLARATION SET, not `container-type` alone.
+   Today that is `display: block; width: 100%; min-width: 0; container-type: inline-size` — and
+   the rule is "whatever `:host` declares", so if the block below gains a declaration the wrapper
+   owes it too. MOST `:host([presentation="X"]) <sel>` rules further down rewrite mechanically
+   to `.sk-app-shell-host--X <sel>` — but not all of them. The last rule in this file is
+   `:host(:is([presentation="compact"], [presentation="rail-preserving"])) ...[hidden]`, and it
+   is load-bearing: at (0,4,0) it is what beats the @container-gated `display: block` at (0,3,0),
+   so a rewrite that skips it leaves a closed drawer visible. `:host(:not(...))` and a bare
+   `:host([attr])` styling the host itself occur elsewhere in the library. #309 owns all four
+   shapes; do not assume the single-attribute form is the only one.
+
+   THE ABBREVIATED WRAPPER IS NOT A SHORTCUT, IT IS A BUG. `container-type: inline-size` implies
+   size containment, so a wrapper with no width of its own contributes nothing to intrinsic
+   sizing. Measured, chromium and firefox, with the component as an item of a 300px flex row:
+   the real element and the full wrapper both compute `width: 300px`; a wrapper carrying only
+   `container-type` computes `0px`. The component vanishes. In a 300px grid track all three
+   agree, which is exactly why this is easy to miss.
+
+   DO NOT COLLAPSE THE TWO ELEMENTS. Moving `container-type` onto `.sk-app-shell` and turning
+   the axis into `.sk-app-shell--compact` is the obvious translation and it is wrong: an
+   element is never its own query container, so `.sk-app-shell`'s own rules then answer some
+   outer ancestor of the page instead of the component's box. Its DESCENDANTS keep querying
+   correctly, which is why the defect is silent. Measured, chromium and firefox, at an 800px
+   shell with presentation=compact: the real element computes `grid-template-columns: 800px`
+   and the collapsed static form computes `56px 240px 504px`. Nested inside a 500px ancestor
+   container, a 1200px shell the element leaves at three columns is compacted to one.
+
+   ADR-15 and kitty-specs/static-form-of-element-backed-css-01M248TF/measurement/
+   host-attribute-axis/ hold the full outcome table. This comment adds no rule and changes
+   none. */
+
 :host {
   display: block;
   width: 100%;

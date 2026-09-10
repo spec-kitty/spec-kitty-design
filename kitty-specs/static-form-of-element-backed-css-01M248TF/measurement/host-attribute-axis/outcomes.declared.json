@@ -1,0 +1,29 @@
+{
+  "construct_kind": "host-attribute-axis",
+  "component": "sk-app-shell",
+  "declared_before_running": true,
+  "declaration_note": "Committed in its own commit before any run.mjs or result.json existed, so the success bar is fixed ahead of the evidence (spec FR-008, NFR-001).",
+  "static_exemplar_variants": {
+    "A-collapsed": ":host -> .sk-app-shell on the SAME element; :host([presentation=\"X\"]) .sk-app-shell -> .sk-app-shell.sk-app-shell--X; :host([presentation=\"X\"]) .sk-app-shell__y -> .sk-app-shell--X .sk-app-shell__y. This is the literal candidate-(a) transform plan.md declares.",
+    "B-wrapper": ":host -> a separate wrapper element .sk-app-shell-host that carries container-type and the modifier class, wrapping the unchanged .sk-app-shell root. Preserves the two-element structure the shadow form has."
+  },
+  "pass_bar": "A construct kind earns verdict generated-static-form only if SOME static exemplar variant reproduces EVERY declared outcome below, including both composed sub-cases, against the real built CSS resolved through the @spec-kitty/styles export map. Otherwise shadow-only, with the blocking mechanism named.",
+  "declared_outcomes": [
+    { "id": "O1",  "description": ".sk-app-shell grid-template-columns", "viewport_or_state": "host box 800px, presentation=compact (below the 860px @container breakpoint)" },
+    { "id": "O2",  "description": ".sk-app-shell grid-template-columns", "viewport_or_state": "host box 900px, presentation=compact (above the 860px breakpoint)" },
+    { "id": "O3",  "description": ".sk-app-shell__compact-header display", "viewport_or_state": "host box 800px, presentation=compact" },
+    { "id": "O4",  "description": ".sk-app-shell__compact-header display", "viewport_or_state": "host box 900px, presentation=compact" },
+    { "id": "O5",  "description": ".sk-app-shell__compact-navigation display", "viewport_or_state": "host box 800px, presentation=compact" },
+    { "id": "O6",  "description": ".sk-app-shell__personal display", "viewport_or_state": "host box 800px, presentation=compact" },
+    { "id": "O7",  "description": ".sk-app-shell grid-template-columns", "viewport_or_state": "host box 1000px, presentation=rail-preserving (below the 1100px breakpoint)" },
+    { "id": "O8",  "description": ".sk-app-shell grid-template-columns", "viewport_or_state": "host box 1200px, presentation=rail-preserving (above the 1100px breakpoint)" },
+    { "id": "O9",  "description": ".sk-app-shell__compact-header display", "viewport_or_state": "host box 1000px, presentation=rail-preserving" },
+    { "id": "O10", "description": ".sk-app-shell__context display", "viewport_or_state": "host box 1000px, presentation=rail-preserving" },
+    { "id": "O11", "description": ".sk-app-shell grid-template-columns (COMPOSED: outer ancestor container-type:inline-size at 1400px, component box 800px)", "viewport_or_state": "composed-outer-wider, presentation=compact" },
+    { "id": "O12", "description": ".sk-app-shell__compact-header display (COMPOSED: outer 1400px, component 800px)", "viewport_or_state": "composed-outer-wider, presentation=compact" },
+    { "id": "O13", "description": ".sk-app-shell grid-template-columns (COMPOSED: outer ancestor container-type:inline-size at 500px, component box 1200px)", "viewport_or_state": "composed-outer-narrower, presentation=compact" },
+    { "id": "O14", "description": ".sk-app-shell__compact-header display (COMPOSED: outer 500px, component 1200px)", "viewport_or_state": "composed-outer-narrower, presentation=compact" }
+  ],
+  "engines": ["chromium", "firefox"],
+  "fidelity_crosscheck": "The controlled shadow page's O1/O3/O5 values are additionally compared against the real Storybook story elements-skappshell--compact-860 rendered from apps/storybook/storybook-static/iframe.html, so the controlled page is shown to be faithful to the shipped harness rather than a bespoke re-creation."
+}

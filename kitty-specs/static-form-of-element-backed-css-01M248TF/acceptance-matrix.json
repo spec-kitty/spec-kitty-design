@@ -1,0 +1,136 @@
+{
+  "mission_slug": "static-form-of-element-backed-css-01M248TF",
+  "mission_number": "",
+  "mission_type": "software-dev",
+  "overall_verdict": "pass",
+  "criteria": [
+    {
+      "criterion_id": "FR-001",
+      "description": "Verify FR-001 is satisfied",
+      "proof_type": "document_inspection",
+      "evidence": "docs/architecture/decisions/2026-09-10-15-static-form-of-element-backed-css.md \u2014 new ADR-15, Status Proposed, row added to docs/architecture/README.md; node scripts/check-adr-index.mjs green at 16 records / 16 rows.",
+      "pass_fail": "pass",
+      "verified_by": "architect-alphonso",
+      "verified_at": "2026-09-10T01:07:21.343344+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-002",
+      "description": "Verify FR-002 is satisfied",
+      "proof_type": "document_inspection",
+      "evidence": "ADR-15 'Decision Outcome' sections 1, 2 and 3 plus the Summary table: all three construct kinds named with a verdict each, none silent.",
+      "pass_fail": "pass",
+      "verified_by": "architect-alphonso",
+      "verified_at": "2026-09-10T01:07:22.411361+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-003",
+      "description": "Verify FR-003 is satisfied",
+      "proof_type": "document_inspection",
+      "evidence": "ADR-15 'Which gated children may freeze a static API': #302 unconditional, #304 split, #305 unconditional, #307 wrapper-form-only with the :host declaration set named.",
+      "pass_fail": "pass",
+      "verified_by": "architect-alphonso",
+      "verified_at": "2026-09-10T01:07:23.436485+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-004",
+      "description": "Verify FR-004 is satisfied",
+      "proof_type": "committed_measurement",
+      "evidence": "ADR-15 'Real package consumption, and what #161 does and does not block'; every probe resolves its CSS via import.meta.resolve and records real_package_consumption.resolved_to in measurement/<construct>/result.json. Root-import defect reproduced with its corrected cause.",
+      "pass_fail": "pass",
+      "verified_by": "architect-alphonso",
+      "verified_at": "2026-09-10T01:07:24.475212+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-005",
+      "description": "Verify FR-005 is satisfied",
+      "proof_type": "document_inspection",
+      "evidence": "ADR-15 'Relationship to #239, which this record does not decide' \u2014 states the relationship, selects no mechanism for #239.",
+      "pass_fail": "pass",
+      "verified_by": "architect-alphonso",
+      "verified_at": "2026-09-10T01:07:25.500591+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-006",
+      "description": "Verify FR-006 is satisfied",
+      "proof_type": "filed_issue",
+      "evidence": "#309 (generator) and #310 (equivalence gate), each carrying the full probe table from measurement/*/result.json including composed, flex-item, unconditional-@container and exact-breakpoint cases. Neither built in this PR; git diff touches no script under scripts/.",
+      "pass_fail": "pass",
+      "verified_by": "architect-alphonso",
+      "verified_at": "2026-09-10T01:07:26.476507+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-007",
+      "description": "Verify FR-007 is satisfied",
+      "proof_type": "mixed_docs_and_filed_issue",
+      "evidence": "sk-entity-marker instruction shipped in packages/styles/src/entity-marker/sk-entity-marker.css; docs/contributing/adding-a-component.md corrected; the remaining six sheets owned by #311 with a per-file rule inventory. ADR-15 'Where issue #301 acceptance item 7 is discharged' records both halves.",
+      "pass_fail": "pass",
+      "verified_by": "architect-alphonso",
+      "verified_at": "2026-09-10T01:07:27.459843+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-008",
+      "description": "Verify FR-008 is satisfied",
+      "proof_type": "committed_measurement",
+      "evidence": "kitty-specs/.../measurement/ \u2014 22 + 20 + 10 pre-declared outcomes across outcomes.declared.json and outcomes.declared.cycle-2.json, each committed before its probe ran; run.mjs + result.json per construct; chromium 151 and firefox 153 agree on every row.",
+      "pass_fail": "pass",
+      "verified_by": "architect-alphonso",
+      "verified_at": "2026-09-10T01:07:28.432429+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-009",
+      "description": "Verify FR-009 is satisfied",
+      "proof_type": "document_inspection",
+      "evidence": "ADR-15 'The observed failure mode (FR-009 \u2014 reported evidence, not re-measured here)' \u2014 attributed to #301, names the unreachable planning-repo path, not treated as first-party measurement anywhere in the record.",
+      "pass_fail": "pass",
+      "verified_by": "architect-alphonso",
+      "verified_at": "2026-09-10T01:07:29.407149+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    }
+  ],
+  "negative_invariants": [
+    {
+      "invariant_id": "NI-001",
+      "description": "C-003: no Lynn product verdict is cited as evidence anywhere in the deliverable surfaces. No such verdict is recorded; the program-state name 'ready-for-Lynn' and explicit statements that no verdict exists are permitted and are not matched.",
+      "verification_method": "grep_absence",
+      "verification_command": "Lynn (approved|approves)|Lynn's (approval|verdict) (is|was|confirms)|per Lynn|Lynn signed off",
+      "result": "confirmed_absent",
+      "evidence": "grep found zero matches",
+      "scope": "docs packages/styles/src"
+    },
+    {
+      "invariant_id": "NI-002",
+      "description": "HIGH-1 regression guard: no surface prescribes the static wrapper as carrying container-type alone. The wrapper carries the component's complete :host declaration set; the abbreviated rule makes sk-app-shell compute 0px against 300px as a flex item, measured in both engines.",
+      "verification_method": "grep_absence",
+      "verification_command": "sk-[a-z-]+-host [{] container-type: inline-size",
+      "result": "confirmed_absent",
+      "evidence": "grep found zero matches",
+      "scope": "docs packages/styles/src"
+    },
+    {
+      "invariant_id": "NI-003",
+      "description": "HIGH-1 regression guard, prose form: the #307 freeze guidance and the authoring recipe must not describe the wrapper by naming container-type as the thing 'on the outer element'.",
+      "verification_method": "grep_absence",
+      "verification_command": "container-type: inline-size. on the outer",
+      "result": "confirmed_absent",
+      "evidence": "grep found zero matches",
+      "scope": "docs"
+    },
+    {
+      "invariant_id": "NI-004",
+      "description": "MEDIUM-1 regression guard: no component comment tells a static consumer merely to 'outbid this rule on specificity'. The instruction must state the tie boundary, because an equal-specificity consumer selector resolves by stylesheet order where the element form yielded unconditionally.",
+      "verification_method": "grep_absence",
+      "verification_command": "outbid this rule on specificity",
+      "result": "confirmed_absent",
+      "evidence": "grep found zero matches",
+      "scope": "docs packages/styles/src"
+    }
+  ]
+}

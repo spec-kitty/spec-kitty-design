@@ -1,0 +1,1124 @@
+{
+  "construct_kind": "host-attribute-axis",
+  "component": "sk-app-shell",
+  "generated_at": "2026-09-10T00:59:57.606Z",
+  "train_ref_note": "Run on mission/static-form-of-element-backed-css, branched from train/elements-first@2b59c8c.",
+  "shadow_form_source": "packages/elements/src/app-shell/sk-app-shell.ts, rendered from the Storybook build (apps/storybook/storybook-static/elements-dist/elements.js) via shadow.html, cross-checked against Storybook story elements-skappshell--compact-860",
+  "static_exemplar_source": "kitty-specs/static-form-of-element-backed-css-01M248TF/measurement/host-attribute-axis/exemplar.html (throwaway; links the export-map-resolved built CSS)",
+  "real_package_consumption": {
+    "specifier": "@spec-kitty/styles/app-shell/sk-app-shell.css",
+    "resolved_to": "/home/jeroennouws/dev/spec-kitty-design-missions/301/packages/styles/dist/app-shell/sk-app-shell.css",
+    "how": "Node's own export-map resolution via import.meta.resolve, served to the browser by harness.mjs on /pkg/<specifier>"
+  },
+  "declared_outcome_sources": [
+    "outcomes.declared.json",
+    "outcomes.declared.cycle-2.json"
+  ],
+  "declared_outcome_count": 22,
+  "static_exemplar_variants": {
+    "A-collapsed": "A",
+    "B-wrapper": "B",
+    "B-abbrev": "Babbrev"
+  },
+  "engines": [
+    "chromium",
+    "firefox"
+  ],
+  "per_engine": {
+    "chromium": {
+      "widths": {
+        "shadow": {
+          "S1": 800,
+          "S2": 900,
+          "S3": 1000,
+          "S4": 1200,
+          "S5": 800,
+          "S6": 1200,
+          "S7": 300,
+          "S8": 300,
+          "S9": 600,
+          "S10": 760,
+          "S11": 700
+        },
+        "A-collapsed": {
+          "S1": 800,
+          "S2": 900,
+          "S3": 1000,
+          "S4": 1200,
+          "S5": 800,
+          "S6": 1200,
+          "S7": 300,
+          "S8": 300,
+          "S9": 600,
+          "S10": 760,
+          "S11": 700
+        },
+        "B-wrapper": {
+          "S1": 800,
+          "S2": 900,
+          "S3": 1000,
+          "S4": 1200,
+          "S5": 800,
+          "S6": 1200,
+          "S7": 300,
+          "S8": 300,
+          "S9": 600,
+          "S10": 760,
+          "S11": 700
+        },
+        "B-abbrev": {
+          "S1": 800,
+          "S2": 900,
+          "S3": 1000,
+          "S4": 1200,
+          "S5": 800,
+          "S6": 1200,
+          "S7": 0,
+          "S8": 300,
+          "S9": 600,
+          "S10": 760,
+          "S11": 700
+        }
+      },
+      "shadow_notes": {
+        "S1": {
+          "compact_navigation_hidden_attr": false
+        },
+        "S2": {
+          "compact_navigation_hidden_attr": true
+        },
+        "S3": {
+          "compact_navigation_hidden_attr": false
+        },
+        "S4": {
+          "compact_navigation_hidden_attr": true
+        },
+        "S5": {
+          "compact_navigation_hidden_attr": false
+        },
+        "S6": {
+          "compact_navigation_hidden_attr": true
+        },
+        "S7": {
+          "compact_navigation_hidden_attr": false
+        },
+        "S8": {
+          "compact_navigation_hidden_attr": false
+        },
+        "S9": {
+          "compact_navigation_hidden_attr": true
+        },
+        "S10": {
+          "compact_navigation_hidden_attr": true
+        },
+        "S11": {
+          "compact_navigation_hidden_attr": false
+        }
+      },
+      "fidelity_crosscheck": {
+        "story_id": "elements-skappshell--compact-860",
+        "story": {
+          "shell_width": 860,
+          "host_presentation": "compact",
+          "grid_template_columns": "860px",
+          "compact_header_display": "block"
+        },
+        "controlled_shadow_page": {
+          "shell_width": 860,
+          "grid_template_columns": "860px",
+          "compact_header_display": "block"
+        },
+        "faithful": true
+      },
+      "observed_outcomes": [
+        {
+          "id": "O1",
+          "description": ".sk-app-shell grid-template-columns",
+          "viewport_or_state": "host box 800px, presentation=compact (below the 860px @container breakpoint)",
+          "shadow_form_value": "800px",
+          "static_exemplar_value": {
+            "A-collapsed": "56px 240px 504px",
+            "B-wrapper": "800px",
+            "B-abbrev": "800px"
+          },
+          "equal": {
+            "A-collapsed": false,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        },
+        {
+          "id": "O2",
+          "description": ".sk-app-shell grid-template-columns",
+          "viewport_or_state": "host box 900px, presentation=compact (above the 860px breakpoint)",
+          "shadow_form_value": "56px 240px 604px",
+          "static_exemplar_value": {
+            "A-collapsed": "56px 240px 604px",
+            "B-wrapper": "56px 240px 604px",
+            "B-abbrev": "56px 240px 604px"
+          },
+          "equal": {
+            "A-collapsed": true,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        },
+        {
+          "id": "O3",
+          "description": ".sk-app-shell__compact-header display",
+          "viewport_or_state": "host box 800px, presentation=compact",
+          "shadow_form_value": "block",
+          "static_exemplar_value": {
+            "A-collapsed": "block",
+            "B-wrapper": "block",
+            "B-abbrev": "block"
+          },
+          "equal": {
+            "A-collapsed": true,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        },
+        {
+          "id": "O4",
+          "description": ".sk-app-shell__compact-header display",
+          "viewport_or_state": "host box 900px, presentation=compact",
+          "shadow_form_value": "none",
+          "static_exemplar_value": {
+            "A-collapsed": "none",
+            "B-wrapper": "none",
+            "B-abbrev": "none"
+          },
+          "equal": {
+            "A-collapsed": true,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        },
+        {
+          "id": "O5",
+          "description": ".sk-app-shell__compact-navigation display",
+          "viewport_or_state": "host box 800px, presentation=compact",
+          "shadow_form_value": "block",
+          "static_exemplar_value": {
+            "A-collapsed": "block",
+            "B-wrapper": "block",
+            "B-abbrev": "block"
+          },
+          "equal": {
+            "A-collapsed": true,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        },
+        {
+          "id": "O6",
+          "description": ".sk-app-shell__personal display",
+          "viewport_or_state": "host box 800px, presentation=compact",
+          "shadow_form_value": "none",
+          "static_exemplar_value": {
+            "A-collapsed": "none",
+            "B-wrapper": "none",
+            "B-abbrev": "none"
+          },
+          "equal": {
+            "A-collapsed": true,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        },
+        {
+          "id": "O7",
+          "description": ".sk-app-shell grid-template-columns",
+          "viewport_or_state": "host box 1000px, presentation=rail-preserving (below the 1100px breakpoint)",
+          "shadow_form_value": "56px 944px",
+          "static_exemplar_value": {
+            "A-collapsed": "56px 240px 704px",
+            "B-wrapper": "56px 944px",
+            "B-abbrev": "56px 944px"
+          },
+          "equal": {
+            "A-collapsed": false,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        },
+        {
+          "id": "O8",
+          "description": ".sk-app-shell grid-template-columns",
+          "viewport_or_state": "host box 1200px, presentation=rail-preserving (above the 1100px breakpoint)",
+          "shadow_form_value": "56px 240px 904px",
+          "static_exemplar_value": {
+            "A-collapsed": "56px 240px 904px",
+            "B-wrapper": "56px 240px 904px",
+            "B-abbrev": "56px 240px 904px"
+          },
+          "equal": {
+            "A-collapsed": true,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        },
+        {
+          "id": "O9",
+          "description": ".sk-app-shell__compact-header display",
+          "viewport_or_state": "host box 1000px, presentation=rail-preserving",
+          "shadow_form_value": "block",
+          "static_exemplar_value": {
+            "A-collapsed": "block",
+            "B-wrapper": "block",
+            "B-abbrev": "block"
+          },
+          "equal": {
+            "A-collapsed": true,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        },
+        {
+          "id": "O10",
+          "description": ".sk-app-shell__context display",
+          "viewport_or_state": "host box 1000px, presentation=rail-preserving",
+          "shadow_form_value": "none",
+          "static_exemplar_value": {
+            "A-collapsed": "none",
+            "B-wrapper": "none",
+            "B-abbrev": "none"
+          },
+          "equal": {
+            "A-collapsed": true,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        },
+        {
+          "id": "O11",
+          "description": ".sk-app-shell grid-template-columns (COMPOSED: outer ancestor container-type:inline-size at 1400px, component box 800px)",
+          "viewport_or_state": "composed-outer-wider, presentation=compact",
+          "shadow_form_value": "800px",
+          "static_exemplar_value": {
+            "A-collapsed": "56px 240px 504px",
+            "B-wrapper": "800px",
+            "B-abbrev": "800px"
+          },
+          "equal": {
+            "A-collapsed": false,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        },
+        {
+          "id": "O12",
+          "description": ".sk-app-shell__compact-header display (COMPOSED: outer 1400px, component 800px)",
+          "viewport_or_state": "composed-outer-wider, presentation=compact",
+          "shadow_form_value": "block",
+          "static_exemplar_value": {
+            "A-collapsed": "block",
+            "B-wrapper": "block",
+            "B-abbrev": "block"
+          },
+          "equal": {
+            "A-collapsed": true,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        },
+        {
+          "id": "O13",
+          "description": ".sk-app-shell grid-template-columns (COMPOSED: outer ancestor container-type:inline-size at 500px, component box 1200px)",
+          "viewport_or_state": "composed-outer-narrower, presentation=compact",
+          "shadow_form_value": "56px 240px 904px",
+          "static_exemplar_value": {
+            "A-collapsed": "1200px",
+            "B-wrapper": "56px 240px 904px",
+            "B-abbrev": "56px 240px 904px"
+          },
+          "equal": {
+            "A-collapsed": false,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        },
+        {
+          "id": "O14",
+          "description": ".sk-app-shell__compact-header display (COMPOSED: outer 500px, component 1200px)",
+          "viewport_or_state": "composed-outer-narrower, presentation=compact",
+          "shadow_form_value": "none",
+          "static_exemplar_value": {
+            "A-collapsed": "none",
+            "B-wrapper": "none",
+            "B-abbrev": "none"
+          },
+          "equal": {
+            "A-collapsed": true,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        },
+        {
+          "id": "O15",
+          "description": ".sk-app-shell width (HIGH-1: component as an item of a 300px flex row)",
+          "viewport_or_state": "flex parent 300px, presentation=compact",
+          "shadow_form_value": "300px",
+          "static_exemplar_value": {
+            "A-collapsed": "300px",
+            "B-wrapper": "300px",
+            "B-abbrev": "0px"
+          },
+          "equal": {
+            "A-collapsed": true,
+            "B-wrapper": true,
+            "B-abbrev": false
+          }
+        },
+        {
+          "id": "O16",
+          "description": ".sk-app-shell grid-template-columns (HIGH-1: component as an item of a 300px flex row)",
+          "viewport_or_state": "flex parent 300px, presentation=compact",
+          "shadow_form_value": "300px",
+          "static_exemplar_value": {
+            "A-collapsed": "56px 240px 4px",
+            "B-wrapper": "300px",
+            "B-abbrev": "0px"
+          },
+          "equal": {
+            "A-collapsed": false,
+            "B-wrapper": true,
+            "B-abbrev": false
+          }
+        },
+        {
+          "id": "O17",
+          "description": ".sk-app-shell width (HIGH-1 control: component as an item of a 300px grid track — the layout the cycle-1 table already resembled)",
+          "viewport_or_state": "grid parent, single 300px track, presentation=compact",
+          "shadow_form_value": "300px",
+          "static_exemplar_value": {
+            "A-collapsed": "300px",
+            "B-wrapper": "300px",
+            "B-abbrev": "300px"
+          },
+          "equal": {
+            "A-collapsed": true,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        },
+        {
+          "id": "O18",
+          "description": ".sk-app-shell grid-template-columns (HIGH-1 control: 300px grid track)",
+          "viewport_or_state": "grid parent, single 300px track, presentation=compact",
+          "shadow_form_value": "300px",
+          "static_exemplar_value": {
+            "A-collapsed": "56px 240px 4px",
+            "B-wrapper": "300px",
+            "B-abbrev": "300px"
+          },
+          "equal": {
+            "A-collapsed": false,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        },
+        {
+          "id": "O19",
+          "description": ".sk-app-shell grid-template-columns (MEDIUM-2: the sheet's UNCONDITIONAL @container (max-width: 720px) rule, with NO presentation attribute so no host-attribute rule can also fire)",
+          "viewport_or_state": "shell 600px, no presentation attribute",
+          "shadow_form_value": "600px",
+          "static_exemplar_value": {
+            "A-collapsed": "56px 240px 304px",
+            "B-wrapper": "600px",
+            "B-abbrev": "600px"
+          },
+          "equal": {
+            "A-collapsed": false,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        },
+        {
+          "id": "O20",
+          "description": ".sk-app-shell grid-template-columns (MEDIUM-2: just above the unconditional 720px breakpoint, no presentation attribute)",
+          "viewport_or_state": "shell 760px, no presentation attribute",
+          "shadow_form_value": "56px 240px 464px",
+          "static_exemplar_value": {
+            "A-collapsed": "56px 240px 464px",
+            "B-wrapper": "56px 240px 464px",
+            "B-abbrev": "56px 240px 464px"
+          },
+          "equal": {
+            "A-collapsed": true,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        },
+        {
+          "id": "O21",
+          "description": ".sk-app-shell__compact-header display (MEDIUM-2: confirms the unconditional 720px rule does not reach the compact regions)",
+          "viewport_or_state": "shell 600px, no presentation attribute",
+          "shadow_form_value": "none",
+          "static_exemplar_value": {
+            "A-collapsed": "none",
+            "B-wrapper": "none",
+            "B-abbrev": "none"
+          },
+          "equal": {
+            "A-collapsed": true,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        },
+        {
+          "id": "O22",
+          "description": ".sk-app-shell grid-template-columns (MEDIUM-2: sub-720 WITH the rail-preserving axis also active, so the unconditional and host-attribute rules compose)",
+          "viewport_or_state": "shell 700px, presentation=rail-preserving",
+          "shadow_form_value": "56px 644px",
+          "static_exemplar_value": {
+            "A-collapsed": "56px 240px 404px",
+            "B-wrapper": "56px 644px",
+            "B-abbrev": "56px 644px"
+          },
+          "equal": {
+            "A-collapsed": false,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        }
+      ]
+    },
+    "firefox": {
+      "widths": {
+        "shadow": {
+          "S1": 800,
+          "S2": 900,
+          "S3": 1000,
+          "S4": 1200,
+          "S5": 800,
+          "S6": 1200,
+          "S7": 300,
+          "S8": 300,
+          "S9": 600,
+          "S10": 760,
+          "S11": 700
+        },
+        "A-collapsed": {
+          "S1": 800,
+          "S2": 900,
+          "S3": 1000,
+          "S4": 1200,
+          "S5": 800,
+          "S6": 1200,
+          "S7": 300,
+          "S8": 300,
+          "S9": 600,
+          "S10": 760,
+          "S11": 700
+        },
+        "B-wrapper": {
+          "S1": 800,
+          "S2": 900,
+          "S3": 1000,
+          "S4": 1200,
+          "S5": 800,
+          "S6": 1200,
+          "S7": 300,
+          "S8": 300,
+          "S9": 600,
+          "S10": 760,
+          "S11": 700
+        },
+        "B-abbrev": {
+          "S1": 800,
+          "S2": 900,
+          "S3": 1000,
+          "S4": 1200,
+          "S5": 800,
+          "S6": 1200,
+          "S7": 0,
+          "S8": 300,
+          "S9": 600,
+          "S10": 760,
+          "S11": 700
+        }
+      },
+      "shadow_notes": {
+        "S1": {
+          "compact_navigation_hidden_attr": false
+        },
+        "S2": {
+          "compact_navigation_hidden_attr": true
+        },
+        "S3": {
+          "compact_navigation_hidden_attr": false
+        },
+        "S4": {
+          "compact_navigation_hidden_attr": true
+        },
+        "S5": {
+          "compact_navigation_hidden_attr": false
+        },
+        "S6": {
+          "compact_navigation_hidden_attr": true
+        },
+        "S7": {
+          "compact_navigation_hidden_attr": false
+        },
+        "S8": {
+          "compact_navigation_hidden_attr": false
+        },
+        "S9": {
+          "compact_navigation_hidden_attr": true
+        },
+        "S10": {
+          "compact_navigation_hidden_attr": true
+        },
+        "S11": {
+          "compact_navigation_hidden_attr": false
+        }
+      },
+      "fidelity_crosscheck": {
+        "story_id": "elements-skappshell--compact-860",
+        "story": {
+          "shell_width": 860,
+          "host_presentation": "compact",
+          "grid_template_columns": "860px",
+          "compact_header_display": "block"
+        },
+        "controlled_shadow_page": {
+          "shell_width": 860,
+          "grid_template_columns": "860px",
+          "compact_header_display": "block"
+        },
+        "faithful": true
+      },
+      "observed_outcomes": [
+        {
+          "id": "O1",
+          "description": ".sk-app-shell grid-template-columns",
+          "viewport_or_state": "host box 800px, presentation=compact (below the 860px @container breakpoint)",
+          "shadow_form_value": "800px",
+          "static_exemplar_value": {
+            "A-collapsed": "56px 240px 504px",
+            "B-wrapper": "800px",
+            "B-abbrev": "800px"
+          },
+          "equal": {
+            "A-collapsed": false,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        },
+        {
+          "id": "O2",
+          "description": ".sk-app-shell grid-template-columns",
+          "viewport_or_state": "host box 900px, presentation=compact (above the 860px breakpoint)",
+          "shadow_form_value": "56px 240px 604px",
+          "static_exemplar_value": {
+            "A-collapsed": "56px 240px 604px",
+            "B-wrapper": "56px 240px 604px",
+            "B-abbrev": "56px 240px 604px"
+          },
+          "equal": {
+            "A-collapsed": true,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        },
+        {
+          "id": "O3",
+          "description": ".sk-app-shell__compact-header display",
+          "viewport_or_state": "host box 800px, presentation=compact",
+          "shadow_form_value": "block",
+          "static_exemplar_value": {
+            "A-collapsed": "block",
+            "B-wrapper": "block",
+            "B-abbrev": "block"
+          },
+          "equal": {
+            "A-collapsed": true,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        },
+        {
+          "id": "O4",
+          "description": ".sk-app-shell__compact-header display",
+          "viewport_or_state": "host box 900px, presentation=compact",
+          "shadow_form_value": "none",
+          "static_exemplar_value": {
+            "A-collapsed": "none",
+            "B-wrapper": "none",
+            "B-abbrev": "none"
+          },
+          "equal": {
+            "A-collapsed": true,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        },
+        {
+          "id": "O5",
+          "description": ".sk-app-shell__compact-navigation display",
+          "viewport_or_state": "host box 800px, presentation=compact",
+          "shadow_form_value": "block",
+          "static_exemplar_value": {
+            "A-collapsed": "block",
+            "B-wrapper": "block",
+            "B-abbrev": "block"
+          },
+          "equal": {
+            "A-collapsed": true,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        },
+        {
+          "id": "O6",
+          "description": ".sk-app-shell__personal display",
+          "viewport_or_state": "host box 800px, presentation=compact",
+          "shadow_form_value": "none",
+          "static_exemplar_value": {
+            "A-collapsed": "none",
+            "B-wrapper": "none",
+            "B-abbrev": "none"
+          },
+          "equal": {
+            "A-collapsed": true,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        },
+        {
+          "id": "O7",
+          "description": ".sk-app-shell grid-template-columns",
+          "viewport_or_state": "host box 1000px, presentation=rail-preserving (below the 1100px breakpoint)",
+          "shadow_form_value": "56px 944px",
+          "static_exemplar_value": {
+            "A-collapsed": "56px 240px 704px",
+            "B-wrapper": "56px 944px",
+            "B-abbrev": "56px 944px"
+          },
+          "equal": {
+            "A-collapsed": false,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        },
+        {
+          "id": "O8",
+          "description": ".sk-app-shell grid-template-columns",
+          "viewport_or_state": "host box 1200px, presentation=rail-preserving (above the 1100px breakpoint)",
+          "shadow_form_value": "56px 240px 904px",
+          "static_exemplar_value": {
+            "A-collapsed": "56px 240px 904px",
+            "B-wrapper": "56px 240px 904px",
+            "B-abbrev": "56px 240px 904px"
+          },
+          "equal": {
+            "A-collapsed": true,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        },
+        {
+          "id": "O9",
+          "description": ".sk-app-shell__compact-header display",
+          "viewport_or_state": "host box 1000px, presentation=rail-preserving",
+          "shadow_form_value": "block",
+          "static_exemplar_value": {
+            "A-collapsed": "block",
+            "B-wrapper": "block",
+            "B-abbrev": "block"
+          },
+          "equal": {
+            "A-collapsed": true,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        },
+        {
+          "id": "O10",
+          "description": ".sk-app-shell__context display",
+          "viewport_or_state": "host box 1000px, presentation=rail-preserving",
+          "shadow_form_value": "none",
+          "static_exemplar_value": {
+            "A-collapsed": "none",
+            "B-wrapper": "none",
+            "B-abbrev": "none"
+          },
+          "equal": {
+            "A-collapsed": true,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        },
+        {
+          "id": "O11",
+          "description": ".sk-app-shell grid-template-columns (COMPOSED: outer ancestor container-type:inline-size at 1400px, component box 800px)",
+          "viewport_or_state": "composed-outer-wider, presentation=compact",
+          "shadow_form_value": "800px",
+          "static_exemplar_value": {
+            "A-collapsed": "56px 240px 504px",
+            "B-wrapper": "800px",
+            "B-abbrev": "800px"
+          },
+          "equal": {
+            "A-collapsed": false,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        },
+        {
+          "id": "O12",
+          "description": ".sk-app-shell__compact-header display (COMPOSED: outer 1400px, component 800px)",
+          "viewport_or_state": "composed-outer-wider, presentation=compact",
+          "shadow_form_value": "block",
+          "static_exemplar_value": {
+            "A-collapsed": "block",
+            "B-wrapper": "block",
+            "B-abbrev": "block"
+          },
+          "equal": {
+            "A-collapsed": true,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        },
+        {
+          "id": "O13",
+          "description": ".sk-app-shell grid-template-columns (COMPOSED: outer ancestor container-type:inline-size at 500px, component box 1200px)",
+          "viewport_or_state": "composed-outer-narrower, presentation=compact",
+          "shadow_form_value": "56px 240px 904px",
+          "static_exemplar_value": {
+            "A-collapsed": "1200px",
+            "B-wrapper": "56px 240px 904px",
+            "B-abbrev": "56px 240px 904px"
+          },
+          "equal": {
+            "A-collapsed": false,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        },
+        {
+          "id": "O14",
+          "description": ".sk-app-shell__compact-header display (COMPOSED: outer 500px, component 1200px)",
+          "viewport_or_state": "composed-outer-narrower, presentation=compact",
+          "shadow_form_value": "none",
+          "static_exemplar_value": {
+            "A-collapsed": "none",
+            "B-wrapper": "none",
+            "B-abbrev": "none"
+          },
+          "equal": {
+            "A-collapsed": true,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        },
+        {
+          "id": "O15",
+          "description": ".sk-app-shell width (HIGH-1: component as an item of a 300px flex row)",
+          "viewport_or_state": "flex parent 300px, presentation=compact",
+          "shadow_form_value": "300px",
+          "static_exemplar_value": {
+            "A-collapsed": "300px",
+            "B-wrapper": "300px",
+            "B-abbrev": "0px"
+          },
+          "equal": {
+            "A-collapsed": true,
+            "B-wrapper": true,
+            "B-abbrev": false
+          }
+        },
+        {
+          "id": "O16",
+          "description": ".sk-app-shell grid-template-columns (HIGH-1: component as an item of a 300px flex row)",
+          "viewport_or_state": "flex parent 300px, presentation=compact",
+          "shadow_form_value": "300px",
+          "static_exemplar_value": {
+            "A-collapsed": "56px 240px 4px",
+            "B-wrapper": "300px",
+            "B-abbrev": "0px"
+          },
+          "equal": {
+            "A-collapsed": false,
+            "B-wrapper": true,
+            "B-abbrev": false
+          }
+        },
+        {
+          "id": "O17",
+          "description": ".sk-app-shell width (HIGH-1 control: component as an item of a 300px grid track — the layout the cycle-1 table already resembled)",
+          "viewport_or_state": "grid parent, single 300px track, presentation=compact",
+          "shadow_form_value": "300px",
+          "static_exemplar_value": {
+            "A-collapsed": "300px",
+            "B-wrapper": "300px",
+            "B-abbrev": "300px"
+          },
+          "equal": {
+            "A-collapsed": true,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        },
+        {
+          "id": "O18",
+          "description": ".sk-app-shell grid-template-columns (HIGH-1 control: 300px grid track)",
+          "viewport_or_state": "grid parent, single 300px track, presentation=compact",
+          "shadow_form_value": "300px",
+          "static_exemplar_value": {
+            "A-collapsed": "56px 240px 4px",
+            "B-wrapper": "300px",
+            "B-abbrev": "300px"
+          },
+          "equal": {
+            "A-collapsed": false,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        },
+        {
+          "id": "O19",
+          "description": ".sk-app-shell grid-template-columns (MEDIUM-2: the sheet's UNCONDITIONAL @container (max-width: 720px) rule, with NO presentation attribute so no host-attribute rule can also fire)",
+          "viewport_or_state": "shell 600px, no presentation attribute",
+          "shadow_form_value": "600px",
+          "static_exemplar_value": {
+            "A-collapsed": "56px 240px 304px",
+            "B-wrapper": "600px",
+            "B-abbrev": "600px"
+          },
+          "equal": {
+            "A-collapsed": false,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        },
+        {
+          "id": "O20",
+          "description": ".sk-app-shell grid-template-columns (MEDIUM-2: just above the unconditional 720px breakpoint, no presentation attribute)",
+          "viewport_or_state": "shell 760px, no presentation attribute",
+          "shadow_form_value": "56px 240px 464px",
+          "static_exemplar_value": {
+            "A-collapsed": "56px 240px 464px",
+            "B-wrapper": "56px 240px 464px",
+            "B-abbrev": "56px 240px 464px"
+          },
+          "equal": {
+            "A-collapsed": true,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        },
+        {
+          "id": "O21",
+          "description": ".sk-app-shell__compact-header display (MEDIUM-2: confirms the unconditional 720px rule does not reach the compact regions)",
+          "viewport_or_state": "shell 600px, no presentation attribute",
+          "shadow_form_value": "none",
+          "static_exemplar_value": {
+            "A-collapsed": "none",
+            "B-wrapper": "none",
+            "B-abbrev": "none"
+          },
+          "equal": {
+            "A-collapsed": true,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        },
+        {
+          "id": "O22",
+          "description": ".sk-app-shell grid-template-columns (MEDIUM-2: sub-720 WITH the rail-preserving axis also active, so the unconditional and host-attribute rules compose)",
+          "viewport_or_state": "shell 700px, presentation=rail-preserving",
+          "shadow_form_value": "56px 644px",
+          "static_exemplar_value": {
+            "A-collapsed": "56px 240px 404px",
+            "B-wrapper": "56px 644px",
+            "B-abbrev": "56px 644px"
+          },
+          "equal": {
+            "A-collapsed": false,
+            "B-wrapper": true,
+            "B-abbrev": true
+          }
+        }
+      ]
+    }
+  },
+  "variant_passes_every_declared_outcome": {
+    "A-collapsed": false,
+    "B-wrapper": true,
+    "B-abbrev": false
+  },
+  "declared_outcome_failures": {
+    "A-collapsed": [
+      {
+        "engine": "chromium",
+        "id": "O1",
+        "description": ".sk-app-shell grid-template-columns",
+        "viewport_or_state": "host box 800px, presentation=compact (below the 860px @container breakpoint)",
+        "shadow_form_value": "800px",
+        "static_exemplar_value": "56px 240px 504px"
+      },
+      {
+        "engine": "chromium",
+        "id": "O7",
+        "description": ".sk-app-shell grid-template-columns",
+        "viewport_or_state": "host box 1000px, presentation=rail-preserving (below the 1100px breakpoint)",
+        "shadow_form_value": "56px 944px",
+        "static_exemplar_value": "56px 240px 704px"
+      },
+      {
+        "engine": "chromium",
+        "id": "O11",
+        "description": ".sk-app-shell grid-template-columns (COMPOSED: outer ancestor container-type:inline-size at 1400px, component box 800px)",
+        "viewport_or_state": "composed-outer-wider, presentation=compact",
+        "shadow_form_value": "800px",
+        "static_exemplar_value": "56px 240px 504px"
+      },
+      {
+        "engine": "chromium",
+        "id": "O13",
+        "description": ".sk-app-shell grid-template-columns (COMPOSED: outer ancestor container-type:inline-size at 500px, component box 1200px)",
+        "viewport_or_state": "composed-outer-narrower, presentation=compact",
+        "shadow_form_value": "56px 240px 904px",
+        "static_exemplar_value": "1200px"
+      },
+      {
+        "engine": "chromium",
+        "id": "O16",
+        "description": ".sk-app-shell grid-template-columns (HIGH-1: component as an item of a 300px flex row)",
+        "viewport_or_state": "flex parent 300px, presentation=compact",
+        "shadow_form_value": "300px",
+        "static_exemplar_value": "56px 240px 4px"
+      },
+      {
+        "engine": "chromium",
+        "id": "O18",
+        "description": ".sk-app-shell grid-template-columns (HIGH-1 control: 300px grid track)",
+        "viewport_or_state": "grid parent, single 300px track, presentation=compact",
+        "shadow_form_value": "300px",
+        "static_exemplar_value": "56px 240px 4px"
+      },
+      {
+        "engine": "chromium",
+        "id": "O19",
+        "description": ".sk-app-shell grid-template-columns (MEDIUM-2: the sheet's UNCONDITIONAL @container (max-width: 720px) rule, with NO presentation attribute so no host-attribute rule can also fire)",
+        "viewport_or_state": "shell 600px, no presentation attribute",
+        "shadow_form_value": "600px",
+        "static_exemplar_value": "56px 240px 304px"
+      },
+      {
+        "engine": "chromium",
+        "id": "O22",
+        "description": ".sk-app-shell grid-template-columns (MEDIUM-2: sub-720 WITH the rail-preserving axis also active, so the unconditional and host-attribute rules compose)",
+        "viewport_or_state": "shell 700px, presentation=rail-preserving",
+        "shadow_form_value": "56px 644px",
+        "static_exemplar_value": "56px 240px 404px"
+      },
+      {
+        "engine": "firefox",
+        "id": "O1",
+        "description": ".sk-app-shell grid-template-columns",
+        "viewport_or_state": "host box 800px, presentation=compact (below the 860px @container breakpoint)",
+        "shadow_form_value": "800px",
+        "static_exemplar_value": "56px 240px 504px"
+      },
+      {
+        "engine": "firefox",
+        "id": "O7",
+        "description": ".sk-app-shell grid-template-columns",
+        "viewport_or_state": "host box 1000px, presentation=rail-preserving (below the 1100px breakpoint)",
+        "shadow_form_value": "56px 944px",
+        "static_exemplar_value": "56px 240px 704px"
+      },
+      {
+        "engine": "firefox",
+        "id": "O11",
+        "description": ".sk-app-shell grid-template-columns (COMPOSED: outer ancestor container-type:inline-size at 1400px, component box 800px)",
+        "viewport_or_state": "composed-outer-wider, presentation=compact",
+        "shadow_form_value": "800px",
+        "static_exemplar_value": "56px 240px 504px"
+      },
+      {
+        "engine": "firefox",
+        "id": "O13",
+        "description": ".sk-app-shell grid-template-columns (COMPOSED: outer ancestor container-type:inline-size at 500px, component box 1200px)",
+        "viewport_or_state": "composed-outer-narrower, presentation=compact",
+        "shadow_form_value": "56px 240px 904px",
+        "static_exemplar_value": "1200px"
+      },
+      {
+        "engine": "firefox",
+        "id": "O16",
+        "description": ".sk-app-shell grid-template-columns (HIGH-1: component as an item of a 300px flex row)",
+        "viewport_or_state": "flex parent 300px, presentation=compact",
+        "shadow_form_value": "300px",
+        "static_exemplar_value": "56px 240px 4px"
+      },
+      {
+        "engine": "firefox",
+        "id": "O18",
+        "description": ".sk-app-shell grid-template-columns (HIGH-1 control: 300px grid track)",
+        "viewport_or_state": "grid parent, single 300px track, presentation=compact",
+        "shadow_form_value": "300px",
+        "static_exemplar_value": "56px 240px 4px"
+      },
+      {
+        "engine": "firefox",
+        "id": "O19",
+        "description": ".sk-app-shell grid-template-columns (MEDIUM-2: the sheet's UNCONDITIONAL @container (max-width: 720px) rule, with NO presentation attribute so no host-attribute rule can also fire)",
+        "viewport_or_state": "shell 600px, no presentation attribute",
+        "shadow_form_value": "600px",
+        "static_exemplar_value": "56px 240px 304px"
+      },
+      {
+        "engine": "firefox",
+        "id": "O22",
+        "description": ".sk-app-shell grid-template-columns (MEDIUM-2: sub-720 WITH the rail-preserving axis also active, so the unconditional and host-attribute rules compose)",
+        "viewport_or_state": "shell 700px, presentation=rail-preserving",
+        "shadow_form_value": "56px 644px",
+        "static_exemplar_value": "56px 240px 404px"
+      }
+    ],
+    "B-wrapper": [],
+    "B-abbrev": [
+      {
+        "engine": "chromium",
+        "id": "O15",
+        "description": ".sk-app-shell width (HIGH-1: component as an item of a 300px flex row)",
+        "viewport_or_state": "flex parent 300px, presentation=compact",
+        "shadow_form_value": "300px",
+        "static_exemplar_value": "0px"
+      },
+      {
+        "engine": "chromium",
+        "id": "O16",
+        "description": ".sk-app-shell grid-template-columns (HIGH-1: component as an item of a 300px flex row)",
+        "viewport_or_state": "flex parent 300px, presentation=compact",
+        "shadow_form_value": "300px",
+        "static_exemplar_value": "0px"
+      },
+      {
+        "engine": "firefox",
+        "id": "O15",
+        "description": ".sk-app-shell width (HIGH-1: component as an item of a 300px flex row)",
+        "viewport_or_state": "flex parent 300px, presentation=compact",
+        "shadow_form_value": "300px",
+        "static_exemplar_value": "0px"
+      },
+      {
+        "engine": "firefox",
+        "id": "O16",
+        "description": ".sk-app-shell grid-template-columns (HIGH-1: component as an item of a 300px flex row)",
+        "viewport_or_state": "flex parent 300px, presentation=compact",
+        "shadow_form_value": "300px",
+        "static_exemplar_value": "0px"
+      }
+    ]
+  },
+  "composed_case_tested": true,
+  "verdict_for_this_construct_kind": "generated-static-form",
+  "passing_static_exemplar_variant": "B-wrapper"
+}

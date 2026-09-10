@@ -1,3 +1,61 @@
+/* WHAT A STATIC CONSUMER MUST AUTHOR INSTEAD (ADR-15).
+
+   THIS SHEET CARRIES ALL THREE OF ADR-15's CONSTRUCT KINDS AT ONCE, and their verdicts apply
+   independently — carrying three kinds does not merge them into one answer.
+
+   1. HOST-OWNED container-type (`:host { container-type: inline-size }` below, establishing
+      `@container (max-width: 720px)`) and
+   2. A HOST-ATTRIBUTE AXIS in its BARE form (`:host([sticky]) { position: sticky }`, styling
+      the host itself rather than a descendant)
+      -> both are generable as a static form, but only in a TWO-ELEMENT shape, and #309 (the
+         generator) is unbuilt, so nothing defines `.sk-page-header-host` today. Author it:
+
+             <div class="sk-page-header-host">            <- add --sticky here for the axis
+               <div class="sk-page-header"> ... </div>
+             </div>
+
+             .sk-page-header-host {
+               display: block;
+               width: 100%;
+               min-width: 0;
+               container-type: inline-size;
+             }
+
+      THE WRAPPER CARRIES THIS SHEET'S WHOLE `:host` SET, as written above — not
+      `container-type` alone and not a list copied from another component. And DO NOT move
+      `container-type` onto `.sk-page-header`: an element is never its own query container, so
+      the `@container` rules would answer an outer ancestor of the page, or nothing, while the
+      descendants kept querying correctly.
+
+      The bare `:host([sticky])` form is the one ADR-15 names as NOT rewriting mechanically to
+      `.sk-page-header-host--sticky <descendant>`; it lands on the wrapper itself. ADDING THE CLASS IS
+      NOT ENOUGH: this sheet declares NOTHING for `.sk-page-header-host--sticky`, so a consumer
+      who only adds it gets a class that does nothing — the same silently-inert outcome the
+      wrapper block above warns about, one level down. Until #309 generates it, the consumer
+      hand-rewrites ALL SEVEN `:host([sticky])` rules below onto that class: the host rule and the
+      `.sk-page-header` descendant rule at top level, both of their copies inside the
+      `@media (max-width: 720px)` and `@media (max-height: 480px)` blocks (which drop stickiness
+      and are part of the axis, not optional refinements), AND the
+      `@media (forced-colors: active)` rule. Do not drop that last one: the top-level descendant
+      rule RESERVES the border band at `transparent`, and the forced-colors rule is what turns it
+      on. Rewrite the first without the second and a static sticky header is separated from the
+      content beneath it by nothing at all under forced colors, because `box-shadow` computes
+      away there — the accessibility regression this whole comment exists to prevent. Note the
+      sticky rules deliberately use `@media`, for the reason the comment further down records —
+      the element being restyled is the host, and a container query cannot reach its own
+      container. That is the same fact ADR-15 generalises.
+
+   3. `::slotted(*)` (below, plus four `--compact` variants) is SHADOW-ONLY. No generated static
+      form is planned. A static consumer writes their own descendant rule against the flattened
+      shape, and must compute its specificity themselves: a page rule overriding it needs
+      STRICTLY HIGHER specificity than the rewrite, because at a tie the winner is stylesheet
+      order, where the element form yielded to the page unconditionally. #311 owns backfilling
+      the precise per-rule instruction for this sheet.
+
+   This component was not itself probed; ADR-15 measured sk-app-shell, sk-action-row and
+   sk-entity-marker, and each mechanism is a property of CSS rather than of one component.
+   This comment adds no rule and changes none. */
+
 :host {
   display: block;
   width: 100%;

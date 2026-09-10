@@ -1,3 +1,48 @@
+/* WHAT A STATIC CONSUMER MUST AUTHOR INSTEAD (ADR-15).
+
+   `:host { container-type: inline-size }` below is the sole container establishing the
+   `@container (max-width: 400px)` reflow — the only reflow rule this file has. There is no
+   light-DOM form of it in this package yet (#309 generator, #310 equivalence gate), so a
+   server-rendered consumer authors the wrapper themselves:
+
+       <div class="sk-action-row-host">
+         <div class="sk-action-row"> ... </div>
+       </div>
+
+   THE WRAPPER CARRIES THIS SHEET'S WHOLE `:host` DECLARATION SET, not `container-type` alone —
+   today `display: block; min-width: 0; container-type: inline-size`, and "whatever `:host`
+   declares" if that changes. This sheet's `:host` happens to declare no `width`, so here an
+   abbreviated wrapper measures identically (all 20 declared outcomes, both engines, including
+   the flex-item case). That is a coincidence of THIS component, not a general licence:
+   `sk-app-shell.css` declares `width: 100%` on `:host`, and dropping it makes the component
+   compute `0px` in a flex row. Read each sheet's own `:host`; never copy another's list.
+
+   AND THIS SHEET DOES NOT DEFINE `.sk-action-row-host`. Nothing in @spec-kitty/styles does yet —
+   #309 is the generator that will emit it, and it is unbuilt. The container above lives on
+   `:host`, which is inert in a document. So a static consumer who writes the two-element markup
+   and links this file alone gets NO CONTAINER, and `@container (max-width: 400px)` below never
+   fires — the exact failure #301 reported. Until #309 lands, author this yourself:
+
+       .sk-action-row-host {
+         display: block;
+         min-width: 0;
+         container-type: inline-size;
+       }
+
+   When #309 lands it becomes redundant rather than wrong, and #310 holds the generated rule
+   equal to it.
+
+   DO NOT MOVE `container-type` ONTO `.sk-action-row`. An element is never its own query
+   container. Measured, chromium and firefox, at a 360px row: the real element computes
+   `flex-wrap: wrap` and the collapsed static form computes `nowrap`; nested inside a 320px
+   ancestor container, a 700px row the element correctly leaves unwrapped wraps anyway. The
+   trigger's `grid-template-areas` agrees in both forms at every width, because the trigger is
+   a DESCENDANT of the container — which is what makes the divergence easy to miss.
+
+   ADR-15 and kitty-specs/static-form-of-element-backed-css-01M248TF/measurement/
+   host-container-type/ hold the full outcome table. This comment adds no rule and changes
+   none. */
+
 :host {
   display: block;
   min-width: 0;

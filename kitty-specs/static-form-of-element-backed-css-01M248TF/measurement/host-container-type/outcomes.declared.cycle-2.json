@@ -1,0 +1,25 @@
+{
+  "construct_kind": "host-container-type",
+  "component": "sk-action-row",
+  "supplements": "outcomes.declared.json",
+  "declared_before_running": true,
+  "declaration_note": "Committed in its own commit before the probe was extended or re-run. outcomes.declared.json is left byte-identical.",
+  "why_these_outcomes_exist": {
+    "HIGH-1": "Same as the host-attribute-axis file: the cycle-1 prose prescribed an abbreviated wrapper that was never the rule measured. B-abbrev is added here too, so #307's frozen contract and #309's generator are pinned against the same evidence for both construct kinds rather than only for one.",
+    "MEDIUM-2": "This sheet has no unconditional @container rule, so the app-shell gap does not exist here — its single 400px breakpoint IS exercised by the cycle-1 states (360 below, 500 above). What the cycle-1 set never touched is the boundary itself. `@container (max-width: 400px)` is inclusive, so 400 must reflow and 401 must not; a generator that emitted `<` for `<=` would have passed the cycle-1 table."
+  },
+  "static_exemplar_variants_added": {
+    "B-abbrev": "`.sk-action-row-host { container-type: inline-size }` and nothing else — the wrapper as the cycle-1 prose prescribed it."
+  },
+  "pass_bar": "Unchanged from cycle 1, applied to the combined set of both declaration files.",
+  "declared_outcomes": [
+    { "id": "O14", "description": ".sk-action-row width (HIGH-1: component as an item of a 300px flex row)", "viewport_or_state": "flex parent 300px" },
+    { "id": "O15", "description": ".sk-action-row__trigger grid-template-areas (HIGH-1: component as an item of a 300px flex row)", "viewport_or_state": "flex parent 300px" },
+    { "id": "O16", "description": ".sk-action-row width (HIGH-1 control: 300px grid track)", "viewport_or_state": "grid parent, single 300px track" },
+    { "id": "O17", "description": ".sk-action-row flex-wrap (MEDIUM-2: exactly AT the inclusive 400px breakpoint)", "viewport_or_state": "row 400px" },
+    { "id": "O18", "description": ".sk-action-row__trigger grid-template-areas (MEDIUM-2: exactly at 400px)", "viewport_or_state": "row 400px" },
+    { "id": "O19", "description": ".sk-action-row flex-wrap (MEDIUM-2: one pixel above the breakpoint)", "viewport_or_state": "row 401px" },
+    { "id": "O20", "description": ".sk-action-row__trigger grid-template-areas (MEDIUM-2: one pixel above the breakpoint)", "viewport_or_state": "row 401px" }
+  ],
+  "engines": ["chromium", "firefox"]
+}

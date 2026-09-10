@@ -1,0 +1,137 @@
+{
+  "rows": {
+    "#161": {
+      "evidence_ref": "Open and unfixed here by design. Reproduced first-hand at this head: the per-component subpath exports resolve to real files, and the ROOT import fails with ERR_MODULE_NOT_FOUND on extensionless relative re-exports in dist/src/index.js \u2014 NOT, as #161's own text states, because dist/src/index.js is never emitted (it is). ADR-15 records the corrected cause; #161 still owns the fix and should be corrected on its stated cause.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
+    },
+    "#239": {
+      "evidence_ref": "Open, cited, and deliberately NOT decided (spec FR-005, C-004). ADR-15 has a section stating the relationship \u2014 #239 is the inverse question \u2014 and contributes only one measured fact to it: outer-tree declarations beat inner-tree ::slotted() declarations regardless of specificity. It selects no mechanism for #239.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
+    },
+    "#286": {
+      "evidence_ref": "Open, cited only as constraint C-002. This mission introduces no component-visible copy and no element render() literal; nothing in the diff touches #286's surface, and #286 compliance remains review-only (no script under scripts/ enforces copy or i18n).",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
+    },
+    "#300": {
+      "evidence_ref": "Parent epic, cited not worked. This mission closes epic child gap G0 only; #300 stays open and owns the remaining Family 4 gaps.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
+    },
+    "#301": {
+      "evidence_ref": "This mission's own issue. ADR-15 (docs/architecture/decisions/2026-09-10-15-static-form-of-element-backed-css.md) is the recorded ruling; measurement under kitty-specs/static-form-of-element-backed-css-01M248TF/measurement/. Acceptance items 1-9 answered; the ruling is Proposed and #301 itself stays open pending the operator's ratification and the Family 4 product verdict it names.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "in-mission",
+      "wp": "WP01"
+    },
+    "#302": {
+      "evidence_ref": "Gated child, unblocked not worked. ADR-15 'Which gated children may freeze a static API': #302 may freeze now, unconditionally \u2014 sk-pill-tag.css's only :host rule is display: inline-flex, no container-type, no ::slotted(); a tone axis is an ordinary root-class modifier.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
+    },
+    "#304": {
+      "evidence_ref": "Gated child, unblocked not worked. ADR-15 rules #304 SPLIT: size and border axes are root-class modifiers and may be frozen now; the image axis is construct kind 3 (::slotted), ruled shadow-only, and may be frozen only as a documented authoring instruction stating its cascade position differs.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
+    },
+    "#305": {
+      "evidence_ref": "Gated child, unblocked not worked. ADR-15: #305 may freeze now, unconditionally \u2014 sk-button.css's only :host rule is display: inline-flex, explicitly inert in the static path; a busy axis is a root-class modifier plus ARIA.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
+    },
+    "#307": {
+      "evidence_ref": "Gated child, unblocked not worked. ADR-15: #307 may freeze a static API in the TWO-ELEMENT wrapper form only \u2014 div.sk-action-row-host > div.sk-action-row with container-type on the outer element. It must not freeze a single-element form; measurement/host-container-type/result.json O1/O3/O10/O12 record what that costs.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
+    },
+    "#309": {
+      "evidence_ref": "Filed by this mission as the named generator work ADR-15 owes; deliberately not built here (#301 bounds the mission to one WP). Reviewer verified at cycle-2: #309 names both probe tables including the cycle-2 additions (O15/O16 flex-item, O17/O18 grid control, O19 unconditional @container, O22, and action-row's 400/401 inclusive boundary), forbids the collapsed form AND the abbreviated wrapper, names sk-copy-field and sk-page-header with the :host([sticky]) host-styling sub-case, and excludes ::slotted() (owned by #311).",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
+    },
+    "#311": {
+      "evidence_ref": "Filed by this mission to own #301 acceptance item 7 for the six sheets outside WP01's declared owned_files. Reviewer verified at cycle-2: the per-file rule inventory's line numbers are exact on all six sheets, the 14-sheet classification is exhaustive and correctly partitioned (6 owed / 1 discharged here / 7 exempt), each instruction must state its own computed tie boundary rather than transcribe entity-marker's (0,1,1), the cascade matrix is the verification bar, and acceptance requires a check refusing both the empty set and silent regrowth. Judged a discharge, not a deferral.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
+    }
+  },
+  "schema_version": 1
+}

@@ -1,0 +1,91 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>sk-action-row — static exemplar (candidate-(a) transform)</title>
+<!--
+  THE STATIC SIDE of the host-container-type measurement. Links the REAL BUILT CSS through
+  the package's own export map (/pkg/@spec-kitty/styles/action-row/sk-action-row.css, served
+  from whatever import.meta.resolve returns for that specifier — spec FR-004).
+
+  Only the :host rule is rewritten, in two variants:
+    variant=A  "collapsed" — :host { container-type: inline-size } lands on .sk-action-row
+                             itself, the element the sheet's own @container block styles.
+                             This is plan.md's literal candidate-(a) transform.
+    variant=B  "wrapper"   — :host becomes a separate .sk-action-row-host wrapper element
+                             carrying container-type around an unchanged .sk-action-row root.
+
+  As in the app-shell exemplar, variant A cannot carry :host's `display: block` alongside
+  .sk-action-row's `display: flex` on one element; it keeps `flex` and takes only `min-width`
+  and `container-type`.
+
+  Query params: ?variant=A|B&width=<px>&compose=none|wider|narrower&outer=<px>
+-->
+<link rel="stylesheet" href="/packages/tokens/dist/tokens.css">
+<link rel="stylesheet" href="/pkg/@spec-kitty%2Fstyles%2Faction-row%2Fsk-action-row.css">
+<script>
+  // SELECTORS EXACTLY AS A GENERATOR WOULD EMIT THEM — no page-scoping prefix. An earlier
+  // revision selected the variant with a `.v-A`/`.v-B` body class, which silently added a
+  // class to every override selector and inflated its specificity: a measurement artifact,
+  // not a property of the transform. The variant sheet is now injected unprefixed, in the
+  // position a generated companion sheet would occupy (immediately after the base <link>).
+  const VARIANT_CSS = {
+    A: `.sk-action-row { min-width: 0; container-type: inline-size; }`,
+    B: `.sk-action-row-host { display: block; min-width: 0; container-type: inline-size; }`,
+    // Babbrev — the wrapper AS THE CYCLE-1 PROSE PRESCRIBED IT: container-type and nothing
+    // else. Cycle-1 review found the prose and the measured exemplar disagreed; this variant
+    // makes the disagreement a recorded number rather than an argument.
+    Babbrev: `.sk-action-row-host { container-type: inline-size; }`,
+  };
+  const requested = new URLSearchParams(location.search).get('variant') ?? 'A';
+  if (!(requested in VARIANT_CSS)) throw new Error(`unknown variant ${requested}`);
+  const variantSheet = document.createElement('style');
+  variantSheet.textContent = VARIANT_CSS[requested];
+  document.currentScript.after(variantSheet);
+</script>
+<style> html, body { margin: 0; padding: 0; } </style>
+<div id="outer"><div id="sizer">
+  <div id="mount"></div>
+</div></div>
+<script>
+  const q = new URLSearchParams(location.search);
+  const variant = q.get('variant') ?? 'A';
+  // The flattened tree the element renders (packages/elements/src/action-row/sk-action-row.ts
+  // render() + scanContent()); every projection wrapper carries content, so none of the
+  // element's JS-managed `hidden` attributes are set on either side.
+  const inner = `
+    <div class="sk-action-row__trigger sk-action-row__trigger--static">
+      <span class="sk-action-row__marker"><span>M</span></span>
+      <span class="sk-action-row__title"><span>Title</span></span>
+      <span class="sk-action-row__reference"><span>ref/path</span></span>
+      <span class="sk-action-row__tags"><span>tag</span></span>
+      <span class="sk-action-row__metadata"><span>2h ago</span></span>
+      <span class="sk-action-row__supporting"><span>Supporting context</span></span>
+    </div>
+    <div class="sk-action-row__controls"><button type="button">Act</button></div>`;
+
+  const mount = document.getElementById('mount');
+  mount.outerHTML =
+    variant === 'A'
+      ? `<div id="component" class="sk-action-row">${inner}</div>`
+      : `<div id="component" class="sk-action-row-host"><div class="sk-action-row">${inner}</div></div>`;
+
+  const DEFAULT_WIDTH = 360;
+  const outer = document.getElementById('outer');
+  const sizer = document.getElementById('sizer');
+  const layout = q.get('layout') ?? 'block';
+  if (layout === 'flex') {
+    outer.style.display = 'flex';
+    outer.style.width = '300px';
+    sizer.style.display = 'contents';
+  } else if (layout === 'grid') {
+    outer.style.display = 'grid';
+    outer.style.gridTemplateColumns = '300px';
+    sizer.style.display = 'contents';
+  } else {
+    sizer.style.width = `${q.get('width') ?? DEFAULT_WIDTH}px`;
+    const compose = q.get('compose') ?? 'none';
+    if (compose !== 'none') {
+      outer.style.containerType = 'inline-size';
+      outer.style.width = `${q.get('outer')}px`;
+    }
+  }
+</script>

@@ -39,6 +39,7 @@ Identifiers below are the ones each record uses in its own H1. Every ADR record'
 | [ADR-12](decisions/2026-09-02-12-consumer-audit-of-record.md) | Consumer Audit of Record, and Diagram Corrections | Proposed |
 | [ADR-13](decisions/2026-09-02-13-storybook-web-components-builder.md) | Storybook Moves to the Web-Components Renderer on Vite | Proposed |
 | [ADR-14](decisions/2026-09-06-14-detached-probe-validation-seam.md) | The Detached-Probe Validation Seam | Proposed |
+| [ADR-15](decisions/2026-09-10-15-static-form-of-element-backed-css.md) | The Static Form of Element-Backed CSS | Proposed |
 
 ## Research
 

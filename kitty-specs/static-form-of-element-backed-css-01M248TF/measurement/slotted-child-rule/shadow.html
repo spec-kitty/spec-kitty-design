@@ -1,0 +1,19 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>sk-entity-marker — real custom element (shadow form)</title>
+<!--
+  THE SHADOW SIDE of the ::slotted() measurement. Loads the REAL element from the
+  Storybook-built bundle. The <img> is a light-DOM child of the host, i.e. the node
+  ::slotted(img) targets.
+
+  Query params: ?competing=none|equal|higher
+-->
+<link rel="stylesheet" href="/packages/tokens/dist/tokens.css">
+<style id="page-rules"> html, body { margin: 0; padding: 0; } </style>
+<div class="page-scope theme">
+  <sk-entity-marker id="component" label="Ada Lovelace" shape="circle">
+    <img id="probe-img" src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2280%22%20height%3D%22120%22%20viewBox%3D%220%200%2080%20120%22%3E%3Crect%20width%3D%2280%22%20height%3D%22120%22%20fill%3D%22%238fcb8f%22%2F%3E%3C%2Fsvg%3E" alt="">
+  </sk-entity-marker>
+</div>
+<script src="/apps/storybook/storybook-static/elements-dist/elements.js"></script>
+<script src="./competing-rule.js"></script>

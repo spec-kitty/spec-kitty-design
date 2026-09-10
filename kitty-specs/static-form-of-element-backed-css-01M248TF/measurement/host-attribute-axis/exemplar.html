@@ -1,0 +1,167 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>sk-app-shell — static exemplar (candidate-(a) transform)</title>
+<!--
+  THE STATIC SIDE of the host-attribute-axis measurement.
+
+  It links the REAL BUILT CSS through the package's own export map:
+  /pkg/@spec-kitty/styles/app-shell/sk-app-shell.css is served by harness.mjs from whatever
+  `import.meta.resolve('@spec-kitty/styles/app-shell/sk-app-shell.css')` returns — i.e. the
+  file an installed consumer actually resolves (spec FR-004). No source file is read here.
+
+  On top of that unmodified sheet sits ONLY the candidate-(a) rewrite of the :host-dependent
+  rules, in two variants:
+
+    variant=A  "collapsed"  — plan.md's literal transform: :host and the root class become ONE
+                              element. :host([presentation="X"]) .sk-app-shell becomes
+                              .sk-app-shell.sk-app-shell--X (specificity preserved at (0,2,0));
+                              :host([presentation="X"]) .sk-app-shell__y becomes
+                              .sk-app-shell--X .sk-app-shell__y.
+    variant=B  "wrapper"    — the shadow structure preserved: :host becomes a separate
+                              .sk-app-shell-host wrapper element carrying container-type and
+                              the modifier, around an unchanged .sk-app-shell root.
+
+  SELECTORS ARE WRITTEN EXACTLY AS A GENERATOR WOULD EMIT THEM — no page-scoping prefix.
+  An earlier revision of this file selected the variant with a `.v-A`/`.v-B` body class, which
+  silently added a class to every override selector and inflated its specificity. That is a
+  measurement artifact, not a property of the transform, so the variant is now chosen by
+  injecting one of two unprefixed sheets immediately after the base <link> — the position a
+  generated companion sheet would occupy.
+
+  NOTE ON `display`. `:host` declares `display: block` while `.sk-app-shell` declares
+  `display: grid`. Variant A cannot carry both on one element, so it keeps the root class's
+  `grid` (the layout the component's own rules depend on) and takes only `width`, `min-width`
+  and `container-type` from `:host`. Variant B has two elements and carries both faithfully.
+
+  Query params: ?variant=A|B&presentation=compact|rail-preserving&width=<px>&compose=none|wider|narrower&outer=<px>
+-->
+<link rel="stylesheet" href="/packages/tokens/dist/tokens.css">
+<link rel="stylesheet" href="/pkg/@spec-kitty%2Fstyles%2Fapp-shell%2Fsk-app-shell.css">
+<script>
+  const VARIANT_CSS = {
+    A: `
+      .sk-app-shell { width: 100%; min-width: 0; container-type: inline-size; }
+
+      @container (max-inline-size: 1100px) {
+        .sk-app-shell.sk-app-shell--rail-preserving {
+          grid-template-columns: var(--sk-layout-personal-rail-width) minmax(0, 1fr);
+        }
+        .sk-app-shell--rail-preserving .sk-app-shell__personal { grid-column: 1; grid-row: 1 / span 3; }
+        .sk-app-shell--rail-preserving .sk-app-shell__context { display: none; }
+        .sk-app-shell--rail-preserving .sk-app-shell__compact-header,
+        .sk-app-shell--rail-preserving .sk-app-shell__compact-navigation,
+        .sk-app-shell--rail-preserving .sk-app-shell__content { grid-column: 2; }
+        .sk-app-shell--rail-preserving .sk-app-shell__compact-header { display: block; grid-row: 1; }
+        .sk-app-shell--rail-preserving .sk-app-shell__compact-navigation { display: block; grid-row: 2; }
+        .sk-app-shell--rail-preserving .sk-app-shell__content { grid-row: 3; }
+      }
+
+      @container (max-inline-size: 860px) {
+        .sk-app-shell.sk-app-shell--compact { grid-template-columns: minmax(0, 1fr); }
+        .sk-app-shell--compact .sk-app-shell__personal,
+        .sk-app-shell--compact .sk-app-shell__context { display: none; }
+        .sk-app-shell--compact .sk-app-shell__compact-header { display: block; }
+        .sk-app-shell--compact .sk-app-shell__compact-navigation { display: block; }
+      }
+
+      :is(.sk-app-shell--compact, .sk-app-shell--rail-preserving) .sk-app-shell__compact-navigation[hidden] { display: none; }
+    `,
+    B: `
+      .sk-app-shell-host { display: block; width: 100%; min-width: 0; container-type: inline-size; }
+
+      @container (max-inline-size: 1100px) {
+        .sk-app-shell-host--rail-preserving .sk-app-shell {
+          grid-template-columns: var(--sk-layout-personal-rail-width) minmax(0, 1fr);
+        }
+        .sk-app-shell-host--rail-preserving .sk-app-shell__personal { grid-column: 1; grid-row: 1 / span 3; }
+        .sk-app-shell-host--rail-preserving .sk-app-shell__context { display: none; }
+        .sk-app-shell-host--rail-preserving .sk-app-shell__compact-header,
+        .sk-app-shell-host--rail-preserving .sk-app-shell__compact-navigation,
+        .sk-app-shell-host--rail-preserving .sk-app-shell__content { grid-column: 2; }
+        .sk-app-shell-host--rail-preserving .sk-app-shell__compact-header { display: block; grid-row: 1; }
+        .sk-app-shell-host--rail-preserving .sk-app-shell__compact-navigation { display: block; grid-row: 2; }
+        .sk-app-shell-host--rail-preserving .sk-app-shell__content { grid-row: 3; }
+      }
+
+      @container (max-inline-size: 860px) {
+        .sk-app-shell-host--compact .sk-app-shell { grid-template-columns: minmax(0, 1fr); }
+        .sk-app-shell-host--compact .sk-app-shell__personal,
+        .sk-app-shell-host--compact .sk-app-shell__context { display: none; }
+        .sk-app-shell-host--compact .sk-app-shell__compact-header { display: block; }
+        .sk-app-shell-host--compact .sk-app-shell__compact-navigation { display: block; }
+      }
+
+      :is(.sk-app-shell-host--compact, .sk-app-shell-host--rail-preserving) .sk-app-shell__compact-navigation[hidden] { display: none; }
+    `,
+  };
+
+  // variant Babbrev — the wrapper AS THE CYCLE-1 PROSE PRESCRIBED IT: `container-type` and
+  // nothing else. Everything below the host rule is byte-identical to variant B, derived from
+  // it rather than retyped, so the two variants cannot drift apart and the ONLY difference
+  // measured is the host declaration set. Cycle-1 review found the prose and the measured
+  // exemplar disagreed here; this variant is what makes that disagreement a recorded number.
+  VARIANT_CSS.Babbrev = VARIANT_CSS.B.replace(
+    '.sk-app-shell-host { display: block; width: 100%; min-width: 0; container-type: inline-size; }',
+    '.sk-app-shell-host { container-type: inline-size; }',
+  );
+  if (VARIANT_CSS.Babbrev === VARIANT_CSS.B) throw new Error('Babbrev derivation did not apply');
+  const params = new URLSearchParams(location.search);
+  const variant = params.get('variant') ?? 'A';
+  if (!(variant in VARIANT_CSS)) throw new Error(`unknown variant ${variant}`);
+  const variantSheet = document.createElement('style');
+  variantSheet.textContent = VARIANT_CSS[variant];
+  document.currentScript.after(variantSheet);
+</script>
+<style> html, body { margin: 0; padding: 0; } </style>
+<div id="outer"><div id="sizer">
+  <div id="mount"></div>
+</div></div>
+<script>
+  const q = new URLSearchParams(location.search);
+  const v = q.get('variant') ?? 'A';
+  const presentation = q.get('presentation');
+
+  // The flattened tree the element renders (see packages/elements/src/app-shell/sk-app-shell.ts
+  // render()); the slotted children sit exactly where their slots do.
+  const inner = `
+    <div class="sk-app-shell__personal"><nav aria-label="Product areas">P</nav></div>
+    <div class="sk-app-shell__context"><nav aria-label="Context">C</nav></div>
+    <div class="sk-app-shell__compact-header"><div>H</div></div>
+    <div class="sk-app-shell__compact-navigation"><nav aria-label="Repository navigation">N</nav></div>
+    <div class="sk-app-shell__content">
+      <div class="sk-app-shell__header"><div>PH</div></div>
+      <main class="sk-app-shell__main"><p>Main</p></main>
+    </div>`;
+
+  const mount = document.getElementById('mount');
+  if (v === 'A') {
+    const mod = presentation ? ` sk-app-shell--${presentation}` : '';
+    mount.outerHTML = `<div id="component" class="sk-app-shell${mod}">${inner}</div>`;
+  } else {
+    // B and Babbrev share the markup exactly; only the wrapper's own rule differs.
+    const mod = presentation ? ` sk-app-shell-host--${presentation}` : '';
+    mount.outerHTML =
+      `<div id="component" class="sk-app-shell-host${mod}"><div class="sk-app-shell">${inner}</div></div>`;
+  }
+
+  const DEFAULT_WIDTH = 800;
+  const outer = document.getElementById('outer');
+  const sizer = document.getElementById('sizer');
+  const layout = q.get('layout') ?? 'block';
+  if (layout === 'flex') {
+    outer.style.display = 'flex';
+    outer.style.width = '300px';
+    sizer.style.display = 'contents';
+  } else if (layout === 'grid') {
+    outer.style.display = 'grid';
+    outer.style.gridTemplateColumns = '300px';
+    sizer.style.display = 'contents';
+  } else {
+    sizer.style.width = `${q.get('width') ?? DEFAULT_WIDTH}px`;
+    const compose = q.get('compose') ?? 'none';
+    if (compose !== 'none') {
+      outer.style.containerType = 'inline-size';
+      outer.style.width = `${q.get('outer')}px`;
+    }
+  }
+</script>

@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "mission_slug": "static-form-of-element-backed-css-01M248TF",
+  "mission_id": "01M248TF3N3ZZR1NQ5S4ND379W",
+  "mission_branch": "kitty/mission-static-form-of-element-backed-css-01M248TF",
+  "target_branch": "mission/static-form-of-element-backed-css",
+  "lanes": [
+    {
+      "lane_id": "lane-a",
+      "wp_ids": [
+        "WP01"
+      ],
+      "write_scope": [
+        "docs/architecture/README.md",
+        "docs/architecture/decisions/**",
+        "docs/contributing/adding-a-component.md",
+        "packages/elements/src/action-row/sk-action-row.ts",
+        "packages/elements/src/app-shell/sk-app-shell.ts",
+        "packages/elements/src/entity-marker/sk-entity-marker.ts",
+        "packages/styles/src/action-row/sk-action-row.css",
+        "packages/styles/src/app-shell/sk-app-shell.css",
+        "packages/styles/src/entity-marker/sk-entity-marker.css"
+      ],
+      "predicted_surfaces": [
+        "api",
+        "app-shell",
+        "artifact-rendering",
+        "tests",
+        "tracker-integration"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    }
+  ],
+  "computed_at": "2026-09-10T00:07:16.414411+00:00",
+  "computed_from": "dependency_graph+ownership",
+  "planning_artifact_wps": [],
+  "planning_commit_sha": "50df8e2f80f225a13140076912378567adcd1fae"
+}

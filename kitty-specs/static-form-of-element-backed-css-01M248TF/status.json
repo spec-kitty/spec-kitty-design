@@ -1,0 +1,58 @@
+{
+  "event_count": 11,
+  "last_event_id": "01M24EFQPYE3K4FF72S38WFYKX",
+  "materialized_at": "2026-09-10T01:21:32.382383+00:00",
+  "mission_number": "",
+  "mission_slug": "static-form-of-element-backed-css-01M248TF",
+  "mission_type": "software-dev",
+  "summary": {
+    "approved": 1,
+    "blocked": 0,
+    "canceled": 0,
+    "claimed": 0,
+    "done": 0,
+    "for_review": 0,
+    "in_progress": 0,
+    "in_review": 0,
+    "planned": 0
+  },
+  "work_packages": {
+    "WP01": {
+      "actor": "claude",
+      "agent": "claude",
+      "agent_profile": "__resolved_profile_absent__",
+      "agent_profile_version": "__resolved_profile_version_absent__",
+      "force_count": 1,
+      "lane": "approved",
+      "last_event_id": "01M24EFQPYE3K4FF72S38WFYKX",
+      "last_transition_at": "2026-09-10T01:21:32.382383+00:00",
+      "model": "__resolved_model_absent__",
+      "notes": [
+        "Independent reviewer claiming WP01 for review",
+        "Independent reviewer claiming WP01 for cycle-2 re-review",
+        "APPROVE (cycle 2, independent review). All four cycle-1 findings closed and verified at every named site, not a sample. Everything re-measured on a clean --skip-nx-cache rebuild; all three probes reproduce byte-identically (app-shell wrapper 22/22, A 16 fail-pairs, B-abbrev 4; action-row wrapper 20/20, A 12, B-abbrev 0; slotted shadow-only, 6). Independently confirmed: the converse finding (action-row B-abbrev passes because its :host declares no width and the element itself is 0px in a flex row), O19 (600px, no presentation attribute: element and wrapper 600px, collapsed 56px 240px 304px, so the collapse breaks plain container queries too), the 400/401 inclusive-boundary pair, and the O5 erratum (::slotted(img) is (0,0,2) and loses to the (0,1,1) static rewrite on either reading). Positive-controlled all four negative invariants against a reconstructed cycle-1 tree: each matches the exact defect text it guards, none matches HEAD, and NI-001 discriminates the four defect forms from ready-for-Lynn and from the not-recorded statements. My own new attack over 7 unprobed layout contexts (56 comparisons, both engines): B-wrapper 0 mismatches, B-abbrev fails in 3 MORE contexts than the record claims, so HIGH-1 is understated rather than overstated. Ruled that #311 discharges #301 acceptance item 7 rather than deferring it, and separately verified clause (a) by reading all four surviving ::slotted mentions - none implies a static equivalent. ADR-10 section 3 citation verified verbatim. Gates re-run: npm test 582/582 suite floor green, lint 0 errors, all check-*.mjs green, both --check generators drift-free, commitlint green, tree clean, 100dvh non-green still pre-existing (line 87) and unwired. Two non-blocking LOWs recorded for the PR: ADR line 215's '(firefox identical)' is literally false for the O3/O4 sub-pixel values it quotes (verdicts agree in both engines; line 158's equivalent claim is true), and ADR line 142's variant-B shape description still names container-type alone, incomplete against the corrected prescription below it but descriptive rather than prescriptive. Reviewer recorded the issue-matrix dispositions for #309 and #311, which the WP had left unset and which blocked the approval gate."
+      ],
+      "provider": "__resolved_provider_absent__",
+      "review": null,
+      "review_result": {
+        "feedback_path": "/home/jeroennouws/dev/spec-kitty-design-missions/301/kitty-specs/static-form-of-element-backed-css-01M248TF/tasks/WP01-decide-static-form-ruling/review-cycle-2.md",
+        "reference": "review-cycle://static-form-of-element-backed-css-01M248TF/WP01-decide-static-form-ruling/review-cycle-2.md",
+        "reviewer": "claude",
+        "verdict": "approved"
+      },
+      "role": "reviewer",
+      "shell_pid": null,
+      "shell_pid_created_at": null,
+      "subtasks": {
+        "T001": "done",
+        "T002": "done",
+        "T003": "done",
+        "T004": "done",
+        "T005": "done",
+        "T006": "done",
+        "T007": "done",
+        "T008": "done"
+      }
+    }
+  }
+}
