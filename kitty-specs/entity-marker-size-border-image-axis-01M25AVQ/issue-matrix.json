@@ -48,6 +48,18 @@
       "verdict": "in-mission",
       "wp": "WP01"
     },
+    "#301": {
+      "evidence_ref": "spec.md/plan.md/research.md cross-reference only: #301 is ADR-15's own already-landed PR that ruled the ::slotted(img) instruction shadow-only; verified by diff that #304 leaves that rule and its header comment byte-identical (zero changes).",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
     "#303": {
       "evidence_ref": "spec.md prose cross-reference only: #303 is the named downstream consumer of this WP's public surface (size scale, border modifier, image-axis instruction) in a later Wave C mission; it composes on #304's contract but is out of #304's own scope.",
       "fr": null,
