@@ -131,6 +131,18 @@
       "title": null,
       "verdict": "verified-already-fixed",
       "wp": null
+    },
+    "#93": {
+      "evidence_ref": "https://github.com/spec-kitty/spec-kitty-design/issues/93 \u2014 established that a LightMode story must wrap in class=sk-light, not the inert data-theme=light; this mission's LightMode story follows the fixed pattern (verified directly in sk-pill-tag.stories.ts)",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "verified-already-fixed",
+      "wp": null
     }
   },
   "schema_version": 1
