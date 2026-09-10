@@ -78,7 +78,16 @@
     border-color var(--sk-motion-duration-fast) var(--sk-motion-ease-out);
 }
 
-.sk-action-row[aria-current="true"] {
+/* #349: route mode never sets `aria-current="true"` on the row — it sets `aria-current="page"`
+   on the trigger anchor instead (FR-011, ratified: attribute parity only, one value per mode).
+   Without the `:has()` arm below, a route-mode current row painted identically to a non-current
+   one — assistive tech was told which row is current, a sighted user was not. The `:has()` arm
+   reaches the row from the anchor's attribute so the SAME declarations paint both cases; this is
+   not a second visual language, it is the one rule this component already had, applied to both
+   places `aria-current` can land. `> .sk-action-row__trigger` matches only the DIRECT trigger
+   child, never a nested consumer-supplied anchor (e.g. inside `supporting`). */
+.sk-action-row[aria-current="true"],
+.sk-action-row:has(> .sk-action-row__trigger[aria-current="page"]) {
   background: var(--sk-surface-pill);
   border-color: var(--sk-border-strong);
 }
@@ -90,7 +99,8 @@
   border-radius: 0;
 }
 
-.sk-action-row--flush[aria-current="true"] {
+.sk-action-row--flush[aria-current="true"],
+.sk-action-row--flush:has(> .sk-action-row__trigger[aria-current="page"]) {
   background: var(--sk-surface-pill);
   border-color: transparent;
   border-width: 0;
@@ -295,12 +305,18 @@ a.sk-action-row__trigger:active {
    opting out of the user's palette. System colours live on policed longhands;
    focus keeps the base rule's width/style and overrides its colour only. */
 @media (forced-colors: active) {
-  .sk-action-row[aria-current="true"] {
+  /* #349: the colour-only case above — this is where a route-mode current row's treatment
+     would vanish entirely if it were left keyed to `[aria-current="true"]` alone: forced-colors
+     already flattens `background`/`border-color` to Canvas, so this block's own edge is the
+     ONLY surviving carrier of "current" here, for either mode. */
+  .sk-action-row[aria-current="true"],
+  .sk-action-row:has(> .sk-action-row__trigger[aria-current="page"]) {
     border-inline-start-color: Highlight;
     border-inline-start-width: var(--sk-border-width-2);
   }
 
-  .sk-action-row--flush[aria-current="true"] {
+  .sk-action-row--flush[aria-current="true"],
+  .sk-action-row--flush:has(> .sk-action-row__trigger[aria-current="page"]) {
     border-inline-start-width: 0;
   }
 

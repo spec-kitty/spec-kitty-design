@@ -86,9 +86,19 @@ const mediaRuleFor = (query: string): CSSMediaRule | undefined =>
     (rule): rule is CSSMediaRule => rule instanceof CSSMediaRule && rule.media.mediaText === query,
   );
 
+// Matches the WHOLE selectorText (existing callers, e.g. the two-part hover/pressed/focus
+// selectors that really are one rule's own literal list) OR one member of a comma-separated
+// list (#349: `.sk-action-row[aria-current="true"]` now shares a declaration block with a
+// `:has()` arm, so exact-whole-string equality alone would stop finding it).
 const styleRuleFor = (media: CSSMediaRule, selector: string): CSSStyleRule | undefined =>
   Array.from(media.cssRules).find(
-    (rule): rule is CSSStyleRule => rule instanceof CSSStyleRule && rule.selectorText === selector,
+    (rule): rule is CSSStyleRule =>
+      rule instanceof CSSStyleRule &&
+      (rule.selectorText === selector ||
+        rule.selectorText
+          .split(',')
+          .map((part) => part.trim())
+          .includes(selector)),
   );
 
 const rootStyleRuleFor = (selector: string): CSSStyleRule | undefined =>
@@ -731,6 +741,27 @@ test('the authored sheet scopes reduced motion and preserves every forced-colors
   expect(forcedColors, 'the forced-colors media rule was not parsed').not.toBeUndefined();
   const selected = styleRuleFor(forcedColors!, '.sk-action-row[aria-current="true"]')!;
   const flushSelected = styleRuleFor(forcedColors!, '.sk-action-row--flush[aria-current="true"]')!;
+
+  // #349: the route-mode arm must land in the SAME declaration block as the attribute arm above
+  // (`selected`/`flushSelected` themselves, not a third, independently-drifting rule) — this is
+  // the forced-colors half of matching the existing treatment rather than inventing a second one.
+  const routeSelected = styleRuleFor(
+    forcedColors!,
+    '.sk-action-row:has(> .sk-action-row__trigger[aria-current="page"])',
+  )!;
+  const routeFlushSelected = styleRuleFor(
+    forcedColors!,
+    '.sk-action-row--flush:has(> .sk-action-row__trigger[aria-current="page"])',
+  )!;
+  expect(routeSelected, 'the route-mode forced-colors rule was not parsed').not.toBeUndefined();
+  expect(routeFlushSelected, 'the route-mode flush forced-colors rule was not parsed').not.toBeUndefined();
+  expect(routeSelected.style.cssText, 'route-mode must share the attribute arm’s own declaration block').toBe(
+    selected.style.cssText,
+  );
+  expect(
+    routeFlushSelected.style.cssText,
+    'route-mode flush must share the attribute arm’s own declaration block',
+  ).toBe(flushSelected.style.cssText);
   const hover = styleRuleFor(
     forcedColors!,
     'button.sk-action-row__trigger:hover, a.sk-action-row__trigger:hover',
@@ -1134,6 +1165,50 @@ test('[T006][FR-011] aria-current is present with the correct value when current
   expect(regressed.hasAttribute('aria-current'), 'hasAttribute must catch an aria-current="false" regression').toBe(
     true,
   );
+});
+
+test('[T006][#349] a current route row carries the same visual treatment as a current non-route row, and differs from a non-current route row — read from computed style, not the class list', () => {
+  const removeCss = installActionRowCss();
+  const routeCurrent = renderStatic({ href: '#x', current: true }, { title: 'Route, current' });
+  const routeNotCurrent = renderStatic({ href: '#x' }, { title: 'Route, not current' });
+  const nonRouteCurrent = renderStatic({ current: true }, { title: 'Current' });
+  document.body.append(routeCurrent, routeNotCurrent, nonRouteCurrent);
+  try {
+    const routeCurrentStyle = getComputedStyle(routeCurrent.querySelector('.sk-action-row')!);
+    const routeNotCurrentStyle = getComputedStyle(routeNotCurrent.querySelector('.sk-action-row')!);
+    const nonRouteCurrentStyle = getComputedStyle(nonRouteCurrent.querySelector('.sk-action-row')!);
+
+    // The defect (#349): a route-mode current row carries `aria-current="page"` on the anchor
+    // (asserted above), but nothing selected on that attribute, so the row painted identically
+    // to a non-current route row — no visual carrier at all, sighted or otherwise.
+    expect(
+      routeCurrentStyle.backgroundColor,
+      'a current route row must be visually distinguishable from a non-current route row (#349)',
+    ).not.toBe(routeNotCurrentStyle.backgroundColor);
+    expect(
+      routeCurrentStyle.borderColor,
+      'the border colour must distinguish current from non-current route rows too',
+    ).not.toBe(routeNotCurrentStyle.borderColor);
+
+    // Match the existing treatment rather than inventing a second visual language: route-mode
+    // current must compute the SAME background/border as the non-route current row.
+    expect(
+      routeCurrentStyle.backgroundColor,
+      'route-mode current must match the non-route current treatment exactly',
+    ).toBe(nonRouteCurrentStyle.backgroundColor);
+    expect(routeCurrentStyle.borderColor, 'including the border colour').toBe(nonRouteCurrentStyle.borderColor);
+
+    // MUTATION-EQUIVALENT CHECK: a leaked `aria-current="true"` hand-added to the route row's
+    // OWN attribute (never emitted by the real markup, see [T006][FR-011] above) would produce
+    // the same passing background/border comparison here for the wrong reason. Confirm the
+    // route-mode row itself still carries no `aria-current="true"` while the visual match holds.
+    expect(routeCurrent.querySelector('.sk-action-row')!.hasAttribute('aria-current')).toBe(false);
+  } finally {
+    routeCurrent.remove();
+    routeNotCurrent.remove();
+    nonRouteCurrent.remove();
+    removeCss();
+  }
 });
 
 test('[T006][FR-012] flush presentation changes computed background/border, and its absence restores the bordered surface — read from computed style, not the class list', () => {
