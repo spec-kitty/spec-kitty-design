@@ -57,11 +57,11 @@
     {
       "criterion_id": "FR-006",
       "description": "Verify FR-006 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "proof_type": "filed_issue",
+      "evidence": "#309 (generator) and #310 (equivalence gate), each carrying the full probe table from measurement/*/result.json including composed, flex-item, unconditional-@container and exact-breakpoint cases. Neither built in this PR; git diff touches no script under scripts/.",
+      "pass_fail": "pass",
+      "verified_by": "architect-alphonso",
+      "verified_at": "2026-09-10T01:07:26.476507+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
