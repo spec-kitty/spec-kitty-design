@@ -196,9 +196,17 @@ declare module 'vue' {
      *
      * STATIC FORM (FR-016). This component ships no `sk-confirm-dialog.markup.ts` and generates
      * no static `sk-confirm-dialog.html`/`index.ts` — `showModal()` has no server-rendered
-     * equivalent, the same shape as `sk-notice` (#178). Whether the *stylesheet* additionally
-     * needs a generated static twin for a consumer-rendered `<dialog>` is explicitly deferred to
-     * open issue #301's ruling; this component does not decide it.
+     * equivalent, the same shape as `sk-notice` (#178). Authoring a static twin for the *stylesheet*
+     * was always this component's own decision to make (matching #72/#73's decline, per
+     * `adding-a-component.md`), not something gated by external ruling, and it declines one. #301
+     * (the static-form-of-element-backed-CSS question) is CLOSED; its ruling shipped as ADR-15
+     * (`docs/architecture/decisions/2026-09-10-15-static-form-of-element-backed-css.md`), still
+     * `Proposed`, not ratified. ADR-15 rules on exactly three CSS construct kinds — a host-attribute
+     * variant axis inside a host-owned `@container`, a host-owned `container-type`, and `::slotted()`
+     * — and `sk-confirm-dialog.css` uses none of them: no `@container`, no `container-type`, no
+     * `::slotted()`, and its one `:host` rule is unconditional, not an attribute-gated variant axis.
+     * There is therefore no ruling to defer to, and none is needed — nothing about this stylesheet's
+     * shape raises the shadow-vs-static divergence question ADR-15 exists to resolve.
      *
      * TEAM DELETION IS NEVER A DEMONSTRATED FLOW (FR-014). Whole-Team deletion is blocked upstream
      * (Team Kitty SaaS #1432); every example anywhere near this component uses membership

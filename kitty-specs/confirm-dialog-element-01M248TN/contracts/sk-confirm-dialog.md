@@ -80,6 +80,11 @@ and bearer-link revoke.
 ## Static form
 
 This element has no server-rendered static twin for its *interactive* behavior — `showModal()` has
-no static equivalent, the same shape as `sk-notice` (#178). Whether its **stylesheet** additionally
-needs a generated static twin for a consumer-rendered `<dialog>` is explicitly deferred to open
-issue #301's ruling (FR-016) and is not decided by this contract.
+no static equivalent, the same shape as `sk-notice` (#178). Authoring a static twin for its
+**stylesheet** was always this component's own decision (matching #72/#73's decline), not
+something gated by external ruling, and it declines one (FR-016). #301 (the static-form-of-
+element-backed-CSS question) is closed; its ruling shipped as ADR-15, still `Proposed`, not
+ratified, and it rules on exactly three CSS construct kinds — a host-attribute variant axis inside
+a host-owned `@container`, a host-owned `container-type`, and `::slotted()`. `sk-confirm-dialog.css`
+uses none of them: no `@container`, no `container-type`, no `::slotted()`, and its one `:host` rule
+is unconditional. There is no ruling to defer to here, and none is needed.
