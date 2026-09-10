@@ -641,6 +641,13 @@ declare module 'vue' {
       /** Shape: `eyebrow` for the larger, square-cornered lead-in label. Omit for the compact pill. */
       'shape'?: 'eyebrow' | undefined;
       /**
+       * Operational status tone, orthogonal to `variant` and `shape` — a tag may carry any
+       * combination. The vocabulary is `sk-status-indicator`'s; this element holds no domain mapping
+       * and never infers a tone. An unknown value renders the base tag and warns rather than
+       * throwing.
+       */
+      'status'?: 'neutral' | 'info' | 'success' | 'attention' | 'danger' | 'recovery' | undefined;
+      /**
        * Colour: `green`, `purple`, `breaking` or `yellow`. Omit for the neutral tag. An unknown
        * value renders the base tag and warns rather than throwing.
        */

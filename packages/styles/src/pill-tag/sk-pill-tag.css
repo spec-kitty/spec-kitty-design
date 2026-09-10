@@ -68,6 +68,104 @@
   color: var(--sk-on-tint-butter);
 }
 
+/* ---- Operational status tones (#302, reusing #177's ruling for sk-card) ----
+   ONE axis. `variant` stays the brand/decorative axis; `status` is the operational one, and a
+   pill may carry both — orthogonal as inputs. THE PRECEDENCE RULE, decided and documented here
+   rather than left emergent (FR-003/C-011 of #302's spec): while a status is present it
+   SUPERSEDES the brand variant's `background`/`color` entirely. `.sk-pill-tag--<variant>` above
+   and each `.sk-pill-tag--status-<tone>` rule below set exactly `background` and `color`, both at
+   equal specificity (0,1,0), and the status rules are authored AFTER the variant rules — so
+   source order decides and the variant contributes nothing to those two properties once a status
+   is set. This is the same relationship #177 rules for `sk-card`'s `variant`/`status` pair; it is
+   restated per-component rather than assumed, per this file's own "MEASURED, not assumed"
+   standard for the block above.
+
+   TOKENS ONLY, no new pair: --sk-status-<tone> / --sk-on-status-<tone> already exist in both
+   theme blocks of packages/tokens/src/tokens.css (#177). This component paints `background` and
+   `color` from the SAME pair, so — unlike sk-card, which also has a body-copy contrast contract
+   distinct from its edge — there is exactly one contrast measurement per tone, not two.
+
+   MEASURED, not assumed, against the REAL RENDERED PILL (`--sk-text-xs`, normal-size text, so
+   4.5:1 is the correct AA bar, not the 3:1 large-text one). Re-verified for this component rather
+   than merely cited from #177's card-side measurement, because the font-size differs even though
+   the token values do not:
+     tone        dark pair   light pair
+     neutral        6.01:1      5.22:1
+     info           9.42:1      7.70:1
+     success        8.55:1      7.10:1
+     attention     11.18:1      6.28:1
+     danger         5.87:1      9.11:1
+     recovery       7.88:1      8.00:1
+   All six clear NFR-001's 4.5:1 threshold in both themes.
+
+   TONE IS NEVER THE ONLY CARRIER OF MEANING (FR-010) — these two declarations are decoration
+   only. No role, no accessible-name contribution, and no inference of meaning from the slotted
+   label; the label's TEXT is what a reader relies on. */
+.sk-pill-tag--status-neutral {
+  background: var(--sk-status-neutral);
+  color: var(--sk-on-status-neutral);
+}
+
+.sk-pill-tag--status-info {
+  background: var(--sk-status-info);
+  color: var(--sk-on-status-info);
+}
+
+.sk-pill-tag--status-success {
+  background: var(--sk-status-success);
+  color: var(--sk-on-status-success);
+}
+
+.sk-pill-tag--status-attention {
+  background: var(--sk-status-attention);
+  color: var(--sk-on-status-attention);
+}
+
+.sk-pill-tag--status-danger {
+  background: var(--sk-status-danger);
+  color: var(--sk-on-status-danger);
+}
+
+.sk-pill-tag--status-recovery {
+  background: var(--sk-status-recovery);
+  color: var(--sk-on-status-recovery);
+}
+
+/* FORCED COLORS: this component declares NO border of any kind today, and `background` does not
+   survive `forced-colors: active` — it flattens to `Canvas`, so the six tints collapse to one
+   ground and the tone is gone. A plain `border` survives with ZERO further author CSS (the
+   browser remaps its color automatically), so the mere PRESENCE of a border — nothing about its
+   colour — is what says "this pill carries an operational status" once the tint disappears.
+
+   THIS BLOCK IS LOAD-BEARING, not the redundant no-op `sk-card.css`'s own header comment warns
+   against. That warning is about a block that RESTATES a remap the UA already performs for an
+   edge that already exists (sk-card already declares a border; adding a forced-colors override
+   for its colour is the no-op). There is nothing here for this block to be redundant with:
+   sk-pill-tag has no border today, in or out of this media query, so this is the first and only
+   place the edge is declared at all.
+
+   SAY THE CONSEQUENCE OUT LOUD: all six tones become MUTUALLY INDISTINGUISHABLE from each other
+   in this mode — `success` and `danger` render identically, because both grounds flatten to
+   `Canvas` and both borders remap to the same system colour. That is an ACCEPTED consequence, not
+   a defect, because tone is never the sole carrier of meaning here (see above): the surviving
+   distinction is status-vs-no-status, carried by the border's presence, and the slotted label's
+   TEXT still carries which status. Asserted, not eyeballed: see the forced-colors case in
+   `apps/storybook/src/tests/elements-load.spec.ts`, which emulates the media feature in both
+   colour schemes and requires a status-bearing pill's computed `border-width` to be non-zero
+   where a status-less pill's stays `0px`. */
+@media (forced-colors: active) {
+  .sk-pill-tag--status-neutral,
+  .sk-pill-tag--status-info,
+  .sk-pill-tag--status-success,
+  .sk-pill-tag--status-attention,
+  .sk-pill-tag--status-danger,
+  .sk-pill-tag--status-recovery {
+    border: var(--sk-border-width-2) solid;
+  }
+}
+
+/* No reduced-motion block: this file sets no transition on any rule, and this axis adds none. */
+
 /* ---- Eyebrow: a SHAPE/SIZE modifier, not a second component ----
    `.sk-eyebrow-pill` was a standalone class in this same file that restated the base
    rule almost verbatim — same display, background, font family, weight, colour and

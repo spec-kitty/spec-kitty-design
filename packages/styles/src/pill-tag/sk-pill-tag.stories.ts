@@ -7,6 +7,12 @@ import {
   SkPillTagBreakingHTML,
   SkPillTagYellowHTML,
   SkPillTagEyebrowHTML,
+  SkPillTagStatusNeutralHTML,
+  SkPillTagStatusInfoHTML,
+  SkPillTagStatusSuccessHTML,
+  SkPillTagStatusAttentionHTML,
+  SkPillTagStatusDangerHTML,
+  SkPillTagStatusRecoveryHTML,
 } from './index';
 
 /**
@@ -91,6 +97,35 @@ export const Eyebrow: Story = {
   `,
 };
 
+/**
+ * The status axis on the NO-JAVASCRIPT path (#302), from the NEWLY GENERATED
+ * `SkPillTagStatus<Tone>HTML` exports — never hand-written markup, mirroring `sk-card`'s own
+ * static status story (`packages/styles/src/card/sk-card-html.stories.ts`). Same six modifiers
+ * the element reflects, from the same generated exports: one authored source behind both
+ * consumption paths.
+ *
+ * No claim is made here about composing into `sk-metric`'s `::part(tag)` annotation — that
+ * `::part()` gap is #314's, not this mission's (C-006/FR-009).
+ */
+const STATUS_FORMS: readonly (readonly [string, string])[] = [
+  [SkPillTagStatusNeutralHTML, 'Not started'],
+  [SkPillTagStatusInfoHTML, 'In review'],
+  [SkPillTagStatusSuccessHTML, 'Active'],
+  [SkPillTagStatusAttentionHTML, 'Needs attention'],
+  [SkPillTagStatusDangerHTML, 'Revoked'],
+  [SkPillTagStatusRecoveryHTML, 'Recovering'],
+];
+
+const statusRow = (light = false) => `
+  <div${light ? ' class="sk-light"' : ''} style="background: var(--sk-surface-page); padding: var(--sk-space-6); display: flex; gap: var(--sk-space-3); flex-wrap: wrap;">
+    ${STATUS_FORMS.map(([markup, body]) => label(markup, body)).join('')}
+  </div>
+`;
+
+export const Statuses: Story = {
+  render: () => statusRow(),
+};
+
 /** `class="sk-light"`, NOT `data-theme="light"` — the attribute form activates nothing (#93). */
 export const LightMode: Story = {
   parameters: { backgrounds: { default: 'sk-light' } },
@@ -101,5 +136,6 @@ export const LightMode: Story = {
       ${label(SkPillTagPurpleHTML, 'Skills Pack')}
       ${label(SkPillTagYellowHTML, 'Schema Gate')}
     </div>
+    ${statusRow(true)}
   `,
 };

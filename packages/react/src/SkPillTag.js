@@ -7,6 +7,7 @@ export const SkPillTag = forwardRef((props, forwardedRef) => {
   const ref = useRef(null);
   const {
     shape,
+    status,
     variant,
     className,
     exportparts,
@@ -27,6 +28,7 @@ export const SkPillTag = forwardRef((props, forwardedRef) => {
       ref: createForwardedRefHandler(ref, forwardedRef),
       ...restProps,
       shape: shape,
+      status: status,
       variant: variant,
       class: className,
       exportparts: exportparts,

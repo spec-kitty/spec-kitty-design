@@ -21,6 +21,12 @@ export interface SkPillTagProps extends Pick<
   /** Shape: `eyebrow` for the larger, square-cornered lead-in label. Omit for the compact pill. */
   shape?: SkPillTagElement["shape"];
 
+  /** Operational status tone, orthogonal to `variant` and `shape` — a tag may carry any
+combination. The vocabulary is `sk-status-indicator`'s; this element holds no domain mapping
+and never infers a tone. An unknown value renders the base tag and warns rather than
+throwing. */
+  status?: SkPillTagElement["status"];
+
   /** Colour: `green`, `purple`, `breaking` or `yellow`. Omit for the neutral tag. An unknown
 value renders the base tag and warns rather than throwing. */
   variant?: SkPillTagElement["variant"];
@@ -58,6 +64,10 @@ value renders the base tag and warns rather than throwing. */
  * Component attributes and properties that can be applied to the element or by using JavaScript.
  *
  * - `shape`: Shape: `eyebrow` for the larger, square-cornered lead-in label. Omit for the compact pill.
+ * - `status`: Operational status tone, orthogonal to `variant` and `shape` — a tag may carry any
+ * combination. The vocabulary is `sk-status-indicator`'s; this element holds no domain mapping
+ * and never infers a tone. An unknown value renders the base tag and warns rather than
+ * throwing.
  * - `variant`: Colour: `green`, `purple`, `breaking` or `yellow`. Omit for the neutral tag. An unknown
  * value renders the base tag and warns rather than throwing.
  *

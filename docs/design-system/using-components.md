@@ -838,11 +838,48 @@ Pill-shaped tags used to label and categorise content inline.
 `variant` (colour) and `shape` (the eyebrow form) are independent axes and compose. The label
 is slotted content. Use `sk-pill-tag::part(tag)` to reach the pill itself.
 
+### The operational status axis
+
+`status` is a **third**, independent axis (#302): `variant` is the brand/decorative one, `shape`
+is size, and `status` is operational. It accepts the same six tones `sk-status-indicator` and
+`sk-card`'s own `status` axis do — `neutral`, `info`, `success`, `attention`, `danger`,
+`recovery` — because there is one tone vocabulary in this library, not one per component.
+
+```html
+<sk-pill-tag status="success">Active</sk-pill-tag>
+<sk-pill-tag status="danger">Revoked</sk-pill-tag>
+```
+
+**Brand and status may both be set, and the rendering is precedence, not co-existence.** While a
+`status` is present it **supersedes** the brand variant's surface and ink entirely —
+`variant="purple" status="danger"` and `status="danger"` render identically — because
+`.sk-pill-tag--<variant>` and each `.sk-pill-tag--status-<tone>` rule both set exactly
+`background` and `color`, at equal specificity, with the status rule authored after the variant
+rules in the stylesheet. Set `variant` for how the tag looks when it has no operational state to
+report; do not expect it to tint one that does. `shape="eyebrow"` composes with either axis
+without conflict — it sets only padding, radius and font-size, which neither colour axis touches.
+
+**You supply the tone.** The tag holds no domain mapping: it will not decide that a label
+containing "revoked" means `danger`, and an unrecognised value renders the base tag and warns
+rather than throwing. `status=""` (present but empty) is treated as absent, with no warning —
+the same rule `sk-card`'s `status` attribute uses.
+
+**The tone is not the message.** The pill paints a surface and an ink colour; the meaning belongs
+to the slotted text. There is no role and no accessible-name contribution from this axis — it is
+decoration, exactly as `sk-card`'s equivalent axis documents.
+
+The static path carries the same axis as `.sk-pill-tag--status-<tone>`, generated into
+`@spec-kitty/styles` as `SkPillTagStatus<Tone>HTML`. **This mission makes no claim** that the
+static pill composes into `sk-metric`'s `::part(tag)` annotation (`packages/styles/src/metric/sk-metric.css`)
+equivalently to the element form — that gap is real and is tracked separately (#314), not solved
+here.
+
 **HTML:**
 
 ```html
 <span class="sk-pill-tag">Design system</span>
 <span class="sk-pill-tag sk-pill-tag--eyebrow">New</span>
+<span class="sk-pill-tag sk-pill-tag--status-success">Active</span>
 ```
 
 [View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/primitives-skpilltag-html--default)

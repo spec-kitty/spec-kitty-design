@@ -706,3 +706,64 @@ test('section-header preserves the consumer heading without adding a banner land
   await expect(page.getByRole('heading', { name: 'Repository activity', level: 3 })).toBeVisible();
   await expect(page.getByRole('banner')).toHaveCount(0);
 });
+
+/**
+ * #302's forced-colors distinguishability claim (FR-016/NFR-002), the same class of assertion
+ * `sk-card`'s forced-colors case above makes, scaled to this component's simpler mechanism.
+ *
+ * `sk-card` already had a border, and forced colors widens it; `sk-pill-tag` has NO border of
+ * any kind outside `@media (forced-colors: active)` — this component's only edge is the one
+ * `.sk-pill-tag--status-<tone>` adds inside that query. So the assertion is simpler too: a
+ * status pill's computed border-width must be non-zero where a status-less pill's stays `0px`,
+ * in both colour schemes.
+ */
+const pillTagStory = async (page: Page, id: string) => {
+  await page.goto(`/iframe.html?id=elements-skpilltag--${id}&viewMode=story`);
+  const host = page.locator('sk-pill-tag').first();
+  await expect(host.locator('[part="tag"]')).toBeVisible({ timeout: 20000 });
+};
+
+test.describe('sk-pill-tag forced colors', () => {
+  test('a status pill gains a border where a status-less pill has none', async ({ page, browserName }) => {
+    const borderWidth = (locator: Locator) => locator.evaluate((node) => {
+      const tag = node.shadowRoot!.querySelector('[part="tag"]')!;
+      return Number.parseFloat(getComputedStyle(tag).borderWidth);
+    });
+
+    for (const colorScheme of ['dark', 'light'] as const) {
+      // Loaded once per media state, not measured twice on one load — the same discipline
+      // `sk-card`'s equivalent case above records, for the same reason.
+      const measure = async (forcedColors: 'none' | 'active') => {
+        await page.emulateMedia({ forcedColors, colorScheme });
+        await pillTagStory(page, 'forced-colors');
+        const toneHosts = await page.locator('sk-pill-tag[status]').all();
+        expect(toneHosts.length, 'the story must render every tone beside the base pill').toBe(6);
+        return {
+          base: await borderWidth(page.locator('sk-pill-tag[data-forced-colors-base]')),
+          tones: await Promise.all(toneHosts.map((host) => borderWidth(host))),
+        };
+      };
+
+      const normal = await measure('none');
+      // THE FLOOR: outside forced-colors mode, nothing here has a border at all — the block
+      // must be additive only inside the media query, never a visible change outside it.
+      expect(normal.base, `${colorScheme}: the base pill must have no border outside forced-colors`).toBe(0);
+      for (const width of normal.tones) {
+        expect(width, `${colorScheme}: a status pill must have no border outside forced-colors`).toBe(0);
+      }
+
+      const forced = await measure('active');
+      // Assert the project exists rather than trusting the string — the same guard `sk-card`'s
+      // case takes against a silently-renamed or dropped Chromium project.
+      expect(test.info().config.projects.map((project) => project.name),
+        'the chromium floor below is keyed on this project name')
+        .toContain('chromium');
+      if (browserName === 'chromium') {
+        expect(forced.base, `${colorScheme}: the base pill must stay borderless in forced-colors mode`).toBe(0);
+        for (const width of forced.tones) {
+          expect(width, `${colorScheme}: a status pill must gain a border in forced-colors mode`).toBeGreaterThan(0);
+        }
+      }
+    }
+  });
+});
