@@ -1,0 +1,34 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>sk-action-row — real custom element (shadow form)</title>
+<!--
+  THE SHADOW SIDE of the host-container-type measurement. Loads the REAL element from the
+  Storybook-built bundle so the measured shadow form is the shipped element adopting its
+  own shipped sheet. run.mjs cross-checks these values against the real Storybook story.
+
+  Query params: ?width=<px>&compose=none|wider|narrower&outer=<px>
+-->
+<link rel="stylesheet" href="/packages/tokens/dist/tokens.css">
+<style> html, body { margin: 0; padding: 0; } </style>
+<div id="outer"><div id="sizer">
+  <sk-action-row id="component">
+    <span slot="marker">M</span>
+    <span slot="title">Title</span>
+    <span slot="reference">ref/path</span>
+    <span slot="tags">tag</span>
+    <span slot="metadata">2h ago</span>
+    <span slot="supporting">Supporting context</span>
+    <button slot="controls" type="button">Act</button>
+  </sk-action-row>
+</div></div>
+<script src="/apps/storybook/storybook-static/elements-dist/elements.js"></script>
+<script>
+  const q = new URLSearchParams(location.search);
+  document.getElementById('sizer').style.width = `${q.get('width') ?? 360}px`;
+  const compose = q.get('compose') ?? 'none';
+  if (compose !== 'none') {
+    const outer = document.getElementById('outer');
+    outer.style.containerType = 'inline-size';
+    outer.style.width = `${q.get('outer')}px`;
+  }
+</script>

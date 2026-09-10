@@ -1,0 +1,77 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>sk-entity-marker — static exemplar (candidate-(a) transform)</title>
+<!--
+  THE STATIC SIDE of the ::slotted() measurement. Links the REAL BUILT CSS through the
+  package's own export map (/pkg/@spec-kitty/styles/entity-marker/sk-entity-marker.css).
+
+  Two variants of the rewrite of `::slotted(img)`:
+    variant=A  "descendant"      — a separate document rule
+                                   `.sk-entity-marker__content > img`. (plan.md's shorthand
+                                   said `.sk-entity-marker > img`; the <slot> is inside
+                                   .sk-entity-marker__content, so that is where an assigned
+                                   node renders in the flattened tree, and the structurally
+                                   faithful rewrite is measured instead.)
+    variant=B  "paired spelling" — the repository's OWN established convention (the #78 fix
+                                   already shipped in sk-blog-card, sk-feature-card,
+                                   sk-ribbon-card and sk-site-footer): ONE selector list
+                                   carrying both spellings,
+                                   `.sk-entity-marker__content > img, ::slotted(img)`.
+                                   Measuring this variant tests the claim those sheets state
+                                   in prose — that `::slotted()` is inert but harmless in a
+                                   document, so a comma list holding it is not invalidated
+                                   (the #143 hazard: one invalid selector kills the whole list).
+
+  Query params: ?variant=A|B&competing=none|equal|higher
+-->
+<link rel="stylesheet" href="/packages/tokens/dist/tokens.css">
+<link rel="stylesheet" href="/pkg/@spec-kitty%2Fstyles%2Fentity-marker%2Fsk-entity-marker.css">
+<script>
+  // SELECTORS EXACTLY AS A GENERATOR WOULD EMIT THEM — no page-scoping prefix. This matters
+  // more here than anywhere else in the mission: outcomes O5 and O6 are CASCADE outcomes, and
+  // an earlier revision of this file selected the variant with a `.v-A`/`.v-B` body class,
+  // which raised `.sk-entity-marker__content > img` from (0,1,1) to (0,2,1) and made it beat a
+  // consumer rule it should have lost to. The injected sheet below carries the exact selectors
+  // a generated static sheet would, in the position such a sheet would occupy — after the base
+  // <link>, before the consumer's own rules (which competing-rule.js appends last).
+  const VARIANT_CSS = {
+    // variant A "descendant": ::slotted(img) -> .sk-entity-marker__content > img.
+    // (plan.md's shorthand said `.sk-entity-marker > img`; the <slot> is inside
+    //  .sk-entity-marker__content, so that is where an assigned node renders in the
+    //  flattened tree, and the structurally faithful rewrite is what gets measured.)
+    A: `
+      .sk-entity-marker__content > img {
+        display: block;
+        inline-size: 100%;
+        block-size: 100%;
+        object-fit: cover;
+        flex: none;
+      }
+    `,
+    // variant B "paired spelling": the repository's OWN established convention (the #78 fix
+    // already shipped in sk-blog-card, sk-feature-card, sk-ribbon-card and sk-site-footer) —
+    // ONE selector list carrying both spellings. Measuring it tests the claim those sheets
+    // state in prose: that `::slotted()` is inert but harmless in a document, so a comma list
+    // holding it is not invalidated (the #143 hazard: one invalid selector kills the list).
+    B: `
+      .sk-entity-marker__content > img,
+      ::slotted(img) {
+        display: block;
+        inline-size: 100%;
+        block-size: 100%;
+        object-fit: cover;
+        flex: none;
+      }
+    `,
+  };
+  const variantSheet = document.createElement('style');
+  variantSheet.textContent = VARIANT_CSS[new URLSearchParams(location.search).get('variant') ?? 'A'];
+  document.currentScript.after(variantSheet);
+</script>
+<style> html, body { margin: 0; padding: 0; } </style>
+<div class="page-scope">
+  <span id="component" class="sk-entity-marker sk-entity-marker--circle" role="img" aria-label="Ada Lovelace">
+    <span class="sk-entity-marker__content"><img id="probe-img" src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2280%22%20height%3D%22120%22%20viewBox%3D%220%200%2080%20120%22%3E%3Crect%20width%3D%2280%22%20height%3D%22120%22%20fill%3D%22%238fcb8f%22%2F%3E%3C%2Fsvg%3E" alt=""></span>
+  </span>
+</div>
+<script src="./competing-rule.js"></script>

@@ -1,0 +1,617 @@
+{
+  "construct_kind": "host-attribute-axis",
+  "component": "sk-app-shell",
+  "generated_at": "2026-09-10T00:22:29.036Z",
+  "train_ref_note": "Run on mission/static-form-of-element-backed-css, branched from train/elements-first@2b59c8c.",
+  "shadow_form_source": "packages/elements/src/app-shell/sk-app-shell.ts, rendered from the Storybook build (apps/storybook/storybook-static/elements-dist/elements.js) via shadow.html, cross-checked against Storybook story elements-skappshell--compact-860",
+  "static_exemplar_source": "kitty-specs/static-form-of-element-backed-css-01M248TF/measurement/host-attribute-axis/exemplar.html (throwaway; links the export-map-resolved built CSS)",
+  "real_package_consumption": {
+    "specifier": "@spec-kitty/styles/app-shell/sk-app-shell.css",
+    "resolved_to": "/home/jeroennouws/dev/spec-kitty-design-missions/301/packages/styles/dist/app-shell/sk-app-shell.css",
+    "how": "Node's own export-map resolution via import.meta.resolve, served to the browser by harness.mjs on /pkg/<specifier>"
+  },
+  "engines": [
+    "chromium",
+    "firefox"
+  ],
+  "per_engine": {
+    "chromium": {
+      "widths": {
+        "shadow": {
+          "S1": 800,
+          "S2": 900,
+          "S3": 1000,
+          "S4": 1200,
+          "S5": 800,
+          "S6": 1200
+        },
+        "A-collapsed": {
+          "S1": 800,
+          "S2": 900,
+          "S3": 1000,
+          "S4": 1200,
+          "S5": 800,
+          "S6": 1200
+        },
+        "B-wrapper": {
+          "S1": 800,
+          "S2": 900,
+          "S3": 1000,
+          "S4": 1200,
+          "S5": 800,
+          "S6": 1200
+        }
+      },
+      "shadow_notes": {
+        "S1": {
+          "compact_navigation_hidden_attr": false
+        },
+        "S2": {
+          "compact_navigation_hidden_attr": true
+        },
+        "S3": {
+          "compact_navigation_hidden_attr": false
+        },
+        "S4": {
+          "compact_navigation_hidden_attr": true
+        },
+        "S5": {
+          "compact_navigation_hidden_attr": false
+        },
+        "S6": {
+          "compact_navigation_hidden_attr": true
+        }
+      },
+      "fidelity_crosscheck": {
+        "story_id": "elements-skappshell--compact-860",
+        "story": {
+          "shell_width": 860,
+          "host_presentation": "compact",
+          "grid_template_columns": "860px",
+          "compact_header_display": "block"
+        },
+        "controlled_shadow_page": {
+          "shell_width": 860,
+          "grid_template_columns": "860px",
+          "compact_header_display": "block"
+        },
+        "faithful": true
+      },
+      "observed_outcomes": [
+        {
+          "id": "O1",
+          "description": ".sk-app-shell grid-template-columns",
+          "viewport_or_state": "host box 800px, presentation=compact (below the 860px @container breakpoint)",
+          "shadow_form_value": "800px",
+          "static_exemplar_value": {
+            "A-collapsed": "56px 240px 504px",
+            "B-wrapper": "800px"
+          },
+          "equal": {
+            "A-collapsed": false,
+            "B-wrapper": true
+          }
+        },
+        {
+          "id": "O2",
+          "description": ".sk-app-shell grid-template-columns",
+          "viewport_or_state": "host box 900px, presentation=compact (above the 860px breakpoint)",
+          "shadow_form_value": "56px 240px 604px",
+          "static_exemplar_value": {
+            "A-collapsed": "56px 240px 604px",
+            "B-wrapper": "56px 240px 604px"
+          },
+          "equal": {
+            "A-collapsed": true,
+            "B-wrapper": true
+          }
+        },
+        {
+          "id": "O3",
+          "description": ".sk-app-shell__compact-header display",
+          "viewport_or_state": "host box 800px, presentation=compact",
+          "shadow_form_value": "block",
+          "static_exemplar_value": {
+            "A-collapsed": "block",
+            "B-wrapper": "block"
+          },
+          "equal": {
+            "A-collapsed": true,
+            "B-wrapper": true
+          }
+        },
+        {
+          "id": "O4",
+          "description": ".sk-app-shell__compact-header display",
+          "viewport_or_state": "host box 900px, presentation=compact",
+          "shadow_form_value": "none",
+          "static_exemplar_value": {
+            "A-collapsed": "none",
+            "B-wrapper": "none"
+          },
+          "equal": {
+            "A-collapsed": true,
+            "B-wrapper": true
+          }
+        },
+        {
+          "id": "O5",
+          "description": ".sk-app-shell__compact-navigation display",
+          "viewport_or_state": "host box 800px, presentation=compact",
+          "shadow_form_value": "block",
+          "static_exemplar_value": {
+            "A-collapsed": "block",
+            "B-wrapper": "block"
+          },
+          "equal": {
+            "A-collapsed": true,
+            "B-wrapper": true
+          }
+        },
+        {
+          "id": "O6",
+          "description": ".sk-app-shell__personal display",
+          "viewport_or_state": "host box 800px, presentation=compact",
+          "shadow_form_value": "none",
+          "static_exemplar_value": {
+            "A-collapsed": "none",
+            "B-wrapper": "none"
+          },
+          "equal": {
+            "A-collapsed": true,
+            "B-wrapper": true
+          }
+        },
+        {
+          "id": "O7",
+          "description": ".sk-app-shell grid-template-columns",
+          "viewport_or_state": "host box 1000px, presentation=rail-preserving (below the 1100px breakpoint)",
+          "shadow_form_value": "56px 944px",
+          "static_exemplar_value": {
+            "A-collapsed": "56px 240px 704px",
+            "B-wrapper": "56px 944px"
+          },
+          "equal": {
+            "A-collapsed": false,
+            "B-wrapper": true
+          }
+        },
+        {
+          "id": "O8",
+          "description": ".sk-app-shell grid-template-columns",
+          "viewport_or_state": "host box 1200px, presentation=rail-preserving (above the 1100px breakpoint)",
+          "shadow_form_value": "56px 240px 904px",
+          "static_exemplar_value": {
+            "A-collapsed": "56px 240px 904px",
+            "B-wrapper": "56px 240px 904px"
+          },
+          "equal": {
+            "A-collapsed": true,
+            "B-wrapper": true
+          }
+        },
+        {
+          "id": "O9",
+          "description": ".sk-app-shell__compact-header display",
+          "viewport_or_state": "host box 1000px, presentation=rail-preserving",
+          "shadow_form_value": "block",
+          "static_exemplar_value": {
+            "A-collapsed": "block",
+            "B-wrapper": "block"
+          },
+          "equal": {
+            "A-collapsed": true,
+            "B-wrapper": true
+          }
+        },
+        {
+          "id": "O10",
+          "description": ".sk-app-shell__context display",
+          "viewport_or_state": "host box 1000px, presentation=rail-preserving",
+          "shadow_form_value": "none",
+          "static_exemplar_value": {
+            "A-collapsed": "none",
+            "B-wrapper": "none"
+          },
+          "equal": {
+            "A-collapsed": true,
+            "B-wrapper": true
+          }
+        },
+        {
+          "id": "O11",
+          "description": ".sk-app-shell grid-template-columns (COMPOSED: outer ancestor container-type:inline-size at 1400px, component box 800px)",
+          "viewport_or_state": "composed-outer-wider, presentation=compact",
+          "shadow_form_value": "800px",
+          "static_exemplar_value": {
+            "A-collapsed": "56px 240px 504px",
+            "B-wrapper": "800px"
+          },
+          "equal": {
+            "A-collapsed": false,
+            "B-wrapper": true
+          }
+        },
+        {
+          "id": "O12",
+          "description": ".sk-app-shell__compact-header display (COMPOSED: outer 1400px, component 800px)",
+          "viewport_or_state": "composed-outer-wider, presentation=compact",
+          "shadow_form_value": "block",
+          "static_exemplar_value": {
+            "A-collapsed": "block",
+            "B-wrapper": "block"
+          },
+          "equal": {
+            "A-collapsed": true,
+            "B-wrapper": true
+          }
+        },
+        {
+          "id": "O13",
+          "description": ".sk-app-shell grid-template-columns (COMPOSED: outer ancestor container-type:inline-size at 500px, component box 1200px)",
+          "viewport_or_state": "composed-outer-narrower, presentation=compact",
+          "shadow_form_value": "56px 240px 904px",
+          "static_exemplar_value": {
+            "A-collapsed": "1200px",
+            "B-wrapper": "56px 240px 904px"
+          },
+          "equal": {
+            "A-collapsed": false,
+            "B-wrapper": true
+          }
+        },
+        {
+          "id": "O14",
+          "description": ".sk-app-shell__compact-header display (COMPOSED: outer 500px, component 1200px)",
+          "viewport_or_state": "composed-outer-narrower, presentation=compact",
+          "shadow_form_value": "none",
+          "static_exemplar_value": {
+            "A-collapsed": "none",
+            "B-wrapper": "none"
+          },
+          "equal": {
+            "A-collapsed": true,
+            "B-wrapper": true
+          }
+        }
+      ]
+    },
+    "firefox": {
+      "widths": {
+        "shadow": {
+          "S1": 800,
+          "S2": 900,
+          "S3": 1000,
+          "S4": 1200,
+          "S5": 800,
+          "S6": 1200
+        },
+        "A-collapsed": {
+          "S1": 800,
+          "S2": 900,
+          "S3": 1000,
+          "S4": 1200,
+          "S5": 800,
+          "S6": 1200
+        },
+        "B-wrapper": {
+          "S1": 800,
+          "S2": 900,
+          "S3": 1000,
+          "S4": 1200,
+          "S5": 800,
+          "S6": 1200
+        }
+      },
+      "shadow_notes": {
+        "S1": {
+          "compact_navigation_hidden_attr": false
+        },
+        "S2": {
+          "compact_navigation_hidden_attr": true
+        },
+        "S3": {
+          "compact_navigation_hidden_attr": false
+        },
+        "S4": {
+          "compact_navigation_hidden_attr": true
+        },
+        "S5": {
+          "compact_navigation_hidden_attr": false
+        },
+        "S6": {
+          "compact_navigation_hidden_attr": true
+        }
+      },
+      "fidelity_crosscheck": {
+        "story_id": "elements-skappshell--compact-860",
+        "story": {
+          "shell_width": 860,
+          "host_presentation": "compact",
+          "grid_template_columns": "860px",
+          "compact_header_display": "block"
+        },
+        "controlled_shadow_page": {
+          "shell_width": 860,
+          "grid_template_columns": "860px",
+          "compact_header_display": "block"
+        },
+        "faithful": true
+      },
+      "observed_outcomes": [
+        {
+          "id": "O1",
+          "description": ".sk-app-shell grid-template-columns",
+          "viewport_or_state": "host box 800px, presentation=compact (below the 860px @container breakpoint)",
+          "shadow_form_value": "800px",
+          "static_exemplar_value": {
+            "A-collapsed": "56px 240px 504px",
+            "B-wrapper": "800px"
+          },
+          "equal": {
+            "A-collapsed": false,
+            "B-wrapper": true
+          }
+        },
+        {
+          "id": "O2",
+          "description": ".sk-app-shell grid-template-columns",
+          "viewport_or_state": "host box 900px, presentation=compact (above the 860px breakpoint)",
+          "shadow_form_value": "56px 240px 604px",
+          "static_exemplar_value": {
+            "A-collapsed": "56px 240px 604px",
+            "B-wrapper": "56px 240px 604px"
+          },
+          "equal": {
+            "A-collapsed": true,
+            "B-wrapper": true
+          }
+        },
+        {
+          "id": "O3",
+          "description": ".sk-app-shell__compact-header display",
+          "viewport_or_state": "host box 800px, presentation=compact",
+          "shadow_form_value": "block",
+          "static_exemplar_value": {
+            "A-collapsed": "block",
+            "B-wrapper": "block"
+          },
+          "equal": {
+            "A-collapsed": true,
+            "B-wrapper": true
+          }
+        },
+        {
+          "id": "O4",
+          "description": ".sk-app-shell__compact-header display",
+          "viewport_or_state": "host box 900px, presentation=compact",
+          "shadow_form_value": "none",
+          "static_exemplar_value": {
+            "A-collapsed": "none",
+            "B-wrapper": "none"
+          },
+          "equal": {
+            "A-collapsed": true,
+            "B-wrapper": true
+          }
+        },
+        {
+          "id": "O5",
+          "description": ".sk-app-shell__compact-navigation display",
+          "viewport_or_state": "host box 800px, presentation=compact",
+          "shadow_form_value": "block",
+          "static_exemplar_value": {
+            "A-collapsed": "block",
+            "B-wrapper": "block"
+          },
+          "equal": {
+            "A-collapsed": true,
+            "B-wrapper": true
+          }
+        },
+        {
+          "id": "O6",
+          "description": ".sk-app-shell__personal display",
+          "viewport_or_state": "host box 800px, presentation=compact",
+          "shadow_form_value": "none",
+          "static_exemplar_value": {
+            "A-collapsed": "none",
+            "B-wrapper": "none"
+          },
+          "equal": {
+            "A-collapsed": true,
+            "B-wrapper": true
+          }
+        },
+        {
+          "id": "O7",
+          "description": ".sk-app-shell grid-template-columns",
+          "viewport_or_state": "host box 1000px, presentation=rail-preserving (below the 1100px breakpoint)",
+          "shadow_form_value": "56px 944px",
+          "static_exemplar_value": {
+            "A-collapsed": "56px 240px 704px",
+            "B-wrapper": "56px 944px"
+          },
+          "equal": {
+            "A-collapsed": false,
+            "B-wrapper": true
+          }
+        },
+        {
+          "id": "O8",
+          "description": ".sk-app-shell grid-template-columns",
+          "viewport_or_state": "host box 1200px, presentation=rail-preserving (above the 1100px breakpoint)",
+          "shadow_form_value": "56px 240px 904px",
+          "static_exemplar_value": {
+            "A-collapsed": "56px 240px 904px",
+            "B-wrapper": "56px 240px 904px"
+          },
+          "equal": {
+            "A-collapsed": true,
+            "B-wrapper": true
+          }
+        },
+        {
+          "id": "O9",
+          "description": ".sk-app-shell__compact-header display",
+          "viewport_or_state": "host box 1000px, presentation=rail-preserving",
+          "shadow_form_value": "block",
+          "static_exemplar_value": {
+            "A-collapsed": "block",
+            "B-wrapper": "block"
+          },
+          "equal": {
+            "A-collapsed": true,
+            "B-wrapper": true
+          }
+        },
+        {
+          "id": "O10",
+          "description": ".sk-app-shell__context display",
+          "viewport_or_state": "host box 1000px, presentation=rail-preserving",
+          "shadow_form_value": "none",
+          "static_exemplar_value": {
+            "A-collapsed": "none",
+            "B-wrapper": "none"
+          },
+          "equal": {
+            "A-collapsed": true,
+            "B-wrapper": true
+          }
+        },
+        {
+          "id": "O11",
+          "description": ".sk-app-shell grid-template-columns (COMPOSED: outer ancestor container-type:inline-size at 1400px, component box 800px)",
+          "viewport_or_state": "composed-outer-wider, presentation=compact",
+          "shadow_form_value": "800px",
+          "static_exemplar_value": {
+            "A-collapsed": "56px 240px 504px",
+            "B-wrapper": "800px"
+          },
+          "equal": {
+            "A-collapsed": false,
+            "B-wrapper": true
+          }
+        },
+        {
+          "id": "O12",
+          "description": ".sk-app-shell__compact-header display (COMPOSED: outer 1400px, component 800px)",
+          "viewport_or_state": "composed-outer-wider, presentation=compact",
+          "shadow_form_value": "block",
+          "static_exemplar_value": {
+            "A-collapsed": "block",
+            "B-wrapper": "block"
+          },
+          "equal": {
+            "A-collapsed": true,
+            "B-wrapper": true
+          }
+        },
+        {
+          "id": "O13",
+          "description": ".sk-app-shell grid-template-columns (COMPOSED: outer ancestor container-type:inline-size at 500px, component box 1200px)",
+          "viewport_or_state": "composed-outer-narrower, presentation=compact",
+          "shadow_form_value": "56px 240px 904px",
+          "static_exemplar_value": {
+            "A-collapsed": "1200px",
+            "B-wrapper": "56px 240px 904px"
+          },
+          "equal": {
+            "A-collapsed": false,
+            "B-wrapper": true
+          }
+        },
+        {
+          "id": "O14",
+          "description": ".sk-app-shell__compact-header display (COMPOSED: outer 500px, component 1200px)",
+          "viewport_or_state": "composed-outer-narrower, presentation=compact",
+          "shadow_form_value": "none",
+          "static_exemplar_value": {
+            "A-collapsed": "none",
+            "B-wrapper": "none"
+          },
+          "equal": {
+            "A-collapsed": true,
+            "B-wrapper": true
+          }
+        }
+      ]
+    }
+  },
+  "variant_passes_every_declared_outcome": {
+    "A-collapsed": false,
+    "B-wrapper": true
+  },
+  "declared_outcome_failures": {
+    "A-collapsed": [
+      {
+        "engine": "chromium",
+        "id": "O1",
+        "description": ".sk-app-shell grid-template-columns",
+        "viewport_or_state": "host box 800px, presentation=compact (below the 860px @container breakpoint)",
+        "shadow_form_value": "800px",
+        "static_exemplar_value": "56px 240px 504px"
+      },
+      {
+        "engine": "chromium",
+        "id": "O7",
+        "description": ".sk-app-shell grid-template-columns",
+        "viewport_or_state": "host box 1000px, presentation=rail-preserving (below the 1100px breakpoint)",
+        "shadow_form_value": "56px 944px",
+        "static_exemplar_value": "56px 240px 704px"
+      },
+      {
+        "engine": "chromium",
+        "id": "O11",
+        "description": ".sk-app-shell grid-template-columns (COMPOSED: outer ancestor container-type:inline-size at 1400px, component box 800px)",
+        "viewport_or_state": "composed-outer-wider, presentation=compact",
+        "shadow_form_value": "800px",
+        "static_exemplar_value": "56px 240px 504px"
+      },
+      {
+        "engine": "chromium",
+        "id": "O13",
+        "description": ".sk-app-shell grid-template-columns (COMPOSED: outer ancestor container-type:inline-size at 500px, component box 1200px)",
+        "viewport_or_state": "composed-outer-narrower, presentation=compact",
+        "shadow_form_value": "56px 240px 904px",
+        "static_exemplar_value": "1200px"
+      },
+      {
+        "engine": "firefox",
+        "id": "O1",
+        "description": ".sk-app-shell grid-template-columns",
+        "viewport_or_state": "host box 800px, presentation=compact (below the 860px @container breakpoint)",
+        "shadow_form_value": "800px",
+        "static_exemplar_value": "56px 240px 504px"
+      },
+      {
+        "engine": "firefox",
+        "id": "O7",
+        "description": ".sk-app-shell grid-template-columns",
+        "viewport_or_state": "host box 1000px, presentation=rail-preserving (below the 1100px breakpoint)",
+        "shadow_form_value": "56px 944px",
+        "static_exemplar_value": "56px 240px 704px"
+      },
+      {
+        "engine": "firefox",
+        "id": "O11",
+        "description": ".sk-app-shell grid-template-columns (COMPOSED: outer ancestor container-type:inline-size at 1400px, component box 800px)",
+        "viewport_or_state": "composed-outer-wider, presentation=compact",
+        "shadow_form_value": "800px",
+        "static_exemplar_value": "56px 240px 504px"
+      },
+      {
+        "engine": "firefox",
+        "id": "O13",
+        "description": ".sk-app-shell grid-template-columns (COMPOSED: outer ancestor container-type:inline-size at 500px, component box 1200px)",
+        "viewport_or_state": "composed-outer-narrower, presentation=compact",
+        "shadow_form_value": "56px 240px 904px",
+        "static_exemplar_value": "1200px"
+      }
+    ],
+    "B-wrapper": []
+  },
+  "composed_case_tested": true,
+  "verdict_for_this_construct_kind": "generated-static-form",
+  "passing_static_exemplar_variant": "B-wrapper"
+}

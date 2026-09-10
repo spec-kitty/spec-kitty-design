@@ -1,0 +1,47 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>sk-app-shell — real custom element (shadow form)</title>
+<!--
+  THE SHADOW SIDE of the host-attribute-axis measurement.
+
+  This loads the REAL element from the Storybook-built bundle
+  (apps/storybook/storybook-static/elements-dist/elements.js, produced by
+  `npx nx run storybook:storybook:build --skip-nx-cache`), so the shadow form
+  measured here is the shipped element adopting its own shipped sheet — not a
+  re-creation. run.mjs additionally cross-checks these values against the real
+  Storybook story iframe, so this controlled page is shown to be faithful to
+  the harness the repo already uses.
+
+  Query params: ?presentation=compact|rail-preserving&width=<px>&compose=none|wider|narrower&outer=<px>
+-->
+<link rel="stylesheet" href="/packages/tokens/dist/tokens.css">
+<style>
+  html, body { margin: 0; padding: 0; }
+  #outer { }
+  #sizer { }
+</style>
+<div id="outer"><div id="sizer">
+  <sk-app-shell id="component" open>
+    <nav slot="personal-rail" aria-label="Product areas">P</nav>
+    <nav slot="context-sidebar" aria-label="Context">C</nav>
+    <div slot="compact-header">H</div>
+    <nav slot="compact-navigation" aria-label="Repository navigation">N</nav>
+    <div slot="page-header">PH</div>
+    <p>Main</p>
+  </sk-app-shell>
+</div></div>
+<script src="/apps/storybook/storybook-static/elements-dist/elements.js"></script>
+<script>
+  const q = new URLSearchParams(location.search);
+  const outer = document.getElementById('outer');
+  const sizer = document.getElementById('sizer');
+  const component = document.getElementById('component');
+  sizer.style.width = `${q.get('width') ?? 800}px`;
+  const compose = q.get('compose') ?? 'none';
+  if (compose !== 'none') {
+    outer.style.containerType = 'inline-size';
+    outer.style.width = `${q.get('outer')}px`;
+  }
+  const presentation = q.get('presentation');
+  if (presentation) component.setAttribute('presentation', presentation);
+</script>
