@@ -105,7 +105,7 @@ Add a fourth tone, `danger-secondary`, to the existing `sk-button` component (bo
 element and its generated static form), reusing the already-published `--sk-status-danger` /
 `--sk-on-status-danger` pair for the control boundary — no new token, no edit to
 `packages/tokens/src/tokens.css` — with a resolved `:active` parity behaviour and a forced-colors-
-only distinguishing marker, and ship it with full stories, behaviour-test coverage, and ratchet
+only `border-width` step, and ship it with full stories, behaviour-test coverage, and ratchet
 confirmation, as one PR (issue #320, epic #319).
 
 ## Context
@@ -127,13 +127,18 @@ exactly as resolved, not re-litigated:
 2. **Forced-colors distinguishability.** `.sk-button--secondary` already has an unconditional,
    non-transparent border, so `danger-secondary`'s border alone would remap to the *same* system
    colour under `forced-colors: active` and the two tones would be indistinguishable by colour or
-   border-presence alone. This WP adds a content-drawn, alt-texted-empty marker
-   (`content: '<glyph>' / '';`, mirroring `sk-disclosure__summary::before`'s technique) scoped
-   entirely inside `@media (forced-colors: active)` — it must be invisible/inert in normal light and
-   dark rendering. See plan.md Design §3 for the two construction options and pick option 1 (a bare
-   pseudo-element on the existing `part="button"` node) unless it measurably distorts layout at
-   `size="icon"`'s fixed 40×40 box, in which case fall back to option 2 and update
-   `expected-parts.json`'s `sk-button` entry and `total` explicitly.
+   border-presence alone. Forced-colors remaps `border-color` but leaves `border-width`/`border-
+   style` untouched, and this repo already establishes stepping the width as the house mechanism for
+   exactly this situation — `packages/styles/src/card/sk-card.css`'s status axis (`border-inline-
+   start-width`, always-on, no media query needed because that width is permanently 4px by design)
+   and `packages/styles/src/confirm-dialog/sk-confirm-dialog.css`'s open state (`@media (forced-
+   colors: active) { border-width: calc(var(--sk-border-width-1) * 2); }`, scoped to the media query
+   because its border is 1px in normal rendering). `danger-secondary` follows the `sk-confirm-dialog`
+   shape: step `border-width` from the 1px every tone carries to `var(--sk-border-width-2)`, scoped
+   entirely inside `@media (forced-colors: active)`. An earlier draft of this WP (and the spec/plan
+   it was generated from) specified a content-drawn glyph instead — that was rejected (see spec.md's
+   Assumptions for the four reasons) in favour of this width step, which needs no pseudo-element, no
+   new `::part()`, and no markup change.
 
 Read `plan.md` in full before starting — it contains the exact CSS block, the exact regeneration
 command sequence, and the exact gate list this WP must run to completion.
@@ -186,8 +191,9 @@ includes `"danger-secondary"`, and the generated React/Vue prop types widen to m
 
 ### Subtask T003: Author the CSS
 
-**Purpose**: Paint the new tone at rest, hover, active and (forced-colors only) with a
-distinguishing marker — all token-driven, all reusing only the danger pair.
+**Purpose**: Paint the new tone at rest, hover, active and (forced-colors only) with a border-width
+step distinguishing it from plain `secondary` — all token-driven, all reusing only the danger pair
+and one already-published border-width token.
 
 **Steps**:
 1. In `packages/styles/src/button/sk-button.css`, add (after the existing `.sk-button--ghost:hover`
@@ -209,27 +215,37 @@ distinguishing marker — all token-driven, all reusing only the danger pair.
      transform: scale(0.97);
    }
    ```
-2. Add the forced-colors block per plan.md Design §3's resolved option 1 — a bare
-   `content: '<glyph>' / '';` pseudo-element on `.sk-button--danger-secondary`'s rendered
-   `part="button"` node, scoped to `@media (forced-colors: active)` only. Choose a glyph that reads
-   clearly at both the default/`--sm` text sizes and the `--icon` 40×40 box (a filled triangle or
-   similar is a reasonable default; verify visually before committing). Do **not** use
-   `forced-color-adjust: none` anywhere (FR-014). Do **not** let the glyph contribute to the
-   accessible name — the alt-text half of the `content` shorthand (`/ '';`) must be present.
-3. Verify empirically (Playwright, `forced-colors: active` media emulation, both colour schemes)
-   that the marker does not distort layout at any size. If it does, switch to plan.md's option 2 (a
-   dedicated wrapper/`::part()`) and update `expected-parts.json` explicitly (bump `total`), noting
-   the change in the PR body rather than silently landing it.
+2. Add the forced-colors block per plan.md Design §3 — step `border-width` on the SAME
+   `.sk-button--danger-secondary` class, scoped to `@media (forced-colors: active)` only:
+   ```css
+   @media (forced-colors: active) {
+     .sk-button--danger-secondary {
+       border-width: var(--sk-border-width-2);
+     }
+   }
+   ```
+   No pseudo-element, no `content` property, no `forced-color-adjust` anywhere (FR-014) — the step
+   targets the existing class directly, on both the shadow-DOM `part="button"` node and the static
+   form's own root element, with no markup change on either path.
+3. **State the layout consequence in the CSS comment, do not leave it implicit.** At `size="icon"`,
+   `.sk-button--icon` already declares `box-sizing: border-box`, so the extra 1px is absorbed into
+   the existing 40×40 box (content area shrinks by 1px per side; the box does not grow) — no
+   compensation needed. At the default and `size="sm"` sizes, this file sets no `box-sizing` (the
+   browser default, `content-box`, applies), so the step grows the button's total box by 1px per
+   side in forced-colors mode only. Say this in the comment, matching plan.md's Design §3 wording,
+   so a reviewer can check it rather than discover it.
 4. Do **not** edit `.sk-button--secondary` or `.sk-button--ghost` in any way (C-003) — this WP adds
    new selectors only.
-5. Do **not** edit `packages/tokens/src/tokens.css` (C-002) — every colour here is `var(--sk-status-
-   danger)` or `var(--sk-on-status-danger)`, already published.
+5. Do **not** edit `packages/tokens/src/tokens.css` (C-002) — every value here is `var(--sk-status-
+   danger)`, `var(--sk-on-status-danger)`, or `var(--sk-border-width-2)`, all already published.
 
-**Files**: `packages/styles/src/button/sk-button.css` (~25-40 lines added)
+**Files**: `packages/styles/src/button/sk-button.css` (~25-35 lines added)
 **Validation**: `npm run quality:stylelint` passes (every value is `var(--sk-*)`); a rendered
 `<sk-button variant="danger-secondary">`'s computed `border-color`/`color` equal a
 `--sk-on-status-danger` token probe in both themes; `:hover` changes only `background-color`;
-`:active` computed `transform` is `scale(0.97)`.
+`:active` computed `transform` is `scale(0.97)`; under `forced-colors: active` emulation, computed
+`border-width` is `var(--sk-border-width-2)`'s resolved pixel value, strictly greater than plain
+`secondary`'s under the same emulation.
 
 ### Subtask T004: Stories — element and static path
 
@@ -253,7 +269,7 @@ disabled at both `--sm` and `--icon` sizes, dark + `LightMode`, and the static g
    rule 6) — verify the new entries actually render light styling (assert computed colour differs
    between default and `.sk-light`, per the recipe's own instruction, in T006's tests).
 4. Add a forced-colors story or extend `apps/storybook/src/tests/elements-load.spec.ts` (T007
-   covers the latter) demonstrating the FR-013 marker.
+   covers the latter) demonstrating the FR-013 border-width step.
 
 **Files**: `packages/elements/src/button/sk-button.stories.ts`,
 `packages/styles/src/button/sk-button-html.stories.ts` (~40-60 lines added combined)
@@ -328,9 +344,9 @@ file — this component has exactly one today).
    "Decline" outside a story/doc example file (a targeted assertion, not a repo-wide #286 gate —
    C-011-equivalent boundary named in plan.md).
 7. Confirm — do not silently skip — that no `behaviours.json`/`mutations.json` edit is needed:
-   `sk-button` is already an SC-013/SC-014 subject; this mission adds no new `::part()` (unless T003
-   fell back to option 2, in which case revisit), no new reflected property, and no responsive
-   threshold.
+   `sk-button` is already an SC-013/SC-014 subject; this mission adds no new `::part()`, no new
+   reflected property, and no responsive threshold — the forced-colors mechanism (T003) is a
+   `border-width` rule on the existing class, not a new part or attribute.
 
 **Files**: `fixtures/elements-behaviour/src/sk-button.test.ts` (~1 literal changed, ~60-100 lines
 added)
@@ -341,23 +357,28 @@ red-first proof).
 ### Subtask T007: Forced-colors distinguishability assertion
 
 **Purpose**: Prove, not merely assert in prose, that `danger-secondary` remains visually
-distinguishable from plain `secondary` under `forced-colors: active` in both colour schemes.
+distinguishable from plain `secondary` under `forced-colors: active` in both colour schemes — via a
+COMPARATIVE border-width assertion, not a presence/absence check.
 
 **Steps**:
 1. In `apps/storybook/src/tests/elements-load.spec.ts`, add a case emulating `forced-colors: active`
-   (matching whatever existing forced-colors emulation pattern this file or a sibling
-   `*-forced-colors.html` demo page already uses in this repo) for both `<sk-button
-   variant="secondary">` and `<sk-button variant="danger-secondary">`, and assert a measurable
-   difference between them — e.g., the presence/absence or content of the T003 pseudo-element marker
-   — in both the dark and light colour schemes.
+   (matching whatever existing forced-colors emulation pattern this file or `sk-card`'s own
+   forced-colors assertion already uses in this repo) for both `<sk-button variant="secondary">` and
+   `<sk-button variant="danger-secondary">`, in the SAME emulation and colour scheme, and assert:
+   `getComputedStyle(dangerSecondaryControl).borderWidth` is strictly greater than
+   `getComputedStyle(secondaryControl).borderWidth`. Run the comparison in both the dark and light
+   colour schemes — two assertions, not one, since either scheme could regress independently.
 2. If a dedicated `sk-button-forced-colors.html` demo page fits this repo's existing pattern better
    than a spec-file case (see `sk-breadcrumbs-forced-colors.html`, `sk-event-timeline-forced-colors.html`
-   for precedent), use that shape instead — WP's choice, but the assertion must be real (a Playwright
-   emulation check), not a screenshot-only story with no assertion.
+   for precedent), use that shape instead — WP's choice, but the assertion must be a real,
+   comparative Playwright emulation check, not a screenshot-only story with no assertion, and not an
+   independent-presence check on either tone alone (that would pass even if both tones' widths moved
+   together and stayed equal).
 
 **Files**: `apps/storybook/src/tests/elements-load.spec.ts` (~20-40 lines added)
-**Validation**: the new assertion fails if the T003 forced-colors block is reverted (manually verify
-once as a red-first proof), and passes with it in place.
+**Validation**: the new comparative assertion fails if the T003 forced-colors block is reverted, AND
+fails if some future change stepped BOTH tones' width equally (manually verify the first case once,
+as the red-first proof), and passes with T003 in place and `secondary` untouched.
 
 ### Subtask T008: Ratchets, docs, full gate run, commit
 
@@ -367,8 +388,8 @@ sequence within this one WP/PR) this mission ships as.
 
 **Steps**:
 1. Confirm `expected-parts.json`'s `sk-button` entry stays `["button"]` and `total` is unchanged —
-   **unless** T003 used option 2 (new `::part()`), in which case update both explicitly and say so
-   in the PR body.
+   unconditionally: the FR-013 mechanism is a `border-width` rule on the existing class, targeting
+   the existing `part="button"` node, so no `::part()` is added and this ratchet needs no edit.
 2. Confirm `expected-docs.json`'s `sk-button` entry stays `{ "attributes": 5, "properties": 0,
    "methods": 0 }` — unchanged, because `danger-secondary` is a new *value*, not a new attribute.
 3. Update `docs/design-system/using-components.md` (or `sk-button`'s own doc section, whichever
@@ -404,8 +425,8 @@ sequence within this one WP/PR) this mission ships as.
 6. Commit with conventional-commit scopes from the closed enum (`styles`, `elements`; unscoped
    `docs:` for the doc-only change) — never `specs`, `spec`, `adr`, or `button`.
 
-**Files**: `expected-parts.json` (confirm-only, or explicit bump per step 1), `expected-docs.json`
-(confirm-only), `docs/design-system/using-components.md`
+**Files**: `expected-parts.json` (confirm-only), `expected-docs.json` (confirm-only),
+`docs/design-system/using-components.md`
 **Validation**: every command in step 4 exits 0; `git status --porcelain` is empty; the PR body
 contains the measured contrast table and the #155 coordination note.
 
@@ -416,27 +437,32 @@ contains the measured contrast table and the #155 coordination note.
 - [ ] `.sk-button--danger-secondary` (rest, hover, active) authored using only `--sk-status-danger`/
       `--sk-on-status-danger`, with the measured-contrast header comment; zero edits to
       `.sk-button--secondary`/`.sk-button--ghost`; zero edits to `packages/tokens/src/tokens.css` (T003)
-- [ ] Forced-colors-only marker present, content-drawn, alt-texted-empty, no `forced-color-adjust:
-      none`, verified not to distort layout at any size (T003)
+- [ ] Forced-colors-only `border-width: var(--sk-border-width-2)` step present, scoped to
+      `@media (forced-colors: active)`, no `content` property, no `forced-color-adjust: none`; the
+      layout consequence (default/`--sm` box growth vs. `--icon`'s absorbed growth) stated in the
+      CSS comment (T003)
 - [ ] Element and static-path stories cover default/hover/active/focus-visible/disabled at `--sm`
       and `--icon`, dark + `LightMode` (T004)
 - [ ] All generated artifacts regenerated and `--check`-clean; only `sk-button`'s generated files
       changed (T005)
 - [ ] Behaviour test's tone-count literal updated to 4; new hover/active/two-theme-boundary/size/
       no-copy-default assertions added and green (T006)
-- [ ] Forced-colors distinguishability assertion added and green in both colour schemes (T007)
-- [ ] `expected-parts.json`/`expected-docs.json` confirmed unchanged (or explicitly updated if T003
-      fell back to option 2); docs updated; full gate list green; #155 coordination recorded (T008)
+- [ ] Forced-colors COMPARATIVE border-width assertion (danger-secondary vs. secondary, same
+      emulation, both colour schemes) added and green (T007)
+- [ ] `expected-parts.json`/`expected-docs.json` confirmed unchanged; docs updated; full gate list
+      green; #155 coordination recorded (T008)
 - [ ] No state machine, confirmation step, mutation/lifecycle code, or copy default anywhere in the
       diff (C-006, FR-010, FR-011)
 - [ ] `git status --porcelain` empty before the PR is opened
 
 ## Risks
 
-- **Forced-colors marker distorts layout.** Mitigation: verify empirically before committing to
-  option 1; fall back to option 2 (new `::part()`) with an explicit ratchet update if needed.
-- **nx cache serves a stale `dist/` to `measure-elements-sizes.mjs`.** Mitigation: run the real
-  build immediately before measuring; use `--skip-nx-cache` if a stale-cache symptom appears.
+- **The default/`--sm` sizes' 1px-per-side box growth under forced-colors reads as an unintended
+  regression to a reviewer who has not read the plan.** Mitigation: state the consequence in the
+  CSS comment and the PR body, matching plan.md's Design §3 note, rather than leaving it to be
+  discovered in a diff.
+- **`nx` build cache serves a stale `dist/` to `measure-elements-sizes.mjs`.** Mitigation: run the
+  real build immediately before measuring; use `--skip-nx-cache` if a stale-cache symptom appears.
 - **Accidentally retrofitting `:active` onto `secondary`/`ghost`, or editing their existing rules
   while adding the new one.** Mitigation: review `git diff --stat` against plan.md's Design §3
   before commit — only new selectors should appear in the diff to `sk-button.css`.
@@ -444,16 +470,22 @@ contains the measured contrast table and the #155 coordination note.
   re-measurement.** Mitigation: the CSS header comment and the PR body both carry the figures this
   WP itself re-derives (matching BORDER-ROLE-319's numbers, which is expected — the token values on
   this branch have not moved), not a copy-pasted quote presented as new evidence.
+- **The T007 forced-colors assertion checks each tone's border-width independently instead of
+  comparatively**, which would pass even if a future regression stepped both tones' widths equally
+  and left them indistinguishable again. Mitigation: T007 requires the SAME-emulation, SAME-scheme
+  comparative assertion explicitly, not two independent presence checks.
 
 ## Reviewer Guidance
 
 Focus review on: (1) zero edits to `packages/tokens/src/tokens.css` and zero edits to
-`.sk-button--secondary`/`.sk-button--ghost`'s existing rules; (2) the forced-colors marker is
-genuinely inert outside `forced-colors: active` and does not use `forced-color-adjust: none`; (3)
-the `:active` scoping is explicit to `danger-secondary` only, with the parity rationale visible in
-the CSS comment; (4) no copy default, confirmation logic, or lifecycle code anywhere in the diff;
-(5) the measured contrast figures in the PR body are independently computed, not merely copied from
-BORDER-ROLE-319; (6) `expected-parts.json`/`expected-docs.json` are correctly left unchanged (or, if
-T003 fell back to option 2, correctly and explicitly updated).
+`.sk-button--secondary`/`.sk-button--ghost`'s existing rules; (2) the forced-colors mechanism is a
+`border-width` step only — no pseudo-element, no `content` property, no `forced-color-adjust: none`,
+and its layout consequence at default/`--sm` vs. `--icon` is stated, not silent; (3) the `:active`
+scoping is explicit to `danger-secondary` only, with the parity rationale visible in the CSS comment;
+(4) no copy default, confirmation logic, or lifecycle code anywhere in the diff; (5) the measured
+contrast figures in the PR body are independently computed, not merely copied from BORDER-ROLE-319;
+(6) `expected-parts.json`/`expected-docs.json` are correctly left unchanged; (7) the T007 assertion
+is genuinely comparative (danger-secondary vs. secondary in the same emulation), not two independent
+presence checks that could both pass on a regression.
 
 Implementation command: `spec-kitty agent action implement WP01 --agent claude`
