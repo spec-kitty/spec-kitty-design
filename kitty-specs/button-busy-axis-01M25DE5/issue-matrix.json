@@ -37,7 +37,7 @@
       "wp": "WP01"
     },
     "#286": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "FR-017/C-009: no component-scoped #286 test added, reasoned explicitly in spec.md's Decision section (matching #302's precedent, not #308's) since no new literal-emitting code path exists in this mission's render() diff -- confirmed by direct read of sk-button.ts's render().",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -45,8 +45,8 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "verdict": "in-mission",
+      "wp": "WP01"
     },
     "#300": {
       "evidence_ref": "Epic tracking parent, Gap G4 (spec.md line 6). This WP delivers #305's slice of epic #300; the epic itself is not closed by this WP.",
