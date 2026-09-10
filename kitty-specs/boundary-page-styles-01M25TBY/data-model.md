@@ -31,12 +31,19 @@ create a second absence contract this mission's evidence does not ask for.
 | Composed component | Owning mission | What this frame may set | What this frame must not set |
 |---|---|---|---|
 | `<sk-entity-marker>` | #304 (shipped) | placement/spacing classes on the `.sk-boundary-page__mark` wrapper; the consumer's own choice of `size`/`shape`/`border="true"` attributes on the element itself | any default `size`/`shape`/`border` value inferred by the frame; any `::part()` rule reaching the marker's shadow internals |
-| `<sk-pill-tag class="sk-pill-tag--status-<tone>">` | #302 (shipped) | placement/spacing classes on wherever the status pill is composed (e.g. inside `__body` or `__title`'s row) | any default tone inferred by the frame; any role/accessible-name contribution derived from the tone; any `::part()` rule reaching the pill's shadow internals |
+| `<span class="sk-pill-tag sk-pill-tag--status-<tone>">` (styles-layer form) | #302 (shipped) | placement/spacing classes on wherever the status pill is composed (e.g. inside `__body` or `__title`'s row) | any default tone inferred by the frame; any role/accessible-name contribution derived from the tone; any `::part()` rule reaching the pill's shadow internals |
 
 Both rows are read directly from the shipped CSS header comments in
 `packages/styles/src/entity-marker/sk-entity-marker.css` and
 `packages/styles/src/pill-tag/sk-pill-tag.css` — see research.md Decision 2 for the exact quoted
 text. Neither composed component is modified by this mission.
+
+**Correction (WP01 review finding)**: an earlier revision of this row named
+`<sk-pill-tag class="sk-pill-tag--status-<tone>">` — the custom element with a class on its host.
+That form is inert: `status` is a property on the element, and the shipped `pillTagClasses()`
+places the tone modifier class on the shadow `<span part="tag">`, never on the light-DOM host, so
+a host class renders no tone at all. The styles-layer span form above is what actually works, and
+what every exemplar now authors.
 
 ## Entity: the footnote absence contract
 
@@ -65,7 +72,7 @@ sk-boundary-page (styles-only family, no element, no shadow root)
  │               modifier; content alone differs, per research.md Decision 3)
  │         ├─ __mark (OPTIONAL — omit entirely) ── composes <sk-entity-marker> (#304, unmodified)
  │         ├─ consumer's own <h1> (styled, not manufactured; landmark stays with consumer)
- │         │    └─ optional composed <sk-pill-tag class="sk-pill-tag--status-*"> (#302, unmodified)
+ │         │    └─ optional composed <span class="sk-pill-tag sk-pill-tag--status-*"> (#302, unmodified, styles-layer form)
  │         ├─ __body (required) ── may contain a real <form>, plain message text, or long opaque
  │         │                       content (URL/email/identifier) that must contain locally
  │         ├─ __action-group (required container; 0..N actions; 44px targets both widths)

@@ -88,11 +88,15 @@ way an absent flex/grid child implies — never merely that the element is invis
 
 ### User Story 3 - Composing #302 and #304 without inferring tone, size, shape, border, or naming (Priority: P1)
 
-A Team Kitty screen author placing an `<sk-entity-marker>` in `.sk-boundary-page__mark` or an
-`<sk-pill-tag class="sk-pill-tag--status-<tone>">` for status text needs the frame to place and
-space those components without silently choosing a size, shape, border, or tone on the author's
-behalf, and without the frame acquiring any accessible-naming responsibility the composed
-components do not already carry.
+A Team Kitty screen author placing an `<sk-entity-marker>` in `.sk-boundary-page__mark` or the
+styles-layer `<span class="sk-pill-tag sk-pill-tag--status-<tone>">` for status text needs the
+frame to place and space those components without silently choosing a size, shape, border, or
+tone on the author's behalf, and without the frame acquiring any accessible-naming responsibility
+the composed components do not already carry. (Not `<sk-pill-tag class="sk-pill-tag--status-
+<tone>">` — the custom element's tone is a `status` property, and the shipped `pillTagClasses()`
+places the resulting modifier class on the shadow `<span part="tag">`, not the light-DOM host, so
+a class authored on the host renders nothing; corrected here per WP01's review finding, which
+probed this directly against the built Storybook.)
 
 **Why this priority**: This is the seam the epic's dependency map names explicitly (`T2 --> T3`,
 `T4 --> T3`) and the issue's own binding sentence ("The frame infers no tone") turns into a test
@@ -111,10 +115,12 @@ no ARIA attribute targeting either composed component.
 2. **Given** `.sk-boundary-page__mark` containing a plain `<sk-entity-marker>` with no size/shape/
    border attributes, **When** it renders, **Then** it uses #304's own default box — the frame
    sets no default itself.
-3. **Given** a composed `<sk-pill-tag class="sk-pill-tag--status-danger">` inside the frame,
-   **When** it renders, **Then** the frame's own CSS contains no rule setting `background`/
-   `color` on `.sk-pill-tag` or any of its status modifiers, and no rule setting `role` or an
-   accessible-name attribute on it.
+3. **Given** a composed `<span class="sk-pill-tag sk-pill-tag--status-danger">` (the styles-layer
+   form — see this story's own header note on why the `<sk-pill-tag class="...">` host-class form
+   is inert) inside the frame, **When** it renders, **Then** the frame's own CSS contains no rule
+   setting `background`/`color` on `.sk-pill-tag` or any of its status modifiers, and no rule
+   setting `role` or an accessible-name attribute on it, and the pill's OWN rendered tone
+   (computed style, not a light-DOM attribute) matches the authored status class.
 4. **Given** the shipped `sk-boundary-page` CSS, **When** it is inspected, **Then** it contains no
    `::part()` selector targeting either composed component's shadow parts.
 

@@ -246,7 +246,11 @@ one existing package, following the `sk-progress`/`sk-empty-state` precedent exa
 - **Affected surfaces**: `sk-boundary-page.css` (`__mark` placement rule, title-row layout for an
   optional composed pill), exemplar `.html` files demonstrating `<sk-entity-marker size="lg"
   shape="circle" border="true">` (explicit `border="true"`, never the bare attribute, per the
-  mission brief) and `<sk-pill-tag class="sk-pill-tag--status-danger">`.
+  mission brief) and the STYLES-LAYER `<span class="sk-pill-tag sk-pill-tag--status-danger">` —
+  never `<sk-pill-tag class="sk-pill-tag--status-danger">`, the custom element with a class on its
+  host: `status` is a property there, and the shipped `pillTagClasses()` applies the tone modifier
+  to the shadow `<span part="tag">`, so a host-class never reaches it (WP01 review finding;
+  corrected here from an earlier revision of this plan that named the inert form).
 - **Sequencing/depends-on**: IC-01 (mark/status slots sit inside the anatomy IC-01 establishes).
 - **Risks**: the known `sk-entity-marker` ergonomic gap (a bare `border` attribute silently
   no-ops in plain HTML) makes it easy for an exemplar to *look* bordered when authored carelessly

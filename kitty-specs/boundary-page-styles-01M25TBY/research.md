@@ -103,9 +103,23 @@ exception count' section").
 
 **Decision**: The mark slot composes `<sk-entity-marker>` unmodified — consumer picks
 `size`/`shape`/`border` from #304's shipped axis, the frame supplies no default and infers no
-size. The status slot (when the consumer supplies one) composes `<sk-pill-tag
-class="sk-pill-tag--status-<tone>">` unmodified — consumer picks the tone, the frame infers none
-and contributes no role/name/meaning from it.
+size. The status slot (when the consumer supplies one) composes the STYLES-LAYER form of #302 —
+`<span class="sk-pill-tag sk-pill-tag--status-<tone>">`, exactly what
+`packages/styles/src/pill-tag/sk-pill-tag.html` ships — unmodified; consumer picks the tone, the
+frame infers none and contributes no role/name/meaning from it.
+
+**Correction (WP01 review finding, not the original research pass)**: an earlier revision of this
+decision named `<sk-pill-tag class="sk-pill-tag--status-<tone>">` — the CUSTOM ELEMENT with a
+class on its host. That form is inert: `sk-pill-tag`'s tone is a `status` PROPERTY, and
+`pillTagClasses()` (`packages/elements/src/pill-tag/sk-pill-tag.markup.ts`) applies the resulting
+modifier class to the SHADOW `<span part="tag">`, not the host — so a class authored on the
+light-DOM `<sk-pill-tag>` element never reaches the node that actually carries the tone rule.
+Probed directly against the built Storybook: the element upgrades, `statusAttr` is `null`, and
+zero loaded document rules match `sk-pill-tag--status*` on the host. The styles-layer span form
+above is the one that actually renders a tone, and it is also the right choice independent of the
+bug: this is a styles-only frame, so its native idiom is styles-layer markup, and it needs no
+`sk-pill-tag` custom-element registration in `.storybook/preview.ts` at all (see that file's own
+comment).
 
 **Rationale — quoted from the shipped source, per the mission brief's instruction to read what
 actually shipped rather than the issue text**:
