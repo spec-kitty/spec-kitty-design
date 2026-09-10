@@ -58,10 +58,10 @@
       "criterion_id": "FR-006",
       "description": "Verify FR-006 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "tests/node/form-input-border-target-size-parity.test.ts. Reproduced red myself twice: (1) removed min-block-size from sk-form-field.css's .sk-input only -> exact error 'packages/styles/src/form-field/sk-form-field.css: .sk-input has no min-block-size declaration: expected undefined to be defined'; (2) reverted, then changed only sk-form-input.css's border token to --sk-border-strong -> exact error 'border diverged: ... .sk-input = \"var(--sk-border-width-1) solid var(--sk-border-control)\" vs ... .sk-form-input__control = \"var(--sk-border-width-1) solid var(--sk-border-strong)\"'. Both reverted; npm test green in the committed tree (51/51 files, 620/620 tests).",
+      "pass_fail": "pass",
+      "verified_by": "reviewer-renata",
+      "verified_at": "2026-09-10T15:48:56.167800+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
