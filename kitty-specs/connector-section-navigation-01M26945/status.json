@@ -1,7 +1,7 @@
 {
-  "event_count": 4,
-  "last_event_id": "01M26ERD1XCXPX699W9HZBFBP2",
-  "materialized_at": "2026-09-10T20:04:45.245749+00:00",
+  "event_count": 5,
+  "last_event_id": "01M26HZJYK1R6KDB4HHXD0D765",
+  "materialized_at": "2026-09-10T21:01:06.387368+00:00",
   "mission_number": "",
   "mission_slug": "connector-section-navigation-01M26945",
   "mission_type": "software-dev",
@@ -11,18 +11,18 @@
     "canceled": 0,
     "claimed": 0,
     "done": 0,
-    "for_review": 1,
+    "for_review": 0,
     "in_progress": 0,
-    "in_review": 0,
+    "in_review": 1,
     "planned": 0
   },
   "work_packages": {
     "WP01": {
       "actor": "claude",
       "force_count": 1,
-      "lane": "for_review",
-      "last_event_id": "01M26ERD1XCXPX699W9HZBFBP2",
-      "last_transition_at": "2026-09-10T20:04:45.245749+00:00"
+      "lane": "in_review",
+      "last_event_id": "01M26HZJYK1R6KDB4HHXD0D765",
+      "last_transition_at": "2026-09-10T21:01:06.387368+00:00"
     }
   }
 }
