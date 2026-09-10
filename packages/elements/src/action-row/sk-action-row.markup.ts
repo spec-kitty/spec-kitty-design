@@ -144,12 +144,14 @@ const PLACEHOLDER_CONTENT: ActionRowContent = {
   // Plain, dependency-free markup — never `sk-button` classes. `.sk-action-row__controls`
   // styles only layout (display/gap/padding); it does not colour its children, matching the
   // shadow form, where a real consumer's own button/link/`sk-button` owns its own contrast. An
-  // earlier revision of this placeholder used `sk-button--ghost` classes with no `sk-button.css`
-  // loaded alongside — the classes were inert, the UA default link colour took over, and axe
-  // caught a real WCAG AA color-contrast failure against the dark surface on every generated
-  // exemplar and story that rendered this default content. `color: inherit` picks up
-  // `.sk-action-row`'s own `--sk-fg-body`, already used (and already passing axe) elsewhere on
-  // this row.
+  // earlier revision of this placeholder used `sk-button--ghost` classes with no sk-button
+  // stylesheet loaded alongside (filename spelled without backticks per #332, which owns the
+  // check-no-css-in-source false positive on that pattern in prose) — the classes were inert,
+  // the UA default link colour took over, and axe caught a real WCAG AA color-contrast failure
+  // against the dark surface on every generated exemplar and story that rendered this default
+  // content.
+  // `color: inherit` picks up `.sk-action-row`'s own `--sk-fg-body`, already used (and already
+  // passing axe) elsewhere on this row.
   controls:
     '<button type="button" style="color:inherit;font:inherit;background:none;border:0;padding:0;cursor:pointer;text-decoration:underline;">Action</button>',
 };
