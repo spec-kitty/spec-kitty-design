@@ -128,10 +128,10 @@
       "criterion_id": "FR-013",
       "description": "Verify FR-013 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "packages/elements/src/confirm-dialog/sk-confirm-dialog.ts \u2014 `showModal()` calls the native `HTMLDialogElement.showModal()` directly (no reimplementation of focus trap/inertness/top-layer); exercised by every SC-005/SC-006/SC-007 test in the 20/20 passing run, all of which open the dialog via this method.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T09:44:53.952703+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
