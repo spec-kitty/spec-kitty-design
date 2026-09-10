@@ -36,6 +36,18 @@
       "verdict": "verified-already-fixed",
       "wp": null
     },
+    "#216": {
+      "evidence_ref": "https://github.com/spec-kitty/spec-kitty-design/issues/216 \u2014 made status-tones.ts importable by a markup module evaluated in bare Node and added the generator's leaf-import enforcement; sk-pill-tag.markup.ts relies on that landed capability",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "verified-already-fixed",
+      "wp": null
+    },
     "#286": {
       "evidence_ref": "Follow-up: #286 (repo-wide no-user-visible-literal-in-render() gate) remains a separate deliverable; C-011/FR-011 explicitly state this mission does not build it",
       "fr": null,
