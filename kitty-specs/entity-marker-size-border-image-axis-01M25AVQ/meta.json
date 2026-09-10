@@ -23,6 +23,7 @@
   "purpose_context": "This mission advances entity marker size border image axis on mission/entity-marker-size-border-image-axis so stakeholders can track the work from mission creation onward.",
   "purpose_tldr": "entity marker size border image axis",
   "slug": "entity-marker-size-border-image-axis-01M25AVQ",
+  "status_phase": "1",
   "target_branch": "mission/entity-marker-size-border-image-axis",
   "topology": "single_branch"
 }
