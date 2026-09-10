@@ -9,6 +9,23 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) conve
 
 ### Changed
 
+- **`.sk-input` / `<sk-form-input>`'s resting-state control boundary now clears WCAG 1.4.11**
+  (#321). A new token, `--sk-border-control` (dark `#81818B`, light `#7A7A6E` — independently
+  declared literals, not aliases of `--sk-fg-subtle`), replaces `--sk-border-default` as the
+  resting-state `border-color` on both `.sk-input` (`packages/styles/src/form-field/sk-form-field.css`)
+  and `<sk-form-input>`'s shadow-DOM `.sk-form-input__control`
+  (`packages/styles/src/form-input/sk-form-input.css`). Measured against `--sk-surface-page`,
+  `--sk-surface-card`, and `--sk-surface-input` in both themes: dark 5.01:1 / 4.51:1 / 4.28:1;
+  light 3.98:1 / 4.34:1 / 3.85:1 — all six clear the 3:1 non-text contrast floor, mechanically
+  enforced by `tests/node/form-input-border-control-contrast.test.ts`. `.sk-input` also gains
+  the `var(--sk-border-width-1)` width spelling in place of its literal `1px` (closing the #173
+  spelling gap between the two paths; both compute to 1px, unchanged). Both rules gain
+  `min-block-size: var(--sk-space-9)` (48px, this repo's existing nearest-above-44px token), so
+  the control clears the WCAG 2.5.8-aligned 44px target-size floor established at #303. Focus,
+  `[aria-invalid="true"]`, and `:disabled` styling are unchanged. `.sk-textarea`,
+  `.sk-form-textarea__control`, and `.sk-form-select` keep `--sk-border-default` and are known,
+  disclosed, and deliberately out of scope for this change — not fixed here.
+
 - **BEHAVIOUR — `sk-notice`'s `heading` slot is now announced** (#228, operator ruling
   2026-09-07). The heading box moved from a sibling *before* the live region to the **first child
   inside it**, so a screen reader reads the whole notice, headline first.
