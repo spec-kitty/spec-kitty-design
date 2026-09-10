@@ -1,0 +1,52 @@
+{
+  "entries": [
+    {
+      "created_at": "2026-09-09T23:49:38.920531Z",
+      "decision_id": "01M2497FF81WMVA14RGCK0X8S9",
+      "final_answer": "yes-skip-discovery",
+      "input_key": "discovery_mode",
+      "mission_id": "01M248TF3N3ZZR1NQ5S4ND379W",
+      "mission_slug": "static-form-of-element-backed-css-01M248TF",
+      "opened_by": "cli",
+      "options": [
+        "yes-skip-discovery",
+        "no-run-full-interview"
+      ],
+      "origin_flow": "specify",
+      "other_answer": false,
+      "question": "This mission is dispatched with a fully-specified operator brief (issue #301, cross-checked against #300/#161/#239/#253 and this repo's ADRs/scripts/CSS on the actual train head) rather than an interactive user request. Skip the interactive discovery interview and treat the brief as the confirmed Intent Summary?",
+      "rationale": null,
+      "resolved_at": "2026-09-09T23:49:42.662974Z",
+      "resolved_by": null,
+      "slot_key": "specify.scope.discovery-mode",
+      "status": "resolved",
+      "step_id": null,
+      "summary_json": null
+    },
+    {
+      "created_at": "2026-09-10T00:00:57.518768Z",
+      "decision_id": "01M249W65EV9YR1VHCTZXMZNV1",
+      "final_answer": "yes-skip-discovery",
+      "input_key": "discovery_mode",
+      "mission_id": "01M248TF3N3ZZR1NQ5S4ND379W",
+      "mission_slug": "static-form-of-element-backed-css-01M248TF",
+      "opened_by": "cli",
+      "options": [
+        "yes-skip-discovery",
+        "no-run-full-interrogation"
+      ],
+      "origin_flow": "plan",
+      "other_answer": false,
+      "question": "Skip interactive planning interrogation and derive Technical Context directly from the confirmed spec (fully specified, operator-authorized brief; no open unknowns remain)?",
+      "rationale": null,
+      "resolved_at": "2026-09-10T00:01:02.332961Z",
+      "resolved_by": null,
+      "slot_key": "plan.scope.discovery-mode",
+      "status": "resolved",
+      "step_id": null,
+      "summary_json": null
+    }
+  ],
+  "mission_id": "01M248TF3N3ZZR1NQ5S4ND379W",
+  "version": 1
+}

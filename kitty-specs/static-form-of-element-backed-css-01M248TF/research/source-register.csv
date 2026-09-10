@@ -1,0 +1,20 @@
+source_id,source_type,title,location,status,accessed_at
+SRC-001,github-issue,"[TKT1] decide the static form of element-backed CSS families",https://github.com/spec-kitty/spec-kitty-design/issues/301,authoritative,2026-09-10
+SRC-002,github-issue,"Epic: Teams and membership — static-path contract, status tones, and public-boundary surfaces",https://github.com/spec-kitty/spec-kitty-design/issues/300,authoritative,2026-09-10
+SRC-003,github-issue,"[styles] @spec-kitty/styles main/exports point at ./dist/src/index.js, which the build never emits",https://github.com/spec-kitty/spec-kitty-design/issues/161,open-dependency,2026-09-10
+SRC-004,github-issue,"[styles] A shadow-DOM element cannot consume the .sk-data-table primitive",https://github.com/spec-kitty/spec-kitty-design/issues/239,open-adjacent,2026-09-10
+SRC-005,github-issue,"Epic: Repository Dossier — reusable navigation, responsive shell, and copy-control surfaces",https://github.com/spec-kitty/spec-kitty-design/issues/253,closed-adjacent,2026-09-10
+SRC-006,github-issue,"[TKX5] sk-app-shell rail-preserving responsive mode",https://github.com/spec-kitty/spec-kitty-design/issues/274,closed-precedent,2026-09-10
+SRC-007,repo-file,"ADR-9: Shadow DOM, the Styling API, and Label Ownership",docs/architecture/decisions/2026-09-02-9-shadow-dom-and-styling-api.md,authoritative,2026-09-10
+SRC-008,repo-file,"ADR-10: Distribution, Build Artifacts, and Canonical Markup",docs/architecture/decisions/2026-09-02-10-distribution-and-canonical-markup.md,authoritative,2026-09-10
+SRC-009,repo-file,"ADR-11: Verification Stack for Elements, and Generated Wrappers",docs/architecture/decisions/2026-09-02-11-verification-stack-and-wrapper-generation.md,authoritative,2026-09-10
+SRC-010,repo-file,"Adding a component (component-authoring recipe)",docs/contributing/adding-a-component.md,authoritative,2026-09-10
+SRC-011,repo-file,"sk-app-shell.css",packages/styles/src/app-shell/sk-app-shell.css,measured,2026-09-10
+SRC-012,repo-file,"sk-action-row.css",packages/styles/src/action-row/sk-action-row.css,measured,2026-09-10
+SRC-013,repo-file,"sk-entity-marker.css",packages/styles/src/entity-marker/sk-entity-marker.css,measured,2026-09-10
+SRC-014,repo-file,"check-adopted-css-boundaries.mjs (ADR-9 Confirmation #1 boundary gate and self-test table)",scripts/check-adopted-css-boundaries.mjs,measured,2026-09-10
+SRC-015,repo-file,"build-element-markup.mjs (canonical-markup generator)",scripts/build-element-markup.mjs,measured,2026-09-10
+SRC-016,repo-file,"build-elements-css.mjs (adopted-CSS generator)",scripts/build-elements-css.mjs,measured,2026-09-10
+SRC-017,external,"Family 4 Teams-and-membership planning pack (ux_redesign/families/04-teams-membership)",N/A (planning repo not reachable from this checkout),unverified-testimony,2026-09-10
+SRC-018,measured-build,"Real npx nx run styles:build --skip-nx-cache output + Node ESM resolution through node_modules/@spec-kitty/styles workspace symlink",packages/styles/dist/ (generated; not committed),measured,2026-09-10
+
