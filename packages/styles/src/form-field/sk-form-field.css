@@ -41,7 +41,15 @@
   font-size: var(--sk-text-base);
   color: var(--sk-fg-default);
   outline: none;
-  /* --sk-space-9 is 3rem/48px — the closest token at or above the 44px NFR-001 floor. */
+  /* --sk-space-9 is 3rem/48px — the closest token at or above the 44px NFR-001 floor.
+     Measured (#321): the padding/border/line-height above already sum to 48px on this
+     rule's own default content, so this declaration is not currently what makes the
+     default story clear 44px — removing it alone leaves the box unchanged (verified;
+     FR-006's parity test catches that deletion instead). It is the guarantee against a
+     FUTURE change to padding, font-size, or line-height — do not delete it as dead code
+     after measuring 48px without it; tests/node/form-input-border-target-size-parity.test.ts
+     and apps/storybook/src/tests/sk-form-input-contrast-touch-target.spec.ts (FR-007,
+     broken as padding+floor together) both depend on it staying declared. */
   min-block-size: var(--sk-space-9);
   transition:
     border-color var(--sk-motion-duration-fast) var(--sk-motion-ease-out),
