@@ -159,7 +159,7 @@ Those look contradictory and are not: **they are different bases, and partly a
 different component.** ADR-10's SP-3 spike measured \`sk-card\`, not \`sk-stub\`.
 
 - ADR-10 §2's two figures are **unminified raw on \`sk-card\` ALONE** (3.7 / 26.6 KB).
-- ADR-8's ~6 KB is **minified+gzip**, and the IIFE now measures ${kb(ARTIFACTS[1].mingzip)}
+- ADR-8's ~6 KB is **minified+gzip**, and the IIFE now measures ${wholeKb(ARTIFACTS[1].mingzip)}
   min+gzip — which does NOT corroborate it and is not meant to. That figure was a per-component
   Lit-runtime estimate; this artifact carries the runtime plus every component in the package,
   so the two are different bases and the gap grows with each component added. An earlier
@@ -218,6 +218,33 @@ ${ARTIFACTS.map(
 ).join('\n')}
 \`\`\`
 `;
+
+// REGRESSION GUARD (#317): a decimal-precision compressed figure snuck into the ADR-8
+// corroboration paragraph (`kb(ARTIFACTS[1].mingzip)` where the rest of the file uses
+// `wholeKb()` for anything gzip-derived) and it was NOT caught by `--check`, because
+// `--check` only proves this run's generated body matches what was committed — it says
+// nothing about whether that body is itself well-formed. That line passed `--check` on
+// every machine that generated it and only broke on the machine that generated it next,
+// because gzip output is not reproducible across zlib builds (see the note above `wholeKb`).
+//
+// This asserts directly against the real computed byte counts for THIS build, not a regex
+// over prose: `kb()` always renders one decimal place before "KiB" (e.g. "36.1 KiB") and
+// `wholeKb()` never does (e.g. "36 KiB"), so the decimal-precision string for a gzip/mingzip
+// figure cannot appear in a correctly generated body by coincidence — only by a future edit
+// reaching for `kb()` on a compressed figure again.
+for (const a of ARTIFACTS) {
+  for (const [label, value] of [['gzip', a.gzip], ['min+gzip', a.mingzip]]) {
+    const decimalForm = kb(value);
+    if (body.includes(decimalForm)) {
+      console.error(
+        `measure-elements-sizes: generated body embeds "${decimalForm}" — a decimal-precision ` +
+          `${label} figure for ${a.name}. Compressed sizes are not reproducible across machines; ` +
+          `use wholeKb(), not kb(), for anything derived from a.gzip or a.mingzip. See #317.`,
+      );
+      process.exit(1);
+    }
+  }
+}
 
 if (check) {
   const current = existsSync(OUT) ? readFileSync(OUT, 'utf8') : null;
