@@ -230,11 +230,24 @@ The Storybook `Patterns/CLI Auth` family (spec-kitty/spec-kitty-design#329) demo
 canonical CLI/device-authorization states — code entry, review and decide, terminal
 success/denial, and terminal error — as composition and accessibility evidence, not a published
 page component and not a replica of all twelve Family 5 screens. Story 1 composes one native
-`<form>` with a labelled `sk-form-input` and one `sk-button` primary. Story 2 composes `sk-card`,
-native `.sk-facts`, one `sk-pill-tag` per supplied scope, and Approve/Deny inside one native
-`<form>`, DOM order Approve-then-Deny.
+`<form>` with a labelled `sk-form-input` and one native `<button type="submit" class="sk-button
+sk-button--primary">`. Story 2 composes `sk-card`, native `.sk-facts`, one `sk-pill-tag` per
+supplied scope, and Approve/Deny as two native `<button type="submit" class="sk-button
+sk-button--*">` inside one native `<form>`, DOM order Approve-then-Deny.
 
-**Status at authoring time**: Story 2's Deny action ships as a plain `sk-button` secondary tone,
+**`<sk-button>` cannot submit an enclosing form.** Its shadow-root control hard-codes
+`type="button"` (a `<button>` inside a shadow root does not participate in an enclosing form's
+submission either way), so it can never be the primary/Approve/Deny action in a genuine
+native-form flow like this one. The supported shape for that case is a native
+`<button type="submit">` carrying the public `.sk-button`/`.sk-button--*` styles-layer classes
+directly — which is what all three form actions in this pattern do. `.sk-button` is a public
+surface in its own right (`packages/styles/src/button/sk-button.css`), not merely the element's
+internal implementation, so this stays within "public surfaces and native semantic HTML," not a
+fork. If a future revision gives `<sk-button>` real submit behavior, ADR-9 §4's `ElementInternals`
+research and `#74`'s form-association work are the documented route — until then, use the native
+`<button>` shape for anything that must submit a form.
+
+**Status at authoring time**: Story 2's Deny action ships as a plain `.sk-button--secondary` class,
 pending `#320`'s danger-secondary tone landing on `train/elements-first`. Stories 3 and 4 render a
 documented pending shell rather than any composition — `#303`'s `sk-boundary-page` public frame
 does not exist yet, and no local frame, stage, or "boundary" substitute was built in its place.

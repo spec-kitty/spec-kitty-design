@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { expect, test, type Locator, type Page } from "@playwright/test";
 import { getViolations, injectAxe } from "axe-playwright";
+import esbuild from "esbuild";
 
 /**
  * Focused Storybook Playwright suite for the CLI Auth pattern family
@@ -22,6 +23,13 @@ import { getViolations, injectAxe } from "axe-playwright";
  * Story 1's contrast/target-size clauses that depend on `#321`'s landed fix are also isolated
  * and marked `// pending #321` — the CURRENT `.sk-input`/`sk-form-field` border and lack of an
  * input target-size floor are exactly the gap `#321` exists to close (research.md).
+ *
+ * WHY THE THREE FORM ACTIONS ARE `button.sk-button`, NOT `sk-button` LOCATORS. `<sk-button>`
+ * hard-codes `type="button"` on its shadow-root control and cannot submit an enclosing form
+ * (its own source comment says so). Story 1's submit action and Story 2's Approve/Deny are
+ * therefore native `<button type="submit" class="sk-button sk-button--*">` — see
+ * `cli-auth.stories.ts`'s file-level doc comment for the full reasoning. Every assertion below
+ * that touches those three controls locates them as `button`, not `sk-button`.
  */
 
 const STORY_PREFIX = "patterns-cli-auth--";
@@ -89,28 +97,43 @@ test("source is Storybook-only composition with no forbidden reader, private rea
     "packages/elements/src/patterns/cli-auth.stories.ts",
     "utf8",
   );
+  // Comment-stripped, the same way check-pattern-composition.mjs reads this file — so a doc
+  // comment that NAMES a forbidden tag while explaining why it is forbidden (this file's own
+  // file-level comment says "NOT `<sk-button>`" in prose) cannot false-positive a check meant
+  // for real markup usage. `code` is the actual template/import content the forbidden-pattern
+  // checks below run against; `source` (unstripped) is still used for the two positive
+  // dependency-honesty markers, which are meant to be found in prose.
+  const code = esbuild.transformSync(source, { loader: "ts", format: "esm" }).code;
 
   // C-002's forbidden abstractions — no custom element with these names is ever used.
-  expect(source).not.toMatch(
+  expect(code).not.toMatch(
     /<\s*(?:auth-card|scope-chip|form-action-row|sk-terminal-frame|sk-boundary-stage)(?:\s|>)/,
   );
   // No custom element is DEFINED by this fixture (it composes, it does not build).
-  expect(source).not.toMatch(/customElements\.define\s*\(/);
+  expect(code).not.toMatch(/customElements\.define\s*\(/);
   // C-004 — no private-root reach, the same three spellings check-pattern-composition.mjs's R1
   // treats as the natural ones.
-  expect(source).not.toMatch(/\.shadowRoot\b|\.renderRoot\b|getRootNode\s*\(/);
+  expect(code).not.toMatch(/\.shadowRoot\b|\.renderRoot\b|getRootNode\s*\(/);
   // C-005 — no invented auth/session/persistence/fetch behavior.
-  expect(source).not.toMatch(
+  expect(code).not.toMatch(
     /\b(?:fetch|setTimeout|setInterval|requestAnimationFrame)\s*\(/,
   );
-  expect(source).not.toMatch(
+  expect(code).not.toMatch(
     /\b(?:localStorage|sessionStorage|Math\.random|new\s+Date)\b/,
   );
   // The dependency-honesty markers this WP requires must actually be present, not merely
-  // asserted in prose elsewhere.
+  // asserted in prose elsewhere — read from the unstripped source since these ARE prose.
   expect(source).toContain("pending #320");
   expect(source).toContain("TODO(#303)");
   expect(source).toMatch(/excludeStories:\s*\[[\s\S]*["']CLI_AUTH_FIXTURES["']/);
+  // <sk-button> cannot submit an enclosing form (it hard-codes type="button" in shadow DOM);
+  // the three form actions must stay native <button type="submit" class="sk-button ...">, not
+  // the custom element, and this must not silently regress back to it. Checked against the
+  // comment-stripped code so this file's own explanatory prose ("NOT <sk-button>") cannot trip
+  // it — only a real `<sk-button` in a template or a real import would.
+  expect(code).not.toMatch(/<\s*sk-button(?:\s|>)/);
+  expect(code).not.toMatch(/from\s*["']\.\.\/button\/sk-button\.js["']/);
+  expect(code).toMatch(/<button\s+type="submit"\s+class="sk-button sk-button--primary"/);
 });
 
 test("built index discovers the complete reviewed family", async ({ request }) => {
@@ -178,11 +201,18 @@ test("Story 1 composes one labelled sk-form-input, its description association, 
   expect(defaultFacts.describedBy).toContain("description");
   expect(defaultFacts.errorText).toBe("");
 
-  // Keyboard order equals DOM order (FR-007): input, then the primary submit button.
+  // DOM order (FR-007): input, then the native primary submit button.
   const tagOrder = await defaultRoot
     .locator("form > *")
     .evaluateAll((elements) => elements.map((el) => el.tagName.toLowerCase()));
-  expect(tagOrder).toEqual(["sk-form-input", "sk-button"]);
+  expect(tagOrder).toEqual(["sk-form-input", "button"]);
+  await expect(defaultRoot.locator("form > button")).toHaveAttribute(
+    "type",
+    "submit",
+  );
+  await expect(defaultRoot.locator("form > button")).toHaveClass(
+    "sk-button sk-button--primary",
+  );
 
   const invalidRoot = await openStory(page, "code-entry-invalid");
   const invalidInput = invalidRoot.locator("sk-form-input");
@@ -284,34 +314,74 @@ test("Story 2 renders the authorization fixture's facts, scopes, and Approve-the
   ]);
 
   const actionOrder = await root
-    .locator("form sk-button")
+    .locator("form button")
     .evaluateAll((elements) =>
       elements.map((el) => ({
-        variant: el.getAttribute("variant"),
+        type: el.getAttribute("type"),
+        classes: el.className,
         text: el.textContent?.trim(),
       })),
     );
   expect(actionOrder).toEqual([
-    { variant: "primary", text: "Approve" },
-    { variant: "secondary", text: "Deny" },
+    { type: "submit", classes: "sk-button sk-button--primary", text: "Approve" },
+    { type: "submit", classes: "sk-button sk-button--secondary", text: "Deny" },
   ]);
 });
 
-test("Story 2's Deny action composes #320's real danger-secondary tone once it lands — pending #320", async ({
+test("keyboard focus order equals DOM order for Story 1 and Story 2's native submit actions (FR-007)", async ({
   page,
 }) => {
-  // #320 has not landed on train/elements-first at authoring time (research.md). `sk-button`
-  // publishes only primary/secondary/ghost today — verified directly against
-  // packages/styles/src/button/sk-button.css, which names no danger tone. This assertion is
-  // therefore red for the honest reason: Deny is a PLAIN secondary button (C-010 forbids
-  // forking a local stand-in), and T010 turns this green once #320 lands and this lane
-  // rebases onto the train commit that carries it.
+  // Real Tab-key traversal, not just a DOM-order read: `<sk-form-input>` does not set
+  // `delegatesFocus`, so `document.activeElement` stays the host while its shadow root's own
+  // `activeElement` reaches the real `<input>` — this walks that chain rather than assuming it.
+  const activeElementChain = () =>
+    page.evaluate(() => {
+      const chain: string[] = [];
+      let node: Element | null = document.activeElement;
+      while (node) {
+        chain.push(node.tagName.toLowerCase());
+        node = (node as Element & { shadowRoot?: ShadowRoot }).shadowRoot
+          ?.activeElement as Element | null;
+      }
+      return chain.join(">");
+    });
+
+  await openStory(page, "code-entry-default");
+  await page.keyboard.press("Tab");
+  expect(await activeElementChain()).toBe("sk-form-input>input");
+  await page.keyboard.press("Tab");
+  expect(await activeElementChain()).toBe("button");
+  expect(
+    await page.evaluate(() => document.activeElement?.textContent?.trim()),
+  ).toBe("Continue");
+
+  await openStory(page, "authorization-decision");
+  await page.keyboard.press("Tab");
+  expect(await activeElementChain()).toBe("button");
+  expect(
+    await page.evaluate(() => document.activeElement?.textContent?.trim()),
+  ).toBe("Approve");
+  await page.keyboard.press("Tab");
+  expect(await activeElementChain()).toBe("button");
+  expect(
+    await page.evaluate(() => document.activeElement?.textContent?.trim()),
+  ).toBe("Deny");
+});
+
+test("Story 2's Deny action composes #320's real danger-secondary class once it lands — pending #320", async ({
+  page,
+}) => {
+  // #320 has not landed on train/elements-first at authoring time (research.md).
+  // packages/styles/src/button/sk-button.css publishes only .sk-button--primary/--secondary/
+  // --ghost today (verified directly, `grep -n danger` finds nothing) — no `--danger-secondary`
+  // modifier exists yet. This assertion targets that class name as the BEM-modifier sibling of
+  // the three that already exist; #320's own mission owns the final name, and T010 corrects
+  // this if it ships differently. Deny is a PLAIN `.sk-button--secondary` class today (C-010
+  // forbids forking a local stand-in), so this is red for the honest reason, and T010 turns it
+  // green once #320 lands and this lane rebases onto the train commit that carries it.
   const root = await openStory(page, "authorization-decision");
-  const denyVariant = await root
-    .locator("form sk-button")
-    .nth(1)
-    .getAttribute("variant");
-  expect(denyVariant).toBe("danger-secondary");
+  const denyClasses = await root.locator("form button").nth(1).getAttribute("class");
+  expect(denyClasses?.split(/\s+/)).toContain("sk-button--danger-secondary");
 });
 
 test("Story 3/4 compose #303's public sk-boundary-page frame once it lands — pending #303", async ({
@@ -353,7 +423,7 @@ test("Stories 1 and 2 stay contained at 390px with equal gutters and unclipped a
       clientWidth: 390,
       scrollWidth: 390,
     });
-    const buttons = root.locator("sk-button");
+    const buttons = root.locator("form button");
     const count = await buttons.count();
     for (let index = 0; index < count; index += 1) {
       const box = await buttons.nth(index).boundingBox();
@@ -428,12 +498,13 @@ test("Stories 1 and 2 keep the input boundary, both button tones, and scope pill
   // forced-colors contract is sk-pill-tag's own, asserted elsewhere in the catalogue.
   expect(pillBorder).toBeDefined();
   const buttons = await root
-    .locator("sk-button")
+    .locator("form button")
     .evaluateAll((elements) =>
       elements.map((element) => ({
         display: getComputedStyle(element).display,
       })),
     );
+  expect(buttons).toHaveLength(2);
   expect(buttons.every((b) => b.display !== "none")).toBe(true);
 });
 

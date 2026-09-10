@@ -3,7 +3,6 @@ import { html, type TemplateResult } from "lit";
 import { ref } from "lit/directives/ref.js";
 import "../form-input/sk-form-input.js";
 import type { SkFormInput } from "../form-input/sk-form-input.js";
-import "../button/sk-button.js";
 import "../card/sk-card.js";
 import "../pill-tag/sk-pill-tag.js";
 import {
@@ -28,7 +27,7 @@ export {
  *
  * DEPENDENCY POSTURE (spec.md's dependency-posture table, re-verified in research.md at
  * authoring time against `origin/train/elements-first@4d6c5f2`):
- *   - Story 2's Deny action composes a PLAIN `sk-button` secondary tone, marked `// pending
+ *   - Story 2's Deny action composes a PLAIN `.sk-button--secondary` tone, marked `// pending
  *     #320` below. #320's danger-secondary tone is not yet public; this is not a substitute —
  *     see the comment at the Deny button for why no local danger style is used instead (C-010).
  *   - Stories 3 and 4 compose no frame at all: `sk-boundary-page` (#303) does not exist
@@ -39,6 +38,24 @@ export {
  *   - Story 1 composes the CURRENT, unchanged `.sk-form-input`/`sk-form-field` contract; #321's
  *     contrast/target-size fix has not landed, so those specific acceptance clauses stay
  *     red-first (`// pending #321` in the test file) until IC-06 rebases onto it.
+ *
+ * WHY THE THREE FORM ACTIONS ARE NATIVE `<button>`, NOT `<sk-button>`. `sk-button.ts` hard-codes
+ * `type="button"` on its shadow-root control and says so in its own comment: "A `<button>`
+ * inside a shadow root does not submit an enclosing form ... so this element can never be a
+ * submit button." A story whose acceptance text calls for "a primary submit action" (Story 1)
+ * and native forms whose DOM order IS the focus order (Story 2) cannot satisfy that with an
+ * element that structurally cannot submit — so every form action here is
+ * `<button type="submit" class="sk-button sk-button--*">`, composing the PUBLIC styles-layer
+ * class directly rather than the element. This is still "public surfaces plus native semantic
+ * HTML" (C-004): `.sk-button` and its tone modifiers in `packages/styles/src/button/sk-button.css`
+ * are a public surface in their own right, not merely the element's internal implementation.
+ * `apps/storybook/.storybook/preview.ts` imports that stylesheet globally for exactly this case
+ * (see its own header comment on why only `scope:storybook` may reach both layers). The
+ * `<sk-form-input>` element stays as-is: it is the one composed surface here that is not a form
+ * action, and the pairing is deliberate — Story 1 exercises both consumption paths at once,
+ * which is the anti-drift property #321 exists to establish. See `docs/design-system/
+ * using-components.md`'s "CLI auth pattern" section for the consumer-facing statement of this
+ * limitation and its escape hatch (ADR-9 §4 / #74's `ElementInternals` work).
  */
 const patternStyles = html`<style>
   .sk-cli-auth-pattern {
@@ -89,10 +106,12 @@ const patternStyles = html`<style>
   }
 </style>`;
 
-/** Story 1 — code entry. One native `<form>`, one labelled `sk-form-input`, one `sk-button`
- *  primary. No submission/validation LOGIC is added (C-005) — `setCustomError` on the invalid
- *  variant supplies the fixture's own error text through the element's real public API rather
- *  than the native `required` message, which the element derives itself and no fixture owns. */
+/** Story 1 — code entry. One native `<form>`, one labelled `sk-form-input`, one native
+ *  `<button type="submit" class="sk-button sk-button--primary">` (see the file-level doc
+ *  comment for why the submit action is native rather than `<sk-button>`). No submission/
+ *  validation LOGIC is added (C-005) — `setCustomError` on the invalid variant supplies the
+ *  fixture's own error text through the element's real public API rather than the native
+ *  `required` message, which the element derives itself and no fixture owns. */
 const renderCodeEntry = (
   variant: "default" | "invalid",
   light = false,
@@ -124,21 +143,26 @@ const renderCodeEntry = (
         label=${fixture.label}
         description=${fixture.description}
       ></sk-form-input>
-      <sk-button variant="primary">${fixture.submitLabel}</sk-button>
+      <button type="submit" class="sk-button sk-button--primary">${fixture.submitLabel}</button>
     </form>
   </div>`;
 };
 
 /** Story 2 — review and decide. `sk-card` + `.sk-facts` (native `<dl>`) + `sk-pill-tag` per
- *  scope + one native `<form>` holding Approve and Deny, DOM order Approve-then-Deny.
+ *  scope + one native `<form>` holding Approve and Deny as native
+ *  `<button type="submit" class="sk-button sk-button--*">` (see the file-level doc comment for
+ *  why native, not `<sk-button>`), DOM order Approve-then-Deny.
  *
- *  DENY IS A PLAIN secondary `sk-button` below — the pending state, not the finished one.
- *  #320's danger-secondary tone is the honest public surface for this action and has not
+ *  DENY IS A PLAIN `.sk-button--secondary` class below — the pending state, not the finished
+ *  one. #320's danger-secondary tone is the honest public surface for this action and has not
  *  landed on train/elements-first at authoring time (research.md, verified via `grep -n danger
  *  packages/styles/src/button/sk-button.css`, no match). Do not fork it: no local
  *  `--sk-status-danger` restyle of `.sk-button--secondary`, no story-local danger class or
- *  component (C-010, the alternatives-rejected table in research.md). T010 swaps this variant
- *  for #320's actual landed tone once it lands and this lane rebases.
+ *  component (C-010, the alternatives-rejected table in research.md). T010 swaps this class for
+ *  #320's actual landed one once it lands and this lane rebases — the test file's pending
+ *  assertion targets `.sk-button--danger-secondary` as the class #320 is expected to publish
+ *  (the BEM-modifier sibling of `.sk-button--primary`/`--secondary`/`--ghost`); #320's own
+ *  mission owns the final name, and T010 corrects this if it ships differently.
  *  // pending #320 */
 const renderAuthorizationDecision = (light = false): TemplateResult => {
   const fixture = CLI_AUTH_FIXTURES.authorizationDecision;
@@ -163,10 +187,10 @@ const renderAuthorizationDecision = (light = false): TemplateResult => {
         )}
       </div>
       <form class="sk-cli-auth-pattern__decision-actions" novalidate>
-        <sk-button variant="primary">${fixture.approveLabel}</sk-button>
-        <!-- Deny stays a plain secondary tone: pending #320's danger-secondary sk-button
+        <button type="submit" class="sk-button sk-button--primary">${fixture.approveLabel}</button>
+        <!-- Deny stays a plain secondary class: pending #320's danger-secondary sk-button
              tone landing on train/elements-first. See the doc comment above this function. -->
-        <sk-button variant="secondary">${fixture.denyLabel}</sk-button>
+        <button type="submit" class="sk-button sk-button--secondary">${fixture.denyLabel}</button>
       </form>
     </sk-card>
   </div>`;
