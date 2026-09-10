@@ -275,12 +275,29 @@
   system-font geometry diffs. Neither surface has a mission-owned snapshot change; the pinned
   GitHub runner remains authoritative for both.
 - The current registry contains 254 mutations. The prior exact-head sweep passed 253/253 and the
-  new theme mutation arms have each produced their named red. On this rebase, repeated full sweeps
-  failed closed on unrelated nav-pill/app-shell dynamic-import transport errors while other
-  checkouts were running browser gates; Chromium renderer SIGSEGV coredumps align with those
-  timestamps, with no OOM or disk exhaustion. A clean retry of the harness self-tests passed
-  10/10. No #323 product or theme test failed. The debugger seat requires one isolated idle-host
-  full rerun before this gate may be recorded green; that rerun is pending.
+  new theme mutation arms have each produced their named red. Initial rebase sweeps failed closed
+  on unrelated nav-pill/app-shell transport errors during competing browser workloads; matching
+  Chromium renderer SIGSEGV coredumps had no OOM or disk-exhaustion signal. The required isolated
+  idle-host retry then completed 252/254: unchanged `sk-bar-chart` SC-006 and `sk-app-shell` SC-012
+  arms each hung for 180 seconds before producing a report; every other arm, including every #323
+  theme arm, produced its named red. Harness self-tests passed 10/10. The harness correctly fails
+  closed, so the exact-head mutation gate remains blocked pending the post-remediation sweep or
+  authoritative GitHub mutation job; shared diagnostics remain issue #238 scope.
+
+### Final pre-accept adversarial point-cut — pass 5
+
+- Four fresh read-only governed lenses reviewed exact clean HEAD
+  `c5337dd9f82e5f1467616f2563f0ac9b177b3794`. Architecture passed with zero High/Medium findings.
+  Accessibility rejected with one High: the genuine 200% Chrome capture visibly truncates the
+  composed eyebrow, title, supporting, and sync text while the test asserts only toggle geometry.
+- Runtime and semantic-compression lenses independently rejected the document-global lifecycle:
+  simultaneous System toggles retain separate listeners, so a sibling can overwrite a later manual
+  choice on an OS change. Runtime review also found invalid JavaScript `preference` assignments
+  bypass the attribute converter and can apply an invalid root theme. Semantic review found the
+  System media-query string duplicated and unasserted across the bootstrap and element adapters.
+- Disposition: fresh implementation seat, red-first coverage for all four product findings, fresh
+  genuine zoom evidence, complete focused/full gates, and a fresh exact-head independent review.
+  Detailed evidence is in `reviews/adversarial-review-pass-5.md`.
 
 ## Publication and merge
 

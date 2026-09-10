@@ -279,10 +279,25 @@ gates and explicitly retain local/CI-only limitations.
 - Local visual regression remained the documented host-font class (6 passed / 229 failed out of
   235) and diagram normalization reported eight analogous geometry diffs. No snapshot was updated,
   and #323 changes no tracked visual baseline; the GitHub jobs are authoritative.
-- The 254-arm mutation sweep failed closed on unrelated nav-pill/app-shell dynamic-import transport
-  errors during concurrent browser work from other isolated mission checkouts. Independent
-  `debugger-debbie` diagnosis found matching Chromium renderer SIGSEGV coredumps, no OOM/disk
-  exhaustion, no #323 source/config change to the runner, and prior issue #238 evidence for the
-  same class. The harness self-test passed 10/10 on a clean retry; the prior 253-arm exact-head
-  sweep and every new theme arm are green/red as required. One isolated idle-host full sweep is
-  still required before acceptance; no shared harness change is absorbed into #323.
+- The 254-arm mutation sweep initially failed closed on unrelated nav-pill/app-shell dynamic-import
+  transport errors during concurrent browser work from other isolated mission checkouts.
+  Independent `debugger-debbie` diagnosis found matching Chromium renderer SIGSEGV coredumps, no
+  OOM/disk exhaustion, no #323 source/config change to the runner, and prior issue #238 evidence
+  for the same class. The required isolated idle-host full retry then completed 252/254: unchanged
+  `sk-bar-chart` SC-006 and `sk-app-shell` SC-012 arms each hung for 180 seconds before producing a
+  report; every other arm, including every theme arm, produced its named red. The harness self-test
+  passed 10/10, but the exact-head mutation gate remains fail-closed until a post-remediation sweep
+  or authoritative GitHub mutation job passes. No shared harness change is absorbed into #323.
+
+### Final pre-accept adversarial point-cut — pass 5
+
+Four fresh governed read-only lenses reviewed exact clean HEAD
+`c5337dd9f82e5f1467616f2563f0ac9b177b3794`. `architect-alphonso` passed the resolver/bootstrap,
+SSR, package-boundary, generated-surface, Factory-scope, cleanup, and rebase-union architecture with
+zero High or Medium findings. `designer-dagmar` rejected one High because the committed genuine
+200% capture visibly loses compact page-header text and the browser assertion measures only toggle
+geometry. `debugger-debbie` and Randy Reducer rejected the independent per-instance System
+listeners, which let one live control overwrite a sibling's manual root preference after an OS
+change. The runtime lens also found invalid direct property assignment bypassing System fallback;
+the semantic lens found the exact System media query duplicated and unasserted across production
+adapters. All other scoped acceptance surfaces passed. See `reviews/adversarial-review-pass-5.md`.
