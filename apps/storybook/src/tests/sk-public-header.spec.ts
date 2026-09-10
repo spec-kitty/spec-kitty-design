@@ -717,6 +717,41 @@ test.describe('sk-public-header geometry, state, and resilience contract', () =>
     expect(await actionCue(ordinary)).toEqual(noAttributeCue);
   });
 
+  test('the action slot normalises a composed anchor and button to one row', async ({
+    page,
+  }) => {
+    // The mixed-controls fixture co-classes `sk-public-header__action` with `sk-button--ghost`
+    // on an <a> and `sk-button--secondary` on a <button>. Both control classes declare colour,
+    // background, border colour, font and text-decoration at the same (0,1,0) specificity this
+    // family used to use, so the winner was bundle order — and it differed BY ELEMENT TYPE,
+    // because only the anchor matched the `:link` rule. Two adjacent actions therefore rendered
+    // at different foregrounds in the fixture whose purpose is proving they compose as one row.
+    // These assertions pin the normalisation; they fail if the specificity scoping is removed.
+    const { header } = await openStory(page, 'mixed-controls');
+    const readSlot = (target: Locator) =>
+      target.evaluate((node) => {
+        const style = getComputedStyle(node);
+        return {
+          backgroundColor: style.backgroundColor,
+          color: style.color,
+          fontFamily: style.fontFamily,
+          fontWeight: style.fontWeight,
+          textDecorationLine: style.textDecorationLine,
+        };
+      });
+    const anchor = await readSlot(header.locator('a.sk-public-header__action'));
+    const button = await readSlot(
+      header.locator('button.sk-public-header__action'),
+    );
+    expect(anchor).toEqual(button);
+
+    // …and the shared value is the header's own inherited foreground, not either control's.
+    const inherited = await header.evaluate(
+      (node) => getComputedStyle(node).color,
+    );
+    expect(anchor.color).toBe(inherited);
+  });
+
   test('forced colours preserve the header boundary, current cue, and focus outline', async ({
     page,
     browserName,

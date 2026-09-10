@@ -870,16 +870,15 @@ receives the family's target-size floor.
 With zero actions, omit the `<nav>` instead of rendering an empty landmark.
 
 **The action slot normalises the controls placed in it, and that supersession is intentional.**
-`sk-public-header__action` sets `color: inherit` (including `:link`/`:visited`) and a hover
-underline so anchors, native buttons and composed controls read as one row rather than as three
-different affordances. Because `.sk-public-header__action:link` is more specific than a single
-control class, a composed `sk-button` variant's own colour — `sk-button--ghost`'s
-`--sk-fg-muted`, for instance — is deliberately overridden inside the header. For a
-`<button>` the two selectors tie on specificity, so **load the component sheets in the documented
-order** (tokens, then the control sheets, then `sk-public-header.css`) if you need the family's
-normalisation to win consistently across both element types. If you want a composed control to keep
-its own colour, give it your own class rather than removing `sk-public-header__action` — that class
-is what carries the target-size floor.
+The action slot sets `color: inherit`, a transparent background and border, the family font, and a
+hover underline, so anchors, native buttons and composed controls read as one row rather than as
+three different affordances. A composed `sk-button` variant's own colour — `sk-button--ghost`'s
+`--sk-fg-muted`, for instance — is deliberately overridden inside the header. Those six
+declarations are scoped as `.sk-public-header .sk-public-header__action`, one class more specific
+than a control class, so the normalisation wins **in any stylesheet order and for every element
+type**; you do not have to sequence your `@import`s to get a consistent row. If you want a composed
+control to keep its own colour, give it your own class rather than removing
+`sk-public-header__action` — that class is what carries the target-size floor.
 
 **A composed custom element must size its own interior.** `sk-public-header__action` constrains the
 *host box* only; it cannot reach through a shadow root. A document-tree declaration does beat a

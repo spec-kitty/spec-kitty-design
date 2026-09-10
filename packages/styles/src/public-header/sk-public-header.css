@@ -78,19 +78,32 @@
   min-inline-size: var(--sk-space-9);
   max-inline-size: 100%;
   min-block-size: var(--sk-space-9);
+  border-block-end-style: solid;
+  border-block-end-width: var(--sk-border-width-1);
+  overflow-wrap: anywhere;
+}
+
+/* COMPOSITION NORMALISATION, deliberately one class more specific than the rule above.
+   These six properties are the ones a composed control also declares — `.sk-button`,
+   `.sk-button--ghost` and `.sk-button--secondary` each set colour, background, border colour,
+   font and text-decoration at (0,1,0). At (0,1,0) this family tied with them and the winner was
+   whichever stylesheet the consumer's bundler happened to place last, which is not a contract.
+   Worse, it resolved INCONSISTENTLY within one row: an <a> was rescued by the :link rule below
+   while an adjacent <button> was not, so the two rendered at different foregrounds in the very
+   fixture that exists to prove mixed controls compose as one row.
+   Scoping to the block class makes the slot's normalisation win by specificity, in any bundle
+   order, for every element type — without this sheet naming `.sk-button`, which C-007 forbids. */
+.sk-public-header .sk-public-header__action {
   color: inherit;
   background: transparent;
   border-block-end-color: transparent;
-  border-block-end-style: solid;
-  border-block-end-width: var(--sk-border-width-1);
   font-family: var(--sk-font-sans);
   font-weight: var(--sk-weight-normal);
-  overflow-wrap: anywhere;
   text-decoration: none;
 }
 
-.sk-public-header__action:link,
-.sk-public-header__action:visited {
+.sk-public-header .sk-public-header__action:link,
+.sk-public-header .sk-public-header__action:visited {
   color: inherit;
 }
 
