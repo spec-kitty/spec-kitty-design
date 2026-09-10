@@ -274,44 +274,72 @@
   }
 
   /*
-   * T002 — measured, not assumed: `.sk-progress--indeterminate`'s own rules
-   * above have higher selector specificity (two classes) than the unscoped
-   * override immediately above (one class), so without this block the
-   * indeterminate fill's gradient `background-image` (and, on the host
-   * layer, its `background-color: var(--sk-surface-input)`) would keep
-   * winning the cascade even under forced-colors, leaking an unstyled fill.
-   * This block matches that higher specificity on BOTH surfaces — the host
-   * (the layer Chromium actually renders for indeterminate, per the measured
-   * note above) and the pseudo-elements (Firefox) — flattens each to a solid
-   * `Highlight` fill, and explicitly clears the gradient so the animation
-   * (left running, harmlessly — `background-position` has nothing left to
-   * move) has nothing to sweep. The result is legible identically at every
-   * point in the animation cycle, verified by sampling more than one (see
-   * apps/storybook/src/tests/sk-progress.spec.ts). Because the host is now
-   * the fill's own paint surface, its `Highlight` background necessarily
-   * matches the fill's colour rather than contrasting with it the way the
-   * determinate track's auto-flattened `Canvas` background does — the
-   * track's `border` remains the boundary signal in that case, exactly as
-   * the existing forced-colors test for this family already checks (border
-   * vs. page background, not track-fill-vs-track-background), so this is a
-   * deliberate, documented trade-off of the two-surface technique above, not
-   * an oversight. Three separate rules, per the measured grouped-selector-
-   * list hazard documented at the indeterminate rule above (NOT combined the
-   * way the unscoped determinate override two rules up is — that one is
-   * #210's and out of this WP's authorised scope to alter).
+   * #345 — MEASURED, NOT ASSUMED: flattening the indeterminate fill to a
+   * solid, full-width `Highlight` block (the original shape of this rule)
+   * made it pixel-identical to the determinate `Complete` fixture once #328's
+   * selector-list fix above lets the determinate `::-webkit-progress-value`
+   * pseudo actually receive its own `Highlight` override — both fixtures then
+   * render as a single, full-width, uniformly-`Highlight`-coloured bar with
+   * no motion, a false completion claim (spec.md User Story 3 calls this "a
+   * correctness defect, not a cosmetic one"). Confirmed by rendering both
+   * under `forced-colors: active` and sampling: identical centre/left pixels.
+   *
+   * The obvious fix — a two-stop `linear-gradient(Highlight, Canvas)` doing
+   * the width-split via `background-image` — was tried and MEASURED to fail:
+   * the CSS Color Adjustment spec requires UAs to ignore any author
+   * `background-image` under forced-colors unless `forced-color-adjust: none`
+   * is set (which would also let the non-system sweep gradient's colours
+   * back in, defeating the point), and an isolated probe confirmed Chromium
+   * does exactly this — the gradient never painted, leaving only the
+   * `background-color: Canvas` fallback, making the fixture pixel-identical
+   * to `Zero` instead. `background-image` is therefore off the table for
+   * this fix, forced-colors-wide, not just here.
+   *
+   * The fix that DOES survive (confirmed by the same probe): `clip-path` is
+   * pure geometry, not colour, so forced-colors never touches it. Clipping
+   * the fill to its own left half — solid `Highlight`, no image — is
+   * non-full-width (so it can never read as "done") and, combined with
+   * `animation-name: none`, non-motion (rather than "left running,
+   * harmlessly" as the original comment claimed a gradient would be — with
+   * no gradient at all now, there is nothing left to leave running). The
+   * clip stops at 45% rather than exactly 50% so the sampling test's centre
+   * point (~50%) lands unambiguously on the Canvas side rather than on the
+   * clip edge itself. This mirrors the existing `prefers-reduced-motion`
+   * frame below — a partial, static cue that is deliberately neither the
+   * `Complete` fixture's fully-full fill nor the `Zero` fixture's fully-empty
+   * track — and, like that frame, is exercised by an assertion (see
+   * apps/storybook/src/tests/sk-progress.spec.ts) rather than assumed
+   * correct from the CSS alone. `.sk-progress--indeterminate`'s own rules
+   * retain the cascade priority explained below (two classes beat the
+   * one-class #328 override above), so this still needs restating on BOTH
+   * surfaces — the host (the layer Chromium actually renders for
+   * indeterminate, per the measured note above) and the pseudo-elements
+   * (Firefox) — and the `forced-colors` + `prefers-reduced-motion`
+   * combination is covered for free: this block runs regardless of the
+   * reduced-motion preference, so it already produces the same static,
+   * partial frame under both. Three separate rules, per the measured
+   * grouped-selector-list hazard documented at the indeterminate rule above
+   * (NOT combined the way the unscoped determinate override two rules up is
+   * — that one is #210's and out of this WP's authorised scope to alter).
    */
   .sk-progress--indeterminate .sk-progress__bar {
     background-color: Highlight;
     background-image: none;
+    animation-name: none;
+    clip-path: inset(0 55% 0 0);
   }
 
   .sk-progress--indeterminate .sk-progress__bar::-webkit-progress-value {
     background-color: Highlight;
     background-image: none;
+    animation-name: none;
+    clip-path: inset(0 55% 0 0);
   }
 
   .sk-progress--indeterminate .sk-progress__bar::-moz-progress-bar {
     background-color: Highlight;
     background-image: none;
+    animation-name: none;
+    clip-path: inset(0 55% 0 0);
   }
 }

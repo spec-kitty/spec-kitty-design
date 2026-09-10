@@ -52,6 +52,11 @@ const pixelsEqual = (a: number[], b: number[], tolerance = 2) =>
 const samplesEqual = (a: Pixels, b: Pixels, tolerance = 2) =>
   pixelsEqual(a.left, b.left, tolerance) && pixelsEqual(a.center, b.center, tolerance) && pixelsEqual(a.right, b.right, tolerance);
 
+/** `getComputedStyle(...).borderColor` / `.backgroundColor` come back as `rgb(r, g, b)` or
+ * `rgba(r, g, b, a)` strings; extract the numeric components for a pixel-tolerance compare
+ * against a canvas-sampled RGBA array via `pixelsEqual`. */
+const parseRgb = (s: string) => (s.match(/\d+/g) ?? []).map(Number);
+
 /**
  * Every exported fixture constant from the GENERATED barrel, parsed the same way the
  * generator itself produced them (`JSON.stringify`-escaped one-liners) — a static
@@ -312,11 +317,28 @@ test.describe('sk-progress overflow, forced-colors, and reduced-motion observabl
     expect(colours.borderColor).not.toBe(colours.backgroundColor);
   });
 
-  test('Indeterminate forced-colors: the fill is legible against the page at two distinct points in the animation cycle', async ({ page }) => {
+  test('Indeterminate forced-colors: the fill is legible against the page, non-full-width, and non-animating, at two distinct points in the animation cycle', async ({ page }) => {
     // R-06: the existing forced-colors precedent was proven for a static fill only;
     // an animated fill needs sampling at more than one point in its cycle so a
     // coincidentally-correct single frame cannot produce a false pass.
+    //
+    // #345 — MEASURED: this rule used to flatten the fill to a solid, full-width Highlight
+    // block. Once #328's selector-list fix (above) lets the determinate Complete fixture's own
+    // fill receive the identical Highlight override, that shape renders pixel-identical to
+    // Complete — a false completion claim under forced-colors (spec.md User Story 3). Confirmed
+    // by rendering both under forced-colors and sampling before the fix landed. Fixed via
+    // `clip-path` (a `linear-gradient` two-stop split was tried first and MEASURED to fail: the
+    // CSS Color Adjustment spec requires UAs to drop author `background-image` under
+    // forced-colors, confirmed by an isolated probe — `clip-path` is pure geometry, so it
+    // survives). This test asserts the fixed shape directly against both Complete and Zero, not
+    // merely against the page background.
     await page.emulateMedia({ forcedColors: 'active' });
+
+    const complete = await story(page, 'complete');
+    const completeSample = await samplePixels(page, await complete.locator('progress').screenshot());
+    const zero = await story(page, 'zero');
+    const zeroSample = await samplePixels(page, await zero.locator('progress').screenshot());
+
     const host = await story(page, 'indeterminate-forced-colors');
     const bar = host.locator('progress');
 
@@ -329,17 +351,45 @@ test.describe('sk-progress overflow, forced-colors, and reduced-motion observabl
     await page.waitForTimeout(300);
     const sample2 = await samplePixels(page, await bar.screenshot());
 
-    const parseRgb = (s: string) => (s.match(/\d+/g) ?? []).map(Number);
     const bodyRgb = parseRgb(bodyBackground);
-    // The fill is distinguishable from the page background at EVERY sampled point —
-    // not just coincidentally at one.
+
+    // The fill's clipped region is the left portion of the track (see sk-progress.css's #345
+    // comment) — sample there. Legible against the page at EVERY sampled point, not just
+    // coincidentally at one.
     for (const sample of [sample1, sample2]) {
-      expect(pixelsEqual(sample.center.slice(0, 3), bodyRgb, 10)).toBe(false);
+      expect(pixelsEqual(sample.left.slice(0, 3), bodyRgb, 10)).toBe(false);
     }
-    // T002's measured design: forced-colors flattens the sweep to a solid legible
-    // fill (no gradient), so the two samples are identical — this IS the expected,
-    // deliberate shape (see sk-progress.css's forced-colors comment), not a bug.
+
+    // Non-motion: the clip and colour are both static now — there is no gradient left to sweep
+    // — so the two samples are identical. This IS the expected, deliberate shape (see
+    // sk-progress.css's #345 comment), not a bug.
     expect(samplesEqual(sample1, sample2)).toBe(true);
+
+    // Non-full-width: distinguishable from Complete's fully-full, edge-to-edge fill (its right
+    // edge, outside this fixture's clip, must differ from Complete's) and from Zero's
+    // fully-empty track (its left edge, inside the clip, must differ from Zero's) — neither the
+    // Complete nor the Zero visual, mirroring the reduced-motion frame's own technique below.
+    // And its own left/right samples must differ from each other — proving partial geometry
+    // rather than a uniform block.
+    expect(pixelsEqual(sample1.right.slice(0, 3), completeSample.right.slice(0, 3), 10)).toBe(false);
+    expect(pixelsEqual(sample1.left.slice(0, 3), zeroSample.left.slice(0, 3), 10)).toBe(false);
+    expect(pixelsEqual(sample1.left.slice(0, 3), sample1.right.slice(0, 3), 10)).toBe(false);
+  });
+
+  test('Indeterminate forced-colors AND prefers-reduced-motion together: the same non-full-width, non-animating fill — a common Windows High Contrast pairing neither axis alone tests', async ({ page }) => {
+    await page.emulateMedia({ forcedColors: 'active', reducedMotion: 'reduce' });
+    const host = await story(page, 'indeterminate-forced-colors');
+    const bar = host.locator('progress');
+
+    const sample1 = await samplePixels(page, await bar.screenshot());
+    await page.waitForTimeout(300);
+    const sample2 = await samplePixels(page, await bar.screenshot());
+
+    // Non-motion under the combination (forced-colors alone already guarantees this; asserted
+    // directly for the combined case rather than assumed from each axis independently).
+    expect(samplesEqual(sample1, sample2)).toBe(true);
+    // Non-full-width under the combination.
+    expect(pixelsEqual(sample1.left.slice(0, 3), sample1.right.slice(0, 3), 10)).toBe(false);
   });
 
   test('Indeterminate: the authored sweep animation actually runs (two captures over time differ) with no reduced-motion preference set', async ({ page }) => {
