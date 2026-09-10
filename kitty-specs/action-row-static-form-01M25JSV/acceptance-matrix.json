@@ -108,10 +108,10 @@
       "criterion_id": "FR-011",
       "description": "Verify FR-011 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
+      "evidence": "fixtures/elements-behaviour/src/sk-action-row.test.ts:1087 test [T006][FR-011] 'aria-current is present with the correct value when current, and entirely absent \u2014 never false \u2014 when not' \u2014 passing",
+      "pass_fail": "pass",
       "verified_by": null,
-      "verified_at": null,
+      "verified_at": "2026-09-10T14:07:16.032958+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
