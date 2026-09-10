@@ -66,6 +66,25 @@ const measuredTheme = async (page: Page, root: Locator) => {
   return state;
 };
 
+const axeIsClean = async (page: Page, storyId: StoryId): Promise<void> => {
+  await injectAxe(page);
+  let violations: Awaited<ReturnType<typeof getViolations>> | undefined;
+  for (let attempt = 0; attempt < 10; attempt += 1) {
+    try {
+      violations = await getViolations(page, 'body', {
+        runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa'] },
+      });
+      break;
+    } catch (error) {
+      const concurrentAxe =
+        error instanceof Error && error.message.includes('Axe is already running');
+      if (!concurrentAxe || attempt === 9) throw error;
+      await page.waitForTimeout(100);
+    }
+  }
+  expect(violations, `${storyId} must have zero WCAG 2.1 AA violations`).toEqual([]);
+};
+
 test('Default and LightMode apply distinct root palettes with AA page contrast', async ({ page }) => {
   const dark = await measuredTheme(page, await openStory(page, 'default'));
   expect(dark.rootTheme).toBe('dark');
@@ -235,10 +254,6 @@ test('the composed Default, LightMode, System, and forced-colors stories are axe
     if (story === 'system-light') await page.emulateMedia({ colorScheme: 'light' });
     if (story === 'forced-colors') await page.emulateMedia({ forcedColors: 'active' });
     await openStory(page, story);
-    await injectAxe(page);
-    const violations = await getViolations(page, 'body', {
-      runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa'] },
-    });
-    expect(violations, `${story} must have zero WCAG 2.1 AA violations`).toEqual([]);
+    await axeIsClean(page, story);
   }
 });
