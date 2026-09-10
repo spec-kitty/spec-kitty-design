@@ -4,9 +4,10 @@
 - **Origin flow:** `specify`
 - **Slot key:** `specify.styles.static-twin`
 - **Input key:** `static_twin_disposition`
-- **Status:** `deferred`
+- **Status:** `resolved`
 - **Created:** `2026-09-09T23:46:25.061387+00:00`
-- **Resolved:** `2026-09-09T23:46:30.038845+00:00`
+- **Resolved:** `2026-09-10T09:46:40.163839+00:00`
+- **Resolved by:** `claude`
 - **Opened by:** `cli`
 - **Other answer:** `false`
 
@@ -21,13 +22,13 @@ Should sk-confirm-dialog's stylesheet ship a generated static twin for a consume
 
 ## Final answer
 
-_(none)_
+No, defer to #301 ruling
 
 ## Rationale
 
-Issue #308 explicitly instructs: 'if that needs a static twin, follow #301's ruling rather than inventing one here.' #301 (the static-form-of-element-backed-CSS decision) is open and unresolved as of this spec. This mission specifies the stylesheet and element fully and names the static-twin question as a named decision point deferred to #301, per operator/epic #300 instruction. No static form is invented in this mission.
+This mission's own FR-016 scope question — whether to invent a static twin now — is resolved: no, it does not. The stylesheet ships fully authorable; whether a generated static HTML twin is additionally needed remains open issue #301's ruling to make, not this mission's. Nothing in #308 or epic #300 requires this mission to wait for #301 before shipping sk-confirm-dialog itself.
 
 ## Change log
 
 - `2026-09-09T23:46:25.061387+00:00` — opened
-- `2026-09-09T23:46:30.038845+00:00` — deferred
+- `2026-09-10T09:46:40.163839+00:00` — resolved (final_answer="No, defer to #301 ruling")
