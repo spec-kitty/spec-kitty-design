@@ -47,11 +47,11 @@
     {
       "criterion_id": "FR-005",
       "description": "Verify FR-005 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "proof_type": "document_inspection",
+      "evidence": "ADR-15 'Relationship to #239, which this record does not decide' \u2014 states the relationship, selects no mechanism for #239.",
+      "pass_fail": "pass",
+      "verified_by": "architect-alphonso",
+      "verified_at": "2026-09-10T01:07:25.500591+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
