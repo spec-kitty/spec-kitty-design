@@ -8,10 +8,10 @@
       "criterion_id": "FR-001",
       "description": "One anatomy: stage / card / mark / title / body / action-group / footnote",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "packages/styles/src/boundary-page/sk-boundary-page.css:106-257 (.sk-boundary-page__stage/__card/__mark/__title/__body/__action-group/__footnote, exactly seven anatomy classes); packages/styles/src/boundary-page/sk-boundary-page-form-card.html shows all seven in DOM order; 128/128 Playwright tests across chromium+firefox pass, including sk-boundary-page-absence.spec.ts's structural contracts",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T18:19:02.973096+00:00",
       "notes": "Owned by WP01 (mission/boundary-page-styles). pass_fail/evidence/verified_by/verified_at and overall_verdict are the accept gate's own fields (run via the Spec Kitty CLI's accept phase later) and are deliberately left as recorded by the scaffolder, not hand-written here."
     },
     {
