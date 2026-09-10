@@ -2424,3 +2424,40 @@ test('SK-boundary-page HTML narrow 320 — visual baseline', async ({ page }) =>
     maxDiffPixelRatio: 0.02,
   });
 });
+
+// #320 (WP01) — the danger-secondary axis. FR-019 asks for these baselined explicitly, not
+// inferred from the axe pass above: axe proves no WCAG violation, not that the tone's rest
+// state/border-width and its light-mode repaint are the pixels this repo intends to ship.
+// Clipped to the single <sk-button> host, matching this file's own convention (see the header
+// comment) — the box-size assertion still applies (forced-colors' 1px growth at default/`--sm`
+// sizes is a DIFFERENT, Playwright-emulation-driven claim already covered by the comparative
+// case in elements-load.spec.ts; forced-colors is deliberately NOT re-asserted here as a third
+// pixel baseline).
+const dangerSecondaryButtonHost = (page: Page) =>
+  page.locator('sk-button[variant="danger-secondary"]').first();
+
+test('SK-button danger-secondary dark default — visual baseline', async ({ page }) => {
+  await page.goto('/iframe.html?id=elements-skbutton--danger-secondary&viewMode=story');
+  const host = dangerSecondaryButtonHost(page);
+  await host.waitFor({ state: 'visible', timeout: 20000 });
+  await expect(host.locator('button')).toBeVisible();
+  await expect(host).toHaveScreenshot('sk-button-danger-secondary-dark.png', {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+  });
+});
+
+test('SK-button danger-secondary light mode — visual baseline', async ({ page }) => {
+  // Reuses the combined LightMode story (all tones together, matching every other tone's own
+  // convention for this story) and clips to just the danger-secondary host — the same
+  // scoped-locator-inside-a-shared-story pattern SK-section-header and SK-status-indicator use
+  // above, rather than a bespoke single-tone LightMode story.
+  await page.goto('/iframe.html?id=elements-skbutton--light-mode&viewMode=story');
+  const host = dangerSecondaryButtonHost(page);
+  await host.waitFor({ state: 'visible', timeout: 20000 });
+  await expect(host.locator('button')).toBeVisible();
+  await expect(host).toHaveScreenshot('sk-button-danger-secondary-light.png', {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+  });
+});
