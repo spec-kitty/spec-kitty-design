@@ -119,6 +119,18 @@
       "title": "<fill at WP-implementation time>",
       "verdict": "deferred-with-followup",
       "wp": null
+    },
+    "#79": {
+      "evidence_ref": "https://github.com/spec-kitty/spec-kitty-design/issues/79 \u2014 prior primitives batch (eyebrow-as-shape modelling, on-tint contrast fix for the four brand variants); this mission builds its status axis on that already-landed base",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "verified-already-fixed",
+      "wp": null
     }
   },
   "schema_version": 1
