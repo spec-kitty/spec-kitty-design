@@ -61,7 +61,7 @@
       "wp": "WP01"
     },
     "#319": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "This mission is GAP-F5-02 of epic #319's Family 5 component-gap audit; WP01 delivers this gap's slice. Epic #319 remains open across its other gaps (e.g. GAP-F5-01/#320) -- not closed by this mission alone",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -69,8 +69,8 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "verdict": "in-mission",
+      "wp": "WP01"
     },
     "#320": {
       "evidence_ref": "<link or commit>",
