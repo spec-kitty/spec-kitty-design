@@ -177,11 +177,11 @@
     {
       "criterion_id": "FR-018",
       "description": "Verify FR-018 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "proof_type": "manual_verification",
+      "evidence": "git diff 4d6c5f2..07228ee -- expected-parts.json expected-docs.json mutations.json behaviours.json: empty output (no changes). node scripts/check-part-ratchet.mjs: '140 declared part(s), all recorded in expected-parts.json.'",
+      "pass_fail": "pass",
+      "verified_by": "reviewer-renata",
+      "verified_at": "2026-09-10T15:46:31.601306+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
