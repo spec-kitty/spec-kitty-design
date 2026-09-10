@@ -37,7 +37,7 @@
       "wp": "WP01"
     },
     "#303": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "spec.md prose cross-reference only: #303 is the named downstream consumer of this WP's public surface (size scale, border modifier, image-axis instruction) in a later Wave C mission; it composes on #304's contract but is out of #304's own scope.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -45,8 +45,8 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
     },
     "#304": {
       "evidence_ref": "<link or commit>",
