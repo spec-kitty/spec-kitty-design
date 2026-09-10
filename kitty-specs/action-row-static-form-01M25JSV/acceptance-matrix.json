@@ -198,10 +198,10 @@
       "criterion_id": "FR-020",
       "description": "Verify FR-020 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
+      "evidence": "node scripts/build-element-markup.mjs --check exit 0, '\u2705 Generated markup is up to date (11 component(s))' (2026-09-10); packages/styles/src/action-row/sk-action-row.html and index.ts are generated outputs of that script from sk-action-row.markup.ts per ADR-10 \u00a73, git diff --exit-code confirms zero drift",
+      "pass_fail": "pass",
       "verified_by": null,
-      "verified_at": null,
+      "verified_at": "2026-09-10T14:07:25.640528+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
