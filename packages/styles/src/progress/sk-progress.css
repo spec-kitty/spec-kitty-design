@@ -255,7 +255,20 @@
  * non-vacuous guard this mission adds.
  */
 @media (forced-colors: active) {
-  .sk-progress__bar::-webkit-progress-value,
+  /*
+   * #328 — measured, not assumed: a comma-separated selector list mixing a
+   * `::-webkit-*` pseudo with an unrecognised (to Chromium) `::-moz-*` pseudo
+   * is dropped WHOLESALE by Chromium, per the T002 finding documented at the
+   * indeterminate rule below — so the combined list this rule used to be
+   * silently applied NEITHER declaration in Chromium, leaving the determinate
+   * fill's `::-webkit-progress-value` pseudo with no forced-colors override at
+   * all. Split into two separate rules, matching the convention the
+   * indeterminate rules below already follow for the same reason.
+   */
+  .sk-progress__bar::-webkit-progress-value {
+    background-color: Highlight;
+  }
+
   .sk-progress__bar::-moz-progress-bar {
     background-color: Highlight;
   }
