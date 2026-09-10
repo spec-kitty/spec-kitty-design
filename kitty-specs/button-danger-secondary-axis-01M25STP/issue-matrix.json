@@ -24,6 +24,18 @@
       "verdict": "deferred-with-followup",
       "wp": "WP01"
     },
+    "#218": {
+      "evidence_ref": "Historical reference only, inside sk-button.css's forced-colors comment: #218 previously deleted a no-op border-inline-start-color rule from sk-card.css. Not touched, reopened, or acted on by this WP; cited for precedent only.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
+    },
     "#286": {
       "evidence_ref": "FR-010/FR-017: no-copy-default targeted assertion authored in fixtures/elements-behaviour/src/sk-button.test.ts ('danger-secondary has no new copy default anywhere in source'), independently confirmed passing (npm run test, 617/617).",
       "fr": null,
