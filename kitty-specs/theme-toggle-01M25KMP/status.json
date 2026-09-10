@@ -38,7 +38,8 @@
         "Remediate adversarial pass 1 cleanup-ownership finding",
         "Adversarial cleanup-ownership remediation complete; focused red/green and typechecks passed",
         "Adversarial architecture pass 2 rejected exact HEAD 5f5a800e for order-dependent global theme story cleanup.",
-        "Fresh Codex remediation turn for adversarial review cycle 4."
+        "Fresh Codex remediation turn for adversarial review cycle 4.",
+        "Cycle-4 remediation complete at 8d21f62b; full npm test 665/665 and focused overlap tests 2/2."
       ],
       "provider": "__resolved_provider_absent__",
       "review": null,
