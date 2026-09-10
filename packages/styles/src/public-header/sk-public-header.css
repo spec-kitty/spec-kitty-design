@@ -157,15 +157,17 @@
   font-weight: var(--sk-weight-semibold);
 }
 
+/* NO `ButtonText` DECLARATIONS HERE, and their absence is measured rather than assumed.
+   An earlier revision set `border-block-end-color: ButtonText` on the band and
+   `border-inline-start-color: ButtonText` on the brand divider. A probe added to
+   `sk-public-header.spec.ts` resolved both `ButtonText` and `CanvasText` to rgb(0,0,0) under
+   Chromium's forced-colors emulation, so the UA's own remap — which recolours a border with zero
+   author CSS — already produced the identical result. `sk-card.css:202-211` records the #218
+   ruling for exactly this shape: a block that restates what the UA computes anyway reads as the
+   mechanism while doing none of the work, and the next author widens it believing the edge
+   depends on it. `Highlight` stays because it IS a different colour and therefore does real
+   work; the spec asserts that difference so a future palette collapse turns this red. */
 @media (forced-colors: active) {
-  .sk-public-header {
-    border-block-end-color: ButtonText;
-  }
-
-  .sk-public-header__brand-context {
-    border-inline-start-color: ButtonText;
-  }
-
   /* MUST match the scoping of the rule it overrides. A media query adds no specificity, so once
      the base current-route rule became (0,4,0) an unscoped (0,3,0) override here would have lost
      and the current cue would have kept `--sk-color-accent` under forced colours instead of

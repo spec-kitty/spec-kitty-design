@@ -756,11 +756,20 @@ test.describe('sk-public-header geometry, state, and resilience contract', () =>
     // HOVER TOO. `.sk-button--ghost:hover { color }` is itself two classes, so before the state
     // selectors were scoped this comparison held at rest and broke on pointer-over — and broke
     // asymmetrically, since only the <a> matches the `:link` rule that rescued it.
+    // Hover BOTH and compare hovered-to-hovered. An earlier revision compared the hovered button
+    // against the resting anchor and failed on `textDecorationLine`, which was the test being
+    // wrong rather than the sheet: the family's own `:hover` rule adds the underline deliberately,
+    // to both element types. What must not diverge is the pair under the same state.
     await header.locator('button.sk-public-header__action').hover();
+    const hoveredButton = await readSlot(
+      header.locator('button.sk-public-header__action'),
+    );
+    await header.locator('a.sk-public-header__action').hover();
+    const hoveredAnchor = await readSlot(header.locator('a.sk-public-header__action'));
     expect(
-      await readSlot(header.locator('button.sk-public-header__action')),
-      'a hovered composed button does not diverge from its anchor sibling',
-    ).toEqual(anchor);
+      hoveredButton,
+      'a hovered composed button does not diverge from a hovered anchor sibling',
+    ).toEqual(hoveredAnchor);
   });
 
   test('the action slot normalises BARE controls, where UA defaults differ', async ({ page }) => {
@@ -868,18 +877,23 @@ test.describe('sk-public-header geometry, state, and resilience contract', () =>
       };
     });
 
-    // #218's question, asked rather than assumed: if these resolve identically then the block's
-    // two `ButtonText` declarations restate what the UA computes anyway and must be DELETED
-    // rather than kept, because a block that reads as the mechanism while doing none of the work
-    // is worse than no block. This assertion makes that fact visible instead of presumed.
+    // #218's question was ASKED here rather than assumed, and CI answered it: `ButtonText` and
+    // `CanvasText` both resolve to rgb(0,0,0) under Chromium's emulation, so the two boundary
+    // declarations this block used to carry restated what the UA computes anyway. Per the ruling
+    // recorded in `sk-card.css`, they were DELETED rather than kept — a block that reads as the
+    // mechanism while doing none of the work is worse than no block. What remains is `Highlight`,
+    // which is a different colour and therefore does real work; this precondition proves that
+    // rather than presuming it, and turns red if a future palette collapses the two.
     expect(
-      system.buttonText,
-      '#218: ButtonText must differ from CanvasText, or the boundary declarations are no-ops',
+      system.highlight,
+      'Highlight must differ from CanvasText, or the current-cue declaration is a no-op too',
     ).not.toBe(system.canvasText);
 
     const forcedCurrentColour = await borderBlockEndColour(current);
-    expect(boundary.borderColor, 'header band uses ButtonText').toBe(system.buttonText);
     expect(forcedCurrentColour, 'current cue uses Highlight').toBe(system.highlight);
+    // The band itself needs no declaration: the UA remaps a border colour with zero author CSS.
+    // Asserted so the deletion is evidenced, not merely assumed.
+    expect(boundary.borderStyle, 'band survives on the UA remap alone').not.toBe('none');
     expect(plainCurrentColour).not.toBe(plainOrdinaryColour);
 
     await page.evaluate(() =>
