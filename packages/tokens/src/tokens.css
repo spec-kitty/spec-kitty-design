@@ -201,8 +201,11 @@
      non-text obligation to a token that moves for an unrelated text-contrast (4.5:1) reason,
      and check-token-breaking-changes.sh computes no contrast, so nothing would catch a future
      silent regression of that coupling. Measured (relative-luminance formula, both themes,
-     three surfaces): dark #81818B — page 5.01:1, card 4.51:1, input 4.28:1; light #7A7A6E —
-     page 3.98:1, card 4.34:1, input 3.85:1. Mechanically enforced by
+     five surfaces — page/card/input/muted/pill): dark #81818B — page 5.01:1, card 4.51:1,
+     input 4.28:1, muted 3.64:1, pill 3.86:1; light #7A7A6E — page 3.98:1, card 4.34:1,
+     input 3.85:1, muted 3.35:1, pill 3.51:1. Tightest of the ten (theme x surface) pairs is
+     light vs muted at 3.35:1 — 0.35 of headroom above the 3:1 floor, the margin a future
+     nudge of this hex must not spend. Mechanically enforced by
      tests/node/form-input-border-control-contrast.test.ts. */
   --sk-border-control:      #81818B;
   --sk-border-width-1:      1px;
@@ -414,7 +417,7 @@
   --sk-border-strong:       #D6CFB9;   /* card border / divider */
   /* Non-text control boundary, light theme — independent literal, not an alias. See the
      :root declaration's comment for the full decoupling rationale. #7A7A6E — page 3.98:1,
-     card 4.34:1, input 3.85:1 (tightest margin of the six pairs). */
+     card 4.34:1, input 3.85:1, muted 3.35:1 (tightest of all ten pairs), pill 3.51:1. */
   --sk-border-control:      #7A7A6E;
 
   /* Light-mode link accent flips to sage — sage-DEEP, and the shade is load-bearing.

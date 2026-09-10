@@ -13,7 +13,7 @@
  * composition renders `.sk-input` on `--sk-surface-muted` (the filters bar's own background,
  * packages/elements/src/patterns/work-explorer.stories.ts's `.sk-work-explorer-pattern__filters`
  * rule), which the original three-surface scope left unguarded — light-theme muted measures
- * 3.35:1, the tightest of all eight (theme x surface) pairs, below the previously-reported
+ * 3.35:1, the tightest of all ten (theme x surface) pairs, below the previously-reported
  * tightest of 3.85:1 (light vs input). `--sk-surface-pill` is included alongside it as the
  * remaining themed surface in the same family (nav pill rail, chips, hover row) that a form
  * control could plausibly sit on in a future composition.
