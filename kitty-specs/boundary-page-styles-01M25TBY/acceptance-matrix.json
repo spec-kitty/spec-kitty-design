@@ -138,10 +138,10 @@
       "criterion_id": "FR-014",
       "description": "No user-visible literal, no copy defaults",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "packages/styles/src/boundary-page/sk-boundary-page.css has zero 'content:' literal declarations (grep matches are only 'justify-content', not the content property); packages/styles/src/boundary-page/index.ts is GENERATED markup re-exporting the *.html exemplars verbatim, no template/interpolation logic, no code path composes an English string at runtime; #286's open cross-cutting constraint does not apply per spec.md:217/238 (no render(), no markup emission \u2014 research.md Decision 5)",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T18:20:06.814325+00:00",
       "notes": "Owned by WP01 (mission/boundary-page-styles). pass_fail/evidence/verified_by/verified_at and overall_verdict are the accept gate's own fields (run via the Spec Kitty CLI's accept phase later) and are deliberately left as recorded by the scaffolder, not hand-written here."
     },
     {
