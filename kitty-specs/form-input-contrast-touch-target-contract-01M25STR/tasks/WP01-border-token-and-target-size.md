@@ -1,0 +1,461 @@
+---
+work_package_id: WP01
+title: New --sk-border-control token, both consumption paths, and the anti-drift/rendered proof
+dependencies: []
+requirement_refs:
+- FR-001
+- FR-002
+- FR-003
+- FR-004
+- FR-005
+- FR-006
+- FR-007
+- FR-008
+- FR-009
+- FR-010
+- FR-011
+planning_base_branch: mission/form-input-contrast-touch-target-contract
+merge_target_branch: mission/form-input-contrast-touch-target-contract
+branch_strategy: Planning artifacts for this mission were generated on mission/form-input-contrast-touch-target-contract. During /spec-kitty.implement this WP may branch from a dependency-specific base, but completed changes must merge back into mission/form-input-contrast-touch-target-contract unless the human explicitly redirects the landing branch.
+subtasks:
+- T001
+- T002
+- T003
+- T004
+- T005
+- T006
+- T007
+- T008
+- T009
+- T010
+- T011
+- T012
+phase: Phase 1 - The mission's only Work Package
+history:
+- at: '2026-09-10T00:00:00Z'
+  actor: system
+  action: Prompt generated via /spec-kitty.tasks
+agent_profile: implementer-ivan
+authoritative_surface: packages/tokens/src/tokens.css, packages/styles/src/form-field/, packages/styles/src/form-input/
+create_intent:
+- tests/node/form-input-border-target-size-parity.test.ts
+- apps/storybook/src/tests/sk-form-input-contrast-touch-target.spec.ts
+execution_mode: code_change
+model: ''
+owned_files:
+- packages/tokens/src/tokens.css
+- packages/tokens/dist/token-catalogue.json
+- packages/styles/src/form-field/sk-form-field.css
+- packages/styles/src/form-input/sk-form-input.css
+- packages/elements/src/form-input/sk-form-input.css.js
+- packages/elements/src/form-input/sk-form-input.css.d.ts
+- tests/node/form-input-border-target-size-parity.test.ts
+- apps/storybook/src/tests/sk-form-input-contrast-touch-target.spec.ts
+- docs/design-system/changelog.md
+role: implementer
+tags: []
+task_type: implement
+tracker_refs: []
+---
+
+# Work Package Prompt: WP01 – New `--sk-border-control` token, both consumption paths, and the anti-drift/rendered proof
+
+## ⚡ Do This First: Load Agent Profile
+
+Use the `/ad-hoc-profile-load` skill to load the agent profile specified in the frontmatter (or
+any user-defined profile), and behave according to its guidance before parsing the rest of this
+prompt.
+
+- **Profile**: `implementer-ivan`
+- **Role**: `implementer`
+- **Agent/tool**: `claude`
+
+If no profile is specified, run `spec-kitty agent profile list` and select the best match for
+this work package's `task_type` and `authoritative_surface`.
+
+---
+
+## ⚠️ IMPORTANT: Review Feedback
+
+**Read this first if you are implementing this task!**
+
+- **Has review feedback?**: Check the `review_ref` field in the event log (via
+  `spec-kitty agent tasks status` or the Activity Log below).
+- **You must address all feedback** before your work is complete. Feedback items are your
+  implementation TODO list.
+- **Report progress**: As you address each feedback item, update the Activity Log explaining what
+  you changed.
+
+---
+
+## Review Feedback
+
+*(none yet — this is the first pass)*
+
+---
+
+## Markdown Formatting
+
+Wrap HTML/XML tags in backticks: `<input>`, `<sk-form-input>`
+Use language identifiers in code blocks: `css`, `ts`, `bash`
+
+---
+
+## Objectives & Success Criteria
+
+Ship the one coherent, token-layer fix for `.sk-input` / `<sk-form-input>`'s failing control
+boundary and missing target-size floor (GAP-F5-02, issue #321), as ONE Work Package and ONE PR
+back onto `train/elements-first`. This is the mission's only Work Package — every functional
+requirement in `spec.md` (FR-001 through FR-011) belongs to it.
+
+Success is:
+
+1. `--sk-border-control` exists in **both** theme blocks of `packages/tokens/src/tokens.css`,
+   aliased to `var(--sk-fg-subtle)`, with its derivation and six measured ratios recorded in a
+   comment beside the declaration (FR-001).
+2. `.sk-input` (`sk-form-field.css`) and `.sk-form-input__control` (`sk-form-input.css`) both
+   adopt the new role for their resting-state border, and both spell the width the same way
+   (`var(--sk-border-width-1)`), closing the #173-documented spelling gap in the same change
+   (FR-002, FR-003).
+3. Both rules gain `min-block-size: var(--sk-space-9)`, matching the exact comment shape already
+   shipped in `sk-confirm-dialog.css`/`sk-context-nav.css` (FR-004).
+4. Focus, `[aria-invalid="true"]`, and `:disabled` rules are untouched on both paths (FR-005).
+5. A Node-lane test proves the two files' `border`/`min-block-size` values cannot drift apart
+   without being caught — demonstrated red (a deliberate divergence) before green (FR-006).
+6. A Playwright test proves the rendered control clears 44px at 390px width and under a
+   calibrated 200% zoom simulation, on **both** consumption paths (FR-007).
+7. A Playwright test proves the border survives `forced-colors: active` and records its actual
+   resolved color rather than assuming one (FR-008).
+8. `packages/tokens/dist/token-catalogue.json` and `packages/elements/src/form-input/sk-form-input.css.js`/`.css.d.ts`
+   are regenerated by their own scripts, never hand-edited (FR-009).
+9. The PR body records the coordination outcome for #155 (FR-010) — and touches zero files under
+   any `*button*` directory.
+10. `docs/design-system/changelog.md` gains a `[Unreleased]` → `Changed` entry (FR-011).
+11. `npm run quality:all`, `node scripts/build-elements-css.mjs --check`, and the full Playwright
+    suite pass; `git status --porcelain` is empty after regeneration.
+
+## Context & Constraints
+
+- **Read first, in this order**: `.kittify/charter/charter.md`; `docs/contributing/adding-a-component.md`
+  (the recipe, especially its forced-colors section); ADR-9 (`docs/architecture/decisions/2026-09-02-9-shadow-dom-and-styling-api.md`);
+  ADR-10 (`docs/architecture/decisions/2026-09-02-10-distribution-and-canonical-markup.md`);
+  ADR-15 (`docs/architecture/decisions/2026-09-10-15-static-form-of-element-backed-css.md`) — this
+  mission does NOT need a new static-form decision, ADR-15 already covers `sk-form-input` (no
+  `container-type`); this mission's `spec.md`, `plan.md`, `research.md`.
+- **Source issue**: `gh issue view 321 --repo spec-kitty/spec-kitty-design` — read the COMPLETE
+  live issue; do not rely solely on this prompt's paraphrase. Also read #155 (the button's own
+  hairline defect — DO NOT touch `.sk-button--secondary`), #173 (`.sk-input`/`.sk-textarea` rename
+  deferral — DO NOT rename anything), #286 (copy/i18n — this WP adds no copy), #303 (the 44px
+  precedent this mission reconciles against), and
+  `/home/jeroennouws/dev/spec-kitty-design-missions/_program-319/DECISION-border-role.md` (the
+  binding programme decision that fixes the altitude/owner/obligation this WP implements).
+- **Pattern precedent for the 44px floor**: `packages/styles/src/confirm-dialog/sk-confirm-dialog.css:165-173`
+  and `packages/styles/src/context-nav/sk-context-nav.css` (three call sites) — both already use
+  `min-block-size: var(--sk-space-9)` for exactly this floor. Copy the comment shape, do not
+  re-derive it.
+- **Pattern precedent for the anti-drift test's parsing technique**: `apps/storybook/src/tests/sk-form-select.spec.ts`
+  already imports `postcss`/`postcss-selector-parser` (existing devDependencies) the same way.
+- **Pattern precedent for the 200% zoom simulation**: `apps/storybook/src/tests/sk-collection.spec.ts`'s
+  `style.zoom = '2'` technique with its own width-probe calibration — reuse it, do not invent a
+  new zoom mechanism.
+- **Pattern precedent for the forced-colors test**: `apps/storybook/src/tests/sk-copy-field-forced-colors.spec.ts`'s
+  `page.emulateMedia({ forcedColors: 'active' })` + shadow-root `getComputedStyle` pattern.
+- **Do NOT touch**: any file under `packages/styles/src/button*/` or `packages/elements/src/button*/`
+  (#155/#320 boundary, C-004/C-005); `packages/styles/src/form-textarea/sk-form-textarea.css` or
+  `packages/elements/src/form-textarea/` (C-003 — the resulting visual divergence from
+  `.sk-input`/`.sk-form-input__control` is disclosed and deliberate, not a defect to fix here);
+  `.sk-textarea`'s rule inside `sk-form-field.css` (same file as `.sk-input`, different rule — edit
+  only `.sk-input`).
+- **Do NOT rename** `.sk-input`, `.sk-textarea`, `.sk-form-input__control`, or any other class —
+  #173's call, not this WP's.
+- **Do NOT wire `apps/storybook/src/tests/visual.spec.ts`** for this component (C-009) — it has
+  zero existing entries for this component pair and extending that system is out of this WP's
+  bounded scope.
+- **Do NOT touch `expected-parts.json`, `expected-docs.json`, `behaviours.json`, or `mutations.json`** —
+  this WP adds no new `::part()`, documented attribute/method, or owned behavior. If, while
+  implementing, you find yourself wanting to add an entry to any of these four files, STOP — that
+  means the work has drifted outside this WP's contract; re-read `spec.md`'s Constraints before
+  proceeding.
+- **Tokens-first.** No raw hex/`Npx` literal in either changed `.css` file — everything through
+  `var(--sk-*)`.
+- **Never hand-edit generated files**: `packages/tokens/dist/token-catalogue.json`,
+  `packages/elements/src/form-input/sk-form-input.css.js`, `.css.d.ts`. Regenerate them with their
+  own scripts (T002, T005).
+- **This is a single WP by mandate** (issue #321: "one bounded Work Package and one PR") and the
+  scope is genuinely small enough to fit comfortably — see `tasks.md`'s "Work Package count" note.
+  If this genuinely cannot be delivered as one PR, STOP and report rather than splitting
+  unilaterally.
+
+## Branch Strategy
+
+- **Strategy**: single_branch — this mission has no separate coordination branch. Work and commit
+  directly on the mission branch.
+- **Planning base branch**: `mission/form-input-contrast-touch-target-contract`
+- **Merge target branch**: `mission/form-input-contrast-touch-target-contract` (the PR back to
+  `train/elements-first` happens from this branch per issue #321's "Branch: cut ... from the
+  latest `train/elements-first`; PR back into the train.")
+
+> These fields are populated automatically by `spec-kitty agent mission tasks`. Do NOT change
+> them manually unless you are certain the branch topology has changed.
+
+## Subtasks & Detailed Guidance
+
+### Subtask T001 – New `--sk-border-control` token, both theme blocks
+
+- **Purpose**: Land the token-layer fix everything else in this WP references.
+- **Steps**:
+  1. In `packages/tokens/src/tokens.css`'s Borders block (`/* ── Borders ─────── */`, alongside
+     `--sk-border-default`/`--sk-border-strong`/`--sk-border-focus`), add
+     `--sk-border-control: var(--sk-fg-subtle);` to `:root`.
+  2. In the light-mode override block (`:root[data-theme="light"], .sk-light`), find where
+     `--sk-border-default`/`--sk-border-strong` are redefined and add
+     `--sk-border-control: var(--sk-fg-subtle);` there too — each block's `--sk-fg-subtle` value
+     (dark `#81818B`, light `#8A8A7E`) is what the alias resolves to per theme.
+  3. Add a comment beside the `:root` declaration recording: the alias rationale (reuses
+     `--sk-fg-subtle`, introduces zero new hex literals), and the six measured ratios from
+     `research.md`'s table (dark: page 5.01, card 4.51, input 4.28; light: page 3.20, card 3.49,
+     input 3.09), in `ratio : 1` per-theme format — this is the exact figure the PR body (T012)
+     must also carry.
+- **Files**: `packages/tokens/src/tokens.css`.
+- **Parallel?**: No — foundation for T002-T004.
+- **Notes**: Do not add a new hex literal. Do not touch any other token in the Borders block.
+
+### Subtask T002 – Regenerate the token catalogue
+
+- **Purpose**: Keep `packages/tokens/dist/token-catalogue.json` (the stylelint/docs-site source of
+  truth) current with T001's new token.
+- **Steps**: Run `npx nx run tokens:catalogue` (or `npm run tokens:catalogue`); confirm the new
+  `border` category entry for `border-control` appears in the output.
+- **Files**: `packages/tokens/dist/token-catalogue.json` (generated).
+- **Parallel?**: No — after T001.
+- **Notes**: This file is generated; never hand-edit it.
+
+### Subtask T003 – `.sk-input`'s border and target size
+
+- **Purpose**: Apply the fix to the hand-authored static path.
+- **Steps**:
+  1. In `packages/styles/src/form-field/sk-form-field.css`, change `.sk-input`'s
+     `border: 1px solid var(--sk-border-default);` to
+     `border: var(--sk-border-width-1) solid var(--sk-border-control);`.
+  2. Add `min-block-size: var(--sk-space-9);` to the same rule, with a one-line comment naming it
+     the 44px floor (copy the exact comment shape from `sk-confirm-dialog.css:171`).
+  3. Do **not** touch `.sk-textarea` in the same file (different rule, out of scope, C-003).
+  4. Verify (by reading, not assuming) that none of the five static exemplar HTML files
+     (`sk-form-input-default.html`, `-focus.html`, `-error.html`, `-disabled.html`, `-filled.html`)
+     duplicate the old border/height value inline — they should not, per `research.md`'s check,
+     but confirm again against the current tree before considering this subtask done.
+- **Files**: `packages/styles/src/form-field/sk-form-field.css`.
+- **Parallel?**: [P] with T004 (different file).
+- **Notes**: The width spelling change (`1px` → `var(--sk-border-width-1)`) is deliberate and
+  in-scope (FR-002) — name it explicitly in the PR description as closing #173's documented
+  spelling gap, not an unrelated drive-by.
+
+### Subtask T004 – `.sk-form-input__control`'s border and target size
+
+- **Purpose**: Apply the fix to the live element path.
+- **Steps**:
+  1. In `packages/styles/src/form-input/sk-form-input.css`, change `.sk-form-input__control`'s
+     `border: var(--sk-border-width-1) solid var(--sk-border-default);` to
+     `border: var(--sk-border-width-1) solid var(--sk-border-control);` (width spelling already
+     tokenized — only the color changes here).
+  2. Add `min-block-size: var(--sk-space-9);` to the same rule, same comment shape as T003.
+  3. Add one line to the file's existing header comment block (lines 1-38) noting that this
+     resolution closes the `--sk-border-default` weakness the header already discusses, matching
+     the file's own convention of recording what changed and why in that block.
+- **Files**: `packages/styles/src/form-input/sk-form-input.css`.
+- **Parallel?**: [P] with T003 (different file).
+- **Notes**: Do not touch any other rule in this file (focus, `[aria-invalid]`, `:disabled`,
+  `::placeholder`, the `:host(:not([invalid]))` error-visibility rule are all out of scope).
+
+### Subtask T005 – Regenerate the element's generated CSS module
+
+- **Purpose**: Propagate T004's source change into the artifact `<sk-form-input>` actually adopts.
+- **Steps**: Run `node scripts/build-elements-css.mjs` (no `--check` flag — this invocation WRITES
+  the regenerated output). Confirm `packages/elements/src/form-input/sk-form-input.css.js` and
+  `.css.d.ts` now reflect T004's new declarations.
+- **Files**: `packages/elements/src/form-input/sk-form-input.css.js`, `.css.d.ts` (generated).
+- **Parallel?**: No — after T004.
+- **Notes**: Forgetting this step is silently NOT caught by stylelint/typecheck — only
+  `build-elements-css.mjs --check` (run again in T011) catches the drift.
+
+### Subtask T006 – Anti-drift test (FR-006)
+
+- **Purpose**: Build the mechanical proof that `.sk-input` and `.sk-form-input__control` cannot
+  silently drift apart, since no generator links these two files.
+- **Steps**:
+  1. Create `tests/node/form-input-border-target-size-parity.test.ts` (picked up automatically by
+     `vitest.config.mts`'s existing `include: ['tests/node/**/*.test.ts']` — no config change).
+  2. Use `postcss` to parse `packages/styles/src/form-field/sk-form-field.css` and
+     `packages/styles/src/form-input/sk-form-input.css`; find the `.sk-input` rule and the
+     `.sk-form-input__control` rule respectively (via `postcss-selector-parser` if selector
+     matching needs to be robust to compound selectors — these two are simple class selectors, so
+     a direct rule-selector string match is sufficient; do not over-engineer).
+  3. Extract the `border` and `min-block-size` declaration VALUES from each rule.
+  4. Assert: (a) the two files' `border` values are equal to each other; (b) the two files'
+     `min-block-size` values are equal to each other; (c) each `border` value equals
+     `var(--sk-border-width-1) solid var(--sk-border-control)`; (d) each `min-block-size` value
+     equals `var(--sk-space-9)`.
+  5. **Demonstrate red first**: temporarily edit ONE file's `border` or `min-block-size` value to
+     a different (but still valid) token, run the test, confirm it fails and that the failure
+     message names which file/selector/property diverged, then revert the temporary edit and
+     confirm the test passes again. Record both outputs (red and green) as evidence.
+- **Files**: `tests/node/form-input-border-target-size-parity.test.ts` (new).
+- **Parallel?**: No — after T003 and T004 (needs their final values).
+- **Notes**: Scope the comparison to exactly `border` and `min-block-size` — not the whole rule.
+  The two rules share several other declarations (`padding`, `background`, `font-family`, etc.)
+  that are legitimately outside this contract; asserting the whole rule would silently expand this
+  mission's scope beyond what the issue asks for.
+
+### Subtask T007 – Rendered target-size measurement, both paths (FR-007)
+
+- **Purpose**: Prove the 44px floor holds on the actual rendered box, not just in the CSS source.
+- **Steps**:
+  1. Create `apps/storybook/src/tests/sk-form-input-contrast-touch-target.spec.ts` (auto-collected
+     by the existing whole-`testDir` `npx playwright test` job — no config change).
+  2. Open story `form-formfield-html--form-input-default` (static path) and story
+     `elements-skforminput--default` (element path) — these exact ids were confirmed via a real
+     `storybook-static/index.json` build; re-verify if the story titles/export names changed since
+     `research.md` was written.
+  3. At a 390px viewport, measure the control's `getBoundingClientRect()` and assert block-size
+     (height) ≥44px.
+  4. Under a calibrated `style.zoom = '2'` simulation (copy `sk-collection.spec.ts`'s width-probe
+     calibration exactly — create a 100px-wide probe element, assert its measured width is 200px,
+     THEN take the real measurement), assert the control's block-size remains ≥44px and it is not
+     clipped by any ancestor or pushed outside the viewport.
+  5. Four (path × condition) combinations total: static/390px, static/zoom-200, element/390px,
+     element/zoom-200.
+- **Files**: `apps/storybook/src/tests/sk-form-input-contrast-touch-target.spec.ts` (new — same
+  file as T008).
+- **Parallel?**: No — after T005 (needs the rebuilt `sk-form-input.css.js` reflected in Storybook).
+- **Notes**: For the element path, remember the control lives in the shadow root —
+  `page.locator('sk-form-input').first()` then `.evaluate(el => el.shadowRoot.querySelector('.sk-form-input__control'))`-style
+  access, or a `part`-based locator if one is easier; there is currently no `::part()` on this
+  control specifically — check the element source before assuming one exists.
+
+### Subtask T008 – Forced-colors distinguishability, both paths (FR-008)
+
+- **Purpose**: Prove (not assume) the border survives `forced-colors: active` and record its
+  actual resolved color.
+- **Steps**:
+  1. In the same spec file as T007, add a forced-colors sub-suite:
+     `page.emulateMedia({ forcedColors: 'active' })`.
+  2. For both consumption paths, read the control's computed `border-top-style` (or equivalent)
+     and assert it is not `'none'`.
+  3. Also render a plain, non-interactive bordered reference element (e.g. a `<div>` with a
+     `border: 1px solid CanvasText`-style rule, or reuse an existing non-interactive bordered
+     element already present in the story) in the same document and read ITS resolved
+     forced-colors border color.
+  4. Record both resolved colors (control vs. reference) as console output or an assertion
+     message — the point is to MEASURE the actual values Chromium's forced-colors stylesheet
+     produces for a native `<input>` vs. a generic bordered element, not to assert a specific
+     system-color keyword from memory (see `adding-a-component.md`'s own corrected-guidance
+     history on exactly this kind of mistake).
+- **Files**: `apps/storybook/src/tests/sk-form-input-contrast-touch-target.spec.ts` (same file as
+  T007).
+- **Parallel?**: [P] with T007 (same new file, independent `test()` blocks — write both, they do
+  not depend on each other's assertions).
+- **Notes**: Model the emulation/shadow-root-read pattern on `apps/storybook/src/tests/sk-copy-field-forced-colors.spec.ts`.
+
+### Subtask T009 – Axe re-run over the existing story set
+
+- **Purpose**: Confirm the border-color/min-block-size change introduces zero new accessibility
+  violations.
+- **Steps**: Build Storybook (`npx nx run storybook:storybook:build`), then run
+  `node scripts/run-axe-storybook.js`. Confirm zero WCAG 2.1 AA violations across all stories,
+  including every story under `Elements/SkFormInput` and `Form/FormField (HTML)`.
+- **Files**: none changed by this subtask — verification only.
+- **Parallel?**: No — after T005 (needs the rebuilt Storybook).
+- **Notes**: A story that fails to load is itself a failure under this repo's convention — do not
+  treat a load error as an absence of violations.
+
+### Subtask T010 – Changelog entry (FR-011)
+
+- **Purpose**: Record the visible change for consumers, per DIRECTIVE_037.
+- **Steps**: Add a `[Unreleased]` → `### Changed` entry to `docs/design-system/changelog.md`
+  describing: the new `--sk-border-control` token; the `.sk-input`/`.sk-form-input__control`
+  resting-state border-color change (and, for `.sk-input`, the width-spelling normalization); the
+  added `min-block-size: var(--sk-space-9)` target-size floor. Follow the file's existing entry
+  format (see the `sk-notice` entry already in the file for the level of detail expected).
+- **Files**: `docs/design-system/changelog.md`.
+- **Parallel?**: [P] with T006-T009 (no code dependency, but wait until T001-T004's exact values
+  are settled before describing them).
+
+### Subtask T011 – Full local quality gate run
+
+- **Purpose**: Close out the WP with every relevant gate green.
+- **Steps**: Run, in order, until all are green:
+  1. `npm run quality:all` (ESLint + Stylelint + HTMLHint).
+  2. `bash scripts/check-token-breaking-changes.sh` (confirms no breaking token removal/rename).
+  3. `node scripts/build-elements-css.mjs --check` (confirms T005's regeneration is current).
+  4. `node scripts/check-adopted-css-boundaries.mjs` (confirms no cross-boundary selector was
+     introduced — should be a no-op here since no new selector was added).
+  5. `npx nx run storybook:storybook:build` then `node scripts/run-axe-storybook.js` (re-confirm
+     T009 after any later edits).
+  6. `npx playwright test` (whole `testDir` — picks up T007/T008 automatically; also re-confirms
+     nothing else regressed).
+  7. `git status --porcelain` — must be empty after all regeneration steps above (no forgotten
+     generated-artifact diff).
+- **Files**: none changed by this subtask — verification only.
+- **Parallel?**: No — after T001-T010.
+
+### Subtask T012 – PR-body coordination record (FR-010)
+
+- **Purpose**: Give #155 a linkable, accurate record of this mission's outcome.
+- **Steps**:
+  1. Draft the PR description naming `--sk-border-control`, its six measured ratios in
+     `ratio : 1` per-theme format (matching #155's own published format), and a plain statement
+     that this mission does not close, absorb, or widen #155 — `.sk-button--secondary`'s own
+     adoption remains #155's to do.
+  2. Run `git diff --stat <base>..HEAD` (or equivalent) and confirm zero files under any
+     `*button*` directory appear — paste that confirmation into the PR body or note it was
+     checked.
+  3. Note the disclosed `sk-textarea`/`sk-form-textarea` divergence (C-003) in the PR body so a
+     reviewer does not mistake it for a missed file.
+- **Files**: none — PR description only (not a repository file).
+- **Parallel?**: No — last, once the final diff exists to describe.
+
+## Test Strategy
+
+- Static parity: `tests/node/form-input-border-target-size-parity.test.ts` (T006), Vitest Node
+  lane, auto-included, demonstrated red before green.
+- Rendered/forced-colors: `apps/storybook/src/tests/sk-form-input-contrast-touch-target.spec.ts`
+  (T007, T008), Playwright, auto-collected by the whole-testDir job.
+- Accessibility: `scripts/run-axe-storybook.js` (T009) — zero WCAG 2.1 AA violations.
+- Full command list: `docs/contributing/adding-a-component.md` and `docs/contributing/running-quality-checks.md`
+  (T011).
+
+## Risks & Mitigations
+
+- **Forgetting to regenerate `sk-form-input.css.js`/`.css.d.ts` after T004** — silently NOT green
+  under stylelint/typecheck alone; mitigate by running T011's `build-elements-css.mjs --check`
+  explicitly, not assuming an editor watcher caught it.
+- **T006's parser scope too broad or too narrow** — comparing whole-rule text would either miss
+  the width-spelling drift #173 documents or false-positive on legitimately-different declarations
+  (`padding`, `background`, etc.); mitigate by scoping strictly to `border`/`min-block-size`.
+- **T007's zoom calibration uncalibrated** — mitigate by copying `sk-collection.spec.ts`'s
+  width-probe technique exactly rather than assuming `style.zoom = '2'` alone is sufficient.
+- **T008 asserting a specific forced-colors color from memory** — mitigate by measuring the actual
+  resolved value; see `adding-a-component.md`'s own corrected-guidance history.
+- **Scope creep into `.sk-textarea`/`sk-form-textarea` or any `*button*` file** — mitigate with
+  T012's explicit `git diff --stat` check before the PR is opened.
+- **Accidentally wiring `visual.spec.ts`** — out of scope per C-009; if implementation finds
+  itself editing that file, stop and reconsider against the spec's Constraints.
+
+## Review Guidance
+
+- Verify `--sk-border-control`'s six measured ratios independently (re-run the contrast
+  computation against the actual committed hex values, don't just trust the comment).
+- Verify `.sk-input` and `.sk-form-input__control`'s `border`/`min-block-size` declarations are
+  textually identical (modulo selector name) in the final diff.
+- Verify T006's test is genuinely demonstrated red (ask for the red transcript, not just the green
+  one).
+- Verify the diff touches zero `*button*` files and zero `sk-textarea`/`sk-form-textarea` files.
+- Verify `expected-parts.json`, `expected-docs.json`, `behaviours.json`, `mutations.json` are
+  UNCHANGED in the diff (this WP should not touch any of them).
+- Verify the PR body states the #155 coordination outcome in a form #155 can link to.
+
+## Activity Log
+
+> **CRITICAL**: Activity log entries MUST be in chronological order (oldest first, newest last).
+
+- 2026-09-10T00:00:00Z – system – Prompt created.
