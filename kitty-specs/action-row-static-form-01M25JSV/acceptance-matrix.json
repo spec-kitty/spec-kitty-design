@@ -217,11 +217,11 @@
     {
       "criterion_id": "FR-022",
       "description": "Verify FR-022 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
+      "proof_type": "code_review",
+      "evidence": "git diff origin/train/elements-first..HEAD -- packages/styles/src/action-row/sk-action-row.css is empty \u2014 the sheet (and its existing prefers-reduced-motion block) is untouched by this mission; ReducedMotion story documents the inherited behaviour and passes axe",
+      "pass_fail": "pass",
       "verified_by": null,
-      "verified_at": null,
+      "verified_at": "2026-09-10T14:07:27.741192+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
