@@ -13,7 +13,7 @@
       "wp": "WP01"
     },
     "#239": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "Open, cited, and deliberately NOT decided (spec FR-005, C-004). ADR-15 has a section stating the relationship \u2014 #239 is the inverse question \u2014 and contributes only one measured fact to it: outer-tree declarations beat inner-tree ::slotted() declarations regardless of specificity. It selects no mechanism for #239.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -21,8 +21,8 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
     },
     "#286": {
       "evidence_ref": "<link or commit>",
