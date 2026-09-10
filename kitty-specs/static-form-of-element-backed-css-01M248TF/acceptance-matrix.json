@@ -77,11 +77,11 @@
     {
       "criterion_id": "FR-008",
       "description": "Verify FR-008 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "proof_type": "committed_measurement",
+      "evidence": "kitty-specs/.../measurement/ \u2014 22 + 20 + 10 pre-declared outcomes across outcomes.declared.json and outcomes.declared.cycle-2.json, each committed before its probe ran; run.mjs + result.json per construct; chromium 151 and firefox 153 agree on every row.",
+      "pass_fail": "pass",
+      "verified_by": "architect-alphonso",
+      "verified_at": "2026-09-10T01:07:28.432429+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
