@@ -137,11 +137,11 @@
     {
       "criterion_id": "FR-014",
       "description": "Verify FR-014 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "proof_type": "code_review",
+      "evidence": "grep -n 'content:|forced-color-adjust' packages/styles/src/button/sk-button.css: zero matches; the forced-colors block only sets border-width.",
+      "pass_fail": "pass",
+      "verified_by": "reviewer-renata",
+      "verified_at": "2026-09-10T15:46:19.528571+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
