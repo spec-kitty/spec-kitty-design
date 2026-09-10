@@ -470,6 +470,11 @@ result, not whose digits, is what generalises.
   When #309 lands, that block becomes redundant rather than wrong, and #310 is what will hold the
   generated rule equal to the one written here.
 
+  **2026-09-11: #309 and #310 landed.** The hand-authored block above is now redundant, exactly as
+  predicted; `@spec-kitty/styles/action-row/static/sk-action-row.static.css` is generated and a
+  static consumer links it INSTEAD of `sk-action-row.css`. See the Amendment below for what the
+  gate does and does not establish.
+
 ## Relationship to #239, which this record does not decide (FR-005)
 
 #239 asks the **inverse** question: whether a shadow-DOM element may consume a light-DOM
@@ -483,6 +488,73 @@ a root that did not author it; this is about a sheet authored for a root being m
 record contributes to #239's file is the O5/O6 measurement above: outer-tree declarations beat
 inner-tree `::slotted()` declarations regardless of specificity, which is a cascade fact #239 will
 have to reason about whichever mechanism it chooses. It does not select that mechanism.
+
+## Amendment (2026-09-11) — the generated wrapper hardens `:host`'s cascade position (#375, closed)
+
+**Added by #309/#310, which built the generator and the gate this record filed. It does not
+overturn any verdict above.** ADR-16's group H found, and #375 filed, a gap in this record's
+*evidence* rather than in its ruling: all 42 outcomes behind the kind-1 and kind-2 verdicts are
+**library-only**. None introduces a rule the *consumer* wrote. They establish that the two-element
+wrapper reproduces `:host`'s **layout**; they do not test whether it reproduces `:host`'s **cascade
+position**, and it does not.
+
+**The mechanism, in ADR-16's corrected terms.** `:host` declarations sit in the element's **inner**
+tree. Under CSS Cascade's tree-order sort a normal declaration from the **outer** tree wins over
+one from the inner tree *before* specificity and *before* source order are consulted. So any
+document rule matching `<sk-action-row>` beats `:host` at any weight in any order. Moved onto
+`.sk-action-row-host` those same declarations are ordinary document declarations competing on
+ordinary terms. (ADR-16 also corrects this record's attribution of that property: it belongs to
+tree order, not to `::slotted()`. `::slotted()` and cross-sheet `::part()` are the same rule seen
+from opposite sides.)
+
+**Measured, chromium 151 and firefox 153 identical**, re-runnable with
+`node scripts/check-static-form-equivalence.mjs` and pinned as
+`expected-static-form.json`'s `consumerOverrides` table:
+
+| The consumer's intent | Against the element | Against the generated wrapper |
+|---|---|---|
+| `display: flex` at **(0,0,1)** — `sk-action-row { … }` / `div { … }` | **wins** (`flex`) | **loses** (`block`) |
+| `container-type: normal`, equal weight, authored **first** | **wins** — the container is destroyed and `@container (max-width: 400px)` stops firing | **loses** — the container survives |
+| `container-type: normal`, equal weight, authored **last** | wins | wins |
+| the same at **strictly higher** specificity, either order | wins | wins |
+
+**The ruling on the gap, which is a limit rather than a repair.** The wrapper is emitted at
+**preserved specificity** — `:host` is (0,1,0) and `.sk-x-host` is (0,1,0); `:host([a="v"])` is
+(0,2,0) and `.sk-x-host.sk-x-host--v` is (0,2,0) — and the generator asserts that equality per
+selector rather than asserting it here. What a static consumer is owed instead of tree order is a
+**boundary computed from the rule actually emitted**: specificity **strictly higher** than the
+generated rule declaring the property they are changing, or the same specificity in a **later**
+stylesheet. It is not one number. `position: sticky` on `sk-page-header` is declared by the
+*modifier* rule at (0,2,0), not by the base wrapper rule at (0,1,0). Each affected sheet's
+`WHAT A STATIC CONSUMER MUST AUTHOR INSTEAD` block and each generated static form's own header
+state this, generically, in the shape #304 established.
+
+**`:where(.sk-<name>-host)` was measured, not argued, and is declined.** #375 named it as a
+candidate and required a measurement. At (0,0,0) it moves **no** library-only outcome in either
+engine (0 of 449) and it flips every `below`- and `tie`-weight override row above to *equal* — a
+real improvement on that table. It is declined for two measured reasons and one stated one:
+
+* it defers to **every** document rule matching the wrapper, including a page-wide `div { … }`
+  reset, which cannot touch the custom element at all — so it trades a divergence a consumer can
+  compute for one they cannot;
+* it leaves the **modifier** rules at their own weight, so a bare host-attribute axis
+  (`:host([sticky])`) keeps diverging regardless — H10 in the pinned table is measured at
+  `diverge` under `:where()` too;
+* and it is still not tree order: importance **reverses** tree order (ADR-16 M7), and no
+  specificity trick reproduces that.
+
+The candidate is re-measured on every `check-static-form-equivalence.mjs --selftest` run, so the
+decision stays evidenced rather than becoming folklore.
+
+**What the gate therefore certifies, stated plainly.** `scripts/check-static-form-equivalence.mjs`
+holds the generated static form **equal to the shadow form on a library-only page** — 449 declared
+outcomes per engine across 38 scenarios and all four components, in chromium and firefox — and
+**pins the cascade divergence by verdict** rather than demanding an equality CSS cannot provide.
+It does **not** establish cascade equivalence and says so in its own header. That is the same test
+this record applied to `::slotted()` and ADR-16 applied to cross-sheet `::part()`, reaching a
+different answer for a stated reason: for those two the divergence *is* the substance of the
+construct, so both were ruled shadow-only; here the layout equivalence is real, generable and
+worth gating, and the cascade divergence is bounded, measurable and now written down.
 
 ## Consequences
 
@@ -520,10 +592,17 @@ have to reason about whichever mechanism it chooses. It does not select that mec
   #310's table, not among this record's measured claims.
 * Measured layout contexts are **block, a 300px flex row, and a 300px grid track**. Float, table
   and table-cell, and an inline formatting context are neither measured nor warned about.
-  #309/#310 should widen this rather than assume the three generalise.
-* No generator and no gate exist yet. Until the issues filed below land, the ruling for kinds 1
-  and 2 is a specification, not an enforced artifact — and this record says so rather than
-  implying the static form already ships.
+  #309/#310 should widen this rather than assume the three generalise. **2026-09-11: #310's
+  permanent table did not widen it** — it kept the same three contexts and added the composed
+  outer-container case, the exact breakpoints and two more components. Float, table/table-cell
+  and inline formatting contexts remain unmeasured, and that is stated here rather than implied
+  by a larger outcome count.
+* ~~No generator and no gate exist yet.~~ **Superseded 2026-09-11 by #309/#310** —
+  `scripts/build-static-form-css.mjs` emits
+  `packages/styles/src/<name>/static/sk-<name>.static.css` for all four sheets and
+  `scripts/check-static-form-equivalence.mjs` gates it, both ENFORCED in CI. The sentence stands
+  as the record of what was true when this was written; the Amendment above states what the gate
+  does and does not establish.
 * `::slotted()` gets no generated equivalent, so every component using it owes its consumers a
   hand-written instruction. Six sheets still owe one — `sk-context-sidebar`, `sk-personal-rail`,
   `sk-section-header`, `sk-notice`, `sk-page-header` and `sk-nav-pill-drawer`. That debt is
