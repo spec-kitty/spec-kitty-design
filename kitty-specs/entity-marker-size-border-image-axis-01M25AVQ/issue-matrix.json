@@ -1,7 +1,7 @@
 {
   "rows": {
     "#212": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "spec.md prose cross-reference only: #212 previously rejected a separate sk-avatar component; #304's design explicitly upholds that disposition (no sk-avatar, verified by diff \u2014 no new component/Team/membership model added). Not a dependency #304 resolves.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -9,8 +9,8 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "verdict": "in-mission",
+      "wp": "WP01"
     },
     "#286": {
       "evidence_ref": "<link or commit>",
