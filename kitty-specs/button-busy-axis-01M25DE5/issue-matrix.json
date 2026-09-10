@@ -73,7 +73,7 @@
       "wp": null
     },
     "#305": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "This IS the mission (issue #305 itself, spec.md line 6). Implemented and independently reviewed in WP01 at 294022d; approved.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -81,8 +81,8 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "verdict": "in-mission",
+      "wp": "WP01"
     },
     "#306": {
       "evidence_ref": "<link or commit>",
