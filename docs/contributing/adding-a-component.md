@@ -54,9 +54,51 @@ consumer's `style="max-width: 640px"` on your element is silently inert. Declare
 display: `sk-section-banner` shipped `:host { display: inline-flex }` against a static
 `display: flex` for one commit, and the two consumption paths rendered differently.
 
-`:host` is accepted by `check-adopted-css-boundaries.mjs` and is inert in the static path, where
-the root element IS the `.sk-<name>` div. #77 found five committed stories whose `max-width` had
-never done anything.
+`:host` is accepted by `check-adopted-css-boundaries.mjs`, and a `:host { display: … }` rule
+specifically is inert in the static path, where the root element IS the `.sk-<name>` div. #77 found
+five committed stories whose `max-width` had never done anything.
+
+**That "the root element IS the `.sk-<name>` div" collapse is true for `display`, and false for
+three other things `:host` can carry.** ADR-15 measured all three against the real elements. Read
+it before you write any `:host` rule that is not `display`.
+
+| What you are about to write on `:host` | What the static path gets |
+|---|---|
+| `display: …` | The collapse holds. `.sk-<name>` restates it; nothing else is needed. |
+| `container-type: inline-size` | **Not a collapse.** A generated static form is coming (#309/#310) and it keeps the host as a **separate wrapper element**. Do not tell anyone the static path can move `container-type` onto `.sk-<name>`. |
+| `:host([attr="X"]) .sk-<name>…` gating an `@container` block | Same — the axis becomes `.sk-<name>-host--X`, on that same wrapper, not a modifier on the root class. |
+| `::slotted(x)` | **Shadow-only.** No generated static form, now or planned. |
+
+**The rule behind the first two rows: an element is never its own query container.** A container
+query styles a container's DESCENDANTS. In the shadow form the host establishes the container and
+`.sk-<name>` is a descendant of it, so `.sk-<name>`'s own rules respond to the host's width.
+Collapse the two onto one element and that element has to look further up — so it answers some
+outer ancestor of your consumer's page, or nothing at all. Its *descendants* keep working, which
+is why the failure is quiet: most of the sheet still behaves.
+
+`packages/styles/src/page-header/sk-page-header.css` already had to reason about this — it uses
+`@media` rather than `@container` for its stickiness rules, because the element being restyled is
+the host itself.
+
+**What a static consumer must author instead, until #309/#310 land.** For a host-owned
+`container-type` or a host-attribute axis: their own two-element wrapper —
+`<div class="sk-<name>-host"><div class="sk-<name>">…</div></div>` with
+`container-type: inline-size` on the outer one — and their own modifier class on that outer
+element. For `::slotted(x)`: their own descendant rule in their own stylesheet. Say so in your
+component's CSS header comment, the way `sk-app-shell.css`, `sk-action-row.css` and
+`sk-entity-marker.css` now do.
+
+**`::slotted()` has one further consequence a static rewrite cannot reproduce, so do not promise
+it does.** A declaration from the outer tree beats a `::slotted()` declaration from the inner tree
+**regardless of specificity** — a consumer's bare `img { … }` overrides your `::slotted(img)`.
+Rewritten as a document rule, `.sk-<name>__content > img` is an ordinary (0,1,1) selector and wins
+against that same consumer rule. The two forms look identical and cascade differently; ADR-15 has
+the measured values.
+
+If your rule genuinely serves both paths, use the paired spelling this repo already established in
+#78 — `.sk-<name>__y, ::slotted(.sk-<name>__y)` — one selector list, nothing written twice. It is
+valid in both contexts (measured: the `::slotted()` branch does not invalidate the list, the #143
+hazard), and it fixes duplication, not cascade position.
 
 
 `packages/styles/src/<name>/sk-<name>.css`. This is the source of record and the only file

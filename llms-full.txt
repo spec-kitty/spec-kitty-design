@@ -301,6 +301,34 @@ ties the probe, the rendered control and `setFormValue()` together, and where
 the mechanism lives once a shared form-control base exists. This summary takes
 no position on any of the three.
 
+### ADR-15 — The Static Form of Element-Backed CSS
+
+`docs/architecture/decisions/2026-09-10-15-static-form-of-element-backed-css.md`.
+**Decision:** per construct kind, not globally. A **host-attribute variant axis**
+and a **host-owned `container-type`** get a generated, gate-able light-DOM static
+form — but only in a **two-element** shape, where `:host` becomes a separate
+`.sk-<name>-host` wrapper around the unchanged `.sk-<name>` root. A
+**`::slotted()` child rule** is **shadow-only**: no generated static equivalent.
+**Why:** measured, not asserted. The real elements were rendered from the
+Storybook-built bundle and compared against static exemplars linking the real
+built CSS resolved through the package's own export map, in Chromium and
+Firefox, against outcomes pre-declared before the probes existed. The intuitive
+transform — collapse `:host` onto the root class, move `container-type` there —
+diverged on 4 of 14 outcomes for `sk-app-shell` and 4 of 13 for `sk-action-row`;
+the wrapper form matched on every one. **The rule that bites:** *an element is
+never its own query container.* A container query styles a container's
+DESCENDANTS, so `container-type` moved onto the root class makes that element
+answer some outer ancestor — or nothing — while its descendants keep querying it
+correctly. Most of the sheet still works, which is why the defect is silent; the
+composed cases (an outer ancestor that also declares `container-type`) are the
+only ones that expose it. For `::slotted()`, appearance IS reproducible but
+**cascade position is not**: an outer-tree declaration beats a `::slotted()`
+declaration regardless of specificity, so a consumer's bare `img { object-fit:
+contain }` wins against the shadow form and loses against the static descendant
+rewrite — an equivalence gate cannot hold there. `#309` files the generator and
+`#310` the equivalence gate; neither is built by the record. Status is
+`Proposed`, and adoption is gated on a product verdict that is still pending.
+
 ---
 
 ## 2a. Gates
