@@ -85,7 +85,7 @@
       "wp": "WP01"
     },
     "#305": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "Gated child, unblocked not worked. ADR-15: #305 may freeze now, unconditionally \u2014 sk-button.css's only :host rule is display: inline-flex, explicitly inert in the static path; a busy axis is a root-class modifier plus ARIA.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -93,8 +93,8 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
     },
     "#307": {
       "evidence_ref": "<link or commit>",
