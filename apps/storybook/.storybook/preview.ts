@@ -29,18 +29,38 @@ import "../../../packages/styles/src/progress/sk-progress.css";
 import "../../../packages/styles/src/prose/sk-prose.css";
 import "../../../packages/styles/src/workflow-board/sk-workflow-board.css";
 import "../../../packages/styles/src/workflow-lane/sk-workflow-lane.css";
-// #303's sk-boundary-page is the mirror-image case of the block above: a styles-only,
-// no-element FRAME (packages/styles, scope:styles) composing two already-shipped CUSTOM
-// ELEMENTS (sk-entity-marker #304, sk-pill-tag #302) as opaque children in its own plain
-// HTML exemplars — never the other way around. Its own CSS sets no default size/shape/
-// border/tone on either (research.md Decision 2) and reaches into neither via `::part()`
-// (spec C-005); this import only makes the two elements UPGRADE (attach their own shadow
-// root) when Storybook renders sk-boundary-page's markup, exactly the same
-// scope:styles-cannot-import-scope:elements boundary as the comment above, mirrored: a
-// styles-only component has no layer of its own to import a custom element's definition
-// from, and `scope:storybook` is again the one project allowed to reach both.
+// #303's sk-boundary-page is the mirror-image case of the block above: a styles-only, no-element
+// FRAME (packages/styles, scope:styles) composing an already-shipped CUSTOM ELEMENT
+// (sk-entity-marker #304) as an opaque child in its own plain HTML exemplars — never the other
+// way around. Its own CSS sets no default size/shape/border on it (research.md Decision 2) and
+// reaches into it via no `::part()` (spec C-005). sk-pill-tag is NOT registered here: after this
+// mission's review-remediation pass, the composed status pill is authored as the STYLES-LAYER
+// span form (`<span class="sk-pill-tag sk-pill-tag--status-<tone>">`, exactly what
+// packages/styles/src/pill-tag/sk-pill-tag.html ships), not `<sk-pill-tag status="...">` — the
+// custom element's `status` is a PROPERTY, and `pillTagClasses()` puts the tone modifier on the
+// SHADOW `<span part="tag">`, so a class on the light-DOM `<sk-pill-tag>` host never reaches it.
+// sk-boundary-page-html.stories.ts imports packages/styles/src/pill-tag/sk-pill-tag.css directly
+// instead (an intra-project import within the single `styles` nx project, not a cross-project
+// one `@nx/enforce-module-boundaries` would constrain), so no element registration is needed for
+// it at all.
+//
+// sk-entity-marker still needs registering here, and the reason is checked, not assumed: a
+// styles-only component has no layer of its own to import a custom element's definition from,
+// and `scope:storybook` is the one project allowed to reach both scope:styles and scope:elements
+// (see the depConstraints in eslint.config.mjs). Probed directly (this mission's review pass) —
+// a bare `import "@spec-kitty/elements"` from inside packages/styles fails as a CIRCULAR
+// DEPENDENCY (`Circular dependency between "styles" and "elements" detected: styles -> elements
+// -> styles`), not the `scope:styles` depConstraint an earlier revision of this comment implied
+// (elements itself depends on styles, so styles importing elements closes a cycle, and nx's
+// circular-dependency check fires before the depConstraints check gets a chance to); a relative
+// path (`import "../../elements/src/..."`) fails separately, with "Projects cannot be imported
+// by a relative or absolute path, and must begin with a npm scope"; and a deep subpath import
+// (`@spec-kitty/elements/entity-marker/...`) raises NO lint error at all, because it is simply
+// unmapped in `tsconfig.base.json`'s `paths` (only the package root and a `/dist/*` alias exist
+// there) — it would fail at resolution time, not at lint time. None of the three is a route
+// packages/styles can take; `scope:storybook` importing the built element module, here, is the
+// only one that works.
 import "../../../packages/elements/src/entity-marker/sk-entity-marker.js";
-import "../../../packages/elements/src/pill-tag/sk-pill-tag.js";
 import type { Preview } from "@storybook/web-components";
 
 const preview: Preview = {
