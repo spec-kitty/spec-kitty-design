@@ -159,7 +159,7 @@ Those look contradictory and are not: **they are different bases, and partly a
 different component.** ADR-10's SP-3 spike measured \`sk-card\`, not \`sk-stub\`.
 
 - ADR-10 §2's two figures are **unminified raw on \`sk-card\` ALONE** (3.7 / 26.6 KB).
-- ADR-8's ~6 KB is **minified+gzip**, and the IIFE now measures ${kb(ARTIFACTS[1].mingzip)}
+- ADR-8's ~6 KB is **minified+gzip**, and the IIFE now measures ${wholeKb(ARTIFACTS[1].mingzip)}
   min+gzip — which does NOT corroborate it and is not meant to. That figure was a per-component
   Lit-runtime estimate; this artifact carries the runtime plus every component in the package,
   so the two are different bases and the gap grows with each component added. An earlier
@@ -218,6 +218,53 @@ ${ARTIFACTS.map(
 ).join('\n')}
 \`\`\`
 `;
+
+// REGRESSION GUARD (#317): a decimal-precision compressed figure snuck into the ADR-8
+// corroboration paragraph (`kb(ARTIFACTS[1].mingzip)` where the rest of the file uses
+// `wholeKb()` for anything gzip-derived) and it was NOT caught by `--check`, because
+// `--check` only proves this run's generated body matches what was committed — it says
+// nothing about whether that body is itself well-formed. That line passed `--check` on
+// every machine that generated it and only broke on the machine that generated it next,
+// because gzip output is not reproducible across zlib builds (see the note above `wholeKb`).
+//
+// `kb()` always renders one decimal place before "KiB" (e.g. "36.1 KiB") and `wholeKb()`
+// never does (e.g. "36 KiB"), so a bare `body.includes(kb(a.mingzip))` rules out a wholeKb()
+// rendering colliding by construction. It does NOT rule out a coincidental collision with a
+// REPRODUCIBLE figure — raw, minified, or unpacked — that this file also renders via `kb()`
+// at one decimal place. If `kb(a.gzip)` happened to equal the rendering of some package's
+// `unpacked` size, a bare substring match would red a perfectly correct tree (#332 names this
+// exact shape — a coincidental string match — in another gate in this repo).
+//
+// So this only flags a decimal-precision compressed figure whose string is NOT ALSO the
+// legitimate `kb()` rendering of a reproducible quantity the file reports elsewhere: every
+// artifact's raw and minified size, every package's unpacked size, and the raw runtime-cost
+// delta used in the ADR-8 section (`ARTIFACTS[1].raw - ARTIFACTS[0].raw`) — the complete set
+// of things this file legitimately renders through `kb()`. This closes the coincidental-string
+// false positive while still catching the real defect, because the guard's failure mode is
+// symmetric with its success: the ONLY way a compressed figure's decimal string can now go
+// unflagged is if a reproducible figure renders to that exact same string in this exact build,
+// at which point the compressed figure is textually indistinguishable from a legitimate one and
+// no purely textual check — this one included — can tell them apart. Author discipline (use
+// `wholeKb()` for anything derived from `a.gzip`/`a.mingzip`) remains the actual control; this
+// is a best-effort net under it, not a proof.
+const reproducibleDecimalForms = new Set([
+  ...ARTIFACTS.flatMap((a) => [kb(a.raw), kb(a.min)]),
+  ...PACKAGES.map((p) => kb(p.unpacked)),
+  kb(ARTIFACTS[1].raw - ARTIFACTS[0].raw),
+]);
+for (const a of ARTIFACTS) {
+  for (const [label, value] of [['gzip', a.gzip], ['min+gzip', a.mingzip]]) {
+    const decimalForm = kb(value);
+    if (body.includes(decimalForm) && !reproducibleDecimalForms.has(decimalForm)) {
+      console.error(
+        `measure-elements-sizes: generated body embeds "${decimalForm}" — a decimal-precision ` +
+          `${label} figure for ${a.name}. Compressed sizes are not reproducible across machines; ` +
+          `use wholeKb(), not kb(), for anything derived from a.gzip or a.mingzip. See #317.`,
+      );
+      process.exit(1);
+    }
+  }
+}
 
 if (check) {
   const current = existsSync(OUT) ? readFileSync(OUT, 'utf8') : null;
