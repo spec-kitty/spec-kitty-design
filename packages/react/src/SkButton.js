@@ -6,6 +6,7 @@ import { createForwardedRefHandler } from "./react-utils.js";
 export const SkButton = forwardRef((props, forwardedRef) => {
   const ref = useRef(null);
   const {
+    busy,
     disabled,
     href,
     label,
@@ -38,6 +39,7 @@ export const SkButton = forwardRef((props, forwardedRef) => {
       for: htmlFor ?? props["for"],
       part: part,
       tabindex: tabIndex ?? props["tabindex"],
+      busy: busy ? true : undefined,
       disabled: disabled ? true : undefined,
       style: { ...props.style },
     },

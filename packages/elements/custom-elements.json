@@ -59,8 +59,8 @@
         {
           "kind": "variable",
           "name": "BUTTON_AXES",
-          "default": "{ Sm: { size: 'sm', variant: 'primary' }, Link: { href: '#', variant: 'primary' }, } as const satisfies Record<string, ButtonStaticOptions>",
-          "description": "The static forms this component publishes, beyond the base and one per variant.\n\n`Sm` is the small size in its primary tone; `Link` is the anchor form."
+          "default": "{ Sm: { size: 'sm', variant: 'primary' }, Link: { href: '#', variant: 'primary' }, Busy: { busy: true, variant: 'primary' }, } as const satisfies Record<string, ButtonStaticOptions>",
+          "description": "The static forms this component publishes, beyond the base and one per variant.\n\n`Sm` is the small size in its primary tone; `Link` is the anchor form; `Busy` carries the\n`.sk-button--busy` class with no cue markup (see `buttonStaticHtml`'s doc comment)."
         },
         {
           "kind": "variable",
@@ -102,9 +102,16 @@
               "type": {
                 "text": "string"
               }
+            },
+            {
+              "name": "busy",
+              "optional": true,
+              "type": {
+                "text": "boolean"
+              }
             }
           ],
-          "description": "The button's class list. Warns and degrades on an unknown variant or size."
+          "description": "The button's class list. Warns and degrades on an unknown variant or size. `busy` is a\nplain boolean append — unlike variant/size there is no \"unknown busy value\" failure mode,\nso no validation function is needed for it."
         },
         {
           "kind": "function",
@@ -127,7 +134,7 @@
               "default": "'Label'"
             }
           ],
-          "description": "The static form. Throws on an unknown variant or size.\n\nANCHOR OR BUTTON, decided by `href`, and this is not a convenience — it is what the\ncatalogue already does. Every real use of this class in `apps/demo` is an `<a href>` styled\nas a button; the stories use `<button>`. One primitive, two elements, and the class list is\nidentical on both. So the element switches on the same signal rather than forcing consumers\nto choose between a working link and a styled one."
+          "description": "The static form. Throws on an unknown variant or size.\n\nANCHOR OR BUTTON, decided by `href`, and this is not a convenience — it is what the\ncatalogue already does. Every real use of this class in `apps/demo` is an `<a href>` styled\nas a button; the stories use `<button>`. One primitive, two elements, and the class list is\nidentical on both. So the element switches on the same signal rather than forcing consumers\nto choose between a working link and a styled one.\n\n`busy` (#305) THREADS THE CLASS ONLY. `.sk-button--busy` reaches this output the same way\nvariant/size do — one CSS source, shared (ADR-10 §3). But the decorative cue node\n(`sk-button.ts`'s `<span part=\"busy-cue\">`) is never emitted here: this function has no\nshadow root and no `render()` to conditionally attach it to, so a static consumer who wants\nthe visual cue must author their own element against the same generated stylesheet. This is\nthe same pattern ADR-15 already establishes for other constructs a static consumer must\nauthor instead of receiving generated — stated explicitly here so a future reader does not\nassume this branch renders an equivalent cue automatically. It does not, by design."
         },
         {
           "kind": "variable",
@@ -2138,6 +2145,10 @@
           "name": "SkButton",
           "cssParts": [
             {
+              "description": "a decorative, `aria-hidden` activity indicator shown while `busy` is set",
+              "name": "busy-cue"
+            },
+            {
               "description": "the rendered `<button>` or `<a>`",
               "name": "button"
             }
@@ -2165,6 +2176,17 @@
               "type": {
                 "text": "string | undefined"
               }
+            },
+            {
+              "kind": "field",
+              "name": "busy",
+              "privacy": "public",
+              "type": {
+                "text": "boolean"
+              },
+              "description": "Shows a decorative activity cue via CSS alone. Purely presentational: this component\nnever sets, clears, or reads `disabled`/`aria-disabled` on account of `busy`, owns no\nrequest/timer/announcement, and the accessible name is unchanged in either state — the\nconsumer's own request-handling code and disabling mechanism stay entirely its own.",
+              "attribute": "busy",
+              "reflects": true
             },
             {
               "kind": "field",
@@ -2232,6 +2254,14 @@
             }
           ],
           "attributes": [
+            {
+              "name": "busy",
+              "type": {
+                "text": "boolean"
+              },
+              "description": "Shows a decorative activity cue via CSS alone. Purely presentational: this component\nnever sets, clears, or reads `disabled`/`aria-disabled` on account of `busy`, owns no\nrequest/timer/announcement, and the accessible name is unchanged in either state — the\nconsumer's own request-handling code and disabling mechanism stay entirely its own.",
+              "fieldName": "busy"
+            },
             {
               "name": "disabled",
               "type": {

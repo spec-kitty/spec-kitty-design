@@ -48,7 +48,8 @@
     "#274 ratchets fourteen additive sk-app-shell rail-preserving stories: closed/open, 390/768/1024/1100/1101/wide, long labels, short/tall viewports, reduced motion, forced colors, and LightMode. On the refreshed train after #257, total moves 420 -> 434; all legacy, #254, segmented-choice, collection, action-row, checkbox-choice-group, event-timeline, Mission Reading, and copy-field story ids remain unchanged.",
     "#278 ratchets the ten Storybook-only Mission Kanban routes named as acceptance evidence, total 434 -> 444 on the refreshed train after #274. K1-K6 remain separately addressable alongside LightMode, long-content, forced-colors, and reduced-motion evidence; fixture, projector, guard, and render helpers are excluded from CSF indexing.",
     "#255 ratchets the eighteen Storybook-only Repository Dossier routes named as acceptance evidence. D1 is the populated desktop composition; D2 retains separate closed and controlled-open 390px drawer states; D4-D8 preserve cross-branch, terminal, snapshot, indexing, and completed-empty truth; LightMode, long data, supplied progress values, the 860/861 compact-navigation seam, safe/static tracker destinations, forced colors, reduced motion, and 200%/400% zoom remain independently reviewable. On the refreshed train after #278, total moves 444 -> 462; fixture, projection, freeze, and render helpers are excluded from CSF indexing.",
-    "#275 ratchets the exact ten Storybook-only Work Explorer W1-W10 compositions. Lane, person, and type regroupings conserve one 50-record fixture; rail-preserving, LightMode, filtered-empty, no-work, degraded, loading, and no-repository states stay separately addressable. On the refreshed train after #255, total moves 462 -> 472; fixture, selector, projector, and renderer helpers are excluded from CSF indexing."
+    "#275 ratchets the exact ten Storybook-only Work Explorer W1-W10 compositions. Lane, person, and type regroupings conserve one 50-record fixture; rail-preserving, LightMode, filtered-empty, no-work, degraded, loading, and no-repository states stay separately addressable. On the refreshed train after #255, total moves 462 -> 472; fixture, selector, projector, and renderer helpers are excluded from CSF indexing.",
+    "#305 adds five sk-button busy stories: Busy (per tone, side by side with the idle Primary/Secondary/Ghost stories already present for comparison), BusySmall, BusyIcon, BusyDisabled, and BusyAriaDisabled. The existing LightMode story is extended in place with a busy fixture and is not a new id. Total moves 472 -> 477; every pre-existing sk-button story id is unchanged."
   ],
   "byElement": {
     "sk-action-row": [
@@ -143,7 +144,12 @@
       "elements-skbutton--icon",
       "elements-skbutton--icon-link",
       "elements-skbutton--icon-focus",
-      "elements-skbutton--light-mode"
+      "elements-skbutton--light-mode",
+      "elements-skbutton--busy",
+      "elements-skbutton--busy-small",
+      "elements-skbutton--busy-icon",
+      "elements-skbutton--busy-disabled",
+      "elements-skbutton--busy-aria-disabled"
     ],
     "sk-card": [
       "elements-skcard--default",
@@ -618,5 +624,5 @@
       "patterns-work-explorer--w-10-no-admitted-repositories-dark"
     ]
   },
-  "total": 472
+  "total": 477
 }

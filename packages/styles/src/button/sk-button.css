@@ -26,6 +26,10 @@
     border-color var(--sk-motion-duration-fast) var(--sk-motion-ease-out),
     background var(--sk-motion-duration-fast) var(--sk-motion-ease-out);
   text-decoration: none;
+  /* Positioning container for the busy cue below (#305). Inert on its own — a `position`
+     change with no absolutely-positioned descendant changes nothing about this element's own
+     box, so this line alone cannot be the source of a layout-shift regression. */
+  position: relative;
 }
 
 /* Primary variant — yellow fill, dark ink text, pill shape */
@@ -91,3 +95,155 @@
   opacity: 0.4;
   cursor: not-allowed;
 }
+
+/* ============================================================================================
+ * Busy axis (#305): a decorative, non-flow-participating activity cue.
+ *
+ * MARKUP SHAPE: `sk-button.ts` renders an unconditional, `aria-hidden="true"`, text-free
+ * `<span part="busy-cue">` inside BOTH the `<button>` and `<a>` branches, alongside the
+ * existing `part="button"` node. Its DOM presence never changes between idle and busy — only
+ * the CSS below (keyed on `.sk-button--busy` / `:host([busy])`) changes its
+ * `visibility`/`opacity`/`animation`. This is deliberate: a cue whose presence in the DOM was
+ * itself conditional on `busy` would make the layout-shift measurement (FR-006) test the
+ * wrong thing (DOM mutation cost, not the CSS mechanism below).
+ *
+ * ZERO LAYOUT SHIFT BY CONSTRUCTION, not by assertion. `.sk-button__busy-cue` is
+ * `position: absolute`, confined to the button's own padding box (`.sk-button` above gains
+ * `position: relative` as its positioning container). An absolutely-positioned element does
+ * not participate in flex-row sizing, so the cue's mere presence or absence under
+ * `.sk-button--busy` cannot change `.sk-button`'s own `getBoundingClientRect()` box — this is
+ * the MECHANISM FR-006's idle/busy/idle geometry test measures, not an assumption the test
+ * merely restates. Do not reserve space for the cue with padding, margin, or a flex-basis
+ * change keyed on `busy` — that would reintroduce the exact defect both hand-authored Family 4
+ * spinners (`.saving-spinner`, `.sending-spinner`) shipped with.
+ *
+ * NEITHER DISABLING MECHANISM (C-002, FR-003/004/005). Every rule below is keyed exclusively
+ * on `.sk-button--busy` / `:host([busy])` — never on `:disabled`, `[disabled]`, or
+ * `[aria-disabled]`. The existing `:disabled, [disabled]` block above is untouched and composes
+ * independently: a busy+disabled button dims (existing rule, unmodified) AND shows the cue
+ * (this rule, unmodified by the dimming) at the same time, because the two rule sets share no
+ * selector.
+ *
+ * NO SHARED PRIMITIVE WITH sk-progress/#306 (C-004, C-005). This cue is authored independently
+ * of the progress family per the ratified TKT5/TKT6 cross-mission decision — see
+ * kitty-specs/button-busy-axis-01M25DE5/spec.md's "Cross-Mission Decision" section. It reuses
+ * no `sk-progress__bar`, no `<progress>`-based element, and no DOM primitive shared with that
+ * family, and it is not designed, named, or structured to be a general-purpose spinner usable
+ * by other components.
+ *
+ * THE STATIC FORM GETS THE CLASS, NOT THE CUE. `.sk-button--busy` is an ordinary root-class
+ * modifier the static markup module (`sk-button.markup.ts`) can append, sharing this one CSS
+ * source (ADR-10 §3) — confirmed this component's `:host` rule is a bare `display` declaration,
+ * so ADR-15 does not gate it and ADR-15's generated-wrapper cases do not apply. But the cue
+ * itself is a real shadow-DOM node with no static-path equivalent: the static form has no
+ * `render()` to emit it, so `.sk-button__busy-cue` never exists in flattened static markup. A
+ * static consumer wanting the visual cue authors their own node against this same generated
+ * stylesheet — see `sk-button.markup.ts`'s doc comment for the consumer-facing statement of
+ * this boundary.
+ *
+ * TOKENS: `--sk-motion-duration-slow` (rotation duration — `linear` timing is a CSS keyword,
+ * not a token, chosen so the spin reads as constant-speed activity rather than
+ * decelerating/accelerating), `--sk-space-*` (inset/size), `--sk-border-width-2` /
+ * `--sk-border-default` (resting ring), `--sk-fg-default` / `--sk-fg-on-primary` (active arc,
+ * per tone) — all pre-existing tokens, no new category (NFR-005).
+ * ============================================================================================ */
+
+.sk-button__busy-cue {
+  position: absolute;
+  inset-block: 0;
+  /* Vertical centering via auto margins on both inset-block edges, NOT `transform`. The spin
+     keyframes below own `transform` exclusively — combining a static `translate` with an
+     animated `rotate` on the same property would force the browser to interpolate between two
+     different transform-function lists (matrix-decomposed), which does not produce a clean
+     spin around a fixed centre. */
+  margin-block: auto;
+  inset-inline-start: var(--sk-space-2);
+  inline-size: var(--sk-space-4);
+  block-size: var(--sk-space-4);
+  box-sizing: border-box;
+  border-radius: var(--sk-radius-pill); /* clamps to a full circle on a square box */
+  /* LONGHANDS, not the `border` shorthand — a shorthand value containing `var(...)` cannot be
+     split into individual longhands in the CSSOM (stored as a pending-substitution value), so
+     `CSSStyleRule.style.borderStyle` reads back as `''` instead of `'solid'`. The
+     forced-colors test below (and FR-010's evidence) needs to read this back. */
+  border-width: var(--sk-border-width-2);
+  border-style: solid;
+  border-color: var(--sk-border-default);
+  border-top-color: var(--sk-fg-default);
+  visibility: hidden;
+  opacity: 0;
+}
+
+.sk-button--busy .sk-button__busy-cue,
+:host([busy]) .sk-button__busy-cue {
+  visibility: visible;
+  opacity: 1;
+  /* LONGHANDS, not the `animation` shorthand — matching sk-status-indicator.css's own pulse
+     rule. A shorthand whose value contains `var(...)` cannot be split into individual longhand
+     components in the CSSOM (it is stored as a pending-substitution value), so
+     `CSSStyleRule.style.animationName` reads back as `''` instead of the keyframe name — this
+     broke the reduced-motion test below until switched to longhands, the same way
+     sk-status-indicator.test.ts's `authoredStatusSheet` technique already relies on longhands
+     existing to read.
+     `linear`, not an `--sk-motion-ease-*` token: a constant-speed spin reads as "in progress";
+     easing the rotation itself would read as decelerating/accelerating activity, which is not
+     the signal intended. The duration still comes from a token (NFR-001). */
+  animation-name: sk-button-busy-spin;
+  animation-duration: var(--sk-motion-duration-slow);
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+@keyframes sk-button-busy-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Primary's arc reuses the same dark ink already used for its text (matches
+   --sk-fg-on-primary's existing role on this tone) — secondary/ghost/base keep the base rule's
+   --sk-fg-default, which already matches their own text colour. */
+.sk-button--primary .sk-button__busy-cue {
+  border-top-color: var(--sk-fg-on-primary);
+}
+
+/* --sm: smaller box, smaller cue and inset — measured against the real built stylesheet
+   (~32px control height at this size) so the ring does not crowd the shorter padding box. */
+.sk-button--sm .sk-button__busy-cue {
+  inset-inline-start: var(--sk-space-1);
+  inline-size: var(--sk-space-3);
+  block-size: var(--sk-space-3);
+}
+
+/* --icon: a fixed 40px square with zero padding (`.sk-button--icon` above) and a
+   consumer-slotted glyph already filling the box — measured against that real 40px render
+   rather than assuming the default inset transfers. A corner-anchored cue smaller than the
+   default size leaves the glyph legible while still being clearly present. */
+.sk-button--icon .sk-button__busy-cue {
+  inset-inline-start: var(--sk-space-1);
+  inline-size: var(--sk-space-3);
+  block-size: var(--sk-space-3);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Motion stops; the cue does NOT. Scoped to exactly the cue selector and the `animation`
+     property — never a wildcard over the button's own subtree, and never touching
+     `visibility`/`opacity`, which stay at the busy-visible values above. A cue that vanished
+     here would read as "the activity disappeared", not "motion stopped" (FR-009). Distinguishable
+     from idle by construction: idle's `.sk-button__busy-cue` is `opacity: 0`/`visibility: hidden`
+     (invisible), while this frozen frame stays fully opaque and visible — no additional
+     reduced-motion-only styling is needed to tell the two apart. */
+  .sk-button--busy .sk-button__busy-cue,
+  :host([busy]) .sk-button__busy-cue {
+    animation-name: none;
+  }
+}
+
+/* No explicit forced-colors override for the cue (checked, not assumed absent — T001 Activity
+   Log). `border` survives `forced-colors: active` automatically with zero author CSS (the
+   browser remaps border colors to a system color), per this doc's own established guidance
+   (docs/contributing/adding-a-component.md, "Forced-colors and reduced-motion baselines"), and
+   this cue is entirely border-drawn (no `background`/`box-shadow` carrying its shape). The base
+   rule's `border-style: solid` (via the `border` shorthand above) is therefore the only
+   assertion this needs — see `fixtures/elements-behaviour/src/sk-button.test.ts`'s
+   forced-colors coverage. */

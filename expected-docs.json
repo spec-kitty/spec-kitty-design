@@ -38,9 +38,10 @@
     "#254 adds two reflected sk-app-shell attributes (presentation and open) plus one property-only compactTrigger field. On the refreshed train after #256, total moves 111 -> 114; no public method is added.",
     "#272 adds two reflected sk-action-row attributes: href for the native-anchor route mode and presentation for the orthogonal flush surface. On the refreshed train after #254, action-row moves 4 -> 6 and total moves 114 -> 116; no property-only field or public method is added.",
     "#257 adds sk-copy-field's five documented string attributes and no public methods or property-only fields. On the refreshed train after #288, total moves 116 -> 121.",
-    "#308 adds sk-confirm-dialog: eight documented attributes (dialog-title, message, confirm-label, cancel-label, confirm-variant, initial-focus, backdrop-dismiss, open), no property-only fields, and one public method (showModal). On the refreshed train after #257, total moves 121 -> 130."
+    "#308 adds sk-confirm-dialog: eight documented attributes (dialog-title, message, confirm-label, cancel-label, confirm-variant, initial-focus, backdrop-dismiss, open), no property-only fields, and one public method (showModal). On the refreshed train after #257, total moves 121 -> 130.",
+    "#305 adds one documented sk-button attribute: busy (boolean, reflected). No property-only field or public method is added. On the refreshed train after #308, total moves 130 -> 131."
   ],
-  "total": 130,
+  "total": 131,
   "elements": {
     "sk-action-row": {
       "attributes": 6,
@@ -63,7 +64,7 @@
       "methods": 0
     },
     "sk-button": {
-      "attributes": 5,
+      "attributes": 6,
       "properties": 0,
       "methods": 0
     },
