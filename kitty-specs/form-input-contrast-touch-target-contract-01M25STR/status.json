@@ -1,7 +1,7 @@
 {
-  "event_count": 1,
-  "last_event_id": "01M25V3MFHFJN0Y6QHF5AFR813",
-  "materialized_at": "2026-09-10T14:21:21.778006+00:00",
+  "event_count": 2,
+  "last_event_id": "01M25ZRM5TBTV9JVZ5G236QV5D",
+  "materialized_at": "2026-09-10T15:42:43.898467+00:00",
   "mission_number": "",
   "mission_slug": "form-input-contrast-touch-target-contract-01M25STR",
   "mission_type": "software-dev",
@@ -9,20 +9,40 @@
     "approved": 0,
     "blocked": 0,
     "canceled": 0,
-    "claimed": 0,
+    "claimed": 1,
     "done": 0,
     "for_review": 0,
     "in_progress": 0,
     "in_review": 0,
-    "planned": 1
+    "planned": 0
   },
   "work_packages": {
     "WP01": {
-      "actor": "finalize-tasks",
+      "actor": "user",
+      "agent_profile": "__resolved_profile_absent__",
+      "agent_profile_version": "__resolved_profile_version_absent__",
       "force_count": 0,
-      "lane": "planned",
-      "last_event_id": "01M25V3MFHFJN0Y6QHF5AFR813",
-      "last_transition_at": "2026-09-10T14:21:21.778006+00:00"
+      "lane": "claimed",
+      "last_event_id": "01M25ZRM5TBTV9JVZ5G236QV5D",
+      "last_transition_at": "2026-09-10T15:42:43.898467+00:00",
+      "model": "__resolved_model_absent__",
+      "provider": "__resolved_provider_absent__",
+      "role": "implementer",
+      "subtasks": {
+        "T001": "done",
+        "T002": "done",
+        "T003": "done",
+        "T004": "done",
+        "T005": "done",
+        "T006": "done",
+        "T007": "done",
+        "T008": "done",
+        "T009": "done",
+        "T010": "done",
+        "T011": "done",
+        "T012": "done",
+        "T013": "done"
+      }
     }
   }
 }
