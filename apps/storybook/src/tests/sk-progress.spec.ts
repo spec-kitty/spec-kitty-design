@@ -12,6 +12,47 @@ const story = async (page: Page, id: string) => {
 };
 
 /**
+ * Decodes a Playwright screenshot Buffer INSIDE the page (Canvas/Image are standard
+ * web APIs, identical across chromium/firefox/webkit) and samples three points across
+ * the element's width. Exists because `getComputedStyle(node, '::-webkit-progress-value')`
+ * / `'::-moz-progress-bar'` does not reliably reflect authored CSS for these vendor
+ * pseudo-elements in this repo's measured testing (Chromium in particular returns
+ * default/initial values regardless of the actual applied style) — pixel sampling
+ * reads what actually rendered instead of guessing at an unreliable API, and works
+ * identically on every engine including WebKit in CI.
+ */
+const samplePixels = async (page: Page, buffer: Buffer) => {
+  const dataUrl = `data:image/png;base64,${buffer.toString('base64')}`;
+  return page.evaluate(async (url) => {
+    const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+      const image = new Image();
+      image.onload = () => resolve(image);
+      image.onerror = reject;
+      image.src = url;
+    });
+    const canvas = document.createElement('canvas');
+    canvas.width = img.naturalWidth;
+    canvas.height = img.naturalHeight;
+    const ctx = canvas.getContext('2d')!;
+    ctx.drawImage(img, 0, 0);
+    const w = canvas.width;
+    const h = canvas.height;
+    const sample = (x: number, y: number) => Array.from(ctx.getImageData(x, y, 1, 1).data);
+    return {
+      left: sample(2, Math.floor(h / 2)),
+      center: sample(Math.floor(w / 2), Math.floor(h / 2)),
+      right: sample(Math.max(0, w - 3), Math.floor(h / 2)),
+    };
+  }, dataUrl);
+};
+
+type Pixels = Awaited<ReturnType<typeof samplePixels>>;
+const pixelsEqual = (a: number[], b: number[], tolerance = 2) =>
+  a.every((v, i) => Math.abs(v - b[i]) <= tolerance);
+const samplesEqual = (a: Pixels, b: Pixels, tolerance = 2) =>
+  pixelsEqual(a.left, b.left, tolerance) && pixelsEqual(a.center, b.center, tolerance) && pixelsEqual(a.right, b.right, tolerance);
+
+/**
  * Every exported fixture constant from the GENERATED barrel, parsed the same way the
  * generator itself produced them (`JSON.stringify`-escaped one-liners) — a static
  * source read, matching sk-transition-matrix.spec.ts's own convention of asserting
@@ -30,6 +71,9 @@ const readFixtures = (): Array<{ name: string; html: string }> => {
   return fixtures;
 };
 
+/** FR-014/R-03: the naming convention every indeterminate fixture export uses. */
+const isIndeterminate = (name: string) => name.includes('Indeterminate');
+
 const parseFixture = (html: string) => {
   const value = Number(html.match(/\bvalue="(-?\d+(?:\.\d+)?)"/)?.[1]);
   const max = Number(html.match(/\bmax="(-?\d+(?:\.\d+)?)"/)?.[1]);
@@ -45,14 +89,52 @@ test.describe('sk-progress markup contract and source-level assertions', () => {
     expect(css).not.toMatch(/content\s*:[^;]*\b(value|max|counter\()/);
   });
 
-  test('reduced-motion guard is either absent (no transition authored) or scoped to exactly one selector/property', () => {
+  /**
+   * R-07's narrow CSS-guard substitute for a component-scoped #286 no-literal test:
+   * this family has no `render()`/shadow root at all (confirmed by the ADR-15-
+   * independence grep below), so the defect class #286 targets cannot occur here.
+   * This asserts no `content:` declaration anywhere in the file carries literal
+   * text (distinct from the test above, which only checks for value/max/counter()
+   * references) — a permanent, cheap regression guard, not a new repo-wide gate.
+   */
+  test('no CSS Generated Content literal text: no content declaration with a quoted string', () => {
     const css = readFileSync(PROGRESS_CSS, 'utf8');
-    const hasTransition = /\.sk-progress[^{]*\{[^}]*transition\s*:/s.test(css);
-    const reducedMotionBlocks = css.match(/@media \(prefers-reduced-motion: reduce\)\s*\{[^}]*\{[^}]*\}[^}]*\}/gs) ?? [];
-    if (!hasTransition) {
+    expect(css).not.toMatch(/content\s*:\s*["']/);
+  });
+
+  test('ADR-15 independence remains true after this mission: zero :host/::slotted/container-type/::part RULE usage', () => {
+    // SC-013 / R-01: this file's own header comment explains, in prose, that no
+    // `:host` rule applies here — a literal grep for the bare strings would flag
+    // that explanatory sentence itself (it always has, since #210). The actual
+    // gate is for RULE syntax (a selector or declaration), not the word appearing
+    // in a comment, so this matches the same shapes
+    // `check-adopted-css-boundaries.mjs` looks for.
+    const css = readFileSync(PROGRESS_CSS, 'utf8');
+    expect(css).not.toMatch(/:host\s*[{(]|::slotted\s*\(|container-type\s*:|::part\s*\(/);
+  });
+
+  test('reduced-motion guard is either absent (no transition/animation authored) or scoped to exactly the selectors/properties owning one', () => {
+    const css = readFileSync(PROGRESS_CSS, 'utf8');
+    // FR-007/NFR-005: this mission's guard is `animation`-based, not `transition`-based
+    // (the determinate family owns no transition at all — unchanged). The original
+    // version of this test only looked for `transition:`, which would have silently
+    // treated this mission's real, non-vacuous `animation-name` guard as vacuous.
+    const hasMotionDeclaration = /\.sk-progress[^{]*\{[^}]*(transition|animation-name)\s*:/s.test(css);
+    const reducedMotionBlocks = css.match(/@media \(prefers-reduced-motion: reduce\)\s*\{[\s\S]*?\n\}/g) ?? [];
+    if (!hasMotionDeclaration) {
       expect(reducedMotionBlocks).toHaveLength(0);
     } else {
       expect(reducedMotionBlocks.length).toBeGreaterThan(0);
+      // Every rule inside the reduced-motion block(s) is scoped to a
+      // `.sk-progress--indeterminate` selector and sets `animation-name` — never a
+      // wildcard over the component's own subtree.
+      const combined = reducedMotionBlocks.join('\n');
+      const innerSelectors = combined.match(/^\s*\.[^{]+\{/gm) ?? [];
+      expect(innerSelectors.length).toBeGreaterThan(0);
+      for (const selector of innerSelectors) {
+        expect(selector).toContain('.sk-progress--indeterminate');
+      }
+      expect(combined).toMatch(/animation-name\s*:\s*none/);
     }
   });
 
@@ -63,8 +145,14 @@ test.describe('sk-progress markup contract and source-level assertions', () => {
     }
   });
 
-  test('every maintained fixture keeps its visible meta text consistent with its own value/max pair', () => {
-    for (const { name, html } of readFixtures()) {
+  test('every maintained DETERMINATE fixture keeps its visible meta text consistent with its own value/max pair', () => {
+    // Scoped to determinate fixtures only (FR-014/R-03/SC-009) — a targeted filter,
+    // not a loosened assertion: every determinate fixture is still checked exactly
+    // as before this mission. Indeterminate fixtures have no value/max pair by
+    // design (FR-002) and are asserted separately below.
+    const determinateFixtures = readFixtures().filter(({ name }) => !isIndeterminate(name));
+    expect(determinateFixtures.length).toBeGreaterThan(0);
+    for (const { name, html } of determinateFixtures) {
       const { value, max, metaText } = parseFixture(html);
       expect(Number.isFinite(value), `${name}: value must parse`).toBe(true);
       expect(Number.isFinite(max), `${name}: max must parse`).toBe(true);
@@ -74,6 +162,29 @@ test.describe('sk-progress markup contract and source-level assertions', () => {
       const expectedPercent = Math.round((value / max) * 100);
       expect(Number(percentMatch![1]), `${name}: meta "${metaText}" vs value=${value} max=${max}`).toBe(expectedPercent);
     }
+  });
+
+  test('every INDETERMINATE fixture has no value attribute anywhere in its source, and any meta text is never a percentage', () => {
+    const indeterminateFixtures = readFixtures().filter(({ name }) => isIndeterminate(name));
+    // FR-012: at least the five required fixtures exist.
+    expect(indeterminateFixtures.length).toBeGreaterThanOrEqual(5);
+    for (const { name, html } of indeterminateFixtures) {
+      // R-02: structurally absent, not an empty string or an out-of-range value —
+      // asserted at the source-file text level, matching the fixture author's own
+      // source, not only the rendered DOM (a template artifact injecting `value=""`
+      // would be invisible to a rendered-DOM-only check).
+      expect(html, `${name} must carry no value attribute at all`).not.toMatch(/\bvalue=/);
+      const metaText = html.match(/sk-progress__meta">([^<]*)</)?.[1];
+      if (metaText !== undefined) {
+        expect(metaText, `${name}: meta text "${metaText}" must never read as a percentage`).not.toMatch(/^\d+%$/);
+      }
+    }
+    // FR-005: at least one fixture omits __meta entirely (a supported, tested
+    // state), and at least one supplies non-numeric status text.
+    const withoutMeta = indeterminateFixtures.filter(({ html }) => !html.includes('sk-progress__meta'));
+    const withMeta = indeterminateFixtures.filter(({ html }) => html.includes('sk-progress__meta'));
+    expect(withoutMeta.length).toBeGreaterThan(0);
+    expect(withMeta.length).toBeGreaterThan(0);
   });
 
   test('the T10, Compact, and Narrow fixtures carry identical value/max/id/for attributes — only the root class list differs', () => {
@@ -128,10 +239,56 @@ test.describe('sk-progress accessibility tree and DOM structure', () => {
       await expect(page.getByRole('progressbar', { name: '5 of 8 Work Packages done' })).toHaveCount(1);
     });
   }
+
+  test('Indeterminate exposes the native progressbar role and accessible name from label association alone, with no numeric value exposed', async ({ page }) => {
+    const host = await story(page, 'indeterminate');
+    const control = host.locator('progress');
+    await expect(page.getByRole('progressbar', { name: 'Syncing your changes' })).toHaveCount(1);
+    // The HTML spec's own engine-agnostic signal for indeterminate state — more
+    // robust than depending on any particular ARIA string, and works identically
+    // across chromium/firefox/webkit (R-02/plan.md).
+    expect(await control.evaluate((node: HTMLProgressElement) => node.position)).toBe(-1);
+    await expect(control).not.toHaveAttribute('value');
+    // No accessible numeric value is exposed via the accessibility snapshot API.
+    const snapshot = await control.ariaSnapshot();
+    expect(snapshot).not.toMatch(/\d/);
+  });
+
+  test('indeterminate two-child (no meta) and three-child (with meta) fixtures preserve the exact flat-children order, no wrapper, no reorder', async ({ page }) => {
+    const noMeta = await story(page, 'indeterminate');
+    const noMetaChildren = noMeta.locator(':scope > *');
+    await expect(noMetaChildren).toHaveCount(2);
+    expect(await noMetaChildren.evaluateAll((nodes) => nodes.map((n) => n.tagName.toLowerCase()))).toEqual(['label', 'progress']);
+
+    const withMeta = await story(page, 'indeterminate-with-meta');
+    const withMetaChildren = withMeta.locator(':scope > *');
+    await expect(withMetaChildren).toHaveCount(3);
+    expect(await withMetaChildren.evaluateAll((nodes) => nodes.map((n) => n.tagName.toLowerCase()))).toEqual(['label', 'progress', 'span']);
+  });
+
+  test('IndeterminateNarrow preserves the three-flat-children contract combined with the existing --narrow layout modifier', async ({ page }) => {
+    const host = await story(page, 'indeterminate-narrow');
+    await expect(host).toHaveClass(/sk-progress--indeterminate/);
+    await expect(host).toHaveClass(/sk-progress--narrow/);
+    const control = host.locator('progress');
+    expect(await control.evaluate((node: HTMLProgressElement) => node.position)).toBe(-1);
+  });
 });
 
 test.describe('sk-progress overflow, forced-colors, and reduced-motion observables', () => {
   for (const id of ['long-label', 'large-total']) {
+    test(`${id} produces no horizontal page overflow at a narrow viewport`, async ({ page }) => {
+      await page.setViewportSize({ width: 360, height: 640 });
+      await story(page, id);
+      const geometry = await page.evaluate(() => ({
+        scrollWidth: document.documentElement.scrollWidth,
+        clientWidth: document.documentElement.clientWidth,
+      }));
+      expect(geometry.scrollWidth).toBe(geometry.clientWidth);
+    });
+  }
+
+  for (const id of ['indeterminate-narrow', 'indeterminate-long-label']) {
     test(`${id} produces no horizontal page overflow at a narrow viewport`, async ({ page }) => {
       await page.setViewportSize({ width: 360, height: 640 });
       await story(page, id);
@@ -153,6 +310,111 @@ test.describe('sk-progress overflow, forced-colors, and reduced-motion observabl
     });
     expect(colours.borderColor).not.toBe('');
     expect(colours.borderColor).not.toBe(colours.backgroundColor);
+  });
+
+  test('Indeterminate forced-colors: the fill is legible against the page at two distinct points in the animation cycle', async ({ page }) => {
+    // R-06: the existing forced-colors precedent was proven for a static fill only;
+    // an animated fill needs sampling at more than one point in its cycle so a
+    // coincidentally-correct single frame cannot produce a false pass.
+    await page.emulateMedia({ forcedColors: 'active' });
+    const host = await story(page, 'indeterminate-forced-colors');
+    const bar = host.locator('progress');
+
+    const bodyBackground = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
+    const borderColor = await bar.evaluate((node) => getComputedStyle(node).borderColor);
+    expect(borderColor).not.toBe('');
+    expect(borderColor).not.toBe(bodyBackground);
+
+    const sample1 = await samplePixels(page, await bar.screenshot());
+    await page.waitForTimeout(300);
+    const sample2 = await samplePixels(page, await bar.screenshot());
+
+    const parseRgb = (s: string) => (s.match(/\d+/g) ?? []).map(Number);
+    const bodyRgb = parseRgb(bodyBackground);
+    // The fill is distinguishable from the page background at EVERY sampled point —
+    // not just coincidentally at one.
+    for (const sample of [sample1, sample2]) {
+      expect(pixelsEqual(sample.center.slice(0, 3), bodyRgb, 10)).toBe(false);
+    }
+    // T002's measured design: forced-colors flattens the sweep to a solid legible
+    // fill (no gradient), so the two samples are identical — this IS the expected,
+    // deliberate shape (see sk-progress.css's forced-colors comment), not a bug.
+    expect(samplesEqual(sample1, sample2)).toBe(true);
+  });
+
+  test('Indeterminate: the authored sweep animation actually runs (two captures over time differ) with no reduced-motion preference set', async ({ page }) => {
+    const host = await story(page, 'indeterminate');
+    const bar = host.locator('progress');
+    const sample1 = await samplePixels(page, await bar.screenshot());
+    await page.waitForTimeout(400);
+    const sample2 = await samplePixels(page, await bar.screenshot());
+    expect(samplesEqual(sample1, sample2)).toBe(false);
+  });
+
+  test('Indeterminate under prefers-reduced-motion: reduce — the animation stops (two captures over time are identical) and the frozen frame is neither the Complete nor the Zero determinate visual', async ({ page }) => {
+    // Complete/Zero baselines, unaffected by reduced-motion (they carry no
+    // authored transition/animation at all — see the vacuous-guard test above).
+    const complete = await story(page, 'complete');
+    const completePixels = await samplePixels(page, await complete.locator('progress').screenshot());
+    const zero = await story(page, 'zero');
+    const zeroPixels = await samplePixels(page, await zero.locator('progress').screenshot());
+
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    const host = await story(page, 'indeterminate');
+    const bar = host.locator('progress');
+
+    // (a) the animation is not running: two captures 400ms apart are identical.
+    const frame1 = await samplePixels(page, await bar.screenshot());
+    await page.waitForTimeout(400);
+    const frame2 = await samplePixels(page, await bar.screenshot());
+    expect(samplesEqual(frame1, frame2)).toBe(true);
+
+    // (b) the frozen frame is distinguishable from BOTH the Complete determinate
+    // fixture's fully-full fill (uniform colour edge-to-edge) and the Zero
+    // determinate fixture's fully-empty track (uniform colour edge-to-edge). The
+    // reduced-motion frame is a partial gradient band: its own left/center/right
+    // samples are NOT all identical to each other (proving it is neither a
+    // uniform full fill nor a uniform empty track), and its centre sample differs
+    // measurably from the Zero fixture's centre (proving something IS visibly
+    // painted) while its edge samples differ from the Complete fixture's edge
+    // (proving the fill does not reach fully to both edges the way Complete's
+    // solid, 100%-width fill does).
+    expect(pixelsEqual(frame1.left, frame1.center, 6) && pixelsEqual(frame1.center, frame1.right, 6)).toBe(false);
+    expect(pixelsEqual(frame1.center, zeroPixels.center, 10)).toBe(false);
+    expect(pixelsEqual(frame1.left, completePixels.left, 10) && pixelsEqual(frame1.right, completePixels.right, 10)).toBe(false);
+  });
+});
+
+test.describe('sk-progress absent-state regression: the indeterminate modifier does not leak onto determinate fixtures', () => {
+  /**
+   * #308's HIGH ("display: flex with no [open] qualifier never hid a closed
+   * dialog") and #302's own fix were both missed because every test exercised the
+   * PRESENT state and nothing asserted the ABSENT one. The indeterminate modifier
+   * is a present/absent feature too: this test asserts a determinate fixture
+   * renders with no leaked animation, AND — mutated and watched, not merely
+   * asserted — that the SAME technique would have caught it had the modifier
+   * actually leaked, by injecting the leak via `page.evaluate` and re-running the
+   * identical check.
+   */
+  test('Default (determinate) has no authored animation running, and this check has teeth: injecting the modifier makes it fail', async ({ page }) => {
+    const host = await story(page, 'default');
+    await expect(host).not.toHaveClass(/sk-progress--indeterminate/);
+    const bar = host.locator('progress');
+
+    const before1 = await samplePixels(page, await bar.screenshot());
+    await page.waitForTimeout(400);
+    const before2 = await samplePixels(page, await bar.screenshot());
+    // No leak: no motion on the unmodified determinate fixture.
+    expect(samplesEqual(before1, before2)).toBe(true);
+
+    // MUTATE: simulate the modifier leaking onto a determinate fixture.
+    await host.evaluate((node) => node.classList.add('sk-progress--indeterminate'));
+    const after1 = await samplePixels(page, await bar.screenshot());
+    await page.waitForTimeout(400);
+    const after2 = await samplePixels(page, await bar.screenshot());
+    // WATCH: with the leak injected, the identical check now correctly detects
+    // motion — proving the "no leak" assertion above is not vacuous.
+    expect(samplesEqual(after1, after2)).toBe(false);
   });
 });
 
