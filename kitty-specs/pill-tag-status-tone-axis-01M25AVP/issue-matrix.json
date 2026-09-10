@@ -37,7 +37,7 @@
       "wp": null
     },
     "#300": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "Follow-up: #300 is the Family-4 component-gap epic; this mission (#302) closes one gap (G1) under it but does not close the epic",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -45,7 +45,7 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
+      "verdict": "deferred-with-followup",
       "wp": null
     },
     "#301": {
