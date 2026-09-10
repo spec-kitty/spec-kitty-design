@@ -571,8 +571,10 @@ have to reason about whichever mechanism it chooses. It does not select that mec
     surface named in the Summary. `sk-metric.css:67` styles `sk-pill-tag` through `::part(tag)`
     with six declarations and no static spelling, and `sk-pill-tag` declares `tag` as a
     manifest-recorded public part. `expected-parts.json` records **134 parts across 28
-    elements** under `scripts/check-part-ratchet.mjs` (the element sources carry 141 `@csspart`
-    tags; the ratchet's manifest-derived 134 is the governed figure). The static question has
+    elements** under `scripts/check-part-ratchet.mjs` (a raw grep for the string `@csspart`
+    across the element sources returns 141 occurrences, at least one of which is a maintainer
+    comment mentioning the tag rather than a tag; the ratchet's manifest-derived 134 is the
+    governed figure). The static question has
     never been asked of any of them. This record does not answer it and changes no sheet.
 
   None of #309, #310, #311 or #314 is built here. #309 and #310 name the composed cases

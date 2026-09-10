@@ -32,10 +32,15 @@
       NOT ENOUGH: this sheet declares NOTHING for `.sk-page-header-host--sticky`, so a consumer
       who only adds it gets a class that does nothing — the same silently-inert outcome the
       wrapper block above warns about, one level down. Until #309 generates it, the consumer
-      hand-rewrites the whole axis onto that class: both `:host([sticky])` rules below (the host
-      rule and the `.sk-page-header` descendant rule) AND both of their copies inside the
-      `@media (max-width: 720px)` and `@media (max-height: 480px)` blocks, which drop stickiness
-      and are part of the axis rather than optional refinements. Note the
+      hand-rewrites ALL SEVEN `:host([sticky])` rules below onto that class: the host rule and the
+      `.sk-page-header` descendant rule at top level, both of their copies inside the
+      `@media (max-width: 720px)` and `@media (max-height: 480px)` blocks (which drop stickiness
+      and are part of the axis, not optional refinements), AND the
+      `@media (forced-colors: active)` rule. Do not drop that last one: the top-level descendant
+      rule RESERVES the border band at `transparent`, and the forced-colors rule is what turns it
+      on. Rewrite the first without the second and a static sticky header is separated from the
+      content beneath it by nothing at all under forced colors, because `box-shadow` computes
+      away there — the accessibility regression this whole comment exists to prevent. Note the
       sticky rules deliberately use `@media`, for the reason the comment further down records —
       the element being restyled is the host, and a container query cannot reach its own
       container. That is the same fact ADR-15 generalises.
