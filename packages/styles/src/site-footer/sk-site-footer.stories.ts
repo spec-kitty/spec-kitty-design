@@ -1,6 +1,6 @@
 import './sk-site-footer.css';
 import type { Meta, StoryObj } from '@storybook/web-components';
-import { SkSiteFooterHTML } from './index';
+import { SkSiteFooterHTML, SkSiteFooterCompactHTML } from './index';
 
 /**
  * <sk-site-footer> — the STATIC form, generated from the element's markup module (ADR-10 §3).
@@ -38,6 +38,23 @@ export const LightMode: Story = {
   render: () => `
     <div class="sk-light" style="background: var(--sk-surface-page); display: block; width: 100%;">
       ${SkSiteFooterHTML}
+    </div>
+  `,
+};
+
+/**
+ * [FR-008] The compact presentation's static form — no JavaScript required. Generated from
+ * `SITE_FOOTER_AXES.Compact` (#354): the same markup module the element renders from, so the
+ * two paths cannot diverge.
+ */
+export const Compact: Story = { render: () => SkSiteFooterCompactHTML };
+
+/** [C-004] `class="sk-light"`, NOT `data-theme="light"`, on the static compact form. */
+export const CompactLightMode: Story = {
+  parameters: { backgrounds: { default: 'sk-light' }, layout: 'fullscreen' },
+  render: () => `
+    <div class="sk-light" style="background: var(--sk-surface-page); display: block; width: 100%;">
+      ${SkSiteFooterCompactHTML}
     </div>
   `,
 };
