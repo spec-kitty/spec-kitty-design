@@ -1,5 +1,17 @@
 {
   "rows": {
+    "#146": {
+      "evidence_ref": "https://github.com/spec-kitty/spec-kitty-design/issues/146 \u2014 established the single-authored tone-vocabulary-as-leaf pattern sk-card consumes; this mission's status-tones.ts import follows it unchanged",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "verified-already-fixed",
+      "wp": null
+    },
     "#177": {
       "evidence_ref": "https://github.com/spec-kitty/spec-kitty-design/issues/177 \u2014 sk-card status-tone precedent (tokens, brand-vs-status precedence rule) reused by this mission, already landed on train",
       "fr": null,
