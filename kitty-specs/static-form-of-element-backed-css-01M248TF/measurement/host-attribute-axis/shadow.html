@@ -33,15 +33,34 @@
 <script src="/apps/storybook/storybook-static/elements-dist/elements.js"></script>
 <script>
   const q = new URLSearchParams(location.search);
-  const outer = document.getElementById('outer');
-  const sizer = document.getElementById('sizer');
+  const DEFAULT_WIDTH = 800;
   const component = document.getElementById('component');
-  sizer.style.width = `${q.get('width') ?? 800}px`;
-  const compose = q.get('compose') ?? 'none';
-  if (compose !== 'none') {
-    outer.style.containerType = 'inline-size';
-    outer.style.width = `${q.get('outer')}px`;
-  }
   const presentation = q.get('presentation');
   if (presentation) component.setAttribute('presentation', presentation);
+  const outer = document.getElementById('outer');
+  const sizer = document.getElementById('sizer');
+  // layout=block  : #sizer carries an explicit px width (the cycle-1 shape).
+  // layout=flex   : #outer is a 300px flex row and #sizer is display:contents, so the
+  //                 component itself is the flex ITEM. This is the layout that discriminates
+  //                 a wrapper carrying the complete :host declaration set from one carrying
+  //                 only container-type — size containment makes a width-less containing
+  //                 wrapper contribute zero to intrinsic sizing.
+  // layout=grid   : the same as a single 300px grid track, as a control.
+  const layout = q.get('layout') ?? 'block';
+  if (layout === 'flex') {
+    outer.style.display = 'flex';
+    outer.style.width = '300px';
+    sizer.style.display = 'contents';
+  } else if (layout === 'grid') {
+    outer.style.display = 'grid';
+    outer.style.gridTemplateColumns = '300px';
+    sizer.style.display = 'contents';
+  } else {
+    sizer.style.width = `${q.get('width') ?? DEFAULT_WIDTH}px`;
+    const compose = q.get('compose') ?? 'none';
+    if (compose !== 'none') {
+      outer.style.containerType = 'inline-size';
+      outer.style.width = `${q.get('outer')}px`;
+    }
+  }
 </script>

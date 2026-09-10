@@ -94,8 +94,20 @@
       :is(.sk-app-shell-host--compact, .sk-app-shell-host--rail-preserving) .sk-app-shell__compact-navigation[hidden] { display: none; }
     `,
   };
+
+  // variant Babbrev — the wrapper AS THE CYCLE-1 PROSE PRESCRIBED IT: `container-type` and
+  // nothing else. Everything below the host rule is byte-identical to variant B, derived from
+  // it rather than retyped, so the two variants cannot drift apart and the ONLY difference
+  // measured is the host declaration set. Cycle-1 review found the prose and the measured
+  // exemplar disagreed here; this variant is what makes that disagreement a recorded number.
+  VARIANT_CSS.Babbrev = VARIANT_CSS.B.replace(
+    '.sk-app-shell-host { display: block; width: 100%; min-width: 0; container-type: inline-size; }',
+    '.sk-app-shell-host { container-type: inline-size; }',
+  );
+  if (VARIANT_CSS.Babbrev === VARIANT_CSS.B) throw new Error('Babbrev derivation did not apply');
   const params = new URLSearchParams(location.search);
   const variant = params.get('variant') ?? 'A';
+  if (!(variant in VARIANT_CSS)) throw new Error(`unknown variant ${variant}`);
   const variantSheet = document.createElement('style');
   variantSheet.textContent = VARIANT_CSS[variant];
   document.currentScript.after(variantSheet);
@@ -126,16 +138,30 @@
     const mod = presentation ? ` sk-app-shell--${presentation}` : '';
     mount.outerHTML = `<div id="component" class="sk-app-shell${mod}">${inner}</div>`;
   } else {
+    // B and Babbrev share the markup exactly; only the wrapper's own rule differs.
     const mod = presentation ? ` sk-app-shell-host--${presentation}` : '';
     mount.outerHTML =
       `<div id="component" class="sk-app-shell-host${mod}"><div class="sk-app-shell">${inner}</div></div>`;
   }
 
-  document.getElementById('sizer').style.width = `${q.get('width') ?? 800}px`;
-  const compose = q.get('compose') ?? 'none';
-  if (compose !== 'none') {
-    const outer = document.getElementById('outer');
-    outer.style.containerType = 'inline-size';
-    outer.style.width = `${q.get('outer')}px`;
+  const DEFAULT_WIDTH = 800;
+  const outer = document.getElementById('outer');
+  const sizer = document.getElementById('sizer');
+  const layout = q.get('layout') ?? 'block';
+  if (layout === 'flex') {
+    outer.style.display = 'flex';
+    outer.style.width = '300px';
+    sizer.style.display = 'contents';
+  } else if (layout === 'grid') {
+    outer.style.display = 'grid';
+    outer.style.gridTemplateColumns = '300px';
+    sizer.style.display = 'contents';
+  } else {
+    sizer.style.width = `${q.get('width') ?? DEFAULT_WIDTH}px`;
+    const compose = q.get('compose') ?? 'none';
+    if (compose !== 'none') {
+      outer.style.containerType = 'inline-size';
+      outer.style.width = `${q.get('outer')}px`;
+    }
   }
 </script>

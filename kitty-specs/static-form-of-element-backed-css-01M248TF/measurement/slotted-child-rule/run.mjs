@@ -8,9 +8,23 @@ import { startServer, perEngine, measurementUrl, diffOutcomes, resolvePackageSpe
 
 const CONSTRUCT = 'slotted-child-rule';
 const HERE = new URL('.', import.meta.url).pathname;
-const declared = JSON.parse(readFileSync(join(HERE, 'outcomes.declared.json'), 'utf8'));
+const declaredCycle1 = JSON.parse(readFileSync(join(HERE, 'outcomes.declared.json'), 'utf8'));
+const declaredCycle2 = JSON.parse(readFileSync(join(HERE, 'outcomes.declared.cycle-2.json'), 'utf8'));
+const declaredOutcomes = [...declaredCycle1.declared_outcomes, ...declaredCycle2.declared_outcomes];
 
-const CASES = { C1: 'competing=none', C2: 'competing=equal', C3: 'competing=higher' };
+// Three specificity regimes against the static rewrite `.sk-entity-marker__content > img`
+// (0,1,1) — consumer LOSES / TIES / OUTBIDS — each at both document positions, because at a
+// tie the winner is order, not weight. Cycle 1 measured only the two `order=last` columns and
+// mislabelled the tie as "higher specificity"; see outcomes.declared.cycle-2.json's errata.
+const CASES = {
+  C1: 'competing=none',
+  C2: 'competing=weak&order=last',
+  C3: 'competing=tie&order=last',
+  C4: 'competing=weak&order=first',
+  C5: 'competing=tie&order=first',
+  C6: 'competing=strong&order=last',
+  C7: 'competing=strong&order=first',
+};
 
 const READS = {
   O1: ['C1', 'display'],
@@ -19,6 +33,10 @@ const READS = {
   O4: ['C1', 'object-fit'],
   O5: ['C2', 'object-fit'],
   O6: ['C3', 'object-fit'],
+  O7: ['C4', 'object-fit'],
+  O8: ['C5', 'object-fit'],
+  O9: ['C6', 'object-fit'],
+  O10: ['C7', 'object-fit'],
 };
 
 const readImg = (prop) =>
@@ -121,7 +139,7 @@ try {
     return {
       paired_list_validity_in_shadow_tree: await pairedListValidity(page, server.origin),
       fidelity_crosscheck: await crossCheck(page, server.origin),
-      observed_outcomes: diffOutcomes(declared.declared_outcomes, shadow, {
+      observed_outcomes: diffOutcomes(declaredOutcomes, shadow, {
         'A-descendant': varA,
         'B-paired-spelling': varB,
       }),
@@ -165,6 +183,8 @@ try {
       resolved_to: resolvePackageSpecifier('@spec-kitty/styles/entity-marker/sk-entity-marker.css'),
       how: "Node's own export-map resolution via import.meta.resolve, served to the browser by harness.mjs on /pkg/<specifier>",
     },
+    declared_outcome_sources: ['outcomes.declared.json', 'outcomes.declared.cycle-2.json'],
+    declared_outcome_count: declaredOutcomes.length,
     engines,
     per_engine: perEngineResults,
     variant_passes_every_declared_outcome: variantPasses,

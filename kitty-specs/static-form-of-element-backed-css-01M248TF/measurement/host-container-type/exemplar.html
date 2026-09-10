@@ -30,9 +30,15 @@
   const VARIANT_CSS = {
     A: `.sk-action-row { min-width: 0; container-type: inline-size; }`,
     B: `.sk-action-row-host { display: block; min-width: 0; container-type: inline-size; }`,
+    // Babbrev — the wrapper AS THE CYCLE-1 PROSE PRESCRIBED IT: container-type and nothing
+    // else. Cycle-1 review found the prose and the measured exemplar disagreed; this variant
+    // makes the disagreement a recorded number rather than an argument.
+    Babbrev: `.sk-action-row-host { container-type: inline-size; }`,
   };
+  const requested = new URLSearchParams(location.search).get('variant') ?? 'A';
+  if (!(requested in VARIANT_CSS)) throw new Error(`unknown variant ${requested}`);
   const variantSheet = document.createElement('style');
-  variantSheet.textContent = VARIANT_CSS[new URLSearchParams(location.search).get('variant') ?? 'A'];
+  variantSheet.textContent = VARIANT_CSS[requested];
   document.currentScript.after(variantSheet);
 </script>
 <style> html, body { margin: 0; padding: 0; } </style>
@@ -62,11 +68,24 @@
       ? `<div id="component" class="sk-action-row">${inner}</div>`
       : `<div id="component" class="sk-action-row-host"><div class="sk-action-row">${inner}</div></div>`;
 
-  document.getElementById('sizer').style.width = `${q.get('width') ?? 360}px`;
-  const compose = q.get('compose') ?? 'none';
-  if (compose !== 'none') {
-    const outer = document.getElementById('outer');
-    outer.style.containerType = 'inline-size';
-    outer.style.width = `${q.get('outer')}px`;
+  const DEFAULT_WIDTH = 360;
+  const outer = document.getElementById('outer');
+  const sizer = document.getElementById('sizer');
+  const layout = q.get('layout') ?? 'block';
+  if (layout === 'flex') {
+    outer.style.display = 'flex';
+    outer.style.width = '300px';
+    sizer.style.display = 'contents';
+  } else if (layout === 'grid') {
+    outer.style.display = 'grid';
+    outer.style.gridTemplateColumns = '300px';
+    sizer.style.display = 'contents';
+  } else {
+    sizer.style.width = `${q.get('width') ?? DEFAULT_WIDTH}px`;
+    const compose = q.get('compose') ?? 'none';
+    if (compose !== 'none') {
+      outer.style.containerType = 'inline-size';
+      outer.style.width = `${q.get('outer')}px`;
+    }
   }
 </script>

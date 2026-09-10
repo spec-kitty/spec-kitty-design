@@ -8,13 +8,22 @@ import { startServer, perEngine, measurementUrl, diffOutcomes, resolvePackageSpe
 
 const CONSTRUCT = 'host-container-type';
 const HERE = new URL('.', import.meta.url).pathname;
-const declared = JSON.parse(readFileSync(join(HERE, 'outcomes.declared.json'), 'utf8'));
+const declaredCycle1 = JSON.parse(readFileSync(join(HERE, 'outcomes.declared.json'), 'utf8'));
+const declaredCycle2 = JSON.parse(readFileSync(join(HERE, 'outcomes.declared.cycle-2.json'), 'utf8'));
+const declaredOutcomes = [...declaredCycle1.declared_outcomes, ...declaredCycle2.declared_outcomes];
 
 const CASES = {
   S1: 'width=360&compose=none',
   S2: 'width=500&compose=none',
   S3: 'width=360&compose=wider&outer=1200',
   S4: 'width=700&compose=narrower&outer=320',
+  // cycle 2 — HIGH-1: the layouts that discriminate the wrapper's declaration set.
+  S5: 'layout=flex',
+  S6: 'layout=grid',
+  // cycle 2 — MEDIUM-2: the inclusive 400px boundary itself, which 360/500 straddle but
+  // never touch. `@container (max-width: 400px)` must fire AT 400 and not at 401.
+  S7: 'width=400&compose=none',
+  S8: 'width=401&compose=none',
 };
 
 const READS = {
@@ -31,7 +40,16 @@ const READS = {
   O11: ['S3', '.sk-action-row__trigger', 'grid-template-areas'],
   O12: ['S4', '.sk-action-row', 'flex-wrap'],
   O13: ['S4', '.sk-action-row__trigger', 'grid-template-areas'],
+  O14: ['S5', '.sk-action-row', 'width'],
+  O15: ['S5', '.sk-action-row__trigger', 'grid-template-areas'],
+  O16: ['S6', '.sk-action-row', 'width'],
+  O17: ['S7', '.sk-action-row', 'flex-wrap'],
+  O18: ['S7', '.sk-action-row__trigger', 'grid-template-areas'],
+  O19: ['S8', '.sk-action-row', 'flex-wrap'],
+  O20: ['S8', '.sk-action-row__trigger', 'grid-template-areas'],
 };
+
+const VARIANTS = { 'A-collapsed': 'A', 'B-wrapper': 'B', 'B-abbrev': 'Babbrev' };
 
 const readInPage = ([sel, prop]) => {
   const c = document.getElementById('component');
@@ -125,23 +143,25 @@ const server = await startServer();
 try {
   const perEngineResults = await perEngine(async (page) => {
     const shadow = await collect(page, server.origin, 'shadow.html', '', true);
-    const varA = await collect(page, server.origin, 'exemplar.html', '&variant=A', false);
-    const varB = await collect(page, server.origin, 'exemplar.html', '&variant=B', false);
+    const statics = {};
+    const shapes = { shadow: shadow.shape };
+    for (const [label, param] of Object.entries(VARIANTS)) {
+      const run = await collect(page, server.origin, 'exemplar.html', `&variant=${param}`, false);
+      statics[label] = run.values;
+      shapes[label] = run.shape;
+    }
     const fidelity = await crossCheck(page, server.origin);
     return {
-      rendered_shape: { shadow: shadow.shape, 'A-collapsed': varA.shape, 'B-wrapper': varB.shape },
+      rendered_shape: shapes,
       fidelity_crosscheck: fidelity,
-      observed_outcomes: diffOutcomes(declared.declared_outcomes, shadow.values, {
-        'A-collapsed': varA.values,
-        'B-wrapper': varB.values,
-      }),
+      observed_outcomes: diffOutcomes(declaredOutcomes, shadow.values, statics),
     };
   });
 
   const engines = Object.keys(perEngineResults);
   const variantPasses = {};
   const failures = {};
-  for (const variant of ['A-collapsed', 'B-wrapper']) {
+  for (const variant of Object.keys(VARIANTS)) {
     variantPasses[variant] = engines.every((e) =>
       perEngineResults[e].observed_outcomes.every((row) => row.equal[variant] === true),
     );
@@ -175,6 +195,9 @@ try {
       resolved_to: resolvePackageSpecifier('@spec-kitty/styles/action-row/sk-action-row.css'),
       how: "Node's own export-map resolution via import.meta.resolve, served to the browser by harness.mjs on /pkg/<specifier>",
     },
+    declared_outcome_sources: ['outcomes.declared.json', 'outcomes.declared.cycle-2.json'],
+    declared_outcome_count: declaredOutcomes.length,
+    static_exemplar_variants: VARIANTS,
     engines,
     per_engine: perEngineResults,
     variant_passes_every_declared_outcome: variantPasses,

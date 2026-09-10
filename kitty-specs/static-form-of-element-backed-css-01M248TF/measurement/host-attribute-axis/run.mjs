@@ -13,7 +13,12 @@ import { startServer, perEngine, measurementUrl, diffOutcomes, resolvePackageSpe
 
 const CONSTRUCT = 'host-attribute-axis';
 const HERE = new URL('.', import.meta.url).pathname;
-const declared = JSON.parse(readFileSync(join(HERE, 'outcomes.declared.json'), 'utf8'));
+// BOTH declaration files. The cycle-1 file is never rewritten; cycle 2 adds to it in its own
+// dated record, so the original pre-declaration stays auditable (`git log` shows one commit on
+// it and no amendment).
+const declaredCycle1 = JSON.parse(readFileSync(join(HERE, 'outcomes.declared.json'), 'utf8'));
+const declaredCycle2 = JSON.parse(readFileSync(join(HERE, 'outcomes.declared.cycle-2.json'), 'utf8'));
+const declaredOutcomes = [...declaredCycle1.declared_outcomes, ...declaredCycle2.declared_outcomes];
 
 const CASES = {
   S1: 'presentation=compact&width=800&compose=none',
@@ -22,6 +27,14 @@ const CASES = {
   S4: 'presentation=rail-preserving&width=1200&compose=none',
   S5: 'presentation=compact&width=800&compose=wider&outer=1400',
   S6: 'presentation=compact&width=1200&compose=narrower&outer=500',
+  // cycle 2 — HIGH-1: the layouts that discriminate the wrapper's declaration set.
+  S7: 'presentation=compact&layout=flex',
+  S8: 'presentation=compact&layout=grid',
+  // cycle 2 — MEDIUM-2: below, above and across the sheet's UNCONDITIONAL 720px container rule.
+  // No presentation attribute on S9/S10, so no host-attribute rule can fire alongside it.
+  S9: 'width=600&compose=none',
+  S10: 'width=760&compose=none',
+  S11: 'presentation=rail-preserving&width=700&compose=none',
 };
 
 // outcome id -> [case, selector, property]
@@ -40,7 +53,17 @@ const READS = {
   O12: ['S5', '.sk-app-shell__compact-header', 'display'],
   O13: ['S6', '.sk-app-shell', 'grid-template-columns'],
   O14: ['S6', '.sk-app-shell__compact-header', 'display'],
+  O15: ['S7', '.sk-app-shell', 'width'],
+  O16: ['S7', '.sk-app-shell', 'grid-template-columns'],
+  O17: ['S8', '.sk-app-shell', 'width'],
+  O18: ['S8', '.sk-app-shell', 'grid-template-columns'],
+  O19: ['S9', '.sk-app-shell', 'grid-template-columns'],
+  O20: ['S10', '.sk-app-shell', 'grid-template-columns'],
+  O21: ['S9', '.sk-app-shell__compact-header', 'display'],
+  O22: ['S11', '.sk-app-shell', 'grid-template-columns'],
 };
+
+const VARIANTS = { 'A-collapsed': 'A', 'B-wrapper': 'B', 'B-abbrev': 'Babbrev' };
 
 const readInPage = ([sel, prop]) => {
   const c = document.getElementById('component');
@@ -144,23 +167,25 @@ const server = await startServer();
 try {
   const perEngineResults = await perEngine(async (page) => {
     const shadow = await collect(page, server.origin, 'shadow.html', '', true);
-    const varA = await collect(page, server.origin, 'exemplar.html', '&variant=A', false);
-    const varB = await collect(page, server.origin, 'exemplar.html', '&variant=B', false);
+    const statics = {};
+    const widths = { shadow: shadow.widths };
+    for (const [label, param] of Object.entries(VARIANTS)) {
+      const run = await collect(page, server.origin, 'exemplar.html', `&variant=${param}`, false);
+      statics[label] = run.values;
+      widths[label] = run.widths;
+    }
     const fidelity = await crossCheck(page, server.origin);
     return {
-      widths: { shadow: shadow.widths, 'A-collapsed': varA.widths, 'B-wrapper': varB.widths },
+      widths,
       shadow_notes: shadow.notes,
       fidelity_crosscheck: fidelity,
-      observed_outcomes: diffOutcomes(declared.declared_outcomes, shadow.values, {
-        'A-collapsed': varA.values,
-        'B-wrapper': varB.values,
-      }),
+      observed_outcomes: diffOutcomes(declaredOutcomes, shadow.values, statics),
     };
   });
 
   const engines = Object.keys(perEngineResults);
   const variantPasses = {};
-  for (const variant of ['A-collapsed', 'B-wrapper']) {
+  for (const variant of Object.keys(VARIANTS)) {
     variantPasses[variant] = engines.every((e) =>
       perEngineResults[e].observed_outcomes.every((row) => row.equal[variant] === true),
     );
@@ -168,7 +193,7 @@ try {
   const passingVariant = Object.entries(variantPasses).find(([, ok]) => ok)?.[0] ?? null;
 
   const failures = {};
-  for (const variant of ['A-collapsed', 'B-wrapper']) {
+  for (const variant of Object.keys(VARIANTS)) {
     failures[variant] = engines.flatMap((e) =>
       perEngineResults[e].observed_outcomes
         .filter((row) => row.equal[variant] !== true)
@@ -198,6 +223,9 @@ try {
       resolved_to: resolvePackageSpecifier('@spec-kitty/styles/app-shell/sk-app-shell.css'),
       how: "Node's own export-map resolution via import.meta.resolve, served to the browser by harness.mjs on /pkg/<specifier>",
     },
+    declared_outcome_sources: ['outcomes.declared.json', 'outcomes.declared.cycle-2.json'],
+    declared_outcome_count: declaredOutcomes.length,
+    static_exemplar_variants: VARIANTS,
     engines,
     per_engine: perEngineResults,
     variant_passes_every_declared_outcome: variantPasses,
