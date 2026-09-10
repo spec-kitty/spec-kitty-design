@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "mission_slug": "connector-section-navigation-01M26945",
+  "mission_id": "01M269452BZFFESKH6YJMTS3Z6",
+  "mission_branch": "kitty/mission-connector-section-navigation-01M26945",
+  "target_branch": "mission/connector-section-navigation",
+  "lanes": [
+    {
+      "lane_id": "lane-a",
+      "wp_ids": [
+        "WP01"
+      ],
+      "write_scope": [
+        "apps/storybook/src/tests/sk-section-nav.spec.ts",
+        "apps/storybook/src/tests/visual.spec.ts",
+        "apps/storybook/src/tests/visual.spec.ts-snapshots/*section-nav*",
+        "docs/design-system/using-components.md",
+        "expected-stories.json",
+        "packages/elements/SIZES.md",
+        "packages/styles/package.json",
+        "packages/styles/src/index.ts",
+        "packages/styles/src/section-nav/**"
+      ],
+      "predicted_surfaces": [
+        "api",
+        "app-shell"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    }
+  ],
+  "computed_at": "2026-09-10T18:41:49.442750+00:00",
+  "computed_from": "dependency_graph+ownership",
+  "planning_artifact_wps": [],
+  "planning_commit_sha": "2ec9e177a5fb880c01cb7a5e25e9cccc311fd9c2"
+}
