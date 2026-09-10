@@ -27,11 +27,11 @@
     {
       "criterion_id": "FR-003",
       "description": "Verify FR-003 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "proof_type": "code_inspection",
+      "evidence": "git diff 4d6c5f2..HEAD -- packages/styles/src/form-input/sk-form-input.css: .sk-form-input__control's border-color changed from var(--sk-border-default) to var(--sk-border-control) (width spelling was already var(--sk-border-width-1), unchanged). Header comment block (lines 1-38) gained a note recording the #321 resolution, matching the file's own convention.",
+      "pass_fail": "pass",
+      "verified_by": "reviewer-renata",
+      "verified_at": "2026-09-10T15:48:41.709082+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
