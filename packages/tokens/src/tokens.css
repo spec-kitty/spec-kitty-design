@@ -196,6 +196,15 @@
   --sk-border-default:      #2B313B;   /* hairline default — slightly cool */
   --sk-border-strong:       #353C48;   /* card border */
   --sk-border-focus:        #F5C518;   /* focus ring (= yellow) */
+  /* Non-text control boundary (WCAG 1.4.11, ≥3:1) — #321. An INDEPENDENTLY DECLARED
+     LITERAL, deliberately NOT var(--sk-fg-subtle): aliasing would couple this border's 3:1
+     non-text obligation to a token that moves for an unrelated text-contrast (4.5:1) reason,
+     and check-token-breaking-changes.sh computes no contrast, so nothing would catch a future
+     silent regression of that coupling. Measured (relative-luminance formula, both themes,
+     three surfaces): dark #81818B — page 5.01:1, card 4.51:1, input 4.28:1; light #7A7A6E —
+     page 3.98:1, card 4.34:1, input 3.85:1. Mechanically enforced by
+     tests/node/form-input-border-control-contrast.test.ts. */
+  --sk-border-control:      #81818B;
   --sk-border-width-1:      1px;
   --sk-border-width-2:      2px;
   /* The accent-edge step. Theme-invariant, like -1 and -2, so it is defined once here and
@@ -403,6 +412,10 @@
 
   --sk-border-default:      #EAE4D2;   /* hairline default */
   --sk-border-strong:       #D6CFB9;   /* card border / divider */
+  /* Non-text control boundary, light theme — independent literal, not an alias. See the
+     :root declaration's comment for the full decoupling rationale. #7A7A6E — page 3.98:1,
+     card 4.34:1, input 3.85:1 (tightest margin of the six pairs). */
+  --sk-border-control:      #7A7A6E;
 
   /* Light-mode link accent flips to sage — sage-DEEP, and the shade is load-bearing.
      This said `var(--sk-color-sage)`, and a token documented as a *link* accent has to be
