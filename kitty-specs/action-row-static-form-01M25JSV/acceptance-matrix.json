@@ -8,10 +8,10 @@
       "criterion_id": "FR-001",
       "description": "Verify FR-001 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
+      "evidence": "packages/elements/src/action-row/sk-action-row.markup.ts:230 (actionRowStaticHtml always returns .sk-action-row-host > .sk-action-row, never single-element); generated packages/styles/src/action-row/sk-action-row.html confirms; exercised by all 9 passing WP01 tests in fixtures/elements-behaviour/src/sk-action-row.test.ts (full suite 622/622 green, npm test run 2026-09-10)",
+      "pass_fail": "pass",
       "verified_by": null,
-      "verified_at": null,
+      "verified_at": "2026-09-10T14:07:05.257523+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
