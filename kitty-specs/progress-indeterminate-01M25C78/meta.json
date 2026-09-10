@@ -23,6 +23,7 @@
   "purpose_context": "This mission advances progress indeterminate on mission/progress-indeterminate so stakeholders can track the work from mission creation onward.",
   "purpose_tldr": "progress indeterminate",
   "slug": "progress-indeterminate-01M25C78",
+  "status_phase": "1",
   "target_branch": "mission/progress-indeterminate",
   "topology": "single_branch"
 }
