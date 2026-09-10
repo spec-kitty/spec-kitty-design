@@ -23,6 +23,7 @@
   "purpose_context": "This mission advances boundary page styles on mission/boundary-page-styles so stakeholders can track the work from mission creation onward.",
   "purpose_tldr": "boundary page styles",
   "slug": "boundary-page-styles-01M25TBY",
+  "status_phase": "1",
   "target_branch": "mission/boundary-page-styles",
   "topology": "single_branch"
 }
