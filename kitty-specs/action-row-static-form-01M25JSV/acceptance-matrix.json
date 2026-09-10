@@ -48,10 +48,10 @@
       "criterion_id": "FR-005",
       "description": "Verify FR-005 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
+      "evidence": "Same test at sk-action-row.test.ts:910 (docs.md copy pinned too); packages/styles/src/action-row/sk-action-row.css:20-26 explicitly states in its header COMMENT 'THIS SHEET DOES NOT DEFINE .sk-action-row-host'; grep confirms no active (non-comment) CSS rule for .sk-action-row-host in any built stylesheet under packages/styles or packages/elements",
+      "pass_fail": "pass",
       "verified_by": null,
-      "verified_at": null,
+      "verified_at": "2026-09-10T14:07:09.506778+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
