@@ -235,7 +235,7 @@ control).
 | FR-012 | Forced-colours presentation | As a Team Kitty engineer, I want the header's boundary and focus indication to remain visible under `forced-colors: active` using the `outline`-not-`box-shadow` and `border`-survives-automatically techniques already established by #176, so that the header remains usable in that mode. | High | Open |
 | FR-013 | Reduced-motion presentation | As a Team Kitty engineer, I want any transition the family declares (e.g. hover/focus) to be disabled under `prefers-reduced-motion: reduce`, scoped to the exact declared property, so that motion-sensitive users are not exposed to it. | Medium | Open |
 | FR-014 | Full keyboard operability | As a Team Kitty engineer, I want every native control in the header to be keyboard-reachable and operable in DOM order with a non-obscured focus-visible indicator, so that no pointer is required. | High | Open |
-| FR-015 | 44px interactive-target floor for composed controls | As a Team Kitty engineer, I want every direct child of `.sk-public-header__actions` to compute an interactive hit area of at least 44 CSS px in both dimensions, so that the header meets the issue's stated target-size floor even when composing a smaller consumer control (e.g. `sk-button--sm`). **See "[NEEDS DECISION] Target-size mechanism vs. no-internals-reach-through" below** — the exact CSS mechanism is not yet settled by any ADR or the issue text. | High | Open |
+| FR-015 | 44px interactive-target floor for composed controls | As a Team Kitty engineer, I want every action carrying the family's own `.sk-public-header__action` class to compute an interactive hit area of at least 44 CSS px in both dimensions, so that the header meets the issue's stated target-size floor even when composing a smaller consumer control (e.g. `sk-button--sm`). **Mechanism settled** — see "Resolved decision — target-size mechanism vs. no-internals-reach-through" below: the floor is pinned on this family's own BEM class, never on `.sk-button`, a `::part()`, or a shadow-root internal. | High | Resolved |
 | FR-016 | No CSS-forced icon-only collapse | As a Team Kitty engineer, I want the family to never hide action text via `display:none`/`visibility:hidden`/clip techniques at any width, so that icon-only presentation stays a consumer content decision, never a family default. | Medium | Open |
 | FR-017 | Required Storybook evidence set | As a mission reviewer, I want a `packages/styles/src/public-header/sk-public-header-html.stories.ts` file exporting named stories for brand-only, one-action, the two-action Family-6 shape, many/long actions, mixed anchor/button/theme-toggle (dependency-blocked), narrow, RTL, default dark, and `LightMode`, so that every required evidence axis from the issue is independently inspectable. | High | Open |
 | FR-018 | Usage documentation | As a Team Kitty engineer adopting the family, I want a `## Public header` section in `docs/design-system/using-components.md` naming the anatomy classes, the consumer obligations from FR-008/NFR-006, and the #323 composition deferral, so that I do not have to read the mission spec to use the family correctly. | Medium | Open |
@@ -250,7 +250,7 @@ control).
 | NFR-002 | Zero axe violations | `node scripts/run-axe-storybook.js` reports zero WCAG 2.1 AA violations across every `sk-public-header` story id. | Accessibility | High | Open |
 | NFR-003 | No root overflow | `document.scrollingElement.scrollWidth <= document.scrollingElement.clientWidth` holds at 390px, 1440px, and a 200%-zoom emulation (halved viewport) for every required story, asserted in the mission's Playwright spec. | Reliability | High | Open |
 | NFR-004 | No clipped focus | Every focusable control's `getBoundingClientRect()` stays within `[0, viewport width/height]` when reached by `Tab`, at both 390px and 1440px. | Accessibility | High | Open |
-| NFR-005 | 44px target-size floor, machine-verified | Every direct child of `.sk-public-header__actions` computes `getBoundingClientRect().width >= 44` and `.height >= 44` at 390px, asserted in the mission's Playwright spec. Mechanism per FR-015/NEEDS DECISION. | Accessibility | High | Open |
+| NFR-005 | 44px target-size floor, machine-verified | Every element carrying `.sk-public-header__action` computes `getBoundingClientRect().width >= 44` and `.height >= 44` at 390px and 1440px, asserted in the mission's Playwright spec; and every direct child of `.sk-public-header__actions` in every shipped fixture carries that class, so the assertion cannot be satisfied by an empty selector. Mechanism per FR-015, settled in "Resolved decision" below. | Accessibility | High | Resolved |
 | NFR-006 | Accessibility-tree correctness | Exactly one `banner` role per rendered story; a `navigation` role is present if and only if an action region exists, and always carries a non-empty accessible name; source DOM order equals Tab focus order. Asserted via a Chromium CDP accessibility-tree snapshot, in the idiom of `apps/storybook/src/tests/sk-context-nav.spec.ts`. | Accessibility | High | Open |
 | NFR-007 | Forced-colours integrity | Under `page.emulateMedia({ forcedColors: 'active' })`, the header's own `border-block-end` computed style is non-`none` and every focus-visible outline is non-`none`, following the `outline`-not-`box-shadow` rule in `docs/contributing/adding-a-component.md`. | Accessibility | High | Open |
 | NFR-008 | Reduced-motion integrity | Under `page.emulateMedia({ reducedMotion: 'reduce' })`, any transition/animation duration declared in `sk-public-header.css` computes to `0s` for its affected property, scoped to the exact selector/property (never a wildcard), matching the shape at `sk-disclosure.css`/`sk-skip-link.css`. | Accessibility | Medium | Open |
@@ -263,7 +263,7 @@ control).
 | ID | Title | Constraint | Category | Priority | Status |
 |----|-------|------------|----------|----------|--------|
 | C-001 | Tokens-only values | No raw hex/`rgba()`/`px`/radius/shadow/motion/z-index literal in component CSS; every value resolves through a `var(--sk-*)` token defined in `packages/tokens/src/tokens.css` (CLAUDE.md §3 rule 1). | Technical | High | Open |
-| C-002 | BEM naming, `sk-` prefix | Every class is one of `sk-public-header`, `sk-public-header__inner`, `sk-public-header__brand`, `sk-public-header__brand-context`, `sk-public-header__actions`, or a `--modifier` on one of those; no class is borrowed verbatim from the Family 6 evidence's local names (`topnav`, `topnav-inner`, `logo`, `nav-actions`, `brand-context`) (CLAUDE.md §3 rule 4; ADR-10's `form-field` section, the #139 per-component prefix rule). | Technical | High | Open |
+| C-002 | BEM naming, `sk-` prefix | Every class is one of `sk-public-header`, `sk-public-header__inner`, `sk-public-header__brand`, `sk-public-header__brand-context`, `sk-public-header__actions`, `sk-public-header__action`, or a `--modifier` on one of those; no class is borrowed verbatim from the Family 6 evidence's local names (`topnav`, `topnav-inner`, `logo`, `nav-actions`, `brand-context`) (CLAUDE.md §3 rule 4; ADR-10's `form-field` section, the #139 per-component prefix rule). | Technical | High | Open |
 | C-003 | No custom element is registered | No `packages/elements/src/public-header/` directory, `.markup.ts`, `custom-elements.json` entry, React wrapper, or `expected-docs.json` row is created for this mission. See "Styles-only rationale" below for which ADR-10 reasoning this decision actually rests on. | Technical | High | Open |
 | C-004 | No theme selector in component CSS | Light-mode variance is expressed only through `--sk-*` tokens (reusing the `--sk-surface-tint-*`/`--sk-on-tint-*`/`--sk-border-tint-*` family if a tinted state is needed), never a `.sk-light .sk-public-header {…}` or `:root[data-theme="light"] .sk-public-header {…}` rule. See "Styles-only rationale and theme-selector reasoning" below for which of the recipe's two reasons actually governs a component with no shadow root. | Technical | High | Open |
 | C-005 | One-directional package dependency | `packages/styles` imports only from `packages/tokens`; the family introduces no import from `packages/elements` or `packages/react` (CLAUDE.md §3 rule 2; ADR-8). | Technical | High | Open |
@@ -290,6 +290,11 @@ consumer instantiates):
 - **Action Region** (`.sk-public-header__actions`) — an optional, consumer-labelled `<nav>` holding
   zero or more action items (anchors, buttons, or a composed `sk-theme-toggle`). Entirely absent
   from the DOM, not empty, when the consumer supplies no actions.
+- **Action Item** (`.sk-public-header__action`) — the family's documented composition slot for one
+  action. The consumer authors this class on each anchor/button/element it renders inside the
+  action region, alongside whatever classes that control already carries (`sk-button`,
+  `sk-button--sm`, none). It is the only place the family expresses the 44px target floor, and it
+  is the family's own class, so no rule reaches into a composed control's internals.
 
 ## Styles-only rationale (why no custom element)
 
@@ -344,45 +349,80 @@ gives two reasons theme selectors are forbidden, and only one of them applies he
   for any tinted state), never a selector, because that is what keeps `check-component-token-literals.mjs`
   and the token catalogue the single enforcement point rather than a second, selector-based one.
 
-## [NEEDS DECISION] Target-size mechanism vs. no-internals-reach-through
+## Resolved decision — target-size mechanism vs. no-internals-reach-through
 
-The issue states two requirements about the action region that are not obviously reconcilable
-without a chosen mechanism, and neither the issue text nor any ADR resolves the conflict:
+**Status: RESOLVED.** This section was authored as `[NEEDS DECISION]`. It is resolved by existing
+repository precedent, **not** by an operator decision — there is no operator ruling on this fork
+and none is claimed.
+
+**Who ruled and on what basis.** Programme orchestrator, session `ea037606`, 2026-09-10, from
+repository precedent. The fork the spec raised is not open: this repository has already answered
+"how does a family meet a 44px target floor over a control it does not own" twice, in two
+independently authored stylesheets, and both answers are the same idiom.
+
+### The question as posed
+
+The issue states two requirements that read as being in tension:
 
 > "The action region accepts real anchors/buttons and the public `sk-theme-toggle` from #323
 > without styling its internals or owning theme state." … "targets meet the 44px floor."
 
-Measured against the actual evidence: Family 6's own two-action header composes `sk-button--sm`
-(`packages/styles/src/button/sk-button.css:73-77`), whose computed block-size is
-`var(--sk-space-2)` (8px) padding × 2 + a `line-height: 1` text-sm (14px) line box ≈ **30px** —
-under the 44px floor on its own, and the family is not supposed to hand-restyle `sk-button--sm`'s
-own selectors to fix that (that would be exactly the "styling its internals" the issue forbids).
+Family 6's own two-action header composes `sk-button--sm`, whose computed block-size is under the
+44px floor on its own; the family must not hand-restyle `sk-button--sm`'s selectors to fix that.
 
-**Option A — recommended.** The family sets a `min-block-size`/`min-inline-size` floor and centers
-content on the **direct children** of `.sk-public-header__actions` via a child combinator (e.g.
-`.sk-public-header__actions > :is(a, button)`), sized to 44 CSS px using an existing `--sk-space-*`
-token (`--sk-space-9` = 48px is the token `sk-context-nav` already uses for its own equivalent
-`__link` sizing). This touches only the composed element's own outer box — the box the header's
-flex layout already positions — never a class, `::part()`, or shadow-root selector belonging to
-`sk-button` or `sk-theme-toggle`. It is the enlarge-the-target-without-reaching-in technique WCAG
-2.5.8 documents, and it is the only option that makes NFR-005 mechanically verifiable by the
-required target-size Playwright assertion rather than merely documented.
+### The precedent, verified in this checkout
 
-**Option B — not recommended.** The family supplies spacing/`gap` only and documents the 44px floor
-as a **consumer obligation** (e.g. "compose the default `sk-button` size, not `--sm`, inside this
-region"), enforcing nothing in CSS. This keeps the family's CSS narrower but makes the issue's
-"targets meet the 44px floor" requirement unverifiable by the family itself — the required
-target-size evidence item in the issue's own "Required stories and tests" list would have nothing
-to assert against, which the mission's own evidence bar (this spec's NFR-005/SC list) cannot leave
-unresolved.
+1. **`packages/styles/src/confirm-dialog/sk-confirm-dialog.css:165-174`** — the case is stated
+   verbatim in the sheet's own comment and answered on the component's own BEM classes:
 
-**Recommendation:** Option A. It satisfies both issue sentences simultaneously, is precedented by
-`sk-context-nav`'s own link sizing, and is what makes the required target-size test in the issue's
-evidence list executable rather than aspirational. **This is flagged to the operator rather than
-decided silently** because it is a real fork in how "without styling its internals" is read, and a
-wrong reading here would either leave a stated requirement unimplementable (Option B) or set a
-precedent for reaching into composed elements' outer box that a future mission might misapply to an
-actual internal selector.
+   ```css
+   /* NFR-001: every interactive control here is at least 44x44px. `.sk-button` does not
+      guarantee that on its own (its `sm` size is deliberately smaller), so this component pins
+      its own minimums on the two controls it renders, regardless of which `.sk-button` size
+      modifier (if any) the consumer's classes end up carrying. */
+   .sk-confirm-dialog__confirm,
+   .sk-confirm-dialog__cancel {
+     /* --sk-space-9 is 3rem/48px — the closest token at or above the 44px NFR-001 floor. */
+     min-inline-size: var(--sk-space-9);
+     min-block-size: var(--sk-space-9);
+   }
+   ```
+
+   The floor is pinned on `.sk-confirm-dialog__confirm` / `.sk-confirm-dialog__cancel` — the
+   dialog family's **own** classes — and no rule anywhere in that sheet targets `.sk-button`,
+   `.sk-button--sm`, a `::part()`, or a shadow-root internal.
+
+2. **`packages/styles/src/context-nav/sk-context-nav.css:44-56`** — the same idiom on
+   `.sk-context-nav__link`: `display: flex; align-items: center;` alongside
+   `min-block-size: var(--sk-space-9)`, so the floor is not inert on what would otherwise be an
+   inline box. `apps/storybook/src/tests/sk-context-nav.spec.ts` asserts the resulting boxes are
+   `>= 44` in both dimensions at 390px and 1280px.
+
+### The ruling
+
+`.sk-public-header` **owns a family BEM class for an action item** — spelled
+`.sk-public-header__action` — and pins the 44px floor on **that class**, together with whatever
+`display` value makes a block-size floor non-inert on an anchor/button (`inline-flex` with
+`align-items: center; justify-content: center`, following the `sk-context-nav__link` shape).
+
+The family **never** writes a rule against `.sk-button`, `.sk-button--sm`, `sk-theme-toggle`, any
+`::part()`, or any shadow-root internal. `.sk-public-header__action` is a **documented composition
+slot** — a category the issue itself lists as library-owned ("documented composition slots/regions")
+— and applying it to each action the consumer renders is a **documented consumer obligation**,
+exactly as applying `.sk-context-nav__link` to each of its own anchors is. This reconciles both of
+the issue's sentences with zero reach-through: the class the rule targets belongs to this family,
+and the consumer opts each control into it by authoring it, the same way they author every other
+class in this family.
+
+The earlier draft's "Option A" (a `.sk-public-header__actions > :is(a, button)` child combinator)
+is **not** adopted: a descendant/child combinator reaching the composed control by *element type*
+rather than by this family's own class is a weaker version of the same idea with none of the
+precedent behind it, and it silently misses a composed `sk-theme-toggle` custom element. The
+earlier draft's "Option B" (document-only, enforce nothing) is rejected for the reason it already
+gave — it leaves NFR-005 with nothing to assert.
+
+**FR-015 and NFR-005 are settled by this section** and carry no open decision. The implementer
+does not choose a mechanism; the mechanism above is the plan's input.
 
 ## Cross-mission / dependency section
 
@@ -456,6 +496,7 @@ that success criteria be independently checkable and name the mechanism.
   / dependency" #323 entry).
 - **SC-012**: `npm run quality:all` (ESLint, stylelint, htmlhint) exits 0 over every new file this
   mission adds.
-- **SC-013**: The `[NEEDS DECISION]` target-size mechanism above is resolved (by the operator or by
-  an explicit ADR/issue-comment ruling) before the Work Package's CSS is authored, and the mission's
-  plan records which option was chosen and why, rather than the implementer choosing silently.
+- **SC-013**: `git grep -n "NEEDS DECISION" -- kitty-specs/public-header-styles-01M268NK/spec.md`
+  returns nothing — the target-size mechanism is settled in "Resolved decision" above, from the two
+  cited precedents, before any of the Work Package's CSS is authored. The implementer applies that
+  mechanism; it does not choose one.
