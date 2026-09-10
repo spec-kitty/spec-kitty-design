@@ -1,7 +1,7 @@
 {
   "rows": {
     "#101": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "research.md 'Decision: --sk-border-control is an INDEPENDENTLY DECLARED LITERAL' section; #101's --sk-fg-subtle move is historical precedent this mission deliberately does NOT alias into (that was the rejected draft) -- independently re-derived by this reviewer from tokens.css, matches the cited #101 figures",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -9,8 +9,8 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
     },
     "#155": {
       "evidence_ref": "<link or commit>",
