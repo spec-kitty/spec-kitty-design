@@ -13,7 +13,7 @@
       "wp": "WP01"
     },
     "#300": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "No work owed directly. #300 is the Family 4 component-gap-audit epic that #303 (this mission's own issue) is Gap G2 of (spec.md:6, research.md:4). This mission closes only #303's WP01, not the epic itself, which tracks additional gaps across other missions (see plan.md:125 Family 6 coordination note). No followup owed by this WP; #300 stays open at the epic level.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -21,8 +21,8 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
     },
     "#302": {
       "evidence_ref": "<link or commit>",
