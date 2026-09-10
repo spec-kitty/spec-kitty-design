@@ -95,5 +95,15 @@
       "notes": "TODO: replace with a real acceptance criterion"
     }
   ],
-  "negative_invariants": []
+  "negative_invariants": [
+    {
+      "invariant_id": "NI-001",
+      "description": "C-003: no Lynn product verdict is cited as evidence anywhere in the deliverable surfaces. No such verdict is recorded; the program-state name 'ready-for-Lynn' and explicit statements that no verdict exists are permitted and are not matched.",
+      "verification_method": "grep_absence",
+      "verification_command": "Lynn (approved|approves)|Lynn's (approval|verdict) (is|was|confirms)|per Lynn|Lynn signed off",
+      "result": "confirmed_absent",
+      "evidence": "grep found zero matches",
+      "scope": "docs packages/styles/src"
+    }
+  ]
 }
