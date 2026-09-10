@@ -47,11 +47,11 @@
     {
       "criterion_id": "FR-005",
       "description": "Verify FR-005 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "proof_type": "manual_inspection",
+      "evidence": "packages/styles/src/entity-marker/sk-entity-marker.css .sk-entity-marker--bordered uses only --sk-border-width-1 and --sk-border-default (existing token family); no raw hex/rgba/px; border-color kept as longhand per declaration-strict-value convention",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T11:03:06.705420+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
