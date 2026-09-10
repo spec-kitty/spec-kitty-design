@@ -83,6 +83,18 @@
       "title": "<fill at WP-implementation time>",
       "verdict": "fixed",
       "wp": "WP01"
+    },
+    "#73": {
+      "evidence_ref": "research.md cites '#72 and #73 both declined it' as settled precedent that a component's markup module is optional (glob-derived generator work set); sk-confirm-dialog correctly follows the same declined-markup-module shape for its interactive-only form. Not touched by this WP.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
     }
   },
   "schema_version": 1
