@@ -468,6 +468,12 @@ const sameAssertionCounts = (left, right) =>
 const SANDBOX_INPUTS = [
   'fixtures', 'packages', 'scripts', 'tests', 'vitest.config.mts',
   'behaviours.json', 'package.json', 'tsconfig.base.json', 'tsconfig.json',
+  // sk-action-row.test.ts (#307/#331) imports using-components.md as an anti-drift
+  // comparator — a real `?raw` import, not test scaffolding, so the sandbox must resolve
+  // it too or the whole file fails to transform and every behaviour it declares reads as
+  // "missing". NOT the whole 'docs' tree: docs/architecture alone is 5.3M of validation
+  // PNGs nothing here imports, and this list is re-copied per mutation arm.
+  'docs/design-system',
 ];
 const sandboxRoot = mkdtempSync(join(tmpdir(), 'suite-selftest-'));
 const pristine = join(sandboxRoot, 'pristine');
