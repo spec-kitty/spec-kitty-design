@@ -1,3 +1,34 @@
+/* WHAT A STATIC CONSUMER MUST AUTHOR INSTEAD (ADR-15).
+
+   `::slotted(img)` at the bottom of this file is SHADOW-ONLY. ADR-15 ruled this construct kind
+   shadow-only: no generated static form is planned, because the two forms cannot be held equal.
+
+   A server-rendered consumer authors their own descendant rule, against the flattened shape the
+   element produces — the <slot> lives inside `.sk-entity-marker__content`, so the assigned node
+   is a child of THAT, not of `.sk-entity-marker`:
+
+       .sk-entity-marker__content > img {
+         display: block; inline-size: 100%; block-size: 100%; object-fit: cover; flex: none;
+       }
+
+   That rule reproduces the appearance exactly — measured `block` / `32px` / `32px` / `cover` on
+   both paths, chromium and firefox. What it does NOT reproduce is CASCADE POSITION, and the
+   difference is not a detail: a declaration from the outer tree beats a `::slotted()`
+   declaration from the inner tree REGARDLESS of specificity, so a page's bare
+   `img { object-fit: contain }` overrides the shadow form (measured: `contain`) and loses to the
+   static descendant rule (measured: `cover`). A static consumer's own stylesheet therefore has
+   to outbid this rule on specificity where the element would simply have yielded to it.
+
+   If a future rule here should serve both paths from one place, use the paired spelling #78
+   established for sk-blog-card, sk-feature-card, sk-ribbon-card and sk-site-footer —
+   `.sk-entity-marker__content > img, ::slotted(img)` — which is valid in both contexts
+   (measured: the `::slotted()` branch does not invalidate the list). It removes duplication; it
+   does not change the cascade fact above.
+
+   ADR-15 and kitty-specs/static-form-of-element-backed-css-01M248TF/measurement/
+   slotted-child-rule/ hold the full outcome table. This comment adds no rule and changes
+   none. */
+
 :host {
   display: inline-flex;
 }

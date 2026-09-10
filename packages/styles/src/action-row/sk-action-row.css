@@ -1,3 +1,25 @@
+/* WHAT A STATIC CONSUMER MUST AUTHOR INSTEAD (ADR-15).
+
+   `:host { container-type: inline-size }` below is the sole container establishing the
+   `@container (max-width: 400px)` reflow — the only reflow rule this file has. There is no
+   light-DOM form of it in this package yet (#309 generator, #310 equivalence gate), so a
+   server-rendered consumer authors the wrapper themselves:
+
+       <div class="sk-action-row-host">        <- container-type: inline-size here
+         <div class="sk-action-row"> ... </div>
+       </div>
+
+   DO NOT MOVE `container-type` ONTO `.sk-action-row`. An element is never its own query
+   container. Measured, chromium and firefox, at a 360px row: the real element computes
+   `flex-wrap: wrap` and the collapsed static form computes `nowrap`; nested inside a 320px
+   ancestor container, a 700px row the element correctly leaves unwrapped wraps anyway. The
+   trigger's `grid-template-areas` agrees in both forms at every width, because the trigger is
+   a DESCENDANT of the container — which is what makes the divergence easy to miss.
+
+   ADR-15 and kitty-specs/static-form-of-element-backed-css-01M248TF/measurement/
+   host-container-type/ hold the full outcome table. This comment adds no rule and changes
+   none. */
+
 :host {
   display: block;
   min-width: 0;

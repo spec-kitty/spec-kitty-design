@@ -1,3 +1,30 @@
+/* WHAT A STATIC CONSUMER MUST AUTHOR INSTEAD (ADR-15).
+
+   The compact / rail-preserving axis below is a HOST-ATTRIBUTE VARIANT AXIS inside a
+   @container block whose container is `:host`. There is no light-DOM form of it in this
+   package yet — #309 files the generator, #310 the equivalence gate — so a server-rendered
+   consumer authors it themselves, and there is exactly one shape that works:
+
+       <div class="sk-app-shell-host sk-app-shell-host--compact">   <- container-type here
+         <div class="sk-app-shell"> ... </div>
+       </div>
+
+   with `.sk-app-shell-host { container-type: inline-size }` and every
+   `:host([presentation="X"]) <sel>` rule below rewritten as `.sk-app-shell-host--X <sel>`.
+
+   DO NOT COLLAPSE THE TWO ELEMENTS. Moving `container-type` onto `.sk-app-shell` and turning
+   the axis into `.sk-app-shell--compact` is the obvious translation and it is wrong: an
+   element is never its own query container, so `.sk-app-shell`'s own rules then answer some
+   outer ancestor of the page instead of the component's box. Its DESCENDANTS keep querying
+   correctly, which is why the defect is silent. Measured, chromium and firefox, at an 800px
+   shell with presentation=compact: the real element computes `grid-template-columns: 800px`
+   and the collapsed static form computes `56px 240px 504px`. Nested inside a 500px ancestor
+   container, a 1200px shell the element leaves at three columns is compacted to one.
+
+   ADR-15 and kitty-specs/static-form-of-element-backed-css-01M248TF/measurement/
+   host-attribute-axis/ hold the full outcome table. This comment adds no rule and changes
+   none. */
+
 :host {
   display: block;
   width: 100%;
