@@ -601,9 +601,9 @@ const actionRowHtmlStory = async (page: Page, storyId: string) => {
 
 test('SK-action-row HTML default and light — visual baselines', async ({ page }) => {
   let host = await actionRowHtmlStory(page, 'default');
-  await expect(host).toHaveScreenshot('sk-action-row-html-default-dark.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  await expect.soft(host).toHaveScreenshot('sk-action-row-html-default-dark.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
   host = await actionRowHtmlStory(page, 'light-mode');
-  await expect(host).toHaveScreenshot('sk-action-row-html-light.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  await expect.soft(host).toHaveScreenshot('sk-action-row-html-light.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
 });
 
 test('SK-action-row HTML card, flush, route and current states — visual baselines', async ({ page }) => {
@@ -615,7 +615,7 @@ test('SK-action-row HTML card, flush, route and current states — visual baseli
     ['route-current', 'sk-action-row-html-route-current.png'],
   ] as const) {
     const host = await actionRowHtmlStory(page, storyId);
-    await expect(host).toHaveScreenshot(snapshot, { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+    await expect.soft(host).toHaveScreenshot(snapshot, { threshold: 0.02, maxDiffPixelRatio: 0.02 });
   }
 });
 
