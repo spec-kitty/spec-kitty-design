@@ -1,0 +1,143 @@
+/* @spec-kitty/styles — native light-DOM public header presentation (#353) */
+/* Consumers own identity, routes, labels, action presence, current state, and theme state. */
+
+.sk-public-header {
+  box-sizing: border-box;
+  inline-size: 100%;
+  color: var(--sk-fg-body);
+  background: var(--sk-surface-page);
+  border-block-end-color: var(--sk-border-default);
+  border-block-end-style: solid;
+  border-block-end-width: var(--sk-border-width-1);
+  font-family: var(--sk-font-sans);
+}
+
+.sk-public-header__inner {
+  box-sizing: border-box;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  min-inline-size: 0;
+  min-block-size: var(--sk-space-10);
+  gap: var(--sk-space-4);
+  padding-block: var(--sk-space-3);
+  padding-inline: var(--sk-space-4);
+}
+
+.sk-public-header__brand {
+  box-sizing: border-box;
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  min-block-size: var(--sk-space-9);
+  margin-inline-end: auto;
+  gap: var(--sk-space-3);
+  color: var(--sk-fg-default);
+  font-size: var(--sk-text-xl);
+  font-weight: var(--sk-weight-semibold);
+  overflow-wrap: anywhere;
+  text-decoration: none;
+}
+
+.sk-public-header__brand:link,
+.sk-public-header__brand:visited {
+  color: var(--sk-fg-default);
+}
+
+.sk-public-header__brand-context {
+  min-inline-size: 0;
+  padding-inline-start: var(--sk-space-4);
+  color: var(--sk-fg-muted);
+  border-inline-start-color: var(--sk-border-strong);
+  border-inline-start-style: solid;
+  border-inline-start-width: var(--sk-border-width-1);
+  font-size: var(--sk-text-sm);
+  font-weight: var(--sk-weight-normal);
+  overflow-wrap: anywhere;
+}
+
+.sk-public-header__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  margin-inline-start: auto;
+  gap: var(--sk-space-3);
+}
+
+.sk-public-header__action {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-inline-size: var(--sk-space-9);
+  max-inline-size: 100%;
+  min-block-size: var(--sk-space-9);
+  color: inherit;
+  background: transparent;
+  border-block-end-color: transparent;
+  border-block-end-style: solid;
+  border-block-end-width: var(--sk-border-width-1);
+  font-family: var(--sk-font-sans);
+  font-weight: var(--sk-weight-normal);
+  overflow-wrap: anywhere;
+  text-decoration: none;
+}
+
+.sk-public-header__action:link,
+.sk-public-header__action:visited {
+  color: inherit;
+}
+
+.sk-public-header__action:hover {
+  text-decoration-line: underline;
+  text-decoration-style: solid;
+  text-decoration-thickness: var(--sk-border-width-1);
+  text-underline-offset: var(--sk-space-1);
+}
+
+.sk-public-header__action:active {
+  text-decoration-line: underline;
+  text-decoration-style: double;
+  text-decoration-thickness: var(--sk-border-width-2);
+}
+
+.sk-public-header__brand:focus-visible,
+.sk-public-header__action:focus-visible {
+  outline-color: var(--sk-border-focus);
+  outline-style: solid;
+  outline-width: var(--sk-border-width-2);
+  outline-offset: var(--sk-border-width-1);
+}
+
+.sk-public-header__action[aria-current]:not([aria-current="false"]) {
+  color: var(--sk-fg-default);
+  border-block-end-color: var(--sk-color-accent);
+  border-block-end-style: solid;
+  border-block-end-width: var(--sk-border-width-4);
+  font-weight: var(--sk-weight-semibold);
+}
+
+@media (forced-colors: active) {
+  .sk-public-header {
+    border-block-end-color: ButtonText;
+  }
+
+  .sk-public-header__brand-context {
+    border-inline-start-color: ButtonText;
+  }
+
+  .sk-public-header__action[aria-current]:not([aria-current="false"]) {
+    border-block-end-color: Highlight;
+  }
+
+  .sk-public-header__brand:focus-visible,
+  .sk-public-header__action:focus-visible {
+    outline-color: Highlight;
+  }
+}
