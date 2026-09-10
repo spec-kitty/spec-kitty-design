@@ -2,7 +2,7 @@
   "mission_slug": "form-input-contrast-touch-target-contract-01M25STR",
   "mission_number": "",
   "mission_type": "software-dev",
-  "overall_verdict": "pending",
+  "overall_verdict": "pass",
   "criteria": [
     {
       "criterion_id": "FR-001",
@@ -97,11 +97,11 @@
     {
       "criterion_id": "FR-010",
       "description": "Verify FR-010 is satisfied",
-      "proof_type": "manual_review",
-      "evidence": "PR-TIME-PENDING -- no PR is open yet for this mission, so the actual PR-body text cannot be observed by this reviewer. What IS confirmed now: the WP01 activity log (2026-09-10T15:25:57Z entry) contains a drafted PR-body line naming --sk-border-control, and git diff 4d6c5f2..HEAD --name-only contains zero files under any *button* path (checked directly). The coordination-outcome statement, the six ratios in the PR description, and the explicit #155 non-closure statement are all artifacts that only exist once a PR is opened -- deliberately not marked pass on evidence I have not observed.",
-      "pass_fail": "pending",
-      "verified_by": "reviewer-renata",
-      "verified_at": "2026-09-10T15:49:20.982639+00:00",
+      "proof_type": "manual_inspection",
+      "evidence": "https://github.com/spec-kitty/spec-kitty-design/pull/339 body: names --sk-border-control, records all ten measured ratios in 'ratio : 1' format (dark 5.01/4.51/4.28/3.64/3.86, light 3.98/4.34/3.85/3.35/3.51), and states explicitly that #155 keeps .sk-button--secondary and is not closed, absorbed or widened by this mission. Verified at head e416da96; PR body references #155 four times.",
+      "pass_fail": "pass",
+      "verified_by": "programme-319-orchestrator",
+      "verified_at": "2026-09-10T21:52:02.666118+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
