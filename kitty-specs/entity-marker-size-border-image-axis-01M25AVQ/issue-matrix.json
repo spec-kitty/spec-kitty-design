@@ -13,7 +13,7 @@
       "wp": "WP01"
     },
     "#286": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "spec.md prose cross-reference only: #286 is a cited shared constraint honored by this WP's design (tokens-first, existing anatomy). Not a dependency #304 resolves.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -21,8 +21,8 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "verdict": "in-mission",
+      "wp": "WP01"
     },
     "#300": {
       "evidence_ref": "<link or commit>",
