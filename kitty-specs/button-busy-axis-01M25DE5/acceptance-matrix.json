@@ -178,10 +178,10 @@
       "criterion_id": "FR-018",
       "description": "Verify FR-018 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "no request lifecycle, timer, mutation, or double-submit code added anywhere in this diff; busy composes with consumer-owned disabled/aria-disabled without this mission touching either mechanism; BusyAriaDisabled story comment explicitly names SaaS #1520's double-submit prevention as the mechanism this composition preserves",
+      "pass_fail": "pass",
+      "verified_by": "mission-closer",
+      "verified_at": "2026-09-10T12:35:53.170597+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     }
   ],
