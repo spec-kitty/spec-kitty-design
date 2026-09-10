@@ -85,7 +85,7 @@
       "wp": "WP01"
     },
     "#310": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "spec.md C-002/L142: the equivalence gate for the generated rule is explicitly #310's scope, gated on #309 landing first",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -93,8 +93,8 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
     }
   },
   "schema_version": 1
