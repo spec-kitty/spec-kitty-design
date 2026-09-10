@@ -355,3 +355,25 @@
   which the generated manifest already advertised from `./dist/index.js`. Red-first parity test,
   regenerated/checked derived outputs, release and size gates, and a genuine 100%/200% recapture
   on the changed product tree are recorded in the implementation evidence.
+
+## Final remediation review — pass 6
+
+- Fresh read-only Claude Code `reviewer-renata` seat, governed by Op
+  `01M26SYR6566YPWBQ5A0H3YBAT`, reviewed exact clean HEAD
+  `9510b74e6103aec15aa187d3121a73f91fe84d3e` and rejected with zero High, one Medium, and five Low
+  findings. The detailed structured review is `reviews/adversarial-review-pass-6.md`.
+- The four pass-5 findings and generated-surface parity are closed except for a remaining edge of
+  multi-control coherence: when storage is denied, removing the last control deletes the
+  page-level coordinator, so a later new control resets the root to System. That contradicts the
+  current-page fallback contract and requires another fresh remediation/review cycle.
+- L1-L3 (synchronous event-handler reversion, invalid markup wording, and authored initial-
+  preference guidance) are same-contract hardening to fold into that bounded remediation. L4-L5
+  are non-blocking scope-metadata/test-structure observations.
+- Independent review checks: browser behavior 54/54, Node contract/barrel 11/11, temporary
+  Storybook Chromium composition/no-JS 14/14, uncached typecheck 5/5, relevant generated checks,
+  commitlint, temporary bundle identity, sizes and SRI. Both zoom images were directly inspected
+  and accepted. The full mutation sweep remains an acceptance blocker.
+- A fresh fetch during review moved `origin/train/elements-first` from
+  `bab211c9876d85c2c004daf05ef27046bbf0e671` to
+  `9df4b5a1518c964816e1f47162dae02c8b0db71b`; rebase/regeneration precede remediation so the next
+  product point-cut is current.
