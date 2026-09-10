@@ -37,7 +37,7 @@
       "wp": "WP01"
     },
     "#305": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "C-008: busy/loading axis explicitly excluded from this mission's scope; remains #305's own separate concern, unaffected by this diff.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -45,8 +45,8 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
     },
     "#319": {
       "evidence_ref": "<link or commit>",
