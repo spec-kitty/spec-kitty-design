@@ -137,11 +137,11 @@
     {
       "criterion_id": "FR-014",
       "description": "Verify FR-014 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "proof_type": "document_inspection",
+      "evidence": "Independently re-ran `grep -rniE \"team.{0,20}(delet|remov)\" packages/elements/src/confirm-dialog packages/styles/src/confirm-dialog fixtures/elements-behaviour/src/sk-confirm-dialog.test.ts kitty-specs/confirm-dialog-element-01M248TN` \u2014 every match is prohibition documentation (JSDoc, spec.md, tasks.md, issue-matrix.json, review notes) naming the Team Kitty SaaS #1432 constraint or membership-removal/leave/bearer-link-revoke framing; zero matches present whole-Team deletion as an available flow. Matches review-cycle-1/2's own independent T011 audit.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T09:44:54.921548+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
