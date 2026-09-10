@@ -49,7 +49,7 @@
       "wp": null
     },
     "#301": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "ADR-15 (docs/architecture/decisions/2026-09-10-15-static-form-of-element-backed-css.md) is #301's ruling and has landed on train, unblocking this mission's static freeze",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -57,7 +57,7 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
+      "verdict": "verified-already-fixed",
       "wp": null
     },
     "#302": {
