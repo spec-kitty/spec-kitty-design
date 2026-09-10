@@ -88,10 +88,10 @@
       "criterion_id": "FR-009",
       "description": "Verify FR-009 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "Ran myself: 'node scripts/build-elements-css.mjs --check' -> 'Generated CSS modules are up to date (30 component(s)).' 'npx nx run tokens:catalogue' regenerated packages/tokens/dist/token-catalogue.json with only a generated_at timestamp diff against the committed file (reverted as noise, confirmed via git diff). Neither generated file was hand-edited.",
+      "pass_fail": "pass",
+      "verified_by": "reviewer-renata",
+      "verified_at": "2026-09-10T15:49:15.122439+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
