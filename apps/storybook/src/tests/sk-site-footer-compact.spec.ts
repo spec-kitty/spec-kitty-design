@@ -106,8 +106,14 @@ test('the compact row stacks at 639px and does not stack at 641px, with DOM/focu
   await footer.evaluate(
     (element) => (element as HTMLElement & { updateComplete: Promise<unknown> }).updateComplete,
   );
-  const narrowDisplay = await rowOf(footer).evaluate((el) => getComputedStyle(el).flexDirection);
-  expect(narrowDisplay, '639px must stack').toBe('column');
+  // Pins the media query's own two declarations, not just the direction — the mirror of the
+  // wide branch's defect one line up, where asserting the initial value proved nothing.
+  const narrow = await rowOf(footer).evaluate((el) => {
+    const style = getComputedStyle(el);
+    return { alignItems: style.alignItems, flexDirection: style.flexDirection };
+  });
+  expect(narrow.flexDirection, '639px must stack').toBe('column');
+  expect(narrow.alignItems, '639px stack aligns to the logical start').toBe('flex-start');
 
   // DOM/focus order is unchanged across the transition — the stacking is CSS `flex-direction`
   // only, never a DOM reorder.

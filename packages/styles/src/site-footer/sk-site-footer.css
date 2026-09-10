@@ -221,8 +221,11 @@
 /* PAIRED SPELLING, and it is load-bearing rather than stylistic. The compact anchors are
    DIRECTLY ASSIGNED to `slot[name=compact-links]`, so they stay light-DOM nodes: a bare class
    selector in this sheet reaches them in the static/document path and reaches NOTHING once the
-   sheet is adopted into the shadow root. That is the same situation as `__column` above, which
-   is why line 59 already ships this exact pairing. Without the `::slotted()` half, the 44px
+   sheet is adopted into the shadow root. (Do NOT read the `__column` pairing above as the
+   precedent for this: since the #77 ruling the element renders `.sk-site-footer__column` itself,
+   inside the shadow root, and only the `<li>` items are slotted — so there the BARE half is the
+   live one and the `::slotted()` half is a vestige of the pre-#77 design. Here the live halves
+   are the other way round.) Without the `::slotted()` half, the 44px
    target-size floor applied only where a consumer had separately adopted this sheet into their
    document — the stories do, which is why the target-size test passed while the shipped element
    did not carry the rule. `::slotted()` takes no state pseudo-class here, so the caveat in this

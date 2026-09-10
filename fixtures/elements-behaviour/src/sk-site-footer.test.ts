@@ -90,6 +90,30 @@ const mountCompact = async (
 /** No `<nav>`, no heading, no `<ul>`, no `<hr>` — the zero-scaffolding claim, checked structurally. */
 const NO_LANDMARK_SELECTOR = 'nav, ul, ol, li, h1, h2, h3, h4, h5, h6, hr';
 
+// FIRST TEST IN THE FILE, DELIBERATELY. `document.adoptedStyleSheets` is never unwound between
+// cases here, so once any later test calls `adoptSheetIntoDocument()` the document carries the
+// sheet for the rest of the run and this measurement stops proving anything. It must observe a
+// document that has NOT adopted it.
+test('[NFR-006] a slotted compact link meets the 44px floor from the SHADOW sheet alone', async () => {
+  expect(
+    document.adoptedStyleSheets.includes(skSiteFooterSheet),
+    'this case must run before any adoptSheetIntoDocument() call',
+  ).toBe(false);
+
+  const element = await mountCompact();
+  const anchor = element.querySelector('a.sk-site-footer__link--compact')!;
+  const box = anchor.getBoundingClientRect();
+
+  // The whole point. The anchor is a DIRECTLY ASSIGNED light-DOM node, so before the rule carried
+  // its `::slotted()` half the shipped element reached it with nothing and this box was ~20px —
+  // while every existing test stayed green, because the stories and the equivalence test adopt the
+  // sheet into `document` and supplied the rule the element did not. Delete the `::slotted()` half
+  // and this reds; nothing else in the suite does.
+  expect(box.height, 'block-size floor').toBeGreaterThanOrEqual(44);
+  expect(box.width, 'inline-size floor').toBeGreaterThanOrEqual(44);
+  element.remove();
+});
+
 test('[SC-013] every declared part is targetable from outside', async () => {
   const el = await mount();
   const cases: readonly (readonly [string, string])[] = [
@@ -288,13 +312,19 @@ test('compact renders no landmark, no heading and no list — at zero, one and s
 
 test('compact draws no divider, with or without a legal line', async () => {
   const withLegal = await mountCompact();
-  expect(partOf(withLegal, 'divider'), 'element path, with legal').toBe(null);
+  expect(
+    withLegal.shadowRoot!.querySelector('hr, .sk-site-footer__divider'),
+    'element path, with legal',
+  ).toBe(null);
   withLegal.remove();
 
   const withoutLegal = await mountCompact([{ label: 'Terms', href: '/terms/' }], {
     tagline: COMPACT_ATTRS.tagline,
   });
-  expect(partOf(withoutLegal, 'divider'), 'element path, without legal').toBe(null);
+  expect(
+    withoutLegal.shadowRoot!.querySelector('hr, .sk-site-footer__divider'),
+    'element path, without legal',
+  ).toBe(null);
   withoutLegal.remove();
 
   const links: SiteFooterLink[] = [{ label: 'Terms', href: '/terms/' }];
