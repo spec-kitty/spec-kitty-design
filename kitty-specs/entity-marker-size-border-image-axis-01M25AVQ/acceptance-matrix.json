@@ -8,10 +8,10 @@
       "criterion_id": "FR-001",
       "description": "Verify FR-001 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "packages/styles/src/entity-marker/sk-entity-marker.css (.sk-entity-marker--lg, --sk-space-9); apps/storybook/src/tests/sk-compact-work-item-extensions.spec.ts 'keeps size and shape independent across the full 2x2 matrix'; reviewer review-cycle-1.md 585/585 tests",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T11:02:56.113901+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
