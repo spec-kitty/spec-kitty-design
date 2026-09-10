@@ -13,7 +13,7 @@
       "wp": "WP01"
     },
     "#1520": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "Team Kitty SaaS double-submit prevention (different repo; C-006/FR-018 out of scope). Verified this WP takes no ownership: the [FR-003/004/005] test confirms busy composes independently of native disabled and focusable aria-disabled, matching #1520's required shape.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -21,8 +21,8 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "verdict": "in-mission",
+      "wp": "WP01"
     },
     "#178": {
       "evidence_ref": "<link or commit>",
