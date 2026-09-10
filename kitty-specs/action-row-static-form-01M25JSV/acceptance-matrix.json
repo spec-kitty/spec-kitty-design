@@ -138,10 +138,10 @@
       "criterion_id": "FR-014",
       "description": "Verify FR-014 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
+      "evidence": "fixtures/elements-behaviour/src/sk-action-row.test.ts:1174 test [T006][FR-014] 'no trailing action renders no .sk-action-row__controls element at all \u2014 absent, not hidden' \u2014 passing",
+      "pass_fail": "pass",
       "verified_by": null,
-      "verified_at": null,
+      "verified_at": "2026-09-10T14:07:19.235789+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
