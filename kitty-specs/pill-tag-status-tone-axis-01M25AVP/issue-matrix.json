@@ -25,7 +25,7 @@
       "wp": null
     },
     "#286": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "Follow-up: #286 (repo-wide no-user-visible-literal-in-render() gate) remains a separate deliverable; C-011/FR-011 explicitly state this mission does not build it",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -33,7 +33,7 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
+      "verdict": "deferred-with-followup",
       "wp": null
     },
     "#300": {
