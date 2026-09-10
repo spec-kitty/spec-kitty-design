@@ -18,10 +18,10 @@
       "criterion_id": "FR-002",
       "description": "Verify FR-002 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "fixtures/elements-behaviour/src/sk-confirm-dialog.test.ts \u2014 \"FR-002: aria-labelledby/aria-describedby resolve within the same shadow root\" asserts the dialog's aria-labelledby/aria-describedby targets resolve within the same shadow root (ADR-9 \u00a74) and carry the supplied title/message text; passing in the 20/20 run.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T09:44:43.268996+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
