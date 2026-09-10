@@ -23,6 +23,7 @@
   "purpose_context": "This mission advances pill tag status tone axis on mission/pill-tag-status-tone-axis so stakeholders can track the work from mission creation onward.",
   "purpose_tldr": "pill tag status tone axis",
   "slug": "pill-tag-status-tone-axis-01M25AVP",
+  "status_phase": "1",
   "target_branch": "mission/pill-tag-status-tone-axis",
   "topology": "single_branch"
 }
