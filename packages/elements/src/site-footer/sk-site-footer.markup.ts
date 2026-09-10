@@ -31,13 +31,46 @@ export const SITE_FOOTER_CLASSES = {
   link: 'sk-site-footer__link',
   divider: 'sk-site-footer__divider',
   legal: 'sk-site-footer__legal',
+  // COMPACT PRESENTATION (#354). `row`/`meta` are the compact anatomy's own layout nodes;
+  // `linkCompact` is a MODIFIER on the existing `link` class, applied only in the light DOM
+  // (element path: a consumer-authored `<a>`; static path: a generated `<a>`) — never a
+  // descendant selector from the root, because the root class lives inside the shadow root in
+  // the element path and the anchor does not descend from it there.
+  row: 'sk-site-footer__row',
+  meta: 'sk-site-footer__meta',
+  linkCompact: 'sk-site-footer__link--compact',
 } as const;
 
 /** No colour or shape variants — a site footer is one thing. */
 export const SITE_FOOTER_VARIANTS = {} as const;
 
-/** No non-variant axes. */
-export const SITE_FOOTER_AXES = {} as const;
+/**
+ * The compact presentation, one of two closed records keyed by `presentation`. Mirrors
+ * `sk-check-bullet`'s `CHECK_BULLET_PRESENTATIONS` shape: `full` is the backward-compatible
+ * default (no modifier class, so `siteFooterClasses()` output is unchanged for every existing
+ * caller), `compact` adds one ordinary BEM modifier class on the root — never a `:host([attr])`
+ * rule, which is what keeps ADR-15's #309/#310 host-axis machinery untriggered.
+ */
+const SITE_FOOTER_PRESENTATIONS = Object.freeze({
+  full: Object.freeze({ modifier: '' }),
+  compact: Object.freeze({ modifier: 'sk-site-footer--compact' }),
+} as const);
+
+/** Normalize untrusted runtime input without mutating or throwing. */
+function siteFooterPresentation(presentation?: string) {
+  const entry = Object.entries(SITE_FOOTER_PRESENTATIONS).find(([name]) => name === presentation);
+  return entry?.[1] ?? SITE_FOOTER_PRESENTATIONS.full;
+}
+
+/**
+ * The root element's class list, shared by the element and the static form (#354).
+ *
+ * Every compact CSS rule targets an ordinary root-block BEM class selector — matching identically
+ * in a shadow root and in a document — rather than a `:host([attr])` rule.
+ */
+export function siteFooterClasses(presentation?: string): string {
+  return ['sk-site-footer', siteFooterPresentation(presentation).modifier].filter(Boolean).join(' ');
+}
 
 // NO CLOCK, WHICH THE RULING ALSO SETTLED. The barrel this replaces opened with
 // `new Date().getFullYear()`. Harmless in a hand-authored module a consumer imports at runtime;
@@ -48,12 +81,36 @@ export const SITE_FOOTER_AXES = {} as const;
 // The placeholder carries no year either: not a pinned one, which would only move the staleness
 // into what a consumer reads in 2028, and not `<year>`, which htmlhint parses as an unclosed tag.
 
+/** Which of the two footer presentations to render. Omit for the backward-compatible full presentation. */
+export type SiteFooterPresentation = 'full' | 'compact';
+
+/**
+ * One compact-presentation link, as structured data.
+ *
+ * The static path escapes both fields at the only two boundaries that exist: `label` through
+ * `text()`, `href` through `attr()`. No markup-bearing string is ever accepted.
+ */
+export interface SiteFooterLink {
+  /** The link's visible text. */
+  label: string;
+  /** The link's destination. */
+  href: string;
+}
+
 export interface SiteFooterStaticOptions {
   wordmark?: string;
   tagline?: string;
   headingOne?: string;
   headingTwo?: string;
   legal?: string;
+  /** Selects the compact, server-renderable presentation. Omit for the full presentation. */
+  presentation?: SiteFooterPresentation;
+  /**
+   * The compact presentation's links, as `{ label, href }` pairs — rendered in the order given.
+   * Deliberately NOT in `DEFAULTS`: a default here would put a library-authored destination into
+   * a real consumer footer. Omit for zero links.
+   */
+  links?: readonly SiteFooterLink[];
 }
 
 const DEFAULTS = {
@@ -83,14 +140,53 @@ const column = (heading: string, items: string): string =>
   `<div class="${SITE_FOOTER_CLASSES.heading}">${text(heading)}</div>` +
   `<ul class="${SITE_FOOTER_CLASSES.links}">${items}</ul></nav>`;
 
+// THE COMPACT ANATOMY (#354, plan.md D-4) — a bare `<a>` sibling to the tagline/meta block, NOT
+// an `<li>` in a `<ul>`. Family 6's public/account screens (`screens/P1`, `P2`, `P16`, `P20` in
+// the approved ux_redesign corpus) are byte-identical and contain no `<nav>`, no `<ul>`, no
+// `<li>`, no heading — reintroducing a list would depart from the settled corpus shape.
+const compactLinkHtml = (link: SiteFooterLink): string =>
+  `<a class="${SITE_FOOTER_CLASSES.link} ${SITE_FOOTER_CLASSES.linkCompact}" href="${attr(link.href)}">${text(link.label)}</a>`;
+
+// ZERO LINKS → NO SCAFFOLDING. There is nothing to be empty, structurally: no `<nav>`, no
+// heading, no `<ul>` under any input — full stop, not conditionally. `wordmark`/`tagline`/`legal`
+// are each rendered only when set, matching the existing full-form discipline for `legal`
+// ((legal ?? '').trim() non-blank) and extending it to the two fields the compact anatomy makes
+// optional at the block level rather than always rendering an empty node.
+const siteFooterCompactHtml = (o: SiteFooterStaticOptions): string => {
+  const legal = (o.legal ?? '').trim();
+  const links = o.links ?? [];
+  return (
+    `<footer part="footer" class="${siteFooterClasses(o.presentation)}">` +
+    `<div class="${SITE_FOOTER_CLASSES.row}">` +
+    `<div class="${SITE_FOOTER_CLASSES.meta}">` +
+    (o.wordmark
+      ? `<div class="${SITE_FOOTER_CLASSES.brand}">` +
+        `<span class="${SITE_FOOTER_CLASSES.wordmark}">${text(o.wordmark)}</span></div>`
+      : '') +
+    (o.tagline ? `<p class="${SITE_FOOTER_CLASSES.tagline}">${text(o.tagline)}</p>` : '') +
+    (legal ? `<p part="legal" class="${SITE_FOOTER_CLASSES.legal}">${text(legal)}</p>` : '') +
+    `</div>` +
+    links.map(compactLinkHtml).join('') +
+    `</div>` +
+    `</footer>`
+  );
+};
+
 /**
  * The static form, for a consumer with no JavaScript.
  *
  * The element renders the same structure from the same class map, so the two paths cannot
  * diverge — the difference is only where the content comes from: properties there, literals here.
+ *
+ * `presentation: 'compact'` branches to the compact anatomy BEFORE any of the full presentation's
+ * template is evaluated — the line below is the only edit this function makes to the full
+ * branch, which is otherwise the unedited template literal that predates this mission.
  */
 export function siteFooterStaticHtml(opts: SiteFooterStaticOptions = {}): string {
   const o = { ...DEFAULTS, ...opts };
+  if (o.presentation === 'compact') {
+    return siteFooterCompactHtml(o);
+  }
   return (
     `<footer class="${SITE_FOOTER_CLASSES.root}">` +
     `<div class="${SITE_FOOTER_CLASSES.grid}">` +
@@ -109,3 +205,22 @@ export function siteFooterStaticHtml(opts: SiteFooterStaticOptions = {}): string
 
 /** The legal placeholder, exported so a test can assert it carries no year. */
 export const PLACEHOLDER_LEGAL = DEFAULTS.legal;
+
+// THE _AXES PLACEHOLDER LINKS CARRY NO DIGITS (C-006) — not a year, not a count — and live only
+// here, never in DEFAULTS, so `siteFooterStaticHtml({ presentation: 'compact' })` renders zero
+// links (the `CompactNoLinks` case) and no library-authored destination reaches a real footer.
+const PLACEHOLDER_COMPACT_LINKS: readonly SiteFooterLink[] = Object.freeze([
+  Object.freeze({ label: 'Terms', href: '#' }),
+]);
+
+/**
+ * One additional generated static form beyond the base: the compact presentation, demonstrated
+ * with a placeholder link. `CompactNoLinks` demonstrates the zero-links case, which is the same
+ * shape a consumer who omits `links` altogether gets. In-repo precedent: `sk-check-bullet` keeps
+ * `CHECK_BULLET_VARIANTS = {}` while declaring its own backward-compatible added presentation as
+ * `CHECK_BULLET_AXES = { Pending: { state: 'pending' } }` — copied here exactly.
+ */
+export const SITE_FOOTER_AXES = {
+  Compact: { presentation: 'compact', links: PLACEHOLDER_COMPACT_LINKS },
+  CompactNoLinks: { presentation: 'compact' },
+} as const satisfies Record<string, SiteFooterStaticOptions>;

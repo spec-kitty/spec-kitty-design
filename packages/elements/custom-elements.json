@@ -1286,19 +1286,16 @@
         {
           "kind": "variable",
           "name": "SITE_FOOTER_AXES",
-          "type": {
-            "text": "{}"
-          },
-          "default": "{}",
-          "description": "No non-variant axes."
+          "default": "{ Compact: { presentation: 'compact', links: PLACEHOLDER_COMPACT_LINKS }, CompactNoLinks: { presentation: 'compact' }, } as const satisfies Record<string, SiteFooterStaticOptions>",
+          "description": "One additional generated static form beyond the base: the compact presentation, demonstrated\nwith a placeholder link. `CompactNoLinks` demonstrates the zero-links case, which is the same\nshape a consumer who omits `links` altogether gets. In-repo precedent: `sk-check-bullet` keeps\n`CHECK_BULLET_VARIANTS = {}` while declaring its own backward-compatible added presentation as\n`CHECK_BULLET_AXES = { Pending: { state: 'pending' } }` — copied here exactly."
         },
         {
           "kind": "variable",
           "name": "SITE_FOOTER_CLASSES",
           "type": {
-            "text": "{\n  root: 'sk-site-footer',\n  grid: 'sk-site-footer__grid',\n  column: 'sk-site-footer__column',\n  brand: 'sk-site-footer__brand',\n  wordmark: 'sk-site-footer__wordmark',\n  tagline: 'sk-site-footer__tagline',\n  heading: 'sk-site-footer__heading',\n  links: 'sk-site-footer__links',\n  link: 'sk-site-footer__link',\n  divider: 'sk-site-footer__divider',\n  legal: 'sk-site-footer__legal',\n}"
+            "text": "{\n  root: 'sk-site-footer',\n  grid: 'sk-site-footer__grid',\n  column: 'sk-site-footer__column',\n  brand: 'sk-site-footer__brand',\n  wordmark: 'sk-site-footer__wordmark',\n  tagline: 'sk-site-footer__tagline',\n  heading: 'sk-site-footer__heading',\n  links: 'sk-site-footer__links',\n  link: 'sk-site-footer__link',\n  divider: 'sk-site-footer__divider',\n  legal: 'sk-site-footer__legal',\n  // COMPACT PRESENTATION (#354). `row`/`meta` are the compact anatomy's own layout nodes;\n  // `linkCompact` is a MODIFIER on the existing `link` class, applied only in the light DOM\n  // (element path: a consumer-authored `<a>`; static path: a generated `<a>`) — never a\n  // descendant selector from the root, because the root class lives inside the shadow root in\n  // the element path and the anchor does not descend from it there.\n  row: 'sk-site-footer__row',\n  meta: 'sk-site-footer__meta',\n  linkCompact: 'sk-site-footer__link--compact',\n}"
           },
-          "default": "{ root: 'sk-site-footer', grid: 'sk-site-footer__grid', column: 'sk-site-footer__column', brand: 'sk-site-footer__brand', wordmark: 'sk-site-footer__wordmark', tagline: 'sk-site-footer__tagline', heading: 'sk-site-footer__heading', links: 'sk-site-footer__links', link: 'sk-site-footer__link', divider: 'sk-site-footer__divider', legal: 'sk-site-footer__legal', }",
+          "default": "{ root: 'sk-site-footer', grid: 'sk-site-footer__grid', column: 'sk-site-footer__column', brand: 'sk-site-footer__brand', wordmark: 'sk-site-footer__wordmark', tagline: 'sk-site-footer__tagline', heading: 'sk-site-footer__heading', links: 'sk-site-footer__links', link: 'sk-site-footer__link', divider: 'sk-site-footer__divider', legal: 'sk-site-footer__legal', // COMPACT PRESENTATION (#354). `row`/`meta` are the compact anatomy's own layout nodes; // `linkCompact` is a MODIFIER on the existing `link` class, applied only in the light DOM // (element path: a consumer-authored `<a>`; static path: a generated `<a>`) — never a // descendant selector from the root, because the root class lives inside the shadow root in // the element path and the anchor does not descend from it there. row: 'sk-site-footer__row', meta: 'sk-site-footer__meta', linkCompact: 'sk-site-footer__link--compact', }",
           "description": "The class names this component renders, named once.\n\nThe element imports these rather than re-typing them (ADR-8 criterion 3)."
         },
         {
@@ -1309,6 +1306,25 @@
           },
           "default": "{}",
           "description": "No colour or shape variants — a site footer is one thing."
+        },
+        {
+          "kind": "function",
+          "name": "siteFooterClasses",
+          "return": {
+            "type": {
+              "text": "string"
+            }
+          },
+          "parameters": [
+            {
+              "name": "presentation",
+              "optional": true,
+              "type": {
+                "text": "string"
+              }
+            }
+          ],
+          "description": "The root element's class list, shared by the element and the static form (#354).\n\nEvery compact CSS rule targets an ordinary root-block BEM class selector — matching identically\nin a shadow root and in a document — rather than a `:host([attr])` rule."
         },
         {
           "kind": "function",
@@ -1327,7 +1343,7 @@
               }
             }
           ],
-          "description": "The static form, for a consumer with no JavaScript.\n\nThe element renders the same structure from the same class map, so the two paths cannot\ndiverge — the difference is only where the content comes from: properties there, literals here."
+          "description": "The static form, for a consumer with no JavaScript.\n\nThe element renders the same structure from the same class map, so the two paths cannot\ndiverge — the difference is only where the content comes from: properties there, literals here.\n\n`presentation: 'compact'` branches to the compact anatomy BEFORE any of the full presentation's\ntemplate is evaluated — the line below is the only edit this function makes to the full\nbranch, which is otherwise the unedited template literal that predates this mission."
         },
         {
           "kind": "class",
@@ -5735,8 +5751,12 @@
               "name": "column-one"
             },
             {
-              "description": "`<li>` items for the second link column The slot NAMES keep their hyphens — a slot name is a string, not a property key, so the constraint that shaped `headingOne`/`headingTwo` does not reach them.",
+              "description": "`<li>` items for the second link column",
               "name": "column-two"
+            },
+            {
+              "description": "the compact presentation's links, as native `<a>` elements The slot NAMES keep their hyphens — a slot name is a string, not a property key, so the constraint that shaped `headingOne`/`headingTwo` does not reach them.",
+              "name": "compact-links"
             }
           ],
           "members": [
@@ -5758,6 +5778,11 @@
                   }
                 }
               ]
+            },
+            {
+              "kind": "method",
+              "name": "#renderCompact",
+              "privacy": "private"
             },
             {
               "kind": "field",
@@ -5790,6 +5815,17 @@
               },
               "description": "The copyright line. Omit it and the divider above it is not rendered either.",
               "attribute": "legal",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "presentation",
+              "privacy": "public",
+              "type": {
+                "text": "'full' | 'compact' | undefined"
+              },
+              "description": "Selects the compact, server-renderable presentation. Omit for the full presentation.",
+              "attribute": "presentation",
               "reflects": true
             },
             {
@@ -5839,6 +5875,14 @@
               },
               "description": "The copyright line. Omit it and the divider above it is not rendered either.",
               "fieldName": "legal"
+            },
+            {
+              "name": "presentation",
+              "type": {
+                "text": "'full' | 'compact' | undefined"
+              },
+              "description": "Selects the compact, server-renderable presentation. Omit for the full presentation.",
+              "fieldName": "presentation"
             },
             {
               "name": "tagline",
@@ -7623,6 +7667,14 @@
           "name": "SITE_FOOTER_VARIANTS",
           "declaration": {
             "name": "SITE_FOOTER_VARIANTS",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "siteFooterClasses",
+          "declaration": {
+            "name": "siteFooterClasses",
             "module": "./dist/index.js"
           }
         },

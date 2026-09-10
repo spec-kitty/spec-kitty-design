@@ -727,6 +727,8 @@ declare module 'vue' {
       'headingTwo'?: string | undefined;
       /** The copyright line. Omit it and the divider above it is not rendered either. */
       'legal'?: string | undefined;
+      /** Selects the compact, server-renderable presentation. Omit for the full presentation. */
+      'presentation'?: 'full' | 'compact' | undefined;
       /** One sentence under the wordmark. */
       'tagline'?: string | undefined;
       /** The brand wordmark. */
