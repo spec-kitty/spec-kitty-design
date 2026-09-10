@@ -12,7 +12,7 @@
 
 ## Summary
 
-Introduce one new token-layer border role, `--sk-border-control`, in both theme blocks of `packages/tokens/src/tokens.css`, aliased to the existing `--sk-fg-subtle` token (zero new hex literals). Point both consumption paths of the input control — the hand-authored static `.sk-input` (`packages/styles/src/form-field/sk-form-field.css`) and the live `<sk-form-input>` element's shadow-DOM `.sk-form-input__control` (`packages/styles/src/form-input/sk-form-input.css`) — at the new role for their resting-state border color, and give both a `min-block-size: var(--sk-space-9)` (48px, the repo's own existing nearest-above-44px-floor token, already precedented in `sk-confirm-dialog.css`/`sk-context-nav.css`). Because no generator links these two files (unlike a component with a `*.markup.ts`), add a Node-lane static-parity test and Playwright rendered/forced-colors tests as the anti-drift proof the issue requires. Regenerate the two generated artifacts this change touches (`token-catalogue.json`, `sk-form-input.css.js`/`.d.ts`). Touch no button-related file (#155/#320 boundary) and no `sk-textarea`/`sk-form-textarea` file (explicit non-goal).
+Introduce one new token-layer border role, `--sk-border-control`, in both theme blocks of `packages/tokens/src/tokens.css`, declared as its **own independent literal per theme** (`#81818B` dark, `#7A7A6E` light) — deliberately NOT an alias of `--sk-fg-subtle` or any other token, so this role's 3:1 non-text obligation can never be silently moved by a future edit made for an unrelated (e.g. text-contrast) reason (see spec's "Decisions this spec makes" and `research.md` for the full rationale and the review correction that produced it). Point both consumption paths of the input control — the hand-authored static `.sk-input` (`packages/styles/src/form-field/sk-form-field.css`) and the live `<sk-form-input>` element's shadow-DOM `.sk-form-input__control` (`packages/styles/src/form-input/sk-form-input.css`) — at the new role for their resting-state border color, and give both a `min-block-size: var(--sk-space-9)` (48px, the repo's own existing nearest-above-44px-floor token, already precedented in `sk-confirm-dialog.css`/`sk-context-nav.css`). Because no generator links these two files (unlike a component with a `*.markup.ts`), add a Node-lane static-parity test, a Node-lane executable contrast test (six assertions, since a recorded ratio in a PR cannot go red), and Playwright rendered/forced-colors tests as the anti-drift proof the issue requires. Regenerate the two generated artifacts this change touches (`token-catalogue.json`, `sk-form-input.css.js`/`.d.ts`). Touch no button-related file (#155/#320 boundary) and no `sk-textarea`/`sk-form-textarea` file (explicit non-goal) — and name the third sibling weak-hairline instance found while checking blast radius, `.sk-form-select`, as a known remaining instance rather than silently leaving it undocumented.
 
 ## Technical Context
 
@@ -23,7 +23,7 @@ Introduce one new token-layer border role, `--sk-border-control`, in both theme 
 **Target Platform**: Same as every other component — modern evergreen browsers (Chrome/Firefox/Safari), the existing Storybook/Playwright/axe toolchain. No new platform.
 **Project Type**: Single library, existing `packages/<pkg>/src/<name>/` layout. No new package, no web/mobile split.
 **Performance Goals**: None beyond existing charter baseline (no runtime performance targets for static/presentational components).
-**Constraints**: Tokens-only CSS (C-007). No new hex literal in `tokens.css` — the new role is a `var()` alias (see spec's "Decisions this spec makes"). `packages/elements/src/form-input/sk-form-input.css.js`/`.css.d.ts` and `packages/tokens/dist/token-catalogue.json` are generated and regenerated, never hand-edited (C-008). One Work Package, one PR (C-001). No file under any `*button*` directory (C-004/C-005). No edit to `sk-textarea`/`sk-form-textarea` files (C-003). No `ElementInternals`/validation change (C-006).
+**Constraints**: Tokens-only CSS in the two component `.css` files (C-007) — `tokens.css` itself is where literals belong (it is stylelint-exempt and is the Borders block's own house style: `--sk-border-default`/`-strong`/`-focus` are all literals, and `--sk-border-control` follows suit as an independently declared literal, not an alias — see spec's "Decisions this spec makes"). `packages/elements/src/form-input/sk-form-input.css.js`/`.css.d.ts` and `packages/tokens/dist/token-catalogue.json` are generated and regenerated, never hand-edited (C-008). One Work Package, one PR (C-001). No file under any `*button*` directory (C-004/C-005). No edit to `sk-textarea`/`sk-form-textarea` files, nor to `sk-form-select` (a third sibling weak-hairline instance found during this mission, out of scope by the same reasoning) (C-003). No `ElementInternals`/validation change (C-006). The new contrast test (FR-012) stays scoped to this mission's own token/surfaces and must not become #155's general 1.4.11 gate (C-010).
 **Scale/Scope**: Two existing CSS rules edited (`.sk-input`, `.sk-form-input__control`); one new token declared twice (once per theme block); two new test files; two generated artifacts regenerated. No new component, no new element, no new attribute/property/method/part — `expected-parts.json`, `expected-docs.json`, `behaviours.json`, and `mutations.json` are **not** touched (verified: this mission adds no `@csspart`, no documented attribute/method, and no new owned behavior — confirmed by reading `behaviours.json`'s existing `sk-form-input` entries, all of which are pre-existing validation/form-association ids this mission does not touch).
 
 ## Charter Check
@@ -37,14 +37,15 @@ Charter file present at `.kittify/charter/charter.md` (generated 2026-05-01, not
 | Storybook story: default + all interactive states + responsive breakpoints | Partially — no NEW story needed | Every required state (default, focus, `[aria-invalid="true"]`, `:disabled`, dark, `LightMode`) already exists on both paths (`Form/FormField (HTML)`: `FormInput Default/Focus/Error/Disabled/Filled`, `Light Mode`; `Elements/SkFormInput`: `Default/Error/Disabled`, `Light Mode`) — verified by reading both `.stories.ts`/HTML-story files. This mission changes the CSS those stories render, not the story set itself. No new story is required by the spec. |
 | axe-core zero WCAG 2.1 AA violations, load failure = failure | Yes | `node scripts/run-axe-storybook.js` re-run over the existing (unchanged-count) story set — a border-color/min-block-size change does not add new violation surface, but must still measure zero, not assume it. |
 | Visual diff / reference screenshots | Yes, but not via `visual.spec.ts` | `apps/storybook/src/tests/visual.spec.ts` has zero entries for this component today (verified) — this mission does not newly wire that opt-in baseline system (spec C-009). The charter's "visual review... approved" gate is satisfied by human review of the PR's screenshots plus the new FR-007/FR-008 automated rendered checks. |
-| Token dependency documentation | Yes | `--sk-border-control`'s derivation and measured ratios are recorded as a comment beside its declaration in `tokens.css` (FR-001), following the `--sk-fg-subtle`/rose-tint precedent. |
+| Token dependency documentation | Yes | `--sk-border-control`'s derivation (independently declared literal, not an alias — and why) and measured ratios are recorded as a comment beside its declaration in `tokens.css` (FR-001), following the `--sk-fg-subtle`/rose-tint derivation-comment convention in form, not in aliasing. |
 | ADR-11 required-behaviours list, red-first | No — not applicable | This mission adds no new attribute, event, focus/keyboard behavior, or form-association change to `<sk-form-input>`. `behaviours.json`'s existing `sk-form-input` subjects (form association, SC-016 delegate/rendered-control correspondence, etc.) are untouched and remain valid — this mission's CSS-only change does not alter any UA-delegate or validation logic. No new subject is declared; declaring one where none is owned would assert nothing (per the recipe's own warning). |
 | CSS/SCSS `--sk-*` tokens only | Yes | `stylelint`'s `scale-unlimited/declaration-strict-value` (already covers `/color/`, `background*`, `padding`, `margin`, `border-radius` — not `min-block-size`/`border` shorthand, but CLAUDE.md's hard rule 1 is repo policy regardless of gate coverage) — every new/changed value here is `var(--sk-space-9)` or `var(--sk-border-control)`; zero literals. |
 | Conventional commits via commitlint | Yes | Scopes `tokens` (tokens.css commit) and `styles`/`elements` (CSS + generated `.css.js` commit) per the closed enum — no `specs`/`adr` scope exists; the spec-phase commit already used `docs:` unscoped (corrected from an initial `docs(specs)` miss during this mission — see spec-commit history). |
 | Maintainer approval on component/token-layer PRs | Yes | Applies at PR review time — outside this design-phase mission's own scope, but flagged here since this PR touches the token namespace (one maintainer approval required per charter Review Policy). |
 | Adversarial squad — tier and cadence | Yes | Issue #321 states **Squad tier: C — pre-merge**. Per charter Review Policy, tier-C is pre-merge only; this design-phase mission does not need a squad pass before implementation is dispatched. |
-| Deployment/versioning constraints | Yes | Adding a token is additive (no rename/removal of `--sk-border-default`/`-strong`, both remain in use by `.sk-textarea`/`.sk-form-textarea__control` and elsewhere) — no major version bump implied. `bash scripts/check-token-breaking-changes.sh` should report no breaking changes. |
+| Deployment/versioning constraints | Yes | Adding a token is additive (no rename/removal of `--sk-border-default`/`-strong`, both remain in use by `.sk-textarea`/`.sk-form-textarea__control`/`.sk-form-select` and elsewhere) — no major version bump implied. `bash scripts/check-token-breaking-changes.sh` should report no breaking changes. **Read in full during this mission's review correction**: this script diffs only removed/renamed token NAMES against `token-catalogue.json` — it computes no contrast whatsoever, which is exactly why FR-012's executable contrast test exists as a separate, additional gate this charter row does not otherwise provide. |
 | One human approval for `--sk-*` token namespace changes | Yes | This PR changes the token namespace (adds `--sk-border-control`) — explicitly flagged for the human reviewer, per charter Branch Strategy. |
+| Mechanical enforcement of a stated numeric contract (this mission's own addition, not a pre-existing charter row) | Yes | FR-012: a Node-lane test computes and asserts all six (theme × surface) contrast ratios for `--sk-border-control`, demonstrated red-first. Scoped narrowly to this mission's own token — explicitly not #155's open general-gate question (C-010). |
 
 No Charter Check violations requiring justification. Complexity Tracking table below is empty.
 
@@ -72,9 +73,11 @@ kitty-specs/form-input-contrast-touch-target-contract-01M25STR/
 
 ```
 packages/tokens/src/tokens.css
-# Borders block, BOTH theme blocks: add
-#   --sk-border-control: var(--sk-fg-subtle);
-# with a derivation comment (FR-001).
+# Borders block, BOTH theme blocks: add, as INDEPENDENT LITERALS (not var() aliases):
+#   :root                                    --sk-border-control: #81818B;
+#   :root[data-theme="light"], .sk-light     --sk-border-control: #7A7A6E;
+# with a derivation comment recording why this is a literal rather than an alias of
+# --sk-fg-subtle, and the six measured ratios (FR-001).
 
 packages/tokens/dist/token-catalogue.json
 # REGENERATED by `npx nx run tokens:catalogue` — never hand-edited.
@@ -101,6 +104,12 @@ tests/node/form-input-border-target-size-parity.test.ts   # NEW
 # `include: ['tests/node/**/*.test.ts']`. Parses both CSS source files with
 # postcss, asserts cross-file AND canonical-value equality (FR-006).
 
+tests/node/form-input-border-control-contrast.test.ts   # NEW
+# Vitest Node-lane test, same auto-inclusion. Parses BOTH theme blocks of
+# tokens.css, resolves --sk-border-control and the three surface tokens per
+# theme, computes WCAG contrast, asserts >=3:1 on all six combinations,
+# demonstrated red-first (FR-012). Narrowly scoped — not #155's general gate (C-010).
+
 apps/storybook/src/tests/sk-form-input-contrast-touch-target.spec.ts   # NEW
 # Playwright spec, auto-collected by the existing whole-testDir `npx playwright test`
 # job (no config change). Covers:
@@ -112,17 +121,22 @@ docs/design-system/changelog.md
 
 # NOT touched by this mission (explicit — see Constraints):
 #   packages/styles/src/form-textarea/, packages/elements/src/form-textarea/  (C-003)
+#   packages/styles/src/form-select/sk-form-select.css — a THIRD sibling weak-hairline
+#     instance found while checking blast radius (.sk-form-select's own border-color
+#     is also var(--sk-border-default)); named in spec/PR, not fixed here            (C-003)
 #   any packages/styles/src/*button*/, packages/elements/src/*button*/       (C-004, C-005)
 #   expected-parts.json, expected-docs.json, behaviours.json, mutations.json  (no new
 #     part/attribute/method/behavior owned — see Technical Context, Scale/Scope)
-#   apps/storybook/src/tests/visual.spec.ts and its snapshots directory        (C-009)
+#   apps/storybook/src/tests/visual.spec.ts and its snapshots directory        (C-009;
+#     checked, not assumed — its one form-related baseline, form-skformselect-html,
+#     locates .sk-form-field and never renders .sk-input; see research.md)
 #   packages/react/src/**, packages/elements/vue.d.ts, custom-elements.json,
 #     SIZES.md — regeneration is a no-op for a pure CSS-value/token change (no
 #     attribute/method/part/size delta), but each generator's `--check` mode is
 #     still run as a drift sanity check in the WP's quality pass (see below).
 ```
 
-**Structure Decision**: No new package, no new component, no new element. This is a two-file CSS edit plus a one-token addition against the existing `packages/tokens` / `packages/styles` / `packages/elements` layout, plus two new test files in their existing, already-globbed test directories. The smallest structural shape this repo has for a change of this shape — matching, for example, how #177 (the rose tint family) touched only `tokens.css` plus its catalogue regeneration.
+**Structure Decision**: No new package, no new component, no new element. This is a two-file CSS edit plus a one-token addition (declared as an independent literal per theme, not an alias) against the existing `packages/tokens` / `packages/styles` / `packages/elements` layout, plus three new test files (parity, contrast, rendered/forced-colors) in their existing, already-globbed test directories. The smallest structural shape this repo has for a change of this shape — matching, for example, how #177 (the rose tint family) touched only `tokens.css` plus its catalogue regeneration.
 
 ## Complexity Tracking
 
@@ -138,18 +152,18 @@ docs/design-system/changelog.md
 > map exists only to help `/spec-kitty.tasks` sequence the single WP's internal task order — it
 > does **not** imply multiple WPs, and `/spec-kitty.tasks` must not split it into more than one.
 
-### IC-01 — Token role and the two CSS declarations
+### IC-01 — Token role (independent literal, not an alias) and the two CSS declarations
 
-- **Purpose**: Add `--sk-border-control` to both theme blocks of `tokens.css` with its derivation recorded, regenerate the token catalogue, and point `.sk-input`'s and `.sk-form-input__control`'s resting-state `border` at it while adding the `min-block-size: var(--sk-space-9)` target-size floor to both. This is the actual fix; everything else in this mission proves it.
+- **Purpose**: Add `--sk-border-control` to both theme blocks of `tokens.css`, as its own independently declared literal per theme (`#81818B` dark, `#7A7A6E` light — not `var(--sk-fg-subtle)`) with its derivation recorded, regenerate the token catalogue, and point `.sk-input`'s and `.sk-form-input__control`'s resting-state `border` at it while adding the `min-block-size: var(--sk-space-9)` target-size floor to both. This is the actual fix; everything else in this mission proves it.
 - **Relevant requirements**: FR-001, FR-002, FR-003, FR-004, FR-005, FR-009 (token-catalogue half), NFR-001, NFR-002, NFR-004.
 - **Affected surfaces**: `packages/tokens/src/tokens.css`, `packages/tokens/dist/token-catalogue.json` (generated), `packages/styles/src/form-field/sk-form-field.css`, `packages/styles/src/form-input/sk-form-input.css`, `packages/elements/src/form-input/sk-form-input.css.js`/`.css.d.ts` (generated).
-- **Sequencing/depends-on**: none — this is the foundation the anti-drift and rendered tests verify.
-- **Risks**: Editing `.sk-input`'s border-width spelling (`1px` → `var(--sk-border-width-1)`) is a deliberate, in-scope normalization (FR-002) — a reviewer could mistake it for an unrelated drive-by if the PR doesn't explain it; the PR description should name it explicitly as part of closing #173's documented spelling gap, not a separate concern. Forgetting to regenerate `sk-form-input.css.js` after editing the source `.css` is silently NOT green — `build-elements-css.mjs --check` fails CI on the drift.
+- **Sequencing/depends-on**: none — this is the foundation the anti-drift, contrast, and rendered tests verify.
+- **Risks**: Reaching for `var(--sk-fg-subtle)` as a shortcut during implementation — this is the exact mistake this mission's own review corrected; the token must be a literal. Editing `.sk-input`'s border-width spelling (`1px` → `var(--sk-border-width-1)`) is a deliberate, in-scope normalization (FR-002) — a reviewer could mistake it for an unrelated drive-by if the PR doesn't explain it; the PR description should name it explicitly as part of closing #173's documented spelling gap, not a separate concern. Forgetting to regenerate `sk-form-input.css.js` after editing the source `.css` is silently NOT green — `build-elements-css.mjs --check` fails CI on the drift.
 
-### IC-02 — Anti-drift, rendered-measurement, and forced-colors proof
+### IC-02 — Anti-drift, contrast, rendered-measurement, and forced-colors proof
 
-- **Purpose**: Build the automated proof the issue's "hard part" demands: a static parity/canonical-value test that can be shown red on a deliberate divergence (FR-006), a rendered target-size measurement at narrow width and simulated 200% zoom on both consumption paths (FR-007), and a forced-colors distinguishability check measured (not assumed) on both paths (FR-008). Also covers the axe re-run, the changelog entry, and the PR-body coordination record.
-- **Relevant requirements**: FR-006, FR-007, FR-008, FR-010, FR-011, NFR-003, NFR-005.
-- **Affected surfaces**: `tests/node/form-input-border-target-size-parity.test.ts` (new), `apps/storybook/src/tests/sk-form-input-contrast-touch-target.spec.ts` (new), `docs/design-system/changelog.md`, the PR description (not a repo file).
-- **Sequencing/depends-on**: IC-01 (the canonical values these tests assert against must exist first; the rendered tests need the built Storybook to reflect the IC-01 CSS change).
-- **Risks**: A postcss-based parser that is too loose (e.g., comparing whole rule text instead of the specific `border`/`min-block-size` declarations) would false-positive on unrelated formatting differences; too narrow (only checking `border-color` when the width spelling also matters per FR-002) would miss the very drift #173 already documented. The `style.zoom` 200% simulation technique (from `sk-collection.spec.ts`) must be calibrated with its own width-probe assertion, not assumed correct by inspection. The forced-colors test must record the ACTUAL resolved system color rather than asserting a specific one by assumption — `adding-a-component.md`'s own corrected-guidance history is the cautionary precedent here.
+- **Purpose**: Build the automated proof the issue's "hard part" demands, over BOTH halves of the contract: a static parity/canonical-value test that can be shown red on a deliberate divergence (FR-006); an executable contrast assertion over the new token's six (theme × surface) ratios, also demonstrated red-first, since `check-token-breaking-changes.sh` provably does not cover contrast (FR-012); a rendered target-size measurement at narrow width and simulated 200% zoom on both consumption paths (FR-007); and a forced-colors distinguishability check measured (not assumed) on both paths (FR-008). Also covers the axe re-run, the changelog entry, and the PR-body coordination record (which must name all three known remaining weak-hairline instances and disclaim #155's general gate).
+- **Relevant requirements**: FR-006, FR-007, FR-008, FR-010, FR-011, FR-012, NFR-002, NFR-003, NFR-005.
+- **Affected surfaces**: `tests/node/form-input-border-target-size-parity.test.ts` (new), `tests/node/form-input-border-control-contrast.test.ts` (new), `apps/storybook/src/tests/sk-form-input-contrast-touch-target.spec.ts` (new), `docs/design-system/changelog.md`, the PR description (not a repo file).
+- **Sequencing/depends-on**: IC-01 (the canonical values and literal token definitions these tests assert against must exist first; the rendered tests need the built Storybook to reflect the IC-01 CSS change).
+- **Risks**: A postcss-based parity parser that is too loose (e.g., comparing whole rule text instead of the specific `border`/`min-block-size` declarations) would false-positive on unrelated formatting differences; too narrow (only checking `border-color` when the width spelling also matters per FR-002) would miss the very drift #173 already documented. The contrast test must resolve `--sk-border-control` per theme block correctly (it is a literal, not a `var()` chain, so a direct per-block hex read is sufficient — do not build general `var()` resolution for a scope of exactly four tokens). The `style.zoom` 200% simulation technique (from `sk-collection.spec.ts`) must be calibrated with its own width-probe assertion, not assumed correct by inspection. The forced-colors test must record the ACTUAL resolved system color rather than asserting a specific one by assumption — `adding-a-component.md`'s own corrected-guidance history is the cautionary precedent here. The contrast test must stay scoped to exactly this mission's token/surfaces — do not generalize it into #155's open gate question (C-010).
