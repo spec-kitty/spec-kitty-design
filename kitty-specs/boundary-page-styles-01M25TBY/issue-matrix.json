@@ -25,7 +25,7 @@
       "wp": "WP01"
     },
     "#302": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "#302 (pill-tag status-tone axis) already shipped and verified directly against packages/styles/src/pill-tag/sk-pill-tag.css: all six .sk-pill-tag--status-<tone> rules present (lines 104-131). This mission composes it unmodified per FR-005/research.md Decision 2, and after this WP's HIGH-1 fix uses the actual shipped styles-layer form <span class=\"sk-pill-tag sk-pill-tag--status-<tone>\">, not the inert host-attribute form the exemplars previously authored.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -33,8 +33,8 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
     },
     "#304": {
       "evidence_ref": "<link or commit>",
