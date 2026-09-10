@@ -38,10 +38,10 @@
       "criterion_id": "FR-004",
       "description": "Verify FR-004 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
+      "evidence": "fixtures/elements-behaviour/src/sk-action-row.test.ts:910 test [T004][FR-004][FR-005] compares hostHostBlockDeclarations of sk-action-row.css header comment, the local test constant, AND docs/design-system/using-components.md's fenced block via one comparator \u2014 passing; docs section at using-components.md:1305-1318 states 'whatever :host declares' generically",
+      "pass_fail": "pass",
       "verified_by": null,
-      "verified_at": null,
+      "verified_at": "2026-09-10T14:07:08.481263+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
