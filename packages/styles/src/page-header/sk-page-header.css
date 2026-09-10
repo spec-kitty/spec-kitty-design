@@ -49,8 +49,47 @@
       form is planned. A static consumer writes their own descendant rule against the flattened
       shape, and must compute its specificity themselves: a page rule overriding it needs
       STRICTLY HIGHER specificity than the rewrite, because at a tie the winner is stylesheet
-      order, where the element form yielded to the page unconditionally. #311 owns backfilling
-      the precise per-rule instruction for this sheet.
+      order, where the element form yielded to the page unconditionally.
+
+      THE PER-RULE BACKFILL (#311). This element has no generated static markup at this head (no
+      `sk-page-header.markup.ts`, no `.html`), so the compositions below are hypothetical, read
+      from this element's own template (packages/elements/src/page-header/sk-page-header.ts).
+
+      The bare `::slotted(*)` rule applies uniformly across all five named slots (`eyebrow`,
+      `title`, `supporting`, `sync`, `actions`), each landing directly inside its own wrapper:
+
+          :is(
+            .sk-page-header__eyebrow,
+            .sk-page-header__title,
+            .sk-page-header__supporting,
+            .sk-page-header__sync,
+            .sk-page-header__actions
+          ) > * {
+            min-width: 0;
+            max-width: 100%;
+          }
+
+      — at (0,1,0). The four `--compact` variants reach only four of those five wrappers (not
+      `actions`), gated behind the density modifier:
+
+          :is(
+            .sk-page-header--compact .sk-page-header__eyebrow,
+            .sk-page-header--compact .sk-page-header__title,
+            .sk-page-header--compact .sk-page-header__supporting,
+            .sk-page-header--compact .sk-page-header__sync
+          ) > * {
+            display: block;
+            overflow: hidden;
+            margin: 0;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+          }
+
+      — at (0,2,0), two classes deep. Both rewrites reproduce the appearance and compete on
+      those ordinary specificities rather than winning unconditionally; a consumer overriding
+      either needs specificity strictly higher than its own number, and at a tie the winner is
+      whichever stylesheet comes last, where the element form would have yielded regardless of
+      order.
 
    This component was not itself probed; ADR-15 measured sk-app-shell, sk-action-row and
    sk-entity-marker, and each mechanism is a property of CSS rather than of one component.

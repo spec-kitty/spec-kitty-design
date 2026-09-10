@@ -35,6 +35,44 @@
   margin-block-start: auto;
 }
 
+/* WHAT A STATIC CONSUMER MUST AUTHOR INSTEAD (ADR-15).
+
+   Both rules below are SHADOW-ONLY: ADR-15 ruled `::slotted()` construct kind shadow-only
+   because no gate can hold a static rewrite equal to it (the outer/page tree always beats an
+   inner/shadow `::slotted()` declaration by CSS Cascade's tree-order rule, before specificity
+   and before source order are consulted — a property of tree order, not of `::slotted()`
+   itself; ADR-16 generalises it). No generated static form is planned.
+
+   THE CLASSES, read from this element's own template (packages/elements/src/context-sidebar/
+   sk-context-sidebar.ts) rather than guessed: this element has no generated static markup at
+   this head (no `sk-context-sidebar.markup.ts`, no `.html`), so the composition below is
+   hypothetical. All three named slots (`header`, default, `footer`) each land directly inside
+   their own wrapper — `.sk-context-sidebar__header`, `.sk-context-sidebar__content`,
+   `.sk-context-sidebar__footer` — and neither rule below distinguishes which slot the node
+   came from, so the rewrite must cover all three:
+
+       :is(.sk-context-sidebar__header, .sk-context-sidebar__content, .sk-context-sidebar__footer)
+         > * {
+         min-width: 0;
+         max-width: 100%;
+       }
+
+       :is(.sk-context-sidebar__header, .sk-context-sidebar__content, .sk-context-sidebar__footer)
+         > :is(a, button) {
+         display: block;
+         overflow: hidden;
+         text-overflow: ellipsis;
+         white-space: nowrap;
+       }
+
+   That reproduces the appearance. It does NOT reproduce cascade position: the shadow rules
+   above lose to ANY page rule, however weak. Rewritten as document rules they compete on
+   ordinary terms — (0,1,0) for the first, (0,1,1) for the second — so a consumer who wants to
+   override them needs specificity STRICTLY HIGHER than that, and at a tie the winner is
+   whichever stylesheet comes last, where the element form would have yielded unconditionally.
+
+   ADR-15 holds the full mechanism and outcome table. This comment adds no rule and changes
+   none. */
 ::slotted(*) {
   min-width: 0;
   max-width: 100%;

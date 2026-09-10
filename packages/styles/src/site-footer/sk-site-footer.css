@@ -94,7 +94,33 @@
 }
 
 /* The slotted <li> items, reachable because they are DIRECTLY assigned into the element's own
-   <ul>. The bare selector serves the static path, where the <li> is an ordinary child. */
+   <ul>. */
+/* WHAT A STATIC CONSUMER MUST AUTHOR INSTEAD (ADR-15).
+
+   Unlike `.sk-site-footer__column` above, this rule ships NO paired bare-class spelling — it is
+   SHADOW-ONLY, same as every other `::slotted()` construct ADR-15 ruled on: a page's outer-tree
+   declaration beats an inner-tree `::slotted()` one by CSS Cascade's tree-order rule regardless
+   of specificity or source order (generalised in ADR-16 — not a special case of `::slotted()`).
+
+   THE CLASS — or rather, the absence of one. `sk-site-footer`'s generated static markup
+   (`siteFooterStaticHtml()`, sk-site-footer.markup.ts) renders each item as a PLAIN `<li>` with
+   no class at all, directly inside `<ul class="sk-site-footer__links">`:
+
+       <ul class="sk-site-footer__links"><li><a href="#" class="sk-site-footer__link">...</a></li></ul>
+
+   So the static rewrite is a bare descendant type selector, not a class:
+
+       .sk-site-footer__links > li {
+         margin: 0;
+       }
+
+   That reproduces the appearance, at (0,1,1) — competing on ordinary terms rather than winning
+   unconditionally the way the shadow rule does. A consumer overriding it needs specificity
+   STRICTLY HIGHER than (0,1,1); at a tie the winner is whichever stylesheet comes last, where
+   the element form would have yielded regardless of order.
+
+   ADR-15 holds the full mechanism and outcome table. This comment adds no rule and changes
+   none. */
 ::slotted(li) {
   margin: 0;
 }
