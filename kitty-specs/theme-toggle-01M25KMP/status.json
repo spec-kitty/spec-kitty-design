@@ -32,7 +32,8 @@
         "Codex frontend-freddy implementation seat active; red-first evidence recorded",
         "WP01 implementation committed at 0d4278f; direct SSR import blocker remediated and focused/full local gates recorded",
         "Cycle 1 rejected at ab7d4d5 by fresh Codex reviewer-renata: four Medium evidence gaps",
-        "Cycle-1 remediation committed at 62ee477; all four Medium findings plus uncached type blocker closed"
+        "Cycle-1 remediation committed at 62ee477; all four Medium findings plus uncached type blocker closed",
+        "APPROVE: exact implementation/evidence HEAD 3b3d772e; no unresolved High or Medium findings; cycle-1 findings closed; all anti-pattern checks pass; CI-authoritative WebKit and visual checks remain merge conditions"
       ],
       "provider": "__resolved_provider_absent__",
       "review": null,
