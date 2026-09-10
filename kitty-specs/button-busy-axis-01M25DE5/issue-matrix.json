@@ -1,7 +1,7 @@
 {
   "rows": {
     "#125": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "'tracks #125' per spec.md line 6 -- a cross-tracking reference, not an issue this WP resolves directly.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -9,8 +9,8 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "verdict": "in-mission",
+      "wp": "WP01"
     },
     "#1520": {
       "evidence_ref": "<link or commit>",
