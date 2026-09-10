@@ -98,6 +98,6 @@ packages/elements/dist/index.js
 packages/elements/dist/elements.js
   raw        253787 bytes  (247.8 KiB)
   minified   168502 bytes  (164.6 KiB)
-  gzip         53 KiB
+  gzip         54 KiB
   min+gzip     36 KiB
 ```
