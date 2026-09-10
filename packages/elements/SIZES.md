@@ -15,7 +15,7 @@ Components in these artifacts: sk-action-row, sk-app-shell, sk-bar-chart, sk-blo
 For a CDN load of `dist/elements.js`, pin what the browser executes:
 
 ```
-integrity="sha384-3AuwoU8yfNX9CvrbCS5eVl+XCEAdfLgEwIJmeyq7KBdLLwgf2qf7juNSTjenGl1e"
+integrity="sha384-M5lkJuvfxrIywSDHAUA1jNGSJ6IpdckZxHS5uc7nBkVPtBpqGjkwkulxnfyC/+nI"
 ```
 
 Derived from the built artifact on every run and re-derived by `--check`, so it cannot be
@@ -34,9 +34,9 @@ What a consumer downloads, from a real `npm pack` of each package in the derived
 
 | package | files | unpacked |
 |---|---:|---:|
-| `@spec-kitty/tokens` | 37 | 5764.3 KiB |
-| `@spec-kitty/styles` | 252 | 695.7 KiB |
-| `@spec-kitty/elements` | 52 | 944.3 KiB |
+| `@spec-kitty/tokens` | 37 | 5765.3 KiB |
+| `@spec-kitty/styles` | 231 | 627.9 KiB |
+| `@spec-kitty/elements` | 51 | 930.6 KiB |
 | `@spec-kitty/react` | 64 | 170.5 KiB |
 
 PACKED SIZE IS DELIBERATELY NOT IN THIS TABLE. It is the size of the gzipped tarball and therefore
