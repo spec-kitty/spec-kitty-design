@@ -47,7 +47,7 @@ history:
   actor: system
   action: Prompt generated via /spec-kitty.tasks
 agent_profile: frontend-freddy
-authoritative_surface: packages/styles/src/entity-marker/, packages/elements/src/entity-marker/
+authoritative_surface: packages/elements/src/entity-marker/
 create_intent: []
 execution_mode: code_change
 model: ''
@@ -83,8 +83,9 @@ prompt.
 - **Agent/tool**: *(assign at dispatch time)*
 
 If no profile is specified, run `spec-kitty agent profile list` and select the best match for
-`task_type: implement` against `authoritative_surface: packages/styles/src/entity-marker/,
-packages/elements/src/entity-marker/`.
+`task_type: implement` against `authoritative_surface: packages/elements/src/entity-marker/`
+(this WP's diff also touches `packages/styles/src/entity-marker/`, the fixture test file, and the
+ratchet files listed in `owned_files` above).
 
 ---
 
