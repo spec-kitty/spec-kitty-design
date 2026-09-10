@@ -56,6 +56,8 @@ authoritative_surface: packages/elements/src/button/
 create_intent:
 - apps/storybook/src/tests/sk-button.spec.ts
 execution_mode: code_change
+agent_profile: frontend-freddy
+agent: claude
 model: ''
 owned_files:
 - packages/elements/src/button/**
