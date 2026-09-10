@@ -31,22 +31,25 @@
         "Independent reviewer claiming WP01 for review"
       ],
       "provider": "__resolved_provider_absent__",
+      "review": null,
       "review_result": {
         "feedback_path": "/home/jeroennouws/dev/spec-kitty-design-missions/301/kitty-specs/static-form-of-element-backed-css-01M248TF/tasks/WP01-decide-static-form-ruling/review-cycle-1.md",
         "reference": "review-cycle://static-form-of-element-backed-css-01M248TF/WP01-decide-static-form-ruling/review-cycle-1.md",
         "reviewer": "claude",
         "verdict": "changes_requested"
       },
-      "role": "reviewer",
+      "role": "implementer",
+      "shell_pid": null,
+      "shell_pid_created_at": null,
       "subtasks": {
-        "T001": "done",
-        "T002": "done",
-        "T003": "done",
-        "T004": "done",
-        "T005": "done",
-        "T006": "done",
-        "T007": "done",
-        "T008": "done"
+        "T001": "planned",
+        "T002": "planned",
+        "T003": "planned",
+        "T004": "planned",
+        "T005": "planned",
+        "T006": "planned",
+        "T007": "planned",
+        "T008": "planned"
       }
     }
   }
