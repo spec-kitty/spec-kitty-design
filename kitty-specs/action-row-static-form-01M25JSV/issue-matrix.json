@@ -12,6 +12,18 @@
       "verdict": "verified-already-fixed",
       "wp": "WP01"
     },
+    "#163": {
+      "evidence_ref": "WP01-static-action-row.md L183: the shared HTML-escaper is explicitly #163's future scope; this WP copies sk-button.markup.ts's local attr() helper rather than importing a shared one, by design, until #163 lands",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
+    },
     "#272": {
       "evidence_ref": "spec.md L59/L252: sibling-not-descendant/no-new-activation already established by #272 in the shadow element; this WP's T005 mutation-proven test re-verifies the same rule for the new static form, does not change it",
       "fr": null,
