@@ -2,7 +2,7 @@
   "mission_slug": "static-form-of-element-backed-css-01M248TF",
   "mission_number": "",
   "mission_type": "software-dev",
-  "overall_verdict": "fail",
+  "overall_verdict": "pass",
   "criteria": [
     {
       "criterion_id": "FR-001",
@@ -109,9 +109,9 @@
       "invariant_id": "NI-002",
       "description": "HIGH-1 regression guard: no surface prescribes the static wrapper as carrying container-type alone. The wrapper carries the component's complete :host declaration set; the abbreviated rule makes sk-app-shell compute 0px against 300px as a flex item, measured in both engines.",
       "verification_method": "grep_absence",
-      "verification_command": "\\-host \\{ container-type: inline-size \\}",
-      "result": "verification_error",
-      "evidence": "grep verification failed (exit 2): grep: Invalid content of \\{\\}",
+      "verification_command": "sk-[a-z-]+-host [{] container-type: inline-size",
+      "result": "confirmed_absent",
+      "evidence": "grep found zero matches",
       "scope": "docs packages/styles/src"
     },
     {
