@@ -30,19 +30,23 @@
       "model": "__resolved_model_absent__",
       "notes": [
         "Codex frontend-freddy implementation seat active; red-first evidence recorded",
-        "WP01 implementation committed at 0d4278f; direct SSR import blocker remediated and focused/full local gates recorded"
+        "WP01 implementation committed at 0d4278f; direct SSR import blocker remediated and focused/full local gates recorded",
+        "Cycle 1 rejected at ab7d4d5 by fresh Codex reviewer-renata: four Medium evidence gaps"
       ],
       "provider": "__resolved_provider_absent__",
+      "review": null,
       "role": "implementer",
+      "shell_pid": null,
+      "shell_pid_created_at": null,
       "subtasks": {
-        "T001": "done",
-        "T002": "done",
-        "T003": "done",
-        "T004": "done",
-        "T005": "done",
-        "T006": "done",
-        "T007": "done",
-        "T008": "done"
+        "T001": "planned",
+        "T002": "planned",
+        "T003": "planned",
+        "T004": "planned",
+        "T005": "planned",
+        "T006": "planned",
+        "T007": "planned",
+        "T008": "planned"
       }
     }
   }
