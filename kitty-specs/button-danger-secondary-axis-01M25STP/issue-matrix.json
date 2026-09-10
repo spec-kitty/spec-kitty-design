@@ -73,7 +73,7 @@
       "wp": "WP01"
     },
     "#321": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "BORDER-ROLE-319/spec Assumptions: #320 does not participate in the neutral-border-role token fix at all and touches zero token files; that work belongs entirely to #321, not this WP.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -81,8 +81,8 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
     }
   },
   "schema_version": 1
