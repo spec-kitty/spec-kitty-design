@@ -21,6 +21,9 @@ requirement_refs:
 - FR-016
 - FR-017
 - FR-018
+planning_base_branch: mission/confirm-dialog-element
+merge_target_branch: mission/confirm-dialog-element
+branch_strategy: Planning artifacts for this mission were generated on mission/confirm-dialog-element. During /spec-kitty.implement this WP may branch from a dependency-specific base, but completed changes must merge back into mission/confirm-dialog-element unless the human explicitly redirects the landing branch.
 subtasks:
 - T001
 - T002
