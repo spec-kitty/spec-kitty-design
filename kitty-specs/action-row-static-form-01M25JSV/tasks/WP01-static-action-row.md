@@ -354,3 +354,7 @@ Read, in full, before starting:
   necessary, it is recorded with a one-line rationale in the PR description.
 - The PR description states the `#283` boundary verbatim from spec.md and the "wrapper CSS does not
   ship until #309" note verbatim from the docs added in T011.
+
+## Activity Log
+
+- 2026-09-10T13:26:57Z – claude – T002 frontmatter (owned_files/create_intent) names packages/elements/src/action-row/sk-action-row-html.stories.ts for the styles-layer story file. Verified against actual repo convention before authoring: every existing *-html.stories.ts (sk-button-html, sk-card-html, sk-feature-card-html, sk-data-table-html, and 21 others — 25 total) lives under packages/styles/src/<name>/, never packages/elements/src/<name>/, and eslint.config.mjs's depConstraints forbid scope:styles from depending on scope:elements at all, which a file physically inside packages/elements/src/action-row/ would not by itself violate but which the generator/story-discovery convention already treats as a packages/styles surface. Placed the file at packages/styles/src/action-row/sk-action-row-html.stories.ts instead, matching precedent and T002's own prose ('styles-layer stories file'). The frontmatter path is the one entry that does not match the file actually created; everything else in owned_files/create_intent is unchanged.
