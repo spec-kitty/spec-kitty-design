@@ -88,10 +88,10 @@
       "criterion_id": "FR-009",
       "description": "Verify FR-009 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
+      "evidence": "packages/elements/src/action-row/sk-action-row.markup.ts else-branch emits <div class=\"sk-action-row__trigger sk-action-row__trigger--static\"> when href is blank; confirmed in generated packages/styles/src/action-row/sk-action-row.html (default axis) and StaticTrigger/Default stories",
+      "pass_fail": "pass",
       "verified_by": null,
-      "verified_at": null,
+      "verified_at": "2026-09-10T14:07:13.852472+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
