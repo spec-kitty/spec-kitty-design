@@ -13,7 +13,7 @@
       "wp": "WP01"
     },
     "#155": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "FR-022/C-004: coordination recorded via GH comment https://github.com/spec-kitty/spec-kitty-design/issues/155#issuecomment-5619975095; #155's own hairline fix remains owned by #321, not touched here.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -21,8 +21,8 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
     },
     "#286": {
       "evidence_ref": "<link or commit>",
