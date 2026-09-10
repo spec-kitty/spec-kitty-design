@@ -1,9 +1,12 @@
 /* WHAT A STATIC CONSUMER MUST AUTHOR INSTEAD (ADR-15).
 
    The compact / rail-preserving axis below is a HOST-ATTRIBUTE VARIANT AXIS inside a
-   @container block whose container is `:host`. There is no light-DOM form of it in this
-   package yet — #309 files the generator, #310 the equivalence gate — so a server-rendered
-   consumer authors it themselves, and there is exactly one shape that works:
+   @container block whose container is `:host`. Its light-DOM form is GENERATED (#309) and gated
+   equal to this sheet's shadow form (#310); a server-rendered consumer links
+
+       @spec-kitty/styles/app-shell/static/sk-app-shell.static.css
+
+   INSTEAD OF this file, never in addition to it, and authors exactly one markup shape:
 
        <div class="sk-app-shell-host sk-app-shell-host--compact">
          <div class="sk-app-shell"> ... </div>
@@ -36,9 +39,26 @@
    and the collapsed static form computes `56px 240px 504px`. Nested inside a 500px ancestor
    container, a 1200px shell the element leaves at three columns is compacted to one.
 
+   OVERRIDING A WRAPPER DECLARATION IS NOT THE SAME AS OVERRIDING `:host` — A RULED LIMIT (#375).
+   `:host` declarations sit in the element's INNER tree, and under CSS Cascade's tree-order sort a
+   normal outer-tree declaration wins BEFORE specificity or source order is consulted. So any
+   document rule matching `<sk-app-shell>` beats `:host` at any weight, in any order. On
+   `.sk-app-shell-host` the same declarations are ordinary document declarations. Measured,
+   chromium and firefox identical: `sk-action-row { display: flex }` at (0,0,1) beats `:host`,
+   while `div { display: flex }` at the SAME (0,0,1) loses to `.sk-action-row-host`; and
+   `sk-action-row { container-type: normal }` destroys the element's container while the same
+   declaration on the wrapper, at equal weight authored first, does not. The static form therefore
+   reproduces `:host`'s LAYOUT and HARDENS its cascade position. To change a wrapper declaration a
+   consumer needs specificity STRICTLY HIGHER than the generated rule that declares it — or the
+   same specificity in a LATER stylesheet — computed from that rule rather than from a number
+   quoted here: `.sk-app-shell-host` is (0,1,0), and a modifier rule
+   `.sk-app-shell-host.sk-app-shell-host--<axis>` is (0,2,0). `:where()` on the wrapper
+   was measured as a candidate and is deliberately not emitted; the generated sheet's own header
+   records why.
+
    ADR-15 and kitty-specs/static-form-of-element-backed-css-01M248TF/measurement/
-   host-attribute-axis/ hold the full outcome table. This comment adds no rule and changes
-   none. */
+   host-attribute-axis/ hold the full outcome table; expected-static-form.json holds the
+   permanent one #310 runs. This comment adds no rule and changes none. */
 
 :host {
   display: block;

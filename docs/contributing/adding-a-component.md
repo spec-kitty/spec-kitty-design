@@ -65,9 +65,9 @@ it before you write any `:host` rule that is not `display`.
 | What you are about to write on `:host` | What the static path gets |
 |---|---|
 | `display: …` | The collapse holds. `.sk-<name>` restates it; nothing else is needed. |
-| `container-type: inline-size` | **Not a collapse.** A generated static form is coming (#309/#310) and it keeps the host as a **separate wrapper element**, carrying your sheet's whole `:host` declaration set. Do not tell anyone the static path can move `container-type` onto `.sk-<name>`. |
+| `container-type: inline-size` | **Not a collapse.** The static form is GENERATED (#309) and gated equal to the shadow form (#310), and it keeps the host as a **separate wrapper element**, carrying your sheet's whole `:host` declaration set. Declare `container-type` on `:host` and `scripts/build-static-form-css.mjs` picks your sheet up automatically — that one declaration IS the derivation. Do not tell anyone the static path can move `container-type` onto `.sk-<name>`. |
 | `:host([attr="X"]) .sk-<name>…` gating an `@container` block | Same — the axis becomes `.sk-<name>-host--X`, on that same wrapper, not a modifier on the root class. |
-| `:host(:is(…))`, `:host(:not(…))`, or a bare `:host([attr])` styling the host itself | Same family, and **these do not rewrite mechanically** — the bare form lands on the wrapper element, and the functional forms need their argument list rewritten too. `sk-app-shell.css`'s last rule is `:host(:is([presentation="compact"], [presentation="rail-preserving"])) …[hidden]` and is load-bearing at (0,4,0); `sk-form-input`/`sk-form-textarea` use `:host(:not([invalid]))`; `sk-page-header` uses a bare `:host([sticky])`. #309 owns all four shapes. |
+| `:host(:is(…))`, `:host(:not(…))`, or a bare `:host([attr])` styling the host itself | Same family. The generator handles all four shapes and **asserts the rewrite's specificity equals the source's, per selector** — `sk-app-shell.css`'s last rule, `:host(:is([presentation="compact"], [presentation="rail-preserving"])) …[hidden]`, is load-bearing at (0,4,0) and its rewrite is (0,4,0). What it will NOT rewrite it refuses loudly: a `~=`/`^=` operator, a case-sensitivity flag, or a value that is not a lowercase BEM modifier all fail the build rather than emitting a class that silently never matches. |
 | `::slotted(x)` | **Shadow-only.** No generated static form, now or planned. #311 owns backfilling the per-sheet instruction. |
 
 **The rule behind the first two rows: an element is never its own query container.** A container
@@ -81,12 +81,24 @@ is why the failure is quiet: most of the sheet still behaves.
 `@media` rather than `@container` for its stickiness rules, because the element being restyled is
 the host itself.
 
-**What a static consumer must author instead, until #309/#310 land.** For a host-owned
-`container-type` or a host-attribute axis: their own two-element wrapper —
-`<div class="sk-<name>-host"><div class="sk-<name>">…</div></div>` — plus their own modifier
-class on that outer element. For `::slotted(x)`: their own descendant rule in their own
-stylesheet. Say so in your component's CSS header comment, the way `sk-app-shell.css`,
-`sk-action-row.css` and `sk-entity-marker.css` now do.
+**What a static consumer authors.** For a host-owned `container-type` or a host-attribute axis:
+the two-element markup — `<div class="sk-<name>-host"><div class="sk-<name>">…</div></div>` — plus
+the generated sheet, `@spec-kitty/styles/<name>/static/sk-<name>.static.css`, linked **instead of**
+`sk-<name>.css` rather than in addition to it. For `::slotted(x)`: their own descendant rule in
+their own stylesheet, because that kind is shadow-only and has no generated form. Say so in your
+component's CSS header comment, the way `sk-app-shell.css`, `sk-action-row.css` and
+`sk-entity-marker.css` now do.
+
+**And say what the static form does NOT reproduce.** ADR-15's 2026-09-11 amendment (#375) is a
+ruled limit, not an open question: `:host` declarations sit in the inner tree and beat nothing —
+any document rule matching your element wins over them at any weight, in any order. On
+`.sk-<name>-host` they are ordinary document declarations. Measured, both engines:
+`sk-action-row { display: flex }` at (0,0,1) beats `:host`, and `div { display: flex }` at the
+same (0,0,1) loses to `.sk-action-row-host`. Your instruction block owes a consumer the boundary —
+**strictly higher specificity than the generated rule declaring the property, or the same
+specificity in a later stylesheet** — stated generically and computed from the rule actually
+emitted, never transcribed as a constant. The generated sheet's own header does this for you; do
+not contradict it.
 
 **Only four sheets carry `container-type` at all** — `sk-app-shell`, `sk-action-row`,
 `sk-copy-field` and `sk-page-header` — and this whole section is about them. A host-attribute

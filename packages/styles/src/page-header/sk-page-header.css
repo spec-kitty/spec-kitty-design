@@ -7,19 +7,16 @@
       `@container (max-width: 720px)`) and
    2. A HOST-ATTRIBUTE AXIS in its BARE form (`:host([sticky]) { position: sticky }`, styling
       the host itself rather than a descendant)
-      -> both are generable as a static form, but only in a TWO-ELEMENT shape, and #309 (the
-         generator) is unbuilt, so nothing defines `.sk-page-header-host` today. Author it:
+      -> both are generable as a static form, but only in a TWO-ELEMENT shape, and #309 has now
+         generated it. A static consumer links
+
+             @spec-kitty/styles/page-header/static/sk-page-header.static.css
+
+         INSTEAD OF this file, never in addition to it, and authors:
 
              <div class="sk-page-header-host">            <- add --sticky here for the axis
                <div class="sk-page-header"> ... </div>
              </div>
-
-             .sk-page-header-host {
-               display: block;
-               width: 100%;
-               min-width: 0;
-               container-type: inline-size;
-             }
 
       THE WRAPPER CARRIES THIS SHEET'S WHOLE `:host` SET, as written above — not
       `container-type` alone and not a list copied from another component. And DO NOT move
@@ -28,19 +25,18 @@
       descendants kept querying correctly.
 
       The bare `:host([sticky])` form is the one ADR-15 names as NOT rewriting mechanically to
-      `.sk-page-header-host--sticky <descendant>`; it lands on the wrapper itself. ADDING THE CLASS IS
-      NOT ENOUGH: this sheet declares NOTHING for `.sk-page-header-host--sticky`, so a consumer
-      who only adds it gets a class that does nothing — the same silently-inert outcome the
-      wrapper block above warns about, one level down. Until #309 generates it, the consumer
-      hand-rewrites ALL SEVEN `:host([sticky])` rules below onto that class: the host rule and the
-      `.sk-page-header` descendant rule at top level, both of their copies inside the
-      `@media (max-width: 720px)` and `@media (max-height: 480px)` blocks (which drop stickiness
-      and are part of the axis, not optional refinements), AND the
-      `@media (forced-colors: active)` rule. Do not drop that last one: the top-level descendant
-      rule RESERVES the border band at `transparent`, and the forced-colors rule is what turns it
-      on. Rewrite the first without the second and a static sticky header is separated from the
-      content beneath it by nothing at all under forced colors, because `box-shadow` computes
-      away there — the accessibility regression this whole comment exists to prevent. Note the
+      `.sk-page-header-host--sticky <descendant>`; it lands on the wrapper itself. THIS SHEET still
+      declares NOTHING for `.sk-page-header-host--sticky` — the generated static form does, and it
+      carries ALL SEVEN `:host([sticky])` rules below: the host rule and the `.sk-page-header`
+      descendant rule at top level, both of their copies inside the `@media (max-width: 720px)` and
+      `@media (max-height: 480px)` blocks (which drop stickiness and are part of the axis, not
+      optional refinements), AND the `@media (forced-colors: active)` rule. That last one is why
+      the count matters rather than the shape: the top-level descendant rule RESERVES the border
+      band at `transparent`, and the forced-colors rule is what turns it on, so a rewrite carrying
+      the first without the second separates a static sticky header from the content beneath it by
+      nothing at all under forced colors, `box-shadow` having computed away there. The generator
+      copies at-rules unchanged and #310 renders the result, so this is now enforced rather than
+      instructed. Note the
       sticky rules deliberately use `@media`, for the reason the comment further down records —
       the element being restyled is the host, and a container query cannot reach its own
       container. That is the same fact ADR-15 generalises.
@@ -91,9 +87,31 @@
       whichever stylesheet comes last, where the element form would have yielded regardless of
       order.
 
-   This component was not itself probed; ADR-15 measured sk-app-shell, sk-action-row and
-   sk-entity-marker, and each mechanism is a property of CSS rather than of one component.
-   This comment adds no rule and changes none. */
+   OVERRIDING A WRAPPER DECLARATION IS NOT THE SAME AS OVERRIDING `:host` — A RULED LIMIT (#375).
+   `:host` declarations sit in the element's INNER tree, and under CSS Cascade's tree-order sort a
+   normal outer-tree declaration wins BEFORE specificity or source order is consulted. So any
+   document rule matching `<sk-page-header>` beats `:host` at any weight, in any order. On
+   `.sk-page-header-host` the same declarations are ordinary document declarations. Measured,
+   chromium and firefox identical: `sk-action-row { display: flex }` at (0,0,1) beats `:host`,
+   while `div { display: flex }` at the SAME (0,0,1) loses to `.sk-action-row-host`; and
+   `sk-action-row { container-type: normal }` destroys the element's container while the same
+   declaration on the wrapper, at equal weight authored first, does not. The static form therefore
+   reproduces `:host`'s LAYOUT and HARDENS its cascade position. To change a wrapper declaration a
+   consumer needs specificity STRICTLY HIGHER than the generated rule that declares it — or the
+   same specificity in a LATER stylesheet — computed from that rule rather than from a number
+   quoted here: `.sk-page-header-host` is (0,1,0), and a modifier rule
+   `.sk-page-header-host.sk-page-header-host--<axis>` is (0,2,0). `:where()` on the wrapper
+   was measured as a candidate and is deliberately not emitted; the generated sheet's own header
+   records why.
+   For this sheet the sharpest case is `position`, which is declared by the MODIFIER rule
+   `.sk-page-header-host.sk-page-header-host--sticky` at (0,2,0) rather than by the base wrapper
+   rule: a consumer switching sticky off needs (0,3,0), or (0,2,0) in a later sheet. Measured:
+   `sk-page-header { position: static }` from the document DOES switch the element's sticky off
+   and does NOT switch the wrapper's off.
+
+   ADR-15 measured sk-app-shell, sk-action-row and sk-entity-marker and did not probe this
+   component; expected-static-form.json now does, on eleven scenarios per engine — including both
+   axes at once. This comment adds no rule and changes none. */
 
 :host {
   display: block;
