@@ -1,0 +1,36 @@
+{
+  "accept_commit": "a023f77dadf5cebdbce8b2b29601e8ed41a3d0bc",
+  "acceptance_history": [
+    {
+      "accept_commit": "68efa81d6da6277a8819bd69b1e529dc5f6665ad",
+      "acceptance_mode": "pr",
+      "accepted_at": "2026-09-10T13:17:39.267332+00:00",
+      "accepted_by": "jeroennouws",
+      "accepted_from_commit": "699c2d807b6fa79196a6b1343c2f6fbb0d2edb1f"
+    },
+    {
+      "accept_commit": "a023f77dadf5cebdbce8b2b29601e8ed41a3d0bc",
+      "acceptance_mode": "pr",
+      "accepted_at": "2026-09-10T14:23:07.482977+00:00",
+      "accepted_by": "jeroennouws",
+      "accepted_from_commit": "90566321c975259571b49de4a7b6cccb6dee2941"
+    }
+  ],
+  "acceptance_mode": "pr",
+  "accepted_at": "2026-09-10T14:23:07.482977+00:00",
+  "accepted_by": "jeroennouws",
+  "accepted_from_commit": "90566321c975259571b49de4a7b6cccb6dee2941",
+  "created_at": "2026-09-10T10:22:27.296144+00:00",
+  "flattened": false,
+  "friendly_name": "button busy axis",
+  "mission_id": "01M25DE5YX9BBF974531TG47N7",
+  "mission_number": null,
+  "mission_slug": "button-busy-axis-01M25DE5",
+  "mission_type": "software-dev",
+  "purpose_context": "This mission advances button busy axis on mission/button-busy-axis so stakeholders can track the work from mission creation onward.",
+  "purpose_tldr": "button busy axis",
+  "slug": "button-busy-axis-01M25DE5",
+  "status_phase": "1",
+  "target_branch": "mission/button-busy-axis",
+  "topology": "single_branch"
+}

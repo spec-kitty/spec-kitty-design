@@ -1,0 +1,189 @@
+{
+  "mission_slug": "button-busy-axis-01M25DE5",
+  "mission_number": "",
+  "mission_type": "software-dev",
+  "overall_verdict": "pass",
+  "criteria": [
+    {
+      "criterion_id": "FR-001",
+      "description": "Verify FR-001 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "fixtures/elements-behaviour/src/sk-button.test.ts (FR-001/FR-006 tests); packages/elements/src/button/sk-button.ts:30 (busy reflected attribute); packages/styles/src/button/sk-button.css (.sk-button--busy rules per tone/size); independent reviewer verified directly against source and live-browser rendering, review-cycle-1.md",
+      "pass_fail": "pass",
+      "verified_by": "mission-closer",
+      "verified_at": "2026-09-10T12:35:10.062869+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-002",
+      "description": "Verify FR-002 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "packages/elements/src/button/sk-button.markup.ts buttonClasses/buttonStaticHtml/ButtonStaticOptions accept busy option producing identical .sk-button--busy class; reviewer verified FR-002 directly, review-cycle-1.md",
+      "pass_fail": "pass",
+      "verified_by": "mission-closer",
+      "verified_at": "2026-09-10T12:35:11.157521+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-003",
+      "description": "Verify FR-003 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "packages/styles/src/button/sk-button.css: busy rules keyed exclusively on .sk-button--busy/:host([busy]); grep confirms no :disabled/[disabled]/[aria-disabled] coupling; reviewer verified FR-003, review-cycle-1.md",
+      "pass_fail": "pass",
+      "verified_by": "mission-closer",
+      "verified_at": "2026-09-10T12:35:12.282642+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-004",
+      "description": "Verify FR-004 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "BusyDisabled story; existing :disabled,[disabled] block untouched; reviewer verified FR-004 directly against source and live-browser rendering, review-cycle-1.md",
+      "pass_fail": "pass",
+      "verified_by": "mission-closer",
+      "verified_at": "2026-09-10T12:35:13.419335+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-005",
+      "description": "Verify FR-005 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "BusyAriaDisabled story; no CSS rule dims on [aria-disabled]; reviewer verified FR-005 directly against source and live-browser rendering, review-cycle-1.md",
+      "pass_fail": "pass",
+      "verified_by": "mission-closer",
+      "verified_at": "2026-09-10T12:35:14.528672+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-006",
+      "description": "Verify FR-006 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "fixtures/elements-behaviour/src/sk-button.test.ts:449 idle->busy->idle geometry test across every tone/size/label-length; reviewer's targeted mutation broke only the busy->idle restore leg (103.4 vs 87.4px), caught exclusively by the idleAfter assertion, proving the three-point measurement is real, review-cycle-1.md",
+      "pass_fail": "pass",
+      "verified_by": "mission-closer",
+      "verified_at": "2026-09-10T12:35:15.594126+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-007",
+      "description": "Verify FR-007 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "packages/elements/src/button/sk-button.ts: <span part=busy-cue aria-hidden=true> carries no text content or default label; reviewer verified FR-007, review-cycle-1.md",
+      "pass_fail": "pass",
+      "verified_by": "mission-closer",
+      "verified_at": "2026-09-10T12:35:16.726743+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-008",
+      "description": "Verify FR-008 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "no role=status/aria-live/live-region added anywhere in sk-button source; reviewer verified FR-008 directly, review-cycle-1.md",
+      "pass_fail": "pass",
+      "verified_by": "mission-closer",
+      "verified_at": "2026-09-10T12:35:17.858308+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-009",
+      "description": "Verify FR-009 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "fixtures/elements-behaviour/src/sk-button.test.ts:644 [FR-009/FR-010] reduced motion stops animation while cue stays visible (visibility:visible, opacity:1, animation-name:none, distinguishable from idle); apps/storybook/src/tests/visual.spec.ts 'SK-button busy reduced motion' baseline added this session; reviewer verified live via Playwright emulation, review-cycle-1.md",
+      "pass_fail": "pass",
+      "verified_by": "mission-closer",
+      "verified_at": "2026-09-10T12:35:27.416269+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-010",
+      "description": "Verify FR-010 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "fixtures/elements-behaviour/src/sk-button.test.ts:672 no forced-colors override exists for the cue; a plain solid border survives forced-colors without relying on box-shadow; apps/storybook/src/tests/visual.spec.ts 'SK-button busy forced colors' baseline added this session; reviewer verified live via Playwright emulation, review-cycle-1.md",
+      "pass_fail": "pass",
+      "verified_by": "mission-closer",
+      "verified_at": "2026-09-10T12:35:28.553882+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-011",
+      "description": "Verify FR-011 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "cue is aria-hidden with no role, so no second accessible-tree object is exposed in either state; reviewer verified FR-011 directly against live-browser accessibility tree, review-cycle-1.md",
+      "pass_fail": "pass",
+      "verified_by": "mission-closer",
+      "verified_at": "2026-09-10T12:35:29.689506+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-012",
+      "description": "Verify FR-012 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "packages/elements/src/button/sk-button.ts uses a plain <span part=busy-cue>, not a <progress>-based element or any shared DOM primitive; independently authored per the ratified TKT5/TKT6 cross-mission decision recorded in spec.md's Cross-Mission Decision section, scoped to sk-button alone; #306 owns its own cue",
+      "pass_fail": "pass",
+      "verified_by": "mission-closer",
+      "verified_at": "2026-09-10T12:35:30.752762+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-013",
+      "description": "Verify FR-013 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "expected-stories.json committed note: '#305 adds five sk-button busy stories: Busy (per tone), BusySmall, BusyIcon, BusyDisabled, and BusyAriaDisabled. The existing LightMode story is extended in place'; long/short label coverage held by fixtures/elements-behaviour/src/sk-button.test.ts:449 rather than a dedicated story, deliberately (see that file's own comment); idle comparison via pre-existing Primary/Secondary/Ghost stories",
+      "pass_fail": "pass",
+      "verified_by": "mission-closer",
+      "verified_at": "2026-09-10T12:35:41.375115+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-014",
+      "description": "Verify FR-014 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "reduced motion and forced colors: fixtures/elements-behaviour/src/sk-button.test.ts:644,672; RTL/logical-layout and narrow-width/zoom: apps/storybook/src/tests/sk-button.spec.ts (dir=rtl physical-side test; 390px/195px viewport overflow test); reviewer ran sk-button.spec.ts on chromium+firefox, 4/4 pass, review-cycle-1.md",
+      "pass_fail": "pass",
+      "verified_by": "mission-closer",
+      "verified_at": "2026-09-10T12:35:42.445773+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-015",
+      "description": "Verify FR-015 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "axe: 0 WCAG 2.1 AA violations across the busy stories. Visual regression: three chromium-only entries added in b4fbe7c; baselines harvested from this PR's own CI run 34478179652 (artifact visual-regression-diffs) and committed in d49ea6a per the repo's CI-authoritative policy; visual-regression job PASSES at d49ea6a. The default and reduced-motion baselines are byte-identical because Playwright's toHaveScreenshot defaults to animations:'disabled', cancelling infinite animations to initial state \u2014 the reduced-motion RULE is proven by the computed-style test (animation-name:none, visibility:visible, opacity:1), not by the pixel baseline.",
+      "pass_fail": "pass",
+      "verified_by": "mission-closer",
+      "verified_at": "2026-09-10T13:17:30.500892+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-016",
+      "description": "Verify FR-016 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "expected-docs.json sk-button attributes 5->6, total bumped to 131 (reconciled against #308's independent addition during the train rebase); expected-parts.json busy-cue part added, total bumped to 141; expected-stories.json 472->477; mutations.json gains one SC-013 arm for the busy-cue part on the button branch; all confirmed regenerating byte-identical via --check gates",
+      "pass_fail": "pass",
+      "verified_by": "mission-closer",
+      "verified_at": "2026-09-10T12:35:50.938820+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-017",
+      "description": "Verify FR-017 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "spec.md:226-242 'Decision: no component-scoped #286 no-literal test for this mission' records the reasoning explicitly, following #302's precedent per C-009; auditable rather than silent",
+      "pass_fail": "pass",
+      "verified_by": "mission-closer",
+      "verified_at": "2026-09-10T12:35:52.062818+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-018",
+      "description": "Verify FR-018 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "no request lifecycle, timer, mutation, or double-submit code added anywhere in this diff; busy composes with consumer-owned disabled/aria-disabled without this mission touching either mechanism; BusyAriaDisabled story comment explicitly names SaaS #1520's double-submit prevention as the mechanism this composition preserves",
+      "pass_fail": "pass",
+      "verified_by": "mission-closer",
+      "verified_at": "2026-09-10T12:35:53.170597+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    }
+  ],
+  "negative_invariants": []
+}

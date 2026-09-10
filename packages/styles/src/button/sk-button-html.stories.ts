@@ -6,6 +6,7 @@ import {
   SkButtonGhostHTML,
   SkButtonSmHTML,
   SkButtonLinkHTML,
+  SkButtonBusyHTML,
 } from './index';
 
 /**
@@ -74,6 +75,16 @@ export const Small: Story = {
  * gives the a11y gate the class-path anchor form to check.
  */
 export const Link: Story = { render: () => label(SkButtonLinkHTML, 'Read the docs') };
+
+/**
+ * The busy AXIS on the static path (#305). `SkButtonBusyHTML` carries `.sk-button--busy` — the
+ * SAME class the shadow form's cue rules key on, sharing one CSS source (ADR-10 §3) — but no
+ * cue markup: the static form has no `render()` to emit `sk-button.ts`'s `<span
+ * part="busy-cue">`, so this story renders visibly identically to `Default` except for the
+ * class the styles carry. This is a deliberate, documented boundary
+ * (`sk-button.markup.ts`'s `buttonStaticHtml` doc comment), not a gap this story papers over.
+ */
+export const Busy: Story = { render: () => label(SkButtonBusyHTML, 'Saving') };
 
 /**
  * `disabled` is authored here rather than generated: it is a STATE, not a variant, so it is not

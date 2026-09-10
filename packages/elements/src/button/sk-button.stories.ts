@@ -60,6 +60,47 @@ export const IconFocus: Story = {
     '<sk-button variant="secondary" size="icon" label="Focus preview"><span aria-hidden="true">+</span></sk-button>',
 };
 
+/**
+ * Busy (#305): a decorative, non-flow-participating activity cue, per tone. The accessible
+ * name is unchanged from the idle `Primary`/`Secondary`/`Ghost` stories above — compare them
+ * side by side rather than adding a redundant "Idle" story here.
+ */
+export const Busy: Story = {
+  render: () => `
+    <div style="display:flex; gap:var(--sk-space-4); align-items:center; flex-wrap:wrap;">
+      <sk-button variant="primary" busy>Saving</sk-button>
+      <sk-button variant="secondary" busy>Saving</sk-button>
+      <sk-button variant="ghost" busy>Saving</sk-button>
+      <sk-button busy>Saving</sk-button>
+    </div>
+  `,
+};
+
+/** The busy axis at `size="sm"` — the smaller cue/inset variant in `sk-button.css`. */
+export const BusySmall: Story = {
+  render: () => '<sk-button variant="primary" size="sm" busy>Saving</sk-button>',
+};
+
+/** The busy axis at `size="icon"` — the tightest box the cue must fit (#305's FR-001). */
+export const BusyIcon: Story = {
+  render: () =>
+    '<sk-button variant="primary" size="icon" label="Sending invitation" busy><span aria-hidden="true">✉</span></sk-button>',
+};
+
+/** `busy` + native `disabled` (User Story 2): the existing dimmed/not-allowed treatment
+ *  applies unchanged, the cue is still visible, and the control leaves the tab order — all per
+ *  platform default, none of it owned by this mission. */
+export const BusyDisabled: Story = {
+  render: () => '<sk-button variant="primary" busy disabled>Saving</sk-button>',
+};
+
+/** `busy` + focusable `aria-disabled="true"` (User Story 2): no CSS this mission adds dims the
+ *  button, the cue is still visible, and the control remains focusable and in the tab order —
+ *  the shape Team Kitty SaaS #1520's double-submit prevention relies on. */
+export const BusyAriaDisabled: Story = {
+  render: () => '<sk-button variant="primary" busy aria-disabled="true">Saving</sk-button>',
+};
+
 export const AllVariants: Story = {
   render: () => `
     <div style="display:flex; gap:var(--sk-space-4); align-items:center; flex-wrap:wrap;">
@@ -81,6 +122,7 @@ export const LightMode: Story = {
       <sk-button variant="ghost">Ghost</sk-button>
       <sk-button variant="primary" size="icon" label="Notifications"><span aria-hidden="true">●</span></sk-button>
       <sk-button variant="ghost" size="icon" label="Open settings" href="#settings"><span aria-hidden="true">★</span></sk-button>
+      <sk-button variant="primary" busy>Saving</sk-button>
     </div>
   `,
 };

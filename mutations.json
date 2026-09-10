@@ -55,7 +55,8 @@
     "#308 adds six sk-confirm-dialog arms: SC-005 (focus does not return to the invoker), SC-006 (confirm fires a duplicate close), SC-007 (confirm loses its explicit outcome), SC-013 (the confirm part is renamed), SC-014 (neither adopted sheet is composed), and SC-015 (module registration stops preserving constructor identity). All six are demonstrated red-first against fixtures/elements-behaviour/src/sk-confirm-dialog.test.ts.",
     "Correction: the confirm-dialog focus-return arm (\"focus does not return to the invoker on close\") was filed under SC-005 (form association), matching behaviours.json's own now-corrected mislabeling. Re-keyed to SC-012 (focus and keyboard), the id its test is actually marked with.",
     "#302 adds ONE for <sk-pill-tag>: the SC-010 arm flips `reflect` on `status`, mirroring sk-card's #177 SC-010 arm exactly. The named [SC-010] test asserts a pre-upgrade property assignment reaches the ATTRIBUTE, so an unreflected status is an axis that does nothing outside the shadow root and no static consumer or CSS author can see it. NO ARM FOR THE VOCABULARY ASSERTION, for the same reason #177's own note on this file records: guard 7 keys on a declared (id, subject) pair and there is no ADR-11 id for 'two components share one enum', so `Object.keys(PILL_TAG_STATUSES)` equals `STATUS_TONES` is held by an ordinary test rather than by this harness.",
-    "#302 updates the pre-existing SC-013 \"pill-tag part present\" arm's `from`/`to` strings: render() now calls `pillTagClasses(this.variant, this.shape, this.status)` with the new third argument, so the old two-argument literal no longer occurs in the source and the arm would apply nothing. The claim under test (the declared part survives) is unchanged."
+    "#302 updates the pre-existing SC-013 \"pill-tag part present\" arm's `from`/`to` strings: render() now calls `pillTagClasses(this.variant, this.shape, this.status)` with the new third argument, so the old two-argument literal no longer occurs in the source and the arm would apply nothing. The claim under test (the declared part survives) is unchanged.",
+    "#305 adds one sk-button SC-013 arm for the new busy-cue part, on the BUTTON branch specifically — the existing sk-button SC-013 arm already covers the ANCHOR branch (`part=\"button\"` there), so this one exercises the other branch rather than duplicating it. `from` is the exact rendered line including its 10-space indent, matched byte-for-byte against the shipped sk-button.ts; the mutation drops only the `part=\"busy-cue\"` attribute, leaving the class (and therefore the cue's own visibility/animation) untouched, so the arm reds specifically on the extended [SC-013] test's outside-targetability assertion rather than on any geometry or visibility assertion."
   ],
   "mutations": [
     {
@@ -522,6 +523,14 @@
       "file": "packages/elements/src/button/sk-button.ts",
       "from": "<a part=\"button\" class=${cls} href=${this.href} aria-label=${ifDefined(validLabel)}",
       "to": "<a class=${cls} href=${this.href} aria-label=${ifDefined(validLabel)}"
+    },
+    {
+      "id": "SC-013",
+      "subject": "fixtures/elements-behaviour/src/sk-button.test.ts",
+      "arm": "busy-cue part present, BUTTON branch (#305)",
+      "file": "packages/elements/src/button/sk-button.ts",
+      "from": "          <span part=\"busy-cue\" class=\"sk-button__busy-cue\" aria-hidden=\"true\"></span>",
+      "to": "          <span class=\"sk-button__busy-cue\" aria-hidden=\"true\"></span>"
     },
     {
       "id": "SC-014",

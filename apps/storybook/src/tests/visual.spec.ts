@@ -2001,3 +2001,58 @@ test("Work Explorer short viewport keeps focused work unobscured — visual base
     timeout: 20000,
   });
 });
+
+// SK-button busy axis (#305). No *.spec.ts file existed for sk-button before this mission and
+// visual.spec.ts had no story helper for it either — only the sk-app-shell composition story
+// above (`teamOverviewShellStory`) happens to embed one as a nested element. FR-015 requires
+// CI-authoritative baselines for the busy states; plan.md names the requirement (gate 16, line
+// 78) but does not enumerate which states, so the ones added here are chosen for the highest
+// silent-regression risk rather than exhaustive coverage of every busy story:
+//   - the default busy composition, because it is the core new surface and every tone renders
+//     in one frame;
+//   - reduced motion, because FR-009 requires the cue to stay VISIBLE with motion stopped —
+//     the animation freezing is a STABLE pixel diff subject, but a regression that made the
+//     cue disappear instead of freeze would otherwise pass every other gate silently (axe does
+//     not check for this, and the vitest suite only reads computed style, not a rendered frame);
+//   - forced colors, the same silent-vanish failure class as reduced motion (FR-010: the cue
+//     must stay visible without relying on `box-shadow`), and this file's near-universal
+//     convention for every other gated element already carries a forced-colors baseline.
+// Baselines are NOT generated locally — CI is authoritative here (this repo's own recorded
+// lesson: a local render differs from the runner's). The PR's own CI run produces the
+// "A snapshot doesn't exist" failure once; the actual PNG is harvested from that run's
+// `visual-regression-diffs` artifact and committed separately.
+const buttonStory = async (page: Page, id = 'busy'): Promise<Locator> => {
+  await page.goto(`/iframe.html?id=elements-skbutton--${id}&viewMode=story`);
+  const root = page.locator('#storybook-root');
+  await root.locator('sk-button').first().waitFor({ state: 'visible', timeout: 20000 });
+  return root;
+};
+
+test('SK-button busy default — visual baseline', async ({ page }) => {
+  const root = await buttonStory(page, 'busy');
+  await expect(root).toHaveScreenshot('sk-button-busy-default.png', {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+    timeout: 20000,
+  });
+});
+
+test('SK-button busy reduced motion — visual baseline', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  const root = await buttonStory(page, 'busy');
+  await expect(root).toHaveScreenshot('sk-button-busy-reduced-motion.png', {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+    timeout: 20000,
+  });
+});
+
+test('SK-button busy forced colors — visual baseline', async ({ page }) => {
+  await page.emulateMedia({ forcedColors: 'active' });
+  const root = await buttonStory(page, 'busy');
+  await expect(root).toHaveScreenshot('sk-button-busy-forced-colors.png', {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+    timeout: 20000,
+  });
+});

@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "mission_slug": "button-busy-axis-01M25DE5",
+  "mission_id": "01M25DE5YX9BBF974531TG47N7",
+  "mission_branch": "kitty/mission-button-busy-axis-01M25DE5",
+  "target_branch": "mission/button-busy-axis",
+  "lanes": [
+    {
+      "lane_id": "lane-a",
+      "wp_ids": [
+        "WP01"
+      ],
+      "write_scope": [
+        "apps/storybook/src/tests/sk-button.spec.ts",
+        "expected-docs.json",
+        "expected-parts.json",
+        "expected-stories.json",
+        "fixtures/elements-behaviour/src/sk-button.test.ts",
+        "packages/elements/SIZES.md",
+        "packages/elements/custom-elements.json",
+        "packages/elements/src/button/**",
+        "packages/elements/vue.d.ts",
+        "packages/react/src/button/**",
+        "packages/styles/src/button/sk-button.css"
+      ],
+      "predicted_surfaces": [
+        "api",
+        "app-shell",
+        "artifact-rendering",
+        "tracker-integration"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    }
+  ],
+  "computed_at": "2026-09-10T10:43:08.411143+00:00",
+  "computed_from": "dependency_graph+ownership",
+  "planning_artifact_wps": [],
+  "planning_commit_sha": "f2334d92d5af30e9123730acf6c34120f2326d8f"
+}
