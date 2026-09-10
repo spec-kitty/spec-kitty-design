@@ -1,0 +1,36 @@
+{
+  "accept_commit": "c6c31bf4abb15cce498fb8c64bd7901dc89229cd",
+  "acceptance_history": [
+    {
+      "accept_commit": "728dea6e94b8df6243cc8cec644b96f30c33bdd5",
+      "acceptance_mode": "pr",
+      "accepted_at": "2026-09-10T09:47:00.835919+00:00",
+      "accepted_by": "jeroennouws",
+      "accepted_from_commit": "b8c4217a2ea8a8a05d45de9ebbebca4e4ca3fe0b"
+    },
+    {
+      "accept_commit": "c6c31bf4abb15cce498fb8c64bd7901dc89229cd",
+      "acceptance_mode": "pr",
+      "accepted_at": "2026-09-10T11:11:59.447790+00:00",
+      "accepted_by": "jeroennouws",
+      "accepted_from_commit": "0aa521683a599c4e22aef726c4af0de7966afee7"
+    }
+  ],
+  "acceptance_mode": "pr",
+  "accepted_at": "2026-09-10T11:11:59.447790+00:00",
+  "accepted_by": "jeroennouws",
+  "accepted_from_commit": "0aa521683a599c4e22aef726c4af0de7966afee7",
+  "created_at": "2026-09-09T23:42:39.573146+00:00",
+  "flattened": false,
+  "friendly_name": "confirm dialog element",
+  "mission_id": "01M248TNYM7ZBRVQTSFFH7HX1A",
+  "mission_number": null,
+  "mission_slug": "confirm-dialog-element-01M248TN",
+  "mission_type": "software-dev",
+  "purpose_context": "This mission advances confirm dialog element on mission/confirm-dialog-element so stakeholders can track the work from mission creation onward.",
+  "purpose_tldr": "confirm dialog element",
+  "slug": "confirm-dialog-element-01M248TN",
+  "status_phase": "1",
+  "target_branch": "mission/confirm-dialog-element",
+  "topology": "single_branch"
+}

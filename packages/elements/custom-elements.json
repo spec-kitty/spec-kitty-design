@@ -2437,6 +2437,289 @@
         },
         {
           "kind": "class",
+          "description": "A bounded, single-purpose confirmation dialog over the native `<dialog>`, opened via\n`showModal()`.\n\nNO STRING HAS A DEFAULT (FR-001, FR-017). `dialogTitle`, `message`, `confirmLabel` and\n`cancelLabel` are entirely consumer-supplied. Omitting one renders that node with nothing\nsubstituted for it — never an English or any other library-authored literal — and logs a\none-time development warning naming the missing property. That is FR-018's guarantee,\nproven in `fixtures/elements-behaviour/src/sk-confirm-dialog.test.ts` by a component-scoped\ntest asserting the rendered shadow tree carries zero bare user-visible text beyond the\nexact supplied strings; that test is NOT a repo-wide gate (issue #286 owns building one).\n\nONE REPORTING MECHANISM (FR-006). The element never fires a custom event for its outcome.\nEvery path — confirm, cancel, Escape, backdrop dismissal (when `backdrop-dismiss` is set),\nand a programmatic `close()` with no explicit value — funnels through the native `<dialog>`\n`close` event, read via `returnValue` (`'confirm' | 'cancel'`). Every path other than an\nexplicit confirm activation resolves `'cancel'` (FR-007) — the element defaults\n`returnValue` to `'cancel'` before the dialog can be shown, so an unset programmatic close\ncan never be read back as an invented confirmation.\n\nTHE ELEMENT PERFORMS NO MUTATION, REQUEST, OR NAVIGATION (FR-005). It reports what the user\ndid; the consumer decides what happens next, listening for the dialog's own `close` event:\n\n```ts\nconst dialogEl = host.shadowRoot!.querySelector('[part=\"dialog\"]') as HTMLDialogElement;\ndialogEl.addEventListener('close', () => {\n  if (dialogEl.returnValue === 'confirm') doTheThing();\n});\n```\n\nSTATIC FORM (FR-016). This component ships no `sk-confirm-dialog.markup.ts` and generates\nno static `sk-confirm-dialog.html`/`index.ts` — `showModal()` has no server-rendered\nequivalent, the same shape as `sk-notice` (#178). Authoring a static twin for the *stylesheet*\nwas always this component's own decision to make (matching #72/#73's decline, per\n`adding-a-component.md`), not something gated by external ruling, and it declines one. #301\n(the static-form-of-element-backed-CSS question) is CLOSED; its ruling shipped as ADR-15\n(`docs/architecture/decisions/2026-09-10-15-static-form-of-element-backed-css.md`), still\n`Proposed`, not ratified. ADR-15 rules on exactly three CSS construct kinds — a host-attribute\nvariant axis inside a host-owned `@container`, a host-owned `container-type`, and `::slotted()`\n— and `sk-confirm-dialog.css` uses none of them: no `@container`, no `container-type`, no\n`::slotted()`, and its one `:host` rule is unconditional, not an attribute-gated variant axis.\nThere is therefore no ruling to defer to, and none is needed — nothing about this stylesheet's\nshape raises the shadow-vs-static divergence question ADR-15 exists to resolve.\n\nTEAM DELETION IS NEVER A DEMONSTRATED FLOW (FR-014). Whole-Team deletion is blocked upstream\n(Team Kitty SaaS #1432); every example anywhere near this component uses membership\nremoval, leaving a team, or bearer-link revocation instead.\n\nToken dependencies: --sk-border-default, --sk-border-width-1, --sk-fg-body,\n--sk-fg-default, --sk-font-sans, --sk-motion-duration-fast, --sk-motion-ease-out,\n--sk-radius-lg, --sk-shadow-elev, --sk-space-2, --sk-space-3, --sk-space-4, --sk-space-5,\n--sk-space-8, --sk-space-9, --sk-text-base, --sk-text-lg, --sk-weight-semibold (this\ncomponent's own sheet), plus whichever `--sk-*` tokens the composed `.sk-button` sheet\nuses for the confirm/cancel controls.",
+          "name": "SkConfirmDialog",
+          "cssParts": [
+            {
+              "description": "The footer row holding the cancel and confirm controls. Never scrolls.",
+              "name": "actions"
+            },
+            {
+              "description": "The message region. Scrolls independently when its content overflows (FR-010); its text is the dialog's accessible description.",
+              "name": "body"
+            },
+            {
+              "description": "The cancel control.",
+              "name": "cancel"
+            },
+            {
+              "description": "The confirm control. Composes `.sk-button`; set `confirm-variant` to choose its tone — the element never infers or applies one (FR-004).",
+              "name": "confirm"
+            },
+            {
+              "description": "The native `<dialog>` itself; the root surface, and the consumer's own access point for the platform's `close`/`returnValue` contract.",
+              "name": "dialog"
+            },
+            {
+              "description": "The heading node. Its text is the dialog's accessible name.",
+              "name": "title"
+            }
+          ],
+          "members": [
+            {
+              "kind": "field",
+              "name": "#dialogEl",
+              "privacy": "private",
+              "type": {
+                "text": "HTMLDialogElement | undefined"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "#handleBackdropClick",
+              "privacy": "private"
+            },
+            {
+              "kind": "field",
+              "name": "#handleCancelClick",
+              "privacy": "private"
+            },
+            {
+              "kind": "field",
+              "name": "#handleClose",
+              "privacy": "private"
+            },
+            {
+              "kind": "field",
+              "name": "#handleConfirmClick",
+              "privacy": "private"
+            },
+            {
+              "kind": "field",
+              "name": "#invoker",
+              "privacy": "private",
+              "type": {
+                "text": "HTMLElement | undefined"
+              }
+            },
+            {
+              "kind": "method",
+              "name": "#requiredText",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "string | typeof nothing"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "prop",
+                  "type": {
+                    "text": "RequiredStringProp"
+                  }
+                },
+                {
+                  "name": "value",
+                  "type": {
+                    "text": "string | undefined"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "field",
+              "name": "#setDialogEl",
+              "privacy": "private"
+            },
+            {
+              "kind": "field",
+              "name": "#warned",
+              "privacy": "private",
+              "default": "new Set<RequiredStringProp>()"
+            },
+            {
+              "kind": "field",
+              "name": "backdropDismiss",
+              "privacy": "public",
+              "type": {
+                "text": "boolean"
+              },
+              "description": "Whether clicking the dialog's own backdrop closes it. Defaults to `false`: a\ndestructive confirmation's safest default is to require an explicit control activation,\nso an accidental click outside the dialog's content does nothing rather than silently\ncancelling. When set, a backdrop click resolves `'cancel'` (FR-007).",
+              "default": "false",
+              "attribute": "backdrop-dismiss",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "cancelLabel",
+              "privacy": "public",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "The cancel control's visible label. Required — no default (FR-001, FR-017).",
+              "attribute": "cancel-label"
+            },
+            {
+              "kind": "field",
+              "name": "confirmLabel",
+              "privacy": "public",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "The confirm control's visible label. Required — no default (FR-001, FR-017).",
+              "attribute": "confirm-label"
+            },
+            {
+              "kind": "field",
+              "name": "confirmVariant",
+              "privacy": "public",
+              "type": {
+                "text": "'primary' | 'secondary' | 'ghost' | undefined"
+              },
+              "description": "The confirm control's `.sk-button` tone (`primary`, `secondary` or `ghost`). Omit for\nthe unstyled base button. The element never infers or applies a tone itself (FR-004) —\nthis is a style choice, not user-visible copy, so it is exempt from the no-defaults rule\nand may reasonably be left unset by a consumer who wants the base button.",
+              "attribute": "confirm-variant"
+            },
+            {
+              "kind": "field",
+              "name": "dialogTitle",
+              "privacy": "public",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "The dialog's accessible name. Required — no default (FR-001, FR-017). Omitting it warns\nand renders the title node with no text.",
+              "attribute": "dialog-title"
+            },
+            {
+              "kind": "field",
+              "name": "initialFocus",
+              "privacy": "public",
+              "type": {
+                "text": "'confirm' | 'cancel'"
+              },
+              "description": "Which control receives focus when the dialog opens: `'confirm'` or `'cancel'`.\nDefaults to `'cancel'`, the safe default for a destructive confirmation (FR-008). An\nunknown value warns and falls back to `'cancel'`.",
+              "default": "'cancel'",
+              "attribute": "initial-focus"
+            },
+            {
+              "kind": "field",
+              "name": "message",
+              "privacy": "public",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "The dialog's accessible description. Required — no default (FR-001, FR-017). Long\nvalues scroll independently of the action row (FR-010).",
+              "attribute": "message"
+            },
+            {
+              "kind": "field",
+              "name": "open",
+              "privacy": "public",
+              "type": {
+                "text": "boolean"
+              },
+              "description": "Reflects the dialog's real open/closed state (ADR-11 SC-005). Read-only in practice —\nset by the element itself from `showModal()` and the native `close` event — a consumer\nshould not assign it directly to open or close the dialog; call `showModal()` and the\ndialog's own `close()` instead.",
+              "default": "false",
+              "attribute": "open",
+              "reflects": true
+            },
+            {
+              "kind": "method",
+              "name": "showModal",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "invoker",
+                  "optional": true,
+                  "type": {
+                    "text": "HTMLElement"
+                  }
+                }
+              ],
+              "description": "Opens the dialog as a native modal (FR-013). Equivalent to calling `showModal()` on the\nrendered `<dialog>` directly (reachable via `shadowRoot.querySelector('[part=\"dialog\"]')`\n— the same node `::part(dialog)` targets from outside), except that it also records\n`invoker` (or `document.activeElement`, if omitted) as the element focus returns to when\nthe dialog closes (FR-009), and it resets `returnValue` to `'cancel'` before opening so an\nunset close can never be read back as a confirmation (FR-007)."
+            }
+          ],
+          "attributes": [
+            {
+              "name": "backdrop-dismiss",
+              "type": {
+                "text": "boolean"
+              },
+              "description": "Whether clicking the dialog's own backdrop closes it. Defaults to `false`: a\ndestructive confirmation's safest default is to require an explicit control activation,\nso an accidental click outside the dialog's content does nothing rather than silently\ncancelling. When set, a backdrop click resolves `'cancel'` (FR-007).",
+              "default": "false",
+              "fieldName": "backdropDismiss"
+            },
+            {
+              "name": "cancel-label",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "The cancel control's visible label. Required — no default (FR-001, FR-017).",
+              "fieldName": "cancelLabel"
+            },
+            {
+              "name": "confirm-label",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "The confirm control's visible label. Required — no default (FR-001, FR-017).",
+              "fieldName": "confirmLabel"
+            },
+            {
+              "name": "confirm-variant",
+              "type": {
+                "text": "'primary' | 'secondary' | 'ghost' | undefined"
+              },
+              "description": "The confirm control's `.sk-button` tone (`primary`, `secondary` or `ghost`). Omit for\nthe unstyled base button. The element never infers or applies a tone itself (FR-004) —\nthis is a style choice, not user-visible copy, so it is exempt from the no-defaults rule\nand may reasonably be left unset by a consumer who wants the base button.",
+              "fieldName": "confirmVariant"
+            },
+            {
+              "name": "dialog-title",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "The dialog's accessible name. Required — no default (FR-001, FR-017). Omitting it warns\nand renders the title node with no text.",
+              "fieldName": "dialogTitle"
+            },
+            {
+              "name": "initial-focus",
+              "type": {
+                "text": "'confirm' | 'cancel'"
+              },
+              "description": "Which control receives focus when the dialog opens: `'confirm'` or `'cancel'`.\nDefaults to `'cancel'`, the safe default for a destructive confirmation (FR-008). An\nunknown value warns and falls back to `'cancel'`.",
+              "default": "'cancel'",
+              "fieldName": "initialFocus"
+            },
+            {
+              "name": "message",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "The dialog's accessible description. Required — no default (FR-001, FR-017). Long\nvalues scroll independently of the action row (FR-010).",
+              "fieldName": "message"
+            },
+            {
+              "name": "open",
+              "type": {
+                "text": "boolean"
+              },
+              "description": "Reflects the dialog's real open/closed state (ADR-11 SC-005). Read-only in practice —\nset by the element itself from `showModal()` and the native `close` event — a consumer\nshould not assign it directly to open or close the dialog; call `showModal()` and the\ndialog's own `close()` instead.",
+              "default": "false",
+              "fieldName": "open"
+            }
+          ],
+          "superclass": {
+            "name": "LitElement",
+            "package": "lit"
+          },
+          "tagName": "sk-confirm-dialog",
+          "customElement": true
+        },
+        {
+          "kind": "class",
           "description": "A labelled complementary landmark for consumer-owned selected-context content.",
           "name": "SkContextSidebar",
           "cssParts": [
@@ -6556,6 +6839,22 @@
         },
         {
           "kind": "js",
+          "name": "ConfirmDialogInitialFocus",
+          "declaration": {
+            "name": "ConfirmDialogInitialFocus",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "ConfirmDialogOutcome",
+          "declaration": {
+            "name": "ConfirmDialogOutcome",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
           "name": "CopyFieldOutcome",
           "declaration": {
             "name": "CopyFieldOutcome",
@@ -7143,6 +7442,14 @@
           "name": "skCheckBulletSheet",
           "declaration": {
             "name": "default",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "SkConfirmDialog",
+          "declaration": {
+            "name": "SkConfirmDialog",
             "module": "./dist/index.js"
           }
         },

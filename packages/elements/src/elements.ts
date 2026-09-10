@@ -42,3 +42,4 @@ import './notice/sk-notice.js';
 import './bar-chart/sk-bar-chart.js';
 import './time-series-chart/sk-time-series-chart.js';
 import './copy-field/sk-copy-field.js';
+import './confirm-dialog/sk-confirm-dialog.js';

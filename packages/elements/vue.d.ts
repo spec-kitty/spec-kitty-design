@@ -164,6 +164,104 @@ declare module 'vue' {
       /** Read-only completion state. Omit for complete; unsupported values render as complete. */
       'state'?: 'complete' | 'pending' | undefined;
     }>;
+    /**
+     * A bounded, single-purpose confirmation dialog over the native `<dialog>`, opened via
+     * `showModal()`.
+     *
+     * NO STRING HAS A DEFAULT (FR-001, FR-017). `dialogTitle`, `message`, `confirmLabel` and
+     * `cancelLabel` are entirely consumer-supplied. Omitting one renders that node with nothing
+     * substituted for it — never an English or any other library-authored literal — and logs a
+     * one-time development warning naming the missing property. That is FR-018's guarantee,
+     * proven in `fixtures/elements-behaviour/src/sk-confirm-dialog.test.ts` by a component-scoped
+     * test asserting the rendered shadow tree carries zero bare user-visible text beyond the
+     * exact supplied strings; that test is NOT a repo-wide gate (issue #286 owns building one).
+     *
+     * ONE REPORTING MECHANISM (FR-006). The element never fires a custom event for its outcome.
+     * Every path — confirm, cancel, Escape, backdrop dismissal (when `backdrop-dismiss` is set),
+     * and a programmatic `close()` with no explicit value — funnels through the native `<dialog>`
+     * `close` event, read via `returnValue` (`'confirm' | 'cancel'`). Every path other than an
+     * explicit confirm activation resolves `'cancel'` (FR-007) — the element defaults
+     * `returnValue` to `'cancel'` before the dialog can be shown, so an unset programmatic close
+     * can never be read back as an invented confirmation.
+     *
+     * THE ELEMENT PERFORMS NO MUTATION, REQUEST, OR NAVIGATION (FR-005). It reports what the user
+     * did; the consumer decides what happens next, listening for the dialog's own `close` event:
+     *
+     * ```ts
+     * const dialogEl = host.shadowRoot!.querySelector('[part="dialog"]') as HTMLDialogElement;
+     * dialogEl.addEventListener('close', () => {
+     *   if (dialogEl.returnValue === 'confirm') doTheThing();
+     * });
+     * ```
+     *
+     * STATIC FORM (FR-016). This component ships no `sk-confirm-dialog.markup.ts` and generates
+     * no static `sk-confirm-dialog.html`/`index.ts` — `showModal()` has no server-rendered
+     * equivalent, the same shape as `sk-notice` (#178). Authoring a static twin for the *stylesheet*
+     * was always this component's own decision to make (matching #72/#73's decline, per
+     * `adding-a-component.md`), not something gated by external ruling, and it declines one. #301
+     * (the static-form-of-element-backed-CSS question) is CLOSED; its ruling shipped as ADR-15
+     * (`docs/architecture/decisions/2026-09-10-15-static-form-of-element-backed-css.md`), still
+     * `Proposed`, not ratified. ADR-15 rules on exactly three CSS construct kinds — a host-attribute
+     * variant axis inside a host-owned `@container`, a host-owned `container-type`, and `::slotted()`
+     * — and `sk-confirm-dialog.css` uses none of them: no `@container`, no `container-type`, no
+     * `::slotted()`, and its one `:host` rule is unconditional, not an attribute-gated variant axis.
+     * There is therefore no ruling to defer to, and none is needed — nothing about this stylesheet's
+     * shape raises the shadow-vs-static divergence question ADR-15 exists to resolve.
+     *
+     * TEAM DELETION IS NEVER A DEMONSTRATED FLOW (FR-014). Whole-Team deletion is blocked upstream
+     * (Team Kitty SaaS #1432); every example anywhere near this component uses membership
+     * removal, leaving a team, or bearer-link revocation instead.
+     *
+     * Token dependencies: --sk-border-default, --sk-border-width-1, --sk-fg-body,
+     * --sk-fg-default, --sk-font-sans, --sk-motion-duration-fast, --sk-motion-ease-out,
+     * --sk-radius-lg, --sk-shadow-elev, --sk-space-2, --sk-space-3, --sk-space-4, --sk-space-5,
+     * --sk-space-8, --sk-space-9, --sk-text-base, --sk-text-lg, --sk-weight-semibold (this
+     * component's own sheet), plus whichever `--sk-*` tokens the composed `.sk-button` sheet
+     * uses for the confirm/cancel controls.
+     */
+    'sk-confirm-dialog': SkElement<{
+      /**
+       * Whether clicking the dialog's own backdrop closes it. Defaults to `false`: a
+       * destructive confirmation's safest default is to require an explicit control activation,
+       * so an accidental click outside the dialog's content does nothing rather than silently
+       * cancelling. When set, a backdrop click resolves `'cancel'` (FR-007).
+       */
+      'backdrop-dismiss'?: boolean;
+      /** The cancel control's visible label. Required — no default (FR-001, FR-017). */
+      'cancel-label'?: string | undefined;
+      /** The confirm control's visible label. Required — no default (FR-001, FR-017). */
+      'confirm-label'?: string | undefined;
+      /**
+       * The confirm control's `.sk-button` tone (`primary`, `secondary` or `ghost`). Omit for
+       * the unstyled base button. The element never infers or applies a tone itself (FR-004) —
+       * this is a style choice, not user-visible copy, so it is exempt from the no-defaults rule
+       * and may reasonably be left unset by a consumer who wants the base button.
+       */
+      'confirm-variant'?: 'primary' | 'secondary' | 'ghost' | undefined;
+      /**
+       * The dialog's accessible name. Required — no default (FR-001, FR-017). Omitting it warns
+       * and renders the title node with no text.
+       */
+      'dialog-title'?: string | undefined;
+      /**
+       * Which control receives focus when the dialog opens: `'confirm'` or `'cancel'`.
+       * Defaults to `'cancel'`, the safe default for a destructive confirmation (FR-008). An
+       * unknown value warns and falls back to `'cancel'`.
+       */
+      'initial-focus'?: 'confirm' | 'cancel';
+      /**
+       * The dialog's accessible description. Required — no default (FR-001, FR-017). Long
+       * values scroll independently of the action row (FR-010).
+       */
+      'message'?: string | undefined;
+      /**
+       * Reflects the dialog's real open/closed state (ADR-11 SC-005). Read-only in practice —
+       * set by the element itself from `showModal()` and the native `close` event — a consumer
+       * should not assign it directly to open or close the dialog; call `showModal()` and the
+       * dialog's own `close()` instead.
+       */
+      'open'?: boolean;
+    }>;
     /** A labelled complementary landmark for consumer-owned selected-context content. */
     'sk-context-sidebar': SkElement<{
       /** Accessible name forwarded unchanged to the complementary landmark when nonblank. */

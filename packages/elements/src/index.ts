@@ -70,6 +70,12 @@ export {
 } from './notice/sk-notice.js';
 
 export {
+  SkConfirmDialog,
+  type ConfirmDialogOutcome,
+  type ConfirmDialogInitialFocus,
+} from './confirm-dialog/sk-confirm-dialog.js';
+
+export {
   SkTransitionMatrix,
   type TransitionColumn,
   type TransitionMatrixProperties,

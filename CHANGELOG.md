@@ -13,14 +13,21 @@ compatibility window to honour and no deprecation cycle to run.
 
 ### `@spec-kitty/elements`
 
-The custom-element base layer (ADR-8): twenty-nine components as standard custom elements, built on
+The custom-element base layer (ADR-8): thirty components as standard custom elements, built on
 Lit, with styling delivered through constructed stylesheets and a closed styling API (ADR-9).
 
 - `sk-action-row`, `sk-app-shell`, `sk-bar-chart`, `sk-blog-card`, `sk-button`, `sk-card`, `sk-check-bullet`,
-  `sk-context-sidebar`, `sk-copy-field`, `sk-entity-marker`, `sk-evidence-chain`, `sk-feature-card`, `sk-form-input`,
+  `sk-confirm-dialog`, `sk-context-sidebar`, `sk-copy-field`, `sk-entity-marker`, `sk-evidence-chain`, `sk-feature-card`, `sk-form-input`,
   `sk-form-textarea`, `sk-grid`, `sk-metric`, `sk-nav-pill`, `sk-notice`, `sk-page-header`,
   `sk-personal-rail`, `sk-pill-tag`, `sk-ribbon-card`, `sk-section-banner`, `sk-section-header`,
   `sk-site-footer`, `sk-status-indicator`, `sk-stub`, `sk-time-series-chart`, `sk-transition-matrix`
+- `sk-confirm-dialog` (#308) is a bounded, consumer-copy confirmation dialog over the native
+  `<dialog>`, opened via `showModal()`. Every visible string (title, body, confirm label, cancel
+  label) is entirely consumer-supplied — there is no library-authored fallback text anywhere, and
+  an omitted string renders nothing rather than a substituted literal. It reports its outcome
+  through exactly one mechanism, the native `close` event's `returnValue` (`'confirm' | 'cancel'`);
+  every dismissal path (Escape, backdrop, an unset programmatic close) resolves `'cancel'`. It
+  performs no mutation, request, or navigation itself
 - `sk-copy-field` (#257) displays and copies one exact consumer-provided string, reports only
   truthful `copied`, manual-selection, or failure outcomes through an accessible live region and
   privacy-safe event, and wraps long values without owning command execution or application state

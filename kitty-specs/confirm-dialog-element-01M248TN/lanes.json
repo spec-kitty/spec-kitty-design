@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "mission_slug": "confirm-dialog-element-01M248TN",
+  "mission_id": "01M248TNYM7ZBRVQTSFFH7HX1A",
+  "mission_branch": "kitty/mission-confirm-dialog-element-01M248TN",
+  "target_branch": "mission/confirm-dialog-element",
+  "lanes": [
+    {
+      "lane_id": "lane-a",
+      "wp_ids": [
+        "WP01"
+      ],
+      "write_scope": [
+        "behaviours.json",
+        "expected-docs.json",
+        "expected-parts.json",
+        "fixtures/elements-behaviour/src/sk-confirm-dialog.test.ts",
+        "mutations.json",
+        "packages/elements/SIZES.md",
+        "packages/elements/custom-elements.json",
+        "packages/elements/src/confirm-dialog/**",
+        "packages/elements/vue.d.ts",
+        "packages/react/src/**",
+        "packages/styles/package.json",
+        "packages/styles/src/confirm-dialog/**"
+      ],
+      "predicted_surfaces": [
+        "api",
+        "app-shell",
+        "artifact-rendering",
+        "legacy-cleanup",
+        "tracker-integration"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    }
+  ],
+  "computed_at": "2026-09-10T00:02:11.475279+00:00",
+  "computed_from": "dependency_graph+ownership",
+  "planning_artifact_wps": [],
+  "planning_commit_sha": "8eaba6ad287ca756c54d17ab948d02f1e626690f"
+}
