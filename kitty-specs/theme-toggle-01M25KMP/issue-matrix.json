@@ -37,7 +37,7 @@
       "wp": null
     },
     "#259": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "Closed public-surface composition lineage extended by operational-status stories and tests",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -45,8 +45,8 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
     },
     "#323": {
       "evidence_ref": "WP01 approved implementation at 3b3d772e; exact gates and independent review in implementation-evidence.md",
