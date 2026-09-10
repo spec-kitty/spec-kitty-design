@@ -61,7 +61,7 @@
       "wp": "WP01"
     },
     "#323": {
-      "evidence_ref": "WP01 approved implementation at 3b3d772e; exact gates and independent review in implementation-evidence.md",
+      "evidence_ref": "WP01 cycle 6 approved product HEAD 3234d06f with no High/Medium; exact executable gate snapshot 4172c6fa recorded in implementation-evidence.md",
       "fr": null,
       "nfr": null,
       "repo": null,
