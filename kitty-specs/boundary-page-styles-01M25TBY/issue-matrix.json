@@ -1,77 +1,113 @@
 {
-  "rows": {
-    "#286": {
-      "evidence_ref": "Spurious/no-overlap citation, no work owed by this WP. #286 is spec-kitty-design's open, cross-cutting no-literal-copy gate. spec.md:217 (FR-014) and spec.md:238 (C-004) explicitly decline a repo-wide or component-scoped gate here: sk-boundary-page has no render() and emits no markup itself (research.md Decision 5), so the #308 precedent's risk does not apply. #286 stays open; no followup is intended by this mission.",
-      "fr": "FR-014",
-      "nfr": null,
-      "repo": null,
-      "sc": null,
-      "scope": null,
-      "source_file": "spec.md",
-      "title": "Repo-wide no-user-visible-literal gate (open, cross-cutting constraint)",
-      "verdict": "deferred-with-followup",
-      "wp": "WP01"
+    "rows": {
+        "#176": {
+            "evidence_ref": "No work owed by this WP. #176 established the styles-only-class recorded-reason convention that ADR-10 generalised; research.md Decision 1 cites #176 twice (lines 95, 99) only as prior-art precedent for WHY sk-boundary-page's styles-only status gets a recorded reason (matching the five other styles-only components), not as a dependency this WP fixes or extends. #176 is already closed.",
+            "fr": null,
+            "nfr": null,
+            "repo": null,
+            "sc": null,
+            "scope": null,
+            "source_file": "research.md",
+            "title": "Styles-only-class recorded-reason precedent (prior-art citation only)",
+            "verdict": "deferred-with-followup",
+            "wp": "WP01"
+        },
+        "#286": {
+            "evidence_ref": "Spurious/no-overlap citation, no work owed by this WP. #286 is spec-kitty-design's open, cross-cutting no-literal-copy gate. spec.md:217 (FR-014) and spec.md:238 (C-004) explicitly decline a repo-wide or component-scoped gate here: sk-boundary-page has no render() and emits no markup itself (research.md Decision 5), so the #308 precedent's risk does not apply. #286 stays open; no followup is intended by this mission.",
+            "fr": "FR-014",
+            "nfr": null,
+            "repo": null,
+            "sc": null,
+            "scope": null,
+            "source_file": "spec.md",
+            "title": "Repo-wide no-user-visible-literal gate (open, cross-cutting constraint)",
+            "verdict": "deferred-with-followup",
+            "wp": "WP01"
+        },
+        "#300": {
+            "evidence_ref": "No work owed directly. #300 is the Family 4 component-gap-audit epic that #303 (this mission's own issue) is Gap G2 of (spec.md:6, research.md:4). This mission closes only #303's WP01, not the epic itself, which tracks additional gaps across other missions (see plan.md:125 Family 6 coordination note). No followup owed by this WP; #300 stays open at the epic level.",
+            "fr": null,
+            "nfr": null,
+            "repo": null,
+            "sc": null,
+            "scope": null,
+            "source_file": "spec.md",
+            "title": "Family 4 component-gap audit (epic; #303 is its Gap G2)",
+            "verdict": "deferred-with-followup",
+            "wp": "WP01"
+        },
+        "#302": {
+            "evidence_ref": "#302 (pill-tag status-tone axis) already shipped and verified directly against packages/styles/src/pill-tag/sk-pill-tag.css: all six .sk-pill-tag--status-<tone> rules present (lines 104-131). This mission composes it unmodified per FR-005/research.md Decision 2, and after this WP's HIGH-1 fix uses the actual shipped styles-layer form <span class=\"sk-pill-tag sk-pill-tag--status-<tone>\">, not the inert host-attribute form the exemplars previously authored.",
+            "fr": "FR-005",
+            "nfr": null,
+            "repo": null,
+            "sc": null,
+            "scope": null,
+            "source_file": "spec.md",
+            "title": "sk-pill-tag status-tone axis (pill-tag-status-tone-axis-01M25AVP)",
+            "verdict": "verified-already-fixed",
+            "wp": "WP01"
+        },
+        "#303": {
+            "evidence_ref": "Self-reference: #303 IS this mission's own tracked issue (spec.md subject, this WP's implementation target). WP01 implements the sk-boundary-page styles-only frame that #303 requests; see packages/styles/src/boundary-page/ and the PR that closes #303 directly. Not a dependency on other work \u2014 the row exists only because the issue matrix scraper picks up the mission's own issue number wherever it is cited in spec.md/plan.md/research.md/tasks/*.md.",
+            "fr": null,
+            "nfr": null,
+            "repo": null,
+            "sc": null,
+            "scope": null,
+            "source_file": "spec.md",
+            "title": "sk-boundary-page styles-only frame (this mission's own issue)",
+            "verdict": "fixed",
+            "wp": "WP01"
+        },
+        "#304": {
+            "evidence_ref": "#304 (entity-marker size/shape/border axis) already shipped and verified directly against packages/styles/src/entity-marker/sk-entity-marker.css (--sm/--lg/--circle/--bordered rules present). This mission composes <sk-entity-marker> unmodified per FR-004/research.md Decision 2, with explicit border=\"true\" in every exemplar (never the bare border attribute's known ergonomic gap).",
+            "fr": "FR-004",
+            "nfr": null,
+            "repo": null,
+            "sc": null,
+            "scope": null,
+            "source_file": "spec.md",
+            "title": "sk-entity-marker size/shape/border axis (entity-marker-size-border-image-axis-01M25AVQ)",
+            "verdict": "verified-already-fixed",
+            "wp": "WP01"
+        },
+        "#305": {
+            "evidence_ref": "No work owed by this WP; #305 (sk-button busy axis) is cited only as the source of a defect-pattern precedent \u2014 'visual baselines shipped as a gate over zero real coverage' (plan.md:320, research.md:258/272/306/322/328, tasks/WP01-boundary-page-styles.md:603) \u2014 that this WP's OWN absence-of-mark and footnote guards are written to avoid repeating (see sk-boundary-page-absence.spec.ts's absolute geometry assertions). #305 itself is unrelated component work already shipped on the train; this mission touches none of its files.",
+            "fr": null,
+            "nfr": null,
+            "repo": null,
+            "sc": null,
+            "scope": null,
+            "source_file": "research.md",
+            "title": "Visual-baseline-over-zero-coverage defect pattern precedent (#305/FR-015, prior-art citation only)",
+            "verdict": "deferred-with-followup",
+            "wp": "WP01"
+        },
+        "#308": {
+            "evidence_ref": "#308 (display:flex with no [open] qualifier, missed by 602 tests) was a defect in its own component, already fixed there prior to this mission. Cited here only as the precedent apps/storybook/src/tests/sk-boundary-page-absence.spec.ts guards against recurrence of in sk-boundary-page. Per MEDIUM-3 of this review-remediation pass, the mark's absence now also carries a real computed-geometry (absolute, not merely presence-boolean) assertion mirroring the footnote's, with red-then-green mutation proof, closing the gap the review found in the original guard.",
+            "fr": "FR-006",
+            "nfr": null,
+            "repo": null,
+            "sc": null,
+            "scope": null,
+            "source_file": "spec.md",
+            "title": "Absence-of-child defect precedent: display:flex with no [open] qualifier, missed by 602 tests",
+            "verdict": "verified-already-fixed",
+            "wp": "WP01"
+        },
+        "#314": {
+            "evidence_ref": "No work owed. #314 is the open cross-sheet ::part() question that spec C-005/FR-016 leaves undecided (research.md:49). This mission adds zero ::part() selectors targeting sk-entity-marker or sk-pill-tag, verified by sk-boundary-page-responsive.spec.ts's dedicated 'no ::part()' assertion (spec SC-010). No followup is intended by this WP; #314 remains open for whoever resolves it.",
+            "fr": "FR-016",
+            "nfr": null,
+            "repo": null,
+            "sc": null,
+            "scope": null,
+            "source_file": "spec.md",
+            "title": "Cross-sheet ::part() reach into composed components' shadow internals (open, undecided)",
+            "verdict": "deferred-with-followup",
+            "wp": "WP01"
+        }
     },
-    "#300": {
-      "evidence_ref": "No work owed directly. #300 is the Family 4 component-gap-audit epic that #303 (this mission's own issue) is Gap G2 of (spec.md:6, research.md:4). This mission closes only #303's WP01, not the epic itself, which tracks additional gaps across other missions (see plan.md:125 Family 6 coordination note). No followup owed by this WP; #300 stays open at the epic level.",
-      "fr": null,
-      "nfr": null,
-      "repo": null,
-      "sc": null,
-      "scope": null,
-      "source_file": "spec.md",
-      "title": "Family 4 component-gap audit (epic; #303 is its Gap G2)",
-      "verdict": "deferred-with-followup",
-      "wp": "WP01"
-    },
-    "#302": {
-      "evidence_ref": "#302 (pill-tag status-tone axis) already shipped and verified directly against packages/styles/src/pill-tag/sk-pill-tag.css: all six .sk-pill-tag--status-<tone> rules present (lines 104-131). This mission composes it unmodified per FR-005/research.md Decision 2, and after this WP's HIGH-1 fix uses the actual shipped styles-layer form <span class=\"sk-pill-tag sk-pill-tag--status-<tone>\">, not the inert host-attribute form the exemplars previously authored.",
-      "fr": "FR-005",
-      "nfr": null,
-      "repo": null,
-      "sc": null,
-      "scope": null,
-      "source_file": "spec.md",
-      "title": "sk-pill-tag status-tone axis (pill-tag-status-tone-axis-01M25AVP)",
-      "verdict": "verified-already-fixed",
-      "wp": "WP01"
-    },
-    "#304": {
-      "evidence_ref": "#304 (entity-marker size/shape/border axis) already shipped and verified directly against packages/styles/src/entity-marker/sk-entity-marker.css (--sm/--lg/--circle/--bordered rules present). This mission composes <sk-entity-marker> unmodified per FR-004/research.md Decision 2, with explicit border=\"true\" in every exemplar (never the bare border attribute's known ergonomic gap).",
-      "fr": "FR-004",
-      "nfr": null,
-      "repo": null,
-      "sc": null,
-      "scope": null,
-      "source_file": "spec.md",
-      "title": "sk-entity-marker size/shape/border axis (entity-marker-size-border-image-axis-01M25AVQ)",
-      "verdict": "verified-already-fixed",
-      "wp": "WP01"
-    },
-    "#308": {
-      "evidence_ref": "#308 (display:flex with no [open] qualifier, missed by 602 tests) was a defect in its own component, already fixed there prior to this mission. Cited here only as the precedent apps/storybook/src/tests/sk-boundary-page-absence.spec.ts guards against recurrence of in sk-boundary-page. Per MEDIUM-3 of this review-remediation pass, the mark's absence now also carries a real computed-geometry (absolute, not merely presence-boolean) assertion mirroring the footnote's, with red-then-green mutation proof, closing the gap the review found in the original guard.",
-      "fr": "FR-006",
-      "nfr": null,
-      "repo": null,
-      "sc": null,
-      "scope": null,
-      "source_file": "spec.md",
-      "title": "Absence-of-child defect precedent: display:flex with no [open] qualifier, missed by 602 tests",
-      "verdict": "verified-already-fixed",
-      "wp": "WP01"
-    },
-    "#314": {
-      "evidence_ref": "No work owed. #314 is the open cross-sheet ::part() question that spec C-005/FR-016 leaves undecided (research.md:49). This mission adds zero ::part() selectors targeting sk-entity-marker or sk-pill-tag, verified by sk-boundary-page-responsive.spec.ts's dedicated 'no ::part()' assertion (spec SC-010). No followup is intended by this WP; #314 remains open for whoever resolves it.",
-      "fr": "FR-016",
-      "nfr": null,
-      "repo": null,
-      "sc": null,
-      "scope": null,
-      "source_file": "spec.md",
-      "title": "Cross-sheet ::part() reach into composed components' shadow internals (open, undecided)",
-      "verdict": "deferred-with-followup",
-      "wp": "WP01"
-    }
-  },
-  "schema_version": 1
+    "schema_version": 1
 }

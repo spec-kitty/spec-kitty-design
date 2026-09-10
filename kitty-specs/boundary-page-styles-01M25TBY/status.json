@@ -28,7 +28,8 @@
       "last_transition_at": "2026-09-10T18:09:29.494663+00:00",
       "model": "__resolved_model_absent__",
       "notes": [
-        "reviewer picks up WP01 for review"
+        "reviewer picks up WP01 for review",
+        "WP01 rejected on first review: HIGH-1 inert composed sk-pill-tag modifier class (ruleMatches 0->statusRuleCount 6, fixed via shadow part targeting, commits f48a0d5f/6a2b4c7a/d8e73ddb); HIGH-2 action-group specificity race at (0,1,0) tying .sk-button--primary, split into target-size floor (0,1,1) and legibility/typography reset (0,0,0), commit 256643f2. Both fixes verified; approved on re-review."
       ],
       "provider": "__resolved_provider_absent__",
       "review_result": {
