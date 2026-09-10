@@ -72,6 +72,18 @@
       "verdict": "fixed",
       "wp": "WP01"
     },
+    "#325": {
+      "evidence_ref": "Merged PR #325 is incorporated in base 91a7c8c and removes stale global story-total assertions",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
     "#76": {
       "evidence_ref": "Closed authoring-recipe issue; WP01 followed the current recipe and regenerated all required surfaces",
       "fr": null,
