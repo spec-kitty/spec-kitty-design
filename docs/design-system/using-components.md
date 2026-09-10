@@ -875,8 +875,12 @@ hover underline, so anchors, native buttons and composed controls read as one ro
 three different affordances. A composed `sk-button` variant's own colour — `sk-button--ghost`'s
 `--sk-fg-muted`, for instance — is deliberately overridden inside the header. Those six
 declarations are scoped as `.sk-public-header .sk-public-header__action`, one class more specific
-than a control class, so the normalisation wins **in any stylesheet order and for every element
-type**; you do not have to sequence your `@import`s to get a consistent row. If you want a composed
+than a control class, and the `:hover`/`:active`/`:focus-visible` colour and block-end-border
+resets are scoped one deeper still — a control's own `--ghost:hover { color }` is itself two
+classes, so without that the resting state was order-independent while the hover was not, and
+resolved differently for an `<a>` than for a `<button>`. With both, the normalisation wins **in
+any stylesheet order and for every element type, at rest and in every interactive state**; you do
+not have to sequence your `@import`s to get a consistent row. If you want a composed
 control to keep its own colour, give it your own class rather than removing
 `sk-public-header__action` — that class is what carries the target-size floor.
 
@@ -884,8 +888,9 @@ control to keep its own colour, give it your own class rather than removing
 *host box* only; it cannot reach through a shadow root. A document-tree declaration does beat a
 shadow-tree `:host` rule, so the floor is never inert on the host — but if the element's internal
 control does not fill its host, the extra height becomes non-interactive padding around a smaller
-real target. An element whose `:host` is `inline-flex` inherits the floor through flex stretching;
-one whose `:host` is `block` does not. This obligation belongs to the composed element, and #323
+real target. The obligation is simply that the element's interior control fill its
+host box — whatever its own `:host` display happens to be, since a document-tree declaration
+outranks a shadow-tree `:host` rule either way. It belongs to the composed element, and #323
 carries it for `sk-theme-toggle`.
 
 The consumer supplies `aria-current` on the current route; values other than

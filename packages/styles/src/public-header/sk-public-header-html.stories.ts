@@ -35,7 +35,7 @@ const storyFrame = (
     shortViewport?: boolean;
   } = {},
 ): string => `
-  <div data-public-header-story-frame${light ? ' class="sk-light"' : ''}${rtl ? ' dir="rtl"' : ''} style="box-sizing: border-box; inline-size: calc(100vw - var(--sk-space-8)); max-inline-size: ${narrow ? 'calc(var(--sk-space-10) * 4)' : 'calc(var(--sk-space-12) * 8)'};${shortViewport ? ' block-size: calc(var(--sk-space-12) * 2); overflow-block: auto;' : ''} color: var(--sk-fg-body); background: var(--sk-surface-page);">
+  <div data-public-header-story-frame${light ? ' class="sk-light"' : ''}${rtl ? ' dir="rtl"' : ''} style="box-sizing: border-box; inline-size: calc(100vw - var(--sk-space-8)); max-inline-size: ${narrow ? 'calc(var(--sk-space-10) * 4)' : 'calc(var(--sk-space-12) * 8)'};${shortViewport ? ' block-size: var(--sk-space-10); overflow-block: auto;' : ''} color: var(--sk-fg-body); background: var(--sk-surface-page);">
     ${html}
   </div>
 `;
@@ -91,7 +91,6 @@ export const ThemeToggleComposition: Story = {
 // carry. The Playwright layer sets its own viewport and remains the behavioural proof; this makes
 // the story list honest to a human reviewer opening it.
 export const Narrow: Story = {
-  parameters: { viewport: { defaultViewport: 'mobile1' } },
   render: () => storyFrame(SkPublicHeaderTwoActionsHTML, { narrow: true }),
 };
 

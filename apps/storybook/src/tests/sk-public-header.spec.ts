@@ -798,20 +798,43 @@ test.describe('sk-public-header geometry, state, and resilience contract', () =>
     expect(currentCue.borderBlockEndStyle).not.toBe('none');
     expect(Number.parseFloat(currentCue.borderBlockEndWidth)).toBeGreaterThan(0);
 
-    // The falsifying half: these read values the forced-colors block uniquely determines.
-    // The header band and the current cue must both RECOLOUR under emulation (proving the
-    // `ButtonText`/`Highlight` declarations are reached), and the current action must remain
-    // distinguishable from an ordinary one — the whole point of `Highlight` rather than letting
-    // both collapse to `CanvasText`, which is what a deleted block would produce.
-    const forcedBoundaryColour = boundary.borderColor;
+    // Compare against RESOLVED SYSTEM COLOURS, using the probe pattern
+    // `apps/storybook/src/tests/sk-action-row.spec.ts:231-249` already established.
+    //
+    // An earlier revision of this test asserted only that things "recoloured" under emulation
+    // and called that the falsifying half. It was not: `sk-card.css:202-211` records the #218
+    // ruling that the forced-colors algorithm remaps border colours with ZERO author CSS, so a
+    // mere "it changed" assertion passes whether or not this sheet's block exists. These read the
+    // specific system colour each declaration names, so deleting a declaration changes the value.
+    const system = await header.evaluate(() => {
+      const resolve = (value: string) => {
+        const probe = document.createElement('span');
+        probe.style.color = value;
+        document.body.append(probe);
+        const resolved = getComputedStyle(probe).color;
+        probe.remove();
+        return resolved;
+      };
+      return {
+        buttonText: resolve('ButtonText'),
+        canvasText: resolve('CanvasText'),
+        highlight: resolve('Highlight'),
+      };
+    });
+
+    // #218's question, asked rather than assumed: if these resolve identically then the block's
+    // two `ButtonText` declarations restate what the UA computes anyway and must be DELETED
+    // rather than kept, because a block that reads as the mechanism while doing none of the work
+    // is worse than no block. This assertion makes that fact visible instead of presumed.
+    expect(
+      system.buttonText,
+      '#218: ButtonText must differ from CanvasText, or the boundary declarations are no-ops',
+    ).not.toBe(system.canvasText);
+
     const forcedCurrentColour = await borderBlockEndColour(current);
-    const forcedOrdinaryColour = await borderBlockEndColour(
-      header.locator('.sk-public-header__action:not([aria-current])').first(),
-    );
-    expect(forcedBoundaryColour).not.toBe(plainBoundaryColour);
-    expect(forcedCurrentColour).not.toBe(plainCurrentColour);
+    expect(boundary.borderColor, 'header band uses ButtonText').toBe(system.buttonText);
+    expect(forcedCurrentColour, 'current cue uses Highlight').toBe(system.highlight);
     expect(plainCurrentColour).not.toBe(plainOrdinaryColour);
-    expect(forcedCurrentColour).not.toBe(forcedOrdinaryColour);
 
     await page.evaluate(() =>
       (document.activeElement as HTMLElement | null)?.blur(),

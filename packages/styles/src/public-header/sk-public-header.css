@@ -107,6 +107,22 @@
   color: inherit;
 }
 
+/* THE STATES NEED THE SAME SCOPING, and the first revision of this fix missed them.
+   `.sk-button--ghost:hover { color }` and `.sk-button--secondary:hover { border-color }` are
+   themselves (0,2,0) — equal to the resting rule above, so order decided again. And it decided
+   ASYMMETRICALLY for the same reason as before: an <a> stays inherited because the `:link` rule
+   is (0,3,0) and still matches while hovered, while an adjacent <button> does not match `:link`
+   at all and took the control's hover colour. That is the exact defect the resting fix was
+   written to remove, surviving one pseudo-class deeper. At (0,3,0) these win outright.
+   Deliberately BEFORE the `[aria-current]` rule, which is also (0,3,0): the current-route cue
+   must still beat a hover, and equal specificity is resolved by order. */
+.sk-public-header .sk-public-header__action:hover,
+.sk-public-header .sk-public-header__action:active,
+.sk-public-header .sk-public-header__action:focus-visible {
+  color: inherit;
+  border-block-end-color: transparent;
+}
+
 .sk-public-header__action:hover {
   text-decoration-line: underline;
   text-decoration-style: solid;
