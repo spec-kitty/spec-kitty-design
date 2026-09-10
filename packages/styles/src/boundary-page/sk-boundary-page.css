@@ -243,7 +243,26 @@
       C-003 category HIGH-2 closed for colour, relocated to typography. `min-block-size: 48px`
       already guarantees FR-013 independently of font metrics, so `font: inherit` was always a
       normalisation convenience for a BARE, unclassed action, never a floor a consumer class
-      should have to lose to. */
+      should have to lose to.
+
+   #356 DECISION (deliberate, not implicit): the frame's action contract is `<a>` OR
+   `<button>` — never any other interactive markup. A `<span role="button" tabindex="0">`
+   composed as an action does NOT receive the target-size floor below (measured: it computed
+   `min-block-size: auto`, `padding-inline: 0px`; the 48px it appeared to have in the
+   `several-actions` exemplar was incidental flex-stretch from the action-group's own
+   cross-axis, not this rule). This is the existing shape of EVERY rule in this remediation,
+   not a new restriction invented for #356: the legibility floor and the typography reset two
+   rules below are already scoped to the identical `a, button` pair, and `spec.md`'s FR-013
+   row and its own Edge Cases section now state this contract explicitly rather than leaving
+   it implicit. `> *` was considered and rejected: a universal selector cannot reach (0,1,1) —
+   `*` itself contributes zero specificity (UNCOUNTED per the CSS Selectors spec), so
+   `.sk-boundary-page__action-group > *` is (0,1,0), identical to a single consumer class, the
+   exact defect #356 reports), and widening the ELEMENT list to catch arbitrary interactive
+   roles (`[role="button"]`, `[tabindex]`) would reach past this frame's own anatomy and risk
+   matching a consumer's non-action content that merely happens to sit inside the
+   action-group. A screen author who needs a `role="button"` action composes a real `<button>`
+   instead — the WCAG target-size floor a `<span>` would need is exactly what `<button>`
+   already gets for free. */
 .sk-boundary-page__action-group > :is(a, button) {
   box-sizing: border-box;
   display: inline-flex;
@@ -312,7 +331,18 @@
     align-items: stretch;
   }
 
-  .sk-boundary-page__action-group > * {
+  /* #356(b): was `.sk-boundary-page__action-group > *`, (0,1,0) — identical to a consumer's
+     own single class (e.g. `.sk-button`, also (0,1,0)), so import order silently decided
+     whether the narrow-width full-width layout actually won. The C-003 remediation's own
+     principle (see that comment, above the base target-size rule) is that a floor like this
+     gets an ORDER-INDEPENDENT specificity; it was applied to the target-size floor but missed
+     here. Matching #356(a)'s decision (the frame's action contract is `<a>`/`<button>` only):
+     `> :is(a, button)` carries the element selector's own specificity, (0,1,1), strictly
+     ABOVE any single consumer class, so it wins regardless of source order — the identical
+     treatment as `.sk-boundary-page__action-group > :is(a, button)`'s target-size rule above,
+     not the `:where()`-zeroed legibility/typography rule, because a consumer's own visual
+     styling must not be able to silently undo the narrow-width full-width layout either. */
+  .sk-boundary-page__action-group > :is(a, button) {
     inline-size: 100%;
   }
 }
