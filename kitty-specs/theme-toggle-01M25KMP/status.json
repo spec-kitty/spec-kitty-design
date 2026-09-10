@@ -19,7 +19,7 @@
   "work_packages": {
     "WP01": {
       "actor": "codex",
-      "agent": null,
+      "agent": "codex",
       "agent_profile": "__resolved_profile_absent__",
       "agent_profile_version": "__resolved_profile_version_absent__",
       "assignee": "codex",
@@ -39,7 +39,8 @@
         "Adversarial cleanup-ownership remediation complete; focused red/green and typechecks passed",
         "Adversarial architecture pass 2 rejected exact HEAD 5f5a800e for order-dependent global theme story cleanup.",
         "Fresh Codex remediation turn for adversarial review cycle 4.",
-        "Cycle-4 remediation complete at 8d21f62b; full npm test 665/665 and focused overlap tests 2/2."
+        "Cycle-4 remediation complete at 8d21f62b; full npm test 665/665 and focused overlap tests 2/2.",
+        "Fresh Codex frontend-freddy seat, invocation 01M268WA2VXGM1DX4X0RBE56T3; cycle 5 bounded exact axe transient retry"
       ],
       "provider": "__resolved_provider_absent__",
       "review": null,
