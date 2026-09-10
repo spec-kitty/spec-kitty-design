@@ -1,16 +1,86 @@
 ---
-work_package_id: "WP01"
-title: "sk-button danger-secondary axis: source, proofs, ratchets"
+work_package_id: WP01
+title: 'sk-button danger-secondary axis: source, proofs, ratchets'
 dependencies: []
-requirement_refs: ["FR-001", "FR-002", "FR-003", "FR-004", "FR-005", "FR-006", "FR-007", "FR-008", "FR-009", "FR-010", "FR-011", "FR-012", "FR-013", "FR-014", "FR-015", "FR-016", "FR-017", "FR-018", "FR-019", "FR-020", "FR-021", "FR-022", "NFR-001", "NFR-002", "NFR-003", "NFR-004", "NFR-005", "NFR-006", "C-001", "C-002", "C-003", "C-004", "C-005", "C-006", "C-007", "C-008", "C-009", "C-010", "C-011", "C-012"]
-subtasks: ["T001", "T002", "T003", "T004", "T005", "T006", "T007", "T008"]
-owned_files: ["packages/styles/src/button/sk-button.css", "packages/styles/src/button/sk-button.html", "packages/styles/src/button/index.ts", "packages/styles/src/button/sk-button-html.stories.ts", "packages/elements/src/button/sk-button.markup.ts", "packages/elements/src/button/sk-button.ts", "packages/elements/src/button/sk-button.css.js", "packages/elements/src/button/sk-button.css.d.ts", "packages/elements/src/button/sk-button.stories.ts", "packages/react/src/**", "packages/elements/vue.d.ts", "packages/elements/custom-elements.json", "packages/elements/SIZES.md", "fixtures/elements-behaviour/src/sk-button.test.ts", "apps/storybook/src/tests/elements-load.spec.ts", "docs/design-system/using-components.md"]
-authoritative_surface: "packages/styles/src/button/"
-execution_mode: "code_change"
-agent_profile: "frontend-freddy"
-role: "implementer"
-agent: "claude"
-model: ""
+requirement_refs:
+- FR-001
+- FR-002
+- FR-003
+- FR-004
+- FR-005
+- FR-006
+- FR-007
+- FR-008
+- FR-009
+- FR-010
+- FR-011
+- FR-012
+- FR-013
+- FR-014
+- FR-015
+- FR-016
+- FR-017
+- FR-018
+- FR-019
+- FR-020
+- FR-021
+- FR-022
+- NFR-001
+- NFR-002
+- NFR-003
+- NFR-004
+- NFR-005
+- NFR-006
+- C-001
+- C-002
+- C-003
+- C-004
+- C-005
+- C-006
+- C-007
+- C-008
+- C-009
+- C-010
+- C-011
+- C-012
+planning_base_branch: mission/button-danger-secondary-axis
+merge_target_branch: mission/button-danger-secondary-axis
+branch_strategy: Planning artifacts for this mission were generated on mission/button-danger-secondary-axis. During /spec-kitty.implement this WP may branch from a dependency-specific base, but completed changes must merge back into mission/button-danger-secondary-axis unless the human explicitly redirects the landing branch.
+subtasks:
+- T001
+- T002
+- T003
+- T004
+- T005
+- T006
+- T007
+- T008
+history: []
+agent_profile: frontend-freddy
+authoritative_surface: packages/styles/src/button/
+create_intent: []
+execution_mode: code_change
+model: ''
+owned_files:
+- packages/styles/src/button/sk-button.css
+- packages/styles/src/button/sk-button.html
+- packages/styles/src/button/index.ts
+- packages/styles/src/button/sk-button-html.stories.ts
+- packages/elements/src/button/sk-button.markup.ts
+- packages/elements/src/button/sk-button.ts
+- packages/elements/src/button/sk-button.css.js
+- packages/elements/src/button/sk-button.css.d.ts
+- packages/elements/src/button/sk-button.stories.ts
+- packages/react/src/**
+- packages/elements/vue.d.ts
+- packages/elements/custom-elements.json
+- packages/elements/SIZES.md
+- fixtures/elements-behaviour/src/sk-button.test.ts
+- apps/storybook/src/tests/elements-load.spec.ts
+- docs/design-system/using-components.md
+role: implementer
+tags: []
+tracker_refs: []
 ---
 
 # WP01 — sk-button danger-secondary axis: source, proofs, ratchets
