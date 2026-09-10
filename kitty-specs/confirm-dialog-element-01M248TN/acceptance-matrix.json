@@ -68,10 +68,10 @@
       "criterion_id": "FR-007",
       "description": "Verify FR-007 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "fixtures/elements-behaviour/src/sk-confirm-dialog.test.ts \u2014 \"[SC-007] Escape resolves \\\"cancel\\\" even immediately after a prior confirming close\", \"[SC-007] backdrop dismissal resolves \\\"cancel\\\", and only when enabled\", \"[SC-007] a click inside the dialog content never dismisses, even with backdrop-dismiss enabled\", and \"[SC-007] a programmatic close with no explicit outcome resolves \\\"cancel\\\", never an invented \\\"confirm\\\"\" all pass in the 20/20 run, covering every dismissal path named in the FR.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T09:44:48.174346+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
