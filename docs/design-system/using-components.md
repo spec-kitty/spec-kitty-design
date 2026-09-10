@@ -224,6 +224,35 @@ snapshot/retention message that needs announcement semantics; do not create a lo
 is intentionally no `sk-work-package-card`, Work Package page element, stateful Kanban component,
 checklist control, or execution panel.
 
+## CLI auth pattern
+
+The Storybook `Patterns/CLI Auth` family (spec-kitty/spec-kitty-design#329) demonstrates four
+canonical CLI/device-authorization states — code entry, review and decide, terminal
+success/denial, and terminal error — as composition and accessibility evidence, not a published
+page component and not a replica of all twelve Family 5 screens. Story 1 composes one native
+`<form>` with a labelled `sk-form-input` and one `sk-button` primary. Story 2 composes `sk-card`,
+native `.sk-facts`, one `sk-pill-tag` per supplied scope, and Approve/Deny inside one native
+`<form>`, DOM order Approve-then-Deny.
+
+**Status at authoring time**: Story 2's Deny action ships as a plain `sk-button` secondary tone,
+pending `#320`'s danger-secondary tone landing on `train/elements-first`. Stories 3 and 4 render a
+documented pending shell rather than any composition — `#303`'s `sk-boundary-page` public frame
+does not exist yet, and no local frame, stage, or "boundary" substitute was built in its place.
+Story 1's target-size and contrast evidence is pending `#321`'s landed fix to the current
+`.sk-input`/`sk-form-field` contract. A later work package finalizes all three once their
+dependencies land and this lane rebases onto the train commits that carry them; check `#320`,
+`#321`, and `#303` for current status before relying on any of the three.
+
+One deeply frozen fixture (`packages/elements/src/patterns/cli-auth.fixture.ts`) owns every
+label, description, fact, scope, status heading/body, and action value across all four stories —
+nothing is a component default. What the pattern does NOT own, and stays entirely the consuming
+application's: route/navigation, permission and session state, validation logic (the invalid
+code-entry story demonstrates the wiring — `aria-invalid`, an associated announced error — with a
+fixture-supplied message, not a real validation rule), form submission, confirmation, copy and
+localization, and terminal-state selection (choosing success vs. denied vs. error is the
+consumer's decision, not something this pattern infers). There is intentionally no `auth-card`,
+auth-shell, `scope-chip`, or `form-action-row` component, and no second boundary/stage frame.
+
 ## Application shell composition
 
 The shell elements supply layout and landmarks while the consumer supplies destinations, state,
