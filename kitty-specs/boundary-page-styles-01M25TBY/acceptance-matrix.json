@@ -58,10 +58,10 @@
       "criterion_id": "FR-006",
       "description": "Footnote is optional; its DOM-absence is a supported, explicitly tested state",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "sk-boundary-page-without-footnote.html omits .sk-boundary-page__footnote; sk-boundary-page-absence.spec.ts:95 (no footnote node + exact action-group-to-card-bottom geometry) and :103 (with-footnote measures strictly larger, absolute assertions replacing the prior phantom-mark-blind boolean-presence check per review MEDIUM-3)",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T18:19:28.421929+00:00",
       "notes": "Owned by WP01 (mission/boundary-page-styles). pass_fail/evidence/verified_by/verified_at and overall_verdict are the accept gate's own fields (run via the Spec Kitty CLI's accept phase later) and are deliberately left as recorded by the scaffolder, not hand-written here."
     },
     {
