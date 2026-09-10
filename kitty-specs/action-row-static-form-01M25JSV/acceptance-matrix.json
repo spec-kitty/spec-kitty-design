@@ -58,10 +58,10 @@
       "criterion_id": "FR-006",
       "description": "Verify FR-006 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
+      "evidence": "fixtures/elements-behaviour/src/sk-action-row.test.ts:1063 test [T005][FR-006][FR-007] 'trailing controls are a DOM sibling of the trigger, never a descendant, across every generated exemplar' \u2014 passing",
+      "pass_fail": "pass",
       "verified_by": null,
-      "verified_at": null,
+      "verified_at": "2026-09-10T14:07:10.598174+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
