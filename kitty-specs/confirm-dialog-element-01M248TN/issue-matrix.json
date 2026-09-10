@@ -37,7 +37,7 @@
       "wp": "WP01"
     },
     "#300": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "Epic #300 (Family 4 component-gap audit) is this mission's parent epic (gap G7); epic-level tracking and closure remain owned by the epic itself, not by this single WP. WP01 satisfies epic #300's shared constraint 4 (no Team/membership/invitation/session domain model, FR-015).",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -45,8 +45,8 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
     },
     "#301": {
       "evidence_ref": "<link or commit>",
