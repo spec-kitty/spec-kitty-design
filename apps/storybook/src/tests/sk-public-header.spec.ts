@@ -568,9 +568,15 @@ test.describe('sk-public-header geometry, state, and resilience contract', () =>
   test('long labels remain visible and wrap without clipping', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 900 });
     const { header } = await openStory(page, 'long-labels');
-    for (const node of await header
-      .locator('.sk-public-header__brand, .sk-public-header__action')
-      .all()) {
+    const wrapping = header.locator('.sk-public-header__brand, .sk-public-header__action');
+    // Same non-vacuity guard the target-size test carries: an empty selector set makes every
+    // assertion in the loop below pass without measuring anything, so a future fixture edit
+    // could silently reduce this test to a no-op.
+    expect(
+      await wrapping.count(),
+      'long-labels has wrapping candidates to measure',
+    ).toBeGreaterThan(0);
+    for (const node of await wrapping.all()) {
       const text = (await node.innerText()).trim();
       const facts = await node.evaluate((element) => ({
         horizontalClip: element.scrollWidth > element.clientWidth + 1,
