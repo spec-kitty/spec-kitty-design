@@ -122,15 +122,62 @@ test.describe('sk-boundary-page heading/landmark contract (spec SC-004, US1 AS3)
   }
 });
 
+// #365(c): the DOM-order-equals-visual-order premise below rests on "nothing reorders
+// content" — no `order`, no `position: absolute`, no negative `tabindex`. The `position`/
+// `tabindex` halves were already true by construction (this file's own heading/landmark and
+// no-extra-tab-stop assertions would have caught either), but `order` had never been measured
+// anywhere in this mission's four spec files — a source-text grep couldn't have covered it
+// either, since `order` is a legitimate flex property this file simply never happens to use;
+// only a computed-style read proves that. Measured directly, in every browser project, on
+// every anatomy part that is ever a flex ITEM, before the focus-order test below leans on it.
+test.describe('sk-boundary-page nothing reorders content (spec SC-004 premise, backs the focus-order test below)', () => {
+  test('every anatomy part computes the initial `order: 0` in the form-card story', async ({ page }) => {
+    await openStory(page, 'form-card');
+    const orders = await page.evaluate(() => {
+      const selectors = [
+        '.sk-boundary-page__mark',
+        '.sk-boundary-page__title',
+        '.sk-boundary-page__body',
+        '.sk-boundary-page__action-group',
+        '.sk-boundary-page__footnote',
+      ];
+      return selectors
+        .map((selector) => document.querySelector<HTMLElement>(selector))
+        .filter((el): el is HTMLElement => el !== null)
+        .map((el) => getComputedStyle(el).order);
+    });
+    expect(orders.length).toBeGreaterThan(0);
+    for (const order of orders) {
+      expect(order).toBe('0');
+    }
+  });
+
+  test('every direct child of the action-group also computes the initial `order: 0`, in the several-actions story', async ({
+    page,
+  }) => {
+    await openStory(page, 'several-actions');
+    const orders = await page.evaluate(() =>
+      Array.from(document.querySelectorAll<HTMLElement>('.sk-boundary-page__action-group > *')).map(
+        (el) => getComputedStyle(el).order,
+      ),
+    );
+    expect(orders.length).toBeGreaterThan(1);
+    for (const order of orders) {
+      expect(order).toBe('0');
+    }
+  });
+});
+
 /**
  * Reads the DOM's own focusable-element order (a[href], button, input, select, textarea, not
  * disabled) — this is also the VISUAL order for every story, because nothing in this frame's CSS
- * reorders content (no `order`, no `position: absolute` pulling an element out of flow, no
- * negative `tabindex`; sk-boundary-page-responsive.spec.ts's own logical-properties test already
- * proves no physical-property tricks exist). Comparing this list's length AND per-step identity
- * against a real Tab-key walk proves both "focus order matches visual order" and "no extra tab
- * stops" at once: an extra stop would land the Nth press on the wrong element (never reaching the
- * real Nth item on schedule), and a missing one would do the same in the other direction.
+ * reorders content (no `order` — measured directly above, no `position: absolute` pulling an
+ * element out of flow, no negative `tabindex`; sk-boundary-page-responsive.spec.ts's own
+ * logical-properties test covers the physical-property half). Comparing this list's length AND
+ * per-step identity against a real Tab-key walk proves both "focus order matches visual order"
+ * and "no extra tab stops" at once: an extra stop would land the Nth press on the wrong element
+ * (never reaching the real Nth item on schedule), and a missing one would do the same in the
+ * other direction.
  */
 const focusableSignature = (page: Page) =>
   page.evaluate(() => {

@@ -138,14 +138,25 @@ test.describe('sk-boundary-page reduced motion (spec FR-012) — asserted, not a
 });
 
 test.describe('sk-boundary-page logical properties only (spec FR-010)', () => {
-  test('the source CSS declares no physical left/right/top/bottom/width/height property', () => {
+  // #365(c): this is a SOURCE-TEXT check only — it proves the CSS never spells a physical
+  // property name, not that logical properties actually mirror correctly under `dir="rtl"`
+  // in the browser (the 'several-actions action-group order mirrors under dir="rtl"' test
+  // below is the DOM counterpart that establishes THAT). Titled to what a single-file regex
+  // can actually establish, rather than implying it alone proves RTL correctness.
+  test('the source CSS text contains no physical left/right/top/bottom/width/height property declaration', () => {
     const css = readCssRules();
     expect(css).not.toMatch(/(?<![-a-z])(left|right|top|bottom)\s*:/i);
     expect(css).not.toMatch(/(?<![-a-z])width\s*:/i);
     expect(css).not.toMatch(/(?<![-a-z])height\s*:/i);
   });
 
-  test('the source CSS never writes a `::part()` selector reaching sk-entity-marker or sk-pill-tag (spec C-005)', () => {
+  // #365(c): narrowed from "...reaching sk-entity-marker or sk-pill-tag" — a regex over THIS
+  // file alone can only prove sk-boundary-page.css itself writes no `::part()` selector; it
+  // establishes nothing about what sk-entity-marker.css or sk-pill-tag.css do in their OWN
+  // files, so a title claiming reach into those components overclaimed what a single-file
+  // grep can deliver. The real claim (spec C-005/FR-016): this file leaves the #314
+  // cross-sheet `::part()` question undecided by never writing one itself.
+  test('the source CSS never writes a `::part()` selector at all (spec C-005/FR-016)', () => {
     const css = readCssRules();
     expect(css).not.toMatch(/::part\(/);
   });
@@ -180,13 +191,15 @@ test.describe('sk-boundary-page logical properties only (spec FR-010)', () => {
 test.describe('sk-boundary-page theming (MEDIUM-H, pre-merge squad finding)', () => {
   /**
    * sk-boundary-page-html.stories.ts's LightMode doc comment claims this file "verifies a
-   * computed value genuinely differs between this and Default" — no such test existed before
-   * this one. Follows sk-progress.spec.ts's own LightMode pattern (FR-011): sample tokens that
-   * actually have a `.sk-light` override in packages/tokens/src/tokens.css
-   * (`--sk-surface-card`, `--sk-fg-default`) rather than assuming the wrapper does anything —
-   * the #93 inert-theme-wrapper defect class this guards against.
+   * computed value genuinely differs between this and the dark FormCard baseline" — no such
+   * test existed before this one. Follows sk-progress.spec.ts's own LightMode pattern
+   * (FR-011): sample tokens that actually have a `.sk-light` override in
+   * packages/tokens/src/tokens.css (`--sk-surface-card`, `--sk-fg-default`) rather than
+   * assuming the wrapper does anything — the #93 inert-theme-wrapper defect class this guards
+   * against. (#365: this opened the now-removed byte-identical `default` story id — a decoy
+   * of FormCard with no exemplar of its own — repointed to `form-card`, its real content.)
    */
-  test('LightMode resolves genuinely different computed card background and title color than Default', async ({ page }) => {
+  test('LightMode resolves genuinely different computed card background and title color than the dark FormCard baseline', async ({ page }) => {
     const themedStyles = async (story: string) => {
       await openStory(page, story);
       return page.evaluate(() => {
@@ -199,7 +212,7 @@ test.describe('sk-boundary-page theming (MEDIUM-H, pre-merge squad finding)', ()
       });
     };
 
-    const dark = await themedStyles('default');
+    const dark = await themedStyles('form-card');
     const light = await themedStyles('light-mode');
 
     expect(light.cardBackground).not.toBe(dark.cardBackground);

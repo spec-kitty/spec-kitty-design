@@ -110,3 +110,76 @@ test.describe('sk-boundary-page composed status pill actually renders its author
     });
   }
 });
+
+// #365(b), the named #304 trap: sk-entity-marker's `border` property is a validated String
+// enum (only "true" is legal), never a native Boolean — packages/elements/src/entity-marker/
+// sk-entity-marker.ts's own comment records why (FR-011 needs a warn-and-fall-open invalid
+// state, which a Lit `type: Boolean` property cannot represent). A BARE `<sk-entity-marker
+// border>` (no value) reflects the attribute as `""`, `entityMarkerBorder("")` treats that as
+// "absent" per its own `value !== ''` guard, and the marker renders UNBORDERED — silently,
+// with no console.warn, unlike every OTHER invalid value on this axis. Every boundary-page
+// exemplar that composes a mark uses the explicit `border="true"` form (sk-boundary-page-form-
+// card.html's own comment names this exact trap) — but until now nothing in this mission's
+// four spec files ever measured that `border="true"` genuinely renders a border, or that the
+// bare form genuinely does not. Both measured directly via the marker's own shadow `[part=
+// "marker"]` computed border, never a light-DOM attribute or a class-string match.
+test.describe('sk-boundary-page composed sk-entity-marker border modifier actually renders (spec FR-004, #304 trap)', () => {
+  test('the form-card story composes border="true" and its sk-entity-marker genuinely renders a border', async ({
+    page,
+  }) => {
+    await openStory(page, 'form-card');
+    const marker = page.locator('.sk-boundary-page__mark sk-entity-marker').first();
+    await expect(marker).toHaveAttribute('border', 'true');
+    const measured = await marker.evaluate((element) => {
+      const part = element.shadowRoot!.querySelector<HTMLElement>('[part="marker"]')!;
+      const style = getComputedStyle(part);
+      return { borderStyle: style.borderStyle, borderWidth: parseFloat(style.borderWidth) };
+    });
+    expect(measured.borderStyle).toBe('solid');
+    expect(measured.borderWidth).toBeGreaterThan(0);
+  });
+
+  test('a bare border attribute (no value) silently renders unbordered, unlike border="true" — proving the #304 trap rather than transcribing it', async ({
+    page,
+  }) => {
+    // Any page with the elements bundle loaded works; form-card already has one composed.
+    await openStory(page, 'form-card');
+    const measured = await page.evaluate(() => {
+      const makeMarker = (borderValue: string) => {
+        const el = document.createElement('sk-entity-marker');
+        el.setAttribute('border', borderValue);
+        document.body.appendChild(el);
+        return el;
+      };
+      const waitForPart = (el: Element) =>
+        new Promise<HTMLElement>((resolve) => {
+          const check = () => {
+            const part = el.shadowRoot?.querySelector<HTMLElement>('[part="marker"]');
+            if (part) resolve(part);
+            else requestAnimationFrame(check);
+          };
+          check();
+        });
+
+      const bare = makeMarker(''); // <sk-entity-marker border> in real HTML
+      const trueForm = makeMarker('true'); // <sk-entity-marker border="true">
+
+      return Promise.all([waitForPart(bare), waitForPart(trueForm)]).then(([barePart, truePart]) => {
+        const result = {
+          bareBorderStyle: getComputedStyle(barePart).borderStyle,
+          bareBorderWidth: parseFloat(getComputedStyle(barePart).borderWidth),
+          trueBorderStyle: getComputedStyle(truePart).borderStyle,
+          trueBorderWidth: parseFloat(getComputedStyle(truePart).borderWidth),
+        };
+        bare.remove();
+        trueForm.remove();
+        return result;
+      });
+    });
+    // The explicit form genuinely renders bordered — the control for the assertion below.
+    expect(measured.trueBorderStyle).toBe('solid');
+    expect(measured.trueBorderWidth).toBeGreaterThan(0);
+    // The trap: the bare attribute form is indistinguishable from no border attribute at all.
+    expect(measured.bareBorderWidth).toBe(0);
+  });
+});

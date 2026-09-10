@@ -200,6 +200,10 @@ assertion rather than an assumption.
 - SaaS #1281's non-enumerating copy (deliberately vague reason text) placed in `__body` or
   `__footnote` — must render identically to precisely-enumerated copy; the frame draws no
   distinction and imposes no schema.
+- An action composed as `<span role="button" tabindex="0">` instead of `<a>`/`<button>` (#356
+  decision) — this is OUT of the frame's action contract and does not receive the FR-013
+  target-size floor; measured directly (`min-block-size: auto`, `padding-inline: 0px`), not
+  assumed. A screen author needing a `role="button"` action composes a real `<button>` instead.
 
 ## Requirements *(mandatory)*
 
@@ -219,7 +223,7 @@ assertion rather than an assumption.
 | FR-010 | RTL / logical layout | As a screen author on an RTL page, I want every part of the anatomy to mirror correctly via logical properties. | Medium | Open |
 | FR-011 | Forced-colors treatment authored once, border-based | As a screen author, I want the card's edge to remain visible under forced-colors via the established auto-remapped-border convention. | Medium | Open |
 | FR-012 | No motion introduced, and the absence is asserted | As a screen author relying on `prefers-reduced-motion`, I want a test proving the frame introduces no transition/animation, not an assumption. | Medium | Open |
-| FR-013 | Interactive target sizes hold at 44px in the action-group at both required widths | As a screen author, I want every action to remain a usable tap target at narrow and default widths. | High | Open |
+| FR-013 | Interactive target sizes hold at 44px in the action-group's `<a>`/`<button>` children at both required widths | As a screen author, I want every `<a>`/`<button>` action to remain a usable tap target at narrow and default widths. The frame's action contract is `<a>` or `<button>` ONLY (#356 decision) — an action composed as other interactive markup (e.g. `<span role="button" tabindex="0">`) does not receive this floor; a screen author needing a `role="button"` action composes a real `<button>` instead. | High | Open |
 | FR-014 | No user-visible literal, no copy defaults | As a maintainer honoring #286's open cross-cutting constraint, I want the frame to own zero markup generation, so no code path can emit an English string. | High | Open |
 | FR-015 | Team Kitty SaaS #1281's non-enumerating copy stays expressible | As a Team Kitty screen author, I want to write a deliberately vague boundary message with no schema/enum forcing it into a closed vocabulary. | Medium | Open |
 | FR-016 | No `::part()` reach into composed components' shadow internals | As a maintainer, I want this mission to leave #314's cross-sheet `::part()` question undecided rather than pre-empting it. | Medium | Open |
