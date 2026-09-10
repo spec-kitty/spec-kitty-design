@@ -145,10 +145,37 @@ test.describe('sk-input / sk-form-input__control — forced-colors distinguishab
         JSON.stringify({ control: controlPresentation, reference: referencePresentation }),
       );
 
-      // Record both — a native form control's UA-level remap and a generic bordered div's
-      // remap are measured here, not asserted to be identical or different from memory.
-      expect(controlPresentation.borderTopColor.length).toBeGreaterThan(0);
-      expect(referencePresentation.borderTopColor.length).toBeGreaterThan(0);
+      // The comparison this test exists for. Measured (not assumed): under real
+      // forced-colors emulation, `--sk-border-control`'s authored hex is NOT what either
+      // element renders -- both a correctly forced-colors-compliant control and a plain
+      // forced-colors-compliant reference resolve to the SAME UA system colour, because
+      // forced-colors overrides author border-color for both alike. That equality is
+      // exactly the meaningful, catchable assertion: if this control's forced-colors
+      // handling were ever silently disabled (e.g. an author `forced-color-adjust: none`
+      // leaking onto it, or an ancestor value inherited unexpectedly) its resolved colour
+      // would diverge from the reference and stay pinned to the RAW authored hex instead --
+      // measured directly: a control carrying `forced-color-adjust: none` resolves to
+      // `rgb(129, 129, 139)` (the literal --sk-border-control value) here, while every
+      // properly forced-colors-compliant element in this same document resolves to the
+      // same system colour regardless of its own authored hex. Neither reverting the
+      // border to --sk-border-default nor setting it to transparent can pass this: both
+      // still correctly received the SAME forced system colour as the reference (proving
+      // forced-colors itself was never the defect in those cases) -- what this assertion
+      // actually guards is forced-colors compliance surviving on this control specifically,
+      // which is the literal claim FR-008 makes.
+      expect(
+        controlPresentation.borderTopColor,
+        `${name} path: control's forced-colors border colour (${controlPresentation.borderTopColor}) does not match the reference element's forced-colors border colour (${referencePresentation.borderTopColor}) -- forced-colors compliance may be disabled on this control (check for a leaked forced-color-adjust: none) rather than genuinely applied`,
+      ).toBe(referencePresentation.borderTopColor);
+
+      // And the raw authored token must not leak through uncontested -- if it did, forced
+      // colors would be silently inert on this control even though the two assertions
+      // above happened to still read as "present" and "matching something".
+      const rawControlToken = 'rgb(129, 129, 139)'; // --sk-border-control, dark theme
+      expect(
+        controlPresentation.borderTopColor,
+        `${name} path: control's forced-colors border colour is still the raw authored --sk-border-control value -- forced-colors is not overriding it`,
+      ).not.toBe(rawControlToken);
     });
   }
 });
