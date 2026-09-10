@@ -5,12 +5,13 @@
 - Mission ID: `01M25KMPPGYRPHTBZATJG15NWK`
 - Mission branch: `mission/theme-toggle`
 - PR target: `train/elements-first`
-- Current train base SHA: `7032cf7792a83ee20d9fd70ddcfb28a057c72884`
-- Current exact product commit: `3c64c4286b8cc5e1511edb890a59f83640087895`
-- Current exact independently reviewed lifecycle HEAD: `eb77cd52e4445f4f7634ab9171ebc0bf3ac1f29e`
-- Current cycle-eight review-transition HEAD: `c4e74e280ad8c7ea7b6b2ee216515b7e82de1fa7`
-- Current phase: review / fresh cycle-eight review pending
-- Current WP lane: WP01 / `for_review`
+- Current train base SHA: `bab211c9876d85c2c004daf05ef27046bbf0e671`
+- Current exact product commit: `3c6ad6d425aaceb32171843b9f3167473a299c7f`
+- Current exact executable validation HEAD: `9eb4e5950e6bc8a7e4bcec28d496576a2be21b3a`
+- Latest independently approved WP snapshot before the final train rebase:
+  `b8267b70e6654dc2ab519950715abf92a7feb742`
+- Current phase: exact-head validation / pre-accept adversarial point-cut
+- Current WP lane: WP01 / `approved`
 
 ## Seats
 
@@ -31,7 +32,7 @@
   (completed; retained the SSR runtime fallback while restoring the supported constructed-sheet
   browser declaration)
 - WP01 review cycle 1: fresh read-only Codex / `reviewer-renata` (rejected exact HEAD `ab7d4d5a2d055eddf6ef09e227eb9b9062827b58`)
-- WP01 review-cycle-1 remediation: fresh delegated Codex / resolved `frontend-freddy` with implement-scoped doctrine (in progress)
+- WP01 review-cycle-1 remediation: fresh delegated Codex / resolved `frontend-freddy` with implement-scoped doctrine (completed)
 - Final train rebase conflict audit: independent read-only Codex / architecture-and-generated-artifact lens (completed; semantic unions confirmed, CHANGELOG component count corrected)
 - Exact-head ADR-11 mutation remediation: fresh delegated Codex / `debugger-debbie` then `frontend-freddy` (completed; test helper decoupled without changing product code)
 - WP01 review cycle 2: fresh read-only Codex / `reviewer-renata` (approved its exact reviewed snapshot)
@@ -53,6 +54,12 @@
 - WP01 review-cycle-7 remediation: fresh delegated Codex / resolved `frontend-freddy`, Op
   `01M26G61HC68WA7TS6XBDAD2VM` (completed from exact start HEAD `9807f3c9`; generated-size commit
   `7b69e314`; evidence commit `1a56426a`; no product behavior change)
+- WP01 review cycle 8: fresh read-only Codex / resolved `reviewer-renata`, Op
+  `01M26GKAZ8HZG9KNVR7GECRMP0` (approved exact clean pre-rebase HEAD `b8267b70` with
+  no High or Medium findings)
+- Final-rebase mutation infrastructure diagnosis: fresh read-only Codex / resolved
+  `debugger-debbie` (classified unrelated mutation-arm import failures as fail-closed shared
+  runner/host crashes, with an idle-host exact rerun required before acceptance)
 
 ## Review cycles and findings
 
@@ -232,14 +239,56 @@
   commit is `7b69e3140bb14f4d002bcad453583fbf34114a9c`; this evidence-only update follows it. A fresh
   exact-head review remains required before acceptance.
 
+### Third train refresh and exact-head gate snapshot
+
+- Fetched and rebased onto `origin/train/elements-first` at
+  `bab211c9876d85c2c004daf05ef27046bbf0e671`. Shared append-only lifecycle records were unioned
+  and every authored/generated surface was regenerated. A history-only conventional-header
+  normalization then made all 147 mission commits pass the repository's branch-wide commitlint;
+  the tree object remained byte-identical at `c5b8a435c63a4ec95745414c3cefdf3e9be26e1f`.
+  The clean executable validation HEAD is `9eb4e5950e6bc8a7e4bcec28d496576a2be21b3a`.
+- `npm test` and the timed rerun passed 677/677 tests across 51 files (43 Node and 634 Chromium),
+  zero skipped, in 18.6 seconds against the 40-second ADR-11 ceiling. `quality:all` passed with
+  only the repository's retained security warnings, and uncached typecheck passed all five
+  declared projects.
+- All applicable authored/generator drift and self-test surfaces passed: element CSS (31),
+  bootstrap (3/3), token no-JS fallback (4/4), React (65 files / 31 elements / 26 probes), Vue,
+  manifest (31 elements / 138 documented public surfaces / 15 probes), entries, static markup,
+  public parts, patterns, story and behavior ratchets, action pins, ADR/LLM surfaces, and gate
+  wiring. The behavior-import check's ignored `.ts`-suffixed screenshot directory was moved out
+  of the checkout before its successful run; hardening that discovery edge remains a Low follow-up.
+- Storybook built in 9.73 seconds; demo assembly resolved 42/42 references; all 551 declared story
+  IDs were present; the axe self-test passed 50/50 and axe reported zero WCAG AA violations across
+  all 669 rendered stories. Chromium and Firefox scheduled 1,388 Playwright cases: 1,341 passed,
+  47 explicit feature/browser-conditional skips, zero failures. The focused theme/no-JS lane was
+  19 passed plus the three expected Firefox forced-colors feature skips. The 11-case WebKit lane
+  could not launch solely because the host lacks GTK 4, ICU 74, JPEG Turbo 8, and GStreamer; the
+  GitHub workflow installs them and remains authoritative.
+- Release/security passed: 28/28 release self-tests; uncached tokens/styles/elements builds; four
+  publishable packages packed with every export resolving; packed Vue types; 31/31 packed element
+  upgrades, 30 fonts, and zero external network; no high/critical audit findings; lockfile dry-run;
+  action pins; and size/SRI drift. Current elements output is 247331/165832 ESM raw/minified bytes,
+  266319/175710 IIFE raw/minified bytes, 58 files / 991.2 KiB unpacked, and SRI
+  `sha384-4QnnLbHquqvJs5EjtoFHoFqHvfW2KKrmU2OtSSVgjxAtocUuMGaQYAjIrHSEccev`.
+- Local visual regression was not updated: 6 of 235 cases passed and 229 showed the already
+  base-reproduced system-font geometry class. Diagram normalization likewise reported eight local
+  system-font geometry diffs. Neither surface has a mission-owned snapshot change; the pinned
+  GitHub runner remains authoritative for both.
+- The current registry contains 254 mutations. The prior exact-head sweep passed 253/253 and the
+  new theme mutation arms have each produced their named red. On this rebase, repeated full sweeps
+  failed closed on unrelated nav-pill/app-shell dynamic-import transport errors while other
+  checkouts were running browser gates; Chromium renderer SIGSEGV coredumps align with those
+  timestamps, with no OOM or disk exhaustion. A clean retry of the harness self-tests passed
+  10/10. No #323 product or theme test failed. The debugger seat requires one isolated idle-host
+  full rerun before this gate may be recorded green; that rerun is pending.
+
 ## Publication and merge
 
 - PR URL: pending
-- Exact current product commit: `3c64c4286b8cc5e1511edb890a59f83640087895`
-- Latest exact independent review head: `eb77cd52e4445f4f7634ab9171ebc0bf3ac1f29e`
-  (cycle 7 changes requested for generated records/evidence; fresh approval pending)
-- Exact generated-size remediation commit: `7b69e3140bb14f4d002bcad453583fbf34114a9c`
-- Exact cycle-eight review-transition head: `c4e74e280ad8c7ea7b6b2ee216515b7e82de1fa7`
+- Exact current product commit: `3c6ad6d425aaceb32171843b9f3167473a299c7f`
+- Latest independent WP approval: pre-rebase exact HEAD
+  `b8267b70e6654dc2ab519950715abf92a7feb742`; exact final-rebase point-cut pending
+- Exact executable gate snapshot: `9eb4e5950e6bc8a7e4bcec28d496576a2be21b3a`
 - Merge status: not merged
 - Merge commit: pending
 - Post-merge mission-review verdict: pending

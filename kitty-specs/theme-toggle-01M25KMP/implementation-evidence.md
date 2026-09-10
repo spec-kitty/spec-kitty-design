@@ -258,3 +258,31 @@ gates and explicitly retain local/CI-only limitations.
   canonical `sourceDiffSha256` procedure; optionally harden the manifest parity probe for
   `export *`; and make the behavior-fixture import gate ignore screenshot directories whose names
   end in `.ts`.
+
+### Third train refresh and exact-head validation
+
+- Rebased base: `origin/train/elements-first` at
+  `bab211c9876d85c2c004daf05ef27046bbf0e671`. Shared lifecycle/generated conflicts were resolved
+  from authored sources. Conventional-header normalization changed history only: the before/after
+  tree remained `c5b8a435c63a4ec95745414c3cefdf3e9be26e1f`, and all 147 mission commits now pass
+  branch-wide commitlint. Clean executable validation HEAD:
+  `9eb4e5950e6bc8a7e4bcec28d496576a2be21b3a`.
+- Full Vitest and its timed rerun passed 677/677 across 51 files (43 Node, 634 Chromium), zero
+  skipped, in 18.6 seconds / 40 seconds. `quality:all` passed and uncached typecheck passed all
+  five projects. Every applicable generated-artifact, contract, ratchet, architecture, workflow,
+  audit, lockfile, action-pin, release, package-export, offline, and size/SRI check passed.
+- Storybook built in 9.73 seconds; all 551 declared IDs were present; axe's self-test passed 50/50
+  and all 669 rendered stories had zero WCAG AA violations. Full Chromium + Firefox Playwright:
+  1,341 passed, 47 explicit conditional skips, zero failures out of 1,388 scheduled. WebKit's 11
+  selected theme/no-JS cases could not launch only because this host lacks its GTK/ICU/JPEG/media
+  dependencies; CI installs them and is authoritative.
+- Local visual regression remained the documented host-font class (6 passed / 229 failed out of
+  235) and diagram normalization reported eight analogous geometry diffs. No snapshot was updated,
+  and #323 changes no tracked visual baseline; the GitHub jobs are authoritative.
+- The 254-arm mutation sweep failed closed on unrelated nav-pill/app-shell dynamic-import transport
+  errors during concurrent browser work from other isolated mission checkouts. Independent
+  `debugger-debbie` diagnosis found matching Chromium renderer SIGSEGV coredumps, no OOM/disk
+  exhaustion, no #323 source/config change to the runner, and prior issue #238 evidence for the
+  same class. The harness self-test passed 10/10 on a clean retry; the prior 253-arm exact-head
+  sweep and every new theme arm are green/red as required. One isolated idle-host full sweep is
+  still required before acceptance; no shared harness change is absorbed into #323.
