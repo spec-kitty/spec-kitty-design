@@ -29,7 +29,8 @@
       "last_transition_at": "2026-09-10T14:38:53.735912+00:00",
       "model": "__resolved_model_absent__",
       "notes": [
-        "Codex frontend-freddy implementation seat active; red-first evidence recorded"
+        "Codex frontend-freddy implementation seat active; red-first evidence recorded",
+        "WP01 implementation committed at 0d4278f; direct SSR import blocker remediated and focused/full local gates recorded"
       ],
       "provider": "__resolved_provider_absent__",
       "role": "implementer",
