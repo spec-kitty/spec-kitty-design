@@ -109,7 +109,7 @@
       "wp": null
     },
     "#312": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "The PR that merged #301's ADR-15 ruling into train/elements-first at 5061e68, prior to this mission's base.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -117,8 +117,8 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
     },
     "#93": {
       "evidence_ref": "<link or commit>",
