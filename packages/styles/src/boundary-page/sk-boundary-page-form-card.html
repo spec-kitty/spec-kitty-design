@@ -1,0 +1,35 @@
+<!-- @spec-kitty/styles — sk-boundary-page (form card: mark, status pill, real <form>, footnote) -->
+<!-- Consumer-authored copy; the frame owns no text. sk-entity-marker composes with an explicit
+     border="true" (never the bare `border` attribute, which silently no-ops for plain-HTML
+     authors — the known #304 ergonomic gap this exemplar must not fall into). -->
+<main id="main">
+  <div class="sk-boundary-page sk-boundary-page__stage">
+    <div class="sk-boundary-page__card">
+      <div class="sk-boundary-page__mark">
+        <sk-entity-marker size="lg" shape="circle" border="true">AR</sk-entity-marker>
+      </div>
+      <h1 class="sk-boundary-page__title">
+        Join Acme Robotics
+        <span class="sk-pill-tag sk-pill-tag--status-info">Invitation</span>
+      </h1>
+      <form id="bp-form-card-form" class="sk-boundary-page__body">
+        <p>Set a password to finish creating your account.</p>
+        <p>
+          <label for="bp-form-card-email">Email</label><br />
+          <input id="bp-form-card-email" type="email" value="ada@example.com" readonly />
+        </p>
+        <p>
+          <label for="bp-form-card-password">Password</label><br />
+          <input id="bp-form-card-password" type="password" autocomplete="new-password" />
+        </p>
+      </form>
+      <div class="sk-boundary-page__action-group">
+        <button type="submit" form="bp-form-card-form">Accept invitation</button>
+        <a href="#decline">Decline</a>
+      </div>
+      <p class="sk-boundary-page__footnote">
+        If you weren't expecting this, you can safely ignore it — no account will be created.
+      </p>
+    </div>
+  </div>
+</main>

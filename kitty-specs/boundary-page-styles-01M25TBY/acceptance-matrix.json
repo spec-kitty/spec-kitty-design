@@ -1,0 +1,179 @@
+{
+  "mission_slug": "boundary-page-styles-01M25TBY",
+  "mission_number": "",
+  "mission_type": "software-dev",
+  "overall_verdict": "pass",
+  "criteria": [
+    {
+      "criterion_id": "FR-001",
+      "description": "One anatomy: stage / card / mark / title / body / action-group / footnote",
+      "proof_type": "automated_test",
+      "evidence": "packages/styles/src/boundary-page/sk-boundary-page.css:106-257 (.sk-boundary-page__stage/__card/__mark/__title/__body/__action-group/__footnote, exactly seven anatomy classes); packages/styles/src/boundary-page/sk-boundary-page-form-card.html shows all seven in DOM order; 128/128 Playwright tests across chromium+firefox pass, including sk-boundary-page-absence.spec.ts's structural contracts",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T18:19:02.973096+00:00",
+      "notes": "Owned by WP01 (mission/boundary-page-styles). pass_fail/evidence/verified_by/verified_at and overall_verdict are the accept gate's own fields (run via the Spec Kitty CLI's accept phase later) and are deliberately left as recorded by the scaffolder, not hand-written here."
+    },
+    {
+      "criterion_id": "FR-002",
+      "description": "No card-shape modifier",
+      "proof_type": "automated_test",
+      "evidence": "packages/styles/src/boundary-page/sk-boundary-page.css comment block (lines ~32,82) documents no shape/rounded/square modifier class exists; grep across the file for '--rounded'/'--square'/'--shape' returns no matches; consumer's own <sk-entity-marker> carries all size/shape/border presentation per FR-004",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T18:19:14.039372+00:00",
+      "notes": "Owned by WP01 (mission/boundary-page-styles). pass_fail/evidence/verified_by/verified_at and overall_verdict are the accept gate's own fields (run via the Spec Kitty CLI's accept phase later) and are deliberately left as recorded by the scaffolder, not hand-written here."
+    },
+    {
+      "criterion_id": "FR-003",
+      "description": "Consumer keeps landmarks and the <h1>",
+      "proof_type": "automated_test",
+      "evidence": "apps/storybook/src/tests/sk-boundary-page-a11y.spec.ts:39 (exactly one <h1>, no other heading level, scoped to #storybook-root \u2014 the iframe.html skeleton trap), :58 (no landmark beyond the consumer's own <main>), :94 (#main skip target satisfiable via real fragment navigation); 12/12 stories x both checks pass on chromium+firefox",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T18:19:16.090004+00:00",
+      "notes": "Owned by WP01 (mission/boundary-page-styles). pass_fail/evidence/verified_by/verified_at and overall_verdict are the accept gate's own fields (run via the Spec Kitty CLI's accept phase later) and are deliberately left as recorded by the scaffolder, not hand-written here."
+    },
+    {
+      "criterion_id": "FR-004",
+      "description": "Mark is optional, composes sk-entity-marker unmodified, no inferred axis",
+      "proof_type": "automated_test",
+      "evidence": "packages/styles/src/boundary-page/sk-boundary-page-form-card.html:8 <sk-entity-marker size=\"lg\" shape=\"circle\" border=\"true\">, unmodified consumer-authored attributes; sk-boundary-page-without-mark.html omits the mark entirely; sk-boundary-page-absence.spec.ts:53/59/74/82 assert both DOM absence and geometry (title position) for with/without-mark states, 8/8 passing",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T18:19:18.109253+00:00",
+      "notes": "Owned by WP01 (mission/boundary-page-styles). pass_fail/evidence/verified_by/verified_at and overall_verdict are the accept gate's own fields (run via the Spec Kitty CLI's accept phase later) and are deliberately left as recorded by the scaffolder, not hand-written here."
+    },
+    {
+      "criterion_id": "FR-005",
+      "description": "Status composes sk-pill-tag unmodified, frame infers no tone",
+      "proof_type": "automated_test",
+      "evidence": "packages/styles/src/boundary-page/sk-boundary-page-form-card.html:12 <span class=\"sk-pill-tag sk-pill-tag--status-info\">, the shipped styles-layer composition form (HIGH-1 fix, commits f48a0d5f/6a2b4c7a/d8e73ddb, replacing the inert host-attribute form); sk-boundary-page-composition.spec.ts:69-88 verifies the composed pill's computed background differs from untoned default and matches an isolated reference pill for 4/4 toned stories, chromium+firefox",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T18:19:27.212473+00:00",
+      "notes": "Owned by WP01 (mission/boundary-page-styles). pass_fail/evidence/verified_by/verified_at and overall_verdict are the accept gate's own fields (run via the Spec Kitty CLI's accept phase later) and are deliberately left as recorded by the scaffolder, not hand-written here."
+    },
+    {
+      "criterion_id": "FR-006",
+      "description": "Footnote is optional; its DOM-absence is a supported, explicitly tested state",
+      "proof_type": "automated_test",
+      "evidence": "sk-boundary-page-without-footnote.html omits .sk-boundary-page__footnote; sk-boundary-page-absence.spec.ts:95 (no footnote node + exact action-group-to-card-bottom geometry) and :103 (with-footnote measures strictly larger, absolute assertions replacing the prior phantom-mark-blind boolean-presence check per review MEDIUM-3)",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T18:19:28.421929+00:00",
+      "notes": "Owned by WP01 (mission/boundary-page-styles). pass_fail/evidence/verified_by/verified_at and overall_verdict are the accept gate's own fields (run via the Spec Kitty CLI's accept phase later) and are deliberately left as recorded by the scaffolder, not hand-written here."
+    },
+    {
+      "criterion_id": "FR-007",
+      "description": "Action-group is a required container that may hold zero actions",
+      "proof_type": "automated_test",
+      "evidence": "packages/styles/src/boundary-page/sk-boundary-page.css:181-186 (.sk-boundary-page__action-group required container, present even with zero children per comment); sk-boundary-page-no-action.html has zero action children; sk-boundary-page-absence.spec.ts:125 (container present with zero children) and :136 (several-actions has >1 child)",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T18:19:29.608072+00:00",
+      "notes": "Owned by WP01 (mission/boundary-page-styles). pass_fail/evidence/verified_by/verified_at and overall_verdict are the accept gate's own fields (run via the Spec Kitty CLI's accept phase later) and are deliberately left as recorded by the scaffolder, not hand-written here."
+    },
+    {
+      "criterion_id": "FR-008",
+      "description": "Long unbroken content contains locally, no document-level horizontal scroll",
+      "proof_type": "automated_test",
+      "evidence": "sk-boundary-page-responsive.spec.ts:28-41 'long-content containment' asserts zero document-level horizontal overflow at 320/640/1280px for both long-identifier and long-email stories, 6/6 passing chromium+firefox; packages/styles/src/boundary-page/sk-boundary-page.css:125 documents the containment mechanism",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T18:19:36.785773+00:00",
+      "notes": "Owned by WP01 (mission/boundary-page-styles). pass_fail/evidence/verified_by/verified_at and overall_verdict are the accept gate's own fields (run via the Spec Kitty CLI's accept phase later) and are deliberately left as recorded by the scaffolder, not hand-written here."
+    },
+    {
+      "criterion_id": "FR-009",
+      "description": "Responsive behaviour authored once, via @media",
+      "proof_type": "automated_test",
+      "evidence": "packages/styles/src/boundary-page/sk-boundary-page.css: single component-level @media block governs responsive behaviour (no duplicated per-anatomy-part media queries); sk-boundary-page-responsive.spec.ts exercises the same story set at 320/640/1280px widths for containment and target-size, confirming one authored responsive path",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T18:19:38.001824+00:00",
+      "notes": "Owned by WP01 (mission/boundary-page-styles). pass_fail/evidence/verified_by/verified_at and overall_verdict are the accept gate's own fields (run via the Spec Kitty CLI's accept phase later) and are deliberately left as recorded by the scaffolder, not hand-written here."
+    },
+    {
+      "criterion_id": "FR-010",
+      "description": "RTL / logical layout",
+      "proof_type": "automated_test",
+      "evidence": "sk-boundary-page-responsive.spec.ts:141 (source CSS declares no physical left/right/top/bottom/width/height property) and :153 (several-actions action-group order mirrors under dir=\"rtl\" using logical properties alone, no dir-specific override)",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T18:19:39.142627+00:00",
+      "notes": "Owned by WP01 (mission/boundary-page-styles). pass_fail/evidence/verified_by/verified_at and overall_verdict are the accept gate's own fields (run via the Spec Kitty CLI's accept phase later) and are deliberately left as recorded by the scaffolder, not hand-written here."
+    },
+    {
+      "criterion_id": "FR-011",
+      "description": "Forced-colors treatment authored once, border-based",
+      "proof_type": "automated_test",
+      "evidence": "sk-boundary-page-responsive.spec.ts:61 (card gains non-zero border under forced-colors, the first and only place the file declares that edge) and :71 (default non-forced-colors card renders zero border width, proving the block is load-bearing not redundant); sk-boundary-page.css forced-colors block is border-based, no color-only signal",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T18:19:46.795057+00:00",
+      "notes": "Owned by WP01 (mission/boundary-page-styles). pass_fail/evidence/verified_by/verified_at and overall_verdict are the accept gate's own fields (run via the Spec Kitty CLI's accept phase later) and are deliberately left as recorded by the scaffolder, not hand-written here."
+    },
+    {
+      "criterion_id": "FR-012",
+      "description": "No motion introduced, and the absence is asserted",
+      "proof_type": "automated_test",
+      "evidence": "sk-boundary-page-responsive.spec.ts:82 (no transition/animation under reduced-motion emulation), :121 (same, unconditionally without emulation), :132 (source CSS declares no @media prefers-reduced-motion block at all, because it sets no transition/animation anywhere to guard, avoiding the dead-guard defect named at sk-transition-matrix.css:237) \u2014 asserted, not assumed",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T18:19:47.982663+00:00",
+      "notes": "Owned by WP01 (mission/boundary-page-styles). pass_fail/evidence/verified_by/verified_at and overall_verdict are the accept gate's own fields (run via the Spec Kitty CLI's accept phase later) and are deliberately left as recorded by the scaffolder, not hand-written here."
+    },
+    {
+      "criterion_id": "FR-013",
+      "description": "Interactive target sizes hold at 44px in the action-group at both required widths",
+      "proof_type": "automated_test",
+      "evidence": "sk-boundary-page-responsive.spec.ts:45 (every interactive target in the action-group measures >=44px at 320px and 1280px), packages/styles/src/boundary-page/sk-boundary-page.css:192-226 (HIGH-2 fix, commit 256643f2: target-size floor at specificity (0,1,1) split from a separate legibility/typography reset at (0,0,0), verified in both source orders)",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T18:19:49.157595+00:00",
+      "notes": "Owned by WP01 (mission/boundary-page-styles). pass_fail/evidence/verified_by/verified_at and overall_verdict are the accept gate's own fields (run via the Spec Kitty CLI's accept phase later) and are deliberately left as recorded by the scaffolder, not hand-written here."
+    },
+    {
+      "criterion_id": "FR-014",
+      "description": "No user-visible literal, no copy defaults",
+      "proof_type": "automated_test",
+      "evidence": "packages/styles/src/boundary-page/sk-boundary-page.css has zero 'content:' literal declarations (grep matches are only 'justify-content', not the content property); packages/styles/src/boundary-page/index.ts is GENERATED markup re-exporting the *.html exemplars verbatim, no template/interpolation logic, no code path composes an English string at runtime; #286's open cross-cutting constraint does not apply per spec.md:217/238 (no render(), no markup emission \u2014 research.md Decision 5)",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T18:20:06.814325+00:00",
+      "notes": "Owned by WP01 (mission/boundary-page-styles). pass_fail/evidence/verified_by/verified_at and overall_verdict are the accept gate's own fields (run via the Spec Kitty CLI's accept phase later) and are deliberately left as recorded by the scaffolder, not hand-written here."
+    },
+    {
+      "criterion_id": "FR-015",
+      "description": "Team Kitty SaaS #1281's non-enumerating copy stays expressible",
+      "proof_type": "automated_test",
+      "evidence": "packages/styles/src/boundary-page/index.ts exports plain, untyped strings (no union/enum of allowed messages); the eleven *.html exemplars carry mutually distinct, freeform title/body/footnote copy (e.g. sk-boundary-page-long-email.html's arbitrary sentence, sk-boundary-page-several-actions.html's four-action variant) with no schema validating or constraining content, satisfying Team Kitty SaaS #1281's non-enumerating requirement structurally",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T18:20:07.892102+00:00",
+      "notes": "Owned by WP01 (mission/boundary-page-styles). pass_fail/evidence/verified_by/verified_at and overall_verdict are the accept gate's own fields (run via the Spec Kitty CLI's accept phase later) and are deliberately left as recorded by the scaffolder, not hand-written here."
+    },
+    {
+      "criterion_id": "FR-016",
+      "description": "No ::part() reach into composed components' shadow internals",
+      "proof_type": "automated_test",
+      "evidence": "sk-boundary-page-responsive.spec.ts:148 asserts the source CSS never writes a ::part() selector reaching sk-entity-marker or sk-pill-tag (spec C-005), grep-based, deterministic; ADR-15's shadow-boundary reach (::part()/::slotted()/:host/container-type) is #314's undecided territory and confirmed absent by checking the actual authored CSS, not assumed",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T18:20:14.682015+00:00",
+      "notes": "Owned by WP01 (mission/boundary-page-styles). pass_fail/evidence/verified_by/verified_at and overall_verdict are the accept gate's own fields (run via the Spec Kitty CLI's accept phase later) and are deliberately left as recorded by the scaffolder, not hand-written here."
+    },
+    {
+      "criterion_id": "FR-017",
+      "description": "Required stories, tests, ratchets, and CSS modules/barrels regenerated",
+      "proof_type": "automated_test",
+      "evidence": "expected-stories.json: 12 sk-boundary-page story ids added, total recomputed 505->517 (post-rebase, sum-over-byElement verified equal); packages/elements/SIZES.md regenerated from a real nx build + measure-elements-sizes.mjs --check passes; packages/styles/src/index.ts exports the boundary-page barrel; apps/storybook/src/tests/visual.spec.ts carries 8 SK-boundary-page HTML visual-baseline tests with 8 distinct toHaveScreenshot() filenames, all surviving the train rebase; sk-boundary-page-html.stories.ts registers all 12 stories",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T18:20:15.785031+00:00",
+      "notes": "Owned by WP01 (mission/boundary-page-styles). pass_fail/evidence/verified_by/verified_at and overall_verdict are the accept gate's own fields (run via the Spec Kitty CLI's accept phase later) and are deliberately left as recorded by the scaffolder, not hand-written here."
+    }
+  ],
+  "negative_invariants": []
+}

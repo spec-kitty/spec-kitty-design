@@ -36,6 +36,7 @@
 // Safe because every per-component barrel exports only `Sk*HTML` consts, verified collision-free
 // across all of them.
 export * from './blog-card/index';
+export * from './boundary-page/index';
 export * from './breadcrumbs/index';
 export * from './button/index';
 export * from './card/index';
