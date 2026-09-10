@@ -67,6 +67,7 @@ it before you write any `:host` rule that is not `display`.
 | `display: …` | The collapse holds. `.sk-<name>` restates it; nothing else is needed. |
 | `container-type: inline-size` | **Not a collapse.** A generated static form is coming (#309/#310) and it keeps the host as a **separate wrapper element**, carrying your sheet's whole `:host` declaration set. Do not tell anyone the static path can move `container-type` onto `.sk-<name>`. |
 | `:host([attr="X"]) .sk-<name>…` gating an `@container` block | Same — the axis becomes `.sk-<name>-host--X`, on that same wrapper, not a modifier on the root class. |
+| `:host(:is(…))`, `:host(:not(…))`, or a bare `:host([attr])` styling the host itself | Same family, and **these do not rewrite mechanically** — the bare form lands on the wrapper element, and the functional forms need their argument list rewritten too. `sk-app-shell.css`'s last rule is `:host(:is([presentation="compact"], [presentation="rail-preserving"])) …[hidden]` and is load-bearing at (0,4,0); `sk-form-input`/`sk-form-textarea` use `:host(:not([invalid]))`; `sk-page-header` uses a bare `:host([sticky])`. #309 owns all four shapes. |
 | `::slotted(x)` | **Shadow-only.** No generated static form, now or planned. #311 owns backfilling the per-sheet instruction. |
 
 **The rule behind the first two rows: an element is never its own query container.** A container
@@ -87,6 +88,12 @@ class on that outer element. For `::slotted(x)`: their own descendant rule in th
 stylesheet. Say so in your component's CSS header comment, the way `sk-app-shell.css`,
 `sk-action-row.css` and `sk-entity-marker.css` now do.
 
+**Only four sheets carry `container-type` at all** — `sk-app-shell`, `sk-action-row`,
+`sk-copy-field` and `sk-page-header` — and this whole section is about them. A host-attribute
+axis in a sheet with no container (`sk-metric`, `sk-transition-matrix`, `sk-nav-pill-drawer`,
+`sk-form-input`, `sk-form-textarea`) collapses onto the root class perfectly safely, and adding a
+wrapper there would be an unmeasured layout change for no reason.
+
 **The wrapper carries your sheet's WHOLE `:host` declaration set — never `container-type`
 alone, and never a list copied from another component.** ADR-15 measured both failure
 directions. Drop `width: 100%` from `sk-app-shell`'s wrapper and, as an item of a 300px flex
@@ -95,6 +102,11 @@ size containment means a wrapper with no width of its own contributes nothing to
 sizing. (In a grid track it measures correctly, so a page that only ever uses grid will not
 show you this.) Copy that same list onto `sk-action-row`, whose `:host` declares no `width`,
 and you have added a declaration the element never had. Read the sheet's own `:host`.
+
+**And `display: contents` on the wrapper deletes the container.** `container-type` needs a
+principal box; `display: contents` removes it. It looks like a harmless tidy-up of a div that
+"does nothing" and it silently reverts the whole thing. (Stated from the spec — ADR-15 did not
+probe it.)
 
 **`::slotted()` has one further consequence a static rewrite cannot reproduce, so do not promise
 it does.** A declaration from the outer tree beats a `::slotted()` declaration from the inner tree

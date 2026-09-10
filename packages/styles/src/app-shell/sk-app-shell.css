@@ -12,8 +12,13 @@
    THE WRAPPER CARRIES THIS SHEET'S WHOLE `:host` DECLARATION SET, not `container-type` alone.
    Today that is `display: block; width: 100%; min-width: 0; container-type: inline-size` — and
    the rule is "whatever `:host` declares", so if the block below gains a declaration the wrapper
-   owes it too. Every `:host([presentation="X"]) <sel>` rule further down is rewritten as
-   `.sk-app-shell-host--X <sel>`.
+   owes it too. MOST `:host([presentation="X"]) <sel>` rules further down rewrite mechanically
+   to `.sk-app-shell-host--X <sel>` — but not all of them. The last rule in this file is
+   `:host(:is([presentation="compact"], [presentation="rail-preserving"])) ...[hidden]`, and it
+   is load-bearing: at (0,4,0) it is what beats the @container-gated `display: block` at (0,3,0),
+   so a rewrite that skips it leaves a closed drawer visible. `:host(:not(...))` and a bare
+   `:host([attr])` styling the host itself occur elsewhere in the library. #309 owns all four
+   shapes; do not assume the single-attribute form is the only one.
 
    THE ABBREVIATED WRAPPER IS NOT A SHORTCUT, IT IS A BUG. `container-type: inline-size` implies
    size containment, so a wrapper with no width of its own contributes nothing to intrinsic

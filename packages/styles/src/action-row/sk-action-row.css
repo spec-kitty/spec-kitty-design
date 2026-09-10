@@ -17,6 +17,21 @@
    `sk-app-shell.css` declares `width: 100%` on `:host`, and dropping it makes the component
    compute `0px` in a flex row. Read each sheet's own `:host`; never copy another's list.
 
+   AND THIS SHEET DOES NOT DEFINE `.sk-action-row-host`. Nothing in @spec-kitty/styles does yet —
+   #309 is the generator that will emit it, and it is unbuilt. The container above lives on
+   `:host`, which is inert in a document. So a static consumer who writes the two-element markup
+   and links this file alone gets NO CONTAINER, and `@container (max-width: 400px)` below never
+   fires — the exact failure #301 reported. Until #309 lands, author this yourself:
+
+       .sk-action-row-host {
+         display: block;
+         min-width: 0;
+         container-type: inline-size;
+       }
+
+   When #309 lands it becomes redundant rather than wrong, and #310 holds the generated rule
+   equal to it.
+
    DO NOT MOVE `container-type` ONTO `.sk-action-row`. An element is never its own query
    container. Measured, chromium and firefox, at a 360px row: the real element computes
    `flex-wrap: wrap` and the collapsed static form computes `nowrap`; nested inside a 320px

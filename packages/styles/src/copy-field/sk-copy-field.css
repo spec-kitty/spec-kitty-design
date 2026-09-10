@@ -1,5 +1,41 @@
 /* sk-copy-field — exact non-editable value plus one copy action. */
 
+/* WHAT A STATIC CONSUMER MUST AUTHOR INSTEAD (ADR-15).
+
+   `:host { container-type: inline-size }` below is the sole container establishing the
+   `@container (max-inline-size: 20rem)` reflow further down. ADR-15 ruled this construct kind
+   (a host-owned container-type) generable as a static form, but only in a TWO-ELEMENT shape,
+   and #309 — the generator that would emit it — is unbuilt. Nothing in @spec-kitty/styles
+   defines `.sk-copy-field-host` today. So a server-rendered consumer authors both halves:
+
+       <div class="sk-copy-field-host">
+         <div class="sk-copy-field"> ... </div>
+       </div>
+
+       .sk-copy-field-host {
+         box-sizing: border-box;
+         display: block;
+         container-type: inline-size;
+         inline-size: 100%;
+         max-inline-size: 100%;
+         min-inline-size: 0;
+       }
+
+   THE WRAPPER CARRIES THIS SHEET'S WHOLE `:host` DECLARATION SET, as written above — not
+   `container-type` alone, and not a list copied from another component. Measured on
+   sk-app-shell: dropping `:host`'s width declaration makes the component compute `0px` instead
+   of `300px` as an item of a 300px flex row, in both engines.
+
+   DO NOT MOVE `container-type` ONTO `.sk-copy-field`. An element is never its own query
+   container, so the `@container` rules below would answer some outer ancestor of the page, or
+   nothing, while `.sk-copy-field`'s descendants kept querying correctly — most of the sheet
+   keeps working, which is what makes the defect quiet.
+
+   This component was not itself probed; ADR-15's measurement used sk-app-shell and
+   sk-action-row, and the mechanism is a property of CSS containment rather than of any one
+   component. ADR-15 and #309/#310 hold the outcome tables. This comment adds no rule and
+   changes none. */
+
 :host {
   box-sizing: border-box;
   display: block;
