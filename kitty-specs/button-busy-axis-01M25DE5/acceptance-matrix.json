@@ -148,10 +148,10 @@
       "criterion_id": "FR-015",
       "description": "Verify FR-015 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
+      "evidence": "axe: run-axe-storybook reported 0 WCAG 2.1 AA violations across 587 stories incl. the new busy stories, reviewer-confirmed in review-cycle-1.md. Visual regression: WP01 never added baseline entries to apps/storybook/src/tests/visual.spec.ts despite plan.md gate 16 requiring them (confirmed absent: zero busy/skbutton references, WP01 commit never touched the file) -- a genuine gap, not recorded as a false pass. Fixed at mission-closing: commit b4fbe7c adds three chromium-only entries (busy default, reduced motion, forced colors). Baselines are CI-authoritative per this repo's own policy and are NOT generated locally; PENDING until this PR's own CI run produces them and they are harvested from the visual-regression-diffs artifact and committed",
       "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "verified_by": "mission-closer",
+      "verified_at": "2026-09-10T12:35:43.624491+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
