@@ -57,11 +57,11 @@
     {
       "criterion_id": "FR-006",
       "description": "Verify FR-006 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "proof_type": "code_review",
+      "evidence": "sk-button.css diff adds no new :focus-visible/:disabled rule; danger-secondary relies on the shared .sk-button:focus-visible/.sk-button:disabled. run-axe-storybook.js: elements-skbutton--danger-secondary-disabled and --danger-secondary-focus both axe-clean.",
+      "pass_fail": "pass",
+      "verified_by": "reviewer-renata",
+      "verified_at": "2026-09-10T15:46:01.835398+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
