@@ -97,7 +97,7 @@
       "wp": "WP01"
     },
     "#307": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "Gated child, unblocked not worked. ADR-15: #307 may freeze a static API in the TWO-ELEMENT wrapper form only \u2014 div.sk-action-row-host > div.sk-action-row with container-type on the outer element. It must not freeze a single-element form; measurement/host-container-type/result.json O1/O3/O10/O12 record what that costs.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -105,8 +105,8 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
     }
   },
   "schema_version": 1
