@@ -155,6 +155,18 @@
       "title": "<fill at WP-implementation time>",
       "verdict": "deferred-with-followup",
       "wp": "WP01"
+    },
+    "#93": {
+      "evidence_ref": "WP01-static-action-row.md L267: the class=\"sk-light\" (never data-theme=\"light\") convention was already established by #93; this WP's stories follow it unchanged",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
     }
   },
   "schema_version": 1
