@@ -5,6 +5,32 @@ import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import postcss from "postcss";
 import selectorParser from "postcss-selector-parser";
+import { PNG } from "pngjs";
+
+// Counts pixels that differ by more than `tolerance` per channel between two same-size PNG
+// screenshots. A plain byte-buffer comparison would also trip on PNG-encoder metadata noise
+// unrelated to what actually painted; decoding to raw pixels and tolerating small deltas keeps
+// the probe sensitive to a real rendered check-glyph while ignoring anti-aliasing jitter.
+function countDifferingPixels(a: Buffer, b: Buffer, tolerance = 24): number {
+  const pngA = PNG.sync.read(a);
+  const pngB = PNG.sync.read(b);
+  if (pngA.width !== pngB.width || pngA.height !== pngB.height) {
+    // A dimension mismatch is itself a measurable difference — report every pixel of the
+    // larger image as differing rather than throwing, so the caller's threshold still applies.
+    return Math.max(pngA.width * pngA.height, pngB.width * pngB.height);
+  }
+  let differing = 0;
+  for (let i = 0; i < pngA.data.length; i += 4) {
+    const dr = Math.abs(pngA.data[i] - pngB.data[i]);
+    const dg = Math.abs(pngA.data[i + 1] - pngB.data[i + 1]);
+    const db = Math.abs(pngA.data[i + 2] - pngB.data[i + 2]);
+    const da = Math.abs(pngA.data[i + 3] - pngB.data[i + 3]);
+    if (dr > tolerance || dg > tolerance || db > tolerance || da > tolerance) {
+      differing += 1;
+    }
+  }
+  return differing;
+}
 
 const COMPONENT_DIR = "packages/styles/src/radio-choice-group";
 const CHOICE_GROUP_CSS = `${COMPONENT_DIR}/sk-radio-choice-group.css`;
@@ -1102,10 +1128,15 @@ test.describe("sk-radio-choice-group live native semantics and presentation", ()
     expect(Number.parseFloat(focused.outlineWidth)).toBeGreaterThan(0);
     expect(focused.outlineColor).not.toBe(focused.backgroundColor);
 
-    // NI-009/FR-009: the accent-color-customized control's rendered appearance is paired with
-    // its real accessible checked/unchecked state via the platform accessibility tree — a
-    // screenshot alone cannot prove this, so the DOM ground truth and the CDP AX-tree state are
-    // compared directly for every radio in the fixture, under forced-colors emulation.
+    // SEMANTIC half only: this walk demonstrates that the platform accessibility tree's
+    // `checked` property tracks the real DOM `.checked` flag under forced-colors emulation. It
+    // is NOT evidence for the VISUAL half of NI-009/FR-009 (that forced colors actually renders a
+    // perceivable difference between a checked and an unchecked control) — for a native radio,
+    // the AX `checked` property is computed from the same DOM flag regardless of any CSS
+    // (`accent-color` included), so this comparison is true by construction and cannot go red
+    // from a suppressed/flattened glyph. The paired rendered-pixel probe immediately below this
+    // test (`forced colors: a checked control's rendered pixels visibly differ from an unchecked
+    // one`) is the actual visual-half evidence; a screenshot there, not here, is what proves it.
     const domChecked = await controls.evaluateAll((nodes) =>
       nodes.map((node) => (node as HTMLInputElement).checked),
     );
@@ -1139,11 +1170,50 @@ test.describe("sk-radio-choice-group live native semantics and presentation", ()
         descendantIds.has(node.nodeId) &&
         node.role?.value === "radio",
     );
+    // Length floor: an empty `axRadios` against an empty `domChecked` would make the comparison
+    // below pass vacuously. The `forced-colors` story's fixture (disabled.html) always has
+    // exactly four radios — assert that count explicitly before trusting the array comparison.
+    expect(axRadios.length).toBe(4);
+    expect(domChecked.length).toBe(4);
     const axChecked = axRadios.map(
       (node) =>
         node.properties?.find((property) => property.name === "checked")
           ?.value?.value === "true",
     );
     expect(axChecked).toEqual(domChecked);
+  });
+
+  test("forced colors: a checked control's rendered pixels visibly differ from an unchecked one (visual half of the accent-color proof)", async ({
+    page,
+    browserName,
+  }) => {
+    test.skip(
+      browserName !== "chromium",
+      "Playwright forced-colors emulation is Chromium-owned",
+    );
+    // VISUAL half of NI-009/FR-009: the AX/DOM comparison in the previous test proves the
+    // accessible state tracks reality; it cannot prove forced colors actually PAINTS a
+    // perceivable difference for the customized `accent-color`. Only a rendered-pixel
+    // comparison can prove that, so this crops just the native control (not the whole choice,
+    // which would also pick up border/background cues already covered elsewhere) for a checked
+    // and an unchecked radio and requires their pixels to differ by more than incidental
+    // anti-aliasing noise. If forced colors suppressed or flattened the check glyph, both crops
+    // would render as the same empty ring and this test would go red — verified red-first by
+    // temporarily setting `appearance: none` on the control (see the WP01 report for the exact
+    // red-first command and result); this is the version that must stay green afterward.
+    await page.emulateMedia({ forcedColors: "active" });
+    const { group } = await openStory(page, "forced-colors");
+    const controls = group.getByRole("radio");
+    await expect(controls).toHaveCount(4);
+    await expect(controls.nth(0)).toBeChecked();
+    await expect(controls.nth(1)).not.toBeChecked();
+    const checkedShot = await controls.nth(0).screenshot();
+    const uncheckedShot = await controls.nth(1).screenshot();
+    const diffPixels = countDifferingPixels(checkedShot, uncheckedShot);
+    expect(
+      diffPixels,
+      `checked vs. unchecked control differed by only ${diffPixels} pixel(s) under forced ` +
+        "colors — the check indicator is not visibly rendered",
+    ).toBeGreaterThan(15);
   });
 });
