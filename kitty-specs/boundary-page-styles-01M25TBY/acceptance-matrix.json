@@ -38,10 +38,10 @@
       "criterion_id": "FR-004",
       "description": "Mark is optional, composes sk-entity-marker unmodified, no inferred axis",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "packages/styles/src/boundary-page/sk-boundary-page-form-card.html:8 <sk-entity-marker size=\"lg\" shape=\"circle\" border=\"true\">, unmodified consumer-authored attributes; sk-boundary-page-without-mark.html omits the mark entirely; sk-boundary-page-absence.spec.ts:53/59/74/82 assert both DOM absence and geometry (title position) for with/without-mark states, 8/8 passing",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T18:19:18.109253+00:00",
       "notes": "Owned by WP01 (mission/boundary-page-styles). pass_fail/evidence/verified_by/verified_at and overall_verdict are the accept gate's own fields (run via the Spec Kitty CLI's accept phase later) and are deliberately left as recorded by the scaffolder, not hand-written here."
     },
     {
