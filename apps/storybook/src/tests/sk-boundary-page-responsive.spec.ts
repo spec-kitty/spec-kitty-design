@@ -152,7 +152,11 @@ test.describe('sk-boundary-page logical properties only (spec FR-010)', () => {
 
   test('the several-actions action-group order mirrors under dir="rtl" using logical properties alone, with no dir-specific CSS override needed', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
-    await openStory(page, 'form-card');
+    // LOW-6 (WP01 review remediation): this test's title has always advertised
+    // "several-actions" — it previously opened 'form-card' (2 actions) instead, and its
+    // `count === 2` assertion happened to pass against the WRONG fixture without anyone
+    // noticing the title/body mismatch. Now opens the four-action fixture the title names.
+    await openStory(page, 'several-actions');
 
     const order = async () =>
       page.evaluate(() => {
@@ -162,7 +166,7 @@ test.describe('sk-boundary-page logical properties only (spec FR-010)', () => {
       });
 
     const ltr = await order();
-    expect(ltr.count).toBe(2);
+    expect(ltr.count).toBe(4);
     expect(ltr.firstLeft).toBeLessThan(ltr.lastLeft);
 
     await page.evaluate(() => {

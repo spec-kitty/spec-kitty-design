@@ -26,17 +26,26 @@ const measure = (page: Page) =>
     const actionGroup = document.querySelector<HTMLElement>('.sk-boundary-page__action-group')!;
     const footnote = document.querySelector<HTMLElement>('.sk-boundary-page__footnote');
     const mark = document.querySelector<HTMLElement>('.sk-boundary-page__mark');
+    const title = document.querySelector<HTMLElement>('.sk-boundary-page__title')!;
     const cardRect = card.getBoundingClientRect();
     const actionRect = actionGroup.getBoundingClientRect();
+    const titleRect = title.getBoundingClientRect();
     const cardStyle = getComputedStyle(card);
     return {
       footnotePresent: footnote !== null,
       markPresent: mark !== null,
       actionGroupChildCount: actionGroup.childElementCount,
       distanceActionGroupBottomToCardBottom: cardRect.bottom - actionRect.bottom,
+      // Mirrors distanceActionGroupBottomToCardBottom on the START edge: the first REAL child's
+      // (the title's) distance from the card's top edge. Absolute, not a presence boolean and
+      // not merely a with/without diff — see this file's header comment on why the diff alone is
+      // not sufficient.
+      distanceCardTopToTitleTop: titleRect.top - cardRect.top,
+      cardPaddingBlockStart: parseFloat(cardStyle.paddingBlockStart),
       cardPaddingBlockEnd: parseFloat(cardStyle.paddingBlockEnd),
       cardRowGap: parseFloat(cardStyle.rowGap),
       footnoteHeight: footnote ? footnote.getBoundingClientRect().height : null,
+      markHeight: mark ? mark.getBoundingClientRect().height : null,
     };
   });
 
@@ -51,6 +60,34 @@ test.describe('sk-boundary-page mark DOM-absence contract', () => {
     await openStory(page, 'form-card');
     const measured = await measure(page);
     expect(measured.markPresent).toBe(true);
+  });
+
+  // MEDIUM-3 (WP01 review remediation): the two tests above are a tautology over fixtures that
+  // by construction contain (or omit) a mark node — they prove nothing about GEOMETRY. The
+  // reviewer proved the gap directly: a 48px phantom mark
+  // (`.sk-boundary-page__card::before { content:""; display:block; block-size:48px; }`) left the
+  // whole suite green, including both tests above, because neither one measures space. This test
+  // is the geometry guard, mirroring the footnote pair's own ABSOLUTE assertion (not the diff
+  // one — see that describe block's second test for why an absolute measurement is what actually
+  // catches a phantom, while a with/without diff can be fooled by one that adds equally to both
+  // fixtures compared).
+  test('the without-mark story: the title sits exactly padding-block-start below the card top — no leaked mark space', async ({ page }) => {
+    await openStory(page, 'without-mark');
+    const measured = await measure(page);
+    expect(measured.markPresent).toBe(false);
+    expect(measured.cardPaddingBlockStart).toBeGreaterThan(0);
+    expect(Math.abs(measured.distanceCardTopToTitleTop - measured.cardPaddingBlockStart)).toBeLessThan(1.5);
+  });
+
+  test('the form-card story (with mark): the title sits strictly further from the card top than padding-block-start alone', async ({ page }) => {
+    await openStory(page, 'form-card');
+    const measured = await measure(page);
+    expect(measured.markPresent).toBe(true);
+    expect(measured.markHeight).not.toBeNull();
+    // Absolute character preserved here too: the mark's own height plus the gap step is
+    // consumed on top of the padding, not merely "greater than zero".
+    const expectedMinimum = measured.cardPaddingBlockStart + (measured.markHeight as number) + measured.cardRowGap;
+    expect(Math.abs(measured.distanceCardTopToTitleTop - expectedMinimum)).toBeLessThan(1.5);
   });
 });
 
