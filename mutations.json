@@ -1430,6 +1430,14 @@
       "to": "    shapeBroken: { type: String, reflect: true },"
     },
     {
+      "id": "SC-010",
+      "subject": "fixtures/elements-behaviour/src/sk-entity-marker.test.ts",
+      "arm": "pre-upgrade bordered presentation stays registered and renders independently",
+      "file": "packages/elements/src/entity-marker/sk-entity-marker.ts",
+      "from": "    border: { type: String, reflect: true },",
+      "to": "    borderBroken: { type: String, reflect: true },"
+    },
+    {
       "id": "SC-013",
       "subject": "fixtures/elements-behaviour/src/sk-action-row.test.ts",
       "arm": "action-row supporting part remains targetable",

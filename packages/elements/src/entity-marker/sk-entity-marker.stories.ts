@@ -66,6 +66,56 @@ export const ImageNaming: Story = {
   `),
 };
 
+/* #304 additive stories below. AxisMatrix and ImageNaming above are NOT extended — both are
+   pinned by exact-count/exact-order Playwright assertions
+   (apps/storybook/src/tests/sk-compact-work-item-extensions.spec.ts's "keeps size and shape
+   independent across the full 2x2 matrix" and "uses one host-owned name and cover-crops
+   portrait and landscape images") and by visual-regression baselines in
+   apps/storybook/src/tests/visual.spec.ts (NFR-001 requires those pixel-identical). New size,
+   border and image-at-new-size coverage lands as new, additive stories instead. */
+
+export const LargeSize: Story = {
+  render: () => wrapper(`
+    <sk-entity-marker label="Large square" size="lg">LS</sk-entity-marker>
+    <sk-entity-marker label="Large circle" size="lg" shape="circle">LC</sk-entity-marker>
+  `),
+};
+
+export const ImageNamingLargeSize: Story = {
+  render: () => wrapper(`
+    <sk-entity-marker label="Ada Lovelace" size="lg" shape="circle">
+      <img src="${IMAGE_SOURCE}" alt="">
+    </sk-entity-marker>
+    <span style="color:var(--sk-fg-body);">Ada Lovelace, at the page-scale profile-picture size</span>
+  `),
+};
+
+export const BorderedAxisMatrix: Story = {
+  render: () => wrapper(`
+    <sk-entity-marker label="Default square bordered" border="true">DB</sk-entity-marker>
+    <sk-entity-marker label="Default circle bordered" shape="circle" border="true">DCB</sk-entity-marker>
+    <sk-entity-marker label="Compact square bordered" size="sm" border="true">CB</sk-entity-marker>
+    <sk-entity-marker label="Compact circle bordered" size="sm" shape="circle" border="true">CCB</sk-entity-marker>
+    <sk-entity-marker label="Large square bordered" size="lg" border="true">LB</sk-entity-marker>
+    <sk-entity-marker label="Large circle bordered" size="lg" shape="circle" border="true">LCB</sk-entity-marker>
+  `),
+};
+
+export const BorderedOuterBoxComparison: Story = {
+  render: () => wrapper(`
+    <sk-entity-marker label="Unbordered" data-comparison="unbordered">CMP</sk-entity-marker>
+    <sk-entity-marker label="Bordered" border="true" data-comparison="bordered">CMP</sk-entity-marker>
+  `),
+};
+
+export const BorderedForcedColors: Story = {
+  parameters: { a11y: { disable: false } },
+  render: () => wrapper(`
+    <sk-entity-marker label="Unbordered reference" data-forced-colors-base>UB</sk-entity-marker>
+    <sk-entity-marker label="Bordered" border="true">BD</sk-entity-marker>
+  `),
+};
+
 export const LongLabel: Story = {
   render: () => wrapper(`
     <sk-entity-marker label="A deliberately long consumer-authored accessible name" size="sm" shape="circle">AL</sk-entity-marker>

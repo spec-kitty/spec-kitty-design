@@ -49,7 +49,8 @@
     "#278 ratchets the ten Storybook-only Mission Kanban routes named as acceptance evidence, total 434 -> 444 on the refreshed train after #274. K1-K6 remain separately addressable alongside LightMode, long-content, forced-colors, and reduced-motion evidence; fixture, projector, guard, and render helpers are excluded from CSF indexing.",
     "#255 ratchets the eighteen Storybook-only Repository Dossier routes named as acceptance evidence. D1 is the populated desktop composition; D2 retains separate closed and controlled-open 390px drawer states; D4-D8 preserve cross-branch, terminal, snapshot, indexing, and completed-empty truth; LightMode, long data, supplied progress values, the 860/861 compact-navigation seam, safe/static tracker destinations, forced colors, reduced motion, and 200%/400% zoom remain independently reviewable. On the refreshed train after #278, total moves 444 -> 462; fixture, projection, freeze, and render helpers are excluded from CSF indexing.",
     "#275 ratchets the exact ten Storybook-only Work Explorer W1-W10 compositions. Lane, person, and type regroupings conserve one 50-record fixture; rail-preserving, LightMode, filtered-empty, no-work, degraded, loading, and no-repository states stay separately addressable. On the refreshed train after #255, total moves 462 -> 472; fixture, selector, projector, and renderer helpers are excluded from CSF indexing.",
-    "#302 adds fourteen sk-pill-tag stories for the status-tone axis: the six tones individually, AllStatuses, BrandWithStatus, EyebrowWithStatus, LongLabel, Rtl, Zoom200, UnknownStatus, and ForcedColors; LightMode is extended in place (not counted as new) to include a status tone. Verified against the built Storybook index before committing, per the recipe. sk-pill-tag moves 9 -> 23; total moves by the same delta."
+    "#302 adds fourteen sk-pill-tag stories for the status-tone axis: the six tones individually, AllStatuses, BrandWithStatus, EyebrowWithStatus, LongLabel, Rtl, Zoom200, UnknownStatus, and ForcedColors; LightMode is extended in place (not counted as new) to include a status tone. Verified against the built Storybook index before committing, per the recipe. sk-pill-tag moves 9 -> 23; total moves by the same delta.",
+    "#304 (ADR-15 split) adds five additive sk-entity-marker stories for the widened size and border axes: LargeSize and ImageNamingLargeSize demonstrate the new `lg` token size (square/circle, and a slotted image at that size); BorderedAxisMatrix shows the border modifier at every named size x both shapes; BorderedOuterBoxComparison and BorderedForcedColors back the outer-box-unchanged visual proof and the forced-colors visibility check. The eight pre-existing sk-entity-marker story ids (Initials through LightMode, including AxisMatrix and ImageNaming) are UNCHANGED — both are pinned by exact-count/order Playwright assertions and NFR-001's zero-diff visual-regression requirement, so the new axes are additive stories rather than edits to them. On the refreshed train after #302, total moves 486 -> 491."
   ],
   "byElement": {
     "sk-action-row": [
@@ -286,7 +287,12 @@
       "elements-skentitymarker--image-naming",
       "elements-skentitymarker--long-label",
       "elements-skentitymarker--compact-circle-light-mode",
-      "elements-skentitymarker--light-mode"
+      "elements-skentitymarker--light-mode",
+      "elements-skentitymarker--large-size",
+      "elements-skentitymarker--image-naming-large-size",
+      "elements-skentitymarker--bordered-axis-matrix",
+      "elements-skentitymarker--bordered-outer-box-comparison",
+      "elements-skentitymarker--bordered-forced-colors"
     ],
     "sk-event-timeline": [
       "primitives-skeventtimeline-html--default",
@@ -633,5 +639,5 @@
       "patterns-work-explorer--w-10-no-admitted-repositories-dark"
     ]
   },
-  "total": 486
+  "total": 491
 }

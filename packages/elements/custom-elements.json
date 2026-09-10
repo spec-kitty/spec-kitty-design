@@ -3093,7 +3093,7 @@
         },
         {
           "kind": "class",
-          "description": "A compact consumer-supplied icon, initials, or short mark with explicit accessible naming.\n\nToken dependencies: --sk-font-sans, --sk-on-tint-butter, --sk-radius-pill, --sk-radius-sm,\n--sk-space-1, --sk-space-5, --sk-space-7, --sk-surface-tint-butter, --sk-text-xs,\n--sk-weight-bold.",
+          "description": "A compact consumer-supplied icon, initials, or short mark with explicit accessible naming.\n\nToken dependencies: --sk-border-default, --sk-border-width-1, --sk-font-sans,\n--sk-on-tint-butter, --sk-radius-pill, --sk-radius-sm, --sk-space-1, --sk-space-5,\n--sk-space-7, --sk-space-9, --sk-surface-tint-butter, --sk-text-xs, --sk-weight-bold.",
           "name": "SkEntityMarker",
           "cssParts": [
             {
@@ -3112,6 +3112,17 @@
             }
           ],
           "members": [
+            {
+              "kind": "field",
+              "name": "border",
+              "privacy": "public",
+              "type": {
+                "text": "'true' | undefined"
+              },
+              "description": "Optional bordered presentation whose outer box is identical to the unbordered form. Only `true` is supported; invalid values render unbordered.",
+              "attribute": "border",
+              "reflects": true
+            },
             {
               "kind": "field",
               "name": "label",
@@ -3139,14 +3150,22 @@
               "name": "size",
               "privacy": "public",
               "type": {
-                "text": "'sm' | undefined"
+                "text": "'sm' | 'lg' | undefined"
               },
-              "description": "Optional compact presentation. Only `sm` is supported; invalid values use the default size.",
+              "description": "Optional presentation size. Only `sm`/`lg` are supported; invalid values use the default size.",
               "attribute": "size",
               "reflects": true
             }
           ],
           "attributes": [
+            {
+              "name": "border",
+              "type": {
+                "text": "'true' | undefined"
+              },
+              "description": "Optional bordered presentation whose outer box is identical to the unbordered form. Only `true` is supported; invalid values render unbordered.",
+              "fieldName": "border"
+            },
             {
               "name": "label",
               "type": {
@@ -3166,9 +3185,9 @@
             {
               "name": "size",
               "type": {
-                "text": "'sm' | undefined"
+                "text": "'sm' | 'lg' | undefined"
               },
-              "description": "Optional compact presentation. Only `sm` is supported; invalid values use the default size.",
+              "description": "Optional presentation size. Only `sm`/`lg` are supported; invalid values use the default size.",
               "fieldName": "size"
             }
           ],

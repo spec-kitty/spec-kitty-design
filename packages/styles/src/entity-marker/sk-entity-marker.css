@@ -67,8 +67,49 @@
   block-size: var(--sk-space-5);
 }
 
+/* T6: membership-detail profile-avatar — the one Family 4 mark with no existing named size to
+   reach for (a real member image, page-prominent rather than a compact list/top-bar glyph).
+   #304's evidence names no pixel figure, so the token is this WP's own choice: two steps above
+   the existing default (--sk-space-7) is the smallest step that reads as clearly page-scale
+   rather than "a slightly bigger default", without inventing a size no Family 4 screen needs. */
+.sk-entity-marker--lg {
+  inline-size: var(--sk-space-9);
+  block-size: var(--sk-space-9);
+}
+
 .sk-entity-marker--circle {
   border-radius: var(--sk-radius-pill);
+}
+
+/* Optional border modifier (#304). OUTER BOX IS UNCHANGED AT EVERY SIZE — proven by
+   apps/storybook/src/tests/visual.spec.ts's bordered/unbordered comparison, not asserted here.
+
+   MECHANISM: box-sizing stays `content-box` (unchanged from `.sk-entity-marker` above) and the
+   border width is taken OUT of the existing padding, not added on top of it. Today's box is
+   `inline-size` (content) + 2x `--sk-space-1` (padding), with no border. This modifier renders
+   `inline-size` (content, unchanged) + 2x(`--sk-space-1` minus the border width) (padding) +
+   2x the border width — which sums back to exactly `inline-size` + 2x `--sk-space-1`, the same
+   outer box, at every named size, because the swap is between padding and border, not a change
+   to the total. This composes with the size axis for free: neither this rule nor the size rules
+   touch padding's OWN token, so a future size needs no matching edit here.
+
+   `--sk-border-width-1` (1px) is the token used elsewhere in this library for a hairline
+   separation border (`sk-card`, `sk-button` secondary, `sk-disclosure`) — the same weight, not a
+   new one. `border-color` is the LONGHAND, per this repo's forced-colors convention
+   (docs/contributing/adding-a-component.md): `declaration-strict-value` only polices `-color`
+   properties, and the `border` SHORTHAND would dodge the token check entirely.
+
+   FORCED COLORS: no explicit `@media (forced-colors: active)` block, deliberately. A plain
+   border with a `border-style`/`border-color` pair already survives forced-colors with ZERO
+   author CSS — the browser remaps `border-color` to a system color automatically (see
+   sk-notice.css's own forced-colors note for the same fact, measured there). This modifier only
+   ever adds a border; it never removes the surface/foreground pair the base rule already sets,
+   so the marker stays distinguishable by both its own tint and the auto-remapped edge. */
+.sk-entity-marker--bordered {
+  border-style: solid;
+  border-width: var(--sk-border-width-1);
+  border-color: var(--sk-border-default);
+  padding: calc(var(--sk-space-1) - var(--sk-border-width-1));
 }
 
 .sk-entity-marker__content {

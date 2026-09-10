@@ -18,13 +18,16 @@ export interface SkEntityMarkerProps extends Pick<
   | "onFocus"
   | "onBlur"
 > {
+  /** Optional bordered presentation whose outer box is identical to the unbordered form. Only `true` is supported; invalid values render unbordered. */
+  border?: SkEntityMarkerElement["border"];
+
   /** Accessible name for a meaningful mark. Empty or whitespace-only values make it decorative. */
   label?: SkEntityMarkerElement["label"];
 
   /** Optional circular presentation. Only `circle` is supported; invalid values use the square shape. */
   shape?: SkEntityMarkerElement["shape"];
 
-  /** Optional compact presentation. Only `sm` is supported; invalid values use the default size. */
+  /** Optional presentation size. Only `sm`/`lg` are supported; invalid values use the default size. */
   size?: SkEntityMarkerElement["size"];
 
   /** A space-separated list of the classes of the element. Classes allows CSS and JavaScript to select and access specific elements via the class selectors or functions like the method `Document.getElementsByClassName()`. */
@@ -52,17 +55,18 @@ export interface SkEntityMarkerProps extends Pick<
 /**
  * A compact consumer-supplied icon, initials, or short mark with explicit accessible naming.
  *
- * Token dependencies: --sk-font-sans, --sk-on-tint-butter, --sk-radius-pill, --sk-radius-sm,
- * --sk-space-1, --sk-space-5, --sk-space-7, --sk-surface-tint-butter, --sk-text-xs,
- * --sk-weight-bold.
+ * Token dependencies: --sk-border-default, --sk-border-width-1, --sk-font-sans,
+ * --sk-on-tint-butter, --sk-radius-pill, --sk-radius-sm, --sk-space-1, --sk-space-5,
+ * --sk-space-7, --sk-space-9, --sk-surface-tint-butter, --sk-text-xs, --sk-weight-bold.
  *
  * ## Attributes & Properties
  *
  * Component attributes and properties that can be applied to the element or by using JavaScript.
  *
+ * - `border`: Optional bordered presentation whose outer box is identical to the unbordered form. Only `true` is supported; invalid values render unbordered.
  * - `label`: Accessible name for a meaningful mark. Empty or whitespace-only values make it decorative.
  * - `shape`: Optional circular presentation. Only `circle` is supported; invalid values use the square shape.
- * - `size`: Optional compact presentation. Only `sm` is supported; invalid values use the default size.
+ * - `size`: Optional presentation size. Only `sm`/`lg` are supported; invalid values use the default size.
  *
  * ## Slots
  *

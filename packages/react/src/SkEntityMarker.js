@@ -6,6 +6,7 @@ import { createForwardedRefHandler } from "./react-utils.js";
 export const SkEntityMarker = forwardRef((props, forwardedRef) => {
   const ref = useRef(null);
   const {
+    border,
     label,
     shape,
     size,
@@ -27,6 +28,7 @@ export const SkEntityMarker = forwardRef((props, forwardedRef) => {
     {
       ref: createForwardedRefHandler(ref, forwardedRef),
       ...restProps,
+      border: border,
       label: label,
       shape: shape,
       size: size,

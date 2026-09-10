@@ -293,17 +293,19 @@ declare module 'vue' {
     /**
      * A compact consumer-supplied icon, initials, or short mark with explicit accessible naming.
      *
-     * Token dependencies: --sk-font-sans, --sk-on-tint-butter, --sk-radius-pill, --sk-radius-sm,
-     * --sk-space-1, --sk-space-5, --sk-space-7, --sk-surface-tint-butter, --sk-text-xs,
-     * --sk-weight-bold.
+     * Token dependencies: --sk-border-default, --sk-border-width-1, --sk-font-sans,
+     * --sk-on-tint-butter, --sk-radius-pill, --sk-radius-sm, --sk-space-1, --sk-space-5,
+     * --sk-space-7, --sk-space-9, --sk-surface-tint-butter, --sk-text-xs, --sk-weight-bold.
      */
     'sk-entity-marker': SkElement<{
+      /** Optional bordered presentation whose outer box is identical to the unbordered form. Only `true` is supported; invalid values render unbordered. */
+      'border'?: 'true' | undefined;
       /** Accessible name for a meaningful mark. Empty or whitespace-only values make it decorative. */
       'label'?: string | undefined;
       /** Optional circular presentation. Only `circle` is supported; invalid values use the square shape. */
       'shape'?: 'circle' | undefined;
-      /** Optional compact presentation. Only `sm` is supported; invalid values use the default size. */
-      'size'?: 'sm' | undefined;
+      /** Optional presentation size. Only `sm`/`lg` are supported; invalid values use the default size. */
+      'size'?: 'sm' | 'lg' | undefined;
     }>;
     /**
      * An ordered chain of generic evidence stages composed from real `sk-metric` elements.
