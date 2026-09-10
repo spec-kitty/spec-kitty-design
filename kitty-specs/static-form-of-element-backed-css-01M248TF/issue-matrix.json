@@ -1,7 +1,7 @@
 {
   "rows": {
     "#161": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "Open and unfixed here by design. Reproduced first-hand at this head: the per-component subpath exports resolve to real files, and the ROOT import fails with ERR_MODULE_NOT_FOUND on extensionless relative re-exports in dist/src/index.js \u2014 NOT, as #161's own text states, because dist/src/index.js is never emitted (it is). ADR-15 records the corrected cause; #161 still owns the fix and should be corrected on its stated cause.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -9,8 +9,8 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
     },
     "#239": {
       "evidence_ref": "<link or commit>",
