@@ -1,5 +1,17 @@
 {
   "rows": {
+    "#146": {
+      "evidence_ref": "plan.md L271: prior mission (#146) already added sk-action-row's rows to expected-docs.json/expected-parts.json; this WP confirms (check-manifest-content.mjs/check-part-ratchet.mjs green, zero diff) it does not need to change",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
     "#272": {
       "evidence_ref": "spec.md L59/L252: sibling-not-descendant/no-new-activation already established by #272 in the shadow element; this WP's T005 mutation-proven test re-verifies the same rule for the new static form, does not change it",
       "fr": null,
