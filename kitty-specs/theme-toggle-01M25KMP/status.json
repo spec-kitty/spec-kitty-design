@@ -19,7 +19,7 @@
   "work_packages": {
     "WP01": {
       "actor": "codex",
-      "agent": null,
+      "agent": "codex",
       "agent_profile": "__resolved_profile_absent__",
       "agent_profile_version": "__resolved_profile_version_absent__",
       "assignee": "codex",
@@ -41,7 +41,8 @@
         "Fresh Codex remediation turn for adversarial review cycle 4.",
         "Cycle-4 remediation complete at 8d21f62b; full npm test 665/665 and focused overlap tests 2/2.",
         "Fresh Codex frontend-freddy seat, invocation 01M268WA2VXGM1DX4X0RBE56T3; cycle 5 bounded exact axe transient retry",
-        "Cycle 5 remediation: exact axe concurrency transient bounded-retry stress 12/12; Chromium 627/627; ready for fresh exact-head review"
+        "Cycle 5 remediation: exact axe concurrency transient bounded-retry stress 12/12; Chromium 627/627; ready for fresh exact-head review",
+        "Review-cycle-6 remediation started by a fresh Codex frontend-freddy seat; governed Op 01M26DDXM559KWABQZGM9ST1Z6. No Claude transport invoked."
       ],
       "provider": "__resolved_provider_absent__",
       "review": null,
