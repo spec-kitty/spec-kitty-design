@@ -1825,6 +1825,33 @@ a large total, and a long label) plus both modifiers — see
 styles-only class ruling for why no `sk-progress` element exists. Negative values or a `value`
 exceeding `max` are consumer validation, not a concern this component's CSS or markup enforces.
 
+**Indeterminate** (#306) — unknown-duration activity, the same markup shape, one modifier:
+
+```html
+<div class="sk-progress sk-progress--indeterminate">
+  <label class="sk-progress__label" for="sync-progress">Syncing your changes</label>
+  <progress class="sk-progress__bar" id="sync-progress"></progress>
+</div>
+```
+
+`sk-progress--indeterminate` is a root-class modifier, orthogonal to `--compact`/`--narrow` (all
+three combine freely). The only markup change from the determinate contract is that `<progress>`
+carries **no `value` attribute at all** — never an empty string, never an out-of-range value relied
+on for parse-failure behaviour. `sk-progress__meta` becomes optional for this state (its absence is
+a supported, tested state); when supplied, its text must never read as a percentage (there is no
+percentage to state) — a short status word like "Syncing…" is the intended use. No ARIA is added:
+the native, valueless `<progress>` plus the existing `for`/`id` label pair remains the sole
+accessibility mechanism.
+
+The activity look is an authored, `--sk-motion-*`-token-driven animation (a sweeping gradient), not
+a reliance on any browser's own default indeterminate paint — this keeps rendering consistent across
+Chromium, Firefox, and WebKit, and lets `prefers-reduced-motion: reduce` genuinely stop it. Under
+reduced motion the animation stops but the track stays visibly present at a fixed, partial frame —
+never fully empty, never fully full, so it is never mistaken for the Zero or Complete determinate
+states. This family does not share its activity cue with `sk-button`'s own busy-state affordance —
+see `kitty-specs/progress-indeterminate-01M25C78/spec.md`'s "Cross-Mission Decision: TKT5/TKT6
+Activity Cue" section for the ruling.
+
 [View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/primitives-skprogress-html--default)
 
 ---

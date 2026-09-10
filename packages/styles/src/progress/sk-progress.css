@@ -17,6 +17,26 @@
  * Three flat children, always in this order — no wrapper div between them, so every
  * layout arrangement below is expressed as a flex direction/sizing rule on the root
  * and its direct children, never a restructure.
+ *
+ * Indeterminate (#306, mission progress-indeterminate-01M25C78): a root modifier,
+ * `.sk-progress--indeterminate`, expresses unknown-duration activity with the
+ * SAME three-flat-children markup, one change only — `<progress class="sk-
+ * progress__bar">` carries no `value` attribute at all (not an empty string, not
+ * an out-of-range value):
+ *   <div class="sk-progress sk-progress--indeterminate">
+ *     <label class="sk-progress__label" for="<id>">...</label>
+ *     <progress class="sk-progress__bar" id="<id>"></progress>
+ *     <span class="sk-progress__meta">...</span>  <!-- OPTIONAL for this state -->
+ *   </div>
+ * `sk-progress__meta` becomes optional for this state (its absence is a
+ * supported, tested state) and, when present, must never read as a percentage
+ * — there is no percentage to state. No ARIA is added anywhere; the native,
+ * valueless `<progress>` plus the existing `for`/`id` label pair is the sole
+ * accessibility mechanism, unchanged in mechanism from the determinate case.
+ * This family does NOT share its activity cue with `sk-button`/#305 — see
+ * spec.md's "Cross-Mission Decision: TKT5/TKT6 Activity Cue" section
+ * (kitty-specs/progress-indeterminate-01M25C78/spec.md) for the ruling and its
+ * reasoning; nothing below is designed, named, or structured for reuse there.
  */
 
 .sk-progress {
@@ -91,6 +111,132 @@
 }
 
 /*
+ * Indeterminate (FR-001, FR-007): an AUTHORED, token-driven animation — never
+ * a reliance on each engine's own default indeterminate paint. research.md
+ * R-05 records why: native indeterminate rendering (a) is not an author
+ * `animation`/`transition`, so `prefers-reduced-motion` cannot switch it off
+ * on its own, which would make FR-008 unsatisfiable, and (b) is itself the
+ * named cross-engine divergence risk this mission exists to avoid.
+ *
+ * MEASURED, NOT ASSUMED (T001/T002), TWO separate findings:
+ *
+ * 1. Chromium generates no paintable `::-webkit-progress-value` box at all
+ *    for an indeterminate `<progress>` — confirmed by an isolated probe
+ *    outside this component's own CSS entirely: a bare
+ *    `progress:indeterminate::-webkit-progress-value { background: red }`
+ *    paints nothing, while the identical selector without `:indeterminate`
+ *    paints normally for a determinate value. Firefox's `::-moz-progress-bar`,
+ *    by contrast, DOES paint for the indeterminate case. WebKit cannot be
+ *    measured on this host (R-04) and may match either behaviour. To avoid
+ *    gambling on which mechanism a given engine uses, the SAME sweep is
+ *    authored on TWO surfaces below: the host `.sk-progress__bar` element's
+ *    own background (which always paints — the track border/background
+ *    already prove this for every state) as the resilient base layer, and
+ *    the vendor pseudo-elements as an enhancement for engines that also
+ *    paint those.
+ * 2. A comma-separated selector list that MIXES a plain selector (or a
+ *    `::-webkit-*` pseudo) with an unrecognised `::-moz-*` pseudo (or vice
+ *    versa) is dropped WHOLESALE by Chromium — not just the unrecognised
+ *    branch. Confirmed by isolated probe: `.a, .a::-moz-progress-bar { … }`
+ *    applies NEITHER declaration to `.a` in Chromium, where `.a { … }` alone
+ *    applies normally; a plain grouped selector list is not "forgiving" the
+ *    way `:is()`/`:where()` are. This is exactly why the determinate rules
+ *    above (`::-webkit-progress-value` / `::-moz-progress-bar`) already live
+ *    in two SEPARATE rule blocks rather than one combined list — that
+ *    existing convention is followed deliberately below, never combined,
+ *    even though it duplicates declarations three ways (host / webkit /
+ *    moz).
+ *
+ * Technique: a soft gradient band, twice the track's own width, swept by
+ * animating `background-position` from fully off the left edge to fully off
+ * the right edge, looping — a standard "search-light" sweep. This is the
+ * `--sk-motion-*`-token-driven activity cue itself.
+ */
+.sk-progress--indeterminate .sk-progress__bar {
+  background-color: var(--sk-surface-input);
+  background-image: linear-gradient(90deg, transparent 0%, var(--sk-color-yellow) 50%, transparent 100%);
+  background-size: 200% 100%;
+  background-repeat: no-repeat;
+  animation-name: sk-progress-indeterminate-sweep;
+  animation-duration: var(--sk-motion-duration-slow);
+  animation-timing-function: var(--sk-motion-ease-in-out);
+  animation-iteration-count: infinite;
+}
+
+/* The pseudo-element layer (Firefox; a harmless no-op where Chromium/WebKit
+   never paint it — see finding 1 above): span the full track, since there is
+   no value/max pair for the browser to size it from, and clear the solid
+   fill colour so the gradient (not a block) is what reads as the fill. */
+.sk-progress--indeterminate .sk-progress__bar::-webkit-progress-value {
+  appearance: none;
+  width: 100%;
+  background-color: transparent;
+  background-image: linear-gradient(90deg, transparent 0%, var(--sk-color-yellow) 50%, transparent 100%);
+  background-size: 200% 100%;
+  background-repeat: no-repeat;
+  border-radius: var(--sk-radius-pill);
+  animation-name: sk-progress-indeterminate-sweep;
+  animation-duration: var(--sk-motion-duration-slow);
+  animation-timing-function: var(--sk-motion-ease-in-out);
+  animation-iteration-count: infinite;
+}
+
+.sk-progress--indeterminate .sk-progress__bar::-moz-progress-bar {
+  appearance: none;
+  width: 100%;
+  background-color: transparent;
+  background-image: linear-gradient(90deg, transparent 0%, var(--sk-color-yellow) 50%, transparent 100%);
+  background-size: 200% 100%;
+  background-repeat: no-repeat;
+  border-radius: var(--sk-radius-pill);
+  animation-name: sk-progress-indeterminate-sweep;
+  animation-duration: var(--sk-motion-duration-slow);
+  animation-timing-function: var(--sk-motion-ease-in-out);
+  animation-iteration-count: infinite;
+}
+
+@keyframes sk-progress-indeterminate-sweep {
+  from {
+    background-position: -100% 0;
+  }
+
+  to {
+    background-position: 200% 0;
+  }
+}
+
+/*
+ * Reduced motion (FR-008, NFR-005): the animation stops, but the frozen frame
+ * is fixed at `background-position: 50% 0` — the gradient band's own
+ * midpoint, which paints a soft, visibly-present band roughly centred in the
+ * track. This is deliberately neither the Complete determinate fixture's
+ * fully-full fill nor the Zero determinate fixture's fully-empty one (both of
+ * which are solid `background-color` fills at 100%/0% width, a different
+ * rendering mechanism entirely from this gradient-band technique) — the
+ * inverse of the usual reflex, where stopping motion means hiding the
+ * indicator: here the track must stay visibly present. User Story 3's
+ * acceptance scenarios measure this frame directly; it is not assumed from
+ * "the animation stops" alone. Three separate rules, per the measured
+ * grouped-selector-list hazard documented above.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .sk-progress--indeterminate .sk-progress__bar {
+    animation-name: none;
+    background-position: 50% 0;
+  }
+
+  .sk-progress--indeterminate .sk-progress__bar::-webkit-progress-value {
+    animation-name: none;
+    background-position: 50% 0;
+  }
+
+  .sk-progress--indeterminate .sk-progress__bar::-moz-progress-bar {
+    animation-name: none;
+    background-position: 50% 0;
+  }
+}
+
+/*
  * Forced-colors: the track's plain `border` above survives automatically — no
  * override needed (adding-a-component.md's forced-colors section, and this
  * repo's own sk-skip-link/sk-data-table measurements). The fill is
@@ -99,16 +245,60 @@
  * sk-skip-link.css / sk-data-table.css's established pattern. `Highlight` is
  * already in stylelint.config.mjs's `ignoreValues` — no config change needed.
  *
- * No reduced-motion block: no transition is authored on the fill. This
- * mission's fixtures are static snapshots (no live `value` mutation), and
- * FR-010/AC-2 explicitly allows the reduced-motion requirement to be
- * "satisfied vacuously" when no transition exists — adding one here with
- * nothing to guard would be exactly the dead-guard shape
- * adding-a-component.md warns against (sk-transition-matrix.css:237).
+ * No reduced-motion block for the determinate rules above: no transition is
+ * authored on the determinate fill. Those fixtures are static snapshots (no
+ * live `value` mutation), and FR-010/AC-2 explicitly allows the
+ * reduced-motion requirement to be "satisfied vacuously" when no transition
+ * exists — adding one here with nothing to guard would be exactly the
+ * dead-guard shape adding-a-component.md warns against
+ * (sk-transition-matrix.css:237). The indeterminate rule above is the real,
+ * non-vacuous guard this mission adds.
  */
 @media (forced-colors: active) {
   .sk-progress__bar::-webkit-progress-value,
   .sk-progress__bar::-moz-progress-bar {
     background-color: Highlight;
+  }
+
+  /*
+   * T002 — measured, not assumed: `.sk-progress--indeterminate`'s own rules
+   * above have higher selector specificity (two classes) than the unscoped
+   * override immediately above (one class), so without this block the
+   * indeterminate fill's gradient `background-image` (and, on the host
+   * layer, its `background-color: var(--sk-surface-input)`) would keep
+   * winning the cascade even under forced-colors, leaking an unstyled fill.
+   * This block matches that higher specificity on BOTH surfaces — the host
+   * (the layer Chromium actually renders for indeterminate, per the measured
+   * note above) and the pseudo-elements (Firefox) — flattens each to a solid
+   * `Highlight` fill, and explicitly clears the gradient so the animation
+   * (left running, harmlessly — `background-position` has nothing left to
+   * move) has nothing to sweep. The result is legible identically at every
+   * point in the animation cycle, verified by sampling more than one (see
+   * apps/storybook/src/tests/sk-progress.spec.ts). Because the host is now
+   * the fill's own paint surface, its `Highlight` background necessarily
+   * matches the fill's colour rather than contrasting with it the way the
+   * determinate track's auto-flattened `Canvas` background does — the
+   * track's `border` remains the boundary signal in that case, exactly as
+   * the existing forced-colors test for this family already checks (border
+   * vs. page background, not track-fill-vs-track-background), so this is a
+   * deliberate, documented trade-off of the two-surface technique above, not
+   * an oversight. Three separate rules, per the measured grouped-selector-
+   * list hazard documented at the indeterminate rule above (NOT combined the
+   * way the unscoped determinate override two rules up is — that one is
+   * #210's and out of this WP's authorised scope to alter).
+   */
+  .sk-progress--indeterminate .sk-progress__bar {
+    background-color: Highlight;
+    background-image: none;
+  }
+
+  .sk-progress--indeterminate .sk-progress__bar::-webkit-progress-value {
+    background-color: Highlight;
+    background-image: none;
+  }
+
+  .sk-progress--indeterminate .sk-progress__bar::-moz-progress-bar {
+    background-color: Highlight;
+    background-image: none;
   }
 }

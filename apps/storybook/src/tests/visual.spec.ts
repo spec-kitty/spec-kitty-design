@@ -70,6 +70,21 @@ test('SK-progress HTML forced colors — visual baseline', async ({ page }) => {
   await expect(target).toHaveScreenshot('sk-progress-html-forced-colors.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
 });
 
+// #306: chromium-only, matching the repository's existing VR policy (R-04, SC-014
+// — no firefox/webkit pixel baseline is added). `prefers-reduced-motion: reduce`
+// is emulated deliberately: the indeterminate track otherwise animates
+// continuously, and a screenshot of a moving gradient is inherently
+// non-deterministic frame-to-frame. Under reduced motion the CSS freezes the
+// sweep at a fixed, documented `background-position` (sk-progress.css), which
+// makes this baseline reproducible the same way every other static fixture's is.
+test('SK-progress HTML indeterminate (reduced motion) — visual baseline', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/iframe.html?id=primitives-skprogress-html--indeterminate&viewMode=story');
+  const target = page.locator('.sk-progress').first();
+  await target.waitFor({ state: 'visible', timeout: 20000 });
+  await expect(target).toHaveScreenshot('sk-progress-html-indeterminate-reduced-motion.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+});
+
 const eventTimelineStory = async (page: Page, id: string): Promise<Locator> => {
   await page.goto(`/iframe.html?id=primitives-skeventtimeline-html--${id}&viewMode=story`);
   const target = page.locator('.sk-event-timeline').first();

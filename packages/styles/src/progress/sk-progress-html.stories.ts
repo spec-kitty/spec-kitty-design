@@ -9,6 +9,11 @@ import {
   SkProgressCompactHTML,
   SkProgressNarrowHTML,
   SkProgressForcedColorsHTML,
+  SkProgressIndeterminateHTML,
+  SkProgressIndeterminateWithMetaHTML,
+  SkProgressIndeterminateNarrowHTML,
+  SkProgressIndeterminateLongLabelHTML,
+  SkProgressIndeterminateForcedColorsHTML,
 } from './index';
 
 const meta: Meta = {
@@ -50,6 +55,36 @@ export const Narrow: Story = {
 
 export const ForcedColors: Story = {
   render: () => SkProgressForcedColorsHTML,
+};
+
+/**
+ * Indeterminate (#306): a real, valueless `<progress class="sk-progress__bar">`
+ * — no `value` attribute anywhere in the source, no meta. See spec.md's
+ * "Cross-Mission Decision: TKT5/TKT6 Activity Cue" for why this cue is not
+ * shared with sk-button/#305.
+ */
+export const Indeterminate: Story = {
+  render: () => SkProgressIndeterminateHTML,
+};
+
+/** Indeterminate with non-percentage `sk-progress__meta` status text. */
+export const IndeterminateWithMeta: Story = {
+  render: () => SkProgressIndeterminateWithMetaHTML,
+};
+
+/** Indeterminate combined with the existing `--narrow` layout modifier. */
+export const IndeterminateNarrow: Story = {
+  render: () => SkProgressIndeterminateNarrowHTML,
+};
+
+/** Indeterminate combined with a long label, proving no horizontal overflow. */
+export const IndeterminateLongLabel: Story = {
+  render: () => SkProgressIndeterminateLongLabelHTML,
+};
+
+/** Indeterminate under `forced-colors: active` — sampled at multiple points in the animation cycle by the corresponding Playwright test. */
+export const IndeterminateForcedColors: Story = {
+  render: () => SkProgressIndeterminateForcedColorsHTML,
 };
 
 /**

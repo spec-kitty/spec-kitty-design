@@ -1,0 +1,169 @@
+{
+  "mission_slug": "progress-indeterminate-01M25C78",
+  "mission_number": "",
+  "mission_type": "software-dev",
+  "overall_verdict": "pass",
+  "criteria": [
+    {
+      "criterion_id": "FR-001",
+      "description": "Verify FR-001 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "packages/styles/src/progress/sk-progress-indeterminate*.html (root .sk-progress--indeterminate class); apps/storybook/src/tests/sk-progress.spec.ts:271",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T13:10:37.068480+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-002",
+      "description": "Verify FR-002 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "apps/storybook/src/tests/sk-progress.spec.ts:167-183 (no value attribute on any indeterminate fixture)",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T13:10:38.188555+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-003",
+      "description": "Verify FR-003 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "apps/storybook/src/tests/sk-progress.spec.ts:257-268 (flat three-child order: label, bar, meta)",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T13:10:39.324047+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-004",
+      "description": "Verify FR-004 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "apps/storybook/src/tests/sk-progress.spec.ts:203-256 (label for/id association, accessible name)",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T13:10:40.422580+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-005",
+      "description": "Verify FR-005 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "packages/styles/src/progress/sk-progress-indeterminate-with-meta.html; sk-progress.spec.ts:184-189 (meta optional, non-percentage text)",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T13:10:41.473175+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-006",
+      "description": "Verify FR-006 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "apps/storybook/src/tests/sk-progress.spec.ts:141-147 (zero aria-*/role on every authored fixture)",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T13:10:42.693108+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-007",
+      "description": "Verify FR-007 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "packages/styles/src/progress/sk-progress.css:155-220 (authored @keyframes sk-progress-indeterminate-sweep driven by --sk-motion-* tokens); sk-progress.spec.ts:345-353 (sweep actually runs)",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T13:10:51.054188+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-008",
+      "description": "Verify FR-008 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "packages/styles/src/progress/sk-progress.css:222-236 (reduced-motion override); sk-progress.spec.ts:354-387 (stops, frame distinguishable from Complete/Zero)",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T13:10:52.156446+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-009",
+      "description": "Verify FR-009 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "packages/styles/src/progress/sk-progress.css:257-303 (forced-colors block); sk-progress.spec.ts:315-344 (fill legible at two distinct animation-cycle points)",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T13:10:53.293511+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-010",
+      "description": "Verify FR-010 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "packages/styles/src/progress/sk-progress-indeterminate-narrow.html; sk-progress.spec.ts:269-277 (narrow composition preserved)",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T13:10:54.410158+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-011",
+      "description": "Verify FR-011 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "apps/storybook/src/tests/sk-progress.spec.ts:148-166,190-241 (determinate fixtures/tests unchanged); full vitest/playwright suite re-run in gate step confirms no regression",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T13:10:55.506126+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-012",
+      "description": "Verify FR-012 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "packages/styles/src/progress/sk-progress-indeterminate{,-with-meta,-narrow,-long-label,-forced-colors}.html (5 fixtures); sk-progress.spec.ts:170-183 (>=5 assertion)",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T13:10:56.641934+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-013",
+      "description": "Verify FR-013 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "playwright.config.ts:26-40 (chromium/firefox/webkit projects, unfiltered playwright job); WebKit assertions verified on CI per mission convention, not locally",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T13:11:02.942717+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-014",
+      "description": "Verify FR-014 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "apps/storybook/src/tests/sk-progress.spec.ts:74-75,148-153 (isIndeterminate helper scopes value/max/percentage test to determinate fixtures only, added in the same commit as the first indeterminate fixture)",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T13:11:04.016243+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-015",
+      "description": "Verify FR-015 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "packages/styles/src/progress/sk-progress-html.stories.ts (LightMode story wrapped class=\"sk-light\"); sk-progress.spec.ts:421-450 (LightMode resolves genuinely different computed styling than Default)",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T13:11:05.111034+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-016",
+      "description": "Verify FR-016 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "find packages/elements/src -iname '*progress*' returns no results; no custom element, ::part(), or manifest/React/Vue wrapper entry added",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T13:11:06.220064+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    }
+  ],
+  "negative_invariants": []
+}
