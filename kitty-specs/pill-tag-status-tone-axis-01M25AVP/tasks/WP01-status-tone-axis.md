@@ -34,7 +34,7 @@ requirement_refs:
 - FR-019
 planning_base_branch: mission/pill-tag-status-tone-axis
 merge_target_branch: mission/pill-tag-status-tone-axis
-branch_strategy: Planning artifacts for this mission were generated on mission/pill-tag-status-tone-axis. During /spec-kitty.implement this WP may branch from a dependency-specific base, but completed changes must merge back into mission/pill-tag-status-tone-axis unless the human explicitly redirects the landing branch.
+branch_strategy: Planning artifacts for this mission were generated on mission/pill-tag-status-tone-axis (single_branch topology). During /spec-kitty.implement this WP commits directly on mission/pill-tag-status-tone-axis; completed changes stay on that branch for the mission's one PR unless the human explicitly redirects the landing branch.
 subtasks:
 - T001
 - T002
