@@ -70,10 +70,20 @@
 }
 
 /* ---- Danger-secondary: reuses the secondary SHAPE with the danger role's own boundary ----
-   Binding under BORDER-ROLE-319 (kitty-specs/../.../_program-319/DECISION-border-role.md): this
-   tone never reaches for --sk-border-default/--sk-border-strong (#155's failing hairline). The
-   control boundary IS the danger role itself, `--sk-on-status-danger`, already published and used
-   by sk-status-indicator and sk-pill-tag's status axis. No new token.
+   Binding under BORDER-ROLE-319 (kitty-specs/../.../_program-319/DECISION-border-role.md): THIS
+   TONE'S OWN RULES never reach for --sk-border-default/--sk-border-strong (#155's failing
+   hairline). The control boundary IS the danger role itself, `--sk-on-status-danger`, already
+   published and used by sk-status-indicator and sk-pill-tag's status axis. No new token.
+   SCOPE OF THAT CLAIM, stated precisely (pre-merge squad finding #5, two lenses
+   independently): it covers this tone's own selectors below, not the composed
+   `danger-secondary` + `busy` state. `.sk-button__busy-cue` (the busy axis, #305/#327, bottom
+   of this file)'s resting ring is `border-color: var(--sk-border-default)`, with only a
+   `.sk-button--primary .sk-button__busy-cue` override for the other tone — so a BUSY
+   `danger-secondary` button currently paints that ring in the exact hairline this tone's own
+   boundary rule exists to avoid. That is the busy axis's own coverage gap, not this tone's — no
+   per-tone cue colour override is added here (out of scope for this mission; filed separately)
+   — but the claim above is scoped to this tone's OWN rules so a reader does not mistake it for
+   covering the composed state too.
    MEASURED (WCAG 1.4.11), independently re-derived on this branch, not quoted from BORDER-ROLE-319:
      --sk-on-status-danger vs --sk-surface-page:   6.58:1 dark  / 10.12:1 light
      --sk-on-status-danger vs --sk-surface-card:   5.94:1 dark  / 11.04:1 light
