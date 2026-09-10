@@ -37,7 +37,7 @@
       "wp": null
     },
     "#300": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "Parent epic, cited not worked. This mission closes epic child gap G0 only; #300 stays open and owns the remaining Family 4 gaps.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -45,8 +45,8 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
     },
     "#301": {
       "evidence_ref": "This mission's own issue. ADR-15 (docs/architecture/decisions/2026-09-10-15-static-form-of-element-backed-css.md) is the recorded ruling; measurement under kitty-specs/static-form-of-element-backed-css-01M248TF/measurement/. Acceptance items 1-9 answered; the ruling is Proposed and #301 itself stays open pending the operator's ratification and the Family 4 product verdict it names.",
