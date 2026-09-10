@@ -823,7 +823,13 @@ test.describe('sk-pill-tag forced colors', () => {
  */
 const buttonForcedColorsStory = async (page: Page) => {
   await page.goto('/iframe.html?id=elements-skbutton--forced-colors&viewMode=story');
-  await expect(page.locator('sk-button[variant="danger-secondary"] button')).toBeVisible({ timeout: 20000 });
+  // `.first()`: the story now renders THREE danger-secondary hosts (default, sm, icon — added
+  // for the size="icon"/size="sm" extension below), so the bare selector is a strict-mode
+  // violation. This is only a readiness gate — the tests below each pick their own
+  // size-qualified locator.
+  await expect(page.locator('sk-button[variant="danger-secondary"] button').first()).toBeVisible({
+    timeout: 20000,
+  });
 };
 
 test.describe('sk-button forced colors', () => {
@@ -844,8 +850,8 @@ test.describe('sk-button forced colors', () => {
         await page.emulateMedia({ forcedColors, colorScheme });
         await buttonForcedColorsStory(page);
         return {
-          secondary: await borderWidth(page.locator('sk-button[variant="secondary"]')),
-          dangerSecondary: await borderWidth(page.locator('sk-button[variant="danger-secondary"]')),
+          secondary: await borderWidth(page.locator('sk-button[variant="secondary"]:not([size])')),
+          dangerSecondary: await borderWidth(page.locator('sk-button[variant="danger-secondary"]:not([size])')),
         };
       };
 
@@ -857,6 +863,12 @@ test.describe('sk-button forced colors', () => {
         normal.dangerSecondary,
         `${colorScheme}: outside forced-colors, danger-secondary must share the 1px base border with secondary`,
       ).toBe(normal.secondary);
+      // THE ABSOLUTE ANCHOR (pre-merge squad finding #2): the two lines above are both purely
+      // RELATIVE, so deleting `.sk-button`'s own `border: 1px solid transparent` — or zeroing
+      // secondary's width some other way — keeps them green (0 === 0) while secondary silently
+      // loses its only forced-colors affordance. Name the literal, matching the sk-pill-tag
+      // precedent this case models itself on.
+      expect(normal.secondary, `${colorScheme}: the base border is 1px, not merely equal to itself`).toBe(1);
 
       const forced = await measure('active');
       // THE FLOOR'S OWN FLOOR, matching the sk-card/sk-pill-tag cases' own guard against a
@@ -866,6 +878,14 @@ test.describe('sk-button forced colors', () => {
         'the chromium floor below is keyed on this project name',
       ).toContain('chromium');
       if (browserName === 'chromium') {
+        // SECONDARY'S OWN FORCED-COLORS FLOOR (finding #2, continued): secondary must still
+        // carry its 1px border under forced colors — this is what rules out "the comparator was
+        // degraded to make danger-secondary look relatively wider" as a way to pass the
+        // inequality below.
+        expect(
+          forced.secondary,
+          `${colorScheme}: secondary must keep its 1px border under forced colors`,
+        ).toBe(normal.secondary);
         // THE MECHANISM, comparative: danger-secondary's forced-colors border must be strictly
         // wider than plain secondary's, on the same page, same emulation, same colour scheme.
         expect(
@@ -874,5 +894,55 @@ test.describe('sk-button forced colors', () => {
         ).toBeGreaterThan(forced.secondary);
       }
     }
+  });
+
+  /**
+   * Pre-merge squad finding #7: the layout consequence sk-button.css's own comment states
+   * (`size="icon"`'s `box-sizing: border-box` absorbs the forced-colors width step; default and
+   * `size="sm"` — both `content-box` — grow by 1px per side) was asserted in prose only. Proven
+   * here at both sizes, on the SAME `ForcedColors` story extended with sm/icon pairs above.
+   */
+  test('the forced-colors width step is absorbed at size="icon" and grows the box at size="sm"', async ({
+    page,
+    browserName,
+  }) => {
+    test.skip(browserName !== 'chromium', 'forced-colors emulation is asserted on chromium only, matching the case above');
+
+    const boxSize = (locator: Locator) =>
+      locator.evaluate((node) => {
+        const control = node.shadowRoot!.querySelector('[part="button"]')!;
+        const rect = control.getBoundingClientRect();
+        return { width: rect.width, height: rect.height };
+      });
+
+    const measure = async (forcedColors: 'none' | 'active') => {
+      await page.emulateMedia({ forcedColors, colorScheme: 'dark' });
+      await buttonForcedColorsStory(page);
+      return {
+        sm: await boxSize(page.locator('sk-button[variant="danger-secondary"][size="sm"]')),
+        icon: await boxSize(page.locator('sk-button[variant="danger-secondary"][size="icon"]')),
+      };
+    };
+
+    const normal = await measure('none');
+    const forced = await measure('active');
+
+    // ICON: box-sizing: border-box absorbs the extra pixel — the box must NOT grow.
+    expect(forced.icon.width, 'size="icon" must not grow under forced colors').toBe(normal.icon.width);
+    expect(forced.icon.height, 'size="icon" must not grow under forced colors').toBe(normal.icon.height);
+    // A FLOOR under the "did not grow" claim: icon stays the documented 40px square in both
+    // modes, so "did not grow" is not vacuously true over a box that was already zero.
+    expect(Math.round(normal.icon.width), 'size="icon" width').toBe(40);
+    expect(Math.round(normal.icon.height), 'size="icon" height').toBe(40);
+
+    // SM: content-box, no compensation — the box grows by 1px per side (2px total) on each axis.
+    expect(forced.sm.width, 'size="sm" must grow by 1px per side under forced colors').toBeCloseTo(
+      normal.sm.width + 2,
+      1,
+    );
+    expect(forced.sm.height, 'size="sm" must grow by 1px per side under forced colors').toBeCloseTo(
+      normal.sm.height + 2,
+      1,
+    );
   });
 });

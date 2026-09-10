@@ -1,6 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/web-components';
 import './sk-button.js';
 
+const hostFrom = (canvasElement: HTMLElement): HTMLElement =>
+  canvasElement.querySelector('sk-button') as HTMLElement;
+
 /**
  * <sk-button> — #79's primitives batch.
  *
@@ -82,6 +85,7 @@ export const Busy: Story = {
       <sk-button variant="secondary" busy>Saving</sk-button>
       <sk-button variant="ghost" busy>Saving</sk-button>
       <sk-button busy>Saving</sk-button>
+      <sk-button variant="danger-secondary" busy>Deny</sk-button>
     </div>
   `,
 };
@@ -117,10 +121,20 @@ export const DangerSecondaryIcon: Story = {
     '<sk-button variant="danger-secondary" size="icon" label="Deny"><span aria-hidden="true">✕</span></sk-button>',
 };
 
-/** Focus the host to preview the delegated focus-visible treatment, same pattern as `IconFocus`. */
+/**
+ * Actually focuses the delegated real control (pre-merge squad finding #8) — unlike `IconFocus`
+ * above (a pre-existing #79 story this one originally mirrored byte-for-byte apart from its
+ * label), which has no `play` and previews nothing without a human opening it and tabbing in.
+ * `play` here matches `sk-copy-field.stories.ts`'s `Focused` story: focus the shadow
+ * `[part="button"]` directly, so the focus-visible treatment is addressable evidence, not a
+ * decoy of the shape this repo has already deleted once (see expected-stories.json's #176 note).
+ */
 export const DangerSecondaryFocus: Story = {
   render: () =>
     '<sk-button variant="danger-secondary" size="icon" label="Focus preview"><span aria-hidden="true">✕</span></sk-button>',
+  play: async ({ canvasElement }) => {
+    (hostFrom(canvasElement).shadowRoot!.querySelector('[part="button"]') as HTMLButtonElement).focus();
+  },
 };
 
 /** `disabled`, mirroring the primary-tone `Disabled` story above. */
@@ -166,9 +180,13 @@ export const LightMode: Story = {
  */
 export const ForcedColors: Story = {
   render: () => `
-    <div style="display:flex; gap:var(--sk-space-4); align-items:center;">
+    <div style="display:flex; gap:var(--sk-space-4); align-items:center; flex-wrap:wrap;">
       <sk-button variant="secondary">Secondary</sk-button>
       <sk-button variant="danger-secondary">Deny</sk-button>
+      <sk-button variant="secondary" size="sm">Secondary</sk-button>
+      <sk-button variant="danger-secondary" size="sm">Deny</sk-button>
+      <sk-button variant="secondary" size="icon" label="Secondary action"><span aria-hidden="true">•</span></sk-button>
+      <sk-button variant="danger-secondary" size="icon" label="Deny"><span aria-hidden="true">✕</span></sk-button>
     </div>
   `,
 };

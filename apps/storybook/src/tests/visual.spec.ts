@@ -2453,6 +2453,16 @@ test('SK-button danger-secondary light mode — visual baseline', async ({ page 
   // scoped-locator-inside-a-shared-story pattern SK-section-header and SK-status-indicator use
   // above, rather than a bespoke single-tone LightMode story.
   await page.goto('/iframe.html?id=elements-skbutton--light-mode&viewMode=story');
+  // COUNTED BEFORE `.first()` (pre-merge squad finding #11), matching the SK-status-indicator
+  // case's own `toHaveCount(6)` guard above. LightMode now renders TWO danger-secondary hosts
+  // (the plain text button and the size="icon" one added alongside it) — `.first()` alone
+  // silently picks whichever the story markup happens to list first, and a reorder would swap
+  // which button this baseline is actually of with no signal. This makes that count an
+  // assertion, not an assumption.
+  await expect(
+    page.locator('sk-button[variant="danger-secondary"]'),
+    'the LightMode story is expected to render exactly two danger-secondary hosts',
+  ).toHaveCount(2);
   const host = dangerSecondaryButtonHost(page);
   await host.waitFor({ state: 'visible', timeout: 20000 });
   await expect(host.locator('button')).toBeVisible();

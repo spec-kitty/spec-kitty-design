@@ -36,20 +36,31 @@ beforeEach(installTokenSheet);
 const authoredButtonSheet = new CSSStyleSheet();
 authoredButtonSheet.replaceSync(skButtonCss);
 
-const rootStyleRuleFor = (selector: string): CSSStyleRule | undefined =>
-  Array.from(authoredButtonSheet.cssRules).find(
-    (rule): rule is CSSStyleRule => rule instanceof CSSStyleRule && rule.selectorText === selector,
-  );
-
-const mediaRuleFor = (query: string): CSSMediaRule | undefined =>
-  Array.from(authoredButtonSheet.cssRules).find(
-    (rule): rule is CSSMediaRule => rule instanceof CSSMediaRule && rule.media.mediaText === query,
-  );
-
 const styleRuleFor = (rules: CSSRuleList | readonly CSSRule[], selector: string): CSSStyleRule | undefined =>
   Array.from(rules).find(
     (rule): rule is CSSStyleRule => rule instanceof CSSStyleRule && rule.selectorText === selector,
   );
+
+// ROOT-SCOPED, ONE IMPLEMENTATION. Was a second copy of styleRuleFor's own find/instanceof
+// logic, hardcoded to authoredButtonSheet.cssRules instead of taking rules as a parameter — a
+// pre-merge lens found the duplication. Delegates now; the only difference is the fixed root.
+const rootStyleRuleFor = (selector: string): CSSStyleRule | undefined =>
+  styleRuleFor(authoredButtonSheet.cssRules, selector);
+
+// PLURAL, COLLECTING ALL MATCHES — not `.find()`'s first-match. A pre-merge lens (two,
+// independently) found the forced-colors busy-cue check below calling a first-match
+// `mediaRuleFor` while its own comment claimed the guard held "regardless of how many other
+// tones gain their own forced-colors rules later" — a property `.find()` does not have: a
+// SECOND `@media (forced-colors: active)` block carrying a busy-cue override would sit past
+// index 0 and never be checked. `mediaRuleFor` (singular) still exists for the
+// prefers-reduced-motion caller below, which has exactly one block and no claim about future
+// ones; it now delegates to this one rather than duplicating the scan.
+const mediaRulesFor = (query: string): CSSMediaRule[] =>
+  Array.from(authoredButtonSheet.cssRules).filter(
+    (rule): rule is CSSMediaRule => rule instanceof CSSMediaRule && rule.media.mediaText === query,
+  );
+
+const mediaRuleFor = (query: string): CSSMediaRule | undefined => mediaRulesFor(query)[0];
 
 const mount = async (attrs: Record<string, string> = {}, label = 'Label') => {
   const el = document.createElement('sk-button');
@@ -351,7 +362,7 @@ test('the static ANCHOR branch renders, and href cannot break out of the attribu
   ).toBe('/s?a=1&b=2');
 });
 
-test('the primary tone PAINTS, and the three tones are distinct', async () => {
+test('the primary tone PAINTS, and the four tones are distinct', async () => {
   // RENAMED AND STRENGTHENED. The old name said "every tone PAINTS" and no assertion proved any
   // tone painted: deleting `background: var(--sk-color-yellow)` from --primary left three still
   // distinct triples, so the component's whole visual contract was deletable green. A lens
@@ -423,6 +434,14 @@ test('danger-secondary declares :active { transform: scale(0.97) }, scoped to it
 test('danger-secondary border and text colour resolve to --sk-on-status-danger, in both themes', async () => {
   // Same two-theme token-boundary probe pattern as "icon controls are exactly 40px square and
   // token-focus-visible in both themes" above, applied to the new tone's own boundary token.
+  //
+  // THE RESOLVED TOKEN IS HOISTED OUT OF THE LOOP, into a record that survives both iterations
+  // (pre-merge squad finding #3). Before this, `computed` and `resolvedToken` were both read
+  // from the SAME live frame in the SAME iteration — so if `.sk-light` silently stopped
+  // applying, both would independently settle on the dark palette's value and agree with each
+  // other, and this test would pass while testing the dark theme twice. Recording each theme's
+  // resolved value here lets the cross-theme floor below catch exactly that failure mode.
+  const resolved: Record<'dark' | 'light', string> = { dark: '', light: '' };
   for (const theme of ['dark', 'light'] as const) {
     const frame = document.createElement('div');
     if (theme === 'light') frame.className = 'sk-light';
@@ -439,14 +458,35 @@ test('danger-secondary border and text colour resolve to --sk-on-status-danger, 
     tokenProbe.style.color = 'var(--sk-on-status-danger)';
     frame.append(tokenProbe);
     const resolvedToken = getComputedStyle(tokenProbe).color;
+    resolved[theme] = resolvedToken;
 
     expect(computed.borderColor, `${theme} danger-secondary border colour`).toBe(resolvedToken);
     expect(computed.color, `${theme} danger-secondary text colour`).toBe(resolvedToken);
     frame.remove();
   }
+
+  // THE CROSS-THEME FLOOR: this is the mission's headline accessibility claim (independently
+  // re-measured contrast, per theme), and until this line no assertion in this file could fail
+  // if the light theme silently never applied. `--sk-on-status-danger` is a genuinely different
+  // colour per theme by design (dark #E97373, light #6B2424), so the two resolved values must
+  // differ.
+  expect(
+    resolved.light,
+    'the light and dark themes must resolve danger-secondary to different colours',
+  ).not.toBe(resolved.dark);
 });
 
-test('danger-secondary has no new copy default anywhere in source (FR-017)', () => {
+// PARSED PAST THE COMMENTS, NOT GREPPED OVER THEM — the same technique
+// sk-page-header.test.ts's own import-graph scan already establishes in this suite (its own
+// docblock: "A raw grep would match the docblock above that explains why these APIs are
+// absent"). Pre-merge squad finding #6: the original `/deny|decline/i` regex ran over the
+// WHOLE file text, so it would red the moment either source file's own JSDoc used the word
+// "Deny" in prose (e.g. documenting which tone a consumer should reach for) — a defect report
+// about a hardcoded copy default that was never there.
+const stripComments = (source: string): string =>
+  source.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/[^\n]*/g, '$1');
+
+test('danger-secondary has no new copy default anywhere in source (FR-017)', async () => {
   // The generated static default stays the shared 'Label' placeholder — the label is always
   // consumer-supplied (#286), even for a tone whose real-world use is a deny/decline action.
   expect(buttonStaticHtml({ variant: 'danger-secondary' })).toBe(
@@ -454,14 +494,40 @@ test('danger-secondary has no new copy default anywhere in source (FR-017)', () 
   );
 
   // A TARGETED assertion (not #286's repo-wide gate): the two source files this WP authors must
-  // not smuggle in a hardcoded "Deny"/"Decline" default. Stories and docs are allowed to use
-  // those words as EXAMPLE values — only the two authored source modules are checked here.
+  // not smuggle in a hardcoded "Deny"/"Decline" default OUTSIDE their comments. Stories and docs
+  // are allowed to use those words as EXAMPLE values; a JSDoc/line comment describing when to
+  // reach for this tone is allowed too — only executable source (string/template literals,
+  // identifiers, markup) is checked here, which is what strippedComments leaves behind.
   for (const [name, source] of [
     ['sk-button.ts', skButtonElementSource],
     ['sk-button.markup.ts', skButtonMarkupSource],
   ] as const) {
-    expect(/deny|decline/i.test(source), `${name} must not hardcode a copy default`).toBe(false);
+    const stripped = stripComments(source);
+    // ANTI-VACUITY: the stripper must actually have removed something and must not have eaten
+    // the real source — otherwise "no offenders found" is unfalsifiable.
+    expect(stripped.length, `${name}: nothing was stripped — the comment remover is inert`).toBeLessThan(
+      source.length,
+    );
+    expect(stripped, `${name}: the stripper ate the source`).toContain('danger-secondary');
+    expect(/deny|decline/i.test(stripped), `${name} must not hardcode a copy default`).toBe(false);
   }
+
+  // THE ELEMENT PATH, not just the static path (too narrow before this fix — a pre-merge lens
+  // found the element render() branch entirely unasserted here). Mount the REAL element with
+  // variant="danger-secondary" and a genuinely empty slot, and prove the shadow tree
+  // contributes no text of its own: `[part="button"]`'s own DOM textContent is the slot
+  // element's fallback content, which sk-button.ts's template never supplies, so any non-empty
+  // result would mean render() baked in a default rather than leaving the label consumer-owned.
+  const emptySlotEl = document.createElement('sk-button');
+  emptySlotEl.setAttribute('variant', 'danger-secondary');
+  document.body.append(emptySlotEl);
+  await (emptySlotEl as unknown as { updateComplete: Promise<unknown> }).updateComplete;
+  const slot = emptySlotEl.shadowRoot!.querySelector('slot') as HTMLSlotElement;
+  expect(slot.assignedNodes().length, 'an empty slot must have no assigned nodes').toBe(0);
+  expect(
+    (partOf(emptySlotEl).textContent ?? '').trim(),
+    'the shadow tree must contribute no text of its own for danger-secondary',
+  ).toBe('');
 });
 
 test('size is an axis independent of tone', async () => {
@@ -810,16 +876,26 @@ test('[FR-009/FR-010] reduced motion stops the animation while the cue stays vis
   // was always "the cue has no override", and it stays checkable — and this arm stays a real
   // assertion rather than a silently-skipped one — regardless of how many other tones gain
   // their own forced-colors rules later.
-  const forcedColorsBlock = mediaRuleFor('(forced-colors: active)')!;
-  expect(forcedColorsBlock, 'a forced-colors block is expected (danger-secondary\'s), just not for the cue').not.toBeUndefined();
+  //
+  // EVERY MATCHING BLOCK, not just the first (pre-merge squad finding #4, two lenses
+  // independently) — `mediaRulesFor` collects all `@media (forced-colors: active)` blocks in
+  // the sheet, so a SECOND block (a future tone's own step, say) carrying a busy-cue override
+  // cannot sit past index 0 and go unchecked the way a `.find()`-based lookup would let it.
+  const forcedColorsBlocks = mediaRulesFor('(forced-colors: active)');
   expect(
-    styleRuleFor(forcedColorsBlock.cssRules, '.sk-button__busy-cue'),
-    'no forced-colors override should exist for the idle cue rule',
-  ).toBeUndefined();
-  expect(
-    styleRuleFor(forcedColorsBlock.cssRules, busySelector),
-    'no forced-colors override should exist for the busy-visible cue rule',
-  ).toBeUndefined();
+    forcedColorsBlocks.length,
+    'a forced-colors block is expected (danger-secondary\'s), just not one carrying a cue override',
+  ).toBeGreaterThan(0);
+  for (const block of forcedColorsBlocks) {
+    expect(
+      styleRuleFor(block.cssRules, '.sk-button__busy-cue'),
+      'no forced-colors override should exist for the idle cue rule, in any matching block',
+    ).toBeUndefined();
+    expect(
+      styleRuleFor(block.cssRules, busySelector),
+      'no forced-colors override should exist for the busy-visible cue rule, in any matching block',
+    ).toBeUndefined();
+  }
 });
 
 test('[FR-002] the static markup module threads busy through to the shared class list', () => {
