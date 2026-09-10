@@ -24,6 +24,18 @@
       "verdict": "verified-already-fixed",
       "wp": "WP01"
     },
+    "#257": {
+      "evidence_ref": "https://github.com/spec-kitty/spec-kitty-design/issues/257 (sk-copy-field) \u2014 closed; cited in research.md/WP01 tasks as a contrasted precedent for the event-vs-native-close decision. Not touched by this WP.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
     "#286": {
       "evidence_ref": "https://github.com/spec-kitty/spec-kitty-design/issues/286 remains open \u2014 it proposes a repo-wide 'no literal text in render()' gate, which is explicitly NOT this WP's deliverable per FR-018's own docstring. WP01 satisfies the current requirement (zero English/user-visible literals ship while #286 is open, FR-001/FR-017) via a component-scoped test only, and does not close or generalize #286; follow-up remains owned by #286 itself.",
       "fr": null,
