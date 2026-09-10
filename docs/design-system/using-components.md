@@ -782,19 +782,16 @@ Primary, secondary, ghost, and danger-secondary call-to-action buttons used to d
 bordered) with the danger role's own surface/foreground pair, `--sk-status-danger` /
 `--sk-on-status-danger` — the same pair `sk-status-indicator` and `sk-pill-tag`'s status axis
 already publish. It introduces **no new token**: binding under the programme's BORDER-ROLE-319
-ruling, this tone never reaches for `--sk-border-default`/`--sk-border-strong`, the pair
-`.sk-button--secondary`'s own boundary uses and which #155 records as already failing WCAG
-1.4.11. Measured independently on this branch (`ratio : 1`, per theme, against the three
-committed surfaces):
+ruling, this tone's own rules never reach for `--sk-border-default`/`--sk-border-strong`, the
+pair `.sk-button--secondary`'s own boundary uses and which #155 records as already failing WCAG
+1.4.11 — the composed `danger-secondary` + `busy` state is a separate, currently-open coverage
+gap in the busy axis's own cue styling, tracked apart from this tone.
 
-| surface | dark | light |
-|---|---:|---:|
-| `--sk-surface-page` | 6.58:1 | 10.12:1 |
-| `--sk-surface-card` | 5.94:1 | 11.04:1 |
-| `--sk-surface-input` | 5.63:1 | 9.78:1 |
-
-All six clear the 3:1 control-boundary floor with wide margin in both themes. See #155 for the
-coordination record this measurement was posted against.
+All six measured contrast pairs (three surfaces, two themes) clear the 3:1 control-boundary floor
+with wide margin. The figures are kept in one place — the `.sk-button--danger-secondary` header
+comment in `packages/styles/src/button/sk-button.css`, beside the declarations they justify —
+rather than restated here where nothing recomputes them; see #155 for the coordination record
+this measurement was posted against.
 
 Under `forced-colors: active`, `.sk-button--secondary` already gets an automatic border-colour
 remap (its border is unconditional and non-transparent), so `danger-secondary`'s identically
