@@ -127,11 +127,11 @@
     {
       "criterion_id": "FR-013",
       "description": "Verify FR-013 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "proof_type": "manual_verification",
+      "evidence": "Personally reverted sk-button.css's forced-colors border-width to --sk-border-width-1, rebuilt Storybook, ran 'danger-secondary keeps a strictly wider border...' against a scratch Playwright config on port 6199: observed 'Expected: > 1, Received: 1'. Restored source; with the real block, the same test passes under chromium+firefox in the full playwright run.",
+      "pass_fail": "pass",
+      "verified_by": "reviewer-renata",
+      "verified_at": "2026-09-10T15:46:18.364019+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
