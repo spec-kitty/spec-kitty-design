@@ -97,7 +97,7 @@
       "wp": "WP01"
     },
     "#308": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "Precedent mission; its absent-state testing lesson (a closed-state HIGH) is applied here and independently reconfirmed via mutation testing: an unconditional busy-class leak is caught by the [FR-001/FR-006] idle-cue-visibility assertion and the pre-existing exact-match class-list test.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -105,8 +105,8 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
     },
     "#312": {
       "evidence_ref": "The PR that merged #301's ADR-15 ruling into train/elements-first at 5061e68, prior to this mission's base.",
