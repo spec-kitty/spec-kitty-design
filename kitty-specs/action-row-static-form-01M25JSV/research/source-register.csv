@@ -1,0 +1,13 @@
+id,source,type,accessed_at,note
+S1,spec-kitty/spec-kitty-design#307,github-issue,2026-09-10,"Mission brief [TKT7]; the ADR-15 ruling comment carries the binding guidance"
+S2,spec-kitty/spec-kitty-design#300,github-issue,2026-09-10,"Epic; shared constraints, dependency map, #283 coordination note"
+S3,spec-kitty/spec-kitty-design#283,github-issue,2026-09-10,"OPEN, record-list; re-fetched live rather than trusted from epic snapshot"
+S4,spec-kitty/spec-kitty-design#272,github-issue,2026-09-10,"CLOSED, sk-action-row native route mode; source of the sibling-not-descendant rule"
+S5,docs/architecture/decisions/2026-09-10-15-static-form-of-element-backed-css.md,adr,2026-09-10,"ADR-15, read in full including #307-specific paragraph"
+S6,packages/styles/src/action-row/sk-action-row.css,source,2026-09-10,"Read in full including header comment and @container reflow rule"
+S7,packages/elements/src/action-row/sk-action-row.ts,source,2026-09-10,"Read in full: render(), properties, slots, parts, events"
+S8,docs/contributing/adding-a-component.md,doc,2026-09-10,"Recipe; markup-module contract, VARIANTS/AXES generator contract, container-type wrapper guidance"
+S9,packages/elements/src/card/sk-card.markup.ts,source,2026-09-10,"Reference shape for a markup module (VARIANTS + AXES + Classes + StaticHtml)"
+S10,packages/elements/src/button/sk-button.markup.ts,source,2026-09-10,"Reference shape for a two-shape trigger (anchor vs control) markup module"
+S11,packages/elements/src/grid/sk-grid.markup.ts,source,2026-09-10,"Reference shape for AXES derived from a non-variant modifier map"
+S12,scripts/build-element-markup.mjs,source,2026-09-10,"grep of VARIANTS/AXES/staticHtml contract the generator enforces"
