@@ -27,11 +27,11 @@
     {
       "criterion_id": "FR-003",
       "description": "Verify FR-003 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "proof_type": "document_inspection",
+      "evidence": "ADR-15 'Which gated children may freeze a static API': #302 unconditional, #304 split, #305 unconditional, #307 wrapper-form-only with the :host declaration set named.",
+      "pass_fail": "pass",
+      "verified_by": "architect-alphonso",
+      "verified_at": "2026-09-10T01:07:23.436485+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
