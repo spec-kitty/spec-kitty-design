@@ -61,7 +61,7 @@
       "wp": "WP01"
     },
     "#302": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "Gated child, unblocked not worked. ADR-15 'Which gated children may freeze a static API': #302 may freeze now, unconditionally \u2014 sk-pill-tag.css's only :host rule is display: inline-flex, no container-type, no ::slotted(); a tone axis is an ordinary root-class modifier.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -69,8 +69,8 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
     },
     "#304": {
       "evidence_ref": "<link or commit>",
