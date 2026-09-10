@@ -1,7 +1,7 @@
 {
-  "event_count": 6,
-  "last_event_id": "01M25ZW34XBSHEYCR3YVMPQDKX",
-  "materialized_at": "2026-09-10T15:44:37.533933+00:00",
+  "event_count": 7,
+  "last_event_id": "01M26082T62509JAEW0N2VXPKB",
+  "materialized_at": "2026-09-10T15:51:10.406418+00:00",
   "mission_number": "",
   "mission_slug": "form-input-contrast-touch-target-contract-01M25STR",
   "mission_type": "software-dev",
@@ -18,13 +18,13 @@
   },
   "work_packages": {
     "WP01": {
-      "actor": "user",
+      "actor": "claude",
       "agent_profile": "__resolved_profile_absent__",
       "agent_profile_version": "__resolved_profile_version_absent__",
-      "force_count": 0,
+      "force_count": 1,
       "lane": "approved",
-      "last_event_id": "01M25ZW34XBSHEYCR3YVMPQDKX",
-      "last_transition_at": "2026-09-10T15:44:37.533933+00:00",
+      "last_event_id": "01M26082T62509JAEW0N2VXPKB",
+      "last_transition_at": "2026-09-10T15:51:10.406418+00:00",
       "model": "__resolved_model_absent__",
       "notes": [
         "Reviewer: implementation, tests, and gates already complete on the mission branch; catching up runtime state (subtasks marked done, WP moved to for_review) ahead of review-renata's independent pass",
