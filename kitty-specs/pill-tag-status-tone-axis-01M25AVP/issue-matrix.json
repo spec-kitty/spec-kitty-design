@@ -13,7 +13,7 @@
       "wp": null
     },
     "#212": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "https://github.com/spec-kitty/spec-kitty-design/issues/212 \u2014 prior decision confirming sk-card[status] ownership of card anatomy, rejecting a separate sk-avatar; informs this mission's scope only",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -21,7 +21,7 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
+      "verdict": "verified-already-fixed",
       "wp": null
     },
     "#286": {
