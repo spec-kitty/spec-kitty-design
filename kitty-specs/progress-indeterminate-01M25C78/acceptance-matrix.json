@@ -78,10 +78,10 @@
       "criterion_id": "FR-008",
       "description": "Verify FR-008 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "packages/styles/src/progress/sk-progress.css:222-236 (reduced-motion override); sk-progress.spec.ts:354-387 (stops, frame distinguishable from Complete/Zero)",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T13:10:52.156446+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
