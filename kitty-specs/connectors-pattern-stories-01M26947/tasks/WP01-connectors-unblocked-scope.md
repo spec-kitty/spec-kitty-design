@@ -60,7 +60,7 @@ requirement_refs:
 - C-014
 planning_base_branch: mission/connectors-pattern-stories
 merge_target_branch: mission/connectors-pattern-stories
-branch_strategy: Planning artifacts for this mission were generated on mission/connectors-pattern-stories (single_branch topology). Implementation happens directly on this branch; there is no separate lane branch to merge back.
+branch_strategy: Planning artifacts for this mission were generated on mission/connectors-pattern-stories. During /spec-kitty.implement this WP may branch from a dependency-specific base, but completed changes must merge back into mission/connectors-pattern-stories unless the human explicitly redirects the landing branch.
 base_branch: mission/connectors-pattern-stories
 base_commit: 54666c850e58263873acb11c9c851092280753ef
 created_at: '2026-09-10T19:00:00Z'
@@ -77,13 +77,24 @@ subtasks:
 - T010
 - T011
 phase: Phase 1 - Connectors pattern proof (unblocked scope)
-assignee: ""
-agent: ""
-shell_pid: ""
 history:
-  - timestamp: "2026-09-10T19:00:00Z"
-    agent: "system"
-    action: "WP authored by hand following the repository-dossier-pattern-stories precedent, per instruction that spec-kitty tasks --json overwrites hand-authored tasks.md prose"
+- timestamp: '2026-09-10T19:00:00Z'
+  agent: system
+  action: WP authored by hand following the repository-dossier-pattern-stories precedent, per instruction that spec-kitty tasks --json overwrites hand-authored tasks.md prose
+authoritative_surface: packages/elements/src/patterns/connectors.stories.ts
+create_intent:
+- packages/elements/src/patterns/connectors.fixture.ts
+- packages/elements/src/patterns/connectors.stories.ts
+- apps/storybook/src/tests/sk-connectors-pattern.spec.ts
+execution_mode: code_change
+owned_files:
+- packages/elements/src/patterns/connectors.fixture.ts
+- packages/elements/src/patterns/connectors.stories.ts
+- apps/storybook/src/tests/sk-connectors-pattern.spec.ts
+- expected-stories.json
+- docs/design-system/using-components.md
+tags: []
+tracker_refs: []
 ---
 
 # Work Package Prompt: WP01 - Connectors pattern stories, unblocked scope
