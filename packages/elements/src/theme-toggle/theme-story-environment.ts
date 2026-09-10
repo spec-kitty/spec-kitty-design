@@ -6,6 +6,13 @@ import {
 
 export type ThemeStoryParameters = Readonly<{ themePreference?: ThemePreference }>;
 
+type ThemeStoryContext = Readonly<{
+  parameters: ThemeStoryParameters;
+  canvasElement?: ParentNode;
+}>;
+
+const THEME_CONTROL_SELECTOR = 'sk-theme-toggle[data-theme-control]';
+
 const preferenceFor = (parameters: ThemeStoryParameters): ThemePreference =>
   isThemePreference(parameters.themePreference) ? parameters.themePreference : 'dark';
 
@@ -14,11 +21,17 @@ const preferenceFor = (parameters: ThemeStoryParameters): ThemePreference =>
  *
  * A Storybook iframe can render several stories without replacing its document. This helper
  * snapshots every shared surface before a story mounts and restores it from Storybook's
- * supported `beforeEach` cleanup callback. Removing mounted controls first lets each element
- * release its media-query listener before root and storage state are restored.
+ * supported `beforeEach` cleanup callback. The Storybook canvas scopes control ownership so
+ * cleanup cannot disconnect another story's control. Removing this story's mounted controls
+ * first lets each element release its media-query listener before root and storage state are
+ * restored.
  */
-export const isolateThemeStory = ({ parameters }: { parameters: ThemeStoryParameters }) => {
+export const isolateThemeStory = ({ parameters, canvasElement }: ThemeStoryContext) => {
   const root = document.documentElement;
+  const controlScope = canvasElement ?? document;
+  const controlsBeforeMount = new Set(
+    Array.from(controlScope.querySelectorAll(THEME_CONTROL_SELECTOR)),
+  );
   const themeAttribute = root.getAttribute('data-theme');
   const colorScheme = root.style.getPropertyValue('color-scheme');
   const colorSchemePriority = root.style.getPropertyPriority('color-scheme');
@@ -34,8 +47,9 @@ export const isolateThemeStory = ({ parameters }: { parameters: ThemeStoryParame
   }
 
   return () => {
-    document.querySelectorAll('sk-theme-toggle[data-theme-control]')
-      .forEach((toggle) => toggle.remove());
+    controlScope.querySelectorAll(THEME_CONTROL_SELECTOR).forEach((toggle) => {
+      if (!controlsBeforeMount.has(toggle)) toggle.remove();
+    });
 
     if (themeAttribute === null) root.removeAttribute('data-theme');
     else root.setAttribute('data-theme', themeAttribute);

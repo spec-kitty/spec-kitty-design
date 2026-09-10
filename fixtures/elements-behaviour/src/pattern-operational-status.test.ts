@@ -212,6 +212,40 @@ test('the story boundary restores root state and storage after disconnecting its
   localStorage.removeItem('spec-kitty-theme');
 });
 
+test('story cleanup removes only its owned control and leaves a concurrent story control connected', async () => {
+  const system = new SystemPreference(false);
+  globalThis.matchMedia = () => system;
+  const ownedCanvas = document.createElement('div');
+  const concurrentCanvas = document.createElement('div');
+  document.body.append(ownedCanvas, concurrentCanvas);
+
+  const context = {
+    parameters: { themePreference: 'system' as const },
+    canvasElement: ownedCanvas,
+  };
+  const cleanup = isolateThemeStory(context);
+
+  render(renderOperationalStatus(OPERATIONAL_MODEL, { preference: 'system' }), ownedCanvas);
+  const owned = ownedCanvas.querySelector<Updatable>('sk-theme-toggle')!;
+  await owned.updateComplete;
+
+  render(renderOperationalStatus(OPERATIONAL_MODEL, { preference: 'system' }), concurrentCanvas);
+  const concurrent = concurrentCanvas.querySelector<Updatable>('sk-theme-toggle')!;
+  await concurrent.updateComplete;
+  expect(system.listenerCount).toBe(2);
+
+  cleanup();
+
+  expect(owned.isConnected).toBe(false);
+  expect(concurrent.isConnected).toBe(true);
+  expect(system.listenerCount).toBe(1);
+
+  concurrentCanvas.remove();
+  expect(system.listenerCount).toBe(0);
+  ownedCanvas.remove();
+  localStorage.removeItem('spec-kitty-theme');
+});
+
 /**
  * The claim in the criterion's own words: assembled FROM PUBLIC SURFACES. The `<dl>` and the
  * `<details>` are consumer-owned light DOM handed to `<sk-card>`'s default slot — no wrapper
