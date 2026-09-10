@@ -19,7 +19,7 @@
   "work_packages": {
     "WP01": {
       "actor": "user",
-      "agent": "codex",
+      "agent": null,
       "agent_profile": "__resolved_profile_absent__",
       "agent_profile_version": "__resolved_profile_version_absent__",
       "assignee": "codex",
@@ -57,14 +57,14 @@
       "shell_pid": null,
       "shell_pid_created_at": null,
       "subtasks": {
-        "T001": "done",
-        "T002": "done",
-        "T003": "done",
-        "T004": "done",
-        "T005": "done",
-        "T006": "done",
-        "T007": "done",
-        "T008": "done"
+        "T001": "planned",
+        "T002": "planned",
+        "T003": "planned",
+        "T004": "planned",
+        "T005": "planned",
+        "T006": "planned",
+        "T007": "planned",
+        "T008": "planned"
       }
     }
   }
