@@ -1,7 +1,7 @@
 {
-  "event_count": 1,
-  "last_event_id": "01M25DA0X8BDYEC1H1FXW8HB74",
-  "materialized_at": "2026-09-10T10:20:11.048678+00:00",
+  "event_count": 2,
+  "last_event_id": "01M25JWVGZG4SVHGEVX060FBYX",
+  "materialized_at": "2026-09-10T11:57:51.007098+00:00",
   "mission_number": "",
   "mission_slug": "progress-indeterminate-01M25C78",
   "mission_type": "software-dev",
@@ -9,20 +9,25 @@
     "approved": 0,
     "blocked": 0,
     "canceled": 0,
-    "claimed": 0,
+    "claimed": 1,
     "done": 0,
     "for_review": 0,
     "in_progress": 0,
     "in_review": 0,
-    "planned": 1
+    "planned": 0
   },
   "work_packages": {
     "WP01": {
-      "actor": "finalize-tasks",
+      "actor": "frontend-freddy",
+      "agent_profile": "__resolved_profile_absent__",
+      "agent_profile_version": "__resolved_profile_version_absent__",
       "force_count": 0,
-      "lane": "planned",
-      "last_event_id": "01M25DA0X8BDYEC1H1FXW8HB74",
-      "last_transition_at": "2026-09-10T10:20:11.048678+00:00"
+      "lane": "claimed",
+      "last_event_id": "01M25JWVGZG4SVHGEVX060FBYX",
+      "last_transition_at": "2026-09-10T11:57:51.007098+00:00",
+      "model": "__resolved_model_absent__",
+      "provider": "__resolved_provider_absent__",
+      "role": "implementer"
     }
   }
 }
