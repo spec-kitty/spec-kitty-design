@@ -81,8 +81,22 @@ test('the compact row stacks at 639px and does not stack at 641px, with DOM/focu
   page,
 }) => {
   const footer = await load(page, 'compact-several-links', { width: 641, height: 400 });
-  const wideDisplay = await rowOf(footer).evaluate((el) => getComputedStyle(el).flexDirection);
-  expect(wideDisplay, '641px must not stack').toBe('row');
+  // Assert what the sheet DECLARES, not just `flexDirection`. `flex-direction` computes to its
+  // initial `row` whether or not the element is a flex container at all, so the whole
+  // `.sk-site-footer__row` base rule could be deleted and this branch would still pass.
+  const wide = await rowOf(footer).evaluate((el) => {
+    const style = getComputedStyle(el);
+    return {
+      alignItems: style.alignItems,
+      display: style.display,
+      flexDirection: style.flexDirection,
+      justifyContent: style.justifyContent,
+    };
+  });
+  expect(wide.flexDirection, '641px must not stack').toBe('row');
+  expect(wide.display, '641px row is a flex container').toBe('flex');
+  expect(wide.justifyContent, '641px row separates meta from links').toBe('space-between');
+  expect(wide.alignItems, '641px row centres its children').toBe('center');
 
   await page.setViewportSize({ width: 639, height: 400 });
   await footer.evaluate(
@@ -143,12 +157,36 @@ test('keyboard: Tab visits every compact link in DOM order with a visible, uncli
     const state = await page.evaluate(() => {
       const el = document.activeElement as HTMLElement | null;
       if (!el) return null;
+      // Inflate the focus rect by its own outline, then compare against every CLIPPING ancestor's
+      // box — the predicate `sk-context-nav.spec.ts` already uses. The previous version only set
+      // `clipped` when an ancestor's own rect was 0x0, which a laid-out ancestor never is, so an
+      // outline genuinely cropped by an `overflow: hidden` ancestor of normal size was reported
+      // unclipped. It could not fail for the condition it names.
+      const rect = el.getBoundingClientRect();
+      const elStyle = getComputedStyle(el);
+      const expansion = Math.max(
+        0,
+        Number.parseFloat(elStyle.outlineWidth) + Number.parseFloat(elStyle.outlineOffset),
+      );
+      const outlineRect = {
+        top: rect.top - expansion,
+        right: rect.right + expansion,
+        bottom: rect.bottom + expansion,
+        left: rect.left - expansion,
+      };
       let clipped = false;
-      for (let node: HTMLElement | null = el; node; node = node.parentElement) {
+      for (let node: HTMLElement | null = el.parentElement; node; node = node.parentElement) {
         const style = getComputedStyle(node);
-        if (style.overflow !== 'visible' && node !== el) {
-          const rect = node.getBoundingClientRect();
-          if (rect.width === 0 || rect.height === 0) clipped = true;
+        const clipsX = ['hidden', 'clip'].includes(style.overflowX);
+        const clipsY = ['hidden', 'clip'].includes(style.overflowY);
+        if (!clipsX && !clipsY) continue;
+        const box = node.getBoundingClientRect();
+        if (
+          (clipsX && (outlineRect.left < box.left || outlineRect.right > box.right))
+          || (clipsY && (outlineRect.top < box.top || outlineRect.bottom > box.bottom))
+        ) {
+          clipped = true;
+          break;
         }
       }
       return {

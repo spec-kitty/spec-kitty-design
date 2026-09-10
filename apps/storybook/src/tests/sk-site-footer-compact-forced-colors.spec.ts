@@ -29,16 +29,39 @@ test('forced colors preserves the compact footer boundary and a visible, unclipp
     await link.focus();
     await expect(link).toBeFocused();
     const state = await link.evaluate((element) => {
+      // Inflate the focus rect by its own outline, then compare against every CLIPPING ancestor's
+      // box — the predicate `sk-context-nav.spec.ts` already uses. The previous version only set
+      // `clipped` when an ancestor's own rect was 0x0, which a laid-out ancestor never is, so an
+      // outline genuinely cropped by an `overflow: hidden` ancestor of normal size was reported
+      // unclipped. It could not fail for the condition it names.
+      const rect = element.getBoundingClientRect();
+      const style = getComputedStyle(element);
+      const expansion = Math.max(
+        0,
+        Number.parseFloat(style.outlineWidth) + Number.parseFloat(style.outlineOffset),
+      );
+      const outlineRect = {
+        top: rect.top - expansion,
+        right: rect.right + expansion,
+        bottom: rect.bottom + expansion,
+        left: rect.left - expansion,
+      };
       let clipped = false;
-      for (let node: HTMLElement | null = element; node; node = node.parentElement) {
-        if (node === element) continue;
-        const style = getComputedStyle(node);
-        if (style.overflow !== 'visible') {
-          const rect = node.getBoundingClientRect();
-          if (rect.width === 0 || rect.height === 0) clipped = true;
+      for (let node: HTMLElement | null = element.parentElement; node; node = node.parentElement) {
+        const nodeStyle = getComputedStyle(node);
+        const clipsX = ['hidden', 'clip'].includes(nodeStyle.overflowX);
+        const clipsY = ['hidden', 'clip'].includes(nodeStyle.overflowY);
+        if (!clipsX && !clipsY) continue;
+        const box = node.getBoundingClientRect();
+        if (
+          (clipsX && (outlineRect.left < box.left || outlineRect.right > box.right))
+          || (clipsY && (outlineRect.top < box.top || outlineRect.bottom > box.bottom))
+        ) {
+          clipped = true;
+          break;
         }
       }
-      return { outlineStyle: getComputedStyle(element).outlineStyle, clipped };
+      return { outlineStyle: style.outlineStyle, clipped };
     });
     expect(state.outlineStyle, `link ${i}: focus outline must be visible`).not.toBe('none');
     expect(state.clipped, `link ${i}: focus outline must be unclipped`).toBe(false);

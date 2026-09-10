@@ -302,14 +302,21 @@ test('compact draws no divider, with or without a legal line', async () => {
     siteFooterStaticHtml({ presentation: 'compact', ...COMPACT_ATTRS, links }),
     'text/html',
   );
-  expect(staticWithLegal.querySelector('[part="divider"]'), 'static path, with legal').toBe(null);
+  // Queried by CLASS, not by `[part="divider"]`. The static path writes
+  // `<hr class="sk-site-footer__divider" />` with no `part` attribute at all (markup.ts), so a
+  // part-selector here returns null for every static output, compact or full — including the
+  // realistic regression of pasting the full path's <hr> into the compact branch.
+  expect(
+    staticWithLegal.querySelector('hr, .sk-site-footer__divider'),
+    'static path, with legal',
+  ).toBe(null);
 
   const staticWithoutLegal = new DOMParser().parseFromString(
     siteFooterStaticHtml({ presentation: 'compact', tagline: COMPACT_ATTRS.tagline, links }),
     'text/html',
   );
   expect(
-    staticWithoutLegal.querySelector('[part="divider"]'),
+    staticWithoutLegal.querySelector('hr, .sk-site-footer__divider'),
     'static path, without legal',
   ).toBe(null);
 });
