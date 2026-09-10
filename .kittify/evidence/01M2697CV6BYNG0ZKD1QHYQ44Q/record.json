@@ -1,0 +1,8 @@
+{
+  "event": "completed",
+  "invocation_id": "01M2697CV6BYNG0ZKD1QHYQ44Q",
+  "completed_at": "2026-09-10T18:37:54.688738+00:00",
+  "outcome": "done",
+  "closed_by": "agent",
+  "evidence_ref": "APPROVE exact clean HEAD 3234d06f; no High/Medium; stress 12/12, Chromium 627/627"
+}

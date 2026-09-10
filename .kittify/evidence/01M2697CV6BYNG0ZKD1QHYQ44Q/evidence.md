@@ -1,0 +1,1 @@
+APPROVE exact clean HEAD 3234d06f; no High/Medium; stress 12/12, Chromium 627/627
