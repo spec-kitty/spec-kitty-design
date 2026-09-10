@@ -13,7 +13,7 @@
       "wp": "WP01"
     },
     "#283": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "spec.md C-005/L229: .sk-record-list (#283) is OPEN and explicitly not touched or widened by this mission; only the boundary is stated in prose (FR-018)",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -21,8 +21,8 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
     },
     "#286": {
       "evidence_ref": "<link or commit>",
