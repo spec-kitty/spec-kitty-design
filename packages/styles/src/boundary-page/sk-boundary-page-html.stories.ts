@@ -36,10 +36,6 @@ const meta: Meta = {
 export default meta;
 type Story = StoryObj;
 
-export const Default: Story = {
-  render: () => SkBoundaryPageFormCardHTML,
-};
-
 export const FormCard: Story = {
   render: () => SkBoundaryPageFormCardHTML,
 };
@@ -85,7 +81,10 @@ export const ForcedColors: Story = {
  * `data-theme="light"`, which activates nothing on a wrapper (CLAUDE.md §6, #93).
  * apps/storybook/src/tests/sk-boundary-page-responsive.spec.ts's 'sk-boundary-page theming'
  * describe block verifies a computed value (card background, title color) genuinely differs
- * between this and Default rather than assuming the class does something.
+ * between this and the dark FormCard baseline rather than assuming the class does something.
+ * (#365: this doc comment previously said "Default" — a byte-identical re-render of FormCard
+ * with no `-default.html` exemplar behind it, a decoy story #176's own gate finding named as
+ * the pattern to delete rather than ratchet. Removed; FormCard is the dark baseline now.)
  */
 export const LightMode: Story = {
   parameters: { backgrounds: { default: 'sk-light' } },
