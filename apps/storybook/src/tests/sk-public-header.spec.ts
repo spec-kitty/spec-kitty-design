@@ -193,6 +193,17 @@ function nonColourCue(cue: Awaited<ReturnType<typeof actionCue>>): string {
   return JSON.stringify(cue);
 }
 
+/**
+ * Read a resolved border colour.
+ *
+ * Deliberately NOT folded into `actionCue`: that shape is stringified by `nonColourCue` and fed
+ * to the "five distinct non-colour cues" assertion, so a colour added there would let that test
+ * pass on exactly the signal it exists to exclude.
+ */
+async function borderBlockEndColour(target: Locator): Promise<string> {
+  return target.evaluate((node) => getComputedStyle(node).borderBlockEndColor);
+}
+
 test.describe('sk-public-header source, markup, and distribution contract', () => {
   test.skip(
     ({ browserName }) => browserName !== 'chromium',
@@ -214,7 +225,15 @@ test.describe('sk-public-header source, markup, and distribution contract', () =
     );
     expect(code).not.toMatch(/(?:^|[;{])\s*order\s*:|(?:row|column)-reverse/);
     expect(code).not.toMatch(/position\s*:\s*(?:sticky|fixed)/);
-    expect(code).not.toMatch(/(?:^|[;{])\s*(?:transition|animation)[-\w]*\s*:/m);
+    expect(code).not.toMatch(
+      /(?:^|[;{-])\s*(?:transition|animation)[-\w]*\s*:|@keyframes/m,
+    );
+    // #286: the library owns no user-visible string. `classSelectorInventory` collects class
+    // names only, so a `content:` declaration on a pseudo-element is invisible to every other
+    // assertion in this block — `.sk-public-header__brand::before { content: "Spec Kitty" }`
+    // would otherwise pass the whole file. Banning the property closes the class by construction
+    // rather than relying on nobody trying it.
+    expect(code).not.toMatch(/(?:^|[;{])\s*content\s*:/m);
     expect(code).not.toMatch(/44px/i);
     expect(code).not.toMatch(/(?:display\s*:\s*none|visibility\s*:\s*hidden|clip-path\s*:)/);
 
@@ -418,7 +437,11 @@ test.describe('sk-public-header live native semantics', () => {
         true,
       );
       await expect(header).toHaveRole('banner');
-      await expect(header).toHaveCount(1);
+      // Counted on an UNSCOPED locator. `header` is `…locator(…).first()`, which resolves to at
+      // most one node by construction and had already been awaited visible — so counting it
+      // could never fail, including on a page rendering three headers. That left NFR-006's
+      // "exactly one banner landmark" resting on a chromium-only test.
+      await expect(page.locator('header.sk-public-header')).toHaveCount(1);
     });
   }
 
@@ -702,6 +725,24 @@ test.describe('sk-public-header geometry, state, and resilience contract', () =>
       browserName !== 'chromium',
       'Playwright forced-colours emulation is Chromium-only',
     );
+    // Baseline WITHOUT emulation first. Every "is it still non-none / still non-zero" assertion
+    // below is satisfied by declarations outside the forced-colors block, so on their own the
+    // whole `@media (forced-colors: active)` block could be deleted with this test still green.
+    // What the block uniquely determines is the resolved COLOURS, so those are what get compared.
+    const { header: plainHeader } = await openStory(page, 'forced-colors');
+    const plainOrdinary = plainHeader.locator(
+      '.sk-public-header__action:not([aria-current])',
+    );
+    const plainBoundaryColour = await plainHeader.evaluate(
+      (node) => getComputedStyle(node).borderBlockEndColor,
+    );
+    const plainCurrentColour = await borderBlockEndColour(
+      plainHeader.locator(
+        '.sk-public-header__action[aria-current]:not([aria-current="false"])',
+      ),
+    );
+    const plainOrdinaryColour = await borderBlockEndColour(plainOrdinary);
+
     await page.emulateMedia({ forcedColors: 'active' });
     const { header } = await openStory(page, 'forced-colors');
     const boundary = await header.evaluate((node) => {
@@ -721,6 +762,21 @@ test.describe('sk-public-header geometry, state, and resilience contract', () =>
     const currentCue = await actionCue(current);
     expect(currentCue.borderBlockEndStyle).not.toBe('none');
     expect(Number.parseFloat(currentCue.borderBlockEndWidth)).toBeGreaterThan(0);
+
+    // The falsifying half: these read values the forced-colors block uniquely determines.
+    // The header band and the current cue must both RECOLOUR under emulation (proving the
+    // `ButtonText`/`Highlight` declarations are reached), and the current action must remain
+    // distinguishable from an ordinary one — the whole point of `Highlight` rather than letting
+    // both collapse to `CanvasText`, which is what a deleted block would produce.
+    const forcedBoundaryColour = boundary.borderColor;
+    const forcedCurrentColour = await borderBlockEndColour(current);
+    const forcedOrdinaryColour = await borderBlockEndColour(
+      header.locator('.sk-public-header__action:not([aria-current])').first(),
+    );
+    expect(forcedBoundaryColour).not.toBe(plainBoundaryColour);
+    expect(forcedCurrentColour).not.toBe(plainCurrentColour);
+    expect(plainCurrentColour).not.toBe(plainOrdinaryColour);
+    expect(forcedCurrentColour).not.toBe(forcedOrdinaryColour);
 
     await page.evaluate(() =>
       (document.activeElement as HTMLElement | null)?.blur(),

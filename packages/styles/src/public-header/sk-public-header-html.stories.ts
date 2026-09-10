@@ -27,9 +27,15 @@ const storyFrame = (
     light = false,
     narrow = false,
     rtl = false,
-  }: { light?: boolean; narrow?: boolean; rtl?: boolean } = {},
+    shortViewport = false,
+  }: {
+    light?: boolean;
+    narrow?: boolean;
+    rtl?: boolean;
+    shortViewport?: boolean;
+  } = {},
 ): string => `
-  <div data-public-header-story-frame${light ? ' class="sk-light"' : ''}${rtl ? ' dir="rtl"' : ''} style="box-sizing: border-box; inline-size: calc(100vw - var(--sk-space-8)); max-inline-size: ${narrow ? 'calc(var(--sk-space-10) * 4)' : 'calc(var(--sk-space-12) * 8)'}; color: var(--sk-fg-body); background: var(--sk-surface-page);">
+  <div data-public-header-story-frame${light ? ' class="sk-light"' : ''}${rtl ? ' dir="rtl"' : ''} style="box-sizing: border-box; inline-size: calc(100vw - var(--sk-space-8)); max-inline-size: ${narrow ? 'calc(var(--sk-space-10) * 4)' : 'calc(var(--sk-space-12) * 8)'};${shortViewport ? ' block-size: calc(var(--sk-space-12) * 2); overflow-block: auto;' : ''} color: var(--sk-fg-body); background: var(--sk-surface-page);">
     ${html}
   </div>
 `;
@@ -76,24 +82,21 @@ export const ThemeToggleComposition: Story = {
   render: () => storyFrame(SkPublicHeaderThemeSlotHTML),
 };
 
+// `parameters.viewport` is INERT in this repo: `apps/storybook/.storybook/main.ts` registers only
+// addon-docs and addon-a11y, and the viewport feature is applied by the manager resizing the
+// preview iframe — which nothing here goes through, since every consumer loads `/iframe.html`
+// directly. So these two stories constrain the FRAME, the way LongLabels already did. Without
+// that they rendered byte-identically to Default while being frozen into `expected-stories.json`
+// as independent narrow/short evidence — an artifact enrolled in a gate on evidence it did not
+// carry. The Playwright layer sets its own viewport and remains the behavioural proof; this makes
+// the story list honest to a human reviewer opening it.
 export const Narrow: Story = {
   parameters: { viewport: { defaultViewport: 'mobile1' } },
-  render: () => storyFrame(SkPublicHeaderTwoActionsHTML),
+  render: () => storyFrame(SkPublicHeaderTwoActionsHTML, { narrow: true }),
 };
 
 export const ShortViewport: Story = {
-  parameters: {
-    viewport: {
-      defaultViewport: 'publicHeaderShort',
-      options: {
-        publicHeaderShort: {
-          name: 'Public header short viewport',
-          styles: { width: '720px', height: '320px' },
-        },
-      },
-    },
-  },
-  render: () => storyFrame(SkPublicHeaderTwoActionsHTML),
+  render: () => storyFrame(SkPublicHeaderTwoActionsHTML, { shortViewport: true }),
 };
 
 export const Rtl: Story = {

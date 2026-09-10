@@ -825,7 +825,11 @@ context-navigation family does not widen the sidebar element.
 
 Use `sk-public-header` for the public-facing brand and route actions above an anonymous or account
 front-door page. The consumer authors the semantic light-DOM structure and supplies every string,
-URL, action, authentication decision, current-route value, and theme-state mechanism:
+URL, action, authentication decision, current-route value, and theme-state mechanism. Note the one
+place that ownership is narrower than it sounds: the consumer owns the brand's *content and
+destination*, while its typography — type scale, weight and colour — is library-owned and expected
+to be overridden if you ship a wordmark image or a different brand scale. The brand slot is styled,
+not blank:
 
 ```css
 @import '@spec-kitty/tokens';
@@ -864,6 +868,26 @@ landmark stays singular. Apply `sk-public-header__action` to every action-region
 any control classes it already carries. Every action must carry `sk-public-header__action` so it
 receives the family's target-size floor.
 With zero actions, omit the `<nav>` instead of rendering an empty landmark.
+
+**The action slot normalises the controls placed in it, and that supersession is intentional.**
+`sk-public-header__action` sets `color: inherit` (including `:link`/`:visited`) and a hover
+underline so anchors, native buttons and composed controls read as one row rather than as three
+different affordances. Because `.sk-public-header__action:link` is more specific than a single
+control class, a composed `sk-button` variant's own colour — `sk-button--ghost`'s
+`--sk-fg-muted`, for instance — is deliberately overridden inside the header. For a
+`<button>` the two selectors tie on specificity, so **load the component sheets in the documented
+order** (tokens, then the control sheets, then `sk-public-header.css`) if you need the family's
+normalisation to win consistently across both element types. If you want a composed control to keep
+its own colour, give it your own class rather than removing `sk-public-header__action` — that class
+is what carries the target-size floor.
+
+**A composed custom element must size its own interior.** `sk-public-header__action` constrains the
+*host box* only; it cannot reach through a shadow root. A document-tree declaration does beat a
+shadow-tree `:host` rule, so the floor is never inert on the host — but if the element's internal
+control does not fill its host, the extra height becomes non-interactive padding around a smaller
+real target. An element whose `:host` is `inline-flex` inherits the floor through flex stretching;
+one whose `:host` is `block` does not. This obligation belongs to the composed element, and #323
+carries it for `sk-theme-toggle`.
 
 The consumer supplies `aria-current` on the current route; values other than
 `aria-current="false"` receive both stronger weight and a logical border, so colour alone never
