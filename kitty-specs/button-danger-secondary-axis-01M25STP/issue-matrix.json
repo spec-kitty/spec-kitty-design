@@ -1,7 +1,7 @@
 {
   "rows": {
     "#153": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "FR-009: icon-sized danger-secondary keeps the consumer-supplied label as accessible name via the existing unchanged aria-label mechanism; #153 (general icon-button a11y-name issue) not reopened or fixed here.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -9,8 +9,8 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
     },
     "#155": {
       "evidence_ref": "<link or commit>",
