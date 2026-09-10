@@ -17,11 +17,11 @@
     {
       "criterion_id": "FR-002",
       "description": "Verify FR-002 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "proof_type": "document_inspection",
+      "evidence": "ADR-15 'Decision Outcome' sections 1, 2 and 3 plus the Summary table: all three construct kinds named with a verdict each, none silent.",
+      "pass_fail": "pass",
+      "verified_by": "architect-alphonso",
+      "verified_at": "2026-09-10T01:07:22.411361+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
