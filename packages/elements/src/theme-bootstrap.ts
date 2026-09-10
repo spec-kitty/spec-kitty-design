@@ -2,6 +2,7 @@ import {
   applyResolvedTheme,
   readThemePreference,
   resolveTheme,
+  THEME_DARK_SCHEME_QUERY,
   type ThemeStorage,
 } from './theme-toggle/theme-preference.js';
 
@@ -11,7 +12,7 @@ if (typeof document !== 'undefined') {
   let media: MediaQueryList | undefined;
   try {
     media = typeof globalThis.matchMedia === 'function'
-      ? globalThis.matchMedia('(prefers-color-scheme: dark)')
+      ? globalThis.matchMedia(THEME_DARK_SCHEME_QUERY)
       : undefined;
   } catch {
     media = undefined;

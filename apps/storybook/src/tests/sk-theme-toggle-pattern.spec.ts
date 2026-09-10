@@ -245,6 +245,126 @@ test('narrow and supplemental HiDPI routes keep controls and content contained',
   }
 });
 
+/** The complete strings the composition supplies to its page header's text slots. */
+const HEADER_COPY = [
+  { slot: 'eyebrow', text: 'Operations' },
+  { slot: 'title', text: 'Regional service status' },
+  {
+    slot: 'supporting',
+    text: 'Every value below is supplied by the application. The library styles none of it.',
+  },
+  { slot: 'sync', text: 'Updated 4 minutes ago' },
+] as const;
+
+/**
+ * Measure whether every supplied header string is VISIBLY available, not merely present.
+ *
+ * `text-overflow: ellipsis` changes painting, not the DOM, so a truncated string still has its
+ * full text content and accessible name. What does change is geometry: the string's own line
+ * boxes extend past the clipping box that paints the ellipsis. Each line box of each string is
+ * therefore compared with every overflow-clipping box between it and the document, walking the
+ * flat tree across slot assignment and shadow boundaries, and with the viewport's inline extent.
+ */
+const headerCopyVisibility = (composition: Locator) =>
+  composition.evaluate((element, slots) => {
+    const header = element.querySelector('sk-page-header');
+    if (!header) throw new Error('the composition has no page header');
+    const viewportWidth = document.documentElement.clientWidth;
+    const flatParent = (node: Element): Element | null => {
+      if (node.assignedSlot) return node.assignedSlot;
+      const parent = node.parentNode;
+      if (parent instanceof ShadowRoot) return parent.host;
+      return parent instanceof Element ? parent : null;
+    };
+    const describe = (node: Element) =>
+      node.localName + (node.classList.length ? `.${Array.from(node.classList).join('.')}` : '');
+
+    return slots.map((slot) => {
+      const copy = header.querySelector<HTMLElement>(`:scope > [slot="${slot}"]`);
+      if (!copy) return { slot, text: null, visible: false, lines: 0, clippedBy: ['missing'] };
+      const range = document.createRange();
+      range.selectNodeContents(copy);
+      const lines = Array.from(range.getClientRects()).filter((line) => line.width > 0);
+      const outside = (left: number, top: number, right: number, bottom: number) =>
+        lines.some((line) =>
+          line.left < left - 1 || line.right > right + 1 ||
+          line.top < top - 1 || line.bottom > bottom + 1);
+      const clippedBy: string[] = [];
+      for (
+        let node: Element | null = copy;
+        node && node !== document.body && node !== document.documentElement;
+        node = flatParent(node)
+      ) {
+        const style = getComputedStyle(node);
+        if (style.overflowX === 'visible' && style.overflowY === 'visible') continue;
+        const box = node.getBoundingClientRect();
+        const left = box.left + node.clientLeft;
+        const top = box.top + node.clientTop;
+        if (outside(left, top, left + node.clientWidth, top + node.clientHeight)) {
+          clippedBy.push(describe(node));
+        }
+      }
+      if (lines.some((line) => line.left < -1 || line.right > viewportWidth + 1)) {
+        clippedBy.push('viewport');
+      }
+      return {
+        slot,
+        text: copy.textContent?.trim() ?? null,
+        visible: copy.checkVisibility({ checkOpacity: true, checkVisibilityCSS: true }),
+        lines: lines.length,
+        clippedBy,
+      };
+    });
+  }, HEADER_COPY.map(({ slot }) => slot));
+
+/**
+ * Three CSS geometries of the SAME composition. The middle one is the effective CSS viewport the
+ * genuine headed-Chrome capture measured at 200% browser zoom (`browser-zoom/metrics.json`):
+ * layout sees CSS pixels, so this is the layout genuine zoom produces. It is not itself browser
+ * zoom — the committed headed captures remain that evidence.
+ */
+const HEADER_GEOMETRIES = [
+  { name: 'desktop 100%', story: 'zoom-200', width: 1199, height: 712, deviceScaleFactor: 1 },
+  { name: '200% zoom CSS viewport', story: 'zoom-200', width: 599, height: 356, deviceScaleFactor: 2 },
+  { name: 'narrow', story: 'narrow', width: 390, height: 844, deviceScaleFactor: 1 },
+] as const;
+
+for (const geometry of HEADER_GEOMETRIES) {
+  test(`the composed header keeps every supplied string visibly available at ${geometry.name}`, async ({
+    browser,
+  }) => {
+    const context = await browser.newContext({
+      viewport: { width: geometry.width, height: geometry.height },
+      deviceScaleFactor: geometry.deviceScaleFactor,
+    });
+    try {
+      const page = await context.newPage();
+      const root = await openStory(page, geometry.story, {
+        width: geometry.width,
+        height: geometry.height,
+      });
+
+      const copy = await headerCopyVisibility(root);
+      expect(copy.map(({ lines, ...visibility }) => visibility)).toEqual(
+        HEADER_COPY.map(({ slot, text }) => ({ slot, text, visible: true, clippedBy: [] })),
+      );
+      for (const { slot, lines } of copy) expect(lines, `${slot} line boxes`).toBeGreaterThan(0);
+
+      const document = await page.evaluate(() => ({
+        clientWidth: document.documentElement.clientWidth,
+        scrollWidth: document.documentElement.scrollWidth,
+      }));
+      expect(document.scrollWidth).toBeLessThanOrEqual(document.clientWidth);
+      for (const name of ['System', 'Light', 'Dark']) {
+        await expect(root.getByRole('radio', { name })).toBeVisible();
+      }
+      await expect(root.getByRole('radio', { name: 'Dark' })).toBeChecked();
+    } finally {
+      await context.close();
+    }
+  });
+}
+
 test('the composed Default, LightMode, System, and forced-colors stories are axe-clean', async ({
   page,
   browserName,

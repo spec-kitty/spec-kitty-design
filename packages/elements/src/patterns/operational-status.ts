@@ -7,7 +7,7 @@
  *
  * Four shapes, assembled from the six closed children of #183 and nothing else:
  *
- *   * an operational page header            sk-page-header[density=compact][sticky]   (#182)
+ *   * an operational page header            sk-page-header[sticky]                    (#182)
  *   * a live status / alert region          sk-notice[announce]                       (#178)
  *   * toned status cards carrying a fact
  *     block and collapsible detail          sk-card[status] + .sk-facts/.sk-disclosure (#177/#176)
@@ -346,9 +346,19 @@ const renderUnit = (unit: OperationalUnit): TemplateResult => html`
  * The whole composition, as one light-DOM tree the consumer owns.
  *
  * Nothing here reaches into a shadow root, and nothing restyles a component through anything but
- * its documented attributes, slots and tokens. `sticky` and `density="compact"` are #182's own
- * public attributes; `announce` and `tone` are #178's; `status` is #177's; `gap-threshold` and
- * `series` are #179's.
+ * its documented attributes, slots and tokens. `sticky` is #182's own public attribute;
+ * `announce` and `tone` are #178's; `status` is #177's; `gap-threshold` and `series` are #179's.
+ *
+ * THE HEADER USES THE DEFAULT DENSITY, deliberately (#323). `density="compact"` is #182's
+ * single-row presentation: its sheet sets the eyebrow, title, supporting and sync copy to
+ * `nowrap` with a visual-only ellipsis, which is the right trade for short operational labels.
+ * This composition supplies a full supporting sentence, and at desktop, narrow and genuine 200%
+ * browser zoom that presentation painted every one of the four strings as an ellipsis — present
+ * in the accessibility tree, not visible on screen. The default density wraps the same five
+ * slots instead, so every supplied string stays readable. The compact axis itself is unchanged
+ * and remains demonstrated by `sk-page-header`'s own stories.
+ * `apps/storybook/src/tests/sk-theme-toggle-pattern.spec.ts` asserts the strings' line boxes
+ * against every clipping box, so a return to the truncating presentation goes red.
  *
  * `options.light` adds `class="sk-light"` to the wrapper — NOT `data-theme="light"`,
  * which activates nothing on a wrapper because `@spec-kitty/tokens` anchors its light block
@@ -368,7 +378,7 @@ export const renderOperationalStatus = (
   return html`
   ${operationalStatusStyles}
   <div class=${classes} data-theme-composition>
-    <sk-page-header density="compact" sticky>
+    <sk-page-header sticky>
       <span slot="eyebrow">${model.eyebrow}</span>
       <h1 slot="title">${model.title}</h1>
       <p slot="supporting">${model.supporting}</p>

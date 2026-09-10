@@ -27,7 +27,7 @@ export interface SkThemeToggleProps extends Pick<
   /** Visible label for the Light choice. */
   lightLabel?: SkThemeToggleElement["lightLabel"];
 
-  /** Selected preference. Invalid attribute values safely become `system`. */
+  /** Selected preference. Invalid attribute and property values safely become `system`. */
   preference?: SkThemeToggleElement["preference"];
 
   /** Visible label for the System choice. */
@@ -70,6 +70,11 @@ export interface SkThemeToggleProps extends Pick<
  * If any label is absent or blank, the element renders no interactive control. The pre-paint
  * bootstrap is independent of this presentation and continues to provide system-default theming.
  *
+ * Every control connected to one document shows one shared preference: a choice on any of them
+ * selects it on all of them, and exactly one System listener exists while that preference is
+ * System. A control connected later adopts the page's current preference unless it was given
+ * an explicit `preference` before connecting.
+ *
  * ## Attributes & Properties
  *
  * Component attributes and properties that can be applied to the element or by using JavaScript.
@@ -77,7 +82,7 @@ export interface SkThemeToggleProps extends Pick<
  * - `dark-label`/`darkLabel`: Visible label for the Dark choice.
  * - `label`: Visible legend and accessible name for the preference group.
  * - `light-label`/`lightLabel`: Visible label for the Light choice.
- * - `preference`: Selected preference. Invalid attribute values safely become `system`.
+ * - `preference`: Selected preference. Invalid attribute and property values safely become `system`.
  * - `system-label`/`systemLabel`: Visible label for the System choice.
  *
  * ## Events

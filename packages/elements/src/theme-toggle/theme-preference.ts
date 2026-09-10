@@ -10,6 +10,12 @@ export const THEME_STORAGE_KEY = 'spec-kitty-theme';
 /** The complete public preference vocabulary, in control order. */
 export const THEME_PREFERENCES = ['system', 'light', 'dark'] as const;
 
+/**
+ * The one media query whose match means System resolves dark. The pre-paint bootstrap and the
+ * element both ask exactly this query, so neither adapter can drift to a different System source.
+ */
+export const THEME_DARK_SCHEME_QUERY = '(prefers-color-scheme: dark)';
+
 /** The minimum storage surface needed by the theme contract. */
 export interface ThemeStorage {
   getItem(key: string): string | null;

@@ -55,6 +55,7 @@ import { installTokenSheet } from './token-sheet.js';
 import { assertThemesDiffered, contrast } from './contrast.js';
 
 type Updatable = Element & { updateComplete?: Promise<unknown> };
+type ThemeControl = Updatable & { preference?: string };
 
 class SystemPreference implements MediaQueryList {
   readonly media = '(prefers-color-scheme: dark)';
@@ -85,6 +86,12 @@ class SystemPreference implements MediaQueryList {
 
   dispatchEvent(): boolean {
     return true;
+  }
+
+  setDark(dark: boolean): void {
+    this.matches = dark;
+    const event = { matches: dark, media: this.media } as MediaQueryListEvent;
+    for (const listener of [...this.#listeners]) listener.call(this, event);
   }
 }
 
@@ -232,7 +239,8 @@ test('story cleanup removes only its owned control and leaves a concurrent story
   render(renderOperationalStatus(OPERATIONAL_MODEL, { preference: 'system' }), concurrentCanvas);
   const concurrent = concurrentCanvas.querySelector<Updatable>('sk-theme-toggle')!;
   await concurrent.updateComplete;
-  expect(system.listenerCount).toBe(2);
+  // Two connected System controls are one document preference with one System listener.
+  expect(system.listenerCount).toBe(1);
 
   cleanup();
 
@@ -254,6 +262,12 @@ const documentThemeState = () => ({
   stored: localStorage.getItem('spec-kitty-theme'),
 });
 
+/** The root theme after the OS reports dark, then light. */
+const rootAcrossOsChanges = (system: SystemPreference) => [true, false].map((dark) => {
+  system.setDark(dark);
+  return document.documentElement.getAttribute('data-theme');
+});
+
 const exerciseOverlappingThemeSessions = async (order: OverlapCleanupOrder) => {
   const system = new SystemPreference(false);
   globalThis.matchMedia = () => system;
@@ -270,7 +284,7 @@ const exerciseOverlappingThemeSessions = async (order: OverlapCleanupOrder) => {
     canvasElement: olderCanvas,
   });
   render(renderOperationalStatus(OPERATIONAL_MODEL, { preference: 'system' }), olderCanvas);
-  const older = olderCanvas.querySelector<Updatable>('sk-theme-toggle')!;
+  const older = olderCanvas.querySelector<ThemeControl>('sk-theme-toggle')!;
   await older.updateComplete;
 
   const cleanupNewer = isolateThemeStory({
@@ -278,15 +292,18 @@ const exerciseOverlappingThemeSessions = async (order: OverlapCleanupOrder) => {
     canvasElement: newerCanvas,
   });
   render(renderOperationalStatus(OPERATIONAL_MODEL, { preference: 'dark' }), newerCanvas);
-  const newer = newerCanvas.querySelector<Updatable>('sk-theme-toggle')!;
+  const newer = newerCanvas.querySelector<ThemeControl>('sk-theme-toggle')!;
   await newer.updateComplete;
+  await older.updateComplete;
 
   const beforeCleanup = {
     ...documentThemeState(),
     listeners: system.listenerCount,
+    preferences: [older.preference, newer.preference],
     olderConnected: older.isConnected,
     newerConnected: newer.isConnected,
   };
+  const beforeCleanupAcrossOsChanges = rootAcrossOsChanges(system);
   const [firstCleanup, finalCleanup] = order === 'older-first'
     ? [cleanupOlder, cleanupNewer]
     : [cleanupNewer, cleanupOlder];
@@ -297,6 +314,7 @@ const exerciseOverlappingThemeSessions = async (order: OverlapCleanupOrder) => {
     olderConnected: older.isConnected,
     newerConnected: newer.isConnected,
   };
+  const survivorAcrossOsChanges = rootAcrossOsChanges(system);
   finalCleanup();
   const final = {
     ...documentThemeState(),
@@ -308,7 +326,13 @@ const exerciseOverlappingThemeSessions = async (order: OverlapCleanupOrder) => {
   olderCanvas.remove();
   newerCanvas.remove();
   localStorage.removeItem('spec-kitty-theme');
-  return { beforeCleanup, survivor, final };
+  return {
+    beforeCleanup,
+    beforeCleanupAcrossOsChanges,
+    survivor,
+    survivorAcrossOsChanges,
+    final,
+  };
 };
 
 test.each([
@@ -319,6 +343,7 @@ test.each([
     listeners: 0,
     olderConnected: false,
     newerConnected: true,
+    survivorAcrossOsChanges: ['dark', 'dark'],
   },
   {
     order: 'newer-first' as const,
@@ -327,18 +352,24 @@ test.each([
     listeners: 1,
     olderConnected: true,
     newerConnected: false,
+    survivorAcrossOsChanges: ['dark', 'light'],
   },
 ])('overlapping theme-story sessions restore ownership when cleaned $order', async (expected) => {
   const states = await exerciseOverlappingThemeSessions(expected.order);
 
+  // The newer manual session owns the document: both connected controls show it, no System
+  // listener survives in manual mode, and an OS change cannot reach the root through the older
+  // story's control.
   expect(states.beforeCleanup).toEqual({
     theme: 'dark',
     colorScheme: 'dark',
     stored: 'dark',
-    listeners: 1,
+    listeners: 0,
+    preferences: ['dark', 'dark'],
     olderConnected: true,
     newerConnected: true,
   });
+  expect(states.beforeCleanupAcrossOsChanges).toEqual(['dark', 'dark']);
   expect(states.survivor).toEqual({
     theme: expected.survivingTheme,
     colorScheme: expected.survivingTheme,
@@ -347,6 +378,7 @@ test.each([
     olderConnected: expected.olderConnected,
     newerConnected: expected.newerConnected,
   });
+  expect(states.survivorAcrossOsChanges).toEqual(expected.survivorAcrossOsChanges);
   expect(states.final).toEqual({
     theme: 'baseline-theme',
     colorScheme: 'light dark',
@@ -355,6 +387,43 @@ test.each([
     olderConnected: false,
     newerConnected: false,
   });
+});
+
+test('a choice made inside an older story session is what that session restores', async () => {
+  const system = new SystemPreference(false);
+  globalThis.matchMedia = () => system;
+  const olderCanvas = document.createElement('div');
+  const newerCanvas = document.createElement('div');
+  document.body.append(olderCanvas, newerCanvas);
+
+  const cleanupOlder = isolateThemeStory({
+    parameters: { themePreference: 'system' },
+    canvasElement: olderCanvas,
+  });
+  render(renderOperationalStatus(OPERATIONAL_MODEL, { preference: 'system' }), olderCanvas);
+  const older = olderCanvas.querySelector<ThemeControl>('sk-theme-toggle')!;
+  await older.updateComplete;
+
+  const cleanupNewer = isolateThemeStory({
+    parameters: { themePreference: 'dark' },
+    canvasElement: newerCanvas,
+  });
+  render(renderOperationalStatus(OPERATIONAL_MODEL, { preference: 'dark' }), newerCanvas);
+  const newer = newerCanvas.querySelector<ThemeControl>('sk-theme-toggle')!;
+  await newer.updateComplete;
+
+  older.shadowRoot!.querySelector<HTMLInputElement>('input[value="light"]')!.click();
+  await older.updateComplete;
+  cleanupNewer();
+  await older.updateComplete;
+
+  expect(documentThemeState()).toEqual({ theme: 'light', colorScheme: 'light', stored: 'light' });
+  expect(older.preference).toBe('light');
+  expect(system.listenerCount).toBe(0);
+  cleanupOlder();
+  olderCanvas.remove();
+  newerCanvas.remove();
+  localStorage.removeItem('spec-kitty-theme');
 });
 
 /**

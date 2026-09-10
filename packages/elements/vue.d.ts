@@ -758,6 +758,11 @@ declare module 'vue' {
      * Consumer-supplied labels are required so the package never ships untranslated fallback copy.
      * If any label is absent or blank, the element renders no interactive control. The pre-paint
      * bootstrap is independent of this presentation and continues to provide system-default theming.
+     *
+     * Every control connected to one document shows one shared preference: a choice on any of them
+     * selects it on all of them, and exactly one System listener exists while that preference is
+     * System. A control connected later adopts the page's current preference unless it was given
+     * an explicit `preference` before connecting.
      */
     'sk-theme-toggle': SkElement<{
       /** Visible label for the Dark choice. */
@@ -766,7 +771,7 @@ declare module 'vue' {
       'label'?: string;
       /** Visible label for the Light choice. */
       'light-label'?: string;
-      /** Selected preference. Invalid attribute values safely become `system`. */
+      /** Selected preference. Invalid attribute and property values safely become `system`. */
       'preference'?: 'system' | 'light' | 'dark';
       /** Visible label for the System choice. */
       'system-label'?: string;

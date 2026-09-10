@@ -111,9 +111,20 @@ class ListenerlessMediaQueryList {
 
 let media: FakeMediaQueryList;
 
+const DARK_SCHEME_QUERY = '(prefers-color-scheme: dark)';
+
+/**
+ * Any query other than the dark colour-scheme query sees a static, never-matching result. The
+ * fake is therefore argument-sensitive: a production adapter that asked a drifted query would
+ * lose the dark System source rather than receive the canned list regardless of what it asked.
+ */
+const unrelatedMedia = { media: 'not all', matches: false, onchange: null };
+
 const installMedia = (dark: boolean): FakeMediaQueryList => {
   media = new FakeMediaQueryList(dark);
-  vi.stubGlobal('matchMedia', vi.fn(() => media as unknown as MediaQueryList));
+  vi.stubGlobal('matchMedia', vi.fn((query: string) =>
+    (query === DARK_SCHEME_QUERY ? media : unrelatedMedia) as unknown as MediaQueryList,
+  ));
   return media;
 };
 
@@ -155,6 +166,7 @@ type BootstrapScenario = {
 
 type BootstrapBoundary = {
   colorScheme: string;
+  queries: string[];
   stylesheetCount: number;
   theme: string | undefined;
 };
@@ -180,13 +192,18 @@ const runBootstrapConsumer = async (scenario: BootstrapScenario): Promise<{
   const iframe = document.createElement('iframe');
   iframe.srcdoc = `<!doctype html><html><head>
     <script>${storageSetup}
-      globalThis.matchMedia = () => ({ matches: ${String(scenario.systemDark)} });
+      globalThis.__themeQueries = [];
+      globalThis.matchMedia = (query) => {
+        globalThis.__themeQueries.push(query);
+        return { matches: query === '(prefers-color-scheme: dark)' && ${String(scenario.systemDark)} };
+      };
     <\/script>
     <script id="theme-bootstrap" src="${bootstrapUrl}"><\/script>
     <script>
       globalThis.__themeAtPreStylesheetBoundary = {
         theme: document.documentElement.dataset.theme,
         colorScheme: document.documentElement.style.colorScheme,
+        queries: globalThis.__themeQueries.slice(),
         stylesheetCount: document.styleSheets.length
       };
     <\/script>
@@ -239,6 +256,30 @@ const choose = async (element: ThemeToggle, value: ThemePreference): Promise<voi
   expect(choice, `missing ${value} choice`).toBeTruthy();
   await userEvent.click(choice!);
   await (element.updateComplete ?? Promise.resolve());
+};
+
+/**
+ * Checked choices located by VALUE, not by input type. The radio-semantics assertion stays on the
+ * type-specific `radios()` helper so the SC-012 radio-type arm reds only that test; a
+ * type-specific helper here made that arm red the SC-010 upgrade case too (collateral).
+ */
+const checkedValues = (element: ThemeToggle): string[] =>
+  Array.from(element.shadowRoot?.querySelectorAll<HTMLInputElement>('input[value]') ?? [])
+    .filter((choice) => choice.checked)
+    .map((choice) => choice.value);
+
+const settled = async (...elements: ThemeToggle[]): Promise<void> => {
+  for (const element of elements) await (element.updateComplete ?? Promise.resolve());
+};
+
+const rootTheme = () => ({
+  theme: document.documentElement.dataset.theme,
+  colorScheme: document.documentElement.style.colorScheme,
+});
+
+const labelled = (element: ThemeToggle): ThemeToggle => {
+  for (const [name, value] of Object.entries(labels)) element.setAttribute(name, value);
+  return element;
 };
 
 beforeEach(() => {
@@ -503,6 +544,7 @@ test.each([
     expect(consumer.boundary).toEqual({
       theme: scenario.resolved,
       colorScheme: scenario.resolved,
+      queries: ['(prefers-color-scheme: dark)'],
       stylesheetCount: 0,
     });
     expect(consumer.document.styleSheets).toHaveLength(1);
@@ -531,6 +573,190 @@ test('[SC-010] a preference assigned before upgrade survives definition and reac
 
   expect(element.getAttribute('preference')).toBe('dark');
   expect(document.documentElement.dataset.theme).toBe('dark');
+});
+
+test('[SC-012] System resolves through exactly the dark colour-scheme media query', async () => {
+  installMedia(true);
+  const element = await mount();
+  const queries = vi.mocked(globalThis.matchMedia).mock.calls.map(([query]) => query);
+
+  expect(queries.length).toBeGreaterThan(0);
+  expect(new Set(queries)).toEqual(new Set(['(prefers-color-scheme: dark)']));
+  expect(rootTheme()).toEqual({ theme: 'dark', colorScheme: 'dark' });
+  expect(media.listenerCount).toBe(1);
+  media.setDark(false);
+  expect(rootTheme()).toEqual({ theme: 'light', colorScheme: 'light' });
+  element.remove();
+});
+
+test('[SC-012] a manual choice on one control selects it on every connected control', async () => {
+  installMedia(false);
+  const first = await mount();
+  const second = await mount();
+
+  await choose(first, 'light');
+  await settled(first, second);
+  expect([first.preference, second.preference]).toEqual(['light', 'light']);
+  expect([checkedValues(first), checkedValues(second)]).toEqual([['light'], ['light']]);
+  expect(localStorage.getItem('spec-kitty-theme')).toBe('light');
+  expect(rootTheme()).toEqual({ theme: 'light', colorScheme: 'light' });
+
+  await choose(second, 'dark');
+  await settled(first, second);
+  expect([first.preference, second.preference]).toEqual(['dark', 'dark']);
+  expect([checkedValues(first), checkedValues(second)]).toEqual([['dark'], ['dark']]);
+  expect(localStorage.getItem('spec-kitty-theme')).toBe('dark');
+  expect(rootTheme()).toEqual({ theme: 'dark', colorScheme: 'dark' });
+});
+
+test('[SC-012] a stale System sibling never overwrites a manual choice after an OS change', async () => {
+  installMedia(true);
+  const first = await mount();
+  const second = await mount();
+  expect(rootTheme()).toEqual({ theme: 'dark', colorScheme: 'dark' });
+
+  await choose(first, 'light');
+  await settled(first, second);
+  for (const dark of [false, true, false, true]) {
+    media.setDark(dark);
+    expect(rootTheme(), `after the OS reported dark=${dark}`).toEqual({
+      theme: 'light',
+      colorScheme: 'light',
+    });
+  }
+  expect(localStorage.getItem('spec-kitty-theme')).toBe('light');
+  expect([first.preference, second.preference]).toEqual(['light', 'light']);
+});
+
+test('[SC-012] connected controls share exactly one System listener, released on the last disconnect', async () => {
+  installMedia(false);
+  const first = await mount();
+  const second = await mount();
+  const third = await mount();
+  expect(media.listenerCount).toBe(1);
+
+  await choose(second, 'dark');
+  await settled(first, second, third);
+  expect(media.listenerCount).toBe(0);
+
+  await choose(third, 'system');
+  await settled(first, second, third);
+  expect(media.listenerCount).toBe(1);
+
+  first.remove();
+  second.remove();
+  expect(media.listenerCount).toBe(1);
+  media.setDark(true);
+  expect(rootTheme()).toEqual({ theme: 'dark', colorScheme: 'dark' });
+
+  third.remove();
+  expect(media.listenerCount).toBe(0);
+  media.setDark(false);
+  expect(rootTheme()).toEqual({ theme: 'dark', colorScheme: 'dark' });
+});
+
+test('[SC-012] a reconnecting control adopts the live document preference without a second listener', async () => {
+  installMedia(false);
+  const first = await mount();
+  const second = await mount();
+
+  first.remove();
+  await choose(second, 'dark');
+  document.body.append(first);
+  await settled(first, second);
+  expect(rootTheme()).toEqual({ theme: 'dark', colorScheme: 'dark' });
+  expect(first.preference).toBe('dark');
+  expect(checkedValues(first)).toEqual(['dark']);
+  expect(media.listenerCount).toBe(0);
+
+  await choose(first, 'system');
+  await settled(first, second);
+  expect(second.preference).toBe('system');
+  expect(media.listenerCount).toBe(1);
+
+  first.remove();
+  second.remove();
+  expect(media.listenerCount).toBe(0);
+  document.body.append(second);
+  await settled(second);
+  expect(media.listenerCount).toBe(1);
+  second.remove();
+  expect(media.listenerCount).toBe(0);
+});
+
+test('[SC-012] a control connected with an explicit preference becomes every connected control\'s preference', async () => {
+  installMedia(false);
+  const first = await mount();
+  const second = labelled(document.createElement('sk-theme-toggle') as ThemeToggle);
+  second.preference = 'dark';
+  document.body.append(second);
+  await settled(first, second);
+
+  expect([first.preference, second.preference]).toEqual(['dark', 'dark']);
+  expect([checkedValues(first), checkedValues(second)]).toEqual([['dark'], ['dark']]);
+  expect(rootTheme()).toEqual({ theme: 'dark', colorScheme: 'dark' });
+  expect(media.listenerCount).toBe(0);
+  media.setDark(false);
+  expect(rootTheme()).toEqual({ theme: 'dark', colorScheme: 'dark' });
+});
+
+test('[SC-012] with storage denied a newly connected control adopts the current-page choice', async () => {
+  vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
+    throw new DOMException('blocked', 'SecurityError');
+  });
+  vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+    throw new DOMException('blocked', 'SecurityError');
+  });
+  installMedia(false);
+  const first = await mount();
+  await choose(first, 'dark');
+
+  const second = await mount();
+  await settled(first, second);
+  expect(rootTheme()).toEqual({ theme: 'dark', colorScheme: 'dark' });
+  expect([first.preference, second.preference]).toEqual(['dark', 'dark']);
+  expect(checkedValues(second)).toEqual(['dark']);
+});
+
+test.each(['sepia', '', 'SYSTEM', null, undefined, 42])(
+  'a direct invalid preference assignment (%s) normalizes to System at the property boundary',
+  async (invalid) => {
+    installMedia(true);
+    const element = await mount();
+    await choose(element, 'light');
+    expect(media.listenerCount).toBe(0);
+
+    (element as unknown as { preference: unknown }).preference = invalid;
+    await settled(element);
+    expect(element.preference).toBe('system');
+    expect(element.getAttribute('preference')).toBe('system');
+    expect(checkedValues(element)).toEqual(['system']);
+    expect(rootTheme()).toEqual({ theme: 'dark', colorScheme: 'dark' });
+    expect(media.listenerCount).toBe(1);
+  },
+);
+
+test('[SC-010] an invalid preference assigned before upgrade becomes System on upgrade', async () => {
+  installMedia(false);
+  const element = document.createElement('sk-theme-toggle-late-invalid') as ThemeToggle;
+  (element as unknown as { preference: unknown }).preference = 'sepia';
+  Object.assign(element, {
+    label: labels.label,
+    systemLabel: labels['system-label'],
+    lightLabel: labels['light-label'],
+    darkLabel: labels['dark-label'],
+  });
+  document.body.append(element);
+
+  const { SkThemeToggle } = await import('../../../packages/elements/src/theme-toggle/sk-theme-toggle.js');
+  customElements.define('sk-theme-toggle-late-invalid', class extends SkThemeToggle {});
+  await customElements.whenDefined('sk-theme-toggle-late-invalid');
+  await settled(element);
+
+  expect(element.preference).toBe('system');
+  expect(element.getAttribute('preference')).toBe('system');
+  expect(checkedValues(element)).toEqual(['system']);
+  expect(rootTheme()).toEqual({ theme: 'light', colorScheme: 'light' });
 });
 
 test('[SC-013] the public control part is present and externally targetable', async () => {

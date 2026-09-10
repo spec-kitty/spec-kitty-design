@@ -6,6 +6,7 @@ export {
 } from './copy-field/sk-copy-field.js';
 export { SkThemeToggle } from './theme-toggle/sk-theme-toggle.js';
 export {
+  THEME_DARK_SCHEME_QUERY,
   THEME_PREFERENCES,
   THEME_STORAGE_KEY,
   applyResolvedTheme,

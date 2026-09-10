@@ -301,3 +301,118 @@ listeners, which let one live control overwrite a sibling's manual root preferen
 change. The runtime lens also found invalid direct property assignment bypassing System fallback;
 the semantic lens found the exact System media query duplicated and unasserted across production
 adapters. All other scoped acceptance surfaces passed. See `reviews/adversarial-review-pass-5.md`.
+
+### Pass-5 remediation — multi-control coherence, property normalization, query authority, zoom
+
+Governed by Op `01M26P9C3YQN3YJS0ZY6DZEDGD`; fresh Claude Code `frontend-freddy` seat, starting
+from clean exact HEAD `aafa24e82577ba9fdb47ca7cde85015e373d1a3a` on `mission/theme-toggle`. The
+changes are left uncommitted for the orchestrator.
+
+**Red first, against unchanged production code at that HEAD** (every failure a behavioural
+assertion; no missing-symbol or collection failure):
+
+- `npx vitest run --project browser fixtures/elements-behaviour/src/sk-theme-toggle.test.ts
+  fixtures/elements-behaviour/src/pattern-operational-status.test.ts` — 16 failed / 38 passed.
+  Sibling sync: `expected [ 'light', 'system' ] to deeply equal [ 'light', 'light' ]`. Stale System
+  sibling: `after the OS reported dark=true: expected { theme: 'dark', colorScheme: 'dark' }` to
+  equal the manual Light state. Ownership: `expected 3 to be 1` listeners. Reconnect: the root
+  resolved System's light instead of the live Dark. Explicit newcomer: `[ 'system', 'dark' ]`.
+  Storage-denied adoption: root light instead of the current-page Dark. Invalid property
+  (`sepia`, `''`, `SYSTEM`, `null`, `undefined`, `42`): `expected 'sepia' to be 'system'` and the
+  equivalent for each value. `[SC-010]` invalid pre-upgrade: `expected 'sepia' to be 'system'`.
+  Story overlap: `expected 2 to be 1` concurrent listeners, and both cleanup orders reported the
+  older System control still live under the newer manual session.
+- `npx vitest run --project node tests/node/theme-preference-contract.test.ts` — 1 failed / 9
+  passed: `expected { contract: +0, element: 1, bootstrap: 1, storySupport: 1 }` to equal
+  `{ contract: 1, element: 0, bootstrap: 0, storySupport: 0 }`.
+- `STORYBOOK_PORT=63323 npx playwright test apps/storybook/src/tests/sk-theme-toggle-pattern.spec.ts
+  --project=chromium -g "keeps every supplied string"` against a fresh HEAD build — 3/3 failed:
+  eyebrow, title, supporting and sync copy each clipped by the slotted node and its
+  `.sk-page-header__*` wrapper at `599 x 356`, the supporting sentence (and title at 390px) also by
+  the viewport; the desktop case clipped eyebrow, title and supporting copy.
+- Two new assertions pass on the old code by design and are contract coverage, not red-first:
+  the exact `matchMedia` argument (the literal was already right — its drift is caught by the
+  argument-sensitive fake and the new SC-012 arm) and a choice made inside an older story
+  session (a regression guard for the reworked story isolation).
+
+**Implementation.** A module-private `DocumentTheme` coordinator per document owns the preference
+every connected control shows, the root, and the only System listener; the first control, or one
+assigned a preference while disconnected, sets it and any later control adopts it. `preference`
+now owns its accessor and normalizes invalid direct, attribute and pre-upgrade values to System;
+its public type stays exactly `'system' | 'light' | 'dark'`. `THEME_DARK_SCHEME_QUERY` in the
+DOM-free contract is the only spelling of the query; the bootstrap entry, the element and the
+story support import it. Story isolation records user choices per session and restores a
+surviving session by assigning its preference to one connected owned control. The composition
+header uses the default density so no supplied string is ellipsized.
+
+**Green.**
+
+- Focused: browser 54/54 across both subject files; Node contract 10/10; theme Playwright
+  (`sk-theme-toggle-pattern.spec.ts`, `theme-no-js.spec.ts`) Chromium + Firefox 25 passed, 3
+  explicit Chromium-only skips (forced colours, HiDPI supplement, axe lane) in Firefox.
+- `npm test`: 51 files / 693 tests (44 Node, 649 Chromium), zero skipped, 18.8 s; suite floor
+  green. The `ResizeObserver loop` console lines come from the untouched `sk-app-shell.test.ts`.
+- `NX_SKIP_NX_CACHE=true node scripts/typecheck-all.mjs`: 5/5 projects. `npm run quality:all`:
+  zero errors (existing warnings only; the nine changed source/test files lint clean).
+- Generators from authored sources: `build-theme-bootstrap` (regenerated; `--check` + 3/3
+  self-test), `elements:analyze` (manifest: descriptions only, `preference` type unchanged),
+  `build-react-wrappers` (regenerated; `--check` byte-identical twice), `build-vue-types`
+  (regenerated; `--check`), `check-vue-template-types`, uncached `elements:build` then
+  `measure-elements-sizes` (regenerated; `--check`), `build-elements-css --check` (31 current).
+- `check-manifest-content` 31 elements / 138 surfaces + 15/15 self-test;
+  `check-pattern-composition` + 47-probe self-test; `check-behaviour-fixture-imports` 35 files +
+  22-row self-test; release graph 28/28 self-test, uncached build of `tokens,styles,elements`, 4
+  packages packing with every export resolving; packed Vue types; offline load 31/31 elements,
+  zero off-machine requests, plus its self-test; `security:lockfile-check`.
+- Storybook built in 9.4 s; axe gate self-test 50/50 and zero WCAG 2.1 AA violations across 669
+  rendered stories. Mutation-harness guard self-test 10/10 in 96.7 s.
+- ADR-11: six new arms (five SC-012, one SC-010) and the SC-010 anchor update; mutations.json now
+  holds 260 arms. Every arm in the three touched sources was applied directly and restored; see
+  the arm record below. The full 260-arm sweep is the orchestrator's.
+- Genuine headed Chrome 100%/200% captures replaced; see
+  `docs/architecture/validation/issue-323-theme-toggle/browser-zoom/README.md`.
+
+Not run here: the Chromium visual-regression job (no committed baseline covers the touched
+stories, and the local host-font failure class is recorded above), WebKit (host libraries
+absent), commitlint (no commit was made), and the full mutation sweep.
+
+**Arm record (direct application, copy-free, each source restored and hash-verified).** Every
+`mutations.json` arm whose file is `sk-theme-toggle.ts`, `theme-preference.ts` or
+`operational-status.ts` was applied and run against both subject files; the verdict applies the
+harness's own rule (named `[SC-NNN]` test in the subject file failed, no other marked test failed).
+15/15 RED, zero collateral: SC-006, SC-007, SC-008, SC-011 (composition), SC-010 (unregistered
+property; anchor updated for `noAccessor`), SC-012 radio type, SC-012 complete listener pair,
+SC-013, SC-014, and the six new arms — shared document state (6 named reds), sibling display (5),
+manual-mode listener release (3), last-disconnect release (2), contract query identity (4), and
+SC-010 invalid normalization (1). A first pass found the SC-012 radio-type arm also redding the
+new `[SC-010]` upgrade case through a radio-typed test helper; the helper now locates checked
+choices by value, and the re-run is clean.
+
+**Operator follow-up — root-barrel export parity.** Independent inspection found
+`packages/elements/custom-elements.json` advertising `THEME_DARK_SCHEME_QUERY` as a JavaScript export
+of `./dist/index.js` (the manifest config rewrites every module path to that root) while
+`packages/elements/src/index.ts` and the built `dist/index.js` did not export it; every adjacent
+DOM-free contract value is a root export. The earlier handoff wrongly described the omission as a
+deliberate choice.
+
+- Red first: new `tests/node/theme-root-barrel.test.ts`, run with
+  `npx vitest run --project node tests/node/theme-root-barrel.test.ts
+  tests/node/theme-preference-contract.test.ts` — 1 failed / 10 passed:
+  `expected [ 'THEME_DARK_SCHEME_QUERY' ] to deeply equal []`. The test lives in its own file
+  because importing the root loads Lit's Node build, whose DOM shims made two DOM-global-absence
+  assertions order-dependent when it first sat in the contract test file.
+- Fix: one line in the authored barrel. Green: 11/11 (a node-only subset exits 1 by design on
+  the suite-floor reporter, which requires the browser lane).
+- Regenerated/checked from repository generators: `elements:analyze --skip-nx-cache` (manifest
+  delta against HEAD unchanged by this fix — it already advertised the export),
+  `build-react-wrappers` + `--check` (byte-identical twice) + 26-probe `--selftest`,
+  `build-vue-types` + `--check`, `check-vue-template-types`, `check-manifest-content` 31/138 +
+  15/15 self-test, uncached five-project typecheck, uncached `elements:build`; the built
+  `dist/index.js` exports the constant and `dist/index.d.ts` declares it; `measure-elements-sizes`
+  regenerated (ESM `dist/index.js` 249707 raw / 166585 minified bytes; IIFE and SRI unchanged)
+  + `--check`; release graph 28/28 self-test, uncached `tokens,styles,elements` build, 4 packages
+  packing with every export resolving; packed Vue types; offline load 31/31 + self-test.
+- `npm test`: 52 files / 694 tests (45 Node, 649 Chromium), zero skipped, 18.6 s.
+- The product tree changed, so Storybook was rebuilt (9.83 s) and both genuine headed-Chrome zoom
+  levels were recaptured and inspected; the images are byte-identical to the first pass and
+  `metrics.json` names the new tree `85cbf6e2413d695a242eef3870d497c91cc1f1f0`.

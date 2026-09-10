@@ -2,15 +2,18 @@ import {
   applyResolvedTheme,
   isThemePreference,
   resolveTheme,
+  THEME_DARK_SCHEME_QUERY,
   THEME_STORAGE_KEY,
   type ThemePreference,
 } from './theme-preference.js';
 
 export type ThemeStoryParameters = Readonly<{ themePreference?: ThemePreference }>;
 
+type ThemeStoryScope = ParentNode & EventTarget;
+
 type ThemeStoryContext = Readonly<{
   parameters: ThemeStoryParameters;
-  canvasElement?: ParentNode;
+  canvasElement?: ThemeStoryScope;
 }>;
 
 const THEME_CONTROL_SELECTOR = 'sk-theme-toggle[data-theme-control]';
@@ -26,11 +29,13 @@ type ThemeStorySnapshot = Readonly<{
   storageAvailable: boolean;
 }>;
 
-type ThemeStorySession = Readonly<{
-  controlScope: ParentNode;
-  controlsBeforeMount: Set<Element>;
+type ThemeStorySession = {
+  readonly controlScope: ThemeStoryScope;
+  readonly controlsBeforeMount: Set<Element>;
+  /** The story's parameter preference, then the last choice a user made inside this story. */
   preference: ThemePreference;
-}>;
+  readonly recordChoice: (event: Event) => void;
+};
 
 type ThemeStoryEnvironment = {
   baseline: ThemeStorySnapshot;
@@ -91,27 +96,32 @@ const controlsOwnedBy = (session: ThemeStorySession): Element[] =>
   Array.from(session.controlScope.querySelectorAll(THEME_CONTROL_SELECTOR))
     .filter((control) => !session.controlsBeforeMount.has(control));
 
-const currentPreferenceFor = (session: ThemeStorySession): ThemePreference => {
-  for (const control of controlsOwnedBy(session).reverse()) {
-    const preference = (control as Element & { preference?: unknown }).preference;
-    if (isThemePreference(preference)) return preference;
-  }
-  return session.preference;
-};
-
 const systemPrefersDark = (): boolean => {
   try {
     return typeof globalThis.matchMedia === 'function' &&
-      globalThis.matchMedia('(prefers-color-scheme: dark)').matches;
+      globalThis.matchMedia(THEME_DARK_SCHEME_QUERY).matches;
   } catch {
     return false;
   }
 };
 
+/**
+ * Make a surviving session's preference the document's again.
+ *
+ * Connected controls share one document preference, so an owned control cannot remember its
+ * story's value while a newer story owns the document — that is why the session records user
+ * choices itself. Assigning the preference to one connected owned control republishes it to every
+ * connected control, the root, and the single System listener. Only a session with no connected
+ * control resolves the root directly, through the same contract.
+ */
 const applySession = (environment: ThemeStoryEnvironment, session: ThemeStorySession): void => {
-  const preference = currentPreferenceFor(session);
-  setStoredPreference(preference);
-  applyResolvedTheme(environment.root, resolveTheme(preference, systemPrefersDark()));
+  setStoredPreference(session.preference);
+  const control = controlsOwnedBy(session).find((owned) => owned.isConnected);
+  if (control) {
+    (control as Element & { preference: ThemePreference }).preference = session.preference;
+  } else {
+    applyResolvedTheme(environment.root, resolveTheme(session.preference, systemPrefersDark()));
+  }
 };
 
 /**
@@ -120,9 +130,10 @@ const applySession = (environment: ThemeStoryEnvironment, session: ThemeStorySes
  * A Storybook iframe can render several stories without replacing its document. This helper
  * captures one true baseline per document and tracks overlapping sessions in creation order.
  * The Storybook canvas scopes control ownership so cleanup cannot disconnect another story's
- * control. Closing the current owner reapplies the most recent remaining session; closing an
- * older session keeps the newer owner authoritative. Only the final cleanup
- * restores the pre-first-session root, storage, and color-scheme baseline.
+ * control, and scopes the `sk-theme-change` choices each session records. Closing the current
+ * owner reapplies the most recent remaining session's preference; closing an older session keeps
+ * the newer owner authoritative. Only the final cleanup restores the pre-first-session root,
+ * storage, and color-scheme baseline.
  */
 export const isolateThemeStory = ({ parameters, canvasElement }: ThemeStoryContext) => {
   const storyDocument = document;
@@ -140,13 +151,21 @@ export const isolateThemeStory = ({ parameters, canvasElement }: ThemeStoryConte
     controlScope,
     controlsBeforeMount,
     preference: preferenceFor(parameters),
+    recordChoice: (event) => {
+      const choice = (event as CustomEvent<{ preference?: unknown }>).detail?.preference;
+      const owned = event.target instanceof Element &&
+        controlsOwnedBy(session).includes(event.target);
+      if (owned && isThemePreference(choice)) session.preference = choice;
+    },
   };
+  controlScope.addEventListener('sk-theme-change', session.recordChoice);
   environment.sessions.push(session);
   setStoredPreference(session.preference);
 
   return () => {
     const index = environment.sessions.indexOf(session);
     if (index < 0) return;
+    controlScope.removeEventListener('sk-theme-change', session.recordChoice);
     controlsOwnedBy(session).forEach((toggle) => toggle.remove());
     environment.sessions.splice(index, 1);
     const current = environment.sessions.at(-1);

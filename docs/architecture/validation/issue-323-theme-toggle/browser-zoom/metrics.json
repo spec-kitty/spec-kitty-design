@@ -1,26 +1,39 @@
 {
-  "sourceHead": "c158e53cce903235b85751dc97dc5e2ea339aca2",
+  "sourceHead": "aafa24e82577ba9fdb47ca7cde85015e373d1a3a",
   "sourceProductTree": {
-    "sha": "2b59e239254938f06cf6dffb040af4043843eb79",
+    "sha": "85cbf6e2413d695a242eef3870d497c91cc1f1f0",
     "paths": [
       "apps/storybook/src/tests/sk-theme-toggle-pattern.spec.ts",
+      "docs/design-system/using-components.md",
       "fixtures/elements-behaviour/src/pattern-operational-status.test.ts",
       "fixtures/elements-behaviour/src/sk-theme-toggle.test.ts",
       "mutations.json",
-      "packages/elements/custom-elements-manifest.config.mjs",
+      "packages/elements/SIZES.md",
       "packages/elements/custom-elements.json",
+      "packages/elements/src/index.ts",
       "packages/elements/src/patterns/operational-status.stories.ts",
-      "packages/elements/src/theme-toggle/sk-theme-toggle.stories.ts",
+      "packages/elements/src/patterns/operational-status.ts",
+      "packages/elements/src/theme-bootstrap.ts",
       "packages/elements/src/theme-toggle/sk-theme-toggle.ts",
+      "packages/elements/src/theme-toggle/theme-preference.ts",
       "packages/elements/src/theme-toggle/theme-story-environment.fixture.ts",
-      "packages/elements/src/theme-toggle/theme-story-environment.ts",
-      "scripts/check-manifest-content.mjs"
+      "packages/elements/theme-bootstrap.js",
+      "packages/elements/vue.d.ts",
+      "packages/react/src/SkThemeToggle.d.ts",
+      "tests/node/theme-preference-contract.test.ts",
+      "tests/node/theme-root-barrel.test.ts"
     ]
   },
-  "sourceDiffSha256": "00e73db131430ecf34b4c867840ab9b1010cbe86c8688c0015e36650d916c7ee",
+  "sourceDiffSha256": "13c921d3c3ae18e039e13f616dbdd3af38b5f0144de58daaf9d653689b9fe3e5",
+  "sourceIdentityProcedure": [
+    "EXCLUDE=(':(exclude)docs/architecture/validation/issue-323-theme-toggle' ':(exclude)kitty-specs')",
+    "GIT_INDEX_FILE=<temp> git read-tree HEAD && GIT_INDEX_FILE=<temp> git add -A -- . \"${EXCLUDE[@]}\" && GIT_INDEX_FILE=<temp> git write-tree",
+    "git diff HEAD --binary -- . \"${EXCLUDE[@]}\" | sha256sum",
+    "Untracked product files are included in the tree (git add -A) but not in `git diff HEAD`; they are listed in sourceUntrackedPaths and hashed individually there."
+  ],
   "browserVersion": "151.0.7922.34",
   "executablePath": "/home/jeroennouws/.cache/ms-playwright/chromium-1234/chrome-linux64/chrome",
-  "display": ":103 1200x800x24",
+  "display": "xvfb-run -a -s '-screen 0 1200x800x24' (auto-selected display); Chrome forced to X11 with --ozone-platform=x11 and WAYLAND_DISPLAY unset",
   "pageUrl": "http://127.0.0.1:6323/iframe.html?id=patterns-operational-status--zoom-200&viewMode=story",
   "zoomMechanism": "X11 XTEST native Ctrl+0, then five Ctrl+Shift+= browser UI chords",
   "constraints": {
@@ -41,24 +54,28 @@
           "preference": "dark",
           "theme": "dark",
           "colorScheme": "dark",
+          "stored": "dark",
           "systemDark": false
         },
         {
           "preference": "light",
           "theme": "light",
           "colorScheme": "light",
+          "stored": "light",
           "systemDark": false
         },
         {
           "preference": "system",
           "theme": "light",
           "colorScheme": "light",
+          "stored": "system",
           "systemDark": false
         },
         {
           "preference": "dark",
           "theme": "dark",
           "colorScheme": "dark",
+          "stored": "dark",
           "systemDark": false
         }
       ]
@@ -78,25 +95,79 @@
         "clientWidth": 1184,
         "clientHeight": 712,
         "scrollWidth": 1184,
-        "scrollHeight": 1277
+        "scrollHeight": 1354
       },
       "composition": {
         "left": 0,
         "top": 0,
         "right": 1184,
-        "bottom": 1277,
+        "bottom": 1354,
         "width": 1184,
-        "height": 1277,
+        "height": 1354,
         "clientWidth": 1184,
-        "clientHeight": 1277,
+        "clientHeight": 1354,
         "scrollWidth": 1184,
-        "scrollHeight": 1277
+        "scrollHeight": 1354
       },
+      "header": {
+        "density": null,
+        "sticky": true,
+        "box": {
+          "left": 0,
+          "top": 0,
+          "right": 1184,
+          "bottom": 174,
+          "width": 1184,
+          "height": 174,
+          "clientWidth": 1184,
+          "clientHeight": 174,
+          "scrollWidth": 1184,
+          "scrollHeight": 174
+        }
+      },
+      "headerCopy": [
+        {
+          "slot": "eyebrow",
+          "text": "Operations",
+          "lines": 1,
+          "textOverflow": "clip",
+          "whiteSpace": "normal",
+          "visible": true,
+          "clippedBy": []
+        },
+        {
+          "slot": "title",
+          "text": "Regional service status",
+          "lines": 1,
+          "textOverflow": "clip",
+          "whiteSpace": "normal",
+          "visible": true,
+          "clippedBy": []
+        },
+        {
+          "slot": "supporting",
+          "text": "Every value below is supplied by the application. The library styles none of it.",
+          "lines": 2,
+          "textOverflow": "clip",
+          "whiteSpace": "normal",
+          "visible": true,
+          "clippedBy": []
+        },
+        {
+          "slot": "sync",
+          "text": "Updated 4 minutes ago",
+          "lines": 1,
+          "textOverflow": "clip",
+          "whiteSpace": "normal",
+          "visible": true,
+          "clippedBy": []
+        }
+      ],
       "toggle": {
-        "left": 713.859375,
-        "top": 8,
-        "right": 1020.453125,
-        "bottom": 88,
+        "left": 705.859375,
+        "top": 24,
+        "right": 1012.453125,
+        "bottom": 104,
         "width": 306.59375,
         "height": 80,
         "clientWidth": 307,
@@ -105,10 +176,10 @@
         "scrollHeight": 80
       },
       "fieldset": {
-        "left": 713.859375,
-        "top": 8,
-        "right": 1020.453125,
-        "bottom": 88,
+        "left": 705.859375,
+        "top": 24,
+        "right": 1012.453125,
+        "bottom": 104,
         "width": 306.59375,
         "height": 80,
         "clientWidth": 305,
@@ -122,10 +193,10 @@
           "checked": false,
           "text": "System",
           "box": {
-            "left": 722.859375,
-            "top": 35,
-            "right": 825.4375,
-            "bottom": 79,
+            "left": 714.859375,
+            "top": 51,
+            "right": 817.4375,
+            "bottom": 95,
             "width": 102.578125,
             "height": 44,
             "clientWidth": 101,
@@ -139,10 +210,10 @@
           "checked": false,
           "text": "Light",
           "box": {
-            "left": 829.4375,
-            "top": 35,
-            "right": 917.703125,
-            "bottom": 79,
+            "left": 821.4375,
+            "top": 51,
+            "right": 909.703125,
+            "bottom": 95,
             "width": 88.265625,
             "height": 44,
             "clientWidth": 86,
@@ -156,10 +227,10 @@
           "checked": true,
           "text": "Dark",
           "box": {
-            "left": 921.703125,
-            "top": 35,
-            "right": 1011.453125,
-            "bottom": 79,
+            "left": 913.703125,
+            "top": 51,
+            "right": 1003.453125,
+            "bottom": 95,
             "width": 89.75,
             "height": 44,
             "clientWidth": 86,
@@ -183,6 +254,7 @@
       },
       "checks": {
         "noDocumentHorizontalOverflow": true,
+        "everyHeaderStringVisible": true,
         "allChoicesVisible": true,
         "noChoiceClipping": true,
         "noChoiceOverlap": true,
@@ -193,7 +265,7 @@
     },
     "capture": {
       "file": "operational-status-100-desktop.png",
-      "sha256": "60a440bbe4f57f9140db24fa587d5abc7e005939804dacb9f20988c0aec1f7cf"
+      "sha256": "3ea7314c09d868ac16db8503592ae514a99649f1e1122b163a1fd88d3010e45e"
     }
   },
   "at200": {
@@ -209,24 +281,28 @@
           "preference": "dark",
           "theme": "dark",
           "colorScheme": "dark",
+          "stored": "dark",
           "systemDark": false
         },
         {
           "preference": "light",
           "theme": "light",
           "colorScheme": "light",
+          "stored": "light",
           "systemDark": false
         },
         {
           "preference": "system",
           "theme": "light",
           "colorScheme": "light",
+          "stored": "system",
           "systemDark": false
         },
         {
           "preference": "dark",
           "theme": "dark",
           "colorScheme": "dark",
+          "stored": "dark",
           "systemDark": false
         }
       ]
@@ -246,25 +322,79 @@
         "clientWidth": 592,
         "clientHeight": 356,
         "scrollWidth": 592,
-        "scrollHeight": 1734
+        "scrollHeight": 1892
       },
       "composition": {
         "left": 0,
         "top": 0,
         "right": 592,
-        "bottom": 1734.4375,
+        "bottom": 1892.4375,
         "width": 592,
-        "height": 1734.4375,
+        "height": 1892.4375,
         "clientWidth": 592,
-        "clientHeight": 1734,
+        "clientHeight": 1892,
         "scrollWidth": 592,
-        "scrollHeight": 1734
+        "scrollHeight": 1892
       },
+      "header": {
+        "density": null,
+        "sticky": true,
+        "box": {
+          "left": 0,
+          "top": 0,
+          "right": 592,
+          "bottom": 310.5,
+          "width": 592,
+          "height": 310.5,
+          "clientWidth": 592,
+          "clientHeight": 311,
+          "scrollWidth": 592,
+          "scrollHeight": 311
+        }
+      },
+      "headerCopy": [
+        {
+          "slot": "eyebrow",
+          "text": "Operations",
+          "lines": 1,
+          "textOverflow": "clip",
+          "whiteSpace": "normal",
+          "visible": true,
+          "clippedBy": []
+        },
+        {
+          "slot": "title",
+          "text": "Regional service status",
+          "lines": 1,
+          "textOverflow": "clip",
+          "whiteSpace": "normal",
+          "visible": true,
+          "clippedBy": []
+        },
+        {
+          "slot": "supporting",
+          "text": "Every value below is supplied by the application. The library styles none of it.",
+          "lines": 2,
+          "textOverflow": "clip",
+          "whiteSpace": "normal",
+          "visible": true,
+          "clippedBy": []
+        },
+        {
+          "slot": "sync",
+          "text": "Updated 4 minutes ago",
+          "lines": 1,
+          "textOverflow": "clip",
+          "whiteSpace": "normal",
+          "visible": true,
+          "clippedBy": []
+        }
+      ],
       "toggle": {
-        "left": 121.8671875,
-        "top": 63.5,
-        "right": 428.4609375,
-        "bottom": 143.5,
+        "left": 24,
+        "top": 205.5,
+        "right": 330.59375,
+        "bottom": 285.5,
         "width": 306.59375,
         "height": 80,
         "clientWidth": 307,
@@ -273,10 +403,10 @@
         "scrollHeight": 80
       },
       "fieldset": {
-        "left": 121.8671875,
-        "top": 63.5,
-        "right": 428.4609375,
-        "bottom": 143.5,
+        "left": 24,
+        "top": 205.5,
+        "right": 330.59375,
+        "bottom": 285.5,
         "width": 306.59375,
         "height": 80,
         "clientWidth": 305,
@@ -290,10 +420,10 @@
           "checked": false,
           "text": "System",
           "box": {
-            "left": 130.8671875,
-            "top": 90.5,
-            "right": 233.4453125,
-            "bottom": 134.5,
+            "left": 33,
+            "top": 232.5,
+            "right": 135.578125,
+            "bottom": 276.5,
             "width": 102.578125,
             "height": 44,
             "clientWidth": 101,
@@ -307,10 +437,10 @@
           "checked": false,
           "text": "Light",
           "box": {
-            "left": 237.4453125,
-            "top": 90.5,
-            "right": 325.7109375,
-            "bottom": 134.5,
+            "left": 139.578125,
+            "top": 232.5,
+            "right": 227.84375,
+            "bottom": 276.5,
             "width": 88.265625,
             "height": 44,
             "clientWidth": 86,
@@ -324,10 +454,10 @@
           "checked": true,
           "text": "Dark",
           "box": {
-            "left": 329.7109375,
-            "top": 90.5,
-            "right": 419.4609375,
-            "bottom": 134.5,
+            "left": 231.84375,
+            "top": 232.5,
+            "right": 321.59375,
+            "bottom": 276.5,
             "width": 89.75,
             "height": 44,
             "clientWidth": 86,
@@ -351,6 +481,7 @@
       },
       "checks": {
         "noDocumentHorizontalOverflow": true,
+        "everyHeaderStringVisible": true,
         "allChoicesVisible": true,
         "noChoiceClipping": true,
         "noChoiceOverlap": true,
@@ -361,9 +492,18 @@
     },
     "capture": {
       "file": "operational-status-200-desktop.png",
-      "sha256": "0a123c1866552d706e843e62302d2617d7603878cc2372ca194dd918ce772397"
+      "sha256": "5e15275cf203b26a83eab5c6eb9c7c4e3f91a23d675f3c89914056802e26fb91"
     }
   },
-  "errors": [],
-  "ignoredWarnings": []
+  "consoleErrors": [
+    "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  ],
+  "failedPageResponses": [],
+  "consoleErrorNote": "One 'Failed to load resource: 404' console entry was recorded. No response the page made returned 4xx, and a headless load of the same story records none, so the entry is a request outside the page itself, most likely Chrome's automatic headed-mode favicon.ico request; Storybook's static build ships favicon.svg only. It is recorded, not suppressed.",
+  "sourceUntrackedPaths": [
+    "tests/node/theme-root-barrel.test.ts"
+  ],
+  "sourceUntrackedSha256": {
+    "tests/node/theme-root-barrel.test.ts": "3030c27800772d5f9d5a85ddb75b1cf1686e4c219d6cbd8a441597e8834ed1fa"
+  }
 }

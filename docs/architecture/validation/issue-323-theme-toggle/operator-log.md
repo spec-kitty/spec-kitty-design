@@ -321,8 +321,37 @@
 - The elements declaration build's handling of generated stylesheet submodules is pre-existing
   package-wide debt. Current release-graph/package checks are green; #323 does not redesign that build.
 - Spec Kitty's resolved review Op stores a catalog recommendation naming a Claude model even though
-  the actual transport and every executed seat in this mission were Codex. The generated Op was not
-  hand-edited; no Claude or Claude-backed tool was invoked.
+  the actual transport and every executed seat in this mission, through adversarial pass 5, were
+  Codex. The generated Op was not hand-edited. That statement stands as history: through
+  adversarial pass 5, no Claude or Claude-backed tool was invoked. The operator then explicitly
+  switched the pass-5 remediation seat (Op `01M26P9C3YQN3YJS0ZY6DZEDGD`) and later seats to Claude
+  Code; see "Pass-5 remediation" below.
 - Cycle-seven reviewer Lows remain separate gate/evidence hardening: document or regenerate the
   canonical `sourceDiffSha256` procedure; recognize `export *` in a future manifest-parity hardening;
   and ignore screenshot-directory names ending in `.ts` in the behavior-fixture import gate.
+
+## Pass-5 remediation (Op `01M26P9C3YQN3YJS0ZY6DZEDGD`)
+
+- Seat: fresh Claude Code / `frontend-freddy`, from clean exact HEAD
+  `aafa24e82577ba9fdb47ca7cde85015e373d1a3a`; changes left uncommitted for the orchestrator.
+- High 1 (200% zoom content): the composition's header now uses the default density; a
+  whole-header Playwright geometry test went red first on the compact truncation and is green at
+  desktop, the 200%-zoom CSS viewport and narrow width in Chromium and Firefox. Genuine headed
+  Chrome 100%/200% captures and metrics were replaced and inspected directly.
+- Medium 1 (multi-control root corruption): a per-document coordinator owns the shared
+  preference, the root, and one System listener; sibling sync, OS immunity, ownership, last
+  disconnect, reconnect, explicit newcomers, storage-denied adoption, and overlapping story
+  sessions went red first and are green.
+- Medium 2 (invalid property): the `preference` accessor normalizes to System; direct and
+  pre-upgrade invalid assignments went red first and are green; public typing is unchanged.
+- Medium 3 (duplicated query): `THEME_DARK_SCHEME_QUERY` lives only in the DOM-free contract;
+  both production adapters and story support import it; both adapters' `matchMedia` arguments are
+  asserted.
+- Records: `kitty-specs/theme-toggle-01M25KMP/implementation-evidence.md` (pass-5 section).
+- Still open for the orchestrator: commit, the full 260-arm mutation sweep, suite-budget
+  re-measurement for the grown mutation and assertion sets, fresh WP review, and the pre-merge
+  squad.
+- Operator follow-up (same seat and Op): the root barrel now exports `THEME_DARK_SCHEME_QUERY`,
+  which the generated manifest already advertised from `./dist/index.js`. Red-first parity test,
+  regenerated/checked derived outputs, release and size gates, and a genuine 100%/200% recapture
+  on the changed product tree are recorded in the implementation evidence.

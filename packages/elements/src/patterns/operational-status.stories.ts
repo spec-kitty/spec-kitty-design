@@ -108,9 +108,9 @@ export const ForcedColors: Story = {
 };
 
 /**
- * The compact sticky header (#182) and the auto-fit card grid at one column. The narrow
- * evidence #183's programme requirements ask every child for, taken over the composition
- * rather than over one element in isolation.
+ * The sticky header (#182), which returns to normal flow below 720px, and the auto-fit card grid
+ * at one column. The narrow evidence #183's programme requirements ask every child for, taken
+ * over the composition rather than over one element in isolation.
  */
 export const Narrow: Story = {
   parameters: {

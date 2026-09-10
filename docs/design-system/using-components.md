@@ -71,6 +71,20 @@ arrow-key behavior and exposes the checked option programmatically; visible opti
 state understandable without color. In forced-colors mode the same radios remain operable and the
 preference still persists, while authored palette colors defer to the user's system colors.
 
+Every `sk-theme-toggle` connected to one document shows one shared preference. A choice on any
+control selects it on every connected control, persists once, and resolves one root theme; while
+that preference is System exactly one live `prefers-color-scheme` listener exists, and none
+exists in Light or Dark, so a second control can never apply the operating system over a manual
+choice. A control connected later adopts the page's current preference — including a choice
+that could not be persisted because storage is denied — unless it was given an explicit
+`preference` before connecting, which then becomes every control's preference. The last control
+to disconnect releases the listener. Coordination is per document only; there is no cross-tab
+synchronization.
+
+The `preference` property and attribute accept only `system`, `light`, and `dark`. Any other
+value assigned from JavaScript or markup becomes `system`: it is never reflected, never leaves
+the group without a selected choice, and never reaches the root.
+
 Degradation is deliberate:
 
 - Without JavaScript, the generated published token stylesheet follows

@@ -4,6 +4,7 @@ import { runInNewContext } from 'node:vm';
 import { expect, test, vi } from 'vitest';
 
 const bootstrapPath = 'packages/elements/theme-bootstrap.js';
+const DARK_SCHEME_QUERY = '(prefers-color-scheme: dark)';
 
 const runBootstrap = (options: {
   stored?: string | null;
@@ -13,12 +14,17 @@ const runBootstrap = (options: {
   document?: boolean;
 }) => {
   const root = { dataset: {} as { theme?: string }, style: { colorScheme: '' } };
+  const queries: unknown[] = [];
   const sandbox: Record<string, unknown> = {};
   if (options.document !== false) sandbox['document'] = { documentElement: root };
   if (options.matchMediaThrows) {
     sandbox['matchMedia'] = () => { throw new Error('media query unavailable'); };
   } else if (options.systemDark !== undefined) {
-    sandbox['matchMedia'] = () => ({ matches: options.systemDark });
+    // Argument-sensitive: only the dark colour-scheme query can report the dark System source.
+    sandbox['matchMedia'] = (query: unknown) => {
+      queries.push(query);
+      return { matches: query === DARK_SCHEME_QUERY && options.systemDark };
+    };
   }
   if (options.storageThrows) {
     Object.defineProperty(sandbox, 'localStorage', {
@@ -28,7 +34,7 @@ const runBootstrap = (options: {
     sandbox['localStorage'] = { getItem: () => options.stored ?? null };
   }
   runInNewContext(readFileSync(bootstrapPath, 'utf8'), sandbox);
-  return root;
+  return Object.assign(root, { queries });
 };
 
 test('publishes one DOM-free theme preference contract and bootstrap export', async () => {
@@ -111,7 +117,20 @@ test('the generated classic bootstrap has parity for accepted, invalid, missing,
     const root = runBootstrap(item);
     expect(root.dataset.theme, JSON.stringify(item)).toBe(item.expected);
     expect(root.style.colorScheme, JSON.stringify(item)).toBe(item.expected);
+    expect(root.queries, JSON.stringify(item)).toEqual([DARK_SCHEME_QUERY]);
   }
+});
+
+test('the System media query has one authority: the DOM-free contract', () => {
+  const occurrences = (path: string) => readFileSync(path, 'utf8').split(DARK_SCHEME_QUERY).length - 1;
+
+  expect({
+    contract: occurrences('packages/elements/src/theme-toggle/theme-preference.ts'),
+    element: occurrences('packages/elements/src/theme-toggle/sk-theme-toggle.ts'),
+    bootstrap: occurrences('packages/elements/src/theme-bootstrap.ts'),
+    storySupport: occurrences('packages/elements/src/theme-toggle/theme-story-environment.fixture.ts'),
+  }).toEqual({ contract: 1, element: 0, bootstrap: 0, storySupport: 0 });
+  expect(occurrences(bootstrapPath)).toBe(1);
 });
 
 test('the bootstrap is inert during SSR and safely falls back when matchMedia is absent or throws', () => {
