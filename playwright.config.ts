@@ -1,5 +1,11 @@
 import { defineConfig, devices } from '@playwright/test';
 
+const storybookPort = Number(process.env['STORYBOOK_PORT'] ?? 6006);
+if (!Number.isInteger(storybookPort) || storybookPort < 1 || storybookPort > 65_535) {
+  throw new Error('STORYBOOK_PORT must be an integer from 1 through 65535');
+}
+const storybookUrl = `http://localhost:${storybookPort}`;
+
 export default defineConfig({
   testDir: 'apps/storybook/src/tests',
   // visual-regression owns visual.spec.ts: it runs chromium-only, with its own
@@ -14,12 +20,12 @@ export default defineConfig({
   workers: process.env['CI'] ? 2 : undefined,
   reporter: [['html', { open: 'never' }]],
   use: {
-    baseURL: 'http://localhost:6006',
+    baseURL: storybookUrl,
     trace: 'on-first-retry',
   },
   webServer: {
-    command: 'npx http-server apps/storybook/storybook-static --port 6006 --silent',
-    url: 'http://localhost:6006',
+    command: `npx http-server apps/storybook/storybook-static --port ${storybookPort} --silent`,
+    url: storybookUrl,
     reuseExistingServer: !process.env['CI'],
     timeout: 60000,
   },

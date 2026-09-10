@@ -71,3 +71,59 @@ gates and explicitly retain local/CI-only limitations.
 - The derived all-project typecheck reached an unrelated existing diagnostic at
   `fixtures/elements-behaviour/src/sk-form-input.test.ts:471` (`TS2538`, unique symbol index);
   this slice did not change that file. The exact-base/final full gate must classify it.
+
+### WP01 review-cycle-1 remediation
+
+- Independent `reviewer-renata` rejected exact HEAD
+  `ab7d4d5a2d055eddf6ef09e227eb9b9062827b58` with four Medium evidence gaps. A fresh
+  Codex `frontend-freddy` seat loaded the complete runtime fix prompt and implement-scoped
+  doctrine before changing the rejected implementation.
+- The public `sk-theme-change` assertion now carries `[SC-006][SC-007][SC-008]`, observes the
+  event at an ancestor, and proves one delivery, the exact two-key detail/value contract,
+  `bubbles: true`, `composed: true`, and the intentionally non-cancelable SC-009 boundary.
+  `behaviours.json` registers this exact subject for all three applicable IDs and
+  `mutations.json` carries one surgical arm per ID. Direct falsification reds were:
+  duplicate delivery expected 1 / received 2; wrong detail expected preference `dark` /
+  received `system`; disabled bubbling/composed expected one ancestor event / received zero.
+- A browser consumer fixture executes the byte-exact generated classic bootstrap as a blocking
+  `<head>` script, records root `data-theme` and inline `color-scheme` before a following real
+  external stylesheet, and then proves that stylesheet loaded. Seven cases cover stored Light,
+  stored Dark, missing storage, invalid storage, explicit System-light, explicit System-dark,
+  and throwing storage. Reversing the bootstrap/stylesheet order red at DOM position expected
+  `FOLLOWING` (4) / received `PRECEDING` (2); restored focused fixture passed 24/24 total tests.
+- A legacy-only MediaQueryList fake exposes no modern event-listener methods. It proves live
+  System updates, zero listeners after entering manual mode, listener restoration when returning
+  to System, disconnect cleanup, and one-only reconnect installation. Omitting the production
+  `addListener` call red immediately at listener count expected 1 / received 0.
+- The forced-colors Storybook proof now compares the choice's computed foreground/background to
+  browser system `CanvasText`/`Canvas` and asserts computed `forced-color-adjust: auto`, in
+  addition to preserving operation and root/storage resolution. A generated CSS falsification
+  with authored `forced-color-adjust: none` red at expected `auto` / received `none`; authored
+  CSS was restored, generated via `build-elements-css.mjs`, Storybook rebuilt, and the isolated
+  Chromium lane passed on `STORYBOOK_PORT=63232`. No snapshot was updated.
+- Focused integrity checks: theme browser fixture 24/24; forced-colors Playwright 1/1 on the
+  isolated port; configured-baseURL timezone navigation 1/1 on isolated port 63234; Node config
+  contract 14/14; elements typecheck; CSS/bootstrap generated checks;
+  behavior-fixture deep-import gate 34/34 plus 22/22 self-test; relevant ESLint with zero errors;
+  all three new mutation source anchors unique/effective; and `git diff --check` passed. The
+  deterministic registry now has 244 arms. The three added arms were directly applied and each
+  produced its named red, but the full 244-arm copy-isolated sweep is intentionally deferred to
+  the exact-head gate rather than represented as completed here.
+- The uncached `elements-behaviour-fixture:typecheck` then exposed a generator declaration
+  mismatch: RED with 31 diagnostics because all 30 generated sheet declarations had been
+  widened to `CSSStyleSheet | CSSResult`, while the browser-only behavior fixtures correctly
+  inspect `cssRules` and constructed-sheet identity. The generated `.css.js` paths are internal
+  to the package graph (not package subpath exports); sheet values re-exported by the package are
+  likewise a browser-facing adoption surface. The
+  runtime `CSSResult` branch is intentionally limited to inert DOM-free package/element import,
+  not server-side sheet inspection. The authoritative generator now retains that runtime branch
+  while declaring the supported browser surface as `CSSStyleSheet`; its self-test pins both
+  behaviors independently.
+- GREEN after generator-only source remediation and regeneration of all 30 declarations:
+  `build-elements-css --selftest` passed 3/3, `--check` reported all 30 components current,
+  the actual source-element Node import passed 9/9, a fresh uncached elements build plus
+  built-package SSR import passed without `document`, `window`, `CSSStyleSheet`, or
+  `customElements`, the exact Chromium constructed-sheet identity assertion passed 1/1,
+  uncached `elements-behaviour-fixture:typecheck` passed, and the derived uncached all-project
+  typecheck passed all five projects (`elements-behaviour-fixture`, `react-consumer-fixture`,
+  `vue-consumer-fixture`, `elements`, and `react`).

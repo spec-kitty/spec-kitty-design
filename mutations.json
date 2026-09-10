@@ -68,6 +68,30 @@
       "subject": "fixtures/elements-behaviour/src/sk-card.test.ts"
     },
     {
+      "id": "SC-006",
+      "arm": "one theme-change event per native preference selection",
+      "file": "packages/elements/src/theme-toggle/sk-theme-toggle.ts",
+      "from": "    this.dispatchEvent(themeChangeEvent);",
+      "to": "    this.dispatchEvent(themeChangeEvent); this.dispatchEvent(themeChangeEvent);",
+      "subject": "fixtures/elements-behaviour/src/sk-theme-toggle.test.ts"
+    },
+    {
+      "id": "SC-007",
+      "arm": "exact theme preference and resolved-theme detail",
+      "file": "packages/elements/src/theme-toggle/sk-theme-toggle.ts",
+      "from": "      detail: Object.freeze({ preference: this.preference, theme: this.#resolvedTheme() }),",
+      "to": "      detail: Object.freeze({ preference: 'system', theme: this.#resolvedTheme() }),",
+      "subject": "fixtures/elements-behaviour/src/sk-theme-toggle.test.ts"
+    },
+    {
+      "id": "SC-008",
+      "arm": "theme-change bubbles and crosses shadow boundaries as documented",
+      "file": "packages/elements/src/theme-toggle/sk-theme-toggle.ts",
+      "from": "      bubbles: true,\n      composed: true,",
+      "to": "      bubbles: false,\n      composed: false,",
+      "subject": "fixtures/elements-behaviour/src/sk-theme-toggle.test.ts"
+    },
+    {
       "id": "SC-010",
       "arm": "status reflection",
       "file": "packages/elements/src/card/sk-card.ts",

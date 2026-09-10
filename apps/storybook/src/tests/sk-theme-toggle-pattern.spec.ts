@@ -148,6 +148,30 @@ test('forced colours keep the three-state control operable while root preference
   const light = root.getByRole('radio', { name: 'Light' });
   await light.click();
   await expect(light).toBeChecked();
+  const forcedPresentation = await light.evaluate((radio) => {
+    const choice = radio.closest('label');
+    if (!choice) throw new Error('theme choice has no label');
+    const systemProbe = document.createElement('span');
+    systemProbe.style.color = 'CanvasText';
+    systemProbe.style.backgroundColor = 'Canvas';
+    systemProbe.style.position = 'fixed';
+    systemProbe.style.insetInlineStart = '-10000px';
+    document.body.append(systemProbe);
+    const choiceStyle = getComputedStyle(choice);
+    const probeStyle = getComputedStyle(systemProbe);
+    const result = {
+      background: choiceStyle.backgroundColor,
+      color: choiceStyle.color,
+      forcedColorAdjust: choiceStyle.forcedColorAdjust,
+      systemBackground: probeStyle.backgroundColor,
+      systemColor: probeStyle.color,
+    };
+    systemProbe.remove();
+    return result;
+  });
+  expect(forcedPresentation.forcedColorAdjust).toBe('auto');
+  expect(forcedPresentation.color).toBe(forcedPresentation.systemColor);
+  expect(forcedPresentation.background).toBe(forcedPresentation.systemBackground);
   expect(await page.evaluate(() => document.documentElement.dataset.theme)).toBe('light');
   expect(await page.evaluate((key) => localStorage.getItem(key), STORAGE_KEY)).toBe('light');
 });

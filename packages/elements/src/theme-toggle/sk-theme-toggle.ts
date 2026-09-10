@@ -145,11 +145,12 @@ export class SkThemeToggle extends LitElement {
     this.preference = input.value;
     writeThemePreference(storage(), this.preference);
     this.#applyAndSynchronize();
-    this.dispatchEvent(new CustomEvent('sk-theme-change', {
+    const themeChangeEvent = new CustomEvent('sk-theme-change', {
       detail: Object.freeze({ preference: this.preference, theme: this.#resolvedTheme() }),
       bubbles: true,
       composed: true,
-    }));
+    });
+    this.dispatchEvent(themeChangeEvent);
   };
 
   #hasLabels(): boolean {

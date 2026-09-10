@@ -3,6 +3,7 @@ import { userEvent } from 'vitest/browser';
 import { afterEach, beforeEach, expect, test, vi } from 'vitest';
 import '../../../packages/elements/src/theme-toggle/sk-theme-toggle.js';
 import skThemeToggleSheet from '../../../packages/elements/src/theme-toggle/sk-theme-toggle.css.js';
+import themeBootstrapSource from '../../../packages/elements/theme-bootstrap.js?raw';
 
 type ThemePreference = 'system' | 'light' | 'dark';
 type ThemeToggle = HTMLElement & {
@@ -68,12 +69,123 @@ class FakeMediaQueryList extends EventTarget {
   }
 }
 
+type LegacyMediaListener = (event: MediaQueryListEvent) => void;
+
+/** A deliberately legacy-only MQL: the modern listener methods do not exist. */
+class LegacyMediaQueryList {
+  readonly media = '(prefers-color-scheme: dark)';
+  onchange: ((event: MediaQueryListEvent) => void) | null = null;
+  matches: boolean;
+  #listeners = new Set<LegacyMediaListener>();
+
+  constructor(dark: boolean) {
+    this.matches = dark;
+  }
+
+  get listenerCount(): number {
+    return this.#listeners.size;
+  }
+
+  addListener(callback: LegacyMediaListener): void {
+    this.#listeners.add(callback);
+  }
+
+  removeListener(callback: LegacyMediaListener): void {
+    this.#listeners.delete(callback);
+  }
+
+  setDark(dark: boolean): void {
+    this.matches = dark;
+    const event = { matches: dark, media: this.media } as MediaQueryListEvent;
+    for (const listener of this.#listeners) listener(event);
+  }
+}
+
 let media: FakeMediaQueryList;
 
 const installMedia = (dark: boolean): FakeMediaQueryList => {
   media = new FakeMediaQueryList(dark);
   vi.stubGlobal('matchMedia', vi.fn(() => media as unknown as MediaQueryList));
   return media;
+};
+
+const installLegacyMedia = (dark: boolean): LegacyMediaQueryList => {
+  const legacy = new LegacyMediaQueryList(dark);
+  vi.stubGlobal('matchMedia', vi.fn(() => legacy as unknown as MediaQueryList));
+  return legacy;
+};
+
+type BootstrapScenario = {
+  stored: string | null;
+  systemDark: boolean;
+  storageThrows?: boolean;
+  resolved: 'light' | 'dark';
+};
+
+type BootstrapBoundary = {
+  colorScheme: string;
+  stylesheetCount: number;
+  theme: string | undefined;
+};
+
+const runBootstrapConsumer = async (scenario: BootstrapScenario): Promise<{
+  boundary: BootstrapBoundary;
+  document: Document;
+}> => {
+  const bootstrapUrl = URL.createObjectURL(new Blob([themeBootstrapSource], {
+    type: 'text/javascript',
+  }));
+  const stylesheetUrl = URL.createObjectURL(new Blob([
+    ':root { --theme-bootstrap-consumer-stylesheet: loaded; }',
+  ], { type: 'text/css' }));
+  const storageSetup = scenario.storageThrows
+    ? `Object.defineProperty(globalThis, 'localStorage', {
+        configurable: true,
+        get() { throw new DOMException('blocked', 'SecurityError'); }
+      });`
+    : scenario.stored === null
+      ? `localStorage.removeItem('spec-kitty-theme');`
+      : `localStorage.setItem('spec-kitty-theme', ${JSON.stringify(scenario.stored)});`;
+  const iframe = document.createElement('iframe');
+  iframe.srcdoc = `<!doctype html><html><head>
+    <script>${storageSetup}
+      globalThis.matchMedia = () => ({ matches: ${String(scenario.systemDark)} });
+    <\/script>
+    <script id="theme-bootstrap" src="${bootstrapUrl}"><\/script>
+    <script>
+      globalThis.__themeAtPreStylesheetBoundary = {
+        theme: document.documentElement.dataset.theme,
+        colorScheme: document.documentElement.style.colorScheme,
+        stylesheetCount: document.styleSheets.length
+      };
+    <\/script>
+    <link id="consumer-stylesheet" rel="stylesheet" href="${stylesheetUrl}">
+  </head><body></body></html>`;
+
+  try {
+    const loaded = new Promise<void>((resolve, reject) => {
+      iframe.addEventListener('load', () => resolve(), { once: true });
+      iframe.addEventListener('error', () => reject(new Error('bootstrap consumer failed')), {
+        once: true,
+      });
+    });
+    document.body.append(iframe);
+    await loaded;
+    const consumerDocument = iframe.contentDocument;
+    const consumerWindow = iframe.contentWindow as Window & {
+      __themeAtPreStylesheetBoundary?: BootstrapBoundary;
+    };
+    if (!consumerDocument || !consumerWindow.__themeAtPreStylesheetBoundary) {
+      throw new Error('bootstrap consumer did not record its pre-stylesheet boundary');
+    }
+    return {
+      boundary: consumerWindow.__themeAtPreStylesheetBoundary,
+      document: consumerDocument,
+    };
+  } finally {
+    URL.revokeObjectURL(bootstrapUrl);
+    URL.revokeObjectURL(stylesheetUrl);
+  }
 };
 
 const mount = async (attrs: Record<string, string> = {}): Promise<ThemeToggle> => {
@@ -197,6 +309,33 @@ test('manual choices persist, ignore OS changes, and returning to System follows
   expect(document.documentElement.style.colorScheme).toBe('dark');
 });
 
+test('legacy-only matchMedia follows System and cleans up across manual mode and reconnects', async () => {
+  const legacy = installLegacyMedia(true);
+  const element = await mount();
+  expect(legacy.listenerCount).toBe(1);
+  expect(document.documentElement.dataset.theme).toBe('dark');
+
+  legacy.setDark(false);
+  expect(document.documentElement.dataset.theme).toBe('light');
+
+  await choose(element, 'dark');
+  expect(legacy.listenerCount).toBe(0);
+  legacy.setDark(false);
+  expect(document.documentElement.dataset.theme).toBe('dark');
+
+  await choose(element, 'system');
+  expect(legacy.listenerCount).toBe(1);
+  expect(document.documentElement.dataset.theme).toBe('light');
+  element.remove();
+  expect(legacy.listenerCount).toBe(0);
+
+  document.body.append(element);
+  await (element.updateComplete ?? Promise.resolve());
+  expect(legacy.listenerCount).toBe(1);
+  element.remove();
+  expect(legacy.listenerCount).toBe(0);
+});
+
 test('storage exceptions preserve current-page selection and root application', async () => {
   vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
     throw new DOMException('blocked', 'SecurityError');
@@ -261,15 +400,54 @@ test('missing matchMedia degrades System to light without making the control ino
   expect(document.documentElement.dataset.theme).toBe('dark');
 });
 
-test('a user choice emits its textual preference and resolved theme', async () => {
+test('[SC-006][SC-007][SC-008] a user choice emits once with exact public detail and propagation', async () => {
   const element = await mount();
-  const events: unknown[] = [];
-  element.addEventListener('sk-theme-change', (event) => {
-    events.push((event as CustomEvent).detail);
-  });
+  const events: CustomEvent[] = [];
+  const recordEvent = (event: Event) => {
+    events.push(event as CustomEvent);
+  };
+  document.body.addEventListener('sk-theme-change', recordEvent);
   await choose(element, 'dark');
-  expect(events).toEqual([{ preference: 'dark', theme: 'dark' }]);
+  document.body.removeEventListener('sk-theme-change', recordEvent);
+  expect(events).toHaveLength(1);
+  expect(events[0]!.detail).toEqual({ preference: 'dark', theme: 'dark' });
+  expect(Object.keys(events[0]!.detail).sort()).toEqual(['preference', 'theme']);
+  expect(events[0]!.bubbles).toBe(true);
+  expect(events[0]!.composed).toBe(true);
+  expect(events[0]!.cancelable).toBe(false);
 });
+
+test.each([
+  { stored: 'light', systemDark: true, resolved: 'light' },
+  { stored: 'dark', systemDark: false, resolved: 'dark' },
+  { stored: null, systemDark: false, resolved: 'light' },
+  { stored: 'sepia', systemDark: true, resolved: 'dark' },
+  { stored: 'system', systemDark: false, resolved: 'light' },
+  { stored: 'system', systemDark: true, resolved: 'dark' },
+  { stored: null, systemDark: true, storageThrows: true, resolved: 'dark' },
+] as const)(
+  'generated classic bootstrap resolves stored=$stored systemDark=$systemDark before consumer CSS',
+  async (scenario) => {
+    const consumer = await runBootstrapConsumer(scenario);
+    const bootstrap = consumer.document.querySelector('#theme-bootstrap');
+    const stylesheet = consumer.document.querySelector('#consumer-stylesheet');
+
+    expect(bootstrap?.getAttribute('type')).toBeNull();
+    expect(
+      bootstrap?.compareDocumentPosition(stylesheet!) ?? 0,
+    ).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    expect(consumer.boundary).toEqual({
+      theme: scenario.resolved,
+      colorScheme: scenario.resolved,
+      stylesheetCount: 0,
+    });
+    expect(consumer.document.styleSheets).toHaveLength(1);
+    expect(
+      consumer.document.defaultView?.getComputedStyle(consumer.document.documentElement)
+        .getPropertyValue('--theme-bootstrap-consumer-stylesheet').trim(),
+    ).toBe('loaded');
+  },
+);
 
 test('[SC-010] a preference assigned before upgrade survives definition and reaches the root', async () => {
   const element = document.createElement('sk-theme-toggle-late') as ThemeToggle;
