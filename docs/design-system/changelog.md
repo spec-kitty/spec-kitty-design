@@ -27,7 +27,7 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) conve
   nearest-above-44px token). **The 44px contract was already satisfied without this
   declaration** — measured from the actual CI-rendered work-explorer pattern (not the isolated
   Storybook story), the control's natural content-driven height there is 45px. What the
-  declaration adds is pinning that height to an exact 48px, which is not free: in the 17 (18)
+  declaration adds is pinning that height to an exact 48px, which is not free: in the 18
   work-explorer visual baselines this pinning invalidated, it costs **+1px** where the control
   shares a grid row with an `.sk-form-select` sibling already at 47px (≥1101px viewports), the
   full **+3px** where the control has its own row (narrower viewports), and **+6px** under the
@@ -44,9 +44,14 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) conve
   changing it is out of this WP's scope. Filed as a separate defect.
 
   **Also disclosed**: the control's new 48px height no longer matches the sibling
-  `.sk-form-select`'s (unchanged) 47px natural height in the same filters row, so under
-  `align-items: end` their bottom edges no longer align by 1px in some layouts. Not fixed here —
-  `.sk-form-select` is explicitly out of scope (see below).
+  `.sk-form-select`'s (unchanged) 47px natural height in the same filters row. Decoded directly
+  from `work-explorer-active-filters`, not assumed: `.sk-form-select` sits top=14/bottom=60,
+  `.sk-input` sits top=13/bottom=60 — **both bottom edges land at the same pixel row (y=60)**,
+  which `align-items: end` on the shared row guarantees regardless of either control's height, so
+  the two were never at risk of a bottom-edge misalignment. The 1px height difference shows up at
+  the *top* edge instead (the taller `.sk-input` starts 1px higher) and in the row's own height,
+  which grows by 1px to accommodate it. Not fixed here — `.sk-form-select` is explicitly out of
+  scope (see below).
 
   Focus and `:disabled` styling are unchanged. `.sk-textarea`,
   `.sk-form-textarea__control`, and `.sk-form-select` keep `--sk-border-default` and are known,

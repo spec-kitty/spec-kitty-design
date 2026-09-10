@@ -82,8 +82,8 @@
      a natural content-driven height of 45px — the padding/border/line-height sum here is
      identical by construction (FR-006's parity test enforces it), so the same 45px vs
      48px relationship applies to this shadow-DOM control's real line-height context, even
-     though no dedicated visual baseline yet exists for this specific consumption path to
-     decode pixel-by-pixel (see apps/storybook/src/tests/sk-form-input-contrast-touch-target.spec.ts
+     though no baseline of this control in a real composition yet exists to decode
+     pixel-by-pixel (see apps/storybook/src/tests/sk-form-input-contrast-touch-target.spec.ts
      for the rendered proof this WP does carry). Where a real composition shares this
      control's grid row with a sibling already at 47px the floor costs 1px; where the
      control has its own row it costs the full 3px. Do not delete this declaration after
