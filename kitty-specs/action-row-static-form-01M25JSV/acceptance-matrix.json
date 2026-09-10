@@ -238,10 +238,10 @@
       "criterion_id": "FR-024",
       "description": "Verify FR-024 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
+      "evidence": "run-axe-storybook.js (2026-09-10): zero WCAG 2.1 AA violations across all 627 rendered stories, including all 19 new primitives-skactionrow-html--* stories; npx playwright test --project=chromium: 599/600 passed (the 1 failure is a pre-existing, unrelated nav-pill demo-surface gap, apps/storybook/src/tests/nav-pill-behaviour.spec.ts, untouched by this mission's diff); packages/elements/SIZES.md regenerated after a real build (tokens/styles/elements --skip-nx-cache) and --check passes",
+      "pass_fail": "pass",
       "verified_by": null,
-      "verified_at": null,
+      "verified_at": "2026-09-10T14:07:29.817493+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
