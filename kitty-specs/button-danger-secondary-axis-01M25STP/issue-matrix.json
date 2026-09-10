@@ -49,7 +49,7 @@
       "wp": "WP01"
     },
     "#319": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "Epic parent providing authority/deadline posture for this mission; sibling Family 5 children (incl. #321) and Lynn's pending product verdict remain outstanding, not resolved by this WP.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -57,8 +57,8 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
     },
     "#320": {
       "evidence_ref": "This WP's diff (6e89c92,40cc95f,b2a358c,07228ee) is the implementation of #320 itself.",
