@@ -36,7 +36,7 @@ history:
   actor: system
   action: Prompt generated via /spec-kitty.tasks
 agent_profile: implementer-ivan
-authoritative_surface: packages/tokens/src/tokens.css, packages/styles/src/form-field/, packages/styles/src/form-input/
+authoritative_surface: packages/styles/src/
 create_intent:
 - tests/node/form-input-border-target-size-parity.test.ts
 - apps/storybook/src/tests/sk-form-input-contrast-touch-target.spec.ts
