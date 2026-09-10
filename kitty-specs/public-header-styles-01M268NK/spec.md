@@ -496,7 +496,10 @@ that success criteria be independently checkable and name the mechanism.
   / dependency" #323 entry).
 - **SC-012**: `npm run quality:all` (ESLint, stylelint, htmlhint) exits 0 over every new file this
   mission adds.
-- **SC-013**: `git grep -n "NEEDS DECISION" -- kitty-specs/public-header-styles-01M268NK/spec.md`
-  returns nothing — the target-size mechanism is settled in "Resolved decision" above, from the two
-  cited precedents, before any of the Work Package's CSS is authored. The implementer applies that
-  mechanism; it does not choose one.
+- **SC-013**: No heading in this spec begins with `[NEEDS DECISION]` — checked with
+  `grep -n '^#\+ \[NEEDS DECISION\]' kitty-specs/public-header-styles-01M268NK/spec.md`, which
+  returns nothing. The target-size mechanism is settled in "Resolved decision" above from the two
+  cited precedents, before any of the Work Package's CSS is authored, and `sk-public-header.css`
+  contains no rule whose selector names `.sk-button`, `sk-theme-toggle`, or `::part(` — checked with
+  `grep -nE '\.sk-button|sk-theme-toggle|::part\(' packages/styles/src/public-header/sk-public-header.css`,
+  which returns nothing. The implementer applies the settled mechanism; it does not choose one.
