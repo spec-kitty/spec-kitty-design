@@ -28,10 +28,10 @@
       "criterion_id": "FR-003",
       "description": "Verify FR-003 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "packages/styles/src/button/sk-button.css: busy rules keyed exclusively on .sk-button--busy/:host([busy]); grep confirms no :disabled/[disabled]/[aria-disabled] coupling; reviewer verified FR-003, review-cycle-1.md",
+      "pass_fail": "pass",
+      "verified_by": "mission-closer",
+      "verified_at": "2026-09-10T12:35:12.282642+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
