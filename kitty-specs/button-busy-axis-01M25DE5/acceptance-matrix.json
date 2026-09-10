@@ -8,10 +8,10 @@
       "criterion_id": "FR-001",
       "description": "Verify FR-001 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "fixtures/elements-behaviour/src/sk-button.test.ts (FR-001/FR-006 tests); packages/elements/src/button/sk-button.ts:30 (busy reflected attribute); packages/styles/src/button/sk-button.css (.sk-button--busy rules per tone/size); independent reviewer verified directly against source and live-browser rendering, review-cycle-1.md",
+      "pass_fail": "pass",
+      "verified_by": "mission-closer",
+      "verified_at": "2026-09-10T12:35:10.062869+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
