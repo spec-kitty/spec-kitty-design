@@ -1995,7 +1995,8 @@
       "file": "packages/elements/src/confirm-dialog/sk-confirm-dialog.ts",
       "from": "          part=\"confirm\"",
       "to": "          part=\"confirm-button\"",
-      "subject": "fixtures/elements-behaviour/src/sk-confirm-dialog.test.ts"
+      "subject": "fixtures/elements-behaviour/src/sk-confirm-dialog.test.ts",
+      "expectCollateral": true
     },
     {
       "id": "SC-014",

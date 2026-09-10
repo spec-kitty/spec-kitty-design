@@ -4,11 +4,20 @@ import { expect, waitFor } from 'storybook/test';
 import './sk-confirm-dialog.js';
 import type { SkConfirmDialog } from './sk-confirm-dialog.js';
 
-// EVERY STORY BELOW SUPPLIES REAL, NON-EMPTY STRINGS FOR ALL FOUR REQUIRED PROPS — except
-// `MissingConfirmLabel`, which deliberately omits one to demonstrate FR-017/FR-018's
-// warn-and-render-nothing behaviour to a reviewer. There is no generated static markup module
-// for this component (FR-016/research.md) — every story below renders from the element's own
-// tag, never from hand-written static HTML.
+// EVERY STORY BELOW SUPPLIES REAL, NON-EMPTY STRINGS FOR ALL FOUR REQUIRED PROPS. There is no
+// generated static markup module for this component (FR-016/research.md) — every story below
+// renders from the element's own tag, never from hand-written static HTML.
+//
+// FR-001/FR-017/FR-018's warn-and-render-nothing behaviour for an OMITTED required string is
+// deliberately NOT demonstrated as a Storybook story. Omitting `confirm-label` renders that
+// control with zero accessible name — a genuine WCAG 4.1.2 violation this repo's axe gate
+// correctly rejects, measured directly: an earlier `MissingConfirmLabel` story reported
+// `component host(s) rendered nothing: button.sk-button` and never satisfied the render-wait.
+// This repo has no per-story a11y opt-out (`run-axe-storybook.js` scans every story with none
+// exempted), so a story that is honestly, unavoidably inaccessible cannot ship here. The
+// mechanical proof stays exactly where it is authoritative — the red-first-demonstrated tests in
+// `fixtures/elements-behaviour/src/sk-confirm-dialog.test.ts` — rather than a visual aid that
+// would fail the very gate every other story here passes.
 //
 // TEAM DELETION IS NEVER THE EXAMPLE (FR-014). Every destructive exemplar here is membership
 // removal, leaving a team, or bearer-link revocation — never whole-Team deletion, which is
@@ -209,24 +218,5 @@ export const NarrowWidth: Story = {
       false,
       '18rem',
     ),
-  play: async ({ canvasElement }) => openViaShowModal(canvasElement),
-};
-
-/**
- * FR-001/FR-017/FR-018, VISUALLY DEMONSTRATED FOR A REVIEWER: `confirm-label` is omitted here.
- * The confirm control renders with no text — never a substituted placeholder like "Confirm" or
- * "OK" — and the omission is logged as a `console.warn`. `sk-confirm-dialog.test.ts` is the
- * mechanical proof; this story is what it looks like.
- */
-export const MissingConfirmLabel: Story = {
-  render: () =>
-    frame(html`
-      <sk-confirm-dialog
-        dialog-title="Revoke this link?"
-        message="Anyone with this link will lose access immediately. This can't be undone."
-        cancel-label="Keep link"
-        confirm-variant="primary"
-      ></sk-confirm-dialog>
-    `),
   play: async ({ canvasElement }) => openViaShowModal(canvasElement),
 };
