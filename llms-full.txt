@@ -304,30 +304,51 @@ no position on any of the three.
 ### ADR-15 — The Static Form of Element-Backed CSS
 
 `docs/architecture/decisions/2026-09-10-15-static-form-of-element-backed-css.md`.
-**Decision:** per construct kind, not globally. A **host-attribute variant axis**
-and a **host-owned `container-type`** get a generated, gate-able light-DOM static
+**Decision:** per construct kind, not globally — four construct kinds in all. A
+**host-attribute variant axis inside a host-owned `@container`** and a
+**host-owned `container-type`** get a generated, gate-able light-DOM static
 form — but only in a **two-element** shape, where `:host` becomes a separate
-`.sk-<name>-host` wrapper around the unchanged `.sk-<name>` root. A
-**`::slotted()` child rule** is **shadow-only**: no generated static equivalent.
-**Why:** measured, not asserted. The real elements were rendered from the
-Storybook-built bundle and compared against static exemplars linking the real
-built CSS resolved through the package's own export map, in Chromium and
-Firefox, against outcomes pre-declared before the probes existed. The intuitive
-transform — collapse `:host` onto the root class, move `container-type` there —
-diverged on 4 of 14 outcomes for `sk-app-shell` and 4 of 13 for `sk-action-row`;
-the wrapper form matched on every one. **The rule that bites:** *an element is
-never its own query container.* A container query styles a container's
-DESCENDANTS, so `container-type` moved onto the root class makes that element
-answer some outer ancestor — or nothing — while its descendants keep querying it
-correctly. Most of the sheet still works, which is why the defect is silent; the
-composed cases (an outer ancestor that also declares `container-type`) are the
-only ones that expose it. For `::slotted()`, appearance IS reproducible but
-**cascade position is not**: an outer-tree declaration beats a `::slotted()`
-declaration regardless of specificity, so a consumer's bare `img { object-fit:
-contain }` wins against the shadow form and loses against the static descendant
-rewrite — an equivalence gate cannot hold there. `#309` files the generator and
-`#310` the equivalence gate; neither is built by the record. Status is
-`Proposed`, and adoption is gated on a product verdict that is still pending.
+`.sk-<name>-host` wrapper around the unchanged `.sk-<name>` root, carrying the
+component's **complete `:host` declaration set** — never a fixed property list,
+because the right list differs per component and a copied one goes wrong in
+both directions (`sk-action-row`'s `:host` declares no `width`, so a list
+copied from `sk-app-shell` would wrongly add `width: 100%` where the element
+never had one). A host-attribute axis in a sheet with **no** `container-type` —
+five sheets, `sk-form-input` and `sk-form-textarea` among them — is untouched
+by this ruling: the collapsed transform is sound there and a wrapper would be
+an unmeasured layout change made for no reason. `::slotted()` child rules and
+`::part()` reached from another sheet are both **shadow-only**, with no
+generated static equivalent for either; `::part()` is a fourth construct kind
+this mission found beyond #301's original question, and its static form is
+#314's decision, not this record's. **Why:** measured, not asserted, against
+the union of two committed declaration files per construct kind (a cycle-1 bar,
+and a cycle-2 errata that adds outcomes rather than rewriting any). Declared
+totals: **22** outcomes for the host-attribute axis (`sk-app-shell`), **20**
+for host-owned `container-type` (`sk-action-row`), **10** for `::slotted()`
+(`sk-entity-marker`). The intuitive transform — collapse `:host` onto the root
+class — diverged on **8 of 22** outcomes for `sk-app-shell` and **6 of 20** for
+`sk-action-row`, in both engines; the two-element wrapper matched on every
+declared outcome for both. A wrapper carrying `container-type` alone, without
+the rest of `:host`, still failed 2 of the 22: measured as an item of a 300px
+flex row, `sk-app-shell` computes `width: 0px`, because `container-type:
+inline-size` implies size containment and a widthless wrapper contributes
+nothing to intrinsic sizing — a failure the cycle-1 bar alone could not see,
+since it tested only block and grid layouts. **The rule that bites:** *an
+element is never its own query container.* A container query styles a
+container's DESCENDANTS, so `container-type` moved onto the root class makes
+that element answer some outer ancestor — or nothing — while its descendants
+keep querying it correctly. Most of the sheet still works, which is why the
+defect is silent; the composed cases (an outer ancestor that also declares
+`container-type`) are the only ones that expose it. For `::slotted()`,
+appearance IS reproducible but **cascade position is not**: an outer-tree
+declaration beats a `::slotted()` declaration regardless of specificity, so a
+consumer's bare `img { object-fit: contain }` wins against the shadow form and
+loses against the static descendant rewrite — an equivalence gate cannot hold
+there. `#309` files the generator and `#310` the equivalence gate for the two
+generated construct kinds; `#311` backfills the `::slotted()` static-consumer
+instruction into six sheets that still owe one. None of the three is built by
+this record. Status is `Proposed`, and adoption is gated on a product verdict
+that is still pending.
 
 ---
 
