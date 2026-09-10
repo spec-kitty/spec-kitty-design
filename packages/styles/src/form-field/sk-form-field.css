@@ -42,14 +42,25 @@
   color: var(--sk-fg-default);
   outline: none;
   /* --sk-space-9 is 3rem/48px — the closest token at or above the 44px NFR-001 floor.
-     Measured (#321): the padding/border/line-height above already sum to 48px on this
-     rule's own default content, so this declaration is not currently what makes the
-     default story clear 44px — removing it alone leaves the box unchanged (verified;
-     FR-006's parity test catches that deletion instead). It is the guarantee against a
-     FUTURE change to padding, font-size, or line-height — do not delete it as dead code
-     after measuring 48px without it; tests/node/form-input-border-target-size-parity.test.ts
-     and apps/storybook/src/tests/sk-form-input-contrast-touch-target.spec.ts (FR-007,
-     broken as padding+floor together) both depend on it staying declared. */
+     The 44px contract is already satisfied without this declaration: measured directly
+     from the CI-rendered work-explorer pattern baselines (#321), this rule's natural
+     content-driven height (padding + border + this control's real line-height in that
+     composition, NOT the isolated Storybook story, whose inherited line-height differs)
+     is 45px — already above 44px. What this declaration adds is pinning that height to
+     an exact 48px, which is NOT free: in a composition where the control shares a grid
+     row with a sibling already at 47px it costs 1px; where it has its own row it costs
+     the full 3px (45px -> 48px), confirmed by decoding the border rows of the
+     work-explorer-w1-lane-dark (45px -> 48px) and work-explorer-w4-rail-1024
+     (45px -> 48px, own row) baseline PNGs pixel-by-pixel. Do not read this cost as a
+     defect to revert — it is the declared, disclosed price of expressing a 44px floor
+     with this repo's only token at or above it (see sk-confirm-dialog.css:171's
+     identical idiom). Do not delete this declaration after measuring some OTHER
+     content's height and finding it already >=48px without it — that was exactly the
+     mistake an earlier version of this comment made, generalising a measurement taken
+     in the isolated form-field story into a false "removing it changes nothing" claim.
+     tests/node/form-input-border-target-size-parity.test.ts and
+     apps/storybook/src/tests/sk-form-input-contrast-touch-target.spec.ts (FR-007, broken
+     as padding+floor together) both depend on it staying declared. */
   min-block-size: var(--sk-space-9);
   transition:
     border-color var(--sk-motion-duration-fast) var(--sk-motion-ease-out),
