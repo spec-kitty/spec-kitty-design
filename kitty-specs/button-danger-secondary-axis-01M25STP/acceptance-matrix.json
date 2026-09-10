@@ -107,11 +107,11 @@
     {
       "criterion_id": "FR-011",
       "description": "Verify FR-011 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "proof_type": "code_review",
+      "evidence": "Full diff (6e89c92,40cc95f,b2a358c,07228ee) reviewed line-by-line: no state machine, confirmation-dialog composition, double-submit prevention, or request-lifecycle code anywhere.",
+      "pass_fail": "pass",
+      "verified_by": "reviewer-renata",
+      "verified_at": "2026-09-10T15:46:16.120707+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
