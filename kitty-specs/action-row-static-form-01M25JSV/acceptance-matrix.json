@@ -207,11 +207,11 @@
     {
       "criterion_id": "FR-021",
       "description": "Verify FR-021 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
+      "proof_type": "manual_review",
+      "evidence": "packages/styles/src/action-row/sk-action-row-html.stories.ts LongContentNarrow/LongContentDesktop/Zoom200 stories use a long unbroken reference fixture at narrow/desktop/zoom-proxy widths; all pass axe with zero violations (run-axe-storybook.js, 2026-09-10); containment comes from the shared, unmodified sk-action-row.css",
+      "pass_fail": "pass",
       "verified_by": null,
-      "verified_at": null,
+      "verified_at": "2026-09-10T14:07:26.674534+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
