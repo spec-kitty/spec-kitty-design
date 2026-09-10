@@ -7,15 +7,15 @@ Components in these artifacts: sk-action-row, sk-app-shell, sk-bar-chart, sk-blo
 
 | artifact | raw | minified | min+gzip | notes |
 |---|---:|---:|---:|---|
-| `ESM  (dist/index.js)` | 241.2 KiB | 161.8 KiB | 34 KiB | `lit` external |
-| `IIFE (dist/elements.js)` | 259.7 KiB | 171.4 KiB | 38 KiB | runtime bundled |
+| `ESM  (dist/index.js)` | 241.6 KiB | 162.0 KiB | 34 KiB | `lit` external |
+| `IIFE (dist/elements.js)` | 260.1 KiB | 171.6 KiB | 38 KiB | runtime bundled |
 
 ## Subresource Integrity — the classic-script bundle (FR-005)
 
 For a CDN load of `dist/elements.js`, pin what the browser executes:
 
 ```
-integrity="sha384-zL5mDGFIBoATy9x2ux7AYHodXnhy5IPd5IU9OdB0pGj0NOD4nTWhpYkJcdB0Uepo"
+integrity="sha384-92rwa8hDEZJJQOdLFTMfsKONul8dIDj7CyjuxIaHhiW+n5FPNdDoyGXKkpTzCWFw"
 ```
 
 Derived from the built artifact on every run and re-derived by `--check`, so it cannot be
@@ -36,7 +36,7 @@ What a consumer downloads, from a real `npm pack` of each package in the derived
 |---|---:|---:|
 | `@spec-kitty/tokens` | 37 | 5774.7 KiB |
 | `@spec-kitty/styles` | 253 | 704.9 KiB |
-| `@spec-kitty/elements` | 58 | 991.8 KiB |
+| `@spec-kitty/elements` | 58 | 991.3 KiB |
 | `@spec-kitty/react` | 66 | 175.5 KiB |
 
 PACKED SIZE IS DELIBERATELY NOT IN THIS TABLE. It is the size of the gzipped tarball and therefore
@@ -82,7 +82,7 @@ unit: every figure in this file is KiB (1024). The WP prompt recorded the IIFE a
 "24.0 KB" where this file would have read 23.5 KiB — **24073 bytes either way**.
 Those two numbers are pinned historical values on purpose. An earlier revision of this
 paragraph interpolated the CURRENT raw size into that comparison, so once the artifact
-grew it asserted that 265916 bytes are "24.0 KB" — false by a factor of
+grew it asserted that 266359 bytes are "24.0 KB" — false by a factor of
 five, in the one paragraph whose whole lesson is to state the basis and the unit. A lens
 caught it.
 
@@ -91,13 +91,13 @@ caught it.
 ```
 $ npx nx run elements:build && node scripts/measure-elements-sizes.mjs
 packages/elements/dist/index.js
-  raw        246950 bytes  (241.2 KiB)
-  minified   165673 bytes  (161.8 KiB)
+  raw        247371 bytes  (241.6 KiB)
+  minified   165870 bytes  (162.0 KiB)
   gzip         50 KiB
   min+gzip     34 KiB
 packages/elements/dist/elements.js
-  raw        265916 bytes  (259.7 KiB)
-  minified   175551 bytes  (171.4 KiB)
-  gzip         55 KiB
+  raw        266359 bytes  (260.1 KiB)
+  minified   175748 bytes  (171.6 KiB)
+  gzip         56 KiB
   min+gzip     38 KiB
 ```
