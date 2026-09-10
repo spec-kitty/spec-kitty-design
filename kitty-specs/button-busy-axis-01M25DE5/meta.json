@@ -1,0 +1,14 @@
+{
+  "created_at": "2026-09-10T10:22:27.296144+00:00",
+  "flattened": false,
+  "friendly_name": "button busy axis",
+  "mission_id": "01M25DE5YX9BBF974531TG47N7",
+  "mission_number": null,
+  "mission_slug": "button-busy-axis-01M25DE5",
+  "mission_type": "software-dev",
+  "purpose_context": "This mission advances button busy axis on mission/button-busy-axis so stakeholders can track the work from mission creation onward.",
+  "purpose_tldr": "button busy axis",
+  "slug": "button-busy-axis-01M25DE5",
+  "target_branch": "mission/button-busy-axis",
+  "topology": "single_branch"
+}
