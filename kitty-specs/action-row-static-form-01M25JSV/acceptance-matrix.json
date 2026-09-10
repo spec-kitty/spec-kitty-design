@@ -2,7 +2,7 @@
   "mission_slug": "action-row-static-form-01M25JSV",
   "mission_number": "",
   "mission_type": "software-dev",
-  "overall_verdict": "pending",
+  "overall_verdict": "pass",
   "criteria": [
     {
       "criterion_id": "FR-001",
@@ -248,10 +248,10 @@
       "criterion_id": "FR-025",
       "description": "Verify FR-025 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
+      "evidence": "node scripts/check-manifest-content.mjs and node scripts/check-part-ratchet.mjs both exit 0 with zero diff against expected-docs.json/expected-parts.json (2026-09-10, no new attribute/method/csspart added); docs/design-system/using-components.md:1150-1330 updated with the 'Action row static form' section including the two-element wrapper, the pinned .sk-action-row-host block, and the explicit 'does not ship until #309' note",
+      "pass_fail": "pass",
       "verified_by": null,
-      "verified_at": null,
+      "verified_at": "2026-09-10T14:07:30.861295+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     }
   ],
