@@ -204,9 +204,9 @@ const radios = (element: ThemeToggle): HTMLInputElement[] =>
   );
 
 const choose = async (element: ThemeToggle, value: ThemePreference): Promise<void> => {
-  const radio = radios(element).find((candidate) => candidate.value === value);
-  expect(radio, `missing ${value} radio`).toBeTruthy();
-  await userEvent.click(radio!);
+  const choice = element.shadowRoot?.querySelector<HTMLInputElement>(`input[value="${value}"]`);
+  expect(choice, `missing ${value} choice`).toBeTruthy();
+  await userEvent.click(choice!);
   await (element.updateComplete ?? Promise.resolve());
 };
 
