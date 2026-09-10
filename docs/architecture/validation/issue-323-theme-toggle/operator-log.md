@@ -8,9 +8,9 @@
 - Current train base SHA: `7032cf7792a83ee20d9fd70ddcfb28a057c72884`
 - Current exact product commit: `3c64c4286b8cc5e1511edb890a59f83640087895`
 - Current exact independently reviewed lifecycle HEAD: `eb77cd52e4445f4f7634ab9171ebc0bf3ac1f29e`
-- Current cycle-eight remediation base HEAD: `9807f3c984ec60ef15864f049f097f6e74422460`
-- Current phase: implementation / review-cycle-7 remediation
-- Current WP lane: WP01 / `in_progress`
+- Current cycle-eight review-transition HEAD: `c4e74e280ad8c7ea7b6b2ee216515b7e82de1fa7`
+- Current phase: review / fresh cycle-eight review pending
+- Current WP lane: WP01 / `for_review`
 
 ## Seats
 
@@ -51,8 +51,8 @@
   `01M26FDAW4MB8YV7VTYRZSATCQ` (rejected exact lifecycle HEAD `eb77cd52` with two Medium
   generated-record/evidence findings; all three product findings verified closed)
 - WP01 review-cycle-7 remediation: fresh delegated Codex / resolved `frontend-freddy`, Op
-  `01M26G61HC68WA7TS6XBDAD2VM` (in progress from exact start HEAD `9807f3c9`; no product behavior
-  change)
+  `01M26G61HC68WA7TS6XBDAD2VM` (completed from exact start HEAD `9807f3c9`; generated-size commit
+  `7b69e314`; evidence commit `1a56426a`; no product behavior change)
 
 ## Review cycles and findings
 
@@ -239,6 +239,7 @@
 - Latest exact independent review head: `eb77cd52e4445f4f7634ab9171ebc0bf3ac1f29e`
   (cycle 7 changes requested for generated records/evidence; fresh approval pending)
 - Exact generated-size remediation commit: `7b69e3140bb14f4d002bcad453583fbf34114a9c`
+- Exact cycle-eight review-transition head: `c4e74e280ad8c7ea7b6b2ee216515b7e82de1fa7`
 - Merge status: not merged
 - Merge commit: pending
 - Post-merge mission-review verdict: pending
