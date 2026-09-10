@@ -69,6 +69,78 @@
   color: var(--sk-fg-default);
 }
 
+/* ---- Danger-secondary: reuses the secondary SHAPE with the danger role's own boundary ----
+   Binding under BORDER-ROLE-319 (kitty-specs/../.../_program-319/DECISION-border-role.md): this
+   tone never reaches for --sk-border-default/--sk-border-strong (#155's failing hairline). The
+   control boundary IS the danger role itself, `--sk-on-status-danger`, already published and used
+   by sk-status-indicator and sk-pill-tag's status axis. No new token.
+   MEASURED (WCAG 1.4.11), independently re-derived on this branch, not quoted from BORDER-ROLE-319:
+     --sk-on-status-danger vs --sk-surface-page:   6.58:1 dark  / 10.12:1 light
+     --sk-on-status-danger vs --sk-surface-card:   5.94:1 dark  / 11.04:1 light
+     --sk-on-status-danger vs --sk-surface-input:  5.63:1 dark  /  9.78:1 light
+   All six clear the 3:1 control-boundary floor with wide margin in both themes. */
+.sk-button--danger-secondary {
+  background: transparent;
+  color: var(--sk-on-status-danger);
+  border-color: var(--sk-on-status-danger);
+}
+
+.sk-button--danger-secondary:hover {
+  /* The danger pair's SURFACE member — a subtle danger-tinted fill — rather than inventing a
+     "strong" danger border token the way .sk-button--secondary:hover reaches for
+     --sk-border-strong. Border colour and text colour are unchanged on hover. */
+  background: var(--sk-status-danger);
+}
+
+/* Explicit :active on this tone only — see spec.md's Assumptions for why "parity with the
+   existing tones" is resolved as "adopt the value the issue names" rather than "inherit whichever
+   tone's current, and mutually inconsistent, :active behaviour this one happens to be shaped
+   like." .sk-button--secondary and .sk-button--ghost are NOT retrofitted (C-003) — that is a
+   pre-existing inconsistency across the other three tones and out of this mission's scope. */
+.sk-button--danger-secondary:active {
+  transform: scale(0.97);
+}
+
+/* Forced colors: `.sk-button--secondary` already declares an unconditional, non-transparent
+   border-color, so it already gets the platform's automatic border-colour remap with zero author
+   CSS — which means danger-secondary's own (equally unconditional, non-transparent) border would
+   remap to the IDENTICAL system colour as plain secondary and the two would become visually
+   indistinguishable. Colour and border-presence therefore cannot carry the distinction the issue
+   asks for here (contrast with sk-pill-tag's forced-colors case, where the base pill has NO border
+   at all, so presence-vs-absence alone was sufficient there).
+
+   THE MECHANISM IS BORDER-WIDTH, not colour and not generated content — this repo has already
+   established it, in writing, twice. sk-card.css's own status-axis comment: "forced colors remaps
+   COLOR and leaves width alone, so that step survives untouched while the tint does not" — and
+   that same comment records that an EARLIER `@media (forced-colors: active)` block there, setting
+   `border-inline-start-color: CanvasText`, was a NO-OP and was deleted (#218): the colour was
+   already auto-remapped and the width was already unconditional, so restating either did nothing.
+   sk-confirm-dialog.css does the forced-colors-SCOPED version of the same move (its border is 1px
+   in normal rendering, unlike sk-card's permanently-4px status accent, so the step belongs inside
+   the media query, not outside it) — that is the shape this rule follows.
+
+   A content-drawn glyph was considered in an earlier draft of this plan and rejected: it risks
+   colliding with size="icon"'s consumer-supplied glyph inside a padding:0, fixed 40x40 box; its
+   accessible-name safety depends on alt-text-syntax support that is not universal, landing
+   undocumented content inside a #286-governed consumer-supplied label if unsupported; it is a
+   scope ADDITION where the width step is the repo's own existing pattern applied unchanged; and it
+   would have been this repo's first use of the technique for a forced-colors purpose, where the
+   width step already has two working, CI-verified precedents. See spec.md's Assumptions for the
+   full four-point comparison.
+
+   LAYOUT CONSEQUENCE, stated rather than left implicit. At size="icon", `.sk-button--icon`
+   already declares `box-sizing: border-box`, so the extra 1px is absorbed into the existing 40x40
+   box (content area shrinks by 1px per side; the box itself does not grow) — no compensation
+   needed. At the default and size="sm" sizes, this file sets no box-sizing (browser default,
+   content-box, applies), so the step grows the button's total box by 1px per side, forced-colors
+   mode only — accepted as minor and scoped, the same order of magnitude as sk-confirm-dialog's own
+   unremarked growth under the identical mechanism. */
+@media (forced-colors: active) {
+  .sk-button--danger-secondary {
+    border-width: var(--sk-border-width-2);
+  }
+}
+
 /* Small size modifier */
 .sk-button--sm {
   padding: var(--sk-space-2) var(--sk-space-5);
