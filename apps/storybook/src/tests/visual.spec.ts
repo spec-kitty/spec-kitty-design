@@ -938,7 +938,7 @@ test('SK-form-select forced colors — visual baseline', async ({ page }) => {
 // composing an input, .sk-input/.sk-form-input__control revert to zero visual coverage.
 // This block gives both paths the same sk-form-select-shaped set (default-dark, light,
 // invalid, narrow@320px, forced-colors) -- "compact" is dropped, .sk-input has no compact
-// variant. Expected to red on first run (no baseline exists yet); harvested from that
+// variant. Redded on first run (no baseline existed yet) and was harvested from that
 // run's artifact per this file's own CI-authoritative convention, same flow as #320.
 
 const staticFormInputStory = async (
@@ -960,10 +960,17 @@ const staticFormInputVisuals = [
   ['form-input-error', 'sk-input-invalid.png'],
 ] as const;
 
+// This block's threshold is deliberately tighter than the file's usual 0.02: counted
+// against each image's own pixel budget, a total loss of the control's border color
+// stayed within a 2% ratio for three of these ten shots (sk-form-input-invalid and both
+// narrow shots, whose larger frames dilute the border's share of the image) -- geometry
+// alone would still catch a size change, but colour would not. 0.005 leaves no shot
+// with more than a few hundred border pixels of slack, so a fully-lost border reds on
+// every one of the ten.
 for (const [id, snapshot] of staticFormInputVisuals) {
   test(`SK-input ${id} — visual baseline`, async ({ page }) => {
     const field = await staticFormInputStory(page, id);
-    await expect(field).toHaveScreenshot(snapshot, { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+    await expect(field).toHaveScreenshot(snapshot, { threshold: 0.02, maxDiffPixelRatio: 0.005 });
   });
 }
 
@@ -982,10 +989,12 @@ test('SK-input narrow — visual baseline', async ({ page }) => {
     };
   });
   expect(geometry).toEqual({ targetWidth: 320, viewportWidth: 320, documentScrollWidth: 320 });
-  void field;
-  await expect(target).toHaveScreenshot('sk-input-narrow.png', {
+  // Clipped to the component (`field`), not `target` (#storybook-root) -- this file's own
+  // invariant above: an unclipped shot dilutes the diff ratio's denominator with page
+  // background, which is exactly what made this test's border-loss budget too loose.
+  await expect(field).toHaveScreenshot('sk-input-narrow.png', {
     threshold: 0.02,
-    maxDiffPixelRatio: 0.02,
+    maxDiffPixelRatio: 0.005,
   });
 });
 
@@ -995,7 +1004,7 @@ test('SK-input forced colors — visual baseline', async ({ page }) => {
   await field.locator('.sk-input').focus();
   await expect(field).toHaveScreenshot('sk-input-forced-colors.png', {
     threshold: 0.02,
-    maxDiffPixelRatio: 0.02,
+    maxDiffPixelRatio: 0.005,
   });
 });
 
@@ -1021,7 +1030,7 @@ const elementFormInputVisuals = [
 for (const [id, snapshot] of elementFormInputVisuals) {
   test(`SK-form-input ${id} — visual baseline`, async ({ page }) => {
     const host = await elementFormInputStory(page, id);
-    await expect(host).toHaveScreenshot(snapshot, { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+    await expect(host).toHaveScreenshot(snapshot, { threshold: 0.02, maxDiffPixelRatio: 0.005 });
   });
 }
 
@@ -1040,10 +1049,11 @@ test('SK-form-input narrow — visual baseline', async ({ page }) => {
     };
   });
   expect(geometry).toEqual({ targetWidth: 320, viewportWidth: 320, documentScrollWidth: 320 });
-  void host;
-  await expect(target).toHaveScreenshot('sk-form-input-narrow.png', {
+  // Clipped to the component (`host`), not `target` (#storybook-root) -- see the sibling
+  // static-path narrow test's comment; same invariant, same reason.
+  await expect(host).toHaveScreenshot('sk-form-input-narrow.png', {
     threshold: 0.02,
-    maxDiffPixelRatio: 0.02,
+    maxDiffPixelRatio: 0.005,
   });
 });
 
@@ -1053,7 +1063,7 @@ test('SK-form-input forced colors — visual baseline', async ({ page }) => {
   await host.locator('[part="control"]').focus();
   await expect(host).toHaveScreenshot('sk-form-input-forced-colors.png', {
     threshold: 0.02,
-    maxDiffPixelRatio: 0.02,
+    maxDiffPixelRatio: 0.005,
   });
 });
 
