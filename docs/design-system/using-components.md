@@ -1909,6 +1909,88 @@ available from the root TypeScript export. The stylesheet depends on `--sk-bg-pi
 
 ---
 
+## Radio choice group
+
+Apply the styles-only radio choice group family to native light-DOM form markup — the
+exactly-one-of-many counterpart to the checkbox choice group above (#336, coordinated with #277). A
+real `fieldset` and `legend` name the group, and every real `label` contains its visible native
+radio, primary label text, and an optional secondary machine value. Every radio in the group shares
+one `name`, which is what makes the browser — not this library — enforce exactly-one selection:
+
+```html
+<fieldset class="sk-radio-choice-group">
+  <legend class="sk-radio-choice-group__legend">Connect a workspace</legend>
+  <div class="sk-radio-choice-group__options">
+    <label class="sk-radio-choice-group__choice">
+      <input
+        class="sk-radio-choice-group__control"
+        type="radio"
+        name="workspace"
+        value="acme"
+        checked
+        required
+      />
+      <span class="sk-radio-choice-group__label">Acme</span>
+      <span class="sk-radio-choice-group__secondary-value">acme</span>
+    </label>
+    <label class="sk-radio-choice-group__choice">
+      <input
+        class="sk-radio-choice-group__control"
+        type="radio"
+        name="workspace"
+        value="acme-platform"
+        required
+      />
+      <span class="sk-radio-choice-group__label">Acme / Platform</span>
+      <span class="sk-radio-choice-group__secondary-value">acme/platform</span>
+    </label>
+  </div>
+</fieldset>
+```
+
+The exact public selectors are `.sk-radio-choice-group`, `.sk-radio-choice-group__legend`,
+`.sk-radio-choice-group__options`, `.sk-radio-choice-group__choice`,
+`.sk-radio-choice-group__control`, `.sk-radio-choice-group__label`, and
+`.sk-radio-choice-group__secondary-value`. The secondary machine value (e.g. an opaque path or
+identifier) is OPTIONAL ordinary text per choice; its absence causes no implicit selection,
+disabling, or validation-state change. The intrinsic options grid adapts to its container and
+reaches one column when narrow, while long legends, primary labels, and secondary values wrap
+inside their own choice without overlapping siblings. Every choice's full visible label is the
+pointer/touch target and computes at least 44px in the narrow-floor dimension
+(`--sk-space-9`, the token `sk-confirm-dialog.css` already documents as the closest token at or
+above that floor). The layout uses logical properties throughout, so it mirrors correctly in a
+right-to-left (`dir="rtl"`) document with no horizontal overflow.
+
+The browser owns exactly-one selection (via the shared `name`), focus, arrow-key roving selection,
+Space and label activation, native constraint validation (including the `required` case — a
+`required` group with nothing checked is a valid, honestly-styled state, not an error this library
+suppresses), form submission, and reset. This family styles the native `:invalid`/`:required`
+state; it never generates, owns, or overrides validation-message copy. Consumers own the group
+name, every visible label and secondary value, order, checked/default-checked/disabled/required
+state, submission and reset handling, routing, selection effects, request handling, validation
+messages, and all translatable copy/i18n (#286). This family provides no custom element,
+JavaScript, selection store, or custom radio glyph — the native radio glyph remains visible, and
+`accent-color` is the only sanctioned native-appearance customization.
+
+`.sk-radio-choice-group` and `.sk-checkbox-choice-group` (#277) deliberately share BEM shape
+(root/legend/options/choice/control/label plus one optional content slot) but remain two distinct,
+non-aliased public contracts: the checkbox family permits zero-to-many checked choices and carries
+no `required`/invalid contract, while the radio family is browser-enforced exactly-one and adds
+native required/invalid presentation. No shared class name implies the other family's cardinality
+or validation behavior.
+
+Import the CSS from `@spec-kitty/styles/radio-choice-group/sk-radio-choice-group.css`; generated
+fixture markup is available from the root TypeScript export. The stylesheet depends on
+`--sk-bg-pill`, `--sk-border-default`, `--sk-border-focus`, `--sk-border-strong`,
+`--sk-border-width-1`, `--sk-border-width-2`, `--sk-border-width-4`, `--sk-color-red`,
+`--sk-color-yellow`, `--sk-fg-body`, `--sk-fg-default`, `--sk-fg-muted`, `--sk-font-mono`,
+`--sk-font-sans`, `--sk-radius-sm`, `--sk-space-2`, `--sk-space-3`, `--sk-space-4`, `--sk-space-6`,
+`--sk-space-9`, `--sk-space-12`, `--sk-surface-card`, `--sk-surface-muted`, `--sk-text-base`,
+`--sk-text-sm`, `--sk-text-xs`, `--sk-weight-medium`, `--sk-weight-normal`, and
+`--sk-weight-semibold`.
+
+---
+
 ## Segmented choice
 
 Apply `sk-segmented-choice` to an accessibly named native group and

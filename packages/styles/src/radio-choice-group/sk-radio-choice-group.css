@@ -1,0 +1,201 @@
+/* @spec-kitty/styles — native radio-choice-group presentation (#336) */
+/* Structural pass: the browser still owns exactly-one selection, constraint validation
+   (including `required`), arrow-key roving, tab order, activation, submission, and reset via the
+   shared `name` attribute. This sheet styles native :checked/:disabled/:required/:invalid state; it
+   never maintains or infers selection with script. Anatomy is coordinated with the sibling
+   .sk-checkbox-choice-group (#277) where behavior matches, and diverges where radio semantics
+   (exactly-one, arrow-key roving, required/invalid) require it — see the contract's distinction
+   table. No transition/animation is declared anywhere in this file, so reduced-motion has nothing
+   to disable (NFR-010). */
+
+.sk-radio-choice-group {
+  box-sizing: border-box;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.sk-radio-choice-group__legend {
+  max-inline-size: 100%;
+  padding: 0;
+  overflow-wrap: anywhere;
+  color: var(--sk-fg-default);
+  font-family: var(--sk-font-sans);
+  font-size: var(--sk-text-base);
+  font-weight: var(--sk-weight-semibold);
+  text-align: start;
+}
+
+.sk-radio-choice-group__options {
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(
+      min(100%, calc(var(--sk-space-12) + var(--sk-space-12))),
+      1fr
+    )
+  );
+  gap: var(--sk-space-2);
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  margin-block-start: var(--sk-space-3);
+}
+
+.sk-radio-choice-group__choice {
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: auto minmax(min-content, 2fr) minmax(0, 1fr);
+  align-items: center;
+  gap: var(--sk-space-2);
+  /* --sk-space-9 is 3rem/48px — the same token sk-confirm-dialog.css documents as the closest
+     token at or above the 44px NFR-009 interactive-target floor. Pinned on this family's own
+     `__choice` class, over the full label, never on a shared element's internals. */
+  min-block-size: var(--sk-space-9);
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  padding: var(--sk-space-2);
+  color: var(--sk-fg-body);
+  background: var(--sk-surface-card);
+  border-color: var(--sk-border-default);
+  border-style: solid;
+  border-width: var(--sk-border-width-1);
+  border-radius: var(--sk-radius-sm);
+  font-family: var(--sk-font-sans);
+  font-size: var(--sk-text-sm);
+  font-weight: var(--sk-weight-normal);
+  text-align: start;
+}
+
+.sk-radio-choice-group__control {
+  inline-size: var(--sk-space-4);
+  block-size: var(--sk-space-4);
+  margin: 0;
+  scroll-margin-block: var(--sk-space-6);
+  accent-color: var(--sk-color-yellow);
+}
+
+.sk-radio-choice-group__label {
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  overflow-wrap: anywhere;
+}
+
+.sk-radio-choice-group__secondary-value {
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  overflow-wrap: anywhere;
+  color: var(--sk-fg-muted);
+  font-family: var(--sk-font-mono);
+  font-size: var(--sk-text-xs);
+  text-align: end;
+}
+
+.sk-radio-choice-group__choice:has(
+  .sk-radio-choice-group__control:not(:disabled)
+) {
+  cursor: pointer;
+}
+
+.sk-radio-choice-group__choice:has(
+  .sk-radio-choice-group__control:checked
+) {
+  background: var(--sk-bg-pill);
+  border-color: var(--sk-border-strong);
+  border-style: double;
+  border-width: var(--sk-border-width-2);
+  font-weight: var(--sk-weight-semibold);
+}
+
+.sk-radio-choice-group__choice:has(
+    .sk-radio-choice-group__control:not(:disabled)
+  ):hover {
+  background: var(--sk-bg-pill);
+  border-style: dashed;
+  font-weight: var(--sk-weight-medium);
+}
+
+.sk-radio-choice-group__choice:has(
+    .sk-radio-choice-group__control:not(:disabled)
+  ):active {
+  background: var(--sk-surface-muted);
+  border-style: solid;
+  border-width: var(--sk-border-width-2);
+  font-weight: var(--sk-weight-semibold);
+}
+
+.sk-radio-choice-group__choice:has(
+  .sk-radio-choice-group__control:focus-visible
+) {
+  border-color: var(--sk-border-focus);
+  border-style: dashed;
+  border-width: var(--sk-border-width-2);
+  font-weight: var(--sk-weight-medium);
+}
+
+.sk-radio-choice-group__control:focus-visible {
+  outline-color: var(--sk-border-focus);
+  outline-style: solid;
+  outline-width: var(--sk-border-width-2);
+  outline-offset: calc(var(--sk-border-width-2) * -1);
+}
+
+.sk-radio-choice-group__choice:has(
+  .sk-radio-choice-group__control:disabled
+) {
+  color: var(--sk-fg-muted);
+  border-style: dotted;
+  cursor: not-allowed;
+}
+
+.sk-radio-choice-group__control:disabled {
+  cursor: not-allowed;
+}
+
+/* Required/invalid is a GROUP-level native constraint-validation state: every radio in a required
+   group reports `:invalid` until any one of them is checked (see data-model.md's state-transition
+   table). The cue lives on the legend, distinct from any per-choice checked/hover/active/disabled
+   cue above, so it stays honest even when disabled/checked choice-level cues are also present. */
+.sk-radio-choice-group:has(
+  .sk-radio-choice-group__control:required:invalid
+) .sk-radio-choice-group__legend {
+  padding-block-end: var(--sk-space-2);
+  color: var(--sk-color-red);
+  border-block-end-color: var(--sk-color-red);
+  border-block-end-style: solid;
+  border-block-end-width: var(--sk-border-width-2);
+  font-weight: var(--sk-weight-semibold);
+}
+
+@media (forced-colors: active) {
+  .sk-radio-choice-group__choice:has(
+    .sk-radio-choice-group__control:checked
+  ) {
+    border-block-end-color: Highlight;
+    border-block-end-style: double;
+    border-block-end-width: var(--sk-border-width-4);
+  }
+
+  .sk-radio-choice-group__control:focus-visible {
+    outline-color: Highlight;
+    outline-width: var(--sk-border-width-4);
+    outline-offset: calc(var(--sk-border-width-4) * -1);
+  }
+
+  .sk-radio-choice-group__choice:has(
+    .sk-radio-choice-group__control:disabled
+  ) {
+    border-block-end-color: GrayText;
+    border-block-end-style: dotted;
+    border-block-end-width: var(--sk-border-width-4);
+  }
+
+  .sk-radio-choice-group:has(
+    .sk-radio-choice-group__control:required:invalid
+  ) .sk-radio-choice-group__legend {
+    border-block-end-color: LinkText;
+    border-block-end-style: solid;
+    border-block-end-width: var(--sk-border-width-4);
+  }
+}

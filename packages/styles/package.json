@@ -47,6 +47,7 @@
     "./progress/*": "./dist/progress/*",
     "./prose/*": "./dist/prose/*",
     "./public-header/*": "./dist/public-header/*",
+    "./radio-choice-group/*": "./dist/radio-choice-group/*",
     "./ribbon-card/*": "./dist/ribbon-card/*",
     "./section-banner/*": "./dist/section-banner/*",
     "./section-header/*": "./dist/section-header/*",
