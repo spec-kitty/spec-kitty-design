@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "mission_slug": "boundary-page-styles-01M25TBY",
+  "mission_id": "01M25TBY50DF3N4GVEW20J4TNG",
+  "mission_branch": "kitty/mission-boundary-page-styles-01M25TBY",
+  "target_branch": "mission/boundary-page-styles",
+  "lanes": [
+    {
+      "lane_id": "lane-a",
+      "wp_ids": [
+        "WP01"
+      ],
+      "write_scope": [
+        "apps/storybook/src/tests/sk-boundary-page-absence.spec.ts",
+        "apps/storybook/src/tests/sk-boundary-page-responsive.spec.ts",
+        "apps/storybook/src/tests/visual.spec.ts",
+        "expected-stories.json",
+        "packages/elements/SIZES.md",
+        "packages/styles/src/boundary-page/index.ts",
+        "packages/styles/src/boundary-page/sk-boundary-page-forced-colors.html",
+        "packages/styles/src/boundary-page/sk-boundary-page-form-card.html",
+        "packages/styles/src/boundary-page/sk-boundary-page-html.stories.ts",
+        "packages/styles/src/boundary-page/sk-boundary-page-long-email.html",
+        "packages/styles/src/boundary-page/sk-boundary-page-long-identifier.html",
+        "packages/styles/src/boundary-page/sk-boundary-page-no-action.html",
+        "packages/styles/src/boundary-page/sk-boundary-page-several-actions.html",
+        "packages/styles/src/boundary-page/sk-boundary-page-terminal-card.html",
+        "packages/styles/src/boundary-page/sk-boundary-page-with-footnote.html",
+        "packages/styles/src/boundary-page/sk-boundary-page-without-footnote.html",
+        "packages/styles/src/boundary-page/sk-boundary-page-without-mark.html",
+        "packages/styles/src/boundary-page/sk-boundary-page.css",
+        "packages/styles/src/index.ts"
+      ],
+      "predicted_surfaces": [
+        "api",
+        "app-shell",
+        "artifact-rendering",
+        "tracker-integration"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    }
+  ],
+  "computed_at": "2026-09-10T14:22:56.131332+00:00",
+  "computed_from": "dependency_graph+ownership",
+  "planning_artifact_wps": [],
+  "planning_commit_sha": "9a74c65a502440412938a045a64b54dc5744536d"
+}
