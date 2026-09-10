@@ -48,10 +48,10 @@
       "criterion_id": "FR-005",
       "description": "Verify FR-005 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "packages/styles/src/progress/sk-progress-indeterminate-with-meta.html; sk-progress.spec.ts:184-189 (meta optional, non-percentage text)",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T13:10:41.473175+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
