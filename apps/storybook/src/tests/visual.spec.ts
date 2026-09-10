@@ -931,6 +931,142 @@ test('SK-form-select forced colors — visual baseline', async ({ page }) => {
   });
 });
 
+// #321's pre-merge squad found zero dedicated visual baselines existed for either
+// consumption path of .sk-input/.sk-form-input__control -- the only coverage that
+// mission's own baselines gave the control was incidental (18 work-explorer pattern
+// captures that happen to compose the search filter field). If work-explorer ever stops
+// composing an input, .sk-input/.sk-form-input__control revert to zero visual coverage.
+// This block gives both paths the same sk-form-select-shaped set (default-dark, light,
+// invalid, narrow@320px, forced-colors) -- "compact" is dropped, .sk-input has no compact
+// variant. Redded on first run (no baseline existed yet) and was harvested from that
+// run's artifact per this file's own CI-authoritative convention, same flow as #320.
+
+const staticFormInputStory = async (
+  page: Page,
+  id: string,
+  viewport: { width: number; height: number } = { width: 720, height: 480 },
+): Promise<Locator> => {
+  await page.setViewportSize(viewport);
+  await page.goto(`/iframe.html?id=form-formfield-html--${id}&viewMode=story`);
+  const target = page.locator('.sk-form-field').first();
+  await target.waitFor({ state: 'visible', timeout: 20000 });
+  await expect(target.locator('.sk-input')).toBeVisible();
+  return target;
+};
+
+const staticFormInputVisuals = [
+  ['form-input-default', 'sk-input-default-dark.png'],
+  ['light-mode', 'sk-input-light.png'],
+  ['form-input-error', 'sk-input-invalid.png'],
+] as const;
+
+// This block's threshold is deliberately tighter than the file's usual 0.02: counted
+// against each image's own pixel budget, a total loss of the control's border color
+// stayed within a 2% ratio for three of these ten shots (sk-form-input-invalid and both
+// narrow shots, whose larger frames dilute the border's share of the image) -- geometry
+// alone would still catch a size change, but colour would not. 0.005 leaves no shot
+// with more than a few hundred border pixels of slack, so a fully-lost border reds on
+// every one of the ten.
+for (const [id, snapshot] of staticFormInputVisuals) {
+  test(`SK-input ${id} — visual baseline`, async ({ page }) => {
+    const field = await staticFormInputStory(page, id);
+    await expect(field).toHaveScreenshot(snapshot, { threshold: 0.02, maxDiffPixelRatio: 0.005 });
+  });
+}
+
+test('SK-input narrow — visual baseline', async ({ page }) => {
+  const field = await staticFormInputStory(page, 'form-input-default', { width: 320, height: 480 });
+  const target = page.locator('#storybook-root');
+  await target.evaluate((node: HTMLElement) => {
+    node.style.inlineSize = '100vw';
+  });
+  const geometry = await target.evaluate((node) => {
+    const scroller = document.scrollingElement ?? document.documentElement;
+    return {
+      targetWidth: node.getBoundingClientRect().width,
+      viewportWidth: document.documentElement.clientWidth,
+      documentScrollWidth: scroller.scrollWidth,
+    };
+  });
+  expect(geometry).toEqual({ targetWidth: 320, viewportWidth: 320, documentScrollWidth: 320 });
+  // Clipped to the component (`field`), not `target` (#storybook-root) -- this file's own
+  // invariant above: an unclipped shot dilutes the diff ratio's denominator with page
+  // background, which is exactly what made this test's border-loss budget too loose.
+  await expect(field).toHaveScreenshot('sk-input-narrow.png', {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.005,
+  });
+});
+
+test('SK-input forced colors — visual baseline', async ({ page }) => {
+  await page.emulateMedia({ forcedColors: 'active' });
+  const field = await staticFormInputStory(page, 'form-input-default');
+  await field.locator('.sk-input').focus();
+  await expect(field).toHaveScreenshot('sk-input-forced-colors.png', {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.005,
+  });
+});
+
+const elementFormInputStory = async (
+  page: Page,
+  id: string,
+  viewport: { width: number; height: number } = { width: 720, height: 480 },
+): Promise<Locator> => {
+  await page.setViewportSize(viewport);
+  await page.goto(`/iframe.html?id=elements-skforminput--${id}&viewMode=story`);
+  const target = page.locator('sk-form-input').first();
+  await target.waitFor({ state: 'visible', timeout: 20000 });
+  await expect(target.locator('[part="control"]')).toBeVisible();
+  return target;
+};
+
+const elementFormInputVisuals = [
+  ['default', 'sk-form-input-default-dark.png'],
+  ['light-mode', 'sk-form-input-light.png'],
+  ['error', 'sk-form-input-invalid.png'],
+] as const;
+
+for (const [id, snapshot] of elementFormInputVisuals) {
+  test(`SK-form-input ${id} — visual baseline`, async ({ page }) => {
+    const host = await elementFormInputStory(page, id);
+    await expect(host).toHaveScreenshot(snapshot, { threshold: 0.02, maxDiffPixelRatio: 0.005 });
+  });
+}
+
+test('SK-form-input narrow — visual baseline', async ({ page }) => {
+  const host = await elementFormInputStory(page, 'default', { width: 320, height: 480 });
+  const target = page.locator('#storybook-root');
+  await target.evaluate((node: HTMLElement) => {
+    node.style.inlineSize = '100vw';
+  });
+  const geometry = await target.evaluate((node) => {
+    const scroller = document.scrollingElement ?? document.documentElement;
+    return {
+      targetWidth: node.getBoundingClientRect().width,
+      viewportWidth: document.documentElement.clientWidth,
+      documentScrollWidth: scroller.scrollWidth,
+    };
+  });
+  expect(geometry).toEqual({ targetWidth: 320, viewportWidth: 320, documentScrollWidth: 320 });
+  // Clipped to the component (`host`), not `target` (#storybook-root) -- see the sibling
+  // static-path narrow test's comment; same invariant, same reason.
+  await expect(host).toHaveScreenshot('sk-form-input-narrow.png', {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.005,
+  });
+});
+
+test('SK-form-input forced colors — visual baseline', async ({ page }) => {
+  await page.emulateMedia({ forcedColors: 'active' });
+  const host = await elementFormInputStory(page, 'default');
+  await host.locator('[part="control"]').focus();
+  await expect(host).toHaveScreenshot('sk-form-input-forced-colors.png', {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.005,
+  });
+});
+
 const checkboxChoiceGroupStory = async (
   page: Page,
   id: string,

@@ -299,3 +299,13 @@
 {"agent": "claude", "at": "2026-09-10T14:16:55.063222+00:00", "canonical_action_id": "plan::plan", "mission_id": "01M25TBY50DF3N4GVEW20J4TNG", "phase": "started", "reason": null, "wp_id": null}
 {"agent": "claude", "at": "2026-09-10T14:19:06.569211+00:00", "canonical_action_id": "plan::plan", "mission_id": "01M25TBY50DF3N4GVEW20J4TNG", "phase": "completed", "reason": null, "wp_id": null}
 {"agent": "claude", "at": "2026-09-10T14:19:19.148493+00:00", "canonical_action_id": "tasks::tasks", "mission_id": "01M25TBY50DF3N4GVEW20J4TNG", "phase": "started", "reason": null, "wp_id": null}
+{"agent": "claude", "at": "2026-09-10T14:16:18.418386+00:00", "canonical_action_id": "discovery::research", "mission_id": "01M25STR64AQWSVVSBV15TWJR5", "phase": "started", "reason": null, "wp_id": null}
+{"agent": "claude", "at": "2026-09-10T14:16:48.624963+00:00", "canonical_action_id": "discovery::research", "mission_id": "01M25STR64AQWSVVSBV15TWJR5", "phase": "completed", "reason": null, "wp_id": null}
+{"agent": "claude", "at": "2026-09-10T14:16:49.321675+00:00", "canonical_action_id": "specify::specify", "mission_id": "01M25STR64AQWSVVSBV15TWJR5", "phase": "started", "reason": null, "wp_id": null}
+{"agent": "claude", "at": "2026-09-10T14:17:01.576770+00:00", "canonical_action_id": "specify::specify", "mission_id": "01M25STR64AQWSVVSBV15TWJR5", "phase": "completed", "reason": null, "wp_id": null}
+{"agent": "claude", "at": "2026-09-10T14:17:14.162583+00:00", "canonical_action_id": "plan::plan", "mission_id": "01M25STR64AQWSVVSBV15TWJR5", "phase": "started", "reason": null, "wp_id": null}
+{"agent": "claude", "at": "2026-09-10T14:17:17.140804+00:00", "canonical_action_id": "plan::plan", "mission_id": "01M25STR64AQWSVVSBV15TWJR5", "phase": "completed", "reason": null, "wp_id": null}
+{"agent": "claude", "at": "2026-09-10T14:17:29.802985+00:00", "canonical_action_id": "tasks::tasks", "mission_id": "01M25STR64AQWSVVSBV15TWJR5", "phase": "started", "reason": null, "wp_id": null}
+{"agent": "claude", "at": "2026-09-10T14:18:46.471075+00:00", "canonical_action_id": "tasks::tasks", "mission_id": "01M25STR64AQWSVVSBV15TWJR5", "phase": "completed", "reason": null, "wp_id": null}
+{"agent": "claude", "at": "2026-09-10T14:18:46.831518+00:00", "canonical_action_id": "tasks::tasks", "mission_id": "01M25STR64AQWSVVSBV15TWJR5", "phase": "started", "reason": null, "wp_id": null}
+{"agent": "claude", "at": "2026-09-10T14:20:44.681085+00:00", "canonical_action_id": "tasks::tasks", "mission_id": "01M25STR64AQWSVVSBV15TWJR5", "phase": "completed", "reason": null, "wp_id": null}

@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "generated_at": "2026-09-07T02:05:33.655Z",
+  "generated_at": "2026-09-10T14:38:01.204Z",
   "generated_from": "packages/tokens/src/tokens.css",
   "categories": {
     "color": {
@@ -58,6 +58,7 @@
         "--sk-border-default",
         "--sk-border-strong",
         "--sk-border-focus",
+        "--sk-border-control",
         "--sk-border-width-1",
         "--sk-border-width-2",
         "--sk-border-width-4"

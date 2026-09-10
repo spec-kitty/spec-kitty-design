@@ -35,12 +35,33 @@
   width: 100%;
   padding: var(--sk-space-3) var(--sk-space-4);
   background: var(--sk-surface-input);
-  border: 1px solid var(--sk-border-default);
+  border: var(--sk-border-width-1) solid var(--sk-border-control);
   border-radius: var(--sk-radius-sm);
   font-family: var(--sk-font-sans);
   font-size: var(--sk-text-base);
   color: var(--sk-fg-default);
   outline: none;
+  /* --sk-space-9 is 3rem/48px — the closest token at or above the 44px NFR-001 floor.
+     The 44px contract is already satisfied without this declaration: measured directly
+     from the CI-rendered work-explorer pattern baselines (#321), this rule's natural
+     content-driven height (padding + border + this control's real line-height in that
+     composition, NOT the isolated Storybook story, whose inherited line-height differs)
+     is 45px — already above 44px. What this declaration adds is pinning that height to
+     an exact 48px, which is NOT free: in a composition where the control shares a grid
+     row with a sibling already at 47px it costs 1px; where it has its own row it costs
+     the full 3px (45px -> 48px), confirmed by decoding the border rows of the
+     work-explorer-w1-lane-dark (45px -> 48px) and work-explorer-w4-rail-1024
+     (45px -> 48px, own row) baseline PNGs pixel-by-pixel. Do not read this cost as a
+     defect to revert — it is the declared, disclosed price of expressing a 44px floor
+     with this repo's only token at or above it (see sk-confirm-dialog.css:171's
+     identical idiom). Do not delete this declaration after measuring some OTHER
+     content's height and finding it already >=48px without it — that was exactly the
+     mistake an earlier version of this comment made, generalising a measurement taken
+     in the isolated form-field story into a false "removing it changes nothing" claim.
+     tests/node/form-input-border-target-size-parity.test.ts and
+     apps/storybook/src/tests/sk-form-input-contrast-touch-target.spec.ts (FR-007, broken
+     as padding+floor together) both depend on it staying declared. */
+  min-block-size: var(--sk-space-9);
   transition:
     border-color var(--sk-motion-duration-fast) var(--sk-motion-ease-out),
     box-shadow var(--sk-motion-duration-fast) var(--sk-motion-ease-out);

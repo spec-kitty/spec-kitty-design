@@ -9,6 +9,54 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) conve
 
 ### Changed
 
+- **`.sk-input` / `<sk-form-input>`'s resting-state control boundary now clears WCAG 1.4.11**
+  (#321). A new token, `--sk-border-control` (dark `#81818B`, light `#7A7A6E` — independently
+  declared literals, not aliases of `--sk-fg-subtle`), replaces `--sk-border-default` as the
+  resting-state `border-color` on both `.sk-input` (`packages/styles/src/form-field/sk-form-field.css`)
+  and `<sk-form-input>`'s shadow-DOM `.sk-form-input__control`
+  (`packages/styles/src/form-input/sk-form-input.css`). Measured against `--sk-surface-page`,
+  `--sk-surface-card`, `--sk-surface-input`, `--sk-surface-muted`, and `--sk-surface-pill` in
+  both themes: dark 5.01:1 / 4.51:1 / 4.28:1 / 3.64:1 / 3.86:1; light 3.98:1 / 4.34:1 / 3.85:1 /
+  **3.35:1** / 3.51:1 — all ten clear the 3:1 non-text contrast floor (the tightest is light
+  against `--sk-surface-muted`, the surface the control actually renders on in the work-explorer
+  pattern's filters bar), mechanically enforced by `tests/node/form-input-border-control-contrast.test.ts`.
+  `.sk-input` also gains the `var(--sk-border-width-1)` width spelling in place of its literal
+  `1px` (closing the #173 spelling gap between the two paths; both compute to 1px, unchanged).
+
+  Both rules also gain `min-block-size: var(--sk-space-9)` (48px, this repo's existing
+  nearest-above-44px token). **The 44px contract was already satisfied without this
+  declaration** — measured from the actual CI-rendered work-explorer pattern (not the isolated
+  Storybook story), the control's natural content-driven height there is 45px. What the
+  declaration adds is pinning that height to an exact 48px, which is not free: in the 18
+  work-explorer visual baselines this pinning invalidated, it costs **+1px** where the control
+  shares a grid row with an `.sk-form-select` sibling already at 47px (≥1101px viewports), the
+  full **+3px** where the control has its own row (narrower viewports), and **+6px** under the
+  200%-CSS-zoom baseline (2x the +3px case). All refreshed baselines were harvested from CI,
+  never shot locally, per this repo's CI-authoritative baseline convention.
+
+  **Known, disclosed side effect, not fixed here**: `[aria-invalid="true"]`'s border color
+  (`--sk-color-red`, `#E97373`) is not redefined for the light theme. Before this change, every
+  resting-and-invalid border on this control failed 3:1 in both themes, so the relative ordering
+  was moot. After this change, a light-theme input in its *invalid* state measures **2.60:1**
+  against `--sk-surface-input` — a **less visible boundary than the same input at rest**
+  (3.85:1). This is a real, if narrow, regression in relative terms, and it is not addressed by
+  this mission — `--sk-color-red` is a cross-cutting token used well beyond this control, and
+  changing it is out of this WP's scope. Filed as a separate defect.
+
+  **Also disclosed**: the control's new 48px height no longer matches the sibling
+  `.sk-form-select`'s (unchanged) 47px natural height in the same filters row. Decoded directly
+  from `work-explorer-active-filters`, not assumed: `.sk-form-select` sits top=14/bottom=60,
+  `.sk-input` sits top=13/bottom=60 — **both bottom edges land at the same pixel row (y=60)**,
+  which `align-items: end` on the shared row guarantees regardless of either control's height, so
+  the two were never at risk of a bottom-edge misalignment. The 1px height difference shows up at
+  the *top* edge instead (the taller `.sk-input` starts 1px higher) and in the row's own height,
+  which grows by 1px to accommodate it. Not fixed here — `.sk-form-select` is explicitly out of
+  scope (see below).
+
+  Focus and `:disabled` styling are unchanged. `.sk-textarea`,
+  `.sk-form-textarea__control`, and `.sk-form-select` keep `--sk-border-default` and are known,
+  disclosed, and deliberately out of scope for this change — not fixed here.
+
 - **BEHAVIOUR — `sk-notice`'s `heading` slot is now announced** (#228, operator ruling
   2026-09-07). The heading box moved from a sibling *before* the live region to the **first child
   inside it**, so a screen reader reads the whole notice, headline first.
