@@ -88,10 +88,10 @@
       "criterion_id": "FR-009",
       "description": "Verify FR-009 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "fixtures/elements-behaviour/src/sk-button.test.ts:644 [FR-009/FR-010] reduced motion stops animation while cue stays visible (visibility:visible, opacity:1, animation-name:none, distinguishable from idle); apps/storybook/src/tests/visual.spec.ts 'SK-button busy reduced motion' baseline added this session; reviewer verified live via Playwright emulation, review-cycle-1.md",
+      "pass_fail": "pass",
+      "verified_by": "mission-closer",
+      "verified_at": "2026-09-10T12:35:27.416269+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
