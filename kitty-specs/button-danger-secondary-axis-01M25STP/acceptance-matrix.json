@@ -88,10 +88,10 @@
       "criterion_id": "FR-009",
       "description": "Verify FR-009 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "DangerSecondaryIcon/DangerSecondaryFocus stories (label='Deny') axe-clean per run-axe-storybook.js; #153 not reopened (confirmed via issue-matrix verdict deferred-with-followup).",
+      "pass_fail": "pass",
+      "verified_by": "reviewer-renata",
+      "verified_at": "2026-09-10T15:46:05.151837+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
