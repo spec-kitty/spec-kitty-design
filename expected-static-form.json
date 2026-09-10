@@ -1,0 +1,264 @@
+{
+  "$comment": [
+    "THE PRE-DECLARED PROBE TABLE for scripts/check-static-form-equivalence.mjs (ADR-15 kinds 1 and 2, #310).",
+    "",
+    "WHAT `equivalence` MEANS HERE, STATED BEFORE THE TABLE RATHER THAN IMPLIED BY IT.",
+    "The `scenarios` x `observables` cross product below is a LIBRARY-ONLY bar: every outcome in it is",
+    "measured on a page whose only author CSS is this library's own. On that bar the generated static",
+    "form is required to be EQUAL to the shadow form, within one engine, and the gate fails on any",
+    "divergence. That is the whole of what this gate certifies, and it is deliberately less than the",
+    "phrase `equal to the shadow form` sounds like.",
+    "",
+    "WHAT IT DOES NOT CERTIFY, MEASURED RATHER THAN CONCEDED: `consumerOverrides` below. `:host`",
+    "declarations sit in the INNER tree, so a document declaration beats them at any weight and in any",
+    "order. Moved onto `.sk-<name>-host` they become ordinary (0,1,0) document declarations a consumer",
+    "must outbid. The wrapper therefore reproduces `:host`'s LAYOUT and HARDENS its cascade position —",
+    "#375, found by ADR-16's group H. Those rows are pinned by VERDICT (`diverge` or `equal`), never by",
+    "equality, because equality is not what CSS provides there. A gate that only ran the library-only",
+    "table would certify an equivalence it never tested; a gate that demanded equality on these rows",
+    "would demand something no document selector can give.",
+    "",
+    "COMPARE WITHIN ONE ENGINE. ADR-15's 52 declared outcomes reach the same verdict in chromium and",
+    "firefox but not always the same VALUE: sk-action-row's grid tracks resolve from font metrics and",
+    "differ sub-pixel between engines for the same PASSING comparison. Nothing in this file is a",
+    "transcribed computed value for that reason. `consumerOverrides[].shadowValue` is the one exception",
+    "and every one of them is a keyword, never a length.",
+    "",
+    "FLOORS ARE SHRINK-ONLY, the same shape expected-parts.json and check-adopted-css-boundaries.mjs's",
+    "own probe table use. Raise them when you add rows; lower one only with a reason in the commit",
+    "message. A green line over zero compared components is the vacuous pass this repository has",
+    "red-ed for twice, and `floors.components` is what refuses it."
+  ],
+
+  "components": {
+    "action-row": {
+      "tag": "sk-action-row",
+      "note": "ADR-15's measured exemplar for kind 2. `@container (max-width: 400px)` is inclusive, and the 360/500 pair straddles it without ever touching it — hence the 400 and 401 scenarios.",
+      "light": "<span slot=\"controls\"></span>",
+      "innerHtml": "",
+      "observables": [
+        { "selector": ":host", "properties": ["display", "container-type", "width", "min-width"] },
+        { "selector": ".sk-action-row", "properties": ["flex-wrap", "width", "display"] },
+        { "selector": ".sk-action-row__trigger", "properties": ["grid-template-columns", "grid-template-areas"] },
+        { "selector": ".sk-action-row__metadata", "properties": ["justify-self"] },
+        { "selector": ".sk-action-row__controls", "properties": ["width"] }
+      ],
+      "scenarios": [
+        { "id": "A1", "context": "block", "width": 360, "note": "below the 400px breakpoint" },
+        { "id": "A2", "context": "block", "width": 500, "note": "above it" },
+        { "id": "A3", "context": "block", "width": 400, "note": "the inclusive breakpoint itself — ADR-15 O17" },
+        { "id": "A4", "context": "block", "width": 401, "note": "one pixel above it — ADR-15 O20" },
+        { "id": "A5", "context": "composed", "outer": 1200, "width": 360, "note": "an outer container WIDER than the row" },
+        { "id": "A6", "context": "composed", "outer": 320, "width": 700, "note": "an outer container NARROWER than the row — the collapsed form answers the wrong one" },
+        { "id": "A7", "context": "flex-item", "width": 300, "note": "an item of a 300px flex row — the case that pins the wrapper's declaration set" },
+        { "id": "A8", "context": "grid-track", "width": 300, "note": "the control: a 300px grid track hides the flex-item defect entirely" }
+      ]
+    },
+
+    "app-shell": {
+      "tag": "sk-app-shell",
+      "note": "ADR-15's measured exemplar for kind 1, and the only sheet carrying an UNCONDITIONAL @container block that no host attribute gates.",
+      "light": "<nav slot=\"personal-rail\">rail</nav><aside slot=\"context-sidebar\">context</aside><div slot=\"compact-header\">compact header</div><nav slot=\"compact-navigation\">compact nav</nav><header slot=\"page-header\">page header</header><p>main content</p>",
+      "innerHtml": "",
+      "observables": [
+        { "selector": ":host", "properties": ["display", "container-type", "width", "min-width"] },
+        { "selector": ".sk-app-shell", "properties": ["grid-template-columns", "width"] },
+        { "selector": ".sk-app-shell__personal", "properties": ["display"] },
+        { "selector": ".sk-app-shell__context", "properties": ["display"] },
+        { "selector": ".sk-app-shell__compact-header", "properties": ["display", "grid-row", "grid-column"] },
+        { "selector": ".sk-app-shell__compact-navigation", "properties": ["display", "grid-row", "grid-column"] },
+        { "selector": ".sk-app-shell__content", "properties": ["grid-column"] }
+      ],
+      "scenarios": [
+        { "id": "B1", "context": "block", "width": 800, "attrs": { "presentation": "compact" }, "note": "ADR-15 O1" },
+        { "id": "B2", "context": "block", "width": 1000, "attrs": { "presentation": "rail-preserving" }, "note": "ADR-15 O7" },
+        { "id": "B3", "context": "composed", "outer": 1400, "width": 800, "attrs": { "presentation": "compact" }, "note": "ADR-15 O11 — composed, outer WIDER" },
+        { "id": "B4", "context": "composed", "outer": 500, "width": 1200, "attrs": { "presentation": "compact" }, "note": "ADR-15 O13 — composed, outer NARROWER; the sharpest collapsed-form divergence" },
+        { "id": "B5", "context": "flex-item", "width": 300, "attrs": { "presentation": "compact" }, "note": "ADR-15 O15/O16 — the abbreviated wrapper computes 0px here" },
+        { "id": "B6", "context": "grid-track", "width": 300, "attrs": { "presentation": "compact" }, "note": "ADR-15 O17/O18 — the control that hides O15/O16" },
+        { "id": "B7", "context": "block", "width": 600, "note": "ADR-15 O19 — NO presentation attribute; the sheet's unconditional @container (max-width: 720px)" },
+        { "id": "B8", "context": "block", "width": 760, "note": "ADR-15 O20 — no presentation, above the unconditional breakpoint" },
+        { "id": "B9", "context": "block", "width": 700, "attrs": { "presentation": "rail-preserving" }, "note": "ADR-15 O22 — both the unconditional and the host-gated rules apply" },
+        { "id": "B10", "context": "block", "width": 800, "attrs": { "presentation": "compact", "open": "" }, "note": "the drawer OPEN, so the [hidden] rule that must keep its (0,4,0) weight is the one NOT applying" },
+        { "id": "B11", "context": "block", "width": 720, "note": "the unconditional breakpoint itself — max-width is inclusive" }
+      ]
+    },
+
+    "copy-field": {
+      "tag": "sk-copy-field",
+      "note": "Named by ADR-15 as in scope and NOT measured by it — `the ruling applies to it unchanged, because the mechanism is a property of CSS containment and not of the component`. This gate is where that stops being an inference. It adopts sk-button.css as a FOREIGN sheet, foreign sheet first, so the static twin links it in the same order.",
+      "light": "",
+      "attrs": { "value": "sk-abc-123" },
+      "innerHtml": "",
+      "observables": [
+        { "selector": ":host", "properties": ["display", "container-type", "width", "min-width"] },
+        { "selector": ".sk-copy-field", "properties": ["grid-template-columns", "width"] },
+        { "selector": ".sk-copy-field__value", "properties": ["min-width"] },
+        { "selector": ".sk-copy-field .sk-button", "properties": ["justify-self"] }
+      ],
+      "scenarios": [
+        { "id": "C1", "context": "block", "width": 280, "note": "below the 20rem (320px) breakpoint" },
+        { "id": "C2", "context": "block", "width": 320, "note": "the inclusive breakpoint itself" },
+        { "id": "C3", "context": "block", "width": 321, "note": "one pixel above it" },
+        { "id": "C4", "context": "block", "width": 500, "note": "well above" },
+        { "id": "C5", "context": "composed", "outer": 1200, "width": 280, "note": "composed, outer WIDER" },
+        { "id": "C6", "context": "composed", "outer": 280, "width": 600, "note": "composed, outer NARROWER" },
+        { "id": "C7", "context": "flex-item", "width": 300, "note": "an item of a 300px flex row" },
+        { "id": "C8", "context": "grid-track", "width": 300, "note": "a 300px grid track" }
+      ]
+    },
+
+    "page-header": {
+      "tag": "sk-page-header",
+      "note": "ADR-15's MIXED case — a host-owned container-type (kind 2), a BARE `:host([sticky])` styling the host itself (kind 1 in the form that does not rewrite mechanically), and `::slotted(*)` (kind 3, shadow-only). The three verdicts apply independently: the first two get the wrapper, the third has NO static form and its rules are absent from the generated sheet. The `:host` observable is what makes the bare sticky axis testable at all — it is the only construct in this table whose subject is the host rather than a descendant.",
+      "light": "<span slot=\"eyebrow\">Workspace</span><h1 slot=\"title\">A page title long enough to wrap at narrow widths</h1><p slot=\"supporting\">Supporting copy.</p><span slot=\"sync\">Synced</span><button slot=\"actions\" type=\"button\">Act</button>",
+      "innerHtml": "",
+      "observables": [
+        { "selector": ":host", "properties": ["display", "container-type", "position", "inset-block-start", "z-index"] },
+        { "selector": ".sk-page-header", "properties": ["grid-template-columns", "width"] },
+        { "selector": ".sk-page-header__meta", "properties": ["width", "justify-content", "flex-wrap"] },
+        { "selector": ".sk-page-header__text", "properties": ["flex-wrap", "flex-direction"] }
+      ],
+      "scenarios": [
+        { "id": "D1", "context": "block", "width": 600, "note": "below the 720px breakpoint" },
+        { "id": "D2", "context": "block", "width": 720, "note": "the inclusive breakpoint itself" },
+        { "id": "D3", "context": "block", "width": 721, "note": "one pixel above it" },
+        { "id": "D4", "context": "block", "width": 900, "note": "well above" },
+        { "id": "D5", "context": "block", "width": 900, "attrs": { "sticky": "" }, "note": "the BARE host-attribute axis — the subject is the host itself" },
+        { "id": "D6", "context": "block", "width": 600, "attrs": { "sticky": "" }, "note": "sticky below the container breakpoint" },
+        { "id": "D7", "context": "block", "width": 900, "attrs": { "sticky": "", "density": "compact" }, "note": "both axes at once; density is an ordinary root-class modifier, sticky is a host one" },
+        { "id": "D8", "context": "composed", "outer": 1400, "width": 600, "note": "composed, outer WIDER" },
+        { "id": "D9", "context": "composed", "outer": 500, "width": 900, "note": "composed, outer NARROWER" },
+        { "id": "D10", "context": "flex-item", "width": 300, "note": "an item of a 300px flex row" },
+        { "id": "D11", "context": "grid-track", "width": 300, "note": "a 300px grid track" }
+      ]
+    }
+  },
+
+  "consumerOverrides": {
+    "$comment": [
+      "#375's table, generalised from ADR-16 group H's four rows to every component this gate covers.",
+      "",
+      "`staticWeight` is stated RELATIVE TO THE WRAPPER RULE, not relative to the shadow-side spelling,",
+      "and that asymmetry is the finding rather than a modelling convenience. In the shadow form a",
+      "consumer targets the custom element, which is a TYPE selector at (0,0,1). There is no document",
+      "spelling of the wrapper below (0,1,0), because the wrapper is reached by a class. So a consumer",
+      "who beat `:host` with `sk-action-row { … }` has to climb a whole specificity level merely to TIE",
+      "`.sk-action-row-host`, and even the tie loses unless their sheet is later.",
+      "",
+      "`against` names the EMITTED rule each row competes with, and the gate reads that rule out of the generated",
+      "sheet, asserts it declares the property in question, and computes the boundary from it. The boundary is",
+      "never a constant: `position: sticky` on sk-page-header is emitted by a MODIFIER rule at (0,2,0) while",
+      "`display` on the same component is emitted by the base wrapper rule at (0,1,0).",
+      "",
+      "`below` rows diverge. `tie` rows diverge when the consumer's rule is authored FIRST and are equal",
+      "when it is authored LAST — a bundler's decision more often than a consumer's. `above` rows are",
+      "equal in either order. Those three lines ARE the ruled limit: not `the wrapper always wins`, but",
+      "`strictly outbid it, or be later`.",
+      "",
+      "`verdict` is pinned; the computed values are recorded but not pinned, except `shadowValue`, which",
+      "is a keyword in every row that has one. A row flipping from `diverge` to `equal` is a FAILURE",
+      "here, not an improvement: it would mean the emitted wrapper's weight changed under everyone who",
+      "has already written an override against it, and that is a decision, not a side effect."
+    ],
+    "rows": [
+      {
+        "id": "H1", "component": "action-row", "scenario": "A1", "position": "after",
+        "shadowCss": "sk-action-row { display: flex }", "staticCss": "div { display: flex }",
+        "against": ".sk-action-row-host", "staticWeight": "below", "sameWeightAsShadow": true,
+        "selector": ":host", "property": "display",
+        "verdict": "diverge", "shadowValue": "flex",
+        "note": "ADR-16 H1/H2. The identical intent at (0,0,1) wins against the element and loses against the wrapper, in either order."
+      },
+      {
+        "id": "H2", "component": "action-row", "scenario": "A1", "position": "before",
+        "shadowCss": "sk-action-row { container-type: normal }", "staticCss": ".sk-action-row-host { container-type: normal }",
+        "against": ".sk-action-row-host", "staticWeight": "tie",
+        "selector": ":host", "property": "container-type",
+        "verdict": "diverge", "shadowValue": "normal",
+        "note": "ADR-16 H3/H4, the sharper pair — a consumer can switch the ELEMENT's container off from the document at (0,0,1), and cannot switch the wrapper's off at a (0,1,0) tie authored first."
+      },
+      {
+        "id": "H3", "component": "action-row", "scenario": "A1", "position": "before",
+        "shadowCss": "sk-action-row { container-type: normal }", "staticCss": ".sk-action-row-host { container-type: normal }",
+        "against": ".sk-action-row-host", "staticWeight": "tie",
+        "selector": ".sk-action-row", "property": "flex-wrap",
+        "verdict": "diverge", "shadowValue": "nowrap",
+        "note": "the same override read one level down: destroying the element's container stops @container (max-width: 400px) firing, and the wrapper's survives."
+      },
+      {
+        "id": "H4", "component": "action-row", "scenario": "A1", "position": "after",
+        "shadowCss": "sk-action-row { container-type: normal }", "staticCss": ".sk-action-row-host { container-type: normal }",
+        "against": ".sk-action-row-host", "staticWeight": "tie",
+        "selector": ":host", "property": "container-type",
+        "verdict": "equal", "shadowValue": "normal",
+        "note": "THE TIE, resolved by ORDER. The same equal-weight override authored AFTER the sheet wins in both forms."
+      },
+      {
+        "id": "H5", "component": "action-row", "scenario": "A1", "position": "before", "scope": "page-scope",
+        "shadowCss": ".page-scope sk-action-row { container-type: normal }", "staticCss": ".page-scope .sk-action-row-host { container-type: normal }",
+        "against": ".sk-action-row-host", "staticWeight": "above",
+        "selector": ":host", "property": "container-type",
+        "verdict": "equal", "shadowValue": "normal",
+        "note": "STRICTLY OUTBID at (0,2,0), authored first — equal in both forms. This row with H2 is what makes the boundary a number rather than a warning."
+      },
+      {
+        "id": "H6", "component": "app-shell", "scenario": "B1", "position": "after",
+        "shadowCss": "sk-app-shell { display: flex }", "staticCss": "div { display: flex }",
+        "against": ".sk-app-shell-host", "staticWeight": "below", "sameWeightAsShadow": true,
+        "selector": ":host", "property": "display",
+        "verdict": "diverge", "shadowValue": "flex",
+        "note": "#375's `plus the sk-app-shell equivalents`, on the kind-1 exemplar."
+      },
+      {
+        "id": "H7", "component": "app-shell", "scenario": "B1", "position": "before",
+        "shadowCss": "sk-app-shell { container-type: normal }", "staticCss": ".sk-app-shell-host { container-type: normal }",
+        "against": ".sk-app-shell-host", "staticWeight": "tie",
+        "selector": ".sk-app-shell", "property": "grid-template-columns",
+        "verdict": "diverge", "shadowValue": "",
+        "note": "the container-destroying override read at the rule the presentation axis actually drives. `shadowValue` is a LENGTH here and is deliberately unpinned — see this file's $comment on within-engine comparison."
+      },
+      {
+        "id": "H8", "component": "copy-field", "scenario": "C1", "position": "after",
+        "shadowCss": "sk-copy-field { display: flex }", "staticCss": "div { display: flex }",
+        "against": ".sk-copy-field-host", "staticWeight": "below", "sameWeightAsShadow": true,
+        "selector": ":host", "property": "display",
+        "verdict": "diverge", "shadowValue": "flex",
+        "note": "the component ADR-15 ruled on without measuring."
+      },
+      {
+        "id": "H9", "component": "copy-field", "scenario": "C1", "position": "before",
+        "shadowCss": "sk-copy-field { container-type: normal }", "staticCss": ".sk-copy-field-host { container-type: normal }",
+        "against": ".sk-copy-field-host", "staticWeight": "tie",
+        "selector": ".sk-copy-field", "property": "grid-template-columns",
+        "verdict": "diverge", "shadowValue": "",
+        "note": "the container-destroying override on the unmeasured component, at the tie."
+      },
+      {
+        "id": "H10", "component": "page-header", "scenario": "D5", "position": "after",
+        "shadowCss": "sk-page-header { position: static }", "staticCss": "div { position: static }",
+        "against": ".sk-page-header-host.sk-page-header-host--sticky", "staticWeight": "below", "sameWeightAsShadow": true,
+        "selector": ":host", "property": "position",
+        "verdict": "diverge", "shadowValue": "static",
+        "note": "the BARE host-attribute axis, overridden. A consumer switching sticky off from the document succeeds against the element and fails against the wrapper — the axis whose subject IS the host is where this matters most."
+      },
+      {
+        "id": "H11", "component": "page-header", "scenario": "D5", "position": "after",
+        "shadowCss": "sk-page-header { position: static }", "staticCss": ".sk-page-header-host.sk-page-header-host--sticky { position: static }",
+        "against": ".sk-page-header-host.sk-page-header-host--sticky", "staticWeight": "tie",
+        "selector": ":host", "property": "position",
+        "verdict": "equal", "shadowValue": "static",
+        "note": "the same intent spelled at the weight of the rule ACTUALLY EMITTING `position`, authored LAST — equal. Note which selector that is: `position: sticky` is declared by the MODIFIER rule at (0,2,0), not by the base wrapper rule at (0,1,0). The boundary is a property of the rule you are overriding, never a constant, which is why `against` names it and the gate reads the weight off the generated sheet."
+      }
+    ]
+  },
+
+  "floors": {
+    "components": 4,
+    "scenarios": 38,
+    "outcomes": 240,
+    "consumerOverrides": 11,
+    "engines": 1,
+    "$comment": "`engines` is 1 rather than 2 because WebKit cannot launch on the maintainer workstation (ADR-10's recorded host gap) and firefox is not installed in every job. The gate names every engine it ran and every engine it could not, and refuses to run on none."
+  }
+}

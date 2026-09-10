@@ -705,6 +705,16 @@ else {
     // proves scope; a table that stops running is a gate whose defeated forms quietly reopen.
     [/node\s+scripts\/check-pattern-composition\.mjs(?!\s*--selftest)(\s|$)/, 'the pattern-composition gate', 'scripts/check-pattern-composition.mjs'],
     [/node\s+scripts\/check-pattern-composition\.mjs\s+--selftest(\s|$)/, "the pattern-composition gate's own probe table", 'scripts/check-pattern-composition.mjs --selftest'],
+    // #309/#310, all four entries with the gates themselves, per every comment above. The static
+    // form is a GENERATED artifact a static consumer links instead of the authored sheet, so its
+    // drift check is the same contract build-element-markup.mjs's is; the rewrite table is
+    // required separately because it is the only thing holding the four `:host(...)` spellings
+    // ADR-15 names, each of whose wrong rewrite is silent. `--static` here is HALF of #310 — the
+    // rendered half needs a browser and lives in REQUIRED_RELEASE below, and both halves are
+    // registered so neither can be deleted while the other reads as coverage.
+    [/node\s+scripts\/build-static-form-css\.mjs\s+--check(\s|$)/, 'the static-form drift check', 'scripts/build-static-form-css.mjs --check'],
+    [/node\s+scripts\/build-static-form-css\.mjs\s+--selftest(\s|$)/, "the static-form generator's own rewrite table", 'scripts/build-static-form-css.mjs --selftest'],
+    [/node\s+scripts\/check-static-form-equivalence\.mjs\s+--static(\s|$)/, "the static form's structural and declaration-set checks", 'scripts/check-static-form-equivalence.mjs --static'],
   ];
 
   /**
@@ -781,6 +791,14 @@ else {
     [/node\s+scripts\/check-offline-load\.mjs\s+--selftest(\s|$)/, "the offline probe's own blindness check", 'scripts/check-offline-load.mjs --selftest'],
     [/node\s+scripts\/measure-elements-sizes\.mjs\s+--check(\s|$)/, 'the size and SRI drift check', 'scripts/measure-elements-sizes.mjs --check'],
     [/node\s+scripts\/check-vue-packed-types\.mjs(\s|$)/, 'the packed Vue declaration gate', 'scripts/check-vue-packed-types.mjs'],
+    // #310's rendered half. Registered here rather than in REQUIRED_LINT because it needs the
+    // real built artifacts this job produces — and registered SEPARATELY from its probe table,
+    // per #75's pair: a probe table that stops running is a gate whose defeated forms quietly
+    // reopen, and this one's defeated forms are the collapsed transform and the abbreviated
+    // wrapper ADR-15 measured. Whole-command matching, because `check-static-form-equivalence.mjs`
+    // is a SUBSTRING of the same line with `--selftest`.
+    [/node\s+scripts\/check-static-form-equivalence\.mjs(?!\s*--)(\s|$)/, 'the static-form rendered equivalence gate', 'scripts/check-static-form-equivalence.mjs'],
+    [/node\s+scripts\/check-static-form-equivalence\.mjs\s+--selftest(\s|$)/, "the static-form gate's red-first probe table", 'scripts/check-static-form-equivalence.mjs --selftest'],
   ];
   const releaseSteps = wf.jobs?.['release-gate']?.steps ?? [];
   for (const [re, what, label] of REQUIRED_RELEASE) {
