@@ -1,0 +1,8 @@
+{
+  "event": "completed",
+  "invocation_id": "01M26BGPJX4NN958288KD53YYZ",
+  "completed_at": "2026-09-10T19:37:39.571715+00:00",
+  "outcome": "done",
+  "closed_by": "agent",
+  "evidence_ref": "REJECT exact 61d2a5f1: false 200 percent zoom evidence plus two overlapping Mediums"
+}

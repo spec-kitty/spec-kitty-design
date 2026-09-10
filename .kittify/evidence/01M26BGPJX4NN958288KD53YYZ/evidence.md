@@ -1,0 +1,1 @@
+REJECT exact 61d2a5f1: false 200 percent zoom evidence plus two overlapping Mediums
