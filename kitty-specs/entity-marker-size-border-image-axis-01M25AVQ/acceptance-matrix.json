@@ -117,11 +117,11 @@
     {
       "criterion_id": "FR-012",
       "description": "Verify FR-012 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "proof_type": "manual_inspection",
+      "evidence": "packages/elements/src/entity-marker/sk-entity-marker.ts render(): the only interpolated content is the class-name string built from size/shape/border attribute state; no new user-visible string literal introduced",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T11:03:31.268959+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
