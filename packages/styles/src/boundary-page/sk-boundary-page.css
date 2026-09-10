@@ -25,10 +25,14 @@
  *
  * COMPOSITION IS PLACEMENT-ONLY. `.sk-boundary-page__mark` positions and centers whatever
  * `<sk-entity-marker>` the consumer authors (size/shape/border are entirely the consumer's
- * choice — this file sets none of them). The status pill (`<sk-pill-tag
- * class="sk-pill-tag--status-<tone>">`) is composed inline inside `.sk-boundary-page__title`
- * or `.sk-boundary-page__body` with no rule here targeting `.sk-pill-tag` at all — no default
- * tone, no background/color override, no role/name contribution.
+ * choice — this file sets none of them). The status pill is composed as the STYLES-LAYER span
+ * form — `<span class="sk-pill-tag sk-pill-tag--status-<tone>">` — not the custom element with a
+ * class on its host, which is inert: `sk-pill-tag`'s tone modifier is applied by
+ * `pillTagClasses()` to the shadow `<span part="tag">`, so a class on the light-DOM
+ * `<sk-pill-tag>` host never reaches it (review finding, this mission). It is composed inline
+ * inside `.sk-boundary-page__title` or `.sk-boundary-page__body` with no rule here targeting
+ * `.sk-pill-tag` at all — no default tone, no background/color override, no role/name
+ * contribution.
  *
  * THE FOOTNOTE/MARK ABSENCE MECHANISM IS ORDINARY FLEX `gap`, NOTHING ELSE. `.sk-boundary-page__card`
  * is a column flex container whose ONLY inter-child spacing is `gap` — no child ever carries its
@@ -61,16 +65,25 @@
  * property nothing sets is not a safety margin, it is the dead-guard defect pattern; the
  * absence itself is what apps/storybook/src/tests/sk-boundary-page-responsive.spec.ts asserts.
  *
- * THE BARE `sk-boundary-page` CLASS ON `__stage` CARRIES NO RULE OF ITS OWN — it is the same
- * component-host identification hook every multi-part styles-only family in this directory
- * puts on its outermost element (`sk-context-nav`, `sk-data-table`, `sk-workflow-board`: the
- * root always carries the bare block class alongside — or instead of — a BEM element class).
+ * THE BARE `sk-boundary-page` CLASS ON `__stage` CARRIES NO RULE OF ITS OWN — it exists purely as
+ * a component-host identification hook. CORRECTED (WP01 review finding): an earlier revision of
+ * this comment claimed carrying it alongside a BEM element class on the SAME node
+ * (`class="sk-boundary-page sk-boundary-page__stage"`) follows an EXISTING convention —
+ * `sk-context-nav`, `sk-data-table`, `sk-workflow-board` doing the same "alongside — or instead
+ * of" a BEM element class. Checked, not assumed: all three carry the bare block class ALONE on
+ * their root (`sk-context-nav`'s `<nav class="sk-context-nav">`, `sk-data-table`'s `<table
+ * class="sk-data-table">`, `sk-workflow-board`'s `<div class="sk-workflow-board">`) — none of
+ * them carries `class="sk-x sk-x__y"` on one node anywhere in this repo. This file's own
+ * `class="sk-boundary-page sk-boundary-page__stage"` is therefore a NEW shape, not a
+ * precedent-following one — still the right hook for the reason below, just not an existing one.
  * `scripts/run-axe-storybook.js`'s render-verdict walk looks for it by name
  * (`BLOCK_CLASS = /^sk-[a-z0-9]+(?:-[a-z0-9]+)*$/`, which a BEM `__element`/`--modifier`
  * class never matches by construction) to find "a component actually mounted" versus "only
- * wrapper divs mounted" — every exemplar without a composed `<sk-entity-marker>`/`<sk-pill-tag>`
- * (which would otherwise supply that signal by accident, via their own tag name) needs this
- * frame to supply it directly.
+ * wrapper divs mounted" — every exemplar without a composed `<sk-entity-marker>` (a custom
+ * element, which would otherwise supply that signal by accident via its own tag name) needs this
+ * frame to supply it directly. The composed status pill never supplies this signal itself: it is
+ * authored as the styles-layer `<span class="sk-pill-tag sk-pill-tag--status-<tone>">` form, not
+ * the `<sk-pill-tag>` custom element, so it contributes no tag-name signal of its own.
  *
  * ANATOMY (data-model.md is authoritative; not restated in full here) — direct children of
  * `.sk-boundary-page__card`, in this fixed order:
@@ -140,7 +153,7 @@
   color: var(--sk-fg-default);
   /* This class is applied TO the consumer's own <h1> — it never generates one. `display: flex`
      here is the title-ROW status-composition point (spec FR-005): it lets a composed
-     `<sk-pill-tag class="sk-pill-tag--status-<tone>">` sit beside a long heading and wrap
+     `<span class="sk-pill-tag sk-pill-tag--status-<tone>">` sit beside a long heading and wrap
      without forcing either into horizontal overflow (spec Edge Cases), with zero rule here
      targeting `.sk-pill-tag` itself — no background/color, no role, no default tone. */
 }
@@ -169,7 +182,31 @@
      mark/footnote's full-DOM-omission contract — see this file's header comment. */
 }
 
-.sk-boundary-page__action-group > * {
+/* C-003 REMEDIATION (WP01 review finding). `.sk-boundary-page__action-group > *`'s single rule
+   used to carry BOTH a structural target-size floor (min-block-size/padding-inline, spec FR-013)
+   AND a legibility floor (background/color) at one specificity, (0,1,0) — identical to a
+   consumer's own `.sk-button`/`.sk-button--primary` (also single classes, (0,1,0)). Source order
+   then decided, and BOTH orders broke something: `button.css` after this file let the frame's
+   rule win, so a composed `<button class="sk-button sk-button--primary">` lost its yellow
+   background and on-primary text; `button.css` before this file let `.sk-button`'s own `padding`
+   shorthand win instead, so the frame lost its 20px `padding-inline` and weakened FR-013's target
+   size. These two floors need OPPOSITE outcomes against a consumer class, so they are now two
+   rules at two different, ORDER-INDEPENDENT specificities rather than one rule at a shared,
+   order-DEPENDENT one:
+
+   1. The TARGET-SIZE floor below is deliberately NOT beatable by a same-specificity consumer
+      class: `> :is(a, button)` carries the element selector's own specificity, (0,1,1) — strictly
+      ABOVE any single class like `.sk-button`, (0,1,0) — so it wins regardless of import order.
+      This is FR-013's accessibility floor (WCAG minimum target size); a consumer's own visual
+      styling must never be able to shrink it back under 44px by accident.
+   2. The LEGIBILITY floor further below is deliberately fully `:where()`-wrapped, INCLUDING the
+      container class — `:where(.sk-boundary-page__action-group) > :where(a, button)` — for TRUE
+      zero specificity, (0,0,0), strictly BELOW any single class, so it always loses to a
+      consumer's own background/color, regardless of import order. It exists only to keep a BARE,
+      unclassed action legible (see the MEASURED comment below); the instant a consumer supplies
+      their own tone via a class, that tone must win outright, not merely "when it happens to load
+      second". */
+.sk-boundary-page__action-group > :is(a, button) {
   box-sizing: border-box;
   display: inline-flex;
   align-items: center;
@@ -180,13 +217,22 @@
     alone reaches it" branch, verified rather than assumed against sk-confirm-dialog.css's
     own --sk-space-9 target-size precedent. */
   padding-inline: var(--sk-space-5);
+  font: inherit;
+}
+
+/* Legibility floor ONLY — see the C-003 remediation comment above for why this is a SEPARATE,
+   zero-specificity rule rather than folded into the structural one above. No `text-decoration`
+   here: an earlier revision also reset it to `none`, but that is a VISUAL opinion (matching a
+   button's un-underlined look), not a legibility floor — actual color contrast is the only thing
+   MEASURED below, and removing a link's one non-color distinguishing signal (WCAG 1.4.1) is not
+   something a floor rule should impose. Left at the UA default; a consumer who wants no underline
+   makes that choice via their own class, same as radius/hover/border already are (per C-003). */
+:where(.sk-boundary-page__action-group) > :where(a, button) {
   background: transparent;
   color: var(--sk-fg-default);
-  text-decoration: none;
-  font: inherit;
   /* MEASURED, not assumed (#69's own convention) — a bare, unstyled `<a>` fails axe's
      color-contrast rule inside this card: the UA default link blue (`rgb(0, 0, 238)`) against
-     `--sk-surface-card` (`rgb(24, 26, 31)`) measures ~1.85:1, far under the 4.5:1 floor. A bare
+     `--sk-surface-card` (`rgb(24, 26, 31)`) measures ~1.875:1, far under the 4.5:1 floor. A bare
      `<button>` does not fail the SAME way (`color`/`background-color` both come from its own UA
      rule, `ButtonText` on `ButtonFace`, which self-contrasts fine) but DOES clash with a
      surrounding dark card if only the link half were fixed — `color: var(--sk-fg-default)` on

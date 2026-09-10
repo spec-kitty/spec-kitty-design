@@ -1,4 +1,14 @@
 import './sk-boundary-page.css';
+// The composed status pill is authored as the STYLES-LAYER span form
+// (`<span class="sk-pill-tag sk-pill-tag--status-<tone>">`), not the `<sk-pill-tag>` custom
+// element — see sk-boundary-page.css's own header comment. A styles-layer class needs its
+// stylesheet loaded wherever it is used; unlike sk-entity-marker (composed as the real custom
+// element, which carries its own shadow CSS), sk-pill-tag's document-form classes have no
+// shadow root to bring the rules along, so this import is required for the composed pill to
+// render any tone at all. This is an intra-project import (both files belong to the single nx
+// `styles` project, tag `scope:styles`), not a cross-project one, so it is not constrained by
+// `@nx/enforce-module-boundaries`'s `scope:styles` -> `scope:tokens`-only rule.
+import '../pill-tag/sk-pill-tag.css';
 import type { Meta, StoryObj } from '@storybook/web-components';
 import {
   SkBoundaryPageForcedColorsHTML,
