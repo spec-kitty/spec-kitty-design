@@ -97,11 +97,11 @@
     {
       "criterion_id": "FR-010",
       "description": "Verify FR-010 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
+      "proof_type": "manual_review",
+      "evidence": "PR-TIME-PENDING -- no PR is open yet for this mission, so the actual PR-body text cannot be observed by this reviewer. What IS confirmed now: the WP01 activity log (2026-09-10T15:25:57Z entry) contains a drafted PR-body line naming --sk-border-control, and git diff 4d6c5f2..HEAD --name-only contains zero files under any *button* path (checked directly). The coordination-outcome statement, the six ratios in the PR description, and the explicit #155 non-closure statement are all artifacts that only exist once a PR is opened -- deliberately not marked pass on evidence I have not observed.",
       "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "verified_by": "reviewer-renata",
+      "verified_at": "2026-09-10T15:49:20.982639+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
