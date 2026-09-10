@@ -228,10 +228,10 @@
       "criterion_id": "FR-023",
       "description": "Verify FR-023 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
+      "evidence": "packages/styles/src/action-row/sk-action-row-html.stories.ts LightMode story present (class=\"sk-light\", not data-theme, per #93) alongside the package-wide dark-default convention shared by every sibling *-html.stories.ts; both Default and LightMode pass axe with zero violations (run-axe-storybook.js: primitives-skactionrow-html--default and --light-mode, 2026-09-10)",
+      "pass_fail": "pass",
       "verified_by": null,
-      "verified_at": null,
+      "verified_at": "2026-09-10T14:07:28.798582+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
