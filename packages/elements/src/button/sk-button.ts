@@ -15,6 +15,7 @@ import { buttonClasses } from './sk-button.markup.js';
  * @element sk-button
  * @slot - the visible label or consumer-supplied glyph
  * @csspart button - the rendered `<button>` or `<a>`
+ * @csspart busy-cue - a decorative, `aria-hidden` activity indicator shown while `busy` is set
  */
 export class SkButton extends LitElement {
   static styles = [sheet];
@@ -26,6 +27,7 @@ export class SkButton extends LitElement {
     label: { type: String, reflect: true },
     href: { type: String, reflect: true },
     disabled: { type: Boolean, reflect: true },
+    busy: { type: Boolean, reflect: true },
   };
 
   /** Tone: `primary`, `secondary` or `ghost`. Omit for the unstyled base. An unknown value
@@ -45,11 +47,17 @@ export class SkButton extends LitElement {
    *  has, and faking one with pointer-events hides it from assistive technology. */
   declare disabled: boolean;
 
+  /** Shows a decorative activity cue via CSS alone. Purely presentational: this component
+   *  never sets, clears, or reads `disabled`/`aria-disabled` on account of `busy`, owns no
+   *  request/timer/announcement, and the accessible name is unchanged in either state — the
+   *  consumer's own request-handling code and disabling mechanism stay entirely its own. */
+  declare busy: boolean;
+
   #hasWarnedInvalidIconLabel = false;
   #lastInvalidIconLabel: string | undefined;
 
   render() {
-    const cls = buttonClasses(this.variant, this.size);
+    const cls = buttonClasses(this.variant, this.size, this.busy);
     const validLabel = typeof this.label === 'string' && this.label.trim() ? this.label : undefined;
     const invalidIconLabel = this.size === 'icon' && validLabel === undefined;
     if (invalidIconLabel) {
@@ -85,6 +93,13 @@ export class SkButton extends LitElement {
     // the element became `<a href="">` instead of reverting to `<button>`: a click reloaded the
     // page and AT still announced "link". sk-ribbon-card.ts:63 was immune only because it tests
     // truthiness. Found by a lens, not by the suite — `mount()` never mutated after mount.
+    // THE BUSY CUE IS UNCONDITIONAL, on both branches. Its DOM presence never itself changes
+    // between idle and busy — only `.sk-button__busy-cue`'s CSS-driven visibility/animation
+    // does (see sk-button.css). Rendering it conditionally on `this.busy` would make the
+    // layout-shift measurement test a DOM-mutation cost instead of the CSS mechanism it exists
+    // to prove. `aria-hidden="true"` is likewise unconditional: it carries no text and is never
+    // a candidate accessible-tree object in either state (FR-011), so its presence is not an
+    // accessibility-tree change either.
     return this.href == null
       ? html`<button
           part="button"
@@ -94,9 +109,11 @@ export class SkButton extends LitElement {
           ?disabled=${this.disabled}
         >
           <slot></slot>
+          <span part="busy-cue" class="sk-button__busy-cue" aria-hidden="true"></span>
         </button>`
       : html`<a part="button" class=${cls} href=${this.href} aria-label=${ifDefined(validLabel)}
           ><slot></slot
+          ><span part="busy-cue" class="sk-button__busy-cue" aria-hidden="true"></span
         ></a>`;
   }
 }

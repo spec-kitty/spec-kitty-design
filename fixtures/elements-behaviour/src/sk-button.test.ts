@@ -3,7 +3,7 @@
    Vitest's dependency graph, and one barrel import puts every element source in every behaviour
    test's graph — which is what made that filter inert. */
 /**
- * <sk-button> — #79's primitives batch.
+ * <sk-button> — #79's primitives batch, plus #305's busy axis.
  *
  * SC-013 and SC-014, plus the claims specific to this primitive: it renders a REAL interactive
  * element (an anchor when given href, a button otherwise), the two axes are independent, and
@@ -12,6 +12,7 @@
 import { beforeEach, expect, test } from 'vitest';
 import '../../../packages/elements/src/button/sk-button.js';
 import skButtonSheet from '../../../packages/elements/src/button/sk-button.css.js';
+import skButtonCssRaw from '../../../packages/styles/src/button/sk-button.css?raw';
 import { SkButton } from '../../../packages/elements/src/button/sk-button.js';
 import {
   BUTTON_SIZES,
@@ -33,6 +34,24 @@ const mount = async (attrs: Record<string, string> = {}, label = 'Label') => {
 };
 
 const partOf = (el: Element) => el.shadowRoot!.querySelector('[part="button"]') as HTMLElement;
+const busyCueOf = (el: Element) =>
+  el.shadowRoot!.querySelector('[part="busy-cue"]') as HTMLElement;
+
+// The busy-axis (#305) authored CSS, parsed the way sk-status-indicator.test.ts's
+// `authoredStatusSheet`/`mediaRuleFor` pair already does: asserting the AUTHORED sheet itself
+// carries the guard, independent of any one browser's runtime media-query interpretation.
+const authoredButtonSheet = new CSSStyleSheet();
+authoredButtonSheet.replaceSync(skButtonCssRaw);
+
+const mediaRuleFor = (query: string): CSSMediaRule | undefined =>
+  Array.from(authoredButtonSheet.cssRules).find(
+    (rule): rule is CSSMediaRule => rule instanceof CSSMediaRule && rule.media.mediaText === query,
+  );
+
+const styleRuleFor = (rules: CSSRuleList | readonly CSSRule[], selector: string): CSSStyleRule | undefined =>
+  Array.from(rules).find(
+    (rule): rule is CSSStyleRule => rule instanceof CSSStyleRule && rule.selectorText === selector,
+  );
 
 test('icon button and link branches expose the supplied label as their accessible name', async () => {
   const button = await mount({ variant: 'primary', size: 'icon', label: 'Notifications' }, '●');
@@ -179,20 +198,26 @@ test('icon controls are exactly 40px square and token-focus-visible in both them
   }
 });
 
-test('[SC-013] the declared part is targetable from outside, on BOTH branches', async () => {
-  // BOTH BRANCHES, because this element renders two different nodes. An earlier version mounted
-  // only the button branch, which made the mutation covering the ANCHOR branch semantically
-  // inert — the harness caught that, and it is the same hole in reverse: a part declared once
-  // but rendered by two code paths needs both exercised or half of it is unheld.
+test('[SC-013] the declared parts are targetable from outside, on BOTH branches', async () => {
+  // BOTH BRANCHES, because this element renders two different nodes on both. An earlier
+  // version mounted only the button branch for `part="button"`, which made the mutation
+  // covering the ANCHOR branch semantically inert — the harness caught that, and it is the
+  // same hole in reverse: a part declared once but rendered by two code paths needs both
+  // exercised or half of it is unheld. `busy-cue` (#305) joins the SAME loop for the identical
+  // reason, rather than a separate test that could drift out of sync with this one.
   const s = document.createElement('style');
-  s.textContent = 'sk-button::part(button) { outline-style: dashed; }';
+  s.textContent =
+    'sk-button::part(button) { outline-style: dashed; } ' +
+    'sk-button::part(busy-cue) { outline-style: dotted; }';
   document.head.append(s);
   try {
     for (const attrs of [{ variant: 'primary' }, { variant: 'primary', href: '#x' }]) {
       const el = await mount(attrs);
       const node = partOf(el);
+      const cue = busyCueOf(el);
       const branch = 'href' in attrs ? 'anchor' : 'button';
       expect(node, `part="button" is not rendered on the ${branch} branch`).not.toBe(null);
+      expect(cue, `part="busy-cue" is not rendered on the ${branch} branch`).not.toBe(null);
       expect(
         getComputedStyle(node).outlineStyle,
         // INTERPOLATED, and that is load-bearing. check-part-ratchet.mjs greps the
@@ -201,6 +226,10 @@ test('[SC-013] the declared part is targetable from outside, on BOTH branches', 
         // rule above would leave the ratchet arm green over nothing. A lens caught this.
         `::part(${'button'}) is not targetable on the ${branch} branch`,
       ).toBe('dashed');
+      expect(
+        getComputedStyle(cue).outlineStyle,
+        `::part(${'busy-cue'}) is not targetable on the ${branch} branch`,
+      ).toBe('dotted');
     }
   } finally {
     s.remove();
@@ -387,4 +416,288 @@ test('an unknown variant or size degrades on RENDER and throws on AUTHORING', as
     expect(buttonClasses(key).trim()).toBe('sk-button');
     expect(buttonClasses(undefined, key).trim()).toBe('sk-button');
   }
+});
+
+// ============================================================================================
+// Busy axis (#305). FR-001 through FR-011, User Stories 1-4.
+// ============================================================================================
+
+test('[FR-001/FR-006] the cue is out-of-flow BY MECHANISM, in both idle and busy, not merely by an unshifted result', async () => {
+  // `::part(busy-cue)` styling from OUTSIDE (the [SC-013] test above) and a geometry
+  // before/after comparison ([FR-006] below) both hold even if the cue's OWN internal class
+  // never matched anything at all — an empty, entirely unstyled inline `<span>` also
+  // contributes ~0 to a flex row's box, so a missing `class="sk-button__busy-cue"` on the
+  // rendered node would pass both of those checks while the CSS in sk-button.css never
+  // actually applied. This test closes that gap directly: `position: absolute` is asserted on
+  // the REAL element, in BOTH states, which only holds if the class is actually present and
+  // the base (idle) rule is actually matching — the mechanism FR-006 depends on, not an
+  // unshifted number that could arise by accident.
+  const el = await mount({ variant: 'primary' });
+  const cue = busyCueOf(el);
+  expect(cue.classList.contains('sk-button__busy-cue'), 'the cue must carry its own class').toBe(true);
+  expect(getComputedStyle(cue).position, 'idle: the cue must be out of flow').toBe('absolute');
+  expect(getComputedStyle(cue).visibility, 'idle: the cue must be hidden').toBe('hidden');
+  expect(getComputedStyle(cue).opacity, 'idle: the cue must be transparent').toBe('0');
+
+  el.setAttribute('busy', '');
+  await (el as unknown as { updateComplete: Promise<unknown> }).updateComplete;
+  expect(getComputedStyle(cue).position, 'busy: the cue must still be out of flow').toBe('absolute');
+  expect(getComputedStyle(cue).visibility, 'busy: the cue must be visible').toBe('visible');
+  expect(getComputedStyle(cue).opacity, 'busy: the cue must be opaque').toBe('1');
+});
+
+test('[FR-006] idle -> busy -> idle geometry is pixel-identical for every tone/size/label length', async () => {
+  // THREE MEASUREMENTS, NOT TWO (R-07, the #308 closed-dialog lesson). A defect that only
+  // breaks the RETURN to idle cannot be caught by a test that only ever measures entry.
+  const variants = [undefined, 'primary', 'secondary', 'ghost'] as const;
+  const sizes = [undefined, 'sm'] as const;
+  const labels: Record<string, string> = {
+    long: 'A considerably longer label that approaches the wrapping boundary',
+    short: 'Go',
+  };
+
+  for (const variant of variants) {
+    for (const size of sizes) {
+      for (const [labelKind, text] of Object.entries(labels)) {
+        const attrs: Record<string, string> = {};
+        if (variant) attrs['variant'] = variant;
+        if (size) attrs['size'] = size;
+        const el = await mount(attrs, text);
+        const control = partOf(el);
+        const ctx = `${variant ?? 'base'}/${size ?? 'default'}/${labelKind}`;
+
+        const idleBefore = control.getBoundingClientRect();
+        el.setAttribute('busy', '');
+        await (el as unknown as { updateComplete: Promise<unknown> }).updateComplete;
+        const busy = control.getBoundingClientRect();
+        expect(busy.width, `${ctx}: width shifted entering busy`).toBe(idleBefore.width);
+        expect(busy.height, `${ctx}: height shifted entering busy`).toBe(idleBefore.height);
+
+        el.removeAttribute('busy');
+        await (el as unknown as { updateComplete: Promise<unknown> }).updateComplete;
+        const idleAfter = control.getBoundingClientRect();
+        // ASSERTED EXPLICITLY, not inferred from the busy measurement holding — the NOT-busy
+        // state after the cycle is its own claim (User Story 3, Acceptance Scenario 2).
+        expect(idleAfter.width, `${ctx}: width did not restore on return to idle`).toBe(idleBefore.width);
+        expect(idleAfter.height, `${ctx}: height did not restore on return to idle`).toBe(idleBefore.height);
+        el.remove();
+      }
+    }
+  }
+});
+
+test('[FR-006] the fixed-size icon variant is measured like every other size, not assumed safe', async () => {
+  // `.sk-button--icon` is ALREADY a fixed box before this mission (see the existing "icon
+  // controls are exactly 40px square" test above) — that existing fixed-ness must not be
+  // mistaken for automatic zero-shift immunity to a NEW axis; it is measured explicitly.
+  const el = await mount({ variant: 'primary', size: 'icon', label: 'Send invitation' }, '✉');
+  const control = partOf(el);
+  const idleBefore = control.getBoundingClientRect();
+
+  el.setAttribute('busy', '');
+  await (el as unknown as { updateComplete: Promise<unknown> }).updateComplete;
+  const busy = control.getBoundingClientRect();
+  expect(busy.width).toBe(idleBefore.width);
+  expect(busy.height).toBe(idleBefore.height);
+  expect(Math.round(busy.width)).toBe(40);
+
+  el.removeAttribute('busy');
+  await (el as unknown as { updateComplete: Promise<unknown> }).updateComplete;
+  const idleAfter = control.getBoundingClientRect();
+  expect(idleAfter.width).toBe(idleBefore.width);
+  expect(idleAfter.height).toBe(idleBefore.height);
+});
+
+test('[FR-006] a sibling element does not move across the idle -> busy -> idle cycle', async () => {
+  const row = document.createElement('div');
+  row.style.display = 'flex';
+  document.body.append(row);
+  const first = document.createElement('sk-button');
+  first.setAttribute('variant', 'primary');
+  first.textContent = 'First';
+  const sibling = document.createElement('sk-button');
+  sibling.setAttribute('variant', 'secondary');
+  sibling.textContent = 'Sibling';
+  row.append(first, sibling);
+  await (first as unknown as { updateComplete: Promise<unknown> }).updateComplete;
+  await (sibling as unknown as { updateComplete: Promise<unknown> }).updateComplete;
+
+  const before = sibling.getBoundingClientRect();
+  first.setAttribute('busy', '');
+  await (first as unknown as { updateComplete: Promise<unknown> }).updateComplete;
+  const during = sibling.getBoundingClientRect();
+  first.removeAttribute('busy');
+  await (first as unknown as { updateComplete: Promise<unknown> }).updateComplete;
+  const after = sibling.getBoundingClientRect();
+
+  expect(during.left, 'the sibling moved while its neighbour became busy').toBe(before.left);
+  expect(during.top).toBe(before.top);
+  expect(after.left, 'the sibling did not return to its original position').toBe(before.left);
+  expect(after.top).toBe(before.top);
+  row.remove();
+});
+
+test('[FR-003/004/005] busy composes independently of either disabling mechanism, or neither', async () => {
+  // busy + native disabled: the existing dimmed/not-allowed treatment applies EXACTLY as it
+  // does today without busy, the cue is still visible, and the control is excluded from the
+  // tab order — platform default, unmodified by this mission.
+  const disabledEl = await mount({ variant: 'primary', busy: '', disabled: '' });
+  const disabledControl = partOf(disabledEl) as HTMLButtonElement;
+  const disabledCue = busyCueOf(disabledEl);
+  expect(getComputedStyle(disabledControl).opacity).toBe('0.4');
+  expect(getComputedStyle(disabledControl).cursor).toBe('not-allowed');
+  expect(getComputedStyle(disabledCue).visibility, 'the cue must still be visible').toBe('visible');
+  expect(getComputedStyle(disabledCue).opacity).toBe('1');
+  expect(disabledControl.disabled).toBe(true);
+  // `.tabIndex` itself is NOT the exclusion mechanism — a disabled button's IDL `tabIndex`
+  // still reads its element-default (0); the platform excludes it from focus/tab order via
+  // the separate "disabled" focusing flag. So the exclusion is asserted the way it actually
+  // manifests: focus() does not move focus onto a disabled control.
+  disabledControl.focus();
+  expect(
+    disabledEl.shadowRoot!.activeElement,
+    'native disabled must still exclude the control from receiving focus',
+  ).not.toBe(disabledControl);
+
+  // busy + focusable aria-disabled (no native disabled): no CSS this mission adds dims the
+  // control, the cue is still visible, and the control remains focusable and in the tab order
+  // — the shape Team Kitty SaaS #1520's double-submit prevention relies on (C-006, FR-018).
+  const ariaEl = document.createElement('sk-button');
+  ariaEl.setAttribute('variant', 'primary');
+  ariaEl.setAttribute('busy', '');
+  ariaEl.setAttribute('aria-disabled', 'true');
+  ariaEl.textContent = 'Label';
+  document.body.append(ariaEl);
+  await (ariaEl as unknown as { updateComplete: Promise<unknown> }).updateComplete;
+  const ariaControl = partOf(ariaEl) as HTMLButtonElement;
+  const ariaCue = busyCueOf(ariaEl);
+  expect(getComputedStyle(ariaControl).opacity, 'aria-disabled alone must not dim the button').toBe('1');
+  expect(getComputedStyle(ariaControl).cursor).not.toBe('not-allowed');
+  expect(getComputedStyle(ariaCue).visibility).toBe('visible');
+  expect(getComputedStyle(ariaCue).opacity).toBe('1');
+  expect(ariaControl.disabled).toBe(false);
+  (ariaEl as HTMLElement).focus();
+  expect(ariaEl.shadowRoot!.activeElement, 'aria-disabled alone must not block focus delegation').toBe(ariaControl);
+  expect(ariaControl.tabIndex, 'aria-disabled alone must not remove the control from tab order').not.toBe(-1);
+
+  // busy with NEITHER disabling mechanism present (Edge Case): the cue renders identically —
+  // the component does not infer or impose a disabling mechanism from busy alone.
+  const plainEl = await mount({ variant: 'primary', busy: '' });
+  const plainCue = busyCueOf(plainEl);
+  expect(getComputedStyle(plainCue).visibility).toBe('visible');
+  expect(getComputedStyle(plainCue).opacity).toBe('1');
+});
+
+test('[R-03] the busy rule selectors never reference a disabling attribute, read from the parsed sheet', () => {
+  // STATIC HALF of the two-way independence check (R-03) — the dynamic half is the test
+  // immediately above. A selector-only check alone would miss a JS-level coupling (e.g.
+  // render() suppressing the cue on aria-disabled); a rendering-only check alone would miss a
+  // selector that happens not to collide in the fixtures tested without proving the general
+  // rule. Both are required.
+  const busySelectors: string[] = [];
+  const collect = (rules: CSSRuleList | readonly CSSRule[]) => {
+    for (const rule of Array.from(rules)) {
+      if (rule instanceof CSSStyleRule && rule.selectorText.includes('busy')) {
+        busySelectors.push(rule.selectorText);
+      }
+      if (rule instanceof CSSMediaRule) collect(rule.cssRules);
+    }
+  };
+  collect(authoredButtonSheet.cssRules);
+  expect(busySelectors.length, 'no busy-scoped rule was found to check').toBeGreaterThan(0);
+  for (const selector of busySelectors) {
+    expect(selector, `busy rule "${selector}" must not reference a disabling attribute`).not.toMatch(
+      /:disabled|\[disabled\]|\[aria-disabled\]/,
+    );
+  }
+});
+
+test('[FR-007/FR-008/FR-011] accessible name is unchanged by busy, and no live region exists', async () => {
+  // Text fixture.
+  const textEl = await mount({ variant: 'primary' }, 'Save changes');
+  await expect.element(partOf(textEl)).toHaveAccessibleName('Save changes');
+  textEl.setAttribute('busy', '');
+  await (textEl as unknown as { updateComplete: Promise<unknown> }).updateComplete;
+  await expect.element(partOf(textEl)).toHaveAccessibleName('Save changes');
+
+  // Icon-only fixture — the accessible name comes solely from `label`.
+  const iconEl = await mount({ variant: 'primary', size: 'icon', label: 'Send invitation' }, '✉');
+  await expect.element(partOf(iconEl)).toHaveAccessibleName('Send invitation');
+  iconEl.setAttribute('busy', '');
+  await (iconEl as unknown as { updateComplete: Promise<unknown> }).updateComplete;
+  await expect.element(partOf(iconEl)).toHaveAccessibleName('Send invitation');
+
+  // No live region, role="status", or aria-live in EITHER state, on either fixture (C-003,
+  // FR-008) — the component reports state; it never narrates it.
+  for (const el of [textEl, iconEl]) {
+    for (const busyState of [true, false]) {
+      if (busyState) el.setAttribute('busy', '');
+      else el.removeAttribute('busy');
+      await (el as unknown as { updateComplete: Promise<unknown> }).updateComplete;
+      const tree = el.shadowRoot!;
+      expect(tree.querySelector('[role="status"]')).toBe(null);
+      expect(tree.querySelector('[aria-live]')).toBe(null);
+    }
+  }
+});
+
+test('[FR-009/FR-010] reduced motion stops the animation while the cue stays visible; the base rule is solid-bordered', () => {
+  // Mirrors sk-status-indicator.test.ts's "authored pulse CSS has ... fallbacks" technique
+  // exactly: assert the AUTHORED sheet carries the guard, not a single browser's runtime
+  // interpretation of the media query.
+  const busySelector = '.sk-button--busy .sk-button__busy-cue, :host([busy]) .sk-button__busy-cue';
+  const busyRule = styleRuleFor(authoredButtonSheet.cssRules, busySelector)!;
+  expect(busyRule, 'the busy-visible rule was not found').not.toBeUndefined();
+  expect(busyRule.style.visibility).toBe('visible');
+  expect(busyRule.style.opacity).toBe('1');
+  expect(busyRule.style.animationName).toBe('sk-button-busy-spin');
+
+  const reduced = mediaRuleFor('(prefers-reduced-motion: reduce)')!;
+  expect(reduced, 'no (prefers-reduced-motion: reduce) block was found').not.toBeUndefined();
+  const reducedBusy = styleRuleFor(reduced.cssRules, busySelector)!;
+  expect(reducedBusy, 'the reduced-motion block does not scope the busy-cue selector').not.toBeUndefined();
+  expect(reducedBusy.style.animationName).toBe('none');
+  // NOT RESET to the idle-hidden values — the frozen frame stays visible. This rule restates
+  // no visibility/opacity of its own, so the busy-visible rule's cascade values remain in
+  // effect, which the idle (non-busy) base rule below proves are distinguishable from absent.
+  expect(reducedBusy.style.visibility, 'reduced motion must not restate visibility').toBe('');
+  expect(reducedBusy.style.opacity, 'reduced motion must not restate opacity').toBe('');
+
+  const idleCue = styleRuleFor(authoredButtonSheet.cssRules, '.sk-button__busy-cue')!;
+  expect(idleCue, 'the idle (at-rest) cue rule was not found').not.toBeUndefined();
+  expect(idleCue.style.visibility, 'idle must be hidden for the busy state to be distinguishable').toBe('hidden');
+  expect(idleCue.style.opacity).toBe('0');
+  expect(idleCue.style.borderStyle, 'the resting ring must be solid-bordered').toBe('solid');
+
+  // No forced-colors override exists for the cue (T001 Activity Log: checked, not assumed
+  // absent) — a plain `border` survives forced-colors automatically with zero author CSS
+  // (docs/contributing/adding-a-component.md), and this cue is entirely border-drawn. The base
+  // rule's solid border-style, asserted above, is the only thing FR-010 needs from this file.
+  expect(mediaRuleFor('(forced-colors: active)'), 'no forced-colors override should exist for the cue').toBeUndefined();
+});
+
+test('[FR-002] the static markup module threads busy through to the shared class list', () => {
+  expect(buttonClasses('primary', undefined, true)).toContain('sk-button--busy');
+  expect(buttonClasses(undefined, undefined, false)).not.toContain('sk-button--busy');
+  expect(buttonClasses(undefined, undefined, undefined)).not.toContain('sk-button--busy');
+
+  const buttonMarkup = buttonStaticHtml({ busy: true, variant: 'primary' });
+  expect(buttonMarkup).toContain('sk-button--busy');
+  const parsedButton = new DOMParser().parseFromString(buttonMarkup, 'text/html').querySelector('button')!;
+  expect(parsedButton.className.split(' ')).toContain('sk-button--busy');
+
+  const anchorMarkup = buttonStaticHtml({ busy: true, href: '/x' });
+  expect(anchorMarkup).toContain('sk-button--busy');
+  const parsedAnchor = new DOMParser().parseFromString(anchorMarkup, 'text/html').querySelector('a')!;
+  expect(parsedAnchor.className.split(' ')).toContain('sk-button--busy');
+
+  // `busy` is a plain boolean, never interpolated as a string into an attribute — unlike
+  // `href` (tested above in "the static ANCHOR branch renders..."), it introduces no new
+  // escaping question. Stated explicitly rather than left unstated (T006 step 5).
+  expect(parsedAnchor.getAttributeNames().sort()).toEqual(['class', 'href']);
+
+  // THE STATIC FORM RENDERS NO CUE MARKUP — this is the whole point of the boundary recorded
+  // in both sk-button.css's header comment and sk-button.markup.ts's doc comment.
+  expect(buttonMarkup).not.toContain('busy-cue');
+  expect(anchorMarkup).not.toContain('busy-cue');
 });

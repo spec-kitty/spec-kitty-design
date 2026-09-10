@@ -119,6 +119,13 @@ declare module 'vue' {
      */
     'sk-button': SkElement<{
       /**
+       * Shows a decorative activity cue via CSS alone. Purely presentational: this component
+       * never sets, clears, or reads `disabled`/`aria-disabled` on account of `busy`, owns no
+       * request/timer/announcement, and the accessible name is unchanged in either state — the
+       * consumer's own request-handling code and disabling mechanism stay entirely its own.
+       */
+      'busy'?: boolean;
+      /**
        * Disables the button. Ignored when `href` is set — a disabled link is not a thing HTML
        * has, and faking one with pointer-events hides it from assistive technology.
        */

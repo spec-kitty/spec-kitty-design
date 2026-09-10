@@ -39,9 +39,10 @@
     "#212 adds only sk-action-row's supporting part, backed by its focused external-targetability test and SC-013 mutation. On the refreshed train after #179, total moves 127 -> 128; every other element part set is unchanged.",
     "#254 adds sk-app-shell compact-header and compact-navigation as two externally targetable parts, total 128 -> 130. The six legacy parts remain unchanged.",
     "#257 adds sk-copy-field's four stable surfaces (field, value, copy-control, status), each present in its SC-013 fixture. On the refreshed train after #254, total moves 130 -> 134.",
-    "#308 adds sk-confirm-dialog with SIX parts: dialog, title, body, actions, cancel, confirm. Each is targeted from outside by the [SC-013] test in fixtures/elements-behaviour/src/sk-confirm-dialog.test.ts. Total moves 134 -> 140."
+    "#308 adds sk-confirm-dialog with SIX parts: dialog, title, body, actions, cancel, confirm. Each is targeted from outside by the [SC-013] test in fixtures/elements-behaviour/src/sk-confirm-dialog.test.ts. Total moves 134 -> 140.",
+    "#305 adds sk-button's busy-cue: a decorative, aria-hidden activity indicator rendered unconditionally on both the <button> and <a> branches, present in the DOM in both idle and busy states (only its CSS-driven visibility/animation changes). Targeted from outside by the extended [SC-013] test in fixtures/elements-behaviour/src/sk-button.test.ts, per this file's own rule that a new part lands with a test in the same PR. On the refreshed train after #308, total moves 140 -> 141."
   ],
-  "total": 140,
+  "total": 141,
   "byElement": {
     "sk-action-row": [
       "controls",
@@ -79,6 +80,7 @@
       "thumbnail"
     ],
     "sk-button": [
+      "busy-cue",
       "button"
     ],
     "sk-card": [

@@ -18,6 +18,12 @@ export interface SkButtonProps extends Pick<
   | "onFocus"
   | "onBlur"
 > {
+  /** Shows a decorative activity cue via CSS alone. Purely presentational: this component
+never sets, clears, or reads `disabled`/`aria-disabled` on account of `busy`, owns no
+request/timer/announcement, and the accessible name is unchanged in either state — the
+consumer's own request-handling code and disabling mechanism stay entirely its own. */
+  busy?: boolean;
+
   /** Disables the button. Ignored when `href` is set — a disabled link is not a thing HTML
 has, and faking one with pointer-events hides it from assistive technology. */
   disabled?: boolean;
@@ -69,6 +75,10 @@ renders the base button and warns rather than throwing. */
  *
  * Component attributes and properties that can be applied to the element or by using JavaScript.
  *
+ * - `busy`: Shows a decorative activity cue via CSS alone. Purely presentational: this component
+ * never sets, clears, or reads `disabled`/`aria-disabled` on account of `busy`, owns no
+ * request/timer/announcement, and the accessible name is unchanged in either state — the
+ * consumer's own request-handling code and disabling mechanism stay entirely its own.
  * - `disabled`: Disables the button. Ignored when `href` is set — a disabled link is not a thing HTML
  * has, and faking one with pointer-events hides it from assistive technology.
  * - `href`: When set, the element renders an anchor to this URL instead of a button.
@@ -87,6 +97,7 @@ renders the base button and warns rather than throwing. */
  *
  * Custom selectors for styling elements within the component.
  *
+ * - `busy-cue`: a decorative, `aria-hidden` activity indicator shown while `busy` is set
  * - `button`: the rendered `<button>` or `<a>`
  */
 export const SkButton: React.ForwardRefExoticComponent<SkButtonProps>;

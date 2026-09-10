@@ -40,9 +40,10 @@
     "#257 adds sk-copy-field's five documented string attributes and no public methods or property-only fields. On the refreshed train after #288, total moves 116 -> 121.",
     "#308 adds sk-confirm-dialog: eight documented attributes (dialog-title, message, confirm-label, cancel-label, confirm-variant, initial-focus, backdrop-dismiss, open), no property-only fields, and one public method (showModal). On the refreshed train after #257, total moves 121 -> 130.",
     "#302 adds sk-pill-tag's third reflected attribute, `status` — the operational status-tone axis. sk-pill-tag moves 2 -> 3. On the refreshed train after #308, total moves 130 -> 131.",
-    "#304 (ADR-15 split) adds sk-entity-marker's one new `border` documented attribute (a validated string enum, `'true'`, chosen over a native boolean so FR-011's warn-and-fall-open contract applies to it exactly like size/shape). entity-marker moves 3 -> 4 attributes; no property-only field or public method is added. On the refreshed train after #302, total moves 131 -> 132."
+    "#304 (ADR-15 split) adds sk-entity-marker's one new `border` documented attribute (a validated string enum, `'true'`, chosen over a native boolean so FR-011's warn-and-fall-open contract applies to it exactly like size/shape). entity-marker moves 3 -> 4 attributes; no property-only field or public method is added. On the refreshed train after #302, total moves 131 -> 132.",
+    "#305 adds one documented sk-button attribute: busy (boolean, reflected). No property-only field or public method is added. On the refreshed train after #304, total moves 132 -> 133."
   ],
-  "total": 132,
+  "total": 133,
   "elements": {
     "sk-action-row": {
       "attributes": 6,
@@ -65,7 +66,7 @@
       "methods": 0
     },
     "sk-button": {
-      "attributes": 5,
+      "attributes": 6,
       "properties": 0,
       "methods": 0
     },

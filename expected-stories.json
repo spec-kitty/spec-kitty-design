@@ -50,7 +50,9 @@
     "#255 ratchets the eighteen Storybook-only Repository Dossier routes named as acceptance evidence. D1 is the populated desktop composition; D2 retains separate closed and controlled-open 390px drawer states; D4-D8 preserve cross-branch, terminal, snapshot, indexing, and completed-empty truth; LightMode, long data, supplied progress values, the 860/861 compact-navigation seam, safe/static tracker destinations, forced colors, reduced motion, and 200%/400% zoom remain independently reviewable. On the refreshed train after #278, total moves 444 -> 462; fixture, projection, freeze, and render helpers are excluded from CSF indexing.",
     "#275 ratchets the exact ten Storybook-only Work Explorer W1-W10 compositions. Lane, person, and type regroupings conserve one 50-record fixture; rail-preserving, LightMode, filtered-empty, no-work, degraded, loading, and no-repository states stay separately addressable. On the refreshed train after #255, total moves 462 -> 472; fixture, selector, projector, and renderer helpers are excluded from CSF indexing.",
     "#302 adds fourteen sk-pill-tag stories for the status-tone axis: the six tones individually, AllStatuses, BrandWithStatus, EyebrowWithStatus, LongLabel, Rtl, Zoom200, UnknownStatus, and ForcedColors; LightMode is extended in place (not counted as new) to include a status tone. Verified against the built Storybook index before committing, per the recipe. sk-pill-tag moves 9 -> 23; total moves by the same delta.",
-    "#304 (ADR-15 split) adds five additive sk-entity-marker stories for the widened size and border axes: LargeSize and ImageNamingLargeSize demonstrate the new `lg` token size (square/circle, and a slotted image at that size); BorderedAxisMatrix shows the border modifier at every named size x both shapes; BorderedOuterBoxComparison and BorderedForcedColors back the outer-box-unchanged visual proof and the forced-colors visibility check. The eight pre-existing sk-entity-marker story ids (Initials through LightMode, including AxisMatrix and ImageNaming) are UNCHANGED — both are pinned by exact-count/order Playwright assertions and NFR-001's zero-diff visual-regression requirement, so the new axes are additive stories rather than edits to them. On the refreshed train after #302, total moves 486 -> 491."
+    "#304 (ADR-15 split) adds five additive sk-entity-marker stories for the widened size and border axes: LargeSize and ImageNamingLargeSize demonstrate the new `lg` token size (square/circle, and a slotted image at that size); BorderedAxisMatrix shows the border modifier at every named size x both shapes; BorderedOuterBoxComparison and BorderedForcedColors back the outer-box-unchanged visual proof and the forced-colors visibility check. The eight pre-existing sk-entity-marker story ids (Initials through LightMode, including AxisMatrix and ImageNaming) are UNCHANGED — both are pinned by exact-count/order Playwright assertions and NFR-001's zero-diff visual-regression requirement, so the new axes are additive stories rather than edits to them. On the refreshed train after #302, total moves 486 -> 491.",
+    "#305 adds five sk-button busy stories: Busy (per tone, side by side with the idle Primary/Secondary/Ghost stories already present for comparison), BusySmall, BusyIcon, BusyDisabled, and BusyAriaDisabled. The existing LightMode story is extended in place with a busy fixture and is not a new id. On the refreshed train after #304, total moves 491 -> 496; every pre-existing sk-button story id is unchanged."
+
   ],
   "byElement": {
     "sk-action-row": [
@@ -145,7 +147,12 @@
       "elements-skbutton--icon",
       "elements-skbutton--icon-link",
       "elements-skbutton--icon-focus",
-      "elements-skbutton--light-mode"
+      "elements-skbutton--light-mode",
+      "elements-skbutton--busy",
+      "elements-skbutton--busy-small",
+      "elements-skbutton--busy-icon",
+      "elements-skbutton--busy-disabled",
+      "elements-skbutton--busy-aria-disabled"
     ],
     "sk-card": [
       "elements-skcard--default",
@@ -639,5 +646,5 @@
       "patterns-work-explorer--w-10-no-admitted-repositories-dark"
     ]
   },
-  "total": 491
+  "total": 496
 }
