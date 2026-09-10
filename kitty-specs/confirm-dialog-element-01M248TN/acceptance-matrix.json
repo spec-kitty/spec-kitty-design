@@ -78,10 +78,10 @@
       "criterion_id": "FR-008",
       "description": "Verify FR-008 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "fixtures/elements-behaviour/src/sk-confirm-dialog.test.ts \u2014 \"[SC-005] initial focus lands on the documented target and is consumer-overridable\" and \"[SC-005] an unknown initial-focus value warns and falls back to cancel\" pass in the 20/20 run; sk-confirm-dialog.ts documents the default in its `initialFocus` JSDoc (defaults to cancel).",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T09:44:49.128318+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
