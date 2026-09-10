@@ -42,6 +42,11 @@ const samplePixels = async (page: Page, buffer: Buffer) => {
       left: sample(2, Math.floor(h / 2)),
       center: sample(Math.floor(w / 2), Math.floor(h / 2)),
       right: sample(Math.max(0, w - 3), Math.floor(h / 2)),
+      // The 1px top border stroke, sampled the same pixel-reading way as the fill (FR-009/SC-006
+      // boundary-vs-indicator — `getComputedStyle(...).borderColor` is ALSO unreliable here: under
+      // forced-colors Chromium reports it as a semi-transparent `rgba(...)` pre-blend value, not
+      // the opaque rendered colour, which does not compare meaningfully against a sampled pixel).
+      borderTop: sample(Math.floor(w / 2), 0),
     };
   }, dataUrl);
 };
@@ -315,9 +320,22 @@ test.describe('sk-progress overflow, forced-colors, and reduced-motion observabl
     });
     expect(colours.borderColor).not.toBe('');
     expect(colours.borderColor).not.toBe(colours.backgroundColor);
+
+    // FR-009/SC-006's full requirement is boundary-vs-page AND boundary-vs-indicator — the
+    // assertion above only covers the first half (`colours.backgroundColor` here is the PAGE's
+    // background, not the fill's, despite the property name). getComputedStyle is unreliable for
+    // this comparison too, not only on the vendor fill pseudo: MEASURED that Chromium reports
+    // `border-color: Highlight` as a semi-transparent `rgba(...)` pre-blend value under
+    // forced-colors, not the opaque colour that is actually rendered on screen, so parsing and
+    // comparing it numerically against a rendered pixel does not measure what it claims to.
+    // Pixel-sample both the fill and the border stroke instead (samplePixels' own `borderTop`
+    // field) — this fixture is 5 of 8 (63%), so the bar's horizontal centre sits inside the
+    // filled portion.
+    const fillSample = await samplePixels(page, await bar.screenshot());
+    expect(pixelsEqual(fillSample.center.slice(0, 3), fillSample.borderTop.slice(0, 3), 10)).toBe(false);
   });
 
-  test('Indeterminate forced-colors: the fill is legible against the page, non-full-width, and non-animating, at two distinct points in the animation cycle', async ({ page }) => {
+  test('Indeterminate forced-colors: the fill is legible against the page, distinguishable from the boundary, non-full-width, and non-animating, at two distinct points in the animation cycle', async ({ page }) => {
     // R-06: the existing forced-colors precedent was proven for a static fill only;
     // an animated fill needs sampling at more than one point in its cycle so a
     // coincidentally-correct single frame cannot produce a false pass.
@@ -346,6 +364,18 @@ test.describe('sk-progress overflow, forced-colors, and reduced-motion observabl
     const borderColor = await bar.evaluate((node) => getComputedStyle(node).borderColor);
     expect(borderColor).not.toBe('');
     expect(borderColor).not.toBe(bodyBackground);
+
+    // FR-009/SC-006: boundary-vs-indicator, not only boundary/indicator-vs-page. Unlike the
+    // determinate fixture (whose fill paints on a vendor pseudo — getComputedStyle is MEASURED
+    // unreliable there, see samplePixels' doc comment), #345's fix puts the indeterminate fill
+    // directly on the HOST's own `background-color`, so getComputedStyle reads it cleanly — a
+    // plain string compare against the border is enough, no pixel sampling or alpha-blend
+    // reconstruction needed. MEASURED: Chromium represents a forced-colors `border-color` as a
+    // semi-transparent computed string (e.g. `rgba(5, 0, 73, 0.8)`); mutating this rule's border
+    // to `Highlight` made this comparison correctly fail, because `background-color: Highlight`
+    // reports that IDENTICAL string.
+    const indicatorColor = await bar.evaluate((node) => getComputedStyle(node).backgroundColor);
+    expect(borderColor).not.toBe(indicatorColor);
 
     const sample1 = await samplePixels(page, await bar.screenshot());
     await page.waitForTimeout(300);
