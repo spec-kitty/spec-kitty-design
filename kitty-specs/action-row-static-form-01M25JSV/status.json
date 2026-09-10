@@ -1,7 +1,7 @@
 {
-  "event_count": 4,
-  "last_event_id": "01M25Q8C1FA01EFE5PBDZCS95D",
-  "materialized_at": "2026-09-10T13:14:02.671243+00:00",
+  "event_count": 5,
+  "last_event_id": "01M25QV6TQC6P67CP0TCS2P6MD",
+  "materialized_at": "2026-09-10T13:24:19.927057+00:00",
   "mission_number": "",
   "mission_slug": "action-row-static-form-01M25JSV",
   "mission_type": "software-dev",
@@ -11,23 +11,29 @@
     "canceled": 0,
     "claimed": 0,
     "done": 0,
-    "for_review": 1,
+    "for_review": 0,
     "in_progress": 0,
     "in_review": 0,
-    "planned": 0
+    "planned": 1
   },
   "work_packages": {
     "WP01": {
-      "actor": "claude",
+      "actor": "user",
       "agent": "claude",
       "agent_profile": "__resolved_profile_absent__",
       "agent_profile_version": "__resolved_profile_version_absent__",
-      "force_count": 0,
-      "lane": "for_review",
-      "last_event_id": "01M25Q8C1FA01EFE5PBDZCS95D",
-      "last_transition_at": "2026-09-10T13:14:02.671243+00:00",
+      "force_count": 1,
+      "lane": "planned",
+      "last_event_id": "01M25QV6TQC6P67CP0TCS2P6MD",
+      "last_transition_at": "2026-09-10T13:24:19.927057+00:00",
       "model": "__resolved_model_absent__",
       "provider": "__resolved_provider_absent__",
+      "review_result": {
+        "feedback_path": "/home/jeroennouws/dev/spec-kitty-design-missions/307/kitty-specs/action-row-static-form-01M25JSV/tasks/WP01-static-action-row/review-cycle-1.md",
+        "reference": "review-cycle://action-row-static-form-01M25JSV/WP01-static-action-row/review-cycle-1.md",
+        "reviewer": "user",
+        "verdict": "changes_requested"
+      },
       "role": "implementer",
       "subtasks": {
         "T001": "done",
