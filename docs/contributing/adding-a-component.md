@@ -65,9 +65,9 @@ it before you write any `:host` rule that is not `display`.
 | What you are about to write on `:host` | What the static path gets |
 |---|---|
 | `display: …` | The collapse holds. `.sk-<name>` restates it; nothing else is needed. |
-| `container-type: inline-size` | **Not a collapse.** A generated static form is coming (#309/#310) and it keeps the host as a **separate wrapper element**. Do not tell anyone the static path can move `container-type` onto `.sk-<name>`. |
+| `container-type: inline-size` | **Not a collapse.** A generated static form is coming (#309/#310) and it keeps the host as a **separate wrapper element**, carrying your sheet's whole `:host` declaration set. Do not tell anyone the static path can move `container-type` onto `.sk-<name>`. |
 | `:host([attr="X"]) .sk-<name>…` gating an `@container` block | Same — the axis becomes `.sk-<name>-host--X`, on that same wrapper, not a modifier on the root class. |
-| `::slotted(x)` | **Shadow-only.** No generated static form, now or planned. |
+| `::slotted(x)` | **Shadow-only.** No generated static form, now or planned. #311 owns backfilling the per-sheet instruction. |
 
 **The rule behind the first two rows: an element is never its own query container.** A container
 query styles a container's DESCENDANTS. In the shadow form the host establishes the container and
@@ -82,18 +82,39 @@ the host itself.
 
 **What a static consumer must author instead, until #309/#310 land.** For a host-owned
 `container-type` or a host-attribute axis: their own two-element wrapper —
-`<div class="sk-<name>-host"><div class="sk-<name>">…</div></div>` with
-`container-type: inline-size` on the outer one — and their own modifier class on that outer
-element. For `::slotted(x)`: their own descendant rule in their own stylesheet. Say so in your
-component's CSS header comment, the way `sk-app-shell.css`, `sk-action-row.css` and
-`sk-entity-marker.css` now do.
+`<div class="sk-<name>-host"><div class="sk-<name>">…</div></div>` — plus their own modifier
+class on that outer element. For `::slotted(x)`: their own descendant rule in their own
+stylesheet. Say so in your component's CSS header comment, the way `sk-app-shell.css`,
+`sk-action-row.css` and `sk-entity-marker.css` now do.
+
+**The wrapper carries your sheet's WHOLE `:host` declaration set — never `container-type`
+alone, and never a list copied from another component.** ADR-15 measured both failure
+directions. Drop `width: 100%` from `sk-app-shell`'s wrapper and, as an item of a 300px flex
+row, the component computes `width: 0px` against the real element's `300px` in both engines —
+size containment means a wrapper with no width of its own contributes nothing to intrinsic
+sizing. (In a grid track it measures correctly, so a page that only ever uses grid will not
+show you this.) Copy that same list onto `sk-action-row`, whose `:host` declares no `width`,
+and you have added a declaration the element never had. Read the sheet's own `:host`.
 
 **`::slotted()` has one further consequence a static rewrite cannot reproduce, so do not promise
 it does.** A declaration from the outer tree beats a `::slotted()` declaration from the inner tree
-**regardless of specificity** — a consumer's bare `img { … }` overrides your `::slotted(img)`.
-Rewritten as a document rule, `.sk-<name>__content > img` is an ordinary (0,1,1) selector and wins
-against that same consumer rule. The two forms look identical and cascade differently; ADR-15 has
-the measured values.
+**regardless of specificity and regardless of stylesheet order** — a consumer's bare `img { … }`
+always overrides your `::slotted(img)`. Rewritten as a document rule, `.sk-<name>__content > img`
+is an ordinary selector competing on ordinary terms.
+
+**State the tie boundary in your instruction, not just "outbid it".** ADR-15 measured all three
+regimes at both document positions, chromium and firefox identical, against a (0,1,1) rewrite:
+
+| Consumer's rule | Consumer sheet last | Consumer sheet first |
+|---|---|---|
+| loses on specificity | diverges | diverges |
+| **ties** | equal | **diverges** |
+| strictly outbids | equal | equal |
+
+A consumer needs *strictly higher* specificity to override the static rule reliably. At a tie —
+what scoping with one wrapper class produces — the winner is stylesheet order, which a bundler
+often decides. The element form would have yielded unconditionally. Compute the boundary from
+your own rewrite's specificity; do not transcribe `(0,1,1)` from `sk-entity-marker`.
 
 If your rule genuinely serves both paths, use the paired spelling this repo already established in
 #78 — `.sk-<name>__y, ::slotted(.sk-<name>__y)` — one selector list, nothing written twice. It is

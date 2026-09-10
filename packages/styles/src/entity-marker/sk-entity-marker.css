@@ -12,12 +12,24 @@
        }
 
    That rule reproduces the appearance exactly — measured `block` / `32px` / `32px` / `cover` on
-   both paths, chromium and firefox. What it does NOT reproduce is CASCADE POSITION, and the
-   difference is not a detail: a declaration from the outer tree beats a `::slotted()`
-   declaration from the inner tree REGARDLESS of specificity, so a page's bare
-   `img { object-fit: contain }` overrides the shadow form (measured: `contain`) and loses to the
-   static descendant rule (measured: `cover`). A static consumer's own stylesheet therefore has
-   to outbid this rule on specificity where the element would simply have yielded to it.
+   both paths, chromium and firefox. What it does NOT reproduce is CASCADE POSITION. A
+   declaration from the outer tree beats a `::slotted()` declaration from the inner tree
+   REGARDLESS of specificity AND of stylesheet order, so a page's bare
+   `img { object-fit: contain }` always overrides the shadow form (measured: `contain`) and
+   loses to the static descendant rule (measured: `cover`).
+
+   THE BOUNDARY, BECAUSE "JUST OUTBID IT" IS WRONG AT THE TIE. The rewrite above is (0,1,1).
+   Measured across all three regimes at both document positions, chromium and firefox identical:
+
+       consumer rule            sheet LAST        sheet FIRST
+       img              (0,0,1) diverges          diverges        <- consumer loses
+       .scope img       (0,1,1) equal             DIVERGES        <- consumer TIES
+       .scope.theme img (0,2,1) equal             equal           <- consumer outbids
+
+   So a static consumer needs STRICTLY HIGHER specificity than (0,1,1) to override this reliably.
+   At a tie — which scoping with a single wrapper class produces, the most ordinary thing a
+   consumer does — the winner is whichever stylesheet comes last, and the element form would have
+   yielded unconditionally. Order is often a bundler's decision, not the consumer's.
 
    If a future rule here should serve both paths from one place, use the paired spelling #78
    established for sk-blog-card, sk-feature-card, sk-ribbon-card and sk-site-footer —

@@ -19,7 +19,10 @@ Three shipped CSS constructs are legitimate shadow-DOM authoring patterns — no
 the boundary rule `scripts/check-adopted-css-boundaries.mjs` enforces, whose own self-test table
 accepts `:host`, `:host([attr]) <descendant>` and `::slotted(...)` compounds as owned — but none
 had a demonstrated equivalent for a consumer that cannot use a shadow root at all. Family 4's
-T1–T6 are Django-rendered shells, which is how the majority of named consumers take this library.
+T1–T6 are Django-rendered shells. That the server-rendered path carries the majority of this
+library's named consumers is ADR-10 §3's finding, not a new claim here — it names the docsite, the
+marketing pages, the slidedecks and the Django UI as that majority, and made static markup
+generated output rather than droppable for exactly that reason.
 
 | # | Construct kind | Measured in | The construct |
 |---|---|---|---|
@@ -166,9 +169,43 @@ is **compacted anyway** by the collapsed static form, because it is answering a 
 should never have been asking. O11 is the same defect in the other direction. The composed case
 is not a corner: it is any static consumer whose page already uses a container query.
 
+**The defect is not confined to the host-attribute rules.** This sheet also carries an
+*unconditional* `@container (max-width: 720px) { .sk-app-shell { grid-template-columns:
+minmax(0, 1fr) } }`, which no `presentation` attribute gates. Measured with no `presentation`
+attribute set at all (O19-O21, both engines): at a 600px shell the real element and the wrapper
+both compute `600px`, and the collapsed form computes `56px 240px 304px` — it never sees the
+breakpoint. At 760px, above it, all three agree (`56px 240px 464px`). At a 700px
+`rail-preserving` shell where both the unconditional and the host-attribute rules apply (O22):
+`56px 644px` for the element and the wrapper, `56px 240px 404px` for the collapsed form. So the
+collapse breaks a sheet's plain container queries too, not only its host-gated ones.
+
 **What the static path gets:** a generated `.sk-app-shell-host` / `.sk-app-shell-host--<axis>`
 wrapper pair, emitted alongside the static markup and the light-DOM sheet, and gated equal to the
 shadow form. **Not** a single-element root-class modifier.
+
+**The wrapper carries the component's COMPLETE `:host` declaration set — not `container-type`
+alone.** This is stated generically on purpose: the rule is "whatever that component's `:host`
+declared, moved to the wrapper", never a fixed property list, because the right list differs per
+component and a copied one goes wrong in both directions. For `sk-app-shell` the set is
+`display: block; width: 100%; min-width: 0; container-type: inline-size`. Measured (O15/O16, both
+engines), with the component as an item of a 300px flex row:
+
+| Wrapper rule | `.sk-app-shell` `width` | `grid-template-columns` |
+|---|---|---|
+| the real element (`:host`) | `300px` | `300px` |
+| wrapper with the complete `:host` set | `300px` ✓ | `300px` ✓ |
+| wrapper with `container-type: inline-size` only | **`0px`** ✗ | **`0px`** ✗ |
+
+The component vanishes. `container-type: inline-size` implies size containment, so a wrapper with
+no width of its own contributes nothing to intrinsic sizing and the flex item resolves to zero.
+As a control, the same abbreviated wrapper in a 300px **grid track** measures `300px` and passes
+(O17/O18) — which is why an outcome table built only on block and grid layouts, as the cycle-1
+table was, cannot see this at all.
+
+The converse error is just as real, and `sk-action-row` is the case that shows it: its `:host`
+declares no `width`, so the abbreviated wrapper happens to pass every one of its twenty outcomes
+(§2). A prescription that hardcoded app-shell's four properties would have added `width: 100%`
+where the element never had it. Hence: whatever `:host` declared, per component.
 
 ### 2. Host-owned `container-type` — **generated static form**, and only in the two-element form
 
@@ -184,14 +221,30 @@ Measured values, chromium (firefox identical):
 | O10 | **composed**: outer container 1200px, row 360px, `flex-wrap` | `wrap` | `nowrap` ✗ | `wrap` ✓ |
 | O12 | **composed**: outer container 320px, row 700px, `flex-wrap` | `nowrap` | `wrap` ✗ | `nowrap` ✓ |
 
-Note which outcomes did *not* diverge for variant A: `grid-template-areas` on
-`.sk-action-row__trigger` matched at every width, because the trigger is a **descendant** of the
-container and therefore still queries it correctly. Only the container element's own rules break.
-That is what makes this defect so quiet — most of the sheet keeps working.
+Note which outcomes did *not* diverge for variant A at these widths: `grid-template-areas` on
+`.sk-action-row__trigger` matched, because the trigger is a **descendant** of the container and
+therefore still queries it correctly. Only the container element's own rules break at first
+glance. That is what makes this defect so quiet — most of the sheet keeps working.
 
-**What the static path gets:** a generated `.sk-action-row-host` wrapper carrying
-`container-type: inline-size` around an unchanged `.sk-action-row` root, gated equal.
+It does not stay quiet at the boundary. `@container (max-width: 400px)` is inclusive, and the
+360/500 pair straddles it without ever touching it. Measured exactly there (O17-O20, both
+engines): at **400px** the element and the wrapper compute `flex-wrap: wrap` and the collapsed
+form computes `nowrap`; at **401px** the element and the wrapper keep the three-column trigger
+areas while the collapsed form has already dropped to the two-column stack. So the trigger
+diverges too — the cycle-1 widths simply never asked it at a width where it could.
+
+**What the static path gets:** a generated `.sk-action-row-host` wrapper around an unchanged
+`.sk-action-row` root, gated equal, carrying — as in §1 — **this component's complete `:host`
+declaration set**, which here is `display: block; min-width: 0; container-type: inline-size`.
 `container-type` must **not** be moved onto the root class.
+
+For this component, and only by coincidence of its own `:host`, the abbreviated wrapper also
+passes: 20 of 20 declared outcomes, both engines, including the flex-item case that breaks
+`sk-app-shell`. The reason is that `sk-action-row`'s `:host` declares no `width`, so there is
+nothing to lose — the real element measures `0px` in a 300px flex row too (O14), and all three
+forms agree. This is the second half of §1's argument for a generic prescription rather than a
+copied property list, and it is why the generator must read each component's own `:host` rather
+than apply a template.
 
 ### 3. `::slotted()` child rule — **shadow-only**
 
@@ -215,13 +268,30 @@ The fifth is the negative measurement:
 | O6 | `.page-scope img { object-fit: contain }` — specificity (0,1,1) | `contain` | `contain` ✓ |
 
 **The mechanism, named:** a declaration from the outer tree wins over a `::slotted()` declaration
-from the inner tree **regardless of specificity**. So in the shadow form the consumer's bare
-`img` selector — the weakest selector there is — beats the library. Rewritten as a document rule,
-`.sk-entity-marker__content > img` is an ordinary (0,1,1) selector and *beats* that same consumer
-rule. The two forms cannot be declared equal: the shadow form always yields to the page, and the
-static form yields only when the page outbids it. This is a one-way cascade property of the shadow
-boundary, and there is no document-context selector that reproduces "always lose to the outer
-tree."
+from the inner tree **regardless of specificity, and regardless of stylesheet order**. So in the
+shadow form the consumer's bare `img` selector — the weakest selector there is — beats the
+library, always. Rewritten as a document rule, `.sk-entity-marker__content > img` is an ordinary
+(0,1,1) selector competing on ordinary terms, and it wins or loses like any other.
+
+The full matrix, measured against all three specificity regimes at both document positions
+(O5-O10; chromium and firefox identical on every cell). "Static" is the descendant rewrite:
+
+| Consumer's own rule | Consumer sheet LAST | Consumer sheet FIRST |
+|---|---|---|
+| `img` (0,0,1) — **loses** to the static rule | shadow `contain` / static `cover` — **diverge** | shadow `contain` / static `cover` — **diverge** |
+| `.page-scope img` (0,1,1) — **ties** the static rule | shadow `contain` / static `contain` — equal | shadow `contain` / static **`cover`** — **diverge** |
+| `.page-scope.theme img` (0,2,1) — **outbids** the static rule | equal | equal |
+
+So the correct statement is three-way, not two-way: the shadow form always yields to the page; the
+static form yields **only when the consumer strictly outbids it on specificity**. At a **tie** the
+result depends on stylesheet order, which a consumer using a bundler often does not control — and
+a tie is not an exotic case, it is what scoping with a single wrapper class produces. A cycle-1
+draft of this record concluded "the static form yields only when the page outbids it" from the
+`order=last` column alone; the `order=first` column falsifies it, and the sentence is corrected
+here rather than left standing.
+
+There is no document-context selector that reproduces "always lose to the outer tree, at any
+weight, in any order."
 
 Two further first-hand observations, recorded because they bound the ruling:
 
@@ -262,16 +332,23 @@ the consumer's own stylesheet.
   axes are ordinary root-class modifiers (`.sk-entity-marker--sm`, `.sk-entity-marker--circle`) and
   may be frozen as a static API now. The **image axis may not be frozen as an equality-gated
   static API** — it is construct kind 3, ruled shadow-only above. It may be frozen as a documented
-  *authoring instruction* (the paired-spelling rule), which must state that its cascade position
-  differs from the shadow form's.
+  *authoring instruction* (the paired-spelling rule), and that instruction **must state the tie
+  boundary explicitly**: a consumer overriding the static rule needs **strictly higher**
+  specificity than (0,1,1); at an equal-specificity selector — which one wrapper class produces —
+  the winner is whichever stylesheet comes last, where the element form would have yielded
+  unconditionally. An instruction saying only "outbid it on specificity" is safe when followed
+  literally and silently wrong at the tie, which is the ordinary case.
 * **#305 — [TKT5] `.sk-button` busy axis.** **May freeze a static API now, unconditionally.** Same
   basis as #302: `sk-button.css`'s only `:host` rule is `display: inline-flex`, explicitly "inert
   in the static path". A busy axis is a root-class modifier plus ARIA on the control.
 * **#307 — [TKT7] static `.sk-action-row` form with trailing controls.** **May freeze a static
   API, in the two-element wrapper form only.** This is construct kind 2. The frozen static contract
-  is `<div class="sk-action-row-host"><div class="sk-action-row">…</div></div>`, with
-  `container-type: inline-size` on the outer element. #307 must **not** freeze a single-element
-  form that puts `container-type` on `.sk-action-row`; O1/O3/O10/O12 above are what that costs, and
+  is `<div class="sk-action-row-host"><div class="sk-action-row">…</div></div>`, where the outer
+  element carries **`sk-action-row.css`'s complete `:host` declaration set** — today
+  `display: block; min-width: 0; container-type: inline-size`. Freeze it as "the `:host` set",
+  not as a copied property list: if that sheet's `:host` gains a declaration the wrapper owes it
+  too, and #310 is the gate that will say so. #307 must **not** freeze a single-element form that
+  puts `container-type` on `.sk-action-row`; O1/O3/O10/O12/O17/O20 above are what that costs, and
   the failure is silent.
 
 ## Relationship to #239, which this record does not decide (FR-005)
@@ -310,7 +387,9 @@ have to reason about whichever mechanism it chooses. It does not select that mec
   and 2 is a specification, not an enforced artifact — and this record says so rather than
   implying the static form already ships.
 * `::slotted()` gets no generated equivalent, so every component using it owes its consumers a
-  hand-written instruction.
+  hand-written instruction. Six sheets still owe one — `sk-context-sidebar`, `sk-personal-rail`,
+  `sk-section-header`, `sk-notice`, `sk-page-header` and `sk-nav-pill-drawer`. That debt is
+  **owned by #311**, not left to be noticed later; see "Filed follow-up work" below.
 
 ### Neutral
 
@@ -336,8 +415,23 @@ have to reason about whichever mechanism it chooses. It does not select that mec
     set, with the **collapsed** static forms recorded as the red probes it must reject and the
     **wrapper** forms as the green probes it must accept.
 
-  Neither is built here. Both name the composed cases explicitly, because those are the only
-  outcomes that separate a correct static form from one that agrees by coincidence.
+  * **#311 — [styles] backfill the shadow-only `::slotted()` static-consumer instruction** into
+    the six sheets that still owe one: `sk-context-sidebar`, `sk-personal-rail`,
+    `sk-section-header`, `sk-notice`, `sk-page-header`, `sk-nav-pill-drawer`. It enumerates every
+    sheet under `packages/styles/src/` containing `::slotted`, classifies each as owed, already
+    discharged, or exempt-with-reason, and requires a check that refuses both the empty set and
+    silent regrowth.
+
+  Neither #309 nor #310 is built here, and both name the composed cases explicitly, because those
+  are the only outcomes that separate a correct static form from one that agrees by coincidence.
+
+**Where issue #301's acceptance item 7 is discharged.** That item — "each affected component's
+docs say what a static consumer must author instead" — applies to construct kind 3, the one ruled
+shadow-only. It is discharged **in two places, and neither is a promise**: `sk-entity-marker`, the
+component this record measured, carries the instruction in this record's own PR; the remaining six
+sheets are owned by **#311**, with their rules enumerated per file and an acceptance bar of the
+same shape as #309's and #310's. Six sheets were left outside this PR because they sit outside the
+Work Package's declared file ownership, not because the debt is optional.
 
 ## More Information
 

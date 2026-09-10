@@ -5,9 +5,17 @@
    light-DOM form of it in this package yet (#309 generator, #310 equivalence gate), so a
    server-rendered consumer authors the wrapper themselves:
 
-       <div class="sk-action-row-host">        <- container-type: inline-size here
+       <div class="sk-action-row-host">
          <div class="sk-action-row"> ... </div>
        </div>
+
+   THE WRAPPER CARRIES THIS SHEET'S WHOLE `:host` DECLARATION SET, not `container-type` alone —
+   today `display: block; min-width: 0; container-type: inline-size`, and "whatever `:host`
+   declares" if that changes. This sheet's `:host` happens to declare no `width`, so here an
+   abbreviated wrapper measures identically (all 20 declared outcomes, both engines, including
+   the flex-item case). That is a coincidence of THIS component, not a general licence:
+   `sk-app-shell.css` declares `width: 100%` on `:host`, and dropping it makes the component
+   compute `0px` in a flex row. Read each sheet's own `:host`; never copy another's list.
 
    DO NOT MOVE `container-type` ONTO `.sk-action-row`. An element is never its own query
    container. Measured, chromium and firefox, at a 360px row: the real element computes
