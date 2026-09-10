@@ -78,10 +78,10 @@
       "criterion_id": "FR-008",
       "description": "Verify FR-008 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
+      "evidence": "packages/elements/src/action-row/sk-action-row.markup.ts route branch emits a real <a href> trigger; ACTION_ROW_AXES.Link/RouteCurrent generate anchor exemplars used by the Route/RouteCurrent/RouteWithControls stories (packages/styles/src/action-row/sk-action-row-html.stories.ts) and by the T004 reflow-parity test; all pass axe (run-axe-storybook.js, 2026-09-10, zero violations across 627 stories) and Playwright (apps/storybook/src/tests/elements-load.spec.ts, chromium, 2026-09-10)",
+      "pass_fail": "pass",
       "verified_by": null,
-      "verified_at": null,
+      "verified_at": "2026-09-10T14:07:12.773460+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
