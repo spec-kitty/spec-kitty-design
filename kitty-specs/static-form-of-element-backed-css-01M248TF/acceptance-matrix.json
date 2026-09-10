@@ -122,6 +122,15 @@
       "result": "confirmed_absent",
       "evidence": "grep found zero matches",
       "scope": "docs"
+    },
+    {
+      "invariant_id": "NI-004",
+      "description": "MEDIUM-1 regression guard: no component comment tells a static consumer merely to 'outbid this rule on specificity'. The instruction must state the tie boundary, because an equal-specificity consumer selector resolves by stylesheet order where the element form yielded unconditionally.",
+      "verification_method": "grep_absence",
+      "verification_command": "outbid this rule on specificity",
+      "result": "confirmed_absent",
+      "evidence": "grep found zero matches",
+      "scope": "docs packages/styles/src"
     }
   ]
 }
