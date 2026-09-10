@@ -108,10 +108,10 @@
       "criterion_id": "FR-011",
       "description": "Verify FR-011 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "cue is aria-hidden with no role, so no second accessible-tree object is exposed in either state; reviewer verified FR-011 directly against live-browser accessibility tree, review-cycle-1.md",
+      "pass_fail": "pass",
+      "verified_by": "mission-closer",
+      "verified_at": "2026-09-10T12:35:29.689506+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
