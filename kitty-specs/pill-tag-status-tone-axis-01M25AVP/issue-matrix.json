@@ -1,7 +1,7 @@
 {
   "rows": {
     "#177": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "https://github.com/spec-kitty/spec-kitty-design/issues/177 \u2014 sk-card status-tone precedent (tokens, brand-vs-status precedence rule) reused by this mission, already landed on train",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -9,7 +9,7 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
+      "verdict": "verified-already-fixed",
       "wp": null
     },
     "#212": {
