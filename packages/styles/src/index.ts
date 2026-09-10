@@ -61,6 +61,7 @@ export * from './public-header/index';
 export * from './radio-choice-group/index';
 export * from './ribbon-card/index';
 export * from './section-banner/index';
+export * from './section-nav/index';
 export * from './segmented-choice/index';
 export * from './site-footer/index';
 export * from './skip-link/index';

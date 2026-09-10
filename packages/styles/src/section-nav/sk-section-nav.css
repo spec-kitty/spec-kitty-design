@@ -1,0 +1,90 @@
+/* @spec-kitty/styles — native light-DOM section navigation presentation (#337) */
+/* Consumers own the nav label, hrefs, anchor labels, order, permission-gated presence, and */
+/* aria-current. No custom element is registered and no ARIA tab role is used anywhere here. */
+
+.sk-section-nav {
+  box-sizing: border-box;
+  display: flex;
+  align-items: stretch;
+  inline-size: 100%;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  overflow-x: auto;
+  overflow-y: visible;
+  overflow-wrap: anywhere;
+  border-block-end-color: var(--sk-border-strong);
+  border-block-end-style: solid;
+  border-block-end-width: var(--sk-border-width-1);
+  color: var(--sk-fg-body);
+  font-family: var(--sk-font-sans);
+  font-size: var(--sk-text-sm);
+}
+
+.sk-section-nav__link {
+  box-sizing: border-box;
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  min-inline-size: var(--sk-space-9);
+  min-block-size: var(--sk-space-9);
+  margin-block-end: calc(var(--sk-border-width-1) * -1);
+  padding-block: var(--sk-space-2);
+  padding-inline: var(--sk-space-4);
+  color: inherit;
+  background: transparent;
+  border-block-end-color: transparent;
+  border-block-end-style: solid;
+  border-block-end-width: var(--sk-border-width-4);
+  font-weight: var(--sk-weight-normal);
+  line-height: normal;
+  scroll-margin-inline: var(--sk-space-4);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.sk-section-nav__link:link,
+.sk-section-nav__link:visited {
+  color: inherit;
+}
+
+.sk-section-nav__link:hover {
+  color: var(--sk-fg-default);
+  text-decoration-line: underline;
+  text-decoration-thickness: var(--sk-border-width-1);
+  text-underline-offset: var(--sk-space-1);
+}
+
+.sk-section-nav__link:active {
+  background: var(--sk-surface-muted);
+  border-block-end-color: var(--sk-border-strong);
+  border-block-end-style: double;
+}
+
+.sk-section-nav__link:focus-visible {
+  outline-color: var(--sk-color-accent);
+  outline-offset: calc(var(--sk-border-width-2) * -1);
+  outline-style: solid;
+  outline-width: var(--sk-border-width-2);
+}
+
+.sk-section-nav__link[aria-current]:not([aria-current="false"]) {
+  color: var(--sk-fg-default);
+  border-block-end-color: var(--sk-color-accent);
+  border-block-end-style: solid;
+  font-weight: var(--sk-weight-semibold);
+}
+
+.sk-section-nav__link[aria-current]:not([aria-current="false"]):active {
+  background: var(--sk-surface-muted);
+  border-block-end-style: double;
+}
+
+@media (forced-colors: active) {
+  .sk-section-nav__link[aria-current]:not([aria-current="false"]) {
+    border-block-end-color: Highlight;
+  }
+
+  .sk-section-nav__link:focus-visible {
+    outline-color: Highlight;
+  }
+}

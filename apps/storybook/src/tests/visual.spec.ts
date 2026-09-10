@@ -1479,6 +1479,43 @@ for (const [id, snapshot] of [
   });
 }
 
+const sectionNavStory = async (
+  page: Page,
+  id: string,
+  viewport: { width: number; height: number } = { width: 720, height: 720 },
+): Promise<Locator> => {
+  await page.setViewportSize(viewport);
+  await page.goto(`/iframe.html?id=navigation-sksectionnav-html--${id}&viewMode=story`);
+  const target = page.locator('[data-section-nav-story-frame]').first();
+  await target.waitFor({ state: 'visible', timeout: 20000 });
+  await expect(target.locator('nav.sk-section-nav')).toBeVisible();
+  return target;
+};
+
+const sectionNavVisuals = [
+  ['default', 'sk-section-nav-default-dark.png', { width: 720, height: 720 }],
+  ['light-mode', 'sk-section-nav-light.png', { width: 720, height: 720 }],
+  ['long-labels', 'sk-section-nav-long-labels-240.png', { width: 390, height: 720 }],
+  ['many-routes', 'sk-section-nav-many-routes-240.png', { width: 390, height: 720 }],
+] as const;
+
+for (const [id, snapshot, viewport] of sectionNavVisuals) {
+  test(`SK-section-nav ${id} — visual baseline`, async ({ page }) => {
+    const target = await sectionNavStory(page, id, viewport);
+    await expect(target).toHaveScreenshot(snapshot, { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  });
+}
+
+test('SK-section-nav forced colors — visual baseline', async ({ page }) => {
+  await page.emulateMedia({ forcedColors: 'active' });
+  const target = await sectionNavStory(page, 'forced-colors', { width: 390, height: 720 });
+  await target.locator('.sk-section-nav__link[aria-current]').focus();
+  await expect(target).toHaveScreenshot('sk-section-nav-forced-colors.png', {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+  });
+});
+
 type TeamOverviewStoryId =
   | 'default'
   | 'light-mode'
