@@ -167,6 +167,49 @@ test('every one of the four required strings independently omits with no fallbac
 });
 
 // ---------------------------------------------------------------------------------------------
+// FR-013 — a closed dialog is not displayed. UNMARKED: no ADR-11 id names "a native <dialog>'s
+// own [open] attribute gates this component's CSS", so this is this component's own subject,
+// the same shape as the FR-018 literal-text test above.
+//
+// THE DEFECT THIS GUARDS: native <dialog> is hidden only by the UA stylesheet's
+// `dialog:not([open]) { display: none }`, and normal-origin author CSS beats UA-origin CSS
+// regardless of specificity. `sk-confirm-dialog.css`'s `.sk-confirm-dialog` ruleset originally
+// declared `display: flex` (plus border/background/padding/sizing) with no `[open]` qualifier,
+// so it silently overrode the UA's own hiding rule: a mounted-but-never-opened element rendered
+// as a real, positioned, non-modal box in normal flow, and the SAME box survived every close()
+// — the documented "mount once, showModal() later" pattern therefore produced a permanently
+// visible confirmation panel with two silently no-op buttons. The `Closed` story's own doc
+// comment ("nothing renders unexpectedly") was aspirational, not true, and nothing caught it:
+// every test in this file calls showModal() immediately after mount, so the never-opened state
+// was never observed anywhere.
+// ---------------------------------------------------------------------------------------------
+
+test('a mounted-but-never-opened dialog is not displayed, and is hidden again after close()', async () => {
+  const element = await mount();
+  const dialog = dialogOf(element);
+  expect(getComputedStyle(dialog).display).toBe('none');
+  const closedBox = dialog.getBoundingClientRect();
+  expect(closedBox.width).toBe(0);
+  expect(closedBox.height).toBe(0);
+
+  element.showModal();
+  await element.updateComplete;
+  expect(getComputedStyle(dialog).display).not.toBe('none');
+  const openBox = dialog.getBoundingClientRect();
+  expect(openBox.width).toBeGreaterThan(0);
+  expect(openBox.height).toBeGreaterThan(0);
+
+  const closed = waitForClose(dialog);
+  cancelButton(element).click();
+  await closed;
+  await element.updateComplete;
+  expect(getComputedStyle(dialog).display).toBe('none');
+  const reClosedBox = dialog.getBoundingClientRect();
+  expect(reClosedBox.width).toBe(0);
+  expect(reClosedBox.height).toBe(0);
+});
+
+// ---------------------------------------------------------------------------------------------
 // [SC-005] Focus and keyboard: Escape closes as cancel, focus returns to the invoker, and the
 // `open` state attribute tracks the dialog's real state.
 // ---------------------------------------------------------------------------------------------

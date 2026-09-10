@@ -69,8 +69,31 @@ const meta: Meta = {
 export default meta;
 type Story = StoryObj;
 
-/** The dialog element present but not opened — nothing renders unexpectedly. */
-export const Closed: Story = {};
+/**
+ * The dialog element present but not opened — nothing renders unexpectedly.
+ *
+ * ASSERTED, not eyeballed: a real defect shipped here once already. `sk-confirm-dialog.css`'s
+ * root ruleset originally declared `display: flex` (plus border/background/padding/sizing) with
+ * no `[open]` qualifier, which overrides the native `<dialog>` UA stylesheet's own
+ * `dialog:not([open]) { display: none }` — normal-origin author CSS beats UA-origin CSS
+ * regardless of specificity. The visible symptom was exactly this story: a mounted-but-never-
+ * opened dialog rendering as a real, positioned, non-modal box with the full title and body
+ * text, silently contradicting this doc comment. `fixtures/elements-behaviour/src/sk-confirm-dialog.test.ts`
+ * is the mechanical, red-first-demonstrated proof; this `play()` is what makes THIS story catch
+ * a regression too, rather than only ever being read, not run.
+ */
+export const Closed: Story = {
+  play: async ({ canvasElement }) => {
+    const host = hostFrom(canvasElement);
+    await (host as unknown as { updateComplete: Promise<unknown> }).updateComplete;
+    const dialog = host.shadowRoot!.querySelector('[part="dialog"]') as HTMLDialogElement;
+    expect(dialog).not.toHaveAttribute('open');
+    expect(getComputedStyle(dialog).display).toBe('none');
+    const box = dialog.getBoundingClientRect();
+    expect(box.width).toBe(0);
+    expect(box.height).toBe(0);
+  },
+};
 
 export const OpenShortBody: Story = {
   play: async ({ canvasElement }) => openViaShowModal(canvasElement),

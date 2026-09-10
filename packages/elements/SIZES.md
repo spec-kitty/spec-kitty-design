@@ -8,14 +8,14 @@ Components in these artifacts: sk-action-row, sk-app-shell, sk-bar-chart, sk-blo
 | artifact | raw | minified | min+gzip | notes |
 |---|---:|---:|---:|---|
 | `ESM  (dist/index.js)` | 223.4 KiB | 150.0 KiB | 31 KiB | `lit` external |
-| `IIFE (dist/elements.js)` | 243.5 KiB | 161.0 KiB | 36 KiB | runtime bundled |
+| `IIFE (dist/elements.js)` | 243.6 KiB | 161.0 KiB | 36 KiB | runtime bundled |
 
 ## Subresource Integrity — the classic-script bundle (FR-005)
 
 For a CDN load of `dist/elements.js`, pin what the browser executes:
 
 ```
-integrity="sha384-EwYw+Dsux4aFlHqcanW5iufIIALZPX0XNQ77C1XPLGi2trMytvxenqBksN4zznrk"
+integrity="sha384-w/EECQzDJiJpFRt3BLnkW6bCsYvLZtohpPPOFTrFh9cPGVq6ynQzc7e3tnT3GXBW"
 ```
 
 Derived from the built artifact on every run and re-derived by `--check`, so it cannot be
@@ -35,7 +35,7 @@ What a consumer downloads, from a real `npm pack` of each package in the derived
 | package | files | unpacked |
 |---|---:|---:|
 | `@spec-kitty/tokens` | 37 | 5764.3 KiB |
-| `@spec-kitty/styles` | 231 | 605.6 KiB |
+| `@spec-kitty/styles` | 231 | 607.5 KiB |
 | `@spec-kitty/elements` | 51 | 909.9 KiB |
 | `@spec-kitty/react` | 64 | 167.8 KiB |
 
@@ -82,7 +82,7 @@ unit: every figure in this file is KiB (1024). The WP prompt recorded the IIFE a
 "24.0 KB" where this file would have read 23.5 KiB — **24073 bytes either way**.
 Those two numbers are pinned historical values on purpose. An earlier revision of this
 paragraph interpolated the CURRENT raw size into that comparison, so once the artifact
-grew it asserted that 249383 bytes are "24.0 KB" — false by a factor of
+grew it asserted that 249407 bytes are "24.0 KB" — false by a factor of
 five, in the one paragraph whose whole lesson is to state the basis and the unit. A lens
 caught it.
 
@@ -91,13 +91,13 @@ caught it.
 ```
 $ npx nx run elements:build && node scripts/measure-elements-sizes.mjs
 packages/elements/dist/index.js
-  raw        228716 bytes  (223.4 KiB)
-  minified   153577 bytes  (150.0 KiB)
+  raw        228740 bytes  (223.4 KiB)
+  minified   153601 bytes  (150.0 KiB)
   gzip         47 KiB
   min+gzip     31 KiB
 packages/elements/dist/elements.js
-  raw        249383 bytes  (243.5 KiB)
-  minified   164859 bytes  (161.0 KiB)
+  raw        249407 bytes  (243.6 KiB)
+  minified   164883 bytes  (161.0 KiB)
   gzip         53 KiB
   min+gzip     36 KiB
 ```
