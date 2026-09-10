@@ -62,6 +62,30 @@ const SPEC_KITTY_AUTO_COMMIT_PATTERNS = [
     ),
   // spec: Initial mission spec (Spec Kitty creation step)
   (msg) => /^spec: /.test(msg),
+  // `spec-kitty specify` also emits this older bootstrap shape ("Add spec for <slug>") before
+  // any conventional-commit history exists on the branch. The (Add|Map|Update) bootstrap pattern
+  // above has a fixed noun list (tasks|plan|meta|charter|requirements) that never included
+  // "spec", so this message alone reds `type may not be empty` / `subject may not be empty` —
+  // live evidence in PR #312, run 34425464248, job `lint-code`. Given its own anchored pattern
+  // rather than widening that list's regex or using an unanchored /^Add spec for /, which would
+  // exempt any commit starting with those words from EVERY rule. Bound to the FRIENDLY slug
+  // shape (lowercase letters, digits, single hyphens) rather than `\S+`: this message carries
+  // the friendly slug alone, with no `-01XXXXXX` mission-id suffix (unlike the `spec-kitty
+  // accept` messages below, which do carry it). Anchored to end-of-LINE like its siblings.
+  (msg) => /^Add spec for [a-z0-9]+(?:-[a-z0-9]+)*\s*(\n|$)/.test(msg),
+  // `spec-kitty accept` emits three of its own message shapes while recording the acceptance
+  // gate outcome and none of the three existed when the exemption list above was last extended,
+  // so all three also red in PR #312's `lint-code` run alongside "Add spec for" above. Each
+  // carries the FULL slug (friendly slug + Spec Kitty's `-01` + >=6 uppercase-alphanumeric
+  // mission id) — the same shape the `chore(acceptance)` entries above already bind, never
+  // `\S+` (which would also match `X`, `NOT-A-SLUG!!!` or `../../etc/passwd`). Anchored to
+  // end-of-LINE: an unanchored alternation of these three prefixes would exempt any commit
+  // starting with "Accept ", "Record acceptance commit for " or "Finalize acceptance artifacts
+  // for " from every rule, the same trap the `chore(spec-kitty)` comment above records.
+  (msg) =>
+    /^(?:Accept|Record acceptance commit for|Finalize acceptance artifacts for) [a-z0-9]+(?:-[a-z0-9]+)*-01[A-Z0-9]{6,}\s*(\n|$)/.test(
+      msg,
+    ),
   // op(<profile-id>): <action> [<invocation-id>] — the Op record `spec-kitty dispatch` commits
   // for every governed invocation. Same class as the entries above: a CLI-authored message this
   // project does not control. It fails BOTH enums — `op` is not a conventional type, and a

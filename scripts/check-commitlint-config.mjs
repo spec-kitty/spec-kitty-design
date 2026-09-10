@@ -23,6 +23,13 @@ const generatedMessages = [
   'chore(acceptance): record NFR-008=pending for team-overview-shell-elements-01M1S8R8',
   'chore(acceptance): register negative invariant NI-001 for team-overview-shell-elements-01M1S8R8',
   'Update generator config for feature adr-index-reconciliation-and-gate-01M1TAA0',
+  // `spec-kitty specify` / `spec-kitty accept` bootstrap and acceptance-gate commits (PR #312,
+  // run 34425464248, job `lint-code`): real messages from the
+  // static-form-of-element-backed-css-01M248TF mission branch.
+  'Add spec for static-form-of-element-backed-css',
+  'Accept static-form-of-element-backed-css-01M248TF',
+  'Record acceptance commit for static-form-of-element-backed-css-01M248TF',
+  'Finalize acceptance artifacts for static-form-of-element-backed-css-01M248TF',
 ];
 
 for (const message of generatedMessages) {
@@ -44,6 +51,21 @@ const nearMisses = [
   'Update generator config for feature NOT-A-SLUG!!!',
   'Update generator config for feature ../../etc/passwd',
   'Update generator config for feature adr-index-reconciliation-and-gate',
+  // The "Add spec for" exemption is bounded to the FRIENDLY slug shape (lowercase, digits,
+  // hyphens only) — no mission-id suffix, no `\S+`. Each of these is what an unbounded tail
+  // would have let through, or a case that must stay outside the pattern's own bound.
+  'Add spec for X',
+  'Add spec for NOT-A-SLUG!!!',
+  'Add spec for ../../etc/passwd',
+  'Add spec for static-form-of-element-backed-css and bypass checks',
+  // The `spec-kitty accept` exemptions require the FULL slug (friendly slug + `-01` +
+  // >=6 uppercase-alphanumeric mission id), not just the friendly slug, and not `\S+`.
+  'Accept static-form-of-element-backed-css',
+  'Accept static-form-of-element-backed-css-01M248TF and merge',
+  'Accept NOT-A-SLUG!!!-01M248TF',
+  'Record acceptance commit for static-form-of-element-backed-css',
+  'Finalize acceptance artifacts for ../../etc/passwd-01M248TF',
+  'Reject static-form-of-element-backed-css-01M248TF',
 ];
 
 for (const message of nearMisses) {
