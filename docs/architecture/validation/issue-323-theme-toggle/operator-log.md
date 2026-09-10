@@ -5,8 +5,10 @@
 - Mission ID: `01M25KMPPGYRPHTBZATJG15NWK`
 - Mission branch: `mission/theme-toggle`
 - PR target: `train/elements-first`
-- Current phase: implementation / review-cycle-1 remediation
-- Current WP lane: WP01 / `in_progress`
+- Current train base SHA: `91a7c8c36873141fdd5d0a7313726185c559768f`
+- Current exact validation HEAD: `05064441d114165cf0ed1dd14b14b64673d1912b`
+- Current phase: review / fresh review cycle 2 pending
+- Current WP lane: WP01 / `for_review`
 
 ## Seats
 
@@ -28,11 +30,15 @@
   browser declaration)
 - WP01 review cycle 1: fresh read-only Codex / `reviewer-renata` (rejected exact HEAD `ab7d4d5a2d055eddf6ef09e227eb9b9062827b58`)
 - WP01 review-cycle-1 remediation: fresh delegated Codex / resolved `frontend-freddy` with implement-scoped doctrine (in progress)
+- Final train rebase conflict audit: independent read-only Codex / architecture-and-generated-artifact lens (completed; semantic unions confirmed, CHANGELOG component count corrected)
+- Exact-head ADR-11 mutation remediation: fresh delegated Codex / `debugger-debbie` then `frontend-freddy` (completed; test helper decoupled without changing product code)
+- WP01 review cycle 2: fresh read-only Codex / `reviewer-renata` (pending dispatch on exact validated HEAD)
 
 ## Review cycles and findings
 
 - Pre-review requirement audit: High — actual element import evaluated `CSSStyleSheet` and registration state at module scope. Disposition: resolved through the authoritative CSS generator and lazy guarded registration; focused exact-runtime evidence is green before WP review.
 - Review cycle 1, exact reviewed HEAD `ab7d4d5a2d055eddf6ef09e227eb9b9062827b58`: REJECT with four Medium evidence gaps. Dispositions: `sk-theme-change` SC-006/007/008 assertions, registrations, and mutation arms added; generated classic bootstrap now executes in a real browser `<head>` before an external stylesheet across valid/missing/invalid/throwing/System inputs; legacy-only `addListener`/`removeListener` lifecycle proof added; forced-colors proof now asserts automatic adjustment and Canvas/CanvasText presentation. Fresh exact-HEAD review remains pending after remediation validation. SC-009 remains correctly N/A because the event is non-cancelable and owns no preventable default action.
+- Exact-head mutation pass 1 found one evidence-coupling failure at 252/253: the SC-012 radio-to-checkbox mutant prevented the shared `choose()` helper from locating a control, so the independently marked SC-006 event assertion could not perform its interaction. A fresh debugger/remediation seat made the interaction helper locate the value-bearing choice independently of input type while leaving `radios()` type-specific for the semantic assertion. The exact temporary mutant then made SC-012 red while SC-006/007/008 stayed green. Product source was restored byte-identically; the full exact-head rerun passed 253/253.
 
 ## Gate results
 
@@ -79,10 +85,55 @@
   contexts the configured `baseURL`. Its exact Chromium test passed on isolated port 63234; no
   repository test URL bypasses the configured Storybook origin now.
 
+### Final rebase and exact-head validation
+
+- Fetched and rebased onto `origin/train/elements-first` at
+  `91a7c8c36873141fdd5d0a7313726185c559768f`. Conflicts in append-only mission events,
+  ratchets, and generated artifacts were resolved by preserving both event histories, taking
+  the authored semantic union, and regenerating every derived surface. The branch was clean at
+  exact validation HEAD `05064441d114165cf0ed1dd14b14b64673d1912b`.
+- `npm test`: 51 files / 662 tests passed (43 Node, 619 Chromium), zero skipped; the exact-head
+  rerun after the mutation-fixture remediation passed the same complete suite.
+- `node scripts/measure-suite-time.mjs`: 662/662 passed in 18.3 seconds against the 40-second
+  ceiling. `node scripts/suite-selftest.mjs`: all 253 mutations produced their named red from a
+  619-assertion green baseline in 1076 seconds against the 1649.8-second ceiling. The first run's
+  252/253 coupling find was remediated as recorded above. `--selftest`: 10/10 guard probes passed
+  in 96.4 seconds.
+- `npm run quality:all`: passed. ESLint reported 26 element-source and 28 fixture security-rule
+  warnings, zero errors; Stylelint passed; HTMLHint scanned 124 files with zero errors.
+  `node scripts/typecheck-all.mjs` passed all five declared projects.
+- Token build/catalogue, generated element CSS (`--check`, 31 modules; `--selftest`, 3/3),
+  authored/static markup, styles-only barrels, bootstrap (`--check`; `--selftest`, 3/3), no-JS
+  token fallback (`--check`; `--selftest`, 4/4), manifest generation/content (31 registered
+  elements, 138 described public members; 15/15 probes), React wrapper generation (65 files,
+  31 elements; 26/26 probes), Vue declarations/template/packed typing, element entries,
+  public-part contract, adopted-CSS boundaries/hygiene, part/story/behavior ratchets, pattern
+  composition, gate-wiring/defeat table, ADR index, LLM ADR surface, action pins, and branch-wide
+  commitlint all passed.
+- Storybook built in 11.37 seconds against the 180-second ceiling; its wrapper self-test passed
+  4/4. Size ratchets passed, the publishable graph built, and demo assembly resolved all 42
+  references. The a11y gate classified all 50 self-test shapes correctly and axe found zero
+  WCAG 2.1 AA violations across all 632 rendered stories (510 ratcheted story IDs present).
+- Isolated-port Chromium + Firefox Playwright: 1183 passed, 47 explicit project/feature-conditional
+  skips, zero failures across 1230 scheduled cases. The selected WebKit theme/no-JS run could not
+  start any of 11 cases because this workstation lacks Playwright's GTK 4, ICU 74, JPEG Turbo 8,
+  and GStreamer dependencies; the workflow's `playwright install --with-deps` lane is authoritative.
+- Chromium visual regression was run without snapshot updates: 6 passed and 216 failed on local
+  font-dependent geometry. The same stub, progress, and copy-field failures were reproduced on an
+  untouched worktree at the exact train base, and each mission/base actual PNG pair had the same
+  SHA-256 (`054a2509…`, `4b0fc5be…`, `0bd1d0ae…`). This is pre-existing host/baseline drift;
+  GitHub's visual job remains the acceptance authority. The temporary base worktree was removed.
+- Release/security: all 28 release-gate self-tests passed; four publishable packages packed with
+  every export resolved; packed Vue declarations compiled; sizes and SRI matched; the offline
+  probe self-test detected planted network use; packed `file://` load upgraded 31/31 elements,
+  shipped 30/30 font files, and made zero off-machine requests; npm audit found no high/critical
+  vulnerabilities; lockfile dry-run, action-pin check, commitlint-config probes, and full branch
+  commitlint passed.
+
 ## Publication and merge
 
 - PR URL: pending
-- Exact reviewed head: pending
+- Exact reviewed head: pending fresh review cycle 2 (validation HEAD `05064441d114165cf0ed1dd14b14b64673d1912b`)
 - Merge status: not merged
 - Merge commit: pending
 - Post-merge mission-review verdict: pending
@@ -91,4 +142,5 @@
 
 - `spec-kitty-design#93` remains repository-wide LightMode-wrapper work; this mission owns only its root-level resolver and composed proof.
 - `factory-dashboard#14` remains consumer integration work.
-- Merged train PR #325 independently fixes global story-total assertions that red any story-adding mission; its changes will enter this mission through the mandatory final rebase.
+- Train PRs #325 and #327 are incorporated through the final rebase; their authored and generated
+  surfaces were preserved in the semantic union.

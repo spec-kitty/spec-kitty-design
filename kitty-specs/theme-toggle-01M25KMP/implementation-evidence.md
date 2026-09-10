@@ -127,3 +127,37 @@ gates and explicitly retain local/CI-only limitations.
   uncached `elements-behaviour-fixture:typecheck` passed, and the derived uncached all-project
   typecheck passed all five projects (`elements-behaviour-fixture`, `react-consumer-fixture`,
   `vue-consumer-fixture`, `elements`, and `react`).
+
+### Final rebased exact-head record
+
+- Rebased base: `origin/train/elements-first` at
+  `91a7c8c36873141fdd5d0a7313726185c559768f`.
+- Exact validation HEAD: `05064441d114165cf0ed1dd14b14b64673d1912b`.
+- Full Vitest: 51 files / 662 tests passed (43 Node, 619 Chromium), zero skipped. The budgeted
+  behavior run completed in 18.3 seconds against 40 seconds.
+- Full mutation pass 1 found a test-evidence coupling at 252/253: the SC-012 input-type mutant
+  prevented the interaction helper from locating a choice and therefore also prevented the
+  SC-006 event assertion from acting. A fresh Codex debugger/remediation seat changed only the
+  test helper to locate a choice by value; the radio semantics helper remains type-specific.
+  Exact-mutant falsification then left SC-006/007/008 green while SC-012 went red. Full pass 2:
+  all 253 mutations produced their named red in 1076 seconds against 1649.8 seconds. Mutation
+  guard self-test: 10/10 in 96.4 seconds.
+- Exact-head `quality:all` passed (zero lint errors; existing security-rule warnings retained),
+  and the derived typecheck passed all five declared projects. All current generator drift,
+  generator self-test, manifest, wrapper, Vue, entry, public-contract, ratchet, composition,
+  architecture-index, workflow, action-pin, size, release, offline, audit, lockfile, and full
+  branch commitlint checks passed.
+- Storybook built in 11.37 seconds. The a11y gate's 50/50 self-test shapes behaved correctly;
+  all 510 ratcheted story IDs were present; axe reported zero WCAG 2.1 AA violations across 632
+  rendered stories. Demo assembly resolved all 42 references.
+- Isolated-port Chromium + Firefox Playwright scheduled 1230 cases: 1183 passed, 47 explicit
+  conditional skips, zero failures. WebKit was attempted for the 11 theme/no-JS cases and could
+  not launch because required host GTK/ICU/JPEG/GStreamer libraries are unavailable; CI installs
+  these and remains authoritative.
+- Local Chromium visual regression was not hidden or updated: 6 passed / 216 failed on
+  font-dependent dimensions. Three representative failures were reproduced against the exact
+  train base and produced byte-identical actual PNGs on base and mission, proving the local
+  failure class pre-exists #323. GitHub visual artifacts remain authoritative.
+- Release graph: four publishable packages packed and every export resolved. Packed Vue types,
+  SRI/size records, 31/31 packed-element offline upgrade, 30/30 shipped font files, zero network,
+  no high/critical audit findings, lockfile dry-run, and action pinning passed.
