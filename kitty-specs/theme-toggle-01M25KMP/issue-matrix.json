@@ -1,7 +1,7 @@
 {
   "rows": {
     "#14": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "spec-kitty/factory-dashboard#14 remains consumer integration; this mission exports only generic design-system surfaces",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -9,8 +9,8 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
     },
     "#177": {
       "evidence_ref": "Closed sk-card operational status-tone API consumed by the public Factory-pattern composition",
