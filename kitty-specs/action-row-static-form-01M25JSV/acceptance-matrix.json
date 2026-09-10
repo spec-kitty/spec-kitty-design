@@ -157,11 +157,11 @@
     {
       "criterion_id": "FR-016",
       "description": "Verify FR-016 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
+      "proof_type": "code_review",
+      "evidence": "packages/styles/src/action-row/sk-action-row-html.stories.ts Collection story composes 3 independently-generated rows (incl. one Flush) via list(); each row's markup comes from the same generated exports (./index) used standalone elsewhere in the file, and actionRowStaticHtml() has no shared/positional state, so collection composition cannot alter a row's own rendering",
+      "pass_fail": "pass",
       "verified_by": null,
-      "verified_at": null,
+      "verified_at": "2026-09-10T14:07:21.462536+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
