@@ -49,7 +49,7 @@
       "wp": "WP01"
     },
     "#308": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "#308 (display:flex with no [open] qualifier, missed by 602 tests) was a defect in its own component, already fixed there prior to this mission. Cited here only as the precedent apps/storybook/src/tests/sk-boundary-page-absence.spec.ts guards against recurrence of in sk-boundary-page. Per MEDIUM-3 of this review-remediation pass, the mark's absence now also carries a real computed-geometry (absolute, not merely presence-boolean) assertion mirroring the footnote's, with red-then-green mutation proof, closing the gap the review found in the original guard.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -57,8 +57,8 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
     },
     "#314": {
       "evidence_ref": "<link or commit>",
