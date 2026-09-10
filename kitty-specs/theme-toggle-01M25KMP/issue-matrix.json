@@ -60,6 +60,18 @@
       "verdict": "fixed",
       "wp": "WP01"
     },
+    "#76": {
+      "evidence_ref": "Closed authoring-recipe issue; WP01 followed the current recipe and regenerated all required surfaces",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
     "#93": {
       "evidence_ref": "Repository-wide legacy LightMode wrapper repair remains open #93; #323 proves only its own root resolver/composition",
       "fr": null,
