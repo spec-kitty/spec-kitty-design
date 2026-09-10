@@ -164,6 +164,15 @@
 }
 
 .sk-boundary-page__body {
+  margin: 0; /* #360: this file's header comment states `gap` is the ONLY inter-child
+    spacing — but `.sk-boundary-page__body` is a bare `<p>` in every exemplar except
+    form-card (a real `<form>`, which the UA stylesheet already gives zero margin), and an
+    unreset `<p>` carries a UA `margin-block: 1em` (16px at the default font size) on TOP of
+    the 20px `row-gap`. Measured, not inferred. `.sk-boundary-page__title` (an `<h1>`) and
+    `.sk-boundary-page__footnote` (a `<p>` when present) already carry this same `margin: 0`
+    reset above/below — `.sk-boundary-page__mark` and `.sk-boundary-page__action-group` are
+    both `<div>`s with no UA margin to reset. This is every remaining frame child checked,
+    not just the one instance measured. */
   min-inline-size: 0;
   overflow-wrap: anywhere; /* inherited property (CSS Text) — cascades to nested paragraphs/
     forms without a second declaration. sk-empty-state--inline's pattern, re-verified against
