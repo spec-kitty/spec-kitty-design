@@ -158,10 +158,10 @@
       "criterion_id": "FR-016",
       "description": "Verify FR-016 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "fixtures/elements-behaviour/src/sk-button.test.ts diff: expect(variants.length,...).toBe(3) -> toBe(4); npm run test: 617/617 passed, incl. this file's 20 tests.",
+      "pass_fail": "pass",
+      "verified_by": "reviewer-renata",
+      "verified_at": "2026-09-10T15:46:29.397469+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
