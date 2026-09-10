@@ -25,7 +25,7 @@
       "wp": "WP01"
     },
     "#286": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "Open, cited only as constraint C-002. This mission introduces no component-visible copy and no element render() literal; nothing in the diff touches #286's surface, and #286 compliance remains review-only (no script under scripts/ enforces copy or i18n).",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -33,8 +33,8 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
     },
     "#300": {
       "evidence_ref": "Parent epic, cited not worked. This mission closes epic child gap G0 only; #300 stays open and owns the remaining Family 4 gaps.",
