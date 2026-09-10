@@ -187,11 +187,11 @@
     {
       "criterion_id": "FR-019",
       "description": "Verify FR-019 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
+      "proof_type": "ci_pending",
+      "evidence": "Axe half PASSES: run-axe-storybook.js \u2014 613 stories, 0 WCAG violations, incl. elements-skbutton--danger-secondary and --danger-secondary-forced-colors related entries. Visual-regression half is genuinely NOT provable pre-CI: apps/storybook/src/tests/visual.spec.ts has two new toHaveScreenshot() cases (confirmed collected, not skipped \u2014 PW_INCLUDE_VISUAL gate), and no baseline PNG is committed (confirmed via git log --name-only, zero .png). Per this repo's own CI-authoritative-baseline policy, the first visual-regression CI run is expected to red by design until baselines are harvested from its visual-regression-diffs artifact. Marking pending rather than pass because the criterion as written requires both halves and the baseline does not exist yet.",
       "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "verified_by": "reviewer-renata",
+      "verified_at": "2026-09-10T15:46:43.326496+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
