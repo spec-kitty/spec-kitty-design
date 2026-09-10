@@ -113,6 +113,15 @@
       "result": "verification_error",
       "evidence": "grep verification failed (exit 2): grep: Invalid content of \\{\\}",
       "scope": "docs packages/styles/src"
+    },
+    {
+      "invariant_id": "NI-003",
+      "description": "HIGH-1 regression guard, prose form: the #307 freeze guidance and the authoring recipe must not describe the wrapper by naming container-type as the thing 'on the outer element'.",
+      "verification_method": "grep_absence",
+      "verification_command": "container-type: inline-size. on the outer",
+      "result": "confirmed_absent",
+      "evidence": "grep found zero matches",
+      "scope": "docs"
     }
   ]
 }
