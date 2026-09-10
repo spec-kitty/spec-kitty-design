@@ -350,6 +350,41 @@ instruction into six sheets that still owe one. None of the three is built by
 this record. Status is `Proposed`, and adoption is gated on a product verdict
 that is still pending.
 
+### ADR-16 — The Static Form of Cross-Sheet `::part()` Styling
+
+`docs/architecture/decisions/2026-09-10-16-static-form-of-cross-sheet-part-styling.md`.
+**Decision:** cross-sheet `::part()` — one stylesheet reaching into another
+component's shadow tree — is the fourth construct kind ADR-15 named and
+deferred, and it is **shadow-only**. No generated static form, no equality
+gate, and a written per-rule instruction instead. **Why:** measured against the
+union of two committed declaration files, 31 outcomes, chromium and firefox
+identical on every one. `::part()` and `::slotted()` are the SAME cascade rule
+seen from opposite sides — CSS's tree-order sort, which is consulted before
+specificity and before source order — with the library's declaration on the
+inner side for `::slotted()` and on the outer side for `::part()`. So a
+reaching `::part()` rule at (0,0,2) beats an inner rule at (1,3,0), in any
+stylesheet order, and two `!important` declarations invert it so the INNER one
+wins. A static rewrite has no tree, so it has no tree-order position and
+competes on ordinary specificity and order. The one shipped rule,
+`packages/styles/src/metric/sk-metric.css:67`, DOES reproduce all six of its
+declarations under a naive rewrite today — and that equality rests on two
+facts the shadow form never consults: the target component's own selector
+specificity, and document order. Adding one (0,3,0) rule to `sk-pill-tag.css`,
+or merely reordering the same tie, flips the static form while the shadow form
+does not move. The three-party case is worse than un-gateable: in the element
+path the pill inside a metric annotation is unreachable from the page by any
+selector at any weight, and in a static path it is a plain class any page rule
+can restyle, so a generated form would silently widen a public API ADR-9 §2
+makes versioned. **What a static consumer does instead:** an ordinary selector
+naming the class the part node already carries — trivial, unlike
+`::slotted()`'s rewrite — plus a stated specificity boundary, because what is
+lost is not reach but the unconditional win. `#374` backfills that instruction
+into `sk-metric.css`; `#373` files the gate, the boundary gate being measurably
+blind to `::part()` today; `#375` records that ADR-15's kind-1/kind-2 wrapper
+reproduces `:host`'s layout but HARDENS its cascade position, a gap its
+library-only outcome tables cannot see. None of the three is built by this
+record, which changes no sheet. Status is `Proposed`.
+
 ---
 
 ## 2a. Gates
