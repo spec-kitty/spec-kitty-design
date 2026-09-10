@@ -85,7 +85,7 @@
       "wp": null
     },
     "#314": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "Follow-up: #314 owns the sk-pill-tag::part(tag)/sk-metric composition gap; C-005/C-006/FR-009 explicitly keep this mission from claiming or building that parity",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -93,7 +93,7 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
+      "verdict": "deferred-with-followup",
       "wp": null
     }
   },
