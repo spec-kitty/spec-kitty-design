@@ -162,7 +162,7 @@ test.describe('sk-input / sk-form-input__control — forced-colors distinguishab
       // `rgb(129, 129, 139)` (the literal --sk-border-control value) here, while every
       // properly forced-colors-compliant element in this same document resolves to the
       // same system colour regardless of its own authored hex. Neither reverting the
-      // border to --sk-border-default nor setting it to transparent can pass this: both
+      // border to --sk-border-default nor setting it to transparent can fail this: both
       // still correctly received the SAME forced system colour as the reference (proving
       // forced-colors itself was never the defect in those cases) -- what this assertion
       // actually guards is forced-colors compliance surviving on this control specifically,
