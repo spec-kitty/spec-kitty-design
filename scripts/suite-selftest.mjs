@@ -631,7 +631,21 @@ const baseBehaviourTests = baseTests.filter(isBehaviourTest);
 const incompleteBaselineFiles = (baseline.testResults ?? []).filter((file) =>
   file.status === 'failed' || file.message || (file.assertionResults ?? []).length === 0
 );
+// #334 — a subject file whose transform or import throws before any test in it can be
+// collected used to read as N separate "missing behaviour [SC-xxx]" lines, one per tag
+// the registry declares for that file. One unresolved `?raw` import at the sandbox-copy
+// stage produced six such lines that read as six coverage holes, when the real fault was
+// the single load failure. A LOAD fault specifically: a message (transform/import threw),
+// or zero assertions collected at all. A file that loaded and collected tests where some
+// merely FAILED is not this — its declared tests are genuinely present in baseTests (just
+// not green), so `missingBehaviourSubjects` below already reads it correctly unaided and
+// folding it in here would wrongly suppress a real "missing behaviour" line for it.
+const loadFaultFiles = incompleteBaselineFiles.filter(
+  (file) => file.message || (file.assertionResults ?? []).length === 0
+);
+const loadFailureFor = (file) => file ? loadFaultFiles.find((f) => f.name.endsWith(file)) : undefined;
 const missingBehaviourSubjects = behaviourSubjects.filter(({ id, file }) =>
+  !loadFailureFor(file) &&
   !baseTests.some((test) =>
     test.name.includes(`[${id}]`) && (!file || test.file.endsWith(file))
   )
@@ -661,6 +675,33 @@ if (baseline.success !== true || baseTests.length === 0
     || incompleteBaselineFiles.length > 0 || missingBehaviourSubjects.length > 0) {
   console.error('❌ baseline is incomplete or not green; refusing mutation authority.');
   if (baseline.__stderr) console.error(baseline.__stderr);
+  // #334 — report a load failure directly, once per file, rather than as one "missing
+  // behaviour" line per tag the failed file happened to declare. `missing behaviour
+  // [SC-xxx]` is kept for what it actually means below: the file loaded and the tagged
+  // test simply is not in it.
+  for (const file of incompleteBaselineFiles) {
+    const unreachableCount = behaviourSubjects.filter(
+      ({ file: subjectFile }) => loadFailureFor(subjectFile) === file
+    ).length;
+    const assertions = file.assertionResults ?? [];
+    if (file.message || assertions.length === 0) {
+      // A load fault: the transform/import threw before anything in the file could be
+      // collected (a message), or nothing was collected at all (no message, zero
+      // assertions — e.g. `describe.skip`-ing an entire file). Either way, no declared
+      // behaviour tag in this file could possibly appear in baseTests, so blaming each
+      // one individually would be the exact defect #334 reports.
+      const cause = file.message
+        ? String(file.message).replace(/\s+/g, ' ').slice(-300)
+        : `produced no test results (status: ${file.status ?? 'unknown'})`;
+      console.error(
+        `   ${unreachableCount} behaviour(s) unreachable: ${file.name} failed to load — ${cause}`
+      );
+    } else {
+      // The file loaded and collected tests; some just failed. Not a load fault — the
+      // individual assertion failures are Vitest's own concern, not this gate's.
+      console.error(`   ${file.name}: collected but not all-green (status: ${file.status ?? 'unknown'})`);
+    }
+  }
   for (const { id, file } of missingBehaviourSubjects) {
     console.error(`   missing behaviour [${id}] in ${file ?? 'the browser suite'}`);
   }

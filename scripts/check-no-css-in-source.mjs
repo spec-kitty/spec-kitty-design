@@ -96,9 +96,17 @@ for (const f of files) {
     if (kind !== 'parsed') return raw;
     if (parsed === undefined) {
       try {
+        // minifyWhitespace, not the default `{}` and not `legalComments: 'none'` — this
+        // repo's pinned esbuild (0.28.1) keeps a comment preceding an object-literal
+        // property under both of those, so a doc comment mentioning `` `foo.css` `` in
+        // backticks still trips the member-expression pattern below. Only
+        // minifyWhitespace actually strips it. Scoped to the `parsed` rendition alone —
+        // the raw rendition stays untouched so the other four patterns keep full
+        // strength over comments and code (see the block comment above FORBIDDEN).
         parsed = esbuild.transformSync(raw, {
           loader: f.endsWith('.ts') ? 'ts' : 'js',
           format: 'esm',
+          minifyWhitespace: true,
         }).code;
       } catch (err) {
         console.error(`❌ ${f} does not parse — FR-009 cannot be checked over it:`);

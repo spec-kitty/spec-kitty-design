@@ -125,7 +125,11 @@ function loadStoryManifest() {
       return Object.values(entries)
         .filter(e => e.type === 'story' || !e.type) // older format has no type field
         .filter(e => e.id)
-        .map(e => ({ id: e.id, importPath: e.importPath || '' }));
+        // `title` travels too (#326): it is Storybook's own category, "Elements/SkFoo"
+        // for every packages/elements component and nothing else, and is the signal
+        // the byElement opt-in-ratchet check below uses to find an element with real
+        // shipped stories and no guard, rather than a second hand-maintained list.
+        .map(e => ({ id: e.id, importPath: e.importPath || '', title: e.title || '' }));
     }
   }
   return null;
@@ -659,6 +663,53 @@ if (require.main === module) (async () => {
       process.exit(1);
     }
     console.log(`✅ All ${declared.length} declared story id(s) present in the build.`);
+
+    // #326 — the checks above only ever ask "is everything DECLARED here still built?".
+    // Nothing asked the opposite question: is everything BUILT, for an element, declared
+    // here? byElement had 51 keys against a repo that ships more elements than that, so
+    // sk-confirm-dialog, sk-grid, sk-nav-pill, sk-section-banner and sk-stub could each
+    // have every one of their stories deleted and nothing would notice — the exact loss
+    // this ratchet exists to catch, just never asked of them.
+    //
+    // "Elements/*" is Storybook's OWN category for a packages/elements component
+    // (elements/<name>/*.stories.ts), not a second hand-maintained list this gate could
+    // itself drift from — every real element gets exactly one such title, and nothing
+    // else does (packages/styles primitives are "Primitives/…", patterns are their own
+    // titles, both out of #219's mandatory scope). PascalCase -> kebab is the inverse of
+    // Storybook's own title-casing and is exact for this repo's naming (no digits, no
+    // acronyms in an element name).
+    const toElementKey = (title) =>
+      title
+        .slice('Elements/'.length)
+        .replace(/([a-z0-9])([A-Z])/g, '$1-$2')
+        .toLowerCase();
+    const builtElementKeys = new Set(
+      storyIds
+        .filter((s) => s.title.startsWith('Elements/'))
+        .map((s) => toElementKey(s.title))
+    );
+    const declaredElementKeys = new Set(Object.keys(expected.byElement ?? {}));
+    const unratcheted = expected.unratchetedElements ?? {};
+    const undeclared = [...builtElementKeys].filter(
+      (key) => !declaredElementKeys.has(key) && !Object.prototype.hasOwnProperty.call(unratcheted, key)
+    );
+    if (undeclared.length) {
+      console.error(
+        '❌ Built element(s) have shipped stories but no story-removal guard at all:'
+      );
+      for (const key of undeclared) console.error(`   ${key}`);
+      console.error(
+        '   #219 already settled scope: every packages/elements component is in it. Either\n' +
+          `   add its story ids to byElement in ${expectedPath}, or record it in that file's\n` +
+          '   unratchetedElements map with a written reason — an opt-out, not a silent gap.'
+      );
+      server.close();
+      process.exit(1);
+    }
+    console.log(
+      `✅ All ${builtElementKeys.size} built element(s) are either ratcheted or explicitly ` +
+        `unratcheted (${Object.keys(unratcheted).length}).`
+    );
   }
 
   // #69 deleted UNRENDERABLE_IMPORT_PATTERN, so there is no filtered subset: every
