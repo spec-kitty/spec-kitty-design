@@ -119,6 +119,18 @@
       "title": null,
       "verdict": "deferred-with-followup",
       "wp": "WP01"
+    },
+    "#311": {
+      "evidence_ref": "Filed by this mission to own #301 acceptance item 7 for the six sheets outside WP01's declared owned_files. Reviewer verified at cycle-2: the per-file rule inventory's line numbers are exact on all six sheets, the 14-sheet classification is exhaustive and correctly partitioned (6 owed / 1 discharged here / 7 exempt), each instruction must state its own computed tie boundary rather than transcribe entity-marker's (0,1,1), the cascade matrix is the verification bar, and acceptance requires a check refusing both the empty set and silent regrowth. Judged a discharge, not a deferral.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
     }
   },
   "schema_version": 1
