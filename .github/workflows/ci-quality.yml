@@ -523,14 +523,31 @@ jobs:
       # webkit CANNOT launch on the project workstation (Fedora, Ubuntu-targeted libs), so
       # CI is the only place these behaviours meet WebKit at all.
       - run: npx playwright install --with-deps chromium webkit
-      - name: "[ENFORCED] Behaviour suite (ADR-11 required behaviours)"
-        run: node scripts/measure-suite-time.mjs
+      # Order is deliberate (#358): the two mutation-harness steps run BEFORE the timing
+      # assertion. GitHub Actions skips every later step once one fails (short of
+      # `continue-on-error`, forbidden here — see below), and this repo has already
+      # measured a ~20% same-set timing spread against a single-digit-percent margin (see
+      # suite-budget.json) — a ceiling breach is ordinary noise, not a rare event. With
+      # the timing check first, that noise silently cost the job its only two
+      # mutation-adequacy gates on every breach: a timing regression read as "the mutation
+      # harness didn't run" rather than what it actually was.
+      #
+      # `if: always()` on the mutation steps was tried first and rejected: it also works
+      # (the job conclusion is still `failure` if ANY step fails — `if:` only controls
+      # whether a LATER step is attempted), but scripts/check-gate-wiring.mjs refuses any
+      # `if:` on an [ENFORCED] step on principle, having been defeated twice before (#202,
+      # #205) by edits that read as correct. A reorder needs no exemption from that rule
+      # and closes the same hole. The timing check must still fail the job — it is not
+      # made non-blocking, only moved to run last so its failure cannot skip anything.
+      #
       # Re-derives every red-first claim in the suite. Without it, "demonstrated to fail
       # before it passes" is a paste in a commit message.
       - name: "[ENFORCED] Mutation harness — red-first is re-derived (NFR-002)"
         run: node scripts/suite-selftest.mjs
       - name: "[ENFORCED] Mutation harness guards are themselves exercised"
         run: node scripts/suite-selftest.mjs --selftest
+      - name: "[ENFORCED] Behaviour suite (ADR-11 required behaviours)"
+        run: node scripts/measure-suite-time.mjs
 
   # ── Lighthouse (advisory) ──────────────────────────────────────────────────
   lighthouse:
