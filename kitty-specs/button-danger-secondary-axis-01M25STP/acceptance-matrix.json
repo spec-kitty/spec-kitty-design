@@ -188,10 +188,10 @@
       "criterion_id": "FR-019",
       "description": "Verify FR-019 is satisfied",
       "proof_type": "ci_pending",
-      "evidence": "Axe half PASSES: run-axe-storybook.js \u2014 613 stories, 0 WCAG violations, incl. elements-skbutton--danger-secondary and --danger-secondary-forced-colors related entries. Visual-regression half is genuinely NOT provable pre-CI: apps/storybook/src/tests/visual.spec.ts has two new toHaveScreenshot() cases (confirmed collected, not skipped \u2014 PW_INCLUDE_VISUAL gate), and no baseline PNG is committed (confirmed via git log --name-only, zero .png). Per this repo's own CI-authoritative-baseline policy, the first visual-regression CI run is expected to red by design until baselines are harvested from its visual-regression-diffs artifact. Marking pending rather than pass because the criterion as written requires both halves and the baseline does not exist yet.",
+      "evidence": "Axe half PASSES: run-axe-storybook.js \u2014 613 stories, 0 WCAG violations, incl. danger-secondary/-icon/-focus/-disabled/-forced-colors stories. Visual-regression half NOT provable pre-CI: apps/storybook/src/tests/visual.spec.ts gained two toHaveScreenshot() cases (confirmed collected, not silently skipped by the PW_INCLUDE_VISUAL gate), and no baseline PNG is committed (git log --name-only: zero .png). Per this repo's CI-authoritative-baseline policy the first visual-regression CI run is expected to red by design until baselines are harvested from its visual-regression-diffs artifact. FINDING [LOW, from WP review]: WP01-danger-secondary-axis.md's owned_files frontmatter omits apps/storybook/src/tests/visual.spec.ts even though FR-019 requires it and the diff touches it \u2014 a WP task-file scope-declaration gap, not a functional defect; left as-is per this repo's frozen-task-file policy, recorded here instead. Marking pending: the criterion requires both halves and the visual baseline does not exist yet.",
       "pass_fail": "pending",
       "verified_by": "reviewer-renata",
-      "verified_at": "2026-09-10T15:46:43.326496+00:00",
+      "verified_at": "2026-09-10T15:47:00.034536+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
