@@ -105,7 +105,11 @@ test.describe('sk-input / sk-form-input__control — rendered target size (FR-00
 
 test.describe('sk-input / sk-form-input__control — forced-colors distinguishability (FR-008)', () => {
   for (const { name, storyId, getControl } of paths) {
-    test(`${name} path: border survives forced-colors: active, resolved color recorded`, async ({ page }) => {
+    test(`${name} path: border survives forced-colors: active, resolved color recorded`, async ({
+      page,
+      browserName,
+    }) => {
+      test.skip(browserName !== 'chromium', 'Playwright forced-colours emulation is Chromium-only');
       await page.emulateMedia({ forcedColors: 'active' });
       await openStory(page, storyId);
       const control = await getControl(page);
