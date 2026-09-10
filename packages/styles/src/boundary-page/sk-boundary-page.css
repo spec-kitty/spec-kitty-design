@@ -174,7 +174,22 @@
   line-height: 1.5;
 }
 
-.sk-boundary-page__body :is(label, input, textarea, select) {
+/* C-003 class, same fix as the action-group's rule below (see that comment for the full
+   history): a bare `.sk-boundary-page__body :is(label, input, textarea, select)` selector
+   carries (0,1,1) — one class plus `:is()` taking its most specific argument — which sits
+   ABOVE any single-class consumer rule like `.sk-form-field__label` ((0,1,0)) and wins
+   regardless of import order. Measured directly: with the classed `.sk-form-field__label`
+   inside `.sk-boundary-page__body`, that (0,1,1) form forced the frame's `font-size:
+   var(--sk-text-base)`/normal weight (16px/400) onto the label in BOTH source orders,
+   discarding its own authored `--sk-text-sm`/`--sk-weight-medium` (14px/500). `:where()` on
+   BOTH the container and the element list drops this to true (0,0,0) — strictly below any
+   single class — so a composed `.sk-form-field__label` (or any other classed label/input)
+   always keeps its own typography, regardless of import order, while a bare unclassed
+   `<label>`/`<input>` still normalises to the frame's typography, because author origin beats
+   the UA default regardless of specificity. This is a normalisation convenience for bare
+   markup only, never a floor a consumer class should have to lose to — identical intent to the
+   `font: inherit` rule in the action-group's own zero-specificity rule below. */
+:where(.sk-boundary-page__body) :where(label, input, textarea, select) {
   font: inherit;
 }
 
@@ -187,7 +202,10 @@
      mark/footnote's full-DOM-omission contract — see this file's header comment. */
 }
 
-/* C-003 REMEDIATION (WP01 review finding, amended by the WP01 re-review). `.sk-boundary-page__action-group > *`'s
+/* C-003 REMEDIATION (WP01 review finding, amended by the WP01 re-review, and again by the
+   pre-merge squad — the SAME construct also surfaced two rules above, in `.sk-boundary-page__body`'s
+   `font: inherit` reset over `label`/`input`/`textarea`/`select`; that rule now carries the
+   identical `:where()` treatment for the identical reason, see its own comment above). `.sk-boundary-page__action-group > *`'s
    single rule used to carry a structural target-size floor (min-block-size/padding-inline, spec
    FR-013), a legibility floor (background/color), AND a typography reset (`font: inherit`) all at
    one specificity, (0,1,0) — identical to a consumer's own `.sk-button`/`.sk-button--primary`
