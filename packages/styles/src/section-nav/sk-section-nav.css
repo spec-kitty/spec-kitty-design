@@ -37,7 +37,7 @@
   border-block-end-width: var(--sk-border-width-4);
   font-weight: var(--sk-weight-normal);
   line-height: normal;
-  scroll-margin-inline: var(--sk-space-4);
+  scroll-margin-inline: var(--sk-space-9);
   text-decoration: none;
   white-space: nowrap;
 }

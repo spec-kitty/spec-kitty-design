@@ -439,22 +439,7 @@ test.describe('sk-section-nav live native semantics', () => {
     expect(sequence).toEqual([...hrefs, 'sentinel']);
   });
 
-  test('the last, off-screen-at-rest link scrolls fully into view on focus with an unclipped outline', async ({ page, browserName }) => {
-    // KNOWN, MEASURED FIREFOX LIMITATION — not a defect this styles-only family can fix.
-    // Reaching the last of six links via a REAL sequential Tab walk (Tab through nav, route-1..6)
-    // leaves it ~37-42px short of full reveal in Firefox specifically: measured scrollLeft after
-    // the walk is 358px against a true full-reveal scrollLeft of 395px. Isolated by direct
-    // comparison: a JS `.focus()` call straight to the same link — with no preceding Tab walk —
-    // scrolls Firefox to the correct 395px every time, as does Chromium's OWN real Tab walk.
-    // Enlarging `scroll-margin-inline` to 200px (12.5x the shipped token value) does not close the
-    // gap (still ~42px short), so this is not a margin-sizing shortfall; it is Firefox's own
-    // sequential-focus scroll heuristic under-scrolling relative to the FULL scrollable range once
-    // several prior Tab stops precede the target in one flow. Fixing it would require an
-    // on-focus `scrollIntoView()` listener, which C-004 forbids outright ("no keyboard scripting
-    // of any kind — this is a styles-only family with zero owned JavaScript behavior") — this
-    // family cannot own that listener without violating its own binding contract.
-    test.fail(browserName === 'firefox', 'Firefox sequential-Tab scrollIntoView under-scrolls the last of many links; see comment above. No CSS-only or JS-forbidden remedy exists within this family\'s C-004 contract.');
-
+  test('the last, off-screen-at-rest link scrolls fully into view on focus with an unclipped outline', async ({ page }) => {
     const { nav } = await openStory(page, 'narrow');
     const links = nav.locator('.sk-section-nav__link');
     const count = await links.count();
@@ -649,5 +634,70 @@ test.describe('sk-section-nav state and resilience contract', () => {
     expect(light.color).not.toBe(dark.color);
     expect(light.linkBackground).toBe('rgba(0, 0, 0, 0)');
     expect(dark.linkBackground).toBe('rgba(0, 0, 0, 0)');
+  });
+
+  /**
+   * CDP-APPROXIMATED 200%/400% REFLOW — NOT genuine browser-chrome zoom.
+   *
+   * `native-context-navigation-styles-01M1Y3MG`'s own task file is explicit that "viewport
+   * resizing or CSS `zoom` does not substitute for browser zoom" (T006), and that mission's
+   * reviewer filed the absence of real 200%/400% zoom evidence as [HIGH] (review-cycle-1.md:15)
+   * — this sandbox has no host browser UI to drive real ctrl/cmd-+ zoom through, so that exact
+   * evidence remains permanently out of reach here too (tracked at programme level, not a claim
+   * this WP makes; see the mission's implementation-evidence.md for the full disposition).
+   *
+   * What CDP's `Emulation.setDeviceMetricsOverride` DOES approximate: halving (then quartering)
+   * the CSS viewport while doubling (then quadrupling) `deviceScaleFactor` reproduces the REFLOW
+   * a page sees under real 200%/400% browser zoom (less available inline space, same physical
+   * pixels) — it does not reproduce the browser chrome's own zoom mechanism, UI scaling, or
+   * input/hit-testing behavior. Treat this test's result as reflow-under-constraint evidence only,
+   * never as "zoom was tested."
+   *
+   * SCOPE NOTE, measured rather than assumed: this suite's own `storyFrame()` helper wraps every
+   * fixture in a FIXED-width demo box (240px narrow / 320px default) simulating "a column this
+   * wide", not a fluid page. At the most aggressive scale factor (4, ~98px effective viewport) the
+   * fixed 240px demo frame legitimately exceeds that width and the outer HTML document scrolls —
+   * that is the fixed-size DEMO FIXTURE's own choice, not `.sk-section-nav` forcing document
+   * overflow (a real consumer's fluid container would shrink with the viewport; this demo frame
+   * deliberately does not, the same way every other story in this file is a fixed-width box).
+   * So this test asserts what is actually attributable to the family under test: the strip never
+   * exceeds the width its own immediate container gives it, and no content is lost — not a
+   * document-level scrollWidth equality the fixed demo frame cannot honestly satisfy at 400%.
+   */
+  test('CDP-approximated 200%/400% reflow: the strip stays within its container and no content is lost', async ({ page, browserName }) => {
+    test.skip(browserName !== 'chromium', 'Emulation.setDeviceMetricsOverride is a Chromium CDP method');
+    const session = await page.context().newCDPSession(page);
+    try {
+      for (const scaleFactor of [2, 4] as const) {
+        await session.send('Emulation.setDeviceMetricsOverride', {
+          width: Math.round(390 / scaleFactor),
+          height: Math.round(720 / scaleFactor),
+          deviceScaleFactor: scaleFactor,
+          mobile: false,
+        });
+        const { nav } = await openStory(page, 'many-routes');
+        const containment = await nav.evaluate((node) => {
+          const frame = node.closest('[data-section-nav-story-frame]');
+          if (frame === null) throw new Error('section-nav story frame is missing');
+          const navRect = node.getBoundingClientRect();
+          const frameRect = frame.getBoundingClientRect();
+          return {
+            navWithinFrame: navRect.right <= frameRect.right + 1 && navRect.left >= frameRect.left - 1,
+            navOwnsItsOverflow: node.scrollWidth >= node.clientWidth,
+          };
+        });
+        expect(containment.navWithinFrame, `scaleFactor=${scaleFactor}: strip exceeded its own container`).toBe(true);
+        expect(containment.navOwnsItsOverflow, `scaleFactor=${scaleFactor}`).toBe(true);
+        const links = nav.locator('.sk-section-nav__link');
+        expect(await links.count(), `scaleFactor=${scaleFactor}`).toBe(6);
+        for (const link of await links.all()) {
+          const text = (await link.innerText()).trim();
+          expect(text, `scaleFactor=${scaleFactor}`).not.toBe('');
+        }
+      }
+    } finally {
+      await session.send('Emulation.clearDeviceMetricsOverride');
+      await session.detach();
+    }
   });
 });
