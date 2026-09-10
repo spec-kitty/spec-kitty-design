@@ -35,6 +35,12 @@
  *   live value, which makes it a hardcoded 120px wearing a token's clothes — and `min-height`
  *   is not in stylelint's strict-value property list, so nothing objected. It is resolved
  *   against a real token where it reappears (sk-form-textarea.css, WP03).
+ *
+ * #321 — `.sk-form-input__control`'s resting-state border moved from `--sk-border-default`
+ * (a hairline that fails WCAG 1.4.11's ≥3:1 non-text floor on every surface in both themes) to
+ * the new `--sk-border-control` role, and gained `min-block-size: var(--sk-space-9)` (the 44px
+ * NFR-001 target-size floor). `.sk-input` in sk-form-field.css carries the identical values,
+ * mechanically kept in sync by tests/node/form-input-border-target-size-parity.test.ts.
  */
 
 /* ── The field wrapper, inside the shadow root ─────────────────────────── */
@@ -62,12 +68,14 @@
   width: 100%;
   padding: var(--sk-space-3) var(--sk-space-4);
   background: var(--sk-surface-input);
-  border: var(--sk-border-width-1) solid var(--sk-border-default);
+  border: var(--sk-border-width-1) solid var(--sk-border-control);
   border-radius: var(--sk-radius-sm);
   font-family: var(--sk-font-sans);
   font-size: var(--sk-text-base);
   color: var(--sk-fg-default);
   outline: none;
+  /* --sk-space-9 is 3rem/48px — the closest token at or above the 44px NFR-001 floor. */
+  min-block-size: var(--sk-space-9);
   transition:
     border-color var(--sk-motion-duration-fast) var(--sk-motion-ease-out),
     box-shadow var(--sk-motion-duration-fast) var(--sk-motion-ease-out);
