@@ -48,6 +48,18 @@
       "verdict": "verified-already-fixed",
       "wp": "WP01"
     },
+    "#286": {
+      "evidence_ref": "Open repository-wide i18n policy applied to #323: the element requires supplied labels and introduces no consumer-visible fallback copy",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "in-mission",
+      "wp": "WP01"
+    },
     "#323": {
       "evidence_ref": "WP01 approved implementation at 3b3d772e; exact gates and independent review in implementation-evidence.md",
       "fr": null,
