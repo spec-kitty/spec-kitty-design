@@ -72,6 +72,18 @@
       "verdict": "verified-already-fixed",
       "wp": "WP01"
     },
+    "#302": {
+      "evidence_ref": "Precedent mission (sk-pill-tag's render()-widened-safely reasoning for #286). This mission mirrors #302's reasoning per FR-017/spec.md line 235, rather than #308's -- confirmed by direct read of sk-button.ts's render() diff (no new literal-emitting path).",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
     "#305": {
       "evidence_ref": "This IS the mission (issue #305 itself, spec.md line 6). Implemented and independently reviewed in WP01 at 294022d; approved.",
       "fr": null,
