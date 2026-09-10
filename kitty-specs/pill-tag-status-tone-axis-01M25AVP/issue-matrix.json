@@ -73,7 +73,7 @@
       "wp": "WP01"
     },
     "#308": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "https://github.com/spec-kitty/spec-kitty-design/issues/308 \u2014 confirm-dialog absent-state HIGH, already fixed there; this mission's absent-state test (verified by mutation) follows its lesson but is not itself #308's fix",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -81,7 +81,7 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
+      "verdict": "verified-already-fixed",
       "wp": null
     },
     "#314": {
