@@ -138,10 +138,10 @@
       "criterion_id": "FR-014",
       "description": "Verify FR-014 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "apps/storybook/src/tests/sk-progress.spec.ts:74-75,148-153 (isIndeterminate helper scopes value/max/percentage test to determinate fixtures only, added in the same commit as the first indeterminate fixture)",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T13:11:04.016243+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
