@@ -165,3 +165,63 @@
   color: var(--sk-fg-muted);
   margin: 0;
 }
+
+/* THE COMPACT PRESENTATION (#354, plan.md D-4/D-8/D-9). Layout only: no `background`, no
+   `box-shadow`, no `transition`, no `animation`, and no `color` declaration anywhere below — the
+   existing `.sk-site-footer { border-top: ... }` above already survives `forced-colors: active`
+   with zero authored CSS, and adding a colour here would reach the shared `.sk-site-footer__link`
+   rule this file already ships for the full presentation.
+
+   EVERY RULE HERE IS AN ORDINARY ROOT-BLOCK BEM CLASS SELECTOR — never a host-attribute
+   selector, and this file adds no inline-size query container or query rule anywhere. That is
+   what keeps ADR-15's #309/#310 host-axis machinery untriggered (a grep for the three
+   container/host-selector tokens over this file, in the task prompt, must report only the
+   pre-existing display rule at the top): the class is written identically by the element (on
+   its own shadow `<footer>`) and by the static form (on the document `<footer>`), via the
+   shared `siteFooterClasses()` helper, so a bare class selector matches in both.
+
+   NO PHYSICAL left/right/margin-left/margin-right/text-align anywhere below — RTL (FR-013) must
+   mirror automatically via logical and flex properties alone. */
+
+/* `.sk-site-footer--compact` ITSELF CARRIES NO DECLARATION. The base `.sk-site-footer` rule
+   above (padding, border-top) already applies — both classes are always present together, via
+   `siteFooterClasses()` — and nothing about the compact layout needs to override it. The
+   modifier exists to be targeted (by a test, or a consumer override) independently of
+   `__row`/`__meta`; a `.sk-site-footer--compact .sk-site-footer__link--compact` DESCENDANT
+   selector would not match in the element path, where the root class sits in the shadow root
+   and the anchor does not descend from it — which is why `__link--compact` below is a bare
+   class selector, not scoped under the modifier. */
+
+.sk-site-footer__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sk-space-4);
+}
+
+.sk-site-footer__meta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sk-space-2);
+  min-width: 0;
+}
+
+@media (max-width: 640px) {
+  .sk-site-footer__row { flex-direction: column; align-items: flex-start; }
+}
+
+/* THE 44px TARGET-SIZE FLOOR (NFR-006), on a LIGHT-DOM class on the anchor — never a descendant
+   selector from `.sk-site-footer--compact`, which does not match in the element path (see
+   above). --sk-space-8 (40px) + --sk-space-1 (4px) = 44px; re-verified against
+   packages/tokens/src/tokens.css at implementation time.
+
+   No focus-ring CSS and no `color:`/`outline-color:` here — the compact links keep the UA's own
+   `:focus-visible` ring, the same one the full presentation's `.sk-site-footer__link` already
+   ships, so nothing here can reach the frozen full presentation. */
+.sk-site-footer__link--compact {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: calc(var(--sk-space-8) + var(--sk-space-1));
+  min-inline-size: calc(var(--sk-space-8) + var(--sk-space-1));
+  padding-inline: var(--sk-space-2);
+}
