@@ -167,7 +167,101 @@ const leadingCompound = (nodes) => {
   return out;
 };
 
-function violationsFor(selector, name) {
+/** Splits a selector's nodes into compounds at each top-level combinator. */
+function toCompounds(sel) {
+  const compounds = [];
+  let current = [];
+  for (const n of sel.nodes) {
+    if (n.type === 'combinator') {
+      compounds.push(current);
+      current = [];
+    } else current.push(n);
+  }
+  compounds.push(current);
+  return compounds;
+}
+
+/**
+ * Cross-sheet `::part()` — the fourth surface ADR-16 rules on, and this gate's second blind
+ * spot (#373, ADR-16's red-first probes).
+ *
+ * A `::part()` compound reaches into ANOTHER element's shadow tree by construction: a sheet
+ * only ever styles ITS OWN root from the inside (`:host`, an owned class, `::slotted()`), so
+ * writing `::part()` at all means naming a DIFFERENT element's exposed part from outside its
+ * root — there is no "self" spelling for it. `compoundOwns` only ever inspects the LEFTMOST
+ * compound, so `.sk-pill-tag sk-metric::part(metric)` sailed through unseen: the leftmost
+ * compound (`.sk-pill-tag`) owns the sheet, and nothing downstream of it was ever examined.
+ *
+ * ADR-16 ruled this pattern shadow-only, not forbidden — ADR-9 §2 already makes `::part()` one
+ * of exactly three sanctioned styling channels, and `sk-metric.css` ships one such rule reaching
+ * `sk-pill-tag`. So this gate does not reject `::part()` outright; it requires every occurrence
+ * to be a DELIBERATE, RECORDED one, the same shape `expected-parts.json` already gives a
+ * declared part: present in EXPECTED_CROSS_SHEET_PARTS_FILE, with a reason, or the rule is a
+ * violation.
+ */
+const partHere = (c) => c.some((n) => n.type === 'pseudo' && n.value === '::part');
+
+/** Whether any compound in the selector carries a `::part()` pseudo-element. */
+const hasCrossSheetPart = (sel) => toCompounds(sel).some(partHere);
+
+/**
+ * `::part()` is a pseudo-element: nothing may follow it via a COMBINATOR — a later compound
+ * never matches, the identical never-matches shape `slottedIsNotLast` already guards for
+ * `::slotted()`. UNLIKE `::slotted()`, a pseudo-CLASS may follow `::part()` in the SAME
+ * compound (`::part(tag):hover` is valid CSS Shadow Parts, measured — postcss-selector-parser
+ * parses it as two sibling pseudo nodes in one compound), so that case is deliberately not
+ * flagged here; flagging it would reject a legal, common form.
+ */
+const partIsNotLast = (sel) => {
+  const compounds = toCompounds(sel);
+  return compounds.some((c, i) => partHere(c) && i < compounds.length - 1);
+};
+
+const EXPECTED_CROSS_SHEET_PARTS_FILE = 'expected-cross-sheet-parts.json';
+
+/** Loaded once per run; entries are marked used as violationsFor() matches them. */
+let crossSheetPartAllowlist = null;
+const usedAllowlistEntries = new Set();
+
+function loadCrossSheetPartAllowlist() {
+  if (crossSheetPartAllowlist) return crossSheetPartAllowlist;
+  let raw;
+  try {
+    raw = readFileSync(EXPECTED_CROSS_SHEET_PARTS_FILE, 'utf8');
+  } catch {
+    throw new Error(
+      `${EXPECTED_CROSS_SHEET_PARTS_FILE} is missing — refusing to treat its absence as "no ` +
+        'cross-sheet ::part() rules exist"; a missing inventory reads exactly like an empty one.'
+    );
+  }
+  const parsed = JSON.parse(raw);
+  const entries = parsed.entries ?? [];
+  for (const e of entries) {
+    if (!e.file || !e.selector || !e.reason || !String(e.reason).trim()) {
+      throw new Error(
+        `${EXPECTED_CROSS_SHEET_PARTS_FILE} has an entry missing "file", "selector" or a ` +
+          `non-empty "reason": ${JSON.stringify(e)}`
+      );
+    }
+  }
+  crossSheetPartAllowlist = entries;
+  return entries;
+}
+
+/**
+ * Whether `file`+`selText` is a recorded exemption. Marks the entry used so a stale one — kept
+ * after the rule it exempted was removed or changed — can be caught at the end of the run,
+ * rather than rotting the way an unbounded allowlist always eventually does.
+ */
+function isAllowedCrossSheetPart(file, selText) {
+  const entries = loadCrossSheetPartAllowlist();
+  const idx = entries.findIndex((e) => e.file === file && e.selector === selText);
+  if (idx === -1) return false;
+  usedAllowlistEntries.add(idx);
+  return true;
+}
+
+function violationsFor(selector, name, file = null) {
   const found = [];
   let root;
   try {
@@ -185,12 +279,26 @@ function violationsFor(selector, name) {
     if (slottedIsNotLast(sel)) {
       found.push('::slotted() is a pseudo-element — nothing may follow it; this never matches');
     }
+    if (partIsNotLast(sel)) {
+      found.push('::part() is a pseudo-element — nothing may follow it via a combinator; this never matches');
+    }
     // 3. The general rule.
     if (!compoundOwns(leadingCompound(sel.nodes), name)) {
       found.push(
         `the leftmost compound "${String(sel).trim().split(/\s|>|\+|~/)[0]}" is not part of ` +
           `sk-${name}, so it is an ancestor this sheet cannot reach once adopted`
       );
+    }
+    // 4. Cross-sheet `::part()` (ADR-16, #373) — a recorded exemption or a violation.
+    if (hasCrossSheetPart(sel) && file !== null) {
+      const selText = String(sel).trim();
+      if (!isAllowedCrossSheetPart(file, selText)) {
+        found.push(
+          `"${selText}" reaches into another element's shadow tree via ::part() (ADR-16) and ` +
+            `is not a recorded exemption in ${EXPECTED_CROSS_SHEET_PARTS_FILE} — add one with a ` +
+            'reason in the same commit, or restate the rule without crossing the boundary'
+        );
+      }
     }
   }
   return found;
@@ -270,6 +378,106 @@ if (selftest) {
     );
     process.exit(1);
   }
+  // -------------------------------------------------------------------------
+  // CROSS-SHEET `::part()` PROBES (#373, ADR-16). ADR-16 measured this gate red-first against
+  // three probes appended to `sk-pill-tag.css` and reverted; the first two below are those
+  // probes verbatim, plus the control, plus the shipping exemption and two cases that isolate
+  // the "nothing may follow ::part() via a combinator" rule from a legal trailing pseudo-class.
+  // -------------------------------------------------------------------------
+  const REAL_METRIC_FILE = 'packages/styles/src/metric/sk-metric.css';
+  const REAL_METRIC_SELECTOR = '.sk-metric__annotation sk-pill-tag::part(tag)';
+  const PART_PROBES = [
+    // [selector, owner, file, expected, note]
+    [
+      '.sk-pill-tag sk-metric::part(metric)',
+      'pill-tag',
+      'probe.css',
+      'reject',
+      "ADR-16's probe 1 — reaches into another element's shadow tree, no recorded exemption",
+    ],
+    [
+      '.sk-pill-tag sk-metric::part(metric) .x',
+      'pill-tag',
+      'probe.css',
+      'reject',
+      "ADR-16's probe 2 — inert: nothing may follow ::part() via a combinator",
+    ],
+    [
+      'sk-metric::part(metric)',
+      'pill-tag',
+      'probe.css',
+      'reject',
+      "ADR-16's probe 3 — control: bare type selector leftmost, the gate's original rule catches it",
+    ],
+    [
+      REAL_METRIC_SELECTOR,
+      'metric',
+      REAL_METRIC_FILE,
+      'accept',
+      'the one shipping cross-sheet ::part() rule, exempted by file+selector in ' +
+        EXPECTED_CROSS_SHEET_PARTS_FILE,
+    ],
+    [
+      REAL_METRIC_SELECTOR,
+      'metric',
+      'packages/styles/src/other/sk-other.css',
+      'reject',
+      'same selector text, wrong file — matching is keyed to file+selector, not selector alone',
+    ],
+    [
+      '.sk-pill-tag sk-metric::part(metric):hover',
+      'pill-tag',
+      null,
+      'accept',
+      'a pseudo-CLASS may follow ::part() in the SAME compound (CSS Shadow Parts) — unlike ' +
+        '::slotted(), this must not be flagged as inert',
+    ],
+    [
+      '.sk-pill-tag sk-metric::part(metric)::before',
+      'pill-tag',
+      null,
+      'accept',
+      'a tree-abiding pseudo-ELEMENT may likewise follow — same allowance ::slotted() gets',
+    ],
+    [
+      '.sk-pill-tag sk-metric::part(metric) .x',
+      'pill-tag',
+      null,
+      'reject',
+      'the inert rule alone, isolated from the allowlist check by a null file',
+    ],
+  ];
+  let pbad = 0;
+  for (const [sel, owner, file, expected, note] of PART_PROBES) {
+    const got = violationsFor(sel, owner, file).length ? 'reject' : 'accept';
+    const ok = got === expected;
+    if (!ok) pbad += 1;
+    console.log(`${ok ? '✅' : '❌'} ${expected.padEnd(6)} ${sel.padEnd(46)} ${note}`);
+  }
+  if (pbad) {
+    console.error(`\n❌ ${pbad} of ${PART_PROBES.length} cross-sheet ::part() probe(s) did not behave as recorded.`);
+    process.exit(1);
+  }
+  // An empty-set floor for this table specifically — the same shape as the selector table's own
+  // FLOOR just above. A table trimmed to nothing would self-test green while re-opening exactly
+  // the blindness #373 exists to close.
+  const partRejects = PART_PROBES.filter(([, , , e]) => e === 'reject').length;
+  const partAccepts = PART_PROBES.length - partRejects;
+  const PART_FLOOR = { rejects: 5, accepts: 3 };
+  if (PART_PROBES.length === 0 || partRejects < PART_FLOOR.rejects || partAccepts < PART_FLOOR.accepts) {
+    console.error(
+      `❌ Cross-sheet ::part() probe table shrank: ${partRejects} reject / ${partAccepts} accept, ` +
+        `floor is ${PART_FLOOR.rejects} / ${PART_FLOOR.accepts}. ADR-16's three red-first probes ` +
+        'must stay in the table.'
+    );
+    process.exit(1);
+  }
+  // The accept/reject probes above against REAL_METRIC_FILE already exercised
+  // loadCrossSheetPartAllowlist() against the COMMITTED expected-cross-sheet-parts.json,
+  // confirming that file parses and that its one entry is well-formed, without a separate
+  // fixture. `--selftest` exits before the repository pass below, so the "stale exemption"
+  // check that pass runs never sees these probe-only lookups.
+
   // -------------------------------------------------------------------------
   // OWNERSHIP DERIVATION PROBES. The selector table above never reaches
   // `adoptedSheets()`, so before these existed the file's only new logic — deriving the adopted
@@ -576,11 +784,30 @@ for (const name of components) {
       ruleCount += 1;
       const line = rule.source?.start?.line ?? 0;
       // `owner`, not `name`: the sheet's author owns its rules.
-      for (const why of violationsFor(rule.selector, owner)) {
+      for (const why of violationsFor(rule.selector, owner, file)) {
         violations.push(`${file}:${line} — ${rule.selector.trim()} — ${why}`);
       }
     });
   }
+}
+
+// A STALE EXEMPTION IS THE SAME HOLE IN THE OTHER DIRECTION. An entry that no longer matches
+// any rule this run examined means either the rule was removed (the entry should have gone
+// with it) or it was edited (the entry now exempts nothing and something else, unrecorded, is
+// what actually ships) — either way the file has drifted from what it claims to describe, the
+// same rot `check-part-ratchet.mjs` refuses for declared parts.
+{
+  const entries = loadCrossSheetPartAllowlist();
+  entries.forEach((e, idx) => {
+    if (!usedAllowlistEntries.has(idx)) {
+      violations.push(
+        `${EXPECTED_CROSS_SHEET_PARTS_FILE} records an exemption for ${e.file} — "${e.selector}" ` +
+          `— that no rule in this run matched. Remove it if the rule is gone, or fix it if the ` +
+          `rule changed shape; a stale exemption is an allowlist that no longer describes the ` +
+          `repository.`
+      );
+    }
+  });
 }
 
 if (ruleCount === 0) {
@@ -604,5 +831,6 @@ if (violations.length) {
 
 console.log(
   `✅ No cross-root selectors: ${components.length} of ${components.length} element(s) checked, ` +
-    `${sheetCount} adopted stylesheet(s), ${ruleCount} rule(s).`
+    `${sheetCount} adopted stylesheet(s), ${ruleCount} rule(s), ` +
+    `${usedAllowlistEntries.size} recorded cross-sheet ::part() exemption(s), none stale.`
 );

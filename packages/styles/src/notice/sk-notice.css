@@ -207,6 +207,49 @@
    consumer's: an element-generated <h2> is an outline defect a consumer cannot
    repair from outside. `::slotted()` reaches only the top-level assigned node,
    which is exactly the consumer's heading. */
+/* WHAT A STATIC CONSUMER MUST AUTHOR INSTEAD (ADR-15).
+
+   All three rules below (this one, plus the two on `.sk-notice__body`) are SHADOW-ONLY: ADR-15
+   ruled `::slotted()` shadow-only because a page's outer-tree declaration beats an inner-tree
+   `::slotted()` one by CSS Cascade's tree-order rule regardless of specificity or source order
+   (generalised in ADR-16 — not a special case of `::slotted()`). No generated static form is
+   planned.
+
+   sk-notice HAS NO STATIC FORM AT ALL, not merely an ungenerated one — say so plainly rather
+   than implying markup ships. Its own module comment records why: the live region and the
+   dismiss control are meaningless without JavaScript, so there is nothing for
+   `build-element-markup.mjs` to generate and no `sk-notice.markup.ts` exists (packages/elements/
+   src/notice/sk-notice.ts). The classes below are read from that element's shadow template —
+   `.sk-notice__heading` and `.sk-notice__body` — because that template is ADR-10 §3's sole
+   authored source, but a server-rendered `sk-notice` composition is hypothetical until this
+   component is given one.
+
+   Read hypothetically, the assigned heading lands directly inside `.sk-notice__heading`, and
+   the assigned message paragraph(s) land directly inside `.sk-notice__body`:
+
+       .sk-notice__heading > * {
+         margin: 0;
+         font-size: var(--sk-text-lg);
+         font-weight: var(--sk-weight-semibold);
+         color: inherit;
+       }
+
+       .sk-notice__body > p {
+         margin-block: 0;
+       }
+
+       .sk-notice__body > p + p {
+         margin-block-start: var(--sk-space-2);
+       }
+
+   That reproduces the appearance, at (0,1,0), (0,1,1) and (0,1,2) respectively — competing on
+   ordinary terms rather than winning unconditionally the way the shadow rules do. A consumer
+   overriding any of them needs specificity STRICTLY HIGHER than its own number above; at a tie
+   the winner is whichever stylesheet comes last, where the element form would have yielded
+   regardless of order.
+
+   ADR-15 holds the full mechanism and outcome table. This comment adds no rule and changes
+   none. */
 .sk-notice__heading ::slotted(*) {
   margin: 0;
   font-size: var(--sk-text-lg);

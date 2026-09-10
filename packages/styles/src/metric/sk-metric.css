@@ -64,6 +64,58 @@
   max-width: 100%;
 }
 
+/* WHAT A STATIC CONSUMER MUST AUTHOR INSTEAD (ADR-16).
+
+   The rule below reaches into ANOTHER element's shadow tree through `::part()` — this repo's
+   only shipping cross-sheet `::part()` rule. ADR-16 ruled cross-sheet `::part()` SHADOW-ONLY:
+   no generated static form is planned, and no equality gate between the two forms is possible
+   (`check-adopted-css-boundaries.mjs` cannot see it today either — #373).
+
+   THE CLASS, not a part. `sk-pill-tag`'s generated static markup (`pillTagStaticHtml()`,
+   sk-pill-tag.markup.ts) is `<span class="sk-pill-tag ...">Label</span>` — with NO `part`
+   attribute, because a `part` attribute is inert outside a shadow root. A server-rendered
+   consumer authors an ordinary descendant rule against that class:
+
+       .sk-metric__annotation .sk-pill-tag {
+         box-sizing: border-box;
+         max-width: 100%;
+         padding-block: 0;
+         padding-inline: var(--sk-space-2);
+         overflow-wrap: anywhere;
+         white-space: normal;
+       }
+
+   That reproduces every declared value (ADR-16 S1-S7). It does NOT reproduce cascade position,
+   and the risk runs the OPPOSITE direction from `::slotted()`'s (sk-entity-marker.css,
+   sk-action-row.css): there the library sits in the INNER tree and always loses to the page;
+   here the reaching rule sits in the OUTER tree (this sheet, relative to `sk-pill-tag`'s), so in
+   the shadow form it beats `sk-pill-tag.css`'s own rules UNCONDITIONALLY, by tree order — not by
+   specificity, not by source order (ADR-16 M2, M4, M7). The static rewrite has no tree, so it
+   competes as an ordinary document rule at (0,2,0): it wins only while `sk-pill-tag.css` (or
+   any consumer sheet) does not declare something for `.sk-pill-tag` at an EQUAL OR HIGHER
+   specificity ordered later — a rule at a strictly higher specificity wins regardless of order,
+   and at a tie the winner is whichever stylesheet is last, where the shadow form would have won
+   regardless of order (ADR-16 S8-S10). That is a fact about what `sk-pill-tag.css` declares
+   TODAY, not a standing guarantee.
+
+   AND THE SURFACE IS WIDER, NOT NARROWER — the opposite caveat from `::slotted()`. In the
+   element path this composition is UNREACHABLE from the page by any selector at any weight,
+   because `sk-metric` forwards no `exportparts` (ADR-16 P1/P2/P4). The static rewrite above
+   makes the pill an ordinary `<span class="sk-pill-tag">` that any page rule can restyle
+   (ADR-16 P3/P5). A consumer relying on this instruction is gaining reach they did not have
+   in the element path, not losing any.
+
+   sk-metric HAS NO GENERATED STATIC MARKUP AT THIS HEAD — no `sk-metric.markup.ts`, no
+   `sk-metric.html` (packages/elements/src/metric/) — so the composition above is hypothetical;
+   whether sk-metric owes a static form at all is an open question this comment does not settle.
+   Nor does it adopt the #78 paired spelling (`.sk-metric__annotation .sk-pill-tag,
+   .sk-metric__annotation sk-pill-tag::part(tag)`): ADR-16 measured that the `::slotted()` case's
+   paired list is not invalidated by its shadow branch, but does not claim the result transfers
+   to a `::part()` branch, and there is no static markup here yet to re-measure it against — so
+   that decision stays open rather than assumed.
+
+   ADR-16 and kitty-specs/cross-sheet-part-static-form-adr16/measurement/ hold the full outcome
+   table. This comment adds no rule and changes none. */
 .sk-metric__annotation sk-pill-tag::part(tag) {
   box-sizing: border-box;
   max-width: 100%;

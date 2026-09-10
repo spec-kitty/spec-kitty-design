@@ -1,0 +1,27 @@
+{
+  "$comment": [
+    "The recorded-exemption inventory for cross-sheet ::part() rules (ADR-16, #373).",
+    "",
+    "check-adopted-css-boundaries.mjs cannot hold a ::part() rule that reaches into another",
+    "element's shadow tree equal to any static form — ADR-16 measured why: the win is by tree",
+    "order, which a static rewrite has no way to reproduce. So the gate does not forbid the",
+    "pattern outright (ADR-9 SS2 makes ::part() one of exactly three sanctioned styling",
+    "channels) — it requires every occurrence to be a DELIBERATE, RECORDED one, the same shape",
+    "expected-parts.json already gives a declared part.",
+    "",
+    "A rule reaching into another element's shadow tree via ::part() that is not listed here,",
+    "keyed by file + the exact selector text, is a gate failure. An entry that no longer matches",
+    "any rule the gate examines is ALSO a failure — a stale exemption describing a rule that no",
+    "longer exists, or no longer has that shape.",
+    "",
+    "Add an entry, with a reason, in the same commit that ships a new cross-sheet ::part() rule.",
+    "Remove the entry in the same commit that removes or rewrites the rule it exempts."
+  ],
+  "entries": [
+    {
+      "file": "packages/styles/src/metric/sk-metric.css",
+      "selector": ".sk-metric__annotation sk-pill-tag::part(tag)",
+      "reason": "ADR-16 (#314): sk-metric's only cross-sheet ::part() rule, styling sk-pill-tag's public `tag` part from inside sk-metric's own composition. Ruled shadow-only by ADR-16 — no equality gate is possible against a static form — and the static-consumer instruction this obligates is backfilled at the rule itself (#374)."
+    }
+  ]
+}

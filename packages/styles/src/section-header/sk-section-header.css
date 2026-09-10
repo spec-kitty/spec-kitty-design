@@ -30,6 +30,34 @@
   min-width: 0;
 }
 
+/* WHAT A STATIC CONSUMER MUST AUTHOR INSTEAD (ADR-15).
+
+   SHADOW-ONLY: ADR-15 ruled `::slotted()` shadow-only because a page's outer-tree declaration
+   beats an inner-tree `::slotted()` one by CSS Cascade's tree-order rule regardless of
+   specificity or source order (generalised in ADR-16 — not a special case of `::slotted()`).
+   No generated static form is planned.
+
+   THE CLASS, read from this element's own template (packages/elements/src/section-header/
+   sk-section-header.ts) rather than guessed: this element has no generated static markup at
+   this head (no `sk-section-header.markup.ts`, no `.html`), so the composition below is
+   hypothetical. Only the `title` slot carries this rule, and the assigned heading lands
+   directly inside `.sk-section-header__title` (the `<slot>` itself has no static counterpart):
+
+       .sk-section-header__title > * {
+         margin: 0;
+         color: var(--sk-fg-default);
+         font-family: var(--sk-font-display);
+         font-size: var(--sk-text-xl);
+         font-weight: var(--sk-weight-semibold);
+       }
+
+   That reproduces the appearance, at (0,1,0), competing on ordinary terms rather than winning
+   unconditionally the way the shadow rule does. A consumer overriding it needs specificity
+   STRICTLY HIGHER than (0,1,0); at a tie the winner is whichever stylesheet comes last, where
+   the element form would have yielded regardless of order.
+
+   ADR-15 holds the full mechanism and outcome table. This comment adds no rule and changes
+   none. */
 .sk-section-header__title slot::slotted(*) {
   margin: 0;
   color: var(--sk-fg-default);
