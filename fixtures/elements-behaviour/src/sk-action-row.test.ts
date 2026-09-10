@@ -10,6 +10,13 @@ import {
   type ActionRowActivateDetail,
   SkActionRow,
 } from '../../../packages/elements/src/action-row/sk-action-row.js';
+import {
+  ACTION_ROW_AXES,
+  ACTION_ROW_VARIANTS,
+  actionRowStaticHtml,
+  type ActionRowContent,
+  type ActionRowStaticOptions,
+} from '../../../packages/elements/src/action-row/sk-action-row.markup.js';
 import { userEvent } from 'vitest/browser';
 import actionRowCss from '../../../packages/styles/src/action-row/sk-action-row.css?raw';
 import { assertThemesDiffered, contrast } from './contrast.js';
@@ -849,4 +856,362 @@ test('the public attributes are exactly the four controlled inputs plus route an
     'selectable',
     'selected',
   ]);
+});
+
+
+// ============================================================================================
+// WP01 — sk-action-row static form (#307). Every test below proves the static markup a
+// consumer authors from `actionRowStaticHtml()` is a real parity match for the shadow form —
+// not a visual approximation — per FR-003/NFR-001, and encodes #272's sibling-not-descendant
+// rule (FR-006/FR-007) and the four absent-state axes (FR-011/FR-013/FR-014, #308's lesson).
+// ============================================================================================
+
+/**
+ * THE ANTI-DRIFT PIN (T004). `sk-action-row.css`'s header comment documents the literal
+ * `.sk-action-row-host` block a consumer must author until #309 generates it. This mission's own
+ * copies — this constant and the one in `docs/design-system/using-components.md` — must never
+ * silently diverge from that sheet's own text, so this block is pinned against it by assertion
+ * below rather than trusted by inspection.
+ */
+const LOCAL_ACTION_ROW_HOST_CSS = `
+  .sk-action-row-host {
+    display: block;
+    min-width: 0;
+    container-type: inline-size;
+  }
+`;
+
+/** Extracts the declaration list of the FIRST `<selector> { … }` block naming `.sk-action-row-host`
+ *  from raw CSS (or CSS-shaped comment) text. Used against both the sheet's header comment and
+ *  this file's own local copy, so the two are compared on the same footing. */
+const hostHostBlockDeclarations = (css: string, source: string): string[] => {
+  const match = css.match(/\.sk-action-row-host\s*\{([^}]*)\}/);
+  if (!match) {
+    throw new Error(
+      `sk-action-row.test.ts: could not find a ".sk-action-row-host { … }" block in ${source} — ` +
+        'the anti-drift pin has nothing to compare against.',
+    );
+  }
+  return match[1]
+    .split(';')
+    .map((declaration) => declaration.replace(/\s+/g, ' ').trim())
+    .filter((declaration) => declaration.length > 0)
+    .sort();
+};
+
+test('[T004][FR-004][FR-005] the locally-authored .sk-action-row-host block is textually equal (order-insensitive) to sk-action-row.css\'s header comment', () => {
+  const documented = hostHostBlockDeclarations(actionRowCss, "sk-action-row.css's header comment");
+  const local = hostHostBlockDeclarations(LOCAL_ACTION_ROW_HOST_CSS, 'this test\'s own LOCAL_ACTION_ROW_HOST_CSS');
+  expect(local).toEqual(documented);
+
+  // PROOF THE PIN CAN FAIL: a copy that dropped one declaration, or added an unrelated one, must
+  // not compare equal. Verified directly here (not merely asserted to be so) so the pin is not
+  // vacuous — see the report for the mutation-arm equivalent run against the authored module.
+  const droppedADeclaration = hostHostBlockDeclarations('.sk-action-row-host { display: block; min-width: 0; }', 'a deliberately incomplete copy');
+  expect(droppedADeclaration).not.toEqual(documented);
+  const addedAnExtraDeclaration = hostHostBlockDeclarations(
+    '.sk-action-row-host { display: block; min-width: 0; container-type: inline-size; width: 100%; }',
+    'a deliberately padded copy',
+  );
+  expect(addedAnExtraDeclaration).not.toEqual(documented);
+});
+
+/** Installs the real, unmodified `sk-action-row.css` (light-DOM document context, not a shadow
+ *  root) so computed-style assertions against the static markup reflect the shipped sheet. */
+const installActionRowCss = (): (() => void) => {
+  const style = document.createElement('style');
+  style.textContent = actionRowCss;
+  document.head.append(style);
+  return () => style.remove();
+};
+
+/** Installs the pinned `.sk-action-row-host` block ON TOP OF the real sheet — exactly what a
+ *  real consumer links today per `sk-action-row.css`'s own header comment and FR-005 (no
+ *  `.sk-action-row-host` rule ships from any package stylesheet in this mission). */
+const installActionRowHostAndCss = (): (() => void) => {
+  const style = document.createElement('style');
+  style.textContent = `${LOCAL_ACTION_ROW_HOST_CSS}\n${actionRowCss}`;
+  document.head.append(style);
+  return () => style.remove();
+};
+
+/** Parses `actionRowStaticHtml(opts, content)`'s output into a detached container. */
+const renderStatic = (opts: ActionRowStaticOptions = {}, content?: ActionRowContent): HTMLDivElement => {
+  const container = document.createElement('div');
+  container.innerHTML = actionRowStaticHtml(opts, content);
+  return container;
+};
+
+test('[T004][FR-003][NFR-001] static and shadow forms compute identical reflow at 360px, 400px and 401px', async () => {
+  const removeCss = installActionRowHostAndCss();
+  try {
+    const results: Record<number, { flexWrap: string }> = {};
+    for (const width of [360, 400, 401]) {
+      // SHADOW FORM — static (non-interactive) trigger, so the trigger TAG matches the static
+      // form's own default shape exactly (both `<div class="sk-action-row__trigger
+      // sk-action-row__trigger--static">`), keeping the comparison to what the shared CSS does
+      // rather than any UA-default difference between a <button> and a <div>.
+      const shadowFrame = document.createElement('div');
+      shadowFrame.style.width = `${width}px`;
+      document.body.append(shadowFrame);
+      const element = await mount({
+        selectable: false,
+        href: undefined,
+        children: `
+          <span slot="marker">SP</span>
+          <strong slot="title">team-landing-pivots</strong>
+          <code slot="reference">spec-kitty/e2e-team-landing</code>
+          <span slot="tags">Fresh</span>
+          <time slot="metadata">2 hours ago</time>
+          <a slot="controls" href="#details">Details</a>
+        `,
+      });
+      shadowFrame.append(element);
+      await element.updateComplete;
+      const shadowRow = partOf(element, 'row')!;
+      const shadowTrigger = triggerOf(element);
+      const shadowRowStyle = getComputedStyle(shadowRow);
+      const shadowTriggerStyle = getComputedStyle(shadowTrigger);
+      const shadow = {
+        flexWrap: shadowRowStyle.flexWrap,
+        gridTemplateAreas: shadowTriggerStyle.gridTemplateAreas,
+        gridTemplateColumns: shadowTriggerStyle.gridTemplateColumns,
+      };
+
+      // STATIC FORM — the two-element wrapper, equivalent content, both the pinned host block
+      // and the real built sheet adopted, reproducing exactly what a real consumer does.
+      const staticFrame = document.createElement('div');
+      staticFrame.style.width = `${width}px`;
+      document.body.append(staticFrame);
+      staticFrame.innerHTML = actionRowStaticHtml(
+        {},
+        {
+          mark: 'SP',
+          title: 'team-landing-pivots',
+          reference: 'spec-kitty/e2e-team-landing',
+          tags: 'Fresh',
+          metadata: '2 hours ago',
+          controls: '<a href="#details">Details</a>',
+        },
+      );
+      const staticRow = staticFrame.querySelector('.sk-action-row') as HTMLElement;
+      const staticTrigger = staticFrame.querySelector('.sk-action-row__trigger') as HTMLElement;
+      const staticRowStyle = getComputedStyle(staticRow);
+      const staticTriggerStyle = getComputedStyle(staticTrigger);
+
+      expect(staticRowStyle.flexWrap, `flex-wrap mismatch at ${width}px`).toBe(shadow.flexWrap);
+      expect(staticTriggerStyle.gridTemplateAreas, `grid-template-areas mismatch at ${width}px`).toBe(
+        shadow.gridTemplateAreas,
+      );
+      expect(staticTriggerStyle.gridTemplateColumns, `grid-template-columns mismatch at ${width}px`).toBe(
+        shadow.gridTemplateColumns,
+      );
+
+      results[width] = { flexWrap: shadow.flexWrap };
+      shadowFrame.remove();
+      staticFrame.remove();
+    }
+
+    // THE BOUNDARY ITSELF, computed within this run rather than transcribed from ADR-15's own
+    // tables (sub-pixel/engine values are not portable; the WRAP VERDICT at the boundary is).
+    expect(results[400]!.flexWrap, '400px must wrap').toBe('wrap');
+    expect(results[401]!.flexWrap, '401px must not wrap').not.toBe('wrap');
+  } finally {
+    removeCss();
+  }
+});
+
+test('[T004] a hostile href cannot break out of the trigger anchor\'s attribute, and legitimate characters round-trip', () => {
+  // ASSERTED BY PARSING, matching sk-button.markup.ts's own documented test approach — a
+  // substring check would pass against a CORRECTLY escaped string too.
+  const hostile = actionRowStaticHtml({ href: '" onfocus=alert(1) x="' }, { title: 'Hostile href' });
+  const parsed = new DOMParser().parseFromString(hostile, 'text/html');
+  const anchor = parsed.querySelector('a')!;
+  expect(anchor, 'the hostile input must still produce exactly one anchor trigger').not.toBe(null);
+  expect(anchor.getAttributeNames().sort(), 'no attribute may be injected').toEqual([
+    'aria-labelledby',
+    'class',
+    'href',
+  ]);
+  expect(anchor.getAttribute('href')).toBe('" onfocus=alert(1) x="');
+
+  const amp = actionRowStaticHtml({ href: '/s?a=1&b=2' }, { title: 'Ampersand href' });
+  expect(amp).toContain('href="/s?a=1&amp;b=2"');
+  expect(new DOMParser().parseFromString(amp, 'text/html').querySelector('a')!.getAttribute('href')).toBe(
+    '/s?a=1&b=2',
+  );
+});
+
+test('[T005][FR-006][FR-007] trailing controls are a DOM sibling of the trigger, never a descendant, across every generated exemplar', async () => {
+  const exemplars: [string, ActionRowStaticOptions][] = [['base', {}], ...Object.entries(ACTION_ROW_AXES)];
+  expect(Object.keys(ACTION_ROW_VARIANTS)).toHaveLength(0); // no variant forms exist for this component
+  for (const [name, opts] of exemplars) {
+    const container = renderStatic(opts); // default content includes controls
+    expect(
+      container.querySelector('.sk-action-row__trigger .sk-action-row__controls'),
+      `${name}: controls must never be a descendant of the trigger`,
+    ).toBe(null);
+    const trigger = container.querySelector('.sk-action-row__trigger');
+    const controls = container.querySelector('.sk-action-row__controls');
+    expect(trigger, `${name}: trigger missing`).not.toBe(null);
+    expect(controls, `${name}: controls missing from a generated exemplar that should carry them`).not.toBe(null);
+    expect(trigger!.parentElement, `${name}: controls must be a sibling of the trigger`).toBe(
+      controls!.parentElement,
+    );
+  }
+
+  // THE SHADOW ROOT AS A CONTROL (data-model.md), proving the two forms agree structurally.
+  const element = await mount();
+  expect(element.shadowRoot!.querySelector('.sk-action-row__trigger .sk-action-row__controls')).toBe(null);
+  expect(triggerOf(element).parentElement).toBe(partOf(element, 'controls')!.parentElement);
+});
+
+test('[T006][FR-011] aria-current is present with the correct value when current, and entirely absent — never "false" — when not', () => {
+  const notCurrentRow = renderStatic({}, { title: 'Not current' }).querySelector('.sk-action-row')!;
+  expect(notCurrentRow.hasAttribute('aria-current')).toBe(false);
+  expect(notCurrentRow.outerHTML).not.toContain('aria-current');
+
+  const currentRow = renderStatic({ current: true }, { title: 'Current' }).querySelector('.sk-action-row')!;
+  expect(currentRow.getAttribute('aria-current')).toBe('true');
+
+  const routeContainer = renderStatic({ href: '#x' }, { title: 'Route, not current' });
+  expect(routeContainer.querySelector('.sk-action-row')!.hasAttribute('aria-current')).toBe(false);
+  expect(routeContainer.querySelector('.sk-action-row__trigger')!.hasAttribute('aria-current')).toBe(false);
+
+  const routeCurrentContainer = renderStatic({ href: '#x', current: true }, { title: 'Route, current' });
+  const routeCurrentRow = routeCurrentContainer.querySelector('.sk-action-row')!;
+  const routeCurrentAnchor = routeCurrentContainer.querySelector('.sk-action-row__trigger')!;
+  expect(routeCurrentRow.hasAttribute('aria-current'), 'the row must not ALSO carry aria-current in route mode').toBe(
+    false,
+  );
+  expect(routeCurrentAnchor.getAttribute('aria-current')).toBe('page');
+
+  // MUTATION-EQUIVALENT CHECK, verified directly: a build that emitted `aria-current="false"`
+  // instead of omitting the attribute would still satisfy a naive `getAttribute(...) !== 'true'`
+  // check. `hasAttribute` does not have that gap — confirmed by constructing exactly that string
+  // and asserting THIS test's own predicate rejects it.
+  const regressed = document.createElement('div');
+  regressed.setAttribute('aria-current', 'false');
+  expect(regressed.hasAttribute('aria-current'), 'hasAttribute must catch an aria-current="false" regression').toBe(
+    true,
+  );
+});
+
+test('[T006][FR-012] flush presentation changes computed background/border, and its absence restores the bordered surface — read from computed style, not the class list', () => {
+  const removeCss = installActionRowCss();
+  const bordered = renderStatic({}, { title: 'Bordered' });
+  const flush = renderStatic({ presentation: 'flush' }, { title: 'Flush' });
+  document.body.append(bordered, flush);
+  try {
+    const borderedRow = bordered.querySelector('.sk-action-row') as HTMLElement;
+    const flushRow = flush.querySelector('.sk-action-row') as HTMLElement;
+    const borderedStyle = getComputedStyle(borderedRow);
+    const flushStyle = getComputedStyle(flushRow);
+
+    expect(flushStyle.borderWidth, 'flush must drop the border').toBe('0px');
+    expect(borderedStyle.borderWidth, 'the bordered row must keep a real border').not.toBe('0px');
+    expect(
+      flushStyle.backgroundColor,
+      'flush and bordered must not compute the same background',
+    ).not.toBe(borderedStyle.backgroundColor);
+
+    // MUTATION-EQUIVALENT CHECK: a leaked `class="sk-action-row sk-action-row--flush"` on the
+    // BORDERED row with no matching rule change would still say `classList.contains(...)` is
+    // false for the bordered row and true for the flush row — the class-list signal alone cannot
+    // catch a declaration that silently stopped applying. Confirmed directly: forcing the
+    // border-clearing declaration onto the bordered row's OWN computed style and observing that
+    // this test's border assertion (not the class list) is what would catch it.
+    borderedRow.style.setProperty('border-width', '0px');
+    expect(getComputedStyle(borderedRow).borderWidth, 'the computed-style assertion must be sensitive to a leak').toBe(
+      '0px',
+    );
+  } finally {
+    bordered.remove();
+    flush.remove();
+    removeCss();
+  }
+});
+
+test('[T006][FR-013] each optional anatomy part is entirely absent from the DOM — not an empty wrapper — when no content is supplied', () => {
+  const sparse = renderStatic({}, { title: 'Only a title is supplied' });
+  for (const part of ['marker', 'reference', 'tags', 'metadata', 'supporting']) {
+    expect(
+      sparse.querySelector(`.sk-action-row__${part}`),
+      `${part} must be entirely absent from the DOM, not merely empty`,
+    ).toBe(null);
+  }
+  expect(sparse.querySelector('.sk-action-row__title'), 'the mandatory title must still be present').not.toBe(null);
+
+  // MUTATION-EQUIVALENT CHECK, verified directly: an implementation that rendered an EMPTY
+  // `<span class="sk-action-row__marker"></span>` instead of omitting it entirely would be found
+  // by this same querySelector — confirmed by constructing exactly that leak and observing the
+  // query DOES find it, which is what the assertion above depends on to fail correctly.
+  const leaked = document.createElement('div');
+  leaked.innerHTML = '<span class="sk-action-row__marker"></span>';
+  expect(leaked.querySelector('.sk-action-row__marker'), 'the query must be able to catch a leaked empty wrapper').not.toBe(
+    null,
+  );
+});
+
+test('[T006][FR-014] no trailing action renders no .sk-action-row__controls element at all — absent, not hidden', () => {
+  const noControls = renderStatic({}, { title: 'No controls here' });
+  expect(noControls.querySelector('.sk-action-row__controls')).toBe(null);
+  expect(noControls.innerHTML).not.toMatch(/controls[^>]*hidden|hidden[^>]*controls/);
+
+  const withControls = renderStatic({}, { title: 'Has controls', controls: '<a href="#">Go</a>' });
+  expect(withControls.querySelector('.sk-action-row__controls'), 'the positive case must still render controls').not.toBe(
+    null,
+  );
+});
+
+test('[T007][FR-017][NFR-003] the anchor and each trailing control are distinct DOM-order tab stops, each ≥44×44px at narrow and desktop widths', () => {
+  const removeCss = installActionRowHostAndCss();
+  try {
+    for (const width of [360, 960]) {
+      const frame = document.createElement('div');
+      frame.style.width = `${width}px`;
+      document.body.append(frame);
+      frame.innerHTML = actionRowStaticHtml(
+        { href: '#route' },
+        {
+          title: 'Route row with two controls',
+          // Sized inline per FR-017's own target-size floor — the requirement is on the
+          // STATIC FORM as a consumer actually authors it (the row markup itself imposes no
+          // ceiling), not on any one control component's shipped default. `sk-button`'s own
+          // base height (measured 42px, two below the floor) is an existing, unrelated fact
+          // about that component's CSS and out of this WP's owned_files.
+          controls:
+            '<a href="#one" style="display:inline-flex;align-items:center;justify-content:center;min-width:44px;min-height:44px;">One</a>' +
+            '<button type="button" style="display:inline-flex;align-items:center;justify-content:center;min-width:44px;min-height:44px;">Two</button>',
+        },
+      );
+      const container = frame.firstElementChild!;
+
+      const trigger = container.querySelector('.sk-action-row__trigger') as HTMLElement;
+      const controls = Array.from(container.querySelectorAll('.sk-action-row__controls a, .sk-action-row__controls button')) as HTMLElement[];
+      expect(controls, `${width}px: expected exactly two controls`).toHaveLength(2);
+
+      // DISTINCT, DOM-ORDER TAB STOPS: the trigger anchor followed by each control, in the
+      // order `querySelectorAll` returns them (document order), with no duplicate node.
+      const focusables = [trigger, ...controls];
+      expect(new Set(focusables).size, `${width}px: every focusable target must be a distinct node`).toBe(3);
+      const allNodes = Array.from(container.querySelectorAll('a, button'));
+      expect(allNodes.indexOf(trigger), `${width}px: the trigger must precede the controls in DOM order`).toBeLessThan(
+        allNodes.indexOf(controls[0]!),
+      );
+      expect(allNodes.indexOf(controls[0]!)).toBeLessThan(allNodes.indexOf(controls[1]!));
+
+      const triggerRect = trigger.getBoundingClientRect();
+      expect(triggerRect.width, `${width}px: trigger width`).toBeGreaterThanOrEqual(44);
+      expect(triggerRect.height, `${width}px: trigger height`).toBeGreaterThanOrEqual(44);
+      for (const [i, control] of controls.entries()) {
+        const rect = control.getBoundingClientRect();
+        expect(rect.width, `${width}px: control ${i} width`).toBeGreaterThanOrEqual(44);
+        expect(rect.height, `${width}px: control ${i} height`).toBeGreaterThanOrEqual(44);
+      }
+      frame.remove();
+    }
+  } finally {
+    removeCss();
+  }
 });
