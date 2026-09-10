@@ -1,9 +1,7 @@
 # Public contract: `sk-confirm-dialog`
 
-Exact attribute names, the backdrop-dismissal toggle's default, and the final `::part()` set are
-finalized during `/spec-kitty.tasks` and implementation (see research.md's "Open questions carried
-into tasks"). This contract fixes what is **not** negotiable: the shape, the no-defaults rule, and
-the single reporting mechanism.
+Finalized during implementation (WP01, #308). This contract fixes the shape, the no-defaults
+rule, and the single reporting mechanism.
 
 ## Inputs
 
@@ -13,19 +11,24 @@ the single reporting mechanism.
 | `message` | `message` | `string` | **none** | Yes — same as above |
 | `confirmLabel` | `confirm-label` | `string` | **none** | Yes — same as above |
 | `cancelLabel` | `cancel-label` | `string` | **none** | Yes — same as above |
+| `confirmVariant` | `confirm-variant` | `'primary' \| 'secondary' \| 'ghost' \| undefined` | **none** (renders the unstyled base `.sk-button`) | No — a style choice, not user-visible copy, so it is exempt from the no-defaults rule (FR-004) |
 | `initialFocus` | `initial-focus` | `'confirm' \| 'cancel'` | `'cancel'` | No — this is a behavioral safe-default (FR-008), not user-visible copy, so it is exempt from the no-defaults rule |
-| a backdrop-dismissal toggle | *(name finalized in tasks)* | `boolean` | *(finalized in tasks)* | No |
+| `backdropDismiss` | `backdrop-dismiss` | `boolean` (reflected) | `false` | No — the safest default for a destructive confirmation is to require an explicit control activation; a consumer opts in to backdrop dismissal explicitly |
+| `open` | `open` | `boolean` (reflected, read-mostly) | `false` | No — mirrors the native `<dialog>`'s real open/closed state (ADR-11 SC-005); a consumer should not assign it directly |
 
-**No property in this table other than `initialFocus` and the backdrop-dismissal toggle may ever
-carry a fallback value that renders as literal text.** This is the sharpest, most heavily reviewed
-line in issue #308: "No user-visible literal enters `render()`."
+**No property in this table other than `confirmVariant`, `initialFocus`, `backdropDismiss` and
+`open` may ever carry a fallback value that renders as literal text.** This is the sharpest, most
+heavily reviewed line in issue #308: "No user-visible literal enters `render()`."
 
 ## Opening and closing
 
-- The consumer opens the dialog by calling the underlying native `showModal()` behavior (exposed
-  however the element chooses to expose it — as a public method or by consumer access to the
-  rendered `<dialog>` via a part — finalized in tasks). The platform then supplies focus trapping,
-  page inertness, and top-layer stacking (FR-013).
+- The consumer opens the dialog by calling the element's own public `showModal(invoker?)` method,
+  which also records the invoker (or `document.activeElement`, if omitted) for FR-009's focus
+  return and resets `returnValue` to `'cancel'` before opening (FR-007). The rendered `<dialog>`
+  itself remains reachable at `shadowRoot.querySelector('[part="dialog"]')`, the same node
+  `::part(dialog)` targets from outside, for a consumer who prefers to call its native
+  `showModal()`/`close()` directly. The platform supplies focus trapping, page inertness, and
+  top-layer stacking either way (FR-013).
 - The consumer never calls a "confirm" or "cancel" method on the element itself to force an
   outcome — the element performs no action; it only reports what the user did (FR-005).
 
@@ -50,15 +53,19 @@ no second, competing custom event for outcome reporting. Every path below resolv
 
 Focus returns to the element that invoked the dialog on every path above (FR-009).
 
-## Parts and semantics (illustrative — finalized in tasks)
+## Parts and semantics
 
-- A root dialog surface part.
-- A title/heading part (accessible name source).
-- A body part (accessible description source; scrolls when content overflows, FR-010).
-- An actions part containing the confirm and cancel controls.
-- The confirm control composes the existing `.sk-button` contract; **the consumer supplies its
-  tone** (e.g., a destructive red vs. a neutral tone) — the element never infers or applies one
-  (FR-004).
+Six declared `::part()`s, each present unconditionally and targetable from outside:
+
+- `dialog` — the native `<dialog>` itself; the root surface.
+- `title` — the heading node; its text is the dialog's accessible name (`aria-labelledby`).
+- `body` — the message region; its text is the dialog's accessible description
+  (`aria-describedby`); scrolls independently when content overflows (FR-010).
+- `actions` — the footer row holding the cancel and confirm controls; never scrolls.
+- `cancel` — the cancel control.
+- `confirm` — the confirm control. Composes the existing `.sk-button` contract; **the consumer
+  supplies its tone** via `confirm-variant` (e.g., a destructive red vs. a neutral tone) — the
+  element never infers or applies one itself (FR-004).
 
 ## What this element does NOT do
 

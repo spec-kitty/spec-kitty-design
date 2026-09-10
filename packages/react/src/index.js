@@ -5,6 +5,7 @@ export * from "./SkBlogCard.js";
 export * from "./SkButton.js";
 export * from "./SkCard.js";
 export * from "./SkCheckBullet.js";
+export * from "./SkConfirmDialog.js";
 export * from "./SkContextSidebar.js";
 export * from "./SkCopyField.js";
 export * from "./SkEntityMarker.js";

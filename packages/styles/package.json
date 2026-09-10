@@ -20,6 +20,7 @@
     "./check-bullet/*": "./dist/check-bullet/*",
     "./checkbox-choice-group/*": "./dist/checkbox-choice-group/*",
     "./collection/*": "./dist/collection/*",
+    "./confirm-dialog/*": "./dist/confirm-dialog/*",
     "./context-nav/*": "./dist/context-nav/*",
     "./context-sidebar/*": "./dist/context-sidebar/*",
     "./copy-field/*": "./dist/copy-field/*",
