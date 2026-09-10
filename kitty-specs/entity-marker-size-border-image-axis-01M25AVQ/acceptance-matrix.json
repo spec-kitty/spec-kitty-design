@@ -38,10 +38,10 @@
       "criterion_id": "FR-004",
       "description": "Verify FR-004 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "fixtures/elements-behaviour/src/sk-entity-marker.test.ts:171 '[FR-004] the border modifier does not change the outer box'; apps/storybook/src/tests/sk-compact-work-item-extensions.spec.ts '[FR-004] the border modifier does not change the outer box (real Storybook render)' and 'at every named size and shape' \u2014 deterministic getBoundingClientRect() equality asserted, reviewer reproduced Playwright 15/15",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T11:03:05.694237+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
