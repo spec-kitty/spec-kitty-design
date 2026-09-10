@@ -121,7 +121,7 @@
       "wp": "WP01"
     },
     "#93": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "Recorded LightMode/class=sk-light defect. Verified sk-button.stories.ts's LightMode story uses class=\"sk-light\", not data-theme=\"light\" (packages/elements/src/button/sk-button.stories.ts).",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -129,8 +129,8 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
     }
   },
   "schema_version": 1
