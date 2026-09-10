@@ -68,10 +68,10 @@
       "criterion_id": "FR-007",
       "description": "Verify FR-007 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "apps/storybook/src/tests/sk-form-input-contrast-touch-target.spec.ts, rendered target-size tests: PASS on chromium+firefox for both consumption paths at 390px and calibrated 200% zoom (webkit fails suite-wide on this host for an unrelated pre-existing dependency reason, documented). DISCLOSED LIMITATION, independently verified by this reviewer, not taken on the implementer's word: min-block-size: var(--sk-space-9) is NOT currently the sole guarantor of the 44px floor on either path -- with it removed from BOTH files (rebuilt CSS + Storybook), I measured the actual rendered boxes myself via a scratch script: static=48px, element=48px, i.e. removing it alone changes nothing observable (padding+border+line-height already sum to 48px). I then additionally zeroed both rules' block padding (padding: var(--sk-space-3) var(--sk-space-4) -> 0 var(--sk-space-4)), touching only .sk-input's line and not .sk-textarea's identical-looking line at a different offset in the same file, and re-measured: both paths at exactly 24px, and the real FR-007 Playwright assertion reds with 'Error: static path at 390px: measured block-size 24px, below the 44px floor' / same for element path -- exact match to the implementer's reported evidence. MY VERDICT: this disclosure is honest and sufficient, not an excuse -- it correctly assigns single-declaration-deletion coverage to FR-006 (which does red on that case) and whole-contract-break coverage to FR-007 (which reds only when padding+floor are both broken together), and both halves of that division were independently reproduced by me, not merely re-asserted from the implementer's transcript.",
+      "pass_fail": "pass",
+      "verified_by": "reviewer-renata",
+      "verified_at": "2026-09-10T15:49:06.299468+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
