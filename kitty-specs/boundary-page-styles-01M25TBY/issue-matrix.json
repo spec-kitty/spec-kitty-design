@@ -1,7 +1,7 @@
 {
   "rows": {
     "#286": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "Spurious/no-overlap citation, no work owed by this WP. #286 is spec-kitty-design's open, cross-cutting no-literal-copy gate. spec.md:217 (FR-014) and spec.md:238 (C-004) explicitly decline a repo-wide or component-scoped gate here: sk-boundary-page has no render() and emits no markup itself (research.md Decision 5), so the #308 precedent's risk does not apply. #286 stays open; no followup is intended by this mission.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -9,8 +9,8 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
     },
     "#300": {
       "evidence_ref": "<link or commit>",
