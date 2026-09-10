@@ -23,6 +23,7 @@
   "purpose_context": "This mission advances confirm dialog element on mission/confirm-dialog-element so stakeholders can track the work from mission creation onward.",
   "purpose_tldr": "confirm dialog element",
   "slug": "confirm-dialog-element-01M248TN",
+  "status_phase": "1",
   "target_branch": "mission/confirm-dialog-element",
   "topology": "single_branch"
 }
