@@ -2,6 +2,11 @@
 /* All values use --sk-* tokens only — no hardcoded values, except the system-color keyword
    under forced-colors — see docs/contributing/adding-a-component.md's "Forced-colors and
    reduced-motion baselines" section, the canonical owner of that convention; not restated here. */
+/* The published exemplars compose sk-entity-marker and sk-pill-tag (both unmodified, placement
+   only — see this file's COMPOSITION comment below); a consumer using an exemplar as-is must also
+   load those components' own stylesheets (packages/styles/src/entity-marker/sk-entity-marker.css
+   and packages/styles/src/pill-tag/sk-pill-tag.css, or the entity-marker element's own bundled
+   shadow CSS if composed as a custom element), or the composed pill/mark render untoned/unstyled. */
 /*
  * NO SHADOW ROOT, NO CUSTOM ELEMENT — deliberately, and for a reason distinct from this
  * directory's other styles-only components. ADR-10's "Styles-only components are a class, not
@@ -182,30 +187,36 @@
      mark/footnote's full-DOM-omission contract — see this file's header comment. */
 }
 
-/* C-003 REMEDIATION (WP01 review finding). `.sk-boundary-page__action-group > *`'s single rule
-   used to carry BOTH a structural target-size floor (min-block-size/padding-inline, spec FR-013)
-   AND a legibility floor (background/color) at one specificity, (0,1,0) — identical to a
-   consumer's own `.sk-button`/`.sk-button--primary` (also single classes, (0,1,0)). Source order
-   then decided, and BOTH orders broke something: `button.css` after this file let the frame's
-   rule win, so a composed `<button class="sk-button sk-button--primary">` lost its yellow
-   background and on-primary text; `button.css` before this file let `.sk-button`'s own `padding`
-   shorthand win instead, so the frame lost its 20px `padding-inline` and weakened FR-013's target
-   size. These two floors need OPPOSITE outcomes against a consumer class, so they are now two
-   rules at two different, ORDER-INDEPENDENT specificities rather than one rule at a shared,
-   order-DEPENDENT one:
+/* C-003 REMEDIATION (WP01 review finding, amended by the WP01 re-review). `.sk-boundary-page__action-group > *`'s
+   single rule used to carry a structural target-size floor (min-block-size/padding-inline, spec
+   FR-013), a legibility floor (background/color), AND a typography reset (`font: inherit`) all at
+   one specificity, (0,1,0) — identical to a consumer's own `.sk-button`/`.sk-button--primary`
+   (also single classes, (0,1,0)). Source order then decided, and BOTH orders broke something:
+   `button.css` after this file let the frame's rule win, so a composed `<button class="sk-button
+   sk-button--primary">` lost its yellow background and on-primary text; `button.css` before this
+   file let `.sk-button`'s own `padding` shorthand win instead, so the frame lost its 20px
+   `padding-inline` and weakened FR-013's target size. Only TWO of these three properties need to
+   win outright regardless of order; the third needs to LOSE outright. So they sit in two rules at
+   two different, ORDER-INDEPENDENT specificities, split by which outcome each one needs against a
+   consumer class — never by which rule "sounds structural":
 
-   1. The TARGET-SIZE floor below is deliberately NOT beatable by a same-specificity consumer
-      class: `> :is(a, button)` carries the element selector's own specificity, (0,1,1) — strictly
-      ABOVE any single class like `.sk-button`, (0,1,0) — so it wins regardless of import order.
-      This is FR-013's accessibility floor (WCAG minimum target size); a consumer's own visual
-      styling must never be able to shrink it back under 44px by accident.
-   2. The LEGIBILITY floor further below is deliberately fully `:where()`-wrapped, INCLUDING the
-      container class — `:where(.sk-boundary-page__action-group) > :where(a, button)` — for TRUE
-      zero specificity, (0,0,0), strictly BELOW any single class, so it always loses to a
-      consumer's own background/color, regardless of import order. It exists only to keep a BARE,
-      unclassed action legible (see the MEASURED comment below); the instant a consumer supplies
-      their own tone via a class, that tone must win outright, not merely "when it happens to load
-      second". */
+   1. The TARGET-SIZE floor below (`min-block-size`, `padding-inline` — spec FR-013, WCAG minimum
+      target size) is deliberately NOT beatable by a same-specificity consumer class: `> :is(a,
+      button)` carries the element selector's own specificity, (0,1,1) — strictly ABOVE any single
+      class like `.sk-button`, (0,1,0) — so it wins regardless of import order. A consumer's own
+      visual styling must never be able to shrink it back under 44px by accident.
+   2. The LEGIBILITY floor AND the typography reset (`background`, `color`, `font: inherit`)
+      further below are deliberately fully `:where()`-wrapped, INCLUDING the container class —
+      `:where(.sk-boundary-page__action-group) > :where(a, button)` — for TRUE zero specificity,
+      (0,0,0), strictly BELOW any single class, so a consumer's own value always wins, regardless
+      of import order. `font: inherit` moved here from rule 1 after the re-review measured its
+      consequence directly: at (0,1,1) it beat `.sk-button`'s own `font-weight`/`line-height`
+      declarations in BOTH source orders (a composed `.sk-button.sk-button--primary` computed
+      `fontWeight: "400"`/`lineHeight: "normal"` instead of the button's own 500/1) — the exact
+      C-003 category HIGH-2 closed for colour, relocated to typography. `min-block-size: 48px`
+      already guarantees FR-013 independently of font metrics, so `font: inherit` was always a
+      normalisation convenience for a BARE, unclassed action, never a floor a consumer class
+      should have to lose to. */
 .sk-boundary-page__action-group > :is(a, button) {
   box-sizing: border-box;
   display: inline-flex;
@@ -217,19 +228,20 @@
     alone reaches it" branch, verified rather than assumed against sk-confirm-dialog.css's
     own --sk-space-9 target-size precedent. */
   padding-inline: var(--sk-space-5);
-  font: inherit;
 }
 
-/* Legibility floor ONLY — see the C-003 remediation comment above for why this is a SEPARATE,
-   zero-specificity rule rather than folded into the structural one above. No `text-decoration`
-   here: an earlier revision also reset it to `none`, but that is a VISUAL opinion (matching a
-   button's un-underlined look), not a legibility floor — actual color contrast is the only thing
-   MEASURED below, and removing a link's one non-color distinguishing signal (WCAG 1.4.1) is not
-   something a floor rule should impose. Left at the UA default; a consumer who wants no underline
-   makes that choice via their own class, same as radius/hover/border already are (per C-003). */
+/* Legibility floor AND typography reset — beatable by design, see the C-003 remediation comment
+   above for why these sit in a SEPARATE, zero-specificity rule rather than the structural one.
+   No `text-decoration` here: an earlier revision also reset it to `none`, but that is a VISUAL
+   opinion (matching a button's un-underlined look), not a legibility floor — actual color
+   contrast is the only thing MEASURED below, and removing a link's one non-color distinguishing
+   signal (WCAG 1.4.1) is not something a floor rule should impose. Left at the UA default; a
+   consumer who wants no underline makes that choice via their own class, same as radius/hover/
+   border already are (per C-003). */
 :where(.sk-boundary-page__action-group) > :where(a, button) {
   background: transparent;
   color: var(--sk-fg-default);
+  font: inherit;
   /* MEASURED, not assumed (#69's own convention) — a bare, unstyled `<a>` fails axe's
      color-contrast rule inside this card: the UA default link blue (`rgb(0, 0, 238)`) against
      `--sk-surface-card` (`rgb(24, 26, 31)`) measures ~1.875:1, far under the 4.5:1 floor. A bare
