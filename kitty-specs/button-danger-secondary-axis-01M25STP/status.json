@@ -21,13 +21,27 @@
       "actor": "user",
       "agent_profile": "__resolved_profile_absent__",
       "agent_profile_version": "__resolved_profile_version_absent__",
+      "assignee": "reviewer-renata",
       "force_count": 0,
       "lane": "in_progress",
       "last_event_id": "01M25ZN0BQJQ60TEFCJG9R9DK5",
       "last_transition_at": "2026-09-10T15:40:45.303866+00:00",
       "model": "__resolved_model_absent__",
+      "notes": [
+        "Implementation commits already present on branch (6e89c92, 40cc95f, b2a358c, 07228ee); advancing lane state to reflect actual progress before review."
+      ],
       "provider": "__resolved_provider_absent__",
-      "role": "implementer"
+      "role": "implementer",
+      "subtasks": {
+        "T001": "done",
+        "T002": "done",
+        "T003": "done",
+        "T004": "done",
+        "T005": "done",
+        "T006": "done",
+        "T007": "done",
+        "T008": "done"
+      }
     }
   }
 }
