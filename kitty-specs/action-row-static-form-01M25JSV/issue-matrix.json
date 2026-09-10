@@ -120,6 +120,18 @@
       "verdict": "in-mission",
       "wp": "WP01"
     },
+    "#308": {
+      "evidence_ref": "research.md L154/163/197: #308 (a HIGH in sk-confirm-dialog, a different component) was already fixed; this WP's T006 absent-state tests (mutation-proven, independently verified by reviewer) are the applied lesson, not a reopening of #308 itself",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
     "#309": {
       "evidence_ref": "spec.md C-002/FR-005: the generated .sk-action-row-host CSS rule is explicitly #309's scope, not shipped in this mission",
       "fr": null,
