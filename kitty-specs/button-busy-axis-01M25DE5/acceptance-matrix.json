@@ -78,10 +78,10 @@
       "criterion_id": "FR-008",
       "description": "Verify FR-008 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "no role=status/aria-live/live-region added anywhere in sk-button source; reviewer verified FR-008 directly, review-cycle-1.md",
+      "pass_fail": "pass",
+      "verified_by": "mission-closer",
+      "verified_at": "2026-09-10T12:35:17.858308+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
