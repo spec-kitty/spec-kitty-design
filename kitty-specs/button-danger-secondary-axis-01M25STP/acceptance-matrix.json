@@ -217,11 +217,11 @@
     {
       "criterion_id": "FR-022",
       "description": "Verify FR-022 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
+      "proof_type": "ci_pending",
+      "evidence": "A coordination comment recording the outcome exists at https://github.com/spec-kitty/spec-kitty-design/issues/155#issuecomment-5619975095 (#155 not closed/widened). However this cannot be marked pass: (1) I could not confirm this comment was posted by this WP's own T008 step vs. the epic-level BORDER-ROLE-319 decision process \u2014 attribution is uncertain; (2) the criterion also requires the PR body record the outcome, and no PR exists yet at WP-review time. Both halves genuinely PR-time-pending.",
       "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "verified_by": "reviewer-renata",
+      "verified_at": "2026-09-10T15:46:44.429965+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     }
   ],
