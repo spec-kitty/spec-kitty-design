@@ -425,6 +425,15 @@
         },
         {
           "kind": "variable",
+          "name": "controlsBeforeMount",
+          "default": "new Set( Array.from(controlScope.querySelectorAll(THEME_CONTROL_SELECTOR)), )"
+        },
+        {
+          "kind": "variable",
+          "name": "controlScope"
+        },
+        {
+          "kind": "variable",
           "name": "DEFAULT_ACCENT",
           "type": {
             "text": "FeatureCardAccent"
@@ -993,13 +1002,13 @@
           "name": "isolateThemeStory",
           "parameters": [
             {
-              "name": "{ parameters }",
+              "name": "{ parameters, canvasElement }",
               "type": {
-                "text": "{ parameters: ThemeStoryParameters }"
+                "text": "ThemeStoryContext"
               }
             }
           ],
-          "description": "Isolate document-global theme state for a Storybook story.\n\nA Storybook iframe can render several stories without replacing its document. This helper\nsnapshots every shared surface before a story mounts and restores it from Storybook's\nsupported `beforeEach` cleanup callback. Removing mounted controls first lets each element\nrelease its media-query listener before root and storage state are restored."
+          "description": "Isolate document-global theme state for a Storybook story.\n\nA Storybook iframe can render several stories without replacing its document. This helper\ncaptures one true baseline per document and tracks overlapping sessions in creation order.\nThe Storybook canvas scopes control ownership so cleanup cannot disconnect another story's\ncontrol. Closing the current owner reapplies the most recent remaining session; closing an\nolder session keeps the newer owner authoritative. Only the final cleanup\nrestores the pre-first-session root, storage, and color-scheme baseline."
         },
         {
           "kind": "function",

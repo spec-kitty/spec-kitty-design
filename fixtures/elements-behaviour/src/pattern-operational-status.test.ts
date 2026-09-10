@@ -246,6 +246,117 @@ test('story cleanup removes only its owned control and leaves a concurrent story
   localStorage.removeItem('spec-kitty-theme');
 });
 
+type OverlapCleanupOrder = 'older-first' | 'newer-first';
+
+const documentThemeState = () => ({
+  theme: document.documentElement.getAttribute('data-theme'),
+  colorScheme: document.documentElement.style.getPropertyValue('color-scheme'),
+  stored: localStorage.getItem('spec-kitty-theme'),
+});
+
+const exerciseOverlappingThemeSessions = async (order: OverlapCleanupOrder) => {
+  const system = new SystemPreference(false);
+  globalThis.matchMedia = () => system;
+  document.documentElement.dataset.theme = 'baseline-theme';
+  document.documentElement.style.colorScheme = 'light dark';
+  localStorage.setItem('spec-kitty-theme', 'baseline-preference');
+
+  const olderCanvas = document.createElement('div');
+  const newerCanvas = document.createElement('div');
+  document.body.append(olderCanvas, newerCanvas);
+
+  const cleanupOlder = isolateThemeStory({
+    parameters: { themePreference: 'system' },
+    canvasElement: olderCanvas,
+  });
+  render(renderOperationalStatus(OPERATIONAL_MODEL, { preference: 'system' }), olderCanvas);
+  const older = olderCanvas.querySelector<Updatable>('sk-theme-toggle')!;
+  await older.updateComplete;
+
+  const cleanupNewer = isolateThemeStory({
+    parameters: { themePreference: 'dark' },
+    canvasElement: newerCanvas,
+  });
+  render(renderOperationalStatus(OPERATIONAL_MODEL, { preference: 'dark' }), newerCanvas);
+  const newer = newerCanvas.querySelector<Updatable>('sk-theme-toggle')!;
+  await newer.updateComplete;
+
+  const beforeCleanup = {
+    ...documentThemeState(),
+    listeners: system.listenerCount,
+    olderConnected: older.isConnected,
+    newerConnected: newer.isConnected,
+  };
+  const [firstCleanup, finalCleanup] = order === 'older-first'
+    ? [cleanupOlder, cleanupNewer]
+    : [cleanupNewer, cleanupOlder];
+  firstCleanup();
+  const survivor = {
+    ...documentThemeState(),
+    listeners: system.listenerCount,
+    olderConnected: older.isConnected,
+    newerConnected: newer.isConnected,
+  };
+  finalCleanup();
+  const final = {
+    ...documentThemeState(),
+    listeners: system.listenerCount,
+    olderConnected: older.isConnected,
+    newerConnected: newer.isConnected,
+  };
+
+  olderCanvas.remove();
+  newerCanvas.remove();
+  localStorage.removeItem('spec-kitty-theme');
+  return { beforeCleanup, survivor, final };
+};
+
+test.each([
+  {
+    order: 'older-first' as const,
+    survivingTheme: 'dark',
+    survivingPreference: 'dark',
+    listeners: 0,
+    olderConnected: false,
+    newerConnected: true,
+  },
+  {
+    order: 'newer-first' as const,
+    survivingTheme: 'light',
+    survivingPreference: 'system',
+    listeners: 1,
+    olderConnected: true,
+    newerConnected: false,
+  },
+])('overlapping theme-story sessions restore ownership when cleaned $order', async (expected) => {
+  const states = await exerciseOverlappingThemeSessions(expected.order);
+
+  expect(states.beforeCleanup).toEqual({
+    theme: 'dark',
+    colorScheme: 'dark',
+    stored: 'dark',
+    listeners: 1,
+    olderConnected: true,
+    newerConnected: true,
+  });
+  expect(states.survivor).toEqual({
+    theme: expected.survivingTheme,
+    colorScheme: expected.survivingTheme,
+    stored: expected.survivingPreference,
+    listeners: expected.listeners,
+    olderConnected: expected.olderConnected,
+    newerConnected: expected.newerConnected,
+  });
+  expect(states.final).toEqual({
+    theme: 'baseline-theme',
+    colorScheme: 'light dark',
+    stored: 'baseline-preference',
+    listeners: 0,
+    olderConnected: false,
+    newerConnected: false,
+  });
+});
+
 /**
  * The claim in the criterion's own words: assembled FROM PUBLIC SURFACES. The `<dl>` and the
  * `<details>` are consumer-owned light DOM handed to `<sk-card>`'s default slot — no wrapper
