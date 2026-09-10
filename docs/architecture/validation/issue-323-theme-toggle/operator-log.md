@@ -6,9 +6,11 @@
 - Mission branch: `mission/theme-toggle`
 - PR target: `train/elements-first`
 - Current train base SHA: `7032cf7792a83ee20d9fd70ddcfb28a057c72884`
-- Current exact executable validation HEAD: `4172c6fa04d531281d45db1efa1f69867ecf77c0`
-- Current phase: review / final exact-head adversarial point-cut pending
-- Current WP lane: WP01 / `for_review`
+- Current exact product commit: `3c64c4286b8cc5e1511edb890a59f83640087895`
+- Current exact independently reviewed lifecycle HEAD: `eb77cd52e4445f4f7634ab9171ebc0bf3ac1f29e`
+- Current cycle-eight remediation base HEAD: `9807f3c984ec60ef15864f049f097f6e74422460`
+- Current phase: implementation / review-cycle-7 remediation
+- Current WP lane: WP01 / `in_progress`
 
 ## Seats
 
@@ -40,6 +42,17 @@
 - Semantic-compression lens: fresh read-only Codex / Randy Reducer (same axe Medium; production contract found irreducible)
 - Axe-harness remediation: fresh delegated Codex / resolved `frontend-freddy`, Op `01M268WA2VXGM1DX4X0RBE56T3` (completed)
 - WP01 review cycle 6: fresh read-only Codex / resolved `reviewer-renata`, Op `01M2697CV6BYNG0ZKD1QHYQ44Q` (approved exact clean HEAD `3234d06f` with no High or Medium findings)
+- Final pre-accept point-cut pass 4: four fresh read-only Codex lenses — resolved
+  `architect-alphonso`, `debugger-debbie`, `designer-dagmar`, and Randy Reducer — rejected exact
+  HEAD `61d2a5f1` with three Medium acceptance/evidence findings and no High finding
+- WP01 review-cycle-6 remediation: fresh delegated Codex / resolved `frontend-freddy`, Op
+  `01M26DDXM559KWABQZGM9ST1Z6` (completed at exact product commit `3c64c428`)
+- WP01 review cycle 7: fresh read-only Codex / resolved `reviewer-renata`, Op
+  `01M26FDAW4MB8YV7VTYRZSATCQ` (rejected exact lifecycle HEAD `eb77cd52` with two Medium
+  generated-record/evidence findings; all three product findings verified closed)
+- WP01 review-cycle-7 remediation: fresh delegated Codex / resolved `frontend-freddy`, Op
+  `01M26G61HC68WA7TS6XBDAD2VM` (in progress from exact start HEAD `9807f3c9`; no product behavior
+  change)
 
 ## Review cycles and findings
 
@@ -49,6 +62,20 @@
 - Adversarial pass 2 rejected the overlapping-story cleanup protocol: destroying the older session could restore an intermediate snapshot over a still-live newer session. The fresh remediation introduced one per-Document ordered registry with a true baseline, reapplied the latest surviving preference, and restored the baseline only after final cleanup. Both cleanup orders now assert the surviving root theme, `color-scheme`, storage, listener count, connectivity, idempotence, and final baseline.
 - Review cycle 5, exact reviewed HEAD `60d5261bb0c50f4af0d20ac6de850cef240d92d4`: REJECT with one Medium test-harness reliability finding. Twelve-worker stress independently reproduced `Axe is already running` 4/12 times when the mission-owned test raced Storybook addon-a11y. A fresh implementation seat added a bounded ten-attempt retry for only that exact sentinel, rethrowing every other/exhausted error and retaining the exact zero-violations assertion. Remediation stress passed 12/12 and full Chromium passed 627/627.
 - Review cycle 6, exact clean HEAD `3234d06fcdec0081b5fb1b30dcbf976b7e58053c`: APPROVE. The independent reviewer found no unresolved High or Medium finding and re-ran the contention, focused product, resolver, generated-artifact, type, size, and release checks. The remaining catalogue-count and operator-log lows were corrected before the final point-cut. The repeated repository-wide axe retry helpers and pre-existing declaration-packaging debt remain bounded follow-ups.
+- Final adversarial pass 4, exact HEAD `61d2a5f150900517454262c79fc59083d4c3d0bb`:
+  REJECT with three Medium findings and no High finding. The element assumed listener APIs existed on
+  a valid `MediaQueryList`; CEM advertised a story-only helper absent from package runtime exports;
+  and the automated DPR case had been mislabeled as genuine 200% browser zoom. A fresh remediation
+  added complete-pair feature detection plus an ADR-11 mutation, excluded `.fixture.ts` through the
+  manifest configuration with negative declaration/runtime parity probes, and captured genuine
+  headed Chrome UI zoom at fixed physical dimensions. Exact product commit: `3c64c428`.
+- Review cycle 7, exact lifecycle HEAD `eb77cd52e4445f4f7634ab9171ebc0bf3ac1f29e`:
+  REJECT with two Medium record-integrity findings and no High finding. The independent reviewer
+  verified all three pass-4 product findings closed, independently inspected both zoom captures,
+  and accepted the root/focus/containment evidence. It then correctly found that `SIZES.md` came
+  from stale `dist/` and that the durable evidence still named `4172c6fa` as current. Cycle-eight
+  disposition: rebuild first, regenerate the size record only with its repository generator, rerun
+  release/package checks, and refresh both durable records. No Low was absorbed into product scope.
 
 ## Gate results
 
@@ -175,11 +202,43 @@
   images were already reproduced on the exact train base. GitHub's pinned Chromium artifact is the
   authoritative visual verdict.
 
+### Cycle-seven product and cycle-eight generated-record validation
+
+- Cycle-seven remediation product commit: `3c64c4286b8cc5e1511edb890a59f83640087895`.
+  Focused listenerless/incomplete-media behavior passed 27/27; the composed-pattern Chromium lane
+  passed 9/9; `npm test` passed 668/668; all five typecheck projects, `quality:all`, manifest
+  generation/content/negative probes, React/Vue generators, Storybook build, commitlint, and
+  lockfile dry-run passed. The independent cycle-seven reviewer repeated Vitest 36/36, pattern
+  9/9, typecheck, quality, manifest 31 elements / 138 documented surfaces plus 15/15 self-tests,
+  wrapper/Vue checks, and release graph 4 packages plus 28/28 self-tests.
+- Genuine Chrome UI zoom evidence used a fixed `1199 x 799` browser window. CSS viewport changed
+  from `1199 x 712` at 100% to `599 x 356` at 200%; native keyboard input exercised all three
+  preferences; root `data-theme` and `color-scheme` followed each selection; all choices remained
+  visible, non-overlapping, unclipped, contained, and horizontally overflow-free; and a visible 2px
+  focus outline remained. Primary Codex inspection and the fresh independent cycle-seven reviewer
+  both inspected the complete 100% and 200% captures; the latter includes Chrome's native `200%`
+  indicator. The automated DPR lane is explicitly supplemental HiDPI evidence only.
+- Cycle-eight started at exact HEAD `9807f3c984ec60ef15864f049f097f6e74422460`.
+  `NX_SKIP_NX_CACHE=true npx nx run elements:build` passed, followed by generator-only size-record
+  regeneration and `node scripts/measure-elements-sizes.mjs --check`. Current generated values:
+  ESM 247291 raw / 165794 minified bytes (241.5 / 161.9 KiB); IIFE 266279 raw / 175672 minified
+  bytes (260.0 / 171.6 KiB); 34 / 38 KiB min+gzip; SRI
+  `sha384-LxNIa59oFAZHhaAik41sUkpsz62WC+5EybutmXM945orIz6bCp49pr8ZMU7nBD9A`;
+  `@spec-kitty/elements` 56 files / 976.4 KiB unpacked.
+- The exact release sequence passed after regeneration: `check-release-graph --selftest` 28/28;
+  uncached graph build for tokens/styles/elements; coherent four-package pack with every export
+  resolving; packed Vue declarations compiling with workspace paths disabled; and final size/SRI
+  drift check. No product source changed in cycle eight. The exact generated-size remediation
+  commit is `7b69e3140bb14f4d002bcad453583fbf34114a9c`; this evidence-only update follows it. A fresh
+  exact-head review remains required before acceptance.
+
 ## Publication and merge
 
 - PR URL: pending
-- Exact reviewed product head: `3234d06fcdec0081b5fb1b30dcbf976b7e58053c` (WP01 cycle 6 approved)
-- Exact executable validation head: `4172c6fa04d531281d45db1efa1f69867ecf77c0`
+- Exact current product commit: `3c64c4286b8cc5e1511edb890a59f83640087895`
+- Latest exact independent review head: `eb77cd52e4445f4f7634ab9171ebc0bf3ac1f29e`
+  (cycle 7 changes requested for generated records/evidence; fresh approval pending)
+- Exact generated-size remediation commit: `7b69e3140bb14f4d002bcad453583fbf34114a9c`
 - Merge status: not merged
 - Merge commit: pending
 - Post-merge mission-review verdict: pending
@@ -197,3 +256,6 @@
 - Spec Kitty's resolved review Op stores a catalog recommendation naming a Claude model even though
   the actual transport and every executed seat in this mission were Codex. The generated Op was not
   hand-edited; no Claude or Claude-backed tool was invoked.
+- Cycle-seven reviewer Lows remain separate gate/evidence hardening: document or regenerate the
+  canonical `sourceDiffSha256` procedure; recognize `export *` in a future manifest-parity hardening;
+  and ignore screenshot-directory names ending in `.ts` in the behavior-fixture import gate.

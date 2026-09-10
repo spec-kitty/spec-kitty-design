@@ -190,3 +190,71 @@ gates and explicitly retain local/CI-only limitations.
 - Local Chromium visual regression was not updated or hidden: 6 passed / 217 failed out of 223 on
   the already base-reproduced host-font geometry class. GitHub's pinned runner remains the visual
   and WebKit acceptance authority.
+
+### Cycle-seven acceptance-gap remediation and cycle-eight record correction
+
+- The final pre-accept point-cut rejected exact HEAD
+  `61d2a5f150900517454262c79fc59083d4c3d0bb` with three Medium findings: a
+  listenerless `MediaQueryList` could throw, the manifest advertised a story-only helper that the
+  package did not export, and the automated `deviceScaleFactor: 2` case had been described as
+  200% browser zoom even though it proved only HiDPI density. A fresh Codex
+  `frontend-freddy` seat, governed by Op `01M26DDXM559KWABQZGM9ST1Z6`, remediated those
+  findings from exact cycle-seven start HEAD
+  `c158e53cce903235b85751dc97dc5e2ea339aca2`. The exact product commit is
+  `3c64c4286b8cc5e1511edb890a59f83640087895`.
+- Listener installation now requires a complete modern add/remove pair or a complete legacy pair,
+  records the mechanism only after successful installation, and treats listenerless or throwing
+  implementations as a static System source. Focused Chromium covered listenerless plus partial
+  modern/legacy shapes, cleanup, reconnect, and exact root state; the fixture's ADR-11 mutation
+  makes the missing feature-detection boundary red.
+- `theme-story-environment.fixture.ts` is excluded through the manifest's authoritative fixture
+  policy rather than exposed as public API. The manifest gate now rejects story-helper names in
+  the manifest, explicit authored package root, and declaration input set, and carries negative
+  probes for each boundary. Independent review also checked the fresh built runtime. Fresh manifest generation retained 31 registered elements
+  and 138 documented public surfaces while omitting the helper from the manifest, declaration
+  publication, package root, and built runtime.
+- Genuine headed Chrome UI zoom evidence is committed under
+  `docs/architecture/validation/issue-323-theme-toggle/browser-zoom/`. With a fixed physical
+  `1199 x 799` browser window, native Chrome controls reduced the effective CSS viewport from
+  `1199 x 712` at 100% to `599 x 356` at 200%. Native keyboard input exercised
+  `dark -> light -> system -> dark`; preference, root `data-theme`, and `color-scheme` agreed at
+  every transition. Machine-readable geometry proves all three visible choices remained contained,
+  non-overlapping, unclipped, singly selected, and horizontally overflow-free, with a visible 2px
+  focus outline. The two capture hashes are `60a440bbe4f57f9140db24fa587d5abc7e005939804dacb9f20988c0aec1f7cf`
+  (100%) and `0a123c1866552d706e843e62302d2617d7603878cc2372ca194dd918ce772397`
+  (200%); `metrics.json` hashes to
+  `35c0079d7b147aed1333641fc16e19e10948a52e46284e25ae210bff5c3b8a9e`.
+  Primary Codex inspection found the complete labelled control, selected Dark text/semantics, and
+  focus ring visible at both levels, with the native `200%` indicator visible in the second capture.
+  The independent cycle-seven reviewer inspected both images and accepted the evidence as credible.
+  The Playwright DPR case remains only supplemental HiDPI coverage and is labelled accordingly.
+- Cycle-seven implementation validation passed: focused theme behavior 27/27; composed-pattern
+  Chromium 9/9; full `npm test` 668/668; five-project typecheck; `quality:all`; manifest generation,
+  content, and negative/self-test probes; React and Vue generators/types; Storybook build; and
+  commitlint/lockfile checks. Fresh independent `reviewer-renata` review at exact lifecycle HEAD
+  `eb77cd52e4445f4f7634ab9171ebc0bf3ac1f29e`, governed by Op
+  `01M26FDAW4MB8YV7VTYRZSATCQ`, verified all three product findings closed and independently passed
+  Vitest 36/36, composed-pattern Chromium 9/9, five-project typecheck, manifest 31/138 plus 15/15
+  self-tests, wrapper/Vue generators, release-graph 4 packages plus 28/28 self-tests,
+  `quality:all`, commitlint, and lockfile dry-run.
+- That reviewer correctly rejected the review head with two Medium evidence/package findings:
+  `packages/elements/SIZES.md` had been measured against stale `dist/`, and this file plus the
+  operator log stopped at the older `4172c6fa04d531281d45db1efa1f69867ecf77c0` snapshot. Cycle
+  eight began at exact HEAD `9807f3c984ec60ef15864f049f097f6e74422460` under a fresh Codex
+  `frontend-freddy` seat and Op `01M26G61HC68WA7TS6XBDAD2VM`.
+- Cycle-eight disposition used the recipe's required order: an uncached authoritative
+  `elements:build`, then the repository generator, then `measure-elements-sizes.mjs --check`.
+  The generated record now contains ESM 247291 raw / 165794 minified bytes (241.5 / 161.9 KiB),
+  IIFE 266279 raw / 175672 minified bytes (260.0 / 171.6 KiB), 34 / 38 KiB min+gzip, IIFE SRI
+  `sha384-LxNIa59oFAZHhaAik41sUkpsz62WC+5EybutmXM945orIz6bCp49pr8ZMU7nBD9A`, and
+  `@spec-kitty/elements` 56 files / 976.4 KiB unpacked. The complete release sequence then passed:
+  28/28 release-gate self-tests, uncached build of the three buildable projects, four publishable
+  packages packing with every export resolving, packed Vue declarations compiling without
+  workspace paths, and a final byte-identical size/SRI check. No product behavior changed in this
+  cycle. The exact generated-size remediation commit is
+  `7b69e3140bb14f4d002bcad453583fbf34114a9c`; this evidence update follows it without changing
+  executable or generated package content. Acceptance and fresh review remain pending.
+- Reviewer Low follow-ups remain deferred without expanding #323: document or regenerate the
+  canonical `sourceDiffSha256` procedure; optionally harden the manifest parity probe for
+  `export *`; and make the behavior-fixture import gate ignore screenshot directories whose names
+  end in `.ts`.
