@@ -12,6 +12,7 @@ import {
   SkProgressIndeterminateHTML,
   SkProgressIndeterminateWithMetaHTML,
   SkProgressIndeterminateNarrowHTML,
+  SkProgressIndeterminateCompactHTML,
   SkProgressIndeterminateLongLabelHTML,
   SkProgressIndeterminateForcedColorsHTML,
 } from './index';
@@ -80,6 +81,15 @@ export const IndeterminateNarrow: Story = {
 /** Indeterminate combined with a long label, proving no horizontal overflow. */
 export const IndeterminateLongLabel: Story = {
   render: () => SkProgressIndeterminateLongLabelHTML,
+};
+
+/**
+ * Indeterminate combined with the existing `--compact` layout modifier (FR-010,
+ * data-model.md:57 — `.sk-progress--indeterminate.sk-progress--compact` is a
+ * declared-supported combination).
+ */
+export const IndeterminateCompact: Story = {
+  render: () => SkProgressIndeterminateCompactHTML,
 };
 
 /** Indeterminate under `forced-colors: active` — sampled at multiple points in the animation cycle by the corresponding Playwright test. */

@@ -283,6 +283,37 @@ test.describe('sk-progress accessibility tree and DOM structure', () => {
     const control = host.locator('progress');
     expect(await control.evaluate((node: HTMLProgressElement) => node.position)).toBe(-1);
   });
+
+  /**
+   * #346/FR-010: `.sk-progress--indeterminate.sk-progress--compact` is declared supported
+   * (data-model.md:57) but had no fixture, story, or assertion at all — FR-010 was recorded
+   * `pass` citing only the narrow fixture. This mirrors IndeterminateNarrow above, and adds a
+   * REAL layout assertion (not just class presence): `--compact` switches the root to a row
+   * flex direction, which a genuinely-composed fixture must exhibit exactly like the
+   * determinate Compact fixture does.
+   */
+  test('IndeterminateCompact preserves the three-flat-children contract combined with the existing --compact layout modifier, and actually lays out as a row', async ({ page }) => {
+    const host = await story(page, 'indeterminate-compact');
+    await expect(host).toHaveClass(/sk-progress--indeterminate/);
+    await expect(host).toHaveClass(/sk-progress--compact/);
+    const control = host.locator('progress');
+    expect(await control.evaluate((node: HTMLProgressElement) => node.position)).toBe(-1);
+
+    const children = host.locator(':scope > *');
+    await expect(children).toHaveCount(2);
+    expect(await children.evaluateAll((nodes) => nodes.map((n) => n.tagName.toLowerCase()))).toEqual(['label', 'progress']);
+
+    // The row layout is a REAL computed effect of --compact, not merely a class that happens to
+    // be present: the label and the bar sit side by side (comparable vertical position), unlike
+    // the default stacked column direction.
+    const flexDirection = await host.evaluate((node) => getComputedStyle(node).flexDirection);
+    expect(flexDirection).toBe('row');
+    const labelBox = await host.locator('label').boundingBox();
+    const barBox = await control.boundingBox();
+    expect(labelBox).not.toBeNull();
+    expect(barBox).not.toBeNull();
+    expect(Math.abs(labelBox!.y - barBox!.y)).toBeLessThan(Math.max(labelBox!.height, barBox!.height));
+  });
 });
 
 test.describe('sk-progress overflow, forced-colors, and reduced-motion observables', () => {
