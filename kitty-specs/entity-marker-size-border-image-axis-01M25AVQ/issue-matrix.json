@@ -1,5 +1,17 @@
 {
   "rows": {
+    "#146": {
+      "evidence_ref": "research.md prose cross-reference only: #146 is a prior, already-shipped mission cited as precedent for a docs/vue-types pipeline convention (union spelled out inline). Not a dependency #304 resolves.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
     "#212": {
       "evidence_ref": "spec.md prose cross-reference only: #212 previously rejected a separate sk-avatar component; #304's design explicitly upholds that disposition (no sk-avatar, verified by diff \u2014 no new component/Team/membership model added). Not a dependency #304 resolves.",
       "fr": null,
