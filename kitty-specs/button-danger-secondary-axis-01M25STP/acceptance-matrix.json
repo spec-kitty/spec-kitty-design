@@ -198,10 +198,10 @@
       "criterion_id": "FR-020",
       "description": "Verify FR-020 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "node scripts/build-react-wrappers.mjs --check: '\u2705 up to date (63 file(s), 30 element(s)), two runs byte-identical.' node scripts/build-vue-types.mjs --check: '\u2705 vue.d.ts up to date (30 elements).'",
+      "pass_fail": "pass",
+      "verified_by": "reviewer-renata",
+      "verified_at": "2026-09-10T15:46:32.685070+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
