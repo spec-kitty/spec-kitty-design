@@ -107,11 +107,11 @@
     {
       "criterion_id": "FR-011",
       "description": "Verify FR-011 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "proof_type": "code_inspection",
+      "evidence": "git diff 4d6c5f2..HEAD -- docs/design-system/changelog.md: [Unreleased] Changed entry added, read directly. Names --sk-border-control (dark/light hexes, not aliases), both border-color changes, the .sk-input width-spelling normalization (#173), the min-block-size floor and its 48px/44px rationale, and explicitly names .sk-textarea/.sk-form-textarea__control/.sk-form-select as known, disclosed, out-of-scope instances.",
+      "pass_fail": "pass",
+      "verified_by": "reviewer-renata",
+      "verified_at": "2026-09-10T15:49:26.164210+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     }
   ],
