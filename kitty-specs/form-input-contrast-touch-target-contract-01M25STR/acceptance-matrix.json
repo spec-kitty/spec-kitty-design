@@ -7,11 +7,11 @@
     {
       "criterion_id": "FR-001",
       "description": "Verify FR-001 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": "test",
+      "proof_type": "code_inspection",
+      "evidence": "packages/tokens/src/tokens.css: read directly -- :root has '--sk-border-control: #81818B;' and :root[data-theme=\"light\"],.sk-light has '--sk-border-control: #7A7A6E;', both plain hex literals, zero var() reference (confirmed no alias crept back in). Derivation comment present beside declaration. Six ratios independently re-derived by this reviewer with the standard WCAG relative-luminance formula from these exact committed hexes: dark vs page/card/input = 5.01/4.51/4.28:1, light = 3.98/4.34/3.85:1 -- match NFR-002 exactly. Mechanically enforced by tests/node/form-input-border-control-contrast.test.ts (FR-012 -- note: FR-012 has no row in this acceptance-matrix scaffold, which predates its amendment; verified separately -- red reproduced at exact reported 2.93:1 figure, green in committed npm test run).",
       "pass_fail": "pass",
       "verified_by": "reviewer-renata",
-      "verified_at": "2026-09-10T15:48:06.564405+00:00",
+      "verified_at": "2026-09-10T15:48:33.656841+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
