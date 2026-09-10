@@ -68,10 +68,10 @@
       "criterion_id": "FR-007",
       "description": "Verify FR-007 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "packages/styles/src/entity-marker/sk-entity-marker.css ::slotted(img) rule is byte-identical to train (git diff shows zero changes to this rule or its header comment); apps/storybook/src/tests/sk-compact-work-item-extensions.spec.ts 'uses one host-owned name and cover-crops portrait and landscape images' confirms object-fit:cover, contained, clipped across shapes",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T11:03:17.186408+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
