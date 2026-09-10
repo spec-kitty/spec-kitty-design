@@ -158,10 +158,10 @@
       "criterion_id": "FR-016",
       "description": "Verify FR-016 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "expected-docs.json sk-button attributes 5->6, total bumped to 131 (reconciled against #308's independent addition during the train rebase); expected-parts.json busy-cue part added, total bumped to 141; expected-stories.json 472->477; mutations.json gains one SC-013 arm for the busy-cue part on the button branch; all confirmed regenerating byte-identical via --check gates",
+      "pass_fail": "pass",
+      "verified_by": "mission-closer",
+      "verified_at": "2026-09-10T12:35:50.938820+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
