@@ -821,6 +821,79 @@ context-navigation family does not widen the sidebar element.
 
 ---
 
+## Public header
+
+Use `sk-public-header` for the public-facing brand and route actions above an anonymous or account
+front-door page. The consumer authors the semantic light-DOM structure and supplies every string,
+URL, action, authentication decision, current-route value, and theme-state mechanism:
+
+```css
+@import '@spec-kitty/tokens';
+@import '@spec-kitty/styles/public-header/sk-public-header.css';
+```
+
+```html
+<header class="sk-public-header">
+  <div class="sk-public-header__inner">
+    <a class="sk-public-header__brand" href="/">
+      Your brand<span class="sk-public-header__brand-context">Workspace</span>
+    </a>
+    <nav class="sk-public-header__actions" aria-label="Account">
+      <a class="sk-public-header__action" href="/sign-in">Sign in</a>
+      <a class="sk-public-header__action" href="/start">Start free</a>
+    </nav>
+  </div>
+</header>
+```
+
+The six anatomy classes have fixed semantic homes:
+
+| Class | Consumer-authored element |
+|---|---|
+| `sk-public-header` | the required native `<header>` root |
+| `sk-public-header__inner` | the required inner `<div>` flex row |
+| `sk-public-header__brand` | the required brand/home `<a href>` |
+| `sk-public-header__brand-context` | an optional `<span>` inside the brand anchor |
+| `sk-public-header__actions` | an optional, labelled `<nav>`; omit it entirely when there are no actions |
+| `sk-public-header__action` | every action `<a>`, `<button>`, or composed control inside that navigation region |
+
+Three consumer obligations preserve the accessibility contract. When actions exist, the
+`sk-public-header__actions` navigation must have a non-empty `aria-label` (or another non-empty
+accessible name). Render exactly one `sk-public-header` per document so the native `banner`
+landmark stays singular. Apply `sk-public-header__action` to every action-region child, alongside
+any control classes it already carries. Every action must carry `sk-public-header__action` so it
+receives the family's target-size floor.
+With zero actions, omit the `<nav>` instead of rendering an empty landmark.
+
+The consumer supplies `aria-current` on the current route; values other than
+`aria-current="false"` receive both stronger weight and a logical border, so colour alone never
+carries the current-location meaning. The row and action group wrap continuously without a
+breakpoint, CSS reordering, text hiding, or route inference. The inner row supplies the minimum
+inline gutter but deliberately does not impose the consumer's page-width container.
+
+The future `sk-theme-toggle` composition is blocked on #323. What ships now is a neutral native
+button proving that the action slot accepts mixed controls. Once #323 merges into
+`train/elements-first` with a stable public contract, consumers can place the real control on
+`sk-public-header__action`; this family will still own no theme state or persistence.
+
+This family is deliberately styles-only under ADR-10's `form-field`-shaped recorded-decision
+reasoning: issue #353 explicitly scopes it to consumer-owned native markup. It does not claim the
+general native-relationship rationale used by tables, lists, or same-root references. Nearby
+families remain separate: `sk-app-shell` owns authenticated application chrome,
+`sk-page-header` owns the content heading, `sk-nav-pill` owns primary-navigation presentation,
+and `sk-skip-link` owns the keyboard skip affordance.
+
+The stylesheet depends on these existing semantic tokens: `--sk-border-default`,
+`--sk-border-focus`, `--sk-border-strong`, `--sk-border-width-1`, `--sk-border-width-2`,
+`--sk-border-width-4`, `--sk-color-accent`, `--sk-fg-body`, `--sk-fg-default`,
+`--sk-fg-muted`, `--sk-font-sans`, `--sk-space-1`, `--sk-space-3`,
+`--sk-space-4`, `--sk-space-9`, `--sk-space-10`, `--sk-surface-page`, `--sk-text-sm`,
+`--sk-text-xl`, `--sk-weight-normal`, and `--sk-weight-semibold`.
+
+[View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/navigation-skpublicheader-html--default)
+
+---
+
 ## Tags
 
 Pill-shaped tags used to label and categorise content inline.
