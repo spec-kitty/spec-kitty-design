@@ -207,11 +207,11 @@
     {
       "criterion_id": "FR-021",
       "description": "Verify FR-021 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "proof_type": "code_review",
+      "evidence": "docs/design-system/using-components.md diff: fourth tone documented in the Buttons section with the reused-token boundary, the re-derived contrast table (matches my own independent measurement), the forced-colors mechanism, and a #155 pointer.",
+      "pass_fail": "pass",
+      "verified_by": "reviewer-renata",
+      "verified_at": "2026-09-10T15:46:33.787180+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
