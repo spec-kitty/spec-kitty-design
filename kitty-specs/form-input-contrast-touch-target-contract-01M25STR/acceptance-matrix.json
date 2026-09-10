@@ -47,11 +47,11 @@
     {
       "criterion_id": "FR-005",
       "description": "Verify FR-005 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "proof_type": "code_inspection",
+      "evidence": "Read full diff hunks for both changed files: only the border declaration and the added min-block-size line changed within .sk-input/.sk-form-input__control's resting-state rule. Focus (--sk-border-focus), [aria-invalid=\"true\"] (--sk-color-red), and :disabled (opacity) rules appear nowhere in either diff -- confirmed untouched by inspection of the full file diffs.",
+      "pass_fail": "pass",
+      "verified_by": "reviewer-renata",
+      "verified_at": "2026-09-10T15:48:50.747214+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
