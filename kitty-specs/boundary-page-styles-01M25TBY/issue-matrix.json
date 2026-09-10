@@ -37,7 +37,7 @@
       "wp": "WP01"
     },
     "#304": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "#304 (entity-marker size/shape/border axis) already shipped and verified directly against packages/styles/src/entity-marker/sk-entity-marker.css (--sm/--lg/--circle/--bordered rules present). This mission composes <sk-entity-marker> unmodified per FR-004/research.md Decision 2, with explicit border=\"true\" in every exemplar (never the bare border attribute's known ergonomic gap).",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -45,8 +45,8 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
     },
     "#308": {
       "evidence_ref": "<link or commit>",
