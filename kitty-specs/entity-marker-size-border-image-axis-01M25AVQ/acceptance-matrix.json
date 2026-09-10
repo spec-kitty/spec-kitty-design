@@ -87,11 +87,11 @@
     {
       "criterion_id": "FR-009",
       "description": "Verify FR-009 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "proof_type": "manual_inspection",
+      "evidence": "CSS header comment states the tie boundary generically ('strictly higher specificity than the shipped rewrite...ties resolve to last-stylesheet-wins...shadow form yields unconditionally'), unchanged/byte-identical vs train; reviewer review-cycle-1.md: 'no transcribed specificity tuple invalidated'; SC-004 tuple appears only inside the CSS comment itself, per spec.md/tasks/WP01 quoting it solely as the prohibition being described, not as a newly-asserted mission finding",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T11:03:19.218160+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
