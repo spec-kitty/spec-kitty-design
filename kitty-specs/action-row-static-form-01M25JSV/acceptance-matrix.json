@@ -28,10 +28,10 @@
       "criterion_id": "FR-003",
       "description": "Verify FR-003 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
+      "evidence": "fixtures/elements-behaviour/src/sk-action-row.test.ts:963 test [T004][FR-003][NFR-001] 'static and shadow forms compute identical reflow at 360px, 400px and 401px' \u2014 passing in full suite run (622/622, npm test 2026-09-10)",
+      "pass_fail": "pass",
       "verified_by": null,
-      "verified_at": null,
+      "verified_at": "2026-09-10T14:07:07.410290+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
