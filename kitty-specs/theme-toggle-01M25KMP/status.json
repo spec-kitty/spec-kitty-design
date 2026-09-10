@@ -1,7 +1,7 @@
 {
-  "event_count": 15,
-  "last_event_id": "01M26761NGH9ZVRZX4CJVXP0WB",
-  "materialized_at": "2026-09-10T17:52:23.728259+00:00",
+  "event_count": 16,
+  "last_event_id": "01M2676N9BHRMRV1SVXPGZGPSZ",
+  "materialized_at": "2026-09-10T17:52:43.819179+00:00",
   "mission_number": "",
   "mission_slug": "theme-toggle-01M25KMP",
   "mission_type": "software-dev",
@@ -9,12 +9,12 @@
     "approved": 0,
     "blocked": 0,
     "canceled": 0,
-    "claimed": 0,
+    "claimed": 1,
     "done": 0,
     "for_review": 0,
     "in_progress": 0,
     "in_review": 0,
-    "planned": 1
+    "planned": 0
   },
   "work_packages": {
     "WP01": {
@@ -24,9 +24,9 @@
       "agent_profile_version": "1.0",
       "assignee": "codex",
       "force_count": 3,
-      "lane": "planned",
-      "last_event_id": "01M26761NGH9ZVRZX4CJVXP0WB",
-      "last_transition_at": "2026-09-10T17:52:23.728259+00:00",
+      "lane": "claimed",
+      "last_event_id": "01M2676N9BHRMRV1SVXPGZGPSZ",
+      "last_transition_at": "2026-09-10T17:52:43.819179+00:00",
       "model": "__resolved_model_absent__",
       "notes": [
         "Codex frontend-freddy implementation seat active; red-first evidence recorded",
@@ -36,7 +36,8 @@
         "APPROVE: exact implementation/evidence HEAD 3b3d772e; no unresolved High or Medium findings; cycle-1 findings closed; all anti-pattern checks pass; CI-authoritative WebKit and visual checks remain merge conditions",
         "Pre-accept architecture lens rejected b22af20d for cross-story cleanup ownership",
         "Remediate adversarial pass 1 cleanup-ownership finding",
-        "Adversarial cleanup-ownership remediation complete; focused red/green and typechecks passed"
+        "Adversarial cleanup-ownership remediation complete; focused red/green and typechecks passed",
+        "Adversarial architecture pass 2 rejected exact HEAD 5f5a800e for order-dependent global theme story cleanup."
       ],
       "provider": "__resolved_provider_absent__",
       "review": null,
@@ -47,17 +48,17 @@
         "verdict": "changes_requested"
       },
       "role": "implementer",
-      "shell_pid": 504396,
-      "shell_pid_created_at": "1789061361.9",
+      "shell_pid": null,
+      "shell_pid_created_at": null,
       "subtasks": {
-        "T001": "done",
-        "T002": "done",
-        "T003": "done",
-        "T004": "done",
-        "T005": "done",
-        "T006": "done",
-        "T007": "done",
-        "T008": "done"
+        "T001": "planned",
+        "T002": "planned",
+        "T003": "planned",
+        "T004": "planned",
+        "T005": "planned",
+        "T006": "planned",
+        "T007": "planned",
+        "T008": "planned"
       }
     }
   }
