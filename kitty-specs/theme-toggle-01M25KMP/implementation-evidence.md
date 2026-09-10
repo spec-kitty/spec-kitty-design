@@ -161,3 +161,32 @@ gates and explicitly retain local/CI-only limitations.
 - Release graph: four publishable packages packed and every export resolved. Packed Vue types,
   SRI/size records, 31/31 packed-element offline upgrade, 30/30 shipped font files, zero network,
   no high/critical audit findings, lockfile dry-run, and action pinning passed.
+
+### Second train refresh, adversarial closure, and executable gate snapshot
+
+- Rebased base: `origin/train/elements-first` at
+  `7032cf7792a83ee20d9fd70ddcfb28a057c72884`, incorporating PR #330 while preserving the #323
+  generated/story-ratchet union. Product review cycle 6 approved exact clean HEAD
+  `3234d06fcdec0081b5fb1b30dcbf976b7e58053c`; the complete executable gate snapshot was
+  `4172c6fa04d531281d45db1efa1f69867ecf77c0`.
+- A pre-accept runtime-failure lens rejected the preceding product snapshot for one Medium
+  mission-owned test-harness race, independently reproducing `Axe is already running` 4/12 times
+  under 12-worker pressure. No product or accessibility violation was present. A fresh
+  `frontend-freddy` Codex seat changed only the Playwright test: ten bounded attempts retry only
+  that exact sentinel, every other/exhausted error is rethrown, and the final assertion remains
+  exact zero violations. Stress passed 12/12; full Chromium passed 627/627; fresh WP review then
+  approved with no High or Medium findings.
+- `npm test`: 51 files / 665 tests passed (43 Node, 622 Chromium), zero skipped. Timed suite:
+  18.5 seconds / 40 seconds. ADR-11: 253/253 named mutations red from a 622-assertion green
+  baseline in 977.7 seconds / 1649.8 seconds; mutation harness self-test 10/10 in 83.1 seconds.
+- Full Chromium + Firefox Playwright: 1,207 passed, 47 explicit conditional skips, zero failures
+  across 1,254 scheduled cases. Selected WebKit theme/no-JS: 11 launch failures solely because the
+  host lacks GTK 4, ICU 74, JPEG Turbo 8, and GStreamer; the GitHub lane installs those libraries.
+- `quality:all` and all five uncached typecheck projects passed. All applicable generator drift,
+  self-test, manifest, wrapper, Vue, entry, ratchet, composition, gate-wiring, ADR/LLM, release,
+  offline, size, audit, lockfile, action-pin, and branch-wide commitlint checks passed.
+- Storybook built in 10.20 seconds; demo assembly resolved 42/42 references; 519 declared story IDs
+  were present; axe rendered 637/637 stories with zero WCAG 2.1 AA violations.
+- Local Chromium visual regression was not updated or hidden: 6 passed / 217 failed out of 223 on
+  the already base-reproduced host-font geometry class. GitHub's pinned runner remains the visual
+  and WebKit acceptance authority.
