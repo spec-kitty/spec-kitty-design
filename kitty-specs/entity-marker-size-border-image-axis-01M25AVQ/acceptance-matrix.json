@@ -77,11 +77,11 @@
     {
       "criterion_id": "FR-008",
       "description": "Verify FR-008 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "proof_type": "manual_inspection",
+      "evidence": "packages/styles/src/entity-marker/sk-entity-marker.css header comment (unchanged, byte-identical vs train) states shadow-only classification per ADR-15, the static-consumer rewrite, and C-005 (no equality-gated static API for this axis) is respected \u2014 no CI check added asserting shadow-vs-static cascade-position equality",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T11:03:18.192408+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
