@@ -97,11 +97,11 @@
     {
       "criterion_id": "FR-010",
       "description": "Verify FR-010 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
+      "proof_type": "code_review",
+      "evidence": "grep -c '<button' packages/styles/src/action-row/sk-action-row.html returns 1, belonging to the controls region only \u2014 never the trigger; sk-action-row.markup.ts comment block states the two-trigger-shape-only policy explicitly and the code has no third branch",
+      "pass_fail": "pass",
       "verified_by": null,
-      "verified_at": null,
+      "verified_at": "2026-09-10T14:07:14.954603+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
