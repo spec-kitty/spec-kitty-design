@@ -38,10 +38,12 @@ therefore not blocked on #309/#310/#311/#314.
 ## Cross-Mission Decision: TKT5/TKT6 Activity Cue — consumed, not relitigated
 
 #306 started first (no `button-busy-axis` mission existed yet on this train head at the time) and
-recorded the joint ruling both issues require. The canonical record is
-[`kitty-specs/progress-indeterminate-01M25C78/spec.md#cross-mission-decision-tkt5tkt6-activity-cue`](../progress-indeterminate-01M25C78/spec.md#cross-mission-decision-tkt5tkt6-activity-cue)
-in the `306` mission's own checkout. This spec links to it rather than restating it, per that
-record's own instruction.
+recorded the joint ruling both issues require. The canonical record is the "Cross-Mission Decision: TKT5/TKT6 Activity Cue" section of
+`kitty-specs/progress-indeterminate-01M25C78/spec.md`, committed on `mission/progress-indeterminate`
+in the `306` mission's own checkout (`/home/jeroennouws/dev/spec-kitty-design-missions/306`) — not a
+resolvable relative path from this checkout, since each mission's `spec-kitty` scaffold lives in its
+own per-issue checkout. This spec cites it rather than restating it, per that record's own
+instruction.
 
 **Ruling: two independently-authored activity cues. No shared primitive.** The forcing constraints
 — opposite accessibility postures (#306's cue must *be* an exposed, unlabelled-by-ARIA progress
