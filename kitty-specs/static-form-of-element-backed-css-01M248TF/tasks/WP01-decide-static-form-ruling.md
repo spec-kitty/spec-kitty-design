@@ -29,7 +29,7 @@ history:
 - at: '2026-09-10T00:05:05Z'
   actor: system
   action: Prompt generated via /spec-kitty.tasks
-agent_profile: ''
+agent_profile: architect-alphonso
 authoritative_surface: docs/architecture/decisions/
 create_intent: []
 execution_mode: code_change
@@ -44,7 +44,7 @@ owned_files:
 - packages/elements/src/app-shell/sk-app-shell.ts
 - packages/elements/src/action-row/sk-action-row.ts
 - packages/elements/src/entity-marker/sk-entity-marker.ts
-role: ''
+role: implementer
 tags: []
 task_type: implement
 tracker_refs: []
@@ -58,8 +58,7 @@ Use the `/ad-hoc-profile-load` skill to load the agent profile specified in the 
 any user-defined profile), and behave according to its guidance before parsing the rest of this
 prompt.
 
-- **Profile**: *(assign at dispatch time — this is architecture/ADR authorship + a small
-  measurement harness; `architect-alphonso` or an equivalent architecture-tier profile fits best)*
+- **Profile**: `architect-alphonso`
 - **Role**: `implementer`
 - **Agent/tool**: *(assign at dispatch time)*
 
