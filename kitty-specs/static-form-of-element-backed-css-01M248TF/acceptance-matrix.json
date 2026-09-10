@@ -67,11 +67,11 @@
     {
       "criterion_id": "FR-007",
       "description": "Verify FR-007 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "proof_type": "mixed_docs_and_filed_issue",
+      "evidence": "sk-entity-marker instruction shipped in packages/styles/src/entity-marker/sk-entity-marker.css; docs/contributing/adding-a-component.md corrected; the remaining six sheets owned by #311 with a per-file rule inventory. ADR-15 'Where issue #301 acceptance item 7 is discharged' records both halves.",
+      "pass_fail": "pass",
+      "verified_by": "architect-alphonso",
+      "verified_at": "2026-09-10T01:07:27.459843+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
