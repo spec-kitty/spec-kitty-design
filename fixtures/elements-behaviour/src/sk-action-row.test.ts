@@ -19,6 +19,7 @@ import {
 } from '../../../packages/elements/src/action-row/sk-action-row.markup.js';
 import { userEvent } from 'vitest/browser';
 import actionRowCss from '../../../packages/styles/src/action-row/sk-action-row.css?raw';
+import usingComponentsDocs from '../../../docs/design-system/using-components.md?raw';
 import { assertThemesDiffered, contrast } from './contrast.js';
 import { installTokenSheet } from './token-sheet.js';
 
@@ -868,10 +869,16 @@ test('the public attributes are exactly the four controlled inputs plus route an
 
 /**
  * THE ANTI-DRIFT PIN (T004). `sk-action-row.css`'s header comment documents the literal
- * `.sk-action-row-host` block a consumer must author until #309 generates it. This mission's own
- * copies — this constant and the one in `docs/design-system/using-components.md` — must never
- * silently diverge from that sheet's own text, so this block is pinned against it by assertion
- * below rather than trusted by inspection.
+ * `.sk-action-row-host` block a consumer must author until #309 generates it. This mission ships
+ * TWO further copies — this constant, and the one in `docs/design-system/using-components.md`'s
+ * "Action row static form" section — and BOTH are asserted equal to the sheet's own text below,
+ * by the same comparator, so neither can silently diverge from it.
+ *
+ * A review-cycle-1 finding on this WP caught the doc copy claiming to be "pinned word-for-word"
+ * while nothing actually read `using-components.md` — the test compared only this local constant
+ * against the sheet, and the claim about the SECOND copy was simply false, undetected because the
+ * two happened to already agree. Fixed by making the claim true rather than retracting it: the
+ * doc's own block is now extracted and compared the same way.
  */
 const LOCAL_ACTION_ROW_HOST_CSS = `
   .sk-action-row-host {
@@ -882,8 +889,9 @@ const LOCAL_ACTION_ROW_HOST_CSS = `
 `;
 
 /** Extracts the declaration list of the FIRST `<selector> { … }` block naming `.sk-action-row-host`
- *  from raw CSS (or CSS-shaped comment) text. Used against both the sheet's header comment and
- *  this file's own local copy, so the two are compared on the same footing. */
+ *  from raw CSS (or CSS-shaped comment, or fenced-markdown-code) text. Used against the sheet's
+ *  header comment, this file's own local copy, and using-components.md's fenced block, so all
+ *  three are compared on the same footing. */
 const hostHostBlockDeclarations = (css: string, source: string): string[] => {
   const match = css.match(/\.sk-action-row-host\s*\{([^}]*)\}/);
   if (!match) {
@@ -899,14 +907,24 @@ const hostHostBlockDeclarations = (css: string, source: string): string[] => {
     .sort();
 };
 
-test('[T004][FR-004][FR-005] the locally-authored .sk-action-row-host block is textually equal (order-insensitive) to sk-action-row.css\'s header comment', () => {
+test('[T004][FR-004][FR-005] the locally-authored AND the using-components.md .sk-action-row-host blocks are textually equal (order-insensitive) to sk-action-row.css\'s header comment', () => {
   const documented = hostHostBlockDeclarations(actionRowCss, "sk-action-row.css's header comment");
   const local = hostHostBlockDeclarations(LOCAL_ACTION_ROW_HOST_CSS, 'this test\'s own LOCAL_ACTION_ROW_HOST_CSS');
   expect(local).toEqual(documented);
 
+  // THE SECOND COPY, actually read and compared — not merely claimed. using-components.md's
+  // "Action row static form" section carries the same block in a fenced ```css``` example; this
+  // is the assertion review-cycle-1 found missing.
+  const docs = hostHostBlockDeclarations(
+    usingComponentsDocs,
+    "docs/design-system/using-components.md's Action row static form section",
+  );
+  expect(docs).toEqual(documented);
+
   // PROOF THE PIN CAN FAIL: a copy that dropped one declaration, or added an unrelated one, must
   // not compare equal. Verified directly here (not merely asserted to be so) so the pin is not
-  // vacuous — see the report for the mutation-arm equivalent run against the authored module.
+  // vacuous — see the report for the mutation-arm equivalent run against the authored module and
+  // against the real sk-action-row.css header comment.
   const droppedADeclaration = hostHostBlockDeclarations('.sk-action-row-host { display: block; min-width: 0; }', 'a deliberately incomplete copy');
   expect(droppedADeclaration).not.toEqual(documented);
   const addedAnExtraDeclaration = hostHostBlockDeclarations(
