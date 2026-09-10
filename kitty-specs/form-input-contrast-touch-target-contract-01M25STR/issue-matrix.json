@@ -37,7 +37,7 @@
       "wp": "WP01"
     },
     "#286": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "C-006: no ElementInternals/validation/copy change added by this mission; #286's copy/i18n intake boundary is respected, not advanced -- verified: diff adds no copy string",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -45,8 +45,8 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
     },
     "#303": {
       "evidence_ref": "<link or commit>",
