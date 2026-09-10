@@ -565,7 +565,7 @@ const main = async () => {
   // The declared set is the bar; refuse to record a run whose outcome ids differ from it.
   const declaredIds = declared.outcomes.map((o) => o.id).sort();
   const measurable = Object.values(observed).find((v) => !v.__unmeasurable);
-  const observedIds = Object.keys(measurable ?? {}).sort();
+  const observedIds = Object.keys(measurable?.outcomes ?? {}).sort();
   const missing = declaredIds.filter((id) => !observedIds.includes(id));
   const extra = observedIds.filter((id) => !declaredIds.includes(id));
   if (missing.length || extra.length) {
@@ -586,7 +586,7 @@ const main = async () => {
     engines: Object.fromEntries(
       Object.entries(observed).map(([engine, values]) => [
         engine,
-        values.__unmeasurable ? { unmeasurable: values.__unmeasurable } : { outcomes: values },
+        values.__unmeasurable ? { unmeasurable: values.__unmeasurable } : values,
       ]),
     ),
   };

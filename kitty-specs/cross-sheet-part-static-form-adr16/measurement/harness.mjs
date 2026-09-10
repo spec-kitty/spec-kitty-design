@@ -94,7 +94,9 @@ export const perEngine = async (fn) => {
     try {
       const context = await browser.newContext({ viewport: { width: 1600, height: 900 } });
       const page = await context.newPage();
-      out[name] = await fn(page, name);
+      // The engine BUILD is recorded next to its values. A record that prints a version in prose
+      // and nowhere in its evidence is asking to be trusted about the one thing it did not measure.
+      out[name] = { version: browser.version(), outcomes: await fn(page, name) };
       await context.close();
     } finally {
       await browser.close();

@@ -107,7 +107,9 @@ S8's measured value stands unamended and is *not* relabelled a pass — it is ev
 right, because what it shows is a shipped-shaped comparison surviving on an ordering accident.
 S9 and S10 in the cycle-2 file probe the two cases S8's declaration conflated.
 
-**Engines.** Chromium 1234 and Firefox 1538 via Playwright 1.62.1. **All 31 outcomes produced
+**Engines.** Chromium 151.0.7922.34 and Firefox 153.0, via Playwright 1.62.1 — the same two
+engines ADR-9's, ADR-10's and ADR-15's confirmations use here. Each engine's build string is
+recorded in `result.json` beside its values rather than only in this prose. **All 31 outcomes produced
 byte-identical values in both engines** — every measured value here is a keyword or an integer
 pixel length, so ADR-15's "comparing within one engine" warning, which exists because
 `sk-action-row`'s font-derived tracks differ sub-pixel between engines, does not bite on this

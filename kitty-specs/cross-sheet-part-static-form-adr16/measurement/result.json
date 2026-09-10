@@ -1,7 +1,7 @@
 {
   "issue": 314,
-  "ran_at": "2026-09-10T21:54:55.590Z",
-  "head": "bf3b6a89044de6ee1aa54ba9ea5041dfb1b1e44b",
+  "ran_at": "2026-09-10T22:04:46.664Z",
+  "head": "5cca7b8a49cd22505565d7f979a89c107ea35a01",
   "declared_outcome_sources": [
     "outcomes.declared.json",
     "outcomes.declared.cycle-2.json"
@@ -46,6 +46,7 @@
   },
   "engines": {
     "chromium": {
+      "version": "151.0.7922.34",
       "outcomes": {
         "M1": "normal",
         "M4": "normal",
@@ -137,6 +138,7 @@
       }
     },
     "firefox": {
+      "version": "153.0",
       "outcomes": {
         "M1": "normal",
         "M4": "normal",
