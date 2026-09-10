@@ -14,6 +14,7 @@
     "./app-shell/*": "./dist/app-shell/*",
     "./bar-chart/*": "./dist/bar-chart/*",
     "./blog-card/*": "./dist/blog-card/*",
+    "./boundary-page/*": "./dist/boundary-page/*",
     "./breadcrumbs/*": "./dist/breadcrumbs/*",
     "./button/*": "./dist/button/*",
     "./card/*": "./dist/card/*",
