@@ -2,7 +2,7 @@
   "mission_slug": "confirm-dialog-element-01M248TN",
   "mission_number": "",
   "mission_type": "software-dev",
-  "overall_verdict": "pending",
+  "overall_verdict": "pass",
   "criteria": [
     {
       "criterion_id": "FR-001",
@@ -178,10 +178,10 @@
       "criterion_id": "FR-018",
       "description": "Verify FR-018 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "fixtures/elements-behaviour/src/sk-confirm-dialog.test.ts \u2014 the two unmarked (no [SC-NNN] id) component-scoped tests \"all four strings supplied: the shadow tree carries exactly those four strings and nothing else\" and \"an omitted required string renders no substituted literal and warns exactly once per omission\" are FR-018's own red-first-demonstrated deliverable (per #178's sk-notice precedent), registered as this component's subject in behaviours.json/mutations.json; review-cycle-2 independently reproduced the FR-018 mutation red then reverted clean, and the full 243/243 mutation harness pass (906.3s) includes this arm.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T09:44:58.807241+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     }
   ],
