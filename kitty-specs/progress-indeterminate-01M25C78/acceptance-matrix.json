@@ -88,10 +88,10 @@
       "criterion_id": "FR-009",
       "description": "Verify FR-009 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "packages/styles/src/progress/sk-progress.css:257-303 (forced-colors block); sk-progress.spec.ts:315-344 (fill legible at two distinct animation-cycle points)",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T13:10:53.293511+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
