@@ -22,9 +22,19 @@ product-level page element.
 state verified 2026-09-10 (`gh issue view`/`gh pr view`): #336, #337, #280, #307, #320, and #321 are
 all **OPEN**. #280 has no PR. #307 is PR #331 (UNSTABLE). #320 and #321 have no PR. #336 and #337
 are wave-1 lanes of this same programme, in flight now. Every FR below that depends on one of these
-six is marked `blocked-on: #NNN`. See `research.md` for the full canvas→surface→dependency map and
-for the measured finding that `sk-action-row`'s interactive `controls` slot is already public ahead
-of #307 (recorded, not acted on).
+carries a `blocked-on: #NNN` marker.
+
+**Orchestrator ruling, 2026-09-10 (not an operator decision — recorded in `research.md`'s
+"Dependency reconciliation" section with full measurement):** the live #338 issue body names #280
+and #307 among its six hard dependencies; measurement against the current train contradicts both
+for this mission specifically. `#280` is dropped as a hard dependency of #338 — it is filed for a
+different epic (#279, Work Package Detail) and today's plain `.sk-facts` already renders C6/C7's
+installation-facts group truthfully, just without #280's grouped-reflow presentation, which is
+recorded as a follow-up candidate in `plan.md` rather than a gate. `#307` is dropped from C2 and
+C9a — `sk-action-row`'s interactive `controls` slot/part is already public and styled on the train
+today, independent of #307/PR #331 (which adds only the static no-JS markup form). `#336`, `#320`,
+and `#321` remain live blocks where marked below. See `research.md` for the full canvas→surface→
+dependency map and the dated reconciliation record.
 
 ```mermaid
 flowchart LR
@@ -211,14 +221,14 @@ recorded in `research.md`.
 | ID | Title | Canvas | Required states | Priority | Status |
 |---|---|---|---|---|---|
 | FR-001 | Setup index | C1 | admin empty; server-configuration gaps; no dead actions | High | Open |
-| FR-002 | Operating index | C2 | admin/member projections; mixed provider health; GitHub admission/relay; outbound-only Slack; permission-owned actions | High | `blocked-on: #307` (trailing action per row — see research.md finding) |
+| FR-002 | Operating index | C2 | admin/member projections; mixed provider health; GitHub admission/relay; outbound-only Slack; permission-owned actions | High | Open — doable now (`#307` dropped; see research.md Dependency reconciliation, 2026-09-10) |
 | FR-003 | Provider authorization handoff | C3 | installation, reconnect, own-user-linking; distinct waiting/completing/source-exact-failure states | High | Open |
 | FR-004 | GitHub App setup failure | C4 | resolved-Team back route present; no-Team boundary variant omits it | High | Open |
 | FR-005 | GitLab group selection | C5 | populated, no-groups, validation, connected-after-refresh-failure; exactly-one selection; no submission-success theater | High | `blocked-on: #336, #321` |
-| FR-006 | Installation detail shell | C6 | admin/member shell; authoritative health variants | High | `blocked-on: #337, #280` |
-| FR-007 | Workspace scope tab | C7 | populated, empty, unavailable, stale-persisted-after-refresh-failure; member admin-only boundary | High | `blocked-on: #337` (sub-nav reached via C6); `blocked-on: #280` if scope facts are grouped |
+| FR-006 | Installation detail shell | C6 | admin/member shell; authoritative health variants; installation-facts group (Provider, Connected account, Health, Project routing count, Linked accounts count, Installed) renders via plain `.sk-facts` (stacked). The four/two/one-column reflowing presentation from the approved screen is deferred to #280 and tracked as a plan.md follow-up candidate; no fact is omitted or altered by the narrowing | High | `blocked-on: #337` only (`#280` dropped as a hard dependency; see research.md Dependency reconciliation, 2026-09-10) |
+| FR-007 | Workspace scope tab | C7 | populated, empty, unavailable, stale-persisted-after-refresh-failure; member admin-only boundary; shares C6's stacked-`.sk-facts` installation-facts header under the same narrowing; C7's own tab-unique content (`scope-stats` pair count, scope table) needs no facts-grid at all | High | `blocked-on: #337` only (`#280` dropped; see research.md Dependency reconciliation, 2026-09-10) |
 | FR-008 | Project routing / admitted repos | C8 | active/disabled mappings; admitted/withdrawn repositories; empty/validation/Jira-rescue; hard-purge confirmation via `sk-confirm-dialog` | High | `blocked-on: #337, #320, #321` |
-| FR-009 | Team account links | C9a | active/unhealthy linked accounts; unlinked/empty states; self-owned mutation only; `needs_reauth` danger with no recovery action | High | `blocked-on: #337, #307, #320` |
+| FR-009 | Team account links | C9a | active/unhealthy linked accounts; unlinked/empty states; self-owned mutation only; `needs_reauth` danger with no recovery action | High | `blocked-on: #337, #320` (`#307` dropped; the interactive `sk-action-row`'s `controls` slot is already public and styled — see research.md Dependency reconciliation, 2026-09-10) |
 | FR-010 | Slack channel selection | C9b | public-channel selection; empty; refusal; rate-limit; incomplete enumeration | High | `blocked-on: #321` if a filter input is part of the picker |
 
 ### Functional Requirements — Truth and ownership assertions

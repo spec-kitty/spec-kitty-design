@@ -119,10 +119,10 @@ flowchart TD
   F --> G
   H[Blocked: #336 radio-choice-group] -. required for .-> C5[C5 GitLab group choice]
   I[Blocked: #337 section-navigation] -. required for .-> C6789a[C6/C7/C8/C9a sub-nav]
-  J[Blocked: #280 facts-grid] -. required for .-> C67[C6/C7 grouped facts]
-  K[Blocked: #307 static action-row] -. named by issue for .-> C29a[C2/C9a trailing controls]
-  L[Blocked: #320 danger-secondary button] -. required for .-> C89a[C8 purge / C9a revoke styling]
-  M[Blocked: #321 input contrast/target-size] -. required for .-> C589b[C5/C8/C9b form inputs]
+  L[Reported, pending ruling: #320 danger-secondary button] -. degraded-not-hard, PR #341 in flight .-> C89a[C8 purge / C9a revoke styling]
+  M[Reported, pending ruling: #321 input contrast/target-size] -. degraded-not-hard, PR #339 in flight .-> C589b[C5/C8/C9b form inputs]
+  N[Dropped 2026-09-10: #280 facts-grid] -. narrowed to stacked .sk-facts, follow-up candidate .-> C67[C6/C7 grouped-facts presentation only]
+  O[Dropped 2026-09-10: #307 static action-row] -. sk-action-row's controls slot already public .-> C29a[C2/C9a trailing controls]
 ```
 
 The only mutable demonstration state anticipated is consumer-owned (e.g. a controlled
@@ -151,19 +151,25 @@ on a named dependency. Nothing in either group is executed this pass — tasks/W
   `BACKEND-CAPABILITY-MAP.md`'s route/state inventory (already read) and the issue's explicit fact
   list (health, counts, IDs, timestamps, branches, errors, permissions) rather than guessing ahead.
 
-#### IC-02 — Unblocked canvas composition: C1, C3, C4
+#### IC-02 — Unblocked canvas composition: C1, C2, C3, C4
 
-- **Purpose**: Compose the three canvases with no `blocked-on` marker in spec.md — C1 (setup index),
-  C3 (provider handoff), C4 (GitHub App setup failure) — entirely from surfaces verified present
-  today (`sk-app-shell`, `sk-page-header`, `sk-card`, `sk-notice`, `sk-status-indicator`, `sk-button`
-  busy-cue, `.sk-breadcrumbs`, `.sk-empty-state`).
-- **Relevant requirements**: FR-001, FR-003, FR-004; FR-011, FR-014 (both touch these canvases via
-  the automatic-admission and redirect-fact assertions).
-- **Affected surfaces**: same pattern module, C1/C3/C4 render functions and projections.
+- **Purpose**: Compose the four canvases with no `blocked-on` marker in spec.md — C1 (setup index),
+  **C2 (operating index — moved here 2026-09-10; `#307` dropped, see the Dependency reconciliation
+  section of research.md)**, C3 (provider handoff), C4 (GitHub App setup failure) — entirely from
+  surfaces verified present today (`sk-app-shell`, `sk-page-header`, `sk-card`, `sk-notice`,
+  `sk-status-indicator`, `sk-pill-tag`, `sk-button` busy-cue, `.sk-breadcrumbs`, `.sk-empty-state`,
+  and the interactive `sk-action-row` with its already-public, already-styled `controls` slot/part
+  for C2's per-row trailing action — `packages/elements/src/action-row/sk-action-row.ts:161-198`,
+  `packages/styles/src/action-row/sk-action-row.css:188,226,253`).
+- **Relevant requirements**: FR-001, FR-002, FR-003, FR-004; FR-011, FR-012, FR-014 (automatic-
+  admission, outbound-only-Slack, and redirect-fact assertions all touch these canvases).
+- **Affected surfaces**: same pattern module, C1/C2/C3/C4 render functions and projections.
 - **Sequencing/depends-on**: IC-01.
-- **Risks**: C1/C4's provider card grid and back-route layout are pattern-owned IA (C-004); risk is
-  accidentally generalizing them into a reusable component. Mitigate by keeping every layout helper
-  private to the `.stories.ts` module, as the #259 gate and every precedent require.
+- **Risks**: C1/C2/C4's provider card grid, row layout, and back-route layout are pattern-owned IA
+  (C-004); risk is accidentally generalizing them into a reusable component. Mitigate by keeping
+  every layout helper private to the `.stories.ts` module, as the #259 gate and every precedent
+  require. C2's action rows should not be generalized into a shared "connector row" component either
+  — the trailing-control composition is pattern-owned, only the underlying `sk-action-row` is public.
 
 #### IC-03 — Truth-boundary test *shapes* not requiring rendered blocked canvases
 
@@ -212,36 +218,31 @@ on a named dependency. Nothing in either group is executed this pass — tasks/W
 - **Relevant requirements**: FR-006, FR-007, FR-008, FR-009; FR-015, FR-016, FR-022, FR-023.
 - **Blocked on**: `#337` (section-navigation — the sub-navigation strip connecting all four canvases
   does not exist; verified `.sk-context-nav` is a different, nested-tree contract, not a substitute);
-  `#280` (grouped/reflowing facts-grid for C6's health facts and C7's scope facts — `.sk-facts`
-  today only supports stacked/two-col, not a grouped grid); `#320` (danger-secondary button for the
-  C8 hard-purge confirm action and any C9a revoke-styled control); `#307` (issue names it for C2/C9a
-  trailing controls — see the IC-07 note on the measured finding); `#321` (C8 validation/Jira-rescue
-  inputs).
+  `#320` (danger-secondary button for the C8 hard-purge confirm action and the C9a self-unlink
+  control — **reported, not yet ruled on**: research.md's 2026-09-10 finding measures this as
+  degraded-not-hard, since `sk-button--secondary` already tells both truthfully today, matching
+  DESIGN.md's own "destructive actions stay secondary" rule, but the visual baseline would need
+  reshooting once PR #341 merges — kept as a hard block here pending the orchestrator's disposition
+  of that finding); `#321` (C8 validation/Jira-rescue inputs — same reported-not-ruled status, PR
+  #339, same reshoot reasoning).
+  **`#280` dropped 2026-09-10** (see research.md's Dependency reconciliation) — C6's and C7's shared
+  installation-facts group (Provider, Connected account, Health, Project routing count, Linked
+  accounts count, Installed) composes truthfully today from plain `.sk-facts` (stacked, NOT
+  `--two-col` — `packages/styles/src/facts/sk-facts.css:36-47` has no `min-width:0`/`overflow-wrap`
+  on its value track and is an untested overflow risk; stacked has none by construction). The lost
+  four/two/one-column reflow presentation is recorded as a follow-up candidate below, not a gate.
+  **`#307` dropped from C9a 2026-09-10** — same `sk-action-row` finding as IC-02.
 - **Sequencing/depends-on**: IC-01; internally, the shell (C6) before its three tabs since they share
   the sub-navigation surface.
-- **Risks**: this is the largest blocked concern — four of the ten canvases sit behind two-to-four
-  dependencies each. Do not decompose it into a partial PR once dependencies land one at a time;
-  spec.md C-012 keeps delivery to one PR, so implementation should wait until all of #337/#280/#320
-  land (whichever of #307/#321 apply to the specific canvas) rather than landing C6 alone.
+- **Risks**: this is still the largest blocked concern, now gated on `#337` alone for reachability
+  plus `#320`/`#321` for two specific buttons/inputs within it. Do not decompose it into a partial PR
+  once dependencies land one at a time; spec.md C-012 keeps delivery to one PR. Given #320/#321 both
+  have owned PRs in flight (#341, #339) rather than #280's unowned state, sequence — wait for all
+  three (#337, #320, #321) — rather than narrow further; the narrowing already taken (stacked facts)
+  is the one that doesn't cost a reshoot, and stacking a second narrowing on top of it for the button
+  or input would trade truth for a baseline that changes out from under it.
 
-#### IC-07 — C2 operating index and C9a trailing controls
-
-- **Purpose**: Compose provider rows/linked-account rows with a trailing per-row control (e.g. a
-  reconnect or self-owned unlink action).
-- **Relevant requirements**: FR-002, FR-009 (trailing-control portion); FR-012, FR-016.
-- **Blocked on**: `#307` as named explicitly by the issue's dependency list. **Recorded finding,
-  not acted on**: `research.md` shows the interactive `sk-action-row` Lit element already exposes a
-  public `controls` slot/part on the train today, independent of #307/PR #331 (which adds only the
-  static server-rendered form). If the operator confirms the Storybook composition may proceed on
-  the interactive element alone, IC-07's `sk-action-row`-based rows could move to "doable now"; this
-  plan does NOT make that call unilaterally and keeps IC-07 blocked per the issue's explicit text
-  until the operator disposes of the finding.
-- **Sequencing/depends-on**: IC-01, IC-02 (C2 is otherwise unblocked apart from this one facet).
-- **Risks**: splitting "the parts of C2 that don't need a trailing control" from "the parts that do"
-  into separate work risks a half-rendered canvas landing before its story is complete. Keep C2 as
-  one unit gated on the operator's disposition of the #307 finding.
-
-#### IC-08 — C9b Slack channel selection (partial block)
+#### IC-07 — C9b Slack channel selection (partial block)
 
 - **Purpose**: Compose populated/empty/refusal/rate-limit/incomplete-enumeration channel selection.
 - **Relevant requirements**: FR-010; FR-012.
@@ -253,17 +254,32 @@ on a named dependency. Nothing in either group is executed this pass — tasks/W
   must re-check the corpus's exact C9b form before assuming #321 applies, rather than blocking
   optimistically or unblocking incorrectly.
 
-#### IC-09 — Delivery boundary, ratchets, and documentation
+#### IC-08 — Delivery boundary, ratchets, and documentation
 
 - **Purpose**: Register the family in every required ratchet (`expected-parts.json`,
   `expected-docs.json`, `behaviours.json`, `mutations.json`, `expected-stories.json`), harvest CI
   visual baselines, and document the composition/ownership boundary.
 - **Relevant requirements**: FR-026, FR-027, FR-028, FR-029; NFR-008, NFR-009, NFR-010.
-- **Blocked on**: transitively blocked — cannot finalize until IC-05 through IC-08 are complete,
+- **Blocked on**: transitively blocked — cannot finalize until IC-05 through IC-07 are complete,
   since ratchets and baselines cover the whole family, not a partial one (C-012's one-PR rule).
-- **Sequencing/depends-on**: IC-01 through IC-08.
+- **Sequencing/depends-on**: IC-01 through IC-07.
 - **Risks**: partial ratchet registration would misrepresent the family as complete. Mitigate by
   finalizing this concern only once every blocked canvas has landed.
+
+## Follow-up candidates (recorded, not filed — the orchestrator files if warranted)
+
+These are narrowings this mission's design pass took to stay truthful without a hard dependency;
+each leaves a named, recordable gap between what #338 ships and what the approved corpus screen
+shows. This mission does not open a GitHub issue for either.
+
+- **C6/C7 installation-facts grouped-reflow presentation (relates to #280).** C6 and C7's shared
+  installation-facts group ships as plain stacked `.sk-facts` instead of the corpus's four/two/
+  one-column grouped-pair grid (`screens/C6-installation-detail-dark.html:972-978`,
+  `screens/C7-workspace-scope-dark.html:997-1003`). No fact is wrong or missing; the loss is purely
+  the compact card-like grouping. If #280 (or an equivalent facts-grid extension, from whichever
+  epic actually delivers it) lands on the train later, re-narrow C6/C7 to the grid and reshoot their
+  baselines. Ruled 2026-09-10: orchestrator decision from measured evidence (`#280` filed for #279,
+  not #338) — see research.md's Dependency reconciliation section.
 
 ## Verification Strategy
 

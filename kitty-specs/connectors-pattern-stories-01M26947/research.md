@@ -99,15 +99,15 @@ issue calls for an exactly-one submitted choice — concretely, C5's GitLab grou
 | Canvas | Composes (verified public, unblocked) | Blocked dependency, and for what | Pattern-owned |
 |---|---|---|---|
 | **C1** setup index | `sk-app-shell`, `sk-personal-rail`, `sk-context-sidebar`, `sk-page-header`, `sk-card`, `sk-notice` (server-configuration-gap explanations), `.sk-empty-state`, `sk-button` (primary/secondary/ghost only — no dead/destructive action needed here) | none identified | provider card grid layout, admin-empty projection selectors |
-| **C2** operating index | Same shell/header family; `sk-card[status]`, `sk-status-indicator` (`danger` for `needs_reauth`/revoked/failed — unblocked), `sk-pill-tag`, `sk-action-row` (Lit `controls` slot — see finding above; treated as blocked per issue text), `sk-notice` (Slack outbound-only framing) | `#307` (issue names it; interactive slot arguably already public — flag for operator) | provider card grid, admin/member projection, health-mix fixture |
+| **C2** operating index | Same shell/header family; `sk-card[status]`, `sk-status-indicator` (`danger` for `needs_reauth`/revoked/failed — unblocked), `sk-pill-tag`, `sk-action-row` (Lit `controls` slot — public today), `sk-notice` (Slack outbound-only framing) | **none — `#307` dropped 2026-09-10, see Dependency reconciliation below** | provider card grid, admin/member projection, health-mix fixture |
 | **C3** provider handoff | `sk-notice`, `sk-card`, `sk-status-indicator`, `sk-button` (busy-cue part for waiting state) | none identified for the loading/failure/completing states themselves | waiting/completing/source-exact-failure projection selectors |
 | **C4** GitHub App setup failure | `sk-notice` (failure explanation), `sk-page-header`/breadcrumbs (resolved-Team back route), `sk-button` | none identified — the "no-Team boundary variant" is an omission (absent back-link), provable with existing primitives | back-route presence/absence projection |
-| **C5** GitLab group selection | `sk-card`, `sk-notice` (validation/refresh-failure), `sk-button` | **`#336`** — exactly-one group choice is the radio-choice-group's defining contract; **`#321`** — any text/validation input in this form inherits the unfixed contrast/target-size defect | populated/no-groups/validation/connected-after-refresh-failure fixture states; announce-only submit interception |
-| **C6** installation detail shell | `sk-app-shell`, `sk-page-header`, `sk-card[status]`, `sk-status-indicator`, `sk-copy-field` (installation IDs), `.sk-breadcrumbs` | **`#337`** — the Workspace Scope / Project Routing / Team Accounts sub-navigation is exactly TKC2's contract; **`#280`** — grouped health/installed-by/at facts need the reflowing facts-grid, `.sk-facts` alone only does stacked/two-col | admin/member shell projection, authoritative health variant selectors |
-| **C7** workspace scope tab | `.sk-data-table` or `.sk-facts`, `.sk-empty-state`, `sk-notice` (unavailable, stale-after-refresh-failure) | **`#337`** — reached via the same sub-navigation as C6; **`#280`** if scope facts are grouped rather than tabular | populated/empty/unavailable/stale-persisted projection; member admin-only boundary |
-| **C8** project routing/admitted repos | `.sk-data-table`, `sk-status-indicator`, `.sk-empty-state`, `sk-confirm-dialog` (hard-purge confirmation — dialog itself unblocked), `sk-form-input`/`.sk-form-select` (Jira rescue state) | **`#337`** (sub-navigation); **`#320`** — the purge confirmation's destructive action needs the danger-secondary button axis (confirm-dialog has no built-in destructive tone); **`#321`** — validation-state form inputs | active/disabled mapping projection, admitted/withdrawn repository states, hard-purge confirm wiring (mutation-free) |
-| **C9a** team account links | `.sk-data-table` or `sk-action-row` rows, `sk-status-indicator` (`danger` for `needs_reauth`/revoked — unblocked), `sk-pill-tag` | **`#337`** (sub-navigation); **`#307`** (trailing self-owned unlink control — same finding as C2); **`#320`** if any destructive/revoke-styled button appears | active/unhealthy/unlinked/empty projection; self-owned-mutation-only boundary; explicit no-recovery-route assertion for `needs_reauth`/revoked/failed |
-| **C9b** Slack channel selection | `.sk-form-select` or `.sk-data-table` (channel list), `sk-notice` (refusal/rate-limit), `.sk-empty-state` | **`#321`** if a filter/search input is part of the picker | populated/empty/refusal/rate-limit/incomplete-enumeration projection |
+| **C5** GitLab group selection | `sk-card`, `sk-notice` (validation/refresh-failure), `sk-button` | **`#336`** — exactly-one group choice is the radio-choice-group's defining contract, unchanged hard block; **`#321`** — reported degraded-not-hard 2026-09-10, pending ruling (today's `.sk-input` already tells validation-state facts truthfully; only the border-contrast/target-size floor would need a later reshoot) | populated/no-groups/validation/connected-after-refresh-failure fixture states; announce-only submit interception |
+| **C6** installation detail shell | `sk-app-shell`, `sk-page-header`, `sk-card[status]`, `sk-status-indicator`, `sk-copy-field` (installation IDs), `.sk-breadcrumbs`, `.sk-facts` (stacked, narrowed) | **`#337`** — the Workspace Scope / Project Routing / Team Accounts sub-navigation is exactly TKC2's contract. `#280` dropped 2026-09-10 — see Dependency reconciliation below; grouped-reflow presentation deferred as a follow-up | admin/member shell projection, authoritative health variant selectors |
+| **C7** workspace scope tab | `.sk-data-table`, `.sk-facts` (stacked, narrowed, shared header), `.sk-empty-state`, `sk-notice` (unavailable, stale-after-refresh-failure) | **`#337`** — reached via the same sub-navigation as C6. `#280` dropped 2026-09-10 — C7's own tab-unique content (`scope-stats`, `scope-table`) never needed it | populated/empty/unavailable/stale-persisted projection; member admin-only boundary |
+| **C8** project routing/admitted repos | `.sk-data-table`, `sk-status-indicator`, `.sk-empty-state`, `sk-confirm-dialog` (hard-purge confirmation — dialog itself unblocked), `sk-form-input`/`.sk-form-select` (Jira rescue state) | **`#337`** (sub-navigation, unchanged); **`#320`** and **`#321`** — both reported degraded-not-hard 2026-09-10, pending ruling (`sk-button--secondary` inside `sk-confirm-dialog`'s `confirm` part, and today's `.sk-input`, both already tell C8 truthfully; both would need a later reshoot) | active/disabled mapping projection, admitted/withdrawn repository states, hard-purge confirm wiring (mutation-free) |
+| **C9a** team account links | `sk-action-row` rows (public `controls` slot), `sk-status-indicator` (`danger` for `needs_reauth`/revoked — unblocked), `sk-pill-tag` | **`#337`** (sub-navigation, unchanged); **`#320`** for the self-unlink button's destructive treatment — reported degraded-not-hard 2026-09-10, pending ruling (`sk-button--secondary` already tells it truthfully). `#307` dropped 2026-09-10 — same finding as C2 | active/unhealthy/unlinked/empty projection; self-owned-mutation-only boundary; explicit no-recovery-route assertion for `needs_reauth`/revoked/failed |
+| **C9b** Slack channel selection | `.sk-form-select` or `.sk-data-table` (channel list), `sk-notice` (refusal/rate-limit), `.sk-empty-state` | **`#321`** if a filter/search input is part of the picker — reported degraded-not-hard 2026-09-10, pending ruling, conditional on whether the corpus C9b markup actually includes a free-text filter | populated/empty/refusal/rate-limit/incomplete-enumeration projection |
 
 ## Surfaces the issue/epic name that could not be verified as already existing
 
@@ -187,3 +187,64 @@ No CSS, markup, or behavior from #331 (PR, action-row static form), #336/#337 (n
 any other unmerged branch was read from a working tree or copied. All verification above reads
 `train/elements-first` HEAD in this checkout only. Where a canvas's composition genuinely requires
 a named dependency, the map above records it; nothing is forked or faked to appear unblocked.
+
+## Dependency reconciliation — 2026-09-10 (orchestrator ruling, not an operator decision)
+
+**What the live #338 issue body claims.** Its "Dependencies and parallelization" section names six
+hard dependencies for final implementation and baselines: #336, #337, #280, #307, #320, #321.
+
+**What was measured, with citations, and what the orchestrator ruled from that evidence:**
+
+1. **#280 (responsive facts-grid extension) — dropped as a hard dependency of #338.**
+   `gh issue view 280` shows it is filed for `mission: work-package-detail-facts-grid`, part of
+   epic **#279** (Work Package Detail), not #335/#338 — #338 cites it opportunistically. Measured
+   against the train: `packages/styles/src/facts/sk-facts.css:8-30` (stacked `.sk-facts`) already
+   renders C6's and C7's shared six-pair installation-facts group
+   (`screens/C6-installation-detail-dark.html:972-978`,
+   `screens/C7-workspace-scope-dark.html:997-1003`) truthfully — every fact present, none fabricated
+   or omitted. `.sk-facts--two-col` (`sk-facts.css:36-47`) was explicitly rejected as the narrowing
+   target: it has no `min-width:0`/`overflow-wrap` declared on its value track, an untested overflow
+   risk stacked `.sk-facts` does not carry. **Mission does instead**: C6/C7 compose the shared
+   installation-facts group via stacked `.sk-facts`; the lost four/two/one-column grouped-reflow
+   presentation is recorded as a named follow-up candidate in `plan.md`, not filed as a GitHub issue
+   by this mission. No 390px/root-overflow/gutter clause is broken by this narrowing.
+
+2. **#307 (static action-row with trailing controls) — dropped from C2 and C9a.**
+   `packages/elements/src/action-row/sk-action-row.ts:161-198` shows the interactive element already
+   renders `<slot name="controls">` behind `part="controls"`; `packages/styles/src/action-row/
+   sk-action-row.css:188,226,253` shows `.sk-action-row__controls` is already styled in the shipped
+   stylesheet. `gh pr view 331` confirms PR #331 adds only `actionRowStaticHtml()` and the
+   `.sk-action-row-host` no-JS wrapper contract — nothing the interactive element's `controls` slot
+   depends on. The corpus's own real markup for a trailing self-unlink control
+   (`screens/C6-installation-detail-dark.html:1050`) is a native `<form method="post" action="…">`
+   sibling of the trigger — exactly what the public `controls` slot already accepts. The mutation-
+   free-forms requirement (FR-018) is satisfied by an ordinary `submit` listener with
+   `preventDefault()`, independent of which action-row form is used. **Mission does instead**: C2
+   and C9a's trailing controls compose the already-public interactive `sk-action-row` today.
+
+3. **#336, #337 remain live hard blocks** — no substitute exists on the train for either (verified:
+   `find . -iname "*radio-choice*"` and `*section-nav*"` both return nothing under `packages/`), and
+   `.sk-context-nav` was confirmed a different, nested-tree contract, not a section-navigation strip.
+
+4. **#320 and #321 — reported, not yet ruled on** (both have owned PRs in flight — #341, #320; #339,
+   #321 — so the stakes are sequencing, not survival). Measured: `sk-button.css:11-97` confirms only
+   `primary`/`secondary`/`ghost` exist; DESIGN.md's own visual rule says destructive actions stay
+   **secondary**, not danger-toned, so `sk-button--secondary` inside `sk-confirm-dialog`'s `confirm`
+   part tells C8/C9a truthfully today. `sk-form-field.css:32-64` and `sk-form-input.css:65-88` show
+   `[aria-invalid="true"]` already sets `border-color: var(--sk-color-red)` on both consumption
+   paths independent of #321, and the computed control height (padding + line content + border, from
+   `tokens.css:199,220,236-237`) already clears both the axe 2.5.8 24px floor and the 44/48px
+   precedent #321 wants to make contractual — though this is a token computation, not a rendered
+   measurement. `run-axe-storybook.js:9` requests only `wcag2a + wcag2aa` (WCAG 2.0), which excludes
+   1.4.11 Non-text Contrast (a 2.1 addition) — corroborated by `#155` (OPEN, the identical
+   `--sk-border-default` weakness on `sk-button--secondary`) shipping unflagged in two already-merged
+   pattern stories (`work-explorer.stories.ts`, `mission-kanban.stories.ts`). Both read as
+   **degraded, not hard** on the evidence — but both would need a **visual-baseline reshoot** once
+   their respective PRs merge, which argues for sequencing the baseline-harvest step after landing
+   rather than narrowing spec.md/plan.md now. Kept as active blocks in spec.md/plan.md pending the
+   orchestrator's explicit disposition of this finding — not silently acted on.
+
+**What was NOT done**: the FR/IC blocked-on markers for #336, #337, #320, #321 were left exactly as
+the issue states (or, for #320/#321, reported but not narrowed); only #280 and #307's markers were
+changed, and only after this dated record was written, per instruction to record the conflict rather
+than silently edit the dependency list as though the issue had always said this.
