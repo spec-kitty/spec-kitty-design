@@ -4,7 +4,7 @@ artifact_type: spec-kitty.analysis-report
 command: /spec-kitty.analyze
 mission_slug: theme-toggle-01M25KMP
 mission_id: 01M25KMPPGYRPHTBZATJG15NWK
-generated_at: '2026-09-10T14:57:48.646971+00:00'
+generated_at: '2026-09-10T14:59:08.449821+00:00'
 analyzer_agent: codex
 input_artifacts:
   spec.md:
@@ -19,13 +19,13 @@ input_artifacts:
   charter:
     path: .kittify/charter/charter.yaml
     sha256: 027fa1ef1a203b970e2688e837774cfeadacbdcec1e42897633d0a243ace0071
-verdict: unknown
+verdict: ready
 issue_counts:
-  medium:
-  info:
-  low:
-  high:
-  critical:
+  medium: 0
+  low: 0
+  high: 0
+  critical: 0
+  info: 0
 findings: []
 ---
 
