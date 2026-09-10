@@ -39,7 +39,7 @@ requirement_refs:
 - NFR-006
 planning_base_branch: mission/button-busy-axis
 merge_target_branch: mission/button-busy-axis
-branch_strategy: Planning artifacts for this mission were generated on mission/button-busy-axis (single_branch topology). This WP executes directly on mission/button-busy-axis; no separate lane branch or worktree is created. Completed changes stay on this branch, which is later opened as a PR into train/elements-first.
+branch_strategy: Planning artifacts for this mission were generated on mission/button-busy-axis. During /spec-kitty.implement this WP may branch from a dependency-specific base, but completed changes must merge back into mission/button-busy-axis unless the human explicitly redirects the landing branch.
 subtasks:
 - T001
 - T002
@@ -65,7 +65,7 @@ owned_files:
 - expected-parts.json
 - expected-docs.json
 - expected-stories.json
-- custom-elements.json
+- packages/elements/custom-elements.json
 - packages/react/src/button/**
 - packages/elements/vue.d.ts
 - packages/elements/SIZES.md
