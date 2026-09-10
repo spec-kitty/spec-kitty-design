@@ -78,10 +78,10 @@
       "criterion_id": "FR-008",
       "description": "Verify FR-008 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "fixtures/elements-behaviour/src/sk-button.test.ts: 'size is an axis independent of tone' extended assertions \u2014 danger-secondary at size=sm/icon match primary's padding/40px bounds; passing.",
+      "pass_fail": "pass",
+      "verified_by": "reviewer-renata",
+      "verified_at": "2026-09-10T15:46:04.074303+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
