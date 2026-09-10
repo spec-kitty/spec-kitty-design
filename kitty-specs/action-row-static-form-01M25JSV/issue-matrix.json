@@ -1,7 +1,7 @@
 {
   "rows": {
     "#272": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "spec.md L59/L252: sibling-not-descendant/no-new-activation already established by #272 in the shadow element; this WP's T005 mutation-proven test re-verifies the same rule for the new static form, does not change it",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -9,8 +9,8 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
     },
     "#283": {
       "evidence_ref": "<link or commit>",
