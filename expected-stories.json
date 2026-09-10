@@ -65,7 +65,8 @@
     "#353 opts in all thirteen native styles-only public-header stories named as acceptance evidence. Brand-only; one, two, and many actions; long labels; current route; mixed controls; the #323-blocked composition slot; narrow and short viewports; RTL; forced colours; and real `.sk-light` evidence remain independently reviewable. IDs were read from the built Storybook index; the generated autodocs entry is excluded. On the refreshed train after #307, total moves 537 -> 550.",
     "#353 opts in all thirteen native styles-only public-header stories named as acceptance evidence. Brand-only; one, two, and many actions; long labels; current route; mixed controls; the #323-blocked composition slot; narrow and short viewports; RTL; forced colours; and real `.sk-light` evidence remain independently reviewable. IDs were read from the built Storybook index; the generated autodocs entry is excluded. On the refreshed train after #307 and then #303, total moves 537 -> 550 (537 is #303's end state, not #307's).",
     "#323 ratchets seven sk-theme-toggle element stories and seven additive operational-status theme routes, total 564 -> 578 on the refreshed train after #397. Default/dark and real LightMode stay separately addressable alongside System, manual Light, greyscale, forced-colors, narrow, system-light/system-dark, manual-light/manual-dark, and 200% zoom proof. The shared Storybook beforeEach helper is not a CSF export; every route restores root, storage, and mounted-listener state.",
-    "#320 adds five sk-button danger-secondary stories: DangerSecondary, DangerSecondaryIcon, DangerSecondaryFocus, DangerSecondaryDisabled, and ForcedColors — two of the five are navigated BY ID as acceptance evidence rather than merely rendered (elements-load.spec.ts's forced-colors comparative case goes to `--forced-colors`; visual.spec.ts's baseline case goes to `--danger-secondary`), which is exactly the shape this ratchet's own rule targets: 'a story cited as proof is ratcheted in the same commit that cites it'. A pre-merge lens found these five missing after the fact — scripts/run-axe-storybook.js enforces declared-vs-present only, so it could not have caught the gap itself. The existing Busy and LightMode stories are both extended in place with a danger-secondary fixture and are not new ids (matching #305's own LightMode precedent). On the refreshed train after #323, total moves 578 -> 583; every pre-existing sk-button story id is unchanged."
+    "#320 adds five sk-button danger-secondary stories: DangerSecondary, DangerSecondaryIcon, DangerSecondaryFocus, DangerSecondaryDisabled, and ForcedColors — two of the five are navigated BY ID as acceptance evidence rather than merely rendered (elements-load.spec.ts's forced-colors comparative case goes to `--forced-colors`; visual.spec.ts's baseline case goes to `--danger-secondary`), which is exactly the shape this ratchet's own rule targets: 'a story cited as proof is ratcheted in the same commit that cites it'. A pre-merge lens found these five missing after the fact — scripts/run-axe-storybook.js enforces declared-vs-present only, so it could not have caught the gap itself. The existing Busy and LightMode stories are both extended in place with a danger-secondary fixture and are not new ids (matching #305's own LightMode precedent). On the refreshed train after #323, total moves 578 -> 583; every pre-existing sk-button story id is unchanged.",
+    "#320 pre-merge squad round 1, finding #5: adds a sixth id, DangerSecondaryBusy, covering the previously-unrendered `busy` + `danger-secondary` composition. NOT added into the pre-existing `Busy` story: that story's `#storybook-root` is what visual.spec.ts's three `SK-button busy *` cases screenshot whole, and a fifth button there would have shifted the row's pixel dimensions and broken #327's already-committed baselines for a combination this mission does not touch — found live, CI run 34510234447 red on exactly those three cases after a first attempt added it there. DangerSecondaryBusy carries no visual-regression baseline of its own; the Busy story itself is unchanged from its #327 shape. Total moves 583 -> 584."
   ],
   "unratchetedElements": {
     "sk-confirm-dialog": "Ships stories (elements-skconfirmdialog--*) but was never named in this file's own history -- not even as 'still outside'. No mission has reviewed it against this ratchet; #326 is the first time its absence was written down anywhere.",
@@ -212,6 +213,7 @@
       "elements-skbutton--danger-secondary-icon",
       "elements-skbutton--danger-secondary-focus",
       "elements-skbutton--danger-secondary-disabled",
+      "elements-skbutton--danger-secondary-busy",
       "elements-skbutton--forced-colors"
     ],
     "sk-card": [
@@ -769,5 +771,5 @@
       "form-formfield-html--light-mode-error"
     ]
   },
-  "total": 583
+  "total": 584
 }

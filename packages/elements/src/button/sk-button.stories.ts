@@ -85,7 +85,6 @@ export const Busy: Story = {
       <sk-button variant="secondary" busy>Saving</sk-button>
       <sk-button variant="ghost" busy>Saving</sk-button>
       <sk-button busy>Saving</sk-button>
-      <sk-button variant="danger-secondary" busy>Deny</sk-button>
     </div>
   `,
 };
@@ -140,6 +139,23 @@ export const DangerSecondaryFocus: Story = {
 /** `disabled`, mirroring the primary-tone `Disabled` story above. */
 export const DangerSecondaryDisabled: Story = {
   render: () => '<sk-button variant="danger-secondary" disabled>Deny</sk-button>',
+};
+
+/**
+ * `busy` + `danger-secondary` composed (round 1, finding #5): reachable and previously
+ * uncovered. Given its OWN story rather than added into the pre-existing `Busy` story above —
+ * that story's `#storybook-root` is what `visual.spec.ts`'s `SK-button busy *` cases screenshot
+ * whole, so adding a fifth button there would have shifted the row's pixel dimensions and
+ * broken #327's already-committed baselines for a combination this mission does not touch. This
+ * story carries no visual-regression baseline of its own — axe coverage is what finding #5
+ * actually asked for.
+ *
+ * The cue currently rings in `--sk-border-default`, the exact hairline this tone's own boundary
+ * rule (see sk-button.css) exists to avoid — a real, currently-uncovered gap in the busy axis's
+ * own per-tone cue colouring, filed separately by the reviewer and NOT fixed here.
+ */
+export const DangerSecondaryBusy: Story = {
+  render: () => '<sk-button variant="danger-secondary" busy>Deny</sk-button>',
 };
 
 export const AllVariants: Story = {
