@@ -1,0 +1,18 @@
+evidence_id,source_id,finding,decision_or_requirement,confidence
+EV-001,SRC-001,"Four representative stories are required, not twelve one-for-one screen replicas.","C-007;FR-001;FR-002;FR-003;FR-004",high
+EV-002,SRC-001,"Specification, planning, fixture selection, and red-first scaffolding may start while #320/#321/#303 are in flight; final composition rebases onto the train commits that land them.","FR-020;C-010",high
+EV-003,SRC-001,"No fabricated recovery action on terminal error unless the fixture explicitly supplies a real route.","FR-004",high
+EV-004,SRC-002,"#329 is Wave 2, sequenced after Wave 1 (#320, #321) in the epic's dependency map, with #303 owned by a different epic (#300).","FR-020;C-003",high
+EV-005,SRC-003,"Measured on the pinned train ref: sk-button.css publishes exactly primary/secondary/ghost; no danger tone exists.","FR-002;C-010",high
+EV-006,SRC-004,"Measured on the pinned train ref: .sk-input/sk-form-input declare a border using the same weak --sk-border-default token and no target-size floor.","FR-001;FR-011",high
+EV-007,SRC-005,"#303 is open, owned by epic #300, with no branch/PR; sequenced after TKT2/TKT4 which it composes.","FR-003;FR-004;C-003",high
+EV-008,SRC-006,"#286's known-violation table names sk-metric, sk-transition-matrix, operational-status.ts, and sk-stub only — none of the elements this mission composes.","FR-018",high
+EV-009,SRC-008,"Direct grep of packages/styles/src/button/sk-button.css confirms no 'danger' string present.","FR-002",high
+EV-010,SRC-009,"Direct read of packages/styles/src/form-field/sk-form-field.css confirms no min-height/min-block-size on the .sk-input rule.","FR-011",high
+EV-011,SRC-010,"check-pattern-composition.mjs SCAN constant is packages/elements/src/patterns/**/*.{ts,tsx,js,mjs,cjs,css} — already covers any new fixture placed in that directory.","FR-017",high
+EV-012,SRC-011,"sk-pill-tag already ships --status-danger reusing --sk-status-danger/--sk-on-status-danger, usable for terminal-state status affordances without #320.","FR-003;FR-004",medium
+EV-013,SRC-012,"sk-entity-marker is implemented, confirming #303's own composition of it will be available once #303 lands.","FR-003;FR-004",medium
+EV-014,SRC-013,".sk-facts is implemented as a native <dl> styles-only pattern with no gap for Story 2's fact list.","FR-002",high
+EV-015,SRC-014,"repository-dossier-pattern-stories establishes the fixture.ts + stories.ts + focused-spec + expected-stories.json + docs-section file shape this mission follows.","FR-017;FR-019",high
+EV-016,SRC-016,"check-pattern-composition.mjs was purpose-built for exactly this composition/inventory proof and explicitly states it applies to the whole patterns directory by convention.","FR-017",high
+EV-017,SRC-019,"git ls-remote for mission/button-danger-secondary-axis, mission/form-input-contrast-touch-target-contract, and mission/boundary-page-styles returns no refs — none of the three dependency branches exist yet.","FR-020;NFR-009",high
