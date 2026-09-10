@@ -1,7 +1,7 @@
 {
-  "event_count": 2,
-  "last_event_id": "01M26GWBWX2V9SPFDKCEXYCJ63",
-  "materialized_at": "2026-09-10T20:41:52.285139+00:00",
+  "event_count": 3,
+  "last_event_id": "01M26GWF3SE47JGNQZVT0RBDEJ",
+  "materialized_at": "2026-09-10T20:41:55.577631+00:00",
   "mission_number": "",
   "mission_slug": "connector-radio-choice-group-01M2693Y",
   "mission_type": "software-dev",
@@ -9,10 +9,10 @@
     "approved": 0,
     "blocked": 0,
     "canceled": 0,
-    "claimed": 1,
+    "claimed": 0,
     "done": 0,
     "for_review": 0,
-    "in_progress": 0,
+    "in_progress": 1,
     "in_review": 0,
     "planned": 0
   },
@@ -20,9 +20,9 @@
     "WP01": {
       "actor": "claude",
       "force_count": 0,
-      "lane": "claimed",
-      "last_event_id": "01M26GWBWX2V9SPFDKCEXYCJ63",
-      "last_transition_at": "2026-09-10T20:41:52.285139+00:00"
+      "lane": "in_progress",
+      "last_event_id": "01M26GWF3SE47JGNQZVT0RBDEJ",
+      "last_transition_at": "2026-09-10T20:41:55.577631+00:00"
     }
   }
 }
