@@ -120,6 +120,18 @@
       "verdict": "verified-already-fixed",
       "wp": "WP01"
     },
+    "#309": {
+      "evidence_ref": "spec.md line 36 / C-008: this mission's static-form freeze deliberately does not wait on #309/#310/#311/#314 (ADR-15 read directly against sk-button.css's :host rule instead). Those missions remain independently tracked and are out of this WP's scope.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
+    },
     "#312": {
       "evidence_ref": "The PR that merged #301's ADR-15 ruling into train/elements-first at 5061e68, prior to this mission's base.",
       "fr": null,
