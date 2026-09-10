@@ -12,6 +12,9 @@ requirement_refs:
 - FR-007
 - FR-008
 - FR-009
+planning_base_branch: mission/static-form-of-element-backed-css
+merge_target_branch: mission/static-form-of-element-backed-css
+branch_strategy: Planning artifacts for this mission were generated on mission/static-form-of-element-backed-css. During /spec-kitty.implement this WP may branch from a dependency-specific base, but completed changes must merge back into mission/static-form-of-element-backed-css unless the human explicitly redirects the landing branch.
 subtasks:
 - T001
 - T002
@@ -28,10 +31,7 @@ history:
   action: Prompt generated via /spec-kitty.tasks
 agent_profile: ''
 authoritative_surface: docs/architecture/decisions/
-create_intent:
-- kitty-specs/static-form-of-element-backed-css-01M248TF/measurement/host-attribute-axis/result.json
-- kitty-specs/static-form-of-element-backed-css-01M248TF/measurement/host-container-type/result.json
-- kitty-specs/static-form-of-element-backed-css-01M248TF/measurement/slotted-child-rule/result.json
+create_intent: []
 execution_mode: code_change
 model: ''
 owned_files:
@@ -44,7 +44,6 @@ owned_files:
 - packages/elements/src/app-shell/sk-app-shell.ts
 - packages/elements/src/action-row/sk-action-row.ts
 - packages/elements/src/entity-marker/sk-entity-marker.ts
-- kitty-specs/static-form-of-element-backed-css-01M248TF/measurement/**
 role: ''
 tags: []
 task_type: implement
@@ -129,6 +128,12 @@ Use language identifiers in code blocks: ````python`, ````bash`
 - **C-005**: never hand-edit `kitty-specs/` or `.kittify/` artifacts outside the normal CLI/skill
   flow; this WP's own status transitions go through `spec-kitty agent tasks mark-status` /
   `move-task`, not manual file edits.
+- **Ownership metadata note**: `kitty-specs/static-form-of-element-backed-css-01M248TF/measurement/**`
+  (T002-T004's evidence) is not listed in this WP's `owned_files` — the finalizer rejects
+  `kitty-specs/` paths there by design, since mission artifacts aren't a code-ownership surface.
+  Create and commit those files normally anyway (e.g. via `spec-kitty spec-commit` or a plain
+  commit on this mission's branch); this is a tooling constraint on the frontmatter field, not a
+  statement that the evidence files are out of scope.
 
 ## Branch Strategy
 
