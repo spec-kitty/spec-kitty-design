@@ -49,7 +49,7 @@
       "wp": null
     },
     "#300": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "Epic tracking parent, Gap G4 (spec.md line 6). This WP delivers #305's slice of epic #300; the epic itself is not closed by this WP.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -57,8 +57,8 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "verdict": "in-mission",
+      "wp": "WP01"
     },
     "#301": {
       "evidence_ref": "<link or commit>",
