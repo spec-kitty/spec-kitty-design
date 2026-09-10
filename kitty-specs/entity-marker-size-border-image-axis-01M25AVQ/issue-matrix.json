@@ -61,7 +61,7 @@
       "wp": "WP01"
     },
     "#308": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "spec.md/WP prompt prose cross-reference only: #308 is a sibling mission cited as precedent for absent-state test coverage; verified independently that #304's own tests explicitly assert the no-border/default-size absent states (fixtures/elements-behaviour/src/sk-entity-marker.test.ts and apps/storybook/src/tests/sk-compact-work-item-extensions.spec.ts both measure borderStyle:'none' for the unbordered case). Not a dependency #304 resolves.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -69,8 +69,8 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "verdict": "in-mission",
+      "wp": "WP01"
     }
   },
   "schema_version": 1
