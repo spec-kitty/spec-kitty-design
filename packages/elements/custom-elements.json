@@ -8,6 +8,91 @@
       "declarations": [
         {
           "kind": "variable",
+          "name": "ACTION_ROW_AXES",
+          "default": "{ Card: { layout: 'card' }, Flush: { presentation: 'flush' }, Link: { href: '#' }, Current: { current: true }, RouteCurrent: { href: '#', current: true }, } as const satisfies Record<string, ActionRowStaticOptions>",
+          "description": "The static forms this component publishes, beyond the base.\n\nRequired by the generator even when it would otherwise be sparse: `?? {}` cannot distinguish\n\"no axes\" from \"wrong export name\" (`sk-grid.markup.ts`'s comment on exactly this).\n\n`Card` and `Flush` give each independent boolean axis its own generated export. `Link` gives\nthe ANCHOR branch of `actionRowStaticHtml` its coverage — mirroring `BUTTON_AXES.Link` in\n`sk-button.markup.ts` — because the route trigger is the shape every real Team Kitty row uses\n(Family 4's T1 workspace/invitation rows), not an edge case. `Current` and `RouteCurrent` give\nthe styles-layer story (which may not import this module directly — `scope:styles` may only\ndepend on `scope:tokens`) a generated export for each of `aria-current`'s two present shapes\n(FR-011), since the generator's own opts-only axis mechanism is the only route a static export\ncan vary `current` through without the story hand-authoring the wrapper markup a second time."
+        },
+        {
+          "kind": "variable",
+          "name": "ACTION_ROW_LAYOUTS",
+          "type": {
+            "text": "{ card: 'sk-action-row--card' }"
+          },
+          "default": "{ card: 'sk-action-row--card' }",
+          "description": "The `layout` axis. Only `card` is a recognised value; anything else degrades to the row layout."
+        },
+        {
+          "kind": "variable",
+          "name": "ACTION_ROW_PRESENTATIONS",
+          "type": {
+            "text": "{ flush: 'sk-action-row--flush' }"
+          },
+          "default": "{ flush: 'sk-action-row--flush' }",
+          "description": "The `presentation` axis. Only `flush` is recognised; anything else keeps the bordered card."
+        },
+        {
+          "kind": "variable",
+          "name": "ACTION_ROW_VARIANTS",
+          "type": {
+            "text": "{}"
+          },
+          "default": "{}",
+          "description": "`sk-action-row` has no mutually-exclusive variant enum — unlike `sk-card`'s `blue`/`purple`,\n`layout` and `presentation` are independent boolean axes (both, either or neither may apply).\nRequired by the generator even when empty: `?? {}` cannot distinguish \"this component has no\nvariants\" from \"I looked for the wrong export name\" (see `sk-grid.markup.ts`'s comment on\nexactly this)."
+        },
+        {
+          "kind": "function",
+          "name": "actionRowClasses",
+          "return": {
+            "type": {
+              "text": "string"
+            }
+          },
+          "parameters": [
+            {
+              "name": "layout",
+              "optional": true,
+              "type": {
+                "text": "string"
+              }
+            },
+            {
+              "name": "presentation",
+              "optional": true,
+              "type": {
+                "text": "string"
+              }
+            }
+          ],
+          "description": "The row's class list. Warns and degrades on an unrecognised `layout` or `presentation`."
+        },
+        {
+          "kind": "function",
+          "name": "actionRowStaticHtml",
+          "return": {
+            "type": {
+              "text": "string"
+            }
+          },
+          "parameters": [
+            {
+              "name": "opts",
+              "default": "{}",
+              "type": {
+                "text": "ActionRowStaticOptions"
+              }
+            },
+            {
+              "name": "content",
+              "default": "PLACEHOLDER_CONTENT",
+              "type": {
+                "text": "ActionRowContent"
+              }
+            }
+          ],
+          "description": "The static form. THROWS on an unrecognised `layout`/`presentation`, or on a missing/blank\n`content.title` — the authoring-time policy: a bad value must not reach committed output.\n\nTWO TRIGGER SHAPES ONLY (FR-008/009/010) — never a `<button>`. `sk-action-row.ts`'s third\ntrigger shape emits `sk-action-row-activate` from a click listener the static form does not\nhave; promising it here would freeze an activation contract this form cannot keep. A non-blank\n`href` selects the native `<a>` route trigger; otherwise the static, non-interactive div.\n\nCONTROLS ARE A SIBLING OF THE TRIGGER, never its descendant (#272) — both are children of the\nouter `.sk-action-row` div, controls placed after the trigger, reproducing\n`sk-action-row.ts`'s own DOM shape exactly. Omitted entirely (not `hidden`) when blank."
+        },
+        {
+          "kind": "variable",
           "name": "BLOG_CARD_AXES",
           "type": {
             "text": "{\n  WithImage: { thumbnail: PLACEHOLDER_THUMBNAIL, alt: PLACEHOLDER_ALT },\n  WithEyebrow: { eyebrow: 'Field notes' },\n  Full: { thumbnail: PLACEHOLDER_THUMBNAIL, alt: PLACEHOLDER_ALT, eyebrow: 'Field notes' },\n}"
@@ -715,6 +800,40 @@
             }
           ],
           "description": "The static form, for a consumer with no JavaScript. Throws on an unknown variant."
+        },
+        {
+          "kind": "function",
+          "name": "isActionRowLayout",
+          "return": {
+            "type": {
+              "text": "value is ActionRowLayoutValue"
+            }
+          },
+          "parameters": [
+            {
+              "name": "value",
+              "type": {
+                "text": "string"
+              }
+            }
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "isActionRowPresentation",
+          "return": {
+            "type": {
+              "text": "value is ActionRowPresentationValue"
+            }
+          },
+          "parameters": [
+            {
+              "name": "value",
+              "type": {
+                "text": "string"
+              }
+            }
+          ]
         },
         {
           "kind": "function",
@@ -6603,6 +6722,40 @@
         },
         {
           "kind": "function",
+          "name": "unknownLayoutMessage",
+          "return": {
+            "type": {
+              "text": "string"
+            }
+          },
+          "parameters": [
+            {
+              "name": "value",
+              "type": {
+                "text": "string"
+              }
+            }
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "unknownPresentationMessage",
+          "return": {
+            "type": {
+              "text": "string"
+            }
+          },
+          "parameters": [
+            {
+              "name": "value",
+              "type": {
+                "text": "string"
+              }
+            }
+          ]
+        },
+        {
+          "kind": "function",
           "name": "unknownRibbonMessage",
           "return": {
             "type": {
@@ -6658,9 +6811,57 @@
       "exports": [
         {
           "kind": "js",
+          "name": "ACTION_ROW_AXES",
+          "declaration": {
+            "name": "ACTION_ROW_AXES",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "ACTION_ROW_LAYOUTS",
+          "declaration": {
+            "name": "ACTION_ROW_LAYOUTS",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "ACTION_ROW_PRESENTATIONS",
+          "declaration": {
+            "name": "ACTION_ROW_PRESENTATIONS",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "ACTION_ROW_VARIANTS",
+          "declaration": {
+            "name": "ACTION_ROW_VARIANTS",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
           "name": "ActionRowActivateDetail",
           "declaration": {
             "name": "ActionRowActivateDetail",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "actionRowClasses",
+          "declaration": {
+            "name": "actionRowClasses",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "actionRowStaticHtml",
+          "declaration": {
+            "name": "actionRowStaticHtml",
             "module": "./dist/index.js"
           }
         },
@@ -7061,6 +7262,22 @@
           "name": "GridVariant",
           "declaration": {
             "name": "GridVariant",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "isActionRowLayout",
+          "declaration": {
+            "name": "isActionRowLayout",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "isActionRowPresentation",
+          "declaration": {
+            "name": "isActionRowPresentation",
             "module": "./dist/index.js"
           }
         },
@@ -7917,6 +8134,22 @@
           "name": "unknownGapMessage",
           "declaration": {
             "name": "unknownGapMessage",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "unknownLayoutMessage",
+          "declaration": {
+            "name": "unknownLayoutMessage",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "unknownPresentationMessage",
+          "declaration": {
+            "name": "unknownPresentationMessage",
             "module": "./dist/index.js"
           }
         },
