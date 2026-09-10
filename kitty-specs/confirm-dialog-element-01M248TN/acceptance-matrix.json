@@ -117,11 +117,11 @@
     {
       "criterion_id": "FR-012",
       "description": "Verify FR-012 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "proof_type": "document_inspection",
+      "evidence": "packages/styles/src/confirm-dialog/sk-confirm-dialog.css \u2014 `@media (forced-colors: active) { .sk-confirm-dialog { border-width: calc(var(--sk-border-width-1) * 2); box-shadow: none; } }` keeps the dialog surface/boundary/backdrop distinguishable once forced-colors flattens `background`; demonstrated by the ForcedColors story in sk-confirm-dialog.stories.ts.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T09:44:52.972934+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
