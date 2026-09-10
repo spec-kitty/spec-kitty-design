@@ -37,11 +37,11 @@
     {
       "criterion_id": "FR-004",
       "description": "Verify FR-004 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "proof_type": "code_inspection",
+      "evidence": "min-block-size: var(--sk-space-9); present in both .sk-input (sk-form-field.css) and .sk-form-input__control (sk-form-input.css) resting-state rules, with a comment matching the exact shape at packages/styles/src/confirm-dialog/sk-confirm-dialog.css:171 ('the closest token at or above the 44px NFR-001 floor') -- confirmed this precedent is real by reading that file directly. FR-006's parity test mechanically enforces the declaration's presence in both files (reproduced red myself on a single-file deletion). See FR-007 for the rendered-floor caveat: the declaration is not currently the sole guarantor of the 44px floor on either path (padding+border+line-height already sum to 48px) -- verified empirically by this reviewer, disclosed honestly in the source comments.",
+      "pass_fail": "pass",
+      "verified_by": "reviewer-renata",
+      "verified_at": "2026-09-10T15:48:49.644961+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
