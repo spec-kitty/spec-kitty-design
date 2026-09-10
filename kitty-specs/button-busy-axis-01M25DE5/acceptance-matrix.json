@@ -98,10 +98,10 @@
       "criterion_id": "FR-010",
       "description": "Verify FR-010 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "fixtures/elements-behaviour/src/sk-button.test.ts:672 no forced-colors override exists for the cue; a plain solid border survives forced-colors without relying on box-shadow; apps/storybook/src/tests/visual.spec.ts 'SK-button busy forced colors' baseline added this session; reviewer verified live via Playwright emulation, review-cycle-1.md",
+      "pass_fail": "pass",
+      "verified_by": "mission-closer",
+      "verified_at": "2026-09-10T12:35:28.553882+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
