@@ -73,7 +73,7 @@
       "wp": "WP01"
     },
     "#304": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "Gated child, unblocked not worked. ADR-15 rules #304 SPLIT: size and border axes are root-class modifiers and may be frozen now; the image axis is construct kind 3 (::slotted), ruled shadow-only, and may be frozen only as a documented authoring instruction stating its cascade position differs.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -81,8 +81,8 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
     },
     "#305": {
       "evidence_ref": "<link or commit>",
