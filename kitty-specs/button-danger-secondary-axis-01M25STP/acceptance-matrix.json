@@ -27,11 +27,11 @@
     {
       "criterion_id": "FR-003",
       "description": "Verify FR-003 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "proof_type": "code_review",
+      "evidence": "grep for --sk-border-default/--sk-border-strong in the new .sk-button--danger-secondary block: no matches at any state (rest/hover/active/forced-colors).",
+      "pass_fail": "pass",
+      "verified_by": "reviewer-renata",
+      "verified_at": "2026-09-10T15:45:48.159207+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
