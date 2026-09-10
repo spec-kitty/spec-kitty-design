@@ -31,28 +31,31 @@
         "Independent review (fresh pass, no prior findings inherited)"
       ],
       "provider": "__resolved_provider_absent__",
+      "review": null,
       "review_result": {
         "feedback_path": "/home/jeroennouws/dev/spec-kitty-design-missions/308/kitty-specs/confirm-dialog-element-01M248TN/tasks/WP01-sk-confirm-dialog/review-cycle-1.md",
         "reference": "review-cycle://confirm-dialog-element-01M248TN/WP01-sk-confirm-dialog/review-cycle-1.md",
         "reviewer": "claude",
         "verdict": "changes_requested"
       },
-      "role": "reviewer",
+      "role": "implementer",
+      "shell_pid": null,
+      "shell_pid_created_at": null,
       "subtasks": {
-        "T001": "done",
-        "T002": "done",
-        "T003": "done",
-        "T004": "done",
-        "T005": "done",
-        "T006": "done",
-        "T007": "done",
-        "T008": "done",
-        "T009": "done",
-        "T010": "done",
-        "T011": "done",
-        "T012": "done",
-        "T013": "done",
-        "T014": "done"
+        "T001": "planned",
+        "T002": "planned",
+        "T003": "planned",
+        "T004": "planned",
+        "T005": "planned",
+        "T006": "planned",
+        "T007": "planned",
+        "T008": "planned",
+        "T009": "planned",
+        "T010": "planned",
+        "T011": "planned",
+        "T012": "planned",
+        "T013": "planned",
+        "T014": "planned"
       }
     }
   }
