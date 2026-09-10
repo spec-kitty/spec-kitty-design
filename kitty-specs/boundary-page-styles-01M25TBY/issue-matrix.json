@@ -61,7 +61,7 @@
       "wp": "WP01"
     },
     "#314": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "No work owed. #314 is the open cross-sheet ::part() question that spec C-005/FR-016 leaves undecided (research.md:49). This mission adds zero ::part() selectors targeting sk-entity-marker or sk-pill-tag, verified by sk-boundary-page-responsive.spec.ts's dedicated 'no ::part()' assertion (spec SC-010). No followup is intended by this WP; #314 remains open for whoever resolves it.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -69,8 +69,8 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
     }
   },
   "schema_version": 1
