@@ -8,10 +8,10 @@
       "criterion_id": "FR-001",
       "description": "Verify FR-001 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "fixtures/elements-behaviour/src/sk-confirm-dialog.test.ts \u2014 \"an omitted required string renders no substituted literal and warns exactly once per omission\" and \"every one of the four required strings independently omits with no fallback and no throw\" both assert zero library-authored fallback text for any of the four required strings; independently re-run via `npx vitest run fixtures/elements-behaviour/src/sk-confirm-dialog.test.ts` = 20/20 passed.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T09:44:42.265930+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
