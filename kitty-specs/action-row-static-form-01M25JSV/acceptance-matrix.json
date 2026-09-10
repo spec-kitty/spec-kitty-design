@@ -1,0 +1,259 @@
+{
+  "mission_slug": "action-row-static-form-01M25JSV",
+  "mission_number": "",
+  "mission_type": "software-dev",
+  "overall_verdict": "pass",
+  "criteria": [
+    {
+      "criterion_id": "FR-001",
+      "description": "Verify FR-001 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "packages/elements/src/action-row/sk-action-row.markup.ts:230 (actionRowStaticHtml always returns .sk-action-row-host > .sk-action-row, never single-element); generated packages/styles/src/action-row/sk-action-row.html confirms; exercised by all 9 passing WP01 tests in fixtures/elements-behaviour/src/sk-action-row.test.ts (full suite 622/622 green, npm test run 2026-09-10)",
+      "pass_fail": "pass",
+      "verified_by": null,
+      "verified_at": "2026-09-10T14:07:05.257523+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-002",
+      "description": "Verify FR-002 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "packages/elements/src/action-row/sk-action-row.markup.ts part() helper emits sk-action-row__marker/title/reference/tags/metadata/supporting/controls/trigger BEM classes; verified in generated packages/styles/src/action-row/sk-action-row.html",
+      "pass_fail": "pass",
+      "verified_by": null,
+      "verified_at": "2026-09-10T14:07:06.331294+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-003",
+      "description": "Verify FR-003 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "fixtures/elements-behaviour/src/sk-action-row.test.ts:963 test [T004][FR-003][NFR-001] 'static and shadow forms compute identical reflow at 360px, 400px and 401px' \u2014 passing in full suite run (622/622, npm test 2026-09-10)",
+      "pass_fail": "pass",
+      "verified_by": null,
+      "verified_at": "2026-09-10T14:07:07.410290+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-004",
+      "description": "Verify FR-004 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "fixtures/elements-behaviour/src/sk-action-row.test.ts:910 test [T004][FR-004][FR-005] compares hostHostBlockDeclarations of sk-action-row.css header comment, the local test constant, AND docs/design-system/using-components.md's fenced block via one comparator \u2014 passing; docs section at using-components.md:1305-1318 states 'whatever :host declares' generically",
+      "pass_fail": "pass",
+      "verified_by": null,
+      "verified_at": "2026-09-10T14:07:08.481263+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-005",
+      "description": "Verify FR-005 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "Same test at sk-action-row.test.ts:910 (docs.md copy pinned too); packages/styles/src/action-row/sk-action-row.css:20-26 explicitly states in its header COMMENT 'THIS SHEET DOES NOT DEFINE .sk-action-row-host'; grep confirms no active (non-comment) CSS rule for .sk-action-row-host in any built stylesheet under packages/styles or packages/elements",
+      "pass_fail": "pass",
+      "verified_by": null,
+      "verified_at": "2026-09-10T14:07:09.506778+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-006",
+      "description": "Verify FR-006 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "fixtures/elements-behaviour/src/sk-action-row.test.ts:1063 test [T005][FR-006][FR-007] 'trailing controls are a DOM sibling of the trigger, never a descendant, across every generated exemplar' \u2014 passing",
+      "pass_fail": "pass",
+      "verified_by": null,
+      "verified_at": "2026-09-10T14:07:10.598174+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-007",
+      "description": "Verify FR-007 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "Same test, fixtures/elements-behaviour/src/sk-action-row.test.ts:1063 [T005][FR-006][FR-007] \u2014 DOM query run against every generated exemplar plus the real shadow root as control \u2014 passing",
+      "pass_fail": "pass",
+      "verified_by": null,
+      "verified_at": "2026-09-10T14:07:11.723415+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-008",
+      "description": "Verify FR-008 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "packages/elements/src/action-row/sk-action-row.markup.ts route branch emits a real <a href> trigger; ACTION_ROW_AXES.Link/RouteCurrent generate anchor exemplars used by the Route/RouteCurrent/RouteWithControls stories (packages/styles/src/action-row/sk-action-row-html.stories.ts) and by the T004 reflow-parity test; all pass axe (run-axe-storybook.js, 2026-09-10, zero violations across 627 stories) and Playwright (apps/storybook/src/tests/elements-load.spec.ts, chromium, 2026-09-10)",
+      "pass_fail": "pass",
+      "verified_by": null,
+      "verified_at": "2026-09-10T14:07:12.773460+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-009",
+      "description": "Verify FR-009 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "packages/elements/src/action-row/sk-action-row.markup.ts else-branch emits <div class=\"sk-action-row__trigger sk-action-row__trigger--static\"> when href is blank; confirmed in generated packages/styles/src/action-row/sk-action-row.html (default axis) and StaticTrigger/Default stories",
+      "pass_fail": "pass",
+      "verified_by": null,
+      "verified_at": "2026-09-10T14:07:13.852472+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-010",
+      "description": "Verify FR-010 is satisfied",
+      "proof_type": "code_review",
+      "evidence": "grep -c '<button' packages/styles/src/action-row/sk-action-row.html returns 1, belonging to the controls region only \u2014 never the trigger; sk-action-row.markup.ts comment block states the two-trigger-shape-only policy explicitly and the code has no third branch",
+      "pass_fail": "pass",
+      "verified_by": null,
+      "verified_at": "2026-09-10T14:07:14.954603+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-011",
+      "description": "Verify FR-011 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "fixtures/elements-behaviour/src/sk-action-row.test.ts:1087 test [T006][FR-011] 'aria-current is present with the correct value when current, and entirely absent \u2014 never false \u2014 when not' \u2014 passing",
+      "pass_fail": "pass",
+      "verified_by": null,
+      "verified_at": "2026-09-10T14:07:16.032958+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-012",
+      "description": "Verify FR-012 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "fixtures/elements-behaviour/src/sk-action-row.test.ts:1118 test [T006][FR-012] 'flush presentation changes computed background/border ... read from computed style' \u2014 passing",
+      "pass_fail": "pass",
+      "verified_by": null,
+      "verified_at": "2026-09-10T14:07:17.100541+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-013",
+      "description": "Verify FR-013 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "fixtures/elements-behaviour/src/sk-action-row.test.ts:1153 test [T006][FR-013] 'each optional anatomy part is entirely absent from the DOM \u2014 not an empty wrapper' \u2014 passing",
+      "pass_fail": "pass",
+      "verified_by": null,
+      "verified_at": "2026-09-10T14:07:18.182754+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-014",
+      "description": "Verify FR-014 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "fixtures/elements-behaviour/src/sk-action-row.test.ts:1174 test [T006][FR-014] 'no trailing action renders no .sk-action-row__controls element at all \u2014 absent, not hidden' \u2014 passing",
+      "pass_fail": "pass",
+      "verified_by": null,
+      "verified_at": "2026-09-10T14:07:19.235789+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-015",
+      "description": "Verify FR-015 is satisfied",
+      "proof_type": "code_review",
+      "evidence": "packages/styles/src/action-row/sk-action-row-html.stories.ts Default story doc comment cites FR-015 ('this IS that fragment, rendered with no surrounding collection markup and no script'); actionRowStaticHtml() (sk-action-row.markup.ts) takes no collection/index/context argument, so its output is context-free by construction \u2014 a single row renders identically in or out of a collection",
+      "pass_fail": "pass",
+      "verified_by": null,
+      "verified_at": "2026-09-10T14:07:20.345802+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-016",
+      "description": "Verify FR-016 is satisfied",
+      "proof_type": "code_review",
+      "evidence": "packages/styles/src/action-row/sk-action-row-html.stories.ts Collection story composes 3 independently-generated rows (incl. one Flush) via list(); each row's markup comes from the same generated exports (./index) used standalone elsewhere in the file, and actionRowStaticHtml() has no shared/positional state, so collection composition cannot alter a row's own rendering",
+      "pass_fail": "pass",
+      "verified_by": null,
+      "verified_at": "2026-09-10T14:07:21.462536+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-017",
+      "description": "Verify FR-017 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "fixtures/elements-behaviour/src/sk-action-row.test.ts:1185 test [T007][FR-017][NFR-003] 'the anchor and each trailing control are distinct DOM-order tab stops, each >=44x44px at narrow and desktop widths' \u2014 passing",
+      "pass_fail": "pass",
+      "verified_by": null,
+      "verified_at": "2026-09-10T14:07:22.518661+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-018",
+      "description": "Verify FR-018 is satisfied",
+      "proof_type": "manual_review",
+      "evidence": "kitty-specs/action-row-static-form-01M25JSV/spec.md:227-242 'Boundary with #283' section states the seam verbatim: the moment a row needs a trailing action or a native route it is .sk-action-row's anatomy, never .sk-record-list's, because .sk-record-list has disclaimed interactivity by name",
+      "pass_fail": "pass",
+      "verified_by": null,
+      "verified_at": "2026-09-10T14:07:23.560291+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-019",
+      "description": "Verify FR-019 is satisfied",
+      "proof_type": "code_review",
+      "evidence": "packages/elements/src/action-row/sk-action-row.markup.ts: every rendered string besides class/attribute names is sourced from caller-supplied opts/content (part() helper only echoes content.*, attr() only escapes href); PLACEHOLDER_CONTENT is solely a default-parameter fallback used by generated exemplars/stories, not emitted when a real caller supplies content, mirroring the shadow element's slot-only render path",
+      "pass_fail": "pass",
+      "verified_by": null,
+      "verified_at": "2026-09-10T14:07:24.598816+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-020",
+      "description": "Verify FR-020 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "node scripts/build-element-markup.mjs --check exit 0, '\u2705 Generated markup is up to date (11 component(s))' (2026-09-10); packages/styles/src/action-row/sk-action-row.html and index.ts are generated outputs of that script from sk-action-row.markup.ts per ADR-10 \u00a73, git diff --exit-code confirms zero drift",
+      "pass_fail": "pass",
+      "verified_by": null,
+      "verified_at": "2026-09-10T14:07:25.640528+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-021",
+      "description": "Verify FR-021 is satisfied",
+      "proof_type": "manual_review",
+      "evidence": "packages/styles/src/action-row/sk-action-row-html.stories.ts LongContentNarrow/LongContentDesktop/Zoom200 stories use a long unbroken reference fixture at narrow/desktop/zoom-proxy widths; all pass axe with zero violations (run-axe-storybook.js, 2026-09-10); containment comes from the shared, unmodified sk-action-row.css",
+      "pass_fail": "pass",
+      "verified_by": null,
+      "verified_at": "2026-09-10T14:07:26.674534+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-022",
+      "description": "Verify FR-022 is satisfied",
+      "proof_type": "code_review",
+      "evidence": "git diff origin/train/elements-first..HEAD -- packages/styles/src/action-row/sk-action-row.css is empty \u2014 the sheet (and its existing prefers-reduced-motion block) is untouched by this mission; ReducedMotion story documents the inherited behaviour and passes axe",
+      "pass_fail": "pass",
+      "verified_by": null,
+      "verified_at": "2026-09-10T14:07:27.741192+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-023",
+      "description": "Verify FR-023 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "packages/styles/src/action-row/sk-action-row-html.stories.ts LightMode story present (class=\"sk-light\", not data-theme, per #93) alongside the package-wide dark-default convention shared by every sibling *-html.stories.ts; both Default and LightMode pass axe with zero violations (run-axe-storybook.js: primitives-skactionrow-html--default and --light-mode, 2026-09-10)",
+      "pass_fail": "pass",
+      "verified_by": null,
+      "verified_at": "2026-09-10T14:07:28.798582+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-024",
+      "description": "Verify FR-024 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "run-axe-storybook.js (2026-09-10): zero WCAG 2.1 AA violations across all 627 rendered stories, including all 19 new primitives-skactionrow-html--* stories; npx playwright test --project=chromium: 599/600 passed (the 1 failure is a pre-existing, unrelated nav-pill demo-surface gap, apps/storybook/src/tests/nav-pill-behaviour.spec.ts, untouched by this mission's diff); packages/elements/SIZES.md regenerated after a real build (tokens/styles/elements --skip-nx-cache) and --check passes",
+      "pass_fail": "pass",
+      "verified_by": null,
+      "verified_at": "2026-09-10T14:07:29.817493+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-025",
+      "description": "Verify FR-025 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "node scripts/check-manifest-content.mjs and node scripts/check-part-ratchet.mjs both exit 0 with zero diff against expected-docs.json/expected-parts.json (2026-09-10, no new attribute/method/csspart added); docs/design-system/using-components.md:1150-1330 updated with the 'Action row static form' section including the two-element wrapper, the pinned .sk-action-row-host block, and the explicit 'does not ship until #309' note",
+      "pass_fail": "pass",
+      "verified_by": null,
+      "verified_at": "2026-09-10T14:07:30.861295+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    }
+  ],
+  "negative_invariants": []
+}

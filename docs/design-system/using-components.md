@@ -1148,9 +1148,10 @@ retyping it.
 ## Operational feed primitives
 
 Four controlled/presentational elements provide the reusable heading, row, status, and visual-marker
-pieces of an operational feed. They have no static HTML form: their contracts are defined by
-consumer slot composition and a live row-intent event, so a string builder would create a second
-projection vocabulary.
+pieces of an operational feed. `sk-section-header`, `sk-status-indicator` and `sk-entity-marker`
+have no static HTML form: their contracts are defined by consumer slot composition and a live
+row-intent event, so a string builder would create a second projection vocabulary.
+`sk-action-row` is the exception — see "Action row static form" below for its two-element wrapper.
 
 ```html
 <sk-section-header>
@@ -1248,6 +1249,82 @@ single name on the host and keep the consumer-owned image decorative:
 The component never rewrites `alt`. A nonempty image `alt` beside a nonempty host `label` is a
 consumer error because it introduces a duplicate name. Consumers own image bytes, alternate-text
 choice, initials, identity lookup and any trust or liveness interpretation.
+
+---
+
+### Action row static form
+
+`sk-action-row` is the one element in "Operational feed primitives" that has a server-rendered
+static form (#307), because ADR-15 ruled a static equivalent must exist for it: the shadow
+element's `:host { container-type: inline-size; }` reflow rule is otherwise unreachable outside a
+shadow root, and Family 4's Django-rendered workspace/invitation/ledger rows need it without
+JavaScript.
+
+**The static form is always the TWO-ELEMENT WRAPPER — never a single-element collapse.** An
+element is never its own container-query container, so `.sk-action-row-host` must be a real,
+separate ancestor of `.sk-action-row`:
+
+```html
+<div class="sk-action-row-host">
+  <div class="sk-action-row">
+    <a class="sk-action-row__trigger" href="/missions/272" aria-labelledby="sk-action-row-title">
+      <span class="sk-action-row__marker"><!-- optional mark --></span>
+      <span id="sk-action-row-title" class="sk-action-row__title">team-landing-pivots</span>
+      <span class="sk-action-row__reference">spec-kitty/e2e-team-landing</span>
+      <span class="sk-action-row__tags"><!-- optional tags --></span>
+      <span class="sk-action-row__metadata">2 hours ago</span>
+      <span class="sk-action-row__supporting"><!-- optional supporting line --></span>
+    </a>
+    <div class="sk-action-row__controls">
+      <button type="button">Pin</button>
+    </div>
+  </div>
+</div>
+```
+
+`title` is the only mandatory part. Every other scan-content part (`marker`, `reference`, `tags`,
+`metadata`, `supporting`) and the whole `.sk-action-row__controls` region is entirely OMITTED from
+the markup — never rendered as an empty wrapper — when no content is supplied for it, because
+there is no `slotchange` script to hide it after the fact. `.sk-action-row__controls` is always a
+SIBLING of the trigger, never its descendant (#272) — nesting it inside the `<a>`/`<div>` trigger
+is invalid, activation-breaking HTML.
+
+There are only two trigger shapes: a real `<a href>` in route mode, or a non-interactive
+`<div class="sk-action-row__trigger sk-action-row__trigger--static">` otherwise. There is
+deliberately **no** static `<button>` trigger — the shadow form's selectable-button mode requires
+a `sk-action-row-activate` listener the static page does not have, and promising that shape here
+would freeze an activation contract the static form cannot keep.
+
+`aria-current` follows the shadow form exactly: present with the correct value
+(`aria-current="true"` on `.sk-action-row` in non-route mode, `aria-current="page"` on the anchor
+in route mode) when the row is current, and **entirely absent** — never `aria-current="false"` —
+when it is not. `.sk-action-row--flush` and `.sk-action-row--card` are the same optional modifier
+classes the shadow element reflects from its `presentation`/`layout` attributes.
+
+**The wrapper's CSS is documented here, not shipped by any `@spec-kitty/styles` file yet
+(#309/#310).** `sk-action-row.css` already carries this exact instruction in its own header
+comment; the copy below is pinned word-for-word against it by
+`fixtures/elements-behaviour/src/sk-action-row.test.ts`, so the two cannot silently diverge.
+Author it yourself, alongside the built `sk-action-row.css`, until #309 lands:
+
+```css
+.sk-action-row-host {
+  display: block;
+  min-width: 0;
+  container-type: inline-size;
+}
+```
+
+Do **not** move `container-type` onto `.sk-action-row` itself — measured in `ADR-15`, that
+collapse makes the row's own `@container (max-width: 400px)` reflow rule silently stop firing.
+
+Generate this markup with `actionRowStaticHtml(opts, content)` from
+`@spec-kitty/elements`'s `sk-action-row.markup.ts` (or copy the generated
+`packages/styles/src/action-row/sk-action-row.html` exemplar) rather than hand-authoring the
+wrapper shape a second time — see `docs/contributing/adding-a-component.md` for the full
+generator contract.
+
+[View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/primitives-skactionrow-html--default)
 
 ---
 

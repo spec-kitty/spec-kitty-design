@@ -590,6 +590,42 @@ test.describe('sk-action-row browser contract', () => {
 });
 
 /**
+ * The static form (#307) has no `<sk-action-row>` element at all — it is `.sk-action-row-host` >
+ * `.sk-action-row` light-DOM markup, rendered from the styles-layer story
+ * (`packages/styles/src/action-row/sk-action-row-html.stories.ts`). Its forced-colors treatment
+ * is inherited UNCHANGED from the shared, unmodified `sk-action-row.css` — this mission edits
+ * neither the sheet nor its `@media (forced-colors: active)` block, only the markup module — so
+ * this case is verification that the shared rule reaches the light-DOM form too, not new CSS.
+ *
+ * Same "measure twice, feature off then on, reload between" discipline as the `sk-card forced
+ * colors` case below: `matchMedia(...).matches` answering `true` is not evidence an engine
+ * performed the remap (WebKit measured answering `true` while leaving colors exactly as
+ * authored), so this asks the observable question — did the edge actually widen and recolor —
+ * against the SAME element rather than trusting the media-query answer alone.
+ */
+test.describe('sk-action-row static form forced colors', () => {
+  test("the aria-current row keeps its forced-colors border treatment (#307)", async ({ page }) => {
+    const measure = async (forcedColors: 'none' | 'active') => {
+      await page.emulateMedia({ forcedColors });
+      await page.goto('/iframe.html?id=primitives-skactionrow-html--current&viewMode=story');
+      const row = page.locator('.sk-action-row[aria-current="true"]').first();
+      await row.waitFor({ state: 'visible', timeout: 20000 });
+      return row.evaluate((element) => {
+        const style = getComputedStyle(element);
+        return { width: style.borderInlineStartWidth, color: style.borderInlineStartColor };
+      });
+    };
+    const off = await measure('none');
+    const on = await measure('active');
+    expect(
+      Number.parseFloat(on.width),
+      'the forced-colors edge must be strictly wider than the normal-mode border',
+    ).toBeGreaterThan(Number.parseFloat(off.width));
+    expect(on.color, 'the edge colour must change under forced colors').not.toBe(off.color);
+  });
+});
+
+/**
  * #218. `sk-card`'s ForcedColors story emulated nothing, asserted nothing, and rendered bytes
  * identical to `AllStatuses`. The obligation it was discharging — "a forced-colors story or a
  * documented baseline" — was met by a docstring, which is exactly the shape this repo keeps
