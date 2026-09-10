@@ -96,6 +96,18 @@
       "verdict": "in-mission",
       "wp": "WP01"
     },
+    "#302": {
+      "evidence_ref": "research.md L138/151: #302 already shipped the reasoned-out-precedent this WP follows for its own absent-state test design; not reopened or modified by this WP",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
     "#307": {
       "evidence_ref": "spec.md L6: #307 is this mission's own issue; WP01 is its sole work package",
       "fr": null,
