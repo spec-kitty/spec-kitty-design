@@ -622,10 +622,21 @@ test.describe('sk-public-header geometry, state, and resilience contract', () =>
   test('rest, hover, active, focus-visible, and current use five distinct non-colour cues', async ({
     page,
   }) => {
+    // Two story loads plus a pointer and a keyboard sequence in one test; `openStory` alone may
+    // wait up to 20s for the story to paint on a loaded runner. Declared rather than left to the
+    // default 30s. Scoped to this test — `test.slow()` at describe level would silently retimebox
+    // every sibling test too.
+    test.slow();
     const { header } = await openStory(page, 'current-action');
-    const ordinary = header
-      .locator('.sk-public-header__action:not([aria-current])')
-      .first();
+    // Addressed by href, NOT by `:not([aria-current])`. The tail of this test sets
+    // `aria-current="false"` on this very element to prove the CSS treats that as not-current;
+    // a locator keyed on the absence of that attribute stops matching the moment it is set, and
+    // the element can never re-enter its own match set. That hung `actionCue` until the test
+    // timeout on all three engines (CI run 34526412236) — a live Locator re-resolves on every
+    // use, so it is not a snapshot of the element it first found.
+    const ordinary = header.locator(
+      '.sk-public-header__action[href="/accounts/profile/"]',
+    );
     const current = header.locator(
       '.sk-public-header__action[aria-current]:not([aria-current="false"])',
     );
