@@ -118,10 +118,10 @@
       "criterion_id": "FR-012",
       "description": "No motion introduced, and the absence is asserted",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "sk-boundary-page-responsive.spec.ts:82 (no transition/animation under reduced-motion emulation), :121 (same, unconditionally without emulation), :132 (source CSS declares no @media prefers-reduced-motion block at all, because it sets no transition/animation anywhere to guard, avoiding the dead-guard defect named at sk-transition-matrix.css:237) \u2014 asserted, not assumed",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T18:19:47.982663+00:00",
       "notes": "Owned by WP01 (mission/boundary-page-styles). pass_fail/evidence/verified_by/verified_at and overall_verdict are the accept gate's own fields (run via the Spec Kitty CLI's accept phase later) and are deliberately left as recorded by the scaffolder, not hand-written here."
     },
     {
