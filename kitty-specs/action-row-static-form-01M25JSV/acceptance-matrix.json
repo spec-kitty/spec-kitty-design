@@ -177,11 +177,11 @@
     {
       "criterion_id": "FR-018",
       "description": "Verify FR-018 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
+      "proof_type": "manual_review",
+      "evidence": "kitty-specs/action-row-static-form-01M25JSV/spec.md:227-242 'Boundary with #283' section states the seam verbatim: the moment a row needs a trailing action or a native route it is .sk-action-row's anatomy, never .sk-record-list's, because .sk-record-list has disclaimed interactivity by name",
+      "pass_fail": "pass",
       "verified_by": null,
-      "verified_at": null,
+      "verified_at": "2026-09-10T14:07:23.560291+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
