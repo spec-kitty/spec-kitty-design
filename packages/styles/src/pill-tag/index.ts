@@ -7,3 +7,9 @@ export const SkPillTagPurpleHTML = "<span class=\"sk-pill-tag sk-pill-tag--purpl
 export const SkPillTagBreakingHTML = "<span class=\"sk-pill-tag sk-pill-tag--breaking\">Label</span>";
 export const SkPillTagYellowHTML = "<span class=\"sk-pill-tag sk-pill-tag--yellow\">Label</span>";
 export const SkPillTagEyebrowHTML = "<span class=\"sk-pill-tag sk-pill-tag--eyebrow\">Label</span>";
+export const SkPillTagStatusNeutralHTML = "<span class=\"sk-pill-tag sk-pill-tag--status-neutral\">Label</span>";
+export const SkPillTagStatusInfoHTML = "<span class=\"sk-pill-tag sk-pill-tag--status-info\">Label</span>";
+export const SkPillTagStatusSuccessHTML = "<span class=\"sk-pill-tag sk-pill-tag--status-success\">Label</span>";
+export const SkPillTagStatusAttentionHTML = "<span class=\"sk-pill-tag sk-pill-tag--status-attention\">Label</span>";
+export const SkPillTagStatusDangerHTML = "<span class=\"sk-pill-tag sk-pill-tag--status-danger\">Label</span>";
+export const SkPillTagStatusRecoveryHTML = "<span class=\"sk-pill-tag sk-pill-tag--status-recovery\">Label</span>";

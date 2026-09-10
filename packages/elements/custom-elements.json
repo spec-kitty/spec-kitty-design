@@ -900,8 +900,8 @@
         {
           "kind": "variable",
           "name": "PILL_TAG_AXES",
-          "default": "Object.fromEntries( Object.keys(PILL_TAG_SHAPES).map((s) => [`${s.charAt(0).toUpperCase()}${s.slice(1)}`, { shape: s }]), )",
-          "description": "The non-variant axes: one per shape."
+          "default": "{ ...SHAPE_AXES, ...STATUS_AXES, } satisfies Record<string, PillTagStaticOptions>",
+          "description": "The non-variant axes: one per shape, one per status tone."
         },
         {
           "kind": "variable",
@@ -911,6 +911,15 @@
           },
           "default": "{ eyebrow: 'sk-pill-tag--eyebrow' }",
           "description": "The shape/size axis. Independent of colour: an eyebrow may be tinted or not."
+        },
+        {
+          "kind": "variable",
+          "name": "PILL_TAG_STATUSES",
+          "type": {
+            "text": "Readonly<Record<StatusIndicatorTone, string>>"
+          },
+          "default": "Object.freeze( Object.fromEntries(STATUS_TONES.map((tone) => [tone, `sk-pill-tag--status-${tone}`])), )",
+          "description": "Status tone → BEM modifier. The tone vocabulary is `sk-status-indicator`'s, not the tag's."
         },
         {
           "kind": "variable",
@@ -943,9 +952,16 @@
               "type": {
                 "text": "string"
               }
+            },
+            {
+              "name": "status",
+              "optional": true,
+              "type": {
+                "text": "string"
+              }
             }
           ],
-          "description": "The tag's class list. Warns and degrades on an unknown variant or shape."
+          "description": "The tag's class list. Warns and degrades on an unknown variant, shape or status."
         },
         {
           "kind": "function",
@@ -968,7 +984,7 @@
               "default": "'Label'"
             }
           ],
-          "description": "The static form. Throws on an unknown variant or shape."
+          "description": "The static form. Throws on an unknown variant, shape or status."
         },
         {
           "kind": "variable",
@@ -5244,6 +5260,17 @@
             },
             {
               "kind": "field",
+              "name": "status",
+              "privacy": "public",
+              "type": {
+                "text": "'neutral' | 'info' | 'success' | 'attention' | 'danger' | 'recovery' | undefined"
+              },
+              "description": "Operational status tone, orthogonal to `variant` and `shape` — a tag may carry any\ncombination. The vocabulary is `sk-status-indicator`'s; this element holds no domain mapping\nand never infers a tone. An unknown value renders the base tag and warns rather than\nthrowing.",
+              "attribute": "status",
+              "reflects": true
+            },
+            {
+              "kind": "field",
               "name": "variant",
               "privacy": "public",
               "type": {
@@ -5262,6 +5289,14 @@
               },
               "description": "Shape: `eyebrow` for the larger, square-cornered lead-in label. Omit for the compact pill.",
               "fieldName": "shape"
+            },
+            {
+              "name": "status",
+              "type": {
+                "text": "'neutral' | 'info' | 'success' | 'attention' | 'danger' | 'recovery' | undefined"
+              },
+              "description": "Operational status tone, orthogonal to `variant` and `shape` — a tag may carry any\ncombination. The vocabulary is `sk-status-indicator`'s; this element holds no domain mapping\nand never infers a tone. An unknown value renders the base tag and warns rather than\nthrowing.",
+              "fieldName": "status"
             },
             {
               "name": "variant",
@@ -7138,6 +7173,14 @@
           "name": "PILL_TAG_SHAPES",
           "declaration": {
             "name": "PILL_TAG_SHAPES",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "PILL_TAG_STATUSES",
+          "declaration": {
+            "name": "PILL_TAG_STATUSES",
             "module": "./dist/index.js"
           }
         },

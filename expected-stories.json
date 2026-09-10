@@ -48,7 +48,8 @@
     "#274 ratchets fourteen additive sk-app-shell rail-preserving stories: closed/open, 390/768/1024/1100/1101/wide, long labels, short/tall viewports, reduced motion, forced colors, and LightMode. On the refreshed train after #257, total moves 420 -> 434; all legacy, #254, segmented-choice, collection, action-row, checkbox-choice-group, event-timeline, Mission Reading, and copy-field story ids remain unchanged.",
     "#278 ratchets the ten Storybook-only Mission Kanban routes named as acceptance evidence, total 434 -> 444 on the refreshed train after #274. K1-K6 remain separately addressable alongside LightMode, long-content, forced-colors, and reduced-motion evidence; fixture, projector, guard, and render helpers are excluded from CSF indexing.",
     "#255 ratchets the eighteen Storybook-only Repository Dossier routes named as acceptance evidence. D1 is the populated desktop composition; D2 retains separate closed and controlled-open 390px drawer states; D4-D8 preserve cross-branch, terminal, snapshot, indexing, and completed-empty truth; LightMode, long data, supplied progress values, the 860/861 compact-navigation seam, safe/static tracker destinations, forced colors, reduced motion, and 200%/400% zoom remain independently reviewable. On the refreshed train after #278, total moves 444 -> 462; fixture, projection, freeze, and render helpers are excluded from CSF indexing.",
-    "#275 ratchets the exact ten Storybook-only Work Explorer W1-W10 compositions. Lane, person, and type regroupings conserve one 50-record fixture; rail-preserving, LightMode, filtered-empty, no-work, degraded, loading, and no-repository states stay separately addressable. On the refreshed train after #255, total moves 462 -> 472; fixture, selector, projector, and renderer helpers are excluded from CSF indexing."
+    "#275 ratchets the exact ten Storybook-only Work Explorer W1-W10 compositions. Lane, person, and type regroupings conserve one 50-record fixture; rail-preserving, LightMode, filtered-empty, no-work, degraded, loading, and no-repository states stay separately addressable. On the refreshed train after #255, total moves 462 -> 472; fixture, selector, projector, and renderer helpers are excluded from CSF indexing.",
+    "#302 adds fourteen sk-pill-tag stories for the status-tone axis: the six tones individually, AllStatuses, BrandWithStatus, EyebrowWithStatus, LongLabel, Rtl, Zoom200, UnknownStatus, and ForcedColors; LightMode is extended in place (not counted as new) to include a status tone. Verified against the built Storybook index before committing, per the recipe. sk-pill-tag moves 9 -> 23; total moves by the same delta."
   ],
   "byElement": {
     "sk-action-row": [
@@ -422,6 +423,20 @@
       "elements-skpilltag--eyebrow",
       "elements-skpilltag--tinted-eyebrow",
       "elements-skpilltag--all-variants",
+      "elements-skpilltag--status-neutral",
+      "elements-skpilltag--status-info",
+      "elements-skpilltag--status-success",
+      "elements-skpilltag--status-attention",
+      "elements-skpilltag--status-danger",
+      "elements-skpilltag--status-recovery",
+      "elements-skpilltag--all-statuses",
+      "elements-skpilltag--brand-with-status",
+      "elements-skpilltag--eyebrow-with-status",
+      "elements-skpilltag--long-label",
+      "elements-skpilltag--rtl",
+      "elements-skpilltag--zoom-200",
+      "elements-skpilltag--unknown-status",
+      "elements-skpilltag--forced-colors",
       "elements-skpilltag--light-mode"
     ],
     "sk-prose": [
@@ -618,5 +633,5 @@
       "patterns-work-explorer--w-10-no-admitted-repositories-dark"
     ]
   },
-  "total": 472
+  "total": 486
 }

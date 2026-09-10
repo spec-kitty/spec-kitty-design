@@ -1,0 +1,199 @@
+{
+  "mission_slug": "pill-tag-status-tone-axis-01M25AVP",
+  "mission_number": "",
+  "mission_type": "software-dev",
+  "overall_verdict": "pass",
+  "criteria": [
+    {
+      "criterion_id": "FR-001",
+      "description": "Verify FR-001 is satisfied",
+      "proof_type": "manual_evidence_review",
+      "evidence": "packages/elements/src/pill-tag/sk-pill-tag.markup.ts: PILL_TAG_STATUSES derived via Object.fromEntries(STATUS_TONES.map(...)), producing exactly sk-pill-tag--status-<tone> for the six STATUS_TONES; equality asserted in fixtures/elements-behaviour/src/sk-pill-tag.test.ts:242-243",
+      "pass_fail": "pass",
+      "verified_by": "claude-pr-agent",
+      "verified_at": "2026-09-10T11:18:20.549057+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-002",
+      "description": "Verify FR-002 is satisfied",
+      "proof_type": "manual_evidence_review",
+      "evidence": "packages/styles/src/pill-tag/sk-pill-tag.css: each .sk-pill-tag--status-<tone> rule sets exactly background/color from --sk-status-<tone>/--sk-on-status-<tone>; tokens.css diff vs train is empty (no new tokens)",
+      "pass_fail": "pass",
+      "verified_by": "claude-pr-agent",
+      "verified_at": "2026-09-10T11:18:18.225118+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-003",
+      "description": "Verify FR-003 is satisfied",
+      "proof_type": "manual_evidence_review",
+      "evidence": "packages/styles/src/pill-tag/sk-pill-tag.css comment block above status rules: precedence documented (status rules after variant rules, equal 0,1,0 specificity, mirrors #177 for sk-card)",
+      "pass_fail": "pass",
+      "verified_by": "claude-pr-agent",
+      "verified_at": "2026-09-10T11:18:19.384393+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-004",
+      "description": "Verify FR-004 is satisfied",
+      "proof_type": "manual_evidence_review",
+      "evidence": "packages/elements/src/pill-tag/sk-pill-tag.ts:22,37-41: status reflected property (type:String, reflect:true), inline literal union type matching sk-card.ts JSDoc pattern",
+      "pass_fail": "pass",
+      "verified_by": "claude-pr-agent",
+      "verified_at": "2026-09-10T11:18:23.939321+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-005",
+      "description": "Verify FR-005 is satisfied",
+      "proof_type": "manual_evidence_review",
+      "evidence": "pillTagClasses() in sk-pill-tag.markup.ts: unknown status hits isPillTagStatus guard, console.warn + degrade to base tag, never throws; test 'an unknown status degrades on the RENDER path' in sk-pill-tag.test.ts:255",
+      "pass_fail": "pass",
+      "verified_by": "claude-pr-agent",
+      "verified_at": "2026-09-10T11:18:25.069655+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-006",
+      "description": "Verify FR-006 is satisfied",
+      "proof_type": "manual_evidence_review",
+      "evidence": "pillTagClasses() guard uses 'status &&' not 'status !== undefined &&': status='' treated as absent with no warning; asserted in sk-pill-tag.test.ts absent-state test",
+      "pass_fail": "pass",
+      "verified_by": "claude-pr-agent",
+      "verified_at": "2026-09-10T11:18:21.619476+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-007",
+      "description": "Verify FR-007 is satisfied",
+      "proof_type": "manual_evidence_review",
+      "evidence": "pillTagStaticHtml() in sk-pill-tag.markup.ts: unconditional throw on unknown status via isPillTagStatus check before any output",
+      "pass_fail": "pass",
+      "verified_by": "claude-pr-agent",
+      "verified_at": "2026-09-10T11:18:22.765721+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-008",
+      "description": "Verify FR-008 is satisfied",
+      "proof_type": "manual_evidence_review",
+      "evidence": "sk-pill-tag.markup.ts gained PILL_TAG_STATUSES/STATUS_AXES generated exports; packages/styles/src/pill-tag/index.ts regenerated; sk-pill-tag.css :host is display:inline-flex only, no container-type/::slotted(), so no ADR-15 deferred construct applies",
+      "pass_fail": "pass",
+      "verified_by": "claude-pr-agent",
+      "verified_at": "2026-09-10T11:18:26.227933+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-009",
+      "description": "Verify FR-009 is satisfied",
+      "proof_type": "manual_evidence_review",
+      "evidence": "docs/design-system/using-components.md lines 871-875: explicit 'This mission makes no claim' the static pill composes into sk-metric's ::part(tag) equivalently, deferred to #314; no doc/story/test asserts parity",
+      "pass_fail": "pass",
+      "verified_by": "claude-pr-agent",
+      "verified_at": "2026-09-10T11:18:27.409072+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-010",
+      "description": "Verify FR-010 is satisfied",
+      "proof_type": "manual_evidence_review",
+      "evidence": "sk-pill-tag.css comment: 'TONE IS NEVER THE ONLY CARRIER OF MEANING' - decoration only; render() in sk-pill-tag.ts emits only a class list via part=tag, no role/aria added",
+      "pass_fail": "pass",
+      "verified_by": "claude-pr-agent",
+      "verified_at": "2026-09-10T11:18:34.259452+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-011",
+      "description": "Verify FR-011 is satisfied",
+      "proof_type": "manual_evidence_review",
+      "evidence": "sk-pill-tag.ts render(): html`<span part=\"tag\" class=${pillTagClasses(...)}><slot></slot></span>` - zero new text nodes, class-list computation only",
+      "pass_fail": "pass",
+      "verified_by": "claude-pr-agent",
+      "verified_at": "2026-09-10T11:18:33.106082+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-012",
+      "description": "Verify FR-012 is satisfied",
+      "proof_type": "manual_evidence_review",
+      "evidence": "expected-docs.json diff vs train: sk-pill-tag attributes 2->3, total 121->122, with changelog entry citing #302",
+      "pass_fail": "pass",
+      "verified_by": "claude-pr-agent",
+      "verified_at": "2026-09-10T11:18:36.525422+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-013",
+      "description": "Verify FR-013 is satisfied",
+      "proof_type": "manual_evidence_review",
+      "evidence": "behaviours.json line 47: #302 adds sk-pill-tag to SC-010, keeping existing SC-013/SC-014 subject status, matching #177's rationale for sk-card",
+      "pass_fail": "pass",
+      "verified_by": "claude-pr-agent",
+      "verified_at": "2026-09-10T11:18:35.404650+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-014",
+      "description": "Verify FR-014 is satisfied",
+      "proof_type": "manual_evidence_review",
+      "evidence": "fixtures/elements-behaviour/src/sk-pill-tag.test.ts:25 imports STATUS_TONES from status-indicator/status-tones.js (not @spec-kitty/elements); line 242-243 asserts Object.keys(PILL_TAG_STATUSES) equals STATUS_TONES in order",
+      "pass_fail": "pass",
+      "verified_by": "claude-pr-agent",
+      "verified_at": "2026-09-10T11:18:29.751256+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-015",
+      "description": "Verify FR-015 is satisfied",
+      "proof_type": "manual_evidence_review",
+      "evidence": "packages/elements/src/pill-tag/sk-pill-tag.stories.ts exports: six StatusX stories, AllStatuses, BrandWithStatus, EyebrowWithStatus, LongLabel, Rtl, Zoom200, UnknownStatus, ForcedColors, LightMode, Default, plus brand variants - matches issue's required story list",
+      "pass_fail": "pass",
+      "verified_by": "claude-pr-agent",
+      "verified_at": "2026-09-10T11:18:28.563439+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-016",
+      "description": "Verify FR-016 is satisfied",
+      "proof_type": "manual_evidence_review",
+      "evidence": "apps/storybook/src/tests/elements-load.spec.ts:726-764 'sk-pill-tag forced colors' describe block: asserts status pill gains non-zero border-width under forced-colors while base pill stays 0px, in both color schemes",
+      "pass_fail": "pass",
+      "verified_by": "claude-pr-agent",
+      "verified_at": "2026-09-10T11:18:31.968256+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-017",
+      "description": "Verify FR-017 is satisfied",
+      "proof_type": "manual_evidence_review",
+      "evidence": "packages/styles/src/pill-tag/sk-pill-tag.css comment block: six measured contrast ratios (neutral 6.01/5.22, info 9.42/7.70, success 8.55/7.10, attention 11.18/6.28, danger 5.87/9.11, recovery 7.88/8.00) all clearing 4.5:1 in both themes",
+      "pass_fail": "pass",
+      "verified_by": "claude-pr-agent",
+      "verified_at": "2026-09-10T11:18:30.895732+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-018",
+      "description": "Verify FR-018 is satisfied",
+      "proof_type": "manual_evidence_review",
+      "evidence": "expected-stories.json sk-pill-tag entry lists all 23 stories including the new status/forced-colors/light-mode ones; run-axe-storybook.js and visual-regression both key off this manifest so new stories are covered automatically",
+      "pass_fail": "pass",
+      "verified_by": "claude-pr-agent",
+      "verified_at": "2026-09-10T11:18:38.776501+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-019",
+      "description": "Verify FR-019 is satisfied",
+      "proof_type": "manual_evidence_review",
+      "evidence": "docs/design-system/using-components.md lines 841-861: 'The operational status axis' section documents the third axis, six values, precedence rule, and FR-009's ADR-15 boundary",
+      "pass_fail": "pass",
+      "verified_by": "claude-pr-agent",
+      "verified_at": "2026-09-10T11:18:37.631021+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    }
+  ],
+  "negative_invariants": []
+}
