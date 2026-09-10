@@ -120,6 +120,18 @@
       "verdict": "verified-already-fixed",
       "wp": "WP01"
     },
+    "#79": {
+      "evidence_ref": "Prior mission that established sk-button's primitive, export-map entries, and CSS source structure (plan.md lines 55, 130; WP01 task file line 204). Already merged and confirmed present/unchanged at this mission's base.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
     "#93": {
       "evidence_ref": "Recorded LightMode/class=sk-light defect. Verified sk-button.stories.ts's LightMode story uses class=\"sk-light\", not data-theme=\"light\" (packages/elements/src/button/sk-button.stories.ts).",
       "fr": null,
