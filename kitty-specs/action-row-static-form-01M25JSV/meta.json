@@ -23,6 +23,7 @@
   "purpose_context": "This mission advances action row static form on mission/action-row-static-form so stakeholders can track the work from mission creation onward.",
   "purpose_tldr": "action row static form",
   "slug": "action-row-static-form-01M25JSV",
+  "status_phase": "1",
   "target_branch": "mission/action-row-static-form",
   "topology": "single_branch"
 }
