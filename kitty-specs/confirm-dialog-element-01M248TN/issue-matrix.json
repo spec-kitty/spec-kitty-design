@@ -13,7 +13,7 @@
       "wp": null
     },
     "#178": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "https://github.com/spec-kitty/spec-kitty-design/issues/178 \u2014 precedent cited by FR-018 for registering sk-confirm-dialog's unmarked zero-literal test the same way sk-notice's unmarked re-announcement test is registered, without minting a new ADR-11 id. #178 itself is not touched by this WP; the precedent it established is already settled/merged and correctly reused here.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -21,8 +21,8 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
     },
     "#286": {
       "evidence_ref": "<link or commit>",
