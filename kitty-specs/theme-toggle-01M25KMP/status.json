@@ -37,7 +37,8 @@
         "Pre-accept architecture lens rejected b22af20d for cross-story cleanup ownership",
         "Remediate adversarial pass 1 cleanup-ownership finding",
         "Adversarial cleanup-ownership remediation complete; focused red/green and typechecks passed",
-        "Adversarial architecture pass 2 rejected exact HEAD 5f5a800e for order-dependent global theme story cleanup."
+        "Adversarial architecture pass 2 rejected exact HEAD 5f5a800e for order-dependent global theme story cleanup.",
+        "Fresh Codex remediation turn for adversarial review cycle 4."
       ],
       "provider": "__resolved_provider_absent__",
       "review": null,
