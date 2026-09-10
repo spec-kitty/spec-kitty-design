@@ -7,11 +7,11 @@
     {
       "criterion_id": "FR-001",
       "description": "Verify FR-001 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "proof_type": "document_inspection",
+      "evidence": "docs/architecture/decisions/2026-09-10-15-static-form-of-element-backed-css.md \u2014 new ADR-15, Status Proposed, row added to docs/architecture/README.md; node scripts/check-adr-index.mjs green at 16 records / 16 rows.",
+      "pass_fail": "pass",
+      "verified_by": "architect-alphonso",
+      "verified_at": "2026-09-10T01:07:21.343344+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
