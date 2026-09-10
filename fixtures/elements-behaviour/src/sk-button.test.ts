@@ -20,9 +20,24 @@ import {
   buttonClasses,
   buttonStaticHtml,
 } from '../../../packages/elements/src/button/sk-button.markup.js';
+import skButtonCss from '../../../packages/styles/src/button/sk-button.css?raw';
+import skButtonElementSource from '../../../packages/elements/src/button/sk-button.ts?raw';
+import skButtonMarkupSource from '../../../packages/elements/src/button/sk-button.markup.ts?raw';
 import { installTokenSheet } from './token-sheet.js';
 
 beforeEach(installTokenSheet);
+
+// AUTHORED sheet, parsed directly — the same technique sk-action-row.test.ts uses for a
+// pseudo-class rule (`:hover`/`:active`) that `getComputedStyle` cannot answer without actually
+// simulating the state. `sk-button--danger-secondary`'s hover fill and active transform are
+// both asserted this way below.
+const authoredButtonSheet = new CSSStyleSheet();
+authoredButtonSheet.replaceSync(skButtonCss);
+
+const rootStyleRuleFor = (selector: string): CSSStyleRule | undefined =>
+  Array.from(authoredButtonSheet.cssRules).find(
+    (rule): rule is CSSStyleRule => rule instanceof CSSStyleRule && rule.selectorText === selector,
+  );
 
 const mount = async (attrs: Record<string, string> = {}, label = 'Label') => {
   const el = document.createElement('sk-button');
@@ -349,7 +364,7 @@ test('the primary tone PAINTS, and the three tones are distinct', async () => {
   // Derived from the module's own map with a literal floor, per #78's finding that a hardcoded
   // list lets a fourth value ship with no coverage.
   const variants = Object.keys(BUTTON_VARIANTS);
-  expect(variants.length, 'the tone map went empty or grew uncovered').toBe(3);
+  expect(variants.length, 'the tone map went empty or grew uncovered').toBe(4);
   const seen = new Map<string, string>();
   for (const variant of variants) {
     const el = await mount({ variant });
@@ -364,6 +379,93 @@ test('the primary tone PAINTS, and the three tones are distinct', async () => {
     new Set(seen.values()).size,
     `the tones are not distinct: ${[...seen].map(([k, v]) => `${k}=${v}`).join(', ')}`,
   ).toBe(variants.length);
+});
+
+test('danger-secondary fills on hover and does not otherwise change its border or text colour', async () => {
+  // `:hover` cannot be simulated by getComputedStyle here — the same limitation
+  // sk-action-row.test.ts's own hover assertions work around — so the AUTHORED rule is read
+  // directly from the parsed sheet, matching that file's `rootStyleRuleFor` technique.
+  const el = await mount({ variant: 'danger-secondary' });
+  const resting = getComputedStyle(partOf(el));
+  expect(resting.backgroundColor, 'danger-secondary is transparent at rest').toBe('rgba(0, 0, 0, 0)');
+
+  const hoverRule = rootStyleRuleFor('.sk-button--danger-secondary:hover');
+  expect(hoverRule, 'the danger-secondary hover rule was not parsed').not.toBeUndefined();
+  expect(hoverRule!.style.background, 'hover must set a background').not.toBe('');
+  expect(hoverRule!.style.borderColor, 'hover must not touch border-color').toBe('');
+  expect(hoverRule!.style.color, 'hover must not touch text colour').toBe('');
+
+  const probe = document.createElement('span');
+  probe.style.background = hoverRule!.style.background;
+  document.body.append(probe);
+  const resolvedHoverFill = getComputedStyle(probe).backgroundColor;
+  probe.remove();
+
+  const dangerSurfaceProbe = document.createElement('span');
+  dangerSurfaceProbe.style.background = 'var(--sk-status-danger)';
+  document.body.append(dangerSurfaceProbe);
+  const resolvedDangerSurface = getComputedStyle(dangerSurfaceProbe).backgroundColor;
+  dangerSurfaceProbe.remove();
+
+  expect(resolvedHoverFill, 'hover resolves to the danger surface token').toBe(resolvedDangerSurface);
+  expect(resolvedHoverFill, 'hover fill must not equal the resting (transparent) fill').not.toBe(
+    resting.backgroundColor,
+  );
+});
+
+test('danger-secondary declares :active { transform: scale(0.97) }, scoped to itself only', () => {
+  const activeRule = rootStyleRuleFor('.sk-button--danger-secondary:active');
+  expect(activeRule, 'the danger-secondary active rule was not parsed').not.toBeUndefined();
+  expect(activeRule!.style.transform).toBe('scale(0.97)');
+
+  // C-003: secondary/ghost are NOT retrofitted with :active — this WP adds the rule to
+  // danger-secondary only, and this assertion is the proof, not just the CSS comment.
+  expect(rootStyleRuleFor('.sk-button--secondary:active'), 'secondary must not gain :active').toBeUndefined();
+  expect(rootStyleRuleFor('.sk-button--ghost:active'), 'ghost must not gain :active').toBeUndefined();
+});
+
+test('danger-secondary border and text colour resolve to --sk-on-status-danger, in both themes', async () => {
+  // Same two-theme token-boundary probe pattern as "icon controls are exactly 40px square and
+  // token-focus-visible in both themes" above, applied to the new tone's own boundary token.
+  for (const theme of ['dark', 'light'] as const) {
+    const frame = document.createElement('div');
+    if (theme === 'light') frame.className = 'sk-light';
+    document.body.append(frame);
+
+    const el = document.createElement('sk-button');
+    el.setAttribute('variant', 'danger-secondary');
+    el.textContent = 'Deny';
+    frame.append(el);
+    await (el as unknown as { updateComplete: Promise<unknown> }).updateComplete;
+
+    const computed = getComputedStyle(partOf(el));
+    const tokenProbe = document.createElement('span');
+    tokenProbe.style.color = 'var(--sk-on-status-danger)';
+    frame.append(tokenProbe);
+    const resolvedToken = getComputedStyle(tokenProbe).color;
+
+    expect(computed.borderColor, `${theme} danger-secondary border colour`).toBe(resolvedToken);
+    expect(computed.color, `${theme} danger-secondary text colour`).toBe(resolvedToken);
+    frame.remove();
+  }
+});
+
+test('danger-secondary has no new copy default anywhere in source (FR-017)', () => {
+  // The generated static default stays the shared 'Label' placeholder — the label is always
+  // consumer-supplied (#286), even for a tone whose real-world use is a deny/decline action.
+  expect(buttonStaticHtml({ variant: 'danger-secondary' })).toBe(
+    '<button class="sk-button sk-button--danger-secondary" type="button">Label</button>',
+  );
+
+  // A TARGETED assertion (not #286's repo-wide gate): the two source files this WP authors must
+  // not smuggle in a hardcoded "Deny"/"Decline" default. Stories and docs are allowed to use
+  // those words as EXAMPLE values — only the two authored source modules are checked here.
+  for (const [name, source] of [
+    ['sk-button.ts', skButtonElementSource],
+    ['sk-button.markup.ts', skButtonMarkupSource],
+  ] as const) {
+    expect(/deny|decline/i.test(source), `${name} must not hardcode a copy default`).toBe(false);
+  }
 });
 
 test('size is an axis independent of tone', async () => {
@@ -381,6 +483,35 @@ test('size is an axis independent of tone', async () => {
   );
   expect(getComputedStyle(partOf(icon)).backgroundColor).toBe(
     getComputedStyle(partOf(base)).backgroundColor,
+  );
+
+  // danger-secondary composed with each size: same padding/dimension behaviour as any other
+  // tone at that size, and the tone's own boundary colour is unaffected by size.
+  const dangerBase = await mount({ variant: 'danger-secondary' });
+  const dangerSmall = await mount({ variant: 'danger-secondary', size: 'sm' });
+  const dangerIcon = await mount(
+    { variant: 'danger-secondary', size: 'icon', label: 'Deny' },
+    '✕',
+  );
+  const dangerBasePad = parseFloat(getComputedStyle(partOf(dangerBase)).paddingLeft);
+  const dangerSmallPad = parseFloat(getComputedStyle(partOf(dangerSmall)).paddingLeft);
+  expect(dangerSmallPad, 'danger-secondary size="sm" padding must match primary size="sm" padding').toBe(
+    smallPad,
+  );
+  expect(dangerBasePad, 'danger-secondary default padding must match primary default padding').toBe(
+    basePad,
+  );
+  const dangerIconBounds = partOf(dangerIcon).getBoundingClientRect();
+  expect(Math.round(dangerIconBounds.width), 'danger-secondary icon width').toBe(40);
+  expect(Math.round(dangerIconBounds.height), 'danger-secondary icon height').toBe(40);
+  // Size leaves the tone's own colours alone — the same coupling check as the primary tone
+  // above, applied to danger-secondary's border colour instead of background (it has no fill
+  // at rest, so background is uninformative here; border-color is the tone's carrier).
+  expect(getComputedStyle(partOf(dangerSmall)).borderColor).toBe(
+    getComputedStyle(partOf(dangerBase)).borderColor,
+  );
+  expect(getComputedStyle(partOf(dangerIcon)).borderColor).toBe(
+    getComputedStyle(partOf(dangerBase)).borderColor,
   );
 });
 

@@ -137,10 +137,10 @@ declare module 'vue' {
       /** Size: `sm`, `icon`, or omit for the default. */
       'size'?: 'sm' | 'icon' | undefined;
       /**
-       * Tone: `primary`, `secondary` or `ghost`. Omit for the unstyled base. An unknown value
-       * renders the base button and warns rather than throwing.
+       * Tone: `primary`, `secondary`, `ghost` or `danger-secondary`. Omit for the unstyled base. An
+       * unknown value renders the base button and warns rather than throwing.
        */
-      'variant'?: 'primary' | 'secondary' | 'ghost' | undefined;
+      'variant'?: 'primary' | 'secondary' | 'ghost' | 'danger-secondary' | undefined;
     }>;
     /** The card primitive — the first real component on the ADR-8 base layer. */
     'sk-card': SkElement<{

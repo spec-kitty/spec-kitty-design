@@ -22,12 +22,22 @@ export const Primary: Story = {};
 export const Secondary: Story = { render: () => '<sk-button variant="secondary">Secondary</sk-button>' };
 export const Ghost: Story = { render: () => '<sk-button variant="ghost">Ghost</sk-button>' };
 
+/**
+ * Danger-secondary — reuses `--sk-status-danger`/`--sk-on-status-danger` for the fill/boundary,
+ * no new token (BORDER-ROLE-319, C-002). `label` is an example value only, never a component
+ * default (#286) — the generated static export's own default content stays `'Label'`.
+ */
+export const DangerSecondary: Story = {
+  render: () => '<sk-button variant="danger-secondary">Deny</sk-button>',
+};
+
 /** Size is an axis, independent of tone. */
 export const Small: Story = {
   render: () => `
     <div style="display:flex; gap:var(--sk-space-4); align-items:center;">
       <sk-button variant="primary" size="sm">Small primary</sk-button>
       <sk-button variant="secondary" size="sm">Small secondary</sk-button>
+      <sk-button variant="danger-secondary" size="sm">Small deny</sk-button>
     </div>
   `,
 };
@@ -101,12 +111,30 @@ export const BusyAriaDisabled: Story = {
   render: () => '<sk-button variant="primary" busy aria-disabled="true">Saving</sk-button>',
 };
 
+/** `size="icon"` composed with the new tone — the consumer supplies the glyph, as always. */
+export const DangerSecondaryIcon: Story = {
+  render: () =>
+    '<sk-button variant="danger-secondary" size="icon" label="Deny"><span aria-hidden="true">✕</span></sk-button>',
+};
+
+/** Focus the host to preview the delegated focus-visible treatment, same pattern as `IconFocus`. */
+export const DangerSecondaryFocus: Story = {
+  render: () =>
+    '<sk-button variant="danger-secondary" size="icon" label="Focus preview"><span aria-hidden="true">✕</span></sk-button>',
+};
+
+/** `disabled`, mirroring the primary-tone `Disabled` story above. */
+export const DangerSecondaryDisabled: Story = {
+  render: () => '<sk-button variant="danger-secondary" disabled>Deny</sk-button>',
+};
+
 export const AllVariants: Story = {
   render: () => `
     <div style="display:flex; gap:var(--sk-space-4); align-items:center; flex-wrap:wrap;">
       <sk-button variant="primary">Primary</sk-button>
       <sk-button variant="secondary">Secondary</sk-button>
       <sk-button variant="ghost">Ghost</sk-button>
+      <sk-button variant="danger-secondary">Deny</sk-button>
       <sk-button variant="primary" href="#">Link</sk-button>
     </div>
   `,
@@ -120,9 +148,27 @@ export const LightMode: Story = {
       <sk-button variant="primary">Primary</sk-button>
       <sk-button variant="secondary">Secondary</sk-button>
       <sk-button variant="ghost">Ghost</sk-button>
+      <sk-button variant="danger-secondary">Deny</sk-button>
       <sk-button variant="primary" size="icon" label="Notifications"><span aria-hidden="true">●</span></sk-button>
       <sk-button variant="ghost" size="icon" label="Open settings" href="#settings"><span aria-hidden="true">★</span></sk-button>
       <sk-button variant="primary" busy>Saving</sk-button>
+      <sk-button variant="danger-secondary" size="icon" label="Deny"><span aria-hidden="true">✕</span></sk-button>
+    </div>
+  `,
+};
+
+/**
+ * FR-013's comparative claim, rendered so `elements-load.spec.ts` can measure it: the SAME
+ * emulation and colour scheme must produce a strictly wider computed border on
+ * `danger-secondary` than on plain `secondary` (T007). No assertion lives here — Storybook
+ * renders no forced-colors CSS of its own — this story only exists so the Playwright case has
+ * both tones on one page to compare.
+ */
+export const ForcedColors: Story = {
+  render: () => `
+    <div style="display:flex; gap:var(--sk-space-4); align-items:center;">
+      <sk-button variant="secondary">Secondary</sk-button>
+      <sk-button variant="danger-secondary">Deny</sk-button>
     </div>
   `,
 };

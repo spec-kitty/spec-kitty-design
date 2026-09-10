@@ -30,9 +30,9 @@ export class SkButton extends LitElement {
     busy: { type: Boolean, reflect: true },
   };
 
-  /** Tone: `primary`, `secondary` or `ghost`. Omit for the unstyled base. An unknown value
-   *  renders the base button and warns rather than throwing. */
-  declare variant: 'primary' | 'secondary' | 'ghost' | undefined;
+  /** Tone: `primary`, `secondary`, `ghost` or `danger-secondary`. Omit for the unstyled base. An
+   *  unknown value renders the base button and warns rather than throwing. */
+  declare variant: 'primary' | 'secondary' | 'ghost' | 'danger-secondary' | undefined;
 
   /** Size: `sm`, `icon`, or omit for the default. */
   declare size: 'sm' | 'icon' | undefined;

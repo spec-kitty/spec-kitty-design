@@ -803,3 +803,76 @@ test.describe('sk-pill-tag forced colors', () => {
     }
   });
 });
+
+/**
+ * WP01/#320's forced-colors distinguishability claim (FR-013/FR-014), T007 — a COMPARATIVE
+ * case, not a presence check.
+ *
+ * `.sk-button--secondary` already carries an unconditional, non-transparent 1px border, so it
+ * already gets the platform's automatic forced-colors colour remap with zero author CSS.
+ * `.sk-button--danger-secondary` reuses that same bordered shape, so it would remap to the
+ * IDENTICAL system colour as plain `secondary` — colour and border-PRESENCE therefore cannot
+ * carry the distinction here, unlike `sk-pill-tag`'s case above, where the base pill has no
+ * border at all. The mechanism is `border-width`, stepped from 1px to `--sk-border-width-2`
+ * inside `@media (forced-colors: active)` only (`sk-button.css`) — so the assertion that
+ * actually pins it down is a STRICT INEQUALITY between the two tones' computed border widths,
+ * measured on the SAME page, in the SAME emulation and colour scheme. An independent-presence
+ * check on either tone alone would pass even if a future regression stepped both tones' widths
+ * equally and left them indistinguishable again — see `sk-button.stories.ts`'s `ForcedColors`
+ * story, which renders both tones side by side for exactly this comparison.
+ */
+const buttonForcedColorsStory = async (page: Page) => {
+  await page.goto('/iframe.html?id=elements-skbutton--forced-colors&viewMode=story');
+  await expect(page.locator('sk-button[variant="danger-secondary"] button')).toBeVisible({ timeout: 20000 });
+};
+
+test.describe('sk-button forced colors', () => {
+  test('danger-secondary keeps a strictly wider border than plain secondary under forced colors', async ({
+    page,
+    browserName,
+  }) => {
+    const borderWidth = (locator: Locator) =>
+      locator.evaluate((node) => {
+        const control = node.shadowRoot!.querySelector('[part="button"]')!;
+        return Number.parseFloat(getComputedStyle(control).borderWidth);
+      });
+
+    for (const colorScheme of ['dark', 'light'] as const) {
+      // Loaded once per media state, not measured twice on one load — the same discipline the
+      // sk-card and sk-pill-tag cases above record, for the same reason.
+      const measure = async (forcedColors: 'none' | 'active') => {
+        await page.emulateMedia({ forcedColors, colorScheme });
+        await buttonForcedColorsStory(page);
+        return {
+          secondary: await borderWidth(page.locator('sk-button[variant="secondary"]')),
+          dangerSecondary: await borderWidth(page.locator('sk-button[variant="danger-secondary"]')),
+        };
+      };
+
+      const normal = await measure('none');
+      // THE FLOOR: outside forced-colors mode both tones share the same 1px base border — if
+      // they were already unequal here, "danger-secondary widens under forced colors" would be
+      // comparing two rules that were never equal to begin with.
+      expect(
+        normal.dangerSecondary,
+        `${colorScheme}: outside forced-colors, danger-secondary must share the 1px base border with secondary`,
+      ).toBe(normal.secondary);
+
+      const forced = await measure('active');
+      // THE FLOOR'S OWN FLOOR, matching the sk-card/sk-pill-tag cases' own guard against a
+      // silently renamed or dropped chromium project quietly emptying the branch below.
+      expect(
+        test.info().config.projects.map((project) => project.name),
+        'the chromium floor below is keyed on this project name',
+      ).toContain('chromium');
+      if (browserName === 'chromium') {
+        // THE MECHANISM, comparative: danger-secondary's forced-colors border must be strictly
+        // wider than plain secondary's, on the same page, same emulation, same colour scheme.
+        expect(
+          forced.dangerSecondary,
+          `${colorScheme}: danger-secondary must be strictly wider than secondary under forced colors`,
+        ).toBeGreaterThan(forced.secondary);
+      }
+    }
+  });
+});
