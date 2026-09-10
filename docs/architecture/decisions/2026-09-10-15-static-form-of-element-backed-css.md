@@ -150,7 +150,7 @@ inside an `@container` block the host itself establishes. A host-attribute axis 
 inserting a wrapper would be an unmeasured layout change made for no reason. Only four sheets in
 `packages/styles/src` declare `container-type` at all — see "Which sheets this ruling reaches".
 
-A static equivalent exists and was demonstrated equal on every one of the fourteen pre-declared
+A static equivalent exists and was demonstrated equal on every one of the twenty-two pre-declared
 outcomes, in both engines — **but only when the host is preserved as a separate wrapper element.**
 
 Two static exemplars were measured against the same built sheet:

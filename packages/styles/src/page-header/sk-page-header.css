@@ -28,7 +28,14 @@
       descendants kept querying correctly.
 
       The bare `:host([sticky])` form is the one ADR-15 names as NOT rewriting mechanically to
-      `.sk-page-header-host--sticky <descendant>`; it lands on the wrapper itself. Note the
+      `.sk-page-header-host--sticky <descendant>`; it lands on the wrapper itself. ADDING THE CLASS IS
+      NOT ENOUGH: this sheet declares NOTHING for `.sk-page-header-host--sticky`, so a consumer
+      who only adds it gets a class that does nothing — the same silently-inert outcome the
+      wrapper block above warns about, one level down. Until #309 generates it, the consumer
+      hand-rewrites the whole axis onto that class: both `:host([sticky])` rules below (the host
+      rule and the `.sk-page-header` descendant rule) AND both of their copies inside the
+      `@media (max-width: 720px)` and `@media (max-height: 480px)` blocks, which drop stickiness
+      and are part of the axis rather than optional refinements. Note the
       sticky rules deliberately use `@media`, for the reason the comment further down records —
       the element being restyled is the host, and a container query cannot reach its own
       container. That is the same fact ADR-15 generalises.
