@@ -309,3 +309,14 @@
 {"agent": "claude", "at": "2026-09-10T14:18:46.471075+00:00", "canonical_action_id": "tasks::tasks", "mission_id": "01M25STR64AQWSVVSBV15TWJR5", "phase": "completed", "reason": null, "wp_id": null}
 {"agent": "claude", "at": "2026-09-10T14:18:46.831518+00:00", "canonical_action_id": "tasks::tasks", "mission_id": "01M25STR64AQWSVVSBV15TWJR5", "phase": "started", "reason": null, "wp_id": null}
 {"agent": "claude", "at": "2026-09-10T14:20:44.681085+00:00", "canonical_action_id": "tasks::tasks", "mission_id": "01M25STR64AQWSVVSBV15TWJR5", "phase": "completed", "reason": null, "wp_id": null}
+{"agent": "codex", "at": "2026-09-10T12:11:08.395460+00:00", "canonical_action_id": "discovery::research", "mission_id": "01M25KMPPGYRPHTBZATJG15NWK", "phase": "started", "reason": null, "wp_id": null}
+{"agent": "codex", "at": "2026-09-10T12:22:29.939045+00:00", "canonical_action_id": "discovery::research", "mission_id": "01M25KMPPGYRPHTBZATJG15NWK", "phase": "completed", "reason": null, "wp_id": null}
+{"agent": "codex", "at": "2026-09-10T12:22:31.217285+00:00", "canonical_action_id": "specify::specify", "mission_id": "01M25KMPPGYRPHTBZATJG15NWK", "phase": "started", "reason": null, "wp_id": null}
+{"agent": "codex", "at": "2026-09-10T12:29:29.378114+00:00", "canonical_action_id": "specify::specify", "mission_id": "01M25KMPPGYRPHTBZATJG15NWK", "phase": "completed", "reason": null, "wp_id": null}
+{"agent": "codex", "at": "2026-09-10T12:29:48.970865+00:00", "canonical_action_id": "plan::plan", "mission_id": "01M25KMPPGYRPHTBZATJG15NWK", "phase": "started", "reason": null, "wp_id": null}
+{"agent": "codex", "at": "2026-09-10T12:41:56.989604+00:00", "canonical_action_id": "plan::plan", "mission_id": "01M25KMPPGYRPHTBZATJG15NWK", "phase": "completed", "reason": null, "wp_id": null}
+{"agent": "codex", "at": "2026-09-10T12:42:15.427070+00:00", "canonical_action_id": "tasks::tasks", "mission_id": "01M25KMPPGYRPHTBZATJG15NWK", "phase": "started", "reason": null, "wp_id": null}
+{"agent": "codex", "at": "2026-09-10T12:48:55.103480+00:00", "canonical_action_id": "tasks::tasks", "mission_id": "01M25KMPPGYRPHTBZATJG15NWK", "phase": "completed", "reason": null, "wp_id": null}
+{"agent": "codex", "at": "2026-09-10T12:48:55.486630+00:00", "canonical_action_id": "tasks::tasks", "mission_id": "01M25KMPPGYRPHTBZATJG15NWK", "phase": "started", "reason": null, "wp_id": null}
+{"agent": "codex", "at": "2026-09-10T12:49:46.702945+00:00", "canonical_action_id": "tasks::tasks", "mission_id": "01M25KMPPGYRPHTBZATJG15NWK", "phase": "completed", "reason": null, "wp_id": null}
+{"agent": "codex", "at": "2026-09-10T12:50:00.098390+00:00", "canonical_action_id": "implement::implement", "mission_id": "01M25KMPPGYRPHTBZATJG15NWK", "phase": "started", "reason": null, "wp_id": "WP01"}

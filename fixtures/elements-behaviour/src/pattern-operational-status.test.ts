@@ -44,15 +44,63 @@
  * sufficiency is the claim. `check-pattern-composition.mjs` therefore scopes R1 to
  * `packages/elements/src/patterns/` and says so by name.
  */
-import { beforeEach, expect, test } from 'vitest';
+import { afterEach, beforeEach, expect, test } from 'vitest';
 import { render } from 'lit';
 import {
   OPERATIONAL_MODEL,
   renderOperationalStatus,
 } from '../../../packages/elements/src/patterns/operational-status.js';
+import { isolateThemeStory } from '../../../packages/elements/src/theme-toggle/theme-story-environment.js';
 import { installTokenSheet } from './token-sheet.js';
+import { assertThemesDiffered, contrast } from './contrast.js';
 
 type Updatable = Element & { updateComplete?: Promise<unknown> };
+
+class SystemPreference implements MediaQueryList {
+  readonly media = '(prefers-color-scheme: dark)';
+  readonly onchange = null;
+  #listeners = new Set<(event: MediaQueryListEvent) => void>();
+
+  constructor(public matches: boolean) {}
+
+  get listenerCount(): number {
+    return this.#listeners.size;
+  }
+
+  addEventListener(_type: 'change', listener: EventListenerOrEventListenerObject): void {
+    this.#listeners.add(listener as (event: MediaQueryListEvent) => void);
+  }
+
+  removeEventListener(_type: 'change', listener: EventListenerOrEventListenerObject): void {
+    this.#listeners.delete(listener as (event: MediaQueryListEvent) => void);
+  }
+
+  addListener(listener: ((this: MediaQueryList, ev: MediaQueryListEvent) => void) | null): void {
+    if (listener) this.#listeners.add(listener);
+  }
+
+  removeListener(listener: ((this: MediaQueryList, ev: MediaQueryListEvent) => void) | null): void {
+    if (listener) this.#listeners.delete(listener);
+  }
+
+  dispatchEvent(): boolean {
+    return true;
+  }
+}
+
+const originalMatchMedia = globalThis.matchMedia;
+
+const luminance = (color: string): number => {
+  const channels = color.match(/[\d.]+/g)?.slice(0, 3).map(Number);
+  if (!channels || channels.length !== 3) throw new Error(`cannot measure ${color}`);
+  const linear = channels.map((channel) => {
+    const normalized = channel / 255;
+    return normalized <= 0.03928
+      ? normalized / 12.92
+      : ((normalized + 0.055) / 1.055) ** 2.4;
+  });
+  return 0.2126 * linear[0]! + 0.7152 * linear[1]! + 0.0722 * linear[2]!;
+};
 
 const mount = async () => {
   const host = document.createElement('div');
@@ -70,6 +118,99 @@ const slotOf = (element: Element, name?: string) =>
   );
 
 beforeEach(installTokenSheet);
+
+afterEach(() => {
+  document.documentElement.removeAttribute('data-theme');
+  document.documentElement.style.removeProperty('color-scheme');
+  globalThis.matchMedia = originalMatchMedia;
+});
+
+test('the Factory-pattern composition includes the public theme, status-card, and facts surfaces', async () => {
+  const host = await mount();
+
+  expect(host.querySelectorAll('sk-theme-toggle[data-theme-control]')).toHaveLength(1);
+  expect(host.querySelectorAll('sk-card[status]')).toHaveLength(OPERATIONAL_MODEL.units.length);
+  expect(host.querySelectorAll('dl.sk-facts')).toHaveLength(OPERATIONAL_MODEL.units.length);
+  expect(host.querySelector('[data-theme-control]')?.getAttribute('label')).toBe('Theme');
+});
+
+test('manual light and dark resolve on the root with mutually exclusive luminance and AA contrast', async () => {
+  const surfaces = new Map<string, string>();
+  const luminances = new Map<string, number>();
+
+  for (const preference of ['dark', 'light'] as const) {
+    const host = document.createElement('div');
+    document.body.append(host);
+    render(renderOperationalStatus(OPERATIONAL_MODEL, { preference }), host);
+    for (const element of Array.from(host.querySelectorAll<Updatable>('*'))) {
+      if (element.updateComplete) await element.updateComplete;
+    }
+
+    const surface = host.querySelector<HTMLElement>('[data-theme-composition]')!;
+    const style = getComputedStyle(surface);
+    surfaces.set(preference, style.backgroundColor);
+    luminances.set(preference, luminance(style.backgroundColor));
+
+    expect(document.documentElement.dataset.theme).toBe(preference);
+    expect(document.documentElement.style.colorScheme).toBe(preference);
+    expect(contrast(style.color, style.backgroundColor), `${preference} page contrast`)
+      .toBeGreaterThanOrEqual(4.5);
+
+    host.remove();
+  }
+
+  assertThemesDiffered(surfaces);
+  expect(luminances.get('dark')).toBeLessThan(0.5);
+  expect(luminances.get('light')).toBeGreaterThan(0.5);
+});
+
+test('System follows the media preference and releases its listener on a manual selection', async () => {
+  const system = new SystemPreference(true);
+  globalThis.matchMedia = () => system;
+  const host = document.createElement('div');
+  document.body.append(host);
+
+  render(renderOperationalStatus(OPERATIONAL_MODEL, { preference: 'system' }), host);
+  const toggle = host.querySelector<Updatable & { preference: string }>('sk-theme-toggle')!;
+  await toggle.updateComplete;
+  expect(document.documentElement.dataset.theme).toBe('dark');
+  expect(system.listenerCount).toBe(1);
+
+  toggle.preference = 'light';
+  await toggle.updateComplete;
+  expect(document.documentElement.dataset.theme).toBe('light');
+  expect(system.listenerCount).toBe(0);
+
+  host.remove();
+  expect(system.listenerCount).toBe(0);
+});
+
+test('the story boundary restores root state and storage after disconnecting its System control', async () => {
+  const system = new SystemPreference(false);
+  globalThis.matchMedia = () => system;
+  document.documentElement.dataset.theme = 'dark';
+  document.documentElement.style.colorScheme = 'dark';
+  localStorage.setItem('spec-kitty-theme', 'light');
+
+  const cleanup = isolateThemeStory({ parameters: { themePreference: 'system' } });
+  const host = document.createElement('div');
+  document.body.append(host);
+  render(renderOperationalStatus(OPERATIONAL_MODEL, { preference: 'system' }), host);
+  const toggle = host.querySelector<Updatable>('sk-theme-toggle')!;
+  await toggle.updateComplete;
+
+  expect(document.documentElement.dataset.theme).toBe('light');
+  expect(localStorage.getItem('spec-kitty-theme')).toBe('system');
+  expect(system.listenerCount).toBe(1);
+
+  cleanup();
+  expect(host.querySelector('sk-theme-toggle')).toBeNull();
+  expect(system.listenerCount).toBe(0);
+  expect(document.documentElement.dataset.theme).toBe('dark');
+  expect(document.documentElement.style.colorScheme).toBe('dark');
+  expect(localStorage.getItem('spec-kitty-theme')).toBe('light');
+  localStorage.removeItem('spec-kitty-theme');
+});
 
 /**
  * The claim in the criterion's own words: assembled FROM PUBLIC SURFACES. The `<dl>` and the

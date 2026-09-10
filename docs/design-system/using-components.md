@@ -3,11 +3,11 @@
 The Spec Kitty components ship as CSS in `@spec-kitty/styles`, and — for the components migrated
 so far — as **custom elements** in `@spec-kitty/elements`. Both require `@spec-kitty/tokens`.
 
-**Migration is in progress.** Twenty-eight elements exist today: `sk-action-row`, `sk-app-shell`,
-`sk-bar-chart`, `sk-blog-card`, `sk-button`, `sk-card`, `sk-check-bullet`, `sk-context-sidebar`, `sk-entity-marker`,
+**Migration is in progress.** Thirty elements exist today: `sk-action-row`, `sk-app-shell`,
+`sk-bar-chart`, `sk-blog-card`, `sk-button`, `sk-card`, `sk-check-bullet`, `sk-context-sidebar`, `sk-copy-field`, `sk-entity-marker`,
 `sk-evidence-chain`, `sk-feature-card`, `sk-form-input`, `sk-form-textarea`, `sk-grid`, `sk-metric`,
 `sk-nav-pill`, `sk-notice`, `sk-page-header`, `sk-personal-rail`, `sk-pill-tag`, `sk-ribbon-card`,
-`sk-section-banner`, `sk-section-header`, `sk-site-footer`, `sk-status-indicator`, `sk-stub`,
+`sk-section-banner`, `sk-section-header`, `sk-site-footer`, `sk-status-indicator`, `sk-stub`, `sk-theme-toggle`,
 `sk-time-series-chart`, and `sk-transition-matrix`.
 Several of the catalogue's component packages are CSS only by a recorded decision — `form-field`,
 (#176) `facts`, `disclosure`, `data-table`, `empty-state`, `skip-link`, (#210) `progress`, and
@@ -28,6 +28,66 @@ section below says which it is, because the difference decides how you use it.
 Because a custom element needs no wrapper, every framework can use the migrated ones directly. A
 generated React wrapper exists for JSX typing and typed refs — see
 [Using the elements from React](./using-react.md) for what it does and does not buy, measured.
+
+## Theme preference
+
+`sk-theme-toggle` exposes exactly three preferences: `system`, `light`, and `dark`. `system` is
+the default and resolves the operating-system `prefers-color-scheme`; Light and Dark are manual
+overrides. All three values, including `system`, persist under the single namespaced
+`localStorage` key `spec-kitty-theme`. The resolved value is always `light` or `dark` and is
+applied to both `document.documentElement.dataset.theme` and the root `color-scheme` style.
+
+Prevent a wrong-theme first paint by copying the complete generated classic-script asset from
+`@spec-kitty/elements/theme-bootstrap.js` byte-for-byte into the marked inline script. It must be
+the first theme-affecting item in `<head>`, before every stylesheet link. Do not transcribe its
+storage key or resolver into an application-owned snippet; the artifact is generated from the
+same DOM-free contract imported by the element.
+
+```html
+<head>
+  <script data-sk-theme-bootstrap>
+    /* Paste the exact contents of @spec-kitty/elements/theme-bootstrap.js here. */
+  </script>
+  <link rel="stylesheet" href="/node_modules/@spec-kitty/tokens/dist/tokens.css">
+</head>
+```
+
+The control's visible group and option labels are consumer-supplied so applications can localize
+them. Supply every label; if one is blank or missing, the element deliberately renders no
+interactive controls rather than shipping fallback copy or an unnamed partial choice.
+
+```html
+<sk-theme-toggle
+  label="Theme preference"
+  system-label="Use system setting"
+  light-label="Light"
+  dark-label="Dark"
+></sk-theme-toggle>
+<script src="/node_modules/@spec-kitty/elements/dist/elements.js"></script>
+```
+
+This is a native labelled radio group, not a binary switch. The browser supplies single-choice
+arrow-key behavior and exposes the checked option programmatically; visible option text keeps the
+state understandable without color. In forced-colors mode the same radios remain operable and the
+preference still persists, while authored palette colors defer to the user's system colors.
+
+Degradation is deliberate:
+
+- Without JavaScript, the generated published token stylesheet follows
+  `prefers-color-scheme`; the unupgraded empty host exposes no inert buttons or radios. Manual
+  selection and persistence require enhancement. The component-authoring recipe makes static
+  markup optional when no truthful static control exists; generating radio markup here would
+  present an operable-looking choice that cannot change the root, so this element intentionally
+  has no generated static form.
+- If `localStorage` is unavailable or throws, root resolution and current-page selection still
+  work, but the choice cannot survive a reload.
+- If `matchMedia` is unavailable or throws, System safely resolves to Light and installs no live
+  listener. Manual Light and Dark remain available.
+
+This component owns only generic theme resolution. Factory Dashboard issue #14 still owns placing
+and integrating it in that application. Design-system issue #93 still owns the remaining
+repository-wide broken LightMode wrappers; this component's root-level proof does not claim those
+acceptance criteria.
 
 ## Repository Dossier pattern
 

@@ -650,6 +650,10 @@ else {
     // from the gate: a table that stops running is a gate whose defeated forms quietly reopen.
     [/node\s+scripts\/build-react-wrappers\.mjs\s+--check(?!\s*--selftest)(\s|$)/, 'the React wrapper drift gate', 'scripts/build-react-wrappers.mjs --check'],
     [/node\s+scripts\/build-react-wrappers\.mjs\s+--selftest(\s|$)/, "the wrapper gate's own probe table", 'scripts/build-react-wrappers.mjs --selftest'],
+    [/node\s+scripts\/build-theme-bootstrap\.mjs\s+--check(\s|$)/, 'the pre-paint bootstrap drift gate', 'scripts/build-theme-bootstrap.mjs --check'],
+    [/node\s+scripts\/build-theme-bootstrap\.mjs\s+--selftest(\s|$)/, "the pre-paint bootstrap gate's own probe table", 'scripts/build-theme-bootstrap.mjs --selftest'],
+    [/node\s+scripts\/build-tokens-css\.mjs\s+--check(\s|$)/, 'the no-JS token fallback drift gate', 'scripts/build-tokens-css.mjs --check'],
+    [/node\s+scripts\/build-tokens-css\.mjs\s+--selftest(\s|$)/, "the no-JS token fallback gate's own probe table", 'scripts/build-tokens-css.mjs --selftest'],
     // #129. check-manifest-content.mjs was an ENFORCED step with NO entry here at all, so
     // deleting its CI line was green — the exact episode the comment above records for
     // check-element-css-hygiene, in the gate that had just gained the description ratchet.

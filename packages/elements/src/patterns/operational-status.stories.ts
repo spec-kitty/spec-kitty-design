@@ -19,6 +19,13 @@
  */
 import type { Meta, StoryObj } from '@storybook/web-components';
 import { OPERATIONAL_MODEL, renderOperationalStatus } from './operational-status.js';
+import { isolateThemeStory } from '../theme-toggle/theme-story-environment.js';
+import type { ThemePreference } from '../theme-toggle/theme-preference.js';
+
+const themeParameters = (preference: ThemePreference, description: string) => ({
+  themePreference: preference,
+  docs: { description: { story: description } },
+});
 
 const meta = {
   title: 'Patterns/Operational Status',
@@ -36,17 +43,68 @@ const meta = {
       },
     },
   },
-  render: () => renderOperationalStatus(OPERATIONAL_MODEL),
+  beforeEach: isolateThemeStory,
+  render: () => renderOperationalStatus(OPERATIONAL_MODEL, { preference: 'dark' }),
 } satisfies Meta;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {};
+export const Default: Story = {
+  parameters: themeParameters('dark', 'The default operational composition resolved to Dark.'),
+};
 
 export const LightMode: Story = {
-  parameters: { backgrounds: { default: 'sk-light' } },
-  render: () => renderOperationalStatus(OPERATIONAL_MODEL, { light: true }),
+  parameters: {
+    ...themeParameters('light', 'The required LightMode composition resolved on the document root.'),
+    backgrounds: { default: 'sk-light' },
+  },
+  render: () => renderOperationalStatus(OPERATIONAL_MODEL, { light: true, preference: 'light' }),
+};
+
+export const SystemLight: Story = {
+  parameters: themeParameters(
+    'system',
+    'System preference under a light operating-system preference; browser tests emulate the media query.',
+  ),
+  render: () => renderOperationalStatus(OPERATIONAL_MODEL, { preference: 'system' }),
+};
+
+export const SystemDark: Story = {
+  parameters: themeParameters(
+    'system',
+    'System preference under a dark operating-system preference; browser tests emulate the media query.',
+  ),
+  render: () => renderOperationalStatus(OPERATIONAL_MODEL, { preference: 'system' }),
+};
+
+export const ManualLight: Story = {
+  parameters: themeParameters('light', 'Manual Light remains selected against a dark OS preference.'),
+  render: () => renderOperationalStatus(OPERATIONAL_MODEL, { preference: 'light' }),
+};
+
+export const ManualDark: Story = {
+  parameters: themeParameters('dark', 'Manual Dark remains selected against a light OS preference.'),
+  render: () => renderOperationalStatus(OPERATIONAL_MODEL, { preference: 'dark' }),
+};
+
+export const Greyscale: Story = {
+  parameters: themeParameters(
+    'dark',
+    'Colour is removed while native checked state, visible labels, status text, and markers remain.',
+  ),
+  render: () => renderOperationalStatus(OPERATIONAL_MODEL, {
+    preference: 'dark',
+    presentation: 'greyscale',
+  }),
+};
+
+export const ForcedColors: Story = {
+  parameters: themeParameters(
+    'system',
+    'Browser tests activate forced colours and verify the three labelled native choices remain operable.',
+  ),
+  render: () => renderOperationalStatus(OPERATIONAL_MODEL, { preference: 'system' }),
 };
 
 /**
@@ -55,7 +113,19 @@ export const LightMode: Story = {
  * rather than over one element in isolation.
  */
 export const Narrow: Story = {
-  parameters: { viewport: { defaultViewport: 'mobile1' } },
+  parameters: {
+    ...themeParameters('dark', 'The theme control and operational cards reflow at a narrow viewport.'),
+    viewport: { defaultViewport: 'mobile1' },
+  },
+  render: () => renderOperationalStatus(OPERATIONAL_MODEL, { preference: 'dark' }),
+};
+
+export const Zoom200: Story = {
+  parameters: themeParameters(
+    'dark',
+    'An effective 200% zoom route (780 physical pixels / 390 CSS pixels); browser tests assert content containment and control operation.',
+  ),
+  render: () => renderOperationalStatus(OPERATIONAL_MODEL, { preference: 'dark' }),
 };
 
 /**
@@ -66,6 +136,7 @@ export const Narrow: Story = {
  * the composition degrades by omitting a surface, not by substituting a placeholder for it.
  */
 export const WithoutBanner: Story = {
+  parameters: themeParameters('dark', 'The optional live-status region is omitted without a placeholder.'),
   render: () => renderOperationalStatus({ ...OPERATIONAL_MODEL, banner: null }),
 };
 
@@ -78,6 +149,7 @@ export const WithoutBanner: Story = {
  * "No data", never an interpolation.
  */
 export const CompleteSeries: Story = {
+  parameters: themeParameters('dark', 'Every time-series interval carries an observation.'),
   render: () =>
     renderOperationalStatus({
       ...OPERATIONAL_MODEL,

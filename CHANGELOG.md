@@ -20,7 +20,7 @@ Lit, with styling delivered through constructed stylesheets and a closed styling
   `sk-confirm-dialog`, `sk-context-sidebar`, `sk-copy-field`, `sk-entity-marker`, `sk-evidence-chain`, `sk-feature-card`, `sk-form-input`,
   `sk-form-textarea`, `sk-grid`, `sk-metric`, `sk-nav-pill`, `sk-notice`, `sk-page-header`,
   `sk-personal-rail`, `sk-pill-tag`, `sk-ribbon-card`, `sk-section-banner`, `sk-section-header`,
-  `sk-site-footer`, `sk-status-indicator`, `sk-stub`, `sk-time-series-chart`, `sk-transition-matrix`
+  `sk-site-footer`, `sk-status-indicator`, `sk-stub`, `sk-theme-toggle`, `sk-time-series-chart`, `sk-transition-matrix`
 - `sk-confirm-dialog` (#308) is a bounded, consumer-copy confirmation dialog over the native
   `<dialog>`, opened via `showModal()`. Every visible string (title, body, confirm label, cancel
   label) is entirely consumer-supplied — there is no library-authored fallback text anywhere, and
@@ -28,6 +28,10 @@ Lit, with styling delivered through constructed stylesheets and a closed styling
   through exactly one mechanism, the native `close` event's `returnValue` (`'confirm' | 'cancel'`);
   every dismissal path (Escape, backdrop, an unset programmatic close) resolves `'cancel'`. It
   performs no mutation, request, or navigation itself
+- `sk-theme-toggle` (#323) exposes the exact System, Light, and Dark preference model as a
+  labelled native radio group, persists it under `spec-kitty-theme`, applies the resolved theme
+  and `color-scheme` at the document root, and ships a generated pre-paint bootstrap from the
+  same DOM-free resolver contract
 - `sk-copy-field` (#257) displays and copies one exact consumer-provided string, reports only
   truthful `copied`, manual-selection, or failure outcomes through an accessible live region and
   privacy-safe event, and wraps long values without owning command execution or application state

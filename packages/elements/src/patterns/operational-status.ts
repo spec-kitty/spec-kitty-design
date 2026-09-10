@@ -13,6 +13,7 @@
  *     block and collapsible detail          sk-card[status] + .sk-facts/.sk-disclosure (#177/#176)
  *                                           + sk-status-indicator                      (#146)
  *   * a gap-aware time series               sk-time-series-chart                       (#179)
+ *   * a three-choice theme preference        sk-theme-toggle                            (#323)
  *
  * WHY THIS IS A MODULE AND NOT ONLY A STORY. `team-overview.stories.ts`, the one existing
  * pattern fixture, carries six ratcheted story ids and no behaviour test. A story id proves a
@@ -47,7 +48,9 @@ import '../card/sk-card.js';
 import '../notice/sk-notice.js';
 import '../page-header/sk-page-header.js';
 import '../status-indicator/sk-status-indicator.js';
+import '../theme-toggle/sk-theme-toggle.js';
 import '../time-series-chart/sk-time-series-chart.js';
+import type { ThemePreference } from '../theme-toggle/theme-preference.js';
 import type { TimeSeriesDatum } from '../time-series-chart/sk-time-series-chart.js';
 
 /** One operational tone from the library's own public enum. The fixture invents none. */
@@ -77,6 +80,12 @@ export type OperationalModel = Readonly<{
   seriesLabel: string;
   seriesDescription: string;
   gapThreshold: number;
+}>;
+
+export type OperationalStatusOptions = Readonly<{
+  light?: boolean;
+  preference?: ThemePreference;
+  presentation?: 'default' | 'greyscale';
 }>;
 
 const HOUR = 3_600_000;
@@ -245,6 +254,20 @@ export const operationalStatusStyles = html`<style>
     padding: var(--sk-space-6);
   }
 
+  .sk-pattern-operations__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    justify-content: end;
+    gap: var(--sk-space-3);
+    min-inline-size: 0;
+  }
+
+  .sk-pattern-operations__theme-control {
+    flex: 1 1 auto;
+    min-inline-size: 0;
+  }
+
   .sk-pattern-operations__units {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(var(--sk-space-12), 1fr));
@@ -275,6 +298,10 @@ export const operationalStatusStyles = html`<style>
     font: inherit;
   }
 
+  .sk-pattern-operations--greyscale {
+    filter: grayscale(1);
+  }
+
   @media (max-width: 720px) {
     .sk-pattern-operations__body {
       gap: var(--sk-space-4);
@@ -283,6 +310,11 @@ export const operationalStatusStyles = html`<style>
 
     .sk-pattern-operations__units {
       grid-template-columns: minmax(0, 1fr);
+    }
+
+    .sk-pattern-operations__actions {
+      align-items: stretch;
+      justify-content: stretch;
     }
   }
 </style>`;
@@ -324,18 +356,35 @@ const renderUnit = (unit: OperationalUnit): TemplateResult => html`
  */
 export const renderOperationalStatus = (
   model: OperationalModel = OPERATIONAL_MODEL,
-  options: Readonly<{ light?: boolean }> = {},
-): TemplateResult => html`
+  options: OperationalStatusOptions = {},
+): TemplateResult => {
+  const preference = options.preference ?? 'dark';
+  const classes = [
+    'sk-pattern-operations',
+    options.light ? 'sk-light' : '',
+    options.presentation === 'greyscale' ? 'sk-pattern-operations--greyscale' : '',
+  ].filter(Boolean).join(' ');
+
+  return html`
   ${operationalStatusStyles}
-  <div class=${options.light ? 'sk-pattern-operations sk-light' : 'sk-pattern-operations'}>
+  <div class=${classes} data-theme-composition>
     <sk-page-header density="compact" sticky>
       <span slot="eyebrow">${model.eyebrow}</span>
       <h1 slot="title">${model.title}</h1>
       <p slot="supporting">${model.supporting}</p>
       <span slot="sync">${model.updated}</span>
-      <button slot="actions" type="button" class="sk-pattern-operations__action">
-        ${model.actionLabel}
-      </button>
+      <div slot="actions" class="sk-pattern-operations__actions">
+        <sk-theme-toggle
+          class="sk-pattern-operations__theme-control"
+          data-theme-control
+          .preference=${preference}
+          label="Theme"
+          system-label="System"
+          light-label="Light"
+          dark-label="Dark"
+        ></sk-theme-toggle>
+        <button type="button" class="sk-pattern-operations__action">${model.actionLabel}</button>
+      </div>
     </sk-page-header>
 
     <div class="sk-pattern-operations__body">
@@ -368,3 +417,4 @@ export const renderOperationalStatus = (
     </div>
   </div>
 `;
+};

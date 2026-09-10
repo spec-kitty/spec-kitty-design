@@ -55,6 +55,7 @@
     "./skip-link/*": "./dist/skip-link/*",
     "./status-indicator/*": "./dist/status-indicator/*",
     "./stub/*": "./dist/stub/*",
+    "./theme-toggle/*": "./dist/theme-toggle/*",
     "./time-series-chart/*": "./dist/time-series-chart/*",
     "./transition-matrix/*": "./dist/transition-matrix/*",
     "./workflow-board/*": "./dist/workflow-board/*",

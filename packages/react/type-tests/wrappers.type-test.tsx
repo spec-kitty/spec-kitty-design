@@ -24,6 +24,7 @@ import {
   SkNavPill,
   SkNotice,
   SkStatusIndicator,
+  SkThemeToggle,
   SkTransitionMatrix,
   type ActionRowActivateDetail,
   type SkAppShellElement,
@@ -35,6 +36,8 @@ import {
   type SkFormInputElement,
   type SkNoticeProps,
   type SkStatusIndicatorProps,
+  type SkThemeToggleElement,
+  type SkThemeToggleProps,
   type TransitionMatrixSelectDetail,
 } from '../src/index.js';
 import type {
@@ -47,6 +50,31 @@ import type {
   StatusIndicatorTone,
   TransitionMatrixProperties,
 } from '@spec-kitty/elements';
+
+// --- sk-theme-toggle: exact three-value preference and typed change detail -----------------
+export const themeToggleAllProps = (
+  <SkThemeToggle
+    preference="system"
+    label="Appearance"
+    systemLabel="Use device setting"
+    lightLabel="Light theme"
+    darkLabel="Dark theme"
+    onSkThemeChange={(event) => {
+      const preference: 'system' | 'light' | 'dark' = event.detail.preference;
+      const theme: 'light' | 'dark' = event.detail.theme;
+      void preference;
+      void theme;
+    }}
+  />
+);
+const themeToggleElement: SkThemeToggleElement | null = null;
+void themeToggleElement;
+const themeTogglePreference: NonNullable<SkThemeToggleProps['preference']> = 'dark';
+void themeTogglePreference;
+// @ts-expect-error arbitrary palettes are outside the exact three-value public contract
+export const themeToggleArbitrary = <SkThemeToggle preference="sepia" />;
+// @ts-expect-error the generated event detail is exact rather than any
+export const themeToggleWrongDetail = <SkThemeToggle onSkThemeChange={(event) => void event.detail.mode} />;
 
 // --- props are typed, and inherited ones are present -----------------------------------
 // value/label/required are inheritedFrom FormControlBase with privacy public. FR-004 said for

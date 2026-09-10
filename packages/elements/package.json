@@ -15,6 +15,11 @@
       "types": "./dist/elements.d.ts",
       "default": "./dist/elements.js"
     },
+    "./theme-bootstrap.js": "./theme-bootstrap.js",
+    "./theme-preference.js": {
+      "types": "./dist/theme-toggle/theme-preference.d.ts",
+      "default": "./dist/theme-toggle/theme-preference.js"
+    },
     "./vue": {
       "types": "./vue.d.ts"
     },
@@ -24,6 +29,7 @@
   "customElements": "custom-elements.json",
   "files": [
     "dist/",
+    "theme-bootstrap.js",
     "custom-elements.json",
     "vue.d.ts"
   ],

@@ -42,9 +42,10 @@
     "#302 adds sk-pill-tag's third reflected attribute, `status` — the operational status-tone axis. sk-pill-tag moves 2 -> 3. On the refreshed train after #308, total moves 130 -> 131.",
     "#304 (ADR-15 split) adds sk-entity-marker's one new `border` documented attribute (a validated string enum, `'true'`, chosen over a native boolean so FR-011's warn-and-fall-open contract applies to it exactly like size/shape). entity-marker moves 3 -> 4 attributes; no property-only field or public method is added. On the refreshed train after #302, total moves 131 -> 132.",
     "#305 adds one documented sk-button attribute: busy (boolean, reflected). No property-only field or public method is added. On the refreshed train after #304, total moves 132 -> 133.",
-    "#354 adds sk-site-footer's sixth reflected attribute: presentation ('full' | 'compact', string). No property-only field or public method is added. sk-site-footer moves 5 -> 6 attributes. On the rebased train after #305, total moves 133 -> 134."
+    "#354 adds sk-site-footer's sixth reflected attribute: presentation ('full' | 'compact', string). No property-only field or public method is added. sk-site-footer moves 5 -> 6 attributes. On the rebased train after #305, total moves 133 -> 134.",
+    "#323 adds sk-theme-toggle with five consumer-label/preference attributes and no public method or property-only field. On the rebased train after #354, total moves 134 -> 139."
   ],
-  "total": 134,
+  "total": 139,
   "elements": {
     "sk-action-row": {
       "attributes": 6,
@@ -189,6 +190,11 @@
     "sk-time-series-chart": {
       "attributes": 5,
       "properties": 1,
+      "methods": 0
+    },
+    "sk-theme-toggle": {
+      "attributes": 5,
+      "properties": 0,
       "methods": 0
     },
     "sk-transition-matrix": {

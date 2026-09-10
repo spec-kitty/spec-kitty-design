@@ -1,0 +1,81 @@
+/* @spec-kitty/styles — sk-theme-toggle styles — tokens only, no hardcoded values */
+
+:host {
+  display: inline-block;
+  max-inline-size: 100%;
+  color: var(--sk-fg-body);
+  font-family: var(--sk-font-sans);
+}
+
+.sk-theme-toggle {
+  box-sizing: border-box;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  margin: 0;
+  padding: var(--sk-space-2);
+  border: var(--sk-border-width-1) solid var(--sk-border-default);
+  border-radius: var(--sk-radius-md);
+}
+
+.sk-theme-toggle__legend {
+  padding-inline: var(--sk-space-1);
+  font-size: var(--sk-text-sm);
+  font-weight: var(--sk-weight-semibold);
+}
+
+.sk-theme-toggle__choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sk-space-1);
+  min-inline-size: 0;
+}
+
+.sk-theme-toggle__choice {
+  box-sizing: border-box;
+  position: relative;
+  display: inline-flex;
+  flex: 1 1 auto;
+  align-items: center;
+  gap: var(--sk-space-2);
+  min-block-size: calc(var(--sk-space-10) - var(--sk-space-5));
+  min-inline-size: 0;
+  padding-block: var(--sk-space-2);
+  padding-inline: var(--sk-space-3);
+  overflow-wrap: anywhere;
+  color: var(--sk-fg-body);
+  background: var(--sk-surface-input);
+  border: var(--sk-border-width-1) solid var(--sk-border-default);
+  border-radius: var(--sk-radius-sm);
+  font-size: var(--sk-text-sm);
+  cursor: pointer;
+}
+
+.sk-theme-toggle__choice:has(input:checked) {
+  background: var(--sk-bg-pill);
+  border-color: var(--sk-border-strong);
+  border-style: double;
+  border-width: var(--sk-border-width-2);
+  font-weight: var(--sk-weight-semibold);
+}
+
+.sk-theme-toggle__choice:has(input:focus-visible) {
+  outline: var(--sk-border-width-2) solid var(--sk-border-focus);
+  outline-offset: var(--sk-space-1);
+}
+
+.sk-theme-toggle__choice input {
+  accent-color: var(--sk-color-accent);
+}
+
+@media (forced-colors: active) {
+  .sk-theme-toggle__choice:has(input:checked) {
+    border-block-end-color: Highlight;
+    border-block-end-style: double;
+    border-block-end-width: var(--sk-border-width-4);
+  }
+
+  .sk-theme-toggle__choice:has(input:focus-visible) {
+    outline-color: Highlight;
+    outline-width: var(--sk-border-width-4);
+  }
+}

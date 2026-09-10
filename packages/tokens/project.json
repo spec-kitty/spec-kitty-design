@@ -6,8 +6,15 @@
     "build": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "rm -rf packages/tokens/dist/fonts packages/tokens/dist/assets && mkdir -p packages/tokens/dist/fonts packages/tokens/dist/assets && cp packages/tokens/src/tokens.css packages/tokens/dist/tokens.css && cp -r packages/tokens/fonts/. packages/tokens/dist/fonts/ && cp -r packages/tokens/assets/. packages/tokens/dist/assets/"
-      }
+        "command": "node scripts/build-tokens-css.mjs && rm -rf packages/tokens/dist/fonts packages/tokens/dist/assets && mkdir -p packages/tokens/dist/fonts packages/tokens/dist/assets && cp -r packages/tokens/fonts/. packages/tokens/dist/fonts/ && cp -r packages/tokens/assets/. packages/tokens/dist/assets/"
+      },
+      "inputs": [
+        "{projectRoot}/src/tokens.css",
+        "{workspaceRoot}/scripts/build-tokens-css.mjs",
+        "{projectRoot}/fonts/**/*",
+        "{projectRoot}/assets/**/*"
+      ],
+      "outputs": ["{projectRoot}/dist"]
     },
     "lint": {
       "executor": "nx:run-commands",

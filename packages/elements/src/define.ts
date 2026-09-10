@@ -54,20 +54,39 @@ export const registeredTags: string[] = [];
  * register an element without going through it, which is what "unevadable" has to mean.
  * `registeredTags` is then a genuine record rather than a claim about developer discipline.
  */
-const nativeDefine = customElements.define.bind(customElements);
-customElements.define = function patchedDefine(
-  tag: string,
-  ctor: CustomElementConstructor,
-  options?: ElementDefinitionOptions,
-): void {
-  nativeDefine(tag, ctor, options);
-  // AFTER the native call, so a tag that throws (duplicate, invalid name) is not recorded as
-  // registered. Moving this above would make the array claim tags that never registered.
-  registeredTags.push(tag);
-} as typeof customElements.define;
+let patchedRegistry: CustomElementRegistry | undefined;
+
+/**
+ * Resolve and patch the registry lazily. Lit's Node entry may install its SSR registry after
+ * this module has loaded, while non-DOM runtimes provide no registry at all. Deferring the
+ * patch keeps both imports inert without making browser registration asynchronous.
+ */
+function currentRegistry(): CustomElementRegistry | undefined {
+  const registry = globalThis.customElements as CustomElementRegistry | undefined;
+  if (!registry) return undefined;
+  if (registry === patchedRegistry) return registry;
+
+  const nativeDefine = registry.define.bind(registry);
+  registry.define = function patchedDefine(
+    tag: string,
+    ctor: CustomElementConstructor,
+    options?: ElementDefinitionOptions,
+  ): void {
+    nativeDefine(tag, ctor, options);
+    // AFTER the native call, so a tag that throws (duplicate, invalid name) is not recorded as
+    // registered. Moving this above would make the array claim tags that never registered.
+    registeredTags.push(tag);
+  } as typeof registry.define;
+  patchedRegistry = registry;
+  return registry;
+}
+
+currentRegistry();
 
 export function define(tag: string, ctor: CustomElementConstructor): void {
-  const existing = customElements.get(tag);
+  const registry = currentRegistry();
+  if (!registry) return;
+  const existing = registry.get(tag);
   if (existing) {
     if (existing !== ctor) {
       console.warn(
@@ -79,5 +98,5 @@ export function define(tag: string, ctor: CustomElementConstructor): void {
     }
     return;
   }
-  customElements.define(tag, ctor);
+  registry.define(tag, ctor);
 }

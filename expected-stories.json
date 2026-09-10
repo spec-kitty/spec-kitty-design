@@ -63,7 +63,8 @@
     "#354 adds the compact presentation's required story set: 7 elements-layer ids (Compact, CompactNoLinks, CompactSeveralLinks, CompactWithoutLegal, CompactLongContent, CompactRtl, CompactLightMode) under the existing `sk-site-footer` key, plus a NEW `sk-site-footer (static path)` key — precedent: `sk-card (static path)` — for the 2 styles-layer static-form ids (Compact, CompactLightMode). All 9 ids verified against the built Storybook index (apps/storybook/storybook-static/index.json) before committing, not guessed from export names; the autodocs `--docs` entries are excluded, as elsewhere. On the rebased train after #305, total moves 537 -> 546.",
     "#353 opts in all thirteen native styles-only public-header stories named as acceptance evidence. Brand-only; one, two, and many actions; long labels; current route; mixed controls; the #323-blocked composition slot; narrow and short viewports; RTL; forced colours; and real `.sk-light` evidence remain independently reviewable. IDs were read from the built Storybook index; the generated autodocs entry is excluded. On the refreshed train after #307, total moves 537 -> 550.",
     "#353 opts in all thirteen native styles-only public-header stories named as acceptance evidence. Brand-only; one, two, and many actions; long labels; current route; mixed controls; the #323-blocked composition slot; narrow and short viewports; RTL; forced colours; and real `.sk-light` evidence remain independently reviewable. IDs were read from the built Storybook index; the generated autodocs entry is excluded. On the refreshed train after #307, total moves 537 -> 550.",
-    "#353 opts in all thirteen native styles-only public-header stories named as acceptance evidence. Brand-only; one, two, and many actions; long labels; current route; mixed controls; the #323-blocked composition slot; narrow and short viewports; RTL; forced colours; and real `.sk-light` evidence remain independently reviewable. IDs were read from the built Storybook index; the generated autodocs entry is excluded. On the refreshed train after #307 and then #303, total moves 537 -> 550 (537 is #303's end state, not #307's)."
+    "#353 opts in all thirteen native styles-only public-header stories named as acceptance evidence. Brand-only; one, two, and many actions; long labels; current route; mixed controls; the #323-blocked composition slot; narrow and short viewports; RTL; forced colours; and real `.sk-light` evidence remain independently reviewable. IDs were read from the built Storybook index; the generated autodocs entry is excluded. On the refreshed train after #307 and then #303, total moves 537 -> 550 (537 is #303's end state, not #307's).",
+    "#323 ratchets seven sk-theme-toggle element stories and seven additive operational-status theme routes, total 564 -> 578 on the refreshed train after #397. Default/dark and real LightMode stay separately addressable alongside System, manual Light, greyscale, forced-colors, narrow, system-light/system-dark, manual-light/manual-dark, and 200% zoom proof. The shared Storybook beforeEach helper is not a CSF export; every route restores root, storage, and mounted-listener state."
   ],
   "unratchetedElements": {
     "sk-confirm-dialog": "Ships stories (elements-skconfirmdialog--*) but was never named in this file's own history -- not even as 'still outside'. No mission has reviewed it against this ratchet; #326 is the first time its absence was written down anywhere.",
@@ -643,10 +644,26 @@
       "patterns-team-overview--controlled-interactions",
       "patterns-team-overview--empty-partial-data"
     ],
+    "sk-theme-toggle": [
+      "elements-skthemetoggle--default",
+      "elements-skthemetoggle--system",
+      "elements-skthemetoggle--manual-light",
+      "elements-skthemetoggle--greyscale",
+      "elements-skthemetoggle--forced-colors",
+      "elements-skthemetoggle--narrow",
+      "elements-skthemetoggle--light-mode"
+    ],
     "operational-status-pattern": [
       "patterns-operational-status--default",
       "patterns-operational-status--light-mode",
+      "patterns-operational-status--system-light",
+      "patterns-operational-status--system-dark",
+      "patterns-operational-status--manual-light",
+      "patterns-operational-status--manual-dark",
+      "patterns-operational-status--greyscale",
+      "patterns-operational-status--forced-colors",
       "patterns-operational-status--narrow",
+      "patterns-operational-status--zoom-200",
       "patterns-operational-status--without-banner",
       "patterns-operational-status--complete-series"
     ],
@@ -746,5 +763,5 @@
       "form-formfield-html--light-mode-error"
     ]
   },
-  "total": 564
+  "total": 578
 }

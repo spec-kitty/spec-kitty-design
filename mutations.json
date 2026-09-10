@@ -2041,6 +2041,38 @@
       "from": "    status: { type: String, reflect: true },",
       "to": "    status: { type: String, reflect: false },",
       "subject": "fixtures/elements-behaviour/src/sk-pill-tag.test.ts"
+    },
+    {
+      "id": "SC-010",
+      "arm": "preference remains reactive, reflected, and preserves pre-upgrade assignment",
+      "file": "packages/elements/src/theme-toggle/sk-theme-toggle.ts",
+      "from": "    preference: { type: String, converter: preferenceConverter, reflect: true },",
+      "to": "    // preference is deliberately unregistered by this mutation arm",
+      "subject": "fixtures/elements-behaviour/src/sk-theme-toggle.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "the theme preference is a native same-name radio group",
+      "file": "packages/elements/src/theme-toggle/sk-theme-toggle.ts",
+      "from": "              type=\"radio\"",
+      "to": "              type=\"checkbox\"",
+      "subject": "fixtures/elements-behaviour/src/sk-theme-toggle.test.ts"
+    },
+    {
+      "id": "SC-013",
+      "arm": "the stable theme control part remains targetable",
+      "file": "packages/elements/src/theme-toggle/sk-theme-toggle.ts",
+      "from": "        part=\"control\"",
+      "to": "        part=\"chooser\"",
+      "subject": "fixtures/elements-behaviour/src/sk-theme-toggle.test.ts"
+    },
+    {
+      "id": "SC-014",
+      "arm": "the generated theme-toggle stylesheet is adopted by identity",
+      "file": "packages/elements/src/theme-toggle/sk-theme-toggle.ts",
+      "from": "  static styles = [sheet];",
+      "to": "  static styles = [new CSSStyleSheet()];",
+      "subject": "fixtures/elements-behaviour/src/sk-theme-toggle.test.ts"
     }
   ]
 }
