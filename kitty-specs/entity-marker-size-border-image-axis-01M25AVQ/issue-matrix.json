@@ -95,6 +95,18 @@
       "title": "<fill at WP-implementation time>",
       "verdict": "in-mission",
       "wp": "WP01"
+    },
+    "#311": {
+      "evidence_ref": "spec.md C-006 explicitly scopes #311's six other named ::slotted() sheets OUT of #304: 'this mission does not touch any of #311's six other named sheets.' Verified: only sk-entity-marker.css changed; no other sheet's ::slotted() rule touched.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
     }
   },
   "schema_version": 1
