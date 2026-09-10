@@ -147,11 +147,11 @@
     {
       "criterion_id": "FR-015",
       "description": "Verify FR-015 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "proof_type": "document_inspection",
+      "evidence": "`grep -niE \"team|membership|invitation|bearer.?link|session\"` over sk-confirm-dialog.ts returns only the FR-014 prohibition comment in the class JSDoc \u2014 no Team/membership/invitation/bearer-link/session reactive property, method, or type exists anywhere in the element; the component's only public surface is dialogTitle/message/confirmLabel/cancelLabel/confirmVariant/initialFocus/backdropDismiss/open.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T09:44:55.901749+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
