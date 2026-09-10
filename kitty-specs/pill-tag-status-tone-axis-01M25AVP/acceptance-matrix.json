@@ -157,11 +157,11 @@
     {
       "criterion_id": "FR-016",
       "description": "Verify FR-016 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "proof_type": "manual_evidence_review",
+      "evidence": "apps/storybook/src/tests/elements-load.spec.ts:726-764 'sk-pill-tag forced colors' describe block: asserts status pill gains non-zero border-width under forced-colors while base pill stays 0px, in both color schemes",
+      "pass_fail": "pass",
+      "verified_by": "claude-pr-agent",
+      "verified_at": "2026-09-10T11:18:31.968256+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
