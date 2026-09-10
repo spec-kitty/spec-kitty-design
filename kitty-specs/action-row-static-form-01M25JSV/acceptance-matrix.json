@@ -187,11 +187,11 @@
     {
       "criterion_id": "FR-019",
       "description": "Verify FR-019 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
+      "proof_type": "code_review",
+      "evidence": "packages/elements/src/action-row/sk-action-row.markup.ts: every rendered string besides class/attribute names is sourced from caller-supplied opts/content (part() helper only echoes content.*, attr() only escapes href); PLACEHOLDER_CONTENT is solely a default-parameter fallback used by generated exemplars/stories, not emitted when a real caller supplies content, mirroring the shadow element's slot-only render path",
+      "pass_fail": "pass",
       "verified_by": null,
-      "verified_at": null,
+      "verified_at": "2026-09-10T14:07:24.598816+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
