@@ -1,19 +1,19 @@
 {
-  "event_count": 5,
-  "last_event_id": "01M25PBPYY1RRCYR99PMS1Q7JB",
-  "materialized_at": "2026-09-10T12:58:23.582940+00:00",
+  "event_count": 6,
+  "last_event_id": "01M25PGTEGFKZWNX743RVPMS45",
+  "materialized_at": "2026-09-10T13:01:10.993011+00:00",
   "mission_number": "",
   "mission_slug": "progress-indeterminate-01M25C78",
   "mission_type": "software-dev",
   "summary": {
-    "approved": 0,
+    "approved": 1,
     "blocked": 0,
     "canceled": 0,
     "claimed": 0,
     "done": 0,
     "for_review": 0,
     "in_progress": 0,
-    "in_review": 1,
+    "in_review": 0,
     "planned": 0
   },
   "work_packages": {
@@ -23,11 +23,17 @@
       "agent_profile": "__resolved_profile_absent__",
       "agent_profile_version": "__resolved_profile_version_absent__",
       "force_count": 0,
-      "lane": "in_review",
-      "last_event_id": "01M25PBPYY1RRCYR99PMS1Q7JB",
-      "last_transition_at": "2026-09-10T12:58:23.582940+00:00",
+      "lane": "approved",
+      "last_event_id": "01M25PGTEGFKZWNX743RVPMS45",
+      "last_transition_at": "2026-09-10T13:01:10.993011+00:00",
       "model": "__resolved_model_absent__",
       "provider": "__resolved_provider_absent__",
+      "review_result": {
+        "feedback_path": "/home/jeroennouws/dev/spec-kitty-design-missions/306/kitty-specs/progress-indeterminate-01M25C78/tasks/WP01-progress-indeterminate/review-cycle-1.md",
+        "reference": "review-cycle://progress-indeterminate-01M25C78/WP01-progress-indeterminate/review-cycle-1.md",
+        "reviewer": "user",
+        "verdict": "approved"
+      },
       "role": "reviewer",
       "subtasks": {
         "T001": "done",
