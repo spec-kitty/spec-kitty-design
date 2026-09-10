@@ -108,10 +108,10 @@
       "criterion_id": "FR-011",
       "description": "Verify FR-011 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "fixtures/elements-behaviour/src/sk-entity-marker.test.ts:228 'unknown values warn and fail open on only their own axis without losing content', with explicit [FR-011] block asserting an invalid border value falls open to unbordered without disturbing size/shape/content; sk-entity-marker.ts entityMarkerBorder() warns via console.warn and returns undefined on invalid input, independent of entityMarkerSize/entityMarkerShape",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-10T11:03:30.190775+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
