@@ -73,7 +73,7 @@
       "wp": "WP01"
     },
     "#309": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "spec.md C-002/FR-005: the generated .sk-action-row-host CSS rule is explicitly #309's scope, not shipped in this mission",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -81,8 +81,8 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
     },
     "#310": {
       "evidence_ref": "<link or commit>",
