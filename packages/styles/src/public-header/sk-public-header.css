@@ -144,7 +144,12 @@
   outline-offset: var(--sk-border-width-1);
 }
 
-.sk-public-header__action[aria-current]:not([aria-current="false"]) {
+/* SCOPED like the rules above, and for a reason the fold created: `:link` is now (0,3,0), which
+   TIED this rule at (0,3,0) and left the current-route cue decided by source order alone. No test
+   reads the current action's text colour — `nonColourCue` excludes colour deliberately — so a
+   future "group the link rules together" tidy-up would have dropped `--sk-fg-default` from the
+   current route with the whole suite green. At (0,4,0) it is specificity-decided again. */
+.sk-public-header .sk-public-header__action[aria-current]:not([aria-current="false"]) {
   color: var(--sk-fg-default);
   border-block-end-color: var(--sk-color-accent);
   border-block-end-style: solid;
@@ -161,7 +166,11 @@
     border-inline-start-color: ButtonText;
   }
 
-  .sk-public-header__action[aria-current]:not([aria-current="false"]) {
+  /* MUST match the scoping of the rule it overrides. A media query adds no specificity, so once
+     the base current-route rule became (0,4,0) an unscoped (0,3,0) override here would have lost
+     and the current cue would have kept `--sk-color-accent` under forced colours instead of
+     `Highlight`. */
+  .sk-public-header .sk-public-header__action[aria-current]:not([aria-current="false"]) {
     border-block-end-color: Highlight;
   }
 

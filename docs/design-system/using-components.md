@@ -870,7 +870,7 @@ receives the family's target-size floor.
 With zero actions, omit the `<nav>` instead of rendering an empty landmark.
 
 **The action slot normalises the controls placed in it, and that supersession is intentional.**
-The action slot sets `color: inherit`, a transparent background and border, the family font, and a
+The action slot sets `color: inherit`, a transparent background, a transparent **block-end** border (its other three edges are the composed control's own), the family font, and a
 hover underline, so anchors, native buttons and composed controls read as one row rather than as
 three different affordances. A composed `sk-button` variant's own colour — `sk-button--ghost`'s
 `--sk-fg-muted`, for instance — is deliberately overridden inside the header. Those six

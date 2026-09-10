@@ -225,15 +225,17 @@ test.describe('sk-public-header source, markup, and distribution contract', () =
     );
     expect(code).not.toMatch(/(?:^|[;{])\s*order\s*:|(?:row|column)-reverse/);
     expect(code).not.toMatch(/position\s*:\s*(?:sticky|fixed)/);
+    // Case-insensitive: CSS at-rules and property names are, and `@-webkit-keyframes` does not
+    // match a bare `@keyframes`.
     expect(code).not.toMatch(
-      /(?:^|[;{-])\s*(?:transition|animation)[-\w]*\s*:|@keyframes/m,
+      /(?:^|[;{-])\s*(?:transition|animation)[-\w]*\s*:|@[-\w]*keyframes/im,
     );
     // #286: the library owns no user-visible string. `classSelectorInventory` collects class
     // names only, so a `content:` declaration on a pseudo-element is invisible to every other
     // assertion in this block — `.sk-public-header__brand::before { content: "Spec Kitty" }`
     // would otherwise pass the whole file. Banning the property closes the class by construction
     // rather than relying on nobody trying it.
-    expect(code).not.toMatch(/(?:^|[;{])\s*content\s*:/m);
+    expect(code).not.toMatch(/(?:^|[;{])\s*content\s*:/im);
     expect(code).not.toMatch(/44px/i);
     expect(code).not.toMatch(/(?:display\s*:\s*none|visibility\s*:\s*hidden|clip-path\s*:)/);
 
@@ -750,6 +752,50 @@ test.describe('sk-public-header geometry, state, and resilience contract', () =>
       (node) => getComputedStyle(node).color,
     );
     expect(anchor.color).toBe(inherited);
+
+    // HOVER TOO. `.sk-button--ghost:hover { color }` is itself two classes, so before the state
+    // selectors were scoped this comparison held at rest and broke on pointer-over — and broke
+    // asymmetrically, since only the <a> matches the `:link` rule that rescued it.
+    await header.locator('button.sk-public-header__action').hover();
+    expect(
+      await readSlot(header.locator('button.sk-public-header__action')),
+      'a hovered composed button does not diverge from its anchor sibling',
+    ).toEqual(anchor);
+  });
+
+  test('the action slot normalises BARE controls, where UA defaults differ', async ({ page }) => {
+    // `mixed-controls` co-classes both actions with `.sk-button`, which itself declares
+    // font-family, font-weight, text-decoration and a transparent background — so comparing its
+    // anchor to its button is, in mutation terms, a `color`-only test: delete `background`,
+    // `font-family`, `font-weight` or `text-decoration` from the slot and it still passes.
+    // `theme-toggle-composition` carries NO control classes, so the UA's own <a>-vs-<button>
+    // defaults differ on all four at once and each becomes independently falsifiable.
+    const { header } = await openStory(page, 'theme-toggle-composition');
+    const read = (target: Locator) =>
+      target.evaluate((node) => {
+        const style = getComputedStyle(node);
+        return {
+          backgroundColor: style.backgroundColor,
+          color: style.color,
+          fontFamily: style.fontFamily,
+          fontWeight: style.fontWeight,
+          textDecorationLine: style.textDecorationLine,
+        };
+      });
+    const bareAnchor = await read(header.locator('a.sk-public-header__action').first());
+    const bareButton = await read(header.locator('button.sk-public-header__action'));
+    expect(bareButton, 'a bare <button> matches a bare <a> in the slot').toEqual(bareAnchor);
+
+    // Absolute, not just mutual: a transparent background and the family font are what the slot
+    // owes, and a mutual comparison alone cannot tell "both correct" from "both wrong".
+    const headerStyle = await header.evaluate((node) => {
+      const style = getComputedStyle(node);
+      return { color: style.color, fontFamily: style.fontFamily };
+    });
+    expect(bareButton.backgroundColor).toBe('rgba(0, 0, 0, 0)');
+    expect(bareButton.fontFamily).toBe(headerStyle.fontFamily);
+    expect(bareButton.color).toBe(headerStyle.color);
+    expect(bareButton.textDecorationLine).toBe('none');
   });
 
   test('forced colours preserve the header boundary, current cue, and focus outline', async ({
