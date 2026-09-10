@@ -404,6 +404,104 @@ test.describe('entity-marker axes and consumer images', () => {
     await expect(page.getByRole('img', { name: 'A deliberately long consumer-authored accessible name' })).toHaveCount(1);
     expect(await meaningful.locator('[part="marker"]').boundingBox()).toEqual(before);
   });
+
+  test('[FR-004] the border modifier does not change the outer box (real Storybook render)', async ({ page }) => {
+    await openStory(page, 'elements-skentitymarker--bordered-outer-box-comparison');
+    const markers = page.locator('sk-entity-marker');
+    await expect(markers).toHaveCount(2);
+    const [unbordered, bordered] = await markers.evaluateAll((elements) =>
+      elements.map((element) => {
+        const marker = element.shadowRoot!.querySelector<HTMLElement>('[part="marker"]')!;
+        const rect = marker.getBoundingClientRect();
+        const style = getComputedStyle(marker);
+        return {
+          width: rect.width,
+          height: rect.height,
+          borderStyle: style.borderStyle,
+          borderWidth: Number.parseFloat(style.borderTopWidth),
+        };
+      }),
+    );
+    expect(unbordered!.borderStyle).toBe('none');
+    expect(bordered!.borderStyle).toBe('solid');
+    expect(bordered!.borderWidth).toBeGreaterThan(0);
+    // THE LOAD-BEARING ASSERTION (FR-004/SC-003): the outer box measured by
+    // getBoundingClientRect() — what layout actually sees — is identical whether or not the
+    // border modifier is applied, in a real Storybook-rendered page, not merely a unit-test DOM.
+    expect(bordered!.width).toBe(unbordered!.width);
+    expect(bordered!.height).toBe(unbordered!.height);
+  });
+
+  test('[FR-004] the border modifier does not change the outer box at every named size and shape', async ({ page }) => {
+    await openStory(page, 'elements-skentitymarker--bordered-axis-matrix');
+    const bordered = page.locator('sk-entity-marker');
+    await expect(bordered).toHaveCount(6);
+    const geometry = await bordered.evaluateAll((elements) =>
+      elements.map((element) => ({
+        size: element.getAttribute('size'),
+        shape: element.getAttribute('shape'),
+        rect: (() => {
+          const marker = element.shadowRoot!.querySelector<HTMLElement>('[part="marker"]')!;
+          const box = marker.getBoundingClientRect();
+          return { width: box.width, height: box.height };
+        })(),
+      })),
+    );
+    // Cross-reference against the CURRENT (unbordered) AxisMatrix + LargeSize geometry so the
+    // comparison is against the real shipped sizes, not a magic number restated here.
+    await openStory(page, 'elements-skentitymarker--axis-matrix');
+    const axisMatrix = page.locator('sk-entity-marker');
+    const unborderedDefaultSquare = await axisMatrix.first().evaluate((element) => {
+      const marker = element.shadowRoot!.querySelector<HTMLElement>('[part="marker"]')!;
+      const box = marker.getBoundingClientRect();
+      return { width: box.width, height: box.height };
+    });
+    await openStory(page, 'elements-skentitymarker--large-size');
+    const unborderedLarge = await page
+      .locator('sk-entity-marker')
+      .first()
+      .evaluate((element) => {
+        const marker = element.shadowRoot!.querySelector<HTMLElement>('[part="marker"]')!;
+        const box = marker.getBoundingClientRect();
+        return { width: box.width, height: box.height };
+      });
+
+    const defaultBordered = geometry.find((entry) => entry.size === null && entry.shape === null)!;
+    const largeBordered = geometry.find((entry) => entry.size === 'lg' && entry.shape === null)!;
+    expect(defaultBordered.rect.width).toBe(unborderedDefaultSquare.width);
+    expect(defaultBordered.rect.height).toBe(unborderedDefaultSquare.height);
+    expect(largeBordered.rect.width).toBe(unborderedLarge.width);
+    expect(largeBordered.rect.height).toBe(unborderedLarge.height);
+    // Every bordered marker is still square (radius aside) — the border never distorts the box.
+    expect(geometry.every(({ rect }) => Math.round(rect.width) === Math.round(rect.height))).toBe(true);
+  });
+
+  test('[FR-006] the border stays visible and distinguishing under forced-colors', async ({ page }) => {
+    await page.emulateMedia({ forcedColors: 'active' });
+    await openStory(page, 'elements-skentitymarker--bordered-forced-colors');
+    const markers = page.locator('sk-entity-marker');
+    await expect(markers).toHaveCount(2);
+    const [reference, borderedForced] = await markers.evaluateAll((elements) =>
+      elements.map((element) => {
+        const marker = element.shadowRoot!.querySelector<HTMLElement>('[part="marker"]')!;
+        const style = getComputedStyle(marker);
+        return {
+          borderStyle: style.borderStyle,
+          borderColor: style.borderTopColor,
+          background: style.backgroundColor,
+        };
+      }),
+    );
+    // `border-style` is authored, unaffected by the forced-colors remap — proves the modifier's
+    // OWN class is still applied under this media state, not merely that a browser default
+    // border appears.
+    expect(reference!.borderStyle).toBe('none');
+    expect(borderedForced!.borderStyle).toBe('solid');
+    // The color is a real, resolved value (the browser's automatic system-color remap), and it
+    // is not simply invisible-on-invisible with the flattened background.
+    expect(borderedForced!.borderColor).not.toBe('');
+    expect(borderedForced!.borderColor).not.toBe(borderedForced!.background);
+  });
 });
 
 test.describe('marker-only pulse and user preferences', () => {

@@ -1,0 +1,113 @@
+{
+  "rows": {
+    "#146": {
+      "evidence_ref": "research.md prose cross-reference only: #146 is a prior, already-shipped mission cited as precedent for a docs/vue-types pipeline convention (union spelled out inline). Not a dependency #304 resolves.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
+    "#212": {
+      "evidence_ref": "spec.md prose cross-reference only: #212 previously rejected a separate sk-avatar component; #304's design explicitly upholds that disposition (no sk-avatar, verified by diff \u2014 no new component/Team/membership model added). Not a dependency #304 resolves.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "in-mission",
+      "wp": "WP01"
+    },
+    "#286": {
+      "evidence_ref": "spec.md prose cross-reference only: #286 is a cited shared constraint honored by this WP's design (tokens-first, existing anatomy). Not a dependency #304 resolves.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "in-mission",
+      "wp": "WP01"
+    },
+    "#300": {
+      "evidence_ref": "spec.md prose cross-reference only: #300 is the parent epic (Teams and membership) that #304 is scoped under. Not a dependency #304 resolves.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "in-mission",
+      "wp": "WP01"
+    },
+    "#301": {
+      "evidence_ref": "spec.md/plan.md/research.md cross-reference only: #301 is ADR-15's own already-landed PR that ruled the ::slotted(img) instruction shadow-only; verified by diff that #304 leaves that rule and its header comment byte-identical (zero changes).",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
+    "#303": {
+      "evidence_ref": "spec.md prose cross-reference only: #303 is the named downstream consumer of this WP's public surface (size scale, border modifier, image-axis instruction) in a later Wave C mission; it composes on #304's contract but is out of #304's own scope.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
+    },
+    "#304": {
+      "evidence_ref": "This IS the mission's own issue number; self-reference scraped from spec.md prose.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "in-mission",
+      "wp": "WP01"
+    },
+    "#308": {
+      "evidence_ref": "spec.md/WP prompt prose cross-reference only: #308 is a sibling mission cited as precedent for absent-state test coverage; verified independently that #304's own tests explicitly assert the no-border/default-size absent states (fixtures/elements-behaviour/src/sk-entity-marker.test.ts and apps/storybook/src/tests/sk-compact-work-item-extensions.spec.ts both measure borderStyle:'none' for the unbordered case). Not a dependency #304 resolves.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "in-mission",
+      "wp": "WP01"
+    },
+    "#311": {
+      "evidence_ref": "spec.md C-006 explicitly scopes #311's six other named ::slotted() sheets OUT of #304: 'this mission does not touch any of #311's six other named sheets.' Verified: only sk-entity-marker.css changed; no other sheet's ::slotted() rule touched.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
+    }
+  },
+  "schema_version": 1
+}

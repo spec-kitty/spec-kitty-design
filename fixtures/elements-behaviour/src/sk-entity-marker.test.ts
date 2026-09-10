@@ -12,8 +12,9 @@ beforeEach(installTokenSheet);
 
 type MarkerElement = HTMLElement & {
   label?: string;
-  size?: 'sm';
+  size?: 'sm' | 'lg';
   shape?: 'circle';
+  border?: 'true';
   updateComplete: Promise<unknown>;
 };
 
@@ -92,6 +93,28 @@ test.each([undefined, '', '   '])('an absent or blank label makes the mark decor
   expect(marker.hasAttribute('aria-label')).toBe(false);
 });
 
+test('[FR-010] the accessible-naming contract is a pure function of label, unaffected by size, shape, or border', async () => {
+  const { element: meaningful } = await mount('Ada Lovelace', 'AL');
+  meaningful.setAttribute('size', 'lg');
+  meaningful.setAttribute('shape', 'circle');
+  meaningful.setAttribute('border', 'true');
+  await meaningful.updateComplete;
+  const meaningfulMarker = partOf(meaningful, 'marker')!;
+  expect(meaningfulMarker.getAttribute('role')).toBe('img');
+  expect(meaningfulMarker.getAttribute('aria-label')).toBe('Ada Lovelace');
+  expect(meaningfulMarker.hasAttribute('aria-hidden')).toBe(false);
+
+  const { element: decorative } = await mount(undefined, '◇');
+  decorative.setAttribute('size', 'lg');
+  decorative.setAttribute('shape', 'circle');
+  decorative.setAttribute('border', 'true');
+  await decorative.updateComplete;
+  const decorativeMarker = partOf(decorative, 'marker')!;
+  expect(decorativeMarker.getAttribute('aria-hidden')).toBe('true');
+  expect(decorativeMarker.hasAttribute('role')).toBe(false);
+  expect(decorativeMarker.hasAttribute('aria-label')).toBe(false);
+});
+
 test('omitted axes preserve the current default square geometry', async () => {
   const { element } = await mount('Default marker');
   const geometry = geometryOf(element);
@@ -109,6 +132,8 @@ test('size and shape compose as two independent presentation axes', async () => 
     { size: 'sm', shape: undefined, compact: true, circle: false },
     { size: undefined, shape: 'circle', compact: false, circle: true },
     { size: 'sm', shape: 'circle', compact: true, circle: true },
+    { size: 'lg', shape: undefined, compact: false, circle: false },
+    { size: 'lg', shape: 'circle', compact: false, circle: true },
   ] as const;
   const measured = [];
   for (const current of cases) {
@@ -123,6 +148,8 @@ test('size and shape compose as two independent presentation axes', async () => 
   const compactSquare = measured[1]!;
   const defaultCircle = measured[2]!;
   const compactCircle = measured[3]!;
+  const largeSquare = measured[4]!;
+  const largeCircle = measured[5]!;
   expect(compactSquare.geometry.width).toBeLessThan(defaultSquare.geometry.width);
   expect(compactSquare.geometry.height).toBeLessThan(defaultSquare.geometry.height);
   expect(defaultCircle.geometry.width).toBe(defaultSquare.geometry.width);
@@ -131,7 +158,47 @@ test('size and shape compose as two independent presentation axes', async () => 
   expect(compactCircle.geometry.height).toBe(compactSquare.geometry.height);
   expect(defaultCircle.geometry.radius).not.toBe(defaultSquare.geometry.radius);
   expect(compactCircle.geometry.radius).not.toBe(compactSquare.geometry.radius);
-  expect(measured.map(({ content }) => content)).toEqual(['AX', 'AX', 'AX', 'AX']);
+  // [FR-001/FR-003] the new `lg` size is strictly larger than the unchanged default, and
+  // composes with circle exactly like every other size — shape changes only the radius.
+  expect(largeSquare.geometry.width).toBeGreaterThan(defaultSquare.geometry.width);
+  expect(largeSquare.geometry.height).toBeGreaterThan(defaultSquare.geometry.height);
+  expect(largeCircle.geometry.width).toBe(largeSquare.geometry.width);
+  expect(largeCircle.geometry.height).toBe(largeSquare.geometry.height);
+  expect(largeCircle.geometry.radius).not.toBe(largeSquare.geometry.radius);
+  expect(measured.map(({ content }) => content)).toEqual(['AX', 'AX', 'AX', 'AX', 'AX', 'AX']);
+});
+
+test('[FR-004] the border modifier does not change the outer box at any size or shape', async () => {
+  const sizes = [undefined, 'sm', 'lg'] as const;
+  const shapes = [undefined, 'circle'] as const;
+  for (const size of sizes) {
+    for (const shape of shapes) {
+      const { element: plain } = await mount('Unbordered marker', 'PL');
+      if (size) plain.setAttribute('size', size);
+      if (shape) plain.setAttribute('shape', shape);
+      await plain.updateComplete;
+      const unbordered = geometryOf(plain);
+
+      const { element: bordered } = await mount('Bordered marker', 'BD');
+      if (size) bordered.setAttribute('size', size);
+      if (shape) bordered.setAttribute('shape', shape);
+      bordered.setAttribute('border', 'true');
+      await bordered.updateComplete;
+      const withBorder = geometryOf(bordered);
+
+      expect(withBorder.width, `width at size=${size ?? 'default'} shape=${shape ?? 'square'}`).toBe(
+        unbordered.width,
+      );
+      expect(withBorder.height, `height at size=${size ?? 'default'} shape=${shape ?? 'square'}`).toBe(
+        unbordered.height,
+      );
+      // The border traces the shape's own radius rather than a separate box.
+      expect(withBorder.radius).toBe(unbordered.radius);
+      const marker = partOf(bordered, 'marker')!;
+      expect(getComputedStyle(marker).borderStyle).toBe('solid');
+      expect(px(getComputedStyle(marker).borderTopWidth)).toBeGreaterThan(0);
+    }
+  }
 });
 
 test('attributes and properties reflect and remain independently toggleable after upgrade', async () => {
@@ -193,13 +260,28 @@ test('unknown values warn and fail open on only their own axis without losing co
     const invalidShape = geometryOf(element);
     expect(invalidShape.width).toBeLessThan(invalidSize.width);
     expect(invalidShape.radius).toBe(`${tokenPx('--sk-radius-sm')}px`);
+
+    // [FR-011] an invalid `border` value falls open to unbordered without disturbing size,
+    // shape, or the slotted content — the same independence already proven for size/shape.
+    element.setAttribute('size', 'sm');
+    element.setAttribute('shape', 'circle');
+    element.setAttribute('border', 'yes');
+    await element.updateComplete;
+    const invalidBorder = geometryOf(element);
+    const expectedUnborderedSmCircleWidth = tokenPx('--sk-space-5') + tokenPx('--sk-space-1') * 2;
+    expect(partOf(element, 'marker')!.classList.contains('sk-entity-marker--bordered')).toBe(false);
+    expect(Math.round(invalidBorder.width)).toBe(Math.round(expectedUnborderedSmCircleWidth));
+    expect(invalidBorder.radius).not.toBe(`${tokenPx('--sk-radius-sm')}px`);
+    expect(supplied.textContent).toBe('KEPT');
+
     expect(warnings.map((entry) => String(entry[0]))).toEqual(
       expect.arrayContaining([
         expect.stringMatching(/unknown entity-marker size "huge"; using default/i),
         expect.stringMatching(/unknown entity-marker shape "hexagon"; using square/i),
+        expect.stringMatching(/unknown entity-marker border "yes"; using unbordered/i),
       ]),
     );
-    expect(warnings).toHaveLength(2);
+    expect(warnings).toHaveLength(3);
   } finally {
     console.warn = realWarn;
   }
@@ -241,6 +323,34 @@ test.each([
   else expect(restoredGeometry.radius).not.toBe(appliedGeometry.radius);
 });
 
+test('[SC-010] border property assigned before definition survives upgrade independently', async () => {
+  const tag = 'sk-entity-marker-border-late';
+  const element = document.createElement(tag) as MarkerElement;
+  element.border = 'true';
+  element.textContent = 'border';
+  document.body.append(element);
+  const { SkEntityMarker } = await import('../../../packages/elements/src/entity-marker/sk-entity-marker.js');
+  customElements.define(tag, class extends SkEntityMarker {});
+  await customElements.whenDefined(tag);
+  await element.updateComplete;
+
+  expect(element.border).toBe('true');
+  expect(element.getAttribute('border')).toBe('true');
+  expect(element.textContent).toBe('border');
+  expect(element.hasAttribute('size')).toBe(false);
+  expect(element.hasAttribute('shape')).toBe(false);
+  const marker = partOf(element, 'marker')!;
+  expect(marker.classList.contains('sk-entity-marker--bordered')).toBe(true);
+  const appliedGeometry = geometryOf(element);
+
+  element.border = undefined;
+  await element.updateComplete;
+  expect(marker.classList.contains('sk-entity-marker--bordered')).toBe(false);
+  const restoredGeometry = geometryOf(element);
+  expect(restoredGeometry.width).toBe(appliedGeometry.width);
+  expect(restoredGeometry.height).toBe(appliedGeometry.height);
+});
+
 test('consumer initials, icons, and images project verbatim with no derived identity content', async () => {
   const initials = await mount('Initials', 'SK');
   const icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -263,27 +373,36 @@ test('consumer initials, icons, and images project verbatim with no derived iden
 test.each([
   { width: 4, height: 12, label: 'portrait' },
   { width: 12, height: 4, label: 'landscape' },
-])('$label images cover and remain clipped in every size/shape combination', async ({ width, height, label }) => {
-  for (const size of [undefined, 'sm'] as const) {
+])('$label images cover and remain clipped in every size/shape/border combination', async ({ width, height, label }) => {
+  for (const size of [undefined, 'sm', 'lg'] as const) {
     for (const shape of [undefined, 'circle'] as const) {
-      const image = await loadedImage(width, height, `${label}-${size ?? 'default'}-${shape ?? 'square'}`);
-      const { element } = await mount(`${label} actor`, image);
-      if (size) element.size = size;
-      if (shape) element.shape = shape;
-      await element.updateComplete;
+      for (const border of [undefined, 'true'] as const) {
+        const image = await loadedImage(
+          width,
+          height,
+          `${label}-${size ?? 'default'}-${shape ?? 'square'}-${border ? 'bordered' : 'unbordered'}`,
+        );
+        const { element } = await mount(`${label} actor`, image);
+        if (size) element.size = size;
+        if (shape) element.shape = shape;
+        if (border) element.border = border;
+        await element.updateComplete;
 
-      const marker = partOf(element, 'marker')!;
-      const content = partOf(element, 'content')!;
-      const markerRect = marker.getBoundingClientRect();
-      const contentRect = content.getBoundingClientRect();
-      const imageRect = image.getBoundingClientRect();
-      expect(getComputedStyle(image).objectFit).toBe('cover');
-      expect(getComputedStyle(marker).overflow).toBe('hidden');
-      expect(Math.round(imageRect.width)).toBe(Math.round(contentRect.width));
-      expect(Math.round(imageRect.height)).toBe(Math.round(contentRect.height));
-      expect(imageRect.width).toBeLessThanOrEqual(markerRect.width);
-      expect(imageRect.height).toBeLessThanOrEqual(markerRect.height);
-      expect(Math.round(markerRect.width)).toBe(Math.round(markerRect.height));
+        const marker = partOf(element, 'marker')!;
+        const content = partOf(element, 'content')!;
+        const markerRect = marker.getBoundingClientRect();
+        const contentRect = content.getBoundingClientRect();
+        const imageRect = image.getBoundingClientRect();
+        // [FR-007] image styling (cover, clip, no distortion) is unaffected by the new size
+        // and border axes — the same `::slotted(img)` rule, unchanged, at every combination.
+        expect(getComputedStyle(image).objectFit).toBe('cover');
+        expect(getComputedStyle(marker).overflow).toBe('hidden');
+        expect(Math.round(imageRect.width)).toBe(Math.round(contentRect.width));
+        expect(Math.round(imageRect.height)).toBe(Math.round(contentRect.height));
+        expect(imageRect.width).toBeLessThanOrEqual(markerRect.width);
+        expect(imageRect.height).toBeLessThanOrEqual(markerRect.height);
+        expect(Math.round(markerRect.width)).toBe(Math.round(markerRect.height));
+      }
     }
   }
 });

@@ -635,6 +635,32 @@ test('compact work-item extensions portrait and landscape crop — visual baseli
   );
 });
 
+/**
+ * #304 (ADR-15 split) — FR-004/SC-003's visual proof that the border modifier leaves the outer
+ * box unchanged. The unbordered and bordered markers render side by side at the SAME size/shape
+ * (BorderedOuterBoxComparison, a new additive story — AxisMatrix above is deliberately
+ * untouched, see the stories file's own comment); a reviewer or the pre-merge squad can see the
+ * two boxes are the same footprint with only the second one visibly bordered. This is evidence
+ * ALONGSIDE the computed-`getBoundingClientRect()` assertions in
+ * sk-compact-work-item-extensions.spec.ts, not a replacement for them — a screenshot's pixel
+ * tolerance (0.02) could mask a one-pixel shift a computed-style comparison would not.
+ *
+ * BASELINE IS CI-AUTHORITATIVE, like every other snapshot in this file — this PR does not ship
+ * a locally-generated PNG for this test; the baseline must be harvested from this PR's own CI
+ * run (the `visual-regression-diffs` artifact) before merge, exactly as
+ * docs/contributing/adding-a-component.md's step 8 requires.
+ */
+test('SK-entity-marker bordered vs unbordered outer box — visual baseline', async ({ page }) => {
+  await page.goto('/iframe.html?id=elements-skentitymarker--bordered-outer-box-comparison&viewMode=story');
+  const markers = page.locator('sk-entity-marker');
+  await expect(markers).toHaveCount(2);
+  await markers.first().waitFor({ state: 'visible', timeout: 20000 });
+  await expect(markers.first().locator('..')).toHaveScreenshot(
+    'sk-entity-marker-bordered-outer-box-comparison.png',
+    { threshold: 0.02, maxDiffPixelRatio: 0.02 },
+  );
+});
+
 test('compact work-item extensions pulse off/on reduced-motion fallback — visual baseline', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/iframe.html?id=elements-skstatusindicator--pulsing-preferences&viewMode=story');
