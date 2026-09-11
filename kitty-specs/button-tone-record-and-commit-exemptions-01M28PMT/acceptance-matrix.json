@@ -57,11 +57,11 @@
     {
       "criterion_id": "FR-006",
       "description": "Verify FR-006 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "proof_type": "manual_review",
+      "evidence": "ADR-17's 'The load-bearing fact' section states BUTTON_VARIANTS is a codegen source, grounded in sk-button.markup.ts:14-18's comment and build-element-markup.mjs:288-300's per-key derivation",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T17:11:52.431679+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
