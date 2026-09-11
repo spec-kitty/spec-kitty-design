@@ -27,9 +27,9 @@ on:
   # branch-filtered, not universal, so a long-lived integration branch has to
   # be named explicitly or it merges unchecked.
   pull_request:
-    branches: [main, 'train/**']
+    branches: [main, 'train/**', develop]
   push:
-    branches: [main, 'train/**']
+    branches: [main, 'train/**', develop]
   schedule:
     # FR-041: nightly CVE audit on main branch
     # Offset from top of hour to avoid busy scheduling window (matches SK pattern)
