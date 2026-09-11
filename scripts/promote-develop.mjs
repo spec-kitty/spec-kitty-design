@@ -11,8 +11,13 @@
  * CLI:
  *   node scripts/promote-develop.mjs run              # the real thing (CI only)
  *   node scripts/promote-develop.mjs decide --cwd <p> --train <ref> --develop <ref>
- *   node scripts/promote-develop.mjs assert-scope [--input <file>]
+ *   node scripts/promote-develop.mjs assert-scope
  *   node scripts/promote-develop.mjs --selftest       # red-first probe table, no network
+ *
+ * `--selftest` sets its own git identity for the process (the GIT_AUTHOR_ and GIT_COMMITTER_
+ * env vars, see `selftest()`) so it never depends on ambient git config — verify it the way CI actually
+ * sees it, with NEITHER config source available:
+ *   GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null node scripts/promote-develop.mjs --selftest
  */
 import { execFileSync } from 'node:child_process';
 import { appendFileSync, mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
@@ -23,7 +28,9 @@ import { fileURLToPath } from 'node:url';
 import {
   defaultExec,
   listOpenPRsBaseDevelop,
+  listOpenPromotionHeadPRsAnyBase,
   listPromotionBranches,
+  PROMOTION_BRANCH_RE,
   pushPromotionBranch,
   openPromotionPR,
   commentOnPR,
@@ -40,11 +47,72 @@ const __dirname = dirname(__filename);
 
 // ── Exported pure functions (contracts/promotion-script.contract.md) ─────────────────────
 
+/** The branch prefix this mechanism ever creates. A single, shared constant (M2, pre-merge
+ *  squad) — every place that builds or recognizes a promotion branch name reads this ONE
+ *  value, so a probe can prove the whole system is sensitive to it (see `--selftest` probe
+ *  for the `promote/` -> `sync/` mutation) rather than each call site carrying its own
+ *  independent literal that a rename could miss. */
+export const PROMOTE_PREFIX = 'promote/';
+
 /**
- * Pure. The decision algorithm's entire branching logic, including the divergence health
- * check (B1/FR-007(d)) — a sixth outcome, `refuse-diverged`, alongside the original five.
- * Order matters: missing-develop and diverged are both checked before anything else touches
+ * The decision algorithm's branching logic, expressed as an ORDERED LIST of small rule
+ * functions rather than one large function's sequential `if`s (M2, pre-merge squad). Each
+ * rule receives the same input `decidePromotion` does and returns either a partial result
+ * (this rule matched) or `null` (try the next rule). `decidePromotion` below iterates this
+ * list via `impl.decisionRules`, so `--selftest`'s probe 12 mutation control can REORDER the
+ * REAL rule functions in place — swapping two entries of this array — rather than hand-
+ * reimplementing the whole decision function's logic a second time (which the contract
+ * explicitly rules out: "never a second, hand-written simulated defeat").
+ *
+ * Order matters: missing-develop and diverged are both checked before anything that touches
  * `trainTree`/`developTree`/`existingPr` (contract).
+ */
+function ruleMissingDevelop({ developSha }) {
+  if (developSha !== null) return null;
+  return { outcome: 'no-op-missing-develop', developHealthy: null };
+}
+
+function ruleDiverged({ developHealthy, divergence, existingPr }) {
+  if (developHealthy !== false) return null;
+  return { outcome: 'refuse-diverged', divergence: divergence ?? null, existingPr: existingPr ?? null };
+}
+
+function ruleInSync({ developTree, trainTree, existingPr }) {
+  if (developTree !== trainTree) return null;
+  return { outcome: 'no-op-in-sync', existingPr: existingPr ?? null };
+}
+
+function ruleReuse({ existingPr, trainTree }) {
+  if (!existingPr || existingPr.headTree !== trainTree) return null;
+  return { outcome: 'reuse-existing-pr', existingPr };
+}
+
+function ruleSupersede({ existingPr, trainTree, trainSha }) {
+  if (!existingPr || existingPr.headTree === trainTree) return null;
+  return {
+    outcome: 'supersede-and-open',
+    existingPr,
+    commitMessage: buildCommitMessage(trainSha),
+    branchName: `${PROMOTE_PREFIX}${trainSha}`,
+  };
+}
+
+function ruleOpenNew({ trainSha }) {
+  return {
+    outcome: 'open-new',
+    existingPr: null,
+    commitMessage: buildCommitMessage(trainSha),
+    branchName: `${PROMOTE_PREFIX}${trainSha}`,
+  };
+}
+
+const DEFAULT_DECISION_RULES = [ruleMissingDevelop, ruleDiverged, ruleInSync, ruleReuse, ruleSupersede, ruleOpenNew];
+
+/**
+ * Pure (as long as `impl.decisionRules` is the unmutated default — see above). Runs each rule
+ * in `impl.decisionRules`, in order, and returns the first non-null result merged onto the
+ * common `base` shape. Throws only if every rule declines, which is unreachable with the
+ * default rule list (`ruleOpenNew` never returns `null`) but not necessarily with a mutated one.
  */
 export function decidePromotion({
   trainSha,
@@ -55,6 +123,7 @@ export function decidePromotion({
   developHealthy = null,
   divergence = null,
 }) {
+  const input = { trainSha, trainTree, developSha, developTree, existingPr, developHealthy, divergence };
   const base = {
     trainSha: trainSha ?? null,
     trainTree: trainTree ?? null,
@@ -66,31 +135,11 @@ export function decidePromotion({
     commitMessage: null,
     branchName: null,
   };
-
-  if (developSha === null) {
-    return { ...base, outcome: 'no-op-missing-develop', developHealthy: null };
+  for (const rule of impl.decisionRules) {
+    const partial = rule(input);
+    if (partial) return { ...base, ...partial };
   }
-
-  if (developHealthy === false) {
-    return { ...base, outcome: 'refuse-diverged', divergence: divergence ?? null, existingPr };
-  }
-
-  if (developTree === trainTree) {
-    return { ...base, outcome: 'no-op-in-sync', existingPr: existingPr ?? null };
-  }
-
-  const branchName = `promote/${trainSha}`;
-  const commitMessage = buildCommitMessage(trainSha);
-
-  if (existingPr && existingPr.headTree === trainTree) {
-    return { ...base, outcome: 'reuse-existing-pr', existingPr };
-  }
-
-  if (existingPr && existingPr.headTree !== trainTree) {
-    return { ...base, outcome: 'supersede-and-open', existingPr, commitMessage, branchName };
-  }
-
-  return { ...base, outcome: 'open-new', existingPr: null, commitMessage, branchName };
+  throw new Error('decidePromotion: no rule in impl.decisionRules matched (unreachable with the default rule list)');
 }
 
 /**
@@ -144,9 +193,11 @@ export function assessMergeReadiness({ mergeable, mergeStateStatus }) {
   }
 }
 
-/** Pure. M6 — `gh pr list --head` is an exact match, so discovery is list-then-filter. */
+/** Pure. M6 — `gh pr list --head` is an exact match, so discovery is list-then-filter. Reads
+ *  `PROMOTE_PREFIX`, the same constant the decision rules build branch names from (M2) — the
+ *  two are joined at the hip on purpose, and a `--selftest` mutation control proves it. */
 export function findPromotionPRs(prListJson) {
-  return (prListJson ?? []).filter((pr) => String(pr.headRefName ?? '').startsWith('promote/'));
+  return (prListJson ?? []).filter((pr) => String(pr.headRefName ?? '').startsWith(PROMOTE_PREFIX));
 }
 
 /** Pure. M5 — fails closed unless the installation covers exactly spec-kitty/spec-kitty-design. */
@@ -164,8 +215,25 @@ export function assertSingleRepoScope(installationRepositoriesJson) {
 
 /**
  * Shells out to git in `cwd`. Returns the new commit SHA. Never touches the network or a
- * remote. `env` may carry `GIT_AUTHOR_*`/`GIT_COMMITTER_*` for a scratch-repo test identity —
- * production relies on the workflow's own `git config --global` bot identity instead.
+ * remote. `env` may carry additional overrides merged onto `process.env`; production relies
+ * on the workflow's own `git config --global` bot identity, so it never needs to pass any.
+ *
+ * **Corrected claim (B1, pre-merge squad — CI was RED at PR #429's head on this exact defect):**
+ * an earlier revision of this comment claimed callers pass `GIT_AUTHOR_*`/`GIT_COMMITTER_*`
+ * here per call. None of the five call sites in this file ever did — every one relied on
+ * whatever git identity happened to already be configured globally on the machine running
+ * this process, which a real workstation has and a bare CI runner does not
+ * (`lint-code`'s "[ENFORCED] develop-promotion mechanism self-test" step failed with `git
+ * commit-tree`'s own "Author identity unknown … unable to auto-detect email address").
+ * **Fixed at the actual choke point instead**: `selftest()` sets `GIT_AUTHOR_NAME`/
+ * `GIT_AUTHOR_EMAIL`/`GIT_COMMITTER_NAME`/`GIT_COMMITTER_EMAIL` on `process.env` itself, once,
+ * before running any probe — every `execFileSync` call in this file (this one included, via
+ * its own `{ ...process.env, ...env }` merge) inherits it from there, so no call site needs
+ * its own `env` override. Verify the way CI actually sees it — a runner with no ambient git
+ * config at all — by unsetting both config sources first:
+ * `GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null node scripts/promote-develop.mjs --selftest`.
+ * A developer's own workstation, with a real global git identity already set, can otherwise be
+ * strictly greener than CI on this exact defect and never notice.
  */
 export function createTreeSyncCommit(cwd, { tree, parentSha, message, env = {} }) {
   return execFileSync('git', ['commit-tree', tree, '-p', parentSha, '-m', message], {
@@ -219,6 +287,9 @@ export const impl = {
   assertSingleRepoScope,
   createTreeSyncCommit,
   readRefTip,
+  // M2: the ORDERED rule list `decidePromotion` iterates. A mutation control reorders this
+  // real array in place rather than hand-reimplementing the decision function.
+  decisionRules: [...DEFAULT_DECISION_RULES],
 };
 
 // ── Internal helpers used by the `decide`/`run` CLI modes only ───────────────────────────
@@ -391,15 +462,17 @@ function cliDecide(args) {
 
 // ── CLI: assert-scope ─────────────────────────────────────────────────────────────────
 
-function cliAssertScope(args) {
-  const inputFile = getArg(args, '--input');
-  let json;
-  if (inputFile) {
-    json = JSON.parse(readFileSync(inputFile, 'utf8'));
-  } else {
-    const out = defaultExec('gh', ['api', 'installation/repositories']);
-    json = JSON.parse(out);
-  }
+function cliAssertScope() {
+  // M9 (pre-merge squad): no `--input` fixture seam here. It was reachable from production
+  // (`node scripts/promote-develop.mjs assert-scope --input <file>`) but nothing in
+  // `--selftest` used it — probe 16 calls `impl.assertSingleRepoScope` directly, in-process,
+  // against synthetic fixtures. A production-reachable seam nothing exercises is exactly the
+  // defect class `check-gate-wiring-defeats.mjs`'s own header comment describes closing: a
+  // flag that lets a real invocation bypass the real check it exists to enforce. Manual
+  // verification against a fixture (WP report) now calls `impl.assertSingleRepoScope` from a
+  // one-off `node -e`, not through this CLI.
+  const out = defaultExec('gh', ['api', 'installation/repositories']);
+  const json = JSON.parse(out);
   try {
     impl.assertSingleRepoScope(json);
   } catch (err) {
@@ -479,7 +552,22 @@ export function applyOutcome(exec, repo, cwd, decision, developSha, trainSha) {
   }
 }
 
-async function pollAndMerge(exec, repo, prNumber, prHeadSha) {
+/**
+ * B2 (pre-merge squad, PR #429): re-reads `develop`'s LIVE tip immediately before merging —
+ * `expectedParentSha` is `develop`'s tip AT DECISION TIME (the commit the promotion tree-sync
+ * commit was parented on, or the tip an existing/reused PR was computed against). If it no
+ * longer matches, this run refuses to merge over it (the next run recomputes and supersedes)
+ * rather than trusting that nothing changed since the decision was made. `--match-head-commit`
+ * (in `mergePR`) is a SEPARATE, narrower defense against the PR's own head branch changing —
+ * see `scripts/lib/promote-github.mjs`'s corrected comment (B2) — neither one alone covers
+ * `develop` moving underneath this run, which is what this explicit re-read closes.
+ *
+ * After a successful merge, `readDevelopTree` is compared against `trainTree` (passed in,
+ * previously computed but never used for this) — a mismatch means the merge reported success
+ * without producing the promised content, and exits non-zero rather than only printing a
+ * notice nobody reads.
+ */
+async function pollAndMerge(exec, repo, cwd, prNumber, prHeadSha, expectedParentSha, trainTree) {
   // 10-minute bound (research.md R5, explicitly a provisional estimate pending recalibration
   // against the first real cycle — plan.md's Orchestrator Actions).
   const budgetMs = 10 * 60 * 1000;
@@ -489,17 +577,37 @@ async function pollAndMerge(exec, repo, prNumber, prHeadSha) {
     const status = viewPRMergeStatus(exec, repo, prNumber);
     const action = assessMergeReadiness(status);
     if (action === 'attempt-merge') {
-      // NOTE on --match-head-commit: plan.md's Promotion algorithm prose names this
-      // argument as "<develop-tip-sha>", but `gh pr merge --help` and the GitHub REST merge
-      // endpoint's own `sha` parameter (both cited in research.md R6) document it as "the
-      // commit SHA the pull request HEAD must match" — the PR's own head, not the base. Using
-      // develop's tip here would not match the PR's head SHA and would make every merge
-      // attempt fail closed. This implementation follows the verified flag semantics (the PR's
-      // own head SHA) rather than plan.md's inline example text; flagged in the WP report.
+      let liveDevelopSha;
+      try {
+        liveDevelopSha = liveRemoteTip(exec, 'origin', 'develop', cwd);
+      } catch (err) {
+        console.error(`::error::could not re-read develop's live tip before merging: ${err.message}`);
+        process.exitCode = 1;
+        return;
+      }
+      if (liveDevelopSha !== expectedParentSha) {
+        console.error(
+          `::error::develop's live tip (${liveDevelopSha}) no longer matches the parent this ` +
+            `promotion commit was built on (${expectedParentSha}) — refusing to merge over it. ` +
+            'The sweep/next run will recompute and supersede rather than lose whatever landed ' +
+            'on develop in between (B2).',
+        );
+        process.exitCode = 1;
+        return;
+      }
       mergePR(exec, repo, prNumber, prHeadSha);
       const finalTree = readDevelopTree(exec, repo);
-      writeStepSummary(`- post-merge tree assertion: \`develop^{tree}\` = \`${finalTree}\``);
-      console.log(`::notice::merged PR #${prNumber}; develop^{tree} = ${finalTree}`);
+      if (finalTree !== trainTree) {
+        console.error(
+          `::error::post-merge tree assertion FAILED — develop^{tree} is ${finalTree}, expected ` +
+            `${trainTree} (the promoted train tip's own tree). The merge reported success but ` +
+            'did not produce the promised content (B2).',
+        );
+        process.exitCode = 1;
+        return;
+      }
+      writeStepSummary(`- post-merge tree assertion: \`develop^{tree}\` = \`${finalTree}\` (matches train, verified)`);
+      console.log(`::notice::merged PR #${prNumber}; develop^{tree} = ${finalTree} (verified against train)`);
       return;
     }
     if (action === 'recheck-divergence') {
@@ -524,11 +632,100 @@ async function pollAndMerge(exec, repo, prNumber, prHeadSha) {
   }
 }
 
+/**
+ * The per-cycle body `cliRun` drives, extracted so `--selftest` can probe it directly with a
+ * recording `exec` and a real scratch `cwd` (never real `gh`/network calls) instead of only
+ * exercising the pure `decidePromotion` function — M1 (pre-merge squad): the sweep must run
+ * on EVERY outcome, "every run" (R22) meant literally, not only the ones that reach a PR. The
+ * `finally` below is what makes that true regardless of which branch above it returns from.
+ */
+async function runCycle({ exec, repo, cwd, decision, developSha, trainSha, trainTree }) {
+  try {
+    writeStepSummary(renderDecisionSummary(decision));
+    console.log(JSON.stringify(decision, null, 2));
+
+    if (decision.outcome === 'no-op-missing-develop') {
+      console.log('::notice::develop does not exist yet — no-op (FR-007(c)).');
+      return;
+    }
+    if (decision.outcome === 'refuse-diverged') {
+      console.error(`::error::refuse-diverged — ${decision.divergence?.reason}`);
+      process.exitCode = 1;
+      return;
+    }
+    if (decision.outcome === 'no-op-in-sync') {
+      console.log('::notice::develop already matches the train tip — nothing to promote.');
+    }
+    if (decision.outcome === 'reuse-existing-pr') {
+      console.log(`::notice::reusing existing, current promotion PR #${decision.existingPr.number}.`);
+    }
+
+    const { prNumber, prHeadSha } = applyOutcome(exec, repo, cwd, decision, developSha, trainSha);
+
+    if (prNumber != null) {
+      await pollAndMerge(exec, repo, cwd, prNumber, prHeadSha, developSha, trainTree);
+    }
+  } finally {
+    // R22, M1: every run, including no-op-missing-develop and refuse-diverged above — a
+    // stranded promote/* branch or a stale open PR does not care which outcome produced it.
+    // B5: `openPRs` is base-develop only (closing/commenting is only ever this mechanism's
+    // own PRs); `protectedBranches` covers a `promote/<40-hex>`-shaped branch with an open PR
+    // to ANY OTHER base, which must never be deleted even though it matches the exact shape.
+    const finalPRs = findPromotionPRs(listOpenPRsBaseDevelop(exec, repo));
+    const anyBasePromotionPRs = listOpenPromotionHeadPRsAnyBase(exec, repo);
+    const allBranches = listPromotionBranches(exec, repo);
+    const protectedBranches = new Set(
+      anyBasePromotionPRs.filter((pr) => pr.baseRefName !== 'develop').map((pr) => pr.headRefName),
+    );
+    const sweepRows = sweepPromotionNamespace(exec, repo, { openPRs: finalPRs, allBranches, protectedBranches });
+    for (const row of sweepRows) console.log(`::notice::sweep: ${JSON.stringify(row)}`);
+  }
+}
+
 async function cliRun() {
   const repo = requireEnv('GITHUB_REPOSITORY');
   const sourceRef = process.env.PROMOTE_SOURCE_REF || 'train/elements-first';
   const cwd = process.cwd();
   const exec = defaultExec;
+
+  // M8 (pre-merge squad): the workflow's own `if:` hardcodes a push to `train/elements-first`
+  // as the ONLY thing that triggers this job — `PROMOTE_DEVELOP_SOURCE_BRANCH` is honoured
+  // only for this script's INTERNAL notion of "what is the train tip" (research.md R17), never
+  // as a way to widen which push is allowed to promote. If the variable and the ref that
+  // actually triggered this run ever disagree, promoting from the variable's content would
+  // promote a branch this job's own trigger was never scoped to gate. Fail closed rather than
+  // silently trusting the variable over the trigger.
+  const triggeringRef = process.env.GITHUB_REF_NAME;
+  if (triggeringRef && triggeringRef !== sourceRef) {
+    console.error(
+      `::error::PROMOTE_SOURCE_REF ("${sourceRef}") does not match GITHUB_REF_NAME ` +
+        `("${triggeringRef}", the ref that actually triggered this run) — refusing to promote ` +
+        "from a branch this job's own push trigger is not scoped to. Changing the source " +
+        'requires updating BOTH the variable and the workflow trigger together ' +
+        "(branch-model.md's source-branch cutover caveat), never the variable alone.",
+    );
+    process.exitCode = 1;
+    return;
+  }
+
+  // M7 (pre-merge squad): fetch the source ref (and develop, best-effort) before any LOCAL git
+  // operation assumes their tip commit is already present — a race where either branch moved
+  // again between the triggering push and this checkout would otherwise crash
+  // `listFirstParentShas`/`git commit-tree` with an opaque "bad object" error instead of
+  // either fetching what is needed or failing with a clear message.
+  try {
+    execFileSync('git', ['fetch', '--quiet', 'origin', sourceRef], { cwd, encoding: 'utf8' });
+  } catch (err) {
+    console.error(`::error::could not fetch ${sourceRef} from origin: ${err.message}`);
+    process.exitCode = 1;
+    return;
+  }
+  try {
+    execFileSync('git', ['fetch', '--quiet', 'origin', 'develop'], { cwd, encoding: 'utf8' });
+  } catch {
+    // develop may genuinely not exist yet — the ls-remote-based absence check below is what
+    // actually decides that; a fetch failure here is not itself the signal.
+  }
 
   const trainSha = liveRemoteTip(exec, 'origin', sourceRef, cwd);
   const trainTree = resolveTreeForSha(cwd, trainSha, exec, repo);
@@ -576,45 +773,25 @@ async function cliRun() {
     developHealthy,
     divergence,
   });
-  writeStepSummary(renderDecisionSummary(decision));
-  console.log(JSON.stringify(decision, null, 2));
 
-  if (decision.outcome === 'no-op-missing-develop') {
-    console.log('::notice::develop does not exist yet — no-op (FR-007(c)).');
-    return;
-  }
-  if (decision.outcome === 'refuse-diverged') {
-    console.error(`::error::refuse-diverged — ${decision.divergence?.reason}`);
-    process.exitCode = 1;
-    return;
-  }
-  if (decision.outcome === 'no-op-in-sync') {
-    console.log('::notice::develop already matches the train tip — nothing to promote.');
-  }
-  if (decision.outcome === 'reuse-existing-pr') {
-    console.log(`::notice::reusing existing, current promotion PR #${decision.existingPr.number}.`);
-  }
-
-  const { prNumber, prHeadSha } = applyOutcome(exec, repo, cwd, decision, developSha, trainSha);
-
-  if (prNumber != null) {
-    await pollAndMerge(exec, repo, prNumber, prHeadSha);
-  }
-
-  // Cleanup, every run (R22) — regardless of this run's own outcome above.
-  const finalPRs = findPromotionPRs(listOpenPRsBaseDevelop(exec, repo));
-  const allBranches = listPromotionBranches(exec, repo);
-  const sweepRows = sweepPromotionNamespace(exec, repo, { openPRs: finalPRs, allBranches });
-  for (const row of sweepRows) console.log(`::notice::sweep: ${JSON.stringify(row)}`);
+  await runCycle({ exec, repo, cwd, decision, developSha, trainSha, trainTree });
 }
 
 // ── --selftest (T003/IC-03): 18 probes, floor outside the table, mutation controls ───────
 //
 // contracts/promotion-script.contract.md is authoritative for the shape and numbering below.
 // Every probe runs against a FRESH scratch git repository (`mkdtempSync`), identity set via
-// `GIT_AUTHOR_*`/`GIT_COMMITTER_*` environment variables on each git call — never `git config
-// --global`, which a CI runner has none of and a developer's own workstation has real ones
-// that must not be touched (research.md R14).
+// `GIT_AUTHOR_*`/`GIT_COMMITTER_*` environment variables — never `git config --global`, which
+// a CI runner has none of and a developer's own workstation has real ones that must not be
+// touched (research.md R14). **Corrected (B1, pre-merge squad)**: this used to claim every
+// git call carried those vars individually; `scratchRepo()`'s own `git()` wrapper does, but
+// `createTreeSyncCommit`/`impl.createTreeSyncCommit` (called directly, not through that
+// wrapper, at every `promote/*`-branch-building call site) did not, and inherited whatever
+// git identity happened to be configured globally on the machine running this process — real
+// on a workstation, absent on a bare CI runner, which is exactly how this shipped green
+// locally and red in CI at PR #429's head. Fixed at the one choke point that actually reaches
+// every git call in this file: `selftest()` sets all four vars on `process.env` itself before
+// running any probe.
 
 function scratchRepo() {
   const dir = mkdtempSync(join(tmpdir(), 'promote-develop-selftest-'));
@@ -782,6 +959,11 @@ function makeRecordingExec({ prNumber = 101 } = {}) {
       created += 1;
       return `https://github.com/spec-kitty/spec-kitty-design/pull/${prNumber + created - 1}\n`;
     }
+    // Every list-shaped read (`gh pr list`, `gh api .../matching-refs/...`) defaults to an
+    // empty JSON array — callers that need a non-empty list build their OWN exec (as probe
+    // 17/20 do) rather than this shared default having to anticipate every scenario.
+    if (file === 'gh' && args?.[0] === 'pr' && args?.[1] === 'list') return '[]';
+    if (file === 'gh' && args?.[0] === 'api' && String(args?.[1] ?? '').includes('matching-refs')) return '[]';
     return '';
   };
   return { exec, calls };
@@ -789,7 +971,24 @@ function makeRecordingExec({ prNumber = 101 } = {}) {
 
 async function runProbes() {
   const results = [];
-  const record = (n, name, expect, ok, detail) => results.push({ n, name, expect, ok, detail });
+  /**
+   * M4 (pre-merge squad): `ok` is DERIVED from `expect` and `succeeded` here — never passed in
+   * pre-computed — so relabelling a probe's `expect` without changing what it measures
+   * actually flips its `ok`, instead of leaving a `record()` call that got the polarity
+   * label wrong but still reports green. `succeeded` always means "the thing under test
+   * behaved as it would with NOTHING mutated / nothing wrong" — for a normal `expect: 'pass'`
+   * probe that IS the assertion; for an `expect: 'fail'` mutation control or product-defect
+   * probe, `succeeded` still means "behaved as if unmutated" (bad — the point is proving it
+   * does NOT), so `ok = succeeded === false` there. `justification: true` (probe 5 only)
+   * excludes a probe from the degenerate-set polarity count below without exempting it from
+   * the per-probe match requirement — it tests `git`'s own merge behaviour, not this
+   * mechanism's product code, so it does not count as evidence that a REAL negative case in
+   * THIS product is exercised.
+   */
+  const record = (n, name, expect, succeeded, detail, { justification = false } = {}) => {
+    const ok = expect === 'pass' ? succeeded === true : succeeded === false;
+    results.push({ n, name, expect, ok, succeeded, detail, justification });
+  };
 
   // Probe 1 — missing develop.
   {
@@ -895,15 +1094,20 @@ async function runProbes() {
     record(4, 'two-cycle tree-sync, full postcondition', 'pass', held === true, { held });
   }
 
-  // Probe 5 — two-cycle squash DOES conflict (product probe, expect: 'fail' on purpose).
+  // Probe 5 — two-cycle squash DOES conflict (JUSTIFICATION probe, expect: 'fail' on purpose —
+  // M4: this tests git's own merge behaviour, not this mechanism's product code, so it is
+  // excluded from the degenerate-set polarity count in selftest() even though it must still
+  // match its own declared expectation like every other probe).
   {
     const conflicted = runSquashConflictScenario();
+    // succeeded = "the squash approach behaved fine, no conflict" — we WANT this false.
     record(
       5,
       "two-cycle squash conflicts — Option D's justification (expect: 'fail' on purpose)",
       'fail',
-      conflicted === true,
+      conflicted === false,
       { conflicted },
+      { justification: true },
     );
   }
 
@@ -1045,9 +1249,9 @@ async function runProbes() {
   // supersede-and-open) — divergence must win regardless, which is exactly the branch-ORDER
   // property a real (not probe-local) reordering of `decidePromotion` would break, so this is
   // also the probe a manual "temporarily reorder the real function" check reds on.
-  for (const [withExistingPr, label] of [
-    [false, 'no existing PR'],
-    [true, 'with a stale existing PR (divergence must still win)'],
+  for (const [n, withExistingPr, label] of [
+    [9, false, 'no existing PR'],
+    [10, true, 'with a stale existing PR (divergence must still win)'],
   ]) {
     const scenario = buildDivergedScenario({ withExistingPr });
     try {
@@ -1067,7 +1271,7 @@ async function runProbes() {
         divergence,
       });
       record(
-        9,
+        n,
         `diverged develop: unrelated direct commit -> refuse-diverged (${label})`,
         'pass',
         healthy === false &&
@@ -1124,7 +1328,7 @@ async function runProbes() {
         divergence,
       });
       record(
-        10,
+        11,
         'develop moves between PR-open and merge-attempt -> re-check divergence, never merge over it',
         'pass',
         stillHealthy === false && recheck.outcome === 'refuse-diverged',
@@ -1155,41 +1359,30 @@ async function runProbes() {
     } finally {
       impl.createTreeSyncCommit = original;
     }
-    const caught = held === false;
-    record(11, 'mutation control: broken createTreeSyncCommit is caught', 'fail', caught, { held });
+    // succeeded = "the postcondition held despite the mutation" — we WANT this false (caught).
+    record(12, 'mutation control: broken createTreeSyncCommit is caught', 'fail', held === true, { held });
   }
 
-  // Probe 12 — mutation control: reordered decision branches. Monkey-patches the REAL,
-  // already-loaded `impl.decidePromotion` to check `existingPr` before `developHealthy`, and
-  // re-runs probe 9's own diverged scenario (with an existingPr this time, so the reordering
-  // actually changes the result) — the harness MUST report the wrong outcome as caught.
+  // Probe 13 — mutation control: reordered decision RULES (M2, pre-merge squad — REWORKED).
+  // The earlier version of this probe hand-reimplemented `decidePromotion`'s entire body with
+  // the reorder baked in — precisely the "second, hand-written simulated defeat" the contract
+  // rules out, and it tested the REIMPLEMENTATION, not the product. This version instead
+  // reorders `impl.decisionRules` itself — the REAL, already-loaded rule functions
+  // `decidePromotion` iterates (see the DEFAULT_DECISION_RULES definition above) — by moving
+  // `ruleDiverged` to run AFTER `ruleReuse`/`ruleSupersede`, then re-runs probe 10's own
+  // diverged-with-existing-PR scenario through the REAL `impl.decidePromotion`.
   {
-    const original = impl.decidePromotion;
-    impl.decidePromotion = (input) => {
-      const { trainSha, trainTree, developSha, developTree, existingPr, developHealthy, divergence } = input;
-      const base = {
-        trainSha: trainSha ?? null,
-        trainTree: trainTree ?? null,
-        developSha: developSha ?? null,
-        developTree: developTree ?? null,
-        developHealthy: developHealthy ?? null,
-        divergence: null,
-        existingPr: null,
-        commitMessage: null,
-        branchName: null,
-      };
-      if (developSha === null) return { ...base, outcome: 'no-op-missing-develop', developHealthy: null };
-      if (developTree === trainTree) return { ...base, outcome: 'no-op-in-sync', existingPr: existingPr ?? null };
-      const branchName = `promote/${trainSha}`;
-      const commitMessage = buildCommitMessage(trainSha);
-      // MUTATION: existingPr branches checked BEFORE developHealthy.
-      if (existingPr && existingPr.headTree === trainTree) return { ...base, outcome: 'reuse-existing-pr', existingPr };
-      if (existingPr && existingPr.headTree !== trainTree) {
-        return { ...base, outcome: 'supersede-and-open', existingPr, commitMessage, branchName };
-      }
-      if (developHealthy === false) return { ...base, outcome: 'refuse-diverged', divergence: divergence ?? null, existingPr };
-      return { ...base, outcome: 'open-new', existingPr: null, commitMessage, branchName };
-    };
+    const original = impl.decisionRules;
+    const reordered = [...original];
+    const divergedIndex = reordered.indexOf(ruleDiverged);
+    const supersedeIndex = reordered.indexOf(ruleSupersede);
+    if (divergedIndex === -1 || supersedeIndex === -1) {
+      throw new Error('probe 13: could not locate ruleDiverged/ruleSupersede in impl.decisionRules — the array shape changed');
+    }
+    const [divergedRule] = reordered.splice(divergedIndex, 1);
+    reordered.splice(reordered.indexOf(ruleSupersede) + 1, 0, divergedRule);
+    impl.decisionRules = reordered;
+
     let mutatedOutcome;
     const scenario = buildDivergedScenario({ withExistingPr: true });
     try {
@@ -1209,10 +1402,12 @@ async function runProbes() {
       }).outcome;
     } finally {
       scenario.cleanup();
-      impl.decidePromotion = original;
+      impl.decisionRules = original;
     }
-    const caught = mutatedOutcome !== 'refuse-diverged';
-    record(12, 'mutation control: reordered decision branches is caught', 'fail', caught, { mutatedOutcome });
+    // succeeded = "still correctly refused despite the reorder" — we WANT this false (caught).
+    record(13, 'mutation control: reordered decision rules is caught', 'fail', mutatedOutcome === 'refuse-diverged', {
+      mutatedOutcome,
+    });
   }
 
   // Probe 13 — assessMergeReadiness, all seven documented states + null.
@@ -1233,10 +1428,10 @@ async function runProbes() {
       actual: impl.assessMergeReadiness(input),
     }));
     const allMatch = outcomes.every((o) => o.actual === o.expected);
-    record(13, 'assessMergeReadiness: all documented states + null', 'pass', allMatch, outcomes);
+    record(14, 'assessMergeReadiness: all documented states + null', 'pass', allMatch, outcomes);
   }
 
-  // Probe 14 — findPromotionPRs: 0, 1, 2+.
+  // Probe 15 — findPromotionPRs: 0, 1, 2+.
   {
     const zero = impl.findPromotionPRs([{ headRefName: 'other' }]);
     const one = impl.findPromotionPRs([{ headRefName: 'other' }, { headRefName: 'promote/aaa' }]);
@@ -1246,10 +1441,10 @@ async function runProbes() {
       { headRefName: 'other' },
     ]);
     const ok = zero.length === 0 && one.length === 1 && two.length === 2;
-    record(14, 'findPromotionPRs: 0, 1, 2+', 'pass', ok, { zero: zero.length, one: one.length, two: two.length });
+    record(15, 'findPromotionPRs: 0, 1, 2+', 'pass', ok, { zero: zero.length, one: one.length, two: two.length });
   }
 
-  // Probe 15 — assertSingleRepoScope: 0, 1-correct, 1-wrong, 2+.
+  // Probe 16 — assertSingleRepoScope: 0, 1-correct, 1-wrong, 2+.
   {
     const fixtures = {
       zero: { repositories: [] },
@@ -1276,18 +1471,27 @@ async function runProbes() {
       outcomes.oneCorrect === 'accepted' &&
       outcomes.oneWrong === 'rejected' &&
       outcomes.twoPlus === 'rejected';
-    record(15, 'assertSingleRepoScope: 0, 1-correct, 1-wrong, 2+', 'pass', ok, outcomes);
+    record(16, 'assertSingleRepoScope: 0, 1-correct, 1-wrong, 2+', 'pass', ok, outcomes);
   }
 
-  // Probe 16 — promote/* sweep: two open PRs (oldest superseded, newest kept), one branch
-  // with no PR (deleted), and a simulated delete failure reported as a named, non-fatal row.
+  // Probe 17 — promote/* sweep: two open PRs (oldest superseded, newest kept), one branch
+  // with no PR (deleted), a simulated delete failure reported as a named, non-fatal row, and
+  // (B5, pre-merge squad) a branch with an open PR to a DIFFERENT base — protected, never
+  // deleted, plus the exact-shape regex itself (`promote/<40-hex>`, never a loose prefix).
   {
+    const shapeOk =
+      PROMOTION_BRANCH_RE.test(`promote/${'0'.repeat(40)}`) && !PROMOTION_BRANCH_RE.test('promote/my-feature');
+
     const now = Date.now();
     const openPRs = [
       { number: 10, headRefName: 'promote/aaa', createdAt: new Date(now - 100000).toISOString() },
       { number: 11, headRefName: 'promote/bbb', createdAt: new Date(now).toISOString() },
     ];
-    const allBranches = ['promote/aaa', 'promote/bbb', 'promote/ccc'];
+    const allBranches = ['promote/aaa', 'promote/bbb', 'promote/ccc', 'promote/ddd'];
+    // B5: promote/ddd has no open base-develop PR (absent from `openPRs`) but DOES have an
+    // open PR to a different base (a human's own branch that happens to match the shape) —
+    // it must survive the sweep untouched.
+    const protectedBranches = new Set(['promote/ddd']);
     let failDelete = false;
     const calls = [];
     const exec = (file, args) => {
@@ -1297,106 +1501,112 @@ async function runProbes() {
       }
       return '';
     };
-    const rows1 = sweepPromotionNamespace(exec, 'spec-kitty/spec-kitty-design', { openPRs, allBranches });
+    const rows1 = sweepPromotionNamespace(exec, 'spec-kitty/spec-kitty-design', { openPRs, allBranches, protectedBranches });
     const closedOldest = rows1.some((r) => r.action === 'closed' && r.number === 10);
     const keptNewest = !rows1.some((r) => r.action === 'closed' && r.number === 11);
     const deletedCcc = rows1.some((r) => r.action === 'branch-deleted' && r.branch === 'promote/ccc');
+    const protectedDddSurvived =
+      rows1.some((r) => r.action === 'branch-protected' && r.branch === 'promote/ddd') &&
+      !calls.some((c) => c[0] === 'gh' && c[1] === 'api' && c[2] === '-X' && c[3] === 'DELETE' && String(c[4] ?? '').includes('ddd'));
     const commentedOldestFirst = calls.some(
       (c) => c[0] === 'gh' && c[1] === 'pr' && c[2] === 'comment' && c[3] === '10',
     );
     failDelete = true;
-    const rows2 = sweepPromotionNamespace(exec, 'spec-kitty/spec-kitty-design', { openPRs, allBranches });
+    const rows2 = sweepPromotionNamespace(exec, 'spec-kitty/spec-kitty-design', { openPRs, allBranches, protectedBranches });
     const failedRowNonFatal = rows2.some((r) => r.action === 'branch-delete-failed' && r.branch === 'promote/ccc');
-    const ok = closedOldest && keptNewest && deletedCcc && commentedOldestFirst && failedRowNonFatal;
-    record(16, 'promote/* sweep: oldest superseded, newest kept, orphan branch deleted, failure non-fatal', 'pass', ok, {
-      rows1,
-      rows2,
-    });
+    const ok =
+      shapeOk && closedOldest && keptNewest && deletedCcc && protectedDddSurvived && commentedOldestFirst && failedRowNonFatal;
+    record(
+      17,
+      'promote/* sweep: oldest superseded, newest kept, orphan deleted, other-base PR protected, failure non-fatal, exact-shape regex',
+      'pass',
+      ok,
+      { shapeOk, rows1, rows2 },
+    );
   }
 
-  // Probe 17 — dry-run / recorded invocation: for each of the six outcomes, the exact
-  // gh/git argv sequence matches what that outcome should do (research.md R23).
+  // Probe 18 — dry-run / recorded invocation (M2, pre-merge squad — REWORKED). The earlier
+  // version hand-built each `decision` object as a literal and asserted only argv PREFIXES,
+  // so a mutant that changed the `promote/` branch-name prefix to `sync/` (or anything else)
+  // left this probe green — the hand-built literals still said `promote/${train.sha}` even
+  // though the REAL `impl.decidePromotion` would have produced something else. Every decision
+  // below is now produced by calling the REAL `impl.decidePromotion` against real scratch-repo
+  // state, and every assertion is FULL deep-argv equality (including the exact branch name),
+  // never a prefix/shape check — so a prefix mutation shows up here as a mismatched command,
+  // not as a still-passing "starts with the right thing".
   {
     const s = scratchRepo();
     try {
+      const seed = tipOf(s.git, 'HEAD');
       s.git(['branch', 'develop']);
       s.commit('a.txt', 'a', 'chore: a');
       const train = tipOf(s.git, 'HEAD');
-      const develop = tipOf(s.git, 'develop');
+      const develop = tipOf(s.git, 'develop'); // still at `seed` — healthy, behind train
+
       const staleExistingPr = {
         number: 5,
         headSha: 'e'.repeat(40),
         headTree: '2'.repeat(40),
-        branch: 'promote/stale',
+        branch: `${PROMOTE_PREFIX}${'e'.repeat(40)}`,
         createdAt: new Date().toISOString(),
       };
       const freshExistingPr = { ...staleExistingPr, number: 6, headTree: train.tree };
 
+      const baseInput = { trainSha: train.sha, trainTree: train.tree, developSha: develop.sha, developTree: develop.tree };
+
       const outcomeChecks = [
         {
           name: 'no-op-missing-develop',
-          decision: { outcome: 'no-op-missing-develop', existingPr: null },
+          decision: impl.decidePromotion({ ...baseInput, developSha: null, developTree: null, existingPr: null, developHealthy: null }),
           developSha: null,
-          expectZeroCalls: true,
+          expectedArgv: [],
         },
         {
           name: 'refuse-diverged',
-          decision: { outcome: 'refuse-diverged', existingPr: null, divergence: { reason: 'x' } },
+          decision: impl.decidePromotion({ ...baseInput, existingPr: null, developHealthy: false, divergence: { reason: 'x' } }),
           developSha: develop.sha,
-          expectZeroCalls: true,
+          expectedArgv: [],
         },
         {
           name: 'no-op-in-sync (no existing PR)',
-          decision: { outcome: 'no-op-in-sync', existingPr: null },
+          decision: impl.decidePromotion({ ...baseInput, developTree: train.tree, existingPr: null, developHealthy: true }),
           developSha: develop.sha,
-          expectZeroCalls: true,
+          expectedArgv: [],
         },
         {
           name: 'no-op-in-sync (stale existing PR closed)',
-          decision: { outcome: 'no-op-in-sync', existingPr: staleExistingPr },
+          decision: impl.decidePromotion({ ...baseInput, developTree: train.tree, existingPr: staleExistingPr, developHealthy: true }),
           developSha: develop.sha,
-          expectCallShapes: [
-            ['gh', 'pr', 'comment', '5'],
-            ['gh', 'pr', 'close', '5'],
+          expectedArgv: [
+            ['gh', 'pr', 'comment', '5', '--repo', 'spec-kitty/spec-kitty-design', '--body', 'develop already carries this tree — closing this now-stale promotion PR.'],
+            ['gh', 'pr', 'close', '5', '--repo', 'spec-kitty/spec-kitty-design'],
           ],
         },
         {
           name: 'reuse-existing-pr',
-          decision: { outcome: 'reuse-existing-pr', existingPr: freshExistingPr },
+          decision: impl.decidePromotion({ ...baseInput, existingPr: freshExistingPr, developHealthy: true }),
           developSha: develop.sha,
-          expectZeroCalls: true,
+          expectedArgv: [],
         },
         {
           name: 'open-new',
-          decision: {
-            outcome: 'open-new',
-            existingPr: null,
-            trainTree: train.tree,
-            commitMessage: buildCommitMessage(train.sha),
-            branchName: `promote/${train.sha}`,
-          },
+          decision: impl.decidePromotion({ ...baseInput, existingPr: null, developHealthy: true }),
           developSha: develop.sha,
-          expectCallShapes: [
-            ['git', 'push'],
-            ['gh', 'pr', 'create'],
+          expectedArgv: (decision) => [
+            ['git', 'push', 'origin', `PLACEHOLDER_SHA:refs/heads/${decision.branchName}`],
+            ['gh', 'pr', 'create', '--repo', 'spec-kitty/spec-kitty-design', '--base', 'develop', '--head', decision.branchName, '--title', decision.commitMessage.split('\n')[0], '--body', decision.commitMessage],
           ],
         },
         {
           name: 'supersede-and-open',
-          decision: {
-            outcome: 'supersede-and-open',
-            existingPr: staleExistingPr,
-            trainTree: train.tree,
-            commitMessage: buildCommitMessage(train.sha),
-            branchName: `promote/${train.sha}`,
-          },
+          decision: impl.decidePromotion({ ...baseInput, existingPr: staleExistingPr, developHealthy: true }),
           developSha: develop.sha,
-          expectCallShapes: [
-            ['gh', 'pr', 'comment', '5'],
-            ['gh', 'pr', 'close', '5'],
-            ['gh', 'api', '-X', 'DELETE'],
-            ['git', 'push'],
-            ['gh', 'pr', 'create'],
+          expectedArgv: (decision) => [
+            ['gh', 'pr', 'comment', '5', '--repo', 'spec-kitty/spec-kitty-design', '--body', `Superseded by a fresh tree-sync commit for ${train.sha} — the train moved again before this PR merged.`],
+            ['gh', 'pr', 'close', '5', '--repo', 'spec-kitty/spec-kitty-design'],
+            ['gh', 'api', '-X', 'DELETE', `repos/spec-kitty/spec-kitty-design/git/refs/heads/${staleExistingPr.branch}`],
+            ['git', 'push', 'origin', `PLACEHOLDER_SHA:refs/heads/${decision.branchName}`],
+            ['gh', 'pr', 'create', '--repo', 'spec-kitty/spec-kitty-design', '--base', 'develop', '--head', decision.branchName, '--title', decision.commitMessage.split('\n')[0], '--body', decision.commitMessage],
           ],
         },
       ];
@@ -1405,37 +1615,218 @@ async function runProbes() {
       for (const check of outcomeChecks) {
         const { exec, calls } = makeRecordingExec();
         applyOutcome(exec, 'spec-kitty/spec-kitty-design', s.dir, check.decision, check.developSha, train.sha);
-        let ok;
-        if (check.expectZeroCalls) {
-          ok = calls.length === 0;
-        } else {
-          ok =
-            calls.length === check.expectCallShapes.length &&
-            check.expectCallShapes.every((shape, i) => shape.every((part, j) => calls[i][j] === part));
-        }
-        perOutcome[check.name] = { ok, calls };
+        const expected =
+          typeof check.expectedArgv === 'function' ? check.expectedArgv(check.decision) : check.expectedArgv;
+        // The pushed tree-sync commit's SHA is generated fresh each run — replace the
+        // placeholder in the expected argv with whatever `git push` actually recorded, so the
+        // comparison is still a FULL deep-equality check on everything else (crucially, the
+        // exact branch name, which is what a prefix mutation would change).
+        const actualPushArg = calls.find((c) => c[0] === 'git' && c[1] === 'push')?.[3];
+        const resolvedExpected = expected.map((argv) =>
+          argv.map((part) => (actualPushArg && part.startsWith('PLACEHOLDER_SHA:') ? actualPushArg : part)),
+        );
+        const ok =
+          calls.length === resolvedExpected.length &&
+          resolvedExpected.every((argv, i) => argv.length === calls[i].length && argv.every((part, j) => calls[i][j] === part));
+        perOutcome[check.name] = { ok, calls, expected: resolvedExpected };
       }
       const allOk = Object.values(perOutcome).every((r) => r.ok);
-      record(17, 'dry-run/recorded invocation: exact argv per outcome (6 outcomes)', 'pass', allOk, perOutcome);
+      record(18, 'dry-run/recorded invocation: FULL argv (incl. exact branch name) per outcome, derived via impl.decidePromotion', 'pass', allOk, perOutcome);
     } finally {
       s.cleanup();
     }
   }
 
-  // Probe 18 — probe-count floor. The count alone is necessary but not sufficient (contract,
-  // M8) — the degenerate-set refusal and the per-probe match assertion in `selftest()` are
-  // what actually enforce the meaningful part; this probe only asserts the table itself has
-  // not shrunk below its own documented size (contracts/promotion-script.contract.md's table).
-  record(18, 'probe-count floor: this table has not shrunk below 18', 'pass', results.length + 1 >= 18, {
-    countSoFar: results.length + 1,
-  });
+  // Probe 19 — B2 (pre-merge squad): pollAndMerge re-reads develop's LIVE tip immediately
+  // before merging and refuses if it moved since the decision was made; and the post-merge
+  // tree assertion actually COMPARES against the promoted train tree rather than only
+  // printing it. Exercised with a recording exec (never real gh/git network calls) so all
+  // three sub-cases run in-process.
+  {
+    const makePollExec = ({ mergeStatus, developLiveSha, postMergeTree }) => {
+      const calls = [];
+      const exec = (file, args) => {
+        calls.push([file, ...(args ?? [])]);
+        if (file === 'gh' && args?.[0] === 'pr' && args?.[1] === 'view') {
+          return JSON.stringify(mergeStatus);
+        }
+        if (file === 'git' && args?.[0] === 'ls-remote') {
+          return `${developLiveSha}\trefs/heads/develop\n`;
+        }
+        if (file === 'gh' && args?.[0] === 'api' && String(args?.[1] ?? '').includes('git/refs/heads/develop')) {
+          return JSON.stringify({ object: { sha: 'post-merge-commit-sha' } });
+        }
+        if (file === 'gh' && args?.[0] === 'api' && String(args?.[1] ?? '').includes('git/commits/')) {
+          return JSON.stringify({ tree: { sha: postMergeTree } });
+        }
+        return '';
+      };
+      return { exec, calls };
+    };
+
+    const savedExitCode = process.exitCode;
+    const outcomes = {};
+
+    // (a) develop's live tip moved since the decision — must refuse, never call `gh pr merge`.
+    process.exitCode = undefined;
+    {
+      const { exec, calls } = makePollExec({
+        mergeStatus: { mergeable: true, mergeStateStatus: 'CLEAN' },
+        developLiveSha: 'MOVED_AWAY_SHA',
+        postMergeTree: 'irrelevant',
+      });
+      await pollAndMerge(exec, 'spec-kitty/spec-kitty-design', '/tmp', 1, 'headsha', 'EXPECTED_PARENT_SHA', 'TRAIN_TREE');
+      outcomes.refusesOnMovedParent =
+        process.exitCode === 1 && !calls.some((c) => c[0] === 'gh' && c[1] === 'pr' && c[2] === 'merge');
+    }
+
+    // (b) parent matches, but the post-merge tree does NOT match the promoted train tree —
+    // must exit non-zero even though the merge call itself "succeeded".
+    process.exitCode = undefined;
+    {
+      const { exec, calls } = makePollExec({
+        mergeStatus: { mergeable: true, mergeStateStatus: 'CLEAN' },
+        developLiveSha: 'EXPECTED_PARENT_SHA',
+        postMergeTree: 'WRONG_TREE',
+      });
+      await pollAndMerge(exec, 'spec-kitty/spec-kitty-design', '/tmp', 1, 'headsha', 'EXPECTED_PARENT_SHA', 'TRAIN_TREE');
+      outcomes.catchesPostMergeMismatch =
+        process.exitCode === 1 && calls.some((c) => c[0] === 'gh' && c[1] === 'pr' && c[2] === 'merge');
+    }
+
+    // (c) happy path — parent matches, post-merge tree matches — merges cleanly, no error.
+    process.exitCode = undefined;
+    {
+      const { exec, calls } = makePollExec({
+        mergeStatus: { mergeable: true, mergeStateStatus: 'CLEAN' },
+        developLiveSha: 'EXPECTED_PARENT_SHA',
+        postMergeTree: 'TRAIN_TREE',
+      });
+      await pollAndMerge(exec, 'spec-kitty/spec-kitty-design', '/tmp', 1, 'headsha', 'EXPECTED_PARENT_SHA', 'TRAIN_TREE');
+      outcomes.happyPathMerges =
+        process.exitCode !== 1 && calls.some((c) => c[0] === 'gh' && c[1] === 'pr' && c[2] === 'merge');
+    }
+
+    process.exitCode = savedExitCode;
+    const ok = outcomes.refusesOnMovedParent && outcomes.catchesPostMergeMismatch && outcomes.happyPathMerges;
+    record(
+      19,
+      "pollAndMerge re-reads develop's live tip before merging and verifies the post-merge tree (B2)",
+      'pass',
+      ok,
+      outcomes,
+    );
+  }
+
+  // Probe 20 — M1 (pre-merge squad): the sweep runs on EVERY outcome via `runCycle`'s
+  // `finally`, including `no-op-missing-develop` and `refuse-diverged` — the two outcomes
+  // that returned early, before the sweep, in the version that shipped with PR #429 despite
+  // its own comment claiming "every run".
+  {
+    const savedExitCode = process.exitCode;
+    const cases = {};
+    for (const decision of [
+      { outcome: 'no-op-missing-develop', existingPr: null, divergence: null },
+      { outcome: 'refuse-diverged', existingPr: null, divergence: { reason: 'x' } },
+    ]) {
+      process.exitCode = undefined;
+      const { exec, calls } = makeRecordingExec();
+      await runCycle({
+        exec,
+        repo: 'spec-kitty/spec-kitty-design',
+        cwd: '/tmp',
+        decision,
+        developSha: decision.outcome === 'refuse-diverged' ? 'somesha' : null,
+        trainSha: 'trainsha',
+        trainTree: 'traintree',
+      });
+      // The sweep's own read calls (list open PRs, list any-base promotion PRs, list
+      // branches) must have run regardless of the outcome above having returned early.
+      cases[decision.outcome] = calls.some((c) => c[0] === 'gh' && c[1] === 'pr' && c[2] === 'list');
+    }
+    process.exitCode = savedExitCode;
+    const ok = cases['no-op-missing-develop'] === true && cases['refuse-diverged'] === true;
+    record(20, 'the sweep runs on every outcome, including no-op-missing-develop and refuse-diverged (M1)', 'pass', ok, cases);
+  }
+
+  // Probe 21 — M2 (pre-merge squad): a mutation control for the `promote/` prefix ITSELF. The
+  // reducer/reviewer lens demonstrated that changing the prefix to `sync/` left the previous
+  // 19/19 suite green while defeating every guard in the PR — the missing catch was that
+  // nothing joined branch-name CONSTRUCTION to branch-name RECOGNITION. This monkey-patches
+  // the REAL `ruleOpenNew`/`ruleSupersede` (via `impl.decisionRules`) to build a `sync/<sha>`
+  // branch name instead, then asserts the REAL, unmutated `findPromotionPRs` no longer
+  // recognizes a PR headed that way — the concrete, product-level consequence of a prefix
+  // drift (every subsequent run would open a DUPLICATE promotion PR forever, never finding
+  // the one it already opened).
+  {
+    const original = impl.decisionRules;
+    const mutatedOpenNew = (input) => {
+      const partial = ruleOpenNew(input);
+      return partial ? { ...partial, branchName: `sync/${input.trainSha}` } : null;
+    };
+    const mutatedSupersede = (input) => {
+      const partial = ruleSupersede(input);
+      return partial ? { ...partial, branchName: `sync/${input.trainSha}` } : null;
+    };
+    impl.decisionRules = original.map((rule) => {
+      if (rule === ruleOpenNew) return mutatedOpenNew;
+      if (rule === ruleSupersede) return mutatedSupersede;
+      return rule;
+    });
+
+    let mutatedBranchName;
+    try {
+      const decision = impl.decidePromotion({
+        trainSha: 'a'.repeat(40),
+        trainTree: 'tree-a',
+        developSha: 'b'.repeat(40),
+        developTree: 'tree-b',
+        existingPr: null,
+        developHealthy: true,
+        divergence: null,
+      });
+      mutatedBranchName = decision.branchName;
+    } finally {
+      impl.decisionRules = original;
+    }
+
+    // The REAL, unmutated findPromotionPRs — does it still recognize the mutated branch name?
+    const foundUnderMutatedPrefix = impl.findPromotionPRs([{ headRefName: mutatedBranchName }]).length > 0;
+    // succeeded = "still found despite the prefix drift" — we WANT this false (caught).
+    record(
+      21,
+      'mutation control: a promote/ -> sync/ prefix drift breaks PR re-discovery (M2)',
+      'fail',
+      foundUnderMutatedPrefix,
+      { mutatedBranchName, foundUnderMutatedPrefix },
+    );
+  }
 
   return results;
 }
 
-const PROBE_FLOOR = 18;
+// M3 (pre-merge squad): 21 DISTINCT probe numbers (1-21, no duplicates — the two divergence
+// scenarios that both used to be numbered "9" are now 9 and 10) and no second, self-
+// referential floor living INSIDE the table (the contract's own words: "the floor sits
+// OUTSIDE the probe table") — the code-level checks below are the only floor. Raise this
+// deliberately when a probe is added; lowering it is a deliberate edit in the same commit
+// that removes a probe, never a silent side effect of a duplicate label masking a shrink.
+const PROBE_FLOOR = 21;
 
 async function selftest() {
+  // B1 (pre-merge squad, PR #429): the ONE choke point every git call in this file's
+  // `execFileSync(..., { env: { ...process.env, ... } })` merges reach. Setting these here,
+  // once, means `createTreeSyncCommit`'s five call sites (and any future one) never depend on
+  // whatever git identity happens to be configured globally on the machine running this
+  // process — real on a workstation, absent on a bare CI runner. Verify this is really what
+  // closes the gap by running with NEITHER config source available, the way CI's runner
+  // actually looks:
+  //   GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null node scripts/promote-develop.mjs --selftest
+  process.env.GIT_AUTHOR_NAME = 'selftest';
+  process.env.GIT_AUTHOR_EMAIL = 'selftest@example.invalid';
+  process.env.GIT_COMMITTER_NAME = 'selftest';
+  process.env.GIT_COMMITTER_EMAIL = 'selftest@example.invalid';
+
   const results = await runProbes();
 
   if (results.length < PROBE_FLOOR) {
@@ -1451,12 +1842,19 @@ async function selftest() {
   // THE FLOOR SITS OUTSIDE THE TABLE (contract). A bare count is not this: it does not verify
   // every probe actually ran and matched its declared expectation, only that the array was
   // not shrunk. Both checks run — this one, and the per-probe match assertion below.
-  const expectedPass = results.filter((r) => r.expect === 'pass');
-  const expectedFail = results.filter((r) => r.expect === 'fail');
+  //
+  // M4 (pre-merge squad): JUSTIFICATION probes (probe 5 — it tests git's own merge behaviour,
+  // not this mechanism's product code) are excluded from the polarity count. Counting them
+  // would let a probe that measures nothing about THIS product's negative-case coverage
+  // satisfy the "at least one expect-fail exists" requirement on the product's behalf.
+  const polarityCandidates = results.filter((r) => !r.justification);
+  const expectedPass = polarityCandidates.filter((r) => r.expect === 'pass');
+  const expectedFail = polarityCandidates.filter((r) => r.expect === 'fail');
   if (expectedPass.length === 0 || expectedFail.length === 0) {
     console.error(
       'Refusing to report green over a degenerate probe set: ' +
-        `${expectedPass.length} expect-pass, ${expectedFail.length} expect-fail.`,
+        `${expectedPass.length} expect-pass, ${expectedFail.length} expect-fail ` +
+        `(of ${polarityCandidates.length} non-justification probes).`,
     );
     process.exitCode = 1;
     return;
@@ -1497,7 +1895,7 @@ async function main() {
       cliDecide(rest);
       return;
     case 'assert-scope':
-      cliAssertScope(rest);
+      cliAssertScope();
       return;
     default:
       console.error(
