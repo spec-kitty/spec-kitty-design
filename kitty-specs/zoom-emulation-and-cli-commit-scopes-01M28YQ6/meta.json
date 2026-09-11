@@ -23,6 +23,7 @@
   "purpose_context": "This mission advances zoom emulation and cli commit scopes on mission/zoom-emulation-and-cli-commit-scopes so stakeholders can track the work from mission creation onward.",
   "purpose_tldr": "zoom emulation and cli commit scopes",
   "slug": "zoom-emulation-and-cli-commit-scopes-01M28YQ6",
+  "status_phase": "1",
   "target_branch": "mission/zoom-emulation-and-cli-commit-scopes",
   "topology": "single_branch"
 }
