@@ -324,7 +324,7 @@ links are bare `<a slot="compact-links">` carrying both `sk-site-footer__link` a
 `sk-site-footer__link--compact`. `sk-theme-toggle` writes `localStorage` and mutates
 `documentElement`'s theme, so every story in the family isolates that state via `beforeEach`.
 
-Twelve named fixture states back the family; two are proven only in the fixture-behaviour suite
+Thirteen named fixture states back the family; two are proven only in the fixture-behaviour suite
 and carry no story (a populated-providers arm and a closed-signup terminal arm), and one more
 (a cooldown arm) is published only through the `LongStrings` proof. Every fixture is recursively
 frozen and every projection is a pure presence/ordering decision — the consumer supplies signup

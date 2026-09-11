@@ -469,6 +469,14 @@ test.describe("44px target-size floor and unclipped focus (NFR-003, NFR-004)", (
   test("Tab-reachable controls stay inside the viewport bounds", async ({ page }) => {
     const root = await openStory(page, "entry-boundary", { width: 390, height: 844 });
     await root.locator("a, button, input").first().focus();
+    // COUNTED, because `continue` is a silent exit from an assertion. `boundingBox()` returns null
+    // for an attached-but-not-visible match, and `:focus` can resolve to a delegatesFocus host as
+    // well as its inner control, so every one of the six steps could skip and this test would
+    // report green having asserted nothing at all — passing just as happily with the 44px floor
+    // deleted or the focus order broken. The floor below is the same shape the target-size test
+    // above uses (`expect(count).toBeGreaterThan(0)`) and is what makes the loop's greenness mean
+    // something.
+    let measured = 0;
     for (let step = 0; step < 6; step += 1) {
       await page.keyboard.press("Tab");
       // `:focus` can resolve to BOTH a delegatesFocus custom-element host (e.g. sk-theme-toggle)
@@ -476,9 +484,11 @@ test.describe("44px target-size floor and unclipped focus (NFR-003, NFR-004)", (
       const focused = page.locator(":focus").last();
       const box = await focused.boundingBox();
       if (!box) continue;
+      measured += 1;
       expect(box.x).toBeGreaterThanOrEqual(-1);
       expect(box.x + box.width).toBeLessThanOrEqual(390 + 1);
     }
+    expect(measured, "no Tab stop produced a measurable box — the loop asserted nothing").toBeGreaterThan(0);
   });
 });
 

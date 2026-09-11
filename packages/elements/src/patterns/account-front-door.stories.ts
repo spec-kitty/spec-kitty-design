@@ -72,6 +72,7 @@ import {
   type EmailManagementFixture,
   type EntryBoundaryFixture,
   type FormFieldFixture,
+  type SignupFieldFixture,
   type FrontDoorFixture,
   type FrontDoorState,
   type LandingFixture,
@@ -296,12 +297,17 @@ const compactFooter = (chrome: DeepReadonly<PublicChrome>): TemplateResult =>
     )}
   </sk-site-footer>`;
 
+// Takes EITHER field shape. `SignupFieldFixture` has no help text at all (`description?: never`)
+// and `FormFieldFixture`'s is optional, so the description span below is conditional: rendering an
+// always-present span produced an empty, unreferenced element under every signup field, since
+// `aria-describedby` only points at it while an error is showing.
 const formField = (
-  field: DeepReadonly<FormFieldFixture>,
+  field: DeepReadonly<SignupFieldFixture | FormFieldFixture>,
   error: DeepReadonly<LinkedError> | undefined,
   retainedValue: string | undefined,
 ): TemplateResult => {
   const descriptionId = `${field.id}-description`;
+  const descriptionText = error ? error.message : field.description;
   return html`<div class="sk-form-field${error ? " sk-form-field--error" : ""}">
     <label class="sk-form-field__label" for=${field.id}>${field.label}</label>
     <input
@@ -315,9 +321,11 @@ const formField = (
       aria-invalid=${error ? "true" : nothing}
       aria-describedby=${error ? descriptionId : nothing}
     />
-    <span id=${descriptionId} class="sk-form-field__description"
-      >${error ? error.message : field.description}</span
-    >
+    ${descriptionText
+      ? html`<span id=${descriptionId} class="sk-form-field__description"
+          >${descriptionText}</span
+        >`
+      : nothing}
   </div>`;
 };
 
@@ -629,7 +637,6 @@ const renderPasswordMaintenance = (
         ${fixture.currentPassword ? formField(fixture.currentPassword, undefined, undefined) : nothing}
         ${formField(fixture.newPassword, undefined, undefined)}
         ${formField(fixture.repeatPassword, undefined, undefined)}
-        <p class="sk-form-field__description">${fixture.helpText}</p>
       </form>
       <button
         type="submit"

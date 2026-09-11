@@ -77,6 +77,10 @@ describe("Truth constraints made unrepresentable (FR-006, FR-007, FR-009, FR-014
     for (const field of [email, password, teamName, terms]) {
       expect(Object.prototype.hasOwnProperty.call(field, "passwordRequirements")).toBe(false);
       expect(Object.prototype.hasOwnProperty.call(field, "helpText")).toBe(false);
+      // `description` is the member that actually shipped a 12-character promise on the signup
+      // password field. `SignupFieldFixture` now types it `?: never`, so this is belt-and-braces
+      // against a future widening of the type.
+      expect(Object.prototype.hasOwnProperty.call(field, "description")).toBe(false);
     }
   });
 
@@ -88,7 +92,7 @@ describe("Truth constraints made unrepresentable (FR-006, FR-007, FR-009, FR-014
     expect(passwordFields).toHaveLength(1);
   });
 
-  test("P24 legitimately carries a repeat-password field and length help text (FR-007 is signup-scoped, not global)", () => {
+  test("P24 legitimately carries a repeat-password field, and carries no help text at all (FR-007 is signup-scoped; C-011 is not)", () => {
     for (const state of ["password-change", "password-set"] as const) {
       const fixture = fixtureForAccountFrontDoorState(state);
       if (!("newPassword" in fixture) || !("repeatPassword" in fixture)) {
@@ -96,7 +100,17 @@ describe("Truth constraints made unrepresentable (FR-006, FR-007, FR-009, FR-014
       }
       expect(fixture.newPassword).toBeDefined();
       expect(fixture.repeatPassword).toBeDefined();
-      expect(fixture.helpText.length).toBeGreaterThan(0);
+      // The repeat field is P24's own and FR-007's prohibitions are signup-scoped, so it stays.
+      // The HELP TEXT does not. An earlier revision asserted `helpText.length > 0`, which locked
+      // in a sentence the corpus never contained: `COPY-CATALOG.md` §P24 records labels and submit
+      // copy only, and the family's one password-help row belongs to P11 and says EIGHT
+      // characters, not the twelve that shipped. Asserting its ABSENCE is what keeps an invented
+      // requirement from being reintroduced under a corrected number.
+      expect(Object.prototype.hasOwnProperty.call(fixture, "helpText")).toBe(false);
+      for (const field of [fixture.currentPassword, fixture.newPassword, fixture.repeatPassword]) {
+        if (field === undefined) continue;
+        expect(Object.prototype.hasOwnProperty.call(field, "description")).toBe(false);
+      }
     }
   });
 
@@ -172,6 +186,11 @@ describe("Both arms of every conditional composition, proven as a difference (pl
     const fixture = fixtureForAccountFrontDoorState("submitted-validation") as EntryBoundaryFixture;
     expect(fixture.retainedValues.email).toBeDefined();
     expect(fixture.errors.length).toBeGreaterThan(0);
+    // "clears the password" was in this test's NAME but in none of its assertions: the two lines
+    // above pass with a retained password sitting right beside the email. The type forbids one, so
+    // this pins the shape at runtime too — otherwise loosening the type later would leave the
+    // suite green while the test still claimed to prove it.
+    expect(Object.keys(fixture.retainedValues)).toEqual(["email"]);
   });
 });
 

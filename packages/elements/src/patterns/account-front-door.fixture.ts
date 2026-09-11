@@ -5,9 +5,16 @@
  * FR-006/FR-007/FR-009/FR-014/FR-016/FR-018/FR-020/FR-022/C-011/C-014 name is made
  * UNREPRESENTABLE here, not merely untested: `RecoveryOutcomeFixture` has no `exists`/`found`/
  * `known` field, `LegalUnavailableFixture` has no `reason` field, `SignupFormFixture['fields']`
- * is a fixed four-tuple with no `passwordRequirements`/`helpText` member, `EmailRecord` carries
- * only `{ address, primary, verified }`, and no fixture type anywhere in this module accepts a
- * token, session, CSRF value, clock or locale.
+ * is a fixed four-tuple of `SignupFieldFixture` — no `passwordRequirements`/`helpText` member and
+ * `description?: never`, so signup help text of any kind is a compile error — `EmailRecord`
+ * carries only `{ address, primary, verified }`, and no fixture type anywhere in this module
+ * accepts a token, session, CSRF value, clock or locale.
+ *
+ * THE `description?: never` ARM WAS EARNED, not designed in. This header previously made the
+ * claim above while `description` sat on the single shared field type as a required `string`, and
+ * three invented help-text strings duly shipped on the signup composition — including "At least
+ * 12 characters.", which issue #355 names outright as a thing this family must not promise and
+ * which the corpus records as explicitly emptied. The claim is now structural.
  *
  * Two-file split follows `repository-dossier.*`, the closest landed analog (plan.md "Structure
  * Decision"): this module carries the types, the recursive freeze helper, the frozen fixture map,
@@ -86,13 +93,42 @@ export interface PublicChrome {
   }>;
 }
 
-export interface FormFieldFixture {
+/**
+ * A field on the SIGNUP composition, which carries no help text of any kind.
+ *
+ * `description?: never` is the whole point of this type existing. The approved corpus is explicit
+ * twice over: `COPY-CATALOG.md` row `account.signup.field.password1.helpText` records the value as
+ * `"" (explicitly emptied)` with the note "help text intentionally blank — no 12-character or
+ * confirmation claim" (sourced to `repo:apps/teams/forms.py:36`), and the P2 screen's own header
+ * states "ACCOUNT_SIGNUP_FIELDS = [email*, password1*]. No confirmation field or password help
+ * text." Issue #355 then lists a "12-character promise" among the things the signup composition
+ * must not present.
+ *
+ * An earlier revision of this file nonetheless shipped three invented descriptions on these
+ * fields — "At least 12 characters.", "You can rename this later." and "Use the address your team
+ * already knows you by." — none of which the corpus sources, and the first of which the issue
+ * names outright. The module header claimed the constraint was enforced at the type level rather
+ * than merely untested; it was not, because `description` lived on the single shared field type.
+ * `?: never` makes it so: a `description` on a signup field is now a compile error, not a review
+ * catch.
+ */
+export interface SignupFieldFixture {
   readonly id: string;
   readonly label: string;
   readonly type: "email" | "password" | "text";
   readonly autocomplete: string;
   readonly required: boolean;
-  readonly description: string;
+  readonly description?: never;
+}
+
+/**
+ * A field on a NON-signup composition. `description` is optional and, as shipped, unused: the
+ * corpus's P24 section (`COPY-CATALOG.md` §P24) carries labels and submit copy only and records no
+ * help text for password change or set. The member is kept because a future field may have a
+ * SOURCED description; it is not a licence to invent one (C-011).
+ */
+export interface FormFieldFixture extends Omit<SignupFieldFixture, "description"> {
+  readonly description?: string;
 }
 
 export interface TermsFieldFixture {
@@ -102,9 +138,9 @@ export interface TermsFieldFixture {
 
 /** Fixed four-tuple: email, password, team name, Terms. No fifth member is representable. */
 export type SignupFields = readonly [
-  FormFieldFixture,
-  FormFieldFixture,
-  FormFieldFixture,
+  SignupFieldFixture,
+  SignupFieldFixture,
+  SignupFieldFixture,
   TermsFieldFixture,
 ];
 
@@ -218,7 +254,18 @@ export interface PasswordMaintenanceFixture {
   readonly currentPassword: FormFieldFixture | undefined;
   readonly newPassword: FormFieldFixture;
   readonly repeatPassword: FormFieldFixture;
-  readonly helpText: string;
+  /**
+   * NO `helpText` MEMBER, and its absence is sourced rather than an omission. An earlier revision
+   * carried "Your password must be at least 12 characters and can't be entirely numeric." on both
+   * password-maintenance states. The corpus does not contain that sentence anywhere. Its P24
+   * section (`COPY-CATALOG.md` §P24, rows `account.passwordSet.*` / `account.passwordChange.*`)
+   * records labels and submit copy ONLY — no help row exists for either screen. The corpus's one
+   * password-help row is `account.reset.setNew.field.password1.help`, which belongs to P11
+   * (reset set-new), is Django's real four-item validator list, and says at least EIGHT
+   * characters. So the shipped sentence was invented AND contradicted the only sourced figure in
+   * the family. C-011 forbids the library supplying copy it cannot source, so it is gone rather
+   * than restated with a corrected number on a screen the corpus gives no help text for.
+   */
   readonly submitLabel: string;
 }
 
@@ -303,31 +350,28 @@ const chromeWith = (actions: readonly RouteAction[]): PublicChrome => ({
 const OPEN_CHROME = chromeWith([SIGN_IN, START_FREE]);
 const CLOSED_CHROME = chromeWith([SIGN_IN]);
 
-const EMAIL_FIELD: FormFieldFixture = {
+const EMAIL_FIELD: SignupFieldFixture = {
   id: "front-door-email",
   label: "Email",
   type: "email",
   autocomplete: "email",
   required: true,
-  description: "Use the address your team already knows you by.",
 };
 
-const PASSWORD_FIELD: FormFieldFixture = {
+const PASSWORD_FIELD: SignupFieldFixture = {
   id: "front-door-password",
   label: "Password",
   type: "password",
   autocomplete: "new-password",
   required: true,
-  description: "At least 12 characters.",
 };
 
-const TEAM_NAME_FIELD: FormFieldFixture = {
+const TEAM_NAME_FIELD: SignupFieldFixture = {
   id: "front-door-team-name",
   label: "Team name (optional)",
   type: "text",
   autocomplete: "organization",
   required: false,
-  description: "You can rename this later.",
 };
 
 const TERMS_FIELD: TermsFieldFixture = {
@@ -382,7 +426,6 @@ const NEW_PASSWORD_FIELD: FormFieldFixture = {
   type: "password",
   autocomplete: "new-password",
   required: true,
-  description: "At least 12 characters, and not one you've used before.",
 };
 
 const REPEAT_PASSWORD_FIELD: FormFieldFixture = {
@@ -391,7 +434,6 @@ const REPEAT_PASSWORD_FIELD: FormFieldFixture = {
   type: "password",
   autocomplete: "new-password",
   required: true,
-  description: "Re-enter the password above exactly.",
 };
 
 const CURRENT_PASSWORD_FIELD: FormFieldFixture = {
@@ -400,7 +442,6 @@ const CURRENT_PASSWORD_FIELD: FormFieldFixture = {
   type: "password",
   autocomplete: "current-password",
   required: true,
-  description: "Confirm it's you before setting a new one.",
 };
 
 // ── The sole authored source for every repeated Account Front Door display fact ────────────────
@@ -568,7 +609,6 @@ const ACCOUNT_FRONT_DOOR_FIXTURES_AUTHORED = {
     currentPassword: CURRENT_PASSWORD_FIELD,
     newPassword: NEW_PASSWORD_FIELD,
     repeatPassword: REPEAT_PASSWORD_FIELD,
-    helpText: "Your password must be at least 12 characters and can't be entirely numeric.",
     submitLabel: "Change password",
   } satisfies PasswordMaintenanceFixture,
 
@@ -581,7 +621,6 @@ const ACCOUNT_FRONT_DOOR_FIXTURES_AUTHORED = {
     currentPassword: undefined,
     newPassword: NEW_PASSWORD_FIELD,
     repeatPassword: REPEAT_PASSWORD_FIELD,
-    helpText: "Your password must be at least 12 characters and can't be entirely numeric.",
     submitLabel: "Set password",
   } satisfies PasswordMaintenanceFixture,
 } satisfies Record<FrontDoorState, unknown>;

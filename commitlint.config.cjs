@@ -38,7 +38,7 @@ const SPEC_KITTY_AUTO_COMMIT_PATTERNS = [
   // The subject is FIXED (no slug, no WP id), so it is anchored whole rather than given a tail
   // pattern: an unanchored /^chore\(spec-kitty\): commit / would exempt any commit with that
   // prefix from EVERY rule, the trap the comment above records. Probed in
-  // scripts/check-commitlint-config.mjs, both the exemption and two near misses.
+  // scripts/check-commitlint-config.mjs, both the exemption and three near misses.
   (msg) => /^chore\(spec-kitty\): commit scaffold artifacts left by specify\s*(\n|$)/.test(msg),
   (msg) => /^chore: Record review-cycle-\d+ \([a-z-]+\) for WP\d+ on \S+\s*(\n|$)/.test(msg),
   (msg) => /^chore: update issue-matrix for \S+\s*(\n|$)/.test(msg),
