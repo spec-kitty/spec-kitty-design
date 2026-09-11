@@ -258,6 +258,11 @@ function contrastRatio(first: string, second: string): number {
   return (lighter + 0.05) / (darker + 0.05);
 }
 
+test('the chromium project the describe below depends on still exists', () => {
+  expect(test.info().config.projects.map((project) => project.name),
+    'the browser-independent-once skip below is keyed on this project name').toContain('chromium');
+});
+
 test.describe('sk-context-nav source, markup, and distribution contract', () => {
   test.skip(({ browserName }) => browserName !== 'chromium', 'browser-independent contracts run once');
 

@@ -97,6 +97,11 @@ async function assertNativeSelect(select: Locator): Promise<void> {
   expect(facts.authoredOptionState).toBe(0);
 }
 
+test('the chromium project the describe below depends on still exists', () => {
+  expect(test.info().config.projects.map((project) => project.name),
+    'the browser-independent-once skip below is keyed on this project name').toContain('chromium');
+});
+
 test.describe('sk-form-select source, markup, and distribution contract', () => {
   test.skip(({ browserName }) => browserName !== 'chromium', 'browser-independent contracts run once');
 

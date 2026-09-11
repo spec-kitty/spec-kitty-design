@@ -270,6 +270,11 @@ function expectEquivalentZoomMetrics(reference: ZoomMetrics, candidate: ZoomMetr
   expect(candidate.lineFragments).toBe(reference.lineFragments);
 }
 
+test('the chromium project the describe below depends on still exists', () => {
+  expect(test.info().config.projects.map((project) => project.name),
+    'the browser-independent-once skip below is keyed on this project name').toContain('chromium');
+});
+
 test.describe('sk-collection neutral source boundary', () => {
   test.skip(({ browserName }) => browserName !== 'chromium', 'browser-independent source checks run once');
 
