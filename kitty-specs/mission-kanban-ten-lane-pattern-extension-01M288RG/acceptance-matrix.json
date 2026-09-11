@@ -27,11 +27,11 @@
     {
       "criterion_id": "FR-003",
       "description": "Verify FR-003 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "proof_type": "guard proof + seam mutation test",
+      "evidence": "head 4f301f83; sk-mission-kanban-ten-lane-pattern.spec.ts [T002] 17 named guards all fail closed; base/projection mutation blocked; repeated projection equal; moving WP04 in a cloned base moves counts to 1/1/1/3/2/1/1/4/1/0 (derived, not restated).",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T13:44:31.553135+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
