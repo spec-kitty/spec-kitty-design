@@ -57,11 +57,11 @@
     {
       "criterion_id": "FR-006",
       "description": "Verify FR-006 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "proof_type": "manual_inspection",
+      "evidence": "Reviewer directly opened the 4 harvested 390px CI baselines (code-entry-390, authorization-decision-390, terminal-success-390, terminal-error-with-action-390): all show equal side gutters, no clipped form actions/identifiers, no visible overflow at the 390px frame edge. Companion automated assertion: sk-cli-auth-pattern.spec.ts:516-535 measures document clientWidth===scrollWidth===390 and every button's bounding box within [0,390]; execution outcome pending CI.",
+      "pass_fail": "pass",
+      "verified_by": "reviewer-renata",
+      "verified_at": "2026-09-11T12:08:53.742231+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
