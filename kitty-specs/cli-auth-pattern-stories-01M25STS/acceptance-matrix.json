@@ -17,11 +17,11 @@
     {
       "criterion_id": "FR-002",
       "description": "Verify FR-002 is satisfied",
-      "proof_type": "code_review",
-      "evidence": "Composition verified by reading cli-auth.stories.ts:149-187 (renderAuthorizationDecision): .sk-facts native <dl> from fixture.facts, one sk-pill-tag per fixture.scopes entry, Approve=sk-button--primary, Deny=sk-button--danger-secondary, one native <form>, DOM order Approve-then-Deny. Behavioral assertion: sk-cli-auth-pattern.spec.ts:320-377 checks facts array equality, scopes array equality, actionOrder array (type/classes/text) exact match. Execution outcome pending CI's playwright/test jobs (run 34596232715, in_progress at verdict time).",
-      "pass_fail": "pending",
-      "verified_by": "reviewer-renata",
-      "verified_at": "2026-09-11T12:08:21.635154+00:00",
+      "proof_type": "automated_test",
+      "evidence": "Composition confirmed by direct read: cli-auth.stories.ts:159-187 (renderAuthorizationDecision) - .sk-facts native <dl> from fixture.facts, one sk-pill-tag per fixture.scopes entry, Approve=sk-button--primary, Deny=sk-button--danger-secondary, one native <form>, DOM order Approve-then-Deny. Behavioral assertion confirmed by direct read: sk-cli-auth-pattern.spec.ts:320-377 checks facts array exact equality, scopes array exact equality, actionOrder array (type/classes/text) exact match, target-size >=24px both actions. Execution outcome now observed: CI run 34597608929 job 103257371328 (playwright) at head eb2db6ad = pass, 2280 passed/131 skipped/1 flaky (unrelated test), 0 sk-cli-auth-pattern.spec.ts failures.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T12:42:47.008085+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
