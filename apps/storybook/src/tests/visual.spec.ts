@@ -931,6 +931,19 @@ test('SK-form-select forced colors — visual baseline', async ({ page }) => {
   });
 });
 
+// #350 — light theme, `:invalid` state. Tighter than this block's usual 0.02
+// maxDiffPixelRatio for the same reason the static/element form-input blocks below use
+// 0.005: this is the shot that exists specifically to detect a border-color regression, and
+// the looser ratio has already been shown (visual.spec.ts:963-969) to tolerate a total loss
+// of the control's border color on shots of this size.
+test('SK-form-select light invalid — visual baseline', async ({ page }) => {
+  const field = await formSelectStory(page, 'light-mode-invalid');
+  await expect(field).toHaveScreenshot('sk-form-select-light-invalid.png', {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.005,
+  });
+});
+
 // #321's pre-merge squad found zero dedicated visual baselines existed for either
 // consumption path of .sk-input/.sk-form-input__control -- the only coverage that
 // mission's own baselines gave the control was incidental (18 work-explorer pattern
@@ -973,6 +986,15 @@ for (const [id, snapshot] of staticFormInputVisuals) {
     await expect(field).toHaveScreenshot(snapshot, { threshold: 0.02, maxDiffPixelRatio: 0.005 });
   });
 }
+
+// #350 — light theme, error state (`form-formfield-html--light-mode-error` renders both
+// SkFormInputErrorHTML and SkFormTextareaErrorHTML; `staticFormInputStory`'s `.sk-form-field`
+// locator takes the first, which is the input one). Covers both the invalid boundary
+// (`--sk-border-control-invalid`) and the error copy (`--sk-fg-error`) in one shot.
+test('SK-input light error — visual baseline', async ({ page }) => {
+  const field = await staticFormInputStory(page, 'light-mode-error');
+  await expect(field).toHaveScreenshot('sk-input-light-error.png', { threshold: 0.02, maxDiffPixelRatio: 0.005 });
+});
 
 test('SK-input narrow — visual baseline', async ({ page }) => {
   const field = await staticFormInputStory(page, 'form-input-default', { width: 320, height: 480 });
@@ -1034,6 +1056,17 @@ for (const [id, snapshot] of elementFormInputVisuals) {
   });
 }
 
+// #350 — light theme, invalid state. Covers both the invalid boundary
+// (`--sk-border-control-invalid`) and the error copy (`--sk-fg-error`), on the live-element
+// path this time.
+test('SK-form-input light error — visual baseline', async ({ page }) => {
+  const host = await elementFormInputStory(page, 'light-mode-error');
+  await expect(host).toHaveScreenshot('sk-form-input-light-error.png', {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.005,
+  });
+});
+
 test('SK-form-input narrow — visual baseline', async ({ page }) => {
   const host = await elementFormInputStory(page, 'default', { width: 320, height: 480 });
   const target = page.locator('#storybook-root');
@@ -1062,6 +1095,32 @@ test('SK-form-input forced colors — visual baseline', async ({ page }) => {
   const host = await elementFormInputStory(page, 'default');
   await host.locator('[part="control"]').focus();
   await expect(host).toHaveScreenshot('sk-form-input-forced-colors.png', {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.005,
+  });
+});
+
+// #350 — <sk-form-textarea>'s FIRST visual baseline of any kind, light theme, invalid state.
+// Covers both the invalid boundary (`--sk-border-control-invalid`) and the error copy
+// (`--sk-fg-error`). Clipped and at the tighter 0.005 maxDiffPixelRatio the sibling
+// form-input/form-select light-invalid shots use, for the same reason: this shot exists
+// specifically to detect a border/text-color regression.
+const elementFormTextareaStory = async (
+  page: Page,
+  id: string,
+  viewport: { width: number; height: number } = { width: 720, height: 480 },
+): Promise<Locator> => {
+  await page.setViewportSize(viewport);
+  await page.goto(`/iframe.html?id=elements-skformtextarea--${id}&viewMode=story`);
+  const target = page.locator('sk-form-textarea').first();
+  await target.waitFor({ state: 'visible', timeout: 20000 });
+  await expect(target.locator('[part="control"]')).toBeVisible();
+  return target;
+};
+
+test('SK-form-textarea light error — visual baseline', async ({ page }) => {
+  const host = await elementFormTextareaStory(page, 'light-mode-error');
+  await expect(host).toHaveScreenshot('sk-form-textarea-light-error.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.005,
   });
