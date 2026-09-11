@@ -356,16 +356,33 @@ export function isBemMemberOf(name, roots) {
  *     callback — the mutation simply had not happened yet at read time. This is what the
  *     observer (rather than a second read) is for.
  *
- * THE GUARANTEE THIS BUYS, STATED PRECISELY (the previous version of this file asserted more
- * than a single read could actually prove, and was told directly that silence on that gap would
- * not be accepted a second time): no unknown `sk`-prefixed tag or class appears ANYWHERE in the
- * light DOM or any OPEN shadow root, at ANY point from just before the story's own script begins
- * through the caller's observation window (currently 500ms past `data-render-complete` — see
- * `sk-cli-auth-pattern.spec.ts`'s use of this pair). "No mutation EVER, however deferred" is NOT
- * claimed and is not obtainable by a bounded test: a mutation timed to land after the
- * observation window closes is not caught, and neither is one inside a `mode: 'closed'` shadow
- * root or one attached to an already-recorded element only after the fact (both above). These
- * are disclosed limits of what a rendered-DOM check can prove, not silent gaps.
+ * THE GUARANTEE THIS BUYS, STATED PRECISELY (an earlier version of this file asserted more than
+ * a single read could actually prove, and was told directly that silence on a gap would not be
+ * accepted again — a claim naming ONE floor when four exist would be the same failure restated,
+ * not corrected): no unknown `sk`-prefixed tag or class appears ANYWHERE in the light DOM, any
+ * OPEN shadow root (recursively), or any SAME-ORIGIN `<iframe>`'s own document (also
+ * recursively), at ANY point from just before the story's own script begins through the
+ * caller's observation window (currently 500ms past `data-render-complete` — see
+ * `sk-cli-auth-pattern.spec.ts`'s use of this pair). "No mutation EVER, however deferred, and no
+ * primitive placed ANYWHERE a script could reach" is NOT claimed. FOUR floors are disclosed,
+ * not chased further, because each is a genuine limit of what THIS mechanism can prove rather
+ * than an unstated gap:
+ *   1. A mutation timed to land after the observation window closes.
+ *   2. A `mode: 'closed'` shadow root — `Element.shadowRoot` returns `null` for one BY DESIGN
+ *      (that is what closed mode is FOR, a platform property, not a defect); no DOM-based check
+ *      can reach one. CHECKED, NOT SKIPPED: `grep -rn "extends:" packages/elements/src` found
+ *      zero customized built-ins (`is="..."`) in this repo — a `<button is="sk-x">` would keep
+ *      `tagName === "BUTTON"` and stay invisible to the tag arm; a future author who introduces
+ *      one should revisit this file.
+ *   3. A CROSS-ORIGIN `<iframe>` — Same-Origin Policy blocks `contentDocument` outright (it
+ *      returns `null` rather than throwing; see `frameDoc()` below), genuinely the same shape
+ *      as a closed shadow root: a platform boundary, not a trick to work around.
+ *   4. A whole-page `Node.prototype.appendChild` patch — intercepting every node's own appends
+ *      across the entire page (Lit's and Storybook's own rendering included), which — to avoid
+ *      visibly breaking the page — would have to relay every real append faithfully, at which
+ *      point it is a real observer and would also relay the actual attack payload.
+ * Also checked, not merely assumed absent: a Web Worker has no `document` and cannot append DOM
+ * nodes at all, so it is not a viable vector for this mechanism regardless of same-origin status.
  */
 export function startSkPrimitiveWatch() {
   // Captured HERE, before any story script has run (`addInitScript` fires before the page's
@@ -394,30 +411,106 @@ export function startSkPrimitiveWatch() {
   };
   const seen = { tags: new Set(), classes: new Set() };
   const observers = [];
-  // `root` is `document`, an `Element`, or a `ShadowRoot`. THE `root.shadowRoot` CHECK AT THE
-  // TOP IS LOAD-BEARING, NOT REDUNDANT WITH THE LOOP BELOW — SELF-ATTACKED, a real bug this
-  // round: a `<div>` created via `document.createElement`, given `attachShadow({mode:'open'})`
-  // and shadow content BEFORE being appended, then appended via `document.body.appendChild`,
-  // passed. The childList handler below calls `watch(node)` for that newly added `div` itself
-  // — and the FIRST version of this function checked `el.shadowRoot` only for DESCENDANTS
-  // found by `querySelectorAll('*')`, never for `root` itself. A `<div>` with no light-DOM
-  // children (all of its content lives in its shadow root) has an EMPTY `querySelectorAll('*')`
-  // result, so nothing about it was ever inspected. Checking `root.shadowRoot` before walking
-  // descendants closes this for both the initial sweep and every future `childList` addition.
+  // Every `Document` a same-origin `<iframe>` (or `<frame>`) exposes — `null` for a cross-origin
+  // one BY CONSTRUCTION, since `contentDocument` is the platform's OWN safe accessor: it returns
+  // `null` rather than throwing when Same-Origin Policy would otherwise block access, so this
+  // needs no try/catch the way reaching for `.contentWindow.document` would.
+  //
+  // SELF-ATTACKED, a real gap found in a round otherwise spent hardening THIS SAME MECHANISM
+  // against a page lying to it — this is a DIFFERENT question: can content render somewhere the
+  // watch never LOOKS, with no lie required at all? `element.parentElement.appendChild(iframe)`,
+  // then `iframe.contentDocument.body.appendChild(div)` with `div.className = "sk-consent-row"`
+  // — a `MutationObserver` on the OUTER `document` never crosses into a child frame's own
+  // `document`; that is a separate tree, not a subtree, regardless of `subtree: true`. This
+  // passed even though `page.addInitScript()` likely arms a SEPARATE, independent watch inside
+  // the iframe's own realm too (its own `window.__skPrimitiveWatch`, never read by
+  // `stopSkPrimitiveWatch()`, which targets the MAIN frame's `window` only via
+  // `page.evaluate()`) — that redundant watch is harmless but irrelevant; the fix below does
+  // not "read from" it, it establishes its OWN observer, FROM the main frame's realm, on the
+  // iframe's document, so the callback runs in the SAME realm as `seen` and writes there
+  // directly, the same way an observer on a shadow root already does.
+  // `el.contentDocument` is `undefined` for a non-iframe element and `null` for a cross-origin
+  // one — both falsy, so a plain truthiness check treats them identically (no recursion),
+  // correctly distinguishing both from a genuine same-origin `Document`.
+  const frameDoc = (el) => el.contentDocument || null;
+  // Watches `el`'s `contentDocument` if it is (or becomes) a same-origin iframe/frame —
+  // checked NOW, AND re-checked on the element's own `load` event, belt-and-suspenders against
+  // `contentDocument` not being populated yet at discovery time (measured as a real, if
+  // inconsistent, possibility across runs of this exact reproduction — see below for the
+  // ACTUAL root cause this session's failures traced to, which was a different bug entirely).
+  //
+  // THE REPORTED IFRAME REPRODUCTION STILL PASSED AFTER ADDING THIS FUNCTION, and chasing why
+  // is what found the real bug. The instinctive first suspicion — `contentDocument` not yet
+  // populated when this mechanism's own `childList` callback discovers the iframe — was
+  // MEASURED, not left assumed, and DISPROVED as the cause here: direct instrumentation showed
+  // `contentDocument` truthy at every discovery, and an isolated same-page test proved a
+  // `MutationObserver` created in the main frame and pointed at a freshly-appended iframe's
+  // `contentDocument` DOES catch a mutation appended to it ~150ms later, across separate
+  // `page.evaluate()` calls and via `page.addInitScript()` — ruling out timing, task-boundary,
+  // and `addInitScript`-specific explanations in turn, each checked directly rather than
+  // reasoned about. The actual cause was in the `MutationObserver` CALLBACK below: `node
+  // instanceof Element`. A `<div>` created via `iframe.contentDocument.createElement(...)` is
+  // an instance of the IFRAME's OWN `Element` constructor, not this (main) frame's — same-origin
+  // iframes are fully script-accessible, but each still has its own separate global object and
+  // therefore its own separate `Element`/`Node` constructors, independent of Same-Origin Policy.
+  // `instanceof Element`, checked against the WRONG realm's constructor, was `false` for every
+  // node the iframe's own document ever produced, so the callback silently `continue`d past the
+  // real payload even though the observer had genuinely fired. See the callback below for the
+  // fix (`nodeType === 1`, a realm-independent integer constant). The `load` fallback here is
+  // kept regardless, since a discovery-time-null `contentDocument` remains a real platform
+  // possibility this mechanism should not depend on avoiding.
+  const watchFrame = (el) => {
+    const doc = frameDoc(el);
+    if (doc) watch(doc);
+    if ('contentDocument' in el && typeof el.addEventListener === 'function') {
+      el.addEventListener('load', () => {
+        const loadedDoc = frameDoc(el);
+        if (loadedDoc) watch(loadedDoc);
+      });
+    }
+  };
+  // `root` is `document`, an `Element`, a `ShadowRoot`, or (recursively) an `<iframe>`'s own
+  // `Document`. THE `root.shadowRoot`/`watchFrame(root)` CALLS AT THE TOP ARE LOAD-BEARING, NOT
+  // REDUNDANT WITH THE LOOP BELOW — SELF-ATTACKED, a real bug an earlier round: a `<div>`
+  // created via `document.createElement`, given `attachShadow({mode:'open'})` and shadow
+  // content BEFORE being appended, then appended via `document.body.appendChild`, passed. The
+  // childList handler below calls `watch(node)` for that newly added `div` itself — and an
+  // earlier version of this function checked `el.shadowRoot` only for DESCENDANTS found by
+  // `querySelectorAll('*')`, never for `root` itself. A `<div>` with no light-DOM children (all
+  // of its content lives in its shadow root) has an EMPTY `querySelectorAll('*')` result, so
+  // nothing about it was ever inspected. Checking `root.shadowRoot`/`watchFrame(root)` before
+  // walking descendants closes this for both the initial sweep and every future `childList`
+  // addition — including a freshly appended `<iframe>` itself.
   const watch = (root) => {
     if (root.shadowRoot) watch(root.shadowRoot);
+    watchFrame(root);
     for (const el of root.querySelectorAll('*')) {
       record(el, seen);
       if (el.shadowRoot) watch(el.shadowRoot);
+      watchFrame(el);
     }
+    // `node.nodeType === 1` (`Node.ELEMENT_NODE`), NOT `node instanceof Element` — SELF-ATTACKED,
+    // a real bug found chasing the iframe finding above: `instanceof` checks against THIS
+    // REALM's `Element` constructor, but a node created via `iframe.contentDocument.
+    // createElement(...)` is an instance of the IFRAME's OWN `Element` (same-origin iframes are
+    // fully script-accessible, but each still has its OWN separate global object and therefore
+    // its own separate `Element`/`Node` constructor functions — that is how JavaScript realms
+    // work, independent of Same-Origin Policy). `node instanceof Element` — checked against the
+    // MAIN frame's `Element` — was `false` for the reported reproduction's `<div>`, created via
+    // the IFRAME's `document.createElement`, so this handler silently `continue`d past it even
+    // though the `MutationObserver` correctly reported the mutation and `watchFrame()` had
+    // already attached an observer to the right document. `nodeType` is a plain integer constant
+    // (`1` for every element, in every realm, per the DOM Standard) with no realm dependency, so
+    // it works identically regardless of which document's `createElement` produced the node.
     const observer = new MutationObserver((mutations) => {
       for (const mutation of mutations) {
-        if (mutation.type === 'attributes' && mutation.target instanceof Element) {
+        if (mutation.type === 'attributes' && mutation.target.nodeType === 1) {
           record(mutation.target, seen);
           if (mutation.target.shadowRoot) watch(mutation.target.shadowRoot);
+          watchFrame(mutation.target);
         } else if (mutation.type === 'childList') {
           for (const node of mutation.addedNodes) {
-            if (!(node instanceof Element)) continue;
+            if (node.nodeType !== 1) continue;
             record(node, seen);
             watch(node);
           }
