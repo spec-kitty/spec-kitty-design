@@ -168,6 +168,11 @@ function filesBelow(directory: string): string[] {
   });
 }
 
+test("the chromium project the describe below depends on still exists", () => {
+  expect(test.info().config.projects.map((project) => project.name),
+    "the browser-independent-once skip below is keyed on this project name").toContain("chromium");
+});
+
 test.describe("sk-segmented-choice source and distribution contract", () => {
   test.skip(
     ({ browserName }) => browserName !== "chromium",

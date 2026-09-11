@@ -176,6 +176,11 @@ function classSelectorInventory(source: string): string[] {
   return [...classes].sort();
 }
 
+test("the chromium project the describe below depends on still exists", () => {
+  expect(test.info().config.projects.map((project) => project.name),
+    "the browser-independent-once skip below is keyed on this project name").toContain("chromium");
+});
+
 test.describe("sk-checkbox-choice-group source and public contract", () => {
   test.skip(
     ({ browserName }) => browserName !== "chromium",
