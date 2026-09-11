@@ -41,6 +41,7 @@ Identifiers below are the ones each record uses in its own H1. Every ADR record'
 | [ADR-14](decisions/2026-09-06-14-detached-probe-validation-seam.md) | The Detached-Probe Validation Seam | Proposed |
 | [ADR-15](decisions/2026-09-10-15-static-form-of-element-backed-css.md) | The Static Form of Element-Backed CSS | Proposed |
 | [ADR-16](decisions/2026-09-10-16-static-form-of-cross-sheet-part-styling.md) | The Static Form of Cross-Sheet `::part()` Styling | Proposed |
+| [ADR-17](decisions/2026-09-11-17-sk-button-tone-intensity-flattening.md) | sk-button's Tone × Intensity Flattening, and the Ceiling on `BUTTON_VARIANTS` | Proposed |
 
 ## Research
 

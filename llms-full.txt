@@ -385,6 +385,30 @@ reproduces `:host`'s layout but HARDENS its cascade position, a gap its
 library-only outcome tables cannot see. None of the three is built by this
 record, which changes no sheet. Status is `Proposed`.
 
+### ADR-17 — sk-button's Tone × Intensity Flattening, and the Ceiling on `BUTTON_VARIANTS`
+
+`docs/architecture/decisions/2026-09-11-17-sk-button-tone-intensity-flattening.md`.
+**Decision:** the flat `BUTTON_VARIANTS` enum (`primary`, `secondary`, `ghost`,
+`danger-secondary`) is deliberate for the cell that exists today — four
+mutually exclusive values need no axis distinction between them — and its
+ceiling is one more flat sibling, `danger-primary`, before the tone ×
+intensity question becomes unavoidable. **Why it does not wait:**
+`BUTTON_VARIANTS` is a codegen source — `scripts/build-element-markup.mjs`
+derives one static HTML export per key, feeding
+`packages/elements/custom-elements.json` and the generated React wrapper's
+prop type — so a future axis split is a generated-artifact change with real
+blast radius, not a local edit to one file. The record states the cost of
+both paths: widening with one more flat `danger-primary` sibling (one map
+entry, no generator change) versus splitting into two axes (the generator's
+per-key derivation convention, the hand-spelled `variant` type union in
+`sk-button.ts`, and every per-tone rule elsewhere in the component would each
+need re-deriving — `#348`'s busy cue, hardcoded to
+`.sk-button--primary .sk-button__busy-cue` with no derivation from
+`BUTTON_VARIANTS`, is named as the live example of that last risk and is not
+fixed by this record). Raised twice at `#341`'s pre-merge gate and dropped
+without disposition both times; filed as `#403`. No code changed; Status is
+`Proposed`.
+
 ---
 
 ## 2a. Gates
