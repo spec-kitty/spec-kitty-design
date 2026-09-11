@@ -37,7 +37,7 @@
       "wp": "WP01"
     },
     "#418": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "commits b13f33b3, 1b263bc7, 3059fafd - derived denylist replacement in sk-cli-auth-pattern.spec.ts + pattern-composition-lib.mjs; reviewer-found Findings 1 (localClassesIn unconstrained local-style acceptance, closed via ownBlockRoots BEM-root derivation) and 2 (classList.add runtime mutation invisible to text scan, closed via explicit ban) both reproduced red-first and fixed in 3059fafd",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -45,8 +45,8 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "verdict": "fixed",
+      "wp": "WP01"
     },
     "#422": {
       "evidence_ref": "<link or commit>",
