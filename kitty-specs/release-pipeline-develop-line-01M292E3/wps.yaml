@@ -1,0 +1,55 @@
+work_packages:
+  - id: WP01
+    title: "develop-line governance: CI coverage, promotion mechanism, ruleset, docs"
+    dependencies: []
+    owned_files:
+      - ".github/workflows/ci-quality.yml"
+      - ".github/workflows/pr-preview.yml"
+      - ".github/rulesets/develop-ruleset.json"
+      - "scripts/promote-develop.mjs"
+      - "scripts/check-develop-ruleset-parity.mjs"
+      - "scripts/check-gate-wiring.mjs"
+      - "scripts/check-gate-wiring-defeats.mjs"
+      - "scripts/lib/promote-github.mjs"
+      - "docs/architecture/branch-model.md"
+      - "docs/architecture/elements-first-run-prompt.md"
+    requirement_refs:
+      - FR-001
+      - FR-002
+      - FR-003
+      - FR-004
+      - FR-005
+      - FR-006
+      - FR-007
+      - FR-008
+      - FR-009
+      - FR-010
+      - NFR-001
+      - NFR-002
+      - NFR-003
+      - NFR-004
+      - NFR-005
+      - C-001
+      - C-002
+      - C-003
+      - C-004
+      - C-005
+    plan_concern_refs:
+      - IC-01
+      - IC-02
+      - IC-03
+      - IC-04
+      - IC-05
+      - IC-06
+    subtasks:
+      - T001
+      - T002
+      - T003
+      - T004
+      - T005
+      - T006
+    prompt_file: "tasks/WP01-develop-line-governance.md"
+    agent_profile: "node-norris"
+    role: "implementer"
+    agent: "claude"
+    model: ""
