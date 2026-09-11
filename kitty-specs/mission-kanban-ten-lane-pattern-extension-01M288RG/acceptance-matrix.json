@@ -164,6 +164,14 @@
       "result": "verification_error",
       "evidence": "grep verification failed (exit 2): grep: Unmatched ( or \\(",
       "scope": "packages/elements/src packages/react/src packages/styles/src"
+    },
+    {
+      "invariant_id": "NI-002",
+      "description": "No #278 story, spec, visual case or baseline changes: its files are byte-identical to the train.",
+      "verification_method": "custom_command",
+      "verification_command": "git diff --quiet origin/train/elements-first...HEAD -- packages/elements/src/patterns/mission-kanban.stories.ts apps/storybook/src/tests/sk-mission-kanban-pattern.spec.ts ':(glob)apps/storybook/src/tests/visual.spec.ts-snapshots/mission-kanban-[!t]*.png'",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: "
     }
   ]
 }
