@@ -114,6 +114,15 @@
       "result": "confirmed_absent",
       "evidence": "grep found zero matches",
       "scope": ".github/rulesets"
+    },
+    {
+      "invariant_id": "NI-002",
+      "description": "No production-reachable --input fixture-injection seam remains in the promotion/ruleset-parity CLIs (M9)",
+      "verification_method": "grep_absence",
+      "verification_command": "'--input'",
+      "result": "confirmed_absent",
+      "evidence": "grep found zero matches",
+      "scope": "scripts/promote-develop.mjs scripts/check-develop-ruleset-parity.mjs"
     }
   ]
 }
