@@ -270,6 +270,11 @@ function expectEquivalentZoomMetrics(reference: ZoomMetrics, candidate: ZoomMetr
   expect(candidate.lineFragments).toBe(reference.lineFragments);
 }
 
+test('the chromium project the describe below depends on still exists', () => {
+  expect(test.info().config.projects.map((project) => project.name),
+    'the browser-independent-once skip below is keyed on this project name').toContain('chromium');
+});
+
 test.describe('sk-collection neutral source boundary', () => {
   test.skip(({ browserName }) => browserName !== 'chromium', 'browser-independent source checks run once');
 
@@ -593,6 +598,7 @@ test('reduced motion suppresses exactly the collection marker transition', async
 });
 
 test('forced colours preserve all six load-bearing borders and outlines', async ({ page, browserName }) => {
+  expect(test.info().config.projects.map((project) => project.name), 'the chromium skip below is keyed on this project name').toContain('chromium');
   test.skip(browserName !== 'chromium', 'Playwright forced-colours emulation is Chromium-only');
   await page.emulateMedia({ forcedColors: 'active' });
   expect(await page.evaluate(() => matchMedia('(forced-colors: active)').matches)).toBe(true);
@@ -635,6 +641,7 @@ test('forced colours preserve all six load-bearing borders and outlines', async 
 });
 
 test('temporary visual evidence captures remain in Playwright output only', async ({ page, browserName }, testInfo) => {
+  expect(test.info().config.projects.map((project) => project.name), 'the chromium skip below is keyed on this project name').toContain('chromium');
   test.skip(browserName !== 'chromium', 'one browser owns temporary review captures');
   for (const id of ['default', 'light-mode', 'narrow', 'blocked'] as const) {
     if (id === 'narrow') await page.setViewportSize({ width: 390, height: 720 });

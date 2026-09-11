@@ -992,6 +992,7 @@ test("Chromium CSS zoom stress retains compact containment", async ({
   page,
   browserName,
 }) => {
+  expect(test.info().config.projects.map((project) => project.name), "the chromium skip below is keyed on this project name").toContain("chromium");
   test.skip(browserName !== "chromium", "CSS zoom stress is Chromium-owned");
   for (const item of [
     { id: "zoom-200", width: 780, zoom: "2" },

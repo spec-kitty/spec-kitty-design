@@ -609,6 +609,7 @@ test("forced colors keep both button tones, scope pill-tags, and the boundary-pa
   page,
   browserName,
 }) => {
+  expect(test.info().config.projects.map((project) => project.name), "the chromium skip below is keyed on this project name").toContain("chromium");
   test.skip(
     browserName !== "chromium",
     "Playwright forced-colors emulation is Chromium-owned",

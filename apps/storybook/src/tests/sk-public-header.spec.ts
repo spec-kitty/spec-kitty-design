@@ -204,6 +204,11 @@ async function borderBlockEndColour(target: Locator): Promise<string> {
   return target.evaluate((node) => getComputedStyle(node).borderBlockEndColor);
 }
 
+test('the chromium project the describe below depends on still exists', () => {
+  expect(test.info().config.projects.map((project) => project.name),
+    'the browser-independent-once skip below is keyed on this project name').toContain('chromium');
+});
+
 test.describe('sk-public-header source, markup, and distribution contract', () => {
   test.skip(
     ({ browserName }) => browserName !== 'chromium',
@@ -451,6 +456,7 @@ test.describe('sk-public-header live native semantics', () => {
     page,
     browserName,
   }) => {
+    expect(test.info().config.projects.map((project) => project.name), 'the chromium skip below is keyed on this project name').toContain('chromium');
     test.skip(
       browserName !== 'chromium',
       'Chromium CDP supplies the inspectable platform accessibility tree',
@@ -811,6 +817,7 @@ test.describe('sk-public-header geometry, state, and resilience contract', () =>
     page,
     browserName,
   }) => {
+    expect(test.info().config.projects.map((project) => project.name), 'the chromium skip below is keyed on this project name').toContain('chromium');
     test.skip(
       browserName !== 'chromium',
       'Playwright forced-colours emulation is Chromium-only',

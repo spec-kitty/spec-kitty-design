@@ -906,6 +906,7 @@ test.describe('sk-button forced colors', () => {
     page,
     browserName,
   }) => {
+    expect(test.info().config.projects.map((project) => project.name), 'the chromium skip below is keyed on this project name').toContain('chromium');
     test.skip(browserName !== 'chromium', 'forced-colors emulation is asserted on chromium only, matching the case above');
 
     const boxSize = (locator: Locator) =>

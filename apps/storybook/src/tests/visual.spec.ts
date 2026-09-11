@@ -38,28 +38,28 @@ test('SK-stub HTML default — visual baseline', async ({ page }) => {
   await page.goto('/iframe.html?id=primitives-skstub-html--default&viewMode=story');
   const target = page.locator('.sk-stub').first();
   await target.waitFor({ state: 'visible', timeout: 20000 });
-  await expect(target).toHaveScreenshot('sk-stub-html-default.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  await expect.soft(target).toHaveScreenshot('sk-stub-html-default.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
 });
 
 test('SK-feature-card HTML default — visual baseline', async ({ page }) => {
   await page.goto('/iframe.html?id=components-skfeaturecard-html--default&viewMode=story');
   const target = page.locator('.sk-feature-card').first();
   await target.waitFor({ state: 'visible', timeout: 20000 });
-  await expect(target).toHaveScreenshot('sk-feature-card-html-default.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  await expect.soft(target).toHaveScreenshot('sk-feature-card-html-default.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
 });
 
 test('SK-progress HTML default dark — visual baseline', async ({ page }) => {
   await page.goto('/iframe.html?id=primitives-skprogress-html--default&viewMode=story');
   const target = page.locator('.sk-progress').first();
   await target.waitFor({ state: 'visible', timeout: 20000 });
-  await expect(target).toHaveScreenshot('sk-progress-html-default-dark.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  await expect.soft(target).toHaveScreenshot('sk-progress-html-default-dark.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
 });
 
 test('SK-progress HTML light mode — visual baseline', async ({ page }) => {
   await page.goto('/iframe.html?id=primitives-skprogress-html--light-mode&viewMode=story');
   const target = page.locator('.sk-progress').first();
   await target.waitFor({ state: 'visible', timeout: 20000 });
-  await expect(target).toHaveScreenshot('sk-progress-html-light.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  await expect.soft(target).toHaveScreenshot('sk-progress-html-light.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
 });
 
 test('SK-progress HTML forced colors — visual baseline', async ({ page }) => {
@@ -67,7 +67,7 @@ test('SK-progress HTML forced colors — visual baseline', async ({ page }) => {
   await page.goto('/iframe.html?id=primitives-skprogress-html--forced-colors&viewMode=story');
   const target = page.locator('.sk-progress').first();
   await target.waitFor({ state: 'visible', timeout: 20000 });
-  await expect(target).toHaveScreenshot('sk-progress-html-forced-colors.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  await expect.soft(target).toHaveScreenshot('sk-progress-html-forced-colors.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
 });
 
 // #306: chromium-only, matching the repository's existing VR policy (R-04, SC-014
@@ -82,7 +82,7 @@ test('SK-progress HTML indeterminate (reduced motion) — visual baseline', asyn
   await page.goto('/iframe.html?id=primitives-skprogress-html--indeterminate&viewMode=story');
   const target = page.locator('.sk-progress').first();
   await target.waitFor({ state: 'visible', timeout: 20000 });
-  await expect(target).toHaveScreenshot('sk-progress-html-indeterminate-reduced-motion.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  await expect.soft(target).toHaveScreenshot('sk-progress-html-indeterminate-reduced-motion.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
 });
 
 const eventTimelineStory = async (page: Page, id: string): Promise<Locator> => {
@@ -96,12 +96,12 @@ const eventTimelineStory = async (page: Page, id: string): Promise<Locator> => {
 test('SK-event-timeline same fixture default and compact — visual baselines', async ({ page }) => {
   const target = await eventTimelineStory(page, 'compact-default');
   await target.evaluate((node) => node.classList.remove('sk-event-timeline--compact'));
-  await expect(target).toHaveScreenshot('sk-event-timeline-compact-fixture-default.png', {
+  await expect.soft(target).toHaveScreenshot('sk-event-timeline-compact-fixture-default.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
   });
   await target.evaluate((node) => node.classList.add('sk-event-timeline--compact'));
-  await expect(target).toHaveScreenshot('sk-event-timeline-compact-dark.png', {
+  await expect.soft(target).toHaveScreenshot('sk-event-timeline-compact-dark.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
   });
@@ -110,7 +110,7 @@ test('SK-event-timeline same fixture default and compact — visual baselines', 
 test('SK-event-timeline compact narrow — visual baseline', async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 720 });
   const target = await eventTimelineStory(page, 'compact-narrow');
-  await expect(target).toHaveScreenshot('sk-event-timeline-compact-narrow.png', {
+  await expect.soft(target).toHaveScreenshot('sk-event-timeline-compact-narrow.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
   });
@@ -118,7 +118,7 @@ test('SK-event-timeline compact narrow — visual baseline', async ({ page }) =>
 
 test('SK-event-timeline compact light — visual baseline', async ({ page }) => {
   const target = await eventTimelineStory(page, 'compact-light-mode');
-  await expect(target).toHaveScreenshot('sk-event-timeline-compact-light.png', {
+  await expect.soft(target).toHaveScreenshot('sk-event-timeline-compact-light.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
   });
@@ -130,7 +130,7 @@ test('SK-event-timeline compact forced colors — visual baseline', async ({ pag
   const anchor = target.locator('a[href="#forced-colors-event"]');
   await anchor.focus();
   await expect(anchor).toBeFocused();
-  await expect(target).toHaveScreenshot('sk-event-timeline-compact-forced-colors.png', {
+  await expect.soft(target).toHaveScreenshot('sk-event-timeline-compact-forced-colors.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
   });
@@ -146,53 +146,53 @@ const copyFieldStory = async (page: Page, id: string, requireValue = true): Prom
 
 test('SK-copy-field default dark — visual baseline', async ({ page }) => {
   const target = await copyFieldStory(page, 'default-dark');
-  await expect(target).toHaveScreenshot('sk-copy-field-default-dark.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  await expect.soft(target).toHaveScreenshot('sk-copy-field-default-dark.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
 });
 
 test('SK-copy-field light mode — visual baseline', async ({ page }) => {
   const target = await copyFieldStory(page, 'light-mode');
-  await expect(target).toHaveScreenshot('sk-copy-field-light.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  await expect.soft(target).toHaveScreenshot('sk-copy-field-light.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
 });
 
 test('SK-copy-field long wrapping — visual baseline', async ({ page }) => {
   const target = await copyFieldStory(page, 'long-wrapping-command');
-  await expect(target).toHaveScreenshot('sk-copy-field-long.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  await expect.soft(target).toHaveScreenshot('sk-copy-field-long.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
 });
 
 test('SK-copy-field narrow — visual baseline', async ({ page }) => {
   const target = await copyFieldStory(page, 'narrow');
-  await expect(target).toHaveScreenshot('sk-copy-field-narrow.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  await expect.soft(target).toHaveScreenshot('sk-copy-field-narrow.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
 });
 
 test('SK-copy-field focus — visual baseline', async ({ page }) => {
   const target = await copyFieldStory(page, 'focused');
   await expect(target.locator('button')).toBeFocused();
-  await expect(target).toHaveScreenshot('sk-copy-field-focus.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  await expect.soft(target).toHaveScreenshot('sk-copy-field-focus.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
 });
 
 test('SK-copy-field disabled empty — visual baseline', async ({ page }) => {
   const target = await copyFieldStory(page, 'disabled-empty', false);
   await expect(target.locator('button')).toBeDisabled();
-  await expect(target).toHaveScreenshot('sk-copy-field-disabled-empty.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  await expect.soft(target).toHaveScreenshot('sk-copy-field-disabled-empty.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
 });
 
 test('SK-copy-field manual fallback — visual baseline', async ({ page }) => {
   const target = await copyFieldStory(page, 'manual-fallback');
   await expect(target.locator('[part="status"]')).toContainText('system copy shortcut');
-  await expect(target).toHaveScreenshot('sk-copy-field-manual.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  await expect.soft(target).toHaveScreenshot('sk-copy-field-manual.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
 });
 
 test('SK-copy-field failure — visual baseline', async ({ page }) => {
   const target = await copyFieldStory(page, 'failure');
   await expect(target.locator('[part="status"]')).toContainText('Unable to copy');
-  await expect(target).toHaveScreenshot('sk-copy-field-failure.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  await expect.soft(target).toHaveScreenshot('sk-copy-field-failure.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
 });
 
 test('SK-copy-field forced colors — visual baseline', async ({ page }) => {
   await page.emulateMedia({ forcedColors: 'active' });
   const target = await copyFieldStory(page, 'forced-colors');
   await expect(target.locator('[part="status"]')).toHaveText('Value copied.');
-  await expect(target).toHaveScreenshot('sk-copy-field-forced-colors.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  await expect.soft(target).toHaveScreenshot('sk-copy-field-forced-colors.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
 });
 
 const workflowBoardStory = async (page: Page, id: string, viewport: { width: number; height: number }): Promise<Locator> => {
@@ -218,7 +218,7 @@ const workflowBoardVisuals = [
 for (const [id, snapshot, viewport] of workflowBoardVisuals) {
   test(`SK-workflow-board ${id} — visual baseline`, async ({ page }) => {
     const target = await workflowBoardStory(page, id, viewport);
-    await expect(target).toHaveScreenshot(snapshot, { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+    await expect.soft(target).toHaveScreenshot(snapshot, { threshold: 0.02, maxDiffPixelRatio: 0.02 });
   });
 }
 
@@ -228,14 +228,14 @@ test('SK-workflow-board forced colors — visual baseline', async ({ page }) => 
   const scroller = target.locator('.sk-workflow-board__scroller');
   await page.locator('body').press('Tab');
   await expect(scroller).toBeFocused();
-  await expect(target).toHaveScreenshot('sk-workflow-board-forced-colors.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  await expect.soft(target).toHaveScreenshot('sk-workflow-board-forced-colors.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
 });
 
 test('SK-ribbon-card HTML with ribbon — visual baseline', async ({ page }) => {
   await page.goto('/iframe.html?id=components-skribboncard-html--with-ribbon&viewMode=story');
   const target = page.locator('.sk-ribbon-card').first();
   await target.waitFor({ state: 'visible', timeout: 20000 });
-  await expect(target).toHaveScreenshot('sk-ribbon-card-html-with-ribbon.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  await expect.soft(target).toHaveScreenshot('sk-ribbon-card-html-with-ribbon.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
 });
 
 const transitionMatrixStory = async (page: Page, id: string): Promise<Locator> => {
@@ -343,7 +343,7 @@ const barChartStory = async (page: Page, id: string): Promise<Locator> => {
 test('SK-team-overview shell desktop dark — visual baseline', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   const host = await teamOverviewShellStory(page);
-  await expect(host).toHaveScreenshot('sk-team-overview-shell-desktop-dark.png', {
+  await expect.soft(host).toHaveScreenshot('sk-team-overview-shell-desktop-dark.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
   });
@@ -352,7 +352,7 @@ test('SK-team-overview shell desktop dark — visual baseline', async ({ page })
 test('SK-team-overview shell desktop light — visual baseline', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   const host = await teamOverviewShellStory(page, true);
-  await expect(host).toHaveScreenshot('sk-team-overview-shell-desktop-light.png', {
+  await expect.soft(host).toHaveScreenshot('sk-team-overview-shell-desktop-light.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
   });
@@ -361,7 +361,7 @@ test('SK-team-overview shell desktop light — visual baseline', async ({ page }
 test('SK-team-overview shell narrow — visual baseline', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 900 });
   const host = await teamOverviewShellStory(page);
-  await expect(host).toHaveScreenshot('sk-team-overview-shell-narrow.png', {
+  await expect.soft(host).toHaveScreenshot('sk-team-overview-shell-narrow.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
   });
@@ -374,7 +374,7 @@ for (const visual of [
 ] as const) {
   test(`SK-app-shell ${visual.name} — visual baseline`, async ({ page }) => {
     const host = await appShellStory(page, visual.id, visual.width, visual.height);
-    await expect(host).toHaveScreenshot(visual.name, {
+    await expect.soft(host).toHaveScreenshot(visual.name, {
       threshold: 0.02,
       maxDiffPixelRatio: 0.02,
     });
@@ -384,7 +384,7 @@ for (const visual of [
 test('SK-app-shell rail-preserving forced colors — visual baseline', async ({ page }) => {
   await page.emulateMedia({ forcedColors: 'active' });
   const host = await appShellStory(page, 'rail-preserving-forced-colors', 1024, 900);
-  await expect(host).toHaveScreenshot('sk-app-shell-rail-preserving-forced-colors.png', {
+  await expect.soft(host).toHaveScreenshot('sk-app-shell-rail-preserving-forced-colors.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
   });
@@ -397,7 +397,7 @@ for (const light of [false, true]) {
     const control = page.getByRole('button', { name: 'Refresh evidence' });
     await control.focus();
     await expect(control).toBeFocused();
-    await expect(control).toHaveScreenshot(`sk-icon-button-focus-${light ? 'light' : 'dark'}.png`, {
+    await expect.soft(control).toHaveScreenshot(`sk-icon-button-focus-${light ? 'light' : 'dark'}.png`, {
       threshold: 0.02,
       maxDiffPixelRatio: 0.02,
     });
@@ -406,21 +406,21 @@ for (const light of [false, true]) {
 
 test('SK-transition-matrix approved dark — visual baseline', async ({ page }) => {
   const host = await transitionMatrixStory(page, 'approved-example');
-  await expect(host).toHaveScreenshot('sk-transition-matrix-approved-dark.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  await expect.soft(host).toHaveScreenshot('sk-transition-matrix-approved-dark.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
 });
 
 test('SK-transition-matrix light — visual baseline', async ({ page }) => {
   const host = await transitionMatrixStory(page, 'light-mode');
-  await expect(host).toHaveScreenshot('sk-transition-matrix-light.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  await expect.soft(host).toHaveScreenshot('sk-transition-matrix-light.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
 });
 
 test('SK-transition-matrix selectable rest and hover — visual baselines', async ({ page }) => {
   await transitionMatrixStory(page, 'selectable-states');
   const host = page.locator('sk-transition-matrix[data-selectable-states]').first();
   const row = host.locator('[data-route-id="planned-progress"]');
-  await expect(host).toHaveScreenshot('sk-transition-matrix-selectable-rest.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  await expect.soft(host).toHaveScreenshot('sk-transition-matrix-selectable-rest.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
   await row.hover();
-  await expect(host).toHaveScreenshot('sk-transition-matrix-selectable-hover.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  await expect.soft(host).toHaveScreenshot('sk-transition-matrix-selectable-hover.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
 });
 
 test('SK-transition-matrix keyboard focus and pressed — visual baselines', async ({ page }) => {
@@ -428,10 +428,10 @@ test('SK-transition-matrix keyboard focus and pressed — visual baselines', asy
   const host = page.locator('sk-transition-matrix[data-selectable-states]').first();
   const row = host.locator('[data-route-id="planned-progress"]');
   await row.focus();
-  await expect(host).toHaveScreenshot('sk-transition-matrix-selectable-focus-visible.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  await expect.soft(host).toHaveScreenshot('sk-transition-matrix-selectable-focus-visible.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
   await page.keyboard.down('Space');
   await expect(row).toHaveAttribute('data-pressed', 'true');
-  await expect(host).toHaveScreenshot('sk-transition-matrix-selectable-keyboard-pressed.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  await expect.soft(host).toHaveScreenshot('sk-transition-matrix-selectable-keyboard-pressed.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
   await page.keyboard.up('Space');
 });
 
@@ -444,7 +444,7 @@ test('SK-transition-matrix pointer active — visual baseline', async ({ page })
   await page.mouse.move(box!.x + box!.width / 2, box!.y + box!.height / 2);
   await page.mouse.down();
   await expect(row).toHaveAttribute('data-pressed', 'true');
-  await expect(host).toHaveScreenshot('sk-transition-matrix-selectable-pointer-active.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  await expect.soft(host).toHaveScreenshot('sk-transition-matrix-selectable-pointer-active.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
   await page.mouse.up();
 });
 
@@ -452,7 +452,7 @@ test('SK-transition-matrix non-selectable analogue — visual baseline', async (
   await transitionMatrixStory(page, 'selectable-states');
   const host = page.locator('sk-transition-matrix[data-disabled-analogue]').first();
   await expect(host.locator('table')).toBeVisible();
-  await expect(host).toHaveScreenshot('sk-transition-matrix-non-selectable.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  await expect.soft(host).toHaveScreenshot('sk-transition-matrix-non-selectable.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
 });
 
 test('SK-transition-matrix narrow scrolled ownership — visual baseline', async ({ page }) => {
@@ -461,7 +461,7 @@ test('SK-transition-matrix narrow scrolled ownership — visual baseline', async
   const scroller = host.locator('[part~="scroller"]');
   await scroller.evaluate((node) => { node.scrollLeft = node.scrollWidth; });
   await expect.poll(() => scroller.evaluate((node) => node.scrollLeft)).toBeGreaterThan(0);
-  await expect(host).toHaveScreenshot('sk-transition-matrix-narrow-scrolled.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  await expect.soft(host).toHaveScreenshot('sk-transition-matrix-narrow-scrolled.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
 });
 
 test('SK-section-header long content — visual baseline', async ({ page }) => {
@@ -472,7 +472,7 @@ test('SK-section-header long content — visual baseline', async ({ page }) => {
   const action = host.locator('sk-button[slot="action"]');
   await expect(action.locator('button')).toBeVisible();
   await expect(action).toHaveText('Open activity');
-  await expect(host).toHaveScreenshot('sk-section-header-long-content.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  await expect.soft(host).toHaveScreenshot('sk-section-header-long-content.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
 });
 
 test('SK-section-header light mode — visual baseline', async ({ page }) => {
@@ -480,7 +480,7 @@ test('SK-section-header light mode — visual baseline', async ({ page }) => {
   const host = page.locator('sk-section-header').first();
   await host.waitFor({ state: 'visible', timeout: 20000 });
   await expect(host.locator('[part="title"]')).toBeVisible();
-  await expect(host).toHaveScreenshot('sk-section-header-light.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  await expect.soft(host).toHaveScreenshot('sk-section-header-light.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
 });
 
 test('SK-status-indicator all tones — visual baseline', async ({ page }) => {
@@ -488,7 +488,7 @@ test('SK-status-indicator all tones — visual baseline', async ({ page }) => {
   const indicators = page.locator('sk-status-indicator');
   await expect(indicators).toHaveCount(6);
   await indicators.first().waitFor({ state: 'visible', timeout: 20000 });
-  await expect(indicators.first().locator('..')).toHaveScreenshot('sk-status-indicator-all-tones.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  await expect.soft(indicators.first().locator('..')).toHaveScreenshot('sk-status-indicator-all-tones.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
 });
 
 test('SK-status-indicator light mode — visual baseline', async ({ page }) => {
@@ -496,28 +496,28 @@ test('SK-status-indicator light mode — visual baseline', async ({ page }) => {
   const indicators = page.locator('sk-status-indicator');
   await expect(indicators).toHaveCount(6);
   await indicators.first().waitFor({ state: 'visible', timeout: 20000 });
-  await expect(indicators.first().locator('..')).toHaveScreenshot('sk-status-indicator-light.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  await expect.soft(indicators.first().locator('..')).toHaveScreenshot('sk-status-indicator-light.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
 });
 
 test('SK-entity-marker meaningful and decorative modes — visual baselines', async ({ page }) => {
   await page.goto('/iframe.html?id=elements-skentitymarker--meaningful-icon&viewMode=story');
   let host = page.locator('sk-entity-marker').first();
   await host.waitFor({ state: 'visible', timeout: 20000 });
-  await expect(host).toHaveScreenshot('sk-entity-marker-meaningful.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  await expect.soft(host).toHaveScreenshot('sk-entity-marker-meaningful.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
 
   await page.goto('/iframe.html?id=elements-skentitymarker--decorative&viewMode=story');
   host = page.locator('sk-entity-marker').first();
   await host.waitFor({ state: 'visible', timeout: 20000 });
-  await expect(host).toHaveScreenshot('sk-entity-marker-decorative.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  await expect.soft(host).toHaveScreenshot('sk-entity-marker-decorative.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
 });
 
 test('SK-action-row default and light — visual baselines', async ({ page }) => {
   let host = await actionRowStory(page, 'default');
-  await expect(host).toHaveScreenshot('sk-action-row-default-dark.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  await expect.soft(host).toHaveScreenshot('sk-action-row-default-dark.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
   host = await actionRowStory(page, 'light-mode');
-  await expect(host).toHaveScreenshot('sk-action-row-light.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  await expect.soft(host).toHaveScreenshot('sk-action-row-light.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
   host = await actionRowStory(page, 'route-flush-light-mode');
-  await expect(host).toHaveScreenshot('sk-action-row-route-flush-light.png', {
+  await expect.soft(host).toHaveScreenshot('sk-action-row-route-flush-light.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
   });
@@ -533,7 +533,7 @@ test('SK-action-row route and flush states — visual baselines', async ({ page 
     ['unknown-presentation', 'sk-action-row-unknown-presentation.png'],
   ] as const) {
     const host = await actionRowStory(page, storyId);
-    await expect(host).toHaveScreenshot(snapshot, { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+    await expect.soft(host).toHaveScreenshot(snapshot, { threshold: 0.02, maxDiffPixelRatio: 0.02 });
   }
 });
 
@@ -542,7 +542,7 @@ test('SK-action-row forced-colors selected comparison — visual baseline', asyn
   await actionRowStory(page, 'forced-colors');
   const comparison = page.locator('[data-forced-colors-comparison]').first();
   await comparison.waitFor({ state: 'visible', timeout: 20000 });
-  await expect(comparison).toHaveScreenshot('sk-action-row-forced-colors.png', {
+  await expect.soft(comparison).toHaveScreenshot('sk-action-row-forced-colors.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
   });
@@ -551,19 +551,19 @@ test('SK-action-row forced-colors selected comparison — visual baseline', asyn
 test('SK-action-row long content at 320px — visual baseline', async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 844 });
   const host = await actionRowStory(page, 'long-content');
-  await expect(host).toHaveScreenshot('sk-action-row-long-content-320.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  await expect.soft(host).toHaveScreenshot('sk-action-row-long-content-320.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
 });
 
 test('SK-action-row selectable rest, hover, focus and pressed — visual baselines', async ({ page }) => {
   const host = await actionRowStory(page, 'selectable-states');
   const trigger = host.locator('button[part="trigger"]');
-  await expect(host).toHaveScreenshot('sk-action-row-selectable-rest.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  await expect.soft(host).toHaveScreenshot('sk-action-row-selectable-rest.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
   await trigger.hover();
-  await expect(host).toHaveScreenshot('sk-action-row-selectable-hover.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  await expect.soft(host).toHaveScreenshot('sk-action-row-selectable-hover.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
   await trigger.focus();
-  await expect(host).toHaveScreenshot('sk-action-row-selectable-focus-visible.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  await expect.soft(host).toHaveScreenshot('sk-action-row-selectable-focus-visible.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
   await page.keyboard.down('Space');
-  await expect(host).toHaveScreenshot('sk-action-row-selectable-keyboard-pressed.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  await expect.soft(host).toHaveScreenshot('sk-action-row-selectable-keyboard-pressed.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
   await page.keyboard.up('Space');
 });
 
@@ -574,15 +574,15 @@ test('SK-action-row pointer active — visual baseline', async ({ page }) => {
   expect(box).not.toBe(null);
   await page.mouse.move(box!.x + box!.width / 2, box!.y + box!.height / 2);
   await page.mouse.down();
-  await expect(host).toHaveScreenshot('sk-action-row-selectable-pointer-active.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  await expect.soft(host).toHaveScreenshot('sk-action-row-selectable-pointer-active.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
   await page.mouse.up();
 });
 
 test('SK-action-row selected and non-selectable analogues — visual baselines', async ({ page }) => {
   let host = await actionRowStory(page, 'selected');
-  await expect(host).toHaveScreenshot('sk-action-row-selected.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  await expect.soft(host).toHaveScreenshot('sk-action-row-selected.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
   host = await actionRowStory(page, 'non-selectable');
-  await expect(host).toHaveScreenshot('sk-action-row-non-selectable.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  await expect.soft(host).toHaveScreenshot('sk-action-row-non-selectable.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
 });
 
 // SK-action-row STATIC FORM (#307). `.sk-action-row-host` > `.sk-action-row` light-DOM markup
@@ -624,7 +624,7 @@ test('SK-action-row HTML forced-colors comparison — visual baseline', async ({
   await page.goto('/iframe.html?id=primitives-skactionrow-html--forced-colors&viewMode=story');
   const comparison = page.locator('[data-forced-colors-comparison]').first();
   await comparison.waitFor({ state: 'visible', timeout: 20000 });
-  await expect(comparison).toHaveScreenshot('sk-action-row-html-forced-colors.png', {
+  await expect.soft(comparison).toHaveScreenshot('sk-action-row-html-forced-colors.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
   });
@@ -633,7 +633,7 @@ test('SK-action-row HTML forced-colors comparison — visual baseline', async ({
 test('SK-action-row HTML long content at 360px — visual baseline', async ({ page }) => {
   await page.setViewportSize({ width: 400, height: 844 });
   const host = await actionRowHtmlStory(page, 'long-content-narrow');
-  await expect(host).toHaveScreenshot('sk-action-row-html-long-content-narrow.png', {
+  await expect.soft(host).toHaveScreenshot('sk-action-row-html-long-content-narrow.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
   });
@@ -642,7 +642,7 @@ test('SK-action-row HTML long content at 360px — visual baseline', async ({ pa
 test('compact work-item extensions T10 dark — visual baseline', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   const host = await actionRowStory(page, 't-10-compact-item');
-  await expect(host).toHaveScreenshot('sk-compact-work-item-extensions-t10-dark.png', {
+  await expect.soft(host).toHaveScreenshot('sk-compact-work-item-extensions-t10-dark.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
   });
@@ -651,7 +651,7 @@ test('compact work-item extensions T10 dark — visual baseline', async ({ page 
 test('compact work-item extensions T10 light — visual baseline', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   const host = await actionRowStory(page, 't-10-compact-item-light-mode');
-  await expect(host).toHaveScreenshot('sk-compact-work-item-extensions-t10-light.png', {
+  await expect.soft(host).toHaveScreenshot('sk-compact-work-item-extensions-t10-light.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
   });
@@ -666,7 +666,7 @@ test('compact work-item extensions narrow long card — visual baseline', async 
     frame.style.inlineSize = '220px';
     frame.style.maxInlineSize = '220px';
   });
-  await expect(host).toHaveScreenshot('sk-compact-work-item-extensions-narrow-long-card.png', {
+  await expect.soft(host).toHaveScreenshot('sk-compact-work-item-extensions-narrow-long-card.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
   });
@@ -677,7 +677,7 @@ test('compact work-item extensions marker axis matrix — visual baseline', asyn
   const markers = page.locator('sk-entity-marker');
   await expect(markers).toHaveCount(4);
   await markers.first().waitFor({ state: 'visible', timeout: 20000 });
-  await expect(markers.first().locator('..')).toHaveScreenshot(
+  await expect.soft(markers.first().locator('..')).toHaveScreenshot(
     'sk-compact-work-item-extensions-marker-axis-matrix.png',
     { threshold: 0.02, maxDiffPixelRatio: 0.02 },
   );
@@ -698,7 +698,7 @@ test('compact work-item extensions portrait and landscape crop — visual baseli
   });
   await expect.poll(() => page.locator('img[data-landscape]').evaluate((image: HTMLImageElement) => image.complete))
     .toBe(true);
-  await expect(first.locator('..')).toHaveScreenshot(
+  await expect.soft(first.locator('..')).toHaveScreenshot(
     'sk-compact-work-item-extensions-marker-image-crop.png',
     { threshold: 0.02, maxDiffPixelRatio: 0.02 },
   );
@@ -724,7 +724,7 @@ test('SK-entity-marker bordered vs unbordered outer box — visual baseline', as
   const markers = page.locator('sk-entity-marker');
   await expect(markers).toHaveCount(2);
   await markers.first().waitFor({ state: 'visible', timeout: 20000 });
-  await expect(markers.first().locator('..')).toHaveScreenshot(
+  await expect.soft(markers.first().locator('..')).toHaveScreenshot(
     'sk-entity-marker-bordered-outer-box-comparison.png',
     { threshold: 0.02, maxDiffPixelRatio: 0.02 },
   );
@@ -736,7 +736,7 @@ test('compact work-item extensions pulse off/on reduced-motion fallback — visu
   const indicators = page.locator('sk-status-indicator');
   await expect(indicators).toHaveCount(2);
   await indicators.first().waitFor({ state: 'visible', timeout: 20000 });
-  await expect(indicators.first().locator('..')).toHaveScreenshot(
+  await expect.soft(indicators.first().locator('..')).toHaveScreenshot(
     'sk-compact-work-item-extensions-pulse-reduced-motion.png',
     { threshold: 0.02, maxDiffPixelRatio: 0.02 },
   );
@@ -746,7 +746,7 @@ test('compact work-item extensions inline short and long dark — visual baselin
   await page.goto('/iframe.html?id=primitives-skemptystate-html--inline&viewMode=story');
   let target = page.locator('[data-inline-empty-frame]');
   await target.waitFor({ state: 'visible', timeout: 20000 });
-  await expect(target).toHaveScreenshot('sk-compact-work-item-extensions-inline-short-dark.png', {
+  await expect.soft(target).toHaveScreenshot('sk-compact-work-item-extensions-inline-short-dark.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
   });
@@ -754,7 +754,7 @@ test('compact work-item extensions inline short and long dark — visual baselin
   await page.goto('/iframe.html?id=primitives-skemptystate-html--inline-long-narrow&viewMode=story');
   target = page.locator('[data-inline-empty-frame]');
   await target.waitFor({ state: 'visible', timeout: 20000 });
-  await expect(target).toHaveScreenshot('sk-compact-work-item-extensions-inline-long-dark.png', {
+  await expect.soft(target).toHaveScreenshot('sk-compact-work-item-extensions-inline-long-dark.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
   });
@@ -764,7 +764,7 @@ test('compact work-item extensions inline light — visual baseline', async ({ p
   await page.goto('/iframe.html?id=primitives-skemptystate-html--inline-light-mode&viewMode=story');
   const target = page.locator('[data-inline-empty-frame]');
   await target.waitFor({ state: 'visible', timeout: 20000 });
-  await expect(target).toHaveScreenshot('sk-compact-work-item-extensions-inline-light.png', {
+  await expect.soft(target).toHaveScreenshot('sk-compact-work-item-extensions-inline-light.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
   });
@@ -775,7 +775,7 @@ test('compact work-item extensions inline forced colors — visual baseline', as
   await page.goto('/iframe.html?id=primitives-skemptystate-html--inline-preferences&viewMode=story');
   const target = page.locator('[data-inline-empty-frame]');
   await target.waitFor({ state: 'visible', timeout: 20000 });
-  await expect(target).toHaveScreenshot('sk-compact-work-item-extensions-inline-forced-colors.png', {
+  await expect.soft(target).toHaveScreenshot('sk-compact-work-item-extensions-inline-forced-colors.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
   });
@@ -799,49 +799,49 @@ const evidenceChainStory = async (page: Page, id: string): Promise<Locator> => {
 
 test('SK-metric default dark and light — visual baselines', async ({ page }) => {
   let host = await metricStory(page, 'default');
-  await expect(host).toHaveScreenshot('sk-metric-default-dark.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  await expect.soft(host).toHaveScreenshot('sk-metric-default-dark.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
   host = await metricStory(page, 'light-mode');
-  await expect(host).toHaveScreenshot('sk-metric-light.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  await expect.soft(host).toHaveScreenshot('sk-metric-light.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
 });
 
 test('SK-metric compact and long content — visual baselines', async ({ page }) => {
   let host = await metricStory(page, 'compact');
-  await expect(host).toHaveScreenshot('sk-metric-compact.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  await expect.soft(host).toHaveScreenshot('sk-metric-compact.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
   await page.setViewportSize({ width: 390, height: 844 });
   host = await metricStory(page, 'long-content');
-  await expect(host).toHaveScreenshot('sk-metric-long-content.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  await expect.soft(host).toHaveScreenshot('sk-metric-long-content.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
 });
 
 test('SK-evidence-chain approved composition and light — visual baselines', async ({ page }) => {
   await evidenceChainStory(page, 'approved-example');
   let target = page.locator('sk-grid').first();
-  await expect(target).toHaveScreenshot('sk-evidence-chain-approved-dark.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  await expect.soft(target).toHaveScreenshot('sk-evidence-chain-approved-dark.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
   await evidenceChainStory(page, 'light-mode');
   target = page.locator('sk-grid').first();
-  await expect(target).toHaveScreenshot('sk-evidence-chain-light.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  await expect.soft(target).toHaveScreenshot('sk-evidence-chain-light.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
 });
 
 test('SK-evidence-chain two and six stages — visual baselines', async ({ page }) => {
   let host = await evidenceChainStory(page, 'two-stages');
-  await expect(host).toHaveScreenshot('sk-evidence-chain-two-stages.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  await expect.soft(host).toHaveScreenshot('sk-evidence-chain-two-stages.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
   host = await evidenceChainStory(page, 'six-stages');
-  await expect(host).toHaveScreenshot('sk-evidence-chain-six-stages.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  await expect.soft(host).toHaveScreenshot('sk-evidence-chain-six-stages.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
 });
 
 test('SK-evidence-chain narrow — visual baseline', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   const host = await evidenceChainStory(page, 'narrow');
-  await expect(host).toHaveScreenshot('sk-evidence-chain-narrow.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  await expect.soft(host).toHaveScreenshot('sk-evidence-chain-narrow.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
 });
 
 test('SK-bar-chart approved dark — visual baseline', async ({ page }) => {
   const host = await barChartStory(page, 'default');
-  await expect(host).toHaveScreenshot('sk-bar-chart-approved-dark.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  await expect.soft(host).toHaveScreenshot('sk-bar-chart-approved-dark.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
 });
 
 test('SK-bar-chart approved light — visual baseline', async ({ page }) => {
   const host = await barChartStory(page, 'light-mode');
-  await expect(host).toHaveScreenshot('sk-bar-chart-approved-light.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  await expect.soft(host).toHaveScreenshot('sk-bar-chart-approved-light.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
 });
 
 test('SK-bar-chart narrow scrolled ownership — visual baseline', async ({ page }) => {
@@ -850,14 +850,14 @@ test('SK-bar-chart narrow scrolled ownership — visual baseline', async ({ page
   const plot = host.locator('[part="plot"]');
   await plot.evaluate((node) => { node.scrollLeft = node.scrollWidth; });
   await expect.poll(() => plot.evaluate((node) => node.scrollLeft)).toBeGreaterThan(0);
-  await expect(host).toHaveScreenshot('sk-bar-chart-narrow-scrolled.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  await expect.soft(host).toHaveScreenshot('sk-bar-chart-narrow-scrolled.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
 });
 
 test('SK-bar-chart zero and empty states — visual baselines', async ({ page }) => {
   let host = await barChartStory(page, 'zero-values');
-  await expect(host).toHaveScreenshot('sk-bar-chart-zero-values.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  await expect.soft(host).toHaveScreenshot('sk-bar-chart-zero-values.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
   host = await barChartStory(page, 'empty');
-  await expect(host).toHaveScreenshot('sk-bar-chart-empty.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  await expect.soft(host).toHaveScreenshot('sk-bar-chart-empty.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
 });
 
 test('SK-bar-chart selectable states — visual baseline', async ({ page }) => {
@@ -871,7 +871,7 @@ test('SK-bar-chart selectable states — visual baseline', async ({ page }) => {
   await expect(rest.locator('[aria-pressed="true"]')).toHaveCount(0);
   await expect(selected.locator('[aria-pressed="true"]')).toHaveCount(1);
   await expect(nonSelectable.getByRole('button')).toHaveCount(0);
-  await expect(states).toHaveScreenshot('sk-bar-chart-selectable-states.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+  await expect.soft(states).toHaveScreenshot('sk-bar-chart-selectable-states.png', { threshold: 0.02, maxDiffPixelRatio: 0.02 });
 });
 
 const formSelectStory = async (
@@ -917,7 +917,7 @@ for (const [id, snapshot, viewport] of formSelectVisuals) {
         documentScrollWidth: viewport.width,
       });
     }
-    await expect(target).toHaveScreenshot(snapshot, { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+    await expect.soft(target).toHaveScreenshot(snapshot, { threshold: 0.02, maxDiffPixelRatio: 0.02 });
   });
 }
 
@@ -925,7 +925,7 @@ test('SK-form-select forced colors — visual baseline', async ({ page }) => {
   await page.emulateMedia({ forcedColors: 'active' });
   const target = await formSelectStory(page, 'forced-colors');
   await target.locator('.sk-form-select').focus();
-  await expect(target).toHaveScreenshot('sk-form-select-forced-colors.png', {
+  await expect.soft(target).toHaveScreenshot('sk-form-select-forced-colors.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
   });
@@ -938,7 +938,7 @@ test('SK-form-select forced colors — visual baseline', async ({ page }) => {
 // of the control's border color on shots of this size.
 test('SK-form-select light invalid — visual baseline', async ({ page }) => {
   const field = await formSelectStory(page, 'light-mode-invalid');
-  await expect(field).toHaveScreenshot('sk-form-select-light-invalid.png', {
+  await expect.soft(field).toHaveScreenshot('sk-form-select-light-invalid.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.005,
   });
@@ -983,7 +983,7 @@ const staticFormInputVisuals = [
 for (const [id, snapshot] of staticFormInputVisuals) {
   test(`SK-input ${id} — visual baseline`, async ({ page }) => {
     const field = await staticFormInputStory(page, id);
-    await expect(field).toHaveScreenshot(snapshot, { threshold: 0.02, maxDiffPixelRatio: 0.005 });
+    await expect.soft(field).toHaveScreenshot(snapshot, { threshold: 0.02, maxDiffPixelRatio: 0.005 });
   });
 }
 
@@ -993,7 +993,7 @@ for (const [id, snapshot] of staticFormInputVisuals) {
 // (`--sk-border-control-invalid`) and the error copy (`--sk-fg-error`) in one shot.
 test('SK-input light error — visual baseline', async ({ page }) => {
   const field = await staticFormInputStory(page, 'light-mode-error');
-  await expect(field).toHaveScreenshot('sk-input-light-error.png', { threshold: 0.02, maxDiffPixelRatio: 0.005 });
+  await expect.soft(field).toHaveScreenshot('sk-input-light-error.png', { threshold: 0.02, maxDiffPixelRatio: 0.005 });
 });
 
 test('SK-input narrow — visual baseline', async ({ page }) => {
@@ -1014,7 +1014,7 @@ test('SK-input narrow — visual baseline', async ({ page }) => {
   // Clipped to the component (`field`), not `target` (#storybook-root) -- this file's own
   // invariant above: an unclipped shot dilutes the diff ratio's denominator with page
   // background, which is exactly what made this test's border-loss budget too loose.
-  await expect(field).toHaveScreenshot('sk-input-narrow.png', {
+  await expect.soft(field).toHaveScreenshot('sk-input-narrow.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.005,
   });
@@ -1024,7 +1024,7 @@ test('SK-input forced colors — visual baseline', async ({ page }) => {
   await page.emulateMedia({ forcedColors: 'active' });
   const field = await staticFormInputStory(page, 'form-input-default');
   await field.locator('.sk-input').focus();
-  await expect(field).toHaveScreenshot('sk-input-forced-colors.png', {
+  await expect.soft(field).toHaveScreenshot('sk-input-forced-colors.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.005,
   });
@@ -1052,7 +1052,7 @@ const elementFormInputVisuals = [
 for (const [id, snapshot] of elementFormInputVisuals) {
   test(`SK-form-input ${id} — visual baseline`, async ({ page }) => {
     const host = await elementFormInputStory(page, id);
-    await expect(host).toHaveScreenshot(snapshot, { threshold: 0.02, maxDiffPixelRatio: 0.005 });
+    await expect.soft(host).toHaveScreenshot(snapshot, { threshold: 0.02, maxDiffPixelRatio: 0.005 });
   });
 }
 
@@ -1061,7 +1061,7 @@ for (const [id, snapshot] of elementFormInputVisuals) {
 // path this time.
 test('SK-form-input light error — visual baseline', async ({ page }) => {
   const host = await elementFormInputStory(page, 'light-mode-error');
-  await expect(host).toHaveScreenshot('sk-form-input-light-error.png', {
+  await expect.soft(host).toHaveScreenshot('sk-form-input-light-error.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.005,
   });
@@ -1084,7 +1084,7 @@ test('SK-form-input narrow — visual baseline', async ({ page }) => {
   expect(geometry).toEqual({ targetWidth: 320, viewportWidth: 320, documentScrollWidth: 320 });
   // Clipped to the component (`host`), not `target` (#storybook-root) -- see the sibling
   // static-path narrow test's comment; same invariant, same reason.
-  await expect(host).toHaveScreenshot('sk-form-input-narrow.png', {
+  await expect.soft(host).toHaveScreenshot('sk-form-input-narrow.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.005,
   });
@@ -1094,7 +1094,7 @@ test('SK-form-input forced colors — visual baseline', async ({ page }) => {
   await page.emulateMedia({ forcedColors: 'active' });
   const host = await elementFormInputStory(page, 'default');
   await host.locator('[part="control"]').focus();
-  await expect(host).toHaveScreenshot('sk-form-input-forced-colors.png', {
+  await expect.soft(host).toHaveScreenshot('sk-form-input-forced-colors.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.005,
   });
@@ -1120,7 +1120,7 @@ const elementFormTextareaStory = async (
 
 test('SK-form-textarea light error — visual baseline', async ({ page }) => {
   const host = await elementFormTextareaStory(page, 'light-mode-error');
-  await expect(host).toHaveScreenshot('sk-form-textarea-light-error.png', {
+  await expect.soft(host).toHaveScreenshot('sk-form-textarea-light-error.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.005,
   });
@@ -1183,7 +1183,7 @@ for (const [id, snapshot, viewport] of checkboxChoiceGroupVisuals) {
       };
     });
     expect(geometry.documentScrollWidth).toBeLessThanOrEqual(geometry.viewportWidth);
-    await expect(target).toHaveScreenshot(snapshot, {
+    await expect.soft(target).toHaveScreenshot(snapshot, {
       threshold: 0.02,
       maxDiffPixelRatio: 0.02,
     });
@@ -1195,7 +1195,7 @@ test('SK-checkbox-choice-group focus — visual baseline', async ({ page }) => {
   const control = target.locator('.sk-checkbox-choice-group__control:not(:checked)').first();
   await control.focus();
   await expect(control).toBeFocused();
-  await expect(target).toHaveScreenshot('sk-checkbox-choice-group-focus.png', {
+  await expect.soft(target).toHaveScreenshot('sk-checkbox-choice-group-focus.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
   });
@@ -1207,7 +1207,7 @@ test('SK-checkbox-choice-group forced colors — visual baseline', async ({ page
   const control = target.locator('.sk-checkbox-choice-group__control:not(:disabled)').last();
   await control.focus();
   await expect(control).toBeFocused();
-  await expect(target).toHaveScreenshot('sk-checkbox-choice-group-forced-colors.png', {
+  await expect.soft(target).toHaveScreenshot('sk-checkbox-choice-group-forced-colors.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
   });
@@ -1249,7 +1249,7 @@ for (const [id, snapshot, viewport] of radioChoiceGroupVisuals) {
       };
     });
     expect(geometry.documentScrollWidth).toBeLessThanOrEqual(geometry.viewportWidth);
-    await expect(target).toHaveScreenshot(snapshot, {
+    await expect.soft(target).toHaveScreenshot(snapshot, {
       threshold: 0.02,
       maxDiffPixelRatio: 0.02,
     });
@@ -1261,7 +1261,7 @@ test('SK-radio-choice-group focus — visual baseline', async ({ page }) => {
   const control = target.locator('.sk-radio-choice-group__control:not(:checked)').first();
   await control.focus();
   await expect(control).toBeFocused();
-  await expect(target).toHaveScreenshot('sk-radio-choice-group-focus.png', {
+  await expect.soft(target).toHaveScreenshot('sk-radio-choice-group-focus.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
   });
@@ -1273,7 +1273,7 @@ test('SK-radio-choice-group forced colors — visual baseline', async ({ page })
   const control = target.locator('.sk-radio-choice-group__control:not(:disabled)').first();
   await control.focus();
   await expect(control).toBeFocused();
-  await expect(target).toHaveScreenshot('sk-radio-choice-group-forced-colors.png', {
+  await expect.soft(target).toHaveScreenshot('sk-radio-choice-group-forced-colors.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
   });
@@ -1294,7 +1294,7 @@ const segmentedChoiceStory = async (
 
 test('SK-segmented-choice selected — visual baseline', async ({ page }) => {
   const target = await segmentedChoiceStory(page, 'default');
-  await expect(target).toHaveScreenshot('sk-segmented-choice-selected.png', {
+  await expect.soft(target).toHaveScreenshot('sk-segmented-choice-selected.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
   });
@@ -1302,7 +1302,7 @@ test('SK-segmented-choice selected — visual baseline', async ({ page }) => {
 
 test('SK-segmented-choice unselected — visual baseline', async ({ page }) => {
   const target = await segmentedChoiceStory(page, 'no-selection');
-  await expect(target).toHaveScreenshot('sk-segmented-choice-unselected.png', {
+  await expect.soft(target).toHaveScreenshot('sk-segmented-choice-unselected.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
   });
@@ -1311,7 +1311,7 @@ test('SK-segmented-choice unselected — visual baseline', async ({ page }) => {
 test('SK-segmented-choice hover — visual baseline', async ({ page }) => {
   const target = await segmentedChoiceStory(page, 'default');
   await target.locator('.sk-segmented-choice__item').nth(1).hover();
-  await expect(target).toHaveScreenshot('sk-segmented-choice-hover.png', {
+  await expect.soft(target).toHaveScreenshot('sk-segmented-choice-hover.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
   });
@@ -1325,7 +1325,7 @@ test('SK-segmented-choice active — visual baseline', async ({ page }) => {
   await page.mouse.move(box!.x + box!.width / 2, box!.y + box!.height / 2);
   await page.mouse.down();
   try {
-    await expect(target).toHaveScreenshot('sk-segmented-choice-active.png', {
+    await expect.soft(target).toHaveScreenshot('sk-segmented-choice-active.png', {
       threshold: 0.02,
       maxDiffPixelRatio: 0.02,
     });
@@ -1336,7 +1336,7 @@ test('SK-segmented-choice active — visual baseline', async ({ page }) => {
 
 test('SK-segmented-choice disabled — visual baseline', async ({ page }) => {
   const target = await segmentedChoiceStory(page, 'one-disabled');
-  await expect(target).toHaveScreenshot('sk-segmented-choice-disabled.png', {
+  await expect.soft(target).toHaveScreenshot('sk-segmented-choice-disabled.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
   });
@@ -1346,7 +1346,7 @@ test('SK-segmented-choice focus — visual baseline', async ({ page }) => {
   const target = await segmentedChoiceStory(page, 'default');
   await page.keyboard.press('Tab');
   await expect(target.locator('.sk-segmented-choice__item').first()).toBeFocused();
-  await expect(target).toHaveScreenshot('sk-segmented-choice-focus.png', {
+  await expect.soft(target).toHaveScreenshot('sk-segmented-choice-focus.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
   });
@@ -1354,7 +1354,7 @@ test('SK-segmented-choice focus — visual baseline', async ({ page }) => {
 
 test('SK-segmented-choice long content — visual baseline', async ({ page }) => {
   const target = await segmentedChoiceStory(page, 'long-labels', { width: 390, height: 420 });
-  await expect(target).toHaveScreenshot('sk-segmented-choice-long-content.png', {
+  await expect.soft(target).toHaveScreenshot('sk-segmented-choice-long-content.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
   });
@@ -1362,7 +1362,7 @@ test('SK-segmented-choice long content — visual baseline', async ({ page }) =>
 
 test('SK-segmented-choice dark — visual baseline', async ({ page }) => {
   const target = await segmentedChoiceStory(page, 'default-dark');
-  await expect(target).toHaveScreenshot('sk-segmented-choice-dark.png', {
+  await expect.soft(target).toHaveScreenshot('sk-segmented-choice-dark.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
   });
@@ -1370,7 +1370,7 @@ test('SK-segmented-choice dark — visual baseline', async ({ page }) => {
 
 test('SK-segmented-choice light — visual baseline', async ({ page }) => {
   const target = await segmentedChoiceStory(page, 'light-mode');
-  await expect(target).toHaveScreenshot('sk-segmented-choice-light.png', {
+  await expect.soft(target).toHaveScreenshot('sk-segmented-choice-light.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
   });
@@ -1380,7 +1380,7 @@ test('SK-segmented-choice forced colors — visual baseline', async ({ page }) =
   await page.emulateMedia({ forcedColors: 'active' });
   const target = await segmentedChoiceStory(page, 'forced-colors');
   await target.locator('.sk-segmented-choice__item').nth(2).focus();
-  await expect(target).toHaveScreenshot('sk-segmented-choice-forced-colors.png', {
+  await expect.soft(target).toHaveScreenshot('sk-segmented-choice-forced-colors.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
   });
@@ -1424,7 +1424,7 @@ const contextNavVisuals = [
 for (const [id, snapshot, viewport] of contextNavVisuals) {
   test(`SK-context-nav ${id} — visual baseline`, async ({ page }) => {
     const target = await contextNavStory(page, id, viewport);
-    await expect(target).toHaveScreenshot(snapshot, { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+    await expect.soft(target).toHaveScreenshot(snapshot, { threshold: 0.02, maxDiffPixelRatio: 0.02 });
   });
 }
 
@@ -1432,7 +1432,7 @@ test('SK-context-nav forced colors — visual baseline', async ({ page }) => {
   await page.emulateMedia({ forcedColors: 'active' });
   const target = await contextNavStory(page, 'forced-colors');
   await target.locator('.sk-context-nav__link[aria-current]').focus();
-  await expect(target).toHaveScreenshot('sk-context-nav-forced-colors.png', {
+  await expect.soft(target).toHaveScreenshot('sk-context-nav-forced-colors.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
   });
@@ -1446,7 +1446,7 @@ test('SK-context-nav unavailable forced colors — visual baseline', async ({
     width: 390,
     height: 720,
   });
-  await expect(target).toHaveScreenshot(
+  await expect.soft(target).toHaveScreenshot(
     'sk-context-nav-unavailable-forced-colors.png',
     {
       threshold: 0.02,
@@ -1472,7 +1472,7 @@ for (const [id, snapshot] of [
 ] as const) {
   test(`SK-public-header ${id} — visual baseline`, async ({ page }) => {
     const target = await publicHeaderStory(page, id);
-    await expect(target).toHaveScreenshot(snapshot, {
+    await expect.soft(target).toHaveScreenshot(snapshot, {
       threshold: 0.02,
       maxDiffPixelRatio: 0.02,
     });
@@ -1502,7 +1502,7 @@ const sectionNavVisuals = [
 for (const [id, snapshot, viewport] of sectionNavVisuals) {
   test(`SK-section-nav ${id} — visual baseline`, async ({ page }) => {
     const target = await sectionNavStory(page, id, viewport);
-    await expect(target).toHaveScreenshot(snapshot, { threshold: 0.02, maxDiffPixelRatio: 0.02 });
+    await expect.soft(target).toHaveScreenshot(snapshot, { threshold: 0.02, maxDiffPixelRatio: 0.02 });
   });
 }
 
@@ -1516,7 +1516,7 @@ test('SK-section-nav forced colors — visual baseline', async ({ page }) => {
   await page.emulateMedia({ forcedColors: 'active' });
   const target = await sectionNavStory(page, 'forced-colors', { width: 390, height: 720 });
   await target.locator('.sk-section-nav__link[aria-current]').focus();
-  await expect(target).toHaveScreenshot('sk-section-nav-forced-colors.png', {
+  await expect.soft(target).toHaveScreenshot('sk-section-nav-forced-colors.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
   });
@@ -1578,7 +1578,7 @@ const teamOverviewFullCases = [
 for (const visual of teamOverviewFullCases) {
   test(`Team overview ${visual.name} — full pattern baseline`, async ({ page }) => {
     const root = await teamOverviewPatternStory(page, visual.id, visual.width, visual.height);
-    await expect(root).toHaveScreenshot(visual.name, {
+    await expect.soft(root).toHaveScreenshot(visual.name, {
       threshold: 0.02,
       maxDiffPixelRatio: 0.02,
     });
@@ -1597,7 +1597,7 @@ for (const visual of teamOverviewFocusedCases) {
     const root = await teamOverviewPatternStory(page, visual.id, 1440, 1600);
     const region = root.locator(`[data-visual-region="${visual.region}"]`).first();
     await region.waitFor({ state: 'visible', timeout: 20000 });
-    await expect(region).toHaveScreenshot(visual.name, {
+    await expect.soft(region).toHaveScreenshot(visual.name, {
       threshold: 0.02,
       maxDiffPixelRatio: 0.02,
     });
@@ -1619,6 +1619,7 @@ const detailStory = async (
 };
 
 test('SK-check-bullet active forced colors retains visible, distinct complete and pending state', async ({ page, browserName }) => {
+  expect(test.info().config.projects.map((project) => project.name), 'the chromium skip below is keyed on this project name').toContain('chromium');
   test.skip(browserName !== 'chromium', 'Playwright forced-colors emulation is Chromium-owned');
   await page.emulateMedia({ forcedColors: 'active' });
   expect(await page.evaluate(() => matchMedia('(forced-colors: active)').matches)).toBe(true);
@@ -1730,7 +1731,7 @@ const workPackageDetailVisuals = [
 for (const visual of workPackageDetailVisuals) {
   test(`Work package detail ${visual.name} — targeted visual baseline`, async ({ page }) => {
     const target = await detailStory(page, visual.id, visual.selector, visual.viewport);
-    await expect(target).toHaveScreenshot(visual.name, {
+    await expect.soft(target).toHaveScreenshot(visual.name, {
       threshold: 0.02,
       maxDiffPixelRatio: 0.02,
     });
@@ -1788,7 +1789,7 @@ const workPackagePatternFullCases = [
 for (const visual of workPackagePatternFullCases) {
   test(`Work Package pattern ${visual.name} — full route baseline`, async ({ page }) => {
     const root = await workPackagePatternStory(page, visual.id, visual.width, visual.height);
-    await expect(root).toHaveScreenshot(visual.name, {
+    await expect.soft(root).toHaveScreenshot(visual.name, {
       threshold: 0.02,
       maxDiffPixelRatio: 0.02,
     });
@@ -1818,7 +1819,7 @@ for (const visual of workPackagePatternFocusedCases) {
     const root = await workPackagePatternStory(page, visual.id, 1280, 1100);
     const region = root.locator(visual.selector).first();
     await region.waitFor({ state: 'visible', timeout: 20000 });
-    await expect(region).toHaveScreenshot(visual.name, {
+    await expect.soft(region).toHaveScreenshot(visual.name, {
       threshold: 0.02,
       maxDiffPixelRatio: 0.02,
     });
@@ -1882,7 +1883,7 @@ for (const visual of missionReadingFullCases) {
       await page.emulateMedia({ reducedMotion: 'reduce' });
       await root.getByRole('link', { name: 'Back to repository' }).focus();
     }
-    await expect(root).toHaveScreenshot(visual.name, {
+    await expect.soft(root).toHaveScreenshot(visual.name, {
       threshold: 0.02,
       maxDiffPixelRatio: 0.02,
       timeout: 20000,
@@ -1893,7 +1894,7 @@ for (const visual of missionReadingFullCases) {
 for (const width of [859, 860, 861] as const) {
   test(`Mission Reading threshold ${width}px — visual baseline`, async ({ page }) => {
     const root = await missionReadingStory(page, 'default', { width, height: 1000 });
-    await expect(root).toHaveScreenshot(`sk-mission-reading-threshold-${width}.png`, {
+    await expect.soft(root).toHaveScreenshot(`sk-mission-reading-threshold-${width}.png`, {
       threshold: 0.02,
       maxDiffPixelRatio: 0.02,
       timeout: 20000,
@@ -1907,7 +1908,7 @@ test('Mission Reading forced colors unavailable entry — visual baseline', asyn
   const unavailable = root.locator(
     '[data-context-nav="desktop"] [data-catalogue-key="plan"] > .sk-context-nav__unavailable',
   );
-  await expect(unavailable).toHaveScreenshot('sk-mission-reading-forced-colors-unavailable.png', {
+  await expect.soft(unavailable).toHaveScreenshot('sk-mission-reading-forced-colors-unavailable.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
     timeout: 20000,
@@ -1919,7 +1920,7 @@ test('Mission Reading forced colors unavailable entry — visual baseline', asyn
 test('Mission Reading long content CSS zoom stress — visual baseline', async ({ page }) => {
   const root = await missionReadingStory(page, 'long-content', { width: 780, height: 1000 });
   await page.evaluate(() => { document.documentElement.style.zoom = '2'; });
-  await expect(root).toHaveScreenshot('sk-mission-reading-long-css-zoom-stress.png', {
+  await expect.soft(root).toHaveScreenshot('sk-mission-reading-long-css-zoom-stress.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
     timeout: 20000,
@@ -1974,7 +1975,7 @@ for (const visual of missionKanbanVisuals) {
     await expect(root).toHaveAttribute('data-play-proof', 'passed');
     await page.evaluate(() => document.fonts.ready);
     await expect(root).not.toBeEmpty();
-    await expect(root).toHaveScreenshot(visual.name, {
+    await expect.soft(root).toHaveScreenshot(visual.name, {
       threshold: 0.02,
       maxDiffPixelRatio: 0.02,
       timeout: 20000,
@@ -2036,7 +2037,7 @@ for (const visual of missionKanbanTenLaneVisuals) {
     await expect(root).toHaveAttribute('data-play-proof', 'passed');
     await page.evaluate(() => document.fonts.ready);
     await expect(root).not.toBeEmpty();
-    await expect(root).toHaveScreenshot(visual.name, {
+    await expect.soft(root).toHaveScreenshot(visual.name, {
       threshold: 0.02,
       maxDiffPixelRatio: 0.02,
       timeout: 20000,
@@ -2110,7 +2111,7 @@ for (const visual of repositoryDossierFullCases) {
       await root.locator('[slot="compact-navigation"]')
         .getByRole('link', { name: 'Overview', exact: true }).focus();
     }
-    await expect(root).toHaveScreenshot(visual.name, {
+    await expect.soft(root).toHaveScreenshot(visual.name, {
       threshold: 0.02,
       maxDiffPixelRatio: 0.02,
       timeout: 20000,
@@ -2119,11 +2120,12 @@ for (const visual of repositoryDossierFullCases) {
 }
 
 test('Repository Dossier active forced colors — visual baseline', async ({ page, browserName }) => {
+  expect(test.info().config.projects.map((project) => project.name), 'the chromium skip below is keyed on this project name').toContain('chromium');
   test.skip(browserName !== 'chromium', 'Playwright forced-colors emulation is Chromium-owned');
   await page.emulateMedia({ forcedColors: 'active', reducedMotion: 'reduce' });
   const root = await repositoryDossierStory(page, 'forced-colors', { width: 1440, height: 1024 });
   await root.locator('[data-context-nav="desktop"] [aria-current="page"]').focus();
-  await expect(root).toHaveScreenshot('sk-repository-dossier-forced-colors.png', {
+  await expect.soft(root).toHaveScreenshot('sk-repository-dossier-forced-colors.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
     timeout: 20000,
@@ -2133,7 +2135,7 @@ test('Repository Dossier active forced colors — visual baseline', async ({ pag
 test('Repository Dossier reduced motion indexing — visual baseline', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   const root = await repositoryDossierStory(page, 'reduced-motion', { width: 1440, height: 900 });
-  await expect(root).toHaveScreenshot('sk-repository-dossier-reduced-motion.png', {
+  await expect.soft(root).toHaveScreenshot('sk-repository-dossier-reduced-motion.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
     timeout: 20000,
@@ -2147,7 +2149,7 @@ for (const zoom of [
   test(`Repository Dossier ${zoom.value}00% CSS zoom stress — visual baseline`, async ({ page }) => {
     const root = await repositoryDossierStory(page, zoom.id, { width: zoom.width, height: 1000 });
     await page.evaluate((value) => { document.documentElement.style.zoom = value; }, zoom.value);
-    await expect(root).toHaveScreenshot(zoom.name, {
+    await expect.soft(root).toHaveScreenshot(zoom.name, {
       threshold: 0.02,
       maxDiffPixelRatio: 0.02,
       timeout: 20000,
@@ -2259,7 +2261,7 @@ for (const visual of workExplorerFullCases) {
       width: visual.width,
       height: visual.height,
     });
-    await expect(root).toHaveScreenshot(visual.name, {
+    await expect.soft(root).toHaveScreenshot(visual.name, {
       threshold: 0.02,
       maxDiffPixelRatio: 0.02,
       timeout: 20000,
@@ -2275,7 +2277,7 @@ for (const width of [1099, 1100, 1101] as const) {
       width,
       height: 1000,
     });
-    await expect(root).toHaveScreenshot(
+    await expect.soft(root).toHaveScreenshot(
       `work-explorer-threshold-${width}.png`,
       {
         threshold: 0.02,
@@ -2294,20 +2296,20 @@ test("Work Explorer controlled collection and blocked exception — visual basel
     height: 1000,
   });
   const planned = root.locator('[data-work-group="planned"]');
-  await expect(planned).toHaveScreenshot("work-explorer-collection-closed.png", {
+  await expect.soft(planned).toHaveScreenshot("work-explorer-collection-closed.png", {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
     timeout: 20000,
   });
   await planned.locator(".sk-collection__toggle").click();
   await page.mouse.move(0, 0);
-  await expect(planned).toHaveScreenshot("work-explorer-collection-open.png", {
+  await expect.soft(planned).toHaveScreenshot("work-explorer-collection-open.png", {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
     timeout: 20000,
   });
   await page.emulateMedia({ forcedColors: "active", reducedMotion: "reduce" });
-  await expect(root.locator("[data-blocked-exception]")).toHaveScreenshot(
+  await expect.soft(root.locator("[data-blocked-exception]")).toHaveScreenshot(
     "work-explorer-blocked-forced-colors.png",
     { threshold: 0.02, maxDiffPixelRatio: 0.02, timeout: 20000 },
   );
@@ -2337,12 +2339,12 @@ test("Work Explorer focused native route and active filters — visual baseline"
     await focusedLink.evaluate((link) => link.matches(":focus-visible")),
   ).toBe(true);
   await expect(focusedLink).toHaveCSS("outline-style", "solid");
-  await expect(focusedRow).toHaveScreenshot("work-explorer-focused-route.png", {
+  await expect.soft(focusedRow).toHaveScreenshot("work-explorer-focused-route.png", {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
     timeout: 20000,
   });
-  await expect(
+  await expect.soft(
     root.locator(".sk-work-explorer-pattern__filters"),
   ).toHaveScreenshot("work-explorer-active-filters.png", {
     threshold: 0.02,
@@ -2361,14 +2363,14 @@ test("Work Explorer W4 controlled drawer open and dismissed — visual baselines
   await page.emulateMedia({ reducedMotion: "reduce" });
   const trigger = root.getByRole("button", { name: "Open team navigation" });
   await trigger.click();
-  await expect(root).toHaveScreenshot("work-explorer-w4-drawer-open.png", {
+  await expect.soft(root).toHaveScreenshot("work-explorer-w4-drawer-open.png", {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
     timeout: 20000,
   });
   await page.keyboard.press("Escape");
   await expect(trigger).toBeFocused();
-  await expect(root).toHaveScreenshot("work-explorer-w4-drawer-dismissed.png", {
+  await expect.soft(root).toHaveScreenshot("work-explorer-w4-drawer-dismissed.png", {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
     timeout: 20000,
@@ -2382,7 +2384,7 @@ test("Work Explorer compact timeline and delayed context — visual baselines", 
     width: 1280,
     height: 1000,
   });
-  await expect(root.locator('[data-truth-tier="activity"]')).toHaveScreenshot(
+  await expect.soft(root.locator('[data-truth-tier="activity"]')).toHaveScreenshot(
     "work-explorer-delayed-activity.png",
     { threshold: 0.02, maxDiffPixelRatio: 0.02, timeout: 20000 },
   );
@@ -2396,7 +2398,7 @@ test("Work Explorer loading stays static under reduced motion — visual baselin
     width: 1024,
     height: 900,
   });
-  await expect(
+  await expect.soft(
     root.locator(".sk-work-explorer-pattern__layout"),
   ).toHaveScreenshot("work-explorer-loading-reduced-motion.png", {
     threshold: 0.02,
@@ -2419,7 +2421,7 @@ test("Work Explorer long supplied labels remain contained — visual baseline", 
       element.textContent =
         "spec-kitty/EXPERIMENTAL-spec-kitty-saas-with-a-supplied-extraordinarily-long-repository-name";
     });
-  await expect(
+  await expect.soft(
     root.locator(".sk-work-explorer-pattern__work"),
   ).toHaveScreenshot("work-explorer-long-content.png", {
     threshold: 0.02,
@@ -2438,7 +2440,7 @@ test("Work Explorer effective 200 percent CSS zoom stress — visual baseline", 
   await page.evaluate(() => {
     document.documentElement.style.zoom = "2";
   });
-  await expect(root).toHaveScreenshot("work-explorer-css-zoom-200.png", {
+  await expect.soft(root).toHaveScreenshot("work-explorer-css-zoom-200.png", {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
     timeout: 20000,
@@ -2454,7 +2456,7 @@ test("Work Explorer short viewport keeps focused work unobscured — visual base
   });
   const toggle = root.locator('[data-work-group="in-progress"] .sk-collection__toggle');
   await toggle.focus();
-  await expect(root).toHaveScreenshot("work-explorer-short-viewport-focus.png", {
+  await expect.soft(root).toHaveScreenshot("work-explorer-short-viewport-focus.png", {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
     timeout: 20000,
@@ -2489,7 +2491,7 @@ const buttonStory = async (page: Page, id = 'busy'): Promise<Locator> => {
 
 test('SK-button busy default — visual baseline', async ({ page }) => {
   const root = await buttonStory(page, 'busy');
-  await expect(root).toHaveScreenshot('sk-button-busy-default.png', {
+  await expect.soft(root).toHaveScreenshot('sk-button-busy-default.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
     timeout: 20000,
@@ -2499,7 +2501,7 @@ test('SK-button busy default — visual baseline', async ({ page }) => {
 test('SK-button busy reduced motion — visual baseline', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   const root = await buttonStory(page, 'busy');
-  await expect(root).toHaveScreenshot('sk-button-busy-reduced-motion.png', {
+  await expect.soft(root).toHaveScreenshot('sk-button-busy-reduced-motion.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
     timeout: 20000,
@@ -2509,7 +2511,7 @@ test('SK-button busy reduced motion — visual baseline', async ({ page }) => {
 test('SK-button busy forced colors — visual baseline', async ({ page }) => {
   await page.emulateMedia({ forcedColors: 'active' });
   const root = await buttonStory(page, 'busy');
-  await expect(root).toHaveScreenshot('sk-button-busy-forced-colors.png', {
+  await expect.soft(root).toHaveScreenshot('sk-button-busy-forced-colors.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
     timeout: 20000,
@@ -2532,7 +2534,7 @@ const boundaryPageStory = async (page: Page, id: string): Promise<Locator> => {
 
 test('SK-boundary-page HTML form-card default dark — visual baseline', async ({ page }) => {
   const target = await boundaryPageStory(page, 'form-card');
-  await expect(target).toHaveScreenshot('sk-boundary-page-html-form-card-default-dark.png', {
+  await expect.soft(target).toHaveScreenshot('sk-boundary-page-html-form-card-default-dark.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
   });
@@ -2540,7 +2542,7 @@ test('SK-boundary-page HTML form-card default dark — visual baseline', async (
 
 test('SK-boundary-page HTML form-card light mode — visual baseline', async ({ page }) => {
   const target = await boundaryPageStory(page, 'light-mode');
-  await expect(target).toHaveScreenshot('sk-boundary-page-html-form-card-light.png', {
+  await expect.soft(target).toHaveScreenshot('sk-boundary-page-html-form-card-light.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
   });
@@ -2548,7 +2550,7 @@ test('SK-boundary-page HTML form-card light mode — visual baseline', async ({ 
 
 test('SK-boundary-page HTML terminal-card default dark — visual baseline', async ({ page }) => {
   const target = await boundaryPageStory(page, 'terminal-card');
-  await expect(target).toHaveScreenshot('sk-boundary-page-html-terminal-card-default-dark.png', {
+  await expect.soft(target).toHaveScreenshot('sk-boundary-page-html-terminal-card-default-dark.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
   });
@@ -2556,7 +2558,7 @@ test('SK-boundary-page HTML terminal-card default dark — visual baseline', asy
 
 test('SK-boundary-page HTML without mark — visual baseline', async ({ page }) => {
   const target = await boundaryPageStory(page, 'without-mark');
-  await expect(target).toHaveScreenshot('sk-boundary-page-html-without-mark.png', {
+  await expect.soft(target).toHaveScreenshot('sk-boundary-page-html-without-mark.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
   });
@@ -2564,7 +2566,7 @@ test('SK-boundary-page HTML without mark — visual baseline', async ({ page }) 
 
 test('SK-boundary-page HTML without footnote — visual baseline', async ({ page }) => {
   const target = await boundaryPageStory(page, 'without-footnote');
-  await expect(target).toHaveScreenshot('sk-boundary-page-html-without-footnote.png', {
+  await expect.soft(target).toHaveScreenshot('sk-boundary-page-html-without-footnote.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
   });
@@ -2572,7 +2574,7 @@ test('SK-boundary-page HTML without footnote — visual baseline', async ({ page
 
 test('SK-boundary-page HTML with footnote — visual baseline', async ({ page }) => {
   const target = await boundaryPageStory(page, 'with-footnote');
-  await expect(target).toHaveScreenshot('sk-boundary-page-html-with-footnote.png', {
+  await expect.soft(target).toHaveScreenshot('sk-boundary-page-html-with-footnote.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
   });
@@ -2581,7 +2583,7 @@ test('SK-boundary-page HTML with footnote — visual baseline', async ({ page })
 test('SK-boundary-page HTML forced colors — visual baseline', async ({ page }) => {
   await page.emulateMedia({ forcedColors: 'active' });
   const target = await boundaryPageStory(page, 'forced-colors');
-  await expect(target).toHaveScreenshot('sk-boundary-page-html-forced-colors.png', {
+  await expect.soft(target).toHaveScreenshot('sk-boundary-page-html-forced-colors.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
   });
@@ -2590,7 +2592,7 @@ test('SK-boundary-page HTML forced colors — visual baseline', async ({ page })
 test('SK-boundary-page HTML narrow 320 — visual baseline', async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 720 });
   const target = await boundaryPageStory(page, 'form-card');
-  await expect(target).toHaveScreenshot('sk-boundary-page-html-narrow-320.png', {
+  await expect.soft(target).toHaveScreenshot('sk-boundary-page-html-narrow-320.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
   });
@@ -2612,7 +2614,7 @@ test('SK-button danger-secondary dark default — visual baseline', async ({ pag
   const host = dangerSecondaryButtonHost(page);
   await host.waitFor({ state: 'visible', timeout: 20000 });
   await expect(host.locator('button')).toBeVisible();
-  await expect(host).toHaveScreenshot('sk-button-danger-secondary-dark.png', {
+  await expect.soft(host).toHaveScreenshot('sk-button-danger-secondary-dark.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
   });
@@ -2637,7 +2639,7 @@ test('SK-button danger-secondary light mode — visual baseline', async ({ page 
   const host = dangerSecondaryButtonHost(page);
   await host.waitFor({ state: 'visible', timeout: 20000 });
   await expect(host.locator('button')).toBeVisible();
-  await expect(host).toHaveScreenshot('sk-button-danger-secondary-light.png', {
+  await expect.soft(host).toHaveScreenshot('sk-button-danger-secondary-light.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
   });
@@ -2699,7 +2701,7 @@ const cliAuthFullCases = [
 for (const visual of cliAuthFullCases) {
   test(`CLI Auth ${visual.name} — pattern baseline`, async ({ page }) => {
     const root = await cliAuthStory(page, visual.id, { width: visual.width, height: visual.height });
-    await expect(root).toHaveScreenshot(visual.name, {
+    await expect.soft(root).toHaveScreenshot(visual.name, {
       threshold: 0.02,
       maxDiffPixelRatio: 0.02,
       timeout: 20000,
@@ -2712,10 +2714,11 @@ for (const forcedColors of [
   { id: 'authorization-decision', name: 'sk-cli-auth-authorization-decision-forced-colors.png' },
 ] as const) {
   test(`CLI Auth ${forcedColors.name} — forced colors baseline`, async ({ page, browserName }) => {
+    expect(test.info().config.projects.map((project) => project.name), 'the chromium skip below is keyed on this project name').toContain('chromium');
     test.skip(browserName !== 'chromium', 'Playwright forced-colors emulation is Chromium-owned');
     await page.emulateMedia({ forcedColors: 'active' });
     const root = await cliAuthStory(page, forcedColors.id, { width: 1440, height: 1024 });
-    await expect(root).toHaveScreenshot(forcedColors.name, {
+    await expect.soft(root).toHaveScreenshot(forcedColors.name, {
       threshold: 0.02,
       maxDiffPixelRatio: 0.02,
       timeout: 20000,
@@ -2732,7 +2735,7 @@ for (const zoom of [
     await page.evaluate(() => {
       document.documentElement.style.zoom = '2';
     });
-    await expect(root).toHaveScreenshot(zoom.name, {
+    await expect.soft(root).toHaveScreenshot(zoom.name, {
       threshold: 0.02,
       maxDiffPixelRatio: 0.02,
       timeout: 20000,
@@ -2797,7 +2800,7 @@ const connectorsDesktopCases = [
 for (const visual of connectorsDesktopCases) {
   test(`Connectors ${visual.id} — desktop baseline`, async ({ page }) => {
     const root = await connectorsStory(page, visual.id, { width: 1440, height: 1000 });
-    await expect(root).toHaveScreenshot(visual.name, { threshold: 0.02, maxDiffPixelRatio: 0.02, timeout: 20000 });
+    await expect.soft(root).toHaveScreenshot(visual.name, { threshold: 0.02, maxDiffPixelRatio: 0.02, timeout: 20000 });
   });
 }
 
@@ -2818,14 +2821,14 @@ const connectorsNarrowCases = [
 for (const visual of connectorsNarrowCases) {
   test(`Connectors ${visual.id} — narrow 390px baseline`, async ({ page }) => {
     const root = await connectorsStory(page, visual.id, { width: 390, height: 844 });
-    await expect(root).toHaveScreenshot(visual.name, { threshold: 0.02, maxDiffPixelRatio: 0.02, timeout: 20000 });
+    await expect.soft(root).toHaveScreenshot(visual.name, { threshold: 0.02, maxDiffPixelRatio: 0.02, timeout: 20000 });
   });
 }
 
 // Targeted role/error/health/hard-purge-dialog states the issue names explicitly.
 test('Connectors C5 validation — role/error-state baseline', async ({ page }) => {
   const root = await connectorsStory(page, 'c-5-gitlab-group-validation', { width: 1440, height: 900 });
-  await expect(root).toHaveScreenshot('sk-connectors-c5-validation.png', {
+  await expect.soft(root).toHaveScreenshot('sk-connectors-c5-validation.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
     timeout: 20000,
@@ -2834,7 +2837,7 @@ test('Connectors C5 validation — role/error-state baseline', async ({ page }) 
 
 test('Connectors C6 needs_reauth — danger health baseline', async ({ page }) => {
   const root = await connectorsStory(page, 'c-6-installation-health-needs-reauth', { width: 1440, height: 900 });
-  await expect(root).toHaveScreenshot('sk-connectors-c6-health-needs-reauth.png', {
+  await expect.soft(root).toHaveScreenshot('sk-connectors-c6-health-needs-reauth.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
     timeout: 20000,
@@ -2844,7 +2847,7 @@ test('Connectors C6 needs_reauth — danger health baseline', async ({ page }) =
 test('Connectors C8 hard-purge confirm dialog — baseline', async ({ page }) => {
   const root = await connectorsStory(page, 'c-8-project-routing-purge-confirm', { width: 1440, height: 900 });
   await expect(root.locator('sk-confirm-dialog')).toHaveAttribute('open', '');
-  await expect(root).toHaveScreenshot('sk-connectors-c8-purge-confirm-dialog.png', {
+  await expect.soft(root).toHaveScreenshot('sk-connectors-c8-purge-confirm-dialog.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
     timeout: 20000,
@@ -2859,7 +2862,7 @@ test('Connectors C7 local table overflow at 390px — no document-level horizont
   expect(overflowsX, 'no document-level horizontal overflow at 390px — only the local table scroller may scroll').toBe(
     false,
   );
-  await expect(root).toHaveScreenshot('sk-connectors-c7-narrow-table-overflow.png', {
+  await expect.soft(root).toHaveScreenshot('sk-connectors-c7-narrow-table-overflow.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
     timeout: 20000,
@@ -2868,7 +2871,7 @@ test('Connectors C7 local table overflow at 390px — no document-level horizont
 
 test('Connectors LightMode — required system proof baseline', async ({ page }) => {
   const root = await connectorsStory(page, 'light-mode', { width: 1440, height: 900 });
-  await expect(root).toHaveScreenshot('sk-connectors-light-mode.png', {
+  await expect.soft(root).toHaveScreenshot('sk-connectors-light-mode.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
     timeout: 20000,
@@ -2876,10 +2879,11 @@ test('Connectors LightMode — required system proof baseline', async ({ page })
 });
 
 test('Connectors forced colors — C6 danger health baseline', async ({ page, browserName }) => {
+  expect(test.info().config.projects.map((project) => project.name), 'the chromium skip below is keyed on this project name').toContain('chromium');
   test.skip(browserName !== 'chromium', 'Playwright forced-colors emulation is Chromium-owned');
   await page.emulateMedia({ forcedColors: 'active' });
   const root = await connectorsStory(page, 'c-6-installation-health-needs-reauth', { width: 1440, height: 900 });
-  await expect(root).toHaveScreenshot('sk-connectors-forced-colors.png', {
+  await expect.soft(root).toHaveScreenshot('sk-connectors-forced-colors.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
     timeout: 20000,
@@ -2889,7 +2893,7 @@ test('Connectors forced colors — C6 danger health baseline', async ({ page, br
 test('Connectors reduced motion — C3 handoff waiting baseline', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   const root = await connectorsStory(page, 'c-3-handoff-installation-waiting', { width: 1440, height: 900 });
-  await expect(root).toHaveScreenshot('sk-connectors-reduced-motion.png', {
+  await expect.soft(root).toHaveScreenshot('sk-connectors-reduced-motion.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
     timeout: 20000,
@@ -2899,7 +2903,7 @@ test('Connectors reduced motion — C3 handoff waiting baseline', async ({ page 
 test('Connectors RTL — C2 operating index baseline', async ({ page }) => {
   const root = await connectorsStory(page, 'c-2-operating-admin', { width: 1440, height: 900 });
   await page.evaluate(() => document.documentElement.setAttribute('dir', 'rtl'));
-  await expect(root).toHaveScreenshot('sk-connectors-rtl.png', { threshold: 0.02, maxDiffPixelRatio: 0.02, timeout: 20000 });
+  await expect.soft(root).toHaveScreenshot('sk-connectors-rtl.png', { threshold: 0.02, maxDiffPixelRatio: 0.02, timeout: 20000 });
 });
 
 test('Connectors 200% zoom — C8 project routing baseline, no document-level horizontal overflow', async ({ page }) => {
@@ -2911,7 +2915,7 @@ test('Connectors 200% zoom — C8 project routing baseline, no document-level ho
     () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
   );
   expect(overflowsX, 'no document-level horizontal overflow at 200% zoom').toBe(false);
-  await expect(root).toHaveScreenshot('sk-connectors-zoom-200.png', {
+  await expect.soft(root).toHaveScreenshot('sk-connectors-zoom-200.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
     timeout: 20000,

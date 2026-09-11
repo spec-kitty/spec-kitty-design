@@ -97,6 +97,11 @@ async function assertNativeSelect(select: Locator): Promise<void> {
   expect(facts.authoredOptionState).toBe(0);
 }
 
+test('the chromium project the describe below depends on still exists', () => {
+  expect(test.info().config.projects.map((project) => project.name),
+    'the browser-independent-once skip below is keyed on this project name').toContain('chromium');
+});
+
 test.describe('sk-form-select source, markup, and distribution contract', () => {
   test.skip(({ browserName }) => browserName !== 'chromium', 'browser-independent contracts run once');
 
@@ -362,6 +367,7 @@ test.describe('sk-form-select live native semantics', () => {
   });
 
   test('forced colors retains native appearance plus non-color focus, invalid, and disabled cues', async ({ page, browserName }) => {
+    expect(test.info().config.projects.map((project) => project.name), 'the chromium skip below is keyed on this project name').toContain('chromium');
     test.skip(browserName !== 'chromium', 'Playwright forced-colors emulation is Chromium-specific');
     await page.emulateMedia({ forcedColors: 'active' });
     const required = await openStory(page, 'forced-colors');

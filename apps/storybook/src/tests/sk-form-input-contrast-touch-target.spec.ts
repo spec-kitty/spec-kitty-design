@@ -109,6 +109,7 @@ test.describe('sk-input / sk-form-input__control — forced-colors distinguishab
       page,
       browserName,
     }) => {
+      expect(test.info().config.projects.map((project) => project.name), 'the chromium skip below is keyed on this project name').toContain('chromium');
       test.skip(browserName !== 'chromium', 'Playwright forced-colours emulation is Chromium-only');
       await page.emulateMedia({ forcedColors: 'active' });
       await openStory(page, storyId);

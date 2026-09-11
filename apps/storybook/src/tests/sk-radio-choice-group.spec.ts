@@ -387,6 +387,11 @@ function classSelectorInventory(source: string): string[] {
   return [...classes].sort();
 }
 
+test("the chromium project the describe below depends on still exists", () => {
+  expect(test.info().config.projects.map((project) => project.name),
+    "the browser-independent-once skip below is keyed on this project name").toContain("chromium");
+});
+
 test.describe("sk-radio-choice-group source and public contract", () => {
   test.skip(
     ({ browserName }) => browserName !== "chromium",
@@ -731,6 +736,7 @@ test.describe("sk-radio-choice-group live native semantics and presentation", ()
     page,
     browserName,
   }) => {
+    expect(test.info().config.projects.map((project) => project.name), "the chromium skip below is keyed on this project name").toContain("chromium");
     test.skip(
       browserName !== "chromium",
       "Chromium CDP supplies the inspectable platform accessibility tree",
@@ -1396,6 +1402,7 @@ test.describe("sk-radio-choice-group live native semantics and presentation", ()
     page,
     browserName,
   }) => {
+    expect(test.info().config.projects.map((project) => project.name), "the chromium skip below is keyed on this project name").toContain("chromium");
     test.skip(
       browserName !== "chromium",
       "Playwright forced-colors emulation is Chromium-owned",
@@ -1484,6 +1491,7 @@ test.describe("sk-radio-choice-group live native semantics and presentation", ()
     page,
     browserName,
   }) => {
+    expect(test.info().config.projects.map((project) => project.name), "the chromium skip below is keyed on this project name").toContain("chromium");
     test.skip(
       browserName !== "chromium",
       "Playwright forced-colors emulation is Chromium-owned",
@@ -1555,6 +1563,7 @@ test.describe("sk-radio-choice-group live native semantics and presentation", ()
     page,
     browserName,
   }) => {
+    expect(test.info().config.projects.map((project) => project.name), "the chromium skip below is keyed on this project name").toContain("chromium");
     test.skip(
       browserName !== "chromium",
       "Playwright forced-colors emulation is Chromium-owned",
