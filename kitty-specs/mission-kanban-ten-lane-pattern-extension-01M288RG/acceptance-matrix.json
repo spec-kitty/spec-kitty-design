@@ -148,10 +148,10 @@
       "criterion_id": "FR-015",
       "description": "Verify FR-015 is satisfied",
       "proof_type": "index + generated checks",
-      "evidence": "head 4f301f83; excludeStories lists all 4 helper exports and the index shows only the 11 stories; elements:analyze leaves custom-elements.json, vue.d.ts and packages/react/src unchanged; SIZES.md --check green.",
+      "evidence": "product head 8986d38f (rebased on train 16948194); excludeStories lists the 4 helper exports and the index shows only the 11 stories; manifest, vue.d.ts, react wrappers and SIZES.md unchanged (checked pre-rebase; the rebase adds no generated delta of this mission); local Chromium+Firefox 96/96 incl. #278 suite; WebKit authority is CI (pre-fold a3ac655c run 34604991224: playwright 3 browsers + test passed).",
       "pass_fail": "pass",
       "verified_by": "claude",
-      "verified_at": "2026-09-11T13:44:45.560768+00:00",
+      "verified_at": "2026-09-11T14:11:20.081011+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     }
   ],
