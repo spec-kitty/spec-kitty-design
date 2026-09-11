@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "mission_slug": "mutation-harness-budget-01M297AX",
+  "mission_id": "01M297AX1Q7A8EDGK8SYAZ2NAC",
+  "mission_branch": "kitty/mission-mutation-harness-budget-01M297AX",
+  "target_branch": "mission/mutation-harness-budget",
+  "lanes": [
+    {
+      "lane_id": "lane-a",
+      "wp_ids": [
+        "WP01"
+      ],
+      "write_scope": [
+        "scripts/suite-selftest.mjs",
+        "suite-budget.json"
+      ],
+      "predicted_surfaces": [],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    }
+  ],
+  "computed_at": "2026-09-11T21:57:34.405611+00:00",
+  "computed_from": "dependency_graph+ownership",
+  "planning_artifact_wps": [],
+  "planning_commit_sha": "c9839e1fb77cd85334e3fabf50c92c86f06525f1"
+}

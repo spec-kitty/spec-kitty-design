@@ -1,0 +1,77 @@
+{
+  "rows": {
+    "#146": {
+      "evidence_ref": "Spurious scrape: #146 is a historical, already-merged PR/mission cited in spec.md's context prose (suite-budget.json's own recorded history), not an open issue this mission addresses. No action taken; referenced only as evidence.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "verified-already-fixed",
+      "wp": null
+    },
+    "#168": {
+      "evidence_ref": "168's central technical claim (harness runs the whole suite once per mutation, O(mutations x tests)) is stale: PR #249 (closes #225, merged f9fd570e on 2026-09-07, 3 days after #168 was filed) made the dependency-graph filter effective. Verified independently: every one of the 8 CI runs measured for this mission reports 'impact graph: 47 source(s), 0 full-suite fallback(s)' at HEAD. Recommend closing as stale.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "verified-already-fixed",
+      "wp": null
+    },
+    "#225": {
+      "evidence_ref": "Spurious scrape: #225 is a historical, already-merged PR/mission cited in spec.md's context prose (suite-budget.json's own recorded history), not an open issue this mission addresses. No action taken; referenced only as evidence.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "verified-already-fixed",
+      "wp": null
+    },
+    "#270": {
+      "evidence_ref": "Spurious scrape: #270 is a historical, already-merged PR/mission cited in spec.md's context prose (suite-budget.json's own recorded history), not an open issue this mission addresses. No action taken; referenced only as evidence.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "verified-already-fixed",
+      "wp": null
+    },
+    "#408": {
+      "evidence_ref": "Duplicate evidence for the same defect as #419 (corpus grew 210->272 past the last calibration). WP01's arm-count-scaled ceiling fixes the structural cause #408 identifies: an absolute ceiling cannot survive corpus growth by construction. Recommend closing as duplicate of #419.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "in-mission",
+      "wp": "WP01"
+    },
+    "#419": {
+      "evidence_ref": "Primary tracking issue. WP01 replaces the flat selftestCeilingSeconds with an arm-count-scaled model fit from 8 real CI runs (34561511046, 34592445070, 34595310707, 34606532461, 34618855795, 34623594612, 34632185898, 34637284298) spanning 1346.6-1949.7s on the identical 272-arm corpus that #419 reports straddling the old ceiling.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "in-mission",
+      "wp": "WP01"
+    }
+  },
+  "schema_version": 1
+}
