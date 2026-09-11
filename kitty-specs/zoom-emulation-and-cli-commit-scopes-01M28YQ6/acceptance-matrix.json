@@ -38,10 +38,10 @@
       "criterion_id": "FR-004",
       "description": "Verify FR-004 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "node scripts/check-visual-screenshot-softness.mjs output (re-run after all zoom-test edits, commit 32ba25a6): '50 spec file(s) scanned; every toHaveScreenshot call site uses expect.soft(...).' Exit 0. All rewritten/added toHaveScreenshot calls (CLI Auth x2, Connectors) keep expect.soft(...); reviewer independently confirmed this gate passes as part of its own verification pass.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T20:01:33.144955+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
