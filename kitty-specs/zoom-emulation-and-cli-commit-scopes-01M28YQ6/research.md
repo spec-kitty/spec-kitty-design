@@ -61,6 +61,89 @@ the installed CLI's *current* shipped call sites can default to through this spe
 mechanism. No fourth pattern was warranted by this audit alone — see the Correction above for
 how the (mistaken) fourth pattern actually got added and then reverted.
 
+## Connectors zoom test — CI-only render instability, mechanism reverted
+
+**Outcome**: the Connectors "200% zoom" test's mechanism (halved viewport + `deviceScaleFactor:
+2`, the same fix as CLI Auth) was reverted back to the original `document.documentElement.style
+.zoom = '2'` emulation, and the test was **renamed** to `'Connectors 200% CSS zoom stress — C8
+project routing baseline, no document-level horizontal overflow'` — #422's own second option
+("keep the current emulation and rename the evidence to what it actually establishes"), the same
+honest-naming treatment already applied to the Mission Reading and Work Explorer sites in this
+same sweep. CLI Auth's fix (the same mechanism) is unaffected and stands on its own merits — its
+two baselines are stable in CI.
+
+**Why.** The coordinator harvested CI's `visual-regression-diffs` artifact after the halved-
+viewport mechanism was first shipped for Connectors and found a genuine render instability, not
+a harvesting problem. From CI's own call log, the SAME element (`[data-connectors-pattern]`,
+story `c-8-project-routing-populated`) on the SAME page, inside a **single**
+`toHaveScreenshot` call's internal stability-retry loop, captured two different heights seconds
+apart:
+
+```
+- Expected an image 1376px by 2310px, received 688px by 1150px.
+- waiting 100ms before taking screenshot
+  ... taking element screenshot / waiting for element to be stable
+- Expected an image 1376px by 2310px, received 688px by 1165px.
+- waiting 250ms before taking screenshot
+  ... taking element screenshot / waiting for element to be stable
+- Expected an image 688px by 1165px, received 688px by 1150px.
+```
+
+A 15px height oscillation (1150 → 1165 → 1150) that Playwright's own stability check could not
+settle. This appeared **only** at the halved viewport (720 CSS px wide) under
+`deviceScaleFactor: 2` — it is not present in the reverted test's full-size (1440px,
+`deviceScaleFactor: 1`) capture, which is stable both in this investigation's local runs and,
+implicitly, in every prior CI run before this mission touched the mechanism (the baseline
+predates this mission and was never flaky before).
+
+**What was ruled out, and how (source, not just failed reproduction).** The most likely
+candidate — a web font swapping metrics after the "fonts loaded" step (`font-display: swap`
+FOUT/FOIT) — is ruled out by reading the source, not merely by failing to reproduce it:
+`connectors.stories.ts` and `packages/styles/src/data-table/sk-data-table.css` both resolve text
+via `--sk-font-sans` / `--sk-font-mono`, and both tokens
+(`packages/tokens/src/tokens.css`) are pure system-font stacks (`ui-sans-serif, system-ui,
+-apple-system, "Segoe UI", Helvetica, Arial, sans-serif` / `'JetBrains Mono', ui-monospace, "SF
+Mono", Menlo, Consolas, monospace`). `tokens.css`'s own comment confirms the `JetBrains Mono`
+`@import` from Google Fonts "never fired" (0 import rules), so it always falls through to
+`ui-monospace`. The only `@font-face` rules anywhere in the codebase (`Falling Sky`, `Swansea`,
+30+ weight/style variants, all `font-display: swap`) are declared in `tokens.css` but referenced
+by no `font-family` value anywhere else in the repository (`grep -rln "Falling Sky\|Swansea"
+packages/ apps/` returns only `tokens.css`/its compiled `dist`/bundle copies) — confirmed nothing
+on this page ever loads or swaps a custom webfont. This elimination saves the next investigator
+the entire font-swap search.
+
+Also checked and ruled out: lazy/virtualized rows (the table rows render synchronously from a
+plain array `.map()`, no virtualization), images/icons without intrinsic dimensions (none found
+in the composed tree), and any `ResizeObserver` / `MutationObserver` / `setInterval` /
+`requestAnimationFrame` / CSS `animation` / `transition` anywhere in `connectors.stories.ts`,
+`sk-data-table.css`, or `sk-page-header.ts` (none found; `sk-page-header.ts` has no async
+lifecycle hook beyond Lit's standard synchronous-by-screenshot-time render).
+
+**Unconfirmed structural theory — clearly labelled as unconfirmed, not a finding.**
+`.sk-data-table__scroller` (`packages/styles/src/data-table/sk-data-table.css`) sets
+`overflow-x: auto; overflow-y: auto;` with no `max-height`/`max-block-size` anywhere constraining
+it. A horizontal scrollbar toggling in/out reserves/releases vertical space at the bottom of the
+scroller; if the table's rendered content width sits right at the scroller's 640px boundary
+under CI's specific font rendering (glyph widths differ from local — see below), a
+scrollbar-appears/disappears oscillation is structurally possible and would plausibly produce a
+height delta in the range observed. **This was never confirmed.** No CI-equivalent environment
+was available to test it against, and it is recorded here only so a future investigator with CI
+access has a concrete first thing to check, not as an established cause.
+
+**Why local reproduction was not possible.** Three separate local attempts — five independent
+full Playwright test invocations, a custom 2-second polling timeline sampling
+`getBoundingClientRect().height` every ~50ms, and the same probe under
+`Emulation.setCPUThrottlingRate: 6` (simulating a loaded CI runner) — found zero instability:
+the pattern's height was bit-identical across every sample. This is not evidence of stability in
+CI. The local element height measured throughout was `1224.375` CSS px; CI's own log shows
+`~575-582` CSS px (`688x1150`/`688x1165` device px ÷ `deviceScaleFactor: 2`) for the same
+element, story, and viewport width — a roughly 2x gap that can only mean local Chromium and CI's
+`ubuntu-latest` runner resolve the page's fonts (and therefore its whole layout) very
+differently. That gap is itself the reason local reproduction failed, not evidence the
+instability is somehow CI-infrastructure noise unrelated to rendering — any future attempt to
+root-cause this for real needs to run inside CI itself, or an environment that reproduces CI's
+font stack, not a local workstation.
+
 ## `MissionStatus.save(*, operation: str)` — a real, currently-uncalled, unbounded escape hatch
 
 > **CORRECTION (post-review, Medium finding).** This section originally named the class

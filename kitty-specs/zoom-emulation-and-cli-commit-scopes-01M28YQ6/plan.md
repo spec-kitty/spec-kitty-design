@@ -21,7 +21,7 @@ One bounded Work Package, #422 only.
 **Project Type**: Single repo, monorepo-style (`apps/storybook`, `packages/elements`, `packages/tokens`, root-level `commitlint.config.cjs` + `scripts/`).
 **Performance Goals**: N/A.
 **Constraints**: See spec.md Constraints C-001, C-004, C-005 (no breakpoint hardcoding across the sibling-mission dependency, never `nx run storybook:lint`, port 6006 hygiene). C-002/C-003/C-006 governed the withdrawn commitlint work and no longer apply to any live deliverable.
-**Scale/Scope**: 1 test file edit (2 zoom tests rewritten for real viewport-halving, 1 more — Connectors — fixed the same way per the sweep, 3 others read and left as-is with the classification recorded inline). The `commitlint.config.cjs`/`check-commitlint-config.mjs` edit was reverted; see the correction note above.
+**Scale/Scope**: 1 test file edit (2 zoom tests rewritten for real viewport-halving; a 3rd, Connectors, was fixed the same way then reverted and renamed instead after CI found a CI-only flaky baseline — see `research.md`; 3 others read and left as-is with the classification recorded inline). The `commitlint.config.cjs`/`check-commitlint-config.mjs` edit was reverted; see the correction note above.
 
 ## Charter Check
 
@@ -44,7 +44,8 @@ kitty-specs/zoom-emulation-and-cli-commit-scopes-01M28YQ6/
 
 ```
 apps/storybook/src/tests/visual.spec.ts   # FR-001..FR-005: CLI Auth zoom tests rewritten;
-                                            # other style.zoom sites audited, one (Connectors) fixed
+                                            # other style.zoom sites audited; Connectors fixed then
+                                            # reverted+renamed (CI-only flaky baseline, research.md)
 
 packages/elements/src/patterns/cli-auth.stories.ts   # READ ONLY — breakpoint source of truth
 packages/tokens/src/tokens.css                       # READ ONLY — --sk-space-4/-6 token values
@@ -76,6 +77,7 @@ Not applicable — no Charter Check violations.
 - **Affected surfaces**: `apps/storybook/src/tests/visual.spec.ts` (Mission Reading long-content zoom stress ~L1920, Repository Dossier zoom-200/zoom-400 ~L2145, Work Explorer zoom stress ~L2433, Connectors zoom-200 ~L2909 — audited during research; all four already self-disclose "CSS zoom stress"/effective-zoom naming rather than claiming unqualified real-zoom breakpoint coverage, so current classification is "already honestly scoped, no fix" pending final confirmation in the WP write-up).
 - **Sequencing/depends-on**: IC-01 (same fix mechanism, applied only where warranted).
 - **Risks**: A test named honestly today could still be re-scoped by a future reader as "the" 200%-zoom evidence if nothing marks the distinction — the WP's report is the record of this classification, not a code change, for sites that stay as-is.
+- **Outcome update (post-CI)**: Connectors was initially fixed with IC-01's mechanism, then CI surfaced a real, CI-only render instability specific to that site (a 15px height oscillation within a single `toHaveScreenshot` stability loop — the same element and page, not a baseline-vs-baseline mismatch). Root-caused as far as possible without CI access (web-font swap ruled out by source; no other cause confirmed; local reproduction impossible — full record in `research.md`) and resolved per #422's own second option: mechanism reverted, test renamed to `'Connectors 200% CSS zoom stress — ...'`. Connectors now sits in the same honestly-named state as Mission Reading and Work Explorer, which is the outcome this IC's risk note above anticipated as a live possibility.
 
 ### IC-03 — `chore(spec-kitty)` commitlint gap audit — WITHDRAWN, preserved for the record
 

@@ -2992,38 +2992,41 @@ test('Connectors RTL — C2 operating index baseline', async ({ page }) => {
   await expect.soft(root).toHaveScreenshot('sk-connectors-rtl.png', { threshold: 0.02, maxDiffPixelRatio: 0.02, timeout: 20000 });
 });
 
-// #422 sweep: this test used to set `document.documentElement.style.zoom = '2'` at the SAME
-// 1440px viewport width it measured `scrollWidth`/`clientWidth` against. Verified empirically
-// (probed directly against this story): at width 1440, `document.documentElement.clientWidth`/
-// `scrollWidth` read 1440/1440 whether or not `style.zoom = '2'` was applied — so the "no
-// document-level horizontal overflow at 200% zoom" claim was, in practice, reading the exact
-// same document dimensions an unzoomed 1440px check would. `connectors.stories.ts` declares no
-// `@media`/`@container` rule of its own, so unlike the CLI Auth pattern there is no known
-// concrete regression this specific gap has been shown to miss (a synthetic injected-overflow
-// probe was caught by both mechanisms, because `zoom` scales injected content proportionally
-// too) — but the claim "no overflow at 200% zoom" is only actually verified against a real
-// halved CSS viewport, so the mechanism is fixed the same way as CLI Auth (#422) for the same
-// reason: a fresh browser context with the viewport halved and `deviceScaleFactor: 2`, which
-// does narrow `document.documentElement.clientWidth` for real (verified empirically to match a
-// genuinely narrow viewport's measurement, unlike the `style.zoom` mechanism above).
-test("Connectors 200% zoom (halved viewport, deviceScaleFactor 2) — C8 project routing baseline, no document-level horizontal overflow", async ({
-  browser,
-  baseURL,
-}) => {
-  const zoomContext = await browser.newContext({ baseURL, deviceScaleFactor: 2 });
-  try {
-    const zoomPage = await zoomContext.newPage();
-    const root = await connectorsStory(zoomPage, 'c-8-project-routing-populated', { width: 720, height: 900 });
-    const overflowsX = await zoomPage.evaluate(
-      () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
-    );
-    expect(overflowsX, 'no document-level horizontal overflow at 200% zoom (real halved viewport)').toBe(false);
-    await expect.soft(root).toHaveScreenshot('sk-connectors-zoom-200.png', {
-      threshold: 0.02,
-      maxDiffPixelRatio: 0.02,
-      timeout: 20000,
-    });
-  } finally {
-    await zoomContext.close();
-  }
+// #422 sweep — REVERTED to the CSS-zoom mechanism, RENAMED to what it actually proves.
+//
+// This test briefly used a real halved-viewport + `deviceScaleFactor: 2` browser context (the
+// same fix as CLI Auth), because `document.documentElement.scrollWidth`/`clientWidth` at width
+// 1440 read 1440/1440 whether or not `style.zoom = '2'` was applied — the "no overflow" claim
+// was, in practice, reading the exact same document dimensions an unzoomed 1440px check would.
+// That mechanism change turned out to introduce a real, CI-only render instability: the SAME
+// element, SAME page, inside a SINGLE `toHaveScreenshot` stability-retry loop, captured
+// 688x1165 then 688x1150 device px seconds apart (CI's own log) — a 15px oscillation Playwright
+// could not settle. Full root-cause investigation, what was ruled out (web-font swap, by
+// source — nothing on this page ever loads a custom webfont), the unconfirmed structural theory
+// (`.sk-data-table__scroller`'s `overflow-x: auto` with no height cap, possibly right at its
+// 640px boundary under CI's font rendering), and why local reproduction is not possible (a
+// measured ~1224 vs ~575-582 CSS-px local/CI rendering gap) are all recorded in `research.md`.
+//
+// `connectors.stories.ts` declares no `@media`/`@container` rule of its own, so — unlike CLI
+// Auth — there was never a known concrete regression this gap had been shown to miss (a
+// synthetic injected-overflow probe was caught by both mechanisms, because `zoom` scales
+// injected content proportionally too). A stable test proving a slightly weaker property beats
+// a flaky test proving a stronger one, so per #422's OWN second option ("keep the current
+// emulation and rename the evidence to what it actually establishes") this reverts to the
+// CSS-zoom mechanism and is renamed to say "CSS zoom stress", matching the honest-naming
+// convention this same sweep already used for Mission Reading and Work Explorer.
+test('Connectors 200% CSS zoom stress — C8 project routing baseline, no document-level horizontal overflow', async ({ page }) => {
+  const root = await connectorsStory(page, 'c-8-project-routing-populated', { width: 1440, height: 900 });
+  await page.evaluate(() => {
+    (document.documentElement.style as CSSStyleDeclaration & { zoom?: string }).zoom = '2';
+  });
+  const overflowsX = await page.evaluate(
+    () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
+  );
+  expect(overflowsX, 'no document-level horizontal overflow at 200% CSS zoom').toBe(false);
+  await expect.soft(root).toHaveScreenshot('sk-connectors-zoom-200.png', {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+    timeout: 20000,
+  });
 });

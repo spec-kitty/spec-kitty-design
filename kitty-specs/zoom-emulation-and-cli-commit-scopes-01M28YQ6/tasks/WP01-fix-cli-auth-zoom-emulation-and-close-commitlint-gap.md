@@ -40,6 +40,9 @@ history:
 - timestamp: '2026-09-11T22:45:00Z'
   agent: system
   action: 'SECOND CORRECTION (reviewer Medium finding, APPROVE-WITH-FINDINGS): the retained escape-hatch class was misrecorded everywhere in this mission as MissionStatusAggregate. Reviewer confirmed zero hits for that identifier anywhere in the installed CLI; the real class is MissionStatus (specify_cli/status/aggregate.py:164, exported via that modules __all__; save() itself at line 797). Behavioral claim (uncalled, unbounded, correctly un-exempted) verified correct by the reviewer independently; only the identifier was wrong. Corrected across research.md, spec.md, plan.md, tasks.md, and this file (including this history log and Part C, left as historical record of the withdrawn commitlint work but not of a wrong class name).'
+- timestamp: '2026-09-11T23:20:00Z'
+  agent: system
+  action: 'THIRD CORRECTION (post-CI, no re-review required): the Connectors zoom test mechanism change (real halved-viewport + deviceScaleFactor: 2, same fix as CLI Auth) was reverted. CI surfaced a genuine CI-only render instability specific to that mechanism at that site: the same element on the same page captured 688x1150 then 688x1165 device px within a single toHaveScreenshot stability-retry loop. Root-caused as far as possible without CI access -- web-font swap ruled out by source (no @font-face is ever applied to visible text on this page), no other cause confirmed, local reproduction impossible due to a measured ~1224 vs ~575-582 CSS-px local/CI rendering gap -- full record in research.md. Resolved per #422s own second option: mechanism reverted to style.zoom, test renamed to Connectors 200% CSS zoom stress -- ..., matching Mission Reading/Work Explorer honest naming. CLI Auth is unaffected; its two baselines are CI-confirmed stable at 195x212 and 195x401.'
 authoritative_surface: apps/storybook/src/tests/visual.spec.ts
 create_intent: []
 execution_mode: code_change
@@ -157,6 +160,16 @@ must be read and classified:
   the SAME CSS viewport `zoom` does not narrow — confirm this by reading how CSS `zoom` affects
   `document.documentElement.clientWidth` before concluding either way), state the finding
   precisely; do not assume by title-similarity alone.
+
+  **Outcome (post-CI addendum).** Connectors was classified as sharing #422's defect (unqualified
+  claim, `clientWidth`/`scrollWidth` confirmed empirically unchanged by `style.zoom`) and fixed
+  with Part A's mechanism. CI then surfaced a genuine, CI-only render instability specific to
+  that fix at that site — full record in `research.md` ("Connectors zoom test — CI-only render
+  instability, mechanism reverted"). Resolved per #422's own second option instead: mechanism
+  reverted to `style.zoom`, test renamed to `'Connectors 200% CSS zoom stress — C8 project
+  routing baseline, no document-level horizontal overflow'`, landing it in the same honestly-
+  scoped state as Mission Reading/Work Explorer above. Do not re-apply Part A's mechanism to this
+  site without first confirming (in a CI-equivalent environment) that the instability is gone.
 
 Fix (same mechanism as Part A) any site whose classification concludes it shares #422's
 defect: an unqualified zoom-percentage claim that implies a breakpoint was exercised, proven
