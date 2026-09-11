@@ -107,11 +107,11 @@
     {
       "criterion_id": "FR-011",
       "description": "Verify FR-011 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "proof_type": "browser lifecycle tests",
+      "evidence": "head 4f301f83; sk-mission-kanban-ten-lane-pattern.spec.ts [T007] triad present exactly while overflowing (K1/K2/K3@390/K6) and absent with no tab stop when fitting (K3@1440, K6@2800); live resize both ways and a content change that does not resize the scroller, each on one mounted root; flips at measured fit width and fit-1; Storybook Reload keeps 1 active resize and content target, 0 detached.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T13:44:41.346446+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
