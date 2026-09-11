@@ -34,7 +34,15 @@ const WORKFLOW = '.github/workflows/ci-quality.yml';
 // is how a step in that job is held to running — see #193's two entries there, and the
 // `lint-code` EDGE assertions below, which hold the job itself to being able to block a merge.
 const JOBS = ['test', 'release-gate'];
-const STORYBOOK_PREDICATE = "needs.changes.outputs.tokens == 'true' || needs.changes.outputs.components == 'true'";
+// REL1 (#362): the relevant-change predicate gained a `promote/*`-skip conjunct
+// (research.md R15) so a promotion PR's already-fully-gated content doesn't redundantly
+// re-run the ~30-minute browser suite. Updated here WITH that edit, not left stale — a stale
+// exact-string comparison would have reported this job's `if:` as wrong forever, which is a
+// checker that reds on a correct file, exactly the failure mode this file's own header warns
+// about one level up.
+const STORYBOOK_PREDICATE =
+  "(needs.changes.outputs.tokens == 'true' || needs.changes.outputs.components == 'true') && " +
+  "!startsWith(github.head_ref, 'promote/')";
 const STORYBOOK_WRAPPER = 'node scripts/build-storybook-with-budget.mjs';
 
 // ── READING A `run:` BODY AS SHAPE RATHER THAN AS TEXT (#202, #205) ───────────────────
@@ -429,9 +437,10 @@ if (!hasPr) {
       return hit;
     };
     // `main` is where the train lands; `train/elements-first` stands for the integration line
-    // every mission branch PRs into (ADR-8). A filter that misses either one is a filter under
-    // which those PRs merge unchecked.
-    for (const ref of ['main', 'train/elements-first']) {
+    // every mission branch PRs into (ADR-8). `develop` is the RC line REL1 (#362) adds — the
+    // promotion mechanism's own PRs target it, and a filter that misses any of the three is a
+    // filter under which those PRs merge unchecked.
+    for (const ref of ['main', 'train/elements-first', 'develop']) {
       if (!covers(ref)) {
         problems.push(
           `\`on.pull_request.branches\` (${entries.join(', ')}) does not match \`${ref}\` — a PR ` +
@@ -476,6 +485,48 @@ else {
 
   const step = (gate.steps ?? []).find((s) => String(s.name ?? '').includes('[ENFORCED]'));
   const script = String(step?.run ?? '');
+
+  // REL1 (#362), contracts/ci-quality-integration.md §3: the gate's promote/* skip-tolerance
+  // exception may only fire INSIDE a conditional testing `head_ref` against a `promote/*`
+  // pattern — never unconditionally. A promotion PR's tree legitimately sets `sb_ok`/`a11y_ok`/
+  // `vr_ok`/`pw_ok` to "success" regardless of the four heavy jobs' real result (research.md
+  // R15); widening that from a narrowly-scoped exception to an unconditional acceptance would
+  // silently readmit the exact green-by-skip bypass this file exists to refuse, for every PR,
+  // not only `promote/*` ones. This is real, new logic (plan.md names this the highest-risk
+  // single edit in this mission) — scoped as narrowly as possible to the one assignment line,
+  // never generalized into a check over every conditional in the step.
+  const TOLERANCE_ASSIGNMENT = 'sb_ok="success"; a11y_ok="success"; vr_ok="success"; pw_ok="success"';
+  if (!script.includes(TOLERANCE_ASSIGNMENT)) {
+    problems.push(
+      "the gate's [ENFORCED] step no longer contains the promote/* skip-tolerance assignment " +
+        `(\`${TOLERANCE_ASSIGNMENT}\`) — if this exception was intentionally removed, this ` +
+        'assertion must be removed in the same commit, not left to silently pass on its absence',
+    );
+  } else {
+    // The nearest still-open `if ... ; then` at the point the assignment line appears must be
+    // the one guarding it — tracked as a simple open/close stack over LOGICAL lines (so
+    // realignment/reflow of the block is free, the same way every other structural check in
+    // this file treats it), not a substring search over the raw text.
+    const guardStack = [];
+    let guardCondition;
+    for (const line of logicalLines(script)) {
+      const opener = line.match(/^if\s+([\s\S]*?);\s*then\b/);
+      if (opener) guardStack.push(opener[1].trim());
+      if (line.includes(TOLERANCE_ASSIGNMENT)) {
+        guardCondition = guardStack.length ? guardStack[guardStack.length - 1] : null;
+        break;
+      }
+      if (/^fi\b/.test(line) && guardStack.length) guardStack.pop();
+    }
+    if (!guardCondition || !/head_ref/.test(guardCondition) || !/promote\/\*/.test(guardCondition)) {
+      problems.push(
+        "the gate's promote/* skip-tolerance assignment is not scoped inside a conditional " +
+          `testing \`head_ref\` against a \`promote/*\` pattern (nearest enclosing guard: ` +
+          `${JSON.stringify(guardCondition ?? null)}) — this turns a narrowly-scoped exception ` +
+          'into an unconditional acceptance of a skip that should be a failure',
+      );
+    }
+  }
 
   // 3. NOT in the skipped-tolerance block. This is the one a future PR will get wrong.
   const toleranceRe = /case\s+"\$relevant"[\s\S]*?esac/;
@@ -719,6 +770,11 @@ else {
     [/node\s+scripts\/build-static-form-css\.mjs\s+--check(\s|$)/, 'the static-form drift check', 'scripts/build-static-form-css.mjs --check'],
     [/node\s+scripts\/build-static-form-css\.mjs\s+--selftest(\s|$)/, "the static-form generator's own rewrite table", 'scripts/build-static-form-css.mjs --selftest'],
     [/node\s+scripts\/check-static-form-equivalence\.mjs\s+--static(\s|$)/, "the static form's structural and declaration-set checks", 'scripts/check-static-form-equivalence.mjs --static'],
+    // REL1 (#362), both entries with the gates themselves, per every comment above. Without an
+    // entry here, either self-test step could be deleted from `lint-code` with this checker
+    // still green — precisely the defect class every comment in this list records.
+    [/node\s+scripts\/promote-develop\.mjs\s+--selftest(\s|$)/, "the develop-promotion mechanism's own probe table", 'scripts/promote-develop.mjs --selftest'],
+    [/node\s+scripts\/check-develop-ruleset-parity\.mjs\s+--selftest(\s|$)/, "the ruleset-parity checker's own probe table", 'scripts/check-develop-ruleset-parity.mjs --selftest'],
   ];
 
   /**

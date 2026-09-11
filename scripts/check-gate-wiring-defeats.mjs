@@ -159,6 +159,19 @@ const CASES = [
     const step = lintStep(wf, 'check-adr-index.mjs');
     step.shell = 'bash -c "true" #';
   }],
+
+  // ── REL1 (#362), contracts/ci-quality-integration.md §5: the two cases this mission adds ──
+  ['REL1 pull_request.branches narrowed back to [main, train/**] (develop must still be flagged uncovered)', (wf) => {
+    wf.on.pull_request.branches = ['main', 'train/**'];
+  }],
+  ['REL1 the gate\'s promote/* tolerance widened to apply unconditionally', (wf) => {
+    const step = gateStep(wf);
+    const anchor =
+      'if [[ "$head_ref" == promote/* ]]; then\n' +
+      '  sb_ok="success"; a11y_ok="success"; vr_ok="success"; pw_ok="success"\n' +
+      'fi';
+    step.run = once(String(step.run), anchor, 'sb_ok="success"; a11y_ok="success"; vr_ok="success"; pw_ok="success"');
+  }],
 ];
 
 /**
@@ -166,7 +179,7 @@ const CASES = [
  * REMOVED by lowering it in the same commit, which is a reviewable edit rather than a deletion
  * that hides in a digit.
  */
-const MIN_CASES = 18;
+const MIN_CASES = 20;
 
 const dir = mkdtempSync(join(tmpdir(), 'gate-wiring-defeats-'));
 mkdirSync(join(dir, '.github/workflows'), { recursive: true });
