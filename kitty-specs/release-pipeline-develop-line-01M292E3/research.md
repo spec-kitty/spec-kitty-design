@@ -535,17 +535,36 @@ removed, asserting the same.
 ## R25 — Ruleset parity: wired into live CI, full-parameter comparison (M10, supersedes R10)
 
 **Reversed decision**: `check-develop-ruleset-parity.mjs --check` **is** wired into automatic CI
-now — on a **schedule** (daily, matching the existing nightly-CVE cadence pattern in
-`ci-quality.yml`) and on **`push` to `develop`** (the branch the parity check is actually about,
-now that FR-003 makes `develop` a real trigger-covered branch). **Token permission needed to read
-rulesets, checked rather than assumed**: `gh api repos/.../rulesets/<id>` (used throughout this
-mission's own research) succeeded using the operator's own `gh` session; the default `GITHUB_TOKEN`
-in a scheduled/push-triggered job on a **public** repository has been sufficient for read-only
-ruleset access in this repository's own prior investigation (the same call this mission ran to
-read `main-is-safe` needed no elevated scope beyond an authenticated `gh` session) — the workflow
-step is given `permissions: { contents: read }` (no ruleset-specific permission exists to request)
-and the implementer confirms this empirically against a real scheduled run before relying on it,
-named here as a residual, not glossed over as certain.
+now — on a **schedule** and on **`push` to `develop`** (the branch the parity check is actually
+about, now that FR-003 makes `develop` a real trigger-covered branch). **Token permission needed
+to read rulesets, checked rather than assumed**: `gh api repos/.../rulesets/<id>` (used
+throughout this mission's own research) succeeded using the operator's own `gh` session; the
+default `GITHUB_TOKEN` in a scheduled/push-triggered job on a **public** repository has been
+sufficient for read-only ruleset access in this repository's own prior investigation (the same
+call this mission ran to read `main-is-safe` needed no elevated scope beyond an authenticated
+`gh` session) — the workflow step is given `permissions: { contents: read }` (no
+ruleset-specific permission exists to request) and the implementer confirms this empirically
+against a real scheduled run before relying on it, named here as a residual, not glossed over as
+certain.
+
+**Corrected during WP01's implementation pass (orchestrator decision): one shared cron, not a
+second one.** This section's first revision read "matching the existing nightly-CVE cadence
+pattern" as licence to add a **second** `schedule` entry (`- cron: '43 3 * * *'`) alongside
+FR-041's `17 2 * * *`, and the WP01 implementer built exactly that, per
+`contracts/ci-quality-integration.md`'s own (now-corrected) §1. That is wrong: GitHub Actions'
+`schedule:` trigger fires the **entire** workflow file for each cron entry independently: a
+second entry does not scope a new job into a second, separate run — it re-triggers every job in
+`ci-quality.yml` a second time per day, and every job without its own event-specific guard
+(`workflow-pin-check`, `lint-code`, `storybook-build`, `test`, `release-gate`, `gate`, and even
+`security`, whose own `if:` discriminates only on `github.ref`, not on which cron fired) runs
+**twice daily instead of once** — an entire extra ~30-minute quality-gate run, every day,
+purely to let a sub-second ruleset comparison run on its own schedule. **Corrected decision:**
+`develop-ruleset-parity` reuses the single existing cron (`17 2 * * *`) via its own job-level
+`if: github.event_name == 'schedule' || (github.event_name == 'push' && github.ref ==
+'refs/heads/develop')` — no second trigger entry. The cost of sharing the cron is that
+`develop-ruleset-parity` also (harmlessly) evaluates its `if:` on `main`'s own nightly CVE-audit
+run, where it is a no-op check against a repository that is not `develop` — cheap, and far
+better than doubling the whole workflow's daily run count.
 
 **`diffRulesetParity` must compare every parameter, not only the six data-model.md table rows**
 (squad correction) — the first revision's function compared a curated subset. Revised: it compares

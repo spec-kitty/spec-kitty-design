@@ -18,8 +18,19 @@ on:
                                                 # invocable until this file reaches `main`
   schedule:
     - cron: '17 2 * * *'
-    - cron: '43 3 * * *'   # research.md R25 — check-develop-ruleset-parity.mjs --check, daily
 ```
+
+**REVISED (orchestrator decision, WP01 implementation pass): no second `cron` entry.** An
+earlier revision of this contract added `- cron: '43 3 * * *'` for
+`check-develop-ruleset-parity.mjs --check`. That is **wrong** and is corrected here rather than
+carried forward: a second `schedule:` entry re-triggers the **entire** `ci-quality.yml` workflow
+a second time daily, and every job in the file that lacks its own event-specific guard
+(`workflow-pin-check`, `lint-code`, `storybook-build`, `test`, `release-gate`, `gate`, and even
+`security` — whose own `if:` checks only `github.ref`, not which cron fired) would then run
+**twice a day instead of once**, purely to serve a sub-second ruleset comparison. See
+research.md R25 for the corrected decision: `develop-ruleset-parity` reuses the **one existing**
+cron (FR-041's `17 2 * * *`) via its own job-level `if:`, rather than the workflow gaining a
+second trigger entry.
 
 ## 2. The four heavy jobs: skip on `promote/*` heads
 
