@@ -23,6 +23,7 @@
   "purpose_context": "This mission advances button danger secondary axis on mission/button-danger-secondary-axis so stakeholders can track the work from mission creation onward.",
   "purpose_tldr": "button danger secondary axis",
   "slug": "button-danger-secondary-axis-01M25STP",
+  "status_phase": "1",
   "target_branch": "mission/button-danger-secondary-axis",
   "topology": "single_branch"
 }
