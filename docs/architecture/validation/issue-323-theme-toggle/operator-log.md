@@ -453,6 +453,77 @@
   notify whoever owns that session so its sweep can be re-run.
 - Still open for the orchestrator: commit, fresh WP review, and the pre-merge squad.
 
+## Orchestrator takeover — Claude Code (2026-09-11)
+
+- **Why the orchestrator changed.** The Codex orchestrator session
+  `01a08b2c-a185-76d3-bae0-969526dcaeb0` stopped at 02:21 +02:00. The pass-6 remediation had
+  finished its evidence corrections but was still uncommitted in
+  `.claude/worktrees/theme-toggle-pass6-remediation`. At the operator's request, Claude Code took
+  over orchestration of the rest of the mission. The earlier record of which seat ran on which
+  transport stands as written.
+- **Pass-6 remediation transferred:**
+  - committed as `fix(elements): keep a denied-storage theme preference across a zero-control gap`;
+  - its Op `01M26W0YAJ4JHY5N6Y52352H13` was closed `done`, and the evidence record committed.
+- **Rebase:**
+  - `mission/theme-toggle` was rebased onto `origin/train/elements-first` `132163ff` (25 new train
+    commits, including #380's static-form generator, #359, #369, #376, #378 and #372).
+  - The first implementation commit had conflicts, resolved as semantic unions:
+    - `expected-docs.json`: total 134 → 139 after #354;
+    - `expected-stories.json`: total 560 → 574 after #353;
+    - `sk-site-footer.css.js`: regenerated from the merged source, never hand-merged.
+  - Generated-only conflicts in later commits (`SIZES.md`) took the mission side and were then
+    regenerated once on the final tree.
+  - Every generator was re-run uncached. `SIZES.md` was the only drift, committed as
+    `chore(elements): regenerate artifacts after train rebase`.
+  - The token catalogue's timestamp-only change was not committed.
+- **Commit hygiene.** CI's commitlint rejected one mission commit (`docs(review): …`, a scope
+  outside the enum). It was reworded to `docs(acceptance): …` with a message-only filter, and the
+  tree was verified byte-identical (`902b7cb8`). `npx commitlint --from=132163ff --to=HEAD` is
+  green.
+- **Pre-merge squad, pass 7** (point-cut `e0fe1949`, tree `902b7cb8`):
+  - Five read-only Claude Code lenses ran in a separate clone. The verdict was REJECT; details in
+    `kitty-specs/theme-toggle-01M25KMP/reviews/adversarial-review-pass-7.md`. Review Op
+    `01M2761HKKNHPQ5T1KQERAVWV1` is closed.
+  - The orchestrator ran every runtime claim as a probe before accepting it. Five went red and are
+    confirmed:
+    - write-denied gap;
+    - stale-instance reconnect;
+    - synchronous-revert storage mismatch;
+    - test-state leakage;
+    - L2 attribute canonicalization.
+  - Two out-of-scope Mediums were deferred, as #404 and #405.
+- **Exact-head gates at tree `902b7cb8`** (phases 1–2, primary checkout, Playwright on isolated
+  `STORYBOOK_PORT=6391`, because port 6006 is held by another checkout's server):
+  - **Lint and generators:** 47 of 48 phase-1 gates green. The single red was commitlint, fixed by
+    the reword above. This includes:
+    - audit, lockfile, action pins;
+    - `quality:all`: 0 errors, 31 pre-existing warnings;
+    - five-project uncached typecheck;
+    - every generator `--check` and `--selftest`;
+    - manifest content, part ratchet, static-form rewrite, gate wiring, ADR index, llms surface.
+  - **Tests and build:**
+    - `npm test`: 55 files / 719 tests (58 Node, 661 Chromium), 0 skipped;
+    - suite time 18.8 s against a 66.9 s ceiling;
+    - Storybook build within budget;
+    - the publishable-graph build plus demo assembly;
+    - `SIZES.md` `--check`.
+  - **Phase 2:**
+    - axe: 0 WCAG 2.1 AA violations across 692 rendered stories;
+    - release graph: 4 packages;
+    - packed Vue types, sizes/SRI;
+    - static-form rendered equivalence: 449 outcomes per engine, Chromium and Firefox;
+    - offline `file://` load from packed tarballs: 31/31 elements.
+  - **Playwright:** 1477 passed and 89 skipped. All but one of the 687 failures are WebKit, which
+    cannot launch on this workstation (`browserType.launch: Host system is missing dependencies to
+    run browsers`, `libgtk-4-1` and others); CI installs it `--with-deps`. The single Chromium
+    failure is the known `sk-action-row.spec.ts` keyboard-timing case ("button keeps external
+    controls on their own Tab and activation paths"), which passed 3/3 in isolation with
+    `--repeat-each=3`.
+  - **Visual regression:** 241 failed and 6 passed locally. Every failure is an image-dimension
+    mismatch in a component this mission does not touch (e.g. 234×96 expected vs 266×100 received),
+    which is local font rasterization against CI-shot baselines. The CI `visual-regression` job is
+    authoritative; nothing was re-shot.
+
 ## Pass-7 remediation (Op `01M275TD2FV77BEVH8D65XW4DC`)
 
 - Seat: a fresh Claude Code `frontend-freddy` seat on Opus, in the dedicated worktree
