@@ -18,10 +18,10 @@
       "criterion_id": "FR-002",
       "description": "Verify FR-002 is satisfied",
       "proof_type": "seam test",
-      "evidence": "head 4f301f83; sk-mission-kanban-ten-lane-pattern.spec.ts [T002] extension keys = copy/format/routes/stress/tones/unverifiedOverlays, no route strings; source imports MISSION_KANBAN_FIXTURE from ./mission-kanban.stories.js; [T006] only WP03 (overlay ref) and WP99 (guard) literals.",
+      "evidence": "product head 8986d38f (rebased on train 16948194); sk-mission-kanban-ten-lane-pattern.spec.ts [T002] extension keys copy/format/routes/stress/tones/unverifiedOverlays, restates no Work Package route; [T006] imports the #278 fixture module, only WP03 (overlay ref) and WP99 (guard) literals; local Chromium+Firefox 96/96 incl. #278 suite; WebKit authority is CI (pre-fold a3ac655c run 34604991224: playwright 3 browsers + test passed).",
       "pass_fail": "pass",
       "verified_by": "claude",
-      "verified_at": "2026-09-11T13:44:30.535176+00:00",
+      "verified_at": "2026-09-11T14:11:05.697587+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
