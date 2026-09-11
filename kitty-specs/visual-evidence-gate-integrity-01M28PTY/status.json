@@ -1,7 +1,7 @@
 {
-  "event_count": 3,
-  "last_event_id": "01M28QWKKS6GSF45JGDQV0G22P",
-  "materialized_at": "2026-09-11T17:22:49.081980+00:00",
+  "event_count": 4,
+  "last_event_id": "01M28QX2TXDQBDJEW5B4R27NPH",
+  "materialized_at": "2026-09-11T17:23:04.669057+00:00",
   "mission_number": "",
   "mission_slug": "visual-evidence-gate-integrity-01M28PTY",
   "mission_type": "software-dev",
@@ -11,23 +11,37 @@
     "canceled": 0,
     "claimed": 0,
     "done": 0,
-    "for_review": 0,
-    "in_progress": 1,
+    "for_review": 1,
+    "in_progress": 0,
     "in_review": 0,
     "planned": 0
   },
   "work_packages": {
     "WP01": {
       "actor": "claude",
+      "agent": "claude",
       "agent_profile": "__resolved_profile_absent__",
       "agent_profile_version": "__resolved_profile_version_absent__",
       "force_count": 0,
-      "lane": "in_progress",
-      "last_event_id": "01M28QWKKS6GSF45JGDQV0G22P",
-      "last_transition_at": "2026-09-11T17:22:49.081980+00:00",
+      "lane": "for_review",
+      "last_event_id": "01M28QX2TXDQBDJEW5B4R27NPH",
+      "last_transition_at": "2026-09-11T17:23:04.669057+00:00",
       "model": "__resolved_model_absent__",
       "provider": "__resolved_provider_absent__",
-      "role": "implementer"
+      "role": "implementer",
+      "subtasks": {
+        "T001": "done",
+        "T002": "done",
+        "T003": "done",
+        "T004": "done",
+        "T005": "done",
+        "T006": "done",
+        "T007": "done",
+        "T008": "done",
+        "T009": "done",
+        "T010": "done",
+        "T011": "done"
+      }
     }
   }
 }
