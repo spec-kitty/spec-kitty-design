@@ -117,11 +117,11 @@
     {
       "criterion_id": "FR-012",
       "description": "Verify FR-012 is satisfied",
-      "proof_type": "manual_inspection",
-      "evidence": "Reviewer directly opened the 3 harvested forced-colors CI baselines (code-entry, authorization-decision-forced-colors): input boundary is a visible high-contrast stroke, Approve and Deny are both visibly bordered and distinguishable from each other (not color-only \u2014 Deny's border is visibly heavier per the companion automated width comparison at sk-cli-auth-pattern.spec.ts:610-628), scope pill-tags carry a visible border. Note: emulation is Chromium-only by established repo convention (test.skip browserName!=='chromium', sk-cli-auth-pattern.spec.ts:588-591); this is documented scope, not a gap. Execution outcome (the automated width-comparison assertion) pending CI's chromium playwright job.",
+      "proof_type": "automated_test",
+      "evidence": "CORRECTED (squad pass 1, item 5): there are 2 harvested forced-colors CI baselines, not 3 as previously miscounted \u2014 code-entry-forced-colors and authorization-decision-forced-colors (apps/storybook/src/tests/visual.spec.ts-snapshots/); I opened both and confirmed input boundary is a visible high-contrast stroke, Approve and Deny are both visibly bordered and distinguishable (not color-only -- Deny's border is visibly heavier per the automated width comparison at sk-cli-auth-pattern.spec.ts's forced-colors test). Previous evidence also wrongly credited scope pill-tags with 'a visible border': they carry no  attribute, so sk-pill-tag.css's forced-colors rule ( only) declares nothing for them and they get NO border under forced colors -- corrected per squad finding 1. Their real protection is the UA's own background/text-colour remap to Canvas/CanvasText, now asserted directly and falsifiably (read from the shadow root's actual  span, not the host) rather than via the previous , which could never fail. Emulation remains Chromium-only by established repo convention (test.skip browserName!=='chromium'); documented scope, not a gap. Execution outcome observed: CI run 34608397407 job 103293125715 (playwright) at head 83f0a8e9 = pass (16m56s), and locally on chromium+firefox (25 passed, 1 correctly skipped).",
       "pass_fail": "pass",
-      "verified_by": "reviewer-renata",
-      "verified_at": "2026-09-11T12:09:15.134810+00:00",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T14:39:58.694231+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
