@@ -308,6 +308,61 @@ behavior, permission and admission logic, mapping/purge/refresh state machines, 
 copy/i18n. There is intentionally no `sk-connectors`, provider component, or published Connectors
 page.
 
+## Account Front Door pattern
+
+The Storybook `Patterns/Account Front Door` family (#355, epic #352) demonstrates six approved
+Family 6 public/account compositions — landing, entry boundary, submitted validation, recovery
+sent, terminal (both inactive and closed-signup arms), published/unavailable legal, and email/
+password account maintenance — without publishing a page component or any new custom element. It
+composes `.sk-skip-link`, `.sk-public-header`, `sk-theme-toggle`, `sk-site-footer` (compact
+presentation), `.sk-boundary-page`, `.sk-form-field`/`.sk-input`, `.sk-radio-choice-group`,
+`.sk-button` (`--primary`/`--secondary`/`--ghost`/`--danger-secondary`), `sk-copy-field`,
+`sk-notice`, `.sk-prose`, `sk-app-shell`, `sk-page-header`, and `.sk-pill-tag`, plus `--sk-*`
+tokens. Every action inside `.sk-public-header__actions` carries `sk-public-header__action`, which
+is what carries its 48px floor; at zero actions the `<nav>` is omitted entirely. Compact footer
+links are bare `<a slot="compact-links">` carrying both `sk-site-footer__link` and
+`sk-site-footer__link--compact`. `sk-theme-toggle` writes `localStorage` and mutates
+`documentElement`'s theme, so every story in the family isolates that state via `beforeEach`.
+
+Twelve named fixture states back the family; two are proven only in the fixture-behaviour suite
+and carry no story (a populated-providers arm and a closed-signup terminal arm), and one more
+(a cooldown arm) is published only through the `LongStrings` proof. Every fixture is recursively
+frozen and every projection is a pure presence/ordering decision — the consumer supplies signup
+fields, CSRF placeholder name, provider list, linked errors, recovery/refusal copy, terminal
+copy and route inventory, the legal document as an ordered block list, email addresses and their
+verification/primary facts, cooldown copy, and password-field facts. The pattern infers none of
+it.
+
+**What the pattern deliberately does not do.** It implements no routing, store, session, or
+navigation; no CSRF token generation (the hidden placeholder is rendered empty and is never
+populated); no client-side validation (a submitted-validation composition renders an
+already-invalid state, it does not compute one); no cooldown timing (a cooldown region is present
+only when the fixture supplies a cooldown fact, absent — not merely hidden — otherwise); no legal
+document publication or authoring (the `.sk-prose` region renders exactly the supplied ordered
+blocks); and no localisation (every string arrives from the fixture; the `LongStrings` proof
+substitutes longer versions of the same real strings, never invented text). It performs no network
+request and no successful-mutation theatre: every `<form>` carries the fixture's own `method`/
+`action`, and no submit handler exists inside the pattern. Recovery, reset, duplicate-account and
+terminal outcomes are rendered from fixture types that carry no existence-expressing field, so
+"does this account exist" is structurally unrepresentable, not merely untested. There is
+intentionally no `sk-error-summary`, `sk-auth-form`, `sk-auth-card`, or any auth/account/
+front-door/legal-page/recovery/MFA/email-row/social-provider/password-maintenance component.
+
+**Composition 3's error list is consumer semantics, not a component.** A `role="alert"
+tabindex="-1"` summary wraps a native `<ul>` of links to each invalid field; the summary alone
+carries `role="alert"` — the field-local `.sk-form-field__description` does not, so the two do not
+double-announce the same text.
+
+**Composition 6's three email actions are a pattern-local row, not `sk-action-row`.** P20's shape
+is a native `.sk-radio-choice-group` for address selection plus a flat row of three plain submit
+buttons that act on whichever address is selected; `sk-action-row`'s identity-row anatomy
+(`__marker`/`__title`/`__trigger`/`__controls`) does not fit a control with no identity and no
+trigger, so this family composes none. `Re-send Verification` composes `.sk-button
+.sk-button--secondary` bare, with no pattern-local border compensation — `.sk-button--secondary`'s
+border currently fails WCAG 1.4.11 (#155, open at time of writing). That is a pre-existing,
+library-owned defect; fixing it belongs to #155, and Epic #352 forbids reproducing Family 6's
+temporary `.front-door-secondary-action` border override as a library contract.
+
 ## Application shell composition
 
 The shell elements supply layout and landmarks while the consumer supplies destinations, state,
