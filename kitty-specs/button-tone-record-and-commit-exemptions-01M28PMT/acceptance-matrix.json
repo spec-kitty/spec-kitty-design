@@ -47,11 +47,11 @@
     {
       "criterion_id": "FR-005",
       "description": "Verify FR-005 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "proof_type": "manual_review",
+      "evidence": "docs/architecture/decisions/2026-09-11-17-sk-button-tone-intensity-flattening.md (Status: Proposed), indexed in docs/architecture/README.md; node scripts/check-adr-index.mjs passes",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T17:11:51.423365+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
