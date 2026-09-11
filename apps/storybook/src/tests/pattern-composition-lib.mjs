@@ -280,73 +280,78 @@ function bemRootOf(name) {
 }
 
 /**
- * The BEM root(s) a rendition DECLARES AS ITS OWN by carrying them on a real story-root
- * element — any element with a `data-*-pattern` attribute, the repo-wide convention every
- * pattern family's story root carries (MEASURED: `cli-auth.stories.ts` uses
- * `data-cli-auth-pattern`, `connectors.stories.ts` uses `data-connectors-pattern`,
- * `mission-kanban.stories.ts` uses `data-mission-kanban-pattern`, and so on — grepped across
- * every `packages/elements/src/patterns/*.stories.ts`; all six named pattern families follow
- * it). Scans each such element's own `class="..."` attribute (including string literals nested
- * in a `${…}` ternary, the same shape `skPrimitivesIn()` already handles), reducing each token
- * to its BEM root.
- *
- * THIS IS THE FIX FOR #418 FINDING 1 (reviewer, WP01 reject #1): `localClassesIn()` used to
- * accept ANY class declared in a fixture's own `<style>` block, unconditionally — no check that
- * it belonged to the fixture's own frame rather than an unrelated block restated locally.
- * REPRODUCED, then closed: planting
- *   <style>.sk-terminal-frame { color: red; }</style>
- *   <div class="sk-terminal-frame">
- * — an INNER element, never carrying a `data-*-pattern` marker — passed the old check because
- * `sk-terminal-frame` had a same-file rule. `sk-terminal-frame` is not an arbitrary name: it is
- * one of the five names the denylist this whole mechanism replaced explicitly forbade, so the
- * old local-classes arm was STRICTLY WEAKER than the mechanism it replaced for that exact case.
- * `ownBlockRoots()` only trusts what an actual story root declares as its own; an inner element
- * styled locally, with no relation to any story root's own class, now has no bucket to land in.
+ * Whether `name` is trusted by a set of BEM roots — either `name` itself IS one of the roots,
+ * or `name`'s own BEM root (`bemRootOf`) is. The single membership test both
+ * `ownedClasses()`-derived acceptance and a spec file's own hardcoded local-block allowance
+ * (see `pattern-composition-lib.mjs`'s header note on #418 FINDING 1's fix, and
+ * `sk-cli-auth-pattern.spec.ts`'s `LOCAL_BLOCK` constant) run through.
  */
-export function ownBlockRoots(rendition) {
-  const roots = new Set();
-  // Bounded to each element's own opening tag, matching `skPrimitivesIn()`'s own proven
-  // technique exactly — and for the same reason: a first attempt here tried to precisely
-  // delimit `class="..."`'s value with `/\bclass\s*=\s*"([^"]*)"/`, which broke on
-  // `cli-auth.stories.ts`'s REAL markup (`class="sk-cli-auth-pattern${light ? " sk-light" :
-  // ""}"`) — the ternary's own nested double-quoted JS string literals terminate a `[^"]*`
-  // capture at the FIRST embedded `"`, silently truncating the match and losing
-  // `sk-cli-auth-pattern` entirely. MEASURED: that version flagged the fixture's own legitimate
-  // `sk-cli-auth-pattern` family as unknown. A blanket `sk-[\w-]+` scan across the whole tag
-  // (not attribute-delimited) sidesteps the quote-nesting problem the same way
-  // `skPrimitivesIn()` already does.
-  const openTag = /<\s*[a-zA-Z][\w-]*((?:[^<>]|\$\{[^{}]*\})*)>/g;
-  for (const m of rendition.matchAll(openTag)) {
-    const attrs = m[1];
-    if (!/\bdata-[a-z0-9-]*-pattern\b/.test(attrs)) continue;
-    for (const token of attrs.matchAll(/\bsk-[\w-]+\b/g)) {
-      roots.add(bemRootOf(token[0]) ?? token[0]);
-    }
-  }
-  return roots;
+export function isBemMemberOf(name, roots) {
+  return roots.has(name) || roots.has(bemRootOf(name));
 }
 
 /**
- * Every class declared inside a rendition's OWN `<style>…</style>` block(s) THAT IS A BEM
- * MEMBER OF ONE OF ITS OWN DECLARED STORY-ROOT BLOCKS (`ownBlockRoots()`) — a story's
- * story-local BEM frame (e.g. `.sk-cli-auth-pattern` and its `__`-children), which is legitimate
- * per-story scoping and not an invented sub-component. A locally-declared class that is NOT
- * BEM-related to any real story root (see `ownBlockRoots()`'s header for the reproduced exploit
- * this refuses) is excluded, not trusted just because a same-file rule exists for it. Reuses
- * `styleBlocks()` so this reads `<style>` bodies the same case-insensitive,
- * interpolation-masking way the CSS arm already does.
+ * Walks the LIGHT DOM of the WHOLE rendered page (`document.body`, not merely a located "root"
+ * element's own subtree) and returns every `sk`-prefixed tag name and class name ACTUALLY
+ * PRESENT — never crossing into any composed element's shadow root, because
+ * `Element.querySelectorAll('*')` structurally cannot.
+ *
+ * DESIGNED TO RUN INSIDE THE BROWSER: pass this function DIRECTLY to Playwright's
+ * `page.evaluate()` (e.g. `await page.evaluate(collectSkPrimitives)`), which serializes it into
+ * the page. It therefore has NO closure over any outer variable and imports nothing — only
+ * `document`/`Element`/`Set`, which exist in both runtimes.
+ *
+ * THIS REPLACES THE SOURCE-TEXT MECHANISM (`skPrimitivesIn()` + `ownBlockRoots()`, both
+ * deleted), which the reviewer defeated TWICE on WP01, and closes a THIRD gap this mechanism's
+ * own first draft (scoped to a located root's subtree, not the whole page) had:
+ *   - `ownBlockRoots()` trusted any element carrying a `data-*-pattern`-shaped attribute as a
+ *     "real story root," including an INVENTED attribute name (`data-evil-pattern`) and the
+ *     REAL attribute repeated on an inner, non-root element — both mint their own credential
+ *     because the check asked the rendition to self-report which of its own elements to trust.
+ *   - The follow-up ban list (`classList.add/remove/toggle/replace`, `setAttribute("class",
+ *     ...)`, `.className=`, the bracket/Reflect spellings of both) was defeated by
+ *     `Object.assign(element, { className: "sk-consent-row" })` — an unquoted property key,
+ *     structurally the same class of mutation spelled a fifth way. Enumerating spellings of "a
+ *     class got mutated" is the exact asymmetry #418 was filed about, one level down: the CSS
+ *     arm is derived from files a fixture cannot edit, and the old DOM arm was not.
+ *   - SELF-ATTACKED before this mechanism was reported closed (see the mission report for the
+ *     full log): a `ref()` callback running `document.body.insertAdjacentHTML("beforeend",
+ *     '<div class="sk-terminal-frame">...</div>')` — appending OUTSIDE the located root's own
+ *     subtree entirely — passed the first draft of this function (scoped to `root.querySelectorAll`)
+ *     silently. Scanning `document.body` itself, not a located root, closes it: there is no
+ *     "outside the root" left for an escape to land in. Storybook's own preview-frame chrome
+ *     (`#storybook-root`, `.sb-wrapper`, etc. — MEASURED by inspecting `document.body.children`
+ *     at this URL) uses `sb-`/plain ids, never `sk-`, so this scan cannot false-positive against
+ *     it.
+ *
+ * Reading the LIVE, RENDERED DOM after every `ref()` callback has already executed makes all
+ * three defeats structural rather than enumerable: there is no "which element is the root" left
+ * to spoof (the scan starts at `document.body`, not a locator match), and "was this class ever
+ * actually applied" is answered by asking the BROWSER's own `element.classList`, which is
+ * authoritative over EVERY possible JS spelling of a mutation (`Object.assign`,
+ * `setAttributeNS`, `Reflect.set`, a computed/bracket key, or any future one) by construction —
+ * there is nothing left to enumerate.
  */
-export function localClassesIn(rendition) {
-  const roots = ownBlockRoots(rendition);
-  const declared = new Set();
-  for (const css of styleBlocks(rendition)) {
-    for (const name of classNamesDeclaredIn(css, 'inline <style>')) declared.add(name);
-  }
-  const accepted = new Set();
-  for (const name of declared) {
-    if (roots.has(name) || roots.has(bemRootOf(name))) accepted.add(name);
-  }
-  return accepted;
+export function collectSkPrimitives() {
+  const tags = new Set();
+  const classes = new Set();
+  const record = (el) => {
+    const tag = el.tagName.toLowerCase();
+    if (tag.startsWith('sk-')) tags.add(tag);
+    for (const cls of el.classList) {
+      // Case-INSENSITIVE prefix test (SELF-ATTACKED: `class="SK-Terminal-Frame"` passed a first
+      // draft using a case-sensitive `cls.startsWith('sk-')`, since neither `insertAdjacentHTML`
+      // nor `classList` itself lowercases a class token). The ORIGINAL casing is still what
+      // gets recorded and compared against every owned/local/known set below (all real,
+      // committed classes in this repo are lowercase-kebab by convention) — a mixed-case
+      // variant therefore still fails to match any of them and reports as unknown, under its
+      // own real spelling in the failure message, not silently normalized away.
+      if (cls.slice(0, 3).toLowerCase() === 'sk-') classes.add(cls);
+    }
+  };
+  record(document.body);
+  for (const el of document.body.querySelectorAll('*')) record(el);
+  return { tags: [...tags], classes: [...classes] };
 }
 
 /**
@@ -401,31 +406,13 @@ export function bemBlockRoots(classNames) {
   return roots;
 }
 
-/**
- * Every `sk`-prefixed tag name and class name a rendition's markup names, bounded to each
- * element's own opening tag (`<tag ...>`) so neither a doc comment (stripped by the caller's
- * `stripComments()` before this ever sees the text) nor an unrelated string literal elsewhere
- * in the file can contribute a false candidate.
- *
- * DELIBERATELY PERMISSIVE INSIDE THAT BOUND — a bare `sk-[\w-]+` scan across the whole opening
- * tag, not a strict `class="..."`-only attribute parse — because a class reaching the DOM
- * through a ternary (`class="sk-cli-auth-pattern${light ? " sk-light" : ""}"`, the real shape
- * `cli-auth.stories.ts` uses for its light-mode toggle) still has to be written as a literal
- * `sk-...` token somewhere inside that same opening tag, whatever the surrounding JS syntax
- * looks like. An interpolation block (`${…}`) is consumed as one unit first so a stray `<`/`>`
- * inside it (there is none here, but a future pattern's fixture data could contain one) cannot
- * truncate the tag match early.
- */
-export function skPrimitivesIn(rendition) {
-  const tags = new Set();
-  const classes = new Set();
-  const openTag = /<\s*([a-zA-Z][\w-]*)((?:[^<>]|\$\{[^{}]*\})*)>/g;
-  for (const m of rendition.matchAll(openTag)) {
-    const tag = m[1].toLowerCase();
-    if (tag.startsWith('sk-')) tags.add(tag);
-    for (const cls of m[2].matchAll(/\bsk-[\w-]+\b/g)) classes.add(cls[0]);
-  }
-  return { tags, classes };
-}
+// `skPrimitivesIn()` — a source-text scan for `sk`-prefixed tags/classes bounded to each
+// element's own opening tag — lived here through WP01's first reject fix. REMOVED, not kept
+// disclosed-and-weaker, on WP01's second reject: it is a proven-defeated mechanism for the
+// composition-inventory purpose (see `collectSkPrimitives()`'s header for both defeats), and
+// leaving a defeated function exported from a file four more pattern missions are meant to
+// reuse is the failure mode the reviewer named directly — "it ships forward into every sibling
+// that adopts it." `collectSkPrimitives()` (runtime, DOM-anchored) is what pattern spec files
+// should import for this purpose now.
 
 
