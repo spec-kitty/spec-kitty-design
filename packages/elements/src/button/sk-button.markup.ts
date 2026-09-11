@@ -21,6 +21,7 @@ export const BUTTON_VARIANTS = {
   primary: 'sk-button--primary',
   secondary: 'sk-button--secondary',
   ghost: 'sk-button--ghost',
+  'danger-secondary': 'sk-button--danger-secondary',
 } as const;
 
 export type ButtonVariant = keyof typeof BUTTON_VARIANTS;

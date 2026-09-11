@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "mission_slug": "button-danger-secondary-axis-01M25STP",
+  "mission_id": "01M25STPNMY133FDM0NDXGHWEB",
+  "mission_branch": "kitty/mission-button-danger-secondary-axis-01M25STP",
+  "target_branch": "mission/button-danger-secondary-axis",
+  "lanes": [
+    {
+      "lane_id": "lane-a",
+      "wp_ids": [
+        "WP01"
+      ],
+      "write_scope": [
+        "apps/storybook/src/tests/elements-load.spec.ts",
+        "docs/design-system/using-components.md",
+        "fixtures/elements-behaviour/src/sk-button.test.ts",
+        "packages/elements/SIZES.md",
+        "packages/elements/custom-elements.json",
+        "packages/elements/src/button/sk-button.css.d.ts",
+        "packages/elements/src/button/sk-button.css.js",
+        "packages/elements/src/button/sk-button.markup.ts",
+        "packages/elements/src/button/sk-button.stories.ts",
+        "packages/elements/src/button/sk-button.ts",
+        "packages/elements/vue.d.ts",
+        "packages/react/src/**",
+        "packages/styles/src/button/index.ts",
+        "packages/styles/src/button/sk-button-html.stories.ts",
+        "packages/styles/src/button/sk-button.css",
+        "packages/styles/src/button/sk-button.html"
+      ],
+      "predicted_surfaces": [
+        "api",
+        "app-shell",
+        "artifact-rendering"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    }
+  ],
+  "computed_at": "2026-09-10T14:20:36.925833+00:00",
+  "computed_from": "dependency_graph+ownership",
+  "planning_artifact_wps": [],
+  "planning_commit_sha": "0defcd9f5ee91ad102a760d45c76a5b2e266918e"
+}

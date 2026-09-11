@@ -764,7 +764,7 @@ npm install @spec-kitty/react                         # optional: JSX typing for
 
 ## Buttons
 
-Primary and secondary call-to-action buttons used to drive user actions.
+Primary, secondary, ghost, and danger-secondary call-to-action buttons used to drive user actions.
 
 **As a custom element** — `sk-button` is migrated, so it needs no wrapper:
 
@@ -775,7 +775,33 @@ Primary and secondary call-to-action buttons used to drive user actions.
 <sk-button variant="secondary">Learn more</sk-button>
 <sk-button variant="primary" size="sm">Book demo</sk-button>
 <sk-button variant="ghost" size="icon" label="Refresh evidence">↻</sk-button>
+<sk-button variant="danger-secondary">Deny</sk-button>
 ```
+
+**`danger-secondary`** composes the `secondary` tone's shape (transparent background at rest,
+bordered) with the danger role's own surface/foreground pair, `--sk-status-danger` /
+`--sk-on-status-danger` — the same pair `sk-status-indicator` and `sk-pill-tag`'s status axis
+already publish. It introduces **no new token**: binding under the programme's BORDER-ROLE-319
+ruling, this tone's own rules never reach for `--sk-border-default`/`--sk-border-strong`, the
+pair `.sk-button--secondary`'s own boundary uses and which #155 records as already failing WCAG
+1.4.11 — the composed `danger-secondary` + `busy` state is a separate, currently-open coverage
+gap in the busy axis's own cue styling, tracked apart from this tone.
+
+All six measured contrast pairs (three surfaces, two themes) clear the 3:1 control-boundary floor
+with wide margin. The figures are kept in one place — the `.sk-button--danger-secondary` header
+comment in `packages/styles/src/button/sk-button.css`, beside the declarations they justify —
+rather than restated here where nothing recomputes them; see #155 for the coordination record
+this measurement was posted against.
+
+Under `forced-colors: active`, `.sk-button--secondary` already gets an automatic border-colour
+remap (its border is unconditional and non-transparent), so `danger-secondary`'s identically
+bordered shape would otherwise remap to the same system colour and become indistinguishable from
+it. `danger-secondary` steps its `border-width` from 1px to `var(--sk-border-width-2)` inside
+that media query only — the same mechanism `sk-card`'s status axis and `sk-confirm-dialog`'s
+open state already use — rather than a content-drawn glyph, which was considered and rejected
+(see the mission's spec for the four reasons). At the default and `size="sm"` sizes (which set no
+`box-sizing`), this grows the button's total box by 1px per side in forced-colors mode only;
+`size="icon"`'s `box-sizing: border-box` absorbs the extra pixel with no box growth.
 
 Set `href` and it renders an anchor instead of a button, with the same class list — which is
 what the demo pages actually need, since every button-styled thing there is a link:
@@ -798,6 +824,7 @@ actions and links rather than as an implicit form-submit button.
 ```html
 <button class="sk-button sk-button--primary">Get started</button>
 <button class="sk-button sk-button--secondary">Learn more</button>
+<button class="sk-button sk-button--danger-secondary">Deny</button>
 ```
 
 [View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/components-button-html--default)

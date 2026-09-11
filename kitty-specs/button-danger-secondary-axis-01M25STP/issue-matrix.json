@@ -1,0 +1,101 @@
+{
+  "rows": {
+    "#153": {
+      "evidence_ref": "FR-009: icon-sized danger-secondary keeps the consumer-supplied label as accessible name via the existing unchanged aria-label mechanism; #153 (general icon-button a11y-name issue) not reopened or fixed here.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
+    },
+    "#155": {
+      "evidence_ref": "FR-022/C-004: coordination recorded via GH comment https://github.com/spec-kitty/spec-kitty-design/issues/155#issuecomment-5619975095; #155's own hairline fix remains owned by #321, not touched here.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
+    },
+    "#218": {
+      "evidence_ref": "Historical reference only, inside sk-button.css's forced-colors comment: #218 previously deleted a no-op border-inline-start-color rule from sk-card.css. Not touched, reopened, or acted on by this WP; cited for precedent only.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
+    },
+    "#286": {
+      "evidence_ref": "FR-010/FR-017: no-copy-default targeted assertion authored in fixtures/elements-behaviour/src/sk-button.test.ts ('danger-secondary has no new copy default anywhere in source'), independently confirmed passing (npm run test, 617/617).",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "in-mission",
+      "wp": "WP01"
+    },
+    "#305": {
+      "evidence_ref": "C-008: busy/loading axis explicitly excluded from this mission's scope; remains #305's own separate concern, unaffected by this diff.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
+    },
+    "#319": {
+      "evidence_ref": "Epic parent providing authority/deadline posture for this mission; sibling Family 5 children (incl. #321) and Lynn's pending product verdict remain outstanding, not resolved by this WP.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
+    },
+    "#320": {
+      "evidence_ref": "This WP's diff (6e89c92,40cc95f,b2a358c,07228ee) is the implementation of #320 itself.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "in-mission",
+      "wp": "WP01"
+    },
+    "#321": {
+      "evidence_ref": "BORDER-ROLE-319/spec Assumptions: #320 does not participate in the neutral-border-role token fix at all and touches zero token files; that work belongs entirely to #321, not this WP.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
+    }
+  },
+  "schema_version": 1
+}

@@ -37,8 +37,8 @@ has, and faking one with pointer-events hides it from assistive technology. */
   /** Size: `sm`, `icon`, or omit for the default. */
   size?: SkButtonElement["size"];
 
-  /** Tone: `primary`, `secondary` or `ghost`. Omit for the unstyled base. An unknown value
-renders the base button and warns rather than throwing. */
+  /** Tone: `primary`, `secondary`, `ghost` or `danger-secondary`. Omit for the unstyled base. An
+unknown value renders the base button and warns rather than throwing. */
   variant?: SkButtonElement["variant"];
 
   /** A space-separated list of the classes of the element. Classes allows CSS and JavaScript to select and access specific elements via the class selectors or functions like the method `Document.getElementsByClassName()`. */
@@ -84,8 +84,8 @@ renders the base button and warns rather than throwing. */
  * - `href`: When set, the element renders an anchor to this URL instead of a button.
  * - `label`: Accessible name forwarded unchanged to the real control. Required for the `icon` size.
  * - `size`: Size: `sm`, `icon`, or omit for the default.
- * - `variant`: Tone: `primary`, `secondary` or `ghost`. Omit for the unstyled base. An unknown value
- * renders the base button and warns rather than throwing.
+ * - `variant`: Tone: `primary`, `secondary`, `ghost` or `danger-secondary`. Omit for the unstyled base. An
+ * unknown value renders the base button and warns rather than throwing.
  *
  * ## Slots
  *

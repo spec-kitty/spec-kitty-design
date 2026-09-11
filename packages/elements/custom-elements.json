@@ -184,9 +184,9 @@
           "kind": "variable",
           "name": "BUTTON_VARIANTS",
           "type": {
-            "text": "{\n  primary: 'sk-button--primary',\n  secondary: 'sk-button--secondary',\n  ghost: 'sk-button--ghost',\n}"
+            "text": "{\n  primary: 'sk-button--primary',\n  secondary: 'sk-button--secondary',\n  ghost: 'sk-button--ghost',\n  'danger-secondary': 'sk-button--danger-secondary',\n}"
           },
-          "default": "{ primary: 'sk-button--primary', secondary: 'sk-button--secondary', ghost: 'sk-button--ghost', }",
+          "default": "{ primary: 'sk-button--primary', secondary: 'sk-button--secondary', ghost: 'sk-button--ghost', 'danger-secondary': 'sk-button--danger-secondary', }",
           "description": "The button's tone modifiers."
         },
         {
@@ -2482,9 +2482,9 @@
               "name": "variant",
               "privacy": "public",
               "type": {
-                "text": "'primary' | 'secondary' | 'ghost' | undefined"
+                "text": "'primary' | 'secondary' | 'ghost' | 'danger-secondary' | undefined"
               },
-              "description": "Tone: `primary`, `secondary` or `ghost`. Omit for the unstyled base. An unknown value\nrenders the base button and warns rather than throwing.",
+              "description": "Tone: `primary`, `secondary`, `ghost` or `danger-secondary`. Omit for the unstyled base. An\nunknown value renders the base button and warns rather than throwing.",
               "attribute": "variant",
               "reflects": true
             }
@@ -2533,9 +2533,9 @@
             {
               "name": "variant",
               "type": {
-                "text": "'primary' | 'secondary' | 'ghost' | undefined"
+                "text": "'primary' | 'secondary' | 'ghost' | 'danger-secondary' | undefined"
               },
-              "description": "Tone: `primary`, `secondary` or `ghost`. Omit for the unstyled base. An unknown value\nrenders the base button and warns rather than throwing.",
+              "description": "Tone: `primary`, `secondary`, `ghost` or `danger-secondary`. Omit for the unstyled base. An\nunknown value renders the base button and warns rather than throwing.",
               "fieldName": "variant"
             }
           ],

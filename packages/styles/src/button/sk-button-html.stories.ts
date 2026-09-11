@@ -4,6 +4,7 @@ import {
   SkButtonPrimaryHTML,
   SkButtonSecondaryHTML,
   SkButtonGhostHTML,
+  SkButtonDangerSecondaryHTML,
   SkButtonSmHTML,
   SkButtonLinkHTML,
   SkButtonBusyHTML,
@@ -60,6 +61,16 @@ type Story = StoryObj;
 export const Default: Story = { render: () => label(SkButtonPrimaryHTML, 'Get started') };
 export const Secondary: Story = { render: () => label(SkButtonSecondaryHTML, 'Star on GitHub') };
 export const Ghost: Story = { render: () => label(SkButtonGhostHTML, 'Read the docs') };
+
+/**
+ * Danger-secondary — the static-path counterpart to `DangerSecondary` in `sk-button.stories.ts`.
+ * `'Deny'` is an example label only, never a component default (#286); the generated export's
+ * own default content parameter stays `'Label'`.
+ */
+export const DangerSecondary: Story = {
+  render: () => label(SkButtonDangerSecondaryHTML, 'Deny'),
+};
+
 export const Small: Story = {
   render: () => label(SkButtonSmHTML, 'Book Demo'),
 };
@@ -101,6 +112,7 @@ export const AllVariants: Story = {
       ${label(SkButtonPrimaryHTML, 'Get started')}
       ${label(SkButtonSecondaryHTML, 'Star on GitHub')}
       ${label(SkButtonGhostHTML, 'Read the docs')}
+      ${label(SkButtonDangerSecondaryHTML, 'Deny')}
       ${label(SkButtonSmHTML, 'Book Demo')}
       ${label(SkButtonLinkHTML, 'Read the docs')}
     </div>
@@ -115,6 +127,7 @@ export const LightMode: Story = {
       ${label(SkButtonPrimaryHTML, 'Get started')}
       ${label(SkButtonSecondaryHTML, 'Star on GitHub')}
       ${label(SkButtonGhostHTML, 'Read the docs')}
+      ${label(SkButtonDangerSecondaryHTML, 'Deny')}
     </div>
   `,
 };

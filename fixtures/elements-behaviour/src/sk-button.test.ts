@@ -12,7 +12,6 @@
 import { beforeEach, expect, test } from 'vitest';
 import '../../../packages/elements/src/button/sk-button.js';
 import skButtonSheet from '../../../packages/elements/src/button/sk-button.css.js';
-import skButtonCssRaw from '../../../packages/styles/src/button/sk-button.css?raw';
 import { SkButton } from '../../../packages/elements/src/button/sk-button.js';
 import {
   BUTTON_SIZES,
@@ -20,9 +19,48 @@ import {
   buttonClasses,
   buttonStaticHtml,
 } from '../../../packages/elements/src/button/sk-button.markup.js';
+import skButtonCss from '../../../packages/styles/src/button/sk-button.css?raw';
+import skButtonElementSource from '../../../packages/elements/src/button/sk-button.ts?raw';
+import skButtonMarkupSource from '../../../packages/elements/src/button/sk-button.markup.ts?raw';
 import { installTokenSheet } from './token-sheet.js';
 
 beforeEach(installTokenSheet);
+
+// AUTHORED sheet, parsed directly — the same technique sk-action-row.test.ts uses for a
+// pseudo-class rule (`:hover`/`:active`) that `getComputedStyle` cannot answer without actually
+// simulating the state, and sk-status-indicator.test.ts's `authoredStatusSheet`/`mediaRuleFor`
+// pair also uses: asserting the AUTHORED sheet itself carries the guard, independent of any one
+// browser's runtime media-query interpretation. ONE shared instance — `danger-secondary`'s
+// hover/active rules (rootStyleRuleFor, below) and the busy axis's media/style rules
+// (mediaRuleFor/styleRuleFor, below) both read off it.
+const authoredButtonSheet = new CSSStyleSheet();
+authoredButtonSheet.replaceSync(skButtonCss);
+
+const styleRuleFor = (rules: CSSRuleList | readonly CSSRule[], selector: string): CSSStyleRule | undefined =>
+  Array.from(rules).find(
+    (rule): rule is CSSStyleRule => rule instanceof CSSStyleRule && rule.selectorText === selector,
+  );
+
+// ROOT-SCOPED, ONE IMPLEMENTATION. Was a second copy of styleRuleFor's own find/instanceof
+// logic, hardcoded to authoredButtonSheet.cssRules instead of taking rules as a parameter — a
+// pre-merge lens found the duplication. Delegates now; the only difference is the fixed root.
+const rootStyleRuleFor = (selector: string): CSSStyleRule | undefined =>
+  styleRuleFor(authoredButtonSheet.cssRules, selector);
+
+// PLURAL, COLLECTING ALL MATCHES — not `.find()`'s first-match. A pre-merge lens (two,
+// independently) found the forced-colors busy-cue check below calling a first-match
+// `mediaRuleFor` while its own comment claimed the guard held "regardless of how many other
+// tones gain their own forced-colors rules later" — a property `.find()` does not have: a
+// SECOND `@media (forced-colors: active)` block carrying a busy-cue override would sit past
+// index 0 and never be checked. `mediaRuleFor` (singular) still exists for the
+// prefers-reduced-motion caller below, which has exactly one block and no claim about future
+// ones; it now delegates to this one rather than duplicating the scan.
+const mediaRulesFor = (query: string): CSSMediaRule[] =>
+  Array.from(authoredButtonSheet.cssRules).filter(
+    (rule): rule is CSSMediaRule => rule instanceof CSSMediaRule && rule.media.mediaText === query,
+  );
+
+const mediaRuleFor = (query: string): CSSMediaRule | undefined => mediaRulesFor(query)[0];
 
 const mount = async (attrs: Record<string, string> = {}, label = 'Label') => {
   const el = document.createElement('sk-button');
@@ -36,22 +74,6 @@ const mount = async (attrs: Record<string, string> = {}, label = 'Label') => {
 const partOf = (el: Element) => el.shadowRoot!.querySelector('[part="button"]') as HTMLElement;
 const busyCueOf = (el: Element) =>
   el.shadowRoot!.querySelector('[part="busy-cue"]') as HTMLElement;
-
-// The busy-axis (#305) authored CSS, parsed the way sk-status-indicator.test.ts's
-// `authoredStatusSheet`/`mediaRuleFor` pair already does: asserting the AUTHORED sheet itself
-// carries the guard, independent of any one browser's runtime media-query interpretation.
-const authoredButtonSheet = new CSSStyleSheet();
-authoredButtonSheet.replaceSync(skButtonCssRaw);
-
-const mediaRuleFor = (query: string): CSSMediaRule | undefined =>
-  Array.from(authoredButtonSheet.cssRules).find(
-    (rule): rule is CSSMediaRule => rule instanceof CSSMediaRule && rule.media.mediaText === query,
-  );
-
-const styleRuleFor = (rules: CSSRuleList | readonly CSSRule[], selector: string): CSSStyleRule | undefined =>
-  Array.from(rules).find(
-    (rule): rule is CSSStyleRule => rule instanceof CSSStyleRule && rule.selectorText === selector,
-  );
 
 test('icon button and link branches expose the supplied label as their accessible name', async () => {
   const button = await mount({ variant: 'primary', size: 'icon', label: 'Notifications' }, '●');
@@ -340,7 +362,7 @@ test('the static ANCHOR branch renders, and href cannot break out of the attribu
   ).toBe('/s?a=1&b=2');
 });
 
-test('the primary tone PAINTS, and the three tones are distinct', async () => {
+test('the primary tone PAINTS, and the four tones are distinct', async () => {
   // RENAMED AND STRENGTHENED. The old name said "every tone PAINTS" and no assertion proved any
   // tone painted: deleting `background: var(--sk-color-yellow)` from --primary left three still
   // distinct triples, so the component's whole visual contract was deletable green. A lens
@@ -349,7 +371,7 @@ test('the primary tone PAINTS, and the three tones are distinct', async () => {
   // Derived from the module's own map with a literal floor, per #78's finding that a hardcoded
   // list lets a fourth value ship with no coverage.
   const variants = Object.keys(BUTTON_VARIANTS);
-  expect(variants.length, 'the tone map went empty or grew uncovered').toBe(3);
+  expect(variants.length, 'the tone map went empty or grew uncovered').toBe(4);
   const seen = new Map<string, string>();
   for (const variant of variants) {
     const el = await mount({ variant });
@@ -364,6 +386,148 @@ test('the primary tone PAINTS, and the three tones are distinct', async () => {
     new Set(seen.values()).size,
     `the tones are not distinct: ${[...seen].map(([k, v]) => `${k}=${v}`).join(', ')}`,
   ).toBe(variants.length);
+});
+
+test('danger-secondary fills on hover and does not otherwise change its border or text colour', async () => {
+  // `:hover` cannot be simulated by getComputedStyle here — the same limitation
+  // sk-action-row.test.ts's own hover assertions work around — so the AUTHORED rule is read
+  // directly from the parsed sheet, matching that file's `rootStyleRuleFor` technique.
+  const el = await mount({ variant: 'danger-secondary' });
+  const resting = getComputedStyle(partOf(el));
+  expect(resting.backgroundColor, 'danger-secondary is transparent at rest').toBe('rgba(0, 0, 0, 0)');
+
+  const hoverRule = rootStyleRuleFor('.sk-button--danger-secondary:hover');
+  expect(hoverRule, 'the danger-secondary hover rule was not parsed').not.toBeUndefined();
+  expect(hoverRule!.style.background, 'hover must set a background').not.toBe('');
+  expect(hoverRule!.style.borderColor, 'hover must not touch border-color').toBe('');
+  expect(hoverRule!.style.color, 'hover must not touch text colour').toBe('');
+
+  const probe = document.createElement('span');
+  probe.style.background = hoverRule!.style.background;
+  document.body.append(probe);
+  const resolvedHoverFill = getComputedStyle(probe).backgroundColor;
+  probe.remove();
+
+  const dangerSurfaceProbe = document.createElement('span');
+  dangerSurfaceProbe.style.background = 'var(--sk-status-danger)';
+  document.body.append(dangerSurfaceProbe);
+  const resolvedDangerSurface = getComputedStyle(dangerSurfaceProbe).backgroundColor;
+  dangerSurfaceProbe.remove();
+
+  expect(resolvedHoverFill, 'hover resolves to the danger surface token').toBe(resolvedDangerSurface);
+  expect(resolvedHoverFill, 'hover fill must not equal the resting (transparent) fill').not.toBe(
+    resting.backgroundColor,
+  );
+});
+
+test('danger-secondary declares :active { transform: scale(0.97) }, scoped to itself only', () => {
+  const activeRule = rootStyleRuleFor('.sk-button--danger-secondary:active');
+  expect(activeRule, 'the danger-secondary active rule was not parsed').not.toBeUndefined();
+  expect(activeRule!.style.transform).toBe('scale(0.97)');
+
+  // C-003: secondary/ghost are NOT retrofitted with :active — this WP adds the rule to
+  // danger-secondary only, and this assertion is the proof, not just the CSS comment.
+  expect(rootStyleRuleFor('.sk-button--secondary:active'), 'secondary must not gain :active').toBeUndefined();
+  expect(rootStyleRuleFor('.sk-button--ghost:active'), 'ghost must not gain :active').toBeUndefined();
+});
+
+test('danger-secondary border and text colour resolve to --sk-on-status-danger, in both themes', async () => {
+  // Same two-theme token-boundary probe pattern as "icon controls are exactly 40px square and
+  // token-focus-visible in both themes" above, applied to the new tone's own boundary token.
+  //
+  // THE RESOLVED TOKEN IS HOISTED OUT OF THE LOOP, into a record that survives both iterations
+  // (pre-merge squad finding #3). Before this, `computed` and `resolvedToken` were both read
+  // from the SAME live frame in the SAME iteration — so if `.sk-light` silently stopped
+  // applying, both would independently settle on the dark palette's value and agree with each
+  // other, and this test would pass while testing the dark theme twice. Recording each theme's
+  // resolved value here lets the cross-theme floor below catch exactly that failure mode.
+  const resolved: Record<'dark' | 'light', string> = { dark: '', light: '' };
+  for (const theme of ['dark', 'light'] as const) {
+    const frame = document.createElement('div');
+    if (theme === 'light') frame.className = 'sk-light';
+    document.body.append(frame);
+
+    const el = document.createElement('sk-button');
+    el.setAttribute('variant', 'danger-secondary');
+    el.textContent = 'Deny';
+    frame.append(el);
+    await (el as unknown as { updateComplete: Promise<unknown> }).updateComplete;
+
+    const computed = getComputedStyle(partOf(el));
+    const tokenProbe = document.createElement('span');
+    tokenProbe.style.color = 'var(--sk-on-status-danger)';
+    frame.append(tokenProbe);
+    const resolvedToken = getComputedStyle(tokenProbe).color;
+    resolved[theme] = resolvedToken;
+
+    expect(computed.borderColor, `${theme} danger-secondary border colour`).toBe(resolvedToken);
+    expect(computed.color, `${theme} danger-secondary text colour`).toBe(resolvedToken);
+    frame.remove();
+  }
+
+  // THE CROSS-THEME FLOOR: this is the mission's headline accessibility claim (independently
+  // re-measured contrast, per theme), and until this line no assertion in this file could fail
+  // if the light theme silently never applied. `--sk-on-status-danger` is a genuinely different
+  // colour per theme by design (dark #E97373, light #6B2424), so the two resolved values must
+  // differ.
+  expect(
+    resolved.light,
+    'the light and dark themes must resolve danger-secondary to different colours',
+  ).not.toBe(resolved.dark);
+});
+
+// PARSED PAST THE COMMENTS, NOT GREPPED OVER THEM — the same technique
+// sk-page-header.test.ts's own import-graph scan already establishes in this suite (its own
+// docblock: "A raw grep would match the docblock above that explains why these APIs are
+// absent"). Pre-merge squad finding #6: the original `/deny|decline/i` regex ran over the
+// WHOLE file text, so it would red the moment either source file's own JSDoc used the word
+// "Deny" in prose (e.g. documenting which tone a consumer should reach for) — a defect report
+// about a hardcoded copy default that was never there.
+const stripComments = (source: string): string =>
+  source.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/[^\n]*/g, '$1');
+
+test('danger-secondary has no new copy default anywhere in source (FR-017)', async () => {
+  // The generated static default stays the shared 'Label' placeholder — the label is always
+  // consumer-supplied (#286), even for a tone whose real-world use is a deny/decline action.
+  expect(buttonStaticHtml({ variant: 'danger-secondary' })).toBe(
+    '<button class="sk-button sk-button--danger-secondary" type="button">Label</button>',
+  );
+
+  // A TARGETED assertion (not #286's repo-wide gate): the two source files this WP authors must
+  // not smuggle in a hardcoded "Deny"/"Decline" default OUTSIDE their comments. Stories and docs
+  // are allowed to use those words as EXAMPLE values; a JSDoc/line comment describing when to
+  // reach for this tone is allowed too — only executable source (string/template literals,
+  // identifiers, markup) is checked here, which is what strippedComments leaves behind.
+  for (const [name, source] of [
+    ['sk-button.ts', skButtonElementSource],
+    ['sk-button.markup.ts', skButtonMarkupSource],
+  ] as const) {
+    const stripped = stripComments(source);
+    // ANTI-VACUITY: the stripper must actually have removed something and must not have eaten
+    // the real source — otherwise "no offenders found" is unfalsifiable.
+    expect(stripped.length, `${name}: nothing was stripped — the comment remover is inert`).toBeLessThan(
+      source.length,
+    );
+    expect(stripped, `${name}: the stripper ate the source`).toContain('danger-secondary');
+    expect(/deny|decline/i.test(stripped), `${name} must not hardcode a copy default`).toBe(false);
+  }
+
+  // THE ELEMENT PATH, not just the static path (too narrow before this fix — a pre-merge lens
+  // found the element render() branch entirely unasserted here). Mount the REAL element with
+  // variant="danger-secondary" and a genuinely empty slot, and prove the shadow tree
+  // contributes no text of its own: `[part="button"]`'s own DOM textContent is the slot
+  // element's fallback content, which sk-button.ts's template never supplies, so any non-empty
+  // result would mean render() baked in a default rather than leaving the label consumer-owned.
+  const emptySlotEl = document.createElement('sk-button');
+  emptySlotEl.setAttribute('variant', 'danger-secondary');
+  document.body.append(emptySlotEl);
+  await (emptySlotEl as unknown as { updateComplete: Promise<unknown> }).updateComplete;
+  const slot = emptySlotEl.shadowRoot!.querySelector('slot') as HTMLSlotElement;
+  expect(slot.assignedNodes().length, 'an empty slot must have no assigned nodes').toBe(0);
+  expect(
+    (partOf(emptySlotEl).textContent ?? '').trim(),
+    'the shadow tree must contribute no text of its own for danger-secondary',
+  ).toBe('');
 });
 
 test('size is an axis independent of tone', async () => {
@@ -381,6 +545,35 @@ test('size is an axis independent of tone', async () => {
   );
   expect(getComputedStyle(partOf(icon)).backgroundColor).toBe(
     getComputedStyle(partOf(base)).backgroundColor,
+  );
+
+  // danger-secondary composed with each size: same padding/dimension behaviour as any other
+  // tone at that size, and the tone's own boundary colour is unaffected by size.
+  const dangerBase = await mount({ variant: 'danger-secondary' });
+  const dangerSmall = await mount({ variant: 'danger-secondary', size: 'sm' });
+  const dangerIcon = await mount(
+    { variant: 'danger-secondary', size: 'icon', label: 'Deny' },
+    '✕',
+  );
+  const dangerBasePad = parseFloat(getComputedStyle(partOf(dangerBase)).paddingLeft);
+  const dangerSmallPad = parseFloat(getComputedStyle(partOf(dangerSmall)).paddingLeft);
+  expect(dangerSmallPad, 'danger-secondary size="sm" padding must match primary size="sm" padding').toBe(
+    smallPad,
+  );
+  expect(dangerBasePad, 'danger-secondary default padding must match primary default padding').toBe(
+    basePad,
+  );
+  const dangerIconBounds = partOf(dangerIcon).getBoundingClientRect();
+  expect(Math.round(dangerIconBounds.width), 'danger-secondary icon width').toBe(40);
+  expect(Math.round(dangerIconBounds.height), 'danger-secondary icon height').toBe(40);
+  // Size leaves the tone's own colours alone — the same coupling check as the primary tone
+  // above, applied to danger-secondary's border colour instead of background (it has no fill
+  // at rest, so background is uninformative here; border-color is the tone's carrier).
+  expect(getComputedStyle(partOf(dangerSmall)).borderColor).toBe(
+    getComputedStyle(partOf(dangerBase)).borderColor,
+  );
+  expect(getComputedStyle(partOf(dangerIcon)).borderColor).toBe(
+    getComputedStyle(partOf(dangerBase)).borderColor,
   );
 });
 
@@ -669,11 +862,40 @@ test('[FR-009/FR-010] reduced motion stops the animation while the cue stays vis
   expect(idleCue.style.opacity).toBe('0');
   expect(idleCue.style.borderStyle, 'the resting ring must be solid-bordered').toBe('solid');
 
-  // No forced-colors override exists for the cue (T001 Activity Log: checked, not assumed
-  // absent) — a plain `border` survives forced-colors automatically with zero author CSS
-  // (docs/contributing/adding-a-component.md), and this cue is entirely border-drawn. The base
-  // rule's solid border-style, asserted above, is the only thing FR-010 needs from this file.
-  expect(mediaRuleFor('(forced-colors: active)'), 'no forced-colors override should exist for the cue').toBeUndefined();
+  // No forced-colors override exists for the CUE specifically (T001 Activity Log: checked, not
+  // assumed absent) — a plain `border` survives forced-colors automatically with zero author
+  // CSS (docs/contributing/adding-a-component.md), and this cue is entirely border-drawn. The
+  // base rule's solid border-style, asserted above, is the only thing FR-010 needs from this
+  // file.
+  //
+  // SCOPED TO THE CUE'S OWN SELECTORS, not "no forced-colors block exists anywhere in the
+  // file" — #320's danger-secondary tone adds its own `@media (forced-colors: active)` block
+  // for an UNRELATED selector (`.sk-button--danger-secondary`, stepping its border-width — see
+  // sk-button.css). Asserting block-ABSENCE would have made this claim false the moment that
+  // landed on the train, for a reason that has nothing to do with the busy cue. The real claim
+  // was always "the cue has no override", and it stays checkable — and this arm stays a real
+  // assertion rather than a silently-skipped one — regardless of how many other tones gain
+  // their own forced-colors rules later.
+  //
+  // EVERY MATCHING BLOCK, not just the first (pre-merge squad finding #4, two lenses
+  // independently) — `mediaRulesFor` collects all `@media (forced-colors: active)` blocks in
+  // the sheet, so a SECOND block (a future tone's own step, say) carrying a busy-cue override
+  // cannot sit past index 0 and go unchecked the way a `.find()`-based lookup would let it.
+  const forcedColorsBlocks = mediaRulesFor('(forced-colors: active)');
+  expect(
+    forcedColorsBlocks.length,
+    'a forced-colors block is expected (danger-secondary\'s), just not one carrying a cue override',
+  ).toBeGreaterThan(0);
+  for (const block of forcedColorsBlocks) {
+    expect(
+      styleRuleFor(block.cssRules, '.sk-button__busy-cue'),
+      'no forced-colors override should exist for the idle cue rule, in any matching block',
+    ).toBeUndefined();
+    expect(
+      styleRuleFor(block.cssRules, busySelector),
+      'no forced-colors override should exist for the busy-visible cue rule, in any matching block',
+    ).toBeUndefined();
+  }
 });
 
 test('[FR-002] the static markup module threads busy through to the shared class list', () => {

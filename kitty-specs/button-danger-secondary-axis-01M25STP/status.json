@@ -1,0 +1,57 @@
+{
+  "event_count": 7,
+  "last_event_id": "01M26055E8KWFCMGQTT6PBHZ01",
+  "materialized_at": "2026-09-10T15:49:34.793006+00:00",
+  "mission_number": "",
+  "mission_slug": "button-danger-secondary-axis-01M25STP",
+  "mission_type": "software-dev",
+  "summary": {
+    "approved": 1,
+    "blocked": 0,
+    "canceled": 0,
+    "claimed": 0,
+    "done": 0,
+    "for_review": 0,
+    "in_progress": 0,
+    "in_review": 0,
+    "planned": 0
+  },
+  "work_packages": {
+    "WP01": {
+      "actor": "claude",
+      "agent": "claude",
+      "agent_profile": "__resolved_profile_absent__",
+      "agent_profile_version": "__resolved_profile_version_absent__",
+      "assignee": "reviewer-renata",
+      "force_count": 1,
+      "lane": "approved",
+      "last_event_id": "01M26055E8KWFCMGQTT6PBHZ01",
+      "last_transition_at": "2026-09-10T15:49:34.793006+00:00",
+      "model": "__resolved_model_absent__",
+      "notes": [
+        "Implementation commits already present on branch (6e89c92, 40cc95f, b2a358c, 07228ee); advancing lane state to reflect actual progress before review.",
+        "Reviewer Renata claiming WP01 for review",
+        "APPROVED — reviewer-renata. All 9 claims independently verified against the diff: zero edits to tokens.css/secondary/ghost rules; contrast table re-derived byte-for-byte matches (6.58/5.94/5.63 dark, 10.12/11.04/9.78 light); forced-colors mechanism is a border-width step only (no content/forced-color-adjust); comparative forced-colors assertion independently broken and observed failing (Expected >1, Received 1) then restored; visual.spec.ts entries genuinely collected (no PW_INCLUDE_VISUAL skip), no baseline PNG committed; no generated-file drift (all --check gates green); no copy default; ratchets confirmed unchanged. Gates: build/check block, 8 checker scripts, typecheck-all, quality:all, npm test (617/617), suite-selftest (244/244 mutations red-first, 1121.3s), storybook build, run-axe-storybook (613 stories, 0 violations), full playwright (1179 passed; all 547 failures are the two pre-documented environment limitations: webkit missing deps, nav-pill /dashboard-demo.html not assembled). Minor non-blocking finding: visual.spec.ts touched (required by FR-019) but absent from WP01 owned_files frontmatter — a documentation gap, not a functional defect.",
+        "Backfilling canonical agent metadata for the already-recorded approval (same-lane re-emit)."
+      ],
+      "provider": "__resolved_provider_absent__",
+      "review_result": {
+        "feedback_path": "/home/jeroennouws/dev/spec-kitty-design-missions/320/kitty-specs/button-danger-secondary-axis-01M25STP/tasks/WP01-danger-secondary-axis/review-cycle-1.md",
+        "reference": "review-cycle://button-danger-secondary-axis-01M25STP/WP01-danger-secondary-axis/review-cycle-1.md",
+        "reviewer": "user",
+        "verdict": "approved"
+      },
+      "role": "reviewer",
+      "subtasks": {
+        "T001": "done",
+        "T002": "done",
+        "T003": "done",
+        "T004": "done",
+        "T005": "done",
+        "T006": "done",
+        "T007": "done",
+        "T008": "done"
+      }
+    }
+  }
+}
