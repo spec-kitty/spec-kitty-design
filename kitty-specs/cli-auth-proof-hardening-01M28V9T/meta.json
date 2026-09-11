@@ -2,11 +2,11 @@
   "accept_commit": "5f09eeaf8dac437d6d733f437edc3afabab54f12",
   "acceptance_history": [
     {
-      "accept_commit": "eb02baa1acf1e4c4c9e2eadaed015d66764b0b14",
+      "accept_commit": "9bcb5da81c0f56c27947e9732dfef033fdd93bda",
       "acceptance_mode": "pr",
       "accepted_at": "2026-09-11T21:33:42.218980+00:00",
       "accepted_by": "jeroennouws",
-      "accepted_from_commit": "fc35e00c6c7d19e801d55c25b2693b314c5034e0"
+      "accepted_from_commit": "68514a7c01bf931ae1fe67e66189cd42515b49d8"
     },
     {
       "accept_commit": "5f09eeaf8dac437d6d733f437edc3afabab54f12",
