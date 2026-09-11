@@ -197,11 +197,11 @@
     {
       "criterion_id": "FR-020",
       "description": "Verify FR-020 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "proof_type": "manual_inspection",
+      "evidence": "git log confirms the required separation: 2a9a9d95 'feat(storybook): add CLI Auth pattern stories, IC-01 through IC-05' (non-dependent scaffolding) is a distinct commit from 6ac345b9 'feat(storybook): finalize CLI Auth pattern IC-06 against landed deps' (dependent finalization). Reviewer confirmed via regex assertion (sk-cli-auth-pattern.spec.ts:164-165) and direct grep of the diff that every 'pending #NNN'/'TODO(#303)' marker is removed only in the finalization commit, none remain in HEAD.",
+      "pass_fail": "pass",
+      "verified_by": "reviewer-renata",
+      "verified_at": "2026-09-11T12:09:32.343339+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     }
   ],
