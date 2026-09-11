@@ -172,6 +172,15 @@
       "verification_command": "git diff --quiet origin/train/elements-first...HEAD -- packages/elements/src/patterns/mission-kanban.stories.ts apps/storybook/src/tests/sk-mission-kanban-pattern.spec.ts ':(glob)apps/storybook/src/tests/visual.spec.ts-snapshots/mission-kanban-[!t]*.png'",
       "result": "confirmed_absent",
       "evidence": "Command exited 0: "
+    },
+    {
+      "invariant_id": "NI-005",
+      "description": "An unverified overlay never renders as Observed: the ten-lane module never names #278's observed tier or field.",
+      "verification_method": "grep_absence",
+      "verification_command": "Observed\\|observedActivity\\|up to 60 s behind",
+      "result": "confirmed_absent",
+      "evidence": "grep found zero matches",
+      "scope": "packages/elements/src/patterns/mission-kanban-ten-lane.stories.ts"
     }
   ]
 }
