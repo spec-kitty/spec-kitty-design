@@ -1,0 +1,14 @@
+{
+  "created_at": "2026-09-11T17:04:26.537062+00:00",
+  "flattened": false,
+  "friendly_name": "visual evidence gate integrity",
+  "mission_id": "01M28PTYX8J026ZVM7C503PCQE",
+  "mission_number": null,
+  "mission_slug": "visual-evidence-gate-integrity-01M28PTY",
+  "mission_type": "software-dev",
+  "purpose_context": "This mission advances visual evidence gate integrity on mission/visual-evidence-gate-integrity so stakeholders can track the work from mission creation onward.",
+  "purpose_tldr": "visual evidence gate integrity",
+  "slug": "visual-evidence-gate-integrity-01M28PTY",
+  "target_branch": "mission/visual-evidence-gate-integrity",
+  "topology": "single_branch"
+}
