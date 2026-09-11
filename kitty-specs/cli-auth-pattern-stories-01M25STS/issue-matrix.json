@@ -25,7 +25,7 @@
       "wp": "WP01"
     },
     "#303": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "sk-boundary-page landed on train/elements-first before IC-06; verified directly against packages/styles/src/boundary-page/sk-boundary-page.css and its HTML exemplars, consumed in cli-auth.stories.ts (commit 6ac345b9).",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -33,8 +33,8 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
     },
     "#319": {
       "evidence_ref": "<link or commit>",
