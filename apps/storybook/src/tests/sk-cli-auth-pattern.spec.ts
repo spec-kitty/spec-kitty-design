@@ -290,6 +290,9 @@ test("rendered DOM contains only known custom elements and owned/local sk- class
     // upgrades the guarantee from "no unknown primitive at the instant of a single read" to
     // "none during this window of the story's rendered lifetime" — see that function's header
     // for the floor that remains beyond this window, stated explicitly rather than implied.
+    // 500ms, NOT 300ms or 1000ms: the reviewer's probe used exactly 300ms, so 500 clears it with
+    // real margin against normal test-runner jitter without meaningfully slowing the suite (13
+    // stories × 500ms ≈ 6.5s added, once, to this one test).
     await page.waitForTimeout(500);
     const { tags, classes, armed } = await page.evaluate(stopSkPrimitiveWatch);
     // The floor this mission's own self-attack found necessary: a crashed

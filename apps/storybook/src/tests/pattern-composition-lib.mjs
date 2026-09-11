@@ -443,22 +443,93 @@ export function startSkPrimitiveWatch() {
  * across the `page.evaluate()` boundary, so this must run IN the page and hand back only
  * serializable data).
  *
- * `armed` IS NOT DECORATIVE — THE CALLER MUST ASSERT IT. SELF-ATTACKED, a real bug this round:
- * `startSkPrimitiveWatch()` used to crash (see its own header) when `document.documentElement`
- * was `null` at `addInitScript` time, and because it crashed BEFORE setting
- * `window.__skPrimitiveWatch`, this function's old "no watch armed → return empty arrays,
- * quietly" fallback made that crash INDISTINGUISHABLE from "nothing unusual was ever rendered."
- * The reproduction this whole mechanism exists to catch (`document.documentElement.
- * appendChild(el)`) therefore passed for the wrong reason — the check had silently degenerated
- * to verifying nothing, the exact "gate that cannot fail" defect class this mission is about,
- * one level down inside its OWN new mechanism. `armed: false` now says so explicitly instead of
- * asking the caller to infer it from an empty result that also means "genuinely clean."
+ * `armed` IS PROVEN, NOT INFERRED — a canary, not a shape check. SELF-ATTACKED TWICE now, and
+ * the second attack is why this function looks the way it does:
+ *
+ *   1. `startSkPrimitiveWatch()` used to crash (see its own header) when
+ *      `document.documentElement` was `null` at `addInitScript` time, and because it crashed
+ *      BEFORE setting `window.__skPrimitiveWatch`, an earlier version of THIS function — which
+ *      inferred `armed` from `Boolean(window.__skPrimitiveWatch)` — could not tell that crash
+ *      apart from "nothing unusual was ever rendered." Fixed, in the previous round, by adding
+ *      `armed` as an explicit field.
+ *   2. That fix was ITSELF forgeable, and WAS forged: `window.__skPrimitiveWatch =
+ *      { seen: { tags: new Set(), classes: new Set() }, observers: [] }`, written from a story
+ *      script, satisfies `Boolean(window.__skPrimitiveWatch)` completely — the decoy has the
+ *      right SHAPE, the real observer chain is gone, and nothing observes anything. A real
+ *      mutation on a real rendered element was recorded nowhere, and `armed: true` was reported
+ *      anyway. This is the SAME defect class as `ownBlockRoots()`'s forgeable root-marker
+ *      attribute and the classList ban list's missed spelling, one level further down: a
+ *      self-reported "I am watching" signal that anything else on the page can write is not
+ *      evidence of watching.
+ *
+ * THE FIX: inject a synthetic CANARY mutation — append a throwaway element carrying a
+ * randomly-named `sk`-prefixed class — and require the watch's OWN accumulated state to
+ * actually contain it before trusting ANYTHING else it reports. A decoy cannot satisfy this by
+ * matching a shape; it would have to genuinely observe the canary mutation to pass, at which
+ * point it is a real, working observer chain and not a decoy. `Promise.resolve()` is awaited
+ * twice after the canary mutation because a `MutationObserver` callback fires as a QUEUED
+ * MICROTASK, not synchronously — the canary's own append queues that microtask before either
+ * `await` does, so both ticks complete after it by FIFO microtask ordering. Any exception while
+ * probing a malformed decoy (e.g. `state.seen.classes` not actually being a `Set`) is caught and
+ * treated as `armed: false`, the same conclusion as if nothing were armed at all — never a
+ * thrown error the caller has to specifically handle.
+ *
+ * SELF-ATTACKED A SECOND TIME, and the canary changed shape again as a direct result. The FIRST
+ * version of this canary called `document.documentElement.classList.add(canary)` — an INSTANCE
+ * method call. A story script defeated it by shadowing exactly that one instance's `.add`
+ * (`document.documentElement.classList.add = (...tokens) => { for (const t of tokens)
+ * decoySeen.add(t); return realAdd(...tokens); }`) while leaving a REAL payload on a different
+ * element (`sk-form-input.classList.add('sk-consent-row')`) completely untouched by the patch —
+ * the canary passed, the payload went unrecorded. See `Node.prototype.appendChild.call(...)`
+ * below for why the canary now goes through the PROTOTYPE method instead, and what residual
+ * that still leaves (a whole-page prototype patch, disclosed rather than chased).
  */
-export function stopSkPrimitiveWatch() {
+export async function stopSkPrimitiveWatch() {
   const state = window.__skPrimitiveWatch;
   if (!state) return { tags: [], classes: [], armed: false };
-  for (const observer of state.observers) observer.disconnect();
+  let armed = false;
+  let probe = null;
+  try {
+    const canary = `sk-canary-${Math.random().toString(36).slice(2)}`;
+    probe = document.createElement('div');
+    probe.className = canary;
+    // Node.prototype.appendChild.call(...), NOT `document.documentElement.appendChild(...)` —
+    // SELF-ATTACKED, a real bypass of an earlier version of this canary that DID call the
+    // instance method directly (`document.documentElement.classList.add(canary)`): a story
+    // script shadowed THAT ONE INSTANCE's own `.add` (`document.documentElement.classList.add =
+    // (...) => { relayIntoDecoy(...); return realAdd(...); }`) — a narrow, plausible-looking
+    // wrapper around one element's own method — while the REAL payload landed on a completely
+    // different, unpatched element (`sk-form-input.classList.add('sk-consent-row')`). The
+    // canary passed; the payload went unrecorded. Calling the PROTOTYPE method explicitly
+    // bypasses any such instance-level shadow, because it never does a property lookup on the
+    // instance at all. Only a PROTOTYPE-level patch — `Node.prototype.appendChild` itself,
+    // intercepting EVERY node's own appends across the ENTIRE page, including Lit's and
+    // Storybook's own rendering — could still intercept this, and to avoid visibly breaking the
+    // page it would have to relay every real append faithfully, at which point it is a real
+    // observer and would also relay the actual attack payload; it would no longer be hiding
+    // anything. That residual is disclosed, not chased further — the same class of limit as
+    // `mode: 'closed'` shadow roots, above.
+    Node.prototype.appendChild.call(document.documentElement, probe);
+    await Promise.resolve();
+    await Promise.resolve();
+    armed = state.seen.classes.has(canary);
+    state.seen.classes.delete(canary);
+  } catch {
+    armed = false;
+  } finally {
+    try {
+      probe?.remove();
+    } catch {
+      // Cleanup only; a failure here does not change the liveness verdict already recorded.
+    }
+  }
+  if (Array.isArray(state.observers)) {
+    for (const observer of state.observers) {
+      if (observer instanceof MutationObserver) observer.disconnect();
+    }
+  }
   delete window.__skPrimitiveWatch;
+  if (!armed) return { tags: [], classes: [], armed: false };
   return { tags: [...state.seen.tags], classes: [...state.seen.classes], armed: true };
 }
 
