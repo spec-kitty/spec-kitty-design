@@ -51,6 +51,7 @@
     "./ribbon-card/*": "./dist/ribbon-card/*",
     "./section-banner/*": "./dist/section-banner/*",
     "./section-header/*": "./dist/section-header/*",
+    "./section-nav/*": "./dist/section-nav/*",
     "./segmented-choice/*": "./dist/segmented-choice/*",
     "./site-footer/*": "./dist/site-footer/*",
     "./skip-link/*": "./dist/skip-link/*",

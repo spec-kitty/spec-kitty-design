@@ -1047,6 +1047,92 @@ The stylesheet depends on these existing semantic tokens: `--sk-border-default`,
 
 ---
 
+## Section navigation
+
+Use `sk-section-nav` for a horizontal strip of sibling, same-level route links inside one detail
+surface — e.g. two or three sibling sections of a single record. It is **not** `sk-context-nav`
+(grouped/nested sidebar navigation), `sk-nav-pill` (a pill-shaped primary destination switcher with
+drawer behaviour), `.sk-breadcrumbs` (an ancestor path), or `.sk-segmented-choice` (a controlled
+exclusive button group with no navigation semantics at all). Import the tokens and the
+independently exported styles subpath:
+
+```css
+@import '@spec-kitty/tokens';
+@import '@spec-kitty/styles/section-nav/sk-section-nav.css';
+```
+
+Apply the classes directly to a consumer-authored, labelled native `<nav>` and its native `<a>`
+children:
+
+```html
+<nav class="sk-section-nav" aria-label="Section navigation">
+  <a class="sk-section-nav__link" href="/overview">Overview</a>
+  <a class="sk-section-nav__link" href="/members" aria-current="page">Members</a>
+  <a class="sk-section-nav__link" href="/settings">Settings</a>
+</nav>
+```
+
+A permission-filtered subset renders as fewer links, in the consumer's own order — the family
+reserves no gap, placeholder, or affordance for a route the consumer chose not to render:
+
+```html
+<nav class="sk-section-nav" aria-label="Section navigation">
+  <a class="sk-section-nav__link" href="/overview" aria-current="page">Overview</a>
+  <a class="sk-section-nav__link" href="/members">Members</a>
+</nav>
+```
+
+The consumer owns the nav's accessible label, every link's `href` and text, link order, which links
+are present at all (permission filtering happens entirely in the consuming application), and the
+`aria-current` value on at most one link (or none, for "no current route"). Only a link whose
+`aria-current` is present and not `"false"` receives current-location presentation. There is no
+router, URL matching, route-discovery, counter, badge, or generated copy anywhere in this family.
+
+Every native anchor behaviour keeps working exactly as the browser already provides: modified-click
+(Ctrl/Cmd/Shift/middle), copy-link, open-in-new-tab, `:visited` history, and ordinary back/forward
+navigation. The family attaches no listener capable of intercepting default anchor activation. It
+neutralises visited colouring on purpose — both `:link` and `:visited` resolve to `color: inherit`
+— rather than leaving it merely unforced; a consumer who wants a distinct visited style overrides a
+`(0,2,0)`-specificity selector to get it.
+
+The strip fits its content inline when the content fits its available space. When constrained, the
+strip itself — never the document — becomes the horizontal-scroll container; a link that receives
+keyboard focus scrolls fully into view inside that container without its focus outline being
+clipped. Long, unbroken labels remain fully available rather than wrapping or being clipped, even
+inside a narrow (~320px) host. The family has no way to scroll the *current* route into view at
+initial paint — that would require JavaScript it does not own — so when the strip is constrained,
+the consumer scrolls the `aria-current` link into view itself (e.g.
+`link.scrollIntoView({ inline: 'nearest' })` once it renders); the family reserves
+`scroll-padding-inline` on the strip itself for exactly that call.
+
+Rest, hover, active, focus-visible, and current-location presentations are each distinguishable by
+more than colour: hover adds an underline, active and current add a `border-block-end` change, and
+current also increases font weight. Under `forced-colors: active`, the current-location border and
+the focus outline both recolor via `border`/`outline`, never `background`. Every link's interactive
+target meets a 44×44 CSS-pixel floor via `--sk-space-9`, never an un-tokened literal. All spacing,
+alignment, and the current-location border use CSS logical properties, so the strip mirrors
+correctly under `dir="rtl"`.
+
+This is deliberately **not** a tab widget: no `role="tablist"`, `role="tab"`, `role="tabpanel"`,
+`aria-controls`, or `aria-selected` appears anywhere in the family, there is no roving `tabindex`,
+and there is no arrow-key keyboard model or other JavaScript behaviour — no `sk-section-nav` custom
+element is registered. Sequential Tab traversal reaches every link exactly once, in the consumer's
+own DOM order, using the browser's native anchor tab order.
+
+The stylesheet depends on these existing semantic tokens: `--sk-border-strong`,
+`--sk-border-width-1`, `--sk-border-width-2`, `--sk-border-width-4`, `--sk-color-accent`,
+`--sk-fg-body`, `--sk-fg-default`, `--sk-font-sans`, `--sk-space-1`, `--sk-space-2`, `--sk-space-4`,
+`--sk-space-9`, `--sk-surface-muted`, `--sk-text-sm`, `--sk-weight-normal`, and
+`--sk-weight-semibold`.
+
+This remains styles-only under ADR-10's "Styles-only components are a class, not a fixed exception
+count" section because native `nav`/`a` navigation semantics are already the correct public API — a
+custom element would add nothing a consumer cannot already express.
+
+[View in Storybook](https://stijn-dejongh.github.io/spec-kitty-design/?path=/story/navigation-sksectionnav-html--default)
+
+---
+
 ## Tags
 
 Pill-shaped tags used to label and categorise content inline.
