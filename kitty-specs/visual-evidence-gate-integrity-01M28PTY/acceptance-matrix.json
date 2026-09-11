@@ -73,6 +73,14 @@
       "verification_command": "node scripts/verify-visual-spec-zero-drift.mjs 38f7e6fa",
       "result": "confirmed_absent",
       "evidence": "Command exited 0: \u2705 NI-001 holds: every changed line in apps/storybook/src/tests/visual.spec.ts relative to 38f7e6fa is exactly expect( -> expect.soft(, or a recognized #401 floor-assertion insertion. No pure deletions"
+    },
+    {
+      "invariant_id": "NI-002",
+      "description": "No toHaveScreenshot call site across apps/storybook/src/tests/*.spec.ts has a statement following it, in the same test/loop block, that is unrecognized as safe -- every follow-up statement is either the end of the block, another toHaveScreenshot call (governed separately by the softness gate), or a recognized safe next-screenshot-setup shape (navigate/resize/emulate/hover/focus/click/waitFor, or a locator-variable reassignment). Formalizes, and goes beyond, the by-hand follow-up-statement inspection this WP's record originally cited as prose evidence.",
+      "verification_method": "custom_command",
+      "verification_command": "node scripts/verify-no-screenshot-hard-abort-dependency.mjs",
+      "result": "confirmed_absent",
+      "evidence": "Command exited 0: \u2705 NI-002 holds: every statement following a toHaveScreenshot call, across 48 spec file(s), is either the end of its block or a recognized safe shape."
     }
   ]
 }
