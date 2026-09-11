@@ -87,11 +87,11 @@
     {
       "criterion_id": "FR-009",
       "description": "Verify FR-009 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
+      "proof_type": "code_review",
+      "evidence": "Assertion verified: sk-cli-auth-pattern.spec.ts:245-286 checks the invalid-code branch's errorRole==='alert' and describedBy contains 'error' via setCustomError()'s real shadow-DOM output (not the native required message). Execution outcome pending CI.",
       "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "verified_by": "reviewer-renata",
+      "verified_at": "2026-09-11T12:09:03.597637+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
