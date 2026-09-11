@@ -154,7 +154,8 @@ push/PR, `ci-quality.yml`'s `ci` filter already globs `scripts/**`).
 maintains a `REQUIRED_LINT` array (`scripts/check-gate-wiring.mjs:636` onward, read directly,
 2026-09-11) of `[pattern, description, label]` tuples that assert a given `[ENFORCED]` step's
 *invocation* actually appears in `lint-code`'s steps — its own header comment records why: a gate
-shipped with no entry here twice (#74, #129) and a lens deleted its CI line with the checker still
+shipped with no entry here twice (spec-kitty/spec-kitty-design#74, spec-kitty/spec-kitty-design#129)
+and a lens deleted its CI line with the checker still
 green. **Both new self-test steps need entries in this array** — without one, this mission's own
 promotion-mechanism tests could be deleted from `ci-quality.yml` with `check-gate-wiring.mjs`
 still reporting green, which is precisely the defect class that array exists to close.
@@ -562,7 +563,7 @@ re-fetch rather than searching by name. `--selftest` for `diffRulesetParity` get
 floor-outside-table treatment as R8 (both a same-and-different fixture pair are required, not just
 a passing one).
 
-## R26 — The REL2 seam, and a corrected claim about `workflow_dispatch` and `GITHUB_TOKEN` (M14)
+## R26 — The REL2 seam, and a corrected claim about `workflow_dispatch` and `GITHUB_TOKEN` (M14) — RESOLVED
 
 **`develop`'s tree is written only by promotion** — stated as an explicit invariant, not merely
 implied by the mechanism's existence. **Consequence for REL2 (#363)**: rc-publish must derive any
@@ -589,13 +590,19 @@ the **job's own `GITHUB_TOKEN`** with `permissions: { actions: write }` added to
 change to the App's permission grant is needed for this**, because the App is not the token making
 that particular call. A fold-in comment is posted on #363 naming this correction, since REL2's own
 planning may have inherited the same backwards assumption from this mission's earlier draft.
-**Separately noted, not rewritten**: `spec.md`'s own inherited "fact 3" paragraph (pre-dating this
-plan phase) also glosses `workflow_dispatch`/`repository_dispatch` as landing in an
-"approval-required state when the actor is `GITHUB_TOKEN`" — that approval gate is GitHub's
-first-time-contributor / fork-PR-run-approval feature, a different mechanism, and does not apply to
-an explicit dispatch call the same way. This mission does not rewrite `spec.md`'s historical fact-3
-prose (it predates this phase and is not one of the adjudicated blockers/majors), but flags the
-imprecision here since it is directly adjacent to the claim just corrected.
+**Resolved (tasks phase, 2026-09-11)**: `spec.md`'s inherited "fact 3" paragraph, and the matching
+Edge Cases paragraph, both glossed `workflow_dispatch`/`repository_dispatch` together with
+`pull_request` `opened`/`synchronize`/`reopened` as uniformly landing in an "approval-required"
+state when the actor is `GITHUB_TOKEN`. Re-verified directly against the live page
+(`https://docs.github.com/en/actions/using-workflows/triggering-a-workflow`, fetched 2026-09-11):
+its exact text is "`workflow_dispatch` and `repository_dispatch` events always create workflow
+runs" (a plain, unconditional exception — not approval-required) and, separately, "`pull_request`
+events with the `opened`, `synchronize`, or `reopened` activity types: when a workflow using
+`GITHUB_TOKEN` creates or updates a pull request, the resulting `pull_request` event creates
+workflow runs in an **approval-required** state" — two exceptions with different outcomes, not one.
+This is the same correction as this section's main finding above, extended to the historical fact-3
+prose: both paragraphs in `spec.md` are now rewritten to separate the two exception classes rather
+than conflating them. R26 is resolved; no open imprecision remains in `spec.md`.
 
 ## R27 — Scope boundary with REL3: the GitHub Packages ruling lands only in `branch-model.md` (M15, supersedes R11)
 

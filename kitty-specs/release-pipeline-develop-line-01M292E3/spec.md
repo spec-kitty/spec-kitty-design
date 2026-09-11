@@ -158,13 +158,15 @@ operator act.
   rc-publish itself is out of scope (#363).
 - What happens if the promotion mechanism's own identity is the workflow's default `GITHUB_TOKEN`?
   Verified 2026-09-11 against GitHub's documentation on triggering workflows: "events triggered by
-  the `GITHUB_TOKEN` will not create a new workflow run," with narrow exceptions
-  (`workflow_dispatch`, `repository_dispatch`, and `pull_request` `opened`/`synchronize`/`reopened`
-  events, which do create a run but in an **approval-required** state when the actor is
-  `GITHUB_TOKEN`). A `GITHUB_TOKEN`-authenticated push to `develop` — the final step of any
-  automated option — therefore fires **no** workflow at all, breaking FR-007(e) and starving
-  REL2's rc-publish trigger silently. See the Decision section (item 5) for the identities that avoid
-  this.
+  the `GITHUB_TOKEN` will not create a new workflow run," with two exceptions that behave
+  differently from each other — `workflow_dispatch` and `repository_dispatch` events **always**
+  create a normal workflow run, even when the call is made by `GITHUB_TOKEN` itself; `pull_request`
+  `opened`/`synchronize`/`reopened` events are the one case that still creates a run but in an
+  **approval-required** state, and only when `GITHUB_TOKEN` itself created or updated that pull
+  request. A `GITHUB_TOKEN`-authenticated push to `develop` — the final step of any automated
+  option — is neither exception, so it fires **no** workflow at all, breaking FR-007(e) and
+  starving REL2's rc-publish trigger silently. See the Decision section (item 5) for the identities
+  that avoid this.
 
 ## Requirements *(mandatory)*
 
@@ -306,19 +308,23 @@ verified evidence, and two new options (D, E) are added.
 2. **The train's history is not linear** (Key Entities, above: 22 of the last 50 mainline commits
    are merge commits). Any mechanism that lands merge commits on `develop` trips
    `required_linear_history`, independent of the `pull_request` rule.
-3. **`GITHUB_TOKEN`-caused events do not trigger new workflow runs**, with narrow, documented
-   exceptions (`workflow_dispatch`, `repository_dispatch`, and `pull_request`
-   `opened`/`synchronize`/`reopened`, which run but in an **approval-required** state for a
-   `GITHUB_TOKEN` actor). A promotion mechanism that opens and/or merges its PR as `GITHUB_TOKEN`
-   therefore either queues every run for manual approval, or — for the final merge, which is a
-   `push`, not one of the excepted events — fires no workflow at all. Either way FR-007(e) and
-   REL2's rc-publish trigger are starved. This is orthogonal to facts 1–2: it applies to *whichever*
-   git mechanism is chosen, and is solved only by using a non-`GITHUB_TOKEN` identity (an
-   installation token from the `spec-kitty-factory-ci` App, or a PAT) for every step whose
-   triggering something matters, or by having the promotion workflow itself call
-   `workflow_dispatch`/`repository_dispatch` to kick REL2's rc-publish workflow directly — REL2
-   owns that trigger, so this is presented here as an option for REL2 to accept or reject, not a
-   decision this mission makes for it.
+3. **`GITHUB_TOKEN`-caused events do not trigger new workflow runs**, with two documented
+   exceptions that behave differently from each other: `workflow_dispatch` and
+   `repository_dispatch` events **always** create a normal workflow run when explicitly called,
+   even by `GITHUB_TOKEN`; `pull_request` `opened`/`synchronize`/`reopened` events are the one case
+   that still creates a run but in an **approval-required** state, and only when `GITHUB_TOKEN`
+   itself created or updated the pull request. A promotion mechanism that opens and/or merges its
+   PR as `GITHUB_TOKEN` therefore either queues every PR-triggered run for manual approval, or —
+   for the final merge, which is a `push`, not one of the excepted events — fires no workflow at
+   all. Either way FR-007(e) and REL2's rc-publish trigger are starved. This is orthogonal to facts
+   1–2: it applies to *whichever* git mechanism is chosen, and is solved only by using a
+   non-`GITHUB_TOKEN` identity (an installation token from the `spec-kitty-factory-ci` App, or a
+   PAT) for every step whose triggering something matters, or by having the promotion workflow
+   itself make an explicit `workflow_dispatch`/`repository_dispatch` call — which, per research.md
+   R26, works correctly even from that job's own `GITHUB_TOKEN`, since it is one of the two
+   always-create exceptions above — to kick REL2's rc-publish workflow directly. REL2 owns that
+   trigger, so this is presented here as an option for REL2 to accept or reject, not a decision this
+   mission makes for it.
 
 ### Verifying the git mechanics (scratch repository, `rel1/promo-test/`)
 
