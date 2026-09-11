@@ -43,8 +43,12 @@ lanes, fifteen Work Packages, one focused suite, twelve visual cases
 
 ### PD-001 — A sibling module, not an edit of #278
 
-The issue requires #278's stories and baselines to stay unchanged, and allows a sibling "per existing
-convention". Adding stories to `mission-kanban.stories.ts` would change #278's built story inventory
+The issue requires #278's stories and baselines to stay unchanged and asks to "extend the existing
+`Patterns/Mission Kanban` story family". The allowance for "a sibling per existing convention" comes
+from the operator's mission brief, not from the issue (corrected after gate pass 1,
+architect-alphonso). The sibling title is therefore an interpretation of "extend the family", chosen
+because it is the only topology that satisfies both requirements. Adding stories to
+`mission-kanban.stories.ts` would change #278's built story inventory
 (its focused suite asserts exactly ten `patterns-mission-kanban--*` ids) and put new code beside
 already-accepted render helpers that embed literals. A sibling module with its own title keeps every
 #278 byte, story id, and test untouched while extending the pattern family in the same sidebar group.
