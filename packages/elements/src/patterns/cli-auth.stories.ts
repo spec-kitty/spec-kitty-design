@@ -103,7 +103,12 @@ const patternStyles = html`<style>
     list-style: none;
   }
 
-  @media (max-width: 390px) {
+  /* #417: deliberately mirrors sk-boundary-page.css's own narrow-width step
+     (packages/styles/src/boundary-page/sk-boundary-page.css's @media (max-width: 480px)),
+     which stories 3/4 compose directly — so both halves of this pattern family share one
+     gutter regime instead of narrowing at two different widths. A future respacing of that
+     file's breakpoint should update this one too. */
+  @media (max-width: 480px) {
     .sk-cli-auth-pattern {
       padding: var(--sk-space-4);
     }

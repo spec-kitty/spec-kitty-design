@@ -2,6 +2,24 @@ import { readFileSync } from "node:fs";
 import { expect, test, type Locator, type Page } from "@playwright/test";
 import { getViolations, injectAxe } from "axe-playwright";
 import esbuild from "esbuild";
+import {
+  bemBlockRoots,
+  knownElementTags,
+  localClassesIn,
+  ownedClasses,
+  skPrimitivesIn,
+  tokensOwnedClasses,
+  // #418 — these six are the derived DOM-inventory arm's primitives. Imported from
+  // pattern-composition-lib.mjs specifically, NOT check-pattern-composition.mjs (which
+  // re-exports the same names): that file's CLI tail uses `import.meta.url` at module scope,
+  // and Playwright bundles every spec + its imports to CJS for this test run, where any
+  // `import.meta` syntax anywhere in the graph fails to parse — MEASURED, not assumed, by
+  // importing check-pattern-composition.mjs here first and watching collection fail with
+  // `SyntaxError: Cannot use 'import.meta' outside a module`. `ownedClasses()` is literally the
+  // same function `check-pattern-composition.mjs`'s R3 already uses, so the property stays
+  // derived rather than becoming a second hand-maintained list. Reusable by the four other
+  // pattern missions in flight, not re-implemented per spec file.
+} from "../../../../scripts/pattern-composition-lib.mjs";
 
 /**
  * Focused Storybook Playwright suite for the CLI Auth pattern family
@@ -130,11 +148,46 @@ test("source is Storybook-only composition with no forbidden reader, private rea
   // false-positive a check meant for real markup usage.
   const code = esbuild.transformSync(source, { loader: "ts", format: "esm" }).code;
 
-  // C-002's forbidden abstractions — no custom element with these names is ever used.
-  expect(code).not.toMatch(
-    /<\s*(?:auth-card|scope-chip|form-action-row|sk-terminal-frame|sk-boundary-stage)(?:\s|>)/,
-  );
-  // No custom element is DEFINED by this fixture (it composes, it does not build).
+  // #418 — DERIVED replacement for the five-name denylist this test used to assert
+  // (`not.toMatch(/<\s*(?:auth-card|scope-chip|form-action-row|sk-terminal-frame|
+  // sk-boundary-stage)(?:\s|>)/)`), which could not fail for a name nobody thought to
+  // enumerate. Every `sk`-prefixed tag/class this fixture's rendered markup names must resolve
+  // to real ground truth: a registered custom element (the generated, CI drift+content-gated
+  // Custom Elements Manifest), a class `packages/styles` or `packages/tokens` owns, or a class
+  // THIS fixture's own <style> block declares (its story-local BEM frame — legitimate
+  // per-story scoping, not an invented sub-component; `bemBlockRoots` additionally covers a
+  // rule-less block-hook class like the bare `sk-boundary-page`, documented in that file as
+  // carrying no rule of its own). An unlisted invented name has no bucket to land in and fails
+  // BY NAME — see the mission report for the executed red-first proof (a planted
+  // `<sk-auth-panel class="sk-consent-row">` caught and named, then reverted).
+  const knownTags = knownElementTags();
+  // FR-004's local floor: the manifest must actually describe something HERE, not only rely on
+  // check-manifest-content.mjs's CI-side anti-vacuity gate elsewhere.
+  expect(knownTags.size).toBeGreaterThan(10);
+  const ownedStylesClasses = ownedClasses();
+  const ownedTokensClasses = tokensOwnedClasses();
+  const localClasses = localClassesIn(code);
+  const blockRoots = bemBlockRoots([...ownedStylesClasses.keys(), ...ownedTokensClasses]);
+  const acceptedClasses = new Set([
+    ...ownedStylesClasses.keys(),
+    ...ownedTokensClasses,
+    ...localClasses,
+    ...blockRoots,
+  ]);
+  const { tags: renderedTags, classes: renderedClasses } = skPrimitivesIn(code);
+  const unknownTags = [...renderedTags].filter((tag) => !knownTags.has(tag));
+  const unknownClasses = [...renderedClasses].filter((cls) => !acceptedClasses.has(cls));
+  expect(
+    unknownTags,
+    `unregistered custom element tag(s) in rendered markup: ${unknownTags.join(", ")}`,
+  ).toEqual([]);
+  expect(
+    unknownClasses,
+    `sk-prefixed class(es) with no known owner (styles, tokens, or this fixture's own <style>): ${unknownClasses.join(", ")}`,
+  ).toEqual([]);
+  // No custom element is DEFINED by this fixture (it composes, it does not build). Kept
+  // alongside the derived tag check above — it catches a DIFFERENT failure mode (this file
+  // REGISTERING a new element), not the same one restated.
   expect(code).not.toMatch(/customElements\.define\s*\(/);
   // C-004 — no private-root reach, the same three spellings check-pattern-composition.mjs's R1
   // treats as the natural ones.

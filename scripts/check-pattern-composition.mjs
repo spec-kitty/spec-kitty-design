@@ -135,7 +135,7 @@
  * Usage: node scripts/check-pattern-composition.mjs [--selftest]
  */
 import { cpSync, globSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
@@ -143,7 +143,6 @@ import esbuild from 'esbuild';
 import postcss from 'postcss';
 
 const SCAN = 'packages/elements/src/patterns/**/*.{ts,tsx,js,mjs,cjs,css}';
-const OWNED_SHEETS = 'packages/styles/src/**/sk-*.css';
 const PARTS_FILE = 'expected-parts.json';
 
 /** A patterns directory composing fewer than this many distinct `sk-` tags is not composing. */
@@ -205,194 +204,48 @@ const CSS_PIERCING = [
  * Comments removed by a real lexer. A file esbuild cannot parse FAILS rather than being skipped:
  * "could not be checked" and "was checked and is clean" must never print the same line.
  */
-export function stripComments(source, file = 'source.ts') {
-  return esbuild.transformSync(source, {
-    loader: file.endsWith('.tsx') ? 'tsx' : 'ts',
-    format: 'esm',
-  }).code;
-}
-
-/**
- * Every `<style>…</style>` body in a rendition, with `${…}` interpolations masked.
- *
- * The mask is a CLASS-SHAPED token rather than a blank, so an interpolated selector still parses
- * and is then REJECTED by name below — a computed selector cannot be checked, and silently
- * dropping it is the certifying-absence shape this file exists to refuse.
- *
- * THE `i` FLAG IS LOAD-BEARING AND WAS MISSING. HTML tag names are case-insensitive, so `<STYLE>`
- * renders identically and a case-only edit disabled the ENTIRE CSS half of this gate — R2, R3 and
- * the piercing-combinator arm together, the last of which has no source-side counterpart. The
- * gate's own rule counter is what makes it visible: 54 rules with `<style>`, 44 with `<STYLE>`,
- * green either way. One character, and the file read clean without being read.
- */
-export const styleBlocks = (rendition) => {
-  const out = [];
-  const re = /<style\b[^>]*>([\s\S]*?)<\/style>/gi;
-  let m;
-  while ((m = re.exec(rendition)) !== null) {
-    out.push(
-      m[1]
-        .replace(/\$\{[\s\S]*?\}/g, 'SK-INTERPOLATED-SELECTOR')
-        // THE JS ESCAPE LAYER, and there are TWO of them here. This block is the SOURCE TEXT of a
-        // template literal, not the string it evaluates to, so a literal backslash in the CSS is
-        // written `\\` and reaches postcss as two characters. `.sk\\-card` therefore decoded to
-        // `.sk\-card`, whose class name the CSS decoder then read as `sk` — a name no sheet owns,
-        // so an escaped-hyphen spelling of `.sk-card` walked through R3 while the single-backslash
-        // spelling was caught. Collapsing the JS layer first puts both on the same footing.
-        .replace(/\\\\/g, '\\'),
-    );
-  }
-  return out;
+// ── Shared derivation primitives ────────────────────────────────────────────────────────────
+//
+// Moved to pattern-composition-lib.mjs (no `import.meta` anywhere in that file) so #418's DOM
+// arm can import `ownedClasses()` and its siblings from a Playwright spec without pulling in
+// this file's CLI tail — MEASURED: importing THIS file after only a `process.exit()` guard was
+// added still broke Playwright's CJS test bundle with `SyntaxError: Cannot use 'import.meta'
+// outside a module`, because `import.meta.url` appears elsewhere in this file (the `--selftest`
+// sandbox) regardless of whether the guarded CLI branch runs. Re-exported here so this file's
+// own previously-exported names (`ownedClasses` etc.) are unchanged for any other consumer.
+import {
+  OWNED_SHEETS,
+  bemBlockRoots,
+  classTagBindings,
+  classesIn,
+  knownElementTags,
+  leadingTag,
+  localClassesIn,
+  ownedClasses,
+  partsIn,
+  skPrimitivesIn,
+  stripComments,
+  styleBlocks,
+  tokensOwnedClasses,
+  trailingBareTag,
+} from './pattern-composition-lib.mjs';
+export {
+  OWNED_SHEETS,
+  bemBlockRoots,
+  classTagBindings,
+  classesIn,
+  knownElementTags,
+  leadingTag,
+  localClassesIn,
+  ownedClasses,
+  partsIn,
+  skPrimitivesIn,
+  stripComments,
+  styleBlocks,
+  tokensOwnedClasses,
+  trailingBareTag,
 };
 
-/**
- * Every class name a selector names — through a class selector OR through a `[class]` attribute
- * selector, and inside functional pseudo-class argument lists either way.
- *
- * THE ATTRIBUTE FORM IS NOT PEDANTRY. `[class~="sk-card"] { border: 0 }` selects exactly what
- * `.sk-card { border: 0 }` selects and is the first thing a `.`-only rule teaches an author to
- * write. Adding it costs one alternation; leaving it out would have made R3 a naming convention
- * rather than a rule.
- */
-export const decodeCssEscapes = (text) =>
-  String(text)
-    // `\64 ` and `\0064` — a hex code point, optionally closed by one whitespace character.
-    .replace(/\\([0-9a-fA-F]{1,6})[ \t\n]?/g, (_, hex) => String.fromCodePoint(parseInt(hex, 16)))
-    // `\-` — any other escaped character stands for itself.
-    .replace(/\\(.)/g, '$1');
-
-/**
- * Every class name a selector names — through a class selector, or through a `[class]` attribute
- * selector in any of its operator and flag spellings.
- *
- * ESCAPES ARE DECODED FIRST, and that is not theoretical tidiness. `.sk\-card` and `.sk-car\64`
- * are the SAME SELECTOR as `.sk-card` to every browser, and against the raw text the class regex
- * stopped at the backslash and yielded `sk` and `sk-car` — two names no sheet owns, so both walked
- * straight through R3. One backslash defeated the whole rule.
- *
- * THE ATTRIBUTE FORMS, all of them. `[class~="sk-card"]` selects exactly what `.sk-card` selects.
- * `[class^="sk-"]` selects EVERY library class at once, which is the broadest possible override and
- * was the quietest hole here. And `[class~="sk-card" i]` — the case-insensitivity flag — walked
- * past the earlier pattern because its `\s*\]` tail could not cross the ` i`, so the very form
- * this file cites as a review self-catch was bypassable by two characters.
- *
- * SUBSTRING OPERATORS ARE RESOLVED AGAINST THE OWNED SET, not treated as literal names: `^=`, `$=`
- * and `*=` name every owned class stand in the stated relation to the value. That is what makes
- * `[class^="sk-"]` report the classes it actually reaches instead of a name nobody owns.
- */
-export const classesIn = (selector, ownedNames = []) => {
-  const decoded = decodeCssEscapes(selector);
-  const out = (decoded.match(/\.(-?[_a-zA-Z][\w-]*)/g) ?? []).map((c) => c.slice(1));
-  const attr = /\[\s*class\s*([~|^$*]?)=\s*(['"]?)([^'"\]]*)\2\s*(?:[isIS]\s*)?\]/g;
-  for (const m of decoded.matchAll(attr)) {
-    const op = m[1];
-    const value = m[3].trim();
-    if (!value) continue;
-    if (op === '^' || op === '$' || op === '*') {
-      for (const name of ownedNames) {
-        const hit =
-          op === '^' ? name.startsWith(value) : op === '$' ? name.endsWith(value) : name.includes(value);
-        if (hit) out.push(name);
-      }
-      continue;
-    }
-    for (const name of value.split(/\s+/).filter(Boolean)) out.push(name);
-  }
-  return out;
-};
-
-/** The leftmost compound's type selector, if it has one. `sk-card > .x` -> `sk-card`. */
-export const leadingTag = (selector) => {
-  const m = decodeCssEscapes(selector).trim().match(/^([a-zA-Z][\w-]*)/);
-  return m ? m[1].toLowerCase() : null;
-};
-
-/** The rightmost compound's bare type selector, if the compound is ONLY a type selector. */
-export const trailingBareTag = (selector) => {
-  const parts = decodeCssEscapes(selector).trim().split(/[\s>+~]+/).filter(Boolean);
-  const last = parts[parts.length - 1] ?? '';
-  return /^[a-zA-Z][\w-]*$/.test(last) && parts.length > 1 ? last.toLowerCase() : null;
-};
-
-/**
- * Every `::part()` in a selector, paired with the element tag it is written against.
- *
- * The tag is the leading type selector of the compound the pseudo-element is attached to. A
- * compound with no type selector (`.some-class::part(x)`) yields `null` and is REJECTED by the
- * caller: which element's contract that part belongs to is then unknowable, and a check that
- * cannot resolve its subject must not pass it.
- */
-export const partsIn = (selector) => {
-  const out = [];
-  const re = /(^|[\s>+~,(])([A-Za-z][\w-]*)?((?:[.#][\w-]+|\[[^\]]*\]|:not\([^)]*\))*)::part\(\s*([^)]*)\s*\)/g;
-  let m;
-  while ((m = re.exec(selector)) !== null) {
-    const compoundClasses = classesIn(m[3] ?? '');
-    for (const name of m[4].trim().split(/\s+/).filter(Boolean)) {
-      out.push({ tag: m[2] ?? null, classes: compoundClasses, part: name });
-    }
-  }
-  return out;
-};
-
-/**
- * Which element tag each class in this fixture's own markup is applied to.
- *
- * WHY THIS EXISTS, and it is the correction a first cut of this gate needed. R2 wants the part
- * checked against THE ELEMENT IT IS WRITTEN AGAINST, and the natural spelling of that is a type
- * selector (`sk-nav-pill::part(nav)`). But the legitimate and already-shipped spelling in
- * `team-overview.stories.ts` is a CLASS on the element —
- * `.sk-pattern-overview__context-navigation::part(nav)`, where the class sits on `<sk-nav-pill>`
- * and `nav`, `items` and `hamburger` are all three recorded for it. Rejecting that would have
- * been a checker reddening correct code, which in this repo gets the checker deleted.
- *
- * So the binding is read from the markup instead: a class that appears in the `class="…"` of
- * exactly one `sk-` tag resolves to that tag, and R2 then runs at full per-element strength
- * through the class spelling too.
- *
- * ONLY LITERAL `class="…"` ATTRIBUTES ARE READ. A class bound by interpolation
- * (`class=${…}`) resolves to nothing and lands in the weakened arm below, which is stated
- * rather than hidden.
- */
-export const classTagBindings = (rendition) => {
-  const bindings = new Map();
-  for (const m of rendition.matchAll(/<\s*([a-zA-Z][\w-]*)([^>]*)>/g)) {
-    const tag = m[1].toLowerCase();
-    for (const attr of m[2].matchAll(/class\s*=\s*"([^"]*)"/g)) {
-      for (const name of attr[1].split(/\s+/).filter(Boolean)) {
-        if (!bindings.has(name)) bindings.set(name, new Set());
-        bindings.get(name).add(tag);
-      }
-    }
-  }
-  return bindings;
-};
-
-// ─────────────────────────────────────────────────────────────────────────────────────────────
-// The repository pass, factored so --selftest can run it against a sandbox.
-// ─────────────────────────────────────────────────────────────────────────────────────────────
-
-/** Every class any `packages/styles` sheet declares rules for. R3's subject. */
-export function ownedClasses(root = '.') {
-  const owned = new Map();
-  for (const file of globSync(join(root, OWNED_SHEETS), {}).sort()) {
-    const css = readFileSync(file, 'utf8');
-    let parsed;
-    try {
-      parsed = postcss.parse(css, { from: file });
-    } catch (err) {
-      throw new Error(`${file} does not parse as CSS: ${err?.message ?? err}`);
-    }
-    parsed.walkRules((rule) => {
-      for (const selector of rule.selectors ?? []) {
-        for (const name of classesIn(selector)) {
-          if (!owned.has(name)) owned.set(name, file);
-        }
-      }
-    });
-  }
-  return owned;
-}
 
 export function run(root = '.') {
   const violations = [];
@@ -979,20 +832,32 @@ function selftest() {
 
 // ─────────────────────────────────────────────────────────────────────────────────────────────
 
-if (process.argv.includes('--selftest')) selftest();
+// Run-as-CLI guard, matching check-release-graph.mjs / check-adr-index.mjs — without it,
+// importing this module for its exported checks (`ownedClasses`, `classesIn`, `stripComments`,
+// …) runs the full CLI pass as a side effect of the import and can call `process.exit()` out
+// from under whatever imported it. MEASURED, not assumed: `node -e "import('./check-pattern-
+// composition.mjs')"` printed the "✅ Pattern composition: …" banner before this guard existed,
+// and running the same import from an empty cwd (no `expected-parts.json` to read) called
+// `process.exit(1)` — inside a Playwright test worker that terminates the worker, not the one
+// test, with no test-runner-visible failure at all. #418's derived DOM-inventory check needs
+// `ownedClasses()` importable from a `.spec.ts`, so this file must be safe to import as a
+// library, not just runnable as a script.
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  if (process.argv.includes('--selftest')) selftest();
 
-const { violations, notes } = run('.');
-if (violations.length > 0) {
-  console.error('❌ Pattern composition (#183 exit criterion, #259):');
-  for (const v of violations) console.error(`   ${v}`);
-  console.error(
-    '\n   A composition fixture is evidence that the PUBLIC surfaces suffice. Reaching a private\n' +
-      '   root, or restating a component\'s own CSS, makes it evidence that they do not.',
+  const { violations, notes } = run('.');
+  if (violations.length > 0) {
+    console.error('❌ Pattern composition (#183 exit criterion, #259):');
+    for (const v of violations) console.error(`   ${v}`);
+    console.error(
+      '\n   A composition fixture is evidence that the PUBLIC surfaces suffice. Reaching a private\n' +
+        '   root, or restating a component\'s own CSS, makes it evidence that they do not.',
+    );
+    process.exit(1);
+  }
+  console.log(
+    `✅ Pattern composition: ${notes.files} fixture(s), ${notes.rules} inline CSS rule(s), ` +
+      `${notes.tags.size} composed element tag(s), every ::part() inside the ${notes.parts}-part ` +
+      `public ratchet, no reach-through, no duplicated component CSS.`,
   );
-  process.exit(1);
 }
-console.log(
-  `✅ Pattern composition: ${notes.files} fixture(s), ${notes.rules} inline CSS rule(s), ` +
-    `${notes.tags.size} composed element tag(s), every ::part() inside the ${notes.parts}-part ` +
-    `public ratchet, no reach-through, no duplicated component CSS.`,
-);
