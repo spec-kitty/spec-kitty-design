@@ -23,6 +23,7 @@
   "purpose_context": "This mission advances cli auth pattern stories on mission/cli-auth-pattern-stories so stakeholders can track the work from mission creation onward.",
   "purpose_tldr": "cli auth pattern stories",
   "slug": "cli-auth-pattern-stories-01M25STS",
+  "status_phase": "1",
   "target_branch": "mission/cli-auth-pattern-stories",
   "topology": "single_branch"
 }
