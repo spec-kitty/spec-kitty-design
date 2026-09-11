@@ -75,6 +75,19 @@ anything), but REL2's rc-publish workflow, if it chooses to be triggered by an e
 need any change to the App's permission grant to make that call — that decision belongs to REL2
 (#363), not to this document.
 
+## The ruleset-parity job's cron is inert until this file reaches `main` (M10)
+
+Same candour as the `workflow_dispatch` note above, for the same underlying reason: a
+`schedule:` trigger always runs the workflow file as it exists on the repository's **default
+branch** (`main`), never as it exists on the branch a PR is merging into. `develop-ruleset-parity`
+shares FR-041's existing nightly cron (`ci-quality.yml`'s `on.schedule`) rather than adding a
+second one (see "The ruleset-parity job's cron" note in that file) — but until this exact version
+of `ci-quality.yml` reaches `main` at the operator's later train→main landing, that scheduled arm
+never actually runs *this* job; only the `push`-to-`develop` arm of its `if:` can fire before
+then, and that one is itself dormant until `develop` exists and the orchestrator's bootstrap
+sequence has flipped things on. Stated here rather than left for a reader to discover the same
+way the `workflow_dispatch` trigger's own inertness is stated above.
+
 ## GitHub Packages visibility (FR-006, operator ruling 2026-09-11)
 
 Recorded here, even though publishing itself is REL2/REL3's (#363/#364) scope, so the next

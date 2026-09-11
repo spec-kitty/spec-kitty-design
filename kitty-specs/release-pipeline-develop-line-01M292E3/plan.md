@@ -291,12 +291,25 @@ GraphQL `MergeStateStatus` enum — research.md R3):
   explicitly provisional estimate, flagged for recalibration in Orchestrator Actions below).
   `BEHIND` → **re-run the divergence health check** rather than blindly re-polling — this is the
   live signal that `develop` moved. `DIRTY` → anomaly, fail loudly, do not retry.
-- **The merge call itself**: `gh pr merge <n> --rebase --match-head-commit <develop-tip-sha>`
-  (research.md R6/R12) — a real `gh` flag that makes GitHub itself refuse the merge server-side if
-  `develop` moved since that SHA was read, independent of this script's own re-read.
-- **Post-merge**: assert `develop^{tree}` equals the promoted train tree (a read-only confirmation).
-- **Cleanup, every run**: sweep `promote/*` (research.md R22) — close every promotion PR except the
-  newest, delete every branch with no open PR, log (never fail on) a delete that itself fails.
+- **The merge call itself**: `gh pr merge <n> --rebase --match-head-commit <PR-head-sha>`
+  (research.md R6/R12) — **corrected here** (pre-merge squad, B2, PR #429): an earlier revision of
+  this line named the argument `<develop-tip-sha>`, but `gh pr merge --help` and the GitHub REST
+  merge endpoint's own `sha` parameter (both cited in research.md R6) document it as the commit SHA
+  the pull request's own **HEAD** must match, never the base — GitHub refuses the merge
+  server-side if the PR's head branch changed since that SHA was read (e.g. a force-push), which is
+  a narrower, separate defense from `develop` having moved. The defense against `develop` moving is
+  the script's own explicit re-read of `develop`'s live tip immediately before this call
+  (`scripts/promote-develop.mjs`'s `pollAndMerge`), not this flag.
+- **Post-merge**: assert `develop^{tree}` equals the promoted train tree, comparing the read
+  against the train tree actually used for this cycle and exiting non-zero on a mismatch — not
+  merely printing it (B2: the implementation shipped in PR #429 only printed the read value; two
+  pre-merge lenses found nothing actually compared it, and `pollAndMerge` was not even passed the
+  train tree to compare against).
+- **Cleanup, every run — literally**: sweep `promote/*` (research.md R22) — close every promotion
+  PR except the newest, delete every branch with no open PR, log (never fail on) a delete that
+  itself fails. M1 (pre-merge squad, PR #429): "every run" means every run, including
+  `no-op-missing-develop` and `refuse-diverged`, which returned before reaching the sweep in the
+  implementation that first shipped; the sweep now runs from a `finally` so no outcome skips it.
 
 ## Failure modes and what each run leaves behind
 
