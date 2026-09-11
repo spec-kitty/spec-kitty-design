@@ -24,7 +24,7 @@
 }
 
 .sk-form-field--error .sk-form-field__description {
-  color: var(--sk-color-red);
+  color: var(--sk-fg-error);
 }
 
 /* ------------------------------------------------------------------ */
@@ -79,7 +79,7 @@
 }
 
 .sk-input[aria-invalid="true"] {
-  border-color: var(--sk-color-red);
+  border-color: var(--sk-border-control-invalid);
 }
 
 .sk-input:disabled {
@@ -120,7 +120,7 @@
 }
 
 .sk-textarea[aria-invalid="true"] {
-  border-color: var(--sk-color-red);
+  border-color: var(--sk-border-control-invalid);
 }
 
 .sk-textarea:disabled {

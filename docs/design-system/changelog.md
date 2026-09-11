@@ -57,6 +57,58 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) conve
   `.sk-form-textarea__control`, and `.sk-form-select` keep `--sk-border-default` and are known,
   disclosed, and deliberately out of scope for this change — not fixed here.
 
+- **The light-theme invalid-boundary inversion the `--sk-border-control` entry above disclosed
+  is now fixed** (#350, closing the gap #321 left open). `--sk-color-red` (`#E97373`, no light
+  override) carried three incompatible contrast contracts at once — a 3:1 non-text boundary
+  contract, a 4.5:1 text contract, and `ribbon-card`'s fill/paired-foreground contract — and in
+  light theme the invalid boundary measured *below* the resting boundary on every surface, the
+  exact inverse of the intended emphasis. Re-theming `--sk-color-red` itself (Option A) is
+  arithmetically impossible: `--sk-fg-on-primary` (`#1A1408`, no light override) paired against
+  `ribbon-card`'s red fill caps at 4.22:1 for any hex that also clears the light relational
+  floor — below AA's 4.5:1 for that 12px-bold label, for every hex in sRGB.
+
+  Two new tokens (Option B) split the two contracts the invalid state actually needs,
+  independently declared literals in both theme blocks, **using only colour values that already
+  exist and are already ratified in `tokens.css`** — `#E97373` (= `--sk-color-red`) and `#6B2424`
+  (= `--sk-on-tint-rose`, light, derived under #177/#217). This adds token *names*, not new
+  colours:
+
+  - **`--sk-border-control-invalid`** (non-text boundary, WCAG 1.4.11 ≥3:1, and ≥
+    `--sk-border-control` on the same surface/theme) — dark `#E97373`, light `#6B2424`.
+  - **`--sk-fg-error`** (error copy, WCAG 1.4.3 ≥4.5:1) — dark `#E97373`, light `#6B2424`.
+
+  Measured against `--sk-surface-page` / `--sk-surface-card` / `--sk-surface-input` /
+  `--sk-surface-muted` / `--sk-surface-pill`, both contracts, both themes (twenty ratios):
+
+  | theme | page | card | input | muted | pill |
+  |---|---|---|---|---|---|
+  | dark (both tokens, byte-identical to before) | 6.58:1 | 5.94:1 | 5.63:1 | 4.79:1 | 5.08:1 |
+  | light (both tokens) | 10.12:1 | 11.04:1 | 9.78:1 | 8.52:1 | 8.93:1 |
+
+  Every dark figure equals its pre-fix measurement (the dark literal does not move) and every
+  light figure now clears both the 3:1/4.5:1 absolute floors and the resting `--sk-border-control`
+  ratio on the same surface (light resting: 3.98:1 / 4.34:1 / 3.85:1 / 3.35:1 / 3.51:1) — closing
+  the inversion.
+
+  Four consumers are repointed: `.sk-form-field--error .sk-form-field__description`,
+  `.sk-input[aria-invalid="true"]` and `.sk-textarea[aria-invalid="true"]`
+  (`sk-form-field.css`); `.sk-form-input__control[aria-invalid="true"]` and
+  `.sk-form-input__error` (`sk-form-input.css`); `.sk-form-select:invalid`
+  (`sk-form-select.css` — border colour only, `border-style`/`border-width` unchanged);
+  `.sk-form-textarea__control[aria-invalid="true"]` and `.sk-form-textarea__error`
+  (`sk-form-textarea.css`). `status-indicator`, `ribbon-card`, `transition-matrix`, and both
+  Storybook token-documentation swatches (`brand.mdx`, `colours.mdx`) are unchanged —
+  `--sk-color-red` itself is untouched and keeps exactly its remaining decorative uses.
+
+  `tests/node/form-input-border-control-contrast.test.ts` grows in place: it now discovers the
+  invalid-boundary and error-copy tokens from the four component sheets themselves (never
+  hard-coded), resolves them through the cascade (including the `:root` fallback that reproduces
+  the pre-fix defect), and asserts an absolute floor, a relational floor against
+  `--sk-border-control`, a pinned dark non-regression floor, and the 4.5:1 text floor, across all
+  **five** surfaces (not just the four the issue's own table named — `--sk-surface-pill` sits on
+  the same rule as the other four and would otherwise be guarded for the resting state and
+  unguarded for the invalid one) in both themes.
+
 - **BEHAVIOUR — `sk-notice`'s `heading` slot is now announced** (#228, operator ruling
   2026-09-07). The heading box moved from a sibling *before* the live region to the **first child
   inside it**, so a screen reader reads the whole notice, headline first.

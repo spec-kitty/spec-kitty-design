@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "generated_at": "2026-09-10T14:38:01.204Z",
+  "generated_at": "2026-09-11T02:06:45.280Z",
   "generated_from": "packages/tokens/src/tokens.css",
   "categories": {
     "color": {
@@ -59,6 +59,7 @@
         "--sk-border-strong",
         "--sk-border-focus",
         "--sk-border-control",
+        "--sk-border-control-invalid",
         "--sk-border-width-1",
         "--sk-border-width-2",
         "--sk-border-width-4"
@@ -126,7 +127,8 @@
         "--sk-fg-subtle",
         "--sk-fg-placeholder",
         "--sk-fg-on-primary",
-        "--sk-fg-on-card"
+        "--sk-fg-on-card",
+        "--sk-fg-error"
       ]
     },
     "font": {

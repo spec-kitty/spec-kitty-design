@@ -29,7 +29,7 @@
 }
 
 .sk-form-select:invalid {
-  border-color: var(--sk-color-red);
+  border-color: var(--sk-border-control-invalid);
   border-style: double;
   border-width: var(--sk-border-width-2);
 }

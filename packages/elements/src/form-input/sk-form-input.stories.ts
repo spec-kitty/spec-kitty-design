@@ -61,6 +61,19 @@ export const LightMode: Story = {
 };
 
 /**
+ * Light theme, invalid state — evidence surface for #350's invalid-boundary and error-copy fix
+ * (--sk-border-control-invalid, --sk-fg-error). `required` with an empty value is invalid on
+ * first update, same reasoning as `Error` above.
+ */
+export const LightModeError: Story = {
+  parameters: { backgrounds: { default: 'sk-light' } },
+  render: () =>
+    `<div class="sk-light" style="background: var(--sk-surface-page); padding: var(--sk-space-6); display: inline-block;">
+  <sk-form-input name="email" label="Email address" required description="Required."></sk-form-input>
+</div>`,
+};
+
+/**
  * #180 — a native constraint (`pattern`) violated on mount, so the merged UA validity flag is
  * visible without interaction, same reasoning as `Error` above.
  */

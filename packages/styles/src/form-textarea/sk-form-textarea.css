@@ -104,7 +104,7 @@
 }
 
 .sk-form-textarea__control[aria-invalid="true"] {
-  border-color: var(--sk-color-red);
+  border-color: var(--sk-border-control-invalid);
 }
 
 .sk-form-textarea__control:disabled {
@@ -131,7 +131,7 @@
  */
 .sk-form-textarea__error {
   font-size: var(--sk-text-xs);
-  color: var(--sk-color-red);
+  color: var(--sk-fg-error);
 }
 
 :host(:not([invalid])) .sk-form-textarea__error {

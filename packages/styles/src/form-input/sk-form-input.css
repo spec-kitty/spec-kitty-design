@@ -110,7 +110,7 @@
 }
 
 .sk-form-input__control[aria-invalid="true"] {
-  border-color: var(--sk-color-red);
+  border-color: var(--sk-border-control-invalid);
 }
 
 .sk-form-input__control:disabled {
@@ -137,7 +137,7 @@
  */
 .sk-form-input__error {
   font-size: var(--sk-text-xs);
-  color: var(--sk-color-red);
+  color: var(--sk-fg-error);
 }
 
 :host(:not([invalid])) .sk-form-input__error {
