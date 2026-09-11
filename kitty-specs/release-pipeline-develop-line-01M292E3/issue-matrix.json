@@ -1,7 +1,7 @@
 {
   "rows": {
     "#361": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "spec.md Summary \u2014 this mission implements REL1, one of three named issues (#362-#364) under epic #361 (Decision A); the epic itself is not closed by this mission",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -9,8 +9,8 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "verdict": "in-mission",
+      "wp": "WP01"
     },
     "#362": {
       "evidence_ref": "kitty-specs/release-pipeline-develop-line-01M292E3/spec.md, plan.md, tasks/WP01-develop-line-governance.md \u2014 this WP implements REL1 (#362) in full",
