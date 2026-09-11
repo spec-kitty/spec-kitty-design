@@ -84,6 +84,23 @@ tracker_refs:
 - `npm run quality:lint` (or `node scripts/check-gate-wiring.mjs`) output confirming no
   ci-quality.yml wiring assumption breaks.
 
+## Reviewer findings addressed
+
+- **Finding 1 (Medium)**: `suite-budget.json#selftestMeasurements` now carries the 14 structured
+  rows (8 at 272 arms, 6 at 10 arms) the committed `selftestBudget` fit is derived from, each with
+  its real run id and job id, in the file's established shape.
+- **Finding 2 (Low)**: `scripts/lib/selftest-budget.mjs` now rejects `fixedSeconds <= 0` and
+  `perArmSeconds <= 0` (previously only `< 0`), naming the invariant a zero would silently break;
+  `tests/node/selftest-budget.test.ts` proves both zero cases throw.
+- **Finding 3 (Low, no action taken on the code)**: the `config-contract.test.ts` SC-310
+  `npx nx show projects` timeout observed during this WP's implementation (5000ms exceeded) was
+  independently NOT reproduced by the reviewer, who saw it pass consistently under 1.1s. It is
+  outside this WP's diff either way (no tsconfig/nx-project/config-contract file is touched here).
+  Recorded as environment-dependent, not as a claim that either observation was wrong: reproduced
+  via `git stash` against unmodified HEAD on this implementer's workstation both before and after
+  this WP's changes, so it predates and is unaffected by this diff, but the reviewer's environment
+  did not see it.
+
 ## Boundaries
 
 - Do not edit guards 1–9, the impact-graph selection, or any mutation-loop logic (C-001).

@@ -37,11 +37,19 @@ export function computeSelftestCeilingSeconds(selftestBudget, armCount) {
     );
   }
   const { fixedSeconds, perArmSeconds } = selftestBudget;
+  // Strictly POSITIVE, not merely non-negative — a review finding on this mission's own PR.
+  // A zero perArmSeconds collapses this model straight back to a flat armCount-independent
+  // ceiling (fixedSeconds alone), which is the exact defect #419/#408 exist to end, and it
+  // would do so silently: every call site would keep computing a number, just the wrong shape
+  // of one. A zero fixedSeconds is equally wrong on this harness's own terms — it claims the
+  // baseline suite run this file's history repeatedly measures costs nothing, which no run
+  // fitted here has ever shown. Both invariants are load-bearing, so both are named.
   for (const [name, value] of [['fixedSeconds', fixedSeconds], ['perArmSeconds', perArmSeconds]]) {
-    if (typeof value !== 'number' || !Number.isFinite(value) || value < 0) {
+    if (typeof value !== 'number' || !Number.isFinite(value) || value <= 0) {
       throw new Error(
         `suite-budget.json#selftestBudget.${name} is ${JSON.stringify(value)} — ` +
-          'expected a finite number >= 0.'
+          'expected a finite number > 0. A zero here would silently collapse the ' +
+          'arm-count-scaled model back to a flat ceiling.'
       );
     }
   }

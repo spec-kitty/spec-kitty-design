@@ -112,3 +112,15 @@ test('fails closed on a malformed field rather than computing NaN/Infinity', () 
     /armCount/
   );
 });
+
+test('fails closed on a ZERO fixedSeconds or perArmSeconds rather than silently accepting one (review finding)', () => {
+  // A zero perArmSeconds collapses this model straight back to a flat, armCount-independent
+  // ceiling — the exact defect this mission exists to end — and `value < 0` alone would let it
+  // through silently. Both terms are required to be strictly positive.
+  expect(() => computeSelftestCeilingSeconds({ fixedSeconds: 0, perArmSeconds: 10.65 }, 272)).toThrow(
+    /fixedSeconds.*collapse/s
+  );
+  expect(() => computeSelftestCeilingSeconds({ fixedSeconds: 70.5, perArmSeconds: 0 }, 272)).toThrow(
+    /perArmSeconds.*collapse/s
+  );
+});
