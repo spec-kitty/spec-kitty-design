@@ -775,24 +775,45 @@ test.describe("sk-radio-choice-group live native semantics and presentation", ()
     expect(await controls.nth(2).isChecked()).toBe(disabledBefore);
 
     await focusDocumentBody(page);
-    await page.keyboard.press("Tab");
     // The checked-but-disabled radio (index 0) is never the tab stop; sequential focus lands on
-    // an enabled control only.
-    const firstFocused = await page.evaluate(
-      () => (document.activeElement as HTMLInputElement | null)?.disabled,
-    );
-    expect(firstFocused).toBe(false);
+    // an enabled control only. Do not assume the FIRST Tab from document.body lands inside the
+    // group — that is a browser-specific tab-order assumption Chromium/Firefox happen to satisfy
+    // and WebKit does not (WebKit's first Tab from body can land elsewhere in the story frame
+    // before reaching the fieldset). Press Tab in a bounded loop until focus genuinely enters the
+    // group, using an auto-retrying locator assertion rather than a raw, snapshot-only
+    // `activeElement` read — `?.disabled` on a non-input `activeElement` silently yields
+    // `undefined`, which must never be mistaken for a pass (or a fail).
+    let enteredGroup = false;
+    for (let attempt = 0; attempt < 10 && !enteredGroup; attempt += 1) {
+      await page.keyboard.press("Tab");
+      enteredGroup = await group.evaluate(
+        (node) => node.contains(document.activeElement),
+      );
+    }
+    expect(
+      enteredGroup,
+      "Tab never moved focus inside the radio group within 10 presses",
+    ).toBe(true);
+    // The native roving-tabindex tab-stop is the first ENABLED radio (index 1); assert that
+    // specific locator, not merely "some enabled control", so a real regression cannot hide
+    // behind an unspecific pass.
+    await expect(controls.nth(1)).toBeFocused();
     await expect(controls.nth(0)).not.toBeFocused();
     await expect(controls.nth(2)).not.toBeFocused();
 
     // Arrow roving only ever lands on and checks enabled controls (indices 1 and 3), never the
-    // disabled ones at 0 and 2, however many times it is pressed.
+    // disabled ones at 0 and 2, however many times it is pressed. Assert against the specific
+    // enabled locators (auto-retrying, browser-independent) rather than reading
+    // `activeElement?.disabled`, for the same reason as above.
     for (let step = 0; step < 4; step += 1) {
       await page.keyboard.press("ArrowDown");
-      const disabled = await page.evaluate(
-        () => (document.activeElement as HTMLInputElement | null)?.disabled,
-      );
-      expect(disabled).toBe(false);
+      const isEnabledFocused =
+        (await controls.nth(1).evaluate((node) => node === document.activeElement)) ||
+        (await controls.nth(3).evaluate((node) => node === document.activeElement));
+      expect(
+        isEnabledFocused,
+        "ArrowDown must always land on one of the group's enabled radios",
+      ).toBe(true);
       await expect(controls.nth(0)).not.toBeFocused();
       await expect(controls.nth(2)).not.toBeFocused();
     }
@@ -1356,6 +1377,6 @@ test.describe("sk-radio-choice-group live native semantics and presentation", ()
       diffPixels,
       `checked vs. unchecked control differed by only ${diffPixels} pixel(s) in normal colours — ` +
         "the check indicator is not visibly rendered",
-    ).toBeGreaterThan(60);
+    ).toBeGreaterThan(80);
   });
 });
