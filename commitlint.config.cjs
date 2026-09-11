@@ -29,6 +29,17 @@ const SPEC_KITTY_AUTO_COMMIT_PATTERNS = [
       msg,
     ),
   (msg) => /^chore\(spec-kitty\): record WP\d+ remediation state\s*(\n|$)/.test(msg),
+  // `spec-kitty specify` emits this one when the scaffold step leaves files the CLI then
+  // commits itself. Same class as its three siblings above and exempted for the reason this
+  // file's header gives: it lands mid-branch, BEFORE the commit lanes.json records as
+  // `planning_commit_sha`, so rewording it renumbers a hash the mission state machine reads
+  // back. Caught by #355's `lint-code`, which only reached the commitlint step once an earlier
+  // gate in the same job stopped failing first — the message had been on the branch throughout.
+  // The subject is FIXED (no slug, no WP id), so it is anchored whole rather than given a tail
+  // pattern: an unanchored /^chore\(spec-kitty\): commit / would exempt any commit with that
+  // prefix from EVERY rule, the trap the comment above records. Probed in
+  // scripts/check-commitlint-config.mjs, both the exemption and two near misses.
+  (msg) => /^chore\(spec-kitty\): commit scaffold artifacts left by specify\s*(\n|$)/.test(msg),
   (msg) => /^chore: Record review-cycle-\d+ \([a-z-]+\) for WP\d+ on \S+\s*(\n|$)/.test(msg),
   (msg) => /^chore: update issue-matrix for \S+\s*(\n|$)/.test(msg),
   // `acceptance-verdict` owns these messages. Criterion/result vocabulary and

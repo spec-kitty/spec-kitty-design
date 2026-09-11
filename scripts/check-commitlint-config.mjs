@@ -19,6 +19,7 @@ const generatedMessages = [
   'chore(spec-kitty): status transition batch WP04',
   'chore(spec-kitty): inner-state annotation WP04\n\nDurable status evidence.',
   'chore(spec-kitty): record WP04 remediation state',
+  'chore(spec-kitty): commit scaffold artifacts left by specify',
   'chore(acceptance): record FR-001=pass for team-overview-shell-elements-01M1S8R8',
   'chore(acceptance): record NFR-008=pending for team-overview-shell-elements-01M1S8R8',
   'chore(acceptance): register negative invariant NI-001 for team-overview-shell-elements-01M1S8R8',
@@ -51,6 +52,11 @@ const nearMisses = [
   'chore(spec-kitty): status transition batch WP04 and bypass checks',
   'chore(spec-kitty): inner-state annotation package-04',
   'chore(spec-kitty): record WP04 arbitrary state',
+  // The scaffold exemption is anchored whole — its subject carries no slug or id to bound, so
+  // the bound is the exact sentence. Each of these is what a prefix-only pattern would admit.
+  'chore(spec-kitty): commit scaffold artifacts left by specify and bypass checks',
+  'chore(spec-kitty): commit scaffold artifacts',
+  'chore(spec-kitty): commit arbitrary artifacts left by specify',
   'chore(acceptance): record FR-001=blocked for team-overview-shell-elements-01M1S8R8',
   'chore(acceptance): record FR-1=pass for team-overview-shell-elements-01M1S8R8',
   'chore(acceptance): register negative invariant NI-1 for team-overview-shell-elements-01M1S8R8',
