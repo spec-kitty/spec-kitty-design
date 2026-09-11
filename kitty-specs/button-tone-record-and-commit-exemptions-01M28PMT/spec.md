@@ -73,10 +73,13 @@ passes with the new record indexed, and the record states the codegen-source fac
 
 **Acceptance Scenarios**:
 
-1. **Given** the new ADR record, **When** a reader consults it, **Then** it states plainly that
-   `BUTTON_VARIANTS` is a codegen source (`scripts/build-element-markup.mjs` derives one static
-   export per entry, feeding `custom-elements.json` and the generated React wrappers), so any
-   future axis split is a generated-artifact change with real blast radius, not a local edit.
+1. **Given** the new ADR record, **When** a reader consults it, **Then** it states accurately
+   that `BUTTON_VARIANTS` feeds ONLY the static-HTML/`index.ts` pipeline
+   (`scripts/build-element-markup.mjs`'s per-key derivation), while `custom-elements.json`'s
+   `variant` type and the generated React wrapper's prop type are sourced separately from
+   `sk-button.ts`'s hand-spelled union, with no gate cross-checking the two — see FR-006's
+   correction note for the full statement and why this scenario's wording changed from an
+   earlier, false single-pipeline claim caught at WP01's review.
 2. **Given** the same record, **When** a reader looks for the ceiling of the current shape or the
    migration shape for a hypothetical `danger-primary`, **Then** at least one of the two is
    stated explicitly, grounded in the actual `BUTTON_VARIANTS` map and `sk-button.css` tone rules
@@ -111,7 +114,7 @@ passes with the new record indexed, and the record states the codegen-source fac
 | FR-003 | Extend `scripts/check-commitlint-config.mjs` with the three real messages in `generatedMessages` | As a maintainer, I want the config's self-test harness to assert the three real CLI messages are ignored and pass so that a future edit cannot silently regress the exemption. | High | Open |
 | FR-004 | Extend `scripts/check-commitlint-config.mjs` with bounded near-misses in `nearMisses` | As a maintainer, I want a near-miss per new pattern asserted NOT ignored so that the exemption cannot silently widen into a blanket exemption for its scope. | High | Open |
 | FR-005 | Record the sk-button tone × intensity flattening as an ADR in the established location/format | As a future contributor reading `BUTTON_VARIANTS`, I want a written record of whether the flat enum is deliberate and what its ceiling or migration shape is so that the question is answered once rather than re-raised at every pre-merge gate. | Medium | Open |
-| FR-006 | State the codegen-source fact in the record | As a future contributor considering an axis split, I want the record to say plainly that `BUTTON_VARIANTS` feeds `custom-elements.json` and the generated React wrappers so that I understand the real blast radius before proposing a change. | Medium | Open |
+| FR-006 | State the real two-pipeline codegen split in the record (corrected — see note) | As a future contributor considering an axis split, I want the record to state accurately that `BUTTON_VARIANTS` feeds ONLY the static-HTML/`index.ts` pipeline (`scripts/build-element-markup.mjs`'s per-key derivation), while `custom-elements.json`'s `variant` type and the generated React wrapper's prop type are sourced separately, from `sk-button.ts`'s hand-spelled `variant` union via the custom-elements-manifest analyzer — with no gate in this repository cross-checking the two — so that I understand the real blast radius, including the mandatory hand-edit to `sk-button.ts`, before proposing a change. **Correction note (added post-review, WP01):** this row originally read "...say plainly that `BUTTON_VARIANTS` feeds `custom-elements.json` and the generated React wrappers..." — a false premise: an earlier draft of ADR-17 stated the same claim and it was caught at review, because `custom-elements.json`'s `SkButton.variant.type.text` and the generated wrapper's prop type are sourced from `sk-button.ts`'s hand-spelled union (confirmed verbatim-identical in the manifest), not from `BUTTON_VARIANTS`. This row is corrected here, after the ADR, so this contract surface agrees with what ADR-17 now actually says rather than with the wording that sent an earlier draft of it wrong. | Medium | Open |
 | FR-007 | Reference #348 in the record without fixing it | As a reader of the ADR, I want the busy-cue hardcoding issue named as the same defect family so that the two records reinforce each other without conflating scope. | Low | Open |
 
 ### Non-Functional Requirements
