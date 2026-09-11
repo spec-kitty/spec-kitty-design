@@ -77,11 +77,11 @@
     {
       "criterion_id": "FR-008",
       "description": "Verify FR-008 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "proof_type": "browser test",
+      "evidence": "head 4f301f83; sk-mission-kanban-ten-lane-pattern.spec.ts [T006] K5: WP03 lane and position identical to K1, one overlay inside WP03's li with visible sk-status-indicator 'Presence \u00b7 unverified', actor lynn, '\u2192 for_review, not yet pushed'; 'live overlays shown' once; no 'Observed'/'up to 60 s behind' text; overlay outside the reported-live region.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T13:44:36.754187+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
