@@ -104,3 +104,77 @@ where the original two entries — even byte-identical — could not.
 - **Risks**: see plan.md's IC-01 through IC-05 risk notes (paren-balanced matching,
   quote-style consistency, gate self-test blind spots, describe-level factory-body timing,
   the flat-rule EXEMPTIONS escape hatch) — all mitigated as recorded there.
+
+## Incident Record 2 — `git filter-branch` after `accept` orphaned four recorded commit SHAs
+
+**What happened.** `npx commitlint --from=origin/train/elements-first --to=HEAD` failed on
+one commit, `chore(spec-kitty): materialize WP01 approval note into status.json` — a
+CLI-emitted message shape (`chore(spec-kitty): {operation}`) not on `commitlint.config.cjs`'s
+closed allowlist of four specific operations (a further instance of the same class as the
+`chore(spec-kitty): status transition WP01` trap this mission had already hit once; tracked
+upstream, not this mission's to fix). Rewording it was the right call — widening the repo's
+lint config to accommodate one message would have been the wrong direction — but it was done
+with `git filter-branch --msg-filter` on the full mission commit range, and it was done
+**after** `spec-kitty accept` had already run and written concrete 40-char commit SHAs into
+`meta.json` (`accept_commit`, `accepted_from_commit`, and the `acceptance_history` log entry)
+and after `spec-kitty agent tasks finalize-tasks` / lane computation had written a
+`planning_commit_sha` into `lanes.json` and a `base_commit` into WP01's own frontmatter.
+`filter-branch` rewrites every commit from the filtered one forward, including all of those
+acceptance/planning commits themselves — so every one of those four recorded SHAs pointed to
+a pre-rewrite commit object that, while still present in the local object store (which is why
+it kept resolving), was no longer an ancestor of the pushed branch. That is the exact defect
+class epic #319 filed as #402 (upstream `spec-kitty/spec-kitty#4230`): an acceptance record
+anchoring a commit SHA that a history rewrite orphaned, making the recorded proof
+unreproducible by the auditor the record exists for. It would have shipped in the very round
+convened to clear it, had the coordinator not checked ancestry directly rather than trusting
+that the SHAs merely existing meant they were reachable.
+
+**Why it happened, precisely.** Rewording a commit — for any reason, at any point after other
+CLI commands have already written that commit's (or a descendant's) hash into a state file —
+requires either accepting that every such recorded hash goes stale, or doing the reword
+*before* anything records a hash. The cheaper fix, per the coordinator, was to reword before
+`accept`, or to let the correction land as a new commit rather than a history rewrite of an
+already-recorded one. Both were available at the time; neither was taken.
+
+**How it was resolved.**
+1. `.git/filter-branch/map/` did not survive (removed at the end of a successful
+   `filter-branch` run) — matched each orphaned SHA to its post-rewrite equivalent instead by
+   commit message, author date, and parent-chain continuity (the parent of each new candidate
+   also message-matches the parent of the old one, checked explicitly, not just the direct
+   pair), same technique the coordinator suggested.
+2. Checked `spec-kitty reconcile --mission ...` first, as instructed — it errored with "no
+   recorded snapshot to reconcile against," meaning that surface addresses a different
+   condition (cross-partition worktree divergence) and does not apply here.
+3. For `meta.json`'s TOP-LEVEL `accept_commit`/`accepted_from_commit` — re-ran
+   `spec-kitty accept --mission ... --lenient --actor claude` for real. Since WP01's
+   readiness was already established and nothing about it changed, this simply re-stamped
+   fresh, reachable SHAs (new accept commit `a290ab60629ec7f2fdff911b89c6e41da78b9d27`, parent
+   `e496bbe90b2589f95c2acc32e40158d08d628760`) via the sanctioned CLI surface — no hand-edit.
+4. Three fields had no CLI write path and were hand-edited, each disclosed here explicitly by
+   name, matching the standard set for the earlier `"four"` → `"eight"` correction:
+   - `meta.json`'s `acceptance_history[0]` entry (the FIRST acceptance's own log record, which
+     `accept`'s re-run appends to rather than rewrites) — `accept_commit` corrected from
+     `34e5cb01a745e3f4668139184b8705acc5807a32` to `cd5b883fde2b0207b9382e97d40bda5797e488d0`,
+     `accepted_from_commit` from `2b251927347273839d3ccef3575abdf573a9f036` to
+     `91a31bae9737a7e2a374a5ea97be6997ce65454a`.
+   - `lanes.json`'s `planning_commit_sha` — corrected from
+     `6e0f5cd375a697d336dbb8c10ba7f1adca15b7af` to `0da9a5b14262fe25edcc7c0c8d2aade5b76a9463`.
+   - WP01's own frontmatter `base_commit` — corrected from
+     `e7a721739d3bb4ef71d0f4ffb0cebfe4616849f8` to `9ad9e0b90812ef44fc4f865cf63edba6ee1874c9`.
+5. Verified with the coordinator's own check, run against the WHOLE mission directory (not
+   only the three files first named), zero output both times:
+   ```
+   grep -rhoE '\b[0-9a-f]{40}\b' kitty-specs/visual-evidence-gate-integrity-01M28PTY/ \
+     | sort -u | while read s; do
+       git merge-base --is-ancestor "$s" HEAD 2>/dev/null || echo "NOT-ANCESTOR: $s"
+     done
+   ```
+6. Pushed once more with `--force-with-lease` (never bare `--force`), after confirming the
+   remote branch still matched this session's own last-pushed SHA (nobody else had touched
+   it).
+
+**Carried forward.** A commit reword after `accept` (or after any other command that writes a
+commit hash into a state file) is not safe by default in this tool's model — it must either
+happen before such a command runs, or be treated as its own mini version of this incident,
+with the same reconciliation discipline applied immediately, not discovered by an external
+check.

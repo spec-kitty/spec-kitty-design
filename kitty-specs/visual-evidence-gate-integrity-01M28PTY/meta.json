@@ -2,11 +2,11 @@
   "accept_commit": "a290ab60629ec7f2fdff911b89c6e41da78b9d27",
   "acceptance_history": [
     {
-      "accept_commit": "34e5cb01a745e3f4668139184b8705acc5807a32",
+      "accept_commit": "cd5b883fde2b0207b9382e97d40bda5797e488d0",
       "acceptance_mode": "pr",
       "accepted_at": "2026-09-11T18:20:57.749358+00:00",
       "accepted_by": "claude",
-      "accepted_from_commit": "2b251927347273839d3ccef3575abdf573a9f036"
+      "accepted_from_commit": "91a31bae9737a7e2a374a5ea97be6997ce65454a"
     },
     {
       "accept_commit": "a290ab60629ec7f2fdff911b89c6e41da78b9d27",
