@@ -1,6 +1,8 @@
 {
+  "accept_commit": "de75c58b80e1bb000d8781436524bf995530dcb4",
   "acceptance_history": [
     {
+      "accept_commit": "de75c58b80e1bb000d8781436524bf995530dcb4",
       "acceptance_mode": "pr",
       "accepted_at": "2026-09-11T02:14:34.296574+00:00",
       "accepted_by": "programme-319-orchestrator",
