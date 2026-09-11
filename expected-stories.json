@@ -426,7 +426,8 @@
       "elements-skforminput--filled",
       "elements-skforminput--error",
       "elements-skforminput--disabled",
-      "elements-skforminput--light-mode"
+      "elements-skforminput--light-mode",
+      "elements-skforminput--light-mode-error"
     ],
     "sk-form-select": [
       "form-skformselect-html--default",
@@ -438,14 +439,16 @@
       "form-skformselect-html--disabled",
       "form-skformselect-html--narrow",
       "form-skformselect-html--forced-colors",
-      "form-skformselect-html--light-mode"
+      "form-skformselect-html--light-mode",
+      "form-skformselect-html--light-mode-invalid"
     ],
     "sk-form-textarea": [
       "elements-skformtextarea--default",
       "elements-skformtextarea--filled",
       "elements-skformtextarea--error",
       "elements-skformtextarea--disabled",
-      "elements-skformtextarea--light-mode"
+      "elements-skformtextarea--light-mode",
+      "elements-skformtextarea--light-mode-error"
     ],
     "sk-metric": [
       "elements-skmetric--default",
@@ -738,7 +741,10 @@
       "patterns-work-explorer--w-8-degraded-context-dark",
       "patterns-work-explorer--w-9-loading-dark",
       "patterns-work-explorer--w-10-no-admitted-repositories-dark"
+    ],
+    "sk-form-field": [
+      "form-formfield-html--light-mode-error"
     ]
   },
-  "total": 560
+  "total": 564
 }

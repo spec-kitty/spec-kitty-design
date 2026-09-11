@@ -140,9 +140,32 @@ function contrastRatio(hexA: string, hexB: string): number {
 type TokensRoot = ReturnType<typeof postcss.parse>;
 
 /** Find the value of a single custom-property declaration inside the rule(s) matching `selector`. */
+/**
+ * Match a theme block by PREDICATE, never by exact selector string.
+ *
+ * This was `root.walkRules(selector, …)`, where postcss compares `rule.selector` for exact
+ * equality — newline and comma spacing included, since `LIGHT_SELECTOR` spans two lines. Two
+ * pre-merge lenses independently proved the consequence: reformat that selector onto one line, or
+ * add a third theme selector, and every light lookup misses, `resolveToken` falls through to
+ * `:root`, and all twenty-odd light assertions silently re-measure the DARK block and report
+ * green. One lens shipped an invalid light border at 1:1 against the page — literally invisible —
+ * through 47/47 passing.
+ *
+ * That is #350's own defect, light resolving to dark unnoticed, reintroduced inside #350's guard.
+ * `tokens.css` is inside `quality:stylelint`'s glob, so a `--fix` or a prettier pass is enough to
+ * trigger it. Predicate matching plus the assertion below closes the class by construction.
+ */
+function matchesTheme(ruleSelector: string, theme: 'root' | 'light'): boolean {
+  const normalised = ruleSelector.replace(/\s+/g, ' ').trim();
+  if (theme === 'light') return normalised.includes('.sk-light');
+  return normalised === ':root';
+}
+
 function findDecl(root: TokensRoot, selector: string, token: string): string | undefined {
+  const theme = selector === ROOT_SELECTOR ? 'root' : 'light';
   let value: string | undefined;
-  root.walkRules(selector, (rule) => {
+  root.walkRules((rule) => {
+    if (!matchesTheme(rule.selector, theme)) return;
     rule.walkDecls(token, (decl) => {
       value = decl.value.trim();
     });
@@ -210,8 +233,20 @@ function discoverBoundaryDecls(): DiscoveredDecl[] {
   for (const file of BOUNDARY_SHEETS) {
     const root = postcss.parse(readFileSync(file, 'utf8'), { from: file });
     root.walkRules((rule) => {
-      if (!rule.selector.includes('[aria-invalid="true"]') && !rule.selector.includes(':invalid')) return;
-      rule.walkDecls(/^border(-color)?$/, (decl) => {
+      // `:user-invalid` does not contain the substring `:invalid`, and `[data-invalid]` is a
+      // plausible future spelling — both would have narrowed discovery silently.
+      if (
+        !rule.selector.includes('[aria-invalid="true"]')
+        && !rule.selector.includes(':invalid')
+        && !rule.selector.includes(':user-invalid')
+        && !rule.selector.includes('[data-invalid]')
+      )
+        return;
+      // Per-edge and logical colours too: a lens proved that switching `border-color` to
+      // `border-left-color` reduced the invalid state to a single edge with the guard still green.
+      rule.walkDecls(
+        /^(border(-(top|right|bottom|left|inline|block)(-(start|end))?)?(-color)?|outline-color)$/,
+        (decl) => {
         const token = singleVarToken(decl.value);
         if (!token) {
           throw new Error(
@@ -260,6 +295,22 @@ const BOUNDARY_TOKEN = boundaryTokens[0] ?? '--sk-invalid-boundary-token-not-dis
 const errorCopyDecls = discoverErrorCopyDecls();
 const errorCopyTokens = [...new Set(errorCopyDecls.map((d) => d.token))];
 const ERROR_TOKEN = errorCopyTokens[0] ?? '--sk-error-copy-token-not-discovered';
+
+test('discovery: the light theme block was actually matched, not silently skipped', () => {
+  // The other half of the predicate fix. Predicate matching stops a reformat from missing the
+  // block; THIS stops a missing block from being indistinguishable from "the light block
+  // deliberately inherits :root". Without it, `resolveToken`'s fallback is load-bearing for the
+  // deletion case (correct) AND a silent pass for the not-found case (the defect).
+  for (const token of [...SURFACE_TOKENS, BORDER_TOKEN]) {
+    expect(
+      findDecl(tokensRoot, LIGHT_SELECTOR, token),
+      `${TOKENS_CSS}: ${token} has no light-theme declaration. Either the light block was not `
+        + 'matched (a selector reformat — the failure mode this assertion exists for) or the token '
+        + 'genuinely lost its light value. Both make every light assertion below measure the dark '
+        + 'block instead, and report green.',
+    ).toBeDefined();
+  }
+});
 
 test('discovery: the invalid-boundary declaration set is non-empty and single-valued', () => {
   expect(
@@ -321,6 +372,13 @@ for (const { name: themeName, selector } of THEMES) {
     });
 
     test(`[FR-003] ${themeName} theme: invalid boundary vs resting boundary on ${surfaceToken}`, () => {
+      // `>=` alone would be satisfied by the invalid rule being repointed at the RESTING token —
+      // equal ratios, both assertions green, and the invalid state visually indistinguishable
+      // from rest. That is the inversion defect's degenerate twin.
+      expect(
+        BOUNDARY_TOKEN,
+        'the invalid boundary must not resolve to the resting boundary token itself',
+      ).not.toBe(BORDER_TOKEN);
       expect(
         invalidRatio,
         `${themeName} theme, ${surfaceToken}: invalid boundary ratio ${invalidRatio.toFixed(2)}:1 is below the resting --sk-border-control ratio ${restingRatio.toFixed(2)}:1 — the invalid state would be LESS visible than the resting state, exactly #350's inversion`,
