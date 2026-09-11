@@ -18,10 +18,10 @@
       "criterion_id": "FR-002",
       "description": "Verify FR-002 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "suite-budget.json#selftestBudget fit from 8 real 272-arm + 6 real 10-arm CI runs (train/elements-first, run ids 34561511046/34592445070/34595310707/34606532461/34618855795/34623594612/34632185898/34637284298), each bucket's worst observation x the file's established 1.5213 multiplier -> fixedSeconds=70.5, perArmSeconds=10.65. Reviewer independently re-derived the identical 70.5/10.65 by hand and verified all 14 cited timings against gh run view --log.",
+      "pass_fail": "pass",
+      "verified_by": "implementer",
+      "verified_at": "2026-09-11T22:46:08.901593+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
