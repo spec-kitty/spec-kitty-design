@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "mission_slug": "mission-kanban-ten-lane-pattern-extension-01M288RG",
+  "mission_id": "01M288RGMV3H1X75ZE2H79RDQZ",
+  "mission_branch": "kitty/mission-mission-kanban-ten-lane-pattern-extension-01M288RG",
+  "target_branch": "mission/mission-kanban-ten-lane-pattern-extension",
+  "lanes": [
+    {
+      "lane_id": "lane-a",
+      "wp_ids": [
+        "WP01"
+      ],
+      "write_scope": [
+        "apps/storybook/src/tests/sk-mission-kanban-ten-lane-pattern.spec.ts",
+        "apps/storybook/src/tests/visual.spec.ts",
+        "apps/storybook/src/tests/visual.spec.ts-snapshots/mission-kanban-ten-lane-*.png",
+        "expected-stories.json",
+        "packages/elements/src/patterns/mission-kanban-ten-lane.stories.ts"
+      ],
+      "predicted_surfaces": [
+        "api",
+        "artifact-rendering"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    }
+  ],
+  "computed_at": "2026-09-11T13:13:36.350169+00:00",
+  "computed_from": "dependency_graph+ownership",
+  "planning_artifact_wps": [],
+  "planning_commit_sha": "e3cf86558c5b09a1b134e508debd4ba7103d2877"
+}

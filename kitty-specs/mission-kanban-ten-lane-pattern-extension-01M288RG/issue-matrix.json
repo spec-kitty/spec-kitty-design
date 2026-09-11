@@ -1,0 +1,41 @@
+{
+  "rows": {
+    "#276": {
+      "evidence_ref": "Epic 276 (Mission Kanban) is the reopened parent; this mission is its only open child. The PR carries Refs #276 with no closing keyword; the epic stays open until #395 is accepted and merged.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "in-mission",
+      "wp": "WP01"
+    },
+    "#278": {
+      "evidence_ref": "Closed #278 (five-stage pattern) is consumed unchanged: its exported frozen fixture and freeze helpers are imported; mission-kanban.stories.ts, sk-mission-kanban-pattern.spec.ts, its ten visual cases/PNGs and its ratchet entry are not modified. Its suite passes 19/19 on Chromium against the train build.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
+    "#395": {
+      "evidence_ref": "Issue 395 (TKK3) is this mission's own child issue; WP01 delivers the ten-lane pattern, focused suite, visual block and ratchet; the PR carries Refs #395.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": "spec.md",
+      "title": "<fill at WP-implementation time>",
+      "verdict": "in-mission",
+      "wp": "WP01"
+    }
+  },
+  "schema_version": 1
+}
