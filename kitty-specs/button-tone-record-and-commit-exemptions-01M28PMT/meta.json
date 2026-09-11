@@ -1,4 +1,16 @@
 {
+  "acceptance_history": [
+    {
+      "acceptance_mode": "pr",
+      "accepted_at": "2026-09-11T17:33:25.098285+00:00",
+      "accepted_by": "claude",
+      "accepted_from_commit": "912b79f57f12a7b7a368c63c428c5d441d4ade58"
+    }
+  ],
+  "acceptance_mode": "pr",
+  "accepted_at": "2026-09-11T17:33:25.098285+00:00",
+  "accepted_by": "claude",
+  "accepted_from_commit": "912b79f57f12a7b7a368c63c428c5d441d4ade58",
   "created_at": "2026-09-11T17:01:05.699086+00:00",
   "flattened": false,
   "friendly_name": "button tone record and commit exemptions",
