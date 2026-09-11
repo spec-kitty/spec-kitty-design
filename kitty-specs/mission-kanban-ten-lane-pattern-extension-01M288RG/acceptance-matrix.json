@@ -47,11 +47,11 @@
     {
       "criterion_id": "FR-005",
       "description": "Verify FR-005 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "proof_type": "browser geometry test",
+      "evidence": "head 4f301f83; sk-mission-kanban-ten-lane-pattern.spec.ts [T005/T007] K2 at 390x844: compact shell, same lanes/counts, triad present, first lane fully visible, second partly visible, equal gutters within 1px, document scrollWidth == clientWidth; baseline mission-kanban-ten-lane-k2-narrow-390.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T13:44:33.603039+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
