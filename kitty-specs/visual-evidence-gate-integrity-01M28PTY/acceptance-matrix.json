@@ -26,7 +26,7 @@
     },
     {
       "criterion_id": "FR-003",
-      "description": "Every `toHaveScreenshot` call site in visual.spec.ts (166 of 166 — the original 16 multi-call tests / 20 baselines, plus every loop-executed single-call site) uses expect.soft(...).toHaveScreenshot(...), with zero baseline PNG drift.",
+      "description": "Every `toHaveScreenshot` call site in visual.spec.ts (166 of 166 \u2014 the original 16 multi-call tests / 20 baselines, plus every loop-executed single-call site) uses expect.soft(...).toHaveScreenshot(...), with zero baseline PNG drift.",
       "proof_type": "automated_test",
       "evidence": "WP01, two passes: pass 1 converted the 16 multi-call tests (36 calls); pass 2 (operator ruling 2026-09-11, rejecting the loop-case exclusion as a deferral) converted the remaining 127 call sites, bringing the file to 166/166. Zero-pixel-drift proven mechanically, not just by diff review: a Python difflib.SequenceMatcher line comparison between the mission-base visual.spec.ts and the final file found 0 pure deletions, 3 pure insertions (all three are the #401 floor lines, verbatim), and 163 replaced line pairs every one of which is provably identical to its original except for the literal substring `expect(` -> `expect.soft(`. Before pass 2, every toHaveScreenshot call site with a statement following it in the same test/loop body (25 sites) was inspected for a later action whose safety depends on a prior hard abort; none found (all 25 are inside already-converted tests, and what follows is only setup for the next screenshot). Full local visual.spec.ts run against CI baselines was NOT used as proof (known local/CI rendering drift, documented in-file at visual.spec.ts:29-31 -- 312x38 local vs 336x34 CI for the sk-stub case) -- CI is authoritative per repo convention; a full local PW_INCLUDE_VISUAL=1 run showed 275 failures, all attributable to this drift, none investigated further or used to justify any baseline regeneration.",
       "pass_fail": "pending",
@@ -58,25 +58,12 @@
       "criterion_id": "FR-006",
       "description": "Each of the four test.describe-level `test.skip(({ browserName }) => browserName !== 'chromium', ...)` predicates gets its own standalone, unconditional floor test, rather than relying on another test elsewhere in the file to cover the same risk.",
       "proof_type": "automated_test",
-      "evidence": "WP01 (operator ruling 2026-09-11, rejecting the transitive-coverage reasoning as the same 'guard depends on something else covering it' shape this mission exists to close): added `test('the chromium project the describe below depends on still exists', ...)` immediately before each of the four test.describe(...) blocks in sk-context-nav.spec.ts:262, sk-collection.spec.ts:274, sk-section-nav.spec.ts:316, sk-form-select.spec.ts:101. Ran all four under --project=chromium --project=firefox --project=webkit: 12/12 passed, confirming unconditional execution (not swallowed by the describe's own skip predicate). Red-first proof: renamed chromium to chromium-renamed in a scratch config, ran the sk-collection.spec.ts floor test, observed it fail naming the project list (['chromium-renamed','firefox','webkit'] does not contain 'chromium'); reverted, confirmed git diff playwright.config.ts empty.",
+      "evidence": "WP01, corrected after review (initial pass fixed 4/8, found by a single-line-only scan; reviewer's independent enumeration found the other 4). All EIGHT test.describe-level browserName!=='chromium' predicate skips now have a standalone floor test immediately before their describe block: sk-context-nav.spec.ts:267, sk-collection.spec.ts:279, sk-section-nav.spec.ts:321, sk-form-select.spec.ts:106, sk-checkbox-choice-group.spec.ts:181, sk-public-header.spec.ts:209, sk-segmented-choice.spec.ts:173, sk-radio-choice-group.spec.ts:392. Ran all 8 floor tests under --project=chromium --project=firefox --project=webkit: 24/24 passed (unconditional execution, not swallowed by the describe's own skip predicate). Red-first proof on one of the newly-found four (sk-public-header.spec.ts): renamed chromium to chromium-renamed in a scratch playwright.config.ts, ran the floor test, observed it fail naming the project list; reverted, git diff playwright.config.ts empty.",
       "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T17:48:31.907458+00:00",
       "notes": "Locally verified by the implementer; awaiting reviewer/CI confirmation."
     }
   ],
-  "negative_invariants": [
-    {
-      "id": "NI-001",
-      "description": "No baseline PNG under apps/storybook/src/tests/visual.spec.ts-snapshots/ changes as a result of this mission.",
-      "status": "held",
-      "evidence": "git diff shows zero binary/PNG changes; only .spec.ts, .mjs, and .yml text files touched. Mechanically reinforced by the difflib line-comparison proof recorded under FR-003."
-    },
-    {
-      "id": "NI-002",
-      "description": "No toHaveScreenshot call site in visual.spec.ts relies on a preceding hard abort as a safety mechanism (the one thing that would make the flat expect.soft conversion actively wrong).",
-      "status": "held",
-      "evidence": "All 25 toHaveScreenshot call sites in the file with a statement following them in the same test/loop body were inspected; every one is inside a test already converted in the first pass, and every followup is only setup for the next screenshot (navigate, resize, hover/focus/press). The gate's EXEMPTIONS map remains empty."
-    }
-  ]
+  "negative_invariants": []
 }
