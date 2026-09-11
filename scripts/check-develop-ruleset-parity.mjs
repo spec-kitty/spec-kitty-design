@@ -15,8 +15,10 @@
  * CLI:
  *   node scripts/check-develop-ruleset-parity.mjs --selftest
  *   node scripts/check-develop-ruleset-parity.mjs --check [--ruleset-id <id>]
- *     (id also read from $DEVELOP_RULESET_ID; unset -> exit 0 with a notice, not a failure —
- *     the live ruleset does not exist until the orchestrator applies it, post-merge.)
+ *     (id also read from $DEVELOP_RULESET_ID; unset -> exit 0 with a notice before the
+ *     BOOTSTRAP_DEADLINE below, exit 1 after it (M9) — the live ruleset does not exist until
+ *     the orchestrator applies it post-merge, but that state must not stay silently green
+ *     forever.)
  */
 import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
@@ -25,7 +27,29 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ARTIFACT_PATH = resolve(__dirname, '..', '.github', 'rulesets', 'develop-ruleset.json');
-const REPO = 'spec-kitty/spec-kitty-design';
+// "Also" item (pre-merge squad, PR #429): env-driven, not a second hardcoded literal — the
+// one INTENTIONALLY hardcoded literal in this mission is `assertSingleRepoScope`'s security
+// invariant in scripts/promote-develop.mjs, which must stay literal (an env var there would
+// let the App-scope guard be satisfied by manipulating the environment, defeating its point).
+// This script is not a security boundary — it only fetches a ruleset for whatever repo the
+// job runs in — so it reads `GITHUB_REPOSITORY` the same way promote-develop.mjs's `cliRun`
+// does, falling back to the literal only for a bare local invocation with no env set.
+const REPO = process.env.GITHUB_REPOSITORY || 'spec-kitty/spec-kitty-design';
+
+// M9 (pre-merge squad, PR #429): a dated floor. Before this, an unset DEVELOP_RULESET_ID made
+// `--check` print a notice and exit 0 FOREVER — including long after the orchestrator's
+// bootstrap window has passed, silently comparing nothing on every nightly run with no signal
+// that anything is wrong. Three weeks (matching the mission's own bootstrap sequence's
+// expected cadence — cut develop, apply the ruleset, flip the enable switch, all one
+// orchestrator sitting) is generous slack; past it, an unset id is itself the failure being
+// reported, not a normal pre-bootstrap state.
+const BOOTSTRAP_DEADLINE = new Date('2026-10-03T00:00:00Z');
+
+/** Pure. Extracted so `--selftest` can probe the dated-floor logic itself without waiting for
+ *  the actual calendar date to pass. */
+export function isPastBootstrapDeadline(now) {
+  return now.getTime() > BOOTSTRAP_DEADLINE.getTime();
+}
 
 const IGNORED_TOP_LEVEL_FIELDS = new Set([
   'id',
@@ -125,23 +149,36 @@ function getArg(args, flag) {
 }
 
 function cliCheck(args) {
+  // M9 (pre-merge squad, PR #429): no `--input` fixture seam here. It was reachable from
+  // production (`--check --input <file>`) but nothing in `--selftest` used it — every probe
+  // calls `diffRulesetParity` directly, in-process, against synthetic fixtures. A
+  // production-reachable seam nothing exercises is exactly the defect class
+  // `check-gate-wiring-defeats.mjs`'s own header comment describes closing. Manual
+  // verification against a fixture (WP report) now calls `diffRulesetParity`/constructs the
+  // `--check` inputs from a one-off `node -e`, not through this CLI.
   const id = getArg(args, '--ruleset-id') ?? process.env.DEVELOP_RULESET_ID;
-  const inputFile = getArg(args, '--input'); // test-only seam: a synthetic fixture, never used
-  // in production — the real ruleset does not exist until the orchestrator applies it
-  // (quickstart.md), so this is how the WP's "run --check with an id set, against a synthetic
-  // fixture" verification step exercises the id-set path without a live ruleset to fetch.
   if (!id) {
+    if (isPastBootstrapDeadline(new Date())) {
+      console.error(
+        `::error::DEVELOP_RULESET_ID is still unset as of ${new Date().toISOString()}, past the ` +
+          `${BOOTSTRAP_DEADLINE.toISOString()} bootstrap deadline (M9) — this is no longer the ` +
+          'expected pre-bootstrap state; the orchestrator sequence in quickstart.md was either ' +
+          'never run or never recorded the ruleset id in branch-model.md. Failing rather than ' +
+          'silently comparing nothing forever.',
+      );
+      process.exitCode = 1;
+      return;
+    }
     console.log(
       '::notice::DEVELOP_RULESET_ID is not set (no --ruleset-id given either) — the develop ' +
         'ruleset has not been applied yet, or its id has not been recorded in ' +
         'docs/architecture/branch-model.md. Nothing to check; this is expected before the ' +
-        "orchestrator's post-merge bootstrap sequence (quickstart.md).",
+        "orchestrator's post-merge bootstrap sequence (quickstart.md), and only before " +
+        `${BOOTSTRAP_DEADLINE.toISOString()}.`,
     );
     return;
   }
-  const live = inputFile
-    ? JSON.parse(readFileSync(inputFile, 'utf8'))
-    : JSON.parse(execFileSync('gh', ['api', `repos/${REPO}/rulesets/${id}`], { encoding: 'utf8' }));
+  const live = JSON.parse(execFileSync('gh', ['api', `repos/${REPO}/rulesets/${id}`], { encoding: 'utf8' }));
   const artifact = JSON.parse(readFileSync(ARTIFACT_PATH, 'utf8'));
   const diffs = diffRulesetParity(live, artifact);
   if (diffs.length) {
@@ -230,10 +267,21 @@ function runProbes() {
     record(5, 'the three named differences, all three present at once -> still []', 'pass', diffs.length === 0, diffs);
   }
 
+  // Probe 6 — M9's dated floor: before the deadline, unset id is tolerated; after it, it must
+  // NOT be (a bare `Date.now()` comparison used inline, un-probed, would drift silently).
+  {
+    const beforeDeadline = !isPastBootstrapDeadline(new Date('2026-09-12T00:00:00Z'));
+    const afterDeadline = isPastBootstrapDeadline(new Date('2027-01-01T00:00:00Z'));
+    record(6, 'the dated bootstrap floor tolerates unset before the deadline, refuses after it', 'pass', beforeDeadline && afterDeadline, {
+      beforeDeadline,
+      afterDeadline,
+    });
+  }
+
   return results;
 }
 
-const PROBE_FLOOR = 5;
+const PROBE_FLOOR = 6;
 
 function selftest() {
   const results = runProbes();
