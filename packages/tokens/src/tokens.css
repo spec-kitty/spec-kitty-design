@@ -21,7 +21,15 @@
   --sk-color-purple-bg:     #1E1A2E;   /* deep purple surface for v2.x section banners */
   --sk-color-green:         #8FCB8F;   /* checkmark / success / "by the numbers" */
   --sk-color-green-bg:      #15241A;   /* dark green surface behind numbers banner */
-  --sk-color-red:           #E97373;   /* validation errors */
+  /* Brand red — DECORATIVE AND GRAPHIC ONLY, and deliberately dark-only with no light override.
+     Its live consumers are ribbon-card's fill and decorative border and transition-matrix's
+     blocked-row graphic. It is NOT the validation colour: this comment used to say "validation
+     errors" and that is exactly how #350 happened — an author greps for the error colour, lands
+     here, and writes a token with no light value into a light-theme boundary, silently. For
+     validation use `--sk-fg-error` (L211/L459, text, 4.5:1) or `--sk-border-control-invalid`
+     (L251/L472, non-text boundary, 3:1 and never less visible than the resting boundary).
+     The obligations its own remaining consumers carry are unguarded and tracked in #398. */
+  --sk-color-red:           #E97373;
   --sk-color-red-soft:      #F0A0A0;
   --sk-color-sage:          #4F8F4F;   /* heading sage on cream (light-mode only) */
   --sk-color-sage-deep:     #3D7A3D;   /* hover / pressed — AND the light-mode --sk-color-accent
