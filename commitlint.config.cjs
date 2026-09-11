@@ -97,6 +97,37 @@ const SPEC_KITTY_AUTO_COMMIT_PATTERNS = [
   // than left open: an unanchored /^op\(/ would exempt anything starting with `op(` from EVERY
   // rule, which is the trap the `chore(spec-kitty)` comment above records.
   (msg) => /^op\([a-z][a-z0-9-]*\): [a-z][a-z-]* \[[0-9A-Z]{6,}\]\s*(\n|$)/.test(msg),
+  // spec-kitty's own `spec-kitty agent tracer-append` auto-commit (append_tracer_finding,
+  // specify_cli/retrospective/tracer_writer.py:277). Neither `tracer` nor `retrospective` is in
+  // scope-enum below, and this message was not covered by any pattern above (#420) -- the same
+  // class as the `chore(spec-kitty)` / `op(...)` entries: a CLI-authored, non-conventional
+  // message this project does not control.
+  //
+  // Closed over TRACER_CATEGORIES' real three values (`tooling-friction` / `approach` /
+  // `design-decisions`, tracer_writer.py's own vocabulary constant -- read from source, not
+  // guessed), never an open `[a-z-]+` category class, and the mission-slug tail matches the
+  // `-01` + >=6 uppercase-alphanumeric suffix every neighbouring pattern in this file already
+  // binds to. An unanchored /^chore\(tracer\):/ or an open category class would exempt any
+  // commit with that scope from EVERY rule -- the trap the `chore(spec-kitty)` comment above
+  // records. Anchored to end-of-LINE like its siblings.
+  (msg) =>
+    /^chore\(tracer\): append (?:tooling-friction|approach|design-decisions) finding for [a-z0-9]+(?:-[a-z0-9]+)*-01[A-Z0-9]{6,}\s*(\n|$)/.test(
+      msg,
+    ),
+  // spec-kitty's own `spec-kitty retrospect create` auto-commit
+  // (specify_cli/cli/commands/retrospect.py:431, `_maybe_auto_commit`). Same gap and same class
+  // as the tracer-append entry above (#420). Bound to the full mission-slug shape, never `\S+`,
+  // and anchored to end-of-LINE.
+  (msg) =>
+    /^chore\(retrospective\): author retrospective for [a-z0-9]+(?:-[a-z0-9]+)*-01[A-Z0-9]{6,}\s*(\n|$)/.test(
+      msg,
+    ),
+  // spec-kitty's own `spec-kitty retrospect backfill` auto-commit
+  // (specify_cli/cli/commands/retrospect.py:845, the len(created)-records summary commit). `\d+`
+  // bounds the count to digits only -- never `\S+`, which would also match a non-numeric or
+  // empty tail -- and the exact plural noun phrase is fixed, matching how every sibling pattern
+  // in this file closes over the CLI's literal wording rather than a loose approximation of it.
+  (msg) => /^chore\(retrospective\): backfill \d+ retrospective records\s*(\n|$)/.test(msg),
 ];
 
 module.exports = {
