@@ -145,7 +145,7 @@ git checkout -b mission/<slug>
 
 If you are resuming in an existing clone: `git checkout train/elements-first && git pull --ff-only` first, then branch.
 
-Never branch from `main`, and never PR into `main` — the train lands on `main` once, at the end, by the operator.
+Never branch from `main`, and never PR into `main` — the train lands on `main` once, at the end, by the operator. (A third branch, `develop`, is now part of the picture too — see [`branch-model.md`](./branch-model.md) for the full three-branch model; this loop's mission PRs still target `train/elements-first` only.)
 
 ## 4. Drive
 
