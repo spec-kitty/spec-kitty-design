@@ -1,0 +1,14 @@
+{
+  "created_at": "2026-09-11T21:52:46.136367+00:00",
+  "flattened": false,
+  "friendly_name": "mutation harness budget",
+  "mission_id": "01M297AX1Q7A8EDGK8SYAZ2NAC",
+  "mission_number": null,
+  "mission_slug": "mutation-harness-budget-01M297AX",
+  "mission_type": "software-dev",
+  "purpose_context": "This mission advances mutation harness budget on mission/mutation-harness-budget so stakeholders can track the work from mission creation onward.",
+  "purpose_tldr": "mutation harness budget",
+  "slug": "mutation-harness-budget-01M297AX",
+  "target_branch": "mission/mutation-harness-budget",
+  "topology": "single_branch"
+}
