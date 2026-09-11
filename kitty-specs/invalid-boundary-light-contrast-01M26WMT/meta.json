@@ -1,0 +1,14 @@
+{
+  "created_at": "2026-09-11T00:07:27.674917+00:00",
+  "flattened": false,
+  "friendly_name": "invalid boundary light contrast",
+  "mission_id": "01M26WMT5TCZ633H83T9MX9TP7",
+  "mission_number": null,
+  "mission_slug": "invalid-boundary-light-contrast-01M26WMT",
+  "mission_type": "software-dev",
+  "purpose_context": "This mission advances invalid boundary light contrast on mission/invalid-boundary-light-contrast so stakeholders can track the work from mission creation onward.",
+  "purpose_tldr": "invalid boundary light contrast",
+  "slug": "invalid-boundary-light-contrast-01M26WMT",
+  "target_branch": "mission/invalid-boundary-light-contrast",
+  "topology": "single_branch"
+}
