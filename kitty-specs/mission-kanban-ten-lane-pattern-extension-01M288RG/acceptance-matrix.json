@@ -17,11 +17,11 @@
     {
       "criterion_id": "FR-002",
       "description": "Verify FR-002 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "proof_type": "seam test",
+      "evidence": "head 4f301f83; sk-mission-kanban-ten-lane-pattern.spec.ts [T002] extension keys = copy/format/routes/stress/tones/unverifiedOverlays, no route strings; source imports MISSION_KANBAN_FIXTURE from ./mission-kanban.stories.js; [T006] only WP03 (overlay ref) and WP99 (guard) literals.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T13:44:30.535176+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
