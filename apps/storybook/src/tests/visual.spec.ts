@@ -1213,6 +1213,72 @@ test('SK-checkbox-choice-group forced colors — visual baseline', async ({ page
   });
 });
 
+const radioChoiceGroupStory = async (
+  page: Page,
+  id: string,
+  viewport: { width: number; height: number } = { width: 720, height: 640 },
+): Promise<Locator> => {
+  await page.setViewportSize(viewport);
+  await page.goto(`/iframe.html?id=form-skradiochoicegroup-html--${id}&viewMode=story`);
+  const target = page.locator('[data-radio-choice-group-story-frame]').first();
+  await target.waitFor({ state: 'visible', timeout: 20000 });
+  await expect(target.locator('fieldset.sk-radio-choice-group')).toBeVisible();
+  return target;
+};
+
+const radioChoiceGroupVisuals = [
+  ['default-dark', 'sk-radio-choice-group-default-dark.png', { width: 1024, height: 720 }],
+  ['light-mode', 'sk-radio-choice-group-light.png', { width: 1024, height: 720 }],
+  ['two-choice', 'sk-radio-choice-group-two-choice.png', { width: 720, height: 400 }],
+  ['required-invalid', 'sk-radio-choice-group-required-invalid.png', { width: 720, height: 400 }],
+  ['disabled-option', 'sk-radio-choice-group-disabled.png', { width: 720, height: 480 }],
+  ['disabled-group', 'sk-radio-choice-group-disabled-group.png', { width: 720, height: 400 }],
+  ['narrow', 'sk-radio-choice-group-narrow.png', { width: 390, height: 844 }],
+  ['long-content', 'sk-radio-choice-group-long-content.png', { width: 390, height: 844 }],
+  ['rtl', 'sk-radio-choice-group-rtl.png', { width: 720, height: 480 }],
+] as const;
+
+for (const [id, snapshot, viewport] of radioChoiceGroupVisuals) {
+  test(`SK-radio-choice-group ${id} — visual baseline`, async ({ page }) => {
+    const target = await radioChoiceGroupStory(page, id, viewport);
+    const geometry = await page.evaluate(() => {
+      const scroller = document.scrollingElement ?? document.documentElement;
+      return {
+        documentScrollWidth: scroller.scrollWidth,
+        viewportWidth: document.documentElement.clientWidth,
+      };
+    });
+    expect(geometry.documentScrollWidth).toBeLessThanOrEqual(geometry.viewportWidth);
+    await expect(target).toHaveScreenshot(snapshot, {
+      threshold: 0.02,
+      maxDiffPixelRatio: 0.02,
+    });
+  });
+}
+
+test('SK-radio-choice-group focus — visual baseline', async ({ page }) => {
+  const target = await radioChoiceGroupStory(page, 'focus-states');
+  const control = target.locator('.sk-radio-choice-group__control:not(:checked)').first();
+  await control.focus();
+  await expect(control).toBeFocused();
+  await expect(target).toHaveScreenshot('sk-radio-choice-group-focus.png', {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+  });
+});
+
+test('SK-radio-choice-group forced colors — visual baseline', async ({ page }) => {
+  await page.emulateMedia({ forcedColors: 'active' });
+  const target = await radioChoiceGroupStory(page, 'forced-colors');
+  const control = target.locator('.sk-radio-choice-group__control:not(:disabled)').first();
+  await control.focus();
+  await expect(control).toBeFocused();
+  await expect(target).toHaveScreenshot('sk-radio-choice-group-forced-colors.png', {
+    threshold: 0.02,
+    maxDiffPixelRatio: 0.02,
+  });
+});
+
 const segmentedChoiceStory = async (
   page: Page,
   id: string,

@@ -1,0 +1,14 @@
+{
+  "created_at": "2026-09-10T18:26:12.413590+00:00",
+  "flattened": false,
+  "friendly_name": "connector radio choice group",
+  "mission_id": "01M2693YSXSN1HD1DAQMAZ5WA2",
+  "mission_number": null,
+  "mission_slug": "connector-radio-choice-group-01M2693Y",
+  "mission_type": "software-dev",
+  "purpose_context": "This mission advances connector radio choice group on mission/connector-radio-choice-group so stakeholders can track the work from mission creation onward.",
+  "purpose_tldr": "connector radio choice group",
+  "slug": "connector-radio-choice-group-01M2693Y",
+  "target_branch": "mission/connector-radio-choice-group",
+  "topology": "single_branch"
+}
