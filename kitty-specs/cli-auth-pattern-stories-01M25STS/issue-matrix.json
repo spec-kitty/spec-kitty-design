@@ -72,6 +72,18 @@
       "verdict": "deferred-with-followup",
       "wp": "WP01"
     },
+    "#320": {
+      "evidence_ref": "#320's .sk-button--danger-secondary landed on train/elements-first before IC-06; verified directly (grep -n danger-secondary packages/styles/src/button/sk-button.css) and consumed by Story 2's Deny action in cli-auth.stories.ts (commit 6ac345b9), not forked.",
+      "fr": null,
+      "nfr": null,
+      "repo": null,
+      "sc": null,
+      "scope": null,
+      "source_file": null,
+      "title": null,
+      "verdict": "verified-already-fixed",
+      "wp": "WP01"
+    },
     "#321": {
       "evidence_ref": "#321's --sk-border-control contrast fix landed on train/elements-first before IC-06; consumed by Story 1 and verified by a real, falsifiable contrast assertion in sk-cli-auth-pattern.spec.ts (fed the pre-#321 color pair as a companion red case).",
       "fr": null,
