@@ -1,7 +1,7 @@
 {
   "rows": {
     "#420": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "Merged prior to this mission; referenced only as precedent for the chore(spec-kitty) allowlist discipline (commitlint.config.cjs lines documenting chore(tracer)/chore(retrospective)). Not touched by this mission's WP01.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -9,7 +9,7 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
+      "verdict": "verified-already-fixed",
       "wp": null
     },
     "#422": {
