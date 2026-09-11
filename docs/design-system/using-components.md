@@ -1402,11 +1402,16 @@ in route mode) when the row is current, and **entirely absent** — never `aria-
 when it is not. `.sk-action-row--flush` and `.sk-action-row--card` are the same optional modifier
 classes the shadow element reflects from its `presentation`/`layout` attributes.
 
-**The wrapper's CSS is documented here, not shipped by any `@spec-kitty/styles` file yet
-(#309/#310).** `sk-action-row.css` already carries this exact instruction in its own header
-comment; the copy below is pinned word-for-word against it by
-`fixtures/elements-behaviour/src/sk-action-row.test.ts`, so the two cannot silently diverge.
-Author it yourself, alongside the built `sk-action-row.css`, until #309 lands:
+**The wrapper's CSS now SHIPS, generated (#309), and a static consumer links it instead of
+`sk-action-row.css`:**
+
+```html
+<link rel="stylesheet" href="@spec-kitty/styles/action-row/static/sk-action-row.static.css">
+```
+
+That file is the whole sheet with `:host` rewritten onto `.sk-action-row-host`, in the same source
+order — so link it **instead of** `sk-action-row.css`, never in addition to it, or every
+declaration arrives twice at two different weights. The rule it emits is:
 
 ```css
 .sk-action-row-host {
@@ -1416,8 +1421,24 @@ Author it yourself, alongside the built `sk-action-row.css`, until #309 lands:
 }
 ```
 
-Do **not** move `container-type` onto `.sk-action-row` itself — measured in `ADR-15`, that
-collapse makes the row's own `@container (max-width: 400px)` reflow rule silently stop firing.
+The copy above is pinned against the generated file by
+`fixtures/elements-behaviour/src/sk-action-row.test.ts`, so this page and the package cannot
+silently diverge. Do **not** move `container-type` onto `.sk-action-row` itself — measured in
+`ADR-15`, that collapse makes the row's own `@container (max-width: 400px)` reflow rule silently
+stop firing.
+
+**One thing the static form does NOT reproduce, and it is a ruled limit rather than a defect
+(ADR-15's 2026-09-11 amendment, #375).** `:host` declarations sit in the element's inner tree, so
+*any* document rule matching `<sk-action-row>` beats them at any weight in any order. On
+`.sk-action-row-host` they are ordinary document declarations. Measured, chromium and firefox
+identical: `sk-action-row { display: flex }` at (0,0,1) **beats** the element's `:host`, and the
+identical `div { display: flex }` at the same (0,0,1) **loses** to `.sk-action-row-host`. To
+override a wrapper declaration you need specificity **strictly higher** than the generated rule
+declaring it — `.sk-action-row-host` is (0,1,0), a `.sk-x-host.sk-x-host--<axis>` modifier rule is
+(0,2,0) — or the same specificity in a **later** stylesheet, which your bundler may decide rather
+than you. `scripts/check-static-form-equivalence.mjs` holds the two forms equal under no consumer
+pressure and pins this divergence by verdict; the generated file's own header states the boundary
+for each component.
 
 Generate this markup with `actionRowStaticHtml(opts, content)` from
 `@spec-kitty/elements`'s `sk-action-row.markup.ts` (or copy the generated

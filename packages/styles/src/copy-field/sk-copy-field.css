@@ -5,21 +5,21 @@
    `:host { container-type: inline-size }` below is the sole container establishing the
    `@container (max-inline-size: 20rem)` reflow further down. ADR-15 ruled this construct kind
    (a host-owned container-type) generable as a static form, but only in a TWO-ELEMENT shape,
-   and #309 — the generator that would emit it — is unbuilt. Nothing in @spec-kitty/styles
-   defines `.sk-copy-field-host` today. So a server-rendered consumer authors both halves:
+   and #309 has now generated it. A server-rendered consumer links
+
+       @spec-kitty/styles/copy-field/static/sk-copy-field.static.css
+
+   INSTEAD OF this file, never in addition to it — it carries every rule below in the same order
+   with `:host` rewritten onto `.sk-copy-field-host` — and authors the two-element markup:
 
        <div class="sk-copy-field-host">
          <div class="sk-copy-field"> ... </div>
        </div>
 
-       .sk-copy-field-host {
-         box-sizing: border-box;
-         display: block;
-         container-type: inline-size;
-         inline-size: 100%;
-         max-inline-size: 100%;
-         min-inline-size: 0;
-       }
+   The generated wrapper rule carries this sheet's whole `:host` set; it is not restated here,
+   because a copy in a comment is a second source of record for a generated rule. #310 holds the
+   generated form rendered-equal to the shadow form on every declared outcome in both engines,
+   this component included — ADR-15 ruled on it without measuring it, and that is no longer true.
 
    THE WRAPPER CARRIES THIS SHEET'S WHOLE `:host` DECLARATION SET, as written above — not
    `container-type` alone, and not a list copied from another component. Measured on
@@ -31,10 +31,26 @@
    nothing, while `.sk-copy-field`'s descendants kept querying correctly — most of the sheet
    keeps working, which is what makes the defect quiet.
 
-   This component was not itself probed; ADR-15's measurement used sk-app-shell and
-   sk-action-row, and the mechanism is a property of CSS containment rather than of any one
-   component. ADR-15 and #309/#310 hold the outcome tables. This comment adds no rule and
-   changes none. */
+   OVERRIDING A WRAPPER DECLARATION IS NOT THE SAME AS OVERRIDING `:host` — A RULED LIMIT (#375).
+   `:host` declarations sit in the element's INNER tree, and under CSS Cascade's tree-order sort a
+   normal outer-tree declaration wins BEFORE specificity or source order is consulted. So any
+   document rule matching `<sk-copy-field>` beats `:host` at any weight, in any order. On
+   `.sk-copy-field-host` the same declarations are ordinary document declarations. Measured,
+   chromium and firefox identical: `sk-action-row { display: flex }` at (0,0,1) beats `:host`,
+   while `div { display: flex }` at the SAME (0,0,1) loses to `.sk-action-row-host`; and
+   `sk-action-row { container-type: normal }` destroys the element's container while the same
+   declaration on the wrapper, at equal weight authored first, does not. The static form therefore
+   reproduces `:host`'s LAYOUT and HARDENS its cascade position. To change a wrapper declaration a
+   consumer needs specificity STRICTLY HIGHER than the generated rule that declares it — or the
+   same specificity in a LATER stylesheet — computed from that rule rather than from a number
+   quoted here: `.sk-copy-field-host` is (0,1,0), and a modifier rule
+   `.sk-copy-field-host.sk-copy-field-host--<axis>` is (0,2,0). `:where()` on the wrapper
+   was measured as a candidate and is deliberately not emitted; the generated sheet's own header
+   records why.
+
+   ADR-15's own measurement used sk-app-shell and sk-action-row and did not probe this component;
+   expected-static-form.json now does, on eight scenarios per engine. This comment adds no rule
+   and changes none. */
 
 :host {
   box-sizing: border-box;

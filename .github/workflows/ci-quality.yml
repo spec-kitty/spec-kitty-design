@@ -306,6 +306,20 @@ jobs:
         run: node scripts/build-element-markup.mjs --check
       - name: "[ENFORCED] ::part() ratchet (C-007, SC-013)"
         run: node scripts/check-part-ratchet.mjs
+      # #309/#310, ADR-15 kinds 1 and 2. The generator's own rewrite table runs BEFORE the drift
+      # check, for the reason every other pair in this job records: a generator observed green on
+      # a healthy tree has demonstrated nothing about what its rewrite refuses, and this one
+      # refuses four `:host(...)` spellings whose wrong rewrite is SILENT — the class simply never
+      # matches and the rule vanishes.
+      - name: "[ENFORCED] Static-form rewrite probe table (#309, ADR-15 §1)"
+        run: node scripts/build-static-form-css.mjs --selftest
+      - name: "[ENFORCED] Generated light-DOM static forms are current (#309, ADR-15 kinds 1 and 2)"
+        run: node scripts/build-static-form-css.mjs --check
+      # The SHAPE half of #310. The rendered half needs a browser and a real build, so it lives in
+      # `release-gate`; this arm is what catches a wrapper that exists and is missing declarations,
+      # and `container-type` landing on a class the sheet's own `@container` block also styles.
+      - name: "[ENFORCED] Static form is a wrapper carrying the whole `:host` set (#310, ADR-15)"
+        run: node scripts/check-static-form-equivalence.mjs --static
       # #77. Two stories shipped `<div data-theme="light">`, which activates nothing — the
       # token package anchors light on `:root[data-theme="light"], .sk-light` and `:root` only
       # matches <html>, so both rendered the DARK palette on a light ground with every gate
@@ -611,7 +625,21 @@ jobs:
         run: node scripts/check-vue-packed-types.mjs
       - name: "[ENFORCED] Sizes and the SRI hash match the built artifacts (FR-005, SC-007, NFR-004)"
         run: node scripts/measure-elements-sizes.mjs --check
-      - run: npx playwright install chromium
+      - run: npx playwright install chromium firefox
+      # #310's RENDERED half, in this job because it needs the real built artifacts this job
+      # already produces: the shadow side is `packages/elements/dist/elements.js` (ADR-10 §2's
+      # self-contained classic script) and the static side is resolved through
+      # `@spec-kitty/styles`'s own export map, so what a probe page links is literally what an
+      # installed consumer links.
+      #
+      # The PROBE TABLE FIRST, like the release graph's above. It renders four deliberately broken
+      # static forms — the collapsed transform, the abbreviated wrapper, a `display: contents`
+      # wrapper, and #375's `:where()` candidate — and asserts each is rejected or accepted as
+      # recorded. A gate that has only ever seen the correct form has demonstrated nothing.
+      - name: "[ENFORCED] The static-form gate's red-first probe table (#310, #375)"
+        run: node scripts/check-static-form-equivalence.mjs --selftest
+      - name: "[ENFORCED] Generated static form renders equal to the shadow form (#310, ADR-15)"
+        run: node scripts/check-static-form-equivalence.mjs
       # The probe BEFORE the check. The graph has no network dependency at all now, so this
       # probe's green is indistinguishable from a probe that cannot see — --selftest plants a page
       # that does reach off-machine and requires the probe to red on it. See the script's header

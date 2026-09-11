@@ -19,6 +19,7 @@ import {
 } from '../../../packages/elements/src/action-row/sk-action-row.markup.js';
 import { userEvent } from 'vitest/browser';
 import actionRowCss from '../../../packages/styles/src/action-row/sk-action-row.css?raw';
+import actionRowStaticCss from '../../../packages/styles/src/action-row/static/sk-action-row.static.css?raw';
 import usingComponentsDocs from '../../../docs/design-system/using-components.md?raw';
 import { assertThemesDiffered, contrast } from './contrast.js';
 import { installTokenSheet } from './token-sheet.js';
@@ -868,17 +869,25 @@ test('the public attributes are exactly the four controlled inputs plus route an
 // ============================================================================================
 
 /**
- * THE ANTI-DRIFT PIN (T004). `sk-action-row.css`'s header comment documents the literal
- * `.sk-action-row-host` block a consumer must author until #309 generates it. This mission ships
- * TWO further copies — this constant, and the one in `docs/design-system/using-components.md`'s
- * "Action row static form" section — and BOTH are asserted equal to the sheet's own text below,
- * by the same comparator, so neither can silently diverge from it.
+ * THE ANTI-DRIFT PIN (T004), REPOINTED BY #309 AT THE ARTIFACT THAT NOW SHIPS.
  *
- * A review-cycle-1 finding on this WP caught the doc copy claiming to be "pinned word-for-word"
- * while nothing actually read `using-components.md` — the test compared only this local constant
- * against the sheet, and the claim about the SECOND copy was simply false, undetected because the
- * two happened to already agree. Fixed by making the claim true rather than retracting it: the
- * doc's own block is now extracted and compared the same way.
+ * When #307 wrote this, no package stylesheet defined `.sk-action-row-host` — the authoritative
+ * text was `sk-action-row.css`'s own header comment, and this test held two further copies equal
+ * to it (this constant, and `docs/design-system/using-components.md`'s "Action row static form"
+ * section). #309 changed the premise rather than the need: the rule is now GENERATED into
+ * `packages/styles/src/action-row/static/sk-action-row.static.css`, so a comment is no longer a
+ * source of record for it and the generated sheet is.
+ *
+ * So the comparison is repointed, not retired. The generated rule is authoritative; this constant
+ * and the doc copy are held equal to IT. What #307's pin covered that #310's gate does not, and
+ * why this test stays: #310 compares the generated static form against the shadow form, and would
+ * be perfectly green with a documentation page telling consumers to author something else
+ * entirely. This is the only thing in the repository comparing what the docs SAY against what the
+ * package SHIPS.
+ *
+ * A review-cycle-1 finding on the original WP caught the doc copy claiming to be "pinned
+ * word-for-word" while nothing actually read `using-components.md`. That claim is still true here
+ * and still checked below.
  */
 const LOCAL_ACTION_ROW_HOST_CSS = `
   .sk-action-row-host {
@@ -907,10 +916,19 @@ const hostHostBlockDeclarations = (css: string, source: string): string[] => {
     .sort();
 };
 
-test('[T004][FR-004][FR-005] the locally-authored AND the using-components.md .sk-action-row-host blocks are textually equal (order-insensitive) to sk-action-row.css\'s header comment', () => {
-  const documented = hostHostBlockDeclarations(actionRowCss, "sk-action-row.css's header comment");
+test('[T004][FR-004][FR-005] the locally-authored AND the using-components.md .sk-action-row-host blocks are textually equal (order-insensitive) to the GENERATED static form\'s rule (#309)', () => {
+  const documented = hostHostBlockDeclarations(
+    actionRowStaticCss,
+    'the generated packages/styles/src/action-row/static/sk-action-row.static.css',
+  );
   const local = hostHostBlockDeclarations(LOCAL_ACTION_ROW_HOST_CSS, 'this test\'s own LOCAL_ACTION_ROW_HOST_CSS');
   expect(local).toEqual(documented);
+
+  // NOT re-asserted here: that the generated rule equals `sk-action-row.css`'s own `:host` set.
+  // `scripts/check-static-form-equivalence.mjs --static` owns that comparison as an ENFORCED
+  // step, per component and against each sheet's own `:host`. A second copy of it extracted from
+  // raw text in this file would have to re-solve the problem of telling a rule from a rule quoted
+  // inside a header comment, which is exactly the class of near-miss this pin already records.
 
   // THE SECOND COPY, actually read and compared — not merely claimed. using-components.md's
   // "Action row static form" section carries the same block in a fenced ```css``` example; this
@@ -943,12 +961,15 @@ const installActionRowCss = (): (() => void) => {
   return () => style.remove();
 };
 
-/** Installs the pinned `.sk-action-row-host` block ON TOP OF the real sheet — exactly what a
- *  real consumer links today per `sk-action-row.css`'s own header comment and FR-005 (no
- *  `.sk-action-row-host` rule ships from any package stylesheet in this mission). */
+/** Installs the GENERATED light-DOM static form — exactly what a static consumer links today
+ *  (`@spec-kitty/styles/action-row/static/sk-action-row.static.css`, #309), instead of the
+ *  authored sheet rather than in addition to it. #307 installed a hand-authored
+ *  `.sk-action-row-host` block on top of `sk-action-row.css` because no such artifact existed;
+ *  installing the real one is what makes the parity assertions below a statement about the
+ *  package rather than about this file's own constant. */
 const installActionRowHostAndCss = (): (() => void) => {
   const style = document.createElement('style');
-  style.textContent = `${LOCAL_ACTION_ROW_HOST_CSS}\n${actionRowCss}`;
+  style.textContent = actionRowStaticCss;
   document.head.append(style);
   return () => style.remove();
 };
