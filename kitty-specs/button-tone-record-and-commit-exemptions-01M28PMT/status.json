@@ -21,6 +21,7 @@
       "actor": "user",
       "agent_profile": "__resolved_profile_absent__",
       "agent_profile_version": "__resolved_profile_version_absent__",
+      "assignee": "claude",
       "force_count": 0,
       "lane": "in_progress",
       "last_event_id": "01M28PZ8A151XNHFFJ46FJ40Y2",
