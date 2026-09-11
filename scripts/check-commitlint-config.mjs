@@ -19,7 +19,6 @@ const generatedMessages = [
   'chore(spec-kitty): status transition batch WP04',
   'chore(spec-kitty): inner-state annotation WP04\n\nDurable status evidence.',
   'chore(spec-kitty): record WP04 remediation state',
-  'chore(spec-kitty): materialize WP01 approval note into status.json',
   'chore(acceptance): record FR-001=pass for team-overview-shell-elements-01M1S8R8',
   'chore(acceptance): record NFR-008=pending for team-overview-shell-elements-01M1S8R8',
   'chore(acceptance): register negative invariant NI-001 for team-overview-shell-elements-01M1S8R8',
@@ -52,12 +51,6 @@ const nearMisses = [
   'chore(spec-kitty): status transition batch WP04 and bypass checks',
   'chore(spec-kitty): inner-state annotation package-04',
   'chore(spec-kitty): record WP04 arbitrary state',
-  // The materialize-approval-note exemption is bounded to the exact observed verb phrase plus
-  // the `WP\d+` token, not `\S+` and not a generalized category — each of these is what a
-  // looser version of the pattern would have let through.
-  'chore(spec-kitty): materialize WP01 approval note into settings.json',
-  'chore(spec-kitty): materialize approval note into status.json',
-  'chore(spec-kitty): materialize WP01 approval note into status.json and bypass checks',
   'chore(acceptance): record FR-001=blocked for team-overview-shell-elements-01M1S8R8',
   'chore(acceptance): record FR-1=pass for team-overview-shell-elements-01M1S8R8',
   'chore(acceptance): register negative invariant NI-1 for team-overview-shell-elements-01M1S8R8',
