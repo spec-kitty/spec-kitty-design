@@ -1,7 +1,7 @@
 {
-  "event_count": 4,
-  "last_event_id": "01M28BP6E7DWGV26G767X0C0SR",
-  "materialized_at": "2026-09-11T13:49:36.072007+00:00",
+  "event_count": 5,
+  "last_event_id": "01M28BP7P06GYBEMB2FR7KMNT4",
+  "materialized_at": "2026-09-11T13:49:37.344871+00:00",
   "mission_number": "",
   "mission_slug": "mission-kanban-ten-lane-pattern-extension-01M288RG",
   "mission_type": "software-dev",
@@ -11,9 +11,9 @@
     "canceled": 0,
     "claimed": 0,
     "done": 0,
-    "for_review": 1,
+    "for_review": 0,
     "in_progress": 0,
-    "in_review": 0,
+    "in_review": 1,
     "planned": 0
   },
   "work_packages": {
@@ -24,18 +24,19 @@
       "agent_profile_version": "__resolved_profile_version_absent__",
       "assignee": "claude",
       "force_count": 0,
-      "lane": "for_review",
-      "last_event_id": "01M28BP6E7DWGV26G767X0C0SR",
-      "last_transition_at": "2026-09-11T13:49:36.072007+00:00",
+      "lane": "in_review",
+      "last_event_id": "01M28BP7P06GYBEMB2FR7KMNT4",
+      "last_transition_at": "2026-09-11T13:49:37.344871+00:00",
       "model": "__resolved_model_absent__",
       "notes": [
         "Claimed by the #395 mission driver (Claude Opus 5); single_branch lane is the mission branch itself.",
-        "Implementation under way: sibling ten-lane module, focused suite, visual block, ratchet."
+        "Implementation under way: sibling ten-lane module, focused suite, visual block, ratchet.",
+        "Implementation, focused suite, twelve CI-harvested baselines and ratchet complete on the mission branch (0c805446..4f301f83); reviewed in https://github.com/spec-kitty/spec-kitty-design/pull/411#issuecomment-5635377301."
       ],
       "provider": "__resolved_provider_absent__",
       "role": "implementer",
-      "shell_pid": 1647092,
-      "shell_pid_created_at": "1789133351.75",
+      "shell_pid": 1855357,
+      "shell_pid_created_at": "1789134575.0",
       "subtasks": {
         "T001": "done",
         "T002": "done",
