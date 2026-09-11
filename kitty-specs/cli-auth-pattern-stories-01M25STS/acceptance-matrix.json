@@ -157,11 +157,11 @@
     {
       "criterion_id": "FR-016",
       "description": "Verify FR-016 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
+      "proof_type": "manual_inspection",
+      "evidence": "16 baselines harvested by reviewer from PR #409's visual-regression run (34596232715, job 103252824447, artifact visual-regression-diffs, whole-zip sha256 08e545a63e8f40b4ea8230ae778f53ac261180950189044054c0eef58a5015ab verified byte-identical to CI's own logged upload digest). Each PNG's content independently verified against its own sha1-hash filename inside the artifact (Playwright blob-storage convention: all 16 self-consistent, zero mismatches). Each PNG opened and visually confirmed to show its claimed story/theme/viewport (dark genuinely dark, light genuinely light, forced-colors genuinely high-contrast bordered, zoom genuinely 2x and unclipped, 390px genuinely narrow with equal gutters) before staging -- none shot locally. Committed at apps/storybook/src/tests/visual.spec.ts-snapshots/sk-cli-auth-*-chromium-linux.png (16 files) and pushed (commit fb6c495d). PENDING, not pass, until CI's visual-regression job at the new head confirms green -- not yet observed by reviewer as of this verdict.",
       "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "verified_by": "reviewer-renata",
+      "verified_at": "2026-09-11T12:09:30.377031+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
