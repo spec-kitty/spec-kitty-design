@@ -1,6 +1,6 @@
 ---
 work_package_id: WP01
-title: "Fix #422's CLI-auth zoom emulation (real halved-viewport zoom, breakpoint read from source), sweep visual.spec.ts for the same defect, and close the third chore(spec-kitty) commitlint gap"
+title: "Fix #422's CLI-auth zoom emulation (real halved-viewport zoom, breakpoint read from source), sweep visual.spec.ts for the same defect [commitlint half WITHDRAWN post-implementation — false premise, see history]"
 dependencies: []
 requirement_refs:
 - FR-001
@@ -8,18 +8,12 @@ requirement_refs:
 - FR-003
 - FR-004
 - FR-005
-- FR-006
-- FR-007
 - FR-008
 - NFR-001
-- NFR-002
 - NFR-003
 - C-001
-- C-002
-- C-003
 - C-004
 - C-005
-- C-006
 planning_base_branch: mission/zoom-emulation-and-cli-commit-scopes
 merge_target_branch: mission/zoom-emulation-and-cli-commit-scopes
 branch_strategy: Planning artifacts for this mission were generated on mission/zoom-emulation-and-cli-commit-scopes. During /spec-kitty.implement this WP may branch from a dependency-specific base, but completed changes must merge back into mission/zoom-emulation-and-cli-commit-scopes unless the human explicitly redirects the landing branch.
@@ -40,13 +34,14 @@ history:
 - timestamp: '2026-09-11T19:35:00Z'
   agent: system
   action: WP authored by hand following the visual-evidence-gate-integrity-01M28PTY precedent, per instruction that spec-kitty tasks --json overwrites hand-authored tasks.md prose
+- timestamp: '2026-09-11T22:10:00Z'
+  agent: system
+  action: 'CORRECTION: the commitlint half (Part C/D, T005-T007 below, FR-006/FR-007/NFR-002/C-002/C-003/C-006) is WITHDRAWN. The mission brief asserted chore(spec-kitty): materialize WP01 approval note into status.json was CLI-emitted; this WPs own source audit could not re-derive it from the installed CLI despite an exhaustive read, and said so rather than shipping unverified coverage. The coordinator then established the true origin: spec-kitty safe-commit --message/-m is a caller-supplied argument -- the message was hand-authored by a sibling missions implementer and passed to safe-commit, never CLI-emitted. Exempting it would have weakened the exact rule #420 exists to uphold. commitlint.config.cjs and scripts/check-commitlint-config.mjs were reverted to their pre-mission (9c269b3c) content, confirmed byte-identical via diff. The MissionStatusAggregate.save(*, operation: str) finding (FR-008) is kept, relocated to research.md as documentation only, per the coordinators explicit instruction. Mission is #422 only.'
 authoritative_surface: apps/storybook/src/tests/visual.spec.ts
 create_intent: []
 execution_mode: code_change
 owned_files:
 - apps/storybook/src/tests/visual.spec.ts
-- commitlint.config.cjs
-- scripts/check-commitlint-config.mjs
 tags: []
 tracker_refs: []
 ---
@@ -166,7 +161,28 @@ only by CSS-zoom magnification. Leave — with the classification recorded in th
 — any site that already discloses it is a magnification-only stress probe, or that provably has
 no breakpoint for the mechanism difference to matter to.
 
-### Part C — Close the third `chore(spec-kitty)` commitlint gap
+### Part C — WITHDRAWN post-implementation: `chore(spec-kitty)` commitlint gap (preserved as historical record; do not re-implement)
+
+> **This part is withdrawn.** The premise below — that `chore(spec-kitty): materialize WP01
+> approval note into status.json` was a CLI-emitted auto-commit — was false. This WP's own
+> source audit (immediately below) could not re-derive that literal message from the installed
+> CLI's source despite reading every relevant call site, and said so rather than shipping
+> unverified coverage. The coordinator then established the true origin: `spec-kitty safe-commit
+> --message`/`-m` is a **caller-supplied, required** argument — the message was hand-authored by
+> a sibling mission's implementer and passed to `safe-commit`, never emitted by the CLI. No
+> #420-class allowlist gap exists. The `commitlint.config.cjs` pattern this Part describes (and
+> Part D's regression coverage for it) were implemented, then **reverted in full** — confirmed
+> byte-identical to `git show 9c269b3c:commitlint.config.cjs` /
+> `:scripts/check-commitlint-config.mjs` via `diff`. The `MissionStatusAggregate.save()` finding
+> below is real and is kept, relocated to `research.md` as documentation only. The text below
+> this note is preserved unedited as the historical record of the (mistaken) work, per this
+> repo's convention of correcting forward rather than erasing — see the WP frontmatter `history`
+> entry and `research.md` for the full correction.
+
+`commitlint.config.cjs`'s `SPEC_KITTY_AUTO_COMMIT_PATTERNS` (search
+`SPEC_KITTY_AUTO_COMMIT_PATTERNS`) currently enumerates exactly four `chore(spec-kitty):` and
+`chore(spec-kitty)`-class shapes (plus the unrelated `chore(tracer)`/`chore(retrospective)`
+pair from #420): `status transition WP\d+`, `status transition batch WP\d+`, `inner-state
 
 `commitlint.config.cjs`'s `SPEC_KITTY_AUTO_COMMIT_PATTERNS` (search
 `SPEC_KITTY_AUTO_COMMIT_PATTERNS`) currently enumerates exactly four `chore(spec-kitty):` and
@@ -223,7 +239,7 @@ correct, not a gap in this config.
 
 **Do not touch `scope-enum`.** Do not write an unanchored `/^chore\(spec-kitty\):/`.
 
-### Part D — Regression coverage for the new pattern
+### Part D — WITHDRAWN along with Part C (preserved as historical record; do not re-implement)
 
 Add to `scripts/check-commitlint-config.mjs`:
 
@@ -256,15 +272,19 @@ failing lint as expected. Record both runs' real output.
       mission report; any sharing #422's defect fixed the same way; Connectors C8's
       breakpoint/CSS-zoom-and-`clientWidth` interaction specifically investigated (not assumed)
       before concluding it needs no fix.
-- [ ] T005: New `chore(spec-kitty)` commitlint pattern added, anchored end-of-line, bound to the
-      exact observed operation text plus `WP\d+`; `scope-enum` untouched; comment documents the
-      source-grounding gap honestly (this pattern rests on the reported real message, not an
-      independently re-derived source match).
-- [ ] T006: `MissionStatusAggregate.save` escape hatch documented as a known, deliberately
-      un-exempted limitation.
-- [ ] T007: `generatedMessages`/`nearMisses` cases added to `check-commitlint-config.mjs`;
-      red-first proof executed and recorded (new generatedMessages case fails before the
-      pattern is added, whole script passes after).
+- [x] T005: **WITHDRAWN.** New `chore(spec-kitty)` commitlint pattern — implemented, then
+      reverted in full once the coordinator established the underlying message was
+      hand-authored and passed to `spec-kitty safe-commit --message`, not CLI-emitted.
+      `commitlint.config.cjs` confirmed byte-identical to its pre-mission (`9c269b3c`) content.
+- [x] T006: `MissionStatusAggregate.save` escape hatch documented as a known, deliberately
+      un-exempted limitation — **relocated** to `research.md` (not a `commitlint.config.cjs`
+      comment, since no pattern exists there for it to sit beside).
+- [ ] T007: **WITHDRAWN.** `generatedMessages`/`nearMisses` cases for the withdrawn pattern —
+      implemented, then reverted in full along with T005; `check-commitlint-config.mjs`
+      confirmed byte-identical to its pre-mission (`9c269b3c`) content and still passes.
+      (Original acceptance text: ~~red-first proof executed and recorded (new generatedMessages
+      case fails before the pattern is added, whole script passes after)~~ — preserved for the
+      historical record; superseded by the revert.)
 - [ ] T008: `npm run quality:lint` run (never `nx run storybook:lint`); `ss -ltnp | grep 6006`
       confirmed clean at hand-off; real command output recorded in the mission report, not
       reasoned about.
