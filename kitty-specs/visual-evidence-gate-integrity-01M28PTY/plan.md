@@ -16,9 +16,11 @@ this repo:
    pattern at every per-test `test.skip(browserName !== 'chromium', ...)` call site in
    `apps/storybook/src/tests/` (31 sites / 18 files), in three surface variants the initial
    grep-based triage did not catch: multi-line-wrapped calls, double-quoted string literals,
-   and both together. Per operator ruling 2026-09-11, the four `test.describe`-level
-   predicate-skip sites in four of those same 18 files also get their own floor, as a
-   standalone test rather than relying on another test in the file to cover the same risk.
+   and both together. Per operator ruling 2026-09-11, the `test.describe`-level
+   predicate-skip sites also get their own floor, as a standalone test rather than relying on
+   another test in the file to cover the same risk — all eight of them, in eight of those
+   same 18 files, corrected from an initial four found by a re-review that itself used a
+   single-line-only scan (see the review-correction note below and in spec.md).
 2. **#367**: `visual.spec.ts` already uses `expect.soft(...).toHaveScreenshot(...)` at 3 call
    sites (the `sk-action-row-html` family). Per operator ruling 2026-09-11, the fix and its
    gate cover EVERY `toHaveScreenshot` call site in the file — not just the 16 tests with 2+
@@ -192,25 +194,28 @@ complexity exception.
 
 ## Scope note — SUPERSEDED by operator ruling 2026-09-11
 
-An earlier draft of this plan left two exclusions here: the four `test.describe`-level
-predicate skips (reasoned as transitively covered by another test elsewhere in the same
-file), and the `for`-loop-executed `toHaveScreenshot` sites (documented as a known gate
-limitation). The operator's directive for this round — *"all work needs to be finished no
-more deferrals, we are here to create features not issues"* — rejected both as deferrals. A
-documented limitation and a follow-up issue are both deferrals; neither was available.
+An earlier draft of this plan left two exclusions here: the `test.describe`-level predicate
+skips (reasoned as transitively covered by another test elsewhere in the same file), and the
+`for`-loop-executed `toHaveScreenshot` sites (documented as a known gate limitation). The
+operator's directive for this round — *"all work needs to be finished no more deferrals, we
+are here to create features not issues"* — rejected both as deferrals. A documented
+limitation and a follow-up issue are both deferrals; neither was available.
 
 Both are now fixed in this WP, under two new implementation concerns:
 
 ### IC-04 — Standalone floor test for each describe-level predicate skip
 
-- **Purpose**: Stop the four `test.describe`-level `test.skip(({ browserName }) => browserName !== 'chromium', ...)`
+- **Purpose**: Stop the `test.describe`-level `test.skip(({ browserName }) => browserName !== 'chromium', ...)`
   predicates from depending on another test elsewhere in the file happening to cover the same
   "renamed/dropped chromium project" risk — a dependency that breaks silently if that other
   coverage is ever deleted, which is the same "a guard holds only because something else
   currently happens to cover it" shape this mission exists to close.
 - **Relevant requirements**: FR-006, NFR-003
-- **Affected surfaces**: `sk-context-nav.spec.ts:262`, `sk-collection.spec.ts:274`,
-  `sk-section-nav.spec.ts:316`, `sk-form-select.spec.ts:101` — one standalone, unconditional
+- **Affected surfaces**: All EIGHT sites — `sk-context-nav.spec.ts:267`,
+  `sk-collection.spec.ts:279`, `sk-section-nav.spec.ts:321`, `sk-form-select.spec.ts:106`,
+  `sk-checkbox-choice-group.spec.ts:181`, `sk-public-header.spec.ts:209`,
+  `sk-segmented-choice.spec.ts:173`, `sk-radio-choice-group.spec.ts:392` — one standalone,
+  unconditional
   `test('the chromium project the describe below depends on still exists', () => { ... })`
   inserted immediately before each `test.describe(...)` call. A bare `expect()` statement
   cannot be placed directly inside the `test.describe(...)` factory body itself (that code
@@ -221,10 +226,22 @@ Both are now fixed in this WP, under two new implementation concerns:
 - **Risks**: A floor test placed INSIDE the skipped describe block would itself be skipped by
   the same predicate on non-chromium projects when the chromium ENGINE (not just the project
   NAME) is still configured under a different project name — so it must be a sibling of the
-  describe, not a child of it. Verified: ran all four floor tests under `--project=chromium
-  --project=firefox --project=webkit` (12/12 passed, confirming unconditional execution), then
-  red-first: renamed `chromium` to `chromium-renamed`, ran the `sk-collection.spec.ts` floor
-  test, observed it fail naming the project list, reverted.
+  describe, not a child of it. Verified: ran all eight floor tests under `--project=chromium
+  --project=firefox --project=webkit` (24/24 passed, confirming unconditional execution), then
+  red-first on two of them (one from the original four, one from the four found on
+  re-review): renamed `chromium` to `chromium-renamed`, ran `sk-collection.spec.ts`'s and
+  `sk-public-header.spec.ts`'s floor tests, observed both fail naming the project list,
+  reverted.
+- **Correction (2026-09-11, WP01 rejected on re-review)**: The first pass of this WP found
+  only four of these eight sites, using `grep -n "test.skip((.*browserName"` — a
+  single-line-only pattern. The other four (`sk-checkbox-choice-group.spec.ts:181`,
+  `sk-public-header.spec.ts:209`, `sk-segmented-choice.spec.ts:173`,
+  `sk-radio-choice-group.spec.ts:392`) wrap the predicate and reason onto their own lines and
+  were missed — the exact same multi-line-blind-spot shape that undercounted the per-test
+  skips earlier in this mission (14 claimed vs. 31 actual). The reviewer's independent
+  enumeration found the correct population of eight; all eight are now fixed, and this plan,
+  spec.md, tasks.md, the WP file, and acceptance-matrix.json were all corrected to state eight
+  rather than leaving the undercount as a permanent record.
 
 ### IC-05 — Flatten the softness gate to "every call site must be soft"
 

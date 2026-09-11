@@ -14,6 +14,7 @@ requirement_refs:
 - NFR-003
 - NFR-004
 - NFR-005
+- NFR-006
 - C-001
 - C-002
 - C-003
@@ -41,6 +42,8 @@ subtasks:
 - T015
 - T016
 - T017
+- T018
+- T019
 phase: Phase 1 - Fix and gate
 history:
 - timestamp: '2026-09-11T19:30:00Z'
@@ -49,6 +52,9 @@ history:
 - timestamp: '2026-09-11T21:00:00Z'
   agent: system
   action: 'Operator ruling: both explicit scope exclusions (describe-level skips, loop-executed screenshots) rejected as deferrals ("all work needs to be finished no more deferrals, we are here to create features not issues"); T012-T017 added to close both in this same WP; T011 superseded'
+- timestamp: '2026-09-11T22:30:00Z'
+  agent: system
+  action: 'WP01 REJECTED on re-review, two High findings: H1 the describe-level sweep was 4/8 (single-line-only scan), H2 the flat softness gate had 3 live parser bypasses (comment before the dot, short lookahead, optional chaining). T018-T019 added to close both.'
 authoritative_surface: apps/storybook/src/tests/
 create_intent: []
 execution_mode: code_change
@@ -88,17 +94,27 @@ found **31 occurrences across 18 files**. Fix the full 31, not the initial 14 �
 carries an explicit operator "no more deferrals" instruction, and the extra 17 sites are the
 same defect, just missed by a grep that was sensitive to formatting it shouldn't have been.
 
-### Part A.1 — ADDENDUM per operator ruling 2026-09-11: the four describe-level skips too
+### Part A.1 — ADDENDUM per operator ruling 2026-09-11: the describe-level skips too
 
-An earlier version of this WP left the four `test.describe`-level
-`test.skip(({ browserName }) => browserName !== 'chromium', ...)` predicates
-(`sk-context-nav.spec.ts:262`, `sk-collection.spec.ts:274`, `sk-section-nav.spec.ts:316`,
-`sk-form-select.spec.ts:101`) unfixed, reasoning that each of those four files already gets
-an unconditional per-test floor elsewhere in the file which transitively covers the same
-risk. The operator rejected this: *"a guard that holds only because something else currently
-happens to cover it"* is the same shape as the defect being fixed — if the per-test floors
-in those files are ever deleted, the describe-level skips silently go unguarded again with
-nothing saying so.
+An earlier version of this WP left the `test.describe`-level
+`test.skip(({ browserName }) => browserName !== 'chromium', ...)` predicates unfixed,
+reasoning that each of those files already gets an unconditional per-test floor elsewhere in
+the file which transitively covers the same risk. The operator rejected this: *"a guard that
+holds only because something else currently happens to cover it"* is the same shape as the
+defect being fixed — if the per-test floors in those files are ever deleted, the
+describe-level skips silently go unguarded again with nothing saying so.
+
+**Correction (WP01 rejected on re-review, H1)**: the first attempt at this fix found only 4
+sites (`sk-context-nav.spec.ts:267`, `sk-collection.spec.ts:279`, `sk-section-nav.spec.ts:321`,
+`sk-form-select.spec.ts:106`), using a single-line-only grep. The reviewer's independent
+enumeration found the true population of **8**: the same 4 plus
+`sk-checkbox-choice-group.spec.ts:181`, `sk-public-header.spec.ts:209`,
+`sk-segmented-choice.spec.ts:173`, `sk-radio-choice-group.spec.ts:392` — all four of which
+wrap the predicate and reason onto their own lines. This is the identical multi-line
+blind-spot shape that undercounted the per-test skips earlier in this same mission (14
+claimed vs. 31 actual). All 8 are now fixed; spec.md (via `spec-kitty spec-commit`) and
+acceptance-matrix.json's FR-006 evidence (via `spec-kitty agent mission acceptance-verdict`)
+were both corrected to state 8, not left recording the undercount.
 
 Fixed by adding, immediately before each `test.describe(...)` call, a standalone,
 unconditional test:
@@ -200,11 +216,12 @@ afterward to confirm the new steps don't desync those checkers' own invariants.
    ideally, a surviving project too — the floor is unconditional). Confirm the floor assertion
    fails with a message naming the guard, NOT a silent skip. Revert the rename and confirm
    `git diff playwright.config.ts` is empty before moving on.
-2. **#401 describe-level floor** (addendum): Run all four new floor tests under
-   `--project=chromium --project=firefox --project=webkit` and confirm all 12 pass
-   (unconditional execution, not gated by the describe's own skip). Then, in the same
-   scratch-renamed config as proof 1, run one of the four floor tests and confirm it fails
-   naming the project list. Revert.
+2. **#401 describe-level floor** (addendum, corrected to all 8 after re-review — see Part
+   A.1): Run all eight new floor tests under `--project=chromium --project=firefox
+   --project=webkit` and confirm all 24 pass (unconditional execution, not gated by the
+   describe's own skip). Then, in the same scratch-renamed config as proof 1, run one of the
+   floor tests from each half (one from the original 4, one from the 4 found on re-review) and
+   confirm both fail naming the project list. Revert.
 3. **#367 gate, multi-call shape**: Against the real, already-converted `visual.spec.ts`,
    temporarily revert one test's `expect.soft` calls back to hard (the W4 drawer test named
    in the source issue, or any other converted test). Run
