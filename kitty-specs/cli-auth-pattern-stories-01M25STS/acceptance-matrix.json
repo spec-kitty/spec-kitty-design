@@ -27,11 +27,11 @@
     {
       "criterion_id": "FR-003",
       "description": "Verify FR-003 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
+      "proof_type": "code_review",
+      "evidence": "Composition verified directly against the real sk-boundary-page anatomy: cli-auth.stories.ts:213-234 (renderTerminal) matches packages/styles/src/boundary-page/sk-boundary-page.css's own documented ANATOMY comment and HTML exemplars exactly (main > .sk-boundary-page.sk-boundary-page__stage > __card > __title/__body/__action-group, mark/footnote omitted entirely, never [hidden]). Behavioral assertion: sk-cli-auth-pattern.spec.ts:426-508 checks exact card-child order/classes and exact heading/body text for terminal-success/terminal-denied, action-group child count 0 for both (no fabricated action). Reviewer also visually confirmed harvested CI baselines sk-cli-auth-terminal-success-{dark,light,390}-chromium-linux.png show correct anatomy, correct text, no action. Playwright execution outcome pending CI (run 34596232715, in_progress at verdict time).",
       "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "verified_by": "reviewer-renata",
+      "verified_at": "2026-09-11T12:08:38.210941+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
