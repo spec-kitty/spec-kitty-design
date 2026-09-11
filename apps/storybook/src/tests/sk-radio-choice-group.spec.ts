@@ -962,18 +962,25 @@ test.describe("sk-radio-choice-group live native semantics and presentation", ()
     await expect(controls.nth(2)).not.toBeFocused();
 
     // Arrow roving alternates between the two ENABLED controls (indices 1 and 3), skipping the
-    // disabled ones at 0 and 2 — measured real Chromium sequence starting from index 1: 3, 1, 3,
-    // 1. An "index 1 OR index 3" check alone proves only exclusion, not movement: a regression
-    // that froze focus on index 1 for all four presses would satisfy an OR-check every time and
-    // the downstream checked-state assertions would still pass. Assert the exact alternating
-    // sequence instead. Reads element IDENTITY against the specific enabled locators, rather than
-    // `activeElement?.disabled` — a non-input `activeElement` can then never be mistaken for
-    // `undefined !== false`. (`.evaluate()` is a one-shot snapshot, not auto-retrying; `.or()` was
-    // considered and rejected — with both radios present in the DOM it trips Playwright strict
-    // mode.)
-    const expectedSequence = [3, 1, 3, 1];
+    // disabled ones at 0 and 2, however many times it is pressed. An "index 1 OR index 3" check
+    // alone proves only exclusion, not movement: a regression that froze focus on index 1 for all
+    // four presses would satisfy an OR-check every time and the downstream checked-state
+    // assertions would still pass. Reads element IDENTITY against the specific enabled locators,
+    // rather than `activeElement?.disabled` — a non-input `activeElement` can then never be
+    // mistaken for `undefined !== false`. (`.evaluate()` is a one-shot snapshot, not
+    // auto-retrying; `.or()` was considered and rejected — with both radios present in the DOM it
+    // trips Playwright strict mode.)
+    //
+    // CI found that the exact alternating sequence [3,1,3,1] — believed to be a cross-engine
+    // invariant — is actually CHROMIUM'S WRAPPING behaviour: Chromium/Firefox wrap past the last
+    // enabled control back to the first (1 -> 3 -> 1 -> 3), but WebKit's native radio-group arrow
+    // navigation does NOT wrap (1 -> 3 -> 3 -> 3, staying at the end). Wrapping is UA-owned, not
+    // something #336's CSS/markup implements or controls, so asserting it as a cross-engine
+    // invariant over-specified the actual contract claim ("never lands on a disabled control,
+    // however many times pressed"). The engine-independent invariants below are asserted on every
+    // engine; the wrap-specific exact sequence is asserted only where the platform performs it.
     const actualSequence: number[] = [];
-    for (let step = 0; step < expectedSequence.length; step += 1) {
+    for (let step = 0; step < 4; step += 1) {
       await page.keyboard.press("ArrowDown");
       const [isNth1, isNth3] = await Promise.all([
         controls.nth(1).evaluate((node) => node === document.activeElement),
@@ -983,11 +990,28 @@ test.describe("sk-radio-choice-group live native semantics and presentation", ()
       await expect(controls.nth(0)).not.toBeFocused();
       await expect(controls.nth(2)).not.toBeFocused();
     }
+    // Invariant (a): the first ArrowDown actually MOVES focus (1 -> 3 in both engines) — guards
+    // the frozen-focus regression a bare "1 or 3" check would miss.
     expect(
-      actualSequence,
-      `ArrowDown roving sequence was [${actualSequence.join(", ")}], expected ` +
-        `[${expectedSequence.join(", ")}]`,
-    ).toEqual(expectedSequence);
+      actualSequence[0],
+      `first ArrowDown landed on ${actualSequence[0]}, expected a move to 3`,
+    ).toBe(3);
+    // Invariant (b): every one of the four landings is a genuinely enabled control (1 or 3),
+    // never -1 (neither) and never the disabled indices 0 or 2.
+    expect(
+      actualSequence.every((landing) => landing === 1 || landing === 3),
+      `ArrowDown sequence was [${actualSequence.join(", ")}] — every landing must be an ` +
+        "enabled control (1 or 3)",
+    ).toBe(true);
+    if (browserName !== "webkit") {
+      // The wrap itself (Chromium/Firefox only — see the comment above).
+      const expectedSequence = [3, 1, 3, 1];
+      expect(
+        actualSequence,
+        `ArrowDown roving sequence was [${actualSequence.join(", ")}], expected ` +
+          `[${expectedSequence.join(", ")}]`,
+      ).toEqual(expectedSequence);
+    }
     expect(
       await controls.evaluateAll(
         (nodes) =>
@@ -1596,8 +1620,9 @@ test.describe("sk-radio-choice-group live native semantics and presentation", ()
     // Expressed as a FRACTION of the crop's total pixels, not a raw count — `page.screenshot`'s
     // clip is rasterised at the real devicePixelRatio, so a fixed pixel-count floor tuned on one
     // engine reads ~4x slacker on a DSF-2 one (e.g. WebKit/Safari emulation). The fraction is
-    // DPR-invariant, so this probe is not restricted to Chromium the way the forced-colors ones
-    // are (those are Chromium-only because `emulateMedia({ forcedColors })` itself is).
+    // DPR-invariant, so this probe runs on EVERY engine (unlike the colour assertion in the
+    // sibling test below, which does not) — geometry-based, it is confirmed passing in CI on
+    // WebKit too.
     // MAJOR finding: at visual.spec.ts's `maxDiffPixelRatio: 0.02` over a ~386x336 baseline crop
     // (budget ~2,594px), every one of the five controls in a story totals only ~1,280px — so
     // fully hiding the check glyph (`visibility: hidden` on every control) still measured under
@@ -1606,16 +1631,14 @@ test.describe("sk-radio-choice-group live native semantics and presentation", ()
     // A targeted control-only crop, independent of the story frame's total pixel budget, closes
     // that specific hole — mirroring the forced-colors probe above but without `emulateMedia`.
     //
-    // MEASURED LIMIT OF THE PIXEL-COUNT HALF ALONE, found on independent re-verification: the
-    // checked radio's disc-vs-ring geometry produces a real, non-zero pixel delta against an
-    // unchecked control INDEPENDENT of the accent colour actually used — `accent-color:
-    // transparent` measured 144px, and a token swap toward the card background measured 154px,
-    // both comfortably clearing a `>80` floor while the customized `accent-color` itself was
-    // invisible. So the pixel-COUNT assertion alone guards only "the control paints nothing" (a
-    // real but narrower claim); it does NOT guard "the customized `accent-color` renders". The
-    // colour assertion immediately below is what closes that: it reads the checked control's
-    // centre pixel and requires it to resolve to `--sk-color-yellow` specifically, not merely to
-    // differ from the unchecked control's colour.
+    // MEASURED LIMIT OF THIS PROBE ALONE, found on independent re-verification: the checked
+    // radio's disc-vs-ring geometry produces a real, non-zero pixel delta against an unchecked
+    // control INDEPENDENT of the accent colour actually used — `accent-color: transparent`
+    // measured 144px, and a token swap toward the card background measured 154px, both
+    // comfortably clearing a `>80`-pixel floor while the customized `accent-color` itself was
+    // invisible. So this assertion alone guards only "the control paints nothing" (a real but
+    // narrower claim); it does NOT guard "the customized `accent-color` renders". The sibling test
+    // below is what closes that, on the engines where a colour sample is valid.
     const { group } = await openStory(page, "default");
     const controls = group.getByRole("radio");
     await expect(controls).toHaveCount(5);
@@ -1640,12 +1663,38 @@ test.describe("sk-radio-choice-group live native semantics and presentation", ()
       `checked vs. unchecked control differed by only ${(diffFraction * 100).toFixed(1)}% of ` +
         "pixels in normal colours — the check indicator is not visibly rendered",
     ).toBeGreaterThan(0.2);
+  });
 
+  test("normal colours: the checked control's fill resolves to --sk-color-yellow", async ({
+    page,
+    browserName,
+  }) => {
+    // CHROMIUM/FIREFOX ONLY. CI measured `rgb(49, 40, 4)` on WebKit — a dark olive blend,
+    // unchanged whether the centred sample patch was a single pixel or an averaged 40% of the
+    // crop's dimensions. That rules out a sampling-position bug: WebKit renders the native
+    // checked-radio fill at a materially smaller size and/or different position within the
+    // control's box than Chromium/Firefox do, so even a broad centred patch there averages mostly
+    // background rather than the accent fill. This is a real rendering difference, not a defect —
+    // scoping the assertion (rather than widening the colour tolerance to paper over it) keeps it
+    // meaningful where it runs; widening the tolerance would also let a genuinely wrong accent
+    // colour through on the engines where the sample IS valid. The sibling pixel-DIFFERENCE test
+    // above stays cross-engine: it is geometry-based, not colour-sampling-based, and already
+    // passes on WebKit in CI — this is a distinct test, not a shared `test.skip` mid-body, so that
+    // sibling's WebKit result reports as a genuine pass, not folded into this one's skip.
+    test.skip(
+      browserName === "webkit",
+      "WebKit renders the checked fill at a different size/position within the control box, so " +
+        "a centred-patch colour sample is not a valid accent-color probe there (see comment)",
+    );
     // The token-colour half: the same pattern already used for `--sk-color-red` on the legend
     // (see `legendCueOf`'s live-resolved comparison above) applied to the checked control's own
     // rendered fill, so a regression that leaves SOME visible glyph but the WRONG colour (e.g. the
-    // accent swapped toward the card surface) is caught even though it would not move the pixel
-    // count enough to fail the floor above.
+    // accent swapped toward the card surface) is caught even though it would not move the sibling
+    // test's pixel-difference fraction enough to fail its floor.
+    const { group } = await openStory(page, "default");
+    const controls = group.getByRole("radio");
+    await expect(controls.nth(0)).toBeChecked();
+    const [checkedShot] = await screenshotControlPair(page, controls.nth(0), controls.nth(1));
     const expectedYellow = await resolveTokenColor(page, "--sk-color-yellow");
     const centre = centrePixel(checkedShot);
     const channelTolerance = 40;
