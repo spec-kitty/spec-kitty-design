@@ -1,0 +1,71 @@
+# Contract for `.github/workflows/promote-develop.yml` (REL1, #362, FR-007/FR-008/FR-010).
+#
+# Promotes `train/elements-first` onto `develop` via tree-sync (spec.md Option D, ruled
+# 2026-09-11). Runs on every push to the train, plus `workflow_dispatch` for a manual re-run
+# (e.g. after fixing a CodeQL finding on a stuck promotion PR). Identity is a GitHub App
+# installed on this repository ONLY (spec.md Recorded Decision #2) — never the workflow's own
+# `GITHUB_TOKEN`, which cannot trigger the push/PR events this mechanism and REL2 depend on
+# (FR-007(h), research.md R4).
+#
+# Concurrency is a QUEUE, not a cancel: two pushes landing close together must not race each
+# other onto `develop`, but cancelling a run that is mid-poll on an already-open PR would abandon
+# that PR's tracking state for no reason — the next run's supersede/reuse logic (data-model.md
+# PromotionDecision) already handles "train moved again while a PR was open" correctly by running
+# to completion first, then letting the queued run decide fresh. `cancel-in-progress: false`.
+
+name: Promote train to develop
+
+on:
+  push:
+    branches: ['train/elements-first']
+  workflow_dispatch: {}
+
+concurrency:
+  group: promote-develop
+  cancel-in-progress: false
+
+permissions:
+  contents: read   # actions/checkout only — every GitHub-write happens on the App token (R4)
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20   # the poll loop itself is capped at 15m (research.md R5); this leaves
+                           # headroom for checkout, token mint, and the git/API calls around it
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # actions/checkout v4.3.1
+        with: { fetch-depth: 0 }   # need both train and develop history, not just the pushed ref
+
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e  # actions/setup-node v6.4.0
+        with: { node-version: '22' }   # promote-develop.mjs is dependency-free node:* only — no npm ci
+
+      # research.md R7: secrets cannot be tested in `if:` directly — read into env, check in the shell.
+      - name: "[ENFORCED] Fail fast if the release App's credentials are missing"
+        env:
+          APP_ID: ${{ secrets.SK_DESIGN_RELEASE_APP_ID }}
+          APP_KEY: ${{ secrets.SK_DESIGN_RELEASE_APP_PRIVATE_KEY }}
+        run: |
+          if [ -z "$APP_ID" ] || [ -z "$APP_KEY" ]; then
+            echo "::error::SK_DESIGN_RELEASE_APP_ID and/or SK_DESIGN_RELEASE_APP_PRIVATE_KEY repository secrets are not set."
+            echo "::error::The develop-promotion workflow cannot mint a token without them and will not pretend to have promoted anything."
+            echo "::error::See docs/architecture/branch-model.md (Operator Actions) for how to create and install the App and add these secrets."
+            exit 1
+          fi
+
+      - uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1  # actions/create-github-app-token v3.2.0
+        id: mint
+        with:
+          app-id: ${{ secrets.SK_DESIGN_RELEASE_APP_ID }}
+          private-key: ${{ secrets.SK_DESIGN_RELEASE_APP_PRIVATE_KEY }}
+          # Neither `owner` nor `repositories` is set: the App is installed on spec-kitty-design
+          # ONLY (spec.md Recorded Decision #2), so the default scope already is this one repo.
+          # Explicit `repositories` would be redundant defense-in-depth against a future install
+          # widening; left implicit here because the App's OWN installation, not this line, is
+          # the actual boundary spec.md ruled on.
+
+      - name: "[ENFORCED] Promote train/elements-first to develop"
+        id: promote
+        env:
+          GH_TOKEN: ${{ steps.mint.outputs.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: node scripts/promote-develop.mjs run
