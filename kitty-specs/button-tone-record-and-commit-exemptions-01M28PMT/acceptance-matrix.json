@@ -8,10 +8,10 @@
       "criterion_id": "FR-001",
       "description": "Verify FR-001 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "commitlint.config.cjs: 3 new anchored SPEC_KITTY_AUTO_COMMIT_PATTERNS entries; node scripts/check-commitlint-config.mjs passes (real tracer-append/retrospect messages ignored+valid)",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T17:11:38.043593+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
