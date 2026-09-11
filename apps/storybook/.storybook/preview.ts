@@ -38,10 +38,15 @@ import "../../../packages/styles/src/progress/sk-progress.css";
 import "../../../packages/styles/src/prose/sk-prose.css";
 import "../../../packages/styles/src/workflow-board/sk-workflow-board.css";
 import "../../../packages/styles/src/workflow-lane/sk-workflow-lane.css";
-// FOUR MORE, ADDED BY #355 FOR THE SAME REASON AND UNDER THE SAME INVARIANT. The account /
+// THREE MORE, ADDED BY #355 FOR THE SAME REASON AND UNDER THE SAME INVARIANT. The account /
 // front-door pattern (packages/elements/src/patterns/account-front-door.stories.ts) composes
 // custom elements with four STYLES-ONLY families that ship no custom element of their own
-// (ADR-10 §3): public-header (#353), boundary-page (#303), radio-choice-group and skip-link. The
+// (ADR-10 §3): public-header (#353), boundary-page (#303), radio-choice-group and skip-link. Only
+// THREE are imported here — #329's CLI Auth pattern reached the same conclusion about
+// boundary-page independently and registered it further down this file, so importing it again
+// here would be a second identical specifier for one sheet. Removed on the rebase that brought
+// #329 onto the train; the surviving import is #329's, left where it is rather than moved up into
+// this block, because it is already landed code and its comment gives its own reason. The
 // pattern story cannot import their CSS itself — `scripts/check-no-css-in-source.mjs` rejects a
 // bare stylesheet import anywhere under packages/elements/src (FR-009, ADR-10 §1 Confirmation
 // #4), and it rejected exactly that, which is how this landed here instead. The block above is
@@ -51,11 +56,11 @@ import "../../../packages/styles/src/workflow-lane/sk-workflow-lane.css";
 // measured: an unstyled <a> under a dark `color-scheme` renders rgb(158, 158, 255), an axe
 // colour-contrast violation.
 //
-// The line-14 invariant holds for all four: every top-level selector in the four sheets is a
+// The line-14 invariant holds for all four sheets this pattern needs, the one #329 registers
+// included: every top-level selector in them is a
 // `.sk-<family>` class or a `:where(.sk-<family>__*) ...` descendant of one, so a story that does
 // not use the classes is unaffected and the axe gate sees no change.
 import "../../../packages/styles/src/public-header/sk-public-header.css";
-import "../../../packages/styles/src/boundary-page/sk-boundary-page.css";
 import "../../../packages/styles/src/radio-choice-group/sk-radio-choice-group.css";
 import "../../../packages/styles/src/skip-link/sk-skip-link.css";
 // #303's sk-boundary-page is the mirror-image case of the block above: a styles-only, no-element
