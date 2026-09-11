@@ -127,11 +127,11 @@
     {
       "criterion_id": "FR-013",
       "description": "Verify FR-013 is satisfied",
-      "proof_type": "runtime string audit",
-      "evidence": "head 4f301f83; sk-mission-kanban-ten-lane-pattern.spec.ts [T006] every rendered light-DOM text node and every aria-label/label/message value across all 11 stories is a string of the base or extension fixture or a fixture formatter output.",
+      "proof_type": "static template scan + runtime audit",
+      "evidence": "product head 8986d38f (rebased on train 16948194); sk-mission-kanban-ten-lane-pattern.spec.ts [T006] every html template carries no text between tags, no literal user-facing attribute and no style attribute (self-probes go red); every rendered text node and 7 user-facing attributes across 11 stories are fixture strings or formatter outputs; local Chromium+Firefox 96/96 incl. #278 suite; WebKit authority is CI (pre-fold a3ac655c run 34604991224: playwright 3 browsers + test passed).",
       "pass_fail": "pass",
       "verified_by": "claude",
-      "verified_at": "2026-09-11T13:44:43.467149+00:00",
+      "verified_at": "2026-09-11T14:11:17.862638+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
