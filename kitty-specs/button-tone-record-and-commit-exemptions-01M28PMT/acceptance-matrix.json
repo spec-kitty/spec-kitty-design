@@ -57,11 +57,11 @@
     {
       "criterion_id": "FR-006",
       "description": "Verify FR-006 is satisfied",
-      "proof_type": "manual_review",
-      "evidence": "ADR-17's 'The load-bearing fact' section states BUTTON_VARIANTS is a codegen source, grounded in sk-button.markup.ts:14-18's comment and build-element-markup.mjs:288-300's per-key derivation",
+      "proof_type": "automated_test",
+      "evidence": "Reviewer-caught error corrected. Verified directly, not by reading the generator comment alone: sk-button.ts:35 hand-spells the variant union; packages/elements/custom-elements.json's SkButton.variant.type.text is byte-for-byte identical to that union (python3 JSON walk); BUTTON_VARIANTS appears in the same manifest only as its own disconnected kind:variable entry, wired to nothing; scripts/build-react-wrappers.mjs's own header comment states wrappers are GENERATED from custom-elements.json; packages/react/src/SkButton.d.ts:42 reads variant?: SkButtonElement[\"variant\"], an indexed type off the element class. ADR-17 now states BUTTON_VARIANTS feeds ONLY the static-HTML/index.ts pipeline (via build-element-markup.mjs:288-300's per-key derivation) and names the two-pipeline split as a standing, gate-invisible drift hazard rather than claiming single-pipeline coverage.",
       "pass_fail": "pass",
       "verified_by": "claude",
-      "verified_at": "2026-09-11T17:11:52.431679+00:00",
+      "verified_at": "2026-09-11T17:24:29.817813+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
