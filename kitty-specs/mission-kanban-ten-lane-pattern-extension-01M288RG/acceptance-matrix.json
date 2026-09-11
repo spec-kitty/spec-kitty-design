@@ -88,10 +88,10 @@
       "criterion_id": "FR-009",
       "description": "Verify FR-009 is satisfied",
       "proof_type": "browser test",
-      "evidence": "head 4f301f83; sk-mission-kanban-ten-lane-pattern.spec.ts [T006] K6: 10 lanes count 0, empty ol with sibling 'No work packages in this lane.', exactly 10 empty states, no a/button/sk-button in the board, reported panel shows the base empty sentence.",
+      "evidence": "product head 8986d38f (rebased on train 16948194); sk-mission-kanban-ten-lane-pattern.spec.ts [T006] K6: 10 lanes count 0, empty ol with sibling 'No work packages in this lane.', 10 empty states, no controls in the board, base empty reported sentence; local Chromium+Firefox 96/96 incl. #278 suite; WebKit authority is CI (pre-fold a3ac655c run 34604991224: playwright 3 browsers + test passed).",
       "pass_fail": "pass",
       "verified_by": "claude",
-      "verified_at": "2026-09-11T13:44:37.813669+00:00",
+      "verified_at": "2026-09-11T14:11:13.485863+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
