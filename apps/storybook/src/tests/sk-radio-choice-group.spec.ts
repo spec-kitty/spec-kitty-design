@@ -15,9 +15,21 @@ function countDifferingPixels(a: Buffer, b: Buffer, tolerance = 24): number {
   const pngA = PNG.sync.read(a);
   const pngB = PNG.sync.read(b);
   if (pngA.width !== pngB.width || pngA.height !== pngB.height) {
-    // A dimension mismatch is itself a measurable difference — report every pixel of the
-    // larger image as differing rather than throwing, so the caller's threshold still applies.
-    return Math.max(pngA.width * pngA.height, pngB.width * pngB.height);
+    // BLOCKING defect, found and fixed after an independent pass-2 review: every call site below
+    // uses `toBeGreaterThan` as a FLOOR. Returning the maximum possible pixel count here (as an
+    // earlier revision did, reasoning "the caller's threshold still applies") makes a dimension
+    // mismatch an UNCONDITIONAL PASS of that floor — exactly backwards. `element.screenshot()`
+    // sizes its crop from a live, possibly sub-pixel bounding box, so two elements with even a
+    // 0.5px difference in computed geometry (e.g. a `double` vs `solid` border of the same
+    // nominal width can shift the rendered box by half a device pixel) can legitimately produce
+    // differently-sized crops — silently. Throwing forces every call site to guarantee
+    // dimension-stable crops (e.g. via `page.screenshot({ clip })` with integer-rounded boxes)
+    // rather than let a size mismatch masquerade as a passing pixel difference.
+    throw new Error(
+      `countDifferingPixels: screenshot dimensions differ (${pngA.width}x${pngA.height} vs. ` +
+        `${pngB.width}x${pngB.height}) — crop the two elements to matching integer-pixel boxes ` +
+        "before comparing; a mismatch must never be read as a passing difference.",
+    );
   }
   let differing = 0;
   for (let i = 0; i < pngA.data.length; i += 4) {
@@ -30,6 +42,98 @@ function countDifferingPixels(a: Buffer, b: Buffer, tolerance = 24): number {
     }
   }
   return differing;
+}
+
+// Same comparison as `countDifferingPixels`, expressed as a fraction of the crop's total pixel
+// count rather than a raw count. `page.screenshot({ clip })`'s CSS-pixel clip box is rasterised at
+// the page's real `devicePixelRatio` — a DSF-2 engine (e.g. WebKit/Safari emulation) returns ~4x
+// as many raw pixels for the SAME logical crop as a DSF-1 one, so a hard-coded pixel-COUNT floor
+// tuned on one engine reads roughly 4x slacker on the other. The fraction is DPR-invariant because
+// both the differing-pixel count and the total scale together.
+function differingPixelFraction(a: Buffer, b: Buffer, tolerance = 24): number {
+  const count = countDifferingPixels(a, b, tolerance);
+  const { width, height } = PNG.sync.read(a);
+  return count / (width * height);
+}
+
+// Screenshots two locators to GUARANTEED-matching integer-pixel dimensions. `locator.screenshot()`
+// derives its clip from the element's own live (fractional) bounding box; two controls whose
+// ANCESTOR choices carry different border widths/styles can report bounding boxes that round to
+// different integer pixel sizes (measured: 17x16 vs 17x17 for a `double`-vs-plain-bordered choice
+// pair), which made `countDifferingPixels`'s old dimension-mismatch branch a silent, permanent
+// pass. Using `page.screenshot({ clip })` with a width/height taken as the MINIMUM of both boxes
+// (not each box's own independently-rounded size) makes the two crops dimension-identical by
+// construction, not by coincidence.
+//
+// `inset` (default 3 CSS px) shrinks the clip symmetrically to exclude the corners of the native
+// radio's square bounding box, where the CIRCLE does not reach and the ANCESTOR choice's own
+// background bleeds through instead. Checked vs. unchecked choices intentionally use different
+// backgrounds (`--sk-bg-pill` vs. `--sk-surface-card`), and their measured channel delta (up to
+// 17) sits just under `countDifferingPixels`'s default `tolerance` of 24 — coincidentally, not by
+// any assertion that keeps it that way. A future token retune could push that delta over the
+// tolerance and let corner background alone masquerade as "the glyph differs" even with a broken
+// glyph. The inset removes the corners from the crop entirely rather than relying on the
+// coincidence.
+async function screenshotControlPair(
+  page: Page,
+  a: Locator,
+  b: Locator,
+  inset = 3,
+): Promise<[Buffer, Buffer]> {
+  const [boxA, boxB] = await Promise.all([a.boundingBox(), b.boundingBox()]);
+  if (!boxA || !boxB) {
+    throw new Error(
+      "screenshotControlPair: one of the two controls has no bounding box (not rendered?)",
+    );
+  }
+  const width = Math.floor(Math.min(boxA.width, boxB.width)) - inset * 2;
+  const height = Math.floor(Math.min(boxA.height, boxB.height)) - inset * 2;
+  if (width <= 0 || height <= 0) {
+    throw new Error(
+      `screenshotControlPair: inset ${inset} leaves a non-positive crop (${width}x${height})`,
+    );
+  }
+  const [shotA, shotB] = await Promise.all([
+    page.screenshot({
+      clip: { x: Math.round(boxA.x) + inset, y: Math.round(boxA.y) + inset, width, height },
+    }),
+    page.screenshot({
+      clip: { x: Math.round(boxB.x) + inset, y: Math.round(boxB.y) + inset, width, height },
+    }),
+  ]);
+  return [shotA, shotB];
+}
+
+// Reads the pixel at the exact centre of a screenshot buffer, as `{r, g, b, a}`. Used to assert a
+// checked radio's fill resolves to the authored `accent-color`, not merely that "something is
+// different" — a pixel-count probe alone cannot distinguish a correctly yellow dot from a wrongly
+// grey one of the same size (both produce the same non-zero diff against an unchecked control).
+function centrePixel(shot: Buffer): { r: number; g: number; b: number; a: number } {
+  const png = PNG.sync.read(shot);
+  const x = Math.floor(png.width / 2);
+  const y = Math.floor(png.height / 2);
+  const i = (png.width * y + x) << 2;
+  return { r: png.data[i], g: png.data[i + 1], b: png.data[i + 2], a: png.data[i + 3] };
+}
+
+// Resolves a `--sk-*` token's real computed colour from the live page, as `{r, g, b}`, so an
+// assertion can compare against the token's ACTUAL rendered value instead of a hard-coded guess
+// at how the browser translates the hex source into RGB.
+async function resolveTokenColor(
+  page: Page,
+  token: string,
+): Promise<{ r: number; g: number; b: number }> {
+  const rgb = await page.evaluate((cssVar) => {
+    const probe = document.createElement("div");
+    probe.style.color = `var(${cssVar})`;
+    document.body.append(probe);
+    const resolved = getComputedStyle(probe).color;
+    probe.remove();
+    return resolved;
+  }, token);
+  const match = /rgba?\((\d+),\s*(\d+),\s*(\d+)/.exec(rgb);
+  if (!match) throw new Error(`resolveTokenColor: could not parse "${rgb}" for ${token}`);
+  return { r: Number(match[1]), g: Number(match[2]), b: Number(match[3]) };
 }
 
 const COMPONENT_DIR = "packages/styles/src/radio-choice-group";
@@ -801,22 +905,33 @@ test.describe("sk-radio-choice-group live native semantics and presentation", ()
     await expect(controls.nth(0)).not.toBeFocused();
     await expect(controls.nth(2)).not.toBeFocused();
 
-    // Arrow roving only ever lands on and checks enabled controls (indices 1 and 3), never the
-    // disabled ones at 0 and 2, however many times it is pressed. Assert against the specific
-    // enabled locators (auto-retrying, browser-independent) rather than reading
-    // `activeElement?.disabled`, for the same reason as above.
-    for (let step = 0; step < 4; step += 1) {
+    // Arrow roving alternates between the two ENABLED controls (indices 1 and 3), skipping the
+    // disabled ones at 0 and 2 — measured real Chromium sequence starting from index 1: 3, 1, 3,
+    // 1. An "index 1 OR index 3" check alone proves only exclusion, not movement: a regression
+    // that froze focus on index 1 for all four presses would satisfy an OR-check every time and
+    // the downstream checked-state assertions would still pass. Assert the exact alternating
+    // sequence instead. Reads element IDENTITY against the specific enabled locators, rather than
+    // `activeElement?.disabled` — a non-input `activeElement` can then never be mistaken for
+    // `undefined !== false`. (`.evaluate()` is a one-shot snapshot, not auto-retrying; `.or()` was
+    // considered and rejected — with both radios present in the DOM it trips Playwright strict
+    // mode.)
+    const expectedSequence = [3, 1, 3, 1];
+    const actualSequence: number[] = [];
+    for (let step = 0; step < expectedSequence.length; step += 1) {
       await page.keyboard.press("ArrowDown");
-      const isEnabledFocused =
-        (await controls.nth(1).evaluate((node) => node === document.activeElement)) ||
-        (await controls.nth(3).evaluate((node) => node === document.activeElement));
-      expect(
-        isEnabledFocused,
-        "ArrowDown must always land on one of the group's enabled radios",
-      ).toBe(true);
+      const [isNth1, isNth3] = await Promise.all([
+        controls.nth(1).evaluate((node) => node === document.activeElement),
+        controls.nth(3).evaluate((node) => node === document.activeElement),
+      ]);
+      actualSequence.push(isNth1 ? 1 : isNth3 ? 3 : -1);
       await expect(controls.nth(0)).not.toBeFocused();
       await expect(controls.nth(2)).not.toBeFocused();
     }
+    expect(
+      actualSequence,
+      `ArrowDown roving sequence was [${actualSequence.join(", ")}], expected ` +
+        `[${expectedSequence.join(", ")}]`,
+    ).toEqual(expectedSequence);
     expect(
       await controls.evaluateAll(
         (nodes) =>
@@ -873,14 +988,35 @@ test.describe("sk-radio-choice-group live native semantics and presentation", ()
     const disabled = await cueOf(choices.nth(2));
     expect(nonColourCue(disabled)).not.toBe(nonColourCue(rest));
 
+    // `checked` above (`disabled-option`'s choice 0) is checked AND disabled — the `:disabled`
+    // rule's `border-style: dotted` (specified later in the sheet) overrides `:checked`'s
+    // `double`, so the pairwise set never actually observed an ENABLED checked choice's own cue.
+    // Verified: removing `border-style: double` from the `:checked` rule entirely left this set
+    // at 6/6, still green, because nothing here exercised it. Sample a genuinely enabled checked
+    // choice from the `default` story and fold it in as a seventh state.
+    const { group: enabledGroup } = await openStory(page, "default");
+    const checkedEnabled = await cueOf(
+      enabledGroup.locator(".sk-radio-choice-group__choice").nth(0),
+    );
+
     // Each state above was only ever compared against `rest`, which proves six one-sided
     // deltas, not that the states are mutually distinguishable from EACH OTHER — e.g. hover
     // (dashed/1px/medium) and focus-visible (dashed/2px/medium) each differ from `rest` in one
     // property but could still collide with one another undetected. "Distinct without colour
     // alone" is a pairwise property: collect every named state's non-colour cue and require them
     // all to be mutually unique.
-    const cues = [rest, checked, hover, active, focusedChoice, disabled].map(nonColourCue);
-    const labels = ["rest", "checked", "hover", "active", "focus-visible", "disabled"];
+    const cues = [rest, checked, hover, active, focusedChoice, disabled, checkedEnabled].map(
+      nonColourCue,
+    );
+    const labels = [
+      "rest",
+      "checked+disabled",
+      "hover",
+      "active",
+      "focus-visible",
+      "disabled",
+      "checked+enabled",
+    ];
     expect(
       new Set(cues).size,
       `expected ${labels.length} pairwise-distinct non-colour cues, got ${new Set(cues).size}: ` +
@@ -1276,10 +1412,41 @@ test.describe("sk-radio-choice-group live native semantics and presentation", ()
     // so it cannot exercise the required-invalid legend rule in the forced-colors block
     // (`sk-radio-choice-group.css`'s `@media (forced-colors: active)` block, the
     // `:required:invalid` legend rule). Open the `required-invalid` and `none-selected` stories
-    // directly instead and emulate forced colors on them, mirroring the light-path assertion
-    // above but under `forcedColors: 'active'` so the forced-colors-specific `LinkText` override
-    // is the thing actually proven, not merely the light-path `--sk-color-red` rule.
+    // directly instead and emulate forced colors on them.
+    //
+    // `forced-colors` forces only COLOUR properties — never `border-style`/`border-width` — so
+    // the LIGHT-PATH rule (`solid`, `--sk-border-width-2`) still applies verbatim under emulation
+    // and a `style !== style` / `width > 0` comparison against the ORDINARY (non-required) legend
+    // passes whether or not the forced-colors block exists at all. Capture the light-path invalid
+    // width first, and compare the forced-colors width against THAT (4px vs. 2px, not 4px vs.
+    // 0px). For colour: an independent re-verification found that asserting only "NOT the
+    // un-emulated `--sk-color-red`" is satisfied by ANY system-colour override — swapping the
+    // CSS's `LinkText` for `CanvasText` left that assertion green, since forced colors replaces
+    // the author colour with something else either way. Assert EQUALITY against the resolved
+    // `LinkText` value specifically, which is what the CSS actually declares.
+    const { group: lightInvalid } = await openStory(page, "required-invalid");
+    const lightInvalidCue = await legendCueOf(
+      lightInvalid.locator(".sk-radio-choice-group__legend"),
+    );
+    const expectedLightRedColor = await page.evaluate(() => {
+      const probe = document.createElement("div");
+      probe.style.color = "var(--sk-color-red)";
+      document.body.append(probe);
+      const resolved = getComputedStyle(probe).color;
+      probe.remove();
+      return resolved;
+    });
+    expect(lightInvalidCue.borderBlockEndColor).toBe(expectedLightRedColor);
+
     await page.emulateMedia({ forcedColors: "active" });
+    const expectedLinkText = await page.evaluate(() => {
+      const probe = document.createElement("div");
+      probe.style.color = "LinkText";
+      document.body.append(probe);
+      const resolved = getComputedStyle(probe).color;
+      probe.remove();
+      return resolved;
+    });
     const { group: ordinary } = await openStory(page, "none-selected");
     const ordinaryCue = await legendCueOf(
       ordinary.locator(".sk-radio-choice-group__legend"),
@@ -1291,9 +1458,17 @@ test.describe("sk-radio-choice-group live native semantics and presentation", ()
     expect(invalidCue.borderBlockEndStyle).not.toBe(
       ordinaryCue.borderBlockEndStyle,
     );
-    expect(Number.parseFloat(invalidCue.borderBlockEndWidth)).toBeGreaterThan(
-      Number.parseFloat(ordinaryCue.borderBlockEndWidth),
-    );
+    // The equality proof: it must be exactly the CSS's declared `LinkText`, not merely "some
+    // colour that isn't the light-path red".
+    expect(invalidCue.borderBlockEndColor).toBe(expectedLinkText);
+    // Compared against the LIGHT-PATH invalid width (2px), not the ordinary legend's 0px, so
+    // deleting the forced-colors rule (which would leave the light-path 2px in place) fails this
+    // specifically, instead of the light-path rule alone satisfying a "> 0" floor.
+    expect(
+      Number.parseFloat(invalidCue.borderBlockEndWidth),
+      `forced-colors width ${invalidCue.borderBlockEndWidth} must exceed the light-path ` +
+        `invalid width ${lightInvalidCue.borderBlockEndWidth}`,
+    ).toBeGreaterThan(Number.parseFloat(lightInvalidCue.borderBlockEndWidth));
   });
 
   test("forced colors: a checked control's rendered pixels visibly differ from an unchecked one (visual half of the accent-color proof)", async ({
@@ -1321,18 +1496,13 @@ test.describe("sk-radio-choice-group live native semantics and presentation", ()
     // checkedness is the only remaining variable — the `disabled` flags are asserted equal
     // immediately below so a later fixture edit cannot silently reintroduce the confound.
     //
-    // MEASURED LIMIT OF THIS PROBE, recorded so it is not cited for more than it proves.
-    // Attempting the generalising red-first mutant -- `appearance: none` plus a fixed ring, so
-    // every control paints identically with no glyph -- did NOT turn this test red: it still
-    // measured 289 differing pixels, byte-identical to the unmutated run. Chromium's
-    // `forced-colors: active` emulation overrides `appearance` for a native radio and restores
-    // truthful checked/unchecked painting regardless of author CSS, so no CSS-only regression
-    // can reach this assertion. What this test therefore proves is that forced colors DOES
-    // paint a perceivable checked/unchecked difference -- which is the clause #336 requires --
-    // not that author CSS could ever break it. The assertion machinery was separately shown
-    // non-vacuous by comparing a control against itself: 0 px, correctly below the threshold.
-    // The load-bearing guard against an invisible `accent-color` is the NORMAL-colours probe
-    // below, which does go red (0 px) under that same mutant.
+    // Screenshots are taken via `screenshotControlPair`, not `locator.screenshot()` directly:
+    // index 0's ancestor choice carries a `double`/2px border (the `:checked` rule) while index
+    // 2's carries a `dotted`/1px one (the `:disabled` rule), and that structural difference was
+    // found to shift the two controls' own live bounding boxes by a fraction of a device pixel —
+    // enough that independently-rounded crops came out 17x16 vs 17x17. `countDifferingPixels` now
+    // throws on any such mismatch rather than silently returning a passing value, so a dimension-
+    // stable crop is required, not optional.
     await page.emulateMedia({ forcedColors: "active" });
     const { group } = await openStory(page, "forced-colors");
     const controls = group.getByRole("radio");
@@ -1347,29 +1517,49 @@ test.describe("sk-radio-choice-group live native semantics and presentation", ()
       checkedDisabled,
       "the compared pair must hold disabled/enabled constant so checkedness is the only variable",
     ).toBe(uncheckedDisabled);
-    const checkedShot = await controls.nth(0).screenshot();
-    const uncheckedShot = await controls.nth(2).screenshot();
+    const [checkedShot, uncheckedShot] = await screenshotControlPair(
+      page,
+      controls.nth(0),
+      controls.nth(2),
+    );
     const diffPixels = countDifferingPixels(checkedShot, uncheckedShot);
+    // With dimension-stable, corner-inset crops the real signal measures 86px (noise floor 0,
+    // `appearance:none`+ring mutant 0). 40 sits comfortably above the noise floor and below the
+    // real signal, with margin on both sides — not the 100 an earlier revision used, which
+    // exceeded the real signal and would have failed a correct implementation.
     expect(
       diffPixels,
       `checked+disabled vs. unchecked+disabled control differed by only ${diffPixels} pixel(s) ` +
         "under forced colors — the check indicator is not visibly rendered",
-    ).toBeGreaterThan(100);
+    ).toBeGreaterThan(40);
   });
 
   test("normal colours: a checked control's rendered pixels visibly differ from an unchecked one (the 11 committed visual baselines cannot see this)", async ({
     page,
   }) => {
+    // Expressed as a FRACTION of the crop's total pixels, not a raw count — `page.screenshot`'s
+    // clip is rasterised at the real devicePixelRatio, so a fixed pixel-count floor tuned on one
+    // engine reads ~4x slacker on a DSF-2 one (e.g. WebKit/Safari emulation). The fraction is
+    // DPR-invariant, so this probe is not restricted to Chromium the way the forced-colors ones
+    // are (those are Chromium-only because `emulateMedia({ forcedColors })` itself is).
     // MAJOR finding: at visual.spec.ts's `maxDiffPixelRatio: 0.02` over a ~386x336 baseline crop
     // (budget ~2,594px), every one of the five controls in a story totals only ~1,280px — so
-    // fully hiding the check glyph (`accent-color: transparent`, a token swap to the card
-    // background, or `visibility: hidden` on every control) still measured under that ratio and
-    // would report GREEN. This is #88's "a blank render and a full render compared EQUAL" defect
-    // re-entered at smaller scale (see visual.spec.ts:10-20's own account of #88). A targeted
-    // control-only crop, independent of the story frame's total pixel budget, is what actually
-    // proves the glyph renders in NORMAL (non-forced) colours — mirroring the forced-colors probe
-    // above but without `emulateMedia`, so it also protects the un-forced-colours default/light
-    // rendering that the 11 committed baselines are supposed to, but structurally cannot, catch.
+    // fully hiding the check glyph (`visibility: hidden` on every control) still measured under
+    // that ratio and would report GREEN. This is #88's "a blank render and a full render compared
+    // EQUAL" defect re-entered at smaller scale (see visual.spec.ts:10-20's own account of #88).
+    // A targeted control-only crop, independent of the story frame's total pixel budget, closes
+    // that specific hole — mirroring the forced-colors probe above but without `emulateMedia`.
+    //
+    // MEASURED LIMIT OF THE PIXEL-COUNT HALF ALONE, found on independent re-verification: the
+    // checked radio's disc-vs-ring geometry produces a real, non-zero pixel delta against an
+    // unchecked control INDEPENDENT of the accent colour actually used — `accent-color:
+    // transparent` measured 144px, and a token swap toward the card background measured 154px,
+    // both comfortably clearing a `>80` floor while the customized `accent-color` itself was
+    // invisible. So the pixel-COUNT assertion alone guards only "the control paints nothing" (a
+    // real but narrower claim); it does NOT guard "the customized `accent-color` renders". The
+    // colour assertion immediately below is what closes that: it reads the checked control's
+    // centre pixel and requires it to resolve to `--sk-color-yellow` specifically, not merely to
+    // differ from the unchecked control's colour.
     const { group } = await openStory(page, "default");
     const controls = group.getByRole("radio");
     await expect(controls).toHaveCount(5);
@@ -1383,13 +1573,33 @@ test.describe("sk-radio-choice-group live native semantics and presentation", ()
       checkedDisabled,
       "the compared pair must hold disabled/enabled constant so checkedness is the only variable",
     ).toBe(uncheckedDisabled);
-    const checkedShot = await controls.nth(0).screenshot();
-    const uncheckedShot = await controls.nth(1).screenshot();
-    const diffPixels = countDifferingPixels(checkedShot, uncheckedShot);
+    const [checkedShot, uncheckedShot] = await screenshotControlPair(
+      page,
+      controls.nth(0),
+      controls.nth(1),
+    );
+    const diffFraction = differingPixelFraction(checkedShot, uncheckedShot);
     expect(
-      diffPixels,
-      `checked vs. unchecked control differed by only ${diffPixels} pixel(s) in normal colours — ` +
-        "the check indicator is not visibly rendered",
-    ).toBeGreaterThan(80);
+      diffFraction,
+      `checked vs. unchecked control differed by only ${(diffFraction * 100).toFixed(1)}% of ` +
+        "pixels in normal colours — the check indicator is not visibly rendered",
+    ).toBeGreaterThan(0.2);
+
+    // The token-colour half: the same pattern already used for `--sk-color-red` on the legend
+    // (see `legendCueOf`'s live-resolved comparison above) applied to the checked control's own
+    // rendered fill, so a regression that leaves SOME visible glyph but the WRONG colour (e.g. the
+    // accent swapped toward the card surface) is caught even though it would not move the pixel
+    // count enough to fail the floor above.
+    const expectedYellow = await resolveTokenColor(page, "--sk-color-yellow");
+    const centre = centrePixel(checkedShot);
+    const channelTolerance = 40;
+    expect(
+      Math.abs(centre.r - expectedYellow.r) <= channelTolerance &&
+        Math.abs(centre.g - expectedYellow.g) <= channelTolerance &&
+        Math.abs(centre.b - expectedYellow.b) <= channelTolerance,
+      `checked control's centre pixel rgb(${centre.r}, ${centre.g}, ${centre.b}) does not ` +
+        `resolve to --sk-color-yellow rgb(${expectedYellow.r}, ${expectedYellow.g}, ` +
+        `${expectedYellow.b})`,
+    ).toBe(true);
   });
 });
