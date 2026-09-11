@@ -7,11 +7,11 @@
     {
       "criterion_id": "FR-001",
       "description": "Verify FR-001 is satisfied",
-      "proof_type": "manual_review",
+      "proof_type": "automated_test",
       "evidence": "apps/storybook/src/tests/visual.spec.ts CLI Auth zoom tests (commit 32ba25a6) drive '200% zoom' via a fresh browser.newContext({baseURL, deviceScaleFactor: 2}) at a halved viewport width, replacing document.documentElement.style.zoom. Proven to actually cross the breakpoint (not just change dsf): the paired padding assertion passed against the real mechanism and failed with 'Expected: < 24, Received: 24' when the test was deliberately run at a viewport that does not cross the breakpoint (forced cliAuthZoomedWidth past the breakpoint), then passed again on revert. The reviewer independently reproduced the identical failure by feeding the zoomed context an unzoomed width (review-cycle-1.md, WP01 approval note).",
       "pass_fail": "pass",
       "verified_by": "claude",
-      "verified_at": "2026-09-11T20:00:56.508436+00:00",
+      "verified_at": "2026-09-11T20:01:15.306701+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
