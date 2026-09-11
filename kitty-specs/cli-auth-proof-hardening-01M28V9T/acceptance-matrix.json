@@ -8,10 +8,10 @@
       "criterion_id": "FR-001",
       "description": "Verify FR-001 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "packages/elements/src/patterns/cli-auth.stories.ts: patternStyles @media max-width changed 390px->480px with a comment recording the deliberate mirror of sk-boundary-page.css's breakpoint (commit b13f33b3, unchanged through subsequent rounds; confirmed present at HEAD 94fff053).",
+      "pass_fail": "pass",
+      "verified_by": "claude-implementer",
+      "verified_at": "2026-09-11T21:32:52.760838+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
