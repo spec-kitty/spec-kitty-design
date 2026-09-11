@@ -18,10 +18,10 @@
       "criterion_id": "FR-002",
       "description": "Verify FR-002 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "The zoom test reads the CLI Auth breakpoint (@media max-width rule + padding token) out of packages/elements/src/patterns/cli-auth.stories.ts at run time via a regex over the real source text, never a hardcoded 390/480 (commit 32ba25a6). If the regex does not match the source, the test throws a descriptive error rather than silently defaulting. Reviewer independently tested the regex against 8 source-shape variants, including the real pending 390px->480px sibling migration, and confirmed it throws on malformed/reformatted input rather than silently defaulting -- 'fails loudly on bad input' is the verified property, not merely 'it parses' (review-cycle-1.md).",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T20:01:22.070663+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
