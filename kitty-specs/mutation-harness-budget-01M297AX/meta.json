@@ -23,6 +23,7 @@
   "purpose_context": "This mission advances mutation harness budget on mission/mutation-harness-budget so stakeholders can track the work from mission creation onward.",
   "purpose_tldr": "mutation harness budget",
   "slug": "mutation-harness-budget-01M297AX",
+  "status_phase": "1",
   "target_branch": "mission/mutation-harness-budget",
   "topology": "single_branch"
 }
