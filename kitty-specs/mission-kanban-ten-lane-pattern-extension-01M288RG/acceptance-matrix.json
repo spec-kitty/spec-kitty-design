@@ -37,11 +37,11 @@
     {
       "criterion_id": "FR-004",
       "description": "Verify FR-004 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "proof_type": "browser test",
+      "evidence": "head 4f301f83; sk-mission-kanban-ten-lane-pattern.spec.ts [T006] K1: 10 lane sections in canonical order, counts 0/2/1/3/2/1/1/4/1/0, 15 cards under committed lanes, native route named by WP id, 'Detailed lane \u00b7 <lane>', profile, independent tracker links, no stage ids; 52/52 Chromium+Firefox.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T13:44:32.566853+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
