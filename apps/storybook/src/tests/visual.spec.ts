@@ -2037,7 +2037,7 @@ for (const visual of missionKanbanTenLaneVisuals) {
     await expect(root).toHaveAttribute('data-play-proof', 'passed');
     await page.evaluate(() => document.fonts.ready);
     await expect(root).not.toBeEmpty();
-    await expect(root).toHaveScreenshot(visual.name, {
+    await expect.soft(root).toHaveScreenshot(visual.name, {
       threshold: 0.02,
       maxDiffPixelRatio: 0.02,
       timeout: 20000,
@@ -2800,7 +2800,7 @@ const connectorsDesktopCases = [
 for (const visual of connectorsDesktopCases) {
   test(`Connectors ${visual.id} — desktop baseline`, async ({ page }) => {
     const root = await connectorsStory(page, visual.id, { width: 1440, height: 1000 });
-    await expect(root).toHaveScreenshot(visual.name, { threshold: 0.02, maxDiffPixelRatio: 0.02, timeout: 20000 });
+    await expect.soft(root).toHaveScreenshot(visual.name, { threshold: 0.02, maxDiffPixelRatio: 0.02, timeout: 20000 });
   });
 }
 
@@ -2821,14 +2821,14 @@ const connectorsNarrowCases = [
 for (const visual of connectorsNarrowCases) {
   test(`Connectors ${visual.id} — narrow 390px baseline`, async ({ page }) => {
     const root = await connectorsStory(page, visual.id, { width: 390, height: 844 });
-    await expect(root).toHaveScreenshot(visual.name, { threshold: 0.02, maxDiffPixelRatio: 0.02, timeout: 20000 });
+    await expect.soft(root).toHaveScreenshot(visual.name, { threshold: 0.02, maxDiffPixelRatio: 0.02, timeout: 20000 });
   });
 }
 
 // Targeted role/error/health/hard-purge-dialog states the issue names explicitly.
 test('Connectors C5 validation — role/error-state baseline', async ({ page }) => {
   const root = await connectorsStory(page, 'c-5-gitlab-group-validation', { width: 1440, height: 900 });
-  await expect(root).toHaveScreenshot('sk-connectors-c5-validation.png', {
+  await expect.soft(root).toHaveScreenshot('sk-connectors-c5-validation.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
     timeout: 20000,
@@ -2837,7 +2837,7 @@ test('Connectors C5 validation — role/error-state baseline', async ({ page }) 
 
 test('Connectors C6 needs_reauth — danger health baseline', async ({ page }) => {
   const root = await connectorsStory(page, 'c-6-installation-health-needs-reauth', { width: 1440, height: 900 });
-  await expect(root).toHaveScreenshot('sk-connectors-c6-health-needs-reauth.png', {
+  await expect.soft(root).toHaveScreenshot('sk-connectors-c6-health-needs-reauth.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
     timeout: 20000,
@@ -2847,7 +2847,7 @@ test('Connectors C6 needs_reauth — danger health baseline', async ({ page }) =
 test('Connectors C8 hard-purge confirm dialog — baseline', async ({ page }) => {
   const root = await connectorsStory(page, 'c-8-project-routing-purge-confirm', { width: 1440, height: 900 });
   await expect(root.locator('sk-confirm-dialog')).toHaveAttribute('open', '');
-  await expect(root).toHaveScreenshot('sk-connectors-c8-purge-confirm-dialog.png', {
+  await expect.soft(root).toHaveScreenshot('sk-connectors-c8-purge-confirm-dialog.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
     timeout: 20000,
@@ -2862,7 +2862,7 @@ test('Connectors C7 local table overflow at 390px — no document-level horizont
   expect(overflowsX, 'no document-level horizontal overflow at 390px — only the local table scroller may scroll').toBe(
     false,
   );
-  await expect(root).toHaveScreenshot('sk-connectors-c7-narrow-table-overflow.png', {
+  await expect.soft(root).toHaveScreenshot('sk-connectors-c7-narrow-table-overflow.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
     timeout: 20000,
@@ -2871,7 +2871,7 @@ test('Connectors C7 local table overflow at 390px — no document-level horizont
 
 test('Connectors LightMode — required system proof baseline', async ({ page }) => {
   const root = await connectorsStory(page, 'light-mode', { width: 1440, height: 900 });
-  await expect(root).toHaveScreenshot('sk-connectors-light-mode.png', {
+  await expect.soft(root).toHaveScreenshot('sk-connectors-light-mode.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
     timeout: 20000,
@@ -2879,10 +2879,11 @@ test('Connectors LightMode — required system proof baseline', async ({ page })
 });
 
 test('Connectors forced colors — C6 danger health baseline', async ({ page, browserName }) => {
+  expect(test.info().config.projects.map((project) => project.name), 'the chromium skip below is keyed on this project name').toContain('chromium');
   test.skip(browserName !== 'chromium', 'Playwright forced-colors emulation is Chromium-owned');
   await page.emulateMedia({ forcedColors: 'active' });
   const root = await connectorsStory(page, 'c-6-installation-health-needs-reauth', { width: 1440, height: 900 });
-  await expect(root).toHaveScreenshot('sk-connectors-forced-colors.png', {
+  await expect.soft(root).toHaveScreenshot('sk-connectors-forced-colors.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
     timeout: 20000,
@@ -2892,7 +2893,7 @@ test('Connectors forced colors — C6 danger health baseline', async ({ page, br
 test('Connectors reduced motion — C3 handoff waiting baseline', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   const root = await connectorsStory(page, 'c-3-handoff-installation-waiting', { width: 1440, height: 900 });
-  await expect(root).toHaveScreenshot('sk-connectors-reduced-motion.png', {
+  await expect.soft(root).toHaveScreenshot('sk-connectors-reduced-motion.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
     timeout: 20000,
@@ -2902,7 +2903,7 @@ test('Connectors reduced motion — C3 handoff waiting baseline', async ({ page 
 test('Connectors RTL — C2 operating index baseline', async ({ page }) => {
   const root = await connectorsStory(page, 'c-2-operating-admin', { width: 1440, height: 900 });
   await page.evaluate(() => document.documentElement.setAttribute('dir', 'rtl'));
-  await expect(root).toHaveScreenshot('sk-connectors-rtl.png', { threshold: 0.02, maxDiffPixelRatio: 0.02, timeout: 20000 });
+  await expect.soft(root).toHaveScreenshot('sk-connectors-rtl.png', { threshold: 0.02, maxDiffPixelRatio: 0.02, timeout: 20000 });
 });
 
 test('Connectors 200% zoom — C8 project routing baseline, no document-level horizontal overflow', async ({ page }) => {
@@ -2914,7 +2915,7 @@ test('Connectors 200% zoom — C8 project routing baseline, no document-level ho
     () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
   );
   expect(overflowsX, 'no document-level horizontal overflow at 200% zoom').toBe(false);
-  await expect(root).toHaveScreenshot('sk-connectors-zoom-200.png', {
+  await expect.soft(root).toHaveScreenshot('sk-connectors-zoom-200.png', {
     threshold: 0.02,
     maxDiffPixelRatio: 0.02,
     timeout: 20000,

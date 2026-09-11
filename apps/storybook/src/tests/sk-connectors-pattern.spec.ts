@@ -659,6 +659,7 @@ test.describe('Viewport and preference coverage', () => {
   });
 
   test('forced colors: C6 danger status keeps a visible, non-color-only distinction', async ({ page, browserName }) => {
+    expect(test.info().config.projects.map((project) => project.name), 'the chromium skip below is keyed on this project name').toContain('chromium');
     test.skip(browserName !== 'chromium', 'Playwright forced-colors emulation is Chromium-owned');
     await page.emulateMedia({ forcedColors: 'active' });
     const root = await loadStory(page, 'c-6-installation-health-needs-reauth');
