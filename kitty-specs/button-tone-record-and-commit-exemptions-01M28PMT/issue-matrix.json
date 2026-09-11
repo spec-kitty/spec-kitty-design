@@ -13,7 +13,7 @@
       "wp": "WP01"
     },
     "#348": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "Referenced in ADR-17's 'Related: #348' section as the same tone-set-is-not-first-class defect family (busy cue hardcoded to .sk-button--primary). Explicitly not fixed by this mission.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -21,8 +21,8 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "verdict": "deferred-with-followup",
+      "wp": "WP01"
     },
     "#403": {
       "evidence_ref": "docs/architecture/decisions/2026-09-11-17-sk-button-tone-intensity-flattening.md (ADR-17, Status: Proposed), indexed in docs/architecture/README.md; node scripts/check-adr-index.mjs passes",
