@@ -38,10 +38,10 @@
       "criterion_id": "FR-004",
       "description": "Verify FR-004 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "nearMisses extended with 6 bounded near-miss cases (2 per pattern); all assert isIgnored()===false and the harness passes; red-first proof executed: an unanchored/open-vocab variant of the tracer pattern was shown (ad hoc node script) to wrongly ignore all 3 tracer near-misses",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T17:11:50.390773+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
