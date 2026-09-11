@@ -407,12 +407,13 @@ test('[T006] the module stays story-only, owns no application machinery, and imp
   for (const [property, value] of colourDeclarations(forcedStyles)) {
     expect(value, `${property} under forced colors`).toMatch(/^(?:var\(--sk-[\w-]+\)|CanvasText|Canvas|Highlight|HighlightText|LinkText|ButtonText|ButtonBorder|GrayText)$/);
   }
-  // Typography and stacking come from tokens too. Colour-bearing and physical multi-value
-  // shorthands are refused outright: a shorthand can smuggle a raw colour or a single side.
-  for (const [, property, value] of styles.matchAll(/(?:^|[\s;{])(font-weight|font-size|line-height|letter-spacing|z-index)\s*:\s*([^;}]+)/g)) {
+  // Typography and stacking come from tokens too. Colour-bearing, typography and physical
+  // multi-value shorthands are refused outright: a shorthand can smuggle a raw colour, a raw
+  // font size or family, or a single side.
+  for (const [, property, value] of styles.matchAll(/(?:^|[\s;{])(font-family|font-weight|font-size|line-height|letter-spacing|z-index)\s*:\s*([^;}]+)/g)) {
     expect(value!.trim(), `${property} must be a token`).toMatch(/^var\(--sk-[\w-]+\)$/);
   }
-  expect(styles).not.toMatch(/(?:^|[\s;{])(?:outline|border|border-block|border-inline|border-block-start|border-block-end|border-inline-start|border-inline-end|box-shadow|text-decoration)\s*:/m);
+  expect(styles).not.toMatch(/(?:^|[\s;{])(?:outline|border|border-block|border-inline|border-block-start|border-block-end|border-inline-start|border-inline-end|box-shadow|text-decoration|font)\s*:/m);
   expect(styles).not.toMatch(/(?:^|[\s;{])(?:margin|padding|inset)\s*:\s*[^\s;}]+\s+[^\s;}]+\s+[^\s;}]+/m);
   expect([...new Set(styles.match(/\d+vh\b/g) ?? [])]).toEqual(['100vh']);
   expect(styles).not.toMatch(/\.sk-(?:action-row|app-shell|workflow-board|workflow-lane|notice|status-indicator|pill-tag|button|context-nav|breadcrumbs|disclosure|checkbox-choice-group|empty-state)[\w-]*\s*[{,:]/);
@@ -489,11 +490,11 @@ test('[T006] every rendered string and accessible name is supplied by a fixture'
 // inside its ${} expressions; attribute writes from script are held to the same rule. The runtime
 // audit cannot tell a hard-coded 'Presence · unverified' from the fixture value it duplicates.
 const ALLOWED_EXPRESSION_LITERALS = new Set(['', ' sk-light', 'rtl', 'page']);
-// A script-side attribute write is copy only when a literal value lands in a user-facing
-// attribute; test hooks (`data-play-proof`) and ARIA tokens (`role="region"`) are not copy.
-const USER_FACING_ATTRIBUTES = new Set([
-  'aria-label', 'aria-description', 'aria-roledescription', 'title', 'alt', 'placeholder', 'label', 'message',
-]);
+// A script-side attribute write is copy unless it targets a token attribute: test hooks
+// (`data-play-proof`), `role`, `tabindex` and ARIA state. Any other attribute, including one named
+// by a variable, takes its whole value from the fixture: a literal anywhere in the value
+// expression (`name || 'Kanban lanes'`) is copy.
+const TOKEN_ATTRIBUTE = /^(?:data-[a-z][\w-]*|role|tabindex|dir|hidden|inert|aria-(?:hidden|expanded|current|pressed|checked|selected|disabled|busy|live|atomic|relevant|haspopup|controls|describedby|labelledby|owns|level|posinset|setsize|orientation|invalid|required|readonly|modal))$/;
 
 function scanRenderCode(text: string): { templates: number; offenders: string[] } {
   const file = ts.createSourceFile('scan.ts', text, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
@@ -513,6 +514,10 @@ function scanRenderCode(text: string): { templates: number; offenders: string[] 
     }
     ts.forEachChild(node, literalsIn);
   };
+  const carriesCopy = (node: ts.Node): boolean =>
+    ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node)
+      ? node.text !== ''
+      : ts.isTemplateExpression(node) || (ts.forEachChild(node, carriesCopy) ?? false);
   const visit = (node: ts.Node): void => {
     if (isHtml(node)) {
       const template = node.template;
@@ -525,11 +530,9 @@ function scanRenderCode(text: string): { templates: number; offenders: string[] 
     }
     if (ts.isCallExpression(node) && ts.isPropertyAccessExpression(node.expression) && node.expression.name.text === 'setAttribute') {
       const [name, value] = node.arguments;
-      const literalText = (argument?: ts.Expression): string | undefined =>
-        argument && (ts.isStringLiteral(argument) || ts.isNoSubstitutionTemplateLiteral(argument)) ? argument.text : undefined;
-      const attribute = literalText(name);
-      if (attribute && USER_FACING_ATTRIBUTES.has(attribute) && value && (literalText(value) !== undefined || ts.isTemplateExpression(value))) {
-        offenders.push(`setAttribute literal copy: ${attribute}`);
+      const attribute = name && (ts.isStringLiteral(name) || ts.isNoSubstitutionTemplateLiteral(name)) ? name.text : undefined;
+      if (value && !(attribute && TOKEN_ATTRIBUTE.test(attribute)) && carriesCopy(value)) {
+        offenders.push(`setAttribute literal copy: ${attribute ?? name?.getText()}`);
       }
     }
     ts.forEachChild(node, visit);
@@ -564,11 +567,14 @@ test('[T006] render code holds no copy: template text, attributes, expression li
     "html`<i aria-roledescription=${'lane'}></i>`",
     "element.setAttribute('aria-label', 'Kanban lanes');",
     "element.setAttribute('title', `Mission ${id}`);",
+    "scroller.setAttribute('aria-label', name || 'Kanban lanes');",
+    "element.setAttribute(attribute, 'Kanban lanes');",
+    "meter.setAttribute('aria-valuetext', 'Three of ten');",
   ]) {
     expect(scanRenderCode(probe).offenders, `self-probe must go red: ${probe}`).not.toEqual([]);
   }
   expect(scanRenderCode("html`<p class=\"x${light ? ' sk-light' : ''}\" dir=${rtl ? 'rtl' : nothing} aria-label=${name}>${copy.label}</p>`").offenders).toEqual([]);
-  expect(scanRenderCode("root.setAttribute('data-play-proof', 'passed'); scroller.setAttribute('role', 'region'); scroller.setAttribute('aria-label', name);").offenders).toEqual([]);
+  expect(scanRenderCode("root.setAttribute('data-play-proof', 'passed'); scroller.setAttribute('role', 'region'); scroller.setAttribute('tabindex', '0'); scroller.setAttribute('aria-label', name ?? '');").offenders).toEqual([]);
   const source = readFileSync(SOURCE, 'utf8');
   const { templates, offenders } = scanRenderCode(source);
   expect(templates, 'every html template in the module is reached').toBe((source.match(/\bhtml`/g) ?? []).length);
