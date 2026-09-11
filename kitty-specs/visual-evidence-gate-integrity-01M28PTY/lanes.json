@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "mission_slug": "visual-evidence-gate-integrity-01M28PTY",
+  "mission_id": "01M28PTYX8J026ZVM7C503PCQE",
+  "mission_branch": "kitty/mission-visual-evidence-gate-integrity-01M28PTY",
+  "target_branch": "mission/visual-evidence-gate-integrity",
+  "lanes": [
+    {
+      "lane_id": "lane-a",
+      "wp_ids": [
+        "WP01"
+      ],
+      "write_scope": [
+        "src/tests/**"
+      ],
+      "predicted_surfaces": [
+        "api",
+        "artifact-rendering",
+        "tracker-integration"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    }
+  ],
+  "computed_at": "2026-09-11T17:19:01.823485+00:00",
+  "computed_from": "dependency_graph+ownership",
+  "planning_artifact_wps": [],
+  "planning_commit_sha": "6e0f5cd375a697d336dbb8c10ba7f1adca15b7af"
+}

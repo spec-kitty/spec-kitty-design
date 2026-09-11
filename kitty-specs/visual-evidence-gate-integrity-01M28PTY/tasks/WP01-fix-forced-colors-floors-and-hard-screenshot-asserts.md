@@ -1,6 +1,6 @@
 ---
 work_package_id: WP01
-title: Fix #401's missing chromium-project floors and #367's hard multi-screenshot assertions, with a regression gate for the latter
+title: Fix
 dependencies: []
 requirement_refs:
 - FR-001
@@ -16,7 +16,7 @@ requirement_refs:
 - C-003
 planning_base_branch: mission/visual-evidence-gate-integrity
 merge_target_branch: mission/visual-evidence-gate-integrity
-branch_strategy: Planning artifacts for this mission were generated on mission/visual-evidence-gate-integrity (single_branch topology). Implementation happens directly on this branch; there is no separate lane branch to merge back.
+branch_strategy: Planning artifacts for this mission were generated on mission/visual-evidence-gate-integrity. During /spec-kitty.implement this WP may branch from a dependency-specific base, but completed changes must merge back into mission/visual-evidence-gate-integrity unless the human explicitly redirects the landing branch.
 base_branch: mission/visual-evidence-gate-integrity
 base_commit: e7a721739d3bb4ef71d0f4ffb0cebfe4616849f8
 created_at: '2026-09-11T19:30:00Z'
@@ -33,13 +33,17 @@ subtasks:
 - T010
 - T011
 phase: Phase 1 - Fix and gate
-assignee: ""
-agent: ""
-shell_pid: ""
 history:
-  - timestamp: "2026-09-11T19:30:00Z"
-    agent: "system"
-    action: "WP authored by hand following the connectors-pattern-stories precedent, per instruction that spec-kitty tasks --json overwrites hand-authored tasks.md prose"
+- timestamp: '2026-09-11T19:30:00Z'
+  agent: system
+  action: WP authored by hand following the connectors-pattern-stories precedent, per instruction that spec-kitty tasks --json overwrites hand-authored tasks.md prose
+authoritative_surface: src/tests/
+create_intent: []
+execution_mode: code_change
+owned_files:
+- src/tests/**
+tags: []
+tracker_refs: []
 ---
 
 # Work Package Prompt: WP01 - Fix #401 and #367, with a regression gate for #367
