@@ -343,6 +343,146 @@ export function selectGithubAppFailureProjection(
 }
 
 // ---------------------------------------------------------------------------------------------
+// C5 — GitLab exactly-one group selection (unblocked 2026-09-11: #336 merged to train as
+// `0a232a01`). Composes the now-public `.sk-radio-choice-group` class family
+// (`packages/styles/src/radio-choice-group/`) from its documented markup contract only — no CSS
+// or internals read from that family beyond its own shipped `.html` exemplars, which this fixture
+// paraphrases the SHAPE of, not the copy. FR-013: only this canvas exposes another-group
+// connection and exactly-one selection; no other canvas in this mission renders a radio group.
+// ---------------------------------------------------------------------------------------------
+
+export type GitlabGroup = Readonly<{ id: string; name: string; display: string }>;
+
+export type GitlabGroupSelectionState = 'populated' | 'no-groups' | 'validation' | 'connected-refresh-failed';
+
+export type GitlabGroupFixture = Readonly<{
+  team: Readonly<{ name: string; slug: string }>;
+  installationUuid: string;
+  groups: ReadonlyArray<GitlabGroup>;
+  /** The already-connected group, present only for the connected-refresh-failed state. Backend
+   * supplied; never inferred from `groups` (which may not even include it after a refresh). */
+  connectedGroup: GitlabGroup | null;
+  selectionMethod: 'POST';
+  selectionPath: string;
+  refreshMethod: 'POST';
+  refreshPath: string;
+  failures: Readonly<{ missing: string; manualRefresh: string; list: string }>;
+}>;
+
+export type GitlabGroupProjection = Readonly<{
+  team: Readonly<{ name: string; slug: string }>;
+  state: GitlabGroupSelectionState;
+  groups: ReadonlyArray<GitlabGroup>;
+  connectedGroup: GitlabGroup | null;
+  selectionMethod: 'POST';
+  selectionPath: string;
+  refreshMethod: 'POST';
+  refreshPath: string;
+  /** Non-null only for `validation` (the missing-selection message) and `connected-refresh-failed`
+   * (the manual-refresh failure) — `populated` and `no-groups` show no error. */
+  failureMessage: string | null;
+}>;
+
+/** Pure. Never renders a success message for any state — FR-005/FR-013's "no submission-success
+ * theater" boundary — because no state this function can select carries one. */
+export function selectGitlabGroupProjection(
+  fixture: GitlabGroupFixture,
+  state: GitlabGroupSelectionState,
+): GitlabGroupProjection {
+  const shared = {
+    team: fixture.team,
+    selectionMethod: fixture.selectionMethod,
+    selectionPath: fixture.selectionPath,
+    refreshMethod: fixture.refreshMethod,
+    refreshPath: fixture.refreshPath,
+  };
+  switch (state) {
+    case 'populated':
+      return { ...shared, state, groups: fixture.groups, connectedGroup: null, failureMessage: null };
+    case 'no-groups':
+      return { ...shared, state, groups: [], connectedGroup: null, failureMessage: null };
+    case 'validation':
+      return { ...shared, state, groups: fixture.groups, connectedGroup: null, failureMessage: fixture.failures.missing };
+    case 'connected-refresh-failed':
+      return {
+        ...shared,
+        state,
+        groups: [],
+        connectedGroup: fixture.connectedGroup,
+        failureMessage: fixture.failures.manualRefresh,
+      };
+  }
+}
+
+// ---------------------------------------------------------------------------------------------
+// C9b — Slack public-channel selection (unblocked 2026-09-11: #321's input contrast/target-size
+// contract landed as PR #339 — moot for this canvas specifically, since the picker is a native
+// `<select>` via `.sk-form-select`, never `.sk-input`; the corpus's own
+// `excluded_actions_and_capabilities` list confirms no search/filter text input exists). FR-012:
+// outbound-only — no preview, readback, delivery-test, or private-channel capability anywhere.
+// ---------------------------------------------------------------------------------------------
+
+export type SlackChannel = Readonly<{ id: string; name: string }>;
+
+export type SlackChannelPickerState = 'populated' | 'empty' | 'refused' | 'rate-limited' | 'incomplete';
+
+export type SlackChannelPickerFixture = Readonly<{
+  team: Readonly<{ name: string; slug: string }>;
+  workspaceName: string;
+  choosePath: string;
+  laterPath: string;
+  projections: Readonly<
+    Record<
+      SlackChannelPickerState,
+      Readonly<{
+        channels: ReadonlyArray<SlackChannel>;
+        selectedChannelId: string;
+        channelsComplete: boolean;
+        errorMessage: string | null;
+      }>
+    >
+  >;
+}>;
+
+export type SlackChannelPickerProjection = Readonly<{
+  team: Readonly<{ name: string; slug: string }>;
+  workspaceName: string;
+  state: SlackChannelPickerState;
+  choosePath: string;
+  laterPath: string;
+  channels: ReadonlyArray<SlackChannel>;
+  /** `"<id>|<name>"`, matching the corpus's own `option_contract.submitted_value` — evidence
+   * only, never submitted by this module. */
+  options: ReadonlyArray<Readonly<{ value: string; label: string; selected: boolean }>>;
+  channelsComplete: boolean;
+  errorMessage: string | null;
+}>;
+
+/** Pure. */
+export function selectSlackChannelPickerProjection(
+  fixture: SlackChannelPickerFixture,
+  state: SlackChannelPickerState,
+): SlackChannelPickerProjection {
+  // eslint-disable-next-line security/detect-object-injection -- key is the literal union type SlackChannelPickerState
+  const projection = fixture.projections[state];
+  return {
+    team: fixture.team,
+    workspaceName: fixture.workspaceName,
+    state,
+    choosePath: fixture.choosePath,
+    laterPath: fixture.laterPath,
+    channels: projection.channels,
+    options: projection.channels.map((channel) => ({
+      value: `${channel.id}|${channel.name}`,
+      label: channel.name,
+      selected: channel.id === projection.selectedChannelId,
+    })),
+    channelsComplete: projection.channelsComplete,
+    errorMessage: projection.errorMessage,
+  };
+}
+
+// ---------------------------------------------------------------------------------------------
 // The one fixture family (FR-017) — deep-frozen so no consumer of it can mutate shared state.
 // ---------------------------------------------------------------------------------------------
 
@@ -351,6 +491,8 @@ export type ConnectorsFixture = Readonly<{
   operating: OperatingFixture;
   handoff: HandoffFixture;
   githubAppFailure: GithubAppFailureFixture;
+  gitlabGroup: GitlabGroupFixture;
+  slackChannelPicker: SlackChannelPickerFixture;
 }>;
 
 /** Recursively freezes an object graph. Mirrors the freeze helper convention established by
@@ -473,6 +615,74 @@ const RAW_CONNECTORS_FIXTURE: ConnectorsFixture = {
         backHref: null,
       },
     ],
+  },
+  gitlabGroup: {
+    team: { name: 'GL Select Team', slug: 'gl-select-team' },
+    installationUuid: '00000000-0000-4000-8000-000000000005',
+    groups: [
+      { id: '2001', name: 'acme', display: 'Acme' },
+      { id: '2002', name: 'acme/platform', display: 'Acme / Platform' },
+    ],
+    connectedGroup: { id: '2001', name: 'acme', display: 'Acme' },
+    selectionMethod: 'POST',
+    selectionPath: '/a/gl-select-team/connectors/install/00000000-0000-4000-8000-000000000005/gitlab-group/',
+    refreshMethod: 'POST',
+    refreshPath: '/a/gl-select-team/connectors/install/00000000-0000-4000-8000-000000000005/gitlab-refresh/',
+    failures: {
+      missing: 'Please choose a GitLab group.',
+      manualRefresh: 'Failed to refresh repositories. Please try again.',
+      list: 'Could not list your GitLab groups. Please try reconnecting.',
+    },
+  },
+  slackChannelPicker: {
+    team: { name: 'State Machine Team', slug: 'sm-team' },
+    workspaceName: 'Collaborative Demo Workspace',
+    choosePath: '/a/sm-team/connectors/slack/channels/choose/',
+    laterPath: '/a/sm-team/connectors/',
+    projections: {
+      populated: {
+        channels: [
+          { id: 'C01GENERAL', name: 'general' },
+          { id: 'C02ENGINEERING', name: 'engineering' },
+          { id: 'C03TEAMMOMENTS', name: 'team-moments' },
+          { id: 'C04PRODUCTUPDATES', name: 'product-updates' },
+          { id: 'C05RELEASEROOM', name: 'release-room' },
+        ],
+        selectedChannelId: 'C03TEAMMOMENTS',
+        channelsComplete: true,
+        errorMessage: null,
+      },
+      empty: {
+        channels: [],
+        selectedChannelId: '',
+        channelsComplete: true,
+        errorMessage: null,
+      },
+      refused: {
+        channels: [],
+        selectedChannelId: '',
+        channelsComplete: true,
+        errorMessage:
+          'Could not read your Slack channels (invalid_auth). Disconnect and connect Slack again; if it keeps failing, the app may need reinstalling in your workspace.',
+      },
+      'rate-limited': {
+        channels: [],
+        selectedChannelId: '',
+        channelsComplete: true,
+        errorMessage: "Slack is asking us to slow down. Try reloading this page in a moment — this isn't a problem with your connection.",
+      },
+      incomplete: {
+        channels: [
+          { id: 'C01GENERAL', name: 'general' },
+          { id: 'C03TEAMMOMENTS', name: 'team-moments' },
+          { id: 'C05RELEASEROOM', name: 'release-room' },
+        ],
+        selectedChannelId: 'C03TEAMMOMENTS',
+        channelsComplete: false,
+        errorMessage:
+          'This workspace has more channels than we could load in time. The list below may be incomplete — reload this page to try again.',
+      },
+    },
   },
 };
 

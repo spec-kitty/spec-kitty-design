@@ -57,12 +57,13 @@ test('fixture and stories keep the pattern outside the public element and applic
   // FR-014: /discovery/ never appears as a link target.
   expect(source).not.toMatch(/href=.*\/discovery\//);
   // FR-018: forms are mutation-free — every form present intercepts its own submit.
-  // Two real rendered forms (C2's disconnect form, C3's entry form) — counted from the template
-  // markup only, not from doc-comment mentions of `<form>` (the header comments above legitimately
-  // discuss forms in prose, which a naive "<form" substring count would over-count).
+  // Five real rendered forms (C2's disconnect form, C3's entry form, C5's selection and refresh
+  // forms, C9b's choose form) — counted from the template markup only, not from doc-comment
+  // mentions of `<form>` (the header comments above legitimately discuss forms in prose, which a
+  // naive "<form" substring count would over-count).
   const preventDefaultCount = (storiesSource.match(/@submit=\$\{\(event: Event\) => event\.preventDefault\(\)\}/g) ?? [])
     .length;
-  expect(preventDefaultCount).toBe(2);
+  expect(preventDefaultCount).toBe(5);
 });
 
 // -------------------------------------------------------------------------------------------
@@ -168,6 +169,117 @@ test.describe('C4 — GitHub App setup failure', () => {
   test('has zero WCAG 2.1 AA violations', async ({ page }) => {
     await loadStory(page, 'c-4-github-app-failure-resolved-team');
     await axeIsClean(page, 'c-4-github-app-failure-resolved-team');
+  });
+});
+
+test.describe('C5 — GitLab exactly-one group selection', () => {
+  test('populated: exactly-one native radio semantics, no pre-checked selection', async ({ page }) => {
+    const root = await loadStory(page, 'c-5-gitlab-group-populated');
+    const radios = root.locator('input[type="radio"]');
+    await expect(radios).toHaveCount(2);
+    const name0 = await radios.nth(0).getAttribute('name');
+    const name1 = await radios.nth(1).getAttribute('name');
+    expect(name0).toBe(name1); // one shared `name` — the browser owns exactly-one selection
+    await expect(root.locator('input[type="radio"]:checked')).toHaveCount(0);
+    await expect(root.locator('fieldset.sk-radio-choice-group')).toHaveCount(1);
+  });
+
+  test('no-groups: honest empty state, no radio group rendered', async ({ page }) => {
+    const root = await loadStory(page, 'c-5-gitlab-group-no-groups');
+    await expect(root.locator('fieldset.sk-radio-choice-group')).toHaveCount(0);
+    await expect(root.locator('.sk-empty-state')).toHaveCount(1);
+  });
+
+  test('validation: missing-selection message present, form still evidence-only', async ({ page }) => {
+    const root = await loadStory(page, 'c-5-gitlab-group-validation');
+    await expect(root.locator('sk-notice', { hasText: 'Please choose a GitLab group' })).toBeVisible();
+    await expect(root.locator('form[data-mutation-free="true"]')).toHaveAttribute(
+      'action',
+      '/a/gl-select-team/connectors/install/00000000-0000-4000-8000-000000000005/gitlab-group/',
+    );
+  });
+
+  test('connected-refresh-failed: shows the connected group and the refresh failure, no picker', async ({ page }) => {
+    const root = await loadStory(page, 'c-5-gitlab-group-connected-refresh-failed');
+    await expect(root.locator('fieldset.sk-radio-choice-group')).toHaveCount(0);
+    await expect(root.locator('sk-notice', { hasText: 'Connected group: Acme' })).toBeVisible();
+    await expect(root.locator('sk-notice', { hasText: 'Failed to refresh repositories' })).toBeVisible();
+  });
+
+  test('no submission-success theater: submitting never shows a success message and never navigates', async ({
+    page,
+  }) => {
+    const root = await loadStory(page, 'c-5-gitlab-group-populated');
+    const before = page.url();
+    await root.locator('input[type="radio"]').first().check();
+    await root.locator('form button[type="submit"]').click();
+    await page.waitForTimeout(250);
+    expect(page.url()).toBe(before);
+    await expect(root.getByText(/success|connected successfully/i)).toHaveCount(0);
+  });
+
+  test('only C5 exposes another-group connection / exactly-one selection (FR-013)', async ({ page }) => {
+    for (const id of [
+      'c-1-setup-admin-empty',
+      'c-2-operating-admin',
+      'c-3-handoff-installation-waiting',
+      'c-4-github-app-failure-resolved-team',
+      'c-9-b-slack-channel-populated',
+    ]) {
+      const root = await loadStory(page, id);
+      await expect(root.locator('input[type="radio"]')).toHaveCount(0);
+    }
+  });
+
+  test('has zero WCAG 2.1 AA violations', async ({ page }) => {
+    await loadStory(page, 'c-5-gitlab-group-populated');
+    await axeIsClean(page, 'c-5-gitlab-group-populated');
+  });
+});
+
+test.describe('C9b — Slack public-channel selection', () => {
+  test('populated: native select, option contract is "<id>|<name>"', async ({ page }) => {
+    const root = await loadStory(page, 'c-9-b-slack-channel-populated');
+    const select = root.locator('select.sk-form-select');
+    await expect(select).toHaveCount(1);
+    await expect(select.locator('option')).toHaveCount(6); // placeholder + 5 channels
+    await expect(select.locator('option[value="C03TEAMMOMENTS|team-moments"]')).toHaveAttribute(
+      'value',
+      'C03TEAMMOMENTS|team-moments',
+    );
+  });
+
+  test('empty: honest empty state, no select rendered', async ({ page }) => {
+    const root = await loadStory(page, 'c-9-b-slack-channel-empty');
+    await expect(root.locator('select.sk-form-select')).toHaveCount(0);
+    await expect(root.locator('.sk-empty-state')).toHaveCount(1);
+  });
+
+  test('refused: shows the exact refusal message', async ({ page }) => {
+    const root = await loadStory(page, 'c-9-b-slack-channel-refused');
+    await expect(root.locator('sk-notice', { hasText: 'invalid_auth' })).toBeVisible();
+  });
+
+  test('rate-limited: shows the exact rate-limit message', async ({ page }) => {
+    const root = await loadStory(page, 'c-9-b-slack-channel-rate-limited');
+    await expect(root.locator('sk-notice', { hasText: 'asking us to slow down' })).toBeVisible();
+  });
+
+  test('incomplete: shows the incomplete-enumeration notice alongside the partial list', async ({ page }) => {
+    const root = await loadStory(page, 'c-9-b-slack-channel-incomplete');
+    await expect(root.locator('sk-notice', { hasText: 'may be incomplete' })).toBeVisible();
+    await expect(root.locator('select option')).toHaveCount(4); // placeholder + 3 channels
+  });
+
+  test('outbound-only: no inbound preview, readback, or delivery-test control anywhere (FR-012)', async ({ page }) => {
+    const root = await loadStory(page, 'c-9-b-slack-channel-populated');
+    await expect(root.getByRole('button', { name: /preview|readback|test post|delivery test/i })).toHaveCount(0);
+    await expect(root.getByRole('textbox')).toHaveCount(0); // no search/filter input exists
+  });
+
+  test('has zero WCAG 2.1 AA violations', async ({ page }) => {
+    await loadStory(page, 'c-9-b-slack-channel-populated');
+    await axeIsClean(page, 'c-9-b-slack-channel-populated');
   });
 });
 

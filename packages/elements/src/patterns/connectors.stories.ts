@@ -1,20 +1,27 @@
 /**
- * CONNECTORS PATTERN STORIES — unblocked scope (C1-C4 only), mission #338.
+ * CONNECTORS PATTERN STORIES — mission #338.
  *
- * Composes C1 (setup index), C2 (operating index), C3 (provider authorization handoff), and C4
- * (GitHub App setup failure) from public `@spec-kitty/elements` custom elements and native HTML
- * semantics only. C5-C9b are deliberately absent — see `connectors.fixture.ts`'s header and
- * `kitty-specs/connectors-pattern-stories-01M26947/tasks.md` (T008-T011).
+ * Composes C1 (setup index), C2 (operating index), C3 (provider authorization handoff), C4
+ * (GitHub App setup failure), C5 (GitLab exactly-one group selection), and C9b (Slack public-
+ * channel selection) from public `@spec-kitty/elements`/`@spec-kitty/styles` surfaces and native
+ * HTML semantics only. **C6, C7, C8, and C9a remain deliberately absent** — held on `.sk-section-
+ * nav` (#337), which is not yet on the train (PR #368, gate running). Do not stub it, do not copy
+ * it from another checkout, do not fork its API. See `connectors.fixture.ts`'s header and
+ * `kitty-specs/connectors-pattern-stories-01M26947/tasks.md` (T009 stays blocked; T008/T010, C5
+ * and C9b, are now complete since #336 merged to train as `0a232a01` and #321 landed as PR #339).
  *
  * PUBLIC SURFACES COMPOSED: `sk-page-header`, `sk-card[status]`, `sk-status-indicator`,
  * `sk-notice`, `sk-button` (element form for the off-site "Manage on GitHub" link; native
- * `class="sk-button sk-button--*"` CSS-only form for the two in-form submit controls, since a
- * `<button>` inside `sk-button`'s shadow root cannot participate in an ancestor light-DOM
- * `<form>` — ADR-9 §4's exact finding, reused here rather than rediscovered), `sk-action-row`
- * (its already-public `controls` slot — see the #307 finding in research.md), plus native
- * `<h1>`/`<form>`/`<a>`/`<dl>` semantics and the documented `.sk-empty-state` CSS family. No
- * shadow-root reach, no duplicated component CSS, no undeclared `::part()` — enforced by
- * `scripts/check-pattern-composition.mjs` (#259).
+ * `class="sk-button sk-button--*"` CSS-only form for in-form submit controls, since a `<button>`
+ * inside `sk-button`'s shadow root cannot participate in an ancestor light-DOM `<form>` — ADR-9
+ * §4's exact finding, reused here rather than rediscovered), `sk-action-row` (its already-public
+ * `controls` slot), `.sk-radio-choice-group` (C5 — native `fieldset`/`legend`/`label`/
+ * `input[type=radio]` with the family's documented classes only, no CSS or internals read from
+ * its package), `.sk-form-select`/`.sk-form-field` (C9b's channel picker — a native `<select>`;
+ * #321's contrast/target-size contract governs `.sk-input`, not this component, so it was never
+ * actually load-bearing for C9b), plus native `<h1>`/`<form>`/`<a>`/`<dl>` semantics and the
+ * documented `.sk-empty-state` CSS family. No shadow-root reach, no duplicated component CSS, no
+ * undeclared `::part()` — enforced by `scripts/check-pattern-composition.mjs` (#259).
  *
  * MUTATION-FREE FORMS (FR-018): every `<form>` below is evidence only — this module never submits
  * one. `apps/storybook/src/tests/sk-connectors-pattern.spec.ts` proves that submitting one in a
@@ -32,15 +39,21 @@ import '../action-row/sk-action-row.js';
 import {
   CONNECTORS_FIXTURE,
   selectGithubAppFailureProjection,
+  selectGitlabGroupProjection,
   selectHandoffProjection,
   selectOperatingProjection,
   selectSetupProjection,
+  selectSlackChannelPickerProjection,
   type ConnectorRole,
   type GithubAppFailureProjection,
+  type GitlabGroupProjection,
+  type GitlabGroupSelectionState,
   type HandoffFlow,
   type HandoffProjection,
   type OperatingProjection,
   type SetupProjection,
+  type SlackChannelPickerProjection,
+  type SlackChannelPickerState,
 } from './connectors.fixture.js';
 
 export {
@@ -48,9 +61,11 @@ export {
   deepFreeze,
   healthTone,
   selectGithubAppFailureProjection,
+  selectGitlabGroupProjection,
   selectHandoffProjection,
   selectOperatingProjection,
   selectSetupProjection,
+  selectSlackChannelPickerProjection,
 } from './connectors.fixture.js';
 
 // -------------------------------------------------------------------------------------------
@@ -293,6 +308,144 @@ function renderGithubAppFailure(projection: GithubAppFailureProjection): Templat
 }
 
 // =============================================================================================
+// C5 — GitLab exactly-one group selection (unblocked 2026-09-11, #336 merged as `0a232a01`)
+// =============================================================================================
+
+let gitlabGroupSelectSeq = 0;
+
+/** Public `.sk-radio-choice-group` markup (`packages/styles/src/radio-choice-group/`), composed
+ * from its documented class contract only — `fieldset.sk-radio-choice-group` >
+ * `legend.sk-radio-choice-group__legend` + `div.sk-radio-choice-group__options` >
+ * `label.sk-radio-choice-group__choice` > `input[type=radio].sk-radio-choice-group__control` +
+ * `span.sk-radio-choice-group__label` (+ optional `span.sk-radio-choice-group__secondary-value`).
+ * No selector here writes CSS for that family — every rule is pattern-scoped, and every use of an
+ * owned class is in markup, which `check-pattern-composition.mjs` R3 treats as composition. */
+function renderGitlabGroupChoices(projection: GitlabGroupProjection): TemplateResult {
+  const groupName = `gitlab-group-${(gitlabGroupSelectSeq += 1)}`;
+  return html`<fieldset class="sk-radio-choice-group">
+    <legend class="sk-radio-choice-group__legend">Connect a GitLab group</legend>
+    <div class="sk-radio-choice-group__options">
+      ${projection.groups.map(
+        (group) => html`<label class="sk-radio-choice-group__choice" for="${groupName}-${group.id}"
+          ><input
+            id="${groupName}-${group.id}"
+            class="sk-radio-choice-group__control"
+            type="radio"
+            name=${groupName}
+            value=${group.id}
+          /><span class="sk-radio-choice-group__label">${group.display}</span
+          ><span class="sk-radio-choice-group__secondary-value">${group.name}</span></label
+        >`,
+      )}
+    </div>
+  </fieldset>`;
+}
+
+function renderGitlabGroup(projection: GitlabGroupProjection): TemplateResult {
+  return html`${patternStyles}
+    <section class="sk-connectors-pattern" data-connectors-pattern="c5" data-render-complete="true" aria-labelledby="c5-heading">
+      <sk-page-header>
+        <span slot="eyebrow">${projection.team.name}</span>
+        <h1 id="c5-heading" slot="title">GitLab group selection</h1>
+        <span slot="supporting">Only GitLab connects another group this way — no other provider exposes this choice.</span>
+      </sk-page-header>
+
+      ${projection.state === 'connected-refresh-failed'
+        ? html`<div class="sk-connectors-pattern__section">
+            <sk-notice tone="success" announce="off"
+              >Connected group: ${projection.connectedGroup?.display} (${projection.connectedGroup?.name})</sk-notice
+            >
+            <sk-notice tone="danger" announce="assertive">${projection.failureMessage}</sk-notice>
+            <form
+              class="sk-connectors-pattern__evidence-form"
+              method=${projection.refreshMethod}
+              action=${projection.refreshPath}
+              data-mutation-free="true"
+              @submit=${(event: Event) => event.preventDefault()}
+            >
+              <button type="submit" class="sk-button sk-button--secondary sk-button--sm">Refresh repositories</button>
+            </form>
+          </div>`
+        : projection.state === 'no-groups'
+          ? html`<div class="sk-empty-state">
+              <h3 class="sk-empty-state__heading">No GitLab groups available</h3>
+              <p class="sk-empty-state__body">No groups were returned for this GitLab account.</p>
+            </div>`
+          : html`<form
+              class="sk-connectors-pattern__evidence-form"
+              method=${projection.selectionMethod}
+              action=${projection.selectionPath}
+              data-mutation-free="true"
+              @submit=${(event: Event) => event.preventDefault()}
+            >
+              ${projection.state === 'validation' && projection.failureMessage
+                ? html`<sk-notice tone="danger" announce="assertive">${projection.failureMessage}</sk-notice>`
+                : nothing}
+              ${renderGitlabGroupChoices(projection)}
+              <button type="submit" class="sk-button sk-button--primary sk-button--sm">Connect group</button>
+            </form>`}
+    </section>`;
+}
+
+// =============================================================================================
+// C9b — Slack public-channel selection (unblocked 2026-09-11, #321 landed as PR #339)
+// =============================================================================================
+
+function renderSlackChannelPicker(projection: SlackChannelPickerProjection): TemplateResult {
+  const fieldId = 'slack-channel-select';
+  return html`${patternStyles}
+    <section class="sk-connectors-pattern" data-connectors-pattern="c9b" data-render-complete="true" aria-labelledby="c9b-heading">
+      <sk-page-header>
+        <span slot="eyebrow">${projection.team.name}</span>
+        <h1 id="c9b-heading" slot="title">Choose a Slack channel</h1>
+        <span slot="supporting">Team Kitty will post team moments here. Outbound only — no message preview or readback.</span>
+      </sk-page-header>
+
+      ${projection.errorMessage
+        ? html`<sk-notice
+            tone=${projection.state === 'rate-limited' || projection.state === 'incomplete' ? 'attention' : 'danger'}
+            announce="assertive"
+            >${projection.errorMessage}</sk-notice
+          >`
+        : nothing}
+
+      ${projection.channels.length === 0 && !projection.errorMessage
+        ? html`<div class="sk-empty-state">
+            <h3 class="sk-empty-state__heading">No public channels found</h3>
+            <p class="sk-empty-state__body">No public channels were returned for ${projection.workspaceName}.</p>
+          </div>`
+        : projection.channels.length > 0
+          ? html`<form
+              class="sk-connectors-pattern__evidence-form"
+              method="post"
+              action=${projection.choosePath}
+              data-mutation-free="true"
+              @submit=${(event: Event) => event.preventDefault()}
+            >
+              <div class="sk-form-field">
+                <label class="sk-form-field__label" for=${fieldId}>Public channel</label>
+                <select class="sk-form-select" id=${fieldId} name="channel">
+                  <option value="" ?selected=${!projection.options.some((option) => option.selected)}>
+                    — choose a channel —
+                  </option>
+                  ${projection.options.map(
+                    (option) =>
+                      html`<option value=${option.value} ?selected=${option.selected}>${option.label}</option>`,
+                  )}
+                </select>
+                <span class="sk-form-field__description"
+                  >Public channels of ${projection.workspaceName}. If the chosen channel shows no posts, invite the
+                  app to it once — Slack only lets the app write where it is a member.</span
+                >
+              </div>
+              <button type="submit" class="sk-button sk-button--primary sk-button--sm">Save channel</button>
+            </form>`
+          : nothing}
+      <a class="sk-connectors-pattern__back-link" href=${projection.laterPath}>Later</a>
+    </section>`;
+}
+
+// =============================================================================================
 // Storybook registration
 // =============================================================================================
 
@@ -363,6 +516,37 @@ function githubAppFailureStory(id: 'resolved-team' | 'no-team-boundary'): Story 
 
 export const C4GithubAppFailureResolvedTeam: Story = githubAppFailureStory('resolved-team');
 export const C4GithubAppFailureNoTeamBoundary: Story = githubAppFailureStory('no-team-boundary');
+
+// --- C5 ---------------------------------------------------------------------------------------
+
+function gitlabGroupStory(state: GitlabGroupSelectionState): Story {
+  return {
+    render: () => withThemeWrapper(renderGitlabGroup(selectGitlabGroupProjection(CONNECTORS_FIXTURE.gitlabGroup, state)), false),
+  };
+}
+
+export const C5GitlabGroupPopulated: Story = gitlabGroupStory('populated');
+export const C5GitlabGroupNoGroups: Story = gitlabGroupStory('no-groups');
+export const C5GitlabGroupValidation: Story = gitlabGroupStory('validation');
+export const C5GitlabGroupConnectedRefreshFailed: Story = gitlabGroupStory('connected-refresh-failed');
+
+// --- C9b --------------------------------------------------------------------------------------
+
+function slackChannelPickerStory(state: SlackChannelPickerState): Story {
+  return {
+    render: () =>
+      withThemeWrapper(
+        renderSlackChannelPicker(selectSlackChannelPickerProjection(CONNECTORS_FIXTURE.slackChannelPicker, state)),
+        false,
+      ),
+  };
+}
+
+export const C9bSlackChannelPopulated: Story = slackChannelPickerStory('populated');
+export const C9bSlackChannelEmpty: Story = slackChannelPickerStory('empty');
+export const C9bSlackChannelRefused: Story = slackChannelPickerStory('refused');
+export const C9bSlackChannelRateLimited: Story = slackChannelPickerStory('rate-limited');
+export const C9bSlackChannelIncomplete: Story = slackChannelPickerStory('incomplete');
 
 // --- Required LightMode system proof (programme brief hard rule 5) ----------------------------
 
