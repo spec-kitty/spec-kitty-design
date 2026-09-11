@@ -37,12 +37,40 @@ export function listOpenPRsBaseDevelop(exec, repo) {
   return JSON.parse(out);
 }
 
-/** List every `promote/*` branch on the remote, for the sweep's branch-deletion half
- *  (R22) — a branch can outlive its PR (e.g. a PR closed by hand). */
+/** The EXACT shape this mechanism ever creates — never a loose `promote/` prefix match
+ *  (B5, pre-merge squad). A human's own `promote/my-feature` branch is a real, reachable
+ *  namespace collision, not a hypothetical: nothing on GitHub reserves `promote/*` for this
+ *  script, and the sweep (below) is a DELETING operation. */
+export const PROMOTION_BRANCH_RE = /^promote\/[0-9a-f]{40}$/;
+
+/** List every branch on the remote matching the mechanism's exact `promote/<40-hex>` shape,
+ *  for the sweep's branch-deletion half (R22) — a branch can outlive its PR (e.g. a PR closed
+ *  by hand). Anything merely PREFIXED with `promote/` (a human's own branch) is excluded. */
 export function listPromotionBranches(exec, repo) {
   const out = exec('gh', ['api', `repos/${repo}/git/matching-refs/heads/promote/`]);
   const refs = JSON.parse(out);
-  return refs.map((r) => String(r.ref).replace(/^refs\/heads\//, ''));
+  return refs
+    .map((r) => String(r.ref).replace(/^refs\/heads\//, ''))
+    .filter((branch) => PROMOTION_BRANCH_RE.test(branch));
+}
+
+/**
+ * List every OPEN pull request repo-wide whose head matches the mechanism's exact
+ * `promote/<40-hex>` shape, regardless of base (B5). This is deliberately NOT scoped to
+ * `--base develop`: the sweep must never delete a branch that has an open PR into some OTHER
+ * base (a human's own `promote/<40-hex>`-named branch — vanishingly unlikely to collide by
+ * name, but not impossible, and the mechanism has no way to tell "mine" from "not mine" other
+ * than checking whether ANY open PR still references the branch).
+ */
+export function listOpenPromotionHeadPRsAnyBase(exec, repo) {
+  const out = exec('gh', [
+    'pr', 'list',
+    '--repo', repo,
+    '--state', 'open',
+    '--limit', '100',
+    '--json', 'number,headRefName,headRefOid,baseRefName,createdAt',
+  ]);
+  return JSON.parse(out).filter((pr) => PROMOTION_BRANCH_RE.test(String(pr.headRefName ?? '')));
 }
 
 /** Push the tree-sync commit to a fresh `promote/<sha>` branch. */
@@ -91,9 +119,20 @@ export function viewPRMergeStatus(exec, repo, number) {
   return JSON.parse(out);
 }
 
-/** The merge call itself. `--match-head-commit` is real, documented defense in depth
- *  (research.md R6/R12): GitHub refuses the merge server-side if `develop` moved since
- *  that SHA was read, independent of this script's own re-read. */
+/**
+ * The merge call itself. `--match-head-commit` pins the PR's own HEAD, never the base
+ * (`gh pr merge --help`: "Commit SHA that pull request head must match to allow merge" — the
+ * GitHub REST merge endpoint's `sha` parameter, exposed directly; verified 2026-09-11,
+ * research.md R6). **Corrected comment** (pre-merge squad, B2): an earlier revision of this
+ * comment inverted that — it claimed this argument pins `develop`'s tip and that GitHub
+ * "refuses the merge server-side if `develop` moved," which is not what this flag does. The
+ * real defense against `develop` having moved since this run last read it is
+ * `pollAndMerge`'s own explicit re-read of `develop`'s live tip immediately before calling
+ * this function (`scripts/promote-develop.mjs`, B2) — this flag is a SEPARATE, narrower
+ * defense: it protects against the promotion PR's own head branch changing underneath this
+ * run between deciding to merge and the merge call itself (e.g. a force-push to the
+ * `promote/*` branch), which `--match-head-commit` catches server-side.
+ */
 export function mergePR(exec, repo, number, matchHeadCommitSha) {
   exec('gh', [
     'pr', 'merge', String(number),
@@ -113,17 +152,22 @@ export function readDevelopTree(exec, repo) {
 }
 
 /**
- * Sweep the `promote/*` scratch namespace (R22): every open promotion PR except the
- * newest (by `createdAt`) is closed with a comment naming its superseder; every
- * `promote/*` branch with no surviving open PR is deleted. A branch-delete failure is
- * caught here and reported as a named, non-fatal row — never thrown, because a stray
- * dead branch is a nuisance, not a promotion failure (R22).
+ * Sweep the `promote/*` scratch namespace (R22): every open, base-`develop` promotion PR
+ * except the newest (by `createdAt`) is closed with a comment naming its superseder; every
+ * `promote/<40-hex>`-shaped branch with no surviving open PR **to any base** is deleted. A
+ * branch-delete failure is caught here and reported as a named, non-fatal row — never thrown,
+ * because a stray dead branch is a nuisance, not a promotion failure (R22).
  *
- * `openPRs` and `allBranches` are what the caller already fetched (`listOpenPRsBaseDevelop`
- * filtered to `promote/*` via `findPromotionPRs`, and `listPromotionBranches`) — this
- * function performs no reads of its own, only the mutating sweep.
+ * `openPRs` is the base-`develop` subset only (`listOpenPRsBaseDevelop` filtered via
+ * `findPromotionPRs`) — closing/commenting only ever touches PRs this mechanism itself would
+ * have opened. `allBranches` is `listPromotionBranches`'s exact-shape list. `protectedBranches`
+ * (B5, pre-merge squad) is the set of `promote/<40-hex>` branch names that have an open PR
+ * **to any base** (`listOpenPromotionHeadPRsAnyBase`, unscoped by base) — a branch in this set
+ * is never deleted, even if it has no base-`develop` PR, because a human's own branch that
+ * happens to match the mechanism's exact name shape must not be destroyed out from under an
+ * unrelated PR. This function performs no reads of its own, only the mutating sweep.
  */
-export function sweepPromotionNamespace(exec, repo, { openPRs, allBranches }) {
+export function sweepPromotionNamespace(exec, repo, { openPRs, allBranches, protectedBranches }) {
   const rows = [];
   const sorted = [...openPRs].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
   const newest = sorted.length ? sorted[sorted.length - 1] : null;
@@ -142,8 +186,13 @@ export function sweepPromotionNamespace(exec, repo, { openPRs, allBranches }) {
     rows.push({ action: 'closed', number: pr.number, branch: pr.headRefName ?? pr.branch });
   }
 
+  const protectedSet = protectedBranches instanceof Set ? protectedBranches : new Set(protectedBranches ?? []);
   for (const branch of allBranches ?? []) {
     if (survivingBranches.has(branch)) continue;
+    if (protectedSet.has(branch)) {
+      rows.push({ action: 'branch-protected', branch, reason: 'has an open PR to a base this mechanism did not create it for' });
+      continue;
+    }
     try {
       deleteBranch(exec, repo, branch);
       rows.push({ action: 'branch-deleted', branch });
