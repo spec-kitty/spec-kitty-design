@@ -97,11 +97,11 @@
     {
       "criterion_id": "FR-010",
       "description": "Verify FR-010 is satisfied",
-      "proof_type": "code_review",
-      "evidence": "Assertion verified: sk-cli-auth-pattern.spec.ts:206-227 checks headings.length<=1 across all 13 stories and, where present, that the single heading is h1, with exact text checks for terminal-success/denied. Reviewer visually confirmed the terminal baselines each show exactly one heading-styled line. Execution outcome pending CI.",
-      "pass_fail": "pending",
-      "verified_by": "reviewer-renata",
-      "verified_at": "2026-09-11T12:09:04.590905+00:00",
+      "proof_type": "automated_test",
+      "evidence": "Assertion confirmed by direct read: sk-cli-auth-pattern.spec.ts:206-227 checks headings.length<=1 across all 13 story ids and, where present, that the single heading is h1; terminal-success h1 text is exactly 'Device connected', terminal-denied h1 text is exactly 'Authorization denied'. Execution outcome now observed: CI run 34597608929 job 103257371328 (playwright) at head eb2db6ad = pass, 0 sk-cli-auth-pattern.spec.ts failures.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T12:43:09.722885+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
