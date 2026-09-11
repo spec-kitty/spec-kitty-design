@@ -46,23 +46,35 @@
  *   3. `expect(root)?.toHaveScreenshot(...)` — optional chaining. The old scan matched a literal
  *      `.` only.
  *
- * KNOWN REMAINING LIMIT — NOT CLOSED, STATED RATHER THAN LEFT SILENT. This gate matches the
- * literal token `expect`. It has no type or binding information, so `expect` SHADOWED or
- * ALIASED — `const check = expect; await check(root).toHaveScreenshot(...);`, or
- * `import { expect as ex } from '@playwright/test'` used as `ex(root).toHaveScreenshot(...)` —
- * passes through undetected. Closing this needs a real AST/scope analysis (e.g. via
- * `@typescript-eslint` or TypeScript's own checker), which is a materially different tool than
- * a text scan; it is out of scope for this gate. No such aliasing currently exists in the
- * scanned files (checked by hand at the time this note was written) and `--selftest` below
- * carries a live probe recording that this specific shape is NOT caught, so a future fix to
- * this limit — or a regression that makes it matter — is visible rather than silently assumed
- * away.
+ * KNOWN REMAINING LIMIT — NOT CLOSED, STATED RATHER THAN LEFT SILENT. This gate is a text scan
+ * with no type, binding, or AST information. That is a class of gap, not one bug, and three
+ * members of the class are known and NOT closed:
+ *   - IDENTIFIER ALIASING/SHADOWING — `const check = expect; await check(root).toHaveScreenshot(...);`,
+ *     or `import { expect as ex } from '@playwright/test'` used as
+ *     `ex(root).toHaveScreenshot(...)` — the literal token `expect` is gone, so nothing matches.
+ *   - COMPUTED MEMBER ACCESS — `expect(root)['toHaveScreenshot'](...)`. `EXPECT_CALL` and the
+ *     trivia scan both look for a literal `.toHaveScreenshot(` (or `?.`); bracket notation with
+ *     the method name as a string is a different token shape entirely.
+ *   - NON-WHITESPACE INVISIBLE TRIVIA — a U+200B zero-width space (or similar Unicode
+ *     format/separator character) between the closing paren and the dot. JavaScript's `\s` in a
+ *     regex does not match U+200B, so `skipWhitespace`'s `/\s/.test(...)` walks past ordinary
+ *     whitespace but stops cold at one, leaving `rest` pointed at a character that is neither
+ *     `.` nor `?` and never matching.
+ * All three need real AST/scope analysis (e.g. `@typescript-eslint` or TypeScript's own
+ * checker) to close correctly — a fix attempted at the text-scan level would just move the
+ * boundary of "what literal shape defeats it" rather than removing the class. That is a
+ * materially different tool than this gate, and out of scope here. None of the three currently
+ * exists in the scanned files (checked by hand at the time this note was written), and
+ * `--selftest` below carries one live probe per bypass recording that each specific shape is
+ * NOT caught, so a future fix to any of them — or a regression that makes one matter — is
+ * visible rather than silently assumed away.
  *
  * Usage: node scripts/check-visual-screenshot-softness.mjs [--selftest]
  */
 import { globSync, readFileSync, writeFileSync, mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const SCAN = 'apps/storybook/src/tests/*.spec.ts';
 
@@ -235,267 +247,287 @@ export function offenders(file, source) {
   return out;
 }
 
-if (process.argv.includes('--selftest')) {
-  const PROBES = [
-    [
-      'two hard calls in one test, nothing soft between them — the W4 drawer shape #367 was filed over',
-      "test('two', async ({ page }) => {\n" +
-        "  await expect(root).toHaveScreenshot('a.png', { threshold: 0.02 });\n" +
-        "  await expect(root).toHaveScreenshot('b.png', { threshold: 0.02 });\n" +
-        '});\n',
-      2,
-    ],
-    [
-      'a single hard call site inside a for loop — the shape the old 2+-per-test rule could not see',
-      "test('loop', async ({ page }) => {\n" +
-        "  for (const visual of cases) {\n" +
+// Run-as-CLI guard, matching check-adr-index.mjs's own convention — without it, importing this
+// module (e.g. from verify-no-screenshot-hard-abort-dependency.mjs, which reuses maskNonCode)
+// would also run this file's --selftest/scan logic and call process.exit as a side effect of
+// merely importing a function.
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  if (process.argv.includes('--selftest')) {
+    const PROBES = [
+      [
+        'two hard calls in one test, nothing soft between them — the W4 drawer shape #367 was filed over',
+        "test('two', async ({ page }) => {\n" +
+          "  await expect(root).toHaveScreenshot('a.png', { threshold: 0.02 });\n" +
+          "  await expect(root).toHaveScreenshot('b.png', { threshold: 0.02 });\n" +
+          '});\n',
+        2,
+      ],
+      [
+        'a single hard call site inside a for loop — the shape the old 2+-per-test rule could not see',
+        "test('loop', async ({ page }) => {\n" +
+          "  for (const visual of cases) {\n" +
+          "    await expect(root).toHaveScreenshot(visual.name, { threshold: 0.02 });\n" +
+          '  }\n' +
+          '});\n',
+        1,
+      ],
+      [
+        'a single hard call, nowhere near a loop or another screenshot — flat rule still catches it',
+        "test('one', async ({ page }) => {\n" +
+          "  await expect(root).toHaveScreenshot('a.png', {});\n" +
+          '});\n',
+        1,
+      ],
+      [
+        'four calls, all hard — the degenerate case, must report all four',
+        "test('four', async ({ page }) => {\n" +
+          "  await expect(root).toHaveScreenshot('a.png', {});\n" +
+          "  await expect(root).toHaveScreenshot('b.png', {});\n" +
+          "  await expect(root).toHaveScreenshot('c.png', {});\n" +
+          "  await expect(root).toHaveScreenshot('d.png', {});\n" +
+          '});\n',
+        4,
+      ],
+      [
+        'everything already soft, including inside a loop — the fixed shape',
+        "test('fixed', async ({ page }) => {\n" +
+          "  for (const visual of cases) {\n" +
+          "    await expect.soft(root).toHaveScreenshot(visual.name, {});\n" +
+          '  }\n' +
+          "  await expect.soft(root).toHaveScreenshot('b.png', {});\n" +
+          '});\n',
+        0,
+      ],
+      [
+        'a hard screenshot plus an unrelated hard expect() — the unrelated one must not count',
+        "test('mixed', async ({ page }) => {\n" +
+          "  await expect(root).toBeVisible();\n" +
+          "  await expect(root).toHaveScreenshot('a.png', {});\n" +
+          '});\n',
+        1,
+      ],
+      [
+        'a locator built from a nested call, still hard — the paren walk must not stop at the first )',
+        "test('nested locator', async ({ page }) => {\n" +
+          "  await expect(root.locator('[data-x]')).toHaveScreenshot('a.png', {});\n" +
+          "  await expect(root.locator('[data-y]')).toHaveScreenshot('b.png', {});\n" +
+          '});\n',
+        2,
+      ],
+      // ── The three live bypasses a pre-merge review defeated this gate with, each now a probe ──
+      [
+        'DEFEAT 1: a block comment between the close-paren and the dot',
+        "test('bypass-1', async ({ page }) => {\n" +
+          "  await expect(root) /* eslint-disable-next-line */.toHaveScreenshot('a.png', {});\n" +
+          '});\n',
+        1,
+      ],
+      [
+        'DEFEAT 1b: a line comment on its own line between the close-paren and the dot',
+        "test('bypass-1b', async ({ page }) => {\n" +
+          '  await expect(root) // why this locator\n' +
+          "    .toHaveScreenshot('a.png', {});\n" +
+          '});\n',
+        1,
+      ],
+      [
+        'DEFEAT 2: far more than 20 characters of whitespace/indentation before the dot',
+        "test('bypass-2', async ({ page }) => {\n" +
+          '  await expect(root)\n' +
+          '                                                                              \n' +
+          "    .toHaveScreenshot('a.png', {});\n" +
+          '});\n',
+        1,
+      ],
+      [
+        'DEFEAT 3: optional chaining — expect(root)?.toHaveScreenshot(...)',
+        "test('bypass-3', async ({ page }) => {\n" +
+          "  await expect(root)?.toHaveScreenshot('a.png', {});\n" +
+          '});\n',
+        1,
+      ],
+      // ── Hunted past the three reported findings, per the follow-up instruction ──────────────
+      [
+        'a LINE COMMENT containing the exact literal text of a hard call — must not be a false positive',
+        "test('comment-text', async ({ page }) => {\n" +
+          "  // old code used to read: await expect(root).toHaveScreenshot('a.png', {});\n" +
+          "  await expect.soft(root).toHaveScreenshot('a.png', {});\n" +
+          '});\n',
+        0,
+      ],
+      [
+        'a BLOCK COMMENT containing the exact literal text of a hard call — must not be a false positive',
+        "test('comment-text-block', async ({ page }) => {\n" +
+          "  /* await expect(root).toHaveScreenshot('a.png', {}); -- the old hard form */\n" +
+          "  await expect.soft(root).toHaveScreenshot('a.png', {});\n" +
+          '});\n',
+        0,
+      ],
+      [
+        'a STRING LITERAL containing the exact literal text of a hard call — must not be a false positive',
+        "test('string-text', async ({ page }) => {\n" +
+          "  const note = 'the old code said expect(root).toHaveScreenshot(\\'a.png\\', {})';\n" +
+          "  await expect.soft(root).toHaveScreenshot('a.png', {});\n" +
+          '});\n',
+        0,
+      ],
+      [
+        'a TEMPLATE LITERAL containing the exact literal text of a hard call — must not be a false positive',
+        "test('template-text', async ({ page }) => {\n" +
+          '  const note = `see also: expect(root).toHaveScreenshot(${name}, {})`;\n' +
+          "  await expect.soft(root).toHaveScreenshot('a.png', {});\n" +
+          '});\n',
+        0,
+      ],
+      [
+        'a TEMPLATE LITERAL whose ${...} interpolation contains a REAL hard call — must still be caught',
+        "test('template-interp', async ({ page }) => {\n" +
+          "  const label = `prefix-${(await expect(root).toHaveScreenshot('a.png', {}), 'x')}-suffix`;\n" +
+          '});\n',
+        1,
+      ],
+      [
+        'a call split across several lines mid-expression, including a blank line — must still be caught',
+        "test('split', async ({ page }) => {\n" +
+          '  await expect(\n' +
+          '    root\n' +
+          '  )\n' +
+          '\n' +
+          "    .toHaveScreenshot(\n" +
+          "      'a.png',\n" +
+          '      {},\n' +
+          '    );\n' +
+          '});\n',
+        1,
+      ],
+      [
+        'space between expect and its opening paren — unusual but legal JS, found while hunting past the reported findings',
+        "test('spaced-paren', async ({ page }) => {\n" +
+          "  await expect (root).toHaveScreenshot('a.png', {});\n" +
+          '});\n',
+        1,
+      ],
+      [
+        'KNOWN GAP, documented not closed: expect ALIASED to another name is not detected — this probe records that fact, it does not assert the gate is safe against it',
+        "test('aliased', async ({ page }) => {\n" +
+          '  const check = expect;\n' +
+          "  await check(root).toHaveScreenshot('a.png', {});\n" +
+          '});\n',
+        0,
+      ],
+      [
+        'KNOWN GAP, documented not closed: COMPUTED MEMBER ACCESS — expect(root)["toHaveScreenshot"](...) is not detected — this probe records that fact, it does not assert the gate is safe against it',
+        "test('computed', async ({ page }) => {\n" +
+          '  await expect(root)[\'toHaveScreenshot\'](\'a.png\', {});\n' +
+          '});\n',
+        0,
+      ],
+      [
+        'KNOWN GAP, documented not closed: a U+200B ZERO-WIDTH SPACE between the close-paren and the dot is not detected (JS \\s does not match it) — this probe records that fact, it does not assert the gate is safe against it',
+        "test('zwsp', async ({ page }) => {\n" +
+          '  await expect(root)​.toHaveScreenshot(\'a.png\', {});\n' +
+          '});\n',
+        0,
+      ],
+    ];
+
+    let bad = 0;
+    let mustCatch = 0;
+    for (const [note, src, expectedCount] of PROBES) {
+      if (expectedCount > 0) mustCatch++;
+      const got = offenders('probe.spec.ts', src);
+      if (got.length !== expectedCount) {
+        console.error(`  ✗ ${note}: expected ${expectedCount} offender(s), got ${got.length}`);
+        if (got.length) console.error(got.map((o) => `      ${o}`).join('\n'));
+        bad++;
+      }
+    }
+
+    // EXEMPTIONS must actually suppress — otherwise the escape hatch the file comment promises
+    // does not work, and the first person who needs it will discover that by being blocked.
+    {
+      const src =
+        "test('exempted', async ({ page }) => {\n" +
+        "  await expect(root).toHaveScreenshot('a.png', {});\n" +
+        '});\n';
+      const line = src.slice(0, src.indexOf('expect(')).split('\n').length;
+      const key = `exempt-probe.spec.ts:${line}`;
+      EXEMPTIONS.set(key, 'selftest probe only');
+      const got = offenders('exempt-probe.spec.ts', src);
+      EXEMPTIONS.delete(key);
+      if (got.length !== 0) {
+        console.error(`  ✗ an EXEMPTIONS entry did not suppress its offender — got ${JSON.stringify(got)}`);
+        bad++;
+      } else {
+        console.log('✓ EXEMPTIONS probe — a listed file:line is suppressed');
+      }
+    }
+
+    // PROBE THE READER, NOT ONLY THE MATCHER. Write a real file to disk and run offenders() over
+    // it read back with readFileSync, the same path the real scan uses, so a broken glob, a
+    // broken file read, or a broken line-number computation cannot self-test green. This probe
+    // specifically plants the LOOP shape, since that is the shape the flat rule exists to catch
+    // that the previous per-test-count rule could not.
+    const dir = mkdtempSync(join(tmpdir(), 'screenshot-softness-selftest-'));
+    const planted = join(dir, 'planted.spec.ts');
+    writeFileSync(
+      planted,
+      "import { test, expect } from '@playwright/test';\n\n" +
+        "test('planted loop with a single hard call site', async ({ page }) => {\n" +
+        '  for (const visual of cases) {\n' +
         "    await expect(root).toHaveScreenshot(visual.name, { threshold: 0.02 });\n" +
         '  }\n' +
         '});\n',
-      1,
-    ],
-    [
-      'a single hard call, nowhere near a loop or another screenshot — flat rule still catches it',
-      "test('one', async ({ page }) => {\n" +
-        "  await expect(root).toHaveScreenshot('a.png', {});\n" +
-        '});\n',
-      1,
-    ],
-    [
-      'four calls, all hard — the degenerate case, must report all four',
-      "test('four', async ({ page }) => {\n" +
-        "  await expect(root).toHaveScreenshot('a.png', {});\n" +
-        "  await expect(root).toHaveScreenshot('b.png', {});\n" +
-        "  await expect(root).toHaveScreenshot('c.png', {});\n" +
-        "  await expect(root).toHaveScreenshot('d.png', {});\n" +
-        '});\n',
-      4,
-    ],
-    [
-      'everything already soft, including inside a loop — the fixed shape',
-      "test('fixed', async ({ page }) => {\n" +
-        "  for (const visual of cases) {\n" +
-        "    await expect.soft(root).toHaveScreenshot(visual.name, {});\n" +
-        '  }\n' +
-        "  await expect.soft(root).toHaveScreenshot('b.png', {});\n" +
-        '});\n',
-      0,
-    ],
-    [
-      'a hard screenshot plus an unrelated hard expect() — the unrelated one must not count',
-      "test('mixed', async ({ page }) => {\n" +
-        "  await expect(root).toBeVisible();\n" +
-        "  await expect(root).toHaveScreenshot('a.png', {});\n" +
-        '});\n',
-      1,
-    ],
-    [
-      'a locator built from a nested call, still hard — the paren walk must not stop at the first )',
-      "test('nested locator', async ({ page }) => {\n" +
-        "  await expect(root.locator('[data-x]')).toHaveScreenshot('a.png', {});\n" +
-        "  await expect(root.locator('[data-y]')).toHaveScreenshot('b.png', {});\n" +
-        '});\n',
-      2,
-    ],
-    // ── The three live bypasses a pre-merge review defeated this gate with, each now a probe ──
-    [
-      'DEFEAT 1: a block comment between the close-paren and the dot',
-      "test('bypass-1', async ({ page }) => {\n" +
-        "  await expect(root) /* eslint-disable-next-line */.toHaveScreenshot('a.png', {});\n" +
-        '});\n',
-      1,
-    ],
-    [
-      'DEFEAT 1b: a line comment on its own line between the close-paren and the dot',
-      "test('bypass-1b', async ({ page }) => {\n" +
-        '  await expect(root) // why this locator\n' +
-        "    .toHaveScreenshot('a.png', {});\n" +
-        '});\n',
-      1,
-    ],
-    [
-      'DEFEAT 2: far more than 20 characters of whitespace/indentation before the dot',
-      "test('bypass-2', async ({ page }) => {\n" +
-        '  await expect(root)\n' +
-        '                                                                              \n' +
-        "    .toHaveScreenshot('a.png', {});\n" +
-        '});\n',
-      1,
-    ],
-    [
-      'DEFEAT 3: optional chaining — expect(root)?.toHaveScreenshot(...)',
-      "test('bypass-3', async ({ page }) => {\n" +
-        "  await expect(root)?.toHaveScreenshot('a.png', {});\n" +
-        '});\n',
-      1,
-    ],
-    // ── Hunted past the three reported findings, per the follow-up instruction ──────────────
-    [
-      'a LINE COMMENT containing the exact literal text of a hard call — must not be a false positive',
-      "test('comment-text', async ({ page }) => {\n" +
-        "  // old code used to read: await expect(root).toHaveScreenshot('a.png', {});\n" +
-        "  await expect.soft(root).toHaveScreenshot('a.png', {});\n" +
-        '});\n',
-      0,
-    ],
-    [
-      'a BLOCK COMMENT containing the exact literal text of a hard call — must not be a false positive',
-      "test('comment-text-block', async ({ page }) => {\n" +
-        "  /* await expect(root).toHaveScreenshot('a.png', {}); -- the old hard form */\n" +
-        "  await expect.soft(root).toHaveScreenshot('a.png', {});\n" +
-        '});\n',
-      0,
-    ],
-    [
-      'a STRING LITERAL containing the exact literal text of a hard call — must not be a false positive',
-      "test('string-text', async ({ page }) => {\n" +
-        "  const note = 'the old code said expect(root).toHaveScreenshot(\\'a.png\\', {})';\n" +
-        "  await expect.soft(root).toHaveScreenshot('a.png', {});\n" +
-        '});\n',
-      0,
-    ],
-    [
-      'a TEMPLATE LITERAL containing the exact literal text of a hard call — must not be a false positive',
-      "test('template-text', async ({ page }) => {\n" +
-        '  const note = `see also: expect(root).toHaveScreenshot(${name}, {})`;\n' +
-        "  await expect.soft(root).toHaveScreenshot('a.png', {});\n" +
-        '});\n',
-      0,
-    ],
-    [
-      'a TEMPLATE LITERAL whose ${...} interpolation contains a REAL hard call — must still be caught',
-      "test('template-interp', async ({ page }) => {\n" +
-        "  const label = `prefix-${(await expect(root).toHaveScreenshot('a.png', {}), 'x')}-suffix`;\n" +
-        '});\n',
-      1,
-    ],
-    [
-      'a call split across several lines mid-expression, including a blank line — must still be caught',
-      "test('split', async ({ page }) => {\n" +
-        '  await expect(\n' +
-        '    root\n' +
-        '  )\n' +
-        '\n' +
-        "    .toHaveScreenshot(\n" +
-        "      'a.png',\n" +
-        '      {},\n' +
-        '    );\n' +
-        '});\n',
-      1,
-    ],
-    [
-      'space between expect and its opening paren — unusual but legal JS, found while hunting past the reported findings',
-      "test('spaced-paren', async ({ page }) => {\n" +
-        "  await expect (root).toHaveScreenshot('a.png', {});\n" +
-        '});\n',
-      1,
-    ],
-    [
-      'KNOWN GAP, documented not closed: expect ALIASED to another name is not detected — this probe records that fact, it does not assert the gate is safe against it',
-      "test('aliased', async ({ page }) => {\n" +
-        '  const check = expect;\n' +
-        "  await check(root).toHaveScreenshot('a.png', {});\n" +
-        '});\n',
-      0,
-    ],
-  ];
-
-  let bad = 0;
-  let mustCatch = 0;
-  for (const [note, src, expectedCount] of PROBES) {
-    if (expectedCount > 0) mustCatch++;
-    const got = offenders('probe.spec.ts', src);
-    if (got.length !== expectedCount) {
-      console.error(`  ✗ ${note}: expected ${expectedCount} offender(s), got ${got.length}`);
-      if (got.length) console.error(got.map((o) => `      ${o}`).join('\n'));
-      bad++;
+    );
+    let onDiskOffenders;
+    try {
+      onDiskOffenders = offenders(planted, readFileSync(planted, 'utf8'));
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
     }
-  }
-
-  // EXEMPTIONS must actually suppress — otherwise the escape hatch the file comment promises
-  // does not work, and the first person who needs it will discover that by being blocked.
-  {
-    const src =
-      "test('exempted', async ({ page }) => {\n" +
-      "  await expect(root).toHaveScreenshot('a.png', {});\n" +
-      '});\n';
-    const line = src.slice(0, src.indexOf('expect(')).split('\n').length;
-    const key = `exempt-probe.spec.ts:${line}`;
-    EXEMPTIONS.set(key, 'selftest probe only');
-    const got = offenders('exempt-probe.spec.ts', src);
-    EXEMPTIONS.delete(key);
-    if (got.length !== 0) {
-      console.error(`  ✗ an EXEMPTIONS entry did not suppress its offender — got ${JSON.stringify(got)}`);
+    if (onDiskOffenders.length !== 1 || !onDiskOffenders[0].includes(':5:')) {
+      console.error(
+        `  ✗ a planted loop-hosted hard call on disk was not flagged at its call-site line — got ${JSON.stringify(onDiskOffenders)}`,
+      );
       bad++;
     } else {
-      console.log('✓ EXEMPTIONS probe — a listed file:line is suppressed');
+      console.log('✓ reader probe — a planted loop-hosted hard call on disk is caught through the real file-read path');
     }
+
+    if (mustCatch < 4) {
+      console.error(`❌ degenerate probe table: only ${mustCatch} must-catch row(s).`);
+      process.exit(1);
+    }
+    if (bad) {
+      console.error(`\n❌ ${bad} probe(s) did not behave as recorded.`);
+      process.exit(1);
+    }
+    console.log(`✅ All ${PROBES.length} shape probes plus the EXEMPTIONS and on-disk reader probes behaved as recorded (${mustCatch} must-catch).`);
+    process.exit(0);
   }
 
-  // PROBE THE READER, NOT ONLY THE MATCHER. Write a real file to disk and run offenders() over
-  // it read back with readFileSync, the same path the real scan uses, so a broken glob, a
-  // broken file read, or a broken line-number computation cannot self-test green. This probe
-  // specifically plants the LOOP shape, since that is the shape the flat rule exists to catch
-  // that the previous per-test-count rule could not.
-  const dir = mkdtempSync(join(tmpdir(), 'screenshot-softness-selftest-'));
-  const planted = join(dir, 'planted.spec.ts');
-  writeFileSync(
-    planted,
-    "import { test, expect } from '@playwright/test';\n\n" +
-      "test('planted loop with a single hard call site', async ({ page }) => {\n" +
-      '  for (const visual of cases) {\n' +
-      "    await expect(root).toHaveScreenshot(visual.name, { threshold: 0.02 });\n" +
-      '  }\n' +
-      '});\n',
-  );
-  let onDiskOffenders;
-  try {
-    onDiskOffenders = offenders(planted, readFileSync(planted, 'utf8'));
-  } finally {
-    rmSync(dir, { recursive: true, force: true });
+  const files = globSync(SCAN, {});
+  // REFUSE AN EMPTY SET — a glob that stops matching would print a green line over nothing.
+  if (files.length === 0) {
+    console.error(`❌ no spec files matched ${SCAN} — refusing to report green over nothing.`);
+    process.exit(1);
   }
-  if (onDiskOffenders.length !== 1 || !onDiskOffenders[0].includes(':5:')) {
+
+  let found = [];
+  for (const file of files) {
+    found = found.concat(offenders(file, readFileSync(file, 'utf8')));
+  }
+
+  if (found.length) {
     console.error(
-      `  ✗ a planted loop-hosted hard call on disk was not flagged at its call-site line — got ${JSON.stringify(onDiskOffenders)}`,
+      `❌ ${found.length} HARD toHaveScreenshot call site(s) found — each can silently drop ` +
+        'every screenshot after it in the same test or loop iteration on a red run (#367):',
     );
-    bad++;
-  } else {
-    console.log('✓ reader probe — a planted loop-hosted hard call on disk is caught through the real file-read path');
-  }
-
-  if (mustCatch < 4) {
-    console.error(`❌ degenerate probe table: only ${mustCatch} must-catch row(s).`);
+    for (const f of found) console.error(`   ${f}`);
     process.exit(1);
   }
-  if (bad) {
-    console.error(`\n❌ ${bad} probe(s) did not behave as recorded.`);
-    process.exit(1);
-  }
-  console.log(`✅ All ${PROBES.length} shape probes plus the EXEMPTIONS and on-disk reader probes behaved as recorded (${mustCatch} must-catch).`);
-  process.exit(0);
-}
 
-const files = globSync(SCAN, {});
-// REFUSE AN EMPTY SET — a glob that stops matching would print a green line over nothing.
-if (files.length === 0) {
-  console.error(`❌ no spec files matched ${SCAN} — refusing to report green over nothing.`);
-  process.exit(1);
-}
-
-let found = [];
-for (const file of files) {
-  found = found.concat(offenders(file, readFileSync(file, 'utf8')));
-}
-
-if (found.length) {
-  console.error(
-    `❌ ${found.length} HARD toHaveScreenshot call site(s) found — each can silently drop ` +
-      'every screenshot after it in the same test or loop iteration on a red run (#367):',
+  console.log(
+    `✅ ${files.length} spec file(s) scanned; every toHaveScreenshot call site uses expect.soft(...).`,
   );
-  for (const f of found) console.error(`   ${f}`);
-  process.exit(1);
 }
-
-console.log(
-  `✅ ${files.length} spec file(s) scanned; every toHaveScreenshot call site uses expect.soft(...).`,
-);
