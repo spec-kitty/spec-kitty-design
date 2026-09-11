@@ -12,6 +12,11 @@ jobs:
   preview:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    # REL1 (#362), research.md R15 §4: a `promote/*`-headed PR carries content already
+    # promoted, unmodified, from an already-fully-gated train commit — it has no reason to
+    # spin up a Storybook preview deployment for content the train's own preview (if any)
+    # already covered.
+    if: "!startsWith(github.head_ref, 'promote/')"
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # actions/checkout v4.3.1
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e  # actions/setup-node v6.4.0

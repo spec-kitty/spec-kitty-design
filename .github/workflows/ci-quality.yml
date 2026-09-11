@@ -30,6 +30,11 @@ on:
     branches: [main, 'train/**', develop]
   push:
     branches: [main, 'train/**', develop]
+  # Added for the future (research.md R18): not actually invocable until this exact file
+  # reaches `main` (workflow_dispatch requires the trigger to already be declared on the
+  # repository's default branch) — harmless now, and it activates automatically once the
+  # operator's later train->main landing carries this file there.
+  workflow_dispatch: {}
   schedule:
     # FR-041: nightly CVE audit on main branch
     # Offset from top of hour to avoid busy scheduling window (matches SK pattern)
@@ -408,6 +413,16 @@ jobs:
         run: node scripts/check-visual-screenshot-softness.mjs --selftest
       - name: "[ENFORCED] Multi-screenshot tests use expect.soft throughout (#367)"
         run: node scripts/check-visual-screenshot-softness.mjs
+      # REL1 (#362). The develop-promotion mechanism's own 18-probe table (T003/IC-03 —
+      # floor-outside-the-table, mutation-controlled, contracts/promotion-script.contract.md).
+      # No network, no GH_TOKEN — every probe runs against a fresh scratch git repository.
+      - name: "[ENFORCED] develop-promotion mechanism self-test (REL1, #362)"
+        run: node scripts/promote-develop.mjs --selftest
+      # REL1 (#362). The develop ruleset parity checker's own probe table (T004/IC-04) — a
+      # same-fixture and a different-fixture case are both required, same floor-outside-the-
+      # table shape as the promotion script's own self-test above.
+      - name: "[ENFORCED] develop ruleset parity checker self-test (REL1, #362)"
+        run: node scripts/check-develop-ruleset-parity.mjs --selftest
       - name: "[ENFORCED] commitlint (FR-020)"
         if: github.event_name == 'pull_request'
         run: |
@@ -433,7 +448,14 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     needs: [changes]
-    if: needs.changes.outputs.tokens == 'true' || needs.changes.outputs.components == 'true'
+    # `&& !startsWith(github.head_ref, 'promote/')` (research.md R15): `github.head_ref` is
+    # empty for `push` events, so this conjunct is a no-op for the push-to-develop run that
+    # follows a promotion merge, and only skips the pull_request-triggered run against the
+    # promotion PR itself — content that is byte-identical to an already-fully-gated train
+    # commit, where the ~30-minute browser suite proves nothing new (REL1, #362).
+    if: >-
+      (needs.changes.outputs.tokens == 'true' || needs.changes.outputs.components == 'true') &&
+      !startsWith(github.head_ref, 'promote/')
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # actions/checkout v4.3.1
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e  # actions/setup-node v6.4.0
@@ -470,7 +492,12 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     needs: [storybook-build]
-    if: needs.storybook-build.result == 'success'
+    # `&& !startsWith(...)` (research.md R15): see storybook-build's own `if:` comment above —
+    # this skip is a no-op for `push` events and only applies to the promotion PR's own
+    # pull_request-triggered run, whose content already passed this suite on train (REL1, #362).
+    if: >-
+      needs.storybook-build.result == 'success' &&
+      !startsWith(github.head_ref, 'promote/')
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # actions/checkout v4.3.1
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e  # actions/setup-node v6.4.0
@@ -495,7 +522,12 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     needs: [storybook-build]
-    if: needs.storybook-build.result == 'success'
+    # `&& !startsWith(...)` (research.md R15): see storybook-build's own `if:` comment above —
+    # this skip is a no-op for `push` events and only applies to the promotion PR's own
+    # pull_request-triggered run, whose content already passed this suite on train (REL1, #362).
+    if: >-
+      needs.storybook-build.result == 'success' &&
+      !startsWith(github.head_ref, 'promote/')
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # actions/checkout v4.3.1
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e  # actions/setup-node v6.4.0
@@ -525,7 +557,12 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     needs: [storybook-build]
-    if: needs.storybook-build.result == 'success'
+    # `&& !startsWith(...)` (research.md R15): see storybook-build's own `if:` comment above —
+    # this skip is a no-op for `push` events and only applies to the promotion PR's own
+    # pull_request-triggered run, whose content already passed this suite on train (REL1, #362).
+    if: >-
+      needs.storybook-build.result == 'success' &&
+      !startsWith(github.head_ref, 'promote/')
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # actions/checkout v4.3.1
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e  # actions/setup-node v6.4.0
@@ -595,7 +632,12 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     needs: [storybook-build]
-    if: needs.storybook-build.result == 'success'
+    # `&& !startsWith(...)` (research.md R15): see storybook-build's own `if:` comment above —
+    # this skip is a no-op for `push` events and only applies to the promotion PR's own
+    # pull_request-triggered run, whose content already passed this suite on train (REL1, #362).
+    if: >-
+      needs.storybook-build.result == 'success' &&
+      !startsWith(github.head_ref, 'promote/')
     continue-on-error: true   # advisory only
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # actions/checkout v4.3.1
@@ -717,6 +759,20 @@ jobs:
           if [ "$vr_ok"   != "success" ] && [ "$vr_ok"   != "skipped" ]; then vr_ok="fail"; fi
           if [ "$pw_ok"   != "success" ] && [ "$pw_ok"   != "skipped" ]; then pw_ok="fail"; fi
 
+          # REL1 (#362): a `promote/*`-headed PR's tree is byte-identical to an already
+          # fully-gated train commit (the four heavy jobs above skip themselves for exactly
+          # this ref shape — see their own `if:` comments), so a `skipped` result here is
+          # correct, not a gap. POSITIVELY SCOPED to `promote/*` only, and it touches ONLY
+          # these four `_ok` variables — `test`/`release-gate`/`security`/`workflow-pin-check`'s
+          # own strict checks below are completely unaffected. This is exactly the class of
+          # edit scripts/check-gate-wiring-defeats.mjs's own header comment warns is easy to
+          # get subtly wrong; its defeat table carries a case asserting this guard cannot be
+          # widened to apply unconditionally.
+          head_ref="${{ github.head_ref }}"
+          if [[ "$head_ref" == promote/* ]]; then
+            sb_ok="success"; a11y_ok="success"; vr_ok="success"; pw_ok="success"
+          fi
+
           # 'skipped' is only acceptable for the REASON it exists: nothing
           # relevant changed. Accepting it unconditionally was the same
           # green-by-skip defect one level down - a PR editing this file could
@@ -756,6 +812,121 @@ jobs:
             exit 1
           fi
           echo "All hard gates passed."
+
+  # ── develop promotion (REL1, #362, FR-007/FR-008/FR-010) ───────────────────────
+  #
+  # Tree-sync promotion (operator-ruled Option D, spec.md Recorded Decision): on every push
+  # to train/elements-first, once the train's own quality gate above has already succeeded,
+  # promote it to `develop` as one new commit whose tree equals the train tip's tree. `needs:
+  # [gate]` is what "gated on real CI" means here (research.md R15) — no poll loop reading a
+  # status no ruleset actually requires, and this job's own `if:` structurally cannot fire for
+  # anything but a push to train/elements-first (NFR-002: main's job set is unaffected).
+  #
+  # This mission's PR does NOT create `develop`, does not apply its ruleset, and does not flip
+  # PROMOTE_DEVELOP_ENABLED — those are the operator's and the orchestrator's actions, after
+  # this PR merges (quickstart.md). Every step below is written to no-op safely before any of
+  # that has happened: the enable switch and the develop-exists check both run before any
+  # secret is read or any token minted (research.md R19).
+  promote-develop:
+    needs: [gate]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/train/elements-first'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15   # the poll loop itself is capped at 10m (research.md R5, an explicitly
+                           # provisional estimate pending recalibration against the first real
+                           # cycle) — this leaves headroom for checkout, token mint, git/API calls
+    permissions:
+      contents: read   # actions/checkout's OWN pre-mint clone step only; every GitHub-write
+                        # after that happens on the App token (research.md R4), never this job's
+                        # own GITHUB_TOKEN
+    steps:
+      # ORDER (M4, research.md R19), cheapest and most information-bearing first:
+      # 1. enable switch (no I/O)  2. develop-exists via remote ls-remote (no auth needed,
+      # public repo)  3. secrets  4. mint + checkout-with-token  5. App-scope guard (M5)
+
+      - name: "[ENFORCED] Enable switch"
+        id: enabled
+        env:
+          ENABLED: ${{ vars.PROMOTE_DEVELOP_ENABLED }}
+        run: |
+          if [ "$ENABLED" != "true" ]; then
+            echo "::notice::PROMOTE_DEVELOP_ENABLED is not 'true' — promotion is disabled. Doing nothing."
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: "[ENFORCED] develop exists? (remote check, no auth needed — public repo)"
+        id: develop-exists
+        if: steps.enabled.outputs.run == 'true'
+        run: |
+          if git ls-remote --exit-code https://github.com/spec-kitty/spec-kitty-design.git refs/heads/develop >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::develop does not exist yet — no-op (FR-007(c)). Not an error."
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      # research.md R7: secrets cannot be tested in `if:` directly — read into env, check in
+      # the shell.
+      - name: "[ENFORCED] Fail fast if the release App's credentials are missing"
+        if: steps.enabled.outputs.run == 'true' && steps.develop-exists.outputs.exists == 'true'
+        env:
+          APP_ID: ${{ secrets.SK_DESIGN_RELEASE_APP_ID }}
+          APP_KEY: ${{ secrets.SK_DESIGN_RELEASE_APP_PRIVATE_KEY }}
+        run: |
+          if [ -z "$APP_ID" ] || [ -z "$APP_KEY" ]; then
+            echo "::error::SK_DESIGN_RELEASE_APP_ID and/or SK_DESIGN_RELEASE_APP_PRIVATE_KEY repository secrets are not set."
+            echo "::error::The develop-promotion job cannot mint a token without them and will not pretend to have promoted anything."
+            echo "::error::See docs/architecture/branch-model.md (Operator Actions) for how to create and install the App and add these secrets."
+            exit 1
+          fi
+
+      - uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1  # actions/create-github-app-token v3.2.0
+        id: mint
+        if: steps.enabled.outputs.run == 'true' && steps.develop-exists.outputs.exists == 'true'
+        with:
+          app-id: ${{ secrets.SK_DESIGN_RELEASE_APP_ID }}
+          private-key: ${{ secrets.SK_DESIGN_RELEASE_APP_PRIVATE_KEY }}
+          # Neither `owner` nor `repositories` set: the App is installed on spec-kitty-design
+          # ONLY (spec.md Recorded Decision), so the default scope already is this one repo.
+          # The runtime guard below is defense in depth against that install ever being widened.
+
+      # B3: mint BEFORE checkout, then checkout WITH the App token — persist-credentials
+      # (default true) then makes every later `git` command (including `git push`) already
+      # authenticate as the App, with no further credential wiring (research.md R14, verified
+      # against the action's own README pattern).
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # actions/checkout v4.3.1
+        if: steps.enabled.outputs.run == 'true' && steps.develop-exists.outputs.exists == 'true'
+        with:
+          fetch-depth: 0
+          token: ${{ steps.mint.outputs.token }}
+
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e  # actions/setup-node v6.4.0
+        if: steps.enabled.outputs.run == 'true' && steps.develop-exists.outputs.exists == 'true'
+        with: { node-version: '22' }
+
+      - name: "[ENFORCED] App-scope runtime guard (M5) — fail closed unless installed on this repo only"
+        if: steps.enabled.outputs.run == 'true' && steps.develop-exists.outputs.exists == 'true'
+        env:
+          GH_TOKEN: ${{ steps.mint.outputs.token }}
+        run: node scripts/promote-develop.mjs assert-scope
+
+      - name: "[ENFORCED] Set the App's bot identity for the commits this job authors"
+        if: steps.enabled.outputs.run == 'true' && steps.develop-exists.outputs.exists == 'true'
+        env:
+          GH_TOKEN: ${{ steps.mint.outputs.token }}
+        run: |
+          user_id=$(gh api "/users/${{ steps.mint.outputs.app-slug }}[bot]" --jq .id)
+          git config --global user.name "${{ steps.mint.outputs.app-slug }}[bot]"
+          git config --global user.email "${user_id}+${{ steps.mint.outputs.app-slug }}[bot]@users.noreply.github.com"
+
+      - name: "[ENFORCED] Promote train/elements-first to develop"
+        if: steps.enabled.outputs.run == 'true' && steps.develop-exists.outputs.exists == 'true'
+        env:
+          GH_TOKEN: ${{ steps.mint.outputs.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          PROMOTE_SOURCE_REF: ${{ vars.PROMOTE_DEVELOP_SOURCE_BRANCH || 'train/elements-first' }}
+        run: node scripts/promote-develop.mjs run
 
   # ── Lint feedback ────────────────────────────────────────────────────────────
   lint-feedback:
