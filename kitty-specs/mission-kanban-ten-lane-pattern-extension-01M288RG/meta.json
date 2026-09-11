@@ -23,6 +23,7 @@
   "purpose_context": "This mission advances mission kanban ten lane pattern extension on mission/mission-kanban-ten-lane-pattern-extension so stakeholders can track the work from mission creation onward.",
   "purpose_tldr": "mission kanban ten lane pattern extension",
   "slug": "mission-kanban-ten-lane-pattern-extension-01M288RG",
+  "status_phase": "1",
   "target_branch": "mission/mission-kanban-ten-lane-pattern-extension",
   "topology": "single_branch"
 }
