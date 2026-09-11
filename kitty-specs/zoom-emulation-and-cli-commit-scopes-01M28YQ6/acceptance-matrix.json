@@ -28,10 +28,10 @@
       "criterion_id": "FR-003",
       "description": "Verify FR-003 is satisfied",
       "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "evidence": "visual.spec.ts's CLI Auth zoom tests (commit 32ba25a6) assert getComputedStyle(...).paddingLeft narrows under the halved-viewport zoom state vs an un-zoomed reference (toBeLessThan, a direction check, not just a difference check), independent of the toHaveScreenshot call below it. Red-first executed: with the zoomed viewport width deliberately forced past the breakpoint, the assertion failed 'Expected: < 24, Received: 24'; reverted, it passed. The reviewer reproduced this exact failure independently by feeding the zoomed context an unzoomed width, without reading my implementation notes first (review-cycle-1.md, WP01 status.events.jsonl).",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T20:01:27.925112+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
