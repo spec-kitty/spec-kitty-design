@@ -137,11 +137,11 @@
     {
       "criterion_id": "FR-014",
       "description": "Verify FR-014 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "proof_type": "stories + browser tests + baselines",
+      "evidence": "head 4f301f83; sk-mission-kanban-ten-lane-pattern.spec.ts [T008] LightMode semantic parity with a theme delta; [T007] long content at 390/780; [T008] forced colors with dashed overlay border = CanvasText and checked cues; reduced motion with 0 running animations; [T007] RTL at 1440/390; 12 CI baselines inspected.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T13:44:44.505546+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
