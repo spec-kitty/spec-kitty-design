@@ -48,10 +48,10 @@
       "criterion_id": "FR-005",
       "description": "Verify FR-005 is satisfied",
       "proof_type": "browser geometry test",
-      "evidence": "head 4f301f83; sk-mission-kanban-ten-lane-pattern.spec.ts [T005/T007] K2 at 390x844: compact shell, same lanes/counts, triad present, first lane fully visible, second partly visible, equal gutters within 1px, document scrollWidth == clientWidth; baseline mission-kanban-ten-lane-k2-narrow-390.",
+      "evidence": "product head 8986d38f (rebased on train 16948194); sk-mission-kanban-ten-lane-pattern.spec.ts [T005/T007] K2 at 390x844: compact shell, same lanes and counts, triad, first lane full and second partial, equal gutters within 1px, no document overflow; CI baseline mission-kanban-ten-lane-k2-narrow-390; local Chromium+Firefox 96/96 incl. #278 suite; WebKit authority is CI (pre-fold a3ac655c run 34604991224: playwright 3 browsers + test passed).",
       "pass_fail": "pass",
       "verified_by": "claude",
-      "verified_at": "2026-09-11T13:44:33.603039+00:00",
+      "verified_at": "2026-09-11T14:11:09.027184+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
