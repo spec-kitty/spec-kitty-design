@@ -1,7 +1,7 @@
 {
   "rows": {
     "#276": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "Epic 276 (Mission Kanban) is the reopened parent; this mission is its only open child. The PR carries Refs #276 with no closing keyword; the epic stays open until #395 is accepted and merged.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -9,8 +9,8 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "verdict": "in-mission",
+      "wp": "WP01"
     },
     "#278": {
       "evidence_ref": "<link or commit>",
