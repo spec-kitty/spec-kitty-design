@@ -274,14 +274,14 @@ operator act.
   inherits that same restriction, which rules out a true merge-commit promotion (Option E, below)
   unless that restriction is itself named as a deviation.
 
-## Open Decision: how `develop` receives commits from `train/elements-first` *(item 5)*
+## Decision: how `develop` receives commits from `train/elements-first` *(item 5, ruled 2026-09-11)*
 
-This is an open decision, not a settled requirement. Per the operator's ruling on 2026-09-11: this
-mission proposes the mechanism, the review squad examines it, and the operator approves it before
-this mission's PR merges. FR-007 states what any mechanism must satisfy; the options below are
-evaluated against those requirements, against the `develop` ruleset (FR-001), and against how the
-choice affects REL2's rc-publish cadence (#363, out of scope here but the consumer of whatever
-`push` events this mechanism produces on `develop`).
+**This is now a recorded decision, not an open one.** The operator ruled on the mechanism and
+identity below on 2026-09-11, from the options this section presented. FR-007 states what the
+mechanism must satisfy; the options that follow are the evaluation trail that produced the ruling,
+kept in full because the review squad and the plan both cite it. The final ruling is in "Recorded
+Decisions (operator ruling, 2026-09-11)" near the end of this document — read that section first;
+what follows is the evidence, not a still-open menu.
 
 **This section was revised after an orchestrator review of the first draft found three errors in
 it, which are corrected below rather than silently fixed:** the first draft's Option B (a
@@ -384,14 +384,15 @@ promotion mechanism's first cycle runs, so a push-triggered baseline scan exists
 promotion PR is opened. This is folded into Sequencing below as an explicit step, not left as a
 gap for whoever operates the mechanism to discover.
 
-### Recommendation — pending operator approval
+### Decision — Option D, ruled 2026-09-11
 
-**Option D** (tree-sync promotion), triggered on every push to `train/elements-first` (per-merge
-cadence), landed through a single-commit PR opened and merged by an installation token from the
-**`spec-kitty-factory-ci`** App if the operator confirms it can be granted `contents: write` +
-`pull-requests: write` on this repository — otherwise a dedicated PAT, or, failing both, REL2
-providing a `workflow_dispatch` entry point so the promotion workflow can trigger rc-publish
-directly regardless of which token opened the PR.
+**Option D** (tree-sync promotion) is the ruled mechanism, triggered on every push to
+`train/elements-first` (per-merge cadence, also ruled), landed through a single-commit PR. The
+operator did **not** grant the org-wide `spec-kitty-factory-ci` App the additional permissions this
+section's recommendation floated; instead the identity is **a new GitHub App, installed on
+`spec-kitty-design` only**, created by the org owner. See "Recorded Decisions" below for the exact
+ruling text; the plan names the new App's permissions and the two repo secrets that carry its
+credentials.
 
 **Why D over the others:** D is the only option that satisfies FR-007(f)/(g) (no merge commits, no
 recurring conflicts — both verified in the scratch repo, not assumed) while adding **zero** ruleset
@@ -401,9 +402,10 @@ byte-identical fast-forward, but that property was never achievable without a by
 `required_linear_history` anyway, given fact 2 — so the trade-off D makes (a fabricated commit
 instead of train's real graph) is the cheapest one available, not a concession specific to D.
 
-This recommendation is **not a decision**. The review squad should examine it against FR-007,
-NFR-005, and C-005 specifically, and the operator answers the numbered questions at the end of
-this spec before this mission's PR merges into `train/elements-first`.
+The review squad still examines the implementation against FR-007, NFR-005, and C-005, and the
+operator still approves the implemented PR itself (FR-008) before it merges into
+`train/elements-first` — the mechanism choice is decided; the concrete workflow is not yet
+reviewed.
 
 ## Sequencing: when the repo-setting actions happen
 
@@ -469,8 +471,9 @@ or attempt to create the branch itself.
 
 ## Notes for the review squad and the operator
 
-- **Item 5 is genuinely open.** FR-007/FR-008 and the Options table above are the artifact meant
-  to carry that decision through review; do not treat "Recommendation" as "Decided."
+- **Item 5 is now decided** (2026-09-11): Option D, tree-sync promotion, with a new
+  repo-scoped GitHub App identity. FR-007/FR-008 and the Options table above remain the record of
+  *why*, for the review squad to examine the implementation against — not a still-open menu.
 - **Two things in the issue text were found to be imprecise, corrected here:**
   - The constraint "do not retarget mission PRs (ADR-8)" cites the wrong document. ADR-8 ("Custom
     Elements as the Shared Component Base Layer") is entirely about the component/framework
@@ -494,29 +497,41 @@ or attempt to create the branch itself.
   `develop` parity), but it is the one long-lived, push-accessible branch that stays unruled
   after this mission, and a future mission or operator decision may want to close that gap.
 
-## Operator approval questions
+## Recorded Decisions (operator ruling, 2026-09-11)
 
-Numbered so each can be answered directly, per the fold-in standing order (an adjacent gap gets a
-named question here rather than a silent assumption):
+These are the operator's answers to the six numbered questions this spec originally posed,
+recorded here as decisions per the fold-in standing order. They were chosen from options presented
+in session; the text below states the recorded answer, not a verbatim transcript (the verbatim
+session comments are on issue #362).
 
-1. **Mechanism**: approve Option D (tree-sync promotion) as recommended, or a different option
-   from the Options table (A/B/C/E), or a variant of one?
-2. **Identity**: can the `spec-kitty-factory-ci` GitHub App (org secrets `SK_CI_APP_ID` /
-   `SK_CI_APP_PRIVATE_KEY`) be granted `contents: write` + `pull-requests: write` on
-   `spec-kitty-design`? If not, is a dedicated PAT approved instead, and who owns its rotation?
-   (Options D and E both need one of these; Option A needs one too, in addition to its bypass
-   actor.)
-3. **Trigger for REL2**: should the promotion workflow call `workflow_dispatch` on REL2's
-   rc-publish workflow directly (bypassing the `push`-to-`develop` trigger entirely), or should
-   REL2 rely on the `push` event produced by whichever non-`GITHUB_TOKEN` identity question 2
-   settles on? This is REL2's trigger to own; this mission only surfaces the choice.
-4. **Cadence**: promote on every `train/elements-first` push (matches train's own activity,
-   recommended), or a batched/scheduled cadence instead (fewer, larger rc-publish triggers)?
-5. **`code_scanning` bootstrap**: approve the Sequencing addition (a plain push to `develop`
-   immediately after it is cut, before the first promotion PR) as the mitigation for the
-   default-setup coverage bootstrap gap, or a different mitigation?
-6. **Ruleset deviations** (only if an option other than D is chosen): if Option A, approve the
-   named bypass actor for both `pull_request` and `required_linear_history` on `develop`. If
-   Option E, approve dropping `required_linear_history` on `develop` (and, if a true merge-commit
-   promotion is wanted, allowing the `merge` method there too, beyond `main-is-safe`'s
-   squash/rebase-only restriction). D needs no such approval.
+1. **Mechanism: Option D (tree-sync promotion).** Each promotion is one commit whose tree equals
+   the train tip's tree, whose parent is `develop`'s current tip, and whose message names the
+   train SHA. It lands through a single-commit PR into `develop`. Options A, B, C and E (the
+   Options table above) are not used.
+2. **Identity: a NEW GitHub App, installed on `spec-kitty-design` only.** The org-wide
+   `spec-kitty-factory-ci` App (Key Entities, above) is **not** widened to cover this mission's
+   need — this ruling supersedes that entity's speculative "is `spec-kitty-factory-ci` grantable
+   here" question with a firm no; a separate, narrowly-scoped App is created instead. The org
+   owner creates the App. The plan (`plan.md`) names its permissions and the two repository
+   secrets that carry its credentials.
+3. **REL2's (#363) trigger: the original question falls away.** With a real (non-`GITHUB_TOKEN`)
+   App identity opening and merging the promotion PR, the promotion merge is an ordinary `push`
+   event on `develop` (Edge Cases and fact 3, above, no longer apply to it). REL2 still owns
+   deciding whether its rc-publish workflow triggers on that `push` or on a `workflow_dispatch`
+   call this mission's workflow could make instead — this mission does not decide REL2's trigger,
+   it only confirms REL2 receives a real, workflow-triggering event either way.
+4. **Cadence: every push to `train/elements-first`.** Not a batched or scheduled alternative.
+5. **`code_scanning` bootstrap: not asked separately, kept as specified.** The Sequencing
+   section's mitigation (one plain push to `develop` immediately after it is cut, before the first
+   promotion PR) stands as technical sequencing rather than a decision requiring separate operator
+   approval.
+6. **Ruleset deviations: none needed.** Because Option D was ruled (not A or E), the question of
+   approving a bypass actor or dropping `required_linear_history` does not arise. **No ruleset is
+   added for `train/elements-first`** in this mission — this resolves NFR-004's open question as
+   "no, not in this mission," not as a still-open gap. A future mission or operator decision may
+   revisit it.
+
+The operator still approves the implemented PR itself (FR-008) — including the concrete workflow,
+the App's actual permission grant, and the `develop` ruleset artifact — before it merges into
+`train/elements-first`. These six rulings settle the mechanism and its identity; they do not
+pre-approve the implementation.
