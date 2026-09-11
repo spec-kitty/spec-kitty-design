@@ -72,3 +72,12 @@ export const LightMode: Story = {
   parameters: { backgrounds: { default: 'sk-light' } },
   render: () => storyFrame(SkFormSelectT10LaneHTML, true),
 };
+
+/**
+ * Light theme, `:invalid` state — evidence surface for #350's invalid-boundary fix
+ * (--sk-border-control-invalid). This component has no error-copy declaration of its own.
+ */
+export const LightModeInvalid: Story = {
+  parameters: { backgrounds: { default: 'sk-light' } },
+  render: () => storyFrame(SkFormSelectRequiredInvalidHTML, true),
+};

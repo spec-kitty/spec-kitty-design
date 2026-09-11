@@ -62,3 +62,17 @@ export const LightMode: Story = {
     </div>
   `,
 };
+
+/**
+ * Light theme, both static invalid controls in their error state — evidence surface for #350's
+ * invalid-boundary and error-copy fix (--sk-border-control-invalid, --sk-fg-error).
+ */
+export const LightModeError: Story = {
+  parameters: { backgrounds: { default: 'sk-light' } },
+  render: () => `
+    <div class="sk-light" style="background: var(--sk-surface-page); padding: var(--sk-space-6); display: inline-flex; flex-direction: column; gap: var(--sk-space-4);">
+      ${SkFormInputErrorHTML}
+      ${SkFormTextareaErrorHTML}
+    </div>
+  `,
+};
