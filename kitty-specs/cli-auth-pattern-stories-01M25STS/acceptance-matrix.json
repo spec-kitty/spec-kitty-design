@@ -137,11 +137,11 @@
     {
       "criterion_id": "FR-014",
       "description": "Verify FR-014 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
+      "proof_type": "code_review",
+      "evidence": "Assertion verified: sk-cli-auth-pattern.spec.ts:562-582 emulates reducedMotion:'reduce' and checks every element's computed animationName is ''/'none' or animationDuration==='0s' across all 13 non-lightmode stories -- an assertion over measured computed style, not an assumption of absence. Execution outcome pending CI.",
       "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "verified_by": "reviewer-renata",
+      "verified_at": "2026-09-11T12:09:17.151160+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
