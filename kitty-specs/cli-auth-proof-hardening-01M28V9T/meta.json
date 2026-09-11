@@ -2,25 +2,25 @@
   "accept_commit": "e10dbd56b68c75256f0c99fabcd544f2836de7b9",
   "acceptance_history": [
     {
-      "accept_commit": "88c1d920f52f25fe985b58d1b5fc74d729c450f7",
+      "accept_commit": "4715261d138eefb5c48ae16635382feafbbcd31d",
       "acceptance_mode": "pr",
       "accepted_at": "2026-09-11T21:33:42.218980+00:00",
       "accepted_by": "jeroennouws",
-      "accepted_from_commit": "2f08d5efc234cddc91be8c8f2844d0b851933c0c"
+      "accepted_from_commit": "61eb3a3fc119171c32ae83d7ea4732527bbfa8bb"
     },
     {
-      "accept_commit": "c13cf70acf08adc4eea87bb2a2c67fa3f0fbc13a",
+      "accept_commit": "5010904111810d8b432ca1f9913c39beade897a4",
       "acceptance_mode": "pr",
       "accepted_at": "2026-09-11T21:40:57.161427+00:00",
       "accepted_by": "jeroennouws",
-      "accepted_from_commit": "3e72371439d43e8f49ef1cb945feea0f83ae075c"
+      "accepted_from_commit": "33ce8782b1530eb692370e726ce721e7dbd8dc4f"
     },
     {
-      "accept_commit": "38ed1eb20fc987168077c0f7b830cb456a7441a0",
+      "accept_commit": "b76219a011defdd9bbbc93f14ebc0cc2b0332d1f",
       "acceptance_mode": "pr",
       "accepted_at": "2026-09-11T22:28:31.830678+00:00",
       "accepted_by": "jeroennouws",
-      "accepted_from_commit": "2e59a671b327963993c832ffc53534c1970ddf23"
+      "accepted_from_commit": "c70f8445bd4cfbee08ca901e4d76986c0e5d31d1"
     },
     {
       "accept_commit": "e10dbd56b68c75256f0c99fabcd544f2836de7b9",

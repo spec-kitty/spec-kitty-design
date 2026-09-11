@@ -180,3 +180,66 @@ routine (CLI re-run for the top-level fields, message+subtree+parent-chain match
 everything else), but doing it twice in one round is itself a signal: a mission that must absorb
 upstream churn between `accept` and merge should expect to repeat this exact procedure once per
 upstream landing, not treat one reconciliation as final.
+
+## Incident Record 3 — a third rebase (onto `#430`'s ceiling fix) re-orphaned the same SHAs again
+
+**What happened.** The coordinator's own CI run against `13117537` (this branch, carrying the
+re-harvested 240px zoom baselines from Incident Record 2) went green on `visual-regression` and
+`playwright`, but `test` failed on wall-clock: the mutation-testing harness ran 272 mutations
+correctly (all named-red, green baseline) in 1691.5s against a flat 1649.8s ceiling calibrated
+when the corpus was 210 arms — this mission adds zero mutations, so the failure was an unrelated
+capacity-planning defect in the harness's own gate, not a regression this mission caused. A
+sibling mission (PR #430, merge commit `40155d58`) had already fixed it on its own merits with a
+corpus-scaled ceiling (`fixedSeconds + perArmSeconds × armCount`); this mission's 1691.5s clears
+the new formula with room. Absorbing that fix required a third `git fetch origin` + `git rebase
+origin/train/elements-first` this round (train had moved to `40155d58`). That rebase re-orphaned
+the same class of SHA this mission has now hit three times running: `meta.json`'s top-level
+`accept_commit`/`accepted_from_commit`, all three `acceptance_history` entries accumulated so
+far, and `lanes.json`'s `planning_commit_sha` — seven 40-char SHAs in total this time, since the
+history array had grown by one entry since Incident Record 2.
+
+**Why it happened, precisely.** Unchanged from Incident Records 1 and 2: any history rewrite
+after a command has recorded a commit hash orphans that hash. Nothing about this occurrence is a
+new failure mode — it is the same mechanical consequence recurring because the mission had to
+absorb a third unrelated piece of legitimate upstream work (a wall-clock ceiling formula fix)
+between its own `accept` and its eventual merge.
+
+**How it was resolved.** Identical method to Incident Records 1 and 2, run a third time:
+1. `spec-kitty accept --mission cli-auth-proof-hardening-01M28V9T --diagnose` (still only the
+   pre-authorized `contracts/` item) then `--lenient` — re-stamped `meta.json`'s TOP-LEVEL
+   `accept_commit`/`accepted_from_commit` via the CLI (new accept commit
+   `e10dbd56b68c75256f0c99fabcd544f2836de7b9`, parent
+   `4d40b06258a68b0a7137e783f3d109e24d9dfdca`) — no hand-edit.
+2. All three `acceptance_history` entries and `lanes.json`'s `planning_commit_sha` again had no
+   CLI write path and were hand-edited, matched to post-rewrite equivalents by commit message,
+   exact mission-subtree tree hash, and parent-chain continuity:
+   - `acceptance_history[0].accept_commit`: `88c1d920f52f25fe985b58d1b5fc74d729c450f7` →
+     `4715261d138eefb5c48ae16635382feafbbcd31d`; `.accepted_from_commit`:
+     `2f08d5efc234cddc91be8c8f2844d0b851933c0c` → `61eb3a3fc119171c32ae83d7ea4732527bbfa8bb`.
+   - `acceptance_history[1].accept_commit`: `c13cf70acf08adc4eea87bb2a2c67fa3f0fbc13a` →
+     `5010904111810d8b432ca1f9913c39beade897a4`; `.accepted_from_commit`:
+     `3e72371439d43e8f49ef1cb945feea0f83ae075c` → `33ce8782b1530eb692370e726ce721e7dbd8dc4f`.
+   - `acceptance_history[2].accept_commit`: `38ed1eb20fc987168077c0f7b830cb456a7441a0` →
+     `b76219a011defdd9bbbc93f14ebc0cc2b0332d1f`; `.accepted_from_commit`:
+     `2e59a671b327963993c832ffc53534c1970ddf23` → `c70f8445bd4cfbee08ca901e4d76986c0e5d31d1`.
+   - `lanes.json`'s `planning_commit_sha`: `cd23baa2a84a3e3867566cfa4b38cffb722af04f` →
+     `2fbe165c97a504f55024c3d9b011cc3316e87ead`.
+3. Verified with the coordinator's exact check against the five named files, zero output.
+4. Re-ran every local gate over the newly merged tree: lint, manifest regeneration + `git diff
+   --exit-code`, the derived-composition selftest (unchanged 47/34/13/8/24 counts, and confirmed
+   by direct inspection — not just unchanged output — that neither `pattern-composition-lib.mjs`
+   nor `check-pattern-composition.mjs` enumerates anything under `scripts/`, so the rebase's new
+   `scripts/lib/selftest-budget.mjs` and changed `suite-budget.json` could not have perturbed
+   those counts even silently), a fresh Storybook build, and the full `sk-cli-auth-pattern.spec.ts`
+   suite (14/14 green). Scope-check (`git diff --name-only origin/train/elements-first...HEAD`)
+   confirmed clean — only this mission's own files plus the two re-harvested zoom PNGs, no
+   `suite-budget.json` or `scripts/lib/selftest-budget.mjs` in scope.
+5. Pushed once more with `--force-with-lease` pinned to the SHA already on the remote, after
+   confirming nobody else had touched it since the prior push.
+
+**Carried forward.** Third occurrence, same class, same fix. The pattern by now is clear enough to
+generalize rather than merely restate: a mission that sits accepted-but-unmerged while sibling
+missions continue landing on the train should expect one reconciliation cycle per upstream
+landing it absorbs, not a single one-time fix — and the reconciliation itself is now a five-minute
+mechanical procedure (CLI re-run + message/subtree/parent-chain matching), not open research, each
+time it recurs.
