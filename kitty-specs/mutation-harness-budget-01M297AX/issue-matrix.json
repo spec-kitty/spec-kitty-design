@@ -61,7 +61,7 @@
       "wp": null
     },
     "#419": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "Primary tracking issue. WP01 replaces the flat selftestCeilingSeconds with an arm-count-scaled model fit from 8 real CI runs (34561511046, 34592445070, 34595310707, 34606532461, 34618855795, 34623594612, 34632185898, 34637284298) spanning 1346.6-1949.7s on the identical 272-arm corpus that #419 reports straddling the old ceiling.",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -69,8 +69,8 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
-      "wp": null
+      "verdict": "in-mission",
+      "wp": "WP01"
     }
   },
   "schema_version": 1
