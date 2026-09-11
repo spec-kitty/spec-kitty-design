@@ -57,11 +57,11 @@
     {
       "criterion_id": "FR-006",
       "description": "Verify FR-006 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "proof_type": "browser test",
+      "evidence": "head 4f301f83; sk-mission-kanban-ten-lane-pattern.spec.ts [T006] K3: open details, legend 'Committed detailed lanes', 10 checkboxes name=lanes in canonical order with counts, exactly in_review+blocked checked, lanes in_review(WP10) then blocked(WP05); toggling a checkbox and clicking Apply/Clear leaves the board unchanged; fits at 1440 with no triad.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T13:44:34.643170+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
