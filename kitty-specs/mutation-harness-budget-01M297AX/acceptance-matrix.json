@@ -37,11 +37,11 @@
     {
       "criterion_id": "FR-004",
       "description": "Verify FR-004 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
-      "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "proof_type": "manual_verification",
+      "evidence": "suite-budget.json $comment gained one appended entry (94 total, none deleted/edited) documenting the measurement, fit, and what the gate catches/does not; selftestMeasurements gained 14 structured rows (8x272-arm, 6x10-arm) with real run/job ids per reviewer finding 1.",
+      "pass_fail": "pass",
+      "verified_by": "implementer",
+      "verified_at": "2026-09-11T22:46:11.033440+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
