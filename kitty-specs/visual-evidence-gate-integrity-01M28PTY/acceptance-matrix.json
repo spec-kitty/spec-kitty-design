@@ -68,11 +68,11 @@
   "negative_invariants": [
     {
       "invariant_id": "NI-001",
-      "description": "No pixel-affecting drift in apps/storybook/src/tests/visual.spec.ts relative to the mission's pre-mission base (38f7e6fa): every changed line, per git diff -U0, is exactly the expect( -> expect.soft( substitution or a recognized #401 floor-assertion pure insertion; no pure deletions, no other content change (locator/story id/viewport/threshold).",
+      "description": "No pixel-affecting drift in apps/storybook/src/tests/visual.spec.ts relative to this branch's own contribution (git merge-base HEAD origin/train/elements-first, recomputed fresh on every run so a future rebase's sibling-PR content is never mistaken for drift): every changed line, per git diff -U0, is exactly the expect( -> expect.soft( substitution or a recognized #401 floor-assertion pure insertion; no pure deletions, no other content change (locator/story id/viewport/threshold).",
       "verification_method": "custom_command",
-      "verification_command": "node scripts/verify-visual-spec-zero-drift.mjs 38f7e6fa",
+      "verification_command": "node scripts/verify-visual-spec-zero-drift.mjs",
       "result": "confirmed_absent",
-      "evidence": "Command exited 0: \u2705 NI-001 holds: every changed line in apps/storybook/src/tests/visual.spec.ts relative to 38f7e6fa is exactly expect( -> expect.soft(, or a recognized #401 floor-assertion insertion. No pure deletions"
+      "evidence": "Command exited 0: \u2705 NI-001 holds: every changed line in apps/storybook/src/tests/visual.spec.ts relative to 04565d55938ac3b9a598d896d99166a800b5b910 is exactly expect( -> expect.soft(, or a recognized #401 floor-assert"
     },
     {
       "invariant_id": "NI-002",
