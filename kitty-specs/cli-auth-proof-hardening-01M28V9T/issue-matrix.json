@@ -1,7 +1,7 @@
 {
   "rows": {
     "#329": {
-      "evidence_ref": "<link or commit>",
+      "evidence_ref": "PR #409 (merged 2026-09-11T15:54:01Z) closes #329's scope; left open deliberately because a Closes line in a train-targeting PR registers nothing against the issue",
       "fr": null,
       "nfr": null,
       "repo": null,
@@ -9,7 +9,7 @@
       "scope": null,
       "source_file": "spec.md",
       "title": "<fill at WP-implementation time>",
-      "verdict": "unknown",
+      "verdict": "verified-already-fixed",
       "wp": null
     },
     "#409": {
