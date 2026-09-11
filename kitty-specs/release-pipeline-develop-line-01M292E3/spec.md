@@ -15,9 +15,9 @@ workflow (#363) — which fires on pushes to `develop` — only ever reaches tha
 whatever mechanism this mission defines.
 
 This mission specifies: the ruleset `develop` needs, the CI coverage it needs, the packaging
-ruling item 4 asks this mission to record, and — as an operator-ruled open decision — the
-requirements a train→develop promotion mechanism must satisfy, the viable options, and a
-recommendation. It does not create `develop`, does not create its ruleset, and does not implement
+ruling item 4 asks this mission to record, and — as an operator-ruled decision recorded below —
+the requirements a train→develop promotion mechanism must satisfy, the viable options, and the
+ruled choice (Option D). It does not create `develop`, does not create its ruleset, and does not implement
 REL2's rc-publish workflow or any registry/`.npmrc` change (REL2/REL3, #363/#364).
 
 ## User Scenarios & Testing *(mandatory)*
@@ -87,7 +87,7 @@ review squad examines it, and the operator approves it before this mission's PR 
 this, REL2's rc-publish workflow has a trigger with nothing upstream of it that reliably fires
 that trigger.
 
-**Independent Test**: this spec's Open Decision section is readable on its own and lets a
+**Independent Test**: this spec's Decision section (item 5) is readable on its own and lets a
 reviewer answer, for each option, "does this need a ruleset exception?" and "how does publish
 cadence change?" without reading any other document.
 
@@ -96,10 +96,10 @@ cadence change?" without reading any other document.
 1. **Given** the options table below, **When** the review squad examines it, **Then** it can
    raise a finding against a specific option/trade-off rather than against an undocumented
    mechanism.
-2. **Given** the operator has not yet approved a specific option, **When** this mission's PR is
-   reviewed, **Then** the recommended option is implemented behind requirements that any of the
-   viable options would also satisfy, so an operator override does not require re-authoring the
-   spec.
+2. **Given** the operator ruled Option D on 2026-09-11 (Recorded Decision, below), **When** this
+   mission's PR is reviewed, **Then** the review squad and the operator examine the *implementation*
+   of that ruling — the concrete workflow, script, App grant and ruleset artifact — which is a
+   distinct approval from the mechanism choice itself (FR-008).
 
 ---
 
@@ -135,8 +135,13 @@ operator act.
   to create `develop` itself (that stays an orchestrator/operator act, per Sequencing below).
 - What happens if `develop` is ever found to not be a strict ancestor-relationship match with
   `train/elements-first` (for example, a ruleset bypass or an out-of-band admin action put a
-  commit on `develop` that never went through `train`)? The mechanism must refuse to force a
-  promotion over that state and must surface the divergence rather than silently overwriting it.
+  commit on `develop` that never went through `train`)? **Post-plan squad blocker B1, fixed in
+  this revision**: the mechanism now detects this rather than only disclaiming it — a sixth
+  outcome, `refuse-diverged` (FR-007(d), plan.md's Promotion algorithm and Merge readiness). A
+  `develop` tip is healthy only if it is (a) a commit on the train's first-parent history (the cut
+  commit itself), or (b) a prior promotion commit whose `Train-SHA:` trailer names a train commit
+  whose tree matches the tip's tree. Anything else refuses visibly, with the reason in the run's
+  step summary, rather than merging over it or silently no-opping.
 - What happens when two train merges land before a promotion cycle completes? The mechanism must
   not open a second, duplicate promotion PR while one is already open and unmerged.
 - What happens when a commit being promoted trips `develop`'s `code_scanning` rule? The mechanism
@@ -146,7 +151,7 @@ operator act.
   default setup has never scanned a PR against `develop`)? Verified 2026-09-11: GitHub's own
   documentation states a ruleset `code_scanning` rule blocks a PR when "a required tool's analysis
   is still in progress, or a required tool is not configured for the repository" — a missing
-  analysis is fail-closed, not a pass. See the Open Decision section for whether `develop`
+  analysis is fail-closed, not a pass. See the Decision section (item 5) for whether `develop`
   qualifies for default-setup coverage and what mitigates the gap if it does not.
 - What happens to REL2's rc-publish workflow before this mission's promotion mechanism has run at
   least once? It has nothing to trigger on; that is expected and is not this mission's failure —
@@ -158,7 +163,7 @@ operator act.
   events, which do create a run but in an **approval-required** state when the actor is
   `GITHUB_TOKEN`). A `GITHUB_TOKEN`-authenticated push to `develop` — the final step of any
   automated option — therefore fires **no** workflow at all, breaking FR-007(e) and starving
-  REL2's rc-publish trigger silently. See the Open Decision section for the identities that avoid
+  REL2's rc-publish trigger silently. See the Decision section (item 5) for the identities that avoid
   this.
 
 ## Requirements *(mandatory)*
@@ -173,8 +178,8 @@ operator act.
 | FR-004 | No unrelated job-level branch logic needed | As a maintainer, I want it recorded that no job inside `ci-quality.yml` needs a branch-conditional change beyond the top-level trigger filters — the only branch-scoped `if` in the file (the FR-041 nightly CVE audit) stays `main`-only by design and is unaffected by adding `develop` to the push filter. | Medium | Open |
 | FR-005 | Action-pin compliance on touched workflow files | As a maintainer, I want every action reference in any workflow file this mission touches or adds (including a new promotion workflow) pinned to a commit SHA, verified by `scripts/check-action-pins.sh`, so this mission does not introduce a tag-pinned action. | High | Open |
 | FR-006 | GitHub Packages visibility ruling recorded | As a maintainer, I want the operator's 2026-09-11 ruling — one public `@spec-kitty/{elements,styles,tokens}` package per name, created private and flipped to public on first publish, rc and prod streams separated only by dist-tag — recorded in this repository's documentation now, even though publishing itself is REL2/REL3 (#363/#364), so the next mission does not have to re-derive it from the epic's comment thread. | Medium | Open |
-| FR-007 | Promotion mechanism satisfies stated requirements | As the release pipeline, I want a train→`develop` promotion mechanism that: (a) requires no ruleset bypass actor unless the operator explicitly approves one as a named deviation from main-is-safe parity; (b) is idempotent — a re-run with nothing new to promote performs no action and opens no duplicate PR; (c) no-ops safely if `develop` does not yet exist; (d) never force-pushes and never overwrites a `develop` that has diverged from `train/elements-first` in a way the mechanism did not itself produce; (e) results in a normal `push` event on `develop` when it succeeds, so REL2's rc-publish workflow has something to trigger on; (f) never pushes a merge commit onto `develop`, so `required_linear_history` holds without a bypass; (g) does not degrade into recurring merge conflicts across repeated promotion cycles; (h) uses an identity other than the workflow's default `GITHUB_TOKEN` for any step whose triggering a downstream workflow matters (opening/updating the PR, and merging it), because `GITHUB_TOKEN`-caused events do not create new workflow runs (Edge Cases, above). | High | Open |
-| FR-008 | Promotion mechanism is operator-approved before merge | As the operator, I want the specific mechanism variant this mission implements marked as a recommendation pending my approval, with the viable alternatives documented, so I decide before this mission's PR merges rather than after. | High | Pending Approval |
+| FR-007 | Promotion mechanism satisfies stated requirements | As the release pipeline, I want a train→`develop` promotion mechanism that: (a) requires no ruleset bypass actor unless the operator explicitly approves one as a named deviation from main-is-safe parity; (b) is idempotent — a re-run with nothing new to promote performs no action and opens no duplicate PR; (c) no-ops safely if `develop` does not yet exist; (d) never force-pushes and never overwrites a `develop` that has diverged from `train/elements-first` in a way the mechanism did not itself produce — **detected**, not merely disclaimed: before merging, the mechanism re-reads `develop`'s live tip and refuses (a sixth outcome, `refuse-diverged`, surfaced visibly with its reason) rather than merging over a tip that is neither the cut commit's first-parent history nor a prior promotion commit whose `Train-SHA:` trailer names a train commit with a matching tree (plan.md, Promotion algorithm); (e) results in a normal `push` event on `develop` when it succeeds, so REL2's rc-publish workflow has something to trigger on; (f) never pushes a merge commit onto `develop`, so `required_linear_history` holds without a bypass; (g) does not degrade into recurring merge conflicts across repeated promotion cycles; (h) uses an identity other than the workflow's default `GITHUB_TOKEN` for any step whose triggering a downstream workflow matters (opening/updating the PR, and merging it), because `GITHUB_TOKEN`-caused events do not create new workflow runs (Edge Cases, above). | High | Open |
+| FR-008 | Promotion mechanism is operator-approved before merge | As the operator, I want the implemented PR — the concrete workflow, script, App permission grant, and `develop` ruleset artifact realizing the ruled mechanism (Recorded Decision, below) — to require my approval before it merges into `train/elements-first`, so I review the actual implementation, not only the already-decided choice of mechanism. | High | Open |
 | FR-009 | Branch-model doc added | As a contributor, I want a short section describing what `main`, `train/elements-first` and `develop` are each for, and which branch a given kind of PR targets, added to the repository's architecture documentation, so the three-branch model is discoverable without reading issue history. | Medium | Open |
 | FR-010 | Promotion outcome is observable | As an operator or maintainer, I want each promotion attempt's outcome (promoted / no-op / blocked-and-why) visible in the mechanism's own run output or PR, so diagnosing "why hasn't `develop` moved" does not require reading raw workflow logs. | Low | Open |
 
@@ -185,8 +190,8 @@ operator act.
 | NFR-001 | Zero unpinned actions | 100% of action `uses:` references in every workflow file this mission adds or edits are pinned to a full commit SHA (0 tag-only or branch-only refs), verified by `scripts/check-action-pins.sh` exiting 0. | Security | High | Open |
 | NFR-002 | No regression on existing branch coverage | After the `ci-quality.yml` filter change, the set of jobs that run on a `main` push and on a `train/**` push is byte-identical to today's set (0 jobs added, removed, or newly skipped for those two branch classes). | Reliability | High | Open |
 | NFR-003 | Promotion idempotency | Across any sequence of promotion-mechanism runs where `train/elements-first` has not moved since the last successful promotion, 0 duplicate PRs are opened and 0 additional pushes are made to `develop`. | Reliability | High | Open |
-| NFR-004 | No silent branch-scan gaps | The ruleset covering `develop` and the `main-is-safe` ruleset covering `main` together leave 0 push-accessible long-lived branches (`main`, `train/elements-first`, `develop`) without an active ruleset of matching rule types, other than `train/elements-first`, which this mission's scope does not add a ruleset for (out of scope; tracked as an open question below). | Security | Medium | Open |
-| NFR-005 | Linear, conflict-free promotion | Every commit the promotion mechanism adds to `develop` has exactly one parent (0 merge commits pushed to `develop`), and across any sequence of promotions where `train/elements-first` keeps advancing, 0 promotion attempts fail with a merge conflict. Verified for the recommended mechanism in a scratch repository (Open Decision, below); the squash/rebase-PR alternative (Option B) does **not** meet this NFR past the first promotion cycle and is documented as failing it, not silently assumed to pass. | Reliability | High | Open |
+| NFR-004 | No silent branch-scan gaps | The ruleset covering `develop` and the `main-is-safe` ruleset covering `main` together leave 0 push-accessible long-lived branches (`main`, `train/elements-first`, `develop`) without an active ruleset of matching rule types, other than `train/elements-first`, for which the operator ruled on 2026-09-11 that this mission adds no ruleset (Recorded Decision, below) — a deliberate scope boundary, not an unresolved gap. | Security | Medium | Open |
+| NFR-005 | Linear, conflict-free promotion | Every commit the promotion mechanism adds to `develop` has exactly one parent (0 merge commits pushed to `develop`), and across any sequence of promotions where `train/elements-first` keeps advancing, 0 promotion attempts fail with a merge conflict. Verified for the ruled mechanism (Option D) in a scratch repository (Decision, item 5, below); the squash/rebase-PR alternative (Option B) does **not** meet this NFR past the first promotion cycle and is documented as failing it, not silently assumed to pass. | Reliability | High | Open |
 
 ### Constraints
 
@@ -216,15 +221,15 @@ operator act.
   pull request" commit); others land via squash (a single non-merge commit directly on the
   mainline, e.g. `a679d837`). Either way, **the train's mainline contains real merge commits**,
   which is the fact that breaks a literal fast-forward of `develop` to the train's tip under
-  `required_linear_history` (Open Decision, below).
+  `required_linear_history` (Decision, item 5, below).
 - **`develop`**: the RC line this mission specifies governance for. Does not exist yet; created by
   the orchestrator from `train/elements-first`'s head, after this mission's PR merges (see
   Sequencing).
 - **The new `develop` ruleset**: does not exist yet. This mission's FR-001 specifies its rules;
   the orchestrator applies it when `develop` is cut.
-- **The promotion mechanism**: the open decision this mission resolves (Open Decision, below).
-  Not yet built; this mission's PR contains the recommended implementation, gated on operator
-  approval before merge.
+- **The promotion mechanism**: Option D (tree-sync), ruled by the operator 2026-09-11 (Decision,
+  item 5, below). Not yet built; this mission's PR contains the implementation, gated on operator
+  approval before merge (FR-008).
 - **`SK_CI_APP_ID` / `SK_CI_APP_PRIVATE_KEY`**: two secrets shared at the organization level.
   Confirmed: `gh api repos/.../actions/secrets` returns 0 repo-level secrets in
   `spec-kitty-design`, so these are org-shared, and nothing in this repository's `.github/`,
@@ -259,7 +264,7 @@ operator act.
   repo, "protected" is being set by the **ruleset alone** (`main-is-safe`), with no classic
   protection involved. That is evidence (not a documented guarantee) that once `develop` carries
   its own ruleset, `develop.protected` should also become `true` and default setup should extend
-  its push/PR scanning to it. See the Open Decision section for the residual risk this still
+  its push/PR scanning to it. See the Decision section (item 5) for the residual risk this still
   leaves (a bootstrap gap on the very first promotion PR) and the mitigation.
 - **GitHub Packages (`@spec-kitty/elements`, `@spec-kitty/styles`, `@spec-kitty/tokens`)**: none
   exist yet (confirmed 404 on npmjs and "no such package" on npm.pkg.github.com, per epic #361's
@@ -351,7 +356,7 @@ Ran both scenarios in a disposable local repo to check the reasoning rather than
 | **A — Authenticated direct fast-forward push** | Mint a non-`GITHUB_TOKEN` token and fast-forward `develop` to `train`'s tip exactly. | **Yes, two rules**: needs a bypass actor for `pull_request` (any direct push is otherwise rejected) **and** for `required_linear_history` (the train's tip carries merge commits — fact 2). "Parity" becomes nominal: the branch that was supposed to have zero bypass actors and reject non-linear history now has neither property enforced for this actor. | Identical SHAs to `train/elements-first`; verified conflict-free by construction (fast-forward, not a merge) — but only landable at all via the bypass. | A real push if done with the App/PAT token (fact 3); still needs that non-`GITHUB_TOKEN` identity. |
 | **B — Squash/rebase promotion PR, auto-merged** | Open a PR `base: develop`, `head: train/elements-first`; merge via `squash` or `rebase` (the only methods main-is-safe's `pull_request` rule allows). | None needed for `pull_request` (fact 1) or `required_linear_history` (squash/rebase both produce single/individually-linear commits). | **Degrades into recurring conflicts from promotion 2 onward** — verified above. Not a viable default; would need manual conflict resolution on an indefinite cadence, which defeats automation. | Needs the App/PAT identity regardless (fact 3); irrelevant once the mechanism itself is non-viable. |
 | **C — Squash/rebase promotion PR, operator-merged** | Same as B, but a human merges. | Same as B. | Same conflict problem as B — a human resolving the same recurring conflict is not a fix, just a slower failure mode. | Same as B. |
-| **D — Tree-sync promotion (recommended)** | On a `train` push, if `develop^{tree} != train^{tree}`, create one commit via `git commit-tree` (tree = train's tip tree, parent = `develop`'s tip, message names the train SHA), land it on `develop` through a single-commit PR (`base: develop`, head a scratch branch holding just that commit). | **None.** The PR satisfies `pull_request` at zero required reviews (fact 1); the commit has exactly one parent, so `required_linear_history` holds without exception; `code_scanning` is unaffected (see below) — no bypass, no dropped rule. | **Verified conflict-free and idempotent across repeated cycles** (above). Each `develop` commit maps 1:1 to a train SHA — better RC provenance than squash/rebase. Not a byte-identical fast-forward (new SHA, same tree), which is an acceptable, stated trade-off, not a hidden one. | Needs the App/PAT identity to open+merge so the PR's checks run and the merge's `push` fires rc-publish (fact 3); or the workflow can call `workflow_dispatch` on REL2's rc-publish workflow directly instead of relying on the `push` event, which sidesteps fact 3 for the trigger specifically (REL2's call to make). |
+| **D — Tree-sync promotion (ruled 2026-09-11)** | On a `train` push, if `develop^{tree} != train^{tree}`, create one commit via `git commit-tree` (tree = train's tip tree, parent = `develop`'s tip, message names the train SHA), land it on `develop` through a single-commit PR (`base: develop`, head a scratch branch holding just that commit). | **None.** The PR satisfies `pull_request` at zero required reviews (fact 1); the commit has exactly one parent, so `required_linear_history` holds without exception; `code_scanning` is unaffected (see below) — no bypass, no dropped rule. | **Verified conflict-free and idempotent across repeated cycles** (above). Each `develop` commit maps 1:1 to a train SHA — better RC provenance than squash/rebase. Not a byte-identical fast-forward (new SHA, same tree), which is an acceptable, stated trade-off, not a hidden one. | Needs the App/PAT identity to open+merge so the PR's checks run and the merge's `push` fires rc-publish (fact 3); or the workflow can call `workflow_dispatch` on REL2's rc-publish workflow directly instead of relying on the `push` event, which sidesteps fact 3 for the trigger specifically (REL2's call to make). |
 | **E — Merge-commit promotion** | `develop`'s ruleset drops `required_linear_history` and allows the `merge` method (permitted at the repo level — Key Entities); promotion PRs merge with a real merge commit, so the merge-base always advances and conflicts cannot recur (git's normal 3-way merge machinery, not squash's history-erasing one). | **Yes, one rule**: drops `required_linear_history` on `develop` only (`pull_request` stays intact at zero reviews, same as D). Raises the question below of whether "linear-history parity" is even a coherent thing to ask of a branch fed entirely from a non-linear source. | No conflicts past the first (assuming normal git merge semantics — not independently scratch-tested here, unlike D, because it is standard, well-understood merge-commit behavior). Preserves full train commit history on `develop`, unlike D's single-commit-per-cycle compression. | Same identity need as D (fact 3). |
 
 **Is "linear-history parity" coherent for `develop`, given fact 2?** Arguably not as a literal
@@ -428,7 +433,7 @@ a commit in this branch.
    triggered CodeQL analysis exists for `develop` (`gh api repos/.../code-scanning/analyses` with
    `ref=refs/heads/develop`) — the branch-cut push in step 2 should itself be enough to seed this,
    but confirm it rather than assume it, given the `code_scanning` deadlock risk described in the
-   Open Decision section. If no analysis appears, wait for the weekly default-setup schedule or
+   Decision section (item 5). If no analysis appears, wait for the weekly default-setup schedule or
    trigger one before opening the first promotion PR, not after it stalls.
 
 **Why this order, not the reverse:** if `develop` were cut *before* this PR merges, its first
@@ -456,16 +461,28 @@ or attempt to create the branch itself.
   filter.
 - **SC-003**: A push to `main` or to any `train/**` branch continues to run exactly the job set it
   runs today — zero regression from the filter change (this is NFR-002 restated as an outcome).
-- **SC-004**: Across the first ten completed promotion cycles after the mechanism is live, zero
-  duplicate promotion PRs exist at any point in time, and zero force-pushes to `develop` occur.
-- **SC-005**: Across the first ten completed promotion cycles, zero merge commits land on
-  `develop` and zero promotion attempts fail with a merge conflict (NFR-005, restated as an
-  outcome and distinguishing this mission's actual mechanism from the withdrawn squash/rebase
-  approach, which does not meet this bar past cycle one).
+- **SC-004**: post-plan squad finding (blocker) — this outcome cannot be observed *inside this
+  mission's PR* (no promotion cycle can run before `develop` exists, which this PR does not
+  create). Rewritten as what the PR itself can prove: `scripts/promote-develop.mjs --selftest`
+  demonstrates, in a scratch repository, zero duplicate promotion branches/PRs across a
+  reuse-then-supersede sequence (contracts/promotion-script.contract.md probes 6/7) and a
+  `refuse-diverged` outcome — never a force-push — when `develop`'s tip is not one the mechanism
+  itself produced (probe set for FR-007(d)). The *real*, post-merge, ten-cycle observation is
+  moved to `docs/architecture/branch-model.md`'s observation queries (added under this SC's
+  original intent) and named as REL2's (#363) to actually run, since no promotion cycle exists
+  until `develop` does — see the fold-in note in plan.md's Fold-ins section.
+- **SC-005**: same finding — rewritten as what the PR itself can prove: the self-test's two-cycle
+  probe (contracts/promotion-script.contract.md probe 4) asserts, after two promotion cycles in a
+  scratch repo, that `develop`'s tree equals the train tree, every promoted commit has exactly one
+  parent, and each carries a `Train-SHA:` trailer naming the promoted commit — not merely that no
+  conflict was raised. The real, post-merge, ten-cycle observation moves to
+  `docs/architecture/branch-model.md` alongside SC-004's, for the same reason.
 - **SC-006**: A contributor who has read only the branch-model doc added under FR-009 can state
   correctly, for a hypothetical new mission PR, that it targets `train/elements-first`, and for a
-  hypothetical RC-only fix, whether it should go through the promotion mechanism or a direct
-  `develop` PR — without opening issue #361 or #362.
+  hypothetical RC-only fix, that it must land on the train first — `develop`'s tree is written
+  only by the promotion mechanism (FR-007(d)'s divergence refusal enforces this at runtime;
+  `branch-model.md` states it as the rule), never by a PR opened directly against `develop` —
+  without opening issue #361 or #362.
 - **SC-007**: The GitHub Packages visibility ruling (FR-006) is findable in the repository's
   documentation by a REL2/REL3 mission without re-reading epic #361's comment thread.
 
@@ -492,44 +509,48 @@ or attempt to create the branch itself.
     `target_branch` is `spec-kitty`'s own internal artifact-commit bookkeeping (where
     `kitty-specs/**` commits land), not the GitHub PR base. The GitHub PR this mission opens still
     targets `train/elements-first`, per C-001, which is unaffected by this.
-- **NFR-004 leaves an open question**, not a requirement: should `train/elements-first` itself
-  ever get a ruleset? This mission does not propose one (out of scope — #362 only asks for
-  `develop` parity), but it is the one long-lived, push-accessible branch that stays unruled
-  after this mission, and a future mission or operator decision may want to close that gap.
+- **NFR-004's `train/elements-first` question is the operator's ruling, not an unowned future
+  item** (post-plan squad correction, M19): ruling 4 below ("no ruleset for `train/elements-first`
+  in this mission") is a decision the operator made on 2026-09-11, not a gap this mission merely
+  declined to close. It remains the one long-lived, push-accessible branch without a ruleset after
+  this mission — that fact is unchanged — but whether to revisit it is now explicitly the
+  operator's to raise again, not a standing open question this document poses to whoever reads it
+  next.
 
-## Recorded Decisions (operator ruling, 2026-09-11)
+## Recorded Decision (operator ruling, 2026-09-11)
 
-These are the operator's answers to the six numbered questions this spec originally posed,
-recorded here as decisions per the fold-in standing order. They were chosen from options presented
-in session; the text below states the recorded answer, not a verbatim transcript (the verbatim
-session comments are on issue #362).
+Quoted directly from the operator's comment on issue #362, 2026-09-11 (the numbering below is the
+comment's own):
 
-1. **Mechanism: Option D (tree-sync promotion).** Each promotion is one commit whose tree equals
-   the train tip's tree, whose parent is `develop`'s current tip, and whose message names the
-   train SHA. It lands through a single-commit PR into `develop`. Options A, B, C and E (the
-   Options table above) are not used.
-2. **Identity: a NEW GitHub App, installed on `spec-kitty-design` only.** The org-wide
-   `spec-kitty-factory-ci` App (Key Entities, above) is **not** widened to cover this mission's
-   need — this ruling supersedes that entity's speculative "is `spec-kitty-factory-ci` grantable
-   here" question with a firm no; a separate, narrowly-scoped App is created instead. The org
-   owner creates the App. The plan (`plan.md`) names its permissions and the two repository
-   secrets that carry its credentials.
-3. **REL2's (#363) trigger: the original question falls away.** With a real (non-`GITHUB_TOKEN`)
-   App identity opening and merging the promotion PR, the promotion merge is an ordinary `push`
-   event on `develop` (Edge Cases and fact 3, above, no longer apply to it). REL2 still owns
-   deciding whether its rc-publish workflow triggers on that `push` or on a `workflow_dispatch`
-   call this mission's workflow could make instead — this mission does not decide REL2's trigger,
-   it only confirms REL2 receives a real, workflow-triggering event either way.
-4. **Cadence: every push to `train/elements-first`.** Not a batched or scheduled alternative.
-5. **`code_scanning` bootstrap: not asked separately, kept as specified.** The Sequencing
-   section's mitigation (one plain push to `develop` immediately after it is cut, before the first
-   promotion PR) stands as technical sequencing rather than a decision requiring separate operator
-   approval.
-6. **Ruleset deviations: none needed.** Because Option D was ruled (not A or E), the question of
-   approving a bypass actor or dropping `required_linear_history` does not arise. **No ruleset is
-   added for `train/elements-first`** in this mission — this resolves NFR-004's open question as
-   "no, not in this mission," not as a still-open gap. A future mission or operator decision may
-   revisit it.
+> 1. **Mechanism: tree-sync promotion (spec option D).** Each promotion is one commit whose tree
+>    equals the train tip's tree, whose parent is `develop`'s tip, and whose message names the
+>    train SHA. It lands through a single-commit PR into `develop`.
+> 2. **Identity: a new GitHub App installed on `spec-kitty-design` only.** The org-wide
+>    `spec-kitty-factory-ci` App is not widened. The org owner creates the App; the plan names its
+>    permissions and secrets.
+> 3. **Cadence: promote on every push to `train/elements-first`.**
+> 4. **No ruleset for `train/elements-first`** in this mission.
+>
+> The operator still approves the implemented PR before it merges into the train. Plan phase
+> starts now.
+
+### Derived consequences (this mission's own inferences, not the operator's words)
+
+- **Options A, B, C and E (the Options table above) are not used** — ruling 1 selects D by name.
+- **Because ruling 1 selected Option D (not A or E), no ruleset bypass actor or
+  `required_linear_history` exception is needed on `develop`** (C-005) — the operator was not
+  separately asked about bypass actors; this follows from which option was ruled.
+- **REL2's (#363) prior open question — what identity/trigger avoids the `GITHUB_TOKEN`
+  limitation — falls away.** With a real, non-`GITHUB_TOKEN` App identity opening and merging the
+  promotion PR (ruling 2), the promotion merge is an ordinary `push` event on `develop` (Edge
+  Cases and fact 3, above, no longer apply to it). REL2 still owns deciding whether its rc-publish
+  workflow triggers on that `push` or on a `workflow_dispatch` call instead — this mission does
+  not decide REL2's trigger, it only confirms REL2 receives a real, workflow-triggering event
+  either way.
+- **The `code_scanning` bootstrap mitigation** (Sequencing, below) was not asked about separately
+  and stands as technical sequencing, not a fifth ruling requiring separate approval.
+- **Ruling 4 resolves NFR-004's prior "open question" framing**, corrected above (M19): it is the
+  operator's decision, recorded here, not a gap left for someone else to notice.
 
 The operator still approves the implemented PR itself (FR-008) — including the concrete workflow,
 the App's actual permission grant, and the `develop` ruleset artifact — before it merges into
