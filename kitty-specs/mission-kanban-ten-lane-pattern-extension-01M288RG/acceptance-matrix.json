@@ -118,10 +118,10 @@
       "criterion_id": "FR-012",
       "description": "Verify FR-012 is satisfied",
       "proof_type": "composition gate + source test",
-      "evidence": "product head 8986d38f (rebased on train 16948194); check-pattern-composition (+ --selftest) green; sk-mission-kanban-ten-lane-pattern.spec.ts [T006] no library selectors, physical properties, raw lengths or colour functions; every ordinary colour declaration is a --sk token, system colours only under forced colors; local Chromium+Firefox 96/96 incl. #278 suite; WebKit authority is CI (pre-fold a3ac655c run 34604991224: playwright 3 browsers + test passed).",
+      "evidence": "product head 0be840ae on train ac9a86cf (#409); check-pattern-composition and its --selftest are green; sk-mission-kanban-ten-lane-pattern.spec.ts [T006]: no library selectors, physical properties, raw lengths, colour functions, colour-bearing, font or multi-value physical shorthands, .style, order/direction/reverse; ordinary colour, font-family and typography declarations are --sk tokens, with system colours only under forced colors; CI Quality run 34620107785 at 0be840ae: playwright green in Chromium, Firefox and WebKit (2452 passed; its 4 flaky retries are other specs), plus visual-regression, a11y (0 violations across 753 stories), lint-code and release-gate; the test job's only failure is the #408 wall-clock ceiling (1656.5 s against 1649.8 s) with all 272 mutations red against a green baseline; the identical product content was fully green, test included (1641.4 s), in run 34616550693 at ed60d776 before the #409 rebase; local Chromium+Firefox 98/98 with #278's suite before the test-only last fold, whose 9 [T006] tests also pass locally in Chromium.",
       "pass_fail": "pass",
       "verified_by": "claude",
-      "verified_at": "2026-09-11T14:11:16.774721+00:00",
+      "verified_at": "2026-09-11T16:39:38.179685+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
