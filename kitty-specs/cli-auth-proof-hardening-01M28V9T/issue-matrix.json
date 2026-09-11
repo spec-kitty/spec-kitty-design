@@ -37,7 +37,7 @@
       "wp": "WP01"
     },
     "#418": {
-      "evidence_ref": "commits 8e20b23c (reword of the rescope/shadow-recursion/lifetime-observation fix, tree-identical to the superseded fea9a1df), 16bbfc5b (canary liveness proof replacing the forgeable armed shape-check, closing an instance-shadow bypass found by self-attack), 14b5c652 (captures and locks Set.prototype.has via Object.freeze + non-configurable window property, closing a global has() patch and a hasMethod-faking decoy found by self-attack). Self-attacked through 4 rounds total; unmodified file stays 14/14 green on a fresh build throughout",
+      "evidence_ref": "commits 8e20b23c, 16bbfc5b, 14b5c652, 7816e662 (same-origin iframe recursion via watchFrame(); closes a MutationObserver-tree-boundary gap and a cross-realm 'instanceof Element' bug found chasing it, both self-attacked - exact reproduction, nested iframe, iframe-in-shadow-root, shadow-root-in-iframe, deferred-past-window all verified). Disclosure now names all four floors: deferred-past-window, closed shadow roots, cross-origin iframes, whole-page appendChild patch. 14/14 green on a fresh build throughout",
       "fr": null,
       "nfr": null,
       "repo": null,
