@@ -27,11 +27,11 @@
     {
       "criterion_id": "FR-003",
       "description": "Verify FR-003 is satisfied",
-      "proof_type": "guard proof + seam mutation test",
-      "evidence": "head 4f301f83; sk-mission-kanban-ten-lane-pattern.spec.ts [T002] 17 named guards all fail closed; base/projection mutation blocked; repeated projection equal; moving WP04 in a cloned base moves counts to 1/1/1/3/2/1/1/4/1/0 (derived, not restated).",
+      "proof_type": "per-guard proof + seam derivations",
+      "evidence": "product head 8986d38f (rebased on train 16948194); sk-mission-kanban-ten-lane-pattern.spec.ts [T002] 20 named guards each throw their own error (a later guard cannot mask an earlier one); mutation blocked; repeated projection equal; moved WP04 changes counts; reversed selection renders in supplied order; a reversed 3-lane subset renders in its own supplied order with counts 0/1/4 (no lane vocabulary); local Chromium+Firefox 96/96 incl. #278 suite; WebKit authority is CI (pre-fold a3ac655c run 34604991224: playwright 3 browsers + test passed).",
       "pass_fail": "pass",
       "verified_by": "claude",
-      "verified_at": "2026-09-11T13:44:31.553135+00:00",
+      "verified_at": "2026-09-11T14:11:06.811492+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
