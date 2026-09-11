@@ -1,7 +1,7 @@
 {
-  "event_count": 1,
-  "last_event_id": "01M28W34HPJPKBJN3ASXPCRACC",
-  "materialized_at": "2026-09-11T18:36:17.334561+00:00",
+  "event_count": 2,
+  "last_event_id": "01M28W3CGYTS5CHX3ZFWQXQ7QS",
+  "materialized_at": "2026-09-11T18:36:25.502188+00:00",
   "mission_number": "",
   "mission_slug": "cli-auth-proof-hardening-01M28V9T",
   "mission_type": "software-dev",
@@ -9,20 +9,25 @@
     "approved": 0,
     "blocked": 0,
     "canceled": 0,
-    "claimed": 0,
+    "claimed": 1,
     "done": 0,
     "for_review": 0,
     "in_progress": 0,
     "in_review": 0,
-    "planned": 1
+    "planned": 0
   },
   "work_packages": {
     "WP01": {
-      "actor": "finalize-tasks",
+      "actor": "user",
+      "agent_profile": "__resolved_profile_absent__",
+      "agent_profile_version": "__resolved_profile_version_absent__",
       "force_count": 0,
-      "lane": "planned",
-      "last_event_id": "01M28W34HPJPKBJN3ASXPCRACC",
-      "last_transition_at": "2026-09-11T18:36:17.334561+00:00"
+      "lane": "claimed",
+      "last_event_id": "01M28W3CGYTS5CHX3ZFWQXQ7QS",
+      "last_transition_at": "2026-09-11T18:36:25.502188+00:00",
+      "model": "__resolved_model_absent__",
+      "provider": "__resolved_provider_absent__",
+      "role": "implementer"
     }
   }
 }
