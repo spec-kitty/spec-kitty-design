@@ -232,8 +232,15 @@ success/denial, and terminal error — as composition and accessibility evidence
 page component and not a replica of all twelve Family 5 screens. Story 1 composes one native
 `<form>` with a labelled `sk-form-input` and one native `<button type="submit" class="sk-button
 sk-button--primary">`. Story 2 composes `sk-card`, native `.sk-facts`, one `sk-pill-tag` per
-supplied scope, and Approve/Deny as two native `<button type="submit" class="sk-button
-sk-button--*">` inside one native `<form>`, DOM order Approve-then-Deny.
+supplied scope, and Approve/Deny as two native `<button type="submit">` inside one native
+`<form>` — Approve carries `class="sk-button sk-button--primary"`, Deny carries
+`class="sk-button sk-button--danger-secondary"` — DOM order Approve-then-Deny. Stories 3 and 4
+compose the public `sk-boundary-page` frame (`packages/styles/src/boundary-page/`, a styles-only
+pattern with no custom element): a consumer-owned `<main>` landmark around
+`.sk-boundary-page__stage` > `.sk-boundary-page__card` containing the heading
+(`<h1 class="sk-boundary-page__title">`), the required `.sk-boundary-page__body`, and the
+required `.sk-boundary-page__action-group` holding zero or one supplied `<a>` action — no local
+frame, stage, or "boundary" component was built in its place.
 
 **`<sk-button>` cannot submit an enclosing form.** Its shadow-root control hard-codes
 `type="button"` (a `<button>` inside a shadow root does not participate in an enclosing form's
@@ -247,14 +254,11 @@ fork. If a future revision gives `<sk-button>` real submit behavior, ADR-9 §4's
 research and `#74`'s form-association work are the documented route — until then, use the native
 `<button>` shape for anything that must submit a form.
 
-**Status at authoring time**: Story 2's Deny action ships as a plain `.sk-button--secondary` class,
-pending `#320`'s danger-secondary tone landing on `train/elements-first`. Stories 3 and 4 render a
-documented pending shell rather than any composition — `#303`'s `sk-boundary-page` public frame
-does not exist yet, and no local frame, stage, or "boundary" substitute was built in its place.
-Story 1's target-size and contrast evidence is pending `#321`'s landed fix to the current
-`.sk-input`/`sk-form-field` contract. A later work package finalizes all three once their
-dependencies land and this lane rebases onto the train commits that carry them; check `#320`,
-`#321`, and `#303` for current status before relying on any of the three.
+All four stories are now fully composed against their landed public surfaces: `#320`'s
+`.sk-button--danger-secondary` tone (Story 2's Deny), `#321`'s `--sk-border-control` contrast
+fix (Story 1's input boundary), and `#303`'s `sk-boundary-page` frame (Stories 3 and 4) all
+shipped to `train/elements-first` before this mission's IC-06 finalization pass, which consumed
+each one's real, shipped shape rather than an assumed class or attribute name.
 
 One deeply frozen fixture (`packages/elements/src/patterns/cli-auth.fixture.ts`) owns every
 label, description, fact, scope, status heading/body, and action value across all four stories —

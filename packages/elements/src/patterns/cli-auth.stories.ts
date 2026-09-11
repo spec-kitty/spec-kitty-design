@@ -25,19 +25,26 @@ export {
  * HTML (spec.md). This is composition and accessibility evidence, not a new component, not a
  * Team Kitty route, and not a replica of A1-A12 (C-007).
  *
- * DEPENDENCY POSTURE (spec.md's dependency-posture table, re-verified in research.md at
- * authoring time against `origin/train/elements-first@4d6c5f2`):
- *   - Story 2's Deny action composes a PLAIN `.sk-button--secondary` tone, marked `// pending
- *     #320` below. #320's danger-secondary tone is not yet public; this is not a substitute —
- *     see the comment at the Deny button for why no local danger style is used instead (C-010).
- *   - Stories 3 and 4 compose no frame at all: `sk-boundary-page` (#303) does not exist
- *     anywhere in this tree (verified: `find packages/{elements,styles}/src -iname
- *     '*boundary-page*'` returns nothing). Importing a nonexistent module would fail the whole
- *     Storybook build, not just these two stories, so each renders a clearly marked
- *     `// TODO(#303)` pending shell instead of a forked frame (C-003).
- *   - Story 1 composes the CURRENT, unchanged `.sk-form-input`/`sk-form-field` contract; #321's
- *     contrast/target-size fix has not landed, so those specific acceptance clauses stay
- *     red-first (`// pending #321` in the test file) until IC-06 rebases onto it.
+ * IC-06 — DEPENDENCY RESOLUTION (all three landed on `train/elements-first`, consumed here from
+ * their real shipped shape, not the class/attribute names research.md guessed at ahead of time):
+ *   - Story 2's Deny action composes `#320`'s real `.sk-button--danger-secondary` class
+ *     (`packages/styles/src/button/sk-button.css`, confirmed on the train — `grep -n
+ *     danger-secondary` matches 7 times).
+ *   - Stories 3 and 4 compose `#303`'s real `sk-boundary-page` — a STYLES-ONLY frame (no custom
+ *     element; `packages/styles/src/boundary-page/sk-boundary-page.css`, confirmed on the train
+ *     via its own HTML exemplars under that same directory) — read from its actual published
+ *     anatomy (that file's own "ANATOMY" doc comment) rather than inferred from #303's issue
+ *     text. `.sk-boundary-page__stage` > `.sk-boundary-page__card` >
+ *     [`.sk-boundary-page__mark` optional] > `<h1 class="sk-boundary-page__title">` >
+ *     `.sk-boundary-page__body` > `.sk-boundary-page__action-group` (0..N `<a>`/`<button>`) >
+ *     [`.sk-boundary-page__footnote` optional]. This mission's fixtures carry no mark/footnote
+ *     field, so both are omitted from the DOM entirely — never `[hidden]` — matching that file's
+ *     own documented absence contract. No local frame was forked or restated (C-003): every
+ *     class below is `sk-boundary-page`'s own, composed exactly as its own exemplars do.
+ *   - Story 1's contrast clause now passes against `#321`'s real `--sk-border-control` token,
+ *     applied to `.sk-input`/`.sk-form-input__control` on the train
+ *     (`packages/tokens/src/tokens.css`, `packages/styles/src/form-field/sk-form-field.css`) —
+ *     verified by the (now green) contrast assertion in the test file, not merely assumed.
  *
  * WHY THE THREE FORM ACTIONS ARE NATIVE `<button>`, NOT `<sk-button>`. `sk-button.ts` hard-codes
  * `type="button"` on its shadow-root control and says so in its own comment: "A `<button>`
@@ -88,15 +95,6 @@ const patternStyles = html`<style>
     display: flex;
     flex-wrap: wrap;
     gap: var(--sk-space-2);
-  }
-
-  .sk-cli-auth-pattern__pending {
-    margin: 0;
-    padding: var(--sk-space-4);
-    border: var(--sk-border-width-1) dashed var(--sk-border-default);
-    border-radius: var(--sk-radius-sm);
-    color: var(--sk-fg-muted);
-    font-size: var(--sk-text-sm);
   }
 
   @media (max-width: 390px) {
@@ -153,17 +151,11 @@ const renderCodeEntry = (
  *  `<button type="submit" class="sk-button sk-button--*">` (see the file-level doc comment for
  *  why native, not `<sk-button>`), DOM order Approve-then-Deny.
  *
- *  DENY IS A PLAIN `.sk-button--secondary` class below — the pending state, not the finished
- *  one. #320's danger-secondary tone is the honest public surface for this action and has not
- *  landed on train/elements-first at authoring time (research.md, verified via `grep -n danger
- *  packages/styles/src/button/sk-button.css`, no match). Do not fork it: no local
- *  `--sk-status-danger` restyle of `.sk-button--secondary`, no story-local danger class or
- *  component (C-010, the alternatives-rejected table in research.md). T010 swaps this class for
- *  #320's actual landed one once it lands and this lane rebases — the test file's pending
- *  assertion targets `.sk-button--danger-secondary` as the class #320 is expected to publish
- *  (the BEM-modifier sibling of `.sk-button--primary`/`--secondary`/`--ghost`); #320's own
- *  mission owns the final name, and T010 corrects this if it ships differently.
- *  // pending #320 */
+ *  DENY COMPOSES `#320`'S REAL `.sk-button--danger-secondary` CLASS — landed on
+ *  `train/elements-first` (`packages/styles/src/button/sk-button.css`, verified: `grep -n
+ *  danger-secondary` matches 7 times). Not forked: this is exactly `#320`'s own published
+ *  modifier class, reusing the secondary shape with the danger role's own boundary
+ *  (`--sk-on-status-danger`), the same class every other consumer of that tone uses. */
 const renderAuthorizationDecision = (light = false): TemplateResult => {
   const fixture = CLI_AUTH_FIXTURES.authorizationDecision;
   return html`<div
@@ -188,9 +180,7 @@ const renderAuthorizationDecision = (light = false): TemplateResult => {
       </div>
       <form class="sk-cli-auth-pattern__decision-actions" novalidate>
         <button type="submit" class="sk-button sk-button--primary">${fixture.approveLabel}</button>
-        <!-- Deny stays a plain secondary class: pending #320's danger-secondary sk-button
-             tone landing on train/elements-first. See the doc comment above this function. -->
-        <button type="submit" class="sk-button sk-button--secondary">${fixture.denyLabel}</button>
+        <button type="submit" class="sk-button sk-button--danger-secondary">${fixture.denyLabel}</button>
       </form>
     </sk-card>
   </div>`;
@@ -199,35 +189,49 @@ const renderAuthorizationDecision = (light = false): TemplateResult => {
 /**
  * Stories 3 and 4 — terminal success/denial and terminal error.
  *
- * TODO(#303): compose `sk-boundary-page` once its public frame lands on `train/elements-first`.
- * This is a RED-FIRST SHELL, not a substitute frame (C-003, spec.md's dependency-posture table).
- * No `sk-boundary-page` element exists anywhere in this tree today — confirmed by
- * `find packages/{elements,styles}/src -iname '*boundary-page*'`, zero results — so this
- * renders only a clearly labelled pending marker carrying the fixture's own heading/body for
- * transparency. It builds no card, stage, or frame of its own to stand in for it: no
- * `auth-card`, no `sk-terminal-frame`, no second boundary/stage component (C-002, C-003).
+ * Composes `#303`'s real, landed `sk-boundary-page` frame — a styles-only pattern, not a custom
+ * element (`packages/styles/src/boundary-page/sk-boundary-page.css`'s own header comment: "NO
+ * SHADOW ROOT, NO CUSTOM ELEMENT — deliberately"). The markup below is exactly that file's own
+ * documented anatomy — verified against its ANATOMY comment and its own HTML exemplars
+ * (`sk-boundary-page-terminal-card.html`, `sk-boundary-page-without-mark.html`), not inferred
+ * from #303's issue text:
+ *   `<main>` (consumer-owned landmark, matching every one of #303's own exemplars)
+ *     > `.sk-boundary-page__stage` `.sk-boundary-page` (bare block class, the frame's own
+ *       component-host identification hook — see that file's header comment on why it sits
+ *       alongside `__stage` rather than alone)
+ *       > `.sk-boundary-page__card`
+ *         > `<h1 class="sk-boundary-page__title">` — consumer's own heading element
+ *         > `.sk-boundary-page__body` — required
+ *         > `.sk-boundary-page__action-group` — required container, 0 or 1 `<a>` here (this
+ *           mission's terminal fixtures never carry more than one supplied action)
+ * `.sk-boundary-page__mark` and `.sk-boundary-page__footnote` are OMITTED ENTIRELY, never
+ * `[hidden]` — this mission's fixtures carry no mark/footnote field, and that sheet's own gap
+ * semantics contract exists precisely so an absent optional child leaves no phantom space
+ * (that file's own header comment). No local frame, stage, or "boundary" component was forked
+ * or restated (C-003): every class below is `sk-boundary-page`'s own.
  */
-const renderTerminalPending = (
+const renderTerminal = (
   fixture: DeepReadonly<TerminalOutcomeFixture | TerminalErrorFixture>,
   storyKey: string,
   light = false,
-): TemplateResult => html`<div
-  class="sk-cli-auth-pattern${light ? " sk-light" : ""}"
+): TemplateResult => html`<main
+  class=${light ? "sk-light" : ""}
   data-cli-auth-pattern
   data-cli-auth-story=${storyKey}
-  data-cli-auth-pending="303"
   data-render-complete="true"
 >
-  ${patternStyles}
-  <p class="sk-cli-auth-pattern__pending">
-    Blocked on #303 (<code>sk-boundary-page</code> is not yet public). Fixture
-    heading: "${fixture.heading}". Body: "${fixture.body}".
-    ${fixture.action
-      ? html`Supplied action: "${fixture.action.label}" -&gt;
-          ${fixture.action.href}.`
-      : "No action supplied."}
-  </p>
-</div>`;
+  <div class="sk-boundary-page sk-boundary-page__stage">
+    <div class="sk-boundary-page__card">
+      <h1 class="sk-boundary-page__title">${fixture.heading}</h1>
+      <p class="sk-boundary-page__body">${fixture.body}</p>
+      <div class="sk-boundary-page__action-group">
+        ${fixture.action
+          ? html`<a href=${fixture.action.href}>${fixture.action.label}</a>`
+          : ""}
+      </div>
+    </div>
+  </div>
+</main>`;
 
 const meta: Meta = {
   title: "Patterns/CLI Auth",
@@ -280,37 +284,71 @@ export const AuthorizationDecisionLightMode: Story = {
 };
 
 export const TerminalSuccess: Story = {
-  name: "Story 3 — terminal success (pending #303)",
+  name: "Story 3 — terminal success",
   render: () =>
-    renderTerminalPending(
+    renderTerminal(CLI_AUTH_FIXTURES.terminalSuccess, "terminal-success"),
+};
+
+export const TerminalSuccessLightMode: Story = {
+  name: "Story 3 — terminal success (LightMode)",
+  parameters: { backgrounds: { default: "sk-light" } },
+  render: () =>
+    renderTerminal(
       CLI_AUTH_FIXTURES.terminalSuccess,
       "terminal-success",
+      true,
     ),
 };
 
 export const TerminalDenied: Story = {
-  name: "Story 3 — terminal denial (pending #303)",
+  name: "Story 3 — terminal denial",
   render: () =>
-    renderTerminalPending(
-      CLI_AUTH_FIXTURES.terminalDenied,
-      "terminal-denied",
-    ),
+    renderTerminal(CLI_AUTH_FIXTURES.terminalDenied, "terminal-denied"),
+};
+
+export const TerminalDeniedLightMode: Story = {
+  name: "Story 3 — terminal denial (LightMode)",
+  parameters: { backgrounds: { default: "sk-light" } },
+  render: () =>
+    renderTerminal(CLI_AUTH_FIXTURES.terminalDenied, "terminal-denied", true),
 };
 
 export const TerminalErrorNoAction: Story = {
-  name: "Story 4 — terminal error, no action (pending #303)",
+  name: "Story 4 — terminal error, no action",
   render: () =>
-    renderTerminalPending(
+    renderTerminal(
       CLI_AUTH_FIXTURES.terminalErrorNoAction,
       "terminal-error-no-action",
     ),
 };
 
-export const TerminalErrorWithAction: Story = {
-  name: "Story 4 — terminal error, with supplied action (pending #303)",
+export const TerminalErrorNoActionLightMode: Story = {
+  name: "Story 4 — terminal error, no action (LightMode)",
+  parameters: { backgrounds: { default: "sk-light" } },
   render: () =>
-    renderTerminalPending(
+    renderTerminal(
+      CLI_AUTH_FIXTURES.terminalErrorNoAction,
+      "terminal-error-no-action",
+      true,
+    ),
+};
+
+export const TerminalErrorWithAction: Story = {
+  name: "Story 4 — terminal error, with supplied action",
+  render: () =>
+    renderTerminal(
       CLI_AUTH_FIXTURES.terminalErrorWithAction,
       "terminal-error-with-action",
+    ),
+};
+
+export const TerminalErrorWithActionLightMode: Story = {
+  name: "Story 4 — terminal error, with supplied action (LightMode)",
+  parameters: { backgrounds: { default: "sk-light" } },
+  render: () =>
+    renderTerminal(
+      CLI_AUTH_FIXTURES.terminalErrorWithAction,
+      "terminal-error-with-action",
+      true,
     ),
 };

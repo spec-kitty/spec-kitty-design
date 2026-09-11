@@ -8,28 +8,22 @@ import esbuild from "esbuild";
  * (spec-kitty/spec-kitty-design#329), following the shape of
  * `sk-repository-dossier-pattern.spec.ts` and `sk-mission-reading-pattern.spec.ts` (T001).
  *
- * SCOPE OF THIS PASS (IC-01 through IC-05 only, per this WP's mission brief). Story 1 and
- * Story 2's non-Deny anatomy are fully composable now and are asserted GREEN below. Two
- * categories of assertion are DELIBERATELY, DOCUMENTEDLY RED, each in its own isolated test so
- * its failure never masks an unrelated regression:
- *
- *   - Story 2's Deny action — `#320`'s danger-secondary `sk-button` tone has not landed on
- *     `train/elements-first` (research.md, verified at authoring time). Marked `// pending
- *     #320` at its test below.
- *   - Stories 3 and 4's `sk-boundary-page` composition — `#303` does not exist anywhere in this
- *     tree (verified: `find packages/{elements,styles}/src -iname '*boundary-page*'`, zero
- *     results). Marked `// pending #303` at its tests below.
- *
- * Story 1's contrast/target-size clauses that depend on `#321`'s landed fix are also isolated
- * and marked `// pending #321` — the CURRENT `.sk-input`/`sk-form-field` border and lack of an
- * input target-size floor are exactly the gap `#321` exists to close (research.md).
+ * IC-06 — all three dependencies have landed on `train/elements-first` and this lane has
+ * rebased onto it: `#320`'s `.sk-button--danger-secondary` class (Story 2's Deny), `#321`'s
+ * `--sk-border-control` contrast fix (Story 1's input boundary), and `#303`'s real
+ * `sk-boundary-page` frame (Stories 3 and 4). Every assertion below is a real, green
+ * composition check — no `pending #NNN` markers remain in this file.
  *
  * WHY THE THREE FORM ACTIONS ARE `button.sk-button`, NOT `sk-button` LOCATORS. `<sk-button>`
  * hard-codes `type="button"` on its shadow-root control and cannot submit an enclosing form
  * (its own source comment says so). Story 1's submit action and Story 2's Approve/Deny are
  * therefore native `<button type="submit" class="sk-button sk-button--*">` — see
- * `cli-auth.stories.ts`'s file-level doc comment for the full reasoning. Every assertion below
- * that touches those three controls locates them as `button`, not `sk-button`.
+ * `cli-auth.stories.ts`'s file-level doc comment for the full reasoning.
+ *
+ * WHY STORIES 3/4 OPEN AS `<main data-cli-auth-pattern>`. `sk-boundary-page` is a styles-only
+ * frame with no custom element (`packages/styles/src/boundary-page/sk-boundary-page.css`'s own
+ * header comment); its root is a consumer-owned `<main>` landmark, matching every one of that
+ * file's own HTML exemplars.
  */
 
 const STORY_PREFIX = "patterns-cli-auth--";
@@ -39,6 +33,17 @@ const STORY_IDS = [
   "code-entry-light-mode",
   "authorization-decision",
   "authorization-decision-light-mode",
+  "terminal-success",
+  "terminal-success-light-mode",
+  "terminal-denied",
+  "terminal-denied-light-mode",
+  "terminal-error-no-action",
+  "terminal-error-no-action-light-mode",
+  "terminal-error-with-action",
+  "terminal-error-with-action-light-mode",
+] as const;
+
+const TERMINAL_STORY_IDS = [
   "terminal-success",
   "terminal-denied",
   "terminal-error-no-action",
@@ -92,17 +97,37 @@ const axeIsClean = async (page: Page, storyId: StoryId): Promise<void> => {
   );
 };
 
+/** WCAG contrast ratio between two `rgb(...)`/`rgba(...)` color strings, computed in Node from
+ *  colors read out of the page — never `eval`'d into the page itself. */
+const contrastRatio = (c1: string, c2: string): number => {
+  const parse = (color: string): [number, number, number] => {
+    const match = color.match(/[0-9.]+/g);
+    if (!match) return [0, 0, 0];
+    return [Number(match[0]), Number(match[1]), Number(match[2])];
+  };
+  const luminance = ([r, g, b]: [number, number, number]): number => {
+    const channel = (c: number): number => {
+      const value = c / 255;
+      return value <= 0.03928
+        ? value / 12.92
+        : Math.pow((value + 0.055) / 1.055, 2.4);
+    };
+    return 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b);
+  };
+  const l1 = luminance(parse(c1));
+  const l2 = luminance(parse(c2));
+  const [lighter, darker] = l1 > l2 ? [l1, l2] : [l2, l1];
+  return (lighter + 0.05) / (darker + 0.05);
+};
+
 test("source is Storybook-only composition with no forbidden reader, private reach, or application surface", () => {
   const source = readFileSync(
     "packages/elements/src/patterns/cli-auth.stories.ts",
     "utf8",
   );
   // Comment-stripped, the same way check-pattern-composition.mjs reads this file — so a doc
-  // comment that NAMES a forbidden tag while explaining why it is forbidden (this file's own
-  // file-level comment says "NOT `<sk-button>`" in prose) cannot false-positive a check meant
-  // for real markup usage. `code` is the actual template/import content the forbidden-pattern
-  // checks below run against; `source` (unstripped) is still used for the two positive
-  // dependency-honesty markers, which are meant to be found in prose.
+  // comment that NAMES a forbidden tag while explaining why it is forbidden cannot
+  // false-positive a check meant for real markup usage.
   const code = esbuild.transformSync(source, { loader: "ts", format: "esm" }).code;
 
   // C-002's forbidden abstractions — no custom element with these names is ever used.
@@ -121,19 +146,24 @@ test("source is Storybook-only composition with no forbidden reader, private rea
   expect(code).not.toMatch(
     /\b(?:localStorage|sessionStorage|Math\.random|new\s+Date)\b/,
   );
-  // The dependency-honesty markers this WP requires must actually be present, not merely
-  // asserted in prose elsewhere — read from the unstripped source since these ARE prose.
-  expect(source).toContain("pending #320");
-  expect(source).toContain("TODO(#303)");
-  expect(source).toMatch(/excludeStories:\s*\[[\s\S]*["']CLI_AUTH_FIXTURES["']/);
-  // <sk-button> cannot submit an enclosing form (it hard-codes type="button" in shadow DOM);
-  // the three form actions must stay native <button type="submit" class="sk-button ...">, not
-  // the custom element, and this must not silently regress back to it. Checked against the
-  // comment-stripped code so this file's own explanatory prose ("NOT <sk-button>") cannot trip
-  // it — only a real `<sk-button` in a template or a real import would.
+  // <sk-button> cannot submit an enclosing form; the three form actions must stay native
+  // <button type="submit" class="sk-button ...">, not the custom element.
   expect(code).not.toMatch(/<\s*sk-button(?:\s|>)/);
   expect(code).not.toMatch(/from\s*["']\.\.\/button\/sk-button\.js["']/);
   expect(code).toMatch(/<button\s+type="submit"\s+class="sk-button sk-button--primary"/);
+  // IC-06's real compositions must be present — Deny's real class and sk-boundary-page's real
+  // BEM classes, composed as markup, not merely referenced in comments.
+  expect(code).toMatch(/class="sk-button sk-button--danger-secondary"/);
+  expect(code).toMatch(/class="sk-boundary-page sk-boundary-page__stage/);
+  expect(code).toMatch(/class="sk-boundary-page__card"/);
+  expect(code).toMatch(/class="sk-boundary-page__title"/);
+  expect(code).toMatch(/class="sk-boundary-page__body"/);
+  expect(code).toMatch(/class="sk-boundary-page__action-group"/);
+  // No stale pending markers survive IC-06 — a leftover marker in shipped code would be worse
+  // than none (mission brief).
+  expect(source).not.toMatch(/pending #(?:320|321|303)\b/);
+  expect(source).not.toContain("TODO(#303)");
+  expect(code).toMatch(/excludeStories:\s*\[[\s\S]*["']CLI_AUTH_FIXTURES["']/);
 });
 
 test("built index discovers the complete reviewed family", async ({ request }) => {
@@ -173,7 +203,30 @@ test("every story is non-empty, story-error-free, and axe-clean", async ({ page 
   expect(errors).toEqual([]);
 });
 
-test("Story 1 composes one labelled sk-form-input, its description association, and the fixture-sourced aria-invalid branch", async ({
+test("heading order: at most one h1 per story, no skipped level, and terminal stories carry the fixture heading", async ({
+  page,
+}) => {
+  for (const storyId of STORY_IDS) {
+    const root = await openStory(page, storyId);
+    const headings = await root
+      .locator("h1, h2, h3, h4, h5, h6")
+      .evaluateAll((elements) =>
+        elements.map((el) => Number(el.tagName.slice(1))),
+      );
+    // Stories 1 and 2 carry no page-level heading at all (their fixtures have no heading
+    // field — inventing one would be a component default, C-006); Stories 3/4 carry exactly
+    // the one `<h1>` sk-boundary-page's own anatomy requires.
+    expect(headings.length).toBeLessThanOrEqual(1);
+    if (headings.length === 1) expect(headings[0]).toBe(1);
+  }
+
+  const successRoot = await openStory(page, "terminal-success");
+  await expect(successRoot.locator("h1")).toHaveText("Device connected");
+  const deniedRoot = await openStory(page, "terminal-denied");
+  await expect(deniedRoot.locator("h1")).toHaveText("Authorization denied");
+});
+
+test("Story 1 composes one labelled sk-form-input, its description association, the fixture-sourced aria-invalid branch, target-size, and #321's real contrast fix", async ({
   page,
 }) => {
   const defaultRoot = await openStory(page, "code-entry-default");
@@ -232,57 +285,39 @@ test("Story 1 composes one labelled sk-form-input, its description association, 
   );
   expect(invalidFacts.errorRole).toBe("alert");
 
-  // FR-011's target-size floor (WCAG 2.5.8 AA, 24px) — this DOES already clear the floor
-  // against the current control's own padding/font-size, even though `sk-form-field.css`
-  // declares no explicit min-height (research.md). Measured directly rather than assumed: this
-  // is real, currently-passing evidence, not something #321 changes.
+  // FR-011's target-size floor (WCAG 2.5.8 AA, 24px).
   const controlHeight = await defaultInput.evaluate((element) => {
     const input = element.shadowRoot?.querySelector("input");
     return input?.getBoundingClientRect().height ?? 0;
   });
   expect(controlHeight).toBeGreaterThanOrEqual(24);
-});
 
-test("Story 1's non-text contrast clause depends on #321's landed fix — pending #321", async ({
-  page,
-}) => {
-  // FR-012 for this story cannot pass against the CURRENT `.sk-input` contract. Measured
-  // directly against the real rendered control (not assumed from the token values alone):
-  // `--sk-border-default` against `--sk-surface-input` is #2B313B on #1C1F25 in dark
-  // (contrast 1.26:1) and #EAE4D2 on #F5F1E6 in light (1.13:1) — both far below WCAG 1.4.11's
-  // 3:1 non-text-contrast floor for the input's own boundary. This is exactly the "weak border
-  // token" gap research.md and #155 both name and #321 exists to fix; #320 does not touch this
-  // token, so this assertion is genuinely independent of #320's Deny work. Turns green the
-  // moment #321 lands and this lane rebases (T010) — not before.
-  const root = await openStory(page, "code-entry-default");
-  const ratio = await root.locator("sk-form-input").evaluate((element) => {
+  // FR-012's non-text contrast floor — now green against #321's real, landed
+  // `--sk-border-control` token (packages/tokens/src/tokens.css,
+  // packages/styles/src/form-field/sk-form-field.css), measured directly against the real
+  // rendered control's own computed colors rather than assumed from the token value alone.
+  // The colors are READ in the page and the ratio is COMPUTED in Node (contrastRatio above) —
+  // no `eval` crosses the browser boundary.
+  const controlColors = await defaultRoot.locator("sk-form-input").evaluate((element) => {
     const input = element.shadowRoot?.querySelector("input");
-    if (!input) return 0;
+    if (!input) return null;
     const style = getComputedStyle(input);
-    const parse = (color: string): [number, number, number] => {
-      const match = color.match(/\d+(\.\d+)?/g);
-      if (!match) return [0, 0, 0];
-      return [Number(match[0]), Number(match[1]), Number(match[2])];
-    };
-    const luminance = ([r, g, b]: [number, number, number]): number => {
-      const channel = (c: number): number => {
-        const value = c / 255;
-        return value <= 0.03928
-          ? value / 12.92
-          : Math.pow((value + 0.055) / 1.055, 2.4);
-      };
-      return 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b);
-    };
-    const l1 = luminance(parse(style.borderTopColor));
-    const l2 = luminance(parse(style.backgroundColor));
-    const [lighter, darker] = l1 > l2 ? [l1, l2] : [l2, l1];
-    return (lighter + 0.05) / (darker + 0.05);
+    return { border: style.borderTopColor, background: style.backgroundColor };
   });
-  // WCAG 1.4.11's non-text-contrast AA floor.
-  expect(ratio).toBeGreaterThanOrEqual(3);
+  expect(controlColors).not.toBeNull();
+  const realRatio = contrastRatio(controlColors!.border, controlColors!.background);
+  expect(realRatio).toBeGreaterThanOrEqual(3);
+
+  // Proves the assertion mechanism itself can register red, not merely that it currently
+  // passes: the SAME contrastRatio() function, fed the PRE-#321 pair this file used to fail
+  // against (`--sk-border-default` #2B313B on `--sk-surface-input` #1C1F25, research.md), must
+  // still compute the too-low ratio that made this a real red-first assertion before #321
+  // landed — confirming this is not a check that is structurally incapable of failing.
+  const regressedRatio = contrastRatio("rgb(43, 49, 59)", "rgb(28, 31, 37)");
+  expect(regressedRatio).toBeLessThan(3);
 });
 
-test("Story 2 renders the authorization fixture's facts, scopes, and Approve-then-Deny DOM order exactly", async ({
+test("Story 2 renders the authorization fixture's facts, scopes, and Approve-then-Deny DOM order — Deny composing #320's real danger-secondary class", async ({
   page,
 }) => {
   const root = await openStory(page, "authorization-decision");
@@ -324,11 +359,24 @@ test("Story 2 renders the authorization fixture's facts, scopes, and Approve-the
     );
   expect(actionOrder).toEqual([
     { type: "submit", classes: "sk-button sk-button--primary", text: "Approve" },
-    { type: "submit", classes: "sk-button sk-button--secondary", text: "Deny" },
+    {
+      type: "submit",
+      classes: "sk-button sk-button--danger-secondary",
+      text: "Deny",
+    },
   ]);
+
+  // Target-size floor (FR-011/NFR-001) for both actions — real geometry, not a class-presence
+  // check alone.
+  const heights = await root
+    .locator("form button")
+    .evaluateAll((elements) =>
+      elements.map((el) => el.getBoundingClientRect().height),
+    );
+  for (const height of heights) expect(height).toBeGreaterThanOrEqual(24);
 });
 
-test("keyboard focus order equals DOM order for Story 1 and Story 2's native submit actions (FR-007)", async ({
+test("keyboard focus order equals DOM order for Story 1, Story 2, and Story 4's native actions (FR-007)", async ({
   page,
 }) => {
   // Real Tab-key traversal, not just a DOM-order read: `<sk-form-input>` does not set
@@ -366,64 +414,116 @@ test("keyboard focus order equals DOM order for Story 1 and Story 2's native sub
   expect(
     await page.evaluate(() => document.activeElement?.textContent?.trim()),
   ).toBe("Deny");
+
+  await openStory(page, "terminal-error-with-action");
+  await page.keyboard.press("Tab");
+  expect(await activeElementChain()).toBe("a");
+  expect(
+    await page.evaluate(() => document.activeElement?.textContent?.trim()),
+  ).toBe("Verify your account");
 });
 
-test("Story 2's Deny action composes #320's real danger-secondary class once it lands — pending #320", async ({
+test("Stories 3 and 4 compose sk-boundary-page's real anatomy: stage/card/title/body/action-group, no mark or footnote", async ({
   page,
 }) => {
-  // #320 has not landed on train/elements-first at authoring time (research.md).
-  // packages/styles/src/button/sk-button.css publishes only .sk-button--primary/--secondary/
-  // --ghost today (verified directly, `grep -n danger` finds nothing) — no `--danger-secondary`
-  // modifier exists yet. This assertion targets that class name as the BEM-modifier sibling of
-  // the three that already exist; #320's own mission owns the final name, and T010 corrects
-  // this if it ships differently. Deny is a PLAIN `.sk-button--secondary` class today (C-010
-  // forbids forking a local stand-in), so this is red for the honest reason, and T010 turns it
-  // green once #320 lands and this lane rebases onto the train commit that carries it.
-  const root = await openStory(page, "authorization-decision");
-  const denyClasses = await root.locator("form button").nth(1).getAttribute("class");
-  expect(denyClasses?.split(/\s+/)).toContain("sk-button--danger-secondary");
-});
+  const expectations: Record<
+    (typeof TERMINAL_STORY_IDS)[number],
+    { heading: string; body: string; action: { label: string; href: string } | null }
+  > = {
+    "terminal-success": {
+      heading: "Device connected",
+      body: "Kitty CLI is now authorized on this account. Close this window and return to your terminal.",
+      action: null,
+    },
+    "terminal-denied": {
+      heading: "Authorization denied",
+      body: "You denied Kitty CLI access to this account. No permissions were granted, and your terminal session was not connected.",
+      action: null,
+    },
+    "terminal-error-no-action": {
+      heading: "This code has expired",
+      body: "The device code you approved is no longer valid. Start a new sign-in from your terminal to get a fresh code.",
+      action: null,
+    },
+    "terminal-error-with-action": {
+      heading: "Your account needs verification first",
+      body: "Team Kitty could not finish device authorization until your account email is verified.",
+      action: {
+        label: "Verify your account",
+        href: "https://team-kitty.example/account/verify",
+      },
+    },
+  };
 
-test("Story 3/4 compose #303's public sk-boundary-page frame once it lands — pending #303", async ({
-  page,
-}) => {
-  // #303 does not exist anywhere in this tree at authoring time (research.md, verified via
-  // `find packages/{elements,styles}/src -iname '*boundary-page*'`, zero results). Each story
-  // renders a documented pending shell instead of a forked frame (C-003) — this assertion
-  // fails cleanly and legibly (zero matches, not a crash) until #303 lands and T010 composes
-  // the real element here.
-  for (const storyId of [
-    "terminal-success",
-    "terminal-denied",
-    "terminal-error-no-action",
-    "terminal-error-with-action",
-  ] as const) {
-    const root = await openStory(page, storyId);
-    await expect(root).toHaveAttribute("data-cli-auth-pending", "303");
-    await expect(root.locator("sk-boundary-page")).toHaveCount(1);
+  for (const storyId of TERMINAL_STORY_IDS) {
+    await openStory(page, storyId);
+
+    await expect(page.locator("main[data-cli-auth-pattern]")).toHaveCount(1);
+    const stage = page.locator(".sk-boundary-page.sk-boundary-page__stage");
+    await expect(stage).toHaveCount(1);
+    await expect(stage.locator("> .sk-boundary-page__card")).toHaveCount(1);
+
+    const card = stage.locator(".sk-boundary-page__card");
+    // Exact anatomy order: title, body, action-group — no mark, no footnote (this mission's
+    // fixtures carry neither field).
+    const childTags = await card
+      .locator("> *")
+      .evaluateAll((elements) =>
+        elements.map((el) => ({
+          tag: el.tagName.toLowerCase(),
+          classes: el.className,
+        })),
+      );
+    expect(childTags).toEqual([
+      { tag: "h1", classes: "sk-boundary-page__title" },
+      { tag: "p", classes: "sk-boundary-page__body" },
+      { tag: "div", classes: "sk-boundary-page__action-group" },
+    ]);
+    await expect(card.locator(".sk-boundary-page__mark")).toHaveCount(0);
+    await expect(card.locator(".sk-boundary-page__footnote")).toHaveCount(0);
+
+    const expected = expectations[storyId];
+    await expect(card.locator(".sk-boundary-page__title")).toHaveText(
+      expected.heading,
+    );
+    await expect(card.locator(".sk-boundary-page__body")).toHaveText(
+      expected.body,
+    );
+
+    const actionGroup = card.locator(".sk-boundary-page__action-group");
+    if (expected.action) {
+      await expect(actionGroup.locator("> *")).toHaveCount(1);
+      const action = actionGroup.locator("a");
+      await expect(action).toHaveText(expected.action.label);
+      await expect(action).toHaveAttribute("href", expected.action.href);
+      // Target-size floor sk-boundary-page's own action-group rule supplies (48px).
+      const height = await action.evaluate(
+        (el) => el.getBoundingClientRect().height,
+      );
+      expect(height).toBeGreaterThanOrEqual(44);
+    } else {
+      await expect(actionGroup.locator("> *")).toHaveCount(0);
+    }
   }
 });
 
-test("Stories 3 and 4's action-count invariant is independently verifiable from the fixture, without the frame", async () => {
-  const { CLI_AUTH_FIXTURES, terminalActionCount } = await import(
-    "../../../../packages/elements/src/patterns/cli-auth.fixture.js"
-  );
-  expect(terminalActionCount(CLI_AUTH_FIXTURES.terminalSuccess)).toBe(0);
-  expect(terminalActionCount(CLI_AUTH_FIXTURES.terminalDenied)).toBe(0);
-  expect(terminalActionCount(CLI_AUTH_FIXTURES.terminalErrorNoAction)).toBe(0);
-  expect(terminalActionCount(CLI_AUTH_FIXTURES.terminalErrorWithAction)).toBe(1);
-});
+// The terminal action-count invariant (0 or exactly 1, per fixture) is asserted against the
+// fixture module directly in tests/node/cli-auth-no-literal.test.ts — not duplicated here.
+// A Node-side dynamic import of packages/elements/src/patterns/cli-auth.fixture.js from this
+// apps/storybook-scoped spec file would also trip @nx/enforce-module-boundaries (relative
+// cross-project import), which the node lane's own test is not subject to.
 
-test("Stories 1 and 2 stay contained at 390px with equal gutters and unclipped actions (FR-006, NFR-003)", async ({
+test("every story stays contained at 390px with equal gutters and unclipped actions (FR-006, NFR-003)", async ({
   page,
 }) => {
-  for (const storyId of ["code-entry-default", "authorization-decision"] as const) {
+  for (const storyId of STORY_IDS) {
+    if (storyId.endsWith("-light-mode")) continue; // covered by its dark counterpart already
     const root = await openStory(page, storyId, { width: 390, height: 844 });
     expect(await documentGeometry(page)).toEqual({
       clientWidth: 390,
       scrollWidth: 390,
     });
-    const buttons = root.locator("form button");
+    const buttons = root.locator("form button, .sk-boundary-page__action-group a");
     const count = await buttons.count();
     for (let index = 0; index < count; index += 1) {
       const box = await buttons.nth(index).boundingBox();
@@ -434,8 +534,9 @@ test("Stories 1 and 2 stay contained at 390px with equal gutters and unclipped a
   }
 });
 
-test("Stories 1 and 2 remain operable and unclipped at 200% zoom (FR-013)", async ({ page }) => {
-  for (const storyId of ["code-entry-default", "authorization-decision"] as const) {
+test("every story remains operable and unclipped at 200% zoom (FR-013)", async ({ page }) => {
+  for (const storyId of STORY_IDS) {
+    if (storyId.endsWith("-light-mode")) continue;
     await page.setViewportSize({ width: 780, height: 844 });
     await page.goto(`/iframe.html?id=${STORY_PREFIX}${storyId}&viewMode=story`);
     await page
@@ -458,11 +559,12 @@ test("Stories 1 and 2 remain operable and unclipped at 200% zoom (FR-013)", asyn
   }
 });
 
-test("Stories 1 and 2 introduce no motion of their own under prefers-reduced-motion", async ({
+test("every story introduces no motion of its own under prefers-reduced-motion", async ({
   page,
 }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
-  for (const storyId of ["code-entry-default", "authorization-decision"] as const) {
+  for (const storyId of STORY_IDS) {
+    if (storyId.endsWith("-light-mode")) continue;
     const root = await openStory(page, storyId);
     expect(
       await root
@@ -479,7 +581,7 @@ test("Stories 1 and 2 introduce no motion of their own under prefers-reduced-mot
   }
 });
 
-test("Stories 1 and 2 keep the input boundary, both button tones, and scope pill-tags visible under forced colors", async ({
+test("forced colors keep the input boundary, both button tones, scope pill-tags, and the boundary-page card visible", async ({
   page,
   browserName,
 }) => {
@@ -488,16 +590,14 @@ test("Stories 1 and 2 keep the input boundary, both button tones, and scope pill
     "Playwright forced-colors emulation is Chromium-owned",
   );
   await page.emulateMedia({ forcedColors: "active" });
-  const root = await openStory(page, "authorization-decision");
-  const pillBorder = await root
+
+  const authRoot = await openStory(page, "authorization-decision");
+  const pillBorder = await authRoot
     .locator("sk-pill-tag")
     .first()
     .evaluate((element) => getComputedStyle(element).borderWidth);
-  // sk-pill-tag has no status tone here (scopes are the neutral variant), so this only proves
-  // the element remains present and rendered under forced colors — the operational-status
-  // forced-colors contract is sk-pill-tag's own, asserted elsewhere in the catalogue.
   expect(pillBorder).toBeDefined();
-  const buttons = await root
+  const buttons = await authRoot
     .locator("form button")
     .evaluateAll((elements) =>
       elements.map((element) => ({
@@ -506,26 +606,85 @@ test("Stories 1 and 2 keep the input boundary, both button tones, and scope pill
     );
   expect(buttons).toHaveLength(2);
   expect(buttons.every((b) => b.display !== "none")).toBe(true);
+
+  // #320's danger-secondary tone declares a forced-colors-only border-width bump
+  // (`sk-button.css`'s own `@media (forced-colors: active) { .sk-button--danger-secondary {
+  // border-width: var(--sk-border-width-2); } }`) — assert it actually widens versus the
+  // normal-rendering width, not merely that the button remains visible.
+  await page.emulateMedia({ forcedColors: "none" });
+  const normalRoot = await openStory(page, "authorization-decision");
+  const normalDenyBorder = await normalRoot
+    .locator("form button")
+    .nth(1)
+    .evaluate((el) => getComputedStyle(el).borderTopWidth);
+  await page.emulateMedia({ forcedColors: "active" });
+  const forcedRoot = await openStory(page, "authorization-decision");
+  const forcedDenyBorder = await forcedRoot
+    .locator("form button")
+    .nth(1)
+    .evaluate((el) => getComputedStyle(el).borderTopWidth);
+  expect(Number.parseFloat(forcedDenyBorder)).toBeGreaterThan(
+    Number.parseFloat(normalDenyBorder),
+  );
+
+  // sk-boundary-page's own card carries no border normally (a surface/background distinction
+  // only) but declares one under forced colors as the first and only place its edge exists
+  // (that file's own header comment) — assert the card gets a real, visible border here.
+  const terminalRoot = await openStory(page, "terminal-success");
+  const cardBorder = await terminalRoot
+    .locator(".sk-boundary-page__card")
+    .evaluate((el) => ({
+      width: getComputedStyle(el).borderTopWidth,
+      style: getComputedStyle(el).borderTopStyle,
+    }));
+  expect(Number.parseFloat(cardBorder.width)).toBeGreaterThan(0);
+  expect(cardBorder.style).toBe("solid");
 });
 
-test("LightMode is a real class=\"sk-light\" wrapper, asserted by computed style — not merely rendered", async ({
+test("LightMode is a real class=\"sk-light\" wrapper, asserted by computed style, for every story family", async ({
   page,
 }) => {
-  const dark = await openStory(page, "code-entry-default");
-  const darkBg = await dark.evaluate((el) => getComputedStyle(el).backgroundColor);
-  const light = await openStory(page, "code-entry-light-mode");
-  await expect(light).toHaveClass(/\bsk-light\b/);
-  const lightBg = await light.evaluate((el) => getComputedStyle(el).backgroundColor);
-  expect(lightBg).not.toBe(darkBg);
+  // Backgrounds are checked on the element that actually PAINTS one: `.sk-cli-auth-pattern`
+  // for Story 1/2 (Story 1/2's own wrapper), `.sk-boundary-page__stage` for Story 3/4 (the
+  // real `background: var(--sk-surface-page)` declaration lives there, not on `<main>` — the
+  // `[data-cli-auth-pattern]` root is transparent in both themes by design).
+  const pairs: ReadonlyArray<
+    [StoryId, StoryId, string]
+  > = [
+    ["code-entry-default", "code-entry-light-mode", "[data-cli-auth-pattern]"],
+    [
+      "authorization-decision",
+      "authorization-decision-light-mode",
+      "[data-cli-auth-pattern]",
+    ],
+    ["terminal-success", "terminal-success-light-mode", ".sk-boundary-page__stage"],
+    ["terminal-denied", "terminal-denied-light-mode", ".sk-boundary-page__stage"],
+    [
+      "terminal-error-no-action",
+      "terminal-error-no-action-light-mode",
+      ".sk-boundary-page__stage",
+    ],
+    [
+      "terminal-error-with-action",
+      "terminal-error-with-action-light-mode",
+      ".sk-boundary-page__stage",
+    ],
+  ];
 
-  const darkAuth = await openStory(page, "authorization-decision");
-  const darkAuthBg = await darkAuth.evaluate(
-    (el) => getComputedStyle(el).backgroundColor,
-  );
-  const lightAuth = await openStory(page, "authorization-decision-light-mode");
-  await expect(lightAuth).toHaveClass(/\bsk-light\b/);
-  const lightAuthBg = await lightAuth.evaluate(
-    (el) => getComputedStyle(el).backgroundColor,
-  );
-  expect(lightAuthBg).not.toBe(darkAuthBg);
+  for (const [darkId, lightId, backgroundSelector] of pairs) {
+    await openStory(page, darkId);
+    const darkBg = await page
+      .locator(backgroundSelector)
+      .first()
+      .evaluate((el) => getComputedStyle(el).backgroundColor);
+    const light = await openStory(page, lightId);
+    await expect(light).toHaveClass(/\bsk-light\b/);
+    const lightBg = await page
+      .locator(backgroundSelector)
+      .first()
+      .evaluate((el) => getComputedStyle(el).backgroundColor);
+    expect(lightBg, `${lightId} must resolve a different background than ${darkId}`).not.toBe(
+      darkBg,
+    );
+  }
 });

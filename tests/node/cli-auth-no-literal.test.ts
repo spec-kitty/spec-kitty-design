@@ -18,10 +18,15 @@ import {
  * fields directly means this test always runs against whatever the fixture module currently
  * says, not a snapshot of it.
  *
- * `sk-boundary-page` (#303) is not yet in the tree — confirmed by
- * `find packages/{elements,styles}/src -iname '*boundary-page*'`, zero results — so its source
- * is not in COMPOSED_SOURCE_FILES below. T010 adds its files here once that surface lands
- * (// TODO(#303)); reporting it as covered before then would be false.
+ * `sk-boundary-page` (#303) IS NOW IN THE TREE (IC-06, landed on `train/elements-first`) — its
+ * own styles source, `packages/styles/src/boundary-page/sk-boundary-page.css`, is included in
+ * COMPOSED_SOURCE_FILES below. It is styles-only (no custom element, no `.ts` module — that
+ * file's own header comment: "NO SHADOW ROOT, NO CUSTOM ELEMENT"), so only its `.css` is
+ * checked, matching the treatment every other styles-only surface here already gets
+ * (`sk-form-field.css`, `sk-facts.css`). Its own HTML exemplars
+ * (`packages/styles/src/boundary-page/sk-boundary-page-*.html`) are NOT scanned: they are
+ * #303's own authored fixture content, not the frame's default-copy surface this assertion
+ * guards against — the same reason this file never scanned `sk-button.stories.ts` either.
  */
 
 const COMPOSED_SOURCE_FILES = [
@@ -36,8 +41,7 @@ const COMPOSED_SOURCE_FILES = [
   "packages/elements/src/pill-tag/sk-pill-tag.ts",
   "packages/elements/src/pill-tag/sk-pill-tag.markup.ts",
   "packages/styles/src/facts/sk-facts.css",
-  // TODO(#303): add sk-boundary-page's own source files here once that surface lands, and
-  // extend the coverage note in this file's docstring to say so.
+  "packages/styles/src/boundary-page/sk-boundary-page.css",
 ] as const;
 
 /** Every genuinely user-visible copy string this mission's four stories render, read live from
@@ -81,6 +85,11 @@ test("every fixture is exported and every collected copy string is non-empty", (
   }
 });
 
+/** Escapes regex metacharacters so a copy string can be searched for literally. */
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 test("no CLI Auth fixture copy string appears as a literal inside the composed elements' own source", () => {
   const copyStrings = collectCopyStrings();
   const sources = COMPOSED_SOURCE_FILES.map((file) => ({
@@ -90,8 +99,15 @@ test("no CLI Auth fixture copy string appears as a literal inside the composed e
 
   const violations: string[] = [];
   for (const copy of copyStrings) {
+    // Word-boundary matching, not a bare substring search: a short fixture value like "Client"
+    // is a real English word that can legitimately appear as a SUBSTRING of an unrelated
+    // identifier in a maintainer comment — measured directly, `sk-button.css` contains
+    // `getBoundingClientRect()`, which a bare `.includes("Client")` flags as a false positive.
+    // `\b<escaped copy>\b` only matches the fixture's value as a whole word/phrase, which is
+    // what "hardcoded as a default inside the element's own source" actually means.
+    const pattern = new RegExp(`\\b${escapeRegExp(copy)}\\b`);
     for (const { file, text } of sources) {
-      if (text.includes(copy)) {
+      if (pattern.test(text)) {
         violations.push(`"${copy}" appears as a literal inside ${file}`);
       }
     }
