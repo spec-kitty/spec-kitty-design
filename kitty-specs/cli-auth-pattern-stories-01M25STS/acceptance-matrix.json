@@ -37,11 +37,11 @@
     {
       "criterion_id": "FR-004",
       "description": "Verify FR-004 is satisfied",
-      "proof_type": "code_review",
-      "evidence": "Same renderTerminal composition as FR-003 covers Story 4. Behavioral assertion: sk-cli-auth-pattern.spec.ts:443-455/493-506 checks terminal-error-no-action has 0 action-group children and terminal-error-with-action has exactly 1 <a> with fixture-sourced label/href ('Verify your account' -> https://team-kitty.example/account/verify). Reviewer visually confirmed harvested sk-cli-auth-terminal-error-with-action-{dark,light,390}-chromium-linux.png: exactly one supplied action renders, no invented retry/back control. Playwright execution outcome pending CI.",
-      "pass_fail": "pending",
-      "verified_by": "reviewer-renata",
-      "verified_at": "2026-09-11T12:08:39.226727+00:00",
+      "proof_type": "automated_test",
+      "evidence": "Same renderTerminal composition as FR-003 (cli-auth.stories.ts:213-234) covers Story 4. Behavioral assertion confirmed by direct read: sk-cli-auth-pattern.spec.ts:443-455 checks terminal-error-no-action has 0 action-group children; :493-506 checks terminal-error-with-action has exactly 1 <a> with fixture-sourced label 'Verify your account' / href https://team-kitty.example/account/verify, target-size >=44px. I independently opened and confirmed sk-cli-auth-terminal-error-with-action-{dark,light,390}-chromium-linux.png: exactly one supplied action renders, no invented retry/back control. Execution outcome now observed: CI run 34597608929 job 103257371328 (playwright) at head eb2db6ad = pass, 0 sk-cli-auth-pattern.spec.ts failures.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T12:42:53.976954+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
