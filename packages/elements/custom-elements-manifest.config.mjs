@@ -22,6 +22,7 @@ export default {
     // Storybook stories and the gate self-test fixtures are not part of the
     // public element surface.
     'packages/elements/src/**/*.stories.ts',
+    'packages/elements/src/**/*.fixture.ts',
     'packages/elements/src/__fixtures__/**',
     // Pattern composition fixtures (#183 exit criterion, #259). Same category as the two
     // exclusions above and excluded for the same stated reason: a fixture is EVIDENCE that the

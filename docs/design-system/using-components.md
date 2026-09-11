@@ -3,11 +3,11 @@
 The Spec Kitty components ship as CSS in `@spec-kitty/styles`, and — for the components migrated
 so far — as **custom elements** in `@spec-kitty/elements`. Both require `@spec-kitty/tokens`.
 
-**Migration is in progress.** Twenty-eight elements exist today: `sk-action-row`, `sk-app-shell`,
-`sk-bar-chart`, `sk-blog-card`, `sk-button`, `sk-card`, `sk-check-bullet`, `sk-context-sidebar`, `sk-entity-marker`,
+**Migration is in progress.** Thirty-one elements exist today: `sk-action-row`, `sk-app-shell`,
+`sk-bar-chart`, `sk-blog-card`, `sk-button`, `sk-card`, `sk-check-bullet`, `sk-confirm-dialog`, `sk-context-sidebar`, `sk-copy-field`, `sk-entity-marker`,
 `sk-evidence-chain`, `sk-feature-card`, `sk-form-input`, `sk-form-textarea`, `sk-grid`, `sk-metric`,
 `sk-nav-pill`, `sk-notice`, `sk-page-header`, `sk-personal-rail`, `sk-pill-tag`, `sk-ribbon-card`,
-`sk-section-banner`, `sk-section-header`, `sk-site-footer`, `sk-status-indicator`, `sk-stub`,
+`sk-section-banner`, `sk-section-header`, `sk-site-footer`, `sk-status-indicator`, `sk-stub`, `sk-theme-toggle`,
 `sk-time-series-chart`, and `sk-transition-matrix`.
 Several of the catalogue's component packages are CSS only by a recorded decision — `form-field`,
 (#176) `facts`, `disclosure`, `data-table`, `empty-state`, `skip-link`, (#210) `progress`, and
@@ -28,6 +28,104 @@ section below says which it is, because the difference decides how you use it.
 Because a custom element needs no wrapper, every framework can use the migrated ones directly. A
 generated React wrapper exists for JSX typing and typed refs — see
 [Using the elements from React](./using-react.md) for what it does and does not buy, measured.
+
+## Theme preference
+
+`sk-theme-toggle` exposes exactly three preferences: `system`, `light`, and `dark`. `system` is
+the default and resolves the operating-system `prefers-color-scheme`; Light and Dark are manual
+overrides. All three values, including `system`, persist under the single namespaced
+`localStorage` key `spec-kitty-theme`. The resolved value is always `light` or `dark` and is
+applied to both `document.documentElement.dataset.theme` and the root `color-scheme` style.
+
+Prevent a wrong-theme first paint by copying the complete generated classic-script asset from
+`@spec-kitty/elements/theme-bootstrap.js` byte-for-byte into the marked inline script. It must be
+the first theme-affecting item in `<head>`, before every stylesheet link. Do not transcribe its
+storage key or resolver into an application-owned snippet; the artifact is generated from the
+same DOM-free contract imported by the element.
+
+```html
+<head>
+  <script data-sk-theme-bootstrap>
+    /* Paste the exact contents of @spec-kitty/elements/theme-bootstrap.js here. */
+  </script>
+  <link rel="stylesheet" href="/node_modules/@spec-kitty/tokens/dist/tokens.css">
+</head>
+```
+
+The control's visible group and option labels are consumer-supplied so applications can localize
+them. Supply every label; if one is blank or missing, the element deliberately renders no
+interactive controls rather than shipping fallback copy or an unnamed partial choice.
+
+```html
+<sk-theme-toggle
+  label="Theme preference"
+  system-label="Use system setting"
+  light-label="Light"
+  dark-label="Dark"
+></sk-theme-toggle>
+<script src="/node_modules/@spec-kitty/elements/dist/elements.js"></script>
+```
+
+This is a native labelled radio group, not a binary switch. The browser supplies single-choice
+arrow-key behavior and exposes the checked option programmatically; visible option text keeps the
+state understandable without color. In forced-colors mode the same radios remain operable and the
+preference still persists, while authored palette colors defer to the user's system colors.
+
+Every `sk-theme-toggle` connected to one document shows one shared preference. A choice on any
+control selects it on every connected control, persists once, and resolves one root theme; while
+that preference is System exactly one live `prefers-color-scheme` listener exists, and none
+exists in Light or Dark, so a second control can never apply the operating system over a manual
+choice. A control connecting while another remains connected always adopts that live,
+sibling-synchronized preference — including a choice that could not be persisted because storage
+is denied — unless it was given an explicit `preference` before connecting, which then becomes
+every control's preference.
+
+The last control to disconnect releases the listener but keeps the preference in memory, together
+with the stored value the page last read or saved. A control that connects later, after every
+other control has briefly disconnected (an SPA remounting a header during navigation, for
+example), re-reads storage at that moment — never the value it read when it was created — and
+adopts what it reads only if that differs from the remembered value, as on a genuinely fresh page
+or after a same-tab write from other code. Otherwise the page's own preference resumes, so a
+choice survives the gap even when storage refused to save it (a full quota, some private modes)
+or cannot be read at all. One consequence is deliberate: a same-tab write of exactly the value
+the page last read or saved looks like no write, so it does not replace a choice that could not
+be saved. Coordination is per document only; there is no cross-tab synchronization.
+
+Most applications should omit the `preference` attribute and property entirely. The element
+already resolves the stored preference (or System) on its own, matching the pre-paint bootstrap,
+so supplying `preference` is an explicit *initial* override — appropriate only when a consumer
+intentionally seeds a first-visit choice — and it does not itself persist that override to
+storage, so an authored value that disagrees with the stored one can produce a bootstrap-to-
+upgrade theme change. A user's selection is saved once, after its `sk-theme-change` event has
+been dispatched: if a synchronous handler of that event reassigns `preference` — rejecting the
+choice — storage keeps the preference the page settled on, not the rejected one, so the next
+load restores what the user last saw.
+
+The `preference` property and attribute accept only `system`, `light`, and `dark`. Any other
+value assigned from JavaScript, or assigned directly to an already-upgraded element's property,
+becomes `system` immediately and is reflected back onto the attribute. A raw invalid string
+written directly onto a connected element's `preference` *attribute* — before or after it has
+rendered — is likewise corrected to `system` once the element next updates; it does not persist
+as the literal invalid string. In every case the value never leaves the group without a selected
+choice and never reaches the root.
+
+Degradation is deliberate:
+
+- Without JavaScript, the generated published token stylesheet follows
+  `prefers-color-scheme`; the unupgraded empty host exposes no inert buttons or radios. Manual
+  selection and persistence require enhancement. The component-authoring recipe makes static
+  markup optional when no truthful static control exists; generating radio markup here would
+  present an operable-looking choice that cannot change the root, so this element intentionally
+  has no generated static form.
+- If `localStorage` is unavailable or throws, root resolution and current-page selection still
+  work, but the choice cannot survive a reload.
+- If `matchMedia` is unavailable or throws, System safely resolves to Light and installs no live
+  listener. Manual Light and Dark remain available.
+
+This component owns only generic theme resolution. Factory Dashboard issue #14 still owns placing
+and integrating it in that application. Design-system issue #93 still owns the remaining
+repository-wide broken LightMode wrappers; this component's root-level proof does not claim those
+acceptance criteria.
 
 ## Repository Dossier pattern
 

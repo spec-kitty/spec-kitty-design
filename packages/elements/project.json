@@ -21,7 +21,9 @@
       "executor": "nx:run-commands",
       "options": {
         "commands": [
+          "node scripts/build-theme-bootstrap.mjs",
           "tsc -p packages/elements/tsconfig.lib.json --emitDeclarationOnly --outDir packages/elements/dist",
+          "esbuild packages/elements/src/theme-toggle/theme-preference.ts --bundle --format=esm --outfile=packages/elements/dist/theme-toggle/theme-preference.js",
           "esbuild packages/elements/src/index.ts --bundle --format=esm --external:lit --outfile=packages/elements/dist/index.js",
           "esbuild packages/elements/src/elements.ts --bundle --format=iife --outfile=packages/elements/dist/elements.js"
         ],
@@ -33,6 +35,7 @@
       ],
       "inputs": [
         "{projectRoot}/**/*",
+        "{workspaceRoot}/scripts/build-theme-bootstrap.mjs",
         "{workspaceRoot}/packages/styles/src/**/*.css",
         "{workspaceRoot}/package.json",
         "{workspaceRoot}/package-lock.json"

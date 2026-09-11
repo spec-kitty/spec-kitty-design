@@ -92,6 +92,30 @@
           "description": "The static form. THROWS on an unrecognised `layout`/`presentation`, or on a missing/blank\n`content.title` — the authoring-time policy: a bad value must not reach committed output.\n\nTWO TRIGGER SHAPES ONLY (FR-008/009/010) — never a `<button>`. `sk-action-row.ts`'s third\ntrigger shape emits `sk-action-row-activate` from a click listener the static form does not\nhave; promising it here would freeze an activation contract this form cannot keep. A non-blank\n`href` selects the native `<a>` route trigger; otherwise the static, non-interactive div.\n\nCONTROLS ARE A SIBLING OF THE TRIGGER, never its descendant (#272) — both are children of the\nouter `.sk-action-row` div, controls placed after the trigger, reproducing\n`sk-action-row.ts`'s own DOM shape exactly. Omitted entirely (not `hidden`) when blank."
         },
         {
+          "kind": "function",
+          "name": "applyResolvedTheme",
+          "return": {
+            "type": {
+              "text": "void"
+            }
+          },
+          "parameters": [
+            {
+              "name": "root",
+              "type": {
+                "text": "ThemeRoot"
+              }
+            },
+            {
+              "name": "theme",
+              "type": {
+                "text": "ResolvedTheme"
+              }
+            }
+          ],
+          "description": "Apply both root signals atomically from the same resolved value."
+        },
+        {
           "kind": "variable",
           "name": "BLOG_CARD_AXES",
           "type": {
@@ -1016,6 +1040,24 @@
           ]
         },
         {
+          "kind": "function",
+          "name": "isThemePreference",
+          "return": {
+            "type": {
+              "text": "value is ThemePreference"
+            }
+          },
+          "parameters": [
+            {
+              "name": "value",
+              "type": {
+                "text": "unknown"
+              }
+            }
+          ],
+          "description": "Whether an unknown value is one of the three public preferences."
+        },
+        {
           "kind": "variable",
           "name": "NOTICE_ANNOUNCEMENTS",
           "type": {
@@ -1125,6 +1167,49 @@
           },
           "default": "'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 1200 675%22%3E%3Crect width=%221200%22 height=%22675%22 fill=%22%2314202E%22/%3E%3Cpath d=%22M0 520 C240 410 410 600 630 460 C810 344 980 390 1200 250 L1200 675 L0 675 Z%22 fill=%22%23F5C518%22 opacity=%220.45%22/%3E%3Cpath d=%22M0 330 C260 250 440 420 690 280 C910 156 1030 220 1200 96%22 fill=%22none%22 stroke=%22%23A9C7E8%22 stroke-width=%2244%22 stroke-linecap=%22round%22 opacity=%220.75%22/%3E%3C/svg%3E'",
           "description": "A placeholder thumbnail, carried here so the generated forms show a real image.\n\nThe same inline SVG the hand-written builder used before #78 — recovered rather than\nre-drawn, so the catalogue's committed visual baseline does not move."
+        },
+        {
+          "kind": "function",
+          "name": "readThemePreference",
+          "return": {
+            "type": {
+              "text": "ThemePreference"
+            }
+          },
+          "parameters": [
+            {
+              "name": "storage",
+              "optional": true,
+              "type": {
+                "text": "ThemeStorage | null"
+              }
+            }
+          ],
+          "description": "Read a preference. Missing, invalid, and inaccessible storage all mean System."
+        },
+        {
+          "kind": "function",
+          "name": "resolveTheme",
+          "return": {
+            "type": {
+              "text": "ResolvedTheme"
+            }
+          },
+          "parameters": [
+            {
+              "name": "preference",
+              "type": {
+                "text": "ThemePreference"
+              }
+            },
+            {
+              "name": "systemDark",
+              "type": {
+                "text": "boolean"
+              }
+            }
+          ],
+          "description": "Resolve System against the current OS preference; manual choices pass through."
         },
         {
           "kind": "variable",
@@ -6019,6 +6104,191 @@
         },
         {
           "kind": "class",
+          "description": "A three-state theme-preference control that resolves System, Light, or Dark on the root.\n\nConsumer-supplied labels are required so the package never ships untranslated fallback copy.\nIf any label is absent or blank, the element renders no interactive control. The pre-paint\nbootstrap is independent of this presentation and continues to provide system-default theming.\n\nEvery control connected to one document shows one shared preference: a choice on any of them\nselects it on all of them, and exactly one System listener exists while that preference is\nSystem. A control connecting alongside another control adopts the page's current preference. A\ncontrol connecting alone re-reads storage and adopts it if it changed since the page last read\nor saved it; otherwise, or when storage cannot be read, the page's own last preference resumes.\nEither is skipped for a control given an explicit `preference` before connecting, which always\nwins.",
+          "name": "SkThemeToggle",
+          "cssParts": [
+            {
+              "description": "The native fieldset containing the three radio choices.",
+              "name": "control"
+            }
+          ],
+          "members": [
+            {
+              "kind": "field",
+              "name": "#assignedWhileDisconnected",
+              "privacy": "private",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false"
+            },
+            {
+              "kind": "field",
+              "name": "#documentTheme",
+              "privacy": "private",
+              "type": {
+                "text": "DocumentTheme | undefined"
+              }
+            },
+            {
+              "kind": "method",
+              "name": "#hasLabels",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "boolean"
+                }
+              }
+            },
+            {
+              "kind": "field",
+              "name": "#preference",
+              "privacy": "private",
+              "type": {
+                "text": "ThemePreference"
+              },
+              "default": "'system'"
+            },
+            {
+              "kind": "method",
+              "name": "#resolvedTheme",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "'light' | 'dark'"
+                }
+              }
+            },
+            {
+              "kind": "field",
+              "name": "#select",
+              "privacy": "private"
+            },
+            {
+              "kind": "field",
+              "name": "#show",
+              "privacy": "private"
+            },
+            {
+              "kind": "field",
+              "name": "darkLabel",
+              "privacy": "public",
+              "type": {
+                "text": "string"
+              },
+              "description": "Visible label for the Dark choice.",
+              "default": "''",
+              "attribute": "dark-label"
+            },
+            {
+              "kind": "field",
+              "name": "label",
+              "privacy": "public",
+              "type": {
+                "text": "string"
+              },
+              "description": "Visible legend and accessible name for the preference group.",
+              "default": "''",
+              "attribute": "label"
+            },
+            {
+              "kind": "field",
+              "name": "lightLabel",
+              "privacy": "public",
+              "type": {
+                "text": "string"
+              },
+              "description": "Visible label for the Light choice.",
+              "default": "''",
+              "attribute": "light-label"
+            },
+            {
+              "kind": "field",
+              "name": "preference",
+              "privacy": "public",
+              "type": {
+                "text": "'system' | 'light' | 'dark'"
+              },
+              "description": "Selected preference. Invalid attribute and property values safely become `system`.",
+              "attribute": "preference",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "systemLabel",
+              "privacy": "public",
+              "type": {
+                "text": "string"
+              },
+              "description": "Visible label for the System choice.",
+              "default": "''",
+              "attribute": "system-label"
+            }
+          ],
+          "events": [
+            {
+              "type": {
+                "text": "CustomEvent<{ preference: 'system' | 'light' | 'dark'; theme: 'light' | 'dark' }>"
+              },
+              "description": "Reports a user-selected preference and its resolved root theme.",
+              "name": "sk-theme-change"
+            }
+          ],
+          "attributes": [
+            {
+              "name": "dark-label",
+              "type": {
+                "text": "string"
+              },
+              "description": "Visible label for the Dark choice.",
+              "default": "''",
+              "fieldName": "darkLabel"
+            },
+            {
+              "name": "label",
+              "type": {
+                "text": "string"
+              },
+              "description": "Visible legend and accessible name for the preference group.",
+              "default": "''",
+              "fieldName": "label"
+            },
+            {
+              "name": "light-label",
+              "type": {
+                "text": "string"
+              },
+              "description": "Visible label for the Light choice.",
+              "default": "''",
+              "fieldName": "lightLabel"
+            },
+            {
+              "name": "preference",
+              "type": {
+                "text": "'system' | 'light' | 'dark'"
+              },
+              "description": "Selected preference. Invalid attribute and property values safely become `system`.",
+              "fieldName": "preference"
+            },
+            {
+              "name": "system-label",
+              "type": {
+                "text": "string"
+              },
+              "description": "Visible label for the System choice.",
+              "default": "''",
+              "fieldName": "systemLabel"
+            }
+          ],
+          "superclass": {
+            "name": "LitElement",
+            "package": "lit"
+          },
+          "tagName": "sk-theme-toggle",
+          "customElement": true
+        },
+        {
+          "kind": "class",
           "description": "A controlled, property-fed line chart over a time axis whose missing intervals are drawn as\ngaps and published as \"No data\".\n\nEvery value is published persistently in a paired native table — the element's accessible\nrepresentation and its narrow-viewport treatment — so no meaning is hover-only. The graphic is\naria-hidden and carries no accessible content of its own. Selection is controlled: activation\nrequests a change and never makes one, and the only default action the element owns is moving\nfocus to the activated point, which a listener may cancel.\n\nSeries are distinguished by three redundant channels — ink, dash pattern and marker shape —\nbecause ink is the one of the three that collapses under forced-colors and in greyscale.\n\nToken dependencies: --sk-border-default, --sk-border-focus, --sk-border-strong,\n--sk-border-width-1, --sk-border-width-2, --sk-chart-baseline, --sk-chart-dash-1,\n--sk-chart-dash-2, --sk-chart-dash-3, --sk-chart-dash-4, --sk-chart-gap,\n--sk-chart-gap-dash, --sk-chart-gap-fill, --sk-chart-grid, --sk-chart-plot-block-size,\n--sk-chart-series-1, --sk-chart-series-2, --sk-chart-series-3, --sk-chart-series-4,\n--sk-chart-stroke-width, --sk-fg-body, --sk-fg-default, --sk-fg-muted, --sk-font-mono,\n--sk-font-sans, --sk-motion-duration-fast, --sk-motion-ease-out, --sk-radius-md,\n--sk-radius-sm, --sk-space-1, --sk-space-2, --sk-space-3, --sk-space-4, --sk-space-5,\n--sk-space-6, --sk-space-10, --sk-surface-card, --sk-surface-pill, --sk-text-sm,\n--sk-text-xs, --sk-weight-medium.",
           "name": "SkTimeSeriesChart",
           "cssParts": [
@@ -6780,6 +7050,33 @@
           "description": "The tone vocabulary, in presentation order."
         },
         {
+          "kind": "variable",
+          "name": "THEME_DARK_SCHEME_QUERY",
+          "type": {
+            "text": "string"
+          },
+          "default": "'(prefers-color-scheme: dark)'",
+          "description": "The one media query whose match means System resolves dark. The pre-paint bootstrap and the\nelement both ask exactly this query, so neither adapter can drift to a different System source."
+        },
+        {
+          "kind": "variable",
+          "name": "THEME_PREFERENCES",
+          "type": {
+            "text": "['system', 'light', 'dark']"
+          },
+          "default": "['system', 'light', 'dark']",
+          "description": "The complete public preference vocabulary, in control order."
+        },
+        {
+          "kind": "variable",
+          "name": "THEME_STORAGE_KEY",
+          "type": {
+            "text": "string"
+          },
+          "default": "'spec-kitty-theme'",
+          "description": "The one storage key shared by the pre-paint bootstrap and the element."
+        },
+        {
           "kind": "function",
           "name": "unknownAccentMessage",
           "return": {
@@ -6899,6 +7196,30 @@
             }
           ],
           "description": "The shared diagnostic for an unrecognised variant."
+        },
+        {
+          "kind": "function",
+          "name": "writeThemePreference",
+          "return": {
+            "type": {
+              "text": "boolean"
+            }
+          },
+          "parameters": [
+            {
+              "name": "storage",
+              "type": {
+                "text": "ThemeStorage | null | undefined"
+              }
+            },
+            {
+              "name": "preference",
+              "type": {
+                "text": "ThemePreference"
+              }
+            }
+          ],
+          "description": "Persist a preference. Storage denial is a recoverable degradation."
         }
       ],
       "exports": [
@@ -6955,6 +7276,14 @@
           "name": "actionRowStaticHtml",
           "declaration": {
             "name": "actionRowStaticHtml",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "applyResolvedTheme",
+          "declaration": {
+            "name": "applyResolvedTheme",
             "module": "./dist/index.js"
           }
         },
@@ -7456,6 +7785,14 @@
         },
         {
           "kind": "js",
+          "name": "isThemePreference",
+          "declaration": {
+            "name": "isThemePreference",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
           "name": "NOTICE_ANNOUNCEMENTS",
           "declaration": {
             "name": "NOTICE_ANNOUNCEMENTS",
@@ -7536,9 +7873,33 @@
         },
         {
           "kind": "js",
+          "name": "readThemePreference",
+          "declaration": {
+            "name": "readThemePreference",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
           "name": "registeredTags",
           "declaration": {
             "name": "registeredTags",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "ResolvedTheme",
+          "declaration": {
+            "name": "ResolvedTheme",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "resolveTheme",
+          "declaration": {
+            "name": "resolveTheme",
             "module": "./dist/index.js"
           }
         },
@@ -8104,6 +8465,22 @@
         },
         {
           "kind": "js",
+          "name": "SkThemeToggle",
+          "declaration": {
+            "name": "SkThemeToggle",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "skThemeToggleSheet",
+          "declaration": {
+            "name": "default",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
           "name": "SkTimeSeriesChart",
           "declaration": {
             "name": "SkTimeSeriesChart",
@@ -8147,6 +8524,54 @@
           "name": "StatusIndicatorTone",
           "declaration": {
             "name": "StatusIndicatorTone",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "THEME_DARK_SCHEME_QUERY",
+          "declaration": {
+            "name": "THEME_DARK_SCHEME_QUERY",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "THEME_PREFERENCES",
+          "declaration": {
+            "name": "THEME_PREFERENCES",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "THEME_STORAGE_KEY",
+          "declaration": {
+            "name": "THEME_STORAGE_KEY",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "ThemePreference",
+          "declaration": {
+            "name": "ThemePreference",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "ThemeRoot",
+          "declaration": {
+            "name": "ThemeRoot",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "ThemeStorage",
+          "declaration": {
+            "name": "ThemeStorage",
             "module": "./dist/index.js"
           }
         },
@@ -8275,6 +8700,14 @@
           "name": "unknownVariantMessage",
           "declaration": {
             "name": "unknownVariantMessage",
+            "module": "./dist/index.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "writeThemePreference",
+          "declaration": {
+            "name": "writeThemePreference",
             "module": "./dist/index.js"
           }
         }

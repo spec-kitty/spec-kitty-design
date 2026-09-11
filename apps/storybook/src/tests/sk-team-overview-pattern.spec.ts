@@ -430,13 +430,14 @@ test('dark and light stories expose identical content and selector signatures', 
   expect(light.surface).not.toBe(dark.surface);
 });
 
-test('fixed labels and selector output remain stable across timezones', async ({ browser }) => {
+test('fixed labels and selector output remain stable across timezones', async ({ browser, baseURL }) => {
+  if (!baseURL) throw new Error('Playwright baseURL is required for isolated Storybook runs');
   const signatures: string[] = [];
   const labels: string[][] = [];
   for (const timezoneId of ['UTC', 'America/Los_Angeles']) {
-    const context = await browser.newContext({ timezoneId });
+    const context = await browser.newContext({ timezoneId, baseURL });
     const page = await context.newPage();
-    await page.goto('http://localhost:6006/iframe.html?id=patterns-team-overview--default&viewMode=story');
+    await page.goto('/iframe.html?id=patterns-team-overview--default&viewMode=story');
     const root = page.locator('[data-team-overview-pattern]');
     await root.waitFor({ state: 'visible', timeout: 20000 });
     signatures.push(await root.getAttribute('data-semantic-signature') ?? '');

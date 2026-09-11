@@ -56,7 +56,9 @@
     "Correction: the confirm-dialog focus-return arm (\"focus does not return to the invoker on close\") was filed under SC-005 (form association), matching behaviours.json's own now-corrected mislabeling. Re-keyed to SC-012 (focus and keyboard), the id its test is actually marked with.",
     "#302 adds ONE for <sk-pill-tag>: the SC-010 arm flips `reflect` on `status`, mirroring sk-card's #177 SC-010 arm exactly. The named [SC-010] test asserts a pre-upgrade property assignment reaches the ATTRIBUTE, so an unreflected status is an axis that does nothing outside the shadow root and no static consumer or CSS author can see it. NO ARM FOR THE VOCABULARY ASSERTION, for the same reason #177's own note on this file records: guard 7 keys on a declared (id, subject) pair and there is no ADR-11 id for 'two components share one enum', so `Object.keys(PILL_TAG_STATUSES)` equals `STATUS_TONES` is held by an ordinary test rather than by this harness.",
     "#302 updates the pre-existing SC-013 \"pill-tag part present\" arm's `from`/`to` strings: render() now calls `pillTagClasses(this.variant, this.shape, this.status)` with the new third argument, so the old two-argument literal no longer occurs in the source and the arm would apply nothing. The claim under test (the declared part survives) is unchanged.",
-    "#305 adds one sk-button SC-013 arm for the new busy-cue part, on the BUTTON branch specifically — the existing sk-button SC-013 arm already covers the ANCHOR branch (`part=\"button\"` there), so this one exercises the other branch rather than duplicating it. `from` is the exact rendered line including its 10-space indent, matched byte-for-byte against the shipped sk-button.ts; the mutation drops only the `part=\"busy-cue\"` attribute, leaving the class (and therefore the cue's own visibility/animation) untouched, so the arm reds specifically on the extended [SC-013] test's outside-targetability assertion rather than on any geometry or visibility assertion."
+    "#305 adds one sk-button SC-013 arm for the new busy-cue part, on the BUTTON branch specifically — the existing sk-button SC-013 arm already covers the ANCHOR branch (`part=\"button\"` there), so this one exercises the other branch rather than duplicating it. `from` is the exact rendered line including its 10-space indent, matched byte-for-byte against the shipped sk-button.ts; the mutation drops only the `part=\"busy-cue\"` attribute, leaving the class (and therefore the cue's own visibility/animation) untouched, so the arm reds specifically on the extended [SC-013] test's outside-targetability assertion rather than on any geometry or visibility assertion.",
+    "#323's pass-5 remediation adds six sk-theme-toggle arms. Four are SC-012 state tracking over the new document-scoped coordinator: one shared state per document (a per-control state reds sibling sync and single-listener ownership), sibling display of a manual choice, release of the one System listener in Light/Dark, and release on the last disconnect. The fifth is SC-012 too and mutates the DOM-free contract rather than the element: the dark colour-scheme query now lives only there, and the behaviour fixture's matchMedia fake is argument-sensitive, so a drifted query loses the dark System source. The sixth is SC-010: the preference setter normalizes invalid direct and pre-upgrade assignments to System, and removing that normalization reds the pre-upgrade case. The existing SC-010 arm's anchor gains `noAccessor: true` because the property now owns its accessor.",
+    "#323's pass-7 remediation RE-DERIVES one pass-6 arm and adds NINE sk-theme-toggle arms, all over existing (id, subject) pairs, moving the standing set from 263 to 272. The dormant coordinator now remembers the stored value it last read or saved and, on an empty-document connect, re-reads storage and adopts it only when it changed; otherwise the page's own preference resumes. Its `useOwn` line no longer exists, so 'a dormant document trusts storage over the last in-memory preference' is re-derived against the unreadable-storage guard in `#resume()` with the same claim. The new SC-012 arms cover each seam of that rule separately: readable storage is re-read at all; the changed-since comparison; an adopted read becomes the remembered value; a refused write is not remembered as saved; an empty document re-reads storage rather than the joining control's constructor-time value; an empty document re-queries matchMedia (the System-reconnect test now installs a FRESH media list, so reusing the first list reds it); a selection is saved after dispatch, as the value the page settled on; and the MODERN listener pair completeness check, which until now had no arm while the legacy pair did. The SC-010 arm removes the requested reflection that corrects an invalid attribute written onto an already-rendered control. The 'readable storage is re-read at all' arm first measured COLLATERAL on the [SC-006][SC-007][SC-008] event test: the per-test reset drove the dormant preference through that same storage path, so the mutation leaked one test's Dark into the next and the event test's click selected nothing. The reset now pins the preference by assignment before connect, which the storage path cannot affect, and the arm carries no expectCollateral."
   ],
   "mutations": [
     {
@@ -66,6 +68,30 @@
       "from": "    console.warn(`sk-card: ${unknownStatusMessage(status)} — rendering the base card.`);\n    status = undefined;",
       "to": "    throw new Error(unknownStatusMessage(status));",
       "subject": "fixtures/elements-behaviour/src/sk-card.test.ts"
+    },
+    {
+      "id": "SC-006",
+      "arm": "one theme-change event per native preference selection",
+      "file": "packages/elements/src/theme-toggle/sk-theme-toggle.ts",
+      "from": "    this.dispatchEvent(themeChangeEvent);",
+      "to": "    this.dispatchEvent(themeChangeEvent); this.dispatchEvent(themeChangeEvent);",
+      "subject": "fixtures/elements-behaviour/src/sk-theme-toggle.test.ts"
+    },
+    {
+      "id": "SC-007",
+      "arm": "exact theme preference and resolved-theme detail",
+      "file": "packages/elements/src/theme-toggle/sk-theme-toggle.ts",
+      "from": "      detail: Object.freeze({ preference: this.preference, theme: this.#resolvedTheme() }),",
+      "to": "      detail: Object.freeze({ preference: 'system', theme: this.#resolvedTheme() }),",
+      "subject": "fixtures/elements-behaviour/src/sk-theme-toggle.test.ts"
+    },
+    {
+      "id": "SC-008",
+      "arm": "theme-change bubbles and crosses shadow boundaries as documented",
+      "file": "packages/elements/src/theme-toggle/sk-theme-toggle.ts",
+      "from": "      bubbles: true,\n      composed: true,",
+      "to": "      bubbles: false,\n      composed: false,",
+      "subject": "fixtures/elements-behaviour/src/sk-theme-toggle.test.ts"
     },
     {
       "id": "SC-010",
@@ -2041,6 +2067,190 @@
       "from": "    status: { type: String, reflect: true },",
       "to": "    status: { type: String, reflect: false },",
       "subject": "fixtures/elements-behaviour/src/sk-pill-tag.test.ts"
+    },
+    {
+      "id": "SC-010",
+      "arm": "preference remains reactive, reflected, and preserves pre-upgrade assignment",
+      "file": "packages/elements/src/theme-toggle/sk-theme-toggle.ts",
+      "from": "    preference: { type: String, converter: preferenceConverter, reflect: true, noAccessor: true },",
+      "to": "    // preference is deliberately unregistered by this mutation arm",
+      "subject": "fixtures/elements-behaviour/src/sk-theme-toggle.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "the theme preference is a native same-name radio group",
+      "file": "packages/elements/src/theme-toggle/sk-theme-toggle.ts",
+      "from": "              type=\"radio\"",
+      "to": "              type=\"checkbox\"",
+      "subject": "fixtures/elements-behaviour/src/sk-theme-toggle.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "System installs only a complete media-query listener lifecycle pair",
+      "file": "packages/elements/src/theme-toggle/sk-theme-toggle.ts",
+      "from": "    const legacy =\n      typeof this.#media.addListener === 'function' &&\n      typeof this.#media.removeListener === 'function';",
+      "to": "    const legacy =\n      typeof this.#media.addListener === 'function';",
+      "subject": "fixtures/elements-behaviour/src/sk-theme-toggle.test.ts"
+    },
+    {
+      "id": "SC-013",
+      "arm": "the stable theme control part remains targetable",
+      "file": "packages/elements/src/theme-toggle/sk-theme-toggle.ts",
+      "from": "        part=\"control\"",
+      "to": "        part=\"chooser\"",
+      "subject": "fixtures/elements-behaviour/src/sk-theme-toggle.test.ts"
+    },
+    {
+      "id": "SC-014",
+      "arm": "the generated theme-toggle stylesheet is adopted by identity",
+      "file": "packages/elements/src/theme-toggle/sk-theme-toggle.ts",
+      "from": "  static styles = [sheet];",
+      "to": "  static styles = [new CSSStyleSheet()];",
+      "subject": "fixtures/elements-behaviour/src/sk-theme-toggle.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "connected theme controls share one document theme state",
+      "file": "packages/elements/src/theme-toggle/sk-theme-toggle.ts",
+      "from": "  let theme = documentThemes.get(document);",
+      "to": "  let theme: DocumentTheme | undefined;",
+      "subject": "fixtures/elements-behaviour/src/sk-theme-toggle.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "a manual choice is shown by every connected sibling control",
+      "file": "packages/elements/src/theme-toggle/sk-theme-toggle.ts",
+      "from": "    for (const control of this.#controls) if (control !== source) control(preference);",
+      "to": "    for (const control of this.#controls) if (control === source) control(preference);",
+      "subject": "fixtures/elements-behaviour/src/sk-theme-toggle.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "Light and Dark release the shared System listener",
+      "file": "packages/elements/src/theme-toggle/sk-theme-toggle.ts",
+      "from": "    if (preference === 'system') this.#startListening();\n    else this.#stopListening();",
+      "to": "    this.#startListening();",
+      "subject": "fixtures/elements-behaviour/src/sk-theme-toggle.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "the last disconnected control releases the shared System listener",
+      "file": "packages/elements/src/theme-toggle/sk-theme-toggle.ts",
+      "from": "    if (this.#controls.size === 0) this.#stopListening();",
+      "to": "    if (false) this.#stopListening();",
+      "subject": "fixtures/elements-behaviour/src/sk-theme-toggle.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "System asks exactly the contract's dark colour-scheme query",
+      "file": "packages/elements/src/theme-toggle/theme-preference.ts",
+      "from": "export const THEME_DARK_SCHEME_QUERY = '(prefers-color-scheme: dark)';",
+      "to": "export const THEME_DARK_SCHEME_QUERY = '(prefers-color-scheme: light)';",
+      "subject": "fixtures/elements-behaviour/src/sk-theme-toggle.test.ts"
+    },
+    {
+      "id": "SC-010",
+      "arm": "an invalid direct or pre-upgrade preference normalizes to System at the property boundary",
+      "file": "packages/elements/src/theme-toggle/sk-theme-toggle.ts",
+      "from": "    const next = isThemePreference(value) ? value : 'system';",
+      "to": "    const next = value;",
+      "subject": "fixtures/elements-behaviour/src/sk-theme-toggle.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "a dormant document trusts storage over the last in-memory preference",
+      "file": "packages/elements/src/theme-toggle/sk-theme-toggle.ts",
+      "from": "    if (!canReadStorage(store)) return this.#preference;",
+      "to": "    if (!true) return this.#preference;",
+      "subject": "fixtures/elements-behaviour/src/sk-theme-toggle.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "a dormant document re-reads readable storage rather than always resuming memory",
+      "file": "packages/elements/src/theme-toggle/sk-theme-toggle.ts",
+      "from": "    if (!canReadStorage(store)) return this.#preference;",
+      "to": "    if (!false) return this.#preference;",
+      "subject": "fixtures/elements-behaviour/src/sk-theme-toggle.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "a dormant document adopts storage only when it changed since the page last read or saved it",
+      "file": "packages/elements/src/theme-toggle/sk-theme-toggle.ts",
+      "from": "    if (stored === this.#stored) return this.#preference;",
+      "to": "    if (false) return this.#preference;",
+      "subject": "fixtures/elements-behaviour/src/sk-theme-toggle.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "an adopted stored value becomes the value the page remembers having read",
+      "file": "packages/elements/src/theme-toggle/sk-theme-toggle.ts",
+      "from": "    this.#stored = stored;\n    return stored;",
+      "to": "    return stored;",
+      "subject": "fixtures/elements-behaviour/src/sk-theme-toggle.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "a write storage refused is not remembered as saved",
+      "file": "packages/elements/src/theme-toggle/sk-theme-toggle.ts",
+      "from": "    if (writeThemePreference(storage(), preference)) this.#stored = preference;",
+      "to": "    writeThemePreference(storage(), preference);\n    this.#stored = preference;",
+      "subject": "fixtures/elements-behaviour/src/sk-theme-toggle.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "an empty document re-reads storage instead of the joining control's constructor-time value",
+      "file": "packages/elements/src/theme-toggle/sk-theme-toggle.ts",
+      "from": "    this.#publish(assigned ? preference : wasEmpty ? this.#resume() : this.#preference, control);",
+      "to": "    this.#publish(assigned || wasEmpty ? preference : this.#preference, control);",
+      "subject": "fixtures/elements-behaviour/src/sk-theme-toggle.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "an empty document re-queries matchMedia rather than reusing the list it captured first",
+      "file": "packages/elements/src/theme-toggle/sk-theme-toggle.ts",
+      "from": "    if (wasEmpty) this.#media = mediaQuery();",
+      "to": "    if (!this.#media) this.#media = mediaQuery();",
+      "subject": "fixtures/elements-behaviour/src/sk-theme-toggle.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "a selection saves the preference the page settled on after dispatch",
+      "file": "packages/elements/src/theme-toggle/sk-theme-toggle.ts",
+      "from": "    documentThemeFor(this.ownerDocument).persist(this.preference);",
+      "to": "    documentThemeFor(this.ownerDocument).persist(input.value as ThemePreference);",
+      "subject": "fixtures/elements-behaviour/src/sk-theme-toggle.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "System installs only a complete modern media-query listener pair",
+      "file": "packages/elements/src/theme-toggle/sk-theme-toggle.ts",
+      "from": "    const modern =\n      typeof this.#media.addEventListener === 'function' &&\n      typeof this.#media.removeEventListener === 'function';",
+      "to": "    const modern =\n      typeof this.#media.addEventListener === 'function';",
+      "subject": "fixtures/elements-behaviour/src/sk-theme-toggle.test.ts"
+    },
+    {
+      "id": "SC-010",
+      "arm": "an invalid attribute written onto a rendered control is reflected back as System",
+      "file": "packages/elements/src/theme-toggle/sk-theme-toggle.ts",
+      "from": "      this.requestUpdate('preference', value);",
+      "to": "      // the reflection Lit skipped is deliberately not requested by this mutation arm",
+      "subject": "fixtures/elements-behaviour/src/sk-theme-toggle.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "the last disconnected control's coordinator is forgotten rather than kept dormant",
+      "file": "packages/elements/src/theme-toggle/sk-theme-toggle.ts",
+      "from": "  disconnect(control: ThemeControl): void {\n    this.#controls.delete(control);\n    if (this.#controls.size === 0) this.#stopListening();\n  }",
+      "to": "  disconnect(control: ThemeControl): void {\n    this.#controls.delete(control);\n    if (this.#controls.size === 0) {\n      this.#stopListening();\n      documentThemes.delete(this.#document);\n    }\n  }",
+      "subject": "fixtures/elements-behaviour/src/sk-theme-toggle.test.ts"
+    },
+    {
+      "id": "SC-012",
+      "arm": "the radio checked binding trusts Lit's cache instead of the live DOM property",
+      "file": "packages/elements/src/theme-toggle/sk-theme-toggle.ts",
+      "from": ".checked=${live(this.preference === value)}",
+      "to": ".checked=${this.preference === value}",
+      "subject": "fixtures/elements-behaviour/src/sk-theme-toggle.test.ts"
     }
   ]
 }

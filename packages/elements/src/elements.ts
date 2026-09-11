@@ -43,3 +43,4 @@ import './bar-chart/sk-bar-chart.js';
 import './time-series-chart/sk-time-series-chart.js';
 import './copy-field/sk-copy-field.js';
 import './confirm-dialog/sk-confirm-dialog.js';
+import './theme-toggle/sk-theme-toggle.js';

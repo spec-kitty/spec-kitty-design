@@ -20,9 +20,150 @@
 import { readFileSync } from 'node:fs';
 import { globSync } from 'node:fs';
 import { createRequire } from 'node:module';
+import { resolve } from 'node:path';
+import ts from 'typescript';
 
 const MANIFEST = 'packages/elements/custom-elements.json';
 const manifest = JSON.parse(readFileSync(MANIFEST, 'utf8'));
+
+/** Runtime names exported by one TypeScript module. */
+const runtimeExportsFrom = (sourcePath) => {
+  const source = ts.createSourceFile(
+    sourcePath,
+    readFileSync(sourcePath, 'utf8'),
+    ts.ScriptTarget.ES2022,
+    true,
+  );
+  const names = new Set();
+  const exported = (node) =>
+    node.modifiers?.some((modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword);
+
+  for (const statement of source.statements) {
+    if (!exported(statement)) continue;
+    if (
+      ts.isFunctionDeclaration(statement) ||
+      ts.isClassDeclaration(statement) ||
+      ts.isEnumDeclaration(statement)
+    ) {
+      if (statement.name) names.add(statement.name.text);
+      continue;
+    }
+    if (ts.isVariableStatement(statement)) {
+      for (const declaration of statement.declarationList.declarations) {
+        if (ts.isIdentifier(declaration.name)) names.add(declaration.name.text);
+      }
+    }
+  }
+  return names;
+};
+
+/** Names the analyzer could accidentally promote from a story-only source module. */
+const declaredRuntimeNamesFrom = (sourcePath) => {
+  const source = ts.createSourceFile(
+    sourcePath,
+    readFileSync(sourcePath, 'utf8'),
+    ts.ScriptTarget.ES2022,
+    true,
+  );
+  const names = new Set();
+  const visit = (node) => {
+    if (
+      (ts.isVariableDeclaration(node) ||
+        ts.isFunctionDeclaration(node) ||
+        ts.isClassDeclaration(node) ||
+        ts.isEnumDeclaration(node)) &&
+      node.name && ts.isIdentifier(node.name)
+    ) {
+      names.add(node.name.text);
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(source);
+  return names;
+};
+
+/** Runtime names the package's authored public root actually exports. */
+const publicRuntimeExportsFrom = (sourcePath) => {
+  const source = ts.createSourceFile(
+    sourcePath,
+    readFileSync(sourcePath, 'utf8'),
+    ts.ScriptTarget.ES2022,
+    true,
+  );
+  const names = runtimeExportsFrom(sourcePath);
+  for (const statement of source.statements) {
+    if (!ts.isExportDeclaration(statement) || statement.isTypeOnly) continue;
+    if (!statement.exportClause || !ts.isNamedExports(statement.exportClause)) continue;
+    for (const element of statement.exportClause.elements) {
+      if (!element.isTypeOnly) names.add(element.name.text);
+    }
+  }
+  return names;
+};
+
+const declarationSourcesFrom = (configPath) => {
+  const config = ts.readConfigFile(configPath, ts.sys.readFile);
+  if (config.error) {
+    throw new Error(ts.flattenDiagnosticMessageText(config.error.messageText, '\n'));
+  }
+  const parsed = ts.parseJsonConfigFileContent(
+    config.config,
+    ts.sys,
+    resolve(configPath, '..'),
+    undefined,
+    configPath,
+  );
+  return new Set(parsed.fileNames.map((file) => resolve(file)));
+};
+
+const ELEMENTS_ROOT = 'packages/elements/src/index.ts';
+const ELEMENTS_LIB_CONFIG = 'packages/elements/tsconfig.lib.json';
+const publicRuntimeExports = publicRuntimeExportsFrom(ELEMENTS_ROOT);
+const declarationSources = declarationSourcesFrom(ELEMENTS_LIB_CONFIG);
+
+const auditStoryOnlyExports = (
+  candidateManifest,
+  sourcePaths,
+  rootRuntimeExports = publicRuntimeExports,
+  emittedDeclarationSources = declarationSources,
+) => {
+  const forbidden = new Map();
+  for (const sourcePath of sourcePaths) {
+    for (const name of declaredRuntimeNamesFrom(sourcePath)) forbidden.set(name, sourcePath);
+  }
+
+  const problems = [];
+  const advertised = new Set();
+  for (const module of candidateManifest.modules ?? []) {
+    for (const item of [...(module.exports ?? []), ...(module.declarations ?? [])]) {
+      if (forbidden.has(item.name)) advertised.add(item.name);
+    }
+  }
+  problems.push(...[...advertised].sort().map(
+    (name) =>
+      `story-only runtime export "${name}" from ${forbidden.get(name)} is advertised by ` +
+      'custom-elements.json even though the package runtime does not export it',
+  ));
+
+  for (const sourcePath of sourcePaths) {
+    for (const name of runtimeExportsFrom(sourcePath)) {
+      if (rootRuntimeExports.has(name)) {
+        problems.push(
+          `story-only runtime export "${name}" from ${sourcePath} is exposed by ${ELEMENTS_ROOT}`,
+        );
+      }
+    }
+    if (emittedDeclarationSources.has(resolve(sourcePath))) {
+      problems.push(
+        `story-only source ${sourcePath} is included by ${ELEMENTS_LIB_CONFIG} and would emit a ` +
+        'consumer declaration without corresponding package JavaScript',
+      );
+    }
+  }
+  return problems;
+};
+
+const storyOnlySources = globSync('packages/elements/src/**/*.fixture.ts');
 
 const declared = [];
 for (const mod of manifest.modules ?? []) {
@@ -416,10 +557,74 @@ if (process.argv.includes('--selftest')) {
     }
     if (expect !== null) caught++;
   }
+
+  const firstStoryOnlySource = storyOnlySources[0];
+  const firstStoryOnlyExport = firstStoryOnlySource
+    ? runtimeExportsFrom(firstStoryOnlySource).values().next().value
+    : undefined;
+  const firstStoryOnlyLocal = firstStoryOnlySource
+    ? [...declaredRuntimeNamesFrom(firstStoryOnlySource)]
+      .find((name) => name !== firstStoryOnlyExport)
+    : undefined;
+  if (!firstStoryOnlySource || !firstStoryOnlyExport || !firstStoryOnlyLocal) {
+    console.error(
+      '  ✗ story-only export self-test requires one exported and one local *.fixture.ts name',
+    );
+    bad++;
+  } else {
+    const cleanProblems = auditStoryOnlyExports(clone(), storyOnlySources);
+    if (cleanProblems.length) {
+      console.error(`  ✗ clean manifest advertises a story-only export: ${cleanProblems.join('; ')}`);
+      bad++;
+    }
+
+    const advertised = clone();
+    advertised.modules[0].exports ??= [];
+    advertised.modules[0].exports.push({ kind: 'js', name: firstStoryOnlyExport });
+    const advertisedProblems = auditStoryOnlyExports(advertised, storyOnlySources);
+    if (!advertisedProblems.some((problem) => problem.includes(firstStoryOnlyExport))) {
+      console.error('  ✗ a synthetic story-only runtime export was not rejected');
+      bad++;
+    }
+
+    const declared = clone();
+    declared.modules[0].declarations ??= [];
+    declared.modules[0].declarations.push({ kind: 'variable', name: firstStoryOnlyLocal });
+    const declaredProblems = auditStoryOnlyExports(declared, storyOnlySources);
+    if (!declaredProblems.some((problem) => problem.includes(firstStoryOnlyLocal))) {
+      console.error('  ✗ a synthetic story-only local declaration was not rejected');
+      bad++;
+    }
+
+    const publicProblems = auditStoryOnlyExports(
+      clone(),
+      storyOnlySources,
+      new Set([...publicRuntimeExports, firstStoryOnlyExport]),
+    );
+    if (!publicProblems.some((problem) => problem.includes(ELEMENTS_ROOT))) {
+      console.error('  ✗ a synthetic story-helper package-root export was not rejected');
+      bad++;
+    }
+
+    const declarationProblems = auditStoryOnlyExports(
+      clone(),
+      storyOnlySources,
+      publicRuntimeExports,
+      new Set([...declarationSources, resolve(firstStoryOnlySource)]),
+    );
+    if (!declarationProblems.some((problem) => problem.includes(ELEMENTS_LIB_CONFIG))) {
+      console.error('  ✗ a synthetic story-helper declaration emission was not rejected');
+      bad++;
+    }
+  }
   if (bad) {
     console.error(`\n❌ ${bad} of ${PROBES.length} probe(s) did not behave as recorded.`);
     process.exit(1);
   }
+  console.log(
+    '\n✅ Story-only public parity probes passed ' +
+    '(manifest export/local, package runtime, and declaration emission).',
+  );
   // Shrink-only floor on the table itself, named rather than a copied literal.
   const FLOOR = { mustCatch: 12, mustPass: 3 };
   if (caught < FLOOR.mustCatch || PROBES.length - caught < FLOOR.mustPass) {
@@ -437,6 +642,7 @@ if (process.argv.includes('--selftest')) {
 }
 
 const problems = [];
+problems.push(...auditStoryOnlyExports(manifest, storyOnlySources));
 if (declared.length === 0) {
   problems.push(
     'the manifest declares NO custom elements at all — every `@element <tag>` JSDoc is ' +

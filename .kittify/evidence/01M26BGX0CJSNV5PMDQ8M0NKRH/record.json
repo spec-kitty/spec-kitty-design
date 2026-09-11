@@ -1,0 +1,8 @@
+{
+  "event": "completed",
+  "invocation_id": "01M26BGX0CJSNV5PMDQ8M0NKRH",
+  "completed_at": "2026-09-10T19:38:12.197094+00:00",
+  "outcome": "done",
+  "closed_by": "agent",
+  "evidence_ref": "REJECT exact 61d2a5f1: semantic lens confirmed all three Mediums; resolver and session registry irreducible"
+}

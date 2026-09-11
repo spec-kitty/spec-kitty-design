@@ -1,0 +1,994 @@
+{
+  "sourceHead": "6c58764c1b582b757b5b4e9d6dcb11d624041281",
+  "sourceProductTree": {
+    "sha": "e47921c641e2cc521355d18253ac3f15d1ee868a",
+    "paths": [
+      "apps/storybook/src/tests/sk-theme-toggle-pattern.spec.ts",
+      "docs/design-system/using-components.md",
+      "fixtures/elements-behaviour/src/pattern-operational-status.test.ts",
+      "fixtures/elements-behaviour/src/sk-theme-toggle.test.ts",
+      "mutations.json",
+      "packages/elements/SIZES.md",
+      "packages/elements/custom-elements.json",
+      "packages/elements/src/patterns/operational-status.stories.ts",
+      "packages/elements/src/patterns/operational-status.ts",
+      "packages/elements/src/theme-toggle/sk-theme-toggle.ts",
+      "packages/elements/vue.d.ts",
+      "packages/react/src/SkThemeToggle.d.ts"
+    ]
+  },
+  "sourceDiffSha256": "f7c0b454fa8b9ef54ee1272945c53ee619661755cc375258e6b6f189859159a5",
+  "sourceIdentityProcedure": [
+    "EXCLUDE=(':(exclude)docs/architecture/validation/issue-323-theme-toggle' ':(exclude)kitty-specs' ':(exclude).scratch-zoom-capture')",
+    "GIT_INDEX_FILE=<temp> git read-tree HEAD && GIT_INDEX_FILE=<temp> git add -A -- . \"${EXCLUDE[@]}\" && GIT_INDEX_FILE=<temp> git write-tree",
+    "git diff HEAD --binary -- . \"${EXCLUDE[@]}\" | sha256sum",
+    "sourceProductTree.paths is the literal output of `git diff HEAD --name-only` over the same pathspec, so the listed paths and the two hashes always agree by construction. kitty-specs/ and this evidence directory (docs/architecture/validation/issue-323-theme-toggle/, including operator-log.md) are excluded from the pathspec entirely because the mission's own running evidence files are self-referential and would make the hash a moving target as this very file is written; they are not part of either hash and are not listed here. No untracked product file existed this cycle (the capture wrapper refuses to run otherwise)."
+  ],
+  "capturedAt": "2026-09-11T03:24:05.625Z",
+  "browserVersion": "151.0.7922.34",
+  "executablePath": "/home/jeroennouws/.cache/ms-playwright/chromium-1234/chrome-linux64/chrome",
+  "display": ":103",
+  "pageUrl": "http://127.0.0.1:6431/iframe.html?id=patterns-operational-status--zoom-200&viewMode=story",
+  "zoomMechanism": "X11 XTEST native Ctrl+0, then five Ctrl+Shift+= browser UI chords",
+  "keyboardMechanism": "native pointer click to focus the checked radio, then X11 XTEST native ArrowLeft chords to cycle",
+  "constraints": {
+    "physicalWindowFixed": true,
+    "noCssZoomOrTransform": true,
+    "noViewportDeviceScaleOrCdpZoomEmulation": true
+  },
+  "at100": {
+    "keyboard": {
+      "values": [
+        "dark",
+        "light",
+        "system",
+        "dark"
+      ],
+      "states": [
+        {
+          "preference": "dark",
+          "theme": "dark",
+          "colorScheme": "dark"
+        },
+        {
+          "preference": "light",
+          "theme": "light",
+          "colorScheme": "light"
+        },
+        {
+          "preference": "system",
+          "theme": "light",
+          "colorScheme": "light"
+        },
+        {
+          "preference": "dark",
+          "theme": "dark",
+          "colorScheme": "dark"
+        }
+      ]
+    },
+    "geometry": {
+      "window": {
+        "innerWidth": 1199,
+        "innerHeight": 712,
+        "outerWidth": 1199,
+        "outerHeight": 799,
+        "devicePixelRatio": 1,
+        "visualViewportWidth": 1184,
+        "visualViewportHeight": 712,
+        "visualViewportScale": 1
+      },
+      "document": {
+        "clientWidth": 1184,
+        "clientHeight": 712,
+        "scrollWidth": 1184,
+        "scrollHeight": 1354
+      },
+      "header": {
+        "box": {
+          "left": 0,
+          "top": 0,
+          "right": 1184,
+          "bottom": 174,
+          "width": 1184,
+          "height": 174,
+          "clientWidth": 1184,
+          "clientHeight": 174,
+          "scrollWidth": 1184,
+          "scrollHeight": 174
+        }
+      },
+      "headerCopy": [
+        {
+          "slot": "eyebrow",
+          "text": "Operations",
+          "textOverflow": "clip",
+          "whiteSpace": "normal",
+          "visible": true,
+          "lines": 1,
+          "clippedBy": [],
+          "rect": {
+            "left": 24,
+            "top": 24,
+            "right": 107.765625,
+            "bottom": 46,
+            "width": 83.765625,
+            "height": 22
+          }
+        },
+        {
+          "slot": "title",
+          "text": "Regional service status",
+          "textOverflow": "clip",
+          "whiteSpace": "normal",
+          "visible": true,
+          "lines": 1,
+          "clippedBy": [],
+          "rect": {
+            "left": 24,
+            "top": 54,
+            "right": 493.40625,
+            "bottom": 97,
+            "width": 469.40625,
+            "height": 43
+          }
+        },
+        {
+          "slot": "supporting",
+          "text": "Every value below is supplied by the application. The library styles none of it.",
+          "textOverflow": "clip",
+          "whiteSpace": "normal",
+          "visible": true,
+          "lines": 2,
+          "clippedBy": [],
+          "rect": {
+            "left": 24,
+            "top": 105,
+            "right": 493.40625,
+            "bottom": 149,
+            "width": 469.40625,
+            "height": 44
+          }
+        },
+        {
+          "slot": "sync",
+          "text": "Updated 4 minutes ago",
+          "textOverflow": "clip",
+          "whiteSpace": "normal",
+          "visible": true,
+          "lines": 1,
+          "clippedBy": [],
+          "rect": {
+            "left": 517.40625,
+            "top": 53,
+            "right": 693.859375,
+            "bottom": 75,
+            "width": 176.453125,
+            "height": 22
+          }
+        }
+      ],
+      "fieldset": {
+        "left": 705.859375,
+        "top": 24,
+        "right": 1012.453125,
+        "bottom": 104,
+        "width": 306.59375,
+        "height": 80,
+        "clientWidth": 305,
+        "clientHeight": 78,
+        "scrollWidth": 305,
+        "scrollHeight": 60
+      },
+      "choices": [
+        {
+          "value": "system",
+          "checked": false,
+          "text": "System",
+          "box": {
+            "left": 714.859375,
+            "top": 51,
+            "right": 817.4375,
+            "bottom": 95,
+            "width": 102.578125,
+            "height": 44,
+            "clientWidth": 101,
+            "clientHeight": 42,
+            "scrollWidth": 101,
+            "scrollHeight": 42
+          }
+        },
+        {
+          "value": "light",
+          "checked": false,
+          "text": "Light",
+          "box": {
+            "left": 821.4375,
+            "top": 51,
+            "right": 909.703125,
+            "bottom": 95,
+            "width": 88.265625,
+            "height": 44,
+            "clientWidth": 86,
+            "clientHeight": 42,
+            "scrollWidth": 86,
+            "scrollHeight": 42
+          }
+        },
+        {
+          "value": "dark",
+          "checked": true,
+          "text": "Dark",
+          "box": {
+            "left": 913.703125,
+            "top": 51,
+            "right": 1003.453125,
+            "bottom": 95,
+            "width": 89.75,
+            "height": 44,
+            "clientWidth": 86,
+            "clientHeight": 40,
+            "scrollWidth": 86,
+            "scrollHeight": 40
+          }
+        }
+      ],
+      "focus": {
+        "value": "dark",
+        "tag": "INPUT",
+        "input": {
+          "outlineStyle": "auto",
+          "outlineWidth": "1px",
+          "outlineOffset": "2px",
+          "outlineColor": "rgb(16, 16, 16)"
+        },
+        "label": {
+          "outlineStyle": "solid",
+          "outlineWidth": "2px",
+          "outlineOffset": "4px",
+          "outlineColor": "rgb(245, 197, 24)"
+        }
+      },
+      "root": {
+        "preference": "dark",
+        "theme": "dark",
+        "colorScheme": "dark"
+      },
+      "surface": {
+        "color": "rgb(214, 214, 218)",
+        "backgroundColor": "rgb(13, 14, 17)"
+      },
+      "themeScopes": [],
+      "checks": {
+        "noDocumentHorizontalOverflow": true,
+        "everyHeaderStringVisible": true,
+        "allChoicesVisible": true,
+        "exactlyOneSelected": true,
+        "selectedMatchesRootPreference": true
+      }
+    },
+    "capture": {
+      "file": "operational-status-100-desktop.png",
+      "sha256": "55d0288dcfa183a5920c365bbe959a04eb915536557680b3122b0a6995ec2461"
+    }
+  },
+  "at200": {
+    "keyboard": {
+      "values": [
+        "dark",
+        "light",
+        "system",
+        "dark"
+      ],
+      "states": [
+        {
+          "preference": "dark",
+          "theme": "dark",
+          "colorScheme": "dark"
+        },
+        {
+          "preference": "light",
+          "theme": "light",
+          "colorScheme": "light"
+        },
+        {
+          "preference": "system",
+          "theme": "light",
+          "colorScheme": "light"
+        },
+        {
+          "preference": "dark",
+          "theme": "dark",
+          "colorScheme": "dark"
+        }
+      ]
+    },
+    "geometry": {
+      "window": {
+        "innerWidth": 599,
+        "innerHeight": 356,
+        "outerWidth": 1199,
+        "outerHeight": 799,
+        "devicePixelRatio": 2,
+        "visualViewportWidth": 592,
+        "visualViewportHeight": 356,
+        "visualViewportScale": 1
+      },
+      "document": {
+        "clientWidth": 592,
+        "clientHeight": 356,
+        "scrollWidth": 592,
+        "scrollHeight": 1892
+      },
+      "header": {
+        "box": {
+          "left": 0,
+          "top": 0,
+          "right": 592,
+          "bottom": 310.5,
+          "width": 592,
+          "height": 310.5,
+          "clientWidth": 592,
+          "clientHeight": 311,
+          "scrollWidth": 592,
+          "scrollHeight": 311
+        }
+      },
+      "headerCopy": [
+        {
+          "slot": "eyebrow",
+          "text": "Operations",
+          "textOverflow": "clip",
+          "whiteSpace": "normal",
+          "visible": true,
+          "lines": 1,
+          "clippedBy": [],
+          "rect": {
+            "left": 24,
+            "top": 24,
+            "right": 107.765625,
+            "bottom": 45.5,
+            "width": 83.765625,
+            "height": 21.5
+          }
+        },
+        {
+          "slot": "title",
+          "text": "Regional service status",
+          "textOverflow": "clip",
+          "whiteSpace": "normal",
+          "visible": true,
+          "lines": 1,
+          "clippedBy": [],
+          "rect": {
+            "left": 24,
+            "top": 53.5,
+            "right": 568,
+            "bottom": 97,
+            "width": 544,
+            "height": 43.5
+          }
+        },
+        {
+          "slot": "supporting",
+          "text": "Every value below is supplied by the application. The library styles none of it.",
+          "textOverflow": "clip",
+          "whiteSpace": "normal",
+          "visible": true,
+          "lines": 2,
+          "clippedBy": [],
+          "rect": {
+            "left": 24,
+            "top": 105,
+            "right": 568,
+            "bottom": 148,
+            "width": 544,
+            "height": 43
+          }
+        },
+        {
+          "slot": "sync",
+          "text": "Updated 4 minutes ago",
+          "textOverflow": "clip",
+          "whiteSpace": "normal",
+          "visible": true,
+          "lines": 1,
+          "clippedBy": [],
+          "rect": {
+            "left": 24,
+            "top": 172,
+            "right": 200.453125,
+            "bottom": 193.5,
+            "width": 176.453125,
+            "height": 21.5
+          }
+        }
+      ],
+      "fieldset": {
+        "left": 24,
+        "top": 205.5,
+        "right": 330.59375,
+        "bottom": 285.5,
+        "width": 306.59375,
+        "height": 80,
+        "clientWidth": 305,
+        "clientHeight": 78,
+        "scrollWidth": 305,
+        "scrollHeight": 60
+      },
+      "choices": [
+        {
+          "value": "system",
+          "checked": false,
+          "text": "System",
+          "box": {
+            "left": 33,
+            "top": 232.5,
+            "right": 135.578125,
+            "bottom": 276.5,
+            "width": 102.578125,
+            "height": 44,
+            "clientWidth": 101,
+            "clientHeight": 42,
+            "scrollWidth": 101,
+            "scrollHeight": 42
+          }
+        },
+        {
+          "value": "light",
+          "checked": false,
+          "text": "Light",
+          "box": {
+            "left": 139.578125,
+            "top": 232.5,
+            "right": 227.84375,
+            "bottom": 276.5,
+            "width": 88.265625,
+            "height": 44,
+            "clientWidth": 86,
+            "clientHeight": 42,
+            "scrollWidth": 86,
+            "scrollHeight": 42
+          }
+        },
+        {
+          "value": "dark",
+          "checked": true,
+          "text": "Dark",
+          "box": {
+            "left": 231.84375,
+            "top": 232.5,
+            "right": 321.59375,
+            "bottom": 276.5,
+            "width": 89.75,
+            "height": 44,
+            "clientWidth": 86,
+            "clientHeight": 40,
+            "scrollWidth": 86,
+            "scrollHeight": 40
+          }
+        }
+      ],
+      "focus": {
+        "value": "dark",
+        "tag": "INPUT",
+        "input": {
+          "outlineStyle": "auto",
+          "outlineWidth": "1px",
+          "outlineOffset": "2px",
+          "outlineColor": "rgb(16, 16, 16)"
+        },
+        "label": {
+          "outlineStyle": "solid",
+          "outlineWidth": "2px",
+          "outlineOffset": "4px",
+          "outlineColor": "rgb(245, 197, 24)"
+        }
+      },
+      "root": {
+        "preference": "dark",
+        "theme": "dark",
+        "colorScheme": "dark"
+      },
+      "surface": {
+        "color": "rgb(214, 214, 218)",
+        "backgroundColor": "rgb(13, 14, 17)"
+      },
+      "themeScopes": [],
+      "checks": {
+        "noDocumentHorizontalOverflow": true,
+        "everyHeaderStringVisible": true,
+        "allChoicesVisible": true,
+        "exactlyOneSelected": true,
+        "selectedMatchesRootPreference": true
+      }
+    },
+    "capture": {
+      "file": "operational-status-200-desktop.png",
+      "sha256": "e94e1fec17b65c43289774d56eb848838fa041eb9eb88ac1dbce1391adba7b33"
+    }
+  },
+  "lightMode": {
+    "pageUrl": "http://127.0.0.1:6431/iframe.html?id=patterns-operational-status--light-mode&viewMode=story",
+    "at100": {
+      "keyboard": {
+        "values": [
+          "light",
+          "system",
+          "dark",
+          "light"
+        ],
+        "states": [
+          {
+            "preference": "light",
+            "theme": "light",
+            "colorScheme": "light"
+          },
+          {
+            "preference": "system",
+            "theme": "light",
+            "colorScheme": "light"
+          },
+          {
+            "preference": "dark",
+            "theme": "dark",
+            "colorScheme": "dark"
+          },
+          {
+            "preference": "light",
+            "theme": "light",
+            "colorScheme": "light"
+          }
+        ]
+      },
+      "geometry": {
+        "window": {
+          "innerWidth": 1199,
+          "innerHeight": 712,
+          "outerWidth": 1199,
+          "outerHeight": 799,
+          "devicePixelRatio": 1,
+          "visualViewportWidth": 1184,
+          "visualViewportHeight": 712,
+          "visualViewportScale": 1
+        },
+        "document": {
+          "clientWidth": 1184,
+          "clientHeight": 712,
+          "scrollWidth": 1184,
+          "scrollHeight": 1354
+        },
+        "header": {
+          "box": {
+            "left": 0,
+            "top": 0,
+            "right": 1184,
+            "bottom": 174,
+            "width": 1184,
+            "height": 174,
+            "clientWidth": 1184,
+            "clientHeight": 174,
+            "scrollWidth": 1184,
+            "scrollHeight": 174
+          }
+        },
+        "headerCopy": [
+          {
+            "slot": "eyebrow",
+            "text": "Operations",
+            "textOverflow": "clip",
+            "whiteSpace": "normal",
+            "visible": true,
+            "lines": 1,
+            "clippedBy": [],
+            "rect": {
+              "left": 24,
+              "top": 24,
+              "right": 107.765625,
+              "bottom": 46,
+              "width": 83.765625,
+              "height": 22
+            }
+          },
+          {
+            "slot": "title",
+            "text": "Regional service status",
+            "textOverflow": "clip",
+            "whiteSpace": "normal",
+            "visible": true,
+            "lines": 1,
+            "clippedBy": [],
+            "rect": {
+              "left": 24,
+              "top": 54,
+              "right": 493.078125,
+              "bottom": 97,
+              "width": 469.078125,
+              "height": 43
+            }
+          },
+          {
+            "slot": "supporting",
+            "text": "Every value below is supplied by the application. The library styles none of it.",
+            "textOverflow": "clip",
+            "whiteSpace": "normal",
+            "visible": true,
+            "lines": 2,
+            "clippedBy": [],
+            "rect": {
+              "left": 24,
+              "top": 105,
+              "right": 493.078125,
+              "bottom": 149,
+              "width": 469.078125,
+              "height": 44
+            }
+          },
+          {
+            "slot": "sync",
+            "text": "Updated 4 minutes ago",
+            "textOverflow": "clip",
+            "whiteSpace": "normal",
+            "visible": true,
+            "lines": 1,
+            "clippedBy": [],
+            "rect": {
+              "left": 517.078125,
+              "top": 53,
+              "right": 693.53125,
+              "bottom": 75,
+              "width": 176.453125,
+              "height": 22
+            }
+          }
+        ],
+        "fieldset": {
+          "left": 705.53125,
+          "top": 24,
+          "right": 1012.453125,
+          "bottom": 104,
+          "width": 306.921875,
+          "height": 80,
+          "clientWidth": 305,
+          "clientHeight": 78,
+          "scrollWidth": 305,
+          "scrollHeight": 60
+        },
+        "choices": [
+          {
+            "value": "system",
+            "checked": false,
+            "text": "System",
+            "box": {
+              "left": 714.53125,
+              "top": 51,
+              "right": 817.109375,
+              "bottom": 95,
+              "width": 102.578125,
+              "height": 44,
+              "clientWidth": 101,
+              "clientHeight": 42,
+              "scrollWidth": 101,
+              "scrollHeight": 42
+            }
+          },
+          {
+            "value": "light",
+            "checked": true,
+            "text": "Light",
+            "box": {
+              "left": 821.109375,
+              "top": 51,
+              "right": 913.109375,
+              "bottom": 95,
+              "width": 92,
+              "height": 44,
+              "clientWidth": 88,
+              "clientHeight": 40,
+              "scrollWidth": 88,
+              "scrollHeight": 40
+            }
+          },
+          {
+            "value": "dark",
+            "checked": false,
+            "text": "Dark",
+            "box": {
+              "left": 917.109375,
+              "top": 51,
+              "right": 1003.453125,
+              "bottom": 95,
+              "width": 86.34375,
+              "height": 44,
+              "clientWidth": 84,
+              "clientHeight": 42,
+              "scrollWidth": 84,
+              "scrollHeight": 42
+            }
+          }
+        ],
+        "focus": {
+          "value": "light",
+          "tag": "INPUT",
+          "input": {
+            "outlineStyle": "auto",
+            "outlineWidth": "1px",
+            "outlineOffset": "2px",
+            "outlineColor": "rgb(16, 16, 16)"
+          },
+          "label": {
+            "outlineStyle": "solid",
+            "outlineWidth": "2px",
+            "outlineOffset": "4px",
+            "outlineColor": "rgb(245, 197, 24)"
+          }
+        },
+        "root": {
+          "preference": "light",
+          "theme": "light",
+          "colorScheme": "light"
+        },
+        "surface": {
+          "color": "rgb(42, 42, 34)",
+          "backgroundColor": "rgb(248, 245, 236)"
+        },
+        "themeScopes": [
+          "div.sk-pattern-operations.sk-light"
+        ],
+        "checks": {
+          "noDocumentHorizontalOverflow": true,
+          "everyHeaderStringVisible": true,
+          "allChoicesVisible": true,
+          "exactlyOneSelected": true,
+          "selectedMatchesRootPreference": true
+        }
+      },
+      "capture": {
+        "file": "operational-status-light-mode-100-desktop.png",
+        "sha256": "4c1c2be28462d7029c7002963c4e1fa1d08a3c09f0af182bea03efd444e762f7"
+      }
+    },
+    "at200": {
+      "keyboard": {
+        "values": [
+          "light",
+          "system",
+          "dark",
+          "light"
+        ],
+        "states": [
+          {
+            "preference": "light",
+            "theme": "light",
+            "colorScheme": "light"
+          },
+          {
+            "preference": "system",
+            "theme": "light",
+            "colorScheme": "light"
+          },
+          {
+            "preference": "dark",
+            "theme": "dark",
+            "colorScheme": "dark"
+          },
+          {
+            "preference": "light",
+            "theme": "light",
+            "colorScheme": "light"
+          }
+        ]
+      },
+      "geometry": {
+        "window": {
+          "innerWidth": 599,
+          "innerHeight": 356,
+          "outerWidth": 1199,
+          "outerHeight": 799,
+          "devicePixelRatio": 2,
+          "visualViewportWidth": 592,
+          "visualViewportHeight": 356,
+          "visualViewportScale": 1
+        },
+        "document": {
+          "clientWidth": 592,
+          "clientHeight": 356,
+          "scrollWidth": 592,
+          "scrollHeight": 1892
+        },
+        "header": {
+          "box": {
+            "left": 0,
+            "top": 0,
+            "right": 592,
+            "bottom": 310.5,
+            "width": 592,
+            "height": 310.5,
+            "clientWidth": 592,
+            "clientHeight": 311,
+            "scrollWidth": 592,
+            "scrollHeight": 311
+          }
+        },
+        "headerCopy": [
+          {
+            "slot": "eyebrow",
+            "text": "Operations",
+            "textOverflow": "clip",
+            "whiteSpace": "normal",
+            "visible": true,
+            "lines": 1,
+            "clippedBy": [],
+            "rect": {
+              "left": 24,
+              "top": 24,
+              "right": 107.765625,
+              "bottom": 45.5,
+              "width": 83.765625,
+              "height": 21.5
+            }
+          },
+          {
+            "slot": "title",
+            "text": "Regional service status",
+            "textOverflow": "clip",
+            "whiteSpace": "normal",
+            "visible": true,
+            "lines": 1,
+            "clippedBy": [],
+            "rect": {
+              "left": 24,
+              "top": 53.5,
+              "right": 568,
+              "bottom": 97,
+              "width": 544,
+              "height": 43.5
+            }
+          },
+          {
+            "slot": "supporting",
+            "text": "Every value below is supplied by the application. The library styles none of it.",
+            "textOverflow": "clip",
+            "whiteSpace": "normal",
+            "visible": true,
+            "lines": 2,
+            "clippedBy": [],
+            "rect": {
+              "left": 24,
+              "top": 105,
+              "right": 568,
+              "bottom": 148,
+              "width": 544,
+              "height": 43
+            }
+          },
+          {
+            "slot": "sync",
+            "text": "Updated 4 minutes ago",
+            "textOverflow": "clip",
+            "whiteSpace": "normal",
+            "visible": true,
+            "lines": 1,
+            "clippedBy": [],
+            "rect": {
+              "left": 24,
+              "top": 172,
+              "right": 200.453125,
+              "bottom": 193.5,
+              "width": 176.453125,
+              "height": 21.5
+            }
+          }
+        ],
+        "fieldset": {
+          "left": 24,
+          "top": 205.5,
+          "right": 330.90625,
+          "bottom": 285.5,
+          "width": 306.90625,
+          "height": 80,
+          "clientWidth": 305,
+          "clientHeight": 78,
+          "scrollWidth": 305,
+          "scrollHeight": 60
+        },
+        "choices": [
+          {
+            "value": "system",
+            "checked": false,
+            "text": "System",
+            "box": {
+              "left": 33,
+              "top": 232.5,
+              "right": 135.578125,
+              "bottom": 276.5,
+              "width": 102.578125,
+              "height": 44,
+              "clientWidth": 101,
+              "clientHeight": 42,
+              "scrollWidth": 101,
+              "scrollHeight": 42
+            }
+          },
+          {
+            "value": "light",
+            "checked": true,
+            "text": "Light",
+            "box": {
+              "left": 139.578125,
+              "top": 232.5,
+              "right": 231.5703125,
+              "bottom": 276.5,
+              "width": 91.9921875,
+              "height": 44,
+              "clientWidth": 88,
+              "clientHeight": 40,
+              "scrollWidth": 88,
+              "scrollHeight": 40
+            }
+          },
+          {
+            "value": "dark",
+            "checked": false,
+            "text": "Dark",
+            "box": {
+              "left": 235.5703125,
+              "top": 232.5,
+              "right": 321.90625,
+              "bottom": 276.5,
+              "width": 86.3359375,
+              "height": 44,
+              "clientWidth": 84,
+              "clientHeight": 42,
+              "scrollWidth": 84,
+              "scrollHeight": 42
+            }
+          }
+        ],
+        "focus": {
+          "value": "light",
+          "tag": "INPUT",
+          "input": {
+            "outlineStyle": "auto",
+            "outlineWidth": "1px",
+            "outlineOffset": "2px",
+            "outlineColor": "rgb(16, 16, 16)"
+          },
+          "label": {
+            "outlineStyle": "solid",
+            "outlineWidth": "2px",
+            "outlineOffset": "4px",
+            "outlineColor": "rgb(245, 197, 24)"
+          }
+        },
+        "root": {
+          "preference": "light",
+          "theme": "light",
+          "colorScheme": "light"
+        },
+        "surface": {
+          "color": "rgb(42, 42, 34)",
+          "backgroundColor": "rgb(248, 245, 236)"
+        },
+        "themeScopes": [
+          "div.sk-pattern-operations.sk-light"
+        ],
+        "checks": {
+          "noDocumentHorizontalOverflow": true,
+          "everyHeaderStringVisible": true,
+          "allChoicesVisible": true,
+          "exactlyOneSelected": true,
+          "selectedMatchesRootPreference": true
+        }
+      },
+      "capture": {
+        "file": "operational-status-light-mode-200-desktop.png",
+        "sha256": "5468662fed6ac06a915fed2c89c2151b2243b208c22a6600cfc477f800654e7b"
+      }
+    }
+  },
+  "consoleErrors": [
+    "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  ],
+  "failedPageResponses": []
+}

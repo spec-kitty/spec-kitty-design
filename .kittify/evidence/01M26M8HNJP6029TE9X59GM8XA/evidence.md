@@ -1,0 +1,1 @@
+REJECT at c5337dd9: High A11Y-001, genuine 200% zoom evidence visibly truncates composed header text and current test measures only control geometry.

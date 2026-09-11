@@ -1,0 +1,8 @@
+{
+  "event": "completed",
+  "invocation_id": "01M26BGBAB4J9VKMN9GGXJQ9Z4",
+  "completed_at": "2026-09-10T19:36:32.189655+00:00",
+  "outcome": "done",
+  "closed_by": "agent",
+  "evidence_ref": "REJECT exact 61d2a5f1: listenerless MQL and false CEM export Mediums"
+}

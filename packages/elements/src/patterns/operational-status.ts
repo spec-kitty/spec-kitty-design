@@ -7,12 +7,13 @@
  *
  * Four shapes, assembled from the six closed children of #183 and nothing else:
  *
- *   * an operational page header            sk-page-header[density=compact][sticky]   (#182)
+ *   * an operational page header            sk-page-header[sticky]                    (#182)
  *   * a live status / alert region          sk-notice[announce]                       (#178)
  *   * toned status cards carrying a fact
  *     block and collapsible detail          sk-card[status] + .sk-facts/.sk-disclosure (#177/#176)
  *                                           + sk-status-indicator                      (#146)
  *   * a gap-aware time series               sk-time-series-chart                       (#179)
+ *   * a three-choice theme preference        sk-theme-toggle                            (#323)
  *
  * WHY THIS IS A MODULE AND NOT ONLY A STORY. `team-overview.stories.ts`, the one existing
  * pattern fixture, carries six ratcheted story ids and no behaviour test. A story id proves a
@@ -47,7 +48,9 @@ import '../card/sk-card.js';
 import '../notice/sk-notice.js';
 import '../page-header/sk-page-header.js';
 import '../status-indicator/sk-status-indicator.js';
+import '../theme-toggle/sk-theme-toggle.js';
 import '../time-series-chart/sk-time-series-chart.js';
+import type { ThemePreference } from '../theme-toggle/theme-preference.js';
 import type { TimeSeriesDatum } from '../time-series-chart/sk-time-series-chart.js';
 
 /** One operational tone from the library's own public enum. The fixture invents none. */
@@ -77,6 +80,13 @@ export type OperationalModel = Readonly<{
   seriesLabel: string;
   seriesDescription: string;
   gapThreshold: number;
+}>;
+
+export type OperationalStatusOptions = Readonly<{
+  light?: boolean;
+  /** An explicit initial override. Omit it so the stored preference governs, as consumers should. */
+  preference?: ThemePreference;
+  presentation?: 'default' | 'greyscale';
 }>;
 
 const HOUR = 3_600_000;
@@ -245,6 +255,20 @@ export const operationalStatusStyles = html`<style>
     padding: var(--sk-space-6);
   }
 
+  .sk-pattern-operations__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    justify-content: end;
+    gap: var(--sk-space-3);
+    min-inline-size: 0;
+  }
+
+  .sk-pattern-operations__theme-control {
+    flex: 1 1 auto;
+    min-inline-size: 0;
+  }
+
   .sk-pattern-operations__units {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(var(--sk-space-12), 1fr));
@@ -275,6 +299,10 @@ export const operationalStatusStyles = html`<style>
     font: inherit;
   }
 
+  .sk-pattern-operations--greyscale {
+    filter: grayscale(1);
+  }
+
   @media (max-width: 720px) {
     .sk-pattern-operations__body {
       gap: var(--sk-space-4);
@@ -283,6 +311,11 @@ export const operationalStatusStyles = html`<style>
 
     .sk-pattern-operations__units {
       grid-template-columns: minmax(0, 1fr);
+    }
+
+    .sk-pattern-operations__actions {
+      align-items: stretch;
+      justify-content: stretch;
     }
   }
 </style>`;
@@ -314,28 +347,61 @@ const renderUnit = (unit: OperationalUnit): TemplateResult => html`
  * The whole composition, as one light-DOM tree the consumer owns.
  *
  * Nothing here reaches into a shadow root, and nothing restyles a component through anything but
- * its documented attributes, slots and tokens. `sticky` and `density="compact"` are #182's own
- * public attributes; `announce` and `tone` are #178's; `status` is #177's; `gap-threshold` and
- * `series` are #179's.
+ * its documented attributes, slots and tokens. `sticky` is #182's own public attribute;
+ * `announce` and `tone` are #178's; `status` is #177's; `gap-threshold` and `series` are #179's.
+ *
+ * THE HEADER USES THE DEFAULT DENSITY, deliberately (#323). `density="compact"` is #182's
+ * single-row presentation: its sheet sets the eyebrow, title, supporting and sync copy to
+ * `nowrap` with a visual-only ellipsis, which is the right trade for short operational labels.
+ * This composition supplies a full supporting sentence, and at desktop, narrow and genuine 200%
+ * browser zoom that presentation painted every one of the four strings as an ellipsis — present
+ * in the accessibility tree, not visible on screen. The default density wraps the same five
+ * slots instead, so every supplied string stays readable. The compact axis itself is unchanged
+ * and remains demonstrated by `sk-page-header`'s own stories.
+ * `apps/storybook/src/tests/sk-theme-toggle-pattern.spec.ts` asserts the strings' line boxes
+ * against every clipping box, so a return to the truncating presentation goes red.
  *
  * `options.light` adds `class="sk-light"` to the wrapper — NOT `data-theme="light"`,
  * which activates nothing on a wrapper because `@spec-kitty/tokens` anchors its light block
  * on `:root[data-theme="light"], .sk-light` and `:root` only matches `<html>` (#93).
+ *
+ * THE THEME CONTROL IS UNBOUND BY DEFAULT (#323), exactly as the consumer guidance says an
+ * ordinary page should author it: the control then resumes the stored preference the pre-paint
+ * bootstrap already applied. `options.preference` renders a `preference` attribute only when a
+ * caller deliberately overrides that initial value — an override that does not itself persist.
+ * An attribute rather than a property binding, because a property binding of `nothing` assigns
+ * `undefined`, and an assigned invalid value is itself an override (it normalizes to System).
  */
 export const renderOperationalStatus = (
   model: OperationalModel = OPERATIONAL_MODEL,
-  options: Readonly<{ light?: boolean }> = {},
-): TemplateResult => html`
+  options: OperationalStatusOptions = {},
+): TemplateResult => {
+  const classes = [
+    'sk-pattern-operations',
+    options.light ? 'sk-light' : '',
+    options.presentation === 'greyscale' ? 'sk-pattern-operations--greyscale' : '',
+  ].filter(Boolean).join(' ');
+
+  return html`
   ${operationalStatusStyles}
-  <div class=${options.light ? 'sk-pattern-operations sk-light' : 'sk-pattern-operations'}>
-    <sk-page-header density="compact" sticky>
+  <div class=${classes} data-theme-composition>
+    <sk-page-header sticky>
       <span slot="eyebrow">${model.eyebrow}</span>
       <h1 slot="title">${model.title}</h1>
       <p slot="supporting">${model.supporting}</p>
       <span slot="sync">${model.updated}</span>
-      <button slot="actions" type="button" class="sk-pattern-operations__action">
-        ${model.actionLabel}
-      </button>
+      <div slot="actions" class="sk-pattern-operations__actions">
+        <sk-theme-toggle
+          class="sk-pattern-operations__theme-control"
+          data-theme-control
+          preference=${options.preference ?? nothing}
+          label="Theme"
+          system-label="System"
+          light-label="Light"
+          dark-label="Dark"
+        ></sk-theme-toggle>
+        <button type="button" class="sk-pattern-operations__action">${model.actionLabel}</button>
+      </div>
     </sk-page-header>
 
     <div class="sk-pattern-operations__body">
@@ -368,3 +434,4 @@ export const renderOperationalStatus = (
     </div>
   </div>
 `;
+};

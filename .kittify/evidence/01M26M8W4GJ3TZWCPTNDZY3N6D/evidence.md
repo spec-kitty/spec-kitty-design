@@ -1,0 +1,1 @@
+REJECT at c5337dd9: Medium multi-toggle root corruption, 200% composition text loss, and duplicated unasserted system media-query authority; no dead-code-only blocker.

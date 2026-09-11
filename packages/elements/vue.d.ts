@@ -753,6 +753,33 @@ declare module 'vue' {
       // no declared props
     }>;
     /**
+     * A three-state theme-preference control that resolves System, Light, or Dark on the root.
+     *
+     * Consumer-supplied labels are required so the package never ships untranslated fallback copy.
+     * If any label is absent or blank, the element renders no interactive control. The pre-paint
+     * bootstrap is independent of this presentation and continues to provide system-default theming.
+     *
+     * Every control connected to one document shows one shared preference: a choice on any of them
+     * selects it on all of them, and exactly one System listener exists while that preference is
+     * System. A control connecting alongside another control adopts the page's current preference. A
+     * control connecting alone re-reads storage and adopts it if it changed since the page last read
+     * or saved it; otherwise, or when storage cannot be read, the page's own last preference resumes.
+     * Either is skipped for a control given an explicit `preference` before connecting, which always
+     * wins.
+     */
+    'sk-theme-toggle': SkElement<{
+      /** Visible label for the Dark choice. */
+      'dark-label'?: string;
+      /** Visible legend and accessible name for the preference group. */
+      'label'?: string;
+      /** Visible label for the Light choice. */
+      'light-label'?: string;
+      /** Selected preference. Invalid attribute and property values safely become `system`. */
+      'preference'?: 'system' | 'light' | 'dark';
+      /** Visible label for the System choice. */
+      'system-label'?: string;
+    }>;
+    /**
      * A controlled, property-fed line chart over a time axis whose missing intervals are drawn as
      * gaps and published as "No data".
      *

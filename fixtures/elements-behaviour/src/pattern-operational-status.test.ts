@@ -44,15 +44,70 @@
  * sufficiency is the claim. `check-pattern-composition.mjs` therefore scopes R1 to
  * `packages/elements/src/patterns/` and says so by name.
  */
-import { beforeEach, expect, test } from 'vitest';
+import { afterEach, beforeEach, expect, test } from 'vitest';
 import { render } from 'lit';
 import {
   OPERATIONAL_MODEL,
   renderOperationalStatus,
 } from '../../../packages/elements/src/patterns/operational-status.js';
+import { isolateThemeStory } from '../../../packages/elements/src/theme-toggle/theme-story-environment.fixture.js';
 import { installTokenSheet } from './token-sheet.js';
+import { assertThemesDiffered, contrast } from './contrast.js';
 
 type Updatable = Element & { updateComplete?: Promise<unknown> };
+type ThemeControl = Updatable & { preference?: string };
+
+class SystemPreference implements MediaQueryList {
+  readonly media = '(prefers-color-scheme: dark)';
+  readonly onchange = null;
+  #listeners = new Set<(event: MediaQueryListEvent) => void>();
+
+  constructor(public matches: boolean) {}
+
+  get listenerCount(): number {
+    return this.#listeners.size;
+  }
+
+  addEventListener(_type: 'change', listener: EventListenerOrEventListenerObject): void {
+    this.#listeners.add(listener as (event: MediaQueryListEvent) => void);
+  }
+
+  removeEventListener(_type: 'change', listener: EventListenerOrEventListenerObject): void {
+    this.#listeners.delete(listener as (event: MediaQueryListEvent) => void);
+  }
+
+  addListener(listener: ((this: MediaQueryList, ev: MediaQueryListEvent) => void) | null): void {
+    if (listener) this.#listeners.add(listener);
+  }
+
+  removeListener(listener: ((this: MediaQueryList, ev: MediaQueryListEvent) => void) | null): void {
+    if (listener) this.#listeners.delete(listener);
+  }
+
+  dispatchEvent(): boolean {
+    return true;
+  }
+
+  setDark(dark: boolean): void {
+    this.matches = dark;
+    const event = { matches: dark, media: this.media } as MediaQueryListEvent;
+    for (const listener of [...this.#listeners]) listener.call(this, event);
+  }
+}
+
+const originalMatchMedia = globalThis.matchMedia;
+
+const luminance = (color: string): number => {
+  const channels = color.match(/[\d.]+/g)?.slice(0, 3).map(Number);
+  if (!channels || channels.length !== 3) throw new Error(`cannot measure ${color}`);
+  const linear = channels.map((channel) => {
+    const normalized = channel / 255;
+    return normalized <= 0.03928
+      ? normalized / 12.92
+      : ((normalized + 0.055) / 1.055) ** 2.4;
+  });
+  return 0.2126 * linear[0]! + 0.7152 * linear[1]! + 0.0722 * linear[2]!;
+};
 
 const mount = async () => {
   const host = document.createElement('div');
@@ -70,6 +125,342 @@ const slotOf = (element: Element, name?: string) =>
   );
 
 beforeEach(installTokenSheet);
+
+afterEach(() => {
+  document.documentElement.removeAttribute('data-theme');
+  document.documentElement.style.removeProperty('color-scheme');
+  globalThis.matchMedia = originalMatchMedia;
+});
+
+test('the Factory-pattern composition includes the public theme, status-card, and facts surfaces', async () => {
+  const host = await mount();
+
+  expect(host.querySelectorAll('sk-theme-toggle[data-theme-control]')).toHaveLength(1);
+  expect(host.querySelectorAll('sk-card[status]')).toHaveLength(OPERATIONAL_MODEL.units.length);
+  expect(host.querySelectorAll('dl.sk-facts')).toHaveLength(OPERATIONAL_MODEL.units.length);
+  expect(host.querySelector('[data-theme-control]')?.getAttribute('label')).toBe('Theme');
+});
+
+test('manual light and dark resolve on the root with mutually exclusive luminance and AA contrast', async () => {
+  const surfaces = new Map<string, string>();
+  const luminances = new Map<string, number>();
+
+  for (const preference of ['dark', 'light'] as const) {
+    const host = document.createElement('div');
+    document.body.append(host);
+    render(renderOperationalStatus(OPERATIONAL_MODEL, { preference }), host);
+    for (const element of Array.from(host.querySelectorAll<Updatable>('*'))) {
+      if (element.updateComplete) await element.updateComplete;
+    }
+
+    const surface = host.querySelector<HTMLElement>('[data-theme-composition]')!;
+    const style = getComputedStyle(surface);
+    surfaces.set(preference, style.backgroundColor);
+    luminances.set(preference, luminance(style.backgroundColor));
+
+    expect(document.documentElement.dataset.theme).toBe(preference);
+    expect(document.documentElement.style.colorScheme).toBe(preference);
+    expect(contrast(style.color, style.backgroundColor), `${preference} page contrast`)
+      .toBeGreaterThanOrEqual(4.5);
+
+    host.remove();
+  }
+
+  assertThemesDiffered(surfaces);
+  expect(luminances.get('dark')).toBeLessThan(0.5);
+  expect(luminances.get('light')).toBeGreaterThan(0.5);
+});
+
+/**
+ * The exemplar follows the consumer guidance it ships beside: an ordinary composition omits
+ * `preference`, so the stored choice — the one the pre-paint bootstrap already applied — governs.
+ * Only a caller that passes a preference overrides it. The bare control is connected against a
+ * different stored value first, so the composition's own connect sees storage change and the
+ * assertion cannot depend on what an earlier test left the dormant document holding.
+ */
+test('the composition leaves the theme preference to storage unless the caller passes one', async () => {
+  const states = new Map<string, unknown>();
+  for (const [name, options] of [
+    ['default', {}],
+    ['override', { preference: 'dark' as const }],
+  ] as const) {
+    localStorage.setItem('spec-kitty-theme', 'dark');
+    const bare = document.createElement('sk-theme-toggle') as Updatable;
+    document.body.append(bare);
+    await bare.updateComplete;
+    bare.remove();
+
+    localStorage.setItem('spec-kitty-theme', 'light');
+    const host = document.createElement('div');
+    document.body.append(host);
+    render(renderOperationalStatus(OPERATIONAL_MODEL, options), host);
+    const toggle = host.querySelector<ThemeControl>('sk-theme-toggle')!;
+    await toggle.updateComplete;
+    states.set(name, { preference: toggle.preference, root: document.documentElement.dataset.theme });
+    host.remove();
+  }
+  localStorage.removeItem('spec-kitty-theme');
+
+  expect(Object.fromEntries(states)).toEqual({
+    default: { preference: 'light', root: 'light' },
+    override: { preference: 'dark', root: 'dark' },
+  });
+});
+
+test('System follows the media preference and releases its listener on a manual selection', async () => {
+  const system = new SystemPreference(true);
+  globalThis.matchMedia = () => system;
+  const host = document.createElement('div');
+  document.body.append(host);
+
+  render(renderOperationalStatus(OPERATIONAL_MODEL, { preference: 'system' }), host);
+  const toggle = host.querySelector<Updatable & { preference: string }>('sk-theme-toggle')!;
+  await toggle.updateComplete;
+  expect(document.documentElement.dataset.theme).toBe('dark');
+  expect(system.listenerCount).toBe(1);
+
+  toggle.preference = 'light';
+  await toggle.updateComplete;
+  expect(document.documentElement.dataset.theme).toBe('light');
+  expect(system.listenerCount).toBe(0);
+
+  host.remove();
+  expect(system.listenerCount).toBe(0);
+});
+
+test('the story boundary restores root state and storage after disconnecting its System control', async () => {
+  const system = new SystemPreference(false);
+  globalThis.matchMedia = () => system;
+  document.documentElement.dataset.theme = 'dark';
+  document.documentElement.style.colorScheme = 'dark';
+  localStorage.setItem('spec-kitty-theme', 'light');
+
+  const cleanup = isolateThemeStory({ parameters: { themePreference: 'system' } });
+  const host = document.createElement('div');
+  document.body.append(host);
+  render(renderOperationalStatus(OPERATIONAL_MODEL, { preference: 'system' }), host);
+  const toggle = host.querySelector<Updatable>('sk-theme-toggle')!;
+  await toggle.updateComplete;
+
+  expect(document.documentElement.dataset.theme).toBe('light');
+  expect(localStorage.getItem('spec-kitty-theme')).toBe('system');
+  expect(system.listenerCount).toBe(1);
+
+  cleanup();
+  expect(host.querySelector('sk-theme-toggle')).toBeNull();
+  expect(system.listenerCount).toBe(0);
+  expect(document.documentElement.dataset.theme).toBe('dark');
+  expect(document.documentElement.style.colorScheme).toBe('dark');
+  expect(localStorage.getItem('spec-kitty-theme')).toBe('light');
+  localStorage.removeItem('spec-kitty-theme');
+});
+
+test('story cleanup removes only its owned control and leaves a concurrent story control connected', async () => {
+  const system = new SystemPreference(false);
+  globalThis.matchMedia = () => system;
+  const ownedCanvas = document.createElement('div');
+  const concurrentCanvas = document.createElement('div');
+  document.body.append(ownedCanvas, concurrentCanvas);
+
+  const context = {
+    parameters: { themePreference: 'system' as const },
+    canvasElement: ownedCanvas,
+  };
+  const cleanup = isolateThemeStory(context);
+
+  render(renderOperationalStatus(OPERATIONAL_MODEL, { preference: 'system' }), ownedCanvas);
+  const owned = ownedCanvas.querySelector<Updatable>('sk-theme-toggle')!;
+  await owned.updateComplete;
+
+  render(renderOperationalStatus(OPERATIONAL_MODEL, { preference: 'system' }), concurrentCanvas);
+  const concurrent = concurrentCanvas.querySelector<Updatable>('sk-theme-toggle')!;
+  await concurrent.updateComplete;
+  // Two connected System controls are one document preference with one System listener.
+  expect(system.listenerCount).toBe(1);
+
+  cleanup();
+
+  expect(owned.isConnected).toBe(false);
+  expect(concurrent.isConnected).toBe(true);
+  expect(system.listenerCount).toBe(1);
+
+  concurrentCanvas.remove();
+  expect(system.listenerCount).toBe(0);
+  ownedCanvas.remove();
+  localStorage.removeItem('spec-kitty-theme');
+});
+
+type OverlapCleanupOrder = 'older-first' | 'newer-first';
+
+const documentThemeState = () => ({
+  theme: document.documentElement.getAttribute('data-theme'),
+  colorScheme: document.documentElement.style.getPropertyValue('color-scheme'),
+  stored: localStorage.getItem('spec-kitty-theme'),
+});
+
+/** The root theme after the OS reports dark, then light. */
+const rootAcrossOsChanges = (system: SystemPreference) => [true, false].map((dark) => {
+  system.setDark(dark);
+  return document.documentElement.getAttribute('data-theme');
+});
+
+const exerciseOverlappingThemeSessions = async (order: OverlapCleanupOrder) => {
+  const system = new SystemPreference(false);
+  globalThis.matchMedia = () => system;
+  document.documentElement.dataset.theme = 'baseline-theme';
+  document.documentElement.style.colorScheme = 'light dark';
+  localStorage.setItem('spec-kitty-theme', 'baseline-preference');
+
+  const olderCanvas = document.createElement('div');
+  const newerCanvas = document.createElement('div');
+  document.body.append(olderCanvas, newerCanvas);
+
+  const cleanupOlder = isolateThemeStory({
+    parameters: { themePreference: 'system' },
+    canvasElement: olderCanvas,
+  });
+  render(renderOperationalStatus(OPERATIONAL_MODEL, { preference: 'system' }), olderCanvas);
+  const older = olderCanvas.querySelector<ThemeControl>('sk-theme-toggle')!;
+  await older.updateComplete;
+
+  const cleanupNewer = isolateThemeStory({
+    parameters: { themePreference: 'dark' },
+    canvasElement: newerCanvas,
+  });
+  render(renderOperationalStatus(OPERATIONAL_MODEL, { preference: 'dark' }), newerCanvas);
+  const newer = newerCanvas.querySelector<ThemeControl>('sk-theme-toggle')!;
+  await newer.updateComplete;
+  await older.updateComplete;
+
+  const beforeCleanup = {
+    ...documentThemeState(),
+    listeners: system.listenerCount,
+    preferences: [older.preference, newer.preference],
+    olderConnected: older.isConnected,
+    newerConnected: newer.isConnected,
+  };
+  const beforeCleanupAcrossOsChanges = rootAcrossOsChanges(system);
+  const [firstCleanup, finalCleanup] = order === 'older-first'
+    ? [cleanupOlder, cleanupNewer]
+    : [cleanupNewer, cleanupOlder];
+  firstCleanup();
+  const survivor = {
+    ...documentThemeState(),
+    listeners: system.listenerCount,
+    olderConnected: older.isConnected,
+    newerConnected: newer.isConnected,
+  };
+  const survivorAcrossOsChanges = rootAcrossOsChanges(system);
+  finalCleanup();
+  const final = {
+    ...documentThemeState(),
+    listeners: system.listenerCount,
+    olderConnected: older.isConnected,
+    newerConnected: newer.isConnected,
+  };
+
+  olderCanvas.remove();
+  newerCanvas.remove();
+  localStorage.removeItem('spec-kitty-theme');
+  return {
+    beforeCleanup,
+    beforeCleanupAcrossOsChanges,
+    survivor,
+    survivorAcrossOsChanges,
+    final,
+  };
+};
+
+test.each([
+  {
+    order: 'older-first' as const,
+    survivingTheme: 'dark',
+    survivingPreference: 'dark',
+    listeners: 0,
+    olderConnected: false,
+    newerConnected: true,
+    survivorAcrossOsChanges: ['dark', 'dark'],
+  },
+  {
+    order: 'newer-first' as const,
+    survivingTheme: 'light',
+    survivingPreference: 'system',
+    listeners: 1,
+    olderConnected: true,
+    newerConnected: false,
+    survivorAcrossOsChanges: ['dark', 'light'],
+  },
+])('overlapping theme-story sessions restore ownership when cleaned $order', async (expected) => {
+  const states = await exerciseOverlappingThemeSessions(expected.order);
+
+  // The newer manual session owns the document: both connected controls show it, no System
+  // listener survives in manual mode, and an OS change cannot reach the root through the older
+  // story's control.
+  expect(states.beforeCleanup).toEqual({
+    theme: 'dark',
+    colorScheme: 'dark',
+    stored: 'dark',
+    listeners: 0,
+    preferences: ['dark', 'dark'],
+    olderConnected: true,
+    newerConnected: true,
+  });
+  expect(states.beforeCleanupAcrossOsChanges).toEqual(['dark', 'dark']);
+  expect(states.survivor).toEqual({
+    theme: expected.survivingTheme,
+    colorScheme: expected.survivingTheme,
+    stored: expected.survivingPreference,
+    listeners: expected.listeners,
+    olderConnected: expected.olderConnected,
+    newerConnected: expected.newerConnected,
+  });
+  expect(states.survivorAcrossOsChanges).toEqual(expected.survivorAcrossOsChanges);
+  expect(states.final).toEqual({
+    theme: 'baseline-theme',
+    colorScheme: 'light dark',
+    stored: 'baseline-preference',
+    listeners: 0,
+    olderConnected: false,
+    newerConnected: false,
+  });
+});
+
+test('a choice made inside an older story session is what that session restores', async () => {
+  const system = new SystemPreference(false);
+  globalThis.matchMedia = () => system;
+  const olderCanvas = document.createElement('div');
+  const newerCanvas = document.createElement('div');
+  document.body.append(olderCanvas, newerCanvas);
+
+  const cleanupOlder = isolateThemeStory({
+    parameters: { themePreference: 'system' },
+    canvasElement: olderCanvas,
+  });
+  render(renderOperationalStatus(OPERATIONAL_MODEL, { preference: 'system' }), olderCanvas);
+  const older = olderCanvas.querySelector<ThemeControl>('sk-theme-toggle')!;
+  await older.updateComplete;
+
+  const cleanupNewer = isolateThemeStory({
+    parameters: { themePreference: 'dark' },
+    canvasElement: newerCanvas,
+  });
+  render(renderOperationalStatus(OPERATIONAL_MODEL, { preference: 'dark' }), newerCanvas);
+  const newer = newerCanvas.querySelector<ThemeControl>('sk-theme-toggle')!;
+  await newer.updateComplete;
+
+  older.shadowRoot!.querySelector<HTMLInputElement>('input[value="light"]')!.click();
+  await older.updateComplete;
+  cleanupNewer();
+  await older.updateComplete;
+
+  expect(documentThemeState()).toEqual({ theme: 'light', colorScheme: 'light', stored: 'light' });
+  expect(older.preference).toBe('light');
+  expect(system.listenerCount).toBe(0);
+  cleanupOlder();
+  olderCanvas.remove();
+  newerCanvas.remove();
+  localStorage.removeItem('spec-kitty-theme');
+});
 
 /**
  * The claim in the criterion's own words: assembled FROM PUBLIC SURFACES. The `<dl>` and the

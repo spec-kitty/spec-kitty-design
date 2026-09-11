@@ -26,5 +26,6 @@ export * from "./SkSectionHeader.js";
 export * from "./SkSiteFooter.js";
 export * from "./SkStatusIndicator.js";
 export * from "./SkStub.js";
+export * from "./SkThemeToggle.js";
 export * from "./SkTimeSeriesChart.js";
 export * from "./SkTransitionMatrix.js";

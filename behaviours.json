@@ -203,6 +203,10 @@
         {
           "name": "sk-confirm-dialog",
           "file": "fixtures/elements-behaviour/src/sk-confirm-dialog.test.ts"
+        },
+        {
+          "name": "sk-theme-toggle",
+          "file": "fixtures/elements-behaviour/src/sk-theme-toggle.test.ts"
         }
       ]
     },
@@ -252,6 +256,10 @@
         {
           "name": "sk-confirm-dialog",
           "file": "fixtures/elements-behaviour/src/sk-confirm-dialog.test.ts"
+        },
+        {
+          "name": "sk-theme-toggle",
+          "file": "fixtures/elements-behaviour/src/sk-theme-toggle.test.ts"
         }
       ]
     },
@@ -297,6 +305,10 @@
         {
           "name": "sk-copy-field",
           "file": "fixtures/elements-behaviour/src/sk-copy-field.test.ts"
+        },
+        {
+          "name": "sk-theme-toggle",
+          "file": "fixtures/elements-behaviour/src/sk-theme-toggle.test.ts"
         }
       ]
     },
@@ -423,6 +435,10 @@
         {
           "name": "sk-pill-tag",
           "file": "fixtures/elements-behaviour/src/sk-pill-tag.test.ts"
+        },
+        {
+          "name": "sk-theme-toggle",
+          "file": "fixtures/elements-behaviour/src/sk-theme-toggle.test.ts"
         }
       ]
     },
@@ -481,6 +497,10 @@
         {
           "name": "sk-confirm-dialog",
           "file": "fixtures/elements-behaviour/src/sk-confirm-dialog.test.ts"
+        },
+        {
+          "name": "sk-theme-toggle",
+          "file": "fixtures/elements-behaviour/src/sk-theme-toggle.test.ts"
         }
       ]
     },
@@ -611,6 +631,10 @@
         {
           "name": "sk-confirm-dialog",
           "file": "fixtures/elements-behaviour/src/sk-confirm-dialog.test.ts"
+        },
+        {
+          "name": "sk-theme-toggle",
+          "file": "fixtures/elements-behaviour/src/sk-theme-toggle.test.ts"
         }
       ]
     },
@@ -720,6 +744,10 @@
         {
           "name": "sk-confirm-dialog",
           "file": "fixtures/elements-behaviour/src/sk-confirm-dialog.test.ts"
+        },
+        {
+          "name": "sk-theme-toggle",
+          "file": "fixtures/elements-behaviour/src/sk-theme-toggle.test.ts"
         }
       ]
     },

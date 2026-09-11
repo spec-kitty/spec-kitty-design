@@ -19,6 +19,13 @@
  */
 import type { Meta, StoryObj } from '@storybook/web-components';
 import { OPERATIONAL_MODEL, renderOperationalStatus } from './operational-status.js';
+import { isolateThemeStory } from '../theme-toggle/theme-story-environment.fixture.js';
+import type { ThemePreference } from '../theme-toggle/theme-preference.js';
+
+const themeParameters = (preference: ThemePreference, description: string) => ({
+  themePreference: preference,
+  docs: { description: { story: description } },
+});
 
 const meta = {
   title: 'Patterns/Operational Status',
@@ -36,26 +43,83 @@ const meta = {
       },
     },
   },
+  beforeEach: isolateThemeStory,
+  // The control is unbound, as the consumer guidance says an ordinary page authors it: each
+  // story's `themePreference` parameter is the stored preference `isolateThemeStory` seeds before
+  // rendering, so every state below — the manual ones included — is the stored choice the control
+  // resumes, not a `preference` override. No story here needs one.
   render: () => renderOperationalStatus(OPERATIONAL_MODEL),
 } satisfies Meta;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {};
+export const Default: Story = {
+  parameters: themeParameters('dark', 'The default operational composition resolved to Dark.'),
+};
 
 export const LightMode: Story = {
-  parameters: { backgrounds: { default: 'sk-light' } },
+  parameters: {
+    ...themeParameters('light', 'The required LightMode composition resolved on the document root.'),
+    backgrounds: { default: 'sk-light' },
+  },
   render: () => renderOperationalStatus(OPERATIONAL_MODEL, { light: true }),
 };
 
+export const SystemLight: Story = {
+  parameters: themeParameters(
+    'system',
+    'System preference under a light operating-system preference; browser tests emulate the media query.',
+  ),
+};
+
+export const SystemDark: Story = {
+  parameters: themeParameters(
+    'system',
+    'System preference under a dark operating-system preference; browser tests emulate the media query.',
+  ),
+};
+
+export const ManualLight: Story = {
+  parameters: themeParameters('light', 'Manual Light remains selected against a dark OS preference.'),
+};
+
+export const ManualDark: Story = {
+  parameters: themeParameters('dark', 'Manual Dark remains selected against a light OS preference.'),
+};
+
+export const Greyscale: Story = {
+  parameters: themeParameters(
+    'dark',
+    'Colour is removed while native checked state, visible labels, status text, and markers remain.',
+  ),
+  render: () => renderOperationalStatus(OPERATIONAL_MODEL, { presentation: 'greyscale' }),
+};
+
+export const ForcedColors: Story = {
+  parameters: themeParameters(
+    'system',
+    'Browser tests activate forced colours and verify the three labelled native choices remain operable.',
+  ),
+};
+
 /**
- * The compact sticky header (#182) and the auto-fit card grid at one column. The narrow
- * evidence #183's programme requirements ask every child for, taken over the composition
- * rather than over one element in isolation.
+ * The sticky header (#182), which returns to normal flow below 720px, and the auto-fit card grid
+ * at one column. The narrow evidence #183's programme requirements ask every child for, taken
+ * over the composition rather than over one element in isolation.
  */
 export const Narrow: Story = {
-  parameters: { viewport: { defaultViewport: 'mobile1' } },
+  parameters: {
+    ...themeParameters('dark', 'The theme control and operational cards reflow at a narrow viewport.'),
+    viewport: { defaultViewport: 'mobile1' },
+  },
+};
+
+export const Zoom200: Story = {
+  parameters: themeParameters(
+    'dark',
+    'A stable composition route for genuine headed-Chrome 100%/200% UI-zoom captures. The story itself applies no zoom or device-density emulation.',
+  ),
 };
 
 /**
@@ -66,6 +130,7 @@ export const Narrow: Story = {
  * the composition degrades by omitting a surface, not by substituting a placeholder for it.
  */
 export const WithoutBanner: Story = {
+  parameters: themeParameters('dark', 'The optional live-status region is omitted without a placeholder.'),
   render: () => renderOperationalStatus({ ...OPERATIONAL_MODEL, banner: null }),
 };
 
@@ -78,6 +143,7 @@ export const WithoutBanner: Story = {
  * "No data", never an interpolation.
  */
 export const CompleteSeries: Story = {
+  parameters: themeParameters('dark', 'Every time-series interval carries an observation.'),
   render: () =>
     renderOperationalStatus({
       ...OPERATIONAL_MODEL,
