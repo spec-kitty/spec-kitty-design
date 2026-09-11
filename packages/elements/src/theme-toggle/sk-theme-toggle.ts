@@ -46,7 +46,8 @@ const storage = (): ThemeStorage | undefined => {
  * Whether storage can currently answer a read. A denied `localStorage` getter throws here in
  * `storage()` already; this additionally catches a `Storage` instance that throws from
  * `getItem` itself (both are exercised by the theme fixture) without treating "no stored key" as
- * denial — that case is a normal, readable miss and must not fall back to dormant memory.
+ * denial — that case is a normal, readable miss. The DOM-free contract's `readThemePreference`
+ * deliberately collapses both into System, so this is the only place the two are told apart.
  */
 const canReadStorage = (store: ThemeStorage | undefined): boolean => {
   if (!store) return false;
@@ -71,21 +72,22 @@ type ThemeControl = (preference: ThemePreference) => void;
  * scope holds only a WeakMap of these, so importing the element stays DOM-free — the WeakMap key
  * ties a dormant coordinator's lifetime to the document, not to how many controls are connected.
  *
- * A dormant document — briefly zero connected controls — keeps its established preference, but
- * only as a fallback: a control connecting into an empty document prefers its OWN freshly-read
- * value whenever storage can actually answer that read, exactly as a genuinely fresh page load
- * would. Only when storage cannot be read at all does the dormant in-memory preference survive
- * the gap. The `#initialized` flag distinguishes a never-connected document (whose first control
- * always sets the preference, storage or no) from a dormant one, because `#controls.size === 0`
- * is true in both. Deleting the coordinator on the last disconnect was the defect this replaces —
- * a manual choice made while storage was denied was lost the moment the page briefly had zero
- * connected controls, because the next control's own storage-denied default (System) won instead.
+ * A dormant document — briefly zero connected controls — keeps its preference AND the stored value
+ * it last read or saved (`#stored`). A control joining an empty document re-reads storage at that
+ * moment, never the value it read when it was constructed, and adopts what it reads only when that
+ * differs from `#stored`: a fresh page, or another script's same-tab write. When storage cannot be
+ * read, or still holds exactly what the page last saw, it has nothing newer to say and the page's
+ * own preference resumes. That is what keeps a choice storage refused to save (quota, private
+ * mode) or to read across an SPA header remount. Two defects precede this rule: deleting the
+ * coordinator on the last disconnect lost a denied-storage choice outright, and trusting any
+ * readable storage lost a choice whose write had failed, because the stale stored value won.
  */
 class DocumentTheme {
   readonly #document: Document;
   readonly #controls = new Set<ThemeControl>();
   #preference: ThemePreference = 'system';
-  #initialized = false;
+  /** The stored preference this document last read or saved; `undefined` until one is known. */
+  #stored: ThemePreference | undefined;
   #media: MediaQueryList | undefined;
   #listenerMechanism: 'modern' | 'legacy' | undefined;
 
@@ -102,23 +104,32 @@ class DocumentTheme {
    *
    * One assigned a preference while disconnected always sets the document's preference. A control
    * joining a still-populated document always adopts the live, sibling-synchronized preference —
-   * a stronger signal than storage. A control joining an EMPTY document (never initialized, or
-   * dormant after every prior control disconnected) prefers its own freshly-read value, matching
-   * a genuine fresh load, unless storage cannot be read at all — then only the dormant in-memory
-   * preference survived the gap, and discarding it for a storage-denied System default is the M1
-   * defect this method fixes. A control connecting from empty re-queries `matchMedia` too, so a
-   * dormant System remount resolves against the environment's current state rather than whatever
-   * `MediaQueryList` the last connect captured.
+   * a stronger signal than storage. A control joining an EMPTY document resumes the document as
+   * the class comment describes, and re-queries `matchMedia`, so a dormant System remount resolves
+   * against the environment's current state rather than whatever `MediaQueryList` the last connect
+   * captured.
    */
   connect(control: ThemeControl, preference: ThemePreference, assigned: boolean): ThemePreference {
     const wasEmpty = this.#controls.size === 0;
     if (wasEmpty) this.#media = mediaQuery();
-    const first = !this.#initialized;
-    const useOwn = assigned || (wasEmpty && (first || canReadStorage(storage())));
-    this.#initialized = true;
     this.#controls.add(control);
-    this.#publish(useOwn ? preference : this.#preference, control);
+    this.#publish(assigned ? preference : wasEmpty ? this.#resume() : this.#preference, control);
     return this.#preference;
+  }
+
+  /** The preference an empty document resumes with: storage only when it has changed. */
+  #resume(): ThemePreference {
+    const store = storage();
+    if (!canReadStorage(store)) return this.#preference;
+    const stored = readThemePreference(store);
+    if (stored === this.#stored) return this.#preference;
+    this.#stored = stored;
+    return stored;
+  }
+
+  /** Save a user selection's settled preference, remembering it only if storage kept it. */
+  persist(preference: ThemePreference): void {
+    if (writeThemePreference(storage(), preference)) this.#stored = preference;
   }
 
   /** The last control's disconnect releases the System listener but keeps the preference. */
@@ -204,10 +215,11 @@ const documentThemeFor = (document: Document): DocumentTheme => {
  *
  * Every control connected to one document shows one shared preference: a choice on any of them
  * selects it on all of them, and exactly one System listener exists while that preference is
- * System. A control connecting alongside another control adopts the page's current preference; a
- * control connecting alone re-reads storage, unless storage cannot be read — then it adopts
- * whatever preference the page last showed. Either is skipped for a control given an explicit
- * `preference` before connecting, which always wins.
+ * System. A control connecting alongside another control adopts the page's current preference. A
+ * control connecting alone re-reads storage and adopts it if it changed since the page last read
+ * or saved it; otherwise, or when storage cannot be read, the page's own last preference resumes.
+ * Either is skipped for a control given an explicit `preference` before connecting, which always
+ * wins.
  *
  * @element sk-theme-toggle
  * @csspart control - The native fieldset containing the three radio choices.
@@ -281,6 +293,15 @@ export class SkThemeToggle extends LitElement {
     super.disconnectedCallback();
   }
 
+  override attributeChangedCallback(name: string, old: string | null, value: string | null): void {
+    super.attributeChangedCallback(name, old, value);
+    // Lit suppresses reflection while it converts an attribute, so an invalid string that became
+    // System would stay on an already-rendered host. Request the reflection that was skipped.
+    if (name === 'preference' && value !== null && !isThemePreference(value)) {
+      this.requestUpdate('preference', value);
+    }
+  }
+
   #show = (preference: ThemePreference): void => {
     const previous = this.#preference;
     if (previous === preference) return;
@@ -296,13 +317,15 @@ export class SkThemeToggle extends LitElement {
     const input = event.currentTarget as HTMLInputElement;
     if (!input.checked || !isThemePreference(input.value)) return;
     this.preference = input.value;
-    writeThemePreference(storage(), this.preference);
     const themeChangeEvent = new CustomEvent('sk-theme-change', {
       detail: Object.freeze({ preference: this.preference, theme: this.#resolvedTheme() }),
       bubbles: true,
       composed: true,
     });
     this.dispatchEvent(themeChangeEvent);
+    // Saved after dispatch: a synchronous handler may have reassigned `preference` to reject the
+    // choice, and the next load must restore what the page settled on, not the rejected value.
+    documentThemeFor(this.ownerDocument).persist(this.preference);
   };
 
   #hasLabels(): boolean {

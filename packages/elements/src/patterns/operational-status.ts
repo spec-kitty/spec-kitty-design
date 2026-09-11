@@ -84,6 +84,7 @@ export type OperationalModel = Readonly<{
 
 export type OperationalStatusOptions = Readonly<{
   light?: boolean;
+  /** An explicit initial override. Omit it so the stored preference governs, as consumers should. */
   preference?: ThemePreference;
   presentation?: 'default' | 'greyscale';
 }>;
@@ -363,12 +364,18 @@ const renderUnit = (unit: OperationalUnit): TemplateResult => html`
  * `options.light` adds `class="sk-light"` to the wrapper — NOT `data-theme="light"`,
  * which activates nothing on a wrapper because `@spec-kitty/tokens` anchors its light block
  * on `:root[data-theme="light"], .sk-light` and `:root` only matches `<html>` (#93).
+ *
+ * THE THEME CONTROL IS UNBOUND BY DEFAULT (#323), exactly as the consumer guidance says an
+ * ordinary page should author it: the control then resumes the stored preference the pre-paint
+ * bootstrap already applied. `options.preference` renders a `preference` attribute only when a
+ * caller deliberately overrides that initial value — an override that does not itself persist.
+ * An attribute rather than a property binding, because a property binding of `nothing` assigns
+ * `undefined`, and an assigned invalid value is itself an override (it normalizes to System).
  */
 export const renderOperationalStatus = (
   model: OperationalModel = OPERATIONAL_MODEL,
   options: OperationalStatusOptions = {},
 ): TemplateResult => {
-  const preference = options.preference ?? 'dark';
   const classes = [
     'sk-pattern-operations',
     options.light ? 'sk-light' : '',
@@ -387,7 +394,7 @@ export const renderOperationalStatus = (
         <sk-theme-toggle
           class="sk-pattern-operations__theme-control"
           data-theme-control
-          .preference=${preference}
+          preference=${options.preference ?? nothing}
           label="Theme"
           system-label="System"
           light-label="Light"

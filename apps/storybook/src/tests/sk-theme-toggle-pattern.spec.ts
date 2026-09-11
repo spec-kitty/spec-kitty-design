@@ -50,20 +50,75 @@ const contrast = (first: string, second: string): number => {
   return (lighter! + 0.05) / (darker! + 0.05);
 };
 
-const measuredTheme = async (page: Page, root: Locator) => {
+/** Relative luminance above which a surface reads as the light palette, below as the dark. */
+const LIGHT_SURFACE_LUMINANCE = 0.5;
+
+/**
+ * Measure one composed story against the theme it must have RESOLVED, not against itself.
+ *
+ * The expected theme is an input so a story can be wrong in only one direction: a ManualLight
+ * whose root says `light` while the surface still paints the dark palette fails the luminance
+ * side, where comparing root theme and contrast alone passed it (both palettes meet AA). Every
+ * ancestor carrying its own theme scope (`.sk-light` or a `data-theme` below `<html>`) is reported
+ * too, so a case can prove the ROOT attribute alone re-themed the surface (#93).
+ */
+const measuredTheme = async (_page: Page, root: Locator, expected: 'light' | 'dark') => {
   const state = await root.evaluate((element) => {
     const style = getComputedStyle(element);
+    const themeScopes: string[] = [];
+    for (let node: Element | null = element; node && node !== document.documentElement;
+      node = node.parentElement) {
+      if (node.classList.contains('sk-light') || node.hasAttribute('data-theme')) {
+        themeScopes.push(`${node.localName}.${Array.from(node.classList).join('.')}`);
+      }
+    }
     return {
       rootTheme: document.documentElement.dataset.theme,
       colorScheme: document.documentElement.style.colorScheme,
       foreground: style.color,
       background: style.backgroundColor,
       stored: localStorage.getItem('spec-kitty-theme'),
+      themeScopes,
     };
   });
-  expect(state.rootTheme).toBe(state.colorScheme);
+  expect({ rootTheme: state.rootTheme, colorScheme: state.colorScheme }).toEqual({
+    rootTheme: expected,
+    colorScheme: expected,
+  });
+  const surface = luminance(state.background);
+  const description = `${expected} surface ${state.background} has luminance ${surface.toFixed(3)}`;
+  if (expected === 'light') expect(surface, description).toBeGreaterThan(LIGHT_SURFACE_LUMINANCE);
+  else expect(surface, description).toBeLessThan(LIGHT_SURFACE_LUMINANCE);
   expect(contrast(state.foreground, state.background)).toBeGreaterThanOrEqual(4.5);
   return state;
+};
+
+/** The non-colour presentation of one choice's label: what still differs with colour removed. */
+const choicePresentation = (root: Locator, name: string) =>
+  root.getByRole('radio', { name }).evaluate((radio) => {
+    const choice = radio.closest('label');
+    if (!choice) throw new Error('theme choice has no label');
+    const style = getComputedStyle(choice);
+    return {
+      borderStyle: style.borderBlockEndStyle,
+      borderWidth: style.borderBlockEndWidth,
+      fontWeight: style.fontWeight,
+    };
+  });
+
+/** The checked choice must differ visibly from every unchecked one without relying on colour. */
+const expectCheckedStandsOutWithoutColour = async (root: Locator, checked: string) => {
+  const names = ['System', 'Light', 'Dark'];
+  const presentations = Object.fromEntries(await Promise.all(
+    names.map(async (name) => [name, await choicePresentation(root, name)] as const),
+  ));
+  const unchecked = names.filter((name) => name !== checked);
+  expect(presentations[unchecked[0]!], 'unchecked choices share one presentation')
+    .toEqual(presentations[unchecked[1]!]);
+  for (const name of unchecked) {
+    expect(presentations[checked], `${checked} (checked) against ${name} (unchecked)`)
+      .not.toEqual(presentations[name]);
+  }
 };
 
 const axeIsClean = async (page: Page, storyId: StoryId): Promise<void> => {
@@ -86,29 +141,29 @@ const axeIsClean = async (page: Page, storyId: StoryId): Promise<void> => {
 };
 
 test('Default and LightMode apply distinct root palettes with AA page contrast', async ({ page }) => {
-  const dark = await measuredTheme(page, await openStory(page, 'default'));
-  expect(dark.rootTheme).toBe('dark');
+  const dark = await measuredTheme(page, await openStory(page, 'default'), 'dark');
   expect(dark.stored).toBe('dark');
+  expect(dark.themeScopes).toEqual([]);
 
+  // LightMode carries the `.sk-light` wrapper as well as the root attribute, so it cannot on its
+  // own prove root resolution; the System-light and manual-Light cases below carry that proof.
   const lightRoot = await openStory(page, 'light-mode');
-  const light = await measuredTheme(page, lightRoot);
-  expect(light.rootTheme).toBe('light');
+  const light = await measuredTheme(page, lightRoot, 'light');
   expect(light.stored).toBe('light');
   await expect(lightRoot).toHaveClass(/\bsk-light\b/);
 
   expect(light.background).not.toBe(dark.background);
-  expect(luminance(dark.background)).toBeLessThan(0.5);
-  expect(luminance(light.background)).toBeGreaterThan(0.5);
 });
 
 for (const resolved of ['light', 'dark'] as const) {
   test(`System-${resolved} follows the emulated operating-system preference`, async ({ page }) => {
     await page.emulateMedia({ colorScheme: resolved });
     const root = await openStory(page, `system-${resolved}`);
-    const state = await measuredTheme(page, root);
+    const state = await measuredTheme(page, root, resolved);
 
-    expect(state.rootTheme).toBe(resolved);
     expect(state.stored).toBe('system');
+    // No wrapper scope: the root `data-theme` alone decides which palette the surface paints.
+    expect(state.themeScopes).toEqual([]);
     await expect(root.getByRole('radio', { name: 'System' })).toBeChecked();
   });
 }
@@ -116,12 +171,20 @@ for (const resolved of ['light', 'dark'] as const) {
 test('manual Light and Dark each override the opposing operating-system preference', async ({ page }) => {
   await page.emulateMedia({ colorScheme: 'dark' });
   let root = await openStory(page, 'manual-light');
-  expect((await measuredTheme(page, root)).rootTheme).toBe('light');
+  const light = await measuredTheme(page, root, 'light');
+  expect({ stored: light.stored, themeScopes: light.themeScopes }).toEqual({
+    stored: 'light',
+    themeScopes: [],
+  });
   await expect(root.getByRole('radio', { name: 'Light' })).toBeChecked();
 
   await page.emulateMedia({ colorScheme: 'light' });
   root = await openStory(page, 'manual-dark');
-  expect((await measuredTheme(page, root)).rootTheme).toBe('dark');
+  const dark = await measuredTheme(page, root, 'dark');
+  expect({ stored: dark.stored, themeScopes: dark.themeScopes }).toEqual({
+    stored: 'dark',
+    themeScopes: [],
+  });
   await expect(root.getByRole('radio', { name: 'Dark' })).toBeChecked();
 });
 
@@ -153,6 +216,9 @@ test('greyscale keeps the selected state understandable from text and native sem
   await expect(root.getByRole('radio', { name: 'Dark' })).toBeChecked();
   await expect(root.getByRole('radio', { name: 'System' })).toHaveCount(1);
   await expect(root.getByRole('radio', { name: 'Light' })).toHaveCount(1);
+  // The accessibility tree is not what a sighted user sees: with colour removed, the checked
+  // choice must still be visibly different from the unchecked ones in the shipped CSS.
+  await expectCheckedStandsOutWithoutColour(root, 'Dark');
 });
 
 test('forced colours keep the three-state control operable while root preference still resolves', async ({
@@ -191,6 +257,8 @@ test('forced colours keep the three-state control operable while root preference
   expect(forcedPresentation.forcedColorAdjust).toBe('auto');
   expect(forcedPresentation.color).toBe(forcedPresentation.systemColor);
   expect(forcedPresentation.background).toBe(forcedPresentation.systemBackground);
+  // Forced colours flatten authored colour, so the selection must survive as shape alone.
+  await expectCheckedStandsOutWithoutColour(root, 'Light');
   expect(await page.evaluate(() => document.documentElement.dataset.theme)).toBe('light');
   expect(await page.evaluate((key) => localStorage.getItem(key), STORAGE_KEY)).toBe('light');
 });

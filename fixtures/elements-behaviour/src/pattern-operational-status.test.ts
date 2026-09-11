@@ -171,6 +171,42 @@ test('manual light and dark resolve on the root with mutually exclusive luminanc
   expect(luminances.get('light')).toBeGreaterThan(0.5);
 });
 
+/**
+ * The exemplar follows the consumer guidance it ships beside: an ordinary composition omits
+ * `preference`, so the stored choice — the one the pre-paint bootstrap already applied — governs.
+ * Only a caller that passes a preference overrides it. The bare control is connected against a
+ * different stored value first, so the composition's own connect sees storage change and the
+ * assertion cannot depend on what an earlier test left the dormant document holding.
+ */
+test('the composition leaves the theme preference to storage unless the caller passes one', async () => {
+  const states = new Map<string, unknown>();
+  for (const [name, options] of [
+    ['default', {}],
+    ['override', { preference: 'dark' as const }],
+  ] as const) {
+    localStorage.setItem('spec-kitty-theme', 'dark');
+    const bare = document.createElement('sk-theme-toggle') as Updatable;
+    document.body.append(bare);
+    await bare.updateComplete;
+    bare.remove();
+
+    localStorage.setItem('spec-kitty-theme', 'light');
+    const host = document.createElement('div');
+    document.body.append(host);
+    render(renderOperationalStatus(OPERATIONAL_MODEL, options), host);
+    const toggle = host.querySelector<ThemeControl>('sk-theme-toggle')!;
+    await toggle.updateComplete;
+    states.set(name, { preference: toggle.preference, root: document.documentElement.dataset.theme });
+    host.remove();
+  }
+  localStorage.removeItem('spec-kitty-theme');
+
+  expect(Object.fromEntries(states)).toEqual({
+    default: { preference: 'light', root: 'light' },
+    override: { preference: 'dark', root: 'dark' },
+  });
+});
+
 test('System follows the media preference and releases its listener on a manual selection', async () => {
   const system = new SystemPreference(true);
   globalThis.matchMedia = () => system;

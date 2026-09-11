@@ -282,12 +282,45 @@ const labelled = (element: ThemeToggle): ThemeToggle => {
   return element;
 };
 
-beforeEach(() => {
+const STORAGE_KEY = 'spec-kitty-theme';
+
+const clearDocumentTheme = (): void => {
   document.body.replaceChildren();
   document.documentElement.removeAttribute('data-theme');
   document.documentElement.style.removeProperty('color-scheme');
-  localStorage.removeItem('spec-kitty-theme');
+  localStorage.removeItem(STORAGE_KEY);
+};
+
+/**
+ * Put this document's theme coordinator into the state of a document no control has joined yet.
+ *
+ * The coordinator deliberately outlives its last control, so without this a test inherited the
+ * preference the previous test left behind — a denied-storage test once started already Dark,
+ * which made its `choose(…, 'dark')` click an already-checked radio and exercise no selection.
+ * The reset goes through the public contract only, in two connects that each pin one half of the
+ * dormant state. A preference assigned before connecting always wins, so the first makes the
+ * page System whatever storage says. A control joining an empty document adopts storage whenever
+ * it differs from the value the page last read or saved, so the second — against a seeded System —
+ * leaves that remembered value System too. The page is then on System and in step with storage:
+ * exactly a fresh document's behaviour. Pinning the preference by assignment rather than through
+ * storage keeps a mutation of the storage path from leaking one test's preference into the next.
+ */
+const resetDocumentTheme = async (): Promise<void> => {
+  for (const step of ['assigned', 'stored'] as const) {
+    localStorage.setItem(STORAGE_KEY, 'system');
+    const control = document.createElement('sk-theme-toggle') as ThemeToggle;
+    if (step === 'assigned') control.preference = 'system';
+    document.body.append(control);
+    await (control.updateComplete ?? Promise.resolve());
+    control.remove();
+  }
+  clearDocumentTheme();
+};
+
+beforeEach(async () => {
+  clearDocumentTheme();
   installMedia(false);
+  await resetDocumentTheme();
 });
 
 afterEach(() => {
@@ -451,6 +484,7 @@ test('storage exceptions preserve current-page selection and root application', 
   installMedia(false);
   const element = await mount();
 
+  // The starting state is guaranteed by resetDocumentTheme(), not by test order.
   expect(element.preference).toBe('system');
   await choose(element, 'dark');
   expect(element.preference).toBe('dark');
@@ -709,6 +743,7 @@ test('[SC-012] with storage denied a newly connected control adopts the current-
   });
   installMedia(false);
   const first = await mount();
+  expect(first.preference).toBe('system');
   await choose(first, 'dark');
 
   const second = await mount();
@@ -727,6 +762,7 @@ test('[SC-012] a manual preference survives a zero-control gap when storage is d
   });
   installMedia(false);
   const first = await mount();
+  expect(first.preference).toBe('system');
   await choose(first, 'dark');
   expect(rootTheme()).toEqual({ theme: 'dark', colorScheme: 'dark' });
   expect(media.listenerCount).toBe(0);
@@ -741,31 +777,167 @@ test('[SC-012] a manual preference survives a zero-control gap when storage is d
 });
 
 test('[SC-012] a System preference reconnects to the live OS state after a zero-control gap', async () => {
-  installMedia(false);
+  const before = installMedia(false);
   const first = await mount();
-  expect(media.listenerCount).toBe(1);
+  expect(before.listenerCount).toBe(1);
   expect(rootTheme()).toEqual({ theme: 'light', colorScheme: 'light' });
 
   first.remove();
-  expect(media.listenerCount).toBe(0);
-  media.setDark(true);
+  expect(before.listenerCount).toBe(0);
 
+  // A FRESH media list, not the old one flipped: a remount that kept the MediaQueryList it
+  // captured before the gap would still read the old list's light result here.
+  const after = installMedia(true);
   const second = await mount();
   expect(second.preference).toBe('system');
-  expect(media.listenerCount).toBe(1);
+  expect([before.listenerCount, after.listenerCount]).toEqual([0, 1]);
   expect(rootTheme()).toEqual({ theme: 'dark', colorScheme: 'dark' });
 
-  media.setDark(false);
+  after.setDark(false);
   expect(rootTheme()).toEqual({ theme: 'light', colorScheme: 'light' });
 });
 
-test('[SC-012] a synchronous change-handler revert leaves exactly the reverted radio checked', async () => {
-  const element = await mount();
-  await choose(element, 'dark');
+const denyWrites = () =>
+  vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+    throw new DOMException('full', 'QuotaExceededError');
+  });
 
-  // Reads the element's own live preference, not the event's `detail` — the latter is SC-006/
-  // SC-007/SC-008's mutation surface, and coupling this trigger to it would make an unrelated
-  // event-contract mutation collaterally red this test.
+const pageState = (element: ThemeToggle) => ({
+  preference: element.preference,
+  checked: checkedValues(element),
+  root: rootTheme(),
+  stored: localStorage.getItem(STORAGE_KEY),
+});
+
+test('[SC-012] a choice storage refused to save survives a zero-control gap while reads still work', async () => {
+  const write = denyWrites();
+  const first = await mount();
+  expect(first.preference).toBe('system');
+  await choose(first, 'dark');
+  expect(write).toHaveBeenCalledWith(STORAGE_KEY, 'dark');
+
+  first.remove();
+  const second = await mount();
+  expect(pageState(second)).toEqual({
+    preference: 'dark',
+    checked: ['dark'],
+    root: { theme: 'dark', colorScheme: 'dark' },
+    stored: null,
+  });
+});
+
+test('[SC-012] a choice made after storage fills survives a gap instead of the last saved one', async () => {
+  const first = await mount();
+  expect(first.preference).toBe('system');
+  await choose(first, 'light');
+  expect(localStorage.getItem(STORAGE_KEY)).toBe('light');
+
+  denyWrites();
+  await choose(first, 'dark');
+  first.remove();
+
+  const second = await mount();
+  expect(pageState(second)).toEqual({
+    preference: 'dark',
+    checked: ['dark'],
+    root: { theme: 'dark', colorScheme: 'dark' },
+    stored: 'light',
+  });
+});
+
+test('[SC-012] a choice made after storage stops answering survives a gap instead of the last saved one', async () => {
+  const first = await mount();
+  expect(first.preference).toBe('system');
+  await choose(first, 'light');
+  expect(localStorage.getItem(STORAGE_KEY)).toBe('light');
+
+  vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
+    throw new DOMException('blocked', 'SecurityError');
+  });
+  denyWrites();
+  await choose(first, 'dark');
+  first.remove();
+
+  const second = await mount();
+  expect({ preference: second.preference, checked: checkedValues(second), root: rootTheme() })
+    .toEqual({ preference: 'dark', checked: ['dark'], root: { theme: 'dark', colorScheme: 'dark' } });
+});
+
+test('[SC-012] after adopting another script\'s write, an unsaved choice still survives the next gap', async () => {
+  const first = await mount();
+  expect(first.preference).toBe('system');
+  await choose(first, 'light');
+  await choose(first, 'system');
+  expect(localStorage.getItem(STORAGE_KEY)).toBe('system');
+  first.remove();
+
+  localStorage.setItem(STORAGE_KEY, 'dark');
+  const adopting = await mount();
+  expect(adopting.preference).toBe('dark');
+
+  denyWrites();
+  await choose(adopting, 'light');
+  adopting.remove();
+
+  const second = await mount();
+  expect(pageState(second)).toEqual({
+    preference: 'light',
+    checked: ['light'],
+    root: { theme: 'light', colorScheme: 'light' },
+    stored: 'dark',
+  });
+});
+
+test('[SC-012] a detached control reconnecting into an empty document shows the choice saved since it left', async () => {
+  const stale = await mount();
+  expect(stale.preference).toBe('system');
+  stale.remove();
+
+  const other = await mount();
+  await choose(other, 'dark');
+  other.remove();
+
+  document.body.append(stale);
+  await settled(stale);
+  expect(pageState(stale)).toEqual({
+    preference: 'dark',
+    checked: ['dark'],
+    root: { theme: 'dark', colorScheme: 'dark' },
+    stored: 'dark',
+  });
+});
+
+test.each(['a new control', 'the same control reattached'] as const)(
+  '[SC-012] a same-tab storage write made while the document is dormant wins for %s',
+  async (joiner) => {
+    const first = await mount();
+    expect(first.preference).toBe('system');
+    await choose(first, 'dark');
+    first.remove();
+
+    localStorage.setItem(STORAGE_KEY, 'light');
+    const control = joiner === 'a new control' ? await mount() : first;
+    if (control === first) {
+      document.body.append(first);
+      await settled(first);
+    }
+    expect(pageState(control)).toEqual({
+      preference: 'light',
+      checked: ['light'],
+      root: { theme: 'light', colorScheme: 'light' },
+      stored: 'light',
+    });
+  },
+);
+
+/**
+ * Choose Light while a synchronous `sk-theme-change` handler reverts the preference to Dark.
+ *
+ * Reads the element's own live preference, not the event's `detail` — the latter is SC-006/
+ * SC-007/SC-008's mutation surface, and coupling this trigger to it would make an unrelated
+ * event-contract mutation collaterally red these tests.
+ */
+const chooseLightAgainstARevertToDark = async (element: ThemeToggle): Promise<void> => {
   let reverted = false;
   const revertOnce = () => {
     if (!reverted && element.preference === 'light') {
@@ -776,9 +948,30 @@ test('[SC-012] a synchronous change-handler revert leaves exactly the reverted r
   element.addEventListener('sk-theme-change', revertOnce);
   await choose(element, 'light');
   element.removeEventListener('sk-theme-change', revertOnce);
+  expect(reverted, 'the revert handler must have run').toBe(true);
+};
+
+test('[SC-012] a synchronous change-handler revert leaves exactly the reverted radio checked', async () => {
+  const element = await mount();
+  await choose(element, 'dark');
+
+  await chooseLightAgainstARevertToDark(element);
 
   expect(element.preference).toBe('dark');
   expect(checkedValues(element)).toEqual(['dark']);
+});
+
+test('[SC-012] a synchronous change-handler revert is what storage keeps for the next load', async () => {
+  const element = await mount();
+  await choose(element, 'dark');
+  expect(localStorage.getItem(STORAGE_KEY)).toBe('dark');
+
+  await chooseLightAgainstARevertToDark(element);
+
+  expect({ stored: localStorage.getItem(STORAGE_KEY), root: rootTheme().theme }).toEqual({
+    stored: 'dark',
+    root: 'dark',
+  });
 });
 
 test('[SC-010] a connected invalid markup preference attribute canonicalizes to System', async () => {
@@ -788,6 +981,24 @@ test('[SC-010] a connected invalid markup preference attribute canonicalizes to 
   expect(element.getAttribute('preference')).toBe('system');
   expect(checkedValues(element)).toEqual(['system']);
 });
+
+test.each(['system', 'light'] as const)(
+  '[SC-010] an invalid attribute written onto a rendered %s control canonicalizes to System',
+  async (start) => {
+    const element = await mount();
+    if (start !== 'system') await choose(element, start);
+    expect(element.getAttribute('preference')).toBe(start);
+
+    element.setAttribute('preference', 'sepia');
+    await settled(element);
+    expect({
+      preference: element.preference,
+      attribute: element.getAttribute('preference'),
+      checked: checkedValues(element),
+      root: rootTheme().theme,
+    }).toEqual({ preference: 'system', attribute: 'system', checked: ['system'], root: 'light' });
+  },
+);
 
 test.each(['sepia', '', 'SYSTEM', null, undefined, 42])(
   'a direct invalid preference assignment (%s) normalizes to System at the property boundary',

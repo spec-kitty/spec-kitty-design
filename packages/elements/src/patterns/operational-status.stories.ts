@@ -44,7 +44,11 @@ const meta = {
     },
   },
   beforeEach: isolateThemeStory,
-  render: () => renderOperationalStatus(OPERATIONAL_MODEL, { preference: 'dark' }),
+  // The control is unbound, as the consumer guidance says an ordinary page authors it: each
+  // story's `themePreference` parameter is the stored preference `isolateThemeStory` seeds before
+  // rendering, so every state below — the manual ones included — is the stored choice the control
+  // resumes, not a `preference` override. No story here needs one.
+  render: () => renderOperationalStatus(OPERATIONAL_MODEL),
 } satisfies Meta;
 
 export default meta;
@@ -59,7 +63,7 @@ export const LightMode: Story = {
     ...themeParameters('light', 'The required LightMode composition resolved on the document root.'),
     backgrounds: { default: 'sk-light' },
   },
-  render: () => renderOperationalStatus(OPERATIONAL_MODEL, { light: true, preference: 'light' }),
+  render: () => renderOperationalStatus(OPERATIONAL_MODEL, { light: true }),
 };
 
 export const SystemLight: Story = {
@@ -67,7 +71,6 @@ export const SystemLight: Story = {
     'system',
     'System preference under a light operating-system preference; browser tests emulate the media query.',
   ),
-  render: () => renderOperationalStatus(OPERATIONAL_MODEL, { preference: 'system' }),
 };
 
 export const SystemDark: Story = {
@@ -75,17 +78,14 @@ export const SystemDark: Story = {
     'system',
     'System preference under a dark operating-system preference; browser tests emulate the media query.',
   ),
-  render: () => renderOperationalStatus(OPERATIONAL_MODEL, { preference: 'system' }),
 };
 
 export const ManualLight: Story = {
   parameters: themeParameters('light', 'Manual Light remains selected against a dark OS preference.'),
-  render: () => renderOperationalStatus(OPERATIONAL_MODEL, { preference: 'light' }),
 };
 
 export const ManualDark: Story = {
   parameters: themeParameters('dark', 'Manual Dark remains selected against a light OS preference.'),
-  render: () => renderOperationalStatus(OPERATIONAL_MODEL, { preference: 'dark' }),
 };
 
 export const Greyscale: Story = {
@@ -93,10 +93,7 @@ export const Greyscale: Story = {
     'dark',
     'Colour is removed while native checked state, visible labels, status text, and markers remain.',
   ),
-  render: () => renderOperationalStatus(OPERATIONAL_MODEL, {
-    preference: 'dark',
-    presentation: 'greyscale',
-  }),
+  render: () => renderOperationalStatus(OPERATIONAL_MODEL, { presentation: 'greyscale' }),
 };
 
 export const ForcedColors: Story = {
@@ -104,7 +101,6 @@ export const ForcedColors: Story = {
     'system',
     'Browser tests activate forced colours and verify the three labelled native choices remain operable.',
   ),
-  render: () => renderOperationalStatus(OPERATIONAL_MODEL, { preference: 'system' }),
 };
 
 /**
@@ -117,7 +113,6 @@ export const Narrow: Story = {
     ...themeParameters('dark', 'The theme control and operational cards reflow at a narrow viewport.'),
     viewport: { defaultViewport: 'mobile1' },
   },
-  render: () => renderOperationalStatus(OPERATIONAL_MODEL, { preference: 'dark' }),
 };
 
 export const Zoom200: Story = {
@@ -125,7 +120,6 @@ export const Zoom200: Story = {
     'dark',
     'A stable composition route for genuine headed-Chrome 100%/200% UI-zoom captures. The story itself applies no zoom or device-density emulation.',
   ),
-  render: () => renderOperationalStatus(OPERATIONAL_MODEL, { preference: 'dark' }),
 };
 
 /**

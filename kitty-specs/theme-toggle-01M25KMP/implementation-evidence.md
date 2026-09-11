@@ -655,3 +655,273 @@ also killed PID 477996, an unrelated session's own full mutation sweep against a
 (`/home/jeroennouws/dev/spec-kitty-design-missions/304`, working on issue #380, mid-flight since
 02:38). No file in that checkout was touched — only the process was killed. The operator should
 tell whoever owns that session so it can be re-run; this seat had no way to notify it directly.
+
+### Pass-7 remediation (Op `01M275TD2FV77BEVH8D65XW4DC`)
+
+Governed by Op `01M275TD2FV77BEVH8D65XW4DC`. The seat was a fresh Claude Code `frontend-freddy` on
+Opus, in worktree `.claude/worktrees/theme-toggle-pass6-remediation` on branch
+`worktree-theme-toggle-pass7-remediation`. It started from clean mission head
+`6c58764c1b582b757b5b4e9d6dcb11d624041281`. Changes are left uncommitted.
+
+#### Red first, against the unmodified pass-6 production source
+
+At these runs only the two test files had been edited.
+
+`npx vitest run --project browser fixtures/elements-behaviour/src/sk-theme-toggle.test.ts` gave
+**8 failed / 47 passed (55)**:
+
+| Finding | Test that failed | Assertion |
+| --- | --- | --- |
+| F1(a) | `[SC-012] a choice storage refused to save survives a zero-control gap while reads still work` | `AssertionError: expected { preference: 'system', …(3) } to deeply equal { preference: 'dark', …(3) }` (stored `null`) |
+| F1(a) | `[SC-012] a choice made after storage fills survives a gap instead of the last saved one` | `AssertionError: expected { preference: 'light', …(3) } to deeply equal { preference: 'dark', …(3) }` (stored `"light"`) |
+| F1(a) | `[SC-012] after adopting another script's write, an unsaved choice still survives the next gap` | `AssertionError: expected { preference: 'dark', …(3) } to deeply equal { preference: 'light', …(3) }` |
+| F1(b) | `[SC-012] a detached control reconnecting into an empty document shows the choice saved since it left` | `AssertionError: expected { preference: 'system', …(3) } to deeply equal { preference: 'dark', …(3) }` (stored `"dark"`) |
+| F1 (docs claim) | `[SC-012] a same-tab storage write made while the document is dormant wins for the same control reattached` | `AssertionError: expected { preference: 'dark', …(3) } to deeply equal { preference: 'light', …(3) }` |
+| F2 | `[SC-012] a synchronous change-handler revert is what storage keeps for the next load` | `AssertionError: expected { stored: 'light', root: 'dark' } to deeply equal { stored: 'dark', root: 'dark' }` |
+| F8 | `[SC-010] an invalid attribute written onto a rendered system control canonicalizes to System`, and the same test for a rendered `light` control | Both: `expected { preference: 'system', …(3) } to deeply equal { preference: 'system', …(3) }`, diff `- "attribute": "system"` / `+ "attribute": "sepia"` |
+
+These tests passed against the pass-6 code, and are kept as seam coverage rather than claimed as
+reproductions:
+
+- the `a new control` same-tab variant, because pass 6 already re-read storage for a fresh
+  element;
+- `[SC-012] a choice made after storage stops answering survives a gap instead of the last saved
+  one`, because pass 6 already kept dormant memory when reads throw;
+- the rewritten System-reconnect test, because pass 6 already re-queried matchMedia.
+
+For F9, `npx vitest run --project browser fixtures/elements-behaviour/src/pattern-operational-status.test.ts`
+gave **1 failed / 13 passed (14)**. `the composition leaves the theme preference to storage unless
+the caller passes one` received `default: { preference: "dark", root: "dark" }` where
+`{ preference: "light", root: "light" }` was expected, because the exemplar bound `.preference=${'dark'}`.
+
+For F4(b), the System-reconnect test used to reuse one `FakeMediaQueryList`. It now installs a
+fresh list, dark this time, between remove and remount, so a remount that kept the old light list
+resolves light and fails.
+
+#### Implementation (`packages/elements/src/theme-toggle/sk-theme-toggle.ts`)
+
+- **F1.** `DocumentTheme` replaces `#initialized` with `#stored`: the stored preference this
+  document last read or saved, `undefined` until one is known.
+  - `connect()` publishes one of three values:
+    - the assigned preference, when a preference was assigned before connect;
+    - the live preference, when the document is still populated;
+    - `#resume()`, when the document is empty.
+  - `#resume()` returns the dormant preference in two cases: when `canReadStorage()` fails, and
+    when `readThemePreference()` equals `#stored`. Otherwise it records the read and adopts it.
+  - A never-joined document falls out of the same rule. `#stored` is `undefined`, so any readable
+    value is adopted; unreadable storage keeps the default System.
+  - The joining control's constructor-time value is no longer used on an empty document.
+- **F2.** `#select` dispatches `sk-theme-change` first and then calls
+  `documentThemeFor(this.ownerDocument).persist(this.preference)`, which writes once.
+  `persist()` records `#stored` only when `writeThemePreference()` returns `true`. Its boolean was
+  previously discarded.
+- **F8.** An `attributeChangedCallback` override calls `super` and then, for a non-null invalid
+  `preference` value, calls `this.requestUpdate('preference', value)`. Lit sets
+  `__reflectingProperty` during attribute conversion, which suppressed the reflection. The
+  requested update reflects `system` on the next render.
+- The element JSDoc, and therefore the manifest, React and Vue description text, now states the
+  resume rule.
+- **F9 (`packages/elements/src/patterns/operational-status.ts` and its stories).** The control is
+  unbound by default, and `preference=${options.preference ?? nothing}` renders an attribute only
+  for an explicit override.
+  - It is an attribute binding rather than a property binding because a property binding of
+    `nothing` assigns `undefined`, and an assigned invalid value is itself an override: it
+    normalizes to System.
+  - Every story now renders unbound. Each state, the manual ones included, is the stored preference
+    the story's `themePreference` parameter seeds.
+- **F6.** Not folded; see below.
+
+#### Tests (`fixtures/elements-behaviour/src/sk-theme-toggle.test.ts`)
+
+- F3: a `resetDocumentTheme()` `beforeEach` pins both halves of the dormant state through the
+  public contract.
+  - An assigned System at connect pins the preference.
+  - A seeded-System connect pins the remembered stored value.
+- F3 starting-state assertions:
+  - the two denied-storage tests assert `system` before they choose Dark, so each choice is now a
+    real selection;
+  - the test that expects `toBe('system')` is now order-independent;
+  - every new test asserts its start.
+- New `[SC-012]` tests: the write-denied probe, filled-quota after a saved choice, reads stop
+  answering after a saved choice, adopting another script's write, the stale detached instance,
+  same-tab write while dormant (both variants), and the F2 storage-keeps-the-revert test.
+- New `[SC-010]` tests: the rendered-attribute canonicalization cases.
+- The F4(b) fresh-media reconnect test.
+- The F9 test in `pattern-operational-status.test.ts`. It first connects a bare control against
+  stored Dark so that the composition's connect sees storage change, independent of test order.
+
+#### Playwright (`apps/storybook/src/tests/sk-theme-toggle-pattern.spec.ts`)
+
+- **F7.** `measuredTheme(page, root, expected)` asserts the root `data-theme` and `color-scheme`
+  equal the expected theme. It asserts which side of the 0.5 luminance threshold the surface falls
+  on, and keeps AA contrast. It also reports `themeScopes`: every `.sk-light` or nested
+  `data-theme` ancestor.
+  - Default, LightMode, System-light, System-dark, manual Light and manual Dark all pass their
+    expected theme.
+  - System-light, System-dark, manual Light, manual Dark and Default require empty `themeScopes`,
+    so the root attribute alone re-themes the surface.
+  - LightMode is recorded as the wrapper-confounded case.
+- **F5.** `expectCheckedStandsOutWithoutColour()` compares the checked label's
+  `border-block-end-style`, `border-block-end-width` and `font-weight` with each unchecked label.
+  The two unchecked labels must match each other, and the checked one must differ from both. It
+  runs on the Greyscale story (Dark checked) and under forced colours (Light checked).
+  `packages/styles/src/theme-toggle/sk-theme-toggle.css` was not changed, because the assertion
+  passed against the shipped sheet.
+
+#### F7 and F5 red-first, by probe
+
+Neither finding changes production, so red-first is a demonstration that the new assertions
+discriminate. Each probe was applied, Storybook rebuilt, and the files restored and verified
+byte-identical (sha256); Storybook was then rebuilt clean.
+
+- **Probe 1 was invalid, and it is recorded as not being evidence.** It disabled the root light
+  selector in `packages/tokens/src/tokens.css`. `tokens:build` refused the edit, because
+  `scripts/build-tokens-css.mjs` requires exactly one authored
+  `:root[data-theme="light"], .sk-light` block. The Storybook build therefore exited 130, and both
+  specs ran against the old build and passed.
+- **Probe 2 was valid.** It made two temporary changes:
+  - A composition rule, `:root[data-theme="light"] .sk-pattern-operations:not(.sk-light) {
+    color: #F8F5EC; background: #0D0E11; }`. This is root-says-light-but-the-surface-stays-dark,
+    the #93 failure mode, and it leaves the `.sk-light` LightMode alone.
+  - The checked choice's non-colour cues were removed from the CSS: `border-style`,
+    `border-width` and `font-weight`, and the forced-colours `border-block-end-style` and
+    `border-block-end-width`.
+- Results in Chromium:
+  - **Old HEAD spec: 1 failed, 11 passed.** The SC-004 cases (System-light, manual Light/Dark),
+    greyscale and forced-colours all passed. Only the axe test failed: it visits `system-light`,
+    and the probe's dark surface raised contrast violations there.
+  - **New spec: 5 failed, 7 passed.**
+    - `System-light …` and `manual Light and Dark …` failed with `light surface rgb(13, 14, 17)
+      has luminance 0.004`.
+    - `greyscale …` failed with `Dark (checked) against System (unchecked)`.
+    - `forced colours …` failed with `Light (checked) against System (unchecked)`.
+    - The same axe test failed.
+
+#### Green
+
+- Focused theme browser file: 55/55. The pattern file: 14/14 (69/69 together).
+- Node: `tests/node/theme-preference-contract.test.ts` 10/10 and
+  `tests/node/theme-root-barrel.test.ts` 1/1.
+- `npm test` with `FORCE_COLOR` and `NO_COLOR` unset, on the final tree: **55 files / 730 tests**
+  (node 58, chromium 672), zero skipped, with the suite floor satisfied.
+- `NX_SKIP_NX_CACHE=true node scripts/typecheck-all.mjs`: 5/5 projects.
+- `npm run quality:all`: 0 errors and 32 `security/detect-object-injection` warnings. One was
+  introduced by this pass, at `pattern-operational-status.test.ts:199`, and was fixed by using a
+  `Map`. Direct eslint of both touched fixture files then reported nothing, and every remaining
+  warning is in a file this pass did not modify.
+- Regenerated: `npx nx run elements:build --skip-nx-cache`,
+  `npx nx run elements:analyze --skip-nx-cache`, `node scripts/build-react-wrappers.mjs` and
+  `node scripts/build-vue-types.mjs`. The only derived drift is the JSDoc description in
+  `custom-elements.json`, `vue.d.ts` and `packages/react/src/SkThemeToggle.d.ts`.
+- `P="$(node scripts/release-graph.mjs --projects)"` (`tokens,styles,elements`), then
+  `npx nx run-many --target=build --projects="$P" --skip-nx-cache`, then
+  `node scripts/measure-elements-sizes.mjs` rewrote `SIZES.md`, and `--check` reports it up to
+  date. `packages/tokens/dist/token-catalogue.json` did not change.
+- Checks, all exit 0:
+  - generator checks: `build-theme-bootstrap.mjs --check`, `build-element-markup.mjs --check`
+    (11), `build-react-wrappers.mjs --check` (65 files, 31 elements, two runs byte-identical),
+    `build-vue-types.mjs --check` (31), `build-elements-css.mjs --check` (31);
+  - manifest and composition: `check-manifest-content.mjs` (139 surfaces, 31 elements),
+    `check-pattern-composition.mjs` (9 fixtures, 256 inline rules, 22 tags, 142-part ratchet);
+  - imports and Vue types: `check-behaviour-fixture-imports.mjs` (35),
+    `check-vue-template-types.mjs`, `check-vue-packed-types.mjs`;
+  - entries and contract: `check-elements-entries.mjs` (31),
+    `check-component-public-contract.mjs --selftest` (6/6);
+  - stories and parts: `check-story-theme-wrapper.mjs` (70 story files, no new inert wrapper),
+    `check-part-ratchet.mjs` (142);
+  - release and load: `check-release-graph.mjs` (4 packages), `check-offline-load.mjs` (31/31
+    from the packed tarballs, zero off-machine requests);
+  - wiring and CSS: `check-gate-wiring.mjs`, `check-adopted-css-boundaries.mjs`,
+    `check-element-css-hygiene.mjs`, `check-component-token-literals.mjs --selftest` (27/27).
+- Storybook: `node scripts/build-storybook-with-budget.mjs`, about 9 s against the 180 s ceiling.
+  Playwright with `STORYBOOK_PORT=6392`, Chromium and Firefox,
+  `sk-theme-toggle-pattern.spec.ts` + `theme-no-js.spec.ts`: **25 passed, 3 skipped**. The skips
+  are the Chromium-owned forced-colours, HiDPI and axe cases in Firefox.
+- `git diff --check`: clean.
+
+#### Arm record
+
+`mutations.json` goes from 263 to 272 arms. All arms reuse existing `(id, subject)` pairs, so no
+behaviour id was minted.
+
+Each arm was applied in place with a single-arm prover. The prover reproduces `suite-selftest.mjs`'s
+verdict: the named `[id]` test in `subject` fails, and no other `[SC-NNN]` test fails. It ran
+`vitest run --project browser` over both related subject files: `sk-theme-toggle.test.ts` and
+`pattern-operational-status.test.ts`, 69 tests. Afterwards it restored the file and compared
+sha256 hashes, and every arm was restored byte-identical.
+
+The "failed" figure counts all failing tests of the 69, including unmarked tests, which are
+invisible to guard 5.
+
+| Arm | Mutation | Failed | Named red |
+| --- | --- | ---: | --- |
+| *Re-derived:* `a dormant document trusts storage over the last in-memory preference` | `if (!canReadStorage(store)) return this.#preference;` becomes `if (!true) …` | 1 | the reads-stop-answering test |
+| `a dormant document re-reads readable storage rather than always resuming memory` | the same anchor becomes `if (!false) …` | 5 | the adopting test and both same-tab variants |
+| `a dormant document adopts storage only when it changed since the page last read or saved it` | the `stored === this.#stored` guard becomes `false` | 3 | the refused-save, filled-quota and adopting tests |
+| `an adopted stored value becomes the value the page remembers having read` | the adopt path no longer records `#stored` | 2 | the adopting test |
+| `a write storage refused is not remembered as saved` | a refused write is recorded anyway | 3 | the refused-save, filled-quota and adopting tests |
+| `an empty document re-reads storage instead of the joining control's constructor-time value` | an empty document publishes the joining control's own value | 7 | seven SC-012 tests, including the detached-instance and reattached same-tab tests |
+| `an empty document re-queries matchMedia rather than reusing the list it captured first` | `if (!this.#media)` | 22 | six SC-012 tests, including the fresh-list System reconnect |
+| `a selection saves the preference the page settled on after dispatch` | `persist(input.value …)` | 1 | the F2 test, `expected { stored: 'light', root: 'dark' } …` |
+| `System installs only a complete modern media-query listener pair` | the `removeEventListener` check is dropped | 1 | the incomplete-`modern` test, `expected 1 to be +0` |
+| `an invalid attribute written onto a rendered control is reflected back as System` (SC-010) | the requested reflection is removed | 2 | both rendered-attribute cases |
+
+The "re-reads readable storage" arm first failed guard 5. Its collateral was
+`[SC-006][SC-007][SC-008] a user choice emits once…`: the first reset drove the preference through
+storage, so the mutation leaked Dark into the event test and its click selected nothing. The reset
+now pins the preference by assignment, and the arm was re-proved clean without `expectCollateral`.
+
+These existing arms were re-proved against the changed test file, each with a named red, no marked
+collateral and a byte-identical restore:
+
+- SC-006, SC-007 and SC-008 on the event contract;
+- the SC-011 composition arm;
+- the eleven sk-theme-toggle and theme-preference arms numbered 249–259;
+- the pass-6 "coordinator is forgotten" arm, which now reds five SC-012 tests;
+- the pass-6 `live()` arm.
+
+The restored hashes are:
+
+- `sk-theme-toggle.ts`: `d2f7a09a803974b716fd4c46dcf33a743a833de685a3964688d3303022034ea5`;
+- `operational-status.ts`: `78b9f843fcc63895e93b17bab5cf8616731460c55d6380d2c0576e5105fb278e`;
+- `theme-preference.ts`: `7eb94419328710b0019d36be564ecfbad3c4f3c62e5d7417c6e12c872de72299`.
+
+The full sweep, `node scripts/suite-selftest.mjs` over 272 arms, was **not** run by this seat. It is
+the orchestrator's final-tree gate.
+
+#### F6, not folded
+
+Replacing the accessors' `'system' | 'light' | 'dark'` with the imported `ThemePreference` changes
+generated output:
+
+- `custom-elements.json` type text becomes `"ThemePreference"`;
+- `vue.d.ts` gains `'preference'?: ThemePreference;`, a type that declaration file does not import;
+- `SkThemeToggle.d.ts` changes as well.
+
+The fold was reverted, and analyze, React and Vue were regenerated. The outputs are byte-identical
+to the pre-fold generation, compared by sha256 over the manifest, `vue.d.ts` and every tracked
+`packages/react/src` file.
+
+#### Zoom evidence
+
+This was a genuine headed-Chrome recapture on the final tree; see `browser-zoom/README.md` and
+`metrics.json`. It covers the zoom-200 route and, new this pass, LightMode, each at 100% and 200%.
+All four images were inspected directly. On the zoom-200 route the geometry and keyboard sequence
+are numerically identical to pass 6, while the PNG bytes differ because the capture port (6431)
+and the pointer position differ.
+
+The pass-6 capture helpers were not preserved. The documented method was re-implemented outside
+the repository (a Playwright driver, a python-xlib XTEST helper and an FFmpeg `x11grab` grab),
+and they are not committed.
+
+#### Not run by this seat
+
+- WebKit, because this workstation still lacks its system libraries.
+- The full 272-arm mutation sweep, the orchestrator's gate on the final tree.
+- The full Playwright suite, `run-axe-storybook.js` and the Chromium visual-regression job. Only
+  the two theme specs were run. No CSS changed, and the composition's rendered state is unchanged:
+  the bound property became a reflected attribute of the same value.
+- `npm run quality:commitlint`, because no commit was made.
+
+Failure screenshots written by the red-first runs, in an untracked
+`fixtures/elements-behaviour/src/__screenshots__/` directory, were removed before the gates.

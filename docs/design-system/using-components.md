@@ -78,26 +78,36 @@ exists in Light or Dark, so a second control can never apply the operating syste
 choice. A control connecting while another remains connected always adopts that live,
 sibling-synchronized preference — including a choice that could not be persisted because storage
 is denied — unless it was given an explicit `preference` before connecting, which then becomes
-every control's preference. The last control to disconnect releases the listener but keeps the
-preference in memory: a control that connects later, after every other control has briefly
-disconnected (an SPA remounting a header during navigation, for example), still adopts that
-retained preference whenever storage cannot be read — otherwise it re-reads storage itself, so a
-genuinely fresh page load, or a same-tab write from other code, is not shadowed by stale memory.
-Coordination is per document only; there is no cross-tab synchronization.
+every control's preference.
+
+The last control to disconnect releases the listener but keeps the preference in memory, together
+with the stored value the page last read or saved. A control that connects later, after every
+other control has briefly disconnected (an SPA remounting a header during navigation, for
+example), re-reads storage at that moment — never the value it read when it was created — and
+adopts what it reads only if that differs from the remembered value, as on a genuinely fresh page
+or after a same-tab write from other code. Otherwise the page's own preference resumes, so a
+choice survives the gap even when storage refused to save it (a full quota, some private modes)
+or cannot be read at all. One consequence is deliberate: a same-tab write of exactly the value
+the page last read or saved looks like no write, so it does not replace a choice that could not
+be saved. Coordination is per document only; there is no cross-tab synchronization.
 
 Most applications should omit the `preference` attribute and property entirely. The element
 already resolves the stored preference (or System) on its own, matching the pre-paint bootstrap,
 so supplying `preference` is an explicit *initial* override — appropriate only when a consumer
 intentionally seeds a first-visit choice — and it does not itself persist that override to
 storage, so an authored value that disagrees with the stored one can produce a bootstrap-to-
-upgrade theme change.
+upgrade theme change. A user's selection is saved once, after its `sk-theme-change` event has
+been dispatched: if a synchronous handler of that event reassigns `preference` — rejecting the
+choice — storage keeps the preference the page settled on, not the rejected one, so the next
+load restores what the user last saw.
 
 The `preference` property and attribute accept only `system`, `light`, and `dark`. Any other
 value assigned from JavaScript, or assigned directly to an already-upgraded element's property,
 becomes `system` immediately and is reflected back onto the attribute. A raw invalid string
-written directly onto a connected element's `preference` *attribute* is likewise corrected to
-`system` once the element next updates; it does not persist as the literal invalid string. In
-every case the value never leaves the group without a selected choice and never reaches the root.
+written directly onto a connected element's `preference` *attribute* — before or after it has
+rendered — is likewise corrected to `system` once the element next updates; it does not persist
+as the literal invalid string. In every case the value never leaves the group without a selected
+choice and never reaches the root.
 
 Degradation is deliberate:
 
