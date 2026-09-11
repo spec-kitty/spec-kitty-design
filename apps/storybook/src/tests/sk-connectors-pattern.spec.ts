@@ -57,13 +57,15 @@ test('fixture and stories keep the pattern outside the public element and applic
   // FR-014: /discovery/ never appears as a link target.
   expect(source).not.toMatch(/href=.*\/discovery\//);
   // FR-018: forms are mutation-free — every form present intercepts its own submit.
-  // Five real rendered forms (C2's disconnect form, C3's entry form, C5's selection and refresh
-  // forms, C9b's choose form) — counted from the template markup only, not from doc-comment
-  // mentions of `<form>` (the header comments above legitimately discuss forms in prose, which a
-  // naive "<form" substring count would over-count).
+  // Nine real rendered form TEMPLATES (C2 disconnect, C3 entry, C5 selection + refresh, C9b
+  // choose, C6 disconnect, C8 mapping-toggle, C9a disconnect-own + link-your-account) — counted
+  // from the template markup only, not from doc-comment mentions of `<form>` (the header comments
+  // above legitimately discuss forms in prose, which a naive "<form" substring count would
+  // over-count). C8's mapping-toggle form is one TEMPLATE occurrence even though it renders once
+  // per mapping row — the count is over source text, not rendered DOM instances.
   const preventDefaultCount = (storiesSource.match(/@submit=\$\{\(event: Event\) => event\.preventDefault\(\)\}/g) ?? [])
     .length;
-  expect(preventDefaultCount).toBe(5);
+  expect(preventDefaultCount).toBe(9);
 });
 
 // -------------------------------------------------------------------------------------------
@@ -94,10 +96,10 @@ test.describe('C2 — operating index', () => {
 
   test('member sees the same provider facts but no admin-only controls (FR-020)', async ({ page }) => {
     const adminRoot = await loadStory(page, 'c-2-operating-admin');
-    const adminFacts = await adminRoot.locator('.sk-connectors-pattern__facts').allTextContents();
+    const adminFacts = await adminRoot.locator('.sk-facts').allTextContents();
 
     const memberRoot = await loadStory(page, 'c-2-operating-member');
-    const memberFacts = await memberRoot.locator('.sk-connectors-pattern__facts').allTextContents();
+    const memberFacts = await memberRoot.locator('.sk-facts').allTextContents();
 
     expect(memberFacts).toEqual(adminFacts);
     await expect(memberRoot.locator('sk-button', { hasText: 'Manage on GitHub' })).toHaveCount(0);
@@ -280,6 +282,199 @@ test.describe('C9b — Slack public-channel selection', () => {
   test('has zero WCAG 2.1 AA violations', async ({ page }) => {
     await loadStory(page, 'c-9-b-slack-channel-populated');
     await axeIsClean(page, 'c-9-b-slack-channel-populated');
+  });
+});
+
+test.describe('C6 — installation detail shell', () => {
+  test('admin and member shells share the section-nav strip, native semantics', async ({ page }) => {
+    const admin = await loadStory(page, 'c-6-installation-admin-active');
+    const nav = admin.locator('nav.sk-section-nav');
+    await expect(nav).toHaveAttribute('aria-label', 'Installation navigation');
+    const links = nav.locator('a.sk-section-nav__link');
+    await expect(links).toHaveCount(3); // admin sees all three tabs
+    await expect(nav.locator('a[aria-current="page"]')).toHaveCount(1);
+
+    const member = await loadStory(page, 'c-6-installation-member-active');
+    await expect(member.locator('nav.sk-section-nav a.sk-section-nav__link')).toHaveCount(2); // no Workspace scope
+  });
+
+  test('needs_reauth/revoked map to danger and expose no recovery action (FR-016)', async ({ page }) => {
+    for (const id of ['c-6-installation-health-needs-reauth', 'c-6-installation-health-revoked']) {
+      const root = await loadStory(page, id);
+      await expect(root.locator('sk-status-indicator[tone="danger"]')).toBeVisible();
+      await expect(root.getByRole('button', { name: /reconnect|reauthoriz/i })).toHaveCount(0);
+      await expect(root.getByRole('link', { name: /reconnect|reauthoriz/i })).toHaveCount(0);
+    }
+  });
+
+  test('degraded maps to attention, not danger — tones are not interchangeable', async ({ page }) => {
+    const root = await loadStory(page, 'c-6-installation-health-degraded');
+    await expect(root.locator('sk-status-indicator[tone="attention"]')).toBeVisible();
+    await expect(root.locator('sk-status-indicator[tone="danger"]')).toHaveCount(0);
+  });
+
+  test('has zero WCAG 2.1 AA violations', async ({ page }) => {
+    await loadStory(page, 'c-6-installation-admin-active');
+    await axeIsClean(page, 'c-6-installation-admin-active');
+  });
+});
+
+test.describe('C7 — workspace scope tab', () => {
+  test('member boundary: Workspace scope tab link is entirely absent, other tabs unaffected', async ({ page }) => {
+    const root = await loadStory(page, 'c-7-workspace-scope-member-boundary');
+    const linkTexts = await root.locator('nav.sk-section-nav a.sk-section-nav__link').allTextContents();
+    expect(linkTexts).not.toContain('Workspace scope');
+    expect(linkTexts).toContain('Project routing');
+    expect(linkTexts).toContain('Team accounts');
+  });
+
+  test('permission projections remove controls without changing shared facts (FR-020)', async ({ page }) => {
+    const adminRoot = await loadStory(page, 'c-6-installation-admin-active');
+    const adminFacts = await adminRoot.locator('.sk-facts').first().allTextContents();
+    // Reached via C7's member-boundary shell, which shares the same installation record.
+    const memberRoot = await loadStory(page, 'c-7-workspace-scope-member-boundary');
+    const memberFacts = await memberRoot.locator('.sk-facts').first().allTextContents();
+    expect(memberFacts).toEqual(adminFacts);
+  });
+
+  test('empty: honest empty state, no fabricated containers', async ({ page }) => {
+    const root = await loadStory(page, 'c-7-workspace-scope-empty');
+    await expect(root.locator('table.sk-data-table')).toHaveCount(0);
+    await expect(root.locator('.sk-empty-state')).toBeVisible();
+  });
+
+  test('unavailable: distinct from empty — an explicit unavailable message, not a zero count', async ({ page }) => {
+    const root = await loadStory(page, 'c-7-workspace-scope-unavailable');
+    await expect(root.getByText('Workspace scope unavailable')).toBeVisible();
+    await expect(root.locator('.sk-facts', { hasText: 'Discovered' })).toHaveCount(0);
+  });
+
+  test('stale-after-refresh-failure: prior data persists distinctly from a fresh success', async ({ page }) => {
+    const root = await loadStory(page, 'c-7-workspace-scope-stale-after-refresh-failure');
+    await expect(root.locator('sk-notice', { hasText: 'Could not verify your GitLab groups' })).toBeVisible();
+    await expect(root.locator('table.sk-data-table tbody tr')).toHaveCount(2); // stale rows still shown
+  });
+
+  test('has zero WCAG 2.1 AA violations', async ({ page }) => {
+    await loadStory(page, 'c-7-workspace-scope-populated');
+    await axeIsClean(page, 'c-7-workspace-scope-populated');
+  });
+});
+
+test.describe('C8 — project routing / admitted repositories', () => {
+  test('active and disabled mappings, active and withdrawn repositories all render truthfully', async ({ page }) => {
+    const root = await loadStory(page, 'c-8-project-routing-populated');
+    await expect(root.locator('table.sk-data-table').first().locator('tbody tr')).toHaveCount(3);
+    await expect(root.getByText('Purged — removed', { exact: false })).toBeVisible();
+  });
+
+  test('hard purge blocks automatic readmission — no tombstone-lift action anywhere (FR-015)', async ({ page }) => {
+    const root = await loadStory(page, 'c-8-project-routing-populated');
+    await expect(root.getByRole('button', { name: /re-?admit|restore|lift|un-?purge/i })).toHaveCount(0);
+    await expect(root.getByRole('link', { name: /re-?admit|restore|lift|un-?purge/i })).toHaveCount(0);
+  });
+
+  test('hard-purge confirmation composes the public sk-confirm-dialog with the danger-secondary tone', async ({
+    page,
+  }) => {
+    const root = await loadStory(page, 'c-8-project-routing-purge-confirm');
+    const dialog = root.locator('sk-confirm-dialog');
+    await expect(dialog).toHaveAttribute('confirm-variant', 'danger-secondary');
+    await expect(dialog).toHaveAttribute('open', '');
+    const confirmButton = dialog.locator('[part="confirm"]');
+    await expect(confirmButton).toHaveClass(/sk-button--danger-secondary/);
+  });
+
+  test('/discovery/ is represented only as a compatibility-redirect fact, never a browse link (FR-014)', async ({
+    page,
+  }) => {
+    const root = await loadStory(page, 'c-8-project-routing-populated');
+    await expect(root.locator('a[href*="/discovery/"]')).toHaveCount(0);
+    await expect(root.getByText('/a/sm-team/connectors/discovery/', { exact: false })).toBeVisible();
+  });
+
+  test('no GitHub repository picker / no "Admit selected" anywhere (FR-011)', async ({ page }) => {
+    const root = await loadStory(page, 'c-8-project-routing-populated');
+    await expect(root.locator('input[type="checkbox"]')).toHaveCount(0);
+    await expect(root.getByText('Admit selected', { exact: false })).toHaveCount(0);
+  });
+
+  test('validation: exact mapping-conflict message present', async ({ page }) => {
+    const root = await loadStory(page, 'c-8-project-routing-validation');
+    await expect(root.locator('sk-notice', { hasText: 'already mapped to project' })).toBeVisible();
+  });
+
+  test('jira-rescue: honest empty state names the manual rescue path', async ({ page }) => {
+    const root = await loadStory(page, 'c-8-project-routing-jira-rescue');
+    await expect(root.getByText('No Jira mappings discovered')).toBeVisible();
+  });
+
+  test('mapping toggle forms are mutation-free and never navigate', async ({ page }) => {
+    const root = await loadStory(page, 'c-8-project-routing-populated');
+    const before = page.url();
+    await root.locator('form[data-mutation-free="true"] button[type="submit"]').first().click();
+    await page.waitForTimeout(250);
+    expect(page.url()).toBe(before);
+  });
+
+  test('has zero WCAG 2.1 AA violations', async ({ page }) => {
+    await loadStory(page, 'c-8-project-routing-populated');
+    await axeIsClean(page, 'c-8-project-routing-populated');
+  });
+});
+
+test.describe('C9a — team account links', () => {
+  test('active links render without any destructive/danger tone', async ({ page }) => {
+    const root = await loadStory(page, 'c-9-a-team-accounts-admin-active');
+    await expect(root.locator('sk-status-indicator[tone="danger"]')).toHaveCount(0);
+    await expect(root.locator('sk-action-row')).toHaveCount(2);
+  });
+
+  test('needs_reauth/revoked map to danger and expose no reauthorization action (FR-016)', async ({ page }) => {
+    const root = await loadStory(page, 'c-9-a-team-accounts-admin-unhealthy');
+    await expect(root.locator('sk-status-indicator[tone="danger"]')).toHaveCount(2); // needs_reauth + revoked
+    await expect(root.getByRole('button', { name: /reconnect|reauthoriz|retry/i })).toHaveCount(0);
+    await expect(root.getByRole('link', { name: /reconnect|reauthoriz|retry/i })).toHaveCount(0);
+  });
+
+  test('self-owned mutation only: the disconnect control appears on the viewer row alone', async ({ page }) => {
+    const root = await loadStory(page, 'c-9-a-team-accounts-admin-unhealthy');
+    const forms = root.locator('form[data-mutation-free="true"]');
+    await expect(forms).toHaveCount(1); // 3 links, only "you" (Jeroen) gets a disconnect control
+  });
+
+  test('account activity (isViewer) stays independent of authorization health', async ({ page }) => {
+    // The viewer's own row is needs_reauth (danger) yet still carries the disconnect control that
+    // ANY viewer row would carry regardless of health — activity and health are separate facts.
+    const root = await loadStory(page, 'c-9-a-team-accounts-admin-unhealthy');
+    const viewerRow = root.locator('sk-action-row', { hasText: 'Jeroen' });
+    await expect(viewerRow.locator('sk-status-indicator[tone="danger"]')).toBeVisible();
+    await expect(viewerRow.locator('form[data-mutation-free="true"]')).toHaveCount(1);
+  });
+
+  test('member-unlinked: own-link-start control available, no other member visible beyond the fixture', async ({
+    page,
+  }) => {
+    const root = await loadStory(page, 'c-9-a-team-accounts-member-unlinked');
+    await expect(root.getByRole('button', { name: 'Link your account' })).toBeVisible();
+  });
+
+  test('member-empty: honest empty state with the exact fixture copy', async ({ page }) => {
+    const root = await loadStory(page, 'c-9-a-team-accounts-member-empty');
+    await expect(root.getByText('No team members have linked their accounts yet.')).toBeVisible();
+  });
+
+  test('disconnect form is mutation-free and never navigates', async ({ page }) => {
+    const root = await loadStory(page, 'c-9-a-team-accounts-admin-active');
+    const before = page.url();
+    await root.locator('form[data-mutation-free="true"] button[type="submit"]').first().click();
+    await page.waitForTimeout(250);
+    expect(page.url()).toBe(before);
+  });
+
+  test('has zero WCAG 2.1 AA violations', async ({ page }) => {
+    await loadStory(page, 'c-9-a-team-accounts-admin-active');
+    await axeIsClean(page, 'c-9-a-team-accounts-admin-active');
   });
 });
 

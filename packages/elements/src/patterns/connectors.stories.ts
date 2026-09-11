@@ -35,38 +35,55 @@ import '../page-header/sk-page-header.js';
 import '../status-indicator/sk-status-indicator.js';
 import '../button/sk-button.js';
 import '../action-row/sk-action-row.js';
+import '../confirm-dialog/sk-confirm-dialog.js';
+import type { SkConfirmDialog } from '../confirm-dialog/sk-confirm-dialog.js';
 
 import {
   CONNECTORS_FIXTURE,
+  healthTone,
+  INSTALLATION_TAB_LABEL,
+  installationTabHref,
   selectGithubAppFailureProjection,
   selectGitlabGroupProjection,
   selectHandoffProjection,
+  selectInstallationShellProjection,
   selectOperatingProjection,
+  selectProjectRoutingProjection,
   selectSetupProjection,
   selectSlackChannelPickerProjection,
+  selectTeamAccountsProjection,
+  selectWorkspaceScopeProjection,
+  withInstallationHealth,
   type ConnectorRole,
   type GithubAppFailureProjection,
   type GitlabGroupProjection,
   type GitlabGroupSelectionState,
   type HandoffFlow,
   type HandoffProjection,
+  type InstallationHealth,
+  type InstallationRole,
+  type InstallationShellProjection,
+  type InstallationTab,
   type OperatingProjection,
+  type ProjectRoutingProjection,
+  type ProjectRoutingState,
   type SetupProjection,
   type SlackChannelPickerProjection,
   type SlackChannelPickerState,
+  type TeamAccountsProjection,
+  type TeamAccountsState,
+  type WorkspaceScopeProjection,
+  type WorkspaceScopeState,
 } from './connectors.fixture.js';
 
-export {
-  CONNECTORS_FIXTURE,
-  deepFreeze,
-  healthTone,
-  selectGithubAppFailureProjection,
-  selectGitlabGroupProjection,
-  selectHandoffProjection,
-  selectOperatingProjection,
-  selectSetupProjection,
-  selectSlackChannelPickerProjection,
-} from './connectors.fixture.js';
+// No re-export of fixture internals from this module (measured 2026-09-11): Storybook's CSF
+// story-index scan treats every named export of a `.stories.ts` file as a candidate story,
+// including a bare re-exported value or function. `node scripts/run-axe-storybook.js`'s full run
+// proved this against the real built index — 13 "did not render (render root is empty)" entries,
+// one per re-exported non-story identifier, each also counted as a render timeout, failing the
+// gate with zero actual WCAG violations. External consumers of these fixture helpers import them
+// directly from `./connectors.fixture.js`, which already exports every one of them; nothing needs
+// them re-exported here too.
 
 // -------------------------------------------------------------------------------------------
 // Pattern-owned, token-only layout CSS. Scoped entirely under `.sk-connectors-pattern` — a
@@ -106,27 +123,6 @@ const patternStyles = html`<style>
     align-items: center;
     justify-content: space-between;
     gap: var(--sk-space-3);
-  }
-
-  .sk-connectors-pattern__facts {
-    margin: var(--sk-space-3) 0 0;
-    padding: 0;
-  }
-
-  .sk-connectors-pattern__facts dt {
-    margin: 0;
-    margin-block-start: var(--sk-space-2);
-    font-size: var(--sk-text-sm);
-    color: var(--sk-fg-muted);
-  }
-
-  .sk-connectors-pattern__facts dt:first-of-type {
-    margin-block-start: 0;
-  }
-
-  .sk-connectors-pattern__facts dd {
-    margin: 0;
-    color: var(--sk-fg-default);
   }
 
   .sk-connectors-pattern__section {
@@ -211,10 +207,10 @@ function renderOperating(projection: OperatingProjection): TemplateResult {
               <h2>${card.label}</h2>
               <sk-status-indicator tone=${card.tone}>${card.healthText}</sk-status-indicator>
             </div>
-            <dl class="sk-connectors-pattern__facts">
+            <dl class="sk-facts">
               ${card.facts.map(
-                (fact) => html`<dt>${fact.term}</dt>
-                  <dd>${fact.value}</dd>`,
+                (fact) => html`<dt class="sk-facts__term">${fact.term}</dt>
+                  <dd class="sk-facts__value">${fact.value}</dd>`,
               )}
             </dl>
             ${card.manageAction && !card.manageAction.disabledForRole
@@ -446,6 +442,361 @@ function renderSlackChannelPicker(projection: SlackChannelPickerProjection): Tem
 }
 
 // =============================================================================================
+// Installation Detail shell — shared by C6/C7/C8/C9a (unblocked 2026-09-11, #337 merged to
+// train as `16948194`). Composes the now-public `.sk-section-nav` from its documented markup
+// contract only — `nav.sk-section-nav[aria-label]` > `a.sk-section-nav__link[href]`, with
+// consumer-supplied `aria-current="page"` on the active route. No CSS or internals read from
+// that package.
+// =============================================================================================
+
+function renderInstallationSectionNav(shell: InstallationShellProjection): TemplateResult {
+  return html`<nav class="sk-section-nav" aria-label="Installation navigation">
+    ${shell.visibleTabs.map(
+      (tab) => html`<a
+        class="sk-section-nav__link"
+        href=${installationTabHref(shell.installation, tab)}
+        aria-current=${tab === shell.activeTab ? 'page' : nothing}
+        >${
+          // eslint-disable-next-line security/detect-object-injection -- key is the literal union type InstallationTab
+          INSTALLATION_TAB_LABEL[tab]
+        }</a
+      >`,
+    )}
+  </nav>`;
+}
+
+/** Stacked `.sk-facts` only — orchestrator ruling 2026-09-11 (research.md's "Dependency
+ * reconciliation"): #280's grouped-reflow facts-grid extension is deferred as a follow-up, not a
+ * gate; `--two-col` is deliberately never used here — it declares no `min-width:0`/`overflow-wrap`
+ * on its value track and carries a real, untested overflow risk that stacked `.sk-facts` does not. */
+function renderInstallationFacts(installation: InstallationRecordLike): TemplateResult {
+  return html`<dl class="sk-facts">
+    <dt class="sk-facts__term">Provider</dt>
+    <dd class="sk-facts__value">${installation.provider}</dd>
+    <dt class="sk-facts__term">Connected account</dt>
+    <dd class="sk-facts__value">${installation.externalAccountLabel}</dd>
+    <dt class="sk-facts__term">Health</dt>
+    <dd class="sk-facts__value">
+      <sk-status-indicator tone=${healthTone(installation.health)}>${installation.health}</sk-status-indicator>
+    </dd>
+    <dt class="sk-facts__term">Project routing</dt>
+    <dd class="sk-facts__value">${installation.activeMappingCount} active mappings</dd>
+    <dt class="sk-facts__term">Linked accounts</dt>
+    <dd class="sk-facts__value">${installation.activeLinkCount} teammates linked</dd>
+    <dt class="sk-facts__term">Installed</dt>
+    <dd class="sk-facts__value">${installation.installedAt} by ${installation.installedBy}</dd>
+  </dl>`;
+}
+
+type InstallationRecordLike = Readonly<{
+  provider: string;
+  externalAccountLabel: string;
+  health: InstallationHealth;
+  activeMappingCount: number;
+  activeLinkCount: number;
+  installedAt: string;
+  installedBy: string;
+}>;
+
+// =============================================================================================
+// C6 — installation detail shell
+// =============================================================================================
+
+function renderInstallationShell(shell: InstallationShellProjection): TemplateResult {
+  const dangerHealth = shell.installation.health === 'needs_reauth' || shell.installation.health === 'revoked';
+  return html`${patternStyles}
+    <section
+      class="sk-connectors-pattern"
+      data-connectors-pattern="c6"
+      data-render-complete="true"
+      aria-labelledby="c6-heading"
+    >
+      <sk-page-header>
+        <span slot="eyebrow">${shell.installation.teamName}</span>
+        <h1 id="c6-heading" slot="title">${shell.installation.provider} installation</h1>
+        <span slot="supporting">Signed in as ${shell.role === 'admin' ? 'an administrator' : 'a member'}.</span>
+      </sk-page-header>
+      ${renderInstallationSectionNav(shell)}
+      ${renderInstallationFacts(shell.installation)}
+      ${dangerHealth
+        ? html`<sk-notice tone="danger" announce="polite"
+            >This installation's authorization needs attention. No automatic recovery route is offered
+            here.</sk-notice
+          >`
+        : nothing}
+      ${shell.canDisconnect
+        ? html`<form
+            class="sk-connectors-pattern__evidence-form"
+            method="post"
+            action=${shell.disconnectPath}
+            data-mutation-free="true"
+            @submit=${(event: Event) => event.preventDefault()}
+          >
+            <button type="submit" class="sk-button sk-button--secondary sk-button--sm">Disconnect tracker</button>
+          </form>`
+        : nothing}
+    </section>`;
+}
+
+// =============================================================================================
+// C7 — workspace scope tab
+// =============================================================================================
+
+function renderWorkspaceScope(scope: WorkspaceScopeProjection, shell: InstallationShellProjection): TemplateResult {
+  return html`${patternStyles}
+    <section
+      class="sk-connectors-pattern"
+      data-connectors-pattern="c7"
+      data-render-complete="true"
+      aria-labelledby="c7-heading"
+    >
+      <sk-page-header>
+        <span slot="eyebrow">${shell.installation.teamName}</span>
+        <h1 id="c7-heading" slot="title">Workspace scope</h1>
+      </sk-page-header>
+      ${renderInstallationSectionNav(shell)}
+      ${renderInstallationFacts(shell.installation)}
+      ${scope.refreshFailureMessage
+        ? html`<sk-notice tone="danger" announce="assertive">${scope.refreshFailureMessage}</sk-notice>`
+        : nothing}
+      ${scope.state === 'unavailable'
+        ? html`<div class="sk-empty-state">
+            <h3 class="sk-empty-state__heading">Workspace scope unavailable</h3>
+            <p class="sk-empty-state__body">Auto-discovered scope could not be read for this installation.</p>
+          </div>`
+        : html`
+            <dl class="sk-facts">
+              <dt class="sk-facts__term">Discovered</dt>
+              <dd class="sk-facts__value">${scope.discovered}</dd>
+              <dt class="sk-facts__term">Included</dt>
+              <dd class="sk-facts__value">${scope.included}</dd>
+            </dl>
+            ${scope.containers.length === 0
+              ? html`<div class="sk-empty-state">
+                  <h3 class="sk-empty-state__heading">No scope containers discovered</h3>
+                  <p class="sk-empty-state__body">Nothing has been auto-discovered for this installation yet.</p>
+                </div>`
+              : html`<div class="sk-data-table__scroller">
+                  <table class="sk-data-table">
+                    <caption>
+                      Auto-discovered tracker scope containers
+                    </caption>
+                    <thead>
+                      <tr>
+                        <th scope="col">Container</th>
+                        <th scope="col">Workspace</th>
+                        <th scope="col">Type</th>
+                        <th scope="col">State</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${scope.containers.map(
+                        (c) => html`<tr>
+                          <td>${c.container}</td>
+                          <td>${c.workspace}</td>
+                          <td>${c.type}</td>
+                          <td>${c.state}</td>
+                        </tr>`,
+                      )}
+                    </tbody>
+                  </table>
+                </div>`}
+          `}
+    </section>`;
+}
+
+// =============================================================================================
+// C8 — project routing / admitted repositories
+// =============================================================================================
+
+function renderProjectRouting(routing: ProjectRoutingProjection, shell: InstallationShellProjection): TemplateResult {
+  return html`${patternStyles}
+    <section
+      class="sk-connectors-pattern"
+      data-connectors-pattern="c8"
+      data-render-complete="true"
+      aria-labelledby="c8-heading"
+    >
+      <sk-page-header>
+        <span slot="eyebrow">${shell.installation.teamName}</span>
+        <h1 id="c8-heading" slot="title">Project routing</h1>
+      </sk-page-header>
+      ${renderInstallationSectionNav(shell)}
+      ${renderInstallationFacts(shell.installation)}
+
+      ${/* FR-014: /discovery/ is a compatibility redirect, never a browse link — rendered as
+          inert text, no href ever points at it. */ nothing}
+      <p class="sk-connectors-pattern__section">
+        <code>${routing.discoveryRedirect.path}</code> — ${routing.discoveryRedirect.note}
+      </p>
+
+      ${routing.validationError
+        ? html`<sk-notice tone="danger" announce="assertive">${routing.validationError}</sk-notice>`
+        : nothing}
+      ${routing.jiraManualRescuePath
+        ? html`<div class="sk-empty-state">
+            <h3 class="sk-empty-state__heading">No Jira mappings discovered</h3>
+            <p class="sk-empty-state__body">
+              Auto-discovery found nothing for this Jira installation. Rescue path:
+              <code>${routing.jiraManualRescuePath}</code>
+            </p>
+          </div>`
+        : nothing}
+
+      ${routing.mappings.length > 0
+        ? html`<div class="sk-data-table__scroller">
+            <table class="sk-data-table">
+              <caption>
+                Resource mappings
+              </caption>
+              <thead>
+                <tr>
+                  <th scope="col">Resource</th>
+                  <th scope="col">Target repo</th>
+                  <th scope="col">Source</th>
+                  <th scope="col">State</th>
+                  <th scope="col">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${routing.mappings.map(
+                  (m) => html`<tr>
+                    <td>${m.resourceLabel}</td>
+                    <td>${m.targetRepo}</td>
+                    <td>${m.source}</td>
+                    <td>${m.isEnabled ? 'Active' : 'Disabled'}</td>
+                    <td>
+                      ${shell.role === 'admin'
+                        ? html`<form
+                            class="sk-connectors-pattern__evidence-form"
+                            method="post"
+                            action="/a/${shell.installation.teamSlug}/connectors/install/${shell.installation
+                              .uuid}/mappings/${m.id}/toggle/"
+                            data-mutation-free="true"
+                            @submit=${(event: Event) => event.preventDefault()}
+                          >
+                            <button type="submit" class="sk-button sk-button--ghost sk-button--sm">
+                              ${m.isEnabled ? 'Disable' : 'Enable'}
+                            </button>
+                          </form>`
+                        : nothing}
+                    </td>
+                  </tr>`,
+                )}
+              </tbody>
+            </table>
+          </div>`
+        : nothing}
+
+      ${routing.repositories.length > 0
+        ? html`<div class="sk-data-table__scroller">
+            <table class="sk-data-table">
+              <caption>
+                Admitted repositories
+              </caption>
+              <thead>
+                <tr>
+                  <th scope="col">Repository</th>
+                  <th scope="col">State</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${routing.repositories.map(
+                  (r) => html`<tr>
+                    <td>${r.repoFullName}</td>
+                    <td>
+                      ${r.isActive
+                        ? 'Active'
+                        : html`Purged — removed ${r.removedDisplay}. Not re-admitted automatically.`}
+                    </td>
+                  </tr>`,
+                )}
+              </tbody>
+            </table>
+          </div>`
+        : nothing}
+
+      ${routing.purgeTargetRepo && routing.purgeConfirmCopy
+        ? html`<sk-confirm-dialog
+            class="sk-connectors-pattern__purge-dialog"
+            dialog-title="Hard-purge repository?"
+            message=${routing.purgeConfirmCopy}
+            confirm-label="Hard-purge repository"
+            cancel-label="Cancel"
+            confirm-variant="danger-secondary"
+          ></sk-confirm-dialog>`
+        : nothing}
+    </section>`;
+}
+
+// =============================================================================================
+// C9a — team account links
+// =============================================================================================
+
+function renderTeamAccounts(accounts: TeamAccountsProjection, shell: InstallationShellProjection): TemplateResult {
+  return html`${patternStyles}
+    <section
+      class="sk-connectors-pattern"
+      data-connectors-pattern="c9a"
+      data-render-complete="true"
+      aria-labelledby="c9a-heading"
+    >
+      <sk-page-header>
+        <span slot="eyebrow">${shell.installation.teamName}</span>
+        <h1 id="c9a-heading" slot="title">Team accounts</h1>
+      </sk-page-header>
+      ${renderInstallationSectionNav(shell)}
+      ${renderInstallationFacts(shell.installation)}
+
+      ${accounts.links.length === 0
+        ? html`<div class="sk-empty-state">
+            <h3 class="sk-empty-state__heading">No linked accounts</h3>
+            <p class="sk-empty-state__body">${accounts.emptyCopy}</p>
+          </div>`
+        : html`<ul class="sk-connectors-pattern__gap-list" aria-label="Linked accounts">
+            ${accounts.links.map((link) => {
+              const dangerHealth = link.authorizationHealth === 'needs_reauth' || link.authorizationHealth === 'revoked';
+              const tone = dangerHealth ? 'danger' : link.authorizationHealth === 'expired' ? 'attention' : 'success';
+              return html`<li>
+                <sk-action-row>
+                  <span slot="title">${link.displayName}${link.isViewer ? ' (you)' : ''}</span>
+                  <span slot="reference">${link.providerSubject}</span>
+                  <span slot="metadata"
+                    ><sk-status-indicator tone=${tone}>${link.authorizationHealth}</sk-status-indicator></span
+                  >
+                  ${link.isViewer
+                    ? html`<form
+                        slot="controls"
+                        class="sk-connectors-pattern__evidence-form"
+                        method="post"
+                        action=${accounts.disconnectOwnPath}
+                        data-mutation-free="true"
+                        @submit=${(event: Event) => event.preventDefault()}
+                      >
+                        <button type="submit" class="sk-button sk-button--danger-secondary sk-button--sm">
+                          Disconnect
+                        </button>
+                      </form>`
+                    : nothing}
+                </sk-action-row>
+              </li>`;
+            })}
+          </ul>`}
+      ${accounts.ownLinkStartAvailable
+        ? html`<form
+            class="sk-connectors-pattern__evidence-form"
+            method="post"
+            action="/a/${shell.installation.teamSlug}/connectors/link/${shell.installation.uuid}/"
+            data-mutation-free="true"
+            @submit=${(event: Event) => event.preventDefault()}
+          >
+            <button type="submit" class="sk-button sk-button--primary sk-button--sm">Link your account</button>
+          </form>`
+        : nothing}
+    </section>`;
+}
+
+// =============================================================================================
 // Storybook registration
 // =============================================================================================
 
@@ -547,6 +898,98 @@ export const C9bSlackChannelEmpty: Story = slackChannelPickerStory('empty');
 export const C9bSlackChannelRefused: Story = slackChannelPickerStory('refused');
 export const C9bSlackChannelRateLimited: Story = slackChannelPickerStory('rate-limited');
 export const C9bSlackChannelIncomplete: Story = slackChannelPickerStory('incomplete');
+
+// --- C6 ---------------------------------------------------------------------------------------
+
+function installationShellStory(role: InstallationRole, health: InstallationHealth): Story {
+  return {
+    render: () =>
+      withThemeWrapper(
+        renderInstallationShell(
+          selectInstallationShellProjection(
+            withInstallationHealth(CONNECTORS_FIXTURE.workspaceScope.installation, health),
+            role,
+            'workspace',
+          ),
+        ),
+        false,
+      ),
+  };
+}
+
+export const C6InstallationAdminActive: Story = installationShellStory('admin', 'active');
+export const C6InstallationMemberActive: Story = installationShellStory('member', 'active');
+export const C6InstallationHealthDegraded: Story = installationShellStory('admin', 'degraded');
+export const C6InstallationHealthRevoked: Story = installationShellStory('admin', 'revoked');
+export const C6InstallationHealthNeedsReauth: Story = installationShellStory('admin', 'needs_reauth');
+
+// --- C7 ---------------------------------------------------------------------------------------
+
+function workspaceScopeStory(state: WorkspaceScopeState, role: InstallationRole = 'admin'): Story {
+  return {
+    render: () => {
+      const shell = selectInstallationShellProjection(CONNECTORS_FIXTURE.workspaceScope.installation, role, 'workspace');
+      const scope = selectWorkspaceScopeProjection(CONNECTORS_FIXTURE.workspaceScope, role, state);
+      return withThemeWrapper(renderWorkspaceScope(scope, shell), false);
+    },
+  };
+}
+
+export const C7WorkspaceScopePopulated: Story = workspaceScopeStory('populated');
+export const C7WorkspaceScopeEmpty: Story = workspaceScopeStory('empty');
+export const C7WorkspaceScopeUnavailable: Story = workspaceScopeStory('unavailable');
+export const C7WorkspaceScopeStaleAfterRefreshFailure: Story = workspaceScopeStory('stale-after-refresh-failure');
+export const C7WorkspaceScopeMemberBoundary: Story = {
+  render: () => {
+    // The Workspace Scope tab is admin-only: a member's shell never lists it among visibleTabs.
+    // This story renders the SHELL as a member would see it, to prove the tab's absence rather
+    // than assuming it — see the FR-007 test that asserts zero "Workspace scope" links here.
+    const shell = selectInstallationShellProjection(CONNECTORS_FIXTURE.workspaceScope.installation, 'member', 'mappings');
+    return withThemeWrapper(renderInstallationShell(shell), false);
+  },
+};
+
+// --- C8 ---------------------------------------------------------------------------------------
+
+function projectRoutingStory(state: ProjectRoutingState, role: InstallationRole = 'admin'): Story {
+  return {
+    render: () => {
+      const shell = selectInstallationShellProjection(CONNECTORS_FIXTURE.workspaceScope.installation, role, 'mappings');
+      const routing = selectProjectRoutingProjection(CONNECTORS_FIXTURE.projectRouting, role, state);
+      return withThemeWrapper(renderProjectRouting(routing, shell), false);
+    },
+  };
+}
+
+export const C8ProjectRoutingPopulated: Story = projectRoutingStory('populated');
+export const C8ProjectRoutingEmpty: Story = projectRoutingStory('empty');
+export const C8ProjectRoutingValidation: Story = projectRoutingStory('validation');
+export const C8ProjectRoutingJiraRescue: Story = projectRoutingStory('jira-rescue');
+export const C8ProjectRoutingPurgeConfirm: Story = {
+  ...projectRoutingStory('purge-confirm'),
+  play: async ({ canvasElement }) => {
+    const dialog = canvasElement.querySelector('sk-confirm-dialog') as SkConfirmDialog | null;
+    await (dialog as unknown as { updateComplete: Promise<unknown> } | null)?.updateComplete;
+    dialog?.showModal();
+  },
+};
+
+// --- C9a --------------------------------------------------------------------------------------
+
+function teamAccountsStory(state: TeamAccountsState, role: InstallationRole): Story {
+  return {
+    render: () => {
+      const shell = selectInstallationShellProjection(CONNECTORS_FIXTURE.workspaceScope.installation, role, 'links');
+      const accounts = selectTeamAccountsProjection(CONNECTORS_FIXTURE.teamAccounts, role, state);
+      return withThemeWrapper(renderTeamAccounts(accounts, shell), false);
+    },
+  };
+}
+
+export const C9aTeamAccountsAdminActive: Story = teamAccountsStory('admin-active', 'admin');
+export const C9aTeamAccountsAdminUnhealthy: Story = teamAccountsStory('admin-unhealthy', 'admin');
+export const C9aTeamAccountsMemberUnlinked: Story = teamAccountsStory('member-unlinked', 'member');
+export const C9aTeamAccountsMemberEmpty: Story = teamAccountsStory('member-empty', 'member');
 
 // --- Required LightMode system proof (programme brief hard rule 5) ----------------------------
 

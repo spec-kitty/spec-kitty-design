@@ -483,6 +483,274 @@ export function selectSlackChannelPickerProjection(
 }
 
 // ---------------------------------------------------------------------------------------------
+// Installation Detail shell shared by C6/C7/C8/C9a (unblocked 2026-09-11: #337 merged to train
+// as `16948194`). Composes the now-public `.sk-section-nav` — a labelled native `<nav>` with real
+// `<a href>` anchors and consumer-supplied `aria-current="page"` — from its documented class
+// contract only (`packages/styles/src/section-nav/`). FR-014: the Workspace Scope tab's own
+// `?tab=discovery` query name is historical route naming, never rendered as `/discovery/`; every
+// `/discovery/`-shaped fact in this fixture is inert display text, never an `<a href>`.
+// ---------------------------------------------------------------------------------------------
+
+export type InstallationHealth = 'active' | 'degraded' | 'needs_reauth' | 'revoked';
+export type InstallationRole = 'admin' | 'member';
+export type InstallationTab = 'workspace' | 'mappings' | 'links';
+
+export type InstallationRecord = Readonly<{
+  uuid: string;
+  teamSlug: string;
+  teamName: string;
+  provider: string;
+  externalAccountLabel: string;
+  health: InstallationHealth;
+  installedBy: string;
+  installedAt: string;
+  activeMappingCount: number;
+  activeLinkCount: number;
+}>;
+
+/** Pure. The `?tab=discovery` name is the real backend's historical route naming for the
+ * Workspace Scope tab (confirmed in the C9a corpus fixture's own `routes.workspace_tab`); it is
+ * NOT `/discovery/` and is never treated as one. */
+export function installationTabHref(installation: InstallationRecord, tab: InstallationTab): string {
+  const query = tab === 'workspace' ? 'discovery' : tab;
+  return `/a/${installation.teamSlug}/connectors/install/${installation.uuid}/?tab=${query}`;
+}
+
+export const INSTALLATION_TAB_LABEL: Readonly<Record<InstallationTab, string>> = {
+  workspace: 'Workspace scope',
+  mappings: 'Project routing',
+  links: 'Team accounts',
+};
+
+/** Pure — a new record with only `health` changed, for C6's authoritative-health-variant stories.
+ * Never mutates the shared fixture. */
+export function withInstallationHealth(installation: InstallationRecord, health: InstallationHealth): InstallationRecord {
+  return { ...installation, health };
+}
+
+// ---------------------------------------------------------------------------------------------
+// C6 — installation detail shell
+// ---------------------------------------------------------------------------------------------
+
+export type InstallationShellProjection = Readonly<{
+  installation: InstallationRecord;
+  role: InstallationRole;
+  activeTab: InstallationTab;
+  visibleTabs: ReadonlyArray<InstallationTab>;
+  /** Present only for admins — a teardown action, never a recovery action (FR-016: danger tone
+   * implies no recovery route; disconnect is teardown, not recovery). */
+  canDisconnect: boolean;
+  disconnectPath: string;
+}>;
+
+/** Pure. Member role removes `workspace` from the visible tabs and `canDisconnect` — matching the
+ * C9a corpus fixture's own `tabs`/`installation_actions` per-role projections. Shared facts
+ * (the installation record itself) never change by role — only which tabs/actions surface. */
+export function selectInstallationShellProjection(
+  installation: InstallationRecord,
+  role: InstallationRole,
+  activeTab: InstallationTab,
+): InstallationShellProjection {
+  return {
+    installation,
+    role,
+    activeTab,
+    visibleTabs: role === 'admin' ? ['workspace', 'mappings', 'links'] : ['mappings', 'links'],
+    canDisconnect: role === 'admin',
+    disconnectPath: `/a/${installation.teamSlug}/connectors/install/${installation.uuid}/disconnect/`,
+  };
+}
+
+// ---------------------------------------------------------------------------------------------
+// C7 — workspace scope tab
+// ---------------------------------------------------------------------------------------------
+
+export type ScopeContainer = Readonly<{
+  id: string;
+  container: string;
+  workspace: string;
+  type: string;
+  state: 'active' | 'disabled';
+}>;
+
+export type WorkspaceScopeState = 'populated' | 'empty' | 'unavailable' | 'stale-after-refresh-failure';
+
+export type WorkspaceScopeFixture = Readonly<{
+  installation: InstallationRecord;
+  states: Readonly<
+    Record<
+      WorkspaceScopeState,
+      Readonly<{
+        discovered: number;
+        included: number;
+        containers: ReadonlyArray<ScopeContainer>;
+        refreshFailureMessage: string | null;
+      }>
+    >
+  >;
+}>;
+
+export type WorkspaceScopeProjection = Readonly<{
+  installation: InstallationRecord;
+  role: InstallationRole;
+  state: WorkspaceScopeState;
+  discovered: number;
+  included: number;
+  containers: ReadonlyArray<ScopeContainer>;
+  refreshFailureMessage: string | null;
+}>;
+
+/** Pure. `role: 'member'` never reaches this tab at all (it is admin-only — `visibleTabs` above
+ * already excludes it), so this selector exists to prove the boundary rather than branch on it:
+ * callers must gate access to this tab by `role`, not by hiding facts inside it. */
+export function selectWorkspaceScopeProjection(
+  fixture: WorkspaceScopeFixture,
+  role: InstallationRole,
+  state: WorkspaceScopeState,
+): WorkspaceScopeProjection {
+  // eslint-disable-next-line security/detect-object-injection -- key is the literal union type WorkspaceScopeState
+  const s = fixture.states[state];
+  return {
+    installation: fixture.installation,
+    role,
+    state,
+    discovered: s.discovered,
+    included: s.included,
+    containers: s.containers,
+    refreshFailureMessage: s.refreshFailureMessage,
+  };
+}
+
+// ---------------------------------------------------------------------------------------------
+// C8 — project routing / admitted repositories
+// ---------------------------------------------------------------------------------------------
+
+export type ResourceMapping = Readonly<{
+  id: number;
+  resourceType: string;
+  resourceLabel: string;
+  targetRepo: string;
+  source: 'discovery' | 'manual';
+  isEnabled: boolean;
+}>;
+
+export type AdmittedRepository = Readonly<{
+  id: number;
+  repoFullName: string;
+  isActive: boolean;
+  removedDisplay: string | null;
+}>;
+
+export type ProjectRoutingState = 'populated' | 'empty' | 'validation' | 'jira-rescue' | 'purge-confirm';
+
+export type ProjectRoutingFixture = Readonly<{
+  installation: InstallationRecord;
+  mappings: ReadonlyArray<ResourceMapping>;
+  repositories: ReadonlyArray<AdmittedRepository>;
+  validationError: string;
+  jiraManualRescuePath: string;
+  purgeConfirmCopy: string;
+  purgeRepositoryId: number;
+  purgePathPattern: string;
+  discoveryRedirect: Readonly<{ path: string; note: string }>;
+}>;
+
+export type ProjectRoutingProjection = Readonly<{
+  installation: InstallationRecord;
+  role: InstallationRole;
+  state: ProjectRoutingState;
+  mappings: ReadonlyArray<ResourceMapping>;
+  repositories: ReadonlyArray<AdmittedRepository>;
+  validationError: string | null;
+  jiraManualRescuePath: string | null;
+  purgeConfirmCopy: string | null;
+  purgeTargetRepo: AdmittedRepository | null;
+  discoveryRedirect: Readonly<{ path: string; note: string }>;
+}>;
+
+/** Pure. Never returns a "re-admit"/"restore" control for an inactive repository — hard purge
+ * blocks automatic readmission (FR-015) and this projection has no field that could express one. */
+export function selectProjectRoutingProjection(
+  fixture: ProjectRoutingFixture,
+  role: InstallationRole,
+  state: ProjectRoutingState,
+): ProjectRoutingProjection {
+  const populatedLike = state === 'populated' || state === 'validation' || state === 'purge-confirm';
+  return {
+    installation: fixture.installation,
+    role,
+    state,
+    mappings: populatedLike ? fixture.mappings : [],
+    repositories: populatedLike ? fixture.repositories : [],
+    validationError: state === 'validation' ? fixture.validationError : null,
+    jiraManualRescuePath: state === 'jira-rescue' ? fixture.jiraManualRescuePath : null,
+    purgeConfirmCopy: state === 'purge-confirm' ? fixture.purgeConfirmCopy : null,
+    purgeTargetRepo:
+      state === 'purge-confirm' ? (fixture.repositories.find((r) => r.id === fixture.purgeRepositoryId) ?? null) : null,
+    discoveryRedirect: fixture.discoveryRedirect,
+  };
+}
+
+// ---------------------------------------------------------------------------------------------
+// C9a — team account links
+// ---------------------------------------------------------------------------------------------
+
+export type LinkAuthHealth = 'active' | 'expired' | 'revoked' | 'needs_reauth';
+
+export type AccountLink = Readonly<{
+  linkId: string;
+  displayName: string;
+  providerSubject: string;
+  authorizationHealth: LinkAuthHealth;
+  isViewer: boolean;
+}>;
+
+export type TeamAccountsState = 'admin-active' | 'admin-unhealthy' | 'member-unlinked' | 'member-empty';
+
+export type TeamAccountsFixture = Readonly<{
+  installation: InstallationRecord;
+  states: Readonly<
+    Record<
+      TeamAccountsState,
+      Readonly<{ links: ReadonlyArray<AccountLink>; emptyCopy: string | null; ownLinkStartAvailable: boolean }>
+    >
+  >;
+  disconnectOwnPath: string;
+}>;
+
+export type TeamAccountsProjection = Readonly<{
+  installation: InstallationRecord;
+  role: InstallationRole;
+  state: TeamAccountsState;
+  links: ReadonlyArray<AccountLink>;
+  emptyCopy: string | null;
+  ownLinkStartAvailable: boolean;
+  disconnectOwnPath: string;
+}>;
+
+/** Pure. Mutation is self-owned only: `may_disconnect` is computed here from `isViewer`, never
+ * carried as a separate fixture field an author could accidentally desync from it (FR-016/FR-022:
+ * `needs_reauth`/revoked expose no recovery action — only disconnect, and only for the viewer's
+ * own row; account activity (`isViewer`) stays independent of `authorizationHealth`). */
+export function selectTeamAccountsProjection(
+  fixture: TeamAccountsFixture,
+  role: InstallationRole,
+  state: TeamAccountsState,
+): TeamAccountsProjection {
+  // eslint-disable-next-line security/detect-object-injection -- key is the literal union type TeamAccountsState
+  const s = fixture.states[state];
+  return {
+    installation: fixture.installation,
+    role,
+    state,
+    links: s.links,
+    emptyCopy: s.emptyCopy,
+    ownLinkStartAvailable: s.ownLinkStartAvailable,
+    disconnectOwnPath: fixture.disconnectOwnPath,
+  };
+}
+
+// ---------------------------------------------------------------------------------------------
 // The one fixture family (FR-017) — deep-frozen so no consumer of it can mutate shared state.
 // ---------------------------------------------------------------------------------------------
 
@@ -493,6 +761,9 @@ export type ConnectorsFixture = Readonly<{
   githubAppFailure: GithubAppFailureFixture;
   gitlabGroup: GitlabGroupFixture;
   slackChannelPicker: SlackChannelPickerFixture;
+  workspaceScope: WorkspaceScopeFixture;
+  projectRouting: ProjectRoutingFixture;
+  teamAccounts: TeamAccountsFixture;
 }>;
 
 /** Recursively freezes an object graph. Mirrors the freeze helper convention established by
@@ -511,6 +782,21 @@ export type DeepReadonly<T> = T extends (infer U)[]
   : T extends object
     ? { readonly [K in keyof T]: DeepReadonly<T[K]> }
     : T;
+
+/** Shared across C6/C7/C8/C9a — one installation, matching the corpus's own reuse of the same
+ * `sm-team` fixture identity across its C6/C7/C8/C9a screens. */
+const SM_TEAM_INSTALLATION: InstallationRecord = {
+  uuid: '00000000-0000-4000-8000-000000000006',
+  teamSlug: 'sm-team',
+  teamName: 'State Machine Team',
+  provider: 'Linear',
+  externalAccountLabel: 'SM Linear',
+  health: 'active',
+  installedBy: 'smadmin@example.com',
+  installedAt: '2026-09-09',
+  activeMappingCount: 2,
+  activeLinkCount: 2,
+};
 
 const RAW_CONNECTORS_FIXTURE: ConnectorsFixture = {
   setup: {
@@ -683,6 +969,88 @@ const RAW_CONNECTORS_FIXTURE: ConnectorsFixture = {
           'This workspace has more channels than we could load in time. The list below may be incomplete — reload this page to try again.',
       },
     },
+  },
+  workspaceScope: {
+    installation: SM_TEAM_INSTALLATION,
+    states: {
+      populated: {
+        discovered: 2,
+        included: 1,
+        containers: [
+          { id: 'w-1', container: 'Platform', workspace: 'linear-team-platform', type: 'linear_team', state: 'active' },
+          { id: 'w-2', container: 'MVP Launch', workspace: 'linear-project-mvp-launch', type: 'linear_project', state: 'disabled' },
+        ],
+        refreshFailureMessage: null,
+      },
+      empty: { discovered: 0, included: 0, containers: [], refreshFailureMessage: null },
+      unavailable: { discovered: 0, included: 0, containers: [], refreshFailureMessage: null },
+      'stale-after-refresh-failure': {
+        discovered: 3,
+        included: 2,
+        containers: [
+          { id: 'w-1', container: 'Platform', workspace: 'linear-team-platform', type: 'linear_team', state: 'active' },
+          { id: 'w-2', container: 'MVP Launch', workspace: 'linear-project-mvp-launch', type: 'linear_project', state: 'active' },
+        ],
+        refreshFailureMessage: 'Could not verify your GitLab groups. Please try again.',
+      },
+    },
+  },
+  projectRouting: {
+    installation: SM_TEAM_INSTALLATION,
+    mappings: [
+      { id: 201, resourceType: 'linear_team', resourceLabel: 'Platform', targetRepo: 'sm-proj', source: 'discovery', isEnabled: true },
+      { id: 202, resourceType: 'linear_project', resourceLabel: 'MVP Launch', targetRepo: 'launch-resilience', source: 'manual', isEnabled: true },
+      { id: 203, resourceType: 'linear_project', resourceLabel: 'Mobile experience', targetRepo: 'mobile-surface', source: 'discovery', isEnabled: false },
+    ],
+    repositories: [
+      { id: 301, repoFullName: 'spec-kitty/sm-proj', isActive: true, removedDisplay: null },
+      { id: 302, repoFullName: 'spec-kitty/launch-resilience', isActive: false, removedDisplay: '9/8/2026, 4:20 PM' },
+    ],
+    validationError: "External resource 'linear-team-platform' is already mapped to project 'sm-proj'.",
+    jiraManualRescuePath: '/a/sm-team/connectors/discovery/manual/?installation=00000000-0000-4000-8000-000000000006',
+    purgeConfirmCopy:
+      'Hard-purge spec-kitty/sm-proj? This permanently erases its dossier, rendered content, and caches on Spec Kitty — it cannot be undone. The repo will not be re-admitted automatically.',
+    purgeRepositoryId: 301,
+    purgePathPattern: '/a/sm-team/connectors/install/00000000-0000-4000-8000-000000000006/repos/{id}/purge/',
+    discoveryRedirect: {
+      path: '/a/sm-team/connectors/discovery/?installation=00000000-0000-4000-8000-000000000006',
+      note: 'One active installation redirects here to Installation Detail; zero or multiple redirect to the Connectors index. Not a browse destination.',
+    },
+  },
+  teamAccounts: {
+    installation: SM_TEAM_INSTALLATION,
+    states: {
+      'admin-active': {
+        links: [
+          { linkId: 'link-jeroen-linear', displayName: 'Jeroen', providerSubject: 'linear-user-jeroen-001', authorizationHealth: 'active', isViewer: true },
+          { linkId: 'link-mia-linear', displayName: 'Mia', providerSubject: 'linear-user-mia-002', authorizationHealth: 'active', isViewer: false },
+        ],
+        emptyCopy: null,
+        ownLinkStartAvailable: false,
+      },
+      'admin-unhealthy': {
+        links: [
+          { linkId: 'link-jeroen-linear', displayName: 'Jeroen', providerSubject: 'linear-user-jeroen-001', authorizationHealth: 'needs_reauth', isViewer: true },
+          { linkId: 'link-mia-linear', displayName: 'Mia', providerSubject: 'linear-user-mia-002', authorizationHealth: 'expired', isViewer: false },
+          { linkId: 'link-lynn-linear', displayName: 'Lynn', providerSubject: 'linear-user-lynn-003', authorizationHealth: 'revoked', isViewer: false },
+        ],
+        emptyCopy: null,
+        ownLinkStartAvailable: false,
+      },
+      'member-unlinked': {
+        links: [
+          { linkId: 'link-mia-linear', displayName: 'Mia', providerSubject: 'linear-user-mia-002', authorizationHealth: 'active', isViewer: false },
+        ],
+        emptyCopy: null,
+        ownLinkStartAvailable: true,
+      },
+      'member-empty': {
+        links: [],
+        emptyCopy: 'No team members have linked their accounts yet.',
+        ownLinkStartAvailable: true,
+      },
+    },
+    disconnectOwnPath: '/a/sm-team/connectors/link/00000000-0000-4000-8000-000000000006/disconnect/',
   },
 };
 
