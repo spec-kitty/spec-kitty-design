@@ -23,6 +23,7 @@
   "purpose_context": "This mission advances button tone record and commit exemptions on mission/button-tone-record-and-commit-exemptions so stakeholders can track the work from mission creation onward.",
   "purpose_tldr": "button tone record and commit exemptions",
   "slug": "button-tone-record-and-commit-exemptions-01M28PMT",
+  "status_phase": "1",
   "target_branch": "mission/button-tone-record-and-commit-exemptions",
   "topology": "single_branch"
 }
