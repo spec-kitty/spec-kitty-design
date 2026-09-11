@@ -1982,6 +1982,68 @@ for (const visual of missionKanbanVisuals) {
   });
 }
 
+// #395 — the ten-lane Mission Kanban family. Additive: the #278 block above and its ten PNGs are
+// untouched. K3 is captured twice, once under forced colors, because its native checkbox cues are
+// the forced-colors evidence the all-tiers ForcedColors story does not carry.
+type MissionKanbanTenLaneVisualStoryId =
+  | 'default'
+  | 'k-2-narrow-contained'
+  | 'k-3-filtered-lanes'
+  | 'k-4-snapshot-behind-log'
+  | 'k-5-unverified-overlay'
+  | 'k-6-empty-lanes'
+  | 'light-mode'
+  | 'long-content'
+  | 'forced-colors'
+  | 'reduced-motion'
+  | 'rtl';
+
+const missionKanbanTenLaneVisuals = [
+  { id: 'default', width: 1440, height: 1024, name: 'mission-kanban-ten-lane-k1-populated-1440.png' },
+  { id: 'k-2-narrow-contained', width: 390, height: 844, name: 'mission-kanban-ten-lane-k2-narrow-390.png' },
+  { id: 'k-3-filtered-lanes', width: 1440, height: 1024, name: 'mission-kanban-ten-lane-k3-filtered-lanes.png' },
+  { id: 'k-3-filtered-lanes', width: 1440, height: 1024, name: 'mission-kanban-ten-lane-k3-forced-colors.png', forcedColors: true },
+  { id: 'k-4-snapshot-behind-log', width: 1440, height: 1024, name: 'mission-kanban-ten-lane-k4-snapshot-behind-log.png' },
+  { id: 'k-5-unverified-overlay', width: 1440, height: 1024, name: 'mission-kanban-ten-lane-k5-unverified-overlay.png' },
+  { id: 'k-6-empty-lanes', width: 1440, height: 1024, name: 'mission-kanban-ten-lane-k6-empty-lanes.png' },
+  { id: 'light-mode', width: 1440, height: 1024, name: 'mission-kanban-ten-lane-light-mode.png' },
+  { id: 'long-content', width: 390, height: 844, name: 'mission-kanban-ten-lane-long-content-390.png' },
+  { id: 'forced-colors', width: 1440, height: 1024, name: 'mission-kanban-ten-lane-forced-colors.png', forcedColors: true },
+  { id: 'reduced-motion', width: 1440, height: 1024, name: 'mission-kanban-ten-lane-reduced-motion.png', reducedMotion: true },
+  { id: 'rtl', width: 1440, height: 1024, name: 'mission-kanban-ten-lane-rtl.png' },
+] as const satisfies ReadonlyArray<{
+  id: MissionKanbanTenLaneVisualStoryId;
+  width: number;
+  height: number;
+  name: `mission-kanban-ten-lane-${string}.png`;
+  forcedColors?: boolean;
+  reducedMotion?: boolean;
+}>;
+
+for (const visual of missionKanbanTenLaneVisuals) {
+  test(`Mission Kanban ten-lane ${visual.name.replace(/\.png$/, '')} — full pattern baseline`, async ({ page }) => {
+    if ('forcedColors' in visual && visual.forcedColors) {
+      await page.emulateMedia({ forcedColors: 'active' });
+    }
+    if ('reducedMotion' in visual && visual.reducedMotion) {
+      await page.emulateMedia({ reducedMotion: 'reduce' });
+    }
+    await page.setViewportSize({ width: visual.width, height: visual.height });
+    await page.goto(`/iframe.html?id=patterns-mission-kanban-ten-lane--${visual.id}&viewMode=story`);
+    const root = page.locator('[data-mission-kanban-ten-lane-pattern]');
+    await root.waitFor({ state: 'visible', timeout: 20000 });
+    await expect(root).toHaveAttribute('data-render-complete', 'true');
+    await expect(root).toHaveAttribute('data-play-proof', 'passed');
+    await page.evaluate(() => document.fonts.ready);
+    await expect(root).not.toBeEmpty();
+    await expect(root).toHaveScreenshot(visual.name, {
+      threshold: 0.02,
+      maxDiffPixelRatio: 0.02,
+      timeout: 20000,
+    });
+  });
+}
+
 type RepositoryDossierStoryId =
   | 'default'
   | 'd-2-narrow-closed'
