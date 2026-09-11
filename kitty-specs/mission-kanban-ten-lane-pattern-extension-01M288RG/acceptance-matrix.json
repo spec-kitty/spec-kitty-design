@@ -17,11 +17,11 @@
     {
       "criterion_id": "FR-002",
       "description": "Verify FR-002 is satisfied",
-      "proof_type": "seam test",
-      "evidence": "product head 8986d38f (rebased on train 16948194); sk-mission-kanban-ten-lane-pattern.spec.ts [T002] extension keys copy/format/routes/stress/tones/unverifiedOverlays, restates no Work Package route; [T006] imports the #278 fixture module, only WP03 (overlay ref) and WP99 (guard) literals; local Chromium+Firefox 96/96 incl. #278 suite; WebKit authority is CI (pre-fold a3ac655c run 34604991224: playwright 3 browsers + test passed).",
+      "proof_type": "seam test + source guard",
+      "evidence": "product head 0be840ae on train ac9a86cf (#409); sk-mission-kanban-ten-lane-pattern.spec.ts [T002]: the extension keys are copy/format/routes/stress/tones/unverifiedOverlays and restate no Work Package route; [T006]: the module imports the #278 fixture module, and the only WP literals in either quote style are WP03 (overlay reference) and WP99 (guard); CI Quality run 34620107785 at 0be840ae: playwright green in Chromium, Firefox and WebKit (2452 passed; its 4 flaky retries are other specs), plus visual-regression, a11y (0 violations across 753 stories), lint-code and release-gate; the test job's only failure is the #408 wall-clock ceiling (1656.5 s against 1649.8 s) with all 272 mutations red against a green baseline; the identical product content was fully green, test included (1641.4 s), in run 34616550693 at ed60d776 before the #409 rebase; local Chromium+Firefox 98/98 with #278's suite before the test-only last fold, whose 9 [T006] tests also pass locally in Chromium.",
       "pass_fail": "pass",
       "verified_by": "claude",
-      "verified_at": "2026-09-11T14:11:05.697587+00:00",
+      "verified_at": "2026-09-11T16:39:27.909335+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
