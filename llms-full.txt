@@ -385,6 +385,40 @@ reproduces `:host`'s layout but HARDENS its cascade position, a gap its
 library-only outcome tables cannot see. None of the three is built by this
 record, which changes no sheet. Status is `Proposed`.
 
+### ADR-17 — sk-button's Tone × Intensity Flattening, and the Ceiling on `BUTTON_VARIANTS`
+
+`docs/architecture/decisions/2026-09-11-17-sk-button-tone-intensity-flattening.md`.
+**Decision:** the flat `BUTTON_VARIANTS` enum (`primary`, `secondary`, `ghost`,
+`danger-secondary`) is deliberate for the cell that exists today — four
+mutually exclusive values need no axis distinction between them — and its
+ceiling is one more flat sibling, `danger-primary`, before the tone ×
+intensity question becomes unavoidable. **Why it does not wait, and the
+hazard this record's own review caught:** `sk-button`'s variant is TWO
+disconnected pipelines, not one. `BUTTON_VARIANTS` feeds only
+`scripts/build-element-markup.mjs`'s per-key static-HTML/`index.ts` export —
+it stops there. `packages/elements/custom-elements.json`'s `variant` type and
+the generated React wrapper's prop type are sourced separately, from
+`sk-button.ts`'s hand-spelled `variant` type union via the custom-elements-
+manifest analyzer and `scripts/build-react-wrappers.mjs` — confirmed by
+reading `SkButton.variant.type.text` in the committed manifest (verbatim-
+identical to the `sk-button.ts` union) and `packages/react/src/SkButton.d.ts`
+(`variant?: SkButtonElement["variant"]`), not by inference. Regenerating from
+`BUTTON_VARIANTS` alone therefore does NOT reach the manifest or the wrapper,
+and no gate in this repository cross-checks the two pipelines against each
+other — a `danger-primary` addition that only edits `BUTTON_VARIANTS` would
+pass every `--check` gate wired today while shipping a manifest and React/Vue
+surface that still advertise four values. The record states the cost of both
+paths with this hazard named explicitly: widening with one more flat
+`danger-primary` sibling (one map entry plus the MANDATORY, non-automatic
+hand-edit to `sk-button.ts`'s union) versus a full two-axis split (both
+pipelines would need restructuring, the second becoming the point where a
+single shared source could finally close the drift hazard). `#348`'s busy
+cue, hardcoded to `.sk-button--primary .sk-button__busy-cue` with no
+derivation from either pipeline, is named as a third independent
+spelling-out of the same tone set and is not fixed by this record. Raised
+twice at `#341`'s pre-merge gate and dropped without disposition both times;
+filed as `#403`. No code changed; Status is `Proposed`.
+
 ---
 
 ## 2a. Gates

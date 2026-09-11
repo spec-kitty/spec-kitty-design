@@ -1,0 +1,29 @@
+{
+  "accept_commit": "1e96e15bd6510f07391fbc699269a055fe323218",
+  "acceptance_history": [
+    {
+      "accept_commit": "1e96e15bd6510f07391fbc699269a055fe323218",
+      "acceptance_mode": "pr",
+      "accepted_at": "2026-09-11T17:33:25.098285+00:00",
+      "accepted_by": "claude",
+      "accepted_from_commit": "912b79f57f12a7b7a368c63c428c5d441d4ade58"
+    }
+  ],
+  "acceptance_mode": "pr",
+  "accepted_at": "2026-09-11T17:33:25.098285+00:00",
+  "accepted_by": "claude",
+  "accepted_from_commit": "912b79f57f12a7b7a368c63c428c5d441d4ade58",
+  "created_at": "2026-09-11T17:01:05.699086+00:00",
+  "flattened": false,
+  "friendly_name": "button tone record and commit exemptions",
+  "mission_id": "01M28PMTS256KGMC19T149N6D6",
+  "mission_number": null,
+  "mission_slug": "button-tone-record-and-commit-exemptions-01M28PMT",
+  "mission_type": "software-dev",
+  "purpose_context": "This mission advances button tone record and commit exemptions on mission/button-tone-record-and-commit-exemptions so stakeholders can track the work from mission creation onward.",
+  "purpose_tldr": "button tone record and commit exemptions",
+  "slug": "button-tone-record-and-commit-exemptions-01M28PMT",
+  "status_phase": "1",
+  "target_branch": "mission/button-tone-record-and-commit-exemptions",
+  "topology": "single_branch"
+}

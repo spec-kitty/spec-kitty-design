@@ -30,6 +30,15 @@ const generatedMessages = [
   'Accept static-form-of-element-backed-css-01M248TF',
   'Record acceptance commit for static-form-of-element-backed-css-01M248TF',
   'Finalize acceptance artifacts for static-form-of-element-backed-css-01M248TF',
+  // `spec-kitty agent tracer-append` / `spec-kitty retrospect create` / `spec-kitty retrospect
+  // backfill` auto-commits (#420): real message shapes from specify_cli/retrospective/
+  // tracer_writer.py:277 and specify_cli/cli/commands/retrospect.py:431,845 in the installed
+  // spec-kitty-cli. `TRACER_CATEGORIES`' three real values, exercised individually.
+  'chore(tracer): append tooling-friction finding for team-overview-shell-elements-01M1S8R8',
+  'chore(tracer): append approach finding for team-overview-shell-elements-01M1S8R8',
+  'chore(tracer): append design-decisions finding for team-overview-shell-elements-01M1S8R8',
+  'chore(retrospective): author retrospective for team-overview-shell-elements-01M1S8R8',
+  'chore(retrospective): backfill 3 retrospective records',
 ];
 
 for (const message of generatedMessages) {
@@ -66,6 +75,18 @@ const nearMisses = [
   'Record acceptance commit for static-form-of-element-backed-css',
   'Finalize acceptance artifacts for ../../etc/passwd-01M248TF',
   'Reject static-form-of-element-backed-css-01M248TF',
+  // The tracer-append exemption is bounded to TRACER_CATEGORIES' three real values, not an open
+  // category word, and to the full mission-slug shape, not `\S+`. Each of these is what an
+  // unbounded version of the pattern would have let through.
+  'chore(tracer): append fabricated finding for team-overview-shell-elements-01M1S8R8',
+  'chore(tracer): append approach finding for not-a-real-slug',
+  'chore(tracer): append approach finding for team-overview-shell-elements',
+  // The retrospective-author exemption requires the full mission-slug shape, not `\S+`.
+  'chore(retrospective): author retrospective for NOT-A-SLUG!!!',
+  // The retrospective-backfill exemption requires a digit count and the exact plural noun
+  // phrase — each of these is what a looser tail would have let through.
+  'chore(retrospective): backfill retrospective records',
+  'chore(retrospective): backfill 3 retrospective record',
 ];
 
 for (const message of nearMisses) {

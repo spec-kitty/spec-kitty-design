@@ -1,0 +1,79 @@
+{
+  "mission_slug": "button-tone-record-and-commit-exemptions-01M28PMT",
+  "mission_number": "",
+  "mission_type": "software-dev",
+  "overall_verdict": "pass",
+  "criteria": [
+    {
+      "criterion_id": "FR-001",
+      "description": "Verify FR-001 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "commitlint.config.cjs: 3 new anchored SPEC_KITTY_AUTO_COMMIT_PATTERNS entries; node scripts/check-commitlint-config.mjs passes (real tracer-append/retrospect messages ignored+valid)",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T17:11:38.043593+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-002",
+      "description": "Verify FR-002 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "Each new pattern closed over TRACER_CATEGORIES' real 3 values and the established -01<ULID> mission-slug shape, never \\S+ or an open class; verified via node -e probing config.ignores against both real and near-miss messages",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T17:11:48.364889+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-003",
+      "description": "Verify FR-003 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "scripts/check-commitlint-config.mjs generatedMessages extended with the 3 real messages (ignored+valid); node scripts/check-commitlint-config.mjs passes",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T17:11:49.377094+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-004",
+      "description": "Verify FR-004 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "nearMisses extended with 6 bounded near-miss cases (2 per pattern); all assert isIgnored()===false and the harness passes; red-first proof executed: an unanchored/open-vocab variant of the tracer pattern was shown (ad hoc node script) to wrongly ignore all 3 tracer near-misses",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T17:11:50.390773+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-005",
+      "description": "Verify FR-005 is satisfied",
+      "proof_type": "manual_review",
+      "evidence": "docs/architecture/decisions/2026-09-11-17-sk-button-tone-intensity-flattening.md (Status: Proposed), indexed in docs/architecture/README.md; node scripts/check-adr-index.mjs passes",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T17:11:51.423365+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-006",
+      "description": "Verify FR-006 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "Reviewer-caught error corrected. Verified directly, not by reading the generator comment alone: sk-button.ts:35 hand-spells the variant union; packages/elements/custom-elements.json's SkButton.variant.type.text is byte-for-byte identical to that union (python3 JSON walk); BUTTON_VARIANTS appears in the same manifest only as its own disconnected kind:variable entry, wired to nothing; scripts/build-react-wrappers.mjs's own header comment states wrappers are GENERATED from custom-elements.json; packages/react/src/SkButton.d.ts:42 reads variant?: SkButtonElement[\"variant\"], an indexed type off the element class. ADR-17 now states BUTTON_VARIANTS feeds ONLY the static-HTML/index.ts pipeline (via build-element-markup.mjs:288-300's per-key derivation) and names the two-pipeline split as a standing, gate-invisible drift hazard rather than claiming single-pipeline coverage.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T17:24:29.817813+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-007",
+      "description": "Verify FR-007 is satisfied",
+      "proof_type": "manual_review",
+      "evidence": "ADR-17's 'Related: #348' section references the busy-cue hardcoding without fixing it",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T17:11:53.455762+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    }
+  ],
+  "negative_invariants": []
+}

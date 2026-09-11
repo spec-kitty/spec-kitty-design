@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "mission_slug": "button-tone-record-and-commit-exemptions-01M28PMT",
+  "mission_id": "01M28PMTS256KGMC19T149N6D6",
+  "mission_branch": "kitty/mission-button-tone-record-and-commit-exemptions-01M28PMT",
+  "target_branch": "mission/button-tone-record-and-commit-exemptions",
+  "lanes": [
+    {
+      "lane_id": "lane-a",
+      "wp_ids": [
+        "WP01"
+      ],
+      "write_scope": [
+        "commitlint.config.cjs",
+        "docs/architecture/README.md",
+        "docs/architecture/decisions/2026-09-11-17-sk-button-tone-intensity-flattening.md",
+        "scripts/check-commitlint-config.mjs"
+      ],
+      "predicted_surfaces": [
+        "api",
+        "artifact-rendering"
+      ],
+      "depends_on_lanes": [],
+      "parallel_group": 0
+    }
+  ],
+  "computed_at": "2026-09-11T17:06:24.896740+00:00",
+  "computed_from": "dependency_graph+ownership",
+  "planning_artifact_wps": [],
+  "planning_commit_sha": "9bd7c4902d92daedf67650945d4270dbe9d7108c"
+}
