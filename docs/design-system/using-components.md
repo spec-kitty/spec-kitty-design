@@ -224,6 +224,58 @@ snapshot/retention message that needs announcement semantics; do not create a lo
 is intentionally no `sk-work-package-card`, Work Package page element, stateful Kanban component,
 checklist control, or execution panel.
 
+## CLI auth pattern
+
+The Storybook `Patterns/CLI Auth` family (spec-kitty/spec-kitty-design#329) demonstrates four
+canonical CLI/device-authorization states — code entry, review and decide, terminal
+success/denial, and terminal error — as composition and accessibility evidence, not a published
+page component and not a replica of all twelve Family 5 screens. Story 1 composes one native
+`<form>` with a labelled `sk-form-input` and one native `<button type="submit" class="sk-button
+sk-button--primary">`. Story 2 composes `sk-card`, native `.sk-facts`, one `sk-pill-tag` per
+supplied scope wrapped in a real `<ul>`/`<li>` list (the scopes are the security payload the
+user is consenting to, so they get list semantics the same way the client/account facts get a
+`<dl>` — `sk-pill-tag` itself is documented presentational, with no role or accessible-name
+contribution), and Approve/Deny as two native `<button type="submit">` inside one native
+`<form>` — Approve carries `class="sk-button sk-button--primary"`, Deny carries
+`class="sk-button sk-button--danger-secondary"` — DOM order Approve-then-Deny. Both actions also
+carry `name="decision"` with distinct `value`s (`"approve"`/`"deny"`), copied along with the
+class/DOM-order shape above: without them a consumer's real server-rendered submission cannot
+tell which action was pressed. Stories 3 and 4
+compose the public `sk-boundary-page` frame (`packages/styles/src/boundary-page/`, a styles-only
+pattern with no custom element): a consumer-owned `<main>` landmark around
+`.sk-boundary-page__stage` > `.sk-boundary-page__card` containing the heading
+(`<h1 class="sk-boundary-page__title">`), the required `.sk-boundary-page__body`, and the
+required `.sk-boundary-page__action-group` holding zero or one supplied `<a>` action — no local
+frame, stage, or "boundary" component was built in its place.
+
+**`<sk-button>` cannot submit an enclosing form.** Its shadow-root control hard-codes
+`type="button"` (a `<button>` inside a shadow root does not participate in an enclosing form's
+submission either way), so it can never be the primary/Approve/Deny action in a genuine
+native-form flow like this one. The supported shape for that case is a native
+`<button type="submit">` carrying the public `.sk-button`/`.sk-button--*` styles-layer classes
+directly — which is what all three form actions in this pattern do. `.sk-button` is a public
+surface in its own right (`packages/styles/src/button/sk-button.css`), not merely the element's
+internal implementation, so this stays within "public surfaces and native semantic HTML," not a
+fork. If a future revision gives `<sk-button>` real submit behavior, ADR-9 §4's `ElementInternals`
+research and `#74`'s form-association work are the documented route — until then, use the native
+`<button>` shape for anything that must submit a form.
+
+All four stories are now fully composed against their landed public surfaces: `#320`'s
+`.sk-button--danger-secondary` tone (Story 2's Deny), `#321`'s `--sk-border-control` contrast
+fix (Story 1's input boundary), and `#303`'s `sk-boundary-page` frame (Stories 3 and 4) all
+shipped to `train/elements-first` before this mission's IC-06 finalization pass, which consumed
+each one's real, shipped shape rather than an assumed class or attribute name.
+
+One deeply frozen fixture (`packages/elements/src/patterns/cli-auth.fixture.ts`) owns every
+label, description, fact, scope, status heading/body, and action value across all four stories —
+nothing is a component default. What the pattern does NOT own, and stays entirely the consuming
+application's: route/navigation, permission and session state, validation logic (the invalid
+code-entry story demonstrates the wiring — `aria-invalid`, an associated announced error — with a
+fixture-supplied message, not a real validation rule), form submission, confirmation, copy and
+localization, and terminal-state selection (choosing success vs. denied vs. error is the
+consumer's decision, not something this pattern infers). There is intentionally no `auth-card`,
+auth-shell, `scope-chip`, or `form-action-row` component, and no second boundary/stage frame.
+
 ## Application shell composition
 
 The shell elements supply layout and landmarks while the consumer supplies destinations, state,

@@ -1,0 +1,209 @@
+{
+  "mission_slug": "cli-auth-pattern-stories-01M25STS",
+  "mission_number": "",
+  "mission_type": "software-dev",
+  "overall_verdict": "pass",
+  "criteria": [
+    {
+      "criterion_id": "FR-001",
+      "description": "Verify FR-001 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "Composition confirmed by direct read: packages/elements/src/patterns/cli-auth.stories.ts:113-147 (renderCodeEntry) - one native <form>, one <sk-form-input> with label/description from fixture, one native <button type=submit class='sk-button sk-button--primary'>. Behavioral assertion confirmed by direct read: apps/storybook/src/tests/sk-cli-auth-pattern.spec.ts:229-318 checks label/description association (labelFor===controlId, describedBy contains 'description'), aria-invalid branch (false default / true+errorRole=alert invalid), DOM order [sk-form-input,button], target-size >=24px. Execution outcome now observed: CI run 34597608929 job 103257371328 (playwright) at head eb2db6ad = pass, 2280 passed/131 skipped/1 flaky (unrelated: sk-team-overview-shell-layout.spec.ts:239, passed on retry), 0 sk-cli-auth-pattern.spec.ts failures.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T12:42:41.108367+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-002",
+      "description": "Verify FR-002 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "Composition confirmed by direct read: cli-auth.stories.ts:159-187 (renderAuthorizationDecision) - .sk-facts native <dl> from fixture.facts, one sk-pill-tag per fixture.scopes entry, Approve=sk-button--primary, Deny=sk-button--danger-secondary, one native <form>, DOM order Approve-then-Deny. Behavioral assertion confirmed by direct read: sk-cli-auth-pattern.spec.ts:320-377 checks facts array exact equality, scopes array exact equality, actionOrder array (type/classes/text) exact match, target-size >=24px both actions. Execution outcome now observed: CI run 34597608929 job 103257371328 (playwright) at head eb2db6ad = pass, 2280 passed/131 skipped/1 flaky (unrelated test), 0 sk-cli-auth-pattern.spec.ts failures.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T12:42:47.008085+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-003",
+      "description": "Verify FR-003 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "Composition confirmed by direct read: cli-auth.stories.ts:213-234 (renderTerminal) matches sk-boundary-page's own documented ANATOMY (main > .sk-boundary-page.sk-boundary-page__stage > __card > __title/__body/__action-group; mark/footnote omitted, never [hidden]). Behavioral assertion confirmed by direct read: sk-cli-auth-pattern.spec.ts:426-491 checks exact card-child order/classes and exact heading/body text for terminal-success ('Device connected') and terminal-denied ('Authorization denied'), 0 action-group children for both. Reviewer visually confirmed (and I independently re-opened) the harvested CI baselines sk-cli-auth-terminal-success-{dark,light,390}-chromium-linux.png: correct anatomy, correct text, no action. Execution outcome now observed: CI run 34597608929 job 103257371328 (playwright) at head eb2db6ad = pass, 0 sk-cli-auth-pattern.spec.ts failures.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T12:42:50.648504+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-004",
+      "description": "Verify FR-004 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "Same renderTerminal composition as FR-003 (cli-auth.stories.ts:213-234) covers Story 4. Behavioral assertion confirmed by direct read: sk-cli-auth-pattern.spec.ts:443-455 checks terminal-error-no-action has 0 action-group children; :493-506 checks terminal-error-with-action has exactly 1 <a> with fixture-sourced label 'Verify your account' / href https://team-kitty.example/account/verify, target-size >=44px. I independently opened and confirmed sk-cli-auth-terminal-error-with-action-{dark,light,390}-chromium-linux.png: exactly one supplied action renders, no invented retry/back control. Execution outcome now observed: CI run 34597608929 job 103257371328 (playwright) at head eb2db6ad = pass, 0 sk-cli-auth-pattern.spec.ts failures.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T12:42:53.976954+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-005",
+      "description": "Verify FR-005 is satisfied",
+      "proof_type": "manual_inspection",
+      "evidence": "Reviewer directly opened all 8 harvested dark/light CI baseline pairs (sk-cli-auth-code-entry, -authorization-decision, -terminal-success, -terminal-error-with-action, each dark+light): every pair shows a genuinely different, correctly-themed background/foreground (dark near-black #0D0E11-ish vs light cream/off-white), not a no-op class toggle. LightMode stories use class=sk-light per cli-auth.stories.ts:269-273 etc., matching repo convention (never data-theme). Companion automated assertion also exists at sk-cli-auth-pattern.spec.ts:644-690 (computed backgroundColor must differ dark vs light for all 6 pairs); execution outcome pending CI.",
+      "pass_fail": "pass",
+      "verified_by": "reviewer-renata",
+      "verified_at": "2026-09-11T12:08:40.249305+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-006",
+      "description": "Verify FR-006 is satisfied",
+      "proof_type": "manual_inspection",
+      "evidence": "Reviewer directly opened the 4 harvested 390px CI baselines (code-entry-390, authorization-decision-390, terminal-success-390, terminal-error-with-action-390): all show equal side gutters, no clipped form actions/identifiers, no visible overflow at the 390px frame edge. Companion automated assertion: sk-cli-auth-pattern.spec.ts:516-535 measures document clientWidth===scrollWidth===390 and every button's bounding box within [0,390]; execution outcome pending CI.",
+      "pass_fail": "pass",
+      "verified_by": "reviewer-renata",
+      "verified_at": "2026-09-11T12:08:53.742231+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-007",
+      "description": "Verify FR-007 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "Assertion confirmed by direct read to be a real Tab-key traversal, not a DOM-order read: sk-cli-auth-pattern.spec.ts:379-424 performs actual page.keyboard.press('Tab') and follows shadow-root activeElement chains, checking sk-form-input>input then button['Continue'] (Story 1), button['Approve'] then button['Deny'] (Story 2), and a['Verify your account'] (Story 4). Execution outcome now observed: CI run 34597608929 job 103257371328 (playwright) at head eb2db6ad = pass, 0 sk-cli-auth-pattern.spec.ts failures.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T12:42:59.984325+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-008",
+      "description": "Verify FR-008 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "Assertion confirmed by direct read: sk-cli-auth-pattern.spec.ts:241-254 reads the real shadow DOM (label[for]===input.id, aria-describedby contains 'description'), not merely the host's label/description attributes. Execution outcome now observed: CI run 34597608929 job 103257371328 (playwright) at head eb2db6ad = pass, 0 sk-cli-auth-pattern.spec.ts failures.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T12:43:02.469128+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-009",
+      "description": "Verify FR-009 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "Assertion confirmed by direct read: sk-cli-auth-pattern.spec.ts:270-286 checks the invalid-code branch's errorRole==='alert' and describedBy contains 'error' via setCustomError()'s real shadow-DOM output (not the native required message), plus exact fixture error text equality. Execution outcome now observed: CI run 34597608929 job 103257371328 (playwright) at head eb2db6ad = pass, 0 sk-cli-auth-pattern.spec.ts failures.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T12:43:04.997186+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-010",
+      "description": "Verify FR-010 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "Assertion confirmed by direct read: sk-cli-auth-pattern.spec.ts:206-227 checks headings.length<=1 across all 13 story ids and, where present, that the single heading is h1; terminal-success h1 text is exactly 'Device connected', terminal-denied h1 text is exactly 'Authorization denied'. Execution outcome now observed: CI run 34597608929 job 103257371328 (playwright) at head eb2db6ad = pass, 0 sk-cli-auth-pattern.spec.ts failures.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T12:43:09.722885+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-011",
+      "description": "Verify FR-011 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "Assertion confirmed by direct read: sk-cli-auth-pattern.spec.ts:288-293 (Story1 input >=24px, WCAG 2.5.8 AA), :369-376 (Story2 both Approve/Deny actions >=24px), :499-503 (terminal supplied action >=44px, sk-boundary-page's own action-group rule) all via real getBoundingClientRect() measurement, not assumed from CSS. Execution outcome now observed: CI run 34597608929 job 103257371328 (playwright) at head eb2db6ad = pass, 0 sk-cli-auth-pattern.spec.ts failures.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T12:43:12.341912+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-012",
+      "description": "Verify FR-012 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "CORRECTED (squad pass 1, item 5): there are 2 harvested forced-colors CI baselines, not 3 as previously miscounted -- code-entry-forced-colors and authorization-decision-forced-colors (apps/storybook/src/tests/visual.spec.ts-snapshots/); I opened both and confirmed input boundary is a visible high-contrast stroke, Approve and Deny are both visibly bordered and distinguishable (not color-only -- Deny's border is visibly heavier per the automated width comparison in sk-cli-auth-pattern.spec.ts's forced-colors test). Previous evidence also wrongly credited scope pill-tags with 'a visible border': they carry no status attribute, so sk-pill-tag.css's forced-colors rule (targeting only status modifier classes) declares nothing for them and they get NO border under forced colors -- corrected per squad finding 1. Their real protection is the UA's own background/text-colour remap to the system Canvas/CanvasText pair, now asserted directly and falsifiably (read from the shadow root's actual pill span, not the host) rather than via the previous toBeDefined() check, which could never fail. Emulation remains Chromium-only by established repo convention; documented scope, not a gap. Execution outcome observed: CI run 34608397407 job 103293125715 (playwright) at head 83f0a8e9 = pass (16m56s), and locally on chromium+firefox (25 passed, 1 correctly skipped).",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T14:40:29.563506+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-013",
+      "description": "Verify FR-013 is satisfied",
+      "proof_type": "manual_inspection",
+      "evidence": "Reviewer directly opened the 2 harvested zoom-200 CI baselines (code-entry-zoom-200, authorization-decision-zoom-200): both render at 2x scale with all content and both button tones fully visible, unclipped, no cut-off text. Companion automated assertion: sk-cli-auth-pattern.spec.ts:537-560 polls document.documentElement scrollWidth<=clientWidth with zoom='2' for all 13 non-lightmode stories; execution outcome pending CI.",
+      "pass_fail": "pass",
+      "verified_by": "reviewer-renata",
+      "verified_at": "2026-09-11T12:09:16.153892+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-014",
+      "description": "Verify FR-014 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "Assertion confirmed by direct read: sk-cli-auth-pattern.spec.ts:562-582 emulates reducedMotion:'reduce' and checks every element's computed animationName is ''/'none' or animationDuration==='0s' across all 13 non-lightmode stories -- an assertion over measured computed style, not an assumption of absence. Execution outcome now observed: CI run 34597608929 job 103257371328 (playwright) at head eb2db6ad = pass, 0 sk-cli-auth-pattern.spec.ts failures.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T12:43:14.874155+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-015",
+      "description": "Verify FR-015 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "CI a11y job (run 34596232715, job 103252824428) completed successfully; reviewer read its log directly: all 13 CLI-auth story ids individually enumerated green (patterns-cli-auth--code-entry-default, ...-invalid, ...-light-mode, authorization-decision[-light-mode], terminal-success[-light-mode], terminal-denied[-light-mode], terminal-error-no-action[-light-mode], terminal-error-with-action[-light-mode]), and the job's own summary line: 'Zero WCAG 2.1 AA violations across all 730 rendered story/stories.' Anchored to run content, not SHA; re-check advised after any story-file change (none made by reviewer).",
+      "pass_fail": "pass",
+      "verified_by": "reviewer-renata",
+      "verified_at": "2026-09-11T12:07:37.753970+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-016",
+      "description": "Verify FR-016 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "16 baselines committed at fb6c495d, harvested from PR #409 visual-regression run 34596232715 job 103252824447 artifact visual-regression-diffs. I independently re-downloaded that artifact (gh run download 34596232715 --name visual-regression-diffs; api digest sha256:08e545a63e8f...015ab matched exactly) and sha1-compared all 16 committed PNGs byte-for-byte against the artifact's content-addressed files: 16/16 identical, none locally shot. I opened all 16 committed PNGs myself and confirmed each renders its claimed story/theme/viewport (dark genuinely dark; light genuinely cream-ground/dark-text; forced-colors genuinely white/high-contrast bordered; zoom-200 genuinely enlarged; 390 genuinely narrow with equal gutters). Confirmed per-assertion harvesting, not per-test: read visual.spec.ts:2593-2632 directly -- each of the 16 baselines has its own dedicated test() block with exactly one toHaveScreenshot call (12 cliAuthFullCases + 2 forced-colors + 2 zoom = 16), so no downstream snapshot could be masked behind a first failure; cross-checked against the artifact's 16 distinct test-name .md error-context files, one per baseline, all reading 'snapshot doesn't exist ... writing actual'. Execution outcome now observed at the new head: CI run 34597608929 job 103257371288 (visual-regression) at head eb2db6ad = pass (6m11s), confirmed via gh pr checks 409.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T12:43:23.943144+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-017",
+      "description": "Verify FR-017 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "node scripts/check-pattern-composition.mjs run directly by reviewer: '\u2705 Pattern composition: 11 fixture(s), 261 inline CSS rule(s), 23 composed element tag(s), every ::part() inside the 142-part public ratchet, no reach-through, no duplicated component CSS.' node scripts/check-pattern-composition.mjs --selftest: '\u2705 All 47 probes behaved as recorded (34 reject, 13 accept), all 8 input probes refused their own branch, both floor arms refused, and 19 planted violation(s) went red in a copy of the real patterns directory.' Zero code changes to the gate itself (git diff confirms scripts/check-pattern-composition.mjs untouched).",
+      "pass_fail": "pass",
+      "verified_by": "reviewer-renata",
+      "verified_at": "2026-09-11T12:07:36.737260+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-018",
+      "description": "Verify FR-018 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "CORRECTED (squad pass 1, item 5): the previous evidence's 'word-boundary regex fix confirmed sound' was false, falsified by squad finding 2 -- the original backslash-b-bounded pattern silently failed to detect a planted literal for any copy string ending in punctuation (every terminal body string, codeEntryDefault.description, codeEntryInvalid.errorMessage -- six of the assertion's strings) because a trailing word-boundary anchor demands a word character after it while a real source literal is followed by a closing quote, itself non-word. States what the fix does and does not cover: fixed to a non-word-or-string-edge boundary on both sides (tests/node/cli-auth-no-literal.test.ts, pattern at line 120), which keeps the same getBoundingClientRect() false-positive rejection (re-verified: the character preceding 'Client' in that identifier is the word character g, so neither boundary alternative matches) while accepting a non-word character, not only a word-to-non-word transition, on either side. Re-verified directly, not merely asserted: planted a literal copy of codeEntryDefault.description into a scratch buffer -- the old pattern missed it, the new pattern caught it. npx vitest run tests/node/cli-auth-no-literal.test.ts (run directly): 4/4 passed. Execution outcome now observed at the rebased head: CI run 34608397407 job 103292725697 (test) baseline line reads 'baseline: 677 assertion(s), all passed' before the unrelated mutation-harness time-ceiling failure (filed as #408, not this file); this file's assertions are part of that green baseline.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T14:40:43.658898+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-019",
+      "description": "Verify FR-019 is satisfied",
+      "proof_type": "manual_inspection",
+      "evidence": "Reviewer read docs/design-system/using-components.md's 'CLI auth pattern' section (added in this diff) directly: explicitly names route/navigation, permission and session state, validation logic, form submission, confirmation, copy and localization, and terminal-state selection as staying entirely the consuming application's, and names #320/#303 by issue number for the two landed dependencies. Content read and confirmed complete against FR-019's own enumerated list.",
+      "pass_fail": "pass",
+      "verified_by": "reviewer-renata",
+      "verified_at": "2026-09-11T12:09:31.369020+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    },
+    {
+      "criterion_id": "FR-020",
+      "description": "Verify FR-020 is satisfied",
+      "proof_type": "automated_test",
+      "evidence": "CORRECTED (squad pass 2, item 3): the previous evidence cited 2a9a9d95 and 6ac345b9, both orphaned by this lane's rebase onto the train tip -- git merge-base --is-ancestor 2a9a9d95 HEAD and the same check for 6ac345b9 both return false, so a reader cannot verify the claim from this branch's history. Pointing at the surviving, rewritten SHAs instead: d0d9f2fc 'add CLI Auth pattern stories, IC-01 through IC-05' (non-dependent scaffolding) is a distinct commit from b845c3ab 'finalize CLI Auth pattern IC-06 against landed deps' (dependent finalization); both are ancestors of HEAD, verified. The previous evidence's closing claim, 'none remain in HEAD', was also broader than the truth: git grep 'pending #' HEAD returns expected-stories.json's own narrative ratchet log, e.g. Story 2's IC-01-05 entry recording 'Deny stays a plain secondary sk-button, pending #320's danger-secondary tone'. That is append-only historical prose describing a past state, not a stale code marker left behind by mistake, so it is not itself a defect -- but the evidence's own claim was not scoped to say so. Qualified claim, verified directly: no pending-comment or TODO-comment marker remains in the mission's shipped source (cli-auth.stories.ts, the spec files); the static regex assertion in sk-cli-auth-pattern.spec.ts (source.not.toMatch against pending hash 320/321/303, and not.toContain TODO hash 303) enforces exactly that scope and passes at HEAD (CI run 34611601183, playwright job pass). expected-stories.json's narrative log entries are excluded from that scope by design -- they are the ratchet's own audit trail, not shipped code.",
+      "pass_fail": "pass",
+      "verified_by": "claude",
+      "verified_at": "2026-09-11T15:23:43.309910+00:00",
+      "notes": "TODO: replace with a real acceptance criterion"
+    }
+  ],
+  "negative_invariants": []
+}

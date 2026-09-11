@@ -68,7 +68,9 @@
     "#320 adds five sk-button danger-secondary stories: DangerSecondary, DangerSecondaryIcon, DangerSecondaryFocus, DangerSecondaryDisabled, and ForcedColors — two of the five are navigated BY ID as acceptance evidence rather than merely rendered (elements-load.spec.ts's forced-colors comparative case goes to `--forced-colors`; visual.spec.ts's baseline case goes to `--danger-secondary`), which is exactly the shape this ratchet's own rule targets: 'a story cited as proof is ratcheted in the same commit that cites it'. A pre-merge lens found these five missing after the fact — scripts/run-axe-storybook.js enforces declared-vs-present only, so it could not have caught the gap itself. The existing Busy and LightMode stories are both extended in place with a danger-secondary fixture and are not new ids (matching #305's own LightMode precedent). On the refreshed train after #323, total moves 578 -> 583; every pre-existing sk-button story id is unchanged.",
     "#320 pre-merge squad round 1, finding #5: adds a sixth id, DangerSecondaryBusy, covering the previously-unrendered `busy` + `danger-secondary` composition. NOT added into the pre-existing `Busy` story: that story's `#storybook-root` is what visual.spec.ts's three `SK-button busy *` cases screenshot whole, and a fifth button there would have shifted the row's pixel dimensions and broken #327's already-committed baselines for a combination this mission does not touch — found live, CI run 34510234447 red on exactly those three cases after a first attempt added it there. DangerSecondaryBusy carries no visual-regression baseline of its own; the Busy story itself is unchanged from its #327 shape. Total moves 583 -> 584.",
     "#336 opts sk-radio-choice-group into this ratchet for the first time, the exactly-one-of-many sibling of #277's sk-checkbox-choice-group. Fourteen native styles-only stories are mandatory: Default (several choices, one selected), TwoChoice (the minimal Family 3 shape), OneOption (a single-radio group), NoneSelected, RequiredInvalid (native required/invalid with nothing checked), DisabledOption, DisabledGroup, LongContent, Narrow, RTL, FocusStates, ForcedColors (including a customized accent-color choice), DefaultDark, and LightMode. Verified against the built Storybook index (form-skradiochoicegroup-html--*) before committing, per the recipe; the autodocs --docs entry is excluded, as elsewhere. No sk-checkbox-choice-group story id changes. On the refreshed train (base total 584), total moves 584 -> 598.",
-    "#337 opts in all twelve native styles-only section-navigation stories. On the refreshed train (base total 598), total moves 598 -> 610. The set preserves the Family-3-shaped three-route administrator (current first/middle/last) and two-route member/permission-subset shapes, one route, many-route local overflow, long labels, narrow, forced colors, RTL, and real .sk-light LightMode evidence, with no custom element registered."
+    "#337 opts in all twelve native styles-only section-navigation stories. On the refreshed train (base total 598), total moves 598 -> 610. The set preserves the Family-3-shaped three-route administrator (current first/middle/last) and two-route member/permission-subset shapes, one route, many-route local overflow, long labels, narrow, forced colors, RTL, and real .sk-light LightMode evidence, with no custom element registered.",
+    "#329 (WP01, IC-01 through IC-05 only) ratchets nine Storybook-only CLI Auth pattern stories: code-entry default/invalid/LightMode (Story 1, fully composed now), authorization-decision/LightMode (Story 2's non-Deny anatomy — Deny stays a plain secondary sk-button, pending #320's danger-secondary tone), and terminal-success/terminal-denied/terminal-error-no-action/terminal-error-with-action (Story 3/4 red-first pending shells — #303's sk-boundary-page is not yet in the tree; no local frame was forked in its place). Re-chained against the rebased train baseline of 610 (598 + #337's 12 section-nav stories, not the 598 an earlier rebase pass saw before #337 landed): total moves 610 -> 619; fixture helpers are excluded from CSF indexing. Deny's real tone and the terminal frame's real composition land in a later IC-06 pass once #320/#303 land and this lane rebases.",
+    "#329 (WP01 IC-06) adds a LightMode variant for each of Stories 3 and 4, four ids, now that #303's sk-boundary-page composition is real rather than a pending shell. Re-chained against this same rebase's own IC-01-05 total of 619 (not the 607 the pre-#337-rebase pass saw): total moves 619 -> 623. All nine IC-01-05 ids are unchanged; Deny (Story 2) and the terminal frame (Stories 3/4) now compose #320's and #303's real landed surfaces in place, with no story id changes from that swap alone."
   ],
   "unratchetedElements": {
     "sk-confirm-dialog": "Ships stories (elements-skconfirmdialog--*) but was never named in this file's own history -- not even as 'still outside'. No mission has reviewed it against this ratchet; #326 is the first time its absence was written down anywhere.",
@@ -773,7 +775,22 @@
     ],
     "sk-form-field": [
       "form-formfield-html--light-mode-error"
+    ],
+    "cli-auth-pattern": [
+      "patterns-cli-auth--code-entry-default",
+      "patterns-cli-auth--code-entry-invalid",
+      "patterns-cli-auth--code-entry-light-mode",
+      "patterns-cli-auth--authorization-decision",
+      "patterns-cli-auth--authorization-decision-light-mode",
+      "patterns-cli-auth--terminal-success",
+      "patterns-cli-auth--terminal-success-light-mode",
+      "patterns-cli-auth--terminal-denied",
+      "patterns-cli-auth--terminal-denied-light-mode",
+      "patterns-cli-auth--terminal-error-no-action",
+      "patterns-cli-auth--terminal-error-no-action-light-mode",
+      "patterns-cli-auth--terminal-error-with-action",
+      "patterns-cli-auth--terminal-error-with-action-light-mode"
     ]
   },
-  "total": 610
+  "total": 623
 }

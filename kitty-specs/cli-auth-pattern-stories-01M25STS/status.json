@@ -1,0 +1,60 @@
+{
+  "event_count": 6,
+  "last_event_id": "01M285DYQST89PHCAPBGV4TS5W",
+  "materialized_at": "2026-09-11T12:00:14.585228+00:00",
+  "mission_number": "",
+  "mission_slug": "cli-auth-pattern-stories-01M25STS",
+  "mission_type": "software-dev",
+  "summary": {
+    "approved": 1,
+    "blocked": 0,
+    "canceled": 0,
+    "claimed": 0,
+    "done": 0,
+    "for_review": 0,
+    "in_progress": 0,
+    "in_review": 0,
+    "planned": 0
+  },
+  "work_packages": {
+    "WP01": {
+      "actor": "user",
+      "agent": "codex",
+      "agent_profile": "__resolved_profile_absent__",
+      "agent_profile_version": "__resolved_profile_version_absent__",
+      "assignee": "codex",
+      "force_count": 0,
+      "lane": "approved",
+      "last_event_id": "01M285DYQST89PHCAPBGV4TS5W",
+      "last_transition_at": "2026-09-11T12:00:14.585228+00:00",
+      "model": "__resolved_model_absent__",
+      "notes": [
+        "Catching up WP lane state: implementation and PR #409 already complete on branch mission/cli-auth-pattern-stories; reviewer-renata advancing lane through the CLI before recording review verdict.",
+        "All four stories composed and finalized against landed #320/#321/#303; PR #409 open against train/elements-first, CI running. Catching up WP lane state before review.",
+        "Reviewer Renata beginning pre-merge review of PR #409 against spec.md/WP01.",
+        "APPROVE. Composition anatomy matches sk-boundary-page's real anatomy exactly; check-pattern-composition.mjs green (11 fixtures, 23 composed tags, 142-part ratchet) and --selftest green (47/47 probes); no forbidden component names anywhere; native button.sk-button confirmed with preview.ts importing sk-button.css and sk-boundary-page.css; pending markers fully removed and asserted absent by regex; contrast assertion carries a real falsifiable companion case; #286 no-literal assertion fixed to word-boundary regex; expected-stories.json ratchets 13 new ids, total 611 = sum(byElement). Non-blocking finding: acceptance-matrix.json never populated (rows still pending/TODO) unlike sibling missions -- recommend filling before/at merge. CI still finishing at review time; treated as authoritative, not re-run locally."
+      ],
+      "provider": "__resolved_provider_absent__",
+      "review_result": {
+        "feedback_path": "/home/jeroennouws/dev/spec-kitty-design-missions/329/kitty-specs/cli-auth-pattern-stories-01M25STS/tasks/WP01-cli-auth-pattern-proof/review-cycle-1.md",
+        "reference": "review-cycle://cli-auth-pattern-stories-01M25STS/WP01-cli-auth-pattern-proof/review-cycle-1.md",
+        "reviewer": "reviewer-renata",
+        "verdict": "approved"
+      },
+      "role": "reviewer",
+      "subtasks": {
+        "T001": "done",
+        "T002": "done",
+        "T003": "done",
+        "T004": "done",
+        "T005": "done",
+        "T006": "done",
+        "T007": "done",
+        "T008": "done",
+        "T009": "done",
+        "T010": "done",
+        "T011": "done"
+      }
+    }
+  }
+}

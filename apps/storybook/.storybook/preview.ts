@@ -61,6 +61,17 @@ import "../../../packages/styles/src/workflow-lane/sk-workflow-lane.css";
 // packages/styles can take; `scope:storybook` importing the built element module, here, is the
 // only one that works.
 import "../../../packages/elements/src/entity-marker/sk-entity-marker.js";
+// #303's own styles-layer sheet — its stories load it via an intra-project import (see
+// sk-boundary-page-html.stories.ts), but #329's CLI Auth pattern lives in packages/elements
+// (scope:elements), which may not import a stylesheet at all, so it needs the same
+// scope:storybook global-import route as the sk-button.css case directly below.
+import "../../../packages/styles/src/boundary-page/sk-boundary-page.css";
+// #329's CLI Auth pattern renders its three native form actions as
+// `<button type="submit" class="sk-button sk-button--*">` rather than `<sk-button>`: a
+// shadow-root `<button>` cannot submit an enclosing form (`type="button"` is hard-coded in
+// sk-button.ts), so a story proving a native-form flow composes the styles-layer class
+// directly — the same two-rule reach this file's own header comment explains.
+import "../../../packages/styles/src/button/sk-button.css";
 import type { Preview } from "@storybook/web-components";
 
 const preview: Preview = {
