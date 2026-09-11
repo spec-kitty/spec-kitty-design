@@ -67,11 +67,11 @@
     {
       "criterion_id": "FR-007",
       "description": "Verify FR-007 is satisfied",
-      "proof_type": "automated_test",
-      "evidence": null,
+      "proof_type": "code_review",
+      "evidence": "Assertion verified as real, not a DOM-order read: sk-cli-auth-pattern.spec.ts:379-424 performs actual page.keyboard.press('Tab') traversal and follows shadow-root activeElement chains, checking sk-form-input>input then button['Continue'] (Story 1), button['Approve'] then button['Deny'] (Story 2), and a['Verify your account'] (Story 4). Execution outcome pending CI's playwright/test jobs.",
       "pass_fail": "pending",
-      "verified_by": null,
-      "verified_at": null,
+      "verified_by": "reviewer-renata",
+      "verified_at": "2026-09-11T12:08:54.778101+00:00",
       "notes": "TODO: replace with a real acceptance criterion"
     },
     {
